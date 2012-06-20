@@ -12,8 +12,6 @@
  */
 package com.dianping.puma.server;
 
-import com.dianping.puma.common.datatype.UnsignedLong;
-
 /**
  * TODO Comment of Test
  * 
@@ -22,12 +20,55 @@ import com.dianping.puma.common.datatype.UnsignedLong;
  */
 public class Test {
 
-    /**
-     * @param args
-     */
-    public static void main(String[] args) {
+	/**
+	 * @param args
+	 */
+	
+	public static void main(String[] args) {
+		//start();
+		
+		Thread t = new Thread(new Runnable() {
 
-        UnsignedLong ul = UnsignedLong.asUnsigned(-1L);
-        System.out.println(ul);
-    }
+			@Override
+			public void run() {
+				while (true) {
+					System.out.println("Connect!");
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		});
+		t.start();
+		
+		System.out.println("dddddd");
+		System.out.println();
+		
+	
+		
+	}
+	public static void start() {
+
+		Thread t = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				while (true) {
+					System.out.println("Connect");
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		});
+		t.start();
+		
+	}
 }
+

@@ -12,12 +12,18 @@
  */
 package com.dianping.puma.server.impl;
 
+import java.io.IOException;
 import java.net.Socket;
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.server.PumaContext;
 import com.dianping.puma.server.Server;
+import com.dianping.puma.server.Position.PositionFileUtils;
+import com.dianping.puma.server.Position.PositionInfor;
 import com.dianping.puma.server.mysql.packet.AuthenticatePacket;
 import com.dianping.puma.server.mysql.packet.ComBinlogDumpPacket;
 import com.dianping.puma.server.mysql.packet.OKErrorPacket;
@@ -31,156 +37,239 @@ import com.dianping.puma.server.mysql.packet.PacketType;
  * 
  */
 public class ReplicationBasedServer implements Server {
-    private static final Logger log            = Logger.getLogger(ReplicationBasedServer.class);
-    protected int               port           = 3306;
-    protected String            host;
-    protected String            user;
-    protected String            password;
-    protected String            database;
-    protected long              serverId       = 6789;
-    protected String            binlogFileName;
-    protected long              binlogPosition = 4;
-    protected String            encoding       = "utf-8";
+	private static final Logger log = Logger
+			.getLogger(ReplicationBasedServer.class);
+	protected int port = 3306;
+	protected String host;
+	protected String user;
+	protected String password;
+	protected String database;
+	protected long serverId = 6789;
+	protected String binlogFileName;
+	protected long binlogPosition = 4;
+	protected String encoding = "utf-8";
+	// add socket
+	protected Socket s;
+	protected boolean stop = false;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.dianping.puma.server.Server#start()
-     */
-    @Override
-    public void start() throws Exception {
-        Socket s = new Socket(host, port);
-        PumaContext context = new PumaContext();
-        context.setBinlogFileName(binlogFileName);
-        context.setBinlogStartPos(binlogPosition);
-        context.setServerId(serverId);
-        // connect
-        PacketFactory.parsePacket(s.getInputStream(), PacketType.CONNECT_PACKET, context);
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dianping.puma.server.Server#start()
+	 */
+	@Override
+	public void start() throws Exception {
 
-        // auth
-        AuthenticatePacket authPacket = (AuthenticatePacket) PacketFactory.createCommandPacket(
-                PacketType.AUTHENTICATE_PACKET, context);
+		// 初始化position/file文件位置信息
+		PositionInfor positioninfor = new PositionInfor(binlogPosition,
+				binlogFileName);
 
-        authPacket.setPassword(password);
-        authPacket.setUser(user);
-        authPacket.setDatabase(database);
-        authPacket.buildPacket(context);
-        authPacket.write(s.getOutputStream(), context);
+		PositionFileUtils positionfileutil = new PositionFileUtils();
+		positionfileutil.write(serverId, positioninfor);
 
-        OKErrorPacket okErrorPacket = (OKErrorPacket) PacketFactory.parsePacket(s.getInputStream(),
-                PacketType.OKERROR_PACKET, context);
+		do {
+			this.s = new Socket(host, port);
 
-        if (okErrorPacket.isOk()) {
-            log.info("Logined...");
+			// 读position/file文件
+			this.binlogFileName = positionfileutil.read(serverId)
+					.getBinlogFileName();
+			this.binlogPosition = positionfileutil.read(serverId)
+					.getBinlogPosition();
 
-            ComBinlogDumpPacket dumpBinlogPacket = (ComBinlogDumpPacket) PacketFactory.createCommandPacket(
-                    PacketType.COM_BINLOG_DUMP_PACKET, context);
-            dumpBinlogPacket.setBinlogFileName(binlogFileName);
-            dumpBinlogPacket.setBinlogFlag(0);
-            dumpBinlogPacket.setBinlogPosition(binlogPosition);
-            dumpBinlogPacket.setServerId(serverId);
-            dumpBinlogPacket.buildPacket(context);
+			PumaContext context = new PumaContext();
 
-            dumpBinlogPacket.write(s.getOutputStream(), context);
+			context.setBinlogFileName(binlogFileName);
+			context.setBinlogStartPos(binlogPosition);
+			context.setServerId(serverId);
 
-            OKErrorPacket dumpCommandResultPacket = (OKErrorPacket) PacketFactory.parsePacket(s.getInputStream(),
-                    PacketType.OKERROR_PACKET, context);
+			CountDownLatch latch = new CountDownLatch(1);
 
-            if (dumpCommandResultPacket.isOk()) {
-                log.info("Dump binlog command success.");
-            } else {
-                log.error("Dump binlog failed. Reason: " + dumpCommandResultPacket.getMessage());
-            }
+			// connect
+			PacketFactory.parsePacket(s.getInputStream(),
+					PacketType.CONNECT_PACKET, context);
 
-        } else {
-            log.error("Login failed. Reason: " + okErrorPacket.getMessage());
-        }
-    }
+			// auth
+			AuthenticatePacket authPacket = (AuthenticatePacket) PacketFactory
+					.createCommandPacket(PacketType.AUTHENTICATE_PACKET,
+							context);
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.dianping.puma.server.Server#stop()
-     */
-    @Override
-    public void stop() throws Exception {
-        // TODO Auto-generated method stub
+			authPacket.setPassword(password);
+			authPacket.setUser(user);
+			authPacket.setDatabase(database);
+			authPacket.buildPacket(context);
+			authPacket.write(s.getOutputStream(), context);
 
-    }
+			OKErrorPacket okErrorPacket = (OKErrorPacket) PacketFactory
+					.parsePacket(s.getInputStream(), PacketType.OKERROR_PACKET,
+							context);
 
-    public int getPort() {
-        return port;
-    }
+			if (okErrorPacket.isOk()) {
+				log.info("Logined...");
 
-    public void setPort(int port) {
-        this.port = port;
-    }
+				ComBinlogDumpPacket dumpBinlogPacket = (ComBinlogDumpPacket) PacketFactory
+						.createCommandPacket(PacketType.COM_BINLOG_DUMP_PACKET,
+								context);
+				dumpBinlogPacket.setBinlogFileName(binlogFileName);
+				dumpBinlogPacket.setBinlogFlag(0);
+				dumpBinlogPacket.setBinlogPosition(binlogPosition);
+				dumpBinlogPacket.setServerId(serverId);
+				dumpBinlogPacket.buildPacket(context);
 
-    public String getHost() {
-        return host;
-    }
+				dumpBinlogPacket.write(s.getOutputStream(), context);
 
-    public void setHost(String host) {
-        this.host = host;
-    }
+				OKErrorPacket dumpCommandResultPacket = (OKErrorPacket) PacketFactory
+						.parsePacket(s.getInputStream(),
+								PacketType.OKERROR_PACKET, context);
 
-    public String getUser() {
-        return user;
-    }
+				if (dumpCommandResultPacket.isOk()) {
+					log.info("Dump binlog command success.");
+				} else {
+					log.error("Dump binlog failed. Reason: "
+							+ dumpCommandResultPacket.getMessage());
+				}
 
-    public void setUser(String user) {
-        this.user = user;
-    }
+				// 开readThread
+				// TODO
+				ReadThread readThread = new ReadThread(latch, "readthread",
+						positionfileutil);
+				new Thread(readThread).start();
 
-    public String getPassword() {
-        return password;
-    }
+				latch.await();
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+			} else {
+				log
+						.error("Login failed. Reason: "
+								+ okErrorPacket.getMessage());
+			}
 
-    public long getServerId() {
-        return serverId;
-    }
+		} while (!stop);
 
-    public void setServerId(long serverId) {
-        this.serverId = serverId;
-    }
+	}
 
-    public String getBinlogFileName() {
-        return binlogFileName;
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dianping.puma.server.Server#stop()
+	 */
+	@Override
+	public void stop() throws Exception {
+		// TODO Auto-generated method stub
+		try {
+			if (this.s != null) {
+				this.s.close();
+			}
+		} catch (IOException ioEx) {
 
-    public void setBinlogFileName(String binlogFileName) {
-        this.binlogFileName = binlogFileName;
-    }
+			this.s = null;
+		}
+		this.stop = true;
 
-    public long getBinlogPosition() {
-        return binlogPosition;
-    }
+	}
 
-    public void setBinlogPosition(long binlogPosition) {
-        this.binlogPosition = binlogPosition;
-    }
+	public int getPort() {
+		return port;
+	}
 
-    public String getEncoding() {
-        return encoding;
-    }
+	public void setPort(int port) {
+		this.port = port;
+	}
 
-    public void setEncoding(String encoding) {
-        this.encoding = encoding;
-    }
+	public String getHost() {
+		return host;
+	}
 
-    public static void main(String[] args) throws Exception {
-        ReplicationBasedServer rbs = new ReplicationBasedServer();
-        rbs.setHost("192.168.7.43");
-        rbs.setPort(3306);
-        rbs.setUser("binlog");
-        rbs.setPassword("binlog");
-        rbs.setBinlogFileName("mysql-bin.000006");
-        rbs.setBinlogPosition(4);
-        rbs.start();
-    }
+	public void setHost(String host) {
+		this.host = host;
+	}
 
+	public String getUser() {
+		return user;
+	}
+
+	public void setUser(String user) {
+		this.user = user;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public long getServerId() {
+		return serverId;
+	}
+
+	public void setServerId(long serverId) {
+		this.serverId = serverId;
+	}
+
+	public String getBinlogFileName() {
+		return binlogFileName;
+	}
+
+	public void setBinlogFileName(String binlogFileName) {
+		this.binlogFileName = binlogFileName;
+	}
+
+	public long getBinlogPosition() {
+		return binlogPosition;
+	}
+
+	public void setBinlogPosition(long binlogPosition) {
+		this.binlogPosition = binlogPosition;
+	}
+
+	public String getEncoding() {
+		return encoding;
+	}
+
+	public void setEncoding(String encoding) {
+		this.encoding = encoding;
+	}
+
+	public static void main(String[] args) throws Exception {
+		ReplicationBasedServer rbs = new ReplicationBasedServer();
+		rbs.setHost("192.168.7.43");
+		rbs.setPort(3306);
+		rbs.setUser("binlog");
+		rbs.setPassword("binlog");
+		rbs.setBinlogFileName("mysql-bin.000006");
+		rbs.setBinlogPosition(4);
+		rbs.start();
+	}
+
+}
+
+// for test
+
+class ReadThread implements Runnable {
+	private CountDownLatch downLatch;
+	private PositionFileUtils positionfileutil = new PositionFileUtils();
+
+	public ReadThread(CountDownLatch downLatch, String name,
+			PositionFileUtils positionfileutil) {
+		super();
+		this.downLatch = downLatch;
+		this.positionfileutil = positionfileutil;
+	}
+
+	public void run() {
+
+		System.out.println("Reading binglog file......");
+		try {
+			TimeUnit.SECONDS.sleep(new Random().nextInt(10));
+		} catch (InterruptedException ie) {
+
+		}
+
+		System.out.println("disconnect from the server");
+		long num = 5;
+		PositionInfor infor = new PositionInfor(num, "mysql-bin.000006");
+		long serverId = 6789;
+		positionfileutil.write(serverId, infor);
+		this.downLatch.countDown();
+	}
 }

@@ -17,17 +17,41 @@ package com.dianping.puma.server;
  * 
  */
 public interface Server {
-    /**
-     * 启动Server
-     * 
-     * @throws Exception
-     */
-    public void start() throws Exception;
+	/**
+	 * 启动Server
+	 * 
+	 * @throws Exception
+	 */
+	public void start() throws Exception;
 
-    /**
-     * 停止Server
-     * 
-     * @throws Exception
-     */
-    public void stop() throws Exception;
+	/**
+	 * 停止Server
+	 * 
+	 * @throws Exception
+	 */
+	public void stop() throws Exception;
+
+	/**
+	 * 
+	 * @param binlogFileName
+	 */
+	public void setBinlogFileName(String binlogFileName);
+
+	/**
+	 * 
+	 * @param pos
+	 */
+	public void setBinlogPosition(long pos);
+
+	/**
+	 * 
+	 * @return
+	 */
+	public String getServerName();
+
+	/**
+	 * 
+	 * @return
+	 */
+	public String getDefaultBinlogFileName();
 }

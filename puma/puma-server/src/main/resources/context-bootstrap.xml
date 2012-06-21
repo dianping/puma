@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+	<bean id="server1" class="com.dianping.puma.server.impl.ReplicationBasedServer">
+		<property name="host" value="192.168.7.43" />
+		<property name="port" value="3306" />
+		<property name="user" value="binlog" />
+		<property name="password" value="binlog" />
+		<property name="binlogFileName" value="mysql-bin.000006" />
+	</bean>
+
+	<bean id="servers" class="java.util.ArrayList">
+		<constructor-arg>
+			<list>
+				<ref bean="server1" />
+			</list>
+		</constructor-arg>
+	</bean>
+</beans>
+	

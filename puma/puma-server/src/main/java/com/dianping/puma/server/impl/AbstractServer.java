@@ -15,7 +15,7 @@
  */
 package com.dianping.puma.server.impl;
 
-import com.dianping.puma.server.PumaContext;
+import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.server.Server;
 
 /**

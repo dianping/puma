@@ -13,18 +13,21 @@
 package com.dianping.puma.server.impl;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.common.bo.PositionInfo;
 import com.dianping.puma.common.util.PositionFileUtils;
+import com.dianping.puma.parser.Parser;
+import com.dianping.puma.parser.mysql.event.BinlogEvent;
 import com.dianping.puma.server.mysql.packet.AuthenticatePacket;
+import com.dianping.puma.server.mysql.packet.BinlogPacket;
 import com.dianping.puma.server.mysql.packet.ComBinlogDumpPacket;
 import com.dianping.puma.server.mysql.packet.OKErrorPacket;
 import com.dianping.puma.server.mysql.packet.PacketFactory;
@@ -49,6 +52,8 @@ public class ReplicationBasedServer extends AbstractServer {
 	protected PumaSocketWrapper	pumaSocket;
 	protected volatile boolean	stop		= false;
 
+	protected Parser			parser;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -68,51 +73,25 @@ public class ReplicationBasedServer extends AbstractServer {
 				context.setServerId(serverId);
 				CountDownLatch latch = new CountDownLatch(1);
 
-				this.pumaSocket = new PumaSocketWrapper(new Socket(host, port));
+				connect();
 
-				// connect
-				PacketFactory.parsePacket(pumaSocket.getInputStream(), PacketType.CONNECT_PACKET, context);
-
-				// auth
-				AuthenticatePacket authPacket = (AuthenticatePacket) PacketFactory.createCommandPacket(
-						PacketType.AUTHENTICATE_PACKET, context);
-
-				authPacket.setPassword(password);
-				authPacket.setUser(user);
-				authPacket.setDatabase(database);
-				authPacket.buildPacket(context);
-				authPacket.write(pumaSocket.getOutputStream(), context);
-
-				OKErrorPacket okErrorPacket = (OKErrorPacket) PacketFactory.parsePacket(pumaSocket.getInputStream(),
-						PacketType.OKERROR_PACKET, context);
-
-				if (okErrorPacket.isOk()) {
+				if (auth()) {
 					log.info("Server logined... serverId: " + serverId + " host: " + host + " port: " + port
 							+ " user: " + user + " database: " + database);
 
-					ComBinlogDumpPacket dumpBinlogPacket = (ComBinlogDumpPacket) PacketFactory.createCommandPacket(
-							PacketType.COM_BINLOG_DUMP_PACKET, context);
-					dumpBinlogPacket.setBinlogFileName(context.getBinlogFileName());
-					dumpBinlogPacket.setBinlogFlag(0);
-					dumpBinlogPacket.setBinlogPosition(context.getBinlogStartPos());
-					dumpBinlogPacket.setServerId(serverId);
-					dumpBinlogPacket.buildPacket(context);
-
-					dumpBinlogPacket.write(pumaSocket.getOutputStream(), context);
-
-					OKErrorPacket dumpCommandResultPacket = (OKErrorPacket) PacketFactory.parsePacket(
-							pumaSocket.getInputStream(), PacketType.OKERROR_PACKET, context);
-
-					if (dumpCommandResultPacket.isOk()) {
+					if (dumpBinlog()) {
 						log.info("Dump binlog command success.");
+
+						readBinlog();
+
 					} else {
-						log.error("Dump binlog failed. Reason: " + dumpCommandResultPacket.getMessage());
+						throw new IOException("Dump binlog failed.");
 					}
 
 					latch.await();
 
 				} else {
-					log.error("Login failed. Reason: " + okErrorPacket.getMessage());
+					throw new IOException("Login failed.");
 				}
 			} catch (IOException e) {
 				log.error("IOException occurs. serverId: " + serverId);
@@ -124,6 +103,87 @@ public class ReplicationBasedServer extends AbstractServer {
 			}
 		} while (!stop);
 
+	}
+
+	private void readBinlog() throws IOException {
+		while (!stop) {
+			BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(pumaSocket.getInputStream(),
+					PacketType.BINLOG_PACKET, context);
+			if (!binlogPacket.isOk()) {
+				log.error("Binlog packet response error.");
+				throw new IOException("Binlog packet response error.");
+			} else {
+				BinlogEvent event = parser.parse(binlogPacket.getBinlogBuf(), context);
+				System.out.println(event);
+			}
+
+		}
+	}
+
+	/**
+	 * Connect to mysql master and parse the greeting packet
+	 * 
+	 * @throws UnknownHostException
+	 * @throws IOException
+	 */
+	private void connect() throws UnknownHostException, IOException {
+		this.pumaSocket = new PumaSocketWrapper(new Socket(host, port));
+		PacketFactory.parsePacket(pumaSocket.getInputStream(), PacketType.CONNECT_PACKET, context);
+	}
+
+	/**
+	 * Send COM_BINLOG_DUMP packet to mysql master and parse the response
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	private boolean dumpBinlog() throws IOException {
+		ComBinlogDumpPacket dumpBinlogPacket = (ComBinlogDumpPacket) PacketFactory.createCommandPacket(
+				PacketType.COM_BINLOG_DUMP_PACKET, context);
+		dumpBinlogPacket.setBinlogFileName(context.getBinlogFileName());
+		dumpBinlogPacket.setBinlogFlag(0);
+		dumpBinlogPacket.setBinlogPosition(context.getBinlogStartPos());
+		dumpBinlogPacket.setServerId(serverId);
+		dumpBinlogPacket.buildPacket(context);
+
+		dumpBinlogPacket.write(pumaSocket.getOutputStream(), context);
+
+		OKErrorPacket dumpCommandResultPacket = (OKErrorPacket) PacketFactory.parsePacket(pumaSocket.getInputStream(),
+				PacketType.OKERROR_PACKET, context);
+		if (dumpCommandResultPacket.isOk()) {
+			return true;
+		} else {
+			log.error("Dump binlog failed. Reason: " + dumpCommandResultPacket.getMessage());
+			return false;
+		}
+	}
+
+	/**
+	 * Send Authentication Packet to mysql master and parse the response
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	private boolean auth() throws IOException {
+		// auth
+		AuthenticatePacket authPacket = (AuthenticatePacket) PacketFactory.createCommandPacket(
+				PacketType.AUTHENTICATE_PACKET, context);
+
+		authPacket.setPassword(password);
+		authPacket.setUser(user);
+		authPacket.setDatabase(database);
+		authPacket.buildPacket(context);
+		authPacket.write(pumaSocket.getOutputStream(), context);
+
+		OKErrorPacket okErrorPacket = (OKErrorPacket) PacketFactory.parsePacket(pumaSocket.getInputStream(),
+				PacketType.OKERROR_PACKET, context);
+
+		if (okErrorPacket.isOk()) {
+			return true;
+		} else {
+			log.error("Login failed. Reason: " + okErrorPacket.getMessage());
+			return false;
+		}
 	}
 
 	/*
@@ -193,6 +253,36 @@ public class ReplicationBasedServer extends AbstractServer {
 		this.encoding = encoding;
 	}
 
+	/**
+	 * @return the database
+	 */
+	public String getDatabase() {
+		return database;
+	}
+
+	/**
+	 * @param database
+	 *            the database to set
+	 */
+	public void setDatabase(String database) {
+		this.database = database;
+	}
+
+	/**
+	 * @return the parser
+	 */
+	public Parser getParser() {
+		return parser;
+	}
+
+	/**
+	 * @param parser
+	 *            the parser to set
+	 */
+	public void setParser(Parser parser) {
+		this.parser = parser;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -217,7 +307,8 @@ public class ReplicationBasedServer extends AbstractServer {
 		 */
 		@Override
 		public InputStream getInputStream() throws IOException {
-			return new BufferedInputStream(socket.getInputStream());
+//			return new BufferedInputStream(socket.getInputStream());
+			return socket.getInputStream();
 		}
 
 		/*
@@ -227,7 +318,7 @@ public class ReplicationBasedServer extends AbstractServer {
 		 */
 		@Override
 		public OutputStream getOutputStream() throws IOException {
-			return new BufferedOutputStream(socket.getOutputStream());
+			return socket.getOutputStream();
 		}
 
 	}

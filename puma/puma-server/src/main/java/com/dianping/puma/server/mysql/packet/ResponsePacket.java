@@ -15,7 +15,7 @@ package com.dianping.puma.server.mysql.packet;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.dianping.puma.server.PumaContext;
+import com.dianping.puma.common.bo.PumaContext;
 
 /**
  * TODO Comment of ResponsePacket

@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.dianping.puma.common.bo.PositionInfo;
+import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.util.PositionFileUtils;
 import com.dianping.puma.common.util.PumaThreadUtils;
 

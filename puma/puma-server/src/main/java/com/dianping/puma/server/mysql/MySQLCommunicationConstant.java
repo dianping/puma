@@ -18,7 +18,7 @@ package com.dianping.puma.server.mysql;
  * @author Leo Liang
  * 
  */
-public class MySQLConstant {
+public class MySQLCommunicationConstant {
     /* new more secure passwords */
     public static final int  CLIENT_LONG_PASSWORD     = 1;
     /* Found instead of affected rows */

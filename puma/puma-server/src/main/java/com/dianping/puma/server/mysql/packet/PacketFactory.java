@@ -17,7 +17,7 @@ import java.io.InputStream;
 
 import org.apache.log4j.Logger;
 
-import com.dianping.puma.server.PumaContext;
+import com.dianping.puma.common.bo.PumaContext;
 
 /**
  * 
@@ -40,6 +40,10 @@ public class PacketFactory {
 					OKErrorPacket okErrorPacket = new OKErrorPacket();
 					okErrorPacket.readPacket(is, context);
 					return okErrorPacket;
+				case BINLOG_PACKET:
+					BinlogPacket binlogPacket = new BinlogPacket();
+					binlogPacket.readPacket(is, context);
+					return binlogPacket;
 				default:
 					return null;
 			}

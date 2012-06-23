@@ -24,6 +24,10 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.dianping.puma</groupId>
+			<artifactId>puma-parser</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.dianping.puma</groupId>
 			<artifactId>puma-common</artifactId>
 		</dependency>
 		<dependency>

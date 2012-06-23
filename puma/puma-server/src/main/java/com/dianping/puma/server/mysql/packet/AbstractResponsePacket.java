@@ -16,8 +16,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
+import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.util.PacketUtils;
-import com.dianping.puma.server.PumaContext;
 
 /**
  * 

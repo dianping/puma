@@ -12,7 +12,10 @@
 		<property name="password" value="binlog" />
 		<property name="defaultBinlogFileName" value="mysql-bin.000006" />
 		<property name="defaultBinlogPosition" value="4" />
+		<property name="parser" ref="defaultParser" />
 	</bean>
+
+	<bean id="defaultParser" class="com.dianping.puma.parser.impl.DefaultBinlogParser" />
 
 	<bean id="servers" class="java.util.ArrayList">
 		<constructor-arg>

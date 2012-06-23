@@ -12,6 +12,8 @@
  */
 package com.dianping.puma.server;
 
+import com.dianping.puma.common.bo.PumaContext;
+
 /**
  * @author Leo Liang
  * 

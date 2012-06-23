@@ -15,9 +15,9 @@ package com.dianping.puma.server.mysql.packet;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.datatype.UnsignedLong;
 import com.dianping.puma.common.util.PacketUtils;
-import com.dianping.puma.server.PumaContext;
 
 /**
  * TODO Comment of OKErrorPacket

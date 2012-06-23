@@ -15,9 +15,9 @@ package com.dianping.puma.server.mysql.packet;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.util.PacketUtils;
-import com.dianping.puma.server.PumaContext;
-import com.dianping.puma.server.mysql.MySQLConstant;
+import com.dianping.puma.server.mysql.MySQLCommunicationConstant;
 
 /**
  * TODO Comment of ComBinlogDumpPacket
@@ -31,7 +31,7 @@ public class ComBinlogDumpPacket extends AbstractCommandPacket {
      * @param command
      */
     public ComBinlogDumpPacket() {
-        super(MySQLConstant.COM_BINLOG_DUMP);
+        super(MySQLCommunicationConstant.COM_BINLOG_DUMP);
     }
 
     private static final long serialVersionUID = 5368054890061442302L;

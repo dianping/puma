@@ -14,9 +14,9 @@ package com.dianping.puma.server.mysql.packet;
 
 import java.nio.ByteBuffer;
 
+import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.util.PacketUtils;
-import com.dianping.puma.server.PumaContext;
-import com.dianping.puma.server.mysql.MySQLConstant;
+import com.dianping.puma.server.mysql.MySQLCommunicationConstant;
 import com.dianping.puma.server.mysql.util.MySQLUtils;
 
 /**
@@ -59,7 +59,7 @@ public class ConnectPacket extends AbstractResponsePacket {
 
 		if ((MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
 				context.getServerSubMinorVersion(), 4, 1, 1) || ((context.getProtocolVersion() > 9) && (context
-				.getServerCapabilities() & MySQLConstant.CLIENT_PROTOCOL_41) != 0))) {
+				.getServerCapabilities() & MySQLCommunicationConstant.CLIENT_PROTOCOL_41) != 0))) {
 
 			/* New protocol with 16 bytes to describe server characteristics */
 			context.setServerCharsetIndex(buf.get() & 0xff);
@@ -76,28 +76,28 @@ public class ConnectPacket extends AbstractResponsePacket {
 			context.setSeed(newSeed.toString());
 		}
 
-		if ((context.getServerCapabilities() & MySQLConstant.CLIENT_LONG_FLAG) != 0) {
-			context.setClientParam(context.getClientParam() | MySQLConstant.CLIENT_LONG_FLAG);
+		if ((context.getServerCapabilities() & MySQLCommunicationConstant.CLIENT_LONG_FLAG) != 0) {
+			context.setClientParam(context.getClientParam() | MySQLCommunicationConstant.CLIENT_LONG_FLAG);
 			context.setHasLongColumnInfo(true);
 		}
 
 		if (context.getProtocolVersion() > 9) {
-			context.setClientParam(context.getClientParam() | MySQLConstant.CLIENT_LONG_PASSWORD);
+			context.setClientParam(context.getClientParam() | MySQLCommunicationConstant.CLIENT_LONG_PASSWORD);
 		} else {
-			context.setClientParam(context.getClientParam() & ~MySQLConstant.CLIENT_LONG_PASSWORD);
+			context.setClientParam(context.getClientParam() & ~MySQLCommunicationConstant.CLIENT_LONG_PASSWORD);
 		}
 
 		if ((MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
 				context.getServerSubMinorVersion(), 4, 1, 0) || ((context.getProtocolVersion() > 9) && (context
-				.getServerCapabilities() & MySQLConstant.CLIENT_RESERVED) != 0))) {
+				.getServerCapabilities() & MySQLCommunicationConstant.CLIENT_RESERVED) != 0))) {
 			if ((MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
 					context.getServerSubMinorVersion(), 4, 1, 1) || ((context.getProtocolVersion() > 9) && (context
-					.getServerCapabilities() & MySQLConstant.CLIENT_PROTOCOL_41) != 0))) {
-				context.setClientParam(context.getClientParam() | MySQLConstant.CLIENT_PROTOCOL_41);
+					.getServerCapabilities() & MySQLCommunicationConstant.CLIENT_PROTOCOL_41) != 0))) {
+				context.setClientParam(context.getClientParam() | MySQLCommunicationConstant.CLIENT_PROTOCOL_41);
 				context.setHas41NewNewProt(true);
 
 			} else {
-				context.setClientParam(context.getClientParam() | MySQLConstant.CLIENT_RESERVED);
+				context.setClientParam(context.getClientParam() | MySQLCommunicationConstant.CLIENT_RESERVED);
 				context.setHas41NewNewProt(false);
 			}
 

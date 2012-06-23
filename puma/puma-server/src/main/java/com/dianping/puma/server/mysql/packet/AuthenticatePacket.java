@@ -15,9 +15,9 @@ package com.dianping.puma.server.mysql.packet;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.util.PacketUtils;
-import com.dianping.puma.server.PumaContext;
-import com.dianping.puma.server.mysql.MySQLConstant;
+import com.dianping.puma.server.mysql.MySQLCommunicationConstant;
 import com.dianping.puma.server.mysql.util.MySQLUtils;
 
 /**
@@ -80,7 +80,7 @@ public class AuthenticatePacket extends AbstractCommandPacket {
         int databaseLength = (database != null) ? database.length() : 0;
         ByteBuffer bodyBuf = ByteBuffer.allocate(((userLength + databaseLength) * 2) + 52);
 
-        if ((context.getServerCapabilities() & MySQLConstant.CLIENT_SECURE_CONNECTION) != 0) {
+        if ((context.getServerCapabilities() & MySQLCommunicationConstant.CLIENT_SECURE_CONNECTION) != 0) {
             if (MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
                     context.getServerSubMinorVersion(), 4, 1, 1)) {
                 secureAuth411(bodyBuf, user, password, database, true, context);
@@ -112,7 +112,7 @@ public class AuthenticatePacket extends AbstractCommandPacket {
                         .getEncoding());
             }
 
-            if (((context.getServerCapabilities() & MySQLConstant.CLIENT_CONNECT_WITH_DB) != 0) && (database != null)
+            if (((context.getServerCapabilities() & MySQLCommunicationConstant.CLIENT_CONNECT_WITH_DB) != 0) && (database != null)
                     && (database.length() > 0)) {
                 PacketUtils.writeNullTerminatedString(bodyBuf, database, context.getEncoding());
             }
@@ -128,9 +128,9 @@ public class AuthenticatePacket extends AbstractCommandPacket {
                 if (MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
                         context.getServerSubMinorVersion(), 4, 1, 1)) {
                     PacketUtils.writeInt(buf, database != null && database.length() != 0 ? context.getClientParam()
-                            | MySQLConstant.CLIENT_SECURE_CONNECTION | MySQLConstant.CLIENT_CONNECT_WITH_DB : context
+                            | MySQLCommunicationConstant.CLIENT_SECURE_CONNECTION | MySQLCommunicationConstant.CLIENT_CONNECT_WITH_DB : context
                             .getClientParam()
-                            | MySQLConstant.CLIENT_SECURE_CONNECTION, 4);
+                            | MySQLCommunicationConstant.CLIENT_SECURE_CONNECTION, 4);
                     PacketUtils.writeInt(buf, context.getMaxThreeBytes(), 4);
 
                     PacketUtils.writeByte(buf, (byte) UTF8_CHARSET_INDEX);

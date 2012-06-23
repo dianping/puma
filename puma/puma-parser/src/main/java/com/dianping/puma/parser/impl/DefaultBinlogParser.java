@@ -15,6 +15,7 @@
  */
 package com.dianping.puma.parser.impl;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import com.dianping.puma.common.bo.PumaContext;
@@ -26,16 +27,14 @@ import com.dianping.puma.parser.mysql.event.QueryEvent;
 
 /**
  * TODO Comment of DefaultBinlogParser
+ * 
  * @author Leo Liang
- *
+ * 
  */
 public class DefaultBinlogParser implements Parser {
 
-	/* (non-Javadoc)
-	 * @see com.dianping.puma.parser.Parser#parse(java.nio.ByteBuffer, com.dianping.puma.common.bo.PumaContext)
-	 */
 	@Override
-	public BinlogEvent parse(ByteBuffer buf, PumaContext context) {
+	public BinlogEvent parse(ByteBuffer buf, PumaContext context) throws IOException {
 		BinlogHeader header = new BinlogHeader();
 		header.parse(buf, context);
 		switch (header.getEventType()) {

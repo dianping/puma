@@ -15,6 +15,7 @@
  */
 package com.dianping.puma.parser;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import com.dianping.puma.common.bo.PumaContext;
@@ -27,5 +28,5 @@ import com.dianping.puma.parser.mysql.event.BinlogEvent;
  * 
  */
 public interface Parser {
-	public BinlogEvent parse(ByteBuffer buf, PumaContext context);
+	public BinlogEvent parse(ByteBuffer buf, PumaContext context) throws IOException;
 }

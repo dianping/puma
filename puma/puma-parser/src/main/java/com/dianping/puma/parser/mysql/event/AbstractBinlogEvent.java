@@ -15,6 +15,7 @@
  */
 package com.dianping.puma.parser.mysql.event;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import com.dianping.puma.common.bo.PumaContext;
@@ -26,15 +27,16 @@ import com.dianping.puma.common.bo.PumaContext;
  * 
  */
 public abstract class AbstractBinlogEvent implements BinlogEvent {
-	private BinlogHeader	header;
+	private static final long	serialVersionUID	= -8136236885229956889L;
+	private BinlogHeader		header;
 
 	@Override
-	public void parse(ByteBuffer buf, PumaContext context, BinlogHeader header) {
+	public void parse(ByteBuffer buf, PumaContext context, BinlogHeader header) throws IOException {
 		this.header = header;
-
+		doParse(buf, context);
 	}
 
-	public abstract void doParse(ByteBuffer buf, PumaContext context);
+	public abstract void doParse(ByteBuffer buf, PumaContext context) throws IOException;
 
 	/*
 	 * (non-Javadoc)

@@ -10,7 +10,7 @@
  * This software is the confidential and proprietary information of
  * Dianping Company. ("Confidential Information").  You shall not
  * disclose such Confidential Information and shall use it only in
- * accordance with the terms of the license agreement you entered into
+ * accordance with the terms of the license agreement you entered byteo
  * with dianping.com.
  */
 package com.dianping.puma.parser.mysql;
@@ -22,15 +22,13 @@ package com.dianping.puma.parser.mysql;
  * 
  */
 public class BinlogConstanst {
-	/**
-	 * binlog支持的27种事件类型.
-	 */
+	// event type
 	public static final byte	UNKNOWN_EVENT				= 0;
 	public static final byte	START_EVENT_V3				= 1;
 	public static final byte	QUERY_EVENT					= 2;
 	public static final byte	STOP_EVENT					= 3;
 	public static final byte	ROTATE_EVENT				= 4;
-	public static final byte	INTVAR_EVENT				= 5;
+	public static final byte	byteVAR_EVENT				= 5;
 	public static final byte	LOAD_EVENT					= 6;
 	public static final byte	SLAVE_EVENT					= 7;
 	public static final byte	CREATE_FILE_EVENT			= 8;
@@ -53,5 +51,17 @@ public class BinlogConstanst {
 	public static final byte	DELETE_ROWS_EVENT			= 25;
 	public static final byte	INCIDENT_EVENT				= 26;
 	public static final byte	HEARTBEAT_LOG_EVENT			= 27;
+
+	// Status variable type
+	public static final byte	Q_FLAGS2_CODE				= 0;
+	public static final byte	Q_SQL_MODE_CODE				= 1;
+	public static final byte	Q_CATALOG_CODE				= 2;
+	public static final byte	Q_AUTO_INCREMENT			= 3;
+	public static final byte	Q_CHARSET_CODE				= 4;
+	public static final byte	Q_TIME_ZONE_CODE			= 5;
+	public static final byte	Q_CATALOG_NZ_CODE			= 6;
+	public static final byte	Q_LC_TIME_NAMES_CODE		= 7;
+	public static final byte	Q_CHARSET_DATABASE_CODE		= 8;
+	public static final byte	Q_TABLE_MAP_FOR_UPDATE_CODE	= 9;
 
 }

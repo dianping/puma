@@ -307,7 +307,6 @@ public class ReplicationBasedServer extends AbstractServer {
 		 */
 		@Override
 		public InputStream getInputStream() throws IOException {
-//			return new BufferedInputStream(socket.getInputStream());
 			return socket.getInputStream();
 		}
 

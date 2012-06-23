@@ -12,6 +12,7 @@
  */
 package com.dianping.puma.server.mysql.packet;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.log4j.Logger;
@@ -25,47 +26,43 @@ import com.dianping.puma.server.PumaContext;
  */
 public class PacketFactory {
 
-    private static final Logger log = Logger.getLogger(PacketFactory.class);
+	private static final Logger	log	= Logger.getLogger(PacketFactory.class);
 
-    public static ResponsePacket parsePacket(InputStream is, PacketType packetType, PumaContext context) {
-        try {
-            switch (packetType) {
-                case CONNECT_PACKET:
-                    ResponsePacket greetingPacket = new ConnectPacket();
-                    greetingPacket.readPacket(is, context);
-                    return greetingPacket;
-                case OKERROR_PACKET:
-                    OKErrorPacket okErrorPacket = new OKErrorPacket();
-                    okErrorPacket.readPacket(is, context);
-                    return okErrorPacket;
-                default:
-                    return null;
-            }
-        } catch (Exception e) {
-            log.error("Read packet failed.", e);
-            return null;
-        }
-    }
+	public static ResponsePacket parsePacket(InputStream is, PacketType packetType, PumaContext context)
+			throws IOException {
+		try {
+			switch (packetType) {
+				case CONNECT_PACKET:
+					ResponsePacket greetingPacket = new ConnectPacket();
+					greetingPacket.readPacket(is, context);
+					return greetingPacket;
+				case OKERROR_PACKET:
+					OKErrorPacket okErrorPacket = new OKErrorPacket();
+					okErrorPacket.readPacket(is, context);
+					return okErrorPacket;
+				default:
+					return null;
+			}
+		} catch (IOException e) {
+			log.error("Read packet failed.", e);
+			throw e;
+		}
+	}
 
-    public static CommandPacket createCommandPacket(PacketType packetType, PumaContext context) {
-        try {
-            switch (packetType) {
-                case AUTHENTICATE_PACKET:
-                    AuthenticatePacket authenticatePacket = new AuthenticatePacket();
-                    authenticatePacket.setSeed(context.getSeed());
-                    authenticatePacket.setSeq(1);
-                    return authenticatePacket;
-                case COM_BINLOG_DUMP_PACKET:
-                    ComBinlogDumpPacket comBinlogDumpPacket = new ComBinlogDumpPacket();
-                    comBinlogDumpPacket.setSeq(0);
-                    return comBinlogDumpPacket;
-                default:
-                    return null;
-            }
-        } catch (Exception e) {
-            log.error("Create packet failed.", e);
-            return null;
-        }
-    }
+	public static CommandPacket createCommandPacket(PacketType packetType, PumaContext context) {
+		switch (packetType) {
+			case AUTHENTICATE_PACKET:
+				AuthenticatePacket authenticatePacket = new AuthenticatePacket();
+				authenticatePacket.setSeed(context.getSeed());
+				authenticatePacket.setSeq(1);
+				return authenticatePacket;
+			case COM_BINLOG_DUMP_PACKET:
+				ComBinlogDumpPacket comBinlogDumpPacket = new ComBinlogDumpPacket();
+				comBinlogDumpPacket.setSeq(0);
+				return comBinlogDumpPacket;
+			default:
+				return null;
+		}
+	}
 
 }

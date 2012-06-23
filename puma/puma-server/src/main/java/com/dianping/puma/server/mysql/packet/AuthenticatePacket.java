@@ -15,7 +15,7 @@ package com.dianping.puma.server.mysql.packet;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import com.dianping.puma.common.util.PacketUtil;
+import com.dianping.puma.common.util.PacketUtils;
 import com.dianping.puma.server.PumaContext;
 import com.dianping.puma.server.mysql.MySQLConstant;
 import com.dianping.puma.server.mysql.util.MySQLUtils;
@@ -90,31 +90,31 @@ public class AuthenticatePacket extends AbstractCommandPacket {
         } else {
 
             if (context.isUse41Extensions()) {
-                PacketUtil.writeInt(bodyBuf, context.getClientParam(), 4);
-                PacketUtil.writeInt(bodyBuf, context.getMaxThreeBytes(), 4);
+                PacketUtils.writeInt(bodyBuf, context.getClientParam(), 4);
+                PacketUtils.writeInt(bodyBuf, context.getMaxThreeBytes(), 4);
 
-                PacketUtil.writeByte(bodyBuf, (byte) 8);
+                PacketUtils.writeByte(bodyBuf, (byte) 8);
 
-                PacketUtil.writeBytesNoNull(bodyBuf, new byte[23]);
+                PacketUtils.writeBytesNoNull(bodyBuf, new byte[23]);
             } else {
-                PacketUtil.writeInt(bodyBuf, (int) context.getClientParam(), 2);
-                PacketUtil.writeInt(bodyBuf, context.getMaxThreeBytes(), 3);
+                PacketUtils.writeInt(bodyBuf, (int) context.getClientParam(), 2);
+                PacketUtils.writeInt(bodyBuf, context.getMaxThreeBytes(), 3);
             }
 
             // User/Password data
-            PacketUtil.writeNullTerminatedString(bodyBuf, user, context.getEncoding());
+            PacketUtils.writeNullTerminatedString(bodyBuf, user, context.getEncoding());
 
             if (context.getProtocolVersion() > 9) {
-                PacketUtil.writeNullTerminatedString(bodyBuf, MySQLUtils.newCrypt(password, context.getSeed()), context
+                PacketUtils.writeNullTerminatedString(bodyBuf, MySQLUtils.newCrypt(password, context.getSeed()), context
                         .getEncoding());
             } else {
-                PacketUtil.writeNullTerminatedString(bodyBuf, MySQLUtils.oldCrypt(password, context.getSeed()), context
+                PacketUtils.writeNullTerminatedString(bodyBuf, MySQLUtils.oldCrypt(password, context.getSeed()), context
                         .getEncoding());
             }
 
             if (((context.getServerCapabilities() & MySQLConstant.CLIENT_CONNECT_WITH_DB) != 0) && (database != null)
                     && (database.length() > 0)) {
-                PacketUtil.writeNullTerminatedString(bodyBuf, database, context.getEncoding());
+                PacketUtils.writeNullTerminatedString(bodyBuf, database, context.getEncoding());
             }
         }
         return bodyBuf;
@@ -127,46 +127,46 @@ public class AuthenticatePacket extends AbstractCommandPacket {
             if (context.isUse41Extensions()) {
                 if (MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
                         context.getServerSubMinorVersion(), 4, 1, 1)) {
-                    PacketUtil.writeInt(buf, database != null && database.length() != 0 ? context.getClientParam()
+                    PacketUtils.writeInt(buf, database != null && database.length() != 0 ? context.getClientParam()
                             | MySQLConstant.CLIENT_SECURE_CONNECTION | MySQLConstant.CLIENT_CONNECT_WITH_DB : context
                             .getClientParam()
                             | MySQLConstant.CLIENT_SECURE_CONNECTION, 4);
-                    PacketUtil.writeInt(buf, context.getMaxThreeBytes(), 4);
+                    PacketUtils.writeInt(buf, context.getMaxThreeBytes(), 4);
 
-                    PacketUtil.writeByte(buf, (byte) UTF8_CHARSET_INDEX);
-                    PacketUtil.writeBytesNoNull(buf, new byte[23]);
+                    PacketUtils.writeByte(buf, (byte) UTF8_CHARSET_INDEX);
+                    PacketUtils.writeBytesNoNull(buf, new byte[23]);
 
                 } else {
-                    PacketUtil.writeInt(buf, context.getClientParam(), 4);
-                    PacketUtil.writeInt(buf, context.getMaxThreeBytes(), 4);
+                    PacketUtils.writeInt(buf, context.getClientParam(), 4);
+                    PacketUtils.writeInt(buf, context.getMaxThreeBytes(), 4);
                 }
             } else {
-                PacketUtil.writeInt(buf, (int) context.getClientParam(), 2);
-                PacketUtil.writeInt(buf, context.getMaxThreeBytes(), 3);
+                PacketUtils.writeInt(buf, (int) context.getClientParam(), 2);
+                PacketUtils.writeInt(buf, context.getMaxThreeBytes(), 3);
             }
         }
 
         // User/Password data
-        PacketUtil.writeNullTerminatedString(buf, user, context.getEncoding());
+        PacketUtils.writeNullTerminatedString(buf, user, context.getEncoding());
 
         if (password.length() != 0) {
-            PacketUtil.writeByte(buf, (byte) 0x14);
+            PacketUtils.writeByte(buf, (byte) 0x14);
 
             try {
-                PacketUtil.writeBytesNoNull(buf, MySQLUtils.scramble411(password, this.seed, context.getEncoding()));
+                PacketUtils.writeBytesNoNull(buf, MySQLUtils.scramble411(password, this.seed, context.getEncoding()));
             } catch (Exception e) {
                 throw new IOException(e.getMessage(), e);
             }
         } else {
             /* For empty password */
-            PacketUtil.writeByte(buf, (byte) 0);
+            PacketUtils.writeByte(buf, (byte) 0);
         }
 
         if (database != null && database.length() > 0) {
-            PacketUtil.writeNullTerminatedString(buf, database, context.getEncoding());
+            PacketUtils.writeNullTerminatedString(buf, database, context.getEncoding());
         } else {
             /* For empty database */
-            PacketUtil.writeByte(buf, (byte) 0);
+            PacketUtils.writeByte(buf, (byte) 0);
         }
 
     }

@@ -14,7 +14,7 @@ package com.dianping.puma.server.mysql.packet;
 
 import java.nio.ByteBuffer;
 
-import com.dianping.puma.common.util.PacketUtil;
+import com.dianping.puma.common.util.PacketUtils;
 import com.dianping.puma.server.PumaContext;
 import com.dianping.puma.server.mysql.MySQLConstant;
 import com.dianping.puma.server.mysql.util.MySQLUtils;
@@ -26,132 +26,132 @@ import com.dianping.puma.server.mysql.util.MySQLUtils;
  */
 public class ConnectPacket extends AbstractResponsePacket {
 
-    private static final long serialVersionUID = -4346727912577548259L;
+	private static final long	serialVersionUID	= -4346727912577548259L;
 
-    @Override
-    protected void doReadPacket(ByteBuffer buf, PumaContext context) {
-        context.setProtocolVersion(buf.get());
-        context.setServerVersion(PacketUtil.readNullTerminatedString(buf));
-        parseVersion(context);
+	@Override
+	protected void doReadPacket(ByteBuffer buf, PumaContext context) {
+		context.setProtocolVersion(buf.get());
+		context.setServerVersion(PacketUtils.readNullTerminatedString(buf));
+		parseVersion(context);
 
-        if (MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(), context
-                .getServerSubMinorVersion(), 4, 0, 8)) {
-            context.setMaxThreeBytes((256 * 256 * 256) - 1);
-            context.setUseNewLargePackets(true);
-        } else {
-            context.setMaxThreeBytes(255 * 255 * 255);
-            context.setUseNewLargePackets(false);
-        }
+		if (MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
+				context.getServerSubMinorVersion(), 4, 0, 8)) {
+			context.setMaxThreeBytes((256 * 256 * 256) - 1);
+			context.setUseNewLargePackets(true);
+		} else {
+			context.setMaxThreeBytes(255 * 255 * 255);
+			context.setUseNewLargePackets(false);
+		}
 
-        context.setColDecimalNeedsBump(MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context
-                .getServerMinorVersion(), context.getServerSubMinorVersion(), 3, 23, 0));
-        context.setColDecimalNeedsBump(!MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context
-                .getServerMinorVersion(), context.getServerSubMinorVersion(), 3, 23, 15));
+		context.setColDecimalNeedsBump(MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(),
+				context.getServerMinorVersion(), context.getServerSubMinorVersion(), 3, 23, 0));
+		context.setColDecimalNeedsBump(!MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(),
+				context.getServerMinorVersion(), context.getServerSubMinorVersion(), 3, 23, 15));
 
-        context.setThreadId(PacketUtil.readLong(buf, 4));
-        context.setSeed(PacketUtil.readNullTerminatedString(buf));
+		context.setThreadId(PacketUtils.readLong(buf, 4));
+		context.setSeed(PacketUtils.readNullTerminatedString(buf));
 
-        context.setServerCapabilities(0);
+		context.setServerCapabilities(0);
 
-        if (buf.position() < buf.limit()) {
-            context.setServerCapabilities(PacketUtil.readInt(buf, 2));
-        }
+		if (buf.position() < buf.limit()) {
+			context.setServerCapabilities(PacketUtils.readInt(buf, 2));
+		}
 
-        if ((MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(), context
-                .getServerSubMinorVersion(), 4, 1, 1) || ((context.getProtocolVersion() > 9) && (context
-                .getServerCapabilities() & MySQLConstant.CLIENT_PROTOCOL_41) != 0))) {
+		if ((MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
+				context.getServerSubMinorVersion(), 4, 1, 1) || ((context.getProtocolVersion() > 9) && (context
+				.getServerCapabilities() & MySQLConstant.CLIENT_PROTOCOL_41) != 0))) {
 
-            /* New protocol with 16 bytes to describe server characteristics */
-            context.setServerCharsetIndex(buf.get() & 0xff);
-            context.setServerStatus(PacketUtil.readInt(buf, 2));
+			/* New protocol with 16 bytes to describe server characteristics */
+			context.setServerCharsetIndex(buf.get() & 0xff);
+			context.setServerStatus(PacketUtils.readInt(buf, 2));
 
-            // context.setServerCapabilities(context.getServerCapabilities() +
-            // 65536 * PacketUtil.readInt(buf, 2));
+			// context.setServerCapabilities(context.getServerCapabilities() +
+			// 65536 * PacketUtil.readInt(buf, 2));
 
-            buf.position(buf.position() + 13);
-            String seedPart2 = PacketUtil.readNullTerminatedString(buf);
-            StringBuilder newSeed = new StringBuilder(20);
-            newSeed.append(context.getSeed());
-            newSeed.append(seedPart2);
-            context.setSeed(newSeed.toString());
-        }
+			buf.position(buf.position() + 13);
+			String seedPart2 = PacketUtils.readNullTerminatedString(buf);
+			StringBuilder newSeed = new StringBuilder(20);
+			newSeed.append(context.getSeed());
+			newSeed.append(seedPart2);
+			context.setSeed(newSeed.toString());
+		}
 
-        if ((context.getServerCapabilities() & MySQLConstant.CLIENT_LONG_FLAG) != 0) {
-            context.setClientParam(context.getClientParam() | MySQLConstant.CLIENT_LONG_FLAG);
-            context.setHasLongColumnInfo(true);
-        }
+		if ((context.getServerCapabilities() & MySQLConstant.CLIENT_LONG_FLAG) != 0) {
+			context.setClientParam(context.getClientParam() | MySQLConstant.CLIENT_LONG_FLAG);
+			context.setHasLongColumnInfo(true);
+		}
 
-        if (context.getProtocolVersion() > 9) {
-            context.setClientParam(context.getClientParam() | MySQLConstant.CLIENT_LONG_PASSWORD);
-        } else {
-            context.setClientParam(context.getClientParam() & ~MySQLConstant.CLIENT_LONG_PASSWORD);
-        }
+		if (context.getProtocolVersion() > 9) {
+			context.setClientParam(context.getClientParam() | MySQLConstant.CLIENT_LONG_PASSWORD);
+		} else {
+			context.setClientParam(context.getClientParam() & ~MySQLConstant.CLIENT_LONG_PASSWORD);
+		}
 
-        if ((MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(), context
-                .getServerSubMinorVersion(), 4, 1, 0) || ((context.getProtocolVersion() > 9) && (context
-                .getServerCapabilities() & MySQLConstant.CLIENT_RESERVED) != 0))) {
-            if ((MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
-                    context.getServerSubMinorVersion(), 4, 1, 1) || ((context.getProtocolVersion() > 9) && (context
-                    .getServerCapabilities() & MySQLConstant.CLIENT_PROTOCOL_41) != 0))) {
-                context.setClientParam(context.getClientParam() | MySQLConstant.CLIENT_PROTOCOL_41);
-                context.setHas41NewNewProt(true);
+		if ((MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
+				context.getServerSubMinorVersion(), 4, 1, 0) || ((context.getProtocolVersion() > 9) && (context
+				.getServerCapabilities() & MySQLConstant.CLIENT_RESERVED) != 0))) {
+			if ((MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
+					context.getServerSubMinorVersion(), 4, 1, 1) || ((context.getProtocolVersion() > 9) && (context
+					.getServerCapabilities() & MySQLConstant.CLIENT_PROTOCOL_41) != 0))) {
+				context.setClientParam(context.getClientParam() | MySQLConstant.CLIENT_PROTOCOL_41);
+				context.setHas41NewNewProt(true);
 
-            } else {
-                context.setClientParam(context.getClientParam() | MySQLConstant.CLIENT_RESERVED);
-                context.setHas41NewNewProt(false);
-            }
+			} else {
+				context.setClientParam(context.getClientParam() | MySQLConstant.CLIENT_RESERVED);
+				context.setHas41NewNewProt(false);
+			}
 
-            context.setUse41Extensions(true);
-        }
+			context.setUse41Extensions(true);
+		}
 
-    }
+	}
 
-    /**
+	/**
      * 
      */
-    private void parseVersion(PumaContext context) {
-        // Parse the server version into major/minor/subminor
-        int point = context.getServerVersion().indexOf('.'); //$NON-NLS-1$
+	private void parseVersion(PumaContext context) {
+		// Parse the server version into major/minor/subminor
+		int point = context.getServerVersion().indexOf('.');
 
-        if (point != -1) {
-            try {
-                int n = Integer.parseInt(context.getServerVersion().substring(0, point));
-                context.setServerMajorVersion(n);
-            } catch (NumberFormatException NFE1) {
-                // ignore
-            }
+		if (point != -1) {
+			try {
+				int n = Integer.parseInt(context.getServerVersion().substring(0, point));
+				context.setServerMajorVersion(n);
+			} catch (NumberFormatException NFE1) {
+				// ignore
+			}
 
-            String remaining = context.getServerVersion().substring(point + 1, context.getServerVersion().length());
-            point = remaining.indexOf('.'); //$NON-NLS-1$
+			String remaining = context.getServerVersion().substring(point + 1, context.getServerVersion().length());
+			point = remaining.indexOf('.'); //$NON-NLS-1$
 
-            if (point != -1) {
-                try {
-                    int n = Integer.parseInt(remaining.substring(0, point));
-                    context.setServerMinorVersion(n);
-                } catch (NumberFormatException nfe) {
-                    // ignore
-                }
+			if (point != -1) {
+				try {
+					int n = Integer.parseInt(remaining.substring(0, point));
+					context.setServerMinorVersion(n);
+				} catch (NumberFormatException nfe) {
+					// ignore
+				}
 
-                remaining = remaining.substring(point + 1, remaining.length());
+				remaining = remaining.substring(point + 1, remaining.length());
 
-                int pos = 0;
+				int pos = 0;
 
-                while (pos < remaining.length()) {
-                    if ((remaining.charAt(pos) < '0') || (remaining.charAt(pos) > '9')) {
-                        break;
-                    }
+				while (pos < remaining.length()) {
+					if ((remaining.charAt(pos) < '0') || (remaining.charAt(pos) > '9')) {
+						break;
+					}
 
-                    pos++;
-                }
+					pos++;
+				}
 
-                try {
-                    int n = Integer.parseInt(remaining.substring(0, pos));
-                    context.setServerSubMinorVersion(n);
-                } catch (NumberFormatException nfe) {
-                    // ignore
-                }
-            }
-        }
-    }
+				try {
+					int n = Integer.parseInt(remaining.substring(0, pos));
+					context.setServerSubMinorVersion(n);
+				} catch (NumberFormatException nfe) {
+					// ignore
+				}
+			}
+		}
+	}
 
 }

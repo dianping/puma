@@ -22,9 +22,8 @@ import java.util.concurrent.CountDownLatch;
 
 import org.apache.log4j.Logger;
 
+import com.dianping.puma.common.bo.PositionInfo;
 import com.dianping.puma.common.util.PositionFileUtils;
-import com.dianping.puma.common.util.PositionInfo;
-import com.dianping.puma.server.PumaContext;
 import com.dianping.puma.server.mysql.packet.AuthenticatePacket;
 import com.dianping.puma.server.mysql.packet.ComBinlogDumpPacket;
 import com.dianping.puma.server.mysql.packet.OKErrorPacket;
@@ -59,65 +58,70 @@ public class ReplicationBasedServer extends AbstractServer {
 	public void start() throws Exception {
 
 		do {
-			this.pumaSocket = new PumaSocketWrapper(new Socket(host, port));
+			try {
+				// 读position/file文件
+				PositionInfo posInfo = PositionFileUtils.getPositionInfo(this.getServerName(),
+						context.getBinlogFileName(), context.getBinlogStartPos());
 
-			// 读position/file文件
-			PositionInfo posInfo = PositionFileUtils.getPositionInfo(this.getServerName(), this.getBinlogFileName());
-			this.binlogFileName = posInfo.getBinlogFileName();
-			this.binlogPosition = posInfo.getBinlogPosition();
+				context.setBinlogFileName(posInfo.getBinlogFileName());
+				context.setBinlogStartPos(posInfo.getBinlogPosition());
+				context.setServerId(serverId);
+				CountDownLatch latch = new CountDownLatch(1);
 
-			PumaContext context = new PumaContext();
+				this.pumaSocket = new PumaSocketWrapper(new Socket(host, port));
 
-			context.setBinlogFileName(binlogFileName);
-			context.setBinlogStartPos(binlogPosition);
-			context.setServerId(serverId);
+				// connect
+				PacketFactory.parsePacket(pumaSocket.getInputStream(), PacketType.CONNECT_PACKET, context);
 
-			CountDownLatch latch = new CountDownLatch(1);
+				// auth
+				AuthenticatePacket authPacket = (AuthenticatePacket) PacketFactory.createCommandPacket(
+						PacketType.AUTHENTICATE_PACKET, context);
 
-			// connect
-			PacketFactory.parsePacket(pumaSocket.getInputStream(), PacketType.CONNECT_PACKET, context);
+				authPacket.setPassword(password);
+				authPacket.setUser(user);
+				authPacket.setDatabase(database);
+				authPacket.buildPacket(context);
+				authPacket.write(pumaSocket.getOutputStream(), context);
 
-			// auth
-			AuthenticatePacket authPacket = (AuthenticatePacket) PacketFactory.createCommandPacket(
-					PacketType.AUTHENTICATE_PACKET, context);
+				OKErrorPacket okErrorPacket = (OKErrorPacket) PacketFactory.parsePacket(pumaSocket.getInputStream(),
+						PacketType.OKERROR_PACKET, context);
 
-			authPacket.setPassword(password);
-			authPacket.setUser(user);
-			authPacket.setDatabase(database);
-			authPacket.buildPacket(context);
-			authPacket.write(pumaSocket.getOutputStream(), context);
+				if (okErrorPacket.isOk()) {
+					log.info("Server logined... serverId: " + serverId + " host: " + host + " port: " + port
+							+ " user: " + user + " database: " + database);
 
-			OKErrorPacket okErrorPacket = (OKErrorPacket) PacketFactory.parsePacket(pumaSocket.getInputStream(),
-					PacketType.OKERROR_PACKET, context);
+					ComBinlogDumpPacket dumpBinlogPacket = (ComBinlogDumpPacket) PacketFactory.createCommandPacket(
+							PacketType.COM_BINLOG_DUMP_PACKET, context);
+					dumpBinlogPacket.setBinlogFileName(context.getBinlogFileName());
+					dumpBinlogPacket.setBinlogFlag(0);
+					dumpBinlogPacket.setBinlogPosition(context.getBinlogStartPos());
+					dumpBinlogPacket.setServerId(serverId);
+					dumpBinlogPacket.buildPacket(context);
 
-			if (okErrorPacket.isOk()) {
-				log.info("Logined...");
+					dumpBinlogPacket.write(pumaSocket.getOutputStream(), context);
 
-				ComBinlogDumpPacket dumpBinlogPacket = (ComBinlogDumpPacket) PacketFactory.createCommandPacket(
-						PacketType.COM_BINLOG_DUMP_PACKET, context);
-				dumpBinlogPacket.setBinlogFileName(binlogFileName);
-				dumpBinlogPacket.setBinlogFlag(0);
-				dumpBinlogPacket.setBinlogPosition(binlogPosition);
-				dumpBinlogPacket.setServerId(serverId);
-				dumpBinlogPacket.buildPacket(context);
+					OKErrorPacket dumpCommandResultPacket = (OKErrorPacket) PacketFactory.parsePacket(
+							pumaSocket.getInputStream(), PacketType.OKERROR_PACKET, context);
 
-				dumpBinlogPacket.write(pumaSocket.getOutputStream(), context);
+					if (dumpCommandResultPacket.isOk()) {
+						log.info("Dump binlog command success.");
+					} else {
+						log.error("Dump binlog failed. Reason: " + dumpCommandResultPacket.getMessage());
+					}
 
-				OKErrorPacket dumpCommandResultPacket = (OKErrorPacket) PacketFactory.parsePacket(
-						pumaSocket.getInputStream(), PacketType.OKERROR_PACKET, context);
+					latch.await();
 
-				if (dumpCommandResultPacket.isOk()) {
-					log.info("Dump binlog command success.");
 				} else {
-					log.error("Dump binlog failed. Reason: " + dumpCommandResultPacket.getMessage());
+					log.error("Login failed. Reason: " + okErrorPacket.getMessage());
 				}
+			} catch (IOException e) {
+				log.error("IOException occurs. serverId: " + serverId);
+				try {
+					this.pumaSocket.close();
+				} catch (IOException closeException) {
 
-				latch.await();
-
-			} else {
-				log.error("Login failed. Reason: " + okErrorPacket.getMessage());
+				}
 			}
-
 		} while (!stop);
 
 	}
@@ -181,22 +185,6 @@ public class ReplicationBasedServer extends AbstractServer {
 		this.serverId = serverId;
 	}
 
-	public String getBinlogFileName() {
-		return binlogFileName;
-	}
-
-	public void setBinlogFileName(String binlogFileName) {
-		this.binlogFileName = binlogFileName;
-	}
-
-	public long getBinlogPosition() {
-		return binlogPosition;
-	}
-
-	public void setBinlogPosition(long binlogPosition) {
-		this.binlogPosition = binlogPosition;
-	}
-
 	public String getEncoding() {
 		return encoding;
 	}
@@ -213,16 +201,6 @@ public class ReplicationBasedServer extends AbstractServer {
 	@Override
 	public String getServerName() {
 		return String.valueOf(serverId);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.server.Server#getDefaultBinlogFileName()
-	 */
-	@Override
-	public String getDefaultBinlogFileName() {
-		return binlogFileName;
 	}
 
 	private static class PumaSocketWrapper extends Socket {
@@ -251,5 +229,6 @@ public class ReplicationBasedServer extends AbstractServer {
 		public OutputStream getOutputStream() throws IOException {
 			return new BufferedOutputStream(socket.getOutputStream());
 		}
+
 	}
 }

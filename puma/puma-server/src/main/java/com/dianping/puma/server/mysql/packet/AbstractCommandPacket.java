@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
-import com.dianping.puma.common.util.PacketUtil;
+import com.dianping.puma.common.util.PacketUtils;
 import com.dianping.puma.server.PumaContext;
 
 /**
@@ -58,8 +58,8 @@ public abstract class AbstractCommandPacket extends AbstractPacket implements Co
     @Override
     public byte[] getBytes() {
         ByteBuffer byteBuf = ByteBuffer.allocate(4 + length);
-        PacketUtil.writeInt(byteBuf, length, 3);
-        PacketUtil.writeByte(byteBuf, (byte) seq);
+        PacketUtils.writeInt(byteBuf, length, 3);
+        PacketUtils.writeByte(byteBuf, (byte) seq);
         byteBuf.put(body);
         byte[] bytes = new byte[4 + length];
         byteBuf.rewind();
@@ -93,8 +93,8 @@ public abstract class AbstractCommandPacket extends AbstractPacket implements Co
             int splitSeq = seq;
             for (; offset + context.getMaxThreeBytes() <= length; offset += context.getMaxThreeBytes()) {
                 ByteBuffer splitHeaderBuffer = ByteBuffer.allocate(4);
-                PacketUtil.writeInt(splitHeaderBuffer, context.getMaxThreeBytes(), 3);
-                PacketUtil.writeInt(splitHeaderBuffer, splitSeq++, 1);
+                PacketUtils.writeInt(splitHeaderBuffer, context.getMaxThreeBytes(), 3);
+                PacketUtils.writeInt(splitHeaderBuffer, splitSeq++, 1);
                 byte[] splitHeader = new byte[4];
                 splitHeaderBuffer.get(splitHeader);
                 os.write(splitHeader);
@@ -102,8 +102,8 @@ public abstract class AbstractCommandPacket extends AbstractPacket implements Co
             }
 
             ByteBuffer splitHeaderBuffer = ByteBuffer.allocate(4);
-            PacketUtil.writeInt(splitHeaderBuffer, body.length - offset, 3);
-            PacketUtil.writeInt(splitHeaderBuffer, splitSeq++, 1);
+            PacketUtils.writeInt(splitHeaderBuffer, body.length - offset, 3);
+            PacketUtils.writeInt(splitHeaderBuffer, splitSeq++, 1);
             byte[] splitHeader = new byte[4];
             splitHeaderBuffer.get(splitHeader);
             os.write(splitHeader);

@@ -26,43 +26,43 @@ public class PacketUtilTest {
     @Test
     public void testReadInt1Byte() {
         ByteBuffer buf = ByteBuffer.wrap(new byte[] { 64 });
-        Assert.assertEquals(64, PacketUtil.readInt(buf, 1));
+        Assert.assertEquals(64, PacketUtils.readInt(buf, 1));
     }
 
     @Test
     public void testReadInt2Byte() {
         ByteBuffer buf = ByteBuffer.wrap(new byte[] { 64, 1 });
-        Assert.assertEquals(320, PacketUtil.readInt(buf, 2));
+        Assert.assertEquals(320, PacketUtils.readInt(buf, 2));
     }
 
     @Test
     public void testReadInt3Byte() {
         ByteBuffer buf = ByteBuffer.wrap(new byte[] { 64, 1, 2 });
-        Assert.assertEquals(131392, PacketUtil.readInt(buf, 3));
+        Assert.assertEquals(131392, PacketUtils.readInt(buf, 3));
     }
 
     @Test
     public void testReadInt4Byte() {
         ByteBuffer buf = ByteBuffer.wrap(new byte[] { 64, 1, 2, 3 });
-        Assert.assertEquals(50463040, PacketUtil.readInt(buf, 4));
+        Assert.assertEquals(50463040, PacketUtils.readInt(buf, 4));
     }
 
     @Test
     public void testReadIntOutOfLimit() {
         ByteBuffer buf = ByteBuffer.wrap(new byte[] { 64, 1 });
-        Assert.assertEquals(0, PacketUtil.readInt(buf, 4));
+        Assert.assertEquals(0, PacketUtils.readInt(buf, 4));
     }
 
     @Test
     public void testReadIntOutOfMaxInt() {
         ByteBuffer buf = ByteBuffer.wrap(new byte[] { 64, 1, 2, 3, 5 });
-        Assert.assertEquals(0, PacketUtil.readInt(buf, 5));
+        Assert.assertEquals(0, PacketUtils.readInt(buf, 5));
     }
     
     @Test
     public void testReadNullTerminatedString(){
         ByteBuffer buf = ByteBuffer.wrap(new byte[]{'t','e','s','t','\0'});
-        Assert.assertEquals("test", PacketUtil.readNullTerminatedString(buf));
+        Assert.assertEquals("test", PacketUtils.readNullTerminatedString(buf));
     }
 
 }

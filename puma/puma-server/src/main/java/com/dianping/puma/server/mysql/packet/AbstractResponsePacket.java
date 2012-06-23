@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-import com.dianping.puma.common.util.PacketUtil;
+import com.dianping.puma.common.util.PacketUtils;
 import com.dianping.puma.server.PumaContext;
 
 /**
@@ -29,7 +29,7 @@ public abstract class AbstractResponsePacket extends AbstractPacket implements R
 
     protected void readHeader(InputStream is) throws IOException {
         byte[] buf = new byte[4];
-        int lenRead = PacketUtil.readFully(is, buf, 0, 4);
+        int lenRead = PacketUtils.readFully(is, buf, 0, 4);
 
         if (lenRead < 4) {
             // TODO close
@@ -37,8 +37,8 @@ public abstract class AbstractResponsePacket extends AbstractPacket implements R
         }
 
         ByteBuffer byteBuffer = ByteBuffer.wrap(buf);
-        length = PacketUtil.readInt(byteBuffer, 3);
-        seq = PacketUtil.readInt(byteBuffer, 1);
+        length = PacketUtils.readInt(byteBuffer, 3);
+        seq = PacketUtils.readInt(byteBuffer, 1);
     }
 
     /*
@@ -52,7 +52,7 @@ public abstract class AbstractResponsePacket extends AbstractPacket implements R
     public void readPacket(InputStream is, PumaContext context) throws IOException {
         readHeader(is);
         byte[] buf = new byte[length + 1];
-        int lenRead = PacketUtil.readFully(is, buf, 0, length);
+        int lenRead = PacketUtils.readFully(is, buf, 0, length);
 
         if (lenRead != length) {
             throw new IOException("Short read, expected " + length + " bytes, only read " + lenRead);

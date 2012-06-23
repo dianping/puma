@@ -31,27 +31,17 @@ public interface Server {
 	 */
 	public void stop() throws Exception;
 
-	/**
-	 * 
-	 * @param binlogFileName
-	 */
-	public void setBinlogFileName(String binlogFileName);
-
-	/**
-	 * 
-	 * @param pos
-	 */
-	public void setBinlogPosition(long pos);
-
-	/**
-	 * 
-	 * @return
-	 */
 	public String getServerName();
 
-	/**
-	 * 
-	 * @return
-	 */
+	public void setContext(PumaContext context);
+
+	public PumaContext getContext();
+
 	public String getDefaultBinlogFileName();
+
+	public void setDefaultBinlogFileName(String binlogFileName);
+
+	public Long getDefaultBinlogPosition();
+
+	public void setDefaultBinlogPosition(Long binlogFileName);
 }

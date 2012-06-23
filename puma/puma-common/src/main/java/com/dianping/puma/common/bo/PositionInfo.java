@@ -1,4 +1,4 @@
-package com.dianping.puma.common.util;
+package com.dianping.puma.common.bo;
 
 public class PositionInfo {
 	private long	binlogPosition;

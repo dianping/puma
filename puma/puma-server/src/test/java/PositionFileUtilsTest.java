@@ -1,9 +1,3 @@
-import junit.framework.Assert;
-
-import org.junit.Test;
-
-import com.dianping.puma.common.util.PositionFileUtils;
-import com.dianping.puma.common.util.PositionInfo;
 
 public class PositionFileUtilsTest {
 //	@Test

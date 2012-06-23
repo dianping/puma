@@ -15,6 +15,7 @@
  */
 package com.dianping.puma.server.impl;
 
+import com.dianping.puma.server.PumaContext;
 import com.dianping.puma.server.Server;
 
 /**
@@ -24,27 +25,39 @@ import com.dianping.puma.server.Server;
  * 
  */
 public abstract class AbstractServer implements Server {
-	protected String	binlogFileName;
-	protected long		binlogPosition;
+	protected PumaContext	context;
+	protected String		defaultBinlogFileName;
+	protected Long			defaultBinlogPosition;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.server.Server#setBinlogFileName(java.lang.String)
-	 */
-	@Override
-	public void setBinlogFileName(String binlogFileName) {
-		this.binlogFileName = binlogFileName;
+	public void setContext(PumaContext context) {
+		this.context = context;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.server.Server#setBinlogPosition(long)
+	public PumaContext getContext() {
+		return context;
+	}
+
+	public String getDefaultBinlogFileName() {
+		return defaultBinlogFileName;
+	}
+
+	public void setDefaultBinlogFileName(String binlogFileName) {
+		this.defaultBinlogFileName = binlogFileName;
+	}
+
+	/**
+	 * @return the defaultBinlogPosition
 	 */
-	@Override
-	public void setBinlogPosition(long pos) {
-		this.binlogPosition = pos;
+	public Long getDefaultBinlogPosition() {
+		return defaultBinlogPosition;
+	}
+
+	/**
+	 * @param defaultBinlogPosition
+	 *            the defaultBinlogPosition to set
+	 */
+	public void setDefaultBinlogPosition(Long defaultBinlogPosition) {
+		this.defaultBinlogPosition = defaultBinlogPosition;
 	}
 
 }

@@ -6,8 +6,9 @@ import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.dianping.puma.common.bo.PositionInfo;
 import com.dianping.puma.common.util.PositionFileUtils;
-import com.dianping.puma.common.util.PositionInfo;
+import com.dianping.puma.common.util.PumaThreadUtils;
 
 public class Bootstrap {
 
@@ -23,22 +24,27 @@ public class Bootstrap {
 
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
+		// init spring
 		ApplicationContext ctx = new ClassPathXmlApplicationContext(SPRING_CONFIG);
 		List<Server> servers = (List<Server>) ctx.getBean(BEAN_SERVERS);
 
+		// start servers
 		for (Server server : servers) {
 			PositionInfo posInfo = PositionFileUtils.getPositionInfo(server.getServerName(),
-					server.getDefaultBinlogFileName());
-			server.setBinlogFileName(posInfo.getBinlogFileName());
-			server.setBinlogPosition(posInfo.getBinlogPosition());
+					server.getDefaultBinlogFileName(), server.getDefaultBinlogPosition());
+			PumaContext context = new PumaContext();
+			context.setBinlogFileName(posInfo.getBinlogFileName());
+			context.setBinlogStartPos(posInfo.getBinlogPosition());
+			server.setContext(context);
 			startServer(server);
-			log.info("Server " + server.getServerName() + " started.");
+			log.info("Server " + server.getServerName() + " started at binlogFile: " + context.getBinlogFileName()
+					+ " position: " + context.getBinlogStartPos());
 		}
 
 	}
 
 	public static void startServer(final Server server) throws Exception {
-		Thread t = new Thread(new Runnable() {
+		PumaThreadUtils.createThread(new Runnable() {
 
 			@Override
 			public void run() {
@@ -46,13 +52,10 @@ public class Bootstrap {
 				try {
 					server.start();
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log.error("Start server: " + server.getServerName() + " failed.", e);
 				}
 			}
-		});
-		t.setName("Server-" + server.getServerName() + "-thread");
-		t.start();
+		}, server.getServerName() + "_Connector", false).start();
 
 	}
 

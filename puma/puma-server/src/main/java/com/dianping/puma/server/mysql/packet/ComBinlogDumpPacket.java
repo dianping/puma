@@ -15,7 +15,7 @@ package com.dianping.puma.server.mysql.packet;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import com.dianping.puma.common.util.PacketUtil;
+import com.dianping.puma.common.util.PacketUtils;
 import com.dianping.puma.server.PumaContext;
 import com.dianping.puma.server.mysql.MySQLConstant;
 
@@ -83,12 +83,12 @@ public class ComBinlogDumpPacket extends AbstractCommandPacket {
     protected ByteBuffer doBuild(PumaContext context) throws IOException {
         ByteBuffer buf = ByteBuffer.allocate(11 + ((binlogFileName == null || binlogFileName.length() == 0) ? 0
                 : binlogFileName.length() * 2));
-        PacketUtil.writeByte(buf, command);
-        PacketUtil.writeLong(buf, binlogPosition, 4);
-        PacketUtil.writeInt(buf, binlogFlag, 2);
-        PacketUtil.writeLong(buf, serverId, 4);
+        PacketUtils.writeByte(buf, command);
+        PacketUtils.writeLong(buf, binlogPosition, 4);
+        PacketUtils.writeInt(buf, binlogFlag, 2);
+        PacketUtils.writeLong(buf, serverId, 4);
         if (binlogFileName != null && binlogFileName.length() != 0) {
-            PacketUtil.writeBytesNoNull(buf, binlogFileName.getBytes(context.getEncoding()));
+            PacketUtils.writeBytesNoNull(buf, binlogFileName.getBytes(context.getEncoding()));
         }
         return buf;
     }

@@ -24,7 +24,7 @@ import com.dianping.puma.common.datatype.UnsignedLong;
  * @author Leo Liang
  * 
  */
-public class PacketUtil {
+public class PacketUtils {
 
     public static int readInt(ByteBuffer buf, int length) {
         if ((buf.position() + length) <= buf.limit() && length <= 4) {

@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import com.dianping.puma.common.datatype.UnsignedLong;
-import com.dianping.puma.common.util.PacketUtil;
+import com.dianping.puma.common.util.PacketUtils;
 import com.dianping.puma.server.PumaContext;
 
 /**
@@ -138,18 +138,18 @@ public class OKErrorPacket extends AbstractResponsePacket {
     protected void doReadPacket(ByteBuffer buf, PumaContext context) throws IOException {
         fieldCount = buf.get();
         if (ERROR_FIELD_COUNT == fieldCount) {
-            errNo = PacketUtil.readInt(buf, 2);
+            errNo = PacketUtils.readInt(buf, 2);
             sqlStateMarker = buf.get();
-            sqlState = PacketUtil.readFixedLengthString(buf, 5);
-            message = PacketUtil.readFixedLengthString(buf, buf.remaining());
+            sqlState = PacketUtils.readFixedLengthString(buf, 5);
+            message = PacketUtils.readFixedLengthString(buf, buf.remaining());
             ok = false;
         } else if (OK_FIELD_COUNT == fieldCount) {
-            affectedRows = PacketUtil.readLengthCodedUnsignedLong(buf);
-            insertId = PacketUtil.readLengthCodedUnsignedLong(buf);
-            serverStatus = PacketUtil.readInt(buf, 2);
-            warningCount = PacketUtil.readInt(buf, 2);
+            affectedRows = PacketUtils.readLengthCodedUnsignedLong(buf);
+            insertId = PacketUtils.readLengthCodedUnsignedLong(buf);
+            serverStatus = PacketUtils.readInt(buf, 2);
+            warningCount = PacketUtils.readInt(buf, 2);
             if (buf.hasRemaining()) {
-                message = PacketUtil.readFixedLengthString(buf, buf.remaining());
+                message = PacketUtils.readFixedLengthString(buf, buf.remaining());
             }
             ok = true;
         }

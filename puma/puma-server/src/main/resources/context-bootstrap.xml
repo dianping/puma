@@ -10,7 +10,8 @@
 		<property name="port" value="3306" />
 		<property name="user" value="binlog" />
 		<property name="password" value="binlog" />
-		<property name="binlogFileName" value="mysql-bin.000006" />
+		<property name="defaultBinlogFileName" value="mysql-bin.000006" />
+		<property name="defaultBinlogPosition" value="4" />
 	</bean>
 
 	<bean id="servers" class="java.util.ArrayList">

@@ -22,7 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.dianping.puma.common.bo.PumaContext;
-import com.dianping.puma.common.datatype.UnsignedLong;
 import com.dianping.puma.common.mysql.Row;
 import com.dianping.puma.common.util.PacketUtils;
 
@@ -34,7 +33,6 @@ import com.dianping.puma.common.util.PacketUtils;
  */
 public class WriteRowsEvent extends AbstractRowsEvent {
 	private static final long	serialVersionUID	= 5158982187051056761L;
-	private UnsignedLong		columnCount;
 	private BitSet				usedColumns;
 	private List<Row>			rows;
 
@@ -45,15 +43,8 @@ public class WriteRowsEvent extends AbstractRowsEvent {
 	 */
 	@Override
 	public String toString() {
-		return "WriteRowsEvent [columnCount=" + columnCount + ", usedColumns=" + usedColumns + ", rows=" + rows
-				+ ", super.toString()=" + super.toString() + "]";
-	}
-
-	/**
-	 * @return the columnCount
-	 */
-	public UnsignedLong getColumnCount() {
-		return columnCount;
+		return "WriteRowsEvent [usedColumns=" + usedColumns + ", rows=" + rows + ", super.toString()="
+				+ super.toString() + "]";
 	}
 
 	/**
@@ -70,28 +61,16 @@ public class WriteRowsEvent extends AbstractRowsEvent {
 		return rows;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.dianping.puma.parser.mysql.event.AbstractBinlogEvent#doParse(java
-	 * .nio.ByteBuffer, com.dianping.puma.common.bo.PumaContext)
-	 */
 	@Override
-	public void doParse(ByteBuffer buf, PumaContext context) throws IOException {
-		tableId = PacketUtils.readLong(buf, 6);
-		reserved = PacketUtils.readInt(buf, 2);
-		columnCount = PacketUtils.readLengthCodedUnsignedLong(buf);
-		int bitmapLen = (int) ((columnCount.intValue() + 7) / 8);
-		usedColumns = new BitSet(bitmapLen);
-		PacketUtils.readBitSet(usedColumns, buf, columnCount.intValue());
+	protected void innderParser(ByteBuffer buf, PumaContext context) throws IOException {
+		usedColumns = PacketUtils.readBitSet(buf, columnCount.intValue());
 		TableMapEvent tme = context.getTableMaps().get(tableId);
 		rows = parseRows(buf, tme);
 
 	}
 
 	protected List<Row> parseRows(ByteBuffer buf, TableMapEvent tme) throws IOException {
-		final List<Row> r = new LinkedList<Row>();
+		List<Row> r = new LinkedList<Row>();
 		while (buf.hasRemaining()) {
 			r.add(parseRow(buf, tme, usedColumns));
 		}

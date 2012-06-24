@@ -20,19 +20,12 @@ import java.nio.ByteBuffer;
 import java.util.BitSet;
 
 import com.dianping.puma.common.datatype.UnsignedLong;
-import com.dianping.puma.common.mysql.column.BitColumn;
 
 /**
  * @author Leo Liang
  * 
  */
 public class PacketUtils {
-
-	public static BitColumn readBit(ByteBuffer buf, int length, boolean isBigEndian) throws IOException {
-		final byte[] value = readBytes(buf, (int) ((length + 7) >> 3));
-		return isBigEndian ? BitColumn.valueOf(length, value) : BitColumn
-				.valueOf(length, CodecUtils.toBigEndian(value));
-	}
 
 	public static int readInt(ByteBuffer buf, int length) {
 		if ((buf.position() + length) <= buf.limit() && length <= 4) {
@@ -112,7 +105,8 @@ public class PacketUtils {
 		return new String(readBytes(buf, length));
 	}
 
-	public static void readBitSet(BitSet bs, ByteBuffer buf, int len) {
+	public static BitSet readBitSet(ByteBuffer buf, int len) {
+		BitSet bs = new BitSet((int) ((len + 7) >>> 3));
 		int i;
 		int b = 0;
 		int leftBit = 0x01;
@@ -130,6 +124,7 @@ public class PacketUtils {
 				bs.clear(i);
 			}
 		}
+		return bs;
 	}
 
 	public static int readFully(InputStream in, byte[] b, int off, int len) throws IOException {

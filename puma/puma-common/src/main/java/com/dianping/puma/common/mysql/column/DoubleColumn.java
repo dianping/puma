@@ -37,7 +37,7 @@ public final class DoubleColumn implements Column {
 	 */
 	@Override
 	public String toString() {
-		return "DoubleColumn [value=" + value + "]";
+		return String.valueOf(value);
 	}
 
 	public Double getValue() {

@@ -158,11 +158,7 @@ public class TableMapEvent extends AbstractBinlogEvent {
 		columnMetadataCount = PacketUtils.readLengthCodedUnsignedLong(buf);
 
 		columnMetadata = Metadata.valueOf(columnTypes, PacketUtils.readBytes(buf, columnMetadataCount.intValue()));
-		int bitSetLength = (int) ((columnCount.intValue() + 7) / 8);
-		columnNullabilities = new BitSet(bitSetLength);
-		if (columnNullabilities != null) {
-			PacketUtils.readBitSet(columnNullabilities, buf, columnCount.intValue());
-		}
+		columnNullabilities = PacketUtils.readBitSet(buf, columnCount.intValue());
 
 		context.getTableMaps().put(tableId, this);
 	}

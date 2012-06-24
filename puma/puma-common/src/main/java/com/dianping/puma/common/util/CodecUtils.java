@@ -16,6 +16,7 @@
 package com.dianping.puma.common.util;
 
 import java.util.Arrays;
+import java.util.BitSet;
 
 /**
  * TODO Comment of CodecUtils
@@ -25,9 +26,26 @@ import java.util.Arrays;
  */
 public final class CodecUtils {
 
-	/**
-	 * 
-	 */
+	public static BitSet fromByteArray(byte[] bytes) {
+		BitSet bits = new BitSet();
+		for (int i = 0; i < bytes.length * 8; i++) {
+			if ((bytes[bytes.length - i / 8 - 1] & (1 << (i % 8))) > 0) {
+				bits.set(i);
+			}
+		}
+		return bits;
+	}
+
+	public static byte[] toByteArray(BitSet bits) {
+		byte[] bytes = new byte[bits.length() / 8 + 1];
+		for (int i = 0; i < bits.length(); i++) {
+			if (bits.get(i)) {
+				bytes[bytes.length - i / 8 - 1] |= 1 << (i % 8);
+			}
+		}
+		return bytes;
+	}
+
 	public static int toBigEndian(final int v) {
 		int r = v;
 		for (int i = 0; i < 4; i++) {

@@ -23,10 +23,13 @@ import java.util.List;
 
 import org.apache.commons.lang.exception.NestableRuntimeException;
 
+import com.dianping.puma.common.bo.PumaContext;
+import com.dianping.puma.common.datatype.UnsignedLong;
 import com.dianping.puma.common.mysql.BinlogConstanst;
 import com.dianping.puma.common.mysql.Metadata;
 import com.dianping.puma.common.mysql.MySQLUtils;
 import com.dianping.puma.common.mysql.Row;
+import com.dianping.puma.common.mysql.column.BitColumn;
 import com.dianping.puma.common.mysql.column.BlobColumn;
 import com.dianping.puma.common.mysql.column.Column;
 import com.dianping.puma.common.mysql.column.DateColumn;
@@ -36,7 +39,7 @@ import com.dianping.puma.common.mysql.column.DoubleColumn;
 import com.dianping.puma.common.mysql.column.EnumColumn;
 import com.dianping.puma.common.mysql.column.FloatColumn;
 import com.dianping.puma.common.mysql.column.Int24Column;
-import com.dianping.puma.common.mysql.column.LongColumn;
+import com.dianping.puma.common.mysql.column.IntColumn;
 import com.dianping.puma.common.mysql.column.LongLongColumn;
 import com.dianping.puma.common.mysql.column.NullColumn;
 import com.dianping.puma.common.mysql.column.SetColumn;
@@ -59,6 +62,7 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 	private static final long	serialVersionUID	= 2658456786993670332L;
 	protected long				tableId;
 	protected int				reserved;
+	protected UnsignedLong		columnCount;
 
 	/*
 	 * (non-Javadoc)
@@ -67,8 +71,15 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 	 */
 	@Override
 	public String toString() {
-		return "AbstractRowsEvent [tableId=" + tableId + ", reserved=" + reserved + ", super.toString()="
-				+ super.toString() + "]";
+		return "AbstractRowsEvent [tableId=" + tableId + ", reserved=" + reserved + ", columnCount=" + columnCount
+				+ ", super.toString()=" + super.toString() + "]";
+	}
+
+	/**
+	 * @return the columnCount
+	 */
+	public UnsignedLong getColumnCount() {
+		return columnCount;
 	}
 
 	public long getTableId() {
@@ -87,12 +98,27 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 		this.reserved = reserved;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.dianping.puma.common.mysql.event.AbstractBinlogEvent#doParse(java
+	 * .nio.ByteBuffer, com.dianping.puma.common.bo.PumaContext)
+	 */
+	@Override
+	public void doParse(ByteBuffer buf, PumaContext context) throws IOException {
+		tableId = PacketUtils.readLong(buf, 6);
+		reserved = PacketUtils.readInt(buf, 2);
+		columnCount = PacketUtils.readLengthCodedUnsignedLong(buf);
+		innderParser(buf, context);
+	}
+
+	protected abstract void innderParser(ByteBuffer buf, PumaContext context) throws IOException;
+
 	protected Row parseRow(ByteBuffer buf, TableMapEvent tme, BitSet usedColumns) throws IOException {
 		byte[] types = tme.getColumnTypes();
 		Metadata metadata = tme.getColumnMetadata();
-		int bitSetLength = (int) ((types.length + 7) / 8);
-		BitSet nullColumns = new BitSet(bitSetLength);
-		PacketUtils.readBitSet(nullColumns, buf, types.length);
+		BitSet nullColumns = PacketUtils.readBitSet(buf, types.length);
 		List<Column> columns = new ArrayList<Column>(types.length);
 		for (int i = 0; i < types.length; ++i) {
 			int length = 0;
@@ -101,7 +127,7 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 			if (type == BinlogConstanst.MYSQL_TYPE_STRING && meta > 256) {
 				int meta0 = meta >> 8;
 				int meta1 = meta & 0xFF;
-				if ((meta0 & 0x30) != 0x30) { // a long CHAR() field: see #37426
+				if ((meta0 & 0x30) != 0x30) {
 					type = meta0 | 0x30;
 					length = meta1 | (((meta0 & 0x30) ^ 0x30) << 4);
 				} else {
@@ -127,7 +153,7 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 
 			switch (type) {
 				case BinlogConstanst.MYSQL_TYPE_TINY:
-					columns.add(TinyColumn.valueOf(buf.get()));
+					columns.add(TinyColumn.valueOf(PacketUtils.readInt(buf, 1)));
 					break;
 				case BinlogConstanst.MYSQL_TYPE_SHORT:
 					columns.add(ShortColumn.valueOf(PacketUtils.readInt(buf, 2)));
@@ -136,7 +162,7 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 					columns.add(Int24Column.valueOf(PacketUtils.readInt(buf, 3)));
 					break;
 				case BinlogConstanst.MYSQL_TYPE_INT:
-					columns.add(LongColumn.valueOf(PacketUtils.readInt(buf, 4)));
+					columns.add(IntColumn.valueOf(PacketUtils.readInt(buf, 4)));
 					break;
 				case BinlogConstanst.MYSQL_TYPE_LONGLONG:
 					columns.add(LongLongColumn.valueOf(PacketUtils.readLong(buf, 8)));
@@ -148,7 +174,7 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 					columns.add(DoubleColumn.valueOf(Double.longBitsToDouble(PacketUtils.readLong(buf, 8))));
 					break;
 				case BinlogConstanst.MYSQL_TYPE_YEAR:
-					columns.add(YearColumn.valueOf(MySQLUtils.toYear(buf.get())));
+					columns.add(YearColumn.valueOf(MySQLUtils.toYear(PacketUtils.readInt(buf, 1))));
 					break;
 				case BinlogConstanst.MYSQL_TYPE_DATE:
 					columns.add(DateColumn.valueOf(MySQLUtils.toDate(PacketUtils.readInt(buf, 3))));
@@ -169,12 +195,12 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 					columns.add(SetColumn.valueOf(PacketUtils.readLong(buf, length)));
 					break;
 				case BinlogConstanst.MYSQL_TYPE_STRING:
-					final int stringLength = length < 256 ? buf.get() : PacketUtils.readInt(buf, 2);
+					final int stringLength = length < 256 ? PacketUtils.readInt(buf, 1) : PacketUtils.readInt(buf, 2);
 					columns.add(StringColumn.valueOf(PacketUtils.readBytes(buf, stringLength)));
 					break;
 				case BinlogConstanst.MYSQL_TYPE_BIT:
 					final int bitLength = (meta >> 8) * 8 + (meta & 0xFF);
-					columns.add(PacketUtils.readBit(buf, bitLength, false));
+					columns.add(BitColumn.valueOf(bitLength, PacketUtils.readBitSet(buf, bitLength)));
 					break;
 				case BinlogConstanst.MYSQL_TYPE_NEWDECIMAL:
 					final int precision = meta & 0xFF;

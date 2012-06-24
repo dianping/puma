@@ -39,7 +39,7 @@ public final class TimestampColumn implements Column {
 	 */
 	@Override
 	public String toString() {
-		return "TimestampColumn [value=" + value + "]";
+		return String.valueOf(value);
 	}
 
 	public Timestamp getValue() {

@@ -47,7 +47,7 @@ public final class ShortColumn implements Column {
 	 */
 	@Override
 	public String toString() {
-		return "ShortColumn [value=" + value + "]";
+		return String.valueOf(value);
 	}
 
 	public Integer getValue() {

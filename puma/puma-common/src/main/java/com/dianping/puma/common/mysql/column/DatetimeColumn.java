@@ -43,7 +43,7 @@ public final class DatetimeColumn implements Column {
 	 */
 	@Override
 	public String toString() {
-		return "DatetimeColumn [value=" + value + "]";
+		return String.valueOf(value);
 	}
 
 	public static final DatetimeColumn valueOf(Date value) {

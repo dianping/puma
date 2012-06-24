@@ -22,7 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.dianping.puma.common.bo.PumaContext;
-import com.dianping.puma.common.datatype.UnsignedLong;
 import com.dianping.puma.common.mysql.Row;
 import com.dianping.puma.common.util.PacketUtils;
 
@@ -35,16 +34,8 @@ import com.dianping.puma.common.util.PacketUtils;
 public class DeleteRowsEvent extends AbstractRowsEvent {
 
 	private static final long	serialVersionUID	= -4574646483606347256L;
-	private UnsignedLong		columnCount;
 	private BitSet				usedColumns;
 	private List<Row>			rows;
-
-	/**
-	 * @return the columnCount
-	 */
-	public UnsignedLong getColumnCount() {
-		return columnCount;
-	}
 
 	/**
 	 * @return the usedColumns
@@ -67,26 +58,14 @@ public class DeleteRowsEvent extends AbstractRowsEvent {
 	 */
 	@Override
 	public String toString() {
-		return "DeleteRowsEvent [columnCount=" + columnCount + ", usedColumns=" + usedColumns + ", rows=" + rows
-				+ ", super.toString()=" + super.toString() + "]";
+		return "DeleteRowsEvent [usedColumns=" + usedColumns + ", rows=" + rows + ", super.toString()="
+				+ super.toString() + "]";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.dianping.puma.common.mysql.event.AbstractBinlogEvent#doParse(java
-	 * .nio.ByteBuffer, com.dianping.puma.common.bo.PumaContext)
-	 */
 	@Override
-	public void doParse(ByteBuffer buf, PumaContext context) throws IOException {
-		tableId = PacketUtils.readLong(buf, 6);
-		final TableMapEvent tme = context.getTableMaps().get(tableId);
-		reserved = PacketUtils.readInt(buf, 2);
-		columnCount = PacketUtils.readLengthCodedUnsignedLong(buf);
-		int bitSetLength = (int) ((columnCount.intValue() + 7) / 8);
-		usedColumns = new BitSet(bitSetLength);
-		PacketUtils.readBitSet(usedColumns, buf, columnCount.intValue());
+	protected void innderParser(ByteBuffer buf, PumaContext context) throws IOException {
+		TableMapEvent tme = context.getTableMaps().get(tableId);
+		usedColumns = PacketUtils.readBitSet(buf, columnCount.intValue());
 		rows = parseRows(buf, tme);
 
 	}

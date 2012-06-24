@@ -36,7 +36,7 @@ public final class DecimalColumn implements Column {
 	 */
 	@Override
 	public String toString() {
-		return "DecimalColumn [value=" + value + ", precision=" + precision + ", scale=" + scale + "]";
+		return String.valueOf(value);
 	}
 
 	public BigDecimal getValue() {

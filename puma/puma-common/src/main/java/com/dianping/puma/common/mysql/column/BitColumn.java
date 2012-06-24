@@ -15,6 +15,10 @@
  */
 package com.dianping.puma.common.mysql.column;
 
+import java.util.BitSet;
+
+import com.dianping.puma.common.util.CodecUtils;
+
 /**
  * 
  * TODO Comment of BitColumn
@@ -68,5 +72,9 @@ public final class BitColumn implements Column {
 		if (length < 0 || length > (value.length << 3))
 			throw new IllegalArgumentException("invalid length: " + length);
 		return new BitColumn(length, value);
+	}
+
+	public static final BitColumn valueOf(int length, BitSet value) {
+		return valueOf(length, CodecUtils.toByteArray(value));
 	}
 }

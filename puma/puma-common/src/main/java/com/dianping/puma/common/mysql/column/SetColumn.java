@@ -37,7 +37,7 @@ public final class SetColumn implements Column {
 	 */
 	@Override
 	public String toString() {
-		return "SetColumn [value=" + value + "]";
+		return String.valueOf(value);
 	}
 
 	public Long getValue() {

@@ -37,7 +37,7 @@ public final class EnumColumn implements Column {
 	 */
 	@Override
 	public String toString() {
-		return "EnumColumn [value=" + value + "]";
+		return String.valueOf(value);
 	}
 
 	public Integer getValue() {

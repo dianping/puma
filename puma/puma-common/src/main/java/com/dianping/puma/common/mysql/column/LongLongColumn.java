@@ -40,7 +40,7 @@ public final class LongLongColumn implements Column {
 	 */
 	@Override
 	public String toString() {
-		return "LongLongColumn [value=" + value + "]";
+		return String.valueOf(value);
 	}
 
 	public Long getValue() {

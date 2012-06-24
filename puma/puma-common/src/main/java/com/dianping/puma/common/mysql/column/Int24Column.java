@@ -47,7 +47,7 @@ public final class Int24Column implements Column {
 	 */
 	@Override
 	public String toString() {
-		return "Int24Column [value=" + value + "]";
+		return String.valueOf(value);
 	}
 
 	public Integer getValue() {

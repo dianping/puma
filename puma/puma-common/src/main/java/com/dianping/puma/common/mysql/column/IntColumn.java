@@ -17,26 +17,26 @@ package com.dianping.puma.common.mysql.column;
 
 /**
  * 
- * TODO Comment of TinyColumn
+ * TODO Comment of IntColumn
  * 
  * @author Leo Liang
  * 
  */
-public final class TinyColumn implements Column {
-	private static final long			serialVersionUID	= -7981385814804060055L;
-	public static final int				MIN_VALUE			= Byte.MIN_VALUE;
-	public static final int				MAX_VALUE			= Byte.MAX_VALUE;
+public final class IntColumn implements Column {
+	private static final long			serialVersionUID	= -8483539867897207855L;
+	public static final int				MIN_VALUE			= Integer.MIN_VALUE;
+	public static final int				MAX_VALUE			= Integer.MAX_VALUE;
 
-	private static final TinyColumn[]	CACHE				= new TinyColumn[255];
+	private static final IntColumn[]	CACHE				= new IntColumn[255];
 	static {
 		for (int i = 0; i < CACHE.length; i++) {
-			CACHE[i] = new TinyColumn(i + Byte.MIN_VALUE);
+			CACHE[i] = new IntColumn(i + Byte.MIN_VALUE);
 		}
 	}
 
 	private final int					value;
 
-	private TinyColumn(int value) {
+	private IntColumn(int value) {
 		this.value = value;
 	}
 
@@ -54,9 +54,10 @@ public final class TinyColumn implements Column {
 		return this.value;
 	}
 
-	public static final TinyColumn valueOf(int value) {
+	public static final IntColumn valueOf(int value) {
 		if (value < MIN_VALUE || value > MAX_VALUE)
 			throw new IllegalArgumentException("invalid value: " + value);
-		return CACHE[value - Byte.MIN_VALUE];
+		final int index = value - Byte.MIN_VALUE;
+		return (index >= 0 && index < CACHE.length) ? CACHE[index] : new IntColumn(value);
 	}
 }

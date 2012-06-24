@@ -39,7 +39,7 @@ public final class TimeColumn implements Column {
 	 */
 	@Override
 	public String toString() {
-		return "TimeColumn [value=" + value + "]";
+		return String.valueOf(value);
 	}
 
 	public Time getValue() {

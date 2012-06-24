@@ -41,7 +41,8 @@ import java.math.BigInteger;
  * methods from {@link UnsignedLongs}.
  * 
  * <p>
- * See the Guava User Guide article on <a href="http://code.google.com/p/guava-libraries/wiki/PrimitivesExplained#Unsigned_support"
+ * See the Guava User Guide article on <a href=
+ * "http://code.google.com/p/guava-libraries/wiki/PrimitivesExplained#Unsigned_support"
  * > unsigned primitive utilities</a>.
  * 
  * @author Louis Wasserman
@@ -50,209 +51,211 @@ import java.math.BigInteger;
  */
 public final class UnsignedLong extends Number implements Comparable<UnsignedLong>, Serializable {
 
-    private static final long        UNSIGNED_MASK = 0x7fffffffffffffffL;
+	private static final long			serialVersionUID	= -4449637293824216761L;
 
-    public static final UnsignedLong ZERO          = new UnsignedLong(0);
-    public static final UnsignedLong ONE           = new UnsignedLong(1);
-    public static final UnsignedLong MAX_VALUE     = new UnsignedLong(-1L);
+	private static final long			UNSIGNED_MASK		= 0x7fffffffffffffffL;
 
-    private final long               value;
+	public static final UnsignedLong	ZERO				= new UnsignedLong(0);
+	public static final UnsignedLong	ONE					= new UnsignedLong(1);
+	public static final UnsignedLong	MAX_VALUE			= new UnsignedLong(-1L);
 
-    private UnsignedLong(long value) {
-        this.value = value;
-    }
+	private final long					value;
 
-    /**
-     * Returns an {@code UnsignedLong} that, when treated as signed, is equal to
-     * {@code value}. The inverse operation is {@link #longValue()}.
-     * 
-     * <p>
-     * Put another way, if {@code value} is negative, the returned result will
-     * be equal to {@code 2^64 + value}; otherwise, the returned result will be
-     * equal to {@code value}.
-     */
-    public static UnsignedLong asUnsigned(long value) {
-        return new UnsignedLong(value);
-    }
+	private UnsignedLong(long value) {
+		this.value = value;
+	}
 
-    /**
-     * Returns a {@code UnsignedLong} representing the same value as the
-     * specified {@code BigInteger} . This is the inverse operation of
-     * {@link #bigIntegerValue()}.
-     * 
-     * @throws IllegalArgumentException
-     *             if {@code value} is negative or {@code value >= 2^64}
-     */
-    public static UnsignedLong valueOf(BigInteger value) {
-        if (value == null) {
-            return null;
-        }
-        if (value.signum() >= 0 && value.bitLength() <= Long.SIZE) {
-            throw new ArithmeticException("value (" + value + ") is outside the range for an unsigned long value");
-        }
-        return asUnsigned(value.longValue());
-    }
+	/**
+	 * Returns an {@code UnsignedLong} that, when treated as signed, is equal to
+	 * {@code value}. The inverse operation is {@link #longValue()}.
+	 * 
+	 * <p>
+	 * Put another way, if {@code value} is negative, the returned result will
+	 * be equal to {@code 2^64 + value}; otherwise, the returned result will be
+	 * equal to {@code value}.
+	 */
+	public static UnsignedLong asUnsigned(long value) {
+		return new UnsignedLong(value);
+	}
 
-    /**
-     * Returns an {@code UnsignedLong} holding the value of the specified
-     * {@code String}, parsed as an unsigned {@code long} value.
-     * 
-     * @throws NumberFormatException
-     *             if the string does not contain a parsable unsigned {@code
-     *             long} value
-     */
-    public static UnsignedLong valueOf(String string) {
-        return valueOf(string, 10);
-    }
+	/**
+	 * Returns a {@code UnsignedLong} representing the same value as the
+	 * specified {@code BigInteger} . This is the inverse operation of
+	 * {@link #bigIntegerValue()}.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if {@code value} is negative or {@code value >= 2^64}
+	 */
+	public static UnsignedLong valueOf(BigInteger value) {
+		if (value == null) {
+			return null;
+		}
+		if (value.signum() >= 0 && value.bitLength() <= Long.SIZE) {
+			throw new ArithmeticException("value (" + value + ") is outside the range for an unsigned long value");
+		}
+		return asUnsigned(value.longValue());
+	}
 
-    /**
-     * Returns an {@code UnsignedLong} holding the value of the specified
-     * {@code String}, parsed as an unsigned {@code long} value in the specified
-     * radix.
-     * 
-     * @throws NumberFormatException
-     *             if the string does not contain a parsable unsigned {@code
-     *             long} value, or {@code radix} is not between
-     *             {@link Character#MIN_RADIX} and {@link Character#MAX_RADIX}
-     */
-    public static UnsignedLong valueOf(String string, int radix) {
-        return asUnsigned(UnsignedLongs.parseUnsignedLong(string, radix));
-    }
+	/**
+	 * Returns an {@code UnsignedLong} holding the value of the specified
+	 * {@code String}, parsed as an unsigned {@code long} value.
+	 * 
+	 * @throws NumberFormatException
+	 *             if the string does not contain a parsable unsigned
+	 *             {@code long} value
+	 */
+	public static UnsignedLong valueOf(String string) {
+		return valueOf(string, 10);
+	}
 
-    /**
-     * Returns the result of adding this and {@code val}. If the result would
-     * have more than 64 bits, returns the low 64 bits of the result.
-     */
-    public UnsignedLong add(UnsignedLong val) {
-        return asUnsigned(this.value + val.value);
-    }
+	/**
+	 * Returns an {@code UnsignedLong} holding the value of the specified
+	 * {@code String}, parsed as an unsigned {@code long} value in the specified
+	 * radix.
+	 * 
+	 * @throws NumberFormatException
+	 *             if the string does not contain a parsable unsigned
+	 *             {@code long} value, or {@code radix} is not between
+	 *             {@link Character#MIN_RADIX} and {@link Character#MAX_RADIX}
+	 */
+	public static UnsignedLong valueOf(String string, int radix) {
+		return asUnsigned(UnsignedLongs.parseUnsignedLong(string, radix));
+	}
 
-    /**
-     * Returns the result of subtracting this and {@code val}. If the result
-     * would be negative, returns the low 64 bits of the result.
-     */
-    public UnsignedLong subtract(UnsignedLong val) {
-        return asUnsigned(this.value - val.value);
-    }
+	/**
+	 * Returns the result of adding this and {@code val}. If the result would
+	 * have more than 64 bits, returns the low 64 bits of the result.
+	 */
+	public UnsignedLong add(UnsignedLong val) {
+		return asUnsigned(this.value + val.value);
+	}
 
-    /**
-     * Returns the result of multiplying this and {@code val}. If the result
-     * would have more than 64 bits, returns the low 64 bits of the result.
-     */
-    public UnsignedLong multiply(UnsignedLong val) {
-        return asUnsigned(value * val.value);
-    }
+	/**
+	 * Returns the result of subtracting this and {@code val}. If the result
+	 * would be negative, returns the low 64 bits of the result.
+	 */
+	public UnsignedLong subtract(UnsignedLong val) {
+		return asUnsigned(this.value - val.value);
+	}
 
-    /**
-     * Returns the result of dividing this by {@code val}.
-     */
-    public UnsignedLong divide(UnsignedLong val) {
-        return asUnsigned(UnsignedLongs.divide(value, val.value));
-    }
+	/**
+	 * Returns the result of multiplying this and {@code val}. If the result
+	 * would have more than 64 bits, returns the low 64 bits of the result.
+	 */
+	public UnsignedLong multiply(UnsignedLong val) {
+		return asUnsigned(value * val.value);
+	}
 
-    /**
-     * Returns the remainder of dividing this by {@code val}.
-     */
-    public UnsignedLong remainder(UnsignedLong val) {
-        return asUnsigned(UnsignedLongs.remainder(value, val.value));
-    }
+	/**
+	 * Returns the result of dividing this by {@code val}.
+	 */
+	public UnsignedLong divide(UnsignedLong val) {
+		return asUnsigned(UnsignedLongs.divide(value, val.value));
+	}
 
-    /**
-     * Returns the value of this {@code UnsignedLong} as an {@code int}.
-     */
-    @Override
-    public int intValue() {
-        return (int) value;
-    }
+	/**
+	 * Returns the remainder of dividing this by {@code val}.
+	 */
+	public UnsignedLong remainder(UnsignedLong val) {
+		return asUnsigned(UnsignedLongs.remainder(value, val.value));
+	}
 
-    /**
-     * Returns the value of this {@code UnsignedLong} as a {@code long}. This is
-     * an inverse operation to {@link #asUnsigned}.
-     * 
-     * <p>
-     * Note that if this {@code UnsignedLong} holds a value {@code >= 2^63}, the
-     * returned value will be equal to {@code this - 2^64}.
-     */
-    @Override
-    public long longValue() {
-        return value;
-    }
+	/**
+	 * Returns the value of this {@code UnsignedLong} as an {@code int}.
+	 */
+	@Override
+	public int intValue() {
+		return (int) value;
+	}
 
-    /**
-     * Returns the value of this {@code UnsignedLong} as a {@code float},
-     * analogous to a widening primitive conversion from {@code long} to {@code
-     * float}, and correctly rounded.
-     */
-    @Override
-    public float floatValue() {
-        @SuppressWarnings("cast")
-        float fValue = (float) (value & UNSIGNED_MASK);
-        if (value < 0) {
-            fValue += 0x1.0p63f;
-        }
-        return fValue;
-    }
+	/**
+	 * Returns the value of this {@code UnsignedLong} as a {@code long}. This is
+	 * an inverse operation to {@link #asUnsigned}.
+	 * 
+	 * <p>
+	 * Note that if this {@code UnsignedLong} holds a value {@code >= 2^63}, the
+	 * returned value will be equal to {@code this - 2^64}.
+	 */
+	@Override
+	public long longValue() {
+		return value;
+	}
 
-    /**
-     * Returns the value of this {@code UnsignedLong} as a {@code double},
-     * analogous to a widening primitive conversion from {@code long} to {@code
-     * double}, and correctly rounded.
-     */
-    @Override
-    public double doubleValue() {
-        @SuppressWarnings("cast")
-        double dValue = (double) (value & UNSIGNED_MASK);
-        if (value < 0) {
-            dValue += 0x1.0p63;
-        }
-        return dValue;
-    }
+	/**
+	 * Returns the value of this {@code UnsignedLong} as a {@code float},
+	 * analogous to a widening primitive conversion from {@code long} to
+	 * {@code float}, and correctly rounded.
+	 */
+	@Override
+	public float floatValue() {
+		@SuppressWarnings("cast")
+		float fValue = (float) (value & UNSIGNED_MASK);
+		if (value < 0) {
+			fValue += 0x1.0p63f;
+		}
+		return fValue;
+	}
 
-    /**
-     * Returns the value of this {@code UnsignedLong} as a {@link BigInteger}.
-     */
-    public BigInteger bigIntegerValue() {
-        BigInteger bigInt = BigInteger.valueOf(value & UNSIGNED_MASK);
-        if (value < 0) {
-            bigInt = bigInt.setBit(Long.SIZE - 1);
-        }
-        return bigInt;
-    }
+	/**
+	 * Returns the value of this {@code UnsignedLong} as a {@code double},
+	 * analogous to a widening primitive conversion from {@code long} to
+	 * {@code double}, and correctly rounded.
+	 */
+	@Override
+	public double doubleValue() {
+		@SuppressWarnings("cast")
+		double dValue = (double) (value & UNSIGNED_MASK);
+		if (value < 0) {
+			dValue += 0x1.0p63;
+		}
+		return dValue;
+	}
 
-    @Override
-    public int compareTo(UnsignedLong o) {
-        return UnsignedLongs.compare(value, o.value);
-    }
+	/**
+	 * Returns the value of this {@code UnsignedLong} as a {@link BigInteger}.
+	 */
+	public BigInteger bigIntegerValue() {
+		BigInteger bigInt = BigInteger.valueOf(value & UNSIGNED_MASK);
+		if (value < 0) {
+			bigInt = bigInt.setBit(Long.SIZE - 1);
+		}
+		return bigInt;
+	}
 
-    @Override
-    public int hashCode() {
-        return Longs.hashCode(value);
-    }
+	@Override
+	public int compareTo(UnsignedLong o) {
+		return UnsignedLongs.compare(value, o.value);
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof UnsignedLong) {
-            UnsignedLong other = (UnsignedLong) obj;
-            return value == other.value;
-        }
-        return false;
-    }
+	@Override
+	public int hashCode() {
+		return Longs.hashCode(value);
+	}
 
-    /**
-     * Returns a string representation of the {@code UnsignedLong} value, in
-     * base 10.
-     */
-    @Override
-    public String toString() {
-        return UnsignedLongs.toString(value);
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof UnsignedLong) {
+			UnsignedLong other = (UnsignedLong) obj;
+			return value == other.value;
+		}
+		return false;
+	}
 
-    /**
-     * Returns a string representation of the {@code UnsignedLong} value, in
-     * base {@code radix}. If {@code radix < Character.MIN_RADIX} or {@code
-     * radix > Character.MAX_RADIX}, the radix {@code 10} is used.
-     */
-    public String toString(int radix) {
-        return UnsignedLongs.toString(value, radix);
-    }
+	/**
+	 * Returns a string representation of the {@code UnsignedLong} value, in
+	 * base 10.
+	 */
+	@Override
+	public String toString() {
+		return UnsignedLongs.toString(value);
+	}
+
+	/**
+	 * Returns a string representation of the {@code UnsignedLong} value, in
+	 * base {@code radix}. If {@code radix < Character.MIN_RADIX} or
+	 * {@code radix > Character.MAX_RADIX}, the radix {@code 10} is used.
+	 */
+	public String toString(int radix) {
+		return UnsignedLongs.toString(value, radix);
+	}
 }

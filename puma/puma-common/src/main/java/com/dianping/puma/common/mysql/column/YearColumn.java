@@ -44,7 +44,7 @@ public final class YearColumn implements Column {
 	 */
 	@Override
 	public String toString() {
-		return "YearColumn [value=" + value + "]";
+		return String.valueOf(value);
 	}
 
 	public Integer getValue() {

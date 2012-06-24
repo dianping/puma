@@ -22,9 +22,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.dianping.puma.common.bo.PumaContext;
-import com.dianping.puma.common.datatype.UnsignedLong;
-import com.dianping.puma.common.mysql.Pair;
 import com.dianping.puma.common.mysql.Row;
+import com.dianping.puma.common.mysql.RowChangedData;
 import com.dianping.puma.common.util.PacketUtils;
 
 /**
@@ -35,11 +34,10 @@ import com.dianping.puma.common.util.PacketUtils;
  */
 public class UpdateRowsEvent extends AbstractRowsEvent {
 
-	private static final long	serialVersionUID	= -877826157536949565L;
-	private UnsignedLong		columnCount;
-	private BitSet				usedColumnsBefore;
-	private BitSet				usedColumnsAfter;
-	private List<Pair<Row>>		rows;
+	private static final long			serialVersionUID	= -877826157536949565L;
+	private BitSet						usedColumnsBefore;
+	private BitSet						usedColumnsAfter;
+	private List<RowChangedData<Row>>	rows;
 
 	/*
 	 * (non-Javadoc)
@@ -48,16 +46,8 @@ public class UpdateRowsEvent extends AbstractRowsEvent {
 	 */
 	@Override
 	public String toString() {
-		return "UpdateRowsEvent [columnCount=" + columnCount + ", usedColumnsBefore=" + usedColumnsBefore
-				+ ", usedColumnsAfter=" + usedColumnsAfter + ", rows=" + rows + ", super.toString()="
-				+ super.toString() + "]";
-	}
-
-	/**
-	 * @return the columnCount
-	 */
-	public UnsignedLong getColumnCount() {
-		return columnCount;
+		return "UpdateRowsEvent [usedColumnsBefore=" + usedColumnsBefore + ", usedColumnsAfter=" + usedColumnsAfter
+				+ ", rows=" + rows + ", super.toString()=" + super.toString() + "]";
 	}
 
 	/**
@@ -77,39 +67,25 @@ public class UpdateRowsEvent extends AbstractRowsEvent {
 	/**
 	 * @return the rows
 	 */
-	public List<Pair<Row>> getRows() {
+	public List<RowChangedData<Row>> getRows() {
 		return rows;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.dianping.puma.common.mysql.event.AbstractBinlogEvent#doParse(java
-	 * .nio.ByteBuffer, com.dianping.puma.common.bo.PumaContext)
-	 */
 	@Override
-	public void doParse(ByteBuffer buf, PumaContext context) throws IOException {
-		tableId = PacketUtils.readLong(buf, 6);
+	protected void innderParser(ByteBuffer buf, PumaContext context) throws IOException {
 		TableMapEvent tme = context.getTableMaps().get(tableId);
-		reserved = PacketUtils.readInt(buf, 2);
-		columnCount = PacketUtils.readLengthCodedUnsignedLong(buf);
-		int bitSetLength = (int) ((columnCount.intValue() + 7) / 8);
-		usedColumnsBefore = new BitSet(bitSetLength);
-		PacketUtils.readBitSet(usedColumnsBefore, buf, columnCount.intValue());
-		usedColumnsAfter = new BitSet(bitSetLength);
-		PacketUtils.readBitSet(usedColumnsAfter, buf, columnCount.intValue());
+		usedColumnsBefore = PacketUtils.readBitSet(buf, columnCount.intValue());
+		usedColumnsAfter = PacketUtils.readBitSet(buf, columnCount.intValue());
 
 		rows = parseRows(buf, tme);
-
 	}
 
-	protected List<Pair<Row>> parseRows(ByteBuffer buf, TableMapEvent tme) throws IOException {
-		final List<Pair<Row>> r = new LinkedList<Pair<Row>>();
+	protected List<RowChangedData<Row>> parseRows(ByteBuffer buf, TableMapEvent tme) throws IOException {
+		final List<RowChangedData<Row>> r = new LinkedList<RowChangedData<Row>>();
 		while (buf.hasRemaining()) {
 			final Row before = parseRow(buf, tme, usedColumnsBefore);
 			final Row after = parseRow(buf, tme, usedColumnsAfter);
-			r.add(new Pair<Row>(before, after));
+			r.add(new RowChangedData<Row>(before, after));
 		}
 		return r;
 	}

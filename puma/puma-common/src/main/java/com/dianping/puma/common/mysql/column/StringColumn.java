@@ -15,7 +15,6 @@
  */
 package com.dianping.puma.common.mysql.column;
 
-import java.util.Arrays;
 
 /**
  * 
@@ -39,7 +38,7 @@ public final class StringColumn implements Column {
 	 */
 	@Override
 	public String toString() {
-		return "StringColumn [value=" + Arrays.toString(value) + "]";
+		return new String(value);
 	}
 
 	public byte[] getValue() {

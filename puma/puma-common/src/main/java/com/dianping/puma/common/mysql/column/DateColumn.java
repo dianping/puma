@@ -39,7 +39,7 @@ public final class DateColumn implements Column {
 	 */
 	@Override
 	public String toString() {
-		return "DateColumn [value=" + value + "]";
+		return String.valueOf(value);
 	}
 
 	public Date getValue() {

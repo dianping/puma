@@ -134,9 +134,6 @@ public class ReplicationBasedServer extends AbstractServer {
 		this.pumaSocket.setTcpNoDelay(false);
 		this.pumaSocket.setKeepAlive(true);
 		this.pumaSocket.connect(new InetSocketAddress(host, port));
-		while (!this.pumaSocket.isConnected()) {
-			log.info("Connecting...");
-		}
 		is = pumaSocket.getInputStream();
 		os = pumaSocket.getOutputStream();
 		PacketFactory.parsePacket(is, PacketType.CONNECT_PACKET, context);

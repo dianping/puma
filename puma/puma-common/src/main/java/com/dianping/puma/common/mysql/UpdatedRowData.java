@@ -16,16 +16,16 @@
 package com.dianping.puma.common.mysql;
 
 /**
- * TODO Comment of Pair
+ * TODO Comment of UpdatedRowData
  * 
  * @author Leo Liang
  * 
  */
-public final class RowChangedData<T> {
+public final class UpdatedRowData<T> {
 	private T	before;
 	private T	after;
 
-	public RowChangedData() {
+	public UpdatedRowData() {
 	}
 
 	/*
@@ -35,10 +35,10 @@ public final class RowChangedData<T> {
 	 */
 	@Override
 	public String toString() {
-		return "RowChangedData [before=" + before + ", after=" + after + "]";
+		return "UpdatedRowData [before=" + before + ", after=" + after + "]";
 	}
 
-	public RowChangedData(T before, T after) {
+	public UpdatedRowData(T before, T after) {
 		this.before = before;
 		this.after = after;
 	}
@@ -65,11 +65,11 @@ public final class RowChangedData<T> {
 		this.after = t;
 	}
 
-	public static void swap(RowChangedData<?> p) {
+	public static void swap(UpdatedRowData<?> p) {
 		doSwap(p);
 	}
 
-	private static <T> void doSwap(RowChangedData<T> p) {
+	private static <T> void doSwap(UpdatedRowData<T> p) {
 		synchronized (p) {
 			final T t = p.before;
 			p.before = p.after;

@@ -23,7 +23,7 @@ import java.util.List;
 
 import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.mysql.Row;
-import com.dianping.puma.common.mysql.RowChangedData;
+import com.dianping.puma.common.mysql.UpdatedRowData;
 import com.dianping.puma.common.util.PacketUtils;
 
 /**
@@ -37,7 +37,7 @@ public class UpdateRowsEvent extends AbstractRowsEvent {
 	private static final long			serialVersionUID	= -877826157536949565L;
 	private BitSet						usedColumnsBefore;
 	private BitSet						usedColumnsAfter;
-	private List<RowChangedData<Row>>	rows;
+	private List<UpdatedRowData<Row>>	rows;
 
 	/*
 	 * (non-Javadoc)
@@ -67,7 +67,7 @@ public class UpdateRowsEvent extends AbstractRowsEvent {
 	/**
 	 * @return the rows
 	 */
-	public List<RowChangedData<Row>> getRows() {
+	public List<UpdatedRowData<Row>> getRows() {
 		return rows;
 	}
 
@@ -80,12 +80,12 @@ public class UpdateRowsEvent extends AbstractRowsEvent {
 		rows = parseRows(buf, tme);
 	}
 
-	protected List<RowChangedData<Row>> parseRows(ByteBuffer buf, TableMapEvent tme) throws IOException {
-		final List<RowChangedData<Row>> r = new LinkedList<RowChangedData<Row>>();
+	protected List<UpdatedRowData<Row>> parseRows(ByteBuffer buf, TableMapEvent tme) throws IOException {
+		final List<UpdatedRowData<Row>> r = new LinkedList<UpdatedRowData<Row>>();
 		while (buf.hasRemaining()) {
 			final Row before = parseRow(buf, tme, usedColumnsBefore);
 			final Row after = parseRow(buf, tme, usedColumnsAfter);
-			r.add(new RowChangedData<Row>(before, after));
+			r.add(new UpdatedRowData<Row>(before, after));
 		}
 		return r;
 	}

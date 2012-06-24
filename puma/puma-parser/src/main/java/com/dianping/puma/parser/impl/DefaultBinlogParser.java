@@ -26,6 +26,7 @@ import com.dianping.puma.common.mysql.event.DeleteRowsEvent;
 import com.dianping.puma.common.mysql.event.FormatDescriptionEvent;
 import com.dianping.puma.common.mysql.event.IncidentEvent;
 import com.dianping.puma.common.mysql.event.IntVarEvent;
+import com.dianping.puma.common.mysql.event.PumaIgnoreEvent;
 import com.dianping.puma.common.mysql.event.QueryEvent;
 import com.dianping.puma.common.mysql.event.RandEvent;
 import com.dianping.puma.common.mysql.event.RotateEvent;
@@ -95,6 +96,7 @@ public class DefaultBinlogParser implements Parser {
 				event = new IncidentEvent();
 				break;
 			default:
+				event = new PumaIgnoreEvent();
 				break;
 		}
 		if (event != null) {

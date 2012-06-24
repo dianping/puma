@@ -12,10 +12,10 @@
  */
 package com.dianping.puma.server.impl;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.CountDownLatch;
@@ -49,7 +49,9 @@ public class ReplicationBasedServer extends AbstractServer {
 	protected long				serverId	= 6789;
 	protected String			encoding	= "utf-8";
 	// add socket
-	protected PumaSocketWrapper	pumaSocket;
+	protected Socket			pumaSocket;
+	protected InputStream		is;
+	protected OutputStream		os;
 	protected volatile boolean	stop		= false;
 
 	protected Parser			parser;
@@ -94,7 +96,7 @@ public class ReplicationBasedServer extends AbstractServer {
 					throw new IOException("Login failed.");
 				}
 			} catch (IOException e) {
-				log.error("IOException occurs. serverId: " + serverId);
+				log.error("IOException occurs. serverId: " + serverId, e);
 				try {
 					this.pumaSocket.close();
 				} catch (IOException closeException) {
@@ -107,13 +109,13 @@ public class ReplicationBasedServer extends AbstractServer {
 
 	private void readBinlog() throws IOException {
 		while (!stop) {
-			BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(pumaSocket.getInputStream(),
-					PacketType.BINLOG_PACKET, context);
+			BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(is, PacketType.BINLOG_PACKET, context);
 			if (!binlogPacket.isOk()) {
 				log.error("Binlog packet response error.");
 				throw new IOException("Binlog packet response error.");
 			} else {
 				BinlogEvent event = parser.parse(binlogPacket.getBinlogBuf(), context);
+				System.out.println(event.getHeader().getNextPosition());
 				System.out.println(event);
 			}
 
@@ -127,8 +129,17 @@ public class ReplicationBasedServer extends AbstractServer {
 	 * @throws IOException
 	 */
 	private void connect() throws UnknownHostException, IOException {
-		this.pumaSocket = new PumaSocketWrapper(new Socket(host, port));
-		PacketFactory.parsePacket(pumaSocket.getInputStream(), PacketType.CONNECT_PACKET, context);
+		closeTransport();
+		this.pumaSocket = new Socket();
+		this.pumaSocket.setTcpNoDelay(false);
+		this.pumaSocket.setKeepAlive(true);
+		this.pumaSocket.connect(new InetSocketAddress(host, port));
+		while (!this.pumaSocket.isConnected()) {
+			log.info("Connecting...");
+		}
+		is = pumaSocket.getInputStream();
+		os = pumaSocket.getOutputStream();
+		PacketFactory.parsePacket(is, PacketType.CONNECT_PACKET, context);
 	}
 
 	/**
@@ -146,9 +157,9 @@ public class ReplicationBasedServer extends AbstractServer {
 		dumpBinlogPacket.setServerId(serverId);
 		dumpBinlogPacket.buildPacket(context);
 
-		dumpBinlogPacket.write(pumaSocket.getOutputStream(), context);
+		dumpBinlogPacket.write(os, context);
 
-		OKErrorPacket dumpCommandResultPacket = (OKErrorPacket) PacketFactory.parsePacket(pumaSocket.getInputStream(),
+		OKErrorPacket dumpCommandResultPacket = (OKErrorPacket) PacketFactory.parsePacket(is,
 				PacketType.OKERROR_PACKET, context);
 		if (dumpCommandResultPacket.isOk()) {
 			return true;
@@ -173,10 +184,9 @@ public class ReplicationBasedServer extends AbstractServer {
 		authPacket.setUser(user);
 		authPacket.setDatabase(database);
 		authPacket.buildPacket(context);
-		authPacket.write(pumaSocket.getOutputStream(), context);
+		authPacket.write(os, context);
 
-		OKErrorPacket okErrorPacket = (OKErrorPacket) PacketFactory.parsePacket(pumaSocket.getInputStream(),
-				PacketType.OKERROR_PACKET, context);
+		OKErrorPacket okErrorPacket = (OKErrorPacket) PacketFactory.parsePacket(is, PacketType.OKERROR_PACKET, context);
 
 		if (okErrorPacket.isOk()) {
 			return true;
@@ -193,6 +203,31 @@ public class ReplicationBasedServer extends AbstractServer {
 	 */
 	@Override
 	public void stop() throws Exception {
+		closeTransport();
+		this.stop = true;
+
+	}
+
+	/**
+	 * 
+	 */
+	private void closeTransport() {
+		try {
+			if (this.is != null) {
+				this.is.close();
+			}
+		} catch (IOException ioEx) {
+			// TODO log
+			this.is = null;
+		}
+		try {
+			if (this.os != null) {
+				this.os.close();
+			}
+		} catch (IOException ioEx) {
+			// TODO log
+			this.os = null;
+		}
 		try {
 			if (this.pumaSocket != null) {
 				this.pumaSocket.close();
@@ -201,8 +236,6 @@ public class ReplicationBasedServer extends AbstractServer {
 			// TODO log
 			this.pumaSocket = null;
 		}
-		this.stop = true;
-
 	}
 
 	public int getPort() {
@@ -293,32 +326,4 @@ public class ReplicationBasedServer extends AbstractServer {
 		return String.valueOf(serverId);
 	}
 
-	private static class PumaSocketWrapper extends Socket {
-		private Socket	socket;
-
-		public PumaSocketWrapper(Socket socket) {
-			this.socket = socket;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.net.Socket#getInputStream()
-		 */
-		@Override
-		public InputStream getInputStream() throws IOException {
-			return socket.getInputStream();
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.net.Socket#getOutputStream()
-		 */
-		@Override
-		public OutputStream getOutputStream() throws IOException {
-			return socket.getOutputStream();
-		}
-
-	}
 }

@@ -1,5 +1,5 @@
 /**
- * Project: ${puma-parser.aid}
+ * Project: ${puma-common.aid}
  * 
  * File Created at 2012-6-24
  * $Id$
@@ -21,27 +21,27 @@ import java.nio.ByteBuffer;
 import com.dianping.puma.common.bo.PumaContext;
 
 /**
- * TODO Comment of AbstractBinlogEvent
+ * TODO Comment of PumaIgnoreEvent
  * 
  * @author Leo Liang
  * 
  */
-public abstract class AbstractBinlogEvent implements BinlogEvent {
-	private static final long	serialVersionUID	= -8136236885229956889L;
-	private BinlogHeader		header;
+public class PumaIgnoreEvent extends AbstractBinlogEvent {
 
+	private static final long	serialVersionUID	= -4082129137615636815L;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.dianping.puma.common.mysql.event.AbstractBinlogEvent#doParse(java
+	 * .nio.ByteBuffer, com.dianping.puma.common.bo.PumaContext)
+	 */
 	@Override
-	public void parse(ByteBuffer buf, PumaContext context, BinlogHeader header) throws IOException {
-		this.header = header;
-		doParse(buf, context);
+	public void doParse(ByteBuffer buf, PumaContext context) throws IOException {
+		// TODO Auto-generated method stub
+
 	}
-
-	@Override
-	public BinlogHeader getHeader() {
-		return header;
-	};
-
-	public abstract void doParse(ByteBuffer buf, PumaContext context) throws IOException;
 
 	/*
 	 * (non-Javadoc)
@@ -50,7 +50,7 @@ public abstract class AbstractBinlogEvent implements BinlogEvent {
 	 */
 	@Override
 	public String toString() {
-		return "AbstractBinlogEvent [header=" + header + "]";
+		return "PumaIgnoreEvent [super.toString()=" + super.toString() + "]";
 	}
 
 }

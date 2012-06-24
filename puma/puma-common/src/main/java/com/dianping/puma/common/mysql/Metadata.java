@@ -18,6 +18,7 @@ package com.dianping.puma.common.mysql;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import com.dianping.puma.common.util.CodecUtils;
 import com.dianping.puma.common.util.PacketUtils;
@@ -45,6 +46,16 @@ public final class Metadata implements Serializable {
 
 	public int getMetadata(int column) {
 		return this.metadata[column];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "Metadata [type=" + Arrays.toString(type) + ", metadata=" + Arrays.toString(metadata) + "]";
 	}
 
 	public static final Metadata valueOf(byte[] type, byte[] data) throws IOException {

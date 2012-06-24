@@ -1,7 +1,7 @@
 /**
  * Project: ${puma-parser.aid}
  * 
- * File Created at 2012-6-23
+ * File Created at 2012-6-24
  * $Id$
  * 
  * Copyright 2010 dianping.com.
@@ -13,20 +13,17 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.parser;
+package com.dianping.puma.common.mysql.column;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
-import com.dianping.puma.common.bo.PumaContext;
-import com.dianping.puma.common.mysql.event.BinlogEvent;
+import java.io.Serializable;
 
 /**
- * TODO Comment of Parser
+ * TODO Comment of Column
  * 
  * @author Leo Liang
  * 
  */
-public interface Parser {
-	public BinlogEvent parse(ByteBuffer buf, PumaContext context) throws IOException;
+public interface Column extends Serializable {
+
+	Object getValue();
 }

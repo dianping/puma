@@ -13,20 +13,20 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.parser;
+package com.dianping.puma.common.mysql.event;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 
 import com.dianping.puma.common.bo.PumaContext;
-import com.dianping.puma.common.mysql.event.BinlogEvent;
 
 /**
- * TODO Comment of Parser
+ * TODO Comment of BinlogEvent
  * 
  * @author Leo Liang
  * 
  */
-public interface Parser {
-	public BinlogEvent parse(ByteBuffer buf, PumaContext context) throws IOException;
+public interface BinlogEvent extends Serializable {
+	public void parse(ByteBuffer buf, PumaContext context, BinlogHeader header) throws IOException;
 }

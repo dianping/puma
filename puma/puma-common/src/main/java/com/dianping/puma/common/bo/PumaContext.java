@@ -13,200 +13,220 @@
 package com.dianping.puma.common.bo;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.dianping.puma.common.mysql.event.TableMapEvent;
 
 /**
  * @author Leo Liang
  * 
  */
 public class PumaContext implements Serializable {
-    private static final long serialVersionUID      = -2280369356150286536L;
-    private String            serverVersion         = null;
-    private int               serverMajorVersion    = 0;
-    private int               serverMinorVersion    = 0;
-    private int               serverSubMinorVersion = 0;
-    private int               maxThreeBytes         = 255 * 255 * 255;
-    private boolean           useNewLargePackets    = false;
-    private boolean           colDecimalNeedsBump   = false;
-    private byte              protocolVersion       = 0;
-    private long              threadId;
-    private String            seed;
-    private int               serverCapabilities;
-    private int               serverCharsetIndex;
-    private int               serverStatus          = 0;
-    private int               clientParam           = 0;
-    private boolean           hasLongColumnInfo     = false;
-    private boolean           has41NewNewProt       = false;
-    private boolean           use41Extensions       = false;
-    private String            encoding              = "utf-8";
-    private String            binlogFileName;
-    private long              binlogStartPos;
-    private long              serverId;
+	private static final long			serialVersionUID		= -2280369356150286536L;
+	private String						serverVersion			= null;
+	private int							serverMajorVersion		= 0;
+	private int							serverMinorVersion		= 0;
+	private int							serverSubMinorVersion	= 0;
+	private int							maxThreeBytes			= 255 * 255 * 255;
+	private boolean						useNewLargePackets		= false;
+	private boolean						colDecimalNeedsBump		= false;
+	private byte						protocolVersion			= 0;
+	private long						threadId;
+	private String						seed;
+	private int							serverCapabilities;
+	private int							serverCharsetIndex;
+	private int							serverStatus			= 0;
+	private int							clientParam				= 0;
+	private boolean						hasLongColumnInfo		= false;
+	private boolean						has41NewNewProt			= false;
+	private boolean						use41Extensions			= false;
+	private String						encoding				= "utf-8";
+	private String						binlogFileName;
+	private long						binlogStartPos;
+	private long						serverId;
+	private Map<Long, TableMapEvent>	tableMaps				= new HashMap<Long, TableMapEvent>();
 
-    public long getServerId() {
-        return serverId;
-    }
+	/**
+	 * @return the tableMaps
+	 */
+	public Map<Long, TableMapEvent> getTableMaps() {
+		return tableMaps;
+	}
 
-    public void setServerId(long serverId) {
-        this.serverId = serverId;
-    }
+	/**
+	 * @param tableMaps
+	 *            the tableMaps to set
+	 */
+	public void setTableMaps(Map<Long, TableMapEvent> tableMaps) {
+		this.tableMaps = tableMaps;
+	}
 
-    public String getBinlogFileName() {
-        return binlogFileName;
-    }
+	public long getServerId() {
+		return serverId;
+	}
 
-    public void setBinlogFileName(String binlogFileName) {
-        this.binlogFileName = binlogFileName;
-    }
+	public void setServerId(long serverId) {
+		this.serverId = serverId;
+	}
 
-    public long getBinlogStartPos() {
-        return binlogStartPos;
-    }
+	public String getBinlogFileName() {
+		return binlogFileName;
+	}
 
-    public void setBinlogStartPos(long binlogStartPos) {
-        this.binlogStartPos = binlogStartPos;
-    }
+	public void setBinlogFileName(String binlogFileName) {
+		this.binlogFileName = binlogFileName;
+	}
 
-    public String getEncoding() {
-        return encoding;
-    }
+	public long getBinlogStartPos() {
+		return binlogStartPos;
+	}
 
-    public void setEncoding(String encoding) {
-        this.encoding = encoding;
-    }
+	public void setBinlogStartPos(long binlogStartPos) {
+		this.binlogStartPos = binlogStartPos;
+	}
 
-    public boolean isUse41Extensions() {
-        return use41Extensions;
-    }
+	public String getEncoding() {
+		return encoding;
+	}
 
-    public void setUse41Extensions(boolean use41Extensions) {
-        this.use41Extensions = use41Extensions;
-    }
+	public void setEncoding(String encoding) {
+		this.encoding = encoding;
+	}
 
-    public boolean isHas41NewNewProt() {
-        return has41NewNewProt;
-    }
+	public boolean isUse41Extensions() {
+		return use41Extensions;
+	}
 
-    public void setHas41NewNewProt(boolean has41NewNewProt) {
-        this.has41NewNewProt = has41NewNewProt;
-    }
+	public void setUse41Extensions(boolean use41Extensions) {
+		this.use41Extensions = use41Extensions;
+	}
 
-    public boolean isHasLongColumnInfo() {
-        return hasLongColumnInfo;
-    }
+	public boolean isHas41NewNewProt() {
+		return has41NewNewProt;
+	}
 
-    public void setHasLongColumnInfo(boolean hasLongColumnInfo) {
-        this.hasLongColumnInfo = hasLongColumnInfo;
-    }
+	public void setHas41NewNewProt(boolean has41NewNewProt) {
+		this.has41NewNewProt = has41NewNewProt;
+	}
 
-    public int getClientParam() {
-        return clientParam;
-    }
+	public boolean isHasLongColumnInfo() {
+		return hasLongColumnInfo;
+	}
 
-    public void setClientParam(int clientParam) {
-        this.clientParam = clientParam;
-    }
+	public void setHasLongColumnInfo(boolean hasLongColumnInfo) {
+		this.hasLongColumnInfo = hasLongColumnInfo;
+	}
 
-    public String getServerVersion() {
-        return serverVersion;
-    }
+	public int getClientParam() {
+		return clientParam;
+	}
 
-    public void setServerVersion(String serverVersion) {
-        this.serverVersion = serverVersion;
-    }
+	public void setClientParam(int clientParam) {
+		this.clientParam = clientParam;
+	}
 
-    public int getServerMajorVersion() {
-        return serverMajorVersion;
-    }
+	public String getServerVersion() {
+		return serverVersion;
+	}
 
-    public void setServerMajorVersion(int serverMajorVersion) {
-        this.serverMajorVersion = serverMajorVersion;
-    }
+	public void setServerVersion(String serverVersion) {
+		this.serverVersion = serverVersion;
+	}
 
-    public int getServerMinorVersion() {
-        return serverMinorVersion;
-    }
+	public int getServerMajorVersion() {
+		return serverMajorVersion;
+	}
 
-    public void setServerMinorVersion(int serverMinorVersion) {
-        this.serverMinorVersion = serverMinorVersion;
-    }
+	public void setServerMajorVersion(int serverMajorVersion) {
+		this.serverMajorVersion = serverMajorVersion;
+	}
 
-    public int getServerSubMinorVersion() {
-        return serverSubMinorVersion;
-    }
+	public int getServerMinorVersion() {
+		return serverMinorVersion;
+	}
 
-    public void setServerSubMinorVersion(int serverSubMinorVersion) {
-        this.serverSubMinorVersion = serverSubMinorVersion;
-    }
+	public void setServerMinorVersion(int serverMinorVersion) {
+		this.serverMinorVersion = serverMinorVersion;
+	}
 
-    public int getMaxThreeBytes() {
-        return maxThreeBytes;
-    }
+	public int getServerSubMinorVersion() {
+		return serverSubMinorVersion;
+	}
 
-    public void setMaxThreeBytes(int maxThreeBytes) {
-        this.maxThreeBytes = maxThreeBytes;
-    }
+	public void setServerSubMinorVersion(int serverSubMinorVersion) {
+		this.serverSubMinorVersion = serverSubMinorVersion;
+	}
 
-    public boolean isUseNewLargePackets() {
-        return useNewLargePackets;
-    }
+	public int getMaxThreeBytes() {
+		return maxThreeBytes;
+	}
 
-    public void setUseNewLargePackets(boolean useNewLargePackets) {
-        this.useNewLargePackets = useNewLargePackets;
-    }
+	public void setMaxThreeBytes(int maxThreeBytes) {
+		this.maxThreeBytes = maxThreeBytes;
+	}
 
-    public boolean isColDecimalNeedsBump() {
-        return colDecimalNeedsBump;
-    }
+	public boolean isUseNewLargePackets() {
+		return useNewLargePackets;
+	}
 
-    public void setColDecimalNeedsBump(boolean colDecimalNeedsBump) {
-        this.colDecimalNeedsBump = colDecimalNeedsBump;
-    }
+	public void setUseNewLargePackets(boolean useNewLargePackets) {
+		this.useNewLargePackets = useNewLargePackets;
+	}
 
-    public byte getProtocolVersion() {
-        return protocolVersion;
-    }
+	public boolean isColDecimalNeedsBump() {
+		return colDecimalNeedsBump;
+	}
 
-    public void setProtocolVersion(byte protocolVersion) {
-        this.protocolVersion = protocolVersion;
-    }
+	public void setColDecimalNeedsBump(boolean colDecimalNeedsBump) {
+		this.colDecimalNeedsBump = colDecimalNeedsBump;
+	}
 
-    public long getThreadId() {
-        return threadId;
-    }
+	public byte getProtocolVersion() {
+		return protocolVersion;
+	}
 
-    public void setThreadId(long threadId) {
-        this.threadId = threadId;
-    }
+	public void setProtocolVersion(byte protocolVersion) {
+		this.protocolVersion = protocolVersion;
+	}
 
-    public String getSeed() {
-        return seed;
-    }
+	public long getThreadId() {
+		return threadId;
+	}
 
-    public void setSeed(String seed) {
-        this.seed = seed;
-    }
+	public void setThreadId(long threadId) {
+		this.threadId = threadId;
+	}
 
-    public int getServerCapabilities() {
-        return serverCapabilities;
-    }
+	public String getSeed() {
+		return seed;
+	}
 
-    public void setServerCapabilities(int serverCapabilities) {
-        this.serverCapabilities = serverCapabilities;
-    }
+	public void setSeed(String seed) {
+		this.seed = seed;
+	}
 
-    public int getServerCharsetIndex() {
-        return serverCharsetIndex;
-    }
+	public int getServerCapabilities() {
+		return serverCapabilities;
+	}
 
-    public void setServerCharsetIndex(int serverCharsetIndex) {
-        this.serverCharsetIndex = serverCharsetIndex;
-    }
+	public void setServerCapabilities(int serverCapabilities) {
+		this.serverCapabilities = serverCapabilities;
+	}
 
-    public int getServerStatus() {
-        return serverStatus;
-    }
+	public int getServerCharsetIndex() {
+		return serverCharsetIndex;
+	}
 
-    public void setServerStatus(int serverStatus) {
-        this.serverStatus = serverStatus;
-    }
+	public void setServerCharsetIndex(int serverCharsetIndex) {
+		this.serverCharsetIndex = serverCharsetIndex;
+	}
+
+	public int getServerStatus() {
+		return serverStatus;
+	}
+
+	public void setServerStatus(int serverStatus) {
+		this.serverStatus = serverStatus;
+	}
 }

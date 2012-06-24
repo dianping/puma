@@ -23,15 +23,15 @@ import java.util.concurrent.CountDownLatch;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.common.bo.PositionInfo;
+import com.dianping.puma.common.mysql.event.BinlogEvent;
+import com.dianping.puma.common.mysql.packet.AuthenticatePacket;
+import com.dianping.puma.common.mysql.packet.BinlogPacket;
+import com.dianping.puma.common.mysql.packet.ComBinlogDumpPacket;
+import com.dianping.puma.common.mysql.packet.OKErrorPacket;
+import com.dianping.puma.common.mysql.packet.PacketFactory;
+import com.dianping.puma.common.mysql.packet.PacketType;
 import com.dianping.puma.common.util.PositionFileUtils;
 import com.dianping.puma.parser.Parser;
-import com.dianping.puma.parser.mysql.event.BinlogEvent;
-import com.dianping.puma.server.mysql.packet.AuthenticatePacket;
-import com.dianping.puma.server.mysql.packet.BinlogPacket;
-import com.dianping.puma.server.mysql.packet.ComBinlogDumpPacket;
-import com.dianping.puma.server.mysql.packet.OKErrorPacket;
-import com.dianping.puma.server.mysql.packet.PacketFactory;
-import com.dianping.puma.server.mysql.packet.PacketType;
 
 /**
  * 基于MySQL复制机制的Server

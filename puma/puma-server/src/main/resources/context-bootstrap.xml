@@ -15,7 +15,8 @@
 		<property name="parser" ref="defaultParser" />
 	</bean>
 
-	<bean id="defaultParser" class="com.dianping.puma.parser.impl.DefaultBinlogParser" />
+	<bean id="defaultParser" class="com.dianping.puma.parser.impl.DefaultBinlogParser"
+		init-method="start" />
 
 	<bean id="servers" class="java.util.ArrayList">
 		<constructor-arg>

@@ -12,26 +12,14 @@
  */
 package com.dianping.puma.server;
 
+import com.dianping.puma.common.LifeCycle;
 import com.dianping.puma.common.bo.PumaContext;
 
 /**
  * @author Leo Liang
  * 
  */
-public interface Server {
-	/**
-	 * 启动Server
-	 * 
-	 * @throws Exception
-	 */
-	public void start() throws Exception;
-
-	/**
-	 * 停止Server
-	 * 
-	 * @throws Exception
-	 */
-	public void stop() throws Exception;
+public interface Server extends LifeCycle {
 
 	public String getServerName();
 

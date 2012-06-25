@@ -18,6 +18,7 @@ package com.dianping.puma.parser;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import com.dianping.puma.common.LifeCycle;
 import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.mysql.event.BinlogEvent;
 
@@ -27,6 +28,6 @@ import com.dianping.puma.common.mysql.event.BinlogEvent;
  * @author Leo Liang
  * 
  */
-public interface Parser {
+public interface Parser extends LifeCycle {
 	public BinlogEvent parse(ByteBuffer buf, PumaContext context) throws IOException;
 }

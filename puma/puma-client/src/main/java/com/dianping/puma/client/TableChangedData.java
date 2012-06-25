@@ -19,7 +19,9 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * TODO Comment of TableChangedData
+ * <pre>
+ * 对应一个表的数据变化
+ * </pre>
  * 
  * @author Leo Liang
  * 
@@ -28,14 +30,14 @@ public class TableChangedData implements Serializable {
 
 	private static final long	serialVersionUID	= -2383357060735671907L;
 
-	private MetaInfo			meta;
+	private TableMetaInfo		meta;
 	List<RowChangedData>		rows;
 
 	/**
 	 * @param meta
 	 * @param rows
 	 */
-	public TableChangedData(MetaInfo meta, List<RowChangedData> rows) {
+	public TableChangedData(TableMetaInfo meta, List<RowChangedData> rows) {
 		super();
 		this.meta = meta;
 		this.rows = rows;
@@ -51,7 +53,7 @@ public class TableChangedData implements Serializable {
 	/**
 	 * @return the meta
 	 */
-	public MetaInfo getMeta() {
+	public TableMetaInfo getMeta() {
 		return meta;
 	}
 

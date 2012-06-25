@@ -20,12 +20,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * TODO Comment of MetaInfo
+ * <pre>
+ * 数据表的Meta信息
+ * 
+ * <strong>注意：<tt>columns</tt>包含所有的列名，包括主键。<tt>keys</tt>仅包含主键列名。</strong>
+ * </pre>
  * 
  * @author Leo Liang
  * 
  */
-public class MetaInfo implements Serializable {
+public class TableMetaInfo implements Serializable {
 
 	private static final long	serialVersionUID	= 5436657168659452692L;
 
@@ -40,7 +44,7 @@ public class MetaInfo implements Serializable {
 	 * @param columns
 	 * @param keys
 	 */
-	public MetaInfo(String database, String table, List<String> columns, List<String> keys) {
+	public TableMetaInfo(String database, String table, List<String> columns, List<String> keys) {
 		super();
 		this.database = database;
 		this.table = table;

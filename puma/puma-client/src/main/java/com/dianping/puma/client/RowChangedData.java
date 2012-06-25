@@ -20,7 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * TODO Comment of RowChangedData
+ * <pre>
+ * 对应一行的数据变化
+ * </pre>
  * 
  * @author Leo Liang
  * 

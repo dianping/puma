@@ -19,7 +19,11 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * TODO Comment of DataChangedEvent
+ * <pre>
+ * 数据变更事件
+ * 
+ * 这个事件里的所有表的所有行数据变化是属于一个transaction的。
+ * </pre>
  * 
  * @author Leo Liang
  * 

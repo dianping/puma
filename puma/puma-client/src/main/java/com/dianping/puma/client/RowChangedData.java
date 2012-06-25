@@ -16,6 +16,7 @@
 package com.dianping.puma.client;
 
 import java.io.Serializable;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -99,13 +100,9 @@ public class RowChangedData implements Serializable {
 		INSERT, DELETE, UPDATE;
 	}
 
-	public static enum ColumnType {
-		BYTEARRAY, SQLDATE, JAVADATE, BIGDECIMAL, DOUBLE, INTEGER, FLOAT, LONG, STRING, NULL, SQLTIME, SQLTIMESTAMP;
-	}
-
 	public static class ColumnInfo implements Serializable {
 		private static final long	serialVersionUID	= 8036820944314281838L;
-		private ColumnType			type;
+		private Types				type;
 		private Object				oldValue;
 		private Object				newValue;
 
@@ -114,7 +111,7 @@ public class RowChangedData implements Serializable {
 		 * @param oldValue
 		 * @param newValue
 		 */
-		public ColumnInfo(ColumnType type, Object oldValue, Object newValue) {
+		public ColumnInfo(Types type, Object oldValue, Object newValue) {
 			super();
 			this.type = type;
 			this.oldValue = oldValue;
@@ -132,7 +129,7 @@ public class RowChangedData implements Serializable {
 		 * @param type
 		 *            the type to set
 		 */
-		public void setType(ColumnType type) {
+		public void setType(Types type) {
 			this.type = type;
 		}
 
@@ -155,7 +152,7 @@ public class RowChangedData implements Serializable {
 		/**
 		 * @return the type
 		 */
-		public ColumnType getType() {
+		public Types getType() {
 			return type;
 		}
 

@@ -13,9 +13,9 @@
 package com.dianping.puma.common.bo;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 
+import com.dianping.puma.common.LRUCache;
 import com.dianping.puma.common.mysql.event.TableMapEvent;
 
 /**
@@ -42,7 +42,7 @@ public class PumaContext implements Serializable {
 	private String						binlogFileName;
 	private long						binlogStartPos;
 	private long						serverId;
-	private Map<Long, TableMapEvent>	tableMaps				= new HashMap<Long, TableMapEvent>();
+	private Map<Long, TableMapEvent>	tableMaps				= new LRUCache<Long, TableMapEvent>(300);
 
 	/**
 	 * @return the tableMaps

@@ -17,7 +17,7 @@ import java.nio.ByteBuffer;
 
 import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.mysql.MySQLCommunicationConstant;
-import com.dianping.puma.common.mysql.MySQLUtils;
+import com.dianping.puma.common.util.MySQLUtils;
 import com.dianping.puma.common.util.PacketUtils;
 
 /**

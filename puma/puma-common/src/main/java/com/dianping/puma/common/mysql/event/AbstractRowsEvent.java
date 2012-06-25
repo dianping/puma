@@ -27,7 +27,6 @@ import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.datatype.UnsignedLong;
 import com.dianping.puma.common.mysql.BinlogConstanst;
 import com.dianping.puma.common.mysql.Metadata;
-import com.dianping.puma.common.mysql.MySQLUtils;
 import com.dianping.puma.common.mysql.Row;
 import com.dianping.puma.common.mysql.column.BitColumn;
 import com.dianping.puma.common.mysql.column.BlobColumn;
@@ -50,6 +49,7 @@ import com.dianping.puma.common.mysql.column.TimestampColumn;
 import com.dianping.puma.common.mysql.column.TinyColumn;
 import com.dianping.puma.common.mysql.column.YearColumn;
 import com.dianping.puma.common.util.CodecUtils;
+import com.dianping.puma.common.util.MySQLUtils;
 import com.dianping.puma.common.util.PacketUtils;
 
 /**

@@ -10,7 +10,7 @@
  * Confidential Information and shall use it only in accordance with the terms
  * of the license agreement you entered into with dianping.com.
  */
-package com.dianping.puma.common.mysql;
+package com.dianping.puma.common.util;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -18,7 +18,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 
-import com.dianping.puma.common.util.CodecUtils;
 
 /**
  * TODO Comment of MySQLUtils

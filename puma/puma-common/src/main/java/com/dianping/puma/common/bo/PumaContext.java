@@ -29,8 +29,6 @@ public class PumaContext implements Serializable {
 	private int							serverMinorVersion		= 0;
 	private int							serverSubMinorVersion	= 0;
 	private int							maxThreeBytes			= 255 * 255 * 255;
-	private boolean						useNewLargePackets		= false;
-	private boolean						colDecimalNeedsBump		= false;
 	private byte						protocolVersion			= 0;
 	private long						threadId;
 	private String						seed;
@@ -38,7 +36,6 @@ public class PumaContext implements Serializable {
 	private int							serverCharsetIndex;
 	private int							serverStatus			= 0;
 	private int							clientParam				= 0;
-	private boolean						hasLongColumnInfo		= false;
 	private boolean						has41NewNewProt			= false;
 	private boolean						use41Extensions			= false;
 	private String						encoding				= "utf-8";
@@ -110,14 +107,6 @@ public class PumaContext implements Serializable {
 		this.has41NewNewProt = has41NewNewProt;
 	}
 
-	public boolean isHasLongColumnInfo() {
-		return hasLongColumnInfo;
-	}
-
-	public void setHasLongColumnInfo(boolean hasLongColumnInfo) {
-		this.hasLongColumnInfo = hasLongColumnInfo;
-	}
-
 	public int getClientParam() {
 		return clientParam;
 	}
@@ -164,22 +153,6 @@ public class PumaContext implements Serializable {
 
 	public void setMaxThreeBytes(int maxThreeBytes) {
 		this.maxThreeBytes = maxThreeBytes;
-	}
-
-	public boolean isUseNewLargePackets() {
-		return useNewLargePackets;
-	}
-
-	public void setUseNewLargePackets(boolean useNewLargePackets) {
-		this.useNewLargePackets = useNewLargePackets;
-	}
-
-	public boolean isColDecimalNeedsBump() {
-		return colDecimalNeedsBump;
-	}
-
-	public void setColDecimalNeedsBump(boolean colDecimalNeedsBump) {
-		this.colDecimalNeedsBump = colDecimalNeedsBump;
 	}
 
 	public byte getProtocolVersion() {

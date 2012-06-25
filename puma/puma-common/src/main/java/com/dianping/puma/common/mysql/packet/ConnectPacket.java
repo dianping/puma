@@ -37,16 +37,9 @@ public class ConnectPacket extends AbstractResponsePacket {
 		if (MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
 				context.getServerSubMinorVersion(), 4, 0, 8)) {
 			context.setMaxThreeBytes((256 * 256 * 256) - 1);
-			context.setUseNewLargePackets(true);
 		} else {
 			context.setMaxThreeBytes(255 * 255 * 255);
-			context.setUseNewLargePackets(false);
 		}
-
-		context.setColDecimalNeedsBump(MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(),
-				context.getServerMinorVersion(), context.getServerSubMinorVersion(), 3, 23, 0));
-		context.setColDecimalNeedsBump(!MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(),
-				context.getServerMinorVersion(), context.getServerSubMinorVersion(), 3, 23, 15));
 
 		context.setThreadId(PacketUtils.readLong(buf, 4));
 		context.setSeed(PacketUtils.readNullTerminatedString(buf));
@@ -74,11 +67,6 @@ public class ConnectPacket extends AbstractResponsePacket {
 			newSeed.append(context.getSeed());
 			newSeed.append(seedPart2);
 			context.setSeed(newSeed.toString());
-		}
-
-		if ((context.getServerCapabilities() & MySQLCommunicationConstant.CLIENT_LONG_FLAG) != 0) {
-			context.setClientParam(context.getClientParam() | MySQLCommunicationConstant.CLIENT_LONG_FLAG);
-			context.setHasLongColumnInfo(true);
 		}
 
 		if (context.getProtocolVersion() > 9) {

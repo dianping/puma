@@ -40,15 +40,33 @@ public class TableMetaInfo implements Serializable {
 
 	/**
 	 * @param database
-	 * @param table
-	 * @param columns
-	 * @param keys
+	 *            the database to set
 	 */
-	public TableMetaInfo(String database, String table, List<String> columns, List<String> keys) {
-		super();
+	public void setDatabase(String database) {
 		this.database = database;
+	}
+
+	/**
+	 * @param table
+	 *            the table to set
+	 */
+	public void setTable(String table) {
 		this.table = table;
+	}
+
+	/**
+	 * @param columns
+	 *            the columns to set
+	 */
+	public void setColumns(List<String> columns) {
 		this.columns = columns;
+	}
+
+	/**
+	 * @param keys
+	 *            the keys to set
+	 */
+	public void setKeys(List<String> keys) {
 		this.keys = keys;
 	}
 

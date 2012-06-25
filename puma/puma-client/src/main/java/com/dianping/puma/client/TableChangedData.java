@@ -35,11 +35,17 @@ public class TableChangedData implements Serializable {
 
 	/**
 	 * @param meta
-	 * @param rows
+	 *            the meta to set
 	 */
-	public TableChangedData(TableMetaInfo meta, List<RowChangedData> rows) {
-		super();
+	public void setMeta(TableMetaInfo meta) {
 		this.meta = meta;
+	}
+
+	/**
+	 * @param rows
+	 *            the rows to set
+	 */
+	public void setRows(List<RowChangedData> rows) {
 		this.rows = rows;
 	}
 

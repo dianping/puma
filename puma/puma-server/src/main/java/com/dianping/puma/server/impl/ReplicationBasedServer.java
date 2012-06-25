@@ -24,8 +24,11 @@ import java.util.concurrent.CountDownLatch;
 
 import org.apache.log4j.Logger;
 
+import com.dianping.puma.client.DataChangedEvent;
 import com.dianping.puma.common.bo.PositionInfo;
+import com.dianping.puma.common.mysql.BinlogConstanst;
 import com.dianping.puma.common.mysql.event.BinlogEvent;
+import com.dianping.puma.common.mysql.event.RotateEvent;
 import com.dianping.puma.common.mysql.packet.AuthenticatePacket;
 import com.dianping.puma.common.mysql.packet.BinlogPacket;
 import com.dianping.puma.common.mysql.packet.ComBinlogDumpPacket;
@@ -33,6 +36,7 @@ import com.dianping.puma.common.mysql.packet.OKErrorPacket;
 import com.dianping.puma.common.mysql.packet.PacketFactory;
 import com.dianping.puma.common.mysql.packet.PacketType;
 import com.dianping.puma.common.util.PositionFileUtils;
+import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.parser.Parser;
 
 /**
@@ -43,19 +47,20 @@ import com.dianping.puma.parser.Parser;
  */
 public class ReplicationBasedServer extends AbstractServer {
 	private static final Logger	log			= Logger.getLogger(ReplicationBasedServer.class);
-	protected int				port		= 3306;
-	protected String			host;
-	protected String			user;
-	protected String			password;
-	protected String			database;
-	protected long				serverId	= 6789;
-	protected String			encoding	= "utf-8";
-	protected Socket			pumaSocket;
-	protected InputStream		is;
-	protected OutputStream		os;
-	protected volatile boolean	stop		= false;
+	private int					port		= 3306;
+	private String				host;
+	private String				user;
+	private String				password;
+	private String				database;
+	private long				serverId	= 6789;
+	private String				encoding	= "utf-8";
+	private Socket				pumaSocket;
+	private InputStream			is;
+	private OutputStream		os;
+	private volatile boolean	stop		= false;
 
-	protected Parser			parser;
+	private Parser				parser;
+	private DataHandler			dataHandler;
 
 	/*
 	 * (non-Javadoc)
@@ -68,7 +73,7 @@ public class ReplicationBasedServer extends AbstractServer {
 		do {
 			try {
 				// 读position/file文件
-				PositionInfo posInfo = PositionFileUtils.getPositionInfo(this.getServerName(),
+				PositionInfo posInfo = PositionFileUtils.getPositionInfo(context.getPumaServerName(),
 						context.getBinlogFileName(), context.getBinlogStartPos());
 
 				context.setBinlogFileName(posInfo.getBinlogFileName());
@@ -85,7 +90,7 @@ public class ReplicationBasedServer extends AbstractServer {
 					if (dumpBinlog()) {
 						log.info("Dump binlog command success.");
 
-						readBinlog();
+						processBinlog();
 
 					} else {
 						throw new IOException("Dump binlog failed.");
@@ -108,16 +113,34 @@ public class ReplicationBasedServer extends AbstractServer {
 
 	}
 
-	private void readBinlog() throws IOException {
+	private void processBinlog() throws IOException {
 		while (!stop) {
 			BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(is, PacketType.BINLOG_PACKET, context);
 			if (!binlogPacket.isOk()) {
 				log.error("Binlog packet response error.");
 				throw new IOException("Binlog packet response error.");
 			} else {
-				BinlogEvent event = parser.parse(binlogPacket.getBinlogBuf(), context);
-				System.out.println(event.getHeader().getNextPosition());
-				System.out.println(event);
+				BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), context);
+
+				if (binlogEvent.getHeader().getEventType() == BinlogConstanst.ROTATE_EVENT) {
+					RotateEvent rotateEvent = (RotateEvent) binlogEvent;
+					PositionFileUtils.savePositionInfo(getServerName(),
+							new PositionInfo(rotateEvent.getFirstEventPosition(), rotateEvent.getNextBinlogFileName()));
+					context.setBinlogFileName(rotateEvent.getNextBinlogFileName());
+					context.setBinlogStartPos(rotateEvent.getFirstEventPosition());
+				} else {
+					DataChangedEvent dataChangedEvent = dataHandler.process(binlogEvent, context);
+					if (dataChangedEvent != null) {
+						// TODO call dispatcher
+						System.out.println(dataChangedEvent);
+
+						// save position
+						PositionFileUtils.savePositionInfo(getServerName(), new PositionInfo(binlogEvent.getHeader()
+								.getNextPosition(), context.getBinlogFileName()));
+						context.setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
+					}
+
+				}
 			}
 
 		}
@@ -268,10 +291,12 @@ public class ReplicationBasedServer extends AbstractServer {
 		this.password = password;
 	}
 
+	@Override
 	public long getServerId() {
 		return serverId;
 	}
 
+	@Override
 	public void setServerId(long serverId) {
 		this.serverId = serverId;
 	}
@@ -312,6 +337,21 @@ public class ReplicationBasedServer extends AbstractServer {
 	 */
 	public void setParser(Parser parser) {
 		this.parser = parser;
+	}
+
+	/**
+	 * @return the dataHandler
+	 */
+	public DataHandler getDataHandler() {
+		return dataHandler;
+	}
+
+	/**
+	 * @param dataHandler
+	 *            the dataHandler to set
+	 */
+	public void setDataHandler(DataHandler dataHandler) {
+		this.dataHandler = dataHandler;
 	}
 
 	/*

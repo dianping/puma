@@ -13,7 +13,12 @@
 		<property name="defaultBinlogFileName" value="mysql-bin.000006" />
 		<property name="defaultBinlogPosition" value="4" />
 		<property name="parser" ref="defaultParser" />
+		<property name="dataHandler" ref="transactionSupportDataHandler" />
 	</bean>
+
+	<bean id="transactionSupportDataHandler"
+		class="com.dianping.puma.datahandler.impl.TransactionSupportDataHandler"
+		init-method="start" />
 
 	<bean id="defaultParser" class="com.dianping.puma.parser.impl.DefaultBinlogParser"
 		init-method="start" />

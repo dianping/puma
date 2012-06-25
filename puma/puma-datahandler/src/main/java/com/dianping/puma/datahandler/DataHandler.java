@@ -17,6 +17,7 @@ package com.dianping.puma.datahandler;
 
 import com.dianping.puma.client.DataChangedEvent;
 import com.dianping.puma.common.LifeCycle;
+import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.mysql.event.BinlogEvent;
 
 /**
@@ -26,5 +27,5 @@ import com.dianping.puma.common.mysql.event.BinlogEvent;
  * 
  */
 public interface DataHandler extends LifeCycle {
-	public DataChangedEvent process(BinlogEvent binlogEvent);
+	public DataChangedEvent process(BinlogEvent binlogEvent, PumaContext context);
 }

@@ -21,8 +21,6 @@ import com.dianping.puma.common.bo.PumaContext;
  */
 public interface Server extends LifeCycle {
 
-	public String getServerName();
-
 	public void setContext(PumaContext context);
 
 	public PumaContext getContext();
@@ -34,4 +32,10 @@ public interface Server extends LifeCycle {
 	public Long getDefaultBinlogPosition();
 
 	public void setDefaultBinlogPosition(Long binlogFileName);
+
+	public void setServerId(long serverId);
+
+	public long getServerId();
+
+	public String getServerName();
 }

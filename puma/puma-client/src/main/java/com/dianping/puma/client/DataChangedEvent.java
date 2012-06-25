@@ -32,19 +32,22 @@ public class DataChangedEvent implements Serializable {
 
 	private static final long		serialVersionUID	= -8268178911916142965L;
 
-	private boolean					empty				= Boolean.FALSE;
 	private List<TableChangedData>	datas;
 	private long					transactionId;
 
 	/**
-	 * @param empty
 	 * @param datas
-	 * @param transactionId
+	 *            the datas to set
 	 */
-	public DataChangedEvent(boolean empty, List<TableChangedData> datas, long transactionId) {
-		super();
-		this.empty = empty;
+	public void setDatas(List<TableChangedData> datas) {
 		this.datas = datas;
+	}
+
+	/**
+	 * @param transactionId
+	 *            the transactionId to set
+	 */
+	public void setTransactionId(long transactionId) {
 		this.transactionId = transactionId;
 	}
 
@@ -62,13 +65,6 @@ public class DataChangedEvent implements Serializable {
 		return datas;
 	}
 
-	/**
-	 * @return the empty
-	 */
-	public boolean isEmpty() {
-		return empty;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -76,7 +72,7 @@ public class DataChangedEvent implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return "DataChangedEvent [empty=" + empty + ", datas=" + datas + ", transactionId=" + transactionId + "]";
+		return "DataChangedEvent [datas=" + datas + ", transactionId=" + transactionId + "]";
 	}
 
 }

@@ -42,7 +42,39 @@ public class PumaContext implements Serializable {
 	private String						binlogFileName;
 	private long						binlogStartPos;
 	private long						serverId;
+	private long						pumaServerId;
+	private String						pumaServerName;
 	private Map<Long, TableMapEvent>	tableMaps				= new LRUCache<Long, TableMapEvent>(300);
+
+	/**
+	 * @return the pumaServerName
+	 */
+	public String getPumaServerName() {
+		return pumaServerName;
+	}
+
+	/**
+	 * @param pumaServerName
+	 *            the pumaServerName to set
+	 */
+	public void setPumaServerName(String pumaServerName) {
+		this.pumaServerName = pumaServerName;
+	}
+
+	/**
+	 * @return the pumaServerId
+	 */
+	public long getPumaServerId() {
+		return pumaServerId;
+	}
+
+	/**
+	 * @param pumaServerId
+	 *            the pumaServerId to set
+	 */
+	public void setPumaServerId(long pumaServerId) {
+		this.pumaServerId = pumaServerId;
+	}
 
 	/**
 	 * @return the tableMaps
@@ -202,4 +234,5 @@ public class PumaContext implements Serializable {
 	public void setServerStatus(int serverStatus) {
 		this.serverStatus = serverStatus;
 	}
+
 }

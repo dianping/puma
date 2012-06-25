@@ -111,10 +111,10 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 		tableId = PacketUtils.readLong(buf, 6);
 		reserved = PacketUtils.readInt(buf, 2);
 		columnCount = PacketUtils.readLengthCodedUnsignedLong(buf);
-		innderParser(buf, context);
+		innderParse(buf, context);
 	}
 
-	protected abstract void innderParser(ByteBuffer buf, PumaContext context) throws IOException;
+	protected abstract void innderParse(ByteBuffer buf, PumaContext context) throws IOException;
 
 	protected Row parseRow(ByteBuffer buf, BitSet usedColumns) throws IOException {
 		byte[] types = tableMapEvent.getColumnTypes();

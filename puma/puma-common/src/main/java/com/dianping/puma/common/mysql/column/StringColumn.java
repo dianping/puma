@@ -15,7 +15,6 @@
  */
 package com.dianping.puma.common.mysql.column;
 
-
 /**
  * 
  * TODO Comment of StringColumn
@@ -41,8 +40,8 @@ public final class StringColumn implements Column {
 		return new String(value);
 	}
 
-	public byte[] getValue() {
-		return this.value;
+	public String getValue() {
+		return new String(this.value);
 	}
 
 	public static final StringColumn valueOf(byte[] value) {

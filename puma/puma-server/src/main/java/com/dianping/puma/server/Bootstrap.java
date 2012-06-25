@@ -31,9 +31,12 @@ public class Bootstrap {
 
 		// start servers
 		for (Server server : servers) {
+
 			PositionInfo posInfo = PositionFileUtils.getPositionInfo(server.getServerName(),
 					server.getDefaultBinlogFileName(), server.getDefaultBinlogPosition());
 			PumaContext context = new PumaContext();
+			context.setPumaServerId(server.getServerId());
+			context.setPumaServerName(server.getServerName());
 			context.setBinlogFileName(posInfo.getBinlogFileName());
 			context.setBinlogStartPos(posInfo.getBinlogPosition());
 			server.setContext(context);

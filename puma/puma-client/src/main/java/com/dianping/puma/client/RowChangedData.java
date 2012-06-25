@@ -33,6 +33,22 @@ public class RowChangedData implements Serializable {
 
 	private long					executeTime;
 	private Map<String, ColumnInfo>	columns				= new HashMap<String, ColumnInfo>();
+	private ActionType				actionType;
+
+	/**
+	 * @return the actionType
+	 */
+	public ActionType getActionType() {
+		return actionType;
+	}
+
+	/**
+	 * @param actionType
+	 *            the actionType to set
+	 */
+	public void setActionType(ActionType actionType) {
+		this.actionType = actionType;
+	}
 
 	/**
 	 * @return the columns
@@ -75,11 +91,16 @@ public class RowChangedData implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return "RowChangedData [executeTime=" + executeTime + ", columns=" + columns + "]";
+		return "RowChangedData [executeTime=" + executeTime + ", columns=" + columns + ", actionType=" + actionType
+				+ "]";
+	}
+
+	public static enum ActionType {
+		INSERT, DELETE, UPDATE;
 	}
 
 	public static enum ColumnType {
-
+		BYTEARRAY, SQLDATE, JAVADATE, BIGDECIMAL, DOUBLE, INTEGER, FLOAT, LONG, STRING, NULL, SQLTIME, SQLTIMESTAMP;
 	}
 
 	public static class ColumnInfo implements Serializable {
@@ -97,6 +118,37 @@ public class RowChangedData implements Serializable {
 			super();
 			this.type = type;
 			this.oldValue = oldValue;
+			this.newValue = newValue;
+		}
+
+		/**
+		 * 
+		 */
+		public ColumnInfo() {
+			super();
+		}
+
+		/**
+		 * @param type
+		 *            the type to set
+		 */
+		public void setType(ColumnType type) {
+			this.type = type;
+		}
+
+		/**
+		 * @param oldValue
+		 *            the oldValue to set
+		 */
+		public void setOldValue(Object oldValue) {
+			this.oldValue = oldValue;
+		}
+
+		/**
+		 * @param newValue
+		 *            the newValue to set
+		 */
+		public void setNewValue(Object newValue) {
 			this.newValue = newValue;
 		}
 

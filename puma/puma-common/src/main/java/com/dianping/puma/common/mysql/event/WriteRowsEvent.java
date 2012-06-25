@@ -62,7 +62,7 @@ public class WriteRowsEvent extends AbstractRowsEvent {
 	}
 
 	@Override
-	protected void innderParser(ByteBuffer buf, PumaContext context) throws IOException {
+	protected void innderParse(ByteBuffer buf, PumaContext context) throws IOException {
 		usedColumns = PacketUtils.readBitSet(buf, columnCount.intValue());
 		tableMapEvent = context.getTableMaps().get(tableId);
 		rows = parseRows(buf);

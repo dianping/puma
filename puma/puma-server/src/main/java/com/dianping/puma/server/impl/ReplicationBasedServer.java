@@ -50,7 +50,6 @@ public class ReplicationBasedServer extends AbstractServer {
 	protected String			database;
 	protected long				serverId	= 6789;
 	protected String			encoding	= "utf-8";
-	// add socket
 	protected Socket			pumaSocket;
 	protected InputStream		is;
 	protected OutputStream		os;

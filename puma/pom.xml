@@ -37,6 +37,9 @@
 		<puma-server.version>${puma-all.version}</puma-server.version>
 		<puma-server.name>puma-server</puma-server.name>
 		<puma-server.aid>puma-server</puma-server.aid>
+                <puma-client.version>${puma-all.version}</puma-client.version>
+		<puma-client.name>puma-client</puma-client.name>
+		<puma-client.aid>puma-client</puma-client.aid>
 	</properties>
 	<modules>
 		<module>puma-parser</module>
@@ -45,6 +48,7 @@
 		<module>puma-dispatcher</module>
 		<module>puma-sender</module>
 		<module>puma-server</module>
+                <module>puma-client</module>
 	</modules>
 	<description>puma</description>
 	<dependencyManagement>
@@ -52,6 +56,11 @@
 			<dependency>
 				<groupId>com.dianping.puma</groupId>
 				<artifactId>puma-common</artifactId>
+				<version>${puma-all.version}</version>
+			</dependency>
+                        <dependency>
+				<groupId>com.dianping.puma</groupId>
+				<artifactId>puma-client</artifactId>
 				<version>${puma-all.version}</version>
 			</dependency>
 			<dependency>

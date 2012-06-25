@@ -64,15 +64,15 @@ public class WriteRowsEvent extends AbstractRowsEvent {
 	@Override
 	protected void innderParser(ByteBuffer buf, PumaContext context) throws IOException {
 		usedColumns = PacketUtils.readBitSet(buf, columnCount.intValue());
-		TableMapEvent tme = context.getTableMaps().get(tableId);
-		rows = parseRows(buf, tme);
+		tableMapEvent = context.getTableMaps().get(tableId);
+		rows = parseRows(buf);
 
 	}
 
-	protected List<Row> parseRows(ByteBuffer buf, TableMapEvent tme) throws IOException {
+	protected List<Row> parseRows(ByteBuffer buf) throws IOException {
 		List<Row> r = new LinkedList<Row>();
 		while (buf.hasRemaining()) {
-			r.add(parseRow(buf, tme, usedColumns));
+			r.add(parseRow(buf, usedColumns));
 		}
 		return r;
 	}

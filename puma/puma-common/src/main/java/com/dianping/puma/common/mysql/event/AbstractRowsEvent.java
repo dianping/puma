@@ -63,6 +63,7 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 	protected long				tableId;
 	protected int				reserved;
 	protected UnsignedLong		columnCount;
+	protected TableMapEvent		tableMapEvent;
 
 	/*
 	 * (non-Javadoc)
@@ -115,9 +116,9 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 
 	protected abstract void innderParser(ByteBuffer buf, PumaContext context) throws IOException;
 
-	protected Row parseRow(ByteBuffer buf, TableMapEvent tme, BitSet usedColumns) throws IOException {
-		byte[] types = tme.getColumnTypes();
-		Metadata metadata = tme.getColumnMetadata();
+	protected Row parseRow(ByteBuffer buf, BitSet usedColumns) throws IOException {
+		byte[] types = tableMapEvent.getColumnTypes();
+		Metadata metadata = tableMapEvent.getColumnMetadata();
 		BitSet nullColumns = PacketUtils.readBitSet(buf, types.length);
 		List<Column> columns = new ArrayList<Column>(types.length);
 		for (int i = 0; i < types.length; ++i) {

@@ -64,16 +64,16 @@ public class DeleteRowsEvent extends AbstractRowsEvent {
 
 	@Override
 	protected void innderParser(ByteBuffer buf, PumaContext context) throws IOException {
-		TableMapEvent tme = context.getTableMaps().get(tableId);
+		tableMapEvent = context.getTableMaps().get(tableId);
 		usedColumns = PacketUtils.readBitSet(buf, columnCount.intValue());
-		rows = parseRows(buf, tme);
+		rows = parseRows(buf);
 
 	}
 
-	protected List<Row> parseRows(ByteBuffer buf, TableMapEvent tme) throws IOException {
+	protected List<Row> parseRows(ByteBuffer buf) throws IOException {
 		final List<Row> r = new LinkedList<Row>();
 		while (buf.hasRemaining()) {
-			r.add(parseRow(buf, tme, usedColumns));
+			r.add(parseRow(buf, usedColumns));
 		}
 		return r;
 	}

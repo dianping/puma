@@ -73,18 +73,18 @@ public class UpdateRowsEvent extends AbstractRowsEvent {
 
 	@Override
 	protected void innderParser(ByteBuffer buf, PumaContext context) throws IOException {
-		TableMapEvent tme = context.getTableMaps().get(tableId);
+		tableMapEvent = context.getTableMaps().get(tableId);
 		usedColumnsBefore = PacketUtils.readBitSet(buf, columnCount.intValue());
 		usedColumnsAfter = PacketUtils.readBitSet(buf, columnCount.intValue());
 
-		rows = parseRows(buf, tme);
+		rows = parseRows(buf);
 	}
 
-	protected List<UpdatedRowData<Row>> parseRows(ByteBuffer buf, TableMapEvent tme) throws IOException {
+	protected List<UpdatedRowData<Row>> parseRows(ByteBuffer buf) throws IOException {
 		final List<UpdatedRowData<Row>> r = new LinkedList<UpdatedRowData<Row>>();
 		while (buf.hasRemaining()) {
-			final Row before = parseRow(buf, tme, usedColumnsBefore);
-			final Row after = parseRow(buf, tme, usedColumnsAfter);
+			final Row before = parseRow(buf, usedColumnsBefore);
+			final Row after = parseRow(buf, usedColumnsAfter);
 			r.add(new UpdatedRowData<Row>(before, after));
 		}
 		return r;

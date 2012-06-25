@@ -12,6 +12,8 @@
  */
 package com.dianping.puma.server.impl;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -134,8 +136,8 @@ public class ReplicationBasedServer extends AbstractServer {
 		this.pumaSocket.setTcpNoDelay(false);
 		this.pumaSocket.setKeepAlive(true);
 		this.pumaSocket.connect(new InetSocketAddress(host, port));
-		is = pumaSocket.getInputStream();
-		os = pumaSocket.getOutputStream();
+		is = new BufferedInputStream(pumaSocket.getInputStream());
+		os = new BufferedOutputStream(pumaSocket.getOutputStream());
 		PacketFactory.parsePacket(is, PacketType.CONNECT_PACKET, context);
 	}
 

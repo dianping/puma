@@ -16,7 +16,6 @@
 package com.dianping.puma.client;
 
 import java.io.Serializable;
-import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +41,7 @@ public class TableMetaInfo implements Serializable {
 	private String					table;
 	private Map<Integer, String>	columns;
 	private List<String>			keys;
-	private Map<String, Integer>	types;
+	private Map<String, String>		types;
 
 	/**
 	 * @param database
@@ -107,7 +106,7 @@ public class TableMetaInfo implements Serializable {
 	/**
 	 * @return the types
 	 */
-	public Map<String, Integer> getTypes() {
+	public Map<String, String> getTypes() {
 		return types;
 	}
 
@@ -115,7 +114,7 @@ public class TableMetaInfo implements Serializable {
 	 * @param types
 	 *            the types to set
 	 */
-	public void setTypes(Map<String, Integer> types) {
+	public void setTypes(Map<String, String> types) {
 		this.types = types;
 	}
 

@@ -19,7 +19,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -161,7 +160,7 @@ public abstract class AbstractDataHandler implements DataHandler {
 						newTmi.setTable(tb);
 						newTmi.setColumns(new HashMap<Integer, String>());
 						newTmi.setKeys(new ArrayList<String>());
-						newTmi.setTypes(new HashMap<String, Integer>());
+						newTmi.setTypes(new HashMap<String, String>());
 						newTableMeta.put(db + "." + tb, newTmi);
 						tmi = newTmi;
 					}
@@ -191,64 +190,8 @@ public abstract class AbstractDataHandler implements DataHandler {
 		}
 	}
 
-	private int convertTypes(String str) {
-		if (str == null) {
-			return Types.OTHER;
-		} else {
-			int endPos = str.indexOf("(");
-			if (endPos != -1) {
-				str = str.substring(0, endPos);
-			}
-			if ("TINYINT".equalsIgnoreCase(str)) {
-				return Types.TINYINT;
-			} else if ("SMALLINT".equalsIgnoreCase(str)) {
-				return Types.SMALLINT;
-			} else if ("MEDIUMINT".equalsIgnoreCase(str)) {
-				return Types.INTEGER;
-			} else if ("BIGINT".equalsIgnoreCase(str)) {
-				return Types.BIGINT;
-			} else if ("FLOAT".equalsIgnoreCase(str)) {
-				return Types.FLOAT;
-			} else if ("DOUBLE".equalsIgnoreCase(str)) {
-				return Types.DOUBLE;
-			} else if ("DECIMAL".equalsIgnoreCase(str)) {
-				return Types.DECIMAL;
-			} else if ("BIT".equalsIgnoreCase(str)) {
-				return Types.BIT;
-			} else if ("CHAR".equalsIgnoreCase(str)) {
-				return Types.CHAR;
-			} else if ("VARCHAR".equalsIgnoreCase(str)) {
-				return Types.VARCHAR;
-			} else if ("TINYTEXT".equalsIgnoreCase(str)) {
-				return Types.VARCHAR;
-			} else if ("TEXT".equalsIgnoreCase(str)) {
-				return Types.LONGVARCHAR;
-			} else if ("MEDIUMTEXT".equalsIgnoreCase(str)) {
-				return Types.LONGVARCHAR;
-			} else if ("LONGTEXT".equalsIgnoreCase(str)) {
-				return Types.LONGVARCHAR;
-			} else if ("BINARY".equalsIgnoreCase(str)) {
-				return Types.BINARY;
-			} else if ("TINYBLOB".equalsIgnoreCase(str)) {
-				return Types.BLOB;
-			} else if ("ENUM".equalsIgnoreCase(str)) {
-				return Types.INTEGER;
-			} else if ("SET".equalsIgnoreCase(str)) {
-				return Types.BIGINT;
-			} else if ("DATE".equalsIgnoreCase(str)) {
-				return Types.DATE;
-			} else if ("DATETIME".equalsIgnoreCase(str)) {
-				return Types.TIME;
-			} else if ("TIME".equalsIgnoreCase(str)) {
-				return Types.TIME;
-			} else if ("TIMESTAMP".equalsIgnoreCase(str)) {
-				return Types.TIMESTAMP;
-			} else if ("YEAR".equalsIgnoreCase(str)) {
-				return Types.INTEGER;
-			} else {
-				return Types.OTHER;
-			}
-		}
+	private String convertTypes(String str) {
+		return str;
 	}
 
 	@Override
@@ -258,8 +201,9 @@ public abstract class AbstractDataHandler implements DataHandler {
 		}
 		if (binlogEvent instanceof QueryEvent) {
 			QueryEvent queryEvent = (QueryEvent) binlogEvent;
-			String sql = queryEvent.getSql();
-			if (StringUtils.startsWithIgnoreCase(StringUtils.trim(sql), "ALTER ")) {
+			String sql = StringUtils.trim(queryEvent.getSql());
+			if (StringUtils.startsWithIgnoreCase(sql, "ALTER ") || StringUtils.startsWithIgnoreCase(sql, "CREATE ")
+					|| StringUtils.startsWithIgnoreCase(sql, "RENAME ")) {
 				refreshTableMeta();
 			}
 		}

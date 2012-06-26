@@ -16,7 +16,6 @@
 package com.dianping.puma.client;
 
 import java.io.Serializable;
-import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -102,8 +101,9 @@ public class RowChangedData implements Serializable {
 
 	public static class ColumnInfo implements Serializable {
 		private static final long	serialVersionUID	= 8036820944314281838L;
-		private Types				type;
+		private int					type;
 		private int					index;
+		private String				name;
 		private Object				oldValue;
 		private Object				newValue;
 
@@ -112,12 +112,28 @@ public class RowChangedData implements Serializable {
 		 * @param oldValue
 		 * @param newValue
 		 */
-		public ColumnInfo(Types type, Object oldValue, Object newValue, int index) {
+		public ColumnInfo(int type, Object oldValue, Object newValue, int index, String name) {
 			super();
+			this.name = name;
 			this.index = index;
 			this.type = type;
 			this.oldValue = oldValue;
 			this.newValue = newValue;
+		}
+
+		/**
+		 * @return the name
+		 */
+		public String getName() {
+			return name;
+		}
+
+		/**
+		 * @param name
+		 *            the name to set
+		 */
+		public void setName(String name) {
+			this.name = name;
 		}
 
 		/**
@@ -146,7 +162,7 @@ public class RowChangedData implements Serializable {
 		 * @param type
 		 *            the type to set
 		 */
-		public void setType(Types type) {
+		public void setType(int type) {
 			this.type = type;
 		}
 
@@ -169,7 +185,7 @@ public class RowChangedData implements Serializable {
 		/**
 		 * @return the type
 		 */
-		public Types getType() {
+		public int getType() {
 			return type;
 		}
 
@@ -194,8 +210,8 @@ public class RowChangedData implements Serializable {
 		 */
 		@Override
 		public String toString() {
-			return "ColumnInfo [type=" + type + ", index=" + index + ", oldValue=" + oldValue + ", newValue="
-					+ newValue + "]";
+			return "ColumnInfo [type=" + type + ", index=" + index + ", name=" + name + ", oldValue=" + oldValue
+					+ ", newValue=" + newValue + "]";
 		}
 
 	}

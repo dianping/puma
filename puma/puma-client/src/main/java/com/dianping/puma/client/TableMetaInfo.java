@@ -16,14 +16,19 @@
 package com.dianping.puma.client;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.sql.Types;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <pre>
  * 数据表的Meta信息
+ * <tt>columns</tt>是以column index为key, 以column name为value的map
+ * <tt>keys</tt>包含所有主键的column name
+ * <tt>types</tt>是以column name为key，以java.sql.Types里面的类型定义为value的map
  * 
  * <strong>注意：<tt>columns</tt>包含所有的列名，包括主键。<tt>keys</tt>仅包含主键列名。</strong>
+ * 
  * </pre>
  * 
  * @author Leo Liang
@@ -31,12 +36,13 @@ import java.util.List;
  */
 public class TableMetaInfo implements Serializable {
 
-	private static final long	serialVersionUID	= 5436657168659452692L;
+	private static final long		serialVersionUID	= 5436657168659452692L;
 
-	private String				database;
-	private String				table;
-	private List<String>		columns				= new ArrayList<String>();
-	private List<String>		keys				= new ArrayList<String>();
+	private String					database;
+	private String					table;
+	private Map<Integer, String>	columns;
+	private List<String>			keys;
+	private Map<String, Integer>	types;
 
 	/**
 	 * @param database
@@ -52,22 +58,6 @@ public class TableMetaInfo implements Serializable {
 	 */
 	public void setTable(String table) {
 		this.table = table;
-	}
-
-	/**
-	 * @param columns
-	 *            the columns to set
-	 */
-	public void setColumns(List<String> columns) {
-		this.columns = columns;
-	}
-
-	/**
-	 * @param keys
-	 *            the keys to set
-	 */
-	public void setKeys(List<String> keys) {
-		this.keys = keys;
 	}
 
 	/**
@@ -87,8 +77,16 @@ public class TableMetaInfo implements Serializable {
 	/**
 	 * @return the columns
 	 */
-	public List<String> getColumns() {
+	public Map<Integer, String> getColumns() {
 		return columns;
+	}
+
+	/**
+	 * @param columns
+	 *            the columns to set
+	 */
+	public void setColumns(Map<Integer, String> columns) {
+		this.columns = columns;
 	}
 
 	/**
@@ -98,6 +96,29 @@ public class TableMetaInfo implements Serializable {
 		return keys;
 	}
 
+	/**
+	 * @param keys
+	 *            the keys to set
+	 */
+	public void setKeys(List<String> keys) {
+		this.keys = keys;
+	}
+
+	/**
+	 * @return the types
+	 */
+	public Map<String, Integer> getTypes() {
+		return types;
+	}
+
+	/**
+	 * @param types
+	 *            the types to set
+	 */
+	public void setTypes(Map<String, Integer> types) {
+		this.types = types;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -105,7 +126,8 @@ public class TableMetaInfo implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return "MetaInfo [database=" + database + ", table=" + table + ", columns=" + columns + ", keys=" + keys + "]";
+		return "TableMetaInfo [database=" + database + ", table=" + table + ", columns=" + columns + ", keys=" + keys
+				+ ", types=" + types + "]";
 	}
 
 }

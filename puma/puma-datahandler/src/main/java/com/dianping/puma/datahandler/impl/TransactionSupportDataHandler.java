@@ -46,7 +46,8 @@ import com.dianping.puma.common.mysql.event.XIDEvent;
  * 
  */
 public class TransactionSupportDataHandler extends AbstractDataHandler {
-	private List<TableChangedData>	datas	= null;
+	private List<TableChangedData>	datas				= null;
+	private TableChangedData		tableChangedData	= null;
 
 	@Override
 	protected DataChangedEvent doProcess(BinlogEvent binlogEvent, PumaContext context, byte eventType) {
@@ -60,7 +61,8 @@ public class TransactionSupportDataHandler extends AbstractDataHandler {
 					DataChangedEvent dataChangedEvent = new DataChangedEvent();
 					dataChangedEvent.setDatas(datas);
 					dataChangedEvent.setTransactionId(((XIDEvent) binlogEvent).getXid());
-					datas = null;
+					this.datas = null;
+					this.tableChangedData = null;
 					return dataChangedEvent;
 				}
 				break;
@@ -71,6 +73,7 @@ public class TransactionSupportDataHandler extends AbstractDataHandler {
 						tableMapEvent.getTableName());
 				TableChangedData tableChangedData = new TableChangedData();
 				tableChangedData.setMeta(tableMeta);
+				this.tableChangedData = tableChangedData;
 				datas.add(tableChangedData);
 
 				break;
@@ -86,14 +89,15 @@ public class TransactionSupportDataHandler extends AbstractDataHandler {
 					for (int columnPos = 0; columnPos < writeRowsEvent.getUsedColumns().size(); columnPos++) {
 						if (writeRowsEvent.getUsedColumns().get(columnPos)) {
 							Column binlogColumn = row.getColumns().get(columnPos);
-							ColumnInfo columnInfo = new ColumnInfo(getColumnType(columnPos + 1), null,
-									binlogColumn.getValue(), columnPos + 1);
-							columns.put(getColumnName(columnPos + 1), columnInfo);
+							String columnName = this.tableChangedData.getMeta().getColumns().get(columnPos + 1);
+							ColumnInfo columnInfo = new ColumnInfo(this.tableChangedData.getMeta().getTypes()
+									.get(columnName), null, binlogColumn.getValue(), columnPos + 1, columnName);
+							columns.put(columnName, columnInfo);
 						}
 					}
 				}
 
-				datas.get(datas.size() - 1).setRows(writeRowChangedDataList);
+				this.tableChangedData.setRows(writeRowChangedDataList);
 
 				break;
 			case BinlogConstanst.UPDATE_ROWS_EVENT:
@@ -108,19 +112,22 @@ public class TransactionSupportDataHandler extends AbstractDataHandler {
 					for (int columnBeforePos = 0; columnBeforePos < updateRowsEvent.getUsedColumnsBefore().size(); columnBeforePos++) {
 						if (updateRowsEvent.getUsedColumnsBefore().get(columnBeforePos)) {
 							Column binlogColumnBefore = row.getBefore().getColumns().get(columnBeforePos);
-							ColumnInfo columnInfo = new ColumnInfo(getColumnType(columnBeforePos + 1),
-									binlogColumnBefore.getValue(), null, columnBeforePos + 1);
-							columns.put(getColumnName(columnBeforePos + 1), columnInfo);
+							String columnName = this.tableChangedData.getMeta().getColumns().get(columnBeforePos + 1);
+							ColumnInfo columnInfo = new ColumnInfo(this.tableChangedData.getMeta().getTypes()
+									.get(columnName), binlogColumnBefore.getValue(), null, columnBeforePos + 1,
+									columnName);
+							columns.put(columnName, columnInfo);
 						}
 					}
 					for (int columnAfterPos = 0; columnAfterPos < updateRowsEvent.getUsedColumnsAfter().size(); columnAfterPos++) {
 						if (updateRowsEvent.getUsedColumnsAfter().get(columnAfterPos)) {
 							Column binlogColumnAfter = row.getAfter().getColumns().get(columnAfterPos);
-							ColumnInfo columnInfo = columns.get(getColumnName(columnAfterPos + 1));
+							String columnName = this.tableChangedData.getMeta().getColumns().get(columnAfterPos + 1);
+							ColumnInfo columnInfo = columns.get(columnName);
 							if (columnInfo == null) {
-								columnInfo = new ColumnInfo(getColumnType(columnAfterPos), null,
-										binlogColumnAfter.getValue(), columnAfterPos + 1);
-								columns.put(getColumnName(columnAfterPos + 1), columnInfo);
+								columnInfo = new ColumnInfo(this.tableChangedData.getMeta().getTypes().get(columnName),
+										null, binlogColumnAfter.getValue(), columnAfterPos + 1, columnName);
+								columns.put(columnName, columnInfo);
 							} else {
 								columnInfo.setNewValue(binlogColumnAfter.getValue());
 							}
@@ -128,7 +135,7 @@ public class TransactionSupportDataHandler extends AbstractDataHandler {
 					}
 				}
 
-				datas.get(datas.size() - 1).setRows(updateRowChangedDataList);
+				this.tableChangedData.setRows(updateRowChangedDataList);
 				break;
 			case BinlogConstanst.DELETE_ROWS_EVENT:
 				DeleteRowsEvent deleteRowsEvent = (DeleteRowsEvent) binlogEvent;
@@ -142,14 +149,15 @@ public class TransactionSupportDataHandler extends AbstractDataHandler {
 					for (int columnPos = 0; columnPos < deleteRowsEvent.getUsedColumns().size(); columnPos++) {
 						if (deleteRowsEvent.getUsedColumns().get(columnPos)) {
 							Column binlogColumn = row.getColumns().get(columnPos);
-							ColumnInfo columnInfo = new ColumnInfo(getColumnType(columnPos + 1),
-									binlogColumn.getValue(), null, columnPos + 1);
-							columns.put(getColumnName(columnPos + 1), columnInfo);
+							String columnName = this.tableChangedData.getMeta().getColumns().get(columnPos + 1);
+							ColumnInfo columnInfo = new ColumnInfo(this.tableChangedData.getMeta().getTypes()
+									.get(columnName), binlogColumn.getValue(), null, columnPos + 1, columnName);
+							columns.put(columnName, columnInfo);
 						}
 					}
 				}
 
-				datas.get(datas.size() - 1).setRows(deleteRowChangedDataList);
+				this.tableChangedData.setRows(deleteRowChangedDataList);
 				break;
 			default:
 				break;

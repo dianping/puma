@@ -18,7 +18,12 @@
 
 	<bean id="transactionSupportDataHandler"
 		class="com.dianping.puma.datahandler.impl.TransactionSupportDataHandler"
-		init-method="start" />
+		init-method="start">
+		<property name="host" value="192.168.7.43" />
+		<property name="port" value="3306" />
+		<property name="user" value="binlog" />
+		<property name="password" value="binlog" />
+	</bean>
 
 	<bean id="defaultParser" class="com.dianping.puma.parser.impl.DefaultBinlogParser"
 		init-method="start" />

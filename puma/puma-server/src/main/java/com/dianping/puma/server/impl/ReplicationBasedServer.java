@@ -241,6 +241,7 @@ public class ReplicationBasedServer extends AbstractServer {
 			}
 		} catch (IOException ioEx) {
 			// TODO log
+		} finally {
 			this.is = null;
 		}
 		try {
@@ -249,6 +250,7 @@ public class ReplicationBasedServer extends AbstractServer {
 			}
 		} catch (IOException ioEx) {
 			// TODO log
+		} finally {
 			this.os = null;
 		}
 		try {
@@ -257,6 +259,7 @@ public class ReplicationBasedServer extends AbstractServer {
 			}
 		} catch (IOException ioEx) {
 			// TODO log
+		} finally {
 			this.pumaSocket = null;
 		}
 	}

@@ -103,6 +103,7 @@ public class RowChangedData implements Serializable {
 	public static class ColumnInfo implements Serializable {
 		private static final long	serialVersionUID	= 8036820944314281838L;
 		private Types				type;
+		private int					index;
 		private Object				oldValue;
 		private Object				newValue;
 
@@ -111,11 +112,27 @@ public class RowChangedData implements Serializable {
 		 * @param oldValue
 		 * @param newValue
 		 */
-		public ColumnInfo(Types type, Object oldValue, Object newValue) {
+		public ColumnInfo(Types type, Object oldValue, Object newValue, int index) {
 			super();
+			this.index = index;
 			this.type = type;
 			this.oldValue = oldValue;
 			this.newValue = newValue;
+		}
+
+		/**
+		 * @return the index
+		 */
+		public int getIndex() {
+			return index;
+		}
+
+		/**
+		 * @param index
+		 *            the index to set
+		 */
+		public void setIndex(int index) {
+			this.index = index;
 		}
 
 		/**
@@ -177,7 +194,8 @@ public class RowChangedData implements Serializable {
 		 */
 		@Override
 		public String toString() {
-			return "ColumnInfo [type=" + type + ", oldValue=" + oldValue + ", newValue=" + newValue + "]";
+			return "ColumnInfo [type=" + type + ", index=" + index + ", oldValue=" + oldValue + ", newValue="
+					+ newValue + "]";
 		}
 
 	}

@@ -86,9 +86,9 @@ public class TransactionSupportDataHandler extends AbstractDataHandler {
 					for (int columnPos = 0; columnPos < writeRowsEvent.getUsedColumns().size(); columnPos++) {
 						if (writeRowsEvent.getUsedColumns().get(columnPos)) {
 							Column binlogColumn = row.getColumns().get(columnPos);
-							ColumnInfo columnInfo = new ColumnInfo(getColumnType(columnPos), null,
-									binlogColumn.getValue());
-							columns.put(getColumnName(columnPos), columnInfo);
+							ColumnInfo columnInfo = new ColumnInfo(getColumnType(columnPos + 1), null,
+									binlogColumn.getValue(), columnPos + 1);
+							columns.put(getColumnName(columnPos + 1), columnInfo);
 						}
 					}
 				}
@@ -108,19 +108,19 @@ public class TransactionSupportDataHandler extends AbstractDataHandler {
 					for (int columnBeforePos = 0; columnBeforePos < updateRowsEvent.getUsedColumnsBefore().size(); columnBeforePos++) {
 						if (updateRowsEvent.getUsedColumnsBefore().get(columnBeforePos)) {
 							Column binlogColumnBefore = row.getBefore().getColumns().get(columnBeforePos);
-							ColumnInfo columnInfo = new ColumnInfo(getColumnType(columnBeforePos),
-									binlogColumnBefore.getValue(), null);
-							columns.put(getColumnName(columnBeforePos), columnInfo);
+							ColumnInfo columnInfo = new ColumnInfo(getColumnType(columnBeforePos + 1),
+									binlogColumnBefore.getValue(), null, columnBeforePos + 1);
+							columns.put(getColumnName(columnBeforePos + 1), columnInfo);
 						}
 					}
 					for (int columnAfterPos = 0; columnAfterPos < updateRowsEvent.getUsedColumnsAfter().size(); columnAfterPos++) {
 						if (updateRowsEvent.getUsedColumnsAfter().get(columnAfterPos)) {
 							Column binlogColumnAfter = row.getAfter().getColumns().get(columnAfterPos);
-							ColumnInfo columnInfo = columns.get(getColumnName(columnAfterPos));
+							ColumnInfo columnInfo = columns.get(getColumnName(columnAfterPos + 1));
 							if (columnInfo == null) {
 								columnInfo = new ColumnInfo(getColumnType(columnAfterPos), null,
-										binlogColumnAfter.getValue());
-								columns.put(getColumnName(columnAfterPos), columnInfo);
+										binlogColumnAfter.getValue(), columnAfterPos + 1);
+								columns.put(getColumnName(columnAfterPos + 1), columnInfo);
 							} else {
 								columnInfo.setNewValue(binlogColumnAfter.getValue());
 							}
@@ -142,9 +142,9 @@ public class TransactionSupportDataHandler extends AbstractDataHandler {
 					for (int columnPos = 0; columnPos < deleteRowsEvent.getUsedColumns().size(); columnPos++) {
 						if (deleteRowsEvent.getUsedColumns().get(columnPos)) {
 							Column binlogColumn = row.getColumns().get(columnPos);
-							ColumnInfo columnInfo = new ColumnInfo(getColumnType(columnPos), binlogColumn.getValue(),
-									null);
-							columns.put(getColumnName(columnPos), columnInfo);
+							ColumnInfo columnInfo = new ColumnInfo(getColumnType(columnPos + 1),
+									binlogColumn.getValue(), null, columnPos + 1);
+							columns.put(getColumnName(columnPos + 1), columnInfo);
 						}
 					}
 				}

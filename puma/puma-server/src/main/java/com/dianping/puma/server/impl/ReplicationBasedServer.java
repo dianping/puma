@@ -134,7 +134,7 @@ public class ReplicationBasedServer extends AbstractServer {
 					DataChangedEvent dataChangedEvent = dataHandler.process(binlogEvent, context);
 					if (dataChangedEvent != null) {
 						// TODO call dispatcher
-						System.out.println(dataChangedEvent);
+						log.info(dataChangedEvent);
 
 						// save position
 						PositionFileUtils.savePositionInfo(getServerName(), new PositionInfo(binlogEvent.getHeader()

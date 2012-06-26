@@ -209,7 +209,8 @@ public abstract class AbstractDataHandler implements DataHandler {
 			QueryEvent queryEvent = (QueryEvent) binlogEvent;
 			String sql = StringUtils.trim(queryEvent.getSql());
 			if (StringUtils.startsWithIgnoreCase(sql, "ALTER ") || StringUtils.startsWithIgnoreCase(sql, "CREATE ")
-					|| StringUtils.startsWithIgnoreCase(sql, "RENAME ")) {
+					|| StringUtils.startsWithIgnoreCase(sql, "RENAME ")
+					|| StringUtils.startsWithIgnoreCase(sql, "DROP ")) {
 				refreshTableMeta();
 			}
 		}
@@ -221,9 +222,10 @@ public abstract class AbstractDataHandler implements DataHandler {
 		} else if (eventType == BinlogConstanst.QUERY_EVENT) {
 			QueryEvent queryEvent = (QueryEvent) binlogEvent;
 			String sql = StringUtils.trim(queryEvent.getSql());
-			if (StringUtils.startsWithIgnoreCase(sql, "ALTER") || StringUtils.startsWithIgnoreCase(sql, "CREATE")
-					|| StringUtils.startsWithIgnoreCase(sql, "DROP") || StringUtils.startsWithIgnoreCase(sql, "RENAME")
-					|| StringUtils.startsWithIgnoreCase(sql, "TRUNCATE")) {
+			if (StringUtils.startsWithIgnoreCase(sql, "ALTER ") || StringUtils.startsWithIgnoreCase(sql, "CREATE ")
+					|| StringUtils.startsWithIgnoreCase(sql, "DROP ")
+					|| StringUtils.startsWithIgnoreCase(sql, "RENAME ")
+					|| StringUtils.startsWithIgnoreCase(sql, "TRUNCATE ")) {
 				DataChangedEvent dataChangedEvent = new DataChangedEvent();
 				dataChangedEvent.setDdl(true);
 				dataChangedEvent.setSql(((QueryEvent) binlogEvent).getSql());
@@ -232,7 +234,11 @@ public abstract class AbstractDataHandler implements DataHandler {
 				return null;
 			}
 		} else {
-			return doProcess(binlogEvent, context, eventType);
+			DataChangedEvent dataChangedEvent = doProcess(binlogEvent, context, eventType);
+			if (dataChangedEvent != null) {
+				dataChangedEvent.setDdl(false);
+			}
+			return dataChangedEvent;
 		}
 	}
 

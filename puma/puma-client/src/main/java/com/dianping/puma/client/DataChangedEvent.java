@@ -34,6 +34,38 @@ public class DataChangedEvent implements Serializable {
 
 	private List<TableChangedData>	datas;
 	private long					transactionId;
+	private boolean					ddl;
+	private String					sql;
+
+	/**
+	 * @return the ddl
+	 */
+	public boolean isDdl() {
+		return ddl;
+	}
+
+	/**
+	 * @param ddl
+	 *            the ddl to set
+	 */
+	public void setDdl(boolean ddl) {
+		this.ddl = ddl;
+	}
+
+	/**
+	 * @return the sql
+	 */
+	public String getSql() {
+		return sql;
+	}
+
+	/**
+	 * @param sql
+	 *            the sql to set
+	 */
+	public void setSql(String sql) {
+		this.sql = sql;
+	}
 
 	/**
 	 * @param datas
@@ -72,7 +104,8 @@ public class DataChangedEvent implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return "DataChangedEvent [datas=" + datas + ", transactionId=" + transactionId + "]";
+		return "DataChangedEvent [datas=" + datas + ", transactionId=" + transactionId + ", ddl=" + ddl + ", sql="
+				+ sql + "]";
 	}
 
 }

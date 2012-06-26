@@ -29,6 +29,7 @@ import org.apache.log4j.Logger;
 
 import com.dianping.puma.client.DataChangedEvent;
 import com.dianping.puma.client.TableMetaInfo;
+import com.dianping.puma.common.annotation.ThreadUnSafe;
 import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.mysql.BinlogConstanst;
 import com.dianping.puma.common.mysql.event.BinlogEvent;
@@ -43,6 +44,7 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
  * @author Leo Liang
  * 
  */
+@ThreadUnSafe
 public abstract class AbstractDataHandler implements DataHandler {
 	private static final Logger									log					= Logger.getLogger(AbstractDataHandler.class);
 	private static AtomicReference<Map<String, TableMetaInfo>>	tableMetaInfoCache	= new AtomicReference<Map<String, TableMetaInfo>>();
@@ -50,6 +52,7 @@ public abstract class AbstractDataHandler implements DataHandler {
 	private String												host;
 	private String												user;
 	private String												password;
+	private MysqlDataSource										metaDs;
 
 	/**
 	 * @return the port
@@ -134,14 +137,17 @@ public abstract class AbstractDataHandler implements DataHandler {
 	protected void refreshTableMeta() {
 		Map<String, TableMetaInfo> newTableMeta = new HashMap<String, TableMetaInfo>();
 
-		MysqlDataSource ds = new MysqlDataSource();
-		ds.setUrl("jdbc:mysql://" + host + ":" + port);
-		ds.setUser(user);
-		ds.setPassword(password);
+		if (metaDs == null) {
+			metaDs = new MysqlDataSource();
+			metaDs.setUrl("jdbc:mysql://" + host + ":" + port);
+			metaDs.setUser(user);
+			metaDs.setPassword(password);
+		}
+
 		Connection conn = null;
 		Statement stmt = null;
 		try {
-			conn = ds.getConnection();
+			conn = metaDs.getConnection();
 			stmt = conn.createStatement();
 			ResultSet rs = stmt
 					.executeQuery("SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS");
@@ -212,6 +218,16 @@ public abstract class AbstractDataHandler implements DataHandler {
 
 		if (eventType == BinlogConstanst.STOP_EVENT || eventType == BinlogConstanst.ROTATE_EVENT) {
 			return null;
+		} else if (eventType == BinlogConstanst.QUERY_EVENT) {
+			QueryEvent queryEvent = (QueryEvent) binlogEvent;
+			if (!StringUtils.equals("BEGIN", StringUtils.trim(queryEvent.getSql()))) {
+				DataChangedEvent dataChangedEvent = new DataChangedEvent();
+				dataChangedEvent.setDdl(true);
+				dataChangedEvent.setSql(((QueryEvent) binlogEvent).getSql());
+				return dataChangedEvent;
+			} else {
+				return null;
+			}
 		} else {
 			return doProcess(binlogEvent, context, eventType);
 		}

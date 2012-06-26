@@ -25,6 +25,7 @@ import java.util.concurrent.CountDownLatch;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.client.DataChangedEvent;
+import com.dianping.puma.common.annotation.ThreadUnSafe;
 import com.dianping.puma.common.bo.PositionInfo;
 import com.dianping.puma.common.mysql.BinlogConstanst;
 import com.dianping.puma.common.mysql.event.BinlogEvent;
@@ -45,6 +46,7 @@ import com.dianping.puma.parser.Parser;
  * @author Leo Liang
  * 
  */
+@ThreadUnSafe
 public class ReplicationBasedServer extends AbstractServer {
 	private static final Logger	log			= Logger.getLogger(ReplicationBasedServer.class);
 	private int					port		= 3306;

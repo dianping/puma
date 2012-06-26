@@ -26,6 +26,7 @@ import com.dianping.puma.client.RowChangedData.ActionType;
 import com.dianping.puma.client.RowChangedData.ColumnInfo;
 import com.dianping.puma.client.TableChangedData;
 import com.dianping.puma.client.TableMetaInfo;
+import com.dianping.puma.common.annotation.ThreadUnSafe;
 import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.mysql.BinlogConstanst;
 import com.dianping.puma.common.mysql.Row;
@@ -45,6 +46,7 @@ import com.dianping.puma.common.mysql.event.XIDEvent;
  * @author Leo Liang
  * 
  */
+@ThreadUnSafe
 public class TransactionSupportDataHandler extends AbstractDataHandler {
 	private List<TableChangedData>	datas				= null;
 	private TableChangedData		tableChangedData	= null;

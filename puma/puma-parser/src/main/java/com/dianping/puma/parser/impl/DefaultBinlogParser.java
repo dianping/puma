@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
 
+import com.dianping.puma.common.annotation.ThreadSafe;
 import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.mysql.BinlogConstanst;
 import com.dianping.puma.common.mysql.event.BinlogEvent;
@@ -49,6 +50,7 @@ import com.dianping.puma.parser.Parser;
  * @author Leo Liang
  * 
  */
+@ThreadSafe
 public class DefaultBinlogParser implements Parser {
 	private static final Logger								log			= Logger.getLogger(DefaultBinlogParser.class);
 	private static Map<Byte, Class<? extends BinlogEvent>>	eventMaps	= new ConcurrentHashMap<Byte, Class<? extends BinlogEvent>>();

@@ -15,6 +15,7 @@
  */
 package com.dianping.puma.server.impl;
 
+import com.dianping.puma.common.annotation.ThreadUnSafe;
 import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.server.Server;
 
@@ -24,6 +25,7 @@ import com.dianping.puma.server.Server;
  * @author Leo Liang
  * 
  */
+@ThreadUnSafe
 public abstract class AbstractServer implements Server {
 	protected PumaContext	context;
 	protected String		defaultBinlogFileName;

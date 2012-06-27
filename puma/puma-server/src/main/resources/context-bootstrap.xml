@@ -14,6 +14,22 @@
 		<property name="defaultBinlogPosition" value="4" />
 		<property name="parser" ref="defaultParser" />
 		<property name="dataHandler" ref="transactionSupportDataHandler" />
+		<property name="dispatcher" ref="simpleDispatcher" />
+	</bean>
+
+	<bean id="simpleDispatcher"
+		class="com.dianping.puma.sender.dispatcher.impl.SimpleDispatherImpl"
+		init-method="start">
+		<property name="name" value="simpleDispatcher" />
+		<property name="senders">
+			<list>
+				<ref bean="testSender" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="testSender" class="com.dianping.puma.sender.impl.SysoutSender">
+		<property name="name" value="TestSender" />
 	</bean>
 
 	<bean id="transactionSupportDataHandler"

@@ -45,5 +45,9 @@
 			<version>4.4</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.dianping.puma</groupId>
+			<artifactId>puma-sender</artifactId>
+		</dependency>
 	</dependencies>
 </project>

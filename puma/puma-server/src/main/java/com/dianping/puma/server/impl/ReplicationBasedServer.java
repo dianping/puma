@@ -39,6 +39,7 @@ import com.dianping.puma.common.mysql.packet.PacketType;
 import com.dianping.puma.common.util.PositionFileUtils;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.parser.Parser;
+import com.dianping.puma.sender.dispatcher.Dispatcher;
 
 /**
  * 基于MySQL复制机制的Server
@@ -63,6 +64,22 @@ public class ReplicationBasedServer extends AbstractServer {
 
 	private Parser				parser;
 	private DataHandler			dataHandler;
+	private Dispatcher			dispatcher;
+
+	/**
+	 * @return the dispatcher
+	 */
+	public Dispatcher getDispatcher() {
+		return dispatcher;
+	}
+
+	/**
+	 * @param dispatcher
+	 *            the dispatcher to set
+	 */
+	public void setDispatcher(Dispatcher dispatcher) {
+		this.dispatcher = dispatcher;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -130,9 +147,11 @@ public class ReplicationBasedServer extends AbstractServer {
 				} else {
 					DataChangedEvent dataChangedEvent = dataHandler.process(binlogEvent, context);
 					if (dataChangedEvent != null) {
-						// TODO call dispatcher
-						log.info(dataChangedEvent);
-
+						try {
+							dispatcher.dispatch(dataChangedEvent, context);
+						} catch (Exception e) {
+							log.error("Dispatcher dispatch failed.", e);
+						}
 					}
 
 					// save position

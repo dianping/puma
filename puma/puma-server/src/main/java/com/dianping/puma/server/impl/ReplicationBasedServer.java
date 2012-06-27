@@ -21,6 +21,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.client.DataChangedEvent;
@@ -38,6 +39,7 @@ import com.dianping.puma.common.mysql.packet.PacketType;
 import com.dianping.puma.common.util.PositionFileUtils;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.parser.Parser;
+import com.dianping.puma.sender.dispatcher.Dispatcher;
 
 /**
  * 基于MySQL复制机制的Server
@@ -47,6 +49,7 @@ import com.dianping.puma.parser.Parser;
  */
 @ThreadUnSafe
 public class ReplicationBasedServer extends AbstractServer {
+
 	private static final Logger log = Logger
 			.getLogger(ReplicationBasedServer.class);
 	private int port = 3306;
@@ -63,6 +66,22 @@ public class ReplicationBasedServer extends AbstractServer {
 
 	private Parser parser;
 	private DataHandler dataHandler;
+	private Dispatcher dispatcher;
+
+	/**
+	 * @return the dispatcher
+	 */
+	public Dispatcher getDispatcher() {
+		return dispatcher;
+	}
+
+	/**
+	 * @param dispatcher
+	 *            the dispatcher to set
+	 */
+	public void setDispatcher(Dispatcher dispatcher) {
+		this.dispatcher = dispatcher;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -140,17 +159,29 @@ public class ReplicationBasedServer extends AbstractServer {
 					DataChangedEvent dataChangedEvent = dataHandler.process(
 							binlogEvent, context);
 					if (dataChangedEvent != null) {
-						// TODO call dispatcher
-						log.info(dataChangedEvent);
+//<<<<<<< HEAD
+//						// TODO call dispatcher
+//						log.info(dataChangedEvent);
+//
+//						// save position
+//						PositionFileUtils.savePositionInfo(getServerName(),
+//								new PositionInfo(binlogEvent.getHeader()
+//										.getNextPosition(), context
+//										.getBinlogFileName()));
+//						context.setBinlogStartPos(binlogEvent.getHeader()
+//								.getNextPosition());
+						try {
+							dispatcher.dispatch(dataChangedEvent, context);
+						} catch (Exception e) {
+							log.error("Dispatcher dispatch failed.", e);
+						}
 
-						// save position
-						PositionFileUtils.savePositionInfo(getServerName(),
-								new PositionInfo(binlogEvent.getHeader()
-										.getNextPosition(), context
-										.getBinlogFileName()));
-						context.setBinlogStartPos(binlogEvent.getHeader()
-								.getNextPosition());
 					}
+
+					// save position
+					PositionFileUtils.savePositionInfo(getServerName(), new PositionInfo(binlogEvent.getHeader()
+							.getNextPosition(), context.getBinlogFileName()));
+					context.setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
 
 				}
 			}
@@ -195,6 +226,23 @@ public class ReplicationBasedServer extends AbstractServer {
 		OKErrorPacket dumpCommandResultPacket = (OKErrorPacket) PacketFactory
 				.parsePacket(is, PacketType.OKERROR_PACKET, context);
 		if (dumpCommandResultPacket.isOk()) {
+			if (StringUtils.isBlank(context.getBinlogFileName())
+					&& StringUtils.isNotBlank(dumpCommandResultPacket
+							.getMessage())) {
+				String msg = dumpCommandResultPacket.getMessage();
+				int startPos = msg.lastIndexOf(' ');
+				if (startPos != -1) {
+					startPos += 1;
+				} else {
+					startPos = 0;
+				}
+				String binlogFile = dumpCommandResultPacket.getMessage()
+						.substring(startPos);
+				PositionFileUtils.savePositionInfo(getServerName(),
+						new PositionInfo(context.getBinlogStartPos(),
+								binlogFile));
+				context.setBinlogFileName(binlogFile);
+			}
 			return true;
 		} else {
 			log.error("Dump binlog failed. Reason: "
@@ -252,6 +300,7 @@ public class ReplicationBasedServer extends AbstractServer {
 				this.is.close();
 			}
 		} catch (IOException ioEx) {
+
 			log.info("Server " + this.getServerName()
 					+ " failed to close the inputstream.");
 		} finally {
@@ -264,6 +313,7 @@ public class ReplicationBasedServer extends AbstractServer {
 		} catch (IOException ioEx) {
 			log.info("Server " + this.getServerName()
 					+ " failed to close the outputstream");
+
 		} finally {
 			this.os = null;
 		}
@@ -274,6 +324,7 @@ public class ReplicationBasedServer extends AbstractServer {
 		} catch (IOException ioEx) {
 			log.error("Server " + this.getServerName()
 					+ " failed to close the socket", ioEx);
+
 		} finally {
 			this.pumaSocket = null;
 		}

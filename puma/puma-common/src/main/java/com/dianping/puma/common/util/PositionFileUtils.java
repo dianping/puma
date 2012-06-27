@@ -108,7 +108,7 @@ public class PositionFileUtils {
 		try {
 			fw = new FileWriter(f);
 			BufferedWriter bw = new BufferedWriter(fw);
-			bw.write(positionInfor.getBinlogFileName());
+			bw.write(positionInfor.getBinlogFileName() == null ? "" : positionInfor.getBinlogFileName());
 			bw.newLine();
 			bw.write(String.valueOf(positionInfor.getBinlogPosition()));
 			bw.newLine();

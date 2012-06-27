@@ -25,6 +25,8 @@ import java.util.Map;
  * <tt>columns</tt>是以column index为key, 以column name为value的map
  * <tt>keys</tt>包含所有主键的column name
  * <tt>types</tt>是以column name为key，以java.sql.Types里面的类型定义为value的map
+ * <tt>rawTypesCodes</tt>是以column index为key，以类型数值为value的map(元数据)
+ * <tt>rawNullAbilities</tt>是所有允许为null的column index(元数据)
  * 
  * <strong>注意：<tt>columns</tt>包含所有的列名，包括主键。<tt>keys</tt>仅包含主键列名。</strong>
  * 
@@ -40,6 +42,8 @@ public class TableMetaInfo implements Serializable {
 	private String					database;
 	private String					table;
 	private Map<Integer, String>	columns;
+	private Map<Integer, Byte>		rawTypeCodes;
+	private List<Integer>			rawNullAbilities;
 	private List<String>			keys;
 	private Map<String, String>		types;
 
@@ -118,6 +122,36 @@ public class TableMetaInfo implements Serializable {
 		this.types = types;
 	}
 
+	/**
+	 * @return the rawTypeCodes
+	 */
+	public Map<Integer, Byte> getRawTypeCodes() {
+		return rawTypeCodes;
+	}
+
+	/**
+	 * @param rawTypeCodes
+	 *            the rawTypeCodes to set
+	 */
+	public void setRawTypeCodes(Map<Integer, Byte> rawTypeCodes) {
+		this.rawTypeCodes = rawTypeCodes;
+	}
+
+	/**
+	 * @return the rawNullAbilities
+	 */
+	public List<Integer> getRawNullAbilities() {
+		return rawNullAbilities;
+	}
+
+	/**
+	 * @param rawNullAbilities
+	 *            the rawNullAbilities to set
+	 */
+	public void setRawNullAbilities(List<Integer> rawNullAbilities) {
+		this.rawNullAbilities = rawNullAbilities;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -125,8 +159,8 @@ public class TableMetaInfo implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return "TableMetaInfo [database=" + database + ", table=" + table + ", columns=" + columns + ", keys=" + keys
-				+ ", types=" + types + "]";
+		return "TableMetaInfo [database=" + database + ", table=" + table + ", columns=" + columns + ", rawTypeCodes="
+				+ rawTypeCodes + ", rawNullAbilities=" + rawNullAbilities + ", keys=" + keys + ", types=" + types + "]";
 	}
 
 }

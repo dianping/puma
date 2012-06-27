@@ -74,6 +74,8 @@ public class TransactionSupportDataHandler extends AbstractDataHandler {
 				TableMetaInfo tableMeta = getTableMetaInfo(tableMapEvent.getDatabaseName(),
 						tableMapEvent.getTableName());
 				TableChangedData tableChangedData = new TableChangedData();
+				fillRawTypeCodes(tableMapEvent, tableMeta);
+				fillRawNullAbilities(tableMapEvent, tableMeta);
 				tableChangedData.setMeta(tableMeta);
 				this.tableChangedData = tableChangedData;
 				datas.add(tableChangedData);
@@ -167,6 +169,37 @@ public class TransactionSupportDataHandler extends AbstractDataHandler {
 
 		return null;
 
+	}
+
+	/**
+	 * @param tableMapEvent
+	 * @param tableMeta
+	 */
+	private void fillRawNullAbilities(TableMapEvent tableMapEvent, TableMetaInfo tableMeta) {
+		if (tableMeta.getRawNullAbilities() == null && tableMapEvent.getColumnNullabilities() != null) {
+			List<Integer> rawNullAbilities = new ArrayList<Integer>();
+			for (int i = 0; i < tableMapEvent.getColumnNullabilities().size()
+					&& i < tableMapEvent.getColumnCount().intValue(); i++) {
+				if (tableMapEvent.getColumnNullabilities().get(i)) {
+					rawNullAbilities.add(i + 1);
+				}
+			}
+			tableMeta.setRawNullAbilities(rawNullAbilities);
+		}
+	}
+
+	/**
+	 * @param tableMapEvent
+	 * @param tableMeta
+	 */
+	private void fillRawTypeCodes(TableMapEvent tableMapEvent, TableMetaInfo tableMeta) {
+		if (tableMeta.getRawTypeCodes() == null && tableMapEvent.getColumnTypes() != null) {
+			Map<Integer, Byte> rawTypes = new HashMap<Integer, Byte>();
+			for (int i = 0; i < tableMapEvent.getColumnTypes().length; i++) {
+				rawTypes.put(i + 1, tableMapEvent.getColumnTypes()[i]);
+			}
+			tableMeta.setRawTypeCodes(rawTypes);
+		}
 	}
 
 	private Map<String, ColumnInfo> initColumns(AbstractRowsEvent rowsEvent,

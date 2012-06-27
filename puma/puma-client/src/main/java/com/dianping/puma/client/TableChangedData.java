@@ -28,10 +28,10 @@ import java.util.List;
  */
 public class TableChangedData implements Serializable {
 
-	private static final long	serialVersionUID	= -2383357060735671907L;
+	private static final long		serialVersionUID	= -2383357060735671907L;
 
-	private TableMetaInfo		meta;
-	List<RowChangedData>		rows;
+	private TableMetaInfo			meta;
+	private List<RowChangedData>	rows;
 
 	/**
 	 * @param meta

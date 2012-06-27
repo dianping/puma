@@ -47,21 +47,22 @@ import com.dianping.puma.parser.Parser;
  */
 @ThreadUnSafe
 public class ReplicationBasedServer extends AbstractServer {
-	private static final Logger	log			= Logger.getLogger(ReplicationBasedServer.class);
-	private int					port		= 3306;
-	private String				host;
-	private String				user;
-	private String				password;
-	private String				database;
-	private long				serverId	= 6789;
-	private String				encoding	= "utf-8";
-	private Socket				pumaSocket;
-	private InputStream			is;
-	private OutputStream		os;
-	private volatile boolean	stop		= false;
+	private static final Logger log = Logger
+			.getLogger(ReplicationBasedServer.class);
+	private int port = 3306;
+	private String host;
+	private String user;
+	private String password;
+	private String database;
+	private long serverId = 6789;
+	private String encoding = "utf-8";
+	private Socket pumaSocket;
+	private InputStream is;
+	private OutputStream os;
+	private volatile boolean stop = false;
 
-	private Parser				parser;
-	private DataHandler			dataHandler;
+	private Parser parser;
+	private DataHandler dataHandler;
 
 	/*
 	 * (non-Javadoc)
@@ -74,8 +75,10 @@ public class ReplicationBasedServer extends AbstractServer {
 		do {
 			try {
 				// 读position/file文件
-				PositionInfo posInfo = PositionFileUtils.getPositionInfo(context.getPumaServerName(),
-						context.getBinlogFileName(), context.getBinlogStartPos());
+				PositionInfo posInfo = PositionFileUtils.getPositionInfo(
+						context.getPumaServerName(), context
+								.getBinlogFileName(), context
+								.getBinlogStartPos());
 
 				context.setBinlogFileName(posInfo.getBinlogFileName());
 				context.setBinlogStartPos(posInfo.getBinlogPosition());
@@ -84,8 +87,9 @@ public class ReplicationBasedServer extends AbstractServer {
 				connect();
 
 				if (auth()) {
-					log.info("Server logined... serverId: " + serverId + " host: " + host + " port: " + port
-							+ " user: " + user + " database: " + database);
+					log.info("Server logined... serverId: " + serverId
+							+ " host: " + host + " port: " + port + " user: "
+							+ user + " database: " + database);
 
 					if (dumpBinlog()) {
 						log.info("Dump binlog command success.");
@@ -95,7 +99,6 @@ public class ReplicationBasedServer extends AbstractServer {
 					} else {
 						throw new IOException("Dump binlog failed.");
 					}
-
 
 				} else {
 					throw new IOException("Login failed.");
@@ -114,29 +117,39 @@ public class ReplicationBasedServer extends AbstractServer {
 
 	private void processBinlog() throws IOException {
 		while (!stop) {
-			BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(is, PacketType.BINLOG_PACKET, context);
+			BinlogPacket binlogPacket = (BinlogPacket) PacketFactory
+					.parsePacket(is, PacketType.BINLOG_PACKET, context);
 			if (!binlogPacket.isOk()) {
 				log.error("Binlog packet response error.");
 				throw new IOException("Binlog packet response error.");
 			} else {
-				BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), context);
+				BinlogEvent binlogEvent = parser.parse(binlogPacket
+						.getBinlogBuf(), context);
 
 				if (binlogEvent.getHeader().getEventType() == BinlogConstanst.ROTATE_EVENT) {
 					RotateEvent rotateEvent = (RotateEvent) binlogEvent;
 					PositionFileUtils.savePositionInfo(getServerName(),
-							new PositionInfo(rotateEvent.getFirstEventPosition(), rotateEvent.getNextBinlogFileName()));
-					context.setBinlogFileName(rotateEvent.getNextBinlogFileName());
-					context.setBinlogStartPos(rotateEvent.getFirstEventPosition());
+							new PositionInfo(rotateEvent
+									.getFirstEventPosition(), rotateEvent
+									.getNextBinlogFileName()));
+					context.setBinlogFileName(rotateEvent
+							.getNextBinlogFileName());
+					context.setBinlogStartPos(rotateEvent
+							.getFirstEventPosition());
 				} else {
-					DataChangedEvent dataChangedEvent = dataHandler.process(binlogEvent, context);
+					DataChangedEvent dataChangedEvent = dataHandler.process(
+							binlogEvent, context);
 					if (dataChangedEvent != null) {
 						// TODO call dispatcher
 						log.info(dataChangedEvent);
 
 						// save position
-						PositionFileUtils.savePositionInfo(getServerName(), new PositionInfo(binlogEvent.getHeader()
-								.getNextPosition(), context.getBinlogFileName()));
-						context.setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
+						PositionFileUtils.savePositionInfo(getServerName(),
+								new PositionInfo(binlogEvent.getHeader()
+										.getNextPosition(), context
+										.getBinlogFileName()));
+						context.setBinlogStartPos(binlogEvent.getHeader()
+								.getNextPosition());
 					}
 
 				}
@@ -169,8 +182,8 @@ public class ReplicationBasedServer extends AbstractServer {
 	 * @throws IOException
 	 */
 	private boolean dumpBinlog() throws IOException {
-		ComBinlogDumpPacket dumpBinlogPacket = (ComBinlogDumpPacket) PacketFactory.createCommandPacket(
-				PacketType.COM_BINLOG_DUMP_PACKET, context);
+		ComBinlogDumpPacket dumpBinlogPacket = (ComBinlogDumpPacket) PacketFactory
+				.createCommandPacket(PacketType.COM_BINLOG_DUMP_PACKET, context);
 		dumpBinlogPacket.setBinlogFileName(context.getBinlogFileName());
 		dumpBinlogPacket.setBinlogFlag(0);
 		dumpBinlogPacket.setBinlogPosition(context.getBinlogStartPos());
@@ -179,12 +192,13 @@ public class ReplicationBasedServer extends AbstractServer {
 
 		dumpBinlogPacket.write(os, context);
 
-		OKErrorPacket dumpCommandResultPacket = (OKErrorPacket) PacketFactory.parsePacket(is,
-				PacketType.OKERROR_PACKET, context);
+		OKErrorPacket dumpCommandResultPacket = (OKErrorPacket) PacketFactory
+				.parsePacket(is, PacketType.OKERROR_PACKET, context);
 		if (dumpCommandResultPacket.isOk()) {
 			return true;
 		} else {
-			log.error("Dump binlog failed. Reason: " + dumpCommandResultPacket.getMessage());
+			log.error("Dump binlog failed. Reason: "
+					+ dumpCommandResultPacket.getMessage());
 			return false;
 		}
 	}
@@ -197,8 +211,8 @@ public class ReplicationBasedServer extends AbstractServer {
 	 */
 	private boolean auth() throws IOException {
 		// auth
-		AuthenticatePacket authPacket = (AuthenticatePacket) PacketFactory.createCommandPacket(
-				PacketType.AUTHENTICATE_PACKET, context);
+		AuthenticatePacket authPacket = (AuthenticatePacket) PacketFactory
+				.createCommandPacket(PacketType.AUTHENTICATE_PACKET, context);
 
 		authPacket.setPassword(password);
 		authPacket.setUser(user);
@@ -206,7 +220,8 @@ public class ReplicationBasedServer extends AbstractServer {
 		authPacket.buildPacket(context);
 		authPacket.write(os, context);
 
-		OKErrorPacket okErrorPacket = (OKErrorPacket) PacketFactory.parsePacket(is, PacketType.OKERROR_PACKET, context);
+		OKErrorPacket okErrorPacket = (OKErrorPacket) PacketFactory
+				.parsePacket(is, PacketType.OKERROR_PACKET, context);
 
 		if (okErrorPacket.isOk()) {
 			return true;
@@ -237,7 +252,8 @@ public class ReplicationBasedServer extends AbstractServer {
 				this.is.close();
 			}
 		} catch (IOException ioEx) {
-log.info("Server " + this.getServerName()+ " failed to close the inputstream.");
+			log.info("Server " + this.getServerName()
+					+ " failed to close the inputstream.");
 		} finally {
 			this.is = null;
 		}
@@ -246,7 +262,8 @@ log.info("Server " + this.getServerName()+ " failed to close the inputstream.");
 				this.os.close();
 			}
 		} catch (IOException ioEx) {
-	log.info("Server "+ this.getServerName()+" failed to close the outputstream");
+			log.info("Server " + this.getServerName()
+					+ " failed to close the outputstream");
 		} finally {
 			this.os = null;
 		}
@@ -255,7 +272,8 @@ log.info("Server " + this.getServerName()+ " failed to close the inputstream.");
 				this.pumaSocket.close();
 			}
 		} catch (IOException ioEx) {
-			log.error("Server "+ this.getServerName()+" failed to close the socket", ioEx);
+			log.error("Server " + this.getServerName()
+					+ " failed to close the socket", ioEx);
 		} finally {
 			this.pumaSocket = null;
 		}

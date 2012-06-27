@@ -21,6 +21,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.client.DataChangedEvent;
@@ -96,7 +97,6 @@ public class ReplicationBasedServer extends AbstractServer {
 						throw new IOException("Dump binlog failed.");
 					}
 
-
 				} else {
 					throw new IOException("Login failed.");
 				}
@@ -133,11 +133,12 @@ public class ReplicationBasedServer extends AbstractServer {
 						// TODO call dispatcher
 						log.info(dataChangedEvent);
 
-						// save position
-						PositionFileUtils.savePositionInfo(getServerName(), new PositionInfo(binlogEvent.getHeader()
-								.getNextPosition(), context.getBinlogFileName()));
-						context.setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
 					}
+
+					// save position
+					PositionFileUtils.savePositionInfo(getServerName(), new PositionInfo(binlogEvent.getHeader()
+							.getNextPosition(), context.getBinlogFileName()));
+					context.setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
 
 				}
 			}
@@ -182,6 +183,20 @@ public class ReplicationBasedServer extends AbstractServer {
 		OKErrorPacket dumpCommandResultPacket = (OKErrorPacket) PacketFactory.parsePacket(is,
 				PacketType.OKERROR_PACKET, context);
 		if (dumpCommandResultPacket.isOk()) {
+			if (StringUtils.isBlank(context.getBinlogFileName())
+					&& StringUtils.isNotBlank(dumpCommandResultPacket.getMessage())) {
+				String msg = dumpCommandResultPacket.getMessage();
+				int startPos = msg.lastIndexOf(' ');
+				if (startPos != -1) {
+					startPos += 1;
+				} else {
+					startPos = 0;
+				}
+				String binlogFile = dumpCommandResultPacket.getMessage().substring(startPos);
+				PositionFileUtils.savePositionInfo(getServerName(), new PositionInfo(context.getBinlogStartPos(),
+						binlogFile));
+				context.setBinlogFileName(binlogFile);
+			}
 			return true;
 		} else {
 			log.error("Dump binlog failed. Reason: " + dumpCommandResultPacket.getMessage());
@@ -237,7 +252,7 @@ public class ReplicationBasedServer extends AbstractServer {
 				this.is.close();
 			}
 		} catch (IOException ioEx) {
-log.info("Server " + this.getServerName()+ " failed to close the inputstream.");
+			log.info("Server " + this.getServerName() + " failed to close the inputstream.");
 		} finally {
 			this.is = null;
 		}
@@ -246,7 +261,7 @@ log.info("Server " + this.getServerName()+ " failed to close the inputstream.");
 				this.os.close();
 			}
 		} catch (IOException ioEx) {
-	log.info("Server "+ this.getServerName()+" failed to close the outputstream");
+			log.info("Server " + this.getServerName() + " failed to close the outputstream");
 		} finally {
 			this.os = null;
 		}
@@ -255,7 +270,7 @@ log.info("Server " + this.getServerName()+ " failed to close the inputstream.");
 				this.pumaSocket.close();
 			}
 		} catch (IOException ioEx) {
-			log.error("Server "+ this.getServerName()+" failed to close the socket", ioEx);
+			log.error("Server " + this.getServerName() + " failed to close the socket", ioEx);
 		} finally {
 			this.pumaSocket = null;
 		}

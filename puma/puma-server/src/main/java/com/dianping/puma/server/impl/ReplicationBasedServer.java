@@ -20,7 +20,6 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.concurrent.CountDownLatch;
 
 import org.apache.log4j.Logger;
 
@@ -79,7 +78,6 @@ public class ReplicationBasedServer extends AbstractServer {
 				context.setBinlogFileName(posInfo.getBinlogFileName());
 				context.setBinlogStartPos(posInfo.getBinlogPosition());
 				context.setServerId(serverId);
-				CountDownLatch latch = new CountDownLatch(1);
 
 				connect();
 
@@ -96,7 +94,6 @@ public class ReplicationBasedServer extends AbstractServer {
 						throw new IOException("Dump binlog failed.");
 					}
 
-					latch.await();
 
 				} else {
 					throw new IOException("Login failed.");
@@ -238,24 +235,25 @@ public class ReplicationBasedServer extends AbstractServer {
 				this.is.close();
 			}
 		} catch (IOException ioEx) {
-			// TODO log
 			this.is = null;
+			log.info("Server " + this.getServerName()+ " failed to close the inputstream.");
 		}
 		try {
 			if (this.os != null) {
 				this.os.close();
 			}
 		} catch (IOException ioEx) {
-			// TODO log
+			
 			this.os = null;
+			log.info("Server "+ this.getServerName()+" failed to close the outputstream");
 		}
 		try {
 			if (this.pumaSocket != null) {
 				this.pumaSocket.close();
 			}
-		} catch (IOException ioEx) {
-			// TODO log
+		} catch (IOException ioEx) {			
 			this.pumaSocket = null;
+			log.error("Server "+ this.getServerName()+" failed to close the socket", ioEx);
 		}
 	}
 

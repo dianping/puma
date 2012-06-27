@@ -18,28 +18,31 @@ package com.dianping.puma.common;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
+import com.dianping.puma.common.annotation.ThreadUnSafe;
+
 /**
  * TODO Comment of LRUCache
+ * 
  * @author Leo Liang
- *
+ * 
  */
+@ThreadUnSafe
 public class LRUCache<K, V> extends LinkedHashMap<K, V> {
-    private static final long serialVersionUID = 6763345531545815287L;
-    protected int             maxElements;
+	private static final long	serialVersionUID	= 6763345531545815287L;
+	protected int				maxElements;
 
-    public LRUCache(int maxSize) {
-        super(maxSize, 0.75f, true);
-        this.maxElements = maxSize;
-    }
+	public LRUCache(int maxSize) {
+		super(maxSize, 0.75f, true);
+		this.maxElements = maxSize;
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.LinkedHashMap#removeEldestEntry(java.util.Map.Entry)
-     */
-    protected boolean removeEldestEntry(Entry<K, V> eldest) {
-        return (size() > this.maxElements);
-    }
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.util.LinkedHashMap#removeEldestEntry(java.util.Map.Entry)
+	 */
+	protected boolean removeEldestEntry(Entry<K, V> eldest) {
+		return (size() > this.maxElements);
+	}
 
 }

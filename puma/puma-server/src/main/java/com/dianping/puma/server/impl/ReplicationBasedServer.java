@@ -24,6 +24,7 @@ import java.net.UnknownHostException;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.client.DataChangedEvent;
+import com.dianping.puma.common.annotation.ThreadUnSafe;
 import com.dianping.puma.common.bo.PositionInfo;
 import com.dianping.puma.common.mysql.BinlogConstanst;
 import com.dianping.puma.common.mysql.event.BinlogEvent;
@@ -44,6 +45,7 @@ import com.dianping.puma.parser.Parser;
  * @author Leo Liang
  * 
  */
+@ThreadUnSafe
 public class ReplicationBasedServer extends AbstractServer {
 	private static final Logger	log			= Logger.getLogger(ReplicationBasedServer.class);
 	private int					port		= 3306;
@@ -129,7 +131,7 @@ public class ReplicationBasedServer extends AbstractServer {
 					DataChangedEvent dataChangedEvent = dataHandler.process(binlogEvent, context);
 					if (dataChangedEvent != null) {
 						// TODO call dispatcher
-						System.out.println(dataChangedEvent);
+						log.info(dataChangedEvent);
 
 						// save position
 						PositionFileUtils.savePositionInfo(getServerName(), new PositionInfo(binlogEvent.getHeader()
@@ -235,25 +237,27 @@ public class ReplicationBasedServer extends AbstractServer {
 				this.is.close();
 			}
 		} catch (IOException ioEx) {
+log.info("Server " + this.getServerName()+ " failed to close the inputstream.");
+		} finally {
 			this.is = null;
-			log.info("Server " + this.getServerName()+ " failed to close the inputstream.");
 		}
 		try {
 			if (this.os != null) {
 				this.os.close();
 			}
 		} catch (IOException ioEx) {
-			
+	log.info("Server "+ this.getServerName()+" failed to close the outputstream");
+		} finally {
 			this.os = null;
-			log.info("Server "+ this.getServerName()+" failed to close the outputstream");
 		}
 		try {
 			if (this.pumaSocket != null) {
 				this.pumaSocket.close();
 			}
-		} catch (IOException ioEx) {			
-			this.pumaSocket = null;
+		} catch (IOException ioEx) {
 			log.error("Server "+ this.getServerName()+" failed to close the socket", ioEx);
+		} finally {
+			this.pumaSocket = null;
 		}
 	}
 

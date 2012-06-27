@@ -15,17 +15,28 @@
  */
 package com.dianping.puma.datahandler.impl;
 
-import java.sql.Types;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.client.DataChangedEvent;
 import com.dianping.puma.client.TableMetaInfo;
+import com.dianping.puma.common.annotation.ThreadUnSafe;
 import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.mysql.BinlogConstanst;
 import com.dianping.puma.common.mysql.event.BinlogEvent;
 import com.dianping.puma.common.mysql.event.PumaIgnoreEvent;
+import com.dianping.puma.common.mysql.event.QueryEvent;
 import com.dianping.puma.datahandler.DataHandler;
+import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 /**
  * TODO Comment of AbstractDataHandler
@@ -33,8 +44,75 @@ import com.dianping.puma.datahandler.DataHandler;
  * @author Leo Liang
  * 
  */
+@ThreadUnSafe
 public abstract class AbstractDataHandler implements DataHandler {
-	private static final Logger	log	= Logger.getLogger(AbstractDataHandler.class);
+	private static final Logger									log					= Logger.getLogger(AbstractDataHandler.class);
+	private static AtomicReference<Map<String, TableMetaInfo>>	tableMetaInfoCache	= new AtomicReference<Map<String, TableMetaInfo>>();
+	private int													port				= 3306;
+	private String												host;
+	private String												user;
+	private String												password;
+	private MysqlDataSource										metaDs;
+
+	/**
+	 * @return the port
+	 */
+	public int getPort() {
+		return port;
+	}
+
+	/**
+	 * @param port
+	 *            the port to set
+	 */
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	/**
+	 * @return the host
+	 */
+	public String getHost() {
+		return host;
+	}
+
+	/**
+	 * @param host
+	 *            the host to set
+	 */
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+	/**
+	 * @return the user
+	 */
+	public String getUser() {
+		return user;
+	}
+
+	/**
+	 * @param user
+	 *            the user to set
+	 */
+	public void setUser(String user) {
+		this.user = user;
+	}
+
+	/**
+	 * @return the password
+	 */
+	public String getPassword() {
+		return password;
+	}
+
+	/**
+	 * @param password
+	 *            the password to set
+	 */
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -43,7 +121,7 @@ public abstract class AbstractDataHandler implements DataHandler {
 	 */
 	@Override
 	public void start() throws Exception {
-
+		refreshTableMeta();
 	}
 
 	/*
@@ -56,35 +134,118 @@ public abstract class AbstractDataHandler implements DataHandler {
 
 	}
 
+	protected void refreshTableMeta() {
+		Map<String, TableMetaInfo> newTableMeta = new HashMap<String, TableMetaInfo>();
+
+		if (metaDs == null) {
+			metaDs = new MysqlDataSource();
+			metaDs.setUrl("jdbc:mysql://" + host + ":" + port);
+			metaDs.setUser(user);
+			metaDs.setPassword(password);
+		}
+
+		Connection conn = null;
+		Statement stmt = null;
+		try {
+			conn = metaDs.getConnection();
+			stmt = conn.createStatement();
+			ResultSet rs = stmt
+					.executeQuery("SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS");
+			if (rs != null) {
+				while (rs.next()) {
+					String db = rs.getString("TABLE_SCHEMA");
+					String tb = rs.getString("TABLE_NAME");
+					String columnName = rs.getString("COLUMN_NAME");
+					int colPosition = rs.getInt("ORDINAL_POSITION");
+					String type = rs.getString("DATA_TYPE");
+					String key = rs.getString("COLUMN_KEY");
+					TableMetaInfo tmi = newTableMeta.get(db + "." + tb);
+					if (tmi == null) {
+						TableMetaInfo newTmi = new TableMetaInfo();
+						newTmi.setDatabase(db);
+						newTmi.setTable(tb);
+						newTmi.setColumns(new HashMap<Integer, String>());
+						newTmi.setKeys(new ArrayList<String>());
+						newTmi.setTypes(new HashMap<String, String>());
+						newTableMeta.put(db + "." + tb, newTmi);
+						tmi = newTmi;
+					}
+					tmi.getColumns().put(colPosition, columnName);
+					tmi.getTypes().put(columnName, convertTypes(type));
+					if ("PRI".equals(key)) {
+						tmi.getKeys().add(columnName);
+					}
+				}
+				tableMetaInfoCache.set(newTableMeta);
+			}
+		} catch (Exception e) {
+			log.error("Refresh TableMeta failed.", e);
+		} finally {
+			if (stmt != null) {
+				try {
+					stmt.close();
+				} catch (SQLException e) {
+				}
+			}
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+	}
+
+	private String convertTypes(String str) {
+		return str;
+	}
+
 	@Override
 	public DataChangedEvent process(BinlogEvent binlogEvent, PumaContext context) {
 		if (binlogEvent instanceof PumaIgnoreEvent) {
 			log.info("Ingore one unknown event. eventType: " + binlogEvent.getHeader().getEventType());
+		}
+		if (binlogEvent instanceof QueryEvent) {
+			QueryEvent queryEvent = (QueryEvent) binlogEvent;
+			String sql = StringUtils.trim(queryEvent.getSql());
+			if (StringUtils.startsWithIgnoreCase(sql, "ALTER ") || StringUtils.startsWithIgnoreCase(sql, "CREATE ")
+					|| StringUtils.startsWithIgnoreCase(sql, "RENAME ")
+					|| StringUtils.startsWithIgnoreCase(sql, "DROP ")) {
+				refreshTableMeta();
+			}
 		}
 
 		byte eventType = binlogEvent.getHeader().getEventType();
 
 		if (eventType == BinlogConstanst.STOP_EVENT || eventType == BinlogConstanst.ROTATE_EVENT) {
 			return null;
+		} else if (eventType == BinlogConstanst.QUERY_EVENT) {
+			QueryEvent queryEvent = (QueryEvent) binlogEvent;
+			String sql = StringUtils.trim(queryEvent.getSql());
+			if (StringUtils.startsWithIgnoreCase(sql, "ALTER ") || StringUtils.startsWithIgnoreCase(sql, "CREATE ")
+					|| StringUtils.startsWithIgnoreCase(sql, "DROP ")
+					|| StringUtils.startsWithIgnoreCase(sql, "RENAME ")
+					|| StringUtils.startsWithIgnoreCase(sql, "TRUNCATE ")) {
+				DataChangedEvent dataChangedEvent = new DataChangedEvent();
+				dataChangedEvent.setDdl(true);
+				dataChangedEvent.setSql(((QueryEvent) binlogEvent).getSql());
+				return dataChangedEvent;
+			} else {
+				return null;
+			}
 		} else {
-			return doProcess(binlogEvent, context, eventType);
+			DataChangedEvent dataChangedEvent = doProcess(binlogEvent, context, eventType);
+			if (dataChangedEvent != null) {
+				dataChangedEvent.setDdl(false);
+			}
+			return dataChangedEvent;
 		}
 	}
 
 	protected abstract DataChangedEvent doProcess(BinlogEvent binlogEvent, PumaContext context, byte eventType);
 
 	protected TableMetaInfo getTableMetaInfo(String database, String table) {
-		// TODO
-		return null;
+		return tableMetaInfoCache.get().get(database + "." + table);
 	}
 
-	protected Types getColumnType(long columnId) {
-		// TODO
-		return null;
-	}
-
-	protected String getColumnName(long columnId) {
-		// TODO
-		return String.valueOf(columnId);
-	}
 }

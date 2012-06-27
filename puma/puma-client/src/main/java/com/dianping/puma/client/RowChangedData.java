@@ -16,7 +16,6 @@
 package com.dianping.puma.client;
 
 import java.io.Serializable;
-import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -102,7 +101,9 @@ public class RowChangedData implements Serializable {
 
 	public static class ColumnInfo implements Serializable {
 		private static final long	serialVersionUID	= 8036820944314281838L;
-		private Types				type;
+		private String				type;
+		private int					index;
+		private String				name;
 		private Object				oldValue;
 		private Object				newValue;
 
@@ -111,11 +112,43 @@ public class RowChangedData implements Serializable {
 		 * @param oldValue
 		 * @param newValue
 		 */
-		public ColumnInfo(Types type, Object oldValue, Object newValue) {
+		public ColumnInfo(String type, Object oldValue, Object newValue, int index, String name) {
 			super();
+			this.name = name;
+			this.index = index;
 			this.type = type;
 			this.oldValue = oldValue;
 			this.newValue = newValue;
+		}
+
+		/**
+		 * @return the name
+		 */
+		public String getName() {
+			return name;
+		}
+
+		/**
+		 * @param name
+		 *            the name to set
+		 */
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		/**
+		 * @return the index
+		 */
+		public int getIndex() {
+			return index;
+		}
+
+		/**
+		 * @param index
+		 *            the index to set
+		 */
+		public void setIndex(int index) {
+			this.index = index;
 		}
 
 		/**
@@ -129,7 +162,7 @@ public class RowChangedData implements Serializable {
 		 * @param type
 		 *            the type to set
 		 */
-		public void setType(Types type) {
+		public void setType(String type) {
 			this.type = type;
 		}
 
@@ -152,7 +185,7 @@ public class RowChangedData implements Serializable {
 		/**
 		 * @return the type
 		 */
-		public Types getType() {
+		public String getType() {
 			return type;
 		}
 
@@ -177,7 +210,8 @@ public class RowChangedData implements Serializable {
 		 */
 		@Override
 		public String toString() {
-			return "ColumnInfo [type=" + type + ", oldValue=" + oldValue + ", newValue=" + newValue + "]";
+			return "ColumnInfo [type=" + type + ", index=" + index + ", name=" + name + ", oldValue=" + oldValue
+					+ ", newValue=" + newValue + "]";
 		}
 
 	}

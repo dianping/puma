@@ -8,7 +8,7 @@ public class EventFilterChainConfig {
 			.getLogger(EventFilterChainConfig.class);
 	private static EventFilterChainConfig instance = new EventFilterChainConfig();
 
-	private List<EventFilter> eventFilters;
+	
 	private static final String CONFIG = "EventFilter.xml";
 
 	private EventFilterChainConfig() {
@@ -19,7 +19,7 @@ public class EventFilterChainConfig {
 		// TODO Auto-generated method stub
 	}
 
-	public List<EventFilter> getProcessors() {
+	public List<EventFilter> getEventFilters() {
 		return eventFilters;
 	}
 

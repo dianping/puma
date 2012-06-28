@@ -85,6 +85,13 @@
 			</list>
 		</constructor-arg>
 	</bean>
+	
+	<bean id="fileQueueConfigHolder" class="com.dianping.filequeue.DefaultFileQueueConfig.FileQueueConfigHolder">
+	<property name ="maxDataFileSize" value="500 * 1024 * 1024">
+	</property>
+	<property name="memCacheSize" value="50000">
+	</property>
+	</bean>
 </beans>
 
 

@@ -54,6 +54,11 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
+				<groupId>com.dianping</groupId>
+				<artifactId>file-queue</artifactId>
+				<version>1.0.0</version>
+			</dependency>
+			<dependency>
 				<groupId>com.dianping.puma</groupId>
 				<artifactId>puma-common</artifactId>
 				<version>${puma-all.version}</version>

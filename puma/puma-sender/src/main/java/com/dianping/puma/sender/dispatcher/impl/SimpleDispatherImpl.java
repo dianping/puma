@@ -50,6 +50,15 @@ public class SimpleDispatherImpl extends AbstractDispatcher {
 		this.senders = senders;
 	}
 
+	@Override
+	public void stop() throws Exception {
+		// TODO Auto-generated method stub
+		for(Sender sender: senders)
+		{
+			sender.stop();
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

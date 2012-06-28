@@ -23,6 +23,10 @@
 	</build>
 	<dependencies>
 		<dependency>
+			<groupId>com.dianping</groupId>
+			<artifactId>file-queue</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.dianping.puma</groupId>
 			<artifactId>puma-common</artifactId>
 		</dependency>

@@ -159,17 +159,6 @@ public class ReplicationBasedServer extends AbstractServer {
 					DataChangedEvent dataChangedEvent = dataHandler.process(
 							binlogEvent, context);
 					if (dataChangedEvent != null) {
-//<<<<<<< HEAD
-//						// TODO call dispatcher
-//						log.info(dataChangedEvent);
-//
-//						// save position
-//						PositionFileUtils.savePositionInfo(getServerName(),
-//								new PositionInfo(binlogEvent.getHeader()
-//										.getNextPosition(), context
-//										.getBinlogFileName()));
-//						context.setBinlogStartPos(binlogEvent.getHeader()
-//								.getNextPosition());
 						try {
 							dispatcher.dispatch(dataChangedEvent, context);
 						} catch (Exception e) {

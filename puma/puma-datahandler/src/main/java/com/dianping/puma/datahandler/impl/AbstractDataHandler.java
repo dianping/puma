@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -28,6 +29,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.client.DataChangedEvent;
+import com.dianping.puma.client.TableChangedData;
 import com.dianping.puma.client.TableMetaInfo;
 import com.dianping.puma.common.annotation.ThreadUnSafe;
 import com.dianping.puma.common.bo.PumaContext;
@@ -46,72 +48,53 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
  */
 @ThreadUnSafe
 public abstract class AbstractDataHandler implements DataHandler {
-	private static final Logger									log					= Logger.getLogger(AbstractDataHandler.class);
+	private static final Logger									log					= Logger
+																							.getLogger(AbstractDataHandler.class);
 	private static AtomicReference<Map<String, TableMetaInfo>>	tableMetaInfoCache	= new AtomicReference<Map<String, TableMetaInfo>>();
-	private int													port				= 3306;
-	private String												host;
-	private String												user;
-	private String												password;
+	private int													metaDBPort			= 3306;
+	private String												metaDBHost;
+	private String												metaDBUser;
+	private String												metaDBPassword;
 	private MysqlDataSource										metaDs;
 
-	/**
-	 * @return the port
-	 */
-	public int getPort() {
-		return port;
+	public int getMetaDBPort() {
+		return metaDBPort;
 	}
 
-	/**
-	 * @param port
-	 *            the port to set
-	 */
-	public void setPort(int port) {
-		this.port = port;
+	public void setMetaDBPort(int metaDBPort) {
+		this.metaDBPort = metaDBPort;
 	}
 
-	/**
-	 * @return the host
-	 */
-	public String getHost() {
-		return host;
+	public String getMetaDBHost() {
+		return metaDBHost;
 	}
 
-	/**
-	 * @param host
-	 *            the host to set
-	 */
-	public void setHost(String host) {
-		this.host = host;
+	public void setMetaDBHost(String metaDBHost) {
+		this.metaDBHost = metaDBHost;
 	}
 
-	/**
-	 * @return the user
-	 */
-	public String getUser() {
-		return user;
+	public String getMetaDBUser() {
+		return metaDBUser;
 	}
 
-	/**
-	 * @param user
-	 *            the user to set
-	 */
-	public void setUser(String user) {
-		this.user = user;
+	public void setMetaDBUser(String metaDBUser) {
+		this.metaDBUser = metaDBUser;
 	}
 
-	/**
-	 * @return the password
-	 */
-	public String getPassword() {
-		return password;
+	public String getMetaDBPassword() {
+		return metaDBPassword;
 	}
 
-	/**
-	 * @param password
-	 *            the password to set
-	 */
-	public void setPassword(String password) {
-		this.password = password;
+	public void setMetaDBPassword(String metaDBPassword) {
+		this.metaDBPassword = metaDBPassword;
+	}
+
+	public MysqlDataSource getMetaDs() {
+		return metaDs;
+	}
+
+	public void setMetaDs(MysqlDataSource metaDs) {
+		this.metaDs = metaDs;
 	}
 
 	/*
@@ -139,9 +122,9 @@ public abstract class AbstractDataHandler implements DataHandler {
 
 		if (metaDs == null) {
 			metaDs = new MysqlDataSource();
-			metaDs.setUrl("jdbc:mysql://" + host + ":" + port);
-			metaDs.setUser(user);
-			metaDs.setPassword(password);
+			metaDs.setUrl("jdbc:mysql://" + metaDBHost + ":" + metaDBPort);
+			metaDs.setUser(metaDBUser);
+			metaDs.setPassword(metaDBPassword);
 		}
 
 		Connection conn = null;
@@ -229,6 +212,17 @@ public abstract class AbstractDataHandler implements DataHandler {
 				DataChangedEvent dataChangedEvent = new DataChangedEvent();
 				dataChangedEvent.setDdl(true);
 				dataChangedEvent.setSql(((QueryEvent) binlogEvent).getSql());
+
+				// Set mock data for setting the database name
+				List<TableChangedData> mockTableChangedDataList = new ArrayList<TableChangedData>();
+				TableMetaInfo mockTableMetaInfo = new TableMetaInfo();
+				mockTableMetaInfo.setDatabase(queryEvent.getDatabaseName());
+				TableChangedData mockTableData = new TableChangedData();
+				mockTableData.setMeta(mockTableMetaInfo);
+				mockTableChangedDataList.add(mockTableData);
+
+				dataChangedEvent.setDatas(mockTableChangedDataList);
+
 				return dataChangedEvent;
 			} else {
 				return null;

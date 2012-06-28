@@ -1,29 +1,38 @@
+/**
+ * Project: hippo-collector
+ * 
+ * File Created at 2011-11-1
+ * $Id$
+ * 
+ * Copyright 2010 dianping.com.
+ * All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Dianping Company. ("Confidential Information").  You shall not
+ * disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with dianping.com.
+ */
 package com.dianping.puma.filter;
 
 import java.util.List;
-import org.apache.log4j.Logger;
 
+/**
+ * TODO Comment of EventFilterChainConfig
+ * 
+ * @author Leo Liang
+ * 
+ */
 public class EventFilterChainConfig {
-	private static final Logger log = Logger
-			.getLogger(EventFilterChainConfig.class);
-	private static EventFilterChainConfig instance = new EventFilterChainConfig();
 
-	
-	private static final String CONFIG = "EventFilter.xml";
+	private List<EventFilter>	eventFilters;
 
-	private EventFilterChainConfig() {
-		initEventFilters();
-	}
-
-	private void initEventFilters() {
-		// TODO Auto-generated method stub
+	public void setEventFilters(List<EventFilter> eventFilters) {
+		this.eventFilters = eventFilters;
 	}
 
 	public List<EventFilter> getEventFilters() {
 		return eventFilters;
 	}
 
-	public static EventFilterChainConfig getInstance() {
-		return instance;
-	}
 }

@@ -5,7 +5,7 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
 	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
-	<bean id="server1" class="com.dianping.puma.server.impl.ReplicationBasedServer">
+	<bean id="server-7_43" class="com.dianping.puma.server.impl.ReplicationBasedServer">
 		<property name="host" value="192.168.7.43" />
 		<property name="port" value="3306" />
 		<property name="user" value="binlog" />
@@ -28,17 +28,51 @@
 		</property>
 	</bean>
 
-	<bean id="testSender" class="com.dianping.puma.sender.impl.SysoutSender">
+	<bean id="testSender" class="com.dianping.puma.sender.impl.SysoutSender"
+		init-method="start">
 		<property name="name" value="TestSender" />
+		<property name="filterChainConfig" ref="dbTbFilterChainConfig" />
+	</bean>
+
+	<bean id="dbTbFilterChainConfig" class="com.dianping.puma.filter.EventFilterChainConfig">
+		<property name="eventFilters">
+			<list>
+				<ref bean="dbTbEventFilter" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="dbTbEventFilter" class="com.dianping.puma.filter.DbTbEventFilter">
+		<property name="dbtbMap">
+			<ref bean="databases1" />
+		</property>
+	</bean>
+
+
+	<bean id="database1" class="com.dianping.puma.filter.DbTbList">
+		<property name="dbName" value="test" />
+		<property name="tbNameList">
+			<list>
+				<value>Binlog_Test_2</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="databases1" class="java.util.ArrayList">
+		<constructor-arg>
+			<list>
+				<ref bean="database1" />
+			</list>
+		</constructor-arg>
 	</bean>
 
 	<bean id="transactionSupportDataHandler"
 		class="com.dianping.puma.datahandler.impl.TransactionSupportDataHandler"
 		init-method="start">
-		<property name="host" value="192.168.7.43" />
-		<property name="port" value="3306" />
-		<property name="user" value="binlog" />
-		<property name="password" value="binlog" />
+		<property name="metaDBHost" value="192.168.7.43" />
+		<property name="metaDBPort" value="3306" />
+		<property name="metaDBUser" value="binlog" />
+		<property name="metaDBPassword" value="binlog" />
 	</bean>
 
 	<bean id="defaultParser" class="com.dianping.puma.parser.impl.DefaultBinlogParser"
@@ -47,7 +81,7 @@
 	<bean id="servers" class="java.util.ArrayList">
 		<constructor-arg>
 			<list>
-				<ref bean="server1" />
+				<ref bean="server-7_43" />
 			</list>
 		</constructor-arg>
 	</bean>

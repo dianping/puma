@@ -5,28 +5,24 @@ import java.util.List;
 import com.dianping.puma.client.DataChangedEvent;
 import com.dianping.puma.common.bo.PumaContext;
 
+public class DefaultEventFilterChain implements EventFilterChain {
 
-public class DefaultEventFilterChain implements EventFilterChain{
-	
-	private int pos=0;
-	
-	private boolean accept=false;
+	private int					pos	= 0;
 
-	private List<EventFilter> eventFilters;
-	
-	public void doNext(DataChangedEvent event, PumaContext	context) {
-		
-		if (EventFilterChainConfig.getInstance().getEventFilters() != null
-				&& pos < EventFilterChainConfig.getInstance().getEventFilters().size()) {
-			EventFilterChainConfig.getInstance().getEventFilters().get(pos++).doFilter(event,this, context);
+	private List<EventFilter>	eventFilters;
+
+	public boolean doNext(DataChangedEvent event, PumaContext context) {
+
+		if (eventFilters != null && pos < eventFilters.size()) {
+			return eventFilters.get(pos++).accept(event, this, context);
 		}
-		
-		if( pos == EventFilterChainConfig.getInstance().getEventFilters().size())
-		{
-			accept=true;
-		}
-		
-		
+
+		return true;
 	}
-	
+
+	@Override
+	public void setEventFilters(List<EventFilter> eventFilters) {
+		this.eventFilters = eventFilters;
+	}
+
 }

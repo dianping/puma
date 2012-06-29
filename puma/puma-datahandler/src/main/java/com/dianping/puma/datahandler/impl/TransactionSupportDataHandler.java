@@ -48,14 +48,12 @@ import com.dianping.puma.common.mysql.event.XIDEvent;
  */
 @ThreadUnSafe
 public class TransactionSupportDataHandler extends AbstractDataHandler {
-	private List<TableChangedData>	datas				= null;
-	private TableChangedData		tableChangedData	= null;
+	private List<TableChangedData>					datas				= new ArrayList<TableChangedData>();
+	private Map<TableMetaInfo, TableChangedData>	tableChangedDataMap	= new HashMap<TableMetaInfo, TableChangedData>();
+	private TableChangedData						tableChangedData	= null;
 
 	@Override
 	protected DataChangedEvent doProcess(BinlogEvent binlogEvent, PumaContext context, byte eventType) {
-		if (datas == null) {
-			datas = new ArrayList<TableChangedData>();
-		}
 
 		switch (eventType) {
 			case BinlogConstanst.XID_EVENT:
@@ -63,7 +61,8 @@ public class TransactionSupportDataHandler extends AbstractDataHandler {
 					DataChangedEvent dataChangedEvent = new DataChangedEvent();
 					dataChangedEvent.setDatas(datas);
 					dataChangedEvent.setTransactionId(((XIDEvent) binlogEvent).getXid());
-					this.datas = null;
+					this.datas.clear();
+					this.tableChangedDataMap.clear();
 					this.tableChangedData = null;
 					return dataChangedEvent;
 				}
@@ -73,12 +72,17 @@ public class TransactionSupportDataHandler extends AbstractDataHandler {
 
 				TableMetaInfo tableMeta = getTableMetaInfo(tableMapEvent.getDatabaseName(),
 						tableMapEvent.getTableName());
-				TableChangedData tableChangedData = new TableChangedData();
+				tableChangedData = tableChangedDataMap.get(tableMeta);
 				fillRawTypeCodes(tableMapEvent, tableMeta);
 				fillRawNullAbilities(tableMapEvent, tableMeta);
-				tableChangedData.setMeta(tableMeta);
-				this.tableChangedData = tableChangedData;
-				datas.add(tableChangedData);
+
+				if (tableChangedData == null) {
+					TableChangedData tableChangedData = new TableChangedData();
+					tableChangedData.setMeta(tableMeta);
+					this.tableChangedData = tableChangedData;
+					tableChangedDataMap.put(tableMeta, tableChangedData);
+					datas.add(tableChangedData);
+				}
 
 				break;
 			case BinlogConstanst.WRITE_ROWS_EVENT:

@@ -64,9 +64,11 @@ public class SwallowSender extends AbstractSender {
 
 			while (!stop) {
 				try {
-					System.out.println("Thread swallowsender name " + senderName + " : read from the queue: "
-							+ queue.get(1, TimeUnit.SECONDS));
-
+					DataChangedEvent event = queue.get(1, TimeUnit.SECONDS);
+					if (event != null) {
+						System.out.println("Thread swallowsender name " + senderName + " : read from the queue: "
+								+ event);
+					}
 				} catch (Exception e) {
 					// TODO
 				}

@@ -48,12 +48,18 @@ import com.dianping.puma.common.mysql.event.XIDEvent;
  */
 @ThreadUnSafe
 public class TransactionSupportDataHandler extends AbstractDataHandler {
-	private List<TableChangedData>					datas				= new ArrayList<TableChangedData>();
-	private Map<TableMetaInfo, TableChangedData>	tableChangedDataMap	= new HashMap<TableMetaInfo, TableChangedData>();
+	private List<TableChangedData>					datas				= null;
+	private Map<TableMetaInfo, TableChangedData>	tableChangedDataMap	= null;
 	private TableChangedData						tableChangedData	= null;
 
 	@Override
 	protected DataChangedEvent doProcess(BinlogEvent binlogEvent, PumaContext context, byte eventType) {
+		if (tableChangedDataMap == null) {
+			tableChangedDataMap = new HashMap<TableMetaInfo, TableChangedData>();
+		}
+		if (datas == null) {
+			datas = new ArrayList<TableChangedData>();
+		}
 
 		switch (eventType) {
 			case BinlogConstanst.XID_EVENT:
@@ -61,8 +67,8 @@ public class TransactionSupportDataHandler extends AbstractDataHandler {
 					DataChangedEvent dataChangedEvent = new DataChangedEvent();
 					dataChangedEvent.setDatas(datas);
 					dataChangedEvent.setTransactionId(((XIDEvent) binlogEvent).getXid());
-					this.datas.clear();
-					this.tableChangedDataMap.clear();
+					this.datas = null;
+					this.tableChangedDataMap = null;
 					this.tableChangedData = null;
 					return dataChangedEvent;
 				}

@@ -111,7 +111,7 @@ public class TransactionSupportDataHandler extends AbstractDataHandler {
 					}
 				}
 
-				this.tableChangedData.setRows(writeRowChangedDataList);
+				this.tableChangedData.addRows(writeRowChangedDataList);
 
 				break;
 			case BinlogConstanst.UPDATE_ROWS_EVENT:
@@ -149,7 +149,7 @@ public class TransactionSupportDataHandler extends AbstractDataHandler {
 					}
 				}
 
-				this.tableChangedData.setRows(updateRowChangedDataList);
+				this.tableChangedData.addRows(updateRowChangedDataList);
 				break;
 			case BinlogConstanst.DELETE_ROWS_EVENT:
 				DeleteRowsEvent deleteRowsEvent = (DeleteRowsEvent) binlogEvent;
@@ -171,7 +171,7 @@ public class TransactionSupportDataHandler extends AbstractDataHandler {
 					}
 				}
 
-				this.tableChangedData.setRows(deleteRowChangedDataList);
+				this.tableChangedData.addRows(deleteRowChangedDataList);
 				break;
 			default:
 				break;

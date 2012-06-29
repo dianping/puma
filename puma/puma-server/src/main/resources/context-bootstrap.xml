@@ -13,6 +13,7 @@
 		<property name="defaultBinlogFileName" value="" />
 		<property name="defaultBinlogPosition" value="4" />
 		<property name="parser" ref="defaultParser" />
+		<property name="serverId" value="9908"/>
 		<property name="dataHandler" ref="transactionSupportDataHandler" />
 		<property name="dispatcher" ref="simpleDispatcher" />
 	</bean>

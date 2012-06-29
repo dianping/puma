@@ -16,6 +16,7 @@
 package com.dianping.puma.client;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -68,6 +69,15 @@ public class TableChangedData implements Serializable {
 	 */
 	public List<RowChangedData> getRows() {
 		return rows;
+	}
+
+	public void addRows(List<RowChangedData> rows) {
+		if (this.rows == null) {
+			this.rows = new ArrayList<RowChangedData>();
+		}
+		if (rows != null && !rows.isEmpty()) {
+			this.rows.addAll(rows);
+		}
 	}
 
 	/*

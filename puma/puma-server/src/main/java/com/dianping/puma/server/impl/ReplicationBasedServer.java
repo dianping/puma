@@ -93,8 +93,8 @@ public class ReplicationBasedServer extends AbstractServer {
 		do {
 			try {
 				// 读position/file文件
-				PositionInfo posInfo = PositionFileUtils.getPositionInfo(context.getPumaServerName(), context
-						.getBinlogFileName(), context.getBinlogStartPos());
+				PositionInfo posInfo = PositionFileUtils.getPositionInfo(context.getPumaServerName(),
+						context.getBinlogFileName(), context.getBinlogStartPos());
 
 				context.setBinlogFileName(posInfo.getBinlogFileName());
 				context.setBinlogStartPos(posInfo.getBinlogPosition());
@@ -118,13 +118,8 @@ public class ReplicationBasedServer extends AbstractServer {
 				} else {
 					throw new IOException("Login failed.");
 				}
-			} catch (IOException e) {
-				log.error("IOException occurs. serverId: " + serverId, e);
-				try {
-					this.pumaSocket.close();
-				} catch (IOException closeException) {
-
-				}
+			} catch (Exception e) {
+				log.error("Exception occurs. serverId: " + serverId + ". Reconnect...", e);
 			}
 		} while (!stop);
 
@@ -141,8 +136,8 @@ public class ReplicationBasedServer extends AbstractServer {
 
 				if (binlogEvent.getHeader().getEventType() == BinlogConstanst.ROTATE_EVENT) {
 					RotateEvent rotateEvent = (RotateEvent) binlogEvent;
-					PositionFileUtils.savePositionInfo(getServerName(), new PositionInfo(rotateEvent
-							.getFirstEventPosition(), rotateEvent.getNextBinlogFileName()));
+					PositionFileUtils.savePositionInfo(getServerName(),
+							new PositionInfo(rotateEvent.getFirstEventPosition(), rotateEvent.getNextBinlogFileName()));
 					context.setBinlogFileName(rotateEvent.getNextBinlogFileName());
 					context.setBinlogStartPos(rotateEvent.getFirstEventPosition());
 				} else {

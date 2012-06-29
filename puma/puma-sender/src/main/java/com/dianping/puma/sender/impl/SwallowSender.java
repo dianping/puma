@@ -12,20 +12,11 @@ public class SwallowSender extends AbstractSender {
 
 	private volatile boolean			stop	= false;
 	private FileQueue<DataChangedEvent>	queue;
-	private String						swallowSenderName;
-	private FileQueueConfigHolder config;
+	private FileQueueConfigHolder		config;
 
-	public void setSwallowSenderName(String swallowSenderName) {
-		this.swallowSenderName = swallowSenderName;
-	}
-
-	
-	
 	public void setConfig(FileQueueConfigHolder config) {
 		this.config = config;
 	}
-
-
 
 	@Override
 	protected void doSend(DataChangedEvent event, PumaContext context) {
@@ -40,29 +31,13 @@ public class SwallowSender extends AbstractSender {
 
 	@Override
 	public void start() throws Exception {
-		
-		
-		//TODO
-		config.setConfigName(this.swallowSenderName);
-		
-		queue = new DefaultFileQueueImpl<DataChangedEvent>(config, this.swallowSenderName, true);
+
+		// TODO
+		config.setConfigName(this.name);
+
+		queue = new DefaultFileQueueImpl<DataChangedEvent>(config, this.name, true);
 		// TODO Auto-generated method stub
-		PumaThreadUtils.createThread(new Runnable() {
-
-			@Override
-			public void run() {
-
-				// TODO
-				try {
-					while (!stop) {
-						System.out.println(queue.get());
-					}
-
-				} catch (Exception e) {
-					// TODO
-				}
-			}
-		}, "Read_from_queue_for_swallow", false).start();
+		PumaThreadUtils.createThread(new SwallowSenderTask(this.name), "Read_from_queue_for_swallow", false).start();
 
 		// open filequeue
 
@@ -72,8 +47,28 @@ public class SwallowSender extends AbstractSender {
 	public void stop() throws Exception {
 
 		stop = true;
-
-		// close filequeue
+		queue.close();
 	}
 
+	private class SwallowSenderTask implements Runnable {
+		private String	senderName;
+
+		public SwallowSenderTask(String senderName) {
+			this.senderName = senderName;
+		}
+
+		@Override
+		public void run() {
+
+			try {
+				while (!stop) {
+					System.out.println("Thread swallowsender name: " + senderName + " read from the queue: "
+							+ queue.get());
+				}
+
+			} catch (Exception e) {
+				// TODO
+			}
+		}
+	}
 }

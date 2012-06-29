@@ -150,14 +150,15 @@ public class ReplicationBasedServer extends AbstractServer {
 							log.error("Dispatcher dispatch failed.", e);
 						}
 
-					}
+						// 只有dataChangedEvent不等于空的时候需要save，否则下次重启的时候会导致读不出一个transaction的数据
+						if (binlogEvent.getHeader() != null && binlogEvent.getHeader().getNextPosition() != 0
+								&& StringUtils.isNotBlank(context.getBinlogFileName())) {
+							// save position
+							PositionFileUtils.savePositionInfo(getServerName(), new PositionInfo(binlogEvent
+									.getHeader().getNextPosition(), context.getBinlogFileName()));
+							context.setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
+						}
 
-					if (binlogEvent.getHeader() != null && binlogEvent.getHeader().getNextPosition() != 0
-							&& StringUtils.isNotBlank(context.getBinlogFileName())) {
-						// save position
-						PositionFileUtils.savePositionInfo(getServerName(), new PositionInfo(binlogEvent.getHeader()
-								.getNextPosition(), context.getBinlogFileName()));
-						context.setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
 					}
 
 				}

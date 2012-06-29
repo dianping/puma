@@ -24,17 +24,11 @@
 		<property name="name" value="simpleDispatcher" />
 		<property name="senders">
 			<list>
-				<ref bean="testSender" />
 				<ref bean="swallowSender1" />
 			</list>
 		</property>
 	</bean>
 
-	<bean id="testSender" class="com.dianping.puma.sender.impl.SysoutSender"
-		init-method="start">
-		<property name="name" value="TestSender" />
-		<property name="filterChainConfig" ref="dbTbFilterChainConfig" />
-	</bean>
 
 	<bean id="dbTbFilterChainConfig" class="com.dianping.puma.filter.EventFilterChainConfig">
 		<property name="eventFilters">
@@ -55,8 +49,17 @@
 		<property name="operationType" value="both" />
 	</bean>
 
-	<bean id="database1" class="com.dianping.puma.filter.DbTbList">
+	<bean id="db-test" class="com.dianping.puma.filter.DbTbList">
 		<property name="dbName" value="test" />
+		<property name="tbNameList">
+			<list>
+				<value>*</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="db-cat" class="com.dianping.puma.filter.DbTbList">
+		<property name="dbName" value="cat" />
 		<property name="tbNameList">
 			<list>
 				<value>*</value>
@@ -67,7 +70,8 @@
 	<bean id="databases1" class="java.util.ArrayList">
 		<constructor-arg>
 			<list>
-				<ref bean="database1" />
+				<ref bean="db-test" />
+				<ref bean="db-cat" />
 			</list>
 		</constructor-arg>
 	</bean>
@@ -100,7 +104,7 @@
 
 	<bean id="swallowSender1" class="com.dianping.puma.sender.impl.SwallowSender"
 		init-method="start">
-		<property name="name" value="swallow" />
+		<property name="name" value="swallowSender" />
 		<property name="config" ref="fileQueueConfigHolder" />
 		<property name="filterChainConfig" ref="dbTbFilterChainConfig" />
 	</bean>

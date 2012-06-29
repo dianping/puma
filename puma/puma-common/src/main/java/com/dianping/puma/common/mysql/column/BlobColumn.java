@@ -18,6 +18,8 @@ package com.dianping.puma.common.mysql.column;
 import java.sql.Blob;
 import java.util.Arrays;
 
+import javax.sql.rowset.serial.SerialBlob;
+
 /**
  * 
  * TODO Comment of BlobColumn
@@ -44,7 +46,11 @@ public class BlobColumn implements Column {
 	}
 
 	public Blob getValue() {
-		return new com.dianping.puma.common.datatype.Blob(value);
+		try {
+			return new SerialBlob(value);
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 	public static final BlobColumn valueOf(byte[] value) {

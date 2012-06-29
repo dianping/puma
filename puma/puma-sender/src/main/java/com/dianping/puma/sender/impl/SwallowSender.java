@@ -4,10 +4,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
+import com.dianping.filequeue.DefaultFileQueueConfig.FileQueueConfigHolder;
 import com.dianping.filequeue.DefaultFileQueueImpl;
 import com.dianping.filequeue.FileQueue;
 import com.dianping.filequeue.FileQueueClosedException;
-import com.dianping.filequeue.DefaultFileQueueConfig.FileQueueConfigHolder;
 import com.dianping.puma.client.DataChangedEvent;
 import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.util.PumaThreadUtils;
@@ -88,8 +88,9 @@ public class SwallowSender extends AbstractSender {
 					}
 					if (dataChangedEvent != null) {
 						// TODO send event to swallow
-						System.out.println("Thread swallowsender name " + senderName + "  read from the queue: "
-								+ dataChangedEvent);
+						// System.out.println("Thread swallowsender name " +
+						// senderName + "  read from the queue: "
+						// + dataChangedEvent);
 						tryTimes = 0;
 					}
 

@@ -15,6 +15,7 @@
  */
 package com.dianping.puma.common.mysql.column;
 
+import java.sql.Blob;
 import java.util.Arrays;
 
 /**
@@ -42,8 +43,8 @@ public class BlobColumn implements Column {
 		return "BlobColumn [value=" + Arrays.toString(value) + "]";
 	}
 
-	public byte[] getValue() {
-		return value;
+	public Blob getValue() {
+		return new com.dianping.puma.common.datatype.Blob(value);
 	}
 
 	public static final BlobColumn valueOf(byte[] value) {

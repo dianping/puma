@@ -15,6 +15,8 @@
  */
 package com.dianping.puma.common.mysql.column;
 
+import java.sql.Date;
+
 /**
  * 
  * TODO Comment of YearColumn
@@ -47,8 +49,8 @@ public final class YearColumn implements Column {
 		return String.valueOf(value);
 	}
 
-	public Integer getValue() {
-		return this.value;
+	public Date getValue() {
+		return new Date(this.value);
 	}
 
 	public static final YearColumn valueOf(int value) {

@@ -1,5 +1,6 @@
 package com.dianping.puma.filter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,16 +12,30 @@ import com.dianping.puma.client.TableChangedData;
 
 public class DbTbEventFilter extends AbstractEventFilter {
 
-	private Map<String, Boolean>	dbtbMap;
+	private Map<String, Boolean>	dbtbMap				= new ConcurrentHashMap<String, Boolean>();
+	private List<String>			prefixList			= new ArrayList<String>();
+	private static final String		DB_TB_SPLIT_STR		= ".";
+	private static final String		ANY_SUFIX_PATTERN	= "*";
 
 	public void setDbtbMap(List<DbTbList> dbtbList) {
-		dbtbMap = new ConcurrentHashMap<String, Boolean>();
 		for (int i = 0; i < dbtbList.size(); i++) {
 			for (int j = 0; j < dbtbList.get(i).getTbNameList().size(); j++) {
-				dbtbMap.put(dbtbList.get(i).getDbName().trim().toLowerCase() + "."
-						+ dbtbList.get(i).getTbNameList().get(j).trim().toLowerCase(), true);
+				String tbName = dbtbList.get(i).getTbNameList().get(j).trim().toLowerCase();
+				String dbName = dbtbList.get(i).getDbName().trim().toLowerCase();
+				if (!tbName.endsWith(ANY_SUFIX_PATTERN)) {
+					dbtbMap.put(dbName + DB_TB_SPLIT_STR + tbName, true);
+				} else {
+					if (ANY_SUFIX_PATTERN.length() < tbName.length()) {
+						prefixList.add(dbName + DB_TB_SPLIT_STR
+								+ tbName.substring(0, tbName.length() - ANY_SUFIX_PATTERN.length()));
+					} else if (ANY_SUFIX_PATTERN.length() == tbName.length()) {
+						prefixList.add(dbName + DB_TB_SPLIT_STR);
+					}
+
+				}
+
 			}
-			dbtbMap.put(dbtbList.get(i) + ".", true);
+			dbtbMap.put(dbtbList.get(i).getDbName() + DB_TB_SPLIT_STR, true);
 		}
 	}
 
@@ -28,10 +43,18 @@ public class DbTbEventFilter extends AbstractEventFilter {
 
 		if (event.getDatas() != null) {
 			for (TableChangedData tableChangedData : event.getDatas()) {
-				String dbName = StringUtils.trimToEmpty(tableChangedData.getMeta().getDatabase());
-				String tbName = StringUtils.trimToEmpty(tableChangedData.getMeta().getTable());
-				if (dbtbMap.get(dbName.toLowerCase() + "." + tbName.toLowerCase()) != null) {
+				String dbName = StringUtils.trimToEmpty(tableChangedData.getMeta().getDatabase()).toLowerCase();
+				String tbName = StringUtils.trimToEmpty(tableChangedData.getMeta().getTable()).toLowerCase();
+				String key = dbName + DB_TB_SPLIT_STR + tbName;
+				if (dbtbMap.get(key) != null) {
 					return true;
+				} else {
+					for (String prefix : prefixList) {
+						if (key.startsWith(prefix)) {
+							return true;
+						}
+					}
+					return false;
 				}
 			}
 		} else {
@@ -40,5 +63,4 @@ public class DbTbEventFilter extends AbstractEventFilter {
 
 		return false;
 	}
-
 }

@@ -59,8 +59,7 @@
 		<property name="dbName" value="test" />
 		<property name="tbNameList">
 			<list>
-				<value>Binlog_Test_2</value>
-				<value>Binlog_Test_3</value>
+				<value>*</value>
 			</list>
 		</property>
 	</bean>

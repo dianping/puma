@@ -8,9 +8,8 @@ import org.apache.commons.lang.StringUtils;
 
 import com.dianping.puma.client.DataChangedEvent;
 import com.dianping.puma.client.TableChangedData;
-import com.dianping.puma.common.bo.PumaContext;
 
-public class DbTbEventFilter implements EventFilter {
+public class DbTbEventFilter extends AbstractEventFilter {
 
 	private Map<String, Boolean>	dbtbMap;
 
@@ -25,17 +24,7 @@ public class DbTbEventFilter implements EventFilter {
 		}
 	}
 
-	public boolean accept(DataChangedEvent event, EventFilterChain eventfilterChain, PumaContext context) {
-
-		if (checkEvent(event)) {
-			return eventfilterChain.doNext(event, context);
-		} else {
-			return false;
-		}
-
-	}
-
-	private boolean checkEvent(DataChangedEvent event) {
+	protected boolean checkEvent(DataChangedEvent event) {
 
 		if (event.getDatas() != null) {
 			for (TableChangedData tableChangedData : event.getDatas()) {

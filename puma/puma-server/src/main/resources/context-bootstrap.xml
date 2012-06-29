@@ -24,6 +24,7 @@
 		<property name="senders">
 			<list>
 				<ref bean="testSender" />
+				<ref bean="swallowSender1" />
 			</list>
 		</property>
 	</bean>
@@ -38,6 +39,7 @@
 		<property name="eventFilters">
 			<list>
 				<ref bean="dbTbEventFilter" />
+				<ref bean="dmlDdlEventFilter" />
 			</list>
 		</property>
 	</bean>
@@ -48,6 +50,9 @@
 		</property>
 	</bean>
 
+	<bean id="dmlDdlEventFilter" class="com.dianping.puma.filter.DmlDdlEventFilter">
+		<property name="operationType" value="dml" />
+	</bean>
 
 	<bean id="database1" class="com.dianping.puma.filter.DbTbList">
 		<property name="dbName" value="test" />
@@ -85,12 +90,18 @@
 			</list>
 		</constructor-arg>
 	</bean>
-	
-	<bean id="fileQueueConfigHolder" class="com.dianping.filequeue.DefaultFileQueueConfig.FileQueueConfigHolder">
-	<property name ="maxDataFileSize" value="500 * 1024 * 1024">
-	</property>
-	<property name="memCacheSize" value="50000">
-	</property>
+
+	<bean id="fileQueueConfigHolder"
+		class="com.dianping.filequeue.DefaultFileQueueConfig.FileQueueConfigHolder">
+		<property name="maxDataFileSize" value="500 * 1024 * 1024" />
+		<property name="memCacheSize" value="50000" />
+	</bean>
+
+	<bean id="swallowSender1" class="com.dianping.puma.sender.impl.SwallowSender"
+		init-method="start">
+		<property name="name" value="swallow" />
+		<property name="config" ref="fileQueueConfigHolder" />
+		<property name="filterChainConfig" ref="dbTbFilterChainConfig" />
 	</bean>
 </beans>
 

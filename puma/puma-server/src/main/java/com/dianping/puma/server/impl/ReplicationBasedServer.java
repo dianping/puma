@@ -120,6 +120,7 @@ public class ReplicationBasedServer extends AbstractServer {
 				}
 			} catch (Exception e) {
 				log.error("Exception occurs. serverId: " + serverId + ". Reconnect...", e);
+				Thread.sleep(1000);
 			}
 		} while (!stop);
 

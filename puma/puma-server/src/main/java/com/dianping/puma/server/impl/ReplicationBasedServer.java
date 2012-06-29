@@ -156,10 +156,13 @@ public class ReplicationBasedServer extends AbstractServer {
 
 					}
 
-					// save position
-					PositionFileUtils.savePositionInfo(getServerName(), new PositionInfo(binlogEvent.getHeader()
-							.getNextPosition(), context.getBinlogFileName()));
-					context.setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
+					if (binlogEvent.getHeader() != null && binlogEvent.getHeader().getNextPosition() != 0
+							&& StringUtils.isNotBlank(context.getBinlogFileName())) {
+						// save position
+						PositionFileUtils.savePositionInfo(getServerName(), new PositionInfo(binlogEvent.getHeader()
+								.getNextPosition(), context.getBinlogFileName()));
+						context.setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
+					}
 
 				}
 			}

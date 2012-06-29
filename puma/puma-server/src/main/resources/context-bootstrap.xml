@@ -51,7 +51,7 @@
 	</bean>
 
 	<bean id="dmlDdlEventFilter" class="com.dianping.puma.filter.DmlDdlEventFilter">
-		<property name="operationType" value="dml" />
+		<property name="operationType" value="both" />
 	</bean>
 
 	<bean id="database1" class="com.dianping.puma.filter.DbTbList">
@@ -93,7 +93,7 @@
 
 	<bean id="fileQueueConfigHolder"
 		class="com.dianping.filequeue.DefaultFileQueueConfig.FileQueueConfigHolder">
-		<property name="maxDataFileSize" value="500 * 1024 * 1024" />
+		<property name="maxDataFileSize" value="524288000" />
 		<property name="memCacheSize" value="50000" />
 	</bean>
 

@@ -1,5 +1,7 @@
 package com.dianping.puma.sender.impl;
 
+import java.util.concurrent.TimeUnit;
+
 import com.dianping.filequeue.DefaultFileQueueImpl;
 import com.dianping.filequeue.FileQueue;
 import com.dianping.filequeue.FileQueueClosedException;
@@ -60,14 +62,14 @@ public class SwallowSender extends AbstractSender {
 		@Override
 		public void run() {
 
-			try {
-				while (!stop) {
-					System.out.println("Thread swallowsender name: " + senderName + " read from the queue: "
-							+ queue.get());
-				}
+			while (!stop) {
+				try {
+					System.out.println("Thread swallowsender name " + senderName + " : read from the queue: "
+							+ queue.get(1, TimeUnit.SECONDS));
 
-			} catch (Exception e) {
-				// TODO
+				} catch (Exception e) {
+					// TODO
+				}
 			}
 		}
 	}

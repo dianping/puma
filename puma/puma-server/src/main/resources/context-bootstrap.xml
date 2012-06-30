@@ -99,7 +99,7 @@
 	<bean id="fileQueueConfigHolder"
 		class="com.dianping.filequeue.DefaultFileQueueConfig.FileQueueConfigHolder">
 		<property name="maxDataFileSize" value="524288000" />
-		<property name="memCacheSize" value="50000" />
+		<property name="memCacheSize" value="1000" />
 	</bean>
 
 	<bean id="swallowSender1" class="com.dianping.puma.sender.impl.SwallowSender"

@@ -16,7 +16,6 @@
 package com.dianping.puma.server.impl;
 
 import java.util.List;
-import java.util.Map;
 
 import com.dianping.hawk.jmx.HawkJMXUtil;
 import com.dianping.puma.common.annotation.ThreadUnSafe;

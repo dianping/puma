@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 
 import com.dianping.puma.common.annotation.ThreadSafe;
 import com.dianping.puma.common.bo.PumaContext;
+import com.dianping.puma.common.monitor.BinlogInfoAware;
 import com.dianping.puma.common.mysql.BinlogConstanst;
 import com.dianping.puma.common.mysql.event.BinlogEvent;
 import com.dianping.puma.common.mysql.event.BinlogHeader;
@@ -51,12 +52,26 @@ import com.dianping.puma.parser.Parser;
  * 
  */
 @ThreadSafe
-public class DefaultBinlogParser implements Parser {
+public class DefaultBinlogParser implements Parser, BinlogInfoAware {
 	private static final Logger								log			= Logger.getLogger(DefaultBinlogParser.class);
 	private static Map<Byte, Class<? extends BinlogEvent>>	eventMaps	= new ConcurrentHashMap<Byte, Class<? extends BinlogEvent>>();
+	private long											binlogPos;
+	private String											binlogFile;
+	private String											name;
+
+	/**
+	 * @param name
+	 *            the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	@Override
 	public BinlogEvent parse(ByteBuffer buf, PumaContext context) throws IOException {
+		binlogFile = context.getBinlogFileName();
+		binlogPos = context.getBinlogStartPos();
+
 		BinlogHeader header = new BinlogHeader();
 		header.parse(buf, context);
 		BinlogEvent event = null;
@@ -108,7 +123,36 @@ public class DefaultBinlogParser implements Parser {
 	 */
 	@Override
 	public void stop() throws Exception {
-		// TODO Auto-generated method stub
 
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dianping.puma.common.monitor.BinlogInfoAware#getBinlogPos()
+	 */
+	@Override
+	public long getBinlogPos() {
+		return binlogPos;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dianping.puma.common.monitor.BinlogInfoAware#getBinlogFile()
+	 */
+	@Override
+	public String getBinlogFile() {
+		return binlogFile;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dianping.puma.common.monitor.Monitorable#getMonitorTargetName()
+	 */
+	@Override
+	public String getMonitorTargetName() {
+		return name;
 	}
 }

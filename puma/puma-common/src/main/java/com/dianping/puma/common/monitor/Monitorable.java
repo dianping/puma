@@ -1,7 +1,7 @@
 /**
- * Project: hippo-collector
+ * Project: ${puma-common.aid}
  * 
- * File Created at 2011-11-1
+ * File Created at 2012-6-30
  * $Id$
  * 
  * Copyright 2010 dianping.com.
@@ -13,26 +13,14 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.filter;
-
-import java.util.List;
+package com.dianping.puma.common.monitor;
 
 /**
- * TODO Comment of EventFilterChainConfig
+ * TODO Comment of Monitorable
  * 
  * @author Leo Liang
  * 
  */
-public class EventFilterChainConfig {
-
-	private List<EventFilter>	eventFilters;
-
-	public void setEventFilters(List<EventFilter> eventFilters) {
-		this.eventFilters = eventFilters;
-	}
-
-	public List<EventFilter> getEventFilters() {
-		return eventFilters;
-	}
-
+public interface Monitorable {
+	public String getMonitorTargetName();
 }

@@ -2,14 +2,48 @@ package com.dianping.puma.sender.impl;
 
 import com.dianping.puma.client.DataChangedEvent;
 import com.dianping.puma.common.bo.PumaContext;
-import com.dianping.puma.filter.DefaultEventFilterChain;
-import com.dianping.puma.filter.EventFilterChain;
-import com.dianping.puma.filter.EventFilterChainConfig;
+import com.dianping.puma.common.monitor.BinlogInfoAware;
 import com.dianping.puma.sender.Sender;
+import com.dianping.puma.sender.filter.DefaultEventFilterChain;
+import com.dianping.puma.sender.filter.EventFilterChain;
+import com.dianping.puma.sender.filter.EventFilterChainConfig;
 
-public abstract class AbstractSender implements Sender {
+public abstract class AbstractSender implements Sender, BinlogInfoAware {
 	protected String					name;
 	protected EventFilterChainConfig	filterChainConfig;
+	protected int						maxTryTimes		= 3;
+	protected boolean					canMissEvent	= false;
+	protected volatile boolean			stop			= false;
+
+	/**
+	 * @return the maxTryTimes
+	 */
+	public int getMaxTryTimes() {
+		return maxTryTimes;
+	}
+
+	/**
+	 * @param maxTryTimes
+	 *            the maxTryTimes to set
+	 */
+	public void setMaxTryTimes(int maxTryTimes) {
+		this.maxTryTimes = maxTryTimes;
+	}
+
+	/**
+	 * @return the canMissEvent
+	 */
+	public boolean isCanMissEvent() {
+		return canMissEvent;
+	}
+
+	/**
+	 * @param canMissEvent
+	 *            the canMissEvent to set
+	 */
+	public void setCanMissEvent(boolean canMissEvent) {
+		this.canMissEvent = canMissEvent;
+	}
 
 	/*
 	 * (non-Javadoc)

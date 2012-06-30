@@ -35,6 +35,10 @@
 			<artifactId>puma-common</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.dianping.hawk</groupId>
+			<artifactId>hawk-client</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
 			<scope>test</scope>

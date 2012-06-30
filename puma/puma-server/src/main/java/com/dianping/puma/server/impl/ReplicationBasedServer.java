@@ -20,6 +20,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -37,9 +38,7 @@ import com.dianping.puma.common.mysql.packet.OKErrorPacket;
 import com.dianping.puma.common.mysql.packet.PacketFactory;
 import com.dianping.puma.common.mysql.packet.PacketType;
 import com.dianping.puma.common.util.PositionFileUtils;
-import com.dianping.puma.datahandler.DataHandler;
-import com.dianping.puma.parser.Parser;
-import com.dianping.puma.sender.dispatcher.Dispatcher;
+import com.dianping.puma.server.monitor.ServerMonitorMBean;
 
 /**
  * 基于MySQL复制机制的Server
@@ -56,39 +55,14 @@ public class ReplicationBasedServer extends AbstractServer {
 	private String				user;
 	private String				password;
 	private String				database;
-	private long				serverId	= 6789;
+
 	private String				encoding	= "utf-8";
 	private Socket				pumaSocket;
 	private InputStream			is;
 	private OutputStream		os;
-	private volatile boolean	stop		= false;
 
-	private Parser				parser;
-	private DataHandler			dataHandler;
-	private Dispatcher			dispatcher;
-
-	/**
-	 * @return the dispatcher
-	 */
-	public Dispatcher getDispatcher() {
-		return dispatcher;
-	}
-
-	/**
-	 * @param dispatcher
-	 *            the dispatcher to set
-	 */
-	public void setDispatcher(Dispatcher dispatcher) {
-		this.dispatcher = dispatcher;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.server.Server#start()
-	 */
 	@Override
-	public void start() throws Exception {
+	public void doStart() throws Exception {
 
 		do {
 			try {
@@ -143,7 +117,10 @@ public class ReplicationBasedServer extends AbstractServer {
 					context.setBinlogStartPos(rotateEvent.getFirstEventPosition());
 				} else {
 					DataChangedEvent dataChangedEvent = dataHandler.process(binlogEvent, context);
-					if (dataChangedEvent != null) {
+					if (dataChangedEvent != null && !dataChangedEvent.isEmpty()) {
+						dataChangedEvent.setBinlogFileName(context.getBinlogFileName());
+						dataChangedEvent.setBinlogPos(context.getBinlogStartPos());
+
 						try {
 							dispatcher.dispatch(dataChangedEvent, context);
 						} catch (Exception e) {
@@ -252,19 +229,8 @@ public class ReplicationBasedServer extends AbstractServer {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.server.Server#stop()
-	 */
-	@Override
-	public void stop() throws Exception {
+	protected void doStop() throws Exception {
 		closeTransport();
-		this.stop = true;
-
-		parser.stop();
-		dispatcher.stop();
-
 	}
 
 	/**
@@ -335,16 +301,6 @@ public class ReplicationBasedServer extends AbstractServer {
 		this.password = password;
 	}
 
-	@Override
-	public long getServerId() {
-		return serverId;
-	}
-
-	@Override
-	public void setServerId(long serverId) {
-		this.serverId = serverId;
-	}
-
 	public String getEncoding() {
 		return encoding;
 	}
@@ -368,44 +324,19 @@ public class ReplicationBasedServer extends AbstractServer {
 		this.database = database;
 	}
 
-	/**
-	 * @return the parser
-	 */
-	public Parser getParser() {
-		return parser;
-	}
-
-	/**
-	 * @param parser
-	 *            the parser to set
-	 */
-	public void setParser(Parser parser) {
-		this.parser = parser;
-	}
-
-	/**
-	 * @return the dataHandler
-	 */
-	public DataHandler getDataHandler() {
-		return dataHandler;
-	}
-
-	/**
-	 * @param dataHandler
-	 *            the dataHandler to set
-	 */
-	public void setDataHandler(DataHandler dataHandler) {
-		this.dataHandler = dataHandler;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.dianping.puma.server.Server#getServerName()
+	 * @see
+	 * com.dianping.puma.server.impl.AbstractServer#initMonitorMBean(com.dianping
+	 * .puma.server.monitor.ServerMonitorMBean)
 	 */
 	@Override
-	public String getServerName() {
-		return String.valueOf(serverId);
+	public void initMonitorMBeanAdditionInfo(ServerMonitorMBean smb) {
+		smb.addAdditionInfo("host", host);
+		smb.addAdditionInfo("port", String.valueOf(port));
+		smb.addAdditionInfo("user", user);
+		smb.addAdditionInfo("db", database);
 	}
 
 }

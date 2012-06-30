@@ -36,6 +36,54 @@ public class DataChangedEvent implements Serializable {
 	private long					transactionId;
 	private boolean					ddl;
 	private String					sql;
+	private String					binlogFileName;
+	private long					binlogPos;
+	private boolean					empty				= true;
+
+	/**
+	 * @return the empty
+	 */
+	public boolean isEmpty() {
+		return empty;
+	}
+
+	/**
+	 * @param empty
+	 *            the empty to set
+	 */
+	public void setEmpty(boolean empty) {
+		this.empty = empty;
+	}
+
+	/**
+	 * @return the binlogFileName
+	 */
+	public String getBinlogFileName() {
+		return binlogFileName;
+	}
+
+	/**
+	 * @param binlogFileName
+	 *            the binlogFileName to set
+	 */
+	public void setBinlogFileName(String binlogFileName) {
+		this.binlogFileName = binlogFileName;
+	}
+
+	/**
+	 * @return the binlogPos
+	 */
+	public long getBinlogPos() {
+		return binlogPos;
+	}
+
+	/**
+	 * @param binlogPos
+	 *            the binlogPos to set
+	 */
+	public void setBinlogPos(long binlogPos) {
+		this.binlogPos = binlogPos;
+	}
 
 	/**
 	 * @return the ddl
@@ -105,7 +153,7 @@ public class DataChangedEvent implements Serializable {
 	@Override
 	public String toString() {
 		return "DataChangedEvent [datas=" + datas + ", transactionId=" + transactionId + ", ddl=" + ddl + ", sql="
-				+ sql + "]";
+				+ sql + ", binlogFileName=" + binlogFileName + ", binlogPos=" + binlogPos + ", empty=" + empty + "]";
 	}
 
 }

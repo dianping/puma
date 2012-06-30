@@ -38,6 +38,8 @@ public abstract class AbstractAsyncSender extends AbstractSender {
 	private static final Logger				log	= Logger.getLogger(AbstractAsyncSender.class);
 	protected FileQueue<DataChangedEvent>	queue;
 	protected FileQueueConfigHolder			config;
+	private long							binlogPos;
+	private String							binlogFile;
 
 	public void setConfig(FileQueueConfigHolder config) {
 		this.config = config;
@@ -65,21 +67,31 @@ public abstract class AbstractAsyncSender extends AbstractSender {
 		config.setConfigName(this.name);
 
 		queue = new DefaultFileQueueImpl<DataChangedEvent>(config, this.name, true);
-		PumaThreadUtils.createThread(new AsyncSenderTask(this.name, this.canMissEvent), "AsyncSender_" + this.name,
-				false).start();
+		PumaThreadUtils.createThread(new AsyncSenderTask(), "AsyncSender_" + this.name, false).start();
 
+	}
+
+	public long getBinlogPos() {
+		return binlogPos;
+	}
+
+	public String getBinlogFile() {
+		return binlogFile;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dianping.puma.common.monitor.Monitorable#getMonitorTargetName()
+	 */
+	@Override
+	public String getMonitorTargetName() {
+		return name;
 	}
 
 	protected abstract void doAsyncSend(DataChangedEvent dataChangedEvent) throws Exception;
 
 	private class AsyncSenderTask implements Runnable {
-		private String	senderName;
-		private boolean	canMissEvent;
-
-		public AsyncSenderTask(String senderName, boolean canMissEvent) {
-			this.senderName = senderName;
-			this.canMissEvent = canMissEvent;
-		}
 
 		@Override
 		public void run() {
@@ -94,20 +106,22 @@ public abstract class AbstractAsyncSender extends AbstractSender {
 					if (dataChangedEvent != null) {
 						doAsyncSend(dataChangedEvent);
 						tryTimes = 0;
+						binlogFile = dataChangedEvent.getBinlogFileName();
+						binlogPos = dataChangedEvent.getBinlogPos();
 					}
 
 				} catch (Throwable e) {
 					tryTimes++;
-					if (this.canMissEvent) {
+					if (canMissEvent) {
 						if (tryTimes == maxTryTimes) {
-							log.error("Sender {" + senderName + "} send event failed for maxmim times: "
-									+ dataChangedEvent, e);
+							log.error("Sender {" + name + "} send event failed for maxmim times: " + dataChangedEvent,
+									e);
 							tryTimes = 0;
 						}
 					} else {
 						if (tryTimes % maxTryTimes == 0) {
-							log.error("Sender {" + senderName + "} send event failed for maxmim times: "
-									+ dataChangedEvent, e);
+							log.error("Sender {" + name + "} send event failed for maxmim times: " + dataChangedEvent,
+									e);
 						}
 					}
 					try {

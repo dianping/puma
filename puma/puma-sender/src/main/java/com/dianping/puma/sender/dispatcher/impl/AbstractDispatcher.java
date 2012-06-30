@@ -19,6 +19,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
 
+import com.dianping.puma.common.monitor.BinlogInfoAware;
 import com.dianping.puma.sender.dispatcher.Dispatcher;
 
 /**
@@ -27,7 +28,7 @@ import com.dianping.puma.sender.dispatcher.Dispatcher;
  * @author Leo Liang
  * 
  */
-public abstract class AbstractDispatcher implements Dispatcher {
+public abstract class AbstractDispatcher implements Dispatcher, BinlogInfoAware {
 	protected String	name;
 
 	/*
@@ -84,5 +85,15 @@ public abstract class AbstractDispatcher implements Dispatcher {
 			throw new Exception(buffer.toString());
 		}
 
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dianping.puma.common.monitor.Monitorable#getMonitorTargetName()
+	 */
+	@Override
+	public String getMonitorTargetName() {
+		return name;
 	}
 }

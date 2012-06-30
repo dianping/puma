@@ -84,6 +84,11 @@
 				<version>${puma-all.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.dianping.hawk</groupId>
+				<artifactId>hawk-client</artifactId>
+				<version>0.5.0</version>
+			</dependency>
+			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-test</artifactId>
 				<version>3.0.5.RELEASE</version>

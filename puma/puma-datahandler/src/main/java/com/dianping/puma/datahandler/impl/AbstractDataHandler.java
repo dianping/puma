@@ -48,8 +48,7 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
  */
 @ThreadUnSafe
 public abstract class AbstractDataHandler implements DataHandler {
-	private static final Logger									log					= Logger
-																							.getLogger(AbstractDataHandler.class);
+	private static final Logger									log					= Logger.getLogger(AbstractDataHandler.class);
 	private static AtomicReference<Map<String, TableMetaInfo>>	tableMetaInfoCache	= new AtomicReference<Map<String, TableMetaInfo>>();
 	private int													metaDBPort			= 3306;
 	private String												metaDBHost;
@@ -188,20 +187,13 @@ public abstract class AbstractDataHandler implements DataHandler {
 		if (binlogEvent instanceof PumaIgnoreEvent) {
 			log.info("Ingore one unknown event. eventType: " + binlogEvent.getHeader().getEventType());
 		}
-		if (binlogEvent instanceof QueryEvent) {
-			QueryEvent queryEvent = (QueryEvent) binlogEvent;
-			String sql = StringUtils.trim(queryEvent.getSql());
-			if (StringUtils.startsWithIgnoreCase(sql, "ALTER ") || StringUtils.startsWithIgnoreCase(sql, "CREATE ")
-					|| StringUtils.startsWithIgnoreCase(sql, "RENAME ")
-					|| StringUtils.startsWithIgnoreCase(sql, "DROP ")) {
-				refreshTableMeta();
-			}
-		}
+
+		DataChangedEvent dataChangedEvent = new DataChangedEvent();
 
 		byte eventType = binlogEvent.getHeader().getEventType();
 
 		if (eventType == BinlogConstanst.STOP_EVENT || eventType == BinlogConstanst.ROTATE_EVENT) {
-			return null;
+			dataChangedEvent.setEmpty(true);
 		} else if (eventType == BinlogConstanst.QUERY_EVENT) {
 			QueryEvent queryEvent = (QueryEvent) binlogEvent;
 			String sql = StringUtils.trim(queryEvent.getSql());
@@ -209,9 +201,13 @@ public abstract class AbstractDataHandler implements DataHandler {
 					|| StringUtils.startsWithIgnoreCase(sql, "DROP ")
 					|| StringUtils.startsWithIgnoreCase(sql, "RENAME ")
 					|| StringUtils.startsWithIgnoreCase(sql, "TRUNCATE ")) {
-				DataChangedEvent dataChangedEvent = new DataChangedEvent();
+				// Refresh table meta
+				refreshTableMeta();
+
+				dataChangedEvent = new DataChangedEvent();
 				dataChangedEvent.setDdl(true);
-				dataChangedEvent.setSql(((QueryEvent) binlogEvent).getSql());
+				dataChangedEvent.setSql(sql);
+				dataChangedEvent.setEmpty(false);
 
 				// Set mock data for setting the database name
 				List<TableChangedData> mockTableChangedDataList = new ArrayList<TableChangedData>();
@@ -223,17 +219,19 @@ public abstract class AbstractDataHandler implements DataHandler {
 
 				dataChangedEvent.setDatas(mockTableChangedDataList);
 
-				return dataChangedEvent;
-			} else {
-				return null;
 			}
 		} else {
-			DataChangedEvent dataChangedEvent = doProcess(binlogEvent, context, eventType);
+			dataChangedEvent = doProcess(binlogEvent, context, eventType);
 			if (dataChangedEvent != null) {
 				dataChangedEvent.setDdl(false);
+				dataChangedEvent.setEmpty(false);
+			} else {
+				dataChangedEvent = new DataChangedEvent();
+				dataChangedEvent.setEmpty(true);
 			}
-			return dataChangedEvent;
 		}
+
+		return dataChangedEvent;
 	}
 
 	protected abstract DataChangedEvent doProcess(BinlogEvent binlogEvent, PumaContext context, byte eventType);

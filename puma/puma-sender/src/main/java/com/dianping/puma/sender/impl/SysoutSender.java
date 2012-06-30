@@ -19,7 +19,7 @@ import com.dianping.puma.client.DataChangedEvent;
 import com.dianping.puma.common.bo.PumaContext;
 
 /**
- * TODO Comment of SysoutSender
+ * For test only
  * 
  * @author Leo Liang
  * 
@@ -29,6 +29,39 @@ public class SysoutSender extends AbstractSender {
 	@Override
 	protected void doSend(DataChangedEvent event, PumaContext context) {
 		System.out.println(event);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dianping.puma.common.monitor.BinlogInfoAware#getBinlogPos()
+	 */
+	@Override
+	public long getBinlogPos() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dianping.puma.common.monitor.BinlogInfoAware#getBinlogFile()
+	 */
+	@Override
+	public String getBinlogFile() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dianping.puma.common.monitor.Monitorable#getMonitorTargetName()
+	 */
+	@Override
+	public String getMonitorTargetName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

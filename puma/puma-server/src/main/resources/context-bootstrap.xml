@@ -30,7 +30,7 @@
 	</bean>
 
 
-	<bean id="dbTbFilterChainConfig" class="com.dianping.puma.filter.EventFilterChainConfig">
+	<bean id="dbTbFilterChainConfig" class="com.dianping.puma.sender.filter.EventFilterChainConfig">
 		<property name="eventFilters">
 			<list>
 				<ref bean="dbTbEventFilter" />
@@ -39,17 +39,17 @@
 		</property>
 	</bean>
 
-	<bean id="dbTbEventFilter" class="com.dianping.puma.filter.DbTbEventFilter">
+	<bean id="dbTbEventFilter" class="com.dianping.puma.sender.filter.DbTbEventFilter">
 		<property name="dbtbMap">
 			<ref bean="databases1" />
 		</property>
 	</bean>
 
-	<bean id="dmlDdlEventFilter" class="com.dianping.puma.filter.DmlDdlEventFilter">
+	<bean id="dmlDdlEventFilter" class="com.dianping.puma.sender.filter.DmlDdlEventFilter">
 		<property name="operationType" value="both" />
 	</bean>
 
-	<bean id="db-test" class="com.dianping.puma.filter.DbTbList">
+	<bean id="db-test" class="com.dianping.puma.sender.filter.DbTbList">
 		<property name="dbName" value="test" />
 		<property name="tbNameList">
 			<list>
@@ -58,7 +58,7 @@
 		</property>
 	</bean>
 
-	<bean id="db-cat" class="com.dianping.puma.filter.DbTbList">
+	<bean id="db-cat" class="com.dianping.puma.sender.filter.DbTbList">
 		<property name="dbName" value="cat" />
 		<property name="tbNameList">
 			<list>
@@ -86,7 +86,9 @@
 	</bean>
 
 	<bean id="defaultParser" class="com.dianping.puma.parser.impl.DefaultBinlogParser"
-		init-method="start" />
+		init-method="start">
+		<property name="name" value="server-7_43-parser" />
+	</bean>
 
 	<bean id="servers" class="java.util.ArrayList">
 		<constructor-arg>

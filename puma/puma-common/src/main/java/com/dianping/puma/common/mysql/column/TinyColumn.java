@@ -24,13 +24,16 @@ package com.dianping.puma.common.mysql.column;
  */
 public final class TinyColumn implements Column {
 	private static final long			serialVersionUID	= -7981385814804060055L;
-	public static final int				MIN_VALUE			= Byte.MIN_VALUE;
-	public static final int				MAX_VALUE			= Byte.MAX_VALUE;
+	public static final int				MIN_VALUE			= 0;
+	public static final int				MAX_VALUE			= 256;
 
-	private static final TinyColumn[]	CACHE				= new TinyColumn[255];
+	private static final TinyColumn[]	CACHE				= new TinyColumn[256];
 	static {
-		for (int i = 0; i < CACHE.length; i++) {
-			CACHE[i] = new TinyColumn(i + Byte.MIN_VALUE);
+		for (int i = 0; i < 128; i++) {
+			CACHE[i] = new TinyColumn(i);
+		}
+		for (int i = 128; i < 256; i++) {
+			CACHE[i] = new TinyColumn(i - 128);
 		}
 	}
 

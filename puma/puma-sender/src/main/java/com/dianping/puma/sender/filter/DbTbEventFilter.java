@@ -7,8 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.dianping.puma.client.DataChangedEvent;
-import com.dianping.puma.client.TableChangedData;
+import com.dianping.puma.client.ChangedEvent;
 
 public class DbTbEventFilter extends AbstractEventFilter {
 
@@ -39,28 +38,25 @@ public class DbTbEventFilter extends AbstractEventFilter {
 		}
 	}
 
-	protected boolean checkEvent(DataChangedEvent event) {
+	protected boolean checkEvent(ChangedEvent event) {
 
-		if (event.getDatas() != null) {
-			for (TableChangedData tableChangedData : event.getDatas()) {
-				String dbName = StringUtils.trimToEmpty(tableChangedData.getMeta().getDatabase()).toLowerCase();
-				String tbName = StringUtils.trimToEmpty(tableChangedData.getMeta().getTable()).toLowerCase();
-				String key = dbName + DB_TB_SPLIT_STR + tbName;
-				if (dbtbMap.get(key) != null) {
-					return true;
-				} else {
-					for (String prefix : prefixList) {
-						if (key.startsWith(prefix)) {
-							return true;
-						}
+		if (event != null) {
+			String dbName = StringUtils.trimToEmpty(event.getDatabase()).toLowerCase();
+			String tbName = StringUtils.trimToEmpty(event.getTable()).toLowerCase();
+			String key = dbName + DB_TB_SPLIT_STR + tbName;
+			if (dbtbMap.get(key) != null) {
+				return true;
+			} else {
+				for (String prefix : prefixList) {
+					if (key.startsWith(prefix)) {
+						return true;
 					}
-					return false;
 				}
+				return false;
 			}
 		} else {
 			return false;
 		}
 
-		return false;
 	}
 }

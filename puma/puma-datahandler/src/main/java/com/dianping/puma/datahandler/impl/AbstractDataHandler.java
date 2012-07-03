@@ -21,16 +21,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.dianping.puma.client.DataChangedEvent;
-import com.dianping.puma.client.TableChangedData;
-import com.dianping.puma.client.TableMetaInfo;
+import com.dianping.puma.client.ChangedEvent;
+import com.dianping.puma.client.DdlEvent;
+import com.dianping.puma.client.RowChangedEvent;
 import com.dianping.puma.common.annotation.ThreadUnSafe;
 import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.mysql.BinlogConstanst;
@@ -38,6 +37,8 @@ import com.dianping.puma.common.mysql.event.BinlogEvent;
 import com.dianping.puma.common.mysql.event.PumaIgnoreEvent;
 import com.dianping.puma.common.mysql.event.QueryEvent;
 import com.dianping.puma.datahandler.DataHandler;
+import com.dianping.puma.datahandler.DataHandlerResult;
+import com.dianping.puma.datahandler.TableMetaInfo;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 /**
@@ -183,17 +184,20 @@ public abstract class AbstractDataHandler implements DataHandler {
 	}
 
 	@Override
-	public DataChangedEvent process(BinlogEvent binlogEvent, PumaContext context) {
+	public DataHandlerResult process(BinlogEvent binlogEvent, PumaContext context) {
+		DataHandlerResult result = new DataHandlerResult();
 		if (binlogEvent instanceof PumaIgnoreEvent) {
 			log.info("Ingore one unknown event. eventType: " + binlogEvent.getHeader().getEventType());
+			result.setEmpty(true);
+			result.setFinished(true);
+			return result;
 		}
-
-		DataChangedEvent dataChangedEvent = new DataChangedEvent();
 
 		byte eventType = binlogEvent.getHeader().getEventType();
 
 		if (eventType == BinlogConstanst.STOP_EVENT || eventType == BinlogConstanst.ROTATE_EVENT) {
-			dataChangedEvent.setEmpty(true);
+			result.setEmpty(true);
+			result.setFinished(true);
 		} else if (eventType == BinlogConstanst.QUERY_EVENT) {
 			QueryEvent queryEvent = (QueryEvent) binlogEvent;
 			String sql = StringUtils.trim(queryEvent.getSql());
@@ -204,37 +208,47 @@ public abstract class AbstractDataHandler implements DataHandler {
 				// Refresh table meta
 				refreshTableMeta();
 
-				dataChangedEvent = new DataChangedEvent();
-				dataChangedEvent.setDdl(true);
-				dataChangedEvent.setSql(sql);
-				dataChangedEvent.setEmpty(false);
+				ChangedEvent dataChangedEvent = new DdlEvent();
+				DdlEvent ddlEvent = (DdlEvent) dataChangedEvent;
+				ddlEvent.setSql(sql);
+				ddlEvent.setDatabase(queryEvent.getDatabaseName());
+				ddlEvent.setExecuteTime(queryEvent.getHeader().getTimestamp());
 
-				// Set mock data for setting the database name
-				List<TableChangedData> mockTableChangedDataList = new ArrayList<TableChangedData>();
-				TableMetaInfo mockTableMetaInfo = new TableMetaInfo();
-				mockTableMetaInfo.setDatabase(queryEvent.getDatabaseName());
-				TableChangedData mockTableData = new TableChangedData();
-				mockTableData.setMeta(mockTableMetaInfo);
-				mockTableChangedDataList.add(mockTableData);
+				result.setData(dataChangedEvent);
+				result.setEmpty(false);
+				result.setFinished(true);
 
-				dataChangedEvent.setDatas(mockTableChangedDataList);
+			} else if (StringUtils.equalsIgnoreCase(sql, "BEGIN")) {
+				// BEGIN事件，发送一个begin transaction的事件
+				ChangedEvent dataChangedEvent = new RowChangedEvent();
+				((RowChangedEvent) dataChangedEvent).setTransactionBegin(true);
 
+				result.setData(dataChangedEvent);
+				result.setEmpty(false);
+				result.setFinished(true);
+			} else {
+				result.setEmpty(true);
+				result.setFinished(true);
 			}
 		} else {
-			dataChangedEvent = doProcess(binlogEvent, context, eventType);
-			if (dataChangedEvent != null) {
-				dataChangedEvent.setDdl(false);
-				dataChangedEvent.setEmpty(false);
+			if (eventType == BinlogConstanst.XID_EVENT) {
+				// commit事件，发送一个commit transaction的事件
+				ChangedEvent dataChangedEvent = new RowChangedEvent();
+				((RowChangedEvent) dataChangedEvent).setTransactionCommit(true);
+
+				result.setData(dataChangedEvent);
+				result.setEmpty(false);
+				result.setFinished(true);
 			} else {
-				dataChangedEvent = new DataChangedEvent();
-				dataChangedEvent.setEmpty(true);
+				doProcess(result, binlogEvent, context, eventType);
 			}
 		}
 
-		return dataChangedEvent;
+		return result;
 	}
 
-	protected abstract DataChangedEvent doProcess(BinlogEvent binlogEvent, PumaContext context, byte eventType);
+	protected abstract void doProcess(DataHandlerResult result, BinlogEvent binlogEvent, PumaContext context,
+			byte eventType);
 
 	protected TableMetaInfo getTableMetaInfo(String database, String table) {
 		return tableMetaInfoCache.get().get(database + "." + table);

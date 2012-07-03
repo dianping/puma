@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.dianping.puma.client.DataChangedEvent;
+import com.dianping.puma.client.ChangedEvent;
 import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.sender.Sender;
 
@@ -59,15 +59,8 @@ public class SimpleDispatherImpl extends AbstractDispatcher {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.dianping.puma.sender.dispatcher.Dispatcher#dispatch(com.dianping.
-	 * puma.client.DataChangedEvent, com.dianping.puma.common.bo.PumaContext)
-	 */
 	@Override
-	public void dispatch(DataChangedEvent event, PumaContext context) throws Exception {
+	public void dispatch(ChangedEvent event, PumaContext context) throws Exception {
 		binlogFile = context.getBinlogFileName();
 		binlogPos = context.getBinlogStartPos();
 		if (senders != null && senders.size() > 0) {

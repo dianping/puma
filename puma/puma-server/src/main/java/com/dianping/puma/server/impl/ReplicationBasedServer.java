@@ -24,7 +24,8 @@ import java.net.UnknownHostException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.dianping.puma.client.DataChangedEvent;
+import com.dianping.puma.client.DdlEvent;
+import com.dianping.puma.client.RowChangedEvent;
 import com.dianping.puma.common.annotation.ThreadUnSafe;
 import com.dianping.puma.common.bo.PositionInfo;
 import com.dianping.puma.common.mysql.BinlogConstanst;
@@ -37,6 +38,7 @@ import com.dianping.puma.common.mysql.packet.OKErrorPacket;
 import com.dianping.puma.common.mysql.packet.PacketFactory;
 import com.dianping.puma.common.mysql.packet.PacketType;
 import com.dianping.puma.common.util.PositionFileUtils;
+import com.dianping.puma.datahandler.DataHandlerResult;
 import com.dianping.puma.server.monitor.ServerMonitorMBean;
 
 /**
@@ -115,26 +117,31 @@ public class ReplicationBasedServer extends AbstractServer {
 					context.setBinlogFileName(rotateEvent.getNextBinlogFileName());
 					context.setBinlogStartPos(rotateEvent.getFirstEventPosition());
 				} else {
-					DataChangedEvent dataChangedEvent = dataHandler.process(binlogEvent, context);
-					if (dataChangedEvent != null && !dataChangedEvent.isEmpty()) {
-						dataChangedEvent.setBinlogFileName(context.getBinlogFileName());
-						dataChangedEvent.setBinlogPos(context.getBinlogStartPos());
-
-						try {
-							dispatcher.dispatch(dataChangedEvent, context);
-						} catch (Exception e) {
-							log.error("Dispatcher dispatch failed.", e);
+					DataHandlerResult dataHandlerResult = null;
+					// 一直处理一个binlogEvent的多行，处理完每行马上分发，以防止一个binlogEvent包含太多ChangedEvent而耗费太多内存
+					do {
+						dataHandlerResult = dataHandler.process(binlogEvent, context);
+						if (!dataHandlerResult.isEmpty()) {
+							try {
+								dispatcher.dispatch(dataHandlerResult.getData(), context);
+							} catch (Exception e) {
+								log.error("Dispatcher dispatch failed.", e);
+							}
 						}
+					} while (dataHandlerResult != null && !dataHandlerResult.isFinished());
 
-						// 只有dataChangedEvent不等于空的时候需要save，否则下次重启的时候会导致读不出一个transaction的数据
-						if (binlogEvent.getHeader() != null && binlogEvent.getHeader().getNextPosition() != 0
-								&& StringUtils.isNotBlank(context.getBinlogFileName())) {
-							// save position
-							PositionFileUtils.savePositionInfo(getServerName(), new PositionInfo(binlogEvent
-									.getHeader().getNextPosition(), context.getBinlogFileName()));
-							context.setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
-						}
-
+					// 只有整个binlogEvent分发完了才save
+					if (binlogEvent.getHeader() != null
+							&& binlogEvent.getHeader().getNextPosition() != 0
+							&& StringUtils.isNotBlank(context.getBinlogFileName())
+							&& dataHandlerResult != null
+							&& !dataHandlerResult.isEmpty()
+							&& (dataHandlerResult.getData() instanceof DdlEvent || (dataHandlerResult.getData() instanceof RowChangedEvent && ((RowChangedEvent) dataHandlerResult
+									.getData()).isTransactionCommit()))) {
+						// save position
+						PositionFileUtils.savePositionInfo(getServerName(), new PositionInfo(binlogEvent.getHeader()
+								.getNextPosition(), context.getBinlogFileName()));
+						context.setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
 					}
 
 				}

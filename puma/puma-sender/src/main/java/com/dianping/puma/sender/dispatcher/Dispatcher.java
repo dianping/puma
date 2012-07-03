@@ -17,7 +17,7 @@ package com.dianping.puma.sender.dispatcher;
 
 import java.util.List;
 
-import com.dianping.puma.client.DataChangedEvent;
+import com.dianping.puma.client.ChangedEvent;
 import com.dianping.puma.common.LifeCycle;
 import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.sender.Sender;
@@ -31,7 +31,7 @@ import com.dianping.puma.sender.Sender;
 public interface Dispatcher extends LifeCycle {
 	public String getName();
 
-	public void dispatch(DataChangedEvent event, PumaContext context) throws Exception;
+	public void dispatch(ChangedEvent event, PumaContext context) throws Exception;
 
 	public List<Sender> getSenders();
 }

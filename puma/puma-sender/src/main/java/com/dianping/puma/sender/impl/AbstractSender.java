@@ -1,19 +1,15 @@
 package com.dianping.puma.sender.impl;
 
-import com.dianping.puma.client.DataChangedEvent;
+import com.dianping.puma.client.ChangedEvent;
 import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.monitor.BinlogInfoAware;
 import com.dianping.puma.sender.Sender;
-import com.dianping.puma.sender.filter.DefaultEventFilterChain;
-import com.dianping.puma.sender.filter.EventFilterChain;
-import com.dianping.puma.sender.filter.EventFilterChainConfig;
 
 public abstract class AbstractSender implements Sender, BinlogInfoAware {
-	protected String					name;
-	protected EventFilterChainConfig	filterChainConfig;
-	protected int						maxTryTimes		= 3;
-	protected boolean					canMissEvent	= false;
-	protected volatile boolean			stop			= false;
+	protected String			name;
+	protected int				maxTryTimes		= 3;
+	protected boolean			canMissEvent	= false;
+	protected volatile boolean	stop			= false;
 
 	/**
 	 * @return the maxTryTimes
@@ -81,22 +77,10 @@ public abstract class AbstractSender implements Sender, BinlogInfoAware {
 		this.name = name;
 	}
 
-	public EventFilterChainConfig getFilterChainConfig() {
-		return filterChainConfig;
-	}
-
-	public void setFilterChainConfig(EventFilterChainConfig filterChainConfig) {
-		this.filterChainConfig = filterChainConfig;
-	}
-
 	@Override
-	public void send(DataChangedEvent event, PumaContext context) throws Exception {
-		EventFilterChain filterChain = new DefaultEventFilterChain();
-		filterChain.setEventFilters(filterChainConfig.getEventFilters());
-		if (filterChain.doNext(event, context)) {
-			doSend(event, context);
-		}
+	public void send(ChangedEvent event, PumaContext context) throws Exception {
+		doSend(event, context);
 	}
 
-	protected abstract void doSend(DataChangedEvent event, PumaContext context);
+	protected abstract void doSend(ChangedEvent event, PumaContext context);
 }

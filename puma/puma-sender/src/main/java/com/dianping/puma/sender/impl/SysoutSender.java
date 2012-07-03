@@ -15,7 +15,8 @@
  */
 package com.dianping.puma.sender.impl;
 
-import com.dianping.puma.client.DataChangedEvent;
+import com.dianping.puma.client.ChangedEvent;
+import com.dianping.puma.client.RowChangedEvent;
 import com.dianping.puma.common.bo.PumaContext;
 
 /**
@@ -27,8 +28,14 @@ import com.dianping.puma.common.bo.PumaContext;
 public class SysoutSender extends AbstractSender {
 
 	@Override
-	protected void doSend(DataChangedEvent event, PumaContext context) {
-		System.out.println(event);
+	protected void doSend(ChangedEvent event, PumaContext context) {
+		if ((event instanceof RowChangedEvent) && ((RowChangedEvent) event).isTransactionBegin()) {
+			System.out.println("Begin Transaction");
+		} else if ((event instanceof RowChangedEvent) && ((RowChangedEvent) event).isTransactionCommit()) {
+			System.out.println("Commit Transaction");
+		} else {
+			System.out.println(event);
+		}
 	}
 
 	/*

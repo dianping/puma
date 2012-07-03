@@ -1,6 +1,8 @@
 package com.dianping.puma.sender.filter;
 
-import com.dianping.puma.client.DataChangedEvent;
+import com.dianping.puma.client.ChangedEvent;
+import com.dianping.puma.client.DdlEvent;
+import com.dianping.puma.client.RowChangedEvent;
 
 public class DmlDdlEventFilter extends AbstractEventFilter {
 
@@ -16,25 +18,25 @@ public class DmlDdlEventFilter extends AbstractEventFilter {
 		}
 	}
 
-	protected boolean checkEvent(DataChangedEvent event) {
+	protected boolean checkEvent(ChangedEvent event) {
 		switch (this.operationType) {
 		// dml_only
-		case 0:
-			if (!event.isDdl()) {
+			case 0:
+				if (event instanceof RowChangedEvent) {
+					return true;
+				}
+				break;
+			// ddl_only
+			case 1:
+				if (event instanceof DdlEvent) {
+					return true;
+				}
+				break;
+			// both
+			case 2:
 				return true;
-			}
-			break;
-		// ddl_only
-		case 1:
-			if (event.isDdl()) {
-				return true;
-			}
-			break;
-		// both
-		case 2:
-			return true;
-		default:
-			break;
+			default:
+				break;
 		}
 		return false;
 	}

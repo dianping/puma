@@ -1,7 +1,7 @@
 /**
- * Project: ${puma-sender.aid}
+ * Project: ${puma-common.aid}
  * 
- * File Created at 2012-6-27
+ * File Created at 2012-7-3
  * $Id$
  * 
  * Copyright 2010 dianping.com.
@@ -13,20 +13,17 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.sender;
+package com.dianping.puma.common.storage;
 
-import com.dianping.puma.client.ChangedEvent;
-import com.dianping.puma.common.LifeCycle;
-import com.dianping.puma.common.bo.PumaContext;
+import java.io.InputStream;
 
 /**
- * TODO Comment of Sender
- * 
  * @author Leo Liang
  * 
  */
-public interface Sender extends LifeCycle {
-	public String getName();
+public interface Storage<T> {
 
-	public void send(ChangedEvent event, PumaContext context) throws Exception;
+	public void save(T obj);
+
+	public InputStream read();
 }

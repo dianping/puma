@@ -14,7 +14,7 @@
 		<property name="defaultBinlogPosition" value="4" />
 		<property name="parser" ref="defaultParser" />
 		<property name="serverId" value="9908" />
-		<property name="dataHandler" ref="transactionSupportDataHandler" />
+		<property name="dataHandler" ref="defaultDataHandler" />
 		<property name="dispatcher" ref="simpleDispatcher" />
 	</bean>
 
@@ -24,60 +24,14 @@
 		<property name="name" value="simpleDispatcher" />
 		<property name="senders">
 			<list>
-				<ref bean="swallowSender1" />
+				<ref bean="sysoutSender" />
 			</list>
 		</property>
 	</bean>
 
 
-	<bean id="dbTbFilterChainConfig" class="com.dianping.puma.sender.filter.EventFilterChainConfig">
-		<property name="eventFilters">
-			<list>
-				<ref bean="dbTbEventFilter" />
-				<ref bean="dmlDdlEventFilter" />
-			</list>
-		</property>
-	</bean>
 
-	<bean id="dbTbEventFilter" class="com.dianping.puma.sender.filter.DbTbEventFilter">
-		<property name="dbtbMap">
-			<ref bean="databases1" />
-		</property>
-	</bean>
-
-	<bean id="dmlDdlEventFilter" class="com.dianping.puma.sender.filter.DmlDdlEventFilter">
-		<property name="operationType" value="both" />
-	</bean>
-
-	<bean id="db-test" class="com.dianping.puma.sender.filter.DbTbList">
-		<property name="dbName" value="test" />
-		<property name="tbNameList">
-			<list>
-				<value>*</value>
-			</list>
-		</property>
-	</bean>
-
-	<bean id="db-cat" class="com.dianping.puma.sender.filter.DbTbList">
-		<property name="dbName" value="cat" />
-		<property name="tbNameList">
-			<list>
-				<value>*</value>
-			</list>
-		</property>
-	</bean>
-
-	<bean id="databases1" class="java.util.ArrayList">
-		<constructor-arg>
-			<list>
-				<ref bean="db-test" />
-				<ref bean="db-cat" />
-			</list>
-		</constructor-arg>
-	</bean>
-
-	<bean id="transactionSupportDataHandler"
-		class="com.dianping.puma.datahandler.impl.TransactionSupportDataHandler"
+	<bean id="defaultDataHandler" class="com.dianping.puma.datahandler.impl.DefaultDataHandler"
 		init-method="start">
 		<property name="metaDBHost" value="192.168.7.43" />
 		<property name="metaDBPort" value="3306" />
@@ -98,17 +52,10 @@
 		</constructor-arg>
 	</bean>
 
-	<bean id="fileQueueConfigHolder"
-		class="com.dianping.filequeue.DefaultFileQueueConfig.FileQueueConfigHolder">
-		<property name="maxDataFileSize" value="524288000" />
-		<property name="memCacheSize" value="1000" />
-	</bean>
 
-	<bean id="swallowSender1" class="com.dianping.puma.sender.impl.SwallowSender"
+	<bean id="sysoutSender" class="com.dianping.puma.sender.impl.SysoutSender"
 		init-method="start">
-		<property name="name" value="swallowSender" />
-		<property name="config" ref="fileQueueConfigHolder" />
-		<property name="filterChainConfig" ref="dbTbFilterChainConfig" />
+		<property name="name" value="sysoutSender" />
 	</bean>
 </beans>
 

@@ -19,18 +19,6 @@
 	<inceptionYear>2012.06</inceptionYear>
 	<properties>
 		<puma-all.version>0.1.0</puma-all.version>
-		<puma-common.version>${puma-all.version}</puma-common.version>
-		<puma-common.name>puma-common</puma-common.name>
-		<puma-common.aid>puma-common</puma-common.aid>
-		<puma-parser.version>${puma-all.version}</puma-parser.version>
-		<puma-parser.name>puma-parser</puma-parser.name>
-		<puma-parser.aid>puma-parser</puma-parser.aid>
-		<puma-datahandler.version>${puma-all.version}</puma-datahandler.version>
-		<puma-datahandler.name>puma-datahandler</puma-datahandler.name>
-		<puma-datahandler.aid>puma-datahandler</puma-datahandler.aid>
-		<puma-sender.version>${puma-all.version}</puma-sender.version>
-		<puma-sender.name>puma-sender</puma-sender.name>
-		<puma-sender.aid>puma-sender</puma-sender.aid>
 		<puma-server.version>${puma-all.version}</puma-server.version>
 		<puma-server.name>puma-server</puma-server.name>
 		<puma-server.aid>puma-server</puma-server.aid>
@@ -42,10 +30,6 @@
 		<puma-core.aid>puma-core</puma-core.aid>
 	</properties>
 	<modules>
-		<module>puma-parser</module>
-		<module>puma-common</module>
-		<module>puma-datahandler</module>
-		<module>puma-sender</module>
 		<module>puma-server</module>
 		<module>puma-client</module>
 		<module>puma-core</module>
@@ -55,32 +39,12 @@
 		<dependencies>
 			<dependency>
 				<groupId>com.dianping.puma</groupId>
-				<artifactId>puma-common</artifactId>
-				<version>${puma-all.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.dianping.puma</groupId>
 				<artifactId>puma-core</artifactId>
 				<version>${puma-all.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.dianping.puma</groupId>
-				<artifactId>puma-datahandler</artifactId>
-				<version>${puma-all.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.dianping.puma</groupId>
 				<artifactId>puma-client</artifactId>
-				<version>${puma-all.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.dianping.puma</groupId>
-				<artifactId>puma-sender</artifactId>
-				<version>${puma-all.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.dianping.puma</groupId>
-				<artifactId>puma-parser</artifactId>
 				<version>${puma-all.version}</version>
 			</dependency>
 			<dependency>

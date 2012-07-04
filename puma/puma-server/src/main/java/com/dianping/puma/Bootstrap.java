@@ -1,4 +1,4 @@
-package com.dianping.puma.server;
+package com.dianping.puma;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -15,6 +15,7 @@ import com.dianping.puma.common.bo.PositionInfo;
 import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.util.PositionFileUtils;
 import com.dianping.puma.core.util.PumaThreadUtils;
+import com.dianping.puma.server.Server;
 
 public class Bootstrap {
 

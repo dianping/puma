@@ -24,15 +24,43 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.dianping.puma</groupId>
-			<artifactId>puma-datahandler</artifactId>
+			<artifactId>puma-core</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.dianping.puma</groupId>
-			<artifactId>puma-parser</artifactId>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.dianping.puma</groupId>
-			<artifactId>puma-common</artifactId>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.dianping.hawk</groupId>
@@ -50,8 +78,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.dianping.puma</groupId>
-			<artifactId>puma-sender</artifactId>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
 	</dependencies>
 </project>

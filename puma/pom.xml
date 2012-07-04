@@ -28,9 +28,6 @@
 		<puma-datahandler.version>${puma-all.version}</puma-datahandler.version>
 		<puma-datahandler.name>puma-datahandler</puma-datahandler.name>
 		<puma-datahandler.aid>puma-datahandler</puma-datahandler.aid>
-		<puma-dispatcher.version>${puma-all.version}</puma-dispatcher.version>
-		<puma-dispatcher.name>puma-dispatcher</puma-dispatcher.name>
-		<puma-dispatcher.aid>puma-dispatcher</puma-dispatcher.aid>
 		<puma-sender.version>${puma-all.version}</puma-sender.version>
 		<puma-sender.name>puma-sender</puma-sender.name>
 		<puma-sender.aid>puma-sender</puma-sender.aid>
@@ -45,7 +42,6 @@
 		<module>puma-parser</module>
 		<module>puma-common</module>
 		<module>puma-datahandler</module>
-		<module>puma-dispatcher</module>
 		<module>puma-sender</module>
 		<module>puma-server</module>
 		<module>puma-client</module>

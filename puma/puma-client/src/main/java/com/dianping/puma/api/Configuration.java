@@ -21,8 +21,4 @@ public class Configuration {
 	public Configuration transaction(boolean supported) {
 	   return this;
    }
-
-	public Configuration batch(int batchSize) {
-	   return this;
-   }
 }

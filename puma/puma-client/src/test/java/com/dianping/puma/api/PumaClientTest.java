@@ -11,28 +11,26 @@ public class PumaClientTest {
 	// DDL & DML [both true]
 	// starting sequence [0]
 	// transaction supported? [false]
-	// max batch size [1000]
-	//String url = "http://localhost:7862/puma/channel?dt=mysql.*&dt=cat.!report&ddl=false&seq=12345&ts=true&batch=100";
+	// String url =
+	// "http://localhost:7862/puma/channel?dt=mysql.*&dt=cat.!report&ddl=false&seq=12345&ts=true&batch=100";
 	@Test
 	public void testApi() {
 		Configuration config = new Configuration() //
 		      .server("localhost", 7862) //
-		      .table("mysql", "*")//
+		      .table("mysql", "*") //
 		      .table("cat", "!report", "!tmp")//
 		      .ddl(false) //
 		      .seq(12345) //
-		      .transaction(true) //
-		      .batch(100);
-		
+		      .transaction(true);
+
 		PumaClient client = new PumaClient(config);
 
 		client.subscribe(new EventListener() {
 			@Override
-         public void onEvent(ChangedEvent event) {
-	         // TODO
-         }
+			public void onEvent(ChangedEvent event) {
+			}
 		});
-		
+
 		client.start();
 		client.stop();
 	}

@@ -1,3 +1,5 @@
+/ws/*
+
 # should not ignored #
 !*.java
 !*.gitignore

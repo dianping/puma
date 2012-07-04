@@ -23,7 +23,7 @@ import java.io.Serializable;
  * @author Leo Liang
  * 
  */
-public class ChangedEvent implements Serializable {
+public abstract class ChangedEvent implements Serializable {
 	private static final long	serialVersionUID	= -2358086827502066009L;
 	private long				executeTime;
 	private String				database;

@@ -21,9 +21,9 @@ import java.util.Arrays;
 import java.util.BitSet;
 
 import com.dianping.puma.common.bo.PumaContext;
-import com.dianping.puma.common.datatype.UnsignedLong;
 import com.dianping.puma.common.mysql.Metadata;
 import com.dianping.puma.common.util.PacketUtils;
+import com.dianping.puma.core.datatype.UnsignedLong;
 
 /**
  * TODO Comment of TableMapEvent

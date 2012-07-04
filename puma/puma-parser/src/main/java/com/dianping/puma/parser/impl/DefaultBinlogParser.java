@@ -22,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
 
-import com.dianping.puma.common.annotation.ThreadSafe;
 import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.monitor.BinlogInfoAware;
 import com.dianping.puma.common.mysql.BinlogConstanst;
@@ -43,6 +42,7 @@ import com.dianping.puma.common.mysql.event.UpdateRowsEvent;
 import com.dianping.puma.common.mysql.event.UserVarEvent;
 import com.dianping.puma.common.mysql.event.WriteRowsEvent;
 import com.dianping.puma.common.mysql.event.XIDEvent;
+import com.dianping.puma.core.annotation.ThreadSafe;
 import com.dianping.puma.parser.Parser;
 
 /**

@@ -1,8 +1,8 @@
 package com.dianping.puma.sender.impl;
 
-import com.dianping.puma.client.ChangedEvent;
 import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.monitor.BinlogInfoAware;
+import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.sender.Sender;
 
 public abstract class AbstractSender implements Sender, BinlogInfoAware {

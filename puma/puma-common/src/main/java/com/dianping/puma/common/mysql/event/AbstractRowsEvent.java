@@ -24,7 +24,6 @@ import java.util.List;
 import org.apache.commons.lang.exception.NestableRuntimeException;
 
 import com.dianping.puma.common.bo.PumaContext;
-import com.dianping.puma.common.datatype.UnsignedLong;
 import com.dianping.puma.common.mysql.BinlogConstanst;
 import com.dianping.puma.common.mysql.Metadata;
 import com.dianping.puma.common.mysql.Row;
@@ -51,6 +50,7 @@ import com.dianping.puma.common.mysql.column.YearColumn;
 import com.dianping.puma.common.util.CodecUtils;
 import com.dianping.puma.common.util.MySQLUtils;
 import com.dianping.puma.common.util.PacketUtils;
+import com.dianping.puma.core.datatype.UnsignedLong;
 
 /**
  * TODO Comment of AbstractRowsEvent

@@ -24,9 +24,6 @@ import java.net.UnknownHostException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.dianping.puma.client.DdlEvent;
-import com.dianping.puma.client.RowChangedEvent;
-import com.dianping.puma.common.annotation.ThreadUnSafe;
 import com.dianping.puma.common.bo.PositionInfo;
 import com.dianping.puma.common.mysql.BinlogConstanst;
 import com.dianping.puma.common.mysql.event.BinlogEvent;
@@ -38,6 +35,9 @@ import com.dianping.puma.common.mysql.packet.OKErrorPacket;
 import com.dianping.puma.common.mysql.packet.PacketFactory;
 import com.dianping.puma.common.mysql.packet.PacketType;
 import com.dianping.puma.common.util.PositionFileUtils;
+import com.dianping.puma.core.annotation.ThreadUnSafe;
+import com.dianping.puma.core.event.DdlEvent;
+import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.datahandler.DataHandlerResult;
 import com.dianping.puma.server.monitor.ServerMonitorMBean;
 

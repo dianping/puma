@@ -17,7 +17,7 @@ package com.dianping.puma.datahandler;
 
 import java.io.Serializable;
 
-import com.dianping.puma.client.ChangedEvent;
+import com.dianping.puma.core.event.ChangedEvent;
 
 /**
  * TODO Comment of DataHandlerResult

@@ -10,7 +10,7 @@
  * Confidential Information and shall use it only in accordance with the terms
  * of the license agreement you entered into with dianping.com.
  */
-package com.dianping.puma.common.datatype;
+package com.dianping.puma.core.datatype;
 
 /*
  * Copyright (C) 2008 The Guava Authors

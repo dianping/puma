@@ -19,7 +19,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.BitSet;
 
-import com.dianping.puma.common.datatype.UnsignedLong;
+import com.dianping.puma.core.datatype.UnsignedLong;
 
 /**
  * @author Leo Liang

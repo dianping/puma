@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.dianping.puma.client.ChangedEvent;
+import com.dianping.puma.core.event.ChangedEvent;
 
 public class DbTbEventFilter extends AbstractEventFilter {
 

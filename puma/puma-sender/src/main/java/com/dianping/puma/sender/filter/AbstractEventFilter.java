@@ -1,7 +1,7 @@
 package com.dianping.puma.sender.filter;
 
-import com.dianping.puma.client.ChangedEvent;
 import com.dianping.puma.common.bo.PumaContext;
+import com.dianping.puma.core.event.ChangedEvent;
 
 public abstract class AbstractEventFilter implements EventFilter {
 	public boolean accept(ChangedEvent event, EventFilterChain eventfilterChain, PumaContext context) {

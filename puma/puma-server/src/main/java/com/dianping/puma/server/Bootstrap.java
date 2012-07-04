@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
@@ -13,7 +14,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import com.dianping.puma.common.bo.PositionInfo;
 import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.util.PositionFileUtils;
-import com.dianping.puma.common.util.PumaThreadUtils;
+import com.dianping.puma.core.util.PumaThreadUtils;
 
 public class Bootstrap {
 
@@ -40,8 +41,8 @@ public class Bootstrap {
 		// start servers
 		for (Server server : servers) {
 
-			PositionInfo posInfo = PositionFileUtils.getPositionInfo(server.getServerName(), server
-					.getDefaultBinlogFileName(), server.getDefaultBinlogPosition());
+			PositionInfo posInfo = PositionFileUtils.getPositionInfo(server.getServerName(),
+					server.getDefaultBinlogFileName(), server.getDefaultBinlogPosition());
 			PumaContext context = new PumaContext();
 			context.setPumaServerId(server.getServerId());
 			context.setPumaServerName(server.getServerName());

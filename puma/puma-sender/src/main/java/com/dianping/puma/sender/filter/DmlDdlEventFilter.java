@@ -1,8 +1,8 @@
 package com.dianping.puma.sender.filter;
 
-import com.dianping.puma.client.ChangedEvent;
-import com.dianping.puma.client.DdlEvent;
-import com.dianping.puma.client.RowChangedEvent;
+import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.DdlEvent;
+import com.dianping.puma.core.event.RowChangedEvent;
 
 public class DmlDdlEventFilter extends AbstractEventFilter {
 

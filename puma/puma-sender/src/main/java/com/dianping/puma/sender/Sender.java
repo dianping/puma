@@ -15,9 +15,9 @@
  */
 package com.dianping.puma.sender;
 
-import com.dianping.puma.client.ChangedEvent;
 import com.dianping.puma.common.LifeCycle;
 import com.dianping.puma.common.bo.PumaContext;
+import com.dianping.puma.core.event.ChangedEvent;
 
 /**
  * TODO Comment of Sender

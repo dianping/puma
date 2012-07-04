@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.common.util;
+package com.dianping.puma.core.util;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;

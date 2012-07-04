@@ -20,8 +20,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.dianping.puma.client.ChangedEvent;
 import com.dianping.puma.common.bo.PumaContext;
+import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.sender.Sender;
 
 /**

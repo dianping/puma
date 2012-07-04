@@ -26,9 +26,5 @@
 			<groupId>com.dianping.puma</groupId>
 			<artifactId>puma-common</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.dianping.puma</groupId>
-			<artifactId>puma-client</artifactId>
-		</dependency>
 	</dependencies>
 </project>

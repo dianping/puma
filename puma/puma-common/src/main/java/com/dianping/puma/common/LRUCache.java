@@ -18,7 +18,7 @@ package com.dianping.puma.common;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
-import com.dianping.puma.common.annotation.ThreadUnSafe;
+import com.dianping.puma.core.annotation.ThreadUnSafe;
 
 /**
  * TODO Comment of LRUCache

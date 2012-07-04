@@ -20,10 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.dianping.puma.client.RowChangedEvent;
-import com.dianping.puma.client.RowChangedEvent.ActionType;
-import com.dianping.puma.client.RowChangedEvent.ColumnInfo;
-import com.dianping.puma.common.annotation.ThreadUnSafe;
 import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.mysql.BinlogConstanst;
 import com.dianping.puma.common.mysql.column.Column;
@@ -33,6 +29,10 @@ import com.dianping.puma.common.mysql.event.DeleteRowsEvent;
 import com.dianping.puma.common.mysql.event.TableMapEvent;
 import com.dianping.puma.common.mysql.event.UpdateRowsEvent;
 import com.dianping.puma.common.mysql.event.WriteRowsEvent;
+import com.dianping.puma.core.annotation.ThreadUnSafe;
+import com.dianping.puma.core.event.RowChangedEvent;
+import com.dianping.puma.core.event.RowChangedEvent.ActionType;
+import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
 import com.dianping.puma.datahandler.DataHandlerResult;
 import com.dianping.puma.datahandler.TableMetaInfo;
 

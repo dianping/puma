@@ -7,9 +7,9 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dianping.puma</groupId>
-	<name>${puma-client.name}</name>
-	<artifactId>${puma-client.aid}</artifactId>
-	<version>${puma-client.version}</version>
+	<name>${puma-core.name}</name>
+	<artifactId>${puma-core.aid}</artifactId>
+	<version>${puma-core.version}</version>
 	<packaging>jar</packaging>
 	<build>
 		<testResources>
@@ -22,9 +22,5 @@
 		</testResources>
 	</build>
 	<dependencies>
-		<dependency>
-			<groupId>com.dianping.puma</groupId>
-			<artifactId>puma-core</artifactId>
-		</dependency>
 	</dependencies>
 </project>

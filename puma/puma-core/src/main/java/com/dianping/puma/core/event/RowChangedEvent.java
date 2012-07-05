@@ -31,8 +31,12 @@ public class RowChangedEvent extends ChangedEvent implements Serializable {
 
 	private static final long		serialVersionUID	= -3426837914222597530L;
 
+	public static final int			INSERT				= 0;
+	public static final int			DELETE				= 1;
+	public static final int			UPDATE				= 2;
+
 	private Map<String, ColumnInfo>	columns				= new HashMap<String, ColumnInfo>();
-	private ActionType				actionType;
+	private int						actionType;
 	private boolean					isTransactionBegin	= false;
 	private boolean					isTransactionCommit	= false;
 
@@ -84,7 +88,7 @@ public class RowChangedEvent extends ChangedEvent implements Serializable {
 	/**
 	 * @return the actionType
 	 */
-	public ActionType getActionType() {
+	public int getActionType() {
 		return actionType;
 	}
 
@@ -92,12 +96,8 @@ public class RowChangedEvent extends ChangedEvent implements Serializable {
 	 * @param actionType
 	 *            the actionType to set
 	 */
-	public void setActionType(ActionType actionType) {
+	public void setActionType(int actionType) {
 		this.actionType = actionType;
-	}
-
-	public static enum ActionType {
-		INSERT, DELETE, UPDATE;
 	}
 
 	/*
@@ -117,6 +117,13 @@ public class RowChangedEvent extends ChangedEvent implements Serializable {
 		private boolean				isKey;
 		private Object				oldValue;
 		private Object				newValue;
+
+		/**
+		 * 
+		 */
+		public ColumnInfo() {
+			super();
+		}
 
 		/**
 		 * @param isKey

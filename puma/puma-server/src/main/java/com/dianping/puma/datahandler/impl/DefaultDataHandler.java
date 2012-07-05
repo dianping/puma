@@ -31,7 +31,6 @@ import com.dianping.puma.common.mysql.event.UpdateRowsEvent;
 import com.dianping.puma.common.mysql.event.WriteRowsEvent;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.event.RowChangedEvent.ActionType;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
 import com.dianping.puma.datahandler.DataHandlerResult;
 import com.dianping.puma.datahandler.TableMetaInfo;
@@ -73,7 +72,8 @@ public class DefaultDataHandler extends AbstractDataHandler {
 					result.setFinished(true);
 				} else {
 					RowChangedEvent rowChangedEvent = new RowChangedEvent();
-					Map<String, ColumnInfo> columns = initColumns(writeRowsEvent, rowChangedEvent, ActionType.INSERT);
+					Map<String, ColumnInfo> columns = initColumns(writeRowsEvent, rowChangedEvent,
+							RowChangedEvent.INSERT);
 
 					for (int columnPos = 0, columnIndex = 0; columnPos < writeRowsEvent.getColumnCount().intValue(); columnPos++) {
 						if (writeRowsEvent.getUsedColumns().get(columnPos)) {
@@ -102,7 +102,8 @@ public class DefaultDataHandler extends AbstractDataHandler {
 					result.setFinished(true);
 				} else {
 					RowChangedEvent rowChangedEvent = new RowChangedEvent();
-					Map<String, ColumnInfo> columns = initColumns(updateRowsEvent, rowChangedEvent, ActionType.UPDATE);
+					Map<String, ColumnInfo> columns = initColumns(updateRowsEvent, rowChangedEvent,
+							RowChangedEvent.UPDATE);
 
 					for (int columnPos = 0, columnAfterIndex = 0, columnBeforeIndex = 0; columnPos < updateRowsEvent
 							.getColumnCount().intValue(); columnPos++) {
@@ -140,7 +141,8 @@ public class DefaultDataHandler extends AbstractDataHandler {
 					result.setFinished(true);
 				} else {
 					RowChangedEvent rowChangedEvent = new RowChangedEvent();
-					Map<String, ColumnInfo> columns = initColumns(deleteRowsEvent, rowChangedEvent, ActionType.DELETE);
+					Map<String, ColumnInfo> columns = initColumns(deleteRowsEvent, rowChangedEvent,
+							RowChangedEvent.DELETE);
 
 					for (int columnPos = 0, columnIndex = 0; columnPos < deleteRowsEvent.getColumnCount().intValue(); columnPos++) {
 						if (deleteRowsEvent.getUsedColumns().get(columnPos)) {
@@ -199,7 +201,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 	}
 
 	private Map<String, ColumnInfo> initColumns(AbstractRowsEvent rowsEvent, RowChangedEvent rowChangedData,
-			ActionType actionType) {
+			int actionType) {
 		Map<String, ColumnInfo> columns = new HashMap<String, ColumnInfo>();
 		rowChangedData.setActionType(actionType);
 		rowChangedData.setExecuteTime(rowsEvent.getHeader().getTimestamp());

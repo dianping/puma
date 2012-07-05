@@ -13,17 +13,22 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.common.storage;
+package com.dianping.puma.storage;
 
-import java.io.InputStream;
+import java.io.IOException;
+
+import com.dianping.puma.core.event.ChangedEvent;
 
 /**
  * @author Leo Liang
  * 
  */
-public interface Storage<T> {
+public interface Bucket {
+	public void append(ChangedEvent event) throws IOException;
 
-	public void save(T obj);
+	public ChangedEvent getNext() throws IOException;
 
-	public InputStream read();
+	public void seek(int offset) throws IOException;
+
+	public void close() throws IOException;
 }

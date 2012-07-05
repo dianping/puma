@@ -28,6 +28,22 @@ public abstract class ChangedEvent implements Serializable {
 	private long				executeTime;
 	private String				database;
 	private String				table;
+	private long				seq;
+
+	/**
+	 * @return the seq
+	 */
+	public long getSeq() {
+		return seq;
+	}
+
+	/**
+	 * @param seq
+	 *            the seq to set
+	 */
+	public void setSeq(long seq) {
+		this.seq = seq;
+	}
 
 	/**
 	 * @return the executeTime

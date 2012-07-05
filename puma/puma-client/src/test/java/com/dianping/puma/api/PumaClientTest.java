@@ -15,15 +15,15 @@ public class PumaClientTest {
 	// "http://localhost:7862/puma/channel?dt=mysql.*&dt=cat.!report&ddl=false&seq=12345&ts=true&batch=100";
 	@Test
 	public void testApi() {
-		Configuration config = new Configuration() //
-		      .server("localhost", 7862) //
-		      .table("mysql", "*") //
-		      .table("cat", "!report", "!tmp")//
-		      .ddl(false) //
-		      .seq(12345) //
-		      .transaction(true);
+		ConfigurationBuilder configBuilder = new ConfigurationBuilder() //
+				.host("localhost") //
+				.port(7862)//
+				.tables("mysql", "*") //
+				.tables("cat", "!report", "!tmp")//
+				.ddl(false) //
+				.transaction(true);
 
-		PumaClient client = new PumaClient(config);
+		PumaClient client = new PumaClient(configBuilder.build());
 
 		client.subscribe(new EventListener() {
 			@Override

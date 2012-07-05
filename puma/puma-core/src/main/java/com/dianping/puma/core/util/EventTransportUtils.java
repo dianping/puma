@@ -26,7 +26,7 @@ import com.dianping.puma.core.event.ChangedEvent;
  * @author Leo Liang
  * 
  */
-public class TransportUtils {
+public class EventTransportUtils {
 
 	public static void write(ChangedEvent event, OutputStream out) {
 		// TODO

@@ -12,7 +12,7 @@ import org.apache.log4j.Logger;
 
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.util.PumaThreadUtils;
-import com.dianping.puma.core.util.TransportUtils;
+import com.dianping.puma.core.util.EventTransportUtils;
 
 public class PumaClient {
 
@@ -137,7 +137,7 @@ public class PumaClient {
 							break;
 						}
 
-						ChangedEvent event = TransportUtils.read(is);
+						ChangedEvent event = EventTransportUtils.read(is);
 						boolean listenerCallSuccess = true;
 
 						// call event listener until success

@@ -33,16 +33,18 @@ import com.dianping.puma.core.event.RowChangedEvent;
  * 
  */
 public class EventTransportUtils {
+	public static final int	DDL_EVENT	= 0;
+	public static final int	DML_EVENT	= 1;
 
 	public static void write(ChangedEvent event, OutputStream out) throws IOException {
 		ObjectMapper om = new ObjectMapper();
 		byte[] data = om.writeValueAsBytes(event);
-		out.write(data.length + 1);
+		out.write(intToByteArray(data.length + 1));
 
 		if (event instanceof DdlEvent) {
-			out.write(0);
+			out.write(DDL_EVENT);
 		} else {
-			out.write(1);
+			out.write(DML_EVENT);
 		}
 
 		out.write(data);
@@ -50,11 +52,13 @@ public class EventTransportUtils {
 
 	public static ChangedEvent read(InputStream is) throws IOException {
 		ObjectMapper om = new ObjectMapper();
-		int length = is.read() - 1;
-		byte[] data = new byte[length];
+		byte[] lengthBytes = new byte[4];
+		readFully(is, lengthBytes, 0, 4);
+		int length = byteArrayToInt(lengthBytes);
+		byte[] data = new byte[length - 1];
 		int type = is.read();
-		readFully(is, data, 0, length);
-		if (type == 0) {
+		readFully(is, data, 0, length - 1);
+		if (type == DDL_EVENT) {
 			return om.readValue(data, DdlEvent.class);
 		} else {
 			return om.readValue(data, RowChangedEvent.class);
@@ -79,4 +83,20 @@ public class EventTransportUtils {
 		}
 		return n;
 	}
+
+	private static final byte[] intToByteArray(int value) {
+		return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value };
+	}
+
+	private static final int byteArrayToInt(byte[] data) {
+		if (data.length <= 4) {
+			int r = 0;
+			for (int i = 0; i < data.length; i++) {
+				r |= ((data[i] & 0xff) << ((data.length - i - 1) << 3));
+			}
+			return r;
+		}
+		return 0;
+	}
+
 }

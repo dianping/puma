@@ -28,13 +28,19 @@ import java.util.Map;
  * 
  */
 public class Configuration implements Serializable {
-	private static final long			serialVersionUID		= 5160892707659109303L;
-	private String						host;
-	private int							port					= 7862;
-	private Map<String, List<String>>	databaseTablesMapping	= new HashMap<String, List<String>>();
-	private boolean						needDdl					= false;
-	private boolean						needDml					= true;
-	private boolean						needTransactionInfo		= false;
+	private static final long serialVersionUID = 5160892707659109303L;
+
+	private String host;
+
+	private int port = 7862;
+
+	private Map<String, List<String>> databaseTablesMapping = new HashMap<String, List<String>>();
+
+	private boolean needDdl = false;
+
+	private boolean needDml = true;
+
+	private boolean needTransactionInfo = false;
 
 	/**
 	 * @return the needDml
@@ -45,7 +51,7 @@ public class Configuration implements Serializable {
 
 	/**
 	 * @param needDml
-	 *            the needDml to set
+	 *           the needDml to set
 	 */
 	public void setNeedDml(boolean needDml) {
 		this.needDml = needDml;
@@ -60,7 +66,7 @@ public class Configuration implements Serializable {
 
 	/**
 	 * @param host
-	 *            the host to set
+	 *           the host to set
 	 */
 	public void setHost(String host) {
 		this.host = host;
@@ -75,7 +81,7 @@ public class Configuration implements Serializable {
 
 	/**
 	 * @param port
-	 *            the port to set
+	 *           the port to set
 	 */
 	public void setPort(int port) {
 		this.port = port;
@@ -105,7 +111,7 @@ public class Configuration implements Serializable {
 
 	/**
 	 * @param needDdl
-	 *            the needDdl to set
+	 *           the needDdl to set
 	 */
 	public void setNeedDdl(boolean needDdl) {
 		this.needDdl = needDdl;
@@ -120,7 +126,7 @@ public class Configuration implements Serializable {
 
 	/**
 	 * @param needTransactionInfo
-	 *            the needTransactionInfo to set
+	 *           the needTransactionInfo to set
 	 */
 	public void setNeedTransactionInfo(boolean needTransactionInfo) {
 		this.needTransactionInfo = needTransactionInfo;
@@ -134,8 +140,12 @@ public class Configuration implements Serializable {
 	@Override
 	public String toString() {
 		return "Configuration [host=" + host + ", port=" + port + ", databaseTablesMapping=" + databaseTablesMapping
-				+ ", needDdl=" + needDdl + ", needDml=" + needDml + ", needTransactionInfo=" + needTransactionInfo
-				+ "]";
+		      + ", needDdl=" + needDdl + ", needDml=" + needDml + ", needTransactionInfo=" + needTransactionInfo + "]";
 	}
 
+	public void validate() {
+		if (host == null || host.trim().length() == 0) {
+			throw new IllegalArgumentException("Puma client's host not set.");
+		}
+	}
 }

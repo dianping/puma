@@ -7,10 +7,8 @@ import com.dianping.puma.core.datatype.Pair;
 public interface BucketManager {
 	public Bucket getBucket(long seq) throws IOException;
 
-	/**
-	 * @param seq
-	 * @return
-	 */
+	public Bucket getNextBucket(long seq);
+	
 	public Pair<Bucket, Long> getNextBucket(long seq);
 
 }

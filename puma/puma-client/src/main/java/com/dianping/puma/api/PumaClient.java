@@ -11,53 +11,48 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.core.util.EventTransportUtils;
+import com.dianping.puma.core.util.PumaThreadUtils;
 
 public class PumaClient {
+	private static final Logger log = Logger.getLogger(PumaClient.class);
 
-	private static final Logger	log		= Logger.getLogger(PumaClient.class);
+	private Configuration config;
 
-	private Configuration		config;
-	private EventListener		eventListener;
-	private volatile boolean	stop	= true;
-	private SeqFileHolder		seqFileHolder;
+	private EventListener eventListener;
+
+	private volatile boolean active;
+
+	private SeqFileHolder seqFileHolder;
 
 	public PumaClient(Configuration config) {
-		this(config, new DefaultSeqFileHolder(config));
-	}
+		if (config == null) {
+			throw new IllegalArgumentException("Config can't be null!");
+		}
 
-	public PumaClient(Configuration config, SeqFileHolder seqFileHolder) {
 		this.config = config;
-		this.seqFileHolder = seqFileHolder;
+		this.seqFileHolder = new DefaultSeqFileHolder(config);
 	}
 
-	public void subscribe(EventListener listener) {
+	public void register(EventListener listener) {
 		this.eventListener = listener;
 	}
 
 	public void stop() {
-		stop = true;
+		active = false;
 	}
 
 	public void start() {
-		if (config == null) {
-			throw new IllegalArgumentException("Puma client has no config.");
-		}
-		if (config.getHost() == null || config.getHost().trim().length() == 0) {
-			throw new IllegalArgumentException("Puma client's host not set.");
-		}
-		if (eventListener == null) {
-			throw new IllegalArgumentException("Puma client has no listener.");
-		}
+		config.validate();
+
 		Thread subscribeThread = PumaThreadUtils.createThread(new PumaClientTask(), "PumaClientSub", false);
 
-		stop = false;
+		active = true;
 		subscribeThread.start();
 	}
 
 	private boolean checkStop() {
-		if (stop) {
+		if (!active) {
 			log.info("Puma client stopped.");
 			return true;
 		}
@@ -65,11 +60,11 @@ public class PumaClient {
 			log.info("Puma client stopped since interrupted.");
 			return true;
 		}
+		
 		return false;
 	}
 
 	private InputStream connect() {
-
 		try {
 			final URL url = new URL("http://" + config.getHost() + ":" + config.getPort() + "/puma/channel");
 
@@ -82,18 +77,17 @@ public class PumaClient {
 			PrintWriter out = new PrintWriter(connection.getOutputStream());
 
 			out.print(URLEncoder.encode("seq", "UTF-8") + "="
-					+ URLEncoder.encode(String.valueOf(seqFileHolder.getSeq()), "UTF-8"));
+			      + URLEncoder.encode(String.valueOf(seqFileHolder.getSeq()), "UTF-8"));
 			out.print(URLEncoder.encode("ddl", "UTF-8") + "="
-					+ URLEncoder.encode(Boolean.toString(config.isNeedDdl()), "UTF-8"));
+			      + URLEncoder.encode(Boolean.toString(config.isNeedDdl()), "UTF-8"));
 			out.print(URLEncoder.encode("dml", "UTF-8") + "="
-					+ URLEncoder.encode(Boolean.toString(config.isNeedDml()), "UTF-8"));
+			      + URLEncoder.encode(Boolean.toString(config.isNeedDml()), "UTF-8"));
 			out.print(URLEncoder.encode("ts", "UTF-8") + "="
-					+ URLEncoder.encode(Boolean.toString(config.isNeedTransactionInfo()), "UTF-8"));
+			      + URLEncoder.encode(Boolean.toString(config.isNeedTransactionInfo()), "UTF-8"));
 
 			for (Map.Entry<String, List<String>> entry : config.getDatabaseTablesMapping().entrySet()) {
 				for (String tb : entry.getValue()) {
-					out.print(URLEncoder.encode("dt", "UTF-8") + "="
-							+ URLEncoder.encode(entry.getKey() + "." + tb, "UTF-8"));
+					out.print(URLEncoder.encode("dt", "UTF-8") + "=" + URLEncoder.encode(entry.getKey() + "." + tb, "UTF-8"));
 				}
 			}
 

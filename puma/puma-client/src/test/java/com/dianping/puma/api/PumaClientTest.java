@@ -25,13 +25,15 @@ public class PumaClientTest {
 
 		PumaClient client = new PumaClient(configBuilder.build());
 
-		client.subscribe(new EventListener() {
+		client.register(new EventListener() {
 			@Override
 			public void onEvent(ChangedEvent event) {
 			}
 		});
 
 		client.start();
+		
+		
 		client.stop();
 	}
 }

@@ -5,8 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import com.dianping.puma.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.storage.codec.EventCodec;
 
 public class FileBucket implements Bucket {
 	private EventCodec codec;

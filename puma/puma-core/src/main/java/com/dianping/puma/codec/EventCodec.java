@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.codec;
+package com.dianping.puma.codec;
 
 import com.dianping.puma.core.event.ChangedEvent;
 

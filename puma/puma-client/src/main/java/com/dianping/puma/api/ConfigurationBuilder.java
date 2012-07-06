@@ -38,6 +38,11 @@ public class ConfigurationBuilder {
 		return this;
 	}
 
+	public ConfigurationBuilder codecType(String codecType) {
+		this.configuration.setCodecType(codecType);
+		return this;
+	}
+
 	public Configuration build() {
 		return this.configuration;
 	}

@@ -18,12 +18,16 @@ package com.dianping.puma.core.util;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.dianping.puma.core.codec.EventCodec;
+import com.dianping.puma.core.codec.JsonEventCodec;
+import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
@@ -34,7 +38,10 @@ import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
  * @author Leo Liang
  * 
  */
-public class EventTransportUtilsTest {
+public class JsonEventCodecTest {
+
+	private EventCodec	codec	= new JsonEventCodec();
+
 	@Test
 	public void testDdl() throws IOException {
 		DdlEvent event = new DdlEvent();
@@ -45,9 +52,12 @@ public class EventTransportUtilsTest {
 		event.setSql("SELECT * FROM testtb");
 
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		EventTransportUtils.write(event, bos);
+		byte[] data = codec.encode(event);
+		bos.write(intToByteArray(data.length));
+		bos.write(data);
 		ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-		DdlEvent result = (DdlEvent) EventTransportUtils.read(bis);
+
+		DdlEvent result = (DdlEvent) readEvent(bis);
 		Assert.assertEquals(event.getDatabase(), result.getDatabase());
 		Assert.assertEquals(event.getExecuteTime(), result.getExecuteTime());
 		Assert.assertEquals(event.getSeq(), result.getSeq());
@@ -70,9 +80,11 @@ public class EventTransportUtilsTest {
 		event.setColumns(columns);
 
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		EventTransportUtils.write(event, bos);
+		byte[] data = codec.encode(event);
+		bos.write(intToByteArray(data.length));
+		bos.write(data);
 		ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-		RowChangedEvent result = (RowChangedEvent) EventTransportUtils.read(bis);
+		RowChangedEvent result = (RowChangedEvent) readEvent(bis);
 		Assert.assertEquals(event.getDatabase(), result.getDatabase());
 		Assert.assertEquals(event.getExecuteTime(), result.getExecuteTime());
 		Assert.assertEquals(event.getSeq(), result.getSeq());
@@ -86,4 +98,18 @@ public class EventTransportUtilsTest {
 			Assert.assertEquals(entry.getValue().getOldValue(), result.getColumns().get(entry.getKey()).getOldValue());
 		}
 	}
+
+	private ChangedEvent readEvent(InputStream is) throws IOException {
+		byte[] lengthArray = new byte[4];
+		StreamUtils.readFully(is, lengthArray, 0, 4);
+		int length = ByteArrayUtils.byteArrayToInt(lengthArray, 0, 4);
+		byte[] data = new byte[length];
+		StreamUtils.readFully(is, data, 0, length);
+		return codec.decode(data);
+	}
+
+	public static final byte[] intToByteArray(int value) {
+		return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value };
+	}
+
 }

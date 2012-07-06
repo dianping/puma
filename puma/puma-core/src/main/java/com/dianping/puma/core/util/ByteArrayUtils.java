@@ -1,5 +1,5 @@
 /**
- * Project: puma-server
+ * Project: puma-core
  * 
  * File Created at 2012-7-6
  * $Id$
@@ -13,14 +13,25 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.storage;
+package com.dianping.puma.core.util;
 
 /**
- * TODO Comment of StorageSequence
+ * TODO Comment of ByteArrayUtils
  * 
  * @author Leo Liang
  * 
  */
-public interface StorageSequence {
+public class ByteArrayUtils {
+
+	public static int byteArrayToInt(byte[] data, int start, int length) {
+		if (length <= 4) {
+			int r = 0;
+			for (int i = start; i < length; i++) {
+				r |= ((data[i] & 0xff) << ((length - (i - start) - 1) << 3));
+			}
+			return r;
+		}
+		return 0;
+	}
 
 }

@@ -28,33 +28,58 @@ import java.util.Map;
  * 
  */
 public class Configuration implements Serializable {
-	private static final long serialVersionUID = 5160892707659109303L;
+	private static final long			serialVersionUID		= 5160892707659109303L;
+	private String						codecType				= "json";
+	private Map<String, List<String>>	databaseTablesMapping	= new HashMap<String, List<String>>();
+	private String						host;
+	private boolean						needDdl					= false;
+	private boolean						needDml					= true;
+	private boolean						needTransactionInfo		= false;
+	private int							port					= 7862;
 
-	private String host;
+	public void addDatabaseTable(String database, String... tablePatterns) {
+		if (!this.databaseTablesMapping.containsKey(database)) {
+			this.databaseTablesMapping.put(database, Arrays.asList(tablePatterns));
+		} else {
+			this.databaseTablesMapping.get(database).addAll(Arrays.asList(tablePatterns));
+		}
+	}
 
-	private int port = 7862;
+	public String buildRequestParamString(long seq) {
+		StringBuilder param = new StringBuilder();
+		param.append("seq=").append(seq);
+		param.append("&ddl=").append(needDdl);
+		param.append("&dml=").append(needDml);
+		param.append("&ts=").append(needTransactionInfo);
+		param.append("&codec=").append(codecType);
+		for (Map.Entry<String, List<String>> entry : databaseTablesMapping.entrySet()) {
+			for (String tb : entry.getValue()) {
+				param.append("&dt=").append(entry.getKey()).append(".").append(tb);
+			}
+		}
 
-	private Map<String, List<String>> databaseTablesMapping = new HashMap<String, List<String>>();
-
-	private boolean needDdl = false;
-
-	private boolean needDml = true;
-
-	private boolean needTransactionInfo = false;
-
-	/**
-	 * @return the needDml
-	 */
-	public boolean isNeedDml() {
-		return needDml;
+		return param.toString();
 	}
 
 	/**
-	 * @param needDml
-	 *           the needDml to set
+	 * @return
 	 */
-	public void setNeedDml(boolean needDml) {
-		this.needDml = needDml;
+	public String buildUrl() {
+		return "http://" + host + ":" + port + "/puma/channel";
+	}
+
+	/**
+	 * @return the codecType
+	 */
+	public String getCodecType() {
+		return codecType;
+	}
+
+	/**
+	 * @return the databaseTablesMapping
+	 */
+	public Map<String, List<String>> getDatabaseTablesMapping() {
+		return databaseTablesMapping;
 	}
 
 	/**
@@ -65,41 +90,10 @@ public class Configuration implements Serializable {
 	}
 
 	/**
-	 * @param host
-	 *           the host to set
-	 */
-	public void setHost(String host) {
-		this.host = host;
-	}
-
-	/**
 	 * @return the port
 	 */
 	public int getPort() {
 		return port;
-	}
-
-	/**
-	 * @param port
-	 *           the port to set
-	 */
-	public void setPort(int port) {
-		this.port = port;
-	}
-
-	/**
-	 * @return the databaseTablesMapping
-	 */
-	public Map<String, List<String>> getDatabaseTablesMapping() {
-		return databaseTablesMapping;
-	}
-
-	public void addDatabaseTable(String database, String... tablePatterns) {
-		if (!this.databaseTablesMapping.containsKey(database)) {
-			this.databaseTablesMapping.put(database, Arrays.asList(tablePatterns));
-		} else {
-			this.databaseTablesMapping.get(database).addAll(Arrays.asList(tablePatterns));
-		}
 	}
 
 	/**
@@ -110,11 +104,10 @@ public class Configuration implements Serializable {
 	}
 
 	/**
-	 * @param needDdl
-	 *           the needDdl to set
+	 * @return the needDml
 	 */
-	public void setNeedDdl(boolean needDdl) {
-		this.needDdl = needDdl;
+	public boolean isNeedDml() {
+		return needDml;
 	}
 
 	/**
@@ -125,11 +118,50 @@ public class Configuration implements Serializable {
 	}
 
 	/**
+	 * @param codecType
+	 */
+	public void setCodecType(String codecType) {
+		this.codecType = codecType;
+	}
+
+	/**
+	 * @param host
+	 *            the host to set
+	 */
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+	/**
+	 * @param needDdl
+	 *            the needDdl to set
+	 */
+	public void setNeedDdl(boolean needDdl) {
+		this.needDdl = needDdl;
+	}
+
+	/**
+	 * @param needDml
+	 *            the needDml to set
+	 */
+	public void setNeedDml(boolean needDml) {
+		this.needDml = needDml;
+	}
+
+	/**
 	 * @param needTransactionInfo
-	 *           the needTransactionInfo to set
+	 *            the needTransactionInfo to set
 	 */
 	public void setNeedTransactionInfo(boolean needTransactionInfo) {
 		this.needTransactionInfo = needTransactionInfo;
+	}
+
+	/**
+	 * @param port
+	 *            the port to set
+	 */
+	public void setPort(int port) {
+		this.port = port;
 	}
 
 	/*
@@ -139,8 +171,9 @@ public class Configuration implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return "Configuration [host=" + host + ", port=" + port + ", databaseTablesMapping=" + databaseTablesMapping
-		      + ", needDdl=" + needDdl + ", needDml=" + needDml + ", needTransactionInfo=" + needTransactionInfo + "]";
+		return "Configuration [codecType=" + codecType + ", databaseTablesMapping=" + databaseTablesMapping + ", host="
+				+ host + ", needDdl=" + needDdl + ", needDml=" + needDml + ", needTransactionInfo="
+				+ needTransactionInfo + ", port=" + port + "]";
 	}
 
 	public void validate() {

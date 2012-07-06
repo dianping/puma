@@ -24,8 +24,8 @@ import com.dianping.puma.core.event.ChangedEvent;
  * 
  */
 public interface Bucket {
-	public long getStartingSequece();
-	
+	public Sequence getStartingSequece();
+
 	public void append(ChangedEvent event) throws IOException;
 
 	public ChangedEvent getNext() throws IOException;
@@ -33,5 +33,9 @@ public interface Bucket {
 	public void seek(int offset) throws IOException;
 
 	public void close() throws IOException;
+
+	public boolean hasRemaining() throws IOException;
+
+	public long getCurrentSeq();
 
 }

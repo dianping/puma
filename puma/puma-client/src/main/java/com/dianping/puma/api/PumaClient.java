@@ -1,29 +1,28 @@
 package com.dianping.puma.api;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.dianping.puma.core.codec.EventCodec;
+import com.dianping.puma.core.codec.EventCodecFactory;
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.util.EventTransportUtils;
+import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.core.util.PumaThreadUtils;
+import com.dianping.puma.core.util.StreamUtils;
 
 public class PumaClient {
-	private static final Logger log = Logger.getLogger(PumaClient.class);
-
-	private Configuration config;
-
-	private EventListener eventListener;
-
-	private volatile boolean active;
-
-	private SeqFileHolder seqFileHolder;
+	private static final Logger	log	= Logger.getLogger(PumaClient.class);
+	private Configuration		config;
+	private EventListener		eventListener;
+	private volatile boolean	active;
+	private SeqFileHolder		seqFileHolder;
+	private EventCodec			codec;
 
 	public PumaClient(Configuration config) {
 		if (config == null) {
@@ -32,6 +31,7 @@ public class PumaClient {
 
 		this.config = config;
 		this.seqFileHolder = new DefaultSeqFileHolder(config);
+		codec = EventCodecFactory.createCodec(config.getCodecType());
 	}
 
 	public void register(EventListener listener) {
@@ -60,13 +60,13 @@ public class PumaClient {
 			log.info("Puma client stopped since interrupted.");
 			return true;
 		}
-		
+
 		return false;
 	}
 
 	private InputStream connect() {
 		try {
-			final URL url = new URL("http://" + config.getHost() + ":" + config.getPort() + "/puma/channel");
+			final URL url = new URL(config.buildUrl());
 
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("POST");
@@ -76,20 +76,9 @@ public class PumaClient {
 			// send the encoded message
 			PrintWriter out = new PrintWriter(connection.getOutputStream());
 
-			out.print(URLEncoder.encode("seq", "UTF-8") + "="
-			      + URLEncoder.encode(String.valueOf(seqFileHolder.getSeq()), "UTF-8"));
-			out.print(URLEncoder.encode("ddl", "UTF-8") + "="
-			      + URLEncoder.encode(Boolean.toString(config.isNeedDdl()), "UTF-8"));
-			out.print(URLEncoder.encode("dml", "UTF-8") + "="
-			      + URLEncoder.encode(Boolean.toString(config.isNeedDml()), "UTF-8"));
-			out.print(URLEncoder.encode("ts", "UTF-8") + "="
-			      + URLEncoder.encode(Boolean.toString(config.isNeedTransactionInfo()), "UTF-8"));
+			String requestParam = config.buildRequestParamString(seqFileHolder.getSeq());
 
-			for (Map.Entry<String, List<String>> entry : config.getDatabaseTablesMapping().entrySet()) {
-				for (String tb : entry.getValue()) {
-					out.print(URLEncoder.encode("dt", "UTF-8") + "=" + URLEncoder.encode(entry.getKey() + "." + tb, "UTF-8"));
-				}
-			}
+			out.print(URLEncoder.encode(requestParam, "UTF-8"));
 
 			out.close();
 
@@ -101,6 +90,15 @@ public class PumaClient {
 
 		return null;
 
+	}
+
+	private ChangedEvent readEvent(InputStream is) throws IOException {
+		byte[] lengthArray = new byte[4];
+		StreamUtils.readFully(is, lengthArray, 0, 4);
+		int length = ByteArrayUtils.byteArrayToInt(lengthArray, 0, 4);
+		byte[] data = new byte[length];
+		StreamUtils.readFully(is, data, 0, length);
+		return codec.decode(data);
 	}
 
 	private class PumaClientTask implements Runnable {
@@ -131,7 +129,8 @@ public class PumaClient {
 							break;
 						}
 
-						ChangedEvent event = EventTransportUtils.read(is);
+						ChangedEvent event = readEvent(is);
+
 						boolean listenerCallSuccess = true;
 
 						// call event listener until success

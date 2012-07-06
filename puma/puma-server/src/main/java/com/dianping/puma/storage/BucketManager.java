@@ -2,6 +2,15 @@ package com.dianping.puma.storage;
 
 import java.io.IOException;
 
+import com.dianping.puma.core.datatype.Pair;
+
 public interface BucketManager {
-	public Bucket getBucket(int startFileNo) throws IOException;
+	public Bucket getBucket(long seq) throws IOException;
+
+	/**
+	 * @param seq
+	 * @return
+	 */
+	public Pair<Bucket, Long> getNextBucket(long seq);
+
 }

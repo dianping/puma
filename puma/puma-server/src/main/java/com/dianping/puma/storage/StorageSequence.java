@@ -1,7 +1,7 @@
 /**
- * Project: ${puma-common.aid}
+ * Project: puma-server
  * 
- * File Created at 2012-7-3
+ * File Created at 2012-7-6
  * $Id$
  * 
  * Copyright 2010 dianping.com.
@@ -15,21 +15,12 @@
  */
 package com.dianping.puma.storage;
 
-import java.io.IOException;
-
-import com.dianping.puma.core.event.ChangedEvent;
-
 /**
+ * TODO Comment of StorageSequence
+ * 
  * @author Leo Liang
  * 
  */
-public interface Bucket {
-	public void append(ChangedEvent event) throws IOException;
-
-	public ChangedEvent getNext() throws IOException;
-
-	public void seek(int offset) throws IOException;
-
-	public void close() throws IOException;
+public interface StorageSequence {
 
 }

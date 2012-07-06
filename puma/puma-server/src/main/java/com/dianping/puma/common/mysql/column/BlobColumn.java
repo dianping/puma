@@ -15,10 +15,7 @@
  */
 package com.dianping.puma.common.mysql.column;
 
-import java.sql.Blob;
 import java.util.Arrays;
-
-import javax.sql.rowset.serial.SerialBlob;
 
 /**
  * 
@@ -45,12 +42,8 @@ public class BlobColumn implements Column {
 		return "BlobColumn [value=" + Arrays.toString(value) + "]";
 	}
 
-	public Blob getValue() {
-		try {
-			return new SerialBlob(value);
-		} catch (Exception e) {
-			return null;
-		}
+	public byte[] getValue() {
+		return value;
 	}
 
 	public static final BlobColumn valueOf(byte[] value) {

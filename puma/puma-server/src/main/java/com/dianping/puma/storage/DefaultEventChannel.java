@@ -3,21 +3,20 @@ package com.dianping.puma.storage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import com.dianping.puma.core.datatype.Pair;
 import com.dianping.puma.core.event.ChangedEvent;
 
 public class DefaultEventChannel implements EventChannel {
-	private BucketManager bucketManager;
+	private BucketManager	bucketManager;
+	private Bucket			bucket;
+	private long			seq;
 
-	private int lastFileNo;
-
-	private Bucket bucket;
-
-	public DefaultEventChannel(BucketManager bucketManager, int startFileNo, int startOffset) throws IOException {
+	public DefaultEventChannel(BucketManager bucketManager, long seq) throws IOException {
 		this.bucketManager = bucketManager;
-		this.lastFileNo = startFileNo;
 
-		bucket = bucketManager.getBucket(startFileNo);
-		bucket.seek(startOffset);
+		bucket = bucketManager.getBucket(seq);
+		this.seq = seq;
+
 	}
 
 	@Override
@@ -31,17 +30,20 @@ public class DefaultEventChannel implements EventChannel {
 				e.printStackTrace();
 			}
 
-			lastFileNo++;
-
 			while (event == null) { // it means end of this bucket
 				try {
-					bucket = bucketManager.getBucket(lastFileNo);
+					Pair<Bucket, Long> result = bucketManager.getNextBucket(seq);
+					seq = result.getSecond();
+					bucket = result.getFirst();
+
 					event = bucket.getNext();
 				} catch (FileNotFoundException e) {
 					Thread.sleep(1); // sleep 1 ms
 				}
 			}
 		}
+
+		seq = event.getSeq();
 
 		return event;
 	}

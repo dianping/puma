@@ -20,14 +20,13 @@ public class DefaultEventChannel implements EventChannel {
 
 	@Override
 	public ChangedEvent next() throws IOException, InterruptedException {
-		if (stopped) {
-			throw new IOException("Channel has been closed.");
-		}
+		checkClosed();
 
 		ChangedEvent event = null;
 
 		while (event == null) {
 			try {
+				checkClosed();
 				event = bucket.getNext();
 			} catch (EOFException e) {
 				if (bucketManager.hasNexReadBucket(seq)) {
@@ -43,6 +42,15 @@ public class DefaultEventChannel implements EventChannel {
 		seq = event.getSeq();
 
 		return event;
+	}
+
+	/**
+	 * @throws IOException
+	 */
+	private void checkClosed() throws IOException {
+		if (stopped) {
+			throw new IOException("Channel has been closed.");
+		}
 	}
 
 	@Override

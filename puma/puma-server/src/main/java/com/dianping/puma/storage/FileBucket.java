@@ -46,6 +46,7 @@ public class FileBucket implements Bucket {
 			byte[] data = new byte[length];
 			int n = 0;
 			while (n < length) {
+				checkClosed();
 				int count = file.read(data, 0 + n, length - n);
 				n += count;
 			}

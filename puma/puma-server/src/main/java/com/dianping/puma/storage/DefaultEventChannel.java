@@ -13,7 +13,7 @@ public class DefaultEventChannel implements EventChannel {
 	public DefaultEventChannel(BucketManager bucketManager, long seq) throws IOException {
 		this.bucketManager = bucketManager;
 		bucket = bucketManager.getReadBucket(seq);
-		this.seq = seq;
+		this.seq = bucket.getStartingSequece().longValue();
 
 	}
 

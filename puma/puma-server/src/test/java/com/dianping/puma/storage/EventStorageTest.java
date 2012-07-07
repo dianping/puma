@@ -81,7 +81,7 @@ public class EventStorageTest {
 
 		Thread.sleep(100);
 
-		EventChannel channel = storage.getChannel(8494000046403439278L);
+		EventChannel channel = storage.getChannel(-1);
 		boolean hasException = false;
 		while (true) {
 			try {

@@ -1,5 +1,6 @@
 package com.dianping.puma.storage;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
@@ -68,7 +69,11 @@ public class DefaultBucketManager implements BucketManager {
 			sequence.clearOffset();
 			Bucket bucket = new FileBucket(file, sequence, localBucketMaxSizeMB, codec);
 			bucket.seek(offset);
-			bucket.getNext();
+			try {
+				bucket.getNext();
+			} catch (EOFException e) {
+				// ignore
+			}
 
 			return bucket;
 		} else {

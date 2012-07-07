@@ -11,4 +11,5 @@ public interface EventCodec {
 	public byte[] encode(ChangedEvent event) throws IOException;
 
 	public ChangedEvent decode(byte[] data) throws IOException;
+
 }

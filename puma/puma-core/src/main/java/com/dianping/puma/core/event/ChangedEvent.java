@@ -97,7 +97,8 @@ public abstract class ChangedEvent implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return "ChangedEvent [executeTime=" + executeTime + ", database=" + database + ", table=" + table + "]";
+		return "ChangedEvent [executeTime=" + executeTime + ", database=" + database + ", table=" + table + ", seq="
+				+ seq + "]";
 	}
 
 }

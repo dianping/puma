@@ -49,6 +49,7 @@ public class FileBucket implements Bucket {
 	@Override
 	public void close() throws IOException {
 		file.close();
+		file = null;
 	}
 
 	@Override
@@ -57,7 +58,7 @@ public class FileBucket implements Bucket {
 	}
 
 	@Override
-	public boolean hasRemaining() throws IOException {
+	public boolean hasRemainingForWrite() throws IOException {
 		return file.length() < maxSizeMB * 1024 * 1024;
 	}
 
@@ -65,4 +66,5 @@ public class FileBucket implements Bucket {
 	public long getCurrentSeq() {
 		return currentSeq;
 	}
+
 }

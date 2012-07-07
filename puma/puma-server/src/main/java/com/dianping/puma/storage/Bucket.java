@@ -34,7 +34,7 @@ public interface Bucket {
 
 	public void close() throws IOException;
 
-	public boolean hasRemaining() throws IOException;
+	public boolean hasRemainingForWrite() throws IOException;
 
 	public long getCurrentSeq();
 

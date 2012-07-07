@@ -10,7 +10,7 @@ public class EventChannelTest {
 	public void test() throws Exception {
 		DefaultEventStorage storage = new DefaultEventStorage();
 
-		storage.setBaseDir("target/puma");
+		storage.setLocalBaseDir("target/puma");
 		storage.setName("test");
 		storage.initialize();
 

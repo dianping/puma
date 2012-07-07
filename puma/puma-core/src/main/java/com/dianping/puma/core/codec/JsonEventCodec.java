@@ -10,11 +10,16 @@ import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 
 public class JsonEventCodec implements EventCodec {
+	private ObjectMapper	om;
+
+	public JsonEventCodec() {
+		om = new ObjectMapper();
+	}
+
 	@Override
 	public byte[] encode(ChangedEvent event) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-		ObjectMapper om = new ObjectMapper();
 		byte[] data = om.writeValueAsBytes(event);
 
 		if (event instanceof DdlEvent) {
@@ -30,7 +35,6 @@ public class JsonEventCodec implements EventCodec {
 
 	@Override
 	public ChangedEvent decode(byte[] data) throws IOException {
-		ObjectMapper om = new ObjectMapper();
 		int type = data[0];
 		if (type == DDL_EVENT) {
 			return om.readValue(data, 1, data.length - 1, DdlEvent.class);

@@ -15,8 +15,6 @@
  */
 package com.dianping.puma.storage;
 
-import java.text.SimpleDateFormat;
-
 import junit.framework.Assert;
 
 import org.junit.Test;

@@ -6,27 +6,24 @@ import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang.StringUtils;
 
 import com.dianping.puma.core.codec.EventCodec;
 
 public class DefaultBucketManager implements BucketManager {
-	private File						localBaseDir;
-	private int							localBucketMaxSizeMB;
-	private String						bucketFilePrefix;
-	private EventCodec					codec;
+	private File										localBaseDir;
+	private int											localBucketMaxSizeMB;
+	private String										bucketFilePrefix;
+	private EventCodec									codec;
 
-	private TreeMap<Sequence, String>	localBuckets;
+	private AtomicReference<TreeMap<Sequence, String>>	localBuckets	= new AtomicReference<TreeMap<Sequence, String>>();
 
 	public DefaultBucketManager(String localBaseDir, String name, String bucketFilePrefix, int localBucketMaxSizeMB,
 			EventCodec codec) {
@@ -37,7 +34,7 @@ public class DefaultBucketManager implements BucketManager {
 		init();
 	}
 
-	public void init() {
+	public synchronized void init() {
 		if (!localBaseDir.exists()) {
 			localBaseDir.mkdirs();
 		}
@@ -51,15 +48,15 @@ public class DefaultBucketManager implements BucketManager {
 		String path = null;
 		if (seq == -1L) {
 			// TODO find hdfs
-			if (localBuckets.isEmpty()) {
+			if (localBuckets.get().isEmpty()) {
 				path = null;
 			} else {
-				path = localBuckets.firstEntry().getValue();
-				sequence = localBuckets.firstEntry().getKey();
+				path = localBuckets.get().firstEntry().getValue();
+				sequence = localBuckets.get().firstEntry().getKey();
 			}
 		} else {
 			sequence = new Sequence(seq);
-			path = localBuckets.get(sequence);
+			path = localBuckets.get().get(sequence);
 			if (path == null) {
 				// TODO invalidate seq
 			}
@@ -71,6 +68,8 @@ public class DefaultBucketManager implements BucketManager {
 			sequence.clearOffset();
 			Bucket bucket = new FileBucket(file, sequence, localBucketMaxSizeMB, codec);
 			bucket.seek(offset);
+			bucket.getNext();
+
 			return bucket;
 		} else {
 			// TODO check HDFS bucket
@@ -83,7 +82,7 @@ public class DefaultBucketManager implements BucketManager {
 	public Bucket getNextReadBucket(long seq) throws IOException {
 		Sequence sequence = new Sequence(seq);
 		sequence.clearOffset();
-		NavigableMap<Sequence, String> tailMap = localBuckets.tailMap(sequence, false);
+		NavigableMap<Sequence, String> tailMap = localBuckets.get().tailMap(sequence, false);
 
 		if (tailMap.isEmpty()) {
 			throw new FileNotFoundException("No next read bucket for seq(" + seq + ")");
@@ -96,7 +95,7 @@ public class DefaultBucketManager implements BucketManager {
 
 	@Override
 	public Bucket getNextWriteBucket() throws IOException {
-		Entry<Sequence, String> lastEntry = localBuckets.lastEntry();
+		Entry<Sequence, String> lastEntry = localBuckets.get().lastEntry();
 		Sequence nextSeq = null;
 		if (lastEntry == null) {
 			nextSeq = new Sequence(getCreationDate(), 0);
@@ -115,7 +114,10 @@ public class DefaultBucketManager implements BucketManager {
 		if (!bucketFile.createNewFile()) {
 			throw new IOException(String.format("Can't create writeBucket(%s)!", bucketFile.getAbsolutePath()));
 		} else {
-			localBuckets.put(nextSeq, bucketPath);
+			// Copy-On-Write, since this case occur rarely
+			TreeMap<Sequence, String> tmpLocalBuckets = new TreeMap<Sequence, String>(localBuckets.get());
+			tmpLocalBuckets.put(nextSeq, bucketPath);
+			localBuckets.set(tmpLocalBuckets);
 			return new FileBucket(bucketFile, nextSeq, localBucketMaxSizeMB, codec);
 		}
 	}
@@ -144,7 +146,7 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	private void initLocalBuckets() {
-		localBuckets = new TreeMap<Sequence, String>(new SequenceComparator());
+		localBuckets.set(new TreeMap<Sequence, String>(new SequenceComparator()));
 		File[] dirs = localBaseDir.listFiles(new FileFilter() {
 
 			@Override
@@ -174,7 +176,7 @@ public class DefaultBucketManager implements BucketManager {
 
 				for (String subFile : subFiles) {
 					String path = dir.getName() + File.separator + subFile;
-					localBuckets.put(convertToSequence(path), path);
+					localBuckets.get().put(convertToSequence(path), path);
 				}
 			}
 		}
@@ -204,5 +206,23 @@ public class DefaultBucketManager implements BucketManager {
 			}
 		}
 
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dianping.puma.storage.BucketManager#hasNexReadBucket(long)
+	 */
+	@Override
+	public boolean hasNexReadBucket(long seq) {
+		Sequence sequence = new Sequence(seq);
+		sequence.clearOffset();
+		NavigableMap<Sequence, String> tailMap = localBuckets.get().tailMap(sequence, false);
+
+		if (tailMap.isEmpty()) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 }

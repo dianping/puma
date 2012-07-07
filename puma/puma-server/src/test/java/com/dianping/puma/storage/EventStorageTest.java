@@ -15,7 +15,7 @@
  */
 package com.dianping.puma.storage;
 
-import java.io.IOException;
+import java.util.Date;
 
 import org.junit.Test;
 
@@ -32,25 +32,66 @@ public class EventStorageTest {
 
 	@Test
 	public void test() throws Exception {
-		DefaultEventStorage storage = new DefaultEventStorage();
+		final DefaultEventStorage storage = new DefaultEventStorage();
 		storage.setCodec(new JsonEventCodec());
-		storage.setFileMaxSizeMB(50);
+		storage.setFileMaxSizeMB(2000);
 		storage.setFilePrefix("dd");
 		storage.setLocalBaseDir("/data/applogs/puma/");
 		storage.setName("puma");
 		storage.initialize();
 
-		DdlEvent event = new DdlEvent();
-		event.setDatabase("cat");
-		event.setExecuteTime(11111);
-		event.setSql("SELECT * FROM REPORT");
-		event.setTable("");
+		// while (true) {
+		// try {
+		// DdlEvent event = new DdlEvent();
+		// event.setDatabase("cat");
+		// event.setExecuteTime((new Date()).getTime());
+		// event.setSql("SELECT * FROM REPORT");
+		// event.setTable("");
+		//
+		// storage.store(event);
+		// Thread.sleep(50000);
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
+		// }
 
-		storage.store(event);
+		Thread t = new Thread(new Runnable() {
 
-		EventChannel channel = storage.getChannel(-1);
+			@Override
+			public void run() {
+				long i = 0;
+				while (true) {
+					try {
+						DdlEvent event = new DdlEvent();
+						event.setDatabase("cat");
+						event.setExecuteTime(i++);
+						event.setSql("SELECT * FROM REPORT");
+						event.setTable("");
+
+						storage.store(event);
+						System.out.println("produced");
+						Thread.sleep(5);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		});
+		t.start();
+
+		Thread.sleep(100);
+
+		EventChannel channel = storage.getChannel(8494000046403439278L);
+		boolean hasException = false;
 		while (true) {
-			System.out.println(channel.next());
+			try {
+				if (!hasException) {
+					System.out.println(channel.next());
+				}
+			} catch (Throwable e) {
+				hasException = true;
+				e.printStackTrace();
+			}
 		}
 
 	}

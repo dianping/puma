@@ -9,4 +9,6 @@ public interface BucketManager {
 
 	public Bucket getNextWriteBucket() throws IOException;
 
+	public boolean hasNexReadBucket(long seq);
+
 }

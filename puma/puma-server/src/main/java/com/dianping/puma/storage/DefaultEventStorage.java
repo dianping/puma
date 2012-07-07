@@ -60,7 +60,7 @@ public class DefaultEventStorage implements EventStorage {
 	public synchronized void store(ChangedEvent event) throws IOException {
 		if (writingBucket == null) {
 			writingBucket = bucketManager.getNextWriteBucket();
-		} else if (!writingBucket.hasRemaining()) {
+		} else if (!writingBucket.hasRemainingForWrite()) {
 			writingBucket.close();
 			writingBucket = bucketManager.getNextWriteBucket();
 		}

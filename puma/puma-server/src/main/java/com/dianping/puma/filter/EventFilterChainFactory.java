@@ -32,6 +32,11 @@ public class EventFilterChainFactory {
 	public static EventFilterChain createEventFilterChain(boolean needDdl, boolean needDml, boolean needTsInfo,
 			String[] dts) {
 		List<EventFilter> eventFilterList = new ArrayList<EventFilter>();
+		// tsInfoFilter should be first
+		TransactionInfoEventFilter tsInfoFilter = new TransactionInfoEventFilter();
+		tsInfoFilter.init(needTsInfo);
+		eventFilterList.add(tsInfoFilter);
+
 		DbTbEventFilter dbtbFilter = new DbTbEventFilter();
 		dbtbFilter.init(dts);
 		eventFilterList.add(dbtbFilter);
@@ -39,10 +44,6 @@ public class EventFilterChainFactory {
 		DmlDdlEventFilter dmlDdlFilter = new DmlDdlEventFilter();
 		dmlDdlFilter.init(needDdl, needDml);
 		eventFilterList.add(dmlDdlFilter);
-
-		TransactionInfoEventFilter tsInfoFilter = new TransactionInfoEventFilter();
-		tsInfoFilter.init(needTsInfo);
-		eventFilterList.add(tsInfoFilter);
 
 		EventFilterChain chain = new DefaultEventFilterChain();
 		chain.setEventFilters(eventFilterList);

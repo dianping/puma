@@ -73,12 +73,11 @@ public class PumaClient {
 			connection.setConnectTimeout(3000);
 			connection.setDoOutput(true);
 
-			// send the encoded message
 			PrintWriter out = new PrintWriter(connection.getOutputStream());
 
-			String requestParam = config.buildRequestParamString(seqFileHolder.getSeq());
+			String requestParams = config.buildRequestParamString(seqFileHolder.getSeq());
 
-			out.print(requestParam);
+			out.print(requestParams);
 
 			out.close();
 

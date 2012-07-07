@@ -15,6 +15,10 @@
  */
 package com.dianping.puma.storage;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
 import junit.framework.Assert;
 
 import org.junit.Test;
@@ -59,5 +63,18 @@ public class SequenceTest {
 		Assert.assertEquals(0, nextSeq.getOffset());
 		Assert.assertEquals(120801, nextSeq.getCreationDate());
 
+	}
+
+	public static void main(String[] args) throws IOException, InterruptedException {
+		while (true) {
+			try {
+				BufferedReader br = new BufferedReader(new FileReader("/data/applogs/puma/seq-localhost-7862.conf"));
+				System.out.println(new Sequence(Long.parseLong(br.readLine())));
+				br.close();
+				Thread.sleep(5000);
+			} catch (Exception e) {
+
+			}
+		}
 	}
 }

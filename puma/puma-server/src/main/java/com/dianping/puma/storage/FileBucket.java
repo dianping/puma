@@ -1,5 +1,6 @@
 package com.dianping.puma.storage;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -12,7 +13,7 @@ public class FileBucket implements Bucket {
 	private EventCodec			codec;
 	private Sequence			startingSequence;
 	private int					maxSizeMB;
-	private long				currentSeq;
+	private Sequence			currentSeq;
 
 	private RandomAccessFile	file;
 
@@ -21,7 +22,7 @@ public class FileBucket implements Bucket {
 		this.startingSequence = sequence;
 		this.maxSizeMB = maxSizeMB;
 		this.codec = codec;
-		currentSeq = startingSequence.longValue();
+		currentSeq = startingSequence;
 	}
 
 	@Override
@@ -29,15 +30,26 @@ public class FileBucket implements Bucket {
 		byte[] data = codec.encode(event);
 		file.writeInt(data.length);
 		file.write(data);
-		currentSeq += 4 + data.length;
+		currentSeq.addOffset(4 + data.length);
 	}
 
 	@Override
 	public ChangedEvent getNext() throws IOException {
-		int length = file.readInt();
-		byte[] data = new byte[length];
-		file.readFully(data);
-		return codec.decode(data);
+		// we should guarantee the whole packet read in one transaction,
+		// otherwise we will skip some bytes and read a wrong value in the next
+		// call
+		if (file.getFilePointer() + 4 < file.length()) {
+			int length = file.readInt();
+			byte[] data = new byte[length];
+			int n = 0;
+			while (n < length) {
+				int count = file.read(data, 0 + n, length - n);
+				n += count;
+			}
+			return codec.decode(data);
+		} else {
+			throw new EOFException();
+		}
 
 	}
 
@@ -64,7 +76,7 @@ public class FileBucket implements Bucket {
 
 	@Override
 	public long getCurrentSeq() {
-		return currentSeq;
+		return currentSeq.longValue();
 	}
 
 }

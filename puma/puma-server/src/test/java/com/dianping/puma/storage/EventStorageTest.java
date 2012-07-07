@@ -69,8 +69,7 @@ public class EventStorageTest {
 						event.setTable("");
 
 						storage.store(event);
-						System.out.println("produced");
-						Thread.sleep(5);
+						Thread.sleep(50);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

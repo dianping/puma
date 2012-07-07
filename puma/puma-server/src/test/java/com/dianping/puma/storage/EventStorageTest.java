@@ -15,8 +15,6 @@
  */
 package com.dianping.puma.storage;
 
-import java.util.Date;
-
 import org.junit.Test;
 
 import com.dianping.puma.core.codec.JsonEventCodec;
@@ -69,7 +67,7 @@ public class EventStorageTest {
 						event.setTable("");
 
 						storage.store(event);
-						Thread.sleep(50);
+						Thread.sleep(5);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -80,7 +78,7 @@ public class EventStorageTest {
 
 		Thread.sleep(100);
 
-		EventChannel channel = storage.getChannel(8494000020633162604L);
+		EventChannel channel = storage.getChannel(-1);
 		boolean hasException = false;
 		while (true) {
 			try {

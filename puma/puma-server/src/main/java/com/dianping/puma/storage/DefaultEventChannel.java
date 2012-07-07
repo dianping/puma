@@ -6,9 +6,10 @@ import java.io.IOException;
 import com.dianping.puma.core.event.ChangedEvent;
 
 public class DefaultEventChannel implements EventChannel {
-	private BucketManager	bucketManager;
-	private Bucket			bucket;
-	private long			seq;
+	private BucketManager		bucketManager;
+	private Bucket				bucket;
+	private long				seq;
+	private volatile boolean	stopped	= false;
 
 	public DefaultEventChannel(BucketManager bucketManager, long seq) throws IOException {
 		this.bucketManager = bucketManager;
@@ -19,6 +20,10 @@ public class DefaultEventChannel implements EventChannel {
 
 	@Override
 	public ChangedEvent next() throws IOException, InterruptedException {
+		if (stopped) {
+			throw new IOException("Channel has been closed.");
+		}
+
 		ChangedEvent event = null;
 
 		while (event == null) {
@@ -42,6 +47,7 @@ public class DefaultEventChannel implements EventChannel {
 
 	@Override
 	public void close() throws IOException {
+		stopped = true;
 		bucket.close();
 	}
 }

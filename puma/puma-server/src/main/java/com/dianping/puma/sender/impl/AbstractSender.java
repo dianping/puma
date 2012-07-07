@@ -1,11 +1,14 @@
 package com.dianping.puma.sender.impl;
 
+import org.apache.log4j.Logger;
+
 import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.monitor.BinlogInfoAware;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.sender.Sender;
 
 public abstract class AbstractSender implements Sender, BinlogInfoAware {
+	private static final Logger	log				= Logger.getLogger(AbstractSender.class);
 	protected String			name;
 	protected int				maxTryTimes		= 3;
 	protected boolean			canMissEvent	= false;
@@ -48,7 +51,6 @@ public abstract class AbstractSender implements Sender, BinlogInfoAware {
 	 */
 	@Override
 	public void start() throws Exception {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -59,8 +61,7 @@ public abstract class AbstractSender implements Sender, BinlogInfoAware {
 	 */
 	@Override
 	public void stop() throws Exception {
-		// TODO Auto-generated method stub
-
+		stop = true;
 	}
 
 	/*
@@ -79,8 +80,22 @@ public abstract class AbstractSender implements Sender, BinlogInfoAware {
 
 	@Override
 	public void send(ChangedEvent event, PumaContext context) throws Exception {
-		doSend(event, context);
+		int retryCount = 0;
+		while (true) {
+			try {
+				doSend(event, context);
+				break;
+			} catch (Exception e) {
+				if (retryCount++ > maxTryTimes) {
+					if (canMissEvent) {
+						log.error("[Miss]Send event(" + event + ") failed for " + maxTryTimes + " times.");
+					} else {
+						log.error("Send event(" + event + ") failed for " + retryCount + " times.");
+					}
+				}
+			}
+		}
 	}
 
-	protected abstract void doSend(ChangedEvent event, PumaContext context);
+	protected abstract void doSend(ChangedEvent event, PumaContext context) throws Exception;
 }

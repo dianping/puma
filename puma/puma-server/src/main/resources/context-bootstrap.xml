@@ -14,24 +14,24 @@
 		<property name="defaultBinlogPosition" value="4" />
 		<property name="parser" ref="defaultParser" />
 		<property name="serverId" value="9908" />
-		<property name="dataHandler" ref="defaultDataHandler" />
-		<property name="dispatcher" ref="simpleDispatcher" />
+		<property name="dataHandler" ref="datahandler-7-43" />
+		<property name="dispatcher" ref="dispatcher-7-43" />
 	</bean>
 
-	<bean id="simpleDispatcher"
+	<bean id="dispatcher-7-43"
 		class="com.dianping.puma.sender.dispatcher.impl.SimpleDispatherImpl"
 		init-method="start">
 		<property name="name" value="simpleDispatcher" />
 		<property name="senders">
 			<list>
-				<ref bean="sysoutSender" />
+				<ref bean="fileSender" />
 			</list>
 		</property>
 	</bean>
 
 
 
-	<bean id="defaultDataHandler" class="com.dianping.puma.datahandler.impl.DefaultDataHandler"
+	<bean id="datahandler-7-43" class="com.dianping.puma.datahandler.impl.DefaultDataHandler"
 		init-method="start">
 		<property name="metaDBHost" value="192.168.7.43" />
 		<property name="metaDBPort" value="3306" />
@@ -53,10 +53,22 @@
 	</bean>
 
 
-	<bean id="sysoutSender" class="com.dianping.puma.sender.impl.SysoutSender"
+	<bean id="fileSender" class="com.dianping.puma.sender.impl.FileDumpSender"
 		init-method="start">
-		<property name="name" value="sysoutSender" />
+		<property name="name" value="fileDumpSender" />
+		<property name="storage" ref="storage-7-43" />
 	</bean>
+
+	<bean id="storage-7-43" class="com.dianping.puma.storage.DefaultEventStorage"
+		init-method="initialize">
+		<property name="localBaseDir" value="/data/applogs/puma/" />
+		<property name="name" value="7-43" />
+		<property name="codec" ref="jsonCodec" />
+		<property name="fileMaxSizeMB" value="500" />
+		<property name="filePrefix" value="bucket-" />
+	</bean>
+
+	<bean id="jsonCodec" class="com.dianping.puma.core.codec.JsonEventCodec" />
 </beans>
 
 

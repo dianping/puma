@@ -14,6 +14,7 @@ public class FileBucket implements Bucket {
 	private Sequence			startingSequence;
 	private int					maxSizeMB;
 	private Sequence			currentSeq;
+	private volatile boolean	stopped	= false;
 
 	private RandomAccessFile	file;
 
@@ -27,6 +28,7 @@ public class FileBucket implements Bucket {
 
 	@Override
 	public void append(ChangedEvent event) throws IOException {
+		checkClosed();
 		byte[] data = codec.encode(event);
 		file.writeInt(data.length);
 		file.write(data);
@@ -35,6 +37,7 @@ public class FileBucket implements Bucket {
 
 	@Override
 	public ChangedEvent getNext() throws IOException {
+		checkClosed();
 		// we should guarantee the whole packet read in one transaction,
 		// otherwise we will skip some bytes and read a wrong value in the next
 		// call
@@ -53,13 +56,21 @@ public class FileBucket implements Bucket {
 
 	}
 
+	private void checkClosed() throws IOException {
+		if (stopped) {
+			throw new IOException("Bucket has been closed");
+		}
+	}
+
 	@Override
 	public void seek(int pos) throws IOException {
+		checkClosed();
 		file.seek(pos);
 	}
 
 	@Override
 	public void close() throws IOException {
+		stopped = true;
 		file.close();
 		file = null;
 	}
@@ -71,6 +82,7 @@ public class FileBucket implements Bucket {
 
 	@Override
 	public boolean hasRemainingForWrite() throws IOException {
+		checkClosed();
 		return file.length() < maxSizeMB * 1024 * 1024;
 	}
 

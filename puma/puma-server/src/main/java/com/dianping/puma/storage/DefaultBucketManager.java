@@ -23,6 +23,7 @@ public class DefaultBucketManager implements BucketManager {
 	private int											localBucketMaxSizeMB;
 	private String										bucketFilePrefix;
 	private EventCodec									codec;
+	private volatile boolean							stopped			= false;
 
 	private AtomicReference<TreeMap<Sequence, String>>	localBuckets	= new AtomicReference<TreeMap<Sequence, String>>();
 
@@ -43,8 +44,15 @@ public class DefaultBucketManager implements BucketManager {
 		initLocalBuckets();
 	}
 
+	private void checkClosed() throws IOException {
+		if (stopped) {
+			throw new IOException("Bucket manager has been closed.");
+		}
+	}
+
 	@Override
 	public Bucket getReadBucket(long seq) throws IOException {
+		checkClosed();
 		Sequence sequence = null;
 		String path = null;
 		if (seq == -1L) {
@@ -85,6 +93,7 @@ public class DefaultBucketManager implements BucketManager {
 
 	@Override
 	public Bucket getNextReadBucket(long seq) throws IOException {
+		checkClosed();
 		Sequence sequence = new Sequence(seq);
 		sequence.clearOffset();
 		NavigableMap<Sequence, String> tailMap = localBuckets.get().tailMap(sequence, false);
@@ -100,6 +109,7 @@ public class DefaultBucketManager implements BucketManager {
 
 	@Override
 	public Bucket getNextWriteBucket() throws IOException {
+		checkClosed();
 		Entry<Sequence, String> lastEntry = localBuckets.get().lastEntry();
 		Sequence nextSeq = null;
 		if (lastEntry == null) {
@@ -219,7 +229,8 @@ public class DefaultBucketManager implements BucketManager {
 	 * @see com.dianping.puma.storage.BucketManager#hasNexReadBucket(long)
 	 */
 	@Override
-	public boolean hasNexReadBucket(long seq) {
+	public boolean hasNexReadBucket(long seq) throws IOException {
+		checkClosed();
 		Sequence sequence = new Sequence(seq);
 		sequence.clearOffset();
 		NavigableMap<Sequence, String> tailMap = localBuckets.get().tailMap(sequence, false);
@@ -229,5 +240,15 @@ public class DefaultBucketManager implements BucketManager {
 		} else {
 			return true;
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dianping.puma.storage.BucketManager#close()
+	 */
+	@Override
+	public void close() {
+		stopped = true;
 	}
 }

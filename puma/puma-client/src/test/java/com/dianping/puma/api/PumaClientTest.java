@@ -14,13 +14,14 @@ public class PumaClientTest {
 	// String url =
 	// "http://localhost:7862/puma/channel?dt=mysql.*&dt=cat.!report&ddl=false&seq=12345&ts=true&batch=100";
 	@Test
-	public void testApi() {
+	public void testApi() throws InterruptedException {
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder() //
 				.host("localhost") //
 				.port(7862)//
-				.tables("mysql", "*") //
-				.tables("cat", "!report", "!tmp")//
+				.tables("cat", "*")//
 				.ddl(false) //
+				.dml(true)//
+				.tables("binlog", "*")//
 				.transaction(true);
 
 		PumaClient client = new PumaClient(configBuilder.build());
@@ -28,12 +29,13 @@ public class PumaClientTest {
 		client.register(new EventListener() {
 			@Override
 			public void onEvent(ChangedEvent event) {
+				System.out.println(event);
 			}
 		});
 
 		client.start();
-		
-		
+
+		Thread.sleep(10000 * 1000);
 		client.stop();
 	}
 }

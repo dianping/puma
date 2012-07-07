@@ -78,7 +78,7 @@ public class PumaClient {
 
 			String requestParam = config.buildRequestParamString(seqFileHolder.getSeq());
 
-			out.print(URLEncoder.encode(requestParam, "UTF-8"));
+			out.print(requestParam);
 
 			out.close();
 

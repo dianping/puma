@@ -44,15 +44,6 @@
 		<property name="name" value="server-7_43-parser" />
 	</bean>
 
-	<bean id="servers" class="java.util.ArrayList">
-		<constructor-arg>
-			<list>
-				<ref bean="server-7_43" />
-			</list>
-		</constructor-arg>
-	</bean>
-
-
 	<bean id="fileSender" class="com.dianping.puma.sender.impl.FileDumpSender"
 		init-method="start">
 		<property name="name" value="fileDumpSender" />
@@ -69,6 +60,27 @@
 	</bean>
 
 	<bean id="jsonCodec" class="com.dianping.puma.core.codec.JsonEventCodec" />
+
+	<bean id="servletAcceptor-7-43" class="com.dianping.puma.consumeracceptor.ServletAcceptor">
+		<property name="storage" ref="storage-7-43" />
+		<property name="name" value="servletAcceptor-7-43" />
+	</bean>
+
+	<bean id="servers" class="java.util.ArrayList">
+		<constructor-arg>
+			<list>
+				<ref bean="server-7_43" />
+			</list>
+		</constructor-arg>
+	</bean>
+
+	<bean id="acceptors" class="java.util.ArrayList">
+		<constructor-arg>
+			<list>
+				<ref bean="servletAcceptor-7-43" />
+			</list>
+		</constructor-arg>
+	</bean>
 </beans>
 
 

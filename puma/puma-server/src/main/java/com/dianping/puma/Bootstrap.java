@@ -14,6 +14,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import com.dianping.puma.common.bo.PositionInfo;
 import com.dianping.puma.common.bo.PumaContext;
 import com.dianping.puma.common.util.PositionFileUtils;
+import com.dianping.puma.consumeracceptor.Acceptor;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.server.Server;
 
@@ -22,6 +23,7 @@ public class Bootstrap {
 	private static Logger		log						= Logger.getLogger(Bootstrap.class);
 	private static final String	SPRING_CONFIG			= "context-bootstrap.xml";
 	private static final String	BEAN_SERVERS			= "servers";
+	private static final String	BEAN_ACCEPTORS			= "acceptors";
 
 	// monitor port number
 	private static final int	DEFAULT_MONITOR_PORT	= 12345;
@@ -54,7 +56,13 @@ public class Bootstrap {
 			log.info("Server " + server.getServerName() + " started at binlogFile: " + context.getBinlogFileName()
 					+ " position: " + context.getBinlogStartPos());
 		}
-		startMonitorTaskThread(servers);
+
+		List<Acceptor> acceptors = (List<Acceptor>) ctx.getBean(BEAN_ACCEPTORS);
+		for (Acceptor acceptor : acceptors) {
+			acceptor.start();
+			log.info("Acceptor " + acceptor.getAcceptorName() + " started.");
+		}
+		startMonitorTaskThread(servers, acceptors);
 
 	}
 
@@ -78,9 +86,9 @@ public class Bootstrap {
 		server.stop();
 	}
 
-	private static void startMonitorTaskThread(List<Server> servers) {
+	private static void startMonitorTaskThread(List<Server> servers, List<Acceptor> acceptors) {
 		MonitorTask monitorTask = new MonitorTask();
-		monitorTask.init(servers);
+		monitorTask.init(servers, acceptors);
 		Thread monitorThread = PumaThreadUtils.createThread(monitorTask, "monitor-thread", true);
 		monitorThread.start();
 	}
@@ -89,9 +97,11 @@ public class Bootstrap {
 		private int				port				= DEFAULT_MONITOR_PORT;
 		private String			COMMAND_SHUTDOWN	= "shutdown";
 		private List<Server>	servers;
+		private List<Acceptor>	acceptors;
 
-		public void init(List<Server> servers) {
+		public void init(List<Server> servers, List<Acceptor> acceptors) {
 			this.servers = servers;
+			this.acceptors = acceptors;
 			String portStr = System.getProperty(MONITOR_PORT_KEY);
 			if (portStr != null && StringUtils.isNumeric(portStr)) {
 				port = Integer.parseInt(portStr);
@@ -121,16 +131,20 @@ public class Bootstrap {
 						String command = br.readLine();
 						log.info("Command : " + command);
 						if (COMMAND_SHUTDOWN.equals(command)) {
+							log.info("Shutdown command received.");
 							for (Server server : servers) {
 
 								try {
-									log.info("Shutdown command received.");
 									stopServer(server);
-
+									log.info("Server " + server.getServerName() + " stopped.");
 								} catch (Exception e) {
 									log.error("Stop Server" + server.getServerName() + " failed.", e);
 									e.printStackTrace();
 								}
+							}
+							for (Acceptor acceptor : acceptors) {
+								acceptor.stop();
+								log.info("Acceptor " + acceptor.getAcceptorName() + " stopped.");
 							}
 							break;
 						}

@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.nio.SelectChannelConnector;
@@ -44,10 +45,11 @@ import com.dianping.puma.storage.EventStorage;
  * 
  */
 public class ServletAcceptor implements Acceptor {
-	private Server			server;
-	private int				port	= 7862;
-	private EventStorage	storage;
-	private String			name;
+	private static final Logger	log		= Logger.getLogger(ServletAcceptor.class);
+	private Server				server;
+	private int					port	= 7862;
+	private EventStorage		storage;
+	private String				name;
 
 	/**
 	 * @param storage
@@ -123,6 +125,7 @@ public class ServletAcceptor implements Acceptor {
 			boolean ts = Boolean.valueOf(req.getParameter("ts"));
 			String codecType = req.getParameter("codec");
 			String[] dts = req.getParameterValues("dt");
+			String clientName = req.getParameter("name");
 
 			EventCodec codec = EventCodecFactory.createCodec(codecType);
 
@@ -138,7 +141,8 @@ public class ServletAcceptor implements Acceptor {
 						resp.getOutputStream().flush();
 					}
 					Thread.sleep(2);
-				} catch (InterruptedException e) {
+				} catch (Exception e) {
+					log.info("One client disconnected. ClientName: " + clientName);
 					break;
 				}
 			}

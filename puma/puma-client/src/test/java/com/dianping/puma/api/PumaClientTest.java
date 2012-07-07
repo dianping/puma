@@ -22,6 +22,7 @@ public class PumaClientTest {
 				.ddl(false) //
 				.dml(true)//
 				.tables("binlog", "*")//
+				.name("testClient")//
 				.transaction(true);
 
 		PumaClient client = new PumaClient(configBuilder.build());

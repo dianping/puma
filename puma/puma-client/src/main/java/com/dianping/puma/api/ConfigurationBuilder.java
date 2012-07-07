@@ -43,6 +43,11 @@ public class ConfigurationBuilder {
 		return this;
 	}
 
+	public ConfigurationBuilder name(String name) {
+		this.configuration.setName(name);
+		return this;
+	}
+
 	public Configuration build() {
 		return this.configuration;
 	}

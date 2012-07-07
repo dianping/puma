@@ -36,6 +36,7 @@ public class Configuration implements Serializable {
 	private boolean						needDml					= true;
 	private boolean						needTransactionInfo		= false;
 	private int							port					= 7862;
+	private String						name;
 
 	public void addDatabaseTable(String database, String... tablePatterns) {
 		if (!this.databaseTablesMapping.containsKey(database)) {
@@ -48,6 +49,7 @@ public class Configuration implements Serializable {
 	public String buildRequestParamString(long seq) {
 		StringBuilder param = new StringBuilder();
 		param.append("seq=").append(seq);
+		param.append("&name=").append(name);
 		param.append("&ddl=").append(needDdl);
 		param.append("&dml=").append(needDml);
 		param.append("&ts=").append(needTransactionInfo);
@@ -164,6 +166,21 @@ public class Configuration implements Serializable {
 		this.port = port;
 	}
 
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name
+	 *            the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -173,12 +190,15 @@ public class Configuration implements Serializable {
 	public String toString() {
 		return "Configuration [codecType=" + codecType + ", databaseTablesMapping=" + databaseTablesMapping + ", host="
 				+ host + ", needDdl=" + needDdl + ", needDml=" + needDml + ", needTransactionInfo="
-				+ needTransactionInfo + ", port=" + port + "]";
+				+ needTransactionInfo + ", port=" + port + ", name=" + name + "]";
 	}
 
 	public void validate() {
 		if (host == null || host.trim().length() == 0) {
 			throw new IllegalArgumentException("Puma client's host not set.");
+		}
+		if (name == null || name.trim().length() == 0) {
+			throw new IllegalArgumentException("Puma client's name not set.");
 		}
 	}
 }

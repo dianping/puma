@@ -127,12 +127,13 @@ public class ServletAcceptor implements Acceptor {
 			String[] dts = req.getParameterValues("dt");
 			String clientName = req.getParameter("name");
 
-			log.info("One client connected. ClientName: " + clientName);
+			log.info("Client(" + clientName + ") connected.");
 
 			EventCodec codec = EventCodecFactory.createCodec(codecType);
 			EventFilterChain filterChain = EventFilterChainFactory.createEventFilterChain(ddl, dml, ts, dts);
 
 			resp.setContentType("application/octet-stream");
+			resp.addHeader("Connection", "Keep-Alive");
 
 			EventChannel channel = storage.getChannel(seq);
 			while (true) {
@@ -147,8 +148,8 @@ public class ServletAcceptor implements Acceptor {
 					}
 					Thread.sleep(2);
 				} catch (Exception e) {
-					log.info("One client disconnected. ClientName: " + clientName);
-					break;
+					log.info("Client(" + clientName + ") failed.");
+					return;
 				}
 			}
 		}

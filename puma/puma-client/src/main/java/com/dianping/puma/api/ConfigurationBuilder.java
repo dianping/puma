@@ -48,6 +48,11 @@ public class ConfigurationBuilder {
 		return this;
 	}
 
+	public ConfigurationBuilder seqFileBase(String seqFileBase) {
+		this.configuration.setSeqFileBase(seqFileBase);
+		return this;
+	}
+
 	public Configuration build() {
 		return this.configuration;
 	}

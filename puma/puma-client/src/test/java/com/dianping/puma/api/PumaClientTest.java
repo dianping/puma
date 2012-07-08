@@ -28,11 +28,10 @@ public class PumaClientTest {
 		PumaClient client = new PumaClient(configBuilder.build());
 
 		client.register(new EventListener() {
-			private long	i	= 0;
 
 			@Override
 			public void onEvent(ChangedEvent event) {
-				System.out.println(i++);
+				System.out.println(event.getSeq());
 			}
 		});
 

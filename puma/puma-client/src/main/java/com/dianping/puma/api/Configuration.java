@@ -37,6 +37,7 @@ public class Configuration implements Serializable {
 	private boolean						needTransactionInfo		= false;
 	private int							port					= 7862;
 	private String						name;
+	private String						seqFileBase				= "/data/applogs/puma/";
 
 	public void addDatabaseTable(String database, String... tablePatterns) {
 		if (!this.databaseTablesMapping.containsKey(database)) {
@@ -61,6 +62,21 @@ public class Configuration implements Serializable {
 		}
 
 		return param.toString();
+	}
+
+	/**
+	 * @return the seqFileBase
+	 */
+	public String getSeqFileBase() {
+		return seqFileBase;
+	}
+
+	/**
+	 * @param seqFileBase
+	 *            the seqFileBase to set
+	 */
+	public void setSeqFileBase(String seqFileBase) {
+		this.seqFileBase = seqFileBase;
 	}
 
 	/**
@@ -190,7 +206,7 @@ public class Configuration implements Serializable {
 	public String toString() {
 		return "Configuration [codecType=" + codecType + ", databaseTablesMapping=" + databaseTablesMapping + ", host="
 				+ host + ", needDdl=" + needDdl + ", needDml=" + needDml + ", needTransactionInfo="
-				+ needTransactionInfo + ", port=" + port + ", name=" + name + "]";
+				+ needTransactionInfo + ", port=" + port + ", name=" + name + ", seqFileBase=" + seqFileBase + "]";
 	}
 
 	public void validate() {

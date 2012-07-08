@@ -29,7 +29,7 @@ public class PumaClient {
 		}
 
 		this.config = config;
-		this.seqFileHolder = new DefaultSeqFileHolder(config);
+		this.seqFileHolder = new MMapBasedSeqFileHolder(config);
 		codec = EventCodecFactory.createCodec(config.getCodecType());
 	}
 

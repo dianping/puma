@@ -24,4 +24,14 @@ public class DefaultEventFilterChain implements EventFilterChain {
 		this.eventFilters = eventFilters;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dianping.puma.filter.EventFilterChain#reset()
+	 */
+	@Override
+	public void reset() {
+		pos = 0;
+	}
+
 }

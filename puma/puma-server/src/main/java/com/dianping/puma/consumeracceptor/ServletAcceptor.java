@@ -128,12 +128,13 @@ public class ServletAcceptor implements Acceptor {
 			String clientName = req.getParameter("name");
 
 			EventCodec codec = EventCodecFactory.createCodec(codecType);
+			EventFilterChain filterChain = EventFilterChainFactory.createEventFilterChain(ddl, dml, ts, dts);
 
 			EventChannel channel = storage.getChannel(seq);
 			while (true) {
 				try {
+					filterChain.reset();
 					ChangedEvent event = channel.next();
-					EventFilterChain filterChain = EventFilterChainFactory.createEventFilterChain(ddl, dml, ts, dts);
 					if (filterChain.doNext(event)) {
 						byte[] data = codec.encode(event);
 						resp.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));

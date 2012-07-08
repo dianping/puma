@@ -9,4 +9,6 @@ public interface EventFilterChain {
 
 	public void setEventFilters(List<EventFilter> eventFilters);
 
+	public void reset();
+
 }

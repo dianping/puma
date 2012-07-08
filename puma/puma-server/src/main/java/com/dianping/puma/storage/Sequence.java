@@ -32,7 +32,7 @@ public class Sequence {
 	}
 
 	public Sequence addOffset(int delta) {
-		return new Sequence(creationDate, number, delta);
+		return new Sequence(creationDate, number, this.offset + delta);
 	}
 
 	public Sequence clearOffset() {

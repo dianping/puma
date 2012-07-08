@@ -1,41 +1,42 @@
 package com.dianping.puma.storage;
 
 import java.util.Calendar;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Sequence {
-	private int				creationDate;
-	private int				number;
-	private AtomicInteger	offset	= new AtomicInteger(0);
+	private int	creationDate;
+	private int	number;
+	private int	offset;
 
-	Sequence(int creationDate, int number) {
+	public Sequence(int creationDate, int number) {
 		this(creationDate, number, 0);
 	}
 
 	public Sequence(int creationDate, int number, int offset) {
 		this.creationDate = creationDate;
 		this.number = number;
-		this.offset = new AtomicInteger(offset);
+		this.offset = offset;
+	}
+
+	public Sequence(Sequence sequence) {
+		this.creationDate = sequence.creationDate;
+		this.number = sequence.number;
+		this.offset = sequence.offset;
 	}
 
 	public Sequence(long seq) {
 		parse(seq);
 	}
 
-	public void clearOffset() {
-		this.offset.set(0);
-	}
-
 	public int getCreationDate() {
 		return creationDate;
 	}
 
-	public void addOffset(int inc) {
-		offset.addAndGet(inc);
+	public Sequence addOffset(int delta) {
+		return new Sequence(creationDate, number, delta);
 	}
 
-	public Sequence clone() {
-		return new Sequence(creationDate, number, offset.intValue());
+	public Sequence clearOffset() {
+		return new Sequence(creationDate, number, 0);
 	}
 
 	public Sequence getNext(boolean forSameDay) {
@@ -58,17 +59,17 @@ public class Sequence {
 	}
 
 	public int getOffset() {
-		return offset.intValue();
+		return offset;
 	}
 
 	public long longValue() {
-		return ((long) creationDate << 46) | ((long) (number & 0x3FFF)) << 32 | offset.longValue();
+		return ((long) creationDate << 46) | ((long) (number & 0x3FFF)) << 32 | offset;
 	}
 
 	private void parse(long seq) {
 		creationDate = (int) (seq >>> 46);
 		number = (int) ((seq >>> 32) & 0x3FFF);
-		offset.set((int) (seq & 0xFFFFFFFF));
+		offset = (int) (seq & 0xFFFFFFFF);
 	}
 
 	/*

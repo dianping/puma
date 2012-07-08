@@ -19,7 +19,7 @@ public class PumaClientTest {
 				.host("localhost") //
 				.port(7862)//
 				.tables("cat", "*")//
-				.ddl(false) //
+				.ddl(true) //
 				.dml(true)//
 				.tables("binlog", "*")//
 				.name("testClient")//
@@ -28,9 +28,11 @@ public class PumaClientTest {
 		PumaClient client = new PumaClient(configBuilder.build());
 
 		client.register(new EventListener() {
+			private long	i	= 0;
+
 			@Override
 			public void onEvent(ChangedEvent event) {
-				System.out.println(event);
+				System.out.println(i++);
 			}
 		});
 

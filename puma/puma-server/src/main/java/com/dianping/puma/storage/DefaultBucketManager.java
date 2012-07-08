@@ -58,24 +58,24 @@ public class DefaultBucketManager implements BucketManager {
 		if (seq == -1L) {
 			// TODO find hdfs
 			if (localBuckets.get().isEmpty()) {
+				// TODO invalid seq
 				path = null;
 			} else {
 				path = localBuckets.get().firstEntry().getValue();
-				sequence = localBuckets.get().firstEntry().getKey().clone();
+				sequence = new Sequence(localBuckets.get().firstEntry().getKey());
 			}
 		} else {
 			sequence = new Sequence(seq);
 			path = localBuckets.get().get(sequence);
 			if (path == null) {
-				// TODO invalidate seq
+				// TODO invalid seq
 			}
 		}
 
 		if (path != null) {
 			File file = new File(localBaseDir, path);
 			int offset = sequence.getOffset();
-			sequence.clearOffset();
-			Bucket bucket = new FileBucket(file, sequence, localBucketMaxSizeMB, codec);
+			Bucket bucket = new FileBucket(file, sequence.clearOffset(), localBucketMaxSizeMB, codec);
 			bucket.seek(offset);
 			try {
 				bucket.getNext();
@@ -95,7 +95,7 @@ public class DefaultBucketManager implements BucketManager {
 	public Bucket getNextReadBucket(long seq) throws IOException {
 		checkClosed();
 		Sequence sequence = new Sequence(seq);
-		sequence.clearOffset();
+		sequence = sequence.clearOffset();
 		NavigableMap<Sequence, String> tailMap = localBuckets.get().tailMap(sequence, false);
 
 		if (tailMap.isEmpty()) {
@@ -113,9 +113,9 @@ public class DefaultBucketManager implements BucketManager {
 		Entry<Sequence, String> lastEntry = localBuckets.get().lastEntry();
 		Sequence nextSeq = null;
 		if (lastEntry == null) {
-			nextSeq = new Sequence(getCreationDate(), 0);
+			nextSeq = new Sequence(getNowCreationDate(), 0);
 		} else {
-			nextSeq = getNextWriteBucketSequence(lastEntry.getKey().clone());
+			nextSeq = getNextWriteBucketSequence(new Sequence(lastEntry.getKey()));
 		}
 		String bucketPath = convertToPath(nextSeq);
 		File bucketFile = new File(localBaseDir, bucketPath);
@@ -137,13 +137,13 @@ public class DefaultBucketManager implements BucketManager {
 		}
 	}
 
-	private int getCreationDate() {
+	private int getNowCreationDate() {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
 		return Integer.valueOf(sdf.format(new Date()));
 	}
 
 	private Sequence getNextWriteBucketSequence(Sequence seq) {
-		if (getCreationDate() == seq.getCreationDate()) {
+		if (getNowCreationDate() == seq.getCreationDate()) {
 			return seq.getNext(true);
 		} else {
 			return seq.getNext(false);
@@ -161,7 +161,7 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	private void initLocalBuckets() {
-		localBuckets.set(new TreeMap<Sequence, String>(new SequenceComparator()));
+		localBuckets.set(new TreeMap<Sequence, String>(new PathSequenceComparator()));
 		File[] dirs = localBaseDir.listFiles(new FileFilter() {
 
 			@Override
@@ -197,7 +197,7 @@ public class DefaultBucketManager implements BucketManager {
 		}
 	}
 
-	private static class SequenceComparator implements Comparator<Sequence> {
+	private static class PathSequenceComparator implements Comparator<Sequence> {
 
 		/*
 		 * (non-Javadoc)

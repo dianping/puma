@@ -5,26 +5,28 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 
 public class FileBucket implements Bucket {
-	private EventCodec			codec;
-	private Sequence			startingSequence;
-	private int					maxSizeMB;
-	private Sequence			currentWritingSeq;
-	private volatile boolean	stopped	= false;
+	private EventCodec					codec;
+	private Sequence					startingSequence;
+	private int							maxSizeMB;
+	private AtomicReference<Sequence>	currentWritingSeq	= new AtomicReference<Sequence>();
+	private volatile boolean			stopped				= false;
 
-	private RandomAccessFile	file;
+	private RandomAccessFile			file;
 
-	public FileBucket(File file, Sequence sequence, int maxSizeMB, EventCodec codec) throws FileNotFoundException {
+	public FileBucket(File file, Sequence startingSequence, int maxSizeMB, EventCodec codec)
+			throws FileNotFoundException {
 		this.file = new RandomAccessFile(file, "rw");
-		this.startingSequence = sequence;
+		this.startingSequence = startingSequence;
 		this.maxSizeMB = maxSizeMB;
 		this.codec = codec;
 		// we need to copy the whole instance
-		this.currentWritingSeq = new Sequence(sequence.getCreationDate(), sequence.getNumber());
+		this.currentWritingSeq.set(new Sequence(startingSequence.getCreationDate(), startingSequence.getNumber()));
 	}
 
 	@Override
@@ -33,7 +35,7 @@ public class FileBucket implements Bucket {
 		byte[] data = codec.encode(event);
 		file.writeInt(data.length);
 		file.write(data);
-		currentWritingSeq.addOffset(4 + data.length);
+		currentWritingSeq.set(currentWritingSeq.get().addOffset(4 + data.length));
 	}
 
 	@Override
@@ -90,7 +92,7 @@ public class FileBucket implements Bucket {
 
 	@Override
 	public long getCurrentWritingSeq() {
-		return currentWritingSeq.longValue();
+		return currentWritingSeq.get().longValue();
 	}
 
 }

@@ -20,20 +20,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.dianping.puma.common.bo.PumaContext;
-import com.dianping.puma.common.mysql.BinlogConstanst;
-import com.dianping.puma.common.mysql.column.Column;
-import com.dianping.puma.common.mysql.event.AbstractRowsEvent;
-import com.dianping.puma.common.mysql.event.BinlogEvent;
-import com.dianping.puma.common.mysql.event.DeleteRowsEvent;
-import com.dianping.puma.common.mysql.event.TableMapEvent;
-import com.dianping.puma.common.mysql.event.UpdateRowsEvent;
-import com.dianping.puma.common.mysql.event.WriteRowsEvent;
+import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
 import com.dianping.puma.datahandler.DataHandlerResult;
 import com.dianping.puma.datahandler.TableMetaInfo;
+import com.dianping.puma.parser.mysql.BinlogConstanst;
+import com.dianping.puma.parser.mysql.column.Column;
+import com.dianping.puma.parser.mysql.event.AbstractRowsEvent;
+import com.dianping.puma.parser.mysql.event.BinlogEvent;
+import com.dianping.puma.parser.mysql.event.DeleteRowsEvent;
+import com.dianping.puma.parser.mysql.event.TableMapEvent;
+import com.dianping.puma.parser.mysql.event.UpdateRowsEvent;
+import com.dianping.puma.parser.mysql.event.WriteRowsEvent;
 
 /**
  * TODO Comment of TransactionSupportDataHandler

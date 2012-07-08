@@ -11,12 +11,12 @@ import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.dianping.puma.common.bo.PositionInfo;
-import com.dianping.puma.common.bo.PumaContext;
-import com.dianping.puma.common.util.PositionFileUtils;
+import com.dianping.puma.bo.PositionInfo;
+import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.consumeracceptor.Acceptor;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.server.Server;
+import com.dianping.puma.utils.PositionFileUtils;
 
 public class Bootstrap {
 

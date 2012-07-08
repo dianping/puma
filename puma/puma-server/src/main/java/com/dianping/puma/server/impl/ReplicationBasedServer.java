@@ -24,22 +24,22 @@ import java.net.UnknownHostException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.dianping.puma.common.bo.PositionInfo;
-import com.dianping.puma.common.mysql.BinlogConstanst;
-import com.dianping.puma.common.mysql.event.BinlogEvent;
-import com.dianping.puma.common.mysql.event.RotateEvent;
-import com.dianping.puma.common.mysql.packet.AuthenticatePacket;
-import com.dianping.puma.common.mysql.packet.BinlogPacket;
-import com.dianping.puma.common.mysql.packet.ComBinlogDumpPacket;
-import com.dianping.puma.common.mysql.packet.OKErrorPacket;
-import com.dianping.puma.common.mysql.packet.PacketFactory;
-import com.dianping.puma.common.mysql.packet.PacketType;
-import com.dianping.puma.common.util.PositionFileUtils;
+import com.dianping.puma.bo.PositionInfo;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.datahandler.DataHandlerResult;
+import com.dianping.puma.parser.mysql.BinlogConstanst;
+import com.dianping.puma.parser.mysql.event.BinlogEvent;
+import com.dianping.puma.parser.mysql.event.RotateEvent;
+import com.dianping.puma.parser.mysql.packet.AuthenticatePacket;
+import com.dianping.puma.parser.mysql.packet.BinlogPacket;
+import com.dianping.puma.parser.mysql.packet.ComBinlogDumpPacket;
+import com.dianping.puma.parser.mysql.packet.OKErrorPacket;
+import com.dianping.puma.parser.mysql.packet.PacketFactory;
+import com.dianping.puma.parser.mysql.packet.PacketType;
 import com.dianping.puma.server.monitor.ServerMonitorMBean;
+import com.dianping.puma.utils.PositionFileUtils;
 
 /**
  * 基于MySQL复制机制的Server

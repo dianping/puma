@@ -127,8 +127,12 @@ public class ServletAcceptor implements Acceptor {
 			String[] dts = req.getParameterValues("dt");
 			String clientName = req.getParameter("name");
 
+			log.info("One client connected. ClientName: " + clientName);
+
 			EventCodec codec = EventCodecFactory.createCodec(codecType);
 			EventFilterChain filterChain = EventFilterChainFactory.createEventFilterChain(ddl, dml, ts, dts);
+
+			resp.setContentType("application/octet-stream");
 
 			EventChannel channel = storage.getChannel(seq);
 			while (true) {

@@ -36,6 +36,6 @@ public interface Bucket {
 
 	public boolean hasRemainingForWrite() throws IOException;
 
-	public long getCurrentSeq();
+	public long getCurrentWritingSeq();
 
 }

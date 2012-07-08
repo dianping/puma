@@ -39,7 +39,7 @@
 		<property name="metaDBPassword" value="binlog" />
 	</bean>
 
-	<bean id="defaultParser" class="com.dianping.puma.parser.impl.DefaultBinlogParser"
+	<bean id="defaultParser" class="com.dianping.puma.parser.DefaultBinlogParser"
 		init-method="start">
 		<property name="name" value="server-7_43-parser" />
 	</bean>

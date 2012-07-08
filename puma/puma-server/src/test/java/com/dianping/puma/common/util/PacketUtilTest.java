@@ -18,6 +18,8 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.dianping.puma.utils.PacketUtils;
+
 /**
  * @author Leo Liang
  * 

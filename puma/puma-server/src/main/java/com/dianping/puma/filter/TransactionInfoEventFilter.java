@@ -13,22 +13,21 @@ public class TransactionInfoEventFilter implements EventFilter {
 
 	public boolean accept(ChangedEvent event, EventFilterChain eventfilterChain) {
 
-		if (checkEvent(event)) {
-			return true;
-		} else {
-			return false;
-		}
-
-	}
-
-	protected boolean checkEvent(ChangedEvent event) {
 		if (event instanceof RowChangedEvent) {
 			RowChangedEvent rowEvent = (RowChangedEvent) event;
-			if (!needTsInfo && (rowEvent.isTransactionBegin() || rowEvent.isTransactionCommit())) {
-				return false;
+			if (rowEvent.isTransactionBegin() || rowEvent.isTransactionCommit()) {
+				if (needTsInfo) {
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				return eventfilterChain.doNext(event);
 			}
+		} else {
+			return eventfilterChain.doNext(event);
 		}
 
-		return true;
 	}
+
 }

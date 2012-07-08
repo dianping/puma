@@ -27,11 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.dianping.puma.common.bo.PumaContext;
-import com.dianping.puma.common.mysql.BinlogConstanst;
-import com.dianping.puma.common.mysql.event.BinlogEvent;
-import com.dianping.puma.common.mysql.event.PumaIgnoreEvent;
-import com.dianping.puma.common.mysql.event.QueryEvent;
+import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
@@ -39,6 +35,10 @@ import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.datahandler.DataHandlerResult;
 import com.dianping.puma.datahandler.TableMetaInfo;
+import com.dianping.puma.parser.mysql.BinlogConstanst;
+import com.dianping.puma.parser.mysql.event.BinlogEvent;
+import com.dianping.puma.parser.mysql.event.PumaIgnoreEvent;
+import com.dianping.puma.parser.mysql.event.QueryEvent;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 /**

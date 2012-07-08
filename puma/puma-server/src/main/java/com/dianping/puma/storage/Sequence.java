@@ -34,6 +34,10 @@ public class Sequence {
 		offset.addAndGet(inc);
 	}
 
+	public Sequence clone() {
+		return new Sequence(creationDate, number, offset.intValue());
+	}
+
 	public Sequence getNext(boolean forSameDay) {
 		if (forSameDay) {
 			return new Sequence(creationDate, number + 1);

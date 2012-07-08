@@ -75,7 +75,7 @@ public class DefaultEventStorage implements EventStorage {
 			writingBucket = bucketManager.getNextWriteBucket();
 		}
 
-		event.setSeq(writingBucket.getCurrentSeq());
+		event.setSeq(writingBucket.getCurrentWritingSeq());
 		writingBucket.append(event);
 	}
 

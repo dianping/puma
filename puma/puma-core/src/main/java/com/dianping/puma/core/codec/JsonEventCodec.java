@@ -14,6 +14,7 @@ public class JsonEventCodec implements EventCodec {
 
 	public JsonEventCodec() {
 		om = new ObjectMapper();
+		om.enableDefaultTyping();
 	}
 
 	@Override

@@ -18,7 +18,7 @@ package com.dianping.puma.server.impl;
 import java.util.List;
 
 import com.dianping.hawk.jmx.HawkJMXUtil;
-import com.dianping.puma.common.bo.PumaContext;
+import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.common.monitor.BinlogInfoAware;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.datahandler.DataHandler;

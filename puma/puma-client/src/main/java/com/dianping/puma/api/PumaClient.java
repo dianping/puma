@@ -71,6 +71,9 @@ public class PumaClient {
 			connection.setRequestMethod("POST");
 			connection.setConnectTimeout(3000);
 			connection.setDoOutput(true);
+			connection.setUseCaches(false);
+			connection.setRequestProperty("Connection", "Keep-Alive");
+			connection.setRequestProperty("Cache-Control", "no-cache");
 
 			PrintWriter out = new PrintWriter(connection.getOutputStream());
 
@@ -106,13 +109,15 @@ public class PumaClient {
 
 			// reconnect while there is some connection problem
 			while (true) {
+				InputStream is = null;
+
 				if (checkStop()) {
 					break;
 				}
 
 				try {
 
-					InputStream is = connect();
+					is = connect();
 
 					// reconnect case
 					if (is == null) {
@@ -141,7 +146,7 @@ public class PumaClient {
 								eventListener.onEvent(event);
 								break;
 							} catch (Exception e) {
-								log.error("Exception occurs in eventListerner.", e);
+								log.error("Exception occurs in eventListerner. Event: " + event, e);
 								listenerCallSuccess = false;
 							}
 						}
@@ -159,6 +164,14 @@ public class PumaClient {
 				} catch (Exception e) {
 					log.error("Connection problem occurs.", e);
 					log.info("Puma client reconnecting...");
+				} finally {
+					if (is != null) {
+						try {
+							is.close();
+						} catch (IOException e) {
+							// ignore
+						}
+					}
 				}
 			}
 		}

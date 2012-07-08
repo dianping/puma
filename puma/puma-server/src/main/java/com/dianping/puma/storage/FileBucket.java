@@ -13,7 +13,7 @@ public class FileBucket implements Bucket {
 	private EventCodec			codec;
 	private Sequence			startingSequence;
 	private int					maxSizeMB;
-	private Sequence			currentSeq;
+	private Sequence			currentWritingSeq;
 	private volatile boolean	stopped	= false;
 
 	private RandomAccessFile	file;
@@ -23,7 +23,8 @@ public class FileBucket implements Bucket {
 		this.startingSequence = sequence;
 		this.maxSizeMB = maxSizeMB;
 		this.codec = codec;
-		currentSeq = startingSequence;
+		// we need to copy the whole instance
+		this.currentWritingSeq = new Sequence(sequence.getCreationDate(), sequence.getNumber());
 	}
 
 	@Override
@@ -32,7 +33,7 @@ public class FileBucket implements Bucket {
 		byte[] data = codec.encode(event);
 		file.writeInt(data.length);
 		file.write(data);
-		currentSeq.addOffset(4 + data.length);
+		currentWritingSeq.addOffset(4 + data.length);
 	}
 
 	@Override
@@ -88,8 +89,8 @@ public class FileBucket implements Bucket {
 	}
 
 	@Override
-	public long getCurrentSeq() {
-		return currentSeq.longValue();
+	public long getCurrentWritingSeq() {
+		return currentWritingSeq.longValue();
 	}
 
 }

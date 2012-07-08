@@ -61,7 +61,7 @@ public class DefaultBucketManager implements BucketManager {
 				path = null;
 			} else {
 				path = localBuckets.get().firstEntry().getValue();
-				sequence = localBuckets.get().firstEntry().getKey();
+				sequence = localBuckets.get().firstEntry().getKey().clone();
 			}
 		} else {
 			sequence = new Sequence(seq);
@@ -115,7 +115,7 @@ public class DefaultBucketManager implements BucketManager {
 		if (lastEntry == null) {
 			nextSeq = new Sequence(getCreationDate(), 0);
 		} else {
-			nextSeq = getNextWriteBucketSequence(lastEntry.getKey());
+			nextSeq = getNextWriteBucketSequence(lastEntry.getKey().clone());
 		}
 		String bucketPath = convertToPath(nextSeq);
 		File bucketFile = new File(localBaseDir, bucketPath);

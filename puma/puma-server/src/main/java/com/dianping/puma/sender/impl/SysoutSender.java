@@ -15,7 +15,7 @@
  */
 package com.dianping.puma.sender.impl;
 
-import com.dianping.puma.common.bo.PumaContext;
+import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 

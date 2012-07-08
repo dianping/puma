@@ -162,8 +162,8 @@ public class PumaClient {
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 				} catch (Exception e) {
-					log.error("Connection problem occurs.", e);
-					log.info("Puma client reconnecting...");
+					log.warn("Connection problem occurs.");
+					log.warn("Puma client reconnecting...");
 				} finally {
 					if (is != null) {
 						try {

@@ -38,6 +38,7 @@ public class Configuration implements Serializable {
 	private int							port					= 7862;
 	private String						name;
 	private String						seqFileBase				= "/data/applogs/puma/";
+	private String target;
 
 	public void addDatabaseTable(String database, String... tablePatterns) {
 		if (!this.databaseTablesMapping.containsKey(database)) {
@@ -51,6 +52,7 @@ public class Configuration implements Serializable {
 		StringBuilder param = new StringBuilder();
 		param.append("seq=").append(seq);
 		param.append("&name=").append(name);
+		param.append("&target=").append(target);
 		param.append("&ddl=").append(needDdl);
 		param.append("&dml=").append(needDml);
 		param.append("&ts=").append(needTransactionInfo);
@@ -217,4 +219,12 @@ public class Configuration implements Serializable {
 			throw new IllegalArgumentException("Puma client's name not set.");
 		}
 	}
+
+	public String getTarget() {
+   	return target;
+   }
+
+	public void setTarget(String target) {
+		this.target = target;
+   }
 }

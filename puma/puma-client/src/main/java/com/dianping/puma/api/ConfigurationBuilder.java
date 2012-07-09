@@ -56,4 +56,9 @@ public class ConfigurationBuilder {
 	public Configuration build() {
 		return this.configuration;
 	}
+
+	public ConfigurationBuilder target(String target) {
+		this.configuration.setTarget(target);
+	   return this;
+   }
 }

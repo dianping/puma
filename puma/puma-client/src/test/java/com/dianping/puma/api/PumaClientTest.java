@@ -23,6 +23,7 @@ public class PumaClientTest {
 				.dml(true)//
 				.tables("binlog", "*")//
 				.name("testClient")//
+				.target("7-43") //
 				.transaction(true);
 
 		PumaClient client = new PumaClient(configBuilder.build());

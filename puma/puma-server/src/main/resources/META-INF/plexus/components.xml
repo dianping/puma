@@ -1,0 +1,47 @@
+<plexus>
+	<components>
+		<component>
+			<role>com.site.web.mvc.model.ModuleRegistry</role>
+			<implementation>com.site.web.mvc.model.ModuleRegistry</implementation>
+			<configuration>
+				<modules>
+					<module default="true">com.dianping.puma.channel.ChannelModule</module>
+				</modules>
+			</configuration>
+		</component>
+		<component>
+			<role>com.dianping.puma.channel.ChannelModule</role>
+			<implementation>com.dianping.puma.channel.ChannelModule</implementation>
+		</component>
+		<component>
+			<role>com.dianping.puma.channel.page.acceptor.Handler</role>
+			<implementation>com.dianping.puma.channel.page.acceptor.Handler</implementation>
+		</component>
+		<component>
+			<role>com.dianping.puma.channel.page.status.Handler</role>
+			<implementation>com.dianping.puma.channel.page.status.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.puma.channel.page.status.JspViewer</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.puma.channel.page.status.JspViewer</role>
+			<implementation>com.dianping.puma.channel.page.status.JspViewer</implementation>
+		</component>
+		<component>
+			<role>com.dianping.puma.channel.page.admin.Handler</role>
+			<implementation>com.dianping.puma.channel.page.admin.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.puma.channel.page.admin.JspViewer</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.puma.channel.page.admin.JspViewer</role>
+			<implementation>com.dianping.puma.channel.page.admin.JspViewer</implementation>
+		</component>
+	</components>
+</plexus>

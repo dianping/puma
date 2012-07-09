@@ -30,11 +30,13 @@ import java.nio.channels.FileChannel.MapMode;
  * 
  */
 public class MMapBasedSeqFileHolder implements SeqFileHolder {
+	private static final int	MAX_FILE_LENGTH	= 100;
 	private String				seqFileBase;
 	private Configuration		config;
 	private MappedByteBuffer	buf;
 	private RandomAccessFile	file;
 	private long				seq;
+	private static final byte[]	BUF_MASK		= new byte[MAX_FILE_LENGTH];
 
 	public MMapBasedSeqFileHolder(Configuration config) {
 		this.seqFileBase = config.getSeqFileBase();
@@ -47,7 +49,7 @@ public class MMapBasedSeqFileHolder implements SeqFileHolder {
 
 		try {
 			this.file = new RandomAccessFile(new File(filePath), "rwd");
-			buf = this.file.getChannel().map(MapMode.READ_WRITE, 0, 50);
+			buf = this.file.getChannel().map(MapMode.READ_WRITE, 0, MAX_FILE_LENGTH);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -103,11 +105,13 @@ public class MMapBasedSeqFileHolder implements SeqFileHolder {
 		for (String hostPart : hostArr) {
 			path.append(hostPart).append("-");
 		}
-		path.append(config.getPort()).append(".conf");
+		path.append(config.getPort()).append("-").append(config.getTarget()).append(".conf");
 		return path.toString();
 	}
 
 	public synchronized void saveSeq(long seq) {
+		buf.position(0);
+		buf.put(BUF_MASK);
 		buf.position(0);
 		buf.put(String.valueOf(seq).getBytes());
 		buf.put("\n".getBytes());

@@ -21,11 +21,11 @@ import com.site.test.browser.DefaultBrowser;
 import com.site.web.MVC;
 
 public class TestServer {
-	private static TestServer s_instance;
+	private static TestServer	s_instance;
 
-	private static Context s_ctx;
+	private static Context		s_ctx;
 
-	private Server m_server;
+	private Server				m_server;
 
 	@AfterClass
 	public static void afterClass() throws Exception {
@@ -71,7 +71,8 @@ public class TestServer {
 			if (contextPath.length() == 0) {
 				contextPath = null;
 			} else if (!contextPath.startsWith("/")) {
-				throw new RuntimeException(String.format("ContextPath(%s) must be null or starting with '/'.", contextPath));
+				throw new RuntimeException(String.format("ContextPath(%s) must be null or starting with '/'.",
+						contextPath));
 			}
 		}
 
@@ -109,7 +110,7 @@ public class TestServer {
 	}
 
 	protected File getScratchDir() {
-		File work = new File(System.getProperty("java.io.tmpdir", "."), "Cat");
+		File work = new File(System.getProperty("java.io.tmpdir", "."), "Puma");
 
 		work.mkdirs();
 		return work;

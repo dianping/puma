@@ -16,11 +16,16 @@ public class DefaultEventStorage implements EventStorage {
 	private EventCodec							codec;
 	private int									fileMaxSizeMB	= 2000;
 	private String								filePrefix		= "b";
+	private String								hdfsBaseDir;
 	private List<WeakReference<EventChannel>>	openChannels	= new ArrayList<WeakReference<EventChannel>>();
 	private volatile boolean					stopped			= false;
 
-	public void initialize() {
-		bucketManager = new DefaultBucketManager(localBaseDir, name, filePrefix, fileMaxSizeMB, codec);
+	public void initialize() throws IOException {
+		bucketManager = new DefaultBucketManager(localBaseDir, hdfsBaseDir, name, filePrefix, fileMaxSizeMB, codec);
+	}
+
+	public void setHdfsBaseDir(String hdfsBaseDir) {
+		this.hdfsBaseDir = hdfsBaseDir;
 	}
 
 	@Override

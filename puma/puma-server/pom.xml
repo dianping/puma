@@ -39,7 +39,7 @@
 			<artifactId>servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
- 		<dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
@@ -66,6 +66,22 @@
 			<artifactId>web-framework</artifactId>
 			<version>1.0.12</version>
 		</dependency>
+		<dependency>
+			<groupId>com.dp.cosmos</groupId>
+			<artifactId>hadoop-core</artifactId>
+			<version>1.0.3.0</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-codec</artifactId>
+					<groupId>commons-codec</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-httpclient</artifactId>
+					<groupId>commons-httpclient</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<finalName>puma</finalName>

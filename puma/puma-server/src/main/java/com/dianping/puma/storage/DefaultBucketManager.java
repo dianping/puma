@@ -6,15 +6,25 @@ import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Map.Entry;
 import java.util.NavigableMap;
+import java.util.Properties;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileUtil;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.security.SecurityUtil;
+import org.apache.hadoop.security.UserGroupInformation;
 
 import com.dianping.puma.core.codec.EventCodec;
 
@@ -25,23 +35,80 @@ public class DefaultBucketManager implements BucketManager {
 	private EventCodec									codec;
 	private volatile boolean							stopped			= false;
 
-	private AtomicReference<TreeMap<Sequence, String>>	localBuckets	= new AtomicReference<TreeMap<Sequence, String>>();
+	private Configuration								hdfsConfig;
+	private String										hdfsBaseDir;
+	private FileSystem									fileSystem;
 
-	public DefaultBucketManager(String localBaseDir, String name, String bucketFilePrefix, int localBucketMaxSizeMB,
-			EventCodec codec) {
+	private AtomicReference<TreeMap<Sequence, String>>	localBuckets	= new AtomicReference<TreeMap<Sequence, String>>();
+	private AtomicReference<TreeMap<Sequence, String>>	hdfsBuckets		= new AtomicReference<TreeMap<Sequence, String>>();
+
+	public void setHdfsBaseDir(String hdfsBaseDir) {
+		this.hdfsBaseDir = hdfsBaseDir;
+	}
+
+	public void initHdfsConfiguration() {
+		hdfsConfig = new Configuration();
+		Properties prop = new Properties();
+		InputStream propIn = null;
+
+		try {
+			propIn = DefaultBucketManager.class.getClassLoader().getResourceAsStream("hdfs.properties");
+			prop.load(propIn);
+
+			for (String key : prop.stringPropertyNames()) {
+				hdfsConfig.set(key, prop.getProperty(key));
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		} finally {
+			if (propIn != null) {
+				try {
+					propIn.close();
+				} catch (IOException e) {
+					// ignore
+				}
+			}
+		}
+
+		UserGroupInformation.setConfiguration(hdfsConfig);
+		try {
+			SecurityUtil.login(hdfsConfig, prop.getProperty("keytabFileKey"), prop.getProperty("userNameKey"));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+	}
+
+	public DefaultBucketManager(String localBaseDir, String hdfsBaseDir, String name, String bucketFilePrefix,
+			int localBucketMaxSizeMB, EventCodec codec) throws IOException {
 		this.localBaseDir = new File(localBaseDir, name);
 		this.localBucketMaxSizeMB = localBucketMaxSizeMB;
 		this.bucketFilePrefix = bucketFilePrefix;
 		this.codec = codec;
-		init();
+		this.hdfsBaseDir = hdfsBaseDir;
+
+		initHdfsConfiguration();
+		this.fileSystem = FileSystem.get(this.hdfsConfig);
+
+		try {
+			init();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
-	public synchronized void init() {
+	public synchronized void init() throws IOException, URISyntaxException {
 		if (!localBaseDir.exists()) {
 			localBaseDir.mkdirs();
 		}
 
 		initLocalBuckets();
+		initHDFSBucket();
+
 	}
 
 	private void checkClosed() throws IOException {
@@ -55,27 +122,46 @@ public class DefaultBucketManager implements BucketManager {
 		checkClosed();
 		Sequence sequence = null;
 		String path = null;
+		boolean hdfs = false; // flag whether hdfs or local bucket
+
 		if (seq == -1L) {
-			// TODO find hdfs
-			if (localBuckets.get().isEmpty()) {
-				// TODO invalid seq
-				path = null;
-			} else {
+			// find hdfs first
+			if (hdfsBuckets.get().isEmpty() == false) {
+				path = hdfsBuckets.get().firstEntry().getValue();
+				sequence = new Sequence(hdfsBuckets.get().firstEntry().getKey());
+
+			} else if (localBuckets.get().isEmpty() == false) {
 				path = localBuckets.get().firstEntry().getValue();
 				sequence = new Sequence(localBuckets.get().firstEntry().getKey());
+				hdfs = true;
+			} else {
+				// TODO invalid seq
+				path = null;
 			}
 		} else {
 			sequence = new Sequence(seq);
 			path = localBuckets.get().get(sequence);
 			if (path == null) {
-				// TODO invalid seq
+				path = hdfsBuckets.get().get(sequence);
+				if (path != null) {
+					hdfs = true;
+				}
 			}
+
 		}
 
 		if (path != null) {
-			File file = new File(localBaseDir, path);
 			int offset = sequence.getOffset();
-			Bucket bucket = new FileBucket(file, sequence.clearOffset(), localBucketMaxSizeMB, codec);
+			Bucket bucket = null;
+
+			if (hdfs == false) {
+				File file = new File(localBaseDir, path);
+				bucket = new FileBucket(file, sequence.clearOffset(), localBucketMaxSizeMB, codec);
+
+			} else {
+				bucket = new HDFSBucket(this.fileSystem, hdfsBaseDir + path, sequence.clearOffset(), codec);
+			}
+
 			bucket.seek(offset);
 			try {
 				bucket.getNext();
@@ -85,7 +171,6 @@ public class DefaultBucketManager implements BucketManager {
 
 			return bucket;
 		} else {
-			// TODO check HDFS bucket
 			throw new FileNotFoundException(String.format("Bucket(%d) not found!", path));
 		}
 
@@ -96,15 +181,20 @@ public class DefaultBucketManager implements BucketManager {
 		checkClosed();
 		Sequence sequence = new Sequence(seq);
 		sequence = sequence.clearOffset();
-		NavigableMap<Sequence, String> tailMap = localBuckets.get().tailMap(sequence, false);
+		NavigableMap<Sequence, String> localTailMap = localBuckets.get().tailMap(sequence, false);
+		NavigableMap<Sequence, String> hdfsTailMap = hdfsBuckets.get().tailMap(sequence, false);
 
-		if (tailMap.isEmpty()) {
-			throw new FileNotFoundException("No next read bucket for seq(" + seq + ")");
-		} else {
-			Entry<Sequence, String> firstEntry = tailMap.firstEntry();
+		if (localTailMap.isEmpty() != false) {
+			Entry<Sequence, String> firstEntry = localTailMap.firstEntry();
 			File file = new File(localBaseDir, firstEntry.getValue());
 			return new FileBucket(file, firstEntry.getKey(), localBucketMaxSizeMB, codec);
+		} else if (hdfsTailMap.isEmpty() != false) {
+			Entry<Sequence, String> firstEntry = localTailMap.firstEntry();
+			return new HDFSBucket(this.fileSystem, hdfsBaseDir + firstEntry.getValue(), firstEntry.getKey(), codec);
+		} else {
+			throw new FileNotFoundException("No next read bucket for seq(" + seq + ")");
 		}
+
 	}
 
 	@Override
@@ -197,6 +287,37 @@ public class DefaultBucketManager implements BucketManager {
 		}
 	}
 
+	private void initHDFSBucket() throws IOException, URISyntaxException {
+
+		hdfsBuckets.set(new TreeMap<Sequence, String>(new PathSequenceComparator()));
+
+		if (this.fileSystem.getFileStatus(new Path(this.hdfsBaseDir)).isDir()) {
+
+			FileStatus[] dirsStatus = this.fileSystem.listStatus(new Path(this.hdfsBaseDir));
+			Path[] listedPaths = FileUtil.stat2Paths(dirsStatus);
+
+			for (Path pathname : listedPaths) {
+
+				if (this.fileSystem.getFileStatus(pathname).isDir()) {
+					if (StringUtils.isNumeric(pathname.getName()) && pathname.getName().length() == 8) {
+
+						FileStatus[] status = this.fileSystem.listStatus(pathname);
+						Path[] listedFiles = FileUtil.stat2Paths(status);
+
+						for (Path subFile : listedFiles) {
+							if (subFile.getName().startsWith(bucketFilePrefix)
+									&& StringUtils.isNumeric(subFile.getName().substring(bucketFilePrefix.length()))) {
+								String path = pathname.getName() + File.separator + subFile.getName();
+								hdfsBuckets.get().put(convertToSequence(path), path);
+							}
+						}
+					}
+				}
+
+			}
+		}
+	}
+
 	private static class PathSequenceComparator implements Comparator<Sequence> {
 
 		/*
@@ -233,9 +354,10 @@ public class DefaultBucketManager implements BucketManager {
 		checkClosed();
 		Sequence sequence = new Sequence(seq);
 		sequence.clearOffset();
-		NavigableMap<Sequence, String> tailMap = localBuckets.get().tailMap(sequence, false);
+		NavigableMap<Sequence, String> localTailMap = localBuckets.get().tailMap(sequence, false);
+		NavigableMap<Sequence, String> hdfsTailMap = hdfsBuckets.get().tailMap(sequence, false);
 
-		if (tailMap.isEmpty()) {
+		if (localTailMap.isEmpty() && hdfsTailMap.isEmpty()) {
 			return false;
 		} else {
 			return true;

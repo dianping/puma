@@ -32,7 +32,7 @@ public class PumaClientTest {
 
 			@Override
 			public void onEvent(ChangedEvent event) {
-				System.out.println(event.getSeq());
+				System.out.println(event);
 			}
 		});
 

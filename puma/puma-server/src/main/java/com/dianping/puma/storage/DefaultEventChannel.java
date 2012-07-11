@@ -29,6 +29,7 @@ public class DefaultEventChannel implements EventChannel {
 				checkClosed();
 				event = bucket.getNext();
 			} catch (EOFException e) {
+				// TODO
 				if (bucketManager.hasNexReadBucket(seq)) {
 					bucket.close();
 					bucket = bucketManager.getNextReadBucket(seq);

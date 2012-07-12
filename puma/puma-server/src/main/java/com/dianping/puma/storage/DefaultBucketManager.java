@@ -29,6 +29,7 @@ import org.apache.hadoop.security.UserGroupInformation;
 import com.dianping.puma.core.codec.EventCodec;
 
 public class DefaultBucketManager implements BucketManager {
+	private static final String							PATH_SEPARATOR	= "/";
 	private File										localBaseDir;
 	private int											localBucketMaxSizeMB;
 	private String										bucketFilePrefix;
@@ -232,11 +233,11 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	private String convertToPath(Sequence seq) {
-		return "20" + seq.getCreationDate() + File.separator + bucketFilePrefix + seq.getNumber();
+		return "20" + seq.getCreationDate() + PATH_SEPARATOR + bucketFilePrefix + seq.getNumber();
 	}
 
 	private Sequence convertToSequence(String path) {
-		String[] parts = path.split(File.separator);
+		String[] parts = path.split(PATH_SEPARATOR);
 		return new Sequence(Integer.valueOf(parts[0].substring(2)), Integer.valueOf(parts[1].substring(bucketFilePrefix
 				.length())));
 	}
@@ -275,7 +276,7 @@ public class DefaultBucketManager implements BucketManager {
 				});
 
 				for (String subFile : subFiles) {
-					String path = dir.getName() + File.separator + subFile;
+					String path = dir.getName() + PATH_SEPARATOR + subFile;
 					localBuckets.get().put(convertToSequence(path), path);
 				}
 			}
@@ -308,7 +309,7 @@ public class DefaultBucketManager implements BucketManager {
 						for (Path subFile : listedFiles) {
 							if (subFile.getName().startsWith(bucketFilePrefix)
 									&& StringUtils.isNumeric(subFile.getName().substring(bucketFilePrefix.length()))) {
-								String path = pathname.getName() + File.separator + subFile.getName();
+								String path = pathname.getName() + PATH_SEPARATOR + subFile.getName();
 								hdfsBuckets.get().put(convertToSequence(path), path);
 							}
 						}

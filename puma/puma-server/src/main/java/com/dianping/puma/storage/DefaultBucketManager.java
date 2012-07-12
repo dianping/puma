@@ -87,25 +87,14 @@ public class DefaultBucketManager implements BucketManager {
 		this.codec = codec;
 		this.hdfsBaseDir = hdfsBaseDir;
 
-		initHdfsConfiguration();
-		this.fileSystem = FileSystem.get(this.hdfsConfig);
-
 		try {
 			init();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			throw new IOException(e);
 		}
 	}
 
 	public synchronized void init() throws IOException, URISyntaxException {
-		if (!localBaseDir.exists()) {
-			localBaseDir.mkdirs();
-		}
-
 		initLocalBuckets();
 		initHDFSBucket();
 
@@ -122,21 +111,20 @@ public class DefaultBucketManager implements BucketManager {
 		checkClosed();
 		Sequence sequence = null;
 		String path = null;
-		boolean hdfs = false; // flag whether hdfs or local bucket
+		boolean hdfs = true; // flag whether hdfs or local bucket
 
 		if (seq == -1L) {
 			// find hdfs first
-			if (hdfsBuckets.get().isEmpty() == false) {
+			if (!hdfsBuckets.get().isEmpty()) {
 				path = hdfsBuckets.get().firstEntry().getValue();
 				sequence = new Sequence(hdfsBuckets.get().firstEntry().getKey());
-
-			} else if (localBuckets.get().isEmpty() == false) {
+				hdfs = true;
+			} else if (!localBuckets.get().isEmpty()) {
 				path = localBuckets.get().firstEntry().getValue();
 				sequence = new Sequence(localBuckets.get().firstEntry().getKey());
-				hdfs = true;
+				hdfs = false;
 			} else {
-				// TODO invalid seq
-				path = null;
+				throw new FileNotFoundException(String.format("No matching bucket for seq(%d)!", seq));
 			}
 		} else {
 			sequence = new Sequence(seq);
@@ -145,7 +133,11 @@ public class DefaultBucketManager implements BucketManager {
 				path = hdfsBuckets.get().get(sequence);
 				if (path != null) {
 					hdfs = true;
+				} else {
+					throw new FileNotFoundException(String.format("No matching bucket for seq(%d)!", seq));
 				}
+			} else {
+				hdfs = false;
 			}
 
 		}
@@ -154,10 +146,9 @@ public class DefaultBucketManager implements BucketManager {
 			int offset = sequence.getOffset();
 			Bucket bucket = null;
 
-			if (hdfs == false) {
+			if (!hdfs) {
 				File file = new File(localBaseDir, path);
 				bucket = new FileBucket(file, sequence.clearOffset(), localBucketMaxSizeMB, codec);
-
 			} else {
 				bucket = new HDFSBucket(this.fileSystem, hdfsBaseDir + path, sequence.clearOffset(), codec);
 			}
@@ -184,12 +175,12 @@ public class DefaultBucketManager implements BucketManager {
 		NavigableMap<Sequence, String> localTailMap = localBuckets.get().tailMap(sequence, false);
 		NavigableMap<Sequence, String> hdfsTailMap = hdfsBuckets.get().tailMap(sequence, false);
 
-		if (localTailMap.isEmpty() != false) {
+		if (!localTailMap.isEmpty()) {
 			Entry<Sequence, String> firstEntry = localTailMap.firstEntry();
 			File file = new File(localBaseDir, firstEntry.getValue());
 			return new FileBucket(file, firstEntry.getKey(), localBucketMaxSizeMB, codec);
-		} else if (hdfsTailMap.isEmpty() != false) {
-			Entry<Sequence, String> firstEntry = localTailMap.firstEntry();
+		} else if (!hdfsTailMap.isEmpty()) {
+			Entry<Sequence, String> firstEntry = hdfsTailMap.firstEntry();
 			return new HDFSBucket(this.fileSystem, hdfsBaseDir + firstEntry.getValue(), firstEntry.getKey(), codec);
 		} else {
 			throw new FileNotFoundException("No next read bucket for seq(" + seq + ")");
@@ -251,6 +242,10 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	private void initLocalBuckets() {
+
+		if (!localBaseDir.exists()) {
+			localBaseDir.mkdirs();
+		}
 		localBuckets.set(new TreeMap<Sequence, String>(new PathSequenceComparator()));
 		File[] dirs = localBaseDir.listFiles(new FileFilter() {
 
@@ -288,12 +283,18 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	private void initHDFSBucket() throws IOException, URISyntaxException {
+		initHdfsConfiguration();
+		this.fileSystem = FileSystem.get(this.hdfsConfig);
 
 		hdfsBuckets.set(new TreeMap<Sequence, String>(new PathSequenceComparator()));
 
 		if (this.fileSystem.getFileStatus(new Path(this.hdfsBaseDir)).isDir()) {
 
 			FileStatus[] dirsStatus = this.fileSystem.listStatus(new Path(this.hdfsBaseDir));
+			if (dirsStatus == null || dirsStatus.length == 0) {
+				return;
+			}
+
 			Path[] listedPaths = FileUtil.stat2Paths(dirsStatus);
 
 			for (Path pathname : listedPaths) {

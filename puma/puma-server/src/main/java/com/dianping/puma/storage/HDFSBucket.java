@@ -29,10 +29,6 @@ public class HDFSBucket implements Bucket {
 		this.inputStream = fileSystem.open(file);
 	}
 
-	// public void setOutStream(String writingPath) throws IOException {
-	// this.outputStream = fileSystem.create(new Path(writingPath));
-	// }
-
 	@Override
 	public void append(ChangedEvent event) throws IOException {
 		throw new UnsupportedOperationException();

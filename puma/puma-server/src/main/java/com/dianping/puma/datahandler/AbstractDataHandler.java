@@ -219,6 +219,8 @@ public abstract class AbstractDataHandler implements DataHandler {
 				// BEGIN事件，发送一个begin transaction的事件
 				ChangedEvent dataChangedEvent = new RowChangedEvent();
 				((RowChangedEvent) dataChangedEvent).setTransactionBegin(true);
+				dataChangedEvent.setExecuteTime(binlogEvent.getHeader().getTimestamp());
+				dataChangedEvent.setDatabase(queryEvent.getDatabaseName());
 
 				result.setData(dataChangedEvent);
 				result.setEmpty(false);
@@ -232,6 +234,7 @@ public abstract class AbstractDataHandler implements DataHandler {
 				// commit事件，发送一个commit transaction的事件
 				ChangedEvent dataChangedEvent = new RowChangedEvent();
 				((RowChangedEvent) dataChangedEvent).setTransactionCommit(true);
+				dataChangedEvent.setExecuteTime(binlogEvent.getHeader().getTimestamp());
 
 				result.setData(dataChangedEvent);
 				result.setEmpty(false);

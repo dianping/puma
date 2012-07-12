@@ -16,7 +16,6 @@ public class HDFSBucket implements Bucket {
 	private Sequence			startingSequence;
 	private volatile boolean	stopped		= false;
 
-	private FileSystem			fileSystem;
 	private FSDataInputStream	inputStream	= null;
 	private Path				file;
 
@@ -24,7 +23,6 @@ public class HDFSBucket implements Bucket {
 
 	public HDFSBucket(FileSystem fileSystem, String readingPath, Sequence startingSequence, EventCodec codec)
 			throws IOException {
-		this.fileSystem = fileSystem;
 		this.startingSequence = startingSequence;
 		this.codec = codec;
 		this.file = new Path(readingPath);
@@ -44,8 +42,6 @@ public class HDFSBucket implements Bucket {
 	public void close() throws IOException {
 		stopped = true;
 		inputStream.close();
-		fileSystem.close();
-		fileSystem = null;
 		inputStream = null;
 	}
 

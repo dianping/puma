@@ -372,5 +372,10 @@ public class DefaultBucketManager implements BucketManager {
 	@Override
 	public void close() {
 		stopped = true;
+		try {
+			this.fileSystem.close();
+		} catch (IOException e) {
+			// ignore
+		}
 	}
 }

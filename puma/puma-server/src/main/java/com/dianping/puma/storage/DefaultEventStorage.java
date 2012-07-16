@@ -14,14 +14,29 @@ public class DefaultEventStorage implements EventStorage {
 	private String								name;
 	private Bucket								writingBucket;
 	private EventCodec							codec;
-	private int									fileMaxSizeMB	= 2000;
-	private String								filePrefix		= "b";
+	private int									fileMaxSizeMB		= 2000;
+	private String								filePrefix			= "b";
 	private String								hdfsBaseDir;
-	private List<WeakReference<EventChannel>>	openChannels	= new ArrayList<WeakReference<EventChannel>>();
-	private volatile boolean					stopped			= false;
+	private List<WeakReference<EventChannel>>	openChannels		= new ArrayList<WeakReference<EventChannel>>();
+	private volatile boolean					stopped				= false;
+	private int									maxLocalFileCount	= 20;
 
 	public void initialize() throws IOException {
-		bucketManager = new DefaultBucketManager(localBaseDir, hdfsBaseDir, name, filePrefix, fileMaxSizeMB, codec);
+		bucketManager = new DefaultBucketManager(localBaseDir, hdfsBaseDir, name, filePrefix, fileMaxSizeMB, codec,
+				maxLocalFileCount);
+		try {
+			bucketManager.init();
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
+	}
+
+	/**
+	 * @param maxLocalFileCount
+	 *            the maxLocalFileCount to set
+	 */
+	public void setMaxLocalFileCount(int maxLocalFileCount) {
+		this.maxLocalFileCount = maxLocalFileCount;
 	}
 
 	public void setHdfsBaseDir(String hdfsBaseDir) {

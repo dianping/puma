@@ -39,14 +39,11 @@ public class Sequence {
 		return new Sequence(creationDate, number, 0);
 	}
 
-	public Sequence getNext(boolean forSameDay) {
-		if (forSameDay) {
+	public Sequence getNext(boolean renewDate) {
+		if (!renewDate) {
 			return new Sequence(creationDate, number + 1);
 		} else {
 			Calendar cal = Calendar.getInstance();
-
-			cal.set(2000 + creationDate / 10000, (creationDate % 10000) / 100 - 1, creationDate % 100);
-			cal.add(Calendar.DATE, 1);
 
 			int date = (cal.get(Calendar.YEAR) - 2000) * 10000 + (cal.get(Calendar.MONTH) + 1) * 100
 					+ cal.get(Calendar.DATE);

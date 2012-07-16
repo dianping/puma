@@ -57,6 +57,7 @@
 		<property name="fileMaxSizeMB" value="500" />
 		<property name="filePrefix" value="bucket-" />
 		<property name="hdfsBaseDir" value="/user/workcron/data/applogs/puma/" />
+		<property name="maxLocalFileCount" value="1" />
 	</bean>
 
 	<bean id="jsonCodec" class="com.dianping.puma.core.codec.JsonEventCodec" />

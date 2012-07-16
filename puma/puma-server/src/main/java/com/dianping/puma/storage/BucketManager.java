@@ -13,4 +13,6 @@ public interface BucketManager {
 
 	public void close();
 
+	public void init() throws Exception;
+
 }

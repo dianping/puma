@@ -24,9 +24,6 @@ package com.dianping.puma.parser.mysql.column;
  */
 public final class IntColumn implements Column {
 	private static final long			serialVersionUID	= -8483539867897207855L;
-	public static final int				MIN_VALUE			= Integer.MIN_VALUE;
-	public static final int				MAX_VALUE			= Integer.MAX_VALUE;
-
 	private static final IntColumn[]	CACHE				= new IntColumn[255];
 	static {
 		for (int i = 0; i < CACHE.length; i++) {
@@ -55,8 +52,6 @@ public final class IntColumn implements Column {
 	}
 
 	public static final IntColumn valueOf(int value) {
-		if (value < MIN_VALUE || value > MAX_VALUE)
-			throw new IllegalArgumentException("invalid value: " + value);
 		final int index = value - Byte.MIN_VALUE;
 		return (index >= 0 && index < CACHE.length) ? CACHE[index] : new IntColumn(value);
 	}

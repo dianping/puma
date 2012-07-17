@@ -42,7 +42,9 @@ public class PositionFileUtils {
 	private static void init() {
 		File fileBase = new File(PARENT_PATH);
 		if (!fileBase.exists()) {
-			fileBase.mkdirs();
+			if (!fileBase.mkdirs()) {
+				throw new RuntimeException("Fail to make dir for " + fileBase.getAbsolutePath());
+			}
 		}
 		String[] configs = fileBase.list(new FilenameFilter() {
 
@@ -85,10 +87,11 @@ public class PositionFileUtils {
 		File f = new File(path);
 
 		FileReader fr = null;
+		BufferedReader br = null;
 
 		try {
 			fr = new FileReader(f);
-			BufferedReader br = new BufferedReader(fr);
+			br = new BufferedReader(fr);
 			String binlogFileName = br.readLine();
 			String binlogPositionStr = br.readLine();
 			long binlogPosition = binlogPositionStr == null ? DEFAULT_BINLOGPOS : Long.parseLong(binlogPositionStr);
@@ -107,6 +110,13 @@ public class PositionFileUtils {
 					log.error("Close file " + f.getAbsolutePath() + " failed.");
 				}
 			}
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					log.error("Close file " + f.getAbsolutePath() + " failed.");
+				}
+			}
 		}
 
 	}
@@ -117,7 +127,9 @@ public class PositionFileUtils {
 			File f = new File(path);
 			if (!f.exists()) {
 				try {
-					f.createNewFile();
+					if (!f.createNewFile()) {
+						throw new RuntimeException("Can not create file(" + f.getAbsolutePath() + ")");
+					}
 					mappedByteBufferMapping.put(path,
 							new RandomAccessFile(f, "rwd").getChannel().map(MapMode.READ_WRITE, 0, MAX_FILE_SIZE));
 				} catch (IOException e) {

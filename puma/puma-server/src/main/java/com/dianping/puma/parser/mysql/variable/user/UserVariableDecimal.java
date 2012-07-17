@@ -23,7 +23,8 @@ package com.dianping.puma.parser.mysql.variable.user;
  * 
  */
 public class UserVariableDecimal implements UserVariable {
-	private final byte[]	value;
+	private static final long	serialVersionUID	= -6007611610621438472L;
+	private final byte[]		value;
 
 	public UserVariableDecimal(byte[] value) {
 		this.value = value;

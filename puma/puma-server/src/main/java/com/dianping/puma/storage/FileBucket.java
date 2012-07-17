@@ -54,7 +54,7 @@ public class FileBucket extends AbstractBucket {
 	}
 
 	protected boolean doHasRemainingForWrite() throws IOException {
-		return file.length() < maxSizeMB * 1024 * 1024;
+		return file.length() < maxSizeByte;
 	}
 
 }

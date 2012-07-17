@@ -23,7 +23,8 @@ package com.dianping.puma.parser.mysql.variable.user;
  * 
  */
 public class UserVariableRow implements UserVariable {
-	private final byte[]	value;
+	private static final long	serialVersionUID	= -8008518088455019529L;
+	private final byte[]		value;
 
 	public UserVariableRow(byte[] value) {
 		this.value = value;

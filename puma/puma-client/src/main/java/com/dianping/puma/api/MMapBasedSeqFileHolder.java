@@ -24,7 +24,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
 
 /**
- * TODO Comment of MMapBasedSeqFileHolder
+ * 基于MMap实现的seq文件操作类
  * 
  * @author Leo Liang
  * 
@@ -90,17 +90,12 @@ public class MMapBasedSeqFileHolder implements SeqFileHolder {
 		}
 	}
 
-	/**
-	 * @param seqFileBase
-	 *            the seqFileBase to set
-	 */
-	public void setSeqFileBase(String seqFileBase) {
-		this.seqFileBase = seqFileBase;
-	}
-
 	private String getSeqConfigFilePath() {
 		String[] hostArr = config.getHost().split("\\.");
 		StringBuilder path = new StringBuilder(seqFileBase);
+		if (seqFileBase.charAt(seqFileBase.length() - 1) != File.separatorChar) {
+			path.append(File.separatorChar);
+		}
 		path.append("seq-");
 		for (String hostPart : hostArr) {
 			path.append(hostPart).append("-");

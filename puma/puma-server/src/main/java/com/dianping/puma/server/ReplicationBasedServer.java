@@ -121,7 +121,7 @@ public class ReplicationBasedServer extends AbstractServer {
 					// 一直处理一个binlogEvent的多行，处理完每行马上分发，以防止一个binlogEvent包含太多ChangedEvent而耗费太多内存
 					do {
 						dataHandlerResult = dataHandler.process(binlogEvent, context);
-						if (!dataHandlerResult.isEmpty()) {
+						if (dataHandlerResult != null && !dataHandlerResult.isEmpty()) {
 							try {
 								dispatcher.dispatch(dataHandlerResult.getData(), context);
 							} catch (Exception e) {

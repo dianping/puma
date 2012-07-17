@@ -23,7 +23,8 @@ package com.dianping.puma.parser.mysql.variable.user;
  * 
  */
 public class UserVariableReal implements UserVariable {
-	private final double	value;
+	private static final long	serialVersionUID	= 1074469803672216223L;
+	private final double		value;
 
 	public UserVariableReal(double value) {
 		this.value = value;

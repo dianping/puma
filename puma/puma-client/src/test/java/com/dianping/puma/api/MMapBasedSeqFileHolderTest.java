@@ -28,16 +28,18 @@ import org.junit.Test;
 public class MMapBasedSeqFileHolderTest {
 	@Test
 	public void test() {
+		int times = 100000;
 		ConfigurationBuilder builder = new ConfigurationBuilder();
-		builder.host("1111");
+		builder.host("192.168.1.23");
 		builder.port(23);
-		builder.seqFileBase("/Users/leoleung/1/");
+		builder.seqFileBase(System.getProperty("java.io.tmpdir", ".") + "test");
 		MMapBasedSeqFileHolder holder = new MMapBasedSeqFileHolder(builder.build());
 		long start = System.currentTimeMillis();
-		for (int i = 0; i < 1000007; i++) {
+		for (int i = 0; i < times; i++) {
 			holder.saveSeq((long) i);
 		}
-		System.out.println((System.currentTimeMillis() - start));
-		Assert.assertEquals(1000006L, holder.getSeq());
+		System.out.println("MMapBaseSeqFileHolder save " + times + " times spend "
+				+ (System.currentTimeMillis() - start) + "ms");
+		Assert.assertEquals(times - 1, holder.getSeq());
 	}
 }

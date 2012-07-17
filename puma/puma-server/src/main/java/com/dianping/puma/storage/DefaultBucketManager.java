@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -214,7 +215,7 @@ public class DefaultBucketManager implements BucketManager {
 
 			return bucket;
 		} else {
-			throw new FileNotFoundException(String.format("Bucket(%d) not found!", path));
+			throw new FileNotFoundException(String.format("Bucket not found for seq(%d)!", seq));
 		}
 
 	}
@@ -319,7 +320,9 @@ public class DefaultBucketManager implements BucketManager {
 			if (parent != null) {
 				String[] subFiles = parent.list();
 				if (subFiles != null && subFiles.length == 0) {
-					parent.delete();
+					if (!parent.delete()) {
+						log.warn("Delete folder(" + parent.getAbsolutePath() + ") failed.");
+					}
 				}
 			}
 
@@ -404,7 +407,9 @@ public class DefaultBucketManager implements BucketManager {
 	private void initLocalBuckets() {
 
 		if (!localBaseDir.exists()) {
-			localBaseDir.mkdirs();
+			if (!localBaseDir.mkdirs()) {
+				throw new RuntimeException("Failed to make dir for " + localBaseDir.getAbsolutePath());
+			}
 		}
 		localBuckets.set(new TreeMap<Sequence, String>(new PathSequenceComparator()));
 		File[] dirs = localBaseDir.listFiles(new FileFilter() {
@@ -446,7 +451,9 @@ public class DefaultBucketManager implements BucketManager {
 		this.hdfsBaseDir = hdfsBaseDir;
 	}
 
-	private static class PathSequenceComparator implements Comparator<Sequence> {
+	private static class PathSequenceComparator implements Comparator<Sequence>, Serializable {
+
+		private static final long	serialVersionUID	= -350477869152651536L;
 
 		/*
 		 * (non-Javadoc)

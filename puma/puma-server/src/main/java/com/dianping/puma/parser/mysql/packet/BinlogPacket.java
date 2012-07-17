@@ -26,14 +26,14 @@ import com.dianping.puma.utils.PacketUtils;
  */
 public class BinlogPacket extends AbstractResponsePacket {
 
-	private static final long	serialVersionUID	= -3612746649357670630L;
-	private static final byte	ERROR_FIELD_COUNT	= (byte) 0xff;
-	private static final byte	OK_FIELD_COUNT		= 0x00;
+	private static final long		serialVersionUID	= -3612746649357670630L;
+	private static final byte		ERROR_FIELD_COUNT	= (byte) 0xff;
+	private static final byte		OK_FIELD_COUNT		= 0x00;
 
-	private boolean				ok					= false;
+	private boolean					ok					= false;
 
-	private byte				fieldCount;
-	private ByteBuffer			binlogBuf;
+	private byte					fieldCount;
+	private transient ByteBuffer	binlogBuf;
 
 	/**
 	 * @return the fieldCount

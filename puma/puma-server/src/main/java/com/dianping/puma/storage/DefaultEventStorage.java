@@ -111,10 +111,11 @@ public class DefaultEventStorage implements EventStorage {
 			}
 		}
 
-		for (WeakReference<EventChannel> channel : openChannels) {
-			if (channel.get() != null) {
+		for (WeakReference<EventChannel> channelRef : openChannels) {
+			EventChannel channel = channelRef.get();
+			if (channel != null) {
 				try {
-					channel.get().close();
+					channel.close();
 				} catch (Exception e) {
 					// ignore
 				}

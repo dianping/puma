@@ -15,12 +15,14 @@
  */
 package com.dianping.puma.parser.mysql.variable.user;
 
+import java.io.Serializable;
+
 /**
  * TODO Comment of UserVariable
  * 
  * @author Leo Liang
  * 
  */
-public interface UserVariable {
+public interface UserVariable extends Serializable {
 	Object getValue();
 }

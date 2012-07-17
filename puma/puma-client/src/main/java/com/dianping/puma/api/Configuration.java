@@ -16,6 +16,7 @@
 package com.dianping.puma.api;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -38,11 +39,11 @@ public class Configuration implements Serializable {
 	private int							port					= 7862;
 	private String						name;
 	private String						seqFileBase				= "/data/applogs/puma/";
-	private String target;
+	private String						target;
 
 	public void addDatabaseTable(String database, String... tablePatterns) {
 		if (!this.databaseTablesMapping.containsKey(database)) {
-			this.databaseTablesMapping.put(database, Arrays.asList(tablePatterns));
+			this.databaseTablesMapping.put(database, new ArrayList<String>(Arrays.asList(tablePatterns)));
 		} else {
 			this.databaseTablesMapping.get(database).addAll(Arrays.asList(tablePatterns));
 		}
@@ -218,13 +219,19 @@ public class Configuration implements Serializable {
 		if (name == null || name.trim().length() == 0) {
 			throw new IllegalArgumentException("Puma client's name not set.");
 		}
+		if (target == null || target.trim().length() == 0) {
+			throw new IllegalArgumentException("Puma client's target not set.");
+		}
+		if (databaseTablesMapping == null || databaseTablesMapping.size() == 0) {
+			throw new IllegalArgumentException("Puma client's db&tb not set.");
+		}
 	}
 
 	public String getTarget() {
-   	return target;
-   }
+		return target;
+	}
 
 	public void setTarget(String target) {
 		this.target = target;
-   }
+	}
 }

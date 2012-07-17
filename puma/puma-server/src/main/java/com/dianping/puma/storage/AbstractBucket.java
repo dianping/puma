@@ -34,10 +34,12 @@ public abstract class AbstractBucket implements Bucket {
 	protected int						maxSizeMB;
 	protected AtomicReference<Sequence>	currentWritingSeq	= new AtomicReference<Sequence>();
 	protected volatile boolean			stopped				= false;
+	protected long						maxSizeByte;
 
 	public AbstractBucket(Sequence startingSequence, int maxSizeMB, EventCodec codec) throws FileNotFoundException {
 		this.startingSequence = startingSequence;
 		this.maxSizeMB = maxSizeMB;
+		this.maxSizeByte = this.maxSizeByte * 1024 * 1024L;
 		this.codec = codec;
 		// we need to copy the whole instance
 		this.currentWritingSeq.set(new Sequence(startingSequence.getCreationDate(), startingSequence.getNumber()));

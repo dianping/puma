@@ -16,7 +16,7 @@
 package com.dianping.puma.api;
 
 /**
- * TODO Comment of SeqFileHolder
+ * seq文件的操作类
  * 
  * @author Leo Liang
  * 

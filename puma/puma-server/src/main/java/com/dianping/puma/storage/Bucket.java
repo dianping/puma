@@ -20,22 +20,62 @@ import java.io.IOException;
 import com.dianping.puma.core.event.ChangedEvent;
 
 /**
+ * 单个文件存储的抽象
+ * 
  * @author Leo Liang
  * 
  */
 public interface Bucket {
+	/**
+	 * 获得当前存储对应的起始sequence(Offset一定为0)
+	 * 
+	 */
 	public Sequence getStartingSequece();
 
+	/**
+	 * 往存储中增加一个事件
+	 * 
+	 * @throws IOException
+	 */
 	public void append(ChangedEvent event) throws IOException;
 
+	/**
+	 * 从存储中获得下一个事件 <br>
+	 * 如果没有，则抛出EOFException，否则一直block到读取完一个事件
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
 	public ChangedEvent getNext() throws IOException;
 
+	/**
+	 * 把文件指针移动到某个offset上
+	 * 
+	 * @param offset
+	 * @throws IOException
+	 */
 	public void seek(int offset) throws IOException;
 
+	/**
+	 * 关闭当前存储
+	 * 
+	 * @throws IOException
+	 */
 	public void close() throws IOException;
 
+	/**
+	 * 判断当前存储是否还有剩余空间可写
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
 	public boolean hasRemainingForWrite() throws IOException;
 
+	/**
+	 * 获得写入的seq
+	 * 
+	 * @return
+	 */
 	public long getCurrentWritingSeq();
 
 }

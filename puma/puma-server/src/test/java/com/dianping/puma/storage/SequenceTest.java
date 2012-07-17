@@ -15,9 +15,8 @@
  */
 package com.dianping.puma.storage;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import junit.framework.Assert;
 
@@ -33,7 +32,6 @@ public class SequenceTest {
 
 	@Test
 	public void testParse() throws Exception {
-
 		Sequence seq = new Sequence(120706, 199);
 		long longSeq = seq.longValue();
 
@@ -44,37 +42,67 @@ public class SequenceTest {
 	}
 
 	@Test
-	public void testNextSameDay() throws Exception {
-
-		Sequence seq = new Sequence(120706, 199, 999);
-		Sequence nextSeq = seq.getNext(true);
-		Assert.assertEquals(200, nextSeq.getNumber());
-		Assert.assertEquals(0, nextSeq.getOffset());
-		Assert.assertEquals(120706, nextSeq.getCreationDate());
-
+	public void testSeqConstruct() throws Exception {
+		Sequence seq = new Sequence(120731, 199, 999);
+		Assert.assertEquals(199, seq.getNumber());
+		Assert.assertEquals(999, seq.getOffset());
+		Assert.assertEquals(120731, seq.getCreationDate());
 	}
 
 	@Test
-	public void testNextNotSameDay() throws Exception {
-
-		Sequence seq = new Sequence(120731, 199, 999);
-		Sequence nextSeq = seq.getNext(false);
-		Assert.assertEquals(0, nextSeq.getNumber());
-		Assert.assertEquals(0, nextSeq.getOffset());
-		Assert.assertEquals(120801, nextSeq.getCreationDate());
-
+	public void testSeqConstructWithoutOffset() throws Exception {
+		Sequence seq = new Sequence(120731, 199);
+		Assert.assertEquals(199, seq.getNumber());
+		Assert.assertEquals(0, seq.getOffset());
+		Assert.assertEquals(120731, seq.getCreationDate());
 	}
 
-	public static void main(String[] args) throws IOException, InterruptedException {
-		while (true) {
-			try {
-				BufferedReader br = new BufferedReader(new FileReader("/data/applogs/puma/seq-localhost-7862.conf"));
-				System.out.println(new Sequence(Long.parseLong(br.readLine())));
-				br.close();
-				Thread.sleep(5000);
-			} catch (Exception e) {
+	@Test
+	public void testSeqCopyConstruct() throws Exception {
+		Sequence seq = new Sequence(120731, 199, 888);
+		Sequence newSeq = new Sequence(seq);
+		Assert.assertEquals(199, newSeq.getNumber());
+		Assert.assertEquals(888, newSeq.getOffset());
+		Assert.assertEquals(120731, newSeq.getCreationDate());
+		Assert.assertTrue(seq != newSeq);
+	}
 
-			}
-		}
+	@Test
+	public void testNextSeqNoRenew() throws Exception {
+		Sequence seq = new Sequence(120706, 199, 999);
+		Sequence nextSeq = seq.getNext(false);
+		Assert.assertEquals(200, nextSeq.getNumber());
+		Assert.assertEquals(0, nextSeq.getOffset());
+		Assert.assertEquals(120706, nextSeq.getCreationDate());
+	}
+
+	@Test
+	public void testNextSeqRenew() throws Exception {
+		Sequence seq = new Sequence(120731, 199, 999);
+		Sequence nextSeq = seq.getNext(true);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
+		Assert.assertEquals(0, nextSeq.getNumber());
+		Assert.assertEquals(0, nextSeq.getOffset());
+		Assert.assertEquals(Integer.parseInt(sdf.format(new Date())), nextSeq.getCreationDate());
+	}
+
+	@Test
+	public void testAddOffset() throws Exception {
+		Sequence seq = new Sequence(120731, 199, 999);
+		Sequence newSeq = seq.addOffset(1000);
+		Assert.assertEquals(199, newSeq.getNumber());
+		Assert.assertEquals(1999, newSeq.getOffset());
+		Assert.assertEquals(120731, newSeq.getCreationDate());
+		Assert.assertTrue(seq != newSeq);
+	}
+
+	@Test
+	public void testClearOffset() throws Exception {
+		Sequence seq = new Sequence(120731, 199, 999);
+		Sequence newSeq = seq.clearOffset();
+		Assert.assertEquals(199, newSeq.getNumber());
+		Assert.assertEquals(0, newSeq.getOffset());
+		Assert.assertEquals(120731, newSeq.getCreationDate());
+		Assert.assertTrue(seq != newSeq);
 	}
 }

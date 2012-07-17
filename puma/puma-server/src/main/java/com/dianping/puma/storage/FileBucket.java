@@ -1,98 +1,60 @@
 package com.dianping.puma.storage;
 
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.concurrent.atomic.AtomicReference;
 
 import com.dianping.puma.core.codec.EventCodec;
-import com.dianping.puma.core.event.ChangedEvent;
 
-public class FileBucket implements Bucket {
-	private EventCodec					codec;
-	private Sequence					startingSequence;
-	private int							maxSizeMB;
-	private AtomicReference<Sequence>	currentWritingSeq	= new AtomicReference<Sequence>();
-	private volatile boolean			stopped				= false;
+/**
+ * 基于本地文件的Bucket实现
+ * 
+ * @author Leo Liang
+ * 
+ */
+public class FileBucket extends AbstractBucket {
 
-	private RandomAccessFile			file;
+	private RandomAccessFile	file;
 
 	public FileBucket(File file, Sequence startingSequence, int maxSizeMB, EventCodec codec)
 			throws FileNotFoundException {
+		super(startingSequence, maxSizeMB, codec);
 		this.file = new RandomAccessFile(file, "rw");
-		this.startingSequence = startingSequence;
-		this.maxSizeMB = maxSizeMB;
-		this.codec = codec;
-		// we need to copy the whole instance
-		this.currentWritingSeq.set(new Sequence(startingSequence.getCreationDate(), startingSequence.getNumber()));
 	}
 
-	@Override
-	public void append(ChangedEvent event) throws IOException {
-		checkClosed();
-		byte[] data = codec.encode(event);
+	protected void doAppend(byte[] data) throws IOException {
 		file.writeInt(data.length);
 		file.write(data);
-		currentWritingSeq.set(currentWritingSeq.get().addOffset(4 + data.length));
 	}
 
-	@Override
-	public ChangedEvent getNext() throws IOException {
-		checkClosed();
-		// we should guarantee the whole packet read in one transaction,
-		// otherwise we will skip some bytes and read a wrong value in the next
-		// call
-		if (file.getFilePointer() + 4 < file.length()) {
-			int length = file.readInt();
-			byte[] data = new byte[length];
-			int n = 0;
-			while (n < length) {
-				checkClosed();
-				int count = file.read(data, 0 + n, length - n);
-				n += count;
-			}
-			return codec.decode(data);
-		} else {
-			throw new EOFException();
+	protected byte[] doReadData() throws IOException {
+		int length = file.readInt();
+		byte[] data = new byte[length];
+		int n = 0;
+		while (n < length) {
+			checkClosed();
+			int count = file.read(data, 0 + n, length - n);
+			n += count;
 		}
-
+		return data;
 	}
 
-	private void checkClosed() throws IOException {
-		if (stopped) {
-			throw new IOException("Bucket has been closed");
-		}
+	protected boolean readable() throws IOException {
+		return file.getFilePointer() + 4 < file.length();
 	}
 
-	@Override
-	public void seek(int pos) throws IOException {
-		checkClosed();
+	protected void doSeek(int pos) throws IOException {
 		file.seek(pos);
 	}
 
-	@Override
-	public void close() throws IOException {
-		stopped = true;
+	protected void doClose() throws IOException {
 		file.close();
 		file = null;
 	}
 
-	@Override
-	public Sequence getStartingSequece() {
-		return startingSequence;
-	}
-
-	@Override
-	public boolean hasRemainingForWrite() throws IOException {
-		checkClosed();
+	protected boolean doHasRemainingForWrite() throws IOException {
 		return file.length() < maxSizeMB * 1024 * 1024;
-	}
-
-	@Override
-	public long getCurrentWritingSeq() {
-		return currentWritingSeq.get().longValue();
 	}
 
 }

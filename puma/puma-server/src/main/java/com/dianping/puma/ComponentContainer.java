@@ -3,12 +3,17 @@ package com.dianping.puma;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+/**
+ * 
+ * @author Leo Liang
+ * 
+ */
 public enum ComponentContainer {
 	SPRING;
 
-	private static final String SPRING_CONFIG = "context-bootstrap.xml";
+	private static final String	SPRING_CONFIG	= "context-bootstrap.xml";
 
-	private ApplicationContext ctx;
+	private ApplicationContext	ctx;
 
 	private ComponentContainer() {
 		this.ctx = new ClassPathXmlApplicationContext(SPRING_CONFIG);

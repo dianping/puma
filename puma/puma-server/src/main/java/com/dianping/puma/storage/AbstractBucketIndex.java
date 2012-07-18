@@ -188,22 +188,31 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 		index.set(newIndexes);
 	}
 
-	public List<String> bulkRemoveFromBeginning(int remainSize) {
+	public List<String> bulkGetRemainN(int remainSize) {
 		List<String> results = new ArrayList<String>();
 		TreeMap<Sequence, String> bakIndexes = index.get();
-		TreeMap<Sequence, String> newIndexes = new TreeMap<Sequence, String>(new PathSequenceComparator());
 
 		int i = 0;
 		for (Entry<Sequence, String> entry : bakIndexes.entrySet()) {
 			if (i < index.get().size() - remainSize) {
 				results.add(entry.getValue());
 			} else {
-				newIndexes.put(entry.getKey(), entry.getValue());
+				break;
 			}
 			i++;
 		}
-		index.set(newIndexes);
 		return results;
+	}
+
+	@Override
+	public void remove(List<String> paths) {
+		TreeMap<Sequence, String> newIndexes = new TreeMap<Sequence, String>(index.get());
+
+		for (String path : paths) {
+			newIndexes.remove(convertToSequence(path));
+		}
+
+		index.set(newIndexes);
 	}
 
 	public String getBaseDir() {

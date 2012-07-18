@@ -16,7 +16,6 @@
 package com.dianping.puma.storage;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -43,7 +42,7 @@ public class DefaultArchiveStrategy implements ArchiveStrategy {
 	@Override
 	public void archive(BucketIndex masterIndex, BucketIndex slaveIndex, int masterRemainFileCount) {
 		if (masterIndex.size() > masterRemainFileCount) {
-			toBeArchiveBuckets.addAll(masterIndex.bulkRemoveFromBeginning(masterRemainFileCount));
+			toBeArchiveBuckets.addAll(masterIndex.bulkGetRemainN(masterRemainFileCount));
 		}
 
 		if (toBeArchiveBuckets.size() > 0) {
@@ -60,20 +59,16 @@ public class DefaultArchiveStrategy implements ArchiveStrategy {
 			}
 
 			slaveIndex.add(copiedFiles);
+			masterIndex.remove(copiedFiles);
+
+			cleanUpLocalFiles(masterIndex.getBaseDir(), copiedFiles);
 		}
 	}
 
-	private boolean doArchive(String baseDir, String path, BucketIndex dest, List<String> copiedFiles) {
-		try {
+	private void cleanUpLocalFiles(String baseDir, List<String> paths) {
+		for (String path : paths) {
 			File localFile = new File(baseDir, path);
-
-			dest.copyFromLocal(baseDir, path);
-
-			copiedFiles.add(path);
-
-			if (!localFile.delete()) {
-				throw new IOException("Can't delete file(" + localFile.getAbsolutePath() + ")");
-			}
+			localFile.delete();
 
 			File parent = localFile.getParentFile();
 			if (parent != null) {
@@ -84,6 +79,14 @@ public class DefaultArchiveStrategy implements ArchiveStrategy {
 					}
 				}
 			}
+		}
+	}
+
+	private boolean doArchive(String baseDir, String path, BucketIndex dest, List<String> copiedFiles) {
+		try {
+			dest.copyFromLocal(baseDir, path);
+			copiedFiles.add(path);
+
 			return true;
 		} catch (Exception e) {
 			log.warn("Archive failed. path: " + path, e);

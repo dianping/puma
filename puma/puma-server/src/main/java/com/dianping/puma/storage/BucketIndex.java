@@ -31,7 +31,7 @@ public interface BucketIndex {
 
 	public void add(List<String> paths);
 
-	public List<String> bulkRemoveFromBeginning(int remainSize);
+	public List<String> bulkGetRemainN(int remainSize);
 
 	public Bucket getNextReadBucket(Sequence sequence) throws IOException;
 
@@ -48,5 +48,7 @@ public interface BucketIndex {
 	public String getBaseDir();
 
 	public void copyFromLocal(String baseDir, String path) throws IOException;
+
+	public void remove(List<String> paths);
 
 }

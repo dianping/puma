@@ -50,12 +50,12 @@ public class DefaultBucketManager implements BucketManager {
 		Sequence sequence = new Sequence(seq);
 		sequence = sequence.clearOffset();
 
-		Bucket bucket = masterIndex.getNextReadBucket(sequence);
+		Bucket bucket = slaveIndex.getNextReadBucket(sequence);
 
 		if (bucket != null) {
 			return bucket;
 		} else {
-			bucket = slaveIndex.getNextReadBucket(sequence);
+			bucket = masterIndex.getNextReadBucket(sequence);
 			if (bucket != null) {
 				return bucket;
 			} else {

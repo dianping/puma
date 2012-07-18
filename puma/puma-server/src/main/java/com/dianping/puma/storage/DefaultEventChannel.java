@@ -3,17 +3,20 @@ package com.dianping.puma.storage;
 import java.io.EOFException;
 import java.io.IOException;
 
+import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 
 public class DefaultEventChannel implements EventChannel {
 	private BucketManager		bucketManager;
+	private EventCodec			codec;
 	private Bucket				bucket;
 	private long				seq;
 	private volatile boolean	stopped	= false;
 
-	public DefaultEventChannel(BucketManager bucketManager, long seq) throws IOException {
+	public DefaultEventChannel(BucketManager bucketManager, long seq, EventCodec codec) throws IOException {
 		this.bucketManager = bucketManager;
 		bucket = bucketManager.getReadBucket(seq);
+		this.codec = codec;
 		this.seq = bucket.getStartingSequece().longValue();
 
 	}
@@ -27,9 +30,9 @@ public class DefaultEventChannel implements EventChannel {
 		while (event == null) {
 			try {
 				checkClosed();
-				event = bucket.getNext();
+				byte[] data = bucket.getNext();
+				event = codec.decode(data);
 			} catch (EOFException e) {
-				// TODO
 				if (bucketManager.hasNexReadBucket(seq)) {
 					bucket.close();
 					bucket = bucketManager.getNextReadBucket(seq);

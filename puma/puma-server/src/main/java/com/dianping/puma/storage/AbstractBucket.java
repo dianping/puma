@@ -20,50 +20,43 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.dianping.puma.core.codec.EventCodec;
-import com.dianping.puma.core.event.ChangedEvent;
-
 /**
  * 
  * @author Leo Liang
  * 
  */
 public abstract class AbstractBucket implements Bucket {
-	protected EventCodec				codec;
 	protected Sequence					startingSequence;
 	protected int						maxSizeMB;
 	protected AtomicReference<Sequence>	currentWritingSeq	= new AtomicReference<Sequence>();
 	protected volatile boolean			stopped				= false;
 	protected long						maxSizeByte;
 
-	public AbstractBucket(Sequence startingSequence, int maxSizeMB, EventCodec codec) throws FileNotFoundException {
+	public AbstractBucket(Sequence startingSequence, int maxSizeMB) throws FileNotFoundException {
 		this.startingSequence = startingSequence;
 		this.maxSizeMB = maxSizeMB;
-		this.maxSizeByte = this.maxSizeByte * 1024 * 1024L;
-		this.codec = codec;
+		this.maxSizeByte = this.maxSizeMB * 1024 * 1024L;
 		// we need to copy the whole instance
 		this.currentWritingSeq.set(new Sequence(startingSequence.getCreationDate(), startingSequence.getNumber()));
 	}
 
 	@Override
-	public void append(ChangedEvent event) throws IOException {
+	public void append(byte[] data) throws IOException {
 		checkClosed();
-		byte[] data = codec.encode(event);
 		doAppend(data);
-		currentWritingSeq.set(currentWritingSeq.get().addOffset(4 + data.length));
+		currentWritingSeq.set(currentWritingSeq.get().addOffset(data.length));
 	}
 
 	protected abstract void doAppend(byte[] data) throws IOException;
 
 	@Override
-	public ChangedEvent getNext() throws IOException {
+	public byte[] getNext() throws IOException {
 		checkClosed();
 		// we should guarantee the whole packet read in one transaction,
 		// otherwise we will skip some bytes and read a wrong value in the next
 		// call
 		if (readable()) {
-			byte[] data = doReadData();
-			return codec.decode(data);
+			return doReadData();
 		} else {
 			throw new EOFException();
 		}

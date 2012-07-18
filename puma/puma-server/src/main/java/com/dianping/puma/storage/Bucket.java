@@ -17,8 +17,6 @@ package com.dianping.puma.storage;
 
 import java.io.IOException;
 
-import com.dianping.puma.core.event.ChangedEvent;
-
 /**
  * 单个文件存储的抽象
  * 
@@ -37,7 +35,7 @@ public interface Bucket {
 	 * 
 	 * @throws IOException
 	 */
-	public void append(ChangedEvent event) throws IOException;
+	public void append(byte[] data) throws IOException;
 
 	/**
 	 * 从存储中获得下一个事件 <br>
@@ -46,7 +44,7 @@ public interface Bucket {
 	 * @return
 	 * @throws IOException
 	 */
-	public ChangedEvent getNext() throws IOException;
+	public byte[] getNext() throws IOException;
 
 	/**
 	 * 把文件指针移动到某个offset上

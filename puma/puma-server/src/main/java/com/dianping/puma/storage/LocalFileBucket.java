@@ -5,26 +5,22 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import com.dianping.puma.core.codec.EventCodec;
-
 /**
  * 基于本地文件的Bucket实现
  * 
  * @author Leo Liang
  * 
  */
-public class FileBucket extends AbstractBucket {
+public class LocalFileBucket extends AbstractBucket {
 
 	private RandomAccessFile	file;
 
-	public FileBucket(File file, Sequence startingSequence, int maxSizeMB, EventCodec codec)
-			throws FileNotFoundException {
-		super(startingSequence, maxSizeMB, codec);
+	public LocalFileBucket(File file, Sequence startingSequence, int maxSizeMB) throws FileNotFoundException {
+		super(startingSequence, maxSizeMB);
 		this.file = new RandomAccessFile(file, "rw");
 	}
 
 	protected void doAppend(byte[] data) throws IOException {
-		file.writeInt(data.length);
 		file.write(data);
 	}
 

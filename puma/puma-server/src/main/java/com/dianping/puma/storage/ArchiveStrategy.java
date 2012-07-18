@@ -1,7 +1,7 @@
 /**
  * Project: puma-server
  * 
- * File Created at 2012-7-7
+ * File Created at 2012-7-18
  * $Id$
  * 
  * Copyright 2010 dianping.com.
@@ -16,11 +16,10 @@
 package com.dianping.puma.storage;
 
 /**
- * TODO Comment of EventStorageTest
  * 
  * @author Leo Liang
  * 
  */
-public class EventStorageTest {
-
+public interface ArchiveStrategy {
+	public void archive(BucketIndex masterIndex, BucketIndex slaveIndex, int masterRemainFileCount);
 }

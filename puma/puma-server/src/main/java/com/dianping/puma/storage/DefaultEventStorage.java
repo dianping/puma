@@ -1,5 +1,6 @@
 package com.dianping.puma.storage;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -7,23 +8,21 @@ import java.util.List;
 
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.util.ByteArrayUtils;
 
 public class DefaultEventStorage implements EventStorage {
 	private BucketManager						bucketManager;
-	private String								localBaseDir;
-	private String								name;
 	private Bucket								writingBucket;
 	private EventCodec							codec;
-	private int									fileMaxSizeMB		= 2000;
-	private String								filePrefix			= "b";
-	private String								hdfsBaseDir;
 	private List<WeakReference<EventChannel>>	openChannels		= new ArrayList<WeakReference<EventChannel>>();
 	private volatile boolean					stopped				= false;
-	private int									maxLocalFileCount	= 20;
+	private int									maxMasterFileCount	= 20;
+	private BucketIndex							masterIndex;
+	private BucketIndex							slaveIndex;
+	private ArchiveStrategy						archiveStrategy;
 
 	public void initialize() throws IOException {
-		bucketManager = new DefaultBucketManager(localBaseDir, hdfsBaseDir, name, filePrefix, fileMaxSizeMB, codec,
-				maxLocalFileCount);
+		bucketManager = new DefaultBucketManager(maxMasterFileCount, masterIndex, slaveIndex, archiveStrategy);
 		try {
 			bucketManager.init();
 		} catch (Exception e) {
@@ -32,50 +31,49 @@ public class DefaultEventStorage implements EventStorage {
 	}
 
 	/**
-	 * @param maxLocalFileCount
-	 *            the maxLocalFileCount to set
+	 * @param maxMasterFileCount
+	 *            the maxMasterFileCount to set
 	 */
-	public void setMaxLocalFileCount(int maxLocalFileCount) {
-		this.maxLocalFileCount = maxLocalFileCount;
+	public void setMaxMasterFileCount(int maxMasterFileCount) {
+		this.maxMasterFileCount = maxMasterFileCount;
 	}
 
-	public void setHdfsBaseDir(String hdfsBaseDir) {
-		this.hdfsBaseDir = hdfsBaseDir;
+	/**
+	 * @param masterIndex
+	 *            the masterIndex to set
+	 */
+	public void setMasterIndex(BucketIndex masterIndex) {
+		this.masterIndex = masterIndex;
+	}
+
+	/**
+	 * @param slaveIndex
+	 *            the slaveIndex to set
+	 */
+	public void setSlaveIndex(BucketIndex slaveIndex) {
+		this.slaveIndex = slaveIndex;
+	}
+
+	/**
+	 * @param archiveStrategy
+	 *            the archiveStrategy to set
+	 */
+	public void setArchiveStrategy(ArchiveStrategy archiveStrategy) {
+		this.archiveStrategy = archiveStrategy;
 	}
 
 	@Override
 	public EventChannel getChannel(long seq) throws IOException {
-
-		EventChannel channel = new DefaultEventChannel(bucketManager, seq);
+		EventChannel channel = new DefaultEventChannel(bucketManager, seq, codec);
 		openChannels.add(new WeakReference<EventChannel>(channel));
 		return channel;
 	}
 
 	/**
-	 * @param filePrefix
-	 *            the filePrefix to set
-	 */
-	public void setFilePrefix(String filePrefix) {
-		this.filePrefix = filePrefix;
-	}
-
-	public void setLocalBaseDir(String localBaseDir) {
-		this.localBaseDir = localBaseDir;
-	}
-
-	/**
-	 * @param fileMaxSizeMB
-	 *            the fileMaxSizeMB to set
-	 */
-	public void setFileMaxSizeMB(int fileMaxSizeMB) {
-		this.fileMaxSizeMB = fileMaxSizeMB;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	/**
+	 * public void setName(String name) { this.name = name; }
+	 * 
+	 * /**
+	 * 
 	 * @param codec
 	 *            the codec to set
 	 */
@@ -96,7 +94,11 @@ public class DefaultEventStorage implements EventStorage {
 		}
 
 		event.setSeq(writingBucket.getCurrentWritingSeq());
-		writingBucket.append(event);
+		byte[] data = codec.encode(event);
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		bos.write(ByteArrayUtils.intToByteArray(data.length));
+		bos.write(data);
+		writingBucket.append(bos.toByteArray());
 	}
 
 	@Override

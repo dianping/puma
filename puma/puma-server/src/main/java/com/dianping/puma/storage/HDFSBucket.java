@@ -6,8 +6,6 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import com.dianping.puma.core.codec.EventCodec;
-
 /**
  * 基于HDFS的Bucket实现
  * 
@@ -19,9 +17,8 @@ public class HDFSBucket extends AbstractBucket {
 	private FSDataInputStream	inputStream	= null;
 	private Path				file;
 
-	public HDFSBucket(FileSystem fileSystem, String readingPath, Sequence startingSequence, EventCodec codec)
-			throws IOException {
-		super(startingSequence, -1, codec);
+	public HDFSBucket(FileSystem fileSystem, String readingPath, Sequence startingSequence) throws IOException {
+		super(startingSequence, -1);
 		this.file = new Path(readingPath);
 		this.inputStream = fileSystem.open(file);
 	}

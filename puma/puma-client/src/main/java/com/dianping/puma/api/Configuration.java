@@ -40,6 +40,9 @@ public class Configuration implements Serializable {
 	private String						name;
 	private String						seqFileBase				= "/data/applogs/puma/";
 	private String						target;
+	private int							maxRetryTimes			= 3;
+	private boolean						canSkip					= false;
+	private SkipEventHandler			skipEventHandler		= null;
 
 	public void addDatabaseTable(String database, String... tablePatterns) {
 		if (!this.databaseTablesMapping.containsKey(database)) {
@@ -234,4 +237,41 @@ public class Configuration implements Serializable {
 	public void setTarget(String target) {
 		this.target = target;
 	}
+
+	/**
+	 * @param maxRetryTimes
+	 *            the maxRetryTimes to set
+	 */
+	public void setMaxRetryTimes(int maxRetryTimes) {
+		this.maxRetryTimes = maxRetryTimes;
+	}
+
+	public int getMaxRetryTimes() {
+		return maxRetryTimes;
+	}
+
+	public boolean canSkip() {
+		return canSkip;
+	}
+
+	/**
+	 * @param canSkip
+	 *            the canSkip to set
+	 */
+	public void setCanSkip(boolean canSkip) {
+		this.canSkip = canSkip;
+	}
+
+	public SkipEventHandler getSkipEventHandler() {
+		return skipEventHandler;
+	}
+
+	/**
+	 * @param skipEventHandler
+	 *            the skipEventHandler to set
+	 */
+	public void setSkipEventHandler(SkipEventHandler skipEventHandler) {
+		this.skipEventHandler = skipEventHandler;
+	}
+
 }

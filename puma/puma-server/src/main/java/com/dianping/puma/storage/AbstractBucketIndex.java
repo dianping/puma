@@ -28,6 +28,8 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.dianping.puma.exception.StorageClosedException;
+
 /**
  * 
  * @author Leo Liang
@@ -39,6 +41,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	protected String										baseDir;
 	protected String										bucketFilePrefix	= "b-";
 	protected int											maxBucketLengthMB	= 2000;
+	protected volatile boolean								stop				= false;
 
 	public void setBucketFilePrefix(String bucketFilePrefix) {
 		this.bucketFilePrefix = bucketFilePrefix;
@@ -58,14 +61,16 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	}
 
 	@Override
-	public void add(Bucket bucket) {
+	public void add(Bucket bucket) throws StorageClosedException {
+		checkClosed();
 		TreeMap<Sequence, String> newIndex = new TreeMap<Sequence, String>(index.get());
 		newIndex.put(new Sequence(bucket.getStartingSequece()), convertToPath(bucket.getStartingSequece()));
 		index.set(newIndex);
 	}
 
 	@Override
-	public Bucket getNextReadBucket(Sequence sequence) throws IOException {
+	public Bucket getNextReadBucket(Sequence sequence) throws IOException, StorageClosedException {
+		checkClosed();
 		NavigableMap<Sequence, String> tailMap = index.get().tailMap(sequence, false);
 		if (!tailMap.isEmpty()) {
 			Entry<Sequence, String> firstEntry = tailMap.firstEntry();
@@ -78,7 +83,8 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 			throws IOException;
 
 	@Override
-	public Bucket getNextWriteBucket() throws IOException {
+	public Bucket getNextWriteBucket() throws IOException, StorageClosedException {
+		checkClosed();
 		Entry<Sequence, String> lastEntry = index.get().lastEntry();
 		Sequence nextSeq = null;
 		if (lastEntry == null) {
@@ -113,7 +119,8 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	 * @see com.dianping.puma.storage.BucketIndex#getReadBucket(long)
 	 */
 	@Override
-	public Bucket getReadBucket(long seq) throws IOException {
+	public Bucket getReadBucket(long seq) throws StorageClosedException, IOException {
+		checkClosed();
 		Sequence sequence = null;
 		String path = null;
 
@@ -162,9 +169,17 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	}
 
 	public void close() {
+		stop = true;
 	}
 
-	public boolean hasNexReadBucket(Sequence sequence) throws IOException {
+	private void checkClosed() throws StorageClosedException {
+		if (stop) {
+			throw new StorageClosedException("Bucket manager has been closed.");
+		}
+	}
+
+	public boolean hasNexReadBucket(Sequence sequence) throws StorageClosedException {
+		checkClosed();
 		NavigableMap<Sequence, String> tailMap = index.get().tailMap(sequence, false);
 
 		if (tailMap.isEmpty()) {
@@ -178,7 +193,8 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 		return index.get().size();
 	}
 
-	public void add(List<String> paths) {
+	public void add(List<String> paths) throws StorageClosedException {
+		checkClosed();
 		TreeMap<Sequence, String> newIndexes = new TreeMap<Sequence, String>(index.get());
 
 		for (String path : paths) {
@@ -188,7 +204,8 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 		index.set(newIndexes);
 	}
 
-	public List<String> bulkGetRemainN(int remainSize) {
+	public List<String> bulkGetRemainN(int remainSize) throws StorageClosedException {
+		checkClosed();
 		List<String> results = new ArrayList<String>();
 		TreeMap<Sequence, String> bakIndexes = index.get();
 
@@ -205,7 +222,8 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	}
 
 	@Override
-	public void remove(List<String> paths) {
+	public void remove(List<String> paths) throws StorageClosedException {
+		checkClosed();
 		TreeMap<Sequence, String> newIndexes = new TreeMap<Sequence, String>(index.get());
 
 		for (String path : paths) {
@@ -219,8 +237,8 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 		return baseDir;
 	}
 
-	public void copyFromLocal(String srcBaseDir, String path) throws IOException {
-
+	public void copyFromLocal(String srcBaseDir, String path) throws IOException, StorageClosedException {
+		checkClosed();
 	}
 
 	protected static class PathSequenceComparator implements Comparator<Sequence>, Serializable {

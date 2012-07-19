@@ -30,6 +30,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.security.SecurityUtil;
 import org.apache.hadoop.security.UserGroupInformation;
 
+import com.dianping.puma.exception.StorageClosedException;
+
 /**
  * TODO Comment of HDFSBucketIndex
  * 
@@ -151,7 +153,8 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 	}
 
 	@Override
-	public void copyFromLocal(String srcBaseDir, String path) throws IOException {
+	public void copyFromLocal(String srcBaseDir, String path) throws IOException, StorageClosedException {
+		super.copyFromLocal(srcBaseDir, path);
 		File localFile = new File(srcBaseDir, path);
 		if (!localFile.exists()) {
 			return;

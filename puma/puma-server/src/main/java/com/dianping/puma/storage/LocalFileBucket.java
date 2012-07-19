@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import com.dianping.puma.exception.StorageClosedException;
+
 /**
  * 基于本地文件的Bucket实现
  * 
@@ -24,7 +26,7 @@ public class LocalFileBucket extends AbstractBucket {
 		file.write(data);
 	}
 
-	protected byte[] doReadData() throws IOException {
+	protected byte[] doReadData() throws StorageClosedException, IOException {
 		int length = file.readInt();
 		byte[] data = new byte[length];
 		int n = 0;

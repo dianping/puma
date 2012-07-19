@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.core.util.PumaThreadUtils;
+import com.dianping.puma.exception.StorageClosedException;
 
 public class DefaultBucketManager implements BucketManager {
 	private static final Logger	log		= Logger.getLogger(DefaultBucketManager.class);
@@ -18,7 +19,7 @@ public class DefaultBucketManager implements BucketManager {
 	private int					maxMasterFileCount;
 
 	public DefaultBucketManager(int maxMasterFileCount, BucketIndex masterIndex, BucketIndex slaveIndex,
-			ArchiveStrategy archiveStrategy) throws IOException {
+			ArchiveStrategy archiveStrategy) {
 		this.maxMasterFileCount = maxMasterFileCount;
 		this.archiveStrategy = archiveStrategy;
 		this.masterIndex = masterIndex;
@@ -26,9 +27,9 @@ public class DefaultBucketManager implements BucketManager {
 
 	}
 
-	private void checkClosed() throws IOException {
+	private void checkClosed() throws StorageClosedException {
 		if (stopped) {
-			throw new IOException("Bucket manager has been closed.");
+			throw new StorageClosedException("Bucket manager has been closed.");
 		}
 	}
 
@@ -45,7 +46,7 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	@Override
-	public Bucket getNextReadBucket(long seq) throws IOException {
+	public Bucket getNextReadBucket(long seq) throws StorageClosedException, IOException {
 		checkClosed();
 		Sequence sequence = new Sequence(seq);
 		sequence = sequence.clearOffset();
@@ -65,7 +66,7 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	@Override
-	public Bucket getNextWriteBucket() throws IOException {
+	public Bucket getNextWriteBucket() throws IOException, StorageClosedException {
 		checkClosed();
 		Bucket bucket = masterIndex.getNextWriteBucket();
 
@@ -78,7 +79,7 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	@Override
-	public Bucket getReadBucket(long seq) throws IOException {
+	public Bucket getReadBucket(long seq) throws IOException, StorageClosedException {
 		checkClosed();
 
 		Bucket bucket = slaveIndex.getReadBucket(seq);
@@ -102,7 +103,7 @@ public class DefaultBucketManager implements BucketManager {
 	 * @see com.dianping.puma.storage.BucketManager#hasNexReadBucket(long)
 	 */
 	@Override
-	public boolean hasNexReadBucket(long seq) throws IOException {
+	public boolean hasNexReadBucket(long seq) throws IOException, StorageClosedException {
 		checkClosed();
 		Sequence sequence = new Sequence(seq);
 		sequence.clearOffset();
@@ -110,7 +111,7 @@ public class DefaultBucketManager implements BucketManager {
 
 	}
 
-	public synchronized void init() throws Exception {
+	public synchronized void init() {
 		startArchiveJob();
 	}
 

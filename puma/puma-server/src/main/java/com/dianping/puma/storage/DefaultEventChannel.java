@@ -5,6 +5,10 @@ import java.io.IOException;
 
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.exception.InvalidSequenceException;
+import com.dianping.puma.exception.StorageClosedException;
+import com.dianping.puma.exception.StorageException;
+import com.dianping.puma.exception.StorageReadException;
 
 public class DefaultEventChannel implements EventChannel {
 	private BucketManager		bucketManager;
@@ -13,16 +17,20 @@ public class DefaultEventChannel implements EventChannel {
 	private long				seq;
 	private volatile boolean	stopped	= false;
 
-	public DefaultEventChannel(BucketManager bucketManager, long seq, EventCodec codec) throws IOException {
+	public DefaultEventChannel(BucketManager bucketManager, long seq, EventCodec codec) throws StorageException {
 		this.bucketManager = bucketManager;
-		bucket = bucketManager.getReadBucket(seq);
+		try {
+			bucket = bucketManager.getReadBucket(seq);
+		} catch (IOException e) {
+			throw new InvalidSequenceException("Invalid sequence(" + seq + ")", e);
+		}
 		this.codec = codec;
 		this.seq = bucket.getStartingSequece().longValue();
 
 	}
 
 	@Override
-	public ChangedEvent next() throws IOException, InterruptedException {
+	public ChangedEvent next() throws StorageException {
 		checkClosed();
 
 		ChangedEvent event = null;
@@ -33,13 +41,23 @@ public class DefaultEventChannel implements EventChannel {
 				byte[] data = bucket.getNext();
 				event = codec.decode(data);
 			} catch (EOFException e) {
-				if (bucketManager.hasNexReadBucket(seq)) {
-					bucket.close();
-					bucket = bucketManager.getNextReadBucket(seq);
-					seq = bucket.getStartingSequece().longValue();
-				} else {
-					Thread.sleep(5);
+				try {
+					if (bucketManager.hasNexReadBucket(seq)) {
+						bucket.close();
+						bucket = bucketManager.getNextReadBucket(seq);
+						seq = bucket.getStartingSequece().longValue();
+					} else {
+						try {
+							Thread.sleep(5);
+						} catch (InterruptedException e1) {
+							Thread.currentThread().interrupt();
+						}
+					}
+				} catch (IOException ex) {
+					throw new StorageReadException("Failed to read", ex);
 				}
+			} catch (IOException e) {
+				throw new StorageReadException("Failed to read", e);
 			}
 		}
 
@@ -48,18 +66,19 @@ public class DefaultEventChannel implements EventChannel {
 		return event;
 	}
 
-	/**
-	 * @throws IOException
-	 */
-	private void checkClosed() throws IOException {
+	private void checkClosed() throws StorageClosedException {
 		if (stopped) {
-			throw new IOException("Channel has been closed.");
+			throw new StorageClosedException("Channel has been closed.");
 		}
 	}
 
 	@Override
-	public void close() throws IOException {
+	public void close() {
 		stopped = true;
-		bucket.close();
+		try {
+			bucket.close();
+		} catch (IOException e) {
+			// ignore
+		}
 	}
 }

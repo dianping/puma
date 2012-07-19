@@ -136,6 +136,8 @@ public class PumaClient {
 
 						boolean listenerCallSuccess = true;
 
+						int retryTimes = 0;
+
 						// call event listener until success
 						while (true) {
 							if (checkStop()) {
@@ -144,10 +146,27 @@ public class PumaClient {
 
 							try {
 								eventListener.onEvent(event);
+								listenerCallSuccess = true;
 								break;
 							} catch (Exception e) {
-								log.error("Exception occurs in eventListerner. Event: " + event, e);
-								listenerCallSuccess = false;
+								log.warn("Exception occurs in eventListerner. Event: " + event, e);
+								if (config.canSkip()) {
+									if (retryTimes >= config.getMaxRetryTimes()) {
+										listenerCallSuccess = true;
+										SkipEventHandler skipEventHandler = config.getSkipEventHandler();
+										if (skipEventHandler != null) {
+											skipEventHandler.notifySkipEvent(event);
+										}
+										log.warn("Event(" + event + ") has tried for " + config.getMaxRetryTimes()
+												+ " times, then it will be skipped.", e);
+										break;
+									} else {
+										listenerCallSuccess = false;
+									}
+								} else {
+									listenerCallSuccess = false;
+								}
+								retryTimes++;
 							}
 						}
 

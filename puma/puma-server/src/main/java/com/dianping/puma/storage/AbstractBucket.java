@@ -20,6 +20,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.dianping.puma.exception.StorageClosedException;
+
 /**
  * 
  * @author Leo Liang
@@ -41,7 +43,7 @@ public abstract class AbstractBucket implements Bucket {
 	}
 
 	@Override
-	public void append(byte[] data) throws IOException {
+	public void append(byte[] data) throws StorageClosedException, IOException {
 		checkClosed();
 		doAppend(data);
 		currentWritingSeq.set(currentWritingSeq.get().addOffset(data.length));
@@ -50,7 +52,7 @@ public abstract class AbstractBucket implements Bucket {
 	protected abstract void doAppend(byte[] data) throws IOException;
 
 	@Override
-	public byte[] getNext() throws IOException {
+	public byte[] getNext() throws StorageClosedException, IOException {
 		checkClosed();
 		// we should guarantee the whole packet read in one transaction,
 		// otherwise we will skip some bytes and read a wrong value in the next
@@ -63,7 +65,7 @@ public abstract class AbstractBucket implements Bucket {
 	}
 
 	@Override
-	public void seek(int pos) throws IOException {
+	public void seek(int pos) throws StorageClosedException, IOException {
 		checkClosed();
 		doSeek(pos);
 	}
@@ -85,7 +87,7 @@ public abstract class AbstractBucket implements Bucket {
 	}
 
 	@Override
-	public boolean hasRemainingForWrite() throws IOException {
+	public boolean hasRemainingForWrite() throws StorageClosedException, IOException {
 		checkClosed();
 		return doHasRemainingForWrite();
 	}
@@ -98,11 +100,11 @@ public abstract class AbstractBucket implements Bucket {
 
 	protected abstract boolean readable() throws IOException;
 
-	protected abstract byte[] doReadData() throws IOException;
+	protected abstract byte[] doReadData() throws StorageClosedException, IOException;
 
-	protected void checkClosed() throws IOException {
+	protected void checkClosed() throws StorageClosedException {
 		if (stopped) {
-			throw new IOException("Bucket has been closed");
+			throw new StorageClosedException("Bucket has been closed");
 		}
 	}
 }

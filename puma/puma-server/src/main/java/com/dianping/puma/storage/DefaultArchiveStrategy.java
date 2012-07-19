@@ -23,6 +23,8 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.dianping.puma.exception.StorageClosedException;
+
 /**
  * 
  * @author Leo Liang
@@ -31,44 +33,46 @@ import org.apache.log4j.Logger;
 public class DefaultArchiveStrategy implements ArchiveStrategy {
 	private static final Logger	log					= Logger.getLogger(DefaultArchiveStrategy.class);
 	private List<String>		toBeArchiveBuckets	= new ArrayList<String>();
+	private List<String>		toBeDeleteBuckets	= new ArrayList<String>();
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.dianping.puma.storage.ArchiveTask#archive(com.dianping.puma.storage
-	 * .BucketIndex, com.dianping.puma.storage.BucketIndex, int)
-	 */
 	@Override
 	public void archive(BucketIndex masterIndex, BucketIndex slaveIndex, int masterRemainFileCount) {
-		if (masterIndex.size() > masterRemainFileCount) {
-			toBeArchiveBuckets.addAll(masterIndex.bulkGetRemainN(masterRemainFileCount));
-		}
-
-		if (toBeArchiveBuckets.size() > 0) {
-			List<String> copiedFiles = new ArrayList<String>();
-
-			Iterator<String> iterator = toBeArchiveBuckets.iterator();
-			while (iterator.hasNext()) {
-				String path = iterator.next();
-				if (StringUtils.isNotBlank(path)) {
-					if (doArchive(masterIndex.getBaseDir(), path, slaveIndex, copiedFiles)) {
-						iterator.remove();
-					}
-				}
+		try {
+			if (masterIndex.size() > masterRemainFileCount) {
+				toBeArchiveBuckets.addAll(masterIndex.bulkGetRemainN(masterRemainFileCount));
 			}
 
-			slaveIndex.add(copiedFiles);
-			masterIndex.remove(copiedFiles);
+			if (toBeArchiveBuckets.size() > 0) {
+				List<String> copiedFiles = new ArrayList<String>();
 
-			cleanUpLocalFiles(masterIndex.getBaseDir(), copiedFiles);
+				Iterator<String> iterator = toBeArchiveBuckets.iterator();
+				while (iterator.hasNext()) {
+					String path = iterator.next();
+					if (StringUtils.isNotBlank(path)) {
+						if (doArchive(masterIndex.getBaseDir(), path, slaveIndex, copiedFiles)) {
+							iterator.remove();
+						}
+					}
+				}
+
+				slaveIndex.add(copiedFiles);
+				masterIndex.remove(copiedFiles);
+
+				toBeDeleteBuckets.addAll(copiedFiles);
+				cleanUpLocalFiles(masterIndex.getBaseDir(), toBeDeleteBuckets);
+			}
+		} catch (StorageClosedException e) {
+			// ignore
 		}
 	}
 
 	private void cleanUpLocalFiles(String baseDir, List<String> paths) {
-		for (String path : paths) {
-			File localFile = new File(baseDir, path);
-			localFile.delete();
+		Iterator<String> iterator = paths.iterator();
+		while (iterator.hasNext()) {
+			File localFile = new File(baseDir, iterator.next());
+			if (localFile.delete()) {
+				iterator.remove();
+			}
 
 			File parent = localFile.getParentFile();
 			if (parent != null) {

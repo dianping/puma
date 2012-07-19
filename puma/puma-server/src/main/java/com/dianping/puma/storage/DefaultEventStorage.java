@@ -9,6 +9,10 @@ import java.util.List;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
+import com.dianping.puma.exception.StorageClosedException;
+import com.dianping.puma.exception.StorageException;
+import com.dianping.puma.exception.StorageInitException;
+import com.dianping.puma.exception.StorageWriteException;
 
 public class DefaultEventStorage implements EventStorage {
 	private BucketManager						bucketManager;
@@ -21,12 +25,12 @@ public class DefaultEventStorage implements EventStorage {
 	private BucketIndex							slaveIndex;
 	private ArchiveStrategy						archiveStrategy;
 
-	public void initialize() throws IOException {
+	public void initialize() throws StorageException {
 		bucketManager = new DefaultBucketManager(maxMasterFileCount, masterIndex, slaveIndex, archiveStrategy);
 		try {
 			bucketManager.init();
 		} catch (Exception e) {
-			throw new IOException(e);
+			throw new StorageInitException("Storage init failed", e);
 		}
 	}
 
@@ -63,7 +67,7 @@ public class DefaultEventStorage implements EventStorage {
 	}
 
 	@Override
-	public EventChannel getChannel(long seq) throws IOException {
+	public EventChannel getChannel(long seq) throws StorageException {
 		EventChannel channel = new DefaultEventChannel(bucketManager, seq, codec);
 		openChannels.add(new WeakReference<EventChannel>(channel));
 		return channel;
@@ -82,23 +86,27 @@ public class DefaultEventStorage implements EventStorage {
 	}
 
 	@Override
-	public synchronized void store(ChangedEvent event) throws IOException {
+	public synchronized void store(ChangedEvent event) throws StorageException {
 		if (stopped) {
-			throw new IOException("Storage has been closed.");
+			throw new StorageClosedException("Storage has been closed.");
 		}
-		if (writingBucket == null) {
-			writingBucket = bucketManager.getNextWriteBucket();
-		} else if (!writingBucket.hasRemainingForWrite()) {
-			writingBucket.close();
-			writingBucket = bucketManager.getNextWriteBucket();
-		}
+		try {
+			if (writingBucket == null) {
+				writingBucket = bucketManager.getNextWriteBucket();
+			} else if (!writingBucket.hasRemainingForWrite()) {
+				writingBucket.close();
+				writingBucket = bucketManager.getNextWriteBucket();
+			}
 
-		event.setSeq(writingBucket.getCurrentWritingSeq());
-		byte[] data = codec.encode(event);
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		bos.write(ByteArrayUtils.intToByteArray(data.length));
-		bos.write(data);
-		writingBucket.append(bos.toByteArray());
+			event.setSeq(writingBucket.getCurrentWritingSeq());
+			byte[] data = codec.encode(event);
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			bos.write(ByteArrayUtils.intToByteArray(data.length));
+			bos.write(data);
+			writingBucket.append(bos.toByteArray());
+		} catch (IOException e) {
+			throw new StorageWriteException("Failed to write event.", e);
+		}
 	}
 
 	@Override

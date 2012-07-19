@@ -18,7 +18,32 @@ package com.dianping.puma.core.event;
 import java.io.Serializable;
 
 /**
- * TODO Comment of ChangedEvent
+ * <p>
+ * 变更时间的基类
+ * </p>
+ * 
+ * <p>
+ * 域信息和含义如下：
+ * </p>
+ * <blockquote>
+ * <table border=0 cellspacing=3 cellpadding=0 summary="">
+ * <tr bgcolor="#ccccff">
+ * <th align=left>域
+ * <th align=left>含义
+ * <tr>
+ * <td><code>executeTime</code>
+ * <td><code>运行时间</code>
+ * <tr bgcolor="#eeeeff">
+ * <td><code>database</code>
+ * <td><code>数据库信息</code>
+ * <tr>
+ * <td><code>table</code>
+ * <td><code>数据库表</code>
+ * <tr bgcolor="#eeeeff">
+ * <td><code>seq</code>
+ * <td><code>时间编号</code>
+ * </table>
+ * </blockquote>
  * 
  * @author Leo Liang
  * 

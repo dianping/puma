@@ -17,6 +17,8 @@ package com.dianping.puma.storage;
 
 import java.io.IOException;
 
+import com.dianping.puma.exception.StorageClosedException;
+
 /**
  * 单个文件存储的抽象
  * 
@@ -35,7 +37,7 @@ public interface Bucket {
 	 * 
 	 * @throws IOException
 	 */
-	public void append(byte[] data) throws IOException;
+	public void append(byte[] data) throws StorageClosedException, IOException;
 
 	/**
 	 * 从存储中获得下一个事件 <br>
@@ -44,7 +46,7 @@ public interface Bucket {
 	 * @return
 	 * @throws IOException
 	 */
-	public byte[] getNext() throws IOException;
+	public byte[] getNext() throws StorageClosedException, IOException;
 
 	/**
 	 * 把文件指针移动到某个offset上
@@ -52,7 +54,7 @@ public interface Bucket {
 	 * @param offset
 	 * @throws IOException
 	 */
-	public void seek(int offset) throws IOException;
+	public void seek(int offset) throws StorageClosedException, IOException;
 
 	/**
 	 * 关闭当前存储
@@ -67,7 +69,7 @@ public interface Bucket {
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean hasRemainingForWrite() throws IOException;
+	public boolean hasRemainingForWrite() throws StorageClosedException, IOException;
 
 	/**
 	 * 获得写入的seq

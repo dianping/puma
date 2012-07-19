@@ -53,12 +53,27 @@ public class ConfigurationBuilder {
 		return this;
 	}
 
+	public ConfigurationBuilder maxRetryTimes(int maxRetryTimes) {
+		this.configuration.setMaxRetryTimes(maxRetryTimes);
+		return this;
+	}
+
+	public ConfigurationBuilder skipEventHandler(SkipEventHandler skipEventHandler) {
+		this.configuration.setSkipEventHandler(skipEventHandler);
+		return this;
+	}
+
+	public ConfigurationBuilder canSkip(boolean canSkip) {
+		this.configuration.setCanSkip(canSkip);
+		return this;
+	}
+
 	public Configuration build() {
 		return this.configuration;
 	}
 
 	public ConfigurationBuilder target(String target) {
 		this.configuration.setTarget(target);
-	   return this;
-   }
+		return this;
+	}
 }

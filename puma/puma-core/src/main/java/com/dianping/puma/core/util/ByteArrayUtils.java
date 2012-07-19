@@ -16,7 +16,6 @@
 package com.dianping.puma.core.util;
 
 /**
- * TODO Comment of ByteArrayUtils
  * 
  * @author Leo Liang
  * 

@@ -24,6 +24,8 @@ import java.util.TreeMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
+import com.dianping.puma.exception.StorageClosedException;
+
 /**
  * TODO Comment of LocalFileBucketIndex
  * 
@@ -106,8 +108,8 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 
 	}
 
-	public void copyFromLocal(String srcBaseDir, String path) throws IOException {
-
+	public void copyFromLocal(String srcBaseDir, String path) throws IOException, StorageClosedException {
+		super.copyFromLocal(srcBaseDir, path);
 		File localFile = new File(srcBaseDir, path);
 		if (!localFile.exists()) {
 			return;

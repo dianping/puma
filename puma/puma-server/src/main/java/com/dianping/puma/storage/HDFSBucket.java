@@ -6,6 +6,8 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+import com.dianping.puma.exception.StorageClosedException;
+
 /**
  * 基于HDFS的Bucket实现
  * 
@@ -41,7 +43,7 @@ public class HDFSBucket extends AbstractBucket {
 		return inputStream.available() > 4;
 	}
 
-	protected byte[] doReadData() throws IOException {
+	protected byte[] doReadData() throws StorageClosedException, IOException {
 		int length = inputStream.readInt();
 		byte[] data = new byte[length];
 		int n = 0;

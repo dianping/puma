@@ -122,7 +122,7 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 	@Override
 	protected Bucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB)
 			throws IOException {
-		return new HDFSBucket(fileSystem, baseDir + path, startingSeq);
+		return new HDFSBucket(fileSystem, baseDir, path, startingSeq);
 	}
 
 	/*

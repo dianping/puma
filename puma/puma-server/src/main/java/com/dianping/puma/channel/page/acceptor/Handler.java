@@ -12,6 +12,7 @@ import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.codec.EventCodecFactory;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
+import com.dianping.puma.exception.StorageException;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.filter.EventFilterChainFactory;
 import com.dianping.puma.storage.EventChannel;
@@ -22,7 +23,7 @@ import com.site.web.mvc.annotation.OutboundActionMeta;
 import com.site.web.mvc.annotation.PayloadMeta;
 
 public class Handler implements PageHandler<Context> {
-	private static final Logger log = Logger.getLogger(Handler.class);
+	private static final Logger	log	= Logger.getLogger(Handler.class);
 
 	@Override
 	@PayloadMeta(Payload.class)
@@ -41,14 +42,19 @@ public class Handler implements PageHandler<Context> {
 
 		EventCodec codec = EventCodecFactory.createCodec(payload.getCodecType());
 		EventFilterChain filterChain = EventFilterChainFactory.createEventFilterChain(payload.isDdl(), payload.isDml(),
-		      payload.isNeedsTransactionMeta(), payload.getDatabaseTables());
+				payload.isNeedsTransactionMeta(), payload.getDatabaseTables());
 
 		res.setContentType("application/octet-stream");
 		res.addHeader("Connection", "Keep-Alive");
 
 		long seq = payload.getSeq();
 		EventStorage storage = ComponentContainer.SPRING.lookup("storage-" + payload.getTarget(), EventStorage.class);
-		EventChannel channel = storage.getChannel(seq);
+		EventChannel channel;
+		try {
+			channel = storage.getChannel(seq);
+		} catch (StorageException e1) {
+			throw new IOException(e1);
+		}
 
 		while (true) {
 			try {
@@ -61,7 +67,7 @@ public class Handler implements PageHandler<Context> {
 					res.getOutputStream().flush();
 				}
 			} catch (Exception e) {
-				log.info("Client(" + payload.getClientName() + ") failed.");
+				log.info("Client(" + payload.getClientName() + ") failed. " + e);
 				return;
 			}
 		}

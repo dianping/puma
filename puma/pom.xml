@@ -26,11 +26,6 @@
 				<version>0.1.0</version>
 			</dependency>
 			<dependency>
-				<groupId>com.dianping.hawk</groupId>
-				<artifactId>hawk-client</artifactId>
-				<version>0.5.0</version>
-			</dependency>
-			<dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>servlet-api</artifactId>
 				<version>2.5</version>
@@ -115,16 +110,6 @@
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>4.8.1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.powermock</groupId>
-				<artifactId>powermock-module-junit4</artifactId>
-				<version>1.4.12</version>
-			</dependency>
-			<dependency>
-				<groupId>org.powermock</groupId>
-				<artifactId>powermock-api-mockito</artifactId>
-				<version>1.4.12</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

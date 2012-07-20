@@ -15,17 +15,11 @@
  */
 package com.dianping.puma.server;
 
-import java.util.List;
-
-import com.dianping.hawk.jmx.HawkJMXUtil;
 import com.dianping.puma.bo.PumaContext;
-import com.dianping.puma.common.monitor.BinlogInfoAware;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.parser.Parser;
-import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.Dispatcher;
-import com.dianping.puma.server.monitor.ServerMonitorMBean;
 
 /**
  * TODO Comment of AbstractServer
@@ -165,34 +159,7 @@ public abstract class AbstractServer implements Server {
 	protected abstract void doStart() throws Exception;
 
 	public void start() throws Exception {
-		ServerMonitorMBean smb = new ServerMonitorMBean();
-		smb.setServerName(getServerName());
-		initMonitorMBeanAdditionInfo(smb);
-		if (parser instanceof BinlogInfoAware) {
-			smb.addBinlogInfo((BinlogInfoAware) parser);
-		}
-
-		if (dataHandler instanceof BinlogInfoAware) {
-			smb.addBinlogInfo((BinlogInfoAware) dataHandler);
-		}
-
-		if (dispatcher instanceof BinlogInfoAware) {
-			smb.addBinlogInfo((BinlogInfoAware) dispatcher);
-		}
-
-		List<Sender> senders = dispatcher.getSenders();
-		if (senders != null && !senders.isEmpty()) {
-			for (Sender sender : senders) {
-				if (sender instanceof BinlogInfoAware) {
-					smb.addBinlogInfo((BinlogInfoAware) sender);
-				}
-			}
-		}
-
-		HawkJMXUtil.registerMBean(smb);
-
 		doStart();
 	}
 
-	public abstract void initMonitorMBeanAdditionInfo(ServerMonitorMBean smb);
 }

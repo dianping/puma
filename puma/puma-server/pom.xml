@@ -31,10 +31,6 @@
 			<artifactId>commons-lang</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.dianping.hawk</groupId>
-			<artifactId>hawk-client</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<scope>provided</scope>

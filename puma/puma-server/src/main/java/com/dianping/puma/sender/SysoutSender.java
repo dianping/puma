@@ -38,37 +38,4 @@ public class SysoutSender extends AbstractSender {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.common.monitor.BinlogInfoAware#getBinlogPos()
-	 */
-	@Override
-	public long getBinlogPos() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.common.monitor.BinlogInfoAware#getBinlogFile()
-	 */
-	@Override
-	public String getBinlogFile() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.common.monitor.Monitorable#getMonitorTargetName()
-	 */
-	@Override
-	public String getMonitorTargetName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

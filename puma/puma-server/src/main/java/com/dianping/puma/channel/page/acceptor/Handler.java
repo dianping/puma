@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.ComponentContainer;
+import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.codec.EventCodecFactory;
 import com.dianping.puma.core.event.ChangedEvent;
@@ -38,6 +39,11 @@ public class Handler implements PageHandler<Context> {
 		Payload payload = ctx.getPayload();
 		HttpServletResponse res = ctx.getHttpServletResponse();
 
+		// status report
+		SystemStatusContainer.instance.addClientStatus(payload.getClientName(), payload.getSeq(), payload.getTarget(),
+				payload.isDml(), payload.isDdl(), payload.isNeedsTransactionMeta(), payload.getDatabaseTables(),
+				payload.getCodecType());
+
 		log.info("Client(" + payload.getClientName() + ") connected.");
 
 		EventCodec codec = EventCodecFactory.createCodec(payload.getCodecType());
@@ -65,8 +71,11 @@ public class Handler implements PageHandler<Context> {
 					res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
 					res.getOutputStream().write(data);
 					res.getOutputStream().flush();
+					// status report
+					SystemStatusContainer.instance.updateClientSeq(payload.getClientName(), event.getSeq());
 				}
 			} catch (Exception e) {
+				SystemStatusContainer.instance.removeClient(payload.getClientName());
 				log.info("Client(" + payload.getClientName() + ") failed. " + e);
 				return;
 			}

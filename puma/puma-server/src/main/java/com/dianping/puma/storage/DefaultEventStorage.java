@@ -6,6 +6,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
@@ -24,6 +25,7 @@ public class DefaultEventStorage implements EventStorage {
 	private BucketIndex							masterIndex;
 	private BucketIndex							slaveIndex;
 	private ArchiveStrategy						archiveStrategy;
+	private String								name;
 
 	public void initialize() throws StorageException {
 		bucketManager = new DefaultBucketManager(maxMasterFileCount, masterIndex, slaveIndex, archiveStrategy);
@@ -32,6 +34,14 @@ public class DefaultEventStorage implements EventStorage {
 		} catch (Exception e) {
 			throw new StorageInitException("Storage init failed", e);
 		}
+	}
+
+	/**
+	 * @param name
+	 *            the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	/**
@@ -74,10 +84,6 @@ public class DefaultEventStorage implements EventStorage {
 	}
 
 	/**
-	 * public void setName(String name) { this.name = name; }
-	 * 
-	 * /**
-	 * 
 	 * @param codec
 	 *            the codec to set
 	 */
@@ -104,6 +110,7 @@ public class DefaultEventStorage implements EventStorage {
 			bos.write(ByteArrayUtils.intToByteArray(data.length));
 			bos.write(data);
 			writingBucket.append(bos.toByteArray());
+			SystemStatusContainer.instance.updateStorageStatus(name, event.getSeq());
 		} catch (IOException e) {
 			throw new StorageWriteException("Failed to write event.", e);
 		}

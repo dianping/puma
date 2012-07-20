@@ -25,6 +25,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.bo.PositionInfo;
+import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
@@ -38,7 +39,6 @@ import com.dianping.puma.parser.mysql.packet.ComBinlogDumpPacket;
 import com.dianping.puma.parser.mysql.packet.OKErrorPacket;
 import com.dianping.puma.parser.mysql.packet.PacketFactory;
 import com.dianping.puma.parser.mysql.packet.PacketType;
-import com.dianping.puma.server.monitor.ServerMonitorMBean;
 import com.dianping.puma.utils.PositionFileUtils;
 
 /**
@@ -142,6 +142,9 @@ public class ReplicationBasedServer extends AbstractServer {
 						PositionFileUtils.savePositionInfo(getServerName(), new PositionInfo(binlogEvent.getHeader()
 								.getNextPosition(), context.getBinlogFileName()));
 						context.setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
+						// status report
+						SystemStatusContainer.instance.updateServerStatus(getServerName(), host, port, database,
+								context.getBinlogFileName(), context.getBinlogStartPos());
 					}
 
 				}
@@ -328,21 +331,6 @@ public class ReplicationBasedServer extends AbstractServer {
 	 */
 	public void setDatabase(String database) {
 		this.database = database;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.dianping.puma.server.impl.AbstractServer#initMonitorMBean(com.dianping
-	 * .puma.server.monitor.ServerMonitorMBean)
-	 */
-	@Override
-	public void initMonitorMBeanAdditionInfo(ServerMonitorMBean smb) {
-		smb.addAdditionInfo("host", host);
-		smb.addAdditionInfo("port", String.valueOf(port));
-		smb.addAdditionInfo("user", user);
-		smb.addAdditionInfo("db", database);
 	}
 
 }

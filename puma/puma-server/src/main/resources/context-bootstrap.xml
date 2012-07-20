@@ -20,7 +20,7 @@
 
 	<bean id="dispatcher-7-43" class="com.dianping.puma.sender.dispatcher.SimpleDispatherImpl"
 		init-method="start">
-		<property name="name" value="simpleDispatcher" />
+		<property name="name" value="dispatcher-7-43" />
 		<property name="senders">
 			<list>
 				<ref bean="fileSender" />
@@ -39,13 +39,11 @@
 	</bean>
 
 	<bean id="defaultParser" class="com.dianping.puma.parser.DefaultBinlogParser"
-		init-method="start">
-		<property name="name" value="server-7_43-parser" />
-	</bean>
+		init-method="start" />
 
 	<bean id="fileSender" class="com.dianping.puma.sender.FileDumpSender"
 		init-method="start">
-		<property name="name" value="fileDumpSender" />
+		<property name="name" value="fileDumpSender-7-43" />
 		<property name="storage" ref="storage-7-43" />
 	</bean>
 
@@ -56,6 +54,7 @@
 		<property name="masterIndex" ref="localBucketIndex-7-43" />
 		<property name="slaveIndex" ref="localBucketIndex-7-43_2" />
 		<property name="archiveStrategy" ref="archiveStrategy" />
+		<property name="name" value="storage-7-43" />
 	</bean>
 
 	<bean id="localBucketIndex-7-43" class="com.dianping.puma.storage.LocalFileBucketIndex"

@@ -3,10 +3,9 @@ package com.dianping.puma.sender;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.bo.PumaContext;
-import com.dianping.puma.common.monitor.BinlogInfoAware;
 import com.dianping.puma.core.event.ChangedEvent;
 
-public abstract class AbstractSender implements Sender, BinlogInfoAware {
+public abstract class AbstractSender implements Sender {
 	private static final Logger	log				= Logger.getLogger(AbstractSender.class);
 	protected String			name;
 	protected int				maxTryTimes		= 3;

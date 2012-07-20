@@ -34,8 +34,6 @@ public class SimpleDispatherImpl extends AbstractDispatcher {
 
 	private static final Logger	log	= Logger.getLogger(SimpleDispatherImpl.class);
 	private List<Sender>		senders;
-	private String				binlogFile;
-	private long				binlogPos;
 
 	/**
 	 * @return the senders
@@ -61,8 +59,6 @@ public class SimpleDispatherImpl extends AbstractDispatcher {
 
 	@Override
 	public void dispatch(ChangedEvent event, PumaContext context) throws Exception {
-		binlogFile = context.getBinlogFileName();
-		binlogPos = context.getBinlogStartPos();
 		if (senders != null && senders.size() > 0) {
 			List<Throwable> exceptionList = new ArrayList<Throwable>();
 			for (Sender sender : senders) {
@@ -78,26 +74,6 @@ public class SimpleDispatherImpl extends AbstractDispatcher {
 		} else {
 			log.warn("No senders in dispatcher " + name);
 		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.common.monitor.BinlogInfoAware#getBinlogPos()
-	 */
-	@Override
-	public long getBinlogPos() {
-		return binlogPos;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.common.monitor.BinlogInfoAware#getBinlogFile()
-	 */
-	@Override
-	public String getBinlogFile() {
-		return binlogFile;
 	}
 
 }

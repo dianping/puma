@@ -27,8 +27,6 @@ import com.dianping.puma.storage.EventStorage;
  */
 public class FileDumpSender extends AbstractSender {
 	private EventStorage	storage;
-	private long			binlogPos;
-	private String			binlogFile;
 
 	/**
 	 * @param storage
@@ -44,41 +42,8 @@ public class FileDumpSender extends AbstractSender {
 		super.stop();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.common.monitor.BinlogInfoAware#getBinlogPos()
-	 */
-	@Override
-	public long getBinlogPos() {
-		return binlogPos;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.common.monitor.BinlogInfoAware#getBinlogFile()
-	 */
-	@Override
-	public String getBinlogFile() {
-		return binlogFile;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.common.monitor.Monitorable#getMonitorTargetName()
-	 */
-	@Override
-	public String getMonitorTargetName() {
-		return name;
-	}
-
 	@Override
 	protected void doSend(ChangedEvent event, PumaContext context) throws Exception {
-		binlogFile = context.getBinlogFileName();
-		binlogPos = context.getBinlogStartPos();
-
 		storage.store(event);
 	}
 

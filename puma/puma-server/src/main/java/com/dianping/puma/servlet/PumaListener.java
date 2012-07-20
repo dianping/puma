@@ -15,18 +15,17 @@ import com.dianping.puma.server.Server;
 import com.dianping.puma.utils.PositionFileUtils;
 
 public class PumaListener implements ServletContextListener {
-	private static Logger log = Logger.getLogger(PumaListener.class);
+	private static Logger		log				= Logger.getLogger(PumaListener.class);
 
-	private static final String BEAN_SERVERS = "servers";
+	private static final String	BEAN_SERVERS	= "servers";
 
-	private List<Server> servers;
+	private List<Server>		servers;
 
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
 		for (Server server : servers) {
 			try {
 				server.stop();
-
 				log.info("Server " + server.getServerName() + " stopped.");
 			} catch (Exception e) {
 				log.error("Stop Server" + server.getServerName() + " failed.", e);
@@ -44,7 +43,7 @@ public class PumaListener implements ServletContextListener {
 		for (Server server : servers) {
 			String serverName = server.getServerName();
 			PositionInfo posInfo = PositionFileUtils.getPositionInfo(serverName, server.getDefaultBinlogFileName(),
-			      server.getDefaultBinlogPosition());
+					server.getDefaultBinlogPosition());
 			PumaContext context = new PumaContext();
 
 			context.setPumaServerId(server.getServerId());
@@ -54,7 +53,7 @@ public class PumaListener implements ServletContextListener {
 			server.setContext(context);
 			startServer(server);
 			log.info("Server " + serverName + " started at binlogFile: " + context.getBinlogFileName() + " position: "
-			      + context.getBinlogStartPos());
+					+ context.getBinlogStartPos());
 		}
 
 		this.servers = servers;

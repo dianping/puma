@@ -18,11 +18,28 @@ package com.dianping.puma.core.event;
 import java.io.Serializable;
 
 /**
- * TODO Comment of DdlEvent
+ * <p>
+ * 变更时间的基类
+ * </p>
+ * 
+ * <p>
+ * 域信息和含义如下：
+ * </p>
+ * <blockquote>
+ * <table border=0 cellspacing=3 cellpadding=0 summary="">
+ * <tr bgcolor="#ccccff">
+ * <th align=left>域
+ * <th align=left>含义
+ * <tr>
+ * <td><code>sql</code>
+ * <td><code>sql语句</code>
+ * </table>
+ * </blockquote>
  * 
  * @author Leo Liang
  * 
  */
+
 public class DdlEvent extends ChangedEvent implements Serializable {
 	private static final long	serialVersionUID	= -5676914333310337620L;
 	private String				sql;

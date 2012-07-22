@@ -24,6 +24,42 @@ import java.util.Map;
  * 对应一行的数据变化
  * </pre>
  * 
+ * <p>
+ * 变更时间的基类
+ * </p>
+ * 
+ * <p>
+ * 域信息和含义如下：
+ * </p>
+ * <blockquote>
+ * <table border=0 cellspacing=3 cellpadding=0 summary="">
+ * <tr bgcolor="#ccccff">
+ * <th align=left>域
+ * <th align=left>含义
+ * <tr>
+ * <td><code>columns</code>
+ * <td><code>列信息</code>
+ * <tr bgcolor="#eeeeff">
+ * <td><code>actionType</code>
+ * <td><code>数据库操作类型</code>
+ * <tr>
+ * <td><code>isTransactionBegin</code>
+ * <td><code>是否是transaction开始事件</code>
+ * <tr bgcolor="#eeeeff">
+ * <td><code>isTransactionCommit</code>
+ * <td><code>是否是transaction提交事件</code>
+ * <tr bgcolor="#eeeeff">
+ * <td><code>INSERT</code>
+ * <td><code>插入操作</code>
+ * <tr bgcolor="#eeeeff">
+ * <td><code>DELETE</code>
+ * <td><code>删除操作</code>
+ * <tr bgcolor="#eeeeff">
+ * <td><code>UPDATE</code>
+ * <td><code>更新操作</code>
+ * </table>
+ * </blockquote>
+ * 
  * @author Leo Liang
  * 
  */

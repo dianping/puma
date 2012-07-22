@@ -83,6 +83,7 @@ public class LocalBucketTest {
 			input.close();
 			Assert.assertEquals(event, s);
 			Assert.assertEquals(data.length, localFileBucket.currentWritingSeq.get().getOffset());
+			Assert.assertEquals(data.length+this.localFileBucket.startingSequence.longValue(), localFileBucket.getCurrentWritingSeq());
 
 		} catch (FileNotFoundException e) {
 			System.out.println("failed to create localfilebucket");
@@ -154,6 +155,7 @@ public class LocalBucketTest {
 		event.setExecuteTime(0);
 		event.setSeq(seq.longValue());
 		event.setTable(null);
+		Sequence newSeq=null;
 
 		JsonEventCodec codec = new JsonEventCodec();
 		byte[] data = null;
@@ -169,7 +171,7 @@ public class LocalBucketTest {
 			bos.flush();
 			RandomAccessFile file = new RandomAccessFile(work, "rw");
 			file.write(bos.toByteArray());
-			Sequence newSeq = seq.addOffset(bos.size());
+			newSeq = seq.addOffset(bos.size());
 			bos.reset();
 
 			event.setSeq(newSeq.longValue());

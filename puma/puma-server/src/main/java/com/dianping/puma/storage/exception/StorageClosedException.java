@@ -13,27 +13,26 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.exception;
+package com.dianping.puma.storage.exception;
 
 /**
- * TODO Comment of StorageException
+ * TODO Comment of StorageClosedException
  * 
  * @author Leo Liang
  * 
  */
-public class StorageException extends Exception {
+public class StorageClosedException extends StorageException {
+	private static final long	serialVersionUID	= -1114590542695849132L;
 
-	private static final long	serialVersionUID	= -3955468875272140081L;
-
-	public StorageException() {
+	public StorageClosedException() {
 		super();
 	}
 
-	public StorageException(String message, Throwable t) {
+	public StorageClosedException(String message, Throwable t) {
 		super(message, t);
 	}
 
-	public StorageException(String message) {
+	public StorageClosedException(String message) {
 		super(message);
 	}
 }

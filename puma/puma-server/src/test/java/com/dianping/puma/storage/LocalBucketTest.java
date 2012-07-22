@@ -20,7 +20,7 @@ import org.junit.Test;
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
-import com.dianping.puma.exception.StorageClosedException;
+import com.dianping.puma.storage.exception.StorageClosedException;
 
 public class LocalBucketTest {
 

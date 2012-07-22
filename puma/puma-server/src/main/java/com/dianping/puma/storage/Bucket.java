@@ -17,7 +17,7 @@ package com.dianping.puma.storage;
 
 import java.io.IOException;
 
-import com.dianping.puma.exception.StorageClosedException;
+import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
  * 单个文件存储的抽象

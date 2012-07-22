@@ -5,10 +5,10 @@ import java.io.IOException;
 
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.exception.InvalidSequenceException;
-import com.dianping.puma.exception.StorageClosedException;
-import com.dianping.puma.exception.StorageException;
-import com.dianping.puma.exception.StorageReadException;
+import com.dianping.puma.storage.exception.InvalidSequenceException;
+import com.dianping.puma.storage.exception.StorageClosedException;
+import com.dianping.puma.storage.exception.StorageException;
+import com.dianping.puma.storage.exception.StorageReadException;
 
 public class DefaultEventChannel implements EventChannel {
 	private BucketManager		bucketManager;

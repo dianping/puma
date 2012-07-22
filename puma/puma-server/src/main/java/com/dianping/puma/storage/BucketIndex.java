@@ -18,7 +18,7 @@ package com.dianping.puma.storage;
 import java.io.IOException;
 import java.util.List;
 
-import com.dianping.puma.exception.StorageClosedException;
+import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
  * Bucket索引

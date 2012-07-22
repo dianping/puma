@@ -13,27 +13,27 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.exception;
+package com.dianping.puma.storage.exception;
 
 /**
- * TODO Comment of InvalidSequenceException
+ * TODO Comment of StorageInitException
  * 
  * @author Leo Liang
  * 
  */
-public class InvalidSequenceException extends StorageException {
+public class StorageWriteException extends StorageException {
 
-	private static final long	serialVersionUID	= 1314449301630651950L;
+	private static final long	serialVersionUID	= 6449475196273722911L;
 
-	public InvalidSequenceException() {
+	public StorageWriteException() {
 		super();
 	}
 
-	public InvalidSequenceException(String message, Throwable t) {
+	public StorageWriteException(String message, Throwable t) {
 		super(message, t);
 	}
 
-	public InvalidSequenceException(String message) {
+	public StorageWriteException(String message) {
 		super(message);
 	}
 }

@@ -3,7 +3,7 @@ package com.dianping.puma.storage;
 import java.io.IOException;
 
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.exception.StorageException;
+import com.dianping.puma.storage.exception.StorageException;
 
 public interface EventChannel {
 	/**

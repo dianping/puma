@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.exception;
+package com.dianping.puma.storage.exception;
 
 /**
  * TODO Comment of StorageInitException
@@ -21,19 +21,19 @@ package com.dianping.puma.exception;
  * @author Leo Liang
  * 
  */
-public class StorageInitException extends StorageException {
+public class StorageReadException extends StorageException {
 
 	private static final long	serialVersionUID	= 6449475196273722911L;
 
-	public StorageInitException() {
+	public StorageReadException() {
 		super();
 	}
 
-	public StorageInitException(String message, Throwable t) {
+	public StorageReadException(String message, Throwable t) {
 		super(message, t);
 	}
 
-	public StorageInitException(String message) {
+	public StorageReadException(String message) {
 		super(message);
 	}
 }

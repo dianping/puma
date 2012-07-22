@@ -6,7 +6,7 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.core.util.PumaThreadUtils;
-import com.dianping.puma.exception.StorageClosedException;
+import com.dianping.puma.storage.exception.StorageClosedException;
 
 public class DefaultBucketManager implements BucketManager {
 	private static final Logger	log		= Logger.getLogger(DefaultBucketManager.class);

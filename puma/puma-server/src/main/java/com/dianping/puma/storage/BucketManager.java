@@ -2,8 +2,8 @@ package com.dianping.puma.storage;
 
 import java.io.IOException;
 
-import com.dianping.puma.exception.StorageClosedException;
-import com.dianping.puma.exception.StorageInitException;
+import com.dianping.puma.storage.exception.StorageClosedException;
+import com.dianping.puma.storage.exception.StorageInitException;
 
 public interface BucketManager {
 	public Bucket getReadBucket(long seq) throws StorageClosedException, IOException;

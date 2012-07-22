@@ -97,6 +97,7 @@ public class MMapBasedSeqFileHolder implements SeqFileHolder {
 			path.append(File.separatorChar);
 		}
 		path.append("seq-");
+		path.append(config.getName()).append("-");
 		for (String hostPart : hostArr) {
 			path.append(hostPart).append("-");
 		}

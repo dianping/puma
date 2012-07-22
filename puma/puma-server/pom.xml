@@ -9,6 +9,11 @@
 	<artifactId>puma-server</artifactId>
 	<name>Puma Server</name>
 	<packaging>war</packaging>
+
+	<properties>
+		<env>dev</env>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.dianping.puma</groupId>
@@ -17,6 +22,14 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.dianping.hawk</groupId>
+			<artifactId>hawk-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.dianping.dpsf</groupId>
+			<artifactId>dpsf-net</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -56,6 +69,15 @@
 			<artifactId>test-framework</artifactId>
 			<version>1.0.1</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.dianping.lion</groupId>
+			<artifactId>lion-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.dianping.lion</groupId>
+			<artifactId>lion-${env}</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.site.common</groupId>

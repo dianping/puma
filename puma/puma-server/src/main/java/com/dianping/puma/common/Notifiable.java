@@ -1,7 +1,7 @@
 /**
- * Project: ${puma-common.aid}
+ * Project: puma-server
  * 
- * File Created at 2012-6-30
+ * File Created at 2012-7-22
  * $Id$
  * 
  * Copyright 2010 dianping.com.
@@ -13,16 +13,12 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.common.monitor;
+package com.dianping.puma.common;
 
 /**
- * TODO Comment of BinlogInfoAware
- * 
  * @author Leo Liang
  * 
  */
-public interface BinlogInfoAware extends Monitorable {
-	public long getBinlogPos();
-
-	public String getBinlogFile();
+public interface Notifiable {
+	public void setNotifyService(NotifyService notifyService);
 }

@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 import com.dianping.puma.bo.PositionInfo;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
+import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.datahandler.DataHandlerResult;
@@ -65,6 +66,7 @@ public class ReplicationBasedServer extends AbstractServer {
 	@Override
 	public void doStart() throws Exception {
 
+		int failCount = 0;
 		do {
 			try {
 				// 读position/file文件
@@ -82,18 +84,22 @@ public class ReplicationBasedServer extends AbstractServer {
 							+ " user: " + user + " database: " + database);
 
 					if (dumpBinlog()) {
+						failCount = 0;
 						log.info("Dump binlog command success.");
-
 						processBinlog();
-
 					} else {
 						throw new IOException("Dump binlog failed.");
 					}
-
 				} else {
 					throw new IOException("Login failed.");
 				}
 			} catch (Exception e) {
+				if (failCount >= 3) {
+					this.notifyService.alarm("Failed to dump mysql[" + host + ":" + port + "] for 3 times.", e, true);
+					failCount = 0;
+				} else {
+					failCount++;
+				}
 				log.error("Exception occurs. serverId: " + serverId + ". Reconnect...", e);
 				Thread.sleep(1000);
 			}
@@ -108,6 +114,7 @@ public class ReplicationBasedServer extends AbstractServer {
 				log.error("Binlog packet response error.");
 				throw new IOException("Binlog packet response error.");
 			} else {
+
 				BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), context);
 
 				if (binlogEvent.getHeader().getEventType() == BinlogConstanst.ROTATE_EVENT) {
@@ -116,15 +123,42 @@ public class ReplicationBasedServer extends AbstractServer {
 							new PositionInfo(rotateEvent.getFirstEventPosition(), rotateEvent.getNextBinlogFileName()));
 					context.setBinlogFileName(rotateEvent.getNextBinlogFileName());
 					context.setBinlogStartPos(rotateEvent.getFirstEventPosition());
+					// status report
+					SystemStatusContainer.instance.updateServerStatus(getServerName(), host, port, database,
+							context.getBinlogFileName(), context.getBinlogStartPos());
 				} else {
 					DataHandlerResult dataHandlerResult = null;
 					// 一直处理一个binlogEvent的多行，处理完每行马上分发，以防止一个binlogEvent包含太多ChangedEvent而耗费太多内存
 					do {
 						dataHandlerResult = dataHandler.process(binlogEvent, context);
 						if (dataHandlerResult != null && !dataHandlerResult.isEmpty()) {
+							ChangedEvent changedEvent = dataHandlerResult.getData();
+
+							// 增加行变更计数器(除去ddl事件和事务信息事件)
+							if ((changedEvent instanceof RowChangedEvent)
+									&& !((RowChangedEvent) changedEvent).isTransactionBegin()
+									&& !((RowChangedEvent) changedEvent).isTransactionCommit()) {
+								switch (((RowChangedEvent) changedEvent).getActionType()) {
+									case RowChangedEvent.INSERT:
+										SystemStatusContainer.instance.incServerRowInsertCounter(getServerName());
+										break;
+									case RowChangedEvent.UPDATE:
+										SystemStatusContainer.instance.incServerRowUpdateCounter(getServerName());
+										break;
+									case RowChangedEvent.DELETE:
+										SystemStatusContainer.instance.incServerRowDeleteCounter(getServerName());
+										break;
+									default:
+										break;
+								}
+							} else if (changedEvent instanceof DdlEvent) {
+								SystemStatusContainer.instance.incServerDdlCounter(getServerName());
+							}
+
 							try {
-								dispatcher.dispatch(dataHandlerResult.getData(), context);
+								dispatcher.dispatch(changedEvent, context);
 							} catch (Exception e) {
+								this.notifyService.alarm("Dispatch event failed. event(" + changedEvent + ")", e, true);
 								log.error("Dispatcher dispatch failed.", e);
 							}
 						}
@@ -251,7 +285,6 @@ public class ReplicationBasedServer extends AbstractServer {
 				this.is.close();
 			}
 		} catch (IOException ioEx) {
-
 			log.info("Server " + this.getServerName() + " failed to close the inputstream.");
 		} finally {
 			this.is = null;
@@ -262,7 +295,6 @@ public class ReplicationBasedServer extends AbstractServer {
 			}
 		} catch (IOException ioEx) {
 			log.info("Server " + this.getServerName() + " failed to close the outputstream");
-
 		} finally {
 			this.os = null;
 		}
@@ -271,8 +303,7 @@ public class ReplicationBasedServer extends AbstractServer {
 				this.pumaSocket.close();
 			}
 		} catch (IOException ioEx) {
-			log.error("Server " + this.getServerName() + " failed to close the socket", ioEx);
-
+			log.info("Server " + this.getServerName() + " failed to close the socket", ioEx);
 		} finally {
 			this.pumaSocket = null;
 		}

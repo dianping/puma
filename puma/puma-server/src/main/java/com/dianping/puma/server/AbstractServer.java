@@ -16,6 +16,8 @@
 package com.dianping.puma.server;
 
 import com.dianping.puma.bo.PumaContext;
+import com.dianping.puma.common.Notifiable;
+import com.dianping.puma.common.NotifyService;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.parser.Parser;
@@ -28,7 +30,7 @@ import com.dianping.puma.sender.dispatcher.Dispatcher;
  * 
  */
 @ThreadUnSafe
-public abstract class AbstractServer implements Server {
+public abstract class AbstractServer implements Server, Notifiable {
 	protected PumaContext		context;
 	protected String			defaultBinlogFileName;
 	protected Long				defaultBinlogPosition;
@@ -36,7 +38,23 @@ public abstract class AbstractServer implements Server {
 	protected DataHandler		dataHandler;
 	protected Dispatcher		dispatcher;
 	protected long				serverId	= 6789;
+	protected NotifyService		notifyService;
 	protected volatile boolean	stop		= false;
+
+	/**
+	 * @return the notifyService
+	 */
+	public NotifyService getNotifyService() {
+		return notifyService;
+	}
+
+	/**
+	 * @param notifyService
+	 *            the notifyService to set
+	 */
+	public void setNotifyService(NotifyService notifyService) {
+		this.notifyService = notifyService;
+	}
 
 	public void setContext(PumaContext context) {
 		this.context = context;

@@ -3,14 +3,25 @@ package com.dianping.puma.sender;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.bo.PumaContext;
+import com.dianping.puma.common.Notifiable;
+import com.dianping.puma.common.NotifyService;
 import com.dianping.puma.core.event.ChangedEvent;
 
-public abstract class AbstractSender implements Sender {
+public abstract class AbstractSender implements Sender, Notifiable {
 	private static final Logger	log				= Logger.getLogger(AbstractSender.class);
 	protected String			name;
 	protected int				maxTryTimes		= 3;
 	protected boolean			canMissEvent	= false;
 	protected volatile boolean	stop			= false;
+	protected NotifyService		notifyService;
+
+	/**
+	 * @param notifyService
+	 *            the notifyService to set
+	 */
+	public void setNotifyService(NotifyService notifyService) {
+		this.notifyService = notifyService;
+	}
 
 	/**
 	 * @return the maxTryTimes
@@ -87,8 +98,18 @@ public abstract class AbstractSender implements Sender {
 				if (retryCount++ > maxTryTimes) {
 					if (canMissEvent) {
 						log.error("[Miss]Send event(" + event + ") failed for " + maxTryTimes + " times.");
+						if (this.notifyService != null) {
+							this.notifyService.alarm("[Miss]Send event(" + event + ") failed for " + maxTryTimes
+									+ " times.", e, false);
+						}
+						return;
 					} else {
 						log.error("Send event(" + event + ") failed for " + retryCount + " times.");
+						retryCount = 1;
+						if (this.notifyService != null) {
+							this.notifyService.alarm("Send event(" + event + ") failed for " + maxTryTimes
+									+ " times and this event can't miss.", e, true);
+						}
 					}
 				}
 			}

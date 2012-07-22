@@ -32,7 +32,7 @@ margin: 0;
 caption { 
 padding: 0 0 5px 0; 
 width: 700px; 
-font: italic 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif; 
+font: bold italic 15px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif; 
 text-align: center; 
 } 
 

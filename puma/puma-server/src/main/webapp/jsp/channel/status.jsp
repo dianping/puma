@@ -6,6 +6,7 @@
 <%@ page import="com.dianping.puma.common.SystemStatusContainer.ServerStatus" %>
 <%@ page import="com.dianping.puma.common.SystemStatusContainer.ClientStatus" %>
 <%@ page import="com.dianping.puma.storage.Sequence" %>
+<%@ page import="java.util.concurrent.atomic.AtomicLong" %>
 <jsp:useBean id="ctx" type="com.dianping.puma.channel.page.status.Context" scope="request"/>
 <jsp:useBean id="payload" type="com.dianping.puma.channel.page.status.Payload" scope="request"/>
 <jsp:useBean id="model" type="com.dianping.puma.channel.page.status.Model" scope="request"/>
@@ -103,7 +104,7 @@ font-size: 12px;
 	%>	
 			<%="<tr><td>" + entry.getKey() + "</td><td>" + ss.getHost() + "</td><td>" + ss.getPort() + "</td><td>" %>
 			<% if(ss.getDb() == null || ss.getDb().length()==0){ %> All <% }else{ %> ss.getDb() <% } %> 
-			<%="</td><td>" + ss.getBinlogFile() + "</td><td>" + ss.getBinlogPos() + "</td><td>" + eventCounter.get(entry.getKey()).longValue() + "</td><td>" + rowCounter.get(entry.getKey()).longValue() + "</td></tr>" %>
+			<%="</td><td>" + ss.getBinlogFile() + "</td><td>" + ss.getBinlogPos() + "</td><td>" + (eventCounter.get(entry.getKey()) == null ? 0: eventCounter.get(entry.getKey()).longValue()) + "</td><td>" + (rowCounter.get(entry.getKey()) == null ? 0: rowCounter.get(entry.getKey()).longValue()) + "</td></tr>" %>
 	<%
 		}
 	%>

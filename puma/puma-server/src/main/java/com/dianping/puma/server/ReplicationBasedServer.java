@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 import com.dianping.puma.bo.PositionInfo;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
+import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.datahandler.DataHandlerResult;
@@ -132,12 +133,19 @@ public class ReplicationBasedServer extends AbstractServer {
 					do {
 						dataHandlerResult = dataHandler.process(binlogEvent, context);
 						if (dataHandlerResult != null && !dataHandlerResult.isEmpty()) {
-							SystemStatusContainer.instance.incServerRowCounte(getServerName());
+							ChangedEvent changedEvent = dataHandlerResult.getData();
+
+							// 增加行变更计数器(除去ddl事件和事务信息事件)
+							if ((changedEvent instanceof RowChangedEvent)
+									&& !((RowChangedEvent) changedEvent).isTransactionBegin()
+									&& !((RowChangedEvent) changedEvent).isTransactionCommit()) {
+								SystemStatusContainer.instance.incServerRowCounte(getServerName());
+							}
+
 							try {
-								dispatcher.dispatch(dataHandlerResult.getData(), context);
+								dispatcher.dispatch(changedEvent, context);
 							} catch (Exception e) {
-								this.notifyService.alarm("Dispatch event failed. event(" + dataHandlerResult.getData()
-										+ "", e, true);
+								this.notifyService.alarm("Dispatch event failed. event(" + changedEvent + ")", e, true);
 								log.error("Dispatcher dispatch failed.", e);
 							}
 						}

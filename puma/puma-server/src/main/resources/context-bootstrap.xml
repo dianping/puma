@@ -23,7 +23,7 @@
 	</bean>
 
 	<bean id="notifyService" class="com.dianping.puma.common.DefaultNotifyService">
-		<property name="alarmService" ref="alarmService" />
+		<property name="alarmService" ref="commonAlarmSerivce" />
 	</bean>
 
 	<bean id="notifiableBean" abstract="true">

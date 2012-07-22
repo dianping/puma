@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.Logger;
+
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
@@ -35,7 +37,8 @@ import com.dianping.puma.storage.Sequence;
  * 
  */
 public class StatusReportTask implements Task, Notifiable {
-	private NotifyService	notifyService;
+	private static final Logger	log	= Logger.getLogger(StatusReportTask.class);
+	private NotifyService		notifyService;
 
 	/**
 	 * @param notifyService
@@ -50,13 +53,14 @@ public class StatusReportTask implements Task, Notifiable {
 
 			@Override
 			public void run() {
+				boolean first = true;
 				while (true) {
 					if (Thread.currentThread().isInterrupted()) {
 						break;
 					}
 					try {
 
-						if (notifyService != null) {
+						if (notifyService != null && !first) {
 							Map<String, Map<String, String>> statuses = new HashMap<String, Map<String, String>>();
 							Map<String, String> serverStatusMap = new HashMap<String, String>();
 							statuses.put("Server Status", serverStatusMap);
@@ -92,10 +96,11 @@ public class StatusReportTask implements Task, Notifiable {
 							notifyService.report("[Puma] Status Reprot", statuses);
 						}
 						TimeUnit.MINUTES.sleep(getStatusReportInterval());
+						first = false;
 					} catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
 					} catch (Exception ex) {
-						// ignore
+						log.error("Status report failed.", ex);
 					}
 				}
 			}

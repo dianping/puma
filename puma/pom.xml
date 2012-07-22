@@ -26,6 +26,11 @@
 				<version>0.1.0</version>
 			</dependency>
 			<dependency>
+				<groupId>com.dianping.dpsf</groupId>
+				<artifactId>dpsf-net</artifactId>
+				<version>1.5.1</version>
+			</dependency>
+			<dependency>
 				<groupId>com.dianping.hawk</groupId>
 				<artifactId>hawk-common</artifactId>
 				<version>0.1.2</version>

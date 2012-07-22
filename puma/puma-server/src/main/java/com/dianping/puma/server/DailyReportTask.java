@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.Logger;
+
 import com.dianping.puma.common.Notifiable;
 import com.dianping.puma.common.NotifyService;
 import com.dianping.puma.common.SystemStatusContainer;
@@ -34,6 +36,7 @@ import com.dianping.puma.storage.Sequence;
  */
 public class DailyReportTask implements Task, Notifiable {
 
+	private static final Logger	log					= Logger.getLogger(DailyReportTask.class);
 	private NotifyService		notifyService;
 	private Map<String, Long>	lastDayParsedRows	= new HashMap<String, Long>();
 	private Map<String, Long>	lastDayParsedEvents	= new HashMap<String, Long>();
@@ -115,7 +118,7 @@ public class DailyReportTask implements Task, Notifiable {
 					} catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
 					} catch (Exception ex) {
-						// ignore
+						log.error("Daily task failed.", ex);
 					}
 				}
 			}

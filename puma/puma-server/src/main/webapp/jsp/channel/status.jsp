@@ -13,6 +13,11 @@
 <META HTTP-EQUIV="REFRESH" CONTENT="5">
 
 <style type="text/css"> 
+.dotline {
+BORDER-BOTTOM-STYLE: dotted; BORDER-LEFT-STYLE: dotted; BORDER-RIGHT-STYLE: dotted; BORDER-TOP-STYLE: dotted;
+color: #4f6b72;
+
+}
 
 body { 
 font: normal 11px auto "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif; 
@@ -113,7 +118,7 @@ font-size: 12px;
 	%>
 </table>
 <br>
-
+<hr class="dotline" size=1>
 <table class="mytable">
 <caption>Storages</caption>
 	<tr><th>Name</th><th>Seq</th></tr>
@@ -128,7 +133,7 @@ font-size: 12px;
 		}
 	%>
 </table>
-
+<hr class="dotline" size=1>
 <br>
 <table class="mytable">
 <caption>Clients</caption>
@@ -150,3 +155,4 @@ font-size: 12px;
 		}
 	%>
 </table>
+<hr class="dotline" size=1>

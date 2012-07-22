@@ -94,17 +94,19 @@ font-size: 12px;
 </style> 
 <table class="mytable">
 <caption>Servers</caption>
-	<tr><th>Name</th><th>Host</th><th>Port</th><th>Db</th><th>Binlog</th><th>Pos</th><th>Pasred events(since start)</th><th>Parsed rows(since start)</th></tr>
+	<tr><th>Name</th><th>Host</th><th>Port</th><th>Db</th><th>Binlog</th><th>Pos</th><th>Pasred rows insert(since start)</th><th>Parsed rows delete(since start)</th><th>Parsed rows update(since start)</th><th>Parsed ddl events(since start)</th></tr>
 	<% 
 		Map<String, ServerStatus> servers = model.getSystemStatus().listServerStatus(); 
-		Map<String, AtomicLong> eventCounter = model.getSystemStatus().listServerEventCounters();
-		Map<String, AtomicLong> rowCounter = model.getSystemStatus().listServerRowCounters();
+		Map<String, AtomicLong> updateCounter = model.getSystemStatus().listServerRowUpdateCounters();
+		Map<String, AtomicLong> deleteCounter = model.getSystemStatus().listServerRowDeleteCounters();
+		Map<String, AtomicLong> insertCounter = model.getSystemStatus().listServerRowInsertCounters();
+		Map<String, AtomicLong> ddlCounter = model.getSystemStatus().listServerDdlCounters();
 		for(Map.Entry<String, ServerStatus> entry : servers.entrySet()) {
 			ServerStatus ss = entry.getValue();
 	%>	
 			<%="<tr><td>" + entry.getKey() + "</td><td>" + ss.getHost() + "</td><td>" + ss.getPort() + "</td><td>" %>
 			<% if(ss.getDb() == null || ss.getDb().length()==0){ %> All <% }else{ %> ss.getDb() <% } %> 
-			<%="</td><td>" + ss.getBinlogFile() + "</td><td>" + ss.getBinlogPos() + "</td><td>" + (eventCounter.get(entry.getKey()) == null ? 0: eventCounter.get(entry.getKey()).longValue()) + "</td><td>" + (rowCounter.get(entry.getKey()) == null ? 0: rowCounter.get(entry.getKey()).longValue()) + "</td></tr>" %>
+			<%="</td><td>" + ss.getBinlogFile() + "</td><td>" + ss.getBinlogPos() + "</td><td>" + (insertCounter.get(entry.getKey()) == null ? 0: insertCounter.get(entry.getKey()).longValue()) + "</td><td>" + (deleteCounter.get(entry.getKey()) == null ? 0: deleteCounter.get(entry.getKey()).longValue())  + "</td><td>" + (updateCounter.get(entry.getKey()) == null ? 0: updateCounter.get(entry.getKey()).longValue()) + "</td><td>" + (ddlCounter.get(entry.getKey()) == null ? 0: ddlCounter.get(entry.getKey()).longValue())+ "</td></tr>" %>
 	<%
 		}
 	%>

@@ -78,12 +78,20 @@ public class StatusReportTask implements Task, Notifiable {
 								serverStatusMap.put("binLogFile", serverStatus.getValue().getBinlogFile());
 								serverStatusMap.put("binLogPos", Long.toString(serverStatus.getValue().getBinlogPos()));
 								serverStatusMap.put(
-										"parsed events(since start)",
-										Long.toString(SystemStatusContainer.instance.listServerEventCounters()
+										"parsed rows update(since start)",
+										Long.toString(SystemStatusContainer.instance.listServerRowUpdateCounters()
 												.get(serverStatus.getKey()).longValue()));
 								serverStatusMap.put(
-										"parsed rows(since start)",
-										Long.toString(SystemStatusContainer.instance.listServerRowCounters()
+										"parsed rows delete(since start)",
+										Long.toString(SystemStatusContainer.instance.listServerRowDeleteCounters()
+												.get(serverStatus.getKey()).longValue()));
+								serverStatusMap.put(
+										"parsed rows insert(since start)",
+										Long.toString(SystemStatusContainer.instance.listServerRowInsertCounters()
+												.get(serverStatus.getKey()).longValue()));
+								serverStatusMap.put(
+										"parsed ddl events(since start)",
+										Long.toString(SystemStatusContainer.instance.listServerDdlCounters()
 												.get(serverStatus.getKey()).longValue()));
 							}
 

@@ -28,24 +28,36 @@ import java.util.concurrent.atomic.AtomicLong;
 public enum SystemStatusContainer {
 	instance;
 
-	private Map<String, ServerStatus>			serverStatus			= new ConcurrentHashMap<String, ServerStatus>();
-	private Map<String, ClientStatus>			clientStatus			= new ConcurrentHashMap<String, ClientStatus>();
-	private Map<String, Long>					storageStatus			= new ConcurrentHashMap<String, Long>();
-	private ConcurrentMap<String, AtomicLong>	serverParsedEventCount	= new ConcurrentHashMap<String, AtomicLong>();
-	private ConcurrentMap<String, AtomicLong>	serverParsedRowCount		= new ConcurrentHashMap<String, AtomicLong>();
+	private Map<String, ServerStatus>			serverStatus				= new ConcurrentHashMap<String, ServerStatus>();
+	private Map<String, ClientStatus>			clientStatus				= new ConcurrentHashMap<String, ClientStatus>();
+	private Map<String, Long>					storageStatus				= new ConcurrentHashMap<String, Long>();
+	private ConcurrentMap<String, AtomicLong>	serverParsedRowUpdateCount	= new ConcurrentHashMap<String, AtomicLong>();
+	private ConcurrentMap<String, AtomicLong>	serverParsedRowDeleteCount	= new ConcurrentHashMap<String, AtomicLong>();
+	private ConcurrentMap<String, AtomicLong>	serverParsedRowInsertCount	= new ConcurrentHashMap<String, AtomicLong>();
+	private ConcurrentMap<String, AtomicLong>	serverParsedDdlCount		= new ConcurrentHashMap<String, AtomicLong>();
 
 	public void updateServerStatus(String name, String host, int port, String db, String binlogFile, long binlogPos) {
 		serverStatus.put(name, new ServerStatus(binlogFile, binlogPos, host, port, db));
 	}
 
-	public void incServerEventCounte(String name) {
-		serverParsedEventCount.putIfAbsent(name, new AtomicLong(0));
-		serverParsedEventCount.get(name).incrementAndGet();
+	public void incServerRowUpdateCounter(String name) {
+		serverParsedRowUpdateCount.putIfAbsent(name, new AtomicLong(0));
+		serverParsedRowUpdateCount.get(name).incrementAndGet();
 	}
 
-	public void incServerRowCounte(String name) {
-		serverParsedRowCount.putIfAbsent(name, new AtomicLong(0));
-		serverParsedRowCount.get(name).incrementAndGet();
+	public void incServerRowDeleteCounter(String name) {
+		serverParsedRowDeleteCount.putIfAbsent(name, new AtomicLong(0));
+		serverParsedRowDeleteCount.get(name).incrementAndGet();
+	}
+
+	public void incServerRowInsertCounter(String name) {
+		serverParsedRowInsertCount.putIfAbsent(name, new AtomicLong(0));
+		serverParsedRowInsertCount.get(name).incrementAndGet();
+	}
+
+	public void incServerDdlCounter(String name) {
+		serverParsedDdlCount.putIfAbsent(name, new AtomicLong(0));
+		serverParsedDdlCount.get(name).incrementAndGet();
 	}
 
 	public void addClientStatus(String name, long seq, String target, boolean dml, boolean ddl, boolean ts,
@@ -85,12 +97,20 @@ public enum SystemStatusContainer {
 		return Collections.unmodifiableMap(clientStatus);
 	}
 
-	public Map<String, AtomicLong> listServerEventCounters() {
-		return Collections.unmodifiableMap(serverParsedEventCount);
+	public Map<String, AtomicLong> listServerRowUpdateCounters() {
+		return Collections.unmodifiableMap(serverParsedRowUpdateCount);
 	}
 
-	public Map<String, AtomicLong> listServerRowCounters() {
-		return Collections.unmodifiableMap(serverParsedRowCount);
+	public Map<String, AtomicLong> listServerRowDeleteCounters() {
+		return Collections.unmodifiableMap(serverParsedRowDeleteCount);
+	}
+
+	public Map<String, AtomicLong> listServerRowInsertCounters() {
+		return Collections.unmodifiableMap(serverParsedRowInsertCount);
+	}
+
+	public Map<String, AtomicLong> listServerDdlCounters() {
+		return Collections.unmodifiableMap(serverParsedDdlCount);
 	}
 
 	public Map<String, Long> listStorageStatus() {

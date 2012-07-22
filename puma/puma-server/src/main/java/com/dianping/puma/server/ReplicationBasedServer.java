@@ -114,7 +114,6 @@ public class ReplicationBasedServer extends AbstractServer {
 				log.error("Binlog packet response error.");
 				throw new IOException("Binlog packet response error.");
 			} else {
-				SystemStatusContainer.instance.incServerEventCounte(getServerName());
 
 				BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), context);
 
@@ -139,7 +138,21 @@ public class ReplicationBasedServer extends AbstractServer {
 							if ((changedEvent instanceof RowChangedEvent)
 									&& !((RowChangedEvent) changedEvent).isTransactionBegin()
 									&& !((RowChangedEvent) changedEvent).isTransactionCommit()) {
-								SystemStatusContainer.instance.incServerRowCounte(getServerName());
+								switch (((RowChangedEvent) changedEvent).getActionType()) {
+									case RowChangedEvent.INSERT:
+										SystemStatusContainer.instance.incServerRowInsertCounter(getServerName());
+										break;
+									case RowChangedEvent.UPDATE:
+										SystemStatusContainer.instance.incServerRowUpdateCounter(getServerName());
+										break;
+									case RowChangedEvent.DELETE:
+										SystemStatusContainer.instance.incServerRowDeleteCounter(getServerName());
+										break;
+									default:
+										break;
+								}
+							} else if (changedEvent instanceof DdlEvent) {
+								SystemStatusContainer.instance.incServerDdlCounter(getServerName());
 							}
 
 							try {

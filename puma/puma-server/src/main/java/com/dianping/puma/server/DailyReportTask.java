@@ -36,11 +36,13 @@ import com.dianping.puma.storage.Sequence;
  */
 public class DailyReportTask implements Task, Notifiable {
 
-	private static final Logger	log					= Logger.getLogger(DailyReportTask.class);
+	private static final Logger	log						= Logger.getLogger(DailyReportTask.class);
 	private NotifyService		notifyService;
-	private Map<String, Long>	lastDayParsedRows	= new HashMap<String, Long>();
-	private Map<String, Long>	lastDayParsedEvents	= new HashMap<String, Long>();
-	private String				lastDay				= "2012-07-22";
+	private Map<String, Long>	lastDayParsedUpdateRows	= new HashMap<String, Long>();
+	private Map<String, Long>	lastDayParsedInsertRows	= new HashMap<String, Long>();
+	private Map<String, Long>	lastDayParsedDeleteRows	= new HashMap<String, Long>();
+	private Map<String, Long>	lastDayParsedDdlEvents	= new HashMap<String, Long>();
+	private String				lastDay					= "2012-07-22";
 
 	/*
 	 * (non-Javadoc)
@@ -78,32 +80,65 @@ public class DailyReportTask implements Task, Notifiable {
 								serverStatusMap.put("binLogFile", serverStatus.getValue().getBinlogFile());
 								serverStatusMap.put("binLogPos", Long.toString(serverStatus.getValue().getBinlogPos()));
 
-								Long lastDayParsedEventCounter = lastDayParsedEvents.get(serverStatus.getKey());
-								if (lastDayParsedEventCounter == null) {
-									lastDayParsedEventCounter = SystemStatusContainer.instance
-											.listServerEventCounters().get(serverStatus.getKey()).longValue();
+								Long lastDayParsedRowsInsertCounter = lastDayParsedInsertRows
+										.get(serverStatus.getKey());
+								if (lastDayParsedRowsInsertCounter == null) {
+									lastDayParsedRowsInsertCounter = SystemStatusContainer.instance
+											.listServerRowInsertCounters().get(serverStatus.getKey()).longValue();
 								} else {
-									lastDayParsedEventCounter = SystemStatusContainer.instance
-											.listServerEventCounters().get(serverStatus.getKey()).longValue()
-											- lastDayParsedEventCounter;
+									lastDayParsedRowsInsertCounter = SystemStatusContainer.instance
+											.listServerRowInsertCounters().get(serverStatus.getKey()).longValue()
+											- lastDayParsedRowsInsertCounter;
 								}
 
-								lastDayParsedEvents.put(serverStatus.getKey(), lastDayParsedEventCounter);
+								lastDayParsedInsertRows.put(serverStatus.getKey(), lastDayParsedRowsInsertCounter);
 
-								Long lastDayParsedRowCounter = lastDayParsedRows.get(serverStatus.getKey());
-								if (lastDayParsedRowCounter == null) {
-									lastDayParsedRowCounter = SystemStatusContainer.instance.listServerRowCounters()
+								Long lastDayParsedRowsUpdateCounter = lastDayParsedUpdateRows
+										.get(serverStatus.getKey());
+								if (lastDayParsedRowsUpdateCounter == null) {
+									lastDayParsedRowsUpdateCounter = SystemStatusContainer.instance
+											.listServerRowUpdateCounters().get(serverStatus.getKey()).longValue();
+								} else {
+									lastDayParsedRowsUpdateCounter = SystemStatusContainer.instance
+											.listServerRowUpdateCounters().get(serverStatus.getKey()).longValue()
+											- lastDayParsedRowsUpdateCounter;
+								}
+
+								lastDayParsedUpdateRows.put(serverStatus.getKey(), lastDayParsedRowsUpdateCounter);
+
+								Long lastDayParsedRowsDeleteCounter = lastDayParsedDeleteRows
+										.get(serverStatus.getKey());
+								if (lastDayParsedRowsDeleteCounter == null) {
+									lastDayParsedRowsDeleteCounter = SystemStatusContainer.instance
+											.listServerRowDeleteCounters().get(serverStatus.getKey()).longValue();
+								} else {
+									lastDayParsedRowsDeleteCounter = SystemStatusContainer.instance
+											.listServerRowDeleteCounters().get(serverStatus.getKey()).longValue()
+											- lastDayParsedRowsDeleteCounter;
+								}
+
+								lastDayParsedDeleteRows.put(serverStatus.getKey(), lastDayParsedRowsDeleteCounter);
+
+								Long lastDayDdlEventsCounter = lastDayParsedDdlEvents.get(serverStatus.getKey());
+								if (lastDayDdlEventsCounter == null) {
+									lastDayDdlEventsCounter = SystemStatusContainer.instance.listServerDdlCounters()
 											.get(serverStatus.getKey()).longValue();
 								} else {
-									lastDayParsedRowCounter = SystemStatusContainer.instance.listServerRowCounters()
+									lastDayDdlEventsCounter = SystemStatusContainer.instance.listServerDdlCounters()
 											.get(serverStatus.getKey()).longValue()
-											- lastDayParsedRowCounter;
+											- lastDayDdlEventsCounter;
 								}
 
-								serverStatusMap.put("parsed events(since last day)",
-										Long.toString(lastDayParsedEventCounter));
-								serverStatusMap.put("parsed rows(since last day)",
-										Long.toString(lastDayParsedRowCounter));
+								lastDayParsedDdlEvents.put(serverStatus.getKey(), lastDayDdlEventsCounter);
+
+								serverStatusMap.put("parsed rows insert(since last day)",
+										Long.toString(lastDayParsedRowsInsertCounter));
+								serverStatusMap.put("parsed rows update(since last day)",
+										Long.toString(lastDayParsedRowsUpdateCounter));
+								serverStatusMap.put("parsed rows delete(since last day)",
+										Long.toString(lastDayParsedRowsDeleteCounter));
+								serverStatusMap.put("parsed ddl events(since last day)",
+										Long.toString(lastDayDdlEventsCounter));
 							}
 
 							for (Map.Entry<String, Long> storageStatus : storageStatuses.entrySet()) {

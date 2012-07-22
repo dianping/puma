@@ -93,15 +93,17 @@ font-size: 12px;
 </style> 
 <table class="mytable">
 <caption>Servers</caption>
-	<tr><th>name</th><th>host</th><th>port</th><th>db</th><th>binlog</th><th>pos</th></tr>
+	<tr><th>Name</th><th>Host</th><th>Port</th><th>Db</th><th>Binlog</th><th>Pos</th><th>Pasred events(since start)</th><th>Parsed rows(since start)</th></tr>
 	<% 
 		Map<String, ServerStatus> servers = model.getSystemStatus().listServerStatus(); 
+		Map<String, AtomicLong> eventCounter = model.getSystemStatus().listServerEventCounters();
+		Map<String, AtomicLong> rowCounter = model.getSystemStatus().listServerRowCounters();
 		for(Map.Entry<String, ServerStatus> entry : servers.entrySet()) {
 			ServerStatus ss = entry.getValue();
 	%>	
 			<%="<tr><td>" + entry.getKey() + "</td><td>" + ss.getHost() + "</td><td>" + ss.getPort() + "</td><td>" %>
 			<% if(ss.getDb() == null || ss.getDb().length()==0){ %> All <% }else{ %> ss.getDb() <% } %> 
-			<%="</td><td>" + ss.getBinlogFile() + "</td><td>" + ss.getBinlogPos() + "</td></tr>" %>
+			<%="</td><td>" + ss.getBinlogFile() + "</td><td>" + ss.getBinlogPos() + "</td><td>" + eventCounter.get(entry.getKey()).longValue() + "</td><td>" + rowCounter.get(entry.getKey()).longValue() + "</td></tr>" %>
 	<%
 		}
 	%>
@@ -110,7 +112,7 @@ font-size: 12px;
 
 <table class="mytable">
 <caption>Storages</caption>
-	<tr><th>name</th><th>seq</th></tr>
+	<tr><th>Name</th><th>Seq</th></tr>
 	<% 
 		Map<String, Long> storages = model.getSystemStatus().listStorageStatus(); 
 		for(Map.Entry<String, Long> entry : storages.entrySet()) {
@@ -126,7 +128,7 @@ font-size: 12px;
 <br>
 <table class="mytable">
 <caption>Clients</caption>
-	<tr><th>name</th><th>target</th><th>seq</th><th>db&table</th><th>codec</th><th>needDdl</th><th>needDml</th><th>needTransactionInfo</th></tr>
+	<tr><th>Name</th><th>Target</th><th>Seq</th><th>Db&table</th><th>codec</th><th>NeedDdl</th><th>NeedDml</th><th>NeedTransactionInfo</th></tr>
 	<% 
 		Map<String, ClientStatus> clients = model.getSystemStatus().listClientStatus(); 
 		for(Map.Entry<String, ClientStatus> entry : clients.entrySet()) {

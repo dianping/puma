@@ -65,97 +65,8 @@ public class DailyReportTask implements Task, Notifiable {
 
 						if (notifyService != null && needReport()) {
 							log.info("Daily report start...");
-							Map<String, Map<String, String>> statuses = new HashMap<String, Map<String, String>>();
-							Map<String, String> serverStatusMap = new HashMap<String, String>();
-							statuses.put("Server Status", serverStatusMap);
 
-							Map<String, String> storageStatusMap = new HashMap<String, String>();
-							statuses.put("Storage Status", storageStatusMap);
-
-							Map<String, ServerStatus> serverStatuses = SystemStatusContainer.instance.listServerStatus();
-							Map<String, Long> storageStatuses = SystemStatusContainer.instance.listStorageStatus();
-
-							for (Map.Entry<String, ServerStatus> serverStatus : serverStatuses.entrySet()) {
-								serverStatusMap.put("name", serverStatus.getKey());
-								serverStatusMap.put("host", serverStatus.getValue().getHost());
-								serverStatusMap.put("port", Integer.toString(serverStatus.getValue().getPort()));
-								serverStatusMap.put("binLogFile", serverStatus.getValue().getBinlogFile());
-								serverStatusMap.put("binLogPos", Long.toString(serverStatus.getValue().getBinlogPos()));
-
-								Long lastDayParsedRowsInsertCounter = lastDayParsedInsertRows
-										.get(serverStatus.getKey());
-								AtomicLong currentParsedRowsInsertCounter = SystemStatusContainer.instance
-										.listServerRowInsertCounters().get(serverStatus.getKey());
-								if (lastDayParsedRowsInsertCounter == null) {
-
-									lastDayParsedRowsInsertCounter = currentParsedRowsInsertCounter == null ? 0
-											: currentParsedRowsInsertCounter.longValue();
-								} else {
-									lastDayParsedRowsInsertCounter = currentParsedRowsInsertCounter == null ? 0
-											: (currentParsedRowsInsertCounter.longValue() - lastDayParsedRowsInsertCounter);
-								}
-
-								lastDayParsedInsertRows.put(serverStatus.getKey(), lastDayParsedRowsInsertCounter);
-
-								Long lastDayParsedRowsUpdateCounter = lastDayParsedUpdateRows
-										.get(serverStatus.getKey());
-
-								AtomicLong currentParsedRowsUpdateCounter = SystemStatusContainer.instance
-										.listServerRowUpdateCounters().get(serverStatus.getKey());
-								if (lastDayParsedRowsUpdateCounter == null) {
-									lastDayParsedRowsUpdateCounter = currentParsedRowsUpdateCounter == null ? 0
-											: currentParsedRowsUpdateCounter.longValue();
-								} else {
-									lastDayParsedRowsUpdateCounter = currentParsedRowsUpdateCounter == null ? 0
-											: (currentParsedRowsUpdateCounter.longValue() - lastDayParsedRowsUpdateCounter);
-								}
-
-								lastDayParsedUpdateRows.put(serverStatus.getKey(), lastDayParsedRowsUpdateCounter);
-
-								Long lastDayParsedRowsDeleteCounter = lastDayParsedDeleteRows
-										.get(serverStatus.getKey());
-								AtomicLong currentParsedRowsDeleteCounter = SystemStatusContainer.instance
-										.listServerRowDeleteCounters().get(serverStatus.getKey());
-								if (lastDayParsedRowsDeleteCounter == null) {
-									lastDayParsedRowsDeleteCounter = currentParsedRowsDeleteCounter == null ? 0
-											: currentParsedRowsDeleteCounter.longValue();
-								} else {
-									lastDayParsedRowsDeleteCounter = currentParsedRowsDeleteCounter == null ? 0
-											: (currentParsedRowsDeleteCounter.longValue() - lastDayParsedRowsDeleteCounter);
-								}
-
-								lastDayParsedDeleteRows.put(serverStatus.getKey(), lastDayParsedRowsDeleteCounter);
-
-								Long lastDayDdlEventsCounter = lastDayParsedDdlEvents.get(serverStatus.getKey());
-								AtomicLong currentDdlCounter = SystemStatusContainer.instance.listServerDdlCounters()
-										.get(serverStatus.getKey());
-								if (lastDayDdlEventsCounter == null) {
-									lastDayDdlEventsCounter = currentDdlCounter == null ? 0 : currentDdlCounter
-											.longValue();
-								} else {
-									lastDayDdlEventsCounter = currentDdlCounter == null ? 0 : (currentDdlCounter
-											.longValue() - lastDayDdlEventsCounter);
-								}
-
-								lastDayParsedDdlEvents.put(serverStatus.getKey(), lastDayDdlEventsCounter);
-
-								serverStatusMap.put("parsed rows insert(since last day)",
-										Long.toString(lastDayParsedRowsInsertCounter));
-								serverStatusMap.put("parsed rows update(since last day)",
-										Long.toString(lastDayParsedRowsUpdateCounter));
-								serverStatusMap.put("parsed rows delete(since last day)",
-										Long.toString(lastDayParsedRowsDeleteCounter));
-								serverStatusMap.put("parsed ddl events(since last day)",
-										Long.toString(lastDayDdlEventsCounter));
-							}
-
-							for (Map.Entry<String, Long> storageStatus : storageStatuses.entrySet()) {
-								storageStatusMap.put("name", storageStatus.getKey());
-								storageStatusMap.put("seq",
-										storageStatus.getValue() + new Sequence(storageStatus.getValue()).toString());
-							}
-
-							notifyService.report("[Puma] Daily Report(" + lastDay + ")", statuses);
+							notifyService.report("[Puma] Daily Report(" + lastDay + ")", getStatus());
 						}
 						TimeUnit.MINUTES.sleep(20);
 					} catch (InterruptedException e) {
@@ -165,8 +76,93 @@ public class DailyReportTask implements Task, Notifiable {
 					}
 				}
 			}
+
 		}, "DailyReport", true).start();
 
+	}
+
+	protected Map<String, Map<String, String>> getStatus() {
+		Map<String, Map<String, String>> statuses = new HashMap<String, Map<String, String>>();
+		Map<String, String> serverStatusMap = new HashMap<String, String>();
+		statuses.put("Server Status", serverStatusMap);
+
+		Map<String, String> storageStatusMap = new HashMap<String, String>();
+		statuses.put("Storage Status", storageStatusMap);
+
+		Map<String, ServerStatus> serverStatuses = SystemStatusContainer.instance.listServerStatus();
+		Map<String, Long> storageStatuses = SystemStatusContainer.instance.listStorageStatus();
+
+		for (Map.Entry<String, ServerStatus> serverStatus : serverStatuses.entrySet()) {
+			serverStatusMap.put("name", serverStatus.getKey());
+			serverStatusMap.put("host", serverStatus.getValue().getHost());
+			serverStatusMap.put("port", Integer.toString(serverStatus.getValue().getPort()));
+			serverStatusMap.put("binLogFile", serverStatus.getValue().getBinlogFile());
+			serverStatusMap.put("binLogPos", Long.toString(serverStatus.getValue().getBinlogPos()));
+
+			Long lastDayParsedRowsInsertCounter = lastDayParsedInsertRows.get(serverStatus.getKey());
+			AtomicLong currentParsedRowsInsertCounter = SystemStatusContainer.instance.listServerRowInsertCounters()
+					.get(serverStatus.getKey());
+			if (lastDayParsedRowsInsertCounter == null) {
+
+				lastDayParsedRowsInsertCounter = currentParsedRowsInsertCounter == null ? 0
+						: currentParsedRowsInsertCounter.longValue();
+			} else {
+				lastDayParsedRowsInsertCounter = currentParsedRowsInsertCounter == null ? 0
+						: (currentParsedRowsInsertCounter.longValue() - lastDayParsedRowsInsertCounter);
+			}
+
+			lastDayParsedInsertRows.put(serverStatus.getKey(), lastDayParsedRowsInsertCounter);
+
+			Long lastDayParsedRowsUpdateCounter = lastDayParsedUpdateRows.get(serverStatus.getKey());
+
+			AtomicLong currentParsedRowsUpdateCounter = SystemStatusContainer.instance.listServerRowUpdateCounters()
+					.get(serverStatus.getKey());
+			if (lastDayParsedRowsUpdateCounter == null) {
+				lastDayParsedRowsUpdateCounter = currentParsedRowsUpdateCounter == null ? 0
+						: currentParsedRowsUpdateCounter.longValue();
+			} else {
+				lastDayParsedRowsUpdateCounter = currentParsedRowsUpdateCounter == null ? 0
+						: (currentParsedRowsUpdateCounter.longValue() - lastDayParsedRowsUpdateCounter);
+			}
+
+			lastDayParsedUpdateRows.put(serverStatus.getKey(), lastDayParsedRowsUpdateCounter);
+
+			Long lastDayParsedRowsDeleteCounter = lastDayParsedDeleteRows.get(serverStatus.getKey());
+			AtomicLong currentParsedRowsDeleteCounter = SystemStatusContainer.instance.listServerRowDeleteCounters()
+					.get(serverStatus.getKey());
+			if (lastDayParsedRowsDeleteCounter == null) {
+				lastDayParsedRowsDeleteCounter = currentParsedRowsDeleteCounter == null ? 0
+						: currentParsedRowsDeleteCounter.longValue();
+			} else {
+				lastDayParsedRowsDeleteCounter = currentParsedRowsDeleteCounter == null ? 0
+						: (currentParsedRowsDeleteCounter.longValue() - lastDayParsedRowsDeleteCounter);
+			}
+
+			lastDayParsedDeleteRows.put(serverStatus.getKey(), lastDayParsedRowsDeleteCounter);
+
+			Long lastDayDdlEventsCounter = lastDayParsedDdlEvents.get(serverStatus.getKey());
+			AtomicLong currentDdlCounter = SystemStatusContainer.instance.listServerDdlCounters().get(
+					serverStatus.getKey());
+			if (lastDayDdlEventsCounter == null) {
+				lastDayDdlEventsCounter = currentDdlCounter == null ? 0 : currentDdlCounter.longValue();
+			} else {
+				lastDayDdlEventsCounter = currentDdlCounter == null ? 0
+						: (currentDdlCounter.longValue() - lastDayDdlEventsCounter);
+			}
+
+			lastDayParsedDdlEvents.put(serverStatus.getKey(), lastDayDdlEventsCounter);
+
+			serverStatusMap.put("parsed rows insert(since last day)", Long.toString(lastDayParsedRowsInsertCounter));
+			serverStatusMap.put("parsed rows update(since last day)", Long.toString(lastDayParsedRowsUpdateCounter));
+			serverStatusMap.put("parsed rows delete(since last day)", Long.toString(lastDayParsedRowsDeleteCounter));
+			serverStatusMap.put("parsed ddl events(since last day)", Long.toString(lastDayDdlEventsCounter));
+		}
+
+		for (Map.Entry<String, Long> storageStatus : storageStatuses.entrySet()) {
+			storageStatusMap.put("name", storageStatus.getKey());
+			storageStatusMap.put("seq", storageStatus.getValue() + new Sequence(storageStatus.getValue()).toString());
+		}
+		return statuses;
 	}
 
 	/*

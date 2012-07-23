@@ -89,7 +89,7 @@ public abstract class AbstractSender implements Sender, Notifiable {
 
 	@Override
 	public void send(ChangedEvent event, PumaContext context) throws Exception {
-		int retryCount = 0;
+		long retryCount = 0;
 		while (true) {
 			try {
 				doSend(event, context);
@@ -104,15 +104,16 @@ public abstract class AbstractSender implements Sender, Notifiable {
 						}
 						return;
 					} else {
-						log.error("Send event(" + event + ") failed for " + retryCount + " times.");
-						retryCount = 1;
-						if (this.notifyService != null) {
-							this.notifyService.alarm("Send event(" + event + ") failed for " + maxTryTimes
-									+ " times and this event can't miss.", e, true);
+						if (retryCount % 100 == 0) {
+							log.error("Send event(" + event + ") failed for " + retryCount + " times.");
+							if (this.notifyService != null) {
+								this.notifyService.alarm("Send event(" + event + ") failed for " + maxTryTimes
+										+ " times and this event can't miss.", e, true);
+							}
 						}
 					}
 				}
-				Thread.sleep(retryCount * 500);
+				Thread.sleep((retryCount % 15) * 100);
 			}
 		}
 	}

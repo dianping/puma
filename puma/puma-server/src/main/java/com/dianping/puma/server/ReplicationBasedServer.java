@@ -94,14 +94,12 @@ public class ReplicationBasedServer extends AbstractServer {
 					throw new IOException("Login failed.");
 				}
 			} catch (Exception e) {
-				if (failCount >= 3) {
+				if (++failCount % 3 == 0) {
 					this.notifyService.alarm("Failed to dump mysql[" + host + ":" + port + "] for 3 times.", e, true);
 					failCount = 0;
-				} else {
-					failCount++;
 				}
 				log.error("Exception occurs. serverId: " + serverId + ". Reconnect...", e);
-				Thread.sleep(1000);
+				Thread.sleep(((failCount % 10) + 1) * 2000);
 			}
 		} while (!stop);
 

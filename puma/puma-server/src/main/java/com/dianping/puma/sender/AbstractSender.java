@@ -91,6 +91,9 @@ public abstract class AbstractSender implements Sender, Notifiable {
 	public void send(ChangedEvent event, PumaContext context) throws Exception {
 		long retryCount = 0;
 		while (true) {
+			if (stop) {
+				break;
+			}
 			try {
 				doSend(event, context);
 				break;

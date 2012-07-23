@@ -112,6 +112,7 @@ public abstract class AbstractSender implements Sender, Notifiable {
 						}
 					}
 				}
+				Thread.sleep(retryCount * 500);
 			}
 		}
 	}

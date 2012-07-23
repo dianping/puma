@@ -176,8 +176,9 @@ public class DailyReportTask implements Task, Notifiable {
 	private boolean needReport() {
 		Calendar cal = Calendar.getInstance();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		if (cal.get(Calendar.HOUR_OF_DAY) == 1) {
-			lastDay = sdf.format(cal.getTime());
+		String nowDate = sdf.format(cal.getTime());
+		if (cal.get(Calendar.HOUR_OF_DAY) == 1 && !nowDate.equals(lastDay)) {
+			lastDay = nowDate;
 			return true;
 		} else {
 			return false;

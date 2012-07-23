@@ -18,6 +18,7 @@ package com.dianping.puma.server;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Logger;
 
@@ -61,6 +62,7 @@ public class StatusReportTask implements Task, Notifiable {
 					try {
 
 						if (notifyService != null && !first) {
+							log.info("Status report start...");
 							Map<String, Map<String, String>> statuses = new HashMap<String, Map<String, String>>();
 							Map<String, String> serverStatusMap = new HashMap<String, String>();
 							statuses.put("Server Status", serverStatusMap);
@@ -77,28 +79,28 @@ public class StatusReportTask implements Task, Notifiable {
 								serverStatusMap.put("port", Integer.toString(serverStatus.getValue().getPort()));
 								serverStatusMap.put("binLogFile", serverStatus.getValue().getBinlogFile());
 								serverStatusMap.put("binLogPos", Long.toString(serverStatus.getValue().getBinlogPos()));
-								serverStatusMap.put(
-										"parsed rows update(since start)",
-										Long.toString(SystemStatusContainer.instance.listServerRowUpdateCounters()
-												.get(serverStatus.getKey()).longValue()));
-								serverStatusMap.put(
-										"parsed rows delete(since start)",
-										Long.toString(SystemStatusContainer.instance.listServerRowDeleteCounters()
-												.get(serverStatus.getKey()).longValue()));
-								serverStatusMap.put(
-										"parsed rows insert(since start)",
-										Long.toString(SystemStatusContainer.instance.listServerRowInsertCounters()
-												.get(serverStatus.getKey()).longValue()));
-								serverStatusMap.put(
-										"parsed ddl events(since start)",
-										Long.toString(SystemStatusContainer.instance.listServerDdlCounters()
-												.get(serverStatus.getKey()).longValue()));
+								AtomicLong updatedRows = SystemStatusContainer.instance.listServerRowUpdateCounters()
+										.get(serverStatus.getKey());
+								serverStatusMap.put("parsed rows update(since start)",
+										Long.toString(updatedRows == null ? 0 : updatedRows.longValue()));
+								AtomicLong deletedRows = SystemStatusContainer.instance.listServerRowDeleteCounters()
+										.get(serverStatus.getKey());
+								serverStatusMap.put("parsed rows delete(since start)",
+										Long.toString(deletedRows == null ? 0 : deletedRows.longValue()));
+								AtomicLong insertedRows = SystemStatusContainer.instance.listServerRowInsertCounters()
+										.get(serverStatus.getKey());
+								serverStatusMap.put("parsed rows insert(since start)",
+										Long.toString(insertedRows == null ? 0 : insertedRows.longValue()));
+								AtomicLong ddls = SystemStatusContainer.instance.listServerDdlCounters().get(
+										serverStatus.getKey());
+								serverStatusMap.put("parsed ddl events(since start)",
+										Long.toString(ddls == null ? 0 : ddls.longValue()));
 							}
 
 							for (Map.Entry<String, Long> storageStatus : storageStatuses.entrySet()) {
 								storageStatusMap.put("name", storageStatus.getKey());
-								storageStatusMap.put("seq",
-										storageStatus.getValue() + new Sequence(storageStatus.getValue()).toString());
+								storageStatusMap.put("seq", storageStatus.getValue() + "&nbsp;&nbsp;"
+										+ new Sequence(storageStatus.getValue()).toString());
 							}
 
 							notifyService.report("[Puma] Status Reprot", statuses);

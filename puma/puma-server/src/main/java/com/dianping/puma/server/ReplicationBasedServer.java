@@ -96,7 +96,8 @@ public class ReplicationBasedServer extends AbstractServer {
 				}
 			} catch (Exception e) {
 				if (++failCount % 3 == 0) {
-					this.notifyService.alarm("Failed to dump mysql[" + host + ":" + port + "] for 3 times.", e, true);
+					this.notifyService.alarm("[" + context.getPumaServerName() + "]" + "Failed to dump mysql[" + host
+							+ ":" + port + "] for 3 times.", e, true);
 					failCount = 0;
 				}
 				log.error("Exception occurs. serverId: " + serverId + ". Reconnect...", e);
@@ -159,7 +160,8 @@ public class ReplicationBasedServer extends AbstractServer {
 							try {
 								dispatcher.dispatch(changedEvent, context);
 							} catch (Exception e) {
-								this.notifyService.alarm("Dispatch event failed. event(" + changedEvent + ")", e, true);
+								this.notifyService.alarm("[" + context.getPumaServerName() + "]"
+										+ "Dispatch event failed. event(" + changedEvent + ")", e, true);
 								log.error("Dispatcher dispatch failed.", e);
 							}
 						}

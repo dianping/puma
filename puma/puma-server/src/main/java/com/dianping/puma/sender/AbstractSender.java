@@ -103,8 +103,10 @@ public abstract class AbstractSender implements Sender, Notifiable {
 						log.error("[Miss]Send event(" + event + ") failed for " + maxTryTimes
 								+ " times. Skip to next pos " + context.getNextBinlogPos());
 						if (this.notifyService != null) {
-							this.notifyService.alarm("[Miss]Send event(" + event + ") failed for " + maxTryTimes
-									+ " times. Skip to next pos " + context.getNextBinlogPos(), e, false);
+							this.notifyService.alarm(
+									"[" + context.getPumaServerName() + "]" + "[Miss]Send event(" + event
+											+ ") failed for " + maxTryTimes + " times. Skip to next pos "
+											+ context.getNextBinlogPos(), e, false);
 						}
 						return;
 					} else {
@@ -113,7 +115,8 @@ public abstract class AbstractSender implements Sender, Notifiable {
 									+ " times. Next binlogEvent pos " + context.getNextBinlogPos());
 							if (this.notifyService != null) {
 								this.notifyService.alarm(
-										"Send event(" + event + ") failed for " + maxTryTimes
+										"[" + context.getPumaServerName() + "]" + "Send event(" + event
+												+ ") failed for " + maxTryTimes
 												+ " times and this event can't miss. Next binlogEvent pos "
 												+ context.getNextBinlogPos(), e, true);
 							}

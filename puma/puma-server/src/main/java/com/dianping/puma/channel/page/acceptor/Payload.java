@@ -6,34 +6,40 @@ import com.site.web.mvc.ActionPayload;
 import com.site.web.mvc.payload.annotation.FieldMeta;
 
 public class Payload implements ActionPayload<ChannelPage, Action> {
-	private ChannelPage m_page;
+	private ChannelPage	m_page;
 
 	@FieldMeta("op")
-	private Action m_action;
+	private Action		m_action;
 
 	@FieldMeta("seq")
-	private long m_seq = -1;
+	private long		m_seq		= -1;
 
 	@FieldMeta("ddl")
-	private boolean m_ddl;
+	private boolean		m_ddl;
 
 	@FieldMeta("dml")
-	private boolean m_dml = true;
+	private boolean		m_dml		= true;
 
 	@FieldMeta("ts")
-	private boolean m_needsTransactionMeta; // needs transaction meta info?
+	private boolean		m_needsTransactionMeta; // needs transaction meta info?
 
 	@FieldMeta("codec")
-	private String m_codecType = "json";
+	private String		m_codecType	= "json";
 
 	@FieldMeta("name")
-	private String m_clientName;
-	
+	private String		m_clientName;
+
 	@FieldMeta("target")
-	private String m_target;
+	private String		m_target;
+	@FieldMeta("masterUrl")
+	private String		m_masterUrl;
+	@FieldMeta("binlog")
+	private String		m_binlog;
+	@FieldMeta("binlogPos")
+	private String		m_binlogPos;
 
 	@FieldMeta("dt")
-	private String[] m_databaseTables;
+	private String[]	m_databaseTables;
 
 	@Override
 	public Action getAction() {
@@ -42,6 +48,18 @@ public class Payload implements ActionPayload<ChannelPage, Action> {
 
 	public String getClientName() {
 		return m_clientName;
+	}
+
+	public String getMasterUrl() {
+		return m_masterUrl;
+	}
+
+	public String getBinlog() {
+		return m_binlog;
+	}
+
+	public String getBinlogPos() {
+		return m_binlogPos;
 	}
 
 	public String getCodecType() {
@@ -62,8 +80,8 @@ public class Payload implements ActionPayload<ChannelPage, Action> {
 	}
 
 	public String getTarget() {
-   	return m_target;
-   }
+		return m_target;
+	}
 
 	public boolean isDdl() {
 		return m_ddl;
@@ -115,8 +133,8 @@ public class Payload implements ActionPayload<ChannelPage, Action> {
 	}
 
 	public void setTarget(String target) {
-   	m_target = target;
-   }
+		m_target = target;
+	}
 
 	@Override
 	public void validate(ActionContext<?> ctx) {

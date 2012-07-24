@@ -42,6 +42,15 @@ import java.io.Serializable;
  * <tr bgcolor="#eeeeff">
  * <td><code>seq</code>
  * <td><code>时间编号</code>
+ * <tr>
+ * <td><code>masterUrl</code>
+ * <td><code>事件来源的Mysql</code>
+ * <tr bgcolor="#eeeeff">
+ * <td><code>binlog</code>
+ * <td><code>事件来源的binlog</code>
+ * <tr>
+ * <td><code>binlogPos</code>
+ * <td><code>事件来源的binlog位置</code>
  * </table>
  * </blockquote>
  * 
@@ -54,6 +63,54 @@ public abstract class ChangedEvent implements Serializable {
 	private String				database;
 	private String				table;
 	private long				seq;
+	private String				masterUrl;
+	private String				binlog;
+	private long				binlogPos;
+
+	/**
+	 * @return the masterUrl
+	 */
+	public String getMasterUrl() {
+		return masterUrl;
+	}
+
+	/**
+	 * @param masterUrl
+	 *            the masterUrl to set
+	 */
+	public void setMasterUrl(String masterUrl) {
+		this.masterUrl = masterUrl;
+	}
+
+	/**
+	 * @return the binlog
+	 */
+	public String getBinlog() {
+		return binlog;
+	}
+
+	/**
+	 * @param binlog
+	 *            the binlog to set
+	 */
+	public void setBinlog(String binlog) {
+		this.binlog = binlog;
+	}
+
+	/**
+	 * @return the binlogPos
+	 */
+	public long getBinlogPos() {
+		return binlogPos;
+	}
+
+	/**
+	 * @param binlogPos
+	 *            the binlogPos to set
+	 */
+	public void setBinlogPos(long binlogPos) {
+		this.binlogPos = binlogPos;
+	}
 
 	/**
 	 * @return the seq
@@ -123,7 +180,7 @@ public abstract class ChangedEvent implements Serializable {
 	@Override
 	public String toString() {
 		return "ChangedEvent [executeTime=" + executeTime + ", database=" + database + ", table=" + table + ", seq="
-				+ seq + "]";
+				+ seq + ", masterUrl=" + masterUrl + ", binlog=" + binlog + ", binlogPos=" + binlogPos + "]";
 	}
 
 }

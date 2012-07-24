@@ -139,4 +139,9 @@ public class DefaultBucketManager implements BucketManager {
 		archiveThread.start();
 	}
 
+	@Override
+	public void updateLatestSequence(Sequence sequence) {
+		this.masterIndex.updateLatestSequence(sequence);
+	}
+
 }

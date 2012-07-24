@@ -110,6 +110,7 @@ public class DefaultEventStorage implements EventStorage {
 			bos.write(ByteArrayUtils.intToByteArray(data.length));
 			bos.write(data);
 			writingBucket.append(bos.toByteArray());
+			bucketManager.updateLatestSequence(new Sequence(event.getSeq()));
 			SystemStatusContainer.instance.updateStorageStatus(name, event.getSeq());
 		} catch (IOException e) {
 			throw new StorageWriteException("Failed to write event.", e);

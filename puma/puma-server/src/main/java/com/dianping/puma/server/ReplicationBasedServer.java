@@ -76,6 +76,7 @@ public class ReplicationBasedServer extends AbstractServer {
 				context.setBinlogFileName(posInfo.getBinlogFileName());
 				context.setBinlogStartPos(posInfo.getBinlogPosition());
 				context.setServerId(serverId);
+				context.setMasterUrl(host, port);
 
 				connect();
 

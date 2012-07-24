@@ -241,7 +241,14 @@ public abstract class AbstractDataHandler implements DataHandler {
 				result.setFinished(true);
 			} else {
 				doProcess(result, binlogEvent, context, eventType);
+
 			}
+		}
+
+		if (result != null && !result.isEmpty() && result.getData() != null) {
+			result.getData().setBinlog(context.getBinlogFileName());
+			result.getData().setBinlogPos(context.getBinlogStartPos());
+			result.getData().setMasterUrl(context.getMasterUrl());
 		}
 
 		return result;

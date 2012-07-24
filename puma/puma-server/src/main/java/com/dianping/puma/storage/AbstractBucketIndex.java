@@ -42,6 +42,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	protected String										bucketFilePrefix	= "b-";
 	protected int											maxBucketLengthMB	= 2000;
 	protected volatile boolean								stop				= false;
+	protected AtomicReference<Sequence>						latestSequence		= new AtomicReference<Sequence>();
 
 	public void setBucketFilePrefix(String bucketFilePrefix) {
 		this.bucketFilePrefix = bucketFilePrefix;
@@ -125,12 +126,21 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 		String path = null;
 
 		if (seq == -1L) {
+			// 从最老开始消费
 			if (!index.get().isEmpty()) {
 				path = index.get().firstEntry().getValue();
 				if (path == null) {
 					return null;
 				}
 				sequence = new Sequence(index.get().firstEntry().getKey());
+			} else {
+				return null;
+			}
+		} else if (seq == -2L) {
+			// 从最新开始消费
+			if (this.latestSequence.get() != null) {
+				sequence = new Sequence(this.latestSequence.get());
+				path = convertToPath(sequence);
 			} else {
 				return null;
 			}
@@ -239,6 +249,11 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 
 	public void copyFromLocal(String srcBaseDir, String path) throws IOException, StorageClosedException {
 		checkClosed();
+	}
+
+	@Override
+	public void updateLatestSequence(Sequence sequence) {
+		this.latestSequence.set(sequence);
 	}
 
 	protected static class PathSequenceComparator implements Comparator<Sequence>, Serializable {

@@ -53,4 +53,6 @@ public interface BucketIndex {
 
 	public void remove(List<String> paths) throws StorageClosedException;
 
+	public void updateLatestSequence(Sequence sequence);
+
 }

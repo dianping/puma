@@ -43,6 +43,33 @@ public class Configuration implements Serializable {
 	private int							maxRetryTimes			= 3;
 	private boolean						canSkip					= false;
 	private SkipEventHandler			skipEventHandler		= null;
+	private String						masterUrl;
+	private String						binlog;
+	private long						binlogPos				= -1;
+
+	/**
+	 * @param masterUrl
+	 *            the masterUrl to set
+	 */
+	public void setMasterUrl(String masterUrl) {
+		this.masterUrl = masterUrl;
+	}
+
+	/**
+	 * @param binlog
+	 *            the binlog to set
+	 */
+	public void setBinlog(String binlog) {
+		this.binlog = binlog;
+	}
+
+	/**
+	 * @param binlogPos
+	 *            the binlogPos to set
+	 */
+	public void setBinlogPos(long binlogPos) {
+		this.binlogPos = binlogPos;
+	}
 
 	public void addDatabaseTable(String database, String... tablePatterns) {
 		if (!this.databaseTablesMapping.containsKey(database)) {
@@ -55,6 +82,11 @@ public class Configuration implements Serializable {
 	public String buildRequestParamString(long seq) {
 		StringBuilder param = new StringBuilder();
 		param.append("seq=").append(seq);
+		if (binlogPos != -1 && binlog != null && masterUrl != null && seq == -3L) {
+			param.append("&binlog").append(binlog);
+			param.append("&binlogPos").append(binlogPos);
+			param.append("&masterUrl").append(masterUrl);
+		}
 		param.append("&name=").append(name);
 		param.append("&target=").append(target);
 		param.append("&ddl=").append(needDdl);
@@ -212,7 +244,10 @@ public class Configuration implements Serializable {
 	public String toString() {
 		return "Configuration [codecType=" + codecType + ", databaseTablesMapping=" + databaseTablesMapping + ", host="
 				+ host + ", needDdl=" + needDdl + ", needDml=" + needDml + ", needTransactionInfo="
-				+ needTransactionInfo + ", port=" + port + ", name=" + name + ", seqFileBase=" + seqFileBase + "]";
+				+ needTransactionInfo + ", port=" + port + ", name=" + name + ", seqFileBase=" + seqFileBase
+				+ ", target=" + target + ", maxRetryTimes=" + maxRetryTimes + ", canSkip=" + canSkip
+				+ ", skipEventHandler=" + skipEventHandler + ", masterUrl=" + masterUrl + ", binlog=" + binlog
+				+ ", binlogPos=" + binlogPos + "]";
 	}
 
 	public void validate() {

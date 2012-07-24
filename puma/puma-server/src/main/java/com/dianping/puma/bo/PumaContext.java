@@ -45,6 +45,22 @@ public class PumaContext implements Serializable {
 	private long						pumaServerId;
 	private String						pumaServerName;
 	private Map<Long, TableMapEvent>	tableMaps				= new LRUCache<Long, TableMapEvent>(300);
+	private String						masterUrl;
+
+	/**
+	 * @return the masterUrl
+	 */
+	public String getMasterUrl() {
+		return masterUrl;
+	}
+
+	/**
+	 * @param masterUrl
+	 *            the masterUrl to set
+	 */
+	public void setMasterUrl(String host, int port) {
+		this.masterUrl = host + ":" + port;
+	}
 
 	/**
 	 * @return the pumaServerName

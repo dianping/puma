@@ -32,24 +32,23 @@ color: #c75f3e;
 .mytable { 
 width: 700px; 
 padding: 0; 
-margin: 0; 
+margin: 0 auto; 
 } 
 
 caption { 
 padding: 0 0 5px 0; 
 width: 700px; 
 font: bold italic 15px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif; 
-text-align: center; 
+margin: 0 auto; 
 } 
 
 th { 
-font: bold 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif; 
+font: bold  11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif; 
 color: #4f6b72; 
 border-right: 1px solid #C1DAD7; 
 border-bottom: 1px solid #C1DAD7; 
 border-top: 1px solid #C1DAD7; 
 letter-spacing: 2px; 
-text-transform: uppercase; 
 text-align: left; 
 padding: 6px 6px 6px 12px; 
 background: #CAE8EA  no-repeat; 
@@ -91,13 +90,9 @@ background: #f5fafa no-repeat;
 font: bold 10px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif; 
 color: #797268; 
 } 
-/*---------for IE 5.x bug*/ 
-html>body td{ font-size:11px;} 
-body,td,th { 
-font-family: 宋体, Arial; 
-font-size: 12px; 
-} 
+
 </style> 
+
 <table class="mytable">
 <caption>Servers</caption>
 	<tr><th>Name</th><th>Host</th><th>Port</th><th>Db</th><th>Binlog</th><th>Pos</th><th>Pasred rows insert(since start)</th><th>Parsed rows delete(since start)</th><th>Parsed rows update(since start)</th><th>Parsed ddl events(since start)</th></tr>

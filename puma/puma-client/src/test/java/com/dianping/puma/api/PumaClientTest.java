@@ -63,7 +63,7 @@ public class PumaClientTest {
 				.ddl(true) //
 				.dml(true)//
 				.tables("binlog", "*")//
-				.name("testClient")//
+				.name("testClient2")//
 				.target("7-43") //
 				.transaction(true);
 

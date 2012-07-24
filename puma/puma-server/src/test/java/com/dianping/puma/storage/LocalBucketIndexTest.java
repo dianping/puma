@@ -18,12 +18,15 @@ public class LocalBucketIndexTest {
 		work.getParentFile().mkdirs();
 		try {
 			if (work.createNewFile())
-				System.out.println("create sucess!");
+				System.out.println("create success!");
 			
 			work= new File(System.getProperty("java.io.tmpdir","."), "Puma/20120710/bucket-1");
 			
 			if(work.createNewFile())
-				sys
+			{
+				System.out.println("create success");
+				
+			}
 		} catch (IOException e1) {
 			System.out.println("failed to create file");
 		}

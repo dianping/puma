@@ -116,6 +116,8 @@ public class ReplicationBasedServer extends AbstractServer {
 
 				BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), context);
 
+				context.setNextBinlogPos(binlogEvent.getHeader().getNextPosition());
+
 				if (binlogEvent.getHeader().getEventType() == BinlogConstanst.ROTATE_EVENT) {
 					RotateEvent rotateEvent = (RotateEvent) binlogEvent;
 					PositionFileUtils.savePositionInfo(getServerName(),

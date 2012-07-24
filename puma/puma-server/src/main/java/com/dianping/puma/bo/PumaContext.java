@@ -46,6 +46,22 @@ public class PumaContext implements Serializable {
 	private String						pumaServerName;
 	private Map<Long, TableMapEvent>	tableMaps				= new LRUCache<Long, TableMapEvent>(300);
 	private String						masterUrl;
+	private long						nextBinlogPos;
+
+	/**
+	 * @return the nextBinlogPos
+	 */
+	public long getNextBinlogPos() {
+		return nextBinlogPos;
+	}
+
+	/**
+	 * @param nextBinlogPos
+	 *            the nextBinlogPos to set
+	 */
+	public void setNextBinlogPos(long nextBinlogPos) {
+		this.nextBinlogPos = nextBinlogPos;
+	}
 
 	/**
 	 * @return the masterUrl

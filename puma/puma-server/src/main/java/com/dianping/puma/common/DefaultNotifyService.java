@@ -69,7 +69,7 @@ public class DefaultNotifyService implements NotifyService {
 			if (sendSms) {
 				List<String> numbers = getPhoneNums();
 				if (numbers != null && numbers.size() > 0) {
-					this.alarmService.sendSmsMessage("[Puma Alarm]" + "_" + localIP + msg, numbers);
+					this.alarmService.sendSmsMessage("[Puma Alarm]" + "_" + localIP + ":" + msg, numbers);
 				}
 			}
 		} catch (LionException e) {

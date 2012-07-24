@@ -6,7 +6,7 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import com.dianping.puma.exception.StorageClosedException;
+import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
  * 基于HDFS的Bucket实现

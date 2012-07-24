@@ -10,10 +10,10 @@ import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
-import com.dianping.puma.exception.StorageClosedException;
-import com.dianping.puma.exception.StorageException;
-import com.dianping.puma.exception.StorageInitException;
-import com.dianping.puma.exception.StorageWriteException;
+import com.dianping.puma.storage.exception.StorageClosedException;
+import com.dianping.puma.storage.exception.StorageException;
+import com.dianping.puma.storage.exception.StorageInitException;
+import com.dianping.puma.storage.exception.StorageWriteException;
 
 public class DefaultEventStorage implements EventStorage {
 	private BucketManager						bucketManager;

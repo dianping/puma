@@ -1,7 +1,7 @@
 package com.dianping.puma.storage;
 
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.exception.StorageException;
+import com.dianping.puma.storage.exception.StorageException;
 
 public interface EventStorage {
 	public EventChannel getChannel(long seq) throws StorageException;

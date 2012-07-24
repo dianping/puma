@@ -38,7 +38,7 @@ import java.util.Map;
  * <th align=left>含义
  * <tr>
  * <td><code>columns</code>
- * <td><code>列信息</code>
+ * <td><code>列信息Map(key为列名，value为列信息)</code>
  * <tr bgcolor="#eeeeff">
  * <td><code>actionType</code>
  * <td><code>数据库操作类型</code>
@@ -48,15 +48,42 @@ import java.util.Map;
  * <tr bgcolor="#eeeeff">
  * <td><code>isTransactionCommit</code>
  * <td><code>是否是transaction提交事件</code>
+ * </table>
+ * 
+ * <p>
+ * <tt>ColumnInfo</tt>域信息和含义如下：
+ * </p>
+ * <table border=0 cellspacing=3 cellpadding=0 summary="">
+ * <tr bgcolor="#ccccff">
+ * <th align=left>域
+ * <th align=left>含义
+ * <tr>
+ * <td><code>isKey</code>
+ * <td><code>是否是主键</code>
  * <tr bgcolor="#eeeeff">
+ * <td><code>oldValue</code>
+ * <td><code>变更前的列值</code>
+ * <tr>
+ * <td><code>newValue</code>
+ * <td><code>变更后的列值</code>
+ * </table>
+ * 
+ * <p>
+ * <tt>ActionType</tt>取值含义如下：
+ * </p>
+ * <table border=0 cellspacing=3 cellpadding=0 summary="">
+ * <tr bgcolor="#ccccff">
+ * <th align=left>值
+ * <th align=left>含义
+ * <tr>
  * <td><code>INSERT</code>
- * <td><code>插入操作</code>
+ * <td><code>0</code>
  * <tr bgcolor="#eeeeff">
  * <td><code>DELETE</code>
- * <td><code>删除操作</code>
- * <tr bgcolor="#eeeeff">
+ * <td><code>1</code>
+ * <tr>
  * <td><code>UPDATE</code>
- * <td><code>更新操作</code>
+ * <td><code>2</code>
  * </table>
  * </blockquote>
  * 

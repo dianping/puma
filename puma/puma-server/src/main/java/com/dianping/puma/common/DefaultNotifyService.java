@@ -28,6 +28,7 @@ import com.dianping.hawk.common.alarm.service.CommonAlarmService;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
+import com.dianping.puma.utils.IPUtils;
 
 /**
  * @author Leo Liang
@@ -40,6 +41,7 @@ public class DefaultNotifyService implements NotifyService {
 	private static final String	KEY_MAIL_TO			= "puma.notify.mailTo";
 	private static final String	KEY_SMS_TO			= "puma.notify.smsTo";
 	private CommonAlarmService	alarmService;
+	private String				localIP				= IPUtils.getFirstNoLoopbackIP4Address();
 
 	/**
 	 * @param alarmService
@@ -63,11 +65,11 @@ public class DefaultNotifyService implements NotifyService {
 			body.append(displayErrorForHtml(t));
 		}
 		try {
-			this.alarmService.sendEmail(body.toString(), MAIL_ALARM_TITLE, getMailTos());
+			this.alarmService.sendEmail(body.toString(), MAIL_ALARM_TITLE + "_" + localIP, getMailTos());
 			if (sendSms) {
 				List<String> numbers = getPhoneNums();
 				if (numbers != null && numbers.size() > 0) {
-					this.alarmService.sendSmsMessage("[Puma Alarm]" + msg, numbers);
+					this.alarmService.sendSmsMessage("[Puma Alarm]" + "_" + localIP + ":" + msg, numbers);
 				}
 			}
 		} catch (LionException e) {
@@ -91,7 +93,7 @@ public class DefaultNotifyService implements NotifyService {
 			body.append("</table>");
 		}
 		try {
-			this.alarmService.sendEmail(body.toString(), title, getMailTos());
+			this.alarmService.sendEmail(body.toString(), title + "_" + localIP, getMailTos());
 		} catch (LionException e) {
 			log.warn("Get mailto list failed.");
 		}

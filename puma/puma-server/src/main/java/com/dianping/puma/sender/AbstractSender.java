@@ -100,18 +100,25 @@ public abstract class AbstractSender implements Sender, Notifiable {
 			} catch (Exception e) {
 				if (retryCount++ > maxTryTimes) {
 					if (canMissEvent) {
-						log.error("[Miss]Send event(" + event + ") failed for " + maxTryTimes + " times.");
+						log.error("[Miss]Send event(" + event + ") failed for " + maxTryTimes
+								+ " times. Skip to next pos " + context.getNextBinlogPos());
 						if (this.notifyService != null) {
-							this.notifyService.alarm("[Miss]Send event(" + event + ") failed for " + maxTryTimes
-									+ " times.", e, false);
+							this.notifyService.alarm(
+									"[" + context.getPumaServerName() + "]" + "[Miss]Send event(" + event
+											+ ") failed for " + maxTryTimes + " times. Skip to next pos "
+											+ context.getNextBinlogPos(), e, false);
 						}
 						return;
 					} else {
 						if (retryCount % 100 == 0) {
-							log.error("Send event(" + event + ") failed for " + retryCount + " times.");
+							log.error("Send event(" + event + ") failed for " + retryCount
+									+ " times. Next binlogEvent pos " + context.getNextBinlogPos());
 							if (this.notifyService != null) {
-								this.notifyService.alarm("Send event(" + event + ") failed for " + maxTryTimes
-										+ " times and this event can't miss.", e, true);
+								this.notifyService.alarm(
+										"[" + context.getPumaServerName() + "]" + "Send event(" + event
+												+ ") failed for " + maxTryTimes
+												+ " times and this event can't miss. Next binlogEvent pos "
+												+ context.getNextBinlogPos(), e, true);
 							}
 						}
 					}

@@ -45,7 +45,7 @@
 		<property name="defaultBinlogFileName" value="" />
 		<property name="defaultBinlogPosition" value="4" />
 		<property name="parser" ref="defaultParser" />
-		<property name="serverId" value="9908" />
+		<property name="serverId" value="9988" />
 		<property name="dataHandler" ref="datahandler-7-43" />
 		<property name="dispatcher" ref="dispatcher-7-43" />
 	</bean>

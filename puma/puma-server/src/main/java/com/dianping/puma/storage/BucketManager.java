@@ -18,4 +18,6 @@ public interface BucketManager {
 
 	public void init() throws StorageInitException;
 
+	public void updateLatestSequence(Sequence sequence);
+
 }

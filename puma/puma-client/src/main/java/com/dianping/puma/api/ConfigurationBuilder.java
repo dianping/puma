@@ -68,6 +68,21 @@ public class ConfigurationBuilder {
 		return this;
 	}
 
+	public ConfigurationBuilder masterUrl(String masterUrl) {
+		this.configuration.setMasterUrl(masterUrl);
+		return this;
+	}
+
+	public ConfigurationBuilder binlog(String binlog) {
+		this.configuration.setBinlog(binlog);
+		return this;
+	}
+
+	public ConfigurationBuilder binlogPos(long binlogPos) {
+		this.configuration.setBinlogPos(binlogPos);
+		return this;
+	}
+
 	public Configuration build() {
 		return this.configuration;
 	}

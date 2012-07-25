@@ -264,7 +264,6 @@ public class HDFSBucketTest {
 	public void testDoHasRemainingForWrite() {
 
 		Sequence sequence = new Sequence(120710, 0, 0);
-		boolean flag = false;
 
 		try {
 			hdfsBucket = new HDFSBucket(fileSystem, "/tmp/", "Puma/7-43/20120710/bucket-0", sequence);
@@ -273,12 +272,12 @@ public class HDFSBucketTest {
 		}
 		try {
 			this.hdfsBucket.doHasRemainingForWrite();
+			Assert.fail();
 		} catch (IOException e) {
 			e.printStackTrace();
+			Assert.fail();
 		} catch (UnsupportedOperationException e) {
-			flag = true;
 		}
-		Assert.assertTrue(flag);
 	}
 
 	protected void assertequalByteArray(byte[] expectedValue, byte[] actualValue) {

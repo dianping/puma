@@ -34,12 +34,12 @@ public class LocalBucketTest {
 
 	@Before
 	public void before() {
-		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/7-43/20120710/bucket-0");
+		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/20120710/bucket-0");
 		work.getParentFile().mkdirs();
 
 		try {
 			if (work.createNewFile())
-				System.out.println("create sucess!");
+				System.out.println("create a file!");
 		} catch (IOException e1) {
 			System.out.println("failed to create file");
 		}
@@ -295,8 +295,6 @@ public class LocalBucketTest {
 			System.out.println("delete file successfully");
 		this.work.getParentFile().delete();
 
-		if (work.exists())
-			System.out.println("1234");
 
 	}
 

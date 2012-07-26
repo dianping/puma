@@ -133,11 +133,13 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 	 */
 	@Override
 	public void close() {
+		super.close();
 		try {
 			this.fileSystem.close();
 		} catch (IOException e) {
 			// ignore
 		}
+		
 	}
 
 	/*

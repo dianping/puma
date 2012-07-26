@@ -537,7 +537,7 @@ public class LocalBucketIndexTest {
 
 		this.localBucketIndex.init();
 		try {
-			this.localBucketIndex.copyFromLocal(System.getProperty("java.io.tmpdir", ".").toString() + "Puma/copy",
+			this.localBucketIndex.copyFromLocal(System.getProperty("java.io.tmpdir", ".") + "/Puma/copy",
 					"20120713/bucket-0");
 		} catch (StorageClosedException e) {
 			e.printStackTrace();

@@ -26,8 +26,6 @@ import com.dianping.puma.bo.PumaContext;
  */
 public class PacketFactory {
 
-	private static final Logger	log	= Logger.getLogger(PacketFactory.class);
-
 	public static ResponsePacket parsePacket(InputStream is, PacketType packetType, PumaContext context)
 			throws IOException {
 		try {

@@ -179,6 +179,9 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	}
 
 	public void close() {
+		if (stop) {
+			return;
+		}
 		stop = true;
 	}
 
@@ -192,11 +195,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 		checkClosed();
 		NavigableMap<Sequence, String> tailMap = index.get().tailMap(sequence, false);
 
-		if (tailMap.isEmpty()) {
-			return false;
-		} else {
-			return true;
-		}
+		return !tailMap.isEmpty();
 	}
 
 	public int size() {

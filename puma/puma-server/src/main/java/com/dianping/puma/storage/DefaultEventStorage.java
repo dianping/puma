@@ -119,6 +119,9 @@ public class DefaultEventStorage implements EventStorage {
 
 	@Override
 	public synchronized void close() {
+		if (stopped) {
+			return;
+		}
 		stopped = true;
 		bucketManager.close();
 		if (writingBucket != null) {

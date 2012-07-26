@@ -74,11 +74,16 @@ public class DefaultEventChannel implements EventChannel {
 
 	@Override
 	public void close() {
-		stopped = true;
-		try {
-			bucket.close();
-		} catch (IOException e) {
-			// ignore
+		if (!stopped) {
+			stopped = true;
+			if (bucket != null) {
+				try {
+					bucket.close();
+					bucket = null;
+				} catch (IOException e) {
+					// ignore
+				}
+			}
 		}
 	}
 }

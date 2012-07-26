@@ -16,11 +16,7 @@ public class TransactionInfoEventFilter implements EventFilter {
 		if (event instanceof RowChangedEvent) {
 			RowChangedEvent rowEvent = (RowChangedEvent) event;
 			if (rowEvent.isTransactionBegin() || rowEvent.isTransactionCommit()) {
-				if (needTsInfo) {
-					return true;
-				} else {
-					return false;
-				}
+				return needTsInfo;
 			} else {
 				return eventfilterChain.doNext(event);
 			}

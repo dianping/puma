@@ -40,6 +40,9 @@ public class DefaultBucketManager implements BucketManager {
 	 */
 	@Override
 	public void close() {
+		if (stopped) {
+			return;
+		}
 		stopped = true;
 		masterIndex.close();
 		slaveIndex.close();

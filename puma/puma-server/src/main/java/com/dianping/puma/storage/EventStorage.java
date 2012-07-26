@@ -9,4 +9,5 @@ public interface EventStorage {
 	public void store(ChangedEvent event) throws StorageException;
 
 	public void close();
+
 }

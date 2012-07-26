@@ -44,12 +44,12 @@ public class LocalBucketIndexTest {
 		work.getParentFile().mkdirs();
 		try {
 			if (work.createNewFile())
-				System.out.println("create a file!");
+				System.out.println("create a file! " + work.getAbsolutePath());
 
 			work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/20120710/bucket-1");
 
 			if (work.createNewFile()) {
-				System.out.println("create a file!");
+				System.out.println("create a file! " + work.getAbsolutePath());
 
 			}
 		} catch (IOException e1) {
@@ -531,11 +531,18 @@ public class LocalBucketIndexTest {
 
 		for (File file : work.listFiles()) {
 			for (File files : file.listFiles()) {
-				if (files.isFile())
-					files.delete();
+				if (files.isFile()) {
+					if (files.delete()) {
+						System.out.println("Clear file: " + file.getAbsolutePath());
+					}
+				}
 			}
-			file.delete();
+			if (file.delete()) {
+				System.out.println("Clear file: " + file.getAbsolutePath());
+			}
 		}
-		work.delete();
+		if (work.delete()) {
+			System.out.println("Clear file: " + work.getAbsolutePath());
+		}
 	}
 }

@@ -86,7 +86,7 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 		initHdfsConfiguration();
 		this.fileSystem = FileSystem.get(this.hdfsConfig);
 
-		index.set(new TreeMap<Sequence, String>(new PathSequenceComparator()));
+		TreeMap<Sequence, String> newIndex = new TreeMap<Sequence, String>(new PathSequenceComparator());
 
 		if (this.fileSystem.getFileStatus(new Path(this.baseDir)).isDir()) {
 
@@ -109,7 +109,7 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 							if (subFile.getName().startsWith(bucketFilePrefix)
 									&& StringUtils.isNumeric(subFile.getName().substring(bucketFilePrefix.length()))) {
 								String path = pathname.getName() + PATH_SEPARATOR + subFile.getName();
-								index.get().put(convertToSequence(path), path);
+								newIndex.put(convertToSequence(path), path);
 							}
 						}
 					}
@@ -117,6 +117,7 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 
 			}
 		}
+		index.set(newIndex);
 	}
 
 	@Override

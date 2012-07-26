@@ -53,7 +53,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 				throw new RuntimeException("Failed to make dir for " + localBaseDir.getAbsolutePath());
 			}
 		}
-		index.set(new TreeMap<Sequence, String>(new PathSequenceComparator()));
+		TreeMap<Sequence, String> newIndex = new TreeMap<Sequence, String>( new PathSequenceComparator());
 		File[] dirs = localBaseDir.listFiles(new FileFilter() {
 
 			@Override
@@ -83,10 +83,11 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 
 				for (String subFile : subFiles) {
 					String path = dir.getName() + PATH_SEPARATOR + subFile;
-					index.get().put(convertToSequence(path), path);
+					newIndex.put(convertToSequence(path), path);
 				}
 			}
 		}
+		index.set(newIndex);
 	}
 
 	@Override

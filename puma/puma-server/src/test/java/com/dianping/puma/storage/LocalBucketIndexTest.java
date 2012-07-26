@@ -27,6 +27,19 @@ public class LocalBucketIndexTest {
 
 	@Before
 	public void before() {
+		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma");
+
+		if (work != null && work.isDirectory()) {
+			for (File file : work.listFiles()) {
+				for (File files : file.listFiles()) {
+					if (files.isFile())
+						files.delete();
+				}
+				file.delete();
+			}
+			work.delete();
+		}
+
 		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/20120710/bucket-0");
 		work.getParentFile().mkdirs();
 		try {
@@ -52,7 +65,7 @@ public class LocalBucketIndexTest {
 	public void testInit() {
 
 		localBucketIndex.init();
-		
+
 		System.out.println("*************************");
 		System.out.println(localBucketIndex.index.get());
 		System.out.println("*************************");
@@ -98,32 +111,33 @@ public class LocalBucketIndexTest {
 		}
 
 	}
-	
-//	@Test
-//	public void testAddBucketList()
-//	{
-//		this.localBucketIndex.init();
-//		
-//		try {
-//
-//			for (int i = 0; i < 2; i++) {
-//				work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/20120711/bucket-"
-//						+ Integer.toString(i));
-//				work.getParentFile().mkdirs();
-//				if (work.createNewFile()) {
-//					System.out.println("create a file: " + work.getName());
-//
-//				}
-//			}
-//		} catch (IOException e1) {
-//			System.out.println("failed to create file");
-//		}
-//		
-//		List<String> paths= new ArrayList<String>();
-//		paths.add("20120711/bucket-0");
-//		
-//		this.localBucketIndex.add(paths);
-//	}
+
+	// @Test
+	// public void testAddBucketList()
+	// {
+	// this.localBucketIndex.init();
+	//		
+	// try {
+	//
+	// for (int i = 0; i < 2; i++) {
+	// work = new File(System.getProperty("java.io.tmpdir", "."),
+	// "Puma/20120711/bucket-"
+	// + Integer.toString(i));
+	// work.getParentFile().mkdirs();
+	// if (work.createNewFile()) {
+	// System.out.println("create a file: " + work.getName());
+	//
+	// }
+	// }
+	// } catch (IOException e1) {
+	// System.out.println("failed to create file");
+	// }
+	//		
+	// List<String> paths= new ArrayList<String>();
+	// paths.add("20120711/bucket-0");
+	//		
+	// this.localBucketIndex.add(paths);
+	// }
 
 	@Test
 	public void testBulkGetRemainN() {
@@ -458,9 +472,8 @@ public class LocalBucketIndexTest {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		localBucketIndex.init();
-		
 
 		Assert.assertEquals(3, this.localBucketIndex.index.get().size());
 		Assert.assertEquals(120713, this.localBucketIndex.index.get().lastKey().getCreationDate());
@@ -477,11 +490,11 @@ public class LocalBucketIndexTest {
 		}
 		work.delete();
 	}
+
 	@Test
-	public void testRemove()
-	{
+	public void testRemove() {
 		this.localBucketIndex.init();
-		List<String> paths= new ArrayList<String>();
+		List<String> paths = new ArrayList<String>();
 		paths.add("20120710/bucket-0");
 		try {
 			this.localBucketIndex.remove(paths);
@@ -489,10 +502,10 @@ public class LocalBucketIndexTest {
 			e.printStackTrace();
 		}
 		Assert.assertEquals(1, this.localBucketIndex.index.get().size());
-		Assert.assertEquals(120710,  this.localBucketIndex.index.get().firstKey().getCreationDate());
+		Assert.assertEquals(120710, this.localBucketIndex.index.get().firstKey().getCreationDate());
 		Assert.assertEquals(1, this.localBucketIndex.index.get().firstKey().getNumber());
-		
-		paths= new ArrayList<String>();
+
+		paths = new ArrayList<String>();
 		paths.add("20120710/bucket-1");
 		try {
 			this.localBucketIndex.remove(paths);
@@ -503,15 +516,14 @@ public class LocalBucketIndexTest {
 	}
 
 	@Test
-	public void testUpdateLatestSequence()
-	{
+	public void testUpdateLatestSequence() {
 		this.localBucketIndex.init();
 		Sequence seq = new Sequence(120710, 1);
 		this.localBucketIndex.updateLatestSequence(seq);
 		Assert.assertEquals(120710, this.localBucketIndex.latestSequence.get().getCreationDate());
 		Assert.assertEquals(1, this.localBucketIndex.latestSequence.get().getNumber());
 	}
-	
+
 	@After
 	public void after() {
 		localBucketIndex.close();

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -30,26 +31,6 @@ public class LocalBucketIndexTest {
 		System.out.println("************************************************************");
 		System.out.println("**************************Before****************************");
 		System.out.println("************************************************************");
-
-		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma");
-
-		// if (work != null && work.isDirectory()) {
-		// for (File file : work.listFiles()) {
-		// for (File files : file.listFiles()) {
-		// if (files.isFile()) {
-		// if (files.delete()) {
-		// System.out.println("Clear file: " + file.getAbsolutePath());
-		// }
-		// }
-		// }
-		// if (file.delete()) {
-		// System.out.println("Clear file: " + file.getAbsolutePath());
-		// }
-		// }
-		// if (work.delete()) {
-		// System.out.println("Clear file: " + work.getAbsolutePath());
-		// }
-		// }
 
 		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/20120710/bucket-0");
 		work.getParentFile().mkdirs();
@@ -678,23 +659,15 @@ public class LocalBucketIndexTest {
 		System.out.println("***************************after*****************************");
 		System.out.println("*************************************************************");
 		localBucketIndex.close();
+		
 		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma");
 
-		for (File file : work.listFiles()) {
-			for (File files : file.listFiles()) {
-				if (files.isFile()) {
-					if (files.delete()) {
-						System.out.println("Clear file: " + files.getAbsolutePath());
-					}
-				}
-			}
-			if (file.delete()) {
-				System.out.println("Clear file: " + file.getAbsolutePath());
-			}
+		try {
+			FileUtils.deleteDirectory(work);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		if (work.delete()) {
-			System.out.println("Clear file: " + work.getAbsolutePath());
-		}
+		
 		System.out.println("*************************************************************");
 		System.out.println("****************************End******************************");
 		System.out.println("*************************************************************");

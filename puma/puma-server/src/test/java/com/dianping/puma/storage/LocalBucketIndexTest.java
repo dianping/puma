@@ -355,21 +355,11 @@ public class LocalBucketIndexTest {
 	@Test
 	public void testGetReadBucketEmpty() {
 		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma");
-
-		for (File file : work.listFiles()) {
-			for (File files : file.listFiles()) {
-				if (files.isFile()) {
-					if (files.delete()) {
-						System.out.println("Clear file: " + files.getAbsolutePath());
-					}
-				}
-			}
-			if (file.delete()) {
-				System.out.println("Clear file: " + file.getAbsolutePath());
-			}
-		}
-		if (work.delete()) {
-			System.out.println("Clear file: " + work.getAbsolutePath());
+		
+		try {
+			FileUtils.deleteDirectory(work);
+		} catch (IOException e1) {
+			e1.printStackTrace();
 		}
 
 		this.localBucketIndex.init();
@@ -513,6 +503,15 @@ public class LocalBucketIndexTest {
 		this.localBucketIndex.init();
 		this.localBucketIndex.close();
 
+		try {
+			this.localBucketIndex.getReadBucket(-1);
+			Assert.fail();
+		} catch (StorageClosedException e) {
+			
+		} catch (IOException e) {
+			Assert.fail();
+		}
+		
 		Assert.assertTrue(this.localBucketIndex.stop);
 		System.out.println("*************************************************************");
 		System.out.println("****************************End******************************");
@@ -556,7 +555,7 @@ public class LocalBucketIndexTest {
 
 		this.localBucketIndex.init();
 		try {
-			this.localBucketIndex.copyFromLocal(System.getProperty("java.io.tmpdir", ".").toString() + "Puma/copy",
+			this.localBucketIndex.copyFromLocal(System.getProperty("java.io.tmpdir", ".").toString() + "/Puma/copy",
 					"20120710/bucket-0");
 		} catch (StorageClosedException e) {
 			e.printStackTrace();

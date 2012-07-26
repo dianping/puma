@@ -27,17 +27,26 @@ public class LocalBucketIndexTest {
 
 	@Before
 	public void before() {
+		System.out.println("************************************************************");
+		System.out.println("**************************Before****************************");
+		System.out.println("************************************************************");
+
 		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma");
 
-		if (work != null && work.isDirectory()) {
-			for (File file : work.listFiles()) {
-				for (File files : file.listFiles()) {
-					if (files.isFile())
-						files.delete();
+		for (File file : work.listFiles()) {
+			for (File files : file.listFiles()) {
+				if (files.isFile()) {
+					if (files.delete()) {
+						System.out.println("Clear file: " + file.getAbsolutePath());
+					}
 				}
-				file.delete();
 			}
-			work.delete();
+			if (file.delete()) {
+				System.out.println("Clear file: " + file.getAbsolutePath());
+			}
+		}
+		if (work.delete()) {
+			System.out.println("Clear file: " + work.getAbsolutePath());
 		}
 
 		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/20120710/bucket-0");
@@ -59,6 +68,10 @@ public class LocalBucketIndexTest {
 		localBucketIndex.setBaseDir(System.getProperty("java.io.tmpdir", ".") + "Puma");
 		localBucketIndex.setBucketFilePrefix("bucket-");
 		localBucketIndex.setMaxBucketLengthMB(500);
+
+		System.out.println("*************************************************************");
+		System.out.println("****************************End******************************");
+		System.out.println("*************************************************************");
 	}
 
 	@Test
@@ -533,7 +546,7 @@ public class LocalBucketIndexTest {
 			for (File files : file.listFiles()) {
 				if (files.isFile()) {
 					if (files.delete()) {
-						System.out.println("Clear file: " + file.getAbsolutePath());
+						System.out.println("Clear file: " + files.getAbsolutePath());
 					}
 				}
 			}

@@ -40,7 +40,7 @@ public class LocalBucketIndexTest {
 
 			}
 		} catch (IOException e1) {
-			System.out.println("failed to create file");
+			e1.printStackTrace();
 		}
 
 		localBucketIndex.setBaseDir(System.getProperty("java.io.tmpdir", ".") + "Puma");
@@ -71,7 +71,7 @@ public class LocalBucketIndexTest {
 			if (work.createNewFile())
 				System.out.println("create a file!");
 		} catch (IOException e1) {
-			System.out.println("failed to create file");
+			e1.printStackTrace();
 		}
 
 		Sequence sequence = new Sequence(120711, 0);
@@ -82,7 +82,7 @@ public class LocalBucketIndexTest {
 			localBucketIndex.add(bucket);
 
 		} catch (FileNotFoundException e) {
-			System.out.println("failed to create localfilebucket");
+			e.printStackTrace();
 		} catch (StorageClosedException e) {
 			e.printStackTrace();
 		}
@@ -137,7 +137,7 @@ public class LocalBucketIndexTest {
 				}
 			}
 		} catch (IOException e1) {
-			System.out.println("failed to create file");
+			e1.printStackTrace();
 		}
 
 		this.localBucketIndex.init();
@@ -180,7 +180,7 @@ public class LocalBucketIndexTest {
 				}
 			}
 		} catch (IOException e1) {
-			System.out.println("failed to create file");
+			e1.printStackTrace();
 		}
 		this.localBucketIndex.init();
 
@@ -224,7 +224,7 @@ public class LocalBucketIndexTest {
 				}
 			}
 		} catch (IOException e1) {
-			System.out.println("failed to create file");
+			e1.printStackTrace();
 		}
 
 		this.localBucketIndex.init();
@@ -271,7 +271,7 @@ public class LocalBucketIndexTest {
 				}
 			}
 		} catch (IOException e1) {
-			System.out.println("failed to create file");
+			e1.printStackTrace();
 		}
 		this.localBucketIndex.init();
 
@@ -304,7 +304,7 @@ public class LocalBucketIndexTest {
 				}
 			}
 		} catch (IOException e1) {
-			System.out.println("failed to create file");
+			e1.printStackTrace();
 		}
 		this.localBucketIndex.init();
 		try {
@@ -384,7 +384,7 @@ public class LocalBucketIndexTest {
 				}
 			}
 		} catch (IOException e1) {
-			System.out.println("failed to create file");
+			e1.printStackTrace();
 		}
 		this.localBucketIndex.init();
 		Assert.assertEquals(6, this.localBucketIndex.size());
@@ -421,7 +421,7 @@ public class LocalBucketIndexTest {
 
 			}
 		} catch (IOException e1) {
-			System.out.println("failed to create file");
+			e1.printStackTrace();
 		}
 
 		this.localBucketIndex.init();
@@ -443,7 +443,7 @@ public class LocalBucketIndexTest {
 				System.out.println("create a file!");
 
 		} catch (IOException e1) {
-			System.out.println("failed to create file");
+			e1.printStackTrace();
 		}
 
 		this.localBucketIndex.init();

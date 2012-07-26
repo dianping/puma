@@ -41,7 +41,7 @@ public class LocalBucketTest {
 			if (work.createNewFile())
 				System.out.println("create a file!");
 		} catch (IOException e1) {
-			System.out.println("failed to create file");
+			e1.printStackTrace();
 		}
 
 		Sequence sequence = new Sequence(120710, 0, 0);
@@ -50,7 +50,7 @@ public class LocalBucketTest {
 			localFileBucket = new LocalFileBucket(work, sequence, 10);
 
 		} catch (FileNotFoundException e) {
-			System.out.println("failed to create localfilebucket");
+			e.printStackTrace();
 		}
 
 	}
@@ -86,9 +86,9 @@ public class LocalBucketTest {
 			Assert.assertEquals(data.length+this.localFileBucket.startingSequence.longValue(), localFileBucket.getCurrentWritingSeq());
 
 		} catch (FileNotFoundException e) {
-			System.out.println("failed to create localfilebucket");
+			e.printStackTrace();
 		} catch (IOException e) {
-			System.out.println("cannot read from the file");
+			e.printStackTrace();
 		}
 	}
 
@@ -234,7 +234,7 @@ public class LocalBucketTest {
 			bucket.close();
 
 		} catch (FileNotFoundException e) {
-			System.out.println("failed to create localfilebucket");
+			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

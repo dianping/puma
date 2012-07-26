@@ -33,23 +33,23 @@ public class LocalBucketIndexTest {
 
 		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma");
 
-		if (work != null && work.isDirectory()) {
-			for (File file : work.listFiles()) {
-				for (File files : file.listFiles()) {
-					if (files.isFile()) {
-						if (files.delete()) {
-							System.out.println("Clear file: " + file.getAbsolutePath());
-						}
-					}
-				}
-				if (file.delete()) {
-					System.out.println("Clear file: " + file.getAbsolutePath());
-				}
-			}
-			if (work.delete()) {
-				System.out.println("Clear file: " + work.getAbsolutePath());
-			}
-		}
+		// if (work != null && work.isDirectory()) {
+		// for (File file : work.listFiles()) {
+		// for (File files : file.listFiles()) {
+		// if (files.isFile()) {
+		// if (files.delete()) {
+		// System.out.println("Clear file: " + file.getAbsolutePath());
+		// }
+		// }
+		// }
+		// if (file.delete()) {
+		// System.out.println("Clear file: " + file.getAbsolutePath());
+		// }
+		// }
+		// if (work.delete()) {
+		// System.out.println("Clear file: " + work.getAbsolutePath());
+		// }
+		// }
 
 		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/20120710/bucket-0");
 		work.getParentFile().mkdirs();
@@ -137,32 +137,50 @@ public class LocalBucketIndexTest {
 		System.out.println("*************************************************************");
 	}
 
-	// @Test
-	// public void testAddBucketList()
-	// {
-	// this.localBucketIndex.init();
-	//		
-	// try {
-	//
-	// for (int i = 0; i < 2; i++) {
-	// work = new File(System.getProperty("java.io.tmpdir", "."),
-	// "Puma/20120711/bucket-"
-	// + Integer.toString(i));
-	// work.getParentFile().mkdirs();
-	// if (work.createNewFile()) {
-	// System.out.println("create a file: " + work.getName());
-	//
-	// }
-	// }
-	// } catch (IOException e1) {
-	// System.out.println("failed to create file");
-	// }
-	//		
-	// List<String> paths= new ArrayList<String>();
-	// paths.add("20120711/bucket-0");
-	//		
-	// this.localBucketIndex.add(paths);
-	// }
+	@Test
+	public void testAddBucketList() {
+		System.out.println("*************************************************************");
+		System.out.println("*********************testAddBucketList***********************");
+		System.out.println("*************************************************************");
+
+		this.localBucketIndex.init();
+
+		try {
+
+			for (int i = 0; i < 2; i++) {
+				work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/20120711/bucket-"
+						+ Integer.toString(i));
+				work.getParentFile().mkdirs();
+				if (work.createNewFile()) {
+					System.out.println("create a file: " + work.getAbsolutePath());
+
+				}
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
+		List<String> paths = new ArrayList<String>();
+		paths.add("20120711/bucket-0");
+		paths.add("20120711/bucket-1");
+
+		try {
+			this.localBucketIndex.add(paths);
+		} catch (StorageClosedException e) {
+			e.printStackTrace();
+		}
+
+		Assert.assertEquals(4, this.localBucketIndex.index.get().size());
+		Assert.assertEquals(120710, this.localBucketIndex.index.get().firstEntry().getKey().getCreationDate());
+		Assert.assertEquals(0, this.localBucketIndex.index.get().firstEntry().getKey().getNumber());
+
+		Assert.assertEquals(120711, this.localBucketIndex.index.get().lastEntry().getKey().getCreationDate());
+		Assert.assertEquals(1, this.localBucketIndex.index.get().lastEntry().getKey().getNumber());
+
+		System.out.println("*************************************************************");
+		System.out.println("****************************End******************************");
+		System.out.println("*************************************************************");
+	}
 
 	@Test
 	public void testBulkGetRemainN() {
@@ -354,6 +372,47 @@ public class LocalBucketIndexTest {
 	}
 
 	@Test
+	public void testGetReadBucketEmpty() {
+		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma");
+
+		for (File file : work.listFiles()) {
+			for (File files : file.listFiles()) {
+				if (files.isFile()) {
+					if (files.delete()) {
+						System.out.println("Clear file: " + files.getAbsolutePath());
+					}
+				}
+			}
+			if (file.delete()) {
+				System.out.println("Clear file: " + file.getAbsolutePath());
+			}
+		}
+		if (work.delete()) {
+			System.out.println("Clear file: " + work.getAbsolutePath());
+		}
+
+		this.localBucketIndex.init();
+
+		try {
+			Bucket bucket = this.localBucketIndex.getReadBucket(-1);
+
+			Assert.assertEquals(null, bucket);
+			bucket = this.localBucketIndex.getReadBucket(-2);
+			Assert.assertEquals(null, bucket);
+			
+			Sequence seq = new Sequence(120710, 0);
+			bucket=this.localBucketIndex.getReadBucket(seq.longValue());
+			Assert.assertEquals(null, bucket);
+			
+		} catch (StorageClosedException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	@Test
 	public void testGetReadBucket() {
 		System.out.println("*************************************************************");
 		System.out.println("*********************testGetReadBucket***********************");
@@ -433,6 +492,7 @@ public class LocalBucketIndexTest {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
 		System.out.println("*************************************************************");
 		System.out.println("****************************End******************************");
 		System.out.println("*************************************************************");

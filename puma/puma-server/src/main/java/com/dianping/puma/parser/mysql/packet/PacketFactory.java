@@ -15,8 +15,6 @@ package com.dianping.puma.parser.mysql.packet;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.log4j.Logger;
-
 import com.dianping.puma.bo.PumaContext;
 
 /**

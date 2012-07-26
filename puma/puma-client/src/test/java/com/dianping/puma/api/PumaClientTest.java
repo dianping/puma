@@ -54,7 +54,7 @@ public class PumaClientTest {
 	// transaction supported? [false]
 	// String url =
 	// "http://localhost:7862/puma/channel?dt=mysql.*&dt=cat.!report&ddl=false&seq=12345&ts=true&batch=100";
-	@Test
+//	@Test
 	public void testApi() throws InterruptedException {
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder() //
 				.host("localhost") //

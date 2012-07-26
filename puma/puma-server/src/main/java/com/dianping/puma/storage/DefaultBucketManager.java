@@ -120,12 +120,13 @@ public class DefaultBucketManager implements BucketManager {
 			@Override
 			public void run() {
 				while (true) {
-					if (stopped) {
+					try {
+						checkClosed();
+					} catch (StorageClosedException e1) {
 						break;
 					}
 
 					try {
-
 						archiveStrategy.archive(masterIndex, slaveIndex, maxMasterFileCount);
 						Thread.sleep(5 * 1000);
 					} catch (Exception e) {

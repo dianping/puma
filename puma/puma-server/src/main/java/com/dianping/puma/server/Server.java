@@ -38,4 +38,6 @@ public interface Server extends LifeCycle {
 	public long getServerId();
 
 	public String getServerName();
+	
+	public void setBinlogPositionHolder(BinlogPositionHolder holder);
 }

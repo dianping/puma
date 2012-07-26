@@ -40,7 +40,6 @@ import com.dianping.puma.parser.mysql.packet.ComBinlogDumpPacket;
 import com.dianping.puma.parser.mysql.packet.OKErrorPacket;
 import com.dianping.puma.parser.mysql.packet.PacketFactory;
 import com.dianping.puma.parser.mysql.packet.PacketType;
-import com.dianping.puma.utils.PositionFileUtils;
 
 /**
  * 基于MySQL复制机制的Server
@@ -70,7 +69,7 @@ public class ReplicationBasedServer extends AbstractServer {
 		do {
 			try {
 				// 读position/file文件
-				PositionInfo posInfo = PositionFileUtils.getPositionInfo(context.getPumaServerName(),
+				PositionInfo posInfo = binlogPositionHolder.getPositionInfo(context.getPumaServerName(),
 						context.getBinlogFileName(), context.getBinlogStartPos());
 
 				context.setBinlogFileName(posInfo.getBinlogFileName());
@@ -121,7 +120,7 @@ public class ReplicationBasedServer extends AbstractServer {
 
 				if (binlogEvent.getHeader().getEventType() == BinlogConstanst.ROTATE_EVENT) {
 					RotateEvent rotateEvent = (RotateEvent) binlogEvent;
-					PositionFileUtils.savePositionInfo(getServerName(),
+					binlogPositionHolder.savePositionInfo(getServerName(),
 							new PositionInfo(rotateEvent.getFirstEventPosition(), rotateEvent.getNextBinlogFileName()));
 					context.setBinlogFileName(rotateEvent.getNextBinlogFileName());
 					context.setBinlogStartPos(rotateEvent.getFirstEventPosition());
@@ -176,7 +175,7 @@ public class ReplicationBasedServer extends AbstractServer {
 							&& (dataHandlerResult.getData() instanceof DdlEvent || (dataHandlerResult.getData() instanceof RowChangedEvent && ((RowChangedEvent) dataHandlerResult
 									.getData()).isTransactionCommit()))) {
 						// save position
-						PositionFileUtils.savePositionInfo(getServerName(), new PositionInfo(binlogEvent.getHeader()
+						binlogPositionHolder.savePositionInfo(getServerName(), new PositionInfo(binlogEvent.getHeader()
 								.getNextPosition(), context.getBinlogFileName()));
 						context.setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
 						// status report
@@ -237,7 +236,7 @@ public class ReplicationBasedServer extends AbstractServer {
 					startPos = 0;
 				}
 				String binlogFile = dumpCommandResultPacket.getMessage().substring(startPos);
-				PositionFileUtils.savePositionInfo(getServerName(), new PositionInfo(context.getBinlogStartPos(),
+				binlogPositionHolder.savePositionInfo(getServerName(), new PositionInfo(context.getBinlogStartPos(),
 						binlogFile));
 				context.setBinlogFileName(binlogFile);
 			}

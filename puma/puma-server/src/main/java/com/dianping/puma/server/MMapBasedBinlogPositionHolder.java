@@ -1,4 +1,19 @@
-package com.dianping.puma.utils;
+/**
+ * Project: puma-server
+ * 
+ * File Created at 2012-7-27
+ * $Id$
+ * 
+ * Copyright 2010 dianping.com.
+ * All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Dianping Company. ("Confidential Information").  You shall not
+ * disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with dianping.com.
+ */
+package com.dianping.puma.server;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,31 +31,26 @@ import org.apache.log4j.Logger;
 import com.dianping.puma.bo.PositionInfo;
 
 /**
- * 
- * TODO Comment of PositionFileUtils
+ * TODO Comment of MMapBasedBinlogPositionHolder
  * 
  * @author Leo Liang
  * 
  */
-public class PositionFileUtils {
+public class MMapBasedBinlogPositionHolder implements BinlogPositionHolder {
 
-	private static final Logger							log						= Logger.getLogger(PositionFileUtils.class);
+	private static final Logger					log						= Logger.getLogger(MMapBasedBinlogPositionHolder.class);
 
-	private static final Map<String, PositionInfo>		positionFile			= new ConcurrentHashMap<String, PositionInfo>();
-	private static final Map<String, MappedByteBuffer>	mappedByteBufferMapping	= new ConcurrentHashMap<String, MappedByteBuffer>();
-	private static final String							PARENT_PATH				= "/data/applogs/puma/";
-	private static final String							SUFFIX					= ".pumaconf";
-	private static final String							PREFIX					= "server-";
-	private static final long							DEFAULT_BINLOGPOS		= 4L;
-	private static final int							MAX_FILE_SIZE			= 200;
-	private static final byte[]							BUF_MASK				= new byte[MAX_FILE_SIZE];
+	private final Map<String, PositionInfo>		positionFile			= new ConcurrentHashMap<String, PositionInfo>();
+	private final Map<String, MappedByteBuffer>	mappedByteBufferMapping	= new ConcurrentHashMap<String, MappedByteBuffer>();
+	private static final String					SUFFIX					= ".pumaconf";
+	private static final String					PREFIX					= "server-";
+	private static final long					DEFAULT_BINLOGPOS		= 4L;
+	private static final int					MAX_FILE_SIZE			= 200;
+	private static final byte[]					BUF_MASK				= new byte[MAX_FILE_SIZE];
+	private String								baseDir;
 
-	static {
-		init();
-	}
-
-	private static void init() {
-		File fileBase = new File(PARENT_PATH);
+	public void init() {
+		File fileBase = new File(baseDir);
 		if (!fileBase.exists()) {
 			if (!fileBase.mkdirs()) {
 				throw new RuntimeException("Fail to make dir for " + fileBase.getAbsolutePath());
@@ -63,12 +73,7 @@ public class PositionFileUtils {
 		}
 	}
 
-	private PositionFileUtils() {
-
-	}
-
-	public synchronized static PositionInfo getPositionInfo(String serverName, String defaultBinlogFile,
-			Long defaultBinlogPos) {
+	public synchronized PositionInfo getPositionInfo(String serverName, String defaultBinlogFile, Long defaultBinlogPos) {
 		PositionInfo posInfo = positionFile.get(serverName);
 		if (posInfo == null) {
 			savePositionInfo(serverName, new PositionInfo(defaultBinlogPos == null ? DEFAULT_BINLOGPOS
@@ -77,13 +82,13 @@ public class PositionFileUtils {
 		return positionFile.get(serverName);
 	}
 
-	public synchronized static void savePositionInfo(String serverName, PositionInfo positionInfor) {
+	public synchronized void savePositionInfo(String serverName, PositionInfo positionInfor) {
 		positionFile.put(serverName, positionInfor);
 		saveToFile(serverName, positionInfor);
 	}
 
-	private static void loadFromFile(String fileName) {
-		String path = PARENT_PATH + fileName;
+	private void loadFromFile(String fileName) {
+		String path = baseDir + fileName;
 		File f = new File(path);
 
 		FileReader fr = null;
@@ -121,8 +126,8 @@ public class PositionFileUtils {
 
 	}
 
-	private synchronized static void saveToFile(String serverName, PositionInfo positionInfor) {
-		String path = PARENT_PATH + getConfFileName(serverName);
+	private synchronized void saveToFile(String serverName, PositionInfo positionInfor) {
+		String path = baseDir + getConfFileName(serverName);
 		if (!mappedByteBufferMapping.containsKey(path)) {
 			File f = new File(path);
 			if (!f.exists()) {
@@ -151,6 +156,11 @@ public class PositionFileUtils {
 
 	private static String getConfFileName(String serverName) {
 		return PREFIX + serverName + SUFFIX;
+	}
+
+	@Override
+	public void setBaseDir(String baseDir) {
+		this.baseDir = baseDir;
 	}
 
 }

@@ -42,6 +42,7 @@ import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatherImpl;
+import com.dianping.puma.server.MMapBasedBinlogPositionHolder;
 import com.dianping.puma.server.ReplicationBasedServer;
 import com.dianping.puma.storage.ArchiveStrategy;
 import com.dianping.puma.storage.BucketIndex;
@@ -70,6 +71,8 @@ public abstract class PumaServerIntegrationBaseTest {
 																	"Puma");
 	private File					storageSlaveBaseDir		= new File(System.getProperty("java.io.tmpdir", "."),
 																	"Puma/bak/");
+	private File					confBaseDir				= new File(System.getProperty("java.io.tmpdir", "."),
+																	"PumaConf");
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
@@ -96,6 +99,9 @@ public abstract class PumaServerIntegrationBaseTest {
 				System.out.println("alarm-----" + msg + ": " + t);
 			}
 		};
+
+		MMapBasedBinlogPositionHolder binlogPositionHolder = new MMapBasedBinlogPositionHolder();
+		binlogPositionHolder.setBaseDir(confBaseDir.getAbsolutePath());
 
 		// init parser
 		Parser parser = new DefaultBinlogParser();
@@ -159,6 +165,7 @@ public abstract class PumaServerIntegrationBaseTest {
 		server.setDataHandler(dataHandler);
 		server.setDispatcher(dispatcher);
 		server.setNotifyService(mockNotifyService);
+		server.setBinlogPositionHolder(binlogPositionHolder);
 
 		PumaContext context = new PumaContext();
 
@@ -184,6 +191,7 @@ public abstract class PumaServerIntegrationBaseTest {
 	}
 
 	protected List<ChangedEvent> getEvents(int n, boolean needTs) throws Exception {
+		Thread.sleep(50);
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
 		EventChannel channel = storage.getChannel(-1);
 		for (int i = 0; i < n;) {
@@ -265,11 +273,15 @@ public abstract class PumaServerIntegrationBaseTest {
 	@After
 	public void after() throws Exception {
 		if (server != null) {
-			server.stop();
+			try {
+				server.stop();
+			} catch (Exception e) {
+				// ignore
+			}
 		}
 		FileUtils.deleteDirectory(storageMasterBaseDir);
 		FileUtils.deleteDirectory(storageSlaveBaseDir);
-		FileUtils.deleteDirectory(new File("/data/applogs/puma"));
+		FileUtils.deleteDirectory(confBaseDir);
 		doAfter();
 	}
 

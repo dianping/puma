@@ -36,6 +36,11 @@
 	<bean id="dailyReportTask" class="com.dianping.puma.server.DailyReportTask"
 		parent="notifiableBean" init-method="start" />
 
+	<bean id="binlogPositionHolder" class="com.dianping.puma.server.MMapBasedBinlogPositionHolder"
+		init-method="init">
+		<property name="baseDir" value="/data/applogs/puma/" />
+	</bean>
+
 	<bean id="server-7_43" class="com.dianping.puma.server.ReplicationBasedServer"
 		parent="notifiableBean">
 		<property name="host" value="192.168.7.43" />
@@ -48,6 +53,7 @@
 		<property name="serverId" value="9988" />
 		<property name="dataHandler" ref="datahandler-7-43" />
 		<property name="dispatcher" ref="dispatcher-7-43" />
+		<property name="binlogPositionHolder" ref="binlogPositionHolder" />
 	</bean>
 
 	<bean id="dispatcher-7-43" class="com.dianping.puma.sender.dispatcher.SimpleDispatherImpl"

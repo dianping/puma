@@ -11,13 +11,15 @@ import com.dianping.puma.ComponentContainer;
 import com.dianping.puma.bo.PositionInfo;
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.util.PumaThreadUtils;
+import com.dianping.puma.server.BinlogPositionHolder;
 import com.dianping.puma.server.Server;
-import com.dianping.puma.utils.PositionFileUtils;
 
 public class PumaListener implements ServletContextListener {
-	private static Logger		log				= Logger.getLogger(PumaListener.class);
 
-	private static final String	BEAN_SERVERS	= "servers";
+	private static Logger		log						= Logger.getLogger(PumaListener.class);
+
+	private static final String	BEAN_BINLOGPOSHOLDER	= "binlogPositionHolder";
+	private static final String	BEAN_SERVERS			= "servers";
 
 	private List<Server>		servers;
 
@@ -36,13 +38,14 @@ public class PumaListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		List<Server> servers = ComponentContainer.SPRING.lookup(BEAN_SERVERS);
+		BinlogPositionHolder binlogPositionHolder = ComponentContainer.SPRING.lookup(BEAN_BINLOGPOSHOLDER);
 
 		log.info("Starting " + servers.size() + " servers configured.");
 
 		// start servers
 		for (Server server : servers) {
 			String serverName = server.getServerName();
-			PositionInfo posInfo = PositionFileUtils.getPositionInfo(serverName, server.getDefaultBinlogFileName(),
+			PositionInfo posInfo = binlogPositionHolder.getPositionInfo(serverName, server.getDefaultBinlogFileName(),
 					server.getDefaultBinlogPosition());
 			PumaContext context = new PumaContext();
 

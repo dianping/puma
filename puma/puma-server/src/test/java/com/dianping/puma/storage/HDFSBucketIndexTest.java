@@ -36,7 +36,7 @@ public class HDFSBucketIndexTest {
 		hdfsConfig.set("hadoop.security.authentication", "kerberos");
 		hdfsConfig.set("dfs.namenode.kerberos.principal", "hadoop/test86.hadoop@DIANPING.COM");
 		hdfsConfig.set("test.hadoop.principal", "workcron@DIANPING.COM");
-		hdfsConfig.set("test.hadoop.keytab.file", "E:/.keytab");
+		hdfsConfig.set("test.hadoop.keytab.file", "/etc/.keytab");
 		hdfsConfig.set("fs.default.name", "hdfs://test86.hadoop/");
 		hdfsConfig.setInt("io.file.buffer.size", 1048576);
 

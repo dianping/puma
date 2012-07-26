@@ -95,6 +95,32 @@ public class LocalBucketIndexTest {
 		}
 
 	}
+	
+//	@Test
+//	public void testAddBucketList()
+//	{
+//		this.localBucketIndex.init();
+//		
+//		try {
+//
+//			for (int i = 0; i < 2; i++) {
+//				work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/20120711/bucket-"
+//						+ Integer.toString(i));
+//				work.getParentFile().mkdirs();
+//				if (work.createNewFile()) {
+//					System.out.println("create a file: " + work.getName());
+//
+//				}
+//			}
+//		} catch (IOException e1) {
+//			System.out.println("failed to create file");
+//		}
+//		
+//		List<String> paths= new ArrayList<String>();
+//		paths.add("20120711/bucket-0");
+//		
+//		this.localBucketIndex.add(paths);
+//	}
 
 	@Test
 	public void testBulkGetRemainN() {
@@ -331,8 +357,6 @@ public class LocalBucketIndexTest {
 				e.printStackTrace();
 			}
 
-			// TODO
-			// no use for bucket.getNext();
 			bucket = this.localBucketIndex.getReadBucket(seq.longValue());
 			Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
 			Assert.assertEquals(3, bucket.getStartingSequece().getNumber());
@@ -432,7 +456,6 @@ public class LocalBucketIndexTest {
 			e.printStackTrace();
 		}
 		
-		//TODO copyfromfile do not update index
 		localBucketIndex.init();
 		
 

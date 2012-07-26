@@ -46,13 +46,16 @@ public class LocalBucketIndexTest {
 		localBucketIndex.setBaseDir(System.getProperty("java.io.tmpdir", ".") + "Puma");
 		localBucketIndex.setBucketFilePrefix("bucket-");
 		localBucketIndex.setMaxBucketLengthMB(500);
-
 	}
 
 	@Test
 	public void testInit() {
 
 		localBucketIndex.init();
+		
+		System.out.println("*************************");
+		System.out.println(localBucketIndex.index.get());
+		System.out.println("*************************");
 
 		Assert.assertEquals("20120710/bucket-0", localBucketIndex.index.get().get(new Sequence(120710, 0)));
 		Assert.assertEquals("20120710/bucket-1", localBucketIndex.index.get().get(new Sequence(120710, 1)));

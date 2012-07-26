@@ -94,6 +94,9 @@ public class ReplicationBasedServer extends AbstractServer {
 					throw new IOException("Login failed.");
 				}
 			} catch (Exception e) {
+				if (stop) {
+					return;
+				}
 				if (++failCount % 3 == 0) {
 					this.notifyService.alarm("[" + context.getPumaServerName() + "]" + "Failed to dump mysql[" + host
 							+ ":" + port + "] for 3 times.", e, true);

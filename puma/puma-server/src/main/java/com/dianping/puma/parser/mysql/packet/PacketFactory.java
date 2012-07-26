@@ -48,7 +48,6 @@ public class PacketFactory {
 					return null;
 			}
 		} catch (IOException e) {
-			log.error("Read packet failed.", e);
 			throw e;
 		}
 	}

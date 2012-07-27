@@ -228,7 +228,7 @@ public abstract class PumaServerIntegrationBaseTest {
 	}
 
 	protected void waitForSync() throws Exception {
-		Thread.sleep(5);
+		Thread.sleep(50);
 	}
 
 	protected void executeSql(String script) throws Exception {

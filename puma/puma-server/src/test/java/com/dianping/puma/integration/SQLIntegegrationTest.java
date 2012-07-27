@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 
 /**
@@ -63,7 +64,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 	@Test
 	public void testUpdateNoTransaction() throws Exception {
 		executeSql("INSERT INTO " + table + " values(1)");
-		waitForSync();
+		waitForSync(50);
 		test(new TestLogic() {
 
 			@Override
@@ -87,7 +88,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 	@Test
 	public void testDeleteNoTransaction() throws Exception {
 		executeSql("INSERT INTO " + table + " values(1)");
-		waitForSync();
+		waitForSync(50);
 		test(new TestLogic() {
 
 			@Override
@@ -104,6 +105,28 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(1, rowChangedEvent.getColumns().size());
 				Assert.assertNull(rowChangedEvent.getColumns().get("id").getNewValue());
 				Assert.assertEquals(1, rowChangedEvent.getColumns().get("id").getOldValue());
+			}
+		});
+	}
+
+	@Test
+	public void testDDl() throws Exception {
+		executeSql("DROP TABLE IF EXISTS DDLtest");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("CREATE TABLE DDLtest(id INT)");
+				waitForSync(1000);
+				List<ChangedEvent> events = getEvents(1, false);
+				Assert.assertEquals(1, events.size());
+				Assert.assertTrue(events.get(0) instanceof DdlEvent);
+				DdlEvent ddlEvent = (DdlEvent) events.get(0);
+				Assert.assertEquals(db, ddlEvent.getDatabase());
+				Assert.assertEquals(host + ":" + port, ddlEvent.getMasterUrl());
+				Assert.assertTrue("CREATE TABLE DDLtest(id INT)".equalsIgnoreCase(ddlEvent.getSql()));
+				executeSql("DROP TABLE DDLtest");
 			}
 		});
 	}

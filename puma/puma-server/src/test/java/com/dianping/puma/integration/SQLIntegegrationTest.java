@@ -62,6 +62,40 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 	}
 
 	@Test
+	public void testInsertWithTransaction() throws Exception {
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("INSERT INTO " + table + " values(1)");
+				List<ChangedEvent> events = getEvents(3, true);
+				Assert.assertEquals(3, events.size());
+
+				Assert.assertTrue(events.get(0) instanceof RowChangedEvent);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.isTransactionBegin());
+				Assert.assertEquals(host + ":" + port, rowChangedEvent.getMasterUrl());
+				Assert.assertEquals(db, rowChangedEvent.getDatabase());
+
+				Assert.assertTrue(events.get(1) instanceof RowChangedEvent);
+				rowChangedEvent = (RowChangedEvent) events.get(1);
+				Assert.assertEquals(RowChangedEvent.INSERT, rowChangedEvent.getActionType());
+				Assert.assertEquals(table, rowChangedEvent.getTable());
+				Assert.assertEquals(host + ":" + port, rowChangedEvent.getMasterUrl());
+				Assert.assertEquals(db, rowChangedEvent.getDatabase());
+				Assert.assertEquals(1, rowChangedEvent.getColumns().size());
+				Assert.assertEquals(1, rowChangedEvent.getColumns().get("id").getNewValue());
+				Assert.assertNull(rowChangedEvent.getColumns().get("id").getOldValue());
+
+				Assert.assertTrue(events.get(2) instanceof RowChangedEvent);
+				rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.isTransactionCommit());
+				Assert.assertEquals(host + ":" + port, rowChangedEvent.getMasterUrl());
+			}
+		});
+	}
+
+	@Test
 	public void testUpdateNoTransaction() throws Exception {
 		executeSql("INSERT INTO " + table + " values(1)");
 		waitForSync(50);

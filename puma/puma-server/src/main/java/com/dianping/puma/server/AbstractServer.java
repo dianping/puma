@@ -31,16 +31,23 @@ import com.dianping.puma.sender.dispatcher.Dispatcher;
  */
 @ThreadUnSafe
 public abstract class AbstractServer implements Server, Notifiable {
-	protected PumaContext			context;
-	protected String				defaultBinlogFileName;
-	protected Long					defaultBinlogPosition;
-	protected Parser				parser;
-	protected DataHandler			dataHandler;
-	protected Dispatcher			dispatcher;
-	protected long					serverId	= 6789;
-	protected NotifyService			notifyService;
-	protected volatile boolean		stop		= false;
-	protected BinlogPositionHolder	binlogPositionHolder;
+	private PumaContext				context;
+	private String					defaultBinlogFileName;
+	private Long					defaultBinlogPosition;
+	private Parser					parser;
+	private DataHandler				dataHandler;
+	private Dispatcher				dispatcher;
+	private long					serverId	= 6789;
+	private NotifyService			notifyService;
+	private volatile boolean		stop		= false;
+	private BinlogPositionHolder	binlogPositionHolder;
+
+	/**
+	 * @return the binlogPositionHolder
+	 */
+	public BinlogPositionHolder getBinlogPositionHolder() {
+		return binlogPositionHolder;
+	}
 
 	/**
 	 * @param binlogPositionHolder
@@ -179,6 +186,10 @@ public abstract class AbstractServer implements Server, Notifiable {
 		parser.stop();
 		dataHandler.stop();
 		dispatcher.stop();
+	}
+
+	public boolean isStop() {
+		return stop;
 	}
 
 	protected abstract void doStop() throws Exception;

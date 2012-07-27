@@ -26,7 +26,7 @@ import java.util.List;
  * 
  */
 public abstract class AbstractDispatcher implements Dispatcher {
-	protected String	name;
+	private String	name;
 
 	/*
 	 * (non-Javadoc)

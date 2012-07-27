@@ -28,11 +28,48 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  * 
  */
 public abstract class AbstractBucket implements Bucket {
-	protected Sequence					startingSequence;
-	protected int						maxSizeMB;
-	protected AtomicReference<Sequence>	currentWritingSeq	= new AtomicReference<Sequence>();
-	protected volatile boolean			stopped				= false;
-	protected long						maxSizeByte;
+	private Sequence					startingSequence;
+	private int							maxSizeMB;
+	private AtomicReference<Sequence>	currentWritingSeq	= new AtomicReference<Sequence>();
+	private volatile boolean			stopped				= false;
+	private long						maxSizeByte;
+
+	/**
+	 * @param maxSizeMB
+	 *            the maxSizeMB to set
+	 */
+	public void setMaxSizeMB(int maxSizeMB) {
+		this.maxSizeMB = maxSizeMB;
+	}
+
+	/**
+	 * @param maxSizeByte
+	 *            the maxSizeByte to set
+	 */
+	public void setMaxSizeByte(long maxSizeByte) {
+		this.maxSizeByte = maxSizeByte;
+	}
+
+	/**
+	 * @return the maxSizeMB
+	 */
+	public int getMaxSizeMB() {
+		return maxSizeMB;
+	}
+
+	/**
+	 * @return the stopped
+	 */
+	public boolean isStopped() {
+		return stopped;
+	}
+
+	/**
+	 * @return the maxSizeByte
+	 */
+	public long getMaxSizeByte() {
+		return maxSizeByte;
+	}
 
 	public AbstractBucket(Sequence startingSequence, int maxSizeMB) throws FileNotFoundException {
 		this.startingSequence = startingSequence;

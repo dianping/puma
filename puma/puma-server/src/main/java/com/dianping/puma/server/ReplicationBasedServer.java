@@ -68,18 +68,18 @@ public class ReplicationBasedServer extends AbstractServer {
 		do {
 			try {
 				// 读position/file文件
-				PositionInfo posInfo = binlogPositionHolder.getPositionInfo(context.getPumaServerName(),
-						context.getBinlogFileName(), context.getBinlogStartPos());
+				PositionInfo posInfo = getBinlogPositionHolder().getPositionInfo(getContext().getPumaServerName(),
+						getContext().getBinlogFileName(), getContext().getBinlogStartPos());
 
-				context.setBinlogFileName(posInfo.getBinlogFileName());
-				context.setBinlogStartPos(posInfo.getBinlogPosition());
-				context.setServerId(serverId);
-				context.setMasterUrl(host, port);
+				getContext().setBinlogFileName(posInfo.getBinlogFileName());
+				getContext().setBinlogStartPos(posInfo.getBinlogPosition());
+				getContext().setServerId(getServerId());
+				getContext().setMasterUrl(host, port);
 
 				connect();
 
 				if (auth()) {
-					log.info("Server logined... serverId: " + serverId + " host: " + host + " port: " + port
+					log.info("Server logined... serverId: " + getServerId() + " host: " + host + " port: " + port
 							+ " user: " + user + " database: " + database);
 
 					if (dumpBinlog()) {
@@ -93,47 +93,49 @@ public class ReplicationBasedServer extends AbstractServer {
 					throw new IOException("Login failed.");
 				}
 			} catch (Exception e) {
-				if (stop) {
+				if (isStop()) {
 					return;
 				}
 				if (++failCount % 3 == 0) {
-					this.notifyService.alarm("[" + context.getPumaServerName() + "]" + "Failed to dump mysql[" + host
-							+ ":" + port + "] for 3 times.", e, true);
+					this.getNotifyService().alarm(
+							"[" + getContext().getPumaServerName() + "]" + "Failed to dump mysql[" + host + ":" + port
+									+ "] for 3 times.", e, true);
 					failCount = 0;
 				}
-				log.error("Exception occurs. serverId: " + serverId + ". Reconnect...", e);
+				log.error("Exception occurs. serverId: " + getServerId() + ". Reconnect...", e);
 				Thread.sleep(((failCount % 10) + 1) * 2000);
 			}
-		} while (!stop);
+		} while (!isStop());
 
 	}
 
 	private void processBinlog() throws IOException {
-		while (!stop) {
-			BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(is, PacketType.BINLOG_PACKET, context);
+		while (!isStop()) {
+			BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(is, PacketType.BINLOG_PACKET,
+					getContext());
 			if (!binlogPacket.isOk()) {
 				log.error("Binlog packet response error.");
 				throw new IOException("Binlog packet response error.");
 			} else {
 
-				BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), context);
+				BinlogEvent binlogEvent = getParser().parse(binlogPacket.getBinlogBuf(), getContext());
 
-				context.setNextBinlogPos(binlogEvent.getHeader().getNextPosition());
+				getContext().setNextBinlogPos(binlogEvent.getHeader().getNextPosition());
 
 				if (binlogEvent.getHeader().getEventType() == BinlogConstanst.ROTATE_EVENT) {
 					RotateEvent rotateEvent = (RotateEvent) binlogEvent;
-					binlogPositionHolder.savePositionInfo(getServerName(),
+					getBinlogPositionHolder().savePositionInfo(getServerName(),
 							new PositionInfo(rotateEvent.getFirstEventPosition(), rotateEvent.getNextBinlogFileName()));
-					context.setBinlogFileName(rotateEvent.getNextBinlogFileName());
-					context.setBinlogStartPos(rotateEvent.getFirstEventPosition());
+					getContext().setBinlogFileName(rotateEvent.getNextBinlogFileName());
+					getContext().setBinlogStartPos(rotateEvent.getFirstEventPosition());
 					// status report
 					SystemStatusContainer.instance.updateServerStatus(getServerName(), host, port, database,
-							context.getBinlogFileName(), context.getBinlogStartPos());
+							getContext().getBinlogFileName(), getContext().getBinlogStartPos());
 				} else {
 					DataHandlerResult dataHandlerResult = null;
 					// 一直处理一个binlogEvent的多行，处理完每行马上分发，以防止一个binlogEvent包含太多ChangedEvent而耗费太多内存
 					do {
-						dataHandlerResult = dataHandler.process(binlogEvent, context);
+						dataHandlerResult = getDataHandler().process(binlogEvent, getContext());
 						if (dataHandlerResult != null && !dataHandlerResult.isEmpty()) {
 							ChangedEvent changedEvent = dataHandlerResult.getData();
 
@@ -159,10 +161,11 @@ public class ReplicationBasedServer extends AbstractServer {
 							}
 
 							try {
-								dispatcher.dispatch(changedEvent, context);
+								getDispatcher().dispatch(changedEvent, getContext());
 							} catch (Exception e) {
-								this.notifyService.alarm("[" + context.getPumaServerName() + "]"
-										+ "Dispatch event failed. event(" + changedEvent + ")", e, true);
+								this.getNotifyService().alarm(
+										"[" + getContext().getPumaServerName() + "]" + "Dispatch event failed. event("
+												+ changedEvent + ")", e, true);
 								log.error("Dispatcher dispatch failed.", e);
 							}
 						}
@@ -171,18 +174,20 @@ public class ReplicationBasedServer extends AbstractServer {
 					// 只有整个binlogEvent分发完了才save
 					if (binlogEvent.getHeader() != null
 							&& binlogEvent.getHeader().getNextPosition() != 0
-							&& StringUtils.isNotBlank(context.getBinlogFileName())
+							&& StringUtils.isNotBlank(getContext().getBinlogFileName())
 							&& dataHandlerResult != null
 							&& !dataHandlerResult.isEmpty()
 							&& (dataHandlerResult.getData() instanceof DdlEvent || (dataHandlerResult.getData() instanceof RowChangedEvent && ((RowChangedEvent) dataHandlerResult
 									.getData()).isTransactionCommit()))) {
 						// save position
-						binlogPositionHolder.savePositionInfo(getServerName(), new PositionInfo(binlogEvent.getHeader()
-								.getNextPosition(), context.getBinlogFileName()));
-						context.setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
+						getBinlogPositionHolder().savePositionInfo(
+								getServerName(),
+								new PositionInfo(binlogEvent.getHeader().getNextPosition(), getContext()
+										.getBinlogFileName()));
+						getContext().setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
 						// status report
 						SystemStatusContainer.instance.updateServerStatus(getServerName(), host, port, database,
-								context.getBinlogFileName(), context.getBinlogStartPos());
+								getContext().getBinlogFileName(), getContext().getBinlogStartPos());
 					}
 
 				}
@@ -204,7 +209,7 @@ public class ReplicationBasedServer extends AbstractServer {
 		this.pumaSocket.connect(new InetSocketAddress(host, port));
 		is = new BufferedInputStream(pumaSocket.getInputStream());
 		os = new BufferedOutputStream(pumaSocket.getOutputStream());
-		PacketFactory.parsePacket(is, PacketType.CONNECT_PACKET, context);
+		PacketFactory.parsePacket(is, PacketType.CONNECT_PACKET, getContext());
 	}
 
 	/**
@@ -215,19 +220,19 @@ public class ReplicationBasedServer extends AbstractServer {
 	 */
 	private boolean dumpBinlog() throws IOException {
 		ComBinlogDumpPacket dumpBinlogPacket = (ComBinlogDumpPacket) PacketFactory.createCommandPacket(
-				PacketType.COM_BINLOG_DUMP_PACKET, context);
-		dumpBinlogPacket.setBinlogFileName(context.getBinlogFileName());
+				PacketType.COM_BINLOG_DUMP_PACKET, getContext());
+		dumpBinlogPacket.setBinlogFileName(getContext().getBinlogFileName());
 		dumpBinlogPacket.setBinlogFlag(0);
-		dumpBinlogPacket.setBinlogPosition(context.getBinlogStartPos());
-		dumpBinlogPacket.setServerId(serverId);
-		dumpBinlogPacket.buildPacket(context);
+		dumpBinlogPacket.setBinlogPosition(getContext().getBinlogStartPos());
+		dumpBinlogPacket.setServerId(getServerId());
+		dumpBinlogPacket.buildPacket(getContext());
 
-		dumpBinlogPacket.write(os, context);
+		dumpBinlogPacket.write(os, getContext());
 
 		OKErrorPacket dumpCommandResultPacket = (OKErrorPacket) PacketFactory.parsePacket(is,
-				PacketType.OKERROR_PACKET, context);
+				PacketType.OKERROR_PACKET, getContext());
 		if (dumpCommandResultPacket.isOk()) {
-			if (StringUtils.isBlank(context.getBinlogFileName())
+			if (StringUtils.isBlank(getContext().getBinlogFileName())
 					&& StringUtils.isNotBlank(dumpCommandResultPacket.getMessage())) {
 				String msg = dumpCommandResultPacket.getMessage();
 				int startPos = msg.lastIndexOf(' ');
@@ -237,9 +242,9 @@ public class ReplicationBasedServer extends AbstractServer {
 					startPos = 0;
 				}
 				String binlogFile = dumpCommandResultPacket.getMessage().substring(startPos);
-				binlogPositionHolder.savePositionInfo(getServerName(), new PositionInfo(context.getBinlogStartPos(),
-						binlogFile));
-				context.setBinlogFileName(binlogFile);
+				getBinlogPositionHolder().savePositionInfo(getServerName(),
+						new PositionInfo(getContext().getBinlogStartPos(), binlogFile));
+				getContext().setBinlogFileName(binlogFile);
 			}
 			return true;
 		} else {
@@ -257,15 +262,16 @@ public class ReplicationBasedServer extends AbstractServer {
 	private boolean auth() throws IOException {
 		// auth
 		AuthenticatePacket authPacket = (AuthenticatePacket) PacketFactory.createCommandPacket(
-				PacketType.AUTHENTICATE_PACKET, context);
+				PacketType.AUTHENTICATE_PACKET, getContext());
 
 		authPacket.setPassword(password);
 		authPacket.setUser(user);
 		authPacket.setDatabase(database);
-		authPacket.buildPacket(context);
-		authPacket.write(os, context);
+		authPacket.buildPacket(getContext());
+		authPacket.write(os, getContext());
 
-		OKErrorPacket okErrorPacket = (OKErrorPacket) PacketFactory.parsePacket(is, PacketType.OKERROR_PACKET, context);
+		OKErrorPacket okErrorPacket = (OKErrorPacket) PacketFactory.parsePacket(is, PacketType.OKERROR_PACKET,
+				getContext());
 
 		if (okErrorPacket.isOk()) {
 			return true;

@@ -47,13 +47,13 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 	 */
 	@Override
 	public void init() {
-		File localBaseDir = new File(baseDir);
+		File localBaseDir = new File(getBaseDir());
 		if (!localBaseDir.exists()) {
 			if (!localBaseDir.mkdirs()) {
 				throw new RuntimeException("Failed to make dir for " + localBaseDir.getAbsolutePath());
 			}
 		}
-		TreeMap<Sequence, String> newIndex = new TreeMap<Sequence, String>( new PathSequenceComparator());
+		TreeMap<Sequence, String> newIndex = new TreeMap<Sequence, String>(new PathSequenceComparator());
 		File[] dirs = localBaseDir.listFiles(new FileFilter() {
 
 			@Override
@@ -73,8 +73,8 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 
 					@Override
 					public boolean accept(File dir, String name) {
-						if (name.startsWith(bucketFilePrefix)
-								&& StringUtils.isNumeric(name.substring(bucketFilePrefix.length()))) {
+						if (name.startsWith(getBucketFilePrefix())
+								&& StringUtils.isNumeric(name.substring(getBucketFilePrefix().length()))) {
 							return true;
 						}
 						return false;
@@ -87,7 +87,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 				}
 			}
 		}
-		index.set(newIndex);
+		getIndex().set(newIndex);
 	}
 
 	@Override
@@ -104,7 +104,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 		if (!bucketFile.createNewFile()) {
 			throw new IOException(String.format("Can't create writeBucket(%s)!", bucketFile.getAbsolutePath()));
 		} else {
-			return new LocalFileBucket(bucketFile, startingSequence, maxBucketLengthMB);
+			return new LocalFileBucket(bucketFile, startingSequence, getMaxBucketLengthMB());
 		}
 
 	}
@@ -116,6 +116,6 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 			return;
 		}
 
-		FileUtils.copyFile(localFile, new File(baseDir, path));
+		FileUtils.copyFile(localFile, new File(getBaseDir(), path));
 	}
 }

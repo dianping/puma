@@ -52,7 +52,7 @@ public class LocalFileBucket extends AbstractBucket {
 	}
 
 	protected boolean doHasRemainingForWrite() throws IOException {
-		return file.length() < maxSizeByte;
+		return file.length() < getMaxSizeByte();
 	}
 
 }

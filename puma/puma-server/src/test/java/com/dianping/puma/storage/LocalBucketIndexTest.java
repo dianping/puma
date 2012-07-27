@@ -66,11 +66,11 @@ public class LocalBucketIndexTest {
 		localBucketIndex.init();
 
 		System.out.println("*************************");
-		System.out.println(localBucketIndex.index.get());
+		System.out.println(localBucketIndex.getIndex().get());
 		System.out.println("*************************");
 
-		Assert.assertEquals("20120710/bucket-0", localBucketIndex.index.get().get(new Sequence(120710, 0)));
-		Assert.assertEquals("20120710/bucket-1", localBucketIndex.index.get().get(new Sequence(120710, 1)));
+		Assert.assertEquals("20120710/bucket-0", localBucketIndex.getIndex().get().get(new Sequence(120710, 0)));
+		Assert.assertEquals("20120710/bucket-1", localBucketIndex.getIndex().get().get(new Sequence(120710, 1)));
 
 		System.out.println("*************************************************************");
 		System.out.println("****************************End******************************");
@@ -107,7 +107,7 @@ public class LocalBucketIndexTest {
 			e.printStackTrace();
 		}
 
-		Assert.assertEquals("20120711/bucket-0", localBucketIndex.index.get().get(sequence));
+		Assert.assertEquals("20120711/bucket-0", localBucketIndex.getIndex().get().get(sequence));
 		try {
 			bucket.close();
 		} catch (IOException e) {
@@ -151,12 +151,12 @@ public class LocalBucketIndexTest {
 			e.printStackTrace();
 		}
 
-		Assert.assertEquals(4, this.localBucketIndex.index.get().size());
-		Assert.assertEquals(120710, this.localBucketIndex.index.get().firstEntry().getKey().getCreationDate());
-		Assert.assertEquals(0, this.localBucketIndex.index.get().firstEntry().getKey().getNumber());
+		Assert.assertEquals(4, this.localBucketIndex.getIndex().get().size());
+		Assert.assertEquals(120710, this.localBucketIndex.getIndex().get().firstEntry().getKey().getCreationDate());
+		Assert.assertEquals(0, this.localBucketIndex.getIndex().get().firstEntry().getKey().getNumber());
 
-		Assert.assertEquals(120711, this.localBucketIndex.index.get().lastEntry().getKey().getCreationDate());
-		Assert.assertEquals(1, this.localBucketIndex.index.get().lastEntry().getKey().getNumber());
+		Assert.assertEquals(120711, this.localBucketIndex.getIndex().get().lastEntry().getKey().getCreationDate());
+		Assert.assertEquals(1, this.localBucketIndex.getIndex().get().lastEntry().getKey().getNumber());
 
 		System.out.println("*************************************************************");
 		System.out.println("****************************End******************************");
@@ -355,7 +355,7 @@ public class LocalBucketIndexTest {
 	@Test
 	public void testGetReadBucketEmpty() {
 		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma");
-		
+
 		try {
 			FileUtils.deleteDirectory(work);
 		} catch (IOException e1) {
@@ -370,11 +370,11 @@ public class LocalBucketIndexTest {
 			Assert.assertEquals(null, bucket);
 			bucket = this.localBucketIndex.getReadBucket(-2);
 			Assert.assertEquals(null, bucket);
-			
+
 			Sequence seq = new Sequence(120710, 0);
-			bucket=this.localBucketIndex.getReadBucket(seq.longValue());
+			bucket = this.localBucketIndex.getReadBucket(seq.longValue());
 			Assert.assertEquals(null, bucket);
-			
+
 		} catch (StorageClosedException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -507,12 +507,12 @@ public class LocalBucketIndexTest {
 			this.localBucketIndex.getReadBucket(-1);
 			Assert.fail();
 		} catch (StorageClosedException e) {
-			
+
 		} catch (IOException e) {
 			Assert.fail();
 		}
-		
-		Assert.assertTrue(this.localBucketIndex.stop);
+
+		Assert.assertTrue(this.localBucketIndex.isStop());
 		System.out.println("*************************************************************");
 		System.out.println("****************************End******************************");
 		System.out.println("*************************************************************");
@@ -524,8 +524,8 @@ public class LocalBucketIndexTest {
 		System.out.println("***********************testGetBaseDir*************************");
 		System.out.println("**************************************************************");
 		this.localBucketIndex.init();
-		Assert.assertEquals((System.getProperty("java.io.tmpdir", ".").toString() + "/Puma"), this.localBucketIndex
-				.getBaseDir());
+		Assert.assertEquals((System.getProperty("java.io.tmpdir", ".").toString() + "/Puma"),
+				this.localBucketIndex.getBaseDir());
 		System.out.println("*************************************************************");
 		System.out.println("****************************End******************************");
 		System.out.println("*************************************************************");
@@ -563,7 +563,7 @@ public class LocalBucketIndexTest {
 			e.printStackTrace();
 		}
 
-		Assert.assertEquals(2, this.localBucketIndex.index.get().size());
+		Assert.assertEquals(2, this.localBucketIndex.getIndex().get().size());
 
 		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/copy/20120713/bucket-0");
 		work.getParentFile().mkdirs();
@@ -587,9 +587,9 @@ public class LocalBucketIndexTest {
 
 		localBucketIndex.init();
 
-		Assert.assertEquals(3, this.localBucketIndex.index.get().size());
-		Assert.assertEquals(120713, this.localBucketIndex.index.get().lastKey().getCreationDate());
-		Assert.assertEquals(0, this.localBucketIndex.index.get().lastKey().getNumber());
+		Assert.assertEquals(3, this.localBucketIndex.getIndex().get().size());
+		Assert.assertEquals(120713, this.localBucketIndex.getIndex().get().lastKey().getCreationDate());
+		Assert.assertEquals(0, this.localBucketIndex.getIndex().get().lastKey().getNumber());
 
 		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/copy");
 
@@ -620,9 +620,9 @@ public class LocalBucketIndexTest {
 		} catch (StorageClosedException e) {
 			e.printStackTrace();
 		}
-		Assert.assertEquals(1, this.localBucketIndex.index.get().size());
-		Assert.assertEquals(120710, this.localBucketIndex.index.get().firstKey().getCreationDate());
-		Assert.assertEquals(1, this.localBucketIndex.index.get().firstKey().getNumber());
+		Assert.assertEquals(1, this.localBucketIndex.getIndex().get().size());
+		Assert.assertEquals(120710, this.localBucketIndex.getIndex().get().firstKey().getCreationDate());
+		Assert.assertEquals(1, this.localBucketIndex.getIndex().get().firstKey().getNumber());
 
 		paths = new ArrayList<String>();
 		paths.add("20120710/bucket-1");
@@ -631,7 +631,7 @@ public class LocalBucketIndexTest {
 		} catch (StorageClosedException e) {
 			e.printStackTrace();
 		}
-		Assert.assertEquals(0, this.localBucketIndex.index.get().size());
+		Assert.assertEquals(0, this.localBucketIndex.getIndex().get().size());
 		System.out.println("*************************************************************");
 		System.out.println("****************************End******************************");
 		System.out.println("*************************************************************");
@@ -645,8 +645,8 @@ public class LocalBucketIndexTest {
 		this.localBucketIndex.init();
 		Sequence seq = new Sequence(120710, 1);
 		this.localBucketIndex.updateLatestSequence(seq);
-		Assert.assertEquals(120710, this.localBucketIndex.latestSequence.get().getCreationDate());
-		Assert.assertEquals(1, this.localBucketIndex.latestSequence.get().getNumber());
+		Assert.assertEquals(120710, this.localBucketIndex.getLatestSequence().get().getCreationDate());
+		Assert.assertEquals(1, this.localBucketIndex.getLatestSequence().get().getNumber());
 		System.out.println("*************************************************************");
 		System.out.println("****************************End******************************");
 		System.out.println("*************************************************************");
@@ -658,7 +658,7 @@ public class LocalBucketIndexTest {
 		System.out.println("***************************after*****************************");
 		System.out.println("*************************************************************");
 		localBucketIndex.close();
-		
+
 		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma");
 
 		try {
@@ -666,7 +666,7 @@ public class LocalBucketIndexTest {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		System.out.println("*************************************************************");
 		System.out.println("****************************End******************************");
 		System.out.println("*************************************************************");

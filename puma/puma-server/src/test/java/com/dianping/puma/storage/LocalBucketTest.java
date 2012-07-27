@@ -82,8 +82,9 @@ public class LocalBucketTest {
 			String s = input.readLine();
 			input.close();
 			Assert.assertEquals(event, s);
-			Assert.assertEquals(data.length, localFileBucket.currentWritingSeq.get().getOffset());
-			Assert.assertEquals(data.length+this.localFileBucket.startingSequence.longValue(), localFileBucket.getCurrentWritingSeq());
+			Assert.assertEquals(data.length, new Sequence(localFileBucket.getCurrentWritingSeq()).getOffset());
+			Assert.assertEquals(data.length + this.localFileBucket.getStartingSequece().longValue(),
+					localFileBucket.getCurrentWritingSeq());
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -155,7 +156,7 @@ public class LocalBucketTest {
 		event.setExecuteTime(0);
 		event.setSeq(seq.longValue());
 		event.setTable(null);
-		Sequence newSeq=null;
+		Sequence newSeq = null;
 
 		JsonEventCodec codec = new JsonEventCodec();
 		byte[] data = null;
@@ -262,7 +263,7 @@ public class LocalBucketTest {
 
 		Assert.assertTrue(flag);
 
-		localFileBucket.maxSizeByte = 0;
+		localFileBucket.setMaxSizeByte(0);
 		try {
 			if (localFileBucket.hasRemainingForWrite() != false)
 				flag = true;
@@ -294,7 +295,6 @@ public class LocalBucketTest {
 		if (work.delete())
 			System.out.println("delete file successfully");
 		this.work.getParentFile().delete();
-
 
 	}
 

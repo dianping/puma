@@ -29,7 +29,7 @@ import com.dianping.puma.core.annotation.ThreadUnSafe;
 @ThreadUnSafe
 public class LRUCache<K, V> extends LinkedHashMap<K, V> {
 	private static final long	serialVersionUID	= 6763345531545815287L;
-	protected int				maxElements;
+	private int					maxElements;
 
 	public LRUCache(int maxSize) {
 		super(maxSize, 0.75f, true);

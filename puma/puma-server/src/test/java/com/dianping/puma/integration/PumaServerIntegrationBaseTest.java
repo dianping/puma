@@ -191,7 +191,7 @@ public abstract class PumaServerIntegrationBaseTest {
 	}
 
 	protected List<ChangedEvent> getEvents(int n, boolean needTs) throws Exception {
-		Thread.sleep(50);
+		waitForSync();
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
 		EventChannel channel = storage.getChannel(-1);
 		for (int i = 0; i < n;) {
@@ -209,6 +209,10 @@ public abstract class PumaServerIntegrationBaseTest {
 		}
 		channel.close();
 		return result;
+	}
+
+	protected void waitForSync() throws Exception {
+		Thread.sleep(5);
 	}
 
 	protected void executeSql(String script) throws Exception {

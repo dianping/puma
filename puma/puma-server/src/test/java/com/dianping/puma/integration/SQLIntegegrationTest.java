@@ -60,6 +60,54 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 		});
 	}
 
+	@Test
+	public void testUpdateNoTransaction() throws Exception {
+		executeSql("INSERT INTO " + table + " values(1)");
+		waitForSync();
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id=2 WHERE id=1");
+				List<ChangedEvent> events = getEvents(1, false);
+				Assert.assertEquals(1, events.size());
+				Assert.assertTrue(events.get(0) instanceof RowChangedEvent);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertEquals(RowChangedEvent.UPDATE, rowChangedEvent.getActionType());
+				Assert.assertEquals(table, rowChangedEvent.getTable());
+				Assert.assertEquals(host + ":" + port, rowChangedEvent.getMasterUrl());
+				Assert.assertEquals(db, rowChangedEvent.getDatabase());
+				Assert.assertEquals(1, rowChangedEvent.getColumns().size());
+				Assert.assertEquals(2, rowChangedEvent.getColumns().get("id").getNewValue());
+				Assert.assertEquals(1, rowChangedEvent.getColumns().get("id").getOldValue());
+			}
+		});
+	}
+
+	@Test
+	public void testDeleteNoTransaction() throws Exception {
+		executeSql("INSERT INTO " + table + " values(1)");
+		waitForSync();
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("DELETE FROM " + table + " WHERE id=1");
+				List<ChangedEvent> events = getEvents(1, false);
+				Assert.assertEquals(1, events.size());
+				Assert.assertTrue(events.get(0) instanceof RowChangedEvent);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertEquals(RowChangedEvent.DELETE, rowChangedEvent.getActionType());
+				Assert.assertEquals(table, rowChangedEvent.getTable());
+				Assert.assertEquals(host + ":" + port, rowChangedEvent.getMasterUrl());
+				Assert.assertEquals(db, rowChangedEvent.getDatabase());
+				Assert.assertEquals(1, rowChangedEvent.getColumns().size());
+				Assert.assertNull(rowChangedEvent.getColumns().get("id").getNewValue());
+				Assert.assertEquals(1, rowChangedEvent.getColumns().get("id").getOldValue());
+			}
+		});
+	}
+
 	public void doAfter() throws Exception {
 		executeSql("DROP TABLE " + table);
 	}

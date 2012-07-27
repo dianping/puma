@@ -131,7 +131,7 @@ public class MMapBasedSeqFileHolder implements SeqFileHolder {
 					throw new RuntimeException("can not create file: " + path);
 				}
 			} catch (IOException e) {
-				throw new RuntimeException("can not create file: " + path);
+				throw new RuntimeException("can not create file: " + path, e);
 			}
 		}
 

@@ -22,7 +22,7 @@ import com.dianping.puma.bo.PumaContext;
  * @author Leo Liang
  * 
  */
-public class PacketFactory {
+public final class PacketFactory {
 	private PacketFactory() {
 
 	}

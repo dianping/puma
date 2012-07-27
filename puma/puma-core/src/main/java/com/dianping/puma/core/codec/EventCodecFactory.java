@@ -21,7 +21,7 @@ package com.dianping.puma.core.codec;
  * @author Leo Liang
  * 
  */
-public class EventCodecFactory {
+public final class EventCodecFactory {
 	private EventCodecFactory() {
 
 	}

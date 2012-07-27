@@ -137,7 +137,7 @@ public class MMapBasedBinlogPositionHolder implements BinlogPositionHolder {
 					mappedByteBufferMapping.put(path,
 							new RandomAccessFile(f, "rwd").getChannel().map(MapMode.READ_WRITE, 0, MAX_FILE_SIZE));
 				} catch (IOException e) {
-					throw new RuntimeException("Create file(" + path + " failed.");
+					throw new RuntimeException("Create file(" + path + " failed.", e);
 				}
 			}
 		}

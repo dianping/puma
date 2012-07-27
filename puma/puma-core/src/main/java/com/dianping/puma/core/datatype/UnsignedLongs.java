@@ -289,14 +289,14 @@ public final class UnsignedLongs {
             throw new NumberFormatException("illegal radix: " + radix);
         }
 
-        int max_safe_pos = maxSafeDigits[radix] - 1;
+        int maxSafePos = maxSafeDigits[radix] - 1;
         long value = 0;
         for (int pos = 0; pos < s.length(); pos++) {
             int digit = Character.digit(s.charAt(pos), radix);
             if (digit == -1) {
                 throw new NumberFormatException(s);
             }
-            if (pos > max_safe_pos && overflowInParse(value, digit, radix)) {
+            if (pos > maxSafePos && overflowInParse(value, digit, radix)) {
                 throw new NumberFormatException("Too large for unsigned long: " + s);
             }
             value = (value * radix) + digit;

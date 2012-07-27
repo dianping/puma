@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -195,10 +194,9 @@ public class ReplicationBasedServer extends AbstractServer {
 	/**
 	 * Connect to mysql master and parse the greeting packet
 	 * 
-	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
-	private void connect() throws UnknownHostException, IOException {
+	private void connect() throws IOException {
 		closeTransport();
 		this.pumaSocket = new Socket();
 		this.pumaSocket.setTcpNoDelay(false);

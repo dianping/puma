@@ -105,7 +105,7 @@ public class ConnectPacket extends AbstractResponsePacket {
 			try {
 				int n = Integer.parseInt(context.getServerVersion().substring(0, point));
 				context.setServerMajorVersion(n);
-			} catch (NumberFormatException NFE1) {
+			} catch (NumberFormatException nfe) {
 				// ignore
 			}
 

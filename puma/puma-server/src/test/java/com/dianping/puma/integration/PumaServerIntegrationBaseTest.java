@@ -194,6 +194,7 @@ public abstract class PumaServerIntegrationBaseTest {
 		waitForSync();
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
 		EventChannel channel = storage.getChannel(-1);
+		checkTimeout(channel);
 		for (int i = 0; i < n;) {
 			ChangedEvent event = channel.next();
 			if (!needTs) {
@@ -209,6 +210,21 @@ public abstract class PumaServerIntegrationBaseTest {
 		}
 		channel.close();
 		return result;
+	}
+
+	protected void checkTimeout(final EventChannel channel) {
+		Thread t = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					Thread.sleep(20 * 1000);
+					channel.close();
+				} catch (InterruptedException e) {
+				}
+			}
+		});
+		t.start();
 	}
 
 	protected void waitForSync() throws Exception {

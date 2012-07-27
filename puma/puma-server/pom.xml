@@ -16,6 +16,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.dianping.cat</groupId>
+			<artifactId>cat-core</artifactId>
+			<version>0.3.4</version>
+		</dependency>
+		<dependency>
 			<groupId>com.dianping.puma</groupId>
 			<artifactId>puma-core</artifactId>
 		</dependency>
@@ -82,7 +87,7 @@
 		<dependency>
 			<groupId>com.site.common</groupId>
 			<artifactId>web-framework</artifactId>
-			<version>1.0.12</version>
+			<version>1.0.14</version>
 		</dependency>
 		<dependency>
 			<groupId>com.dp.cosmos</groupId>

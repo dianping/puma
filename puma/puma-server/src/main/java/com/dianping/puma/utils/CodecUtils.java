@@ -26,6 +26,10 @@ import java.util.BitSet;
  */
 public final class CodecUtils {
 
+	private CodecUtils() {
+
+	}
+
 	public static BitSet fromByteArray(byte[] bytes) {
 		BitSet bits = new BitSet();
 		for (int i = 0; i < bytes.length * 8; i++) {

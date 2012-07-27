@@ -37,13 +37,13 @@ public class PumaListener implements ServletContextListener {
 
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
-		List<Server> servers = ComponentContainer.SPRING.lookup(BEAN_SERVERS);
+		List<Server> configedServers = ComponentContainer.SPRING.lookup(BEAN_SERVERS);
 		BinlogPositionHolder binlogPositionHolder = ComponentContainer.SPRING.lookup(BEAN_BINLOGPOSHOLDER);
 
-		log.info("Starting " + servers.size() + " servers configured.");
+		log.info("Starting " + configedServers.size() + " servers configured.");
 
 		// start servers
-		for (Server server : servers) {
+		for (Server server : configedServers) {
 			String serverName = server.getServerName();
 			PositionInfo posInfo = binlogPositionHolder.getPositionInfo(serverName, server.getDefaultBinlogFileName(),
 					server.getDefaultBinlogPosition());
@@ -59,7 +59,7 @@ public class PumaListener implements ServletContextListener {
 					+ context.getBinlogStartPos());
 		}
 
-		this.servers = servers;
+		this.servers = configedServers;
 	}
 
 	void startServer(final Server server) {

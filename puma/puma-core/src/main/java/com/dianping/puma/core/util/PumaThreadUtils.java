@@ -27,13 +27,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Leo Liang
  * 
  */
-public class PumaThreadUtils {
+public final class PumaThreadUtils {
 
 	private static final String								PREFIX		= "Puma-thread-";
 
 	private static List<WeakReference<Thread>>				threadList	= Collections
 																				.synchronizedList(new ArrayList<WeakReference<Thread>>());
 	private static ConcurrentHashMap<String, AtomicInteger>	taskToSeq	= new ConcurrentHashMap<String, AtomicInteger>();					;
+
+	private PumaThreadUtils() {
+
+	}
 
 	public static Thread createThread(Runnable r, String taskName, boolean isDaemon) {
 		taskToSeq.putIfAbsent(taskName, new AtomicInteger(1));

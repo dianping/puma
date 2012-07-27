@@ -26,7 +26,11 @@ import com.dianping.puma.utils.CodecUtils;
  * @author Leo Liang
  * 
  */
-public class MySQLUtils {
+public final class MySQLUtils {
+	private MySQLUtils() {
+
+	}
+
 	public static boolean versionMeetsMinimum(int serverMajorVersion, int serverMinorVersion,
 			int serverSubMinorVersion, int major, int minor, int subminor) {
 		if (serverMajorVersion >= major) {

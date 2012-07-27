@@ -22,6 +22,9 @@ package com.dianping.puma.core.codec;
  * 
  */
 public class EventCodecFactory {
+	private EventCodecFactory() {
+
+	}
 
 	public static EventCodec createCodec(String type) {
 		if ("json".equals(type)) {

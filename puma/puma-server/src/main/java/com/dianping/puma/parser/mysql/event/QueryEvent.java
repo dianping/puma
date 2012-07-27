@@ -136,47 +136,47 @@ public class QueryEvent extends AbstractBinlogEvent {
 	}
 
 	protected List<StatusVariable> parseStatusVariables(byte[] data) throws IOException {
-		List<StatusVariable> statusVariables = new ArrayList<StatusVariable>();
+		List<StatusVariable> parsedStatusVariables = new ArrayList<StatusVariable>();
 		boolean abort = false;
 		ByteBuffer buf = ByteBuffer.wrap(data);
 		while (!abort && buf.hasRemaining()) {
 			final byte type = buf.get();
 			switch (type) {
 				case BinlogConstanst.Q_AUTO_INCREMENT:
-					statusVariables.add(QAutoIncrement.valueOf(buf));
+					parsedStatusVariables.add(QAutoIncrement.valueOf(buf));
 					break;
 				case BinlogConstanst.Q_CATALOG_CODE:
-					statusVariables.add(QCatalogCode.valueOf(buf));
+					parsedStatusVariables.add(QCatalogCode.valueOf(buf));
 					break;
 				case BinlogConstanst.Q_CATALOG_NZ_CODE:
-					statusVariables.add(QCatalogNZCode.valueOf(buf));
+					parsedStatusVariables.add(QCatalogNZCode.valueOf(buf));
 					break;
 				case BinlogConstanst.Q_CHARSET_CODE:
-					statusVariables.add(QCharsetCode.valueOf(buf));
+					parsedStatusVariables.add(QCharsetCode.valueOf(buf));
 					break;
 				case BinlogConstanst.Q_CHARSET_DATABASE_CODE:
-					statusVariables.add(QCharsetDatabaseCode.valueOf(buf));
+					parsedStatusVariables.add(QCharsetDatabaseCode.valueOf(buf));
 					break;
 				case BinlogConstanst.Q_FLAGS2_CODE:
-					statusVariables.add(QFlags2Code.valueOf(buf));
+					parsedStatusVariables.add(QFlags2Code.valueOf(buf));
 					break;
 				case BinlogConstanst.Q_LC_TIME_NAMES_CODE:
-					statusVariables.add(QLCTimeNamesCode.valueOf(buf));
+					parsedStatusVariables.add(QLCTimeNamesCode.valueOf(buf));
 					break;
 				case BinlogConstanst.Q_SQL_MODE_CODE:
-					statusVariables.add(QSQLModeCode.valueOf(buf));
+					parsedStatusVariables.add(QSQLModeCode.valueOf(buf));
 					break;
 				case BinlogConstanst.Q_TABLE_MAP_FOR_UPDATE_CODE:
-					statusVariables.add(QTableMapForUpdateCode.valueOf(buf));
+					parsedStatusVariables.add(QTableMapForUpdateCode.valueOf(buf));
 					break;
 				case BinlogConstanst.Q_TIME_ZONE_CODE:
-					statusVariables.add(QTimeZoneCode.valueOf(buf));
+					parsedStatusVariables.add(QTimeZoneCode.valueOf(buf));
 					break;
 				default:
 					abort = true;
 					break;
 			}
 		}
-		return statusVariables;
+		return parsedStatusVariables;
 	}
 }

@@ -59,8 +59,9 @@ public final class NullColumn implements Column {
 	}
 
 	public static final NullColumn valueOf(int type) {
-		if (type < 0 || type >= CACHE.length)
+		if (type < 0 || type >= CACHE.length) {
 			throw new IllegalArgumentException("invalid type: " + type);
+		}
 		return CACHE[type];
 	}
 }

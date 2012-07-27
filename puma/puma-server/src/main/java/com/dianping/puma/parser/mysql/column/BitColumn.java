@@ -69,8 +69,9 @@ public final class BitColumn implements Column {
 	}
 
 	public static final BitColumn valueOf(int length, byte[] value) {
-		if (length < 0 || length > (value.length << 3))
+		if (length < 0 || length > (value.length << 3)) {
 			throw new IllegalArgumentException("invalid length: " + length);
+		}
 		return new BitColumn(length, value);
 	}
 

@@ -21,7 +21,11 @@ package com.dianping.puma.parser.mysql;
  * @author Leo Liang
  * 
  */
-public class BinlogConstanst {
+public final class BinlogConstanst {
+	private BinlogConstanst() {
+
+	}
+
 	// event type
 	public static final byte	UNKNOWN_EVENT				= 0;
 	public static final byte	START_EVENT_V3				= 1;

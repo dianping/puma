@@ -72,7 +72,7 @@ public abstract class PumaServerIntegrationBaseTest {
 	private File					storageSlaveBaseDir		= new File(System.getProperty("java.io.tmpdir", "."),
 																	"Puma/bak/");
 	private File					confBaseDir				= new File(System.getProperty("java.io.tmpdir", "."),
-																	"PumaConf");
+																	"PumaConf/");
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
@@ -102,6 +102,7 @@ public abstract class PumaServerIntegrationBaseTest {
 
 		MMapBasedBinlogPositionHolder binlogPositionHolder = new MMapBasedBinlogPositionHolder();
 		binlogPositionHolder.setBaseDir(confBaseDir.getAbsolutePath());
+		binlogPositionHolder.init();
 
 		// init parser
 		Parser parser = new DefaultBinlogParser();
@@ -191,7 +192,7 @@ public abstract class PumaServerIntegrationBaseTest {
 	}
 
 	protected List<ChangedEvent> getEvents(int n, boolean needTs) throws Exception {
-		Thread.sleep(50);
+		waitForSync(50);
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
 		EventChannel channel = storage.getChannel(-1);
 		for (int i = 0; i < n;) {
@@ -209,6 +210,10 @@ public abstract class PumaServerIntegrationBaseTest {
 		}
 		channel.close();
 		return result;
+	}
+
+	protected void waitForSync(long ms) throws Exception {
+		Thread.sleep(ms);
 	}
 
 	protected void executeSql(String script) throws Exception {

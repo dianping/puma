@@ -159,7 +159,9 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 		if (bucket != null) {
 			bucket.seek(offset);
 			try {
-				bucket.getNext();
+				if (seq != -1L && seq != -2L) {
+					bucket.getNext();
+				}
 			} catch (EOFException e) {
 				// ignore
 			}

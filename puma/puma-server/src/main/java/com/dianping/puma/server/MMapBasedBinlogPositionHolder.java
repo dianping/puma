@@ -47,16 +47,15 @@ public class MMapBasedBinlogPositionHolder implements BinlogPositionHolder {
 	private static final long					DEFAULT_BINLOGPOS		= 4L;
 	private static final int					MAX_FILE_SIZE			= 200;
 	private static final byte[]					BUF_MASK				= new byte[MAX_FILE_SIZE];
-	private String								baseDir;
+	private File								baseDir;
 
 	public void init() {
-		File fileBase = new File(baseDir);
-		if (!fileBase.exists()) {
-			if (!fileBase.mkdirs()) {
-				throw new RuntimeException("Fail to make dir for " + fileBase.getAbsolutePath());
+		if (!baseDir.exists()) {
+			if (!baseDir.mkdirs()) {
+				throw new RuntimeException("Fail to make dir for " + baseDir.getAbsolutePath());
 			}
 		}
-		String[] configs = fileBase.list(new FilenameFilter() {
+		String[] configs = baseDir.list(new FilenameFilter() {
 
 			@Override
 			public boolean accept(File dir, String name) {
@@ -88,7 +87,7 @@ public class MMapBasedBinlogPositionHolder implements BinlogPositionHolder {
 	}
 
 	private void loadFromFile(String fileName) {
-		String path = baseDir + fileName;
+		String path = (new File(baseDir, fileName)).getAbsolutePath();
 		File f = new File(path);
 
 		FileReader fr = null;
@@ -127,7 +126,7 @@ public class MMapBasedBinlogPositionHolder implements BinlogPositionHolder {
 	}
 
 	private synchronized void saveToFile(String serverName, PositionInfo positionInfor) {
-		String path = baseDir + getConfFileName(serverName);
+		String path = new File(baseDir, getConfFileName(serverName)).getAbsolutePath();
 		if (!mappedByteBufferMapping.containsKey(path)) {
 			File f = new File(path);
 			if (!f.exists()) {
@@ -160,7 +159,7 @@ public class MMapBasedBinlogPositionHolder implements BinlogPositionHolder {
 
 	@Override
 	public void setBaseDir(String baseDir) {
-		this.baseDir = baseDir;
+		this.baseDir = new File(baseDir);
 	}
 
 }

@@ -88,7 +88,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertNull(rowChangedEvent.getColumns().get("id").getOldValue());
 
 				Assert.assertTrue(events.get(2) instanceof RowChangedEvent);
-				rowChangedEvent = (RowChangedEvent) events.get(0);
+				rowChangedEvent = (RowChangedEvent) events.get(2);
 				Assert.assertTrue(rowChangedEvent.isTransactionCommit());
 				Assert.assertEquals(host + ":" + port, rowChangedEvent.getMasterUrl());
 			}
@@ -115,6 +115,40 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(1, rowChangedEvent.getColumns().size());
 				Assert.assertEquals(2, rowChangedEvent.getColumns().get("id").getNewValue());
 				Assert.assertEquals(1, rowChangedEvent.getColumns().get("id").getOldValue());
+			}
+		});
+	}
+
+	@Test
+	public void testUpdateWithTransaction() throws Exception {
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id=2 WHERE id=1");
+				List<ChangedEvent> events = getEvents(3, true);
+				Assert.assertEquals(3, events.size());
+
+				Assert.assertTrue(events.get(0) instanceof RowChangedEvent);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.isTransactionBegin());
+				Assert.assertEquals(host + ":" + port, rowChangedEvent.getMasterUrl());
+				Assert.assertEquals(db, rowChangedEvent.getDatabase());
+
+				Assert.assertTrue(events.get(1) instanceof RowChangedEvent);
+				rowChangedEvent = (RowChangedEvent) events.get(1);
+				Assert.assertEquals(RowChangedEvent.UPDATE, rowChangedEvent.getActionType());
+				Assert.assertEquals(table, rowChangedEvent.getTable());
+				Assert.assertEquals(host + ":" + port, rowChangedEvent.getMasterUrl());
+				Assert.assertEquals(db, rowChangedEvent.getDatabase());
+				Assert.assertEquals(1, rowChangedEvent.getColumns().size());
+				Assert.assertEquals(2, rowChangedEvent.getColumns().get("id").getNewValue());
+				Assert.assertEquals(1, rowChangedEvent.getColumns().get("id").getOldValue());
+
+				Assert.assertTrue(events.get(2) instanceof RowChangedEvent);
+				rowChangedEvent = (RowChangedEvent) events.get(2);
+				Assert.assertTrue(rowChangedEvent.isTransactionCommit());
+				Assert.assertEquals(host + ":" + port, rowChangedEvent.getMasterUrl());
 			}
 		});
 	}

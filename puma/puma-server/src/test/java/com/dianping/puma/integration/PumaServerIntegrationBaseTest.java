@@ -119,6 +119,7 @@ public abstract class PumaServerIntegrationBaseTest {
 		// init index
 		LocalFileBucketIndex masterIndex = new LocalFileBucketIndex();
 		masterIndex.setBaseDir(storageMasterBaseDir.getAbsolutePath());
+		masterIndex.setMaxBucketLengthMB(1);
 		masterIndex.init();
 		LocalFileBucketIndex slaveIndex = new LocalFileBucketIndex();
 		slaveIndex.setBaseDir(storageSlaveBaseDir.getAbsolutePath());

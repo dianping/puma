@@ -531,8 +531,6 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertNull(rowEvent.getColumns().get("id").getOldValue());
 				Assert.assertEquals(1, rowEvent.getColumns().get("id").getNewValue());
 
-
-
 				rowEvent = (RowChangedEvent) events.get(2);
 				Assert.assertEquals(db, rowEvent.getDatabase());
 				Assert.assertEquals(host + ":" + port, rowEvent.getMasterUrl());
@@ -541,7 +539,6 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(1, rowEvent.getColumns().size());
 				Assert.assertEquals(1, rowEvent.getColumns().get("id").getOldValue());
 				Assert.assertEquals(2, rowEvent.getColumns().get("id").getNewValue());
-
 
 				rowEvent = (RowChangedEvent) events.get(3);
 				Assert.assertEquals(db, rowEvent.getDatabase());
@@ -571,8 +568,8 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 
 			@Override
 			public void doLogic() throws Exception {
-
-				for (int i = 0; i < 1000; i++) {
+				int count = 3000;
+				for (int i = 0; i < count; i++) {
 					if (i % 3 == 0) {
 						executeSql("INSERT INTO " + table + " values(1)");
 					} else if (i % 3 == 1) {
@@ -582,8 +579,8 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 					}
 				}
 
-				List<ChangedEvent> events = getEvents(3000, true);
-				for (int i = 0; i < 3000; i += 3) {
+				List<ChangedEvent> events = getEvents(3 * count, true);
+				for (int i = 0; i < 3 * count; i += 3) {
 					if ((i / 3) % 3 == 0) {
 						Assert.assertTrue(events.get(i) instanceof RowChangedEvent);
 						RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(i);

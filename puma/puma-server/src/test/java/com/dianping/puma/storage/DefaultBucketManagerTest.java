@@ -2,7 +2,9 @@ package com.dianping.puma.storage;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import junit.framework.Assert;
@@ -49,7 +51,7 @@ public class DefaultBucketManagerTest {
 
 		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/null");
 		if (work.mkdirs())
-			System.out.println("create a file! " + work.getAbsolutePath());
+			System.out.println("create a file: " + work.getAbsolutePath());
 		masterIndex = new LocalFileBucketIndex();
 		((AbstractBucketIndex) masterIndex).setBaseDir(System.getProperty("java.io.tmpdir", ".") + "/Puma/master");
 		((AbstractBucketIndex) masterIndex).setBucketFilePrefix("bucket-");
@@ -115,9 +117,9 @@ public class DefaultBucketManagerTest {
 		} catch (IOException e) {
 
 		}
-		
+
 		bucketManager = new DefaultBucketManager(500, masterNullIndex, slaveIndex, archiveStrategy);
-		bucket=null;
+		bucket = null;
 		bucket = bucketManager.getReadBucket(-1);
 		Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
 		Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
@@ -130,7 +132,7 @@ public class DefaultBucketManagerTest {
 		bucket.close();
 
 		sequence = new Sequence(120711, 1, 0);
-		
+
 		try {
 			bucket = bucketManager.getReadBucket(sequence.longValue());
 			Assert.fail();
@@ -147,8 +149,216 @@ public class DefaultBucketManagerTest {
 
 		}
 
+		bucketManager = new DefaultBucketManager(500, masterIndex, slaveNullIndex, archiveStrategy);
+
+		bucket = bucketManager.getReadBucket(-1);
+		Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
+		Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
+		bucket.close();
+
+		sequence = new Sequence(120710, 0, 0);
+		try {
+			bucket = bucketManager.getReadBucket(sequence.longValue());
+			Assert.fail();
+		} catch (IOException e) {
+
+		}
+
+		sequence = new Sequence(120711, 1, 0);
+		bucket = bucketManager.getReadBucket(sequence.longValue());
+		Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
+		Assert.assertEquals(1, bucket.getStartingSequece().getNumber());
+		bucket.close();
+
+		sequence = new Sequence(120712, 0);
+
+		try {
+			bucket = bucketManager.getReadBucket(sequence.longValue());
+			Assert.fail();
+		} catch (IOException e) {
+
+		}
+
+		bucketManager = new DefaultBucketManager(500, masterNullIndex, slaveNullIndex, archiveStrategy);
+		try {
+			bucket = bucketManager.getReadBucket(-1);
+		} catch (IOException e) {
+		}
+
 	}
 
+	@Test
+	public void testGetNextReadBucket() throws StorageClosedException, IOException {
+		bucketManager = new DefaultBucketManager(500, masterIndex, slaveIndex, archiveStrategy);
+
+		Sequence sequence = new Sequence(120710, 0, 0);
+		Bucket bucket = bucketManager.getNextReadBucket(sequence.longValue());
+		Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
+		Assert.assertEquals(1, bucket.getStartingSequece().getNumber());
+		bucket.close();
+
+		sequence = new Sequence(120711, 0, 0);
+		bucket = bucketManager.getNextReadBucket(sequence.longValue());
+		Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
+		Assert.assertEquals(1, bucket.getStartingSequece().getNumber());
+		bucket.close();
+
+		sequence = new Sequence(120711, 1);
+
+		try {
+			bucket = bucketManager.getNextReadBucket(sequence.longValue());
+			Assert.fail();
+		} catch (IOException e) {
+
+		}
+
+		bucketManager = new DefaultBucketManager(500, masterNullIndex, slaveIndex, archiveStrategy);
+		bucket = null;
+
+		sequence = new Sequence(120710, 0, 0);
+		bucket = bucketManager.getNextReadBucket(sequence.longValue());
+		Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
+		Assert.assertEquals(1, bucket.getStartingSequece().getNumber());
+		bucket.close();
+
+		sequence = new Sequence(120711, 1, 0);
+
+		try {
+			bucket = bucketManager.getNextReadBucket(sequence.longValue());
+			Assert.fail();
+		} catch (IOException e) {
+
+		}
+
+		sequence = new Sequence(120712, 0);
+
+		try {
+			bucket = bucketManager.getNextReadBucket(sequence.longValue());
+			Assert.fail();
+		} catch (IOException e) {
+
+		}
+
+		bucketManager = new DefaultBucketManager(500, masterIndex, slaveNullIndex, archiveStrategy);
+		sequence = new Sequence(120710, 0, 0);
+		bucket = bucketManager.getNextReadBucket(sequence.longValue());
+		Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
+		Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
+		bucket.close();
+
+		sequence = new Sequence(120711, 0, 0);
+		bucket = bucketManager.getNextReadBucket(sequence.longValue());
+		Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
+		Assert.assertEquals(1, bucket.getStartingSequece().getNumber());
+		bucket.close();
+
+		sequence = new Sequence(120711, 1);
+
+		try {
+			bucket = bucketManager.getNextReadBucket(sequence.longValue());
+			Assert.fail();
+		} catch (IOException e) {
+
+		}
+
+		bucketManager = new DefaultBucketManager(500, masterNullIndex, slaveNullIndex, archiveStrategy);
+		sequence = new Sequence(120711, 1);
+		bucket = null;
+		try {
+			bucket = bucketManager.getNextReadBucket(sequence.longValue());
+			Assert.fail();
+		} catch (IOException e) {
+
+		}
+
+	}
+
+	@Test
+	public void testGetNextWriteBucket() throws StorageClosedException, IOException {
+		bucketManager = new DefaultBucketManager(500, masterIndex, slaveIndex, archiveStrategy);
+
+		// TDODO
+		Bucket bucket = bucketManager.getNextWriteBucket();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
+		Assert.assertEquals(new Sequence(Integer.valueOf(sdf.format(new Date())), 0).getCreationDate(), bucket
+				.getStartingSequece().getCreationDate());
+		Assert.assertEquals(new Sequence(Integer.valueOf(sdf.format(new Date())), 0).getNumber(), bucket
+				.getStartingSequece().getNumber());
+		Assert.assertEquals(3, masterIndex.size());
+		Assert.assertEquals(2, slaveIndex.size());
+		bucket.close();
+
+		List<String> paths = new ArrayList<String>();
+		Sequence sequence = new Sequence(Integer.valueOf(sdf.format(new Date())), 0);
+		String path = "20" + String.valueOf(sequence.getCreationDate()) + "/bucket-0";
+		paths.add(path);
+		masterIndex.remove(paths);
+	}
+	
+	@Test
+	public void testHasNexReadBucket() throws StorageClosedException, IOException
+	{
+		bucketManager = new DefaultBucketManager(500, masterIndex, slaveIndex, archiveStrategy);
+
+		Sequence sequence = new Sequence(120710, 0, 0);
+		Assert.assertTrue( bucketManager.hasNexReadBucket(sequence.longValue()));
+
+		sequence = new Sequence(120711, 0, 0);
+		Assert.assertTrue( bucketManager.hasNexReadBucket(sequence.longValue()));
+
+		sequence = new Sequence(120711, 1);
+
+		Assert.assertTrue(!bucketManager.hasNexReadBucket(sequence.longValue()));
+
+		bucketManager = new DefaultBucketManager(500, masterNullIndex, slaveIndex, archiveStrategy);
+
+		sequence = new Sequence(120710, 0, 0);
+		Assert.assertTrue( bucketManager.hasNexReadBucket(sequence.longValue()));
+
+		sequence = new Sequence(120711, 1, 0);
+
+		Assert.assertTrue( !bucketManager.hasNexReadBucket(sequence.longValue()));
+
+		sequence = new Sequence(120712, 0);
+
+		Assert.assertTrue(! bucketManager.hasNexReadBucket(sequence.longValue()));
+
+		bucketManager = new DefaultBucketManager(500, masterIndex, slaveNullIndex, archiveStrategy);
+
+		sequence = new Sequence(120711, 0, 0);
+		Assert.assertTrue( bucketManager.hasNexReadBucket(sequence.longValue()));
+
+		sequence = new Sequence(120711, 1);
+
+		Assert.assertTrue(! bucketManager.hasNexReadBucket(sequence.longValue()));
+
+		bucketManager = new DefaultBucketManager(500, masterNullIndex, slaveNullIndex, archiveStrategy);
+		sequence = new Sequence(120711, 1);
+		Assert.assertTrue(! bucketManager.hasNexReadBucket(sequence.longValue()));
+	}
+	
+	@Test
+	public void testClose()
+	{
+		bucketManager = new DefaultBucketManager(500, masterIndex, slaveIndex, archiveStrategy);
+		bucketManager.close();
+		Sequence seq= new Sequence(120711, 1);
+		try {
+			bucketManager.hasNexReadBucket(seq.longValue());
+			Assert.fail();
+		} catch (StorageClosedException e) {
+		} catch (IOException e) {
+			Assert.fail();
+		}
+	}
+	@Test
+	public void testUpdateLatestSequence()
+	{
+		bucketManager = new DefaultBucketManager(500, masterIndex, slaveIndex, archiveStrategy);
+		bucketManager.updateLatestSequence(new Sequence(120712,0));
+		
+	}
+	
 	@After
 	public void after() throws IOException {
 		masterIndex.close();

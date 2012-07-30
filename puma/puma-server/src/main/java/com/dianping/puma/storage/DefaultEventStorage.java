@@ -20,7 +20,7 @@ public class DefaultEventStorage implements EventStorage {
 	private Bucket								writingBucket;
 	private EventCodec							codec;
 	private List<WeakReference<EventChannel>>	openChannels		= new ArrayList<WeakReference<EventChannel>>();
-	private volatile boolean					stopped				= false;
+	private volatile boolean					stopped				= true;
 	private int									maxMasterFileCount	= 20;
 	private BucketIndex							masterIndex;
 	private BucketIndex							slaveIndex;
@@ -28,6 +28,7 @@ public class DefaultEventStorage implements EventStorage {
 	private String								name;
 
 	public void initialize() throws StorageException {
+		stopped = false;
 		bucketManager = new DefaultBucketManager(maxMasterFileCount, masterIndex, slaveIndex, archiveStrategy);
 		try {
 			bucketManager.init();

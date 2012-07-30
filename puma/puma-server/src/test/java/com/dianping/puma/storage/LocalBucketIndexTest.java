@@ -58,7 +58,7 @@ public class LocalBucketIndexTest {
 	}
 
 	@Test
-	public void testInit() {
+	public void testInit() throws Exception {
 
 		System.out.println("************************************************************");
 		System.out.println("***************************Init*****************************");
@@ -78,7 +78,7 @@ public class LocalBucketIndexTest {
 	}
 
 	@Test
-	public void testAddBucket() {
+	public void testAddBucket() throws Exception {
 		System.out.println("*************************************************************");
 		System.out.println("***********************testAddBucket*************************");
 		System.out.println("*************************************************************");
@@ -119,7 +119,7 @@ public class LocalBucketIndexTest {
 	}
 
 	@Test
-	public void testAddBucketList() {
+	public void testAddBucketList() throws Exception {
 		System.out.println("*************************************************************");
 		System.out.println("*********************testAddBucketList***********************");
 		System.out.println("*************************************************************");
@@ -164,7 +164,7 @@ public class LocalBucketIndexTest {
 	}
 
 	@Test
-	public void testBulkGetRemainN() {
+	public void testBulkGetRemainN() throws Exception {
 		System.out.println("************************************************************");
 		System.out.println("********************testBulkGetRemainN**********************");
 		System.out.println("************************************************************");
@@ -212,7 +212,7 @@ public class LocalBucketIndexTest {
 	}
 
 	@Test
-	public void testGetNextReadBucket() {
+	public void testGetNextReadBucket() throws Exception {
 		System.out.println("*************************************************************");
 		System.out.println("*******************testGetNextReadBucket*********************");
 		System.out.println("*************************************************************");
@@ -262,7 +262,7 @@ public class LocalBucketIndexTest {
 	}
 
 	@Test
-	public void testGetNextWriteBucket() {
+	public void testGetNextWriteBucket() throws Exception {
 		System.out.println("**************************************************************");
 		System.out.println("*******************testGetNextWriteBucket*********************");
 		System.out.println("**************************************************************");
@@ -314,7 +314,7 @@ public class LocalBucketIndexTest {
 	}
 
 	@Test
-	public void testHasNexReadBucket() {
+	public void testHasNexReadBucket() throws Exception {
 		System.out.println("**************************************************************");
 		System.out.println("********************testHasNexReadBucket**********************");
 		System.out.println("**************************************************************");
@@ -353,7 +353,7 @@ public class LocalBucketIndexTest {
 	}
 
 	@Test
-	public void testGetReadBucketEmpty() {
+	public void testGetReadBucketEmpty() throws Exception {
 		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma");
 
 		try {
@@ -384,7 +384,7 @@ public class LocalBucketIndexTest {
 	}
 
 	@Test
-	public void testGetReadBucket() {
+	public void testGetReadBucket() throws Exception {
 		System.out.println("*************************************************************");
 		System.out.println("*********************testGetReadBucket***********************");
 		System.out.println("*************************************************************");
@@ -470,7 +470,7 @@ public class LocalBucketIndexTest {
 	}
 
 	@Test
-	public void testSize() {
+	public void testSize() throws Exception {
 		System.out.println("************************************************************");
 		System.out.println("*************************testSize***************************");
 		System.out.println("************************************************************");
@@ -496,7 +496,7 @@ public class LocalBucketIndexTest {
 	}
 
 	@Test
-	public void testClose() {
+	public void testClose() throws Exception {
 		System.out.println("*************************************************************");
 		System.out.println("*************************testClose***************************");
 		System.out.println("*************************************************************");
@@ -519,7 +519,7 @@ public class LocalBucketIndexTest {
 	}
 
 	@Test
-	public void testGetBaseDir() {
+	public void testGetBaseDir() throws Exception {
 		System.out.println("**************************************************************");
 		System.out.println("***********************testGetBaseDir*************************");
 		System.out.println("**************************************************************");
@@ -533,7 +533,7 @@ public class LocalBucketIndexTest {
 	}
 
 	@Test
-	public void testCopyFromLocal() {
+	public void testCopyFromLocal() throws Exception {
 		System.out.println("***************************************************************");
 		System.out.println("**********************testCopyFromLocal************************");
 		System.out.println("***************************************************************");
@@ -608,7 +608,7 @@ public class LocalBucketIndexTest {
 	}
 
 	@Test
-	public void testRemove() {
+	public void testRemove() throws Exception {
 		System.out.println("**************************************************************");
 		System.out.println("*************************testRemove***************************");
 		System.out.println("**************************************************************");
@@ -638,7 +638,7 @@ public class LocalBucketIndexTest {
 	}
 
 	@Test
-	public void testUpdateLatestSequence() {
+	public void testUpdateLatestSequence() throws Exception {
 		System.out.println("**************************************************************");
 		System.out.println("******************testUpdateLatestSequence********************");
 		System.out.println("**************************************************************");

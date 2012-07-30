@@ -41,7 +41,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	private String										baseDir;
 	private String										bucketFilePrefix	= "b-";
 	private int											maxBucketLengthMB	= 2000;
-	private volatile boolean							stop				= false;
+	private volatile boolean							stopped				= true;
 	private AtomicReference<Sequence>					latestSequence		= new AtomicReference<Sequence>();
 
 	/**
@@ -69,7 +69,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	 * @return the stop
 	 */
 	public boolean isStop() {
-		return stop;
+		return stopped;
 	}
 
 	/**
@@ -93,7 +93,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 
 	@Override
 	public void init() throws Exception {
-
+		stopped = false;
 	}
 
 	@Override
@@ -216,15 +216,15 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	}
 
 	public void close() {
-		if (stop) {
+		if (stopped) {
 			return;
 		}
-		stop = true;
+		stopped = true;
 	}
 
 	private void checkClosed() throws StorageClosedException {
-		if (stop) {
-			throw new StorageClosedException("Bucket manager has been closed.");
+		if (stopped) {
+			throw new StorageClosedException("Bucket index has been closed.");
 		}
 	}
 

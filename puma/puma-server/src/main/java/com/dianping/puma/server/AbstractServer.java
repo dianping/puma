@@ -197,6 +197,7 @@ public abstract class AbstractServer implements Server, Notifiable {
 	protected abstract void doStart() throws Exception;
 
 	public void start() throws Exception {
+		stop = false;
 		doStart();
 	}
 

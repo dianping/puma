@@ -15,7 +15,7 @@ public class DefaultBucketManager implements BucketManager {
 
 	private ArchiveStrategy		archiveStrategy;
 
-	private volatile boolean	stopped	= false;
+	private volatile boolean	stopped	= true;
 	private int					maxMasterFileCount;
 
 	public DefaultBucketManager(int maxMasterFileCount, BucketIndex masterIndex, BucketIndex slaveIndex,
@@ -24,7 +24,6 @@ public class DefaultBucketManager implements BucketManager {
 		this.archiveStrategy = archiveStrategy;
 		this.masterIndex = masterIndex;
 		this.slaveIndex = slaveIndex;
-
 	}
 
 	private void checkClosed() throws StorageClosedException {
@@ -115,6 +114,7 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	public synchronized void init() {
+		stopped = false;
 		startArchiveJob();
 	}
 

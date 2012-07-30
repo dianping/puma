@@ -46,7 +46,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 	 * @see com.dianping.puma.storage.AbstractBucketIndex#init()
 	 */
 	@Override
-	public void init() {
+	public void init() throws Exception {
 		File localBaseDir = new File(getBaseDir());
 		if (!localBaseDir.exists()) {
 			if (!localBaseDir.mkdirs()) {
@@ -54,6 +54,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 			}
 		}
 		TreeMap<Sequence, String> newIndex = new TreeMap<Sequence, String>(new PathSequenceComparator());
+		getIndex().set(newIndex);
 		File[] dirs = localBaseDir.listFiles(new FileFilter() {
 
 			@Override
@@ -87,7 +88,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 				}
 			}
 		}
-		getIndex().set(newIndex);
+		super.init();
 	}
 
 	@Override

@@ -59,21 +59,24 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
  * 
  */
 public abstract class PumaServerIntegrationBaseTest {
-	private static final String		dbConfigFile			= "PumaServerIntegrationTest.properties";
-	private static MysqlDataSource	ds;
-	protected static String			host;
-	protected static int			port;
-	private static String			pwd;
-	private static String			user;
-	protected static String			db;
-	private ReplicationBasedServer	server;
-	private DefaultEventStorage		storage;
-	private static File				storageMasterBaseDir	= new File(System.getProperty("java.io.tmpdir", "."),
-																	"Puma");
-	private static File				storageSlaveBaseDir		= new File(System.getProperty("java.io.tmpdir", "."),
-																	"Puma/bak/");
-	private static File				confBaseDir				= new File(System.getProperty("java.io.tmpdir", "."),
-																	"PumaConf/");
+	private static final String			dbConfigFile			= "PumaServerIntegrationTest.properties";
+	private static MysqlDataSource		ds;
+	protected static String				host;
+	protected static int				port;
+	private static String				pwd;
+	private static String				user;
+	protected static String				db;
+	protected ReplicationBasedServer	server;
+	protected DefaultEventStorage		storage;
+	protected LocalFileBucketIndex		masterIndex;
+	protected LocalFileBucketIndex		slaveIndex;
+	protected FileDumpSender			sender;
+	private static File					storageMasterBaseDir	= new File(System.getProperty("java.io.tmpdir", "."),
+																		"Puma");
+	private static File					storageSlaveBaseDir		= new File(System.getProperty("java.io.tmpdir", "."),
+																		"Puma/bak/");
+	private static File					confBaseDir				= new File(System.getProperty("java.io.tmpdir", "."),
+																		"PumaConf/");
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
@@ -119,18 +122,18 @@ public abstract class PumaServerIntegrationBaseTest {
 		dataHandler.start();
 
 		// init index
-		LocalFileBucketIndex masterIndex = new LocalFileBucketIndex();
+		masterIndex = new LocalFileBucketIndex();
 		masterIndex.setBaseDir(storageMasterBaseDir.getAbsolutePath());
 		masterIndex.setMaxBucketLengthMB(1);
 		masterIndex.init();
-		LocalFileBucketIndex slaveIndex = new LocalFileBucketIndex();
+		slaveIndex = new LocalFileBucketIndex();
 		slaveIndex.setBaseDir(storageSlaveBaseDir.getAbsolutePath());
 		slaveIndex.init();
 
 		// init storage
 		storage = new DefaultEventStorage();
 		storage.setCodec(new JsonEventCodec());
-		storage.setMaxMasterFileCount(1);
+		storage.setMaxMasterFileCount(10);
 		storage.setArchiveStrategy(new ArchiveStrategy() {
 
 			@Override
@@ -143,10 +146,11 @@ public abstract class PumaServerIntegrationBaseTest {
 		storage.initialize();
 
 		// init sender
-		FileDumpSender sender = new FileDumpSender();
+		sender = new FileDumpSender();
 		sender.setName("test-sender");
 		sender.setStorage(storage);
 		sender.setNotifyService(mockNotifyService);
+		sender.start();
 
 		// init dispatcher
 		SimpleDispatherImpl dispatcher = new SimpleDispatherImpl();

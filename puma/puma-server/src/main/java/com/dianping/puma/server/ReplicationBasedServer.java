@@ -64,7 +64,7 @@ public class ReplicationBasedServer extends AbstractServer {
 	@Override
 	public void doStart() throws Exception {
 
-		int failCount = 0;
+		long failCount = 0;
 		do {
 			try {
 				// 读position/file文件
@@ -83,7 +83,6 @@ public class ReplicationBasedServer extends AbstractServer {
 							+ " user: " + user + " database: " + database);
 
 					if (dumpBinlog()) {
-						failCount = 0;
 						log.info("Dump binlog command success.");
 						processBinlog();
 					} else {

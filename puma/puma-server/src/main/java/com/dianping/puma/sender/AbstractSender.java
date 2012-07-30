@@ -12,14 +12,14 @@ public abstract class AbstractSender implements Sender, Notifiable {
 	private String				name;
 	private int					maxTryTimes		= 3;
 	private boolean				canMissEvent	= false;
-	private volatile boolean	stop			= false;
+	private volatile boolean	stopped			= true;
 	private NotifyService		notifyService;
 
 	/**
 	 * @return the stop
 	 */
 	public boolean isStop() {
-		return stop;
+		return stopped;
 	}
 
 	/**
@@ -74,7 +74,7 @@ public abstract class AbstractSender implements Sender, Notifiable {
 	 */
 	@Override
 	public void start() throws Exception {
-
+		stopped = false;
 	}
 
 	/*
@@ -84,7 +84,7 @@ public abstract class AbstractSender implements Sender, Notifiable {
 	 */
 	@Override
 	public void stop() throws Exception {
-		stop = true;
+		stopped = true;
 	}
 
 	/*
@@ -105,7 +105,7 @@ public abstract class AbstractSender implements Sender, Notifiable {
 	public void send(ChangedEvent event, PumaContext context) throws Exception {
 		long retryCount = 0;
 		while (true) {
-			if (stop) {
+			if (isStop()) {
 				break;
 			}
 			try {

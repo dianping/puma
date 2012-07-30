@@ -87,6 +87,7 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 		this.fileSystem = FileSystem.get(this.hdfsConfig);
 
 		TreeMap<Sequence, String> newIndex = new TreeMap<Sequence, String>(new PathSequenceComparator());
+		getIndex().set(newIndex);
 
 		if (this.fileSystem.getFileStatus(new Path(this.getBaseDir())).isDir()) {
 
@@ -118,7 +119,7 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 
 			}
 		}
-		getIndex().set(newIndex);
+		super.init();
 	}
 
 	@Override

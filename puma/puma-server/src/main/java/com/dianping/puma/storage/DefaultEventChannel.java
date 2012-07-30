@@ -15,7 +15,7 @@ public class DefaultEventChannel implements EventChannel {
 	private EventCodec			codec;
 	private Bucket				bucket;
 	private long				seq;
-	private volatile boolean	stopped	= false;
+	private volatile boolean	stopped	= true;
 
 	public DefaultEventChannel(BucketManager bucketManager, long seq, EventCodec codec) throws StorageException {
 		this.bucketManager = bucketManager;
@@ -26,6 +26,7 @@ public class DefaultEventChannel implements EventChannel {
 		}
 		this.codec = codec;
 		this.seq = bucket.getStartingSequece().longValue();
+		stopped = false;
 
 	}
 

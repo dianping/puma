@@ -20,31 +20,31 @@ package com.dianping.puma.parser.mysql.packet;
  */
 public class AbstractPacket implements Packet {
 
-    private static final long serialVersionUID = -6136841157699357610L;
-    protected int             length;
-    protected int             seq;
+	private static final long	serialVersionUID	= -6136841157699357610L;
+	protected int				length;
+	protected int				seq;
 
-    public void setSeq(int seq) {
-        this.seq = seq;
-    }
+	public void setSeq(int seq) {
+		this.seq = seq;
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.dianping.puma.server.mysql.packet.Packet#length()
-     */
-    @Override
-    public int length() {
-        return length;
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dianping.puma.server.mysql.packet.Packet#length()
+	 */
+	@Override
+	public int length() {
+		return length;
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.dianping.puma.server.mysql.packet.Packet#seq()
-     */
-    @Override
-    public int seq() {
-        return seq;
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dianping.puma.server.mysql.packet.Packet#seq()
+	 */
+	@Override
+	public int seq() {
+		return seq;
+	}
 }

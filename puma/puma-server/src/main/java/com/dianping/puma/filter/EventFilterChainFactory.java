@@ -24,7 +24,7 @@ import java.util.List;
  * @author Leo Liang
  * 
  */
-public class EventFilterChainFactory {
+public final class EventFilterChainFactory {
 	private EventFilterChainFactory() {
 
 	}

@@ -72,7 +72,7 @@ public class SimpleDispatherImpl extends AbstractDispatcher {
 
 			throwExceptionIfNeeded(exceptionList);
 		} else {
-			log.warn("No senders in dispatcher " + name);
+			log.warn("No senders in dispatcher " + getName());
 		}
 	}
 

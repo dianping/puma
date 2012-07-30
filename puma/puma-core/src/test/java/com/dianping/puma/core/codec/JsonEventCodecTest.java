@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.core.util;
+package com.dianping.puma.core.codec;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -25,12 +25,12 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.dianping.puma.core.codec.EventCodec;
-import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
+import com.dianping.puma.core.util.ByteArrayUtils;
+import com.dianping.puma.core.util.StreamUtils;
 
 /**
  * TODO Comment of EventTransportUtilsTest

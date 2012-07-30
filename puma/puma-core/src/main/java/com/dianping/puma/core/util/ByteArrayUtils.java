@@ -20,7 +20,10 @@ package com.dianping.puma.core.util;
  * @author Leo Liang
  * 
  */
-public class ByteArrayUtils {
+public final class ByteArrayUtils {
+	private ByteArrayUtils() {
+
+	}
 
 	public static int byteArrayToInt(byte[] data, int start, int length) {
 		if (length <= 4) {

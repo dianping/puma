@@ -25,7 +25,10 @@ import com.dianping.puma.core.datatype.UnsignedLong;
  * @author Leo Liang
  * 
  */
-public class PacketUtils {
+public final class PacketUtils {
+	private PacketUtils() {
+
+	}
 
 	public static int readInt(ByteBuffer buf, int length) {
 		if ((buf.position() + length) <= buf.limit() && length <= 4) {
@@ -82,18 +85,19 @@ public class PacketUtils {
 
 	public static UnsignedLong readLengthCodedUnsignedLong(ByteBuffer buf) {
 		byte v = buf.get();
-		if (v < 251)
+		if (v < 251) {
 			return UnsignedLong.asUnsigned(v);
-		else if (v == 251)
+		} else if (v == 251) {
 			return null;
-		else if (v == 252)
+		} else if (v == 252) {
 			return UnsignedLong.asUnsigned(readInt(buf, 2));
-		else if (v == 253)
+		} else if (v == 253) {
 			return UnsignedLong.asUnsigned(readInt(buf, 3));
-		else if (v == 254)
+		} else if (v == 254) {
 			return UnsignedLong.asUnsigned(readInt(buf, 8));
-		else
+		} else {
 			return null;
+		}
 	}
 
 	public static String readLengthCodedString(ByteBuffer buf) throws IOException {

@@ -126,10 +126,11 @@ public abstract class AbstractDataHandler implements DataHandler {
 
 		Connection conn = null;
 		Statement stmt = null;
+		ResultSet rs = null;
 		try {
 			conn = metaDs.getConnection();
 			stmt = conn.createStatement();
-			ResultSet rs = stmt
+			rs = stmt
 					.executeQuery("SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS");
 			if (rs != null) {
 				while (rs.next()) {
@@ -161,6 +162,12 @@ public abstract class AbstractDataHandler implements DataHandler {
 		} catch (Exception e) {
 			log.error("Refresh TableMeta failed.", e);
 		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
 			if (stmt != null) {
 				try {
 					stmt.close();

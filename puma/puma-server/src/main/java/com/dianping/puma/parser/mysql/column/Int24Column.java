@@ -55,8 +55,9 @@ public final class Int24Column implements Column {
 	}
 
 	public static final Int24Column valueOf(int value) {
-		if (value < MIN_VALUE || value > MAX_VALUE)
+		if (value < MIN_VALUE || value > MAX_VALUE) {
 			throw new IllegalArgumentException("invalid value: " + value);
+		}
 		final int index = value - Byte.MIN_VALUE;
 		return (index >= 0 && index < CACHE.length) ? CACHE[index] : new Int24Column(value);
 	}

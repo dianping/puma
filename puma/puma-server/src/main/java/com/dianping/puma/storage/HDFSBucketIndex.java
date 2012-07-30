@@ -88,9 +88,9 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 
 		TreeMap<Sequence, String> newIndex = new TreeMap<Sequence, String>(new PathSequenceComparator());
 
-		if (this.fileSystem.getFileStatus(new Path(this.baseDir)).isDir()) {
+		if (this.fileSystem.getFileStatus(new Path(this.getBaseDir())).isDir()) {
 
-			FileStatus[] dirsStatus = this.fileSystem.listStatus(new Path(this.baseDir));
+			FileStatus[] dirsStatus = this.fileSystem.listStatus(new Path(this.getBaseDir()));
 			if (dirsStatus == null || dirsStatus.length == 0) {
 				return;
 			}
@@ -106,8 +106,9 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 						Path[] listedFiles = FileUtil.stat2Paths(status);
 
 						for (Path subFile : listedFiles) {
-							if (subFile.getName().startsWith(bucketFilePrefix)
-									&& StringUtils.isNumeric(subFile.getName().substring(bucketFilePrefix.length()))) {
+							if (subFile.getName().startsWith(getBucketFilePrefix())
+									&& StringUtils.isNumeric(subFile.getName()
+											.substring(getBucketFilePrefix().length()))) {
 								String path = pathname.getName() + PATH_SEPARATOR + subFile.getName();
 								newIndex.put(convertToSequence(path), path);
 							}
@@ -117,7 +118,7 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 
 			}
 		}
-		index.set(newIndex);
+		getIndex().set(newIndex);
 	}
 
 	@Override
@@ -139,7 +140,7 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 		} catch (IOException e) {
 			// ignore
 		}
-		
+
 	}
 
 	/*
@@ -163,6 +164,6 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 			return;
 		}
 
-		fileSystem.copyFromLocalFile(false, true, new Path(srcBaseDir, path), new Path(this.baseDir, path));
+		fileSystem.copyFromLocalFile(false, true, new Path(srcBaseDir, path), new Path(this.getBaseDir(), path));
 	}
 }

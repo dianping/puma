@@ -24,7 +24,11 @@ import java.io.InputStream;
  * @author Leo Liang
  * 
  */
-public class StreamUtils {
+public final class StreamUtils {
+	private StreamUtils() {
+
+	}
+
 	public static int readFully(InputStream in, byte[] b, int off, int len) throws IOException {
 		if (len < 0) {
 			throw new IndexOutOfBoundsException();

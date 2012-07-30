@@ -22,29 +22,28 @@ import com.dianping.puma.bo.PumaContext;
  * @author Leo Liang
  * 
  */
-public class PacketFactory {
+public final class PacketFactory {
+	private PacketFactory() {
+
+	}
 
 	public static ResponsePacket parsePacket(InputStream is, PacketType packetType, PumaContext context)
 			throws IOException {
-		try {
-			switch (packetType) {
-				case CONNECT_PACKET:
-					ResponsePacket greetingPacket = new ConnectPacket();
-					greetingPacket.readPacket(is, context);
-					return greetingPacket;
-				case OKERROR_PACKET:
-					OKErrorPacket okErrorPacket = new OKErrorPacket();
-					okErrorPacket.readPacket(is, context);
-					return okErrorPacket;
-				case BINLOG_PACKET:
-					BinlogPacket binlogPacket = new BinlogPacket();
-					binlogPacket.readPacket(is, context);
-					return binlogPacket;
-				default:
-					return null;
-			}
-		} catch (IOException e) {
-			throw e;
+		switch (packetType) {
+			case CONNECT_PACKET:
+				ResponsePacket greetingPacket = new ConnectPacket();
+				greetingPacket.readPacket(is, context);
+				return greetingPacket;
+			case OKERROR_PACKET:
+				OKErrorPacket okErrorPacket = new OKErrorPacket();
+				okErrorPacket.readPacket(is, context);
+				return okErrorPacket;
+			case BINLOG_PACKET:
+				BinlogPacket binlogPacket = new BinlogPacket();
+				binlogPacket.readPacket(is, context);
+				return binlogPacket;
+			default:
+				return null;
 		}
 	}
 

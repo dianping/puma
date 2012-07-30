@@ -62,14 +62,14 @@ public class DefaultArchiveStrategyTest {
 		Assert.assertEquals(5, masterIndex.size());
 		Assert.assertEquals(7, slaveIndex.size());
 		for (int i = 7; i < 12; i++) {
-			Assert.assertEquals("20120726/bucket-" + i, masterIndex.index.get().get(new Sequence(120726, i)));
+			Assert.assertEquals("20120726/bucket-" + i, masterIndex.getIndex().get().get(new Sequence(120726, i)));
 			File masterFile = new File(masterBaseDir, "20120726/bucket-" + i);
 			Assert.assertTrue(masterFile.exists());
 			File slaveFile = new File(slaveBaseDir, "20120726/bucket-" + i);
 			Assert.assertFalse(slaveFile.exists());
 		}
 		for (int i = 0; i < 7; i++) {
-			Assert.assertEquals("20120726/bucket-" + i, slaveIndex.index.get().get(new Sequence(120726, i)));
+			Assert.assertEquals("20120726/bucket-" + i, slaveIndex.getIndex().get().get(new Sequence(120726, i)));
 			File slaveFile = new File(slaveBaseDir, "20120726/bucket-" + i);
 			Assert.assertTrue(slaveFile.exists());
 			File masterFile = new File(masterBaseDir, "20120726/bucket-" + i);
@@ -102,14 +102,14 @@ public class DefaultArchiveStrategyTest {
 		Assert.assertEquals(12, masterIndex.size());
 		Assert.assertEquals(0, slaveIndex.size());
 		for (int i = 0; i < 12; i++) {
-			Assert.assertEquals("20120726/bucket-" + i, masterIndex.index.get().get(new Sequence(120726, i)));
+			Assert.assertEquals("20120726/bucket-" + i, masterIndex.getIndex().get().get(new Sequence(120726, i)));
 			File masterFile = new File(masterBaseDir, "20120726/bucket-" + i);
 			Assert.assertTrue(masterFile.exists());
 			File slaveFile = new File(slaveBaseDir, "20120726/bucket-" + i);
 			Assert.assertFalse(slaveFile.exists());
 		}
 		for (int i = 0; i < 12; i++) {
-			Assert.assertNull(slaveIndex.index.get().get(new Sequence(120726, i)));
+			Assert.assertNull(slaveIndex.getIndex().get().get(new Sequence(120726, i)));
 		}
 
 	}
@@ -138,14 +138,14 @@ public class DefaultArchiveStrategyTest {
 		Assert.assertEquals(12, masterIndex.size());
 		Assert.assertEquals(0, slaveIndex.size());
 		for (int i = 0; i < 12; i++) {
-			Assert.assertEquals("20120726/bucket-" + i, masterIndex.index.get().get(new Sequence(120726, i)));
+			Assert.assertEquals("20120726/bucket-" + i, masterIndex.getIndex().get().get(new Sequence(120726, i)));
 			File masterFile = new File(masterBaseDir, "20120726/bucket-" + i);
 			Assert.assertTrue(masterFile.exists());
 			File slaveFile = new File(slaveBaseDir, "20120726/bucket-" + i);
 			Assert.assertFalse(slaveFile.exists());
 		}
 		for (int i = 0; i < 12; i++) {
-			Assert.assertNull(slaveIndex.index.get().get(new Sequence(120726, i)));
+			Assert.assertNull(slaveIndex.getIndex().get().get(new Sequence(120726, i)));
 		}
 
 	}
@@ -180,14 +180,14 @@ public class DefaultArchiveStrategyTest {
 		Assert.assertEquals(5, masterIndex.size());
 		Assert.assertEquals(19, slaveIndex.size());
 		for (int i = 7; i < 12; i++) {
-			Assert.assertEquals("20120726/bucket-" + i, masterIndex.index.get().get(new Sequence(120726, i)));
+			Assert.assertEquals("20120726/bucket-" + i, masterIndex.getIndex().get().get(new Sequence(120726, i)));
 			File masterFile = new File(masterBaseDir, "20120726/bucket-" + i);
 			Assert.assertTrue(masterFile.exists());
 			File slaveFile = new File(slaveBaseDir, "20120726/bucket-" + i);
 			Assert.assertFalse(slaveFile.exists());
 		}
 		for (int i = 0; i < 7; i++) {
-			Assert.assertEquals("20120726/bucket-" + i, slaveIndex.index.get().get(new Sequence(120726, i)));
+			Assert.assertEquals("20120726/bucket-" + i, slaveIndex.getIndex().get().get(new Sequence(120726, i)));
 			File slaveFile = new File(slaveBaseDir, "20120726/bucket-" + i);
 			Assert.assertTrue(slaveFile.exists());
 			File masterFile = new File(masterBaseDir, "20120726/bucket-" + i);
@@ -195,7 +195,7 @@ public class DefaultArchiveStrategyTest {
 		}
 
 		for (int i = 0; i < 12; i++) {
-			Assert.assertEquals("20120725/bucket-" + i, slaveIndex.index.get().get(new Sequence(120725, i)));
+			Assert.assertEquals("20120725/bucket-" + i, slaveIndex.getIndex().get().get(new Sequence(120725, i)));
 			File slaveFile = new File(slaveBaseDir, "20120725/bucket-" + i);
 			Assert.assertTrue(slaveFile.exists());
 

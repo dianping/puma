@@ -36,13 +36,48 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  * 
  */
 public abstract class AbstractBucketIndex implements BucketIndex {
-	protected static final String							PATH_SEPARATOR		= "/";
-	protected AtomicReference<TreeMap<Sequence, String>>	index				= new AtomicReference<TreeMap<Sequence, String>>();
-	protected String										baseDir;
-	protected String										bucketFilePrefix	= "b-";
-	protected int											maxBucketLengthMB	= 2000;
-	protected volatile boolean								stop				= false;
-	protected AtomicReference<Sequence>						latestSequence		= new AtomicReference<Sequence>();
+	protected static final String						PATH_SEPARATOR		= "/";
+	private AtomicReference<TreeMap<Sequence, String>>	index				= new AtomicReference<TreeMap<Sequence, String>>();
+	private String										baseDir;
+	private String										bucketFilePrefix	= "b-";
+	private int											maxBucketLengthMB	= 2000;
+	private volatile boolean							stop				= false;
+	private AtomicReference<Sequence>					latestSequence		= new AtomicReference<Sequence>();
+
+	/**
+	 * @return the index
+	 */
+	public AtomicReference<TreeMap<Sequence, String>> getIndex() {
+		return index;
+	}
+
+	/**
+	 * @return the bucketFilePrefix
+	 */
+	public String getBucketFilePrefix() {
+		return bucketFilePrefix;
+	}
+
+	/**
+	 * @return the maxBucketLengthMB
+	 */
+	public int getMaxBucketLengthMB() {
+		return maxBucketLengthMB;
+	}
+
+	/**
+	 * @return the stop
+	 */
+	public boolean isStop() {
+		return stop;
+	}
+
+	/**
+	 * @return the latestSequence
+	 */
+	public AtomicReference<Sequence> getLatestSequence() {
+		return latestSequence;
+	}
 
 	public void setBucketFilePrefix(String bucketFilePrefix) {
 		this.bucketFilePrefix = bucketFilePrefix;

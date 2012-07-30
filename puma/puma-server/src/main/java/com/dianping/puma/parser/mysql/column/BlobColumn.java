@@ -24,7 +24,7 @@ import java.util.Arrays;
  * @author Leo Liang
  * 
  */
-public class BlobColumn implements Column {
+public final class BlobColumn implements Column {
 	private static final long	serialVersionUID	= 7148702557181753593L;
 	private final byte[]		value;
 

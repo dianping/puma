@@ -58,8 +58,9 @@ public final class TinyColumn implements Column {
 	}
 
 	public static final TinyColumn valueOf(int value) {
-		if (value < MIN_VALUE || value > MAX_VALUE)
+		if (value < MIN_VALUE || value > MAX_VALUE) {
 			throw new IllegalArgumentException("invalid value: " + value);
+		}
 		return CACHE[value - Byte.MIN_VALUE];
 	}
 }

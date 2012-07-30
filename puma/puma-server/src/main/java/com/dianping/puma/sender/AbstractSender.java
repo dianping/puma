@@ -9,11 +9,25 @@ import com.dianping.puma.core.event.ChangedEvent;
 
 public abstract class AbstractSender implements Sender, Notifiable {
 	private static final Logger	log				= Logger.getLogger(AbstractSender.class);
-	protected String			name;
-	protected int				maxTryTimes		= 3;
-	protected boolean			canMissEvent	= false;
-	protected volatile boolean	stop			= false;
-	protected NotifyService		notifyService;
+	private String				name;
+	private int					maxTryTimes		= 3;
+	private boolean				canMissEvent	= false;
+	private volatile boolean	stop			= false;
+	private NotifyService		notifyService;
+
+	/**
+	 * @return the stop
+	 */
+	public boolean isStop() {
+		return stop;
+	}
+
+	/**
+	 * @return the notifyService
+	 */
+	public NotifyService getNotifyService() {
+		return notifyService;
+	}
 
 	/**
 	 * @param notifyService

@@ -68,12 +68,12 @@ public class MMapBasedSeqFileHolder implements SeqFileHolder {
 		BufferedReader br = null;
 		try {
 			br = new BufferedReader(new FileReader(file));
-			String seq = br.readLine();
-			if (seq == null) {
+			String readSeq = br.readLine();
+			if (readSeq == null) {
 				this.seq = -1L;
 				return;
 			} else {
-				this.seq = Long.parseLong(seq);
+				this.seq = Long.parseLong(readSeq);
 				return;
 			}
 		} catch (Exception e) {
@@ -119,19 +119,19 @@ public class MMapBasedSeqFileHolder implements SeqFileHolder {
 	}
 
 	private void ensureFile(String fileName) {
-		File file = new File(fileName);
-		if (!file.getParentFile().exists()) {
-			if (!file.getParentFile().mkdirs()) {
-				throw new RuntimeException("can not create dir: " + file.getParent());
+		File path = new File(fileName);
+		if (!path.getParentFile().exists()) {
+			if (!path.getParentFile().mkdirs()) {
+				throw new RuntimeException("can not create dir: " + path.getParent());
 			}
 		}
-		if (!file.exists()) {
+		if (!path.exists()) {
 			try {
-				if (!file.createNewFile()) {
-					throw new RuntimeException("can not create file: " + file);
+				if (!path.createNewFile()) {
+					throw new RuntimeException("can not create file: " + path);
 				}
 			} catch (IOException e) {
-				throw new RuntimeException("can not create file: " + file);
+				throw new RuntimeException("can not create file: " + path, e);
 			}
 		}
 

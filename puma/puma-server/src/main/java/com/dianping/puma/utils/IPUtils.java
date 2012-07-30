@@ -27,7 +27,12 @@ import java.util.Enumeration;
  * @author Leo Liang
  * 
  */
-public class IPUtils {
+public final class IPUtils {
+
+	private IPUtils() {
+
+	}
+
 	/**
 	 * 获取第一个no loop address
 	 * 

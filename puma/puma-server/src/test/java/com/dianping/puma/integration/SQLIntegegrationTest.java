@@ -15,6 +15,7 @@
  */
 package com.dianping.puma.integration;
 
+import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.Assert;
@@ -358,6 +359,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 			@Override
 			public void doLogic() throws Exception {
 				executeSql("CREATE TABLE DDLtest(id INT)");
+				waitForSync(200);
 				List<ChangedEvent> events = getEvents(1, false);
 				Assert.assertEquals(1, events.size());
 				Assert.assertTrue(events.get(0) instanceof DdlEvent);
@@ -492,6 +494,69 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(host + ":" + port, rowEvent.getMasterUrl());
 
 				DdlEvent ddlEvent = (DdlEvent) events.get(9);
+				Assert.assertEquals(db, ddlEvent.getDatabase());
+				Assert.assertEquals(host + ":" + port, ddlEvent.getMasterUrl());
+				Assert.assertTrue("CREATE TABLE DDLtest(id INT)".equalsIgnoreCase(ddlEvent.getSql()));
+				executeSql("DROP TABLE DDLtest");
+			}
+		});
+	}
+
+	@Test
+	public void testMixedWithTransaction2() throws Exception {
+		executeSql("DROP TABLE IF EXISTS DDLtest");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSqlWithTransaction(Arrays.asList(new String[] { "INSERT INTO " + table + " values(1)",
+						"UPDATE " + table + " SET id=2 WHERE id=1", "DELETE FROM " + table + " WHERE id=2",
+						"CREATE TABLE DDLtest(id INT)" }));
+				waitForSync(100);
+				List<ChangedEvent> events = getEvents(6, true);
+				Assert.assertEquals(6, events.size());
+
+				RowChangedEvent rowEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowEvent.isTransactionBegin());
+				Assert.assertEquals(host + ":" + port, rowEvent.getMasterUrl());
+				Assert.assertEquals(db, rowEvent.getDatabase());
+
+				rowEvent = (RowChangedEvent) events.get(1);
+				Assert.assertEquals(db, rowEvent.getDatabase());
+				Assert.assertEquals(host + ":" + port, rowEvent.getMasterUrl());
+				Assert.assertEquals(RowChangedEvent.INSERT, rowEvent.getActionType());
+				Assert.assertEquals(table, rowEvent.getTable());
+				Assert.assertEquals(1, rowEvent.getColumns().size());
+				Assert.assertNull(rowEvent.getColumns().get("id").getOldValue());
+				Assert.assertEquals(1, rowEvent.getColumns().get("id").getNewValue());
+
+
+
+				rowEvent = (RowChangedEvent) events.get(2);
+				Assert.assertEquals(db, rowEvent.getDatabase());
+				Assert.assertEquals(host + ":" + port, rowEvent.getMasterUrl());
+				Assert.assertEquals(RowChangedEvent.UPDATE, rowEvent.getActionType());
+				Assert.assertEquals(table, rowEvent.getTable());
+				Assert.assertEquals(1, rowEvent.getColumns().size());
+				Assert.assertEquals(1, rowEvent.getColumns().get("id").getOldValue());
+				Assert.assertEquals(2, rowEvent.getColumns().get("id").getNewValue());
+
+
+				rowEvent = (RowChangedEvent) events.get(3);
+				Assert.assertEquals(db, rowEvent.getDatabase());
+				Assert.assertEquals(host + ":" + port, rowEvent.getMasterUrl());
+				Assert.assertEquals(RowChangedEvent.DELETE, rowEvent.getActionType());
+				Assert.assertEquals(table, rowEvent.getTable());
+				Assert.assertEquals(1, rowEvent.getColumns().size());
+				Assert.assertEquals(2, rowEvent.getColumns().get("id").getOldValue());
+				Assert.assertNull(rowEvent.getColumns().get("id").getNewValue());
+
+				rowEvent = (RowChangedEvent) events.get(4);
+				Assert.assertTrue(rowEvent.isTransactionCommit());
+				Assert.assertEquals(host + ":" + port, rowEvent.getMasterUrl());
+
+				DdlEvent ddlEvent = (DdlEvent) events.get(5);
 				Assert.assertEquals(db, ddlEvent.getDatabase());
 				Assert.assertEquals(host + ":" + port, ddlEvent.getMasterUrl());
 				Assert.assertTrue("CREATE TABLE DDLtest(id INT)".equalsIgnoreCase(ddlEvent.getSql()));

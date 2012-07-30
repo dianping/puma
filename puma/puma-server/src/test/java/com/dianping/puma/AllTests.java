@@ -10,6 +10,7 @@ import com.dianping.puma.filter.DmlDdlEventFilterTest;
 import com.dianping.puma.filter.EventFilterChainFactoryTest;
 import com.dianping.puma.filter.TransactionInfoEventFilterTest;
 import com.dianping.puma.integration.SQLIntegegrationTest;
+import com.dianping.puma.integration.SystemIntegegrationTest;
 import com.dianping.puma.storage.DefaultArchiveStrategyTest;
 import com.dianping.puma.storage.DefaultBucketManagerTest;
 import com.dianping.puma.storage.HDFSBucketIndexTest;
@@ -34,7 +35,8 @@ DefaultEventFilterChainTest.class,
 DmlDdlEventFilterTest.class,
 EventFilterChainFactoryTest.class,
 TransactionInfoEventFilterTest.class,
-SQLIntegegrationTest.class
+SQLIntegegrationTest.class,
+SystemIntegegrationTest.class
 
 })
 public class AllTests {

@@ -67,11 +67,11 @@ public abstract class PumaServerIntegrationBaseTest {
 	protected static String			db;
 	private ReplicationBasedServer	server;
 	private DefaultEventStorage		storage;
-	private static File					storageMasterBaseDir	= new File(System.getProperty("java.io.tmpdir", "."),
+	private static File				storageMasterBaseDir	= new File(System.getProperty("java.io.tmpdir", "."),
 																	"Puma");
-	private static File					storageSlaveBaseDir		= new File(System.getProperty("java.io.tmpdir", "."),
+	private static File				storageSlaveBaseDir		= new File(System.getProperty("java.io.tmpdir", "."),
 																	"Puma/bak/");
-	private static File					confBaseDir				= new File(System.getProperty("java.io.tmpdir", "."),
+	private static File				confBaseDir				= new File(System.getProperty("java.io.tmpdir", "."),
 																	"PumaConf/");
 
 	@BeforeClass
@@ -279,6 +279,14 @@ public abstract class PumaServerIntegrationBaseTest {
 
 	@After
 	public void after() throws Exception {
+		stopServer();
+		FileUtils.deleteDirectory(storageMasterBaseDir);
+		FileUtils.deleteDirectory(storageSlaveBaseDir);
+
+		doAfter();
+	}
+
+	protected void stopServer() {
 		if (server != null) {
 			try {
 				server.stop();
@@ -286,10 +294,6 @@ public abstract class PumaServerIntegrationBaseTest {
 				// ignore
 			}
 		}
-		FileUtils.deleteDirectory(storageMasterBaseDir);
-		FileUtils.deleteDirectory(storageSlaveBaseDir);
-
-		doAfter();
 	}
 
 	protected abstract void doAfter() throws Exception;

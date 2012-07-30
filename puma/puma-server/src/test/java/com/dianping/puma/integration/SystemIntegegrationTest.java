@@ -44,6 +44,11 @@ public class SystemIntegegrationTest extends PumaServerIntegrationBaseTest {
 	@Test
 	public void testStop() throws Exception {
 		startServer();
+		Thread thrds[] = new Thread[PumaThreadUtils.getThreadGroup().activeCount()];
+		PumaThreadUtils.getThreadGroup().enumerate(thrds);
+		for (Thread t : thrds) {
+			System.out.println(t.getName());
+		}
 		Assert.assertEquals(2, PumaThreadUtils.getThreadGroup().activeCount());
 		stopServer();
 		Thread.sleep(5 * 1000);

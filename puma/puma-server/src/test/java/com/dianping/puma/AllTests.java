@@ -7,7 +7,7 @@ import org.junit.runners.Suite.SuiteClasses;
 import com.dianping.puma.filter.DbTbEventFilterTest;
 import com.dianping.puma.filter.DefaultEventFilterChainTest;
 import com.dianping.puma.filter.DmlDdlEventFilterTest;
-import com.dianping.puma.filter.EventFilterChainFactory;
+import com.dianping.puma.filter.EventFilterChainFactoryTest;
 import com.dianping.puma.filter.TransactionInfoEventFilterTest;
 import com.dianping.puma.integration.SQLIntegegrationTest;
 import com.dianping.puma.storage.DefaultArchiveStrategyTest;
@@ -32,7 +32,7 @@ HDFSBucketTest.class,
 DbTbEventFilterTest.class,
 DefaultEventFilterChainTest.class,
 DmlDdlEventFilterTest.class,
-EventFilterChainFactory.class,
+EventFilterChainFactoryTest.class,
 TransactionInfoEventFilterTest.class,
 SQLIntegegrationTest.class
 

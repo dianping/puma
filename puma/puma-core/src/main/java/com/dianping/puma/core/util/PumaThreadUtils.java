@@ -33,15 +33,21 @@ public final class PumaThreadUtils {
 
 	private static List<WeakReference<Thread>>				threadList	= Collections
 																				.synchronizedList(new ArrayList<WeakReference<Thread>>());
-	private static ConcurrentHashMap<String, AtomicInteger>	taskToSeq	= new ConcurrentHashMap<String, AtomicInteger>();					;
+	private static ConcurrentHashMap<String, AtomicInteger>	taskToSeq	= new ConcurrentHashMap<String, AtomicInteger>();
+
+	private static ThreadGroup								threadGroup	= new ThreadGroup("pumaThreadGroup");
 
 	private PumaThreadUtils() {
 
 	}
 
+	public static ThreadGroup getThreadGroup() {
+		return threadGroup;
+	}
+
 	public static Thread createThread(Runnable r, String taskName, boolean isDaemon) {
 		taskToSeq.putIfAbsent(taskName, new AtomicInteger(1));
-		Thread t = new Thread(r, PREFIX + taskName + "-" + taskToSeq.get(taskName).getAndIncrement());
+		Thread t = new Thread(threadGroup, r, PREFIX + taskName + "-" + taskToSeq.get(taskName).getAndIncrement());
 		t.setDaemon(isDaemon);
 		threadList.add(new WeakReference<Thread>(t));
 		return t;

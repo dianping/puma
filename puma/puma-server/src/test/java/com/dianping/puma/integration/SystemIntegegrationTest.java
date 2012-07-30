@@ -19,6 +19,8 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.dianping.puma.core.util.PumaThreadUtils;
+
 /**
  * TODO Comment of SystemIntegegrationTest
  * 
@@ -42,13 +44,9 @@ public class SystemIntegegrationTest extends PumaServerIntegrationBaseTest {
 	@Test
 	public void testStop() throws Exception {
 		startServer();
-		// 1. main thread; 2.junit reader thread; 3.archive task thread; 4.
-		// pumar-server thread
-		Assert.assertEquals(4, Thread.activeCount());
+		Assert.assertEquals(2, PumaThreadUtils.getThreadGroup().activeCount());
 		stopServer();
 		Thread.sleep(5 * 1000);
-		// 1. main thread; 2.junit reader thread
-		Assert.assertEquals(2, Thread.activeCount());
+		Assert.assertEquals(0, PumaThreadUtils.getThreadGroup().activeCount());
 	}
-
 }

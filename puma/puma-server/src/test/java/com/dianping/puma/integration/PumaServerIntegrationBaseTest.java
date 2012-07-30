@@ -36,6 +36,7 @@ import com.dianping.puma.common.NotifyService;
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
+import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.datahandler.DefaultDataHandler;
 import com.dianping.puma.parser.DefaultBinlogParser;
 import com.dianping.puma.parser.Parser;
@@ -178,7 +179,7 @@ public abstract class PumaServerIntegrationBaseTest {
 		context.setBinlogStartPos(server.getDefaultBinlogPosition());
 		server.setContext(context);
 
-		Thread t = new Thread(new Runnable() {
+		PumaThreadUtils.createThread(new Runnable() {
 
 			@Override
 			public void run() {
@@ -188,9 +189,7 @@ public abstract class PumaServerIntegrationBaseTest {
 					e.printStackTrace();
 				}
 			}
-		});
-		t.setName("ServerThread");
-		t.start();
+		}, "ServerThread", false).start();
 	}
 
 	protected List<ChangedEvent> getEvents(int n, boolean needTs) throws Exception {

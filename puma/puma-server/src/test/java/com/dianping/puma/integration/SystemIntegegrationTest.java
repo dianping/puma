@@ -29,7 +29,7 @@ import com.dianping.puma.core.util.PumaThreadUtils;
  */
 public class SystemIntegegrationTest extends PumaServerIntegrationBaseTest {
 
-	@Test
+//	@Test
 	public void testStop() throws Exception {
 
 		// wait for last run's stop

@@ -17,7 +17,6 @@ package com.dianping.puma.integration;
 
 import junit.framework.Assert;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.dianping.puma.core.util.PumaThreadUtils;
@@ -44,6 +43,11 @@ public class SystemIntegegrationTest extends PumaServerIntegrationBaseTest {
 		Assert.assertEquals(2, PumaThreadUtils.getThreadGroup().activeCount());
 		stopServer();
 		Thread.sleep(5 * 1000);
+		thrds = new Thread[PumaThreadUtils.getThreadGroup().activeCount()];
+		PumaThreadUtils.getThreadGroup().enumerate(thrds);
+		for (Thread t : thrds) {
+			System.out.println("Stopped: " + t.getName());
+		}
 		Assert.assertEquals(0, PumaThreadUtils.getThreadGroup().activeCount());
 	}
 

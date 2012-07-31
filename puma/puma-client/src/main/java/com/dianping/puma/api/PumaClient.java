@@ -150,12 +150,15 @@ public class PumaClient {
 								break;
 							} catch (Exception e) {
 								log.warn("Exception occurs in eventListerner. Event: " + event, e);
+								ExceptionHandler exceptionHandler = config.getExceptionHandler();
+								if(exceptionHandler != null){
+									exceptionHandler.notifyException(event, e);
+								}
 								if (config.canSkip()) {
 									if (retryTimes >= config.getMaxRetryTimes()) {
 										listenerCallSuccess = true;
-										SkipEventHandler skipEventHandler = config.getSkipEventHandler();
-										if (skipEventHandler != null) {
-											skipEventHandler.notifySkipEvent(event);
+										if (exceptionHandler != null) {
+											exceptionHandler.notifySkipEvent(event);
 										}
 										log.warn("Event(" + event + ") has tried for " + config.getMaxRetryTimes()
 												+ " times, then it will be skipped.", e);

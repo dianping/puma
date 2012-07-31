@@ -119,6 +119,9 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	private void startArchiveJob() {
+		if (archiveStrategy == null) {
+			return;
+		}
 		Thread archiveThread = PumaThreadUtils.createThread(new Runnable() {
 			@Override
 			public void run() {

@@ -59,7 +59,7 @@ public class PumaClientTest {
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder() //
 				.host("localhost") //
 				.port(7862)//
-				.tables("cat", "*")//
+				.tables("cat", "*", "report*", "report1")//
 				.ddl(true) //
 				.dml(true)//
 				.tables("binlog", "*")//
@@ -73,14 +73,14 @@ public class PumaClientTest {
 
 			@Override
 			public void onEvent(ChangedEvent event) {
+				// biz
 				System.out.println(event);
 			}
 		});
 
 		client.start();
 
-		Thread.sleep(10000 * 1000);
-		client.stop();
+		
 	}
 
 	private Object getValue(Object obj, String fieldName) {

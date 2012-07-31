@@ -255,7 +255,7 @@ public abstract class PumaServerIntegrationBaseTest {
 			conn = ds.getConnection();
 			pstmt = conn.prepareStatement(script);
 			pstmt.setBinaryStream(1, new ByteArrayInputStream(data), data.length);
-			pstmt.execute(script);
+			pstmt.execute();
 		} finally {
 			if (pstmt != null) {
 				try {

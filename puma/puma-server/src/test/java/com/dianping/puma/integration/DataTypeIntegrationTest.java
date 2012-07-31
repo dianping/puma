@@ -36,20 +36,20 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 		});
 	}
 	
-	//@Test
-	// TODO
+	@Test
 	public void testBinary() throws Exception {
-		executeSql("CREATE TABLE " + table + "(id BINARY)");
-		executeSql("INSERT INTO " + table + " values(0)");
+		executeSql("CREATE TABLE " + table + "(id BINARY(8))");
 		waitForSync(50);
 		test(new TestLogic() {
 
 			@Override
 			public void doLogic() throws Exception {
-				executeSql("UPDATE " + table + " SET id=1 WHERE id=0");
+				byte[] data = new byte[]{1,2,3,54,5,6,67};
+				insertWithBinaryColumn("INSERT INTO " + table + " values(?)", data);
 				List<ChangedEvent> events = getEvents(1, false);
 				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
-				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof byte[]);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue() instanceof String);
+				Assert.assertEquals(new String(data), (String)rowChangedEvent.getColumns().get("id").getNewValue());
 			}
 		});
 	}

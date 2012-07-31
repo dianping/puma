@@ -28,5 +28,5 @@ import com.dianping.puma.core.event.ChangedEvent;
 public interface Sender extends LifeCycle {
 	public String getName();
 
-	public void send(ChangedEvent event, PumaContext context) throws Exception;
+	public void send(ChangedEvent event, PumaContext context) throws SenderException;
 }

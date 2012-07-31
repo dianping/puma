@@ -29,13 +29,6 @@ import com.dianping.puma.core.util.PumaThreadUtils;
  * 
  */
 public class SystemIntegegrationTest extends PumaServerIntegrationBaseTest {
-	private String	table	= "systemTest";
-
-	@Before
-	public void before() throws Exception {
-		executeSql("DROP TABLE IF EXISTS " + table);
-		executeSql("CREATE TABLE " + table + "(id INT)");
-	}
 
 	@Test
 	public void testStop() throws Exception {
@@ -54,8 +47,4 @@ public class SystemIntegegrationTest extends PumaServerIntegrationBaseTest {
 		Assert.assertEquals(0, PumaThreadUtils.getThreadGroup().activeCount());
 	}
 
-	@Test
-	public void doAfter() throws Exception {
-		executeSql("DROP TABLE " + table);
-	}
 }

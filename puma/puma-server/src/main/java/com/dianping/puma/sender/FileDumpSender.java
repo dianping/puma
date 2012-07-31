@@ -18,6 +18,7 @@ package com.dianping.puma.sender;
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.storage.EventStorage;
+import com.dianping.puma.storage.exception.StorageException;
 
 /**
  * TODO Comment of FileDumpSender
@@ -43,8 +44,12 @@ public class FileDumpSender extends AbstractSender {
 	}
 
 	@Override
-	protected void doSend(ChangedEvent event, PumaContext context) throws Exception {
-		storage.store(event);
+	protected void doSend(ChangedEvent event, PumaContext context) throws SenderException {
+		try {
+			storage.store(event);
+		} catch (StorageException e) {
+			throw new SenderException("FileDumpSender.doSend failed.", e);
+		}
 	}
 
 }

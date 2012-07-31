@@ -27,7 +27,7 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  * 
  */
 public interface BucketIndex {
-	public void init() throws Exception;
+	public void init() throws IOException;
 
 	public void add(Bucket bucket) throws StorageClosedException;
 

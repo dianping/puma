@@ -31,7 +31,7 @@ import com.dianping.puma.sender.Sender;
 public interface Dispatcher extends LifeCycle {
 	public String getName();
 
-	public void dispatch(ChangedEvent event, PumaContext context) throws Exception;
+	public void dispatch(ChangedEvent event, PumaContext context) throws DispatcherException;
 
 	public List<Sender> getSenders();
 }

@@ -102,7 +102,7 @@ public abstract class AbstractSender implements Sender, Notifiable {
 	}
 
 	@Override
-	public void send(ChangedEvent event, PumaContext context) throws Exception {
+	public void send(ChangedEvent event, PumaContext context) throws SenderException {
 		long retryCount = 0;
 		while (true) {
 			if (isStop()) {
@@ -137,10 +137,15 @@ public abstract class AbstractSender implements Sender, Notifiable {
 						}
 					}
 				}
-				Thread.sleep(((retryCount % 15) + 1) * 300);
+				try {
+					Thread.sleep(((retryCount % 15) + 1) * 300);
+				} catch (InterruptedException e1) {
+					Thread.currentThread().interrupt();
+					throw new SenderException("Interrupted", e1);
+				}
 			}
 		}
 	}
 
-	protected abstract void doSend(ChangedEvent event, PumaContext context) throws Exception;
+	protected abstract void doSend(ChangedEvent event, PumaContext context) throws SenderException;
 }

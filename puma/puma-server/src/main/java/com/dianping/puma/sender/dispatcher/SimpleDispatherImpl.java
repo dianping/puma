@@ -58,13 +58,13 @@ public class SimpleDispatherImpl extends AbstractDispatcher {
 	}
 
 	@Override
-	public void dispatch(ChangedEvent event, PumaContext context) throws Exception {
+	public void dispatch(ChangedEvent event, PumaContext context) throws DispatcherException {
 		if (senders != null && senders.size() > 0) {
 			List<Throwable> exceptionList = new ArrayList<Throwable>();
 			for (Sender sender : senders) {
 				try {
 					sender.send(event, context);
-				} catch (Throwable e) {
+				} catch (Exception e) {
 					log.error("Exception occurs in sender " + sender.getName());
 					exceptionList.add(e);
 				}

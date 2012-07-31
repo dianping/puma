@@ -62,7 +62,7 @@ public abstract class AbstractDispatcher implements Dispatcher {
 		this.name = name;
 	}
 
-	protected void throwExceptionIfNeeded(List<Throwable> exceptionList) throws Exception {
+	protected void throwExceptionIfNeeded(List<Throwable> exceptionList) throws DispatcherException {
 
 		if (exceptionList != null && !exceptionList.isEmpty()) {
 			StringWriter buffer = new StringWriter();
@@ -79,7 +79,7 @@ public abstract class AbstractDispatcher implements Dispatcher {
 				}
 			}
 
-			throw new Exception(buffer.toString());
+			throw new DispatcherException(buffer.toString());
 		}
 
 	}

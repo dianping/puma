@@ -42,7 +42,7 @@ public class Configuration implements Serializable {
 	private String						target;
 	private int							maxRetryTimes			= 3;
 	private boolean						canSkip					= false;
-	private SkipEventHandler			skipEventHandler		= null;
+	private ExceptionHandler			exceptionHandler		= null;
 	private String						masterUrl;
 	private String						binlog;
 	private long						binlogPos				= -1;
@@ -246,7 +246,7 @@ public class Configuration implements Serializable {
 				+ host + ", needDdl=" + needDdl + ", needDml=" + needDml + ", needTransactionInfo="
 				+ needTransactionInfo + ", port=" + port + ", name=" + name + ", seqFileBase=" + seqFileBase
 				+ ", target=" + target + ", maxRetryTimes=" + maxRetryTimes + ", canSkip=" + canSkip
-				+ ", skipEventHandler=" + skipEventHandler + ", masterUrl=" + masterUrl + ", binlog=" + binlog
+				+ ", exceptionHandler=" + exceptionHandler + ", masterUrl=" + masterUrl + ", binlog=" + binlog
 				+ ", binlogPos=" + binlogPos + "]";
 	}
 
@@ -297,16 +297,12 @@ public class Configuration implements Serializable {
 		this.canSkip = canSkip;
 	}
 
-	public SkipEventHandler getSkipEventHandler() {
-		return skipEventHandler;
+	public ExceptionHandler getExceptionHandler() {
+		return exceptionHandler;
 	}
 
-	/**
-	 * @param skipEventHandler
-	 *            the skipEventHandler to set
-	 */
-	public void setSkipEventHandler(SkipEventHandler skipEventHandler) {
-		this.skipEventHandler = skipEventHandler;
+	public void setExceptionHandler(ExceptionHandler exceptionHandler) {
+		this.exceptionHandler = exceptionHandler;
 	}
 
 }

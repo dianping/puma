@@ -58,8 +58,8 @@ public class ConfigurationBuilder {
 		return this;
 	}
 
-	public ConfigurationBuilder skipEventHandler(SkipEventHandler skipEventHandler) {
-		this.configuration.setSkipEventHandler(skipEventHandler);
+	public ConfigurationBuilder exceptionHandler(ExceptionHandler exceptionHandler) {
+		this.configuration.setExceptionHandler(exceptionHandler);
 		return this;
 	}
 

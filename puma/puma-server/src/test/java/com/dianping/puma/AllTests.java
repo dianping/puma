@@ -4,6 +4,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+import com.dianping.puma.common.util.PacketUtilTest;
 import com.dianping.puma.filter.DbTbEventFilterTest;
 import com.dianping.puma.filter.DefaultEventFilterChainTest;
 import com.dianping.puma.filter.DmlDdlEventFilterTest;
@@ -38,7 +39,8 @@ EventFilterChainFactoryTest.class,
 TransactionInfoEventFilterTest.class,
 SQLIntegegrationTest.class,
 SystemIntegegrationTest.class,
-DataTypeIntegrationTest.class
+DataTypeIntegrationTest.class,
+PacketUtilTest.class
 
 })
 public class AllTests {

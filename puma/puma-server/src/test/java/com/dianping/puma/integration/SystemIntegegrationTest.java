@@ -47,4 +47,13 @@ public class SystemIntegegrationTest extends PumaServerIntegrationBaseTest {
 		Assert.assertEquals(0, PumaThreadUtils.getThreadGroup().activeCount());
 	}
 
+	/* (non-Javadoc)
+	 * @see com.dianping.puma.integration.PumaServerIntegrationBaseTest#doAfter()
+	 */
+	@Override
+	protected void doAfter() throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

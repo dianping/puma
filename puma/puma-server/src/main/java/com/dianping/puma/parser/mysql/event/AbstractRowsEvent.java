@@ -201,7 +201,7 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 					break;
 				case BinlogConstanst.MYSQL_TYPE_BIT:
 					final int bitLength = (meta >> 8) * 8 + (meta & 0xFF);
-					columns.add(BitColumn.valueOf(bitLength, PacketUtils.readBitSet(buf, bitLength)));
+					columns.add(BitColumn.valueOf(bitLength, PacketUtils.readBit(buf, bitLength, false)));
 					break;
 				case BinlogConstanst.MYSQL_TYPE_NEWDECIMAL:
 					final int precision = meta & 0xFF;

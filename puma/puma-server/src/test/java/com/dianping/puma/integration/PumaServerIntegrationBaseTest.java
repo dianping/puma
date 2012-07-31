@@ -15,9 +15,11 @@
  */
 package com.dianping.puma.integration;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -232,6 +234,32 @@ public abstract class PumaServerIntegrationBaseTest {
 			if (stmt != null) {
 				try {
 					stmt.close();
+				} catch (Exception e) {
+
+				}
+			}
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (Exception e) {
+
+				}
+			}
+		}
+	}
+
+	protected void insertWithBinaryColumn(String script, byte[] data) throws Exception {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		try {
+			conn = ds.getConnection();
+			pstmt = conn.prepareStatement(script);
+			pstmt.setBinaryStream(1, new ByteArrayInputStream(data), data.length);
+			pstmt.execute(script);
+		} finally {
+			if (pstmt != null) {
+				try {
+					pstmt.close();
 				} catch (Exception e) {
 
 				}

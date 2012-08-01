@@ -274,8 +274,7 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 				List<ChangedEvent> events = getEvents(1, false);
 				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("val").getOldValue() instanceof Float);
-				Assert
-						.assertTrue(rowChangedEvent.getColumns().get("val").getOldValue().equals(
+				Assert.assertTrue(rowChangedEvent.getColumns().get("val").getOldValue().equals(
 								new Float(-3.40282E+38)));
 				Assert.assertTrue(rowChangedEvent.getColumns().get("val").getNewValue().equals(new Float(4.56)));
 
@@ -339,7 +338,7 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof Integer);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue().equals(new Integer(8388607)));
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(new Integer(-8388608)));
-				
+
 				rowChangedEvent = (RowChangedEvent) events.get(1);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof Integer);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(new Integer(8388607)));
@@ -367,7 +366,7 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 			}
 		});
 	}
-	
+
 	@Test
 	public void testTinyInt() throws Exception {
 		executeSql("CREATE TABLE " + table + "(id TINYINT)");
@@ -383,6 +382,28 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof Integer);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue().equals(new Integer(-128)));
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(new Integer(127)));
+
+			}
+		});
+	}
+
+	@Test
+	public void testNumeric() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id NUMERIC(4,2))");
+		executeSql("INSERT INTO " + table + " values(-99.99)");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id=0 WHERE id=-99.99");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof BigDecimal);
+				Assert
+						.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(
+								new BigDecimal("-99.99")));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue().equals(new BigDecimal("0.00")));
 
 			}
 		});

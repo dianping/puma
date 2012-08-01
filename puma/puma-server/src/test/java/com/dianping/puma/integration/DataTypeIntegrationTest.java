@@ -1,5 +1,6 @@
 package com.dianping.puma.integration;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -28,11 +29,11 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 
 			@Override
 			public void doLogic() throws Exception {
-				executeSql("UPDATE " + table + " SET id=2 WHERE id=1");
+				executeSql("UPDATE " + table + " SET id=9223372036854775807 WHERE id=1");
 				List<ChangedEvent> events = getEvents(1, false);
 				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof Long);
-				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue().equals(new Long(2)));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue().equals(new Long(9223372036854775807L)));
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(new Long(1)));
 			}
 		});
@@ -200,6 +201,132 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 			
 		});
 	}
+	
+	@Test
+	public void testDecimal() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id DECIMAL(4,2))");
+		executeSql("INSERT INTO " + table + " values(99.99)");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id=0 WHERE id=99.99");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof BigDecimal);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(new BigDecimal("99.99")));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id")
+						.getNewValue().equals(new BigDecimal("0.00")));
+				
+			}
+		});
+	}
+	
+	@Test
+	public void testDouble() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id DOUBLE )");
+		executeSql("INSERT INTO " + table + " values(2.2250738585072E-308)");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id=4.56 WHERE id=2.2250738585072E-308");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof Double);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(new Double(2.2250738585072E-308)));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id")
+						.getNewValue().equals(new Double(4.56)));
+				
+			}
+		});
+	}
+	
+	@Test
+	public void testEnum() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id ENUM('one','two','three'))");
+		executeSql("INSERT INTO " + table + " values('two')");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id='three' WHERE id='two'");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof Integer);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(new Integer(2)));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id")
+						.getNewValue().equals(new Integer(3)));
+				
+			}
+		});
+	}
+	
+	@Test
+	public void testFloat() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id INT, val FLOAT )");
+		executeSql("INSERT INTO " + table + " (id, val) VALUES (1, -3.40282E+38)");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET val=4.56 WHERE id=1");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("val").getOldValue() instanceof Float);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("val").getOldValue().equals(new Float(-3.40282E+38)));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("val")
+						.getNewValue().equals(new Float(4.56)));
+				
+			}
+		});
+	}
+	
+	@Test
+	public void testReal() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id REAL )");
+		executeSql("INSERT INTO " + table + " values(2.2250738585072E-308)");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id=4.56 WHERE id=2.2250738585072E-308");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof Double);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(new Double(2.2250738585072E-308)));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id")
+						.getNewValue().equals(new Double(4.56)));
+				
+			}
+		});
+	}
+	
+	@Test
+	public void testInt() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id INT)");
+		executeSql("INSERT INTO " + table + " values(" + Integer.MAX_VALUE + ")");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id=" + Integer.MIN_VALUE + " WHERE id=" + Integer.MAX_VALUE);
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof Integer);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue().equals(Integer.MIN_VALUE));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(Integer.MAX_VALUE));
+			}
+		});
+	}
+	
+	
 
 	public void doAfter() throws Exception {
 		executeSql("DROP TABLE " + table);

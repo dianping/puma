@@ -348,21 +348,41 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 		});
 	}
 
-	//@Test
+	@Test
 	public void testSmallInt() throws Exception {
 		executeSql("CREATE TABLE " + table + "(id SMALLINT)");
-		executeSql("INSERT INTO " + table + " values(-8388608)");
+		executeSql("INSERT INTO " + table + " values(-32768)");
 		waitForSync(50);
 		test(new TestLogic() {
 
 			@Override
 			public void doLogic() throws Exception {
-				executeSql("UPDATE " + table + " SET id= 8388607 WHERE id=-8388608");
+				executeSql("UPDATE " + table + " SET id= 32767 WHERE id=-32768");
 				List<ChangedEvent> events = getEvents(1, false);
 				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof Integer);
-				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue().equals(new Integer(8388607)));
-				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(new Integer(-8388608)));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue().equals(new Integer(32767)));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(new Integer(-32768)));
+
+			}
+		});
+	}
+	
+	@Test
+	public void testTinyInt() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id TINYINT)");
+		executeSql("INSERT INTO " + table + " values(127)");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id= -128 WHERE id=127");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof Integer);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue().equals(new Integer(-128)));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(new Integer(127)));
 
 			}
 		});

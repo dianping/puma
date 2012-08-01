@@ -23,21 +23,11 @@ package com.dianping.puma.parser.mysql.column;
  * 
  */
 public final class TinyColumn implements Column {
-	private static final long			serialVersionUID	= -7981385814804060055L;
-	public static final int				MIN_VALUE			= 0;
-	public static final int				MAX_VALUE			= 256;
+	private static final long	serialVersionUID	= -7981385814804060055L;
+	public static final int		MIN_VALUE			= -128;
+	public static final int		MAX_VALUE			= 127;
 
-	private static final TinyColumn[]	CACHE				= new TinyColumn[256];
-	static {
-		for (int i = 0; i < 128; i++) {
-			CACHE[i] = new TinyColumn(i);
-		}
-		for (int i = 128; i < 256; i++) {
-			CACHE[i] = new TinyColumn(i - 128);
-		}
-	}
-
-	private final int					value;
+	private final int			value;
 
 	private TinyColumn(int value) {
 		this.value = value;
@@ -61,6 +51,6 @@ public final class TinyColumn implements Column {
 		if (value < MIN_VALUE || value > MAX_VALUE) {
 			throw new IllegalArgumentException("invalid value: " + value);
 		}
-		return CACHE[value - Byte.MIN_VALUE];
+		return new TinyColumn(value);
 	}
 }

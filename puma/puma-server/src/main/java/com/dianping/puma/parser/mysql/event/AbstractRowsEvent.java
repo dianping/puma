@@ -160,7 +160,11 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 					columns.add(ShortColumn.valueOf(PacketUtils.readInt(buf, 2)));
 					break;
 				case BinlogConstanst.MYSQL_TYPE_INT24:
-					columns.add(Int24Column.valueOf(PacketUtils.readInt(buf, 3)));
+					int value = PacketUtils.readInt(buf, 3);
+					if((value & 0x800000) == 0x800000){
+						value =  0xff000000 + value;
+					}
+					columns.add(Int24Column.valueOf(value));
 					break;
 				case BinlogConstanst.MYSQL_TYPE_INT:
 					columns.add(IntColumn.valueOf(PacketUtils.readInt(buf, 4)));

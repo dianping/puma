@@ -59,6 +59,24 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 			}
 		});
 	}
+	
+	@Test
+	public void testVarBinary() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id VARBINARY(10))");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				byte[] data = new byte[] { 1, 2, 3, 54, 5, 6, 67 };
+				insertWithBinaryColumn("INSERT INTO " + table + " values(?)", data);
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue() instanceof String);
+				Assert.assertEquals(new String(data), (String) rowChangedEvent.getColumns().get("id").getNewValue());
+			}
+		});
+	}
 
 	@Test
 	public void testBit() throws Exception {
@@ -492,6 +510,203 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 						.getNewValue());
 				Assert.assertEquals(new Timestamp(108, 7, 8, 14, 47, 11, 0), rowChangedEvent.getColumns().get("id")
 						.getOldValue());
+
+			}
+		});
+	}
+	
+	@Test
+	public void testVarchar() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id VARCHAR(50))");
+		executeSql("INSERT INTO " + table + " values('Early birds catch the bug.')");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof String);
+				Assert.assertEquals(new String("Early birds catch the bug."), rowChangedEvent.getColumns().get("id")
+						.getOldValue());
+				Assert.assertEquals(new String("Early bug is eaten by the bird."), rowChangedEvent.getColumns().get("id")
+						.getNewValue());
+
+			}
+		});
+	}
+	
+	@Test
+	public void testText() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id TEXT)");
+		executeSql("INSERT INTO " + table + " values('Early birds catch the bug.')");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof byte[]);
+				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
+						.getOldValue());
+				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
+						.getNewValue());
+
+			}
+		});
+	}
+	
+	@Test
+	public void testTinyText() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id TINYTEXT)");
+		executeSql("INSERT INTO " + table + " values('Early birds catch the bug.')");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof byte[]);
+				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
+						.getOldValue());
+				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
+						.getNewValue());
+
+			}
+		});
+	}
+	@Test
+	public void testMediumText() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id MEDIUMTEXT)");
+		executeSql("INSERT INTO " + table + " values('Early birds catch the bug.')");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof byte[]);
+				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
+						.getOldValue());
+				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
+						.getNewValue());
+
+			}
+		});
+	}
+	
+	@Test
+	public void testLongText() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id LONGTEXT)");
+		executeSql("INSERT INTO " + table + " values('Early birds catch the bug.')");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof byte[]);
+				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
+						.getOldValue());
+				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
+						.getNewValue());
+
+			}
+		});
+	}
+	
+	@Test
+	public void testBlob() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id BLOB)");
+		executeSql("INSERT INTO " + table + " values('Early birds catch the bug.')");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof byte[]);
+				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
+						.getOldValue());
+				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
+						.getNewValue());
+
+			}
+		});
+	}
+	
+	@Test
+	public void testTinyBlob() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id TINYBLOB)");
+		executeSql("INSERT INTO " + table + " values('Early birds catch the bug.')");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof byte[]);
+				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
+						.getOldValue());
+				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
+						.getNewValue());
+
+			}
+		});
+	}
+	
+	@Test
+	public void testMediumBlob() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id MEDIUMBLOB)");
+		executeSql("INSERT INTO " + table + " values('Early birds catch the bug.')");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof byte[]);
+				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
+						.getOldValue());
+				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
+						.getNewValue());
+
+			}
+		});
+	}
+	
+	@Test
+	public void testLongBlob() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id LONGBLOB)");
+		executeSql("INSERT INTO " + table + " values('Early birds catch the bug.')");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof byte[]);
+				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
+						.getOldValue());
+				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
+						.getNewValue());
 
 			}
 		});

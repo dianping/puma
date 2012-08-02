@@ -62,7 +62,7 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
  */
 public abstract class PumaServerIntegrationBaseTest {
 	private static final String			dbConfigFile			= "PumaServerIntegrationTest.properties";
-	private static MysqlDataSource		ds;
+	protected static MysqlDataSource	ds;
 	protected static String				host;
 	protected static int				port;
 	private static String				pwd;

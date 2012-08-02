@@ -198,8 +198,8 @@ public final class MySQLUtils {
 	private static final BigDecimal	NEGATIVE_ONE			= new BigDecimal("-1");
 	private static final int		DECIMAL_BINARY_SIZE[]	= { 0, 1, 1, 2, 2, 3, 3, 4, 4, 4 };
 
-	public static int toYear(int value) {
-		return 1900 + value;
+	public static short toYear(short value) {
+		return (short)(1900 + value);
 	}
 
 	public static java.sql.Date toDate(int value) {

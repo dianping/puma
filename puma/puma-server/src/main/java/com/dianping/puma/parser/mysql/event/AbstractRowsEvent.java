@@ -182,7 +182,7 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 				columns.add(DoubleColumn.valueOf(Double.longBitsToDouble(PacketUtils.readLong(buf, 8))));
 				break;
 			case BinlogConstanst.MYSQL_TYPE_YEAR:
-				columns.add(YearColumn.valueOf(MySQLUtils.toYear(PacketUtils.readInt(buf, 1))));
+				columns.add(YearColumn.valueOf(MySQLUtils.toYear((short)PacketUtils.readInt(buf, 1))));
 				break;
 			case BinlogConstanst.MYSQL_TYPE_DATE:
 				columns.add(DateColumn.valueOf(MySQLUtils.toDate(PacketUtils.readInt(buf, 3))));

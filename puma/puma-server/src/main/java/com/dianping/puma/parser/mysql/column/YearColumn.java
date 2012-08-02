@@ -15,8 +15,6 @@
  */
 package com.dianping.puma.parser.mysql.column;
 
-import java.sql.Date;
-
 /**
  * 
  * TODO Comment of YearColumn
@@ -28,14 +26,14 @@ public final class YearColumn implements Column {
 	private static final long			serialVersionUID	= 5662761825168326469L;
 	private static final YearColumn[]	CACHE				= new YearColumn[255];
 	static {
-		for (int i = 0; i < CACHE.length; i++) {
-			CACHE[i] = new YearColumn(i + 1900);
+		for (short i = 0; i < CACHE.length; i++) {
+			CACHE[i] = new YearColumn((short) (i + 1900));
 		}
 	}
 
-	private final int					value;
+	private final short					value;
 
-	private YearColumn(int value) {
+	private YearColumn(short value) {
 		this.value = value;
 	}
 
@@ -49,11 +47,11 @@ public final class YearColumn implements Column {
 		return String.valueOf(value);
 	}
 
-	public Date getValue() {
-		return new Date(this.value);
+	public Short getValue() {
+		return this.value;
 	}
 
-	public static final YearColumn valueOf(int value) {
+	public static final YearColumn valueOf(short value) {
 		final int index = value - 1900;
 		return (index >= 0 && index < CACHE.length) ? CACHE[index] : new YearColumn(value);
 	}

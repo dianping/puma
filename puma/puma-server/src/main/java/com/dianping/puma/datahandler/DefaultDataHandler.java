@@ -51,7 +51,8 @@ public class DefaultDataHandler extends AbstractDataHandler {
 			case BinlogConstanst.TABLE_MAP_EVENT:
 				TableMapEvent tableMapEvent = (TableMapEvent) binlogEvent;
 
-				tableMetaInfo = getTableMetaInfo(tableMapEvent.getDatabaseName(), tableMapEvent.getTableName());
+				tableMetaInfo = getTableMetasInfoFetcher().getTableMetaInfo(tableMapEvent.getDatabaseName(),
+						tableMapEvent.getTableName());
 				fillRawTypeCodes(tableMapEvent, tableMetaInfo);
 				fillRawNullAbilities(tableMapEvent, tableMetaInfo);
 

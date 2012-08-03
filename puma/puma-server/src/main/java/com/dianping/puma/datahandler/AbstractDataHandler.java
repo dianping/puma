@@ -16,14 +16,6 @@
 package com.dianping.puma.datahandler;
 
 import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -37,7 +29,6 @@ import com.dianping.puma.parser.mysql.BinlogConstanst;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
 import com.dianping.puma.parser.mysql.event.PumaIgnoreEvent;
 import com.dianping.puma.parser.mysql.event.QueryEvent;
-import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 /**
  * TODO Comment of AbstractDataHandler
@@ -47,52 +38,22 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
  */
 @ThreadUnSafe
 public abstract class AbstractDataHandler implements DataHandler {
-	private static final Logger									log					= Logger.getLogger(AbstractDataHandler.class);
-	private static AtomicReference<Map<String, TableMetaInfo>>	tableMetaInfoCache	= new AtomicReference<Map<String, TableMetaInfo>>();
-	private int													metaDBPort			= 3306;
-	private String												metaDBHost;
-	private String												metaDBUser;
-	private String												metaDBPassword;
-	private MysqlDataSource										metaDs;
+	private static final Logger		log	= Logger.getLogger(AbstractDataHandler.class);
+	private TableMetasInfoFetcher	tableMetasInfoFetcher;
 
-	public int getMetaDBPort() {
-		return metaDBPort;
+	/**
+	 * @return the tableMetasInfoFetcher
+	 */
+	public TableMetasInfoFetcher getTableMetasInfoFetcher() {
+		return tableMetasInfoFetcher;
 	}
 
-	public void setMetaDBPort(int metaDBPort) {
-		this.metaDBPort = metaDBPort;
-	}
-
-	public String getMetaDBHost() {
-		return metaDBHost;
-	}
-
-	public void setMetaDBHost(String metaDBHost) {
-		this.metaDBHost = metaDBHost;
-	}
-
-	public String getMetaDBUser() {
-		return metaDBUser;
-	}
-
-	public void setMetaDBUser(String metaDBUser) {
-		this.metaDBUser = metaDBUser;
-	}
-
-	public String getMetaDBPassword() {
-		return metaDBPassword;
-	}
-
-	public void setMetaDBPassword(String metaDBPassword) {
-		this.metaDBPassword = metaDBPassword;
-	}
-
-	public MysqlDataSource getMetaDs() {
-		return metaDs;
-	}
-
-	public void setMetaDs(MysqlDataSource metaDs) {
-		this.metaDs = metaDs;
+	/**
+	 * @param tableMetasInfoFetcher
+	 *            the tableMetasInfoFetcher to set
+	 */
+	public void setTableMetasInfoFetcher(TableMetasInfoFetcher tableMetasInfoFetcher) {
+		this.tableMetasInfoFetcher = tableMetasInfoFetcher;
 	}
 
 	/*
@@ -102,7 +63,7 @@ public abstract class AbstractDataHandler implements DataHandler {
 	 */
 	@Override
 	public void start() throws Exception {
-		refreshTableMeta();
+		tableMetasInfoFetcher.refreshTableMeta();
 	}
 
 	/*
@@ -113,82 +74,6 @@ public abstract class AbstractDataHandler implements DataHandler {
 	@Override
 	public void stop() throws Exception {
 
-	}
-
-	protected void refreshTableMeta() {
-		Map<String, TableMetaInfo> newTableMeta = new HashMap<String, TableMetaInfo>();
-
-		if (metaDs == null) {
-			metaDs = new MysqlDataSource();
-			metaDs.setUrl("jdbc:mysql://" + metaDBHost + ":" + metaDBPort);
-			metaDs.setUser(metaDBUser);
-			metaDs.setPassword(metaDBPassword);
-		}
-
-		Connection conn = null;
-		Statement stmt = null;
-		ResultSet rs = null;
-		try {
-			conn = metaDs.getConnection();
-			stmt = conn.createStatement();
-			rs = stmt
-					.executeQuery("SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, COLUMN_KEY, COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS");
-			if (rs != null) {
-				while (rs.next()) {
-					String db = rs.getString("TABLE_SCHEMA");
-					String tb = rs.getString("TABLE_NAME");
-					String columnName = rs.getString("COLUMN_NAME");
-					int colPosition = rs.getInt("ORDINAL_POSITION");
-					String type = rs.getString("DATA_TYPE");
-					String key = rs.getString("COLUMN_KEY");
-					String typeStr = rs.getString("COLUMN_TYPE");
-					boolean signed = true;
-					if (typeStr != null && typeStr.indexOf(" unsigned") != -1) {
-						signed = false;
-					}
-					TableMetaInfo tmi = newTableMeta.get(db + "." + tb);
-					if (tmi == null) {
-						TableMetaInfo newTmi = new TableMetaInfo();
-						newTmi.setDatabase(db);
-						newTmi.setTable(tb);
-						newTmi.setColumns(new HashMap<Integer, String>());
-						newTmi.setKeys(new ArrayList<String>());
-						newTmi.setTypes(new HashMap<String, String>());
-						newTmi.setSignedInfos(new HashMap<Integer, Boolean>());
-						newTableMeta.put(db + "." + tb, newTmi);
-						tmi = newTmi;
-					}
-					tmi.getColumns().put(colPosition, columnName);
-					tmi.getSignedInfos().put(colPosition, signed);
-					tmi.getTypes().put(columnName, convertTypes(type));
-					if ("PRI".equals(key)) {
-						tmi.getKeys().add(columnName);
-					}
-				}
-				tableMetaInfoCache.set(newTableMeta);
-			}
-		} catch (Exception e) {
-			log.error("Refresh TableMeta failed.", e);
-		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException e) {
-				}
-			}
-			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (SQLException e) {
-				}
-			}
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-				}
-			}
-		}
 	}
 
 	protected Object convertUnsignedValueIfNeeded(int pos, Object value, TableMetaInfo tableMeta) {
@@ -232,10 +117,6 @@ public abstract class AbstractDataHandler implements DataHandler {
 		return newValue;
 	}
 
-	private String convertTypes(String str) {
-		return str;
-	}
-
 	@Override
 	public DataHandlerResult process(BinlogEvent binlogEvent, PumaContext context) {
 		DataHandlerResult result = new DataHandlerResult();
@@ -259,7 +140,7 @@ public abstract class AbstractDataHandler implements DataHandler {
 					|| StringUtils.startsWithIgnoreCase(sql, "RENAME ")
 					|| StringUtils.startsWithIgnoreCase(sql, "TRUNCATE ")) {
 				// Refresh table meta
-				refreshTableMeta();
+				tableMetasInfoFetcher.refreshTableMeta();
 
 				ChangedEvent dataChangedEvent = new DdlEvent();
 				DdlEvent ddlEvent = (DdlEvent) dataChangedEvent;
@@ -312,9 +193,5 @@ public abstract class AbstractDataHandler implements DataHandler {
 
 	protected abstract void doProcess(DataHandlerResult result, BinlogEvent binlogEvent, PumaContext context,
 			byte eventType);
-
-	protected TableMetaInfo getTableMetaInfo(String database, String table) {
-		return tableMetaInfoCache.get().get(database + "." + table);
-	}
 
 }

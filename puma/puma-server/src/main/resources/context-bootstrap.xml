@@ -70,6 +70,11 @@
 
 	<bean id="datahandler-7-43" class="com.dianping.puma.datahandler.DefaultDataHandler"
 		init-method="start">
+		<property name="tableMetasInfoFetcher" ref="tableMetasInfoFetcher" />
+	</bean>
+
+	<bean id="tableMetasInfoFetcher"
+		class="com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher">
 		<property name="metaDBHost" value="192.168.7.43" />
 		<property name="metaDBPort" value="3306" />
 		<property name="metaDBUser" value="binlog" />

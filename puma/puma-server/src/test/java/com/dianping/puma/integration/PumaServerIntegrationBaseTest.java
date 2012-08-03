@@ -40,6 +40,7 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.datahandler.DefaultDataHandler;
+import com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.parser.DefaultBinlogParser;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.FileDumpSender;
@@ -115,12 +116,16 @@ public abstract class PumaServerIntegrationBaseTest {
 		Parser parser = new DefaultBinlogParser();
 		parser.start();
 
+		// init tablemetasinfofetcher
+		DefaultTableMetaInfoFetcher tableMetaInfoFetcher = new DefaultTableMetaInfoFetcher();
+		tableMetaInfoFetcher.setMetaDBHost(host);
+		tableMetaInfoFetcher.setMetaDBPassword(pwd);
+		tableMetaInfoFetcher.setMetaDBPort(port);
+		tableMetaInfoFetcher.setMetaDBUser(user);
+
 		// init dataHandler
 		DefaultDataHandler dataHandler = new DefaultDataHandler();
-		dataHandler.setMetaDBHost(host);
-		dataHandler.setMetaDBPassword(pwd);
-		dataHandler.setMetaDBPort(port);
-		dataHandler.setMetaDBUser(user);
+		dataHandler.setTableMetasInfoFetcher(tableMetaInfoFetcher);
 		dataHandler.start();
 
 		// init index

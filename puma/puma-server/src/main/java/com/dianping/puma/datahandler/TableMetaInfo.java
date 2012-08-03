@@ -23,6 +23,7 @@ import java.util.Map;
  * <pre>
  * 数据表的Meta信息
  * <tt>columns</tt>是以column index为key, 以column name为value的map
+ * <tt>signedInfos</tt>是以column index为key, 以是否为有符号数为value的map
  * <tt>keys</tt>包含所有主键的column name
  * <tt>types</tt>是以column name为key，以java.sql.Types里面的类型定义为value的map
  * <tt>rawTypesCodes</tt>是以column index为key，以类型数值为value的map(元数据)
@@ -42,10 +43,26 @@ public class TableMetaInfo implements Serializable {
 	private String					database;
 	private String					table;
 	private Map<Integer, String>	columns;
+	private Map<Integer, Boolean>	signedInfos;
 	private Map<Integer, Byte>		rawTypeCodes;
 	private List<Integer>			rawNullAbilities;
 	private List<String>			keys;
 	private Map<String, String>		types;
+
+	/**
+	 * @return the signedInfos
+	 */
+	public Map<Integer, Boolean> getSignedInfos() {
+		return signedInfos;
+	}
+
+	/**
+	 * @param signedInfos
+	 *            the signedInfos to set
+	 */
+	public void setSignedInfos(Map<Integer, Boolean> signedInfos) {
+		this.signedInfos = signedInfos;
+	}
 
 	/**
 	 * @param database
@@ -159,8 +176,9 @@ public class TableMetaInfo implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return "TableMetaInfo [database=" + database + ", table=" + table + ", columns=" + columns + ", rawTypeCodes="
-				+ rawTypeCodes + ", rawNullAbilities=" + rawNullAbilities + ", keys=" + keys + ", types=" + types + "]";
+		return "TableMetaInfo [database=" + database + ", table=" + table + ", columns=" + columns + ", signedInfos="
+				+ signedInfos + ", rawTypeCodes=" + rawTypeCodes + ", rawNullAbilities=" + rawNullAbilities + ", keys="
+				+ keys + ", types=" + types + "]";
 	}
 
 }

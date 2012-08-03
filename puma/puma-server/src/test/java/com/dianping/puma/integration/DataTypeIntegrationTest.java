@@ -1,6 +1,7 @@
 package com.dianping.puma.integration;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -34,10 +35,51 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 				executeSql("UPDATE " + table + " SET id=9223372036854775807 WHERE id=1");
 				List<ChangedEvent> events = getEvents(1, false);
 				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
-				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof Long);
-				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue().equals(
-						new Long(9223372036854775807L)));
-				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(new Long(1)));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof BigInteger);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue()
+						.equals(BigInteger.valueOf(9223372036854775807L)));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(BigInteger.ONE));
+			}
+		});
+	}
+
+	@Test
+	public void testBigInt2() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id BIGINT)");
+		executeSql("INSERT INTO " + table + " values(-9223372036854775808)");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id=9223372036854775807 WHERE id=-9223372036854775808");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof BigInteger);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue()
+						.equals(BigInteger.valueOf(9223372036854775807L)));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue()
+						.equals(new BigInteger("-9223372036854775808")));
+			}
+		});
+	}
+
+	@Test
+	public void testBigIntUnsgined() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id BIGINT UNSIGNED)");
+		executeSql("INSERT INTO " + table + " values(1)");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id=9223372036854775808 WHERE id=1");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof BigInteger);
+				Assert.assertTrue(((BigInteger) rowChangedEvent.getColumns().get("id").getNewValue()).toString()
+						.equals("9223372036854775808"));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(BigInteger.ONE));
 			}
 		});
 	}
@@ -59,7 +101,7 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 			}
 		});
 	}
-	
+
 	@Test
 	public void testVarBinary() throws Exception {
 		executeSql("CREATE TABLE " + table + "(id VARBINARY(10))");
@@ -253,8 +295,8 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 				List<ChangedEvent> events = getEvents(1, false);
 				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof Double);
-				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(
-						new Double(2.2250738585072E-308)));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue()
+						.equals(new Double(2.2250738585072E-308)));
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue().equals(new Double(4.56)));
 
 			}
@@ -294,9 +336,7 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 				List<ChangedEvent> events = getEvents(1, false);
 				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("val").getOldValue() instanceof Float);
-				Assert
-						.assertTrue(rowChangedEvent.getColumns().get("val").getOldValue().equals(
-								new Float(-3.40282E+38)));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("val").getOldValue().equals(new Float(-3.40282E+38)));
 				Assert.assertTrue(rowChangedEvent.getColumns().get("val").getNewValue().equals(new Float(4.56)));
 
 			}
@@ -316,8 +356,8 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 				List<ChangedEvent> events = getEvents(1, false);
 				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof Double);
-				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(
-						new Double(2.2250738585072E-308)));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue()
+						.equals(new Double(2.2250738585072E-308)));
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue().equals(new Double(4.56)));
 
 			}
@@ -336,9 +376,28 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 				executeSql("UPDATE " + table + " SET id=" + Integer.MIN_VALUE + " WHERE id=" + Integer.MAX_VALUE);
 				List<ChangedEvent> events = getEvents(1, false);
 				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
-				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof Integer);
-				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue().equals(Integer.MIN_VALUE));
-				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(Integer.MAX_VALUE));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof Long);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue().equals(-2147483648L));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(2147483647L));
+			}
+		});
+	}
+
+	@Test
+	public void testIntUnsigned() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id INT UNSIGNED)");
+		executeSql("INSERT INTO " + table + " values(2147483648)");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id=1 WHERE id=2147483648");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof Long);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue().equals(1L));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(2147483648L));
 			}
 		});
 	}
@@ -369,6 +428,26 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 	}
 
 	@Test
+	public void testMediumIntUnsigned() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id MEDIUMINT UNSIGNED)");
+		executeSql("INSERT INTO " + table + " values(0)");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id= 8388608 WHERE id=0");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof Integer);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue().equals(new Integer(8388608)));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(new Integer(0)));
+
+			}
+		});
+	}
+
+	@Test
 	public void testSmallInt() throws Exception {
 		executeSql("CREATE TABLE " + table + "(id SMALLINT)");
 		executeSql("INSERT INTO " + table + " values(-32768)");
@@ -383,6 +462,26 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof Integer);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue().equals(new Integer(32767)));
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(new Integer(-32768)));
+
+			}
+		});
+	}
+
+	@Test
+	public void testSmallIntUnsigned() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id SMALLINT UNSIGNED)");
+		executeSql("INSERT INTO " + table + " values(0)");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id= 32768 WHERE id=0");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof Integer);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue().equals(new Integer(32768)));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(new Integer(0)));
 
 			}
 		});
@@ -409,6 +508,26 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 	}
 
 	@Test
+	public void testTinyIntUnsigned() throws Exception {
+		executeSql("CREATE TABLE " + table + "(id TINYINT UNSIGNED)");
+		executeSql("INSERT INTO " + table + " values(0)");
+		waitForSync(50);
+		test(new TestLogic() {
+
+			@Override
+			public void doLogic() throws Exception {
+				executeSql("UPDATE " + table + " SET id= 255 WHERE id=0");
+				List<ChangedEvent> events = getEvents(1, false);
+				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof Integer);
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue().equals(new Integer(255)));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(new Integer(0)));
+
+			}
+		});
+	}
+
+	@Test
 	public void testNumeric() throws Exception {
 		executeSql("CREATE TABLE " + table + "(id NUMERIC(4,2))");
 		executeSql("INSERT INTO " + table + " values(-99.99)");
@@ -421,9 +540,7 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 				List<ChangedEvent> events = getEvents(1, false);
 				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof BigDecimal);
-				Assert
-						.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(
-								new BigDecimal("-99.99")));
+				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue().equals(new BigDecimal("-99.99")));
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getNewValue().equals(new BigDecimal("0.00")));
 
 			}
@@ -514,7 +631,7 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 			}
 		});
 	}
-	
+
 	@Test
 	public void testVarchar() throws Exception {
 		executeSql("CREATE TABLE " + table + "(id VARCHAR(50))");
@@ -524,19 +641,20 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 
 			@Override
 			public void doLogic() throws Exception {
-				executeSql("UPDATE " + table + " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
+				executeSql("UPDATE " + table
+						+ " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
 				List<ChangedEvent> events = getEvents(1, false);
 				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof String);
 				Assert.assertEquals(new String("Early birds catch the bug."), rowChangedEvent.getColumns().get("id")
 						.getOldValue());
-				Assert.assertEquals(new String("Early bug is eaten by the bird."), rowChangedEvent.getColumns().get("id")
-						.getNewValue());
+				Assert.assertEquals(new String("Early bug is eaten by the bird."),
+						rowChangedEvent.getColumns().get("id").getNewValue());
 
 			}
 		});
 	}
-	
+
 	@Test
 	public void testText() throws Exception {
 		executeSql("CREATE TABLE " + table + "(id TEXT)");
@@ -546,19 +664,20 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 
 			@Override
 			public void doLogic() throws Exception {
-				executeSql("UPDATE " + table + " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
+				executeSql("UPDATE " + table
+						+ " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
 				List<ChangedEvent> events = getEvents(1, false);
 				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof byte[]);
-				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
-						.getOldValue());
-				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
-						.getNewValue());
+				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(),
+						(byte[]) rowChangedEvent.getColumns().get("id").getOldValue());
+				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(),
+						(byte[]) rowChangedEvent.getColumns().get("id").getNewValue());
 
 			}
 		});
 	}
-	
+
 	@Test
 	public void testTinyText() throws Exception {
 		executeSql("CREATE TABLE " + table + "(id TINYTEXT)");
@@ -568,18 +687,20 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 
 			@Override
 			public void doLogic() throws Exception {
-				executeSql("UPDATE " + table + " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
+				executeSql("UPDATE " + table
+						+ " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
 				List<ChangedEvent> events = getEvents(1, false);
 				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof byte[]);
-				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
-						.getOldValue());
-				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
-						.getNewValue());
+				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(),
+						(byte[]) rowChangedEvent.getColumns().get("id").getOldValue());
+				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(),
+						(byte[]) rowChangedEvent.getColumns().get("id").getNewValue());
 
 			}
 		});
 	}
+
 	@Test
 	public void testMediumText() throws Exception {
 		executeSql("CREATE TABLE " + table + "(id MEDIUMTEXT)");
@@ -589,19 +710,20 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 
 			@Override
 			public void doLogic() throws Exception {
-				executeSql("UPDATE " + table + " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
+				executeSql("UPDATE " + table
+						+ " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
 				List<ChangedEvent> events = getEvents(1, false);
 				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof byte[]);
-				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
-						.getOldValue());
-				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
-						.getNewValue());
+				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(),
+						(byte[]) rowChangedEvent.getColumns().get("id").getOldValue());
+				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(),
+						(byte[]) rowChangedEvent.getColumns().get("id").getNewValue());
 
 			}
 		});
 	}
-	
+
 	@Test
 	public void testLongText() throws Exception {
 		executeSql("CREATE TABLE " + table + "(id LONGTEXT)");
@@ -611,19 +733,20 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 
 			@Override
 			public void doLogic() throws Exception {
-				executeSql("UPDATE " + table + " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
+				executeSql("UPDATE " + table
+						+ " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
 				List<ChangedEvent> events = getEvents(1, false);
 				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof byte[]);
-				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
-						.getOldValue());
-				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
-						.getNewValue());
+				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(),
+						(byte[]) rowChangedEvent.getColumns().get("id").getOldValue());
+				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(),
+						(byte[]) rowChangedEvent.getColumns().get("id").getNewValue());
 
 			}
 		});
 	}
-	
+
 	@Test
 	public void testBlob() throws Exception {
 		executeSql("CREATE TABLE " + table + "(id BLOB)");
@@ -633,19 +756,20 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 
 			@Override
 			public void doLogic() throws Exception {
-				executeSql("UPDATE " + table + " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
+				executeSql("UPDATE " + table
+						+ " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
 				List<ChangedEvent> events = getEvents(1, false);
 				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof byte[]);
-				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
-						.getOldValue());
-				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
-						.getNewValue());
+				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(),
+						(byte[]) rowChangedEvent.getColumns().get("id").getOldValue());
+				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(),
+						(byte[]) rowChangedEvent.getColumns().get("id").getNewValue());
 
 			}
 		});
 	}
-	
+
 	@Test
 	public void testTinyBlob() throws Exception {
 		executeSql("CREATE TABLE " + table + "(id TINYBLOB)");
@@ -655,19 +779,20 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 
 			@Override
 			public void doLogic() throws Exception {
-				executeSql("UPDATE " + table + " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
+				executeSql("UPDATE " + table
+						+ " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
 				List<ChangedEvent> events = getEvents(1, false);
 				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof byte[]);
-				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
-						.getOldValue());
-				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
-						.getNewValue());
+				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(),
+						(byte[]) rowChangedEvent.getColumns().get("id").getOldValue());
+				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(),
+						(byte[]) rowChangedEvent.getColumns().get("id").getNewValue());
 
 			}
 		});
 	}
-	
+
 	@Test
 	public void testMediumBlob() throws Exception {
 		executeSql("CREATE TABLE " + table + "(id MEDIUMBLOB)");
@@ -677,19 +802,20 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 
 			@Override
 			public void doLogic() throws Exception {
-				executeSql("UPDATE " + table + " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
+				executeSql("UPDATE " + table
+						+ " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
 				List<ChangedEvent> events = getEvents(1, false);
 				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof byte[]);
-				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
-						.getOldValue());
-				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
-						.getNewValue());
+				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(),
+						(byte[]) rowChangedEvent.getColumns().get("id").getOldValue());
+				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(),
+						(byte[]) rowChangedEvent.getColumns().get("id").getNewValue());
 
 			}
 		});
 	}
-	
+
 	@Test
 	public void testLongBlob() throws Exception {
 		executeSql("CREATE TABLE " + table + "(id LONGBLOB)");
@@ -699,14 +825,15 @@ public class DataTypeIntegrationTest extends PumaServerIntegrationBaseTest {
 
 			@Override
 			public void doLogic() throws Exception {
-				executeSql("UPDATE " + table + " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
+				executeSql("UPDATE " + table
+						+ " SET id='Early bug is eaten by the bird.' WHERE id='Early birds catch the bug.'");
 				List<ChangedEvent> events = getEvents(1, false);
 				RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(0);
 				Assert.assertTrue(rowChangedEvent.getColumns().get("id").getOldValue() instanceof byte[]);
-				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
-						.getOldValue());
-				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(), (byte[])rowChangedEvent.getColumns().get("id")
-						.getNewValue());
+				Assert.assertArrayEquals((new String("Early birds catch the bug.")).getBytes(),
+						(byte[]) rowChangedEvent.getColumns().get("id").getOldValue());
+				Assert.assertArrayEquals((new String("Early bug is eaten by the bird.")).getBytes(),
+						(byte[]) rowChangedEvent.getColumns().get("id").getNewValue());
 
 			}
 		});

@@ -78,7 +78,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 							Column binlogColumn = writeRowsEvent.getRows().get(rowPos).getColumns().get(columnIndex);
 							String columnName = tableMetaInfo.getColumns().get(columnPos + 1);
 							ColumnInfo columnInfo = new ColumnInfo(tableMetaInfo.getKeys().contains(columnName), null,
-									binlogColumn.getValue());
+									convertUnsignedValueIfNeeded(columnPos + 1, binlogColumn.getValue(), tableMetaInfo));
 							columns.put(columnName, columnInfo);
 							columnIndex++;
 						}
@@ -119,8 +119,10 @@ public class DefaultDataHandler extends AbstractDataHandler {
 							columnBeforeIndex++;
 						}
 						ColumnInfo columnInfo = new ColumnInfo(tableMetaInfo.getKeys().contains(columnName),
-								beforeColumn == null ? null : beforeColumn.getValue(), afterColumn == null ? null
-										: afterColumn.getValue());
+								beforeColumn == null ? null : convertUnsignedValueIfNeeded(columnPos + 1,
+										beforeColumn.getValue(), tableMetaInfo), afterColumn == null ? null
+										: convertUnsignedValueIfNeeded(columnPos + 1, afterColumn.getValue(),
+												tableMetaInfo));
 						columns.put(columnName, columnInfo);
 					}
 
@@ -146,8 +148,10 @@ public class DefaultDataHandler extends AbstractDataHandler {
 						if (deleteRowsEvent.getUsedColumns().get(columnPos)) {
 							Column binlogColumn = deleteRowsEvent.getRows().get(rowPos).getColumns().get(columnIndex);
 							String columnName = tableMetaInfo.getColumns().get(columnPos + 1);
-							ColumnInfo columnInfo = new ColumnInfo(tableMetaInfo.getKeys().contains(columnName),
-									binlogColumn.getValue(), null);
+							ColumnInfo columnInfo = new ColumnInfo(
+									tableMetaInfo.getKeys().contains(columnName),
+									convertUnsignedValueIfNeeded(columnPos + 1, binlogColumn.getValue(), tableMetaInfo),
+									null);
 							columns.put(columnName, columnInfo);
 							columnIndex++;
 						}

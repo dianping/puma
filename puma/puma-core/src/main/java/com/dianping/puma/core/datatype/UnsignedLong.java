@@ -61,6 +61,10 @@ public final class UnsignedLong extends Number implements Comparable<UnsignedLon
 
 	private final long					value;
 
+	public UnsignedLong() {
+		this.value = 0L;
+	}
+
 	private UnsignedLong(long value) {
 		this.value = value;
 	}

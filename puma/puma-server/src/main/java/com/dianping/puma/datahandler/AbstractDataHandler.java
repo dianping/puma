@@ -15,6 +15,7 @@
  */
 package com.dianping.puma.datahandler;
 
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -131,7 +132,7 @@ public abstract class AbstractDataHandler implements DataHandler {
 			conn = metaDs.getConnection();
 			stmt = conn.createStatement();
 			rs = stmt
-					.executeQuery("SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS");
+					.executeQuery("SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, COLUMN_KEY, COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS");
 			if (rs != null) {
 				while (rs.next()) {
 					String db = rs.getString("TABLE_SCHEMA");
@@ -140,6 +141,11 @@ public abstract class AbstractDataHandler implements DataHandler {
 					int colPosition = rs.getInt("ORDINAL_POSITION");
 					String type = rs.getString("DATA_TYPE");
 					String key = rs.getString("COLUMN_KEY");
+					String typeStr = rs.getString("COLUMN_TYPE");
+					boolean signed = true;
+					if (typeStr != null && typeStr.indexOf(" unsigned") != -1) {
+						signed = false;
+					}
 					TableMetaInfo tmi = newTableMeta.get(db + "." + tb);
 					if (tmi == null) {
 						TableMetaInfo newTmi = new TableMetaInfo();
@@ -148,10 +154,12 @@ public abstract class AbstractDataHandler implements DataHandler {
 						newTmi.setColumns(new HashMap<Integer, String>());
 						newTmi.setKeys(new ArrayList<String>());
 						newTmi.setTypes(new HashMap<String, String>());
+						newTmi.setSignedInfos(new HashMap<Integer, Boolean>());
 						newTableMeta.put(db + "." + tb, newTmi);
 						tmi = newTmi;
 					}
 					tmi.getColumns().put(colPosition, columnName);
+					tmi.getSignedInfos().put(colPosition, signed);
 					tmi.getTypes().put(columnName, convertTypes(type));
 					if ("PRI".equals(key)) {
 						tmi.getKeys().add(columnName);
@@ -181,6 +189,47 @@ public abstract class AbstractDataHandler implements DataHandler {
 				}
 			}
 		}
+	}
+
+	protected Object convertUnsignedValueIfNeeded(int pos, Object value, TableMetaInfo tableMeta) {
+		Object newValue = value;
+		if (value != null) {
+			switch (tableMeta.getRawTypeCodes().get(pos)) {
+				case BinlogConstanst.MYSQL_TYPE_TINY:
+					if ((Integer) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
+						newValue = new Integer((Integer) value + (1 << 8));
+					}
+					break;
+				case BinlogConstanst.MYSQL_TYPE_INT24:
+					if ((Integer) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
+						newValue = new Integer((Integer) value + (1 << 24));
+					}
+					break;
+				case BinlogConstanst.MYSQL_TYPE_SHORT:
+					if ((Integer) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
+						newValue = new Integer((Integer) value + (1 << 16));
+					}
+					break;
+				case BinlogConstanst.MYSQL_TYPE_INT:
+					if ((Integer) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
+						newValue = new Long((Integer) value) + (1L << 32);
+					} else {
+						newValue = new Long((Integer) value);
+					}
+					break;
+				case BinlogConstanst.MYSQL_TYPE_LONGLONG:
+					if ((Long) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
+						newValue = BigInteger.valueOf((Long) value).add(BigInteger.ONE.shiftLeft(64));
+					} else {
+						newValue = BigInteger.valueOf((Long) value);
+					}
+					break;
+				default:
+					break;
+			}
+
+		}
+		return newValue;
 	}
 
 	private String convertTypes(String str) {

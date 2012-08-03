@@ -21,6 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.bo.PumaContext;
+import com.dianping.puma.common.NotifyService;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
@@ -40,6 +41,22 @@ import com.dianping.puma.parser.mysql.event.QueryEvent;
 public abstract class AbstractDataHandler implements DataHandler {
 	private static final Logger		log	= Logger.getLogger(AbstractDataHandler.class);
 	private TableMetasInfoFetcher	tableMetasInfoFetcher;
+	private NotifyService			notifyService;
+
+	/**
+	 * @return the notifyService
+	 */
+	public NotifyService getNotifyService() {
+		return notifyService;
+	}
+
+	/**
+	 * @param notifyService
+	 *            the notifyService to set
+	 */
+	public void setNotifyService(NotifyService notifyService) {
+		this.notifyService = notifyService;
+	}
 
 	/**
 	 * @return the tableMetasInfoFetcher

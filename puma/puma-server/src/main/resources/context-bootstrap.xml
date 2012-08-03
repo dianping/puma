@@ -69,7 +69,7 @@
 
 
 	<bean id="datahandler-7-43" class="com.dianping.puma.datahandler.DefaultDataHandler"
-		init-method="start">
+		init-method="start" parent="notifiableBean">
 		<property name="tableMetasInfoFetcher" ref="tableMetasInfoFetcher" />
 	</bean>
 

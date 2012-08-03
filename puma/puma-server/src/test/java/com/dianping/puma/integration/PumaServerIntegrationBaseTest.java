@@ -126,6 +126,7 @@ public abstract class PumaServerIntegrationBaseTest {
 		// init dataHandler
 		DefaultDataHandler dataHandler = new DefaultDataHandler();
 		dataHandler.setTableMetasInfoFetcher(tableMetaInfoFetcher);
+		dataHandler.setNotifyService(mockNotifyService);
 		dataHandler.start();
 
 		// init index

@@ -99,6 +99,74 @@ public class JsonEventCodecTest {
 		}
 	}
 
+	@Test
+	public void testDmlNullKey() throws IOException {
+		RowChangedEvent event = new RowChangedEvent();
+		event.setDatabase("testdb");
+		event.setExecuteTime(11111111);
+		event.setTable("testtb");
+		event.setSeq(1233);
+		event.setActionType(RowChangedEvent.INSERT);
+		event.setTransactionBegin(false);
+		event.setTransactionCommit(false);
+		Map<String, ColumnInfo> columns = new HashMap<String, ColumnInfo>();
+		columns.put(null, new ColumnInfo(false, null, null));
+		event.setColumns(columns);
+
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		byte[] data = codec.encode(event);
+		bos.write(intToByteArray(data.length));
+		bos.write(data);
+		ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+		RowChangedEvent result = (RowChangedEvent) readEvent(bis);
+		Assert.assertEquals(event.getDatabase(), result.getDatabase());
+		Assert.assertEquals(event.getExecuteTime(), result.getExecuteTime());
+		Assert.assertEquals(event.getSeq(), result.getSeq());
+		Assert.assertEquals(event.getActionType(), result.getActionType());
+		Assert.assertEquals(event.getTable(), result.getTable());
+		Assert.assertEquals(event.isTransactionBegin(), result.isTransactionBegin());
+		Assert.assertEquals(event.isTransactionCommit(), result.isTransactionCommit());
+		for (Map.Entry<String, ColumnInfo> entry : event.getColumns().entrySet()) {
+			Assert.assertEquals(entry.getValue().isKey(), result.getColumns().get("[NullKey]").isKey());
+			Assert.assertNull(result.getColumns().get("[NullKey]").getNewValue());
+			Assert.assertNull(result.getColumns().get("[NullKey]").getOldValue());
+		}
+	}
+
+	@Test
+	public void testDmlNullValue() throws IOException {
+		RowChangedEvent event = new RowChangedEvent();
+		event.setDatabase("testdb");
+		event.setExecuteTime(11111111);
+		event.setTable("testtb");
+		event.setSeq(1233);
+		event.setActionType(RowChangedEvent.INSERT);
+		event.setTransactionBegin(false);
+		event.setTransactionCommit(false);
+		Map<String, ColumnInfo> columns = new HashMap<String, ColumnInfo>();
+		columns.put("dd", new ColumnInfo(false, null, null));
+		event.setColumns(columns);
+
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		byte[] data = codec.encode(event);
+		bos.write(intToByteArray(data.length));
+		bos.write(data);
+		ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+		RowChangedEvent result = (RowChangedEvent) readEvent(bis);
+		Assert.assertEquals(event.getDatabase(), result.getDatabase());
+		Assert.assertEquals(event.getExecuteTime(), result.getExecuteTime());
+		Assert.assertEquals(event.getSeq(), result.getSeq());
+		Assert.assertEquals(event.getActionType(), result.getActionType());
+		Assert.assertEquals(event.getTable(), result.getTable());
+		Assert.assertEquals(event.isTransactionBegin(), result.isTransactionBegin());
+		Assert.assertEquals(event.isTransactionCommit(), result.isTransactionCommit());
+		for (Map.Entry<String, ColumnInfo> entry : event.getColumns().entrySet()) {
+			Assert.assertEquals(entry.getValue().isKey(), result.getColumns().get("dd").isKey());
+			Assert.assertNull(result.getColumns().get("dd").getNewValue());
+			Assert.assertNull(result.getColumns().get("dd").getOldValue());
+		}
+	}
+
 	private ChangedEvent readEvent(InputStream is) throws IOException {
 		byte[] lengthArray = new byte[4];
 		StreamUtils.readFully(is, lengthArray, 0, 4);

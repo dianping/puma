@@ -56,7 +56,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(host + ":" + port, rowChangedEvent.getMasterUrl());
 				Assert.assertEquals(db, rowChangedEvent.getDatabase());
 				Assert.assertEquals(1, rowChangedEvent.getColumns().size());
-				Assert.assertEquals(1, rowChangedEvent.getColumns().get("id").getNewValue());
+				Assert.assertEquals(1L, rowChangedEvent.getColumns().get("id").getNewValue());
 				Assert.assertNull(rowChangedEvent.getColumns().get("id").getOldValue());
 			}
 		});
@@ -85,7 +85,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(host + ":" + port, rowChangedEvent.getMasterUrl());
 				Assert.assertEquals(db, rowChangedEvent.getDatabase());
 				Assert.assertEquals(1, rowChangedEvent.getColumns().size());
-				Assert.assertEquals(1, rowChangedEvent.getColumns().get("id").getNewValue());
+				Assert.assertEquals(1L, rowChangedEvent.getColumns().get("id").getNewValue());
 				Assert.assertNull(rowChangedEvent.getColumns().get("id").getOldValue());
 
 				Assert.assertTrue(events.get(2) instanceof RowChangedEvent);
@@ -119,7 +119,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(host + ":" + port, rowChangedEvent.getMasterUrl());
 				Assert.assertEquals(db, rowChangedEvent.getDatabase());
 				Assert.assertEquals(1, rowChangedEvent.getColumns().size());
-				Assert.assertEquals(1, rowChangedEvent.getColumns().get("id").getNewValue());
+				Assert.assertEquals(1L, rowChangedEvent.getColumns().get("id").getNewValue());
 				Assert.assertNull(rowChangedEvent.getColumns().get("id").getOldValue());
 
 				Assert.assertTrue(events.get(2) instanceof RowChangedEvent);
@@ -129,7 +129,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(host + ":" + port, rowChangedEvent.getMasterUrl());
 				Assert.assertEquals(db, rowChangedEvent.getDatabase());
 				Assert.assertEquals(1, rowChangedEvent.getColumns().size());
-				Assert.assertEquals(2, rowChangedEvent.getColumns().get("id").getNewValue());
+				Assert.assertEquals(2L, rowChangedEvent.getColumns().get("id").getNewValue());
 				Assert.assertNull(rowChangedEvent.getColumns().get("id").getOldValue());
 
 				Assert.assertTrue(events.get(3) instanceof RowChangedEvent);
@@ -158,8 +158,8 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(host + ":" + port, rowChangedEvent.getMasterUrl());
 				Assert.assertEquals(db, rowChangedEvent.getDatabase());
 				Assert.assertEquals(1, rowChangedEvent.getColumns().size());
-				Assert.assertEquals(2, rowChangedEvent.getColumns().get("id").getNewValue());
-				Assert.assertEquals(1, rowChangedEvent.getColumns().get("id").getOldValue());
+				Assert.assertEquals(2L, rowChangedEvent.getColumns().get("id").getNewValue());
+				Assert.assertEquals(1L, rowChangedEvent.getColumns().get("id").getOldValue());
 			}
 		});
 	}
@@ -189,8 +189,8 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(host + ":" + port, rowChangedEvent.getMasterUrl());
 				Assert.assertEquals(db, rowChangedEvent.getDatabase());
 				Assert.assertEquals(1, rowChangedEvent.getColumns().size());
-				Assert.assertEquals(2, rowChangedEvent.getColumns().get("id").getNewValue());
-				Assert.assertEquals(1, rowChangedEvent.getColumns().get("id").getOldValue());
+				Assert.assertEquals(2L, rowChangedEvent.getColumns().get("id").getNewValue());
+				Assert.assertEquals(1L, rowChangedEvent.getColumns().get("id").getOldValue());
 
 				Assert.assertTrue(events.get(2) instanceof RowChangedEvent);
 				rowChangedEvent = (RowChangedEvent) events.get(2);
@@ -226,8 +226,8 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(host + ":" + port, rowChangedEvent.getMasterUrl());
 				Assert.assertEquals(db, rowChangedEvent.getDatabase());
 				Assert.assertEquals(1, rowChangedEvent.getColumns().size());
-				Assert.assertEquals(3, rowChangedEvent.getColumns().get("id").getNewValue());
-				Assert.assertEquals(1, rowChangedEvent.getColumns().get("id").getOldValue());
+				Assert.assertEquals(3L, rowChangedEvent.getColumns().get("id").getNewValue());
+				Assert.assertEquals(1L, rowChangedEvent.getColumns().get("id").getOldValue());
 
 				Assert.assertTrue(events.get(2) instanceof RowChangedEvent);
 				rowChangedEvent = (RowChangedEvent) events.get(2);
@@ -236,8 +236,8 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(host + ":" + port, rowChangedEvent.getMasterUrl());
 				Assert.assertEquals(db, rowChangedEvent.getDatabase());
 				Assert.assertEquals(1, rowChangedEvent.getColumns().size());
-				Assert.assertEquals(3, rowChangedEvent.getColumns().get("id").getNewValue());
-				Assert.assertEquals(2, rowChangedEvent.getColumns().get("id").getOldValue());
+				Assert.assertEquals(3L, rowChangedEvent.getColumns().get("id").getNewValue());
+				Assert.assertEquals(2L, rowChangedEvent.getColumns().get("id").getOldValue());
 
 				Assert.assertTrue(events.get(3) instanceof RowChangedEvent);
 				rowChangedEvent = (RowChangedEvent) events.get(3);
@@ -266,7 +266,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(db, rowChangedEvent.getDatabase());
 				Assert.assertEquals(1, rowChangedEvent.getColumns().size());
 				Assert.assertNull(rowChangedEvent.getColumns().get("id").getNewValue());
-				Assert.assertEquals(1, rowChangedEvent.getColumns().get("id").getOldValue());
+				Assert.assertEquals(1L, rowChangedEvent.getColumns().get("id").getOldValue());
 			}
 		});
 	}
@@ -297,7 +297,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(db, rowChangedEvent.getDatabase());
 				Assert.assertEquals(1, rowChangedEvent.getColumns().size());
 				Assert.assertNull(rowChangedEvent.getColumns().get("id").getNewValue());
-				Assert.assertEquals(1, rowChangedEvent.getColumns().get("id").getOldValue());
+				Assert.assertEquals(1L, rowChangedEvent.getColumns().get("id").getOldValue());
 
 				Assert.assertTrue(events.get(2) instanceof RowChangedEvent);
 				rowChangedEvent = (RowChangedEvent) events.get(2);
@@ -332,7 +332,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(db, rowChangedEvent.getDatabase());
 				Assert.assertEquals(1, rowChangedEvent.getColumns().size());
 				Assert.assertNull(rowChangedEvent.getColumns().get("id").getNewValue());
-				Assert.assertEquals(1, rowChangedEvent.getColumns().get("id").getOldValue());
+				Assert.assertEquals(1L, rowChangedEvent.getColumns().get("id").getOldValue());
 
 				rowChangedEvent = (RowChangedEvent) events.get(2);
 				Assert.assertEquals(RowChangedEvent.DELETE, rowChangedEvent.getActionType());
@@ -341,7 +341,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(db, rowChangedEvent.getDatabase());
 				Assert.assertEquals(1, rowChangedEvent.getColumns().size());
 				Assert.assertNull(rowChangedEvent.getColumns().get("id").getNewValue());
-				Assert.assertEquals(2, rowChangedEvent.getColumns().get("id").getOldValue());
+				Assert.assertEquals(2L, rowChangedEvent.getColumns().get("id").getOldValue());
 
 				rowChangedEvent = (RowChangedEvent) events.get(3);
 				Assert.assertTrue(rowChangedEvent.isTransactionCommit());
@@ -394,7 +394,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(table, rowEvent.getTable());
 				Assert.assertEquals(1, rowEvent.getColumns().size());
 				Assert.assertNull(rowEvent.getColumns().get("id").getOldValue());
-				Assert.assertEquals(1, rowEvent.getColumns().get("id").getNewValue());
+				Assert.assertEquals(1L, rowEvent.getColumns().get("id").getNewValue());
 
 				rowEvent = (RowChangedEvent) events.get(1);
 				Assert.assertEquals(db, rowEvent.getDatabase());
@@ -402,8 +402,8 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(RowChangedEvent.UPDATE, rowEvent.getActionType());
 				Assert.assertEquals(table, rowEvent.getTable());
 				Assert.assertEquals(1, rowEvent.getColumns().size());
-				Assert.assertEquals(1, rowEvent.getColumns().get("id").getOldValue());
-				Assert.assertEquals(2, rowEvent.getColumns().get("id").getNewValue());
+				Assert.assertEquals(1L, rowEvent.getColumns().get("id").getOldValue());
+				Assert.assertEquals(2L, rowEvent.getColumns().get("id").getNewValue());
 
 				rowEvent = (RowChangedEvent) events.get(2);
 				Assert.assertEquals(db, rowEvent.getDatabase());
@@ -411,7 +411,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(RowChangedEvent.DELETE, rowEvent.getActionType());
 				Assert.assertEquals(table, rowEvent.getTable());
 				Assert.assertEquals(1, rowEvent.getColumns().size());
-				Assert.assertEquals(2, rowEvent.getColumns().get("id").getOldValue());
+				Assert.assertEquals(2L, rowEvent.getColumns().get("id").getOldValue());
 				Assert.assertNull(rowEvent.getColumns().get("id").getNewValue());
 
 				DdlEvent ddlEvent = (DdlEvent) events.get(3);
@@ -451,7 +451,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(table, rowEvent.getTable());
 				Assert.assertEquals(1, rowEvent.getColumns().size());
 				Assert.assertNull(rowEvent.getColumns().get("id").getOldValue());
-				Assert.assertEquals(1, rowEvent.getColumns().get("id").getNewValue());
+				Assert.assertEquals(1L, rowEvent.getColumns().get("id").getNewValue());
 
 				rowEvent = (RowChangedEvent) events.get(2);
 				Assert.assertTrue(rowEvent.isTransactionCommit());
@@ -468,8 +468,8 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(RowChangedEvent.UPDATE, rowEvent.getActionType());
 				Assert.assertEquals(table, rowEvent.getTable());
 				Assert.assertEquals(1, rowEvent.getColumns().size());
-				Assert.assertEquals(1, rowEvent.getColumns().get("id").getOldValue());
-				Assert.assertEquals(2, rowEvent.getColumns().get("id").getNewValue());
+				Assert.assertEquals(1L, rowEvent.getColumns().get("id").getOldValue());
+				Assert.assertEquals(2L, rowEvent.getColumns().get("id").getNewValue());
 
 				rowEvent = (RowChangedEvent) events.get(5);
 				Assert.assertTrue(rowEvent.isTransactionCommit());
@@ -486,7 +486,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(RowChangedEvent.DELETE, rowEvent.getActionType());
 				Assert.assertEquals(table, rowEvent.getTable());
 				Assert.assertEquals(1, rowEvent.getColumns().size());
-				Assert.assertEquals(2, rowEvent.getColumns().get("id").getOldValue());
+				Assert.assertEquals(2L, rowEvent.getColumns().get("id").getOldValue());
 				Assert.assertNull(rowEvent.getColumns().get("id").getNewValue());
 
 				rowEvent = (RowChangedEvent) events.get(8);
@@ -529,7 +529,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(table, rowEvent.getTable());
 				Assert.assertEquals(1, rowEvent.getColumns().size());
 				Assert.assertNull(rowEvent.getColumns().get("id").getOldValue());
-				Assert.assertEquals(1, rowEvent.getColumns().get("id").getNewValue());
+				Assert.assertEquals(1L, rowEvent.getColumns().get("id").getNewValue());
 
 				rowEvent = (RowChangedEvent) events.get(2);
 				Assert.assertEquals(db, rowEvent.getDatabase());
@@ -537,8 +537,8 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(RowChangedEvent.UPDATE, rowEvent.getActionType());
 				Assert.assertEquals(table, rowEvent.getTable());
 				Assert.assertEquals(1, rowEvent.getColumns().size());
-				Assert.assertEquals(1, rowEvent.getColumns().get("id").getOldValue());
-				Assert.assertEquals(2, rowEvent.getColumns().get("id").getNewValue());
+				Assert.assertEquals(1L, rowEvent.getColumns().get("id").getOldValue());
+				Assert.assertEquals(2L, rowEvent.getColumns().get("id").getNewValue());
 
 				rowEvent = (RowChangedEvent) events.get(3);
 				Assert.assertEquals(db, rowEvent.getDatabase());
@@ -546,7 +546,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 				Assert.assertEquals(RowChangedEvent.DELETE, rowEvent.getActionType());
 				Assert.assertEquals(table, rowEvent.getTable());
 				Assert.assertEquals(1, rowEvent.getColumns().size());
-				Assert.assertEquals(2, rowEvent.getColumns().get("id").getOldValue());
+				Assert.assertEquals(2L, rowEvent.getColumns().get("id").getOldValue());
 				Assert.assertNull(rowEvent.getColumns().get("id").getNewValue());
 
 				rowEvent = (RowChangedEvent) events.get(4);
@@ -595,7 +595,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 						Assert.assertEquals(host + ":" + port, rowChangedEvent.getMasterUrl());
 						Assert.assertEquals(db, rowChangedEvent.getDatabase());
 						Assert.assertEquals(1, rowChangedEvent.getColumns().size());
-						Assert.assertEquals(1, rowChangedEvent.getColumns().get("id").getNewValue());
+						Assert.assertEquals(1L, rowChangedEvent.getColumns().get("id").getNewValue());
 						Assert.assertNull(rowChangedEvent.getColumns().get("id").getOldValue());
 
 						Assert.assertTrue(events.get(i + 2) instanceof RowChangedEvent);
@@ -616,8 +616,8 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 						Assert.assertEquals(host + ":" + port, rowChangedEvent.getMasterUrl());
 						Assert.assertEquals(db, rowChangedEvent.getDatabase());
 						Assert.assertEquals(1, rowChangedEvent.getColumns().size());
-						Assert.assertEquals(2, rowChangedEvent.getColumns().get("id").getNewValue());
-						Assert.assertEquals(1, rowChangedEvent.getColumns().get("id").getOldValue());
+						Assert.assertEquals(2L, rowChangedEvent.getColumns().get("id").getNewValue());
+						Assert.assertEquals(1L, rowChangedEvent.getColumns().get("id").getOldValue());
 
 						Assert.assertTrue(events.get(i + 2) instanceof RowChangedEvent);
 						rowChangedEvent = (RowChangedEvent) events.get(i + 2);
@@ -638,7 +638,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 						Assert.assertEquals(db, rowChangedEvent.getDatabase());
 						Assert.assertEquals(1, rowChangedEvent.getColumns().size());
 						Assert.assertNull(rowChangedEvent.getColumns().get("id").getNewValue());
-						Assert.assertEquals(2, rowChangedEvent.getColumns().get("id").getOldValue());
+						Assert.assertEquals(2L, rowChangedEvent.getColumns().get("id").getOldValue());
 
 						Assert.assertTrue(events.get(i + 2) instanceof RowChangedEvent);
 						rowChangedEvent = (RowChangedEvent) events.get(i + 2);

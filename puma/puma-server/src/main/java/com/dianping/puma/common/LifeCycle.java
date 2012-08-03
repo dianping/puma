@@ -21,8 +21,8 @@ package com.dianping.puma.common;
  * @author Leo Liang
  * 
  */
-public interface LifeCycle {
-	public void start() throws Exception;
+public interface LifeCycle<T extends Exception> {
+	public void start() throws T;
 
-	public void stop() throws Exception;
+	public void stop() throws T;
 }

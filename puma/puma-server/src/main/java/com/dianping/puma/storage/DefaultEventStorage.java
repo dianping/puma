@@ -12,7 +12,7 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageException;
-import com.dianping.puma.storage.exception.StorageInitException;
+import com.dianping.puma.storage.exception.StorageLifeCycleException;
 import com.dianping.puma.storage.exception.StorageWriteException;
 
 public class DefaultEventStorage implements EventStorage {
@@ -27,13 +27,13 @@ public class DefaultEventStorage implements EventStorage {
 	private ArchiveStrategy						archiveStrategy;
 	private String								name;
 
-	public void initialize() throws StorageException {
+	public void start() throws StorageLifeCycleException {
 		stopped = false;
 		bucketManager = new DefaultBucketManager(maxMasterFileCount, masterIndex, slaveIndex, archiveStrategy);
 		try {
-			bucketManager.init();
+			bucketManager.start();
 		} catch (Exception e) {
-			throw new StorageInitException("Storage init failed", e);
+			throw new StorageLifeCycleException("Storage init failed", e);
 		}
 	}
 
@@ -101,7 +101,7 @@ public class DefaultEventStorage implements EventStorage {
 			if (writingBucket == null) {
 				writingBucket = bucketManager.getNextWriteBucket();
 			} else if (!writingBucket.hasRemainingForWrite()) {
-				writingBucket.close();
+				writingBucket.stop();
 				writingBucket = bucketManager.getNextWriteBucket();
 			}
 
@@ -119,15 +119,19 @@ public class DefaultEventStorage implements EventStorage {
 	}
 
 	@Override
-	public synchronized void close() {
+	public synchronized void stop() {
 		if (stopped) {
 			return;
 		}
 		stopped = true;
-		bucketManager.close();
+		try {
+			bucketManager.stop();
+		} catch (StorageLifeCycleException e1) {
+			// ignore
+		}
 		if (writingBucket != null) {
 			try {
-				writingBucket.close();
+				writingBucket.stop();
 			} catch (IOException e) {
 				// ignore
 			}
@@ -145,4 +149,5 @@ public class DefaultEventStorage implements EventStorage {
 		}
 
 	}
+
 }

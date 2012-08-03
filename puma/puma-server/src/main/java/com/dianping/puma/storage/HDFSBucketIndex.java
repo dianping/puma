@@ -82,7 +82,7 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 	 * @see com.dianping.puma.storage.BucketIndex#init()
 	 */
 	@Override
-	public void init() throws IOException {
+	public void start() throws IOException {
 		initHdfsConfiguration();
 		this.fileSystem = FileSystem.get(this.hdfsConfig);
 
@@ -119,7 +119,7 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 
 			}
 		}
-		super.init();
+		super.start();
 	}
 
 	@Override
@@ -134,8 +134,8 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 	 * @see com.dianping.puma.storage.AbstractBucketIndex#close()
 	 */
 	@Override
-	public void close() {
-		super.close();
+	public void stop() {
+		super.stop();
 		try {
 			this.fileSystem.close();
 		} catch (IOException e) {

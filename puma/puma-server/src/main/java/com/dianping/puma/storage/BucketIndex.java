@@ -18,6 +18,7 @@ package com.dianping.puma.storage;
 import java.io.IOException;
 import java.util.List;
 
+import com.dianping.puma.common.LifeCycle;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
@@ -26,8 +27,7 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  * @author Leo Liang
  * 
  */
-public interface BucketIndex {
-	public void init() throws IOException;
+public interface BucketIndex extends LifeCycle<IOException> {
 
 	public void add(Bucket bucket) throws StorageClosedException;
 
@@ -44,8 +44,6 @@ public interface BucketIndex {
 	public Bucket getReadBucket(long seq) throws StorageClosedException, IOException;
 
 	public int size();
-
-	public void close();
 
 	public String getBaseDir();
 

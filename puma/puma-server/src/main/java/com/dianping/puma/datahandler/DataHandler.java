@@ -25,6 +25,6 @@ import com.dianping.puma.parser.mysql.event.BinlogEvent;
  * @author Leo Liang
  * 
  */
-public interface DataHandler extends LifeCycle {
+public interface DataHandler extends LifeCycle<Exception> {
 	public DataHandlerResult process(BinlogEvent binlogEvent, PumaContext context);
 }

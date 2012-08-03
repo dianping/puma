@@ -44,7 +44,7 @@ public class DefaultEventChannel implements EventChannel {
 			} catch (EOFException e) {
 				try {
 					if (bucketManager.hasNexReadBucket(seq)) {
-						bucket.close();
+						bucket.stop();
 						bucket = bucketManager.getNextReadBucket(seq);
 						seq = bucket.getStartingSequece().longValue();
 					} else {
@@ -79,7 +79,7 @@ public class DefaultEventChannel implements EventChannel {
 			stopped = true;
 			if (bucket != null) {
 				try {
-					bucket.close();
+					bucket.stop();
 					bucket = null;
 				} catch (IOException e) {
 					// ignore

@@ -19,7 +19,7 @@ import com.dianping.puma.common.LifeCycle;
  * @author Leo Liang
  * 
  */
-public interface Server extends LifeCycle {
+public interface Server extends LifeCycle<Exception> {
 
 	public void setContext(PumaContext context);
 
@@ -38,6 +38,6 @@ public interface Server extends LifeCycle {
 	public long getServerId();
 
 	public String getServerName();
-	
+
 	public void setBinlogPositionHolder(BinlogPositionHolder holder);
 }

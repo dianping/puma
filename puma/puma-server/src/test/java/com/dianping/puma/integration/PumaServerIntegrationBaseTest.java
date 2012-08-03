@@ -132,10 +132,10 @@ public abstract class PumaServerIntegrationBaseTest {
 		masterIndex = new LocalFileBucketIndex();
 		masterIndex.setBaseDir(storageMasterBaseDir.getAbsolutePath());
 		masterIndex.setMaxBucketLengthMB(1);
-		masterIndex.init();
+		masterIndex.start();
 		slaveIndex = new LocalFileBucketIndex();
 		slaveIndex.setBaseDir(storageSlaveBaseDir.getAbsolutePath());
-		slaveIndex.init();
+		slaveIndex.start();
 
 		// init storage
 		storage = new DefaultEventStorage();
@@ -150,7 +150,7 @@ public abstract class PumaServerIntegrationBaseTest {
 		storage.setName("test-storage");
 		storage.setMasterIndex(masterIndex);
 		storage.setSlaveIndex(slaveIndex);
-		storage.initialize();
+		storage.start();
 
 		// init sender
 		sender = new FileDumpSender();

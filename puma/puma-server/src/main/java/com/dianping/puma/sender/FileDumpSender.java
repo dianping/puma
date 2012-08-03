@@ -39,7 +39,7 @@ public class FileDumpSender extends AbstractSender {
 
 	@Override
 	public void stop() throws Exception {
-		storage.close();
+		storage.stop();
 		super.stop();
 	}
 

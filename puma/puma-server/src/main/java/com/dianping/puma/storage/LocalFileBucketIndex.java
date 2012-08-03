@@ -46,7 +46,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 	 * @see com.dianping.puma.storage.AbstractBucketIndex#init()
 	 */
 	@Override
-	public void init() throws IOException {
+	public void start() throws IOException {
 		File localBaseDir = new File(getBaseDir());
 		if (!localBaseDir.exists()) {
 			if (!localBaseDir.mkdirs()) {
@@ -88,7 +88,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 				}
 			}
 		}
-		super.init();
+		super.start();
 	}
 
 	@Override

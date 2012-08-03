@@ -232,7 +232,7 @@ public class LocalBucketTest {
 		LocalFileBucket bucket = null;
 		try {
 			bucket = new LocalFileBucket(work, sequence, 10);
-			bucket.close();
+			bucket.stop();
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -286,7 +286,7 @@ public class LocalBucketTest {
 	@After
 	public void after() {
 		try {
-			localFileBucket.close();
+			localFileBucket.stop();
 
 		} catch (IOException e) {
 			e.printStackTrace();

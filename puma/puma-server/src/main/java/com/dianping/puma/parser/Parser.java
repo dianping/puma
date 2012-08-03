@@ -28,6 +28,6 @@ import com.dianping.puma.parser.mysql.event.BinlogEvent;
  * @author Leo Liang
  * 
  */
-public interface Parser extends LifeCycle {
+public interface Parser extends LifeCycle<Exception> {
 	public BinlogEvent parse(ByteBuffer buf, PumaContext context) throws IOException;
 }

@@ -15,13 +15,15 @@
  */
 package com.dianping.puma.storage.exception;
 
+import java.io.IOException;
+
 /**
  * TODO Comment of StorageException
  * 
  * @author Leo Liang
  * 
  */
-public class StorageException extends Exception {
+public class StorageException extends IOException {
 
 	private static final long	serialVersionUID	= -3955468875272140081L;
 

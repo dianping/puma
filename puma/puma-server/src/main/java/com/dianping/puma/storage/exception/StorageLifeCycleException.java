@@ -21,19 +21,19 @@ package com.dianping.puma.storage.exception;
  * @author Leo Liang
  * 
  */
-public class StorageInitException extends StorageException {
+public class StorageLifeCycleException extends StorageException {
 
 	private static final long	serialVersionUID	= 6449475196273722911L;
 
-	public StorageInitException() {
+	public StorageLifeCycleException() {
 		super();
 	}
 
-	public StorageInitException(String message, Throwable t) {
+	public StorageLifeCycleException(String message, Throwable t) {
 		super(message, t);
 	}
 
-	public StorageInitException(String message) {
+	public StorageLifeCycleException(String message) {
 		super(message);
 	}
 }

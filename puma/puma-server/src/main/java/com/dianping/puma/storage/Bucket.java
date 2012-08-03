@@ -17,6 +17,7 @@ package com.dianping.puma.storage;
 
 import java.io.IOException;
 
+import com.dianping.puma.common.LifeCycle;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
@@ -25,7 +26,7 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  * @author Leo Liang
  * 
  */
-public interface Bucket {
+public interface Bucket extends LifeCycle<IOException> {
 	/**
 	 * 获得当前存储对应的起始sequence(Offset一定为0)
 	 * 
@@ -55,13 +56,6 @@ public interface Bucket {
 	 * @throws IOException
 	 */
 	public void seek(int offset) throws StorageClosedException, IOException;
-
-	/**
-	 * 关闭当前存储
-	 * 
-	 * @throws IOException
-	 */
-	public void close() throws IOException;
 
 	/**
 	 * 判断当前存储是否还有剩余空间可写

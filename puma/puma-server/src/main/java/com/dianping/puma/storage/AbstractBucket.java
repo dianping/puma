@@ -108,7 +108,7 @@ public abstract class AbstractBucket implements Bucket {
 	}
 
 	@Override
-	public void close() throws IOException {
+	public void stop() throws IOException {
 		stopped = true;
 		doClose();
 	}
@@ -121,6 +121,11 @@ public abstract class AbstractBucket implements Bucket {
 	@Override
 	public long getCurrentWritingSeq() {
 		return currentWritingSeq.get().longValue();
+	}
+
+	@Override
+	public void start() throws IOException {
+
 	}
 
 	@Override

@@ -65,7 +65,7 @@ public class HDFSBucketIndexTest {
 	public void testInit() {
 
 		try {
-			this.hdfsBucketIndex.init();
+			this.hdfsBucketIndex.start();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -79,7 +79,7 @@ public class HDFSBucketIndexTest {
 	public void testAddBucket() {
 
 		try {
-			this.hdfsBucketIndex.init();
+			this.hdfsBucketIndex.start();
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -112,7 +112,7 @@ public class HDFSBucketIndexTest {
 
 		Assert.assertEquals("20120711/bucket-0", hdfsBucketIndex.getIndex().get().get(sequence));
 		try {
-			bucket.close();
+			bucket.stop();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -122,7 +122,7 @@ public class HDFSBucketIndexTest {
 	public void testAddBucketList() {
 
 		try {
-			this.hdfsBucketIndex.init();
+			this.hdfsBucketIndex.start();
 		} catch (Exception e2) {
 			e2.printStackTrace();
 		}
@@ -180,7 +180,7 @@ public class HDFSBucketIndexTest {
 		}
 
 		try {
-			this.hdfsBucketIndex.init();
+			this.hdfsBucketIndex.start();
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -227,7 +227,7 @@ public class HDFSBucketIndexTest {
 
 		}
 		try {
-			this.hdfsBucketIndex.init();
+			this.hdfsBucketIndex.start();
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -237,7 +237,7 @@ public class HDFSBucketIndexTest {
 			Bucket bucket = this.hdfsBucketIndex.getNextReadBucket(seq);
 			Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
 			Assert.assertEquals(1, bucket.getStartingSequece().getNumber());
-			bucket.close();
+			bucket.stop();
 
 			seq = new Sequence(120710, 1);
 
@@ -245,7 +245,7 @@ public class HDFSBucketIndexTest {
 			Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
 			Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
 
-			bucket.close();
+			bucket.stop();
 
 			seq = new Sequence(120711, 3);
 			bucket = this.hdfsBucketIndex.getNextReadBucket(seq);
@@ -276,7 +276,7 @@ public class HDFSBucketIndexTest {
 		}
 
 		try {
-			this.hdfsBucketIndex.init();
+			this.hdfsBucketIndex.start();
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -285,7 +285,7 @@ public class HDFSBucketIndexTest {
 			Bucket bucket = this.hdfsBucketIndex.getNextWriteBucket();
 			Assert.assertEquals(null, bucket);
 			if (bucket != null) {
-				bucket.close();
+				bucket.stop();
 			}
 
 		} catch (StorageClosedException e) {
@@ -311,7 +311,7 @@ public class HDFSBucketIndexTest {
 			}
 		}
 		try {
-			this.hdfsBucketIndex.init();
+			this.hdfsBucketIndex.start();
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -341,7 +341,7 @@ public class HDFSBucketIndexTest {
 		}
 
 		try {
-			this.hdfsBucketIndex.init();
+			this.hdfsBucketIndex.start();
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -383,7 +383,7 @@ public class HDFSBucketIndexTest {
 			}
 		}
 		try {
-			this.hdfsBucketIndex.init();
+			this.hdfsBucketIndex.start();
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -391,7 +391,7 @@ public class HDFSBucketIndexTest {
 			Bucket bucket = this.hdfsBucketIndex.getReadBucket(-1);
 			Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
 			Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
-			bucket.close();
+			bucket.stop();
 
 			bucket = this.hdfsBucketIndex.getReadBucket(-2);
 			Assert.assertEquals(null, bucket);
@@ -401,7 +401,7 @@ public class HDFSBucketIndexTest {
 			bucket = this.hdfsBucketIndex.getReadBucket(-2);
 			Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
 			Assert.assertEquals(3, bucket.getStartingSequece().getNumber());
-			bucket.close();
+			bucket.stop();
 
 			DdlEvent event = new DdlEvent();
 			event.setSql("CREATE TABLE products (proeduct VARCHAR(10))");
@@ -434,7 +434,7 @@ public class HDFSBucketIndexTest {
 				bucket = this.hdfsBucketIndex.getReadBucket(seq.longValue());
 				Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
 				Assert.assertEquals(3, bucket.getStartingSequece().getNumber());
-				bucket.close();
+				bucket.stop();
 
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -443,7 +443,7 @@ public class HDFSBucketIndexTest {
 			bucket = this.hdfsBucketIndex.getReadBucket(seq.longValue());
 			Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
 			Assert.assertEquals(3, bucket.getStartingSequece().getNumber());
-			bucket.close();
+			bucket.stop();
 
 		} catch (StorageClosedException e) {
 			e.printStackTrace();
@@ -469,7 +469,7 @@ public class HDFSBucketIndexTest {
 			}
 		}
 		try {
-			this.hdfsBucketIndex.init();
+			this.hdfsBucketIndex.start();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -479,11 +479,11 @@ public class HDFSBucketIndexTest {
 	@Test
 	public void testClose() {
 		try {
-			this.hdfsBucketIndex.init();
+			this.hdfsBucketIndex.start();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		this.hdfsBucketIndex.close();
+		this.hdfsBucketIndex.stop();
 
 		try {
 			this.hdfsBucketIndex.getReadBucket(-1);
@@ -500,7 +500,7 @@ public class HDFSBucketIndexTest {
 	@Test
 	public void testGetBaseDir() {
 		try {
-			this.hdfsBucketIndex.init();
+			this.hdfsBucketIndex.start();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -526,7 +526,7 @@ public class HDFSBucketIndexTest {
 			e1.printStackTrace();
 		}
 
-		this.hdfsBucketIndex.init();
+		this.hdfsBucketIndex.start();
 		try {
 			this.hdfsBucketIndex.copyFromLocal(System.getProperty("java.io.tmpdir", ".") + "/Puma/copy",
 					"20120710/bucket-0");
@@ -548,7 +548,7 @@ public class HDFSBucketIndexTest {
 			e1.printStackTrace();
 		}
 
-		this.hdfsBucketIndex.init();
+		this.hdfsBucketIndex.start();
 		try {
 			this.hdfsBucketIndex.copyFromLocal(System.getProperty("java.io.tmpdir", ".") + "/Puma/copy",
 					"20120713/bucket-0");
@@ -558,7 +558,7 @@ public class HDFSBucketIndexTest {
 			e.printStackTrace();
 		}
 
-		hdfsBucketIndex.init();
+		hdfsBucketIndex.start();
 
 		Assert.assertEquals(3, this.hdfsBucketIndex.getIndex().get().size());
 		Assert.assertEquals(120713, this.hdfsBucketIndex.getIndex().get().lastKey().getCreationDate());
@@ -570,7 +570,7 @@ public class HDFSBucketIndexTest {
 
 	@Test
 	public void testRemove() throws Exception {
-		this.hdfsBucketIndex.init();
+		this.hdfsBucketIndex.start();
 		List<String> paths = new ArrayList<String>();
 		paths.add("20120710/bucket-0");
 		try {
@@ -594,7 +594,7 @@ public class HDFSBucketIndexTest {
 
 	@Test
 	public void testUpdateLatestSequence() throws Exception {
-		this.hdfsBucketIndex.init();
+		this.hdfsBucketIndex.start();
 		Sequence seq = new Sequence(120710, 1);
 		this.hdfsBucketIndex.updateLatestSequence(seq);
 		Assert.assertEquals(120710, this.hdfsBucketIndex.getLatestSequence().get().getCreationDate());

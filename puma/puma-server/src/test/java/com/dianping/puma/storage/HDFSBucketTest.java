@@ -242,7 +242,7 @@ public class HDFSBucketTest {
 		HDFSBucket bucket = null;
 		try {
 			bucket = new HDFSBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", sequence);
-			bucket.close();
+			bucket.stop();
 
 		} catch (FileNotFoundException e) {
 			System.out.println("failed to create localfilebucket");
@@ -296,7 +296,7 @@ public class HDFSBucketTest {
 
 			this.fileSystem.delete(new Path("/tmp/Puma"), true);
 			if (hdfsBucket != null) {
-				this.hdfsBucket.close();
+				this.hdfsBucket.stop();
 			}
 			this.fileSystem.close();
 

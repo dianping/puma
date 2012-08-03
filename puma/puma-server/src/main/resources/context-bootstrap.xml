@@ -91,7 +91,7 @@
 	</bean>
 
 	<bean id="storage-7-43" class="com.dianping.puma.storage.DefaultEventStorage"
-		init-method="initialize">
+		init-method="start">
 		<property name="codec" ref="jsonCodec" />
 		<property name="maxMasterFileCount" value="1" />
 		<property name="masterIndex" ref="localBucketIndex-7-43" />
@@ -101,13 +101,13 @@
 	</bean>
 
 	<bean id="localBucketIndex-7-43" class="com.dianping.puma.storage.LocalFileBucketIndex"
-		init-method="init">
+		init-method="start">
 		<property name="bucketFilePrefix" value="bucket-" />
 		<property name="maxBucketLengthMB" value="10" />
 		<property name="baseDir" value="/data/applogs/puma/" />
 	</bean>
 	<bean id="localBucketIndex-7-43_2" class="com.dianping.puma.storage.LocalFileBucketIndex"
-		init-method="init">
+		init-method="start">
 		<property name="bucketFilePrefix" value="bucket-" />
 		<property name="maxBucketLengthMB" value="500" />
 		<property name="baseDir" value="/data/applogs/puma/bak/" />

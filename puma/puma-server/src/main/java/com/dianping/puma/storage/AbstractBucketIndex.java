@@ -92,7 +92,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	}
 
 	@Override
-	public void init() throws IOException {
+	public void start() throws IOException {
 		stopped = false;
 	}
 
@@ -215,7 +215,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 				.length())));
 	}
 
-	public void close() {
+	public void stop() {
 		if (stopped) {
 			return;
 		}

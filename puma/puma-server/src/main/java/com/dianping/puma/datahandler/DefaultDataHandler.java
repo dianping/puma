@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.event.RowChangedEvent;
@@ -41,6 +43,7 @@ import com.dianping.puma.parser.mysql.event.WriteRowsEvent;
  */
 @ThreadUnSafe
 public class DefaultDataHandler extends AbstractDataHandler {
+	private Logger			log		= Logger.getLogger(DefaultDataHandler.class);
 	private TableMetaInfo	tableMetaInfo;
 	private int				rowPos	= 0;
 
@@ -53,6 +56,10 @@ public class DefaultDataHandler extends AbstractDataHandler {
 
 				tableMetaInfo = getTableMetasInfoFetcher().getTableMetaInfo(tableMapEvent.getDatabaseName(),
 						tableMapEvent.getTableName());
+				if (tableMetaInfo == null) {
+					skipEvent(result, binlogEvent);
+					return;
+				}
 				fillRawTypeCodes(tableMapEvent, tableMetaInfo);
 				fillRawNullAbilities(tableMapEvent, tableMetaInfo);
 
@@ -63,6 +70,11 @@ public class DefaultDataHandler extends AbstractDataHandler {
 
 				break;
 			case BinlogConstanst.WRITE_ROWS_EVENT:
+				if (tableMetaInfo == null) {
+					skipEvent(result, binlogEvent);
+					return;
+				}
+
 				WriteRowsEvent writeRowsEvent = (WriteRowsEvent) binlogEvent;
 
 				if (rowPos >= writeRowsEvent.getRows().size()) {
@@ -93,6 +105,10 @@ public class DefaultDataHandler extends AbstractDataHandler {
 				break;
 
 			case BinlogConstanst.UPDATE_ROWS_EVENT:
+				if (tableMetaInfo == null) {
+					skipEvent(result, binlogEvent);
+					return;
+				}
 				UpdateRowsEvent updateRowsEvent = (UpdateRowsEvent) binlogEvent;
 
 				if (rowPos >= updateRowsEvent.getRows().size()) {
@@ -134,6 +150,10 @@ public class DefaultDataHandler extends AbstractDataHandler {
 				}
 				break;
 			case BinlogConstanst.DELETE_ROWS_EVENT:
+				if (tableMetaInfo == null) {
+					skipEvent(result, binlogEvent);
+					return;
+				}
 				DeleteRowsEvent deleteRowsEvent = (DeleteRowsEvent) binlogEvent;
 
 				if (rowPos >= deleteRowsEvent.getRows().size()) {
@@ -170,6 +190,17 @@ public class DefaultDataHandler extends AbstractDataHandler {
 				break;
 		}
 
+	}
+
+	/**
+	 * @param result
+	 * @param binlogEvent
+	 */
+	protected void skipEvent(DataHandlerResult result, BinlogEvent binlogEvent) {
+		rowPos = 0;
+		result.setEmpty(true);
+		result.setFinished(true);
+		log.warn("Skip one event, since there is no table meta info. Event: " + binlogEvent);
 	}
 
 	/**

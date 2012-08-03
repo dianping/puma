@@ -38,13 +38,21 @@ public class DefaultBucketManager implements BucketManager {
 	 * @see com.dianping.puma.storage.BucketManager#close()
 	 */
 	@Override
-	public void close() {
+	public void stop() {
 		if (stopped) {
 			return;
 		}
 		stopped = true;
-		masterIndex.close();
-		slaveIndex.close();
+		try {
+			masterIndex.stop();
+		} catch (IOException e) {
+			// ignore
+		}
+		try {
+			slaveIndex.stop();
+		} catch (IOException e) {
+			// ignore
+		}
 	}
 
 	@Override
@@ -113,7 +121,7 @@ public class DefaultBucketManager implements BucketManager {
 
 	}
 
-	public synchronized void init() {
+	public synchronized void start() {
 		stopped = false;
 		startArchiveJob();
 	}

@@ -197,24 +197,24 @@ public abstract class AbstractDataHandler implements DataHandler {
 			switch (tableMeta.getRawTypeCodes().get(pos)) {
 				case BinlogConstanst.MYSQL_TYPE_TINY:
 					if ((Integer) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
-						newValue = new Integer((Integer) value + (1 << 8));
+						newValue = Integer.valueOf((Integer) value + (1 << 8));
 					}
 					break;
 				case BinlogConstanst.MYSQL_TYPE_INT24:
 					if ((Integer) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
-						newValue = new Integer((Integer) value + (1 << 24));
+						newValue = Integer.valueOf((Integer) value + (1 << 24));
 					}
 					break;
 				case BinlogConstanst.MYSQL_TYPE_SHORT:
 					if ((Integer) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
-						newValue = new Integer((Integer) value + (1 << 16));
+						newValue = Integer.valueOf((Integer) value + (1 << 16));
 					}
 					break;
 				case BinlogConstanst.MYSQL_TYPE_INT:
 					if ((Integer) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
-						newValue = new Long((Integer) value) + (1L << 32);
+						newValue = Long.valueOf((Integer) value) + (1L << 32);
 					} else {
-						newValue = new Long((Integer) value);
+						newValue = Long.valueOf((Integer) value);
 					}
 					break;
 				case BinlogConstanst.MYSQL_TYPE_LONGLONG:

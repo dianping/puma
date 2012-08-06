@@ -609,7 +609,7 @@ public class HDFSBucketIndexTest {
 
 				if (fsDataOutputStream != null) {
 					System.out.println("create a file: " + hdfsPath);
-
+					fsDataOutputStream.close();
 				}
 			}
 		} catch (IOException e1) {

@@ -19,17 +19,17 @@ public class DefaultEventStorage implements EventStorage {
 	private BucketManager						bucketManager;
 	private Bucket								writingBucket;
 	private EventCodec							codec;
-	private List<WeakReference<EventChannel>>	openChannels		= new ArrayList<WeakReference<EventChannel>>();
-	private volatile boolean					stopped				= true;
-	private int									maxMasterFileCount	= 20;
+	private List<WeakReference<EventChannel>>	openChannels	= new ArrayList<WeakReference<EventChannel>>();
+	private volatile boolean					stopped			= true;
 	private BucketIndex							masterIndex;
 	private BucketIndex							slaveIndex;
 	private ArchiveStrategy						archiveStrategy;
+	private CleanupStrategy						cleanupStrategy;
 	private String								name;
 
 	public void start() throws StorageLifeCycleException {
 		stopped = false;
-		bucketManager = new DefaultBucketManager(maxMasterFileCount, masterIndex, slaveIndex, archiveStrategy);
+		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, archiveStrategy, cleanupStrategy);
 		try {
 			bucketManager.start();
 		} catch (Exception e) {
@@ -38,19 +38,19 @@ public class DefaultEventStorage implements EventStorage {
 	}
 
 	/**
+	 * @param cleanupStrategy
+	 *            the cleanupStrategy to set
+	 */
+	public void setCleanupStrategy(CleanupStrategy cleanupStrategy) {
+		this.cleanupStrategy = cleanupStrategy;
+	}
+
+	/**
 	 * @param name
 	 *            the name to set
 	 */
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	/**
-	 * @param maxMasterFileCount
-	 *            the maxMasterFileCount to set
-	 */
-	public void setMaxMasterFileCount(int maxMasterFileCount) {
-		this.maxMasterFileCount = maxMasterFileCount;
 	}
 
 	/**

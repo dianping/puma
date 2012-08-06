@@ -34,12 +34,21 @@ public class DefaultArchiveStrategy implements ArchiveStrategy {
 	private static final Logger	log					= Logger.getLogger(DefaultArchiveStrategy.class);
 	private List<String>		toBeArchiveBuckets	= new ArrayList<String>();
 	private List<String>		toBeDeleteBuckets	= new ArrayList<String>();
+	private int					maxMasterFileCount	= 20;
+
+	/**
+	 * @param maxMasterFileCount
+	 *            the maxMasterFileCount to set
+	 */
+	public void setMaxMasterFileCount(int maxMasterFileCount) {
+		this.maxMasterFileCount = maxMasterFileCount;
+	}
 
 	@Override
-	public void archive(BucketIndex masterIndex, BucketIndex slaveIndex, int masterRemainFileCount) {
+	public void archive(BucketIndex masterIndex, BucketIndex slaveIndex) {
 		try {
-			if (masterIndex.size() > masterRemainFileCount) {
-				toBeArchiveBuckets.addAll(masterIndex.bulkGetRemainN(masterRemainFileCount));
+			if (masterIndex.size() > maxMasterFileCount) {
+				toBeArchiveBuckets.addAll(masterIndex.bulkGetRemainN(maxMasterFileCount));
 			}
 
 			if (toBeArchiveBuckets.size() > 0) {

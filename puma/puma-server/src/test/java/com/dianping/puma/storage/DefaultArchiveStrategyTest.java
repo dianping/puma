@@ -40,7 +40,8 @@ public class DefaultArchiveStrategyTest {
 
 	@Test
 	public void testArchive() throws Exception {
-		ArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
+		DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
+		archiveStrategy.setMaxMasterFileCount(5);
 		LocalFileBucketIndex masterIndex = new LocalFileBucketIndex();
 		masterIndex.setBaseDir(masterBaseDir.getAbsolutePath());
 		masterIndex.setBucketFilePrefix("bucket-");
@@ -57,7 +58,7 @@ public class DefaultArchiveStrategyTest {
 		masterIndex.start();
 		slaveIndex.start();
 
-		archiveStrategy.archive(masterIndex, slaveIndex, 5);
+		archiveStrategy.archive(masterIndex, slaveIndex);
 
 		Assert.assertEquals(5, masterIndex.size());
 		Assert.assertEquals(7, slaveIndex.size());
@@ -80,7 +81,8 @@ public class DefaultArchiveStrategyTest {
 
 	@Test
 	public void testArchive2() throws Exception {
-		ArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
+		DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
+		archiveStrategy.setMaxMasterFileCount(12);
 		LocalFileBucketIndex masterIndex = new LocalFileBucketIndex();
 		masterIndex.setBaseDir(masterBaseDir.getAbsolutePath());
 		masterIndex.setBucketFilePrefix("bucket-");
@@ -97,7 +99,7 @@ public class DefaultArchiveStrategyTest {
 		masterIndex.start();
 		slaveIndex.start();
 
-		archiveStrategy.archive(masterIndex, slaveIndex, 12);
+		archiveStrategy.archive(masterIndex, slaveIndex);
 
 		Assert.assertEquals(12, masterIndex.size());
 		Assert.assertEquals(0, slaveIndex.size());
@@ -116,7 +118,8 @@ public class DefaultArchiveStrategyTest {
 
 	@Test
 	public void testArchive3() throws Exception {
-		ArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
+		DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
+		archiveStrategy.setMaxMasterFileCount(13);
 		LocalFileBucketIndex masterIndex = new LocalFileBucketIndex();
 		masterIndex.setBaseDir(masterBaseDir.getAbsolutePath());
 		masterIndex.setBucketFilePrefix("bucket-");
@@ -133,7 +136,7 @@ public class DefaultArchiveStrategyTest {
 		masterIndex.start();
 		slaveIndex.start();
 
-		archiveStrategy.archive(masterIndex, slaveIndex, 13);
+		archiveStrategy.archive(masterIndex, slaveIndex);
 
 		Assert.assertEquals(12, masterIndex.size());
 		Assert.assertEquals(0, slaveIndex.size());
@@ -152,7 +155,8 @@ public class DefaultArchiveStrategyTest {
 
 	@Test
 	public void testArchive4() throws Exception {
-		ArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
+		DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
+		archiveStrategy.setMaxMasterFileCount(5);
 		LocalFileBucketIndex masterIndex = new LocalFileBucketIndex();
 		masterIndex.setBaseDir(masterBaseDir.getAbsolutePath());
 		masterIndex.setBucketFilePrefix("bucket-");
@@ -175,7 +179,7 @@ public class DefaultArchiveStrategyTest {
 		masterIndex.start();
 		slaveIndex.start();
 
-		archiveStrategy.archive(masterIndex, slaveIndex, 5);
+		archiveStrategy.archive(masterIndex, slaveIndex);
 
 		Assert.assertEquals(5, masterIndex.size());
 		Assert.assertEquals(19, slaveIndex.size());

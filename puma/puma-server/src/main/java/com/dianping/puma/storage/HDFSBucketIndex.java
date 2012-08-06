@@ -167,4 +167,36 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 
 		fileSystem.copyFromLocalFile(false, true, new Path(srcBaseDir, path), new Path(this.getBaseDir(), path));
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.dianping.puma.storage.AbstractBucketIndex#removeBucket(java.lang.
+	 * String)
+	 */
+	@Override
+	public boolean removeBucket(String path) throws StorageClosedException {
+		super.removeBucket(path);
+
+		boolean deleted = false;
+
+		try {
+			Path p = new Path(getBaseDir(), path);
+			if (this.fileSystem.exists(p)) {
+				deleted = this.fileSystem.delete(p, false);
+			}
+
+			if (this.fileSystem.exists(p.getParent())) {
+				FileStatus[] listStatus = this.fileSystem.listStatus(p.getParent());
+				if (listStatus == null || listStatus.length == 0) {
+					this.fileSystem.delete(p.getParent(), false);
+				}
+			}
+
+			return deleted;
+		} catch (IOException e) {
+			return false;
+		}
+	}
 }

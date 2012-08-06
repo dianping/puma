@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -209,6 +210,10 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 		return "20" + seq.getCreationDate() + PATH_SEPARATOR + bucketFilePrefix + seq.getNumber();
 	}
 
+	protected int getDateFromPath(String path) {
+		return Integer.valueOf(path.split(PATH_SEPARATOR)[0]);
+	}
+
 	protected Sequence convertToSequence(String path) {
 		String[] parts = path.split(PATH_SEPARATOR);
 		return new Sequence(Integer.valueOf(parts[0].substring(2)), Integer.valueOf(parts[1].substring(bucketFilePrefix
@@ -268,6 +273,26 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	}
 
 	@Override
+	public List<String> bulkGetRemainNDay(int remainDay) throws StorageClosedException {
+		checkClosed();
+		List<String> results = new ArrayList<String>();
+		TreeMap<Sequence, String> bakIndexes = index.get();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DAY_OF_MONTH, -1 * (remainDay - 1));
+		int preservedFromDay = Integer.valueOf(sdf.format(cal.getTime()));
+
+		for (Entry<Sequence, String> entry : bakIndexes.entrySet()) {
+			String path = entry.getValue();
+			int date = getDateFromPath(path);
+			if (date < preservedFromDay) {
+				results.add(path);
+			}
+		}
+		return results;
+	}
+
+	@Override
 	public void remove(List<String> paths) throws StorageClosedException {
 		checkClosed();
 		TreeMap<Sequence, String> newIndexes = new TreeMap<Sequence, String>(index.get());
@@ -285,6 +310,12 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 
 	public void copyFromLocal(String srcBaseDir, String path) throws IOException, StorageClosedException {
 		checkClosed();
+	}
+
+	@Override
+	public boolean removeBucket(String path) throws StorageClosedException {
+		checkClosed();
+		return true;
 	}
 
 	@Override

@@ -27,7 +27,6 @@ import org.apache.commons.lang.StringUtils;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
- * TODO Comment of LocalFileBucketIndex
  * 
  * @author Leo Liang
  * 
@@ -118,5 +117,23 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 		}
 
 		FileUtils.copyFile(localFile, new File(getBaseDir(), path));
+	}
+
+	@Override
+	public boolean removeBucket(String path) throws StorageClosedException {
+		super.removeBucket(path);
+		File file = new File(getBaseDir(), path);
+		boolean deleted = false;
+		if (file.exists()) {
+			deleted = file.delete();
+		}
+
+		if (file.getParentFile().exists()) {
+			String[] subFiles = file.getParentFile().list();
+			if (subFiles == null || subFiles.length == 0) {
+				file.getParentFile().delete();
+			}
+		}
+		return deleted;
 	}
 }

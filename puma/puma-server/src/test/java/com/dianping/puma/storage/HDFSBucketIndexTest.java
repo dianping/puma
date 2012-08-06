@@ -3,7 +3,9 @@ package com.dianping.puma.storage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -590,6 +592,59 @@ public class HDFSBucketIndexTest {
 			e.printStackTrace();
 		}
 		Assert.assertEquals(0, this.hdfsBucketIndex.getIndex().get().size());
+	}
+
+	@Test
+	public void testRemoveBucket() throws Exception {
+		Calendar cal = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		List<String> folders = new ArrayList<String>();
+		try {
+			for (int i = 0; i <= 10; i++) {
+				cal.add(Calendar.DAY_OF_MONTH, i == 0 ? 0 : -1);
+				String folder = sdf.format(cal.getTime());
+				folders.add(folder);
+				String hdfsPath = "/tmp/Puma/" + folder + "/bucket-0";
+				FSDataOutputStream fsDataOutputStream = this.fileSystem.create(new Path(hdfsPath), true);
+
+				if (fsDataOutputStream != null) {
+					System.out.println("create a file: " + hdfsPath);
+
+				}
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
+		this.hdfsBucketIndex.start();
+		try {
+
+			int num = 4;
+			List<String> results = this.hdfsBucketIndex.bulkGetRemainNDay(num);
+			Assert.assertEquals(13 - num, results.size());
+			Assert.assertEquals("20120710/bucket-0", results.get(0));
+			Assert.assertEquals("20120710/bucket-1", results.get(1));
+			for (int i = 2; i < results.size(); i++) {
+				Assert.assertEquals(folders.get(folders.size() - (i - 2) - 1) + "/bucket-0", results.get(i));
+			}
+
+			for (String path : results) {
+				this.hdfsBucketIndex.removeBucket(path);
+			}
+
+			Assert.assertFalse(this.fileSystem.exists(new Path("/tmp/Puma/20120710/bucket-0")));
+			Assert.assertFalse(this.fileSystem.exists(new Path("/tmp/Puma/20120710/bucket-1")));
+			for (int i = 2; i < results.size(); i++) {
+				Assert.assertFalse(this.fileSystem.exists(new Path("/tmp/Puma/" + results.get(i) + "/bucket-0")));
+			}
+			Assert.assertFalse(this.fileSystem.exists(new Path("/tmp/Puma/20120710/")));
+			for (int i = 2; i < results.size(); i++) {
+				Assert.assertFalse(this.fileSystem.exists(new Path("/tmp/Puma/" + results.get(i))));
+			}
+
+		} catch (StorageClosedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Test

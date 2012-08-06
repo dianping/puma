@@ -1,7 +1,7 @@
 /**
  * Project: puma-server
  * 
- * File Created at 2012-7-18
+ * File Created at 2012-8-6
  * $Id$
  * 
  * Copyright 2010 dianping.com.
@@ -16,10 +16,11 @@
 package com.dianping.puma.storage;
 
 /**
+ * TODO Comment of CleanupStrategy
  * 
  * @author Leo Liang
  * 
  */
-public interface ArchiveStrategy {
-	public void archive(BucketIndex masterIndex, BucketIndex slaveIndex);
+public interface CleanupStrategy {
+	public void cleanup(BucketIndex index);
 }

@@ -50,6 +50,7 @@ import com.dianping.puma.server.MMapBasedBinlogPositionHolder;
 import com.dianping.puma.server.ReplicationBasedServer;
 import com.dianping.puma.storage.ArchiveStrategy;
 import com.dianping.puma.storage.BucketIndex;
+import com.dianping.puma.storage.CleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.LocalFileBucketIndex;
@@ -141,13 +142,20 @@ public abstract class PumaServerIntegrationBaseTest {
 		// init storage
 		storage = new DefaultEventStorage();
 		storage.setCodec(new JsonEventCodec());
-		storage.setMaxMasterFileCount(10);
 		storage.setArchiveStrategy(new ArchiveStrategy() {
 
 			@Override
-			public void archive(BucketIndex masterIndex, BucketIndex slaveIndex, int masterRemainFileCount) {
+			public void archive(BucketIndex masterIndex, BucketIndex slaveIndex) {
 			}
 		});
+		storage.setCleanupStrategy(new CleanupStrategy() {
+
+			@Override
+			public void cleanup(BucketIndex index) {
+
+			}
+		});
+
 		storage.setName("test-storage");
 		storage.setMasterIndex(masterIndex);
 		storage.setSlaveIndex(slaveIndex);

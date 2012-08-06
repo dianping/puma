@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -202,6 +203,59 @@ public class LocalBucketIndexTest {
 			num = 7;
 			results = this.localBucketIndex.bulkGetRemainN(num);
 			Assert.assertEquals(0, results.size());
+
+		} catch (StorageClosedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("*************************************************************");
+		System.out.println("****************************End******************************");
+		System.out.println("*************************************************************");
+	}
+
+	@Test
+	public void testBulkGetRemainNDay() throws Exception {
+		System.out.println("***********************************************************");
+		System.out.println("******************testBulkGetRemainNDay********************");
+		System.out.println("***********************************************************");
+		Calendar cal = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		List<String> folders = new ArrayList<String>();
+		try {
+			for (int i = 0; i <= 10; i++) {
+				cal.add(Calendar.DAY_OF_MONTH, i == 0 ? 0 : -1);
+				String folder = sdf.format(cal.getTime());
+				folders.add(folder);
+				work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/" + folder + "/bucket-0");
+				work.getParentFile().mkdirs();
+				if (work.createNewFile()) {
+					System.out.println("create a file: " + work.getAbsolutePath());
+
+				}
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
+		this.localBucketIndex.start();
+		try {
+
+			int num = 4;
+			List<String> results = this.localBucketIndex.bulkGetRemainNDay(num);
+			Assert.assertEquals(13 - num, results.size());
+			Assert.assertEquals("20120710/bucket-0", results.get(0));
+			Assert.assertEquals("20120710/bucket-1", results.get(1));
+			for (int i = 2; i < results.size(); i++) {
+				Assert.assertEquals(folders.get(folders.size() - (i - 2) - 1) + "/bucket-0", results.get(i));
+			}
+
+			num = 10;
+			results = this.localBucketIndex.bulkGetRemainNDay(num);
+			Assert.assertEquals(13 - num, results.size());
+			Assert.assertEquals("20120710/bucket-0", results.get(0));
+			Assert.assertEquals("20120710/bucket-1", results.get(1));
+			for (int i = 2; i < results.size(); i++) {
+				Assert.assertEquals(folders.get(folders.size() - (i - 2) - 1) + "/bucket-0", results.get(i));
+			}
 
 		} catch (StorageClosedException e) {
 			e.printStackTrace();
@@ -602,6 +656,66 @@ public class LocalBucketIndexTest {
 		}
 		work.delete();
 
+		System.out.println("*************************************************************");
+		System.out.println("****************************End******************************");
+		System.out.println("*************************************************************");
+	}
+
+	@Test
+	public void testRemoveBucket() throws Exception {
+		System.out.println("**********************************************************");
+		System.out.println("********************testRemoveBucket**********************");
+		System.out.println("**********************************************************");
+		Calendar cal = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		List<String> folders = new ArrayList<String>();
+		try {
+			for (int i = 0; i <= 10; i++) {
+				cal.add(Calendar.DAY_OF_MONTH, i == 0 ? 0 : -1);
+				String folder = sdf.format(cal.getTime());
+				folders.add(folder);
+				work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/" + folder + "/bucket-0");
+				work.getParentFile().mkdirs();
+				if (work.createNewFile()) {
+					System.out.println("create a file: " + work.getAbsolutePath());
+
+				}
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
+		this.localBucketIndex.start();
+		try {
+
+			int num = 4;
+			List<String> results = this.localBucketIndex.bulkGetRemainNDay(num);
+			Assert.assertEquals(13 - num, results.size());
+			Assert.assertEquals("20120710/bucket-0", results.get(0));
+			Assert.assertEquals("20120710/bucket-1", results.get(1));
+			for (int i = 2; i < results.size(); i++) {
+				Assert.assertEquals(folders.get(folders.size() - (i - 2) - 1) + "/bucket-0", results.get(i));
+			}
+
+			for (String path : results) {
+				this.localBucketIndex.removeBucket(path);
+			}
+
+			Assert.assertFalse(new File(System.getProperty("java.io.tmpdir", "."), "Puma/20120710/bucket-0").exists());
+			Assert.assertFalse(new File(System.getProperty("java.io.tmpdir", "."), "Puma/20120710/bucket-1").exists());
+			for (int i = 2; i < results.size(); i++) {
+				Assert.assertFalse(new File(System.getProperty("java.io.tmpdir", "."), results.get(i) + "/bucket-0")
+						.exists());
+			}
+
+			Assert.assertFalse(new File(System.getProperty("java.io.tmpdir", "."), "Puma/20120710/").exists());
+			for (int i = 2; i < results.size(); i++) {
+				Assert.assertFalse(new File(System.getProperty("java.io.tmpdir", "."), results.get(i)).exists());
+			}
+
+		} catch (StorageClosedException e) {
+			e.printStackTrace();
+		}
 		System.out.println("*************************************************************");
 		System.out.println("****************************End******************************");
 		System.out.println("*************************************************************");

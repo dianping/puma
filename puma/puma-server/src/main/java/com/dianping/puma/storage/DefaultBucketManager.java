@@ -14,14 +14,14 @@ public class DefaultBucketManager implements BucketManager {
 	private BucketIndex			slaveIndex;
 
 	private ArchiveStrategy		archiveStrategy;
+	private CleanupStrategy		cleanupStrategy;
 
 	private volatile boolean	stopped	= true;
-	private int					maxMasterFileCount;
 
-	public DefaultBucketManager(int maxMasterFileCount, BucketIndex masterIndex, BucketIndex slaveIndex,
-			ArchiveStrategy archiveStrategy) {
-		this.maxMasterFileCount = maxMasterFileCount;
+	public DefaultBucketManager(BucketIndex masterIndex, BucketIndex slaveIndex, ArchiveStrategy archiveStrategy,
+			CleanupStrategy cleanupStrategy) {
 		this.archiveStrategy = archiveStrategy;
+		this.cleanupStrategy = cleanupStrategy;
 		this.masterIndex = masterIndex;
 		this.slaveIndex = slaveIndex;
 	}
@@ -124,6 +124,7 @@ public class DefaultBucketManager implements BucketManager {
 	public synchronized void start() {
 		stopped = false;
 		startArchiveJob();
+		startCleanupJob();
 	}
 
 	private void startArchiveJob() {
@@ -141,7 +142,7 @@ public class DefaultBucketManager implements BucketManager {
 					}
 
 					try {
-						archiveStrategy.archive(masterIndex, slaveIndex, maxMasterFileCount);
+						archiveStrategy.archive(masterIndex, slaveIndex);
 						Thread.sleep(5 * 1000);
 					} catch (Exception e) {
 						log.error("Archive Job failed.", e);
@@ -150,6 +151,34 @@ public class DefaultBucketManager implements BucketManager {
 				}
 			}
 		}, "ArchiveTask", false);
+
+		archiveThread.start();
+	}
+
+	private void startCleanupJob() {
+		if (cleanupStrategy == null) {
+			return;
+		}
+		Thread archiveThread = PumaThreadUtils.createThread(new Runnable() {
+			@Override
+			public void run() {
+				while (true) {
+					try {
+						checkClosed();
+					} catch (StorageClosedException e1) {
+						break;
+					}
+
+					try {
+						cleanupStrategy.cleanup(slaveIndex);
+						Thread.sleep(5 * 1000);
+					} catch (Exception e) {
+						log.error("Cleanup Job failed.", e);
+					}
+
+				}
+			}
+		}, "CleanupTask", false);
 
 		archiveThread.start();
 	}

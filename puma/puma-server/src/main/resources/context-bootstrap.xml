@@ -93,10 +93,10 @@
 	<bean id="storage-7-43" class="com.dianping.puma.storage.DefaultEventStorage"
 		init-method="start">
 		<property name="codec" ref="jsonCodec" />
-		<property name="maxMasterFileCount" value="1" />
 		<property name="masterIndex" ref="localBucketIndex-7-43" />
 		<property name="slaveIndex" ref="localBucketIndex-7-43_2" />
 		<property name="archiveStrategy" ref="archiveStrategy" />
+		<property name="cleanupStrategy" ref="cleanupStrategy" />
 		<property name="name" value="storage-7-43" />
 	</bean>
 
@@ -112,7 +112,13 @@
 		<property name="maxBucketLengthMB" value="500" />
 		<property name="baseDir" value="/data/applogs/puma/bak/" />
 	</bean>
-	<bean id="archiveStrategy" class="com.dianping.puma.storage.DefaultArchiveStrategy" />
+	<bean id="archiveStrategy" class="com.dianping.puma.storage.DefaultArchiveStrategy">
+		<property name="maxMasterFileCount" value="1" />
+	</bean>
+
+	<bean id="cleanupStrategy" class="com.dianping.puma.storage.DefaultCleanupStrategy">
+		<property name="preservedDay" value="14" />
+	</bean>
 
 	<bean id="jsonCodec" class="com.dianping.puma.core.codec.JsonEventCodec" />
 

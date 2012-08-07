@@ -53,21 +53,6 @@ public class ConfigurationBuilder {
 		return this;
 	}
 
-	public ConfigurationBuilder maxRetryTimes(int maxRetryTimes) {
-		this.configuration.setMaxRetryTimes(maxRetryTimes);
-		return this;
-	}
-
-	public ConfigurationBuilder exceptionHandler(ExceptionHandler exceptionHandler) {
-		this.configuration.setExceptionHandler(exceptionHandler);
-		return this;
-	}
-
-	public ConfigurationBuilder canSkip(boolean canSkip) {
-		this.configuration.setCanSkip(canSkip);
-		return this;
-	}
-
 	public ConfigurationBuilder masterUrl(String masterUrl) {
 		this.configuration.setMasterUrl(masterUrl);
 		return this;

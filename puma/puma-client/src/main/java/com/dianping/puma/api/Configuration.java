@@ -40,9 +40,6 @@ public class Configuration implements Serializable {
 	private String						name;
 	private String						seqFileBase				= "/data/applogs/puma/";
 	private String						target;
-	private int							maxRetryTimes			= 3;
-	private boolean						canSkip					= false;
-	private ExceptionHandler			exceptionHandler		= null;
 	private String						masterUrl;
 	private String						binlog;
 	private long						binlogPos				= -1;
@@ -82,10 +79,10 @@ public class Configuration implements Serializable {
 	public String buildRequestParamString(long seq) {
 		StringBuilder param = new StringBuilder();
 		param.append("seq=").append(seq);
-		if (binlogPos != -1 && binlog != null && masterUrl != null && seq == -3L) {
-			param.append("&binlog").append(binlog);
-			param.append("&binlogPos").append(binlogPos);
-			param.append("&masterUrl").append(masterUrl);
+		if (binlogPos != -1L && binlog != null && masterUrl != null && seq == -3L) {
+			param.append("&binlog=").append(binlog);
+			param.append("&binlogPos=").append(binlogPos);
+			param.append("&masterUrl=").append(masterUrl);
 		}
 		param.append("&name=").append(name);
 		param.append("&target=").append(target);
@@ -245,9 +242,8 @@ public class Configuration implements Serializable {
 		return "Configuration [codecType=" + codecType + ", databaseTablesMapping=" + databaseTablesMapping + ", host="
 				+ host + ", needDdl=" + needDdl + ", needDml=" + needDml + ", needTransactionInfo="
 				+ needTransactionInfo + ", port=" + port + ", name=" + name + ", seqFileBase=" + seqFileBase
-				+ ", target=" + target + ", maxRetryTimes=" + maxRetryTimes + ", canSkip=" + canSkip
-				+ ", exceptionHandler=" + exceptionHandler + ", masterUrl=" + masterUrl + ", binlog=" + binlog
-				+ ", binlogPos=" + binlogPos + "]";
+				+ ", target=" + target + ", masterUrl=" + masterUrl + ", binlog=" + binlog + ", binlogPos=" + binlogPos
+				+ "]";
 	}
 
 	public void validate() {
@@ -271,38 +267,6 @@ public class Configuration implements Serializable {
 
 	public void setTarget(String target) {
 		this.target = target;
-	}
-
-	/**
-	 * @param maxRetryTimes
-	 *            the maxRetryTimes to set
-	 */
-	public void setMaxRetryTimes(int maxRetryTimes) {
-		this.maxRetryTimes = maxRetryTimes;
-	}
-
-	public int getMaxRetryTimes() {
-		return maxRetryTimes;
-	}
-
-	public boolean canSkip() {
-		return canSkip;
-	}
-
-	/**
-	 * @param canSkip
-	 *            the canSkip to set
-	 */
-	public void setCanSkip(boolean canSkip) {
-		this.canSkip = canSkip;
-	}
-
-	public ExceptionHandler getExceptionHandler() {
-		return exceptionHandler;
-	}
-
-	public void setExceptionHandler(ExceptionHandler exceptionHandler) {
-		this.exceptionHandler = exceptionHandler;
 	}
 
 }

@@ -16,10 +16,10 @@ import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.core.util.StreamUtils;
 
 public class PumaClient {
-	private static final Logger	log	= Logger.getLogger(PumaClient.class);
+	private static final Logger	log		= Logger.getLogger(PumaClient.class);
 	private Configuration		config;
 	private EventListener		eventListener;
-	private volatile boolean	active;
+	private volatile boolean	active	= false;
 	private SeqFileHolder		seqFileHolder;
 	private EventCodec			codec;
 
@@ -136,8 +136,6 @@ public class PumaClient {
 
 						boolean listenerCallSuccess = true;
 
-						int retryTimes = 0;
-
 						// call event listener until success
 						while (true) {
 							if (checkStop()) {
@@ -150,26 +148,15 @@ public class PumaClient {
 								break;
 							} catch (Exception e) {
 								log.warn("Exception occurs in eventListerner. Event: " + event, e);
-								ExceptionHandler exceptionHandler = config.getExceptionHandler();
-								if(exceptionHandler != null){
-									exceptionHandler.notifyException(event, e);
-								}
-								if (config.canSkip()) {
-									if (retryTimes >= config.getMaxRetryTimes()) {
-										listenerCallSuccess = true;
-										if (exceptionHandler != null) {
-											exceptionHandler.notifySkipEvent(event);
-										}
-										log.warn("Event(" + event + ") has tried for " + config.getMaxRetryTimes()
-												+ " times, then it will be skipped.", e);
-										break;
-									} else {
-										listenerCallSuccess = false;
-									}
+
+								if (eventListener.onException(event, e)) {
+									log.warn("Event(" + event + ") skipped. ");
+									eventListener.onSkipEvent(event);
+									listenerCallSuccess = true;
+									break;
 								} else {
 									listenerCallSuccess = false;
 								}
-								retryTimes++;
 							}
 						}
 

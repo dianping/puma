@@ -69,4 +69,44 @@ public class DdlEvent extends ChangedEvent implements Serializable {
 		return "DdlEvent [sql=" + sql + ", super.toString()=" + super.toString() + "]";
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((sql == null) ? 0 : sql.hashCode());
+		return result;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		DdlEvent other = (DdlEvent) obj;
+		if (sql == null) {
+			if (other.sql != null) {
+				return false;
+			}
+		} else if (!sql.equals(other.sql)) {
+			return false;
+		}
+		return true;
+	}
+
 }

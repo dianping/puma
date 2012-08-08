@@ -1,10 +1,26 @@
 package com.dianping.puma.api;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
+
+import com.dianping.puma.core.codec.EventCodec;
+import com.dianping.puma.core.codec.JsonEventCodec;
+import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.DdlEvent;
+import com.dianping.puma.core.event.RowChangedEvent;
+import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
+import com.dianping.puma.core.util.ByteArrayUtils;
+import com.dianping.puma.core.util.PumaThreadUtils;
 
 public class PumaClientTest {
 	@Test
@@ -108,7 +124,7 @@ public class PumaClientTest {
 				"seq=-2&name=test&target=fff&ddl=true&dml=false&ts=true&codec=json&dt=cat.a&dt=cat.b*&dt=me.d",
 				conf.buildRequestParamString(-2));
 	}
-	
+
 	@Test
 	public void testParamWithoutBinlogInfo3() {
 		ConfigurationBuilder builder = new ConfigurationBuilder();
@@ -160,42 +176,162 @@ public class PumaClientTest {
 
 	}
 
-	// // puma server/ip [localhost/7862]
-	// // databases [all]
-	// // tables [all]
-	// // DDL & DML [both true]
-	// // starting sequence [0]
-	// // transaction supported? [false]
-	// // String url =
-	// //
-	// "http://localhost:7862/puma/channel?dt=mysql.*&dt=cat.!report&ddl=false&seq=12345&ts=true&batch=100";
-	// // @Test
-	// public void testApi() throws InterruptedException {
-	// ConfigurationBuilder configBuilder = new ConfigurationBuilder() //
-	// .host("localhost") //
-	// .port(7862)//
-	// .tables("cat", "*", "report*", "report1")//
-	// .ddl(true) //
-	// .dml(true)//
-	// .tables("binlog", "*")//
-	// .name("testClient2")//
-	// .target("7-43") //
-	// .transaction(true);
-	//
-	// PumaClient client = new PumaClient(configBuilder.build());
-	//
-	// client.register(new EventListener() {
-	//
-	// @Override
-	// public void onEvent(ChangedEvent event) {
-	// // biz
-	// System.out.println(event);
-	// }
-	// });
-	//
-	// client.start();
-	//
-	// }
+	@Test
+	public void testApi() throws InterruptedException {
+		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
+		configBuilder.codecType("json");
+		configBuilder.ddl(true);
+		configBuilder.dml(false);
+		configBuilder.host("localhost");
+		configBuilder.name("test");
+		configBuilder.port(7862);
+		configBuilder.tables("test1", "a", "b*");
+		configBuilder.tables("test2", "d");
+		configBuilder.target("fff");
+		configBuilder.transaction(true);
+		configBuilder.binlog("fff");
+		configBuilder.binlogPos(4);
+		configBuilder.masterUrl("localhost:3306");
+
+		List<ChangedEvent> eventsSent = new ArrayList<ChangedEvent>();
+
+		DdlEvent event1 = new DdlEvent();
+		event1.setBinlog("dddd");
+		event1.setBinlogPos(111);
+		event1.setDatabase("test1");
+		event1.setExecuteTime(1111122233);
+		event1.setMasterUrl("localhost:3306");
+		event1.setSeq(111111222223334L);
+		event1.setSql("CREATE TABLE dddd");
+		eventsSent.add(event1);
+
+		RowChangedEvent event2 = new RowChangedEvent();
+		event2.setBinlog("dddd");
+		event2.setBinlogPos(111);
+		event2.setDatabase("test1");
+		event2.setExecuteTime(1111122233);
+		event2.setMasterUrl("localhost:3306");
+		event2.setSeq(111111222223334L);
+		event2.setActionType(RowChangedEvent.INSERT);
+		event2.setTable("a");
+		event2.setTransactionBegin(false);
+		event2.setTransactionCommit(false);
+		Map<String, ColumnInfo> columns = new HashMap<String, RowChangedEvent.ColumnInfo>();
+		columns.put("id", new ColumnInfo(false, null, 2));
+		event2.setColumns(columns);
+		eventsSent.add(event2);
+
+		RowChangedEvent event3 = new RowChangedEvent();
+		event3.setBinlog("dddd");
+		event3.setBinlogPos(111);
+		event3.setDatabase("test1");
+		event3.setExecuteTime(1111122233);
+		event3.setMasterUrl("localhost:3306");
+		event3.setSeq(111111222223334L);
+		event3.setActionType(RowChangedEvent.UPDATE);
+		event3.setTable("a");
+		event3.setTransactionBegin(false);
+		event3.setTransactionCommit(false);
+		Map<String, ColumnInfo> columns3 = new HashMap<String, RowChangedEvent.ColumnInfo>();
+		columns3.put("id", new ColumnInfo(false, 1, 2));
+		event3.setColumns(columns3);
+		eventsSent.add(event3);
+
+		RowChangedEvent event4 = new RowChangedEvent();
+		event4.setBinlog("dddd");
+		event4.setBinlogPos(111);
+		event4.setDatabase("test1");
+		event4.setExecuteTime(1111122233);
+		event4.setMasterUrl("localhost:3306");
+		event4.setSeq(111111222223334L);
+		event4.setActionType(RowChangedEvent.DELETE);
+		event4.setTable("a");
+		event4.setTransactionBegin(false);
+		event4.setTransactionCommit(false);
+		Map<String, ColumnInfo> columns4 = new HashMap<String, RowChangedEvent.ColumnInfo>();
+		columns4.put("id", new ColumnInfo(false, 1, null));
+		event4.setColumns(columns4);
+		eventsSent.add(event4);
+
+		RowChangedEvent event5 = new RowChangedEvent();
+		event5.setBinlog("dddd");
+		event5.setBinlogPos(111);
+		event5.setDatabase("test1");
+		event5.setExecuteTime(1111122233);
+		event5.setMasterUrl("localhost:3306");
+		event5.setSeq(111111222223334L);
+		event5.setTransactionBegin(true);
+		eventsSent.add(event5);
+
+		RowChangedEvent event6 = new RowChangedEvent();
+		event6.setBinlog("dddd");
+		event6.setBinlogPos(111);
+		event6.setDatabase("test1");
+		event6.setExecuteTime(1111122233);
+		event6.setMasterUrl("localhost:3306");
+		event6.setSeq(111111222223334L);
+		event6.setTransactionCommit(true);
+		eventsSent.add(event6);
+
+		final List<ChangedEvent> eventsReceived = new ArrayList<ChangedEvent>();
+
+		StartMockPumaServer(eventsSent);
+
+		PumaClient client = new PumaClient(configBuilder.build());
+
+		client.register(new EventListener() {
+
+			@Override
+			public void onSkipEvent(ChangedEvent event) {
+
+			}
+
+			@Override
+			public boolean onException(ChangedEvent event, Exception e) {
+				return true;
+			}
+
+			@Override
+			public void onEvent(ChangedEvent event) throws Exception {
+				eventsReceived.add(event);
+			}
+		});
+
+		client.start();
+
+		Thread.sleep(5 * 1000);
+
+		Assert.assertArrayEquals(eventsSent.toArray(new ChangedEvent[0]), eventsReceived.toArray(new ChangedEvent[0]));
+	}
+
+	/**
+	 * @param eventSent
+	 */
+	protected void StartMockPumaServer(final List<ChangedEvent> eventSent) {
+		PumaThreadUtils.createThread(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					ServerSocket ss = new ServerSocket();
+					ss.bind(new InetSocketAddress(7862));
+					Socket s = ss.accept();
+					EventCodec codec = new JsonEventCodec();
+					for (ChangedEvent event : eventSent) {
+						byte[] bytes = codec.encode(event);
+						s.getOutputStream().write(ByteArrayUtils.intToByteArray(bytes.length));
+						s.getOutputStream().write(bytes);
+					}
+
+					s.close();
+					ss.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}, "mockServer", false).start();
+
+	}
 
 	private Object getValue(Object obj, String fieldName) {
 		Field[] fields = obj.getClass().getDeclaredFields();

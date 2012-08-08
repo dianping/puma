@@ -183,4 +183,80 @@ public abstract class ChangedEvent implements Serializable {
 				+ seq + ", masterUrl=" + masterUrl + ", binlog=" + binlog + ", binlogPos=" + binlogPos + "]";
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((binlog == null) ? 0 : binlog.hashCode());
+		result = prime * result + (int) (binlogPos ^ (binlogPos >>> 32));
+		result = prime * result + ((database == null) ? 0 : database.hashCode());
+		result = prime * result + (int) (executeTime ^ (executeTime >>> 32));
+		result = prime * result + ((masterUrl == null) ? 0 : masterUrl.hashCode());
+		result = prime * result + (int) (seq ^ (seq >>> 32));
+		result = prime * result + ((table == null) ? 0 : table.hashCode());
+		return result;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		ChangedEvent other = (ChangedEvent) obj;
+		if (binlog == null) {
+			if (other.binlog != null) {
+				return false;
+			}
+		} else if (!binlog.equals(other.binlog)) {
+			return false;
+		}
+		if (binlogPos != other.binlogPos) {
+			return false;
+		}
+		if (database == null) {
+			if (other.database != null) {
+				return false;
+			}
+		} else if (!database.equals(other.database)) {
+			return false;
+		}
+		if (executeTime != other.executeTime) {
+			return false;
+		}
+		if (masterUrl == null) {
+			if (other.masterUrl != null) {
+				return false;
+			}
+		} else if (!masterUrl.equals(other.masterUrl)) {
+			return false;
+		}
+		if (seq != other.seq) {
+			return false;
+		}
+		if (table == null) {
+			if (other.table != null) {
+				return false;
+			}
+		} else if (!table.equals(other.table)) {
+			return false;
+		}
+		return true;
+	}
+
 }

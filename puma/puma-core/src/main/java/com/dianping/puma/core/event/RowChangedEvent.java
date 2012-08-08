@@ -255,5 +255,110 @@ public class RowChangedEvent extends ChangedEvent implements Serializable {
 			return "ColumnInfo [isKey=" + isKey + ", oldValue=" + oldValue + ", newValue=" + newValue + "]";
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + (isKey ? 1231 : 1237);
+			result = prime * result + ((newValue == null) ? 0 : newValue.hashCode());
+			result = prime * result + ((oldValue == null) ? 0 : oldValue.hashCode());
+			return result;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			ColumnInfo other = (ColumnInfo) obj;
+			if (isKey != other.isKey) {
+				return false;
+			}
+			if (newValue == null) {
+				if (other.newValue != null) {
+					return false;
+				}
+			} else if (!newValue.equals(other.newValue)) {
+				return false;
+			}
+			if (oldValue == null) {
+				if (other.oldValue != null) {
+					return false;
+				}
+			} else if (!oldValue.equals(other.oldValue)) {
+				return false;
+			}
+			return true;
+		}
+
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + actionType;
+		result = prime * result + ((columns == null) ? 0 : columns.hashCode());
+		result = prime * result + (isTransactionBegin ? 1231 : 1237);
+		result = prime * result + (isTransactionCommit ? 1231 : 1237);
+		return result;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		RowChangedEvent other = (RowChangedEvent) obj;
+		if (actionType != other.actionType) {
+			return false;
+		}
+		if (columns == null) {
+			if (other.columns != null) {
+				return false;
+			}
+		} else if (!columns.equals(other.columns)) {
+			return false;
+		}
+		if (isTransactionBegin != other.isTransactionBegin) {
+			return false;
+		}
+		if (isTransactionCommit != other.isTransactionCommit) {
+			return false;
+		}
+		return true;
+	}
+
 }

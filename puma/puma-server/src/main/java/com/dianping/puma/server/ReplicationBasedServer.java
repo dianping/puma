@@ -76,6 +76,9 @@ public class ReplicationBasedServer extends AbstractServer {
 				getContext().setServerId(getServerId());
 				getContext().setMasterUrl(host, port);
 
+				SystemStatusContainer.instance.updateServerStatus(getServerName(), host, port, database, getContext()
+						.getBinlogFileName(), getContext().getBinlogStartPos());
+
 				connect();
 
 				if (auth()) {
@@ -116,83 +119,98 @@ public class ReplicationBasedServer extends AbstractServer {
 				log.error("Binlog packet response error.");
 				throw new IOException("Binlog packet response error.");
 			} else {
-
-				BinlogEvent binlogEvent = getParser().parse(binlogPacket.getBinlogBuf(), getContext());
-
-				getContext().setNextBinlogPos(binlogEvent.getHeader().getNextPosition());
-
-				if (binlogEvent.getHeader().getEventType() == BinlogConstanst.ROTATE_EVENT) {
-					RotateEvent rotateEvent = (RotateEvent) binlogEvent;
-					getBinlogPositionHolder().savePositionInfo(getServerName(),
-							new PositionInfo(rotateEvent.getFirstEventPosition(), rotateEvent.getNextBinlogFileName()));
-					getContext().setBinlogFileName(rotateEvent.getNextBinlogFileName());
-					getContext().setBinlogStartPos(rotateEvent.getFirstEventPosition());
-					// status report
-					SystemStatusContainer.instance.updateServerStatus(getServerName(), host, port, database,
-							getContext().getBinlogFileName(), getContext().getBinlogStartPos());
-				} else {
-					DataHandlerResult dataHandlerResult = null;
-					// 一直处理一个binlogEvent的多行，处理完每行马上分发，以防止一个binlogEvent包含太多ChangedEvent而耗费太多内存
-					do {
-						dataHandlerResult = getDataHandler().process(binlogEvent, getContext());
-						if (dataHandlerResult != null && !dataHandlerResult.isEmpty()) {
-							ChangedEvent changedEvent = dataHandlerResult.getData();
-
-							// 增加行变更计数器(除去ddl事件和事务信息事件)
-							if ((changedEvent instanceof RowChangedEvent)
-									&& !((RowChangedEvent) changedEvent).isTransactionBegin()
-									&& !((RowChangedEvent) changedEvent).isTransactionCommit()) {
-								switch (((RowChangedEvent) changedEvent).getActionType()) {
-									case RowChangedEvent.INSERT:
-										SystemStatusContainer.instance.incServerRowInsertCounter(getServerName());
-										break;
-									case RowChangedEvent.UPDATE:
-										SystemStatusContainer.instance.incServerRowUpdateCounter(getServerName());
-										break;
-									case RowChangedEvent.DELETE:
-										SystemStatusContainer.instance.incServerRowDeleteCounter(getServerName());
-										break;
-									default:
-										break;
-								}
-							} else if (changedEvent instanceof DdlEvent) {
-								SystemStatusContainer.instance.incServerDdlCounter(getServerName());
-							}
-
-							try {
-								getDispatcher().dispatch(changedEvent, getContext());
-							} catch (Exception e) {
-								this.getNotifyService().alarm(
-										"[" + getContext().getPumaServerName() + "]" + "Dispatch event failed. event("
-												+ changedEvent + ")", e, true);
-								log.error("Dispatcher dispatch failed.", e);
-							}
-						}
-					} while (dataHandlerResult != null && !dataHandlerResult.isFinished());
-
-					// 只有整个binlogEvent分发完了才save
-					if (binlogEvent.getHeader() != null
-							&& binlogEvent.getHeader().getNextPosition() != 0
-							&& StringUtils.isNotBlank(getContext().getBinlogFileName())
-							&& dataHandlerResult != null
-							&& !dataHandlerResult.isEmpty()
-							&& (dataHandlerResult.getData() instanceof DdlEvent || (dataHandlerResult.getData() instanceof RowChangedEvent && ((RowChangedEvent) dataHandlerResult
-									.getData()).isTransactionCommit()))) {
-						// save position
-						getBinlogPositionHolder().savePositionInfo(
-								getServerName(),
-								new PositionInfo(binlogEvent.getHeader().getNextPosition(), getContext()
-										.getBinlogFileName()));
-						getContext().setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
-						// status report
-						SystemStatusContainer.instance.updateServerStatus(getServerName(), host, port, database,
-								getContext().getBinlogFileName(), getContext().getBinlogStartPos());
-					}
-
-				}
+				processBinlogPacket(binlogPacket);
 			}
 
 		}
+	}
+
+	protected void processBinlogPacket(BinlogPacket binlogPacket) throws IOException {
+		BinlogEvent binlogEvent = getParser().parse(binlogPacket.getBinlogBuf(), getContext());
+
+		getContext().setNextBinlogPos(binlogEvent.getHeader().getNextPosition());
+
+		if (binlogEvent.getHeader().getEventType() == BinlogConstanst.ROTATE_EVENT) {
+			processRotateEvent(binlogEvent);
+		} else {
+			processDataEvent(binlogEvent);
+		}
+	}
+
+	protected void processDataEvent(BinlogEvent binlogEvent) {
+		DataHandlerResult dataHandlerResult = null;
+		// 一直处理一个binlogEvent的多行，处理完每行马上分发，以防止一个binlogEvent包含太多ChangedEvent而耗费太多内存
+		do {
+			dataHandlerResult = getDataHandler().process(binlogEvent, getContext());
+			if (dataHandlerResult != null && !dataHandlerResult.isEmpty()) {
+				ChangedEvent changedEvent = dataHandlerResult.getData();
+
+				updateOpsCounter(changedEvent);
+
+				dispatch(changedEvent);
+			}
+		} while (dataHandlerResult != null && !dataHandlerResult.isFinished());
+
+		// 只有整个binlogEvent分发完了才save
+		if (binlogEvent.getHeader() != null
+				&& binlogEvent.getHeader().getNextPosition() != 0
+				&& StringUtils.isNotBlank(getContext().getBinlogFileName())
+				&& dataHandlerResult != null
+				&& !dataHandlerResult.isEmpty()
+				&& (dataHandlerResult.getData() instanceof DdlEvent || (dataHandlerResult.getData() instanceof RowChangedEvent && ((RowChangedEvent) dataHandlerResult
+						.getData()).isTransactionCommit()))) {
+			// save position
+			getBinlogPositionHolder().savePositionInfo(getServerName(),
+					new PositionInfo(binlogEvent.getHeader().getNextPosition(), getContext().getBinlogFileName()));
+			getContext().setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
+			// status report
+			SystemStatusContainer.instance.updateServerStatus(getServerName(), host, port, database, getContext()
+					.getBinlogFileName(), getContext().getBinlogStartPos());
+		}
+	}
+
+	protected void dispatch(ChangedEvent changedEvent) {
+		try {
+			getDispatcher().dispatch(changedEvent, getContext());
+		} catch (Exception e) {
+			this.getNotifyService()
+					.alarm("[" + getContext().getPumaServerName() + "]" + "Dispatch event failed. event("
+							+ changedEvent + ")", e, true);
+			log.error("Dispatcher dispatch failed.", e);
+		}
+	}
+
+	protected void updateOpsCounter(ChangedEvent changedEvent) {
+		// 增加行变更计数器(除去ddl事件和事务信息事件)
+		if ((changedEvent instanceof RowChangedEvent) && !((RowChangedEvent) changedEvent).isTransactionBegin()
+				&& !((RowChangedEvent) changedEvent).isTransactionCommit()) {
+			switch (((RowChangedEvent) changedEvent).getActionType()) {
+				case RowChangedEvent.INSERT:
+					SystemStatusContainer.instance.incServerRowInsertCounter(getServerName());
+					break;
+				case RowChangedEvent.UPDATE:
+					SystemStatusContainer.instance.incServerRowUpdateCounter(getServerName());
+					break;
+				case RowChangedEvent.DELETE:
+					SystemStatusContainer.instance.incServerRowDeleteCounter(getServerName());
+					break;
+				default:
+					break;
+			}
+		} else if (changedEvent instanceof DdlEvent) {
+			SystemStatusContainer.instance.incServerDdlCounter(getServerName());
+		}
+	}
+
+	protected void processRotateEvent(BinlogEvent binlogEvent) {
+		RotateEvent rotateEvent = (RotateEvent) binlogEvent;
+		getBinlogPositionHolder().savePositionInfo(getServerName(),
+				new PositionInfo(rotateEvent.getFirstEventPosition(), rotateEvent.getNextBinlogFileName()));
+		getContext().setBinlogFileName(rotateEvent.getNextBinlogFileName());
+		getContext().setBinlogStartPos(rotateEvent.getFirstEventPosition());
+		// status report
+		SystemStatusContainer.instance.updateServerStatus(getServerName(), host, port, database, getContext()
+				.getBinlogFileName(), getContext().getBinlogStartPos());
 	}
 
 	/**

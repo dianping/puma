@@ -91,7 +91,7 @@ public class ReplicationBasedServer extends AbstractServer {
 				} else {
 					throw new IOException("Login failed.");
 				}
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				if (isStop()) {
 					return;
 				}

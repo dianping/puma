@@ -25,14 +25,7 @@ public class PumaListener implements ServletContextListener {
 
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
-		for (Server server : servers) {
-			try {
-				server.stop();
-				log.info("Server " + server.getServerName() + " stopped.");
-			} catch (Exception e) {
-				log.error("Stop Server" + server.getServerName() + " failed.", e);
-			}
-		}
+		stopServers();
 	}
 
 	@Override
@@ -59,10 +52,29 @@ public class PumaListener implements ServletContextListener {
 					+ context.getBinlogStartPos());
 		}
 
+		Runtime.getRuntime().addShutdownHook(PumaThreadUtils.createThread(new Runnable() {
+
+			@Override
+			public void run() {
+				stopServers();
+			}
+		}, "ShutHook", false));
+
 		this.servers = configedServers;
 	}
 
-	void startServer(final Server server) {
+	private void stopServers() {
+		for (Server server : servers) {
+			try {
+				server.stop();
+				log.info("Server " + server.getServerName() + " stopped.");
+			} catch (Exception e) {
+				log.error("Stop Server" + server.getServerName() + " failed.", e);
+			}
+		}
+	}
+
+	private void startServer(final Server server) {
 		PumaThreadUtils.createThread(new Runnable() {
 			@Override
 			public void run() {

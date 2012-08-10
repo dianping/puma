@@ -9,7 +9,6 @@
 <jsp:useBean id="ctx" type="com.dianping.puma.channel.page.status.Context" scope="request"/>
 <jsp:useBean id="payload" type="com.dianping.puma.channel.page.status.Payload" scope="request"/>
 <jsp:useBean id="model" type="com.dianping.puma.channel.page.status.Model" scope="request"/>
-<META HTTP-EQUIV="REFRESH" CONTENT="5">
 
 <style type="text/css"> 
 .dotline {

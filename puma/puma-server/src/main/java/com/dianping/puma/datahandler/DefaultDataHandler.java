@@ -57,7 +57,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 				tableMetaInfo = getTableMetasInfoFetcher().getTableMetaInfo(tableMapEvent.getDatabaseName(),
 						tableMapEvent.getTableName());
 				if (tableMetaInfo == null) {
-					skipEvent(result, binlogEvent);
+					skipEvent(result, context);
 					return;
 				}
 				fillRawTypeCodes(tableMapEvent, tableMetaInfo);
@@ -71,7 +71,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 				break;
 			case BinlogConstanst.WRITE_ROWS_EVENT:
 				if (tableMetaInfo == null) {
-					skipEvent(result, binlogEvent);
+					skipEvent(result, context);
 					return;
 				}
 
@@ -90,7 +90,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 						if (writeRowsEvent.getUsedColumns().get(columnPos)) {
 							Column binlogColumn = writeRowsEvent.getRows().get(rowPos).getColumns().get(columnIndex);
 							String columnName = tableMetaInfo.getColumns().get(columnPos + 1);
-							checkUnknownColumnName(binlogEvent, columnName, columnPos + 1);
+							checkUnknownColumnName(context, columnName, columnPos + 1);
 							ColumnInfo columnInfo = new ColumnInfo(tableMetaInfo.getKeys().contains(columnName), null,
 									convertUnsignedValueIfNeeded(columnPos + 1, binlogColumn.getValue(), tableMetaInfo));
 							columns.put(columnName, columnInfo);
@@ -107,7 +107,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 
 			case BinlogConstanst.UPDATE_ROWS_EVENT:
 				if (tableMetaInfo == null) {
-					skipEvent(result, binlogEvent);
+					skipEvent(result, context);
 					return;
 				}
 				UpdateRowsEvent updateRowsEvent = (UpdateRowsEvent) binlogEvent;
@@ -124,7 +124,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 					for (int columnPos = 0, columnAfterIndex = 0, columnBeforeIndex = 0; columnPos < updateRowsEvent
 							.getColumnCount().intValue(); columnPos++) {
 						String columnName = tableMetaInfo.getColumns().get(columnPos + 1);
-						checkUnknownColumnName(binlogEvent, columnName, columnPos + 1);
+						checkUnknownColumnName(context, columnName, columnPos + 1);
 						Column afterColumn = null;
 						Column beforeColumn = null;
 						if (updateRowsEvent.getUsedColumnsAfter().get(columnPos)) {
@@ -153,7 +153,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 				break;
 			case BinlogConstanst.DELETE_ROWS_EVENT:
 				if (tableMetaInfo == null) {
-					skipEvent(result, binlogEvent);
+					skipEvent(result, context);
 					return;
 				}
 				DeleteRowsEvent deleteRowsEvent = (DeleteRowsEvent) binlogEvent;
@@ -171,7 +171,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 						if (deleteRowsEvent.getUsedColumns().get(columnPos)) {
 							Column binlogColumn = deleteRowsEvent.getRows().get(rowPos).getColumns().get(columnIndex);
 							String columnName = tableMetaInfo.getColumns().get(columnPos + 1);
-							checkUnknownColumnName(binlogEvent, columnName, columnPos + 1);
+							checkUnknownColumnName(context, columnName, columnPos + 1);
 							ColumnInfo columnInfo = new ColumnInfo(
 									tableMetaInfo.getKeys().contains(columnName),
 									convertUnsignedValueIfNeeded(columnPos + 1, binlogColumn.getValue(), tableMetaInfo),
@@ -195,11 +195,12 @@ public class DefaultDataHandler extends AbstractDataHandler {
 
 	}
 
-	protected void checkUnknownColumnName(BinlogEvent binlogEvent, String columnName, int pos) {
+	protected void checkUnknownColumnName(PumaContext context, String columnName, int pos) {
 		if (columnName == null) {
 			StringBuilder msg = new StringBuilder();
-			msg.append("Unknown column for event: ").append(binlogEvent);
-			msg.append(" pos: ").append(pos);
+			msg.append("Unknown column for Binlog:  ").append(context.getBinlogFileName()).append(" BinlogPos: ")
+					.append(context.getBinlogStartPos());
+			msg.append(" columnPos: ").append(pos);
 			log.warn(msg.toString());
 			if (getNotifyService() != null) {
 				getNotifyService().alarm(msg.toString(), null, false);
@@ -207,12 +208,13 @@ public class DefaultDataHandler extends AbstractDataHandler {
 		}
 	}
 
-	protected void skipEvent(DataHandlerResult result, BinlogEvent binlogEvent) {
+	protected void skipEvent(DataHandlerResult result, PumaContext context) {
 		rowPos = 0;
 		result.setEmpty(true);
 		result.setFinished(true);
 		StringBuilder msg = new StringBuilder();
-		msg.append("Skip one event, since there is no table meta info. Event: ").append(binlogEvent);
+		msg.append("Skip one event, since there is no table meta info. Binlog: ").append(context.getBinlogFileName())
+				.append(" Pos: ").append(context.getBinlogStartPos());
 		log.warn(msg.toString());
 		if (getNotifyService() != null) {
 			getNotifyService().alarm(msg.toString(), null, false);

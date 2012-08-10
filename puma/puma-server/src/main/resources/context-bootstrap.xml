@@ -24,6 +24,7 @@
 
 	<bean id="notifyService" class="com.dianping.puma.common.DefaultNotifyService">
 		<property name="alarmService" ref="commonAlarmSerivce" />
+		<property name="devMode" value="true" />
 	</bean>
 
 	<bean id="notifiableBean" abstract="true">
@@ -94,7 +95,7 @@
 		init-method="start">
 		<property name="codec" ref="jsonCodec" />
 		<property name="masterIndex" ref="localBucketIndex-7-43" />
-		<property name="slaveIndex" ref="localBucketIndex-7-43_2" />
+		<property name="slaveIndex" ref="hdfsBucketIndex-7-43" />
 		<property name="archiveStrategy" ref="archiveStrategy" />
 		<property name="cleanupStrategy" ref="cleanupStrategy" />
 		<property name="name" value="storage-7-43" />
@@ -103,14 +104,14 @@
 	<bean id="localBucketIndex-7-43" class="com.dianping.puma.storage.LocalFileBucketIndex"
 		init-method="start">
 		<property name="bucketFilePrefix" value="bucket-" />
-		<property name="maxBucketLengthMB" value="10" />
+		<property name="maxBucketLengthMB" value="1000" />
 		<property name="baseDir" value="/data/applogs/puma/" />
 	</bean>
-	<bean id="localBucketIndex-7-43_2" class="com.dianping.puma.storage.LocalFileBucketIndex"
+	<bean id="hdfsBucketIndex-7-43" class="com.dianping.puma.storage.HDFSBucketIndex"
 		init-method="start">
 		<property name="bucketFilePrefix" value="bucket-" />
-		<property name="maxBucketLengthMB" value="500" />
-		<property name="baseDir" value="/data/applogs/puma/bak/" />
+		<property name="maxBucketLengthMB" value="1000" />
+		<property name="baseDir" value="/user/workcron/puma/" />
 	</bean>
 	<bean id="archiveStrategy" class="com.dianping.puma.storage.DefaultArchiveStrategy">
 		<property name="maxMasterFileCount" value="1" />

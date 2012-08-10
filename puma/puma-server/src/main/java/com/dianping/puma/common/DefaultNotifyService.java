@@ -42,6 +42,15 @@ public class DefaultNotifyService implements NotifyService {
 	private static final String	KEY_SMS_TO			= "puma.notify.smsTo";
 	private CommonAlarmService	alarmService;
 	private String				localIP				= IPUtils.getFirstNoLoopbackIP4Address();
+	private boolean				devMode				= false;
+
+	/**
+	 * @param devMode
+	 *            the devMode to set
+	 */
+	public void setDevMode(boolean devMode) {
+		this.devMode = devMode;
+	}
 
 	/**
 	 * @param alarmService
@@ -64,16 +73,18 @@ public class DefaultNotifyService implements NotifyService {
 			body.append("<i>").append("Stack trace:").append("&nbsp;<i><br/>");
 			body.append(displayErrorForHtml(t));
 		}
-		try {
-			this.alarmService.sendEmail(body.toString(), MAIL_ALARM_TITLE + "_" + localIP, getMailTos());
-			if (sendSms) {
-				List<String> numbers = getPhoneNums();
-				if (numbers != null && numbers.size() > 0) {
-					this.alarmService.sendSmsMessage("[Puma Alarm]" + "_" + localIP + ":" + msg, numbers);
+		if (!devMode) {
+			try {
+				this.alarmService.sendEmail(body.toString(), MAIL_ALARM_TITLE + "_" + localIP, getMailTos());
+				if (sendSms) {
+					List<String> numbers = getPhoneNums();
+					if (numbers != null && numbers.size() > 0) {
+						this.alarmService.sendSmsMessage("[Puma Alarm]" + "_" + localIP + ":" + msg, numbers);
+					}
 				}
+			} catch (Exception e) {
+				log.warn("Alarm failed. BODY: " + body);
 			}
-		} catch (LionException e) {
-			log.warn("Get mailto or smsto list failed.");
 		}
 	}
 
@@ -92,10 +103,12 @@ public class DefaultNotifyService implements NotifyService {
 			}
 			body.append("</table>");
 		}
-		try {
-			this.alarmService.sendEmail(body.toString(), title + "_" + localIP, getMailTos());
-		} catch (LionException e) {
-			log.warn("Get mailto list failed.");
+		if (!devMode) {
+			try {
+				this.alarmService.sendEmail(body.toString(), title + "_" + localIP, getMailTos());
+			} catch (Exception e) {
+				log.warn("Report failed. BODY: " + body);
+			}
 		}
 	}
 

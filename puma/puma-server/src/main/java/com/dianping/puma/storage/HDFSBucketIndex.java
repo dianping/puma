@@ -92,31 +92,30 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 		if (this.fileSystem.getFileStatus(new Path(this.getBaseDir())).isDir()) {
 
 			FileStatus[] dirsStatus = this.fileSystem.listStatus(new Path(this.getBaseDir()));
-			if (dirsStatus == null || dirsStatus.length == 0) {
-				return;
-			}
+			if (dirsStatus != null && dirsStatus.length != 0) {
 
-			Path[] listedPaths = FileUtil.stat2Paths(dirsStatus);
+				Path[] listedPaths = FileUtil.stat2Paths(dirsStatus);
 
-			for (Path pathname : listedPaths) {
+				for (Path pathname : listedPaths) {
 
-				if (this.fileSystem.getFileStatus(pathname).isDir()) {
-					if (StringUtils.isNumeric(pathname.getName()) && pathname.getName().length() == 8) {
+					if (this.fileSystem.getFileStatus(pathname).isDir()) {
+						if (StringUtils.isNumeric(pathname.getName()) && pathname.getName().length() == 8) {
 
-						FileStatus[] status = this.fileSystem.listStatus(pathname);
-						Path[] listedFiles = FileUtil.stat2Paths(status);
+							FileStatus[] status = this.fileSystem.listStatus(pathname);
+							Path[] listedFiles = FileUtil.stat2Paths(status);
 
-						for (Path subFile : listedFiles) {
-							if (subFile.getName().startsWith(getBucketFilePrefix())
-									&& StringUtils.isNumeric(subFile.getName()
-											.substring(getBucketFilePrefix().length()))) {
-								String path = pathname.getName() + PATH_SEPARATOR + subFile.getName();
-								newIndex.put(convertToSequence(path), path);
+							for (Path subFile : listedFiles) {
+								if (subFile.getName().startsWith(getBucketFilePrefix())
+										&& StringUtils.isNumeric(subFile.getName().substring(
+												getBucketFilePrefix().length()))) {
+									String path = pathname.getName() + PATH_SEPARATOR + subFile.getName();
+									newIndex.put(convertToSequence(path), path);
+								}
 							}
 						}
 					}
-				}
 
+				}
 			}
 		}
 		super.start();

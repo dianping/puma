@@ -75,34 +75,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 					return;
 				}
 
-				WriteRowsEvent writeRowsEvent = (WriteRowsEvent) binlogEvent;
-
-				if (rowPos >= writeRowsEvent.getRows().size()) {
-					rowPos = 0;
-					result.setEmpty(true);
-					result.setFinished(true);
-				} else {
-					RowChangedEvent rowChangedEvent = new RowChangedEvent();
-					Map<String, ColumnInfo> columns = initColumns(writeRowsEvent, rowChangedEvent,
-							RowChangedEvent.INSERT);
-
-					for (int columnPos = 0, columnIndex = 0; columnPos < writeRowsEvent.getColumnCount().intValue(); columnPos++) {
-						if (writeRowsEvent.getUsedColumns().get(columnPos)) {
-							Column binlogColumn = writeRowsEvent.getRows().get(rowPos).getColumns().get(columnIndex);
-							String columnName = tableMetaInfo.getColumns().get(columnPos + 1);
-							checkUnknownColumnName(context, columnName, columnPos + 1);
-							ColumnInfo columnInfo = new ColumnInfo(tableMetaInfo.getKeys().contains(columnName), null,
-									convertUnsignedValueIfNeeded(columnPos + 1, binlogColumn.getValue(), tableMetaInfo));
-							columns.put(columnName, columnInfo);
-							columnIndex++;
-						}
-					}
-
-					rowPos++;
-					result.setData(rowChangedEvent);
-					result.setEmpty(false);
-					result.setFinished(false);
-				}
+				processWriteRowEvent(result, binlogEvent, context);
 				break;
 
 			case BinlogConstanst.UPDATE_ROWS_EVENT:
@@ -110,82 +83,14 @@ public class DefaultDataHandler extends AbstractDataHandler {
 					skipEvent(result, context);
 					return;
 				}
-				UpdateRowsEvent updateRowsEvent = (UpdateRowsEvent) binlogEvent;
-
-				if (rowPos >= updateRowsEvent.getRows().size()) {
-					rowPos = 0;
-					result.setEmpty(true);
-					result.setFinished(true);
-				} else {
-					RowChangedEvent rowChangedEvent = new RowChangedEvent();
-					Map<String, ColumnInfo> columns = initColumns(updateRowsEvent, rowChangedEvent,
-							RowChangedEvent.UPDATE);
-
-					for (int columnPos = 0, columnAfterIndex = 0, columnBeforeIndex = 0; columnPos < updateRowsEvent
-							.getColumnCount().intValue(); columnPos++) {
-						String columnName = tableMetaInfo.getColumns().get(columnPos + 1);
-						checkUnknownColumnName(context, columnName, columnPos + 1);
-						Column afterColumn = null;
-						Column beforeColumn = null;
-						if (updateRowsEvent.getUsedColumnsAfter().get(columnPos)) {
-							afterColumn = updateRowsEvent.getRows().get(rowPos).getAfter().getColumns()
-									.get(columnAfterIndex);
-							columnAfterIndex++;
-						}
-						if (updateRowsEvent.getUsedColumnsBefore().get(columnPos)) {
-							beforeColumn = updateRowsEvent.getRows().get(rowPos).getBefore().getColumns()
-									.get(columnBeforeIndex);
-							columnBeforeIndex++;
-						}
-						ColumnInfo columnInfo = new ColumnInfo(tableMetaInfo.getKeys().contains(columnName),
-								beforeColumn == null ? null : convertUnsignedValueIfNeeded(columnPos + 1,
-										beforeColumn.getValue(), tableMetaInfo), afterColumn == null ? null
-										: convertUnsignedValueIfNeeded(columnPos + 1, afterColumn.getValue(),
-												tableMetaInfo));
-						columns.put(columnName, columnInfo);
-					}
-
-					rowPos++;
-					result.setData(rowChangedEvent);
-					result.setEmpty(false);
-					result.setFinished(false);
-				}
+				processUpdateRowEvent(result, binlogEvent, context);
 				break;
 			case BinlogConstanst.DELETE_ROWS_EVENT:
 				if (tableMetaInfo == null) {
 					skipEvent(result, context);
 					return;
 				}
-				DeleteRowsEvent deleteRowsEvent = (DeleteRowsEvent) binlogEvent;
-
-				if (rowPos >= deleteRowsEvent.getRows().size()) {
-					rowPos = 0;
-					result.setEmpty(true);
-					result.setFinished(true);
-				} else {
-					RowChangedEvent rowChangedEvent = new RowChangedEvent();
-					Map<String, ColumnInfo> columns = initColumns(deleteRowsEvent, rowChangedEvent,
-							RowChangedEvent.DELETE);
-
-					for (int columnPos = 0, columnIndex = 0; columnPos < deleteRowsEvent.getColumnCount().intValue(); columnPos++) {
-						if (deleteRowsEvent.getUsedColumns().get(columnPos)) {
-							Column binlogColumn = deleteRowsEvent.getRows().get(rowPos).getColumns().get(columnIndex);
-							String columnName = tableMetaInfo.getColumns().get(columnPos + 1);
-							checkUnknownColumnName(context, columnName, columnPos + 1);
-							ColumnInfo columnInfo = new ColumnInfo(
-									tableMetaInfo.getKeys().contains(columnName),
-									convertUnsignedValueIfNeeded(columnPos + 1, binlogColumn.getValue(), tableMetaInfo),
-									null);
-							columns.put(columnName, columnInfo);
-							columnIndex++;
-						}
-					}
-
-					rowPos++;
-					result.setData(rowChangedEvent);
-					result.setEmpty(false);
-					result.setFinished(false);
-				}
+				processDeleteRowEvent(result, binlogEvent, context);
 				break;
 			default:
 				result.setEmpty(true);
@@ -193,6 +98,121 @@ public class DefaultDataHandler extends AbstractDataHandler {
 				break;
 		}
 
+	}
+
+	/**
+	 * @param result
+	 * @param binlogEvent
+	 * @param context
+	 */
+	protected void processDeleteRowEvent(DataHandlerResult result, BinlogEvent binlogEvent, PumaContext context) {
+		DeleteRowsEvent deleteRowsEvent = (DeleteRowsEvent) binlogEvent;
+
+		if (rowPos >= deleteRowsEvent.getRows().size()) {
+			rowPos = 0;
+			result.setEmpty(true);
+			result.setFinished(true);
+		} else {
+			RowChangedEvent rowChangedEvent = new RowChangedEvent();
+			Map<String, ColumnInfo> columns = initColumns(deleteRowsEvent, rowChangedEvent, RowChangedEvent.DELETE);
+
+			for (int columnPos = 0, columnIndex = 0; columnPos < deleteRowsEvent.getColumnCount().intValue(); columnPos++) {
+				if (deleteRowsEvent.getUsedColumns().get(columnPos)) {
+					Column binlogColumn = deleteRowsEvent.getRows().get(rowPos).getColumns().get(columnIndex);
+					String columnName = tableMetaInfo.getColumns().get(columnPos + 1);
+					checkUnknownColumnName(context, columnName, columnPos + 1);
+					ColumnInfo columnInfo = new ColumnInfo(tableMetaInfo.getKeys().contains(columnName),
+							convertUnsignedValueIfNeeded(columnPos + 1, binlogColumn.getValue(), tableMetaInfo), null);
+					columns.put(columnName, columnInfo);
+					columnIndex++;
+				}
+			}
+
+			rowPos++;
+			result.setData(rowChangedEvent);
+			result.setEmpty(false);
+			result.setFinished(false);
+		}
+	}
+
+	/**
+	 * @param result
+	 * @param binlogEvent
+	 * @param context
+	 */
+	protected void processUpdateRowEvent(DataHandlerResult result, BinlogEvent binlogEvent, PumaContext context) {
+		UpdateRowsEvent updateRowsEvent = (UpdateRowsEvent) binlogEvent;
+
+		if (rowPos >= updateRowsEvent.getRows().size()) {
+			rowPos = 0;
+			result.setEmpty(true);
+			result.setFinished(true);
+		} else {
+			RowChangedEvent rowChangedEvent = new RowChangedEvent();
+			Map<String, ColumnInfo> columns = initColumns(updateRowsEvent, rowChangedEvent, RowChangedEvent.UPDATE);
+
+			for (int columnPos = 0, columnAfterIndex = 0, columnBeforeIndex = 0; columnPos < updateRowsEvent
+					.getColumnCount().intValue(); columnPos++) {
+				String columnName = tableMetaInfo.getColumns().get(columnPos + 1);
+				checkUnknownColumnName(context, columnName, columnPos + 1);
+				Column afterColumn = null;
+				Column beforeColumn = null;
+				if (updateRowsEvent.getUsedColumnsAfter().get(columnPos)) {
+					afterColumn = updateRowsEvent.getRows().get(rowPos).getAfter().getColumns().get(columnAfterIndex);
+					columnAfterIndex++;
+				}
+				if (updateRowsEvent.getUsedColumnsBefore().get(columnPos)) {
+					beforeColumn = updateRowsEvent.getRows().get(rowPos).getBefore().getColumns()
+							.get(columnBeforeIndex);
+					columnBeforeIndex++;
+				}
+				ColumnInfo columnInfo = new ColumnInfo(tableMetaInfo.getKeys().contains(columnName),
+						beforeColumn == null ? null : convertUnsignedValueIfNeeded(columnPos + 1,
+								beforeColumn.getValue(), tableMetaInfo), afterColumn == null ? null
+								: convertUnsignedValueIfNeeded(columnPos + 1, afterColumn.getValue(), tableMetaInfo));
+				columns.put(columnName, columnInfo);
+			}
+
+			rowPos++;
+			result.setData(rowChangedEvent);
+			result.setEmpty(false);
+			result.setFinished(false);
+		}
+	}
+
+	/**
+	 * @param result
+	 * @param binlogEvent
+	 * @param context
+	 */
+	protected void processWriteRowEvent(DataHandlerResult result, BinlogEvent binlogEvent, PumaContext context) {
+		WriteRowsEvent writeRowsEvent = (WriteRowsEvent) binlogEvent;
+
+		if (rowPos >= writeRowsEvent.getRows().size()) {
+			rowPos = 0;
+			result.setEmpty(true);
+			result.setFinished(true);
+		} else {
+			RowChangedEvent rowChangedEvent = new RowChangedEvent();
+			Map<String, ColumnInfo> columns = initColumns(writeRowsEvent, rowChangedEvent, RowChangedEvent.INSERT);
+
+			for (int columnPos = 0, columnIndex = 0; columnPos < writeRowsEvent.getColumnCount().intValue(); columnPos++) {
+				if (writeRowsEvent.getUsedColumns().get(columnPos)) {
+					Column binlogColumn = writeRowsEvent.getRows().get(rowPos).getColumns().get(columnIndex);
+					String columnName = tableMetaInfo.getColumns().get(columnPos + 1);
+					checkUnknownColumnName(context, columnName, columnPos + 1);
+					ColumnInfo columnInfo = new ColumnInfo(tableMetaInfo.getKeys().contains(columnName), null,
+							convertUnsignedValueIfNeeded(columnPos + 1, binlogColumn.getValue(), tableMetaInfo));
+					columns.put(columnName, columnInfo);
+					columnIndex++;
+				}
+			}
+
+			rowPos++;
+			result.setData(rowChangedEvent);
+			result.setEmpty(false);
+			result.setFinished(false);
+		}
 	}
 
 	protected void checkUnknownColumnName(PumaContext context, String columnName, int pos) {

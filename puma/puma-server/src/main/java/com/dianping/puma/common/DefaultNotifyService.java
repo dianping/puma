@@ -64,16 +64,16 @@ public class DefaultNotifyService implements NotifyService {
 	public void alarm(String msg, Throwable t, boolean sendSms) {
 		log.error(MAIL_ALARM_TITLE + " : " + msg, t);
 
-		StringBuilder body = new StringBuilder();
-		body.append("<strong>").append(msg).append("</strong><br/>");
-		body.append("<br/>");
-		if (t != null) {
-			body.append("<b>").append("Exception message:").append("&nbsp;</b>").append(t.getClass().getName())
-					.append(":").append(t.getMessage()).append("<br/>");
-			body.append("<i>").append("Stack trace:").append("&nbsp;<i><br/>");
-			body.append(displayErrorForHtml(t));
-		}
 		if (!devMode) {
+			StringBuilder body = new StringBuilder();
+			body.append("<strong>").append(msg).append("</strong><br/>");
+			body.append("<br/>");
+			if (t != null) {
+				body.append("<b>").append("Exception message:").append("&nbsp;</b>").append(t.getClass().getName())
+						.append(":").append(t.getMessage()).append("<br/>");
+				body.append("<i>").append("Stack trace:").append("&nbsp;<i><br/>");
+				body.append(displayErrorForHtml(t));
+			}
 			try {
 				this.alarmService.sendEmail(body.toString(), MAIL_ALARM_TITLE + "_" + localIP, getMailTos());
 				if (sendSms) {
@@ -90,20 +90,20 @@ public class DefaultNotifyService implements NotifyService {
 
 	@Override
 	public void report(String title, Map<String, Map<String, String>> msg) {
-		log.info("[Puma Status Report]" + msg);
-		StringBuilder body = new StringBuilder();
-		body.append("<strong>Puma Status Report</strong><br/>");
-		for (Map.Entry<String, Map<String, String>> entry : msg.entrySet()) {
-			body.append("<b>").append(entry.getKey()).append("</b><br/>");
-			body.append("<table border=\"1\">");
-			body.append("<tr><td>name</td><td>value</td></tr>");
-			for (Map.Entry<String, String> suEntry : entry.getValue().entrySet()) {
-				body.append("<tr><td>").append(suEntry.getKey()).append("</td><td>").append(suEntry.getValue())
-						.append("</td></tr>");
-			}
-			body.append("</table>");
-		}
+		log.info("[Puma Report]" + msg);
 		if (!devMode) {
+			StringBuilder body = new StringBuilder();
+			body.append("<strong>Puma Status Report</strong><br/>");
+			for (Map.Entry<String, Map<String, String>> entry : msg.entrySet()) {
+				body.append("<b>").append(entry.getKey()).append("</b><br/>");
+				body.append("<table border=\"1\">");
+				body.append("<tr><td>name</td><td>value</td></tr>");
+				for (Map.Entry<String, String> suEntry : entry.getValue().entrySet()) {
+					body.append("<tr><td>").append(suEntry.getKey()).append("</td><td>").append(suEntry.getValue())
+							.append("</td></tr>");
+				}
+				body.append("</table>");
+			}
 			try {
 				this.alarmService.sendEmail(body.toString(), title + "_" + localIP, getMailTos());
 			} catch (Exception e) {

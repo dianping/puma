@@ -14,6 +14,8 @@ public abstract class AbstractSender implements Sender, Notifiable {
 	private boolean				canMissEvent	= false;
 	private volatile boolean	stopped			= true;
 	private NotifyService		notifyService;
+	private final String		MSG_SKIP		= "[Miss]Send event failed for %d times. [servername=%s; current binlogfile=%s; current binlogpos=%d; next binlogpos=%d] ";
+	private final String		MSG_LOOP_FAILED	= "[Can't Miss]Send event failed for %d times. [servername=%s; current binlogfile=%s; current binlogpos=%d; next binlogpos=%d] ";
 
 	/**
 	 * @return the stop
@@ -114,25 +116,24 @@ public abstract class AbstractSender implements Sender, Notifiable {
 			} catch (Exception e) {
 				if (retryCount++ > maxTryTimes) {
 					if (canMissEvent) {
-						log.error("[Miss]Send event(" + event + ") failed for " + maxTryTimes
-								+ " times. Skip to next pos " + context.getNextBinlogPos());
+						log.error(String.format(MSG_SKIP, maxTryTimes, context.getPumaServerName(),
+								context.getBinlogFileName(), context.getBinlogStartPos(), context.getNextBinlogPos()));
 						if (this.notifyService != null) {
 							this.notifyService.alarm(
-									"[" + context.getPumaServerName() + "]" + "[Miss]Send event(" + event
-											+ ") failed for " + maxTryTimes + " times. Skip to next pos "
-											+ context.getNextBinlogPos(), e, false);
+									String.format(MSG_SKIP, maxTryTimes, context.getPumaServerName(),
+											context.getBinlogFileName(), context.getBinlogStartPos(),
+											context.getNextBinlogPos()), e, false);
 						}
 						return;
 					} else {
 						if (retryCount % 100 == 0) {
-							log.error("Send event(" + event + ") failed for " + retryCount
-									+ " times. Next binlogEvent pos " + context.getNextBinlogPos());
+							log.error(String.format(MSG_LOOP_FAILED, maxTryTimes, context.getPumaServerName(),
+									context.getBinlogFileName(), context.getBinlogStartPos(),
+									context.getNextBinlogPos()));
 							if (this.notifyService != null) {
-								this.notifyService.alarm(
-										"[" + context.getPumaServerName() + "]" + "Send event(" + event
-												+ ") failed for " + maxTryTimes
-												+ " times and this event can't miss. Next binlogEvent pos "
-												+ context.getNextBinlogPos(), e, true);
+								this.notifyService.alarm(String.format(MSG_LOOP_FAILED, maxTryTimes,
+										context.getPumaServerName(), context.getBinlogFileName(),
+										context.getBinlogStartPos(), context.getNextBinlogPos()), e, true);
 							}
 						}
 					}

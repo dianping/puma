@@ -91,14 +91,8 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 	 */
 	@Override
 	public void refreshTableMeta() {
-		Map<String, TableMetaInfo> newTableMeta = new HashMap<String, TableMetaInfo>();
 
-		if (metaDs == null) {
-			metaDs = new MysqlDataSource();
-			metaDs.setUrl("jdbc:mysql://" + metaDBHost + ":" + metaDBPort);
-			metaDs.setUser(metaDBUser);
-			metaDs.setPassword(metaDBPassword);
-		}
+		initDsIfNeeded();
 
 		Connection conn = null;
 		Statement stmt = null;
@@ -109,38 +103,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 			rs = stmt
 					.executeQuery("SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, COLUMN_KEY, COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS");
 			if (rs != null) {
-				while (rs.next()) {
-					String db = rs.getString("TABLE_SCHEMA");
-					String tb = rs.getString("TABLE_NAME");
-					String columnName = rs.getString("COLUMN_NAME");
-					int colPosition = rs.getInt("ORDINAL_POSITION");
-					String type = rs.getString("DATA_TYPE");
-					String key = rs.getString("COLUMN_KEY");
-					String typeStr = rs.getString("COLUMN_TYPE");
-					boolean signed = true;
-					if (typeStr != null && typeStr.indexOf(" unsigned") != -1) {
-						signed = false;
-					}
-					TableMetaInfo tmi = newTableMeta.get(db + "." + tb);
-					if (tmi == null) {
-						TableMetaInfo newTmi = new TableMetaInfo();
-						newTmi.setDatabase(db);
-						newTmi.setTable(tb);
-						newTmi.setColumns(new HashMap<Integer, String>());
-						newTmi.setKeys(new ArrayList<String>());
-						newTmi.setTypes(new HashMap<String, String>());
-						newTmi.setSignedInfos(new HashMap<Integer, Boolean>());
-						newTableMeta.put(db + "." + tb, newTmi);
-						tmi = newTmi;
-					}
-					tmi.getColumns().put(colPosition, columnName);
-					tmi.getSignedInfos().put(colPosition, signed);
-					tmi.getTypes().put(columnName, convertTypes(type));
-					if ("PRI".equals(key)) {
-						tmi.getKeys().add(columnName);
-					}
-				}
-				tableMetaInfoCache.set(newTableMeta);
+				fillTableMetaCache(rs);
 			}
 		} catch (Exception e) {
 			log.error("Refresh TableMeta failed.", e);
@@ -163,6 +126,59 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 				} catch (SQLException e) {
 				}
 			}
+		}
+	}
+
+	/**
+	 * @param newTableMeta
+	 * @param rs
+	 * @throws SQLException
+	 */
+	protected void fillTableMetaCache(ResultSet rs) throws SQLException {
+		Map<String, TableMetaInfo> newTableMeta = new HashMap<String, TableMetaInfo>();
+		while (rs.next()) {
+			String db = rs.getString("TABLE_SCHEMA");
+			String tb = rs.getString("TABLE_NAME");
+			String columnName = rs.getString("COLUMN_NAME");
+			int colPosition = rs.getInt("ORDINAL_POSITION");
+			String type = rs.getString("DATA_TYPE");
+			String key = rs.getString("COLUMN_KEY");
+			String typeStr = rs.getString("COLUMN_TYPE");
+			boolean signed = true;
+			if (typeStr != null && typeStr.indexOf(" unsigned") != -1) {
+				signed = false;
+			}
+			TableMetaInfo tmi = newTableMeta.get(db + "." + tb);
+			if (tmi == null) {
+				TableMetaInfo newTmi = new TableMetaInfo();
+				newTmi.setDatabase(db);
+				newTmi.setTable(tb);
+				newTmi.setColumns(new HashMap<Integer, String>());
+				newTmi.setKeys(new ArrayList<String>());
+				newTmi.setTypes(new HashMap<String, String>());
+				newTmi.setSignedInfos(new HashMap<Integer, Boolean>());
+				newTableMeta.put(db + "." + tb, newTmi);
+				tmi = newTmi;
+			}
+			tmi.getColumns().put(colPosition, columnName);
+			tmi.getSignedInfos().put(colPosition, signed);
+			tmi.getTypes().put(columnName, convertTypes(type));
+			if ("PRI".equals(key)) {
+				tmi.getKeys().add(columnName);
+			}
+		}
+		tableMetaInfoCache.set(newTableMeta);
+	}
+
+	/**
+	 * 
+	 */
+	protected void initDsIfNeeded() {
+		if (metaDs == null) {
+			metaDs = new MysqlDataSource();
+			metaDs.setUrl("jdbc:mysql://" + metaDBHost + ":" + metaDBPort);
+			metaDs.setUser(metaDBUser);
+			metaDs.setPassword(metaDBPassword);
 		}
 	}
 

@@ -151,49 +151,10 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 			result.setEmpty(true);
 			result.setFinished(true);
 		} else if (eventType == BinlogConstanst.QUERY_EVENT) {
-			QueryEvent queryEvent = (QueryEvent) binlogEvent;
-			String sql = StringUtils.trim(queryEvent.getSql());
-			if (StringUtils.startsWithIgnoreCase(sql, "ALTER ") || StringUtils.startsWithIgnoreCase(sql, "CREATE ")
-					|| StringUtils.startsWithIgnoreCase(sql, "DROP ")
-					|| StringUtils.startsWithIgnoreCase(sql, "RENAME ")
-					|| StringUtils.startsWithIgnoreCase(sql, "TRUNCATE ")) {
-				// Refresh table meta
-				tableMetasInfoFetcher.refreshTableMeta();
-
-				ChangedEvent dataChangedEvent = new DdlEvent();
-				DdlEvent ddlEvent = (DdlEvent) dataChangedEvent;
-				ddlEvent.setSql(sql);
-				ddlEvent.setDatabase(queryEvent.getDatabaseName());
-				ddlEvent.setExecuteTime(queryEvent.getHeader().getTimestamp());
-
-				result.setData(dataChangedEvent);
-				result.setEmpty(false);
-				result.setFinished(true);
-
-			} else if (StringUtils.equalsIgnoreCase(sql, "BEGIN")) {
-				// BEGIN事件，发送一个begin transaction的事件
-				ChangedEvent dataChangedEvent = new RowChangedEvent();
-				((RowChangedEvent) dataChangedEvent).setTransactionBegin(true);
-				dataChangedEvent.setExecuteTime(binlogEvent.getHeader().getTimestamp());
-				dataChangedEvent.setDatabase(queryEvent.getDatabaseName());
-
-				result.setData(dataChangedEvent);
-				result.setEmpty(false);
-				result.setFinished(true);
-			} else {
-				result.setEmpty(true);
-				result.setFinished(true);
-			}
+			handleQueryEvent(binlogEvent, result);
 		} else {
 			if (eventType == BinlogConstanst.XID_EVENT) {
-				// commit事件，发送一个commit transaction的事件
-				ChangedEvent dataChangedEvent = new RowChangedEvent();
-				((RowChangedEvent) dataChangedEvent).setTransactionCommit(true);
-				dataChangedEvent.setExecuteTime(binlogEvent.getHeader().getTimestamp());
-
-				result.setData(dataChangedEvent);
-				result.setEmpty(false);
-				result.setFinished(true);
+				handleTransactionCommitEvent(binlogEvent, result);
 			} else {
 				doProcess(result, binlogEvent, context, eventType);
 
@@ -207,6 +168,67 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 		}
 
 		return result;
+	}
+
+	protected void handleTransactionCommitEvent(BinlogEvent binlogEvent, DataHandlerResult result) {
+		// commit事件，发送一个commit transaction的事件
+		ChangedEvent dataChangedEvent = new RowChangedEvent();
+		((RowChangedEvent) dataChangedEvent).setTransactionCommit(true);
+		dataChangedEvent.setExecuteTime(binlogEvent.getHeader().getTimestamp());
+
+		result.setData(dataChangedEvent);
+		result.setEmpty(false);
+		result.setFinished(true);
+	}
+
+	protected void handleQueryEvent(BinlogEvent binlogEvent, DataHandlerResult result) {
+		QueryEvent queryEvent = (QueryEvent) binlogEvent;
+		String sql = StringUtils.trim(queryEvent.getSql());
+		if (StringUtils.startsWithIgnoreCase(sql, "ALTER ") || StringUtils.startsWithIgnoreCase(sql, "CREATE ")
+				|| StringUtils.startsWithIgnoreCase(sql, "DROP ") || StringUtils.startsWithIgnoreCase(sql, "RENAME ")
+				|| StringUtils.startsWithIgnoreCase(sql, "TRUNCATE ")) {
+
+			handleDDlEvent(result, queryEvent, sql);
+
+		} else if (StringUtils.equalsIgnoreCase(sql, "BEGIN")) {
+
+			handleTransactionBeginEvent(binlogEvent, result, queryEvent);
+		} else {
+			result.setEmpty(true);
+			result.setFinished(true);
+		}
+	}
+
+	protected void handleTransactionBeginEvent(BinlogEvent binlogEvent, DataHandlerResult result, QueryEvent queryEvent) {
+		// BEGIN事件，发送一个begin transaction的事件
+		ChangedEvent dataChangedEvent = new RowChangedEvent();
+		((RowChangedEvent) dataChangedEvent).setTransactionBegin(true);
+		dataChangedEvent.setExecuteTime(binlogEvent.getHeader().getTimestamp());
+		dataChangedEvent.setDatabase(queryEvent.getDatabaseName());
+
+		result.setData(dataChangedEvent);
+		result.setEmpty(false);
+		result.setFinished(true);
+	}
+
+	/**
+	 * @param result
+	 * @param queryEvent
+	 * @param sql
+	 */
+	protected void handleDDlEvent(DataHandlerResult result, QueryEvent queryEvent, String sql) {
+		// Refresh table meta
+		tableMetasInfoFetcher.refreshTableMeta();
+
+		ChangedEvent dataChangedEvent = new DdlEvent();
+		DdlEvent ddlEvent = (DdlEvent) dataChangedEvent;
+		ddlEvent.setSql(sql);
+		ddlEvent.setDatabase(queryEvent.getDatabaseName());
+		ddlEvent.setExecuteTime(queryEvent.getHeader().getTimestamp());
+
+		result.setData(dataChangedEvent);
+		result.setEmpty(false);
+		result.setFinished(true);
 	}
 
 	protected abstract void doProcess(DataHandlerResult result, BinlogEvent binlogEvent, PumaContext context,

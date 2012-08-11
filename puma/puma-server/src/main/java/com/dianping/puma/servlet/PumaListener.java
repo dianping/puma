@@ -25,7 +25,6 @@ public class PumaListener implements ServletContextListener {
 
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
-		log.info("Stopping...");
 		stopServers();
 	}
 
@@ -65,6 +64,7 @@ public class PumaListener implements ServletContextListener {
 	}
 
 	private void stopServers() {
+		log.info("Stopping...");
 		for (Server server : servers) {
 			try {
 				server.stop();

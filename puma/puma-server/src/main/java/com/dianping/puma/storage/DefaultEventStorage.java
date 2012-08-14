@@ -3,7 +3,9 @@ package com.dianping.puma.storage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.dianping.puma.common.SystemStatusContainer;
@@ -26,8 +28,12 @@ public class DefaultEventStorage implements EventStorage {
 	private ArchiveStrategy						archiveStrategy;
 	private CleanupStrategy						cleanupStrategy;
 	private String								name;
+	private static final String					datePattern		= "yyyy-MM-dd";
+	private String								lastDate;
 
 	public void start() throws StorageLifeCycleException {
+		SimpleDateFormat sdf = new SimpleDateFormat(datePattern);
+		lastDate = sdf.format(new Date());
 		stopped = false;
 		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, archiveStrategy, cleanupStrategy);
 		try {
@@ -103,6 +109,14 @@ public class DefaultEventStorage implements EventStorage {
 			} else if (!writingBucket.hasRemainingForWrite()) {
 				writingBucket.stop();
 				writingBucket = bucketManager.getNextWriteBucket();
+			} else {
+				SimpleDateFormat sdf = new SimpleDateFormat(datePattern);
+				String nowDate = sdf.format(new Date());
+				if (!lastDate.equals(nowDate)) {
+					writingBucket.stop();
+					writingBucket = bucketManager.getNextWriteBucket();
+					lastDate = nowDate;
+				}
 			}
 
 			event.setSeq(writingBucket.getCurrentWritingSeq());

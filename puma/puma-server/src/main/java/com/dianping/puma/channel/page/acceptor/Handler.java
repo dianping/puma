@@ -44,7 +44,7 @@ public class Handler implements PageHandler<Context> {
 			t2.setStatus(Message.SUCCESS);
 			t2.complete();
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Cat failed.");
 		}
 	}
 
@@ -100,7 +100,11 @@ public class Handler implements PageHandler<Context> {
 					SystemStatusContainer.instance.updateClientSeq(payload.getClientName(), event.getSeq());
 				}
 			} catch (Exception e) {
-				Cat.getProducer().logError(e);
+				try {
+					Cat.getProducer().logError(e);
+				} catch (Exception ex) {
+					log.error("Cat failed.");
+				}
 				SystemStatusContainer.instance.removeClient(payload.getClientName());
 				log.info("Client(" + payload.getClientName() + ") failed. " + e);
 				break;

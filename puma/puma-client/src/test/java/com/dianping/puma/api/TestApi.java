@@ -28,11 +28,12 @@ public class TestApi {
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
 		configBuilder.ddl(true);
 		configBuilder.dml(true);
-		configBuilder.host("192.168.64.165");
-		configBuilder.port(7862);
+		configBuilder.host("192.168.8.21");
+		configBuilder.port(8080);
 		configBuilder.masterUrl("192.168.7.43:3306");
 		configBuilder.name("testClient");
 		configBuilder.tables("cat", "*");
+		configBuilder.tables("pumaut", "*");
 		configBuilder.target("7-43");
 		configBuilder.transaction(true);
 		PumaClient pc = new PumaClient(configBuilder.build());

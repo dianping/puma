@@ -28,8 +28,8 @@ public class TestApi {
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
 		configBuilder.ddl(true);
 		configBuilder.dml(true);
-		configBuilder.host("192.168.8.21");
-		configBuilder.port(8080);
+		configBuilder.host("192.168.64.165");
+		configBuilder.port(7862);
 		configBuilder.masterUrl("192.168.7.43:3306");
 		configBuilder.name("testClient");
 		configBuilder.tables("cat", "*");
@@ -45,12 +45,13 @@ public class TestApi {
 
 			@Override
 			public boolean onException(ChangedEvent event, Exception e) {
+				System.out.println("-------------Exception " + e);
 				return true;
 			}
 
 			@Override
 			public void onEvent(ChangedEvent event) throws Exception {
-//				System.out.println("********************Received " + event);
+				System.out.println("********************Received " + event);
 			}
 		});
 		pc.start();

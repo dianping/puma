@@ -68,12 +68,6 @@
 			<artifactId>jsp-2.1</artifactId>
 			<version>6.1.14</version>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>jsp-api-2.1</artifactId>
-					<groupId>org.mortbay.jetty</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.site.common</groupId>

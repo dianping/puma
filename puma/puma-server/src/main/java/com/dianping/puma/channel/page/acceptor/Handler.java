@@ -7,6 +7,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.configuration.NetworkInterfaceManager;
+import com.dianping.cat.message.Message;
+import com.dianping.cat.message.Transaction;
+import com.dianping.cat.message.spi.MessageManager;
 import com.dianping.puma.ComponentContainer;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.codec.EventCodec;
@@ -26,6 +31,23 @@ import com.site.web.mvc.annotation.PayloadMeta;
 public class Handler implements PageHandler<Context> {
 	private static final Logger	log	= Logger.getLogger(Handler.class);
 
+	protected void endCatTransaction() {
+		try {
+			// complete current transaction immediately (for abnormal case only)
+			MessageManager manager = Cat.getManager();
+			Transaction t1 = manager.getPeekTransaction();
+
+			t1.setStatus(Message.SUCCESS);
+			t1.complete();
+
+			Transaction t2 = manager.getPeekTransaction();
+			t2.setStatus(Message.SUCCESS);
+			t2.complete();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	@Override
 	@PayloadMeta(Payload.class)
 	@InboundActionMeta(name = "acceptor")
@@ -36,6 +58,7 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "acceptor")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
+		long start = System.currentTimeMillis();
 		Payload payload = ctx.getPayload();
 		HttpServletResponse res = ctx.getHttpServletResponse();
 
@@ -62,6 +85,8 @@ public class Handler implements PageHandler<Context> {
 			throw new IOException(e1);
 		}
 
+		endCatTransaction();
+
 		while (true) {
 			try {
 				filterChain.reset();
@@ -75,10 +100,15 @@ public class Handler implements PageHandler<Context> {
 					SystemStatusContainer.instance.updateClientSeq(payload.getClientName(), event.getSeq());
 				}
 			} catch (Exception e) {
+				Cat.getProducer().logError(e);
 				SystemStatusContainer.instance.removeClient(payload.getClientName());
 				log.info("Client(" + payload.getClientName() + ") failed. " + e);
-				return;
+				break;
 			}
 		}
+
+		long end = System.currentTimeMillis();
+		String ipAddress = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
+		Cat.getProducer().logEvent("ChannelClosed", ipAddress, Message.SUCCESS, "duration=" + (end - start));
 	}
 }

@@ -30,7 +30,7 @@ public class TestApi {
 		configBuilder.dml(true);
 		configBuilder.host("192.168.8.21");
 		configBuilder.port(8080);
-		configBuilder.masterUrl("192.168.7.43:3306");
+		configBuilder.serverId(1111);
 		configBuilder.name("testClient");
 		configBuilder.tables("cat", "*");
 		configBuilder.tables("pumaut", "*");

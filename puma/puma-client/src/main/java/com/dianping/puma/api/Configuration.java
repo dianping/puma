@@ -40,16 +40,23 @@ public class Configuration implements Serializable {
 	private String						name;
 	private String						seqFileBase				= "/data/applogs/puma/";
 	private String						target;
-	private String						masterUrl;
+	private long						serverId				= -1L;
 	private String						binlog;
 	private long						binlogPos				= -1;
 
 	/**
-	 * @param masterUrl
-	 *            the masterUrl to set
+	 * @return the serverId
 	 */
-	public void setMasterUrl(String masterUrl) {
-		this.masterUrl = masterUrl;
+	public long getServerId() {
+		return serverId;
+	}
+
+	/**
+	 * @param serverId
+	 *            the serverId to set
+	 */
+	public void setServerId(long serverId) {
+		this.serverId = serverId;
 	}
 
 	/**
@@ -79,10 +86,10 @@ public class Configuration implements Serializable {
 	public String buildRequestParamString(long seq) {
 		StringBuilder param = new StringBuilder();
 		param.append("seq=").append(seq);
-		if (binlogPos != -1L && binlog != null && masterUrl != null && seq == -3L) {
+		if (binlogPos != -1L && binlog != null && serverId != -1L && seq == -3L) {
 			param.append("&binlog=").append(binlog);
 			param.append("&binlogPos=").append(binlogPos);
-			param.append("&masterUrl=").append(masterUrl);
+			param.append("&serverId=").append(serverId);
 		}
 		param.append("&name=").append(name);
 		param.append("&target=").append(target);
@@ -242,7 +249,7 @@ public class Configuration implements Serializable {
 		return "Configuration [codecType=" + codecType + ", databaseTablesMapping=" + databaseTablesMapping + ", host="
 				+ host + ", needDdl=" + needDdl + ", needDml=" + needDml + ", needTransactionInfo="
 				+ needTransactionInfo + ", port=" + port + ", name=" + name + ", seqFileBase=" + seqFileBase
-				+ ", target=" + target + ", masterUrl=" + masterUrl + ", binlog=" + binlog + ", binlogPos=" + binlogPos
+				+ ", target=" + target + ", serverId=" + serverId + ", binlog=" + binlog + ", binlogPos=" + binlogPos
 				+ "]";
 	}
 

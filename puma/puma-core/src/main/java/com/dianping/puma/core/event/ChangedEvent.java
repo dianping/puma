@@ -43,8 +43,8 @@ import java.io.Serializable;
  * <td><code>seq</code>
  * <td><code>时间编号</code>
  * <tr>
- * <td><code>masterUrl</code>
- * <td><code>事件来源的Mysql</code>
+ * <td><code>serverId</code>
+ * <td><code>事件来源的Mysql的serverId</code>
  * <tr bgcolor="#eeeeff">
  * <td><code>binlog</code>
  * <td><code>事件来源的binlog</code>
@@ -63,23 +63,23 @@ public abstract class ChangedEvent implements Serializable {
 	private String				database;
 	private String				table;
 	private long				seq;
-	private String				masterUrl;
+	private long				serverId;
 	private String				binlog;
 	private long				binlogPos;
 
 	/**
-	 * @return the masterUrl
+	 * @return the serverId
 	 */
-	public String getMasterUrl() {
-		return masterUrl;
+	public long getServerId() {
+		return serverId;
 	}
 
 	/**
-	 * @param masterUrl
-	 *            the masterUrl to set
+	 * @param serverId
+	 *            the serverId to set
 	 */
-	public void setMasterUrl(String masterUrl) {
-		this.masterUrl = masterUrl;
+	public void setServerId(long serverId) {
+		this.serverId = serverId;
 	}
 
 	/**
@@ -180,7 +180,7 @@ public abstract class ChangedEvent implements Serializable {
 	@Override
 	public String toString() {
 		return "ChangedEvent [executeTime=" + executeTime + ", database=" + database + ", table=" + table + ", seq="
-				+ seq + ", masterUrl=" + masterUrl + ", binlog=" + binlog + ", binlogPos=" + binlogPos + "]";
+				+ seq + ", serverId=" + serverId + ", binlog=" + binlog + ", binlogPos=" + binlogPos + "]";
 	}
 
 	/*
@@ -196,7 +196,7 @@ public abstract class ChangedEvent implements Serializable {
 		result = prime * result + (int) (binlogPos ^ (binlogPos >>> 32));
 		result = prime * result + ((database == null) ? 0 : database.hashCode());
 		result = prime * result + (int) (executeTime ^ (executeTime >>> 32));
-		result = prime * result + ((masterUrl == null) ? 0 : masterUrl.hashCode());
+		result = prime * result + (int) (serverId ^ (serverId >>> 32));
 		result = prime * result + (int) (seq ^ (seq >>> 32));
 		result = prime * result + ((table == null) ? 0 : table.hashCode());
 		return result;
@@ -239,11 +239,7 @@ public abstract class ChangedEvent implements Serializable {
 		if (executeTime != other.executeTime) {
 			return false;
 		}
-		if (masterUrl == null) {
-			if (other.masterUrl != null) {
-				return false;
-			}
-		} else if (!masterUrl.equals(other.masterUrl)) {
+		if (serverId != other.serverId) {
 			return false;
 		}
 		if (seq != other.seq) {

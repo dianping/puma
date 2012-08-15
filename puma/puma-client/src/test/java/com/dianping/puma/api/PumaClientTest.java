@@ -51,7 +51,7 @@ public class PumaClientTest {
 		builder.transaction(true);
 		builder.binlog("fff");
 		builder.binlogPos(4);
-		builder.masterUrl("192.168.7.43:3306");
+		builder.serverId(1111);
 		PumaClient pumaClient = new PumaClient(builder.build());
 		Assert.assertNotNull(getValue(pumaClient, "config"));
 		Assert.assertNotNull(getValue(pumaClient, "seqFileHolder"));
@@ -75,7 +75,7 @@ public class PumaClientTest {
 		builder.transaction(true);
 		builder.binlog("fff");
 		builder.binlogPos(4);
-		builder.masterUrl("192.168.7.43:3306");
+		builder.serverId(1111);
 		Configuration conf = builder.build();
 		Assert.assertEquals("http://111.3.3:123/puma/channel", conf.buildUrl());
 	}
@@ -96,7 +96,7 @@ public class PumaClientTest {
 		builder.transaction(true);
 		builder.binlog("fff");
 		builder.binlogPos(4);
-		builder.masterUrl("192.168.7.43:3306");
+		builder.serverId(1111);
 		Configuration conf = builder.build();
 		Assert.assertEquals(
 				"seq=-1&name=test&target=fff&ddl=true&dml=false&ts=true&codec=json&dt=cat.a&dt=cat.b*&dt=me.d",
@@ -119,7 +119,7 @@ public class PumaClientTest {
 		builder.transaction(true);
 		builder.binlog("fff");
 		builder.binlogPos(4);
-		builder.masterUrl("192.168.7.43:3306");
+		builder.serverId(1111);
 		Configuration conf = builder.build();
 		Assert.assertEquals(
 				"seq=-2&name=test&target=fff&ddl=true&dml=false&ts=true&codec=json&dt=cat.a&dt=cat.b*&dt=me.d",
@@ -142,7 +142,7 @@ public class PumaClientTest {
 		builder.transaction(true);
 		builder.binlog("fff");
 		builder.binlogPos(4);
-		builder.masterUrl("192.168.7.43:3306");
+		builder.serverId(1111);
 		Configuration conf = builder.build();
 		Assert.assertEquals(
 				"seq=10&name=test&target=fff&ddl=true&dml=false&ts=true&codec=json&dt=cat.a&dt=cat.b*&dt=me.d",
@@ -165,7 +165,7 @@ public class PumaClientTest {
 		builder.transaction(true);
 		builder.binlog("fff");
 		builder.binlogPos(4);
-		builder.masterUrl("192.168.7.43:3306");
+		builder.serverId(1111);
 		Configuration conf = builder.build();
 		Assert.assertEquals(
 				"seq=-3&binlog=fff&binlogPos=4&masterUrl=192.168.7.43:3306&name=test&target=fff&ddl=true&dml=false&ts=true&codec=json&dt=cat.a&dt=cat.b*&dt=me.d",
@@ -192,7 +192,7 @@ public class PumaClientTest {
 		configBuilder.transaction(true);
 		configBuilder.binlog("fff");
 		configBuilder.binlogPos(4);
-		configBuilder.masterUrl("localhost:3306");
+		configBuilder.serverId(1111);
 
 		List<ChangedEvent> eventsSent = new ArrayList<ChangedEvent>();
 
@@ -201,7 +201,7 @@ public class PumaClientTest {
 		event1.setBinlogPos(111);
 		event1.setDatabase("test1");
 		event1.setExecuteTime(1111122233);
-		event1.setMasterUrl("localhost:3306");
+		event1.setServerId(11111);
 		event1.setSeq(111111222223334L);
 		event1.setSql("CREATE TABLE dddd");
 		eventsSent.add(event1);
@@ -211,7 +211,7 @@ public class PumaClientTest {
 		event2.setBinlogPos(111);
 		event2.setDatabase("test1");
 		event2.setExecuteTime(1111122233);
-		event2.setMasterUrl("localhost:3306");
+		event2.setServerId(11111);
 		event2.setSeq(111111222223334L);
 		event2.setActionType(RowChangedEvent.INSERT);
 		event2.setTable("a");
@@ -227,7 +227,7 @@ public class PumaClientTest {
 		event3.setBinlogPos(111);
 		event3.setDatabase("test1");
 		event3.setExecuteTime(1111122233);
-		event3.setMasterUrl("localhost:3306");
+		event3.setServerId(11111);
 		event3.setSeq(111111222223334L);
 		event3.setActionType(RowChangedEvent.UPDATE);
 		event3.setTable("a");
@@ -243,7 +243,7 @@ public class PumaClientTest {
 		event4.setBinlogPos(111);
 		event4.setDatabase("test1");
 		event4.setExecuteTime(1111122233);
-		event4.setMasterUrl("localhost:3306");
+		event4.setServerId(11111);
 		event4.setSeq(111111222223334L);
 		event4.setActionType(RowChangedEvent.DELETE);
 		event4.setTable("a");
@@ -259,7 +259,7 @@ public class PumaClientTest {
 		event5.setBinlogPos(111);
 		event5.setDatabase("test1");
 		event5.setExecuteTime(1111122233);
-		event5.setMasterUrl("localhost:3306");
+		event5.setServerId(11111);
 		event5.setSeq(111111222223334L);
 		event5.setTransactionBegin(true);
 		eventsSent.add(event5);
@@ -269,7 +269,7 @@ public class PumaClientTest {
 		event6.setBinlogPos(111);
 		event6.setDatabase("test1");
 		event6.setExecuteTime(1111122233);
-		event6.setMasterUrl("localhost:3306");
+		event6.setServerId(11111);
 		event6.setSeq(111111222223334L);
 		event6.setTransactionCommit(true);
 		eventsSent.add(event6);
@@ -320,7 +320,7 @@ public class PumaClientTest {
 		configBuilder.transaction(true);
 		configBuilder.binlog("fff");
 		configBuilder.binlogPos(4);
-		configBuilder.masterUrl("localhost:3306");
+		configBuilder.serverId(1111);
 
 		List<ChangedEvent> eventsSent = new ArrayList<ChangedEvent>();
 
@@ -329,7 +329,7 @@ public class PumaClientTest {
 		event1.setBinlogPos(111);
 		event1.setDatabase("test1");
 		event1.setExecuteTime(1111122233);
-		event1.setMasterUrl("localhost:3306");
+		event1.setServerId(11111);
 		event1.setSeq(111111222223334L);
 		event1.setSql("CREATE TABLE dddd");
 		eventsSent.add(event1);
@@ -339,7 +339,7 @@ public class PumaClientTest {
 		event2.setBinlogPos(111);
 		event2.setDatabase("test1");
 		event2.setExecuteTime(1111122233);
-		event2.setMasterUrl("localhost:3306");
+		event2.setServerId(11111);
 		event2.setSeq(111111222223334L);
 		event2.setActionType(RowChangedEvent.INSERT);
 		event2.setTable("a");
@@ -355,7 +355,7 @@ public class PumaClientTest {
 		event3.setBinlogPos(111);
 		event3.setDatabase("test1");
 		event3.setExecuteTime(1111122233);
-		event3.setMasterUrl("localhost:3306");
+		event3.setServerId(11111);
 		event3.setSeq(111111222223334L);
 		event3.setActionType(RowChangedEvent.UPDATE);
 		event3.setTable("a");
@@ -371,7 +371,7 @@ public class PumaClientTest {
 		event4.setBinlogPos(111);
 		event4.setDatabase("test1");
 		event4.setExecuteTime(1111122233);
-		event4.setMasterUrl("localhost:3306");
+		event4.setServerId(11111);
 		event4.setSeq(111111222223334L);
 		event4.setActionType(RowChangedEvent.DELETE);
 		event4.setTable("a");
@@ -387,7 +387,7 @@ public class PumaClientTest {
 		event5.setBinlogPos(111);
 		event5.setDatabase("test1");
 		event5.setExecuteTime(1111122233);
-		event5.setMasterUrl("localhost:3306");
+		event5.setServerId(11111);
 		event5.setSeq(111111222223334L);
 		event5.setTransactionBegin(true);
 		eventsSent.add(event5);
@@ -397,7 +397,7 @@ public class PumaClientTest {
 		event6.setBinlogPos(111);
 		event6.setDatabase("test1");
 		event6.setExecuteTime(1111122233);
-		event6.setMasterUrl("localhost:3306");
+		event6.setServerId(11111);
 		event6.setSeq(111111222223334L);
 		event6.setTransactionCommit(true);
 		eventsSent.add(event6);
@@ -452,7 +452,7 @@ public class PumaClientTest {
 		configBuilder.transaction(true);
 		configBuilder.binlog("fff");
 		configBuilder.binlogPos(4);
-		configBuilder.masterUrl("localhost:3306");
+		configBuilder.serverId(1111);
 
 		List<ChangedEvent> eventsSent = new ArrayList<ChangedEvent>();
 
@@ -461,7 +461,7 @@ public class PumaClientTest {
 		event1.setBinlogPos(111);
 		event1.setDatabase("test1");
 		event1.setExecuteTime(1111122233);
-		event1.setMasterUrl("localhost:3306");
+		event1.setServerId(11111);
 		event1.setSeq(111111222223334L);
 		event1.setSql("CREATE TABLE dddd");
 		eventsSent.add(event1);
@@ -471,7 +471,7 @@ public class PumaClientTest {
 		event2.setBinlogPos(111);
 		event2.setDatabase("test1");
 		event2.setExecuteTime(1111122233);
-		event2.setMasterUrl("localhost:3306");
+		event2.setServerId(11111);
 		event2.setSeq(111111222223334L);
 		event2.setActionType(RowChangedEvent.INSERT);
 		event2.setTable("a");
@@ -487,7 +487,7 @@ public class PumaClientTest {
 		event3.setBinlogPos(111);
 		event3.setDatabase("test1");
 		event3.setExecuteTime(1111122233);
-		event3.setMasterUrl("localhost:3306");
+		event3.setServerId(11111);
 		event3.setSeq(111111222223334L);
 		event3.setActionType(RowChangedEvent.UPDATE);
 		event3.setTable("a");
@@ -503,7 +503,7 @@ public class PumaClientTest {
 		event4.setBinlogPos(111);
 		event4.setDatabase("test1");
 		event4.setExecuteTime(1111122233);
-		event4.setMasterUrl("localhost:3306");
+		event4.setServerId(11111);
 		event4.setSeq(111111222223334L);
 		event4.setActionType(RowChangedEvent.DELETE);
 		event4.setTable("a");
@@ -519,7 +519,7 @@ public class PumaClientTest {
 		event5.setBinlogPos(111);
 		event5.setDatabase("test1");
 		event5.setExecuteTime(1111122233);
-		event5.setMasterUrl("localhost:3306");
+		event5.setServerId(11111);
 		event5.setSeq(111111222223334L);
 		event5.setTransactionBegin(true);
 		eventsSent.add(event5);
@@ -529,7 +529,7 @@ public class PumaClientTest {
 		event6.setBinlogPos(111);
 		event6.setDatabase("test1");
 		event6.setExecuteTime(1111122233);
-		event6.setMasterUrl("localhost:3306");
+		event6.setServerId(11111);
 		event6.setSeq(111111222223334L);
 		event6.setTransactionCommit(true);
 		eventsSent.add(event6);

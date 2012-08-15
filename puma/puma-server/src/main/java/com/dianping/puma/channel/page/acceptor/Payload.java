@@ -31,8 +31,8 @@ public class Payload implements ActionPayload<ChannelPage, Action> {
 
 	@FieldMeta("target")
 	private String		m_target;
-	@FieldMeta("masterUrl")
-	private String		m_masterUrl;
+	@FieldMeta("serverId")
+	private long		m_serverId	= -1L;
 	@FieldMeta("binlog")
 	private String		m_binlog;
 	@FieldMeta("binlogPos")
@@ -50,8 +50,8 @@ public class Payload implements ActionPayload<ChannelPage, Action> {
 		return m_clientName;
 	}
 
-	public String getMasterUrl() {
-		return m_masterUrl;
+	public long getServerId() {
+		return m_serverId;
 	}
 
 	public String getBinlog() {

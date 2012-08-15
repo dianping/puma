@@ -53,8 +53,8 @@ public class ConfigurationBuilder {
 		return this;
 	}
 
-	public ConfigurationBuilder masterUrl(String masterUrl) {
-		this.configuration.setMasterUrl(masterUrl);
+	public ConfigurationBuilder serverId(long serverId) {
+		this.configuration.setServerId(serverId);
 		return this;
 	}
 

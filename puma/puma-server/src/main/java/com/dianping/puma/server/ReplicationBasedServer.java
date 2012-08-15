@@ -148,6 +148,8 @@ public class ReplicationBasedServer extends AbstractServer {
 				updateOpsCounter(changedEvent);
 
 				dispatch(changedEvent);
+			} else {
+				getContext().setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
 			}
 		} while (dataHandlerResult != null && !dataHandlerResult.isFinished());
 

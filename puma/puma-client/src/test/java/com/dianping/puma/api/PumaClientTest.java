@@ -168,7 +168,7 @@ public class PumaClientTest {
 		builder.serverId(1111);
 		Configuration conf = builder.build();
 		Assert.assertEquals(
-				"seq=-3&binlog=fff&binlogPos=4&masterUrl=192.168.7.43:3306&name=test&target=fff&ddl=true&dml=false&ts=true&codec=json&dt=cat.a&dt=cat.b*&dt=me.d",
+				"seq=-3&binlog=fff&binlogPos=4&serverId=1111&name=test&target=fff&ddl=true&dml=false&ts=true&codec=json&dt=cat.a&dt=cat.b*&dt=me.d",
 				conf.buildRequestParamString(-3));
 	}
 

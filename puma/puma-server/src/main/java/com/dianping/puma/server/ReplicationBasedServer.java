@@ -148,10 +148,13 @@ public class ReplicationBasedServer extends AbstractServer {
 				updateOpsCounter(changedEvent);
 
 				dispatch(changedEvent);
-			} else {
-				getContext().setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
 			}
 		} while (dataHandlerResult != null && !dataHandlerResult.isFinished());
+
+		getContext().setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
+		// status report
+		SystemStatusContainer.instance.updateServerStatus(getServerName(), host, port, database, getContext()
+				.getBinlogFileName(), getContext().getBinlogStartPos());
 
 		// 只有整个binlogEvent分发完了才save
 		if (binlogEvent.getHeader() != null
@@ -164,10 +167,6 @@ public class ReplicationBasedServer extends AbstractServer {
 			// save position
 			getBinlogPositionHolder().savePositionInfo(getServerName(),
 					new PositionInfo(binlogEvent.getHeader().getNextPosition(), getContext().getBinlogFileName()));
-			getContext().setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
-			// status report
-			SystemStatusContainer.instance.updateServerStatus(getServerName(), host, port, database, getContext()
-					.getBinlogFileName(), getContext().getBinlogStartPos());
 		}
 	}
 

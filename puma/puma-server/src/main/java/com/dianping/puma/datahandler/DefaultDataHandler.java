@@ -219,7 +219,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 		if (columnName == null) {
 			StringBuilder msg = new StringBuilder();
 			msg.append("Unknown column for Binlog:  ").append(context.getBinlogFileName()).append(" BinlogPos: ")
-					.append(context.getBinlogStartPos());
+					.append(context.getBinlogStartPos()).append(" Skip to ").append(context.getNextBinlogPos());
 			msg.append(" columnPos: ").append(pos);
 			log.warn(msg.toString());
 			if (getNotifyService() != null) {
@@ -234,7 +234,8 @@ public class DefaultDataHandler extends AbstractDataHandler {
 		result.setFinished(true);
 		StringBuilder msg = new StringBuilder();
 		msg.append("Skip one event, since there is no table meta info. Binlog: ").append(context.getBinlogFileName())
-				.append(" Pos: ").append(context.getBinlogStartPos());
+				.append(" Pos: ").append(context.getBinlogStartPos()).append(" Skip to ")
+				.append(context.getNextBinlogPos());
 		log.warn(msg.toString());
 		if (getNotifyService() != null) {
 			getNotifyService().alarm(msg.toString(), null, false);

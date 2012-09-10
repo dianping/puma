@@ -26,6 +26,7 @@ import com.dianping.puma.utils.PacketUtils;
 /**
  * TODO Comment of Metadata
  * 
+ * @see http://code.google.com/p/open-replicator/
  * @author Leo Liang
  * 
  */

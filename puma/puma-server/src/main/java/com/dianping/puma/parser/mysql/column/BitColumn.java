@@ -23,6 +23,7 @@ import com.dianping.puma.utils.CodecUtils;
  * 
  * TODO Comment of BitColumn
  * 
+ * @see http://code.google.com/p/open-replicator/
  * @author Leo Liang
  * 
  */

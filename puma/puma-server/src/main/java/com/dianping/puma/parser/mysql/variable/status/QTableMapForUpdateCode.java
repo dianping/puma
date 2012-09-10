@@ -25,6 +25,7 @@ import com.dianping.puma.utils.PacketUtils;
  * 
  * TODO Comment of QTableMapForUpdateCode
  * 
+ * @see http://code.google.com/p/open-replicator/
  * @author Leo Liang
  * 
  */

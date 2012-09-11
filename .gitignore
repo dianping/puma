@@ -64,3 +64,4 @@ Thumbs.db
 # temp folder #
 ######################
 target/
+classes/

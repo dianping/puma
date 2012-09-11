@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+#parse("header.htm")
+<style type="text/css">
+.nav-pills>li>a {
+	border-radius: 5px 5px 5px 5px;
+	margin-bottom: 2px;
+	margin-top: 2px;
+	padding-bottom: 12px;
+	padding-top: 12px;
+	background-color: #CEECF5;
+}
+;
+</style>
+<script>
+	//环境变量
+	window.contextpath = "${rc.contextPath}";
+	window.app = "${app}";
+</script>
+</head>
+<body>
+   #parse("navbar.htm")
+   <div class="container"
+      style="margin-left: 0px; width: 100%; margin-bottom: 50px; height: 500px">
+      <div class="hero-unit"
+         style="background-color: #EFFBF8; margin: 0 auto; margin-top: 10px; height: 400px; width: 70%">
+         <div
+            style="margin: 0 auto; margin-top: -50px; margin-bottom: 20px;">
+            <h1
+               style="height: 200px; width: 600px; background: url('${rc.contextPath}/images/big-logo.png') no-repeat scroll 0 0 transparent;"></h1>
+            <!-- <img alt="" style=""
+               src="${rc.contextPath}/images/big-logo.png"> -->
+         </div>
+         <p>一个可实时运行的demo平台，您可以在查看应用的demo的同时，执行这些demo，看到运行结果。同时可以修改代码，也可以马上看到修改后的效果！</p>
+         <p style="margin-top: 50px;">
+            <a href="#createAppModal" role="button" class="btn btn-info"
+               data-toggle="modal" style="margin-right: 10px">创建应用 »</a>
+            <span style="font-size: 14px;">或</span><span
+               style="margin-left: 10px; font-size: 16px; color: #006DCC;">尝试以下应用
+               »</span>
+         </p>
+         <div style="margin-top: 20px; margin-left: 100px;">
+            <ul class="nav nav-pills">
+               #set($show = false) #set($max = 10) #foreach(${appItem}
+               in ${allAppNames}) #if($velocityCount < $max)
+               <li><a style="margin-left: 10px"
+                  href="${rc.contextPath}/${appItem}">${appItem}</a></li>
+               #else #set($show = true) #end #end #if($show)
+               <li class="dropdown"><a style="margin-left: 10px" class="dropdown-toggle"
+                  data-toggle="dropdown" href="#"> 更多应用 <b
+                     class="caret"></b></a>
+                  <ul class="dropdown-menu">
+                     #foreach(${appItem} in ${allAppNames})
+                     #if($velocityCount >= $max)
+                     <li><a style=""
+                        href="${rc.contextPath}/${appItem}">${appItem}</a></li>
+                     #end #end
+                  </ul></li> #end
+            </ul>
+         </div>
+      </div>
+   </div>
+
+   <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog"
+      tabindex="-1" class="modal hide fade" id="createAppModal"
+      style="display: none;">
+      <div class="modal-header">
+         <button aria-hidden="true" data-dismiss="modal" class="close"
+            type="button">×</button>
+         <h3>创建应用</h3>
+      </div>
+      <div class="modal-body">
+         <form method="post" class="form-horizontal"
+            action="${rc.contextPath}/create">
+            <div class="control-group">
+               <label class="control-label">应用名称</label>
+               <div class="controls">
+                  <input type="text" name="app" size="20"
+                     placeholder="由字母，数字和下划线组成">
+               </div>
+            </div>
+            <div class="control-group">
+               <label class="control-label">Git 仓库的 URL</label>
+               <div class="controls">
+                  <input class="input-xlarge" type="text" name="gitUrl"
+                     placeholder="例如 git://">
+               </div>
+            </div>
+            <div id="branch" style="display:none" class="control-group">
+            <hr style="margin-top:0px;margin-bottom:15px">
+               <label class="control-label" style="color: #696969">分支
+                  (可选)</label>
+               <div class="controls">
+                  <input class="input-xlarge" type="text" name="branch"
+                     placeholder="默认为 master，也可以指定其他具体 branch 名称">
+               </div>
+            </div>
+            <div id="subdir" style="display:none" class="control-group">
+               <label class="control-label" style="color: #696969">仓库的子目录
+                  (可选)</label>
+               <div class="controls">
+                  <input class="input-large" type="text" name="subdir"
+                     placeholder="可选，如 example">
+               </div>
+            </div>
+            <div class="control-group" style="margin-top:40px">
+               <div class="controls">
+                  <button type="submit" class="btn btn-success">
+                     创建</button>
+                  <button type="button" onclick="advance()" style="margin-left: 50px"
+                     class="btn">更多选项</button>
+               </div>
+            </div>
+         </form>
+      </div>
+      <div class="modal-footer">
+         <button data-dismiss="modal" class="btn">取消</button>
+      </div>
+   </div>
+
+   #parse("foot.htm")
+
+   <!-- Le javascript
+    ================================================== -->
+   <!-- Placed at the end of the document so the pages load faster -->
+   <script type="text/javascript"
+      src="${rc.contextPath}/javascripts/bootstrap/jquery-1.7.2.js"></script>
+   <script type="text/javascript"
+      src="${rc.contextPath}/javascripts/bootstrap/bootstrap.js"></script>
+
+   <script type="text/javascript">
+function advance(){
+	$("#branch").toggle();
+	$("#subdir").toggle();
+}				
+			</script>
+
+</body>
+</html>

@@ -21,6 +21,7 @@ import java.util.Arrays;
  * 
  * TODO Comment of BlobColumn
  * 
+ * @see http://code.google.com/p/open-replicator/
  * @author Leo Liang
  * 
  */

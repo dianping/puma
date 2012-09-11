@@ -21,6 +21,7 @@ import java.sql.Date;
  * 
  * TODO Comment of DateColumn
  * 
+ * @see http://code.google.com/p/open-replicator/
  * @author Leo Liang
  * 
  */

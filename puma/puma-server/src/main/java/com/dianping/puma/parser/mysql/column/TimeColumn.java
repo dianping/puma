@@ -21,6 +21,7 @@ import java.sql.Time;
  * 
  * TODO Comment of TimeColumn
  * 
+ * @see http://code.google.com/p/open-replicator/
  * @author Leo Liang
  * 
  */

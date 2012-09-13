@@ -116,7 +116,16 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 
 	protected abstract void innderParse(ByteBuffer buf, PumaContext context) throws IOException;
 
+	/**
+	 * 
+	 * @see http://code.google.com/p/open-replicator/
+	 * @param buf
+	 * @param usedColumns
+	 * @return
+	 * @throws IOException
+	 */
 	protected Row parseRow(ByteBuffer buf, BitSet usedColumns) throws IOException {
+		int unusedColumnCount = 0;
 		byte[] types = tableMapEvent.getColumnTypes();
 		Metadata metadata = tableMapEvent.getColumnMetadata();
 		BitSet nullColumns = PacketUtils.readBitSet(buf, types.length);
@@ -146,8 +155,9 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 			}
 
 			if (!usedColumns.get(i)) {
+				unusedColumnCount++;
 				continue;
-			} else if (nullColumns.get(i)) {
+			} else if (nullColumns.get(i - unusedColumnCount)) {
 				columns.add(NullColumn.valueOf(type));
 				continue;
 			}

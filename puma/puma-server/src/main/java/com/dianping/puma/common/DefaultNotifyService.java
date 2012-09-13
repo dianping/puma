@@ -95,14 +95,20 @@ public class DefaultNotifyService implements NotifyService {
 			StringBuilder body = new StringBuilder();
 			body.append("<strong>Puma Status Report</strong><br/>");
 			for (Map.Entry<String, Map<String, String>> entry : msg.entrySet()) {
-				body.append("<b>").append(entry.getKey()).append("</b><br/>");
-				body.append("<table border=\"1\">");
-				body.append("<tr><td>name</td><td>value</td></tr>");
+				body.append("<table align=\"left\" frame= \"box\" width=\"90%\"><tbody align=\"center\">");
+				body.append("<tr align=\"center\" colspan=\"100%\"><td><font color=\"00005f\" size=\"3\"><b>").append(entry.getKey()).append("</b></font></td></tr>");
+				body.append("<tr bgcolor=\"ffd588\"><th>name</th><th>value</th></tr>");
+				int row = 1;
 				for (Map.Entry<String, String> suEntry : entry.getValue().entrySet()) {
+					if(row++ % 2 == 0){
+						body.append("<tr bgcolor=\"e2e2e2\"><td>").append(suEntry.getKey()).append("</td><td>").append(suEntry.getValue())
+						.append("</td></tr>");
+					}else{
 					body.append("<tr><td>").append(suEntry.getKey()).append("</td><td>").append(suEntry.getValue())
 							.append("</td></tr>");
+					}
 				}
-				body.append("</table>");
+				body.append("</table><br /><br />");
 			}
 			try {
 				this.alarmService.sendEmail(body.toString(), title + "_" + localIP, getMailTos());

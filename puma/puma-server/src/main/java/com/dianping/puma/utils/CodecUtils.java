@@ -21,7 +21,7 @@ import java.util.BitSet;
 /**
  * TODO Comment of CodecUtils
  * 
- * @author Leo Liang
+ * @see http://code.google.com/p/open-replicator/
  * 
  */
 public final class CodecUtils {

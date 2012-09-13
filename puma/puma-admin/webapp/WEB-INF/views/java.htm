@@ -1,0 +1,44 @@
+
+<div class="container-fluid">
+   <div class="row-fluid">
+      <ul class="nav nav-pills" id="javaCodeTab"
+         style="margin-left: 60px; margin-top: 20px; margin-bottom: 0px;">
+         #foreach($javaFileInfo in $javaFileInfoList) #set($index =
+         ${velocityCount} - 1)
+         <li><a style="padding: 2px 10px 2px 10px;"
+            href="javascript:rundemo_app.changeJavaHash(${index});" filePath="${javaFileInfo.getPath()}">${javaFileInfo.getDisplayName()}</a></li>
+         #end
+      </ul>
+      <span style="color: #585858; font-size: 14px">代码演示</span>
+      <hr style="margin-top: 0px; margin-bottom: 5px">
+      <div class="container-fluid">
+         <div class="row-fluid">
+            <div class="span7">
+               <!--
+                     <textarea style="width: 100%" name="content"
+                        id="content" onchange="rundemo_app.modifyCode()"
+                        rows="15"></textarea>
+                        <pre class="prettyprint">import</pre>-->
+               <div id="editor"
+                  style="border: 1px solid #A9E2F3; border-radius: 3px 3px 3px 3px; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;"></div>
+            </div>
+            <div class="span5">
+               <button id="runButton" type="button"
+                  onclick="rundemo_app.runDemo()"
+                  class="btn btn-success">Run</button>
+               <button id="shutdownButton" type="button"
+                  onclick="rundemo_app.shutdown()"
+                  class="btn btn-danger"
+                  style="display: none;">Shutdown</button>
+               <pre
+                  style="cursor: text; margin-top: 20px; background-color: #3A1042; color: #FFFFFF; font-size: 12px; width: 100%; height: 320px; overflow-x: auto;"
+                  id="console"></pre>
+               <span style="float: right; font-size: 9px;">.Console.</span>
+               <input id="consoleInput" type="text" class="input-xlarge" onkeypress="rundemo_app.input(event);" placeholder="console input">
+            </div>
+         </div>
+      </div>
+   </div>
+   <!--/row-->
+</div>
+<!--/.fluid-container-->

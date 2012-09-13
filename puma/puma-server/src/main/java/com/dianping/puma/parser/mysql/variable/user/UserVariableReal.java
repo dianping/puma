@@ -19,6 +19,7 @@ package com.dianping.puma.parser.mysql.variable.user;
  * 
  * TODO Comment of UserVariableReal
  * 
+ * @see http://code.google.com/p/open-replicator/
  * @author Leo Liang
  * 
  */

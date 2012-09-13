@@ -19,6 +19,7 @@ package com.dianping.puma.parser.mysql.column;
  * 
  * TODO Comment of EnumColumn
  * 
+ * @see http://code.google.com/p/open-replicator/
  * @author Leo Liang
  * 
  */

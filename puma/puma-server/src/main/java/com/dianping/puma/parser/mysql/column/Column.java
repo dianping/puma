@@ -20,6 +20,7 @@ import java.io.Serializable;
 /**
  * TODO Comment of Column
  * 
+ * @see http://code.google.com/p/open-replicator/
  * @author Leo Liang
  * 
  */

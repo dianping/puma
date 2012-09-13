@@ -17,6 +17,12 @@ package com.dianping.puma.parser.mysql.column;
 
 import java.math.BigDecimal;
 
+/**
+ * @see http://code.google.com/p/open-replicator/
+ * TODO Comment of DecimalColumn
+ * @author Leo Liang
+ *
+ */
 public final class DecimalColumn implements Column {
 	private static final long	serialVersionUID	= 5487785770715315227L;
 	private final BigDecimal	value;

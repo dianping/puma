@@ -21,6 +21,7 @@ import java.sql.Timestamp;
  * 
  * TODO Comment of TimestampColumn
  * 
+ * @see http://code.google.com/p/open-replicator/
  * @author Leo Liang
  * 
  */

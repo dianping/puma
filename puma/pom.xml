@@ -11,6 +11,7 @@
 		<module>puma-server</module>
 		<module>puma-client</module>
 		<module>puma-core</module>
+                <module>puma-admin</module>
 	</modules>
 	<description>puma</description>
 	<dependencyManagement>

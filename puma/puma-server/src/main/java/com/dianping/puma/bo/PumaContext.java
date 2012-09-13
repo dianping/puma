@@ -41,7 +41,6 @@ public class PumaContext implements Serializable {
 	private String						encoding				= "utf-8";
 	private String						binlogFileName;
 	private long						binlogStartPos;
-	private long						serverId;
 	private long						pumaServerId;
 	private String						pumaServerName;
 	private Map<Long, TableMapEvent>	tableMaps				= new LRUCache<Long, TableMapEvent>(300);
@@ -121,14 +120,6 @@ public class PumaContext implements Serializable {
 	 */
 	public void setTableMaps(Map<Long, TableMapEvent> tableMaps) {
 		this.tableMaps = tableMaps;
-	}
-
-	public long getServerId() {
-		return serverId;
-	}
-
-	public void setServerId(long serverId) {
-		this.serverId = serverId;
 	}
 
 	public String getBinlogFileName() {

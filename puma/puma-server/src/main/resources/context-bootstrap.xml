@@ -114,7 +114,7 @@
 		<property name="baseDir" value="/user/workcron/puma/storage/Dianping/" />
 	</bean>
 	<bean id="archiveStrategy" class="com.dianping.puma.storage.DefaultArchiveStrategy">
-		<property name="maxMasterFileCount" value="10" />
+		<property name="maxMasterFileCount" value="30" />
 	</bean>
 
 	<bean id="cleanupStrategy" class="com.dianping.puma.storage.DefaultCleanupStrategy">

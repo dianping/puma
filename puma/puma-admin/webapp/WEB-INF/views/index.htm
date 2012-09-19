@@ -44,22 +44,26 @@
 </head>
 <body class="body-background">
    #parse("navbar.htm")
- <div class="container" style="margin-top:30px;">
-   <div class="row">
-      <div class="span3">
-         <ul class="nav nav-pills nav-stacked">
-            <li class="active"><a href="${rc.contextPath}/"><i
-                  class="icon-chevron-right"></i> 查看同步状态 </a></li>
-            <li class=""><a href="${rc.contextPath}/create"><i
-                  class="icon-chevron-right"></i> 创建新的同步 </a></li>
-         </ul>
-      </div>
-      <div class="span7">
-         #parse("query.htm") 
+   <div class="container" style="margin-top: 30px;">
+      <div class="row">
+         <div class="span2">
+            <ul class="nav nav-pills nav-stacked">
+               <li class="active"><a href="${rc.contextPath}/"><i
+                     class="icon-chevron-right"></i> 查看同步状态 </a></li>
+               <li class=""><a href="${rc.contextPath}/"><i
+                     class="icon-chevron-right"></i> 一次性同步数据 </a></li>
+               <li class=""><a href="${rc.contextPath}/create"><i
+                     class="icon-chevron-right"></i> 创建新的同步 </a></li>
+               <li class=""><a href="${rc.contextPath}/create"><i
+                     class="icon-chevron-right"></i> 修改已有同步 </a></li>
+               <li class=""><a href="${rc.contextPath}/create"><i
+                     class="icon-chevron-right"></i> 删除同步 </a></li>
+            </ul>
+         </div>
+         <div class="span10">#parse("query.htm")</div>
       </div>
    </div>
-</div>
-   
+
 
 
    #parse("foot.htm")

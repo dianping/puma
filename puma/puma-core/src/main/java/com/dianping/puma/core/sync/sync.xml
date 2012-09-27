@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sync xmlns="puma.dianping.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="sync.xsd">
+    <from>
+        <host>192.168.1.1</host>
+        <port>3306</port>
+        <username>root</username>
+        <password>***</password>
+    </from>
+    <to>
+        <host>192.168.1.2</host>
+        <port>3306</port>
+        <username>root</username>
+        <password>***</password>
+    </to>
+
+    <instance ddl="true">
+        <!-- database同步 -->
+        <database from="db1" to="db11">
+            <table from="*" to="*" />
+        </database>
+        <!-- table 一到一 -->
+        <database from="db2" to="db2">
+            <table from="table1" to="table11"></table>
+            <table from="table2" to="table22"></table>
+            <table from="*" to="*" />
+        </database>
+        <!-- table 多到一 -->
+        <database from="db3" to="db3">
+            <table from="table1" to="table11" partOf="true">
+                <column from="id" to="id" primary="true" />
+                <column from="c1" to="c1" />
+                <column from="c2" to="c2" />
+            </table>
+            <table from="table2" to="table22" partOf="true">
+                <column from="id" to="id" primary="true" />
+                <column from="c3" to="c3" />
+                <column from="c4" to="c4" />
+            </table>
+        </database>
+        <database from="*" to="*" />
+    </instance>
+</sync>

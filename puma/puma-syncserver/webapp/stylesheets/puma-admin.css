@@ -1,0 +1,11 @@
+.body-background{
+	/* background-image: url(../images/gray_background.png); */
+}
+.puma-steps{
+	background-image: url(../images/golden-background.jpg);
+	border-radius: 4px 4px 4px 4px;
+}
+a:hover {
+  color: #005580;
+  text-decoration: none;
+}

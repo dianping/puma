@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+#parse("header.htm")
+<style type="text/css">
+.nav-pills>li>a {
+	border-radius: 5px 5px 5px 5px;
+	margin-bottom: 2px;
+	margin-top: 2px;
+	padding-bottom: 12px;
+	padding-top: 12px;
+	background-color: #CEECF5;
+}
+
+.ins-header {
+	background-color: #E0F2F7;
+}
+
+.ins-body {
+	background-color: #EFFBFB;
+}
+
+.db-header {
+	background-color: #E0F2F7;
+}
+
+.db-body {
+	background-color: #EFFBFB;
+}
+
+.table-header {
+	background-color: #E0F2F7;
+}
+
+.table-body {
+	background-color: #EFFBFB;
+}
+
+.step_active {
+	color: #0088CC;
+}
+
+.step_done {
+	color: #0B610B;
+}
+
+.step_undo {
+    color: #848484;
+}
+</style>
+<script>
+	//环境变量
+	window.contextpath = "${rc.contextPath}";
+	window.app = "${app}";
+</script>
+</head>
+<body class="body-background">
+   #parse("navbar.htm")
+   <div class="container" style="margin-top: 30px;">
+      <div class="row">
+         <div class="span3">
+            <ul class="nav nav-pills nav-stacked">
+               <li class=""><a href="${rc.contextPath}/"><i
+                     class="icon-chevron-right"></i> 查看同步状态 </a></li>
+               <li class="active"><a
+                  href="${rc.contextPath}/create"><i
+                     class="icon-chevron-right"></i> 创建新的同步 </a></li>
+            </ul>
+         </div>
+         <div class="span7">#parse("steps_container.htm")</div>
+      </div>
+   </div>
+
+
+
+   #parse("foot.htm")
+
+   <!-- Le javascript
+    ================================================== -->
+   <!-- Placed at the end of the document so the pages load faster -->
+   <script type="text/javascript"
+      src="${rc.contextPath}/javascripts/jquery-1.7.2.js"></script>
+   <script type="text/javascript"
+      src="${rc.contextPath}/javascripts/bootstrap/bootstrap.js"></script>
+   <script type="text/javascript"
+      src="${rc.contextPath}/javascripts/puma-admin.js"></script>
+
+   <script type="text/javascript">
+				$('.carousel').carousel({
+					interval : false
+				})
+			</script>
+</body>
+</html>

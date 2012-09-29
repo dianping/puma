@@ -32,10 +32,5 @@
             <artifactId>commons-digester</artifactId>
             <version>2.1</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.xmlbeans</groupId>
-            <artifactId>xmlbeans</artifactId>
-            <version>2.4.0</version>
-        </dependency>
 	</dependencies>
 </project>

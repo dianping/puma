@@ -1,10 +1,3 @@
-/**
- * Project: WorkPlatform.web File Created at 2009-9-27 $Id: 2009-9-27 17:54:43 Galaxy Team $ Copyright 2008 Alibaba.com
- * Corporation Limited. All rights reserved. This software is the confidential and proprietary information of Alibaba
- * Company. ("Confidential Information"). You shall not disclose such Confidential Information and shall use it only in
- * accordance with the terms of the license agreement you entered into with Alibaba.com.
- */
-
 package com.dianping.puma.syncserver.web;
 
 import java.io.File;
@@ -26,9 +19,14 @@ import org.apache.commons.digester.Digester;
 import org.apache.commons.io.IOUtils;
 import org.xml.sax.SAXException;
 
-import com.dianping.puma.core.sync.*;
+import com.dianping.puma.core.sync.Column;
+import com.dianping.puma.core.sync.Config;
+import com.dianping.puma.core.sync.Database;
+import com.dianping.puma.core.sync.Instance;
+import com.dianping.puma.core.sync.Sync;
+import com.dianping.puma.core.sync.Table;
 
-public class DefinitionXmlParser {
+public class SyncXmlParser {
 
     private static Digester digester = new Digester();
 

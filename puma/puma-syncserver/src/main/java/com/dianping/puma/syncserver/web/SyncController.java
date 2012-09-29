@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.dianping.puma.core.sync.Sync;
 import com.google.gson.Gson;
 
 @Controller
@@ -21,13 +22,48 @@ public class SyncController {
 
     @RequestMapping(value = "/createSync", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object loadShopTemplate(HttpServletRequest request, String syncXml) {
+    public Object createSync(HttpServletRequest request, String syncXml) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             //解析syncXml，得到Sync对象
-            
-            //启动Sync对象
-            
+            Sync sync = SyncXmlParser.parse(syncXml);
+
+            //启动SyncClient对象
+
+            map.put("success", true);
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", "对不起，服务器内部错误。");
+            LOG.error(e.getMessage(), e);
+        }
+        Gson gson = new Gson();
+        return gson.toJson(map);
+
+    }
+
+    /**
+     * syncXml是更新后的配置。<br>
+     * (1)验证：<br>
+     * 新增database->database或table->table不能和原来的被包含关系，<br>
+     * 被包含，如原来已有db1-> db1，就不能有db1.t1 -> db1.t1；<br>
+     * 可以有覆盖，如原来已有db1.t1 -> db1.t1，可以有db1 -> db1，这样，需要访问db1的table然后除掉t1,再做mysqldump table的操作。 db1.t1；<br>
+     * (2)mysqldump <br>
+     * 找到新增的database->database和database.table -> database.table，进行mysqldump,返回dump的binlog位置<br>
+     * (3)暂停SyncClient与启动临时SyncClient追赶<br>
+     * 暂停当前的同步，记下binlog，启动临时的同步，只同步新增的database->database和database.table->database.table，追赶到binlog位置<br>
+     * (4)启动新的SyncClient<br>
+     * 使用新的syncXml设置SyncClient，恢复同步。<br>
+     */
+    @RequestMapping(value = "/modifySync", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object modifySync(HttpServletRequest request, String syncXml) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            //解析syncXml，得到Sync对象
+            Sync sync = SyncXmlParser.parse(syncXml);
+
+            //启动SyncClient对象
+
             map.put("success", true);
         } catch (Exception e) {
             map.put("success", false);

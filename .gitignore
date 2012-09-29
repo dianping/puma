@@ -65,4 +65,5 @@ Thumbs.db
 ######################
 target/
 classes/
+bin/
 *.*~

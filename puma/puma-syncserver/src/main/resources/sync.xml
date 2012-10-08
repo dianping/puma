@@ -1,24 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<sync xmlns:tns="http://www.example.org/GolfCountryClub"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<sync xmlns:tns="http://www.example.org/GolfCountryClub" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.example.org/GolfCountryClub GolfCountryClub.xsds ">
 
-    <config>
-        <from>
-            <host>192.168.1.1</host>
-            <port>3306</port>
-            <username>root</username>
-            <password>***</password>
-        </from>
-        <to>
-            <host>192.168.1.2</host>
-            <port>3306</port>
-            <username>root</username>
-            <password>***</password>
-        </to>
-    </config>
+    <src>
+        <host>192.168.1.1</host>
+        <port>3306</port>
+        <username>root</username>
+        <password>***</password>
+    </src>
+    <dest>
+        <host>192.168.1.2</host>
+        <port>3306</port>
+        <username>root</username>
+        <password>***</password>
+    </dest>
+    <name>testClient</name>
+    <serverId>1111</serverId>
+    <dml>true</dml>
+    <ddl>true</ddl>
+    <target>77_21</target>
+    <transaction>true</transaction>
 
-    <instance ddl="true">
+    <instance>
         <!-- database同步 -->
         <database from="db1" to="db11">
             <table from="*" to="*" />
@@ -31,12 +34,12 @@
         </database>
         <!-- table 多到一 -->
         <database from="db3" to="db3">
-            <table from="table1" toPartOf="table11">
+            <table from="table1" toPartOf="tableN">
                 <clomn from="id" to="id" primary="true" />
                 <clomn from="c1" to="c1" />
                 <clomn from="c2" to="c2" />
             </table>
-            <table from="table2" toPartOf="table22">
+            <table from="table2" toPartOf="tableN">
                 <clomn from="id" to="id" primary="true" />
                 <clomn from="c3" to="c3" />
                 <clomn from="c4" to="c4" />

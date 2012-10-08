@@ -31,21 +31,29 @@ public class SyncXmlParser {
     private static Digester digester = new Digester();
 
     static {
+        //sync的基本属性
+        digester.addBeanPropertySetter("sync/name");
+        digester.addBeanPropertySetter("sync/serverId");
+        digester.addBeanPropertySetter("sync/dml");
+        digester.addBeanPropertySetter("sync/ddl");
+        digester.addBeanPropertySetter("sync/target");
+        digester.addBeanPropertySetter("sync/transaction");
+
         // sync/from
-        digester.addObjectCreate("sync/from", Config.class);
-        digester.addSetNext("sync/from", "setFrom");
-        digester.addBeanPropertySetter("sync/from/host");
-        digester.addCallMethod("sync/from/port", "setPort", 0, new Class[] { Integer.class });
-        digester.addBeanPropertySetter("sync/from/username");
-        digester.addBeanPropertySetter("sync/from/password");
+        digester.addObjectCreate("sync/src", Config.class);
+        digester.addSetNext("sync/src", "setSrc");
+        digester.addBeanPropertySetter("sync/src/host");
+        digester.addCallMethod("sync/src/port", "setPort", 0, new Class[] { Integer.class });
+        digester.addBeanPropertySetter("sync/src/username");
+        digester.addBeanPropertySetter("sync/src/password");
 
         // sync/to
-        digester.addObjectCreate("sync/to", Config.class);
-        digester.addSetNext("sync/to", "setTo");
-        digester.addBeanPropertySetter("sync/to/host");
-        digester.addCallMethod("sync/to/port", "setPort", 0, new Class[] { Integer.class });
-        digester.addBeanPropertySetter("sync/to/username");
-        digester.addBeanPropertySetter("sync/to/password");
+        digester.addObjectCreate("sync/dest", Config.class);
+        digester.addSetNext("sync/dest", "setDest");
+        digester.addBeanPropertySetter("sync/dest/host");
+        digester.addCallMethod("sync/dest/port", "setPort", 0, new Class[] { Integer.class });
+        digester.addBeanPropertySetter("sync/dest/username");
+        digester.addBeanPropertySetter("sync/dest/password");
 
         // sync/instance
         digester.addObjectCreate("sync/instance", Instance.class);//创建对象
@@ -101,7 +109,7 @@ public class SyncXmlParser {
     //    }
 
     public static void main(String[] args) throws FileNotFoundException, IOException, SAXException {
-        File file = new File("/home/wukezhu/document/mywork/puma/puma/puma-core/src/main/java/com/dianping/puma/core/sync/sync.xml");
+        File file = new File("/home/wukezhu/document/mywork/puma/puma/puma-syncserver/src/main/resources/sync.xml");
         System.out.println(parse(IOUtils.toString(new FileInputStream(file), "UTF-8")));
     }
 }

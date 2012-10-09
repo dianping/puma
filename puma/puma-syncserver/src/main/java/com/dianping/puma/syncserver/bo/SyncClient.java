@@ -89,6 +89,7 @@ public class SyncClient {
         configBuilder.binlogPos(binlogPos);
         _parseSourceDatabaseTables(sync, configBuilder);//configBuilder.tables("DianPing", "*");
         configuration = configBuilder.build();
+        System.out.println(configuration);
         pumaClient = new PumaClient(configuration);
         //初始化mysqlExecutor
         mysqlExecutor = new MysqlExecutor(sync.getDest().getUrl(), sync.getDest().getUsername(), sync.getDest().getPassword());
@@ -107,7 +108,7 @@ public class SyncClient {
 
             @Override
             public void onEvent(ChangedEvent event) throws Exception {
-//                System.out.println("********************Received " + event);
+                //                System.out.println("********************Received " + event);
                 //动态更新binlog和binlogPos
                 binlogPos = event.getBinlogPos();
                 binlog = event.getBinlog();

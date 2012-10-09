@@ -2,50 +2,26 @@
 <sync xmlns="puma.dianping.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="sync.xsds">
     <!-- 同步源的mysql配置 -->
-   <!--  <src>
-        <host>192.168.1.1</host>
-        <port>3306</port>
-        <username>root</username>
-        <password>***</password>
-    </src>  -->
+    <!-- <src> <host>192.168.1.1</host> <port>3306</port> <username>root</username> 
+        <password>***</password> </src> -->
     <!-- 同步目标的mysql配置 -->
     <dest>
-        <url>jdbc:mysql://localhost:3306/aliqr?useUnicode=true&amp;characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;noAccessToProcedureBodies=true</url>
+        <url>jdbc:mysql://localhost:3306/aliqr?useUnicode=true&amp;characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;noAccessToProcedureBodies=true
+        </url>
         <username>root</username>
-        <password>***</password>
+        <password>root</password>
     </dest>
     <!-- PumaClient相关的配置 -->
     <name>testClient</name>
     <serverId>6667</serverId>
     <dml>true</dml>
-    <ddl>true</ddl>
+    <ddl>false</ddl>
     <target>Dianping</target>
-    <transaction>true</transaction>
+    <transaction>false</transaction>
     <!-- database和table的映射关系 -->
     <instance>
-        <!-- database同步 -->
-        <database from="db1" to="db11">
-            <table from="*" to="*" />
+        <database from="pumatest" to="*">
+            <table from="*" to="*" ></table>
         </database>
-        <!-- table 一到一 -->
-        <database from="db2" to="db2">
-            <table from="table1" to="table11"></table>
-            <table from="table2" to="table22"></table>
-            <table from="*" to="*" />
-        </database>
-        <!-- table 多到一 -->
-        <database from="db3" to="db3">
-            <table from="table1" toPartOf="tableN">
-                <clomn from="id" to="id" primary="true" />
-                <clomn from="c1" to="c1" />
-                <clomn from="c2" to="c2" />
-            </table>
-            <table from="table2" toPartOf="tableN">
-                <clomn from="id" to="id" primary="true" />
-                <clomn from="c3" to="c3" />
-                <clomn from="c4" to="c4" />
-            </table>
-        </database>
-        <database from="*" to="*" />
     </instance>
 </sync>

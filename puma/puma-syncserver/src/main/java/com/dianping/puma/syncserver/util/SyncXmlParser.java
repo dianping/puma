@@ -68,7 +68,7 @@ public class SyncXmlParser {
         // sync/instance/database/table
         digester.addObjectCreate("sync/instance/database/table", Table.class);
         digester.addSetNext("sync/instance/database/table", "addTable");
-        digester.addSetProperties("sync/instance/table");//tag的attr
+        digester.addSetProperties("sync/instance/database/table");//tag的attr
 
         // sync/instance/database/table/colmn
         digester.addObjectCreate("sync/instance/database/table/column", Column.class);

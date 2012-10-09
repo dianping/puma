@@ -1,4 +1,4 @@
-package com.dianping.puma.syncserver.web;
+package com.dianping.puma.syncserver.util;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,8 +50,8 @@ public class SyncXmlParser {
         // sync/to
         digester.addObjectCreate("sync/dest", Config.class);
         digester.addSetNext("sync/dest", "setDest");
-        digester.addBeanPropertySetter("sync/dest/host");
-        digester.addCallMethod("sync/dest/port", "setPort", 0, new Class[] { Integer.class });
+        digester.addBeanPropertySetter("sync/dest/url");
+//        digester.addCallMethod("sync/dest/port", "setPort", 0, new Class[] { Integer.class });
         digester.addBeanPropertySetter("sync/dest/username");
         digester.addBeanPropertySetter("sync/dest/password");
 

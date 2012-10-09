@@ -1,10 +1,15 @@
 package com.dianping.puma.syncserver.web;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -13,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.dianping.puma.core.sync.Sync;
+import com.dianping.puma.syncserver.bo.SyncClient;
+import com.dianping.puma.syncserver.util.SyncXmlParser;
 import com.google.gson.Gson;
 
 @Controller
@@ -20,20 +27,26 @@ public class SyncController {
 
     private static final Logger LOG = LoggerFactory.getLogger(SyncController.class);
 
-    @RequestMapping(value = "/createSync", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "/createSync", method = { RequestMethod.GET, RequestMethod.POST }, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object createSync(HttpServletRequest request, String syncXml) {
+    public Object createSync(String syncXml) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
+            //mock syncxml
+            File file = new File("/home/wukezhu/document/mywork/puma/puma/puma-syncserver/src/main/resources/sync.xml");
+            syncXml = IOUtils.toString(new FileInputStream(file), "UTF-8");
             //解析syncXml，得到Sync对象
             Sync sync = SyncXmlParser.parse(syncXml);
-
+            System.out.println(sync);
             //启动SyncClient对象
+            SyncClient syncClient = new SyncClient();
+            syncClient.setSync(sync);
+            syncClient.start();
 
             map.put("success", true);
         } catch (Exception e) {
             map.put("success", false);
-            map.put("errorMsg", "对不起，服务器内部错误。");
+            map.put("errorMsg", stackToString(e));
             LOG.error(e.getMessage(), e);
         }
         Gson gson = new Gson();
@@ -73,5 +86,11 @@ public class SyncController {
         Gson gson = new Gson();
         return gson.toJson(map);
 
+    }
+
+    private String stackToString(Exception ex) {
+        StringWriter sw = new StringWriter();
+        ex.printStackTrace(new PrintWriter(sw));
+        return sw.toString();
     }
 }

@@ -1,4 +1,4 @@
-package com.dianping.puma.syncserver.web;
+package com.dianping.puma.syncserver.bo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,12 +16,16 @@ import com.dianping.puma.core.sync.Database;
 import com.dianping.puma.core.sync.Instance;
 import com.dianping.puma.core.sync.Sync;
 import com.dianping.puma.core.sync.Table;
+import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
 public class SyncClient {
     private Sync sync;
     private Configuration configuration;
     private PumaClient pumaClient;
+    private MysqlExecutor mysqlExecutor;
     private String binlog;
+    private String pumaServerHost = "127.0.0.1";//TODO 可配置
+    private int pumaServerPort = 8080;//TODO 可配置
 
     private long binlogPos;
 
@@ -71,43 +75,48 @@ public class SyncClient {
     }
 
     public void start() {
+        //初始化PumaClient
         ConfigurationBuilder configBuilder = new ConfigurationBuilder();
         configBuilder.ddl(sync.getDdl());
         configBuilder.dml(sync.getDml());
-        configBuilder.host(sync.getSrc().getHost());
-        configBuilder.port(sync.getSrc().getPort());
+        configBuilder.host(pumaServerHost);
+        configBuilder.port(pumaServerPort);
         configBuilder.serverId(sync.getServerId());
         configBuilder.name(sync.getName());
         configBuilder.target(sync.getTarget());
         configBuilder.transaction(sync.getTransaction());
         configBuilder.binlog(binlog);
         configBuilder.binlogPos(binlogPos);
-        //设置tables
         _parseSourceDatabaseTables(sync, configBuilder);//configBuilder.tables("DianPing", "*");
-
-        //启动PumaClient
         configuration = configBuilder.build();
         pumaClient = new PumaClient(configuration);
-        pumaClient.register(new EventListener() {//TODO 建立dest的mysql连接
+        //初始化mysqlExecutor
+        mysqlExecutor = new MysqlExecutor(sync.getDest().getUrl(), sync.getDest().getUsername(), sync.getDest().getPassword());
+        //注册监听器
+        pumaClient.register(new EventListener() {
+            @Override
+            public void onSkipEvent(ChangedEvent event) {
+                System.out.println(">>>>>>>>>>>>>>>>>>Skip " + event);
+            }
 
-                    @Override
-                    public void onSkipEvent(ChangedEvent event) {
-                        System.out.println(">>>>>>>>>>>>>>>>>>Skip " + event);
-                    }
+            @Override
+            public boolean onException(ChangedEvent event, Exception e) {
+                System.out.println("-------------Exception " + e);
+                return true;
+            }
 
-                    @Override
-                    public boolean onException(ChangedEvent event, Exception e) {
-                        System.out.println("-------------Exception " + e);
-                        return true;
-                    }
+            @Override
+            public void onEvent(ChangedEvent event) throws Exception {
+//                System.out.println("********************Received " + event);
+                //动态更新binlog和binlogPos
+                binlogPos = event.getBinlogPos();
+                binlog = event.getBinlog();
+                //执行同步
+                mysqlExecutor.execute(event);
+            }
+        });
 
-                    @Override
-                    public void onEvent(ChangedEvent event) throws Exception {
-                        System.out.println("********************Received " + event);
-                        binlogPos = event.getBinlogPos();
-                        _sync(event);
-                    }
-                });
+        //启动
         pumaClient.start();
     }
 
@@ -147,17 +156,6 @@ public class SyncClient {
         }
     }
 
-    /**
-     * 收到一条ChangedEvent，进行同步
-     */
-    private void _sync(ChangedEvent event) {
-        if (event instanceof DdlEvent) {
-
-        } else if (event instanceof RowChangedEvent) {
-
-        }
-    }
-
     public Sync getSync() {
         return sync;
     }
@@ -166,16 +164,8 @@ public class SyncClient {
         return binlog;
     }
 
-    public void setBinlog(String binlog) {
-        this.binlog = binlog;
-    }
-
     public long getBinlogPos() {
         return binlogPos;
-    }
-
-    public void setBinlogPos(long binlogPos) {
-        this.binlogPos = binlogPos;
     }
 
 }

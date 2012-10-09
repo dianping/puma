@@ -4,7 +4,7 @@
     <element name="sync">
         <complexType>
             <sequence>
-                <element name="from" maxOccurs="1" minOccurs="1">
+                <element name="src" maxOccurs="1" minOccurs="1">
                     <complexType>
                         <sequence>
                             <element name="host" type="string" />
@@ -14,7 +14,7 @@
                         </sequence>
                     </complexType>
                 </element>
-                <element name="to" maxOccurs="1" minOccurs="1">
+                <element name="dest" maxOccurs="1" minOccurs="1">
                     <complexType>
                         <sequence>
                             <element name="host" type="string" />

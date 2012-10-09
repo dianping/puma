@@ -2,25 +2,16 @@ package com.dianping.puma.core.sync;
 
 public class Config {
 
-    private String host;
-    private Integer port;
+    private String url;
     private String password;
     private String username;
 
-    public String getHost() {
-        return host;
+    public String getUrl() {
+        return url;
     }
 
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public Integer getPort() {
-        return port;
-    }
-
-    public void setPort(Integer port) {
-        this.port = port;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public String getPassword() {
@@ -41,7 +32,7 @@ public class Config {
 
     @Override
     public String toString() {
-        return "Config [host=" + host + ", port=" + port + ", password=" + password + ", username=" + username + "]";
+        return "Config [url=" + url + ", password=" + password + ", username=" + username + "]";
     }
 
 }

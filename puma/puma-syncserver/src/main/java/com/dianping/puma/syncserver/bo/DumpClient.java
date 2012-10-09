@@ -1,4 +1,4 @@
-package com.dianping.puma.syncserver.web;
+package com.dianping.puma.syncserver.bo;
 
 import java.util.ArrayList;
 import java.util.List;

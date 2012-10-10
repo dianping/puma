@@ -6,7 +6,7 @@
         <password>***</password> </src> -->
     <!-- 同步目标的mysql配置 -->
     <dest>
-        <url>jdbc:mysql://localhost:3306/aliqr?useUnicode=true&amp;characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;noAccessToProcedureBodies=true
+        <url>jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;noAccessToProcedureBodies=true
         </url>
         <username>root</username>
         <password>root</password>
@@ -15,7 +15,7 @@
     <name>testClient</name>
     <serverId>6667</serverId>
     <dml>true</dml>
-    <ddl>false</ddl>
+    <ddl>true</ddl>
     <target>Dianping</target>
     <transaction>false</transaction>
     <!-- database和table的映射关系 -->

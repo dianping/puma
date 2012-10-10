@@ -1,0 +1,14 @@
+INSERT INTO 
+`${database}`.`${table}` 
+(
+#set($ask = "" )
+#foreach(${column} in ${columns})
+ `${column}`
+ #set($ask = "${ask},?")
+ #if($velocityCount < ${columns.size()})
+   ,
+ #end
+#end
+) 
+VALUES 
+(${ask.substring(1)})

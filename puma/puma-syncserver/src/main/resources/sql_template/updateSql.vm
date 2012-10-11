@@ -1,0 +1,15 @@
+UPDATE `${database}`.`${table}`
+SET
+#foreach(${column} in ${updateColumns})
+  `${column}` = ?
+  #if($velocityCount < ${updateColumns.size()})
+    ,
+  #end
+#end
+WHERE
+#foreach(${column} in ${whereColumns})
+    `${column}` = ?
+  #if($velocityCount < ${whereColumns.size()})
+     AND
+  #end
+#end

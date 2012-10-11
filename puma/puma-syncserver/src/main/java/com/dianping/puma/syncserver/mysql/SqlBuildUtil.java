@@ -27,26 +27,73 @@ public class SqlBuildUtil {
         _ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "class");
         _ve.setProperty("class.resource.loader.class", ClasspathResourceLoader.class.getName());
         _ve.setProperty("class.resource.loader.cache", true);
-        _ve.setProperty("class.resource.loader.modificationCheckInterval", "3600");
+        _ve.setProperty("class.resource.loader.modificationCheckInterval", "-1");
         _ve.setProperty("input.encoding", "UTF-8");
         _ve.init();
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static void main(String[] args) throws Exception {
-        System.out.println(buildInsertSql());
+        String database = "db";
+        String table = "t";
+        List<String> columns = new ArrayList<String>();
+        columns.add("id");
+        columns.add("name");
+        columns.add("desc");
+        System.out.println(buildInsertSql(database, table, columns));
+        
+        //test update
+        columns.clear();
+        columns.add("id");
+        columns.add("name");
+        columns.add("desc");
+        List<String> whereColumns = new ArrayList<String>();
+        whereColumns.add("id");
+        whereColumns.add("name");
+        System.out.println(buildUpdateSql(database, table, columns, whereColumns));
     }
-    
-    public static String buildInsertSql(){
-      //取得velocity的模版
+
+    public static String buildInsertSql(String database, String table, List<String> columns) {
+        //取得velocity的模版
+        Template t = _ve.getTemplate("/sql_template/insertSql.vm");
+        //取得velocity的上下文context
+        VelocityContext context = new VelocityContext();
+        //把数据填入上下文
+        context.put("database", database);
+        context.put("table", table);
+        context.put("columns", columns);
+        //输出流
+        StringWriter writer = new StringWriter();
+        //转换输出
+        t.merge(context, writer);
+        return writer.toString();
+    }
+
+    public static String buildUpdateSql(String database, String table, List<String> updateColumns, List<String> whereColumns) {
+        //取得velocity的模版
+        Template t = _ve.getTemplate("/sql_template/updateSql.vm");
+        //取得velocity的上下文context
+        VelocityContext context = new VelocityContext();
+        //把数据填入上下文
+        context.put("database", database);
+        context.put("table", table);
+        context.put("updateColumns", updateColumns);
+        context.put("whereColumns", whereColumns);
+        //输出流
+        StringWriter writer = new StringWriter();
+        //转换输出
+        t.merge(context, writer);
+        return writer.toString();
+    }
+
+    public static String buildDeleteSql(String database, String table, List<String> columns) {
+        //取得velocity的模版
         Template t = _ve.getTemplate("insertSql.vm");
         //取得velocity的上下文context
         VelocityContext context = new VelocityContext();
         //把数据填入上下文
-        List temp = new ArrayList();
-        temp.add("1");
-        temp.add("2");
-        context.put("columns", temp);
+        context.put("database", database);
+        context.put("table", table);
+        context.put("columns", columns);
         //输出流
         StringWriter writer = new StringWriter();
         //转换输出

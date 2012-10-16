@@ -3,19 +3,19 @@ package com.dianping.puma.core.sync;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Instance {
+public class InstanceConfig {
 
-    private List<Database> databases = new ArrayList<Database>();
+    private List<DatabaseConfig> databases = new ArrayList<DatabaseConfig>();
 
-    public List<Database> getDatabases() {
+    public List<DatabaseConfig> getDatabases() {
         return databases;
     }
 
-    public void setDatabases(List<Database> databases) {
+    public void setDatabases(List<DatabaseConfig> databases) {
         this.databases = databases;
     }
 
-    public void addDatabase(Database database) {
+    public void addDatabase(DatabaseConfig database) {
         this.databases.add(database);
     }
 

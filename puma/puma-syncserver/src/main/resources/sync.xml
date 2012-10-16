@@ -11,7 +11,7 @@
         <username>root</username>
         <password>root</password>
     </dest>
-    <!-- PumaClient相关的配置 -->
+    <!-- 同步源配置：PumaClient相关的配置 -->
     <name>testClient</name>
     <serverId>6667</serverId>
     <dml>true</dml>
@@ -20,7 +20,7 @@
     <transaction>false</transaction>
     <!-- database和table的映射关系 -->
     <instance>
-        <database from="pumatest" to="*">
+        <database from="pumatest" to="pumatest">
             <table from="*" to="*" ></table>
         </database>
     </instance>

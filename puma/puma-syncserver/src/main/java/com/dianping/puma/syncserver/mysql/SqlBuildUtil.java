@@ -1,12 +1,7 @@
 package com.dianping.puma.syncserver.mysql;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FilenameFilter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.velocity.Template;
@@ -14,7 +9,6 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
-import org.apache.velocity.runtime.resource.loader.FileResourceLoader;
 
 /**
  * @author wukezhu
@@ -33,6 +27,7 @@ public class SqlBuildUtil {
     }
 
     public static void main(String[] args) throws Exception {
+        //test insert
         String database = "db";
         String table = "t";
         List<String> columns = new ArrayList<String>();
@@ -40,7 +35,7 @@ public class SqlBuildUtil {
         columns.add("name");
         columns.add("desc");
         System.out.println(buildInsertSql(database, table, columns));
-        
+        System.out.println("-----------------------------");
         //test update
         columns.clear();
         columns.add("id");
@@ -50,6 +45,12 @@ public class SqlBuildUtil {
         whereColumns.add("id");
         whereColumns.add("name");
         System.out.println(buildUpdateSql(database, table, columns, whereColumns));
+        System.out.println("-----------------------------");
+        //test delete
+        List<String> whereColumns2 = new ArrayList<String>();
+        whereColumns2.add("id");
+        whereColumns2.add("name");
+        System.out.println(buildDeleteSql(database, table, whereColumns2));
     }
 
     public static String buildInsertSql(String database, String table, List<String> columns) {
@@ -85,15 +86,15 @@ public class SqlBuildUtil {
         return writer.toString();
     }
 
-    public static String buildDeleteSql(String database, String table, List<String> columns) {
+    public static String buildDeleteSql(String database, String table, List<String> whereColumns) {
         //取得velocity的模版
-        Template t = _ve.getTemplate("insertSql.vm");
+        Template t = _ve.getTemplate("/sql_template/deleteSql.vm");
         //取得velocity的上下文context
         VelocityContext context = new VelocityContext();
         //把数据填入上下文
         context.put("database", database);
         context.put("table", table);
-        context.put("columns", columns);
+        context.put("whereColumns", whereColumns);
         //输出流
         StringWriter writer = new StringWriter();
         //转换输出

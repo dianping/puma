@@ -1,6 +1,6 @@
 package com.dianping.puma.core.sync;
 
-public class Sync {
+public class SyncConfig {
 
     private Config src;
     private Config dest;
@@ -10,7 +10,7 @@ public class Sync {
     private Boolean transaction;
     private Boolean ddl;
     private Boolean dml;
-    private Instance instance;
+    private InstanceConfig instance;
 
     public Config getSrc() {
         return src;
@@ -76,11 +76,11 @@ public class Sync {
         this.ddl = ddl;
     }
 
-    public Instance getInstance() {
+    public InstanceConfig getInstance() {
         return instance;
     }
 
-    public void setInstance(Instance instance) {
+    public void setInstance(InstanceConfig instance) {
         this.instance = instance;
     }
 

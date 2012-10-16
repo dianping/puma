@@ -1,6 +1,6 @@
 package com.dianping.puma.core.sync;
 
-public class Column {
+public class ColumnConfig {
     private String from;
     private String to;
     private Boolean primary;

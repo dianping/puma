@@ -19,12 +19,12 @@ import org.apache.commons.digester.Digester;
 import org.apache.commons.io.IOUtils;
 import org.xml.sax.SAXException;
 
-import com.dianping.puma.core.sync.Column;
+import com.dianping.puma.core.sync.ColumnConfig;
 import com.dianping.puma.core.sync.Config;
-import com.dianping.puma.core.sync.Database;
-import com.dianping.puma.core.sync.Instance;
-import com.dianping.puma.core.sync.Sync;
-import com.dianping.puma.core.sync.Table;
+import com.dianping.puma.core.sync.DatabaseConfig;
+import com.dianping.puma.core.sync.InstanceConfig;
+import com.dianping.puma.core.sync.SyncConfig;
+import com.dianping.puma.core.sync.TableConfig;
 
 public class SyncXmlParser {
 
@@ -56,29 +56,29 @@ public class SyncXmlParser {
         digester.addBeanPropertySetter("sync/dest/password");
 
         // sync/instance
-        digester.addObjectCreate("sync/instance", Instance.class);//创建对象
+        digester.addObjectCreate("sync/instance", InstanceConfig.class);//创建对象
         digester.addSetNext("sync/instance", "setInstance");//添加到父亲
         digester.addSetProperties("sync/instance");//tag的attr
 
         // sync/instance/database
-        digester.addObjectCreate("sync/instance/database", Database.class);
+        digester.addObjectCreate("sync/instance/database", DatabaseConfig.class);
         digester.addSetNext("sync/instance/database", "addDatabase");
         digester.addSetProperties("sync/instance/database");//tag的attr
 
         // sync/instance/database/table
-        digester.addObjectCreate("sync/instance/database/table", Table.class);
+        digester.addObjectCreate("sync/instance/database/table", TableConfig.class);
         digester.addSetNext("sync/instance/database/table", "addTable");
         digester.addSetProperties("sync/instance/database/table");//tag的attr
 
         // sync/instance/database/table/colmn
-        digester.addObjectCreate("sync/instance/database/table/column", Column.class);
+        digester.addObjectCreate("sync/instance/database/table/column", ColumnConfig.class);
         digester.addSetNext("sync/instance/database/table/column", "addColumn");
         digester.addSetProperties("sync/instance/database/table/column");//tag的attr
     }
 
-    public static synchronized Sync parse(String define) throws IOException, SAXException {
+    public static synchronized SyncConfig parse(String define) throws IOException, SAXException {
         try {
-            Sync definition = new Sync();
+            SyncConfig definition = new SyncConfig();
             digester.push(definition);
             digester.parse(new StringReader(define));
             return definition;

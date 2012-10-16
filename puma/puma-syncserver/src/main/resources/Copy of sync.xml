@@ -46,6 +46,6 @@
                 <clomn from="c4" to="c4" />
             </table>
         </database>
-        <database from="pumatest" to="*" />
+        <database from="pumatest" to="pumatest" />
     </instance>
 </sync>

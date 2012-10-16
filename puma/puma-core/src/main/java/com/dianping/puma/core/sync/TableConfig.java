@@ -3,12 +3,12 @@ package com.dianping.puma.core.sync;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Table {
+public class TableConfig {
     private String from;
     private String to;
     private Boolean partOf;
 
-    private List<Column> columns = new ArrayList<Column>();
+    private List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
 
     public String getFrom() {
         return from;
@@ -35,15 +35,15 @@ public class Table {
     }
 
 
-    public List<Column> getColumns() {
+    public List<ColumnConfig> getColumns() {
         return columns;
     }
 
-    public void setColumns(List<Column> columns) {
+    public void setColumns(List<ColumnConfig> columns) {
         this.columns = columns;
     }
 
-    public void addColumn(Column column) {
+    public void addColumn(ColumnConfig column) {
         this.columns.add(column);
     }
 

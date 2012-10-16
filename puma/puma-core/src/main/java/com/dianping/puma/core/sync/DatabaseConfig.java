@@ -3,12 +3,12 @@ package com.dianping.puma.core.sync;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Database {
+public class DatabaseConfig {
 
     private String from;
     private String to;
 
-    private List<Table> tables = new ArrayList<Table>();
+    private List<TableConfig> tables = new ArrayList<TableConfig>();
 
     public String getFrom() {
         return from;
@@ -26,15 +26,15 @@ public class Database {
         this.to = to;
     }
 
-    public List<Table> getTables() {
+    public List<TableConfig> getTables() {
         return tables;
     }
 
-    public void setTables(List<Table> tables) {
+    public void setTables(List<TableConfig> tables) {
         this.tables = tables;
     }
 
-    public void addTable(Table table) {
+    public void addTable(TableConfig table) {
         this.tables.add(table);
     }
 

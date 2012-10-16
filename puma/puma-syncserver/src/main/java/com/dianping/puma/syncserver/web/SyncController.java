@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.dianping.puma.core.sync.Sync;
+import com.dianping.puma.core.sync.SyncConfig;
 import com.dianping.puma.syncserver.bo.SyncClient;
 import com.dianping.puma.syncserver.util.SyncXmlParser;
 import com.google.gson.Gson;
@@ -32,11 +32,11 @@ public class SyncController {
     public Object createSync(String syncXml) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            //mock syncxml
+            //TODO mock syncxml
             File file = new File("/home/wukezhu/document/mywork/puma/puma/puma-syncserver/src/main/resources/sync.xml");
             syncXml = IOUtils.toString(new FileInputStream(file), "UTF-8");
             //解析syncXml，得到Sync对象
-            Sync sync = SyncXmlParser.parse(syncXml);
+            SyncConfig sync = SyncXmlParser.parse(syncXml);
             System.out.println(sync);
             //启动SyncClient对象
             SyncClient syncClient = new SyncClient();
@@ -73,7 +73,7 @@ public class SyncController {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             //解析syncXml，得到Sync对象
-            Sync sync = SyncXmlParser.parse(syncXml);
+            SyncConfig sync = SyncXmlParser.parse(syncXml);
 
             //启动SyncClient对象
 

@@ -1,14 +1,9 @@
-INSERT INTO 
-`${database}`.`${table}` 
-(
-#set($ask = "" )
-#foreach(${column} in ${columns})
- `${column}`
- #set($ask = "${ask},?")
- #if($velocityCount < ${columns.size()})
-   ,
- #end
+DELETE FROM
+`${database}`.`${table}`
+WHERE 
+#foreach(${column} in ${whereColumns})
+  `${column}` = ?
+  #if($velocityCount < ${whereColumns.size()})
+     AND
+  #end
 #end
-) 
-VALUES 
-(${ask.substring(1)})

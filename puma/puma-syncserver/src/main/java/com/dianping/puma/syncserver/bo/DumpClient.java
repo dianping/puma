@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.dianping.puma.core.sync.Config;
-import com.dianping.puma.core.sync.Database;
+import com.dianping.puma.core.sync.DatabaseConfig;
 
 public class DumpClient {
     private Config src;
     private Config dest;
 
-    private List<Database> databases = new ArrayList<Database>();
+    private List<DatabaseConfig> databases = new ArrayList<DatabaseConfig>();
 
     public Config getSrc() {
         return src;
@@ -28,11 +28,11 @@ public class DumpClient {
         this.dest = dest;
     }
 
-    public List<Database> getDatabases() {
+    public List<DatabaseConfig> getDatabases() {
         return databases;
     }
 
-    public void setDatabases(List<Database> databases) {
+    public void setDatabases(List<DatabaseConfig> databases) {
         this.databases = databases;
     }
 

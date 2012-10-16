@@ -12,14 +12,14 @@ import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.sync.Database;
-import com.dianping.puma.core.sync.Instance;
-import com.dianping.puma.core.sync.Sync;
-import com.dianping.puma.core.sync.Table;
+import com.dianping.puma.core.sync.DatabaseConfig;
+import com.dianping.puma.core.sync.InstanceConfig;
+import com.dianping.puma.core.sync.SyncConfig;
+import com.dianping.puma.core.sync.TableConfig;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
 public class SyncClient {
-    private Sync sync;
+    private SyncConfig sync;
     private Configuration configuration;
     private PumaClient pumaClient;
     private MysqlExecutor mysqlExecutor;
@@ -29,10 +29,10 @@ public class SyncClient {
 
     private long binlogPos;
 
-    public void setSync(Sync sync) {
+    public void setSync(SyncConfig sync) {
         if (this.sync != null) {//修改sync(修改sync，只允许新增<database>或<table>级别的标签)
             //对比新旧sync，求出新增的<database>或<table>配置(如果新增*行，也要求出具体的database和table)
-            List<Database> newDatabases = _compare(this.sync, sync);
+            List<DatabaseConfig> newDatabases = _compare(this.sync, sync);
             //对新增的<database>或<table>配置，进行dump
             DumpClient dumpClient = new DumpClient();
             dumpClient.setSrc(this.sync.getSrc());
@@ -65,7 +65,7 @@ public class SyncClient {
     /**
      * 对比新旧sync，求出新增的database或table配置(table也属于database下，故返回的都是database)
      */
-    private List<Database> _compare(Sync oldSync, Sync newSync) {
+    private List<DatabaseConfig> _compare(SyncConfig oldSync, SyncConfig newSync) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -93,6 +93,7 @@ public class SyncClient {
         pumaClient = new PumaClient(configuration);
         //初始化mysqlExecutor
         mysqlExecutor = new MysqlExecutor(sync.getDest().getUrl(), sync.getDest().getUsername(), sync.getDest().getPassword());
+        mysqlExecutor.setSync(sync);
         //注册监听器
         pumaClient.register(new EventListener() {
             @Override
@@ -124,20 +125,20 @@ public class SyncClient {
     /**
      * 设置同步源的数据库和表
      */
-    private void _parseSourceDatabaseTables(Sync sync, ConfigurationBuilder configBuilder) {
-        Instance instance = sync.getInstance();
-        List<Database> databases = instance.getDatabases();
+    private void _parseSourceDatabaseTables(SyncConfig sync, ConfigurationBuilder configBuilder) {
+        InstanceConfig instance = sync.getInstance();
+        List<DatabaseConfig> databases = instance.getDatabases();
         if (databases != null) {
-            for (Database database : databases) {
+            for (DatabaseConfig database : databases) {
                 //解析database
                 String databaseFrom = database.getFrom();
                 //解析table
-                List<Table> tables = database.getTables();
+                List<TableConfig> tables = database.getTables();
                 if (tables != null) {
                     //如果table中有一个是*，则只需要设置一个*；否则，添加所有table配置
                     List<String> tableFroms = new ArrayList<String>();
                     boolean star = false;
-                    for (Table table : tables) {
+                    for (TableConfig table : tables) {
                         if (StringUtils.equals(table.getFrom(), "*")) {
                             star = true;
                             break;
@@ -157,7 +158,7 @@ public class SyncClient {
         }
     }
 
-    public Sync getSync() {
+    public SyncConfig getSync() {
         return sync;
     }
 

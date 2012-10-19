@@ -20,8 +20,17 @@
     <transaction>false</transaction>
     <!-- database和table的映射关系 -->
     <instance>
-        <database from="pumatest" to="pumatest">
-            <table from="*" to="*" ></table>
+        <database from="pumatest" to="test">
+            <table from="test1" to="test5">
+                <column from="id" to="id" primary="true" />
+                <column from="name" to="name" />
+                <column from="desc" to="desc" />
+            </table>
+            <table from="test2" to="test4" partOf="true">
+                <column from="id" to="id" primary="true" />
+                <column from="name" to="name1" />
+            </table>
+            <table from="*" to="*"></table>
         </database>
     </instance>
 </sync>

@@ -10,6 +10,8 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 
+import com.dianping.puma.core.event.RowChangedEvent;
+
 /**
  * @author wukezhu
  */
@@ -20,7 +22,7 @@ public class SqlBuildUtil {
         _ve = new VelocityEngine();
         _ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "class");
         _ve.setProperty("class.resource.loader.class", ClasspathResourceLoader.class.getName());
-        _ve.setProperty("class.resource.loader.cache", true);
+        _ve.setProperty("class.resource.loader.cache", false);
         _ve.setProperty("class.resource.loader.modificationCheckInterval", "-1");
         _ve.setProperty("input.encoding", "UTF-8");
         _ve.init();
@@ -101,5 +103,76 @@ public class SqlBuildUtil {
         t.merge(context, writer);
         return writer.toString();
     }
+
+    public static String buildReplaceSql(String database, String table, List<String> whereColumns) {
+        //取得velocity的模版
+        Template t = _ve.getTemplate("/sql_template/replaceSql.vm");
+        //取得velocity的上下文context
+        VelocityContext context = new VelocityContext();
+        //把数据填入上下文
+        context.put("database", database);
+        context.put("table", table);
+        context.put("whereColumns", whereColumns);
+        //输出流
+        StringWriter writer = new StringWriter();
+        //转换输出
+        t.merge(context, writer);
+        return writer.toString();
+    }
+
+    public static String buildUpdateToNullSql(String database, String table, List<String> updateColumns, List<String> whereColumns) {
+        //取得velocity的模版
+        Template t = _ve.getTemplate("/sql_template/updateToNullSql.vm");
+        //取得velocity的上下文context
+        VelocityContext context = new VelocityContext();
+        //把数据填入上下文
+        context.put("database", database);
+        context.put("table", table);
+        context.put("updateColumns", updateColumns);
+        context.put("whereColumns", whereColumns);
+        //输出流
+        StringWriter writer = new StringWriter();
+        //转换输出
+        t.merge(context, writer);
+        return writer.toString();
+    }
+
+    public static String buildDeleteSql2(RowChangedEvent event) {
+        return buildSql(event, "/sql_template2/deleteSql.vm");
+    }
+
+    public static String buildUpdateSql2(RowChangedEvent event) {
+        return buildSql(event, "/sql_template2/updateSql.vm");
+    }
+
+    public static String buildReplaceSql2(RowChangedEvent event) {
+        return buildSql(event, "/sql_template2/replaceSql.vm");
+    }
+
+    public static String buildUpdateToNullSql2(RowChangedEvent event) {
+        return buildSql(event, "/sql_template2/updateToNullSql.vm");
+    }
+
+    public static String buildInsertSql2(RowChangedEvent event) {
+        return buildSql(event, "/sql_template2/insertSql.vm");
+    }
+
+    private static String buildSql(RowChangedEvent event, String file) {
+        //取得velocity的模版
+        Template t = _ve.getTemplate(file);
+        //取得velocity的上下文context
+        VelocityContext context = new VelocityContext();
+        //把数据填入上下文
+        context.put("event", event);
+        //输出流
+        StringWriter writer = new StringWriter();
+        //转换输出
+        t.merge(context, writer);
+        return writer.toString();
+    }
+
+    //    public boolean needQuot(Class cls){
+    //        
+    //    }
 
 }

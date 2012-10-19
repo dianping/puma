@@ -2,7 +2,7 @@ DELETE FROM
 `${database}`.`${table}`
 WHERE 
 #foreach(${column} in ${whereColumns})
-  `${column}` = ?
+  (`${column}` = ? OR (`${column}` IS NULL AND ? IS NULL))
   #if($velocityCount < ${whereColumns.size()})
      AND
   #end

@@ -1,10 +1,13 @@
 package com.dianping.puma.syncserver.mysql;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
@@ -18,6 +21,8 @@ import com.dianping.puma.core.sync.SyncConfig;
 import com.dianping.puma.core.sync.TableConfig;
 
 public class MysqlExecutor {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MysqlExecutor.class);
 
     private SyncConfig syncConfig;
 
@@ -50,7 +55,7 @@ public class MysqlExecutor {
             //执行sql
             //            jdbcTemplate.execute(sql);
         } else if (event instanceof RowChangedEvent) {
-            _execute(syncConfig, (RowChangedEvent) event);
+            _execute2(syncConfig, (RowChangedEvent) event);
         }
     }
 
@@ -61,7 +66,7 @@ public class MysqlExecutor {
      * @param rowChangedEvent
      * @return
      */
-    private MysqlUpdateStatement _execute(SyncConfig sync, RowChangedEvent rowChangedEvent) {
+    private void _execute(SyncConfig sync, RowChangedEvent rowChangedEvent) {
         //1.获取来源
         //来源的database,column
         String databaseName = rowChangedEvent.getDatabase();
@@ -80,7 +85,7 @@ public class MysqlExecutor {
         List<String> destColumnNames = new ArrayList<String>();//insert,update涉及的所有列名
         List<Object> destColumnValues = new ArrayList<Object>();//insert,update涉及的所有列值
         List<String> destWhereColumnNames = new ArrayList<String>();//delete,update涉及的所有列名
-        List<Object> destWhereColumnValues = new ArrayList<Object>();//delete,update涉及的所有列值
+        List<Object> destWhereColumnValues = new ArrayList<Object>();//delete,update涉及的Where所有列值(where的?将重复出现2次，见sql模板)
         //dest的actionType
         int destActionType = -1;
         //计算过程
@@ -98,6 +103,7 @@ public class MysqlExecutor {
                 destColumnValues.add(srcColumn.getNewValue());
                 //delete,update的where列
                 destWhereColumnNames.add(srcColumnName);
+                destWhereColumnValues.add(srcColumn.getOldValue());
                 destWhereColumnValues.add(srcColumn.getOldValue());
             }
             destActionType = srcActionType;
@@ -117,6 +123,7 @@ public class MysqlExecutor {
                     //delete,update的where列
                     destWhereColumnNames.add(srcColumnName);
                     destWhereColumnValues.add(srcColumn.getOldValue());
+                    destWhereColumnValues.add(srcColumn.getOldValue());
                 }
                 destActionType = srcActionType;
             } else {
@@ -134,6 +141,7 @@ public class MysqlExecutor {
                     //delete,update的where列
                     destWhereColumnNames.add(destColumnName);
                     destWhereColumnValues.add(srcColumn.getOldValue());
+                    destWhereColumnValues.add(srcColumn.getOldValue());
                 }
                 //处理destActionType
                 if (table.getPartOf() != null && table.getPartOf().booleanValue()) {
@@ -146,6 +154,7 @@ public class MysqlExecutor {
                             break;
                         case DELETE:
                             destActionType = UPDTAE_TO_NULL;
+                            //TODO primery key 不能update to null
                             break;
                     }
                 } else {
@@ -163,17 +172,173 @@ public class MysqlExecutor {
         //        String insertSql = "INSERT INTO `<database>`.`<table>` (`column1`) VALUES ( ?,?)";
         //        String updateSql = "UPDATE `<database>`.`<table>` SET `<column>`=?,`<column>`=? WHERE `<column>`=? AND `<column>`=?";
         //        String deleteSql = "DELETE FROM `<database>`.`<table>` WHERE `<column>`=? AND `<column>`=?";
+
+        MysqlUpdateStatement mus = new MysqlUpdateStatement();
         if (destActionType == INSERT) {
-            String insertSql = SqlBuildUtil.buildInsertSql(destDatabaseName, destTableName, destColumnNames);
-            System.out.println(insertSql);
+            String sql = SqlBuildUtil.buildInsertSql(destDatabaseName, destTableName, destColumnNames);
+            mus.setSql(sql);
+            mus.setArgs(destColumnValues.toArray());
+        } else if (destActionType == UPDATE) {
+            String sql = SqlBuildUtil.buildUpdateSql(destDatabaseName, destTableName, destColumnNames, destWhereColumnNames);
+            mus.setSql(sql);
+            List<Object> args = new ArrayList<Object>();
+            args.addAll(destColumnValues);
+            args.addAll(destWhereColumnValues);
+            mus.setArgs(args.toArray());
+        } else if (destActionType == DELETE) {
+            String sql = SqlBuildUtil.buildDeleteSql(destDatabaseName, destTableName, destWhereColumnNames);
+            mus.setSql(sql);
+            mus.setArgs(destWhereColumnValues.toArray());
+        } else if (destActionType == REPLACE_INTO) {
+            String sql = SqlBuildUtil.buildReplaceSql(destDatabaseName, destTableName, destWhereColumnNames);
+            mus.setSql(sql);
+            mus.setArgs(destWhereColumnValues.toArray());
+        } else if (destActionType == UPDTAE_TO_NULL) {
+            String sql = SqlBuildUtil.buildUpdateToNullSql(destDatabaseName, destTableName, destColumnNames, destWhereColumnNames);
+            mus.setSql(sql);
+            List<Object> args = new ArrayList<Object>();
+            args.addAll(destWhereColumnValues);
+            mus.setArgs(args.toArray());
         }
+        LOG.info(mus.toString());
         //TODO 修改sync验证生成sql的过程是否正确？
-        //TODO 其他sql生成
 
-        //TODO 执行sql
+        //执行sql
         //使用jdbc直接执行MysqlUpdateStatement
+        jdbcTemplate.update(mus.getSql(), mus.getArgs());
 
-        return null;
+    }
+
+    private void _execute2(SyncConfig syncConfig2, RowChangedEvent rowChangedEvent) {
+        MysqlUpdateStatement mus = convert(syncConfig2, rowChangedEvent);
+
+        //        jdbcTemplate.update(sql);
+        jdbcTemplate.update(mus.getSql(), mus.getArgs());
+    }
+
+    private MysqlUpdateStatement convert(SyncConfig sync, RowChangedEvent rowChangedEvent) {
+        MysqlUpdateStatement mus = new MysqlUpdateStatement();
+        RowChangedEvent event = rowChangedEvent.clone();
+
+        //来源的database,column
+        String databaseName = rowChangedEvent.getDatabase();
+        String tableName = rowChangedEvent.getTable();
+        Map<String, ColumnInfo> columnMap = rowChangedEvent.getColumns();
+        int srcActionType = rowChangedEvent.getActionType();//actionType
+        //2.根据"来源actionType,database,table,column"和Sync，得到dest的actionType,database,table,column
+        List<DatabaseConfig> databases = sync.getInstance().getDatabases();
+        DatabaseConfig database = findDatabaseConfig(databases, databaseName);
+        if (database.getTo().equals("*")) {//如果是database匹配*
+            //event就是rowChangedEvent;
+        } else {//如果是database不匹配*
+            event.setDatabase(database.getTo());
+            List<TableConfig> tables = database.getTables();
+            TableConfig table = findTableConfig(tables, tableName);
+            if (table.getTo().equals("*")) {//如果是table匹配*
+                //如果是*，则和原来的一致
+            } else {
+                event.setTable(table.getTo());//如果不是*，则destTableName为to的值
+                //处理column
+                List<ColumnConfig> columnConfigs = table.getColumns();
+                for (Map.Entry<String, ColumnInfo> columnEntry : columnMap.entrySet()) {
+                    String srcColumnName = columnEntry.getKey();
+                    ColumnInfo srcColumn = columnEntry.getValue();
+                    ColumnConfig columnConfig = findColumnConfig(columnConfigs, srcColumnName);
+                    String destColumnName = columnConfig.getTo();
+                    //替换event的column
+                    event.getColumns().remove(srcColumnName);
+                    event.getColumns().put(destColumnName, srcColumn);
+                }
+                //如果partOf为true，则修改actionType
+                if (table.getPartOf() != null && table.getPartOf().booleanValue()) {
+                    switch (srcActionType) {
+                        case INSERT:
+                            event.setActionType(REPLACE_INTO);
+                            break;
+                        case UPDATE:
+                            event.setActionType(REPLACE_INTO);
+                            break;
+                        case DELETE:
+                            event.setActionType(UPDTAE_TO_NULL);
+                            break;
+                    }
+                }
+            }
+        }
+        System.out.println("----------------- after convert -------------");
+        System.out.println(event);
+        String sql = parseSql(event);
+        System.out.println("----------------- after parse sql -----------");
+        System.out.println(sql);
+        //构造args
+        Object[] args = parseArgs(event);
+        System.out.println("----------------- after parse args -----------");
+        System.out.println(Arrays.toString(args));
+        mus.setSql(sql);
+        mus.setArgs(args);
+        return mus;
+
+    }
+
+    private String parseSql(RowChangedEvent event) {
+        String sql = null;
+        int actionType = event.getActionType();
+        switch (actionType) {
+            case INSERT:
+                sql = SqlBuildUtil.buildInsertSql2(event);
+                break;
+            case UPDATE:
+                sql = SqlBuildUtil.buildUpdateSql2(event);
+                break;
+            case DELETE:
+                sql = SqlBuildUtil.buildDeleteSql2(event);
+                break;
+            case UPDTAE_TO_NULL:
+                sql = SqlBuildUtil.buildUpdateToNullSql2(event);
+                break;
+            case REPLACE_INTO:
+                sql = SqlBuildUtil.buildReplaceSql2(event);
+                break;
+        }
+        return sql;
+    }
+
+    private Object[] parseArgs(RowChangedEvent event) {
+        int actionType = event.getActionType();
+        Map<String, ColumnInfo> columnMap = event.getColumns();
+        List<Object> args = new ArrayList<Object>();
+        switch (actionType) {
+            case REPLACE_INTO:
+            case INSERT:
+                for (Map.Entry<String, ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
+                    args.add(columnName2ColumnInfo.getValue().getNewValue());
+                }
+                break;
+            case UPDATE:
+                for (Map.Entry<String, ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
+                    args.add(columnName2ColumnInfo.getValue().getNewValue());
+                }
+                for (Map.Entry<String, ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
+                    args.add(columnName2ColumnInfo.getValue().getOldValue());
+                }
+                break;
+            case DELETE:
+                for (Map.Entry<String, ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
+                    args.add(columnName2ColumnInfo.getValue().getOldValue());
+                }
+                break;
+            case UPDTAE_TO_NULL:
+                for (Map.Entry<String, ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
+                    if (!columnName2ColumnInfo.getValue().isKey()) { //primery key 不能update to null
+                        args.add(columnName2ColumnInfo.getValue().getNewValue());
+                    }
+                }
+                for (Map.Entry<String, ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
+                    args.add(columnName2ColumnInfo.getValue().getOldValue());
+                }
+                break;
+        }
+        return args.toArray();
     }
 
     /**

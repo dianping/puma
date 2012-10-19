@@ -1,7 +1,7 @@
 UPDATE `${database}`.`${table}`
 SET
 #foreach(${column} in ${updateColumns})
-  `${column}` = ?
+  `${column}` = NULL
   #if($velocityCount < ${updateColumns.size()})
     ,
   #end

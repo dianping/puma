@@ -1,15 +1,21 @@
-UPDATE `${database}`.`${table}`
+UPDATE `${event.database}`.`${event.table}`
 SET
-#foreach(${column} in ${updateColumns})
-  `${column}` = NULL
-  #if($velocityCount < ${updateColumns.size()})
-    ,
+#foreach($name2ColumnInfo in $event.columns.entrySet())
+  #if(!$name2ColumnInfo.value.isKey())##primery key 不能update to null
+    `${name2ColumnInfo.key}` = ?
+    #if($velocityCount < ${event.columns.size()})
+      ,
+    #end
   #end
 #end
 WHERE
-#foreach(${column} in ${whereColumns})
-   (`${column}` = ? OR (`${column}` IS NULL AND ? IS NULL))
-  #if($velocityCount < ${whereColumns.size()})
+#foreach($name2ColumnInfo in $event.columns.entrySet())
+  #if(!${name2ColumnInfo.value.oldValue})
+    `${name2ColumnInfo.key}` is ?
+  #else
+    `${name2ColumnInfo.key}` = ?
+  #end
+  #if($velocityCount < ${event.columns.size()})
      AND
   #end
 #end

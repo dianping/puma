@@ -33,12 +33,16 @@ public class SyncController {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             //TODO mock syncxml
-            File file = new File("/home/wukezhu/document/mywork/puma/puma/puma-syncserver/src/main/resources/sync.xml");
-            syncXml = IOUtils.toString(new FileInputStream(file), "UTF-8");
+            if (syncXml == null) {
+                File file = new File("/home/wukezhu/document/mywork/puma/puma/puma-syncserver/src/main/resources/sync.xml");
+                syncXml = IOUtils.toString(new FileInputStream(file), "UTF-8");
+            }
+
             //解析syncXml，得到Sync对象
             SyncConfig sync = SyncXmlParser.parse(syncXml);
-            System.out.println(sync);
+            LOG.info("receive sync: " + sync);
             //启动SyncClient对象
+            LOG.info("SyncClient starting...");
             SyncClient syncClient = new SyncClient();
             syncClient.setSync(sync);
             syncClient.start();

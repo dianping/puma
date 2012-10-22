@@ -4,28 +4,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.puma.api.Configuration;
 import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.event.DdlEvent;
-import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.InstanceConfig;
 import com.dianping.puma.core.sync.SyncConfig;
 import com.dianping.puma.core.sync.TableConfig;
+import com.dianping.puma.syncserver.conf.Config;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
+import com.dianping.puma.syncserver.web.SyncController;
 
 public class SyncClient {
+    private static final Logger LOG = LoggerFactory.getLogger(SyncController.class);
+
     private SyncConfig sync;
     private Configuration configuration;
     private PumaClient pumaClient;
     private MysqlExecutor mysqlExecutor;
     private String binlog;
-    private String pumaServerHost = "127.0.0.1";//TODO 可配置
-    private int pumaServerPort = 8080;//TODO 可配置
+    private String pumaServerHost = Config.getInstance().getPumaServerHost();
+    private int pumaServerPort = Config.getInstance().getPumaServerPort();
 
     private long binlogPos;
 
@@ -120,6 +124,7 @@ public class SyncClient {
 
         //启动
         pumaClient.start();
+        LOG.info("SyncClient started.");
     }
 
     /**

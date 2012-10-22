@@ -1,9 +1,13 @@
 DELETE FROM
-`${database}`.`${table}`
+`${event.database}`.`${event.table}`
 WHERE 
-#foreach(${column} in ${whereColumns})
-  (`${column}` = ? OR (`${column}` IS NULL AND ? IS NULL))
-  #if($velocityCount < ${whereColumns.size()})
+#foreach($name2ColumnInfo in $event.columns.entrySet())
+  #if(!${name2ColumnInfo.value.oldValue})
+    `${name2ColumnInfo.key}` is ?
+  #else
+    `${name2ColumnInfo.key}` = ?
+  #end
+  #if($velocityCount < ${event.columns.size()})
      AND
   #end
 #end

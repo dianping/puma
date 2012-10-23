@@ -18,4 +18,11 @@
 --------
 
 ### 如何使用：
+(待续。。。)
+
+
+项目设计
+--------
+
+### 设计文档：[文档地址](https://docs.google.com/a/dianping.com/document/d/17AAC6TOHi367_J_M7FmmKByIGZhAz8J0ov6EtM5HsXM/edit "点击进入谷歌文档")
 

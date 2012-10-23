@@ -27,6 +27,8 @@ public class SyncController {
 
     private static final Logger LOG = LoggerFactory.getLogger(SyncController.class);
 
+    SyncClient syncClient;
+    
     @RequestMapping(value = "/createSync", method = { RequestMethod.GET, RequestMethod.POST }, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object createSync(String syncXml) {
@@ -43,7 +45,7 @@ public class SyncController {
             LOG.info("receive sync: " + sync);
             //启动SyncClient对象
             LOG.info("SyncClient starting...");
-            SyncClient syncClient = new SyncClient();
+            syncClient = new SyncClient();
             syncClient.setSync(sync);
             syncClient.start();
 
@@ -71,25 +73,32 @@ public class SyncController {
      * (4)启动新的SyncClient<br>
      * 使用新的syncXml设置SyncClient，恢复同步。<br>
      */
-    @RequestMapping(value = "/modifySync", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "/modifySync", method = {RequestMethod.POST,RequestMethod.GET}, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object modifySync(HttpServletRequest request, String syncXml) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
+            //TODO mock syncxml
+            if (syncXml == null) {
+                File file = new File("/home/wukezhu/document/mywork/puma/puma/puma-syncserver/src/main/resources/sync.xml");
+                syncXml = IOUtils.toString(new FileInputStream(file), "UTF-8");
+            }
+
             //解析syncXml，得到Sync对象
             SyncConfig sync = SyncXmlParser.parse(syncXml);
-
+            LOG.info("receive sync: " + sync);
             //启动SyncClient对象
+            LOG.info("SyncClient modify...");
+            syncClient.setSync(sync);
 
             map.put("success", true);
         } catch (Exception e) {
             map.put("success", false);
-            map.put("errorMsg", "对不起，服务器内部错误。");
+            map.put("errorMsg", stackToString(e));
             LOG.error(e.getMessage(), e);
         }
         Gson gson = new Gson();
         return gson.toJson(map);
-
     }
 
     private String stackToString(Exception ex) {

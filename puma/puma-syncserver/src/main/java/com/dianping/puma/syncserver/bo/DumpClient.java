@@ -45,6 +45,9 @@ public class DumpClient {
      * 进行dump，并返回binlog位置
      */
     public Long dump() {
+        
+        
+        
         return null;
         // TODO Auto-generated method stub
 

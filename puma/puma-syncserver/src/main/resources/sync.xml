@@ -30,7 +30,16 @@
                 <column from="id" to="id" primary="true" />
                 <column from="name" to="name1" />
             </table>
+            <table from="test3" to="test3" partOf="true">
+                <column from="id" to="id" primary="true" />
+                <column from="name" to="name1" />
+            </table>
+            <table from="test33" to="test33" partOf="true">
+                <column from="id" to="id" primary="true" />
+                <column from="name" to="name1" />
+            </table>
             <table from="*" to="*"></table>
         </database>
+         <database from="*" to="*" />
     </instance>
 </sync>

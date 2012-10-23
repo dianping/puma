@@ -36,23 +36,24 @@ public class SyncClient {
     public void setSync(SyncConfig sync) {
         if (this.sync != null) {//修改sync(修改sync，只允许新增<database>或<table>级别的标签)
             //对比新旧sync，求出新增的<database>或<table>配置(如果新增*行，也要求出具体的database和table)
-            List<DatabaseConfig> newDatabases = _compare(this.sync, sync);
+            List<DatabaseConfig> addedDatabases = _compare(this.sync, sync);
+            LOG.info("sync xml changed database config:" + addedDatabases);
             //对新增的<database>或<table>配置，进行dump
             DumpClient dumpClient = new DumpClient();
             dumpClient.setSrc(this.sync.getSrc());
             dumpClient.setDest(this.sync.getDest());
-            dumpClient.setDatabases(newDatabases);
+            dumpClient.setDatabases(addedDatabases);
             Long dumpBinlogPos = dumpClient.dump();
             //终止当前的PumaClient，记录当前binlogPos
             pumaClient.stop();
             Long curBinlogPos = this.binlogPos;
             //新建临时的PumaClient，对newDatabases进行追赶，起点为dumpBinlogPos，终点为curBinlogPos
             PumaClient pumaClientForPursue = _createPumaClientForPursue(dumpBinlogPos, curBinlogPos);
-            pumaClientForPursue.start();
+//            pumaClientForPursue.start();
             //使用新的sync，重新创建并启动新的PumaClient
             this.sync = sync;
             this.binlogPos = curBinlogPos;
-            this.start();
+//            this.start();
         } else {
             this.sync = sync;
         }
@@ -67,11 +68,30 @@ public class SyncClient {
     }
 
     /**
+     * 修改sync(修改sync，只允许新增<database>或 TODO 修改sync允许哪些修改 ???????????????????????????????????????
+     * <table>
+     * 级别的标签)<br>
      * 对比新旧sync，求出新增的database或table配置(table也属于database下，故返回的都是database)
      */
     private List<DatabaseConfig> _compare(SyncConfig oldSync, SyncConfig newSync) {
-        // TODO Auto-generated method stub
-        return null;
+        //首先验证基础属性（dest，name，serverId，target）是否一致
+        if (!oldSync.getDest().equals(newSync.getDest())) {
+            throw new IllegalArgumentException("dest不一致！");
+        }
+        if (!oldSync.getName().equals(newSync.getName())) {
+            throw new IllegalArgumentException("name不一致！");
+        }
+        if (!oldSync.getServerId().equals(newSync.getServerId())) {
+            throw new IllegalArgumentException("serverId不一致！");
+        }
+        if (!oldSync.getTarget().equals(newSync.getTarget())) {
+            throw new IllegalArgumentException("target不一致！");
+        }
+        //对比instance
+        InstanceConfig oldInstanceConfig = oldSync.getInstance();
+        InstanceConfig newInstanceConfig = newSync.getInstance();
+        List<DatabaseConfig> databaseConfig = oldInstanceConfig.compare(newInstanceConfig);
+        return databaseConfig;
     }
 
     public PumaClient getPumaClient() {

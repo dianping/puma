@@ -52,4 +52,47 @@ public class TableConfig {
         return "Table [from=" + from + ", to=" + to + ", partOf=" + partOf + ", columns=" + columns + "]";
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((columns == null) ? 0 : columns.hashCode());
+        result = prime * result + ((from == null) ? 0 : from.hashCode());
+        result = prime * result + ((partOf == null) ? 0 : partOf.hashCode());
+        result = prime * result + ((to == null) ? 0 : to.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof TableConfig))
+            return false;
+        TableConfig other = (TableConfig) obj;
+        if (columns == null) {
+            if (other.columns != null)
+                return false;
+        } else if (!columns.equals(other.columns))
+            return false;
+        if (from == null) {
+            if (other.from != null)
+                return false;
+        } else if (!from.equals(other.from))
+            return false;
+        if (partOf == null) {
+            if (other.partOf != null)
+                return false;
+        } else if (!partOf.equals(other.partOf))
+            return false;
+        if (to == null) {
+            if (other.to != null)
+                return false;
+        } else if (!to.equals(other.to))
+            return false;
+        return true;
+    }
+
 }

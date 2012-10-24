@@ -77,10 +77,13 @@ public class Handler implements PageHandler<Context> {
 		res.addHeader("Connection", "Keep-Alive");
 
 		long seq = payload.getSeq();
+		long serverId = payload.getServerId();
+		String binlogFile = payload.getBinlog();
+		String binlogPos = payload.getBinlogPos();
 		EventStorage storage = ComponentContainer.SPRING.lookup("storage-" + payload.getTarget(), EventStorage.class);
 		EventChannel channel;
 		try {
-			channel = storage.getChannel(seq);
+			channel = storage.getChannel(seq, serverId, binlogFile, binlogPos);
 		} catch (StorageException e1) {
 			throw new IOException(e1);
 		}

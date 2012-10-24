@@ -215,7 +215,7 @@ public abstract class PumaServerIntegrationBaseTest {
 	protected List<ChangedEvent> getEvents(int n, boolean needTs) throws Exception {
 		waitForSync(50);
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
-		EventChannel channel = storage.getChannel(-1);
+		EventChannel channel = storage.getChannel(-1, 1, null, null);
 		for (int i = 0; i < n;) {
 			ChangedEvent event = channel.next();
 			if (!needTs) {

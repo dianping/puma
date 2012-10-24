@@ -24,9 +24,9 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.dianping.puma.storage.exception.StorageClosedException;
@@ -40,10 +40,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	protected static final String						PATH_SEPARATOR		= "/";
 	private AtomicReference<TreeMap<Sequence, String>>	index				= new AtomicReference<TreeMap<Sequence, String>>();
 	private String										baseDir;
-	//TODO init
-	private String										indexBaseDir;
-	private String										bucketFilePrefix	= "b-";
-	private String 										fileIndexPrefix 	= "index-"; 
+	private String										bucketFilePrefix	= "b-"; 
 	private int											maxBucketLengthMB	= 2000;
 	private volatile boolean							stopped				= true;
 	private AtomicReference<Sequence>					latestSequence		= new AtomicReference<Sequence>();

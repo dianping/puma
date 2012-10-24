@@ -39,4 +39,6 @@ public interface BucketManager extends LifeCycle<StorageLifeCycleException> {
 
 	public Boolean getReadBinlogIndex(BinlogPos binlogpos)
 			throws StorageClosedException, IOException;
+	
+	public void wirteMainBinlogIndex(byte[] data) throws IOException;
 }

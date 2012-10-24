@@ -36,8 +36,6 @@ public class DefaultEventStorage implements EventStorage {
 	private static final String datePattern = "yyyy-MM-dd";
 	private String lastDate;
 
-	private String binlogIndexFileName = "binlogIndex";
-	private RandomAccessFile binlogIndexFile;
 
 	public void start() throws StorageLifeCycleException {
 		SimpleDateFormat sdf = new SimpleDateFormat(datePattern);
@@ -47,11 +45,6 @@ public class DefaultEventStorage implements EventStorage {
 				archiveStrategy, cleanupStrategy);
 		try {
 			bucketManager.start();
-			this.binlogIndexFile = new RandomAccessFile(masterIndex
-					.getBaseDir()
-					+ AbstractBucketIndex.PATH_SEPARATOR + binlogIndexFileName,
-					"rw");
-
 		} catch (Exception e) {
 			throw new StorageLifeCycleException("Storage init failed", e);
 		}
@@ -167,8 +160,7 @@ public class DefaultEventStorage implements EventStorage {
 	public void writeIndexToFile() throws IOException {
 		byte[] binlogindexitem = codec.encode(bucketManager.getBinlogIndex()
 				.get(writingBucket.getStartingBinlogPos()));
-		binlogIndexFile.write(binlogindexitem.length);
-		binlogIndexFile.write(binlogindexitem);
+		bucketManager.writeBinlogToIndex(binlogindexitem);
 	}
 
 	@Override

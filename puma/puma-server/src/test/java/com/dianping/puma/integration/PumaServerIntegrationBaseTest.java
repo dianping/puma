@@ -49,6 +49,7 @@ import com.dianping.puma.sender.dispatcher.SimpleDispatherImpl;
 import com.dianping.puma.server.MMapBasedBinlogPositionHolder;
 import com.dianping.puma.server.ReplicationBasedServer;
 import com.dianping.puma.storage.ArchiveStrategy;
+import com.dianping.puma.storage.BinlogIndexManager;
 import com.dianping.puma.storage.BucketIndex;
 import com.dianping.puma.storage.CleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
@@ -151,7 +152,7 @@ public abstract class PumaServerIntegrationBaseTest {
 		storage.setCleanupStrategy(new CleanupStrategy() {
 
 			@Override
-			public void cleanup(BucketIndex index) {
+			public void cleanup(BucketIndex index, BinlogIndexManager binlogIndexManager) {
 
 			}
 		});

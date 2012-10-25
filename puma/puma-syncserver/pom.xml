@@ -103,6 +103,11 @@
             <artifactId>gson</artifactId>
             <version>2.2.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-exec</artifactId>
+            <version>1.1</version>
+        </dependency>
         <!-- SpringMVC & Velocity -->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -237,6 +242,7 @@
             <plugin>
                 <groupId>org.mortbay.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
+                <version>8.1.7.v20120910</version>
                 <configuration>
                     <!-- <scanIntervalSeconds>2</scanIntervalSeconds> -->
                     <webAppSourceDirectory>webapp</webAppSourceDirectory>

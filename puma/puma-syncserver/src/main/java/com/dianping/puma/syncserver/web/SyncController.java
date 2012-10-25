@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.SyncConfig;
+import com.dianping.puma.syncserver.bo.DumpClient;
 import com.dianping.puma.syncserver.bo.SyncClient;
 import com.dianping.puma.syncserver.util.SyncXmlParser;
 import com.google.gson.Gson;
@@ -28,7 +30,7 @@ public class SyncController {
     private static final Logger LOG = LoggerFactory.getLogger(SyncController.class);
 
     SyncClient syncClient;
-    
+
     @RequestMapping(value = "/createSync", method = { RequestMethod.GET, RequestMethod.POST }, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object createSync(String syncXml) {
@@ -73,7 +75,7 @@ public class SyncController {
      * (4)启动新的SyncClient<br>
      * 使用新的syncXml设置SyncClient，恢复同步。<br>
      */
-    @RequestMapping(value = "/modifySync", method = {RequestMethod.POST,RequestMethod.GET}, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "/modifySync", method = { RequestMethod.POST, RequestMethod.GET }, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object modifySync(HttpServletRequest request, String syncXml) {
         Map<String, Object> map = new HashMap<String, Object>();
@@ -91,6 +93,44 @@ public class SyncController {
             LOG.info("SyncClient modify...");
             syncClient.setSync(sync);
 
+            map.put("success", true);
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", stackToString(e));
+            LOG.error(e.getMessage(), e);
+        }
+        Gson gson = new Gson();
+        return gson.toJson(map);
+    }
+
+    /**
+     * 根据dumpConfig，进行dump，并返回binlog位置<br>
+     * (dump使用json，因为是内部传输；sync使用xml，因为是需要给用户看和修改。)
+     * 
+     */
+    @RequestMapping(value = "/dump", method = { RequestMethod.POST, RequestMethod.GET }, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object dump(HttpServletRequest request, String dumpJson) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            //TODO mock dumpJson
+            if (dumpJson == null) {
+                File file = new File("/home/wukezhu/document/mywork/puma/puma/puma-syncserver/src/main/resources/dumpConfig.json");
+                dumpJson = IOUtils.toString(new FileInputStream(file), "UTF-8");
+            }
+
+            //解析dumpJson，得到DumpConfig对象
+            Gson gson = new Gson();
+            DumpConfig dumpConfig = gson.fromJson(dumpJson, DumpConfig.class);
+            LOG.info("receive dumpConfig: " + dumpConfig);
+            //启动DumpClient对象
+            LOG.info("DumpClient init...");
+            DumpClient dumpClient = new DumpClient(dumpConfig);
+            LOG.info("DumpClient dumping...");
+            Long binlogPos = dumpClient.dump();
+            LOG.info("DumpClient done，binlogPos is " + binlogPos);
+
+            map.put("binlogPos", binlogPos);
             map.put("success", true);
         } catch (Exception e) {
             map.put("success", false);

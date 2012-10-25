@@ -173,7 +173,7 @@ public class JsonEventCodecTest {
 		int length = ByteArrayUtils.byteArrayToInt(lengthArray, 0, 4);
 		byte[] data = new byte[length];
 		StreamUtils.readFully(is, data, 0, length);
-		return codec.decode(data);
+		return (ChangedEvent)codec.decode(data);
 	}
 
 	public static final byte[] intToByteArray(int value) {

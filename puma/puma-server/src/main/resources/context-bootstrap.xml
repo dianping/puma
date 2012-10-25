@@ -79,7 +79,11 @@
 		<property name="metaDBHost" value="127.0.0.1" />
 		<property name="metaDBPort" value="3306" />
 		<property name="metaDBUser" value="root" />
+<<<<<<< HEAD
 		<property name="metaDBPassword" value="root" />
+=======
+		<property name="metaDBPassword" value="000000" />
+>>>>>>> a9f2116a3cb842a97313bfa8ed9fb7bb7fcb2502
 	</bean>
 
 	<bean id="defaultParser" class="com.dianping.puma.parser.DefaultBinlogParser"
@@ -104,7 +108,7 @@
 	<bean id="localBucketIndex-Dianping" class="com.dianping.puma.storage.LocalFileBucketIndex"
 		init-method="start">
 		<property name="bucketFilePrefix" value="bucket-" />
-		<property name="maxBucketLengthMB" value="1000" />
+		<property name="maxBucketLengthMB" value="1" />
 		<property name="baseDir" value="/data/applogs/puma/storage/Dianping/" />
 	</bean>
 	<bean id="hdfsBucketIndex-Dianping" class="com.dianping.puma.storage.LocalFileBucketIndex"

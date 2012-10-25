@@ -40,7 +40,7 @@ public class DefaultEventChannel implements EventChannel {
 			try {
 				checkClosed();
 				byte[] data = bucket.getNext();
-				event = codec.decode(data);
+				event = (ChangedEvent)codec.decode(data);
 			} catch (EOFException e) {
 				try {
 					if (bucketManager.hasNexReadBucket(seq)) {

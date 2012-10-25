@@ -18,8 +18,10 @@ package com.dianping.puma.storage;
 import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.dianping.puma.core.datatype.BinlogPos;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
@@ -29,10 +31,28 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  */
 public abstract class AbstractBucket implements Bucket {
 	private Sequence					startingSequence;
+	private BinlogPos                   startingBinlogPos;
 	private int							maxSizeMB;
 	private AtomicReference<Sequence>	currentWritingSeq	= new AtomicReference<Sequence>();
+	private AtomicReference<BinlogPos>	currentWritingBinlogPos = new AtomicReference<BinlogPos>();
 	private volatile boolean			stopped				= false;
 	private long						maxSizeByte;
+		
+	public BinlogPos getStartingBinlogPos() {
+		return startingBinlogPos;
+	}
+
+	public void setStartingBinlogPos(BinlogPos startingBinlogPos) {
+		this.startingBinlogPos = startingBinlogPos;
+	}
+
+	public BinlogPos getCurrentWritingBinlogPos() {
+		return currentWritingBinlogPos.get();
+	}
+
+	public void setCurrentWritingBinlogPos(BinlogPos binlogPos) {
+		this.currentWritingBinlogPos.set(binlogPos);
+	}
 
 	/**
 	 * @param maxSizeMB

@@ -47,6 +47,7 @@ public class DefaultCleanupStrategyTest {
 		DefaultCleanupStrategy defaultCleanupStrategy = new DefaultCleanupStrategy();
 		defaultCleanupStrategy.setPreservedDay(preservedDay);
 		LocalFileBucketIndex index = new LocalFileBucketIndex();
+		BinlogIndexManager binlogIndexManager = new BinlogIndexManager("bucket-");
 		index.setBaseDir(baseDir.getAbsolutePath());
 		index.setBucketFilePrefix("bucket-");
 
@@ -62,7 +63,7 @@ public class DefaultCleanupStrategyTest {
 
 		index.start();
 
-		defaultCleanupStrategy.cleanup(index);
+		defaultCleanupStrategy.cleanup(index, binlogIndexManager);
 
 		Assert.assertEquals(preservedDay, index.size());
 

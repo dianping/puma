@@ -22,5 +22,5 @@ package com.dianping.puma.storage;
  * 
  */
 public interface CleanupStrategy {
-	public void cleanup(BucketIndex index);
+	public void cleanup(BucketIndex index,BinlogIndexManager binlogIndexManager);
 }

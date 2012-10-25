@@ -56,5 +56,7 @@ public interface BucketIndex extends LifeCycle<IOException> {
 	public void remove(List<String> paths) throws StorageClosedException;
 
 	public void updateLatestSequence(Sequence sequence);
+	
+	public String getBucketFilePrefix();
 
 }

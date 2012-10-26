@@ -25,9 +25,9 @@ public class BinlogIndexManager {
 	private String bucketFilePrefix = "b-";
 	private RandomAccessFile binlogindexfile;
 
-	public BinlogIndexManager(String binlogIndexPrefix) {
+	public BinlogIndexManager(String bucketFilePrefix) {
 		super();
-		this.binlogIndexPrefix = binlogIndexPrefix;
+		this.bucketFilePrefix = bucketFilePrefix;
 	}
 
 	public TreeMap<BinlogPos, BinlogPosAndSeq> getBinlogIndex() {
@@ -202,5 +202,9 @@ public class BinlogIndexManager {
 		String[] parts = path.split(PATH_SEPARATOR);
 		return new Sequence(Integer.valueOf(parts[0].substring(2)), Integer
 				.valueOf(parts[1].substring(bucketFilePrefix.length())));
+	}
+	
+	public void wirteMainBinlogIndex(byte[] data) throws IOException{
+		this.mainBinlogIndexFile.write(data);
 	}
 }

@@ -286,7 +286,7 @@ public class DefaultBucketManager implements BucketManager {
 
 	@Override
 	public void wirteMainBinlogIndex(byte[] data) throws IOException {
-
+		this.binlogIndexManager.writeMainBinlogIndex(data);
 	}
 
 }

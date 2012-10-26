@@ -160,7 +160,10 @@ public class DefaultEventStorage implements EventStorage {
 	public void writeIndexToFile() throws IOException {
 		byte[] binlogindexitem = codec.encode(bucketManager.getBinlogIndex()
 				.get(writingBucket.getStartingBinlogPos()));
-		bucketManager.writeBinlogToIndex(binlogindexitem);
+		ByteArrayOutputStream indexbos = new ByteArrayOutputStream();
+		indexbos.write(ByteArrayUtils.intToByteArray(binlogindexitem.length));
+		indexbos.write(binlogindexitem);
+		bucketManager.wirteMainBinlogIndex(indexbos.toByteArray());
 	}
 
 	@Override

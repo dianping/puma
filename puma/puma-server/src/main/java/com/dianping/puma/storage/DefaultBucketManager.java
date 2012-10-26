@@ -8,8 +8,8 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
-import com.dianping.puma.core.datatype.BinlogPos;
-import com.dianping.puma.core.datatype.BinlogPosAndSeq;
+import com.dianping.puma.core.datatype.BinlogInfo;
+import com.dianping.puma.core.datatype.BinlogInfoAndSeq;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;
@@ -25,11 +25,11 @@ public class DefaultBucketManager implements BucketManager {
 
 	private volatile boolean stopped = true;
 
-	public TreeMap<BinlogPos, BinlogPosAndSeq> getBinlogIndex() {
+	public TreeMap<BinlogInfo, BinlogInfoAndSeq> getBinlogIndex() {
 		return binlogIndexManager.getBinlogIndex();
 	}
 
-	public void setBinlogIndex(TreeMap<BinlogPos, BinlogPosAndSeq> binlogIndex) {
+	public void setBinlogIndex(TreeMap<BinlogInfo, BinlogInfoAndSeq> binlogIndex) {
 		binlogIndexManager.setBinlogIndex(binlogIndex);
 	}
 
@@ -242,8 +242,8 @@ public class DefaultBucketManager implements BucketManager {
 		binlogIndexManager.binlogIndexFileclose();
 	}
 
-	protected static class PathBinlogPosComparator implements
-			Comparator<BinlogPos>, Serializable {
+	protected static class PathBinlogInfoComparator implements
+			Comparator<BinlogInfo>, Serializable {
 
 		private static final long serialVersionUID = -350477869152651536L;
 
@@ -253,7 +253,7 @@ public class DefaultBucketManager implements BucketManager {
 		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 		 */
 		@Override
-		public int compare(BinlogPos o1, BinlogPos o2) {
+		public int compare(BinlogInfo o1, BinlogInfo o2) {
 			if (o1.getServerId() < o2.getServerId()) {
 				return -1;
 			} else if (o1.getServerId() == o2.getServerId()) {
@@ -278,15 +278,20 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	@Override
-	public Boolean getReadBinlogIndex(BinlogPos binlogpos)
+	public Boolean getReadBinlogIndex(BinlogInfo binlogInfo)
 			throws StorageClosedException, IOException {
 		checkClosed();
-		return binlogIndexManager.getReadBinlogIndex(binlogpos);
+		return binlogIndexManager.getReadBinlogIndex(binlogInfo);
 	}
 
 	@Override
-	public void wirteMainBinlogIndex(byte[] data) throws IOException {
-		this.binlogIndexManager.writeMainBinlogIndex(data);
+	public void writeMainBinlogIndex(BinlogInfo binlogInfo) throws IOException {
+		this.binlogIndexManager.writeMainBinlogIndex(binlogInfo);
+	}
+	
+	@Override
+	public void writeBinlogIndexIntoProperty(BinlogInfoAndSeq bpas) throws IOException{
+		this.binlogIndexManager.writeBinlogIndexIntoProperty(bpas);
 	}
 
 }

@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.TreeMap;
 
 import com.dianping.puma.common.LifeCycle;
-import com.dianping.puma.core.datatype.BinlogPos;
-import com.dianping.puma.core.datatype.BinlogPosAndSeq;
+import com.dianping.puma.core.datatype.BinlogInfo;
+import com.dianping.puma.core.datatype.BinlogInfoAndSeq;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;
@@ -27,7 +27,7 @@ public interface BucketManager extends LifeCycle<StorageLifeCycleException> {
 
 	public void updateFileBinlogIndex(Bucket bucket);
 
-	public TreeMap<BinlogPos, BinlogPosAndSeq> getBinlogIndex();
+	public TreeMap<BinlogInfo, BinlogInfoAndSeq> getBinlogIndex();
 
 	public void openBinlogIndex(Sequence seq) throws IOException;
 
@@ -37,8 +37,10 @@ public interface BucketManager extends LifeCycle<StorageLifeCycleException> {
 
 	public void binlogIndexFileclose() throws IOException;
 
-	public Boolean getReadBinlogIndex(BinlogPos binlogpos)
+	public Boolean getReadBinlogIndex(BinlogInfo binlogInfo)
 			throws StorageClosedException, IOException;
 	
-	public void wirteMainBinlogIndex(byte[] data) throws IOException;
+	public void writeMainBinlogIndex(BinlogInfo binlogInfo) throws IOException;
+	
+	public void writeBinlogIndexIntoProperty(BinlogInfoAndSeq bpas) throws IOException;
 }

@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.dianping.puma.core.datatype.BinlogPos;
+import com.dianping.puma.core.datatype.BinlogInfo;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
@@ -31,27 +31,27 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  */
 public abstract class AbstractBucket implements Bucket {
 	private Sequence					startingSequence;
-	private BinlogPos                   startingBinlogPos;
+	private BinlogInfo                   startingBinlogInfo;
 	private int							maxSizeMB;
 	private AtomicReference<Sequence>	currentWritingSeq	= new AtomicReference<Sequence>();
-	private AtomicReference<BinlogPos>	currentWritingBinlogPos = new AtomicReference<BinlogPos>();
+	private AtomicReference<BinlogInfo>	currentWritingBinlogInfo = new AtomicReference<BinlogInfo>();
 	private volatile boolean			stopped				= false;
 	private long						maxSizeByte;
 		
-	public BinlogPos getStartingBinlogPos() {
-		return startingBinlogPos;
+	public BinlogInfo getStartingBinlogInfo() {
+		return startingBinlogInfo;
 	}
 
-	public void setStartingBinlogPos(BinlogPos startingBinlogPos) {
-		this.startingBinlogPos = startingBinlogPos;
+	public void setStartingBinlogInfo(BinlogInfo startingBinlogInfo) {
+		this.startingBinlogInfo = startingBinlogInfo;
 	}
 
-	public BinlogPos getCurrentWritingBinlogPos() {
-		return currentWritingBinlogPos.get();
+	public BinlogInfo getCurrentWritingBinlogInfo() {
+		return currentWritingBinlogInfo.get();
 	}
 
-	public void setCurrentWritingBinlogPos(BinlogPos binlogPos) {
-		this.currentWritingBinlogPos.set(binlogPos);
+	public void setCurrentWritingBinlogInfo(BinlogInfo binlogInfo) {
+		this.currentWritingBinlogInfo.set(binlogInfo);
 	}
 
 	/**

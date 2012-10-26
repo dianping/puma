@@ -18,7 +18,7 @@ package com.dianping.puma.storage;
 import java.io.IOException;
 
 import com.dianping.puma.common.LifeCycle;
-import com.dianping.puma.core.datatype.BinlogPos;
+import com.dianping.puma.core.datatype.BinlogInfo;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
@@ -74,11 +74,11 @@ public interface Bucket extends LifeCycle<IOException> {
 	 */
 	public long getCurrentWritingSeq();
 
-	public BinlogPos getCurrentWritingBinlogPos();
+	public BinlogInfo getCurrentWritingBinlogInfo();
 
-	public void setCurrentWritingBinlogPos(BinlogPos binlogPos);
+	public void setCurrentWritingBinlogInfo(BinlogInfo binlogInfo);
 
-	public BinlogPos getStartingBinlogPos();
+	public BinlogInfo getStartingBinlogInfo();
 	
-	public void setStartingBinlogPos(BinlogPos startingBinlogPos);
+	public void setStartingBinlogInfo(BinlogInfo startingBinlogInfo);
 }

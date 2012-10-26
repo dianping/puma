@@ -47,7 +47,7 @@
 		<property name="host" value="127.0.0.1" />
 		<property name="port" value="3306" />
 		<property name="user" value="root" />
-		<property name="password" value="root" />
+		<property name="password" value="000000" />
 		<property name="defaultBinlogFileName" value="" />
 		<property name="defaultBinlogPosition" value="" />
 		<property name="parser" ref="defaultParser" />
@@ -79,11 +79,7 @@
 		<property name="metaDBHost" value="127.0.0.1" />
 		<property name="metaDBPort" value="3306" />
 		<property name="metaDBUser" value="root" />
-<<<<<<< HEAD
-		<property name="metaDBPassword" value="root" />
-=======
 		<property name="metaDBPassword" value="000000" />
->>>>>>> a9f2116a3cb842a97313bfa8ed9fb7bb7fcb2502
 	</bean>
 
 	<bean id="defaultParser" class="com.dianping.puma.parser.DefaultBinlogParser"

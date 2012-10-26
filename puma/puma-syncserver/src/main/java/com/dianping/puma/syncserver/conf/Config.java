@@ -21,6 +21,8 @@ public class Config {
     private String pumaServerHost;
     private int pumaServerPort;
 
+    private String dumpTempDir;
+
     private Config() {
         Properties p = new Properties();
         try {
@@ -30,6 +32,7 @@ public class Config {
         }
         pumaServerHost = p.getProperty("pumaServerHost", "127.0.0.1");
         pumaServerPort = Integer.parseInt(p.getProperty("pumaServerPort", "8080"));
+        dumpTempDir = p.getProperty("dumpTempDir", "/tmp/puma-syncserver");
     }
 
     public String getPumaServerHost() {
@@ -46,6 +49,14 @@ public class Config {
 
     public void setPumaServerPort(int pumaServerPort) {
         this.pumaServerPort = pumaServerPort;
+    }
+
+    public String getDumpTempDir() {
+        return dumpTempDir;
+    }
+
+    public void setDumpTempDir(String dumpTempDir) {
+        this.dumpTempDir = dumpTempDir;
     }
 
 }

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dump xmlns="puma.dianping.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="sync.xsds">
+    <!-- 同步源的mysql配置 -->
+    <src>
+        <host>192.168.1.1</host>
+        <port>3306</port>
+        <username>root</username>
+        <password>***</password>
+        <opt></opt>
+        <add-drop-database>false</add-drop-database>
+        <add-drop-table>false</add-drop-table>
+        <default-character-set>UTF8</default-character-set>
+    </src>
+    <!-- 同步目标的mysql配置 -->
+    <dest>
+        <host>192.168.1.1</host>
+        <port>3306</port>
+        <username>root</username>
+        <password>root</password>
+    </dest>
+    <databse name="pumatest">
+        <table name="test" />
+        <table name="test1" />
+    </databse>
+    <databse name="test">
+        <table name="test4" />
+    </databse>
+</dump>

@@ -38,18 +38,24 @@ public class SyncClient {
             //对比新旧sync，求出新增的<database>或<table>配置(如果新增*行，也要求出具体的database和table)
             List<DatabaseConfig> addedDatabases = _compare(this.sync, sync);
             LOG.info("sync xml changed database config:" + addedDatabases);
-            //对新增的<database>或<table>配置，进行dump
-            DumpClient dumpClient = new DumpClient();
-            dumpClient.setSrc(this.sync.getSrc());
-            dumpClient.setDest(this.sync.getDest());
-            dumpClient.setDatabases(addedDatabases);
-            Long dumpBinlogPos = dumpClient.dump();
+//            //对新增的<database>或<table>配置，进行dump
+//            DumpClient dumpClient = new DumpClient();
+//            dumpClient.setSrc(this.sync.getSrc());
+//            dumpClient.setDest(this.sync.getDest());
+//            dumpClient.setDatabases(addedDatabases);
+//            Long dumpBinlogPos = dumpClient.dump();
+            Long dumpBinlogPos = null;//dump结束后，dumpBinlogPos作为参数传递进来，表示需要追赶
+            //（1）将使得dumpBinlogPos和curBinlogPos一致
+            //（若dumpBinlogPos < curBinlogPos，则addedDatabases追赶）
+            //（若dumpBinlogPos > curBinlogPos，则当前继续，直到一致。）
             //终止当前的PumaClient，记录当前binlogPos
             pumaClient.stop();
             Long curBinlogPos = this.binlogPos;
             //新建临时的PumaClient，对newDatabases进行追赶，起点为dumpBinlogPos，终点为curBinlogPos
             PumaClient pumaClientForPursue = _createPumaClientForPursue(dumpBinlogPos, curBinlogPos);
 //            pumaClientForPursue.start();
+            
+            //（2）dumpBinlogPos和curBinlogPos一致后，设置PumaClient的sync，重启PumaClient
             //使用新的sync，重新创建并启动新的PumaClient
             this.sync = sync;
             this.binlogPos = curBinlogPos;

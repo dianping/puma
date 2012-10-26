@@ -1,5 +1,6 @@
 package com.dianping.puma.core.sync;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +45,9 @@ public class DumpConfig {
         private Integer port;
         private String username;
         private String password;
-        private String optionString;
+        //--opt --add-drop-database=false --add-drop-table=false --default-character-set=utf8
+        private List<String> options = Arrays.asList(new String[] { "--opt", "--add-drop-database=false", "--add-drop-table=false",
+                "--default-character-set=utf8" });
 
         public String getHost() {
             return host;
@@ -78,12 +81,12 @@ public class DumpConfig {
             this.password = password;
         }
 
-        public String getOptionString() {
-            return optionString;
+        public List<String> getOptions() {
+            return options;
         }
 
-        public void setOptionString(String optionString) {
-            this.optionString = optionString;
+        public void setOptions(List<String> options) {
+            this.options = options;
         }
 
     }

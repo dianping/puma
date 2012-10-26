@@ -38,12 +38,12 @@ public class SyncClient {
             //对比新旧sync，求出新增的<database>或<table>配置(如果新增*行，也要求出具体的database和table)
             List<DatabaseConfig> addedDatabases = _compare(this.sync, sync);
             LOG.info("sync xml changed database config:" + addedDatabases);
-//            //对新增的<database>或<table>配置，进行dump
-//            DumpClient dumpClient = new DumpClient();
-//            dumpClient.setSrc(this.sync.getSrc());
-//            dumpClient.setDest(this.sync.getDest());
-//            dumpClient.setDatabases(addedDatabases);
-//            Long dumpBinlogPos = dumpClient.dump();
+            //            //对新增的<database>或<table>配置，进行dump
+            //            DumpClient dumpClient = new DumpClient();
+            //            dumpClient.setSrc(this.sync.getSrc());
+            //            dumpClient.setDest(this.sync.getDest());
+            //            dumpClient.setDatabases(addedDatabases);
+            //            Long dumpBinlogPos = dumpClient.dump();
             Long dumpBinlogPos = null;//dump结束后，dumpBinlogPos作为参数传递进来，表示需要追赶
             //（1）将使得dumpBinlogPos和curBinlogPos一致
             //（若dumpBinlogPos < curBinlogPos，则addedDatabases追赶）
@@ -53,13 +53,13 @@ public class SyncClient {
             Long curBinlogPos = this.binlogPos;
             //新建临时的PumaClient，对newDatabases进行追赶，起点为dumpBinlogPos，终点为curBinlogPos
             PumaClient pumaClientForPursue = _createPumaClientForPursue(dumpBinlogPos, curBinlogPos);
-//            pumaClientForPursue.start();
-            
+            //            pumaClientForPursue.start();
+
             //（2）dumpBinlogPos和curBinlogPos一致后，设置PumaClient的sync，重启PumaClient
             //使用新的sync，重新创建并启动新的PumaClient
             this.sync = sync;
             this.binlogPos = curBinlogPos;
-//            this.start();
+            //            this.start();
         } else {
             this.sync = sync;
         }
@@ -74,10 +74,9 @@ public class SyncClient {
     }
 
     /**
-     * 修改sync(修改sync，只允许新增<database>或 TODO 修改sync允许哪些修改 ???????????????????????????????????????
-     * <table>
-     * 级别的标签)<br>
-     * 对比新旧sync，求出新增的database或table配置(table也属于database下，故返回的都是database)
+     * 修改sync <br>
+     * 对比新旧sync，求出新增的database或table配置(table也属于database下，故返回的都是database)<br>
+     * 同时做验证：只允许新增database或table配置
      */
     private List<DatabaseConfig> _compare(SyncConfig oldSync, SyncConfig newSync) {
         //首先验证基础属性（dest，name，serverId，target）是否一致

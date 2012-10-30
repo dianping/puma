@@ -17,6 +17,8 @@ package com.dianping.puma.storage;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.dianping.puma.common.LifeCycle;
 import com.dianping.puma.storage.exception.StorageClosedException;
@@ -43,7 +45,7 @@ public interface BucketIndex extends LifeCycle<IOException> {
 
 	public boolean hasNexReadBucket(Sequence sequence) throws StorageClosedException;
 
-	public Bucket getReadBucket(long seq) throws StorageClosedException, IOException;
+	public Bucket getReadBucket(long seq, Boolean start) throws StorageClosedException, IOException;
 
 	public int size();
 
@@ -58,5 +60,7 @@ public interface BucketIndex extends LifeCycle<IOException> {
 	public void updateLatestSequence(Sequence sequence);
 	
 	public String getBucketFilePrefix();
+	
+	public AtomicReference<TreeMap<Sequence, String>> getIndex();
 
 }

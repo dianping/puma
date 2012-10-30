@@ -26,6 +26,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.dianping.puma.core.codec.EventCodec;
+
 /**
  * TODO Comment of DefaultCleanupStrategyTest
  * 

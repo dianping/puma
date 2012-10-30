@@ -8,6 +8,7 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
+import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.datatype.BinlogInfo;
 import com.dianping.puma.core.datatype.BinlogInfoAndSeq;
 import com.dianping.puma.core.util.PumaThreadUtils;
@@ -35,12 +36,12 @@ public class DefaultBucketManager implements BucketManager {
 
 	public DefaultBucketManager(BucketIndex masterIndex,
 			BucketIndex slaveIndex, ArchiveStrategy archiveStrategy,
-			CleanupStrategy cleanupStrategy) {
+			CleanupStrategy cleanupStrategy, EventCodec codec) {
 		this.archiveStrategy = archiveStrategy;
 		this.cleanupStrategy = cleanupStrategy;
 		this.masterIndex = masterIndex;
 		this.slaveIndex = slaveIndex;
-		binlogIndexManager = new BinlogIndexManager(masterIndex.getBucketFilePrefix());
+		binlogIndexManager = new BinlogIndexManager(masterIndex.getBucketFilePrefix(), codec);
 	}
 
 	private void checkClosed() throws StorageClosedException {
@@ -113,12 +114,12 @@ public class DefaultBucketManager implements BucketManager {
 			StorageClosedException {
 		checkClosed();
 
-		Bucket bucket = slaveIndex.getReadBucket(seq);
+		Bucket bucket = slaveIndex.getReadBucket(seq, false);
 
 		if (bucket != null) {
 			return bucket;
 		} else {
-			bucket = masterIndex.getReadBucket(seq);
+			bucket = masterIndex.getReadBucket(seq, false);
 			if (bucket != null) {
 				return bucket;
 			} else {
@@ -148,7 +149,7 @@ public class DefaultBucketManager implements BucketManager {
 	public synchronized void start() throws StorageLifeCycleException {
 		stopped = false;
 		try {
-			this.binlogIndexManager.start();
+			this.binlogIndexManager.start(this.masterIndex, this.slaveIndex);
 		} catch (IOException e) {
 			throw new StorageLifeCycleException("Storage init failed", e);
 		}
@@ -228,13 +229,8 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	@Override
-	public void writeBinlogToIndex(byte[] data) throws IOException {
-		binlogIndexManager.writeBinlogToIndex(data);
-	}
-
-	@Override
-	public byte[] readBinlogFromIndex() throws IOException {
-		return binlogIndexManager.readBinlogFromIndex();
+	public long TranBinlogIndexToSeq(BinlogInfo binlogInfo) throws IOException {
+		return binlogIndexManager.TranBinlogIndexToSeq(binlogInfo);
 	}
 
 	@Override
@@ -278,15 +274,8 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	@Override
-	public Boolean getReadBinlogIndex(BinlogInfo binlogInfo)
-			throws StorageClosedException, IOException {
-		checkClosed();
-		return binlogIndexManager.getReadBinlogIndex(binlogInfo);
-	}
-
-	@Override
-	public void writeMainBinlogIndex(BinlogInfo binlogInfo) throws IOException {
-		this.binlogIndexManager.writeMainBinlogIndex(binlogInfo);
+	public void writeBinlogIndex(BinlogInfo binlogInfo) throws IOException {
+		this.binlogIndexManager.writeBinlogIndex(binlogInfo);
 	}
 	
 	@Override

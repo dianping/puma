@@ -31,16 +31,11 @@ public interface BucketManager extends LifeCycle<StorageLifeCycleException> {
 
 	public void openBinlogIndex(Sequence seq) throws IOException;
 
-	public void writeBinlogToIndex(byte[] data) throws IOException;
-
-	public byte[] readBinlogFromIndex() throws IOException;
+	public long TranBinlogIndexToSeq(BinlogInfo binlogInfo) throws IOException;
 
 	public void binlogIndexFileclose() throws IOException;
-
-	public Boolean getReadBinlogIndex(BinlogInfo binlogInfo)
-			throws StorageClosedException, IOException;
 	
-	public void writeMainBinlogIndex(BinlogInfo binlogInfo) throws IOException;
+	public void writeBinlogIndex(BinlogInfo binlogInfo) throws IOException;
 	
 	public void writeBinlogIndexIntoProperty(BinlogInfoAndSeq bpas) throws IOException;
 }

@@ -48,6 +48,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	/**
 	 * @return the index
 	 */
+	@Override
 	public AtomicReference<TreeMap<Sequence, String>> getIndex() {
 		return index;
 	}
@@ -156,7 +157,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	 * @see com.dianping.puma.storage.BucketIndex#getReadBucket(long)
 	 */
 	@Override
-	public Bucket getReadBucket(long seq) throws StorageClosedException, IOException {
+	public Bucket getReadBucket(long seq, Boolean start) throws StorageClosedException, IOException {
 		checkClosed();
 		Sequence sequence = null;
 		String path = null;
@@ -195,7 +196,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 		if (bucket != null) {
 			bucket.seek(offset);
 			try {
-				if (seq != -1L && seq != -2L) {
+				if (seq != -1L && seq != -2L && !start) {
 					bucket.getNext();
 				}
 			} catch (EOFException e) {

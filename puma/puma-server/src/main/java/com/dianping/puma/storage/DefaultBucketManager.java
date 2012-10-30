@@ -35,13 +35,13 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	public DefaultBucketManager(BucketIndex masterIndex,
-			BucketIndex slaveIndex, ArchiveStrategy archiveStrategy,
-			CleanupStrategy cleanupStrategy, EventCodec codec) {
+			BucketIndex slaveIndex, BinlogIndexManager binlogIndexManager, ArchiveStrategy archiveStrategy,
+			CleanupStrategy cleanupStrategy) {
 		this.archiveStrategy = archiveStrategy;
 		this.cleanupStrategy = cleanupStrategy;
 		this.masterIndex = masterIndex;
 		this.slaveIndex = slaveIndex;
-		binlogIndexManager = new BinlogIndexManager(masterIndex.getBucketFilePrefix(), codec);
+		this.binlogIndexManager = binlogIndexManager;
 	}
 
 	private void checkClosed() throws StorageClosedException {
@@ -235,7 +235,7 @@ public class DefaultBucketManager implements BucketManager {
 
 	@Override
 	public void binlogIndexFileclose() throws IOException {
-		binlogIndexManager.binlogIndexFileclose();
+		binlogIndexManager.closebinlogIndexFile();
 	}
 
 	protected static class PathBinlogInfoComparator implements

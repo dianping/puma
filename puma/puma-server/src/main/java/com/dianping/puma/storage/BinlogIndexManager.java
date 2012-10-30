@@ -7,17 +7,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.dianping.cat.configuration.client.entity.Property;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.datatype.BinlogInfo;
 import com.dianping.puma.core.datatype.BinlogInfoAndSeq;
@@ -25,36 +22,30 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 public class BinlogIndexManager {
-	private AtomicReference<TreeMap<BinlogInfo, BinlogInfoAndSeq>> binlogIndex = new AtomicReference<TreeMap<BinlogInfo, BinlogInfoAndSeq>>();
+	private AtomicReference<TreeMap<BinlogInfo, BinlogInfoAndSeq>> mainBinlogIndex = new AtomicReference<TreeMap<BinlogInfo, BinlogInfoAndSeq>>();
 	private String mainbinlogIndexFileName = "binlogIndex";
 	private String mainbinlogIndexFileNameBasedir = "/data/applogs/puma/";
 	protected static final String PATH_SEPARATOR = "/";
-	private String binlogIndexBaseDir = "/data/applogs/puma/binlogindex";
-	private String binlogIndexPrefix = "index-";
+	private String subBinlogIndexBaseDir = "/data/applogs/puma/binlogindex";
+	private String subBinlogIndexPrefix = "index-";
 	private String bucketFilePrefix = "b-";
 	private String BINLOGINFO_SEPARATOR = "$";
-	private File binlogFile;
+	private File subBinlogFile;
 	private File mainBinlogIndexFile;
 	private Properties prop;
 	private EventCodec codec;
 
-	public BinlogIndexManager(String bucketFilePrefix, EventCodec codec) {
-		super();
-		this.bucketFilePrefix = bucketFilePrefix;
-		this.codec = codec;
-	}
-
 	public TreeMap<BinlogInfo, BinlogInfoAndSeq> getBinlogIndex() {
-		return binlogIndex.get();
+		return mainBinlogIndex.get();
 	}
 
 	public void setBinlogIndex(TreeMap<BinlogInfo, BinlogInfoAndSeq> binlogIndex) {
-		this.binlogIndex.set(binlogIndex);
+		this.mainBinlogIndex.set(binlogIndex);
 	}
 
 	public void start(BucketIndex masterIndex, BucketIndex slaveIndex)
 			throws IOException {
-		this.binlogIndex.set(new TreeMap<BinlogInfo, BinlogInfoAndSeq>(
+		this.mainBinlogIndex.set(new TreeMap<BinlogInfo, BinlogInfoAndSeq>(
 				new PathBinlogInfoComparator()));
 		this.mainBinlogIndexFile = new File(mainbinlogIndexFileNameBasedir,
 				mainbinlogIndexFileName);
@@ -74,7 +65,7 @@ public class BinlogIndexManager {
 			if (!hasCleaned(value, slaveIndex, masterIndex))
 				continue;
 			try {
-				binlogIndex.get().put(convertStringToBinlogInfo(key),
+				mainBinlogIndex.get().put(convertStringToBinlogInfo(key),
 						convertStringToBinlogInfoAndSeq(value));
 			} catch (Exception e) {
 				// TODO is there any more reasonable method
@@ -82,7 +73,7 @@ public class BinlogIndexManager {
 			}
 		}
 		int lostnum = masterIndex.size() + slaveIndex.size()
-				- binlogIndex.get().size();
+				- mainBinlogIndex.get().size();
 		// TODO build the complete binlog index
 		while (lostnum-- > 0) {
 			Bucket bucket = masterIndex.getReadBucket(masterIndex.getIndex()
@@ -107,7 +98,8 @@ public class BinlogIndexManager {
 							|| binlogpos != event.getBinlogPos()) {
 						this.prop.put(convertBinlogInfoToString(new BinlogInfo(
 								event.getServerId(), event.getBinlog(), event
-										.getBinlogPos())), String.valueOf(event.getSeq()));
+										.getBinlogPos())), String.valueOf(event
+								.getSeq()));
 						binlogfile = event.getBinlog();
 						binlogpos = event.getBinlogPos();
 					}
@@ -117,10 +109,10 @@ public class BinlogIndexManager {
 			}
 			binlogInfoAndSeq.setBinlogInfo(new BinlogInfo(event.getServerId(),
 					event.getBinlog(), event.getBinlogPos()));
-			binlogIndex.get().put(binlogInfo, binlogInfoAndSeq);
+			mainBinlogIndex.get().put(binlogInfo, binlogInfoAndSeq);
 			openBinlogIndex(new Sequence(binlogInfoAndSeq.getSeq()));
 			writeBinlogIndex(binlogInfo);
-			binlogIndexFileclose();
+			closebinlogIndexFile();
 		}
 	}
 
@@ -196,34 +188,34 @@ public class BinlogIndexManager {
 
 	private void updateStartBinlogInfoIndex(Bucket bucket) {
 		TreeMap<BinlogInfo, BinlogInfoAndSeq> newBinlogInfoIndexes = new TreeMap<BinlogInfo, BinlogInfoAndSeq>(
-				binlogIndex.get());
+				mainBinlogIndex.get());
 		newBinlogInfoIndexes.put(bucket.getStartingBinlogInfo(),
 				new BinlogInfoAndSeq(bucket.getCurrentWritingBinlogInfo(),
 						bucket.getStartingSequece().longValue()));
-		binlogIndex.set(newBinlogInfoIndexes);
+		mainBinlogIndex.set(newBinlogInfoIndexes);
 	}
 
 	public void updateFileBinlogIndex(Bucket bucket) {
-		if (binlogIndex.get().get(bucket.getStartingBinlogInfo()) == null) {
+		if (mainBinlogIndex.get().get(bucket.getStartingBinlogInfo()) == null) {
 			updateStartBinlogInfoIndex(bucket);
 		} else {
-			binlogIndex.get().get(bucket.getStartingBinlogInfo())
+			mainBinlogIndex.get().get(bucket.getStartingBinlogInfo())
 					.setBinlogInfo(bucket.getCurrentWritingBinlogInfo());
 		}
 	}
 
 	protected String convertToPath(Sequence seq) {
 		return "20" + seq.getCreationDate() + PATH_SEPARATOR
-				+ binlogIndexPrefix + seq.getNumber();
+				+ this.subBinlogIndexPrefix + seq.getNumber();
 	}
 
 	public void openBinlogIndex(Sequence seq) throws IOException {
-		this.binlogFile = new File(binlogIndexBaseDir, convertToPath(seq));
-		if (!this.binlogFile.getParentFile().exists()) {
-			if (!this.binlogFile.getParentFile().mkdirs()) {
+		this.subBinlogFile = new File(this.subBinlogIndexBaseDir, convertToPath(seq));
+		if (!this.subBinlogFile.getParentFile().exists()) {
+			if (!this.subBinlogFile.getParentFile().mkdirs()) {
 				throw new IOException(String.format(
 						"Can't create writeBucket's parent(%s)!",
-						this.binlogFile.getParent()));
+						this.subBinlogFile.getParent()));
 			}
 		}
 	}
@@ -231,7 +223,7 @@ public class BinlogIndexManager {
 	public long readBinlogIndex(Sequence seq, BinlogInfo binlogInfo)
 			throws IOException {
 		Properties result = new Properties();
-		File bfile = new File(binlogIndexBaseDir, convertToPath(seq));
+		File bfile = new File(subBinlogIndexBaseDir, convertToPath(seq));
 		InputStream inStream = new FileInputStream(bfile);
 		inStream.close();
 		result.load(inStream);
@@ -243,7 +235,7 @@ public class BinlogIndexManager {
 		}
 	}
 
-	public void binlogIndexFileclose() throws IOException {
+	public void closebinlogIndexFile() throws IOException {
 		this.prop.clear();
 	}
 
@@ -297,7 +289,7 @@ public class BinlogIndexManager {
 
 	public long TranBinlogIndexToSeq(BinlogInfo binlogInfo)
 			throws StorageClosedException, IOException {
-		Map map = this.binlogIndex.get();
+		Map map = this.mainBinlogIndex.get();
 		Iterator iter = map.entrySet().iterator();
 		Bucket bucket = null;
 		while (iter.hasNext()) {
@@ -314,25 +306,25 @@ public class BinlogIndexManager {
 	}
 
 	public void writeBinlogIndex(BinlogInfo binlogInfo) throws IOException {
-		BinlogInfoAndSeq value = binlogIndex.get().get(binlogInfo);
+		BinlogInfoAndSeq value = mainBinlogIndex.get().get(binlogInfo);
 		try {
-			OutputStream binlogindex = new FileOutputStream(this.binlogFile);
-			this.prop.store(binlogindex, "write to binlogfile");
-			binlogindex.close();
-			OutputStream mainbinlogindex = new FileOutputStream(
+			OutputStream sbindex = new FileOutputStream(this.subBinlogFile);
+			this.prop.store(sbindex, "write to binlogfile");
+			sbindex.close();
+			OutputStream mbindex = new FileOutputStream(
 					this.mainBinlogIndexFile, true);
-			Properties mainindexitem = new Properties();
-			mainindexitem.put(convertBinlogInfoToString(binlogInfo),
+			Properties mbindexitem = new Properties();
+			mbindexitem.put(convertBinlogInfoToString(binlogInfo),
 					convertBinlogInfoAndSeqToString(value));
-			mainindexitem.store(mainbinlogindex, "write a mainbinglogitem");
-			mainbinlogindex.close();
+			mbindexitem.store(mbindex, "write a mainbinglogitem");
+			mbindex.close();
 		} catch (IOException e) {
 			System.err.println("write to binlogfile fail!");
 		}
 	}
 
 	public void deleteBinlogIndexFile(Sequence seq) {
-		File bindex = new File(binlogIndexBaseDir, convertToPath(seq));
+		File bindex = new File(subBinlogIndexBaseDir, convertToPath(seq));
 		bindex.delete();
 	}
 
@@ -340,7 +332,7 @@ public class BinlogIndexManager {
 	public void deleteBinlogIndex(String path) {
 		long deleteitem = convertToSequence(path).longValue();
 		deleteBinlogIndexFile(convertToSequence(path));
-		Map map = this.binlogIndex.get();
+		Map map = this.mainBinlogIndex.get();
 		Iterator iter = map.entrySet().iterator();
 		Bucket bucket = null;
 		while (iter.hasNext()) {
@@ -352,7 +344,7 @@ public class BinlogIndexManager {
 				break;
 			}
 		}
-		binlogIndex.set((TreeMap<BinlogInfo, BinlogInfoAndSeq>) map);
+		mainBinlogIndex.set((TreeMap<BinlogInfo, BinlogInfoAndSeq>) map);
 	}
 
 	protected Sequence convertToSequence(String path) {
@@ -382,5 +374,54 @@ public class BinlogIndexManager {
 				+ String.valueOf(binlogInfoAndSeq.getBinlogInfo()
 						.getBinlogPosition()) + this.BINLOGINFO_SEPARATOR
 				+ String.valueOf(binlogInfoAndSeq.getSeq());
+	}
+
+	public String getMainbinlogIndexFileName() {
+		return mainbinlogIndexFileName;
+	}
+
+	public void setMainbinlogIndexFileName(String mainbinlogIndexFileName) {
+		this.mainbinlogIndexFileName = mainbinlogIndexFileName;
+	}
+
+	public String getMainbinlogIndexFileNameBasedir() {
+		return mainbinlogIndexFileNameBasedir;
+	}
+
+	public void setMainbinlogIndexFileNameBasedir(
+			String mainbinlogIndexFileNameBasedir) {
+		this.mainbinlogIndexFileNameBasedir = mainbinlogIndexFileNameBasedir;
+	}
+
+	public String getSubBinlogIndexBaseDir() {
+		return subBinlogIndexBaseDir;
+	}
+
+	public void setSubBinlogIndexBaseDir(String subBinlogIndexBaseDir) {
+		this.subBinlogIndexBaseDir = subBinlogIndexBaseDir;
+	}
+
+	public String getSubBinlogIndexPrefix() {
+		return subBinlogIndexPrefix;
+	}
+
+	public void setSubBinlogIndexPrefix(String subBinlogIndexPrefix) {
+		this.subBinlogIndexPrefix = subBinlogIndexPrefix;
+	}
+
+	public String getBucketFilePrefix() {
+		return bucketFilePrefix;
+	}
+
+	public void setBucketFilePrefix(String bucketFilePrefix) {
+		this.bucketFilePrefix = bucketFilePrefix;
+	}
+
+	public EventCodec getCodec() {
+		return codec;
+	}
+
+	public void setCodec(EventCodec codec) {
+		this.codec = codec;
 	}
 }

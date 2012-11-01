@@ -56,7 +56,7 @@ public interface Bucket extends LifeCycle<IOException> {
 	 * @param offset
 	 * @throws IOException
 	 */
-	public void seek(int offset) throws StorageClosedException, IOException;
+	public void seek(long offset) throws StorageClosedException, IOException;
 
 	/**
 	 * 判断当前存储是否还有剩余空间可写

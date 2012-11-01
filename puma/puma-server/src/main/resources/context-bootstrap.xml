@@ -125,7 +125,7 @@
 	</bean>
 	
 	<bean id="archiveStrategy" class="com.dianping.puma.storage.DefaultArchiveStrategy">
-		<property name="maxMasterFileCount" value="30" />
+		<property name="maxMasterFileCount" value="3" />
 	</bean>
 
 	<bean id="cleanupStrategy" class="com.dianping.puma.storage.DefaultCleanupStrategy">

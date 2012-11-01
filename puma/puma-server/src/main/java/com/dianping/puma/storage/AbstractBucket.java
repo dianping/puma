@@ -15,11 +15,15 @@
  */
 package com.dianping.puma.storage;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.zip.GZIPInputStream;
 
 import com.dianping.puma.core.datatype.BinlogInfo;
 import com.dianping.puma.storage.exception.StorageClosedException;
@@ -30,14 +34,14 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  * 
  */
 public abstract class AbstractBucket implements Bucket {
-	private Sequence					startingSequence;
-	private BinlogInfo                   startingBinlogInfo;
-	private int							maxSizeMB;
-	private AtomicReference<Sequence>	currentWritingSeq	= new AtomicReference<Sequence>();
-	private AtomicReference<BinlogInfo>	currentWritingBinlogInfo = new AtomicReference<BinlogInfo>();
-	private volatile boolean			stopped				= false;
-	private long						maxSizeByte;
-		
+	private Sequence startingSequence;
+	private BinlogInfo startingBinlogInfo;
+	private int maxSizeMB;
+	private AtomicReference<Sequence> currentWritingSeq = new AtomicReference<Sequence>();
+	private AtomicReference<BinlogInfo> currentWritingBinlogInfo = new AtomicReference<BinlogInfo>();
+	private volatile boolean stopped = false;
+	private long maxSizeByte;
+
 	public BinlogInfo getStartingBinlogInfo() {
 		return startingBinlogInfo;
 	}
@@ -91,12 +95,14 @@ public abstract class AbstractBucket implements Bucket {
 		return maxSizeByte;
 	}
 
-	public AbstractBucket(Sequence startingSequence, int maxSizeMB) throws FileNotFoundException {
+	public AbstractBucket(Sequence startingSequence, int maxSizeMB)
+			throws FileNotFoundException {
 		this.startingSequence = startingSequence;
 		this.maxSizeMB = maxSizeMB;
 		this.maxSizeByte = this.maxSizeMB * 1024 * 1024L;
 		// we need to copy the whole instance
-		this.currentWritingSeq.set(new Sequence(startingSequence.getCreationDate(), startingSequence.getNumber()));
+		this.currentWritingSeq.set(new Sequence(startingSequence
+				.getCreationDate(), startingSequence.getNumber()));
 	}
 
 	@Override
@@ -109,22 +115,9 @@ public abstract class AbstractBucket implements Bucket {
 	protected abstract void doAppend(byte[] data) throws IOException;
 
 	@Override
-	public byte[] getNext() throws StorageClosedException, IOException {
+	public void seek(long offset) throws StorageClosedException, IOException {
 		checkClosed();
-		// we should guarantee the whole packet read in one transaction,
-		// otherwise we will skip some bytes and read a wrong value in the next
-		// call
-		if (readable()) {
-			return doReadData();
-		} else {
-			throw new EOFException();
-		}
-	}
-
-	@Override
-	public void seek(int pos) throws StorageClosedException, IOException {
-		checkClosed();
-		doSeek(pos);
+		doSeek((int)offset);
 	}
 
 	@Override
@@ -149,7 +142,8 @@ public abstract class AbstractBucket implements Bucket {
 	}
 
 	@Override
-	public boolean hasRemainingForWrite() throws StorageClosedException, IOException {
+	public boolean hasRemainingForWrite() throws StorageClosedException,
+			IOException {
 		checkClosed();
 		return doHasRemainingForWrite();
 	}
@@ -162,7 +156,8 @@ public abstract class AbstractBucket implements Bucket {
 
 	protected abstract boolean readable() throws IOException;
 
-	protected abstract byte[] doReadData() throws StorageClosedException, IOException;
+	protected abstract byte[] doReadData() throws StorageClosedException,
+			IOException;
 
 	protected void checkClosed() throws StorageClosedException {
 		if (stopped) {

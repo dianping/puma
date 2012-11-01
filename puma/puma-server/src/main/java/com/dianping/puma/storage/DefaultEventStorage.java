@@ -39,6 +39,8 @@ public class DefaultEventStorage implements EventStorage {
 		SimpleDateFormat sdf = new SimpleDateFormat(datePattern);
 		lastDate = sdf.format(new Date());
 		stopped = false;
+		this.masterIndex.setCodec(codec);
+		this.slaveIndex.setCodec(codec);
 		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, binlogIndexManager,
 				archiveStrategy, cleanupStrategy);
 		try {

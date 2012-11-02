@@ -16,10 +16,7 @@
 package com.dianping.puma.storage;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.EOFException;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
@@ -28,9 +25,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.Map.Entry;
@@ -38,8 +33,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.GZIPOutputStream;
 
 import com.dianping.puma.core.codec.EventCodec;
-import com.dianping.puma.core.datatype.BinlogInfo;
-import com.dianping.puma.core.datatype.BinlogInfoAndSeq;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.storage.exception.StorageClosedException;
 

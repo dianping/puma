@@ -349,14 +349,14 @@ public class HDFSBucketIndexTest {
 		}
 
 		try {
-			Bucket bucket = this.hdfsBucketIndex.getReadBucket(-1);
+			Bucket bucket = this.hdfsBucketIndex.getReadBucket(-1, false);
 
 			Assert.assertEquals(null, bucket);
-			bucket = this.hdfsBucketIndex.getReadBucket(-2);
+			bucket = this.hdfsBucketIndex.getReadBucket(-2, false);
 			Assert.assertEquals(null, bucket);
 
 			Sequence seq = new Sequence(120710, 0);
-			bucket = this.hdfsBucketIndex.getReadBucket(seq.longValue());
+			bucket = this.hdfsBucketIndex.getReadBucket(seq.longValue(), false);
 			Assert.assertEquals(null, bucket);
 
 		} catch (StorageClosedException e) {
@@ -390,17 +390,17 @@ public class HDFSBucketIndexTest {
 			e1.printStackTrace();
 		}
 		try {
-			Bucket bucket = this.hdfsBucketIndex.getReadBucket(-1);
+			Bucket bucket = this.hdfsBucketIndex.getReadBucket(-1, false);
 			Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
 			Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
 			bucket.stop();
 
-			bucket = this.hdfsBucketIndex.getReadBucket(-2);
+			bucket = this.hdfsBucketIndex.getReadBucket(-2, false);
 			Assert.assertEquals(null, bucket);
 
 			Sequence seq = new Sequence(120711, 3);
 			this.hdfsBucketIndex.updateLatestSequence(seq);
-			bucket = this.hdfsBucketIndex.getReadBucket(-2);
+			bucket = this.hdfsBucketIndex.getReadBucket(-2, false);
 			Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
 			Assert.assertEquals(3, bucket.getStartingSequece().getNumber());
 			bucket.stop();
@@ -433,7 +433,7 @@ public class HDFSBucketIndexTest {
 
 				fsoutput.close();
 
-				bucket = this.hdfsBucketIndex.getReadBucket(seq.longValue());
+				bucket = this.hdfsBucketIndex.getReadBucket(seq.longValue(), false);
 				Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
 				Assert.assertEquals(3, bucket.getStartingSequece().getNumber());
 				bucket.stop();
@@ -442,7 +442,7 @@ public class HDFSBucketIndexTest {
 				e.printStackTrace();
 			}
 
-			bucket = this.hdfsBucketIndex.getReadBucket(seq.longValue());
+			bucket = this.hdfsBucketIndex.getReadBucket(seq.longValue(), false);
 			Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
 			Assert.assertEquals(3, bucket.getStartingSequece().getNumber());
 			bucket.stop();
@@ -488,7 +488,7 @@ public class HDFSBucketIndexTest {
 		this.hdfsBucketIndex.stop();
 
 		try {
-			this.hdfsBucketIndex.getReadBucket(-1);
+			this.hdfsBucketIndex.getReadBucket(-1, false);
 			Assert.fail();
 		} catch (StorageClosedException e) {
 

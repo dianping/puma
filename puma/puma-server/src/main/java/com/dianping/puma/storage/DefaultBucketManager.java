@@ -8,7 +8,6 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
-import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.datatype.BinlogInfo;
 import com.dianping.puma.core.datatype.BinlogInfoAndSeq;
 import com.dianping.puma.core.util.PumaThreadUtils;

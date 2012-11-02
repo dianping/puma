@@ -75,6 +75,7 @@ public abstract class PumaServerIntegrationBaseTest {
 	protected DefaultEventStorage		storage;
 	protected LocalFileBucketIndex		masterIndex;
 	protected LocalFileBucketIndex		slaveIndex;
+	protected BinlogIndexManager		binlogIndexManager;
 	protected FileDumpSender			sender;
 	private static File					storageMasterBaseDir	= new File(System.getProperty("java.io.tmpdir", "."),
 																		"Puma");
@@ -139,6 +140,13 @@ public abstract class PumaServerIntegrationBaseTest {
 		slaveIndex = new LocalFileBucketIndex();
 		slaveIndex.setBaseDir(storageSlaveBaseDir.getAbsolutePath());
 		slaveIndex.start();
+		binlogIndexManager = new BinlogIndexManager();
+		binlogIndexManager.setMainbinlogIndexFileName("binlogIndex");
+		binlogIndexManager.setMainbinlogIndexFileNameBasedir(System.getProperty("java.io.tmpdir", ".") + "/Puma");
+		binlogIndexManager.setSubBinlogIndexBaseDir(System.getProperty("java.io.tmpdir", ".") + "/binlogindex");
+		binlogIndexManager.setSubBinlogIndexPrefix("index-");
+		binlogIndexManager.setBucketFilePrefix("bucket-");
+		binlogIndexManager.setCodec(new JsonEventCodec());
 
 		// init storage
 		storage = new DefaultEventStorage();
@@ -160,6 +168,7 @@ public abstract class PumaServerIntegrationBaseTest {
 		storage.setName("test-storage");
 		storage.setMasterIndex(masterIndex);
 		storage.setSlaveIndex(slaveIndex);
+		storage.setBinlogIndexManager(binlogIndexManager);
 		storage.start();
 
 		// init sender

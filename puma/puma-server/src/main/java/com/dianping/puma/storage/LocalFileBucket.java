@@ -1,13 +1,10 @@
 package com.dianping.puma.storage;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.zip.GZIPInputStream;
 
 import com.dianping.puma.storage.exception.StorageClosedException;
 

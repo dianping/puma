@@ -9,7 +9,7 @@ import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializerProvider;
 
-import com.dianping.puma.core.datatype.BinlogPosAndSeq;
+import com.dianping.puma.core.datatype.BinlogInfoAndSeq;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
@@ -60,7 +60,7 @@ public class JsonEventCodec implements EventCodec {
 					.readValue(data, 1, data.length - 1, RowChangedEvent.class);
 		}else{
 			return om
-			.readValue(data, 0, data.length - 1, BinlogPosAndSeq.class);
+			.readValue(data, 0, data.length - 1, BinlogInfoAndSeq.class);
 		}
 	}
 

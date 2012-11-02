@@ -18,7 +18,7 @@ package com.dianping.puma.storage;
 import java.io.IOException;
 
 import com.dianping.puma.common.LifeCycle;
-import com.dianping.puma.core.datatype.BinlogPos;
+import com.dianping.puma.core.datatype.BinlogInfo;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
@@ -56,7 +56,7 @@ public interface Bucket extends LifeCycle<IOException> {
 	 * @param offset
 	 * @throws IOException
 	 */
-	public void seek(int offset) throws StorageClosedException, IOException;
+	public void seek(long offset) throws StorageClosedException, IOException;
 
 	/**
 	 * 判断当前存储是否还有剩余空间可写
@@ -74,11 +74,11 @@ public interface Bucket extends LifeCycle<IOException> {
 	 */
 	public long getCurrentWritingSeq();
 
-	public BinlogPos getCurrentWritingBinlogPos();
+	public BinlogInfo getCurrentWritingBinlogInfo();
 
-	public void setCurrentWritingBinlogPos(BinlogPos binlogPos);
+	public void setCurrentWritingBinlogInfo(BinlogInfo binlogInfo);
 
-	public BinlogPos getStartingBinlogPos();
+	public BinlogInfo getStartingBinlogInfo();
 	
-	public void setStartingBinlogPos(BinlogPos startingBinlogPos);
+	public void setStartingBinlogInfo(BinlogInfo startingBinlogInfo);
 }

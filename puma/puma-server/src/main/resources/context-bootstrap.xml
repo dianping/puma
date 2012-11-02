@@ -47,7 +47,7 @@
 		<property name="host" value="127.0.0.1" />
 		<property name="port" value="3306" />
 		<property name="user" value="root" />
-		<property name="password" value="root" />
+		<property name="password" value="000000" />
 		<property name="defaultBinlogFileName" value="" />
 		<property name="defaultBinlogPosition" value="" />
 		<property name="parser" ref="defaultParser" />
@@ -79,11 +79,7 @@
 		<property name="metaDBHost" value="127.0.0.1" />
 		<property name="metaDBPort" value="3306" />
 		<property name="metaDBUser" value="root" />
-<<<<<<< HEAD
-		<property name="metaDBPassword" value="root" />
-=======
 		<property name="metaDBPassword" value="000000" />
->>>>>>> a9f2116a3cb842a97313bfa8ed9fb7bb7fcb2502
 	</bean>
 
 	<bean id="defaultParser" class="com.dianping.puma.parser.DefaultBinlogParser"
@@ -100,6 +96,7 @@
 		<property name="codec" ref="jsonCodec" />
 		<property name="masterIndex" ref="localBucketIndex-Dianping" />
 		<property name="slaveIndex" ref="hdfsBucketIndex-Dianping" />
+		<property name="binlogIndexManager" ref="binlogIndex" />
 		<property name="archiveStrategy" ref="archiveStrategy" />
 		<property name="cleanupStrategy" ref="cleanupStrategy" />
 		<property name="name" value="storage-Dianping" />
@@ -117,8 +114,18 @@
 		<property name="maxBucketLengthMB" value="1000" />
 		<property name="baseDir" value="/data/applogs/puma/storage/Dianping2/" />
 	</bean>
+	
+	<bean id="binlogIndex" class="com.dianping.puma.storage.BinlogIndexManager">
+		<property name="mainbinlogIndexFileName" value="binlogIndex" />
+		<property name="mainbinlogIndexFileNameBasedir" value="/data/applogs/puma/" />
+		<property name="subBinlogIndexBaseDir" value="/data/applogs/puma/binlogindex" />
+		<property name="subBinlogIndexPrefix" value="index-" />
+		<property name="bucketFilePrefix" value="bucket-" />
+		<property name="codec" ref="jsonCodec" />
+	</bean>
+	
 	<bean id="archiveStrategy" class="com.dianping.puma.storage.DefaultArchiveStrategy">
-		<property name="maxMasterFileCount" value="30" />
+		<property name="maxMasterFileCount" value="3" />
 	</bean>
 
 	<bean id="cleanupStrategy" class="com.dianping.puma.storage.DefaultCleanupStrategy">

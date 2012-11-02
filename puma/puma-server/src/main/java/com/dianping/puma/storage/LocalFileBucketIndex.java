@@ -15,15 +15,23 @@
  */
 package com.dianping.puma.storage;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.TreeMap;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
+import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
@@ -115,8 +123,38 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 		if (!localFile.exists()) {
 			return;
 		}
-
-		FileUtils.copyFile(localFile, new File(getBaseDir(), path));
+		File destFile = new File(this.getBaseDir(),path);
+		if (!destFile.getParentFile().exists()) {
+			if (!destFile.getParentFile().mkdirs()) {
+				throw new IOException(String.format(
+						"Can't create writeBucket's parent(%s)!",
+						destFile.getParent()));
+			}
+		}
+		zipIndex.clear();
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		RandomAccessFile destFileAcess = new RandomAccessFile(destFile, "rw");
+		RandomAccessFile localFileAcess = new RandomAccessFile(localFile, "rw");
+		bos.write(ByteArrayUtils.intToByteArray("ZIPFORMAT".length()));
+		bos.write("ZIPFORMAT".getBytes());
+		destFileAcess.write(bos.toByteArray());
+		while(localFileAcess.getFilePointer() + 4 < localFileAcess.length()){
+			byte[] data = readAndZip(localFileAcess, localFile, destFileAcess.getFilePointer());
+			bos.reset();
+			bos.write(ByteArrayUtils.intToByteArray(data.length));
+			bos.write(data);
+			destFileAcess.write(bos.toByteArray());
+		}
+		OutputStream ios = new FileOutputStream(new File(this.getBaseDir(),
+				path + this.zipIndexsuffix));
+		byte[] index = this.codec.encode(zipIndex);
+		bos.reset();
+		bos.write(ByteArrayUtils.intToByteArray(index.length));
+		bos.write(index);
+		ios.write(bos.toByteArray());
+		ios.close();
+		destFileAcess.close();
+		bos.close();
 	}
 
 	@Override
@@ -126,6 +164,11 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 		boolean deleted = false;
 		if (file.exists()) {
 			deleted = file.delete();
+			if(deleted){
+				File index = new File(getBaseDir(), path);
+				index.delete();
+			}
+				
 		}
 
 		if (file.getParentFile().exists()) {
@@ -135,5 +178,58 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 			}
 		}
 		return deleted;
+	}
+	
+	@Override
+	public Bucket getReadBucket(long seq, Boolean start)
+			throws StorageClosedException, IOException {
+		checkClosed();
+		Sequence sequence = null;
+		String path = null;
+
+		if (seq == -1L) {
+			// 从最老开始消费
+			if (!index.get().isEmpty()) {
+				path = index.get().firstEntry().getValue();
+				if (path == null) {
+					return null;
+				}
+				sequence = new Sequence(index.get().firstEntry().getKey());
+			} else {
+				return null;
+			}
+		} else if (seq == -2L) {
+			// 从最新开始消费
+			if (this.latestSequence.get() != null) {
+				sequence = new Sequence(this.latestSequence.get());
+				path = convertToPath(sequence);
+			} else {
+				return null;
+			}
+		} else {
+			sequence = new Sequence(seq);
+			path = index.get().get(sequence);
+			if (path == null) {
+				return null;
+			}
+
+		}
+
+		int offset = sequence.getOffset();
+		Bucket bucket = doGetReadBucket(baseDir, path, sequence.clearOffset(),
+				maxBucketLengthMB);
+
+		if (bucket != null) {
+			bucket.seek(offset);
+			try {
+				if (seq != -1L && seq != -2L && !start) {
+					bucket.getNext();
+				}
+			} catch (EOFException e) {
+				// ignore
+			}
+		}
+
+		return bucket;
 	}
 }

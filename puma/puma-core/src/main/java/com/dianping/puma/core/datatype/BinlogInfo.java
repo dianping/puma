@@ -1,11 +1,11 @@
 package com.dianping.puma.core.datatype;
 
-public class BinlogPos {
+public class BinlogInfo {
 	private long serverId;
 	private String BinlogFile;
 	private long BinlogPosition;
 
-	public BinlogPos(long serverId, String binlogFile, long binlogPosition) {
+	public BinlogInfo(long serverId, String binlogFile, long binlogPosition) {
 		super();
 		this.serverId = serverId;
 		BinlogFile = binlogFile;

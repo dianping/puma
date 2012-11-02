@@ -8,8 +8,9 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
-import com.dianping.puma.core.datatype.BinlogPos;
-import com.dianping.puma.core.datatype.BinlogPosAndSeq;
+import com.dianping.puma.core.codec.EventCodec;
+import com.dianping.puma.core.datatype.BinlogInfo;
+import com.dianping.puma.core.datatype.BinlogInfoAndSeq;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;
@@ -25,22 +26,22 @@ public class DefaultBucketManager implements BucketManager {
 
 	private volatile boolean stopped = true;
 
-	public TreeMap<BinlogPos, BinlogPosAndSeq> getBinlogIndex() {
+	public TreeMap<BinlogInfo, BinlogInfoAndSeq> getBinlogIndex() {
 		return binlogIndexManager.getBinlogIndex();
 	}
 
-	public void setBinlogIndex(TreeMap<BinlogPos, BinlogPosAndSeq> binlogIndex) {
+	public void setBinlogIndex(TreeMap<BinlogInfo, BinlogInfoAndSeq> binlogIndex) {
 		binlogIndexManager.setBinlogIndex(binlogIndex);
 	}
 
 	public DefaultBucketManager(BucketIndex masterIndex,
-			BucketIndex slaveIndex, ArchiveStrategy archiveStrategy,
+			BucketIndex slaveIndex, BinlogIndexManager binlogIndexManager, ArchiveStrategy archiveStrategy,
 			CleanupStrategy cleanupStrategy) {
 		this.archiveStrategy = archiveStrategy;
 		this.cleanupStrategy = cleanupStrategy;
 		this.masterIndex = masterIndex;
 		this.slaveIndex = slaveIndex;
-		binlogIndexManager = new BinlogIndexManager(masterIndex.getBucketFilePrefix());
+		this.binlogIndexManager = binlogIndexManager;
 	}
 
 	private void checkClosed() throws StorageClosedException {
@@ -113,12 +114,12 @@ public class DefaultBucketManager implements BucketManager {
 			StorageClosedException {
 		checkClosed();
 
-		Bucket bucket = slaveIndex.getReadBucket(seq);
+		Bucket bucket = slaveIndex.getReadBucket(seq, false);
 
 		if (bucket != null) {
 			return bucket;
 		} else {
-			bucket = masterIndex.getReadBucket(seq);
+			bucket = masterIndex.getReadBucket(seq, false);
 			if (bucket != null) {
 				return bucket;
 			} else {
@@ -148,7 +149,7 @@ public class DefaultBucketManager implements BucketManager {
 	public synchronized void start() throws StorageLifeCycleException {
 		stopped = false;
 		try {
-			this.binlogIndexManager.start();
+			this.binlogIndexManager.start(this.masterIndex, this.slaveIndex);
 		} catch (IOException e) {
 			throw new StorageLifeCycleException("Storage init failed", e);
 		}
@@ -228,22 +229,17 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	@Override
-	public void writeBinlogToIndex(byte[] data) throws IOException {
-		binlogIndexManager.writeBinlogToIndex(data);
-	}
-
-	@Override
-	public byte[] readBinlogFromIndex() throws IOException {
-		return binlogIndexManager.readBinlogFromIndex();
+	public long TranBinlogIndexToSeq(BinlogInfo binlogInfo) throws IOException {
+		return binlogIndexManager.TranBinlogIndexToSeq(binlogInfo);
 	}
 
 	@Override
 	public void binlogIndexFileclose() throws IOException {
-		binlogIndexManager.binlogIndexFileclose();
+		binlogIndexManager.closebinlogIndexFile();
 	}
 
-	protected static class PathBinlogPosComparator implements
-			Comparator<BinlogPos>, Serializable {
+	protected static class PathBinlogInfoComparator implements
+			Comparator<BinlogInfo>, Serializable {
 
 		private static final long serialVersionUID = -350477869152651536L;
 
@@ -253,7 +249,7 @@ public class DefaultBucketManager implements BucketManager {
 		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 		 */
 		@Override
-		public int compare(BinlogPos o1, BinlogPos o2) {
+		public int compare(BinlogInfo o1, BinlogInfo o2) {
 			if (o1.getServerId() < o2.getServerId()) {
 				return -1;
 			} else if (o1.getServerId() == o2.getServerId()) {
@@ -278,15 +274,13 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	@Override
-	public Boolean getReadBinlogIndex(BinlogPos binlogpos)
-			throws StorageClosedException, IOException {
-		checkClosed();
-		return binlogIndexManager.getReadBinlogIndex(binlogpos);
+	public void writeBinlogIndex(BinlogInfo binlogInfo) throws IOException {
+		this.binlogIndexManager.writeBinlogIndex(binlogInfo);
 	}
-
+	
 	@Override
-	public void wirteMainBinlogIndex(byte[] data) throws IOException {
-		this.binlogIndexManager.writeMainBinlogIndex(data);
+	public void writeBinlogIndexIntoProperty(BinlogInfoAndSeq bpas) throws IOException{
+		this.binlogIndexManager.writeBinlogIndexIntoProperty(bpas);
 	}
 
 }

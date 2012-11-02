@@ -18,6 +18,7 @@ package com.dianping.puma.storage;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.TreeMap;
 
 import junit.framework.Assert;
 
@@ -27,6 +28,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.dianping.puma.core.codec.EventCodec;
+import com.dianping.puma.core.codec.JsonEventCodec;
+import com.dianping.puma.core.datatype.BinlogInfo;
+import com.dianping.puma.core.datatype.BinlogInfoAndSeq;
 
 /**
  * TODO Comment of DefaultCleanupStrategyTest
@@ -49,9 +53,17 @@ public class DefaultCleanupStrategyTest {
 		DefaultCleanupStrategy defaultCleanupStrategy = new DefaultCleanupStrategy();
 		defaultCleanupStrategy.setPreservedDay(preservedDay);
 		LocalFileBucketIndex index = new LocalFileBucketIndex();
-		BinlogIndexManager binlogIndexManager = new BinlogIndexManager("bucket-");
 		index.setBaseDir(baseDir.getAbsolutePath());
 		index.setBucketFilePrefix("bucket-");
+		BinlogIndexManager binlogIndexManager = new BinlogIndexManager();
+		binlogIndexManager.setMainbinlogIndexFileName("binlogIndex");
+		binlogIndexManager.setMainbinlogIndexFileNameBasedir("java.io.tmpdir" + "Puma");
+		binlogIndexManager.setSubBinlogIndexBaseDir("java.io.tmpdir" + "binlogindex");
+		binlogIndexManager.setSubBinlogIndexPrefix("index-");
+		binlogIndexManager.setBucketFilePrefix("bucket-");
+		binlogIndexManager.setCodec(new JsonEventCodec());
+		binlogIndexManager.setBinlogIndex(new TreeMap<BinlogInfo, BinlogInfoAndSeq>());
+		binlogIndexManager.setMainBinlogIndexFile(new File("java.io.tmpdir" + "Puma", "binlogIndex"));
 
 		Calendar cal = Calendar.getInstance();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
@@ -78,7 +90,7 @@ public class DefaultCleanupStrategyTest {
 			File file = new File(baseDir, "20" + sdf.format(cal.getTime()) + "/bucket-0");
 			Assert.assertTrue(file.exists());
 			Assert.assertNotNull(index.getReadBucket(new Sequence(Integer.valueOf(sdf.format(cal.getTime())), 0)
-					.longValue()));
+					.longValue(), false));
 		}
 
 		cal = Calendar.getInstance();
@@ -88,7 +100,7 @@ public class DefaultCleanupStrategyTest {
 			File file = new File(baseDir, "20" + sdf.format(cal.getTime()) + "/bucket-0");
 			Assert.assertFalse(file.exists());
 			Assert.assertNull(index.getReadBucket(new Sequence(Integer.valueOf(sdf.format(cal.getTime())), 0)
-					.longValue()));
+					.longValue(), false));
 		}
 
 	}

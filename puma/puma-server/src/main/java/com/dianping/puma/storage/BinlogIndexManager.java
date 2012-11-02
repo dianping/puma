@@ -74,8 +74,10 @@ public class BinlogIndexManager {
 		}
 		int lostnum = masterIndex.size() + slaveIndex.size()
 				- mainBinlogIndex.get().size();
-		// TODO build the complete binlog index
 		while (lostnum-- > 0) {
+			// TODO when there are many index to recovery?
+			if(masterIndex.getIndex().get().isEmpty())
+				break;
 			Bucket bucket = masterIndex.getReadBucket(masterIndex.getIndex()
 					.get().lastEntry().getKey().longValue(), true);
 			ChangedEvent event = null;
@@ -107,6 +109,8 @@ public class BinlogIndexManager {
 					break;
 				}
 			}
+			if (event == null)
+				continue;
 			binlogInfoAndSeq.setBinlogInfo(new BinlogInfo(event.getServerId(),
 					event.getBinlog(), event.getBinlogPos()));
 			mainBinlogIndex.get().put(binlogInfo, binlogInfoAndSeq);
@@ -210,7 +214,8 @@ public class BinlogIndexManager {
 	}
 
 	public void openBinlogIndex(Sequence seq) throws IOException {
-		this.subBinlogFile = new File(this.subBinlogIndexBaseDir, convertToPath(seq));
+		this.subBinlogFile = new File(this.subBinlogIndexBaseDir,
+				convertToPath(seq));
 		if (!this.subBinlogFile.getParentFile().exists()) {
 			if (!this.subBinlogFile.getParentFile().mkdirs()) {
 				throw new IOException(String.format(
@@ -345,6 +350,17 @@ public class BinlogIndexManager {
 			}
 		}
 		mainBinlogIndex.set((TreeMap<BinlogInfo, BinlogInfoAndSeq>) map);
+		try {
+			if (this.mainBinlogIndexFile.length() > 1024 * 1024 * 200) {
+				File newmbindex = new File(this.mainbinlogIndexFileNameBasedir,
+						this.mainbinlogIndexFileName + "_bak");
+				OutputStream mbindex = new FileOutputStream(newmbindex);
+				this.prop.store(mbindex, "store prop to backend");
+				newmbindex.renameTo(this.mainBinlogIndexFile);
+			}
+		} catch (IOException e) {
+			//Dont`t do anything
+		}
 	}
 
 	protected Sequence convertToSequence(String path) {
@@ -424,4 +440,13 @@ public class BinlogIndexManager {
 	public void setCodec(EventCodec codec) {
 		this.codec = codec;
 	}
+
+	public File getMainBinlogIndexFile() {
+		return mainBinlogIndexFile;
+	}
+
+	public void setMainBinlogIndexFile(File mainBinlogIndexFile) {
+		this.mainBinlogIndexFile = mainBinlogIndexFile;
+	}
+	
 }

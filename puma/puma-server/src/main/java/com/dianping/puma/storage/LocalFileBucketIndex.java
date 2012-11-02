@@ -16,17 +16,14 @@
 package com.dianping.puma.storage;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
 import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
@@ -147,6 +144,8 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 		}
 		OutputStream ios = new FileOutputStream(new File(this.getBaseDir(),
 				path + this.zipIndexsuffix));
+		if(zipIndex.isEmpty())
+			return;
 		byte[] index = this.codec.encode(zipIndex);
 		bos.reset();
 		bos.write(ByteArrayUtils.intToByteArray(index.length));

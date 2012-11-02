@@ -15,7 +15,6 @@
  */
 package com.dianping.puma.storage;
 
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.File;
@@ -26,8 +25,6 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -39,7 +36,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.security.SecurityUtil;
 import org.apache.hadoop.security.UserGroupInformation;
 
-import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
@@ -199,6 +195,8 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 		}
 		FSDataOutputStream ios = fileSystem.create(new Path(this.getBaseDir(),
 				path + this.zipIndexsuffix));
+		if(zipIndex.isEmpty())
+			return;
 		byte[] index = this.codec.encode(zipIndex);
 		ios.write(index);
 		ios.close();

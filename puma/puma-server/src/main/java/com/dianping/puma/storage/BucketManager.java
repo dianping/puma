@@ -6,7 +6,6 @@ import java.util.TreeMap;
 import com.dianping.puma.common.LifeCycle;
 import com.dianping.puma.core.datatype.BinlogInfo;
 import com.dianping.puma.core.datatype.BinlogInfoAndSeq;
-import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;
 

@@ -14,6 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 public class DefaultBucketManagerTest {
@@ -26,6 +27,7 @@ public class DefaultBucketManagerTest {
 	public BucketIndex			slaveNullIndex;
 	public ArchiveStrategy		archiveStrategy;
 	public CleanupStrategy		cleanupStrategy;
+	public BinlogIndexManager	binlogIndexManager;
 
 	@Before
 	public void before() throws Exception {
@@ -86,12 +88,20 @@ public class DefaultBucketManagerTest {
 		((AbstractBucketIndex) slaveNullIndex).setBucketFilePrefix("bucket-");
 		((AbstractBucketIndex) slaveNullIndex).setMaxBucketLengthMB(500);
 		slaveNullIndex.start();
+		
+		binlogIndexManager = new BinlogIndexManager();
+		binlogIndexManager.setMainbinlogIndexFileName("binlogIndex");
+		binlogIndexManager.setMainbinlogIndexFileNameBasedir(System.getProperty("java.io.tmpdir", ".") + "/Puma");
+		binlogIndexManager.setSubBinlogIndexBaseDir(System.getProperty("java.io.tmpdir", ".") + "/binlogindex");
+		binlogIndexManager.setSubBinlogIndexPrefix("index-");
+		binlogIndexManager.setBucketFilePrefix("bucket-");
+		binlogIndexManager.setCodec(new JsonEventCodec());
 
 	}
 
 	@Test
 	public void testGetReadBucket() throws StorageClosedException, IOException {
-		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, archiveStrategy, cleanupStrategy);
+		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, binlogIndexManager, archiveStrategy, cleanupStrategy);
 		bucketManager.start();
 
 		Bucket bucket = bucketManager.getReadBucket(-1);
@@ -120,7 +130,7 @@ public class DefaultBucketManagerTest {
 
 		}
 
-		bucketManager = new DefaultBucketManager(masterNullIndex, slaveIndex, archiveStrategy, cleanupStrategy);
+		bucketManager = new DefaultBucketManager(masterNullIndex, slaveIndex, binlogIndexManager, archiveStrategy, cleanupStrategy);
 		bucket = null;
 		bucketManager.start();
 		bucket = bucketManager.getReadBucket(-1);
@@ -152,7 +162,7 @@ public class DefaultBucketManagerTest {
 
 		}
 
-		bucketManager = new DefaultBucketManager(masterIndex, slaveNullIndex, archiveStrategy, cleanupStrategy);
+		bucketManager = new DefaultBucketManager(masterIndex, slaveNullIndex, binlogIndexManager, archiveStrategy, cleanupStrategy);
 		bucketManager.start();
 		bucket = bucketManager.getReadBucket(-1);
 		Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
@@ -182,7 +192,7 @@ public class DefaultBucketManagerTest {
 
 		}
 
-		bucketManager = new DefaultBucketManager(masterNullIndex, slaveNullIndex, archiveStrategy, cleanupStrategy);
+		bucketManager = new DefaultBucketManager(masterNullIndex, slaveNullIndex, binlogIndexManager, archiveStrategy, cleanupStrategy);
 		bucketManager.start();
 		try {
 			bucket = bucketManager.getReadBucket(-1);
@@ -193,7 +203,7 @@ public class DefaultBucketManagerTest {
 
 	@Test
 	public void testGetNextReadBucket() throws StorageClosedException, IOException {
-		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, archiveStrategy, cleanupStrategy);
+		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, binlogIndexManager, archiveStrategy, cleanupStrategy);
 		bucketManager.start();
 
 		Sequence sequence = new Sequence(120710, 0, 0);
@@ -217,7 +227,7 @@ public class DefaultBucketManagerTest {
 
 		}
 
-		bucketManager = new DefaultBucketManager(masterNullIndex, slaveIndex, archiveStrategy, cleanupStrategy);
+		bucketManager = new DefaultBucketManager(masterNullIndex, slaveIndex, binlogIndexManager, archiveStrategy, cleanupStrategy);
 		bucket = null;
 
 		bucketManager.start();
@@ -245,7 +255,7 @@ public class DefaultBucketManagerTest {
 
 		}
 
-		bucketManager = new DefaultBucketManager(masterIndex, slaveNullIndex, archiveStrategy, cleanupStrategy);
+		bucketManager = new DefaultBucketManager(masterIndex, slaveNullIndex, binlogIndexManager, archiveStrategy, cleanupStrategy);
 		sequence = new Sequence(120710, 0, 0);
 		bucketManager.start();
 		bucket = bucketManager.getNextReadBucket(sequence.longValue());
@@ -268,7 +278,7 @@ public class DefaultBucketManagerTest {
 
 		}
 
-		bucketManager = new DefaultBucketManager(masterNullIndex, slaveNullIndex, archiveStrategy, cleanupStrategy);
+		bucketManager = new DefaultBucketManager(masterNullIndex, slaveNullIndex, binlogIndexManager, archiveStrategy, cleanupStrategy);
 		sequence = new Sequence(120711, 1);
 		bucket = null;
 		try {
@@ -283,7 +293,7 @@ public class DefaultBucketManagerTest {
 
 	@Test
 	public void testGetNextWriteBucket() throws StorageClosedException, IOException {
-		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, archiveStrategy, cleanupStrategy);
+		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, binlogIndexManager, archiveStrategy, cleanupStrategy);
 		bucketManager.start();
 
 		// TDODO
@@ -306,7 +316,7 @@ public class DefaultBucketManagerTest {
 
 	@Test
 	public void testHasNexReadBucket() throws StorageClosedException, IOException {
-		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, archiveStrategy, cleanupStrategy);
+		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, binlogIndexManager, archiveStrategy, cleanupStrategy);
 		bucketManager.start();
 
 		Sequence sequence = new Sequence(120710, 0, 0);
@@ -319,7 +329,7 @@ public class DefaultBucketManagerTest {
 
 		Assert.assertTrue(!bucketManager.hasNexReadBucket(sequence.longValue()));
 
-		bucketManager = new DefaultBucketManager(masterNullIndex, slaveIndex, archiveStrategy, cleanupStrategy);
+		bucketManager = new DefaultBucketManager(masterNullIndex, slaveIndex, binlogIndexManager, archiveStrategy, cleanupStrategy);
 		bucketManager.start();
 		sequence = new Sequence(120710, 0, 0);
 		Assert.assertTrue(bucketManager.hasNexReadBucket(sequence.longValue()));
@@ -332,7 +342,7 @@ public class DefaultBucketManagerTest {
 
 		Assert.assertTrue(!bucketManager.hasNexReadBucket(sequence.longValue()));
 
-		bucketManager = new DefaultBucketManager(masterIndex, slaveNullIndex, archiveStrategy, cleanupStrategy);
+		bucketManager = new DefaultBucketManager(masterIndex, slaveNullIndex, binlogIndexManager, archiveStrategy, cleanupStrategy);
 		bucketManager.start();
 		sequence = new Sequence(120711, 0, 0);
 		Assert.assertTrue(bucketManager.hasNexReadBucket(sequence.longValue()));
@@ -341,7 +351,7 @@ public class DefaultBucketManagerTest {
 
 		Assert.assertTrue(!bucketManager.hasNexReadBucket(sequence.longValue()));
 
-		bucketManager = new DefaultBucketManager(masterNullIndex, slaveNullIndex, archiveStrategy, cleanupStrategy);
+		bucketManager = new DefaultBucketManager(masterNullIndex, slaveNullIndex, binlogIndexManager, archiveStrategy, cleanupStrategy);
 		bucketManager.start();
 		sequence = new Sequence(120711, 1);
 		Assert.assertTrue(!bucketManager.hasNexReadBucket(sequence.longValue()));
@@ -349,7 +359,7 @@ public class DefaultBucketManagerTest {
 
 	@Test
 	public void testClose() {
-		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, archiveStrategy, cleanupStrategy);
+		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, binlogIndexManager, archiveStrategy, cleanupStrategy);
 		bucketManager.stop();
 		Sequence seq = new Sequence(120711, 1);
 		try {
@@ -363,7 +373,7 @@ public class DefaultBucketManagerTest {
 
 	@Test
 	public void testUpdateLatestSequence() {
-		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, archiveStrategy, cleanupStrategy);
+		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, binlogIndexManager, archiveStrategy, cleanupStrategy);
 		bucketManager.updateLatestSequence(new Sequence(120712, 0));
 
 	}

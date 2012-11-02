@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
@@ -218,6 +219,24 @@ public class MysqlExecutor {
 
     public void setSync(SyncConfig sync) {
         this.syncConfig = sync;
+    }
+
+    public static void main(String[] args44) {
+        MysqlExecutor mysqlExecutor = new MysqlExecutor(
+                "jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;noAccessToProcedureBodies=true",
+                "root", "root");
+        String sql = "INSERT INTO `test`.`test4` VALUES (?,?,?,?)";
+        int id = 35685;
+        for (int j = 0; j < 1000; j++) {
+            List<Object[]> argslist = new ArrayList<Object[]>();
+            for (int i = 0; i < 1000; i++) {
+                Object[] args = new Object[] { Integer.valueOf(id), "name1", "name2", "desc" };
+                argslist.add(args);
+                id++;
+            }
+            mysqlExecutor.jdbcTemplate.batchUpdate(sql, argslist);
+        }
+
     }
 
 }

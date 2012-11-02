@@ -2,14 +2,18 @@ package com.dianping.puma.core.sync;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
+/**
+ * dump规则：<br>
+ * (1)会为目标数据库自动创建table，但database不自动创建。<br>
+ * (2)允许db改名，table改名。但要求table的结构(字段个数，对应字段的类型)一致，字段名可以不一致。
+ */
 public class DumpConfig {
 
     private Src src;
     private Dest dest;
 
-    private Map<String, List<String>> databaseName2TableNames;
+    private List<DumpRelation> dumpRelations;
 
     public Src getSrc() {
         return src;
@@ -27,17 +31,17 @@ public class DumpConfig {
         this.dest = dest;
     }
 
-    public Map<String, List<String>> getDatabaseName2TableNames() {
-        return databaseName2TableNames;
+    public List<DumpRelation> getDumpRelations() {
+        return dumpRelations;
     }
 
-    public void setDatabaseName2TableNames(Map<String, List<String>> databaseName2TableNames) {
-        this.databaseName2TableNames = databaseName2TableNames;
+    public void setDumpRelations(List<DumpRelation> dumpRelations) {
+        this.dumpRelations = dumpRelations;
     }
 
     @Override
     public String toString() {
-        return "DumpConfig [src=" + src + ", dest=" + dest + ", databaseName2TableNames=" + databaseName2TableNames + "]";
+        return "DumpConfig [src=" + src + ", dest=" + dest + ", dumpRelations=" + dumpRelations + "]";
     }
 
     public static class Src {
@@ -45,10 +49,9 @@ public class DumpConfig {
         private Integer port;
         private String username;
         private String password;
-        private List<String> options = Arrays.asList(new String[] { "--no-autocommit", " --disable-keys", "--extended-insert",
-                "--quick", "--add-drop-database=false", "--add-drop-table=false", "--skip-add-locks",
-                "--default-character-set=utf8", "--max_allowed_packet=16777216", " --net_buffer_length=16384", "-i",
-                "--master-data=2", "--single-transaction" });
+        private List<String> options = Arrays.asList(new String[] { "--no-autocommit", " --disable-keys", "--quick",
+                "--add-drop-database=false", "--add-drop-table=false", "--skip-add-locks", "--default-character-set=utf8",
+                "--max_allowed_packet=16777216", " --net_buffer_length=16384", "-i", "--master-data=2", "--single-transaction" });
 
         public String getHost() {
             return host;
@@ -97,7 +100,6 @@ public class DumpConfig {
         private Integer port;
         private String username;
         private String password;
-        private String optionString;
 
         public String getHost() {
             return host;
@@ -131,14 +133,48 @@ public class DumpConfig {
             this.password = password;
         }
 
-        public String getOptionString() {
-            return optionString;
+    }
+
+    /**
+     * Dump的映射关系。
+     */
+    public static class DumpRelation {
+        private String srcDatabaseName;
+        private String destDatabaseName;
+        private List<String> srcTableNames;
+        private List<String> destTableNames;
+
+        public String getSrcDatabaseName() {
+            return srcDatabaseName;
         }
 
-        public void setOptionString(String optionString) {
-            this.optionString = optionString;
+        public void setSrcDatabaseName(String srcDatabaseName) {
+            this.srcDatabaseName = srcDatabaseName;
+        }
+
+        public String getDestDatabaseName() {
+            return destDatabaseName;
+        }
+
+        public void setDestDatabaseName(String destDatabaseName) {
+            this.destDatabaseName = destDatabaseName;
+        }
+
+        public List<String> getSrcTableNames() {
+            return srcTableNames;
+        }
+
+        public void setSrcTableNames(List<String> srcTableNames) {
+            this.srcTableNames = srcTableNames;
+        }
+
+        public List<String> getDestTableNames() {
+            return destTableNames;
+        }
+
+        public void setDestTableNames(List<String> destTableNames) {
+            this.destTableNames = destTableNames;
         }
 
     }
-
 }

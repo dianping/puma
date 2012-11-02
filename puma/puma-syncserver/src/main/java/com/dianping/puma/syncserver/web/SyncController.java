@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.SyncConfig;
+import com.dianping.puma.syncserver.bo.BinlogPos;
 import com.dianping.puma.syncserver.bo.DumpClient;
 import com.dianping.puma.syncserver.bo.SyncClient;
 import com.dianping.puma.syncserver.util.SyncXmlParser;
@@ -127,7 +129,7 @@ public class SyncController {
             LOG.info("DumpClient init...");
             DumpClient dumpClient = new DumpClient(dumpConfig);
             LOG.info("DumpClient dumping...");
-            Long binlogPos = dumpClient.dump();
+            List<BinlogPos> binlogPos = dumpClient.dump();
             LOG.info("DumpClient done，binlogPos is " + binlogPos);
 
             map.put("binlogPos", binlogPos);

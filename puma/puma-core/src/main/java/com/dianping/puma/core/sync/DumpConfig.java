@@ -45,9 +45,10 @@ public class DumpConfig {
         private Integer port;
         private String username;
         private String password;
-        //--opt --add-drop-database=false --add-drop-table=false --default-character-set=utf8
-        private List<String> options = Arrays.asList(new String[] { "--opt", "--add-drop-database=false", "--add-drop-table=false",
-                "--default-character-set=utf8" });
+        private List<String> options = Arrays.asList(new String[] { "--no-autocommit", " --disable-keys", "--extended-insert",
+                "--quick", "--add-drop-database=false", "--add-drop-table=false", "--skip-add-locks",
+                "--default-character-set=utf8", "--max_allowed_packet=16777216", " --net_buffer_length=16384", "-i",
+                "--master-data=2", "--single-transaction" });
 
         public String getHost() {
             return host;

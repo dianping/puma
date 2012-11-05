@@ -164,7 +164,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 		if (file.exists()) {
 			deleted = file.delete();
 			if(deleted){
-				File index = new File(getBaseDir(), path);
+				File index = new File(getBaseDir(), path + this.zipIndexsuffix);
 				index.delete();
 			}
 				

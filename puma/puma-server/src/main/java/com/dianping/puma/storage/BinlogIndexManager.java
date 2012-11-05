@@ -72,52 +72,76 @@ public class BinlogIndexManager {
 				continue;
 			}
 		}
-		int lostnum = masterIndex.size() + slaveIndex.size()
-				- mainBinlogIndex.get().size();
-		while (lostnum-- > 0) {
-			// TODO when there are many index to recovery?
-			if(masterIndex.getIndex().get().isEmpty())
-				break;
-			Bucket bucket = masterIndex.getReadBucket(masterIndex.getIndex()
-					.get().lastEntry().getKey().longValue(), true);
-			ChangedEvent event = null;
-			BinlogInfo binlogInfo = null;
-			BinlogInfoAndSeq binlogInfoAndSeq = null;
-			String binlogfile = null;
-			long binlogpos = 0;
-			while (true) {
-				try {
-					byte[] data = bucket.getNext();
-					event = (ChangedEvent) codec.decode(data);
-					if (binlogInfo == null) {
-						binlogInfo = new BinlogInfo(event.getServerId(), event
-								.getBinlog(), event.getBinlogPos());
-						binlogInfoAndSeq = new BinlogInfoAndSeq(null, event
-								.getSeq());
-
-					}
-					if (binlogfile != event.getBinlog()
-							|| binlogpos != event.getBinlogPos()) {
-						this.prop.put(convertBinlogInfoToString(new BinlogInfo(
-								event.getServerId(), event.getBinlog(), event
-										.getBinlogPos())), String.valueOf(event
-								.getSeq()));
-						binlogfile = event.getBinlog();
-						binlogpos = event.getBinlogPos();
-					}
-				} catch (EOFException e) {
-					break;
-				}
+		TreeMap<Sequence, String> startMasterIndex = masterIndex.getIndex().get();
+		Iterator masterIndexIter = startMasterIndex.entrySet().iterator();
+		while(masterIndexIter.hasNext()){
+			Map.Entry entry = (Map.Entry) masterIndexIter.next();
+			Sequence value = (Sequence) entry.getKey();
+			if(isInBinlogIndex(value.longValue())){
+				addBinlogIndex(value.longValue(), masterIndex);
 			}
-			if (event == null)
-				continue;
-			binlogInfoAndSeq.setBinlogInfo(new BinlogInfo(event.getServerId(),
-					event.getBinlog(), event.getBinlogPos()));
-			mainBinlogIndex.get().put(binlogInfo, binlogInfoAndSeq);
-			openBinlogIndex(new Sequence(binlogInfoAndSeq.getSeq()));
-			writeBinlogIndex(binlogInfo);
-			closebinlogIndexFile();
 		}
+		TreeMap<Sequence, String> startSlaveIndex = slaveIndex.getIndex().get();
+		Iterator slaveIndexIter = startSlaveIndex.entrySet().iterator();
+		while(slaveIndexIter.hasNext()){
+			Map.Entry entry = (Map.Entry) slaveIndexIter.next();
+			Sequence value = (Sequence) entry.getKey();
+			if(isInBinlogIndex(value.longValue())){
+				addBinlogIndex(value.longValue(), slaveIndex);
+			}
+		}
+	}
+	
+	public Boolean isInBinlogIndex(long seq){
+		Iterator binlogIndexIter = this.mainBinlogIndex.get().entrySet().iterator();
+		while(binlogIndexIter.hasNext()){
+			Map.Entry entry = (Map.Entry) binlogIndexIter.next();
+			BinlogInfoAndSeq value = (BinlogInfoAndSeq) entry.getValue();
+			if(value.getSeq() == seq)
+				return true;
+		}
+		return false;
+	}
+	
+	public void addBinlogIndex(long seq, BucketIndex index) throws IOException, IOException{
+		Bucket bucket = index.getReadBucket(seq, true);
+		ChangedEvent event = null;
+		BinlogInfo binlogInfo = null;
+		BinlogInfoAndSeq binlogInfoAndSeq = null;
+		String binlogfile = null;
+		long binlogpos = 0;
+		while (true) {
+			try {
+				byte[] data = bucket.getNext();
+				event = (ChangedEvent) codec.decode(data);
+				if (binlogInfo == null) {
+					binlogInfo = new BinlogInfo(event.getServerId(), event
+							.getBinlog(), event.getBinlogPos());
+					binlogInfoAndSeq = new BinlogInfoAndSeq(null, event
+							.getSeq());
+
+				}
+				if (binlogfile != event.getBinlog()
+						|| binlogpos != event.getBinlogPos()) {
+					this.prop.put(convertBinlogInfoToString(new BinlogInfo(
+							event.getServerId(), event.getBinlog(), event
+									.getBinlogPos())), String.valueOf(event
+							.getSeq()));
+					binlogfile = event.getBinlog();
+					binlogpos = event.getBinlogPos();
+				}
+			} catch (EOFException e) {
+				break;
+			}
+		}
+		if (event == null)
+			return;
+		binlogInfoAndSeq.setBinlogInfo(new BinlogInfo(event.getServerId(),
+				event.getBinlog(), event.getBinlogPos()));
+		mainBinlogIndex.get().put(binlogInfo, binlogInfoAndSeq);
+		openBinlogIndex(new Sequence(binlogInfoAndSeq.getSeq()));
+		writeBinlogIndex(binlogInfo);
+		closebinlogIndexFile();
 	}
 
 	public Boolean hasCleaned(String s, BucketIndex slaveIndex,

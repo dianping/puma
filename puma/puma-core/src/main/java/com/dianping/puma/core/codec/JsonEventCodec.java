@@ -58,9 +58,11 @@ public class JsonEventCodec implements EventCodec {
 		} else if(type == DML_EVENT){
 			return om
 					.readValue(data, 1, data.length - 1, RowChangedEvent.class);
-		}else{
+		}else if(type == BINLOGINFOANDSEQ){
 			return om
 			.readValue(data, 0, data.length - 1, BinlogInfoAndSeq.class);
+		}else{
+			return null;
 		}
 	}
 

@@ -72,38 +72,41 @@ public class BinlogIndexManager {
 				continue;
 			}
 		}
-		TreeMap<Sequence, String> startMasterIndex = masterIndex.getIndex().get();
+		TreeMap<Sequence, String> startMasterIndex = masterIndex.getIndex()
+				.get();
 		Iterator masterIndexIter = startMasterIndex.entrySet().iterator();
-		while(masterIndexIter.hasNext()){
+		while (masterIndexIter.hasNext()) {
 			Map.Entry entry = (Map.Entry) masterIndexIter.next();
 			Sequence value = (Sequence) entry.getKey();
-			if(isInBinlogIndex(value.longValue())){
+			if (!isInBinlogIndex(value.longValue())) {
 				addBinlogIndex(value.longValue(), masterIndex);
 			}
 		}
 		TreeMap<Sequence, String> startSlaveIndex = slaveIndex.getIndex().get();
 		Iterator slaveIndexIter = startSlaveIndex.entrySet().iterator();
-		while(slaveIndexIter.hasNext()){
+		while (slaveIndexIter.hasNext()) {
 			Map.Entry entry = (Map.Entry) slaveIndexIter.next();
 			Sequence value = (Sequence) entry.getKey();
-			if(isInBinlogIndex(value.longValue())){
+			if (!isInBinlogIndex(value.longValue())) {
 				addBinlogIndex(value.longValue(), slaveIndex);
 			}
 		}
 	}
-	
-	public Boolean isInBinlogIndex(long seq){
-		Iterator binlogIndexIter = this.mainBinlogIndex.get().entrySet().iterator();
-		while(binlogIndexIter.hasNext()){
+
+	public Boolean isInBinlogIndex(long seq) {
+		Iterator binlogIndexIter = this.mainBinlogIndex.get().entrySet()
+				.iterator();
+		while (binlogIndexIter.hasNext()) {
 			Map.Entry entry = (Map.Entry) binlogIndexIter.next();
 			BinlogInfoAndSeq value = (BinlogInfoAndSeq) entry.getValue();
-			if(value.getSeq() == seq)
+			if (value.getSeq() == seq)
 				return true;
 		}
 		return false;
 	}
-	
-	public void addBinlogIndex(long seq, BucketIndex index) throws IOException, IOException{
+
+	public void addBinlogIndex(long seq, BucketIndex index) throws IOException,
+			IOException {
 		Bucket bucket = index.getReadBucket(seq, true);
 		ChangedEvent event = null;
 		BinlogInfo binlogInfo = null;
@@ -253,9 +256,18 @@ public class BinlogIndexManager {
 			throws IOException {
 		Properties result = new Properties();
 		File bfile = new File(subBinlogIndexBaseDir, convertToPath(seq));
-		InputStream inStream = new FileInputStream(bfile);
-		inStream.close();
-		result.load(inStream);
+		if (bfile.exists()) {
+			InputStream inStream = new FileInputStream(bfile);
+			result.load(inStream);
+			inStream.close();
+		}else{
+			TreeMap<BinlogInfo, BinlogInfoAndSeq> now= this.mainBinlogIndex.get();
+			if(binlogContain(binlogInfo, now.lastEntry().getKey(), now.lastEntry().getValue().getBinlogInfo())){
+				result = this.prop;
+			}
+		}
+		if(result == null)
+			return -1;
 		String temp = result.getProperty(convertBinlogInfoToString(binlogInfo));
 		if (temp == null) {
 			return -1;
@@ -383,7 +395,7 @@ public class BinlogIndexManager {
 				newmbindex.renameTo(this.mainBinlogIndexFile);
 			}
 		} catch (IOException e) {
-			//Dont`t do anything
+			// Dont`t do anything
 		}
 	}
 
@@ -472,5 +484,5 @@ public class BinlogIndexManager {
 	public void setMainBinlogIndexFile(File mainBinlogIndexFile) {
 		this.mainBinlogIndexFile = mainBinlogIndexFile;
 	}
-	
+
 }

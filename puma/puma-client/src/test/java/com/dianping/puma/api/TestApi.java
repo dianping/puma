@@ -28,13 +28,15 @@ public class TestApi {
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
 		configBuilder.ddl(true);
 		configBuilder.dml(true);
-		configBuilder.host("localhost");
+		configBuilder.host("127.0.0.1");
 		configBuilder.port(8080);
-		configBuilder.serverId(6666);
+		configBuilder.serverId(1);
 		configBuilder.name("testClient");
-		configBuilder.tables("*", "*");
+		configBuilder.tables("hupeng", "*");
 		configBuilder.target("Dianping");
-		configBuilder.transaction(true);
+		configBuilder.transaction(false);
+		configBuilder.binlog("mysql-bin.000121");
+		configBuilder.binlogPos(107);
 		PumaClient pc = new PumaClient(configBuilder.build());
 		pc.register(new EventListener() {
 
@@ -51,7 +53,9 @@ public class TestApi {
 
 			@Override
 			public void onEvent(ChangedEvent event) throws Exception {
+
 				System.out.println("********************Received " + event);
+
 			}
 		});
 		pc.start();

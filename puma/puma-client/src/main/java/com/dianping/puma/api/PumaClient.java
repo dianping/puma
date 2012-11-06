@@ -77,7 +77,7 @@ public class PumaClient {
 
 			PrintWriter out = new PrintWriter(connection.getOutputStream());
 
-			String requestParams = config.buildRequestParamString(seqFileHolder.getSeq());
+			String requestParams = config.buildRequestParamString(-3);
 
 			out.print(requestParams);
 

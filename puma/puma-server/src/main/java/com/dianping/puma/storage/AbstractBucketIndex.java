@@ -52,6 +52,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	protected long zipThreshold = 200 * 1024 * 1024;
 	protected String zipIndexsuffix = "-zipIndex";
 	protected EventCodec codec;
+	// TODO remove zipIndex, refactor to local
 	protected ArrayList<ZipIndexItem> zipIndex = new ArrayList<ZipIndexItem>();
 
 	public EventCodec getCodec() {
@@ -332,9 +333,11 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 
 	public byte[] readAndZip(RandomAccessFile localFileAcess, File file,
 			long offset) throws IOException {
+	    //TODO change num to readed
 		long num = 0;
 		long beginseq = 0;
 		long endseq = 0;
+		// TODO no need
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
 		while (num < this.zipThreshold) {
 			int length = localFileAcess.readInt();

@@ -148,6 +148,7 @@ public class DefaultBucketManager implements BucketManager {
 	public synchronized void start() throws StorageLifeCycleException {
 		stopped = false;
 		try {
+		 // TODO
 			this.binlogIndexManager.start(this.masterIndex, this.slaveIndex);
 		} catch (IOException e) {
 			throw new StorageLifeCycleException("Storage init failed", e);

@@ -15,55 +15,49 @@ import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 
 public class JsonEventCodec implements EventCodec {
-	private ObjectMapper om;
+    private ObjectMapper om;
 
-	public JsonEventCodec() {
-		om = new ObjectMapper();
-		om.enableDefaultTyping();
-		om.getSerializerProvider().setNullKeySerializer(
-				new MapNullKeySerializer());
-	}
+    public JsonEventCodec() {
+        om = new ObjectMapper();
+        om.enableDefaultTyping();
+        om.getSerializerProvider().setNullKeySerializer(new MapNullKeySerializer());
+    }
 
-	private static class MapNullKeySerializer extends JsonSerializer<Object> {
-		@Override
-		public void serialize(Object nullKey, JsonGenerator jsonGenerator,
-				SerializerProvider unused) throws IOException,
-				JsonProcessingException {
-			jsonGenerator.writeFieldName("[NullKey]");
-		}
-	}
+    private static class MapNullKeySerializer extends JsonSerializer<Object> {
+        @Override
+        public void serialize(Object nullKey, JsonGenerator jsonGenerator, SerializerProvider unused) throws IOException,
+                JsonProcessingException {
+            jsonGenerator.writeFieldName("[NullKey]");
+        }
+    }
 
-	@Override
-	public byte[] encode(Object object) throws IOException {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
+    @Override
+    public byte[] encode(Object object) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-		byte[] data = om.writeValueAsBytes(object);
+        byte[] data = om.writeValueAsBytes(object);
 
-		if (object instanceof ChangedEvent) {
-			if (object instanceof DdlEvent) {
-				out.write(DDL_EVENT);
-			} else {
-				out.write(DML_EVENT);
-			}
-		}
-		out.write(data);
-		return out.toByteArray();
-	}
+        if (object instanceof ChangedEvent) {
+            if (object instanceof DdlEvent) {
+                out.write(DDL_EVENT);
+            } else {
+                out.write(DML_EVENT);
+            }
+        }
+        out.write(data);
+        return out.toByteArray();
+    }
 
-	@Override
-	public Object decode(byte[] data) throws IOException {
-		int type = data[0];
-		if (type == DDL_EVENT) {
-			return om.readValue(data, 1, data.length - 1, DdlEvent.class);
-		} else if(type == DML_EVENT){
-			return om
-					.readValue(data, 1, data.length - 1, RowChangedEvent.class);
-		}else if(type == BINLOGINFOANDSEQ){
-			return om
-			.readValue(data, 0, data.length - 1, BinlogInfoAndSeq.class);
-		}else{
-			return null;
-		}
-	}
+    @Override
+    public Object decode(byte[] data) throws IOException {
+        int type = data[0];
+        if (type == DDL_EVENT) {
+            return om.readValue(data, 1, data.length - 1, DdlEvent.class);
+        } else if (type == DML_EVENT) {
+            return om.readValue(data, 1, data.length - 1, RowChangedEvent.class);
+        } else {
+            return null;
+        }
+    }
 
 }

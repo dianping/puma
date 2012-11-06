@@ -2,7 +2,9 @@ package com.dianping.puma.core.datatype;
 
 public class BinlogInfo {
 	private long serverId;
+	// TODO
 	private String BinlogFile;
+	// TODO
 	private long BinlogPosition;
 
 	public BinlogInfo(long serverId, String binlogFile, long binlogPosition) {

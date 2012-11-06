@@ -77,6 +77,7 @@ public class HDFSBucket extends AbstractBucket {
 		// call
 		if (this.zipFileInputStream == null) {
 			byte[] data = doReadData();
+			// TODO 1. performance; 2. duplicated code; 3. ZIPFORMAT only appears in the first block, while we seek....; 4. file format desc
 			if (data.toString().equals("ZIPFORMAT")) {
 				ByteArrayInputStream bin = new ByteArrayInputStream(
 						doReadData());
@@ -84,6 +85,7 @@ public class HDFSBucket extends AbstractBucket {
 						new GZIPInputStream(bin));
 				return getNextFromZipBuf();
 			} else {
+			    // TODO doRead as normal
 				throw new EOFException();
 			}
 		} else {
@@ -92,6 +94,7 @@ public class HDFSBucket extends AbstractBucket {
 	}
 
 	public byte[] getNextFromZipBuf() throws IOException {
+	    // TODO panduan zhe ge zip shi fou ke du, hai yao pan duan you mu you xiayige zip
 		try {
 			int len = this.zipFileInputStream.readInt();
 			byte[] unzipdata = new byte[len];

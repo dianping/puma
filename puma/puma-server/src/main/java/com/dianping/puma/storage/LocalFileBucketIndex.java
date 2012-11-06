@@ -128,6 +128,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 						destFile.getParent()));
 			}
 		}
+		// TODO refactor to local zipIndex
 		zipIndex.clear();
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		RandomAccessFile destFileAcess = new RandomAccessFile(destFile, "rw");
@@ -137,6 +138,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 		destFileAcess.write(bos.toByteArray());
 		while(localFileAcess.getFilePointer() + 4 < localFileAcess.length()){
 			byte[] data = readAndZip(localFileAcess, localFile, destFileAcess.getFilePointer());
+			// TODO bos no need
 			bos.reset();
 			bos.write(ByteArrayUtils.intToByteArray(data.length));
 			bos.write(data);

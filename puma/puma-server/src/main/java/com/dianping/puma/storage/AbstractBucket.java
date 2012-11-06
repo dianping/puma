@@ -98,6 +98,8 @@ public abstract class AbstractBucket implements Bucket {
 		this.currentWritingSeq.set(new Sequence(startingSequence
 				.getCreationDate(), startingSequence.getNumber()));
 	}
+	
+	// TODO add getNext
 
 	@Override
 	public void append(byte[] data) throws StorageClosedException, IOException {

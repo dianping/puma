@@ -120,7 +120,6 @@ public class SyncController {
                 File file = new File("/home/wukezhu/document/mywork/puma/puma/puma-syncserver/src/main/resources/dumpConfig.json");
                 dumpJson = IOUtils.toString(new FileInputStream(file), "UTF-8");
             }
-
             //解析dumpJson，得到DumpConfig对象
             Gson gson = new Gson();
             DumpConfig dumpConfig = gson.fromJson(dumpJson, DumpConfig.class);

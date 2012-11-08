@@ -116,6 +116,7 @@ public class SyncClient {
         configBuilder.transaction(sync.getTransaction());
         configBuilder.binlog(binlog);
         configBuilder.binlogPos(binlogPos);
+        //        configBuilder.seqFileBase(seqFileBase)
         _parseSourceDatabaseTables(sync, configBuilder);//configBuilder.tables("DianPing", "*");
         configuration = configBuilder.build();
         System.out.println(configuration);
@@ -138,7 +139,6 @@ public class SyncClient {
 
             @Override
             public void onEvent(ChangedEvent event) throws Exception {
-                //                System.out.println("********************Received " + event);
                 //动态更新binlog和binlogPos
                 binlogPos = event.getBinlogPos();
                 binlog = event.getBinlog();

@@ -19,6 +19,7 @@ import com.dianping.puma.core.sync.ColumnConfig;
 import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.SyncConfig;
 import com.dianping.puma.core.sync.TableConfig;
+import com.dianping.puma.syncserver.util.SyncConfigPatternParser;
 
 public class MysqlExecutor {
 
@@ -45,6 +46,7 @@ public class MysqlExecutor {
             String sql = ((DdlEvent) event).getSql();
             if (StringUtils.isNotBlank(sql)) {
                 //ddl不做命名的替换！直接执行
+                //TODO ddl 命名替换
                 LOG.info("execute ddl sql: " + sql);
                 jdbcTemplate.update(sql);
             }
@@ -59,11 +61,14 @@ public class MysqlExecutor {
         jdbcTemplate.update(mus.getSql(), mus.getArgs());
     }
 
+    /**
+     * 将RowChangedEvent转化成MysqlUpdateStatement(Mysql操作对象)
+     */
     private MysqlUpdateStatement convert(SyncConfig sync, RowChangedEvent rowChangedEvent) {
         MysqlUpdateStatement mus = new MysqlUpdateStatement();
         RowChangedEvent event = rowChangedEvent.clone();
 
-        //来源的database,column
+        //获取来源的database,column
         String databaseName = rowChangedEvent.getDatabase();
         String tableName = rowChangedEvent.getTable();
         Map<String, ColumnInfo> columnMap = rowChangedEvent.getColumns();
@@ -80,7 +85,12 @@ public class MysqlExecutor {
             if (table.getTo().equals("*")) {//如果是table匹配*
                 //如果是*，则和原来的一致
             } else {
-                event.setTable(table.getTo());//如果不是*，则destTableName为to的值
+                if (table.getTo().startsWith("#partition")) {//如果是自定义#partition，则计算出table名称
+                    //根据自定义规则(如分表)，算出table名称
+                    event.setTable(SyncConfigPatternParser.partition(table.getTo(), rowChangedEvent.getColumns()));
+                } else {
+                    event.setTable(table.getTo());//如果不是*也不是#partition，则destTableName为to的值
+                }
                 //处理column
                 List<ColumnConfig> columnConfigs = table.getColumns();
                 for (Map.Entry<String, ColumnInfo> columnEntry : columnMap.entrySet()) {

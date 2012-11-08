@@ -38,8 +38,16 @@
                 <column from="id" to="id" primary="true" />
                 <column from="name" to="name1" />
             </table>
+            <!-- #regex(test_[0-31])这部分在admin端解析好变成多个<table配置> -->
+            <!-- <table from="#regex(test_[0-31])" to="#partition(test_[$uid/2])" 
+                partOf="true"> <column from="id" to="id" primary="true" /> <column from="name" 
+                to="name1" /> </table> -->
+            <table from="test" to="#partition(test_[$uid%2])">
+                <column from="uid" to="uid" primary="true" />
+                <column from="name" to="name1" />
+                <column from="de" to="de1" />
+            </table>
             <table from="*" to="*"></table>
         </database>
-         <database from="*" to="*" />
     </instance>
 </sync>

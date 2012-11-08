@@ -27,23 +27,23 @@ public class SqlBuildUtil {
     }
 
     public static String buildDeleteSql(RowChangedEvent event) {
-        return buildSql(event, "/sql_template2/deleteSql.vm");
+        return buildSql(event, "/sql_template/deleteSql.vm");
     }
 
     public static String buildUpdateSql(RowChangedEvent event) {
-        return buildSql(event, "/sql_template2/updateSql.vm");
+        return buildSql(event, "/sql_template/updateSql.vm");
     }
 
     public static String buildReplaceSql(RowChangedEvent event) {
-        return buildSql(event, "/sql_template2/replaceSql.vm");
+        return buildSql(event, "/sql_template/replaceSql.vm");
     }
 
     public static String buildUpdateToNullSql(RowChangedEvent event) {
-        return buildSql(event, "/sql_template2/updateToNullSql.vm");
+        return buildSql(event, "/sql_template/updateToNullSql.vm");
     }
 
     public static String buildInsertSql(RowChangedEvent event) {
-        return buildSql(event, "/sql_template2/insertSql.vm");
+        return buildSql(event, "/sql_template/insertSql.vm");
     }
 
     private static String buildSql(RowChangedEvent event, String file) {

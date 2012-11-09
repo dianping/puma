@@ -1,6 +1,5 @@
 package com.dianping.puma.storage;
 
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -54,19 +53,5 @@ public class LocalFileBucket extends AbstractBucket {
 
 	protected boolean doHasRemainingForWrite() throws IOException {
 		return file.length() < getMaxSizeByte();
-	}
-
-	@Override
-	public byte[] getNext() throws StorageClosedException, IOException {
-		checkClosed();
-		// we should guarantee the whole packet read in one transaction,
-		// otherwise we will skip some bytes and read a wrong value in the next
-		// call
-		if (readable()) {
-			byte[] data = doReadData();
-			return data;
-		} else {
-			throw new EOFException();
-		}
 	}
 }

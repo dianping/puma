@@ -15,22 +15,19 @@
  */
 package com.dianping.puma.storage;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
+import java.io.EOFException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.io.Serializable;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.NavigableMap;
+import java.util.Properties;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.zip.GZIPOutputStream;
 
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
@@ -49,11 +46,13 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	protected int maxBucketLengthMB = 2000;
 	private volatile boolean stopped = true;
 	protected AtomicReference<Sequence> latestSequence = new AtomicReference<Sequence>();
-	protected long zipThreshold = 200 * 1024 * 1024;
 	protected String zipIndexsuffix = "-zipIndex";
 	protected EventCodec codec;
+	protected Compress compress;
+	protected static final int COMPRESS_HEAD = 20;
+	protected static final String ZIPFORMAT = "ZIPFORMAT           ";
+	protected static final String ZIPINDEX_SEPARATOR = "$";
 	// TODO remove zipIndex, refactor to local
-	protected ArrayList<ZipIndexItem> zipIndex = new ArrayList<ZipIndexItem>();
 
 	public EventCodec getCodec() {
 		return codec;
@@ -115,54 +114,47 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	@Override
 	public void start() throws IOException {
 		stopped = false;
+		this.compress = new Compress();
+		this.compress.setCodec(codec);
 	}
 
 	@Override
 	public void add(Bucket bucket) throws StorageClosedException {
 		checkClosed();
-		TreeMap<Sequence, String> newIndex = new TreeMap<Sequence, String>(
-				index.get());
-		newIndex.put(new Sequence(bucket.getStartingSequece()),
-				convertToPath(bucket.getStartingSequece()));
+		TreeMap<Sequence, String> newIndex = new TreeMap<Sequence, String>(index.get());
+		newIndex.put(new Sequence(bucket.getStartingSequece()), convertToPath(bucket.getStartingSequece()));
 		index.set(newIndex);
 	}
 
 	@Override
-	public Bucket getNextReadBucket(Sequence sequence) throws IOException,
-			StorageClosedException {
+	public Bucket getNextReadBucket(Sequence sequence) throws IOException, StorageClosedException {
 		checkClosed();
-		NavigableMap<Sequence, String> tailMap = index.get().tailMap(sequence,
-				false);
+		NavigableMap<Sequence, String> tailMap = index.get().tailMap(sequence, false);
 		if (!tailMap.isEmpty()) {
 			Entry<Sequence, String> firstEntry = tailMap.firstEntry();
-			return doGetReadBucket(baseDir, firstEntry.getValue(), firstEntry
-					.getKey(), maxBucketLengthMB);
+			return doGetReadBucket(baseDir, firstEntry.getValue(), firstEntry.getKey(), maxBucketLengthMB);
 		}
 		return null;
 	}
 
-	protected abstract Bucket doGetReadBucket(String baseDir, String path,
-			Sequence startingSeq, int maxSizeMB) throws IOException;
+	protected abstract Bucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB) throws IOException;
 
 	@Override
-	public Bucket getNextWriteBucket() throws IOException,
-			StorageClosedException {
+	public Bucket getNextWriteBucket() throws IOException, StorageClosedException {
 		checkClosed();
 		Entry<Sequence, String> lastEntry = index.get().lastEntry();
 		Sequence nextSeq = null;
 		if (lastEntry == null) {
 			nextSeq = new Sequence(getNowCreationDate(), 0);
 		} else {
-			nextSeq = getNextWriteBucketSequence(new Sequence(lastEntry
-					.getKey()));
+			nextSeq = getNextWriteBucketSequence(new Sequence(lastEntry.getKey()));
 		}
 		String bucketPath = convertToPath(nextSeq);
 		return doGetNextWriteBucket(baseDir, bucketPath, nextSeq);
 
 	}
 
-	protected abstract Bucket doGetNextWriteBucket(String baseDir,
-			String bucketPath, Sequence startingSequence) throws IOException;
+	protected abstract Bucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence) throws IOException;
 
 	protected int getNowCreationDate() {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
@@ -178,8 +170,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	}
 
 	protected String convertToPath(Sequence seq) {
-		return "20" + seq.getCreationDate() + PATH_SEPARATOR + bucketFilePrefix
-				+ seq.getNumber();
+		return "20" + seq.getCreationDate() + PATH_SEPARATOR + bucketFilePrefix + seq.getNumber();
 	}
 
 	protected int getDateFromPath(String path) {
@@ -188,8 +179,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 
 	protected Sequence convertToSequence(String path) {
 		String[] parts = path.split(PATH_SEPARATOR);
-		return new Sequence(Integer.valueOf(parts[0].substring(2)), Integer
-				.valueOf(parts[1].substring(bucketFilePrefix.length())));
+		return new Sequence(Integer.valueOf(parts[0].substring(2)), Integer.valueOf(parts[1].substring(bucketFilePrefix.length())));
 	}
 
 	public void stop() {
@@ -205,11 +195,9 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 		}
 	}
 
-	public boolean hasNexReadBucket(Sequence sequence)
-			throws StorageClosedException {
+	public boolean hasNexReadBucket(Sequence sequence) throws StorageClosedException {
 		checkClosed();
-		NavigableMap<Sequence, String> tailMap = index.get().tailMap(sequence,
-				false);
+		NavigableMap<Sequence, String> tailMap = index.get().tailMap(sequence, false);
 
 		return !tailMap.isEmpty();
 	}
@@ -220,8 +208,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 
 	public void add(List<String> paths) throws StorageClosedException {
 		checkClosed();
-		TreeMap<Sequence, String> newIndexes = new TreeMap<Sequence, String>(
-				index.get());
+		TreeMap<Sequence, String> newIndexes = new TreeMap<Sequence, String>(index.get());
 
 		for (String path : paths) {
 			newIndexes.put(convertToSequence(path), path);
@@ -230,8 +217,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 		index.set(newIndexes);
 	}
 
-	public List<String> bulkGetRemainN(int remainSize)
-			throws StorageClosedException {
+	public List<String> bulkGetRemainN(int remainSize) throws StorageClosedException {
 		checkClosed();
 		List<String> results = new ArrayList<String>();
 		TreeMap<Sequence, String> bakIndexes = index.get();
@@ -249,8 +235,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	}
 
 	@Override
-	public List<String> bulkGetRemainNDay(int remainDay)
-			throws StorageClosedException {
+	public List<String> bulkGetRemainNDay(int remainDay) throws StorageClosedException {
 		checkClosed();
 		List<String> results = new ArrayList<String>();
 		TreeMap<Sequence, String> bakIndexes = index.get();
@@ -272,8 +257,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	@Override
 	public void remove(List<String> paths) throws StorageClosedException {
 		checkClosed();
-		TreeMap<Sequence, String> newIndexes = new TreeMap<Sequence, String>(
-				index.get());
+		TreeMap<Sequence, String> newIndexes = new TreeMap<Sequence, String>(index.get());
 
 		for (String path : paths) {
 			newIndexes.remove(convertToSequence(path));
@@ -286,8 +270,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 		return baseDir;
 	}
 
-	public void copyFromLocal(String srcBaseDir, String path)
-			throws IOException, StorageClosedException {
+	public void copyFromLocal(String srcBaseDir, String path) throws IOException, StorageClosedException {
 		checkClosed();
 	}
 
@@ -302,68 +285,123 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 		this.latestSequence.set(sequence);
 	}
 
-	protected static class PathSequenceComparator implements
-			Comparator<Sequence>, Serializable {
+	@Override
+	public Bucket getReadBucket(long seq, Boolean start) throws StorageClosedException, IOException {
+		checkClosed();
+		Sequence sequence = null;
+		String path = null;
 
-		private static final long serialVersionUID = -350477869152651536L;
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-		 */
-		@Override
-		public int compare(Sequence o1, Sequence o2) {
-			if (o1.getCreationDate() > o2.getCreationDate()) {
-				return 1;
-			} else if (o1.getCreationDate() < o2.getCreationDate()) {
-				return -1;
+		if (seq == -1L) {
+			// 从最老开始消费
+			if (!index.get().isEmpty()) {
+				path = index.get().firstEntry().getValue();
+				if (path == null) {
+					return null;
+				}
+				sequence = new Sequence(index.get().firstEntry().getKey());
 			} else {
-				if (o1.getNumber() > o2.getNumber()) {
-					return 1;
-				} else if (o1.getNumber() < o2.getNumber()) {
-					return -1;
+				return null;
+			}
+		} else if (seq == -2L) {
+			// 从最新开始消费
+			if (this.latestSequence.get() != null) {
+				sequence = new Sequence(this.latestSequence.get());
+				path = convertToPath(sequence);
+			} else {
+				return null;
+			}
+		} else {
+			sequence = new Sequence(seq);
+			path = index.get().get(sequence);
+			if (path == null) {
+				return null;
+			}
+
+		}
+
+		int offset = sequence.getOffset();
+		Bucket bucket = doGetReadBucket(baseDir, path, sequence.clearOffset(), maxBucketLengthMB);
+
+		if (bucket != null) {
+			byte[] headData = bucket.getNext();
+			if (headData.length != COMPRESS_HEAD) {
+				if (start) {
+					bucket.seek(0);
+					return bucket;
 				} else {
-					return 0;
+					if (seq != -1 && seq != -2) {
+						bucket.seek(offset);
+						bucket.getNext();
+						return bucket;
+					} else {
+						bucket.seek(offset);
+						return bucket;
+					}
+				}
+			} else {
+				if (headData.equals(ZIPFORMAT)) {
+					bucket.setIsCompress(true);
+					if (seq != -1L) {
+						ArrayList<ZipIndexItem> zipIndex = readZipIndex(this.getBaseDir(), path + this.zipIndexsuffix);
+						long off = findZipFileOffset(sequence, zipIndex);
+						bucket.seek(off);
+						while (true) {
+							try {
+								byte[] lookupdata = bucket.getNext();
+								ChangedEvent event = (ChangedEvent) codec.decode(lookupdata);
+								if (event.getSeq() == seq)
+									return bucket;
+							} catch (EOFException e) {
+								return null;
+							}
+						}
+					}else{
+						bucket.seek(COMPRESS_HEAD);
+						return bucket;
+					}
+				} else {
+					if (start) {
+						bucket.seek(0);
+						return bucket;
+					} else {
+						if (seq != -1 && seq != -2) {
+							bucket.seek(offset);
+							bucket.getNext();
+							return bucket;
+						} else {
+							bucket.seek(offset);
+							return bucket;
+						}
+					}
 				}
 			}
+			/*
+			 * 
+			 * try { if (seq != -1L && seq != -2L && !start) { bucket.getNext();
+			 * } } catch (EOFException e) { // ignore }
+			 */
 		}
 
+		return bucket;
 	}
-
-	public byte[] readAndZip(RandomAccessFile localFileAcess, File file,
-			long offset) throws IOException {
-	    //TODO change num to readed
-		long num = 0;
-		long beginseq = 0;
-		long endseq = 0;
-		// TODO no need
-		ByteArrayOutputStream bout = new ByteArrayOutputStream();
-		while (num < this.zipThreshold) {
-			int length = localFileAcess.readInt();
-			byte[] data = new byte[length];
-			int n = 0;
-			while (n < length) {
-				int count = localFileAcess.read(data, 0 + n, length - n);
-				n += count;
+	
+	public long findZipFileOffset(Sequence seq, ArrayList<ZipIndexItem> zipIndex) {
+		int size = zipIndex.size();
+		for (int i = 0; i < size; i++) {
+			if (zipIndex.get(i).getBenginseq() <= seq.longValue()
+					&& zipIndex.get(i).getEndseq() >= seq.longValue()) {
+				return zipIndex.get(i).getOffset();
 			}
-			ChangedEvent event = (ChangedEvent) codec.decode(data);
-			if (beginseq == 0)
-				beginseq = event.getSeq();
-			endseq = event.getSeq();
-			bout.write(length);
-			bout.write(data);
-			num = num + length + 4;
-			if (localFileAcess.getFilePointer() + 4 > localFileAcess.length())
-				break;
 		}
-		this.zipIndex.add(new ZipIndexItem(beginseq, endseq, offset));
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		GZIPOutputStream zip = new GZIPOutputStream(bos);
-		zip.write(bout.toByteArray());
-		zip.close();
-		bout.close();
-		return bos.toByteArray();
+		return -1;
 	}
-
+	
+	public void writeZipIndex(ArrayList<ZipIndexItem> zipIndex, OutputStream ios) throws IOException {
+		Properties properties = new Properties();
+		for (int i = 0; i < zipIndex.size(); i++) {
+			properties.put(String.valueOf(zipIndex.get(i).getBenginseq()) + ZIPINDEX_SEPARATOR + String.valueOf(zipIndex.get(i).getEndseq()),
+					String.valueOf(zipIndex.get(i).getOffset()));
+		}
+		properties.store(ios, "store zipIndex");
+	}
 }

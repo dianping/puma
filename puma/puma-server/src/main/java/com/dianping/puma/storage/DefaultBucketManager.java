@@ -2,14 +2,9 @@ package com.dianping.puma.storage;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.Serializable;
-import java.util.Comparator;
-import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
-import com.dianping.puma.core.datatype.BinlogInfo;
-import com.dianping.puma.core.datatype.BinlogInfoAndSeq;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;
@@ -24,14 +19,6 @@ public class DefaultBucketManager implements BucketManager {
 	private CleanupStrategy cleanupStrategy;
 
 	private volatile boolean stopped = true;
-
-	public TreeMap<BinlogInfo, BinlogInfoAndSeq> getBinlogIndex() {
-		return binlogIndexManager.getBinlogIndex();
-	}
-
-	public void setBinlogIndex(TreeMap<BinlogInfo, BinlogInfoAndSeq> binlogIndex) {
-		binlogIndexManager.setBinlogIndex(binlogIndex);
-	}
 
 	public DefaultBucketManager(BucketIndex masterIndex,
 			BucketIndex slaveIndex, BinlogIndexManager binlogIndexManager, ArchiveStrategy archiveStrategy,
@@ -147,12 +134,6 @@ public class DefaultBucketManager implements BucketManager {
 
 	public synchronized void start() throws StorageLifeCycleException {
 		stopped = false;
-		try {
-		 // TODO
-			this.binlogIndexManager.start(this.masterIndex, this.slaveIndex);
-		} catch (IOException e) {
-			throw new StorageLifeCycleException("Storage init failed", e);
-		}
 		startArchiveJob();
 		startCleanupJob();
 	}
@@ -217,70 +198,4 @@ public class DefaultBucketManager implements BucketManager {
 	public void updateLatestSequence(Sequence sequence) {
 		this.masterIndex.updateLatestSequence(sequence);
 	}
-
-	@Override
-	public void updateFileBinlogIndex(Bucket bucket) {
-		binlogIndexManager.updateFileBinlogIndex(bucket);
-	}
-
-	@Override
-	public void openBinlogIndex(Sequence seq) throws IOException {
-		binlogIndexManager.openBinlogIndex(seq);
-	}
-
-	@Override
-	public long TranBinlogIndexToSeq(BinlogInfo binlogInfo) throws IOException {
-		return binlogIndexManager.TranBinlogIndexToSeq(binlogInfo);
-	}
-
-	@Override
-	public void binlogIndexFileclose() throws IOException {
-		binlogIndexManager.closebinlogIndexFile();
-	}
-
-	protected static class PathBinlogInfoComparator implements
-			Comparator<BinlogInfo>, Serializable {
-
-		private static final long serialVersionUID = -350477869152651536L;
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-		 */
-		@Override
-		public int compare(BinlogInfo o1, BinlogInfo o2) {
-			if (o1.getServerId() < o2.getServerId()) {
-				return -1;
-			} else if (o1.getServerId() == o2.getServerId()) {
-				if (o1.getBinlogFile().compareTo(o2.getBinlogFile()) < 0) {
-					return -1;
-				} else if (o1.getBinlogFile().compareTo(o2.getBinlogFile()) == 0) {
-					if (o1.getBinlogPosition() < o2.getBinlogPosition()) {
-						return -1;
-					} else if (o1.getBinlogPosition() == o2.getBinlogPosition()) {
-						return 0;
-					} else {
-						return 1;
-					}
-				} else {
-					return 1;
-				}
-			} else {
-				return 1;
-			}
-		}
-
-	}
-
-	@Override
-	public void writeBinlogIndex(BinlogInfo binlogInfo) throws IOException {
-		this.binlogIndexManager.writeBinlogIndex(binlogInfo);
-	}
-	
-	@Override
-	public void writeBinlogIndexIntoProperty(BinlogInfoAndSeq bpas) throws IOException{
-		this.binlogIndexManager.writeBinlogIndexIntoProperty(bpas);
-	}
-
 }

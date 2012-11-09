@@ -16,14 +16,18 @@
 package com.dianping.puma.storage;
 
 import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.Properties;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
@@ -39,8 +43,7 @@ import com.dianping.puma.storage.exception.StorageClosedException;
 public class LocalFileBucketIndex extends AbstractBucketIndex {
 
 	@Override
-	protected Bucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB)
-			throws IOException {
+	protected Bucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB) throws IOException {
 		return new LocalFileBucket(new File(baseDir, path), startingSeq, maxSizeMB);
 	}
 
@@ -57,7 +60,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 				throw new RuntimeException("Failed to make dir for " + localBaseDir.getAbsolutePath());
 			}
 		}
-		TreeMap<Sequence, String> newIndex = new TreeMap<Sequence, String>(new PathSequenceComparator());
+		TreeMap<Sequence, String> newIndex = new TreeMap<Sequence, String>();
 		getIndex().set(newIndex);
 		File[] dirs = localBaseDir.listFiles(new FileFilter() {
 
@@ -96,8 +99,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 	}
 
 	@Override
-	protected Bucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence)
-			throws IOException {
+	protected Bucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence) throws IOException {
 		File bucketFile = new File(baseDir, bucketPath);
 
 		if (!bucketFile.getParentFile().exists()) {
@@ -120,39 +122,32 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 		if (!localFile.exists()) {
 			return;
 		}
-		File destFile = new File(this.getBaseDir(),path);
+		File destFile = new File(this.getBaseDir(), path);
 		if (!destFile.getParentFile().exists()) {
 			if (!destFile.getParentFile().mkdirs()) {
-				throw new IOException(String.format(
-						"Can't create writeBucket's parent(%s)!",
-						destFile.getParent()));
+				throw new IOException(String.format("Can't create writeBucket's parent(%s)!", destFile.getParent()));
 			}
 		}
 		// TODO refactor to local zipIndex
-		zipIndex.clear();
+		ArrayList<ZipIndexItem> zipIndex = new ArrayList<ZipIndexItem>();
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		RandomAccessFile destFileAcess = new RandomAccessFile(destFile, "rw");
 		RandomAccessFile localFileAcess = new RandomAccessFile(localFile, "rw");
-		bos.write(ByteArrayUtils.intToByteArray("ZIPFORMAT".length()));
-		bos.write("ZIPFORMAT".getBytes());
+		bos.write(ByteArrayUtils.intToByteArray(ZIPFORMAT.length()));
+		bos.write(ZIPFORMAT.getBytes());
 		destFileAcess.write(bos.toByteArray());
-		while(localFileAcess.getFilePointer() + 4 < localFileAcess.length()){
-			byte[] data = readAndZip(localFileAcess, localFile, destFileAcess.getFilePointer());
+		while (localFileAcess.getFilePointer() + 4 < localFileAcess.length()) {
+			byte[] data = compress.compress(localFileAcess, destFileAcess.getFilePointer(), zipIndex);
 			// TODO bos no need
 			bos.reset();
 			bos.write(ByteArrayUtils.intToByteArray(data.length));
 			bos.write(data);
 			destFileAcess.write(bos.toByteArray());
 		}
-		OutputStream ios = new FileOutputStream(new File(this.getBaseDir(),
-				path + this.zipIndexsuffix));
-		if(zipIndex.isEmpty())
+		OutputStream ios = new FileOutputStream(new File(this.getBaseDir(), path + this.zipIndexsuffix));
+		if (zipIndex.isEmpty())
 			return;
-		byte[] index = this.codec.encode(zipIndex);
-		bos.reset();
-		bos.write(ByteArrayUtils.intToByteArray(index.length));
-		bos.write(index);
-		ios.write(bos.toByteArray());
+		writeZipIndex(zipIndex, ios);
 		ios.close();
 		destFileAcess.close();
 		bos.close();
@@ -165,11 +160,11 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 		boolean deleted = false;
 		if (file.exists()) {
 			deleted = file.delete();
-			if(deleted){
+			if (deleted) {
 				File index = new File(getBaseDir(), path + this.zipIndexsuffix);
 				index.delete();
 			}
-				
+
 		}
 
 		if (file.getParentFile().exists()) {
@@ -180,57 +175,20 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 		}
 		return deleted;
 	}
-	
+
 	@Override
-	public Bucket getReadBucket(long seq, Boolean start)
-			throws StorageClosedException, IOException {
-		checkClosed();
-		Sequence sequence = null;
-		String path = null;
-
-		if (seq == -1L) {
-			// 从最老开始消费
-			if (!index.get().isEmpty()) {
-				path = index.get().firstEntry().getValue();
-				if (path == null) {
-					return null;
-				}
-				sequence = new Sequence(index.get().firstEntry().getKey());
-			} else {
-				return null;
-			}
-		} else if (seq == -2L) {
-			// 从最新开始消费
-			if (this.latestSequence.get() != null) {
-				sequence = new Sequence(this.latestSequence.get());
-				path = convertToPath(sequence);
-			} else {
-				return null;
-			}
-		} else {
-			sequence = new Sequence(seq);
-			path = index.get().get(sequence);
-			if (path == null) {
-				return null;
-			}
-
+	public ArrayList<ZipIndexItem> readZipIndex(String baseDir, String path) throws IOException {
+		Properties properties = new Properties();
+		DataInputStream ios = new DataInputStream(new FileInputStream(new File(baseDir, path + this.zipIndexsuffix)));
+		properties.load(ios);
+		ios.close();
+		ArrayList<ZipIndexItem> results = new ArrayList<ZipIndexItem>();
+		Set<String> keys = properties.stringPropertyNames();
+		for (String key : keys) {
+			ZipIndexItem item = new ZipIndexItem(Long.valueOf(key.substring(0, key.indexOf(ZIPINDEX_SEPARATOR))).longValue(), Long.valueOf(
+					key.substring(key.indexOf(ZIPINDEX_SEPARATOR) + 1)).longValue(), Long.valueOf(properties.getProperty(key)));
+			results.add(item);
 		}
-
-		int offset = sequence.getOffset();
-		Bucket bucket = doGetReadBucket(baseDir, path, sequence.clearOffset(),
-				maxBucketLengthMB);
-
-		if (bucket != null) {
-			bucket.seek(offset);
-			try {
-				if (seq != -1L && seq != -2L && !start) {
-					bucket.getNext();
-				}
-			} catch (EOFException e) {
-				// ignore
-			}
-		}
-
-		return bucket;
+		return results;
 	}
 }

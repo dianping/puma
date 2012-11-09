@@ -10,8 +10,6 @@ import java.util.List;
 
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.codec.EventCodec;
-import com.dianping.puma.core.datatype.BinlogInfo;
-import com.dianping.puma.core.datatype.BinlogInfoAndSeq;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.storage.exception.InvalidSequenceException;
@@ -21,8 +19,8 @@ import com.dianping.puma.storage.exception.StorageLifeCycleException;
 import com.dianping.puma.storage.exception.StorageWriteException;
 
 public class DefaultEventStorage implements EventStorage {
-	private BucketManager bucketManager;
 	private Bucket writingBucket;
+	private BucketManager bucketManager;
 	private EventCodec codec;
 	private List<WeakReference<EventChannel>> openChannels = new ArrayList<WeakReference<EventChannel>>();
 	private volatile boolean stopped = true;
@@ -41,10 +39,12 @@ public class DefaultEventStorage implements EventStorage {
 		stopped = false;
 		this.masterIndex.setCodec(codec);
 		this.slaveIndex.setCodec(codec);
+		this.binlogIndexManager.setCodec(codec);
 		// TODO binlogIndexManager.setCodec
-		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, binlogIndexManager,
-				archiveStrategy, cleanupStrategy);
+		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex,
+				binlogIndexManager, archiveStrategy, cleanupStrategy);
 		try {
+			binlogIndexManager.start(masterIndex, slaveIndex);
 			bucketManager.start();
 			// TODO indexManager.start();
 		} catch (Exception e) {
@@ -104,21 +104,21 @@ public class DefaultEventStorage implements EventStorage {
 			channel = new DefaultEventChannel(bucketManager, seq, codec);
 		} else {
 		 // TODO BinlogInfo & BinlogInfoAndSeq merge
-			BinlogInfo startbinlog = new BinlogInfo(serverId, binlogFile, Long
-					.valueOf(binlogInfo).longValue());
+			BinlogInfoAndSeq startbinlog = new BinlogInfoAndSeq(serverId, binlogFile, Long
+					.valueOf(binlogInfo).longValue(), -1);
 			channel = new DefaultEventChannel(bucketManager,
-					TransLateBinlogInfoToSeq(startbinlog), codec);
+					translateBinlogInfoToSeq(startbinlog), codec);
 		}
 		openChannels.add(new WeakReference<EventChannel>(channel));
 		return channel;
 	}
 
 	// TODO translateBinlogInfoToSeq
-	public long TransLateBinlogInfoToSeq(BinlogInfo binlogInfo)
+	public long translateBinlogInfoToSeq(BinlogInfoAndSeq binlogInfoAndSeq)
 			throws StorageException {
 		try {
 		 // TODO
-			long result = this.bucketManager.TranBinlogIndexToSeq(binlogInfo);
+			long result = this.binlogIndexManager.tranBinlogIndexToSeq(binlogInfoAndSeq);
 			if (result != -1) {
 				return result;
 			} else {
@@ -127,7 +127,7 @@ public class DefaultEventStorage implements EventStorage {
 			}
 		} catch (IOException e) {
 			throw new InvalidSequenceException("Invalid binlogInfo("
-					+ binlogInfo + ")", e);
+					+ binlogInfoAndSeq + ")", e);
 		}
 	}
 
@@ -139,12 +139,12 @@ public class DefaultEventStorage implements EventStorage {
 		this.codec = codec;
 	}
 
-	public void writeBinlogIndexToFile() throws IOException {
+	public void flushBinlogIndex() throws IOException {
 		/*
 		 * byte[] binlogindexitem = codec.encode(bucketManager.getBinlogIndex()
 		 * .ceilingEntry(writingBucket.getStartingBinlogInfo()));
 		 */
-		bucketManager.writeBinlogIndex(writingBucket.getStartingBinlogInfo());
+		this.binlogIndexManager.flushBinlogIndex(this.writingBucket.getStartingBinlogInfoAndSeq());
 	}
 
 	@Override
@@ -156,41 +156,34 @@ public class DefaultEventStorage implements EventStorage {
 			if (writingBucket == null) {
 				writingBucket = bucketManager.getNextWriteBucket();
 				// TODO
-				bucketManager.openBinlogIndex(writingBucket
-						.getStartingSequece());
+				this.binlogIndexManager.openBinlogIndex(writingBucket.getStartingSequece());
 			} else if (!writingBucket.hasRemainingForWrite()) {
 			 // TODO
-				writeBinlogIndexToFile();
+				flushBinlogIndex();
 				// TODO
-				bucketManager.binlogIndexFileclose();
 				writingBucket.stop();
 				writingBucket = bucketManager.getNextWriteBucket();
 				// TODO
-				bucketManager.openBinlogIndex(writingBucket
-						.getStartingSequece());
-			} else if (writingBucket.getCurrentWritingBinlogInfo()
+				this.binlogIndexManager.openBinlogIndex(writingBucket.getStartingSequece());
+			} else if (writingBucket.getCurrentWritingBinlogInfoAndSeq()
 					.getServerId() != event.getServerId()) {
 			 // TODO
-				writeBinlogIndexToFile();
+				flushBinlogIndex();
 				// TODO
-				bucketManager.binlogIndexFileclose();
 				
 				writingBucket.stop();
 				writingBucket = bucketManager.getNextWriteBucket();
-				bucketManager.openBinlogIndex(writingBucket
-						.getStartingSequece());
+				this.binlogIndexManager.openBinlogIndex(writingBucket.getStartingSequece());
 			} else {
 				SimpleDateFormat sdf = new SimpleDateFormat(datePattern);
 				String nowDate = sdf.format(new Date());
 				if (!lastDate.equals(nowDate)) {
 				 // TODO
-					writeBinlogIndexToFile();
+					flushBinlogIndex();
 					// TODO
-					bucketManager.binlogIndexFileclose();
 					writingBucket.stop();
 					writingBucket = bucketManager.getNextWriteBucket();
-					bucketManager.openBinlogIndex(writingBucket
-							.getStartingSequece());
+					this.binlogIndexManager.openBinlogIndex(writingBucket.getStartingSequece());
 					lastDate = nowDate;
 				}
 			}
@@ -201,37 +194,22 @@ public class DefaultEventStorage implements EventStorage {
 			bos.write(ByteArrayUtils.intToByteArray(data.length));
 			bos.write(data);
 			writingBucket.append(bos.toByteArray());
-			if (writingBucket.getStartingBinlogInfo() == null) {
+			if (writingBucket.getStartingBinlogInfoAndSeq() == null) {
 			 // TODO
-				writingBucket
-						.setStartingBinlogInfo(new BinlogInfo(event
-								.getServerId(), event.getBinlog(), event
-								.getBinlogPos()));
-				writingBucket
-						.setCurrentWritingBinlogInfo(new BinlogInfo(event
-								.getServerId(), event.getBinlog(), event
-								.getBinlogPos()));
-				bucketManager.updateFileBinlogIndex(writingBucket);
-				bucketManager
-						.writeBinlogIndexIntoProperty(new BinlogInfoAndSeq(
-								event.getServerId(), event.getBinlog(), event
-										.getBinlogPos(), event.getSeq()));
+				writingBucket.setStartingBinlogInfoAndSeq(BinlogInfoAndSeq.getBinlogInfoAndSeq(event));
+				this.binlogIndexManager.updateMainBinlogIndex(writingBucket);
+				this.binlogIndexManager.updateSubBinlogIndex(new BinlogInfoAndSeq(
+						event.getServerId(), event.getBinlog(), event
+						.getBinlogPos(), event.getSeq()));
 			} else {
 			 // TODO
-				if (!writingBucket.getCurrentWritingBinlogInfo().equals(
-						new BinlogInfo(event.getServerId(), event.getBinlog(),
-								event.getBinlogPos()))) {
-					writingBucket.setCurrentWritingBinlogInfo(new BinlogInfo(
-							event.getServerId(), event.getBinlog(), event
-									.getBinlogPos()));
-					bucketManager.updateFileBinlogIndex(writingBucket);
-					bucketManager
-							.writeBinlogIndexIntoProperty(new BinlogInfoAndSeq(
+				if (!writingBucket.getCurrentWritingBinlogInfoAndSeq().binlogInfoEqual(
+						BinlogInfoAndSeq.getBinlogInfoAndSeq(event))) {
+					writingBucket.setCurrentWritingBinlogInfoAndSeq(BinlogInfoAndSeq.getBinlogInfoAndSeq(event));
+					this.binlogIndexManager.updateMainBinlogIndex(writingBucket);
+					this.binlogIndexManager.updateSubBinlogIndex(new BinlogInfoAndSeq(
 									event.getServerId(), event.getBinlog(),
 									event.getBinlogPos(), event.getSeq()));
-					writingBucket.setCurrentWritingBinlogInfo(new BinlogInfo(
-							event.getServerId(), event.getBinlog(), event
-									.getBinlogPos()));
 				}
 			}
 
@@ -251,7 +229,13 @@ public class DefaultEventStorage implements EventStorage {
 		}
 		stopped = true;
 		try {
+			try {
+				flushBinlogIndex();
+			} catch (IOException e) {
+				//Do nothing
+			}
 			bucketManager.stop();
+			this.binlogIndexManager.stop();
 			// TODO stop binlog index
 		} catch (StorageLifeCycleException e1) {
 			// ignore

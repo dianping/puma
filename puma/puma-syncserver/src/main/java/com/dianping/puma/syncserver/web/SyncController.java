@@ -20,43 +20,61 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.SyncConfig;
-import com.dianping.puma.syncserver.bo.BinlogPos;
+import com.dianping.puma.syncserver.bo.BinlogInfo;
 import com.dianping.puma.syncserver.bo.DumpClient;
 import com.dianping.puma.syncserver.bo.SyncClient;
+import com.dianping.puma.syncserver.holder.SyncClientHolder;
+import com.dianping.puma.syncserver.util.GsonUtil;
 import com.dianping.puma.syncserver.util.SyncXmlParser;
 import com.google.gson.Gson;
 
+/**
+ * 先做暂停和追赶<br>
+ * 1.core的sync模块移到新的Puma-SyncCore模块，增加DAO层，读写sync和dump(存放到mongo) <br>
+ * 2.admin通过DAO层读写sync和dump配置 <br>
+ * 3.SyncServer通过DAO层读sync和dump配置<br>
+ * 4.SyncServer启动后连接admin，admin告之该获取哪些SyncConfig配置(通过dao获取)
+ * 
+ * @author wukezhu
+ */
 @Controller
 public class SyncController {
 
     private static final Logger LOG = LoggerFactory.getLogger(SyncController.class);
 
-    SyncClient syncClient;
-
     @RequestMapping(value = "/createSync", method = { RequestMethod.GET, RequestMethod.POST }, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object createSync(String syncXml) {
+    public Object createSync(String syncJson) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            //TODO mock syncxml
-            if (syncXml == null) {
+            //接收SyncConfig的json字符串，解析得到SyncConfig对象
+            SyncConfig syncConfig = null;
+            if (syncJson == null) {
                 File file = new File("/home/wukezhu/document/mywork/puma/puma/puma-syncserver/src/main/resources/sync.xml");
-                syncXml = IOUtils.toString(new FileInputStream(file), "UTF-8");
+                String syncXml = IOUtils.toString(new FileInputStream(file), "UTF-8");
+                //解析syncXml，得到Sync对象
+                syncConfig = SyncXmlParser.parse(syncXml);
+                syncConfig.setId(1L);
+            } else {
+                syncConfig = GsonUtil.fromJson(syncJson, SyncConfig.class);
             }
-
-            //解析syncXml，得到Sync对象
-            SyncConfig sync = SyncXmlParser.parse(syncXml);
-            LOG.info("receive sync: " + sync);
-            //启动SyncClient对象
+            LOG.info("receive sync: " + syncConfig);
+            //判断SyncConfig对象是否已经存在，如果存在，返回错误
+            boolean exist = SyncClientHolder.contain(syncConfig.getId());
+            if (exist) {
+                throw new IllegalArgumentException("SyncConfig[id=" + syncConfig.getId() + "] is already exist!");
+            }
+            //创建并启动SyncClient对象
+            LOG.info("SyncClient creating...");
+            SyncClient syncClient = new SyncClient();
+            syncClient.setSync(syncConfig);
             LOG.info("SyncClient starting...");
-            syncClient = new SyncClient();
-            syncClient.setSync(sync);
             syncClient.start();
 
             map.put("success", true);
         } catch (Exception e) {
             map.put("success", false);
-            map.put("errorMsg", stackToString(e));
+            map.put("errorMsg", e.getMessage());
             LOG.error(e.getMessage(), e);
         }
         Gson gson = new Gson();
@@ -79,26 +97,34 @@ public class SyncController {
      */
     @RequestMapping(value = "/modifySync", method = { RequestMethod.POST, RequestMethod.GET }, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object modifySync(HttpServletRequest request, String syncXml) {
+    public Object modifySync(HttpServletRequest request, String syncJson) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            //TODO mock syncxml
-            if (syncXml == null) {
+            //接收SyncConfig的json字符串，解析得到SyncConfig对象
+            SyncConfig syncConfig = null;
+            if (syncJson == null) {
                 File file = new File("/home/wukezhu/document/mywork/puma/puma/puma-syncserver/src/main/resources/sync.xml");
-                syncXml = IOUtils.toString(new FileInputStream(file), "UTF-8");
+                String syncXml = IOUtils.toString(new FileInputStream(file), "UTF-8");
+                //解析syncXml，得到Sync对象
+                syncConfig = SyncXmlParser.parse(syncXml);
+                syncConfig.setId(1L);
+            } else {
+                syncConfig = GsonUtil.fromJson(syncJson, SyncConfig.class);
             }
-
-            //解析syncXml，得到Sync对象
-            SyncConfig sync = SyncXmlParser.parse(syncXml);
-            LOG.info("receive sync: " + sync);
-            //启动SyncClient对象
+            LOG.info("receive sync: " + syncConfig);
+            //获取SyncClient对象
+            SyncClient syncClient = SyncClientHolder.get(syncConfig.getId());
+            if (syncClient == null) {
+                throw new IllegalArgumentException("SyncConfig[id=" + syncConfig.getId() + "] match No SyncClient, is not exist!");
+            }
+            //修改syncClient的SyncConfig
             LOG.info("SyncClient modify...");
-            syncClient.setSync(sync);
+            syncClient.setSync(syncConfig);
 
             map.put("success", true);
         } catch (Exception e) {
             map.put("success", false);
-            map.put("errorMsg", stackToString(e));
+            map.put("errorMsg", e.getMessage());
             LOG.error(e.getMessage(), e);
         }
         Gson gson = new Gson();
@@ -108,7 +134,6 @@ public class SyncController {
     /**
      * 根据dumpConfig，进行dump，并返回binlog位置<br>
      * (dump使用json，因为是内部传输；sync使用xml，因为是需要给用户看和修改。)
-     * 
      */
     @RequestMapping(value = "/dump", method = { RequestMethod.POST, RequestMethod.GET }, produces = "application/json; charset=utf-8")
     @ResponseBody
@@ -128,23 +153,60 @@ public class SyncController {
             LOG.info("DumpClient init...");
             DumpClient dumpClient = new DumpClient(dumpConfig);
             LOG.info("DumpClient dumping...");
-            List<BinlogPos> binlogPos = dumpClient.dump();
+            List<BinlogInfo> binlogPos = dumpClient.dump();
             LOG.info("DumpClient done，binlogPos is " + binlogPos);
 
             map.put("binlogPos", binlogPos);
             map.put("success", true);
         } catch (Exception e) {
             map.put("success", false);
-            map.put("errorMsg", stackToString(e));
+            map.put("errorMsg", e.getMessage());
             LOG.error(e.getMessage(), e);
         }
         Gson gson = new Gson();
         return gson.toJson(map);
     }
 
-    private String stackToString(Exception ex) {
-        StringWriter sw = new StringWriter();
-        ex.printStackTrace(new PrintWriter(sw));
-        return sw.toString();
+    /**
+     * 暂停SyncClient，并返回binlogInfo<br>
+     */
+    @RequestMapping(value = "/stop", method = { RequestMethod.POST, RequestMethod.GET }, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object stop(HttpServletRequest request, Long syncConfigId) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            SyncClient syncClient = SyncClientHolder.get(syncConfigId);
+            BinlogInfo binlogInfo = syncClient.stop();
+            map.put("binlogInfo", binlogInfo);
+            map.put("success", true);
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+            LOG.error(e.getMessage(), e);
+        }
+        Gson gson = new Gson();
+        return gson.toJson(map);
     }
+    
+    /**
+     * TODO 创建新的SyncClient追赶，从binlogFrom 到 binlogTo<br>
+     */
+    @RequestMapping(value = "/stopAndCatchup", method = { RequestMethod.POST, RequestMethod.GET }, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object stopAndCatchup(HttpServletRequest request, Long syncConfigId) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            SyncClient syncClient = SyncClientHolder.get(syncConfigId);
+            BinlogInfo binlogInfo = syncClient.stop();
+            map.put("binlogInfo", binlogInfo);
+            map.put("success", true);
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+            LOG.error(e.getMessage(), e);
+        }
+        Gson gson = new Gson();
+        return gson.toJson(map);
+    }
+
 }

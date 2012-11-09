@@ -27,11 +27,9 @@ public class SyncClient {
     private Configuration configuration;
     private PumaClient pumaClient;
     private MysqlExecutor mysqlExecutor;
-    private String binlog;
+    private BinlogInfo binlogInfo = new BinlogInfo();
     private String pumaServerHost = Config.getInstance().getPumaServerHost();
     private int pumaServerPort = Config.getInstance().getPumaServerPort();
-
-    private long binlogPos;
 
     public void setSync(SyncConfig sync) {
         if (this.sync != null) {//修改sync(修改sync，只允许新增<database>或<table>级别的标签)
@@ -44,21 +42,21 @@ public class SyncClient {
             //            dumpClient.setDest(this.sync.getDest());
             //            dumpClient.setDatabases(addedDatabases);
             //            Long dumpBinlogPos = dumpClient.dump();
-            Long dumpBinlogPos = null;//dump结束后，dumpBinlogPos作为参数传递进来，表示需要追赶
+            //            Long dumpBinlogPos = null;//dump结束后，dumpBinlogPos作为参数传递进来，表示需要追赶
             //（1）将使得dumpBinlogPos和curBinlogPos一致
             //（若dumpBinlogPos < curBinlogPos，则addedDatabases追赶）
             //（若dumpBinlogPos > curBinlogPos，则当前继续，直到一致。）
             //终止当前的PumaClient，记录当前binlogPos
-            pumaClient.stop();
-            Long curBinlogPos = this.binlogPos;
+            //            pumaClient.stop();
+            //            Long curBinlogPos = this.binlogPos;
             //新建临时的PumaClient，对newDatabases进行追赶，起点为dumpBinlogPos，终点为curBinlogPos
-            PumaClient pumaClientForPursue = _createPumaClientForPursue(dumpBinlogPos, curBinlogPos);
+            //            PumaClient pumaClientForPursue = _createPumaClientForPursue(dumpBinlogPos, curBinlogPos);
             //            pumaClientForPursue.start();
 
             //（2）dumpBinlogPos和curBinlogPos一致后，设置PumaClient的sync，重启PumaClient
             //使用新的sync，重新创建并启动新的PumaClient
             this.sync = sync;
-            this.binlogPos = curBinlogPos;
+            //            this.binlogPos = curBinlogPos;
             //            this.start();
         } else {
             this.sync = sync;
@@ -103,6 +101,11 @@ public class SyncClient {
         return pumaClient;
     }
 
+    public BinlogInfo stop() {
+        this.pumaClient.stop();
+        return this.binlogInfo;
+    }
+
     public void start() {
         //初始化PumaClient
         ConfigurationBuilder configBuilder = new ConfigurationBuilder();
@@ -114,8 +117,8 @@ public class SyncClient {
         configBuilder.name(sync.getName());
         configBuilder.target(sync.getTarget());
         configBuilder.transaction(sync.getTransaction());
-        configBuilder.binlog(binlog);
-        configBuilder.binlogPos(binlogPos);
+        configBuilder.binlog(binlogInfo.getBinlogFile());
+        configBuilder.binlogPos(binlogInfo.getBinlogPosition());
         //        configBuilder.seqFileBase(seqFileBase)
         _parseSourceDatabaseTables(sync, configBuilder);//configBuilder.tables("DianPing", "*");
         configuration = configBuilder.build();
@@ -140,8 +143,8 @@ public class SyncClient {
             @Override
             public void onEvent(ChangedEvent event) throws Exception {
                 //动态更新binlog和binlogPos
-                binlogPos = event.getBinlogPos();
-                binlog = event.getBinlog();
+                binlogInfo.setBinlogPosition(event.getBinlogPos());
+                binlogInfo.setBinlogFile(event.getBinlog());
                 //执行同步
                 mysqlExecutor.execute(event);
             }
@@ -190,14 +193,6 @@ public class SyncClient {
 
     public SyncConfig getSync() {
         return sync;
-    }
-
-    public String getBinlog() {
-        return binlog;
-    }
-
-    public long getBinlogPos() {
-        return binlogPos;
     }
 
 }

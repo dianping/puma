@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sync xmlns="puma.dianping.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="sync.xsd">
+    >
+    <!-- xsi:noNamespaceSchemaLocation="sync.xsd" -->
     <from>
         <host>192.168.1.1</host>
         <port>3306</port>

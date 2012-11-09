@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<sync xmlns="puma.dianping.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="sync.xsds">
+<sync xmlns="puma.dianping.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <!-- 同步源的mysql配置 -->
     <!-- <src> <host>192.168.1.1</host> <port>3306</port> <username>root</username> 
         <password>***</password> </src> -->

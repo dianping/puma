@@ -2,6 +2,7 @@ package com.dianping.puma.core.sync;
 
 public class SyncConfig {
 
+    private Long id;
     private Config src;
     private Config dest;
     private String name;
@@ -11,6 +12,14 @@ public class SyncConfig {
     private Boolean ddl;
     private Boolean dml;
     private InstanceConfig instance;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public Config getSrc() {
         return src;

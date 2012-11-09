@@ -1,6 +1,6 @@
 package com.dianping.puma.syncserver.bo;
 
-public class BinlogPos {
+public class BinlogInfo {
     private String BinlogFile;
     private Long BinlogPosition;
 

@@ -68,9 +68,9 @@ public class DumpClient {
      * 解决方法:<br>
      * 允许不同database的mysqldump的state(binlog)不一致，这样需要为不同database做dump和PumaClient的追赶
      */
-    public List<BinlogPos> dump() throws ExecuteException, IOException, InterruptedException {
+    public List<BinlogInfo> dump() throws ExecuteException, IOException, InterruptedException {
         try {
-            List<BinlogPos> binlogPosList = new ArrayList<BinlogPos>();
+            List<BinlogInfo> binlogPosList = new ArrayList<BinlogInfo>();
             List<DumpRelation> dumpRelations = dumpConfig.getDumpRelations();
             LOG.info("============ dump ===========");
             for (DumpRelation dumpRelation : dumpRelations) {
@@ -84,7 +84,7 @@ public class DumpClient {
                     throw new DumpException("mysqldump output is not empty , so consided to be failed: " + output);
                 }
                 LOG.info("dump done.");
-                BinlogPos binlogPos = new BinlogPos();
+                BinlogInfo binlogPos = new BinlogInfo();
                 LineIterator lineIterators = IOUtils.lineIterator(new FileInputStream(_getDumpFile(srcDatabaseName)), "UTF-8");
                 PrintWriter deelFileWriter = new PrintWriter(new File(_getSourceFile(srcDatabaseName)), "UTF-8");
                 deelFileWriter.println("CREATE DATABASE IF NOT EXISTS " + destDatabaseName + ";USE " + destDatabaseName + ";");//添加select database语句

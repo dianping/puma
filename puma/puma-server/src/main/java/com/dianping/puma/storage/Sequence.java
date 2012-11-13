@@ -22,11 +22,14 @@ import java.util.Calendar;
  * @author Leo Liang
  * 
  */
-public class Sequence {
+public class Sequence implements Comparable<Sequence>{
 	private int	creationDate;
 	private int	number;
 	private int	offset;
-
+	
+	private static String subBinlogIndexPrefix = "index-";
+	private static final String PATH_SEPARATOR = "/";
+	
 	public Sequence(int creationDate, int number) {
 		this(creationDate, number, 0);
 	}
@@ -118,6 +121,32 @@ public class Sequence {
 	@Override
 	public String toString() {
 		return "Sequence [creationDate=" + creationDate + ", number=" + number + ", offset=" + offset + "]";
+	}
+	
+	public String convertToSubBinlogIndexPath() {
+		return "20" + this.creationDate + PATH_SEPARATOR + subBinlogIndexPrefix + this.number;
+	}
+	
+	public static Sequence convertToSequence(String path) {
+		String[] parts = path.split(PATH_SEPARATOR);
+		return new Sequence(Integer.valueOf(parts[0].substring(2)), Integer.valueOf(parts[1].substring(parts[1].indexOf("-") + 1)));
+	}
+
+	@Override
+	public int compareTo(Sequence o) {
+		if (this.creationDate > o.getCreationDate()) {
+			return 1;
+		} else if (this.creationDate < o.getCreationDate()) {
+			return -1;
+		} else {
+			if (this.number > o.getNumber()) {
+				return 1;
+			} else if (this.number < o.getNumber()) {
+				return -1;
+			} else {
+				return 0;
+			}
+		}
 	}
 
 }

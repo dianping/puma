@@ -15,11 +15,11 @@
  */
 package com.dianping.puma.storage;
 
+import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.dianping.puma.core.datatype.BinlogInfo;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
@@ -29,27 +29,41 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  */
 public abstract class AbstractBucket implements Bucket {
 	private Sequence startingSequence;
-	private BinlogInfo startingBinlogInfo;
+	private BinlogInfoAndSeq startingBinlogInfoAndSeq;
 	private int maxSizeMB;
 	private AtomicReference<Sequence> currentWritingSeq = new AtomicReference<Sequence>();
-	private AtomicReference<BinlogInfo> currentWritingBinlogInfo = new AtomicReference<BinlogInfo>();
+	private AtomicReference<BinlogInfoAndSeq> currentWritingBinlogInfoAndSeq = new AtomicReference<BinlogInfoAndSeq>();
 	private volatile boolean stopped = false;
 	private long maxSizeByte;
+	private Boolean isCompress = false;
+	protected Compress compress;
 
-	public BinlogInfo getStartingBinlogInfo() {
-		return startingBinlogInfo;
+	public BinlogInfoAndSeq getStartingBinlogInfoAndSeq() {
+		return startingBinlogInfoAndSeq;
 	}
 
-	public void setStartingBinlogInfo(BinlogInfo startingBinlogInfo) {
-		this.startingBinlogInfo = startingBinlogInfo;
+	public void setStartingBinlogInfoAndSeq(BinlogInfoAndSeq startingBinlogInfoAndSeq) {
+		this.startingBinlogInfoAndSeq = startingBinlogInfoAndSeq;
 	}
 
-	public BinlogInfo getCurrentWritingBinlogInfo() {
-		return currentWritingBinlogInfo.get();
+	public BinlogInfoAndSeq getCurrentWritingBinlogInfoAndSeq() {
+		return currentWritingBinlogInfoAndSeq.get();
 	}
 
-	public void setCurrentWritingBinlogInfo(BinlogInfo binlogInfo) {
-		this.currentWritingBinlogInfo.set(binlogInfo);
+	public void setCurrentWritingBinlogInfoAndSeq(BinlogInfoAndSeq binlogInfoAndSeq) {
+		BinlogInfoAndSeq temp = this.currentWritingBinlogInfoAndSeq.get();
+		temp.setServerId(binlogInfoAndSeq.getServerId());
+		temp.setBinlogFile(binlogInfoAndSeq.getBinlogFile());
+		temp.setBinlogPosition(binlogInfoAndSeq.getBinlogPosition());
+		this.currentWritingBinlogInfoAndSeq.set(temp);
+	}
+
+	public Boolean getIsCompress() {
+		return isCompress;
+	}
+
+	public void setIsCompress(Boolean isCompress) {
+		this.isCompress = isCompress;
 	}
 
 	/**
@@ -89,16 +103,14 @@ public abstract class AbstractBucket implements Bucket {
 		return maxSizeByte;
 	}
 
-	public AbstractBucket(Sequence startingSequence, int maxSizeMB)
-			throws FileNotFoundException {
+	public AbstractBucket(Sequence startingSequence, int maxSizeMB) throws FileNotFoundException {
 		this.startingSequence = startingSequence;
 		this.maxSizeMB = maxSizeMB;
 		this.maxSizeByte = this.maxSizeMB * 1024 * 1024L;
 		// we need to copy the whole instance
-		this.currentWritingSeq.set(new Sequence(startingSequence
-				.getCreationDate(), startingSequence.getNumber()));
+		this.currentWritingSeq.set(new Sequence(startingSequence.getCreationDate(), startingSequence.getNumber()));
 	}
-	
+
 	// TODO add getNext
 
 	@Override
@@ -113,7 +125,7 @@ public abstract class AbstractBucket implements Bucket {
 	@Override
 	public void seek(long offset) throws StorageClosedException, IOException {
 		checkClosed();
-		doSeek((int)offset);
+		doSeek((int) offset);
 	}
 
 	@Override
@@ -138,10 +150,58 @@ public abstract class AbstractBucket implements Bucket {
 	}
 
 	@Override
-	public boolean hasRemainingForWrite() throws StorageClosedException,
-			IOException {
+	public boolean hasRemainingForWrite() throws StorageClosedException, IOException {
 		checkClosed();
 		return doHasRemainingForWrite();
+	}
+
+	@Override
+	public byte[] getNext() throws StorageClosedException, IOException {
+		checkClosed();
+		// we should guarantee the whole packet read in one transaction,
+		// otherwise we will skip some bytes and read a wrong value in the next
+		// call
+		if (!this.isCompress) {
+			if (readable()) {
+				byte[] data = doReadData();
+				return data;
+			} else {
+				throw new EOFException();
+			}
+		} else {
+			if (this.compress.getZipFileInputStream() == null) {
+				if (readable()) {
+					byte[] data = doReadData();
+					// TODO 1. performance; 2. duplicated code; 3. ZIPFORMAT
+					// only
+					// appears in the first block, while we seek....; 4. file
+					// format
+					// desc
+					this.compress.readIn(data);
+					return getNextFromZipBuf();
+				}else{
+					throw new EOFException();
+				}
+			} else {
+				return getNextFromZipBuf();
+			}
+		}
+	}
+
+	public byte[] getNextFromZipBuf() throws IOException {
+		// TODO panduan zhe ge zip shi fou ke du, hai yao pan duan you mu you
+		// xiayige zip
+		try {
+			return this.compress.unCompressNext();
+		} catch (EOFException e) {
+			if(readable()){
+				byte[] data = doReadData();
+				this.compress.readIn(data);
+				return this.compress.unCompressNext();
+			}else{
+				throw new EOFException();
+			}
+		}
 	}
 
 	protected abstract boolean doHasRemainingForWrite() throws IOException;
@@ -152,8 +212,7 @@ public abstract class AbstractBucket implements Bucket {
 
 	protected abstract boolean readable() throws IOException;
 
-	protected abstract byte[] doReadData() throws StorageClosedException,
-			IOException;
+	protected abstract byte[] doReadData() throws StorageClosedException, IOException;
 
 	protected void checkClosed() throws StorageClosedException {
 		if (stopped) {

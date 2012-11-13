@@ -16,6 +16,7 @@
 package com.dianping.puma.storage;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -65,5 +66,7 @@ public interface BucketIndex extends LifeCycle<IOException> {
 	public AtomicReference<TreeMap<Sequence, String>> getIndex();
 	
 	public void setCodec(EventCodec codec);
+	
+	public ArrayList<ZipIndexItem> readZipIndex(String baseDir, String path) throws IOException;
 
 }

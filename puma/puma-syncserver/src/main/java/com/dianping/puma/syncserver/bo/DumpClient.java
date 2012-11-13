@@ -59,6 +59,7 @@ public class DumpClient {
         this.dumpOutputDir = BASE_DIR + "dump/" + uuid + "/";
         new File(dumpOutputDir).mkdir();
         this.dumpConfig = dumpConfig;
+        LOG.info("DumpClient inited.");
     }
 
     /**

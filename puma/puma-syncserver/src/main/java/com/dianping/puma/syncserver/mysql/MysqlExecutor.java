@@ -155,6 +155,15 @@ public class MysqlExecutor {
         List<Object> args = new ArrayList<Object>();
         switch (actionType) {
             case REPLACE_INTO:
+                for (Map.Entry<String, ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
+                    args.add(columnName2ColumnInfo.getValue().getNewValue());
+                }
+                for (Map.Entry<String, ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
+                    if (!columnName2ColumnInfo.getValue().isKey()) {
+                        args.add(columnName2ColumnInfo.getValue().getNewValue());
+                    }
+                }
+                break;
             case INSERT:
                 for (Map.Entry<String, ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
                     args.add(columnName2ColumnInfo.getValue().getNewValue());

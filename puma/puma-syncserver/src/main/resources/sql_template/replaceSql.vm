@@ -1,4 +1,4 @@
-REPLACE INTO 
+INSERT INTO 
  `${event.database}`.`${event.table}`
 (
 #set($ask = "" )
@@ -12,3 +12,20 @@ REPLACE INTO
 ) 
 VALUES 
 (${ask.substring(1)})
+##尾部的update语句（重复时使用update）
+ON DUPLICATE KEY UPDATE
+#set($updateSql = "")
+#foreach($name2ColumnInfo in $event.columns.entrySet())
+  #if(!$name2ColumnInfo.value.isKey())
+     #set($updateSql = "$updateSql`${name2ColumnInfo.key}`=?")
+     #if($velocityCount < ${event.columns.size()})
+       #set($updateSql = "$updateSql,")
+     #end
+  #end
+  ##如果key在最后，则最后的逗号需要去掉
+  #if($name2ColumnInfo.value.isKey() && $velocityCount >= ${event.columns.size()} && $updateSql.length()>0)
+    #set($length = ${updateSql.length()})
+    #set($updateSql = "${updateSql.substring(0,$length-1)}")
+  #end
+#end
+$updateSql

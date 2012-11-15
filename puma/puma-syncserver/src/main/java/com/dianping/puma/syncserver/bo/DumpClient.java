@@ -30,6 +30,7 @@ import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.DumpConfig.Dest;
 import com.dianping.puma.core.sync.DumpConfig.DumpRelation;
 import com.dianping.puma.core.sync.DumpConfig.Src;
+import com.google.gson.Gson;
 
 /**
  * @author wukezhu
@@ -59,6 +60,7 @@ public class DumpClient {
         this.dumpOutputDir = BASE_DIR + "dump/" + uuid + "/";
         new File(dumpOutputDir).mkdir();
         this.dumpConfig = dumpConfig;
+        LOG.info("DumpClient inited.");
     }
 
     /**
@@ -219,14 +221,14 @@ public class DumpClient {
         //        r1.setDestTableNames(Arrays.asList(new String[] { "test11", "test22" }));
         r1.setSrcDatabaseName("test");
         r1.setSrcTableNames(Arrays.asList(new String[] { "test4", "test5" }));
-        r1.setDestDatabaseName("pumatest2");
-        r1.setDestTableNames(Arrays.asList(new String[] { "test7", "test8" }));
+        r1.setDestDatabaseName("test");
+        r1.setDestTableNames(Arrays.asList(new String[] { "test1", "test2" }));
         dumpRelations.add(r1);
         DumpRelation r2 = new DumpConfig.DumpRelation();
         r2.setSrcDatabaseName("pumatest");
         r2.setSrcTableNames(Arrays.asList(new String[] { "test1", "test2" }));
-        r2.setDestDatabaseName("pumatest2");
-        r2.setDestTableNames(Arrays.asList(new String[] { "test12", "test13" }));
+        r2.setDestDatabaseName("test");
+        r2.setDestTableNames(Arrays.asList(new String[] { "test3", "test4" }));
         dumpRelations.add(r2);
         dumpConfig.setDumpRelations(dumpRelations);
         Src src = new Src();
@@ -245,6 +247,10 @@ public class DumpClient {
         dest.setPassword("binlog");
         dest.setPort(3306);
         dumpConfig.setDest(dest);
+        //json
+        Gson gson = new Gson();
+        System.out.println(gson.toJson(dumpConfig));
+        
         //调用dump
         DumpClient dumpClient = new DumpClient(dumpConfig);
         System.out.println(dumpClient.dump());

@@ -2,8 +2,6 @@ package com.dianping.puma.syncserver.web;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +18,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.SyncConfig;
+import com.dianping.puma.syncserver.bo.AbstractSyncClient;
 import com.dianping.puma.syncserver.bo.BinlogInfo;
+import com.dianping.puma.syncserver.bo.CatchupClient;
 import com.dianping.puma.syncserver.bo.DumpClient;
 import com.dianping.puma.syncserver.bo.SyncClient;
 import com.dianping.puma.syncserver.holder.SyncClientHolder;
@@ -65,10 +65,7 @@ public class SyncController {
                 throw new IllegalArgumentException("SyncConfig[id=" + syncConfig.getId() + "] is already exist!");
             }
             //创建并启动SyncClient对象
-            LOG.info("SyncClient creating...");
-            SyncClient syncClient = new SyncClient();
-            syncClient.setSync(syncConfig);
-            LOG.info("SyncClient starting...");
+            SyncClient syncClient = new SyncClient(syncConfig);
             syncClient.start();
 
             map.put("success", true);
@@ -113,12 +110,11 @@ public class SyncController {
             }
             LOG.info("receive sync: " + syncConfig);
             //获取SyncClient对象
-            SyncClient syncClient = SyncClientHolder.get(syncConfig.getId());
+            SyncClient syncClient = (SyncClient) SyncClientHolder.get(syncConfig.getId());
             if (syncClient == null) {
                 throw new IllegalArgumentException("SyncConfig[id=" + syncConfig.getId() + "] match No SyncClient, is not exist!");
             }
             //修改syncClient的SyncConfig
-            LOG.info("SyncClient modify...");
             syncClient.setSync(syncConfig);
 
             map.put("success", true);
@@ -150,9 +146,7 @@ public class SyncController {
             DumpConfig dumpConfig = gson.fromJson(dumpJson, DumpConfig.class);
             LOG.info("receive dumpConfig: " + dumpConfig);
             //启动DumpClient对象
-            LOG.info("DumpClient init...");
             DumpClient dumpClient = new DumpClient(dumpConfig);
-            LOG.info("DumpClient dumping...");
             List<BinlogInfo> binlogPos = dumpClient.dump();
             LOG.info("DumpClient done，binlogPos is " + binlogPos);
 
@@ -175,7 +169,7 @@ public class SyncController {
     public Object stop(HttpServletRequest request, Long syncConfigId) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            SyncClient syncClient = SyncClientHolder.get(syncConfigId);
+            SyncClient syncClient = (SyncClient) SyncClientHolder.get(syncConfigId);
             BinlogInfo binlogInfo = syncClient.stop();
             map.put("binlogInfo", binlogInfo);
             map.put("success", true);
@@ -187,18 +181,59 @@ public class SyncController {
         Gson gson = new Gson();
         return gson.toJson(map);
     }
-    
+
     /**
-     * TODO 创建新的SyncClient追赶，从binlogFrom 到 binlogTo<br>
+     * 创建新的SyncClient追赶，从binlogFrom 到 binlogTo <br>
      */
-    @RequestMapping(value = "/stopAndCatchup", method = { RequestMethod.POST, RequestMethod.GET }, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "/catchup", method = { RequestMethod.POST, RequestMethod.GET }, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object stopAndCatchup(HttpServletRequest request, Long syncConfigId) {
+    public Object catchup(HttpServletRequest request, String catchupJson, String startedBinlogFile, Long startedBinlogPosition,
+                          String endBinlogFile, Long endBinlogPosition) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            SyncClient syncClient = SyncClientHolder.get(syncConfigId);
-            BinlogInfo binlogInfo = syncClient.stop();
-            map.put("binlogInfo", binlogInfo);
+            SyncConfig syncConfig = null;
+            if (catchupJson == null) {
+                File file = new File("/home/wukezhu/document/mywork/puma/puma/puma-syncserver/src/main/resources/sync.xml");
+                String syncXml = IOUtils.toString(new FileInputStream(file), "UTF-8");
+                //解析syncXml，得到Sync对象
+                syncConfig = SyncXmlParser.parse(syncXml);
+                syncConfig.setId(1L);
+            } else {
+                syncConfig = GsonUtil.fromJson(catchupJson, SyncConfig.class);
+            }
+            LOG.info("receive sync: " + syncConfig);
+            //获取binlog
+            BinlogInfo startedBinlogInfo = new BinlogInfo();
+            startedBinlogInfo.setBinlogFile(startedBinlogFile);
+            startedBinlogInfo.setBinlogPosition(startedBinlogPosition);
+            BinlogInfo endBinlogInfo = new BinlogInfo();
+            endBinlogInfo.setBinlogFile(endBinlogFile);
+            endBinlogInfo.setBinlogPosition(endBinlogPosition);
+            //构造CatchupClient对象
+            CatchupClient catchupClient = new CatchupClient(syncConfig, startedBinlogInfo, endBinlogInfo);
+            catchupClient.start();
+
+            map.put("success", true);
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+            LOG.error(e.getMessage(), e);
+        }
+        Gson gson = new Gson();
+        return gson.toJson(map);
+    }
+
+    /**
+     * 查看状态<br>
+     */
+    @RequestMapping(value = "/status", method = { RequestMethod.POST, RequestMethod.GET }, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object status(HttpServletRequest request, Long syncConfigId) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            AbstractSyncClient syncClient = SyncClientHolder.get(syncConfigId);
+            Object curBinlogInfo = syncClient.getCurBinlogInfo();
+            map.put("binlogInfo", curBinlogInfo);
             map.put("success", true);
         } catch (Exception e) {
             map.put("success", false);

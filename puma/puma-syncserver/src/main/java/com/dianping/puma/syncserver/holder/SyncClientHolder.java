@@ -2,21 +2,21 @@ package com.dianping.puma.syncserver.holder;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.dianping.puma.syncserver.bo.SyncClient;
+import com.dianping.puma.syncserver.bo.AbstractSyncClient;
 
 public class SyncClientHolder {
 
-    private static ConcurrentHashMap<Long, SyncClient> syncCleintMap = new ConcurrentHashMap<Long, SyncClient>();
+    private static ConcurrentHashMap<Long, AbstractSyncClient> syncCleintMap = new ConcurrentHashMap<Long, AbstractSyncClient>();
 
-    public static SyncClient putIfAbsent(Long key, SyncClient value) {
+    public static AbstractSyncClient putIfAbsent(Long key, AbstractSyncClient value) {
         return syncCleintMap.putIfAbsent(key, value);
     }
 
-    public static SyncClient get(Long key) {
+    public static AbstractSyncClient get(Long key) {
         return syncCleintMap.get(key);
     }
-    
-    public static boolean contain(Long key){
+
+    public static boolean contain(Long key) {
         return syncCleintMap.containsKey(key);
     }
 

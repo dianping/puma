@@ -50,7 +50,6 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	protected static final int COMPRESS_HEAD = 20;
 	protected static final String ZIPFORMAT = "ZIPFORMAT           ";
 	protected static final String ZIPINDEX_SEPARATOR = "$";
-
 	// TODO remove zipIndex, refactor to local
 
 	public Compress getCompress() {
@@ -314,6 +313,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 			}
 
 		}
+
 
 		int offset = sequence.getOffset();
 		Bucket bucket = doGetReadBucket(baseDir, path, sequence.clearOffset(), maxBucketLengthMB);

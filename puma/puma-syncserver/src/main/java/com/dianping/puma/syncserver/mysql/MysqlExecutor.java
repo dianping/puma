@@ -7,7 +7,6 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
@@ -156,6 +155,15 @@ public class MysqlExecutor {
         List<Object> args = new ArrayList<Object>();
         switch (actionType) {
             case REPLACE_INTO:
+                for (Map.Entry<String, ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
+                    args.add(columnName2ColumnInfo.getValue().getNewValue());
+                }
+                for (Map.Entry<String, ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
+                    if (!columnName2ColumnInfo.getValue().isKey()) {
+                        args.add(columnName2ColumnInfo.getValue().getNewValue());
+                    }
+                }
+                break;
             case INSERT:
                 for (Map.Entry<String, ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
                     args.add(columnName2ColumnInfo.getValue().getNewValue());

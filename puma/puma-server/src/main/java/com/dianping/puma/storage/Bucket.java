@@ -18,7 +18,6 @@ package com.dianping.puma.storage;
 import java.io.IOException;
 
 import com.dianping.puma.common.LifeCycle;
-import com.dianping.puma.core.datatype.BinlogInfo;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
@@ -64,8 +63,7 @@ public interface Bucket extends LifeCycle<IOException> {
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean hasRemainingForWrite() throws StorageClosedException,
-			IOException;
+	public boolean hasRemainingForWrite() throws StorageClosedException, IOException;
 
 	/**
 	 * 获得写入的seq
@@ -74,11 +72,13 @@ public interface Bucket extends LifeCycle<IOException> {
 	 */
 	public long getCurrentWritingSeq();
 
-	public BinlogInfo getCurrentWritingBinlogInfo();
+	public BinlogInfoAndSeq getCurrentWritingBinlogInfoAndSeq();
 
-	public void setCurrentWritingBinlogInfo(BinlogInfo binlogInfo);
+	public void setCurrentWritingBinlogInfoAndSeq(BinlogInfoAndSeq binlogInfoAndSeq);
 
-	public BinlogInfo getStartingBinlogInfo();
+	public BinlogInfoAndSeq getStartingBinlogInfoAndSeq();
+
+	public void setStartingBinlogInfoAndSeq(BinlogInfoAndSeq startingBinlogInfoAndSeq);
 	
-	public void setStartingBinlogInfo(BinlogInfo startingBinlogInfo);
+	public void setIsCompress(Boolean isCompress);
 }

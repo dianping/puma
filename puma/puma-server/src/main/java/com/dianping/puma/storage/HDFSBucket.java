@@ -1,10 +1,6 @@
 package com.dianping.puma.storage;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.EOFException;
 import java.io.IOException;
-import java.util.zip.GZIPInputStream;
 
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -22,7 +18,6 @@ public class HDFSBucket extends AbstractBucket {
 
 	private FSDataInputStream inputStream = null;
 	private Path file;
-	private DataInputStream zipFileInputStream;
 
 	public HDFSBucket(FileSystem fileSystem, String baseDir, String path,
 			Sequence startingSequence) throws IOException {
@@ -67,51 +62,5 @@ public class HDFSBucket extends AbstractBucket {
 
 	protected boolean doHasRemainingForWrite() throws IOException {
 		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public byte[] getNext() throws StorageClosedException, IOException {
-		checkClosed();
-		// we should guarantee the whole packet read in one transaction,
-		// otherwise we will skip some bytes and read a wrong value in the next
-		// call
-		if (this.zipFileInputStream == null) {
-			byte[] data = doReadData();
-			// TODO 1. performance; 2. duplicated code; 3. ZIPFORMAT only appears in the first block, while we seek....; 4. file format desc
-			if (data.toString().equals("ZIPFORMAT")) {
-				ByteArrayInputStream bin = new ByteArrayInputStream(
-						doReadData());
-				this.zipFileInputStream = new DataInputStream(
-						new GZIPInputStream(bin));
-				return getNextFromZipBuf();
-			} else {
-			    // TODO doRead as normal
-				throw new EOFException();
-			}
-		} else {
-			return getNextFromZipBuf();
-		}
-	}
-
-	public byte[] getNextFromZipBuf() throws IOException {
-	    // TODO panduan zhe ge zip shi fou ke du, hai yao pan duan you mu you xiayige zip
-		try {
-			int len = this.zipFileInputStream.readInt();
-			byte[] unzipdata = new byte[len];
-			this.zipFileInputStream.read(unzipdata);
-			return unzipdata;
-		} catch (EOFException e) {
-			ByteArrayInputStream bin = new ByteArrayInputStream(doReadData());
-			this.zipFileInputStream = new DataInputStream(new GZIPInputStream(
-					bin));
-			try {
-				int len = this.zipFileInputStream.readInt();
-				byte[] unzipdata = new byte[len];
-				this.zipFileInputStream.read(unzipdata);
-				return unzipdata;
-			} catch (EOFException ee) {
-				throw new EOFException();
-			}
-		}
 	}
 }

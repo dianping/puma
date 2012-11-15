@@ -3,17 +3,33 @@ package com.dianping.puma.core.sync;
 import java.util.Arrays;
 import java.util.List;
 
+import org.bson.types.ObjectId;
+
+import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
+
 /**
  * dump规则：<br>
  * (1)会为目标数据库自动创建table，但database不自动创建。<br>
  * (2)允许db改名，table改名。但要求table的结构(字段个数，对应字段的类型)一致，字段名可以不一致。
  */
+@Entity
 public class DumpConfig {
 
+    @Id
+    private ObjectId id;
     private Src src;
     private Dest dest;
 
     private List<DumpRelation> dumpRelations;
+
+    public ObjectId getId() {
+        return id;
+    }
+
+    public void setId(ObjectId id) {
+        this.id = id;
+    }
 
     public Src getSrc() {
         return src;
@@ -41,7 +57,7 @@ public class DumpConfig {
 
     @Override
     public String toString() {
-        return "DumpConfig [src=" + src + ", dest=" + dest + ", dumpRelations=" + dumpRelations + "]";
+        return "DumpConfig [id=" + id + ", src=" + src + ", dest=" + dest + ", dumpRelations=" + dumpRelations + "]";
     }
 
     public static class Src {

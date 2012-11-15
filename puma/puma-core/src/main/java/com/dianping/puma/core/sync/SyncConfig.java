@@ -1,8 +1,15 @@
 package com.dianping.puma.core.sync;
 
+import org.bson.types.ObjectId;
+
+import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
+
+@Entity
 public class SyncConfig {
 
-    private Long id;
+    @Id
+    private ObjectId id;
     private Config src;
     private Config dest;
     private String name;
@@ -13,11 +20,11 @@ public class SyncConfig {
     private Boolean dml;
     private InstanceConfig instance;
 
-    public Long getId() {
+    public ObjectId getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(ObjectId id) {
         this.id = id;
     }
 

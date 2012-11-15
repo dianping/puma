@@ -46,18 +46,18 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	private volatile boolean stopped = true;
 	protected AtomicReference<Sequence> latestSequence = new AtomicReference<Sequence>();
 	protected String zipIndexsuffix = "-zipIndex";
-	protected Compress compress;
+	protected Compressor compressor;
 	protected static final int COMPRESS_HEAD = 20;
 	protected static final String ZIPFORMAT = "ZIPFORMAT           ";
 	protected static final String ZIPINDEX_SEPARATOR = "$";
 	// TODO remove zipIndex, refactor to local
 
-	public Compress getCompress() {
-		return compress;
+	public Compressor getCompress() {
+		return compressor;
 	}
 
-	public void setCompress(Compress compress) {
-		this.compress = compress;
+	public void setCompress(Compressor compressor) {
+		this.compressor = compressor;
 	}
 
 	/**
@@ -345,7 +345,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 						while (true) {
 							try {
 								byte[] lookupdata = bucket.getNext();
-								ChangedEvent event = this.compress.getEvent(lookupdata);
+								ChangedEvent event = this.compressor.getEvent(lookupdata);
 								if (event.getSeq() == seq) {
 									return bucket;
 								}

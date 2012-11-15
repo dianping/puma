@@ -32,16 +32,16 @@ public class DefaultEventStorage implements EventStorage {
 	private String name;
 	private static final String datePattern = "yyyy-MM-dd";
 	private String lastDate;
-	private Compress compress;
+	private Compressor compressor;
 
 	public void start() throws StorageLifeCycleException {
 		SimpleDateFormat sdf = new SimpleDateFormat(datePattern);
 		lastDate = sdf.format(new Date());
 		stopped = false;
-		this.compress = new Compress();
-		this.compress.setCodec(codec);
-		this.masterIndex.setCompress(compress);
-		this.slaveIndex.setCompress(compress);
+		this.compressor = new Compressor();
+		this.compressor.setCodec(codec);
+		this.masterIndex.setCompress(compressor);
+		this.slaveIndex.setCompress(compressor);
 		this.binlogIndexManager.setCodec(codec);
 		// TODO binlogIndexManager.setCodec
 		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex,

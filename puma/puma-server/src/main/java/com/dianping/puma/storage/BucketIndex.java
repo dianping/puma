@@ -64,7 +64,7 @@ public interface BucketIndex extends LifeCycle<IOException> {
 	
 	public AtomicReference<TreeMap<Sequence, String>> getIndex();
 	
-	public void setCompress(Compress compress);
+	public void setCompress(Compressor compressor);
 	
 	public ArrayList<ZipIndexItem> readZipIndex(String baseDir, String path) throws IOException;
 

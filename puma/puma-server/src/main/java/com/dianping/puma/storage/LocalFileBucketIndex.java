@@ -137,7 +137,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 		bos.write(ZIPFORMAT.getBytes());
 		destFileAcess.write(bos.toByteArray());
 		while (localFileAcess.getFilePointer() + 4 < localFileAcess.length()) {
-			byte[] data = compress.compress(localFileAcess, destFileAcess.getFilePointer(), zipIndex);
+			byte[] data = compressor.compress(localFileAcess, destFileAcess.getFilePointer(), zipIndex);
 			// TODO bos no need
 			bos.reset();
 			bos.write(ByteArrayUtils.intToByteArray(data.length));

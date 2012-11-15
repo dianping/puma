@@ -93,6 +93,12 @@ public class DumpConfig {
             this.options = options;
         }
 
+        @Override
+        public String toString() {
+            return "Src [host=" + host + ", port=" + port + ", username=" + username + ", password=" + password + ", options="
+                    + options + "]";
+        }
+
     }
 
     public static class Dest {
@@ -131,6 +137,11 @@ public class DumpConfig {
 
         public void setPassword(String password) {
             this.password = password;
+        }
+
+        @Override
+        public String toString() {
+            return "Dest [host=" + host + ", port=" + port + ", username=" + username + ", password=" + password + "]";
         }
 
     }
@@ -174,6 +185,12 @@ public class DumpConfig {
 
         public void setDestTableNames(List<String> destTableNames) {
             this.destTableNames = destTableNames;
+        }
+
+        @Override
+        public String toString() {
+            return "DumpRelation [srcDatabaseName=" + srcDatabaseName + ", destDatabaseName=" + destDatabaseName
+                    + ", srcTableNames=" + srcTableNames + ", destTableNames=" + destTableNames + "]";
         }
 
     }

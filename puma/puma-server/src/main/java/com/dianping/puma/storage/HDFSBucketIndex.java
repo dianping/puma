@@ -18,7 +18,6 @@ package com.dianping.puma.storage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -173,7 +172,7 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 		fos.write(ZIPFORMAT.length());
 		fos.write(ZIPFORMAT.getBytes());
 		while (localFileAcess.getFilePointer() + 4 < localFileAcess.length()) {
-			byte[] data = this.compress.compress(localFileAcess, fos.size(), zipIndex);
+			byte[] data = this.compressor.compress(localFileAcess, fos.size(), zipIndex);
 			fos.write(ByteArrayUtils.intToByteArray(data.length));
 			fos.write(data);
 		}

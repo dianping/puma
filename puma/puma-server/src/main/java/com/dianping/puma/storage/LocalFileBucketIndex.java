@@ -137,7 +137,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 		bos.write(ZIPFORMAT.getBytes());
 		destFileAcess.write(bos.toByteArray());
 		while (localFileAcess.getFilePointer() + 4 < localFileAcess.length()) {
-			byte[] data = compress.compress(localFileAcess, destFileAcess.getFilePointer(), zipIndex);
+			byte[] data = compressor.compress(localFileAcess, destFileAcess.getFilePointer(), zipIndex);
 			// TODO bos no need
 			bos.reset();
 			bos.write(ByteArrayUtils.intToByteArray(data.length));
@@ -179,7 +179,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 	@Override
 	public ArrayList<ZipIndexItem> readZipIndex(String baseDir, String path) throws IOException {
 		Properties properties = new Properties();
-		DataInputStream ios = new DataInputStream(new FileInputStream(new File(baseDir, path + this.zipIndexsuffix)));
+		DataInputStream ios = new DataInputStream(new FileInputStream(new File(baseDir, path)));
 		properties.load(ios);
 		ios.close();
 		ArrayList<ZipIndexItem> results = new ArrayList<ZipIndexItem>();

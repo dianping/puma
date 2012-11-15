@@ -14,7 +14,7 @@ import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
 
-public class Compress {
+public class Compressor {
 	private DataInputStream zipFileInputStream = null;
 	private long zipThreshold = 200 * 1024 * 1024;
 	private EventCodec codec;

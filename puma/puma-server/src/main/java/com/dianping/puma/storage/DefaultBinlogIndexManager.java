@@ -114,6 +114,7 @@ public class DefaultBinlogIndexManager implements BinlogIndexManager{
 				if (beginbinlogInfoAndSeq == null) {
 					// TODO use beginBinlogInfo
 					beginbinlogInfoAndSeq = BinlogInfoAndSeq.getBinlogInfoAndSeq(event);
+					beginbinlogInfoAndSeq.setSeq(-1);
 					// TODO use endBinlogInfoSeq
 					endbinlogInfoAndSeq = BinlogInfoAndSeq.getBinlogInfoAndSeq(event);
 					endbinlogInfoAndSeq.setSeq(event.getSeq());

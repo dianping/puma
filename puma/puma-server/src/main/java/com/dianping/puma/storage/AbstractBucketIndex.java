@@ -29,7 +29,6 @@ import java.util.TreeMap;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
@@ -47,20 +46,18 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	private volatile boolean stopped = true;
 	protected AtomicReference<Sequence> latestSequence = new AtomicReference<Sequence>();
 	protected String zipIndexsuffix = "-zipIndex";
-	protected EventCodec codec;
-	protected Compress compress;
+	protected Compressor compressor;
 	protected static final int COMPRESS_HEAD = 20;
 	protected static final String ZIPFORMAT = "ZIPFORMAT           ";
 	protected static final String ZIPINDEX_SEPARATOR = "$";
 	// TODO remove zipIndex, refactor to local
 
-	public EventCodec getCodec() {
-		return codec;
+	public Compressor getCompress() {
+		return compressor;
 	}
 
-	@Override
-	public void setCodec(EventCodec codec) {
-		this.codec = codec;
+	public void setCompress(Compressor compressor) {
+		this.compressor = compressor;
 	}
 
 	/**
@@ -114,8 +111,6 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	@Override
 	public void start() throws IOException {
 		stopped = false;
-		this.compress = new Compress();
-		this.compress.setCodec(codec);
 	}
 
 	@Override
@@ -319,6 +314,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 
 		}
 
+
 		int offset = sequence.getOffset();
 		Bucket bucket = doGetReadBucket(baseDir, path, sequence.clearOffset(), maxBucketLengthMB);
 
@@ -339,24 +335,26 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 					}
 				}
 			} else {
-				if (headData.equals(ZIPFORMAT)) {
+				String head = new String(headData);
+				if (head.equals(ZIPFORMAT)) {
 					bucket.setIsCompress(true);
-					if (seq != -1L) {
+					if (seq != -1L && !start) {
 						ArrayList<ZipIndexItem> zipIndex = readZipIndex(this.getBaseDir(), path + this.zipIndexsuffix);
 						long off = findZipFileOffset(sequence, zipIndex);
 						bucket.seek(off);
 						while (true) {
 							try {
 								byte[] lookupdata = bucket.getNext();
-								ChangedEvent event = (ChangedEvent) codec.decode(lookupdata);
-								if (event.getSeq() == seq)
+								ChangedEvent event = this.compressor.getEvent(lookupdata);
+								if (event.getSeq() == seq) {
 									return bucket;
+								}
 							} catch (EOFException e) {
 								return null;
 							}
 						}
-					}else{
-						bucket.seek(COMPRESS_HEAD);
+					} else {
+						bucket.seek(COMPRESS_HEAD + 4);
 						return bucket;
 					}
 				} else {
@@ -384,23 +382,22 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 
 		return bucket;
 	}
-	
+
 	public long findZipFileOffset(Sequence seq, ArrayList<ZipIndexItem> zipIndex) {
 		int size = zipIndex.size();
 		for (int i = 0; i < size; i++) {
-			if (zipIndex.get(i).getBenginseq() <= seq.longValue()
-					&& zipIndex.get(i).getEndseq() >= seq.longValue()) {
+			if (zipIndex.get(i).getBenginseq() <= seq.longValue() && zipIndex.get(i).getEndseq() >= seq.longValue()) {
 				return zipIndex.get(i).getOffset();
 			}
 		}
 		return -1;
 	}
-	
+
 	public void writeZipIndex(ArrayList<ZipIndexItem> zipIndex, OutputStream ios) throws IOException {
 		Properties properties = new Properties();
 		for (int i = 0; i < zipIndex.size(); i++) {
-			properties.put(String.valueOf(zipIndex.get(i).getBenginseq()) + ZIPINDEX_SEPARATOR + String.valueOf(zipIndex.get(i).getEndseq()),
-					String.valueOf(zipIndex.get(i).getOffset()));
+			properties.put(String.valueOf(zipIndex.get(i).getBenginseq()) + ZIPINDEX_SEPARATOR
+					+ String.valueOf(zipIndex.get(i).getEndseq()), String.valueOf(zipIndex.get(i).getOffset()));
 		}
 		properties.store(ios, "store zipIndex");
 	}

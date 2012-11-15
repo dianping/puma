@@ -32,13 +32,16 @@ public class DefaultEventStorage implements EventStorage {
 	private String name;
 	private static final String datePattern = "yyyy-MM-dd";
 	private String lastDate;
+	private Compressor compressor;
 
 	public void start() throws StorageLifeCycleException {
 		SimpleDateFormat sdf = new SimpleDateFormat(datePattern);
 		lastDate = sdf.format(new Date());
 		stopped = false;
-		this.masterIndex.setCodec(codec);
-		this.slaveIndex.setCodec(codec);
+		this.compressor = new Compressor();
+		this.compressor.setCodec(codec);
+		this.masterIndex.setCompress(compressor);
+		this.slaveIndex.setCompress(compressor);
 		this.binlogIndexManager.setCodec(codec);
 		// TODO binlogIndexManager.setCodec
 		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex,
@@ -197,6 +200,7 @@ public class DefaultEventStorage implements EventStorage {
 			if (writingBucket.getStartingBinlogInfoAndSeq() == null) {
 			 // TODO
 				writingBucket.setStartingBinlogInfoAndSeq(BinlogInfoAndSeq.getBinlogInfoAndSeq(event));
+				writingBucket.setCurrentWritingBinlogInfoAndSeq(BinlogInfoAndSeq.getBinlogInfoAndSeq(event));
 				this.binlogIndexManager.updateMainBinlogIndex(writingBucket);
 				this.binlogIndexManager.updateSubBinlogIndex(new BinlogInfoAndSeq(
 						event.getServerId(), event.getBinlog(), event
@@ -205,7 +209,7 @@ public class DefaultEventStorage implements EventStorage {
 			 // TODO
 				if (!writingBucket.getCurrentWritingBinlogInfoAndSeq().binlogInfoEqual(
 						BinlogInfoAndSeq.getBinlogInfoAndSeq(event))) {
-					writingBucket.setCurrentWritingBinlogInfoAndSeq(BinlogInfoAndSeq.getBinlogInfoAndSeq(event));
+					writingBucket.getCurrentWritingBinlogInfoAndSeq().setBinlogInfoButSeq(event);
 					this.binlogIndexManager.updateMainBinlogIndex(writingBucket);
 					this.binlogIndexManager.updateSubBinlogIndex(new BinlogInfoAndSeq(
 									event.getServerId(), event.getBinlog(),

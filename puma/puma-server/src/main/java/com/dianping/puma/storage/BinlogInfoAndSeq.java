@@ -23,7 +23,13 @@ public class BinlogInfoAndSeq implements Comparable<BinlogInfoAndSeq>{
 	}
 	
 	public static BinlogInfoAndSeq getBinlogInfoAndSeq(ChangedEvent event) {
-		return new BinlogInfoAndSeq(event.getServerId(), event.getBinlog(), event.getBinlogPos(), -1);
+		return new BinlogInfoAndSeq(event.getServerId(), event.getBinlog(), event.getBinlogPos(), event.getSeq());
+	}
+	
+	public void setBinlogInfoButSeq(ChangedEvent event) {
+		this.serverId = event.getServerId();
+		this.binlogFile = event.getBinlog();
+		this.binlogPosition = event.getBinlogPos();
 	}
 
 	public long getSeq() {

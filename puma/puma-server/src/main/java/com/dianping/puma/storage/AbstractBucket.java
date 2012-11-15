@@ -36,7 +36,7 @@ public abstract class AbstractBucket implements Bucket {
 	private volatile boolean stopped = false;
 	private long maxSizeByte;
 	private Boolean isCompress = false;
-	protected Compress compress;
+	protected Compressor compressor;
 
 	public BinlogInfoAndSeq getStartingBinlogInfoAndSeq() {
 		return startingBinlogInfoAndSeq;
@@ -44,6 +44,7 @@ public abstract class AbstractBucket implements Bucket {
 
 	public void setStartingBinlogInfoAndSeq(BinlogInfoAndSeq startingBinlogInfoAndSeq) {
 		this.startingBinlogInfoAndSeq = startingBinlogInfoAndSeq;
+		this.startingBinlogInfoAndSeq.setSeq(-1);
 	}
 
 	public BinlogInfoAndSeq getCurrentWritingBinlogInfoAndSeq() {
@@ -55,6 +56,7 @@ public abstract class AbstractBucket implements Bucket {
 		temp.setServerId(binlogInfoAndSeq.getServerId());
 		temp.setBinlogFile(binlogInfoAndSeq.getBinlogFile());
 		temp.setBinlogPosition(binlogInfoAndSeq.getBinlogPosition());
+		temp.setSeq(binlogInfoAndSeq.getSeq());
 		this.currentWritingBinlogInfoAndSeq.set(temp);
 	}
 
@@ -109,6 +111,8 @@ public abstract class AbstractBucket implements Bucket {
 		this.maxSizeByte = this.maxSizeMB * 1024 * 1024L;
 		// we need to copy the whole instance
 		this.currentWritingSeq.set(new Sequence(startingSequence.getCreationDate(), startingSequence.getNumber()));
+		this.currentWritingBinlogInfoAndSeq.set(new BinlogInfoAndSeq(0, null, 0, 0));
+		this.compressor = new Compressor();
 	}
 
 	// TODO add getNext
@@ -169,7 +173,7 @@ public abstract class AbstractBucket implements Bucket {
 				throw new EOFException();
 			}
 		} else {
-			if (this.compress.getZipFileInputStream() == null) {
+			if (this.compressor.getZipFileInputStream() == null) {
 				if (readable()) {
 					byte[] data = doReadData();
 					// TODO 1. performance; 2. duplicated code; 3. ZIPFORMAT
@@ -177,7 +181,7 @@ public abstract class AbstractBucket implements Bucket {
 					// appears in the first block, while we seek....; 4. file
 					// format
 					// desc
-					this.compress.readIn(data);
+					this.compressor.readIn(data);
 					return getNextFromZipBuf();
 				}else{
 					throw new EOFException();
@@ -192,12 +196,12 @@ public abstract class AbstractBucket implements Bucket {
 		// TODO panduan zhe ge zip shi fou ke du, hai yao pan duan you mu you
 		// xiayige zip
 		try {
-			return this.compress.unCompressNext();
+			return this.compressor.unCompressNext();
 		} catch (EOFException e) {
 			if(readable()){
 				byte[] data = doReadData();
-				this.compress.readIn(data);
-				return this.compress.unCompressNext();
+				this.compressor.readIn(data);
+				return this.compressor.unCompressNext();
 			}else{
 				throw new EOFException();
 			}

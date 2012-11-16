@@ -29,8 +29,8 @@ import org.junit.Test;
 
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.codec.JsonEventCodec;
-import com.dianping.puma.core.datatype.BinlogInfo;
-import com.dianping.puma.core.datatype.BinlogInfoAndSeq;
+//import com.dianping.puma.core.datatype.BinlogInfo;
+//import com.dianping.puma.core.datatype.BinlogInfoAndSeq;
 
 /**
  * TODO Comment of DefaultCleanupStrategyTest
@@ -55,15 +55,15 @@ public class DefaultCleanupStrategyTest {
 		LocalFileBucketIndex index = new LocalFileBucketIndex();
 		index.setBaseDir(baseDir.getAbsolutePath());
 		index.setBucketFilePrefix("bucket-");
-		BinlogIndexManager binlogIndexManager = new BinlogIndexManager();
-		binlogIndexManager.setMainbinlogIndexFileName("binlogIndex");
-		binlogIndexManager.setMainbinlogIndexFileNameBasedir("java.io.tmpdir" + "Puma");
-		binlogIndexManager.setSubBinlogIndexBaseDir("java.io.tmpdir" + "binlogindex");
-		binlogIndexManager.setSubBinlogIndexPrefix("index-");
-		binlogIndexManager.setBucketFilePrefix("bucket-");
-		binlogIndexManager.setCodec(new JsonEventCodec());
-		binlogIndexManager.setBinlogIndex(new TreeMap<BinlogInfo, BinlogInfoAndSeq>());
-		binlogIndexManager.setMainBinlogIndexFile(new File("java.io.tmpdir" + "Puma", "binlogIndex"));
+//		BinlogIndexManager binlogIndexManager = new BinlogIndexManager();
+//		binlogIndexManager.setMainbinlogIndexFileName("binlogIndex");
+//		binlogIndexManager.setMainbinlogIndexFileNameBasedir("java.io.tmpdir" + "Puma");
+//		binlogIndexManager.setSubBinlogIndexBaseDir("java.io.tmpdir" + "binlogindex");
+//		binlogIndexManager.setSubBinlogIndexPrefix("index-");
+//		binlogIndexManager.setBucketFilePrefix("bucket-");
+//		binlogIndexManager.setCodec(new JsonEventCodec());
+//		binlogIndexManager.setBinlogIndex(new TreeMap<BinlogInfo, BinlogInfoAndSeq>());
+//		binlogIndexManager.setMainBinlogIndexFile(new File("java.io.tmpdir" + "Puma", "binlogIndex"));
 
 		Calendar cal = Calendar.getInstance();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
@@ -77,7 +77,7 @@ public class DefaultCleanupStrategyTest {
 
 		index.start();
 
-		defaultCleanupStrategy.cleanup(index, binlogIndexManager);
+//		defaultCleanupStrategy.cleanup(index, binlogIndexManager);
 
 		Assert.assertEquals(preservedDay, index.size());
 

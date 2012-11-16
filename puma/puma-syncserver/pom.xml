@@ -200,6 +200,11 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- mongo -->
+        <dependency>
+            <groupId>com.google.code.morphia</groupId>
+            <artifactId>morphia</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <finalName>puma-syncserver</finalName>

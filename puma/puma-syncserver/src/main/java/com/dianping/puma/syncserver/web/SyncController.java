@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -54,7 +55,7 @@ public class SyncController {
                 String syncXml = IOUtils.toString(new FileInputStream(file), "UTF-8");
                 //解析syncXml，得到Sync对象
                 syncConfig = SyncXmlParser.parse(syncXml);
-                syncConfig.setId(1L);
+                syncConfig.setId(new ObjectId());
             } else {
                 syncConfig = GsonUtil.fromJson(syncJson, SyncConfig.class);
             }
@@ -104,7 +105,7 @@ public class SyncController {
                 String syncXml = IOUtils.toString(new FileInputStream(file), "UTF-8");
                 //解析syncXml，得到Sync对象
                 syncConfig = SyncXmlParser.parse(syncXml);
-                syncConfig.setId(1L);
+                syncConfig.setId(new ObjectId());
             } else {
                 syncConfig = GsonUtil.fromJson(syncJson, SyncConfig.class);
             }
@@ -166,7 +167,7 @@ public class SyncController {
      */
     @RequestMapping(value = "/stop", method = { RequestMethod.POST, RequestMethod.GET }, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object stop(HttpServletRequest request, Long syncConfigId) {
+    public Object stop(HttpServletRequest request, ObjectId syncConfigId) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             SyncClient syncClient = (SyncClient) SyncClientHolder.get(syncConfigId);
@@ -197,7 +198,7 @@ public class SyncController {
                 String syncXml = IOUtils.toString(new FileInputStream(file), "UTF-8");
                 //解析syncXml，得到Sync对象
                 syncConfig = SyncXmlParser.parse(syncXml);
-                syncConfig.setId(1L);
+                syncConfig.setId(new ObjectId());
             } else {
                 syncConfig = GsonUtil.fromJson(catchupJson, SyncConfig.class);
             }
@@ -228,7 +229,7 @@ public class SyncController {
      */
     @RequestMapping(value = "/status", method = { RequestMethod.POST, RequestMethod.GET }, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object status(HttpServletRequest request, Long syncConfigId) {
+    public Object status(HttpServletRequest request, ObjectId syncConfigId) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             AbstractSyncClient syncClient = SyncClientHolder.get(syncConfigId);

@@ -89,13 +89,13 @@ public class DefaultBucketManagerTest {
 		((AbstractBucketIndex) slaveNullIndex).setMaxBucketLengthMB(500);
 		slaveNullIndex.start();
 		
-		binlogIndexManager = new BinlogIndexManager();
-		binlogIndexManager.setMainbinlogIndexFileName("binlogIndex");
-		binlogIndexManager.setMainbinlogIndexFileNameBasedir(System.getProperty("java.io.tmpdir", ".") + "/Puma");
-		binlogIndexManager.setSubBinlogIndexBaseDir(System.getProperty("java.io.tmpdir", ".") + "/binlogindex");
-		binlogIndexManager.setSubBinlogIndexPrefix("index-");
-		binlogIndexManager.setBucketFilePrefix("bucket-");
-		binlogIndexManager.setCodec(new JsonEventCodec());
+//		binlogIndexManager = new BinlogIndexManager();
+//		binlogIndexManager.setMainbinlogIndexFileName("binlogIndex");
+//		binlogIndexManager.setMainbinlogIndexFileNameBasedir(System.getProperty("java.io.tmpdir", ".") + "/Puma");
+//		binlogIndexManager.setSubBinlogIndexBaseDir(System.getProperty("java.io.tmpdir", ".") + "/binlogindex");
+//		binlogIndexManager.setSubBinlogIndexPrefix("index-");
+//		binlogIndexManager.setBucketFilePrefix("bucket-");
+//		binlogIndexManager.setCodec(new JsonEventCodec());
 
 	}
 

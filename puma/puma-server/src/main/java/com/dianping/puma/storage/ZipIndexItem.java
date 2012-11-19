@@ -12,11 +12,11 @@ public class ZipIndexItem {
 		this.offset = offset;
 	}
 
-	public long getBenginseq() {
+	public long getBeginseq() {
 		return benginseq;
 	}
 
-	public void setBenginseq(long benginseq) {
+	public void setBeginseq(long benginseq) {
 		this.benginseq = benginseq;
 	}
 

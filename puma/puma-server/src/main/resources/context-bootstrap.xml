@@ -96,7 +96,7 @@
 		<property name="codec" ref="jsonCodec" />
 		<property name="masterIndex" ref="localBucketIndex-Dianping" />
 		<property name="slaveIndex" ref="hdfsBucketIndex-Dianping" />
-		<property name="binlogIndexManager" ref="binlogIndex" />
+		<property name="binlogIndexManager" ref="binlogIndexManager" />
 		<property name="archiveStrategy" ref="archiveStrategy" />
 		<property name="cleanupStrategy" ref="cleanupStrategy" />
 		<property name="name" value="storage-Dianping" />
@@ -106,21 +106,26 @@
 		init-method="start">
 		<property name="bucketFilePrefix" value="bucket-" />
 		<property name="maxBucketLengthMB" value="1" />
+		<property name="compressor" ref="compressor" />
 		<property name="baseDir" value="/data/applogs/puma/storage/Dianping/" />
 	</bean>
 	<bean id="hdfsBucketIndex-Dianping" class="com.dianping.puma.storage.LocalFileBucketIndex"
 		init-method="start">
 		<property name="bucketFilePrefix" value="bucket-" />
 		<property name="maxBucketLengthMB" value="1000" />
+		<property name="compressor" ref="compressor" />
 		<property name="baseDir" value="/data/applogs/puma/storage/Dianping2/" />
 	</bean>
-	
-	<bean id="binlogIndex" class="com.dianping.puma.storage.DefaultBinlogIndexManager">
-		<property name="mainbinlogIndexFileName" value="binlogIndex" />
-		<property name="mainbinlogIndexFileNameBasedir" value="/data/applogs/puma/" />
+
+	<bean id="binlogIndexManager" class="com.dianping.puma.storage.DefaultBinlogIndexManager">
+		<property name="mainBinlogIndexFileName" value="mainBinlogIndex" />
+		<property name="mainBinlogIndexBasedir" value="/data/applogs/puma/" />
 		<property name="subBinlogIndexBaseDir" value="/data/applogs/puma/binlogindex" />
+		<property name="codec" ref="jsonCodec" />
+		<property name="masterIndex" ref="localBucketIndex-Dianping" />
+		<property name="slaveIndex" ref="hdfsBucketIndex-Dianping" />
 	</bean>
-	
+
 	<bean id="archiveStrategy" class="com.dianping.puma.storage.DefaultArchiveStrategy">
 		<property name="maxMasterFileCount" value="3" />
 	</bean>
@@ -137,6 +142,10 @@
 				<ref bean="server-Dianping" />
 			</list>
 		</constructor-arg>
+	</bean>
+
+	<bean id="compressor" class="com.dianping.puma.storage.ZipCompressor">
+		<property name="codec" ref="jsonCodec" />
 	</bean>
 </beans>
 

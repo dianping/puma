@@ -123,7 +123,7 @@ public class DefaultBucketManagerTest {
 		masterNullIndex.start();
 
 		slaveIndex = new LocalFileBucketIndex();
-		slaveIndex.setCompress(compressor);
+		slaveIndex.setCompressor(compressor);
 		((AbstractBucketIndex) slaveIndex).setBaseDir(System.getProperty("java.io.tmpdir", ".") + "/Puma/slave");
 		((AbstractBucketIndex) slaveIndex).setBucketFilePrefix("bucket-");
 		((AbstractBucketIndex) slaveIndex).setMaxBucketLengthMB(500);
@@ -135,7 +135,7 @@ public class DefaultBucketManagerTest {
 		slaveIndex.add(slavepaths);
 
 		slaveNullIndex = new LocalFileBucketIndex();
-		slaveNullIndex.setCompress(compressor);
+		slaveNullIndex.setCompressor(compressor);
 		((AbstractBucketIndex) slaveNullIndex).setBaseDir(System.getProperty("java.io.tmpdir", ".") + "/Puma/null");
 		((AbstractBucketIndex) slaveNullIndex).setBucketFilePrefix("bucket-");
 		((AbstractBucketIndex) slaveNullIndex).setMaxBucketLengthMB(500);

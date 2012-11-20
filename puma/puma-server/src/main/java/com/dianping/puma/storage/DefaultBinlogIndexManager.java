@@ -140,7 +140,7 @@ public class DefaultBinlogIndexManager implements BinlogIndexManager {
         return false;
     }
 
-    public void addBinlogIndex(long seq, BucketIndex index) throws IOException, IOException {
+    private void addBinlogIndex(long seq, BucketIndex index) throws IOException, IOException {
         Bucket bucket = index.getReadBucket(seq, true);
         ChangedEvent event = null;
         BinlogInfoAndSeq beginbinlogInfoAndSeq = null;
@@ -183,11 +183,7 @@ public class DefaultBinlogIndexManager implements BinlogIndexManager {
     private boolean bucketExist(String s, BucketIndex slaveIndex, BucketIndex masterIndex) {
         BinlogInfoAndSeq binlogInfoAndSeq = BinlogInfoAndSeq.valueOf(s);
         Sequence sequence = new Sequence(Long.valueOf(binlogInfoAndSeq.getSeq()).longValue());
-        if (slaveIndex.getIndex().get().get(sequence) == null && masterIndex.getIndex().get().get(sequence) == null) {
-            return false;
-        } else {
-            return true;
-        }
+        return !(slaveIndex.getIndex().get().get(sequence) == null && masterIndex.getIndex().get().get(sequence) == null);
     }
 
     private void updateStartBinlogInfoIndex(Bucket bucket) {

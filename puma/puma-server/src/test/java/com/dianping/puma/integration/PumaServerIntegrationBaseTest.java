@@ -52,6 +52,7 @@ import com.dianping.puma.storage.ArchiveStrategy;
 import com.dianping.puma.storage.BinlogIndexManager;
 import com.dianping.puma.storage.BucketIndex;
 import com.dianping.puma.storage.CleanupStrategy;
+import com.dianping.puma.storage.DefaultBinlogIndexManager;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.LocalFileBucketIndex;
@@ -140,13 +141,11 @@ public abstract class PumaServerIntegrationBaseTest {
 		slaveIndex = new LocalFileBucketIndex();
 		slaveIndex.setBaseDir(storageSlaveBaseDir.getAbsolutePath());
 		slaveIndex.start();
-//		binlogIndexManager = new BinlogIndexManager();
-//		binlogIndexManager.setMainbinlogIndexFileName("binlogIndex");
-//		binlogIndexManager.setMainbinlogIndexFileNameBasedir(System.getProperty("java.io.tmpdir", ".") + "/Puma");
-//		binlogIndexManager.setSubBinlogIndexBaseDir(System.getProperty("java.io.tmpdir", ".") + "/binlogindex");
-//		binlogIndexManager.setSubBinlogIndexPrefix("index-");
-//		binlogIndexManager.setBucketFilePrefix("bucket-");
-//		binlogIndexManager.setCodec(new JsonEventCodec());
+		binlogIndexManager = new DefaultBinlogIndexManager();
+		binlogIndexManager.setMainbinlogIndexFileName("binlogIndex");
+		binlogIndexManager.setMainbinlogIndexFileNameBasedir(System.getProperty("java.io.tmpdir", ".") + "/Puma");
+		binlogIndexManager.setSubBinlogIndexBaseDir(System.getProperty("java.io.tmpdir", ".") + "/binlogindex");
+		binlogIndexManager.setCodec(new JsonEventCodec());
 
 		// init storage
 		storage = new DefaultEventStorage();

@@ -17,8 +17,6 @@ package com.dianping.puma.integration;
 
 import junit.framework.Assert;
 
-import org.junit.Test;
-
 import com.dianping.puma.core.util.PumaThreadUtils;
 
 /**

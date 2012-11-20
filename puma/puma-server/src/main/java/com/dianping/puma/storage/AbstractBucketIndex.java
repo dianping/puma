@@ -281,7 +281,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	}
 
 	@Override
-	public Bucket getReadBucket(long seq, Boolean start) throws StorageClosedException, IOException {
+	public Bucket getReadBucket(long seq, boolean start) throws StorageClosedException, IOException {
 		checkClosed();
 		Sequence sequence = null;
 		String path = null;
@@ -386,7 +386,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	public long findZipFileOffset(Sequence seq, ArrayList<ZipIndexItem> zipIndex) {
 		int size = zipIndex.size();
 		for (int i = 0; i < size; i++) {
-			if (zipIndex.get(i).getBenginseq() <= seq.longValue() && zipIndex.get(i).getEndseq() >= seq.longValue()) {
+			if (zipIndex.get(i).getBeginseq() <= seq.longValue() && zipIndex.get(i).getEndseq() >= seq.longValue()) {
 				return zipIndex.get(i).getOffset();
 			}
 		}
@@ -396,7 +396,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 	public void writeZipIndex(ArrayList<ZipIndexItem> zipIndex, OutputStream ios) throws IOException {
 		Properties properties = new Properties();
 		for (int i = 0; i < zipIndex.size(); i++) {
-			properties.put(String.valueOf(zipIndex.get(i).getBenginseq()) + ZIPINDEX_SEPARATOR
+			properties.put(String.valueOf(zipIndex.get(i).getBeginseq()) + ZIPINDEX_SEPARATOR
 					+ String.valueOf(zipIndex.get(i).getEndseq()), String.valueOf(zipIndex.get(i).getOffset()));
 		}
 		properties.store(ios, "store zipIndex");

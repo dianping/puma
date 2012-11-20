@@ -1,6 +1,8 @@
 package com.dianping.puma.storage;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.TreeMap;
 
 import com.dianping.puma.common.LifeCycle;
 import com.dianping.puma.core.codec.EventCodec;
@@ -25,4 +27,14 @@ public interface BinlogIndexManager extends LifeCycle<IOException> {
 	public void stop();
 	
 	public void deleteBinlogIndex(String path);
+	
+	public void setMainbinlogIndexFileName(String mainbinlogIndexFileName);
+	
+	public void setMainbinlogIndexFileNameBasedir(String mainbinlogIndexFileNameBasedir);
+	
+	public void setSubBinlogIndexBaseDir(String subBinlogIndexBaseDir);
+	
+	public void setBinlogIndex(TreeMap<BinlogInfoAndSeq, BinlogInfoAndSeq> binlogIndex);
+	
+	public void setMainBinlogIndexFile(File mainBinlogIndexFile);
 }

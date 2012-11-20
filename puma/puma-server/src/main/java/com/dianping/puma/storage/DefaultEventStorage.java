@@ -38,7 +38,7 @@ public class DefaultEventStorage implements EventStorage {
 		SimpleDateFormat sdf = new SimpleDateFormat(datePattern);
 		lastDate = sdf.format(new Date());
 		stopped = false;
-		this.compressor = new Compressor();
+		this.compressor = new ZipCompressor();
 		this.compressor.setCodec(codec);
 		this.masterIndex.setCompress(compressor);
 		this.slaveIndex.setCompress(compressor);

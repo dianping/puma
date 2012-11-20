@@ -112,7 +112,7 @@ public abstract class AbstractBucket implements Bucket {
 		// we need to copy the whole instance
 		this.currentWritingSeq.set(new Sequence(startingSequence.getCreationDate(), startingSequence.getNumber()));
 		this.currentWritingBinlogInfoAndSeq.set(new BinlogInfoAndSeq(0, null, 0, 0));
-		this.compressor = new Compressor();
+		this.compressor = new ZipCompressor();
 	}
 
 	// TODO add getNext

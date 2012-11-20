@@ -46,7 +46,7 @@ public interface BucketIndex extends LifeCycle<IOException> {
 
 	public boolean hasNexReadBucket(Sequence sequence) throws StorageClosedException;
 
-	public Bucket getReadBucket(long seq, Boolean start) throws StorageClosedException, IOException;
+	public Bucket getReadBucket(long seq, boolean start) throws StorageClosedException, IOException;
 
 	public int size();
 

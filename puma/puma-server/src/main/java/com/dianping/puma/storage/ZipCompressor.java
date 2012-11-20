@@ -3,7 +3,6 @@ package com.dianping.puma.storage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
@@ -14,10 +13,13 @@ import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
 
-public class ZipCompressor implements Compressor{
+public class ZipCompressor implements Compressor {
 	private DataInputStream zipFileInputStream = null;
 	private long zipThreshold = 200 * 1024 * 1024;
 	private EventCodec codec;
+	private ByteArrayOutputStream haveReadData = null;
+	private int eventSize;
+	private int nowoff;
 
 	public DataInputStream getZipFileInputStream() {
 		return zipFileInputStream;
@@ -36,21 +38,33 @@ public class ZipCompressor implements Compressor{
 	}
 
 	public void readIn(byte[] data) throws IOException {
-		if(this.zipFileInputStream != null){
+		if (this.zipFileInputStream != null) {
 			this.zipFileInputStream.close();
 		}
 		ByteArrayInputStream bin = new ByteArrayInputStream(data);
-		this.zipFileInputStream = new DataInputStream(new GZIPInputStream(bin,data.length));
+		this.zipFileInputStream = new DataInputStream(new GZIPInputStream(bin));
 	}
 
-	public byte[] unCompressNext() throws IOException {
-		try {
-			int len = this.zipFileInputStream.readInt();
-			byte[] unzipdata = new byte[len];
-			this.zipFileInputStream.read(unzipdata);
-			return unzipdata;
-		} catch (EOFException e) {
-			throw e;
+	public void readByte() throws IOException {
+		this.eventSize = this.zipFileInputStream.readInt();
+		this.nowoff = 0;
+		this.haveReadData = new ByteArrayOutputStream();
+	}
+
+	public byte[] uncompress() throws IOException {
+		while (true) {
+			byte[] unzipdata = new byte[512];
+			int len = this.zipFileInputStream.read(unzipdata, 0, this.eventSize - this.nowoff);
+			if (len == -1) {
+				return null;
+			}
+			this.haveReadData.write(new String(unzipdata).substring(0, len).getBytes());
+			this.nowoff = this.nowoff + len;
+			if (this.nowoff == this.eventSize) {
+				byte[] result = this.haveReadData.toByteArray();
+				this.haveReadData.close();
+				return result;
+			}
 		}
 	}
 
@@ -87,8 +101,8 @@ public class ZipCompressor implements Compressor{
 		bout.close();
 		return bos.toByteArray();
 	}
-	
-	public ChangedEvent getEvent(byte[] data) throws IOException{
+
+	public ChangedEvent getEvent(byte[] data) throws IOException {
 		return (ChangedEvent) this.codec.decode(data);
 	}
 }

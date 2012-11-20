@@ -44,6 +44,10 @@ public class HDFSBucket extends AbstractBucket {
 		return inputStream.available() > 4;
 	}
 
+	protected int readByte() throws StorageClosedException, IOException {
+		return inputStream.readInt();
+	}
+	
 	protected byte[] doReadData() throws StorageClosedException, IOException {
 		int length = inputStream.readInt();
 		byte[] data = new byte[length];
@@ -62,5 +66,25 @@ public class HDFSBucket extends AbstractBucket {
 
 	protected boolean doHasRemainingForWrite() throws IOException {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	protected byte[] doReadDataBlock() throws StorageClosedException, IOException {
+		int read = (512 > (this.blocksize - this.nowoff)) ? (this.blocksize - this.nowoff) : 512;
+		byte[] data = new byte[read];
+		int n = 0;
+		while (n < read) {
+			checkClosed();
+			int count = inputStream.read(data, 0 + n, read - n);
+			if(count == -1)
+				break;
+			n += count;
+		}
+		byte[] result = new byte[n];
+		for(int i=0 ; i<n; i++){
+			result[i] = data[i];
+		}
+		this.nowoff = this.nowoff + n;
+		return result;
 	}
 }

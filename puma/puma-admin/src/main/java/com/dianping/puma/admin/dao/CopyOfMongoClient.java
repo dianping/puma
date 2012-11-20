@@ -1,8 +1,10 @@
-package com.dianping.puma.admin.dao.impl;
+package com.dianping.puma.admin.dao;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,9 +12,12 @@ import org.slf4j.LoggerFactory;
 import com.dianping.puma.admin.config.ConfigChangeListener;
 import com.dianping.puma.admin.config.DynamicConfig;
 import com.dianping.puma.admin.config.impl.LionDynamicConfig;
-import com.google.code.morphia.Datastore;
-import com.google.code.morphia.Morphia;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 import com.mongodb.MongoOptions;
 import com.mongodb.ServerAddress;
 
@@ -21,18 +26,24 @@ import com.mongodb.ServerAddress;
  * 
  * @author wukezhu
  */
-public class MongoClient implements ConfigChangeListener {
+public class CopyOfMongoClient implements ConfigChangeListener {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MongoClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CopyOfMongoClient.class);
 
     private static final String MONGO_SERVER_URI_KEYNAME = "mongoServerUri";
 
     private static final String DB_NAME = "puma_admin";
 
+    private static final String SIZE_KEYNAME = null;
+
+    private static final int MILLION = 0;
+
+    private static final String MAX_DOC_NUM_KEYNAME = null;
+
     private static MongoOptions mongoOptions;
     static {
         //读取properties配置(如果存在configFile，则使用configFile)
-        InputStream in = MongoClient.class.getClassLoader().getResourceAsStream("puma-admin-mongo.properties");
+        InputStream in = CopyOfMongoClient.class.getClassLoader().getResourceAsStream("puma-admin-mongo.properties");
         MongoConfig config;
         if (in != null) {
             config = new MongoConfig(in);
@@ -43,21 +54,22 @@ public class MongoClient implements ConfigChangeListener {
         mongoOptions = getMongoOptions(config);
     }
 
+    /** 由于DBCollection创建后不会删除，故可以缓存DBCollection，避免db.collectionExists和避免db.getCollection的调用 */
+    private final Map<String, DBCollection> cachedCollections = new ConcurrentHashMap<String, DBCollection>();
     private DynamicConfig dynamicConfig;
     private Mongo mongo;
-    private Datastore datastore;
 
     /**
      * 构造一个MongoClient, 服务器地址通过LionDynamicConfig自动获取。
      */
-    public MongoClient() {
+    public CopyOfMongoClient() {
         this(null);
     }
 
     /**
      * 构造一个MongoClient, 参数dynamicConfig指定服务器地址。
      */
-    public MongoClient(DynamicConfig dynamicConfig) {
+    public CopyOfMongoClient(DynamicConfig dynamicConfig) {
         if (dynamicConfig == null) {
             //从动态配置中获取mongo服务器地址
             dynamicConfig = new LionDynamicConfig("puma-admin-mongo.lion.properties");
@@ -67,12 +79,6 @@ public class MongoClient implements ConfigChangeListener {
         List<ServerAddress> replicaSetSeeds = parseUriToAddressList(dynamicConfig.get(MONGO_SERVER_URI_KEYNAME));
         //创建mongo实例
         mongo = new Mongo(replicaSetSeeds, mongoOptions);
-        //创建Datastore
-        datastore = new Morphia().createDatastore(mongo, DB_NAME);
-        //at application start
-        //map classes before calling with morphia map* methods
-        datastore.ensureIndexes(); //creates indexes from @Index annotations in your entities
-        datastore.ensureCaps(); //creates capped collections from @Entity
     }
 
     @Override
@@ -87,12 +93,6 @@ public class MongoClient implements ConfigChangeListener {
                 String mongoServerUri = dynamicConfig.get(MONGO_SERVER_URI_KEYNAME);
                 List<ServerAddress> replicaSetSeeds = parseUriToAddressList(mongoServerUri);
                 mongo = new Mongo(replicaSetSeeds, mongoOptions);
-                //创建Datastore
-                datastore = new Morphia().createDatastore(mongo, DB_NAME);
-                //at application start
-                //map classes before calling with morphia map* methods
-                datastore.ensureIndexes(); //creates indexes from @Index annotations in your entities
-                datastore.ensureCaps(); //creates capped collections from @Entity
             }
         } catch (Exception e) {
             LOG.error("Error occour when reset config from Lion, no config property would changed :" + e.getMessage(), e);
@@ -136,8 +136,51 @@ public class MongoClient implements ConfigChangeListener {
         return options;
     }
 
-    public Datastore getDatastore() {
-        return datastore;
+    public DBCollection getCollection(String collectionName, DBObject indexDBObject) {
+        DBCollection collection = this.cachedCollections.get(collectionName);
+        if (collection == null) {
+            DB db = mongo.getDB(DB_NAME);
+            synchronized (collectionName.intern()) {
+                collection = this.cachedCollections.get(collectionName);
+                if (collection == null && !db.collectionExists(collectionName)) {
+                    collection = createColletcion(collectionName, indexDBObject);
+                    this.cachedCollections.put(collectionName, collection);//缓存collection
+                }
+            }
+            if (collection == null) {
+                collection = db.getCollection(collectionName);
+                this.cachedCollections.put(collectionName, collection);//缓存collection
+            }
+        }
+        return collection;
+    }
+
+    /**
+     * 创建一个DBCollection
+     */
+    private DBCollection createColletcion(String collectionName, DBObject indexDBObject) {
+        DBObject options = new BasicDBObject();
+        options.put("capped", true);
+        options.put("size", Integer.parseInt(this.dynamicConfig.get(SIZE_KEYNAME)) * MILLION);//max db file size in bytes
+        options.put("max", Integer.parseInt(this.dynamicConfig.get(MAX_DOC_NUM_KEYNAME)) * MILLION);//max row count
+        try {
+            DBCollection collection = this.mongo.getDB(DB_NAME).createCollection(collectionName, options);
+            LOG.info("Create collection '" + collection + "' on db " + DB_NAME + ", index is " + indexDBObject);
+            if (indexDBObject != null) {
+                collection.ensureIndex(indexDBObject);
+                LOG.info("Ensure index " + indexDBObject + " on colleciton " + collection);
+            }
+            return collection;
+        } catch (MongoException e) {
+            if (e.getMessage() != null && e.getMessage().indexOf("collection already exists") >= 0) {
+                //collection already exists
+                LOG.warn(e.getMessage() + ":the collectionName is " + collectionName);
+                return this.mongo.getDB(DB_NAME).getCollection(collectionName);
+            } else {
+                //other exception, can not connect to mongo etc, should abort
+                throw e;
+            }
+        }
     }
 
 }

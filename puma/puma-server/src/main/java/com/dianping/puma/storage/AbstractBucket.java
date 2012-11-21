@@ -37,6 +37,8 @@ public abstract class AbstractBucket implements Bucket {
 	private long maxSizeByte;
 	private Boolean isCompress = false;
 	protected Compressor compressor;
+	protected int blocksize;
+	protected int nowoff;
 
 	public BinlogInfoAndSeq getStartingBinlogInfoAndSeq() {
 		return startingBinlogInfoAndSeq;
@@ -173,36 +175,40 @@ public abstract class AbstractBucket implements Bucket {
 				throw new EOFException();
 			}
 		} else {
-			if (this.compressor.getZipFileInputStream() == null) {
-				if (readable()) {
-					byte[] data = doReadData();
-					// TODO 1. performance; 2. duplicated code; 3. ZIPFORMAT
-					// only
-					// appears in the first block, while we seek....; 4. file
-					// format
-					// desc
-					this.compressor.readIn(data);
-					return getNextFromZipBuf();
-				}else{
-					throw new EOFException();
+			if (readable()) {
+				if (this.nowoff >= this.blocksize) {
+					this.blocksize = readByte();
+					this.nowoff = 0;
 				}
+				return getNextEvent();
 			} else {
-				return getNextFromZipBuf();
+				throw new EOFException();
 			}
 		}
 	}
 
-	public byte[] getNextFromZipBuf() throws IOException {
-		// TODO panduan zhe ge zip shi fou ke du, hai yao pan duan you mu you
-		// xiayige zip
+	public byte[] getNextEvent() throws IOException {
+		if (this.compressor.getZipFileInputStream() == null) {
+			this.compressor.readIn(doReadDataBlock());
+		}
 		try {
-			return this.compressor.unCompressNext();
+			this.compressor.readByte();
 		} catch (EOFException e) {
-			if(readable()){
-				byte[] data = doReadData();
-				this.compressor.readIn(data);
-				return this.compressor.unCompressNext();
-			}else{
+			if (readable()) {
+				this.compressor.readIn(doReadDataBlock());
+			} else {
+				throw new EOFException();
+			}
+			this.compressor.readByte();
+		}
+		while (true) {
+			byte[] result = this.compressor.uncompress();
+			if (result != null) {
+				return result;
+			}
+			if (readable()) {
+				this.compressor.readIn(doReadDataBlock());
+			} else {
 				throw new EOFException();
 			}
 		}
@@ -217,6 +223,10 @@ public abstract class AbstractBucket implements Bucket {
 	protected abstract boolean readable() throws IOException;
 
 	protected abstract byte[] doReadData() throws StorageClosedException, IOException;
+
+	protected abstract byte[] doReadDataBlock() throws StorageClosedException, IOException;
+
+	protected abstract int readByte() throws StorageClosedException, IOException;
 
 	protected void checkClosed() throws StorageClosedException {
 		if (stopped) {

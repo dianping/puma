@@ -18,7 +18,9 @@ public interface Compressor {
 	
 	public void readIn(byte[] data) throws IOException;
 	
-	public byte[] unCompressNext() throws IOException;
-	
 	public ChangedEvent getEvent(byte[] data) throws IOException;
+	
+	public void readByte() throws IOException;
+	
+	public byte[] uncompress() throws IOException;
 }

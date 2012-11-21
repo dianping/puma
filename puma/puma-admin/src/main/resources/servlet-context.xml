@@ -29,7 +29,9 @@
     <mvc:resources mapping="/javascripts/**" location="/javascripts/" />
     <mvc:resources mapping="/images/**" location="/images/" />
     <mvc:resources mapping="/stylesheets/**" location="/stylesheets/" />
-    <mvc:resources mapping="/*.html" location="/" />
+    <mvc:resources mapping="/style/**" location="/style/" />
+    <mvc:resources mapping="/image/**" location="/image/" />
+    <mvc:resources mapping="*.html" location="*.html" />
 
     <!-- Saves a locale change using a cookie -->
     <!-- <bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver" 
@@ -58,7 +60,7 @@
         files. If you need different view resolving based on Locale, you have to 
         use the resource bundle resolver. -->
     <bean id="viewResolver"
-        class="org.springframework.web.servlet.view.velocity.VelocityViewResolver"><!-- 一开始误用InternalResourceViewResolver，那是jsp使用的，谨记教训。 -->
+        class="org.springframework.web.servlet.view.velocity.VelocityLayoutViewResolver"><!-- 一开始误用InternalResourceViewResolver，那是jsp使用的，谨记教训。 -->
         <property name="cache" value="true" />
         <property name="cacheUnresolved" value="true" />
         <property name="exposeSpringMacroHelpers" value="true" />
@@ -66,6 +68,9 @@
         <property name="suffix" value=".htm" />
         <property name="toolboxConfigLocation">
             <value>/WEB-INF/velocity/toolbox.xml</value>
+        </property>
+        <property name="layoutUrl">
+            <value>layout.htm</value>
         </property>
         <property name="dateToolAttribute">
             <value>dateTool</value>
@@ -76,6 +81,5 @@
         <!-- 设置响应头的content-type值 -->
         <property name="contentType" value="text/html; charset=UTF-8" />
     </bean>
-
 
 </beans>

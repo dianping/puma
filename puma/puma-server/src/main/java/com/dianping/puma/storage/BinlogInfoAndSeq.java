@@ -1,5 +1,7 @@
 package com.dianping.puma.storage;
 
+import org.apache.commons.lang.builder.CompareToBuilder;
+
 import com.dianping.puma.core.event.ChangedEvent;
 
 public class BinlogInfoAndSeq implements Comparable<BinlogInfoAndSeq> {
@@ -100,25 +102,7 @@ public class BinlogInfoAndSeq implements Comparable<BinlogInfoAndSeq> {
 
     @Override
     public int compareTo(BinlogInfoAndSeq o) {
-        if (this.serverId < o.getServerId()) {
-            return -1;
-        } else if (this.serverId == o.getServerId()) {
-            if (this.binlogFile.compareTo(o.getBinlogFile()) < 0) {
-                return -1;
-            } else if (this.binlogFile.compareTo(o.getBinlogFile()) == 0) {
-                if (this.binlogPosition < o.getBinlogPosition()) {
-                    return -1;
-                } else if (this.binlogPosition == o.getBinlogPosition()) {
-                    return 0;
-                } else {
-                    return 1;
-                }
-            } else {
-                return 1;
-            }
-        } else {
-            return 1;
-        }
+        return CompareToBuilder.reflectionCompare(this, o, new String[] { "seq" });
     }
 
 }

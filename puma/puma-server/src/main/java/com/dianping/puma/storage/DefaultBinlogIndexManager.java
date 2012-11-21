@@ -101,17 +101,21 @@ public class DefaultBinlogIndexManager implements BinlogIndexManager {
         Set<String> mainBinlogIndexkeys = mainIndexes.stringPropertyNames();
         for (String key : mainBinlogIndexkeys) {
             String value = mainIndexes.getProperty(key);
-            if (StringUtils.isNotBlank(key) && !bucketExist(value, slaveIndex, masterIndex)) {
-                continue;
-            }
-            try {
+            if (StringUtils.isNotBlank(key) && StringUtils.isNotBlank(value)) {
+                if (!bucketExist(value, slaveIndex, masterIndex)) {
+                    continue;
+                }
                 BinlogInfoAndSeq binlogInfoAndSeqKey = BinlogInfoAndSeq.valueOf(key);
                 BinlogInfoAndSeq binlogInfoAndSeqValue = BinlogInfoAndSeq.valueOf(value);
                 if (binlogInfoAndSeqKey != null && binlogInfoAndSeqValue != null) {
                     mainBinlogIndex.get().put(binlogInfoAndSeqKey, binlogInfoAndSeqValue);
+                } else {
+                    throw new IllegalStateException(String.format("Main binlog index corrupted(%s).",
+                            this.mainBinlogIndexFile.getAbsolutePath()));
                 }
-            } catch (Exception e) {
-                // ignore
+            } else {
+                throw new IllegalStateException(String.format("Main binlog index corrupted(%s).",
+                        this.mainBinlogIndexFile.getAbsolutePath()));
             }
         }
         TreeMap<Sequence, String> startMasterIndex = masterIndex.getIndex().get();
@@ -139,8 +143,8 @@ public class DefaultBinlogIndexManager implements BinlogIndexManager {
         return false;
     }
 
-    private void addBinlogIndex(long seq, BucketIndex index) throws IOException, IOException {
-        Bucket bucket = index.getReadBucket(seq, true);
+    private void addBinlogIndex(long startingSeq, BucketIndex index) throws IOException, IOException {
+        Bucket bucket = index.getReadBucket(startingSeq, true);
         ChangedEvent event = null;
         BinlogInfoAndSeq beginbinlogInfoAndSeq = null;
         BinlogInfoAndSeq endbinlogInfoAndSeq = null;
@@ -157,8 +161,9 @@ public class DefaultBinlogIndexManager implements BinlogIndexManager {
                     endbinlogInfoAndSeq.setSeq(event.getSeq());
 
                 }
-                if (StringUtils.equals(binlogfile, event.getBinlog()) || binlogpos != event.getBinlogPos()) {
+                if (!StringUtils.equals(binlogfile, event.getBinlog()) || binlogpos != event.getBinlogPos()) {
                     BinlogInfoAndSeq newItem = BinlogInfoAndSeq.getBinlogInfoAndSeq(event);
+                    newItem.setSeq(-1);
                     this.writingSubIndex.put(newItem.toString(), String.valueOf(event.getSeq()));
                     binlogfile = event.getBinlog();
                     binlogpos = event.getBinlogPos();
@@ -167,10 +172,12 @@ public class DefaultBinlogIndexManager implements BinlogIndexManager {
                 break;
             }
         }
-        if (event == null)
+        if (event == null) {
             return;
+        }
         endbinlogInfoAndSeq.setBinlogInfo(event);
-        TreeMap<BinlogInfoAndSeq, BinlogInfoAndSeq> newBinlogIndex = mainBinlogIndex.get();
+        TreeMap<BinlogInfoAndSeq, BinlogInfoAndSeq> newBinlogIndex = new TreeMap<BinlogInfoAndSeq, BinlogInfoAndSeq>(
+                mainBinlogIndex.get());
         newBinlogIndex.put(beginbinlogInfoAndSeq, endbinlogInfoAndSeq);
         mainBinlogIndex.set(newBinlogIndex);
         openBinlogIndex(new Sequence(endbinlogInfoAndSeq.getSeq()));
@@ -203,7 +210,6 @@ public class DefaultBinlogIndexManager implements BinlogIndexManager {
         }
     }
 
-    // TODO openSubIndex
     public void openBinlogIndex(Sequence seq) throws IOException {
         this.subBinlogFile = new File(this.subBinlogIndexBaseDir, seq.convertToSubBinlogIndexPath());
         if (!this.subBinlogFile.getParentFile().exists()) {
@@ -223,7 +229,7 @@ public class DefaultBinlogIndexManager implements BinlogIndexManager {
             inStream.close();
         } else {
             TreeMap<BinlogInfoAndSeq, BinlogInfoAndSeq> now = this.mainBinlogIndex.get();
-            if (binlogContain(binlogInfoAndSeq, now.lastEntry().getKey(), now.lastEntry().getValue())) {
+            if (binlogContains(binlogInfoAndSeq, now.lastEntry().getKey(), now.lastEntry().getValue())) {
                 result = this.writingSubIndex;
             }
         }
@@ -237,15 +243,23 @@ public class DefaultBinlogIndexManager implements BinlogIndexManager {
         }
     }
 
-    private Boolean binlogContain(BinlogInfoAndSeq value, BinlogInfoAndSeq start, BinlogInfoAndSeq end) {
-        if (value.getServerId() != start.getServerId())
+    private boolean binlogContains(BinlogInfoAndSeq value, BinlogInfoAndSeq start, BinlogInfoAndSeq end) {
+        if (value.getServerId() != start.getServerId()) {
             return false;
+        }
         if (value.getBinlogFile().compareTo(start.getBinlogFile()) < 0
-                || value.getBinlogFile().compareTo(end.getBinlogFile()) > 0)
+                || value.getBinlogFile().compareTo(end.getBinlogFile()) > 0) {
             return false;
+        }
         if (value.getBinlogFile().compareTo(end.getBinlogFile()) == 0
-                && value.getBinlogPosition() > end.getBinlogPosition())
+                && value.getBinlogPosition() > end.getBinlogPosition()) {
             return false;
+        }
+
+        if (value.getBinlogFile().compareTo(start.getBinlogFile()) == 0
+                && value.getBinlogPosition() < end.getBinlogPosition()) {
+            return false;
+        }
         return true;
     }
 
@@ -254,7 +268,7 @@ public class DefaultBinlogIndexManager implements BinlogIndexManager {
         Set<BinlogInfoAndSeq> keys = map.keySet();
         for (BinlogInfoAndSeq key : keys) {
             BinlogInfoAndSeq value = (BinlogInfoAndSeq) map.get(key);
-            if (binlogContain(binlogInfoAndSeq, key, value)) {
+            if (binlogContains(binlogInfoAndSeq, key, value)) {
                 Sequence seq = new Sequence(value.getSeq());
                 return readBinlogIndex(seq, binlogInfoAndSeq);
             }

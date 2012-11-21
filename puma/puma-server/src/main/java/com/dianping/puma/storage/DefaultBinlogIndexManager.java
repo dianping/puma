@@ -129,7 +129,7 @@ public class DefaultBinlogIndexManager implements BinlogIndexManager {
         stopped = false;
     }
 
-    public boolean inBinlogIndex(long seq) {
+    private boolean inBinlogIndex(long seq) {
         Set<BinlogInfoAndSeq> keys = this.mainBinlogIndex.get().keySet();
         for (BinlogInfoAndSeq key : keys) {
             BinlogInfoAndSeq value = (BinlogInfoAndSeq) this.mainBinlogIndex.get().get(key);

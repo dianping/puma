@@ -131,14 +131,6 @@ public class DefaultEventStorage implements EventStorage {
         this.codec = codec;
     }
 
-    public void flushBinlogIndex() throws IOException {
-        /*
-         * byte[] binlogindexitem = codec.encode(bucketManager.getBinlogIndex()
-         * .ceilingEntry(writingBucket.getStartingBinlogInfo()));
-         */
-        this.binlogIndexManager.flushBinlogIndex(this.writingBucket.getStartingBinlogInfoAndSeq());
-    }
-
     @Override
     public synchronized void store(ChangedEvent event) throws StorageException {
         if (stopped) {
@@ -147,34 +139,18 @@ public class DefaultEventStorage implements EventStorage {
         try {
             if (writingBucket == null) {
                 writingBucket = bucketManager.getNextWriteBucket();
-                // TODO
-                this.binlogIndexManager.openBinlogIndex(writingBucket.getStartingSequece());
             } else if (!writingBucket.hasRemainingForWrite()) {
-                // TODO
-                flushBinlogIndex();
-                // TODO
                 writingBucket.stop();
                 writingBucket = bucketManager.getNextWriteBucket();
-                // TODO
-                this.binlogIndexManager.openBinlogIndex(writingBucket.getStartingSequece());
             } else if (writingBucket.getCurrentWritingBinlogInfoAndSeq().getServerId() != event.getServerId()) {
-                // TODO
-                flushBinlogIndex();
-                // TODO
-
                 writingBucket.stop();
                 writingBucket = bucketManager.getNextWriteBucket();
-                this.binlogIndexManager.openBinlogIndex(writingBucket.getStartingSequece());
             } else {
                 SimpleDateFormat sdf = new SimpleDateFormat(datePattern);
                 String nowDate = sdf.format(new Date());
                 if (!lastDate.equals(nowDate)) {
-                    // TODO
-                    flushBinlogIndex();
-                    // TODO
                     writingBucket.stop();
-                    writingBucket = bucketManager.getNextWriteBucket();
-                    this.binlogIndexManager.openBinlogIndex(writingBucket.getStartingSequece());
+                    writingBucket = bucketManager.getNextWriteBucket();;
                     lastDate = nowDate;
                 }
             }
@@ -185,24 +161,18 @@ public class DefaultEventStorage implements EventStorage {
             bos.write(ByteArrayUtils.intToByteArray(data.length));
             bos.write(data);
             writingBucket.append(bos.toByteArray());
+            BinlogInfoAndSeq nowItem = BinlogInfoAndSeq.getBinlogInfoAndSeq(event);
             if (writingBucket.getStartingBinlogInfoAndSeq() == null) {
-                // TODO
-                writingBucket.setStartingBinlogInfoAndSeq(BinlogInfoAndSeq.getBinlogInfoAndSeq(event));
-                writingBucket.setCurrentWritingBinlogInfoAndSeq(BinlogInfoAndSeq.getBinlogInfoAndSeq(event));
-                this.binlogIndexManager.updateMainBinlogIndex(writingBucket);
-                this.binlogIndexManager.updateSubBinlogIndex(new BinlogInfoAndSeq(event.getServerId(), event
-                        .getBinlog(), event.getBinlogPos(), event.getSeq()));
+                writingBucket.setStartingBinlogInfoAndSeq(nowItem);
+                writingBucket.setCurrentWritingBinlogInfoAndSeq(nowItem);
+                this.binlogIndexManager.updateBinlogIndex(writingBucket, nowItem);
             } else {
-                // TODO
                 if (!writingBucket.getCurrentWritingBinlogInfoAndSeq().binlogInfoEqual(
                         BinlogInfoAndSeq.getBinlogInfoAndSeq(event))) {
                     writingBucket.getCurrentWritingBinlogInfoAndSeq().setBinlogInfo(event);
-                    this.binlogIndexManager.updateMainBinlogIndex(writingBucket);
-                    this.binlogIndexManager.updateSubBinlogIndex(new BinlogInfoAndSeq(event.getServerId(), event
-                            .getBinlog(), event.getBinlogPos(), event.getSeq()));
+                    this.binlogIndexManager.updateBinlogIndex(writingBucket, nowItem);
                 }
             }
-
             bucketManager.updateLatestSequence(new Sequence(event.getSeq()));
             SystemStatusContainer.instance.updateStorageStatus(name, event.getSeq());
         } catch (IOException e) {
@@ -218,13 +188,12 @@ public class DefaultEventStorage implements EventStorage {
         }
         stopped = true;
         try {
-            try {
-                flushBinlogIndex();
-            } catch (IOException e) {
-                // Do nothing
-            }
             bucketManager.stop();
-            this.binlogIndexManager.stop();
+            try {
+				this.binlogIndexManager.stop();
+			} catch (IOException e) {
+				//ignore
+			}
             // TODO stop binlog index
         } catch (StorageLifeCycleException e1) {
             // ignore

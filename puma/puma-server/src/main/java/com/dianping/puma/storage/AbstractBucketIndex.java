@@ -17,14 +17,12 @@ package com.dianping.puma.storage;
 
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.NavigableMap;
-import java.util.Properties;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
@@ -47,10 +45,9 @@ public abstract class AbstractBucketIndex implements BucketIndex {
     protected AtomicReference<Sequence>                  latestSequence     = new AtomicReference<Sequence>();
     protected String                                     zipIndexsuffix     = "-zipIndex";
     protected Compressor                                 compressor;
-    protected static final int                           COMPRESS_HEAD      = 20;
-    protected static final String                        ZIPFORMAT          = "ZIPFORMAT           ";
-    protected static final String                        ZIPINDEX_SEPARATOR = "$";
-
+    protected static final int COMPRESS_HEAD = 20;
+    protected static final String ZIPFORMAT = "ZIPFORMAT           ";
+    protected static final String ZIPINDEX_SEPARATOR = "$";
     // TODO remove zipIndex, refactor to local
 
     public Compressor getCompress() {
@@ -389,15 +386,5 @@ public abstract class AbstractBucketIndex implements BucketIndex {
             }
         }
         return -1;
-    }
-
-    public void writeZipIndex(ArrayList<ZipIndexItem> zipIndex, OutputStream ios) throws IOException {
-        Properties properties = new Properties();
-        for (int i = 0; i < zipIndex.size(); i++) {
-            properties.put(
-                    String.valueOf(zipIndex.get(i).getBeginseq()) + ZIPINDEX_SEPARATOR
-                            + String.valueOf(zipIndex.get(i).getEndseq()), String.valueOf(zipIndex.get(i).getOffset()));
-        }
-        properties.store(ios, "store zipIndex");
     }
 }

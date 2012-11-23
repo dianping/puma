@@ -1,18 +1,16 @@
 package com.dianping.puma.storage;
 
 import java.io.DataInputStream;
+import java.io.DataOutput;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
 
-import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 
 public interface Compressor {
-
-	public void setCodec(EventCodec codec);
 	
-	public byte[] compress(RandomAccessFile localFileAcess, long offset, ArrayList<ZipIndexItem> zipIndex) throws IOException;
+	public void compress(RandomAccessFile localFileAcess, DataOutput destFile, OutputStream destIndex) throws IOException;
 
 	public DataInputStream getZipFileInputStream();
 	

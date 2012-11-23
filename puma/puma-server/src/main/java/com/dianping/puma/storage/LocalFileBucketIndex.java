@@ -15,7 +15,6 @@
  */
 package com.dianping.puma.storage;
 
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileFilter;
@@ -32,7 +31,6 @@ import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
@@ -128,29 +126,13 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
 				throw new IOException(String.format("Can't create writeBucket's parent(%s)!", destFile.getParent()));
 			}
 		}
-		// TODO refactor to local zipIndex
-		ArrayList<ZipIndexItem> zipIndex = new ArrayList<ZipIndexItem>();
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		RandomAccessFile destFileAcess = new RandomAccessFile(destFile, "rw");
 		RandomAccessFile localFileAcess = new RandomAccessFile(localFile, "rw");
-		bos.write(ByteArrayUtils.intToByteArray(ZIPFORMAT.length()));
-		bos.write(ZIPFORMAT.getBytes());
-		destFileAcess.write(bos.toByteArray());
-		while (localFileAcess.getFilePointer() + 4 < localFileAcess.length()) {
-			byte[] data = compressor.compress(localFileAcess, destFileAcess.getFilePointer(), zipIndex);
-			// TODO bos no need
-			bos.reset();
-			bos.write(ByteArrayUtils.intToByteArray(data.length));
-			bos.write(data);
-			destFileAcess.write(bos.toByteArray());
-		}
-		OutputStream ios = new FileOutputStream(new File(this.getBaseDir(), path + this.zipIndexsuffix));
-		if (zipIndex.isEmpty())
-			return;
-		writeZipIndex(zipIndex, ios);
-		ios.close();
+		RandomAccessFile destFileAcess = new RandomAccessFile(destFile, "rw");
+		OutputStream destIndex = new FileOutputStream(new File(this.getBaseDir(), path + this.zipIndexsuffix));
+		this.compressor.compress(localFileAcess, destFileAcess, destIndex);
+		localFileAcess.close();
 		destFileAcess.close();
-		bos.close();
+		destIndex.close();
 	}
 
 	@Override

@@ -46,7 +46,6 @@ public abstract class AbstractBucket implements Bucket {
 
 	public void setStartingBinlogInfoAndSeq(BinlogInfoAndSeq startingBinlogInfoAndSeq) {
 		this.startingBinlogInfoAndSeq = startingBinlogInfoAndSeq;
-		this.startingBinlogInfoAndSeq.setSeq(-1);
 	}
 
 	public BinlogInfoAndSeq getCurrentWritingBinlogInfoAndSeq() {

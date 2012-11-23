@@ -26,9 +26,7 @@ public class Sequence implements Comparable<Sequence>{
 	private int	creationDate;
 	private int	number;
 	private int	offset;
-	
-	private static String subBinlogIndexPrefix = "index-";
-	private static final String PATH_SEPARATOR = "/";
+	public static final String PATH_SEPARATOR = "/";
 	
 	public Sequence(int creationDate, int number) {
 		this(creationDate, number, 0);
@@ -121,10 +119,6 @@ public class Sequence implements Comparable<Sequence>{
 	@Override
 	public String toString() {
 		return "Sequence [creationDate=" + creationDate + ", number=" + number + ", offset=" + offset + "]";
-	}
-	
-	public String convertToSubBinlogIndexPath() {
-		return "20" + this.creationDate + PATH_SEPARATOR + subBinlogIndexPrefix + this.number;
 	}
 	
 	public static Sequence convertToSequence(String path) {

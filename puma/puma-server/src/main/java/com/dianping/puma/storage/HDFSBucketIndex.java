@@ -35,7 +35,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.security.SecurityUtil;
 import org.apache.hadoop.security.UserGroupInformation;
 
-import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
@@ -166,22 +165,13 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 		if (!localFile.exists()) {
 			return;
 		}
-		ArrayList<ZipIndexItem> zipIndex = new ArrayList<ZipIndexItem>();
-		FSDataOutputStream fos = fileSystem.create(new Path(this.getBaseDir(), path));
 		RandomAccessFile localFileAcess = new RandomAccessFile(localFile, "rw");
-		fos.write(ZIPFORMAT.length());
-		fos.write(ZIPFORMAT.getBytes());
-		while (localFileAcess.getFilePointer() + 4 < localFileAcess.length()) {
-			byte[] data = this.compressor.compress(localFileAcess, fos.size(), zipIndex);
-			fos.write(ByteArrayUtils.intToByteArray(data.length));
-			fos.write(data);
-		}
-		FSDataOutputStream ios = fileSystem.create(new Path(this.getBaseDir(), path + this.zipIndexsuffix));
-		if (zipIndex.isEmpty())
-			return;
-		writeZipIndex(zipIndex, ios);
-		ios.close();
-		fos.close();
+		FSDataOutputStream destFile = fileSystem.create(new Path(this.getBaseDir(), path));
+		FSDataOutputStream destIndex = fileSystem.create(new Path(this.getBaseDir(), path + this.zipIndexsuffix));
+		this.compressor.compress(localFileAcess, destFile, destIndex);
+		localFileAcess.close();
+		destFile.close();
+		destIndex.close();
 	}
 
 	/*

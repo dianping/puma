@@ -3,9 +3,12 @@ package com.dianping.puma.storage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
+import java.io.DataOutput;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Properties;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -20,6 +23,9 @@ public class ZipCompressor implements Compressor {
 	private ByteArrayOutputStream haveReadData = null;
 	private int eventSize;
 	private int nowoff;
+	private ArrayList<ZipIndexItem> zipIndex = new ArrayList<ZipIndexItem>();
+	private static final String ZIPFORMAT = "ZIPFORMAT           ";
+	private static final String ZIPINDEX_SEPARATOR = "$";
 
 	public DataInputStream getZipFileInputStream() {
 		return zipFileInputStream;
@@ -68,8 +74,24 @@ public class ZipCompressor implements Compressor {
 		}
 	}
 
-	public byte[] compress(RandomAccessFile localFileAcess, long offset, ArrayList<ZipIndexItem> zipIndex) throws IOException {
-		// TODO change num to readed
+	public void compress(RandomAccessFile localFileAcess,  DataOutput destFile, OutputStream destIndex) throws IOException {
+		long offset = 0;
+		destFile.write(ByteArrayUtils.intToByteArray(ZIPFORMAT.length()));
+		destFile.write(ZIPFORMAT.getBytes());
+		offset = offset + 4 + ZIPFORMAT.length();
+		while (localFileAcess.getFilePointer() + 4 < localFileAcess.length()) {
+			byte[] data = compressBlock(localFileAcess, offset);
+			destFile.write(ByteArrayUtils.intToByteArray(data.length));
+			destFile.write(data);
+			offset = offset + 4 + data.length;
+		}
+		if (zipIndex.isEmpty())
+			return;
+		writeZipIndex(destIndex);
+		zipIndex.clear();
+	}
+	
+	public byte[] compressBlock(RandomAccessFile localFileAcess, long offset) throws IOException{
 		long readed = 0;
 		long beginseq = 0;
 		long endseq = 0;
@@ -101,6 +123,16 @@ public class ZipCompressor implements Compressor {
 		bout.close();
 		return bos.toByteArray();
 	}
+	
+	public void writeZipIndex(OutputStream ios) throws IOException {
+        Properties properties = new Properties();
+        for (int i = 0; i < zipIndex.size(); i++) {
+            properties.put(
+                    String.valueOf(zipIndex.get(i).getBeginseq()) + ZIPINDEX_SEPARATOR
+                            + String.valueOf(zipIndex.get(i).getEndseq()), String.valueOf(zipIndex.get(i).getOffset()));
+        }
+        properties.store(ios, "store zipIndex");
+    }
 
 	public ChangedEvent getEvent(byte[] data) throws IOException {
 		return (ChangedEvent) this.codec.decode(data);

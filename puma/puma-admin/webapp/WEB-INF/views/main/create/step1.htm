@@ -1,25 +1,20 @@
 <div>
-   <button id="step1_next" disabled="disabled"
-      style="float: right; margin-top: 6px; margin-right: 20px;"
-      type="button" onclick="pumadmin.step1_next();"
-      class="btn btn-info">下一步</button>
-   <p class="legend">请点击选择</p>
-   <span>已有数据源：</span> <select id="dataSourceSelect"
-      onChange="pumadmin.loadDataSource();">
-      <option value="-1" selected="selected">全部</option>
-      #foreach($dataSource in $dataSources)
-      <option value="$src.id">$dataSource.name</option> #end
-   </select>
-   <div id="container" style="height: 550px;">
-      <ul id="offers" class="thumbnails">
-      </ul>
-      <ul class="pager">
-         <li id="prePage"><a
-            href="javascript:pumadmin.loadDataSource(window.pageNum-1)">&larr;
-               上页</a></li>
-         <li id="nextPage"><a
-            href="javascript:pumadmin.loadDataSource(window.pageNum+1)">下页
-               &rarr;</a></li>
-      </ul>
+   <button id="step1_next" style="float: right;" type="button"
+      onclick="pumadmin.step1_next();" class="btn btn-info">确定</button>
+   <br>
+   <div id="container" style="height: 600px;">
+      <div
+         style="margin-left: 20px; margin-top: 10px; color: #585858; font-size: 14px">
+         <span>同步配置</span>
+      </div>
+      <hr style="margin-top: 10px; margin-bottom: 5px">
+      <div class="container-fluid">
+         <div class="row-fluid">
+            <div class="span8">
+               <div id="pomEditor"
+                  style="width: 95%; height: 550px; border: 1px solid #A9E2F3; border-radius: 3px 3px 3px 3px; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;"></div>
+            </div>
+         </div>
+      </div>
    </div>
 </div>

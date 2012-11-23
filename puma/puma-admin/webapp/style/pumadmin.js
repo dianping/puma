@@ -26,6 +26,8 @@
 		},
 		"step1_next" : function() {
 		},
+		"modifyPom" : function() {
+		},
 		"appError" : function(title, errorMsg) {
 			pumadmin.alertError(title, errorMsg);
 		},

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.dianping.puma.admin.config.PropertiesConfig;
 import com.dianping.puma.admin.service.SyncConfigService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.admin.util.SyncXmlParser;
@@ -43,15 +44,34 @@ public class AdminController {
         return new ModelAndView("main/container", map);
     }
 
-    /**
-     * 首页，使用说明
-     */
     @RequestMapping(value = { "/create" })
     public ModelAndView create(HttpSession session) {
         Map<String, Object> map = new HashMap<String, Object>();
 
+        //解析xml，得到SyncConfig(TODO 解析xml的代码需要修改)
+
+        //保存SyncConfig到db
+
         map.put("createActive", "active");
-        map.put("path", "readme");
+        map.put("path", "create");
+        return new ModelAndView("main/container", map);
+    }
+
+    @RequestMapping(value = { "/modify" })
+    public ModelAndView modify(HttpSession session) {
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        map.put("modifyActive", "active");
+        map.put("path", "modify");
+        return new ModelAndView("main/container", map);
+    }
+
+    @RequestMapping(value = { "/delete" })
+    public ModelAndView delete(HttpSession session) {
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        map.put("deleteActive", "active");
+        map.put("path", "delete");
         return new ModelAndView("main/container", map);
     }
 

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
@@ -30,14 +31,36 @@ public class AdminController {
     @Autowired
     private SyncConfigService syncConfigService;
 
-    @RequestMapping(value = "/watch")
+    /**
+     * 首页，使用说明
+     */
+    @RequestMapping(value = { "/" })
+    public ModelAndView readme(HttpSession session) {
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        map.put("readmeActive", "active");
+        map.put("path", "readme");
+        return new ModelAndView("main/container", map);
+    }
+
+    /**
+     * 首页，使用说明
+     */
+    @RequestMapping(value = { "/create" })
+    public ModelAndView create(HttpSession session) {
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        map.put("createActive", "active");
+        map.put("path", "readme");
+        return new ModelAndView("main/container", map);
+    }
+
     public ModelAndView watch(HttpServletRequest request, HttpServletResponse response) {
         Map<String, Object> map = new HashMap<String, Object>();
         System.out.println(syncConfigService.find());
         return new ModelAndView("index", map);
     }
 
-    @RequestMapping(value = "/create")
     public String createSync(HttpServletRequest request, HttpServletResponse response, String syncJson) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {

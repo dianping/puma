@@ -3,7 +3,8 @@
 <head>#parse("common/header.htm")
 </head>
 <body class="home">
-   #parse("common/banner.htm") $screen_content #parse("common/simplefooter.htm")
+   #parse("common/banner.htm") $screen_content
+   #parse("common/simplefooter.htm")
    <!-- 错误消息弹出框 -->
    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog"
       tabindex="-1" class="modal hide fade" id="errorMsg"
@@ -23,7 +24,9 @@
    <script type="text/javascript"
       src="${rc.contextPath}/style/bs/jquery-1.7.2.js"></script>
    <script type="text/javascript"
-      src="${rc.contextPath}/style/bs/js/bs.js"></script>
+      src="${rc.contextPath}/style/bs/js/bootstrap.js"></script>
+   <script src="${rc.contextPath}/style/ace-src-min/ace.js"
+      type="text/javascript"></script>
    <script type="text/javascript"
       src="${rc.contextPath}/style/pumadmin.js?v=3"></script>
    <!--[if IE 6]>

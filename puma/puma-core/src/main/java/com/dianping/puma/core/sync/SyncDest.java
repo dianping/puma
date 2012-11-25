@@ -1,6 +1,6 @@
 package com.dianping.puma.core.sync;
 
-public class Config {
+public class SyncDest {
 
     private String url;
     private String password;
@@ -51,9 +51,9 @@ public class Config {
             return true;
         if (obj == null)
             return false;
-        if (!(obj instanceof Config))
+        if (!(obj instanceof SyncDest))
             return false;
-        Config other = (Config) obj;
+        SyncDest other = (SyncDest) obj;
         if (password == null) {
             if (other.password != null)
                 return false;

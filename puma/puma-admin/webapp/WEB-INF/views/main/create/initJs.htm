@@ -1,0 +1,6 @@
+#set($initJs = "var pomEditor = ace.edit('pomEditor');")
+#set($initJs = "${initJs} pomEditor.setFontSize(14);")
+#set($initJs = "${initJs} pomEditor.setTheme('ace/theme/eclipse');")
+#set($initJs = "${initJs} pomEditor.getSession().setMode('ace/mode/xml');")
+#set($initJs = "${initJs} pomEditor.on('change', pumadmin.modifyPom);")
+#set($initJs = "${initJs} window.pomEditor = pomEditor;")

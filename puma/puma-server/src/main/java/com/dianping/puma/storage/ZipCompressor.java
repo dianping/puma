@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ public class ZipCompressor implements Compressor {
 	private ArrayList<ZipIndexItem> zipIndex = new ArrayList<ZipIndexItem>();
 	private static final String ZIPFORMAT = "ZIPFORMAT           ";
 	private static final String ZIPINDEX_SEPARATOR = "$";
+	private InputStream inputStreaml = null;
 
 	public DataInputStream getZipFileInputStream() {
 		return zipFileInputStream;
@@ -133,8 +135,4 @@ public class ZipCompressor implements Compressor {
         }
         properties.store(ios, "store zipIndex");
     }
-
-	public ChangedEvent getEvent(byte[] data) throws IOException {
-		return (ChangedEvent) this.codec.decode(data);
-	}
 }

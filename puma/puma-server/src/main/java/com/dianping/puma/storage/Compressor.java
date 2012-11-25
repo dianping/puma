@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 
-import com.dianping.puma.core.event.ChangedEvent;
-
 public interface Compressor {
 	
 	public void compress(RandomAccessFile localFileAcess, DataOutput destFile, OutputStream destIndex) throws IOException;
@@ -15,8 +13,6 @@ public interface Compressor {
 	public DataInputStream getZipFileInputStream();
 	
 	public void readIn(byte[] data) throws IOException;
-	
-	public ChangedEvent getEvent(byte[] data) throws IOException;
 	
 	public void readByte() throws IOException;
 	

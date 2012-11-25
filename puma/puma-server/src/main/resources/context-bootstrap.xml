@@ -96,7 +96,7 @@
 		<property name="codec" ref="jsonCodec" />
 		<property name="masterIndex" ref="localBucketIndex-Dianping" />
 		<property name="slaveIndex" ref="hdfsBucketIndex-Dianping" />
-		<property name="binlogIndexManager" ref="binlogIndexManager" />
+		<property name="binlogIndexManager" ref="binlogIndexManager-Dianping" />
 		<property name="archiveStrategy" ref="archiveStrategy" />
 		<property name="cleanupStrategy" ref="cleanupStrategy" />
 		<property name="name" value="storage-Dianping" />
@@ -108,6 +108,7 @@
 		<property name="maxBucketLengthMB" value="1" />
 		<property name="compressor" ref="compressor" />
 		<property name="baseDir" value="/data/applogs/puma/storage/Dianping/" />
+		<property name="codec" ref="jsonCodec"/>
 	</bean>
 	<bean id="hdfsBucketIndex-Dianping" class="com.dianping.puma.storage.LocalFileBucketIndex"
 		init-method="start">
@@ -115,12 +116,12 @@
 		<property name="maxBucketLengthMB" value="1000" />
 		<property name="compressor" ref="compressor" />
 		<property name="baseDir" value="/data/applogs/puma/storage/Dianping2/" />
+		<property name="codec" ref="jsonCodec"/>
 	</bean>
 
-	<bean id="binlogIndexManager" class="com.dianping.puma.storage.DefaultBinlogIndexManager">
-		<property name="mainBinlogIndexFileName" value="mainBinlogIndex" />
-		<property name="mainBinlogIndexBasedir" value="/data/applogs/puma/" />
-		<property name="subBinlogIndexBaseDir" value="/data/applogs/puma/binlogindex" />
+	<bean id="binlogIndexManager-Dianping" class="com.dianping.puma.storage.DefaultBinlogIndexManager">
+		<property name="mainBinlogIndex" ref="mainbinlogindex-Dianping" />	
+		<property name="subBinlogIndex" ref="subbinlogindex-Dianping" />
 		<property name="codec" ref="jsonCodec" />
 		<property name="masterIndex" ref="localBucketIndex-Dianping" />
 		<property name="slaveIndex" ref="hdfsBucketIndex-Dianping" />
@@ -146,6 +147,16 @@
 
 	<bean id="compressor" class="com.dianping.puma.storage.ZipCompressor">
 		<property name="codec" ref="jsonCodec" />
+	</bean>
+	
+	<bean id="mainbinlogindex-Dianping" class="com.dianping.puma.storage.MainBinlogIndexImpl">
+		<property name="mainBinlogIndexFileName" value="mainBinlogIndex"/>
+		<property name="mainBinlogIndexBasedir" value="/data/applogs/puma/"/>
+	</bean>
+	
+	<bean id="subbinlogindex-Dianping" class="com.dianping.puma.storage.SubBinlogIndexImpl">
+		<property name="subBinlogIndexBaseDir" value="/data/applogs/puma/binlogindex"/>
+		<property name="subBinlogIndexPrefix" value="index-"/>
 	</bean>
 </beans>
 

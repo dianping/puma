@@ -1,24 +1,36 @@
 <div>
-   <button id="step1_next" disabled="disabled"
-      style="float: right; margin-top: 6px; margin-right: 20px;"
-      type="button" onclick="pumadmin.step1_next();"
-      class="btn btn-info">下一步</button>
-   <p class="legend">请点击选择</p>
-   <span>已有数据源：</span> <select id="dataSourceSelect"
-      onChange="pumadmin.loadDataSource();">
-      <option value="-1" selected="selected">全部</option>
-      #foreach($dataSource in $dataSources)
-      <option value="$src.id">$dataSource.name</option> #end
-   </select>
+   <p class="legend">点击编辑进行修改</p>
    <div id="container" style="height: 550px;">
-      <ul id="offers" class="thumbnails">
-      </ul>
+      <div id="resultDiv" style="height: 400px; overflow-y: auto;">
+         <table class="table table-hover table-striped">
+            <thead>
+               <tr>
+                  <th>puma-server的host</th>
+                  <th>源serverId</th>
+                  <th>源target</th>
+                  <th>目标host</th>
+                  <th>操作</th>
+               </tr>
+            </thead>
+            <tbody id="resultTable">
+            </tbody>
+         </table>
+         <div id="noResultDiv" class="alert alert-warn"
+            style="text-align: center; display: none;">
+            <br>
+            <p>
+               <i class="icon-warning-sign"></i>
+               您尚未添加任何同步，请点击左边的“创建同步”的按钮进行添加。
+            </p>
+            <br>
+         </div>
+      </div>
       <ul class="pager">
          <li id="prePage"><a
-            href="javascript:pumadmin.loadDataSource(window.pageNum-1)">&larr;
+            href="javascript:pumadmin.loadSyncConfig(window.pageNum-1)">&larr;
                上页</a></li>
          <li id="nextPage"><a
-            href="javascript:pumadmin.loadDataSource(window.pageNum+1)">下页
+            href="javascript:pumadmin.loadSyncConfig(window.pageNum+1)">下页
                &rarr;</a></li>
       </ul>
    </div>

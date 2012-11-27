@@ -27,6 +27,7 @@ import java.util.TreeMap;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
@@ -45,6 +46,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
     protected AtomicReference<Sequence>                  latestSequence     = new AtomicReference<Sequence>();
     protected String                                     zipIndexsuffix     = "-zipIndex";
     protected Compressor                                 compressor;
+    protected EventCodec								 codec;
     protected static final int COMPRESS_HEAD = 20;
     protected static final String ZIPFORMAT = "ZIPFORMAT           ";
     protected static final String ZIPINDEX_SEPARATOR = "$";
@@ -54,7 +56,15 @@ public abstract class AbstractBucketIndex implements BucketIndex {
         return compressor;
     }
 
-    public void setCompressor(Compressor compressor) {
+    public EventCodec getCodec() {
+		return codec;
+	}
+
+	public void setCodec(EventCodec codec) {
+		this.codec = codec;
+	}
+
+	public void setCompressor(Compressor compressor) {
         this.compressor = compressor;
     }
 
@@ -125,7 +135,21 @@ public abstract class AbstractBucketIndex implements BucketIndex {
         NavigableMap<Sequence, String> tailMap = index.get().tailMap(sequence, false);
         if (!tailMap.isEmpty()) {
             Entry<Sequence, String> firstEntry = tailMap.firstEntry();
-            return doGetReadBucket(baseDir, firstEntry.getValue(), firstEntry.getKey(), maxBucketLengthMB);
+            Bucket bucket = doGetReadBucket(baseDir, firstEntry.getValue(), firstEntry.getKey(), maxBucketLengthMB);
+            if(bucket != null){
+            	byte[] data = bucket.getNext();
+            	if(data.length == COMPRESS_HEAD){
+            		 String head = new String(data);
+                     if (head.equals(ZIPFORMAT)) {
+                    	 bucket.setIsCompress(true);
+                     }else{
+                    	 bucket.seek(0);
+                     }
+            	}else{
+            		bucket.seek(0);
+            	}
+            }
+            return bucket;
         }
         return null;
     }
@@ -345,7 +369,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
                         while (true) {
                             try {
                                 byte[] lookupdata = bucket.getNext();
-                                ChangedEvent event = this.compressor.getEvent(lookupdata);
+                                ChangedEvent event = (ChangedEvent) this.codec.decode(lookupdata);
                                 if (event.getSeq() == seq) {
                                     return bucket;
                                 }

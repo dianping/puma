@@ -38,7 +38,7 @@ public class JsonController {
     private SyncConfigService syncConfigService;
 
     private static final String errorMsg = "对不起，出了一点错误，请刷新页面试试。";
-    private static final int PAGESIZE = 15;
+    private static final int PAGESIZE = 8;
 
     @RequestMapping(value = "/loadSyncConfigs", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
@@ -46,9 +46,10 @@ public class JsonController {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             int offset = pageNum == null ? 0 : (pageNum - 1) * PAGESIZE;
-            List<SyncConfig> syncConfigs = syncConfigService.findSyncConfig(offset, PAGESIZE);
-
+            List<SyncConfig> syncConfigs = syncConfigService.findSyncConfigs(offset, PAGESIZE);
+            Long totalSyncConfig = syncConfigService.countSyncConfigs();
             map.put("syncConfigs", syncConfigs);
+            map.put("totalPage", totalSyncConfig / PAGESIZE + (totalSyncConfig % PAGESIZE == 0 ? 0 : 1));
             map.put("success", true);
         } catch (IllegalArgumentException e) {
             map.put("success", false);
@@ -73,7 +74,7 @@ public class JsonController {
             int time = Integer.parseInt(mergeIdSplits[2]);
             ObjectId objectId = new ObjectId(time, machine, inc);
             //mergeId解析成ObjectId
-            SyncXml syncXml = syncConfigService.loadSyncXml(objectId);
+            SyncXml syncXml = syncConfigService.findSyncXml(objectId);
 
             map.put("syncXml", syncXml);
             map.put("success", true);
@@ -101,11 +102,40 @@ public class JsonController {
             syncConfig.setId(new ObjectId());
             LOG.info("receive sync: " + syncConfig);
             //保存SyncConfig到db,同时保存SyncXml
-            ObjectId objectId = syncConfigService.saveSyncConfig(syncConfig);
-            SyncXml syncXml = new SyncXml();
-            syncXml.setId(objectId);
-            syncXml.setXml(syncXmlString);
-            syncConfigService.saveSyncXml(syncXml);
+            syncConfigService.saveSyncConfig(syncConfig,syncXmlString);
+
+            map.put("success", true);
+        } catch (SAXParseException e) {
+            map.put("success", false);
+            map.put("errorMsg", "xml解析出错：" + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", errorMsg);
+            LOG.error(e.getMessage(), e);
+        }
+        return GsonUtil.toJson(map);
+
+    }
+
+    @RequestMapping(value = "/modifySyncXml", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object modifySyncXml(HttpSession session, HttpServletRequest request, String syncXmlString, String mergeId) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            //获取ObjectId
+            String[] mergeIdSplits = StringUtils.split(mergeId, '_');
+            int inc = Integer.parseInt(mergeIdSplits[0]);
+            int machine = Integer.parseInt(mergeIdSplits[1]);
+            int time = Integer.parseInt(mergeIdSplits[2]);
+            ObjectId objectId = new ObjectId(time, machine, inc);
+            //解析xml，得到SyncConfig
+            SyncConfig syncConfig = SyncXmlParser.parse(syncXmlString);
+            LOG.info("receive sync: " + syncConfig);
+            //保存修改
+            syncConfigService.modifySyncConfig(objectId, syncConfig, syncXmlString);
 
             map.put("success", true);
         } catch (SAXParseException e) {

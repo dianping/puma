@@ -37,25 +37,59 @@
 				url : url,
 				data : param,
 				dataType : "json",
-				success : pumadmin.loadSyncConfigDone,
+				success : pumadmin.loadSyncConfigDone(param.pageNum),
 				error : pumadmin.httpError
 			});
 		},
-		"loadSyncConfigDone" : function(data) {
-			if (data.success == false) {
-				pumadmin.appError("错误信息", data.errorMsg);
-			} else {
-				console.log(data);
-				var syncConfigs = data.syncConfigs;
-				if (data.syncConfigs.length <= 0) {
-					$("#noResultDiv").show();
+		"loadSyncConfigDone" : function(pageNum) {
+			return function(data) {
+				if (data.success == false) {
+					pumadmin.appError("错误信息", data.errorMsg);
 				} else {
-					$.each(syncConfigs, function(i, el) {
-						pumadmin.appendSyncConfig(el);
-					});
-					$("#noResultDiv").hide();
+					// 设置offer总页数
+					w.totalPage = data.totalPage;
+					// 如果没有offer，则显示没有offer的警告
+					if (data.syncConfigs.length <= 0) {
+						$("#noResultDiv").show();
+						$('#resultTable').html("");
+						return;
+					}
+					// 检查上一页和下一页是否可以点击
+					w.pageNum = pageNum;
+					if (pageNum >= w.totalPage) {
+						$("#nextPage").addClass("disabled");
+						$("#nextPage > a").attr("href", "javascript:;");
+					} else {
+						$("#nextPage").removeClass("disabled");
+						$("#nextPage > a")
+								.attr("href",
+										"javascript:pumadmin.loadSyncConfigs(window.pageNum+1)");
+					}
+					if (pageNum <= 1) {
+						$("#prePage").addClass("disabled");
+						$("#prePage > a").attr("href", "javascript:;");
+					} else {
+						$("#prePage").removeClass("disabled");
+						$("#prePage > a")
+								.attr("href",
+										"javascript:pumadmin.loadSyncConfigs(window.pageNum-1)");
+					}
+					var syncConfigs = data.syncConfigs;
+					$("#resultTable").html("");
+					if (data.syncConfigs.length <= 0) {
+						$("#noResultDiv").show();
+					} else {
+						$.each(syncConfigs, function(i, el) {
+							pumadmin.appendSyncConfig(el);
+						});
+						$("#noResultDiv").hide();
+					}
 				}
-			}
+			};
+		},
+		"objectId2String" : function(objectId) {
+			return objectId._inc + "_" + objectId._machine + "_"
+					+ objectId._time;
 		},
 		"appendSyncConfig" : function(syncConfig) {
 			// 连接
@@ -113,9 +147,28 @@
 				pumadmin.appError("信息", "保存成功");
 			}
 		},
-		"step1_next" : function() {
-		},
 		"modifySyncXml" : function() {
+			var param = new Object();
+			param.syncXmlString = w.xmlEditor.getValue();
+			param.mergeId = pumadmin.objectId2String(w.syncXmlObjectId);
+			var url = w.contextpath + '/modifySyncXml';
+			$.ajax({
+				type : 'POST',
+				url : url,
+				data : param,
+				dataType : "json",
+				success : pumadmin.modifySyncXmlDone,
+				error : pumadmin.httpError
+			});
+		},
+		"modifySyncXmlDone" : function(data) {
+			if (data.success == false) {
+				pumadmin.appError("错误信息", data.errorMsg);
+			} else {
+				pumadmin.appError("信息", "修改成功");
+			}
+		},
+		"step1_next" : function() {
 		},
 		"appError" : function(title, errorMsg) {
 			pumadmin.alertError(title, errorMsg);

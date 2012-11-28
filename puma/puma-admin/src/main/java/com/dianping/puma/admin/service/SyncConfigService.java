@@ -9,16 +9,14 @@ import com.dianping.puma.core.sync.SyncConfig;
 
 public interface SyncConfigService {
 
-    public ObjectId saveSyncConfig(SyncConfig syncConfig);
+    public ObjectId saveSyncConfig(SyncConfig syncConfig, String syncXmlString);
 
-    public List<SyncConfig> findSyncConfig(int offset, int limit);
+    public List<SyncConfig> findSyncConfigs(int offset, int limit);
 
-    SyncXml loadSyncXml(ObjectId objectId);
+    SyncXml findSyncXml(ObjectId objectId);
 
-    ObjectId modifySyncXml(SyncXml syncXml);
+    ObjectId modifySyncConfig(ObjectId id, SyncConfig syncConfig, String syncXmlString);
 
-    ObjectId modifySyncConfig(SyncConfig syncConfig);
-
-    ObjectId saveSyncXml(SyncXml syncXml);
+    Long countSyncConfigs();
 
 }

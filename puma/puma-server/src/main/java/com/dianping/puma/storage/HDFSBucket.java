@@ -1,5 +1,6 @@
 package com.dianping.puma.storage;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -24,6 +25,7 @@ public class HDFSBucket extends AbstractBucket {
 		super(startingSequence, -1);
 		this.file = new Path(baseDir, path);
 		this.inputStream = fileSystem.open(file);
+		this.compressor.setInputStream(new DataInputStream(inputStream));
 	}
 
 	protected void doAppend(byte[] data) throws IOException {

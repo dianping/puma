@@ -1,6 +1,8 @@
 package com.dianping.puma.storage;
 
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -15,17 +17,27 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  */
 public class LocalFileBucket extends AbstractBucket {
 
-	private RandomAccessFile	file;
+	private RandomAccessFile file;
 
 	public LocalFileBucket(File file, Sequence startingSequence, int maxSizeMB) throws FileNotFoundException {
 		super(startingSequence, maxSizeMB);
 		this.file = new RandomAccessFile(file, "rw");
+		FileInputStream inputStream = new FileInputStream(file);
+		//TODO refactor better
+		try { 
+			if (inputStream.available() >= 24) {
+				inputStream.skip(24);
+			}
+		} catch (Exception e) {
+			// ignore
+		}
+		this.compressor.setInputStream(new DataInputStream(inputStream));
 	}
 
 	protected void doAppend(byte[] data) throws IOException {
 		file.write(data);
 	}
-	
+
 	protected int readByte() throws StorageClosedException, IOException {
 		return file.readInt();
 	}
@@ -41,7 +53,7 @@ public class LocalFileBucket extends AbstractBucket {
 		}
 		return data;
 	}
-	
+
 	protected byte[] doReadDataBlock() throws StorageClosedException, IOException {
 		int read = (512 > (this.blocksize - this.nowoff)) ? (this.blocksize - this.nowoff) : 512;
 		byte[] data = new byte[read];
@@ -49,12 +61,12 @@ public class LocalFileBucket extends AbstractBucket {
 		while (n < read) {
 			checkClosed();
 			int count = file.read(data, 0 + n, read - n);
-			if(count == -1)
+			if (count == -1)
 				break;
 			n += count;
 		}
 		byte[] result = new byte[n];
-		for(int i=0 ; i<n; i++){
+		for (int i = 0; i < n; i++) {
 			result[i] = data[i];
 		}
 		this.nowoff = this.nowoff + n;

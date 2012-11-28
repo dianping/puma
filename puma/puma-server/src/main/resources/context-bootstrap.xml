@@ -147,6 +147,7 @@
 
 	<bean id="compressor" class="com.dianping.puma.storage.ZipCompressor">
 		<property name="codec" ref="jsonCodec" />
+		<property name="zipThreshold" value="526288"/>
 	</bean>
 	
 	<bean id="mainbinlogindex-Dianping" class="com.dianping.puma.storage.MainBinlogIndexImpl">

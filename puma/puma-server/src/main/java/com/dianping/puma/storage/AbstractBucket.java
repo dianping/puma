@@ -192,8 +192,6 @@ public abstract class AbstractBucket implements Bucket {
 
 	protected abstract byte[] doReadData() throws StorageClosedException, IOException;
 
-	protected abstract byte[] doReadDataBlock() throws StorageClosedException, IOException;
-
 	protected abstract int readByte() throws StorageClosedException, IOException;
 
 	protected void checkClosed() throws StorageClosedException {

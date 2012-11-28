@@ -54,25 +54,6 @@ public class LocalFileBucket extends AbstractBucket {
 		return data;
 	}
 
-	protected byte[] doReadDataBlock() throws StorageClosedException, IOException {
-		int read = (512 > (this.blocksize - this.nowoff)) ? (this.blocksize - this.nowoff) : 512;
-		byte[] data = new byte[read];
-		int n = 0;
-		while (n < read) {
-			checkClosed();
-			int count = file.read(data, 0 + n, read - n);
-			if (count == -1)
-				break;
-			n += count;
-		}
-		byte[] result = new byte[n];
-		for (int i = 0; i < n; i++) {
-			result[i] = data[i];
-		}
-		this.nowoff = this.nowoff + n;
-		return result;
-	}
-
 	protected boolean readable() throws IOException {
 		return file.getFilePointer() + 4 < file.length();
 	}

@@ -11,7 +11,7 @@ import org.apache.commons.io.IOUtils;
 import org.xml.sax.SAXException;
 
 import com.dianping.puma.core.sync.ColumnConfig;
-import com.dianping.puma.core.sync.Config;
+import com.dianping.puma.core.sync.SyncDest;
 import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.InstanceConfig;
 import com.dianping.puma.core.sync.SyncConfig;
@@ -31,7 +31,7 @@ public class SyncXmlParser {
         digester.addBeanPropertySetter("sync/transaction");
 
         // sync/from
-        digester.addObjectCreate("sync/src", Config.class);
+        digester.addObjectCreate("sync/src", SyncDest.class);
         digester.addSetNext("sync/src", "setSrc");
         digester.addBeanPropertySetter("sync/src/host");
         digester.addCallMethod("sync/src/port", "setPort", 0, new Class[] { Integer.class });
@@ -39,7 +39,7 @@ public class SyncXmlParser {
         digester.addBeanPropertySetter("sync/src/password");
 
         // sync/to
-        digester.addObjectCreate("sync/dest", Config.class);
+        digester.addObjectCreate("sync/dest", SyncDest.class);
         digester.addSetNext("sync/dest", "setDest");
         digester.addBeanPropertySetter("sync/dest/url");
 //        digester.addCallMethod("sync/dest/port", "setPort", 0, new Class[] { Integer.class });

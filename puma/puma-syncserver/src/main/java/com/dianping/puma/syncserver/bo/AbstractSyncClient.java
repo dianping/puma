@@ -66,13 +66,13 @@ public abstract class AbstractSyncClient {
         if (!oldSync.getDest().equals(newSync.getDest())) {
             throw new IllegalArgumentException("dest不一致！");
         }
-        if (!oldSync.getName().equals(newSync.getName())) {
+        if (!oldSync.getSrc().getName().equals(newSync.getSrc().getName())) {
             throw new IllegalArgumentException("name不一致！");
         }
-        if (!oldSync.getServerId().equals(newSync.getServerId())) {
+        if (!oldSync.getSrc().getServerId().equals(newSync.getSrc().getServerId())) {
             throw new IllegalArgumentException("serverId不一致！");
         }
-        if (!oldSync.getTarget().equals(newSync.getTarget())) {
+        if (!oldSync.getSrc().getTarget().equals(newSync.getSrc().getTarget())) {
             throw new IllegalArgumentException("target不一致！");
         }
         //对比instance
@@ -97,19 +97,19 @@ public abstract class AbstractSyncClient {
     private void _init(BinlogInfo startedBinlogInfo) {
         //1 初始化mysqlExecutor
         LOG.info("initing MysqlExecutor...");
-        mysqlExecutor = new MysqlExecutor(sync.getDest().getUrl(), sync.getDest().getUsername(), sync.getDest().getPassword());
+        mysqlExecutor = new MysqlExecutor(sync.getDest().getHost(), sync.getDest().getUsername(), sync.getDest().getPassword());
         mysqlExecutor.setSync(sync);
         //2 初始化PumaClient
         LOG.info("initing PumaClient...");
         ConfigurationBuilder configBuilder = new ConfigurationBuilder();
-        configBuilder.ddl(sync.getDdl());
-        configBuilder.dml(sync.getDml());
+        configBuilder.ddl(sync.getSrc().getDdl());
+        configBuilder.dml(sync.getSrc().getDml());
         configBuilder.host(pumaServerHost);
         configBuilder.port(pumaServerPort);
-        configBuilder.serverId(sync.getServerId());
-        configBuilder.name(sync.getName());
-        configBuilder.target(sync.getTarget());
-        configBuilder.transaction(sync.getTransaction());
+        configBuilder.serverId(sync.getSrc().getServerId());
+        configBuilder.name(sync.getSrc().getName());
+        configBuilder.target(sync.getSrc().getTarget());
+        configBuilder.transaction(sync.getSrc().getTransaction());
         if (startedBinlogInfo != null) {
             configBuilder.binlog(startedBinlogInfo.getBinlogFile());
             configBuilder.binlogPos(startedBinlogInfo.getBinlogPosition());

@@ -9,14 +9,16 @@
     <!-- 同步源配置：PumaClient相关的配置 -->
     <src>
         <pumaServerHost>127.0.0.1:8080</pumaServerHost>
-        <BinlogFile>binlog</BinlogFile>
-        <BinlogPosition>123</BinlogPosition>
         <name>testClient</name>
         <serverId>6667</serverId>
         <dml>true</dml>
         <ddl>true</ddl>
         <target>Dianping</target>
         <transaction>false</transaction>
+        <binlogInfo>
+            <binlogFile>binlog</binlogFile>
+            <binlogPosition>123</binlogPosition>
+        </binlogInfo>
     </src>
     <instance>
         <database from="pumatest" to="pumatest">

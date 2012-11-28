@@ -11,6 +11,70 @@ public class SyncSrc {
     private Boolean ddl;
     private Boolean dml;
 
+    public String getPumaServerHost() {
+        return pumaServerHost;
+    }
+
+    public void setPumaServerHost(String pumaServerHost) {
+        this.pumaServerHost = pumaServerHost;
+    }
+
+    public BinlogInfo getBinlogInfo() {
+        return binlogInfo;
+    }
+
+    public void setBinlogInfo(BinlogInfo binlogInfo) {
+        this.binlogInfo = binlogInfo;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Long getServerId() {
+        return serverId;
+    }
+
+    public void setServerId(Long serverId) {
+        this.serverId = serverId;
+    }
+
+    public String getTarget() {
+        return target;
+    }
+
+    public void setTarget(String target) {
+        this.target = target;
+    }
+
+    public Boolean getTransaction() {
+        return transaction;
+    }
+
+    public void setTransaction(Boolean transaction) {
+        this.transaction = transaction;
+    }
+
+    public Boolean getDdl() {
+        return ddl;
+    }
+
+    public void setDdl(Boolean ddl) {
+        this.ddl = ddl;
+    }
+
+    public Boolean getDml() {
+        return dml;
+    }
+
+    public void setDml(Boolean dml) {
+        this.dml = dml;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

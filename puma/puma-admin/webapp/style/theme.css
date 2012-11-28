@@ -32,7 +32,6 @@ section {
 	margin-bottom: 5px;
 }
 
-
 hr.soften {
 	border: 0 none;
 	height: 1px;
@@ -80,8 +79,20 @@ strong.stronger {
 	color: #D90B00;
 }
 
+.puma-steps {
+	background-image: url(../images/golden-background.jpg);
+	border-radius: 4px 4px 4px 4px;
+}
 
-.puma-steps{
-    background-image: url(../images/golden-background.jpg);
-    border-radius: 4px 4px 4px 4px;
+.legend {
+	display: block;
+	width: 100%;
+	padding: 0;
+	/*margin-bottom: 27px; wukezhu*/
+	margin-bottom: 15px;
+	font-size: 19.5px;
+	line-height: 36px;
+	color: #333333;
+	border: 0;
+	border-bottom: 1px solid #e5e5e5;
 }

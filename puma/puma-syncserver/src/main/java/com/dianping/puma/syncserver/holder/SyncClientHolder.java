@@ -18,8 +18,8 @@ public class SyncClientHolder {
         return syncCleintMap.get(key);
     }
 
-    public static boolean contain(ObjectId key) {
-        return syncCleintMap.containsKey(key);
+    public static boolean contain(ObjectId ObjectId) {
+        return syncCleintMap.containsKey(ObjectId);
     }
 
 }

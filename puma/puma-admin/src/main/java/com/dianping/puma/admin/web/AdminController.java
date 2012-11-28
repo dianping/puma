@@ -18,9 +18,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.dianping.puma.admin.config.PropertiesConfig;
 import com.dianping.puma.admin.service.SyncConfigService;
 import com.dianping.puma.admin.util.GsonUtil;
+import com.dianping.puma.admin.util.MongoUtils;
 import com.dianping.puma.admin.util.SyncXmlParser;
 import com.dianping.puma.core.sync.SyncConfig;
 import com.google.gson.Gson;
@@ -48,10 +48,6 @@ public class AdminController {
     public ModelAndView create(HttpSession session) {
         Map<String, Object> map = new HashMap<String, Object>();
 
-        //解析xml，得到SyncConfig(TODO 解析xml的代码需要修改)
-
-        //保存SyncConfig到db
-
         map.put("createActive", "active");
         map.put("path", "create");
         return new ModelAndView("main/container", map);
@@ -77,7 +73,7 @@ public class AdminController {
 
     public ModelAndView watch(HttpServletRequest request, HttpServletResponse response) {
         Map<String, Object> map = new HashMap<String, Object>();
-        System.out.println(syncConfigService.find());
+//        System.out.println(syncConfigService.find());
         return new ModelAndView("index", map);
     }
 
@@ -96,7 +92,7 @@ public class AdminController {
                 syncConfig = GsonUtil.fromJson(syncJson, SyncConfig.class);
             }
             LOG.info("receive sync: " + syncConfig);
-            syncConfigService.save(syncConfig);
+//            syncConfigService.save(syncConfig); 
 
             map.put("success", true);
         } catch (Exception e) {

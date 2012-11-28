@@ -61,6 +61,11 @@ public class HDFSBucketIndexTest {
 		this.hdfsBucketIndex.setBaseDir("/tmp/Puma");
 		this.hdfsBucketIndex.setBucketFilePrefix("bucket-");
 		this.hdfsBucketIndex.setMaxBucketLengthMB(500);
+		ZipCompressor zc = new ZipCompressor();
+		JsonEventCodec jec = new JsonEventCodec();
+		zc.setCodec(jec);
+		hdfsBucketIndex.setCompressor(zc);
+		hdfsBucketIndex.setCodec(jec);
 	}
 
 	@Test

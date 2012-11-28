@@ -52,6 +52,11 @@ public class LocalBucketIndexTest {
 		localBucketIndex.setBaseDir(System.getProperty("java.io.tmpdir", ".") + "/Puma");
 		localBucketIndex.setBucketFilePrefix("bucket-");
 		localBucketIndex.setMaxBucketLengthMB(500);
+		ZipCompressor zc = new ZipCompressor();
+		JsonEventCodec jec = new JsonEventCodec();
+		zc.setCodec(jec);
+		localBucketIndex.setCompressor(zc);
+		localBucketIndex.setCodec(jec);
 
 		System.out.println("*************************************************************");
 		System.out.println("****************************End******************************");

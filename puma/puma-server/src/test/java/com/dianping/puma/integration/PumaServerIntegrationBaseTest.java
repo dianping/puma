@@ -144,6 +144,8 @@ public abstract class PumaServerIntegrationBaseTest {
 		slaveIndex.setBaseDir(storageSlaveBaseDir.getAbsolutePath());
 		slaveIndex.start();
 		DefaultBinlogIndexManager dbim = new DefaultBinlogIndexManager();
+		dbim.setMasterIndex(masterIndex);
+		dbim.setSlaveIndex(slaveIndex);
 		MainBinlogIndexImpl mbii = new MainBinlogIndexImpl();
 		mbii.setMainBinlogIndexBasedir(System.getProperty("java.io.tmpdir", ".") + "/Puma");
 		mbii.setMainBinlogIndexFileName("binlogIndex");

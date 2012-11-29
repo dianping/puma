@@ -113,7 +113,6 @@ public class DefaultBinlogIndexManager implements BinlogIndexManager {
 		}
 		endbinlogInfoAndSeq.setBinlogInfo(event);
 		this.mainBinlogIndex.updateMainBinlogIndex(beginbinlogInfoAndSeq, endbinlogInfoAndSeq);
-		// TODO merge into flushIndex
 	}
 
 	public long tranBinlogIndexToSeq(BinlogInfoAndSeq binlogInfoAndSeq) throws StorageClosedException, IOException {

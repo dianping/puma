@@ -45,8 +45,9 @@ public class DefaultBucketManagerTest {
 	public void before() throws Exception {
 		JsonEventCodec jcodec = new JsonEventCodec();
 		codec = jcodec;
-		compressor = new ZipCompressor();
-		compressor.setCodec(codec);
+		ZipCompressor zc = new ZipCompressor();
+		zc.setCodec(codec);
+		compressor = zc;
 		String aevent = "{\"executeTime\":1352877120,\"database\":\"hupeng\",\"table\":null,\"seq\":8522991926054486016,\"serverId\":1,\"binlog\":\"mysql-bin.000132\",\"binlogPos\":107,\"columns\":[\"java.util.HashMap\",{}],\"actionType\":0,\"transactionCommit\":false,\"transactionBegin\":true}";
 		event =	(ChangedEvent) codec.decode(aevent.getBytes());
 		for (int i = 0; i < 2; i++) {
@@ -68,7 +69,6 @@ public class DefaultBucketManagerTest {
 			bout.write(temp);
 			zip.write(bout.toByteArray());
 			zip.close();
-			acfile.write(ByteArrayUtils.intToByteArray(bos.size()));
 			acfile.write(bos.toByteArray());
 			acfile.close();
 			ArrayList<ZipIndexItem> zipIndex = new ArrayList<ZipIndexItem>();
@@ -124,6 +124,7 @@ public class DefaultBucketManagerTest {
 
 		slaveIndex = new LocalFileBucketIndex();
 		slaveIndex.setCompressor(compressor);
+		((AbstractBucketIndex) slaveIndex).setCodec(codec);
 		((AbstractBucketIndex) slaveIndex).setBaseDir(System.getProperty("java.io.tmpdir", ".") + "/Puma/slave");
 		((AbstractBucketIndex) slaveIndex).setBucketFilePrefix("bucket-");
 		((AbstractBucketIndex) slaveIndex).setMaxBucketLengthMB(500);
@@ -141,11 +142,17 @@ public class DefaultBucketManagerTest {
 		((AbstractBucketIndex) slaveNullIndex).setMaxBucketLengthMB(500);
 		slaveNullIndex.start();
 
-		binlogIndexManager = new DefaultBinlogIndexManager();
-		binlogIndexManager.setMainbinlogIndexFileName("binlogIndex");
-		binlogIndexManager.setMainbinlogIndexFileNameBasedir(System.getProperty("java.io.tmpdir", ".") + "/Puma");
-		binlogIndexManager.setSubBinlogIndexBaseDir(System.getProperty("java.io.tmpdir", ".") + "/binlogindex");
-		binlogIndexManager.setCodec(new JsonEventCodec());
+		DefaultBinlogIndexManager dbim = new DefaultBinlogIndexManager();
+		MainBinlogIndexImpl mbii = new MainBinlogIndexImpl();
+		mbii.setMainBinlogIndexBasedir(System.getProperty("java.io.tmpdir", ".") + "/Puma");
+		mbii.setMainBinlogIndexFileName("binlogIndex");
+		SubBinlogIndexImpl sbii = new SubBinlogIndexImpl();
+		sbii.setSubBinlogIndexBaseDir(System.getProperty("java.io.tmpdir", ".") + "/binlogindex");
+		sbii.setSubBinlogIndexPrefix("index");
+		dbim.setMainBinlogIndex(mbii);
+		dbim.setSubBinlogIndex(sbii);
+		dbim.setCodec(new JsonEventCodec());
+		binlogIndexManager = dbim;
 
 	}
 

@@ -24,6 +24,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.dianping.puma.core.codec.JsonEventCodec;
+
 /**
  * @author Leo Liang
  * 
@@ -48,6 +50,11 @@ public class DefaultArchiveStrategyTest {
 		LocalFileBucketIndex slaveIndex = new LocalFileBucketIndex();
 		slaveIndex.setBaseDir(slaveBaseDir.getAbsolutePath());
 		slaveIndex.setBucketFilePrefix("bucket-");
+		ZipCompressor zc = new ZipCompressor();
+		JsonEventCodec jec = new JsonEventCodec();
+		zc.setCodec(jec);
+		slaveIndex.setCompressor(zc);
+		slaveIndex.setCodec(jec);
 
 		for (int i = 0; i < 12; i++) {
 			File masterFile = new File(masterBaseDir, "20120726/bucket-" + i);
@@ -163,6 +170,11 @@ public class DefaultArchiveStrategyTest {
 		LocalFileBucketIndex slaveIndex = new LocalFileBucketIndex();
 		slaveIndex.setBaseDir(slaveBaseDir.getAbsolutePath());
 		slaveIndex.setBucketFilePrefix("bucket-");
+		ZipCompressor zc = new ZipCompressor();
+		JsonEventCodec jec = new JsonEventCodec();
+		zc.setCodec(jec);
+		slaveIndex.setCompressor(zc);
+		slaveIndex.setCodec(jec);
 
 		for (int i = 0; i < 12; i++) {
 			File masterFile = new File(masterBaseDir, "20120726/bucket-" + i);

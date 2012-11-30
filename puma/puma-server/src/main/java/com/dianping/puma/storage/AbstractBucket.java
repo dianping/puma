@@ -174,40 +174,9 @@ public abstract class AbstractBucket implements Bucket {
 				throw new EOFException();
 			}
 		} else {
-			if (readable()) {
-				if (this.nowoff >= this.blocksize) {
-					this.blocksize = readByte();
-					this.nowoff = 0;
-				}
-				return getNextEvent();
-			} else {
-				throw new EOFException();
-			}
-		}
-	}
-
-	public byte[] getNextEvent() throws IOException {
-		if (this.compressor.getZipFileInputStream() == null) {
-			this.compressor.readIn(doReadDataBlock());
-		}
-		try {
-			this.compressor.readByte();
-		} catch (EOFException e) {
-			if (readable()) {
-				this.compressor.readIn(doReadDataBlock());
-			} else {
-				throw new EOFException();
-			}
-			this.compressor.readByte();
-		}
-		while (true) {
-			byte[] result = this.compressor.uncompress();
-			if (result != null) {
-				return result;
-			}
-			if (readable()) {
-				this.compressor.readIn(doReadDataBlock());
-			} else {
+			try{
+				return this.compressor.getNextEvent();
+			}catch(Exception e){
 				throw new EOFException();
 			}
 		}
@@ -222,8 +191,6 @@ public abstract class AbstractBucket implements Bucket {
 	protected abstract boolean readable() throws IOException;
 
 	protected abstract byte[] doReadData() throws StorageClosedException, IOException;
-
-	protected abstract byte[] doReadDataBlock() throws StorageClosedException, IOException;
 
 	protected abstract int readByte() throws StorageClosedException, IOException;
 

@@ -9,12 +9,8 @@ import java.io.RandomAccessFile;
 public interface Compressor {
 	
 	public void compress(RandomAccessFile localFileAcess, DataOutput destFile, OutputStream destIndex) throws IOException;
-
-	public DataInputStream getZipFileInputStream();
 	
-	public void readIn(byte[] data) throws IOException;
+	public void setInputStream(DataInputStream inputStream);
 	
-	public void readByte() throws IOException;
-	
-	public byte[] uncompress() throws IOException;
+	public byte[] getNextEvent() throws IOException;
 }

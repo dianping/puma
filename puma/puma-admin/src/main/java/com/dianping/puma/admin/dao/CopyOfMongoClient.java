@@ -1,11 +1,15 @@
 package com.dianping.puma.admin.dao;
 
 import java.io.InputStream;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang.time.DateUtils;
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -181,6 +185,11 @@ public class CopyOfMongoClient implements ConfigChangeListener {
                 throw e;
             }
         }
+    }
+    
+    public static void main(String[] args) throws ParseException {
+        Date d = DateUtils.parseDate("2012-12-01 00:00", new String[]{"yyyy-MM-dd hh:mm"});
+        System.out.println(new ObjectId(d,0,0));
     }
 
 }

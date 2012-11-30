@@ -37,11 +37,11 @@
 				url : url,
 				data : param,
 				dataType : "json",
-				success : pumadmin.loadSyncConfigDone(param.pageNum),
+				success : pumadmin.loadSyncConfigsDone(param.pageNum),
 				error : pumadmin.httpError
 			});
 		},
-		"loadSyncConfigDone" : function(pageNum) {
+		"loadSyncConfigsDone" : function(pageNum) {
 			return function(data) {
 				if (data.success == false) {
 					pumadmin.appError("错误信息", data.errorMsg);
@@ -87,6 +87,69 @@
 				}
 			};
 		},
+		"loadSyncConfigsForWatch" : function(pageNum) {
+			var param = new Object();
+			if (typeof pageNum != 'undefined' && pageNum > 0) {
+				param.pageNum = pageNum;
+			} else {
+				param.pageNum = 1;
+			}
+			var url = w.contextpath + '/loadSyncConfigs';
+			$.ajax({
+				type : 'POST',
+				url : url,
+				data : param,
+				dataType : "json",
+				success : pumadmin.loadSyncConfigsForWatchDone(param.pageNum),
+				error : pumadmin.httpError
+			});
+		},
+		"loadSyncConfigsForWatchDone" : function(pageNum) {
+			return function(data) {
+				if (data.success == false) {
+					pumadmin.appError("错误信息", data.errorMsg);
+				} else {
+					// 设置offer总页数
+					w.totalPage = data.totalPage;
+					// 如果没有offer，则显示没有offer的警告
+					if (data.syncConfigs.length <= 0) {
+						$("#noResultDiv").show();
+						$('#resultTable').html("");
+						return;
+					}
+					// 检查上一页和下一页是否可以点击
+					w.pageNum = pageNum;
+					if (pageNum >= w.totalPage) {
+						$("#nextPage").addClass("disabled");
+						$("#nextPage > a").attr("href", "javascript:;");
+					} else {
+						$("#nextPage").removeClass("disabled");
+						$("#nextPage > a")
+								.attr("href",
+										"javascript:pumadmin.loadSyncConfigs(window.pageNum+1)");
+					}
+					if (pageNum <= 1) {
+						$("#prePage").addClass("disabled");
+						$("#prePage > a").attr("href", "javascript:;");
+					} else {
+						$("#prePage").removeClass("disabled");
+						$("#prePage > a")
+								.attr("href",
+										"javascript:pumadmin.loadSyncConfigs(window.pageNum-1)");
+					}
+					var syncConfigs = data.syncConfigs;
+					$("#resultTable").html("");
+					if (data.syncConfigs.length <= 0) {
+						$("#noResultDiv").show();
+					} else {
+						$.each(syncConfigs, function(i, el) {
+							pumadmin.appendSyncConfigForWatch(el);
+						});
+						$("#noResultDiv").hide();
+					}
+				}
+			};
+		},
 		"objectId2String" : function(objectId) {
 			return objectId._inc + "_" + objectId._machine + "_"
 					+ objectId._time;
@@ -103,6 +166,34 @@
 					+ syncConfig.src.target + "</td><td>"
 					+ syncConfig.dest.host + "</td><td>" + link + "</td><tr>";
 			$("#resultTable").append(html);
+		},
+		"appendSyncConfigForWatch" : function(syncConfig) {
+			// 连接
+			var id = syncConfig.id._inc + "_" + syncConfig.id._machine + "_"
+					+ syncConfig.id._time;
+			var link = "<a href=\"javascript:pumadmin.watchSyncConfig('" + id
+					+ "')\">具体状态 »</a>";
+			// 拼装
+			var html = "<tr><td>" + syncConfig.src.pumaServerHost + "</td><td>"
+					+ syncConfig.src.serverId + "</td><td>"
+					+ syncConfig.src.target + "</td><td>"
+					+ syncConfig.dest.host + "</td><td>" + link + "</td><tr>";
+			$("#resultTable").append(html);
+		},
+		//显示配置信息，实时：显示binlog进度，操作：暂停，启动，追赶
+		"watchSyncConfig" : function(mergeId) {
+			pumadmin.next();
+			var param = new Object();
+			param.mergeId = mergeId;
+			var url = w.contextpath + '/loadSyncXml';
+			$.ajax({
+				type : 'POST',
+				url : url,
+				data : param,
+				dataType : "json",
+				success : pumadmin.loadSyncXmlDone,
+				error : pumadmin.httpError
+			});
 		},
 		"loadSyncXml" : function(mergeId) {
 			pumadmin.next();

@@ -71,10 +71,13 @@ public class AdminController {
         return new ModelAndView("main/container", map);
     }
 
+    @RequestMapping(value = { "/watch" })
     public ModelAndView watch(HttpServletRequest request, HttpServletResponse response) {
         Map<String, Object> map = new HashMap<String, Object>();
 //        System.out.println(syncConfigService.find());
-        return new ModelAndView("index", map);
+        map.put("watchActive", "active");
+        map.put("path", "watch");
+        return new ModelAndView("main/container", map);
     }
 
     public String createSync(HttpServletRequest request, HttpServletResponse response, String syncJson) {

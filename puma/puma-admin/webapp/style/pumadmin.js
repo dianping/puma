@@ -24,6 +24,15 @@
 					.attr("class", "step_active");
 			$("#stepsCarousel").carousel('next');
 		},
+		"create_step1_next" : function() {
+			//判断上一步是否有保存
+			if (!w.syncConfigObjectId) {
+				pumadmin.appError("错误信息", "先保存，才能到下一步");
+			}
+			pumadmin.next();
+			//根据w.syncConfigObjectId加载DumpConfig TODO
+			
+		},
 		"loadSyncConfigs" : function(pageNum) {
 			var param = new Object();
 			if (typeof pageNum != 'undefined' && pageNum > 0) {
@@ -235,6 +244,7 @@
 			if (data.success == false) {
 				pumadmin.appError("错误信息", data.errorMsg);
 			} else {
+				w.syncConfigObjectId = data.id;
 				pumadmin.appError("信息", "保存成功");
 			}
 		},

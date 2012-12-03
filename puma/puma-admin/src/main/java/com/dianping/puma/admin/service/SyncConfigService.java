@@ -15,6 +15,8 @@ public interface SyncConfigService {
 
     SyncXml findSyncXml(ObjectId objectId);
 
+    SyncConfig findSyncConfig(ObjectId objectId);
+
     ObjectId modifySyncConfig(ObjectId id, SyncConfig syncConfig, String syncXmlString);
 
     Long countSyncConfigs();

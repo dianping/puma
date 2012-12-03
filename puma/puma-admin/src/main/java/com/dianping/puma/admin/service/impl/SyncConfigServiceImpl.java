@@ -117,4 +117,9 @@ public class SyncConfigServiceImpl implements SyncConfigService {
     public SyncXml findSyncXml(ObjectId objectId) {
         return syncXmlDao.getDatastore().getByKey(SyncXml.class, new Key<SyncXml>(SyncXml.class, objectId));
     }
+
+    @Override
+    public SyncConfig findSyncConfig(ObjectId objectId) {
+        return this.syncConfigDao.getDatastore().getByKey(SyncConfig.class, new Key<SyncConfig>(SyncConfig.class, objectId));
+    }
 }

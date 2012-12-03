@@ -89,6 +89,34 @@ public class JsonController {
         return GsonUtil.toJson(map);
 
     }
+    
+    @RequestMapping(value = "/loadDumpConfig", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object loadDumpConfig(HttpSession session, HttpServletRequest request, String mergeId) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            String[] mergeIdSplits = StringUtils.split(mergeId, '_');
+            int inc = Integer.parseInt(mergeIdSplits[0]);
+            int machine = Integer.parseInt(mergeIdSplits[1]);
+            int time = Integer.parseInt(mergeIdSplits[2]);
+            ObjectId objectId = new ObjectId(time, machine, inc);
+            //mergeId解析成ObjectId
+            SyncConfig syncConfig = syncConfigService.findSyncConfig(objectId);
+            //TODO 将syncXml转化成dumpConfig
+
+            map.put("syncConfig", syncConfig);
+            map.put("success", true);
+        } catch (IllegalArgumentException e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", errorMsg);
+            LOG.error(e.getMessage(), e);
+        }
+        return GsonUtil.toJson(map);
+
+    }
 
     @RequestMapping(value = "/saveSyncXml", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
@@ -102,7 +130,7 @@ public class JsonController {
             syncConfig.setId(new ObjectId());
             LOG.info("receive sync: " + syncConfig);
             //保存SyncConfig到db,同时保存SyncXml
-            syncConfigService.saveSyncConfig(syncConfig,syncXmlString);
+            map.put("id", syncConfigService.saveSyncConfig(syncConfig,syncXmlString));
 
             map.put("success", true);
         } catch (SAXParseException e) {

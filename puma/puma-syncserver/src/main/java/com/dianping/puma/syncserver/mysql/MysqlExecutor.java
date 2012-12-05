@@ -34,8 +34,9 @@ public class MysqlExecutor {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public MysqlExecutor(String url, String username, String password) {
-        SingleConnectionDataSource dataSource = new SingleConnectionDataSource(url, username, password, true);
+    public MysqlExecutor(String host, String username, String password) {
+        SingleConnectionDataSource dataSource = new SingleConnectionDataSource("jdbc:mysql://" + host + "/", username, password,
+                true);
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
@@ -240,9 +241,7 @@ public class MysqlExecutor {
     }
 
     public static void main(String[] args44) {
-        MysqlExecutor mysqlExecutor = new MysqlExecutor(
-                "jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;noAccessToProcedureBodies=true",
-                "root", "root");
+        MysqlExecutor mysqlExecutor = new MysqlExecutor("localhost:3306", "root", "root");
         String sql = "INSERT INTO `test`.`test4` VALUES (?,?,?,?)";
         int id = 35685;
         for (int j = 0; j < 1000; j++) {

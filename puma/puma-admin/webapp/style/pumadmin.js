@@ -28,6 +28,7 @@
 			//判断上一步是否有保存
 			if (!w.syncConfigObjectId) {
 				pumadmin.appError("错误信息", "先保存，才能到下一步");
+				return;
 			}
 			pumadmin.next();
 			//根据w.syncConfigObjectId加载DumpConfig TODO

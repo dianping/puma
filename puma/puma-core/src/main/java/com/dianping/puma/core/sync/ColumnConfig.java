@@ -3,7 +3,7 @@ package com.dianping.puma.core.sync;
 public class ColumnConfig {
     private String from;
     private String to;
-    private Boolean primary;
+    private boolean primary;
 
     public String getFrom() {
         return from;
@@ -21,11 +21,11 @@ public class ColumnConfig {
         this.to = to;
     }
 
-    public Boolean getPrimary() {
+    public boolean getPrimary() {
         return primary;
     }
 
-    public void setPrimary(Boolean primary) {
+    public void setPrimary(boolean primary) {
         this.primary = primary;
     }
 
@@ -39,7 +39,7 @@ public class ColumnConfig {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((from == null) ? 0 : from.hashCode());
-        result = prime * result + ((primary == null) ? 0 : primary.hashCode());
+        result = prime * result + (primary ? 1231 : 1237);
         result = prime * result + ((to == null) ? 0 : to.hashCode());
         return result;
     }
@@ -58,10 +58,7 @@ public class ColumnConfig {
                 return false;
         } else if (!from.equals(other.from))
             return false;
-        if (primary == null) {
-            if (other.primary != null)
-                return false;
-        } else if (!primary.equals(other.primary))
+        if (primary != other.primary)
             return false;
         if (to == null) {
             if (other.to != null)

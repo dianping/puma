@@ -1,5 +1,6 @@
 package com.dianping.puma.admin.web;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,15 +20,21 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.xml.sax.SAXParseException;
 
 import com.dianping.puma.admin.bo.SyncXml;
+import com.dianping.puma.admin.config.PropertiesConfig;
 import com.dianping.puma.admin.service.SyncConfigService;
 import com.dianping.puma.admin.util.GsonUtil;
-import com.dianping.puma.admin.util.MongoUtils;
 import com.dianping.puma.admin.util.SyncXmlParser;
+import com.dianping.puma.core.sync.ColumnConfig;
+import com.dianping.puma.core.sync.DatabaseConfig;
+import com.dianping.puma.core.sync.DumpConfig;
+import com.dianping.puma.core.sync.DumpConfig.DumpDest;
+import com.dianping.puma.core.sync.DumpConfig.DumpSrc;
+import com.dianping.puma.core.sync.InstanceConfig;
 import com.dianping.puma.core.sync.SyncConfig;
+import com.dianping.puma.core.sync.SyncDest;
+import com.dianping.puma.core.sync.TableConfig;
 
 /**
- * TODO pumadmin.js loadSyncConfig
- * 
  * @author wukezhu
  */
 @Controller
@@ -89,7 +96,7 @@ public class JsonController {
         return GsonUtil.toJson(map);
 
     }
-    
+
     @RequestMapping(value = "/loadDumpConfig", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object loadDumpConfig(HttpSession session, HttpServletRequest request, String mergeId) {
@@ -102,9 +109,10 @@ public class JsonController {
             ObjectId objectId = new ObjectId(time, machine, inc);
             //mergeId解析成ObjectId
             SyncConfig syncConfig = syncConfigService.findSyncConfig(objectId);
-            //TODO 将syncXml转化成dumpConfig
+            //将syncConfig转化成dumpConfig
+            DumpConfig dumpConfig = this.syncConfigService.convertSyncConfigToDumpConfig(syncConfig);
 
-            map.put("syncConfig", syncConfig);
+            map.put("dumpConfig", dumpConfig);
             map.put("success", true);
         } catch (IllegalArgumentException e) {
             map.put("success", false);
@@ -130,7 +138,7 @@ public class JsonController {
             syncConfig.setId(new ObjectId());
             LOG.info("receive sync: " + syncConfig);
             //保存SyncConfig到db,同时保存SyncXml
-            map.put("id", syncConfigService.saveSyncConfig(syncConfig,syncXmlString));
+            map.put("id", syncConfigService.saveSyncConfig(syncConfig, syncXmlString));
 
             map.put("success", true);
         } catch (SAXParseException e) {

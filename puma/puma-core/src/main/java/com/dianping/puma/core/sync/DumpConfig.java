@@ -18,10 +18,10 @@ public class DumpConfig {
 
     @Id
     private ObjectId id;
-    private Src src;
-    private Dest dest;
+    private DumpSrc src;
+    private DumpDest dest;
 
-    private List<DumpRelation> dumpRelations;
+    private List<DatabaseConfig> databaseConfigs;
 
     public ObjectId getId() {
         return id;
@@ -31,38 +31,37 @@ public class DumpConfig {
         this.id = id;
     }
 
-    public Src getSrc() {
+    public DumpSrc getSrc() {
         return src;
     }
 
-    public void setSrc(Src src) {
+    public void setSrc(DumpSrc src) {
         this.src = src;
     }
 
-    public Dest getDest() {
+    public DumpDest getDest() {
         return dest;
     }
 
-    public void setDest(Dest dest) {
+    public void setDest(DumpDest dest) {
         this.dest = dest;
     }
 
-    public List<DumpRelation> getDumpRelations() {
-        return dumpRelations;
+    public List<DatabaseConfig> getDatabaseConfigs() {
+        return databaseConfigs;
     }
 
-    public void setDumpRelations(List<DumpRelation> dumpRelations) {
-        this.dumpRelations = dumpRelations;
+    public void setDatabaseConfigs(List<DatabaseConfig> databaseConfigs) {
+        this.databaseConfigs = databaseConfigs;
     }
 
     @Override
     public String toString() {
-        return "DumpConfig [id=" + id + ", src=" + src + ", dest=" + dest + ", dumpRelations=" + dumpRelations + "]";
+        return "DumpConfig [id=" + id + ", src=" + src + ", dest=" + dest + ", databaseConfigs=" + databaseConfigs + "]";
     }
 
-    public static class Src {
+    public static class DumpSrc {
         private String host;
-        private Integer port;
         private String username;
         private String password;
         private List<String> options = Arrays.asList(new String[] { "--no-autocommit", " --disable-keys", "--quick",
@@ -75,14 +74,6 @@ public class DumpConfig {
 
         public void setHost(String host) {
             this.host = host;
-        }
-
-        public Integer getPort() {
-            return port;
-        }
-
-        public void setPort(Integer port) {
-            this.port = port;
         }
 
         public String getUsername() {
@@ -111,15 +102,14 @@ public class DumpConfig {
 
         @Override
         public String toString() {
-            return "Src [host=" + host + ", port=" + port + ", username=" + username + ", password=" + password + ", options="
-                    + options + "]";
+            return "Src [host=" + host + ", username=" + username + ", password=" + password + ", options=" + options + "]";
         }
 
     }
 
-    public static class Dest {
+    public static class DumpDest {
         private String host;
-        private Integer port;
+        private int port;
         private String username;
         private String password;
 
@@ -131,11 +121,11 @@ public class DumpConfig {
             this.host = host;
         }
 
-        public Integer getPort() {
+        public int getPort() {
             return port;
         }
 
-        public void setPort(Integer port) {
+        public void setPort(int port) {
             this.port = port;
         }
 
@@ -162,52 +152,52 @@ public class DumpConfig {
 
     }
 
-    /**
-     * Dump的映射关系。
-     */
-    public static class DumpRelation {
-        private String srcDatabaseName;
-        private String destDatabaseName;
-        private List<String> srcTableNames;
-        private List<String> destTableNames;
-
-        public String getSrcDatabaseName() {
-            return srcDatabaseName;
-        }
-
-        public void setSrcDatabaseName(String srcDatabaseName) {
-            this.srcDatabaseName = srcDatabaseName;
-        }
-
-        public String getDestDatabaseName() {
-            return destDatabaseName;
-        }
-
-        public void setDestDatabaseName(String destDatabaseName) {
-            this.destDatabaseName = destDatabaseName;
-        }
-
-        public List<String> getSrcTableNames() {
-            return srcTableNames;
-        }
-
-        public void setSrcTableNames(List<String> srcTableNames) {
-            this.srcTableNames = srcTableNames;
-        }
-
-        public List<String> getDestTableNames() {
-            return destTableNames;
-        }
-
-        public void setDestTableNames(List<String> destTableNames) {
-            this.destTableNames = destTableNames;
-        }
-
-        @Override
-        public String toString() {
-            return "DumpRelation [srcDatabaseName=" + srcDatabaseName + ", destDatabaseName=" + destDatabaseName
-                    + ", srcTableNames=" + srcTableNames + ", destTableNames=" + destTableNames + "]";
-        }
-
-    }
+    //    /**
+    //     * Dump的映射关系。
+    //     */
+    //    public static class DumpRelation {
+    //        private String srcDatabaseName;
+    //        private String destDatabaseName;
+    //        private List<String> srcTableNames;
+    //        private List<String> destTableNames;
+    //
+    //        public String getSrcDatabaseName() {
+    //            return srcDatabaseName;
+    //        }
+    //
+    //        public void setSrcDatabaseName(String srcDatabaseName) {
+    //            this.srcDatabaseName = srcDatabaseName;
+    //        }
+    //
+    //        public String getDestDatabaseName() {
+    //            return destDatabaseName;
+    //        }
+    //
+    //        public void setDestDatabaseName(String destDatabaseName) {
+    //            this.destDatabaseName = destDatabaseName;
+    //        }
+    //
+    //        public List<String> getSrcTableNames() {
+    //            return srcTableNames;
+    //        }
+    //
+    //        public void setSrcTableNames(List<String> srcTableNames) {
+    //            this.srcTableNames = srcTableNames;
+    //        }
+    //
+    //        public List<String> getDestTableNames() {
+    //            return destTableNames;
+    //        }
+    //
+    //        public void setDestTableNames(List<String> destTableNames) {
+    //            this.destTableNames = destTableNames;
+    //        }
+    //
+    //        @Override
+    //        public String toString() {
+    //            return "DumpRelation [srcDatabaseName=" + srcDatabaseName + ", destDatabaseName=" + destDatabaseName
+    //                    + ", srcTableNames=" + srcTableNames + ", destTableNames=" + destTableNames + "]";
+    //        }
+    //
+    //    }
 }

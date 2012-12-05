@@ -26,11 +26,9 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.DumpConfig;
-import com.dianping.puma.core.sync.DumpConfig.Dest;
-import com.dianping.puma.core.sync.DumpConfig.DumpRelation;
-import com.dianping.puma.core.sync.DumpConfig.Src;
-import com.google.gson.Gson;
+import com.dianping.puma.core.sync.TableConfig;
 
 /**
  * @author wukezhu
@@ -70,17 +68,96 @@ public class DumpClient {
      * 解决方法:<br>
      * 允许不同database的mysqldump的state(binlog)不一致，这样需要为不同database做dump和PumaClient的追赶
      */
+    //    public List<BinlogInfo> dump() throws ExecuteException, IOException, InterruptedException {
+    //        try {
+    //            List<BinlogInfo> binlogPosList = new ArrayList<BinlogInfo>();
+    //            List<DumpRelation> dumpRelations = dumpConfig.getDumpRelations();
+    //            LOG.info("============ dump ===========");
+    //            for (DumpRelation dumpRelation : dumpRelations) {
+    //                //执行dump脚本，dump到<dump_tempDir>/<uuid>目录
+    //                String srcDatabaseName = dumpRelation.getSrcDatabaseName();
+    //                List<String> srcTableNames = dumpRelation.getSrcTableNames();
+    //                String destDatabaseName = dumpRelation.getDestDatabaseName();
+    //                List<String> destTableNames = dumpRelation.getDestTableNames();
+    //                String output = _mysqldump(srcDatabaseName, srcTableNames);
+    //                if (StringUtils.isNotBlank(output)) {
+    //                    throw new DumpException("mysqldump output is not empty , so consided to be failed: " + output);
+    //                }
+    //                LOG.info("dump done.");
+    //                BinlogInfo binlogPos = new BinlogInfo();
+    //                LineIterator lineIterators = IOUtils.lineIterator(new FileInputStream(_getDumpFile(srcDatabaseName)), "UTF-8");
+    //                PrintWriter deelFileWriter = new PrintWriter(new File(_getSourceFile(srcDatabaseName)), "UTF-8");
+    //                deelFileWriter.println("CREATE DATABASE IF NOT EXISTS " + destDatabaseName + ";USE " + destDatabaseName + ";");//添加select database语句
+    //                while (lineIterators.hasNext()) {
+    //                    String line = lineIterators.next();
+    //                    //获取binlog位置
+    //                    if (StringUtils.isBlank(binlogPos.getBinlogFile()) || binlogPos.getBinlogPosition() == null) {
+    //                        Matcher matcher = BINLOG_LINE_PATTERN.matcher(line);
+    //                        if (matcher.matches()) {
+    //                            binlogPos.setBinlogFile(matcher.group(1));
+    //                            binlogPos.setBinlogPosition(Long.parseLong(matcher.group(2)));
+    //                        }
+    //                    }
+    //                    //table更名
+    //                    for (int i = 0; i < srcTableNames.size(); i++) {
+    //                        String srcTableName = srcTableNames.get(i);
+    //                        String destTableName = destTableNames.get(i);
+    //                        String originLine = line;
+    //                        line = line.replace("INSERT INTO `" + srcTableName + "`", "INSERT INTO `" + destTableName + "`");
+    //                        line = line.replace("table `" + srcTableName + "`", "table `" + destTableName + "`");
+    //                        line = line.replace("TABLE `" + srcTableName + "`", "TABLE `" + destTableName + "`");
+    //                        if (!StringUtils.equals(line, originLine)) {//line已经改变，即table被替换过，则不需要再查找
+    //                            break;
+    //                        }
+    //                    }
+    //                    //替换 CREATE TABLE 为 CREATE TABLE IF NOT EXISTS
+    //                    line = line.replace("CREATE TABLE", "CREATE TABLE IF NOT EXISTS");
+    //
+    //                    deelFileWriter.println(line);
+    //                }
+    //                deelFileWriter.close();
+    //                if (StringUtils.isBlank(binlogPos.getBinlogFile()) || binlogPos.getBinlogPosition() == null) {
+    //                    throw new DumpException("binlogFile or binlogPos is Error: binlogFile=" + binlogPos.getBinlogFile()
+    //                            + ",binlogPos=" + binlogPos.getBinlogPosition());
+    //                }
+    //                LOG.info("binlog info:" + binlogPos);
+    //                binlogPosList.add(binlogPos);
+    //            }
+    //            //load
+    //            LOG.info("============ load ===========");
+    //            for (DumpRelation dumpRelation : dumpRelations) {
+    //                //执行dump脚本，dump到<dump_tempDir>/<uuid>目录
+    //                String srcDatabaseName = dumpRelation.getSrcDatabaseName();
+    //                String output = _mysqlload(srcDatabaseName);
+    //                if (StringUtils.isNotBlank(output)) {
+    //                    throw new DumpException("mysqlload output is not empty , so consided to be failed: " + output);
+    //                }
+    //                LOG.info("load done.");
+    //            }
+    //            return binlogPosList;
+    //        } catch (Exception e) {
+    //            throw new DumpException("dump error!", e);
+    //        }
+    //    }
+    /**
+     * 根据dumpConfig，进行dump，并返回binlog位置<br>
+     * <br>
+     * 如果一次mysqldump只能指定一个database下的若干table，那么多个database时，得分多次mysqldump。<br>
+     * 解决方法:<br>
+     * 允许不同database的mysqldump的state(binlog)不一致，这样需要为不同database做dump和PumaClient的追赶
+     */
     public List<BinlogInfo> dump() throws ExecuteException, IOException, InterruptedException {
         try {
             List<BinlogInfo> binlogPosList = new ArrayList<BinlogInfo>();
-            List<DumpRelation> dumpRelations = dumpConfig.getDumpRelations();
+            List<DatabaseConfig> databaseConfigs = dumpConfig.getDatabaseConfigs();
             LOG.info("============ dump ===========");
-            for (DumpRelation dumpRelation : dumpRelations) {
+            for (DatabaseConfig databaseConfig : databaseConfigs) {
                 //执行dump脚本，dump到<dump_tempDir>/<uuid>目录
-                String srcDatabaseName = dumpRelation.getSrcDatabaseName();
-                List<String> srcTableNames = dumpRelation.getSrcTableNames();
-                String destDatabaseName = dumpRelation.getDestDatabaseName();
-                List<String> destTableNames = dumpRelation.getDestTableNames();
+                String srcDatabaseName = databaseConfig.getFrom();
+                String destDatabaseName = databaseConfig.getTo();
+                List<TableConfig> tableConfigs = databaseConfig.getTables();
+                List<String> srcTableNames = getSrcTableNames(tableConfigs);
+                List<String> destTableNames = getDestTableNames(tableConfigs);
                 String output = _mysqldump(srcDatabaseName, srcTableNames);
                 if (StringUtils.isNotBlank(output)) {
                     throw new DumpException("mysqldump output is not empty , so consided to be failed: " + output);
@@ -127,9 +204,9 @@ public class DumpClient {
             }
             //load
             LOG.info("============ load ===========");
-            for (DumpRelation dumpRelation : dumpRelations) {
+            for (DatabaseConfig databaseConfig : databaseConfigs) {
                 //执行dump脚本，dump到<dump_tempDir>/<uuid>目录
-                String srcDatabaseName = dumpRelation.getSrcDatabaseName();
+                String srcDatabaseName = databaseConfig.getFrom();
                 String output = _mysqlload(srcDatabaseName);
                 if (StringUtils.isNotBlank(output)) {
                     throw new DumpException("mysqlload output is not empty , so consided to be failed: " + output);
@@ -140,6 +217,32 @@ public class DumpClient {
         } catch (Exception e) {
             throw new DumpException("dump error!", e);
         }
+    }
+
+    /**
+     * 从TableConfig中获取同步源的table名称
+     */
+    private List<String> getSrcTableNames(List<TableConfig> tableConfigs) {
+        List<String> srcTableNames = new ArrayList<String>();
+        if (tableConfigs != null && tableConfigs.size() > 0) {
+            for (TableConfig tableConfig : tableConfigs) {
+                srcTableNames.add(tableConfig.getFrom());
+            }
+        }
+        return srcTableNames;
+    }
+
+    /**
+     * 从TableConfig中获取同步目标的table名称
+     */
+    private List<String> getDestTableNames(List<TableConfig> tableConfigs) {
+        List<String> destTableNames = new ArrayList<String>();
+        if (tableConfigs != null && tableConfigs.size() > 0) {
+            for (TableConfig tableConfig : tableConfigs) {
+                destTableNames.add(tableConfig.getFrom());
+            }
+        }
+        return destTableNames;
     }
 
     private String _getDumpFile(String databaseName) {
@@ -153,10 +256,12 @@ public class DumpClient {
     private String _mysqldump(String databaseName, List<String> tableNames) throws IOException, InterruptedException {
         List<String> cmdlist = new ArrayList<String>();
         cmdlist.add("mysqldump");
-        cmdlist.add("--host=" + dumpConfig.getSrc().getHost());
+        String hostWithPort = dumpConfig.getSrc().getHost();
+        String[] hostWithPortSplits = hostWithPort.split(":");
+        cmdlist.add("--host=" + hostWithPortSplits[0]);
+        cmdlist.add("--port=" + hostWithPortSplits[1]);
         cmdlist.add("--user=" + dumpConfig.getSrc().getUsername());
         cmdlist.add("--password=" + dumpConfig.getSrc().getPassword());
-        cmdlist.add("--port=" + dumpConfig.getSrc().getPort());
         for (String opt : dumpConfig.getSrc().getOptions()) {
             cmdlist.add(opt);
         }
@@ -210,51 +315,52 @@ public class DumpClient {
         return outputStream.toString();
     }
 
-    public static void main(String[] args) throws ExecuteException, IOException, InterruptedException {
-        //mock dumpConfig
-        DumpConfig dumpConfig = new DumpConfig();
-        List<DumpRelation> dumpRelations = new ArrayList<DumpConfig.DumpRelation>();
-        DumpRelation r1 = new DumpConfig.DumpRelation();
-        //        r1.setSrcDatabaseName("pumatest");
-        //        r1.setSrcTableNames(Arrays.asList(new String[] { "test1", "test2" }));
-        //        r1.setDestDatabaseName("pumatest2");
-        //        r1.setDestTableNames(Arrays.asList(new String[] { "test11", "test22" }));
-        r1.setSrcDatabaseName("test");
-        r1.setSrcTableNames(Arrays.asList(new String[] { "test4", "test5" }));
-        r1.setDestDatabaseName("test");
-        r1.setDestTableNames(Arrays.asList(new String[] { "test1", "test2" }));
-        dumpRelations.add(r1);
-        DumpRelation r2 = new DumpConfig.DumpRelation();
-        r2.setSrcDatabaseName("pumatest");
-        r2.setSrcTableNames(Arrays.asList(new String[] { "test1", "test2" }));
-        r2.setDestDatabaseName("test");
-        r2.setDestTableNames(Arrays.asList(new String[] { "test3", "test4" }));
-        dumpRelations.add(r2);
-        dumpConfig.setDumpRelations(dumpRelations);
-        Src src = new Src();
-        src.setHost("127.0.0.1");
-        src.setPassword("root");
-        src.setPort(3306);
-        List<String> opts = Arrays.asList(new String[] { "--no-autocommit", " --disable-keys", "--quick",
-                "--add-drop-database=false", "--add-drop-table=false", "--skip-add-locks", "--default-character-set=utf8",
-                "--max_allowed_packet=16777216", " --net_buffer_length=16384", "-i", "--master-data=2", "--single-transaction" });
-        src.setOptions(opts);
-        src.setUsername("root");
-        dumpConfig.setSrc(src);
-        Dest dest = new Dest();
-        dest.setHost("192.168.7.43");
-        dest.setUsername("binlog");
-        dest.setPassword("binlog");
-        dest.setPort(3306);
-        dumpConfig.setDest(dest);
-        //json
-        Gson gson = new Gson();
-        System.out.println(gson.toJson(dumpConfig));
-        
-        //调用dump
-        DumpClient dumpClient = new DumpClient(dumpConfig);
-        System.out.println(dumpClient.dump());
-
-    }
+    //    public static void main(String[] args) throws ExecuteException, IOException, InterruptedException {
+    //        //mock dumpConfig
+    //        DumpConfig dumpConfig = new DumpConfig();
+    //        List<DumpRelation> dumpRelations = new ArrayList<DumpConfig.DumpRelation>();
+    //        List<DatabaseConfig> databaseConfigs =  new ArrayList<DatabaseConfig>();
+    //        DatabaseConfig r1 = new DatabaseConfig();
+    //        //        r1.setSrcDatabaseName("pumatest");
+    //        //        r1.setSrcTableNames(Arrays.asList(new String[] { "test1", "test2" }));
+    //        //        r1.setDestDatabaseName("pumatest2");
+    //        //        r1.setDestTableNames(Arrays.asList(new String[] { "test11", "test22" }));
+    //        r1.setFrom("test");
+    //        r1.setSrcTableNames(Arrays.asList(new String[] { "test4", "test5" }));
+    //        r1.setDestDatabaseName("test");
+    //        r1.setDestTableNames(Arrays.asList(new String[] { "test1", "test2" }));
+    //        dumpRelations.add(r1);
+    //        DumpRelation r2 = new DumpConfig.DumpRelation();
+    //        r2.setSrcDatabaseName("pumatest");
+    //        r2.setSrcTableNames(Arrays.asList(new String[] { "test1", "test2" }));
+    //        r2.setDestDatabaseName("test");
+    //        r2.setDestTableNames(Arrays.asList(new String[] { "test3", "test4" }));
+    //        dumpRelations.add(r2);
+    //        dumpConfig.setDumpRelations(dumpRelations);
+    //        DumpSrc src = new DumpSrc();
+    //        src.setHost("127.0.0.1");
+    //        src.setPassword("root");
+    //        src.setPort(3306);
+    //        List<String> opts = Arrays.asList(new String[] { "--no-autocommit", " --disable-keys", "--quick",
+    //                "--add-drop-database=false", "--add-drop-table=false", "--skip-add-locks", "--default-character-set=utf8",
+    //                "--max_allowed_packet=16777216", " --net_buffer_length=16384", "-i", "--master-data=2", "--single-transaction" });
+    //        src.setOptions(opts);
+    //        src.setUsername("root");
+    //        dumpConfig.setSrc(src);
+    //        DumpDest dest = new DumpDest();
+    //        dest.setHost("192.168.7.43");
+    //        dest.setUsername("binlog");
+    //        dest.setPassword("binlog");
+    //        dest.setPort(3306);
+    //        dumpConfig.setDest(dest);
+    //        //json
+    //        Gson gson = new Gson();
+    //        System.out.println(gson.toJson(dumpConfig));
+    //
+    //        //调用dump
+    //        DumpClient dumpClient = new DumpClient(dumpConfig);
+    //        System.out.println(dumpClient.dump());
+    //
+    //    }
 
 }

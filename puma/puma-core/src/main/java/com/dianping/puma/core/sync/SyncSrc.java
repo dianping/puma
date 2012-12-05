@@ -5,11 +5,11 @@ public class SyncSrc {
     private String pumaServerHost;
     private BinlogInfo binlogInfo;
     private String name;
-    private Long serverId;
+    private long serverId;
     private String target;
-    private Boolean transaction;
-    private Boolean ddl;
-    private Boolean dml;
+    private boolean transaction;
+    private boolean ddl;
+    private boolean dml;
 
     public String getPumaServerHost() {
         return pumaServerHost;
@@ -35,11 +35,11 @@ public class SyncSrc {
         this.name = name;
     }
 
-    public Long getServerId() {
+    public long getServerId() {
         return serverId;
     }
 
-    public void setServerId(Long serverId) {
+    public void setServerId(long serverId) {
         this.serverId = serverId;
     }
 
@@ -51,27 +51,27 @@ public class SyncSrc {
         this.target = target;
     }
 
-    public Boolean getTransaction() {
+    public boolean getTransaction() {
         return transaction;
     }
 
-    public void setTransaction(Boolean transaction) {
+    public void setTransaction(boolean transaction) {
         this.transaction = transaction;
     }
 
-    public Boolean getDdl() {
+    public boolean getDdl() {
         return ddl;
     }
 
-    public void setDdl(Boolean ddl) {
+    public void setDdl(boolean ddl) {
         this.ddl = ddl;
     }
 
-    public Boolean getDml() {
+    public boolean getDml() {
         return dml;
     }
 
-    public void setDml(Boolean dml) {
+    public void setDml(boolean dml) {
         this.dml = dml;
     }
 
@@ -80,13 +80,13 @@ public class SyncSrc {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((binlogInfo == null) ? 0 : binlogInfo.hashCode());
-        result = prime * result + ((ddl == null) ? 0 : ddl.hashCode());
-        result = prime * result + ((dml == null) ? 0 : dml.hashCode());
+        result = prime * result + (ddl ? 1231 : 1237);
+        result = prime * result + (dml ? 1231 : 1237);
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((pumaServerHost == null) ? 0 : pumaServerHost.hashCode());
-        result = prime * result + ((serverId == null) ? 0 : serverId.hashCode());
+        result = prime * result + (int) (serverId ^ (serverId >>> 32));
         result = prime * result + ((target == null) ? 0 : target.hashCode());
-        result = prime * result + ((transaction == null) ? 0 : transaction.hashCode());
+        result = prime * result + (transaction ? 1231 : 1237);
         return result;
     }
 
@@ -104,15 +104,9 @@ public class SyncSrc {
                 return false;
         } else if (!binlogInfo.equals(other.binlogInfo))
             return false;
-        if (ddl == null) {
-            if (other.ddl != null)
-                return false;
-        } else if (!ddl.equals(other.ddl))
+        if (ddl != other.ddl)
             return false;
-        if (dml == null) {
-            if (other.dml != null)
-                return false;
-        } else if (!dml.equals(other.dml))
+        if (dml != other.dml)
             return false;
         if (name == null) {
             if (other.name != null)
@@ -124,20 +118,14 @@ public class SyncSrc {
                 return false;
         } else if (!pumaServerHost.equals(other.pumaServerHost))
             return false;
-        if (serverId == null) {
-            if (other.serverId != null)
-                return false;
-        } else if (!serverId.equals(other.serverId))
+        if (serverId != other.serverId)
             return false;
         if (target == null) {
             if (other.target != null)
                 return false;
         } else if (!target.equals(other.target))
             return false;
-        if (transaction == null) {
-            if (other.transaction != null)
-                return false;
-        } else if (!transaction.equals(other.transaction))
+        if (transaction != other.transaction)
             return false;
         return true;
     }

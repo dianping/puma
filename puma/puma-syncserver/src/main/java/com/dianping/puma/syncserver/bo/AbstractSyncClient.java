@@ -69,7 +69,7 @@ public abstract class AbstractSyncClient {
         if (!oldSync.getSrc().getName().equals(newSync.getSrc().getName())) {
             throw new IllegalArgumentException("name不一致！");
         }
-        if (!oldSync.getSrc().getServerId().equals(newSync.getSrc().getServerId())) {
+        if (oldSync.getSrc().getServerId() != newSync.getSrc().getServerId()) {
             throw new IllegalArgumentException("serverId不一致！");
         }
         if (!oldSync.getSrc().getTarget().equals(newSync.getSrc().getTarget())) {

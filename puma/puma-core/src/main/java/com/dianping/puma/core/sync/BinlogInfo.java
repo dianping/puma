@@ -2,7 +2,7 @@ package com.dianping.puma.core.sync;
 
 public class BinlogInfo {
     private String BinlogFile;
-    private Long BinlogPosition;
+    private long BinlogPosition;
 
     public String getBinlogFile() {
         return BinlogFile;
@@ -12,11 +12,11 @@ public class BinlogInfo {
         BinlogFile = binlogFile;
     }
 
-    public Long getBinlogPosition() {
+    public long getBinlogPosition() {
         return BinlogPosition;
     }
 
-    public void setBinlogPosition(Long binlogPosition) {
+    public void setBinlogPosition(long binlogPosition) {
         BinlogPosition = binlogPosition;
     }
 
@@ -30,7 +30,7 @@ public class BinlogInfo {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((BinlogFile == null) ? 0 : BinlogFile.hashCode());
-        result = prime * result + ((BinlogPosition == null) ? 0 : BinlogPosition.hashCode());
+        result = prime * result + (int) (BinlogPosition ^ (BinlogPosition >>> 32));
         return result;
     }
 
@@ -48,10 +48,7 @@ public class BinlogInfo {
                 return false;
         } else if (!BinlogFile.equals(other.BinlogFile))
             return false;
-        if (BinlogPosition == null) {
-            if (other.BinlogPosition != null)
-                return false;
-        } else if (!BinlogPosition.equals(other.BinlogPosition))
+        if (BinlogPosition != other.BinlogPosition)
             return false;
         return true;
     }

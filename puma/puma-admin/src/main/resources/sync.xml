@@ -39,11 +39,12 @@
             <!-- <table from="#regex(test_[0-31])" to="#partition(test_[$uid/2])" 
                 partOf="true"> <column from="id" to="id" primary="true" /> <column from="name" 
                 to="name1" /> </table> -->
-            <table from="test" to="#partition(part_[$uid%2])">
+            <!-- <table from="test" to="#partition(part_[$uid%2])">
                 <column from="uid" to="uid" primary="true" />
                 <column from="name" to="name" />
                 <column from="desc" to="desc" />
-            </table>
+            </table>  -->
+            <!-- table才会有*号 -->
             <table from="*" to="*"></table>
         </database>
     </instance>

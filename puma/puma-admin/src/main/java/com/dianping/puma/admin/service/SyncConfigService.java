@@ -1,10 +1,12 @@
 package com.dianping.puma.admin.service;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import org.bson.types.ObjectId;
 
 import com.dianping.puma.admin.bo.SyncXml;
+import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.SyncConfig;
 
 public interface SyncConfigService {
@@ -20,5 +22,12 @@ public interface SyncConfigService {
     ObjectId modifySyncConfig(ObjectId id, SyncConfig syncConfig, String syncXmlString);
 
     Long countSyncConfigs();
+
+    /**
+     * 将syncConfig转化成dumpConfig(包括对*转化成具体table；去除无法dump的table)
+     * 
+     * @throws SQLException
+     */
+    DumpConfig convertSyncConfigToDumpConfig(SyncConfig syncConfig) throws SQLException;
 
 }

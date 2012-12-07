@@ -6,10 +6,17 @@
    <button style="float: right; margin-top: 6px; margin-right: 20px;"
       type="button" onclick="pumadmin.pre();" class="btn">上一步</button>
    <p class="legend">mysqldump</p>
-   <div style="height: 550px; overflow-y: auto;">
-      <div class="alert alert-warning">
-         <strong>温馨提示</strong>：如果不需要dump，可以跳过
-      </div>
+   <div class="alert alert-warning">
+      <strong>温馨提示</strong>：如果不需要dump，可以跳过。 <br> <br>
+      <p>
+         <strong>dump规则</strong>：
+      </p>
+      <p>(1) 目标的数据库可以存在也可以不存在，如果不存在，程序会自动创建。</p>
+      <p>(2) 程序在dump前会判断目标数据库是否已经存在同名的表，如果已存在，则报错。(因为dump时会自动创建表)</p>
+      <p>(3) 允许db改名，table改名，不会自动修改字段名。</p>
+      <p>(4) 要求table的结构(字段个数，对应字段的类型)一致。</p>
+   </div>
+   <div style="">
       <p>
          <span class="label label-info">mysqldump的详情</span>
       </p>
@@ -18,25 +25,51 @@
          <div class="row" style="margin-left: 0px;">
             <div class="span3">
                <form id="preview" class="form-horizontal">
-                  <div  class="control-group">
-                     <label class="control-label">xxxx</label>
+                  <div class="control-group">
+                     <label class="control-label">dump源</label>
                      <div class="controls">
-                        <input style="width: 370px;"
-                           placeholder="不能为空..." type="text">
+                        <input id="dumpSrc" disabled="disabled"
+                           style="width: 370px;" type="text">
                      </div>
                   </div>
                   <div class="control-group">
-                     <label class="control-label">xxxx</label>
+                     <label class="control-label">dump目标</label>
                      <div class="controls">
-                        <input style="width: 420px;"
-                           type="text">
+                        <input id="dumpDest" disabled="disabled"
+                           style="width: 370px;" type="text">
                      </div>
                   </div>
                </form>
             </div>
-            <div class="span3">
-            </div>
          </div>
+         <table class="table table-hover">
+            <thead>
+               <tr>
+                  <th> dbFrom </th>
+                  <th> dbTo </th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr>
+                  <td>tFrom</td>
+                  <td>tTo</td>
+               </tr>
+            </tbody>
+         </table>
+         <table class="table table-hover">
+            <thead>
+               <tr>
+                  <th> ds </th>
+                  <th>Username</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr>
+                  <td>1</td>
+                  <td>Mark</td>
+               </tr>
+            </tbody>
+         </table>
       </div>
    </div>
 </div>

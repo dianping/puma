@@ -21,7 +21,7 @@
         </binlogInfo>
     </src>
     <instance>
-        <database from="pumatest" to="pumatest">
+        <database from="pumatest" to="pumatest2">
             <table from="test1" to="test1">
                 <column from="id" to="id" primary="true" />
                 <column from="name" to="name" />

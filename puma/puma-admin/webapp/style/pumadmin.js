@@ -25,14 +25,45 @@
 			$("#stepsCarousel").carousel('next');
 		},
 		"create_step1_next" : function() {
-			//判断上一步是否有保存
+			// 判断上一步是否有保存
 			if (!w.syncConfigObjectId) {
 				pumadmin.appError("错误信息", "先保存，才能到下一步");
-				return;
+				// TODO return;
+				w.syncConfigObjectId = new Object();
+				w.syncConfigObjectId._inc = 375873205;
+				w.syncConfigObjectId._machine = -458227529;
+				w.syncConfigObjectId._time = 1354868436;
 			}
 			pumadmin.next();
-			//根据w.syncConfigObjectId加载DumpConfig TODO
-			
+			// 根据w.syncConfigObjectId加载DumpConfig TODO
+			pumadmin.loadDumpConfig();
+		},
+		"loadDumpConfig" : function() {
+			var param = new Object();
+			var mergeId = pumadmin.objectId2MergeId(w.syncConfigObjectId);
+			param.mergeId = mergeId;
+			var url = w.contextpath + '/loadDumpConfig';
+			$.ajax({
+				type : 'POST',
+				url : url,
+				data : param,
+				dataType : "json",
+				success : pumadmin.loadDumpConfigDone,
+				error : pumadmin.httpError
+			});
+		},
+		"loadDumpConfigDone" : function(data) {
+			if (data.success == false) {
+				pumadmin.appError("错误信息", data.errorMsg);
+			} else {
+				console.log(data);
+				var dumpSrcText = data.dumpConfig.src.host + " (username="
+						+ data.dumpConfig.src.username + ")";
+				$('#dumpSrc').val(dumpSrcText);
+				var dumpDestText = data.dumpConfig.dest.host + " (username="
+				+ data.dumpConfig.dest.username + ")";
+				$('#dumpDest').val(dumpDestText);
+			}
 		},
 		"loadSyncConfigs" : function(pageNum) {
 			var param = new Object();
@@ -166,8 +197,7 @@
 		},
 		"appendSyncConfig" : function(syncConfig) {
 			// 连接
-			var id = syncConfig.id._inc + "_" + syncConfig.id._machine + "_"
-					+ syncConfig.id._time;
+			var id = pumadmin.objectId2MergeId(syncConfig.id);
 			var link = "<a href=\"javascript:pumadmin.loadSyncXml('" + id
 					+ "')\">编辑 »</a>";
 			// 拼装
@@ -179,10 +209,9 @@
 		},
 		"appendSyncConfigForWatch" : function(syncConfig) {
 			// 连接
-			var id = syncConfig.id._inc + "_" + syncConfig.id._machine + "_"
-					+ syncConfig.id._time;
-			var link = "<a href=\"javascript:pumadmin.watchSyncConfig('" + id
-					+ "')\">具体状态 »</a>";
+			var mergeId = pumadmin.objectId2MergeId(syncConfig.id);
+			var link = "<a href=\"javascript:pumadmin.watchSyncConfig('"
+					+ mergeId + "')\">具体状态 »</a>";
 			// 拼装
 			var html = "<tr><td>" + syncConfig.src.pumaServerHost + "</td><td>"
 					+ syncConfig.src.serverId + "</td><td>"
@@ -190,7 +219,7 @@
 					+ syncConfig.dest.host + "</td><td>" + link + "</td><tr>";
 			$("#resultTable").append(html);
 		},
-		//显示配置信息，实时：显示binlog进度，操作：暂停，启动，追赶
+		// 显示配置信息，实时：显示binlog进度，操作：暂停，启动，追赶
 		"watchSyncConfig" : function(mergeId) {
 			pumadmin.next();
 			var param = new Object();
@@ -269,6 +298,11 @@
 			} else {
 				pumadmin.appError("信息", "修改成功");
 			}
+		},
+		"objectId2MergeId" : function(objectId) {
+			console.log(objectId);
+			return objectId._inc + "_" + objectId._machine + "_"
+					+ objectId._time;
 		},
 		"step1_next" : function() {
 		},

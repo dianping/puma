@@ -22,7 +22,7 @@ public class MysqlMetaInfoFetcher {
 
     public MysqlMetaInfoFetcher(String host, String username, String password) throws SQLException {
         conn = DriverManager.getConnection("jdbc:mysql://" + host + "/", username, password);
-        stmt = conn.prepareStatement("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ?");
+        stmt = conn.prepareStatement("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ?");
     }
 
     public static void main(String[] args) throws SQLException {
@@ -30,7 +30,7 @@ public class MysqlMetaInfoFetcher {
                 .getConnection(
                         "jdbc:mysql://localhost:3306/?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&noAccessToProcedureBodies=true",
                         "root", "root");
-        PreparedStatement stmt = conn.prepareStatement("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ?");
+        PreparedStatement stmt = conn.prepareStatement("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ?");
         stmt.setString(1, "pumatest");
         ResultSet rs = stmt.executeQuery();
         if (rs != null) {

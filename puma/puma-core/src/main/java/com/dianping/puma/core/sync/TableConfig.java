@@ -6,7 +6,7 @@ import java.util.List;
 public class TableConfig {
     private String from;
     private String to;
-    private Boolean partOf;
+    private boolean partOf = false;
 
     private List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
 
@@ -26,14 +26,13 @@ public class TableConfig {
         this.to = to;
     }
 
-    public Boolean getPartOf() {
+    public boolean getPartOf() {
         return partOf;
     }
 
-    public void setPartOf(Boolean partOf) {
+    public void setPartOf(boolean partOf) {
         this.partOf = partOf;
     }
-
 
     public List<ColumnConfig> getColumns() {
         return columns;
@@ -58,7 +57,7 @@ public class TableConfig {
         int result = 1;
         result = prime * result + ((columns == null) ? 0 : columns.hashCode());
         result = prime * result + ((from == null) ? 0 : from.hashCode());
-        result = prime * result + ((partOf == null) ? 0 : partOf.hashCode());
+        result = prime * result + (partOf ? 1231 : 1237);
         result = prime * result + ((to == null) ? 0 : to.hashCode());
         return result;
     }
@@ -82,10 +81,7 @@ public class TableConfig {
                 return false;
         } else if (!from.equals(other.from))
             return false;
-        if (partOf == null) {
-            if (other.partOf != null)
-                return false;
-        } else if (!partOf.equals(other.partOf))
+        if (partOf != other.partOf)
             return false;
         if (to == null) {
             if (other.to != null)

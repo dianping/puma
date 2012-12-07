@@ -32,7 +32,7 @@ public class PropertiesConfig {
         if (serverId2mysqlsrcStr != null) {
             String[] serverId2mysqlsrcSplits = serverId2mysqlsrcStr.split(";");
             for (String serverId2mysqlsrc : serverId2mysqlsrcSplits) {
-                String[] serverId2mysqlsrcSplits2 = serverId2mysqlsrc.split(";");
+                String[] serverId2mysqlsrcSplits2 = serverId2mysqlsrc.split(",");
                 Long serverId = Long.parseLong(serverId2mysqlsrcSplits2[0]);
                 String host = serverId2mysqlsrcSplits2[1];
                 String username = serverId2mysqlsrcSplits2[2];

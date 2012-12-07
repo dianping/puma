@@ -278,10 +278,12 @@ public class DumpClient {
     private String _mysqlload(String databaseName) throws ExecuteException, IOException, InterruptedException {
         List<String> cmdlist = new ArrayList<String>();
         cmdlist.add(SHELL_DIR + "mysqlload.sh");
-        cmdlist.add("--host=" + dumpConfig.getDest().getHost());
         cmdlist.add("--user=" + dumpConfig.getDest().getUsername());
+        String hostWithPort = dumpConfig.getSrc().getHost();
+        String[] hostWithPortSplits = hostWithPort.split(":");
+        cmdlist.add("--host=" + hostWithPortSplits[0]);
+        cmdlist.add("--port=" + hostWithPortSplits[1]);
         cmdlist.add("--password=" + dumpConfig.getDest().getPassword());
-        cmdlist.add("--port=" + dumpConfig.getDest().getPort());
         cmdlist.add(_getSourceFile(databaseName));
         LOG.info("start loading " + databaseName + " ...");
         return _executeByApache(cmdlist.toArray(new String[0]));

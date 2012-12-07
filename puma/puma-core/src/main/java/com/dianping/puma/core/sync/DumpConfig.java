@@ -10,8 +10,8 @@ import com.google.code.morphia.annotations.Id;
 
 /**
  * dump规则：<br>
- * (1)会为目标数据库自动创建table，但database不自动创建。<br>
- * (2)允许db改名，table改名。但要求table的结构(字段个数，对应字段的类型)一致，字段名可以不一致。
+ * (1)如果目标没有数据库，则自动为目标数据库自动创建table，但database不自动创建。<br>
+ * (2)允许db改名，table改名，不会自动修改字段名。 (3)要求table的结构(字段个数，对应字段的类型)一致。
  */
 @Entity
 public class DumpConfig {
@@ -109,7 +109,6 @@ public class DumpConfig {
 
     public static class DumpDest {
         private String host;
-        private int port;
         private String username;
         private String password;
 
@@ -119,14 +118,6 @@ public class DumpConfig {
 
         public void setHost(String host) {
             this.host = host;
-        }
-
-        public int getPort() {
-            return port;
-        }
-
-        public void setPort(int port) {
-            this.port = port;
         }
 
         public String getUsername() {
@@ -147,7 +138,7 @@ public class DumpConfig {
 
         @Override
         public String toString() {
-            return "Dest [host=" + host + ", port=" + port + ", username=" + username + ", password=" + password + "]";
+            return "Dest [host=" + host + ", username=" + username + ", password=" + password + "]";
         }
 
     }

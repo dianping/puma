@@ -2,6 +2,7 @@ package com.dianping.puma.admin.service.impl;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -142,13 +143,9 @@ public class SyncConfigServiceImpl implements SyncConfigService {
         DumpSrc dumpSrc = PropertiesConfig.getInstance().getDumpConfigSrc(serverId);
         dumpConfig.setSrc(dumpSrc);
         SyncDest syncDest = syncConfig.getDest();
-        String[] splits = syncDest.getHost().split(":");
-        String host = splits[0];
-        int port = Integer.parseInt(splits[1]);
         //dumpDest
         DumpDest dumpDest = new DumpDest();
-        dumpDest.setHost(host);
-        dumpDest.setPort(port);
+        dumpDest.setHost(syncDest.getHost());
         dumpDest.setUsername(syncDest.getUsername());
         dumpDest.setPassword(syncDest.getPassword());
         dumpConfig.setDest(dumpDest);
@@ -207,17 +204,21 @@ public class SyncConfigServiceImpl implements SyncConfigService {
     }
 
     /**
-     * TODO 从tableNames中去掉已经存在dumpTableConfigs(以TableConfig.getFrom()判断)中的表名
+     * 从tableNames中去掉已经存在dumpTableConfigs(以TableConfig.getFrom()判断)中的表名
      */
     private void getRidOf(List<String> tableNames, List<TableConfig> dumpTableConfigs) {
-
+        Collection<String> dumpTableNames = new ArrayList<String>();
+        for (TableConfig tableConfig : dumpTableConfigs) {
+            dumpTableNames.add(tableConfig.getFrom());
+        }
+        tableNames.removeAll(dumpTableNames);
     }
 
     /**
      * 如果“table下的字段没有被重命名,partOf为false”，那么该table可以被dump
      */
     private boolean shouldDump(TableConfig tableConfig) {
-        if (!tableConfig.getPartOf()) {
+        if (tableConfig.getPartOf()) {
             return false;
         }
         List<ColumnConfig> columnConfigs = tableConfig.getColumns();

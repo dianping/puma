@@ -103,7 +103,7 @@ public class MysqlExecutor {
                     event.getColumns().put(destColumnName, srcColumn);
                 }
                 //如果partOf为true，则修改actionType
-                if (table.getPartOf() != null && table.getPartOf().booleanValue()) {
+                if (table.getPartOf()) {
                     switch (srcActionType) {
                         case INSERT:
                             event.setActionType(REPLACE_INTO);

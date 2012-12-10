@@ -130,11 +130,12 @@ public class SyncController {
 
     /**
      * 根据dumpConfig，进行dump，并返回binlog位置<br>
-     * (dump使用json，因为是内部传输；sync使用xml，因为是需要给用户看和修改。)
+     * (dump使用json，因为是内部传输；sync使用xml，因为是需要给用户看和修改。) <br>
+     * TODO 按照sessionId将输出流存放起来，下次可获取输出流
      */
     @RequestMapping(value = "/dump", method = { RequestMethod.POST, RequestMethod.GET }, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object dump(HttpServletRequest request, String dumpJson) {
+    public Object dump(HttpServletRequest request, String dumpJson, String sessionId) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             //TODO mock dumpJson

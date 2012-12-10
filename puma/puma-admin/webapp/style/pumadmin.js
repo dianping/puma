@@ -57,12 +57,93 @@
 				pumadmin.appError("错误信息", data.errorMsg);
 			} else {
 				console.log(data);
-				var dumpSrcText = data.dumpConfig.src.host + " (username="
-						+ data.dumpConfig.src.username + ")";
+				var dumpConfig = data.dumpConfig;
+				var dumpSrcText = dumpConfig.src.host + " (username="
+						+ dumpConfig.src.username + ")";
 				$('#dumpSrc').val(dumpSrcText);
-				var dumpDestText = data.dumpConfig.dest.host + " (username="
-				+ data.dumpConfig.dest.username + ")";
+				var dumpDestText = dumpConfig.dest.host + " (username="
+						+ dumpConfig.dest.username + ")";
 				$('#dumpDest').val(dumpDestText);
+				// 展示数据同步的映射关系
+				$("#tables").html('');
+				$.each(dumpConfig.databaseConfigs, function(i, el) {
+					var html = "";
+					html += "<table class=\"table table-hover\">";
+					html += "<thead><tr>";
+					html += "<th>" + el.from + "</th>";
+					html += "<th>" + el.to + "</th>";
+					html += "</tr>";
+					html += "</thead>";
+					html += "<tbody>";
+					$.each(el.tables, function(i, el) {
+						html += "<tr>";
+						html += "<td>" + el.from + "</td>";
+						html += "<td>" + el.from + "</td>";
+						html += "</tr>";
+					});
+					html += "</tbody>";
+					html += "</table>";
+					$("#tables").append(html);
+				});
+
+			}
+		},
+		"dump" : function() {
+			var param = new Object();
+			var url = w.contextpath + '/dump';
+			$.ajax({
+				type : 'POST',
+				url : url,
+				data : param,
+				dataType : "json",
+				success : pumadmin.dumpDone,
+				error : pumadmin.httpError
+			});
+			// 按钮变换
+			$("#dumpButton").attr("disabled", "disabled");
+		},
+		"dumpDone" : function(data) {
+			if (data.success == false) {
+				// 显示错误消息
+				pumadmin.appError("尝试运行时发生错误", data.errorMsg);
+				// 去掉按钮disable
+				$('#dumpButton').removeAttr('disabled');
+			} else {
+				// 开始显示控制台
+				$('#console').text('');
+				pumadmin.dumpConsole();
+			}
+		},
+		"dumpConsole" : function(data) {
+			// 发送到服务端，如果保存成功,则继续，否则alert错误信息
+			var param = new Object();
+			param.pageid = w.pageid;
+			// 发送ajax请求jsonp
+			var url = w.contextpath + '/dumpConsole';
+			$.ajax({
+				type : 'POST',
+				url : url,
+				data : param,
+				dataType : "json",
+				success : pumadmin.dumpConsoleDone,
+				error : pumadmin.httpError
+			});
+		},
+		"dumpConsoleDone" : function(data) {
+			if (data.success == false) {
+				pumadmin.appError("访问控制台时发生错误", data.errorMsg);
+				// 去掉按钮disable
+				$('#dumpButton').removeAttr('disabled');
+			} else {
+				// 显示到控制台
+				$('#console').text($('#console').text() + data.content);// append()和html()一样不做转义，所以使用text()
+				$("#console").scrollTop($("#console")[0].scrollHeight);
+				if (data.status == 'continue') {// 继续运行
+					pumadmin.dumpConsole();
+				} else {// 运行已经停止
+					// 去掉按钮disable
+					$('#dumpButton').removeAttr('disabled');
+				}
 			}
 		},
 		"loadSyncConfigs" : function(pageNum) {

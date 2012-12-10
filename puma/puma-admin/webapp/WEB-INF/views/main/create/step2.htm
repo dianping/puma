@@ -17,59 +17,51 @@
       <p>(4) 要求table的结构(字段个数，对应字段的类型)一致。</p>
    </div>
    <div style="">
-      <p>
-         <span class="label label-info">mysqldump的详情</span>
-      </p>
-      <div
-         style="padding: 30px 0px 30px 0px; background-color: #F5F5F5; border: 1px solid rgba(0, 0, 0, 0.15); border-radius: 4px 4px 4px 4px;">
-         <div class="row" style="margin-left: 0px;">
-            <div class="span3">
-               <form id="preview" class="form-horizontal">
-                  <div class="control-group">
-                     <label class="control-label">dump源</label>
-                     <div class="controls">
-                        <input id="dumpSrc" disabled="disabled"
-                           style="width: 370px;" type="text">
+      <div class="accordion" id="accordion2">
+         <div class="accordion-group">
+            <div class="accordion-heading">
+               <a class="accordion-toggle" data-toggle="collapse"
+                  data-parent="#accordion2" href="#collapseOne"> <span
+                  class="label label-info">mysqldump的详情 (点击可收起)</span></a>
+            </div>
+            <div id="collapseOne" class="accordion-body in collapse"
+               style="height: auto;">
+               <div class="accordion-inner">
+                  <div
+                     style="padding: 30px 0px 30px 0px; background-color: #F5F5F5; border: 1px solid rgba(0, 0, 0, 0.15); border-radius: 4px 4px 4px 4px;">
+                     <div class="row" style="margin-left: 0px;">
+                        <div class="span3">
+                           <form id="preview" class="form-horizontal">
+                              <div class="control-group">
+                                 <label class="control-label">dump源</label>
+                                 <div class="controls">
+                                    <input id="dumpSrc"
+                                       disabled="disabled"
+                                       style="width: 370px;" type="text">
+                                 </div>
+                              </div>
+                              <div class="control-group">
+                                 <label class="control-label">dump目标</label>
+                                 <div class="controls">
+                                    <input id="dumpDest"
+                                       disabled="disabled"
+                                       style="width: 370px;" type="text">
+                                 </div>
+                              </div>
+                           </form>
+                        </div>
                      </div>
+                     <div id="tables"
+                        style="width: 500px; margin: 0 auto;"></div>
                   </div>
-                  <div class="control-group">
-                     <label class="control-label">dump目标</label>
-                     <div class="controls">
-                        <input id="dumpDest" disabled="disabled"
-                           style="width: 370px;" type="text">
-                     </div>
-                  </div>
-               </form>
+               </div>
             </div>
          </div>
-         <table class="table table-hover">
-            <thead>
-               <tr>
-                  <th> dbFrom </th>
-                  <th> dbTo </th>
-               </tr>
-            </thead>
-            <tbody>
-               <tr>
-                  <td>tFrom</td>
-                  <td>tTo</td>
-               </tr>
-            </tbody>
-         </table>
-         <table class="table table-hover">
-            <thead>
-               <tr>
-                  <th> ds </th>
-                  <th>Username</th>
-               </tr>
-            </thead>
-            <tbody>
-               <tr>
-                  <td>1</td>
-                  <td>Mark</td>
-               </tr>
-            </tbody>
-         </table>
       </div>
    </div>
+   <button id="dumpButton" type="button" style="float:right;margin-bottom:10px;margin-right:20px;" onclick="pumadmin.dump()"
+      class="btn btn-success">开始dump</button>
+   <pre
+      style="cursor: text; margin-top: 20px; background-color: #3A1042; color: #FFFFFF; font-size: 12px; width: 95%; height: 320px; overflow-x: auto;"
+      id="console"></pre>
 </div>

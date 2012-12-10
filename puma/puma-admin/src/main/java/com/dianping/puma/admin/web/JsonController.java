@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +25,7 @@ import com.dianping.puma.admin.bo.SyncXml;
 import com.dianping.puma.admin.config.PropertiesConfig;
 import com.dianping.puma.admin.service.SyncConfigService;
 import com.dianping.puma.admin.util.GsonUtil;
+import com.dianping.puma.admin.util.HttpClientUtil;
 import com.dianping.puma.admin.util.SyncXmlParser;
 import com.dianping.puma.core.sync.ColumnConfig;
 import com.dianping.puma.core.sync.DatabaseConfig;
@@ -111,6 +114,8 @@ public class JsonController {
             SyncConfig syncConfig = syncConfigService.findSyncConfig(objectId);
             //将syncConfig转化成dumpConfig
             DumpConfig dumpConfig = this.syncConfigService.convertSyncConfigToDumpConfig(syncConfig);
+            //将dumpConfig放到session中
+            session.setAttribute("dumpConfig", dumpConfig);
 
             map.put("dumpConfig", dumpConfig);
             map.put("success", true);
@@ -177,6 +182,34 @@ public class JsonController {
         } catch (SAXParseException e) {
             map.put("success", false);
             map.put("errorMsg", "xml解析出错：" + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", errorMsg);
+            LOG.error(e.getMessage(), e);
+        }
+        return GsonUtil.toJson(map);
+
+    }
+
+    @RequestMapping(value = "/dump", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object dump(HttpSession session, HttpServletRequest request, String mergeId) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            //從session中获取dumpConfig
+            DumpConfig dumpConfig = (DumpConfig) session.getAttribute("dumpConfig");
+            String url = PropertiesConfig.getInstance().getPumaSyncServerIp();
+            List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+            nvps.add(new BasicNameValuePair("sessionId", session.getId()));
+            nvps.add(new BasicNameValuePair("dumpConfigJson", GsonUtil.toJson(dumpConfig)));
+            //将dumpConfig序列化为json，发送给sync-server
+            HttpClientUtil.post(url, nvps);
+
+            map.put("dumpConfig", dumpConfig);
+            map.put("success", true);
         } catch (IllegalArgumentException e) {
             map.put("success", false);
             map.put("errorMsg", e.getMessage());

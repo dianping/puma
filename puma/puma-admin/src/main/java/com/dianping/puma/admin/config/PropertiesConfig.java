@@ -13,6 +13,7 @@ public class PropertiesConfig {
     private final static PropertiesConfig instance = new PropertiesConfig();
     private List<String> pumaServerIps;
     private Map<Long, DumpConfig.DumpSrc> serverId2mysqlsrc = new HashMap<Long, DumpConfig.DumpSrc>();
+    private String pumaSyncServerUrl;
 
     private PropertiesConfig() {
         Properties p = new Properties();
@@ -46,6 +47,7 @@ public class PropertiesConfig {
         } else {
             throw new IllegalArgumentException("serverId2mysqlsrc must not be null in puma-admin-config.properties.");
         }
+        pumaSyncServerUrl = "http://" + p.getProperty("pumaSyncServerIp") + "/puma-syncserver/dump";
     }
 
     public List<String> getPumaServerIps() {
@@ -58,6 +60,10 @@ public class PropertiesConfig {
 
     public static PropertiesConfig getInstance() {
         return instance;
+    }
+
+    public String getPumaSyncServerIp() {
+        return pumaSyncServerUrl;
     }
 
 }

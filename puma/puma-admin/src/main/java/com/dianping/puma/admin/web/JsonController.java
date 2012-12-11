@@ -1,5 +1,9 @@
 package com.dianping.puma.admin.web;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +12,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -27,15 +32,11 @@ import com.dianping.puma.admin.service.SyncConfigService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.admin.util.HttpClientUtil;
 import com.dianping.puma.admin.util.SyncXmlParser;
-import com.dianping.puma.core.sync.ColumnConfig;
-import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.DumpConfig;
-import com.dianping.puma.core.sync.DumpConfig.DumpDest;
-import com.dianping.puma.core.sync.DumpConfig.DumpSrc;
-import com.dianping.puma.core.sync.InstanceConfig;
 import com.dianping.puma.core.sync.SyncConfig;
-import com.dianping.puma.core.sync.SyncDest;
-import com.dianping.puma.core.sync.TableConfig;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.google.gson.Gson;
 
 /**
  * @author wukezhu
@@ -206,8 +207,11 @@ public class JsonController {
             nvps.add(new BasicNameValuePair("sessionId", session.getId()));
             nvps.add(new BasicNameValuePair("dumpConfigJson", GsonUtil.toJson(dumpConfig)));
             //将dumpConfig序列化为json，发送给sync-server
-            HttpClientUtil.post(url, nvps);
-
+            InputStream ins = HttpClientUtil.postForStream(url, nvps);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(ins, "UTF-8"));
+            //            LOG.info(IOUtils.toString(ins));
+            //将返回的流存储起来
+            session.setAttribute("dumpReader", reader);
             map.put("dumpConfig", dumpConfig);
             map.put("success", true);
         } catch (IllegalArgumentException e) {
@@ -219,7 +223,63 @@ public class JsonController {
             LOG.error(e.getMessage(), e);
         }
         return GsonUtil.toJson(map);
+    }
 
+    /**
+     * js使用长polling不断调用console()。<br>
+     * <br>
+     * console()通过app和pageid获取对应的JavaProject对象, 从JavaProject对象获取其正在运行的jvm的InputStream，<br>
+     * 1 如果获取不到InputStream，说明没有正在运行的jvm，返回map.put("status", "done")，指示前端js停止轮询;<br>
+     * 2 如果获取到InputStream，则尝试从InputStream读取数据:<br>
+     * ---2.1 尝试available()+read() 10次，直到10次结束(注意，此处为了不阻塞，无法知道read()返回-1的情况) <br>
+     * ---2.2 将读到的data(无论data是否有数据)，输出给前端<br>
+     * 
+     * @param app
+     * @param pageid
+     * @return
+     * @throws JsonGenerationException
+     * @throws JsonMappingException
+     * @throws IOException
+     */
+    @RequestMapping(value = "/dumpConsole", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object dumpConsole(HttpSession session) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            BufferedReader reader = (BufferedReader) session.getAttribute("dumpReader");
+            String status = "continue";
+            if (reader == null) {
+                status = "done";
+            } else {
+                try {
+                    String line = reader.readLine();
+                    if (line == null) {
+                        status = "done";
+                        reader.close();
+                        session.removeAttribute("dumpReader");
+                    } else {
+                        map.put("content", line + "\n");
+                    }
+                } catch (IOException e) {//在任何异常时停止进程(如果已经不在运行，也会抛异常)
+                    status = "done";
+                    reader.close();
+                    session.removeAttribute("dumpReader");
+                }
+            }
+            map.put("status", status);
+            map.put("success", true);
+        } catch (Exception e) {
+            StringBuilder error = new StringBuilder();
+            error.append(e.getMessage()).append("\n");
+            for (StackTraceElement element : e.getStackTrace()) {
+                error.append(element.toString()).append("\n");
+            }
+            LOG.error(e.getMessage(), e);
+            map.put("success", false);
+            map.put("errorMsg", error);
+        }
+        Gson gson = new Gson();
+        return gson.toJson(map);
     }
 
 }

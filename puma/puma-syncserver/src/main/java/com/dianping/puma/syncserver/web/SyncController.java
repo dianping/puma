@@ -2,11 +2,18 @@ package com.dianping.puma.syncserver.web;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
@@ -27,6 +34,8 @@ import com.dianping.puma.syncserver.bo.SyncClient;
 import com.dianping.puma.syncserver.holder.SyncClientHolder;
 import com.dianping.puma.syncserver.util.GsonUtil;
 import com.dianping.puma.syncserver.util.SyncXmlParser;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.Gson;
 
 /**
@@ -131,36 +140,39 @@ public class SyncController {
     /**
      * 根据dumpConfig，进行dump，并返回binlog位置<br>
      * (dump使用json，因为是内部传输；sync使用xml，因为是需要给用户看和修改。) <br>
-     * TODO 按照sessionId将输出流存放起来，下次可获取输出流
+     * 
+     * @throws IOException
+     * @throws UnsupportedEncodingException
      */
-    @RequestMapping(value = "/dump", method = { RequestMethod.POST, RequestMethod.GET }, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public Object dump(HttpServletRequest request, String dumpJson, String sessionId) {
-        Map<String, Object> map = new HashMap<String, Object>();
+    @RequestMapping(value = "/dump", method = { RequestMethod.POST, RequestMethod.GET }, produces = "text/html; charset=utf-8")
+    public void dump(HttpServletResponse response, String dumpConfigJson, String sessionId) throws UnsupportedEncodingException,
+            IOException {
+        PrintWriter pw = new PrintWriter(new OutputStreamWriter(response.getOutputStream(), "UTF-8"), true);
         try {
             //TODO mock dumpJson
-            if (dumpJson == null) {
+            if (dumpConfigJson == null) {
                 File file = new File("/home/wukezhu/document/mywork/puma/puma/puma-syncserver/src/main/resources/dumpConfig.json");
-                dumpJson = IOUtils.toString(new FileInputStream(file), "UTF-8");
+                dumpConfigJson = IOUtils.toString(new FileInputStream(file), "UTF-8");
             }
             //解析dumpJson，得到DumpConfig对象
             Gson gson = new Gson();
-            DumpConfig dumpConfig = gson.fromJson(dumpJson, DumpConfig.class);
-            LOG.info("receive dumpConfig: " + dumpConfig);
-            //启动DumpClient对象
-            DumpClient dumpClient = new DumpClient(dumpConfig);
-            List<BinlogInfo> binlogPos = dumpClient.dump();
-            LOG.info("DumpClient done，binlogPos is " + binlogPos);
+            DumpConfig dumpConfig = gson.fromJson(dumpConfigJson, DumpConfig.class);
+            LOG.info("sync-server receive dumpConfig: " + dumpConfig);
+            pw.println("sync-server receive dumpConfig: " + dumpConfig);
+            //启动DumpClient对象(DumpClient将进度输出到out)
+            DumpClient dumpClient = new DumpClient(dumpConfig, pw, sessionId);
+            pw.println("sync-server starting dump");
+            List<BinlogInfo> binlogInfos = dumpClient.dump();
+            //            LOG.info("DumpClient done，binlogPos is " + binlogPos);
 
-            map.put("binlogPos", binlogPos);
-            map.put("success", true);
+            //            map.put("binlogPos", binlogPos);
         } catch (Exception e) {
-            map.put("success", false);
-            map.put("errorMsg", e.getMessage());
             LOG.error(e.getMessage(), e);
+            pw.println(e.getMessage());
+            e.printStackTrace(pw);
+        } finally {
+            pw.close();
         }
-        Gson gson = new Gson();
-        return gson.toJson(map);
     }
 
     /**

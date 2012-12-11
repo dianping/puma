@@ -135,10 +135,10 @@
 				// 去掉按钮disable
 				$('#dumpButton').removeAttr('disabled');
 			} else {
-				// 显示到控制台
-				$('#console').text($('#console').text() + data.content);// append()和html()一样不做转义，所以使用text()
-				$("#console").scrollTop($("#console")[0].scrollHeight);
 				if (data.status == 'continue') {// 继续运行
+					// 显示到控制台
+					$('#console').text($('#console').text() + data.content);// append()和html()一样不做转义，所以使用text()
+					$("#console").scrollTop($("#console")[0].scrollHeight);
 					pumadmin.dumpConsole();
 				} else {// 运行已经停止
 					// 去掉按钮disable

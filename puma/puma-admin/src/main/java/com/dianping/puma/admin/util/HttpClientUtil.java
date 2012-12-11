@@ -79,6 +79,16 @@ public class HttpClientUtil {
         }
     }
 
+    public static InputStream postForStream(String url, List<? extends NameValuePair> nvps) throws IOException {
+
+        HttpPost httpPost = new HttpPost(url);
+        httpPost.setEntity(new UrlEncodedFormEntity(nvps, "UTF-8"));
+
+        HttpResponse response = httpclient.execute(httpPost);
+        HttpEntity entity = response.getEntity();
+        return entity.getContent();
+    }
+
     public static String get(String url, List<? extends NameValuePair> nvps) throws IOException {
         long start = System.currentTimeMillis();
 

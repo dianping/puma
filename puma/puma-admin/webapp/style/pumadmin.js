@@ -101,6 +101,10 @@
 			});
 			// 按钮变换
 			$("#dumpButton").attr("disabled", "disabled");
+			$("#success").hide();
+			$("#fail").hide();
+			$("#binlogFile").text("");
+			$("#binlogPosition").text("");
 		},
 		"dumpDone" : function(data) {
 			if (data.success == false) {
@@ -137,12 +141,27 @@
 			} else {
 				if (data.status == 'continue') {// 继续运行
 					// 显示到控制台
+					w.dumpLastLine = data.content;
 					$('#console').text($('#console').text() + data.content);// append()和html()一样不做转义，所以使用text()
 					$("#console").scrollTop($("#console")[0].scrollHeight);
 					pumadmin.dumpConsole();
 				} else {// 运行已经停止
-					// 去掉按钮disable
-					$('#dumpButton').removeAttr('disabled');
+					// 获取结果
+					var binlogSign = "dump&load done. binloginfo:";
+					if (pumadmin.startWith(w.dumpLastLine, binlogSign)) {
+						var binlogJson = w.dumpLastLine
+								.substring(binlogSign.length);
+						console.log(binlogJson);
+						var binlogInfo = $.parseJSON(binlogJson);
+						$("#binlogFile").text(binlogInfo.binlogFile);
+						$("#binlogPosition").text(binlogInfo.binlogPosition);
+						$("#success").show();
+					} else {
+						// 显示dump失败
+						$("#fail").show();
+						// 去掉按钮disable
+						$('#dumpButton').removeAttr('disabled');
+					}
 				}
 			}
 		},
@@ -391,6 +410,8 @@
 			pumadmin.alertError(title, errorMsg);
 		},
 		"httpError" : function(xhr, textStatus, errorThrown) {
+			// 去掉按钮disable
+			$('#dumpButton').removeAttr('disabled');
 			pumadmin.alertError('抱歉啦', '抱歉，网络发生错误了，请刷新页面试试...');
 		},
 		"alertError" : function(title, errorMsg) {
@@ -398,6 +419,26 @@
 			$('#errorMsg > div[class="modal-header"] > h3').text(title);
 			$('#errorMsg > div[class="modal-body"] > p').text(errorMsg);
 			$('#errorMsg').modal('show');
+		},
+		"endWith" : function(s, endStr) {
+			if (s == null || s == "" || s.length == 0
+					|| endStr.length > s.length)
+				return false;
+			if (s.substring(s.length - endStr.length) == endStr)
+				return true;
+			else
+				return false;
+			return true;
+		},
+		"startWith" : function(s, preStr) {
+			if (s == null || s == "" || s.length == 0
+					|| preStr.length > s.length)
+				return false;
+			if (s.substr(0, preStr.length) == preStr)
+				return true;
+			else
+				return false;
+			return true;
 		}
 	};
 	w.pumadmin = pumadmin;

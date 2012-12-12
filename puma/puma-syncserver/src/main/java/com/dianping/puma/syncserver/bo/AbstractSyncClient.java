@@ -12,6 +12,7 @@ import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.sync.BinlogInfo;
 import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.InstanceConfig;
 import com.dianping.puma.core.sync.SyncConfig;

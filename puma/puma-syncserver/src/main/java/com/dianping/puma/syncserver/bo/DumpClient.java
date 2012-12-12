@@ -23,6 +23,8 @@ import org.apache.commons.io.LineIterator;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang.StringUtils;
 
+import com.dianping.puma.core.sync.BinlogInfo;
+import com.dianping.puma.core.sync.DatabaseBinlogInfo;
 import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.TableConfig;
@@ -146,9 +148,9 @@ public class DumpClient {
      * 解决方法:<br>
      * 允许不同database的mysqldump的state(binlog)不一致，这样需要为不同database做dump和PumaClient的追赶
      */
-    public List<BinlogInfo> dump() throws ExecuteException, IOException, InterruptedException {
+    public List<DatabaseBinlogInfo> dump() throws ExecuteException, IOException, InterruptedException {
         try {
-            List<BinlogInfo> binlogPosList = new ArrayList<BinlogInfo>();
+            List<DatabaseBinlogInfo> binlogPosList = new ArrayList<DatabaseBinlogInfo>();
             List<DatabaseConfig> databaseConfigs = dumpConfig.getDatabaseConfigs();
             pw.println("============ dump ===========");
             for (DatabaseConfig databaseConfig : databaseConfigs) {
@@ -163,14 +165,15 @@ public class DumpClient {
                     throw new DumpException("mysqldump output is not empty , so consided to be failed: " + output);
                 }
                 pw.println("dump done.");
-                BinlogInfo binlogPos = new BinlogInfo();
+                DatabaseBinlogInfo binlogPos = new DatabaseBinlogInfo();
+                binlogPos.setDatabaseName(srcDatabaseName);
                 LineIterator lineIterators = IOUtils.lineIterator(new FileInputStream(_getDumpFile(srcDatabaseName)), "UTF-8");
                 PrintWriter deelFileWriter = new PrintWriter(new File(_getSourceFile(srcDatabaseName)), "UTF-8");
                 deelFileWriter.println("CREATE DATABASE IF NOT EXISTS " + destDatabaseName + ";USE " + destDatabaseName + ";");//添加select database语句
                 while (lineIterators.hasNext()) {
                     String line = lineIterators.next();
                     //获取binlog位置
-                    if (StringUtils.isBlank(binlogPos.getBinlogFile()) || binlogPos.getBinlogPosition() == null) {
+                    if (StringUtils.isBlank(binlogPos.getBinlogFile()) || binlogPos.getBinlogPosition() <= 0) {
                         Matcher matcher = BINLOG_LINE_PATTERN.matcher(line);
                         if (matcher.matches()) {
                             binlogPos.setBinlogFile(matcher.group(1));
@@ -195,7 +198,7 @@ public class DumpClient {
                     deelFileWriter.println(line);
                 }
                 deelFileWriter.close();
-                if (StringUtils.isBlank(binlogPos.getBinlogFile()) || binlogPos.getBinlogPosition() == null) {
+                if (StringUtils.isBlank(binlogPos.getBinlogFile()) || binlogPos.getBinlogPosition() <= 0) {
                     throw new DumpException("binlogFile or binlogPos is Error: binlogFile=" + binlogPos.getBinlogFile()
                             + ",binlogPos=" + binlogPos.getBinlogPosition());
                 }
@@ -215,7 +218,7 @@ public class DumpClient {
             }
             return binlogPosList;
         } catch (Exception e) {
-            throw new DumpException("dump error!", e);
+            throw new DumpException("dump error: " + e.getMessage(), e);
         }
     }
 

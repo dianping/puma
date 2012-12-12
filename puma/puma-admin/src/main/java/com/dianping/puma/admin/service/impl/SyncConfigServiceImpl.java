@@ -44,6 +44,16 @@ public class SyncConfigServiceImpl implements SyncConfigService {
             throw new IllegalArgumentException("创建失败，已有相同的配置存在。(src.serverId=" + syncConfig.getSrc().getServerId() + ",src,target="
                     + syncConfig.getSrc().getTarget() + ",dest.host=" + syncConfig.getDest() + ")");
         }
+        //验证仅有一个databaseConfig
+        if (syncConfig.getInstance().getDatabases() == null || syncConfig.getInstance().getDatabases().size() == 0
+                || syncConfig.getInstance().getDatabases().size() > 1) {
+            throw new IllegalArgumentException("创建失败，<database>配置必须有且仅能有一个！");
+        }
+        //验证table
+        if (syncConfig.getInstance().getDatabases().get(0).getTables() == null
+                || syncConfig.getInstance().getDatabases().get(0).getTables().size() == 0) {
+            throw new IllegalArgumentException("创建失败，<table>配置必须至少有一个！");
+        }
         //保存syncConfig和syncXml
         Key<SyncConfig> key = syncConfigDao.save(syncConfig);
         ObjectId id = (ObjectId) key.getId();

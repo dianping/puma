@@ -1,36 +1,36 @@
 package com.dianping.puma.core.sync;
 
 public class BinlogInfo {
-    private String BinlogFile;
-    private long BinlogPosition;
+    protected String binlogFile;
+    protected long binlogPosition;
 
     public String getBinlogFile() {
-        return BinlogFile;
+        return binlogFile;
     }
 
     public void setBinlogFile(String binlogFile) {
-        BinlogFile = binlogFile;
+        this.binlogFile = binlogFile;
     }
 
     public long getBinlogPosition() {
-        return BinlogPosition;
+        return binlogPosition;
     }
 
     public void setBinlogPosition(long binlogPosition) {
-        BinlogPosition = binlogPosition;
+        this.binlogPosition = binlogPosition;
     }
 
     @Override
     public String toString() {
-        return "BinlogPos [BinlogFile=" + BinlogFile + ", BinlogPosition=" + BinlogPosition + "]";
+        return "BinlogPos [BinlogFile=" + binlogFile + ", BinlogPosition=" + binlogPosition + "]";
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((BinlogFile == null) ? 0 : BinlogFile.hashCode());
-        result = prime * result + (int) (BinlogPosition ^ (BinlogPosition >>> 32));
+        result = prime * result + ((binlogFile == null) ? 0 : binlogFile.hashCode());
+        result = prime * result + (int) (binlogPosition ^ (binlogPosition >>> 32));
         return result;
     }
 
@@ -43,12 +43,12 @@ public class BinlogInfo {
         if (!(obj instanceof BinlogInfo))
             return false;
         BinlogInfo other = (BinlogInfo) obj;
-        if (BinlogFile == null) {
-            if (other.BinlogFile != null)
+        if (binlogFile == null) {
+            if (other.binlogFile != null)
                 return false;
-        } else if (!BinlogFile.equals(other.BinlogFile))
+        } else if (!binlogFile.equals(other.binlogFile))
             return false;
-        if (BinlogPosition != other.BinlogPosition)
+        if (binlogPosition != other.binlogPosition)
             return false;
         return true;
     }

@@ -12,7 +12,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -32,6 +31,9 @@ import com.dianping.puma.admin.service.SyncConfigService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.admin.util.HttpClientUtil;
 import com.dianping.puma.admin.util.SyncXmlParser;
+import com.dianping.puma.core.sync.Constant;
+import com.dianping.puma.core.sync.DatabaseBinlogInfo;
+import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.SyncConfig;
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -115,7 +117,7 @@ public class JsonController {
             SyncConfig syncConfig = syncConfigService.findSyncConfig(objectId);
             //将syncConfig转化成dumpConfig
             DumpConfig dumpConfig = this.syncConfigService.convertSyncConfigToDumpConfig(syncConfig);
-            //将dumpConfig放到session中
+            //将objectId和dumpConfig放到session中
             session.setAttribute("dumpConfig", dumpConfig);
 
             map.put("dumpConfig", dumpConfig);
@@ -211,6 +213,10 @@ public class JsonController {
             BufferedReader reader = new BufferedReader(new InputStreamReader(ins, "UTF-8"));
             //            LOG.info(IOUtils.toString(ins));
             //将返回的流存储起来
+            BufferedReader oldReader = (BufferedReader) session.getAttribute("dumpReader");
+            if (oldReader != null) {
+                oldReader.close();
+            }
             session.setAttribute("dumpReader", reader);
             map.put("dumpConfig", dumpConfig);
             map.put("success", true);
@@ -259,6 +265,11 @@ public class JsonController {
                         session.removeAttribute("dumpReader");
                     } else {
                         map.put("content", line + "\n");
+                        if (StringUtils.startsWith(line, Constant.BINLOG_SIGN_PREFIX)) {
+                            String binlogJson = line.substring(Constant.BINLOG_SIGN_PREFIX.length());
+                            DatabaseBinlogInfo binlogInfo = GsonUtil.fromJson(binlogJson, DatabaseBinlogInfo.class);
+                            //保存binlogInfo
+                        }
                     }
                 } catch (IOException e) {//在任何异常时停止进程(如果已经不在运行，也会抛异常)
                     status = "done";

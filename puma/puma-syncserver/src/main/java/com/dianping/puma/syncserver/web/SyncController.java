@@ -24,10 +24,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.dianping.puma.core.sync.BinlogInfo;
+import com.dianping.puma.core.sync.Constant;
+import com.dianping.puma.core.sync.DatabaseBinlogInfo;
+import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.SyncConfig;
 import com.dianping.puma.syncserver.bo.AbstractSyncClient;
-import com.dianping.puma.syncserver.bo.BinlogInfo;
 import com.dianping.puma.syncserver.bo.CatchupClient;
 import com.dianping.puma.syncserver.bo.DumpClient;
 import com.dianping.puma.syncserver.bo.SyncClient;
@@ -162,14 +165,14 @@ public class SyncController {
             //启动DumpClient对象(DumpClient将进度输出到out)
             DumpClient dumpClient = new DumpClient(dumpConfig, pw, sessionId);
             pw.println("sync-server starting dump");
-            List<BinlogInfo> binlogInfos = dumpClient.dump();
-            //            LOG.info("DumpClient done，binlogPos is " + binlogPos);
-
-            //            map.put("binlogPos", binlogPos);
-        } catch (Exception e) {
+            List<DatabaseBinlogInfo> binlogInfos = dumpClient.dump();
+            //将binlog输出
+            //目前只支持一个databaseConfig，所以此处binlogInfos只有1个
+            DatabaseBinlogInfo binlogInfo = binlogInfos.get(0);
+            pw.println(Constant.BINLOG_SIGN_PREFIX + gson.toJson(binlogInfo));
+        } catch (Throwable e) {
             LOG.error(e.getMessage(), e);
             pw.println(e.getMessage());
-            e.printStackTrace(pw);
         } finally {
             pw.close();
         }

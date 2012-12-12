@@ -15,10 +15,10 @@
         <ddl>true</ddl>
         <target>Dianping</target>
         <transaction>false</transaction>
-        <binlogInfo>
+        <!-- <binlogInfo>
             <binlogFile>binlog</binlogFile>
             <binlogPosition>123</binlogPosition>
-        </binlogInfo>
+        </binlogInfo>  -->
     </src>
     <instance>
         <database from="pumatest" to="pumatest2">

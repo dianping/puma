@@ -1,30 +1,37 @@
 <div>
-   <legend>设置Mysql源</legend>
-   <form method="post" class="form-horizontal"
-      action="${rc.contextPath}/create">
-      <div class="control-group">
-         <label class="control-label">Host</label>
-         <div class="controls">
-            <input type="text" name="app" size="20" placeholder="">
-         </div>
-      </div>
-      <div class="control-group">
-         <label class="control-label">port</label>
-         <div class="controls">
-            <input class="input-xlarge" type="text" name="gitUrl"
-               placeholder="">
-         </div>
-      </div>
-      <div class="control-group" style="margin-top: 40px">
-         <div class="controls">
-            <button type="submit" class="btn btn-success">创建</button>
-            <button type="button" onclick="advance()"
-               style="margin-left: 50px" class="btn">更多选项</button>
-         </div>
-      </div>
-   </form>
-   <div style="width: 100%; text-align: right">
-      <button type="submit" onclick="puma_admin.next_step();"
-         class="btn btn-primary">完成</button>
+   <button style="float: right; margin-right: 20px;" type="button"
+      onclick="pumadmin.create_start_sync();" class="btn btn-info">启动同步</button>
+   <button style="float: right; margin-right: 20px;" type="button"
+      onclick="pumadmin.pre();" class="btn">上一步</button>
+   <p class="legend">启动同步</p>
+   <div class="alert alert-warning">
+      <strong>温馨提示</strong>：binlog位置如果为空，则数据将从启动的时刻开始进行同步。
    </div>
+   <div style="">
+      <div
+         style="padding: 30px 0px 30px 0px; background-color: #F5F5F5; border: 1px solid rgba(0, 0, 0, 0.15); border-radius: 4px 4px 4px 4px;">
+         <div class="row" style="margin-left: 0px;">
+            <div class="span3">
+               <form class="form-horizontal">
+                  <div class="control-group">
+                     <label class="control-label">binlog file</label>
+                     <div class="controls">
+                        <input id="binlogFileInput"
+                           style="width: 370px;" type="text">
+                     </div>
+                  </div>
+                  <div class="control-group">
+                     <label class="control-label">binlog
+                        position</label>
+                     <div class="controls">
+                        <input id="binlogPositionInput"
+                           style="width: 370px;" type="text">
+                     </div>
+                  </div>
+               </form>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
 </div>

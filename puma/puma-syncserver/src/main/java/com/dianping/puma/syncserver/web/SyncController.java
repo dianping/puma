@@ -3,11 +3,9 @@ package com.dianping.puma.syncserver.web;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +17,7 @@ import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.dianping.puma.core.sync.BinlogInfo;
 import com.dianping.puma.core.sync.Constant;
 import com.dianping.puma.core.sync.DatabaseBinlogInfo;
-import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.SyncConfig;
 import com.dianping.puma.syncserver.bo.AbstractSyncClient;
@@ -35,10 +33,9 @@ import com.dianping.puma.syncserver.bo.CatchupClient;
 import com.dianping.puma.syncserver.bo.DumpClient;
 import com.dianping.puma.syncserver.bo.SyncClient;
 import com.dianping.puma.syncserver.holder.SyncClientHolder;
+import com.dianping.puma.syncserver.service.SyncConfigService;
 import com.dianping.puma.syncserver.util.GsonUtil;
 import com.dianping.puma.syncserver.util.SyncXmlParser;
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.Gson;
 
 /**
@@ -54,6 +51,35 @@ import com.google.gson.Gson;
 public class SyncController {
 
     private static final Logger LOG = LoggerFactory.getLogger(SyncController.class);
+
+    @Autowired
+    private SyncConfigService syncConfigService;
+
+    @RequestMapping(value = "/startTask", method = { RequestMethod.GET, RequestMethod.POST }, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object startTask(String syncTaskIdJson) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            //接收syncTaskId的json字符串，解析得到syncTaskId
+            ObjectId syncTaskId = GsonUtil.fromJson(syncTaskIdJson, ObjectId.class);
+            SyncConfig syncConfig = this.syncConfigService.findSyncConfig(syncTaskId);
+            boolean exist = SyncClientHolder.contain(syncConfig.getId());
+            if (exist) {
+                throw new IllegalArgumentException("SyncClient[SyncConfigId=" + syncConfig.getId() + "] is already running!");
+            }
+            //创建并启动SyncClient对象
+            SyncClient syncClient = new SyncClient(syncConfig);
+            syncClient.start();
+            map.put("success", true);
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+            LOG.error(e.getMessage(), e);
+        }
+        Gson gson = new Gson();
+        return gson.toJson(map);
+
+    }
 
     @RequestMapping(value = "/createSync", method = { RequestMethod.GET, RequestMethod.POST }, produces = "application/json; charset=utf-8")
     @ResponseBody

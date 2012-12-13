@@ -1,10 +1,9 @@
 <div>
-   <button id="step2_next"
-      style="float: right; margin-top: 6px; margin-right: 20px;"
-      type="button" onclick="pumadmin.step2_next();"
+   <button id="step2_next" style="float: right; margin-right: 20px;"
+      type="button" onclick="pumadmin.create_step2_next();"
       class="btn btn-info">下一步</button>
-   <button style="float: right; margin-top: 6px; margin-right: 20px;"
-      type="button" onclick="pumadmin.pre();" class="btn">上一步</button>
+   <button style="float: right; margin-right: 20px;" type="button"
+      onclick="pumadmin.pre();" class="btn">上一步</button>
    <p class="legend">mysqldump</p>
    <div class="alert alert-warning">
       <strong>温馨提示</strong>：如果不需要dump，可以跳过。 <br> <br>
@@ -65,6 +64,9 @@
    <pre
       style="cursor: text; margin-top: 20px; background-color: #3A1042; color: #FFFFFF; font-size: 12px; width: 95%; height: 320px; overflow-x: auto;"
       id="console"></pre>
-   <p id="fail" style="display:none;color:red;">dump失败了，请看上述输出，找出原因。</p>
-   <p id="success" style="display:none;color:green;">dump成功。binlogFile:<span id="binlogFile"></span>, binlogPos:<span id="binlogPosition"></span></p>
+   <p id="fail" style="display: none; color: red;">dump失败了，请看上述输出，找出原因。</p>
+   <p id="success" style="display: none; color: green;">
+      dump成功。binlogFile:<span id="binlogFile"></span>, binlogPos:<span
+         id="binlogPosition"></span>
+   </p>
 </div>

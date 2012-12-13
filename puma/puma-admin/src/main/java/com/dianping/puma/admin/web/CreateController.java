@@ -41,12 +41,19 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.Gson;
 
 /**
+ * 
+ * TODO <br>
+ * (1) 以create为整个controller，所有中间状态存放在session
+ * (2) 编写SyncTask的service
+ * (3) pumaSyncServer的id与host的映射
+ * (4) 保存binlog信息，创建同步任务，启动任务
+ * 
  * @author wukezhu
  */
 @Controller
 @RequestMapping(method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-public class JsonController {
-    private static final Logger LOG = LoggerFactory.getLogger(JsonController.class);
+public class CreateController {
+    private static final Logger LOG = LoggerFactory.getLogger(CreateController.class);
     @Autowired
     private SyncConfigService syncConfigService;
 
@@ -233,19 +240,6 @@ public class JsonController {
 
     /**
      * js使用长polling不断调用console()。<br>
-     * <br>
-     * console()通过app和pageid获取对应的JavaProject对象, 从JavaProject对象获取其正在运行的jvm的InputStream，<br>
-     * 1 如果获取不到InputStream，说明没有正在运行的jvm，返回map.put("status", "done")，指示前端js停止轮询;<br>
-     * 2 如果获取到InputStream，则尝试从InputStream读取数据:<br>
-     * ---2.1 尝试available()+read() 10次，直到10次结束(注意，此处为了不阻塞，无法知道read()返回-1的情况) <br>
-     * ---2.2 将读到的data(无论data是否有数据)，输出给前端<br>
-     * 
-     * @param app
-     * @param pageid
-     * @return
-     * @throws JsonGenerationException
-     * @throws JsonMappingException
-     * @throws IOException
      */
     @RequestMapping(value = "/dumpConsole", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
@@ -265,11 +259,6 @@ public class JsonController {
                         session.removeAttribute("dumpReader");
                     } else {
                         map.put("content", line + "\n");
-                        if (StringUtils.startsWith(line, Constant.BINLOG_SIGN_PREFIX)) {
-                            String binlogJson = line.substring(Constant.BINLOG_SIGN_PREFIX.length());
-                            DatabaseBinlogInfo binlogInfo = GsonUtil.fromJson(binlogJson, DatabaseBinlogInfo.class);
-                            //保存binlogInfo
-                        }
                     }
                 } catch (IOException e) {//在任何异常时停止进程(如果已经不在运行，也会抛异常)
                     status = "done";
@@ -291,6 +280,69 @@ public class JsonController {
         }
         Gson gson = new Gson();
         return gson.toJson(map);
+    }
+
+    /**
+     * 将binlog位置信息更新到相应的SyncConfig
+     */
+    @RequestMapping(value = "/saveBinlog", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object saveBinlog(HttpSession session, HttpServletRequest request, String syncConfigMergeId, String binlogFile,
+                             long binlogPos) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            map.put("success", true);
+        } catch (IllegalArgumentException e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", errorMsg);
+            LOG.error(e.getMessage(), e);
+        }
+        return GsonUtil.toJson(map);
+    }
+
+    /**
+     * 创建同步任务,需指派PumaSyncServer的id(保存到数据库，暂时不启动)
+     */
+    @RequestMapping(value = "/createTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object createTask(HttpSession session, HttpServletRequest request, String syncConfigMergeId, String pumaSyncServerId) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            map.put("success", true);
+        } catch (IllegalArgumentException e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", errorMsg);
+            LOG.error(e.getMessage(), e);
+        }
+        return GsonUtil.toJson(map);
+    }
+
+    /**
+     * 启动同步任务(向指派的PumaSyncServer发出启动同步任务的命令)
+     */
+    @RequestMapping(value = "/startTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object startTask(HttpSession session, String taskId) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            //TODO 调用puma-syncserver 参数是taskId
+            
+            map.put("success", true);
+        } catch (IllegalArgumentException e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", errorMsg);
+            LOG.error(e.getMessage(), e);
+        }
+        return GsonUtil.toJson(map);
     }
 
 }

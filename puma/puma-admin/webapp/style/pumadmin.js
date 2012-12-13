@@ -38,6 +38,12 @@
 			// 根据w.syncConfigObjectId加载DumpConfig TODO
 			pumadmin.loadDumpConfig();
 		},
+		"create_step2_next" : function() {
+			pumadmin.next();
+			// 获取binlog位置，如果没有则为空
+			$("#binlogFileInput").val($("#binlogFile").text());
+			$("#binlogPositionInput").val($("#binlogPosition").text());
+		},
 		"loadDumpConfig" : function() {
 			var param = new Object();
 			var mergeId = pumadmin.objectId2MergeId(w.syncConfigObjectId);
@@ -403,8 +409,6 @@
 			console.log(objectId);
 			return objectId._inc + "_" + objectId._machine + "_"
 					+ objectId._time;
-		},
-		"step1_next" : function() {
 		},
 		"appError" : function(title, errorMsg) {
 			pumadmin.alertError(title, errorMsg);

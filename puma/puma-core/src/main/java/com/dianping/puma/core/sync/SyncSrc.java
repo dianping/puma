@@ -3,7 +3,7 @@ package com.dianping.puma.core.sync;
 public class SyncSrc {
 
     private String pumaServerHost;
-    private BinlogInfo binlogInfo;
+    //    private BinlogInfo binlogInfo;
     private String name;
     private long serverId;
     private String target;
@@ -19,13 +19,13 @@ public class SyncSrc {
         this.pumaServerHost = pumaServerHost;
     }
 
-    public BinlogInfo getBinlogInfo() {
-        return binlogInfo;
-    }
-
-    public void setBinlogInfo(BinlogInfo binlogInfo) {
-        this.binlogInfo = binlogInfo;
-    }
+    //    public BinlogInfo getBinlogInfo() {
+    //        return binlogInfo;
+    //    }
+    //
+    //    public void setBinlogInfo(BinlogInfo binlogInfo) {
+    //        this.binlogInfo = binlogInfo;
+    //    }
 
     public String getName() {
         return name;
@@ -79,7 +79,6 @@ public class SyncSrc {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((binlogInfo == null) ? 0 : binlogInfo.hashCode());
         result = prime * result + (ddl ? 1231 : 1237);
         result = prime * result + (dml ? 1231 : 1237);
         result = prime * result + ((name == null) ? 0 : name.hashCode());
@@ -99,11 +98,6 @@ public class SyncSrc {
         if (!(obj instanceof SyncSrc))
             return false;
         SyncSrc other = (SyncSrc) obj;
-        if (binlogInfo == null) {
-            if (other.binlogInfo != null)
-                return false;
-        } else if (!binlogInfo.equals(other.binlogInfo))
-            return false;
         if (ddl != other.ddl)
             return false;
         if (dml != other.dml)
@@ -132,8 +126,8 @@ public class SyncSrc {
 
     @Override
     public String toString() {
-        return "SyncSrc [pumaServerHost=" + pumaServerHost + ", binlogInfo=" + binlogInfo + ", name=" + name + ", serverId="
-                + serverId + ", target=" + target + ", transaction=" + transaction + ", ddl=" + ddl + ", dml=" + dml + "]";
+        return "SyncSrc [pumaServerHost=" + pumaServerHost + ", name=" + name + ", serverId=" + serverId + ", target=" + target
+                + ", transaction=" + transaction + ", ddl=" + ddl + ", dml=" + dml + "]";
     }
 
 }

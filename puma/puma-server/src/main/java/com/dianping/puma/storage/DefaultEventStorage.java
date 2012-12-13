@@ -92,13 +92,13 @@ public class DefaultEventStorage implements EventStorage {
     }
 
     @Override
-    public EventChannel getChannel(long seq, long serverId, String binlogFile, long binlogInfo) throws StorageException {
+    public EventChannel getChannel(long seq, long serverId, String binlogFile, long binlogPos) throws StorageException {
         EventChannel channel = null;
         if (seq != -3) {
             channel = new DefaultEventChannel(bucketManager, seq, codec);
         } else {
             // TODO BinlogInfo & BinlogInfoAndSeq merge
-            BinlogInfoAndSeq startbinlog = new BinlogInfoAndSeq(serverId, binlogFile, Long.valueOf(binlogInfo)
+            BinlogInfoAndSeq startbinlog = new BinlogInfoAndSeq(serverId, binlogFile, Long.valueOf(binlogPos)
                     .longValue(), -1);
             channel = new DefaultEventChannel(bucketManager, translateBinlogInfoToSeq(startbinlog), codec);
         }

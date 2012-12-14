@@ -11,9 +11,9 @@ import com.dianping.puma.core.sync.DumpConfig;
 
 public class PropertiesConfig {
     private final static PropertiesConfig instance = new PropertiesConfig();
-    private List<String> pumaServerIps;
+    private List<String> syncServerHosts;
     private Map<Long, DumpConfig.DumpSrc> serverId2mysqlsrc = new HashMap<Long, DumpConfig.DumpSrc>();
-    private String pumaSyncServerUrl;
+    private String dumpServerHost;
 
     private PropertiesConfig() {
         Properties p = new Properties();
@@ -22,10 +22,10 @@ public class PropertiesConfig {
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
-        String pumaServerIpsStr = p.getProperty("pumaServerIps");
-        if (pumaServerIpsStr != null) {
-            String[] ips = pumaServerIpsStr.split(",");
-            pumaServerIps = Arrays.asList(ips);
+        String syncServerHostsStr = p.getProperty("syncServerHosts");
+        if (syncServerHostsStr != null) {
+            String[] hosts = syncServerHostsStr.split(",");
+            syncServerHosts = Arrays.asList(hosts);
         } else {
             throw new IllegalArgumentException("pumaServerIps must not be null in puma-admin-config.properties.");
         }
@@ -47,11 +47,7 @@ public class PropertiesConfig {
         } else {
             throw new IllegalArgumentException("serverId2mysqlsrc must not be null in puma-admin-config.properties.");
         }
-        pumaSyncServerUrl = "http://" + p.getProperty("pumaSyncServerIp") + "/puma-syncserver/dump";
-    }
-
-    public List<String> getPumaServerIps() {
-        return pumaServerIps;
+        dumpServerHost = p.getProperty("dumpServerHost");
     }
 
     public DumpConfig.DumpSrc getDumpConfigSrc(Long serverId) {
@@ -62,8 +58,12 @@ public class PropertiesConfig {
         return instance;
     }
 
-    public String getPumaSyncServerIp() {
-        return pumaSyncServerUrl;
+    public List<String> getSyncServerHosts() {
+        return syncServerHosts;
+    }
+
+    public String getDumpServerHost() {
+        return dumpServerHost;
     }
 
 }

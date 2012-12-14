@@ -15,6 +15,7 @@ import com.dianping.puma.admin.config.PropertiesConfig;
 import com.dianping.puma.admin.dao.SyncXmlDao;
 import com.dianping.puma.admin.service.SyncConfigService;
 import com.dianping.puma.admin.util.MysqlMetaInfoFetcher;
+import com.dianping.puma.core.sync.BinlogInfo;
 import com.dianping.puma.core.sync.ColumnConfig;
 import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.DumpConfig;
@@ -70,19 +71,17 @@ public class SyncConfigServiceImpl implements SyncConfigService {
     }
 
     @Override
-    public ObjectId modifySyncConfig(ObjectId id, SyncConfig newSyncConfig, String syncXmlString) {
+    public void modifySyncConfig(SyncConfig newSyncConfig, String syncXmlString) {
         //检验是否合法
         SyncConfig oldSyncConfig = syncConfigDao.getDatastore().getByKey(SyncConfig.class,
-                new Key<SyncConfig>(SyncConfig.class, id));
+                new Key<SyncConfig>(SyncConfig.class, newSyncConfig.getId()));
         this._compare(oldSyncConfig, newSyncConfig);
         //保存
-        newSyncConfig.setId(id);
-        Key<SyncConfig> key = syncConfigDao.save(newSyncConfig);
+        syncConfigDao.save(newSyncConfig);
         SyncXml syncXml = new SyncXml();
-        syncXml.setId(id);
+        syncXml.setId(newSyncConfig.getId());
         syncXml.setXml(syncXmlString);
         this._saveSyncXml(syncXml);
-        return (ObjectId) key.getId();
     }
 
     /**
@@ -151,6 +150,9 @@ public class SyncConfigServiceImpl implements SyncConfigService {
         //dumpSrc
         long serverId = syncConfig.getSrc().getServerId();
         DumpSrc dumpSrc = PropertiesConfig.getInstance().getDumpConfigSrc(serverId);
+        if (dumpSrc == null) {
+            throw new IllegalArgumentException("serverId 对应的 mysql信息不存在，请注意该映射关系是需要在config文件作配置的。");
+        }
         dumpConfig.setSrc(dumpSrc);
         SyncDest syncDest = syncConfig.getDest();
         //dumpDest
@@ -238,5 +240,26 @@ public class SyncConfigServiceImpl implements SyncConfigService {
             }
         }
         return true;
+    }
+
+    @Override
+    public void modifySyncConfig(ObjectId syncConfigId, BinlogInfo binlogInfo) {
+        SyncConfig syncConfig = this.syncConfigDao.getDatastore().getByKey(SyncConfig.class,
+                new Key<SyncConfig>(SyncConfig.class, syncConfigId));
+        //更新binloginfo
+        syncConfig.getSrc().setBinlogInfo(binlogInfo);
+        //保存
+        syncConfigDao.save(syncConfig);
+    }
+
+    @Override
+    public void removeSyncConfig(ObjectId id) {
+        Query<SyncConfig> q = syncConfigDao.getDatastore().createQuery(SyncConfig.class);
+        q.field("_id").equal(id);
+        syncConfigDao.deleteByQuery(q);
+        Query<SyncXml> q2 = syncXmlDao.getDatastore().createQuery(SyncXml.class);
+        q2.field("_id").equal(id);
+        syncXmlDao.deleteByQuery(q2);
+
     }
 }

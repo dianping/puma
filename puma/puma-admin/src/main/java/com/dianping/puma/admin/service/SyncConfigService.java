@@ -6,6 +6,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 
 import com.dianping.puma.admin.bo.SyncXml;
+import com.dianping.puma.core.sync.BinlogInfo;
 import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.SyncConfig;
 
@@ -13,13 +14,23 @@ public interface SyncConfigService {
 
     public ObjectId saveSyncConfig(SyncConfig syncConfig, String syncXmlString);
 
+    void modifySyncConfig(SyncConfig syncConfig, String syncXmlString);
+
+    /**
+     * 仅更新SyncConfig的binlog信息
+     */
+    void modifySyncConfig(ObjectId id, BinlogInfo binlogInfo);
+
+    /**
+     * 删除相应的SyncConfig和SyncXml
+     */
+    void removeSyncConfig(ObjectId id);
+
     public List<SyncConfig> findSyncConfigs(int offset, int limit);
 
     SyncXml findSyncXml(ObjectId objectId);
 
     SyncConfig findSyncConfig(ObjectId objectId);
-
-    ObjectId modifySyncConfig(ObjectId id, SyncConfig syncConfig, String syncXmlString);
 
     Long countSyncConfigs();
 

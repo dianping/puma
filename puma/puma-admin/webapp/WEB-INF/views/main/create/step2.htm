@@ -2,8 +2,6 @@
    <button id="step2_next" style="float: right; margin-right: 20px;"
       type="button" onclick="pumadmin.create_step2_next();"
       class="btn btn-info">下一步</button>
-   <button style="float: right; margin-right: 20px;" type="button"
-      onclick="pumadmin.pre();" class="btn">上一步</button>
    <p class="legend">mysqldump</p>
    <div class="alert alert-warning">
       <strong>温馨提示</strong>：如果不需要dump，可以跳过。 <br> <br>
@@ -69,4 +67,46 @@
       dump成功。binlogFile:<span id="binlogFile"></span>, binlogPos:<span
          id="binlogPosition"></span>
    </p>
+   <div class="alert alert-warning">
+      <strong>温馨提示</strong>：binlog位置如果为空，则数据将从启动同步任务的时刻开始进行同步。
+   </div>
+   <div
+      style="padding: 10px 0px 0px 0px; background-color: #F5F5F5; border: 1px solid rgba(0, 0, 0, 0.15); border-radius: 4px 4px 4px 4px;">
+      <div class="row">
+         <div class="span7">
+            <form class="form-horizontal">
+               <div class="control-group">
+                  <label class="control-label">binlog file</label>
+                  <div class="controls">
+                     <input id="binlogFileInput" style="width: 370px;"
+                        type="text">
+                  </div>
+               </div>
+               <div class="control-group">
+                  <label class="control-label">binlog position</label>
+                  <div class="controls">
+                     <input id="binlogPositionInput"
+                        style="width: 370px;" type="text">
+                  </div>
+               </div>
+            </form>
+         </div>
+         <div class="span1">
+            <button type="button" onclick="pumadmin.saveBinlog();"
+               class="btn btn-info">保存</button>
+         </div>
+      </div>
+   </div>
+   <div id="saveBinlogError" style="margin-top: 20px; display: none;"
+      class="alert alert-error">
+      <button type="button" class="close" data-dismiss="alert">×</button>
+      <p>
+         创建失败！详细原因：<span id="saveBinlogErrorCause"></span>
+      </p>
+   </div>
+   <div id="saveBinlogSuccess" style="margin-top: 20px; display: none;"
+      class="alert alert-success">
+      <button type="button" class="close" data-dismiss="alert">×</button>
+      保存binlog信息成功！
+   </div>
 </div>

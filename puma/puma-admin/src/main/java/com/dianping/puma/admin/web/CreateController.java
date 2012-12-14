@@ -25,27 +25,21 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.xml.sax.SAXParseException;
 
-import com.dianping.puma.admin.bo.SyncXml;
 import com.dianping.puma.admin.config.PropertiesConfig;
 import com.dianping.puma.admin.service.SyncConfigService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.admin.util.HttpClientUtil;
 import com.dianping.puma.admin.util.SyncXmlParser;
-import com.dianping.puma.core.sync.Constant;
-import com.dianping.puma.core.sync.DatabaseBinlogInfo;
-import com.dianping.puma.core.sync.DatabaseConfig;
+import com.dianping.puma.core.sync.BinlogInfo;
 import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.SyncConfig;
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.Gson;
 
 /**
- * 
  * TODO <br>
- * (1) 以create为整个controller，所有中间状态存放在session
- * (2) 编写SyncTask的service
- * (3) pumaSyncServer的id与host的映射
+ * (1) 以create为整个controller，所有中间状态存放在session <br>
+ * (2) 编写SyncTask的service <br>
+ * (3) pumaSyncServer的id与host的映射 <br>
  * (4) 保存binlog信息，创建同步任务，启动任务
  * 
  * @author wukezhu
@@ -58,46 +52,28 @@ public class CreateController {
     private SyncConfigService syncConfigService;
 
     private static final String errorMsg = "对不起，出了一点错误，请刷新页面试试。";
-    private static final int PAGESIZE = 8;
 
-    @RequestMapping(value = "/loadSyncConfigs", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    /**
+     * 如果mergeId为空，那么新增配置；不为空，则修改配置。
+     */
+    @RequestMapping(value = "/saveSyncXml", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object loadSyncConfigs(HttpSession session, HttpServletRequest request, Integer pageNum) {
+    public Object saveSyncXml(HttpSession session, HttpServletRequest request, String syncXmlString) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            int offset = pageNum == null ? 0 : (pageNum - 1) * PAGESIZE;
-            List<SyncConfig> syncConfigs = syncConfigService.findSyncConfigs(offset, PAGESIZE);
-            Long totalSyncConfig = syncConfigService.countSyncConfigs();
-            map.put("syncConfigs", syncConfigs);
-            map.put("totalPage", totalSyncConfig / PAGESIZE + (totalSyncConfig % PAGESIZE == 0 ? 0 : 1));
+            //解析xml，得到SyncConfig
+            SyncConfig syncConfig = SyncXmlParser.parse(syncXmlString);
+            syncConfig.setId(new ObjectId());
+            LOG.info("create SyncConfig: " + syncConfig);
+            //保存SyncConfig到db,同时保存SyncXml
+            map.put("id", syncConfigService.saveSyncConfig(syncConfig, syncXmlString));
+            //保存syncConfig到session
+            session.setAttribute("syncConfig", syncConfig);
+
             map.put("success", true);
-        } catch (IllegalArgumentException e) {
+        } catch (SAXParseException e) {
             map.put("success", false);
-            map.put("errorMsg", e.getMessage());
-        } catch (Exception e) {
-            map.put("success", false);
-            map.put("errorMsg", errorMsg);
-            LOG.error(e.getMessage(), e);
-        }
-        return GsonUtil.toJson(map);
-
-    }
-
-    @RequestMapping(value = "/loadSyncXml", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public Object loadSyncXml(HttpSession session, HttpServletRequest request, String mergeId) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        try {
-            String[] mergeIdSplits = StringUtils.split(mergeId, '_');
-            int inc = Integer.parseInt(mergeIdSplits[0]);
-            int machine = Integer.parseInt(mergeIdSplits[1]);
-            int time = Integer.parseInt(mergeIdSplits[2]);
-            ObjectId objectId = new ObjectId(time, machine, inc);
-            //mergeId解析成ObjectId
-            SyncXml syncXml = syncConfigService.findSyncXml(objectId);
-
-            map.put("syncXml", syncXml);
-            map.put("success", true);
+            map.put("errorMsg", "xml解析出错：" + e.getMessage());
         } catch (IllegalArgumentException e) {
             map.put("success", false);
             map.put("errorMsg", e.getMessage());
@@ -112,16 +88,12 @@ public class CreateController {
 
     @RequestMapping(value = "/loadDumpConfig", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object loadDumpConfig(HttpSession session, HttpServletRequest request, String mergeId) {
+    public Object loadDumpConfig(HttpSession session, HttpServletRequest request) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            String[] mergeIdSplits = StringUtils.split(mergeId, '_');
-            int inc = Integer.parseInt(mergeIdSplits[0]);
-            int machine = Integer.parseInt(mergeIdSplits[1]);
-            int time = Integer.parseInt(mergeIdSplits[2]);
-            ObjectId objectId = new ObjectId(time, machine, inc);
-            //mergeId解析成ObjectId
-            SyncConfig syncConfig = syncConfigService.findSyncConfig(objectId);
+            //从会话中取出保存的syncConfig
+            SyncConfig syncConfig = (SyncConfig) session.getAttribute("syncConfig");
+            System.out.println(syncConfig);
             //将syncConfig转化成dumpConfig
             DumpConfig dumpConfig = this.syncConfigService.convertSyncConfigToDumpConfig(syncConfig);
             //将objectId和dumpConfig放到session中
@@ -141,82 +113,19 @@ public class CreateController {
 
     }
 
-    @RequestMapping(value = "/saveSyncXml", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public Object saveSyncXml(HttpSession session, HttpServletRequest request, String syncXmlString) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        try {
-            //解析xml，得到SyncConfig
-            SyncConfig syncConfig = null;
-            //解析syncXml，得到Sync对象
-            syncConfig = SyncXmlParser.parse(syncXmlString);
-            syncConfig.setId(new ObjectId());
-            LOG.info("receive sync: " + syncConfig);
-            //保存SyncConfig到db,同时保存SyncXml
-            map.put("id", syncConfigService.saveSyncConfig(syncConfig, syncXmlString));
-
-            map.put("success", true);
-        } catch (SAXParseException e) {
-            map.put("success", false);
-            map.put("errorMsg", "xml解析出错：" + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            map.put("success", false);
-            map.put("errorMsg", e.getMessage());
-        } catch (Exception e) {
-            map.put("success", false);
-            map.put("errorMsg", errorMsg);
-            LOG.error(e.getMessage(), e);
-        }
-        return GsonUtil.toJson(map);
-
-    }
-
-    @RequestMapping(value = "/modifySyncXml", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public Object modifySyncXml(HttpSession session, HttpServletRequest request, String syncXmlString, String mergeId) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        try {
-            //获取ObjectId
-            String[] mergeIdSplits = StringUtils.split(mergeId, '_');
-            int inc = Integer.parseInt(mergeIdSplits[0]);
-            int machine = Integer.parseInt(mergeIdSplits[1]);
-            int time = Integer.parseInt(mergeIdSplits[2]);
-            ObjectId objectId = new ObjectId(time, machine, inc);
-            //解析xml，得到SyncConfig
-            SyncConfig syncConfig = SyncXmlParser.parse(syncXmlString);
-            LOG.info("receive sync: " + syncConfig);
-            //保存修改
-            syncConfigService.modifySyncConfig(objectId, syncConfig, syncXmlString);
-
-            map.put("success", true);
-        } catch (SAXParseException e) {
-            map.put("success", false);
-            map.put("errorMsg", "xml解析出错：" + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            map.put("success", false);
-            map.put("errorMsg", e.getMessage());
-        } catch (Exception e) {
-            map.put("success", false);
-            map.put("errorMsg", errorMsg);
-            LOG.error(e.getMessage(), e);
-        }
-        return GsonUtil.toJson(map);
-
-    }
-
     @RequestMapping(value = "/dump", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object dump(HttpSession session, HttpServletRequest request, String mergeId) {
+    public Object dump(HttpSession session, HttpServletRequest request) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             //從session中获取dumpConfig
             DumpConfig dumpConfig = (DumpConfig) session.getAttribute("dumpConfig");
-            String url = PropertiesConfig.getInstance().getPumaSyncServerIp();
+            String dumpServiceUrl = "http://" + PropertiesConfig.getInstance().getDumpServerHost() + "/puma-syncserver/dump";
             List<NameValuePair> nvps = new ArrayList<NameValuePair>();
             nvps.add(new BasicNameValuePair("sessionId", session.getId()));
             nvps.add(new BasicNameValuePair("dumpConfigJson", GsonUtil.toJson(dumpConfig)));
             //将dumpConfig序列化为json，发送给sync-server
-            InputStream ins = HttpClientUtil.postForStream(url, nvps);
+            InputStream ins = HttpClientUtil.postForStream(dumpServiceUrl, nvps);
             BufferedReader reader = new BufferedReader(new InputStreamReader(ins, "UTF-8"));
             //            LOG.info(IOUtils.toString(ins));
             //将返回的流存储起来
@@ -287,10 +196,45 @@ public class CreateController {
      */
     @RequestMapping(value = "/saveBinlog", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object saveBinlog(HttpSession session, HttpServletRequest request, String syncConfigMergeId, String binlogFile,
-                             long binlogPos) {
+    public Object saveBinlog(HttpSession session, HttpServletRequest request, String binlogFile, Long binlogPosition) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
+            if (StringUtils.isBlank(binlogFile)) {
+                throw new IllegalArgumentException("binlogFile不能为空！");
+            }
+            if (binlogPosition == null || binlogPosition < 0) {
+                throw new IllegalArgumentException("binlogFile不能为空或小于0！");
+            }
+            //从会话中取出保存的syncConfig
+            SyncConfig syncConfig = (SyncConfig) session.getAttribute("syncConfig");
+            //更新binlogInfo
+            BinlogInfo binlogInfo = new BinlogInfo();
+            binlogInfo.setBinlogFile(binlogFile);
+            binlogInfo.setBinlogPosition(binlogPosition);
+            this.syncConfigService.modifySyncConfig(syncConfig.getId(), binlogInfo);
+            //更新成功后，更新session的syncConfig
+            syncConfig.getSrc().setBinlogInfo(binlogInfo);
+
+            map.put("success", true);
+        } catch (IllegalArgumentException e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", errorMsg);
+            LOG.error(e.getMessage(), e);
+        }
+        return GsonUtil.toJson(map);
+    }
+
+    @RequestMapping(value = "/loadSyncServerList", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object loadSyncServerList(HttpSession session, HttpServletRequest request) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            // 加载SyncServer的服务器列表
+            List<String> syncServerHosts = PropertiesConfig.getInstance().getSyncServerHosts();
+            map.put("syncServerHosts", syncServerHosts);
             map.put("success", true);
         } catch (IllegalArgumentException e) {
             map.put("success", false);
@@ -308,9 +252,13 @@ public class CreateController {
      */
     @RequestMapping(value = "/createTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object createTask(HttpSession session, HttpServletRequest request, String syncConfigMergeId, String pumaSyncServerId) {
+    public Object createTask(HttpSession session, HttpServletRequest request, String pumaSyncServerId) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
+            //TODO 根据syncConfig和pumaSyncServerId，创建SyncTask
+
+            //保存SyncTask
+
             map.put("success", true);
         } catch (IllegalArgumentException e) {
             map.put("success", false);
@@ -332,7 +280,7 @@ public class CreateController {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             //TODO 调用puma-syncserver 参数是taskId
-            
+
             map.put("success", true);
         } catch (IllegalArgumentException e) {
             map.put("success", false);

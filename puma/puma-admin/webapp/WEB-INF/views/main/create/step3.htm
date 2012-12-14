@@ -1,37 +1,17 @@
 <div>
    <button style="float: right; margin-right: 20px;" type="button"
-      onclick="pumadmin.create_start_sync();" class="btn btn-info">启动同步</button>
-   <button style="float: right; margin-right: 20px;" type="button"
       onclick="pumadmin.pre();" class="btn">上一步</button>
-   <p class="legend">启动同步</p>
+   <p class="legend">创建同步任务</p>
    <div class="alert alert-warning">
-      <strong>温馨提示</strong>：binlog位置如果为空，则数据将从启动的时刻开始进行同步。
+      <strong>温馨提示</strong>：同步任务和同步配置是一一对应的，不会重复。
    </div>
-   <div style="">
-      <div
-         style="padding: 30px 0px 30px 0px; background-color: #F5F5F5; border: 1px solid rgba(0, 0, 0, 0.15); border-radius: 4px 4px 4px 4px;">
-         <div class="row" style="margin-left: 0px;">
-            <div class="span3">
-               <form class="form-horizontal">
-                  <div class="control-group">
-                     <label class="control-label">binlog file</label>
-                     <div class="controls">
-                        <input id="binlogFileInput"
-                           style="width: 370px;" type="text">
-                     </div>
-                  </div>
-                  <div class="control-group">
-                     <label class="control-label">binlog
-                        position</label>
-                     <div class="controls">
-                        <input id="binlogPositionInput"
-                           style="width: 370px;" type="text">
-                     </div>
-                  </div>
-               </form>
-            </div>
-         </div>
-      </div>
+   <h5 style="">请为同步任务，分配一台Puma-SyncServer</h5>
+   <div
+      style="padding: 10px 10px 0px 10px; background-color: white; border: 1px solid rgba(0, 0, 0, 0.15); border-radius: 4px 4px 4px 4px;">
+      <form class="form-inline">
+         <span>选择Puma-SyncServer的host: </span> <select
+            id="pumaSyncServerId" style="margin-left: 16px;">
+         </select>
+      </form>
    </div>
-</div>
 </div>

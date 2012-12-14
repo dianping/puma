@@ -24,30 +24,61 @@
 					.attr("class", "step_active");
 			$("#stepsCarousel").carousel('next');
 		},
-		"create_step1_next" : function() {
-			// 判断上一步是否有保存
-			if (!w.syncConfigObjectId) {
-				pumadmin.appError("错误信息", "先保存，才能到下一步");
-				// TODO return;
-				w.syncConfigObjectId = new Object();
-				w.syncConfigObjectId._inc = 375873205;
-				w.syncConfigObjectId._machine = -458227529;
-				w.syncConfigObjectId._time = 1354868436;
-			}
-			pumadmin.next();
-			// 根据w.syncConfigObjectId加载DumpConfig TODO
-			pumadmin.loadDumpConfig();
-		},
 		"create_step2_next" : function() {
 			pumadmin.next();
-			// 获取binlog位置，如果没有则为空
-			$("#binlogFileInput").val($("#binlogFile").text());
-			$("#binlogPositionInput").val($("#binlogPosition").text());
+			// 加载pumaserverId列表
+			pumadmin.loadSyncServerList();
+		},
+		"saveBinlog" : function() {
+			var param = new Object();
+			param.binlogFile = $("#binlogFileInput").val();
+			param.binlogPosition = $("#binlogPositionInput").val();
+			var url = w.contextpath + '/saveBinlog';
+			$.ajax({
+				type : 'POST',
+				url : url,
+				data : param,
+				dataType : "json",
+				success : pumadmin.saveBinlogDone,
+				error : pumadmin.httpError
+			});
+			$("#saveBinlogSuccess").hide();
+			$("#saveBinlogError").hide();
+		},
+		"saveBinlogDone" : function(data) {
+			if (data.success == false) {
+				$("#saveBinlogErrorCause").text(data.errorMsg);
+				$("#saveBinlogError").show();
+			} else {
+				$("#saveBinlogSuccess").show();
+			}
+		},
+		"loadSyncServerList" : function() {
+			var param = new Object();
+			var url = w.contextpath + '/loadSyncServerList';
+			$.ajax({
+				type : 'POST',
+				url : url,
+				data : param,
+				dataType : "json",
+				success : pumadmin.loadSyncServerListDone,
+				error : pumadmin.httpError
+			});
+		},
+		"loadSyncServerListDone" : function(data) {
+			if (data.success == false) {
+				pumadmin.appError("错误信息", data.errorMsg);
+			} else {
+				$('#pumaSyncServerId').html('');
+				$.each(data.syncServerHosts, function(i, el) {
+					$('#pumaSyncServerId').append(new Option(el, el));
+				});
+			}
 		},
 		"loadDumpConfig" : function() {
 			var param = new Object();
-			var mergeId = pumadmin.objectId2MergeId(w.syncConfigObjectId);
-			param.mergeId = mergeId;
+			// var mergeId = pumadmin.objectId2MergeId(w.syncConfigObjectId);
+			// param.mergeId = mergeId;
 			var url = w.contextpath + '/loadDumpConfig';
 			$.ajax({
 				type : 'POST',
@@ -62,7 +93,6 @@
 			if (data.success == false) {
 				pumadmin.appError("错误信息", data.errorMsg);
 			} else {
-				console.log(data);
 				var dumpConfig = data.dumpConfig;
 				var dumpSrcText = dumpConfig.src.host + " (username="
 						+ dumpConfig.src.username + ")";
@@ -125,9 +155,7 @@
 			}
 		},
 		"dumpConsole" : function(data) {
-			// 发送到服务端，如果保存成功,则继续，否则alert错误信息
 			var param = new Object();
-			param.pageid = w.pageid;
 			// 发送ajax请求jsonp
 			var url = w.contextpath + '/dumpConsole';
 			$.ajax({
@@ -162,6 +190,10 @@
 						$("#binlogFile").text(binlogInfo.binlogFile);
 						$("#binlogPosition").text(binlogInfo.binlogPosition);
 						$("#success").show();
+						// 获取binlog位置，如果没有则为空
+						$("#binlogFileInput").val($("#binlogFile").text());
+						$("#binlogPositionInput").val(
+								$("#binlogPosition").text());
 					} else {
 						// 显示dump失败
 						$("#fail").show();
@@ -380,8 +412,10 @@
 			if (data.success == false) {
 				pumadmin.appError("错误信息", data.errorMsg);
 			} else {
-				w.syncConfigObjectId = data.id;
-				pumadmin.appError("信息", "保存成功");
+				// w.syncConfigObjectId = data.id;
+				pumadmin.next();
+				// 加载DumpConfig
+				pumadmin.loadDumpConfig();
 			}
 		},
 		"modifySyncXml" : function() {
@@ -406,7 +440,6 @@
 			}
 		},
 		"objectId2MergeId" : function(objectId) {
-			console.log(objectId);
 			return objectId._inc + "_" + objectId._machine + "_"
 					+ objectId._time;
 		},

@@ -1,4 +1,4 @@
-package com.dianping.puma.admin.dao;
+package com.dianping.puma.core.sync.dao;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -6,11 +6,10 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
-import com.dianping.puma.admin.config.ConfigChangeListener;
-import com.dianping.puma.admin.config.DynamicConfig;
-import com.dianping.puma.admin.config.impl.LionDynamicConfig;
+import com.dianping.puma.core.sync.config.ConfigChangeListener;
+import com.dianping.puma.core.sync.config.DynamicConfig;
+import com.dianping.puma.core.sync.config.LionDynamicConfig;
 import com.google.code.morphia.Datastore;
 import com.google.code.morphia.Morphia;
 import com.mongodb.Mongo;
@@ -22,7 +21,6 @@ import com.mongodb.ServerAddress;
  * 
  * @author wukezhu
  */
-@Service("mongoClient")
 public class MongoClient implements ConfigChangeListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(MongoClient.class);

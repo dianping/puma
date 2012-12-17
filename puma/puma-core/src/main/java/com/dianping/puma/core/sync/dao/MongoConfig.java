@@ -1,4 +1,4 @@
-package com.dianping.puma.admin.dao;
+package com.dianping.puma.core.sync.dao;
 
 import java.io.IOException;
 import java.io.InputStream;

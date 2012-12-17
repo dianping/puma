@@ -11,8 +11,9 @@ import com.dianping.puma.core.sync.DumpConfig;
 
 public class PropertiesConfig {
     private final static PropertiesConfig instance = new PropertiesConfig();
-    private List<String> pumaServerIps;
+    private List<String> syncServerHosts;
     private Map<Long, DumpConfig.DumpSrc> serverId2mysqlsrc = new HashMap<Long, DumpConfig.DumpSrc>();
+    private String dumpServerHost;
 
     private PropertiesConfig() {
         Properties p = new Properties();
@@ -21,10 +22,10 @@ public class PropertiesConfig {
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
-        String pumaServerIpsStr = p.getProperty("pumaServerIps");
-        if (pumaServerIpsStr != null) {
-            String[] ips = pumaServerIpsStr.split(",");
-            pumaServerIps = Arrays.asList(ips);
+        String syncServerHostsStr = p.getProperty("syncServerHosts");
+        if (syncServerHostsStr != null) {
+            String[] hosts = syncServerHostsStr.split(",");
+            syncServerHosts = Arrays.asList(hosts);
         } else {
             throw new IllegalArgumentException("pumaServerIps must not be null in puma-admin-config.properties.");
         }
@@ -32,7 +33,7 @@ public class PropertiesConfig {
         if (serverId2mysqlsrcStr != null) {
             String[] serverId2mysqlsrcSplits = serverId2mysqlsrcStr.split(";");
             for (String serverId2mysqlsrc : serverId2mysqlsrcSplits) {
-                String[] serverId2mysqlsrcSplits2 = serverId2mysqlsrc.split(";");
+                String[] serverId2mysqlsrcSplits2 = serverId2mysqlsrc.split(",");
                 Long serverId = Long.parseLong(serverId2mysqlsrcSplits2[0]);
                 String host = serverId2mysqlsrcSplits2[1];
                 String username = serverId2mysqlsrcSplits2[2];
@@ -46,10 +47,7 @@ public class PropertiesConfig {
         } else {
             throw new IllegalArgumentException("serverId2mysqlsrc must not be null in puma-admin-config.properties.");
         }
-    }
-
-    public List<String> getPumaServerIps() {
-        return pumaServerIps;
+        dumpServerHost = p.getProperty("dumpServerHost");
     }
 
     public DumpConfig.DumpSrc getDumpConfigSrc(Long serverId) {
@@ -58,6 +56,14 @@ public class PropertiesConfig {
 
     public static PropertiesConfig getInstance() {
         return instance;
+    }
+
+    public List<String> getSyncServerHosts() {
+        return syncServerHosts;
+    }
+
+    public String getDumpServerHost() {
+        return dumpServerHost;
     }
 
 }

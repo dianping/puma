@@ -2,8 +2,6 @@ package com.dianping.puma.admin.web;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.text.ParseException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,18 +10,14 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.time.DateUtils;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.dianping.puma.admin.service.SyncConfigService;
 import com.dianping.puma.admin.util.GsonUtil;
-import com.dianping.puma.admin.util.MongoUtils;
 import com.dianping.puma.admin.util.SyncXmlParser;
 import com.dianping.puma.core.sync.SyncConfig;
 import com.google.gson.Gson;
@@ -31,9 +25,6 @@ import com.google.gson.Gson;
 @Controller
 public class AdminController {
     private static final Logger LOG = LoggerFactory.getLogger(AdminController.class);
-
-    @Autowired
-    private SyncConfigService syncConfigService;
 
     /**
      * 首页，使用说明

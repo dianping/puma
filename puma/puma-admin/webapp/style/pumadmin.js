@@ -24,15 +24,184 @@
 					.attr("class", "step_active");
 			$("#stepsCarousel").carousel('next');
 		},
-		"create_step1_next" : function() {
-			//判断上一步是否有保存
-			if (!w.syncConfigObjectId) {
-				pumadmin.appError("错误信息", "先保存，才能到下一步");
-				return;
-			}
+		"create_step2_next" : function() {
 			pumadmin.next();
-			//根据w.syncConfigObjectId加载DumpConfig TODO
-			
+			// 加载pumaserverId列表
+			pumadmin.loadSyncServerList();
+		},
+		"saveBinlog" : function() {
+			var param = new Object();
+			param.binlogFile = $("#binlogFileInput").val();
+			param.binlogPosition = $("#binlogPositionInput").val();
+			var url = w.contextpath + '/saveBinlog';
+			$.ajax({
+				type : 'POST',
+				url : url,
+				data : param,
+				dataType : "json",
+				success : pumadmin.saveBinlogDone,
+				error : pumadmin.httpError
+			});
+			$("#saveBinlogSuccess").hide();
+			$("#saveBinlogError").hide();
+		},
+		"saveBinlogDone" : function(data) {
+			if (data.success == false) {
+				$("#saveBinlogErrorCause").text(data.errorMsg);
+				$("#saveBinlogError").show();
+			} else {
+				$("#saveBinlogSuccess").show();
+			}
+		},
+		"loadSyncServerList" : function() {
+			var param = new Object();
+			var url = w.contextpath + '/loadSyncServerList';
+			$.ajax({
+				type : 'POST',
+				url : url,
+				data : param,
+				dataType : "json",
+				success : pumadmin.loadSyncServerListDone,
+				error : pumadmin.httpError
+			});
+		},
+		"loadSyncServerListDone" : function(data) {
+			if (data.success == false) {
+				pumadmin.appError("错误信息", data.errorMsg);
+			} else {
+				$('#pumaSyncServerId').html('');
+				$.each(data.syncServerHosts, function(i, el) {
+					$('#pumaSyncServerId').append(new Option(el, el));
+				});
+			}
+		},
+		"loadDumpConfig" : function() {
+			var param = new Object();
+			// var mergeId = pumadmin.objectId2MergeId(w.syncConfigObjectId);
+			// param.mergeId = mergeId;
+			var url = w.contextpath + '/loadDumpConfig';
+			$.ajax({
+				type : 'POST',
+				url : url,
+				data : param,
+				dataType : "json",
+				success : pumadmin.loadDumpConfigDone,
+				error : pumadmin.httpError
+			});
+		},
+		"loadDumpConfigDone" : function(data) {
+			if (data.success == false) {
+				pumadmin.appError("错误信息", data.errorMsg);
+			} else {
+				var dumpConfig = data.dumpConfig;
+				var dumpSrcText = dumpConfig.src.host + " (username="
+						+ dumpConfig.src.username + ")";
+				$('#dumpSrc').val(dumpSrcText);
+				var dumpDestText = dumpConfig.dest.host + " (username="
+						+ dumpConfig.dest.username + ")";
+				$('#dumpDest').val(dumpDestText);
+				// 展示数据同步的映射关系
+				$("#tables").html('');
+				$.each(dumpConfig.databaseConfigs, function(i, el) {
+					var html = "";
+					html += "<table class=\"table table-hover\">";
+					html += "<thead><tr>";
+					html += "<th>" + el.from + "</th>";
+					html += "<th>" + el.to + "</th>";
+					html += "</tr>";
+					html += "</thead>";
+					html += "<tbody>";
+					$.each(el.tables, function(i, el) {
+						html += "<tr>";
+						html += "<td>" + el.from + "</td>";
+						html += "<td>" + el.from + "</td>";
+						html += "</tr>";
+					});
+					html += "</tbody>";
+					html += "</table>";
+					$("#tables").append(html);
+				});
+
+			}
+		},
+		"dump" : function() {
+			var param = new Object();
+			var url = w.contextpath + '/dump';
+			$.ajax({
+				type : 'POST',
+				url : url,
+				data : param,
+				dataType : "json",
+				success : pumadmin.dumpDone,
+				error : pumadmin.httpError
+			});
+			// 按钮变换
+			$("#dumpButton").attr("disabled", "disabled");
+			$("#success").hide();
+			$("#fail").hide();
+			$("#binlogFile").text("");
+			$("#binlogPosition").text("");
+		},
+		"dumpDone" : function(data) {
+			if (data.success == false) {
+				// 显示错误消息
+				pumadmin.appError("尝试运行时发生错误", data.errorMsg);
+				// 去掉按钮disable
+				$('#dumpButton').removeAttr('disabled');
+			} else {
+				// 开始显示控制台
+				$('#console').text('');
+				pumadmin.dumpConsole();
+			}
+		},
+		"dumpConsole" : function(data) {
+			var param = new Object();
+			// 发送ajax请求jsonp
+			var url = w.contextpath + '/dumpConsole';
+			$.ajax({
+				type : 'POST',
+				url : url,
+				data : param,
+				dataType : "json",
+				success : pumadmin.dumpConsoleDone,
+				error : pumadmin.httpError
+			});
+		},
+		"dumpConsoleDone" : function(data) {
+			if (data.success == false) {
+				pumadmin.appError("访问控制台时发生错误", data.errorMsg);
+				// 去掉按钮disable
+				$('#dumpButton').removeAttr('disabled');
+			} else {
+				if (data.status == 'continue') {// 继续运行
+					// 显示到控制台
+					w.dumpLastLine = data.content;
+					$('#console').text($('#console').text() + data.content);// append()和html()一样不做转义，所以使用text()
+					$("#console").scrollTop($("#console")[0].scrollHeight);
+					pumadmin.dumpConsole();
+				} else {// 运行已经停止
+					// 获取结果
+					var binlogSign = "dump&load done. binloginfo:";
+					if (pumadmin.startWith(w.dumpLastLine, binlogSign)) {
+						var binlogJson = w.dumpLastLine
+								.substring(binlogSign.length);
+						console.log(binlogJson);
+						var binlogInfo = $.parseJSON(binlogJson);
+						$("#binlogFile").text(binlogInfo.binlogFile);
+						$("#binlogPosition").text(binlogInfo.binlogPosition);
+						$("#success").show();
+						// 获取binlog位置，如果没有则为空
+						$("#binlogFileInput").val($("#binlogFile").text());
+						$("#binlogPositionInput").val(
+								$("#binlogPosition").text());
+					} else {
+						// 显示dump失败
+						$("#fail").show();
+						// 去掉按钮disable
+						$('#dumpButton').removeAttr('disabled');
+					}
+				}
+			}
 		},
 		"loadSyncConfigs" : function(pageNum) {
 			var param = new Object();
@@ -166,8 +335,7 @@
 		},
 		"appendSyncConfig" : function(syncConfig) {
 			// 连接
-			var id = syncConfig.id._inc + "_" + syncConfig.id._machine + "_"
-					+ syncConfig.id._time;
+			var id = pumadmin.objectId2MergeId(syncConfig.id);
 			var link = "<a href=\"javascript:pumadmin.loadSyncXml('" + id
 					+ "')\">编辑 »</a>";
 			// 拼装
@@ -179,10 +347,9 @@
 		},
 		"appendSyncConfigForWatch" : function(syncConfig) {
 			// 连接
-			var id = syncConfig.id._inc + "_" + syncConfig.id._machine + "_"
-					+ syncConfig.id._time;
-			var link = "<a href=\"javascript:pumadmin.watchSyncConfig('" + id
-					+ "')\">具体状态 »</a>";
+			var mergeId = pumadmin.objectId2MergeId(syncConfig.id);
+			var link = "<a href=\"javascript:pumadmin.watchSyncConfig('"
+					+ mergeId + "')\">具体状态 »</a>";
 			// 拼装
 			var html = "<tr><td>" + syncConfig.src.pumaServerHost + "</td><td>"
 					+ syncConfig.src.serverId + "</td><td>"
@@ -190,7 +357,7 @@
 					+ syncConfig.dest.host + "</td><td>" + link + "</td><tr>";
 			$("#resultTable").append(html);
 		},
-		//显示配置信息，实时：显示binlog进度，操作：暂停，启动，追赶
+		// 显示配置信息，实时：显示binlog进度，操作：暂停，启动，追赶
 		"watchSyncConfig" : function(mergeId) {
 			pumadmin.next();
 			var param = new Object();
@@ -245,8 +412,10 @@
 			if (data.success == false) {
 				pumadmin.appError("错误信息", data.errorMsg);
 			} else {
-				w.syncConfigObjectId = data.id;
-				pumadmin.appError("信息", "保存成功");
+				// w.syncConfigObjectId = data.id;
+				pumadmin.next();
+				// 加载DumpConfig
+				pumadmin.loadDumpConfig();
 			}
 		},
 		"modifySyncXml" : function() {
@@ -270,12 +439,16 @@
 				pumadmin.appError("信息", "修改成功");
 			}
 		},
-		"step1_next" : function() {
+		"objectId2MergeId" : function(objectId) {
+			return objectId._inc + "_" + objectId._machine + "_"
+					+ objectId._time;
 		},
 		"appError" : function(title, errorMsg) {
 			pumadmin.alertError(title, errorMsg);
 		},
 		"httpError" : function(xhr, textStatus, errorThrown) {
+			// 去掉按钮disable
+			$('#dumpButton').removeAttr('disabled');
 			pumadmin.alertError('抱歉啦', '抱歉，网络发生错误了，请刷新页面试试...');
 		},
 		"alertError" : function(title, errorMsg) {
@@ -283,6 +456,26 @@
 			$('#errorMsg > div[class="modal-header"] > h3').text(title);
 			$('#errorMsg > div[class="modal-body"] > p').text(errorMsg);
 			$('#errorMsg').modal('show');
+		},
+		"endWith" : function(s, endStr) {
+			if (s == null || s == "" || s.length == 0
+					|| endStr.length > s.length)
+				return false;
+			if (s.substring(s.length - endStr.length) == endStr)
+				return true;
+			else
+				return false;
+			return true;
+		},
+		"startWith" : function(s, preStr) {
+			if (s == null || s == "" || s.length == 0
+					|| preStr.length > s.length)
+				return false;
+			if (s.substr(0, preStr.length) == preStr)
+				return true;
+			else
+				return false;
+			return true;
 		}
 	};
 	w.pumadmin = pumadmin;

@@ -1,30 +1,17 @@
 <div>
-   <legend>设置Mysql源</legend>
-   <form method="post" class="form-horizontal"
-      action="${rc.contextPath}/create">
-      <div class="control-group">
-         <label class="control-label">Host</label>
-         <div class="controls">
-            <input type="text" name="app" size="20" placeholder="">
-         </div>
-      </div>
-      <div class="control-group">
-         <label class="control-label">port</label>
-         <div class="controls">
-            <input class="input-xlarge" type="text" name="gitUrl"
-               placeholder="">
-         </div>
-      </div>
-      <div class="control-group" style="margin-top: 40px">
-         <div class="controls">
-            <button type="submit" class="btn btn-success">创建</button>
-            <button type="button" onclick="advance()"
-               style="margin-left: 50px" class="btn">更多选项</button>
-         </div>
-      </div>
-   </form>
-   <div style="width: 100%; text-align: right">
-      <button type="submit" onclick="puma_admin.next_step();"
-         class="btn btn-primary">完成</button>
+   <button style="float: right; margin-right: 20px;" type="button"
+      onclick="pumadmin.pre();" class="btn">上一步</button>
+   <p class="legend">创建同步任务</p>
+   <div class="alert alert-warning">
+      <strong>温馨提示</strong>：同步任务和同步配置是一一对应的，不会重复。
+   </div>
+   <h5 style="">请为同步任务，分配一台Puma-SyncServer</h5>
+   <div
+      style="padding: 10px 10px 0px 10px; background-color: white; border: 1px solid rgba(0, 0, 0, 0.15); border-radius: 4px 4px 4px 4px;">
+      <form class="form-inline">
+         <span>选择Puma-SyncServer的host: </span> <select
+            id="pumaSyncServerId" style="margin-left: 16px;">
+         </select>
+      </form>
    </div>
 </div>

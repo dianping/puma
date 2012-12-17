@@ -92,14 +92,13 @@ public class DefaultEventStorage implements EventStorage {
     }
 
     @Override
-    public EventChannel getChannel(long seq, long serverId, String binlogFile, String binlogInfo)
-            throws StorageException {
+    public EventChannel getChannel(long seq, long serverId, String binlogFile, long binlogPos) throws StorageException {
         EventChannel channel = null;
         if (seq != -3) {
             channel = new DefaultEventChannel(bucketManager, seq, codec);
         } else {
             // TODO BinlogInfo & BinlogInfoAndSeq merge
-            BinlogInfoAndSeq startbinlog = new BinlogInfoAndSeq(serverId, binlogFile, Long.valueOf(binlogInfo)
+            BinlogInfoAndSeq startbinlog = new BinlogInfoAndSeq(serverId, binlogFile, Long.valueOf(binlogPos)
                     .longValue(), -1);
             channel = new DefaultEventChannel(bucketManager, translateBinlogInfoToSeq(startbinlog), codec);
         }
@@ -150,7 +149,8 @@ public class DefaultEventStorage implements EventStorage {
                 String nowDate = sdf.format(new Date());
                 if (!lastDate.equals(nowDate)) {
                     writingBucket.stop();
-                    writingBucket = bucketManager.getNextWriteBucket();;
+                    writingBucket = bucketManager.getNextWriteBucket();
+                    ;
                     lastDate = nowDate;
                 }
             }
@@ -190,10 +190,10 @@ public class DefaultEventStorage implements EventStorage {
         try {
             bucketManager.stop();
             try {
-				this.binlogIndexManager.stop();
-			} catch (IOException e) {
-				//ignore
-			}
+                this.binlogIndexManager.stop();
+            } catch (IOException e) {
+                // ignore
+            }
             // TODO stop binlog index
         } catch (StorageLifeCycleException e1) {
             // ignore

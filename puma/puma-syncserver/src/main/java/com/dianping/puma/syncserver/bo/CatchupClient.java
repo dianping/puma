@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.sync.BinlogInfo;
 import com.dianping.puma.core.sync.SyncConfig;
 
 public class CatchupClient extends AbstractSyncClient {
@@ -23,7 +24,7 @@ public class CatchupClient extends AbstractSyncClient {
     protected void onEvent(ChangedEvent event) throws Exception {
         //判断是否已经到达binlogTo
         if (StringUtils.equals(binlogInfoEnd.getBinlogFile(), curBinlogInfo.getBinlogFile())
-                && binlogInfoEnd.getBinlogPosition().compareTo(curBinlogInfo.getBinlogPosition()) <= 0) {
+                && binlogInfoEnd.getBinlogPosition() <= curBinlogInfo.getBinlogPosition()) {
             stop();
             return;
         }

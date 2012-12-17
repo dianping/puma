@@ -16,4 +16,19 @@
     <!-- Main spring IOC entrance -->
     <import resource="applicationContext-properties.xml" />
 
+    <bean id="mongoClient" class="com.dianping.puma.core.sync.dao.MongoClient">
+    </bean>
+
+    <bean id="syncConfigDao" class="com.dianping.puma.core.sync.dao.SyncConfigDao">
+        <constructor-arg ref="mongoClient" />
+    </bean>
+
+    <bean id="syncTaskDao" class="com.dianping.puma.core.sync.dao.SyncTaskDao">
+        <constructor-arg ref="mongoClient" />
+    </bean>
+
+    <bean id="syncXmlDao" class="com.dianping.puma.admin.dao.SyncXmlDao">
+        <constructor-arg ref="mongoClient" />
+    </bean>
+
 </beans>

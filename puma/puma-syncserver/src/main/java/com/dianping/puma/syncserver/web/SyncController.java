@@ -2,29 +2,38 @@ package com.dianping.puma.syncserver.web;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.dianping.puma.core.sync.BinlogInfo;
+import com.dianping.puma.core.sync.Constant;
+import com.dianping.puma.core.sync.DatabaseBinlogInfo;
 import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.SyncConfig;
 import com.dianping.puma.syncserver.bo.AbstractSyncClient;
-import com.dianping.puma.syncserver.bo.BinlogInfo;
 import com.dianping.puma.syncserver.bo.CatchupClient;
 import com.dianping.puma.syncserver.bo.DumpClient;
 import com.dianping.puma.syncserver.bo.SyncClient;
 import com.dianping.puma.syncserver.holder.SyncClientHolder;
+import com.dianping.puma.syncserver.service.SyncConfigService;
 import com.dianping.puma.syncserver.util.GsonUtil;
 import com.dianping.puma.syncserver.util.SyncXmlParser;
 import com.google.gson.Gson;
@@ -42,6 +51,35 @@ import com.google.gson.Gson;
 public class SyncController {
 
     private static final Logger LOG = LoggerFactory.getLogger(SyncController.class);
+
+    @Autowired
+    private SyncConfigService syncConfigService;
+
+    @RequestMapping(value = "/startTask", method = { RequestMethod.GET, RequestMethod.POST }, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object startTask(String syncTaskIdJson) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            //接收syncTaskId的json字符串，解析得到syncTaskId
+            ObjectId syncTaskId = GsonUtil.fromJson(syncTaskIdJson, ObjectId.class);
+            SyncConfig syncConfig = this.syncConfigService.findSyncConfig(syncTaskId);
+            boolean exist = SyncClientHolder.contain(syncConfig.getId());
+            if (exist) {
+                throw new IllegalArgumentException("SyncClient[SyncConfigId=" + syncConfig.getId() + "] is already running!");
+            }
+            //创建并启动SyncClient对象
+            SyncClient syncClient = new SyncClient(syncConfig);
+            syncClient.start();
+            map.put("success", true);
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+            LOG.error(e.getMessage(), e);
+        }
+        Gson gson = new Gson();
+        return gson.toJson(map);
+
+    }
 
     @RequestMapping(value = "/createSync", method = { RequestMethod.GET, RequestMethod.POST }, produces = "application/json; charset=utf-8")
     @ResponseBody
@@ -130,36 +168,40 @@ public class SyncController {
 
     /**
      * 根据dumpConfig，进行dump，并返回binlog位置<br>
-     * (dump使用json，因为是内部传输；sync使用xml，因为是需要给用户看和修改。)
+     * (dump使用json，因为是内部传输；sync使用xml，因为是需要给用户看和修改。) <br>
+     * 
+     * @throws IOException
+     * @throws UnsupportedEncodingException
      */
-    @RequestMapping(value = "/dump", method = { RequestMethod.POST, RequestMethod.GET }, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public Object dump(HttpServletRequest request, String dumpJson) {
-        Map<String, Object> map = new HashMap<String, Object>();
+    @RequestMapping(value = "/dump", method = { RequestMethod.POST, RequestMethod.GET }, produces = "text/html; charset=utf-8")
+    public void dump(HttpServletResponse response, String dumpConfigJson, String sessionId) throws UnsupportedEncodingException,
+            IOException {
+        PrintWriter pw = new PrintWriter(new OutputStreamWriter(response.getOutputStream(), "UTF-8"), true);
         try {
             //TODO mock dumpJson
-            if (dumpJson == null) {
+            if (dumpConfigJson == null) {
                 File file = new File("/home/wukezhu/document/mywork/puma/puma/puma-syncserver/src/main/resources/dumpConfig.json");
-                dumpJson = IOUtils.toString(new FileInputStream(file), "UTF-8");
+                dumpConfigJson = IOUtils.toString(new FileInputStream(file), "UTF-8");
             }
             //解析dumpJson，得到DumpConfig对象
             Gson gson = new Gson();
-            DumpConfig dumpConfig = gson.fromJson(dumpJson, DumpConfig.class);
-            LOG.info("receive dumpConfig: " + dumpConfig);
-            //启动DumpClient对象
-            DumpClient dumpClient = new DumpClient(dumpConfig);
-            List<BinlogInfo> binlogPos = dumpClient.dump();
-            LOG.info("DumpClient done，binlogPos is " + binlogPos);
-
-            map.put("binlogPos", binlogPos);
-            map.put("success", true);
-        } catch (Exception e) {
-            map.put("success", false);
-            map.put("errorMsg", e.getMessage());
+            DumpConfig dumpConfig = gson.fromJson(dumpConfigJson, DumpConfig.class);
+            LOG.info("sync-server receive dumpConfig: " + dumpConfig);
+            pw.println("sync-server receive dumpConfig: " + dumpConfig);
+            //启动DumpClient对象(DumpClient将进度输出到out)
+            DumpClient dumpClient = new DumpClient(dumpConfig, pw, sessionId);
+            pw.println("sync-server starting dump");
+            List<DatabaseBinlogInfo> binlogInfos = dumpClient.dump();
+            //将binlog输出
+            //目前只支持一个databaseConfig，所以此处binlogInfos只有1个
+            DatabaseBinlogInfo binlogInfo = binlogInfos.get(0);
+            pw.println(Constant.BINLOG_SIGN_PREFIX + gson.toJson(binlogInfo));
+        } catch (Throwable e) {
             LOG.error(e.getMessage(), e);
+            pw.println(e.getMessage());
+        } finally {
+            pw.close();
         }
-        Gson gson = new Gson();
-        return gson.toJson(map);
     }
 
     /**

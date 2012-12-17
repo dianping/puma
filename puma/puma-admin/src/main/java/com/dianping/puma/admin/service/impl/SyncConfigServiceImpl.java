@@ -2,6 +2,7 @@ package com.dianping.puma.admin.service.impl;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -11,19 +12,20 @@ import org.springframework.stereotype.Service;
 
 import com.dianping.puma.admin.bo.SyncXml;
 import com.dianping.puma.admin.config.PropertiesConfig;
-import com.dianping.puma.admin.dao.SyncConfigDao;
 import com.dianping.puma.admin.dao.SyncXmlDao;
 import com.dianping.puma.admin.service.SyncConfigService;
 import com.dianping.puma.admin.util.MysqlMetaInfoFetcher;
+import com.dianping.puma.core.sync.BinlogInfo;
 import com.dianping.puma.core.sync.ColumnConfig;
 import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.DumpConfig;
+import com.dianping.puma.core.sync.DumpConfig.DumpDest;
+import com.dianping.puma.core.sync.DumpConfig.DumpSrc;
 import com.dianping.puma.core.sync.InstanceConfig;
 import com.dianping.puma.core.sync.SyncConfig;
 import com.dianping.puma.core.sync.SyncDest;
 import com.dianping.puma.core.sync.TableConfig;
-import com.dianping.puma.core.sync.DumpConfig.DumpDest;
-import com.dianping.puma.core.sync.DumpConfig.DumpSrc;
+import com.dianping.puma.core.sync.dao.SyncConfigDao;
 import com.google.code.morphia.Key;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
@@ -43,6 +45,16 @@ public class SyncConfigServiceImpl implements SyncConfigService {
             throw new IllegalArgumentException("创建失败，已有相同的配置存在。(src.serverId=" + syncConfig.getSrc().getServerId() + ",src,target="
                     + syncConfig.getSrc().getTarget() + ",dest.host=" + syncConfig.getDest() + ")");
         }
+        //验证仅有一个databaseConfig
+        if (syncConfig.getInstance().getDatabases() == null || syncConfig.getInstance().getDatabases().size() == 0
+                || syncConfig.getInstance().getDatabases().size() > 1) {
+            throw new IllegalArgumentException("创建失败，<database>配置必须有且仅能有一个！");
+        }
+        //验证table
+        if (syncConfig.getInstance().getDatabases().get(0).getTables() == null
+                || syncConfig.getInstance().getDatabases().get(0).getTables().size() == 0) {
+            throw new IllegalArgumentException("创建失败，<table>配置必须至少有一个！");
+        }
         //保存syncConfig和syncXml
         Key<SyncConfig> key = syncConfigDao.save(syncConfig);
         ObjectId id = (ObjectId) key.getId();
@@ -59,19 +71,17 @@ public class SyncConfigServiceImpl implements SyncConfigService {
     }
 
     @Override
-    public ObjectId modifySyncConfig(ObjectId id, SyncConfig newSyncConfig, String syncXmlString) {
+    public void modifySyncConfig(SyncConfig newSyncConfig, String syncXmlString) {
         //检验是否合法
         SyncConfig oldSyncConfig = syncConfigDao.getDatastore().getByKey(SyncConfig.class,
-                new Key<SyncConfig>(SyncConfig.class, id));
+                new Key<SyncConfig>(SyncConfig.class, newSyncConfig.getId()));
         this._compare(oldSyncConfig, newSyncConfig);
         //保存
-        newSyncConfig.setId(id);
-        Key<SyncConfig> key = syncConfigDao.save(newSyncConfig);
+        syncConfigDao.save(newSyncConfig);
         SyncXml syncXml = new SyncXml();
-        syncXml.setId(id);
+        syncXml.setId(newSyncConfig.getId());
         syncXml.setXml(syncXmlString);
         this._saveSyncXml(syncXml);
-        return (ObjectId) key.getId();
     }
 
     /**
@@ -140,15 +150,14 @@ public class SyncConfigServiceImpl implements SyncConfigService {
         //dumpSrc
         long serverId = syncConfig.getSrc().getServerId();
         DumpSrc dumpSrc = PropertiesConfig.getInstance().getDumpConfigSrc(serverId);
+        if (dumpSrc == null) {
+            throw new IllegalArgumentException("serverId 对应的 mysql信息不存在，请注意该映射关系是需要在config文件作配置的。");
+        }
         dumpConfig.setSrc(dumpSrc);
         SyncDest syncDest = syncConfig.getDest();
-        String[] splits = syncDest.getHost().split(":");
-        String host = splits[0];
-        int port = Integer.parseInt(splits[1]);
         //dumpDest
         DumpDest dumpDest = new DumpDest();
-        dumpDest.setHost(host);
-        dumpDest.setPort(port);
+        dumpDest.setHost(syncDest.getHost());
         dumpDest.setUsername(syncDest.getUsername());
         dumpDest.setPassword(syncDest.getPassword());
         dumpConfig.setDest(dumpDest);
@@ -207,17 +216,21 @@ public class SyncConfigServiceImpl implements SyncConfigService {
     }
 
     /**
-     * TODO 从tableNames中去掉已经存在dumpTableConfigs(以TableConfig.getFrom()判断)中的表名
+     * 从tableNames中去掉已经存在dumpTableConfigs(以TableConfig.getFrom()判断)中的表名
      */
     private void getRidOf(List<String> tableNames, List<TableConfig> dumpTableConfigs) {
-
+        Collection<String> dumpTableNames = new ArrayList<String>();
+        for (TableConfig tableConfig : dumpTableConfigs) {
+            dumpTableNames.add(tableConfig.getFrom());
+        }
+        tableNames.removeAll(dumpTableNames);
     }
 
     /**
      * 如果“table下的字段没有被重命名,partOf为false”，那么该table可以被dump
      */
     private boolean shouldDump(TableConfig tableConfig) {
-        if (!tableConfig.getPartOf()) {
+        if (tableConfig.isPartOf()) {
             return false;
         }
         List<ColumnConfig> columnConfigs = tableConfig.getColumns();
@@ -227,5 +240,26 @@ public class SyncConfigServiceImpl implements SyncConfigService {
             }
         }
         return true;
+    }
+
+    @Override
+    public void modifySyncConfig(ObjectId syncConfigId, BinlogInfo binlogInfo) {
+        SyncConfig syncConfig = this.syncConfigDao.getDatastore().getByKey(SyncConfig.class,
+                new Key<SyncConfig>(SyncConfig.class, syncConfigId));
+        //更新binloginfo
+        syncConfig.getSrc().setBinlogInfo(binlogInfo);
+        //保存
+        syncConfigDao.save(syncConfig);
+    }
+
+    @Override
+    public void removeSyncConfig(ObjectId id) {
+        Query<SyncConfig> q = syncConfigDao.getDatastore().createQuery(SyncConfig.class);
+        q.field("_id").equal(id);
+        syncConfigDao.deleteByQuery(q);
+        Query<SyncXml> q2 = syncXmlDao.getDatastore().createQuery(SyncXml.class);
+        q2.field("_id").equal(id);
+        syncXmlDao.deleteByQuery(q2);
+
     }
 }

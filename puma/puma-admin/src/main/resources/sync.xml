@@ -15,13 +15,13 @@
         <ddl>true</ddl>
         <target>Dianping</target>
         <transaction>false</transaction>
-        <binlogInfo>
+        <!-- <binlogInfo>
             <binlogFile>binlog</binlogFile>
             <binlogPosition>123</binlogPosition>
-        </binlogInfo>
+        </binlogInfo>  -->
     </src>
     <instance>
-        <database from="pumatest" to="pumatest">
+        <database from="pumatest" to="pumatest2">
             <table from="test1" to="test1">
                 <column from="id" to="id" primary="true" />
                 <column from="name" to="name" />

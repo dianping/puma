@@ -1,4 +1,4 @@
-package com.dianping.puma.admin.config;
+package com.dianping.puma.core.sync.config;
 
 public interface DynamicConfig {
 

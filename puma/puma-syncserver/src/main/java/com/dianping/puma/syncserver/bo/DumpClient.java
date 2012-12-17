@@ -8,7 +8,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,9 +22,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import com.dianping.puma.core.sync.BinlogInfo;
+import com.dianping.puma.core.sync.DatabaseBinlogInfo;
 import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.TableConfig;
@@ -34,7 +33,7 @@ import com.dianping.puma.core.sync.TableConfig;
  * @author wukezhu
  */
 public class DumpClient {
-    private static final Logger LOG = LoggerFactory.getLogger(DumpClient.class);
+    //    private static final Logger LOG = LoggerFactory.getLogger(DumpClient.class);
     private final static Pattern BINLOG_LINE_PATTERN = Pattern.compile("^.+LOG_FILE='(.*)',\\s+.+LOG_POS=([0-9]+);$");
 
     private static final String BASE_DIR = "/data/appdatas/puma/syncserver/";
@@ -52,13 +51,16 @@ public class DumpClient {
     private DumpConfig dumpConfig;
 
     private Process proc;
+    private PrintWriter pw;
 
-    public DumpClient(DumpConfig dumpConfig) {
-        this.uuid = UUID.randomUUID().toString();
+    public DumpClient(DumpConfig dumpConfig, PrintWriter pw, String sessionId) {
+        //        this.uuid = UUID.randomUUID().toString();
+        this.uuid = sessionId;
         this.dumpOutputDir = BASE_DIR + "dump/" + uuid + "/";
         new File(dumpOutputDir).mkdir();
         this.dumpConfig = dumpConfig;
-        LOG.info("DumpClient inited.");
+        this.pw = pw;
+        pw.println("DumpClient inited.");
     }
 
     /**
@@ -146,11 +148,11 @@ public class DumpClient {
      * 解决方法:<br>
      * 允许不同database的mysqldump的state(binlog)不一致，这样需要为不同database做dump和PumaClient的追赶
      */
-    public List<BinlogInfo> dump() throws ExecuteException, IOException, InterruptedException {
+    public List<DatabaseBinlogInfo> dump() throws ExecuteException, IOException, InterruptedException {
         try {
-            List<BinlogInfo> binlogPosList = new ArrayList<BinlogInfo>();
+            List<DatabaseBinlogInfo> binlogPosList = new ArrayList<DatabaseBinlogInfo>();
             List<DatabaseConfig> databaseConfigs = dumpConfig.getDatabaseConfigs();
-            LOG.info("============ dump ===========");
+            pw.println("============ dump ===========");
             for (DatabaseConfig databaseConfig : databaseConfigs) {
                 //执行dump脚本，dump到<dump_tempDir>/<uuid>目录
                 String srcDatabaseName = databaseConfig.getFrom();
@@ -162,15 +164,16 @@ public class DumpClient {
                 if (StringUtils.isNotBlank(output)) {
                     throw new DumpException("mysqldump output is not empty , so consided to be failed: " + output);
                 }
-                LOG.info("dump done.");
-                BinlogInfo binlogPos = new BinlogInfo();
+                pw.println("dump done.");
+                DatabaseBinlogInfo binlogPos = new DatabaseBinlogInfo();
+                binlogPos.setDatabaseName(srcDatabaseName);
                 LineIterator lineIterators = IOUtils.lineIterator(new FileInputStream(_getDumpFile(srcDatabaseName)), "UTF-8");
                 PrintWriter deelFileWriter = new PrintWriter(new File(_getSourceFile(srcDatabaseName)), "UTF-8");
                 deelFileWriter.println("CREATE DATABASE IF NOT EXISTS " + destDatabaseName + ";USE " + destDatabaseName + ";");//添加select database语句
                 while (lineIterators.hasNext()) {
                     String line = lineIterators.next();
                     //获取binlog位置
-                    if (StringUtils.isBlank(binlogPos.getBinlogFile()) || binlogPos.getBinlogPosition() == null) {
+                    if (StringUtils.isBlank(binlogPos.getBinlogFile()) || binlogPos.getBinlogPosition() <= 0) {
                         Matcher matcher = BINLOG_LINE_PATTERN.matcher(line);
                         if (matcher.matches()) {
                             binlogPos.setBinlogFile(matcher.group(1));
@@ -195,15 +198,15 @@ public class DumpClient {
                     deelFileWriter.println(line);
                 }
                 deelFileWriter.close();
-                if (StringUtils.isBlank(binlogPos.getBinlogFile()) || binlogPos.getBinlogPosition() == null) {
+                if (StringUtils.isBlank(binlogPos.getBinlogFile()) || binlogPos.getBinlogPosition() <= 0) {
                     throw new DumpException("binlogFile or binlogPos is Error: binlogFile=" + binlogPos.getBinlogFile()
                             + ",binlogPos=" + binlogPos.getBinlogPosition());
                 }
-                LOG.info("binlog info:" + binlogPos);
+                pw.println("binlog info:" + binlogPos);
                 binlogPosList.add(binlogPos);
             }
             //load
-            LOG.info("============ load ===========");
+            pw.println("============ load ===========");
             for (DatabaseConfig databaseConfig : databaseConfigs) {
                 //执行dump脚本，dump到<dump_tempDir>/<uuid>目录
                 String srcDatabaseName = databaseConfig.getFrom();
@@ -211,11 +214,11 @@ public class DumpClient {
                 if (StringUtils.isNotBlank(output)) {
                     throw new DumpException("mysqlload output is not empty , so consided to be failed: " + output);
                 }
-                LOG.info("load done.");
+                pw.println("load done.");
             }
             return binlogPosList;
         } catch (Exception e) {
-            throw new DumpException("dump error!", e);
+            throw new DumpException("dump error: " + e.getMessage(), e);
         }
     }
 
@@ -271,25 +274,27 @@ public class DumpClient {
         for (String tableName : tableNames) {
             cmdlist.add(tableName);
         }
-        LOG.info("start dumping " + databaseName + " ...");
+        pw.println("start dumping " + databaseName + " ...");
         return _executeByApache(cmdlist.toArray(new String[0]));
     }
 
     private String _mysqlload(String databaseName) throws ExecuteException, IOException, InterruptedException {
         List<String> cmdlist = new ArrayList<String>();
         cmdlist.add(SHELL_DIR + "mysqlload.sh");
-        cmdlist.add("--host=" + dumpConfig.getDest().getHost());
         cmdlist.add("--user=" + dumpConfig.getDest().getUsername());
+        String hostWithPort = dumpConfig.getSrc().getHost();
+        String[] hostWithPortSplits = hostWithPort.split(":");
+        cmdlist.add("--host=" + hostWithPortSplits[0]);
+        cmdlist.add("--port=" + hostWithPortSplits[1]);
         cmdlist.add("--password=" + dumpConfig.getDest().getPassword());
-        cmdlist.add("--port=" + dumpConfig.getDest().getPort());
         cmdlist.add(_getSourceFile(databaseName));
-        LOG.info("start loading " + databaseName + " ...");
+        pw.println("start loading " + databaseName + " ...");
         return _executeByApache(cmdlist.toArray(new String[0]));
     }
 
     @SuppressWarnings("unused")
     private String _execute(String[] cmdarray) throws IOException {
-        LOG.info("execute shell script, cmd is: " + Arrays.toString(cmdarray));
+        pw.println("execute shell script, cmd is: " + Arrays.toString(cmdarray));
         InputStream input = null;
         try {
             proc = Runtime.getRuntime().exec(cmdarray);
@@ -309,7 +314,7 @@ public class DumpClient {
         for (int i = 1; i < cmdarray.length; i++) {
             cmdLine.addArgument(cmdarray[i]);
         }
-        LOG.info("execute(by apache) shell script, cmd is: " + cmdLine.toString());
+        pw.println("execute(by apache) shell script, cmd is: " + cmdLine.toString());
         executor.execute(cmdLine, resultHandler);
         resultHandler.waitFor();
         return outputStream.toString();

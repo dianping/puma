@@ -1,4 +1,4 @@
-package com.dianping.puma.admin.config.impl;
+package com.dianping.puma.core.sync.config;
 
 import java.io.InputStream;
 import java.util.Properties;
@@ -10,8 +10,6 @@ import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
-import com.dianping.puma.admin.config.ConfigChangeListener;
-import com.dianping.puma.admin.config.DynamicConfig;
 
 public class LionDynamicConfig implements DynamicConfig {
 

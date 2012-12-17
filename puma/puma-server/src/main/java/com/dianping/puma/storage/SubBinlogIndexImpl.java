@@ -79,8 +79,7 @@ public class SubBinlogIndexImpl implements SubBinlogIndex{
 				return Long.valueOf(temp).longValue();
 			}
 		}
-		if (result == null)
-			return -1;
+
 		String temp = result.getProperty(binlogInfoAndSeq.toString());
 		if (temp == null) {
 			return -1;

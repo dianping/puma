@@ -230,7 +230,7 @@ public class SyncConfigServiceImpl implements SyncConfigService {
      * 如果“table下的字段没有被重命名,partOf为false”，那么该table可以被dump
      */
     private boolean shouldDump(TableConfig tableConfig) {
-        if (tableConfig.getPartOf()) {
+        if (tableConfig.isPartOf()) {
             return false;
         }
         List<ColumnConfig> columnConfigs = tableConfig.getColumns();

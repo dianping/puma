@@ -26,7 +26,7 @@ public class TableConfig {
         this.to = to;
     }
 
-    public boolean getPartOf() {
+    public boolean isPartOf() {
         return partOf;
     }
 

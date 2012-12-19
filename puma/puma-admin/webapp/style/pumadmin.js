@@ -69,9 +69,9 @@
 			if (data.success == false) {
 				pumadmin.appError("错误信息", data.errorMsg);
 			} else {
-				$('#pumaSyncServerId').html('');
+				$('#syncServerHost').html('');
 				$.each(data.syncServerHosts, function(i, el) {
-					$('#pumaSyncServerId').append(new Option(el, el));
+					$('#syncServerHost').append(new Option(el, el));
 				});
 			}
 		},
@@ -185,7 +185,6 @@
 					if (pumadmin.startWith(w.dumpLastLine, binlogSign)) {
 						var binlogJson = w.dumpLastLine
 								.substring(binlogSign.length);
-						console.log(binlogJson);
 						var binlogInfo = $.parseJSON(binlogJson);
 						$("#binlogFile").text(binlogInfo.binlogFile);
 						$("#binlogPosition").text(binlogInfo.binlogPosition);
@@ -437,6 +436,30 @@
 				pumadmin.appError("错误信息", data.errorMsg);
 			} else {
 				pumadmin.appError("信息", "修改成功");
+			}
+		},
+		"saveSyncTask" : function() {
+			var param = new Object();
+			param.syncServerHost = $("#syncServerHost").val();
+			var url = w.contextpath + '/saveSyncTask';
+			$.ajax({
+				type : 'POST',
+				url : url,
+				data : param,
+				dataType : "json",
+				success : pumadmin.saveSyncTaskDone,
+				error : pumadmin.httpError
+			});
+			$("#saveSyncTaskSuccess").hide();
+			$("#saveSyncTaskError").hide();
+		},
+		"saveSyncTaskDone" : function(data) {
+			if (data.success == false) {
+				$("#saveSyncTaskErrorCause").text(data.errorMsg);
+				$("#saveSyncTaskError").show();
+			} else {
+				$("#saveSyncTaskSuccess").show();
+				$("#saveSyncTaskButton").attr("disabled", "disabled");
 			}
 		},
 		"objectId2MergeId" : function(objectId) {

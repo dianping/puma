@@ -24,8 +24,10 @@ import com.dianping.puma.core.sync.DumpConfig.DumpSrc;
 import com.dianping.puma.core.sync.InstanceConfig;
 import com.dianping.puma.core.sync.SyncConfig;
 import com.dianping.puma.core.sync.SyncDest;
+import com.dianping.puma.core.sync.SyncTask;
 import com.dianping.puma.core.sync.TableConfig;
 import com.dianping.puma.core.sync.dao.SyncConfigDao;
+import com.dianping.puma.core.sync.dao.SyncTaskDao;
 import com.google.code.morphia.Key;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
@@ -37,6 +39,9 @@ public class SyncConfigServiceImpl implements SyncConfigService {
 
     @Autowired
     SyncXmlDao syncXmlDao;
+
+    @Autowired
+    SyncTaskDao syncTaskDao;
 
     @Override
     public ObjectId saveSyncConfig(SyncConfig syncConfig, String syncXmlString) {
@@ -261,5 +266,11 @@ public class SyncConfigServiceImpl implements SyncConfigService {
         q2.field("_id").equal(id);
         syncXmlDao.deleteByQuery(q2);
 
+    }
+
+    @Override
+    public ObjectId saveSyncTask(SyncTask syncTask) {
+        Key<SyncTask> key = syncTaskDao.save(syncTask);
+        return (ObjectId) key.getId();
     }
 }

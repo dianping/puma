@@ -9,10 +9,11 @@ import com.dianping.puma.admin.bo.SyncXml;
 import com.dianping.puma.core.sync.BinlogInfo;
 import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.SyncConfig;
+import com.dianping.puma.core.sync.SyncTask;
 
 public interface SyncConfigService {
 
-    public ObjectId saveSyncConfig(SyncConfig syncConfig, String syncXmlString);
+    ObjectId saveSyncConfig(SyncConfig syncConfig, String syncXmlString);
 
     void modifySyncConfig(SyncConfig syncConfig, String syncXmlString);
 
@@ -41,4 +42,5 @@ public interface SyncConfigService {
      */
     DumpConfig convertSyncConfigToDumpConfig(SyncConfig syncConfig) throws SQLException;
 
+    ObjectId saveSyncTask(SyncTask syncTask);
 }

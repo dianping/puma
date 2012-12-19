@@ -17,8 +17,8 @@ public class SyncTask {
 
     @Id
     private ObjectId id;
-    /** puma-syncserver的id，标识着某台具体的服务器 */
-    private String pumaSyncServerId;
+    /** puma-syncserver的host，标识着某台具体的服务器 */
+    private String syncServerHost;
     /** 同步配置的id，对应SyncConfig.getId() */
     private ObjectId syncConfigId;
     /** 创建时间 */
@@ -32,12 +32,12 @@ public class SyncTask {
         this.id = id;
     }
 
-    public String getPumaSyncServerId() {
-        return pumaSyncServerId;
+    public String getSyncServerHost() {
+        return syncServerHost;
     }
 
-    public void setPumaSyncServerId(String pumaSyncServerId) {
-        this.pumaSyncServerId = pumaSyncServerId;
+    public void setSyncServerHost(String syncServerHost) {
+        this.syncServerHost = syncServerHost;
     }
 
     public ObjectId getSyncConfigId() {
@@ -62,8 +62,8 @@ public class SyncTask {
         int result = 1;
         result = prime * result + ((createDate == null) ? 0 : createDate.hashCode());
         result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((pumaSyncServerId == null) ? 0 : pumaSyncServerId.hashCode());
         result = prime * result + ((syncConfigId == null) ? 0 : syncConfigId.hashCode());
+        result = prime * result + ((syncServerHost == null) ? 0 : syncServerHost.hashCode());
         return result;
     }
 
@@ -86,22 +86,22 @@ public class SyncTask {
                 return false;
         } else if (!id.equals(other.id))
             return false;
-        if (pumaSyncServerId == null) {
-            if (other.pumaSyncServerId != null)
-                return false;
-        } else if (!pumaSyncServerId.equals(other.pumaSyncServerId))
-            return false;
         if (syncConfigId == null) {
             if (other.syncConfigId != null)
                 return false;
         } else if (!syncConfigId.equals(other.syncConfigId))
+            return false;
+        if (syncServerHost == null) {
+            if (other.syncServerHost != null)
+                return false;
+        } else if (!syncServerHost.equals(other.syncServerHost))
             return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "SyncTask [id=" + id + ", pumaSyncServerId=" + pumaSyncServerId + ", syncConfigId=" + syncConfigId + ", createDate="
+        return "SyncTask [id=" + id + ", syncServerHost=" + syncServerHost + ", syncConfigId=" + syncConfigId + ", createDate="
                 + createDate + "]";
     }
 

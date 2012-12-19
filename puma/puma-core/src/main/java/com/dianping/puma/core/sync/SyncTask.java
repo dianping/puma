@@ -5,6 +5,8 @@ import java.util.Date;
 import org.bson.types.ObjectId;
 
 import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Indexed;
+import com.google.code.morphia.utils.IndexDirection;
 
 /**
  * 该类代表一个同步的任务<br>
@@ -20,6 +22,7 @@ public class SyncTask {
     /** puma-syncserver的host，标识着某台具体的服务器 */
     private String syncServerHost;
     /** 同步配置的id，对应SyncConfig.getId() */
+    @Indexed(value = IndexDirection.ASC, unique = true, dropDups = true)
     private ObjectId syncConfigId;
     /** 创建时间 */
     private Date createDate;

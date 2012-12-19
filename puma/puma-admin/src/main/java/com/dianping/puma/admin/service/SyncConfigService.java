@@ -27,7 +27,7 @@ public interface SyncConfigService {
      */
     void removeSyncConfig(ObjectId id);
 
-    public List<SyncConfig> findSyncConfigs(int offset, int limit);
+    List<SyncConfig> findSyncConfigs(int offset, int limit);
 
     SyncXml findSyncXml(ObjectId objectId);
 

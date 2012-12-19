@@ -45,28 +45,28 @@ public class ModifyController {
     private static final String errorMsg = "对不起，出了一点错误，请刷新页面试试。";
     private static final int PAGESIZE = 8;
 
-    @RequestMapping(value = "/loadSyncConfigs", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public Object loadSyncConfigs(HttpSession session, HttpServletRequest request, Integer pageNum) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        try {
-            int offset = pageNum == null ? 0 : (pageNum - 1) * PAGESIZE;
-            List<SyncConfig> syncConfigs = syncConfigService.findSyncConfigs(offset, PAGESIZE);
-            Long totalSyncConfig = syncConfigService.countSyncConfigs();
-            map.put("syncConfigs", syncConfigs);
-            map.put("totalPage", totalSyncConfig / PAGESIZE + (totalSyncConfig % PAGESIZE == 0 ? 0 : 1));
-            map.put("success", true);
-        } catch (IllegalArgumentException e) {
-            map.put("success", false);
-            map.put("errorMsg", e.getMessage());
-        } catch (Exception e) {
-            map.put("success", false);
-            map.put("errorMsg", errorMsg);
-            LOG.error(e.getMessage(), e);
-        }
-        return GsonUtil.toJson(map);
-
-    }
+//    @RequestMapping(value = "/loadSyncConfigs", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+//    @ResponseBody
+//    public Object loadSyncConfigs(HttpSession session, HttpServletRequest request, Integer pageNum) {
+//        Map<String, Object> map = new HashMap<String, Object>();
+//        try {
+//            int offset = pageNum == null ? 0 : (pageNum - 1) * PAGESIZE;
+//            List<SyncConfig> syncConfigs = syncConfigService.findSyncConfigs(offset, PAGESIZE);
+//            Long totalSyncConfig = syncConfigService.countSyncConfigs();
+//            map.put("syncConfigs", syncConfigs);
+//            map.put("totalPage", totalSyncConfig / PAGESIZE + (totalSyncConfig % PAGESIZE == 0 ? 0 : 1));
+//            map.put("success", true);
+//        } catch (IllegalArgumentException e) {
+//            map.put("success", false);
+//            map.put("errorMsg", e.getMessage());
+//        } catch (Exception e) {
+//            map.put("success", false);
+//            map.put("errorMsg", errorMsg);
+//            LOG.error(e.getMessage(), e);
+//        }
+//        return GsonUtil.toJson(map);
+//
+//    }
 
     @RequestMapping(value = "/loadSyncXml", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody

@@ -262,6 +262,14 @@
 						});
 						$("#noResultDiv").hide();
 					}
+					// 添加同步任务的已分配或为分配任务
+					var syncTasks = data.syncTasks;
+					if (syncTasks.length > 0) {
+						$.each(syncTasks, function(i, el) {
+							var mergeId = pumadmin.objectId2String(el.syncConfigId);
+							$("#trOf"+mergeId+">td:eq(4)").text(el.syncServerHost);
+						});
+					} 
 				}
 			};
 		},
@@ -325,6 +333,16 @@
 						});
 						$("#noResultDiv").hide();
 					}
+					// 添加同步任务的已分配或为分配任务
+					var syncTasks = data.syncTasks;
+					console.log(syncTasks);
+					if (syncTasks.length > 0) {
+						$.each(syncTasks, function(i, el) {
+							var mergeId = pumadmin.objectId2String(el.syncConfigId);
+							console.log(mergeId);
+							$("#trOf"+mergeId+">td:eq(4)").text(el.syncServerHost);
+						});
+					} 
 				}
 			};
 		},
@@ -334,14 +352,15 @@
 		},
 		"appendSyncConfig" : function(syncConfig) {
 			// 连接
-			var id = pumadmin.objectId2MergeId(syncConfig.id);
-			var link = "<a href=\"javascript:pumadmin.loadSyncXml('" + id
+			var mergeId = pumadmin.objectId2MergeId(syncConfig.id);
+			var link = "<a href=\"javascript:pumadmin.loadSyncXml('" + mergeId
 					+ "')\">编辑 »</a>";
 			// 拼装
-			var html = "<tr><td>" + syncConfig.src.pumaServerHost + "</td><td>"
+			var html = "<tr id='trOf" + mergeId + "'><td>"
+					+ syncConfig.src.pumaServerHost + "</td><td>"
 					+ syncConfig.src.serverId + "</td><td>"
 					+ syncConfig.src.target + "</td><td>"
-					+ syncConfig.dest.host + "</td><td>" + link + "</td><tr>";
+					+ syncConfig.dest.host + "</td><td>未分配sync-server</td><td>" + link + "</td><tr>";
 			$("#resultTable").append(html);
 		},
 		"appendSyncConfigForWatch" : function(syncConfig) {
@@ -350,10 +369,10 @@
 			var link = "<a href=\"javascript:pumadmin.watchSyncConfig('"
 					+ mergeId + "')\">具体状态 »</a>";
 			// 拼装
-			var html = "<tr><td>" + syncConfig.src.pumaServerHost + "</td><td>"
+			var html = "<tr id='trOf" + mergeId + "'><td>" + syncConfig.src.pumaServerHost + "</td><td>"
 					+ syncConfig.src.serverId + "</td><td>"
 					+ syncConfig.src.target + "</td><td>"
-					+ syncConfig.dest.host + "</td><td>" + link + "</td><tr>";
+					+ syncConfig.dest.host + "</td><td>未分配sync-server</td><td>" + link + "</td><tr>";
 			$("#resultTable").append(html);
 		},
 		// 显示配置信息，实时：显示binlog进度，操作：暂停，启动，追赶

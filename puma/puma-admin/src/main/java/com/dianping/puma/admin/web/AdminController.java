@@ -65,12 +65,12 @@ public class AdminController {
         return new ModelAndView("main/container", map);
     }
 
-    @RequestMapping(value = { "/watch" })
+    @RequestMapping(value = { "/created" })
     public ModelAndView watch(HttpServletRequest request, HttpServletResponse response) {
         Map<String, Object> map = new HashMap<String, Object>();
         //        System.out.println(syncConfigService.find());
-        map.put("watchActive", "active");
-        map.put("path", "watch");
+        map.put("createdActive", "active");
+        map.put("path", "created");
         return new ModelAndView("main/container", map);
     }
 

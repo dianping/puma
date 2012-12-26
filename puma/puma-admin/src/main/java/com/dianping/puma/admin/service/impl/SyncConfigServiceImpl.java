@@ -25,7 +25,7 @@ import com.dianping.puma.core.sync.InstanceConfig;
 import com.dianping.puma.core.sync.SyncConfig;
 import com.dianping.puma.core.sync.SyncDest;
 import com.dianping.puma.core.sync.SyncTask;
-import com.dianping.puma.core.sync.TableConfig;
+import com.dianping.puma.core.sync.TableMapping;
 import com.dianping.puma.core.sync.dao.SyncConfigDao;
 import com.dianping.puma.core.sync.dao.SyncTaskDao;
 import com.google.code.morphia.Key;
@@ -174,10 +174,10 @@ public class SyncConfigServiceImpl implements SyncConfigService {
         for (DatabaseConfig databaseConfig : databaseConfigs) {
             String databaseConfigFrom = databaseConfig.getFrom();
             String databaseConfigTo = databaseConfig.getTo();
-            List<TableConfig> dumpTableConfigs = new ArrayList<TableConfig>();
+            List<TableMapping> dumpTableConfigs = new ArrayList<TableMapping>();
             //遍历table配置
-            List<TableConfig> tableConfigs = databaseConfig.getTables();
-            for (TableConfig tableConfig : tableConfigs) {
+            List<TableMapping> tableConfigs = databaseConfig.getTables();
+            for (TableMapping tableConfig : tableConfigs) {
                 String tableConfigFrom = tableConfig.getFrom();
                 String tableConfigTo = tableConfig.getTo();
                 //如果是from=*,to=*，则需要从数据库获取实际的表（排除已经列出的table配置）
@@ -193,14 +193,14 @@ public class SyncConfigServiceImpl implements SyncConfigService {
                     }
                     getRidOf(tableNames, dumpTableConfigs);
                     for (String tableName : tableNames) {
-                        TableConfig dumpTableConfig = new TableConfig();
+                        TableMapping dumpTableConfig = new TableMapping();
                         dumpTableConfig.setFrom(tableName);
                         dumpTableConfig.setTo(tableName);
                         dumpTableConfigs.add(dumpTableConfig);
                     }
                 } else {//如果“table下的字段没有被重命名,partOf为false”，那么该table可以被dump
                     if (shouldDump(tableConfig)) {
-                        TableConfig dumpTableConfig = new TableConfig();
+                        TableMapping dumpTableConfig = new TableMapping();
                         dumpTableConfig.setFrom(tableConfig.getFrom());
                         dumpTableConfig.setTo(tableConfig.getTo());
                         dumpTableConfigs.add(dumpTableConfig);
@@ -223,9 +223,9 @@ public class SyncConfigServiceImpl implements SyncConfigService {
     /**
      * 从tableNames中去掉已经存在dumpTableConfigs(以TableConfig.getFrom()判断)中的表名
      */
-    private void getRidOf(List<String> tableNames, List<TableConfig> dumpTableConfigs) {
+    private void getRidOf(List<String> tableNames, List<TableMapping> dumpTableConfigs) {
         Collection<String> dumpTableNames = new ArrayList<String>();
-        for (TableConfig tableConfig : dumpTableConfigs) {
+        for (TableMapping tableConfig : dumpTableConfigs) {
             dumpTableNames.add(tableConfig.getFrom());
         }
         tableNames.removeAll(dumpTableNames);
@@ -234,7 +234,7 @@ public class SyncConfigServiceImpl implements SyncConfigService {
     /**
      * 如果“table下的字段没有被重命名,partOf为false”，那么该table可以被dump
      */
-    private boolean shouldDump(TableConfig tableConfig) {
+    private boolean shouldDump(TableMapping tableConfig) {
         if (tableConfig.isPartOf()) {
             return false;
         }

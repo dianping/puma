@@ -27,7 +27,7 @@ import com.dianping.puma.core.sync.BinlogInfo;
 import com.dianping.puma.core.sync.DatabaseBinlogInfo;
 import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.DumpConfig;
-import com.dianping.puma.core.sync.TableConfig;
+import com.dianping.puma.core.sync.TableMapping;
 
 /**
  * @author wukezhu
@@ -157,7 +157,7 @@ public class DumpClient {
                 //执行dump脚本，dump到<dump_tempDir>/<uuid>目录
                 String srcDatabaseName = databaseConfig.getFrom();
                 String destDatabaseName = databaseConfig.getTo();
-                List<TableConfig> tableConfigs = databaseConfig.getTables();
+                List<TableMapping> tableConfigs = databaseConfig.getTables();
                 List<String> srcTableNames = getSrcTableNames(tableConfigs);
                 List<String> destTableNames = getDestTableNames(tableConfigs);
                 String output = _mysqldump(srcDatabaseName, srcTableNames);
@@ -225,10 +225,10 @@ public class DumpClient {
     /**
      * 从TableConfig中获取同步源的table名称
      */
-    private List<String> getSrcTableNames(List<TableConfig> tableConfigs) {
+    private List<String> getSrcTableNames(List<TableMapping> tableConfigs) {
         List<String> srcTableNames = new ArrayList<String>();
         if (tableConfigs != null && tableConfigs.size() > 0) {
-            for (TableConfig tableConfig : tableConfigs) {
+            for (TableMapping tableConfig : tableConfigs) {
                 srcTableNames.add(tableConfig.getFrom());
             }
         }
@@ -238,10 +238,10 @@ public class DumpClient {
     /**
      * 从TableConfig中获取同步目标的table名称
      */
-    private List<String> getDestTableNames(List<TableConfig> tableConfigs) {
+    private List<String> getDestTableNames(List<TableMapping> tableConfigs) {
         List<String> destTableNames = new ArrayList<String>();
         if (tableConfigs != null && tableConfigs.size() > 0) {
-            for (TableConfig tableConfig : tableConfigs) {
+            for (TableMapping tableConfig : tableConfigs) {
                 destTableNames.add(tableConfig.getFrom());
             }
         }

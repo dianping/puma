@@ -17,7 +17,7 @@ import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
 import com.dianping.puma.core.sync.ColumnConfig;
 import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.SyncConfig;
-import com.dianping.puma.core.sync.TableConfig;
+import com.dianping.puma.core.sync.TableMapping;
 import com.dianping.puma.syncserver.util.SyncConfigPatternParser;
 
 public class MysqlExecutor {
@@ -80,8 +80,8 @@ public class MysqlExecutor {
             //event就是rowChangedEvent;
         } else {//如果是database不匹配*
             event.setDatabase(database.getTo());
-            List<TableConfig> tables = database.getTables();
-            TableConfig table = findTableConfig(tables, tableName);
+            List<TableMapping> tables = database.getTables();
+            TableMapping table = findTableConfig(tables, tableName);
             if (table.getTo().equals("*")) {//如果是table匹配*
                 //如果是*，则和原来的一致
             } else {
@@ -214,8 +214,8 @@ public class MysqlExecutor {
      * 从tableConfigs中找出from为srcTableName的TableConfig <br>
      * (如果找不到，而有from=*，则返回to(to也等于*)，否则返回null)
      */
-    private TableConfig findTableConfig(List<TableConfig> tables, String srcTableName) {
-        for (TableConfig tableConfig : tables) {
+    private TableMapping findTableConfig(List<TableMapping> tables, String srcTableName) {
+        for (TableMapping tableConfig : tables) {
             if (StringUtils.equals(srcTableName, tableConfig.getFrom()) || StringUtils.equals("*", tableConfig.getFrom())) {
                 return tableConfig;
             }

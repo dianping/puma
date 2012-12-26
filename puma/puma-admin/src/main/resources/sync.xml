@@ -8,12 +8,14 @@
     </dest>
     <!-- 同步源配置：PumaClient相关的配置 -->
     <src>
+        <!-- puma-server固定的(只需选择源数据库名就知道) -->
         <pumaServerHost>127.0.0.1:8080</pumaServerHost>
+        <target>Dianping</target>
+        <!-- 在SyncConfig里面配置 -->
         <name>testClient</name>
         <serverId>6667</serverId>
         <dml>true</dml>
         <ddl>true</ddl>
-        <target>Dianping</target>
         <transaction>false</transaction>
         <!-- <binlogInfo>
             <binlogFile>binlog</binlogFile>

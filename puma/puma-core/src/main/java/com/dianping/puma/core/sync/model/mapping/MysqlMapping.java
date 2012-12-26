@@ -1,10 +1,13 @@
-package com.dianping.puma.core.sync;
+package com.dianping.puma.core.sync.model.mapping;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class InstanceConfig {
+import com.dianping.puma.core.sync.DatabaseConfig;
+import com.dianping.puma.core.sync.InstanceConfig;
+import com.dianping.puma.core.sync.TableMapping;
 
+public class MysqlMapping {
     private List<DatabaseConfig> databases = new ArrayList<DatabaseConfig>();
 
     public List<DatabaseConfig> getDatabases() {
@@ -66,5 +69,4 @@ public class InstanceConfig {
         }
         return newLeftDatabaseConfigs;
     }
-
 }

@@ -2,12 +2,18 @@ package com.dianping.puma.core.sync.model.config;
 
 import java.util.List;
 
+import org.bson.types.ObjectId;
+
 import com.google.code.morphia.annotations.Entity;
+import com.google.code.morphia.annotations.Id;
 import com.google.code.morphia.annotations.Indexed;
 import com.google.code.morphia.utils.IndexDirection;
 
 @Entity
 public class MysqlPumaServerConfig {
+    @Id
+    private ObjectId id;
+
     //数据库名称(如Dianping)
     @Indexed(value = IndexDirection.ASC, name = "name", unique = true, dropDups = true)
     private String mysqlName;
@@ -15,6 +21,14 @@ public class MysqlPumaServerConfig {
     private List<String> pumaServerHosts;
     //puma-server的target
     private String target;
+
+    public ObjectId getId() {
+        return id;
+    }
+
+    public void setId(ObjectId id) {
+        this.id = id;
+    }
 
     public String getMysqlName() {
         return mysqlName;

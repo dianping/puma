@@ -72,6 +72,7 @@ public class SyncConfigServiceImpl implements SyncConfigService {
 
     private ObjectId _saveSyncXml(SyncXml syncXml) {
         Key<SyncXml> key = syncXmlDao.save(syncXml);
+        this.syncXmlDao.getDatastore().ensureIndexes();
         return (ObjectId) key.getId();
     }
 

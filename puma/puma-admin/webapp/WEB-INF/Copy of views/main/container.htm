@@ -10,10 +10,6 @@
                   使用说明 </a></li>
             <li class="divider_line"></li>
             <li class="nav-header"><i class="icon-tasks"></i> 主要功能</li>
-            <li class="$!{mysqlSettingActive}"><a
-               href="${rc.contextPath}/mysqlSetting"><i
-                  class="icon-share #if(${mysqlSettingActive})icon-white #end"></i>
-                  数据库配置 </a></li>
             <li class="$!{createdActive}"><a
                href="${rc.contextPath}/created"><i
                   class="icon-share #if(${createdActive})icon-white #end"></i>
@@ -33,11 +29,7 @@
             <li class="divider_line"></li>
          </ul>
       </div>
-      #if(${subPath})
-        <div class="span12">#parse("main/${path}/${subPath}.htm")</div>
-      #else
-        <div class="span12">#parse("main/${path}/main.htm")</div>
-      #end
+      <div class="span12">#parse("main/${path}/main.htm")</div>
    </div>
 </div>
 

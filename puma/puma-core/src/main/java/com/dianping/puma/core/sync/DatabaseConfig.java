@@ -8,7 +8,7 @@ public class DatabaseConfig {
     private String from;
     private String to;
 
-    private List<TableConfig> tables = new ArrayList<TableConfig>();
+    private List<TableMapping> tables = new ArrayList<TableMapping>();
 
     public String getFrom() {
         return from;
@@ -26,15 +26,15 @@ public class DatabaseConfig {
         this.to = to;
     }
 
-    public List<TableConfig> getTables() {
+    public List<TableMapping> getTables() {
         return tables;
     }
 
-    public void setTables(List<TableConfig> tables) {
+    public void setTables(List<TableMapping> tables) {
         this.tables = tables;
     }
 
-    public void addTable(TableConfig table) {
+    public void addTable(TableMapping table) {
         this.tables.add(table);
     }
 

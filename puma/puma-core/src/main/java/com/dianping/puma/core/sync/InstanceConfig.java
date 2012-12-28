@@ -53,8 +53,8 @@ public class InstanceConfig {
             for (DatabaseConfig oldDatabaseConfig : oldLeftDatabaseConfigs) {
                 if (newDatabaseConfig.getFrom().equals(oldDatabaseConfig.getFrom())
                         && newDatabaseConfig.getTo().equals(oldDatabaseConfig.getTo())) {
-                    List<TableConfig> oldTables = oldDatabaseConfig.getTables();
-                    List<TableConfig> newTables = newDatabaseConfig.getTables();
+                    List<TableMapping> oldTables = oldDatabaseConfig.getTables();
+                    List<TableMapping> newTables = newDatabaseConfig.getTables();
                     //验证旧的table没有被删除
                     if (!newTables.containsAll(oldTables)) {
                         throw new IllegalArgumentException("<table>不能删除: " + oldDatabaseConfig);

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import com.dianping.puma.admin.util.SyncXmlParser;
 import com.dianping.puma.core.sync.BinlogInfo;
 import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.SyncConfig;
+import com.dianping.puma.core.sync.SyncTask;
 import com.google.gson.Gson;
 
 /**
@@ -250,14 +252,24 @@ public class CreateController {
     /**
      * 创建同步任务,需指派PumaSyncServer的id(保存到数据库，暂时不启动)
      */
-    @RequestMapping(value = "/createTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "/saveSyncTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object createTask(HttpSession session, HttpServletRequest request, String pumaSyncServerId) {
+    public Object saveSyncTask(HttpSession session, HttpServletRequest request, String syncServerHost) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            //TODO 根据syncConfig和pumaSyncServerId，创建SyncTask
-
+            //验证
+            if (StringUtils.isBlank(syncServerHost)) {
+                throw new IllegalArgumentException("syncServerHost不能为空！");
+            }
+            // 根据syncConfig和pumaSyncServerId，创建SyncTask
+            SyncTask task = new SyncTask();
+            SyncConfig syncConfig = (SyncConfig) session.getAttribute("syncConfig");
+            task.setCreateDate(new Date());
+            task.setId(new ObjectId());
+            task.setSyncConfigId(syncConfig.getId());
+            task.setSyncServerHost(syncServerHost);
             //保存SyncTask
+            syncConfigService.saveSyncTask(task);
 
             map.put("success", true);
         } catch (IllegalArgumentException e) {
@@ -265,7 +277,7 @@ public class CreateController {
             map.put("errorMsg", e.getMessage());
         } catch (Exception e) {
             map.put("success", false);
-            map.put("errorMsg", errorMsg);
+            map.put("errorMsg", e.getMessage());
             LOG.error(e.getMessage(), e);
         }
         return GsonUtil.toJson(map);

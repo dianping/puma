@@ -15,7 +15,7 @@ import com.dianping.puma.core.sync.SyncDest;
 import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.InstanceConfig;
 import com.dianping.puma.core.sync.SyncConfig;
-import com.dianping.puma.core.sync.TableConfig;
+import com.dianping.puma.core.sync.TableMapping;
 
 public class SyncXmlParser {
 
@@ -57,7 +57,7 @@ public class SyncXmlParser {
         digester.addSetProperties("sync/instance/database");//tag的attr
 
         // sync/instance/database/table
-        digester.addObjectCreate("sync/instance/database/table", TableConfig.class);
+        digester.addObjectCreate("sync/instance/database/table", TableMapping.class);
         digester.addSetNext("sync/instance/database/table", "addTable");
         digester.addSetProperties("sync/instance/database/table");//tag的attr
 

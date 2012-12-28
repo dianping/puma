@@ -1,14 +1,14 @@
-package com.dianping.puma.core.sync;
+package com.dianping.puma.core.sync.model.mapping;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TableConfig {
+public class DatabaseMapping {
+
     private String from;
     private String to;
-    private boolean partOf = false;
 
-    private List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
+    private List<TableMapping> tables = new ArrayList<TableMapping>();
 
     public String getFrom() {
         return from;
@@ -26,38 +26,29 @@ public class TableConfig {
         this.to = to;
     }
 
-    public boolean isPartOf() {
-        return partOf;
+    public List<TableMapping> getTables() {
+        return tables;
     }
 
-    public void setPartOf(boolean partOf) {
-        this.partOf = partOf;
+    public void setTables(List<TableMapping> tables) {
+        this.tables = tables;
     }
 
-    public List<ColumnConfig> getColumns() {
-        return columns;
-    }
-
-    public void setColumns(List<ColumnConfig> columns) {
-        this.columns = columns;
-    }
-
-    public void addColumn(ColumnConfig column) {
-        this.columns.add(column);
+    public void addTable(TableMapping table) {
+        this.tables.add(table);
     }
 
     @Override
     public String toString() {
-        return "Table [from=" + from + ", to=" + to + ", partOf=" + partOf + ", columns=" + columns + "]";
+        return "Database [from=" + from + ", to=" + to + ", tables=" + tables + "]";
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((columns == null) ? 0 : columns.hashCode());
         result = prime * result + ((from == null) ? 0 : from.hashCode());
-        result = prime * result + (partOf ? 1231 : 1237);
+        result = prime * result + ((tables == null) ? 0 : tables.hashCode());
         result = prime * result + ((to == null) ? 0 : to.hashCode());
         return result;
     }
@@ -68,20 +59,18 @@ public class TableConfig {
             return true;
         if (obj == null)
             return false;
-        if (!(obj instanceof TableConfig))
+        if (!(obj instanceof DatabaseMapping))
             return false;
-        TableConfig other = (TableConfig) obj;
-        if (columns == null) {
-            if (other.columns != null)
-                return false;
-        } else if (!columns.equals(other.columns))
-            return false;
+        DatabaseMapping other = (DatabaseMapping) obj;
         if (from == null) {
             if (other.from != null)
                 return false;
         } else if (!from.equals(other.from))
             return false;
-        if (partOf != other.partOf)
+        if (tables == null) {
+            if (other.tables != null)
+                return false;
+        } else if (!tables.equals(other.tables))
             return false;
         if (to == null) {
             if (other.to != null)

@@ -16,7 +16,7 @@ import com.dianping.puma.core.sync.BinlogInfo;
 import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.InstanceConfig;
 import com.dianping.puma.core.sync.SyncConfig;
-import com.dianping.puma.core.sync.TableConfig;
+import com.dianping.puma.core.sync.TableMapping;
 import com.dianping.puma.syncserver.conf.Config;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
@@ -154,12 +154,12 @@ public abstract class AbstractSyncClient {
                 //解析database
                 String databaseFrom = database.getFrom();
                 //解析table
-                List<TableConfig> tables = database.getTables();
+                List<TableMapping> tables = database.getTables();
                 if (tables != null) {
                     //如果table中有一个是*，则只需要设置一个*；否则，添加所有table配置
                     List<String> tableFroms = new ArrayList<String>();
                     boolean star = false;
-                    for (TableConfig table : tables) {
+                    for (TableMapping table : tables) {
                         if (StringUtils.equals(table.getFrom(), "*")) {
                             star = true;
                             break;

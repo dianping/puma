@@ -27,7 +27,6 @@ import com.dianping.puma.core.sync.model.config.MysqlHost;
 @Controller
 public class MysqlSettingController {
     private static final Logger LOG = LoggerFactory.getLogger(MysqlSettingController.class);
-    private static final String errorMsg = "对不起，出了一点错误，请刷新页面试试。";
     @Autowired
     private MysqlConfigService mysqlConfigService;
 
@@ -36,7 +35,7 @@ public class MysqlSettingController {
         Map<String, Object> map = new HashMap<String, Object>();
         //        System.out.println(syncConfigService.find());
         //查询MysqlConfig
-        List<MysqlConfig> mysqlConfigs = mysqlConfigService.findMysqlConfigs();
+        List<MysqlConfig> mysqlConfigs = mysqlConfigService.findAll();
 
         map.put("mysqlConfigs", mysqlConfigs);
         map.put("mysqlSettingActive", "active");
@@ -57,7 +56,7 @@ public class MysqlSettingController {
     public ModelAndView modify(String id) {
         Map<String, Object> map = new HashMap<String, Object>();
         //查询MysqlConfig
-        MysqlConfig mysqlConfig = this.mysqlConfigService.findMysqlConfig(new ObjectId(id));
+        MysqlConfig mysqlConfig = this.mysqlConfigService.find(new ObjectId(id));
         map.put("mysqlConfig", mysqlConfig);
         map.put("mysqlSettingActive", "active");
         map.put("path", "mysqlSetting");
@@ -100,7 +99,7 @@ public class MysqlSettingController {
                 }
             }
             mysqlConfig.setHosts(hosts);
-            this.mysqlConfigService.saveMysqlConfig(mysqlConfig);
+            this.mysqlConfigService.save(mysqlConfig);
 
             map.put("success", true);
         } catch (IllegalArgumentException e) {
@@ -153,7 +152,7 @@ public class MysqlSettingController {
                 }
             }
             mysqlConfig.setHosts(hosts);
-            this.mysqlConfigService.saveMysqlConfig(mysqlConfig);
+            this.mysqlConfigService.save(mysqlConfig);
 
             map.put("success", true);
         } catch (IllegalArgumentException e) {
@@ -176,7 +175,7 @@ public class MysqlSettingController {
                 throw new IllegalArgumentException("id不能为空");
             }
             //删除
-            this.mysqlConfigService.removeMysqlConfig(new ObjectId(id));
+            this.mysqlConfigService.remove(new ObjectId(id));
 
             map.put("success", true);
         } catch (IllegalArgumentException e) {

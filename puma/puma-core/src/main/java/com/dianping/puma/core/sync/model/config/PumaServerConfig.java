@@ -10,7 +10,7 @@ import com.google.code.morphia.annotations.Indexed;
 import com.google.code.morphia.utils.IndexDirection;
 
 @Entity
-public class MysqlPumaServerConfig {
+public class PumaServerConfig {
     @Id
     private ObjectId id;
 
@@ -18,7 +18,7 @@ public class MysqlPumaServerConfig {
     @Indexed(value = IndexDirection.ASC, name = "name", unique = true, dropDups = true)
     private String mysqlName;
     //puma-server列表(host)
-    private List<String> pumaServerHosts;
+    private List<String> hosts;
     //puma-server的target
     private String target;
 
@@ -38,12 +38,12 @@ public class MysqlPumaServerConfig {
         this.mysqlName = mysqlName;
     }
 
-    public List<String> getPumaServerHosts() {
-        return pumaServerHosts;
+    public List<String> getHosts() {
+        return hosts;
     }
 
-    public void setPumaServerHosts(List<String> pumaServerHosts) {
-        this.pumaServerHosts = pumaServerHosts;
+    public void setHosts(List<String> pumaServerHosts) {
+        this.hosts = pumaServerHosts;
     }
 
     public String getTarget() {

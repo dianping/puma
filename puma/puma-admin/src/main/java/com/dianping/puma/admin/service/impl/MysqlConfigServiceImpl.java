@@ -19,38 +19,38 @@ public class MysqlConfigServiceImpl implements MysqlConfigService {
     MysqlConfigDao mysqlConfigDao;
 
     @Override
-    public ObjectId saveMysqlConfig(MysqlConfig mysqlConfig) {
+    public ObjectId save(MysqlConfig mysqlConfig) {
         Key<MysqlConfig> key = this.mysqlConfigDao.save(mysqlConfig);
         this.mysqlConfigDao.getDatastore().ensureIndexes();
         return (ObjectId) key.getId();
     }
 
     @Override
-    public void modifyMysqlConfig(MysqlConfig mysqlConfig) {
+    public void modify(MysqlConfig mysqlConfig) {
         this.mysqlConfigDao.save(mysqlConfig);
     }
 
     @Override
-    public void removeMysqlConfig(ObjectId id) {
+    public void remove(ObjectId id) {
         Query<MysqlConfig> q = mysqlConfigDao.getDatastore().createQuery(MysqlConfig.class);
         q.field("_id").equal(id);
         mysqlConfigDao.deleteByQuery(q);
     }
 
     @Override
-    public List<MysqlConfig> findMysqlConfigs() {
+    public List<MysqlConfig> findAll() {
         Query<MysqlConfig> q = mysqlConfigDao.getDatastore().createQuery(MysqlConfig.class);
         QueryResults<MysqlConfig> result = mysqlConfigDao.find(q);
         return result.asList();
     }
 
     @Override
-    public MysqlConfig findMysqlConfig(ObjectId objectId) {
+    public MysqlConfig find(ObjectId objectId) {
         return this.mysqlConfigDao.getDatastore().getByKey(MysqlConfig.class, new Key<MysqlConfig>(MysqlConfig.class, objectId));
     }
 
     @Override
-    public MysqlConfig findMysqlConfig(String name) {
+    public MysqlConfig find(String name) {
         Query<MysqlConfig> q = mysqlConfigDao.getDatastore().createQuery(MysqlConfig.class);
         q.field("name").equal(name);
         return mysqlConfigDao.findOne(q);

@@ -68,6 +68,35 @@
 				w.location = w.contextpath + '/mysqlSetting';
 			}
 		},
+		"addPumaServerHostInput" : function() {
+			$("#pumaServerHostInput").append(
+					$("#pumaServerHostInputDemo").html());
+		},
+		"savePumaServerConfigDone" : function(data) {
+			if (data.success == false) {
+				pumadmin.appError("错误信息", data.errorMsg);
+			} else {
+				w.location = w.contextpath + '/pumaServerSetting';
+			}
+		},
+		"modifyPumaServerConfigDone" : function(data) {
+			if (data.success == false) {
+				pumadmin.appError("错误信息", data.errorMsg);
+			} else {
+				pumadmin.appError("信息", "更新成功");
+			}
+		},
+		"openDelPumaServerConfigModal" : function(id) {
+			$("#delPumaServerConfigModal").modal('show');
+			$("#delId").val(id);
+		},
+		"deletePumaServerConfigDone" : function(data) {
+			if (data.success == false) {
+				pumadmin.appError("错误信息", data.errorMsg);
+			} else {
+				w.location = w.contextpath + '/pumaServerSetting';
+			}
+		},
 		"saveBinlog" : function() {
 			var param = new Object();
 			param.binlogFile = $("#binlogFileInput").val();

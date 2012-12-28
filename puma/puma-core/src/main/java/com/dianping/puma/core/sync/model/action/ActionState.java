@@ -8,7 +8,7 @@ import com.google.code.morphia.annotations.Id;
 public abstract class ActionState {
 
     @Id
-    private ObjectId id;
+    private ObjectId id;//与Action一致
     //    当前状态
     private State state;
     //    操作的已耗时
@@ -60,6 +60,7 @@ public abstract class ActionState {
 
     public enum State {
         CREATED,
+        PREPARING,
         RUNNING,
         FAILED,
         SUCCEED

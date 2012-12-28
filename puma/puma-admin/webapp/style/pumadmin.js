@@ -29,6 +29,74 @@
 			// 加载pumaserverId列表
 			pumadmin.loadSyncServerList();
 		},
+		"submit" : function(form) {
+			$.ajax({
+				type : $(form).attr('method'),
+				url : $(form).attr('action'),
+				data : $(form).serialize(),
+				dataType : "json",
+				success : pumadmin[$(form).attr('onSuccess')],
+				error : pumadmin.httpError
+			});
+			return false;
+		},
+		"addMysqlHostInput" : function() {
+			$("#mysqlHostInput").append($("#mysqlHostInputDemo").html());
+		},
+		"saveMysqlConfigDone" : function(data) {
+			if (data.success == false) {
+				pumadmin.appError("错误信息", data.errorMsg);
+			} else {
+				w.location = w.contextpath + '/mysqlSetting';
+			}
+		},
+		"modifyMysqlConfigDone" : function(data) {
+			if (data.success == false) {
+				pumadmin.appError("错误信息", data.errorMsg);
+			} else {
+				pumadmin.appError("信息", "更新成功");
+			}
+		},
+		"openDelMysqlConfigModal" : function(id) {
+			$("#delMysqlConfigModal").modal('show');
+			$("#delId").val(id);
+		},
+		"deleteMysqlConfigDone" : function(data) {
+			if (data.success == false) {
+				pumadmin.appError("错误信息", data.errorMsg);
+			} else {
+				w.location = w.contextpath + '/mysqlSetting';
+			}
+		},
+		"addPumaServerHostInput" : function() {
+			$("#pumaServerHostInput").append(
+					$("#pumaServerHostInputDemo").html());
+		},
+		"savePumaServerConfigDone" : function(data) {
+			if (data.success == false) {
+				pumadmin.appError("错误信息", data.errorMsg);
+			} else {
+				w.location = w.contextpath + '/pumaServerSetting';
+			}
+		},
+		"modifyPumaServerConfigDone" : function(data) {
+			if (data.success == false) {
+				pumadmin.appError("错误信息", data.errorMsg);
+			} else {
+				pumadmin.appError("信息", "更新成功");
+			}
+		},
+		"openDelPumaServerConfigModal" : function(id) {
+			$("#delPumaServerConfigModal").modal('show');
+			$("#delId").val(id);
+		},
+		"deletePumaServerConfigDone" : function(data) {
+			if (data.success == false) {
+				pumadmin.appError("错误信息", data.errorMsg);
+			} else {
+				w.location = w.contextpath + '/pumaServerSetting';
+			}
+		},
 		"saveBinlog" : function() {
 			var param = new Object();
 			param.binlogFile = $("#binlogFileInput").val();
@@ -69,9 +137,9 @@
 			if (data.success == false) {
 				pumadmin.appError("错误信息", data.errorMsg);
 			} else {
-				$('#pumaSyncServerId').html('');
+				$('#syncServerHost').html('');
 				$.each(data.syncServerHosts, function(i, el) {
-					$('#pumaSyncServerId').append(new Option(el, el));
+					$('#syncServerHost').append(new Option(el, el));
 				});
 			}
 		},
@@ -185,7 +253,6 @@
 					if (pumadmin.startWith(w.dumpLastLine, binlogSign)) {
 						var binlogJson = w.dumpLastLine
 								.substring(binlogSign.length);
-						console.log(binlogJson);
 						var binlogInfo = $.parseJSON(binlogJson);
 						$("#binlogFile").text(binlogInfo.binlogFile);
 						$("#binlogPosition").text(binlogInfo.binlogPosition);
@@ -263,6 +330,16 @@
 						});
 						$("#noResultDiv").hide();
 					}
+					// 添加同步任务的已分配或为分配任务
+					var syncTasks = data.syncTasks;
+					if (syncTasks.length > 0) {
+						$.each(syncTasks, function(i, el) {
+							var mergeId = pumadmin
+									.objectId2String(el.syncConfigId);
+							$("#trOf" + mergeId + ">td:eq(4)").text(
+									el.syncServerHost);
+						});
+					}
 				}
 			};
 		},
@@ -326,6 +403,18 @@
 						});
 						$("#noResultDiv").hide();
 					}
+					// 添加同步任务的已分配或为分配任务
+					var syncTasks = data.syncTasks;
+					console.log(syncTasks);
+					if (syncTasks.length > 0) {
+						$.each(syncTasks, function(i, el) {
+							var mergeId = pumadmin
+									.objectId2String(el.syncConfigId);
+							console.log(mergeId);
+							$("#trOf" + mergeId + ">td:eq(4)").text(
+									el.syncServerHost);
+						});
+					}
 				}
 			};
 		},
@@ -335,14 +424,16 @@
 		},
 		"appendSyncConfig" : function(syncConfig) {
 			// 连接
-			var id = pumadmin.objectId2MergeId(syncConfig.id);
-			var link = "<a href=\"javascript:pumadmin.loadSyncXml('" + id
+			var mergeId = pumadmin.objectId2MergeId(syncConfig.id);
+			var link = "<a href=\"javascript:pumadmin.loadSyncXml('" + mergeId
 					+ "')\">编辑 »</a>";
 			// 拼装
-			var html = "<tr><td>" + syncConfig.src.pumaServerHost + "</td><td>"
+			var html = "<tr id='trOf" + mergeId + "'><td>"
+					+ syncConfig.src.pumaServerHost + "</td><td>"
 					+ syncConfig.src.serverId + "</td><td>"
 					+ syncConfig.src.target + "</td><td>"
-					+ syncConfig.dest.host + "</td><td>" + link + "</td><tr>";
+					+ syncConfig.dest.host + "</td><td>未分配sync-server</td><td>"
+					+ link + "</td><tr>";
 			$("#resultTable").append(html);
 		},
 		"appendSyncConfigForWatch" : function(syncConfig) {
@@ -351,10 +442,12 @@
 			var link = "<a href=\"javascript:pumadmin.watchSyncConfig('"
 					+ mergeId + "')\">具体状态 »</a>";
 			// 拼装
-			var html = "<tr><td>" + syncConfig.src.pumaServerHost + "</td><td>"
+			var html = "<tr id='trOf" + mergeId + "'><td>"
+					+ syncConfig.src.pumaServerHost + "</td><td>"
 					+ syncConfig.src.serverId + "</td><td>"
 					+ syncConfig.src.target + "</td><td>"
-					+ syncConfig.dest.host + "</td><td>" + link + "</td><tr>";
+					+ syncConfig.dest.host + "</td><td>未分配sync-server</td><td>"
+					+ link + "</td><tr>";
 			$("#resultTable").append(html);
 		},
 		// 显示配置信息，实时：显示binlog进度，操作：暂停，启动，追赶
@@ -437,6 +530,30 @@
 				pumadmin.appError("错误信息", data.errorMsg);
 			} else {
 				pumadmin.appError("信息", "修改成功");
+			}
+		},
+		"saveSyncTask" : function() {
+			var param = new Object();
+			param.syncServerHost = $("#syncServerHost").val();
+			var url = w.contextpath + '/saveSyncTask';
+			$.ajax({
+				type : 'POST',
+				url : url,
+				data : param,
+				dataType : "json",
+				success : pumadmin.saveSyncTaskDone,
+				error : pumadmin.httpError
+			});
+			$("#saveSyncTaskSuccess").hide();
+			$("#saveSyncTaskError").hide();
+		},
+		"saveSyncTaskDone" : function(data) {
+			if (data.success == false) {
+				$("#saveSyncTaskErrorCause").text(data.errorMsg);
+				$("#saveSyncTaskError").show();
+			} else {
+				$("#saveSyncTaskSuccess").show();
+				$("#saveSyncTaskButton").attr("disabled", "disabled");
 			}
 		},
 		"objectId2MergeId" : function(objectId) {

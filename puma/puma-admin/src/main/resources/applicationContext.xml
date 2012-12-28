@@ -8,7 +8,7 @@
             http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
     <!-- annotation scan -->
-    <context:component-scan base-package="com.dianping.puma.admin">
+    <context:component-scan base-package="com.dianping.puma">
         <context:exclude-filter type="annotation"
             expression="org.springframework.stereotype.Controller" />
     </context:component-scan>
@@ -17,18 +17,6 @@
     <import resource="applicationContext-properties.xml" />
 
     <bean id="mongoClient" class="com.dianping.puma.core.sync.dao.MongoClient">
-    </bean>
-
-    <bean id="syncConfigDao" class="com.dianping.puma.core.sync.dao.SyncConfigDao">
-        <constructor-arg ref="mongoClient" />
-    </bean>
-
-    <bean id="syncTaskDao" class="com.dianping.puma.core.sync.dao.SyncTaskDao">
-        <constructor-arg ref="mongoClient" />
-    </bean>
-
-    <bean id="syncXmlDao" class="com.dianping.puma.admin.dao.SyncXmlDao">
-        <constructor-arg ref="mongoClient" />
     </bean>
 
 </beans>

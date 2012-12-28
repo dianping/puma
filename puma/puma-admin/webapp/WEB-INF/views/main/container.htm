@@ -1,5 +1,5 @@
 #set($layout = "shareLayout.htm")
-<div class="container">
+<div class="container" style="width: 1200px;">
    <div class="row">
       <div class="span3">
          <ul class="well nav nav-pills nav-stacked">
@@ -10,9 +10,17 @@
                   使用说明 </a></li>
             <li class="divider_line"></li>
             <li class="nav-header"><i class="icon-tasks"></i> 主要功能</li>
-            <li class="$!{watchActive}"><a
-               href="${rc.contextPath}/watch"><i
-                  class="icon-share #if(${watchActive})icon-white #end"></i>
+            <li class="$!{mysqlSettingActive}"><a
+               href="${rc.contextPath}/mysqlSetting"><i
+                  class="icon-share #if(${mysqlSettingActive})icon-white #end"></i>
+                  数据库源配置 </a></li>
+            <li class="$!{pumaServerSettingActive}"><a
+               href="${rc.contextPath}/pumaServerSetting"><i
+                  class="icon-share #if(${pumaServerSettingActive})icon-white #end"></i>
+                  PumaServer配置 </a></li>
+            <li class="$!{createdActive}"><a
+               href="${rc.contextPath}/created"><i
+                  class="icon-share #if(${createdActive})icon-white #end"></i>
                   已创建的同步任务 </a></li>
             <li class="$!{createActive}"><a
                href="${rc.contextPath}/create"><i
@@ -29,7 +37,11 @@
             <li class="divider_line"></li>
          </ul>
       </div>
-      <div class="span9">#parse("main/${path}/main.htm")</div>
+      #if(${subPath})
+      <div class="span12">#parse("main/${path}/${subPath}.htm")</div>
+      #else
+      <div class="span12">#parse("main/${path}/main.htm")</div>
+      #end
    </div>
 </div>
 

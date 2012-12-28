@@ -3,6 +3,7 @@ package com.dianping.puma.admin.web;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,18 +14,24 @@ import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.dianping.puma.admin.service.MysqlConfigService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.admin.util.SyncXmlParser;
 import com.dianping.puma.core.sync.SyncConfig;
+import com.dianping.puma.core.sync.model.config.MysqlConfig;
 import com.google.gson.Gson;
 
 @Controller
 public class AdminController {
     private static final Logger LOG = LoggerFactory.getLogger(AdminController.class);
+
+    @Autowired
+    private MysqlConfigService mysqlConfigService;
 
     /**
      * 首页，使用说明
@@ -65,12 +72,12 @@ public class AdminController {
         return new ModelAndView("main/container", map);
     }
 
-    @RequestMapping(value = { "/watch" })
+    @RequestMapping(value = { "/created" })
     public ModelAndView watch(HttpServletRequest request, HttpServletResponse response) {
         Map<String, Object> map = new HashMap<String, Object>();
         //        System.out.println(syncConfigService.find());
-        map.put("watchActive", "active");
-        map.put("path", "watch");
+        map.put("createdActive", "active");
+        map.put("path", "created");
         return new ModelAndView("main/container", map);
     }
 

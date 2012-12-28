@@ -97,6 +97,31 @@
 				w.location = w.contextpath + '/pumaServerSetting';
 			}
 		},
+		"savePumaSyncServerConfigDone" : function(data) {
+			if (data.success == false) {
+				pumadmin.appError("错误信息", data.errorMsg);
+			} else {
+				w.location = w.contextpath + '/pumaSyncServerSetting';
+			}
+		},
+		"modifyPumaSyncServerConfigDone" : function(data) {
+			if (data.success == false) {
+				pumadmin.appError("错误信息", data.errorMsg);
+			} else {
+				pumadmin.appError("信息", "更新成功");
+			}
+		},
+		"openDelPumaSyncServerConfigModal" : function(id) {
+			$("#delPumaSyncServerConfigModal").modal('show');
+			$("#delId").val(id);
+		},
+		"deletePumaSyncServerConfigDone" : function(data) {
+			if (data.success == false) {
+				pumadmin.appError("错误信息", data.errorMsg);
+			} else {
+				w.location = w.contextpath + '/pumaSyncServerSetting';
+			}
+		},
 		"saveBinlog" : function() {
 			var param = new Object();
 			param.binlogFile = $("#binlogFileInput").val();

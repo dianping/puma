@@ -125,7 +125,7 @@ public class Configuration implements Serializable {
 	 * @return
 	 */
 	public String buildUrl() {
-		return "http://" + host + ":" + port + "/channel";
+		return "http://" + host + ":" + port + "/puma/channel";
 	}
 
 	/**

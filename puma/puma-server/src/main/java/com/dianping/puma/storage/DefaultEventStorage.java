@@ -189,15 +189,16 @@ public class DefaultEventStorage implements EventStorage {
         stopped = true;
         try {
             bucketManager.stop();
-            try {
-                this.binlogIndexManager.stop();
-            } catch (IOException e) {
-                // ignore
-            }
-            // TODO stop binlog index
         } catch (StorageLifeCycleException e1) {
             // ignore
         }
+
+        try {
+            this.binlogIndexManager.stop();
+        } catch (IOException e) {
+            // ignore
+        }
+
         if (writingBucket != null) {
             try {
                 writingBucket.stop();

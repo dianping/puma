@@ -14,10 +14,10 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
-import com.dianping.puma.core.sync.ColumnConfig;
-import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.SyncConfig;
-import com.dianping.puma.core.sync.TableMapping;
+import com.dianping.puma.core.sync.model.mapping.ColumnMapping;
+import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
+import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.syncserver.util.SyncConfigPatternParser;
 
 public class MysqlExecutor {
@@ -74,8 +74,8 @@ public class MysqlExecutor {
         Map<String, ColumnInfo> columnMap = rowChangedEvent.getColumns();
         int srcActionType = rowChangedEvent.getActionType();//actionType
         //2.根据"来源actionType,database,table,column"和Sync，得到dest的actionType,database,table,column
-        List<DatabaseConfig> databases = sync.getInstance().getDatabases();
-        DatabaseConfig database = findDatabaseConfig(databases, databaseName);
+        List<DatabaseMapping> databases = sync.getInstance().getDatabases();
+        DatabaseMapping database = findDatabaseMapping(databases, databaseName);
         if (database.getTo().equals("*")) {//如果是database匹配*
             //event就是rowChangedEvent;
         } else {//如果是database不匹配*
@@ -92,11 +92,11 @@ public class MysqlExecutor {
                     event.setTable(table.getTo());//如果不是*也不是#partition，则destTableName为to的值
                 }
                 //处理column
-                List<ColumnConfig> columnConfigs = table.getColumns();
+                List<ColumnMapping> columnConfigs = table.getColumns();
                 for (Map.Entry<String, ColumnInfo> columnEntry : columnMap.entrySet()) {
                     String srcColumnName = columnEntry.getKey();
                     ColumnInfo srcColumn = columnEntry.getValue();
-                    ColumnConfig columnConfig = findColumnConfig(columnConfigs, srcColumnName);
+                    ColumnMapping columnConfig = findColumnMapping(columnConfigs, srcColumnName);
                     String destColumnName = columnConfig.getTo();
                     //替换event的column
                     event.getColumns().remove(srcColumnName);
@@ -198,11 +198,11 @@ public class MysqlExecutor {
     }
 
     /**
-     * 从columnConfigs中找出from为srcColumnName的ColumnConfig <br>
+     * 从columnConfigs中找出from为srcColumnName的ColumnMapping <br>
      * (如果找不到，而有from=*，则返回to(to也等于*)，否则返回null)
      */
-    private ColumnConfig findColumnConfig(List<ColumnConfig> columnConfigs, String srcColumnName) {
-        for (ColumnConfig columnConfig : columnConfigs) {
+    private ColumnMapping findColumnMapping(List<ColumnMapping> columnConfigs, String srcColumnName) {
+        for (ColumnMapping columnConfig : columnConfigs) {
             if (StringUtils.equals(srcColumnName, columnConfig.getFrom()) || StringUtils.equals("*", columnConfig.getFrom())) {
                 return columnConfig;
             }
@@ -224,11 +224,11 @@ public class MysqlExecutor {
     }
 
     /**
-     * 从databaseConfigs中找出from为srcDatabaseName的DatabaseConfig<br>
+     * 从databaseConfigs中找出from为srcDatabaseName的DatabaseMapping<br>
      * (如果找不到，而有from=*，则返回to(to也等于*)，否则返回null)
      */
-    private DatabaseConfig findDatabaseConfig(List<DatabaseConfig> databases, String srcDatabaseName) {
-        for (DatabaseConfig databaseConfig : databases) {
+    private DatabaseMapping findDatabaseMapping(List<DatabaseMapping> databases, String srcDatabaseName) {
+        for (DatabaseMapping databaseConfig : databases) {
             if (StringUtils.equals(srcDatabaseName, databaseConfig.getFrom()) || StringUtils.equals("*", databaseConfig.getFrom())) {
                 return databaseConfig;
             }

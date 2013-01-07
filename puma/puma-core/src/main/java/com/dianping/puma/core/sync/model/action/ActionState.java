@@ -1,5 +1,7 @@
 package com.dianping.puma.core.sync.model.action;
 
+import java.util.Date;
+
 import org.bson.types.ObjectId;
 
 import com.dianping.puma.core.sync.model.BinlogInfo;
@@ -11,8 +13,8 @@ public abstract class ActionState {
     private ObjectId id;//与Action一致
     //    当前状态
     private State state;
-    //    操作的已耗时
-    private long timeUsed;
+    //    创建时间
+    private Date createTime;
     //    详细detail信息
     private String detail;
     //binlog信息
@@ -34,12 +36,12 @@ public abstract class ActionState {
         this.state = state;
     }
 
-    public long getTimeUsed() {
-        return timeUsed;
+    public Date getCreateTime() {
+        return createTime;
     }
 
-    public void setTimeUsed(long timeUsed) {
-        this.timeUsed = timeUsed;
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 
     public String getDetail() {

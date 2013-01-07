@@ -18,8 +18,8 @@ public abstract class Action {
     private String srcMysqlName;
     //    目标：目标的数据库名称
     private String destMysqlName;
-    //    目标：具体host列表的index
-    private int indexOfDestMysqlHosts;
+    //    目标：具体host
+    private String destMysqlHost;
     //    指派执行者：sync-server的host
     private String syncServerHost;
 
@@ -59,12 +59,12 @@ public abstract class Action {
         this.destMysqlName = destMysqlName;
     }
 
-    public int getIndexOfDestMysqlHosts() {
-        return indexOfDestMysqlHosts;
+    public String getDestMysqlHost() {
+        return destMysqlHost;
     }
 
-    public void setIndexOfDestMysqlHosts(int indexOfDestMysqlHosts) {
-        this.indexOfDestMysqlHosts = indexOfDestMysqlHosts;
+    public void setDestMysqlHost(String destMysqlHost) {
+        this.destMysqlHost = destMysqlHost;
     }
 
     public String getSyncServerHost() {

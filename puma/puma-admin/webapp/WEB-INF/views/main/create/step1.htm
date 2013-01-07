@@ -1,23 +1,66 @@
-<div>
-   <button id="step1_next" style="float: right;" type="button"
-      onclick="pumadmin.saveSyncXml();" class="btn btn-success">保存，并到下一步</button>
-   <p class="legend">填写同步的配置</p>
-   <div id="container" style="height: 600px;">
-      <div class="container-fluid">
-         <div class="row-fluid">
-            <div class="span8">
-               <form>
-                  <legend>Legend</legend>
-                  <label>Label name</label> <input type="text"
-                     placeholder="Type something…"> <span
-                     class="help-block">Example block-level help
-                     text here.</span> <label class="checkbox"> <input
-                     type="checkbox"> Check me out
-                  </label>
-                  <button type="submit" class="btn">Submit</button>
-               </form>
+<div class="container"
+   style="margin: 0 auto; width: 100%; margin-bottom: 50px;">
+   <ul id="stepsBreak" class="breadcrumb">
+      <li class="step_active">第1步: 填写基础配置 <span class="divider">&gt;</span></li>
+      <li class="step_undo">第2步: 创建DumpAction <span class="divider">&gt;</span>
+      </li>
+      <li class="step_undo">第3步: 创建SyncTaskAction</li>
+   </ul>
+   <div>
+      <form class="form-inline" method="post"
+         onsubmit="submit0(this);return false;" onSuccess="onSuccess"
+         action="${rc.contextPath}/create/step1Save">
+         <button type="submit" style="float: right;"
+            class="btn btn-success">
+            下一步</a>
+         </button>
+         <p class="legend">填写同步的配置</p>
+         <div style="height: 700px">
+            <div class="container-fluid">
+               <div class="row-fluid">
+                  <div class="span10">
+                     <span>选择源数据库: </span> <select name="srcMysql"
+                        style="margin-left: 16px; margin-right: 16px;">
+                        #foreach($mysqlConfig in ${mysqlConfigs})
+                        <option value="${mysqlConfig.name}">${mysqlConfig.name}</option>
+                        #end
+                     </select> <span>选择目标数据库: </span> <select name="destMysql"
+                        style="margin-left: 16px;">
+                        #foreach($mysqlConfig in ${mysqlConfigs})
+                        <option value="${mysqlConfig.name}">${mysqlConfig.name}</option>
+                        #end
+                     </select>
+                     <hr>
+                     <label>映射关系</label>
+                     <div id="xmlEditor"
+                        style="width: 50%; height: 550px; border: 1px solid #A9E2F3; border-radius: 3px 3px 3px 3px; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;"></div>
+                  </div>
+               </div>
             </div>
          </div>
-      </div>
+         <input id="syncXml" type="hidden" name="syncXml" value="">
+      </form>
    </div>
 </div>
+<script>
+	function submit0(form) {
+		$("#syncXml").val(window.xmlEditor.getValue());
+		$.ajax({
+			type : $(form).attr('method'),
+			url : $(form).attr('action'),
+			data : $(form).serialize(),
+			dataType : "json",
+			success : onSuccess,
+			error : pumadmin.httpError
+		});
+		return false;
+	}
+	function onSuccess(data) {
+		if (data.success == false) {
+			pumadmin.appError("错误信息", data.errorMsg);
+		} else {
+			window.location = "${rc.contextPath}/create/step2";
+		}
+	}
+</script>
+#parse("main/create/initJs.htm")

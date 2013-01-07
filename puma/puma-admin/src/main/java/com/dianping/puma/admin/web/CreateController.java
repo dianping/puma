@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,9 +25,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 import org.xml.sax.SAXParseException;
 
 import com.dianping.puma.admin.config.PropertiesConfig;
+import com.dianping.puma.admin.service.DumpActionService;
+import com.dianping.puma.admin.service.DumpActionStateService;
+import com.dianping.puma.admin.service.MysqlConfigService;
+import com.dianping.puma.admin.service.PumaSyncServerConfigService;
 import com.dianping.puma.admin.service.SyncConfigService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.admin.util.HttpClientUtil;
@@ -35,6 +41,12 @@ import com.dianping.puma.core.sync.BinlogInfo;
 import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.SyncConfig;
 import com.dianping.puma.core.sync.SyncTask;
+import com.dianping.puma.core.sync.model.action.DumpAction;
+import com.dianping.puma.core.sync.model.action.DumpActionState;
+import com.dianping.puma.core.sync.model.config.MysqlConfig;
+import com.dianping.puma.core.sync.model.config.PumaSyncServerConfig;
+import com.dianping.puma.core.sync.model.mapping.DumpMapping;
+import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.google.gson.Gson;
 
 /**
@@ -47,28 +59,208 @@ import com.google.gson.Gson;
  * @author wukezhu
  */
 @Controller
-@RequestMapping(method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 public class CreateController {
     private static final Logger LOG = LoggerFactory.getLogger(CreateController.class);
     @Autowired
     private SyncConfigService syncConfigService;
+    @Autowired
+    private MysqlConfigService mysqlConfigService;
+    @Autowired
+    private DumpActionService dumpActionService;
+    @Autowired
+    private DumpActionStateService dumpActionStateService;
+    @Autowired
+    private PumaSyncServerConfigService pumaSyncServerConfigService;
 
     private static final String errorMsg = "对不起，出了一点错误，请刷新页面试试。";
 
+    @RequestMapping(value = { "/create" })
+    public ModelAndView create(HttpSession session) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        //查询MysqlConfig
+        List<MysqlConfig> mysqlConfigs = mysqlConfigService.findAll();
+
+        map.put("mysqlConfigs", mysqlConfigs);
+        map.put("createActive", "active");
+        map.put("path", "create");
+        map.put("subPath", "step1");
+        return new ModelAndView("main/container", map);
+    }
+
+    @RequestMapping(value = "/create/step1Save", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object step1Save(HttpSession session, String srcMysql, String destMysql, String syncXml) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            //保存到session
+            MysqlMapping mysqlMapping = SyncXmlParser.parse2(syncXml);
+            session.setAttribute("mysqlMapping", mysqlMapping);
+            MysqlConfig srcMysqlConfig = mysqlConfigService.find(srcMysql);
+            MysqlConfig destMysqlConfig = mysqlConfigService.find(destMysql);
+            session.setAttribute("srcMysqlConfig", srcMysqlConfig);
+            session.setAttribute("destMysqlConfig", destMysqlConfig);
+
+            map.put("success", true);
+        } catch (SAXParseException e) {
+            map.put("success", false);
+            map.put("errorMsg", "xml解析出错：" + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", errorMsg);
+            LOG.error(e.getMessage(), e);
+        }
+        return GsonUtil.toJson(map);
+
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = { "/create/step2" })
+    public ModelAndView step2(HttpSession session) throws SQLException {
+        Map<String, Object> map = new HashMap<String, Object>();
+        //从session拿出srcMysql，destMysql查询mysql配置
+        MysqlConfig srcMysqlConfig = (MysqlConfig) session.getAttribute("srcMysqlConfig");
+        MysqlConfig destMysqlConfig = (MysqlConfig) session.getAttribute("destMysqlConfig");
+        //查询所有syncServer
+        List<PumaSyncServerConfig> syncServerConfigs = pumaSyncServerConfigService.findAll();
+        //从会话中取出保存的mysqlMapping，计算出dumpMapping
+        MysqlMapping mysqlMapping = (MysqlMapping) session.getAttribute("mysqlMapping");
+        DumpMapping dumpMapping = this.syncConfigService.convertMysqlMappingToDumpMapping(srcMysqlConfig.getHosts().get(0),
+                mysqlMapping);
+        session.setAttribute("dumpMapping", dumpMapping);
+
+        map.put("srcMysqlConfig", srcMysqlConfig);
+        map.put("destMysqlConfig", destMysqlConfig);
+        map.put("syncServerConfigs", syncServerConfigs);
+        map.put("dumpMapping", dumpMapping);
+        map.put("createActive", "active");
+        map.put("path", "create");
+        map.put("subPath", "step2");
+        return new ModelAndView("main/container", map);
+    }
+
+    /**
+     * 创建DumpAction
+     */
+    @RequestMapping(value = "/create/createDumpAction", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object createDumpAction(HttpSession session, String srcMysqlHost, String destMysqlHost, String syncServerHost) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            //检查参数
+            if (StringUtils.isBlank(srcMysqlHost)) {
+                throw new IllegalArgumentException("srcMysqlHost不能为空");
+            }
+            if (StringUtils.isBlank(destMysqlHost)) {
+                throw new IllegalArgumentException("destMysqlHost不能为空");
+            }
+            if (StringUtils.isBlank(syncServerHost)) {
+                throw new IllegalArgumentException("syncServerHost不能为空");
+            }
+            //从session拿出srcMysql，destMysql查询mysql配置
+            MysqlConfig srcMysqlConfig = (MysqlConfig) session.getAttribute("srcMysqlConfig");
+            MysqlConfig destMysqlConfig = (MysqlConfig) session.getAttribute("destMysqlConfig");
+            DumpMapping dumpMapping = (DumpMapping) session.getAttribute("dumpMapping");
+            //查询所有syncServer
+            DumpAction dumpAction = new DumpAction();
+            dumpAction.setSrcMysqlName(srcMysqlConfig.getName());
+            dumpAction.setSrcMysqlHost(srcMysqlHost);
+            dumpAction.setDestMysqlName(destMysqlConfig.getName());
+            dumpAction.setDestMysqlHost(destMysqlHost);
+            dumpAction.setDumpMapping(dumpMapping);
+            dumpAction.setSyncServerHost(syncServerHost);
+            //保存dumpAction到数据库
+            dumpActionService.create(dumpAction);
+            //保存dumpAction到session
+            session.setAttribute("dumpActionId", dumpAction.getId());
+            LOG.info("created dumpAction: " + dumpAction);
+
+            map.put("success", true);
+        } catch (IllegalArgumentException e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", errorMsg);
+            LOG.error(e.getMessage(), e);
+        }
+        return GsonUtil.toJson(map);
+
+    }
+
+    /**
+     * 查看DumpAction的状态
+     */
+    @RequestMapping(value = "/create/refleshDumpState", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object refleshDumpState(HttpSession session) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            ObjectId id = (ObjectId) session.getAttribute("dumpActionId");
+            //检查参数
+            if (id == null) {
+                throw new IllegalArgumentException("dumpActionId为空，可能是会话已经过期！");
+            }
+            //查询dumpActionId对应的DumpActionState
+            DumpActionState dumpActionState = this.dumpActionStateService.find(id);
+            if (dumpActionState != null) {
+                map.put("dumpActionState", dumpActionState);
+                if (dumpActionState.getBinlogInfo() != null) {
+                    session.setAttribute("binlogInfo", dumpActionState.getBinlogInfo());
+                }
+            } else {
+                throw new IllegalArgumentException("dumpActionState不存在，请管理员查看什么原因！");
+            }
+
+            map.put("success", true);
+        } catch (IllegalArgumentException e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", errorMsg);
+            LOG.error(e.getMessage(), e);
+        }
+        return GsonUtil.toJson(map);
+
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = { "/create/step3" })
+    public ModelAndView step3(HttpSession session) throws SQLException {
+        Map<String, Object> map = new HashMap<String, Object>();
+        //从session拿出
+        MysqlConfig srcMysqlConfig = (MysqlConfig) session.getAttribute("srcMysqlConfig");
+        MysqlConfig destMysqlConfig = (MysqlConfig) session.getAttribute("destMysqlConfig");
+        MysqlMapping mysqlMapping = (MysqlMapping) session.getAttribute("mysqlMapping");
+        BinlogInfo binlogInfo = (BinlogInfo) session.getAttribute("binlogInfo");
+        //查询所有syncServer
+        List<PumaSyncServerConfig> syncServerConfigs = pumaSyncServerConfigService.findAll();
+
+        map.put("srcMysqlConfig", srcMysqlConfig);
+        map.put("destMysqlConfig", destMysqlConfig);
+        map.put("syncServerConfigs", syncServerConfigs);
+        map.put("createActive", "active");
+        map.put("path", "create");
+        map.put("subPath", "step3");
+        return new ModelAndView("main/container", map);
+    }
+
+    //*****************************************************************************
     /**
      * 如果mergeId为空，那么新增配置；不为空，则修改配置。
      */
     @RequestMapping(value = "/saveSyncXml", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object saveSyncXml(HttpSession session, HttpServletRequest request, String syncXmlString) {
+    public Object saveSyncXml(HttpSession session, String srcMysql, String destMysql, String syncXml) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             //解析xml，得到SyncConfig
-            SyncConfig syncConfig = SyncXmlParser.parse(syncXmlString);
+            SyncConfig syncConfig = SyncXmlParser.parse(syncXml);
             syncConfig.setId(new ObjectId());
             LOG.info("create SyncConfig: " + syncConfig);
             //保存SyncConfig到db,同时保存SyncXml
-            map.put("id", syncConfigService.saveSyncConfig(syncConfig, syncXmlString));
+            map.put("id", syncConfigService.saveSyncConfig(syncConfig, syncXml));
             //保存syncConfig到session
             session.setAttribute("syncConfig", syncConfig);
 

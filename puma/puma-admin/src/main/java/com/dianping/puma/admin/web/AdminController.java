@@ -45,15 +45,6 @@ public class AdminController {
         return new ModelAndView("main/container", map);
     }
 
-    @RequestMapping(value = { "/create" })
-    public ModelAndView create(HttpSession session) {
-        Map<String, Object> map = new HashMap<String, Object>();
-
-        map.put("createActive", "active");
-        map.put("path", "create");
-        return new ModelAndView("main/container", map);
-    }
-
     @RequestMapping(value = { "/modify" })
     public ModelAndView modify(HttpSession session) {
         Map<String, Object> map = new HashMap<String, Object>();

@@ -23,11 +23,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.dianping.puma.core.sync.BinlogInfo;
 import com.dianping.puma.core.sync.Constant;
 import com.dianping.puma.core.sync.DatabaseBinlogInfo;
 import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.SyncConfig;
+import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.syncserver.bo.AbstractSyncClient;
 import com.dianping.puma.syncserver.bo.CatchupClient;
 import com.dianping.puma.syncserver.bo.DumpClient;

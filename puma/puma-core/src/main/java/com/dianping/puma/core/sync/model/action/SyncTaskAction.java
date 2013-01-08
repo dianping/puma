@@ -22,8 +22,8 @@ public class SyncTaskAction extends Action {
     //    同步配置：映射配置(TableMapping)
     private MysqlMapping mysqlMapping;
 
-    public SyncTaskAction(ActionType type) {
-        super(type);
+    public SyncTaskAction() {
+        super(ActionType.SYNC);
     }
 
     public BinlogInfo getBinlogInfo() {

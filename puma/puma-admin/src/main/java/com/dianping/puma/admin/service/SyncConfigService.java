@@ -6,10 +6,10 @@ import java.util.List;
 import org.bson.types.ObjectId;
 
 import com.dianping.puma.admin.bo.SyncXml;
-import com.dianping.puma.core.sync.BinlogInfo;
 import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.SyncConfig;
 import com.dianping.puma.core.sync.SyncTask;
+import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.config.MysqlHost;
 import com.dianping.puma.core.sync.model.mapping.DumpMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;

@@ -3,6 +3,8 @@ package com.dianping.puma.core.sync.model.action;
 import org.bson.types.ObjectId;
 
 import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Indexed;
+import com.google.code.morphia.utils.IndexDirection;
 
 /**
  * 代表一个动作，由puma-admin创建action(发派命令)，puma-syncServer获取action(执行命令)
@@ -15,13 +17,15 @@ public abstract class Action {
     private ObjectId id;
     private ActionType type;
     //    源：源数据库名称(如Dianping)
+    @Indexed(value = IndexDirection.ASC, name = "srcMysqlName", unique = true, dropDups = true)
     private String srcMysqlName;
     //    目标：目标的数据库名称
     private String destMysqlName;
     //    目标：具体host
     private String destMysqlHost;
-    //    指派执行者：sync-server的host
-    private String syncServerHost;
+    //    指派执行者：sync-server的name
+    @Indexed(value = IndexDirection.ASC, name = "syncServerName", unique = true, dropDups = true)
+    private String syncServerName;
 
     protected Action(ActionType type) {
         this.type = type;
@@ -67,12 +71,12 @@ public abstract class Action {
         this.destMysqlHost = destMysqlHost;
     }
 
-    public String getSyncServerHost() {
-        return syncServerHost;
+    public String getSyncServerName() {
+        return syncServerName;
     }
 
-    public void setSyncServerHost(String syncServerHost) {
-        this.syncServerHost = syncServerHost;
+    public void setSyncServerName(String syncServerName) {
+        this.syncServerName = syncServerName;
     }
 
     public enum ActionType {

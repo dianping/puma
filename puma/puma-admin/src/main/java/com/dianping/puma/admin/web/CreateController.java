@@ -34,15 +34,17 @@ import com.dianping.puma.admin.service.DumpActionStateService;
 import com.dianping.puma.admin.service.MysqlConfigService;
 import com.dianping.puma.admin.service.PumaSyncServerConfigService;
 import com.dianping.puma.admin.service.SyncConfigService;
+import com.dianping.puma.admin.service.SyncTaskActionService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.admin.util.HttpClientUtil;
 import com.dianping.puma.admin.util.SyncXmlParser;
-import com.dianping.puma.core.sync.BinlogInfo;
 import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.SyncConfig;
 import com.dianping.puma.core.sync.SyncTask;
+import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.action.DumpAction;
 import com.dianping.puma.core.sync.model.action.DumpActionState;
+import com.dianping.puma.core.sync.model.action.SyncTaskAction;
 import com.dianping.puma.core.sync.model.config.MysqlConfig;
 import com.dianping.puma.core.sync.model.config.PumaSyncServerConfig;
 import com.dianping.puma.core.sync.model.mapping.DumpMapping;
@@ -71,6 +73,8 @@ public class CreateController {
     private DumpActionStateService dumpActionStateService;
     @Autowired
     private PumaSyncServerConfigService pumaSyncServerConfigService;
+    @Autowired
+    private SyncTaskActionService syncTaskActionService;
 
     private static final String errorMsg = "对不起，出了一点错误，请刷新页面试试。";
 
@@ -145,7 +149,7 @@ public class CreateController {
      */
     @RequestMapping(value = "/create/createDumpAction", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object createDumpAction(HttpSession session, String srcMysqlHost, String destMysqlHost, String syncServerHost) {
+    public Object createDumpAction(HttpSession session, String srcMysqlHost, String destMysqlHost, String syncServerName) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             //检查参数
@@ -155,7 +159,7 @@ public class CreateController {
             if (StringUtils.isBlank(destMysqlHost)) {
                 throw new IllegalArgumentException("destMysqlHost不能为空");
             }
-            if (StringUtils.isBlank(syncServerHost)) {
+            if (StringUtils.isBlank(syncServerName)) {
                 throw new IllegalArgumentException("syncServerHost不能为空");
             }
             //从session拿出srcMysql，destMysql查询mysql配置
@@ -169,7 +173,7 @@ public class CreateController {
             dumpAction.setDestMysqlName(destMysqlConfig.getName());
             dumpAction.setDestMysqlHost(destMysqlHost);
             dumpAction.setDumpMapping(dumpMapping);
-            dumpAction.setSyncServerHost(syncServerHost);
+            dumpAction.setSyncServerName(syncServerName);
             //保存dumpAction到数据库
             dumpActionService.create(dumpAction);
             //保存dumpAction到session
@@ -232,7 +236,6 @@ public class CreateController {
         //从session拿出
         MysqlConfig srcMysqlConfig = (MysqlConfig) session.getAttribute("srcMysqlConfig");
         MysqlConfig destMysqlConfig = (MysqlConfig) session.getAttribute("destMysqlConfig");
-        MysqlMapping mysqlMapping = (MysqlMapping) session.getAttribute("mysqlMapping");
         BinlogInfo binlogInfo = (BinlogInfo) session.getAttribute("binlogInfo");
         //查询所有syncServer
         List<PumaSyncServerConfig> syncServerConfigs = pumaSyncServerConfigService.findAll();
@@ -240,10 +243,86 @@ public class CreateController {
         map.put("srcMysqlConfig", srcMysqlConfig);
         map.put("destMysqlConfig", destMysqlConfig);
         map.put("syncServerConfigs", syncServerConfigs);
+        map.put("binlogInfo", binlogInfo);
         map.put("createActive", "active");
         map.put("path", "create");
         map.put("subPath", "step3");
         return new ModelAndView("main/container", map);
+    }
+
+    /**
+     * 创建SyncAction
+     * 
+     * @param ddl
+     * @param pumaClientName
+     * @param serverId
+     * @param transaction
+     */
+    @RequestMapping(value = "/create/createSyncAction", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object createSyncAction(HttpSession session, String syncServerName, String destMysqlHost, String binlogFile,
+                                   String binlogPosition, Boolean ddl, Boolean dml, String pumaClientName, Long serverId,
+                                   Boolean transaction) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            //检查参数
+            if (StringUtils.isBlank(syncServerName)) {
+                throw new IllegalArgumentException("syncServerHost不能为空");
+            }
+            if (StringUtils.isBlank(destMysqlHost)) {
+                throw new IllegalArgumentException("destMysqlHost不能为空");
+            }
+            if (StringUtils.isBlank(binlogFile)) {
+                throw new IllegalArgumentException("binlogFile不能为空");
+            }
+            if (StringUtils.isBlank(binlogPosition)) {
+                throw new IllegalArgumentException("binlogPosition不能为空");
+            }
+            if (StringUtils.isBlank(pumaClientName)) {
+                throw new IllegalArgumentException("pumaClientName不能为空");
+            }
+            if (serverId == null) {
+                throw new IllegalArgumentException("serverId不能为空");
+            }
+            //从session拿出
+            MysqlConfig srcMysqlConfig = (MysqlConfig) session.getAttribute("srcMysqlConfig");
+            MysqlConfig destMysqlConfig = (MysqlConfig) session.getAttribute("destMysqlConfig");
+            MysqlMapping mysqlMapping = (MysqlMapping) session.getAttribute("mysqlMapping");
+            //创建SyncAction
+            SyncTaskAction syncTaskAction = new SyncTaskAction();
+            syncTaskAction.setSrcMysqlName(srcMysqlConfig.getName());
+            syncTaskAction.setDestMysqlName(destMysqlConfig.getName());
+            syncTaskAction.setDestMysqlHost(destMysqlHost);
+            syncTaskAction.setMysqlMapping(mysqlMapping);
+            syncTaskAction.setSyncServerName(syncServerName);
+            BinlogInfo binlogInfo = new BinlogInfo();
+            if (StringUtils.isNotBlank(binlogFile) && StringUtils.isNotBlank(binlogPosition)) {
+                binlogInfo.setBinlogFile(binlogFile);
+                binlogInfo.setBinlogPosition(Long.parseLong(binlogPosition));
+            }
+            syncTaskAction.setBinlogInfo(binlogInfo);
+            syncTaskAction.setDdl(ddl != null ? ddl : true);
+            syncTaskAction.setDml(dml != null ? dml : true);
+            syncTaskAction.setPumaClientName(pumaClientName);
+            syncTaskAction.setServerId(serverId);
+            syncTaskAction.setTransaction(transaction != null ? transaction : true);
+            //保存dumpAction到数据库
+            syncTaskActionService.create(syncTaskAction);
+            //保存dumpAction到session
+            session.setAttribute("dumpActionId", syncTaskAction.getId());
+            LOG.info("created dumpAction: " + syncTaskAction);
+
+            map.put("success", true);
+        } catch (IllegalArgumentException e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", errorMsg);
+            LOG.error(e.getMessage(), e);
+        }
+        return GsonUtil.toJson(map);
+
     }
 
     //*****************************************************************************

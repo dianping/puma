@@ -8,31 +8,6 @@
    <a style="float: right; margin-right: 20px;" type="button"
       href="${rc.contextPath}/create/step2" class="btn">上一步</a>
    <p class="legend">创建同步任务</p>
-   <div class="alert alert-warning">
-      <strong>温馨提示</strong>：同步任务和同步配置是一一对应的，不会重复。
-   </div>
-   <h5 style="">请为同步任务，分配一台Puma-SyncServer，如有需要可以修改binlog信息</h5>
-   <div
-      style="padding: 10px 10px 0px 10px; background-color: white; border: 1px solid rgba(0, 0, 0, 0.15); border-radius: 4px 4px 4px 4px;">
-      <form method="post"
-         onsubmit="createSyncAction(this);return false;"
-         action="${rc.contextPath}/create/createSyncAction">
-         <label>选择SyncServer服务器作为同步任务的执行者: </label> <select
-            name="syncServerHost" style="margin-left: 16px;">
-            #foreach($syncServerConfig in ${syncServerConfigs})
-            <option value="${syncServerConfig.name}">${syncServerConfig.name}</option>
-            #end
-         </select>
-         <button style="float: right; margin-right: 20px;" type="submit"
-            class="btn btn-success">创建任务</button>
-         <label>binlog文件：</label><input type="text" name="binlogFile"
-            style="margin-left: 16px;"
-            value="$!{binlogInfo.binlogPosition}"><label>
-            binlog位置：</label><input type="text" name="binlogPos"
-            style="margin-left: 16px;"
-            value="$!{binlogInfo.binlogPosition}">
-      </form>
-   </div>
    <div id="saveSyncTaskError" style="margin-top: 20px; display: none;"
       class="alert alert-error">
       <button type="button" class="close" data-dismiss="alert">×</button>
@@ -46,9 +21,57 @@
       <button type="button" class="close" data-dismiss="alert">×</button>
       创建任务信息成功！
    </div>
+   <h5 style="">请为同步任务，分配一台Puma-SyncServer，如有需要可以修改binlog信息</h5>
+   <div
+      style="padding: 10px 10px 0px 10px; background-color: white; border: 1px solid rgba(0, 0, 0, 0.15); border-radius: 4px 4px 4px 4px;">
+      <form method="post"
+         onsubmit="createSyncAction(this);return false;"
+         action="${rc.contextPath}/create/createSyncAction">
+         <div class="container-fluid">
+            <div class="row-fluid">
+               <div class="span5">
+                  <label>选择SyncServer服务器作为同步任务的执行者: </label> <select
+                     name="syncServerName" style="margin-left: 16px;">
+                     #foreach($syncServerConfig in ${syncServerConfigs})
+                     <option value="${syncServerConfig.name}">${syncServerConfig.name}</option>
+                     #end
+                  </select> <label>选择目标数据库(${destMysqlConfig.name})的Host:
+                  </label> <select name="destMysqlHost"
+                     style="margin-left: 16px; margin-right: 16px;">
+                     #foreach($destHost in ${destMysqlConfig.hosts})
+                     <option value="$destHost.host">$destHost.host</option>
+                     #end
+                  </select> <label>binlog文件：</label><input type="text"
+                     name="binlogFile" style="margin-left: 16px;"
+                     value="$!{binlogInfo.binlogFile}"><label>
+                     binlog位置：</label><input type="text" name="binlogPosition"
+                     style="margin-left: 16px;"
+                     value="$!{binlogInfo.binlogPosition}">
+               </div>
+               <div class="span5">
+                  <label>pumaClientName：</label><input type="text"
+                     name="pumaClientName" style="margin-left: 16px;">
+                  <label>serverId：</label><input type="text"
+                     name="serverId" style="margin-left: 16px;">
+                  <label>ddl：</label><input type="text" name="ddl"
+                     style="margin-left: 16px;" placeholder="可选，默认为true">
+                  <label>dml：</label><input type="text" name="dml"
+                     style="margin-left: 16px;" placeholder="可选，默认为true">
+                  <label>transaction：</label><input type="text"
+                     name="transaction" style="margin-left: 16px;"
+                     placeholder="可选，默认为true">
+               </div>
+               <button id="createSyncTaskButton"
+                  style="float: right; margin-right: 20px;"
+                  type="submit" class="btn btn-success">创建任务</button>
+            </div>
+         </div>
+      </form>
+   </div>
 </div>
 <script>
 	function createSyncAction(form) {
+		$('#saveSyncTaskError').hide();
 		$.ajax({
 			type : $(form).attr('method'),
 			url : $(form).attr('action'),
@@ -61,9 +84,12 @@
 	}
 	function createSyncActionDone(data) {
 		if (data.success == false) {
-			pumadmin.appError("错误信息", data.errorMsg);
+			//pumadmin.appError("错误信息", data.errorMsg);
+			$("#saveSyncTaskErrorCause").text(data.errorMsg);
+			$('#saveSyncTaskError').show();
 		} else {
-			$('#dumpState').text("CREATED (创建时间：刚刚)");
+			$("#createSyncTaskButton").attr("disabled", "disabled");
+			$('#saveSyncTaskSuccess').show();
 		}
 	}
 </script>

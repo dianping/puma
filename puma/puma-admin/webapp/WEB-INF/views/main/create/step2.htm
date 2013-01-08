@@ -18,10 +18,7 @@
                   <form class="form" method="post"
                      onsubmit="createDumpAction(this);return false;"
                      action="${rc.contextPath}/create/createDumpAction">
-                     <button id="step1_next" style="" type="submit"
-                        class="btn btn-info">创建DumpAction</button>
-                     <br> <br> <label
-                        style="margin-right: 200px;">DumpAction状态(<a
+                     <label style="">DumpAction状态(<a
                         href="javascript:refleshDumpState();">刷新状态</a>)：<span
                         style="font-size: 12px; color: red"
                         id="dumpState"> </span>
@@ -32,7 +29,11 @@
                         disabled="disabled" id="dumpBinlogPos">
                      <hr>
                      <label>选择源数据库(${srcMysqlConfig.name})的Host:
-                     </label> <select name="srcMysqlHost"
+                     </label>
+                     <button id="createDumpButton"
+                        style="float: right; margin-right: 20px;"
+                        type="submit" class="btn btn-info">创建DumpAction</button>
+                     <select name="srcMysqlHost"
                         style="margin-left: 16px; margin-right: 16px;">
                         #foreach($srcHost in ${srcMysqlConfig.hosts})
                         <option value="$srcHost.host">$srcHost.host</option>
@@ -44,7 +45,7 @@
                         <option value="$destHost.host">$destHost.host</option>
                         #end
                      </select><br> <label>选择SyncServer作为dump的服务器执行者:
-                     </label> <select name="syncServerHost"
+                     </label> <select name="syncServerName"
                         style="margin-left: 16px; margin-right: 16px;">
                         #foreach($syncServerConfig in
                         ${syncServerConfigs})
@@ -121,6 +122,7 @@
 			pumadmin.appError("错误信息", data.errorMsg);
 		} else {
 			$('#dumpState').text("CREATED (创建时间：刚刚)");
+			$("#createDumpButton").attr("disabled", "disabled");
 		}
 	}
 	function refleshDumpState() {
@@ -144,9 +146,12 @@
 			$('#dumpState').text(
 					data.dumpActionState.state + " (创建时间："
 							+ data.dumpActionState.createTime + ")");
-			if (data.binlogFile) {
-				$('#dumpBinlogFile').val(data.binlogFile);
-				$('#dumpBinlogPos').val(data.binlogPos);
+			if (data.dumpActionState.binlogInfo
+					&& data.dumpActionState.binlogInfo.binlogFile) {
+				$('#dumpBinlogFile').val(
+						data.dumpActionState.binlogInfo.binlogFile);
+				$('#dumpBinlogPos').val(
+						data.dumpActionState.binlogInfo.binlogPosition);
 				//把文案显示成“下一步”
 				$("#dumpStepButton").addClass("btn-success");
 				$("#dumpStepButton").text("下一步");

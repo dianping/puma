@@ -91,11 +91,11 @@
 		<property name="storage" ref="storage-7-43" />
 	</bean>
 
-	<bean id="storage-Dianping" class="com.dianping.puma.storage.DefaultEventStorage"
+	<bean id="storage-7-43" class="com.dianping.puma.storage.DefaultEventStorage"
 		init-method="start">
 		<property name="codec" ref="jsonCodec" />
-		<property name="masterIndex" ref="localBucketIndex-7-43" />
-		<property name="slaveIndex" ref="hdfsBucketIndex-7-43" />
+		<property name="masterBucketIndex" ref="localBucketIndex-7-43" />
+		<property name="slaveBucketIndex" ref="hdfsBucketIndex-7-43" />
 		<property name="binlogIndexManager" ref="binlogIndexManager-7-43" />
 		<property name="archiveStrategy" ref="archiveStrategy" />
 		<property name="cleanupStrategy" ref="cleanupStrategy" />
@@ -108,7 +108,7 @@
 		<property name="maxBucketLengthMB" value="1000" />
 		<property name="baseDir" value="/data/applogs/puma/storage/7-43/" />
 		<property name="compressor" ref="compressor" />
-		<property name="codec" ref="jsonCodec"/>
+		<property name="codec" ref="jsonCodec" />
 	</bean>
 	<bean id="hdfsBucketIndex-7-43" class="com.dianping.puma.storage.LocalFileBucketIndex"
 		init-method="start">
@@ -116,15 +116,13 @@
 		<property name="maxBucketLengthMB" value="1000" />
 		<property name="compressor" ref="compressor" />
 		<property name="baseDir" value="/user/workcron/puma/storage/7-43/" />
-		<property name="codec" ref="jsonCodec"/>
+		<property name="codec" ref="jsonCodec" />
 	</bean>
 
-	<bean id="binlogIndexManager-Dianping" class="com.dianping.puma.storage.DefaultBinlogIndexManager">
-		<property name="mainBinlogIndex" ref="mainbinlogindex-7-43" />	
+	<bean id="binlogIndexManager-7-43" class="com.dianping.puma.storage.DefaultBinlogIndexManager">
+		<property name="mainBinlogIndex" ref="mainbinlogindex-7-43" />
 		<property name="subBinlogIndex" ref="subbinlogindex-7-43" />
 		<property name="codec" ref="jsonCodec" />
-		<property name="masterIndex" ref="localBucketIndex-7-43" />
-		<property name="slaveIndex" ref="hdfsBucketIndex-7-43" />
 	</bean>
 
 	<bean id="archiveStrategy" class="com.dianping.puma.storage.DefaultArchiveStrategy">
@@ -147,17 +145,17 @@
 
 	<bean id="compressor" class="com.dianping.puma.storage.ZipCompressor">
 		<property name="codec" ref="jsonCodec" />
-		<property name="zipThreshold" value="526288"/>
+		<property name="zipThreshold" value="526288" />
 	</bean>
-	
+
 	<bean id="mainbinlogindex-7-43" class="com.dianping.puma.storage.MainBinlogIndexImpl">
-		<property name="mainBinlogIndexFileName" value="mainBinlogIndex"/>
-		<property name="mainBinlogIndexBasedir" value="/data/applogs/puma/"/>
+		<property name="mainBinlogIndexFileName" value="mainBinlogIndex" />
+		<property name="mainBinlogIndexBasedir" value="/data/applogs/puma/" />
 	</bean>
-	
+
 	<bean id="subbinlogindex-7-43" class="com.dianping.puma.storage.SubBinlogIndexImpl">
-		<property name="subBinlogIndexBaseDir" value="/data/applogs/puma/binlogindex"/>
-		<property name="subBinlogIndexPrefix" value="index-"/>
+		<property name="subBinlogIndexBaseDir" value="/data/applogs/puma/binlogindex" />
+		<property name="subBinlogIndexPrefix" value="index-" />
 	</bean>
 </beans>
 

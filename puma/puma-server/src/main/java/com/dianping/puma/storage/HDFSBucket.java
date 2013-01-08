@@ -1,6 +1,5 @@
 package com.dianping.puma.storage;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -17,15 +16,13 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  */
 public class HDFSBucket extends AbstractBucket {
 
-	private FSDataInputStream inputStream = null;
-	private Path file;
+	private FSDataInputStream	inputStream	= null;
+	private Path				file;
 
-	public HDFSBucket(FileSystem fileSystem, String baseDir, String path,
-			Sequence startingSequence) throws IOException {
+	public HDFSBucket(FileSystem fileSystem, String baseDir, String path, Sequence startingSequence) throws IOException {
 		super(startingSequence, -1);
 		this.file = new Path(baseDir, path);
 		this.inputStream = fileSystem.open(file);
-		this.compressor.setInputStream(new DataInputStream(inputStream));
 	}
 
 	protected void doAppend(byte[] data) throws IOException {
@@ -46,10 +43,6 @@ public class HDFSBucket extends AbstractBucket {
 		return inputStream.available() > 4;
 	}
 
-	protected int readByte() throws StorageClosedException, IOException {
-		return inputStream.readInt();
-	}
-	
 	protected byte[] doReadData() throws StorageClosedException, IOException {
 		int length = inputStream.readInt();
 		byte[] data = new byte[length];
@@ -69,4 +62,5 @@ public class HDFSBucket extends AbstractBucket {
 	protected boolean doHasRemainingForWrite() throws IOException {
 		throw new UnsupportedOperationException();
 	}
+
 }

@@ -38,7 +38,7 @@ public class DefaultCleanupStrategy implements CleanupStrategy {
 	}
 
 	@Override
-	public void cleanup(BucketIndex index, BinlogIndexManager binlogIndexManager) {
+	public void cleanup(BucketIndex index) {
 		try {
 			toBeDeleteBuckets.addAll(index.bulkGetRemainNDay(preservedDay));
 
@@ -50,7 +50,6 @@ public class DefaultCleanupStrategy implements CleanupStrategy {
 					String path = iterator.next();
 					if (StringUtils.isNotBlank(path)) {
 						if (index.removeBucket(path)) {
-							binlogIndexManager.deleteBinlogIndex(path);
 							iterator.remove();
 						}
 					}

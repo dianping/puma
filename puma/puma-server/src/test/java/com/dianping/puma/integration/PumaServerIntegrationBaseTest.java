@@ -49,15 +49,11 @@ import com.dianping.puma.sender.dispatcher.SimpleDispatherImpl;
 import com.dianping.puma.server.MMapBasedBinlogPositionHolder;
 import com.dianping.puma.server.ReplicationBasedServer;
 import com.dianping.puma.storage.ArchiveStrategy;
-import com.dianping.puma.storage.BinlogIndexManager;
 import com.dianping.puma.storage.BucketIndex;
 import com.dianping.puma.storage.CleanupStrategy;
-import com.dianping.puma.storage.DefaultBinlogIndexManager;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.LocalFileBucketIndex;
-import com.dianping.puma.storage.MainBinlogIndexImpl;
-import com.dianping.puma.storage.SubBinlogIndexImpl;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 /**
@@ -78,7 +74,6 @@ public abstract class PumaServerIntegrationBaseTest {
 	protected DefaultEventStorage		storage;
 	protected LocalFileBucketIndex		masterIndex;
 	protected LocalFileBucketIndex		slaveIndex;
-	protected BinlogIndexManager		binlogIndexManager;
 	protected FileDumpSender			sender;
 	private static File					storageMasterBaseDir	= new File(System.getProperty("java.io.tmpdir", "."),
 																		"Puma");
@@ -143,19 +138,6 @@ public abstract class PumaServerIntegrationBaseTest {
 		slaveIndex = new LocalFileBucketIndex();
 		slaveIndex.setBaseDir(storageSlaveBaseDir.getAbsolutePath());
 		slaveIndex.start();
-		DefaultBinlogIndexManager dbim = new DefaultBinlogIndexManager();
-		dbim.setMasterIndex(masterIndex);
-		dbim.setSlaveIndex(slaveIndex);
-		MainBinlogIndexImpl mbii = new MainBinlogIndexImpl();
-		mbii.setMainBinlogIndexBasedir(System.getProperty("java.io.tmpdir", ".") + "/Puma");
-		mbii.setMainBinlogIndexFileName("binlogIndex");
-		SubBinlogIndexImpl sbii = new SubBinlogIndexImpl();
-		sbii.setSubBinlogIndexBaseDir(System.getProperty("java.io.tmpdir", ".") + "/binlogindex");
-		sbii.setSubBinlogIndexPrefix("index");
-		dbim.setMainBinlogIndex(mbii);
-		dbim.setSubBinlogIndex(sbii);
-		dbim.setCodec(new JsonEventCodec());
-		binlogIndexManager = dbim;
 
 		// init storage
 		storage = new DefaultEventStorage();
@@ -169,7 +151,7 @@ public abstract class PumaServerIntegrationBaseTest {
 		storage.setCleanupStrategy(new CleanupStrategy() {
 
 			@Override
-			public void cleanup(BucketIndex index, BinlogIndexManager binlogIndexManager) {
+			public void cleanup(BucketIndex index) {
 
 			}
 		});
@@ -177,7 +159,6 @@ public abstract class PumaServerIntegrationBaseTest {
 		storage.setName("test-storage");
 		storage.setMasterIndex(masterIndex);
 		storage.setSlaveIndex(slaveIndex);
-		storage.setBinlogIndexManager(binlogIndexManager);
 		storage.start();
 
 		// init sender
@@ -234,7 +215,7 @@ public abstract class PumaServerIntegrationBaseTest {
 	protected List<ChangedEvent> getEvents(int n, boolean needTs) throws Exception {
 		waitForSync(50);
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
-		EventChannel channel = storage.getChannel(-1, 1, null, -1);
+		EventChannel channel = storage.getChannel(-1);
 		for (int i = 0; i < n;) {
 			ChangedEvent event = channel.next();
 			if (!needTs) {

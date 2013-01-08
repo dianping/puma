@@ -15,20 +15,13 @@
  */
 package com.dianping.puma.storage;
 
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.util.ArrayList;
-import java.util.Properties;
-import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.dianping.puma.storage.exception.StorageClosedException;
@@ -59,8 +52,8 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
                 throw new RuntimeException("Failed to make dir for " + localBaseDir.getAbsolutePath());
             }
         }
-        TreeMap<Sequence, String> newIndex = new TreeMap<Sequence, String>();
-        getIndex().set(new TreeMap<Sequence, String>());
+        TreeMap<Sequence, String> newIndex = new TreeMap<Sequence, String>(new PathSequenceComparator());
+        getIndex().set(newIndex);
         File[] dirs = localBaseDir.listFiles(new FileFilter() {
 
             @Override
@@ -94,7 +87,6 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
                 }
             }
         }
-        getIndex().set(newIndex);
         super.start();
     }
 
@@ -123,19 +115,8 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
         if (!localFile.exists()) {
             return;
         }
-        File destFile = new File(this.getBaseDir(), path);
-        if (!destFile.getParentFile().exists()) {
-            if (!destFile.getParentFile().mkdirs()) {
-                throw new IOException(String.format("Can't create writeBucket's parent(%s)!", destFile.getParent()));
-            }
-        }
-        RandomAccessFile localFileAcess = new RandomAccessFile(localFile, "rw");
-        RandomAccessFile destFileAcess = new RandomAccessFile(destFile, "rw");
-        OutputStream destIndex = new FileOutputStream(new File(this.getBaseDir(), path + this.zipIndexsuffix));
-        this.compressor.compress(localFileAcess, destFileAcess, destIndex);
-        localFileAcess.close();
-        destFileAcess.close();
-        destIndex.close();
+
+        FileUtils.copyFile(localFile, new File(getBaseDir(), path));
     }
 
     @Override
@@ -145,11 +126,6 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
         boolean deleted = false;
         if (file.exists()) {
             deleted = file.delete();
-            if (deleted) {
-                File index = new File(getBaseDir(), path + this.zipIndexsuffix);
-                index.delete();
-            }
-
         }
 
         if (file.getParentFile().exists()) {
@@ -159,22 +135,5 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
             }
         }
         return deleted;
-    }
-
-    @Override
-    public ArrayList<ZipIndexItem> readZipIndex(String baseDir, String path) throws IOException {
-        Properties properties = new Properties();
-        DataInputStream ios = new DataInputStream(new FileInputStream(new File(baseDir, path)));
-        properties.load(ios);
-        ios.close();
-        ArrayList<ZipIndexItem> results = new ArrayList<ZipIndexItem>();
-        Set<String> keys = properties.stringPropertyNames();
-        for (String key : keys) {
-            ZipIndexItem item = new ZipIndexItem(Long.valueOf(key.substring(0, key.indexOf(ZIPINDEX_SEPARATOR)))
-                    .longValue(), Long.valueOf(key.substring(key.indexOf(ZIPINDEX_SEPARATOR) + 1)).longValue(),
-                    Long.valueOf(properties.getProperty(key)));
-            results.add(item);
-        }
-        return results;
     }
 }

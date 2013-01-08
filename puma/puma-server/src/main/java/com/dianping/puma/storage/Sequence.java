@@ -22,125 +22,102 @@ import java.util.Calendar;
  * @author Leo Liang
  * 
  */
-public class Sequence implements Comparable<Sequence>{
-	private int	creationDate;
-	private int	number;
-	private int	offset;
-	public static final String PATH_SEPARATOR = "/";
-	
-	public Sequence(int creationDate, int number) {
-		this(creationDate, number, 0);
-	}
+public class Sequence {
+    private int creationDate;
+    private int number;
+    private int offset;
 
-	public Sequence(int creationDate, int number, int offset) {
-		this.creationDate = creationDate;
-		this.number = number;
-		this.offset = offset;
-	}
+    public Sequence(int creationDate, int number) {
+        this(creationDate, number, 0);
+    }
 
-	public Sequence(Sequence sequence) {
-		this.creationDate = sequence.creationDate;
-		this.number = sequence.number;
-		this.offset = sequence.offset;
-	}
+    public Sequence(int creationDate, int number, int offset) {
+        this.creationDate = creationDate;
+        this.number = number;
+        this.offset = offset;
+    }
 
-	public Sequence(long seq) {
-		parse(seq);
-	}
+    public Sequence(Sequence sequence) {
+        this.creationDate = sequence.creationDate;
+        this.number = sequence.number;
+        this.offset = sequence.offset;
+    }
 
-	public int getCreationDate() {
-		return creationDate;
-	}
+    public Sequence(long seq) {
+        parse(seq);
+    }
 
-	/**
-	 * 获得本sequence对应的偏移量增加delta后的sequence的新实例
-	 * 
-	 * @param delta
-	 * @return
-	 */
-	public Sequence addOffset(int delta) {
-		return new Sequence(creationDate, number, this.offset + delta);
-	}
+    public int getCreationDate() {
+        return creationDate;
+    }
 
-	/**
-	 * 获得本sequence对应的偏移量为0的sequence的新实例
-	 * 
-	 */
-	public Sequence clearOffset() {
-		return new Sequence(creationDate, number, 0);
-	}
+    /**
+     * 获得本sequence对应的偏移量增加delta后的sequence的新实例
+     * 
+     * @param delta
+     * @return
+     */
+    public Sequence addOffset(int delta) {
+        return new Sequence(creationDate, number, this.offset + delta);
+    }
 
-	/**
-	 * 获得下一个sequence
-	 * 
-	 * @param renewDate
-	 *            是否需要重新生成创建日期
-	 * @return 如果不renewDate为true，则返回以今天日期为创建日期的0号文件，并且偏移量为0的sequence；
-	 *         否则返回同一创建日期的下一个编号的并且偏移量为0的文件对应的sequence
-	 */
-	public Sequence getNext(boolean renewDate) {
-		if (!renewDate) {
-			return new Sequence(creationDate, number + 1);
-		} else {
-			Calendar cal = Calendar.getInstance();
+    /**
+     * 获得本sequence对应的偏移量为0的sequence的新实例
+     * 
+     */
+    public Sequence clearOffset() {
+        return new Sequence(creationDate, number, 0);
+    }
 
-			int date = (cal.get(Calendar.YEAR) - 2000) * 10000 + (cal.get(Calendar.MONTH) + 1) * 100
-					+ cal.get(Calendar.DATE);
-			return new Sequence(date, 0);
-		}
-	}
+    /**
+     * 获得下一个sequence
+     * 
+     * @param renewDate
+     *            是否需要重新生成创建日期
+     * @return 如果不renewDate为true，则返回以今天日期为创建日期的0号文件，并且偏移量为0的sequence；
+     *         否则返回同一创建日期的下一个编号的并且偏移量为0的文件对应的sequence
+     */
+    public Sequence getNext(boolean renewDate) {
+        if (!renewDate) {
+            return new Sequence(creationDate, number + 1);
+        } else {
+            Calendar cal = Calendar.getInstance();
 
-	public int getNumber() {
-		return number;
-	}
+            int date = (cal.get(Calendar.YEAR) - 2000) * 10000 + (cal.get(Calendar.MONTH) + 1) * 100
+                    + cal.get(Calendar.DATE);
+            return new Sequence(date, 0);
+        }
+    }
 
-	public int getOffset() {
-		return offset;
-	}
+    public int getNumber() {
+        return number;
+    }
 
-	/**
-	 * 获得对应的long值
-	 */
-	public long longValue() {
-		return ((long) creationDate << 46) | ((long) (number & 0x3FFF)) << 32 | offset;
-	}
+    public int getOffset() {
+        return offset;
+    }
 
-	private void parse(long seq) {
-		creationDate = (int) (seq >>> 46);
-		number = (int) ((seq >>> 32) & 0x3FFF);
-		offset = (int) (seq & 0xFFFFFFFF);
-	}
+    /**
+     * 获得对应的long值
+     */
+    public long longValue() {
+        return ((long) creationDate << 46) | ((long) (number & 0x3FFF)) << 32 | offset;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "Sequence [creationDate=" + creationDate + ", number=" + number + ", offset=" + offset + "]";
-	}
-	
-	public static Sequence convertToSequence(String path) {
-		String[] parts = path.split(PATH_SEPARATOR);
-		return new Sequence(Integer.valueOf(parts[0].substring(2)), Integer.valueOf(parts[1].substring(parts[1].indexOf("-") + 1)));
-	}
+    private void parse(long seq) {
+        creationDate = (int) (seq >>> 46);
+        number = (int) ((seq >>> 32) & 0x3FFF);
+        offset = (int) (seq & 0xFFFFFFFF);
+    }
 
-	@Override
-	public int compareTo(Sequence o) {
-		if (this.creationDate > o.getCreationDate()) {
-			return 1;
-		} else if (this.creationDate < o.getCreationDate()) {
-			return -1;
-		} else {
-			if (this.number > o.getNumber()) {
-				return 1;
-			} else if (this.number < o.getNumber()) {
-				return -1;
-			} else {
-				return 0;
-			}
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "Sequence [creationDate=" + creationDate + ", number=" + number + ", offset=" + offset + "]";
+    }
 
 }

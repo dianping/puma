@@ -1,8 +1,6 @@
 package com.dianping.puma.storage;
 
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -17,29 +15,15 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  */
 public class LocalFileBucket extends AbstractBucket {
 
-	private RandomAccessFile file;
+	private RandomAccessFile	file;
 
 	public LocalFileBucket(File file, Sequence startingSequence, int maxSizeMB) throws FileNotFoundException {
 		super(startingSequence, maxSizeMB);
 		this.file = new RandomAccessFile(file, "rw");
-		FileInputStream inputStream = new FileInputStream(file);
-		//TODO refactor better
-		try { 
-			if (inputStream.available() >= 24) {
-				inputStream.skip(24);
-			}
-		} catch (Exception e) {
-			// ignore
-		}
-		this.compressor.setInputStream(new DataInputStream(inputStream));
 	}
 
 	protected void doAppend(byte[] data) throws IOException {
 		file.write(data);
-	}
-
-	protected int readByte() throws StorageClosedException, IOException {
-		return file.readInt();
 	}
 
 	protected byte[] doReadData() throws StorageClosedException, IOException {
@@ -70,4 +54,5 @@ public class LocalFileBucket extends AbstractBucket {
 	protected boolean doHasRemainingForWrite() throws IOException {
 		return file.length() < getMaxSizeByte();
 	}
+
 }

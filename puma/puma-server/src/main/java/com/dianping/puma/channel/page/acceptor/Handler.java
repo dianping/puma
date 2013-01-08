@@ -83,7 +83,7 @@ public class Handler implements PageHandler<Context> {
         EventStorage storage = ComponentContainer.SPRING.lookup("storage-" + payload.getTarget(), EventStorage.class);
         EventChannel channel;
         try {
-            channel = storage.getChannel(seq, serverId, binlogFile, binlogPos);
+            channel = storage.getChannel(seq);
         } catch (StorageException e1) {
             throw new IOException(e1);
         }

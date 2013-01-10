@@ -15,6 +15,7 @@
  */
 package com.dianping.puma.storage;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -33,17 +34,18 @@ public class DefaultCleanupStrategy implements CleanupStrategy {
     private int             preservedDay      = 14;
     private List<String>    toBeDeleteBuckets = new ArrayList<String>();
     @SuppressWarnings("rawtypes")
-    private List<DataIndex> indexs            = new ArrayList<DataIndex>();
+    private List<DataIndex> dataIndexes       = new ArrayList<DataIndex>();
 
     public void setPreservedDay(int preservedDay) {
         this.preservedDay = preservedDay;
     }
 
     @SuppressWarnings("rawtypes")
-    public void add(DataIndex index) {
-        this.indexs.add(index);
+    public void addDataIndex(DataIndex index) {
+        this.dataIndexes.add(index);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void cleanup(BucketIndex index) {
         try {
@@ -51,6 +53,17 @@ public class DefaultCleanupStrategy implements CleanupStrategy {
 
             if (!toBeDeleteBuckets.isEmpty()) {
                 index.remove(toBeDeleteBuckets);
+                for (String path : toBeDeleteBuckets) {
+                    if (dataIndexes != null && !dataIndexes.isEmpty()) {
+                        for (DataIndex dataIndex : dataIndexes) {
+                            try {
+                                dataIndex.removeByL2IndexName(path);
+                            } catch (IOException e) {
+                                // ignore
+                            }
+                        }
+                    }
+                }
 
                 Iterator<String> iterator = toBeDeleteBuckets.iterator();
                 while (iterator.hasNext()) {

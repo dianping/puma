@@ -22,6 +22,7 @@ public class HDFSBucket extends AbstractBucket {
 	public HDFSBucket(FileSystem fileSystem, String baseDir, String path, Sequence startingSequence) throws IOException {
 		super(startingSequence, -1);
 		this.file = new Path(baseDir, path);
+		this.fileName = this.file.getName();
 		this.inputStream = fileSystem.open(file);
 	}
 

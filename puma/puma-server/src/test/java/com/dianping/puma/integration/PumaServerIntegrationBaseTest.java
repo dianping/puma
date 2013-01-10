@@ -161,7 +161,7 @@ public abstract class PumaServerIntegrationBaseTest {
 
             @SuppressWarnings("rawtypes")
             @Override
-            public void add(DataIndex index) {
+            public void addDataIndex(DataIndex index) {
                 // TODO Auto-generated method stub
 
             }

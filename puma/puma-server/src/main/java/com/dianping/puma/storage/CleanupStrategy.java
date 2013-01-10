@@ -25,5 +25,5 @@ public interface CleanupStrategy {
     public void cleanup(BucketIndex index);
 
     @SuppressWarnings("rawtypes")
-    public void add(DataIndex index);
+    public void addDataIndex(DataIndex index);
 }

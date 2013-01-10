@@ -33,7 +33,12 @@ public abstract class AbstractBucket implements Bucket {
     private AtomicReference<Sequence> currentWritingSeq = new AtomicReference<Sequence>();
     private volatile boolean          stopped           = false;
     private long                      maxSizeByte;
+    protected String                  fileName;
 
+    public String getBucketFileName(){
+        return this.fileName;
+    }
+    
     /**
      * @param maxSizeMB
      *            the maxSizeMB to set

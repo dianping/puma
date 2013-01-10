@@ -19,6 +19,7 @@ public class LocalFileBucket extends AbstractBucket {
 
 	public LocalFileBucket(File file, Sequence startingSequence, int maxSizeMB) throws FileNotFoundException {
 		super(startingSequence, maxSizeMB);
+		this.fileName = file.getName();
 		this.file = new RandomAccessFile(file, "rw");
 	}
 

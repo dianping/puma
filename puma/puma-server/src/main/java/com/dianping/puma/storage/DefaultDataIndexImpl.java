@@ -277,27 +277,36 @@ public class DefaultDataIndexImpl<K extends DataIndexKey<K>, V> implements DataI
     }
 
     @Override
-    public void removeAll(K key) throws IOException {
-        String l2IndexName = null;
+    public void removeByL2IndexName(String l2IndexName) throws IOException {
+        boolean removed = false;
         l1WriteLock.lock();
         try {
-            if (l1Index.containsKey(key)) {
-                l2IndexName = l1Index.get(key);
-                l1Index.remove(key);
+            if (l1Index.containsValue(l2IndexName)) {
+                K tobeRemoveKey = null;
+                for (K key : l1Index.keySet()) {
+                    if (l2IndexName.equals(l1Index.get(key))) {
+                        tobeRemoveKey = key;
+                        break;
+                    }
+                }
 
-                closeQuietly(l1IndexWriter);
-                l1IndexWriter = null;
-                FileUtils.deleteQuietly(getL1IndexFile());
-                l1IndexWriter = new BufferedWriter(new FileWriter(getL1IndexFile()));
-                for (Map.Entry<K, String> entry : l1Index.entrySet()) {
-                    appendL1IndexToFile(entry.getKey(), entry.getValue());
+                if (tobeRemoveKey != null) {
+                    l1Index.remove(tobeRemoveKey);
+                    removed = true;
+                    closeQuietly(l1IndexWriter);
+                    l1IndexWriter = null;
+                    FileUtils.deleteQuietly(getL1IndexFile());
+                    l1IndexWriter = new BufferedWriter(new FileWriter(getL1IndexFile()));
+                    for (Map.Entry<K, String> entry : l1Index.entrySet()) {
+                        appendL1IndexToFile(entry.getKey(), entry.getValue());
+                    }
                 }
             }
         } finally {
             l1WriteLock.unlock();
         }
 
-        if (l2IndexName != null) {
+        if (removed) {
             l2WriteLock.lock();
             try {
                 if (StringUtils.equals(l2IndexName, writingl2IndexName)) {

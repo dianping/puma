@@ -27,49 +27,56 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  * 
  */
 public interface Bucket extends LifeCycle<IOException> {
-	/**
-	 * 获得当前存储对应的起始sequence(Offset一定为0)
-	 * 
-	 */
-	public Sequence getStartingSequece();
+    /**
+     * 获得当前存储对应的起始sequence(Offset一定为0)
+     * 
+     */
+    public Sequence getStartingSequece();
 
-	/**
-	 * 往存储中增加一个事件
-	 * 
-	 * @throws IOException
-	 */
-	public void append(byte[] data) throws StorageClosedException, IOException;
+    /**
+     * 往存储中增加一个事件
+     * 
+     * @throws IOException
+     */
+    public void append(byte[] data) throws StorageClosedException, IOException;
 
-	/**
-	 * 从存储中获得下一个事件 <br>
-	 * 如果没有，则抛出EOFException，否则一直block到读取完一个事件
-	 * 
-	 * @return
-	 * @throws IOException
-	 */
-	public byte[] getNext() throws StorageClosedException, IOException;
+    /**
+     * 从存储中获得下一个事件 <br>
+     * 如果没有，则抛出EOFException，否则一直block到读取完一个事件
+     * 
+     * @return
+     * @throws IOException
+     */
+    public byte[] getNext() throws StorageClosedException, IOException;
 
-	/**
-	 * 把文件指针移动到某个offset上
-	 * 
-	 * @param offset
-	 * @throws IOException
-	 */
-	public void seek(int offset) throws StorageClosedException, IOException;
+    /**
+     * 把文件指针移动到某个offset上
+     * 
+     * @param offset
+     * @throws IOException
+     */
+    public void seek(int offset) throws StorageClosedException, IOException;
 
-	/**
-	 * 判断当前存储是否还有剩余空间可写
-	 * 
-	 * @return
-	 * @throws IOException
-	 */
-	public boolean hasRemainingForWrite() throws StorageClosedException, IOException;
+    /**
+     * 判断当前存储是否还有剩余空间可写
+     * 
+     * @return
+     * @throws IOException
+     */
+    public boolean hasRemainingForWrite() throws StorageClosedException, IOException;
 
-	/**
-	 * 获得写入的seq
-	 * 
-	 * @return
-	 */
-	public long getCurrentWritingSeq();
+    /**
+     * 获得写入的seq
+     * 
+     * @return
+     */
+    public long getCurrentWritingSeq();
+
+    /**
+     * 获得BucketFileName
+     * 
+     * @return
+     */
+    public String getBucketFileName();
 
 }

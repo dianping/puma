@@ -30,5 +30,5 @@ public interface DataIndex<K extends DataIndexKey<K>, V> extends LifeCycle<IOExc
 
     public void addL2Index(K key, V value) throws IOException;
 
-    public void removeAll(K key) throws IOException;
+    public void removeByL2IndexName(String l2IndexName) throws IOException;
 }

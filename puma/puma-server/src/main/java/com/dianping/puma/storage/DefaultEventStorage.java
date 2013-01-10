@@ -74,9 +74,9 @@ public class DefaultEventStorage implements EventStorage {
                 new LongIndexItemConvertor(), new TimeStampIndexKeyConvertor());
         binlogIndex = new DefaultDataIndexImpl<BinlogIndexKey, Long>(binlogIndexBaseDir, new LongIndexItemConvertor(),
                 new BinlogIndexKeyConvertor());
-        
-        cleanupStrategy.add(binlogIndex);
-        cleanupStrategy.add(timeStampIndex);
+
+        cleanupStrategy.addDataIndex(binlogIndex);
+        cleanupStrategy.addDataIndex(timeStampIndex);
 
         try {
             bucketManager.start();
@@ -163,10 +163,11 @@ public class DefaultEventStorage implements EventStorage {
             long newSeq = writingBucket.getCurrentWritingSeq();
 
             if (newL1Index) {
-                timeStampIndex.addL1Index(new TimeStampIndexKey(event.getExecuteTime()), Long.toString(newSeq));
+                timeStampIndex.addL1Index(new TimeStampIndexKey(event.getExecuteTime()),
+                        writingBucket.getBucketFileName());
                 binlogIndex.addL1Index(
                         new BinlogIndexKey(event.getBinlog(), event.getBinlogPos(), event.getServerId()),
-                        Long.toString(newSeq));
+                        writingBucket.getBucketFileName());
             }
 
             timeStampIndex.addL2Index(new TimeStampIndexKey(event.getExecuteTime()), newSeq);

@@ -182,7 +182,7 @@ public class DefaultDataIndexTest {
         index.addL1Index(key, "1");
         index.addL2Index(key, 123L);
 
-        index.removeAll(key);
+        index.removeByL2IndexName("1");
 
         File l1IndexFile = new File(baseDir, DefaultDataIndexImpl.L1INDEX_FILENAME);
         Assert.assertTrue(l1IndexFile.exists());

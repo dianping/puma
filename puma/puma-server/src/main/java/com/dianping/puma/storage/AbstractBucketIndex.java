@@ -161,7 +161,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 		Sequence sequence = null;
 		String path = null;
 
-		if (seq == -1L) {
+		if (seq == SEQ_FROM_OLDEST) {
 			// 从最老开始消费
 			if (!index.get().isEmpty()) {
 				path = index.get().firstEntry().getValue();
@@ -172,7 +172,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 			} else {
 				return null;
 			}
-		} else if (seq == -2L) {
+		} else if (seq == SEQ_FROM_LATEST) {
 			// 从最新开始消费
 			if (this.latestSequence.get() != null) {
 				sequence = new Sequence(this.latestSequence.get());
@@ -195,7 +195,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 		if (bucket != null) {
 			bucket.seek(offset);
 			try {
-				if (seq != -1L && seq != -2L) {
+				if (seq != SEQ_FROM_OLDEST && seq != SEQ_FROM_LATEST) {
 					bucket.getNext();
 				}
 			} catch (EOFException e) {

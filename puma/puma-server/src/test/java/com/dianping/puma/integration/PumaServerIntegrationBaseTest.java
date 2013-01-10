@@ -51,6 +51,7 @@ import com.dianping.puma.server.ReplicationBasedServer;
 import com.dianping.puma.storage.ArchiveStrategy;
 import com.dianping.puma.storage.BucketIndex;
 import com.dianping.puma.storage.CleanupStrategy;
+import com.dianping.puma.storage.DataIndex;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.LocalFileBucketIndex;
@@ -63,432 +64,446 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
  * 
  */
 public abstract class PumaServerIntegrationBaseTest {
-	private static final String			dbConfigFile			= "PumaServerIntegrationTest.properties";
-	protected static MysqlDataSource	ds;
-	protected static String				host;
-	protected static int				port;
-	private static String				pwd;
-	private static String				user;
-	protected static String				db;
-	protected ReplicationBasedServer	server;
-	protected DefaultEventStorage		storage;
-	protected LocalFileBucketIndex		masterIndex;
-	protected LocalFileBucketIndex		slaveIndex;
-	protected FileDumpSender			sender;
-	private static File					storageMasterBaseDir	= new File(System.getProperty("java.io.tmpdir", "."),
-																		"Puma");
-	private static File					storageSlaveBaseDir		= new File(System.getProperty("java.io.tmpdir", "."),
-																		"Puma/bak/");
-	private static File					confBaseDir				= new File(System.getProperty("java.io.tmpdir", "."),
-																		"PumaConf/");
+    private static final String      dbConfigFile          = "PumaServerIntegrationTest.properties";
+    protected static MysqlDataSource ds;
+    protected static String          host;
+    protected static int             port;
+    private static String            pwd;
+    private static String            user;
+    protected static String          db;
+    protected ReplicationBasedServer server;
+    protected DefaultEventStorage    storage;
+    protected LocalFileBucketIndex   masterIndex;
+    protected LocalFileBucketIndex   slaveIndex;
+    protected FileDumpSender         sender;
+    private static File              storageMasterBaseDir  = new File(System.getProperty("java.io.tmpdir", "."), "Puma");
+    private static File              storageSlaveBaseDir   = new File(System.getProperty("java.io.tmpdir", "."),
+                                                                   "Puma/bak/");
+    private static File              confBaseDir           = new File(System.getProperty("java.io.tmpdir", "."),
+                                                                   "PumaConf/");
+    private static File              binlogIndexBaseDir    = new File(System.getProperty("java.io.tmpdir", "."),
+                                                                   "binlogIndex/");
+    private static File              timeStampIndexBaseDir = new File(System.getProperty("java.io.tmpdir", "."),
+                                                                   "timeIndex/");
 
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-		initProperties();
-		initDataSource();
-		FileUtils.deleteDirectory(confBaseDir);
-		// createDB();
-	}
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        initProperties();
+        initDataSource();
+        FileUtils.deleteDirectory(confBaseDir);
+        // createDB();
+    }
 
-	@AfterClass
-	public static void afterClass() throws Exception {
-		// dropDB();
-	}
+    @AfterClass
+    public static void afterClass() throws Exception {
+        // dropDB();
+    }
 
-	protected void startServer() throws Exception {
-		NotifyService mockNotifyService = new NotifyService() {
+    protected void startServer() throws Exception {
+        NotifyService mockNotifyService = new NotifyService() {
 
-			@Override
-			public void report(String title, Map<String, Map<String, String>> msg) {
-				System.out.println("report-----" + title + ": " + msg);
-			}
+            @Override
+            public void report(String title, Map<String, Map<String, String>> msg) {
+                System.out.println("report-----" + title + ": " + msg);
+            }
 
-			@Override
-			public void alarm(String msg, Throwable t, boolean sendSms) {
-				System.out.println("alarm-----" + msg + ": " + t);
-			}
-		};
+            @Override
+            public void alarm(String msg, Throwable t, boolean sendSms) {
+                System.out.println("alarm-----" + msg + ": " + t);
+            }
+        };
 
-		MMapBasedBinlogPositionHolder binlogPositionHolder = new MMapBasedBinlogPositionHolder();
-		binlogPositionHolder.setBaseDir(confBaseDir.getAbsolutePath());
-		binlogPositionHolder.init();
+        MMapBasedBinlogPositionHolder binlogPositionHolder = new MMapBasedBinlogPositionHolder();
+        binlogPositionHolder.setBaseDir(confBaseDir.getAbsolutePath());
+        binlogPositionHolder.init();
 
-		// init parser
-		Parser parser = new DefaultBinlogParser();
-		parser.start();
+        // init parser
+        Parser parser = new DefaultBinlogParser();
+        parser.start();
 
-		// init tablemetasinfofetcher
-		DefaultTableMetaInfoFetcher tableMetaInfoFetcher = new DefaultTableMetaInfoFetcher();
-		tableMetaInfoFetcher.setMetaDBHost(host);
-		tableMetaInfoFetcher.setMetaDBPassword(pwd);
-		tableMetaInfoFetcher.setMetaDBPort(port);
-		tableMetaInfoFetcher.setMetaDBUser(user);
+        // init tablemetasinfofetcher
+        DefaultTableMetaInfoFetcher tableMetaInfoFetcher = new DefaultTableMetaInfoFetcher();
+        tableMetaInfoFetcher.setMetaDBHost(host);
+        tableMetaInfoFetcher.setMetaDBPassword(pwd);
+        tableMetaInfoFetcher.setMetaDBPort(port);
+        tableMetaInfoFetcher.setMetaDBUser(user);
 
-		// init dataHandler
-		DefaultDataHandler dataHandler = new DefaultDataHandler();
-		dataHandler.setTableMetasInfoFetcher(tableMetaInfoFetcher);
-		dataHandler.setNotifyService(mockNotifyService);
-		dataHandler.start();
+        // init dataHandler
+        DefaultDataHandler dataHandler = new DefaultDataHandler();
+        dataHandler.setTableMetasInfoFetcher(tableMetaInfoFetcher);
+        dataHandler.setNotifyService(mockNotifyService);
+        dataHandler.start();
 
-		// init index
-		masterIndex = new LocalFileBucketIndex();
-		masterIndex.setBaseDir(storageMasterBaseDir.getAbsolutePath());
-		masterIndex.setMaxBucketLengthMB(1);
-		masterIndex.start();
-		slaveIndex = new LocalFileBucketIndex();
-		slaveIndex.setBaseDir(storageSlaveBaseDir.getAbsolutePath());
-		slaveIndex.start();
+        // init index
+        masterIndex = new LocalFileBucketIndex();
+        masterIndex.setBaseDir(storageMasterBaseDir.getAbsolutePath());
+        masterIndex.setMaxBucketLengthMB(1);
+        masterIndex.start();
+        slaveIndex = new LocalFileBucketIndex();
+        slaveIndex.setBaseDir(storageSlaveBaseDir.getAbsolutePath());
+        slaveIndex.start();
 
-		// init storage
-		storage = new DefaultEventStorage();
-		storage.setCodec(new JsonEventCodec());
-		storage.setArchiveStrategy(new ArchiveStrategy() {
+        // init storage
+        storage = new DefaultEventStorage();
+        storage.setCodec(new JsonEventCodec());
+        storage.setArchiveStrategy(new ArchiveStrategy() {
 
-			@Override
-			public void archive(BucketIndex masterIndex, BucketIndex slaveIndex) {
-			}
-		});
-		storage.setCleanupStrategy(new CleanupStrategy() {
+            @Override
+            public void archive(BucketIndex masterIndex, BucketIndex slaveIndex) {
+            }
+        });
+        storage.setCleanupStrategy(new CleanupStrategy() {
 
-			@Override
-			public void cleanup(BucketIndex index) {
+            @Override
+            public void cleanup(BucketIndex index) {
 
-			}
-		});
+            }
 
-		storage.setName("test-storage");
-		storage.setMasterIndex(masterIndex);
-		storage.setSlaveIndex(slaveIndex);
-		storage.start();
+            @SuppressWarnings("rawtypes")
+            @Override
+            public void add(DataIndex index) {
+                // TODO Auto-generated method stub
 
-		// init sender
-		sender = new FileDumpSender();
-		sender.setName("test-sender");
-		sender.setStorage(storage);
-		sender.setNotifyService(mockNotifyService);
-		sender.start();
+            }
+        });
 
-		// init dispatcher
-		SimpleDispatherImpl dispatcher = new SimpleDispatherImpl();
-		dispatcher.setName("test-dispatcher");
-		dispatcher.setSenders(Arrays.asList(new Sender[] { sender }));
+        storage.setName("test-storage");
+        storage.setMasterBucketIndex(masterIndex);
+        storage.setSlaveBucketIndex(slaveIndex);
+        storage.setBinlogIndexBaseDir(binlogIndexBaseDir.getAbsolutePath());
+        storage.setTimeStampIndexBaseDir(timeStampIndexBaseDir.getAbsolutePath());
+        storage.start();
 
-		// init server
-		server = new ReplicationBasedServer();
-		server.setDatabase(db);
-		server.setServerId(System.currentTimeMillis());
-		server.setEncoding("UTF-8");
-		server.setUser(user);
-		server.setPort(port);
-		server.setHost(host);
-		server.setPassword(pwd);
-		BinlogInfo binlogInfo = getLatestBinlogInfo();
-		server.setDefaultBinlogFileName(binlogInfo.getFile());
-		server.setDefaultBinlogPosition(binlogInfo.getPos());
-		server.setParser(parser);
-		server.setDataHandler(dataHandler);
-		server.setDispatcher(dispatcher);
-		server.setNotifyService(mockNotifyService);
-		server.setBinlogPositionHolder(binlogPositionHolder);
+        // init sender
+        sender = new FileDumpSender();
+        sender.setName("test-sender");
+        sender.setStorage(storage);
+        sender.setNotifyService(mockNotifyService);
+        sender.start();
 
-		PumaContext context = new PumaContext();
+        // init dispatcher
+        SimpleDispatherImpl dispatcher = new SimpleDispatherImpl();
+        dispatcher.setName("test-dispatcher");
+        dispatcher.setSenders(Arrays.asList(new Sender[] { sender }));
 
-		context.setPumaServerId(server.getServerId());
-		context.setPumaServerName(server.getServerName());
-		context.setBinlogFileName(server.getDefaultBinlogFileName());
-		context.setBinlogStartPos(server.getDefaultBinlogPosition());
-		server.setContext(context);
+        // init server
+        server = new ReplicationBasedServer();
+        server.setDatabase(db);
+        server.setServerId(System.currentTimeMillis());
+        server.setEncoding("UTF-8");
+        server.setUser(user);
+        server.setPort(port);
+        server.setHost(host);
+        server.setPassword(pwd);
+        BinlogInfo binlogInfo = getLatestBinlogInfo();
+        server.setDefaultBinlogFileName(binlogInfo.getFile());
+        server.setDefaultBinlogPosition(binlogInfo.getPos());
+        server.setParser(parser);
+        server.setDataHandler(dataHandler);
+        server.setDispatcher(dispatcher);
+        server.setNotifyService(mockNotifyService);
+        server.setBinlogPositionHolder(binlogPositionHolder);
 
-		PumaThreadUtils.createThread(new Runnable() {
+        PumaContext context = new PumaContext();
 
-			@Override
-			public void run() {
-				try {
-					server.start();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}, "ServerThread", false).start();
-	}
+        context.setPumaServerId(server.getServerId());
+        context.setPumaServerName(server.getServerName());
+        context.setBinlogFileName(server.getDefaultBinlogFileName());
+        context.setBinlogStartPos(server.getDefaultBinlogPosition());
+        server.setContext(context);
 
-	protected List<ChangedEvent> getEvents(int n, boolean needTs) throws Exception {
-		waitForSync(50);
-		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
-		EventChannel channel = storage.getChannel(-1);
-		for (int i = 0; i < n;) {
-			ChangedEvent event = channel.next();
-			if (!needTs) {
-				if (event instanceof RowChangedEvent) {
-					if (((RowChangedEvent) event).isTransactionBegin()
-							|| ((RowChangedEvent) event).isTransactionCommit()) {
-						continue;
-					}
-				}
-			}
-			i++;
-			result.add(event);
-		}
-		channel.close();
-		return result;
-	}
+        PumaThreadUtils.createThread(new Runnable() {
 
-	protected void waitForSync(long ms) throws Exception {
-		Thread.sleep(ms);
-	}
+            @Override
+            public void run() {
+                try {
+                    server.start();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, "ServerThread", false).start();
+    }
 
-	protected void executeSql(String script) throws Exception {
-		Connection conn = null;
-		Statement stmt = null;
-		try {
-			conn = ds.getConnection();
-			stmt = conn.createStatement();
-			stmt.execute(script);
-		} finally {
-			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (Exception e) {
+    protected List<ChangedEvent> getEvents(int n, boolean needTs) throws Exception {
+        waitForSync(50);
+        List<ChangedEvent> result = new ArrayList<ChangedEvent>();
+        EventChannel channel = storage.getChannel(-1);
+        for (int i = 0; i < n;) {
+            ChangedEvent event = channel.next();
+            if (!needTs) {
+                if (event instanceof RowChangedEvent) {
+                    if (((RowChangedEvent) event).isTransactionBegin()
+                            || ((RowChangedEvent) event).isTransactionCommit()) {
+                        continue;
+                    }
+                }
+            }
+            i++;
+            result.add(event);
+        }
+        channel.close();
+        return result;
+    }
 
-				}
-			}
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (Exception e) {
+    protected void waitForSync(long ms) throws Exception {
+        Thread.sleep(ms);
+    }
 
-				}
-			}
-		}
-	}
+    protected void executeSql(String script) throws Exception {
+        Connection conn = null;
+        Statement stmt = null;
+        try {
+            conn = ds.getConnection();
+            stmt = conn.createStatement();
+            stmt.execute(script);
+        } finally {
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (Exception e) {
 
-	protected void insertWithBinaryColumn(String script, byte[] data) throws Exception {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		try {
-			conn = ds.getConnection();
-			pstmt = conn.prepareStatement(script);
-			pstmt.setBinaryStream(1, new ByteArrayInputStream(data), data.length);
-			pstmt.execute();
-		} finally {
-			if (pstmt != null) {
-				try {
-					pstmt.close();
-				} catch (Exception e) {
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (Exception e) {
 
-				}
-			}
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (Exception e) {
+                }
+            }
+        }
+    }
 
-				}
-			}
-		}
-	}
+    protected void insertWithBinaryColumn(String script, byte[] data) throws Exception {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        try {
+            conn = ds.getConnection();
+            pstmt = conn.prepareStatement(script);
+            pstmt.setBinaryStream(1, new ByteArrayInputStream(data), data.length);
+            pstmt.execute();
+        } finally {
+            if (pstmt != null) {
+                try {
+                    pstmt.close();
+                } catch (Exception e) {
 
-	protected void executeSqlWithTransaction(List<String> scripts) throws Exception {
-		Connection conn = null;
-		Statement stmt = null;
-		try {
-			conn = ds.getConnection();
-			conn.setAutoCommit(false);
-			stmt = conn.createStatement();
-			for (String script : scripts) {
-				stmt.execute(script);
-			}
-			conn.commit();
-		} finally {
-			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (Exception e) {
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (Exception e) {
 
-				}
-			}
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (Exception e) {
+                }
+            }
+        }
+    }
 
-				}
-			}
-		}
-	}
+    protected void executeSqlWithTransaction(List<String> scripts) throws Exception {
+        Connection conn = null;
+        Statement stmt = null;
+        try {
+            conn = ds.getConnection();
+            conn.setAutoCommit(false);
+            stmt = conn.createStatement();
+            for (String script : scripts) {
+                stmt.execute(script);
+            }
+            conn.commit();
+        } finally {
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (Exception e) {
 
-	protected void test(TestLogic logic) throws Exception {
-		startServer();
-		logic.doLogic();
-	}
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (Exception e) {
 
-	@After
-	public void after() throws Exception {
-		stopServer();
-		FileUtils.deleteDirectory(storageMasterBaseDir);
-		FileUtils.deleteDirectory(storageSlaveBaseDir);
+                }
+            }
+        }
+    }
 
-		doAfter();
-	}
+    protected void test(TestLogic logic) throws Exception {
+        startServer();
+        logic.doLogic();
+    }
 
-	protected void stopServer() {
-		if (server != null) {
-			try {
-				server.stop();
-			} catch (Exception e) {
-				// ignore
-			}
-		}
-	}
+    @After
+    public void after() throws Exception {
+        stopServer();
+        FileUtils.deleteDirectory(storageMasterBaseDir);
+        FileUtils.deleteDirectory(storageSlaveBaseDir);
+        FileUtils.deleteDirectory(timeStampIndexBaseDir);
+        FileUtils.deleteDirectory(binlogIndexBaseDir);
 
-	protected abstract void doAfter() throws Exception;
+        doAfter();
+    }
 
-	protected BinlogInfo getLatestBinlogInfo() throws Exception {
-		Connection conn = null;
-		Statement stmt = null;
-		try {
-			conn = ds.getConnection();
-			stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("SHOW MASTER STATUS");
-			if (!rs.next()) {
-				throw new RuntimeException("Unexpected empty resultset.");
-			}
-			return new BinlogInfo(rs.getString("File"), rs.getLong("Position"));
+    protected void stopServer() {
+        if (server != null) {
+            try {
+                server.stop();
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+    }
 
-		} finally {
-			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (Exception e) {
+    protected abstract void doAfter() throws Exception;
 
-				}
-			}
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (Exception e) {
+    protected BinlogInfo getLatestBinlogInfo() throws Exception {
+        Connection conn = null;
+        Statement stmt = null;
+        try {
+            conn = ds.getConnection();
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SHOW MASTER STATUS");
+            if (!rs.next()) {
+                throw new RuntimeException("Unexpected empty resultset.");
+            }
+            return new BinlogInfo(rs.getString("File"), rs.getLong("Position"));
 
-				}
-			}
-		}
-	}
+        } finally {
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (Exception e) {
 
-	protected static void initDataSource() throws Exception {
-		ds = new MysqlDataSource();
-		ds.setUrl("jdbc:mysql://" + host + ":" + port + "/" + db);
-		ds.setUser(user);
-		ds.setPassword(pwd);
-	}
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (Exception e) {
 
-	protected static void createDB() throws Exception {
-		Connection conn = null;
-		Statement stmt = null;
-		try {
-			conn = ds.getConnection();
-			stmt = conn.createStatement();
-			stmt.execute("DROP DATABASE IF EXISTS " + db);
-			stmt.execute("CREATE DATABASE " + db);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw e;
-		} finally {
-			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (Exception e) {
+                }
+            }
+        }
+    }
 
-				}
-			}
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (Exception e) {
+    protected static void initDataSource() throws Exception {
+        ds = new MysqlDataSource();
+        ds.setUrl("jdbc:mysql://" + host + ":" + port + "/" + db);
+        ds.setUser(user);
+        ds.setPassword(pwd);
+    }
 
-				}
-			}
-		}
-	}
+    protected static void createDB() throws Exception {
+        Connection conn = null;
+        Statement stmt = null;
+        try {
+            conn = ds.getConnection();
+            stmt = conn.createStatement();
+            stmt.execute("DROP DATABASE IF EXISTS " + db);
+            stmt.execute("CREATE DATABASE " + db);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (Exception e) {
 
-	protected static void dropDB() throws Exception {
-		Connection conn = null;
-		Statement stmt = null;
-		try {
-			conn = ds.getConnection();
-			stmt = conn.createStatement();
-			stmt.execute("DROP DATABASE IF EXISTS" + db);
-		} finally {
-			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (Exception e) {
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (Exception e) {
 
-				}
-			}
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (Exception e) {
+                }
+            }
+        }
+    }
 
-				}
-			}
-		}
-	}
+    protected static void dropDB() throws Exception {
+        Connection conn = null;
+        Statement stmt = null;
+        try {
+            conn = ds.getConnection();
+            stmt = conn.createStatement();
+            stmt.execute("DROP DATABASE IF EXISTS" + db);
+        } finally {
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (Exception e) {
 
-	protected MysqlDataSource getDataSource() {
-		return ds;
-	}
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (Exception e) {
 
-	private static void initProperties() throws Exception {
-		Properties prop = new Properties();
-		InputStream is = null;
-		try {
-			is = PumaServerIntegrationBaseTest.class.getClassLoader().getResourceAsStream(dbConfigFile);
-			prop.load(is);
-			host = prop.getProperty("dbHost");
-			port = Integer.valueOf(prop.getProperty("dbPort"));
-			user = prop.getProperty("dbUser");
-			pwd = prop.getProperty("dbPwd");
-			db = prop.getProperty("dbName");
-		} finally {
-			if (is != null) {
-				is.close();
-			}
-		}
+                }
+            }
+        }
+    }
 
-	}
+    protected MysqlDataSource getDataSource() {
+        return ds;
+    }
 
-	private static class BinlogInfo {
-		private String	file;
-		private long	pos;
+    private static void initProperties() throws Exception {
+        Properties prop = new Properties();
+        InputStream is = null;
+        try {
+            is = PumaServerIntegrationBaseTest.class.getClassLoader().getResourceAsStream(dbConfigFile);
+            prop.load(is);
+            host = prop.getProperty("dbHost");
+            port = Integer.valueOf(prop.getProperty("dbPort"));
+            user = prop.getProperty("dbUser");
+            pwd = prop.getProperty("dbPwd");
+            db = prop.getProperty("dbName");
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+        }
 
-		/**
-		 * @param file
-		 * @param pos
-		 */
-		public BinlogInfo(String file, long pos) {
-			super();
-			this.file = file;
-			this.pos = pos;
-		}
+    }
 
-		/**
-		 * @return the file
-		 */
-		public String getFile() {
-			return file;
-		}
+    private static class BinlogInfo {
+        private String file;
+        private long   pos;
 
-		/**
-		 * @return the pos
-		 */
-		public long getPos() {
-			return pos;
-		}
+        /**
+         * @param file
+         * @param pos
+         */
+        public BinlogInfo(String file, long pos) {
+            super();
+            this.file = file;
+            this.pos = pos;
+        }
 
-	}
+        /**
+         * @return the file
+         */
+        public String getFile() {
+            return file;
+        }
 
-	protected static interface TestLogic {
-		public void doLogic() throws Exception;
-	}
+        /**
+         * @return the pos
+         */
+        public long getPos() {
+            return pos;
+        }
+
+    }
+
+    protected static interface TestLogic {
+        public void doLogic() throws Exception;
+    }
 
 }

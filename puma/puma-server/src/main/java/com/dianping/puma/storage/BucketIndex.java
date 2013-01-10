@@ -29,32 +29,35 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  */
 public interface BucketIndex extends LifeCycle<IOException> {
 
-	public void add(Bucket bucket) throws StorageClosedException;
+    public static final long SEQ_FROM_OLDEST = -1L;
+    public static final long SEQ_FROM_LATEST = -2L;
 
-	public void add(List<String> paths) throws StorageClosedException;
+    public void add(Bucket bucket) throws StorageClosedException;
 
-	public List<String> bulkGetRemainN(int remainSize) throws StorageClosedException;
+    public void add(List<String> paths) throws StorageClosedException;
 
-	public List<String> bulkGetRemainNDay(int remainDay) throws StorageClosedException;
+    public List<String> bulkGetRemainN(int remainSize) throws StorageClosedException;
 
-	public Bucket getNextReadBucket(Sequence sequence) throws StorageClosedException, IOException;
+    public List<String> bulkGetRemainNDay(int remainDay) throws StorageClosedException;
 
-	public Bucket getNextWriteBucket() throws StorageClosedException, IOException;
+    public Bucket getNextReadBucket(Sequence sequence) throws StorageClosedException, IOException;
 
-	public boolean hasNexReadBucket(Sequence sequence) throws StorageClosedException;
+    public Bucket getNextWriteBucket() throws StorageClosedException, IOException;
 
-	public Bucket getReadBucket(long seq) throws StorageClosedException, IOException;
+    public boolean hasNexReadBucket(Sequence sequence) throws StorageClosedException;
 
-	public int size();
+    public Bucket getReadBucket(long seq) throws StorageClosedException, IOException;
 
-	public String getBaseDir();
+    public int size();
 
-	public void copyFromLocal(String baseDir, String path) throws StorageClosedException, IOException;
+    public String getBaseDir();
 
-	public boolean removeBucket(String path) throws StorageClosedException;
+    public void copyFromLocal(String baseDir, String path) throws StorageClosedException, IOException;
 
-	public void remove(List<String> paths) throws StorageClosedException;
+    public boolean removeBucket(String path) throws StorageClosedException;
 
-	public void updateLatestSequence(Sequence sequence);
+    public void remove(List<String> paths) throws StorageClosedException;
+
+    public void updateLatestSequence(Sequence sequence);
 
 }

@@ -15,6 +15,7 @@ import com.dianping.puma.integration.SQLIntegegrationTest;
 import com.dianping.puma.storage.DefaultArchiveStrategyTest;
 import com.dianping.puma.storage.DefaultBucketManagerTest;
 import com.dianping.puma.storage.DefaultCleanupStrategyTest;
+import com.dianping.puma.storage.DefaultDataIndexTest;
 import com.dianping.puma.storage.HDFSBucketIndexTest;
 import com.dianping.puma.storage.HDFSBucketTest;
 import com.dianping.puma.storage.LocalBucketIndexTest;
@@ -41,8 +42,8 @@ SQLIntegegrationTest.class,
 //SystemIntegegrationTest.class,
 DataTypeIntegrationTest.class,
 PacketUtilTest.class,
-DefaultCleanupStrategyTest.class
-
+DefaultCleanupStrategyTest.class,
+DefaultDataIndexTest.class
 })
 public class AllTests {
 

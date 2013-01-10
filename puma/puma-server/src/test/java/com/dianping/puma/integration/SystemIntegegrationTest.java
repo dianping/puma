@@ -17,8 +17,6 @@ package com.dianping.puma.integration;
 
 import junit.framework.Assert;
 
-import org.junit.Test;
-
 import com.dianping.puma.core.util.PumaThreadUtils;
 
 /**
@@ -29,35 +27,38 @@ import com.dianping.puma.core.util.PumaThreadUtils;
  */
 public class SystemIntegegrationTest extends PumaServerIntegrationBaseTest {
 
-//	@Test
-	public void testStop() throws Exception {
+    // @Test
+    public void testStop() throws Exception {
 
-		// wait for last run's stop
-		Thread.sleep(5 * 1000);
-		startServer();
-		Thread thrds[] = new Thread[PumaThreadUtils.getThreadGroup().activeCount()];
-		PumaThreadUtils.getThreadGroup().enumerate(thrds);
-		for (Thread t : thrds) {
-			System.out.println(t.getName());
-		}
-		Assert.assertEquals(2, PumaThreadUtils.getThreadGroup().activeCount());
-		stopServer();
-		Thread.sleep(5 * 1000);
-		thrds = new Thread[PumaThreadUtils.getThreadGroup().activeCount()];
-		PumaThreadUtils.getThreadGroup().enumerate(thrds);
-		for (Thread t : thrds) {
-			System.out.println("Stopped: " + t.getName());
-		}
-		Assert.assertEquals(0, PumaThreadUtils.getThreadGroup().activeCount());
-	}
+        // wait for last run's stop
+        Thread.sleep(5 * 1000);
+        startServer();
+        Thread thrds[] = new Thread[PumaThreadUtils.getThreadGroup().activeCount()];
+        PumaThreadUtils.getThreadGroup().enumerate(thrds);
+        for (Thread t : thrds) {
+            System.out.println(t.getName());
+        }
+        Assert.assertEquals(2, PumaThreadUtils.getThreadGroup().activeCount());
+        stopServer();
+        Thread.sleep(5 * 1000);
+        thrds = new Thread[PumaThreadUtils.getThreadGroup().activeCount()];
+        PumaThreadUtils.getThreadGroup().enumerate(thrds);
+        for (Thread t : thrds) {
+            System.out.println("Stopped: " + t.getName());
+        }
+        Assert.assertEquals(0, PumaThreadUtils.getThreadGroup().activeCount());
+    }
 
-	/* (non-Javadoc)
-	 * @see com.dianping.puma.integration.PumaServerIntegrationBaseTest#doAfter()
-	 */
-	@Override
-	protected void doAfter() throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.dianping.puma.integration.PumaServerIntegrationBaseTest#doAfter()
+     */
+    @Override
+    protected void doAfter() throws Exception {
+        // TODO Auto-generated method stub
+
+    }
 
 }

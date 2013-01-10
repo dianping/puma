@@ -30,34 +30,41 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  * 
  */
 public class DefaultCleanupStrategy implements CleanupStrategy {
-	private int				preservedDay		= 14;
-	private List<String>	toBeDeleteBuckets	= new ArrayList<String>();
+    private int             preservedDay      = 14;
+    private List<String>    toBeDeleteBuckets = new ArrayList<String>();
+    @SuppressWarnings("rawtypes")
+    private List<DataIndex> indexs            = new ArrayList<DataIndex>();
 
-	public void setPreservedDay(int preservedDay) {
-		this.preservedDay = preservedDay;
-	}
+    public void setPreservedDay(int preservedDay) {
+        this.preservedDay = preservedDay;
+    }
 
-	@Override
-	public void cleanup(BucketIndex index) {
-		try {
-			toBeDeleteBuckets.addAll(index.bulkGetRemainNDay(preservedDay));
+    @SuppressWarnings("rawtypes")
+    public void add(DataIndex index) {
+        this.indexs.add(index);
+    }
 
-			if (!toBeDeleteBuckets.isEmpty()) {
-				index.remove(toBeDeleteBuckets);
+    @Override
+    public void cleanup(BucketIndex index) {
+        try {
+            toBeDeleteBuckets.addAll(index.bulkGetRemainNDay(preservedDay));
 
-				Iterator<String> iterator = toBeDeleteBuckets.iterator();
-				while (iterator.hasNext()) {
-					String path = iterator.next();
-					if (StringUtils.isNotBlank(path)) {
-						if (index.removeBucket(path)) {
-							iterator.remove();
-						}
-					}
-				}
-			}
-		} catch (StorageClosedException e) {
-			// ignore
-		}
+            if (!toBeDeleteBuckets.isEmpty()) {
+                index.remove(toBeDeleteBuckets);
 
-	}
+                Iterator<String> iterator = toBeDeleteBuckets.iterator();
+                while (iterator.hasNext()) {
+                    String path = iterator.next();
+                    if (StringUtils.isNotBlank(path)) {
+                        if (index.removeBucket(path)) {
+                            iterator.remove();
+                        }
+                    }
+                }
+            }
+        } catch (StorageClosedException e) {
+            // ignore
+        }
+
+    }
 }

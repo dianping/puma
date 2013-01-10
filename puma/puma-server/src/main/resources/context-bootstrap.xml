@@ -94,11 +94,13 @@
 	<bean id="storage-7-43" class="com.dianping.puma.storage.DefaultEventStorage"
 		init-method="start">
 		<property name="codec" ref="jsonCodec" />
-		<property name="masterIndex" ref="localBucketIndex-7-43" />
-		<property name="slaveIndex" ref="hdfsBucketIndex-7-43" />
+		<property name="masterBucketIndex" ref="localBucketIndex-7-43" />
+		<property name="slaveBucketIndex" ref="hdfsBucketIndex-7-43" />
 		<property name="archiveStrategy" ref="archiveStrategy" />
 		<property name="cleanupStrategy" ref="cleanupStrategy" />
 		<property name="name" value="storage-7-43" />
+		<property name="binlogIndexBaseDir" value="/data/applogs/puma/binlogIndex/7-43/"/>
+		<property name="timeStampIndexBaseDir" value="/data/applogs/puma/timeStampIndex/7-43/"/>
 	</bean>
 
 	<bean id="localBucketIndex-7-43" class="com.dianping.puma.storage.LocalFileBucketIndex"

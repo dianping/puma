@@ -94,19 +94,19 @@ public class DefaultBucketManagerTest {
 		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, archiveStrategy, cleanupStrategy);
 		bucketManager.start();
 
-		Bucket bucket = bucketManager.getReadBucket(-1);
+		Bucket bucket = bucketManager.getReadBucket(-1, true);
 		Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
 		Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
 		bucket.stop();
 
 		Sequence sequence = new Sequence(120710, 0, 0);
-		bucket = bucketManager.getReadBucket(sequence.longValue());
+		bucket = bucketManager.getReadBucket(sequence.longValue(), true);
 		Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
 		Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
 		bucket.stop();
 
 		sequence = new Sequence(120711, 1, 0);
-		bucket = bucketManager.getReadBucket(sequence.longValue());
+		bucket = bucketManager.getReadBucket(sequence.longValue(), true);
 		Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
 		Assert.assertEquals(1, bucket.getStartingSequece().getNumber());
 		bucket.stop();
@@ -114,7 +114,7 @@ public class DefaultBucketManagerTest {
 		sequence = new Sequence(120712, 0);
 
 		try {
-			bucket = bucketManager.getReadBucket(sequence.longValue());
+			bucket = bucketManager.getReadBucket(sequence.longValue(), true);
 			Assert.fail();
 		} catch (IOException e) {
 
@@ -123,13 +123,13 @@ public class DefaultBucketManagerTest {
 		bucketManager = new DefaultBucketManager(masterNullIndex, slaveIndex, archiveStrategy, cleanupStrategy);
 		bucket = null;
 		bucketManager.start();
-		bucket = bucketManager.getReadBucket(-1);
+		bucket = bucketManager.getReadBucket(-1, true);
 		Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
 		Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
 		bucket.stop();
 
 		sequence = new Sequence(120710, 0, 0);
-		bucket = bucketManager.getReadBucket(sequence.longValue());
+		bucket = bucketManager.getReadBucket(sequence.longValue(), true);
 		Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
 		Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
 		bucket.stop();
@@ -137,7 +137,7 @@ public class DefaultBucketManagerTest {
 		sequence = new Sequence(120711, 1, 0);
 
 		try {
-			bucket = bucketManager.getReadBucket(sequence.longValue());
+			bucket = bucketManager.getReadBucket(sequence.longValue(), true);
 			Assert.fail();
 		} catch (IOException e) {
 
@@ -146,7 +146,7 @@ public class DefaultBucketManagerTest {
 		sequence = new Sequence(120712, 0);
 
 		try {
-			bucket = bucketManager.getReadBucket(sequence.longValue());
+			bucket = bucketManager.getReadBucket(sequence.longValue(), true);
 			Assert.fail();
 		} catch (IOException e) {
 
@@ -154,21 +154,21 @@ public class DefaultBucketManagerTest {
 
 		bucketManager = new DefaultBucketManager(masterIndex, slaveNullIndex, archiveStrategy, cleanupStrategy);
 		bucketManager.start();
-		bucket = bucketManager.getReadBucket(-1);
+		bucket = bucketManager.getReadBucket(-1, true);
 		Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
 		Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
 		bucket.stop();
 
 		sequence = new Sequence(120710, 0, 0);
 		try {
-			bucket = bucketManager.getReadBucket(sequence.longValue());
+			bucket = bucketManager.getReadBucket(sequence.longValue(), true);
 			Assert.fail();
 		} catch (IOException e) {
 
 		}
 
 		sequence = new Sequence(120711, 1, 0);
-		bucket = bucketManager.getReadBucket(sequence.longValue());
+		bucket = bucketManager.getReadBucket(sequence.longValue(), true);
 		Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
 		Assert.assertEquals(1, bucket.getStartingSequece().getNumber());
 		bucket.stop();
@@ -176,7 +176,7 @@ public class DefaultBucketManagerTest {
 		sequence = new Sequence(120712, 0);
 
 		try {
-			bucket = bucketManager.getReadBucket(sequence.longValue());
+			bucket = bucketManager.getReadBucket(sequence.longValue(), true);
 			Assert.fail();
 		} catch (IOException e) {
 
@@ -185,7 +185,7 @@ public class DefaultBucketManagerTest {
 		bucketManager = new DefaultBucketManager(masterNullIndex, slaveNullIndex, archiveStrategy, cleanupStrategy);
 		bucketManager.start();
 		try {
-			bucket = bucketManager.getReadBucket(-1);
+			bucket = bucketManager.getReadBucket(-1, true);
 		} catch (IOException e) {
 		}
 

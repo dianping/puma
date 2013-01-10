@@ -190,7 +190,10 @@ public class DefaultDataIndexImpl<K extends DataIndexKey<K>, V> implements DataI
     @Override
     public void stop() throws IOException {
         closeQuietly(l1IndexWriter);
+        l1IndexWriter = null;
         closeQuietly(writingl2IndexWriter);
+        writingl2IndexName = null;
+        writingl2IndexWriter = null;
     }
 
     private void closeQuietly(Writer out) {

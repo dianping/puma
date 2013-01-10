@@ -126,8 +126,9 @@ public class ReplicationBasedServer extends AbstractServer {
     protected void processBinlogPacket(BinlogPacket binlogPacket) throws IOException {
         BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), getContext());
 
-        getContext().setNextBinlogPos(binlogEvent.getHeader().getNextPosition());
-
+        if (binlogEvent.getHeader().getEventType() != BinlogConstanst.FORMAT_DESCRIPTION_EVENT) {
+            getContext().setNextBinlogPos(binlogEvent.getHeader().getNextPosition());
+        }
         if (binlogEvent.getHeader().getEventType() == BinlogConstanst.ROTATE_EVENT) {
             processRotateEvent(binlogEvent);
         } else {
@@ -149,7 +150,9 @@ public class ReplicationBasedServer extends AbstractServer {
             }
         } while (dataHandlerResult != null && !dataHandlerResult.isFinished());
 
-        getContext().setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
+        if (binlogEvent.getHeader().getEventType() != BinlogConstanst.FORMAT_DESCRIPTION_EVENT) {
+            getContext().setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
+        }
         // status report
         SystemStatusContainer.instance.updateServerStatus(getServerName(), host, port, database, getContext()
                 .getBinlogFileName(), getContext().getBinlogStartPos());

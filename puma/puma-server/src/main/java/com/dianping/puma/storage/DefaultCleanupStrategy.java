@@ -57,7 +57,7 @@ public class DefaultCleanupStrategy implements CleanupStrategy {
                     if (dataIndexes != null && !dataIndexes.isEmpty()) {
                         for (DataIndex dataIndex : dataIndexes) {
                             try {
-                                dataIndex.removeByL2IndexName(path);
+                                dataIndex.removeByL2IndexName(path.replace('/', '-'));
                             } catch (IOException e) {
                                 // ignore
                             }
@@ -80,4 +80,5 @@ public class DefaultCleanupStrategy implements CleanupStrategy {
         }
 
     }
+
 }

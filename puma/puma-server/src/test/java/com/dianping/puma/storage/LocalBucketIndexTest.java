@@ -99,7 +99,7 @@ public class LocalBucketIndexTest {
 
 		Bucket bucket = null;
 		try {
-			bucket = new LocalFileBucket(work, sequence, 10);
+			bucket = new LocalFileBucket(work, sequence, 10, "20120711/bucket-0");
 			localBucketIndex.add(bucket);
 
 		} catch (FileNotFoundException e) {
@@ -419,14 +419,14 @@ public class LocalBucketIndexTest {
 		this.localBucketIndex.start();
 
 		try {
-			Bucket bucket = this.localBucketIndex.getReadBucket(-1);
+			Bucket bucket = this.localBucketIndex.getReadBucket(-1, true);
 
 			Assert.assertEquals(null, bucket);
-			bucket = this.localBucketIndex.getReadBucket(-2);
+			bucket = this.localBucketIndex.getReadBucket(-2, true);
 			Assert.assertEquals(null, bucket);
 
 			Sequence seq = new Sequence(120710, 0);
-			bucket = this.localBucketIndex.getReadBucket(seq.longValue());
+			bucket = this.localBucketIndex.getReadBucket(seq.longValue(), true);
 			Assert.assertEquals(null, bucket);
 
 		} catch (StorageClosedException e) {
@@ -458,17 +458,17 @@ public class LocalBucketIndexTest {
 		}
 		this.localBucketIndex.start();
 		try {
-			Bucket bucket = this.localBucketIndex.getReadBucket(-1);
+			Bucket bucket = this.localBucketIndex.getReadBucket(-1, true);
 			Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
 			Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
 			bucket.stop();
 
-			bucket = this.localBucketIndex.getReadBucket(-2);
+			bucket = this.localBucketIndex.getReadBucket(-2, true);
 			Assert.assertEquals(null, bucket);
 
 			Sequence seq = new Sequence(120711, 3);
 			this.localBucketIndex.updateLatestSequence(seq);
-			bucket = this.localBucketIndex.getReadBucket(-2);
+			bucket = this.localBucketIndex.getReadBucket(-2, true);
 			Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
 			Assert.assertEquals(3, bucket.getStartingSequece().getNumber());
 			bucket.stop();
@@ -498,7 +498,7 @@ public class LocalBucketIndexTest {
 				bos.close();
 				file.close();
 
-				bucket = this.localBucketIndex.getReadBucket(seq.longValue());
+				bucket = this.localBucketIndex.getReadBucket(seq.longValue(), true);
 				Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
 				Assert.assertEquals(3, bucket.getStartingSequece().getNumber());
 				bucket.stop();
@@ -507,7 +507,7 @@ public class LocalBucketIndexTest {
 				e.printStackTrace();
 			}
 
-			bucket = this.localBucketIndex.getReadBucket(seq.longValue());
+			bucket = this.localBucketIndex.getReadBucket(seq.longValue(), true);
 			Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
 			Assert.assertEquals(3, bucket.getStartingSequece().getNumber());
 			bucket.stop();
@@ -558,7 +558,7 @@ public class LocalBucketIndexTest {
 		this.localBucketIndex.stop();
 
 		try {
-			this.localBucketIndex.getReadBucket(-1);
+			this.localBucketIndex.getReadBucket(-1, true);
 			Assert.fail();
 		} catch (StorageClosedException e) {
 

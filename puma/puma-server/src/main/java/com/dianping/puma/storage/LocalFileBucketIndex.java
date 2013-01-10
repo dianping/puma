@@ -36,7 +36,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
     @Override
     protected Bucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB)
             throws IOException {
-        return new LocalFileBucket(new File(baseDir, path), startingSeq, maxSizeMB);
+        return new LocalFileBucket(new File(baseDir, path), startingSeq, maxSizeMB, path);
     }
 
     /*
@@ -104,7 +104,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
         if (!bucketFile.createNewFile()) {
             throw new IOException(String.format("Can't create writeBucket(%s)!", bucketFile.getAbsolutePath()));
         } else {
-            return new LocalFileBucket(bucketFile, startingSequence, getMaxBucketLengthMB());
+            return new LocalFileBucket(bucketFile, startingSequence, getMaxBucketLengthMB(), bucketPath);
         }
 
     }

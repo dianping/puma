@@ -89,15 +89,15 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	@Override
-	public Bucket getReadBucket(long seq) throws IOException, StorageClosedException {
+	public Bucket getReadBucket(long seq, boolean fromNext) throws IOException, StorageClosedException {
 		checkClosed();
 
-		Bucket bucket = slaveIndex.getReadBucket(seq);
+		Bucket bucket = slaveIndex.getReadBucket(seq, fromNext);
 
 		if (bucket != null) {
 			return bucket;
 		} else {
-			bucket = masterIndex.getReadBucket(seq);
+			bucket = masterIndex.getReadBucket(seq, fromNext);
 			if (bucket != null) {
 				return bucket;
 			} else {

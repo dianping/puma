@@ -71,6 +71,7 @@ public abstract class PumaServerIntegrationBaseTest {
     private static String            pwd;
     private static String            user;
     protected static String          db;
+    protected static long            serverId;
     protected ReplicationBasedServer server;
     protected DefaultEventStorage    storage;
     protected LocalFileBucketIndex   masterIndex;
@@ -228,7 +229,29 @@ public abstract class PumaServerIntegrationBaseTest {
     protected List<ChangedEvent> getEvents(int n, boolean needTs) throws Exception {
         waitForSync(50);
         List<ChangedEvent> result = new ArrayList<ChangedEvent>();
-        EventChannel channel = storage.getChannel(-1);
+        EventChannel channel = storage.getChannel(-1, -1, null, -1, -1);
+        for (int i = 0; i < n;) {
+            ChangedEvent event = channel.next();
+            if (!needTs) {
+                if (event instanceof RowChangedEvent) {
+                    if (((RowChangedEvent) event).isTransactionBegin()
+                            || ((RowChangedEvent) event).isTransactionCommit()) {
+                        continue;
+                    }
+                }
+            }
+            i++;
+            result.add(event);
+        }
+        channel.close();
+        return result;
+    }
+
+    protected List<ChangedEvent> getEvents(int n, long seq, long serverId, String binlog, long binlogPos,
+            long timeStamp, boolean needTs) throws Exception {
+        waitForSync(50);
+        List<ChangedEvent> result = new ArrayList<ChangedEvent>();
+        EventChannel channel = storage.getChannel(seq, serverId, binlog, binlogPos, timeStamp);
         for (int i = 0; i < n;) {
             ChangedEvent event = channel.next();
             if (!needTs) {
@@ -464,6 +487,7 @@ public abstract class PumaServerIntegrationBaseTest {
             user = prop.getProperty("dbUser");
             pwd = prop.getProperty("dbPwd");
             db = prop.getProperty("dbName");
+            serverId = Long.valueOf(prop.getProperty("serverId"));
         } finally {
             if (is != null) {
                 is.close();
@@ -472,7 +496,7 @@ public abstract class PumaServerIntegrationBaseTest {
 
     }
 
-    private static class BinlogInfo {
+    protected static class BinlogInfo {
         private String file;
         private long   pos;
 

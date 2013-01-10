@@ -47,7 +47,7 @@ public class LocalBucketTest {
 		Sequence sequence = new Sequence(120710, 0, 0);
 
 		try {
-			localFileBucket = new LocalFileBucket(work, sequence, 10);
+			localFileBucket = new LocalFileBucket(work, sequence, 10, "20120710/bucket-0");
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -231,7 +231,7 @@ public class LocalBucketTest {
 		Sequence sequence = new Sequence(120710, 0, 0);
 		LocalFileBucket bucket = null;
 		try {
-			bucket = new LocalFileBucket(work, sequence, 10);
+			bucket = new LocalFileBucket(work, sequence, 10, "20120710/bucket-0");
 			bucket.stop();
 
 		} catch (FileNotFoundException e) {

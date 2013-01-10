@@ -29,9 +29,6 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  */
 public interface BucketIndex extends LifeCycle<IOException> {
 
-    public static final long SEQ_FROM_OLDEST = -1L;
-    public static final long SEQ_FROM_LATEST = -2L;
-
     public void add(Bucket bucket) throws StorageClosedException;
 
     public void add(List<String> paths) throws StorageClosedException;
@@ -46,7 +43,7 @@ public interface BucketIndex extends LifeCycle<IOException> {
 
     public boolean hasNexReadBucket(Sequence sequence) throws StorageClosedException;
 
-    public Bucket getReadBucket(long seq) throws StorageClosedException, IOException;
+    public Bucket getReadBucket(long seq, boolean fromNext) throws StorageClosedException, IOException;
 
     public int size();
 

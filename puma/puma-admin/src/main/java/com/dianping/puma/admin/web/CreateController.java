@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -91,11 +92,37 @@ public class CreateController {
         return new ModelAndView("main/container", map);
     }
 
+    @RequestMapping(value = "/create/loadXmlSample", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object loadXmlSample() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            String sampleXml = IOUtils.toString(Thread.currentThread().getContextClassLoader()
+                    .getResourceAsStream("SyncSample.xml"), "UTF-8");
+            map.put("sampleXml", sampleXml);
+            map.put("success", true);
+        } catch (IllegalArgumentException e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", errorMsg);
+            LOG.error(e.getMessage(), e);
+        }
+        return GsonUtil.toJson(map);
+
+    }
+
     @RequestMapping(value = "/create/step1Save", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object step1Save(HttpSession session, String srcMysql, String destMysql, String syncXml) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
+            //判断该srcMysql和destMysql是否重复
+            if (this.syncTaskActionService.existsBySrcAndDest(srcMysql, destMysql)) {
+                throw new IllegalArgumentException("创建失败，已有相同的配置存在。(srcMysqlName=" + srcMysql + ", destMysqlName=" + destMysql
+                        + ")");
+            }
             //保存到session
             MysqlMapping mysqlMapping = SyncXmlParser.parse2(syncXml);
             session.setAttribute("mysqlMapping", mysqlMapping);
@@ -306,6 +333,9 @@ public class CreateController {
             syncTaskAction.setPumaClientName(pumaClientName);
             syncTaskAction.setServerId(serverId);
             syncTaskAction.setTransaction(transaction != null ? transaction : true);
+            Date curDate = new Date();
+            syncTaskAction.setCreateTime(curDate);
+            syncTaskAction.setLastUpdateTime(curDate);
             //保存dumpAction到数据库
             syncTaskActionService.create(syncTaskAction);
             //保存dumpAction到session

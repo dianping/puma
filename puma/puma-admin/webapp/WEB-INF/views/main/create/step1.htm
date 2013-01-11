@@ -31,7 +31,8 @@
                         #end
                      </select>
                      <hr>
-                     <label>映射关系</label>
+                     <label>映射关系 (<a
+                        href="javascript:loadXmlSample();">加载示例</a>)</label>
                      <div id="xmlEditor"
                         style="width: 50%; height: 550px; border: 1px solid #A9E2F3; border-radius: 3px 3px 3px 3px; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;"></div>
                   </div>
@@ -60,6 +61,26 @@
 			pumadmin.appError("错误信息", data.errorMsg);
 		} else {
 			window.location = "${rc.contextPath}/create/step2";
+		}
+	}
+	function loadXmlSample() {
+		var param = new Object();
+		var url = window.contextpath + '/create/loadXmlSample';
+		$.ajax({
+			type : 'POST',
+			url : url,
+			data : param,
+			dataType : "json",
+			success : loadXmlSampleDone,
+			error : pumadmin.httpError
+		});
+	}
+	function loadXmlSampleDone(data) {
+		if (data.success == false) {
+			pumadmin.appError("错误信息", data.errorMsg);
+		} else {
+			window.xmlEditor.setValue(data.sampleXml);
+			window.xmlEditor.moveCursorTo(0, 0);
 		}
 	}
 </script>

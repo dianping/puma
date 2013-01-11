@@ -30,9 +30,11 @@ public class DumpActionServiceImpl implements DumpActionService {
         //创建DumpActionState
         DumpActionState state = new DumpActionState();
         state.setId(id);
-        state.setState(State.CREATED);
-        state.setDetail("创建。");
-        state.setCreateTime(new Date());
+        state.setState(State.PREPARABLE);
+        state.setDetail(State.PREPARABLE.getDesc());
+        Date curDate = new Date();
+        state.setCreateTime(curDate);
+        state.setLastUpdateTime(curDate);
         BinlogInfo binlogBin = new BinlogInfo();
         binlogBin.setBinlogFile("");
         binlogBin.setBinlogPosition(-1);

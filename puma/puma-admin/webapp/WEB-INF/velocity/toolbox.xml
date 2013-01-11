@@ -41,6 +41,11 @@
     <class>org.apache.commons.lang.StringUtils</class>
   </tool>
 
+  <tool>
+    <key>dateFormatUtils</key>
+    <scope>application</scope>
+    <class>org.apache.commons.lang.time.DateFormatUtils</class>
+  </tool>
   <!--
     ordinarily the SecureLinkTool would simply replace the
     StrutsLinkTool if SSL Ext. is in use - in that case the key would be

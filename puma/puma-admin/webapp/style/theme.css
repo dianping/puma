@@ -4,10 +4,6 @@ body {
 	/*background: url(bg.png) repeat;*/
 }
 
-.mybrand {
-	background: url('../image/logo33.png') no-repeat 0 3px;
-}
-
 .table tbody tr.goldtime td {
 	background-color: #F2DEDE;
 }

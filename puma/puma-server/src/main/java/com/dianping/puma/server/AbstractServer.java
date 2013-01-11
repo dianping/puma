@@ -31,174 +31,139 @@ import com.dianping.puma.sender.dispatcher.Dispatcher;
  */
 @ThreadUnSafe
 public abstract class AbstractServer implements Server, Notifiable {
-	private PumaContext				context;
-	private String					defaultBinlogFileName;
-	private Long					defaultBinlogPosition;
-	private Parser					parser;
-	private DataHandler				dataHandler;
-	private Dispatcher				dispatcher;
-	private long					serverId	= 6789;
-	private NotifyService			notifyService;
-	private volatile boolean		stop		= false;
-	private BinlogPositionHolder	binlogPositionHolder;
+    private PumaContext            context;
+    private String                 defaultBinlogFileName;
+    private Long                   defaultBinlogPosition;
+    protected Parser               parser;
+    protected DataHandler          dataHandler;
+    protected Dispatcher           dispatcher;
+    private long                   serverId = 6789;
+    protected NotifyService        notifyService;
+    private volatile boolean       stop     = false;
+    protected BinlogPositionHolder binlogPositionHolder;
 
-	/**
-	 * @return the binlogPositionHolder
-	 */
-	public BinlogPositionHolder getBinlogPositionHolder() {
-		return binlogPositionHolder;
-	}
+    /**
+     * @param binlogPositionHolder
+     *            the binlogPositionHolder to set
+     */
+    public void setBinlogPositionHolder(BinlogPositionHolder binlogPositionHolder) {
+        this.binlogPositionHolder = binlogPositionHolder;
+    }
 
-	/**
-	 * @param binlogPositionHolder
-	 *            the binlogPositionHolder to set
-	 */
-	public void setBinlogPositionHolder(BinlogPositionHolder binlogPositionHolder) {
-		this.binlogPositionHolder = binlogPositionHolder;
-	}
+    /**
+     * @param notifyService
+     *            the notifyService to set
+     */
+    public void setNotifyService(NotifyService notifyService) {
+        this.notifyService = notifyService;
+    }
 
-	/**
-	 * @return the notifyService
-	 */
-	public NotifyService getNotifyService() {
-		return notifyService;
-	}
+    public void setContext(PumaContext context) {
+        this.context = context;
+    }
 
-	/**
-	 * @param notifyService
-	 *            the notifyService to set
-	 */
-	public void setNotifyService(NotifyService notifyService) {
-		this.notifyService = notifyService;
-	}
+    public PumaContext getContext() {
+        return context;
+    }
 
-	public void setContext(PumaContext context) {
-		this.context = context;
-	}
+    public String getDefaultBinlogFileName() {
+        return defaultBinlogFileName;
+    }
 
-	public PumaContext getContext() {
-		return context;
-	}
+    public void setDefaultBinlogFileName(String binlogFileName) {
+        this.defaultBinlogFileName = binlogFileName;
+    }
 
-	public String getDefaultBinlogFileName() {
-		return defaultBinlogFileName;
-	}
+    /**
+     * @return the defaultBinlogPosition
+     */
+    public Long getDefaultBinlogPosition() {
+        return defaultBinlogPosition;
+    }
 
-	public void setDefaultBinlogFileName(String binlogFileName) {
-		this.defaultBinlogFileName = binlogFileName;
-	}
+    /**
+     * @param defaultBinlogPosition
+     *            the defaultBinlogPosition to set
+     */
+    public void setDefaultBinlogPosition(Long defaultBinlogPosition) {
+        this.defaultBinlogPosition = defaultBinlogPosition;
+    }
 
-	/**
-	 * @return the defaultBinlogPosition
-	 */
-	public Long getDefaultBinlogPosition() {
-		return defaultBinlogPosition;
-	}
+    /**
+     * @param parser
+     *            the parser to set
+     */
+    public void setParser(Parser parser) {
+        this.parser = parser;
+    }
 
-	/**
-	 * @param defaultBinlogPosition
-	 *            the defaultBinlogPosition to set
-	 */
-	public void setDefaultBinlogPosition(Long defaultBinlogPosition) {
-		this.defaultBinlogPosition = defaultBinlogPosition;
-	}
+    /**
+     * @param dataHandler
+     *            the dataHandler to set
+     */
+    public void setDataHandler(DataHandler dataHandler) {
+        this.dataHandler = dataHandler;
+    }
 
-	/**
-	 * @return the parser
-	 */
-	public Parser getParser() {
-		return parser;
-	}
+    /**
+     * @param dispatcher
+     *            the dispatcher to set
+     */
+    public void setDispatcher(Dispatcher dispatcher) {
+        this.dispatcher = dispatcher;
+    }
 
-	/**
-	 * @param parser
-	 *            the parser to set
-	 */
-	public void setParser(Parser parser) {
-		this.parser = parser;
-	}
+    /**
+     * @return the serverId
+     */
+    public long getServerId() {
+        return serverId;
+    }
 
-	/**
-	 * @return the dataHandler
-	 */
-	public DataHandler getDataHandler() {
-		return dataHandler;
-	}
+    /**
+     * @param serverId
+     *            the serverId to set
+     */
+    public void setServerId(long serverId) {
+        this.serverId = serverId;
+    }
 
-	/**
-	 * @param dataHandler
-	 *            the dataHandler to set
-	 */
-	public void setDataHandler(DataHandler dataHandler) {
-		this.dataHandler = dataHandler;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.dianping.puma.server.Server#getServerName()
+     */
+    @Override
+    public String getServerName() {
+        return String.valueOf(serverId);
+    }
 
-	/**
-	 * @return the dispatcher
-	 */
-	public Dispatcher getDispatcher() {
-		return dispatcher;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.dianping.puma.server.Server#stop()
+     */
+    @Override
+    public void stop() throws Exception {
+        doStop();
+        stop = true;
 
-	/**
-	 * @param dispatcher
-	 *            the dispatcher to set
-	 */
-	public void setDispatcher(Dispatcher dispatcher) {
-		this.dispatcher = dispatcher;
-	}
+        parser.stop();
+        dataHandler.stop();
+        dispatcher.stop();
+    }
 
-	/**
-	 * @return the serverId
-	 */
-	public long getServerId() {
-		return serverId;
-	}
+    public boolean isStop() {
+        return stop;
+    }
 
-	/**
-	 * @param serverId
-	 *            the serverId to set
-	 */
-	public void setServerId(long serverId) {
-		this.serverId = serverId;
-	}
+    protected abstract void doStop() throws Exception;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.server.Server#getServerName()
-	 */
-	@Override
-	public String getServerName() {
-		return String.valueOf(serverId);
-	}
+    protected abstract void doStart() throws Exception;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.server.Server#stop()
-	 */
-	@Override
-	public void stop() throws Exception {
-		doStop();
-		stop = true;
-
-		parser.stop();
-		dataHandler.stop();
-		dispatcher.stop();
-	}
-
-	public boolean isStop() {
-		return stop;
-	}
-
-	protected abstract void doStop() throws Exception;
-
-	protected abstract void doStart() throws Exception;
-
-	public void start() throws Exception {
-		stop = false;
-		doStart();
-	}
+    public void start() throws Exception {
+        stop = false;
+        doStart();
+    }
 
 }

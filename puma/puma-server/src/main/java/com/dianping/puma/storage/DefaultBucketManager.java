@@ -7,27 +7,23 @@ import org.apache.log4j.Logger;
 
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.storage.exception.StorageClosedException;
-import com.dianping.puma.storage.exception.StorageLifeCycleException;
 
 public class DefaultBucketManager implements BucketManager {
-	private static final Logger log = Logger
-			.getLogger(DefaultBucketManager.class);
-	private BucketIndex masterIndex;
-	private BucketIndex slaveIndex;
-	private BinlogIndexManager binlogIndexManager;
-	private ArchiveStrategy archiveStrategy;
-	private CleanupStrategy cleanupStrategy;
+	private static final Logger	log		= Logger.getLogger(DefaultBucketManager.class);
+	private BucketIndex			masterIndex;
+	private BucketIndex			slaveIndex;
 
-	private volatile boolean stopped = true;
+	private ArchiveStrategy		archiveStrategy;
+	private CleanupStrategy		cleanupStrategy;
 
-	public DefaultBucketManager(BucketIndex masterIndex,
-			BucketIndex slaveIndex, BinlogIndexManager binlogIndexManager, ArchiveStrategy archiveStrategy,
+	private volatile boolean	stopped	= true;
+
+	public DefaultBucketManager(BucketIndex masterIndex, BucketIndex slaveIndex, ArchiveStrategy archiveStrategy,
 			CleanupStrategy cleanupStrategy) {
 		this.archiveStrategy = archiveStrategy;
 		this.cleanupStrategy = cleanupStrategy;
 		this.masterIndex = masterIndex;
 		this.slaveIndex = slaveIndex;
-		this.binlogIndexManager = binlogIndexManager;
 	}
 
 	private void checkClosed() throws StorageClosedException {
@@ -60,8 +56,7 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	@Override
-	public Bucket getNextReadBucket(long seq) throws StorageClosedException,
-			IOException {
+	public Bucket getNextReadBucket(long seq) throws StorageClosedException, IOException {
 		checkClosed();
 		Sequence sequence = new Sequence(seq);
 		sequence = sequence.clearOffset();
@@ -75,15 +70,13 @@ public class DefaultBucketManager implements BucketManager {
 			if (bucket != null) {
 				return bucket;
 			} else {
-				throw new FileNotFoundException("No next read bucket for seq("
-						+ seq + ")");
+				throw new FileNotFoundException("No next read bucket for seq(" + seq + ")");
 			}
 		}
 	}
 
 	@Override
-	public Bucket getNextWriteBucket() throws IOException,
-			StorageClosedException {
+	public Bucket getNextWriteBucket() throws IOException, StorageClosedException {
 		checkClosed();
 		Bucket bucket = masterIndex.getNextWriteBucket();
 
@@ -96,21 +89,19 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	@Override
-	public Bucket getReadBucket(long seq) throws IOException,
-			StorageClosedException {
+	public Bucket getReadBucket(long seq, boolean fromNext) throws IOException, StorageClosedException {
 		checkClosed();
 
-		Bucket bucket = slaveIndex.getReadBucket(seq, false);
+		Bucket bucket = slaveIndex.getReadBucket(seq, fromNext);
 
 		if (bucket != null) {
 			return bucket;
 		} else {
-			bucket = masterIndex.getReadBucket(seq, false);
+			bucket = masterIndex.getReadBucket(seq, fromNext);
 			if (bucket != null) {
 				return bucket;
 			} else {
-				throw new FileNotFoundException(String.format(
-						"No matching bucket for seq(%d)!", seq));
+				throw new FileNotFoundException(String.format("No matching bucket for seq(%d)!", seq));
 			}
 		}
 
@@ -122,17 +113,15 @@ public class DefaultBucketManager implements BucketManager {
 	 * @see com.dianping.puma.storage.BucketManager#hasNexReadBucket(long)
 	 */
 	@Override
-	public boolean hasNexReadBucket(long seq) throws IOException,
-			StorageClosedException {
+	public boolean hasNexReadBucket(long seq) throws IOException, StorageClosedException {
 		checkClosed();
 		Sequence sequence = new Sequence(seq);
 		sequence.clearOffset();
-		return slaveIndex.hasNexReadBucket(sequence)
-				|| masterIndex.hasNexReadBucket(sequence);
+		return slaveIndex.hasNexReadBucket(sequence) || masterIndex.hasNexReadBucket(sequence);
 
 	}
 
-	public synchronized void start() throws StorageLifeCycleException {
+	public synchronized void start() {
 		stopped = false;
 		startArchiveJob();
 		startCleanupJob();
@@ -181,7 +170,7 @@ public class DefaultBucketManager implements BucketManager {
 					}
 
 					try {
-						cleanupStrategy.cleanup(slaveIndex, binlogIndexManager);
+						cleanupStrategy.cleanup(slaveIndex);
 						Thread.sleep(5 * 1000);
 					} catch (Exception e) {
 						log.error("Cleanup Job failed.", e);
@@ -198,4 +187,5 @@ public class DefaultBucketManager implements BucketManager {
 	public void updateLatestSequence(Sequence sequence) {
 		this.masterIndex.updateLatestSequence(sequence);
 	}
+
 }

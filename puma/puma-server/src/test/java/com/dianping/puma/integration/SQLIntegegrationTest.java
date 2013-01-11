@@ -523,7 +523,7 @@ public class SQLIntegegrationTest extends PumaServerIntegrationBaseTest {
 
 			@Override
 			public void doLogic() throws Exception {
-				int count = 3000;
+				int count = 300;
 				for (int i = 0; i < count; i++) {
 					if (i % 3 == 0) {
 						executeSql("INSERT INTO " + table + " values(1)");

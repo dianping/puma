@@ -58,7 +58,7 @@ public class PumaListener implements ServletContextListener {
 			public void run() {
 				stopServers();
 			}
-		}, "ShutHook", false));
+		}, "ShutdownHook", false));
 
 		this.servers = configedServers;
 	}

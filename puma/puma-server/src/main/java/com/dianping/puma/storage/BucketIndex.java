@@ -16,10 +16,7 @@
 package com.dianping.puma.storage;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicReference;
 
 import com.dianping.puma.common.LifeCycle;
 import com.dianping.puma.storage.exception.StorageClosedException;
@@ -32,40 +29,32 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  */
 public interface BucketIndex extends LifeCycle<IOException> {
 
-	public void add(Bucket bucket) throws StorageClosedException;
+    public void add(Bucket bucket) throws StorageClosedException;
 
-	public void add(List<String> paths) throws StorageClosedException;
+    public void add(List<String> paths) throws StorageClosedException;
 
-	public List<String> bulkGetRemainN(int remainSize) throws StorageClosedException;
+    public List<String> bulkGetRemainN(int remainSize) throws StorageClosedException;
 
-	public List<String> bulkGetRemainNDay(int remainDay) throws StorageClosedException;
+    public List<String> bulkGetRemainNDay(int remainDay) throws StorageClosedException;
 
-	public Bucket getNextReadBucket(Sequence sequence) throws StorageClosedException, IOException;
+    public Bucket getNextReadBucket(Sequence sequence) throws StorageClosedException, IOException;
 
-	public Bucket getNextWriteBucket() throws StorageClosedException, IOException;
+    public Bucket getNextWriteBucket() throws StorageClosedException, IOException;
 
-	public boolean hasNexReadBucket(Sequence sequence) throws StorageClosedException;
+    public boolean hasNexReadBucket(Sequence sequence) throws StorageClosedException;
 
-	public Bucket getReadBucket(long seq, boolean start) throws StorageClosedException, IOException;
+    public Bucket getReadBucket(long seq, boolean fromNext) throws StorageClosedException, IOException;
 
-	public int size();
+    public int size();
 
-	public String getBaseDir();
+    public String getBaseDir();
 
-	public void copyFromLocal(String baseDir, String path) throws StorageClosedException, IOException;
+    public void copyFromLocal(String baseDir, String path) throws StorageClosedException, IOException;
 
-	public boolean removeBucket(String path) throws StorageClosedException;
+    public boolean removeBucket(String path) throws StorageClosedException;
 
-	public void remove(List<String> paths) throws StorageClosedException;
+    public void remove(List<String> paths) throws StorageClosedException;
 
-	public void updateLatestSequence(Sequence sequence);
-	
-	public String getBucketFilePrefix();
-	
-	public AtomicReference<TreeMap<Sequence, String>> getIndex();
-	
-	public void setCompressor(Compressor compressor);
-	
-	public ArrayList<ZipIndexItem> readZipIndex(String baseDir, String path) throws IOException;
+    public void updateLatestSequence(Sequence sequence);
 
 }

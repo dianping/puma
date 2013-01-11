@@ -16,173 +16,173 @@ import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.core.util.StreamUtils;
 
 public class PumaClient {
-	private static final Logger	log		= Logger.getLogger(PumaClient.class);
-	private Configuration		config;
-	private EventListener		eventListener;
-	private volatile boolean	active	= false;
-	private SeqFileHolder		seqFileHolder;
-	private EventCodec			codec;
+    private static final Logger log    = Logger.getLogger(PumaClient.class);
+    private Configuration       config;
+    private EventListener       eventListener;
+    private volatile boolean    active = false;
+    private SeqFileHolder       seqFileHolder;
+    private EventCodec          codec;
 
-	public PumaClient(Configuration config) {
-		if (config == null) {
-			throw new IllegalArgumentException("Config can't be null!");
-		}
+    public PumaClient(Configuration config) {
+        if (config == null) {
+            throw new IllegalArgumentException("Config can't be null!");
+        }
 
-		this.config = config;
-		this.seqFileHolder = new MMapBasedSeqFileHolder(config);
-		codec = EventCodecFactory.createCodec(config.getCodecType());
-	}
+        this.config = config;
+        this.seqFileHolder = new MMapBasedSeqFileHolder(config);
+        codec = EventCodecFactory.createCodec(config.getCodecType());
+    }
 
-	public void register(EventListener listener) {
-		this.eventListener = listener;
-	}
+    public void register(EventListener listener) {
+        this.eventListener = listener;
+    }
 
-	public void stop() {
-		active = false;
-	}
+    public void stop() {
+        active = false;
+    }
 
-	public void start() {
-		config.validate();
+    public void start() {
+        config.validate();
 
-		Thread subscribeThread = PumaThreadUtils.createThread(new PumaClientTask(), "PumaClientSub", false);
+        Thread subscribeThread = PumaThreadUtils.createThread(new PumaClientTask(), "PumaClientSub", false);
 
-		active = true;
-		subscribeThread.start();
-	}
+        active = true;
+        subscribeThread.start();
+    }
 
-	private boolean checkStop() {
-		if (!active) {
-			log.info("Puma client stopped.");
-			return true;
-		}
-		if (Thread.currentThread().isInterrupted()) {
-			log.info("Puma client stopped since interrupted.");
-			return true;
-		}
+    private boolean checkStop() {
+        if (!active) {
+            log.info("Puma client stopped.");
+            return true;
+        }
+        if (Thread.currentThread().isInterrupted()) {
+            log.info("Puma client stopped since interrupted.");
+            return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	private InputStream connect() {
-		try {
-			final URL url = new URL(config.buildUrl());
+    private InputStream connect() {
+        try {
+            final URL url = new URL(config.buildUrl());
 
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestMethod("POST");
-			connection.setConnectTimeout(3000);
-			connection.setDoOutput(true);
-			connection.setUseCaches(false);
-			connection.setRequestProperty("Connection", "Keep-Alive");
-			connection.setRequestProperty("Cache-Control", "no-cache");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setConnectTimeout(3000);
+            connection.setDoOutput(true);
+            connection.setUseCaches(false);
+            connection.setRequestProperty("Connection", "Keep-Alive");
+            connection.setRequestProperty("Cache-Control", "no-cache");
 
-			PrintWriter out = new PrintWriter(connection.getOutputStream());
+            PrintWriter out = new PrintWriter(connection.getOutputStream());
 
-			String requestParams = config.buildRequestParamString(seqFileHolder.getSeq());
+            String requestParams = config.buildRequestParamString(seqFileHolder.getSeq());
 
-			out.print(requestParams);
+            out.print(requestParams);
 
-			out.close();
+            out.close();
 
-			return connection.getInputStream();
+            return connection.getInputStream();
 
-		} catch (Exception ex) {
-			log.error("Connect to puma server failed. " + config, ex);
-		}
+        } catch (Exception ex) {
+            log.error("Connect to puma server failed. " + config, ex);
+        }
 
-		return null;
+        return null;
 
-	}
+    }
 
-	private ChangedEvent readEvent(InputStream is) throws IOException {
-		byte[] lengthArray = new byte[4];
-		StreamUtils.readFully(is, lengthArray, 0, 4);
-		int length = ByteArrayUtils.byteArrayToInt(lengthArray, 0, 4);
-		byte[] data = new byte[length];
-		StreamUtils.readFully(is, data, 0, length);
-		return (ChangedEvent)codec.decode(data);
-	}
+    private ChangedEvent readEvent(InputStream is) throws IOException {
+        byte[] lengthArray = new byte[4];
+        StreamUtils.readFully(is, lengthArray, 0, 4);
+        int length = ByteArrayUtils.byteArrayToInt(lengthArray, 0, 4);
+        byte[] data = new byte[length];
+        StreamUtils.readFully(is, data, 0, length);
+        return codec.decode(data);
+    }
 
-	private class PumaClientTask implements Runnable {
+    private class PumaClientTask implements Runnable {
 
-		@Override
-		public void run() {
+        @Override
+        public void run() {
 
-			// reconnect while there is some connection problem
-			while (true) {
-				InputStream is = null;
+            // reconnect while there is some connection problem
+            while (true) {
+                InputStream is = null;
 
-				if (checkStop()) {
-					break;
-				}
+                if (checkStop()) {
+                    break;
+                }
 
-				try {
+                try {
 
-					is = connect();
+                    is = connect();
 
-					// reconnect case
-					if (is == null) {
-						Thread.sleep(100);
-						log.info("Puma client reconnecting...");
-						continue;
-					}
+                    // reconnect case
+                    if (is == null) {
+                        Thread.sleep(100);
+                        log.info("Puma client reconnecting...");
+                        continue;
+                    }
 
-					// loop read event from the input stream
-					while (true) {
-						if (checkStop()) {
-							break;
-						}
+                    // loop read event from the input stream
+                    while (true) {
+                        if (checkStop()) {
+                            break;
+                        }
 
-						ChangedEvent event = readEvent(is);
+                        ChangedEvent event = readEvent(is);
 
-						boolean listenerCallSuccess = true;
+                        boolean listenerCallSuccess = true;
 
-						// call event listener until success
-						while (true) {
-							if (checkStop()) {
-								break;
-							}
+                        // call event listener until success
+                        while (true) {
+                            if (checkStop()) {
+                                break;
+                            }
 
-							try {
-								eventListener.onEvent(event);
-								listenerCallSuccess = true;
-								break;
-							} catch (Exception e) {
-								log.warn("Exception occurs in eventListerner. Event: " + event, e);
+                            try {
+                                eventListener.onEvent(event);
+                                listenerCallSuccess = true;
+                                break;
+                            } catch (Exception e) {
+                                log.warn("Exception occurs in eventListerner. Event: " + event, e);
 
-								if (eventListener.onException(event, e)) {
-									log.warn("Event(" + event + ") skipped. ");
-									eventListener.onSkipEvent(event);
-									listenerCallSuccess = true;
-									break;
-								} else {
-									listenerCallSuccess = false;
-								}
-							}
-						}
+                                if (eventListener.onException(event, e)) {
+                                    log.warn("Event(" + event + ") skipped. ");
+                                    eventListener.onSkipEvent(event);
+                                    listenerCallSuccess = true;
+                                    break;
+                                } else {
+                                    listenerCallSuccess = false;
+                                }
+                            }
+                        }
 
-						// Maybe not because of the success of last event
-						// listener's run, but the stop command that system
-						// received. We shouldn't save in this case.
-						if (listenerCallSuccess) {
-							seqFileHolder.saveSeq(event.getSeq());
-						}
-					}
+                        // Maybe not because of the success of last event
+                        // listener's run, but the stop command that system
+                        // received. We shouldn't save in this case.
+                        if (listenerCallSuccess) {
+                            seqFileHolder.saveSeq(event.getSeq());
+                        }
+                    }
 
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-				} catch (Exception e) {
-					log.warn("Connection problem occurs." + e);
-					log.warn("Puma client reconnecting...");
-				} finally {
-					if (is != null) {
-						try {
-							is.close();
-						} catch (IOException e) {
-							// ignore
-						}
-					}
-				}
-			}
-		}
-	}
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } catch (Exception e) {
+                    log.warn("Connection problem occurs." + e);
+                    log.warn("Puma client reconnecting...");
+                } finally {
+                    if (is != null) {
+                        try {
+                            is.close();
+                        } catch (IOException e) {
+                            // ignore
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

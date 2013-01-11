@@ -18,16 +18,11 @@ package com.dianping.puma.storage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.util.ArrayList;
 import java.util.Properties;
-import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
@@ -45,8 +40,8 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  */
 public class HDFSBucketIndex extends AbstractBucketIndex {
 
-	private Configuration hdfsConfig;
-	private FileSystem fileSystem;
+	private Configuration	hdfsConfig;
+	private FileSystem		fileSystem;
 
 	public void initHdfsConfiguration() {
 		hdfsConfig = new Configuration();
@@ -91,7 +86,7 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 		initHdfsConfiguration();
 		this.fileSystem = FileSystem.get(this.hdfsConfig);
 
-		TreeMap<Sequence, String> newIndex = new TreeMap<Sequence, String>();
+		TreeMap<Sequence, String> newIndex = new TreeMap<Sequence, String>(new PathSequenceComparator());
 		getIndex().set(newIndex);
 
 		if (this.fileSystem.getFileStatus(new Path(this.getBaseDir())).isDir()) {
@@ -111,7 +106,8 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 
 							for (Path subFile : listedFiles) {
 								if (subFile.getName().startsWith(getBucketFilePrefix())
-										&& StringUtils.isNumeric(subFile.getName().substring(getBucketFilePrefix().length()))) {
+										&& StringUtils.isNumeric(subFile.getName().substring(
+												getBucketFilePrefix().length()))) {
 									String path = pathname.getName() + PATH_SEPARATOR + subFile.getName();
 									newIndex.put(convertToSequence(path), path);
 								}
@@ -126,7 +122,8 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 	}
 
 	@Override
-	protected Bucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB) throws IOException {
+	protected Bucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB)
+			throws IOException {
 		return new HDFSBucket(fileSystem, baseDir, path, startingSeq);
 	}
 
@@ -154,7 +151,8 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 	 * .lang.String, java.lang.String, com.dianping.puma.storage.Sequence)
 	 */
 	@Override
-	protected Bucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence) throws IOException {
+	protected Bucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence)
+			throws IOException {
 		return null;
 	}
 
@@ -165,13 +163,8 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 		if (!localFile.exists()) {
 			return;
 		}
-		RandomAccessFile localFileAcess = new RandomAccessFile(localFile, "rw");
-		FSDataOutputStream destFile = fileSystem.create(new Path(this.getBaseDir(), path));
-		FSDataOutputStream destIndex = fileSystem.create(new Path(this.getBaseDir(), path + this.zipIndexsuffix));
-		this.compressor.compress(localFileAcess, destFile, destIndex);
-		localFileAcess.close();
-		destFile.close();
-		destIndex.close();
+
+		fileSystem.copyFromLocalFile(false, true, new Path(srcBaseDir, path), new Path(this.getBaseDir(), path));
 	}
 
 	/*
@@ -191,8 +184,6 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 			Path p = new Path(getBaseDir(), path);
 			if (this.fileSystem.exists(p)) {
 				deleted = this.fileSystem.delete(p, false);
-				if (deleted)
-					this.fileSystem.delete(new Path(getBaseDir(), path + this.zipIndexsuffix), false);
 			}
 
 			if (this.fileSystem.exists(p.getParent())) {
@@ -206,22 +197,5 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 		} catch (IOException e) {
 			return false;
 		}
-	}
-
-	@Override
-	public ArrayList<ZipIndexItem> readZipIndex(String baseDir, String path) throws IOException {
-		Properties properties = new Properties();
-		Path file = new Path(baseDir, path);
-		FSDataInputStream inputStream = this.fileSystem.open(file);
-		properties.load(inputStream);
-		inputStream.close();
-		ArrayList<ZipIndexItem> results = new ArrayList<ZipIndexItem>();
-		Set<String> keys = properties.stringPropertyNames();
-		for (String key : keys) {
-			ZipIndexItem item = new ZipIndexItem(Long.valueOf(key.substring(0, key.indexOf(ZIPINDEX_SEPARATOR))).longValue(), Long.valueOf(
-					key.substring(key.indexOf(ZIPINDEX_SEPARATOR) + 1)).longValue(), Long.valueOf(properties.getProperty(key)));
-			results.add(item);
-		}
-		return results;
 	}
 }

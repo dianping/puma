@@ -80,10 +80,11 @@ public class Handler implements PageHandler<Context> {
         long serverId = payload.getServerId();
         String binlogFile = payload.getBinlog();
         long binlogPos = payload.getBinlogPos();
+        long timeStamp = payload.getTimestamp();
         EventStorage storage = ComponentContainer.SPRING.lookup("storage-" + payload.getTarget(), EventStorage.class);
         EventChannel channel;
         try {
-            channel = storage.getChannel(seq, serverId, binlogFile, binlogPos);
+            channel = storage.getChannel(seq, serverId, binlogFile, binlogPos, timeStamp);
         } catch (StorageException e1) {
             throw new IOException(e1);
         }

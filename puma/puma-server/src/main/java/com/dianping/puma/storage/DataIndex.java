@@ -1,7 +1,7 @@
 /**
  * Project: puma-server
  * 
- * File Created at 2012-8-6
+ * File Created at 2013-1-8
  * $Id$
  * 
  * Copyright 2010 dianping.com.
@@ -15,15 +15,20 @@
  */
 package com.dianping.puma.storage;
 
+import java.io.IOException;
+
+import com.dianping.puma.common.LifeCycle;
+
 /**
- * TODO Comment of CleanupStrategy
- * 
  * @author Leo Liang
  * 
  */
-public interface CleanupStrategy {
-    public void cleanup(BucketIndex index);
+public interface DataIndex<K extends DataIndexKey<K>, V> extends LifeCycle<IOException> {
+    public V find(K key);
 
-    @SuppressWarnings("rawtypes")
-    public void addDataIndex(DataIndex index);
+    public void addL1Index(K key, String l2IndexName) throws IOException;
+
+    public void addL2Index(K key, V value) throws IOException;
+
+    public void removeByL2IndexName(String l2IndexName) throws IOException;
 }

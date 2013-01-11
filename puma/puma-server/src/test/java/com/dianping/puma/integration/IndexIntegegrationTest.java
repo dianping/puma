@@ -72,6 +72,7 @@ public class IndexIntegegrationTest extends PumaServerIntegrationBaseTest {
             public void doLogic() throws Exception {
                 long timestamp = new Date().getTime() / 1000;
                 executeSql("INSERT INTO " + table + " values(1)");
+                waitForSync(4000);
                 List<ChangedEvent> events = getEvents(1, SubscribeConstant.SEQ_FROM_TIMESTAMP, -1, null, -1, timestamp,
                         false);
                 Assert.assertEquals(1, events.size());
@@ -128,6 +129,7 @@ public class IndexIntegegrationTest extends PumaServerIntegrationBaseTest {
             public void doLogic() throws Exception {
                 long timestamp = new Date().getTime() / 1000;
                 executeSql("INSERT INTO " + table + " values(1)");
+                waitForSync(200);
                 List<ChangedEvent> events = getEvents(3, SubscribeConstant.SEQ_FROM_TIMESTAMP, -1, null, -1, timestamp,
                         true);
                 Assert.assertEquals(3, events.size());
@@ -203,7 +205,7 @@ public class IndexIntegegrationTest extends PumaServerIntegrationBaseTest {
             public void doLogic() throws Exception {
                 long timestamp = new Date().getTime() / 1000;
                 executeSql("INSERT INTO " + table + " values(1),(2)");
-                waitForSync(2000);
+                waitForSync(5000);
                 List<ChangedEvent> events = getEvents(4, SubscribeConstant.SEQ_FROM_TIMESTAMP, -1, null, -1, timestamp,
                         true);
                 Assert.assertEquals(4, events.size());
@@ -273,7 +275,7 @@ public class IndexIntegegrationTest extends PumaServerIntegrationBaseTest {
             public void doLogic() throws Exception {
                 long timestamp = new Date().getTime() / 1000;
                 executeSql("UPDATE " + table + " SET id=2 WHERE id=1");
-                waitForSync(2000);
+                waitForSync(4000);
                 List<ChangedEvent> events = getEvents(1, SubscribeConstant.SEQ_FROM_TIMESTAMP, -1, null, -1, timestamp,
                         false);
                 Assert.assertEquals(1, events.size());
@@ -486,6 +488,7 @@ public class IndexIntegegrationTest extends PumaServerIntegrationBaseTest {
             public void doLogic() throws Exception {
                 long timestamp = new Date().getTime() / 1000;
                 executeSql("DELETE FROM " + table + " WHERE id=1");
+                waitForSync(4000);
                 List<ChangedEvent> events = getEvents(1, SubscribeConstant.SEQ_FROM_TIMESTAMP, -1, null, -1, timestamp,
                         false);
                 Assert.assertEquals(1, events.size());
@@ -546,6 +549,7 @@ public class IndexIntegegrationTest extends PumaServerIntegrationBaseTest {
             public void doLogic() throws Exception {
                 long timestamp = new Date().getTime() / 1000;
                 executeSql("DELETE FROM " + table + " WHERE id=1");
+                waitForSync(4000);
                 List<ChangedEvent> events = getEvents(3, SubscribeConstant.SEQ_FROM_TIMESTAMP, -1, null, -1, timestamp,
                         true);
                 Assert.assertEquals(3, events.size());
@@ -687,7 +691,7 @@ public class IndexIntegegrationTest extends PumaServerIntegrationBaseTest {
             public void doLogic() throws Exception {
                 long timestamp = new Date().getTime()/ 1000;
                 executeSql("CREATE TABLE DDLtest(id INT)");
-                waitForSync(8000);
+                waitForSync(9000);
                 List<ChangedEvent> events = getEvents(1, SubscribeConstant.SEQ_FROM_TIMESTAMP, -1,
                         null, -1, timestamp, false);
                 Assert.assertEquals(1, events.size());

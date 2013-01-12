@@ -10,6 +10,7 @@ import java.io.RandomAccessFile;
 
 import junit.framework.Assert;
 
+import org.apache.commons.io.FileUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -24,281 +25,429 @@ import com.dianping.puma.storage.exception.StorageClosedException;
 
 public class LocalBucketTest {
 
-	protected LocalFileBucket	localFileBucket;
-	protected File				work	= null;
+    protected LocalFileBucket localFileBucket;
+    protected File            work    = null;
+    protected File            zipWork = null;
+    protected File            zipDir  = null;
 
-	@BeforeClass
-	public static void init() {
+    @BeforeClass
+    public static void init() {
 
-	}
+    }
 
-	@Before
-	public void before() {
-		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/20120710/bucket-0");
-		work.getParentFile().mkdirs();
+    @Before
+    public void before() {
+        work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/20120710/bucket-0");
+        work.getParentFile().mkdirs();
 
-		try {
-			if (work.createNewFile())
-				System.out.println("create a file!");
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+        try {
+            if (work.createNewFile())
+                System.out.println("create a file!");
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
 
-		Sequence sequence = new Sequence(120710, 0, 0);
+        zipWork = new File(System.getProperty("java.io.tmpdir", "."), "Puma/zip/20120710/bucket-0");
+        zipDir = zipWork.getParentFile();
+        zipDir.mkdirs();
 
-		try {
-			localFileBucket = new LocalFileBucket(work, sequence, 10, "20120710/bucket-0");
+        Sequence sequence = new Sequence(120710, 0, 0);
 
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
+        try {
+            localFileBucket = new LocalFileBucket(work, sequence, 10, "20120710/bucket-0", false);
 
-	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-	@Test
-	public void testgetStartingSequece() {
-		Sequence seq = localFileBucket.getStartingSequece();
+    }
 
-		Assert.assertEquals(0, seq.getNumber());
-		Assert.assertEquals(0, seq.getOffset());
-		Assert.assertEquals(120710, seq.getCreationDate());
+    @Test
+    public void testgetStartingSequece() {
+        Sequence seq = localFileBucket.getStartingSequece();
 
-	}
+        Assert.assertEquals(0, seq.getNumber());
+        Assert.assertEquals(0, seq.getOffset());
+        Assert.assertEquals(120710, seq.getCreationDate());
 
-	@Test
-	public void testAppend() {
-		String event = "Write an event to the file";
-		byte[] data = event.getBytes();
-		try {
-			localFileBucket.append(data);
-		} catch (StorageClosedException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+    }
 
-		try {
-			BufferedReader input = new BufferedReader(new FileReader(work));
-			String s = input.readLine();
-			input.close();
-			Assert.assertEquals(event, s);
-			Assert.assertEquals(data.length, new Sequence(localFileBucket.getCurrentWritingSeq()).getOffset());
-			Assert.assertEquals(data.length + this.localFileBucket.getStartingSequece().longValue(),
-					localFileBucket.getCurrentWritingSeq());
+    @Test
+    public void testAppend() {
+        String event = "Write an event to the file";
+        byte[] data = event.getBytes();
+        try {
+            localFileBucket.append(data);
+        } catch (StorageClosedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        try {
+            BufferedReader input = new BufferedReader(new FileReader(work));
+            String s = input.readLine();
+            input.close();
+            Assert.assertEquals(event, s);
+            Assert.assertEquals(data.length, new Sequence(localFileBucket.getCurrentWritingSeq()).getOffset());
+            Assert.assertEquals(data.length + this.localFileBucket.getStartingSequece().longValue(),
+                    localFileBucket.getCurrentWritingSeq());
 
-	@Test
-	public void testGetNext() {
-		Sequence seq = localFileBucket.getStartingSequece();
-		DdlEvent event = new DdlEvent();
-		event.setSql("CREATE TABLE products (proeduct VARCHAR(10))");
-		event.setDatabase("cat");
-		event.setExecuteTime(0);
-		event.setSeq(seq.longValue());
-		event.setTable(null);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-		JsonEventCodec codec = new JsonEventCodec();
-		byte[] data = null;
-		try {
-			data = codec.encode(event);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		try {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			bos.write(ByteArrayUtils.intToByteArray(data.length));
-			bos.write(data);
+    @Test
+    public void testGetNext() {
+        Sequence seq = localFileBucket.getStartingSequece();
+        DdlEvent event = new DdlEvent();
+        event.setSql("CREATE TABLE products (proeduct VARCHAR(10))");
+        event.setDatabase("cat");
+        event.setExecuteTime(0);
+        event.setSeq(seq.longValue());
+        event.setTable(null);
 
-			RandomAccessFile file = new RandomAccessFile(work, "rw");
-			file.write(bos.toByteArray());
-			bos.close();
-			file.close();
+        JsonEventCodec codec = new JsonEventCodec();
+        byte[] data = null;
+        try {
+            data = codec.encode(event);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            bos.write(ByteArrayUtils.intToByteArray(data.length));
+            bos.write(data);
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+            RandomAccessFile file = new RandomAccessFile(work, "rw");
+            file.write(bos.toByteArray());
+            bos.close();
+            file.close();
 
-		try {
-			ByteArrayOutputStream os = new ByteArrayOutputStream();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-			ObjectMapper om = new ObjectMapper();
+        try {
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-			os.write(0);
-			os.write(om.writeValueAsBytes(event));
-			os.flush();
-			byte[] datas = os.toByteArray();
-			os.close();
+            ObjectMapper om = new ObjectMapper();
 
-			assertequalByteArray(datas, localFileBucket.getNext());
+            os.write(0);
+            os.write(om.writeValueAsBytes(event));
+            os.flush();
+            byte[] datas = os.toByteArray();
+            os.close();
 
-		} catch (StorageClosedException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+            assertequalByteArray(datas, localFileBucket.getNext());
 
-	}
+        } catch (StorageClosedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-	@Test
-	public void testSeek() {
-		boolean thrown = false;
+    }
 
-		Sequence seq = localFileBucket.getStartingSequece();
-		DdlEvent event = new DdlEvent();
-		event.setSql("CREATE TABLE products (proeduct VARCHAR(10))");
-		event.setDatabase("cat");
-		event.setExecuteTime(0);
-		event.setSeq(seq.longValue());
-		event.setTable(null);
-		Sequence newSeq = null;
+    @Test
+    public void testGetNextFromZipFile() throws IOException {
+        Sequence seq = localFileBucket.getStartingSequece();
+        DdlEvent event = new DdlEvent();
+        event.setSql("CREATE TABLE products (proeduct VARCHAR(10))");
+        event.setDatabase("cat");
+        event.setExecuteTime(0);
+        event.setSeq(seq.longValue());
+        event.setTable(null);
 
-		JsonEventCodec codec = new JsonEventCodec();
-		byte[] data = null;
-		try {
-			data = codec.encode(event);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		try {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			bos.write(ByteArrayUtils.intToByteArray(data.length));
-			bos.write(data);
-			bos.flush();
-			RandomAccessFile file = new RandomAccessFile(work, "rw");
-			file.write(bos.toByteArray());
-			newSeq = seq.addOffset(bos.size());
-			bos.reset();
+        LocalFileBucketIndex bucketIndex = new LocalFileBucketIndex();
+        bucketIndex.setMaster(false);
+        bucketIndex.setBaseDir(new File(System.getProperty("java.io.tmpdir", "."), "Puma/zip/").getAbsolutePath());
+        bucketIndex.setBucketFilePrefix("bucket-");
+        bucketIndex.setMaxBucketLengthMB(10000);
+        bucketIndex.start();
 
-			event.setSeq(newSeq.longValue());
-			data = codec.encode(event);
-			bos.write(ByteArrayUtils.intToByteArray(data.length));
-			bos.write(data);
-			bos.flush();
-			file.write(bos.toByteArray());
+        JsonEventCodec codec = new JsonEventCodec();
+        byte[] data = null;
+        try {
+            data = codec.encode(event);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            bos.write(ByteArrayUtils.intToByteArray(data.length));
+            bos.write(data);
 
-			bos.close();
-			file.close();
+            RandomAccessFile file = new RandomAccessFile(work, "rw");
+            file.write(bos.toByteArray());
+            bos.close();
+            file.close();
 
-			try {
-				localFileBucket.seek(newSeq.getOffset());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-				try {
-					ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try {
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-					ObjectMapper om = new ObjectMapper();
+            ObjectMapper om = new ObjectMapper();
 
-					os.write(0);
-					os.write(om.writeValueAsBytes(event));
-					os.flush();
-					byte[] datas = os.toByteArray();
-					os.close();
+            os.write(0);
+            os.write(om.writeValueAsBytes(event));
+            os.flush();
+            byte[] datas = os.toByteArray();
+            os.close();
 
-					assertequalByteArray(datas, localFileBucket.getNext());
+            bucketIndex.copyFromLocal(new File(System.getProperty("java.io.tmpdir", "."), "Puma/").getAbsolutePath(), "20120710/bucket-0");
+            assertequalByteArray(datas,
+                    new LocalFileBucket(zipWork, new Sequence(120710, 0, 0), 10000, "ffff", true).getNext());
 
-				} catch (StorageClosedException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			} catch (StorageClosedException e) {
-				e.printStackTrace();
-			}
+        } catch (StorageClosedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+    }
 
-		// catch an exception
-		try {
-			localFileBucket.seek(-1);
-		} catch (StorageClosedException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			thrown = true;
-		}
-		Assert.assertTrue(thrown);
+    @Test
+    public void testSeek() {
+        boolean thrown = false;
 
-	}
+        Sequence seq = localFileBucket.getStartingSequece();
+        DdlEvent event = new DdlEvent();
+        event.setSql("CREATE TABLE products (proeduct VARCHAR(10))");
+        event.setDatabase("cat");
+        event.setExecuteTime(0);
+        event.setSeq(seq.longValue());
+        event.setTable(null);
+        Sequence newSeq = null;
 
-	@Test
-	public void testClose() {
-		Sequence sequence = new Sequence(120710, 0, 0);
-		LocalFileBucket bucket = null;
-		try {
-			bucket = new LocalFileBucket(work, sequence, 10, "20120710/bucket-0");
-			bucket.stop();
+        JsonEventCodec codec = new JsonEventCodec();
+        byte[] data = null;
+        try {
+            data = codec.encode(event);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            bos.write(ByteArrayUtils.intToByteArray(data.length));
+            bos.write(data);
+            bos.flush();
+            RandomAccessFile file = new RandomAccessFile(work, "rw");
+            file.write(bos.toByteArray());
+            newSeq = seq.addOffset(bos.size());
+            bos.reset();
 
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+            event.setSeq(newSeq.longValue());
+            data = codec.encode(event);
+            bos.write(ByteArrayUtils.intToByteArray(data.length));
+            bos.write(data);
+            bos.flush();
+            file.write(bos.toByteArray());
 
-		boolean thrown = false;
-		try {
-			bucket.checkClosed();
-		} catch (StorageClosedException e) {
-			thrown = true;
-		}
+            bos.close();
+            file.close();
 
-		Assert.assertTrue(thrown);
-	}
+            try {
+                localFileBucket.seek(newSeq.getOffset());
 
-	@Test
-	public void testHasRemainingForWrite() {
-		boolean flag = false;
-		try {
-			flag = localFileBucket.hasRemainingForWrite();
-		} catch (StorageClosedException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+                try {
+                    ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-		Assert.assertTrue(flag);
+                    ObjectMapper om = new ObjectMapper();
 
-		localFileBucket.setMaxSizeByte(0);
-		try {
-			if (localFileBucket.hasRemainingForWrite() != false)
-				flag = true;
-		} catch (StorageClosedException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		Assert.assertTrue(flag);
-	}
+                    os.write(0);
+                    os.write(om.writeValueAsBytes(event));
+                    os.flush();
+                    byte[] datas = os.toByteArray();
+                    os.close();
 
-	protected void assertequalByteArray(byte[] expectedValue, byte[] actualValue) {
-		Assert.assertEquals(expectedValue.length, actualValue.length);
-		for (int i = 0; i < expectedValue.length; i++) {
-			Assert.assertEquals(expectedValue[i], actualValue[i]);
-		}
+                    assertequalByteArray(datas, localFileBucket.getNext());
 
-	}
+                } catch (StorageClosedException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } catch (StorageClosedException e) {
+                e.printStackTrace();
+            }
 
-	@After
-	public void after() {
-		try {
-			localFileBucket.stop();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+        // catch an exception
+        try {
+            localFileBucket.seek(-1);
+        } catch (StorageClosedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            thrown = true;
+        }
+        Assert.assertTrue(thrown);
 
-		if (work.delete())
-			System.out.println("delete file successfully");
-		this.work.getParentFile().delete();
+    }
+    
+    @Test
+    public void testSeekZipFile() throws IOException {
 
-	}
+        Sequence seq = localFileBucket.getStartingSequece();
+        DdlEvent event = new DdlEvent();
+        event.setSql("CREATE TABLE products (proeduct VARCHAR(10))");
+        event.setDatabase("cat");
+        event.setExecuteTime(0);
+        event.setSeq(seq.longValue());
+        event.setTable(null);
+        Sequence newSeq = null;
+        
+        LocalFileBucketIndex bucketIndex = new LocalFileBucketIndex();
+        bucketIndex.setMaster(false);
+        bucketIndex.setBaseDir(new File(System.getProperty("java.io.tmpdir", "."), "Puma/zip/").getAbsolutePath());
+        bucketIndex.setBucketFilePrefix("bucket-");
+        bucketIndex.setMaxBucketLengthMB(10000);
+        bucketIndex.start();
 
-	@AfterClass
-	public static void destroy() {
-	}
+        JsonEventCodec codec = new JsonEventCodec();
+        byte[] data = null;
+        try {
+            data = codec.encode(event);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            bos.write(ByteArrayUtils.intToByteArray(data.length));
+            bos.write(data);
+            bos.flush();
+            RandomAccessFile file = new RandomAccessFile(work, "rw");
+            file.write(bos.toByteArray());
+            newSeq = seq.addOffset(bos.size());
+            bos.reset();
+
+            event.setSeq(newSeq.longValue());
+            data = codec.encode(event);
+            bos.write(ByteArrayUtils.intToByteArray(data.length));
+            bos.write(data);
+            bos.flush();
+            file.write(bos.toByteArray());
+
+            bos.close();
+            file.close();
+
+            try {
+                bucketIndex.copyFromLocal(new File(System.getProperty("java.io.tmpdir", "."), "Puma/").getAbsolutePath(), "20120710/bucket-0");
+                LocalFileBucket zipBucket = new LocalFileBucket(zipWork, new Sequence(120710, 0, 0), 10000, "ffff", true);
+                zipBucket.seek(newSeq.getOffset());
+
+                try {
+                    ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+                    ObjectMapper om = new ObjectMapper();
+
+                    os.write(0);
+                    os.write(om.writeValueAsBytes(event));
+                    os.flush();
+                    byte[] datas = os.toByteArray();
+                    os.close();
+
+                    assertequalByteArray(datas, zipBucket.getNext());
+
+                } catch (StorageClosedException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } catch (StorageClosedException e) {
+                e.printStackTrace();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    @Test
+    public void testClose() {
+        Sequence sequence = new Sequence(120710, 0, 0);
+        LocalFileBucket bucket = null;
+        try {
+            bucket = new LocalFileBucket(work, sequence, 10, "20120710/bucket-0", false);
+            bucket.stop();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        boolean thrown = false;
+        try {
+            bucket.checkClosed();
+        } catch (StorageClosedException e) {
+            thrown = true;
+        }
+
+        Assert.assertTrue(thrown);
+    }
+
+    @Test
+    public void testHasRemainingForWrite() {
+        boolean flag = false;
+        try {
+            flag = localFileBucket.hasRemainingForWrite();
+        } catch (StorageClosedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Assert.assertTrue(flag);
+
+        localFileBucket.setMaxSizeByte(0);
+        try {
+            if (localFileBucket.hasRemainingForWrite() != false)
+                flag = true;
+        } catch (StorageClosedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Assert.assertTrue(flag);
+    }
+
+    protected void assertequalByteArray(byte[] expectedValue, byte[] actualValue) {
+        Assert.assertEquals(expectedValue.length, actualValue.length);
+        for (int i = 0; i < expectedValue.length; i++) {
+            Assert.assertEquals(expectedValue[i], actualValue[i]);
+        }
+
+    }
+
+    @After
+    public void after() throws IOException {
+        try {
+            localFileBucket.stop();
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (work.delete())
+            System.out.println("delete file successfully");
+        this.work.getParentFile().delete();
+        FileUtils.deleteDirectory(new File(System.getProperty("java.io.tmpdir", "."), "Puma/zip/"));
+
+    }
+
+    @AfterClass
+    public static void destroy() {
+    }
 }

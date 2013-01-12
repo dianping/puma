@@ -1,11 +1,11 @@
 package com.dianping.puma.storage;
 
+import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-
-import com.dianping.puma.storage.exception.StorageClosedException;
+import java.util.zip.GZIPInputStream;
 
 /**
  * 基于本地文件的Bucket实现
@@ -17,34 +17,19 @@ public class LocalFileBucket extends AbstractBucket {
 
     private RandomAccessFile file;
 
-    public LocalFileBucket(File file, Sequence startingSequence, int maxSizeMB, String fileName) throws FileNotFoundException {
-        super(startingSequence, maxSizeMB);
-        this.fileName = fileName;
+    public LocalFileBucket(File file, Sequence startingSequence, int maxSizeMB, String fileName, boolean compress)
+            throws IOException {
+        super(startingSequence, maxSizeMB, fileName, compress);
         this.file = new RandomAccessFile(file, "rw");
+        if (!compress) {
+            input = new DataInputStream(new FileInputStream(file));
+        } else {
+            input = new DataInputStream(new GZIPInputStream(new FileInputStream(file)));
+        }
     }
 
     protected void doAppend(byte[] data) throws IOException {
         file.write(data);
-    }
-
-    protected byte[] doReadData() throws StorageClosedException, IOException {
-        int length = file.readInt();
-        byte[] data = new byte[length];
-        int n = 0;
-        while (n < length) {
-            checkClosed();
-            int count = file.read(data, 0 + n, length - n);
-            n += count;
-        }
-        return data;
-    }
-
-    protected boolean readable() throws IOException {
-        return file.getFilePointer() + 4 < file.length();
-    }
-
-    protected void doSeek(int pos) throws IOException {
-        file.seek(pos);
     }
 
     protected void doClose() throws IOException {

@@ -15,9 +15,11 @@
  */
 package com.dianping.puma.storage;
 
+import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.dianping.puma.storage.exception.StorageClosedException;
@@ -33,12 +35,29 @@ public abstract class AbstractBucket implements Bucket {
     private AtomicReference<Sequence> currentWritingSeq = new AtomicReference<Sequence>();
     private volatile boolean          stopped           = false;
     private long                      maxSizeByte;
-    protected String                  fileName;
+    private String                    fileName;
+    private boolean                   compress;
+    protected DataInputStream         input;
+    protected ByteBuffer              dataLengthBuf     = ByteBuffer.allocate(4);
 
-    public String getBucketFileName(){
+    public String getBucketFileName() {
         return this.fileName;
     }
-    
+
+    /**
+     * @return the fileName
+     */
+    public String getFileName() {
+        return fileName;
+    }
+
+    /**
+     * @return the compress
+     */
+    public boolean isCompress() {
+        return compress;
+    }
+
     /**
      * @param maxSizeMB
      *            the maxSizeMB to set
@@ -76,10 +95,13 @@ public abstract class AbstractBucket implements Bucket {
         return maxSizeByte;
     }
 
-    public AbstractBucket(Sequence startingSequence, int maxSizeMB) throws FileNotFoundException {
+    public AbstractBucket(Sequence startingSequence, int maxSizeMB, String fileName, boolean compress)
+            throws FileNotFoundException {
         this.startingSequence = startingSequence;
         this.maxSizeMB = maxSizeMB;
         this.maxSizeByte = this.maxSizeMB * 1024 * 1024L;
+        this.fileName = fileName;
+        this.compress = compress;
         // we need to copy the whole instance
         this.currentWritingSeq.set(new Sequence(startingSequence.getCreationDate(), startingSequence.getNumber()));
     }
@@ -115,6 +137,8 @@ public abstract class AbstractBucket implements Bucket {
     @Override
     public void stop() throws IOException {
         stopped = true;
+        input.close();
+        input = null;
         doClose();
     }
 
@@ -138,16 +162,48 @@ public abstract class AbstractBucket implements Bucket {
         checkClosed();
         return doHasRemainingForWrite();
     }
+    
+    protected boolean readable() throws IOException {
+        while (dataLengthBuf.hasRemaining()) {
+            int b = input.read();
+            if (b != -1) {
+                dataLengthBuf.put((byte) b);
+            } else {
+                break;
+            }
+        }
+        return !dataLengthBuf.hasRemaining();
+    }
+
+    protected byte[] doReadData() throws StorageClosedException, IOException {
+        dataLengthBuf.flip();
+        int length = dataLengthBuf.getInt();
+        dataLengthBuf.clear();
+        ByteBuffer data = ByteBuffer.allocate(length);
+        while (data.hasRemaining()) {
+            checkClosed();
+            int b = input.read();
+            if (b != -1) {
+                data.put((byte) b);
+            }
+        }
+        return data.array();
+    }
+
+    protected void doSeek(int pos) throws IOException {
+        if (pos < 0) {
+            throw new IOException(String.format("Seek %d pos failed(%s).", pos, getFileName()));
+        }
+
+        for (int i = 0; i < pos; i++) {
+            input.read();
+        }
+
+    }
 
     protected abstract boolean doHasRemainingForWrite() throws IOException;
 
     protected abstract void doClose() throws IOException;
-
-    protected abstract void doSeek(int pos) throws IOException;
-
-    protected abstract boolean readable() throws IOException;
-
-    protected abstract byte[] doReadData() throws StorageClosedException, IOException;
 
     protected void checkClosed() throws StorageClosedException {
         if (stopped) {

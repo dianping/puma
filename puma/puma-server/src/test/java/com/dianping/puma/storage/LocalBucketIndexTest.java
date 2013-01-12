@@ -99,7 +99,7 @@ public class LocalBucketIndexTest {
 
 		Bucket bucket = null;
 		try {
-			bucket = new LocalFileBucket(work, sequence, 10, "20120711/bucket-0");
+			bucket = new LocalFileBucket(work, sequence, 10, "20120711/bucket-0", false);
 			localBucketIndex.add(bucket);
 
 		} catch (FileNotFoundException e) {
@@ -607,6 +607,7 @@ public class LocalBucketIndexTest {
 			e1.printStackTrace();
 		}
 
+		this.localBucketIndex.setMaster(false);
 		this.localBucketIndex.start();
 		try {
 			this.localBucketIndex.copyFromLocal(System.getProperty("java.io.tmpdir", ".").toString() + "/Puma/copy",

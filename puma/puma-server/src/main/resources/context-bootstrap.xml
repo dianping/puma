@@ -106,13 +106,13 @@
 	<bean id="localBucketIndex-7-43" class="com.dianping.puma.storage.LocalFileBucketIndex"
 		init-method="start">
 		<property name="bucketFilePrefix" value="bucket-" />
-		<property name="maxBucketLengthMB" value="50" />
+		<property name="maxBucketLengthMB" value="1000" />
 		<property name="baseDir" value="/data/applogs/puma/storage/master/7-43/" />
 	</bean>
 	<bean id="hdfsBucketIndex-7-43" class="com.dianping.puma.storage.LocalFileBucketIndex"
 		init-method="start">
 		<property name="bucketFilePrefix" value="bucket-" />
-		<property name="maxBucketLengthMB" value="50" />
+		<property name="maxBucketLengthMB" value="1000" />
 		<property name="baseDir" value="/data/applogs/puma/storage/slave/7-43/" />
 	</bean>
 	<bean id="archiveStrategy" class="com.dianping.puma.storage.DefaultArchiveStrategy">

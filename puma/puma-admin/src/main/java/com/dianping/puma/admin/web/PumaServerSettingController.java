@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,13 +70,13 @@ public class PumaServerSettingController {
     public String createPost(String mysqlName, String[] host, String target) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            if (mysqlName == null) {
+            if (StringUtils.isBlank(mysqlName)) {
                 throw new IllegalArgumentException("mysqlName不能为空");
             }
             if (host == null || host.length <= 0) {
                 throw new IllegalArgumentException("host不能为空");
             }
-            if (target == null) {
+            if (StringUtils.isBlank(target)) {
                 throw new IllegalArgumentException("target不能为空");
             }
             //验证mysqlName是否存在
@@ -106,16 +107,16 @@ public class PumaServerSettingController {
     public String modifyPost(String id, String mysqlName, String[] host, String target) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            if (id == null) {
+            if (StringUtils.isBlank(id)) {
                 throw new IllegalArgumentException("id不能为空");
             }
-            if (mysqlName == null) {
+            if (StringUtils.isBlank(mysqlName)) {
                 throw new IllegalArgumentException("mysqlName不能为空");
             }
             if (host == null || host.length <= 0) {
                 throw new IllegalArgumentException("host不能为空");
             }
-            if (target == null) {
+            if (StringUtils.isBlank(target)) {
                 throw new IllegalArgumentException("target不能为空");
             }
             //保存

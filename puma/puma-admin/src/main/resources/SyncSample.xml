@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sync xmlns="puma.dianping.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <instance>
+        <database from="pumatest" to="pumatest2">
+            <table from="test1" to="test1">
+                <column from="id" to="id" primary="false" />
+                <column from="name" to="name" />
+                <column from="desc" to="desc" />
+            </table>
+            <table from="test2" to="test23" partOf="true">
+                <column from="id" to="id" primary="true" />
+                <column from="name" to="name1" />
+            </table>
+            <table from="test3" to="test23" partOf="true">
+                <column from="id" to="id" primary="true" />
+                <column from="name" to="name2" />
+            </table>
+            <!-- #regex(test_[0-31])这部分在admin端解析好变成多个<table配置> -->
+            <!-- <table from="#regex(test_[0-31])" to="#partition(test_[$uid/2])" 
+                partOf="true"> <column from="id" to="id" primary="true" /> <column from="name" 
+                to="name1" /> </table> -->
+            <!-- <table from="test" to="#partition(part_[$uid%2])">
+                <column from="uid" to="uid" primary="true" />
+                <column from="name" to="name" />
+                <column from="desc" to="desc" />
+            </table>  -->
+            <!-- table才会有*号 -->
+            <!--<table from="*" to="*"></table>-->
+        </database>
+    </instance>
+</sync>

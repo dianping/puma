@@ -1,5 +1,8 @@
 package com.dianping.puma.core.sync.model.action;
 
+import java.util.Date;
+import java.util.Map;
+
 import org.bson.types.ObjectId;
 
 import com.dianping.puma.core.sync.model.BinlogInfo;
@@ -11,12 +14,16 @@ public abstract class ActionState {
     private ObjectId id;//与Action一致
     //    当前状态
     private State state;
-    //    操作的已耗时
-    private long timeUsed;
+    //    创建时间
+    private Date createTime;
+    //  最后更新时间
+    private Date lastUpdateTime;
     //    详细detail信息
     private String detail;
     //binlog信息
     private BinlogInfo binlogInfo;
+    //自定义参数
+    private Map<String, String> params;
 
     public ObjectId getId() {
         return id;
@@ -34,12 +41,20 @@ public abstract class ActionState {
         this.state = state;
     }
 
-    public long getTimeUsed() {
-        return timeUsed;
+    public Date getLastUpdateTime() {
+        return lastUpdateTime;
     }
 
-    public void setTimeUsed(long timeUsed) {
-        this.timeUsed = timeUsed;
+    public void setLastUpdateTime(Date lastUpdateTime) {
+        this.lastUpdateTime = lastUpdateTime;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 
     public String getDetail() {
@@ -58,11 +73,33 @@ public abstract class ActionState {
         this.binlogInfo = binlogInfo;
     }
 
+    public Map<String, String> getParams() {
+        return params;
+    }
+
+    public void setParams(Map<String, String> params) {
+        this.params = params;
+    }
+
     public enum State {
-        CREATED,
-        PREPARING,
-        RUNNING,
-        FAILED,
-        SUCCEED
+        PREPARABLE("待准备"),
+        PREPARING("正在准备执行"),
+        RUNNABLE("待运行"),
+        RUNNING("运行中"),
+        PAUSE("待暂停"),
+        SUSPPENDED("已暂停"),
+        RESOLVED("已修复，待重新运行"),
+        FAILED("结束-失败"),
+        SUCCEED("结束-成功");
+
+        private final String desc;
+
+        private State(String desc) {
+            this.desc = desc;
+        }
+
+        public String getDesc() {
+            return desc;
+        }
     }
 }

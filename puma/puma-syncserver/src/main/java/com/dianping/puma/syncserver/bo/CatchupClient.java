@@ -5,8 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.sync.BinlogInfo;
 import com.dianping.puma.core.sync.SyncConfig;
+import com.dianping.puma.core.sync.model.BinlogInfo;
 
 public class CatchupClient extends AbstractSyncClient {
     private static final Logger LOG = LoggerFactory.getLogger(CatchupClient.class);

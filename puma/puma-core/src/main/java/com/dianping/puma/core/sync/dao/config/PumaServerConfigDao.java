@@ -7,7 +7,7 @@ import com.dianping.puma.core.sync.dao.MongoClient;
 import com.dianping.puma.core.sync.model.config.PumaServerConfig;
 import com.google.code.morphia.dao.BasicDAO;
 
-@Service("mysqlPumaServerConfigDao")
+@Service("pumaServerConfigDao")
 public class PumaServerConfigDao extends BasicDAO<PumaServerConfig, String> {
 
     @Autowired

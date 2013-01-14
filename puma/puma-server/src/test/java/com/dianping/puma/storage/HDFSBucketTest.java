@@ -196,7 +196,7 @@ public class HDFSBucketTest {
 
 			try {
 				hdfsBucket = new HDFSBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", seq, false);
-				this.hdfsBucket.seek(newSeq.getOffset());
+				this.hdfsBucket.skip(newSeq.getOffset());
 
 				try {
 					ByteArrayOutputStream os = new ByteArrayOutputStream();

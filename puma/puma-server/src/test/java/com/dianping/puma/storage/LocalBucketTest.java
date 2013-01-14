@@ -254,7 +254,7 @@ public class LocalBucketTest {
             file.close();
 
             try {
-                localFileBucket.seek(newSeq.getOffset());
+                localFileBucket.skip(newSeq.getOffset());
 
                 try {
                     ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -284,7 +284,7 @@ public class LocalBucketTest {
 
         // catch an exception
         try {
-            localFileBucket.seek(-1);
+            localFileBucket.skip(-1);
         } catch (StorageClosedException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -343,7 +343,7 @@ public class LocalBucketTest {
             try {
                 bucketIndex.copyFromLocal(new File(System.getProperty("java.io.tmpdir", "."), "Puma/").getAbsolutePath(), "20120710/bucket-0");
                 LocalFileBucket zipBucket = new LocalFileBucket(zipWork, new Sequence(120710, 0, 0), 10000, "ffff", true);
-                zipBucket.seek(newSeq.getOffset());
+                zipBucket.skip(newSeq.getOffset());
 
                 try {
                     ByteArrayOutputStream os = new ByteArrayOutputStream();

@@ -28,175 +28,130 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  * 
  */
 public abstract class AbstractBucket implements Bucket {
-	private Sequence startingSequence;
-	private BinlogInfoAndSeq startingBinlogInfoAndSeq;
-	private int maxSizeMB;
-	private AtomicReference<Sequence> currentWritingSeq = new AtomicReference<Sequence>();
-	private AtomicReference<BinlogInfoAndSeq> currentWritingBinlogInfoAndSeq = new AtomicReference<BinlogInfoAndSeq>();
-	private volatile boolean stopped = false;
-	private long maxSizeByte;
-	private Boolean isCompress = false;
-	protected Compressor compressor;
-	protected int blocksize;
-	protected int nowoff;
+    private Sequence                  startingSequence;
+    private int                       maxSizeMB;
+    private AtomicReference<Sequence> currentWritingSeq = new AtomicReference<Sequence>();
+    private volatile boolean          stopped           = false;
+    private long                      maxSizeByte;
+    protected String                  fileName;
 
-	public BinlogInfoAndSeq getStartingBinlogInfoAndSeq() {
-		return startingBinlogInfoAndSeq;
-	}
+    public String getBucketFileName(){
+        return this.fileName;
+    }
+    
+    /**
+     * @param maxSizeMB
+     *            the maxSizeMB to set
+     */
+    public void setMaxSizeMB(int maxSizeMB) {
+        this.maxSizeMB = maxSizeMB;
+    }
 
-	public void setStartingBinlogInfoAndSeq(BinlogInfoAndSeq startingBinlogInfoAndSeq) {
-		this.startingBinlogInfoAndSeq = startingBinlogInfoAndSeq;
-	}
+    /**
+     * @param maxSizeByte
+     *            the maxSizeByte to set
+     */
+    public void setMaxSizeByte(long maxSizeByte) {
+        this.maxSizeByte = maxSizeByte;
+    }
 
-	public BinlogInfoAndSeq getCurrentWritingBinlogInfoAndSeq() {
-		return currentWritingBinlogInfoAndSeq.get();
-	}
+    /**
+     * @return the maxSizeMB
+     */
+    public int getMaxSizeMB() {
+        return maxSizeMB;
+    }
 
-	public void setCurrentWritingBinlogInfoAndSeq(BinlogInfoAndSeq binlogInfoAndSeq) {
-		BinlogInfoAndSeq temp = this.currentWritingBinlogInfoAndSeq.get();
-		temp.setServerId(binlogInfoAndSeq.getServerId());
-		temp.setBinlogFile(binlogInfoAndSeq.getBinlogFile());
-		temp.setBinlogPosition(binlogInfoAndSeq.getBinlogPosition());
-		temp.setSeq(binlogInfoAndSeq.getSeq());
-		this.currentWritingBinlogInfoAndSeq.set(temp);
-	}
+    /**
+     * @return the stopped
+     */
+    public boolean isStopped() {
+        return stopped;
+    }
 
-	public Boolean getIsCompress() {
-		return isCompress;
-	}
+    /**
+     * @return the maxSizeByte
+     */
+    public long getMaxSizeByte() {
+        return maxSizeByte;
+    }
 
-	public void setIsCompress(Boolean isCompress) {
-		this.isCompress = isCompress;
-	}
+    public AbstractBucket(Sequence startingSequence, int maxSizeMB) throws FileNotFoundException {
+        this.startingSequence = startingSequence;
+        this.maxSizeMB = maxSizeMB;
+        this.maxSizeByte = this.maxSizeMB * 1024 * 1024L;
+        // we need to copy the whole instance
+        this.currentWritingSeq.set(new Sequence(startingSequence.getCreationDate(), startingSequence.getNumber()));
+    }
 
-	/**
-	 * @param maxSizeMB
-	 *            the maxSizeMB to set
-	 */
-	public void setMaxSizeMB(int maxSizeMB) {
-		this.maxSizeMB = maxSizeMB;
-	}
+    @Override
+    public void append(byte[] data) throws StorageClosedException, IOException {
+        checkClosed();
+        doAppend(data);
+        currentWritingSeq.set(currentWritingSeq.get().addOffset(data.length));
+    }
 
-	/**
-	 * @param maxSizeByte
-	 *            the maxSizeByte to set
-	 */
-	public void setMaxSizeByte(long maxSizeByte) {
-		this.maxSizeByte = maxSizeByte;
-	}
+    protected abstract void doAppend(byte[] data) throws IOException;
 
-	/**
-	 * @return the maxSizeMB
-	 */
-	public int getMaxSizeMB() {
-		return maxSizeMB;
-	}
+    @Override
+    public byte[] getNext() throws StorageClosedException, IOException {
+        checkClosed();
+        // we should guarantee the whole packet read in one transaction,
+        // otherwise we will skip some bytes and read a wrong value in the next
+        // call
+        if (readable()) {
+            return doReadData();
+        } else {
+            throw new EOFException();
+        }
+    }
 
-	/**
-	 * @return the stopped
-	 */
-	public boolean isStopped() {
-		return stopped;
-	}
+    @Override
+    public void seek(int pos) throws StorageClosedException, IOException {
+        checkClosed();
+        doSeek(pos);
+    }
 
-	/**
-	 * @return the maxSizeByte
-	 */
-	public long getMaxSizeByte() {
-		return maxSizeByte;
-	}
+    @Override
+    public void stop() throws IOException {
+        stopped = true;
+        doClose();
+    }
 
-	public AbstractBucket(Sequence startingSequence, int maxSizeMB) throws FileNotFoundException {
-		this.startingSequence = startingSequence;
-		this.maxSizeMB = maxSizeMB;
-		this.maxSizeByte = this.maxSizeMB * 1024 * 1024L;
-		// we need to copy the whole instance
-		this.currentWritingSeq.set(new Sequence(startingSequence.getCreationDate(), startingSequence.getNumber()));
-		this.currentWritingBinlogInfoAndSeq.set(new BinlogInfoAndSeq(0, null, 0, 0));
-		this.compressor = new ZipCompressor();
-	}
+    @Override
+    public Sequence getStartingSequece() {
+        return startingSequence;
+    }
 
-	// TODO add getNext
+    @Override
+    public long getCurrentWritingSeq() {
+        return currentWritingSeq.get().longValue();
+    }
 
-	@Override
-	public void append(byte[] data) throws StorageClosedException, IOException {
-		checkClosed();
-		doAppend(data);
-		currentWritingSeq.set(currentWritingSeq.get().addOffset(data.length));
-	}
+    @Override
+    public void start() throws IOException {
 
-	protected abstract void doAppend(byte[] data) throws IOException;
+    }
 
-	@Override
-	public void seek(long offset) throws StorageClosedException, IOException {
-		checkClosed();
-		doSeek((int) offset);
-	}
+    @Override
+    public boolean hasRemainingForWrite() throws StorageClosedException, IOException {
+        checkClosed();
+        return doHasRemainingForWrite();
+    }
 
-	@Override
-	public void stop() throws IOException {
-		stopped = true;
-		doClose();
-	}
+    protected abstract boolean doHasRemainingForWrite() throws IOException;
 
-	@Override
-	public Sequence getStartingSequece() {
-		return startingSequence;
-	}
+    protected abstract void doClose() throws IOException;
 
-	@Override
-	public long getCurrentWritingSeq() {
-		return currentWritingSeq.get().longValue();
-	}
+    protected abstract void doSeek(int pos) throws IOException;
 
-	@Override
-	public void start() throws IOException {
+    protected abstract boolean readable() throws IOException;
 
-	}
+    protected abstract byte[] doReadData() throws StorageClosedException, IOException;
 
-	@Override
-	public boolean hasRemainingForWrite() throws StorageClosedException, IOException {
-		checkClosed();
-		return doHasRemainingForWrite();
-	}
-
-	@Override
-	public byte[] getNext() throws StorageClosedException, IOException {
-		checkClosed();
-		// we should guarantee the whole packet read in one transaction,
-		// otherwise we will skip some bytes and read a wrong value in the next
-		// call
-		if (!this.isCompress) {
-			if (readable()) {
-				byte[] data = doReadData();
-				return data;
-			} else {
-				throw new EOFException();
-			}
-		} else {
-			try{
-				return this.compressor.getNextEvent();
-			}catch(Exception e){
-				throw new EOFException();
-			}
-		}
-	}
-
-	protected abstract boolean doHasRemainingForWrite() throws IOException;
-
-	protected abstract void doClose() throws IOException;
-
-	protected abstract void doSeek(int pos) throws IOException;
-
-	protected abstract boolean readable() throws IOException;
-
-	protected abstract byte[] doReadData() throws StorageClosedException, IOException;
-
-	protected abstract int readByte() throws StorageClosedException, IOException;
-
-	protected void checkClosed() throws StorageClosedException {
-		if (stopped) {
-			throw new StorageClosedException("Bucket has been closed");
-		}
-	}
+    protected void checkClosed() throws StorageClosedException {
+        if (stopped) {
+            throw new StorageClosedException("Bucket has been closed");
+        }
+    }
 }

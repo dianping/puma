@@ -27,16 +27,14 @@ public class TestApi {
 	public static void main(String[] args) {
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
 		configBuilder.ddl(true);
-		configBuilder.dml(true);
-		configBuilder.host("127.0.0.1");
-		configBuilder.port(8080);
-		configBuilder.serverId(1);
-		configBuilder.name("testClient");
-		configBuilder.tables("hupeng", "*");
-		configBuilder.target("Dianping");
-		configBuilder.transaction(false);
-		configBuilder.binlog("mysql-bin.000121");
-		configBuilder.binlogPos(107);
+        configBuilder.dml(true);
+        configBuilder.host("10.1.77.46");
+        configBuilder.port(7862);
+        configBuilder.serverId(1111);
+        configBuilder.name("testClient");
+        configBuilder.tables("DianPing", "*");
+        configBuilder.target("77_21");
+        configBuilder.transaction(true);
 		PumaClient pc = new PumaClient(configBuilder.build());
 		pc.register(new EventListener() {
 

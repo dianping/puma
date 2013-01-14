@@ -34,12 +34,18 @@ public class Payload implements ActionPayload<ChannelPage, Action> {
     @FieldMeta("serverId")
     private long        m_serverId  = -1L;
     @FieldMeta("binlog")
-    private String      m_binlog;
+    private String      m_binlog    = null;
     @FieldMeta("binlogPos")
-    private long        m_binlogPos;
+    private long        m_binlogPos = -1L;
+    @FieldMeta("timestamp")
+    private long        m_timestamp = -1L;
 
     @FieldMeta("dt")
     private String[]    m_databaseTables;
+
+    public long getTimestamp() {
+        return m_timestamp;
+    }
 
     @Override
     public Action getAction() {

@@ -44,6 +44,10 @@ public class ConfigurationBuilderTest {
 		builder.tables("me", "d");
 		builder.target("fff");
 		builder.transaction(true);
+		builder.timeStamp(111);
+		builder.binlog("ffff.fff");
+		builder.binlogPos(1234);
+		builder.serverId(223);
 		Configuration conf = builder.build();
 		Assert.assertEquals("111", conf.getCodecType());
 		Assert.assertEquals(true, conf.isNeedDdl());
@@ -54,6 +58,10 @@ public class ConfigurationBuilderTest {
 		Assert.assertEquals("11111", conf.getSeqFileBase());
 		Assert.assertEquals("fff", conf.getTarget());
 		Assert.assertEquals(true, conf.isNeedTransactionInfo());
+		Assert.assertEquals(111, conf.getTimeStamp());
+		Assert.assertEquals(1234, conf.getBinlogPos());
+		Assert.assertEquals(223, conf.getServerId());
+		Assert.assertEquals("ffff.fff", conf.getBinlog());
 		Map<String, List<String>> databaseTablesMapping = conf.getDatabaseTablesMapping();
 		Assert.assertEquals(2, databaseTablesMapping.size());
 		Assert.assertEquals(Arrays.asList(new String[] { "a", "b*" }), databaseTablesMapping.get("cat"));

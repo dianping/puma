@@ -1,7 +1,7 @@
 /**
- * Project: puma-server
+ * Project: puma-core
  * 
- * File Created at 2012-8-6
+ * File Created at 2013-1-10
  * $Id$
  * 
  * Copyright 2010 dianping.com.
@@ -13,17 +13,18 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.storage;
+package com.dianping.puma.core.constant;
 
 /**
- * TODO Comment of CleanupStrategy
+ * TODO Comment of SubscribeConstant
  * 
  * @author Leo Liang
  * 
  */
-public interface CleanupStrategy {
-    public void cleanup(BucketIndex index);
+public class SubscribeConstant {
+    public static final long SEQ_FROM_OLDEST     = -1L;
+    public static final long SEQ_FROM_LATEST     = -2L;
+    public static final long SEQ_FROM_BINLOGINFO = -3L;
+    public static final long SEQ_FROM_TIMESTAMP  = -4L;
 
-    @SuppressWarnings("rawtypes")
-    public void addDataIndex(DataIndex index);
 }

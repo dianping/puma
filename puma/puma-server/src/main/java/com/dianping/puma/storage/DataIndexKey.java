@@ -1,7 +1,7 @@
 /**
  * Project: puma-server
  * 
- * File Created at 2012-8-6
+ * File Created at 2013-1-8
  * $Id$
  * 
  * Copyright 2010 dianping.com.
@@ -16,14 +16,9 @@
 package com.dianping.puma.storage;
 
 /**
- * TODO Comment of CleanupStrategy
  * 
  * @author Leo Liang
  * 
  */
-public interface CleanupStrategy {
-    public void cleanup(BucketIndex index);
-
-    @SuppressWarnings("rawtypes")
-    public void addDataIndex(DataIndex index);
+public interface DataIndexKey<T> extends Comparable<T> {
 }

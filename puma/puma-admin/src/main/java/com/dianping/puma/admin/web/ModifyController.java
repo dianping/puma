@@ -1,5 +1,6 @@
 package com.dianping.puma.admin.web;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,10 @@ import org.springframework.web.servlet.ModelAndView;
 import org.xml.sax.SAXParseException;
 
 import com.dianping.puma.admin.bo.SyncXml;
+import com.dianping.puma.admin.service.DumpActionService;
+import com.dianping.puma.admin.service.DumpActionStateService;
+import com.dianping.puma.admin.service.MysqlConfigService;
+import com.dianping.puma.admin.service.PumaSyncServerConfigService;
 import com.dianping.puma.admin.service.SyncConfigService;
 import com.dianping.puma.admin.service.SyncTaskActionService;
 import com.dianping.puma.admin.service.SyncTaskActionStateService;
@@ -32,6 +37,12 @@ import com.dianping.puma.admin.util.SyncXmlParser;
 import com.dianping.puma.core.sync.SyncConfig;
 import com.dianping.puma.core.sync.model.action.SyncTaskAction;
 import com.dianping.puma.core.sync.model.action.SyncTaskActionState;
+import com.dianping.puma.core.sync.model.config.MysqlConfig;
+import com.dianping.puma.core.sync.model.config.PumaSyncServerConfig;
+import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
+import com.dianping.puma.core.sync.model.mapping.DumpMapping;
+import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
+import com.dianping.puma.core.sync.model.mapping.TableMapping;
 
 /**
  * TODO <br>
@@ -48,7 +59,13 @@ public class ModifyController {
     @Autowired
     private SyncConfigService syncConfigService;
     @Autowired
-    private SyncTaskService syncTaskService;
+    private MysqlConfigService mysqlConfigService;
+    @Autowired
+    private DumpActionService dumpActionService;
+    @Autowired
+    private DumpActionStateService dumpActionStateService;
+    @Autowired
+    private PumaSyncServerConfigService pumaSyncServerConfigService;
     @Autowired
     private SyncTaskActionService syncTaskActionService;
     @Autowired
@@ -74,7 +91,7 @@ public class ModifyController {
         map.put("path", "modify");
         return new ModelAndView("main/container", map);
     }
-    
+
     /**
      * 修改SyncTaskActionState的页面
      */
@@ -87,8 +104,77 @@ public class ModifyController {
         map.put("action", action);
         map.put("state", state);
         map.put("modifyActive", "active");
-        map.put("subPath", "action");
         map.put("path", "modify");
+        return new ModelAndView("main/container", map);
+    }
+
+    @RequestMapping(value = "/modify/action/{id}/step1Save", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object step1Save(HttpSession session, @PathVariable("id") String actionId, String[] databaseFrom, String[] databaseTo,
+                            String[] tableFrom, String[] tableTo, Integer count[]) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            //验证参数
+            if (tableFrom == null && tableTo == null) {
+                tableFrom = new String[] { "*" };
+                tableTo = new String[] { "*" };
+            } else if (!(tableFrom != null && tableTo != null && tableFrom.length == tableTo.length)) {
+                throw new IllegalArgumentException("源表个数和目标表的个数不一致。(tableFrom=" + tableFrom + ", tableTo=" + tableTo + ")");
+            }
+            //解析mapping???????????????
+            MysqlMapping mysqlMapping = new MysqlMapping();
+//            DatabaseMapping database = new DatabaseMapping();
+//            database.setFrom(databaseFrom);
+//            database.setTo(databaseTo);
+//            for (int i = 0; i < tableFrom.length; i++) {
+//                String from = tableFrom[i];
+//                String to = tableTo[i];
+//                TableMapping table = new TableMapping();
+//                table.setFrom(from);
+//                table.setTo(to);
+//                database.addTable(table);
+//            }
+//            mysqlMapping.addDatabase(database);
+
+            //对比新的mapping和现有的mapping     ?????????????????????????
+
+            //保存到session
+            session.setAttribute("mysqlMapping", mysqlMapping);
+
+            map.put("success", true);
+        } catch (IllegalArgumentException e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", errorMsg);
+            LOG.error(e.getMessage(), e);
+        }
+        return GsonUtil.toJson(map);
+
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = { "/modify/step2" })
+    public ModelAndView step2(HttpSession session) throws SQLException {
+        Map<String, Object> map = new HashMap<String, Object>();
+        //从session拿出srcMysql，destMysql查询mysql配置
+        MysqlConfig srcMysqlConfig = (MysqlConfig) session.getAttribute("srcMysqlConfig");
+        MysqlConfig destMysqlConfig = (MysqlConfig) session.getAttribute("destMysqlConfig");
+        //查询所有syncServer
+        List<PumaSyncServerConfig> syncServerConfigs = pumaSyncServerConfigService.findAll();
+        //从会话中取出保存的mysqlMapping，计算出dumpMapping
+        MysqlMapping mysqlMapping = (MysqlMapping) session.getAttribute("mysqlMapping");
+        DumpMapping dumpMapping = this.syncConfigService.convertMysqlMappingToDumpMapping(srcMysqlConfig.getHosts().get(0),
+                mysqlMapping);
+        session.setAttribute("dumpMapping", dumpMapping);
+
+        map.put("srcMysqlConfig", srcMysqlConfig);
+        map.put("destMysqlConfig", destMysqlConfig);
+        map.put("syncServerConfigs", syncServerConfigs);
+        map.put("dumpMapping", dumpMapping);
+        map.put("createActive", "active");
+        map.put("path", "create");
+        map.put("subPath", "step2");
         return new ModelAndView("main/container", map);
     }
 

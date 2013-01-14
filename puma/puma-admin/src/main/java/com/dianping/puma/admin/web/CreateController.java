@@ -48,8 +48,10 @@ import com.dianping.puma.core.sync.model.action.DumpActionState;
 import com.dianping.puma.core.sync.model.action.SyncTaskAction;
 import com.dianping.puma.core.sync.model.config.MysqlConfig;
 import com.dianping.puma.core.sync.model.config.PumaSyncServerConfig;
+import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.DumpMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
+import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.google.gson.Gson;
 
 /**
@@ -113,9 +115,9 @@ public class CreateController {
 
     }
 
-    @RequestMapping(value = "/create/step1Save", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "/create/step1Save_backup", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object step1Save(HttpSession session, String srcMysql, String destMysql, String syncXml) {
+    public Object step1Save_backup(HttpSession session, String srcMysql, String destMysql, String syncXml) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             //判断该srcMysql和destMysql是否重复
@@ -135,6 +137,64 @@ public class CreateController {
         } catch (SAXParseException e) {
             map.put("success", false);
             map.put("errorMsg", "xml解析出错：" + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", errorMsg);
+            LOG.error(e.getMessage(), e);
+        }
+        return GsonUtil.toJson(map);
+
+    }
+
+    @RequestMapping(value = "/create/step1Save", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object step1Save(HttpSession session, String srcMysql, String destMysql, String databaseFrom, String databaseTo,
+                            String[] tableFrom, String[] tableTo) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            if (StringUtils.isBlank(srcMysql) || StringUtils.isBlank(destMysql)) {
+                throw new IllegalArgumentException("srcMysql和destMysql都不能为空。(srcMysql=" + srcMysql + ", destMysql=" + destMysql
+                        + ")");
+            }
+            if (tableFrom == null && tableTo == null) {
+                tableFrom = new String[] { "*" };
+                tableTo = new String[] { "*" };
+            } else if (!(tableFrom != null && tableTo != null && tableFrom.length == tableTo.length)) {
+                throw new IllegalArgumentException("源表个数和目标表的个数不一致。(tableFrom=" + tableFrom + ", tableTo=" + tableTo + ")");
+            }
+            //判断该srcMysql和destMysql是否重复
+            if (this.syncTaskActionService.existsBySrcAndDest(srcMysql, destMysql)) {
+                throw new IllegalArgumentException("创建失败，已有相同的配置存在。(srcMysqlName=" + srcMysql + ", destMysqlName=" + destMysql
+                        + ")");
+            }
+            //解析mapping
+            //有xml改为表格提交
+            //            MysqlMapping mysqlMapping = SyncXmlParser.parse2(syncXml);
+            MysqlMapping mysqlMapping = new MysqlMapping();
+            DatabaseMapping database = new DatabaseMapping();
+            database.setFrom(databaseFrom);
+            database.setTo(databaseTo);
+            for (int i = 0; i < tableFrom.length; i++) {
+                String from = tableFrom[i];
+                String to = tableTo[i];
+                TableMapping table = new TableMapping();
+                table.setFrom(from);
+                table.setTo(to);
+                database.addTable(table);
+            }
+            mysqlMapping.addDatabase(database);
+
+            //保存到session
+            session.setAttribute("mysqlMapping", mysqlMapping);
+            MysqlConfig srcMysqlConfig = mysqlConfigService.find(srcMysql);
+            MysqlConfig destMysqlConfig = mysqlConfigService.find(destMysql);
+            session.setAttribute("srcMysqlConfig", srcMysqlConfig);
+            session.setAttribute("destMysqlConfig", destMysqlConfig);
+
+            map.put("success", true);
         } catch (IllegalArgumentException e) {
             map.put("success", false);
             map.put("errorMsg", e.getMessage());

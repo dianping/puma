@@ -141,7 +141,7 @@ public class BinlogHeader implements Serializable {
 		timestamp = PacketUtils.readLong(buf, 4);
 		eventType = buf.get();
 		serverId = PacketUtils.readLong(buf, 4);
-		eventLength = PacketUtils.readInt(buf, 4);
+		eventLength = PacketUtils.readLong(buf, 4);
 		nextPosition = PacketUtils.readLong(buf, 4);
 		flags = PacketUtils.readInt(buf, 2);
 	}

@@ -205,7 +205,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
         Bucket bucket = doGetReadBucket(baseDir, path, sequence.clearOffset(), maxBucketLengthMB);
 
         if (bucket != null) {
-            bucket.seek(offset);
+            bucket.skip(offset);
             try {
                 if (seq != SubscribeConstant.SEQ_FROM_OLDEST && seq != SubscribeConstant.SEQ_FROM_LATEST && fromNext) {
                     bucket.getNext();

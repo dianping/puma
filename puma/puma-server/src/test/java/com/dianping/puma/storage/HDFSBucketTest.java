@@ -224,15 +224,6 @@ public class HDFSBucketTest {
 			e.printStackTrace();
 		}
 
-		// catch an exception
-		try {
-			this.hdfsBucket.seek(newSeq.getOffset() * 2 + 1);
-		} catch (StorageClosedException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			thrown = true;
-		}
-		Assert.assertTrue(thrown);
 
 	}
 

@@ -129,9 +129,9 @@ public abstract class AbstractBucket implements Bucket {
     }
 
     @Override
-    public void seek(int pos) throws StorageClosedException, IOException {
+    public void skip(int pos) throws StorageClosedException, IOException {
         checkClosed();
-        doSeek(pos);
+        doSkip(pos);
     }
 
     @Override
@@ -190,7 +190,7 @@ public abstract class AbstractBucket implements Bucket {
         return data.array();
     }
 
-    protected void doSeek(int pos) throws IOException {
+    protected void doSkip(int pos) throws IOException {
         if (pos < 0) {
             throw new IOException(String.format("Seek %d pos failed(%s).", pos, getFileName()));
         }

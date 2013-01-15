@@ -13,6 +13,8 @@ import com.dianping.puma.core.sync.dao.action.SyncTaskActionDao;
 import com.dianping.puma.core.sync.model.action.ActionState.State;
 import com.dianping.puma.core.sync.model.action.SyncTaskAction;
 import com.dianping.puma.core.sync.model.action.SyncTaskActionState;
+import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
+import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.google.code.morphia.Key;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
@@ -80,6 +82,15 @@ public class SyncTaskActionServiceImpl implements SyncTaskActionService {
         q.limit(limit);
         QueryResults<SyncTaskAction> result = syncTaskActionDao.find(q);
         return result.asList();
+    }
+
+    /**
+     * 对比新旧sync，求出新增的database或table配置(table也属于database下，故返回的都是database)<br>
+     * 同时做验证：只允许新增database或table配置
+     */
+    @Override
+    public MysqlMapping compare(MysqlMapping oldMysqlMapping, MysqlMapping newMysqlMapping) {
+        return oldMysqlMapping.compare(newMysqlMapping);
     }
 
 }

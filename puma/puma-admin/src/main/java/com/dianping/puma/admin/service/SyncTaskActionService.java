@@ -5,6 +5,8 @@ import java.util.List;
 import org.bson.types.ObjectId;
 
 import com.dianping.puma.core.sync.model.action.SyncTaskAction;
+import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
+import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 
 public interface SyncTaskActionService {
 
@@ -18,5 +20,7 @@ public interface SyncTaskActionService {
     List<SyncTaskAction> find(int offset, int limit);
 
     boolean existsBySrcAndDest(String srcMysqlName, String destMysqlName);
+
+    MysqlMapping compare(MysqlMapping oldMysqlMapping, MysqlMapping newMysqlMapping);
 
 }

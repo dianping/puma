@@ -30,7 +30,6 @@ import com.dianping.puma.admin.service.PumaSyncServerConfigService;
 import com.dianping.puma.admin.service.SyncConfigService;
 import com.dianping.puma.admin.service.SyncTaskActionService;
 import com.dianping.puma.admin.service.SyncTaskActionStateService;
-import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.admin.util.MongoUtils;
 import com.dianping.puma.admin.util.SyncXmlParser;
@@ -105,6 +104,7 @@ public class ModifyController {
         map.put("state", state);
         map.put("modifyActive", "active");
         map.put("path", "modify");
+        map.put("subPath", "step1");
         return new ModelAndView("main/container", map);
     }
 
@@ -115,31 +115,60 @@ public class ModifyController {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             //验证参数
+            //databaseFrom和databaseTo
+            if (!(databaseFrom != null && databaseTo != null && databaseFrom.length == databaseTo.length)) {
+                throw new IllegalArgumentException("源数据库个数和目标数据库的个数不一致。(databaseFrom个数=" + databaseFrom.length + ", databaseTo个数="
+                        + databaseTo.length + ")");
+            }
+            //count
+            if (count == null || count.length != databaseFrom.length) {
+                throw new IllegalArgumentException("count参数个数和源数据库个数不一致。(database个数=" + databaseFrom.length + ", count个数="
+                        + count.length + ")");
+            }
+            int totalTable = 0;
+            for (int c : count) {
+                totalTable += c;
+            }
+            //tableFrom和tableTo,totalTable
             if (tableFrom == null && tableTo == null) {
                 tableFrom = new String[] { "*" };
                 tableTo = new String[] { "*" };
             } else if (!(tableFrom != null && tableTo != null && tableFrom.length == tableTo.length)) {
-                throw new IllegalArgumentException("源表个数和目标表的个数不一致。(tableFrom=" + tableFrom + ", tableTo=" + tableTo + ")");
+                throw new IllegalArgumentException("源表个数和目标表的个数不一致。(tableFrom个数=" + tableFrom.length + ", tableTo个数="
+                        + tableTo.length + ")");
+            } else if (tableFrom.length != totalTable) {
+                throw new IllegalArgumentException("count参数总和与表的个数不一致。(table个数=" + tableFrom.length + ", count总和=" + totalTable
+                        + ")");
             }
-            //解析mapping???????????????
+            //解析mapping
             MysqlMapping mysqlMapping = new MysqlMapping();
-//            DatabaseMapping database = new DatabaseMapping();
-//            database.setFrom(databaseFrom);
-//            database.setTo(databaseTo);
-//            for (int i = 0; i < tableFrom.length; i++) {
-//                String from = tableFrom[i];
-//                String to = tableTo[i];
-//                TableMapping table = new TableMapping();
-//                table.setFrom(from);
-//                table.setTo(to);
-//                database.addTable(table);
-//            }
-//            mysqlMapping.addDatabase(database);
-
-            //对比新的mapping和现有的mapping     ?????????????????????????
+            int j = 0, countAmount = 0;
+            for (int i = 0; i < databaseFrom.length; i++) {
+                String dbFrom = databaseFrom[i];
+                String dbTo = databaseTo[i];
+                DatabaseMapping database = new DatabaseMapping();
+                database.setFrom(dbFrom);
+                database.setTo(dbTo);
+                countAmount += count[i];
+                for (; j < countAmount; j++) {
+                    String tableFrom0 = tableFrom[j];
+                    String tableTo0 = tableTo[j];
+                    TableMapping table = new TableMapping();
+                    table.setFrom(tableFrom0);
+                    table.setTo(tableTo0);
+                    database.addTable(table);
+                }
+                mysqlMapping.addDatabase(database);
+            }
+            //对比新的mapping和现有的mapping
+            //查询出SyncTaskAction
+            SyncTaskAction syncTaskAction = this.syncTaskActionService.find(new ObjectId(actionId));
+            MysqlMapping oldMysqlMapping = syncTaskAction.getMysqlMapping();
+            MysqlMapping additionalMysqlMapping = this.syncTaskActionService.compare(oldMysqlMapping, mysqlMapping);
 
             //保存到session
             session.setAttribute("mysqlMapping", mysqlMapping);
+            session.setAttribute("additionalMysqlMapping", additionalMysqlMapping);
 
             map.put("success", true);
         } catch (IllegalArgumentException e) {
@@ -154,26 +183,29 @@ public class ModifyController {
 
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = { "/modify/step2" })
-    public ModelAndView step2(HttpSession session) throws SQLException {
+    @RequestMapping(method = RequestMethod.GET, value = { "/modify/action/{id}/step2" })
+    public ModelAndView step2(HttpSession session, @PathVariable("id") String actionId) throws SQLException {
         Map<String, Object> map = new HashMap<String, Object>();
         //从session拿出srcMysql，destMysql查询mysql配置
-        MysqlConfig srcMysqlConfig = (MysqlConfig) session.getAttribute("srcMysqlConfig");
-        MysqlConfig destMysqlConfig = (MysqlConfig) session.getAttribute("destMysqlConfig");
+        SyncTaskAction syncTaskAction = this.syncTaskActionService.find(new ObjectId(actionId));
+        String srcMysqlName = syncTaskAction.getSrcMysqlName();
+        MysqlConfig srcMysqlConfig = this.mysqlConfigService.find(srcMysqlName);
+        String destMysqlName = syncTaskAction.getDestMysqlName();
+        MysqlConfig destMysqlConfig = this.mysqlConfigService.find(destMysqlName);
         //查询所有syncServer
         List<PumaSyncServerConfig> syncServerConfigs = pumaSyncServerConfigService.findAll();
         //从会话中取出保存的mysqlMapping，计算出dumpMapping
-        MysqlMapping mysqlMapping = (MysqlMapping) session.getAttribute("mysqlMapping");
+        MysqlMapping additionalMysqlMapping = (MysqlMapping) session.getAttribute("additionalMysqlMapping");
         DumpMapping dumpMapping = this.syncConfigService.convertMysqlMappingToDumpMapping(srcMysqlConfig.getHosts().get(0),
-                mysqlMapping);
+                additionalMysqlMapping);
         session.setAttribute("dumpMapping", dumpMapping);
 
         map.put("srcMysqlConfig", srcMysqlConfig);
         map.put("destMysqlConfig", destMysqlConfig);
         map.put("syncServerConfigs", syncServerConfigs);
         map.put("dumpMapping", dumpMapping);
-        map.put("createActive", "active");
-        map.put("path", "create");
+        map.put("modifyActive", "active");
+        map.put("path", "modify");
         map.put("subPath", "step2");
         return new ModelAndView("main/container", map);
     }

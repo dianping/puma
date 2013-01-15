@@ -23,9 +23,9 @@ public class MysqlMapping {
         return "Instance [databases=" + databases + "]";
     }
 
-    public List<DatabaseMapping> compare(MysqlMapping newInstanceMapping) {
+    public MysqlMapping compare(MysqlMapping newMysqlMapping) {
         List<DatabaseMapping> oldDatabaseMappings = new ArrayList<DatabaseMapping>(this.databases);
-        List<DatabaseMapping> newDatabaseMappings = new ArrayList<DatabaseMapping>(newInstanceMapping.getDatabases());
+        List<DatabaseMapping> newDatabaseMappings = new ArrayList<DatabaseMapping>(newMysqlMapping.getDatabases());
         //验证旧的database没有被删除
         for (DatabaseMapping oldDatabaseMapping : oldDatabaseMappings) {
             boolean contain = false;
@@ -37,7 +37,7 @@ public class MysqlMapping {
                 }
             }
             if (!contain) {
-                throw new IllegalArgumentException("<database>不能删除: " + oldDatabaseMapping);
+                throw new IllegalArgumentException("database不能删除: " + oldDatabaseMapping);
             }
         }
         //老Mapping多出的database        
@@ -56,13 +56,15 @@ public class MysqlMapping {
                     List<TableMapping> newTables = newDatabaseMapping.getTables();
                     //验证旧的table没有被删除
                     if (!newTables.containsAll(oldTables)) {
-                        throw new IllegalArgumentException("<table>不能删除: " + oldDatabaseMapping);
+                        throw new IllegalArgumentException("table不能删除: " + oldDatabaseMapping);
                     }
                     newTables.removeAll(oldTables);
                     break;
                 }
             }
         }
-        return newLeftDatabaseMappings;
+        MysqlMapping m = new MysqlMapping();
+        m.setDatabases(newLeftDatabaseMappings);
+        return m;
     }
 }

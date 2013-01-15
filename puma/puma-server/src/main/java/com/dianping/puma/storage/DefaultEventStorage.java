@@ -73,6 +73,8 @@ public class DefaultEventStorage implements EventStorage {
 
     public void start() throws StorageLifeCycleException {
         stopped = false;
+        masterBucketIndex.setMaster(true);
+        slaveBucketIndex.setMaster(false);
         bucketManager = new DefaultBucketManager(masterBucketIndex, slaveBucketIndex, archiveStrategy, cleanupStrategy);
         timeStampIndex = new DefaultDataIndexImpl<TimeStampIndexKey, Long>(timeStampIndexBaseDir,
                 new LongIndexItemConvertor(), new TimeStampIndexKeyConvertor());

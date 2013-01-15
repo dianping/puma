@@ -7,6 +7,11 @@
         <param-name>contextConfigLocation</param-name>
         <param-value>classpath*:applicationContext.xml</param-value>
     </context-param>
+    
+     <session-config>
+        <session-timeout>7200</session-timeout><!-- 48 hours -->
+    </session-config>
+    
 
     <!-- Creates the Spring Container shared by all Servlets and Filters -->
     <listener>

@@ -1,5 +1,7 @@
 package com.dianping.puma.core.sync;
 
+import com.dianping.puma.core.sync.model.BinlogInfo;
+
 public class DatabaseBinlogInfo extends BinlogInfo {
 
     private String databaseName;

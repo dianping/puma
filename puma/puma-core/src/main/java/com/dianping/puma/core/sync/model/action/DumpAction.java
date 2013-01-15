@@ -9,6 +9,9 @@ import com.google.code.morphia.annotations.Entity;
 @Entity
 public class DumpAction extends Action {
 
+    //    源数据库的具体host
+    private String srcMysqlHost;
+
     //Dump配置：映射配置(DumpConfig)
     private DumpMapping dumpMapping;
 
@@ -16,8 +19,16 @@ public class DumpAction extends Action {
             "--add-drop-database=false", "--add-drop-table=false", "--skip-add-locks", "--default-character-set=utf8",
             "--max_allowed_packet=16777216", " --net_buffer_length=16384", "-i", "--master-data=2", "--single-transaction" });
 
-    public DumpAction(ActionType type) {
-        super(type);
+    public DumpAction() {
+        super(ActionType.DUMP);
+    }
+
+    public String getSrcMysqlHost() {
+        return srcMysqlHost;
+    }
+
+    public void setSrcMysqlHost(String srcMysqlHost) {
+        this.srcMysqlHost = srcMysqlHost;
     }
 
     public DumpMapping getDumpMapping() {

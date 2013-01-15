@@ -15,9 +15,6 @@ import com.dianping.puma.admin.config.PropertiesConfig;
 import com.dianping.puma.admin.dao.SyncXmlDao;
 import com.dianping.puma.admin.service.SyncConfigService;
 import com.dianping.puma.admin.util.MysqlMetaInfoFetcher;
-import com.dianping.puma.core.sync.BinlogInfo;
-import com.dianping.puma.core.sync.ColumnConfig;
-import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.DumpConfig.DumpDest;
 import com.dianping.puma.core.sync.DumpConfig.DumpSrc;
@@ -25,9 +22,15 @@ import com.dianping.puma.core.sync.InstanceConfig;
 import com.dianping.puma.core.sync.SyncConfig;
 import com.dianping.puma.core.sync.SyncDest;
 import com.dianping.puma.core.sync.SyncTask;
-import com.dianping.puma.core.sync.TableMapping;
 import com.dianping.puma.core.sync.dao.SyncConfigDao;
 import com.dianping.puma.core.sync.dao.SyncTaskDao;
+import com.dianping.puma.core.sync.model.BinlogInfo;
+import com.dianping.puma.core.sync.model.config.MysqlHost;
+import com.dianping.puma.core.sync.model.mapping.ColumnMapping;
+import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
+import com.dianping.puma.core.sync.model.mapping.DumpMapping;
+import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
+import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.google.code.morphia.Key;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
@@ -95,7 +98,7 @@ public class SyncConfigServiceImpl implements SyncConfigService {
      * 对比新旧sync，求出新增的database或table配置(table也属于database下，故返回的都是database)<br>
      * 同时做验证：只允许新增database或table配置
      */
-    private List<DatabaseConfig> _compare(SyncConfig oldSync, SyncConfig newSync) {
+    private List<DatabaseMapping> _compare(SyncConfig oldSync, SyncConfig newSync) {
         //首先验证基础属性（dest，name，serverId，target）是否一致
         if (!oldSync.getDest().equals(newSync.getDest())) {
             throw new IllegalArgumentException("dest不一致！");
@@ -112,7 +115,7 @@ public class SyncConfigServiceImpl implements SyncConfigService {
         //对比instance
         InstanceConfig oldInstanceConfig = oldSync.getInstance();
         InstanceConfig newInstanceConfig = newSync.getInstance();
-        List<DatabaseConfig> databaseConfig = oldInstanceConfig.compare(newInstanceConfig);
+        List<DatabaseMapping> databaseConfig = oldInstanceConfig.compare(newInstanceConfig);
         return databaseConfig;
     }
 
@@ -167,12 +170,12 @@ public class SyncConfigServiceImpl implements SyncConfigService {
         dumpDest.setUsername(syncDest.getUsername());
         dumpDest.setPassword(syncDest.getPassword());
         dumpConfig.setDest(dumpDest);
-        //dumpDatabaseConfigs 遍历SyncConfig的DatabaseConfig，支持db和table名称改变，字段名称不支持改变。
+        //dumpDatabaseMappings 遍历SyncConfig的DatabaseMapping，支持db和table名称改变，字段名称不支持改变。
         InstanceConfig instance = syncConfig.getInstance();
-        List<DatabaseConfig> databaseConfigs = instance.getDatabases();
-        List<DatabaseConfig> dumpDatabaseConfigs = new ArrayList<DatabaseConfig>();
-        dumpConfig.setDatabaseConfigs(dumpDatabaseConfigs);
-        for (DatabaseConfig databaseConfig : databaseConfigs) {
+        List<DatabaseMapping> databaseConfigs = instance.getDatabases();
+        List<DatabaseMapping> dumpDatabaseMappings = new ArrayList<DatabaseMapping>();
+        dumpConfig.setDatabaseMappings(dumpDatabaseMappings);
+        for (DatabaseMapping databaseConfig : databaseConfigs) {
             String databaseConfigFrom = databaseConfig.getFrom();
             String databaseConfigTo = databaseConfig.getTo();
             List<TableMapping> dumpTableConfigs = new ArrayList<TableMapping>();
@@ -210,15 +213,71 @@ public class SyncConfigServiceImpl implements SyncConfigService {
             }
             //database需要dump(如果下属table没有需要dump则该database也不需要)
             if (dumpTableConfigs.size() > 0) {
-                DatabaseConfig dumpDatabaseConfig = new DatabaseConfig();
-                dumpDatabaseConfig.setFrom(databaseConfigFrom);
-                dumpDatabaseConfig.setTo(databaseConfigTo);
-                dumpDatabaseConfig.setTables(dumpTableConfigs);
-                dumpDatabaseConfigs.add(dumpDatabaseConfig);
+                DatabaseMapping dumpDatabaseMapping = new DatabaseMapping();
+                dumpDatabaseMapping.setFrom(databaseConfigFrom);
+                dumpDatabaseMapping.setTo(databaseConfigTo);
+                dumpDatabaseMapping.setTables(dumpTableConfigs);
+                dumpDatabaseMappings.add(dumpDatabaseMapping);
             }
         }
 
         return dumpConfig;
+    }
+
+    @Override
+    public DumpMapping convertMysqlMappingToDumpMapping(MysqlHost mysqlHost, MysqlMapping mysqlMapping) throws SQLException {
+        DumpMapping dumpMapping = new DumpMapping();
+        //dumpDatabaseMappings 遍历SyncConfig的DatabaseMapping，支持db和table名称改变，字段名称不支持改变。
+        List<DatabaseMapping> databaseMappings = mysqlMapping.getDatabases();
+        List<DatabaseMapping> dumpDatabaseMappings = new ArrayList<DatabaseMapping>();
+        dumpMapping.setDatabaseMappings(dumpDatabaseMappings);
+        for (DatabaseMapping databaseMapping : databaseMappings) {
+            String databaseConfigFrom = databaseMapping.getFrom();
+            String databaseConfigTo = databaseMapping.getTo();
+            List<TableMapping> dumpTableConfigs = new ArrayList<TableMapping>();
+            //遍历table配置
+            List<TableMapping> tableConfigs = databaseMapping.getTables();
+            for (TableMapping tableConfig : tableConfigs) {
+                String tableConfigFrom = tableConfig.getFrom();
+                String tableConfigTo = tableConfig.getTo();
+                //如果是from=*,to=*，则需要从数据库获取实际的表（排除已经列出的table配置）
+                if (StringUtils.equals(tableConfigFrom, "*") && StringUtils.equals(tableConfigTo, "*")) {
+                    //访问数据库，得到该数据库下的所有表名(*配置是在最后的，所以排除已经列出的table配置就是排除dumpTableConfigs)
+                    MysqlMetaInfoFetcher mysqlExecutor = new MysqlMetaInfoFetcher(mysqlHost.getHost(), mysqlHost.getUsername(),
+                            mysqlHost.getPassword());
+                    List<String> tableNames;
+                    try {
+                        tableNames = mysqlExecutor.getTables(databaseConfigFrom);
+                    } finally {
+                        mysqlExecutor.close();
+                    }
+                    getRidOf(tableNames, dumpTableConfigs);
+                    for (String tableName : tableNames) {
+                        TableMapping dumpTableConfig = new TableMapping();
+                        dumpTableConfig.setFrom(tableName);
+                        dumpTableConfig.setTo(tableName);
+                        dumpTableConfigs.add(dumpTableConfig);
+                    }
+                } else {//如果“table下的字段没有被重命名,partOf为false”，那么该table可以被dump
+                    if (shouldDump(tableConfig)) {
+                        TableMapping dumpTableConfig = new TableMapping();
+                        dumpTableConfig.setFrom(tableConfig.getFrom());
+                        dumpTableConfig.setTo(tableConfig.getTo());
+                        dumpTableConfigs.add(dumpTableConfig);
+                    }
+                }
+            }
+            //database需要dump(如果下属table没有需要dump则该database也不需要)
+            if (dumpTableConfigs.size() > 0) {
+                DatabaseMapping dumpDatabaseMapping = new DatabaseMapping();
+                dumpDatabaseMapping.setFrom(databaseConfigFrom);
+                dumpDatabaseMapping.setTo(databaseConfigTo);
+                dumpDatabaseMapping.setTables(dumpTableConfigs);
+                dumpDatabaseMappings.add(dumpDatabaseMapping);
+            }
+        }
+
+        return dumpMapping;
     }
 
     /**
@@ -239,8 +298,8 @@ public class SyncConfigServiceImpl implements SyncConfigService {
         if (tableConfig.isPartOf()) {
             return false;
         }
-        List<ColumnConfig> columnConfigs = tableConfig.getColumns();
-        for (ColumnConfig columnConfig : columnConfigs) {
+        List<ColumnMapping> columnConfigs = tableConfig.getColumns();
+        for (ColumnMapping columnConfig : columnConfigs) {
             if (!StringUtils.equalsIgnoreCase(columnConfig.getFrom(), columnConfig.getTo())) {
                 return false;
             }

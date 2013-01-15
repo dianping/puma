@@ -23,11 +23,10 @@ import org.apache.commons.io.LineIterator;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang.StringUtils;
 
-import com.dianping.puma.core.sync.BinlogInfo;
 import com.dianping.puma.core.sync.DatabaseBinlogInfo;
-import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.DumpConfig;
-import com.dianping.puma.core.sync.TableMapping;
+import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
+import com.dianping.puma.core.sync.model.mapping.TableMapping;
 
 /**
  * @author wukezhu
@@ -151,9 +150,9 @@ public class DumpClient {
     public List<DatabaseBinlogInfo> dump() throws ExecuteException, IOException, InterruptedException {
         try {
             List<DatabaseBinlogInfo> binlogPosList = new ArrayList<DatabaseBinlogInfo>();
-            List<DatabaseConfig> databaseConfigs = dumpConfig.getDatabaseConfigs();
+            List<DatabaseMapping> databaseConfigs = dumpConfig.getDatabaseMappings();
             pw.println("============ dump ===========");
-            for (DatabaseConfig databaseConfig : databaseConfigs) {
+            for (DatabaseMapping databaseConfig : databaseConfigs) {
                 //执行dump脚本，dump到<dump_tempDir>/<uuid>目录
                 String srcDatabaseName = databaseConfig.getFrom();
                 String destDatabaseName = databaseConfig.getTo();
@@ -207,7 +206,7 @@ public class DumpClient {
             }
             //load
             pw.println("============ load ===========");
-            for (DatabaseConfig databaseConfig : databaseConfigs) {
+            for (DatabaseMapping databaseConfig : databaseConfigs) {
                 //执行dump脚本，dump到<dump_tempDir>/<uuid>目录
                 String srcDatabaseName = databaseConfig.getFrom();
                 String output = _mysqlload(srcDatabaseName);
@@ -324,8 +323,8 @@ public class DumpClient {
     //        //mock dumpConfig
     //        DumpConfig dumpConfig = new DumpConfig();
     //        List<DumpRelation> dumpRelations = new ArrayList<DumpConfig.DumpRelation>();
-    //        List<DatabaseConfig> databaseConfigs =  new ArrayList<DatabaseConfig>();
-    //        DatabaseConfig r1 = new DatabaseConfig();
+    //        List<DatabaseMapping> databaseConfigs =  new ArrayList<DatabaseMapping>();
+    //        DatabaseMapping r1 = new DatabaseMapping();
     //        //        r1.setSrcDatabaseName("pumatest");
     //        //        r1.setSrcTableNames(Arrays.asList(new String[] { "test1", "test2" }));
     //        //        r1.setDestDatabaseName("pumatest2");

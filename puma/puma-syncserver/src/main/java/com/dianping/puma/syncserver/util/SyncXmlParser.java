@@ -11,11 +11,11 @@ import org.apache.commons.io.IOUtils;
 import org.xml.sax.SAXException;
 
 import com.dianping.puma.core.sync.ColumnConfig;
-import com.dianping.puma.core.sync.SyncDest;
-import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.InstanceConfig;
 import com.dianping.puma.core.sync.SyncConfig;
-import com.dianping.puma.core.sync.TableMapping;
+import com.dianping.puma.core.sync.SyncDest;
+import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
+import com.dianping.puma.core.sync.model.mapping.TableMapping;
 
 public class SyncXmlParser {
 
@@ -42,7 +42,7 @@ public class SyncXmlParser {
         digester.addObjectCreate("sync/dest", SyncDest.class);
         digester.addSetNext("sync/dest", "setDest");
         digester.addBeanPropertySetter("sync/dest/url");
-//        digester.addCallMethod("sync/dest/port", "setPort", 0, new Class[] { Integer.class });
+        //        digester.addCallMethod("sync/dest/port", "setPort", 0, new Class[] { Integer.class });
         digester.addBeanPropertySetter("sync/dest/username");
         digester.addBeanPropertySetter("sync/dest/password");
 
@@ -52,7 +52,7 @@ public class SyncXmlParser {
         digester.addSetProperties("sync/instance");//tag的attr
 
         // sync/instance/database
-        digester.addObjectCreate("sync/instance/database", DatabaseConfig.class);
+        digester.addObjectCreate("sync/instance/database", DatabaseMapping.class);
         digester.addSetNext("sync/instance/database", "addDatabase");
         digester.addSetProperties("sync/instance/database");//tag的attr
 

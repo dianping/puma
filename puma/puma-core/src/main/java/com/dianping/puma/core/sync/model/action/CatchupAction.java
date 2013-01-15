@@ -85,9 +85,7 @@ public class CatchupAction extends Action {
     public String toString() {
         return "CatchupAction [binlogInfo=" + binlogInfo + ", pumaClientName=" + pumaClientName + ", serverId=" + serverId
                 + ", ddl=" + ddl + ", dml=" + dml + ", transaction=" + transaction + ", mysqlMapping=" + mysqlMapping
-                + ", getId()=" + getId() + ", getType()=" + getType() + ", getSrcMysqlName()=" + getSrcMysqlName()
-                + ", getDestMysqlName()=" + getDestMysqlName() + ", getIndexOfDestMysqlHosts()=" + getIndexOfDestMysqlHosts()
-                + ", getSyncServerHost()=" + getSyncServerHost() + "]";
+                + ", toString()=" + super.toString() + "]";
     }
 
 }

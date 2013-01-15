@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.bson.types.ObjectId;
 
+import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
 
@@ -21,7 +22,7 @@ public class DumpConfig {
     private DumpSrc src;
     private DumpDest dest;
 
-    private List<DatabaseConfig> databaseConfigs;
+    private List<DatabaseMapping> databaseMappings;
 
     public ObjectId getId() {
         return id;
@@ -47,17 +48,17 @@ public class DumpConfig {
         this.dest = dest;
     }
 
-    public List<DatabaseConfig> getDatabaseConfigs() {
-        return databaseConfigs;
+    public List<DatabaseMapping> getDatabaseMappings() {
+        return databaseMappings;
     }
 
-    public void setDatabaseConfigs(List<DatabaseConfig> databaseConfigs) {
-        this.databaseConfigs = databaseConfigs;
+    public void setDatabaseMappings(List<DatabaseMapping> databaseMappings) {
+        this.databaseMappings = databaseMappings;
     }
 
     @Override
     public String toString() {
-        return "DumpConfig [id=" + id + ", src=" + src + ", dest=" + dest + ", databaseConfigs=" + databaseConfigs + "]";
+        return "DumpConfig [id=" + id + ", src=" + src + ", dest=" + dest + ", databaseMappings=" + databaseMappings + "]";
     }
 
     public static class DumpSrc {

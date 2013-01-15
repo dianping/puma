@@ -12,11 +12,11 @@ import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.sync.BinlogInfo;
-import com.dianping.puma.core.sync.DatabaseConfig;
 import com.dianping.puma.core.sync.InstanceConfig;
 import com.dianping.puma.core.sync.SyncConfig;
-import com.dianping.puma.core.sync.TableMapping;
+import com.dianping.puma.core.sync.model.BinlogInfo;
+import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
+import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.syncserver.conf.Config;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
@@ -48,7 +48,7 @@ public abstract class AbstractSyncClient {
     public void setSync(SyncConfig sync) {
         if (this.sync != null) {//修改sync(修改sync，只允许新增<database>或<table>级别的标签)
             //对比新旧sync，求出新增的<database>或<table>配置(如果新增*行，也要求出具体的database和table)
-            List<DatabaseConfig> addedDatabases = _compare(this.sync, sync);
+            List<DatabaseMapping> addedDatabases = _compare(this.sync, sync);
             LOG.info("sync xml changed database config:" + addedDatabases);
             this.sync = sync;
         } else {
@@ -62,7 +62,7 @@ public abstract class AbstractSyncClient {
      * 对比新旧sync，求出新增的database或table配置(table也属于database下，故返回的都是database)<br>
      * 同时做验证：只允许新增database或table配置
      */
-    private List<DatabaseConfig> _compare(SyncConfig oldSync, SyncConfig newSync) {
+    private List<DatabaseMapping> _compare(SyncConfig oldSync, SyncConfig newSync) {
         //首先验证基础属性（dest，name，serverId，target）是否一致
         if (!oldSync.getDest().equals(newSync.getDest())) {
             throw new IllegalArgumentException("dest不一致！");
@@ -79,7 +79,7 @@ public abstract class AbstractSyncClient {
         //对比instance
         InstanceConfig oldInstanceConfig = oldSync.getInstance();
         InstanceConfig newInstanceConfig = newSync.getInstance();
-        List<DatabaseConfig> databaseConfig = oldInstanceConfig.compare(newInstanceConfig);
+        List<DatabaseMapping> databaseConfig = oldInstanceConfig.compare(newInstanceConfig);
         return databaseConfig;
     }
 
@@ -148,9 +148,9 @@ public abstract class AbstractSyncClient {
      */
     private void _parseSourceDatabaseTables(SyncConfig sync, ConfigurationBuilder configBuilder) {
         InstanceConfig instance = sync.getInstance();
-        List<DatabaseConfig> databases = instance.getDatabases();
+        List<DatabaseMapping> databases = instance.getDatabases();
         if (databases != null) {
-            for (DatabaseConfig database : databases) {
+            for (DatabaseMapping database : databases) {
                 //解析database
                 String databaseFrom = database.getFrom();
                 //解析table

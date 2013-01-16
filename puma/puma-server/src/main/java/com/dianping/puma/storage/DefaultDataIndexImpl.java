@@ -157,7 +157,7 @@ public class DefaultDataIndexImpl<K extends DataIndexKey<K>, V> implements DataI
                     }
                 }
                 l1Index = newL1Index;
-                l1IndexWriter = new BufferedWriter(new FileWriter(l1IndexFile));
+                l1IndexWriter = new BufferedWriter(new FileWriter(l1IndexFile, true));
             } finally {
                 closeQuietly(is);
             }

@@ -23,6 +23,8 @@ import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
 
+import com.dianping.puma.core.constant.SubscribeConstant;
+
 /**
  * 基于MMap实现的seq文件操作类
  * 
@@ -61,7 +63,7 @@ public class MMapBasedSeqFileHolder implements SeqFileHolder {
 	 */
 	private void initSeq(File file) {
 		if (!file.exists()) {
-			this.seq = -1L;
+			this.seq = SubscribeConstant.SEQ_FROM_OLDEST;
 			return;
 		}
 
@@ -70,14 +72,14 @@ public class MMapBasedSeqFileHolder implements SeqFileHolder {
 			br = new BufferedReader(new FileReader(file));
 			String readSeq = br.readLine();
 			if (readSeq == null) {
-				this.seq = -1L;
+				this.seq = SubscribeConstant.SEQ_FROM_OLDEST;
 				return;
 			} else {
 				this.seq = Long.parseLong(readSeq);
 				return;
 			}
 		} catch (Exception e) {
-			this.seq = -1L;
+			this.seq = SubscribeConstant.SEQ_FROM_OLDEST;
 			return;
 		} finally {
 			if (br != null) {

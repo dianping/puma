@@ -28,16 +28,18 @@ public class TestApi {
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
 		configBuilder.ddl(true);
         configBuilder.dml(true);
-        configBuilder.host("10.1.77.46");
+        configBuilder.host("127.0.0.1");
         configBuilder.port(7862);
         configBuilder.serverId(1111);
         configBuilder.name("testClient");
-        configBuilder.tables("DianPing", "*");
-        configBuilder.target("77_21");
+        configBuilder.tables("Cat", "*");
+        configBuilder.target("7-43");
+        configBuilder.timeStamp(1351202896L);
         configBuilder.transaction(true);
 		PumaClient pc = new PumaClient(configBuilder.build());
 		pc.register(new EventListener() {
 
+		    private long time = -1L;
 			@Override
 			public void onSkipEvent(ChangedEvent event) {
 				System.out.println(">>>>>>>>>>>>>>>>>>Skip " + event);
@@ -51,7 +53,9 @@ public class TestApi {
 
 			@Override
 			public void onEvent(ChangedEvent event) throws Exception {
-
+			    if(time == -1L || time != event.getExecuteTime()){
+			        time = event.getExecuteTime();
+			    }
 				System.out.println("********************Received " + event);
 
 			}

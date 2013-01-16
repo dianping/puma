@@ -49,6 +49,8 @@ public interface BucketIndex extends LifeCycle<IOException> {
 
     public String getBaseDir();
 
+    public void setMaster(boolean isMaster);
+
     public void copyFromLocal(String baseDir, String path) throws StorageClosedException, IOException;
 
     public boolean removeBucket(String path) throws StorageClosedException;

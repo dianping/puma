@@ -48,7 +48,7 @@
 		<property name="port" value="3306" />
 		<property name="user" value="binlog" />
 		<property name="password" value="binlog" />
-		<property name="defaultBinlogFileName" value="" />
+		<property name="defaultBinlogFileName" value="mysql-bin.000043" />
 		<property name="defaultBinlogPosition" value="4" />
 		<property name="parser" ref="defaultParser" />
 		<property name="serverId" value="9988" />
@@ -99,8 +99,8 @@
 		<property name="archiveStrategy" ref="archiveStrategy" />
 		<property name="cleanupStrategy" ref="cleanupStrategy" />
 		<property name="name" value="storage-7-43" />
-		<property name="binlogIndexBaseDir" value="/data/applogs/puma/binlogIndex/7-43/"/>
-		<property name="timeStampIndexBaseDir" value="/data/applogs/puma/timeStampIndex/7-43/"/>
+		<property name="binlogIndexBaseDir" value="/data/applogs/puma/binlogIndex/7-43/" />
+		<property name="timeStampIndexBaseDir" value="/data/applogs/puma/timeStampIndex/7-43/" />
 	</bean>
 
 	<bean id="localBucketIndex-7-43" class="com.dianping.puma.storage.LocalFileBucketIndex"

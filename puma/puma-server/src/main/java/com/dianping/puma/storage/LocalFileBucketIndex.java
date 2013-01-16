@@ -17,9 +17,11 @@ package com.dianping.puma.storage;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.TreeMap;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -36,7 +38,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
     @Override
     protected Bucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB)
             throws IOException {
-        return new LocalFileBucket(new File(baseDir, path), startingSeq, maxSizeMB, path);
+        return new LocalFileBucket(new File(baseDir, path), startingSeq, maxSizeMB, path, !isMaster());
     }
 
     /*
@@ -104,19 +106,42 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
         if (!bucketFile.createNewFile()) {
             throw new IOException(String.format("Can't create writeBucket(%s)!", bucketFile.getAbsolutePath()));
         } else {
-            return new LocalFileBucket(bucketFile, startingSequence, getMaxBucketLengthMB(), bucketPath);
+            return new LocalFileBucket(bucketFile, startingSequence, getMaxBucketLengthMB(), bucketPath, !isMaster());
         }
 
     }
 
     public void copyFromLocal(String srcBaseDir, String path) throws IOException, StorageClosedException {
+        if (isMaster()) {
+            return;
+        }
         super.copyFromLocal(srcBaseDir, path);
         File localFile = new File(srcBaseDir, path);
         if (!localFile.exists()) {
             return;
         }
 
-        FileUtils.copyFile(localFile, new File(getBaseDir(), path));
+        File destFile = new File(getBaseDir(), path);
+        if (!destFile.getParentFile().exists()) {
+            destFile.getParentFile().mkdirs();
+        }
+        if (!destFile.exists()) {
+            destFile.createNewFile();
+        }
+
+        GZIPOutputStream out = null;
+        try {
+            out = new GZIPOutputStream(new FileOutputStream(destFile));
+            FileUtils.copyFile(localFile, out);
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+        }
     }
 
     @Override
@@ -136,4 +161,5 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
         }
         return deleted;
     }
+
 }

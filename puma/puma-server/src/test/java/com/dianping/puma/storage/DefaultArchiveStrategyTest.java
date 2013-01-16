@@ -55,8 +55,10 @@ public class DefaultArchiveStrategyTest {
 			masterFile.createNewFile();
 		}
 
+		masterIndex.setMaster(true);
 		masterIndex.start();
 		slaveIndex.start();
+		slaveIndex.setMaster(false);
 
 		archiveStrategy.archive(masterIndex, slaveIndex);
 
@@ -97,7 +99,9 @@ public class DefaultArchiveStrategyTest {
 		}
 
 		masterIndex.start();
+		masterIndex.setMaster(true);
 		slaveIndex.start();
+		slaveIndex.setMaster(false);
 
 		archiveStrategy.archive(masterIndex, slaveIndex);
 
@@ -134,7 +138,9 @@ public class DefaultArchiveStrategyTest {
 		}
 
 		masterIndex.start();
+		masterIndex.setMaster(true);
 		slaveIndex.start();
+		slaveIndex.setMaster(false);
 
 		archiveStrategy.archive(masterIndex, slaveIndex);
 
@@ -177,7 +183,9 @@ public class DefaultArchiveStrategyTest {
 		}
 
 		masterIndex.start();
+		masterIndex.setMaster(true);
 		slaveIndex.start();
+		slaveIndex.setMaster(false);
 
 		archiveStrategy.archive(masterIndex, slaveIndex);
 

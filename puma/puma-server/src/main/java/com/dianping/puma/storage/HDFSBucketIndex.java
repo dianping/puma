@@ -20,7 +20,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.zip.GZIPOutputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -40,162 +42,180 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  */
 public class HDFSBucketIndex extends AbstractBucketIndex {
 
-	private Configuration	hdfsConfig;
-	private FileSystem		fileSystem;
+    private Configuration hdfsConfig;
+    private FileSystem    fileSystem;
 
-	public void initHdfsConfiguration() {
-		hdfsConfig = new Configuration();
-		Properties prop = new Properties();
-		InputStream propIn = null;
+    public void initHdfsConfiguration() {
+        hdfsConfig = new Configuration();
+        Properties prop = new Properties();
+        InputStream propIn = null;
 
-		try {
-			propIn = DefaultBucketManager.class.getClassLoader().getResourceAsStream("hdfs.properties");
-			prop.load(propIn);
+        try {
+            propIn = DefaultBucketManager.class.getClassLoader().getResourceAsStream("hdfs.properties");
+            prop.load(propIn);
 
-			for (String key : prop.stringPropertyNames()) {
-				hdfsConfig.set(key, prop.getProperty(key));
-			}
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		} finally {
-			if (propIn != null) {
-				try {
-					propIn.close();
-				} catch (IOException e) {
-					// ignore
-				}
-			}
-		}
+            for (String key : prop.stringPropertyNames()) {
+                hdfsConfig.set(key, prop.getProperty(key));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (propIn != null) {
+                try {
+                    propIn.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+        }
 
-		UserGroupInformation.setConfiguration(hdfsConfig);
-		try {
-			SecurityUtil.login(hdfsConfig, prop.getProperty("keytabFileKey"), prop.getProperty("userNameKey"));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+        UserGroupInformation.setConfiguration(hdfsConfig);
+        try {
+            SecurityUtil.login(hdfsConfig, prop.getProperty("keytabFileKey"), prop.getProperty("userNameKey"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-	}
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.storage.BucketIndex#init()
-	 */
-	@Override
-	public void start() throws IOException {
-		initHdfsConfiguration();
-		this.fileSystem = FileSystem.get(this.hdfsConfig);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.dianping.puma.storage.BucketIndex#init()
+     */
+    @Override
+    public void start() throws IOException {
+        initHdfsConfiguration();
+        this.fileSystem = FileSystem.get(this.hdfsConfig);
 
-		TreeMap<Sequence, String> newIndex = new TreeMap<Sequence, String>(new PathSequenceComparator());
-		getIndex().set(newIndex);
+        TreeMap<Sequence, String> newIndex = new TreeMap<Sequence, String>(new PathSequenceComparator());
+        getIndex().set(newIndex);
 
-		if (this.fileSystem.getFileStatus(new Path(this.getBaseDir())).isDir()) {
+        if (this.fileSystem.getFileStatus(new Path(this.getBaseDir())).isDir()) {
 
-			FileStatus[] dirsStatus = this.fileSystem.listStatus(new Path(this.getBaseDir()));
-			if (dirsStatus != null && dirsStatus.length != 0) {
+            FileStatus[] dirsStatus = this.fileSystem.listStatus(new Path(this.getBaseDir()));
+            if (dirsStatus != null && dirsStatus.length != 0) {
 
-				Path[] listedPaths = FileUtil.stat2Paths(dirsStatus);
+                Path[] listedPaths = FileUtil.stat2Paths(dirsStatus);
 
-				for (Path pathname : listedPaths) {
+                for (Path pathname : listedPaths) {
 
-					if (this.fileSystem.getFileStatus(pathname).isDir()) {
-						if (StringUtils.isNumeric(pathname.getName()) && pathname.getName().length() == 8) {
+                    if (this.fileSystem.getFileStatus(pathname).isDir()) {
+                        if (StringUtils.isNumeric(pathname.getName()) && pathname.getName().length() == 8) {
 
-							FileStatus[] status = this.fileSystem.listStatus(pathname);
-							Path[] listedFiles = FileUtil.stat2Paths(status);
+                            FileStatus[] status = this.fileSystem.listStatus(pathname);
+                            Path[] listedFiles = FileUtil.stat2Paths(status);
 
-							for (Path subFile : listedFiles) {
-								if (subFile.getName().startsWith(getBucketFilePrefix())
-										&& StringUtils.isNumeric(subFile.getName().substring(
-												getBucketFilePrefix().length()))) {
-									String path = pathname.getName() + PATH_SEPARATOR + subFile.getName();
-									newIndex.put(convertToSequence(path), path);
-								}
-							}
-						}
-					}
+                            for (Path subFile : listedFiles) {
+                                if (subFile.getName().startsWith(getBucketFilePrefix())
+                                        && StringUtils.isNumeric(subFile.getName().substring(
+                                                getBucketFilePrefix().length()))) {
+                                    String path = pathname.getName() + PATH_SEPARATOR + subFile.getName();
+                                    newIndex.put(convertToSequence(path), path);
+                                }
+                            }
+                        }
+                    }
 
-				}
-			}
-		}
-		super.start();
-	}
+                }
+            }
+        }
+        super.start();
+    }
 
-	@Override
-	protected Bucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB)
-			throws IOException {
-		return new HDFSBucket(fileSystem, baseDir, path, startingSeq);
-	}
+    @Override
+    protected Bucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB)
+            throws IOException {
+        return new HDFSBucket(fileSystem, baseDir, path, startingSeq, !isMaster());
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.storage.AbstractBucketIndex#close()
-	 */
-	@Override
-	public void stop() {
-		super.stop();
-		try {
-			this.fileSystem.close();
-		} catch (IOException e) {
-			// ignore
-		}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.dianping.puma.storage.AbstractBucketIndex#close()
+     */
+    @Override
+    public void stop() {
+        super.stop();
+        try {
+            this.fileSystem.close();
+        } catch (IOException e) {
+            // ignore
+        }
 
-	}
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.dianping.puma.storage.AbstractBucketIndex#doGetNextWriteBucket(java
-	 * .lang.String, java.lang.String, com.dianping.puma.storage.Sequence)
-	 */
-	@Override
-	protected Bucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence)
-			throws IOException {
-		return null;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.dianping.puma.storage.AbstractBucketIndex#doGetNextWriteBucket(java
+     * .lang.String, java.lang.String, com.dianping.puma.storage.Sequence)
+     */
+    @Override
+    protected Bucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence)
+            throws IOException {
+        return null;
+    }
 
-	@Override
-	public void copyFromLocal(String srcBaseDir, String path) throws IOException, StorageClosedException {
-		super.copyFromLocal(srcBaseDir, path);
-		File localFile = new File(srcBaseDir, path);
-		if (!localFile.exists()) {
-			return;
-		}
+    @Override
+    public void copyFromLocal(String srcBaseDir, String path) throws IOException, StorageClosedException {
+        if (isMaster()) {
+            return;
+        }
+        super.copyFromLocal(srcBaseDir, path);
+        File localFile = new File(srcBaseDir, path);
+        if (!localFile.exists()) {
+            return;
+        }
+        Path destFile = new Path(this.getBaseDir(), path);
 
-		fileSystem.copyFromLocalFile(false, true, new Path(srcBaseDir, path), new Path(this.getBaseDir(), path));
-	}
+        GZIPOutputStream gos = null;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.dianping.puma.storage.AbstractBucketIndex#removeBucket(java.lang.
-	 * String)
-	 */
-	@Override
-	public boolean removeBucket(String path) throws StorageClosedException {
-		super.removeBucket(path);
+        try {
+            gos = new GZIPOutputStream(fileSystem.create(destFile, true));
+            FileUtils.copyFile(localFile, gos);
+        } finally {
 
-		boolean deleted = false;
+            if (gos != null) {
+                try {
+                    gos.close();
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+        }
+    }
 
-		try {
-			Path p = new Path(getBaseDir(), path);
-			if (this.fileSystem.exists(p)) {
-				deleted = this.fileSystem.delete(p, false);
-			}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.dianping.puma.storage.AbstractBucketIndex#removeBucket(java.lang.
+     * String)
+     */
+    @Override
+    public boolean removeBucket(String path) throws StorageClosedException {
+        super.removeBucket(path);
 
-			if (this.fileSystem.exists(p.getParent())) {
-				FileStatus[] listStatus = this.fileSystem.listStatus(p.getParent());
-				if (listStatus == null || listStatus.length == 0) {
-					this.fileSystem.delete(p.getParent(), false);
-				}
-			}
+        boolean deleted = false;
 
-			return deleted;
-		} catch (IOException e) {
-			return false;
-		}
-	}
+        try {
+            Path p = new Path(getBaseDir(), path);
+            if (this.fileSystem.exists(p)) {
+                deleted = this.fileSystem.delete(p, false);
+            }
+
+            if (this.fileSystem.exists(p.getParent())) {
+                FileStatus[] listStatus = this.fileSystem.listStatus(p.getParent());
+                if (listStatus == null || listStatus.length == 0) {
+                    this.fileSystem.delete(p.getParent(), false);
+                }
+            }
+
+            return deleted;
+        } catch (IOException e) {
+            return false;
+        }
+    }
 }

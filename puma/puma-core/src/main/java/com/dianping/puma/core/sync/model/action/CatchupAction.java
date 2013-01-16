@@ -6,6 +6,7 @@ import com.google.code.morphia.annotations.Entity;
 
 @Entity
 public class CatchupAction extends Action {
+    private static final long serialVersionUID = 9067626307003002897L;
     //  源：BinlogInfo起点
     private BinlogInfo binlogInfo;
     //    name：PumaClient的name属性

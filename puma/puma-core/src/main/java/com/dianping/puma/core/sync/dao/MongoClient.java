@@ -140,4 +140,8 @@ public class MongoClient implements ConfigChangeListener {
         return datastore;
     }
 
+    public Mongo getMongo() {
+        return mongo;
+    }
+
 }

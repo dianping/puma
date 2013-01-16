@@ -2,9 +2,8 @@ package com.dianping.puma.core.sync.model.action;
 
 import java.util.Date;
 
-import org.bson.types.ObjectId;
-
-import com.google.code.morphia.annotations.Id;
+import com.dianping.puma.core.sync.model.BaseEntity;
+import com.dianping.puma.core.sync.model.config.MysqlHost;
 import com.google.code.morphia.annotations.Indexed;
 import com.google.code.morphia.utils.IndexDirection;
 
@@ -13,10 +12,9 @@ import com.google.code.morphia.utils.IndexDirection;
  * 
  * @author wukezhu
  */
-public abstract class Action {
+public abstract class Action extends BaseEntity {
 
-    @Id
-    private ObjectId id;
+    private static final long serialVersionUID = -2446587945497295737L;
     private ActionType type;
     //    源：源数据库名称(如Dianping)
     @Indexed(value = IndexDirection.ASC, name = "srcMysqlName", unique = false, dropDups = true)
@@ -25,7 +23,7 @@ public abstract class Action {
     @Indexed(value = IndexDirection.ASC, name = "destMysqlName", unique = false, dropDups = true)
     private String destMysqlName;
     //    目标：具体host
-    private String destMysqlHost;
+    private MysqlHost destMysqlHost;
     //    指派执行者：sync-server的name
     @Indexed(value = IndexDirection.ASC, name = "syncServerName", unique = false, dropDups = true)
     private String syncServerName;
@@ -33,17 +31,19 @@ public abstract class Action {
     private Date createTime;
     //  最后更新时间
     private Date lastUpdateTime;
+    // SyncTaskId
+    private Long syncTaskId;
 
     protected Action(ActionType type) {
         this.type = type;
     }
 
-    public ObjectId getId() {
-        return id;
+    public Long getSyncTaskId() {
+        return syncTaskId;
     }
 
-    public void setId(ObjectId id) {
-        this.id = id;
+    public void setSyncTaskId(Long syncTaskId) {
+        this.syncTaskId = syncTaskId;
     }
 
     public ActionType getType() {
@@ -70,11 +70,11 @@ public abstract class Action {
         this.destMysqlName = destMysqlName;
     }
 
-    public String getDestMysqlHost() {
+    public MysqlHost getDestMysqlHost() {
         return destMysqlHost;
     }
 
-    public void setDestMysqlHost(String destMysqlHost) {
+    public void setDestMysqlHost(MysqlHost destMysqlHost) {
         this.destMysqlHost = destMysqlHost;
     }
 

@@ -19,4 +19,13 @@
     <bean id="mongoClient" class="com.dianping.puma.core.sync.dao.MongoClient">
     </bean>
 
+    <bean id="seqGen"
+        class="com.dianping.puma.core.sync.dao.MongoSeqGeneratorServiceImpl">
+        <property name="mongoClient">
+            <ref bean="mongoClient" />
+        </property>
+        <property name="dbName" value="puma_admin" />
+        <property name="collName" value="seq" />
+    </bean>
+
 </beans>

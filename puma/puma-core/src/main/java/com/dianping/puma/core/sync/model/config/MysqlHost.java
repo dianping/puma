@@ -2,9 +2,18 @@ package com.dianping.puma.core.sync.model.config;
 
 public class MysqlHost {
 
+    private long serverId;
     private String host;
     private String username;
     private String password;
+
+    public long getServerId() {
+        return serverId;
+    }
+
+    public void setServerId(long serverId) {
+        this.serverId = serverId;
+    }
 
     public String getHost() {
         return host;

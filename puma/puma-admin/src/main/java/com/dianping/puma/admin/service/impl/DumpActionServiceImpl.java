@@ -2,7 +2,6 @@ package com.dianping.puma.admin.service.impl;
 
 import java.util.Date;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +22,10 @@ public class DumpActionServiceImpl implements DumpActionService {
     DumpActionStateService dumpActionStateService;
 
     @Override
-    public ObjectId create(DumpAction dumpAction) {
+    public Long create(DumpAction dumpAction) {
         Key<DumpAction> key = this.dumpActionDao.save(dumpAction);
         this.dumpActionDao.getDatastore().ensureIndexes();
-        ObjectId id = (ObjectId) key.getId();
+        Long id = (Long) key.getId();
         //创建DumpActionState
         DumpActionState state = new DumpActionState();
         state.setId(id);
@@ -45,8 +44,8 @@ public class DumpActionServiceImpl implements DumpActionService {
     }
 
     @Override
-    public DumpAction find(ObjectId objectId) {
-        return this.dumpActionDao.getDatastore().getByKey(DumpAction.class, new Key<DumpAction>(DumpAction.class, objectId));
+    public DumpAction find(Long id) {
+        return this.dumpActionDao.getDatastore().getByKey(DumpAction.class, new Key<DumpAction>(DumpAction.class, id));
     }
 
 }

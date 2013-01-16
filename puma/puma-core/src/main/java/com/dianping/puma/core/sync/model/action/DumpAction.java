@@ -3,14 +3,17 @@ package com.dianping.puma.core.sync.model.action;
 import java.util.Arrays;
 import java.util.List;
 
+import com.dianping.puma.core.sync.model.config.MysqlHost;
 import com.dianping.puma.core.sync.model.mapping.DumpMapping;
 import com.google.code.morphia.annotations.Entity;
 
 @Entity
 public class DumpAction extends Action {
 
+    private static final long serialVersionUID = 1174973531845800248L;
+
     //    源数据库的具体host
-    private String srcMysqlHost;
+    private MysqlHost srcMysqlHost;
 
     //Dump配置：映射配置(DumpConfig)
     private DumpMapping dumpMapping;
@@ -23,11 +26,11 @@ public class DumpAction extends Action {
         super(ActionType.DUMP);
     }
 
-    public String getSrcMysqlHost() {
+    public MysqlHost getSrcMysqlHost() {
         return srcMysqlHost;
     }
 
-    public void setSrcMysqlHost(String srcMysqlHost) {
+    public void setSrcMysqlHost(MysqlHost srcMysqlHost) {
         this.srcMysqlHost = srcMysqlHost;
     }
 

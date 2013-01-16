@@ -1,6 +1,5 @@
 package com.dianping.puma.admin.service.impl;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,14 +14,14 @@ public class DumpActionStateServiceImpl implements DumpActionStateService {
     DumpActionStateDao dumpActionStateDao;
 
     @Override
-    public ObjectId save(DumpActionState dumpActionState) {
+    public Long save(DumpActionState dumpActionState) {
         Key<DumpActionState> key = this.dumpActionStateDao.save(dumpActionState);
         this.dumpActionStateDao.getDatastore().ensureIndexes();
-        return (ObjectId) key.getId();
+        return (Long) key.getId();
     }
 
     @Override
-    public DumpActionState find(ObjectId objectId) {
+    public DumpActionState find(Long objectId) {
         return this.dumpActionStateDao.getDatastore().getByKey(DumpActionState.class,
                 new Key<DumpActionState>(DumpActionState.class, objectId));
     }

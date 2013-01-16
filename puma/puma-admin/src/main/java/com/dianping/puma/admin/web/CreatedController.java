@@ -1,6 +1,5 @@
 package com.dianping.puma.admin.web;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +18,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.dianping.puma.admin.service.SyncConfigService;
 import com.dianping.puma.admin.service.SyncTaskActionService;
 import com.dianping.puma.admin.service.SyncTaskActionStateService;
-import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.admin.util.GsonUtil;
-import com.dianping.puma.core.sync.SyncConfig;
-import com.dianping.puma.core.sync.SyncTask;
 import com.dianping.puma.core.sync.model.action.ActionState.State;
 import com.dianping.puma.core.sync.model.action.SyncTaskAction;
 import com.dianping.puma.core.sync.model.action.SyncTaskActionState;
@@ -37,10 +31,6 @@ import com.dianping.puma.core.sync.model.action.SyncTaskActionState;
 @Controller
 public class CreatedController {
     private static final Logger LOG = LoggerFactory.getLogger(CreatedController.class);
-    @Autowired
-    private SyncConfigService syncConfigService;
-    @Autowired
-    private SyncTaskService syncTaskService;
     @Autowired
     private SyncTaskActionService syncTaskActionService;
     @Autowired
@@ -72,11 +62,10 @@ public class CreatedController {
      */
     @RequestMapping(value = "/created/state", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object state(HttpSession session, String actionId) {
+    public Object state(HttpSession session, Long actionId) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            ObjectId id = new ObjectId(actionId);
-            SyncTaskActionState state = this.syncTaskActionStateService.find(id);
+            SyncTaskActionState state = this.syncTaskActionStateService.find(actionId);
             map.put("stateLastUpdateTime", state);
             map.put("state", state);
             map.put("success", true);
@@ -95,11 +84,10 @@ public class CreatedController {
      * 查询SyncTaskActionState
      */
     @RequestMapping(value = "/created/action/{id}", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
-    public ModelAndView action(HttpSession session, @PathVariable("id") String actionId) {
+    public ModelAndView action(HttpSession session, @PathVariable("id") Long actionId) {
         Map<String, Object> map = new HashMap<String, Object>();
-        ObjectId id = new ObjectId(actionId);
-        SyncTaskAction action = this.syncTaskActionService.find(id);
-        SyncTaskActionState state = this.syncTaskActionStateService.find(id);
+        SyncTaskAction action = this.syncTaskActionService.find(actionId);
+        SyncTaskActionState state = this.syncTaskActionStateService.find(actionId);
         map.put("action", action);
         map.put("state", state);
         map.put("createdActive", "active");
@@ -113,11 +101,10 @@ public class CreatedController {
      */
     @RequestMapping(value = "/created/pause", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object pause(HttpSession session, String actionId) {
+    public Object pause(HttpSession session, Long actionId) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            ObjectId id = new ObjectId(actionId);
-            this.syncTaskActionStateService.updateState(id, State.PAUSE, null);
+            this.syncTaskActionStateService.updateState(actionId, State.PAUSE, null);
             map.put("success", true);
         } catch (IllegalArgumentException e) {
             map.put("success", false);
@@ -135,11 +122,10 @@ public class CreatedController {
      */
     @RequestMapping(value = "/created/rerun", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object rerun(HttpSession session, String actionId) {
+    public Object rerun(HttpSession session, Long actionId) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            ObjectId id = new ObjectId(actionId);
-            this.syncTaskActionStateService.updateState(id, State.PREPARABLE, null);
+            this.syncTaskActionStateService.updateState(actionId, State.PREPARABLE, null);
             map.put("success", true);
         } catch (IllegalArgumentException e) {
             map.put("success", false);
@@ -157,11 +143,10 @@ public class CreatedController {
      */
     @RequestMapping(value = "/created/resolved", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object resolved(HttpSession session, String actionId) {
+    public Object resolved(HttpSession session, Long actionId) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            ObjectId id = new ObjectId(actionId);
-            this.syncTaskActionStateService.updateState(id, State.RESOLVED, null);
+            this.syncTaskActionStateService.updateState(actionId, State.RESOLVED, null);
             map.put("success", true);
         } catch (IllegalArgumentException e) {
             map.put("success", false);
@@ -174,48 +159,4 @@ public class CreatedController {
         return GsonUtil.toJson(map);
     }
 
-    //********************************************************************************************************
-    @RequestMapping(value = "/loadSyncConfigs", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public Object loadSyncConfigs(HttpSession session, HttpServletRequest request, Integer pageNum) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        try {
-            int offset = pageNum == null ? 0 : (pageNum - 1) * PAGESIZE;
-            List<SyncConfig> syncConfigs = syncConfigService.findSyncConfigs(offset, PAGESIZE);
-            Long totalSyncConfig = syncConfigService.countSyncConfigs();
-            List<SyncTask> syncTasks = syncTaskService.findSyncTasksBySyncConfigId(getSyncConfigIds(syncConfigs));
-            //            
-            //            List<HashMap<String,Object>> resultMaps = new ArrayList<HashMap<String,Object>>();
-            //            for(SyncConfig syncConfig:syncConfigs){
-            //                for(SyncTask task:syncTasks){
-            //                    if(task.getSyncConfigId().equals(syncConfig.getId())){
-            //                        HashMap<String,Object> m = new HashMap<String, Object>();
-            //                        m.put("", syncConfig.getDest());
-            //                    }
-            //                }
-            //            }
-
-            map.put("syncConfigs", syncConfigs);
-            map.put("syncTasks", syncTasks);
-            map.put("totalPage", totalSyncConfig / PAGESIZE + (totalSyncConfig % PAGESIZE == 0 ? 0 : 1));
-            map.put("success", true);
-        } catch (IllegalArgumentException e) {
-            map.put("success", false);
-            map.put("errorMsg", e.getMessage());
-        } catch (Exception e) {
-            map.put("success", false);
-            map.put("errorMsg", errorMsg);
-            LOG.error(e.getMessage(), e);
-        }
-        return GsonUtil.toJson(map);
-
-    }
-
-    private List<ObjectId> getSyncConfigIds(List<SyncConfig> syncConfigs) {
-        List<ObjectId> list = new ArrayList<ObjectId>(syncConfigs.size());
-        for (SyncConfig syncConfig : syncConfigs) {
-            list.add(syncConfig.getId());
-        }
-        return list;
-    }
 }

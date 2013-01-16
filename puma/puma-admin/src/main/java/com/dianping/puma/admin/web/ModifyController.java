@@ -9,8 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.lang.StringUtils;
-import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,20 +18,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
-import org.xml.sax.SAXParseException;
 
-import com.dianping.puma.admin.bo.SyncXml;
 import com.dianping.puma.admin.service.DumpActionService;
 import com.dianping.puma.admin.service.DumpActionStateService;
 import com.dianping.puma.admin.service.MysqlConfigService;
 import com.dianping.puma.admin.service.PumaSyncServerConfigService;
-import com.dianping.puma.admin.service.SyncConfigService;
 import com.dianping.puma.admin.service.SyncTaskActionService;
 import com.dianping.puma.admin.service.SyncTaskActionStateService;
 import com.dianping.puma.admin.util.GsonUtil;
-import com.dianping.puma.admin.util.MongoUtils;
-import com.dianping.puma.admin.util.SyncXmlParser;
-import com.dianping.puma.core.sync.SyncConfig;
 import com.dianping.puma.core.sync.model.action.SyncTaskAction;
 import com.dianping.puma.core.sync.model.action.SyncTaskActionState;
 import com.dianping.puma.core.sync.model.config.MysqlConfig;
@@ -55,8 +47,6 @@ import com.dianping.puma.core.sync.model.mapping.TableMapping;
 @Controller
 public class ModifyController {
     private static final Logger LOG = LoggerFactory.getLogger(ModifyController.class);
-    @Autowired
-    private SyncConfigService syncConfigService;
     @Autowired
     private MysqlConfigService mysqlConfigService;
     @Autowired
@@ -95,11 +85,10 @@ public class ModifyController {
      * 修改SyncTaskActionState的页面
      */
     @RequestMapping(value = "/modify/action/{id}", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
-    public ModelAndView action(HttpSession session, @PathVariable("id") String actionId) {
+    public ModelAndView action(HttpSession session, @PathVariable("id") Long actionId) {
         Map<String, Object> map = new HashMap<String, Object>();
-        ObjectId id = new ObjectId(actionId);
-        SyncTaskAction action = this.syncTaskActionService.find(id);
-        SyncTaskActionState state = this.syncTaskActionStateService.find(id);
+        SyncTaskAction action = this.syncTaskActionService.find(actionId);
+        SyncTaskActionState state = this.syncTaskActionStateService.find(actionId);
         map.put("action", action);
         map.put("state", state);
         map.put("modifyActive", "active");
@@ -110,7 +99,7 @@ public class ModifyController {
 
     @RequestMapping(value = "/modify/action/{id}/step1Save", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object step1Save(HttpSession session, @PathVariable("id") String actionId, String[] databaseFrom, String[] databaseTo,
+    public Object step1Save(HttpSession session, @PathVariable("id") Long actionId, String[] databaseFrom, String[] databaseTo,
                             String[] tableFrom, String[] tableTo, Integer count[]) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
@@ -162,7 +151,7 @@ public class ModifyController {
             }
             //对比新的mapping和现有的mapping
             //查询出SyncTaskAction
-            SyncTaskAction syncTaskAction = this.syncTaskActionService.find(new ObjectId(actionId));
+            SyncTaskAction syncTaskAction = this.syncTaskActionService.find(actionId);
             MysqlMapping oldMysqlMapping = syncTaskAction.getMysqlMapping();
             MysqlMapping additionalMysqlMapping = this.syncTaskActionService.compare(oldMysqlMapping, mysqlMapping);
 
@@ -184,10 +173,10 @@ public class ModifyController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = { "/modify/action/{id}/step2" })
-    public ModelAndView step2(HttpSession session, @PathVariable("id") String actionId) throws SQLException {
+    public ModelAndView step2(HttpSession session, @PathVariable("id") Long actionId) throws SQLException {
         Map<String, Object> map = new HashMap<String, Object>();
         //从session拿出srcMysql，destMysql查询mysql配置
-        SyncTaskAction syncTaskAction = this.syncTaskActionService.find(new ObjectId(actionId));
+        SyncTaskAction syncTaskAction = this.syncTaskActionService.find(actionId);
         String srcMysqlName = syncTaskAction.getSrcMysqlName();
         MysqlConfig srcMysqlConfig = this.mysqlConfigService.find(srcMysqlName);
         String destMysqlName = syncTaskAction.getDestMysqlName();
@@ -196,7 +185,7 @@ public class ModifyController {
         List<PumaSyncServerConfig> syncServerConfigs = pumaSyncServerConfigService.findAll();
         //从会话中取出保存的mysqlMapping，计算出dumpMapping
         MysqlMapping additionalMysqlMapping = (MysqlMapping) session.getAttribute("additionalMysqlMapping");
-        DumpMapping dumpMapping = this.syncConfigService.convertMysqlMappingToDumpMapping(srcMysqlConfig.getHosts().get(0),
+        DumpMapping dumpMapping = this.syncTaskActionService.convertMysqlMappingToDumpMapping(srcMysqlConfig.getHosts().get(0),
                 additionalMysqlMapping);
         session.setAttribute("dumpMapping", dumpMapping);
 
@@ -208,88 +197,6 @@ public class ModifyController {
         map.put("path", "modify");
         map.put("subPath", "step2");
         return new ModelAndView("main/container", map);
-    }
-
-    //**********************************************************************************************
-
-    //    @RequestMapping(value = "/loadSyncConfigs", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    //    @ResponseBody
-    //    public Object loadSyncConfigs(HttpSession session, HttpServletRequest request, Integer pageNum) {
-    //        Map<String, Object> map = new HashMap<String, Object>();
-    //        try {
-    //            int offset = pageNum == null ? 0 : (pageNum - 1) * PAGESIZE;
-    //            List<SyncConfig> syncConfigs = syncConfigService.findSyncConfigs(offset, PAGESIZE);
-    //            Long totalSyncConfig = syncConfigService.countSyncConfigs();
-    //            map.put("syncConfigs", syncConfigs);
-    //            map.put("totalPage", totalSyncConfig / PAGESIZE + (totalSyncConfig % PAGESIZE == 0 ? 0 : 1));
-    //            map.put("success", true);
-    //        } catch (IllegalArgumentException e) {
-    //            map.put("success", false);
-    //            map.put("errorMsg", e.getMessage());
-    //        } catch (Exception e) {
-    //            map.put("success", false);
-    //            map.put("errorMsg", errorMsg);
-    //            LOG.error(e.getMessage(), e);
-    //        }
-    //        return GsonUtil.toJson(map);
-    //
-    //    }
-
-    @RequestMapping(value = "/loadSyncXml", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public Object loadSyncXml(HttpSession session, HttpServletRequest request, String mergeId) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        try {
-            String[] mergeIdSplits = StringUtils.split(mergeId, '_');
-            int inc = Integer.parseInt(mergeIdSplits[0]);
-            int machine = Integer.parseInt(mergeIdSplits[1]);
-            int time = Integer.parseInt(mergeIdSplits[2]);
-            ObjectId objectId = new ObjectId(time, machine, inc);
-            //mergeId解析成ObjectId
-            SyncXml syncXml = syncConfigService.findSyncXml(objectId);
-
-            map.put("syncXml", syncXml);
-            map.put("success", true);
-        } catch (IllegalArgumentException e) {
-            map.put("success", false);
-            map.put("errorMsg", e.getMessage());
-        } catch (Exception e) {
-            map.put("success", false);
-            map.put("errorMsg", errorMsg);
-            LOG.error(e.getMessage(), e);
-        }
-        return GsonUtil.toJson(map);
-
-    }
-
-    @RequestMapping(value = "/modifySyncXml", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public Object modifySyncXml(HttpSession session, HttpServletRequest request, String syncXmlString, String mergeId) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        try {
-            //获取ObjectId
-            ObjectId objectId = MongoUtils.mergeId2ObjectId(mergeId);
-            //解析xml，得到SyncConfig
-            SyncConfig syncConfig = SyncXmlParser.parse(syncXmlString);
-            syncConfig.setId(objectId);
-            LOG.info("receive sync: " + syncConfig);
-            //保存修改
-            syncConfigService.modifySyncConfig(syncConfig, syncXmlString);
-
-            map.put("success", true);
-        } catch (SAXParseException e) {
-            map.put("success", false);
-            map.put("errorMsg", "xml解析出错：" + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            map.put("success", false);
-            map.put("errorMsg", e.getMessage());
-        } catch (Exception e) {
-            map.put("success", false);
-            map.put("errorMsg", errorMsg);
-            LOG.error(e.getMessage(), e);
-        }
-        return GsonUtil.toJson(map);
-
     }
 
 }

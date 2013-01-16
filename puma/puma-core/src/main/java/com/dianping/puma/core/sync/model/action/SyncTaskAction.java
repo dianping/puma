@@ -7,6 +7,7 @@ import com.google.code.morphia.annotations.Entity;
 @Entity
 public class SyncTaskAction extends Action {
 
+    private static final long serialVersionUID = 2359517002901314187L;
     //    源：BinlogInfo起点
     private BinlogInfo binlogInfo;
     //    name：PumaClient的name属性

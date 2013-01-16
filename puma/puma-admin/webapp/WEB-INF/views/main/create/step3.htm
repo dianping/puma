@@ -52,14 +52,14 @@
                   <label>pumaClientName：</label><input type="text"
                      name="pumaClientName" style="margin-left: 16px;">
                   <label>serverId：</label><input type="text"
-                     name="serverId" style="margin-left: 16px;">
-                  <label>ddl：</label><input type="text" name="ddl"
+                     name="serverId" value="$srcMysqlHost.serverId"
+                     style="margin-left: 16px;"> <label>ddl：</label><input
+                     type="text" name="ddl" style="margin-left: 16px;"
+                     placeholder="可选，默认为true"> <label>dml：</label><input
+                     type="text" name="dml" style="margin-left: 16px;"
+                     placeholder="可选，默认为true"> <label>transaction：</label><input
+                     type="text" name="transaction"
                      style="margin-left: 16px;" placeholder="可选，默认为true">
-                  <label>dml：</label><input type="text" name="dml"
-                     style="margin-left: 16px;" placeholder="可选，默认为true">
-                  <label>transaction：</label><input type="text"
-                     name="transaction" style="margin-left: 16px;"
-                     placeholder="可选，默认为true">
                </div>
                <button id="createSyncTaskButton"
                   style="float: right; margin-right: 20px;"

@@ -3,7 +3,6 @@ package com.dianping.puma.admin.service.impl;
 import java.util.Date;
 import java.util.Map;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,14 +19,14 @@ public class SyncTaskActionStateServiceImpl implements SyncTaskActionStateServic
     SyncTaskActionStateDao syncTaskActionStateDao;
 
     @Override
-    public ObjectId create(SyncTaskActionState syncTaskActionState) {
+    public Long create(SyncTaskActionState syncTaskActionState) {
         Key<SyncTaskActionState> key = this.syncTaskActionStateDao.save(syncTaskActionState);
         this.syncTaskActionStateDao.getDatastore().ensureIndexes();
-        return (ObjectId) key.getId();
+        return (Long) key.getId();
     }
 
     @Override
-    public void updateState(ObjectId id, State state, Map<String, String> params) {
+    public void updateState(Long id, State state, Map<String, String> params) {
         UpdateOperations<SyncTaskActionState> ops = this.syncTaskActionStateDao.getDatastore()
                 .createUpdateOperations(SyncTaskActionState.class).set("state", state);
         if (params != null) {
@@ -39,7 +38,7 @@ public class SyncTaskActionStateServiceImpl implements SyncTaskActionStateServic
     }
 
     @Override
-    public SyncTaskActionState find(ObjectId objectId) {
+    public SyncTaskActionState find(Long objectId) {
         return this.syncTaskActionStateDao.getDatastore().getByKey(SyncTaskActionState.class,
                 new Key<SyncTaskActionState>(SyncTaskActionState.class, objectId));
     }

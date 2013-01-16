@@ -18,7 +18,7 @@ package com.dianping.puma.sender.dispatcher;
 import java.util.List;
 
 import com.dianping.puma.bo.PumaContext;
-import com.dianping.puma.common.LifeCycle;
+import com.dianping.puma.core.LifeCycle;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.sender.Sender;
 

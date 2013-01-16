@@ -1,7 +1,7 @@
 /**
- * Project: puma-server
+ * Project: puma-syncserver
  * 
- * File Created at 2012-7-22
+ * File Created at 2013-1-16
  * $Id$
  * 
  * Copyright 2010 dianping.com.
@@ -13,12 +13,13 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.common;
+package com.dianping.puma.syncserver.job;
+
+import com.dianping.puma.core.LifeCycle;
 
 /**
  * @author Leo Liang
  * 
  */
-public interface Notifiable {
-	public void setNotifyService(NotifyService notifyService);
+public interface JobChecker extends LifeCycle<Exception> {
 }

@@ -43,6 +43,7 @@
         <dependency>
             <groupId>com.dianping.lion</groupId>
             <artifactId>lion-${env}</artifactId>
+            <version>1.0.0</version>
         </dependency>
         <!-- 日志系统 -->
         <dependency>
@@ -84,10 +85,6 @@
         <dependency>
             <groupId>commons-digester</groupId>
             <artifactId>commons-digester</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>

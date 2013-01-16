@@ -13,16 +13,13 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.common;
+package com.dianping.puma.core.monitor;
 
-import java.util.Map;
 
 /**
  * @author Leo Liang
  * 
  */
-public interface NotifyService {
-	public void alarm(String msg, Throwable t, boolean sendSms);
-
-	public void report(String title, Map<String, Map<String, String>> msg);
+public interface Notifiable {
+	public void setNotifyService(NotifyService notifyService);
 }

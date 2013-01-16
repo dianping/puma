@@ -18,7 +18,7 @@ package com.dianping.puma.storage;
 import java.io.IOException;
 import java.util.List;
 
-import com.dianping.puma.common.LifeCycle;
+import com.dianping.puma.core.LifeCycle;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**

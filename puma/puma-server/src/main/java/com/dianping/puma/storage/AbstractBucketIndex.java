@@ -45,6 +45,22 @@ public abstract class AbstractBucketIndex implements BucketIndex {
     private int                                        maxBucketLengthMB = 2000;
     private volatile boolean                           stopped           = true;
     private AtomicReference<Sequence>                  latestSequence    = new AtomicReference<Sequence>();
+    private boolean                                    isMaster          = true;
+
+    /**
+     * @return the isMaster
+     */
+    public boolean isMaster() {
+        return isMaster;
+    }
+
+    /**
+     * @param isMaster
+     *            the isMaster to set
+     */
+    public void setMaster(boolean isMaster) {
+        this.isMaster = isMaster;
+    }
 
     /**
      * @return the index
@@ -189,7 +205,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
         Bucket bucket = doGetReadBucket(baseDir, path, sequence.clearOffset(), maxBucketLengthMB);
 
         if (bucket != null) {
-            bucket.seek(offset);
+            bucket.skip(offset);
             try {
                 if (seq != SubscribeConstant.SEQ_FROM_OLDEST && seq != SubscribeConstant.SEQ_FROM_LATEST && fromNext) {
                     bucket.getNext();

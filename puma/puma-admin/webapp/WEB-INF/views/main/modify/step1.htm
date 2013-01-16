@@ -25,218 +25,185 @@ blockquote button {
 }
 </style>
 <div class="container"
-   style="margin: 0 auto; width: 100%; margin-bottom: 50px; height: 1050px;">
-   <div>
-      <button style="float: right; margin-top: 0px; margin-right: 20px;"
-         type="button" onclick="pumadmin.next();"
-         class="btn btn-primary">下一步</button>
-      <p class="legend">详细信息</p>
-      <div id="container" style="height: 100%;">
-         <div
-            style="padding: 10px 10px 10px 10px; background-color: #F7F7F9;">
-            <blockquote>
-               <strong>源数据库：</strong> <span>$action.srcMysqlName</span>
-               <strong class="actionText">目标数据库：</strong> <span>$action.destMysqlName</span>
-               <strong class="actionText">目标数据库Host：</strong> <span>$action.destMysqlHost</span>
-            </blockquote>
-            <blockquote>
-               <strong>SyncServer名称：</strong> <span>$action.syncServerName</span>
-               <strong class="actionText">PumaClient名称：</strong> <span>$action.pumaClientName</span>
-               <strong class="actionText">PumaClient的ServerId：</strong>
-               <span>$action.serverId</span>
-            </blockquote>
-            <blockquote>
-               <strong class="">PumaClient的ddl值：</strong> <span>$action.ddl</span>
-               <strong class="actionText">PumaClient的dml值：</strong> <span>$action.dml</span>
-               <strong class="actionText">PumaClient的transaction值：</strong>
-               <span>$action.transaction</span>
-            </blockquote>
-            <blockquote>
-               <strong class="">创建时的Binlog起始位置：</strong> <span>$action.binlogInfo.binlogFile
-                  $action.binlogInfo.binlogPosition</span> <strong
-                  class="actionText">创建时间：</strong> <span>${dateFormatUtils.format($action.createTime,"yyyy年MM月dd日
-                  HH时mm分")}</span> <strong class="actionText">最后更新时间：</strong>
-               <span>${dateFormatUtils.format($action.lastUpdateTime,"yyyy年MM月dd日
-                  HH时mm分")}</span>
-            </blockquote>
-         </div>
-         <hr>
-         <div>
-            <h4>状态</h4>
-            <blockquote>
-               <p id="state">
-                  <strong style="color: #DF3A01">$state.state</strong> (<span
-                     style="color:">$state.detail</span>)
-               </p>
-               <p style="font-size: 12px;">
-                  状态的最后更新时间：<span id="lastUpdateTime">${dateFormatUtils.format($state.lastUpdateTime,"yyyy年MM月dd日
+   style="margin: 0 auto; width: 100%; margin-bottom: 50px; height: 1250px;">
+   <ul id="stepsBreak" class="breadcrumb">
+      <li class="step_active">第1步: 修改 <span class="divider">&gt;</span></li>
+      <li class="step_undo">第2步: mysqldump <span class="divider">&gt;</span></li>
+      <li class="step_undo">第3步: 暂停与追赶 <span class="divider">&gt;</span></li>
+      <li class="step_undo">第4步: 重启同步</li>
+   </ul>
+   <div class="container"
+      style="margin: 0 auto; width: 100%; margin-bottom: 50px; height: 1050px;">
+      <div>
+         <button
+            style="float: right; margin-top: 0px; margin-right: 20px;"
+            type="button" onclick="$('#databaseForm').submit();"
+            class="btn btn-primary">下一步</button>
+         <p class="legend">详细信息</p>
+         <div id="container" style="height: 100%;">
+            <div
+               style="padding: 10px 10px 10px 10px; background-color: #F7F7F9;">
+               <blockquote>
+                  <strong>源数据库：</strong> <span>$action.srcMysqlName</span>
+                  <strong class="actionText">目标数据库：</strong> <span>$action.destMysqlName</span>
+                  <strong class="actionText">目标数据库Host：</strong> <span>$action.destMysqlHost</span>
+               </blockquote>
+               <blockquote>
+                  <strong>SyncServer名称：</strong> <span>$action.syncServerName</span>
+                  <strong class="actionText">PumaClient名称：</strong> <span>$action.pumaClientName</span>
+                  <strong class="actionText">PumaClient的ServerId：</strong>
+                  <span>$action.serverId</span>
+               </blockquote>
+               <blockquote>
+                  <strong class="">PumaClient的ddl值：</strong> <span>$action.ddl</span>
+                  <strong class="actionText">PumaClient的dml值：</strong> <span>$action.dml</span>
+                  <strong class="actionText">PumaClient的transaction值：</strong>
+                  <span>$action.transaction</span>
+               </blockquote>
+               <blockquote>
+                  <strong class="">创建时的Binlog起始位置：</strong> <span>$action.binlogInfo.binlogFile
+                     $action.binlogInfo.binlogPosition</span> <strong
+                     class="actionText">创建时间：</strong> <span>${dateFormatUtils.format($action.createTime,"yyyy年MM月dd日
+                     HH时mm分")}</span> <strong class="actionText">最后更新时间：</strong>
+                  <span>${dateFormatUtils.format($action.lastUpdateTime,"yyyy年MM月dd日
                      HH时mm分")}</span>
-               </p>
-            </blockquote>
-         </div>
-         <div>
-            <div
-               style="float: right; margin-top: 0px; margin-right: 20px;">
-               <a href="javascript:addDatabaseDiv();"><i
-                  class="icon-plus"></i>新增数据库同步</a>
+               </blockquote>
             </div>
-            <h4>映射配置</h4>
-            <div
-               style="padding: 20px 10px 10px 10px; border: 1px solid #E5E5E5; border-radius: 4px 4px 4px 4px; background-color: #F7F7F9;">
-               <form id="databaseForm" class="form-horizontal">
-                  #foreach($database in $action.mysqlMapping.databases)
-                  <div>
-                     <a
-                        style="float: right; margin-top: 0px; margin-right: 10px;"
-                        href="javascript:;"
-                        onclick="removeDatabaseDiv(this);"><i
-                        class="icon-remove"></i>删除该库同步</a> <a
-                        style="float: right; margin-top: 0px; margin-right: 10px;"
-                        href="javascript:;" onclick="addTableDiv(this);"><i
-                        class="icon-plus"></i>新增表同步</a>
-                     <div style="font-weight: bold;"
-                        class="control-group">
-                        <label class="control-label">数据库名称</label>
-                        <div class="controls">
-                           <input type="text" placeholder="源数据库名称"
-                              name="databaseFrom" value="$database.from">&nbsp;&nbsp;<i
-                              class="icon-arrow-right"></i>&nbsp;&nbsp;<input
-                              placeholder="目标数据库名称" type="text"
-                              name="databaseTo" value="$database.to">
+            <hr>
+            <div>
+               <h4>状态</h4>
+               <blockquote>
+                  <p id="state">
+                     <strong style="color: #DF3A01">$state.state</strong>
+                     (<span style="color:">$state.detail</span>)
+                  </p>
+                  <p style="font-size: 12px;">
+                     状态的最后更新时间：<span id="lastUpdateTime">${dateFormatUtils.format($state.lastUpdateTime,"yyyy年MM月dd日
+                        HH时mm分")}</span>
+                  </p>
+               </blockquote>
+            </div>
+            <div>
+               <div
+                  style="float: right; margin-top: 0px; margin-right: 20px;">
+                  <a href="javascript:addDatabaseDiv();"><i
+                     class="icon-plus"></i>新增数据库同步</a>
+               </div>
+               <h4>映射配置</h4>
+               <div
+                  style="padding: 20px 10px 10px 10px; border: 1px solid #E5E5E5; border-radius: 4px 4px 4px 4px; background-color: #F7F7F9;">
+                  <form id="databaseForm" class="form-horizontal"
+                     method="post"
+                     onsubmit="submit0(this);return false;"
+                     onSuccess="onSuccess"
+                     action="${rc.contextPath}/modify/action/${id}/step1Save">
+                     #foreach($database in
+                     $action.mysqlMapping.databases)
+                     <div>
+                        <a
+                           style="float: right; margin-top: 0px; margin-right: 10px;"
+                           href="javascript:;"
+                           onclick="removeDatabaseDiv(this);"><i
+                           class="icon-remove"></i>删除该库同步</a> <a
+                           style="float: right; margin-top: 0px; margin-right: 10px;"
+                           href="javascript:;"
+                           onclick="addTableDiv(this);"><i
+                           class="icon-plus"></i>新增表同步</a>
+                        <div style="font-weight: bold;"
+                           class="control-group">
+                           <label class="control-label">数据库名称</label>
+                           <div class="controls">
+                              <input type="text" placeholder="源数据库名称"
+                                 name="databaseFrom"
+                                 value="$database.from">&nbsp;&nbsp;<i
+                                 class="icon-arrow-right"></i>&nbsp;&nbsp;<input
+                                 placeholder="目标数据库名称" type="text"
+                                 name="databaseTo" value="$database.to">
+                           </div>
                         </div>
-                     </div>
-                     <input name="count" autocomplete="off"
-                        type="hidden" value="$database.tables.size()">
-                     #foreach($table in $database.tables)
-                     <div class="control-group">
-                        <label class="control-label">表名</label>
-                        <div class="controls">
-                           <input placeholder="源表名称" type="text"
-                              name="tableFrom" value="$table.from">&nbsp;&nbsp;<i
-                              class="icon-arrow-right"></i>&nbsp;&nbsp;<input
-                              placeholder="目标表名称" type="text"
-                              name="tableTo" value="$table.to">&nbsp;&nbsp;
-                           <a href="javascript:;"
-                              onclick="removeTableDiv(this);"><i
-                              class="icon-remove"></i></a>
+                        <input name="count" autocomplete="off"
+                           type="hidden" value="$database.tables.size()">
+                        #foreach($table in $database.tables)
+                        <div class="control-group">
+                           <label class="control-label">表名</label>
+                           <div class="controls">
+                              <input placeholder="源表名称" type="text"
+                                 name="tableFrom" value="$table.from">&nbsp;&nbsp;<i
+                                 class="icon-arrow-right"></i>&nbsp;&nbsp;<input
+                                 placeholder="目标表名称" type="text"
+                                 name="tableTo" value="$table.to">&nbsp;&nbsp;
+                              <a href="javascript:;"
+                                 onclick="removeTableDiv(this);"><i
+                                 class="icon-remove"></i></a>
+                           </div>
                         </div>
+                        #end
                      </div>
                      #end
-                  </div>
-                  #end
-               </form>
+                  </form>
+               </div>
             </div>
          </div>
       </div>
    </div>
-</div>
-<div style="display: none" id="copySource">
-   <div id="addTableDiv">
-      <div class="control-group">
-         <label class="control-label">表名</label>
-         <div class="controls">
-            <input placeholder="源表名称" type="text" name="tableFrom">&nbsp;&nbsp;<i
-               class="icon-arrow-right"></i>&nbsp;&nbsp;<input
-               placeholder="目标表名称" type="text" name="tableTo">&nbsp;&nbsp;
-            <a href="javascript:;" onclick="removeTableDiv(this);"><i
-               class="icon-remove"></i></a>
-         </div>
-      </div>
-   </div>
-   <div id="addDatabaseDiv">
-      <div>
-         <hr>
-         <a style="float: right; margin-top: 0px; margin-right: 10px;"
-            href="javascript:;" onclick="removeDatabaseDiv(this);"><i
-            class="icon-remove"></i>删除该库同步</a> <a
-            style="float: right; margin-top: 0px; margin-right: 10px;"
-            href="javascript:;" onclick="addTableDiv(this);"><i
-            class="icon-plus"></i>新增表同步</a>
-         <div style="font-weight: bold;" class="control-group">
-            <label class="control-label">数据库名称</label>
+   <div style="display: none" id="copySource">
+      <div id="addTableDiv">
+         <div class="control-group">
+            <label class="control-label">表名</label>
             <div class="controls">
-               <input type="text" placeholder="源数据库名称"
-                  name="databaseFrom">&nbsp;&nbsp;<i
+               <input placeholder="源表名称" type="text" name="tableFrom">&nbsp;&nbsp;<i
                   class="icon-arrow-right"></i>&nbsp;&nbsp;<input
-                  placeholder="目标数据库名称" type="text" name="databaseTo">
+                  placeholder="目标表名称" type="text" name="tableTo">&nbsp;&nbsp;
+               <a href="javascript:;" onclick="removeTableDiv(this);"><i
+                  class="icon-remove"></i></a>
             </div>
          </div>
-         <input type="hidden" autocomplete="off" name="count" value="0">
+      </div>
+      <div id="addDatabaseDiv">
+         <div>
+            <hr>
+            <a
+               style="float: right; margin-top: 0px; margin-right: 10px;"
+               href="javascript:;" onclick="removeDatabaseDiv(this);"><i
+               class="icon-remove"></i>删除该库同步</a> <a
+               style="float: right; margin-top: 0px; margin-right: 10px;"
+               href="javascript:;" onclick="addTableDiv(this);"><i
+               class="icon-plus"></i>新增表同步</a>
+            <div style="font-weight: bold;" class="control-group">
+               <label class="control-label">数据库名称</label>
+               <div class="controls">
+                  <input type="text" placeholder="源数据库名称"
+                     name="databaseFrom">&nbsp;&nbsp;<i
+                     class="icon-arrow-right"></i>&nbsp;&nbsp;<input
+                     placeholder="目标数据库名称" type="text" name="databaseTo">
+               </div>
+            </div>
+            <input type="hidden" autocomplete="off" name="count"
+               value="0">
+         </div>
       </div>
    </div>
 </div>
+
 <script>
-	function saveMapping() {
-		$("#state > strong").text("");
-		$("#state > span").text("");
-		var param = new Object();
-		param.actionId = '$action.id';
-		var url = window.contextpath + '/created/state';
+	function submit0(form) {
+		//$("#syncXml").val(window.xmlEditor.getValue());
 		$.ajax({
-			type : 'POST',
-			url : url,
-			data : param,
+			type : $(form).attr('method'),
+			url : $(form).attr('action'),
+			data : $(form).serialize(),
 			dataType : "json",
-			success : refleshStateDone,
+			success : onSuccess,
 			error : pumadmin.httpError
 		});
+		return false;
 	}
-	function saveMappingDone(data) {
+	function onSuccess(data) {
 		if (data.success == false) {
 			pumadmin.appError("错误信息", data.errorMsg);
 		} else {
-			var state = data.state;
-			$("#state > strong").text(state.state);
-			$("#state > span").text(state.detail);
-			var d1 = Date.parse(state.lastUpdateTime);
-			$("#lastUpdateTime").text(d1.toString('yyyy年MM月dd日 HH时mm分'));
+			window.location = "${rc.contextPath}/modify/action/${id}/step2";
 		}
-	}
-	function pause() {
-		var param = new Object();
-		param.actionId = '$action.id';
-		var url = window.contextpath + '/created/pause';
-		$.ajax({
-			type : 'POST',
-			url : url,
-			data : param,
-			dataType : "json",
-			success : pauseDone,
-			error : pumadmin.httpError
-		});
-	}
-	function pauseDone(data) {
-		if (data.success == false) {
-			pumadmin.appError("错误信息", data.errorMsg);
-		} else {
-			refleshState();
-		}
-	}
-	function rerun() {
-		var param = new Object();
-		param.actionId = '$action.id';
-		var url = window.contextpath + '/created/rerun';
-		$.ajax({
-			type : 'POST',
-			url : url,
-			data : param,
-			dataType : "json",
-			success : pauseDone,
-			error : pumadmin.httpError
-		});
-	}
-	function resolved() {
-		var param = new Object();
-		param.actionId = '$action.id';
-		var url = window.contextpath + '/created/resolved';
-		$.ajax({
-			type : 'POST',
-			url : url,
-			data : param,
-			dataType : "json",
-			success : pauseDone,
-			error : pumadmin.httpError
-		});
 	}
 	function addTableDiv(aLink) {
 		var form = $(aLink).parent();

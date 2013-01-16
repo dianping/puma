@@ -66,11 +66,14 @@ public class MysqlSettingController {
 
     @RequestMapping(value = { "/mysqlSetting/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public String createPost(String name, String[] host, String[] username, String[] password) {
+    public String createPost(String name, Long[] serverId, String[] host, String[] username, String[] password) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             if (name == null) {
                 throw new IllegalArgumentException("name不能为空");
+            }
+            if (serverId == null || serverId.length <= 0) {
+                throw new IllegalArgumentException("serverId不能为空");
             }
             if (host == null || host.length <= 0) {
                 throw new IllegalArgumentException("host不能为空");
@@ -81,8 +84,8 @@ public class MysqlSettingController {
             if (password == null || password.length <= 0) {
                 throw new IllegalArgumentException("password不能为空");
             }
-            if (username.length != host.length || username.length != password.length) {
-                throw new IllegalArgumentException("host,suername,password数量必须一致");
+            if (username.length != serverId.length || username.length != host.length || username.length != password.length) {
+                throw new IllegalArgumentException("serverId,host,suername,password数量必须一致");
             }
             //保存
             MysqlConfig mysqlConfig = new MysqlConfig();
@@ -90,12 +93,15 @@ public class MysqlSettingController {
             List<MysqlHost> hosts = new ArrayList<MysqlHost>(host.length);
             for (int i = 0; i < username.length; i++) {
                 MysqlHost mysqlHost = new MysqlHost();
+                mysqlHost.setServerId(serverId[i]);
                 mysqlHost.setHost(host[i]);
                 mysqlHost.setUsername(username[i]);
                 mysqlHost.setPassword(password[i]);
-                if (StringUtils.isNotBlank(mysqlHost.getHost()) || StringUtils.isNotBlank(mysqlHost.getUsername())
-                        || StringUtils.isNotBlank(mysqlHost.getPassword())) {
+                if (mysqlHost.getServerId() > 0 && StringUtils.isNotBlank(mysqlHost.getHost())
+                        && StringUtils.isNotBlank(mysqlHost.getUsername())) {
                     hosts.add(mysqlHost);
+                } else {
+                    throw new IllegalArgumentException("serverId,host,uername都不能为空!serverId必须大于0！");
                 }
             }
             mysqlConfig.setHosts(hosts);
@@ -115,7 +121,7 @@ public class MysqlSettingController {
 
     @RequestMapping(value = { "/mysqlSetting/modify" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public String modifyPost(String id, String name, String[] host, String[] username, String[] password) {
+    public String modifyPost(String id, String name, Long[] serverId, String[] host, String[] username, String[] password) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             if (id == null) {
@@ -123,6 +129,9 @@ public class MysqlSettingController {
             }
             if (name == null) {
                 throw new IllegalArgumentException("name不能为空");
+            }
+            if (serverId == null || serverId.length <= 0) {
+                throw new IllegalArgumentException("serverId不能为空");
             }
             if (host == null || host.length <= 0) {
                 throw new IllegalArgumentException("host不能为空");
@@ -133,8 +142,8 @@ public class MysqlSettingController {
             if (password == null || password.length <= 0) {
                 throw new IllegalArgumentException("password不能为空");
             }
-            if (username.length != host.length || username.length != password.length) {
-                throw new IllegalArgumentException("host,suername,password数量必须一致");
+            if (username.length != serverId.length || username.length != host.length || username.length != password.length) {
+                throw new IllegalArgumentException("serverId,host,suername,password数量必须一致");
             }
             //保存
             MysqlConfig mysqlConfig = new MysqlConfig();
@@ -143,12 +152,15 @@ public class MysqlSettingController {
             List<MysqlHost> hosts = new ArrayList<MysqlHost>(host.length);
             for (int i = 0; i < username.length; i++) {
                 MysqlHost mysqlHost = new MysqlHost();
+                mysqlHost.setServerId(serverId[i]);
                 mysqlHost.setHost(host[i]);
                 mysqlHost.setUsername(username[i]);
                 mysqlHost.setPassword(password[i]);
-                if (StringUtils.isNotBlank(mysqlHost.getHost()) || StringUtils.isNotBlank(mysqlHost.getUsername())
-                        || StringUtils.isNotBlank(mysqlHost.getPassword())) {
+                if (mysqlHost.getServerId() > 0 && StringUtils.isNotBlank(mysqlHost.getHost())
+                        && StringUtils.isNotBlank(mysqlHost.getUsername())) {
                     hosts.add(mysqlHost);
+                } else {
+                    throw new IllegalArgumentException("serverId,host,uername都不能为空!serverId必须大于0！");
                 }
             }
             mysqlConfig.setHosts(hosts);

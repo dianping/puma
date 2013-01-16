@@ -3,15 +3,12 @@ package com.dianping.puma.core.sync.model.action;
 import java.util.Date;
 import java.util.Map;
 
-import org.bson.types.ObjectId;
-
+import com.dianping.puma.core.sync.model.BaseEntity;
 import com.dianping.puma.core.sync.model.BinlogInfo;
-import com.google.code.morphia.annotations.Id;
 
-public abstract class ActionState {
+public abstract class ActionState extends BaseEntity {
 
-    @Id
-    private ObjectId id;//与Action一致
+    private static final long serialVersionUID = 6392738680314560553L;
     //    当前状态
     private State state;
     //    创建时间
@@ -24,14 +21,6 @@ public abstract class ActionState {
     private BinlogInfo binlogInfo;
     //自定义参数
     private Map<String, String> params;
-
-    public ObjectId getId() {
-        return id;
-    }
-
-    public void setId(ObjectId id) {
-        this.id = id;
-    }
 
     public State getState() {
         return state;

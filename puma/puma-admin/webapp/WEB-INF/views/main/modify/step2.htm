@@ -1,23 +1,160 @@
-<div>
-   <button style="float: right; margin-top: 6px;"
-      type="button" onclick="pumadmin.modifySyncXml();"
-      class="btn btn-info">确定</button>
-   <button style="float: right; margin-top: 6px; margin-right: 20px;"
-      type="button" onclick="pumadmin.pre();" class="btn">上一步</button>
-   <br>
-   <div id="container" style="height: 600px;">
-      <div
-         style="margin-left: 20px; margin-top: 10px; color: #585858; font-size: 14px">
-         <span>同步配置(修改后，作基本验证并保存。但不会马上影响Puma-Server。)</span>
-      </div>
-      <hr style="margin-top: 10px; margin-bottom: 5px">
-      <div class="container-fluid">
-         <div class="row-fluid">
-            <div class="span8">
-               <div id="xmlEditor"
-                  style="width: 95%; height: 550px; border: 1px solid #A9E2F3; border-radius: 3px 3px 3px 3px; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;"></div>
+<div class="container"
+   style="margin: 0 auto; width: 100%; margin-bottom: 50px;">
+    <ul id="stepsBreak" class="breadcrumb">
+      <li class="step_undo">第1步: 修改 <span class="divider">&gt;</span></li>
+      <li class="step_active">第2步: mysqldump <span class="divider">&gt;</span></li>
+      <li class="step_undo">第3步: 暂停与追赶 <span class="divider">&gt;</span></li>
+      <li class="step_undo">第4步: 重启同步</li>
+   </ul>
+   <div>
+      <a href="${rc.contextPath}/create/step3" id="dumpStepButton"
+         type="submit" style="float: right;" class="btn"> 跳过dump</a> </a>
+      <p class="legend">Dump</p>
+      <div style="height: 700px">
+         <div class="container-fluid">
+            <div class="row-fluid">
+               <div class="span10">
+                  <form class="form" method="post"
+                     onsubmit="createDumpAction(this);return false;"
+                     action="${rc.contextPath}/create/createDumpAction">
+                     <label style="">DumpAction状态(<a
+                        href="javascript:refleshDumpState();">刷新状态</a>)：<span
+                        style="font-size: 12px; color: red"
+                        id="dumpState"> </span>
+                     </label> <br> binlog文件：<input class="input-mini"
+                        type="text" disabled="disabled"
+                        id="dumpBinlogFile" style="margin-right: 20px;">
+                     binlog位置：<input class="input-mini" type="text"
+                        disabled="disabled" id="dumpBinlogPos">
+                     <hr>
+                     <label>选择源数据库(${srcMysqlConfig.name})的Host:
+                     </label>
+                     <button id="createDumpButton"
+                        style="float: right; margin-right: 20px;"
+                        type="submit" class="btn btn-info">创建DumpAction</button>
+                     <select name="srcMysqlHost"
+                        style="margin-left: 16px; margin-right: 16px;">
+                        #foreach($srcHost in ${srcMysqlConfig.hosts})
+                        <option value="$srcHost.host">$srcHost.host</option>
+                        #end
+                     </select> <br> <label>选择目标数据库(${destMysqlConfig.name})的Host:
+                     </label> <select name="destMysqlHost"
+                        style="margin-left: 16px; margin-right: 16px;">
+                        #foreach($destHost in ${destMysqlConfig.hosts})
+                        <option value="$destHost.host">$destHost.host</option>
+                        #end
+                     </select><br> <label>选择SyncServer作为dump的服务器执行者:
+                     </label> <select name="syncServerName"
+                        style="margin-left: 16px; margin-right: 16px;">
+                        #foreach($syncServerConfig in
+                        ${syncServerConfigs})
+                        <option value="${syncServerConfig.name}">${syncServerConfig.name}</option>
+                        #end
+                     </select>
+                     <hr>
+                  </form>
+                  <label>映射关系</label>
+                  <div class="accordion" id="accordion2">
+                     <div class="accordion-group">
+                        <div class="accordion-heading">
+                           <a class="accordion-toggle"
+                              data-toggle="collapse"
+                              data-parent="#accordion2"
+                              href="#collapseOne"> <span
+                              class="label label-info">mysqldump的详情
+                                 (点击可收起)</span></a>
+                        </div>
+                        <div id="collapseOne"
+                           class="accordion-body in collapse"
+                           style="height: auto;">
+                           <div class="accordion-inner">
+                              <div
+                                 style="padding: 30px 0px 30px 0px; background-color: #F5F5F5; border: 0px solid rgba(0, 0, 0, 0); border-radius: 4px 4px 4px 4px;">
+                                 <div id="tables"
+                                    style="width: 500px; margin: 0 auto;">
+                                    #foreach($databaseMapping in
+                                    $dumpMapping.databaseMappings)
+                                    <table class="table table-hover">
+                                       <thead>
+                                          <tr>
+                                             <th>$databaseMapping.from</th>
+                                             <th>$databaseMapping.to</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody>
+                                          #foreach($table in
+                                          $databaseMapping.tables)
+                                          <tr>
+                                             <td>$table.from</td>
+                                             <td>$table.to</td>
+                                          </tr>
+                                          #end
+                                       </tbody>
+                                    </table>
+                                    #end
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
             </div>
          </div>
       </div>
    </div>
 </div>
+<script>
+	function createDumpAction(form) {
+		$.ajax({
+			type : $(form).attr('method'),
+			url : $(form).attr('action'),
+			data : $(form).serialize(),
+			dataType : "json",
+			success : createDumpActionDone,
+			error : pumadmin.httpError
+		});
+		return false;
+	}
+	function createDumpActionDone(data) {
+		if (data.success == false) {
+			pumadmin.appError("错误信息", data.errorMsg);
+		} else {
+			$('#dumpState').text("CREATED (创建时间：刚刚)");
+			$("#createDumpButton").attr("disabled", "disabled");
+		}
+	}
+	function refleshDumpState() {
+		var param = new Object();
+		// 发送ajax请求jsonp
+		var url = window.contextpath + '/create/refleshDumpState';
+		$('#dumpState').text("正在刷新...");
+		$.ajax({
+			type : 'POST',
+			url : url,
+			data : param,
+			dataType : "json",
+			success : refleshDumpStateDone,
+			error : pumadmin.httpError
+		});
+	}
+	function refleshDumpStateDone(data) {
+		if (data.success == false) {
+			pumadmin.appError("访问发生错误", data.errorMsg);
+		} else {
+			$('#dumpState').text(
+					data.dumpActionState.state + " (创建时间："
+							+ data.dumpActionState.createTime + ")");
+			if (data.dumpActionState.binlogInfo
+					&& data.dumpActionState.binlogInfo.binlogFile) {
+				$('#dumpBinlogFile').val(
+						data.dumpActionState.binlogInfo.binlogFile);
+				$('#dumpBinlogPos').val(
+						data.dumpActionState.binlogInfo.binlogPosition);
+				//把文案显示成“下一步”
+				$("#dumpStepButton").addClass("btn-success");
+				$("#dumpStepButton").text("下一步");
+			}
+		}
+	}
+</script>

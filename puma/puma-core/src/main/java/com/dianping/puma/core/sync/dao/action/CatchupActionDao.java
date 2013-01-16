@@ -3,15 +3,15 @@ package com.dianping.puma.core.sync.dao.action;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.dianping.puma.core.sync.dao.MongoBaseDao;
 import com.dianping.puma.core.sync.dao.MongoClient;
 import com.dianping.puma.core.sync.model.action.CatchupAction;
-import com.google.code.morphia.dao.BasicDAO;
 
-@Service("catupActionDao")
-public class CatupActionDao extends BasicDAO<CatchupAction, String> {
+@Service("catchupActionDao")
+public class CatchupActionDao extends MongoBaseDao<CatchupAction> {
 
     @Autowired
-    public CatupActionDao(MongoClient mongoClient) {
+    public CatchupActionDao(MongoClient mongoClient) {
         super(mongoClient.getDatastore());
     }
 }

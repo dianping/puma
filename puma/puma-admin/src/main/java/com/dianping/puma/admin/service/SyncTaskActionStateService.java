@@ -9,10 +9,10 @@ import com.dianping.puma.core.sync.model.action.SyncTaskActionState;
 
 public interface SyncTaskActionStateService {
 
-    ObjectId create(SyncTaskActionState syncTaskActionState);
+    Long create(SyncTaskActionState syncTaskActionState);
 
-    SyncTaskActionState find(ObjectId objectId);
+    SyncTaskActionState find(Long objectId);
 
-    void updateState(ObjectId id, State state, Map<String, String> params);
+    void updateState(Long id, State state, Map<String, String> params);
 
 }

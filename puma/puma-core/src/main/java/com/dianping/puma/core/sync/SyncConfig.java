@@ -2,7 +2,6 @@ package com.dianping.puma.core.sync;
 
 import org.bson.types.ObjectId;
 
-import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
 

@@ -25,14 +25,14 @@ public class MongoClient implements ConfigChangeListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(MongoClient.class);
 
-    private static final String MONGO_SERVER_URI_KEYNAME = "puma.admin.mongoServerUri";
+    private static final String MONGO_SERVER_URI_KEYNAME = "puma.mongoServerUri";
 
-    private static final String DB_NAME = "puma_admin";
+    private static final String DB_NAME = "puma";
 
     private static MongoOptions mongoOptions;
     static {
         //读取properties配置(如果存在configFile，则使用configFile)
-        InputStream in = MongoClient.class.getClassLoader().getResourceAsStream("puma-admin-mongo.properties");
+        InputStream in = MongoClient.class.getClassLoader().getResourceAsStream("puma-mongo.properties");
         MongoConfig config;
         if (in != null) {
             config = new MongoConfig(in);
@@ -60,7 +60,7 @@ public class MongoClient implements ConfigChangeListener {
     public MongoClient(DynamicConfig dynamicConfig) {
         if (dynamicConfig == null) {
             //从动态配置中获取mongo服务器地址
-            dynamicConfig = new LionDynamicConfig("puma-admin-mongo.lion.properties");
+            dynamicConfig = new LionDynamicConfig("puma-mongo.lion.properties");
         }
         this.dynamicConfig = dynamicConfig;
         this.dynamicConfig.setConfigChangeListener(this);

@@ -19,11 +19,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.dianping.puma.admin.service.SyncTaskActionService;
-import com.dianping.puma.admin.service.SyncTaskActionStateService;
 import com.dianping.puma.admin.util.GsonUtil;
-import com.dianping.puma.core.sync.model.action.ActionState.State;
-import com.dianping.puma.core.sync.model.action.SyncTaskAction;
-import com.dianping.puma.core.sync.model.action.SyncTaskActionState;
+import com.dianping.puma.core.sync.model.task.SyncTask;
+import com.dianping.puma.core.sync.model.task.TaskState;
+import com.dianping.puma.core.sync.model.task.TaskState.State;
 
 /**
  * 查看已经创建的所有任务
@@ -33,8 +32,6 @@ public class CreatedController {
     private static final Logger LOG = LoggerFactory.getLogger(CreatedController.class);
     @Autowired
     private SyncTaskActionService syncTaskActionService;
-    @Autowired
-    private SyncTaskActionStateService syncTaskActionStateService;
 
     private static final String errorMsg = "对不起，出了一点错误，请刷新页面试试。";
     private static final int PAGESIZE = 8;
@@ -49,7 +46,7 @@ public class CreatedController {
         Map<String, Object> map = new HashMap<String, Object>();
         //        System.out.println(syncConfigService.find());
         int offset = pageNum == null ? 0 : (pageNum - 1) * PAGESIZE;
-        List<SyncTaskAction> syncTaskActions = syncTaskActionService.find(offset, PAGESIZE);
+        List<SyncTask> syncTaskActions = syncTaskActionService.find(offset, PAGESIZE);
         map.put("syncTaskActions", syncTaskActions);
         map.put("createdActive", "active");
         map.put("subPath", "view");
@@ -65,9 +62,10 @@ public class CreatedController {
     public Object state(HttpSession session, Long actionId) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            SyncTaskActionState state = this.syncTaskActionStateService.find(actionId);
-            map.put("stateLastUpdateTime", state);
-            map.put("state", state);
+            SyncTask syncTaskAction = this.syncTaskActionService.find(actionId);
+            TaskState actionState = syncTaskAction.getTaskState();
+            map.put("stateLastUpdateTime", actionState.getLastUpdateTime());
+            map.put("state", actionState);
             map.put("success", true);
         } catch (IllegalArgumentException e) {
             map.put("success", false);
@@ -86,10 +84,10 @@ public class CreatedController {
     @RequestMapping(value = "/created/action/{id}", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
     public ModelAndView action(HttpSession session, @PathVariable("id") Long actionId) {
         Map<String, Object> map = new HashMap<String, Object>();
-        SyncTaskAction action = this.syncTaskActionService.find(actionId);
-        SyncTaskActionState state = this.syncTaskActionStateService.find(actionId);
-        map.put("action", action);
-        map.put("state", state);
+        SyncTask syncTaskAction = this.syncTaskActionService.find(actionId);
+        TaskState actionState = syncTaskAction.getTaskState();
+        map.put("action", syncTaskAction);
+        map.put("state", actionState);
         map.put("createdActive", "active");
         map.put("subPath", "action");
         map.put("path", "created");
@@ -104,7 +102,7 @@ public class CreatedController {
     public Object pause(HttpSession session, Long actionId) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            this.syncTaskActionStateService.updateState(actionId, State.PAUSE, null);
+            this.syncTaskActionService.updateState(actionId, State.PAUSE, null);
             map.put("success", true);
         } catch (IllegalArgumentException e) {
             map.put("success", false);
@@ -125,7 +123,7 @@ public class CreatedController {
     public Object rerun(HttpSession session, Long actionId) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            this.syncTaskActionStateService.updateState(actionId, State.PREPARABLE, null);
+            this.syncTaskActionService.updateState(actionId, State.PREPARABLE, null);
             map.put("success", true);
         } catch (IllegalArgumentException e) {
             map.put("success", false);
@@ -146,7 +144,7 @@ public class CreatedController {
     public Object resolved(HttpSession session, Long actionId) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            this.syncTaskActionStateService.updateState(actionId, State.RESOLVED, null);
+            this.syncTaskActionService.updateState(actionId, State.RESOLVED, null);
             map.put("success", true);
         } catch (IllegalArgumentException e) {
             map.put("success", false);

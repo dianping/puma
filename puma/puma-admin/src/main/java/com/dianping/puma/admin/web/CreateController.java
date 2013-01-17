@@ -9,7 +9,6 @@ import java.util.Map;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang.StringUtils;
-import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,16 +20,12 @@ import org.springframework.web.servlet.ModelAndView;
 import org.xml.sax.SAXParseException;
 
 import com.dianping.puma.admin.service.DumpActionService;
-import com.dianping.puma.admin.service.DumpActionStateService;
 import com.dianping.puma.admin.service.MysqlConfigService;
 import com.dianping.puma.admin.service.PumaSyncServerConfigService;
 import com.dianping.puma.admin.service.SyncTaskActionService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.admin.util.SyncXmlParser;
 import com.dianping.puma.core.sync.model.BinlogInfo;
-import com.dianping.puma.core.sync.model.action.DumpAction;
-import com.dianping.puma.core.sync.model.action.DumpActionState;
-import com.dianping.puma.core.sync.model.action.SyncTaskAction;
 import com.dianping.puma.core.sync.model.config.MysqlConfig;
 import com.dianping.puma.core.sync.model.config.MysqlHost;
 import com.dianping.puma.core.sync.model.config.PumaSyncServerConfig;
@@ -38,6 +33,9 @@ import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.DumpMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
+import com.dianping.puma.core.sync.model.task.DumpTask;
+import com.dianping.puma.core.sync.model.task.SyncTask;
+import com.dianping.puma.core.sync.model.task.TaskState;
 
 /**
  * TODO <br>
@@ -56,8 +54,6 @@ public class CreateController {
     private MysqlConfigService mysqlConfigService;
     @Autowired
     private DumpActionService dumpActionService;
-    @Autowired
-    private DumpActionStateService dumpActionStateService;
     @Autowired
     private PumaSyncServerConfigService pumaSyncServerConfigService;
     @Autowired
@@ -221,7 +217,7 @@ public class CreateController {
             //根据选择的destMysqlHost，找出其MysqlHost对象
             MysqlHost destMysqlHost0 = getMysqlHost(destMysqlConfig, destMysqlHost);
             //查询所有syncServer
-            DumpAction dumpAction = new DumpAction();
+            DumpTask dumpAction = new DumpTask();
             dumpAction.setSrcMysqlName(srcMysqlConfig.getName());
             dumpAction.setSrcMysqlHost(srcMysqlHost0);
             dumpAction.setDestMysqlName(destMysqlConfig.getName());
@@ -262,11 +258,12 @@ public class CreateController {
                 throw new IllegalArgumentException("dumpActionId为空，可能是会话已经过期！");
             }
             //查询dumpActionId对应的DumpActionState
-            DumpActionState dumpActionState = this.dumpActionStateService.find(id);
-            if (dumpActionState != null) {
-                map.put("dumpActionState", dumpActionState);
-                if (dumpActionState.getBinlogInfo() != null) {
-                    session.setAttribute("binlogInfo", dumpActionState.getBinlogInfo());
+            DumpTask dumpAction = this.dumpActionService.find(id);
+            TaskState actionState = dumpAction.getTaskState();
+            if (actionState != null) {
+                map.put("dumpActionState", actionState);
+                if (actionState.getBinlogInfo() != null) {
+                    session.setAttribute("binlogInfo", actionState.getBinlogInfo());
                 }
             } else {
                 throw new IllegalArgumentException("dumpActionState不存在，请管理员查看什么原因！");
@@ -346,7 +343,7 @@ public class CreateController {
             MysqlConfig destMysqlConfig = (MysqlConfig) session.getAttribute("destMysqlConfig");
             MysqlMapping mysqlMapping = (MysqlMapping) session.getAttribute("mysqlMapping");
             //创建SyncAction
-            SyncTaskAction syncTaskAction = new SyncTaskAction();
+            SyncTask syncTaskAction = new SyncTask();
             syncTaskAction.setSrcMysqlName(srcMysqlConfig.getName());
             syncTaskAction.setDestMysqlName(destMysqlConfig.getName());
             syncTaskAction.setDestMysqlHost(getMysqlHost(destMysqlConfig, destMysqlHost));
@@ -368,9 +365,11 @@ public class CreateController {
             syncTaskAction.setLastUpdateTime(curDate);
             //保存dumpAction到数据库
             syncTaskActionService.create(syncTaskAction);
-            //保存dumpAction到session
-            session.setAttribute("dumpActionId", syncTaskAction.getId());
-            LOG.info("created dumpAction: " + syncTaskAction);
+            //更新dumpAction的syncTaskId
+            Long syncTaskId = syncTaskAction.getId();
+            Long dumpActionId = (Long) session.getAttribute("dumpActionId");
+            this.dumpActionService.updateSyncTaskId(dumpActionId, syncTaskId);
+            LOG.info("syncTaskAction.getId(): " + syncTaskAction.getId());
 
             map.put("success", true);
         } catch (IllegalArgumentException e) {

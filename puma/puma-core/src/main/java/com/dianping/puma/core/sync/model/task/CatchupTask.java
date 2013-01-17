@@ -1,11 +1,11 @@
-package com.dianping.puma.core.sync.model.action;
+package com.dianping.puma.core.sync.model.task;
 
 import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.google.code.morphia.annotations.Entity;
 
 @Entity
-public class CatchupAction extends Action {
+public class CatchupTask extends Task {
     private static final long serialVersionUID = 9067626307003002897L;
     //  源：BinlogInfo起点
     private BinlogInfo binlogInfo;
@@ -22,7 +22,7 @@ public class CatchupAction extends Action {
     //    同步配置：映射配置(TableMapping)
     private MysqlMapping mysqlMapping;
 
-    public CatchupAction(ActionType type) {
+    public CatchupTask(Type type) {
         super(type);
     }
 
@@ -84,9 +84,9 @@ public class CatchupAction extends Action {
 
     @Override
     public String toString() {
-        return "CatchupAction [binlogInfo=" + binlogInfo + ", pumaClientName=" + pumaClientName + ", serverId=" + serverId
-                + ", ddl=" + ddl + ", dml=" + dml + ", transaction=" + transaction + ", mysqlMapping=" + mysqlMapping
-                + ", toString()=" + super.toString() + "]";
+        return "CatchupTask [binlogInfo=" + binlogInfo + ", pumaClientName=" + pumaClientName + ", serverId=" + serverId + ", ddl="
+                + ddl + ", dml=" + dml + ", transaction=" + transaction + ", mysqlMapping=" + mysqlMapping + ", toString()="
+                + super.toString() + "]";
     }
 
 }

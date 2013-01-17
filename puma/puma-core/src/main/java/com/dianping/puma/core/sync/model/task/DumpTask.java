@@ -1,4 +1,4 @@
-package com.dianping.puma.core.sync.model.action;
+package com.dianping.puma.core.sync.model.task;
 
 import java.util.Arrays;
 import java.util.List;
@@ -8,7 +8,7 @@ import com.dianping.puma.core.sync.model.mapping.DumpMapping;
 import com.google.code.morphia.annotations.Entity;
 
 @Entity
-public class DumpAction extends Action {
+public class DumpTask extends Task {
 
     private static final long serialVersionUID = 1174973531845800248L;
 
@@ -22,8 +22,8 @@ public class DumpAction extends Action {
             "--add-drop-database=false", "--add-drop-table=false", "--skip-add-locks", "--default-character-set=utf8",
             "--max_allowed_packet=16777216", " --net_buffer_length=16384", "-i", "--master-data=2", "--single-transaction" });
 
-    public DumpAction() {
-        super(ActionType.DUMP);
+    public DumpTask() {
+        super(Type.DUMP);
     }
 
     public MysqlHost getSrcMysqlHost() {
@@ -52,8 +52,8 @@ public class DumpAction extends Action {
 
     @Override
     public String toString() {
-        return "DumpAction [dumpMapping=" + dumpMapping + ", options=" + options + ", getDumpMapping()=" + getDumpMapping()
-                + ", getOptions()=" + getOptions() + "]";
+        return "DumpTask [srcMysqlHost=" + srcMysqlHost + ", dumpMapping=" + dumpMapping + ", options=" + options + ", toString()="
+                + super.toString() + "]";
     }
 
 }

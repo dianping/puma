@@ -44,28 +44,28 @@ blockquote button {
             <div
                style="padding: 10px 10px 10px 10px; background-color: #F7F7F9;">
                <blockquote>
-                  <strong>源数据库：</strong> <span>$action.srcMysqlName</span>
-                  <strong class="actionText">目标数据库：</strong> <span>$action.destMysqlName</span>
-                  <strong class="actionText">目标数据库Host：</strong> <span>$action.destMysqlHost</span>
+                  <strong>源数据库：</strong> <span>$syncTaskAction.srcMysqlName</span>
+                  <strong class="actionText">目标数据库：</strong> <span>$syncTaskAction.destMysqlName</span>
+                  <strong class="actionText">目标数据库Host：</strong> <span>$syncTaskAction.destMysqlHost.host</span>
                </blockquote>
                <blockquote>
-                  <strong>SyncServer名称：</strong> <span>$action.syncServerName</span>
-                  <strong class="actionText">PumaClient名称：</strong> <span>$action.pumaClientName</span>
+                  <strong>SyncServer名称：</strong> <span>$syncTaskAction.syncServerName</span>
+                  <strong class="actionText">PumaClient名称：</strong> <span>$syncTaskAction.pumaClientName</span>
                   <strong class="actionText">PumaClient的ServerId：</strong>
-                  <span>$action.serverId</span>
+                  <span>$syncTaskAction.serverId</span>
                </blockquote>
                <blockquote>
-                  <strong class="">PumaClient的ddl值：</strong> <span>$action.ddl</span>
-                  <strong class="actionText">PumaClient的dml值：</strong> <span>$action.dml</span>
+                  <strong class="">PumaClient的ddl值：</strong> <span>$syncTaskAction.ddl</span>
+                  <strong class="actionText">PumaClient的dml值：</strong> <span>$syncTaskAction.dml</span>
                   <strong class="actionText">PumaClient的transaction值：</strong>
-                  <span>$action.transaction</span>
+                  <span>$syncTaskAction.transaction</span>
                </blockquote>
                <blockquote>
-                  <strong class="">创建时的Binlog起始位置：</strong> <span>$action.binlogInfo.binlogFile
-                     $action.binlogInfo.binlogPosition</span> <strong
-                     class="actionText">创建时间：</strong> <span>${dateFormatUtils.format($action.createTime,"yyyy年MM月dd日
+                  <strong class="">创建时的Binlog起始位置：</strong> <span>$syncTaskAction.binlogInfo.binlogFile
+                     $syncTaskAction.binlogInfo.binlogPosition</span> <strong
+                     class="actionText">创建时间：</strong> <span>${dateFormatUtils.format($syncTaskAction.createTime,"yyyy年MM月dd日
                      HH时mm分")}</span> <strong class="actionText">最后更新时间：</strong>
-                  <span>${dateFormatUtils.format($action.lastUpdateTime,"yyyy年MM月dd日
+                  <span>${dateFormatUtils.format($syncTaskAction.lastUpdateTime,"yyyy年MM月dd日
                      HH时mm分")}</span>
                </blockquote>
             </div>
@@ -74,11 +74,11 @@ blockquote button {
                <h4>状态</h4>
                <blockquote>
                   <p id="state">
-                     <strong style="color: #DF3A01">$state.state</strong>
-                     (<span style="color:">$state.detail</span>)
+                     <strong style="color: #DF3A01">$syncTaskActionState.state</strong>
+                     (<span style="color:">$syncTaskActionState.detail</span>)
                   </p>
                   <p style="font-size: 12px;">
-                     状态的最后更新时间：<span id="lastUpdateTime">${dateFormatUtils.format($state.lastUpdateTime,"yyyy年MM月dd日
+                     状态的最后更新时间：<span id="lastUpdateTime">${dateFormatUtils.format($syncTaskActionState.lastUpdateTime,"yyyy年MM月dd日
                         HH时mm分")}</span>
                   </p>
                </blockquote>
@@ -96,9 +96,9 @@ blockquote button {
                      method="post"
                      onsubmit="submit0(this);return false;"
                      onSuccess="onSuccess"
-                     action="${rc.contextPath}/modify/action/${id}/step1Save">
+                     action="${rc.contextPath}/modify/action/step1Save">
                      #foreach($database in
-                     $action.mysqlMapping.databases)
+                     $syncTaskAction.mysqlMapping.databases)
                      <div>
                         <a
                            style="float: right; margin-top: 0px; margin-right: 10px;"
@@ -202,7 +202,7 @@ blockquote button {
 		if (data.success == false) {
 			pumadmin.appError("错误信息", data.errorMsg);
 		} else {
-			window.location = "${rc.contextPath}/modify/action/${id}/step2";
+			window.location = "${rc.contextPath}/modify/action/step2";
 		}
 	}
 	function addTableDiv(aLink) {

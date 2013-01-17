@@ -1,4 +1,4 @@
-package com.dianping.puma.core.sync.model.action;
+package com.dianping.puma.core.sync.model.task;
 
 import java.util.Date;
 
@@ -8,14 +8,14 @@ import com.google.code.morphia.annotations.Indexed;
 import com.google.code.morphia.utils.IndexDirection;
 
 /**
- * 代表一个动作，由puma-admin创建action(发派命令)，puma-syncServer获取action(执行命令)
+ * 代表一个Task，由puma-admin创建task(发派命令)，puma-syncServer获取task(执行命令)
  * 
  * @author wukezhu
  */
-public abstract class Action extends BaseEntity {
+public abstract class Task extends BaseEntity {
 
     private static final long serialVersionUID = -2446587945497295737L;
-    private ActionType type;
+    private Type type;
     //    源：源数据库名称(如Dianping)
     @Indexed(value = IndexDirection.ASC, name = "srcMysqlName", unique = false, dropDups = true)
     private String srcMysqlName;
@@ -33,8 +33,10 @@ public abstract class Action extends BaseEntity {
     private Date lastUpdateTime;
     // SyncTaskId
     private Long syncTaskId;
+    //状态
+    private TaskState taskState;
 
-    protected Action(ActionType type) {
+    protected Task(Type type) {
         this.type = type;
     }
 
@@ -46,11 +48,11 @@ public abstract class Action extends BaseEntity {
         this.syncTaskId = syncTaskId;
     }
 
-    public ActionType getType() {
+    public Type getType() {
         return type;
     }
 
-    public void setType(ActionType type) {
+    public void setType(Type type) {
         this.type = type;
     }
 
@@ -102,9 +104,25 @@ public abstract class Action extends BaseEntity {
         this.lastUpdateTime = lastUpdateTime;
     }
 
-    public enum ActionType {
+    public TaskState getTaskState() {
+        return taskState;
+    }
+
+    public void setTaskState(TaskState taskState) {
+        this.taskState = taskState;
+    }
+
+    public enum Type {
         SYNC,
         DUMP,
         CATCHUP
     }
+
+    @Override
+    public String toString() {
+        return "Task [type=" + type + ", srcMysqlName=" + srcMysqlName + ", destMysqlName=" + destMysqlName + ", destMysqlHost="
+                + destMysqlHost + ", syncServerName=" + syncServerName + ", createTime=" + createTime + ", lastUpdateTime="
+                + lastUpdateTime + ", syncTaskId=" + syncTaskId + ", taskState=" + taskState + "]";
+    }
+
 }

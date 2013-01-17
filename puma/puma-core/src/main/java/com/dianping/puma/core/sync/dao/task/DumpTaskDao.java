@@ -1,17 +1,17 @@
-package com.dianping.puma.core.sync.dao.action;
+package com.dianping.puma.core.sync.dao.task;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dianping.puma.core.sync.dao.MongoBaseDao;
 import com.dianping.puma.core.sync.dao.MongoClient;
-import com.dianping.puma.core.sync.model.action.CatchupAction;
+import com.dianping.puma.core.sync.model.task.DumpTask;
 
-@Service("catchupActionDao")
-public class CatchupActionDao extends MongoBaseDao<CatchupAction> {
+@Service
+public class DumpTaskDao extends MongoBaseDao<DumpTask> {
 
     @Autowired
-    public CatchupActionDao(MongoClient mongoClient) {
+    public DumpTaskDao(MongoClient mongoClient) {
         super(mongoClient.getDatastore());
     }
 }

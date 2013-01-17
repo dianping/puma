@@ -1,14 +1,12 @@
-package com.dianping.puma.core.sync.model.action;
+package com.dianping.puma.core.sync.model.task;
 
 import java.util.Date;
 import java.util.Map;
 
-import com.dianping.puma.core.sync.model.BaseEntity;
 import com.dianping.puma.core.sync.model.BinlogInfo;
 
-public abstract class ActionState extends BaseEntity {
+public class TaskState {
 
-    private static final long serialVersionUID = 6392738680314560553L;
     //    当前状态
     private State state;
     //    创建时间

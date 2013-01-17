@@ -1,11 +1,11 @@
-package com.dianping.puma.core.sync.model.action;
+package com.dianping.puma.core.sync.model.task;
 
 import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.google.code.morphia.annotations.Entity;
 
 @Entity
-public class SyncTaskAction extends Action {
+public class SyncTask extends Task {
 
     private static final long serialVersionUID = 2359517002901314187L;
     //    源：BinlogInfo起点
@@ -23,8 +23,8 @@ public class SyncTaskAction extends Action {
     //    同步配置：映射配置(TableMapping)
     private MysqlMapping mysqlMapping;
 
-    public SyncTaskAction() {
-        super(ActionType.SYNC);
+    public SyncTask() {
+        super(Type.SYNC);
     }
 
     public BinlogInfo getBinlogInfo() {

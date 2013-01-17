@@ -22,8 +22,8 @@ public class CatchupTask extends Task {
     //    同步配置：映射配置(TableMapping)
     private MysqlMapping mysqlMapping;
 
-    public CatchupTask(Type type) {
-        super(type);
+    public CatchupTask() {
+        super(Type.CATCHUP);
     }
 
     public BinlogInfo getBinlogInfo() {

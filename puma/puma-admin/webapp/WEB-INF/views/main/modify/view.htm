@@ -29,7 +29,7 @@
                         onclick="refleshState(this);"
                         actionId="$syncTaskAction.id"
                         style="margin-right: 10px">刷新状态</a><a
-                        href="${rc.contextPath}/modify/action/$syncTaskAction.id">修改</a></td>
+                        href="${rc.contextPath}/modify/$syncTaskAction.id">修改</a></td>
                   </tr>
                   #end
                </tbody>
@@ -46,25 +46,22 @@
             </div>
             #end
          </div>
-         #if(!$pageNum)
-           #set($pageNum=1)
-         #end
-         #set($nextPage = $pageNum + 1)
-         #set($prePage = $pageNum - 1)
+         #if(!$pageNum) #set($pageNum=1) #end #set($nextPage = $pageNum
+         + 1) #set($prePage = $pageNum - 1)
          <ul class="pager">
-            #if($prePage >= 1) 
-             <li id="prePage"><a
-             href="${rc.contextPath}/modify/${prePage}">&larr; 上页</a></li>
-            #else
-             <li class="disabled"  id="prePage"><a href="javascript:;">&larr; 上页</a></li>
-            #end
+            #if($prePage >= 1)
+            <li id="prePage"><a
+               href="${rc.contextPath}/modify/p/${prePage}">&larr;
+                  上页</a></li> #else
+            <li class="disabled" id="prePage"><a
+               href="javascript:;">&larr; 上页</a></li> #end
             #if(${syncTaskActions.size()} == 0)
-             <li class="disabled"  id="nextPage"><a href="javascript:;">下页 &rarr;</a></li>
-            #else
-             <li id="nextPage"><a
-               href="${rc.contextPath}/modify/${nextPage}">下页 &rarr;</a></li>
-            #end
-            
+            <li class="disabled" id="nextPage"><a
+               href="javascript:;">下页 &rarr;</a></li> #else
+            <li id="nextPage"><a
+               href="${rc.contextPath}/modify/p/${nextPage}">下页
+                  &rarr;</a></li> #end
+
          </ul>
       </div>
    </div>
@@ -75,7 +72,7 @@
 		var actionId = $(td).attr("actionId");
 		param.actionId = actionId;
 		$("td[stateOfId='" + actionId + "']").text("");
-        $("td[stateDetailOfId='" + actionId + "']").text("");
+		$("td[stateDetailOfId='" + actionId + "']").text("");
 		var url = window.contextpath + '/created/state';
 		$.ajax({
 			type : 'POST',

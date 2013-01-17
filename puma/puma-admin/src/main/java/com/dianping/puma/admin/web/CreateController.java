@@ -1,10 +1,10 @@
 package com.dianping.puma.admin.web;
 
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.http.HttpSession;
 
@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.xml.sax.SAXParseException;
 
-import com.dianping.puma.admin.service.DumpActionService;
+import com.dianping.puma.admin.service.DumpTaskService;
 import com.dianping.puma.admin.service.MysqlConfigService;
 import com.dianping.puma.admin.service.PumaSyncServerConfigService;
-import com.dianping.puma.admin.service.SyncTaskActionService;
+import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.admin.util.SyncXmlParser;
 import com.dianping.puma.core.sync.model.BinlogInfo;
@@ -53,11 +53,11 @@ public class CreateController {
     @Autowired
     private MysqlConfigService mysqlConfigService;
     @Autowired
-    private DumpActionService dumpActionService;
+    private DumpTaskService dumpActionService;
     @Autowired
     private PumaSyncServerConfigService pumaSyncServerConfigService;
     @Autowired
-    private SyncTaskActionService syncTaskActionService;
+    private SyncTaskService syncTaskActionService;
 
     private static final String errorMsg = "对不起，出了一点错误，请刷新页面试试。";
 
@@ -285,19 +285,11 @@ public class CreateController {
     @RequestMapping(method = RequestMethod.GET, value = { "/create/step3" })
     public ModelAndView step3(HttpSession session) throws SQLException {
         Map<String, Object> map = new HashMap<String, Object>();
-        //从session拿出
-        MysqlConfig srcMysqlConfig = (MysqlConfig) session.getAttribute("srcMysqlConfig");
-        MysqlConfig destMysqlConfig = (MysqlConfig) session.getAttribute("destMysqlConfig");
-        MysqlHost srcMysqlHost = (MysqlHost) session.getAttribute("srcMysqlHost");
-        BinlogInfo binlogInfo = (BinlogInfo) session.getAttribute("binlogInfo");
         //查询所有syncServer
         List<PumaSyncServerConfig> syncServerConfigs = pumaSyncServerConfigService.findAll();
 
-        map.put("srcMysqlConfig", srcMysqlConfig);
-        map.put("destMysqlConfig", destMysqlConfig);
-        map.put("srcMysqlHost", srcMysqlHost);
         map.put("syncServerConfigs", syncServerConfigs);
-        map.put("binlogInfo", binlogInfo);
+        map.put("pumaClientName", "SyncTask-" + UUID.randomUUID());
         map.put("createActive", "active");
         map.put("path", "create");
         map.put("subPath", "step3");
@@ -360,9 +352,6 @@ public class CreateController {
             syncTaskAction.setPumaClientName(pumaClientName);
             syncTaskAction.setServerId(serverId);
             syncTaskAction.setTransaction(transaction != null ? transaction : true);
-            Date curDate = new Date();
-            syncTaskAction.setCreateTime(curDate);
-            syncTaskAction.setLastUpdateTime(curDate);
             //保存dumpAction到数据库
             syncTaskActionService.create(syncTaskAction);
             //更新dumpAction的syncTaskId

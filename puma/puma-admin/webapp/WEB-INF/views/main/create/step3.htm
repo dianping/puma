@@ -50,9 +50,10 @@
                </div>
                <div class="span5">
                   <label>pumaClientName：</label><input type="text"
-                     name="pumaClientName" style="margin-left: 16px;">
-                  <label>serverId：</label><input type="text"
-                     name="serverId" value="$!srcMysqlHost.serverId"
+                     name="pumaClientName" value="${pumaClientName}"
+                     style="margin-left: 16px;"> <label>serverId：</label><input
+                     type="text" name="serverId"
+                     value="$!srcMysqlHost.serverId"
                      style="margin-left: 16px;"> <label>ddl：</label><input
                      type="text" name="ddl" style="margin-left: 16px;"
                      placeholder="可选，默认为true"> <label>dml：</label><input

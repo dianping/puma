@@ -1,7 +1,5 @@
 package com.dianping.puma.core.sync.model.task;
 
-import java.util.Date;
-
 import com.dianping.puma.core.sync.model.BaseEntity;
 import com.dianping.puma.core.sync.model.config.MysqlHost;
 import com.google.code.morphia.annotations.Indexed;
@@ -27,10 +25,6 @@ public abstract class Task extends BaseEntity {
     //    指派执行者：sync-server的name
     @Indexed(value = IndexDirection.ASC, name = "syncServerName", unique = false, dropDups = true)
     private String syncServerName;
-    //  创建时间
-    private Date createTime;
-    //  最后更新时间
-    private Date lastUpdateTime;
     // SyncTaskId
     private Long syncTaskId;
     //状态
@@ -88,22 +82,6 @@ public abstract class Task extends BaseEntity {
         this.syncServerName = syncServerName;
     }
 
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public Date getLastUpdateTime() {
-        return lastUpdateTime;
-    }
-
-    public void setLastUpdateTime(Date lastUpdateTime) {
-        this.lastUpdateTime = lastUpdateTime;
-    }
-
     public TaskState getTaskState() {
         return taskState;
     }
@@ -121,8 +99,8 @@ public abstract class Task extends BaseEntity {
     @Override
     public String toString() {
         return "Task [type=" + type + ", srcMysqlName=" + srcMysqlName + ", destMysqlName=" + destMysqlName + ", destMysqlHost="
-                + destMysqlHost + ", syncServerName=" + syncServerName + ", createTime=" + createTime + ", lastUpdateTime="
-                + lastUpdateTime + ", syncTaskId=" + syncTaskId + ", taskState=" + taskState + "]";
+                + destMysqlHost + ", syncServerName=" + syncServerName + ", syncTaskId=" + syncTaskId + ", taskState=" + taskState
+                + "]";
     }
 
 }

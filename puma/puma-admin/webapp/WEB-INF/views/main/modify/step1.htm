@@ -96,7 +96,7 @@ blockquote button {
                      method="post"
                      onsubmit="submit0(this);return false;"
                      onSuccess="onSuccess"
-                     action="${rc.contextPath}/modify/action/step1Save">
+                     action="${rc.contextPath}/modify/step1Save">
                      #foreach($database in
                      $syncTaskAction.mysqlMapping.databases)
                      <div>
@@ -202,7 +202,7 @@ blockquote button {
 		if (data.success == false) {
 			pumadmin.appError("错误信息", data.errorMsg);
 		} else {
-			window.location = "${rc.contextPath}/modify/action/step2";
+			window.location = "${rc.contextPath}/modify/step2";
 		}
 	}
 	function addTableDiv(aLink) {

@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,11 +21,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.dianping.puma.admin.service.DumpActionService;
+import com.dianping.puma.admin.service.CatchupTaskService;
+import com.dianping.puma.admin.service.DumpTaskService;
 import com.dianping.puma.admin.service.MysqlConfigService;
 import com.dianping.puma.admin.service.PumaSyncServerConfigService;
-import com.dianping.puma.admin.service.SyncTaskActionService;
+import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.admin.util.GsonUtil;
+import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.config.MysqlConfig;
 import com.dianping.puma.core.sync.model.config.MysqlHost;
 import com.dianping.puma.core.sync.model.config.PumaSyncServerConfig;
@@ -32,6 +35,7 @@ import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.DumpMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
+import com.dianping.puma.core.sync.model.task.CatchupTask;
 import com.dianping.puma.core.sync.model.task.DumpTask;
 import com.dianping.puma.core.sync.model.task.SyncTask;
 import com.dianping.puma.core.sync.model.task.TaskState;
@@ -51,11 +55,13 @@ public class ModifyController {
     @Autowired
     private MysqlConfigService mysqlConfigService;
     @Autowired
-    private DumpActionService dumpActionService;
+    private DumpTaskService dumpTaskService;
     @Autowired
     private PumaSyncServerConfigService pumaSyncServerConfigService;
     @Autowired
-    private SyncTaskActionService syncTaskActionService;
+    private SyncTaskService syncTaskService;
+    @Autowired
+    private CatchupTaskService catchupTaskService;
 
     private static final String errorMsg = "对不起，出了一点错误，请刷新页面试试。";
     private static final int PAGESIZE = 8;
@@ -65,12 +71,12 @@ public class ModifyController {
         return modify0(request, response, 1);
     }
 
-    @RequestMapping(value = { "/modify/{pageNum}" })
+    @RequestMapping(value = { "/modify/p/{pageNum}" })
     public ModelAndView modify0(HttpServletRequest request, HttpServletResponse response, @PathVariable("pageNum") Integer pageNum) {
         Map<String, Object> map = new HashMap<String, Object>();
         //        System.out.println(syncConfigService.find());
         int offset = pageNum == null ? 0 : (pageNum - 1) * PAGESIZE;
-        List<SyncTask> syncTaskActions = syncTaskActionService.find(offset, PAGESIZE);
+        List<SyncTask> syncTaskActions = syncTaskService.find(offset, PAGESIZE);
         map.put("syncTaskActions", syncTaskActions);
         map.put("modifyActive", "active");
         map.put("subPath", "view");
@@ -81,10 +87,10 @@ public class ModifyController {
     /**
      * 修改SyncTaskActionState的页面
      */
-    @RequestMapping(value = "/modify/action/{id}", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "/modify/{id}", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
     public ModelAndView action(HttpSession session, @PathVariable("id") Long actionId) {
         Map<String, Object> map = new HashMap<String, Object>();
-        SyncTask syncTaskAction = this.syncTaskActionService.find(actionId);
+        SyncTask syncTaskAction = this.syncTaskService.find(actionId);
         TaskState actionState = syncTaskAction.getTaskState();
         session.setAttribute("syncTaskAction", syncTaskAction);
         session.setAttribute("syncTaskActionState", actionState);
@@ -94,7 +100,7 @@ public class ModifyController {
         return new ModelAndView("main/container", map);
     }
 
-    @RequestMapping(value = "/modify/action/step1Save", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "/modify/step1Save", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object step1Save(HttpSession session, String[] databaseFrom, String[] databaseTo, String[] tableFrom, String[] tableTo,
                             Integer count[]) {
@@ -149,7 +155,7 @@ public class ModifyController {
             //对比新的mapping和现有的mapping
             SyncTask syncTaskAction = (SyncTask) session.getAttribute("syncTaskAction");
             MysqlMapping oldMysqlMapping = syncTaskAction.getMysqlMapping();
-            MysqlMapping additionalMysqlMapping = this.syncTaskActionService.compare(oldMysqlMapping, mysqlMapping);
+            MysqlMapping additionalMysqlMapping = this.syncTaskService.compare(oldMysqlMapping, mysqlMapping);
 
             //保存到session
             session.setAttribute("mysqlMapping", mysqlMapping);
@@ -168,7 +174,7 @@ public class ModifyController {
 
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = { "/modify/action/step2" })
+    @RequestMapping(method = RequestMethod.GET, value = { "/modify/step2" })
     public ModelAndView step2(HttpSession session) throws SQLException {
         Map<String, Object> map = new HashMap<String, Object>();
         //从session拿出srcMysql，destMysql查询mysql配置
@@ -181,7 +187,7 @@ public class ModifyController {
         List<PumaSyncServerConfig> syncServerConfigs = pumaSyncServerConfigService.findAll();
         //从会话中取出保存的mysqlMapping，计算出dumpMapping
         MysqlMapping additionalMysqlMapping = (MysqlMapping) session.getAttribute("additionalMysqlMapping");
-        DumpMapping dumpMapping = this.syncTaskActionService.convertMysqlMappingToDumpMapping(srcMysqlConfig.getHosts().get(0),
+        DumpMapping dumpMapping = this.syncTaskService.convertMysqlMappingToDumpMapping(srcMysqlConfig.getHosts().get(0),
                 additionalMysqlMapping);
         session.setAttribute("dumpMapping", dumpMapping);
 
@@ -230,7 +236,7 @@ public class ModifyController {
             dumpAction.setDumpMapping(dumpMapping);
             dumpAction.setSyncServerName(syncServerName);
             //保存dumpAction到数据库
-            dumpActionService.create(dumpAction);
+            dumpTaskService.create(dumpAction);
             //保存dumpAction到session
             session.setAttribute("dumpActionId", dumpAction.getId());
             session.setAttribute("srcMysqlHost", srcMysqlHost0);//创建CatchupAction和SyncTaskAction需要从srcMysqlHost0获取serverId显示到页面
@@ -263,7 +269,7 @@ public class ModifyController {
                 throw new IllegalArgumentException("dumpActionId为空，可能是会话已经过期！");
             }
             //查询dumpActionId对应的DumpActionState
-            DumpTask dumpAction = this.dumpActionService.find(id);
+            DumpTask dumpAction = this.dumpTaskService.find(id);
             TaskState actionState = dumpAction.getTaskState();
             if (actionState != null) {
                 map.put("dumpActionState", actionState);
@@ -288,19 +294,112 @@ public class ModifyController {
     }
 
     /**
-     * 创建CatchupAction的页面?????????????????????????
+     * 创建CatchupAction的页面
      */
-    @RequestMapping(method = RequestMethod.GET, value = { "/modify/action/step3" })
+    @RequestMapping(method = RequestMethod.GET, value = { "/modify/step3" })
     public ModelAndView step3(HttpSession session) throws SQLException {
         Map<String, Object> map = new HashMap<String, Object>();
         //查询所有syncServer
         List<PumaSyncServerConfig> syncServerConfigs = pumaSyncServerConfigService.findAll();
 
         map.put("syncServerConfigs", syncServerConfigs);
+        map.put("pumaClientName", "Catchup-" + UUID.randomUUID());
         map.put("modifyActive", "active");
         map.put("path", "modify");
         map.put("subPath", "step3");
         return new ModelAndView("main/container", map);
+    }
+
+    @RequestMapping(value = "/create/createCatchupTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object createCatchupTask(HttpSession session, String binlogFile, String binlogPosition, String pumaClientName,
+                                    Long serverId) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            //检查参数
+            if (StringUtils.isBlank(binlogFile)) {
+                throw new IllegalArgumentException("binlogFile不能为空");
+            }
+            if (StringUtils.isBlank(binlogPosition)) {
+                throw new IllegalArgumentException("binlogPosition不能为空");
+            }
+            if (StringUtils.isBlank(pumaClientName)) {
+                throw new IllegalArgumentException("pumaClientName不能为空");
+            }
+            if (serverId == null) {
+                throw new IllegalArgumentException("serverId不能为空");
+            }
+            //从session拿出SyncTask
+            SyncTask syncTask = (SyncTask) session.getAttribute("syncTaskAction");
+            MysqlMapping mysqlMapping = (MysqlMapping) session.getAttribute("mysqlMapping");
+            //创建
+            CatchupTask catchupTask = new CatchupTask();
+            catchupTask.setSrcMysqlName(syncTask.getSrcMysqlName());
+            catchupTask.setDestMysqlName(syncTask.getDestMysqlName());
+            catchupTask.setDestMysqlHost(syncTask.getDestMysqlHost());
+            catchupTask.setMysqlMapping(mysqlMapping);
+            catchupTask.setSyncServerName(syncTask.getSyncServerName());
+            BinlogInfo binlogInfo = new BinlogInfo();
+            if (StringUtils.isNotBlank(binlogFile) && StringUtils.isNotBlank(binlogPosition)) {
+                binlogInfo.setBinlogFile(binlogFile);
+                binlogInfo.setBinlogPosition(Long.parseLong(binlogPosition));
+            }
+            catchupTask.setBinlogInfo(binlogInfo);
+            catchupTask.setDdl(syncTask.isDdl());
+            catchupTask.setDml(syncTask.isDml());
+            catchupTask.setPumaClientName(pumaClientName);
+            catchupTask.setServerId(serverId);
+            catchupTask.setTransaction(syncTask.isTransaction());
+            catchupTask.setSyncTaskId(syncTask.getId());
+            //保存到数据库
+            catchupTaskService.create(catchupTask);
+            //保存catchupTask到session
+            session.setAttribute("catchupTaskId", catchupTask.getId());
+
+            map.put("success", true);
+        } catch (IllegalArgumentException e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", errorMsg);
+            LOG.error(e.getMessage(), e);
+        }
+        return GsonUtil.toJson(map);
+    }
+
+    /**
+     * 查看CatchupTask的状态
+     */
+    @RequestMapping(value = "/modify/refleshCatchupTaskState", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object refleshCatchupTaskState(HttpSession session) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            Long id = (Long) session.getAttribute("catchupTaskId");
+            //检查参数
+            if (id == null) {
+                throw new IllegalArgumentException("catchupTaskId为空，可能是会话已经过期！");
+            }
+            //查询dumpActionId对应的DumpActionState
+            CatchupTask catchupTask = this.catchupTaskService.find(id);
+            TaskState taskState = catchupTask.getTaskState();
+            map.put("catchupTaskState", taskState);
+            if (taskState.getBinlogInfo() != null) {
+                session.setAttribute("binlogInfo", taskState.getBinlogInfo());
+            }
+
+            map.put("success", true);
+        } catch (IllegalArgumentException e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", errorMsg);
+            LOG.error(e.getMessage(), e);
+        }
+        return GsonUtil.toJson(map);
+
     }
 
     private MysqlHost getMysqlHost(MysqlConfig mysqlConfig, String mysqlHostStr) {

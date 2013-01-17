@@ -11,7 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.dianping.puma.admin.service.SyncTaskActionService;
+import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.admin.util.MysqlMetaInfoFetcher;
 import com.dianping.puma.core.sync.dao.task.SyncTaskDao;
 import com.dianping.puma.core.sync.model.config.MysqlHost;
@@ -29,7 +29,7 @@ import com.google.code.morphia.query.QueryResults;
 import com.google.code.morphia.query.UpdateOperations;
 
 @Service("syncTaskActionService")
-public class SyncTaskServiceImpl implements SyncTaskActionService {
+public class SyncTaskServiceImpl implements SyncTaskService {
     @Autowired
     SyncTaskDao syncTaskDao;
 
@@ -57,7 +57,6 @@ public class SyncTaskServiceImpl implements SyncTaskActionService {
         Date curDate = new Date();
         actionState.setCreateTime(curDate);
         actionState.setLastUpdateTime(curDate);
-        actionState.setBinlogInfo(syncTaskAction.getBinlogInfo());
         syncTaskAction.setTaskState(actionState);
         //开始保存
         Key<SyncTask> key = this.syncTaskDao.save(syncTaskAction);

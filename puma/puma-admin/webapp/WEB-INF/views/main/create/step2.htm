@@ -2,10 +2,9 @@
    style="margin: 0 auto; width: 100%; margin-bottom: 50px;">
    <ul id="stepsBreak" class="breadcrumb">
       <li class="step_done">第1步: 填写基础配置 <span class="divider">&gt;</span></li>
-      <li class="step_active">第2步: 创建DumpAction <span
-         class="divider">&gt;</span>
+      <li class="step_active">第2步: 创建DumpTask <span class="divider">&gt;</span>
       </li>
-      <li class="step_undo">第3步: 创建SyncTaskAction</li>
+      <li class="step_undo">第3步: 创建SyncTask</li>
    </ul>
    <div>
       <a href="${rc.contextPath}/create/step3" id="dumpStepButton"
@@ -16,9 +15,9 @@
             <div class="row-fluid">
                <div class="span10">
                   <form class="form" method="post"
-                     onsubmit="createDumpAction(this);return false;"
-                     action="${rc.contextPath}/create/createDumpAction">
-                     <label style="">DumpAction状态(<a
+                     onsubmit="createDumpTask(this);return false;"
+                     action="${rc.contextPath}/create/createDumpTask">
+                     <label style="">DumpTask状态(<a
                         href="javascript:refleshDumpState();">刷新状态</a>)：<span
                         style="font-size: 12px; color: red"
                         id="dumpState"> </span>
@@ -32,7 +31,7 @@
                      </label>
                      <button id="createDumpButton"
                         style="float: right; margin-right: 20px;"
-                        type="submit" class="btn btn-info">创建DumpAction</button>
+                        type="submit" class="btn btn-info">创建DumpTask</button>
                      <select name="srcMysqlHost"
                         style="margin-left: 16px; margin-right: 16px;">
                         #foreach($srcHost in ${srcMysqlConfig.hosts})
@@ -106,18 +105,18 @@
    </div>
 </div>
 <script>
-	function createDumpAction(form) {
+	function createDumpTask(form) {
 		$.ajax({
 			type : $(form).attr('method'),
 			url : $(form).attr('action'),
 			data : $(form).serialize(),
 			dataType : "json",
-			success : createDumpActionDone,
+			success : createDumpTaskDone,
 			error : pumadmin.httpError
 		});
 		return false;
 	}
-	function createDumpActionDone(data) {
+	function createDumpTaskDone(data) {
 		if (data.success == false) {
 			pumadmin.appError("错误信息", data.errorMsg);
 		} else {
@@ -144,14 +143,14 @@
 			pumadmin.appError("访问发生错误", data.errorMsg);
 		} else {
 			$('#dumpState').text(
-					data.dumpActionState.state + " (创建时间："
-							+ data.dumpActionState.createTime + ")");
-			if (data.dumpActionState.binlogInfo
-					&& data.dumpActionState.binlogInfo.binlogFile) {
+					data.dumpTaskState.state + " (创建时间："
+							+ data.dumpTaskState.createTime + ")");
+			if (data.dumpTaskState.binlogInfo
+					&& data.dumpTaskState.binlogInfo.binlogFile) {
 				$('#dumpBinlogFile').val(
-						data.dumpActionState.binlogInfo.binlogFile);
+						data.dumpTaskState.binlogInfo.binlogFile);
 				$('#dumpBinlogPos').val(
-						data.dumpActionState.binlogInfo.binlogPosition);
+						data.dumpTaskState.binlogInfo.binlogPosition);
 				//把文案显示成“下一步”
 				$("#dumpStepButton").addClass("btn-success");
 				$("#dumpStepButton").text("下一步");

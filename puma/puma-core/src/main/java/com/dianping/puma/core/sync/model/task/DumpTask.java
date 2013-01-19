@@ -3,7 +3,6 @@ package com.dianping.puma.core.sync.model.task;
 import java.util.Arrays;
 import java.util.List;
 
-import com.dianping.puma.core.sync.model.config.MysqlHost;
 import com.dianping.puma.core.sync.model.mapping.DumpMapping;
 import com.google.code.morphia.annotations.Entity;
 
@@ -11,9 +10,6 @@ import com.google.code.morphia.annotations.Entity;
 public class DumpTask extends Task {
 
     private static final long serialVersionUID = 1174973531845800248L;
-
-    //    源数据库的具体host
-    private MysqlHost srcMysqlHost;
 
     //Dump配置：映射配置(DumpConfig)
     private DumpMapping dumpMapping;
@@ -24,14 +20,6 @@ public class DumpTask extends Task {
 
     public DumpTask() {
         super(Type.DUMP);
-    }
-
-    public MysqlHost getSrcMysqlHost() {
-        return srcMysqlHost;
-    }
-
-    public void setSrcMysqlHost(MysqlHost srcMysqlHost) {
-        this.srcMysqlHost = srcMysqlHost;
     }
 
     public DumpMapping getDumpMapping() {
@@ -52,8 +40,7 @@ public class DumpTask extends Task {
 
     @Override
     public String toString() {
-        return "DumpTask [srcMysqlHost=" + srcMysqlHost + ", dumpMapping=" + dumpMapping + ", options=" + options + ", toString()="
-                + super.toString() + "]";
+        return "DumpTask [dumpMapping=" + dumpMapping + ", options=" + options + ", toString()=" + super.toString() + "]";
     }
 
 }

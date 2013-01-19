@@ -17,6 +17,8 @@ public abstract class Task extends BaseEntity {
     //    源：源数据库名称(如Dianping)
     @Indexed(value = IndexDirection.ASC, name = "srcMysqlName", unique = false, dropDups = true)
     private String srcMysqlName;
+    //  源：具体host
+    private MysqlHost srcMysqlHost;
     //    目标：目标的数据库名称
     @Indexed(value = IndexDirection.ASC, name = "destMysqlName", unique = false, dropDups = true)
     private String destMysqlName;
@@ -52,6 +54,14 @@ public abstract class Task extends BaseEntity {
 
     public String getSrcMysqlName() {
         return srcMysqlName;
+    }
+
+    public MysqlHost getSrcMysqlHost() {
+        return srcMysqlHost;
+    }
+
+    public void setSrcMysqlHost(MysqlHost srcMysqlHost) {
+        this.srcMysqlHost = srcMysqlHost;
     }
 
     public void setSrcMysqlName(String srcMysqlName) {

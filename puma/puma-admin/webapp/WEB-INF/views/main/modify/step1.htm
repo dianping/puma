@@ -63,9 +63,9 @@ blockquote button {
                <blockquote>
                   <strong class="">创建时的Binlog起始位置：</strong> <span>$syncTaskAction.binlogInfo.binlogFile
                      $syncTaskAction.binlogInfo.binlogPosition</span> <strong
-                     class="actionText">创建时间：</strong> <span>${dateFormatUtils.format($syncTaskAction.createTime,"yyyy年MM月dd日
+                     class="actionText">创建时间：</strong> <span>${dateFormatUtils.format($syncTaskAction.gmtCreate,"yyyy年MM月dd日
                      HH时mm分")}</span> <strong class="actionText">最后更新时间：</strong>
-                  <span>${dateFormatUtils.format($syncTaskAction.lastUpdateTime,"yyyy年MM月dd日
+                  <span>${dateFormatUtils.format($syncTaskAction.gmtModified,"yyyy年MM月dd日
                      HH时mm分")}</span>
                </blockquote>
             </div>

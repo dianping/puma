@@ -53,11 +53,11 @@ public class CreateController {
     @Autowired
     private MysqlConfigService mysqlConfigService;
     @Autowired
-    private DumpTaskService dumpActionService;
+    private DumpTaskService dumpTaskService;
     @Autowired
     private PumaSyncServerConfigService pumaSyncServerConfigService;
     @Autowired
-    private SyncTaskService syncTaskActionService;
+    private SyncTaskService syncTaskService;
 
     private static final String errorMsg = "对不起，出了一点错误，请刷新页面试试。";
 
@@ -80,7 +80,7 @@ public class CreateController {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             //判断该srcMysql和destMysql是否重复
-            if (this.syncTaskActionService.existsBySrcAndDest(srcMysql, destMysql)) {
+            if (this.syncTaskService.existsBySrcAndDest(srcMysql, destMysql)) {
                 throw new IllegalArgumentException("创建失败，已有相同的配置存在。(srcMysqlName=" + srcMysql + ", destMysqlName=" + destMysql
                         + ")");
             }
@@ -112,6 +112,13 @@ public class CreateController {
     @ResponseBody
     public Object step1Save(HttpSession session, String srcMysql, String destMysql, String databaseFrom, String databaseTo,
                             String[] tableFrom, String[] tableTo) {
+        //清除之前的状态
+        session.removeAttribute("dumpMapping");
+        session.removeAttribute("dumpTask");
+        session.removeAttribute("srcMysqlConfig");
+        session.removeAttribute("destMysqlConfig");
+        session.removeAttribute("mysqlMapping");
+
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             if (StringUtils.isBlank(srcMysql) || StringUtils.isBlank(destMysql)) {
@@ -125,7 +132,7 @@ public class CreateController {
                 throw new IllegalArgumentException("源表个数和目标表的个数不一致。(tableFrom=" + tableFrom + ", tableTo=" + tableTo + ")");
             }
             //判断该srcMysql和destMysql是否重复
-            if (this.syncTaskActionService.existsBySrcAndDest(srcMysql, destMysql)) {
+            if (this.syncTaskService.existsBySrcAndDest(srcMysql, destMysql)) {
                 throw new IllegalArgumentException("创建失败，已有相同的配置存在。(srcMysqlName=" + srcMysql + ", destMysqlName=" + destMysql
                         + ")");
             }
@@ -176,7 +183,7 @@ public class CreateController {
         List<PumaSyncServerConfig> syncServerConfigs = pumaSyncServerConfigService.findAll();
         //从会话中取出保存的mysqlMapping，计算出dumpMapping
         MysqlMapping mysqlMapping = (MysqlMapping) session.getAttribute("mysqlMapping");
-        DumpMapping dumpMapping = this.syncTaskActionService.convertMysqlMappingToDumpMapping(srcMysqlConfig.getHosts().get(0),
+        DumpMapping dumpMapping = this.syncTaskService.convertMysqlMappingToDumpMapping(srcMysqlConfig.getHosts().get(0),
                 mysqlMapping);
         session.setAttribute("dumpMapping", dumpMapping);
 
@@ -191,11 +198,11 @@ public class CreateController {
     }
 
     /**
-     * 创建DumpAction
+     * 创建DumpTask
      */
-    @RequestMapping(value = "/create/createDumpAction", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "/create/createDumpTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object createDumpAction(HttpSession session, String srcMysqlHost, String destMysqlHost, String syncServerName) {
+    public Object createDumpTask(HttpSession session, String srcMysqlHost, String destMysqlHost, String syncServerName) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             //检查参数
@@ -217,19 +224,18 @@ public class CreateController {
             //根据选择的destMysqlHost，找出其MysqlHost对象
             MysqlHost destMysqlHost0 = getMysqlHost(destMysqlConfig, destMysqlHost);
             //查询所有syncServer
-            DumpTask dumpAction = new DumpTask();
-            dumpAction.setSrcMysqlName(srcMysqlConfig.getName());
-            dumpAction.setSrcMysqlHost(srcMysqlHost0);
-            dumpAction.setDestMysqlName(destMysqlConfig.getName());
-            dumpAction.setDestMysqlHost(destMysqlHost0);
-            dumpAction.setDumpMapping(dumpMapping);
-            dumpAction.setSyncServerName(syncServerName);
-            //保存dumpAction到数据库
-            dumpActionService.create(dumpAction);
-            //保存dumpAction到session
-            session.setAttribute("dumpActionId", dumpAction.getId());
-            session.setAttribute("srcMysqlHost", srcMysqlHost0);//创建SyncTaskAction需要从srcMysqlHost0获取serverId显示到页面
-            LOG.info("created dumpAction: " + dumpAction);
+            DumpTask dumpTask = new DumpTask();
+            dumpTask.setSrcMysqlName(srcMysqlConfig.getName());
+            dumpTask.setSrcMysqlHost(srcMysqlHost0);
+            dumpTask.setDestMysqlName(destMysqlConfig.getName());
+            dumpTask.setDestMysqlHost(destMysqlHost0);
+            dumpTask.setDumpMapping(dumpMapping);
+            dumpTask.setSyncServerName(syncServerName);
+            //保存dumpTask到数据库
+            dumpTaskService.create(dumpTask);
+            //保存dumpTask到session
+            session.setAttribute("dumpTask", dumpTask);
+            LOG.info("created dumpTask: " + dumpTask);
 
             map.put("success", true);
         } catch (IllegalArgumentException e) {
@@ -245,28 +251,25 @@ public class CreateController {
     }
 
     /**
-     * 查看DumpAction的状态
+     * 刷新DumpTask的状态
      */
     @RequestMapping(value = "/create/refleshDumpState", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object refleshDumpState(HttpSession session) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            Long id = (Long) session.getAttribute("dumpActionId");
+            DumpTask dumpTask = (DumpTask) session.getAttribute("dumpTask");
             //检查参数
-            if (id == null) {
-                throw new IllegalArgumentException("dumpActionId为空，可能是会话已经过期！");
+            if (dumpTask == null) {
+                throw new IllegalArgumentException("dumpTask为空，可能是会话已经过期！");
             }
-            //查询dumpActionId对应的DumpActionState
-            DumpTask dumpAction = this.dumpActionService.find(id);
-            TaskState actionState = dumpAction.getTaskState();
-            if (actionState != null) {
-                map.put("dumpActionState", actionState);
-                if (actionState.getBinlogInfo() != null) {
-                    session.setAttribute("binlogInfo", actionState.getBinlogInfo());
-                }
-            } else {
-                throw new IllegalArgumentException("dumpActionState不存在，请管理员查看什么原因！");
+            //查询dumpTaskId对应的DumpTaskState
+            dumpTask = this.dumpTaskService.find(dumpTask.getId());
+            session.setAttribute("dumpTask", dumpTask);
+            TaskState taskState = dumpTask.getTaskState();
+            map.put("dumpTaskState", taskState);
+            if (taskState.getBinlogInfo() != null) {
+                session.setAttribute("binlogInfo", taskState.getBinlogInfo());
             }
 
             map.put("success", true);
@@ -297,26 +300,23 @@ public class CreateController {
     }
 
     /**
-     * 创建SyncAction
+     * 创建SyncTask
      * 
      * @param ddl
      * @param pumaClientName
      * @param serverId
      * @param transaction
      */
-    @RequestMapping(value = "/create/createSyncAction", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "/create/createSyncTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object createSyncAction(HttpSession session, String syncServerName, String destMysqlHost, String binlogFile,
-                                   String binlogPosition, Boolean ddl, Boolean dml, String pumaClientName, Long serverId,
-                                   Boolean transaction) {
+    public Object createSyncTask(HttpSession session, String syncServerName, String destMysqlHost, String binlogFile,
+                                 String binlogPosition, Boolean ddl, Boolean dml, String pumaClientName, Long serverId,
+                                 Boolean transaction) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             //检查参数
             if (StringUtils.isBlank(syncServerName)) {
-                throw new IllegalArgumentException("syncServerHost不能为空");
-            }
-            if (StringUtils.isBlank(destMysqlHost)) {
-                throw new IllegalArgumentException("destMysqlHost不能为空");
+                throw new IllegalArgumentException("syncServerName不能为空");
             }
             if (StringUtils.isBlank(binlogFile)) {
                 throw new IllegalArgumentException("binlogFile不能为空");
@@ -327,38 +327,50 @@ public class CreateController {
             if (StringUtils.isBlank(pumaClientName)) {
                 throw new IllegalArgumentException("pumaClientName不能为空");
             }
-            if (serverId == null) {
-                throw new IllegalArgumentException("serverId不能为空");
-            }
             //从session拿出
-            MysqlConfig srcMysqlConfig = (MysqlConfig) session.getAttribute("srcMysqlConfig");
-            MysqlConfig destMysqlConfig = (MysqlConfig) session.getAttribute("destMysqlConfig");
+            DumpTask dumpTask = (DumpTask) session.getAttribute("dumpTask");
             MysqlMapping mysqlMapping = (MysqlMapping) session.getAttribute("mysqlMapping");
-            //创建SyncAction
-            SyncTask syncTaskAction = new SyncTask();
-            syncTaskAction.setSrcMysqlName(srcMysqlConfig.getName());
-            syncTaskAction.setDestMysqlName(destMysqlConfig.getName());
-            syncTaskAction.setDestMysqlHost(getMysqlHost(destMysqlConfig, destMysqlHost));
-            syncTaskAction.setMysqlMapping(mysqlMapping);
-            syncTaskAction.setSyncServerName(syncServerName);
+            //创建SyncTask
+            SyncTask syncTask = new SyncTask();
+            if (dumpTask != null) {
+                syncTask.setSrcMysqlName(dumpTask.getSrcMysqlName());
+                syncTask.setDestMysqlName(dumpTask.getDestMysqlName());
+                syncTask.setDestMysqlHost(dumpTask.getDestMysqlHost());
+                syncTask.setServerId(dumpTask.getSrcMysqlHost().getServerId());
+            } else {
+                //检查参数
+                if (StringUtils.isBlank(destMysqlHost)) {
+                    throw new IllegalArgumentException("destMysqlHost不能为空");
+                }
+                if (serverId == null) {
+                    throw new IllegalArgumentException("serverId不能为空");
+                }
+                MysqlConfig srcMysqlConfig = (MysqlConfig) session.getAttribute("srcMysqlConfig");
+                MysqlConfig destMysqlConfig = (MysqlConfig) session.getAttribute("destMysqlConfig");
+                syncTask.setSrcMysqlName(srcMysqlConfig.getName());
+                syncTask.setDestMysqlName(destMysqlConfig.getName());
+                syncTask.setDestMysqlHost(getMysqlHost(destMysqlConfig, destMysqlHost));
+                syncTask.setServerId(serverId);
+            }
+            syncTask.setMysqlMapping(mysqlMapping);
+            syncTask.setSyncServerName(syncServerName);
             BinlogInfo binlogInfo = new BinlogInfo();
             if (StringUtils.isNotBlank(binlogFile) && StringUtils.isNotBlank(binlogPosition)) {
                 binlogInfo.setBinlogFile(binlogFile);
                 binlogInfo.setBinlogPosition(Long.parseLong(binlogPosition));
             }
-            syncTaskAction.setBinlogInfo(binlogInfo);
-            syncTaskAction.setDdl(ddl != null ? ddl : true);
-            syncTaskAction.setDml(dml != null ? dml : true);
-            syncTaskAction.setPumaClientName(pumaClientName);
-            syncTaskAction.setServerId(serverId);
-            syncTaskAction.setTransaction(transaction != null ? transaction : true);
-            //保存dumpAction到数据库
-            syncTaskActionService.create(syncTaskAction);
-            //更新dumpAction的syncTaskId
-            Long syncTaskId = syncTaskAction.getId();
-            Long dumpActionId = (Long) session.getAttribute("dumpActionId");
-            this.dumpActionService.updateSyncTaskId(dumpActionId, syncTaskId);
-            LOG.info("syncTaskAction.getId(): " + syncTaskAction.getId());
+            syncTask.setBinlogInfo(binlogInfo);
+            syncTask.setPumaClientName(pumaClientName);
+            syncTask.setDdl(ddl != null ? ddl : true);
+            syncTask.setDml(dml != null ? dml : true);
+            syncTask.setTransaction(transaction != null ? transaction : true);
+            //保存dumpTask到数据库
+            syncTaskService.create(syncTask);
+            //更新dumpTask的syncTaskId
+            Long syncTaskId = syncTask.getId();
+            Long dumpTaskId = (Long) session.getAttribute("dumpTaskId");
+            this.dumpTaskService.updateSyncTaskId(dumpTaskId, syncTaskId);
+            LOG.info("syncTask.getId(): " + syncTask.getId());
 
             map.put("success", true);
         } catch (IllegalArgumentException e) {

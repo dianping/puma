@@ -53,7 +53,7 @@
                      style="margin-left: 16px;">
                   #else 
                     <label>选择源数据库(${srcMysqlConfig.name})的Host:
-                    </label> <select name="destMysqlHost"
+                    </label> <select name="srcMysqlHost"
                      style="margin-left: 16px; margin-right: 16px;">
                      #foreach($destHost in ${destMysqlConfig.hosts})
                      <option value="$destHost.host">$destHost.host</option>

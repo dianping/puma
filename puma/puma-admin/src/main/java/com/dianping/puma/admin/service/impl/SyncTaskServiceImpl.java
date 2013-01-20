@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.admin.util.MysqlMetaInfoFetcher;
 import com.dianping.puma.core.sync.dao.task.SyncTaskDao;
+import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.config.MysqlHost;
 import com.dianping.puma.core.sync.model.mapping.ColumnMapping;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
@@ -189,6 +190,14 @@ public class SyncTaskServiceImpl implements SyncTaskService {
         }
         ops.set("actionState.detail", state.getDesc());
         ops.set("actionState.lastUpdateTime", new Date());
+        this.syncTaskDao.getDatastore().update(new Key<SyncTask>(SyncTask.class, id), ops);
+    }
+
+    @Override
+    public void modify(Long id, BinlogInfo binlogInfo, MysqlMapping newMysqlMapping) {
+        UpdateOperations<SyncTask> ops = this.syncTaskDao.getDatastore().createUpdateOperations(SyncTask.class)
+                .set("binlogInfo", binlogInfo);
+        ops.set("mysqlMapping", newMysqlMapping);
         this.syncTaskDao.getDatastore().update(new Key<SyncTask>(SyncTask.class, id), ops);
     }
 

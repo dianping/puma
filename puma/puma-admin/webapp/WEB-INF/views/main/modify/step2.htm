@@ -12,8 +12,7 @@
    <ul id="stepsBreak" class="breadcrumb">
       <li class="step_done">第1步: 修改 <span class="divider">&gt;</span></li>
       <li class="step_active">第2步: mysqldump <span class="divider">&gt;</span></li>
-      <li class="step_undo">第3步: 暂停与追赶 <span class="divider">&gt;</span></li>
-      <li class="step_undo">第4步: 重启同步</li>
+      <li class="step_undo">第3步: 暂停与追赶</li>
    </ul>
    <div>
       <a href="${rc.contextPath}/modify/step3" id="dumpStepButton"
@@ -36,18 +35,13 @@
                      binlog位置：<input class="input-mini" type="text"
                         disabled="disabled" id="dumpBinlogPos">
                      <hr>
-                     <label>选择源数据库(${srcMysqlConfig.name})的Host:
-                     </label>
+                     <label>选择源数据库($syncTask.srcMysqlName)的Host:
+                     </label> <span class="input-large uneditable-input">$syncTask.srcMysqlHost.host</span>
+                     <label>选择目标数据库(${syncTask.destMysqlName})的Host:
+                     </label> <span class="input-large uneditable-input">$syncTask.destMysqlHost.host</span>
                      <button id="createDumpButton"
                         style="float: right; margin-right: 20px;"
                         type="submit" class="btn btn-info">创建DumpAction</button>
-                     <select name="srcMysqlHost"
-                        style="margin-left: 16px; margin-right: 16px;">
-                        #foreach($srcHost in ${srcMysqlConfig.hosts})
-                        <option value="$srcHost.host">$srcHost.host</option>
-                        #end
-                     </select> <br> <label>目标数据库(${destMysqlConfig.name})的Host:
-                     </label> <span class="input-large uneditable-input">${syncTaskAction.destMysqlHost.host}</span>
                      <br> <label>选择SyncServer作为dump的服务器执行者:
                      </label> <select name="syncServerName"
                         style="margin-left: 16px; margin-right: 16px;">

@@ -309,9 +309,9 @@ public class CreateController {
      */
     @RequestMapping(value = "/create/createSyncTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object createSyncTask(HttpSession session, String syncServerName, String destMysqlHost, String binlogFile,
-                                 String binlogPosition, Boolean ddl, Boolean dml, String pumaClientName, Long serverId,
-                                 Boolean transaction) {
+    public Object createSyncTask(HttpSession session, String syncServerName, String srcMysqlHost, String destMysqlHost,
+                                 String binlogFile, String binlogPosition, Boolean ddl, Boolean dml, String pumaClientName,
+                                 Long serverId, Boolean transaction) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             //检查参数
@@ -334,6 +334,7 @@ public class CreateController {
             SyncTask syncTask = new SyncTask();
             if (dumpTask != null) {
                 syncTask.setSrcMysqlName(dumpTask.getSrcMysqlName());
+                syncTask.setSrcMysqlHost(dumpTask.getSrcMysqlHost());
                 syncTask.setDestMysqlName(dumpTask.getDestMysqlName());
                 syncTask.setDestMysqlHost(dumpTask.getDestMysqlHost());
                 syncTask.setServerId(dumpTask.getSrcMysqlHost().getServerId());
@@ -348,6 +349,7 @@ public class CreateController {
                 MysqlConfig srcMysqlConfig = (MysqlConfig) session.getAttribute("srcMysqlConfig");
                 MysqlConfig destMysqlConfig = (MysqlConfig) session.getAttribute("destMysqlConfig");
                 syncTask.setSrcMysqlName(srcMysqlConfig.getName());
+                syncTask.setSrcMysqlHost(getMysqlHost(srcMysqlConfig, srcMysqlHost));
                 syncTask.setDestMysqlName(destMysqlConfig.getName());
                 syncTask.setDestMysqlHost(getMysqlHost(destMysqlConfig, destMysqlHost));
                 syncTask.setServerId(serverId);

@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.config.MysqlHost;
 import com.dianping.puma.core.sync.model.mapping.DumpMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
@@ -28,5 +29,7 @@ public interface SyncTaskService {
     DumpMapping convertMysqlMappingToDumpMapping(MysqlHost mysqlHost, MysqlMapping mysqlMapping) throws SQLException;
 
     void updateState(Long id, State state, Map<String, String> params);
+
+    void modify(Long id, BinlogInfo binlogInfo, MysqlMapping newMysqlMapping);
 
 }

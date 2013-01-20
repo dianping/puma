@@ -17,24 +17,24 @@
                   </tr>
                </thead>
                <tbody id="resultTable">
-                  #foreach($syncTaskAction in $syncTaskActions)
+                  #foreach($syncTask in $syncTasks)
                   <tr>
-                     <td>$syncTaskAction.srcMysqlName</td>
-                     <td>$syncTaskAction.destMysqlName</td>
-                     <td>$syncTaskAction.pumaClientName</td>
-                     <td>$syncTaskAction.syncServerName</td>
-                     <td stateOfId="$syncTaskAction.id"></td>
-                     <td stateDetailOfId="$syncTaskAction.id"></td>
+                     <td>$syncTask.srcMysqlName</td>
+                     <td>$syncTask.destMysqlName</td>
+                     <td>$syncTask.pumaClientName</td>
+                     <td>$syncTask.syncServerName</td>
+                     <td stateOfId="$syncTask.id"></td>
+                     <td stateDetailOfId="$syncTask.id"></td>
                      <td><a reflesh="" href="javascript:;"
                         onclick="refleshState(this);"
-                        actionId="$syncTaskAction.id"
+                        actionId="$syncTask.id"
                         style="margin-right: 10px">刷新状态</a><a
-                        href="${rc.contextPath}/modify/$syncTaskAction.id">修改</a></td>
+                        href="${rc.contextPath}/modify/$syncTask.id">修改</a></td>
                   </tr>
                   #end
                </tbody>
             </table>
-            #if(${syncTaskActions.size()} == 0)
+            #if(${syncTasks.size()} == 0)
             <div id="noResultDiv" class="alert alert-warn"
                style="text-align: center;">
                <br>
@@ -55,7 +55,7 @@
                   上页</a></li> #else
             <li class="disabled" id="prePage"><a
                href="javascript:;">&larr; 上页</a></li> #end
-            #if(${syncTaskActions.size()} == 0)
+            #if(${syncTasks.size()} == 0)
             <li class="disabled" id="nextPage"><a
                href="javascript:;">下页 &rarr;</a></li> #else
             <li id="nextPage"><a

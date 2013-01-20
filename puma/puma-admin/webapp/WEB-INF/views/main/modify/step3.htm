@@ -1,33 +1,33 @@
 <style>
+#form input {
+	margin-left: 16px;
+}
 
-#form input{
-  margin-left:16px;
+#form select {
+	margin-left: 16px;
 }
-#form select{
-  margin-left:16px;
-}
-#form span.uneditable-input{
-  margin-left:16px;
+
+#form span.uneditable-input {
+	margin-left: 16px;
 }
 </style>
 <div>
    <ul id="stepsBreak" class="breadcrumb">
       <li class="step_done">第1步: 修改 <span class="divider">&gt;</span></li>
       <li class="step_done">第2步: mysqldump <span class="divider">&gt;</span></li>
-      <li class="step_active">第3步: 暂停与追赶 <span class="divider">&gt;</span></li>
-      <li class="step_undo">第4步: 重启同步</li>
+      <li class="step_active">第3步: 暂停与追赶</li>
    </ul>
    <a style="float: right; margin-right: 20px;" type="button"
-      href="${rc.contextPath}/modify/action/${id}/step2" class="btn">上一步</a>
+      href="${rc.contextPath}/modify/step2" class="btn">上一步</a>
    <p class="legend">创建追赶任务</p>
-   <div id="saveSyncTaskError" style="margin-top: 20px; display: none;"
-      class="alert alert-error">
+   <div id="saveCatchupTaskError"
+      style="margin-top: 20px; display: none;" class="alert alert-error">
       <button type="button" class="close" data-dismiss="alert">×</button>
       <p>
-         创建失败！详细原因：<span id="saveSyncTaskErrorCause"></span>
+         创建失败！详细原因：<span id="saveCatchupTaskErrorCause"></span>
       </p>
    </div>
-   <div id="saveSyncTaskSuccess"
+   <div id="saveCatchupTaskSuccess"
       style="margin-top: 20px; display: none;"
       class="alert alert-success">
       <button type="button" class="close" data-dismiss="alert">×</button>
@@ -37,52 +37,135 @@
    <div
       style="padding: 10px 10px 0px 10px; background-color: white; border: 1px solid rgba(0, 0, 0, 0.15); border-radius: 4px 4px 4px 4px;">
       <form id="form" method="post"
-         onsubmit="createSyncAction(this);return false;"
-         action="${rc.contextPath}/create/createSyncAction">
+         onsubmit="createCatchupTask(this);return false;"
+         action="${rc.contextPath}/modify/createCatchupTask">
          <div class="container-fluid">
             <div class="row-fluid">
-               <div  class="span5">
-                   <label>binlog文件：</label><input type="text"
+               <div class="span5">
+                  <label>binlog文件：</label><input type="text"
                      name="binlogFile" value="$!{binlogInfo.binlogFile}"><label>
                      binlog位置：</label><input type="text" name="binlogPosition"
                      value="$!{binlogInfo.binlogPosition}">
                </div>
                <div class="span5">
                   <label>pumaClientName：</label><input type="text"
-                     name="pumaClientName"> <label>serverId：</label><input
-                     type="text" name="serverId"
-                     value="$!srcMysqlHost.serverId"> <label>ddl：</label><input
-                     type="text" name="ddl" placeholder="可选，默认为true">
+                     name="pumaClientName" value="${pumaClientName}">
+                  <label>serverId：</label><input type="text"
+                     disabled="disabled"
+                     value="$syncTask.srcMysqlHost.serverId">
                </div>
-               <button id="createSyncTaskButton"
+               <button id="createCatchupTaskButton"
                   style="float: right; margin-right: 20px;"
                   type="submit" class="btn btn-success">创建任务</button>
             </div>
          </div>
       </form>
    </div>
+   <div>
+      <hr>
+      <div id="updateSyncTaskError"
+         style="margin-top: 20px; display: none;"
+         class="alert alert-error">
+         <button type="button" class="close" data-dismiss="alert">×</button>
+         <p>
+            修改失败！详细原因：<span id="updateSyncTaskErrorCause"></span>
+         </p>
+      </div>
+      <div id="updateSyncTaskSuccess"
+         style="margin-top: 20px; display: none;"
+         class="alert alert-success">
+         <button type="button" class="close" data-dismiss="alert">×</button>
+         修改任务成功！
+      </div>
+      <form id="form" method="post"
+         onsubmit="updateSyncTask(this);return false;"
+         action="${rc.contextPath}/modify/updateSyncTask">
+         <label style="">CatchupTask的状态(<a
+            href="javascript:refleshCatchupTaskState();">刷新状态</a>)：<span
+            style="font-size: 12px; color: red" id="catchupTaskState">
+         </span>
+         </label> <br> binlog文件：<input class="input-mini" type="text"
+            id="catchupTaskBinlogFile" name="binlogFile"
+            style="margin-right: 20px;"> binlog位置：<input
+            class="input-mini" type="text" id="catchupTaskBinlogPos"
+            name="binlogPos"> <label>修改同步任务的binlog和mapping信息，并设置状态为准备状态:
+            <button style="float: right; margin-right: 20px;"
+               type="submit" class="btn btn-success">更新和重启同步任务</button>
+         </label>
+         <hr>
+   </div>
 </div>
 <script>
-	function createSyncAction(form) {
-		$('#saveSyncTaskError').hide();
+	function createCatchupTask(form) {
+		$('#saveCatchupTaskError').hide();
 		$.ajax({
 			type : $(form).attr('method'),
 			url : $(form).attr('action'),
 			data : $(form).serialize(),
 			dataType : "json",
-			success : createSyncActionDone,
+			success : createCatchupTaskDone,
 			error : pumadmin.httpError
 		});
 		return false;
 	}
-	function createSyncActionDone(data) {
+	function createCatchupTaskDone(data) {
 		if (data.success == false) {
 			//pumadmin.appError("错误信息", data.errorMsg);
-			$("#saveSyncTaskErrorCause").text(data.errorMsg);
-			$('#saveSyncTaskError').show();
+			$("#saveCatchupTaskErrorCause").text(data.errorMsg);
+			$('#saveCatchupTaskError').show();
 		} else {
-			$("#createSyncTaskButton").attr("disabled", "disabled");
-			$('#saveSyncTaskSuccess').show();
+			$("#createCatchupTaskButton").attr("disabled", "disabled");
+			$('#saveCatchupTaskSuccess').show();
+		}
+	}
+	function refleshCatchupTaskState() {
+		var param = new Object();
+		// 发送ajax请求jsonp
+		var url = window.contextpath + '/modify/refleshCatchupTaskState';
+		$('#catchupTaskState').text("正在刷新...");
+		$.ajax({
+			type : 'POST',
+			url : url,
+			data : param,
+			dataType : "json",
+			success : refleshCatchupTaskStateDone,
+			error : pumadmin.httpError
+		});
+	}
+	function refleshCatchupTaskStateDone(data) {
+		if (data.success == false) {
+			pumadmin.appError("访问发生错误", data.errorMsg);
+		} else {
+			$('#catchupTaskState').text(
+					data.catchupTaskState.state + " (创建时间："
+							+ data.catchupTaskState.createTime + ")");
+			if (data.catchupTaskState.binlogInfo
+					&& data.catchupTaskState.binlogInfo.binlogFile) {
+				$('#catchupTaskBinlogFile').val(
+						data.catchupTaskState.binlogInfo.binlogFile);
+				$('#catchupTaskBinlogPos').val(
+						data.catchupTaskState.binlogInfo.binlogPosition);
+			}
+		}
+	}
+	function updateSyncTask(form) {
+		$('#updateSyncTaskError').hide();
+		$.ajax({
+			type : $(form).attr('method'),
+			url : $(form).attr('action'),
+			data : $(form).serialize(),
+			dataType : "json",
+			success : updateSyncTaskDone,
+			error : pumadmin.httpError
+		});
+		return false;
+	}
+	function updateSyncTaskDone(data) {
+		if (data.success == false) {
+			$("#updateSyncTaskErrorCause").text(data.errorMsg);
+			$('#updateSyncTaskError').show();
+		} else {
+			$('#updateSyncTaskSuccess').show();
 		}
 	}
 </script>

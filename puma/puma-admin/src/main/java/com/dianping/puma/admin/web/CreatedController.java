@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.dianping.puma.admin.service.SyncTaskActionService;
+import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.sync.model.task.SyncTask;
 import com.dianping.puma.core.sync.model.task.TaskState;
@@ -31,7 +31,7 @@ import com.dianping.puma.core.sync.model.task.TaskState.State;
 public class CreatedController {
     private static final Logger LOG = LoggerFactory.getLogger(CreatedController.class);
     @Autowired
-    private SyncTaskActionService syncTaskActionService;
+    private SyncTaskService syncTaskActionService;
 
     private static final String errorMsg = "对不起，出了一点错误，请刷新页面试试。";
     private static final int PAGESIZE = 8;

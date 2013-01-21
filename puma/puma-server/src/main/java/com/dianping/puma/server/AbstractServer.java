@@ -16,9 +16,9 @@
 package com.dianping.puma.server;
 
 import com.dianping.puma.bo.PumaContext;
-import com.dianping.puma.common.Notifiable;
-import com.dianping.puma.common.NotifyService;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
+import com.dianping.puma.core.monitor.Notifiable;
+import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.dispatcher.Dispatcher;

@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.common;
+package com.dianping.puma.core;
 
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;

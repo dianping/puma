@@ -24,10 +24,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Logger;
 
-import com.dianping.puma.common.Notifiable;
-import com.dianping.puma.common.NotifyService;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ServerStatus;
+import com.dianping.puma.core.monitor.Notifiable;
+import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.storage.Sequence;
 

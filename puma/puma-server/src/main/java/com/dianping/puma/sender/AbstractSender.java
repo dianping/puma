@@ -3,9 +3,9 @@ package com.dianping.puma.sender;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.bo.PumaContext;
-import com.dianping.puma.common.Notifiable;
-import com.dianping.puma.common.NotifyService;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.monitor.Notifiable;
+import com.dianping.puma.core.monitor.NotifyService;
 
 public abstract class AbstractSender implements Sender, Notifiable {
 	private static final Logger	log				= Logger.getLogger(AbstractSender.class);

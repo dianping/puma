@@ -17,7 +17,7 @@ package com.dianping.puma.storage;
 
 import java.io.IOException;
 
-import com.dianping.puma.common.LifeCycle;
+import com.dianping.puma.core.LifeCycle;
 
 /**
  * @author Leo Liang

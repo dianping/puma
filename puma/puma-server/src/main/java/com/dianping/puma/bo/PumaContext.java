@@ -15,7 +15,7 @@ package com.dianping.puma.bo;
 import java.io.Serializable;
 import java.util.Map;
 
-import com.dianping.puma.common.LRUCache;
+import com.dianping.puma.core.LRUCache;
 import com.dianping.puma.parser.mysql.event.TableMapEvent;
 
 /**

@@ -13,7 +13,7 @@
 package com.dianping.puma.server;
 
 import com.dianping.puma.bo.PumaContext;
-import com.dianping.puma.common.LifeCycle;
+import com.dianping.puma.core.LifeCycle;
 
 /**
  * @author Leo Liang

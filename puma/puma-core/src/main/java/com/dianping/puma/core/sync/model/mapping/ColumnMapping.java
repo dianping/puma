@@ -68,4 +68,9 @@ public class ColumnMapping {
         return true;
     }
 
+    @Override
+    public ColumnMapping clone() throws CloneNotSupportedException {
+        return (ColumnMapping) super.clone();
+    }
+
 }

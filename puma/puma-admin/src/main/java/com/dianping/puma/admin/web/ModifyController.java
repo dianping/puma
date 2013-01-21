@@ -23,13 +23,10 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.dianping.puma.admin.service.CatchupTaskService;
 import com.dianping.puma.admin.service.DumpTaskService;
-import com.dianping.puma.admin.service.MysqlConfigService;
 import com.dianping.puma.admin.service.PumaSyncServerConfigService;
 import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.sync.model.BinlogInfo;
-import com.dianping.puma.core.sync.model.config.MysqlConfig;
-import com.dianping.puma.core.sync.model.config.MysqlHost;
 import com.dianping.puma.core.sync.model.config.PumaSyncServerConfig;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.DumpMapping;
@@ -41,19 +38,11 @@ import com.dianping.puma.core.sync.model.task.SyncTask;
 import com.dianping.puma.core.sync.model.task.TaskState;
 
 /**
- * TODO <br>
- * (1) 以create为整个controller，所有中间状态存放在session<br>
- * (2) 编写SyncTask的service <br>
- * (3) 保存binlog信息<br>
- * (4) pumaSyncServer的host的选择 (5) 创建同步任务，启动任务
- * 
  * @author wukezhu
  */
 @Controller
 public class ModifyController {
     private static final Logger LOG = LoggerFactory.getLogger(ModifyController.class);
-    @Autowired
-    private MysqlConfigService mysqlConfigService;
     @Autowired
     private DumpTaskService dumpTaskService;
     @Autowired
@@ -191,11 +180,11 @@ public class ModifyController {
     }
 
     /**
-     * 创建DumpAction
+     * 创建DumpTask
      */
-    @RequestMapping(value = "/modify/createDumpAction", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "/modify/createDumpTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object createDumpAction(HttpSession session, String srcMysqlHost, String syncServerName) {
+    public Object createDumpTask(HttpSession session, String srcMysqlHost, String syncServerName) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             if (StringUtils.isBlank(syncServerName)) {
@@ -212,9 +201,9 @@ public class ModifyController {
             dumpTask.setDestMysqlHost(syncTask.getDestMysqlHost());
             dumpTask.setDumpMapping(dumpMapping);
             dumpTask.setSyncServerName(syncServerName);
-            //保存dumpAction到数据库
+            //保存dumpTask到数据库
             dumpTaskService.create(dumpTask);
-            //保存dumpAction到session
+            //保存dumpTask到session
             session.setAttribute("dumpTask", dumpTask);
 
             map.put("success", true);
@@ -266,7 +255,7 @@ public class ModifyController {
     }
 
     /**
-     * 创建CatchupAction的页面
+     * 创建CatchupTask的页面
      */
     @RequestMapping(method = RequestMethod.GET, value = { "/modify/step3" })
     public ModelAndView step3(HttpSession session) throws SQLException {
@@ -402,21 +391,6 @@ public class ModifyController {
             LOG.error(e.getMessage(), e);
         }
         return GsonUtil.toJson(map);
-    }
-
-    private MysqlHost getMysqlHost(MysqlConfig mysqlConfig, String mysqlHostStr) {
-        //根据选择的destMysqlHost，找出其MysqlHost对象
-        MysqlHost mysqlHost = null;
-        for (MysqlHost host : mysqlConfig.getHosts()) {
-            if (host.getHost().equals(mysqlHostStr)) {
-                mysqlHost = host;
-                break;
-            }
-        }
-        if (mysqlHost == null) {
-            throw new IllegalArgumentException("destMysqlHost='" + mysqlHostStr + "' 不在数据库 " + mysqlConfig + " 中！");
-        }
-        return mysqlHost;
     }
 
 }

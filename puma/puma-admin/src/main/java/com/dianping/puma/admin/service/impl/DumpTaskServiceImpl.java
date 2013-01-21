@@ -5,7 +5,7 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.dianping.puma.admin.service.DumpActionService;
+import com.dianping.puma.admin.service.DumpTaskService;
 import com.dianping.puma.core.sync.dao.task.DumpTaskDao;
 import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.task.DumpTask;
@@ -15,7 +15,7 @@ import com.google.code.morphia.Key;
 import com.google.code.morphia.query.UpdateOperations;
 
 @Service("dumpActionService")
-public class DumpTaskServiceImpl implements DumpActionService {
+public class DumpTaskServiceImpl implements DumpTaskService {
     @Autowired
     DumpTaskDao dumpTaskDao;
 

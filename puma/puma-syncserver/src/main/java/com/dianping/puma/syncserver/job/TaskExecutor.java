@@ -15,11 +15,18 @@
  */
 package com.dianping.puma.syncserver.job;
 
-import com.dianping.puma.core.LifeCycle;
-
 /**
  * @author Leo Liang
- *
+ * 
  */
-public interface Job extends LifeCycle<Exception>{
+public interface TaskExecutor {
+    public String getTaskName();
+
+    public TaskExecutionResult exec() throws TaskExecutionException;
+
+    public TaskExecutionResult beforeExec() throws TaskExecutionException;
+
+    public TaskExecutionResult afterExec() throws TaskExecutionException;
+
+    public long getJobId();
 }

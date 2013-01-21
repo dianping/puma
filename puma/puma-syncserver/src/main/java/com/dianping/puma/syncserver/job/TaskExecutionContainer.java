@@ -21,10 +21,7 @@ import com.dianping.puma.core.LifeCycle;
  * @author Leo Liang
  * 
  */
-public interface JobContainer extends LifeCycle<Exception> {
+public interface TaskExecutionContainer extends LifeCycle<TaskExecutionException> {
 
-    public void submitJob(Job job);
-
-    public boolean jobExists(Job job);
-    
+    public void submitTask(TaskExecutor taskExecutor) throws TaskExecutionException;
 }

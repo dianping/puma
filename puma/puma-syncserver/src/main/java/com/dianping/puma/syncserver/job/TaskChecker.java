@@ -15,11 +15,17 @@
  */
 package com.dianping.puma.syncserver.job;
 
+import java.util.List;
+
 import com.dianping.puma.core.LifeCycle;
 
 /**
  * @author Leo Liang
  * 
  */
-public interface JobChecker extends LifeCycle<Exception> {
+public interface TaskChecker extends LifeCycle<TaskExecutionException> {
+
+    public void setTaskCheckStrategyList(List<TaskCheckStrategy> taskCheckStrategyList);
+
+    public void setTaskExecutionContainer(TaskExecutionContainer taskExecutionContainer);
 }

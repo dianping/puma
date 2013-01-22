@@ -29,38 +29,38 @@ import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
 import com.google.code.morphia.query.UpdateOperations;
 
-@Service("syncTaskActionService")
+@Service
 public class SyncTaskServiceImpl implements SyncTaskService {
     @Autowired
     SyncTaskDao syncTaskDao;
 
     @Override
-    public Long create(SyncTask syncTaskAction) {
+    public Long create(SyncTask syncTask) {
         //验证
-        if (this.existsBySrcAndDest(syncTaskAction.getSrcMysqlName(), syncTaskAction.getDestMysqlName())) {
-            throw new IllegalArgumentException("创建失败，已有相同的配置存在。(srcMysqlName=" + syncTaskAction.getSrcMysqlName()
-                    + ", destMysqlName=" + syncTaskAction.getDestMysqlName() + ")");
+        if (this.existsBySrcAndDest(syncTask.getSrcMysqlName(), syncTask.getDestMysqlName())) {
+            throw new IllegalArgumentException("创建失败，已有相同的配置存在。(srcMysqlName=" + syncTask.getSrcMysqlName() + ", destMysqlName="
+                    + syncTask.getDestMysqlName() + ")");
         }
         //验证仅有一个databaseConfig
-        if (syncTaskAction.getMysqlMapping().getDatabases() == null || syncTaskAction.getMysqlMapping().getDatabases().size() == 0
-                || syncTaskAction.getMysqlMapping().getDatabases().size() > 1) {
+        if (syncTask.getMysqlMapping().getDatabases() == null || syncTask.getMysqlMapping().getDatabases().size() == 0
+                || syncTask.getMysqlMapping().getDatabases().size() > 1) {
             throw new IllegalArgumentException("创建失败，<database>配置必须有且仅能有一个！");
         }
         //验证table
-        if (syncTaskAction.getMysqlMapping().getDatabases().get(0).getTables() == null
-                || syncTaskAction.getMysqlMapping().getDatabases().get(0).getTables().size() == 0) {
+        if (syncTask.getMysqlMapping().getDatabases().get(0).getTables() == null
+                || syncTask.getMysqlMapping().getDatabases().get(0).getTables().size() == 0) {
             throw new IllegalArgumentException("创建失败，<table>配置必须至少有一个！");
         }
-        //创建SyncTaskActionState
-        TaskState actionState = new TaskState();
-        actionState.setState(State.PREPARABLE);
-        actionState.setDetail(State.PREPARABLE.getDesc());
+        //创建SyncTasktaskState
+        TaskState taskState = new TaskState();
+        taskState.setState(State.PREPARABLE);
+        taskState.setDetail(State.PREPARABLE.getDesc());
         Date curDate = new Date();
-        actionState.setCreateTime(curDate);
-        actionState.setLastUpdateTime(curDate);
-        syncTaskAction.setTaskState(actionState);
+        taskState.setCreateTime(curDate);
+        taskState.setLastUpdateTime(curDate);
+        syncTask.setTaskState(taskState);
         //开始保存
-        Key<SyncTask> key = this.syncTaskDao.save(syncTaskAction);
+        Key<SyncTask> key = this.syncTaskDao.save(syncTask);
         this.syncTaskDao.getDatastore().ensureIndexes();
         Long id = (Long) key.getId();
 
@@ -92,9 +92,11 @@ public class SyncTaskServiceImpl implements SyncTaskService {
     /**
      * 对比新旧sync，求出新增的database或table配置(table也属于database下，故返回的都是database)<br>
      * 同时做验证：只允许新增database或table配置
+     * 
+     * @throws CloneNotSupportedException
      */
     @Override
-    public MysqlMapping compare(MysqlMapping oldMysqlMapping, MysqlMapping newMysqlMapping) {
+    public MysqlMapping compare(MysqlMapping oldMysqlMapping, MysqlMapping newMysqlMapping) throws CloneNotSupportedException {
         return oldMysqlMapping.compare(newMysqlMapping);
     }
 
@@ -184,12 +186,12 @@ public class SyncTaskServiceImpl implements SyncTaskService {
     @Override
     public void updateState(Long id, State state, Map<String, String> params) {
         UpdateOperations<SyncTask> ops = this.syncTaskDao.getDatastore().createUpdateOperations(SyncTask.class)
-                .set("actionState.state", state);
+                .set("taskState.state", state);
         if (params != null) {
-            ops.set("actionState.params", params);
+            ops.set("taskState.params", params);
         }
-        ops.set("actionState.detail", state.getDesc());
-        ops.set("actionState.lastUpdateTime", new Date());
+        ops.set("taskState.detail", state.getDesc());
+        ops.set("taskState.lastUpdateTime", new Date());
         this.syncTaskDao.getDatastore().update(new Key<SyncTask>(SyncTask.class, id), ops);
     }
 

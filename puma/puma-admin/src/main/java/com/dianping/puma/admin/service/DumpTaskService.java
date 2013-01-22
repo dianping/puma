@@ -5,11 +5,11 @@ import com.dianping.puma.core.sync.model.task.DumpTask;
 public interface DumpTaskService {
 
     /**
-     * 创建DumpAction，同时创建DumpActionState
+     * 创建Dumptask，同时创建DumptaskState
      */
-    Long create(DumpTask dumpAction);
+    Long create(DumpTask dumpTask);
 
     DumpTask find(Long id);
 
-    void updateSyncTaskId(Long dumpActionId, Long syncTaskId);
+    void updateSyncTaskId(Long dumpTaskId, Long syncTaskId);
 }

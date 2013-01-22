@@ -17,24 +17,23 @@
                   </tr>
                </thead>
                <tbody id="resultTable">
-                  #foreach($syncTaskAction in $syncTaskActions)
+                  #foreach($syncTask in $syncTasks)
                   <tr>
-                     <td>$syncTaskAction.srcMysqlName</td>
-                     <td>$syncTaskAction.destMysqlName</td>
-                     <td>$syncTaskAction.pumaClientName</td>
-                     <td>$syncTaskAction.syncServerName</td>
-                     <td stateOfId="$syncTaskAction.id"></td>
-                     <td stateDetailOfId="$syncTaskAction.id"></td>
+                     <td>$syncTask.srcMysqlName</td>
+                     <td>$syncTask.destMysqlName</td>
+                     <td>$syncTask.pumaClientName</td>
+                     <td>$syncTask.syncServerName</td>
+                     <td stateOfId="$syncTask.id"></td>
+                     <td stateDetailOfId="$syncTask.id"></td>
                      <td><a reflesh="" href="javascript:;"
                         onclick="refleshState(this);"
-                        actionId="$syncTaskAction.id"
-                        style="margin-right: 10px">刷新状态</a><a
-                        href="${rc.contextPath}/created/action/$syncTaskAction.id">详细</a></td>
+                        taskId="$syncTask.id" style="margin-right: 10px">刷新状态</a><a
+                        href="${rc.contextPath}/created/task/$syncTask.id">详细</a></td>
                   </tr>
                   #end
                </tbody>
             </table>
-            #if(${syncTaskActions.size()} == 0)
+            #if(${syncTasks.size()} == 0)
             <div id="noResultDiv" class="alert alert-warn"
                style="text-align: center;">
                <br>
@@ -46,25 +45,22 @@
             </div>
             #end
          </div>
-         #if(!$pageNum)
-           #set($pageNum=1)
-         #end
-         #set($nextPage = $pageNum + 1)
-         #set($prePage = $pageNum - 1)
+         #if(!$pageNum) #set($pageNum=1) #end #set($nextPage = $pageNum
+         + 1) #set($prePage = $pageNum - 1)
          <ul class="pager">
-            #if($prePage >= 1) 
-             <li id="prePage"><a
-             href="${rc.contextPath}/created/${prePage}">&larr; 上页</a></li>
+            #if($prePage >= 1)
+            <li id="prePage"><a
+               href="${rc.contextPath}/created/${prePage}">&larr; 上页</a></li>
             #else
-             <li class="disabled"  id="prePage"><a href="javascript:;">&larr; 上页</a></li>
-            #end
-            #if(${syncTaskActions.size()} == 0)
-             <li class="disabled"  id="nextPage"><a href="javascript:;">下页 &rarr;</a></li>
-            #else
-             <li id="nextPage"><a
-               href="${rc.contextPath}/created/${nextPage}">下页 &rarr;</a></li>
-            #end
-            
+            <li class="disabled" id="prePage"><a
+               href="javascript:;">&larr; 上页</a></li> #end
+            #if(${syncTasks.size()} == 0)
+            <li class="disabled" id="nextPage"><a
+               href="javascript:;">下页 &rarr;</a></li> #else
+            <li id="nextPage"><a
+               href="${rc.contextPath}/created/${nextPage}">下页
+                  &rarr;</a></li> #end
+
          </ul>
       </div>
    </div>
@@ -72,17 +68,17 @@
 <script>
 	function refleshState(td) {
 		var param = new Object();
-		var actionId = $(td).attr("actionId");
-		param.actionId = actionId;
-		$("td[stateOfId='" + actionId + "']").text("");
-        $("td[stateDetailOfId='" + actionId + "']").text("");
+		var taskId = $(td).attr("taskId");
+		param.taskId = taskId;
+		$("td[stateOfId='" + taskId + "']").text("");
+		$("td[stateDetailOfId='" + taskId + "']").text("");
 		var url = window.contextpath + '/created/state';
 		$.ajax({
 			type : 'POST',
 			url : url,
 			data : param,
 			dataType : "json",
-			success : refleshStateDone(actionId),
+			success : refleshStateDone(taskId),
 			error : pumadmin.httpError
 		});
 	}

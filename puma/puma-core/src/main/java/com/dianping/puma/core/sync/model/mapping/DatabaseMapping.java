@@ -80,4 +80,19 @@ public class DatabaseMapping {
         return true;
     }
 
+    @Override
+    protected DatabaseMapping clone() throws CloneNotSupportedException {
+        DatabaseMapping dm = new DatabaseMapping();
+        dm.setFrom(this.getFrom());
+        dm.setTo(this.getTo());
+        List<TableMapping> tables0 = new ArrayList<TableMapping>();
+        if (this.getTables() != null) {
+            for (TableMapping c : this.getTables()) {
+                tables0.add(c.clone());
+            }
+        }
+        dm.setTables(tables0);
+        return dm;
+    }
+
 }

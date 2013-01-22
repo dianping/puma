@@ -91,4 +91,20 @@ public class TableMapping {
         return true;
     }
 
+    @Override
+    public TableMapping clone() throws CloneNotSupportedException {
+        TableMapping tm = new TableMapping();
+        tm.setFrom(this.getFrom());
+        tm.setTo(this.getTo());
+        tm.setPartOf(this.isPartOf());
+        List<ColumnMapping> columns0 = new ArrayList<ColumnMapping>();
+        if (this.getColumns() != null) {
+            for (ColumnMapping c : this.getColumns()) {
+                columns0.add(c.clone());
+            }
+        }
+        tm.setColumns(columns0);
+        return tm;
+    }
+
 }

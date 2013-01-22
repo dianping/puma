@@ -14,27 +14,27 @@ import com.dianping.puma.core.sync.model.task.TaskState.State;
 import com.google.code.morphia.Key;
 import com.google.code.morphia.query.UpdateOperations;
 
-@Service("dumpActionService")
+@Service
 public class DumpTaskServiceImpl implements DumpTaskService {
     @Autowired
     DumpTaskDao dumpTaskDao;
 
     @Override
-    public Long create(DumpTask dumpAction) {
-        //创建DumpActionState
-        TaskState actionState = new TaskState();
-        actionState.setState(State.PREPARABLE);
-        actionState.setDetail(State.PREPARABLE.getDesc());
+    public Long create(DumpTask dumptask) {
+        //创建DumptaskState
+        TaskState taskState = new TaskState();
+        taskState.setState(State.PREPARABLE);
+        taskState.setDetail(State.PREPARABLE.getDesc());
         Date curDate = new Date();
-        actionState.setCreateTime(curDate);
-        actionState.setLastUpdateTime(curDate);
+        taskState.setCreateTime(curDate);
+        taskState.setLastUpdateTime(curDate);
         BinlogInfo binlogBin = new BinlogInfo();
         binlogBin.setBinlogFile("");
         binlogBin.setBinlogPosition(-1);
-        actionState.setBinlogInfo(binlogBin);
-        dumpAction.setTaskState(actionState);
+        taskState.setBinlogInfo(binlogBin);
+        dumptask.setTaskState(taskState);
 
-        Key<DumpTask> key = this.dumpTaskDao.save(dumpAction);
+        Key<DumpTask> key = this.dumpTaskDao.save(dumptask);
         this.dumpTaskDao.getDatastore().ensureIndexes();
         Long id = (Long) key.getId();
 
@@ -47,10 +47,10 @@ public class DumpTaskServiceImpl implements DumpTaskService {
     }
 
     @Override
-    public void updateSyncTaskId(Long dumpActionId, Long syncTaskId) {
+    public void updateSyncTaskId(Long dumptaskId, Long syncTaskId) {
         UpdateOperations<DumpTask> ops = this.dumpTaskDao.getDatastore().createUpdateOperations(DumpTask.class)
                 .set("syncTaskId", syncTaskId);
-        this.dumpTaskDao.getDatastore().update(new Key<DumpTask>(DumpTask.class, dumpActionId), ops);
+        this.dumpTaskDao.getDatastore().update(new Key<DumpTask>(DumpTask.class, dumptaskId), ops);
     }
 
 }

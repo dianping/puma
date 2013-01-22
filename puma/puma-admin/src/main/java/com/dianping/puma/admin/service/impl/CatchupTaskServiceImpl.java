@@ -29,7 +29,7 @@ public class CatchupTaskServiceImpl implements CatchupTaskService {
                 || catchupTask.getMysqlMapping().getDatabases().get(0).getTables().size() == 0) {
             throw new IllegalArgumentException("创建失败，<table>配置必须至少有一个！");
         }
-        //创建SyncTaskActionState
+        //创建SyncTaskState
         TaskState taskState = new TaskState();
         taskState.setState(State.PREPARABLE);
         taskState.setDetail(State.PREPARABLE.getDesc());

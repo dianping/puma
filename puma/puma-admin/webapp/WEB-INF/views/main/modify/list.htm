@@ -27,8 +27,7 @@
                      <td stateDetailOfId="$syncTask.id"></td>
                      <td><a reflesh="" href="javascript:;"
                         onclick="refleshState(this);"
-                        actionId="$syncTask.id"
-                        style="margin-right: 10px">刷新状态</a><a
+                        taskId="$syncTask.id" style="margin-right: 10px">刷新状态</a><a
                         href="${rc.contextPath}/modify/$syncTask.id">修改</a></td>
                   </tr>
                   #end
@@ -69,17 +68,17 @@
 <script>
 	function refleshState(td) {
 		var param = new Object();
-		var actionId = $(td).attr("actionId");
-		param.actionId = actionId;
-		$("td[stateOfId='" + actionId + "']").text("");
-		$("td[stateDetailOfId='" + actionId + "']").text("");
+		var taskId = $(td).attr("taskId");
+		param.taskId = taskId;
+		$("td[stateOfId='" + taskId + "']").text("");
+		$("td[stateDetailOfId='" + taskId + "']").text("");
 		var url = window.contextpath + '/created/state';
 		$.ajax({
 			type : 'POST',
 			url : url,
 			data : param,
 			dataType : "json",
-			success : refleshStateDone(actionId),
+			success : refleshStateDone(taskId),
 			error : pumadmin.httpError
 		});
 	}

@@ -17,8 +17,8 @@
 	color: #485764;
 }
 
-blockquote button{
-    margin-right:10px;
+blockquote button {
+	margin-right: 10px;
 }
 </style>
 <div class="container"
@@ -31,28 +31,28 @@ blockquote button{
          <div
             style="padding: 10px 10px 10px 10px; background-color: #F7F7F9;">
             <blockquote>
-               <strong>源数据库：</strong> <span>$action.srcMysqlName</span>
-               <strong class="actionText">目标数据库：</strong> <span>$action.destMysqlName</span>
-               <strong class="actionText">目标数据库Host：</strong> <span>$action.destMysqlHost</span>
+               <strong>源数据库：</strong> <span>$task.srcMysqlName</span> <strong
+                  class="actionText">目标数据库：</strong> <span>$task.destMysqlName</span>
+               <strong class="actionText">目标数据库Host：</strong> <span>$task.destMysqlHost</span>
             </blockquote>
             <blockquote>
-               <strong>SyncServer名称：</strong> <span>$action.syncServerName</span>
-               <strong class="actionText">PumaClient名称：</strong> <span>$action.pumaClientName</span>
+               <strong>SyncServer名称：</strong> <span>$task.syncServerName</span>
+               <strong class="actionText">PumaClient名称：</strong> <span>$task.pumaClientName</span>
                <strong class="actionText">PumaClient的ServerId：</strong>
-               <span>$action.serverId</span>
+               <span>$task.serverId</span>
             </blockquote>
             <blockquote>
-               <strong class="">PumaClient的ddl值：</strong> <span>$action.ddl</span>
-               <strong class="actionText">PumaClient的dml值：</strong> <span>$action.dml</span>
+               <strong class="">PumaClient的ddl值：</strong> <span>$task.ddl</span>
+               <strong class="actionText">PumaClient的dml值：</strong> <span>$task.dml</span>
                <strong class="actionText">PumaClient的transaction值：</strong>
-               <span>$action.transaction</span>
+               <span>$task.transaction</span>
             </blockquote>
             <blockquote>
-               <strong class="">创建时的Binlog起始位置：</strong> <span>$action.binlogInfo.binlogFile
-                  $action.binlogInfo.binlogPosition</span> <strong
-                  class="actionText">创建时间：</strong> <span>${dateFormatUtils.format($action.createTime,"yyyy年MM月dd日
+               <strong class="">创建时的Binlog起始位置：</strong> <span>$task.binlogInfo.binlogFile
+                  $task.binlogInfo.binlogPosition</span> <strong
+                  class="actionText">创建时间：</strong> <span>${dateFormatUtils.format($task.createTime,"yyyy年MM月dd日
                   HH时mm分")}</span> <strong class="actionText">最后更新时间：</strong>
-               <span>${dateFormatUtils.format($action.lastUpdateTime,"yyyy年MM月dd日
+               <span>${dateFormatUtils.format($task.lastUpdateTime,"yyyy年MM月dd日
                   HH时mm分")}</span>
             </blockquote>
          </div>
@@ -82,11 +82,12 @@ blockquote button{
          </div>
          <div>
             <h4>映射配置</h4>
-            #foreach($database in $action.mysqlMapping.databases)
+            #foreach($database in $task.mysqlMapping.databases)
             <div class="accordion" id="accordion2">
                <div class="accordion-group">
                   <div class="accordion-heading">
-                     <a style="text-align: center;" class="accordion-toggle" data-toggle="collapse"
+                     <a style="text-align: center;"
+                        class="accordion-toggle" data-toggle="collapse"
                         data-parent="#accordion2" href="#collapseOne">
                         <span>$database.from -> $database.to</span>
                      </a>
@@ -131,7 +132,7 @@ blockquote button{
 		$("#state > strong").text("");
 		$("#state > span").text("");
 		var param = new Object();
-		param.actionId = '$action.id';
+		param.taskId = '$task.id';
 		var url = window.contextpath + '/created/state';
 		$.ajax({
 			type : 'POST',
@@ -155,7 +156,7 @@ blockquote button{
 	}
 	function pause() {
 		var param = new Object();
-		param.actionId = '$action.id';
+		param.taskId = '$task.id';
 		var url = window.contextpath + '/created/pause';
 		$.ajax({
 			type : 'POST',
@@ -175,7 +176,7 @@ blockquote button{
 	}
 	function rerun() {
 		var param = new Object();
-		param.actionId = '$action.id';
+		param.taskId = '$task.id';
 		var url = window.contextpath + '/created/rerun';
 		$.ajax({
 			type : 'POST',
@@ -188,7 +189,7 @@ blockquote button{
 	}
 	function resolved() {
 		var param = new Object();
-		param.actionId = '$action.id';
+		param.taskId = '$task.id';
 		var url = window.contextpath + '/created/resolved';
 		$.ajax({
 			type : 'POST',

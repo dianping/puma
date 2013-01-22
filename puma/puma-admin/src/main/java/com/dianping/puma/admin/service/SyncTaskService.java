@@ -14,7 +14,7 @@ import com.dianping.puma.core.sync.model.task.TaskState.State;
 public interface SyncTaskService {
 
     /**
-     * 创建SyncTaskAction，同时创建SyncTaskActionState
+     * 创建SyncTask，同时创建SyncTaskState
      */
     Long create(SyncTask syncTask);
 
@@ -24,7 +24,7 @@ public interface SyncTaskService {
 
     boolean existsBySrcAndDest(String srcMysqlName, String destMysqlName);
 
-    MysqlMapping compare(MysqlMapping oldMysqlMapping, MysqlMapping newMysqlMapping);
+    MysqlMapping compare(MysqlMapping oldMysqlMapping, MysqlMapping newMysqlMapping) throws CloneNotSupportedException;
 
     DumpMapping convertMysqlMappingToDumpMapping(MysqlHost mysqlHost, MysqlMapping mysqlMapping) throws SQLException;
 

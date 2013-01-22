@@ -19,13 +19,26 @@ public class MysqlMapping {
     }
 
     @Override
+    public MysqlMapping clone() throws CloneNotSupportedException {
+        MysqlMapping dm = new MysqlMapping();
+        List<DatabaseMapping> databases0 = new ArrayList<DatabaseMapping>();
+        if (this.getDatabases() != null) {
+            for (DatabaseMapping c : this.getDatabases()) {
+                databases0.add(c.clone());
+            }
+        }
+        dm.setDatabases(databases0);
+        return dm;
+    }
+
+    @Override
     public String toString() {
         return "Instance [databases=" + databases + "]";
     }
 
-    public MysqlMapping compare(MysqlMapping newMysqlMapping) {
-        List<DatabaseMapping> oldDatabaseMappings = new ArrayList<DatabaseMapping>(this.databases);
-        List<DatabaseMapping> newDatabaseMappings = new ArrayList<DatabaseMapping>(newMysqlMapping.getDatabases());
+    public MysqlMapping compare(MysqlMapping newMysqlMapping) throws CloneNotSupportedException {
+        List<DatabaseMapping> oldDatabaseMappings = this.clone().getDatabases();
+        List<DatabaseMapping> newDatabaseMappings = newMysqlMapping.clone().getDatabases();
         //验证旧的database没有被删除
         for (DatabaseMapping oldDatabaseMapping : oldDatabaseMappings) {
             boolean contain = false;

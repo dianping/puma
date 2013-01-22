@@ -1,7 +1,7 @@
 /**
- * Project: ${puma-common.aid}
+ * Project: puma-server
  * 
- * File Created at 2012-6-25
+ * File Created at 2012-7-22
  * $Id$
  * 
  * Copyright 2010 dianping.com.
@@ -13,16 +13,16 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.common;
+package com.dianping.puma.core.monitor;
+
+import java.util.Map;
 
 /**
- * TODO Comment of LifeCycle
- * 
  * @author Leo Liang
  * 
  */
-public interface LifeCycle<T extends Exception> {
-	public void start() throws T;
+public interface NotifyService {
+	public void alarm(String msg, Throwable t, boolean sendSms);
 
-	public void stop() throws T;
+	public void report(String title, Map<String, Map<String, String>> msg);
 }

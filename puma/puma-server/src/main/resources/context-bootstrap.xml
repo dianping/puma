@@ -22,7 +22,7 @@
 		<property name="timeout" value="5000" />
 	</bean>
 
-	<bean id="notifyService" class="com.dianping.puma.common.DefaultNotifyService">
+	<bean id="notifyService" class="com.dianping.puma.core.monitor.DefaultNotifyService">
 		<property name="alarmService" ref="commonAlarmSerivce" />
 		<property name="devMode" value="true" />
 	</bean>

@@ -15,14 +15,14 @@ public class LionDynamicConfig implements DynamicConfig {
 
     private static final Logger LOG = LoggerFactory.getLogger(LionDynamicConfig.class);
 
-    private ConfigCache cc;
+    private ConfigCache         cc;
 
     public LionDynamicConfig(String localConfigFileName) {
         String env = EnvZooKeeperConfig.getEnv();
         try {
             cc = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
-            if (!"dev".equals(env) && !"qa".equals(env)) {
-                LOG.warn("not dev or qa, ignore lion local config");
+            if (!"dev".equals(env) && !"qa".equals(env) && "alpha".equals(env)) {
+                LOG.warn("not dev, qa or alpha, ignore lion local config");
             } else {
                 // 如果本地文件存在，则使用Lion本地文件
                 InputStream in = LionDynamicConfig.class.getClassLoader().getResourceAsStream(localConfigFileName);

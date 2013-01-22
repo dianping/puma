@@ -13,7 +13,8 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.common;
+package com.dianping.puma.core.monitor;
+
 
 /**
  * @author Leo Liang

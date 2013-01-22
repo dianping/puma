@@ -1,7 +1,7 @@
 /**
- * Project: ${puma-parser.aid}
+ * Project: puma-syncserver
  * 
- * File Created at 2012-6-23
+ * File Created at 2013-1-16
  * $Id$
  * 
  * Copyright 2010 dianping.com.
@@ -13,21 +13,19 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.parser;
+package com.dianping.puma.syncserver.job;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.util.List;
 
-import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.LifeCycle;
-import com.dianping.puma.parser.mysql.event.BinlogEvent;
 
 /**
- * TODO Comment of Parser
- * 
  * @author Leo Liang
  * 
  */
-public interface Parser extends LifeCycle<Exception> {
-	public BinlogEvent parse(ByteBuffer buf, PumaContext context) throws IOException;
+public interface TaskChecker extends LifeCycle<TaskExecutionException> {
+
+    public void setTaskCheckStrategyList(List<TaskCheckStrategy> taskCheckStrategyList);
+
+    public void setTaskExecutionContainer(TaskExecutionContainer taskExecutionContainer);
 }

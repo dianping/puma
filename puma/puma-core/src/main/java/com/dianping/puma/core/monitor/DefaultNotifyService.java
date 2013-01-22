@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.common;
+package com.dianping.puma.core.monitor;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -28,7 +28,7 @@ import com.dianping.hawk.common.alarm.service.CommonAlarmService;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
-import com.dianping.puma.utils.IPUtils;
+import com.dianping.puma.core.util.IPUtils;
 
 /**
  * @author Leo Liang

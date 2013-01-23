@@ -1,15 +1,12 @@
 package com.dianping.puma.syncserver.service;
 
+import java.util.List;
+
 import com.dianping.puma.core.sync.model.task.CatchupTask;
+import com.dianping.puma.core.sync.model.task.TaskState;
 
 public interface CatchupTaskService {
 
-    Long create(CatchupTask catchupTask);
-
-    CatchupTask find(Long id);
-
-    //    List<CatchupTask> find(int offset, int limit);
-    //
-    //    void updateState(Long id, State state, Map<String, String> params);
+    public List<CatchupTask> find(List<TaskState.State> states, String syncServerName);
 
 }

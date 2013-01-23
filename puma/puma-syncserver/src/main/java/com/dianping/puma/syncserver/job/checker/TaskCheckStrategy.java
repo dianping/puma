@@ -17,7 +17,6 @@ package com.dianping.puma.syncserver.job.checker;
 
 import java.util.List;
 
-import com.dianping.puma.core.LifeCycle;
 import com.dianping.puma.syncserver.job.executor.TaskExecutionException;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 
@@ -25,9 +24,8 @@ import com.dianping.puma.syncserver.job.executor.TaskExecutor;
  * TODO Comment of JobCheckStrategy
  * 
  * @author Leo Liang
- * 
  */
-public interface TaskCheckStrategy extends LifeCycle<TaskExecutionException> {
+public interface TaskCheckStrategy {
     public List<TaskExecutor> check() throws TaskExecutionException;
 
     public String getName();

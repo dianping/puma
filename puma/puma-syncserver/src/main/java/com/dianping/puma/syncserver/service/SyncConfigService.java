@@ -1,21 +1,48 @@
 package com.dianping.puma.syncserver.service;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import org.bson.types.ObjectId;
 
+import com.dianping.puma.core.sync.DumpConfig;
 import com.dianping.puma.core.sync.SyncConfig;
+import com.dianping.puma.core.sync.SyncTask;
+import com.dianping.puma.core.sync.model.BinlogInfo;
+import com.dianping.puma.core.sync.model.config.MysqlHost;
+import com.dianping.puma.core.sync.model.mapping.DumpMapping;
+import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 
 public interface SyncConfigService {
 
-    /**
-     * 根据puma-syncserver id，查询对应的所有SyncTask，再查询对应的所有SyncConfig
-     */
-    public List<SyncConfig> findSyncConfigs(String pumaSyncServerId);
+    ObjectId saveSyncConfig(SyncConfig syncConfig, String syncXmlString);
+
+    void modifySyncConfig(SyncConfig syncConfig, String syncXmlString);
 
     /**
-     * 根据task id，查询对应的SyncTask,再查询对应的SyncConfig
+     * 仅更新SyncConfig的binlog信息
      */
-    SyncConfig findSyncConfig(ObjectId taskId);
+    void modifySyncConfig(ObjectId id, BinlogInfo binlogInfo);
 
+    /**
+     * 删除相应的SyncConfig和SyncXml
+     */
+    void removeSyncConfig(ObjectId id);
+
+    List<SyncConfig> findSyncConfigs(int offset, int limit);
+
+    SyncConfig findSyncConfig(ObjectId objectId);
+
+    Long countSyncConfigs();
+
+    /**
+     * 将syncConfig转化成dumpConfig(包括对*转化成具体table；去除无法dump的table)
+     * 
+     * @throws SQLException
+     */
+    DumpConfig convertSyncConfigToDumpConfig(SyncConfig syncConfig) throws SQLException;
+
+    ObjectId saveSyncTask(SyncTask syncTask);
+
+    DumpMapping convertMysqlMappingToDumpMapping(MysqlHost mysqlHost, MysqlMapping mysqlMapping) throws SQLException;
 }

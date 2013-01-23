@@ -1,4 +1,4 @@
-package com.dianping.puma.syncserver.bo;
+package com.dianping.puma.syncserver.job.executor;
 
 public class DumpException extends RuntimeException {
     private static final long serialVersionUID = -7383812288733645333L;

@@ -13,20 +13,22 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.syncserver.job;
+package com.dianping.puma.syncserver.job.checker;
+
+import java.util.List;
+
+import com.dianping.puma.core.LifeCycle;
+import com.dianping.puma.syncserver.job.executor.TaskExecutionException;
+import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 
 /**
+ * TODO Comment of JobCheckStrategy
+ * 
  * @author Leo Liang
  * 
  */
-public interface TaskExecutor {
-    public String getTaskName();
+public interface TaskCheckStrategy extends LifeCycle<TaskExecutionException> {
+    public List<TaskExecutor> check() throws TaskExecutionException;
 
-    public TaskExecutionResult exec() throws TaskExecutionException;
-
-    public TaskExecutionResult beforeExec() throws TaskExecutionException;
-
-    public TaskExecutionResult afterExec() throws TaskExecutionException;
-
-    public long getJobId();
+    public String getName();
 }

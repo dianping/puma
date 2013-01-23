@@ -13,15 +13,28 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.syncserver.job;
+package com.dianping.puma.syncserver.job.executor;
 
-import com.dianping.puma.core.LifeCycle;
+import com.dianping.puma.core.sync.model.BinlogInfo;
+import com.dianping.puma.core.sync.model.task.TaskState;
 
 /**
  * @author Leo Liang
- * 
  */
-public interface TaskExecutionContainer extends LifeCycle<TaskExecutionException> {
+public interface TaskExecutor {
 
-    public void submitTask(TaskExecutor taskExecutor) throws TaskExecutionException;
+    long getTaskId();
+
+    /** 开始 */
+    void start();
+
+    void pause();
+
+    void succeed();
+
+    void fail();
+
+    BinlogInfo getCurBinlogInfo();
+
+    TaskState getTaskState();
 }

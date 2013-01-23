@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.syncserver.job;
+package com.dianping.puma.syncserver.job.executor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,18 +46,18 @@ public class DefaultTaskContainerImpl implements TaskExecutionContainer {
     @Override
     public void submitTask(final TaskExecutor job) throws TaskExecutionException {
         if (!stopped) {
-            Thread workerThread = PumaThreadUtils.createThread(new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        TaskExecutionResult result = job.exec();
-                    } catch (Exception e) {
-                        log.error("Job exec fail(jobId: {}).", job.getJobId());
-                    }
-
-                }
-            }, job.getTaskName() + "-" + job.getJobId(), false);
+//            Thread workerThread = PumaThreadUtils.createThread(new Runnable() {
+//
+//                @Override
+//                public void run() {
+//                    try {
+//                        TaskExecutionResult result = job.exec();
+//                    } catch (Exception e) {
+//                        log.error("Job exec fail(jobId: {}).", job.getTaskId());
+//                    }
+//
+//                }
+//            }, job.getTaskName() + "-" + job.getJobId(), false);
         }
     }
 

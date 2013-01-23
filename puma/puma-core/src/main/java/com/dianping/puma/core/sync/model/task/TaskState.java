@@ -73,6 +73,8 @@ public class TaskState {
         PREPARING("正在准备执行"),
         RUNNABLE("待运行"),
         RUNNING("运行中"),
+        DUMPING("Dump：Dumping操作进行中"),
+        LOADING("Dump：Loading操作进行中"),
         PAUSE("待暂停"),
         SUSPPENDED("已暂停"),
         RESOLVED("已修复，待重新运行"),

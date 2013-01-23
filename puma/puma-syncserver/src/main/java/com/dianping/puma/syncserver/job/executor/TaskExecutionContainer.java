@@ -13,9 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.syncserver.job;
-
-import java.util.List;
+package com.dianping.puma.syncserver.job.executor;
 
 import com.dianping.puma.core.LifeCycle;
 
@@ -23,9 +21,7 @@ import com.dianping.puma.core.LifeCycle;
  * @author Leo Liang
  * 
  */
-public interface TaskChecker extends LifeCycle<TaskExecutionException> {
+public interface TaskExecutionContainer extends LifeCycle<TaskExecutionException> {
 
-    public void setTaskCheckStrategyList(List<TaskCheckStrategy> taskCheckStrategyList);
-
-    public void setTaskExecutionContainer(TaskExecutionContainer taskExecutionContainer);
+    public void submitTask(TaskExecutor taskExecutor) throws TaskExecutionException;
 }

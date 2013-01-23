@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.syncserver.job;
+package com.dianping.puma.syncserver.job.checker;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -22,20 +22,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.puma.core.util.PumaThreadUtils;
+import com.dianping.puma.syncserver.job.executor.TaskExecutionContainer;
+import com.dianping.puma.syncserver.job.executor.TaskExecutionException;
+import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 
 /**
- * 
  * @author Leo Liang
- * 
  */
 public class SingleThreadLoopTaskCheckerImpl implements TaskChecker {
-    private static final Logger     log                  = LoggerFactory
-                                                                 .getLogger(SingleThreadLoopTaskCheckerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(SingleThreadLoopTaskCheckerImpl.class);
 
-    private int                     loopIntervalMilliSec = 100;
+    private int loopIntervalMilliSec = 100;
     private List<TaskCheckStrategy> taskCheckStrategyList;
-    private TaskExecutionContainer  taskExecutionContainer;
-    private volatile boolean        stopped              = true;
+    private TaskExecutionContainer taskExecutionContainer;
+    private volatile boolean stopped = true;
 
     public void setLoopIntervalMilliSec(int loopIntervalMilliSec) {
         this.loopIntervalMilliSec = loopIntervalMilliSec;
@@ -43,7 +43,6 @@ public class SingleThreadLoopTaskCheckerImpl implements TaskChecker {
 
     /*
      * (non-Javadoc)
-     * 
      * @see com.dianping.puma.core.LifeCycle#start()
      */
     @Override
@@ -63,8 +62,7 @@ public class SingleThreadLoopTaskCheckerImpl implements TaskChecker {
                                         try {
                                             taskExecutionContainer.submitTask(executor);
                                         } catch (Exception e) {
-                                            log.error("Exception occurs while submitting task({})",
-                                                    executor.getTaskName(), e);
+                                            log.error("Exception occurs while submitting task({})", executor.getTaskId(), e);
                                         }
                                     }
                                 }
@@ -88,7 +86,6 @@ public class SingleThreadLoopTaskCheckerImpl implements TaskChecker {
 
     /*
      * (non-Javadoc)
-     * 
      * @see com.dianping.puma.core.LifeCycle#stop()
      */
     @Override

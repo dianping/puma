@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.syncserver.job;
+package com.dianping.puma.syncserver.job.executor;
 
 /**
  * @author Leo Liang

@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.syncserver.job;
+package com.dianping.puma.syncserver.job.executor;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -22,14 +22,14 @@ import java.util.Map;
  * @author Leo Liang
  * 
  */
-public class TaskExecutionResult implements Serializable {
+public class NO_TaskExecutionResult implements Serializable {
 
     private static final long   serialVersionUID = 5195419929153387418L;
     private ReturnCode          returnCode;
     private String              msg;
     private Map<String, String> returnParams;
 
-    public TaskExecutionResult() {
+    public NO_TaskExecutionResult() {
     }
 
     /**
@@ -77,7 +77,7 @@ public class TaskExecutionResult implements Serializable {
         this.returnParams = returnParams;
     }
 
-    public TaskExecutionResult(ReturnCode returnCode, String msg, Map<String, String> returnParams) {
+    public NO_TaskExecutionResult(ReturnCode returnCode, String msg, Map<String, String> returnParams) {
         this.returnCode = returnCode;
         this.msg = msg;
         this.returnParams = returnParams;

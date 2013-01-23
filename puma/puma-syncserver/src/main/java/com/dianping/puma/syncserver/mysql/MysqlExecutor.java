@@ -14,9 +14,9 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
-import com.dianping.puma.core.sync.SyncConfig;
 import com.dianping.puma.core.sync.model.mapping.ColumnMapping;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
+import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.syncserver.util.SyncConfigPatternParser;
 
@@ -24,7 +24,7 @@ public class MysqlExecutor {
 
     private static final Logger LOG = LoggerFactory.getLogger(MysqlExecutor.class);
 
-    private SyncConfig syncConfig;
+    private MysqlMapping mysqlMapping;
 
     public static final int INSERT = 0;
     public static final int DELETE = 1;
@@ -51,12 +51,12 @@ public class MysqlExecutor {
                 jdbcTemplate.update(sql);
             }
         } else if (event instanceof RowChangedEvent) {
-            _execute(syncConfig, (RowChangedEvent) event);
+            _execute(mysqlMapping, (RowChangedEvent) event);
         }
     }
 
-    private void _execute(SyncConfig syncConfig2, RowChangedEvent rowChangedEvent) {
-        MysqlUpdateStatement mus = convert(syncConfig2, rowChangedEvent);
+    private void _execute(MysqlMapping mysqlMapping, RowChangedEvent rowChangedEvent) {
+        MysqlUpdateStatement mus = convert(mysqlMapping, rowChangedEvent);
         LOG.info("execute dml sql statement: " + mus);
         jdbcTemplate.update(mus.getSql(), mus.getArgs());
     }
@@ -64,7 +64,7 @@ public class MysqlExecutor {
     /**
      * 将RowChangedEvent转化成MysqlUpdateStatement(Mysql操作对象)
      */
-    private MysqlUpdateStatement convert(SyncConfig sync, RowChangedEvent rowChangedEvent) {
+    private MysqlUpdateStatement convert(MysqlMapping mysqlMapping, RowChangedEvent rowChangedEvent) {
         MysqlUpdateStatement mus = new MysqlUpdateStatement();
         RowChangedEvent event = rowChangedEvent.clone();
 
@@ -74,7 +74,7 @@ public class MysqlExecutor {
         Map<String, ColumnInfo> columnMap = rowChangedEvent.getColumns();
         int srcActionType = rowChangedEvent.getActionType();//actionType
         //2.根据"来源actionType,database,table,column"和Sync，得到dest的actionType,database,table,column
-        List<DatabaseMapping> databases = sync.getInstance().getDatabases();
+        List<DatabaseMapping> databases = mysqlMapping.getDatabases();
         DatabaseMapping database = findDatabaseMapping(databases, databaseName);
         if (database.getTo().equals("*")) {//如果是database匹配*
             //event就是rowChangedEvent;
@@ -236,8 +236,8 @@ public class MysqlExecutor {
         return null;
     }
 
-    public void setSync(SyncConfig sync) {
-        this.syncConfig = sync;
+    public void setMysqlMapping(MysqlMapping mysqlMapping) {
+        this.mysqlMapping = mysqlMapping;
     }
 
     public static void main(String[] args44) {

@@ -69,15 +69,16 @@ public class TaskState {
     }
 
     public enum State {
-        PREPARABLE("待准备"),
-        PREPARING("正在准备执行"),
-        RUNNABLE("待运行"),
+        /* admin设置的状态 */
+        RUNNABLE("等待运行/恢复并等待重新运行"),
+        PAUSE("等待暂停"),
+        RESOLVED("已修复并等待恢复运行"),
+        /* syncServer设置的状态 */
+        PREPARING("正在准备运行"),
         RUNNING("运行中"),
         DUMPING("Dump：Dumping操作进行中"),
         LOADING("Dump：Loading操作进行中"),
-        PAUSE("待暂停"),
         SUSPPENDED("已暂停"),
-        RESOLVED("已修复，待重新运行"),
         FAILED("结束-失败"),
         SUCCEED("结束-成功");
 
@@ -91,4 +92,11 @@ public class TaskState {
             return desc;
         }
     }
+
+    @Override
+    public String toString() {
+        return "TaskState [state=" + state + ", createTime=" + createTime + ", lastUpdateTime=" + lastUpdateTime + ", detail="
+                + detail + ", binlogInfo=" + binlogInfo + ", params=" + params + "]";
+    }
+
 }

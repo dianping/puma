@@ -4,46 +4,43 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import com.dianping.puma.core.sync.model.config.PumaServerConfig;
-import com.dianping.puma.core.sync.model.task.SyncTask;
+import com.dianping.puma.core.sync.model.task.DumpTask;
 import com.dianping.puma.core.sync.model.task.TaskState.State;
 import com.dianping.puma.syncserver.conf.Config;
-import com.dianping.puma.syncserver.job.executor.SyncTaskExecutor;
+import com.dianping.puma.syncserver.job.executor.DumpTaskExecutor;
 import com.dianping.puma.syncserver.job.executor.TaskExecutionException;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
-import com.dianping.puma.syncserver.service.PumaServerConfigService;
-import com.dianping.puma.syncserver.service.SyncTaskService;
+import com.dianping.puma.syncserver.service.DumpTaskService;
 
+@Service("dumpTaskCheckStrategy")
 public class DumpTaskCheckStrategy implements TaskCheckStrategy {
 
     @Autowired
-    private SyncTaskService syncTaskService;
-    @Autowired
-    private PumaServerConfigService pumaServerConfigService;
+    private DumpTaskService dumpTaskService;
     @Autowired
     private Config config;
 
     @Override
     public List<TaskExecutor> check() throws TaskExecutionException {
+        //访问数据库，获取对应的Task
         String syncServerName = config.getSyncServerName();
         List<State> states = new ArrayList<State>();
         states.add(State.PAUSE);
-        states.add(State.PREPARABLE);
         states.add(State.RESOLVED);
         states.add(State.RUNNABLE);
-        List<SyncTask> syncTasks = syncTaskService.find(states, syncServerName);
-
+        List<DumpTask> dumpTasks = dumpTaskService.find(states, syncServerName);
+        //更新状态
+        for (DumpTask task : dumpTasks) {
+            if (task.getTaskState().getState() != State.PAUSE) {
+                dumpTaskService.updateState(task.getId(), State.PREPARING, null);
+            }
+        }
+        //根据Task创建TaskExecutor
         List<TaskExecutor> taskExecutors = new ArrayList<TaskExecutor>();
-        for (SyncTask task : syncTasks) {
-            String srcMysqlName = task.getSrcMysqlName();
-            PumaServerConfig pumaServerConfig = pumaServerConfigService.find(srcMysqlName);
-            String pumaServerHostAndPort = pumaServerConfig.getHosts().get(0);
-            String[] splits = pumaServerHostAndPort.split(":");
-            String pumaServerHost = splits[0];
-            int pumaServerPort = Integer.parseInt(splits[1]);
-            String target = pumaServerConfig.getTarget();
-            TaskExecutor excutor = new SyncTaskExecutor(task, pumaServerHost, pumaServerPort, target);
+        for (DumpTask task : dumpTasks) {
+            TaskExecutor excutor = new DumpTaskExecutor(task);
             taskExecutors.add(excutor);
         }
 

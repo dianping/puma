@@ -8,23 +8,37 @@
             http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
     <!-- annotation scan -->
-    <context:component-scan base-package="com.dianping.puma.syncserver.service" />
+    <context:component-scan base-package="com.dianping.puma" />
 
 
     <!-- Main spring IOC entrance -->
     <import resource="applicationContext-properties.xml" />
 
 
+    <bean
+        class="com.dianping.puma.syncserver.job.checker.SingleThreadLoopTaskCheckerImpl">
+        <property name="loopIntervalMilliSec" value="500" />
+        <property name="taskExecutionContainer" ref="taskExecutionContainer" />
+        <property name="taskCheckStrategyList">
+            <list>
+                <ref bean="syncTaskCheckStrategy" />
+                <ref bean="catchupTaskCheckStrategy" />
+                <ref bean="dumpTaskCheckStrategy" />
+            </list>
+        </property>
+    </bean>
+
 
     <bean id="mongoClient" class="com.dianping.puma.core.sync.dao.MongoClient">
     </bean>
 
-    <bean id="syncConfigDao" class="com.dianping.puma.core.sync.dao.SyncConfigDao">
-        <constructor-arg ref="mongoClient" />
-    </bean>
-
-    <bean id="syncTaskDao" class="com.dianping.puma.core.sync.dao.SyncTaskDao">
-        <constructor-arg ref="mongoClient" />
+    <bean id="seqGen"
+        class="com.dianping.puma.core.sync.dao.MongoSeqGeneratorServiceImpl">
+        <property name="mongoClient">
+            <ref bean="mongoClient" />
+        </property>
+        <property name="dbName" value="puma_admin" />
+        <property name="collName" value="seq" />
     </bean>
 
 </beans>

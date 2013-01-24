@@ -35,7 +35,7 @@ public class SyncTaskServiceImpl implements SyncTaskService {
     SyncTaskDao syncTaskDao;
 
     @Override
-    public Long create(SyncTask syncTask) {
+    public Long create(SyncTask syncTask, BinlogInfo binlogInfo) {
         //验证
         if (this.existsBySrcAndDest(syncTask.getSrcMysqlName(), syncTask.getDestMysqlName())) {
             throw new IllegalArgumentException("创建失败，已有相同的配置存在。(srcMysqlName=" + syncTask.getSrcMysqlName() + ", destMysqlName="
@@ -53,11 +53,12 @@ public class SyncTaskServiceImpl implements SyncTaskService {
         }
         //创建SyncTasktaskState
         TaskState taskState = new TaskState();
-        taskState.setState(State.PREPARABLE);
-        taskState.setDetail(State.PREPARABLE.getDesc());
+        taskState.setState(State.RUNNABLE);
+        taskState.setDetail(State.RUNNABLE.getDesc());
         Date curDate = new Date();
         taskState.setCreateTime(curDate);
         taskState.setLastUpdateTime(curDate);
+        taskState.setBinlogInfo(binlogInfo);
         syncTask.setTaskState(taskState);
         //开始保存
         Key<SyncTask> key = this.syncTaskDao.save(syncTask);

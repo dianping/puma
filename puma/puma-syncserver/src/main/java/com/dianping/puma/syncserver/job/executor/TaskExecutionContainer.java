@@ -16,12 +16,14 @@
 package com.dianping.puma.syncserver.job.executor;
 
 import com.dianping.puma.core.LifeCycle;
+import com.dianping.puma.core.sync.model.task.Task.Type;
 
 /**
  * @author Leo Liang
- * 
  */
 public interface TaskExecutionContainer extends LifeCycle<TaskExecutionException> {
 
     public void submitTask(TaskExecutor taskExecutor) throws TaskExecutionException;
+
+    public TaskExecutor getTaskExecutor(Type type, long taskId);
 }

@@ -15,15 +15,12 @@
  */
 package com.dianping.puma.syncserver.job.executor;
 
-import com.dianping.puma.core.sync.model.BinlogInfo;
-import com.dianping.puma.core.sync.model.task.TaskState;
+import com.dianping.puma.core.sync.model.task.Task;
 
 /**
  * @author Leo Liang
  */
 public interface TaskExecutor {
-
-    long getTaskId();
 
     /** 开始 */
     void start();
@@ -34,7 +31,5 @@ public interface TaskExecutor {
 
     void fail();
 
-    BinlogInfo getCurBinlogInfo();
-
-    TaskState getTaskState();
+    Task getTask();
 }

@@ -273,8 +273,7 @@ public class ModifyController {
 
     @RequestMapping(value = "/modify/createCatchupTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object createCatchupTask(HttpSession session, String binlogFile, String binlogPosition, String pumaClientName,
-                                    Long serverId) {
+    public Object createCatchupTask(HttpSession session, String binlogFile, String binlogPosition, String pumaClientName) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             //检查参数
@@ -301,7 +300,6 @@ public class ModifyController {
                 binlogInfo.setBinlogFile(binlogFile);
                 binlogInfo.setBinlogPosition(Long.parseLong(binlogPosition));
             }
-            catchupTask.setBinlogInfo(binlogInfo);
             catchupTask.setDdl(syncTask.isDdl());
             catchupTask.setDml(syncTask.isDml());
             catchupTask.setPumaClientName(pumaClientName);
@@ -309,7 +307,7 @@ public class ModifyController {
             catchupTask.setTransaction(syncTask.isTransaction());
             catchupTask.setSyncTaskId(syncTask.getId());
             //保存到数据库
-            catchupTaskService.create(catchupTask);
+            catchupTaskService.create(catchupTask, binlogInfo);
             //保存catchupTask到session
             session.setAttribute("catchupTask", catchupTask);
 

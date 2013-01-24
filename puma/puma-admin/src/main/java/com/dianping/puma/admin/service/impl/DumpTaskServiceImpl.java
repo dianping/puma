@@ -23,8 +23,8 @@ public class DumpTaskServiceImpl implements DumpTaskService {
     public Long create(DumpTask dumptask) {
         //创建DumptaskState
         TaskState taskState = new TaskState();
-        taskState.setState(State.PREPARABLE);
-        taskState.setDetail(State.PREPARABLE.getDesc());
+        taskState.setState(State.RUNNABLE);
+        taskState.setDetail(State.RUNNABLE.getDesc());
         Date curDate = new Date();
         taskState.setCreateTime(curDate);
         taskState.setLastUpdateTime(curDate);

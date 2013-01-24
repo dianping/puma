@@ -10,7 +10,7 @@
     <bean id="propertyConfigurer"
         class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="locations"
-            value="classpath:puma-syncserver-config.properties" />
+            value="classpath:puma.syncserver.config.properties" />
     </bean>
 
 

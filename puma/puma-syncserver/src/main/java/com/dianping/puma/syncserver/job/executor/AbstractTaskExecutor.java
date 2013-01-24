@@ -18,7 +18,7 @@ import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.task.AbstractTask;
-import com.dianping.puma.core.sync.model.task.TaskState;
+import com.dianping.puma.core.sync.model.task.Task;
 import com.dianping.puma.core.sync.model.task.TaskState.State;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
@@ -60,6 +60,11 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, SpeedControl
     }
 
     @Override
+    public Task getTask() {
+        return abstractTask;
+    }
+
+    @Override
     public void pause() {
         this.abstractTask.getTaskState().setState(State.SUSPPENDED);
         this.pumaClient.stop();
@@ -85,7 +90,7 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, SpeedControl
     }
 
     private void init() {
-        BinlogInfo startedBinlogInfo = abstractTask.getBinlogInfo();
+        BinlogInfo startedBinlogInfo = abstractTask.getTaskState().getBinlogInfo();
         //1 初始化mysqlExecutor
         LOG.info("initing MysqlExecutor...");
         mysqlExecutor = new MysqlExecutor(abstractTask.getDestMysqlHost().getHost(), abstractTask.getDestMysqlHost().getUsername(),
@@ -126,8 +131,8 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, SpeedControl
             @Override
             public void onEvent(ChangedEvent event) throws Exception {
                 //动态更新binlog和binlogPos
-                abstractTask.getBinlogInfo().setBinlogPosition(event.getBinlogPos());
-                abstractTask.getBinlogInfo().setBinlogFile(event.getBinlog());
+                abstractTask.getTaskState().getBinlogInfo().setBinlogPosition(event.getBinlogPos());
+                abstractTask.getTaskState().getBinlogInfo().setBinlogFile(event.getBinlog());
                 //执行子类的具体操作
                 AbstractTaskExecutor.this.onEvent(event);
                 //速度调控
@@ -171,21 +176,6 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, SpeedControl
                 }
             }
         }
-    }
-
-    @Override
-    public BinlogInfo getCurBinlogInfo() {
-        return this.abstractTask.getBinlogInfo();
-    }
-
-    @Override
-    public long getTaskId() {
-        return this.abstractTask.getId();
-    }
-
-    @Override
-    public TaskState getTaskState() {
-        return this.abstractTask.getTaskState();
     }
 
     @Override

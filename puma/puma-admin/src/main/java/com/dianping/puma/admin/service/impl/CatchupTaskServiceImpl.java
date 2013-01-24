@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.dianping.puma.admin.service.CatchupTaskService;
 import com.dianping.puma.core.sync.dao.task.CatchupTaskDao;
+import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.task.CatchupTask;
 import com.dianping.puma.core.sync.model.task.TaskState;
 import com.dianping.puma.core.sync.model.task.TaskState.State;
@@ -18,7 +19,7 @@ public class CatchupTaskServiceImpl implements CatchupTaskService {
     CatchupTaskDao catchupTaskDao;
 
     @Override
-    public Long create(CatchupTask catchupTask) {
+    public Long create(CatchupTask catchupTask, BinlogInfo binlogInfo) {
         //验证仅有一个databaseConfig
         if (catchupTask.getMysqlMapping().getDatabases() == null || catchupTask.getMysqlMapping().getDatabases().size() == 0
                 || catchupTask.getMysqlMapping().getDatabases().size() > 1) {
@@ -31,11 +32,12 @@ public class CatchupTaskServiceImpl implements CatchupTaskService {
         }
         //创建SyncTaskState
         TaskState taskState = new TaskState();
-        taskState.setState(State.PREPARABLE);
-        taskState.setDetail(State.PREPARABLE.getDesc());
+        taskState.setState(State.RUNNABLE);
+        taskState.setDetail(State.RUNNABLE.getDesc());
         Date curDate = new Date();
         taskState.setCreateTime(curDate);
         taskState.setLastUpdateTime(curDate);
+        taskState.setBinlogInfo(binlogInfo);
         catchupTask.setTaskState(taskState);
         //开始保存
         Key<CatchupTask> key = this.catchupTaskDao.save(catchupTask);

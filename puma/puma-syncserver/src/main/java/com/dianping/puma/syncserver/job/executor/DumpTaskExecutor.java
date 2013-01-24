@@ -26,10 +26,10 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.task.DumpTask;
+import com.dianping.puma.core.sync.model.task.Task;
 import com.dianping.puma.core.sync.model.task.TaskState;
 import com.dianping.puma.core.sync.model.task.TaskState.State;
 
@@ -96,12 +96,12 @@ public class DumpTaskExecutor implements TaskExecutor {
                     while (lineIterators.hasNext()) {
                         String line = lineIterators.next();
                         //获取binlog位置
-                        if (StringUtils.isBlank(dumpTask.getBinlogInfo().getBinlogFile())
-                                || dumpTask.getBinlogInfo().getBinlogPosition() <= 0) {
+                        if (StringUtils.isBlank(dumpTask.getTaskState().getBinlogInfo().getBinlogFile())
+                                || dumpTask.getTaskState().getBinlogInfo().getBinlogPosition() <= 0) {
                             Matcher matcher = BINLOG_LINE_PATTERN.matcher(line);
                             if (matcher.matches()) {
-                                dumpTask.getBinlogInfo().setBinlogFile(matcher.group(1));
-                                dumpTask.getBinlogInfo().setBinlogPosition(Long.parseLong(matcher.group(2)));
+                                dumpTask.getTaskState().getBinlogInfo().setBinlogFile(matcher.group(1));
+                                dumpTask.getTaskState().getBinlogInfo().setBinlogPosition(Long.parseLong(matcher.group(2)));
                             }
                         }
                         //table更名
@@ -122,13 +122,13 @@ public class DumpTaskExecutor implements TaskExecutor {
                         deelFileWriter.println(line);
                     }
                     deelFileWriter.close();
-                    if (StringUtils.isBlank(dumpTask.getBinlogInfo().getBinlogFile())
-                            || dumpTask.getBinlogInfo().getBinlogPosition() <= 0) {
+                    if (StringUtils.isBlank(dumpTask.getTaskState().getBinlogInfo().getBinlogFile())
+                            || dumpTask.getTaskState().getBinlogInfo().getBinlogPosition() <= 0) {
                         throw new DumpException("binlogFile or binlogPos is Error: binlogFile="
-                                + dumpTask.getBinlogInfo().getBinlogFile() + ",binlogPos="
-                                + dumpTask.getBinlogInfo().getBinlogPosition());
+                                + dumpTask.getTaskState().getBinlogInfo().getBinlogFile() + ",binlogPos="
+                                + dumpTask.getTaskState().getBinlogInfo().getBinlogPosition());
                     }
-                    LOG.info("binlog info:" + dumpTask.getBinlogInfo());
+                    LOG.info("binlog info:" + dumpTask.getTaskState().getBinlogInfo());
                     //(2) load
                     dumpTask.getTaskState().setState(TaskState.State.LOADING);
                     LOG.info("started load.");
@@ -250,8 +250,8 @@ public class DumpTaskExecutor implements TaskExecutor {
     }
 
     @Override
-    public long getTaskId() {
-        return this.dumpTask.getId();
+    public Task getTask() {
+        return this.dumpTask;
     }
 
     @Override
@@ -267,16 +267,6 @@ public class DumpTaskExecutor implements TaskExecutor {
     @Override
     public void fail() {
         this.dumpTask.getTaskState().setState(State.FAILED);
-    }
-
-    @Override
-    public BinlogInfo getCurBinlogInfo() {
-        return dumpTask.getBinlogInfo();
-    }
-
-    @Override
-    public TaskState getTaskState() {
-        return dumpTask.getTaskState();
     }
 
     //    public static void main(String[] args) throws ExecuteException, IOException, InterruptedException {

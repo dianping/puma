@@ -16,7 +16,7 @@ public interface SyncTaskService {
     /**
      * 创建SyncTask，同时创建SyncTaskState
      */
-    Long create(SyncTask syncTask);
+    Long create(SyncTask syncTask, BinlogInfo binlogInfo);
 
     SyncTask find(Long objectId);
 

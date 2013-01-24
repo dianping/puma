@@ -29,8 +29,8 @@ public class CatchupTaskExecutor extends AbstractTaskExecutor {
         //执行同步
         mysqlExecutor.execute(event);
 
-        BinlogInfo catchupBinlogInfo = this.getCurBinlogInfo();
-        BinlogInfo syncBinlogInfo = this.syncTaskExecutor.getCurBinlogInfo();
+        BinlogInfo catchupBinlogInfo = this.getTask().getTaskState().getBinlogInfo();
+        BinlogInfo syncBinlogInfo = this.syncTaskExecutor.getTask().getTaskState().getBinlogInfo();
         //(1) 如果CatchupExcutor比SyncTaskExecutor慢且很接近(或者相等)
         if (StringUtils.equals(syncBinlogInfo.getBinlogFile(), catchupBinlogInfo.getBinlogFile())
                 && syncBinlogInfo.getBinlogPosition() - catchupBinlogInfo.getBinlogPosition() >= 0
@@ -38,7 +38,7 @@ public class CatchupTaskExecutor extends AbstractTaskExecutor {
             //停止SyncTaskExecutor
             this.syncTaskExecutor.pause();
             //因为syncTaskExecutor的执行是在另外的线程中，故stop后再次获取syncTaskExecutor的binlogInfo才是真正的binlogInfo
-            syncBinlogInfo = this.syncTaskExecutor.getCurBinlogInfo();
+            syncBinlogInfo = this.syncTaskExecutor.getTask().getTaskState().getBinlogInfo();
             //此时再判断，如果需要catchupTaskExecutor可以追赶一下，如果不需要，则停止并记录状态
             long diffPos = syncBinlogInfo.getBinlogPosition() - catchupBinlogInfo.getBinlogPosition();
             if (diffPos == 0) {

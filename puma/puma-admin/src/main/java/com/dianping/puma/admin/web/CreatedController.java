@@ -123,7 +123,7 @@ public class CreatedController {
     public Object rerun(HttpSession session, Long taskId) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            this.syncTaskService.updateState(taskId, State.PREPARABLE, null);
+            this.syncTaskService.updateState(taskId, State.RUNNABLE, null);
             map.put("success", true);
         } catch (IllegalArgumentException e) {
             map.put("success", false);

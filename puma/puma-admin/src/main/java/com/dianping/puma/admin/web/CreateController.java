@@ -301,17 +301,12 @@ public class CreateController {
 
     /**
      * 创建SyncTask
-     * 
-     * @param ddl
-     * @param pumaClientName
-     * @param serverId
-     * @param transaction
      */
     @RequestMapping(value = "/create/createSyncTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object createSyncTask(HttpSession session, String syncServerName, String srcMysqlHost, String destMysqlHost,
                                  String binlogFile, String binlogPosition, Boolean ddl, Boolean dml, String pumaClientName,
-                                 Long serverId, Boolean transaction) {
+                                 Boolean transaction) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             //检查参数
@@ -343,16 +338,14 @@ public class CreateController {
                 if (StringUtils.isBlank(destMysqlHost)) {
                     throw new IllegalArgumentException("destMysqlHost不能为空");
                 }
-                if (serverId == null) {
-                    throw new IllegalArgumentException("serverId不能为空");
-                }
                 MysqlConfig srcMysqlConfig = (MysqlConfig) session.getAttribute("srcMysqlConfig");
                 MysqlConfig destMysqlConfig = (MysqlConfig) session.getAttribute("destMysqlConfig");
                 syncTask.setSrcMysqlName(srcMysqlConfig.getName());
-                syncTask.setSrcMysqlHost(getMysqlHost(srcMysqlConfig, srcMysqlHost));
+                MysqlHost srcMysqlHost0 = getMysqlHost(srcMysqlConfig, srcMysqlHost);
+                syncTask.setSrcMysqlHost(srcMysqlHost0);
                 syncTask.setDestMysqlName(destMysqlConfig.getName());
                 syncTask.setDestMysqlHost(getMysqlHost(destMysqlConfig, destMysqlHost));
-                syncTask.setServerId(serverId);
+                syncTask.setServerId(srcMysqlHost0.getServerId());
             }
             syncTask.setMysqlMapping(mysqlMapping);
             syncTask.setSyncServerName(syncServerName);
@@ -361,13 +354,12 @@ public class CreateController {
                 binlogInfo.setBinlogFile(binlogFile);
                 binlogInfo.setBinlogPosition(Long.parseLong(binlogPosition));
             }
-            syncTask.setBinlogInfo(binlogInfo);
             syncTask.setPumaClientName(pumaClientName);
             syncTask.setDdl(ddl != null ? ddl : true);
             syncTask.setDml(dml != null ? dml : true);
             syncTask.setTransaction(transaction != null ? transaction : true);
             //保存dumpTask到数据库
-            syncTaskService.create(syncTask);
+            syncTaskService.create(syncTask, binlogInfo);
             //更新dumpTask的syncTaskId
             Long syncTaskId = syncTask.getId();
             Long dumpTaskId = (Long) session.getAttribute("dumpTaskId");

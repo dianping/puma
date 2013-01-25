@@ -1,57 +1,29 @@
-/**
- * Project: puma-syncserver
- * 
- * File Created at 2013-1-17
- * $Id$
- * 
- * Copyright 2010 dianping.com.
- * All rights reserved.
- *
- * This software is the confidential and proprietary information of
- * Dianping Company. ("Confidential Information").  You shall not
- * disclose such Confidential Information and shall use it only in
- * accordance with the terms of the license agreement you entered into
- * with dianping.com.
- */
-package com.dianping.puma.syncserver.job.executor;
+package com.dianping.puma.syncserver.job.container;
 
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.dianping.puma.core.sync.model.notify.TaskStatusActionEvent;
 import com.dianping.puma.core.sync.model.task.Task;
-import com.dianping.puma.core.sync.model.task.Task.Type;
 import com.dianping.puma.core.sync.model.task.TaskState.State;
+import com.dianping.puma.core.sync.model.task.Type;
+import com.dianping.puma.syncserver.job.executor.TaskExecutionException;
+import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 
 /**
  * @author Leo Liang
  */
-@Service("taskExecutionContainer")
-public class DefaultTaskExecutorContainerImpl implements TaskExecutionContainer {
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultTaskExecutorContainerImpl.class);
+@Service
+public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultTaskExecutorContainer.class);
     private volatile boolean stopped = true;
     private ConcurrentHashMap<Type, ConcurrentHashMap<Long, TaskExecutor>> taskExecutorMap = new ConcurrentHashMap<Type, ConcurrentHashMap<Long, TaskExecutor>>();
 
-    @PostConstruct
-    public void start() throws TaskExecutionException {
-        stopped = false;
-        LOG.info("start TaskExecutionContainer.");
-    }
-
-    @PreDestroy
     @Override
-    public void stop() throws TaskExecutionException {
-        stopped = true;
-        LOG.info("stop TaskExecutionContainer.");
-    }
-
-    @Override
-    public void submitTask(final TaskExecutor taskExecutor) throws TaskExecutionException {
+    public void submit(final TaskExecutor taskExecutor) throws TaskExecutionException {
         LOG.info("TaskExecutor submit: " + taskExecutor.getTask());
         if (!stopped) {
             Task task = taskExecutor.getTask();
@@ -117,9 +89,15 @@ public class DefaultTaskExecutorContainerImpl implements TaskExecutionContainer 
     }
 
     @Override
-    public TaskExecutor getTaskExecutor(Type type, long taskId) {
+    public TaskExecutor get(Type type, long taskId) {
         ConcurrentHashMap<Long, TaskExecutor> taskExcutors = taskExecutorMap.get(type);
         return taskExcutors.get(taskId);
+    }
+
+    @Override
+    public void changeStatus(TaskStatusActionEvent taskStatusActionEvent) {
+        // TODO Auto-generated method stub
+
     }
 
     //TODO 对taskExecutorMap进行状态的监控，每隔n秒记录和处理状态(binlog,state)：更新数据库+通知报警

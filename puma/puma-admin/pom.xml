@@ -177,6 +177,24 @@
             <groupId>com.google.code.morphia</groupId>
             <artifactId>morphia</artifactId>
         </dependency>
+        <!-- swallow -->
+        <dependency>
+            <groupId>com.dianping.swallow</groupId>
+            <artifactId>swallow-consumerclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dianping.hawk</groupId>
+            <artifactId>hawk-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dianping.swallow</groupId>
+            <artifactId>swallow-producerclient</artifactId>
+        </dependency>
+        <!-- 文件队列 -->
+        <dependency>
+            <groupId>com.dianping</groupId>
+            <artifactId>file-queue</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <finalName>puma-admin</finalName>
@@ -222,7 +240,8 @@
                 <version>8.1.7.v20120910</version>
                 <configuration>
                     <!-- <scanIntervalSeconds>2</scanIntervalSeconds> -->
-                    <webAppSourceDirectory>webapp</webAppSourceDirectory>
+                    <webAppSourceDirectory>webapp
+                    </webAppSourceDirectory>
                     <webApp>
                         <contextPath>/puma-admin</contextPath>
                     </webApp>

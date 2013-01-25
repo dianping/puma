@@ -13,17 +13,18 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.syncserver.job.executor;
+package com.dianping.puma.syncserver.job.executor.builder;
 
-import com.dianping.puma.core.LifeCycle;
-import com.dianping.puma.core.sync.model.task.Task.Type;
+import com.dianping.puma.core.sync.model.task.Task;
+import com.dianping.puma.core.sync.model.task.Type;
+import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 
 /**
- * @author Leo Liang
+ * @author wukezhu
  */
-public interface TaskExecutionContainer extends LifeCycle<TaskExecutionException> {
+public interface TaskExecutorStrategy<T extends Task, R extends TaskExecutor> {
+    public R build(T task);
 
-    public void submitTask(TaskExecutor taskExecutor) throws TaskExecutionException;
+    public Type getType();
 
-    public TaskExecutor getTaskExecutor(Type type, long taskId);
 }

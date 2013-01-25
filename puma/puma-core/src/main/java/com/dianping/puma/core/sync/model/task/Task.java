@@ -1,6 +1,7 @@
 package com.dianping.puma.core.sync.model.task;
 
 import com.dianping.puma.core.sync.model.BaseEntity;
+import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.config.MysqlHost;
 import com.google.code.morphia.annotations.Indexed;
 import com.google.code.morphia.utils.IndexDirection;
@@ -32,20 +33,22 @@ public abstract class Task extends BaseEntity {
     //状态
     private TaskState taskState;
 
-    //  源：BinlogInfo起点
-    //    private BinlogInfo binlogInfo;
+    //  源：BinlogInfo
+        private BinlogInfo binlogInfo;
+        // 状态
+        private TaskStatusAction taskStatusAction;
 
     protected Task(Type type) {
         this.type = type;
     }
 
-    //    public BinlogInfo getBinlogInfo() {
-    //        return binlogInfo;
-    //    }
-    //
-    //    public void setBinlogInfo(BinlogInfo binlogInfo) {
-    //        this.binlogInfo = binlogInfo;
-    //    }
+    public BinlogInfo getBinlogInfo() {
+        return binlogInfo;
+    }
+
+    public void setBinlogInfo(BinlogInfo binlogInfo) {
+        this.binlogInfo = binlogInfo;
+    }
 
     public Long getSyncTaskId() {
         return syncTaskId;
@@ -111,10 +114,12 @@ public abstract class Task extends BaseEntity {
         this.taskState = taskState;
     }
 
-    public enum Type {
-        SYNC,
-        DUMP,
-        CATCHUP
+    public TaskStatusAction getTaskStatusAction() {
+        return taskStatusAction;
+    }
+
+    public void setTaskStatusAction(TaskStatusAction taskStatusAction) {
+        this.taskStatusAction = taskStatusAction;
     }
 
     @Override

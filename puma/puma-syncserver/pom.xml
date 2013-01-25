@@ -176,6 +176,23 @@
             <groupId>com.google.code.morphia</groupId>
             <artifactId>morphia</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.dianping.swallow</groupId>
+            <artifactId>swallow-consumerclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dianping.hawk</groupId>
+            <artifactId>hawk-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dianping.swallow</groupId>
+            <artifactId>swallow-producerclient</artifactId>
+        </dependency>
+        <!-- 文件队列 -->
+        <dependency>
+            <groupId>com.dianping</groupId>
+            <artifactId>file-queue</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <finalName>puma-syncserver</finalName>

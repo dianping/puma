@@ -13,20 +13,21 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.syncserver.job.checker;
+package com.dianping.puma.syncserver.job.container;
 
-import java.util.List;
-
+import com.dianping.puma.core.sync.model.notify.TaskStatusActionEvent;
+import com.dianping.puma.core.sync.model.task.Type;
 import com.dianping.puma.syncserver.job.executor.TaskExecutionException;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 
 /**
- * TODO Comment of JobCheckStrategy
- * 
  * @author Leo Liang
  */
-public interface TaskCheckStrategy {
-    public List<TaskExecutor> check() throws TaskExecutionException;
+public interface TaskExecutionContainer {
 
-    public String getName();
+    public void submit(TaskExecutor taskExecutor) throws TaskExecutionException;
+
+    public TaskExecutor get(Type type, long taskId);
+
+    public void changeStatus(TaskStatusActionEvent taskStatusActionEvent);
 }

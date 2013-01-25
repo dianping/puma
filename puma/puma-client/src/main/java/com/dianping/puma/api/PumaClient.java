@@ -23,6 +23,10 @@ public class PumaClient {
     private SeqFileHolder       seqFileHolder;
     private EventCodec          codec;
 
+    public SeqFileHolder getSeqFileHolder() {
+        return seqFileHolder;
+    }
+
     public PumaClient(Configuration config) {
         if (config == null) {
             throw new IllegalArgumentException("Config can't be null!");

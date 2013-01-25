@@ -12,6 +12,7 @@ import com.dianping.puma.api.Configuration;
 import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
+import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
@@ -115,6 +116,11 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, SpeedControl
         configuration = configBuilder.build();
         LOG.info("PumaClient's config is: " + configuration);
         pumaClient = new PumaClient(configuration);
+        if(startedBinlogInfo != null){
+            pumaClient.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_BINLOGINFO);
+        }else{
+            // exception
+        }
         //注册监听器
         pumaClient.register(new EventListener() {
             @Override
@@ -124,8 +130,11 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, SpeedControl
 
             @Override
             public boolean onException(ChangedEvent event, Exception e) {
+                pumaClient.stop();
+                //TODO 报警(记录详细信息)
+
                 LOG.error(e.getMessage(), e);
-                return true;
+                return false;
             }
 
             @Override

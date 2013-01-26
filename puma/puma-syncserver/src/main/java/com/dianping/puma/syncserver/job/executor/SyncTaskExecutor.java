@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.sync.model.task.SyncTask;
 
-public class SyncTaskExecutor extends AbstractTaskExecutor {
+public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTask> {
     protected static final Logger LOG = LoggerFactory.getLogger(SyncTaskExecutor.class);
 
     public SyncTaskExecutor(SyncTask syncTask, String pumaServerHost, int pumaServerPort, String target) {

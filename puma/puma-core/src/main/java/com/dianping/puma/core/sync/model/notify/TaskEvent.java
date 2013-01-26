@@ -2,7 +2,7 @@ package com.dianping.puma.core.sync.model.notify;
 
 import com.dianping.puma.core.sync.model.task.Type;
 
-public class TaskEvent extends AbstractEvent {
+public class TaskEvent extends Event {
 
     private Type type;
 

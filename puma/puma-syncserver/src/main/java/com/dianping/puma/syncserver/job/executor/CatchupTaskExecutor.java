@@ -8,7 +8,7 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.task.CatchupTask;
 
-public class CatchupTaskExecutor extends AbstractTaskExecutor {
+public class CatchupTaskExecutor extends AbstractTaskExecutor<CatchupTask> {
     protected static final Logger LOG = LoggerFactory.getLogger(CatchupTaskExecutor.class);
     /** 追赶的SyncTaskExecutor */
     private SyncTaskExecutor syncTaskExecutor;

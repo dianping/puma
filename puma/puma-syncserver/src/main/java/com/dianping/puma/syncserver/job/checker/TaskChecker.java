@@ -11,7 +11,7 @@ import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.sync.model.notify.Event;
 import com.dianping.puma.core.sync.model.notify.EventListener;
 import com.dianping.puma.core.sync.model.notify.TaskEvent;
-import com.dianping.puma.core.sync.model.notify.TaskStatusActionEvent;
+import com.dianping.puma.core.sync.model.notify.SyncTaskStatusActionEvent;
 import com.dianping.puma.core.sync.model.task.SyncTask;
 import com.dianping.puma.core.sync.model.task.Task;
 import com.dianping.puma.syncserver.conf.Config;
@@ -53,11 +53,12 @@ public class TaskChecker implements EventListener {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void onEvent(Event event) {
-        if (event instanceof TaskStatusActionEvent) {
+        if (event instanceof SyncTaskStatusActionEvent) {
             //收到状态变化的事件，通知Container修改状态
-            taskExecutionContainer.changeStatus(((TaskStatusActionEvent) event));
+            taskExecutionContainer.changeStatus(((SyncTaskStatusActionEvent) event));
         } else if (event instanceof TaskEvent) {
             //收到task的事件（创建或修改）
             //查询出该Task

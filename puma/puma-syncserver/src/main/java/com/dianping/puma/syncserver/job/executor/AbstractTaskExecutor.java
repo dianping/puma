@@ -19,27 +19,26 @@ import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.task.AbstractTask;
-import com.dianping.puma.core.sync.model.task.Task;
 import com.dianping.puma.core.sync.model.task.TaskState.State;
+import com.dianping.puma.core.sync.model.taskexecutor.TaskStatus;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
-public abstract class AbstractTaskExecutor implements TaskExecutor, SpeedControllable {
+//TODO  SyncTask和SyncTaskExecutor 泛型
+public abstract class AbstractTaskExecutor<T extends AbstractTask> implements TaskExecutor<T>, SpeedControllable {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTaskExecutor.class);
 
-    protected AbstractTask abstractTask;
+    protected T abstractTask;
     protected Configuration configuration;
     protected PumaClient pumaClient;
     protected MysqlExecutor mysqlExecutor;
-    private String pumaServerHost;
-    private int pumaServerPort;
-    private String target;
+    protected String pumaServerHost;
+    protected int pumaServerPort;
+    protected String target;
+    protected TaskStatus status;
 
     private long sleepTime = 0;
 
-    //    protected String pumaServerHost = Config.getInstance().getPumaServerHost();
-    //    protected int pumaServerPort = Config.getInstance().getPumaServerPort();
-
-    public AbstractTaskExecutor(AbstractTask abstractTask, String pumaServerHost, int pumaServerPort, String target) {
+    public AbstractTaskExecutor(T abstractTask, String pumaServerHost, int pumaServerPort, String target) {
         this.abstractTask = abstractTask;
         this.pumaServerHost = pumaServerHost;
         this.pumaServerPort = pumaServerPort;
@@ -56,12 +55,12 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, SpeedControl
      */
     protected abstract void onEvent(ChangedEvent event) throws Exception;
 
-    public void setAbstractTask(AbstractTask abstractTask) {
+    public void setAbstractTask(T abstractTask) {
         this.abstractTask = abstractTask;
     }
 
     @Override
-    public Task getTask() {
+    public T getTask() {
         return abstractTask;
     }
 
@@ -90,6 +89,15 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, SpeedControl
         this.abstractTask.getTaskState().setState(State.RUNNING);
     }
 
+    @Override
+    public TaskStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TaskStatus status) {
+        this.status = status;
+    }
+
     private void init() {
         BinlogInfo startedBinlogInfo = abstractTask.getTaskState().getBinlogInfo();
         //1 初始化mysqlExecutor
@@ -116,9 +124,9 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, SpeedControl
         configuration = configBuilder.build();
         LOG.info("PumaClient's config is: " + configuration);
         pumaClient = new PumaClient(configuration);
-        if(startedBinlogInfo != null){
+        if (startedBinlogInfo != null) {
             pumaClient.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_BINLOGINFO);
-        }else{
+        } else {
             // exception
         }
         //注册监听器

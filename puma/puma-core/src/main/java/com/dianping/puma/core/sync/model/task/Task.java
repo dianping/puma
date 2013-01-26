@@ -34,9 +34,7 @@ public abstract class Task extends BaseEntity {
     private TaskState taskState;
 
     //  源：BinlogInfo
-        private BinlogInfo binlogInfo;
-        // 状态
-        private TaskStatusAction taskStatusAction;
+    private BinlogInfo binlogInfo;
 
     protected Task(Type type) {
         this.type = type;
@@ -112,14 +110,6 @@ public abstract class Task extends BaseEntity {
 
     public void setTaskState(TaskState taskState) {
         this.taskState = taskState;
-    }
-
-    public TaskStatusAction getTaskStatusAction() {
-        return taskStatusAction;
-    }
-
-    public void setTaskStatusAction(TaskStatusAction taskStatusAction) {
-        this.taskStatusAction = taskStatusAction;
     }
 
     @Override

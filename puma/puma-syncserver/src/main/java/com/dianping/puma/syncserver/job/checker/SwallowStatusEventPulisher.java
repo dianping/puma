@@ -29,7 +29,7 @@ public class SwallowStatusEventPulisher implements EventPublisher {
     @Override
     public void publish(Event event) {
         try {
-            producer.sendMessage(event);
+            producer.sendMessage(event, event.getSyncServerName());
         } catch (SendFailedException e) {
             notifyService.alarm(e.getMessage(), e, false);
         }

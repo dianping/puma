@@ -15,7 +15,7 @@
  */
 package com.dianping.puma.syncserver.job.container;
 
-import com.dianping.puma.core.sync.model.notify.TaskStatusActionEvent;
+import com.dianping.puma.core.sync.model.notify.SyncTaskStatusActionEvent;
 import com.dianping.puma.core.sync.model.task.Type;
 import com.dianping.puma.syncserver.job.executor.TaskExecutionException;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
@@ -29,5 +29,5 @@ public interface TaskExecutionContainer {
 
     public TaskExecutor get(Type type, long taskId);
 
-    public void changeStatus(TaskStatusActionEvent taskStatusActionEvent);
+    public void changeStatus(SyncTaskStatusActionEvent taskStatusActionEvent);
 }

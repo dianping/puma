@@ -16,11 +16,12 @@
 package com.dianping.puma.syncserver.job.executor;
 
 import com.dianping.puma.core.sync.model.task.Task;
+import com.dianping.puma.core.sync.model.taskexecutor.TaskStatus;
 
 /**
  * @author Leo Liang
  */
-public interface TaskExecutor {
+public interface TaskExecutor<T extends Task> {
 
     /** 开始 */
     void start();
@@ -31,5 +32,7 @@ public interface TaskExecutor {
 
     void fail();
 
-    Task getTask();
+    TaskStatus getStatus();
+
+    T getTask();
 }

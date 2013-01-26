@@ -1,7 +1,7 @@
-package com.dianping.puma.core.sync.model.task;
+package com.dianping.puma.core.sync.model.taskexecutor;
 
 public enum TaskStatus {
-    PREPARING("正在准备运行"),
+    PREPARING("准备运行"),
     RUNNING("运行中"),
     DUMPING("Dump：Dumping操作进行中"),
     LOADING("Dump：Loading操作进行中"),

@@ -29,14 +29,14 @@ import org.slf4j.LoggerFactory;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.task.DumpTask;
-import com.dianping.puma.core.sync.model.task.Task;
 import com.dianping.puma.core.sync.model.task.TaskState;
 import com.dianping.puma.core.sync.model.task.TaskState.State;
+import com.dianping.puma.core.sync.model.taskexecutor.TaskStatus;
 
 /**
  * @author wukezhu
  */
-public class DumpTaskExecutor implements TaskExecutor {
+public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
     private static final Logger LOG = LoggerFactory.getLogger(DumpTaskExecutor.class);
     private final static Pattern BINLOG_LINE_PATTERN = Pattern.compile("^.+LOG_FILE='(.*)',\\s+.+LOG_POS=([0-9]+);$");
 
@@ -56,6 +56,7 @@ public class DumpTaskExecutor implements TaskExecutor {
     private DumpTask dumpTask;
 
     private Process proc;
+    private TaskStatus status;
 
     public DumpTaskExecutor(DumpTask dumpTask) {
         this.uuid = UUID.randomUUID().toString();
@@ -250,13 +251,22 @@ public class DumpTaskExecutor implements TaskExecutor {
     }
 
     @Override
-    public Task getTask() {
+    public DumpTask getTask() {
         return this.dumpTask;
     }
 
     @Override
     public void pause() {
         throw new UnsupportedOperationException("DumpTaskExecutor not support stop() method!");
+    }
+    
+    @Override
+    public TaskStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TaskStatus status) {
+        this.status = status;
     }
 
     @Override

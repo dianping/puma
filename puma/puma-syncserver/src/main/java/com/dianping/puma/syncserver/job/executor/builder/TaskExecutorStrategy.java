@@ -22,6 +22,7 @@ import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 /**
  * @author wukezhu
  */
+@SuppressWarnings("rawtypes")
 public interface TaskExecutorStrategy<T extends Task, R extends TaskExecutor> {
     public R build(T task);
 

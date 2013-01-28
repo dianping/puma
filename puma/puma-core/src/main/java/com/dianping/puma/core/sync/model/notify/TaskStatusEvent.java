@@ -8,19 +8,19 @@ import com.dianping.puma.core.sync.model.taskexecutor.TaskStatus;
 
 public class TaskStatusEvent extends Event {
 
-    private List<Status> status;
+    private List<Status> statusList;
 
-    public List<Status> getStatus() {
-        return status;
+    public List<Status> getStatusList() {
+        return statusList;
     }
 
-    public void setStatus(List<Status> status) {
-        this.status = status;
+    public void setStatusList(List<Status> statusList) {
+        this.statusList = statusList;
     }
 
     @Override
     public String toString() {
-        return "TaskStatusEvent [status=" + status + "]";
+        return "TaskStatusEvent [status=" + statusList + "]";
     }
 
     public static class Status {
@@ -67,8 +67,8 @@ public class TaskStatusEvent extends Event {
 
         @Override
         public String toString() {
-            return "TaskStatusNotify [taskId=" + taskId + ", type=" + type + ", taskStatus=" + taskStatus + ", binlogInfo="
-                    + binlogInfo + "]";
+            return "Status [taskId=" + taskId + ", type=" + type + ", taskStatus=" + taskStatus + ", binlogInfo=" + binlogInfo
+                    + "]";
         }
     }
 }

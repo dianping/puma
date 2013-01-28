@@ -43,7 +43,7 @@ public class SwallowTaskEventSubscriber implements EventSubscriber {
     }
 
     @Override
-    public void setEventListener(EventListener listener) {
+    public void addEventListener(EventListener listener) {
         this.listener = listener;
     }
 

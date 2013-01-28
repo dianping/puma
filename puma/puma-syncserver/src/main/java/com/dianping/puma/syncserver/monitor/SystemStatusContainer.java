@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.dianping.puma.core.sync.model.notify.TaskStatusEvent;
 import com.dianping.puma.core.sync.model.notify.TaskStatusEvent.Status;
@@ -34,6 +35,7 @@ import com.dianping.puma.syncserver.job.executor.TaskExecutor;
  * @author wukezhu
  */
 //TODO 对taskExecutorMap进行状态的监控，每隔n秒记录和处理状态(binlog,state)：更新数据库+通知报警(如果有fail的任务)
+@Service
 public class SystemStatusContainer {
 
     @Autowired
@@ -42,7 +44,7 @@ public class SystemStatusContainer {
     private Config config;
 
     @SuppressWarnings("rawtypes")
-    public TaskStatusEvent getTaskStatusEvents() {
+    public TaskStatusEvent getTaskStatusEvent() {
         TaskStatusEvent event = new TaskStatusEvent();
         List<Status> statusList = new ArrayList<Status>();
         ConcurrentHashMap<Type, ConcurrentHashMap<Long, TaskExecutor>> taskExecutorMapMap = taskExecutorContainer
@@ -63,7 +65,7 @@ public class SystemStatusContainer {
                 }
             }
         }
-        event.setStatus(statusList);
+        event.setStatusList(statusList);
         event.setSyncServerName(config.getSyncServerName());
         return event;
     }

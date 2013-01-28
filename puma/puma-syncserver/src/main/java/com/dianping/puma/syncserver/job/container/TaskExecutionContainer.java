@@ -23,6 +23,7 @@ import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 /**
  * @author Leo Liang
  */
+@SuppressWarnings("rawtypes")
 public interface TaskExecutionContainer {
 
     public void submit(TaskExecutor taskExecutor) throws TaskExecutionException;

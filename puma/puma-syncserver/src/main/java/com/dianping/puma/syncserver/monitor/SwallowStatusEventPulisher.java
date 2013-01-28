@@ -1,5 +1,6 @@
-package com.dianping.puma.syncserver.job.checker;
+package com.dianping.puma.syncserver.monitor;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dianping.puma.core.monitor.NotifyService;
@@ -18,6 +19,7 @@ public class SwallowStatusEventPulisher implements EventPublisher {
 
     private final Producer producer;
     private final String topic = "puma_status_event";
+    @Autowired
     private NotifyService notifyService;
 
     public SwallowStatusEventPulisher() throws RemoteServiceInitFailedException {

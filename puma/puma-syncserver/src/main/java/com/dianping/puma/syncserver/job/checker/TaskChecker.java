@@ -34,6 +34,7 @@ public class TaskChecker implements EventListener {
     @Autowired
     private NotifyService notifyService;
 
+    @SuppressWarnings("rawtypes")
     @PostConstruct
     public void init() {
         //加载所有Task

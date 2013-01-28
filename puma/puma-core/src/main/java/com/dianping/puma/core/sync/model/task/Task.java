@@ -30,8 +30,8 @@ public abstract class Task extends BaseEntity {
     private String syncServerName;
     // SyncTaskId
     private Long syncTaskId;
-    //状态
-    private TaskState taskState;
+    //    //状态
+    //    private TaskState taskState;
 
     //  源：BinlogInfo
     private BinlogInfo binlogInfo;
@@ -104,19 +104,19 @@ public abstract class Task extends BaseEntity {
         this.syncServerName = syncServerName;
     }
 
-    public TaskState getTaskState() {
-        return taskState;
-    }
-
-    public void setTaskState(TaskState taskState) {
-        this.taskState = taskState;
-    }
-
     @Override
     public String toString() {
-        return "Task [type=" + type + ", srcMysqlName=" + srcMysqlName + ", destMysqlName=" + destMysqlName + ", destMysqlHost="
-                + destMysqlHost + ", syncServerName=" + syncServerName + ", syncTaskId=" + syncTaskId + ", taskState=" + taskState
-                + "]";
+        return "Task [type=" + type + ", srcMysqlName=" + srcMysqlName + ", srcMysqlHost=" + srcMysqlHost + ", destMysqlName="
+                + destMysqlName + ", destMysqlHost=" + destMysqlHost + ", syncServerName=" + syncServerName + ", syncTaskId="
+                + syncTaskId + ", binlogInfo=" + binlogInfo + "]";
     }
+
+    //    public TaskState getTaskState() {
+    //        return taskState;
+    //    }
+    //
+    //    public void setTaskState(TaskState taskState) {
+    //        this.taskState = taskState;
+    //    }
 
 }

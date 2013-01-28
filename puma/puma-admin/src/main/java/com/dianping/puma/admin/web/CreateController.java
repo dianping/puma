@@ -17,14 +17,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
-import org.xml.sax.SAXParseException;
 
+import com.dianping.puma.admin.monitor.SystemStatusContainer;
 import com.dianping.puma.admin.service.DumpTaskService;
 import com.dianping.puma.admin.service.MysqlConfigService;
 import com.dianping.puma.admin.service.PumaSyncServerConfigService;
 import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.admin.util.GsonUtil;
-import com.dianping.puma.admin.util.SyncXmlParser;
+import com.dianping.puma.core.monitor.TaskStatusEvent.Status;
 import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.config.MysqlConfig;
 import com.dianping.puma.core.sync.model.config.MysqlHost;
@@ -35,10 +35,9 @@ import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.task.DumpTask;
 import com.dianping.puma.core.sync.model.task.SyncTask;
-import com.dianping.puma.core.sync.model.task.TaskState;
+import com.dianping.puma.core.sync.model.task.Type;
 
 /**
- * TODO <br>
  * (1) 以create为整个controller，所有中间状态存放在session <br>
  * (2) 编写SyncTask的service <br>
  * (3) pumaSyncServer的id与host的映射 <br>
@@ -58,6 +57,8 @@ public class CreateController {
     private PumaSyncServerConfigService pumaSyncServerConfigService;
     @Autowired
     private SyncTaskService syncTaskService;
+    @Autowired
+    private SystemStatusContainer systemStatusContainer;
 
     private static final String errorMsg = "对不起，出了一点错误，请刷新页面试试。";
 
@@ -72,40 +73,6 @@ public class CreateController {
         map.put("path", "create");
         map.put("subPath", "step1");
         return new ModelAndView("main/container", map);
-    }
-
-    @RequestMapping(value = "/create/step1Save_backup", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public Object step1Save_backup(HttpSession session, String srcMysql, String destMysql, String syncXml) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        try {
-            //判断该srcMysql和destMysql是否重复
-            if (this.syncTaskService.existsBySrcAndDest(srcMysql, destMysql)) {
-                throw new IllegalArgumentException("创建失败，已有相同的配置存在。(srcMysqlName=" + srcMysql + ", destMysqlName=" + destMysql
-                        + ")");
-            }
-            //保存到session
-            MysqlMapping mysqlMapping = SyncXmlParser.parse2(syncXml);
-            session.setAttribute("mysqlMapping", mysqlMapping);
-            MysqlConfig srcMysqlConfig = mysqlConfigService.find(srcMysql);
-            MysqlConfig destMysqlConfig = mysqlConfigService.find(destMysql);
-            session.setAttribute("srcMysqlConfig", srcMysqlConfig);
-            session.setAttribute("destMysqlConfig", destMysqlConfig);
-
-            map.put("success", true);
-        } catch (SAXParseException e) {
-            map.put("success", false);
-            map.put("errorMsg", "xml解析出错：" + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            map.put("success", false);
-            map.put("errorMsg", e.getMessage());
-        } catch (Exception e) {
-            map.put("success", false);
-            map.put("errorMsg", errorMsg);
-            LOG.error(e.getMessage(), e);
-        }
-        return GsonUtil.toJson(map);
-
     }
 
     @RequestMapping(value = "/create/step1Save", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
@@ -253,9 +220,9 @@ public class CreateController {
     /**
      * 刷新DumpTask的状态
      */
-    @RequestMapping(value = "/create/refleshDumpState", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "/create/refreshDumpStatus", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object refleshDumpState(HttpSession session) {
+    public Object refreshDumpStatus(HttpSession session) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             DumpTask dumpTask = (DumpTask) session.getAttribute("dumpTask");
@@ -263,13 +230,13 @@ public class CreateController {
             if (dumpTask == null) {
                 throw new IllegalArgumentException("dumpTask为空，可能是会话已经过期！");
             }
-            //查询dumpTaskId对应的DumpTaskState
-            dumpTask = this.dumpTaskService.find(dumpTask.getId());
-            session.setAttribute("dumpTask", dumpTask);
-            TaskState taskState = dumpTask.getTaskState();
-            map.put("dumpTaskState", taskState);
-            if (taskState.getBinlogInfo() != null) {
-                session.setAttribute("binlogInfo", taskState.getBinlogInfo());
+
+            Status status = systemStatusContainer.getStatus(Type.DUMP, dumpTask.getId());
+            if (status != null) {
+                map.put("status", status);
+                if (status.getBinlogInfo() != null) {
+                    session.setAttribute("binlogInfo", status.getBinlogInfo());
+                }
             }
 
             map.put("success", true);
@@ -350,16 +317,15 @@ public class CreateController {
             syncTask.setMysqlMapping(mysqlMapping);
             syncTask.setSyncServerName(syncServerName);
             BinlogInfo binlogInfo = new BinlogInfo();
-            if (StringUtils.isNotBlank(binlogFile) && StringUtils.isNotBlank(binlogPosition)) {
-                binlogInfo.setBinlogFile(binlogFile);
-                binlogInfo.setBinlogPosition(Long.parseLong(binlogPosition));
-            }
+            binlogInfo.setBinlogFile(binlogFile);
+            binlogInfo.setBinlogPosition(Long.parseLong(binlogPosition));
+            syncTask.setBinlogInfo(binlogInfo);
             syncTask.setPumaClientName(pumaClientName);
             syncTask.setDdl(ddl != null ? ddl : true);
             syncTask.setDml(dml != null ? dml : true);
             syncTask.setTransaction(transaction != null ? transaction : true);
             //保存dumpTask到数据库
-            syncTaskService.create(syncTask, binlogInfo);
+            syncTaskService.create(syncTask);
             //更新dumpTask的syncTaskId
             Long syncTaskId = syncTask.getId();
             Long dumpTaskId = (Long) session.getAttribute("dumpTaskId");

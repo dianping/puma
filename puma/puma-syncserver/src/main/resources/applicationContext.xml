@@ -15,24 +15,28 @@
 
     <task:annotation-driven />
 
-    <!-- Main spring IOC entrance -->
     <import resource="applicationContext-properties.xml" />
 
+    <import resource="applicationContext-swallow.xml" />
 
+    <!-- 报警 -->
+    <bean id="notifyService" class="com.dianping.puma.core.monitor.DefaultNotifyService">
+    </bean>
+
+    <!-- executor -->
     <bean
-        class="com.dianping.puma.syncserver.job.checker.SingleThreadLoopTaskCheckerImpl">
-        <property name="loopIntervalMilliSec" value="500" />
-        <property name="taskExecutionContainer" ref="taskExecutionContainer" />
-        <property name="taskCheckStrategyList">
+        class="com.dianping.puma.syncserver.job.executor.builder.DefaultTaskExecutorBuilder">
+        <property name="strategys">
             <list>
-                <ref bean="syncTaskCheckStrategy" />
-                <ref bean="catchupTaskCheckStrategy" />
-                <ref bean="dumpTaskCheckStrategy" />
+                <ref bean="syncTaskExecutorStrategy" />
+                <ref bean="catchupTaskExecutorStrategy" />
+                <ref bean="dumpTaskExecutorStrategy" />
             </list>
         </property>
     </bean>
 
 
+    <!-- 数据库 -->
     <bean id="mongoClient" class="com.dianping.puma.core.sync.dao.MongoClient">
     </bean>
 

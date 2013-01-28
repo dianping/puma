@@ -1,22 +1,23 @@
 package com.dianping.puma.admin.service.impl;
 
-import java.util.Date;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dianping.puma.admin.service.CatchupTaskService;
+import com.dianping.puma.core.monitor.SwallowEventPulisher;
+import com.dianping.puma.core.monitor.TaskEvent;
 import com.dianping.puma.core.sync.dao.task.CatchupTaskDao;
 import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.task.CatchupTask;
-import com.dianping.puma.core.sync.model.task.TaskState;
-import com.dianping.puma.core.sync.model.task.TaskState.State;
+import com.dianping.puma.core.sync.model.task.Type;
 import com.google.code.morphia.Key;
 
 @Service("catchupTaskService")
 public class CatchupTaskServiceImpl implements CatchupTaskService {
     @Autowired
     CatchupTaskDao catchupTaskDao;
+    @Autowired
+    SwallowEventPulisher taskEventPublisher;
 
     @Override
     public Long create(CatchupTask catchupTask, BinlogInfo binlogInfo) {
@@ -30,19 +31,18 @@ public class CatchupTaskServiceImpl implements CatchupTaskService {
                 || catchupTask.getMysqlMapping().getDatabases().get(0).getTables().size() == 0) {
             throw new IllegalArgumentException("创建失败，<table>配置必须至少有一个！");
         }
-        //创建SyncTaskState
-        TaskState taskState = new TaskState();
-        taskState.setState(State.RUNNABLE);
-        taskState.setDetail(State.RUNNABLE.getDesc());
-        Date curDate = new Date();
-        taskState.setCreateTime(curDate);
-        taskState.setLastUpdateTime(curDate);
-        taskState.setBinlogInfo(binlogInfo);
-        catchupTask.setTaskState(taskState);
+        catchupTask.setBinlogInfo(binlogInfo);
         //开始保存
         Key<CatchupTask> key = this.catchupTaskDao.save(catchupTask);
         this.catchupTaskDao.getDatastore().ensureIndexes();
         Long id = (Long) key.getId();
+
+        //通知
+        TaskEvent event = new TaskEvent();
+        event.setTaskId(id);
+        event.setType(Type.CATCHUP);
+        event.setSyncServerName(catchupTask.getSyncServerName());
+        taskEventPublisher.publish(event);
 
         return id;
     }

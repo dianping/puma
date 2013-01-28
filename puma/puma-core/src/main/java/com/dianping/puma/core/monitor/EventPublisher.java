@@ -1,4 +1,4 @@
-package com.dianping.puma.core.sync.model.notify;
+package com.dianping.puma.core.monitor;
 
 
 public interface EventPublisher {

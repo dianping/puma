@@ -12,7 +12,6 @@
                      <th>PumaClientName</th>
                      <th>SyncServer名称</th>
                      <th>状态</th>
-                     <th>状态详情</th>
                      <th>操作</th>
                   </tr>
                </thead>
@@ -23,10 +22,9 @@
                      <td>$syncTask.destMysqlName</td>
                      <td>$syncTask.pumaClientName</td>
                      <td>$syncTask.syncServerName</td>
-                     <td stateOfId="$syncTask.id"></td>
-                     <td stateDetailOfId="$syncTask.id"></td>
-                     <td><a reflesh="" href="javascript:;"
-                        onclick="refleshState(this);"
+                     <td statusOfId="$syncTask.id"></td>
+                     <td><a refresh="" href="javascript:;"
+                        onclick="refreshStatus(this);"
                         taskId="$syncTask.id" style="margin-right: 10px">刷新状态</a><a
                         href="${rc.contextPath}/created/task/$syncTask.id">详细</a></td>
                   </tr>
@@ -66,35 +64,38 @@
    </div>
 </div>
 <script>
-	function refleshState(td) {
+	function refreshStatus(td) {
 		var param = new Object();
 		var taskId = $(td).attr("taskId");
 		param.taskId = taskId;
-		$("td[stateOfId='" + taskId + "']").text("");
-		$("td[stateDetailOfId='" + taskId + "']").text("");
-		var url = window.contextpath + '/created/state';
+		$("td[statusOfId='" + taskId + "']").text("");
+		var url = window.contextpath + '/created/status';
 		$.ajax({
 			type : 'POST',
 			url : url,
 			data : param,
 			dataType : "json",
-			success : refleshStateDone(taskId),
+			success : refreshStatusDone(taskId),
 			error : pumadmin.httpError
 		});
 	}
-	function refleshStateDone(id) {
+	function refreshStatusDone(id) {
 		return function(data) {
 			if (data.success == false) {
 				pumadmin.appError("错误信息", data.errorMsg);
 			} else {
-				var state = data.state;
-				$("td[stateOfId='" + id + "']").text(state.state);
-				$("td[stateDetailOfId='" + id + "']").text(state.detail);
+				var status = data.status;
+				if (status) {
+					$("td[statusOfId='" + id + "']").text(
+							status.taskStatus);
+				} else {
+					$("td[statusOfId='" + id + "']").text("无状态(可能不在运行)");
+				}
 			}
 		}
 	}
 	function init() {
-		var trs = $("a[reflesh]");
+		var trs = $("a[refresh]");
 		$.each(trs, function(i, el) {
 			$(el).click();
 		});

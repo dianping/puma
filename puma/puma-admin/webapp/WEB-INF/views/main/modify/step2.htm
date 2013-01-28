@@ -26,9 +26,9 @@
                      onsubmit="createDumpTask(this);return false;"
                      action="${rc.contextPath}/modify/createDumpTask">
                      <label style="">DumpTask状态(<a
-                        href="javascript:refleshDumpState();">刷新状态</a>)：<span
+                        href="javascript:refreshDumpStatus();">刷新状态</a>)：<span
                         style="font-size: 12px; color: red"
-                        id="dumpState"> </span>
+                        id="dumpStatus"> </span>
                      </label> <br> binlog文件：<input class="input-mini"
                         type="text" disabled="disabled"
                         id="dumpBinlogFile" style="margin-right: 20px;">
@@ -119,37 +119,37 @@
 		if (data.success == false) {
 			pumadmin.appError("错误信息", data.errorMsg);
 		} else {
-			$('#dumpState').text("CREATED (创建时间：刚刚)");
+			$('#dumpStatus').text("CREATED (创建时间：刚刚)");
 			$("#createDumpButton").attr("disabled", "disabled");
 		}
 	}
-	function refleshDumpState() {
+	function refreshDumpStatus() {
 		var param = new Object();
 		// 发送ajax请求jsonp
-		var url = window.contextpath + '/modify/refleshDumpState';
-		$('#dumpState').text("正在刷新...");
+		var url = window.contextpath + '/modify/refreshDumpStatus';
+		$('#dumpStatus').text("正在刷新...");
 		$.ajax({
 			type : 'POST',
 			url : url,
 			data : param,
 			dataType : "json",
-			success : refleshDumpStateDone,
+			success : refreshDumpStatusDone,
 			error : pumadmin.httpError
 		});
 	}
-	function refleshDumpStateDone(data) {
+	function refreshDumpStatusDone(data) {
 		if (data.success == false) {
 			pumadmin.appError("访问发生错误", data.errorMsg);
 		} else {
-			$('#dumpState').text(
-					data.dumpTaskState.state + " (创建时间："
-							+ data.dumpTaskState.createTime + ")");
-			if (data.dumpTaskState.binlogInfo
-					&& data.dumpTaskState.binlogInfo.binlogFile) {
-				$('#dumpBinlogFile').val(
-						data.dumpTaskState.binlogInfo.binlogFile);
-				$('#dumpBinlogPos').val(
-						data.dumpTaskState.binlogInfo.binlogPosition);
+			var status = data.status;
+			if (status) {
+				$("#dumpStatus").text(status.taskStatus);
+			} else {
+				$("#dumpStatus").text("无状态(可能不在运行)");
+			}
+			if (status.binlogInfo && status.binlogInfo.binlogFile) {
+				$('#dumpBinlogFile').val(status.binlogInfo.binlogFile);
+				$('#dumpBinlogPos').val(status.binlogInfo.binlogPosition);
 				//把文案显示成“下一步”
 				$("#dumpStepButton").addClass("btn-success");
 				$("#dumpStepButton").text("下一步");

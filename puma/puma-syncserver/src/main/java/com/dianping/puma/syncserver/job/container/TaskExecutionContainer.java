@@ -15,7 +15,7 @@
  */
 package com.dianping.puma.syncserver.job.container;
 
-import com.dianping.puma.core.sync.model.notify.SyncTaskStatusActionEvent;
+import com.dianping.puma.core.monitor.SyncTaskStatusActionEvent;
 import com.dianping.puma.core.sync.model.task.Type;
 import com.dianping.puma.syncserver.job.executor.TaskExecutionException;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;

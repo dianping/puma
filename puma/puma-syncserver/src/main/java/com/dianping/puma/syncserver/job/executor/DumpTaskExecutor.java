@@ -29,8 +29,6 @@ import org.slf4j.LoggerFactory;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.task.DumpTask;
-import com.dianping.puma.core.sync.model.task.TaskState;
-import com.dianping.puma.core.sync.model.task.TaskState.State;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskStatus;
 
 /**
@@ -74,7 +72,7 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         thread = new Thread() {
             public void run() {
                 LOG.info("started dump.");
-                dumpTask.getTaskState().setState(TaskState.State.DUMPING);
+                setStatus(TaskStatus.DUMPING);
                 try {
                     //(1) dump
                     //目前dump的数据库配置只允许一个
@@ -97,12 +95,12 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
                     while (lineIterators.hasNext()) {
                         String line = lineIterators.next();
                         //获取binlog位置
-                        if (StringUtils.isBlank(dumpTask.getTaskState().getBinlogInfo().getBinlogFile())
-                                || dumpTask.getTaskState().getBinlogInfo().getBinlogPosition() <= 0) {
+                        if (StringUtils.isBlank(dumpTask.getBinlogInfo().getBinlogFile())
+                                || dumpTask.getBinlogInfo().getBinlogPosition() <= 0) {
                             Matcher matcher = BINLOG_LINE_PATTERN.matcher(line);
                             if (matcher.matches()) {
-                                dumpTask.getTaskState().getBinlogInfo().setBinlogFile(matcher.group(1));
-                                dumpTask.getTaskState().getBinlogInfo().setBinlogPosition(Long.parseLong(matcher.group(2)));
+                                dumpTask.getBinlogInfo().setBinlogFile(matcher.group(1));
+                                dumpTask.getBinlogInfo().setBinlogPosition(Long.parseLong(matcher.group(2)));
                             }
                         }
                         //table更名
@@ -123,15 +121,15 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
                         deelFileWriter.println(line);
                     }
                     deelFileWriter.close();
-                    if (StringUtils.isBlank(dumpTask.getTaskState().getBinlogInfo().getBinlogFile())
-                            || dumpTask.getTaskState().getBinlogInfo().getBinlogPosition() <= 0) {
+                    if (StringUtils.isBlank(dumpTask.getBinlogInfo().getBinlogFile())
+                            || dumpTask.getBinlogInfo().getBinlogPosition() <= 0) {
                         throw new DumpException("binlogFile or binlogPos is Error: binlogFile="
-                                + dumpTask.getTaskState().getBinlogInfo().getBinlogFile() + ",binlogPos="
-                                + dumpTask.getTaskState().getBinlogInfo().getBinlogPosition());
+                                + dumpTask.getBinlogInfo().getBinlogFile() + ",binlogPos="
+                                + dumpTask.getBinlogInfo().getBinlogPosition());
                     }
-                    LOG.info("binlog info:" + dumpTask.getTaskState().getBinlogInfo());
+                    LOG.info("binlog info:" + dumpTask.getBinlogInfo());
                     //(2) load
-                    dumpTask.getTaskState().setState(TaskState.State.LOADING);
+                    setStatus(TaskStatus.LOADING);
                     LOG.info("started load.");
                     //执行load脚本
                     srcDatabaseName = databaseMapping.getFrom();
@@ -139,17 +137,16 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
                     if (StringUtils.isNotBlank(output)) {
                         throw new DumpException("mysqlload output is not empty , so consided to be failed: " + output);
                     }
-                    dumpTask.getTaskState().setState(TaskState.State.SUCCEED);
+                    setStatus(TaskStatus.SUCCEED);
                     LOG.info("load done.");
                 } catch (Exception e) {
-                    dumpTask.getTaskState().setState(TaskState.State.FAILED);
-                    dumpTask.getTaskState().setDetail("dump error: " + e.getMessage());
+                    setStatus(TaskStatus.FAILED);
                     LOG.error("dump error: " + e.getMessage(), e);
                 }
             }
         };
         thread.start();
-        this.dumpTask.getTaskState().setState(State.RUNNING);
+        this.setStatus(TaskStatus.RUNNING);
     }
 
     /**
@@ -259,7 +256,7 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
     public void pause() {
         throw new UnsupportedOperationException("DumpTaskExecutor not support stop() method!");
     }
-    
+
     @Override
     public TaskStatus getStatus() {
         return status;
@@ -271,12 +268,12 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
 
     @Override
     public void succeed() {
-        this.dumpTask.getTaskState().setState(State.SUCCEED);
+        this.setStatus(TaskStatus.SUCCEED);
     }
 
     @Override
     public void fail() {
-        this.dumpTask.getTaskState().setState(State.FAILED);
+        this.setStatus(TaskStatus.FAILED);
     }
 
     //    public static void main(String[] args) throws ExecuteException, IOException, InterruptedException {

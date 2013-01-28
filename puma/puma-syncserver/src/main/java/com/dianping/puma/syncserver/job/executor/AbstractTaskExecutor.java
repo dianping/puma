@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.dianping.puma.api.Configuration;
 import com.dianping.puma.api.ConfigurationBuilder;
@@ -14,16 +15,15 @@ import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.task.AbstractTask;
-import com.dianping.puma.core.sync.model.task.TaskState.State;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskStatus;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
-//TODO  SyncTask和SyncTaskExecutor 泛型
 public abstract class AbstractTaskExecutor<T extends AbstractTask> implements TaskExecutor<T>, SpeedControllable {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTaskExecutor.class);
 
@@ -37,6 +37,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     protected TaskStatus status;
 
     private long sleepTime = 0;
+    @Autowired
+    private NotifyService notifyService;
 
     public AbstractTaskExecutor(T abstractTask, String pumaServerHost, int pumaServerPort, String target) {
         this.abstractTask = abstractTask;
@@ -66,19 +68,22 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
     @Override
     public void pause() {
-        this.abstractTask.getTaskState().setState(State.SUSPPENDED);
+        //        this.abstractTask.getTaskState().setState(State.SUSPPENDED);
+        this.setStatus(TaskStatus.SUSPPENDED);
         this.pumaClient.stop();
     }
 
     @Override
     public void succeed() {
-        this.abstractTask.getTaskState().setState(State.SUCCEED);
+        //        this.abstractTask.getTaskState().setState(State.SUCCEED);
+        this.setStatus(TaskStatus.SUCCEED);
         this.pumaClient.stop();
     }
 
     @Override
     public void fail() {
-        this.abstractTask.getTaskState().setState(State.FAILED);
+        //        this.abstractTask.getTaskState().setState(State.FAILED);
+        this.setStatus(TaskStatus.FAILED);
         this.pumaClient.stop();
     }
 
@@ -86,7 +91,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     public void start() {
         //启动
         pumaClient.start();
-        this.abstractTask.getTaskState().setState(State.RUNNING);
+        //        this.abstractTask.getTaskState().setState(State.RUNNING);
+        this.setStatus(TaskStatus.RUNNING);
     }
 
     @Override
@@ -99,7 +105,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     }
 
     private void init() {
-        BinlogInfo startedBinlogInfo = abstractTask.getTaskState().getBinlogInfo();
+        BinlogInfo startedBinlogInfo = abstractTask.getBinlogInfo();
         //1 初始化mysqlExecutor
         LOG.info("initing MysqlExecutor...");
         mysqlExecutor = new MysqlExecutor(abstractTask.getDestMysqlHost().getHost(), abstractTask.getDestMysqlHost().getUsername(),
@@ -127,7 +133,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         if (startedBinlogInfo != null) {
             pumaClient.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_BINLOGINFO);
         } else {
-            // exception
+            // TODO exception
         }
         //注册监听器
         pumaClient.register(new EventListener() {
@@ -139,17 +145,15 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
             @Override
             public boolean onException(ChangedEvent event, Exception e) {
                 pumaClient.stop();
-                //TODO 报警(记录详细信息)
-
-                LOG.error(e.getMessage(), e);
+                notifyService.alarm("PumaClient onException: " + e.getMessage(), e, true);
                 return false;
             }
 
             @Override
             public void onEvent(ChangedEvent event) throws Exception {
                 //动态更新binlog和binlogPos
-                abstractTask.getTaskState().getBinlogInfo().setBinlogPosition(event.getBinlogPos());
-                abstractTask.getTaskState().getBinlogInfo().setBinlogFile(event.getBinlog());
+                abstractTask.getBinlogInfo().setBinlogPosition(event.getBinlogPos());
+                abstractTask.getBinlogInfo().setBinlogFile(event.getBinlog());
                 //执行子类的具体操作
                 AbstractTaskExecutor.this.onEvent(event);
                 //速度调控

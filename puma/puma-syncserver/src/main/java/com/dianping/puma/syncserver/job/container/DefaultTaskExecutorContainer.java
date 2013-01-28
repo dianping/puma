@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dianping.puma.core.monitor.NotifyService;
-import com.dianping.puma.core.sync.model.notify.SyncTaskStatusActionEvent;
+import com.dianping.puma.core.monitor.SyncTaskStatusActionEvent;
 import com.dianping.puma.core.sync.model.task.SyncTaskStatusAction;
 import com.dianping.puma.core.sync.model.task.Task;
 import com.dianping.puma.core.sync.model.task.Type;
@@ -26,7 +26,7 @@ import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 @SuppressWarnings("rawtypes")
 public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultTaskExecutorContainer.class);
-    private volatile boolean stopped = true;
+    private volatile boolean stopped = false;
 
     private ConcurrentHashMap<Type, ConcurrentHashMap<Long, TaskExecutor>> taskExecutorMapMap = new ConcurrentHashMap<Type, ConcurrentHashMap<Long, TaskExecutor>>();
     @Autowired
@@ -98,6 +98,8 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
             if (syncTaskExecutor.getTask().getSyncTaskStatusAction() == SyncTaskStatusAction.RESTART
                     || syncTaskExecutor.getTask().getSyncTaskStatusAction() == SyncTaskStatusAction.START) {
                 syncTaskExecutor.start();
+            }else{
+                syncTaskExecutor.pause();
             }
         } else if (newTaskExecutor instanceof DumpTaskExecutor || newTaskExecutor instanceof CatchupTaskExecutor) {
             newTaskExecutor.start();

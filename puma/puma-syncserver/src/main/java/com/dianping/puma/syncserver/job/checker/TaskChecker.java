@@ -4,14 +4,16 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.dianping.puma.core.monitor.Event;
+import com.dianping.puma.core.monitor.EventListener;
 import com.dianping.puma.core.monitor.NotifyService;
-import com.dianping.puma.core.sync.model.notify.Event;
-import com.dianping.puma.core.sync.model.notify.EventListener;
-import com.dianping.puma.core.sync.model.notify.TaskEvent;
-import com.dianping.puma.core.sync.model.notify.SyncTaskStatusActionEvent;
+import com.dianping.puma.core.monitor.SyncTaskStatusActionEvent;
+import com.dianping.puma.core.monitor.TaskEvent;
 import com.dianping.puma.core.sync.model.task.SyncTask;
 import com.dianping.puma.core.sync.model.task.Task;
 import com.dianping.puma.syncserver.conf.Config;
@@ -21,8 +23,10 @@ import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 import com.dianping.puma.syncserver.job.executor.builder.TaskExecutorBuilder;
 import com.dianping.puma.syncserver.service.TaskService;
 
-@Service
+@Service("taskChecker")
 public class TaskChecker implements EventListener {
+    private static final Logger LOG = LoggerFactory.getLogger(TaskChecker.class);
+
     @Autowired
     private TaskService taskService;
     @Autowired
@@ -52,11 +56,14 @@ public class TaskChecker implements EventListener {
                 }
             }
         }
+        LOG.info("TaskChecker loaded " + (syncTasks != null ? syncTasks.size() : 0) + " tasks.");
+        LOG.info("TaskChecker inited.");
     }
 
     @SuppressWarnings("rawtypes")
     @Override
     public void onEvent(Event event) {
+        LOG.info("Receive event: " + event);
         if (event instanceof SyncTaskStatusActionEvent) {
             //收到状态变化的事件，通知Container修改状态
             taskExecutionContainer.changeStatus(((SyncTaskStatusActionEvent) event));

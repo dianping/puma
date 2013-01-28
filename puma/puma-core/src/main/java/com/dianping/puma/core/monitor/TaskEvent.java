@@ -1,4 +1,4 @@
-package com.dianping.puma.core.sync.model.notify;
+package com.dianping.puma.core.monitor;
 
 import com.dianping.puma.core.sync.model.task.Type;
 
@@ -22,6 +22,11 @@ public class TaskEvent extends Event {
 
     public void setTaskId(long taskId) {
         this.taskId = taskId;
+    }
+
+    @Override
+    public String toString() {
+        return "TaskEvent [type=" + type + ", taskId=" + taskId + "]";
     }
 
 }

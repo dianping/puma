@@ -72,13 +72,8 @@ blockquote button {
             <div>
                <h4>状态</h4>
                <blockquote>
-                  <p id="state">
-                     <strong style="color: #DF3A01">$syncTask.taskState.state</strong>
-                     (<span style="color:">$syncTask.taskState.detail</span>)
-                  </p>
-                  <p style="font-size: 12px;">
-                     状态的最后更新时间：<span id="lastUpdateTime">${dateFormatUtils.format(${syncTask.taskState.lastUpdateTime},"yyyy年MM月dd日
-                        HH时mm分")}</span>
+                  <p id="status">
+                     <strong style="color: #DF3A01">$status</strong>
                   </p>
                </blockquote>
             </div>

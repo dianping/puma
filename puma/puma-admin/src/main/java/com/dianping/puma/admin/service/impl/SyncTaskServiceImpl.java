@@ -3,9 +3,7 @@ package com.dianping.puma.admin.service.impl;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +11,9 @@ import org.springframework.stereotype.Service;
 
 import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.admin.util.MysqlMetaInfoFetcher;
+import com.dianping.puma.core.monitor.SwallowEventPulisher;
+import com.dianping.puma.core.monitor.SyncTaskStatusActionEvent;
+import com.dianping.puma.core.monitor.TaskEvent;
 import com.dianping.puma.core.sync.dao.task.SyncTaskDao;
 import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.config.MysqlHost;
@@ -22,20 +23,23 @@ import com.dianping.puma.core.sync.model.mapping.DumpMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.task.SyncTask;
-import com.dianping.puma.core.sync.model.task.TaskState;
-import com.dianping.puma.core.sync.model.task.TaskState.State;
+import com.dianping.puma.core.sync.model.task.SyncTaskStatusAction;
+import com.dianping.puma.core.sync.model.task.Type;
 import com.google.code.morphia.Key;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
-import com.google.code.morphia.query.UpdateOperations;
 
 @Service
 public class SyncTaskServiceImpl implements SyncTaskService {
     @Autowired
     SyncTaskDao syncTaskDao;
+    @Autowired
+    SwallowEventPulisher taskEventPublisher;
+    @Autowired
+    SwallowEventPulisher statusActionEventPublisher;
 
     @Override
-    public Long create(SyncTask syncTask, BinlogInfo binlogInfo) {
+    public Long create(SyncTask syncTask) {
         //验证
         if (this.existsBySrcAndDest(syncTask.getSrcMysqlName(), syncTask.getDestMysqlName())) {
             throw new IllegalArgumentException("创建失败，已有相同的配置存在。(srcMysqlName=" + syncTask.getSrcMysqlName() + ", destMysqlName="
@@ -51,19 +55,18 @@ public class SyncTaskServiceImpl implements SyncTaskService {
                 || syncTask.getMysqlMapping().getDatabases().get(0).getTables().size() == 0) {
             throw new IllegalArgumentException("创建失败，<table>配置必须至少有一个！");
         }
-        //创建SyncTasktaskState
-        TaskState taskState = new TaskState();
-        taskState.setState(State.RUNNABLE);
-        taskState.setDetail(State.RUNNABLE.getDesc());
-        Date curDate = new Date();
-        taskState.setCreateTime(curDate);
-        taskState.setLastUpdateTime(curDate);
-        taskState.setBinlogInfo(binlogInfo);
-        syncTask.setTaskState(taskState);
+        syncTask.setSyncTaskStatusAction(SyncTaskStatusAction.START);
         //开始保存
         Key<SyncTask> key = this.syncTaskDao.save(syncTask);
         this.syncTaskDao.getDatastore().ensureIndexes();
         Long id = (Long) key.getId();
+
+        //通知
+        TaskEvent event = new TaskEvent();
+        event.setTaskId(id);
+        event.setType(Type.SYNC);
+        event.setSyncServerName(syncTask.getSyncServerName());
+        taskEventPublisher.publish(event);
 
         return id;
     }
@@ -185,23 +188,44 @@ public class SyncTaskServiceImpl implements SyncTaskService {
     }
 
     @Override
-    public void updateState(Long id, State state, Map<String, String> params) {
-        UpdateOperations<SyncTask> ops = this.syncTaskDao.getDatastore().createUpdateOperations(SyncTask.class)
-                .set("taskState.state", state);
-        if (params != null) {
-            ops.set("taskState.params", params);
-        }
-        ops.set("taskState.detail", state.getDesc());
-        ops.set("taskState.lastUpdateTime", new Date());
-        this.syncTaskDao.getDatastore().update(new Key<SyncTask>(SyncTask.class, id), ops);
+    public void modify(Long id, BinlogInfo binlogInfo, MysqlMapping newMysqlMapping) {
+        //        UpdateOperations<SyncTask> ops = this.syncTaskDao.getDatastore().createUpdateOperations(SyncTask.class)
+        //                .set("binlogInfo", binlogInfo);
+        //        ops.set("mysqlMapping", newMysqlMapping);
+        //        Query<SyncTask> q = syncTaskDao.getDatastore().createQuery(SyncTask.class);
+        //        q.field("id").equal(id);
+        //        this.syncTaskDao.update(q, ops);
+
+        SyncTask syncTask = this.find(id);
+        syncTask.setMysqlMapping(newMysqlMapping);
+        syncTask.setBinlogInfo(binlogInfo);
+        this.syncTaskDao.save(syncTask);
+
+        //通知
+        TaskEvent event = new TaskEvent();
+        event.setTaskId(id);
+        event.setType(Type.SYNC);
+        event.setSyncServerName(syncTask.getSyncServerName());
+        taskEventPublisher.publish(event);
     }
 
     @Override
-    public void modify(Long id, BinlogInfo binlogInfo, MysqlMapping newMysqlMapping) {
-        UpdateOperations<SyncTask> ops = this.syncTaskDao.getDatastore().createUpdateOperations(SyncTask.class)
-                .set("binlogInfo", binlogInfo);
-        ops.set("mysqlMapping", newMysqlMapping);
-        this.syncTaskDao.getDatastore().update(new Key<SyncTask>(SyncTask.class, id), ops);
+    public void updateStatusAction(Long taskId, SyncTaskStatusAction statusAction) {
+        SyncTask syncTask = this.find(taskId);
+        syncTask.setSyncTaskStatusAction(statusAction);
+        this.syncTaskDao.save(syncTask);
+        //保存到数据库
+        //        UpdateOperations<SyncTask> ops = this.syncTaskDao.getDatastore().createUpdateOperations(SyncTask.class)
+        //                .set("taskStatusAction", statusAction);
+        //        Query<SyncTask> q = syncTaskDao.getDatastore().createQuery(SyncTask.class);
+        //        q.field("id").equal(taskId);
+        //        this.syncTaskDao.update(q, ops);
+        //通知
+        SyncTaskStatusActionEvent event = new SyncTaskStatusActionEvent();
+        event.setSyncTaskId(taskId);
+        event.setTaskStatusAction(statusAction);
+        event.setSyncServerName(syncTask.getSyncServerName());
+        statusActionEventPublisher.publish(event);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.dianping.puma.core.sync;
+package com.dianping.puma.core.sync.delete;
 
 import com.dianping.puma.core.sync.model.BinlogInfo;
 

@@ -11,7 +11,7 @@ import com.dianping.puma.syncserver.job.executor.CatchupTaskExecutor;
 import com.dianping.puma.syncserver.job.executor.SyncTaskExecutor;
 import com.dianping.puma.syncserver.service.PumaServerConfigService;
 
-@Service("catchupTaskExecutorBuilder")
+@Service("catchupTaskExecutorStrategy")
 public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<CatchupTask, CatchupTaskExecutor> {
 
     @Autowired
@@ -30,8 +30,7 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
         int pumaServerPort = Integer.parseInt(splits[1]);
         String target = pumaServerConfig.getTarget();
         //从taskContainer获取syncTaskExecutor
-        SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) taskExecutionContainer.get(Type.SYNC,
-                task.getSyncTaskId());
+        SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) taskExecutionContainer.get(Type.SYNC, task.getSyncTaskId());
         return new CatchupTaskExecutor(task, pumaServerHost, pumaServerPort, target, syncTaskExecutor);
     }
 

@@ -13,8 +13,13 @@
             expression="org.springframework.stereotype.Controller" />
     </context:component-scan>
 
-    <!-- Main spring IOC entrance -->
     <import resource="applicationContext-properties.xml" />
+
+    <import resource="applicationContext-swallow.xml" />
+
+    <!-- 报警 -->
+    <bean id="notifyService" class="com.dianping.puma.core.monitor.DefaultNotifyService">
+    </bean>
 
     <bean id="mongoClient" class="com.dianping.puma.core.sync.dao.MongoClient">
     </bean>

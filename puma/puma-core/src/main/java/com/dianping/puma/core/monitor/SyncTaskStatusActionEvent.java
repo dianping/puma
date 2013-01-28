@@ -1,4 +1,4 @@
-package com.dianping.puma.core.sync.model.notify;
+package com.dianping.puma.core.monitor;
 
 import com.dianping.puma.core.sync.model.task.SyncTaskStatusAction;
 
@@ -26,7 +26,7 @@ public class SyncTaskStatusActionEvent extends Event {
 
     @Override
     public String toString() {
-        return "TaskStatusActionEvent [syncTaskId=" + syncTaskId + ", taskStatusAction=" + taskStatusAction + "]";
+        return "SyncTaskStatusActionEvent [syncTaskId=" + syncTaskId + ", taskStatusAction=" + taskStatusAction + "]";
     }
 
 }

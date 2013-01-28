@@ -69,5 +69,14 @@
             <artifactId>morphia</artifactId>
             <optional>true</optional>
         </dependency>
+        <!-- swallow -->
+        <dependency>
+            <groupId>com.dianping.swallow</groupId>
+            <artifactId>swallow-consumerclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dianping.swallow</groupId>
+            <artifactId>swallow-producerclient</artifactId>
+        </dependency>
     </dependencies>
 </project>

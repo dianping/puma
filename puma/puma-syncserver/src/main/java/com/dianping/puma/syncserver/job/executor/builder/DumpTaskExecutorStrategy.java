@@ -6,7 +6,7 @@ import com.dianping.puma.core.sync.model.task.DumpTask;
 import com.dianping.puma.core.sync.model.task.Type;
 import com.dianping.puma.syncserver.job.executor.DumpTaskExecutor;
 
-@Service("dumpTaskExecutorBuilder")
+@Service("dumpTaskExecutorStrategy")
 public class DumpTaskExecutorStrategy implements TaskExecutorStrategy<DumpTask, DumpTaskExecutor> {
 
     @Override

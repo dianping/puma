@@ -10,7 +10,7 @@ import com.dianping.puma.core.sync.model.task.Type;
 import com.dianping.puma.syncserver.job.executor.SyncTaskExecutor;
 import com.dianping.puma.syncserver.service.PumaServerConfigService;
 
-@Service("syncTaskExecutorBuilder")
+@Service("syncTaskExecutorStrategy")
 public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, SyncTaskExecutor> {
 
     @Autowired

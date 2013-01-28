@@ -1,4 +1,4 @@
-package com.dianping.puma.core.sync;
+package com.dianping.puma.core.sync.delete;
 
 import java.util.Arrays;
 import java.util.List;

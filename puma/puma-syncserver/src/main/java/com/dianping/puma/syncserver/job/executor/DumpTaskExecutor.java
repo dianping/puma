@@ -169,7 +169,7 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         List<String> destTableNames = new ArrayList<String>();
         if (tableConfigs != null && tableConfigs.size() > 0) {
             for (TableMapping tableConfig : tableConfigs) {
-                destTableNames.add(tableConfig.getFrom());
+                destTableNames.add(tableConfig.getTo());
             }
         }
         return destTableNames;
@@ -187,7 +187,12 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         List<String> cmdlist = new ArrayList<String>();
         cmdlist.add("mysqldump");
         String hostWithPort = dumpTask.getSrcMysqlHost().getHost();
-        String[] hostWithPortSplits = hostWithPort.split(":");
+        String[] hostWithPortSplits;
+        if (StringUtils.indexOf(hostWithPort, ':') != -1) {
+            hostWithPortSplits = hostWithPort.split(":");
+        } else {
+            hostWithPortSplits = new String[] { hostWithPort, "3306" };
+        }
         cmdlist.add("--host=" + hostWithPortSplits[0]);
         cmdlist.add("--port=" + hostWithPortSplits[1]);
         cmdlist.add("--user=" + dumpTask.getSrcMysqlHost().getUsername());

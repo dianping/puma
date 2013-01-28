@@ -45,16 +45,20 @@ public class Config {
         //获取本地ip
         for (String ip : IPUtils.getNoLoopbackIP4Addresses()) {
             String host = ip + ':' + localPort;
-            LOG.info("try this ip to find syncServerName from db : " + ip);
+            LOG.info("Try this ip to find syncServerName from db : " + ip);
             PumaSyncServerConfig config = configService.find(host);
             if (config != null) {
                 syncServerName = config.getName();
+                LOG.info("Match syncServerName: " + syncServerName);
+                break;
+            } else {
+                LOG.info("Not match any syncServerName: " + ip);
             }
         }
-        if(syncServerName==null){
+        if (syncServerName == null) {
             throw new RuntimeException("Cannot try to find the syncServerName, please check the SyncServerConfig in DB.");
         }
-        LOG.info("properties: " + this.toString());
+        LOG.info("Properties: " + this.toString());
 
     }
 

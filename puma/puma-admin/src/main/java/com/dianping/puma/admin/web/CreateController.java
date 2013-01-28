@@ -328,9 +328,11 @@ public class CreateController {
             syncTaskService.create(syncTask);
             //更新dumpTask的syncTaskId
             Long syncTaskId = syncTask.getId();
-            Long dumpTaskId = (Long) session.getAttribute("dumpTaskId");
-            this.dumpTaskService.updateSyncTaskId(dumpTaskId, syncTaskId);
-            LOG.info("syncTask.getId(): " + syncTask.getId());
+            if (dumpTask != null) {
+                long dumpTaskId = dumpTask.getId();
+                this.dumpTaskService.updateSyncTaskId(dumpTaskId, syncTaskId);
+            }
+            LOG.info("created syncTask : " + syncTask);
 
             map.put("success", true);
         } catch (IllegalArgumentException e) {

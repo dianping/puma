@@ -73,7 +73,8 @@ blockquote button {
                <h4>状态</h4>
                <blockquote>
                   <p id="status">
-                     <strong style="color: #DF3A01">$status</strong>
+                     <strong style="color: #DF3A01">#if($status.taskStatus)
+                        $status.taskStatus #else 无状态(可能不在运行) #end</strong>
                   </p>
                </blockquote>
             </div>

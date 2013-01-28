@@ -82,4 +82,17 @@ public class SystemStatusContainer implements EventListener {
             }
         }
     }
+
+    public ConcurrentHashMap<Long, Status> getSyncTaskStatusMap() {
+        return syncTaskStatusMap;
+    }
+
+    public ConcurrentHashMap<Long, Status> getCatchupTaskStatusMap() {
+        return catchupTaskStatusMap;
+    }
+
+    public ConcurrentHashMap<Long, Status> getDumpTaskStatusMap() {
+        return dumpTaskStatusMap;
+    }
+
 }

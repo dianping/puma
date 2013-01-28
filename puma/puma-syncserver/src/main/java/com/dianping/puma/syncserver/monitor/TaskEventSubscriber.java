@@ -15,6 +15,7 @@ public class TaskEventSubscriber extends SwallowEventSubscriber {
     public void init() {
         String type = config.getSyncServerName();
         super.setType(type);
+        super.init();
     }
 
 }

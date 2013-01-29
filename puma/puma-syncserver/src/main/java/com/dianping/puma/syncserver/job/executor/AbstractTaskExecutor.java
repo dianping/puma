@@ -68,21 +68,18 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
     @Override
     public void pause() {
-        //        this.abstractTask.getTaskState().setState(State.SUSPPENDED);
         this.setStatus(TaskStatus.SUSPPENDED);
         this.pumaClient.stop();
     }
 
     @Override
     public void succeed() {
-        //        this.abstractTask.getTaskState().setState(State.SUCCEED);
         this.setStatus(TaskStatus.SUCCEED);
         this.pumaClient.stop();
     }
 
     @Override
     public void fail() {
-        //        this.abstractTask.getTaskState().setState(State.FAILED);
         this.setStatus(TaskStatus.FAILED);
         this.pumaClient.stop();
     }
@@ -91,7 +88,6 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     public void start() {
         //启动
         pumaClient.start();
-        //        this.abstractTask.getTaskState().setState(State.RUNNING);
         this.setStatus(TaskStatus.RUNNING);
     }
 
@@ -137,13 +133,16 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         pumaClient.register(new EventListener() {
             @Override
             public void onSkipEvent(ChangedEvent event) {
+                //动态更新binlog和binlogPos
+                abstractTask.getBinlogInfo().setBinlogPosition(event.getBinlogPos());
+                abstractTask.getBinlogInfo().setBinlogFile(event.getBinlog());
                 LOG.info("onSkipEvent: " + event);
             }
 
             @Override
             public boolean onException(ChangedEvent event, Exception e) {
                 fail();
-                notifyService.alarm("PumaClient onException: " + e.getMessage(), e, true);
+                notifyService.alarm("PumaClient[Event=" + event + "] onException: " + e.getMessage(), e, true);
                 return false;
             }
 

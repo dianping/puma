@@ -58,14 +58,17 @@ public class TaskServiceImpl implements TaskService {
                 SyncTask syncTask = this.find(Type.SYNC, taskId);
                 syncTask.setBinlogInfo(binlogInfo);
                 this.syncTaskDao.save(syncTask);
+                break;
             case CATCHUP:
                 CatchupTask catchupTask = this.find(Type.CATCHUP, taskId);
                 catchupTask.setBinlogInfo(binlogInfo);
                 this.catchupTaskDao.save(catchupTask);
+                break;
             case DUMP:
                 DumpTask dumptask = this.find(Type.DUMP, taskId);
                 dumptask.setBinlogInfo(binlogInfo);
                 this.dumpTaskDao.save(dumptask);
+                break;
         }
     }
 

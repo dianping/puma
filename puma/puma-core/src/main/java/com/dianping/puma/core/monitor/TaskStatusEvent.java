@@ -80,5 +80,23 @@ public class TaskStatusEvent extends Event {
             return "Status [taskId=" + taskId + ", type=" + type + ", taskStatus=" + taskStatus + ", binlogInfo=" + binlogInfo
                     + "]";
         }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + (int) (taskId ^ (taskId >>> 32));
+            result = prime * result + ((type == null) ? 0 : type.hashCode());
+            return result;
+        }
+
+        public static int calHashCode(Type type, long taskId) {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + (int) (taskId ^ (taskId >>> 32));
+            result = prime * result + ((type == null) ? 0 : type.hashCode());
+            return result;
+        }
+
     }
 }

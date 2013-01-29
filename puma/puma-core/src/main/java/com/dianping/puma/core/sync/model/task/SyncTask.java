@@ -8,18 +8,18 @@ public class SyncTask extends AbstractTask {
     private static final long serialVersionUID = 2359517002901314187L;
 
     // 状态
-    private SyncTaskStatusAction taskStatusAction;
+    private SyncTaskStatusAction syncTaskStatusAction;
 
     public SyncTask() {
         super(Type.SYNC);
     }
 
     public SyncTaskStatusAction getSyncTaskStatusAction() {
-        return taskStatusAction;
+        return syncTaskStatusAction;
     }
 
     public void setSyncTaskStatusAction(SyncTaskStatusAction taskStatusAction) {
-        this.taskStatusAction = taskStatusAction;
+        this.syncTaskStatusAction = taskStatusAction;
     }
 
 }

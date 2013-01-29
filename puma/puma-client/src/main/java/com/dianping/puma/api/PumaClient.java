@@ -16,12 +16,12 @@ import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.core.util.StreamUtils;
 
 public class PumaClient {
-    private static final Logger log    = Logger.getLogger(PumaClient.class);
-    private Configuration       config;
-    private EventListener       eventListener;
-    private volatile boolean    active = false;
-    private SeqFileHolder       seqFileHolder;
-    private EventCodec          codec;
+    private static final Logger log = Logger.getLogger(PumaClient.class);
+    private Configuration config;
+    private EventListener eventListener;
+    private volatile boolean active = false;
+    private SeqFileHolder seqFileHolder;
+    private EventCodec codec;
 
     public SeqFileHolder getSeqFileHolder() {
         return seqFileHolder;
@@ -91,6 +91,7 @@ public class PumaClient {
 
         } catch (Exception ex) {
             log.error("Connect to puma server failed. " + config, ex);
+            eventListener.onException(null, ex);
         }
 
         return null;

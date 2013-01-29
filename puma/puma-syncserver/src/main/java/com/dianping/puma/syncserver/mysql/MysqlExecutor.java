@@ -46,7 +46,6 @@ public class MysqlExecutor {
             String sql = ((DdlEvent) event).getSql();
             if (StringUtils.isNotBlank(sql)) {
                 //ddl不做命名的替换！直接执行
-                //TODO ddl 命名替换
                 LOG.info("execute ddl sql: " + sql);
                 jdbcTemplate.update(sql);
             }

@@ -132,8 +132,6 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         pumaClient = new PumaClient(configuration);
         if (startedBinlogInfo != null) {
             pumaClient.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_BINLOGINFO);
-        } else {
-            // TODO exception
         }
         //注册监听器
         pumaClient.register(new EventListener() {

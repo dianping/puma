@@ -98,7 +98,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
             if (syncTaskExecutor.getTask().getSyncTaskStatusAction() == SyncTaskStatusAction.RESTART
                     || syncTaskExecutor.getTask().getSyncTaskStatusAction() == SyncTaskStatusAction.START) {
                 syncTaskExecutor.start();
-            }else{
+            } else {
                 syncTaskExecutor.pause();
             }
         } else if (newTaskExecutor instanceof DumpTaskExecutor || newTaskExecutor instanceof CatchupTaskExecutor) {
@@ -126,7 +126,8 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
         if (syncTaskExecutor != null) {
             SyncTaskStatusAction statusAction = taskStatusActionEvent.getTaskStatusAction();
             if (statusAction == SyncTaskStatusAction.PAUSE
-                    && (syncTaskExecutor.getStatus() == TaskStatus.PREPARING || syncTaskExecutor.getStatus() == TaskStatus.RUNNING)) {
+                    && (syncTaskExecutor.getStatus() == TaskStatus.PREPARING || syncTaskExecutor.getStatus() == TaskStatus.RUNNING || syncTaskExecutor
+                            .getStatus() == TaskStatus.FAILED)) {
                 syncTaskExecutor.pause();
             } else if (statusAction == SyncTaskStatusAction.RESTART
                     && (syncTaskExecutor.getStatus() == TaskStatus.SUSPPENDED || syncTaskExecutor.getStatus() == TaskStatus.SUCCEED || syncTaskExecutor

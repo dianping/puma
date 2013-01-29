@@ -1,5 +1,6 @@
 package com.dianping.puma.core.monitor;
 
+import java.util.Date;
 import java.util.List;
 
 import com.dianping.puma.core.sync.model.BinlogInfo;
@@ -30,8 +31,17 @@ public class TaskStatusEvent extends Event {
 
         private TaskStatus taskStatus;
 
-        //binlog信息
         private BinlogInfo binlogInfo;
+
+        private Date gmtCreate;
+
+        public Status() {
+            gmtCreate = new Date();
+        }
+
+        public Date getGmtCreate() {
+            return gmtCreate;
+        }
 
         public long getTaskId() {
             return taskId;

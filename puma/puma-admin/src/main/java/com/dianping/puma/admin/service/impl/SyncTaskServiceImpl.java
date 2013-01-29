@@ -227,5 +227,11 @@ public class SyncTaskServiceImpl implements SyncTaskService {
         event.setSyncServerName(syncTask.getSyncServerName());
         statusActionEventPublisher.publish(event);
     }
+    
+    @Override
+    public List<SyncTask> findAll() {
+        QueryResults<SyncTask> result = syncTaskDao.find();
+        return result.asList();
+    }
 
 }

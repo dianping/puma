@@ -1,5 +1,6 @@
 package com.dianping.puma.admin.monitor;
 
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,40 +23,40 @@ public class StatusMonitor {
     private SystemStatusContainer systemStatusContainer;
     @Autowired
     private NotifyService notifyService;
+
     /** 当前数据库的所有SyncTask，除非是 */
 
     /**
      * 启动一个定时任务
      */
     @Scheduled(cron = "0/10 * * * * ?")
-    public void report() {
-        //TODO 如果超过30秒没有收到某台syncServer的状态报告时，就报警
-        //需要存放当前的所有SyncTask,DumpTask,CatchupTask,结合SyncServer的所有Status
-        //如果发现有不在运行的Task和失败的Task，报警
-        
-        //如果某台syncServer有fail的task，就报警
+    public void monitor() {
+        //如果有Status超过60秒没有更新，就报警
+        //如果有fail的task，就报警
         ConcurrentHashMap<Long, Status> syncTaskStatusMap = systemStatusContainer.getSyncTaskStatusMap();
-        if (syncTaskStatusMap.size() > 0) {
-            for (Status status : syncTaskStatusMap.values()) {
-                if (status.getTaskStatus() == TaskStatus.FAILED) {
-                    notifyService.alarm("Task failed: " + status, null, true);
-                }
-            }
-        }
+        check(syncTaskStatusMap);
         ConcurrentHashMap<Long, Status> catchupTaskStatusMap = systemStatusContainer.getCatchupTaskStatusMap();
-        if (catchupTaskStatusMap.size() > 0) {
-            for (Status status : catchupTaskStatusMap.values()) {
-                if (status.getTaskStatus() == TaskStatus.FAILED) {
-                    notifyService.alarm("Task failed: " + status, null, true);
-                }
-            }
-        }
+        check(catchupTaskStatusMap);
         ConcurrentHashMap<Long, Status> dumpTaskStatusMap = systemStatusContainer.getDumpTaskStatusMap();
-        if (dumpTaskStatusMap.size() > 0) {
-            for (Status status : dumpTaskStatusMap.values()) {
+        check(dumpTaskStatusMap);
+    }
+
+    private void check(ConcurrentHashMap<Long, Status> saskStatusMap) {
+        if (saskStatusMap.size() > 0) {
+            for (Status status : saskStatusMap.values()) {
                 if (status.getTaskStatus() == TaskStatus.FAILED) {
                     notifyService.alarm("Task failed: " + status, null, true);
+                } else {
+                    Date lastUpdateTime = status.getGmtCreate();
+                    Date curTime = new Date();
+                    long time = curTime.getTime() - lastUpdateTime.getTime();
+                    if (time > 60 * 1000) {//一分钟
+                        notifyService
+                                .alarm("Task's status have " + time / 1000 + " seconds not updated, last Status is: " + status,
+                                        null, true);
+                    }
                 }
+                //TODO 已经报警，不能再报警
             }
         }
     }

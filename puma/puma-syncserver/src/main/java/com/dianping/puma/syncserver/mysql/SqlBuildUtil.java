@@ -20,7 +20,7 @@ public class SqlBuildUtil {
         _ve = new VelocityEngine();
         _ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "class");
         _ve.setProperty("class.resource.loader.class", ClasspathResourceLoader.class.getName());
-        _ve.setProperty("class.resource.loader.cache", false);
+        _ve.setProperty("class.resource.loader.cache", true);
         _ve.setProperty("class.resource.loader.modificationCheckInterval", "-1");
         _ve.setProperty("input.encoding", "UTF-8");
         _ve.init();

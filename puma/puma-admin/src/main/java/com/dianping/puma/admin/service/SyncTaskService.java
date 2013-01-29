@@ -28,4 +28,6 @@ public interface SyncTaskService {
 
     void updateStatusAction(Long taskId, SyncTaskStatusAction statusAction);
 
+    List<SyncTask> findAll();
+
 }

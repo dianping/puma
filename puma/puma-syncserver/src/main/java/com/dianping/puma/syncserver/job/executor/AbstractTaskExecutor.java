@@ -142,7 +142,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
             @Override
             public boolean onException(ChangedEvent event, Exception e) {
-                pumaClient.stop();
+                fail();
                 notifyService.alarm("PumaClient onException: " + e.getMessage(), e, true);
                 return false;
             }

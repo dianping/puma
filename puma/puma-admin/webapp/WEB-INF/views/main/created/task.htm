@@ -143,7 +143,7 @@ blockquote button {
 			pumadmin.appError("错误信息", data.errorMsg);
 		} else {
 			var status = data.status;
-			if (status) {
+			if (status && status.taskStatus) {
 				$("#status > strong").text(status.taskStatus);
 			} else {
 				$("#status > strong").text("无状态(可能不在运行)");

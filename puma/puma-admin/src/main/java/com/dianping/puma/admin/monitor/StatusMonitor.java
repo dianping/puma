@@ -1,8 +1,9 @@
 package com.dianping.puma.admin.monitor;
 
-import java.util.Date;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -23,12 +24,9 @@ public class StatusMonitor {
     private SystemStatusContainer systemStatusContainer;
     @Autowired
     private NotifyService notifyService;
+    /** 存放正在报警的task的status，同一个Task在5分钟内只报警一次 */
+    private HashMap<Status, Long> alarmingStatusMap = new HashMap<Status, Long>();
 
-    /** 当前数据库的所有SyncTask，除非是 */
-
-    /**
-     * 启动一个定时任务
-     */
     @Scheduled(cron = "0/10 * * * * ?")
     public void monitor() {
         //如果有Status超过60秒没有更新，就报警
@@ -41,23 +39,30 @@ public class StatusMonitor {
         check(dumpTaskStatusMap);
     }
 
-    private void check(ConcurrentHashMap<Long, Status> saskStatusMap) {
-        if (saskStatusMap.size() > 0) {
-            for (Status status : saskStatusMap.values()) {
-                if (status.getTaskStatus() == TaskStatus.FAILED) {
+    private void check(ConcurrentHashMap<Long, Status> taskStatusMap) {
+        if (taskStatusMap.size() > 0) {
+            for (Status status : taskStatusMap.values()) {
+                if (status.getTaskStatus() == TaskStatus.FAILED && shouldAlarm(status)) {
                     notifyService.alarm("Task failed: " + status, null, true);
-                } else {
-                    Date lastUpdateTime = status.getGmtCreate();
-                    Date curTime = new Date();
-                    long time = curTime.getTime() - lastUpdateTime.getTime();
-                    if (time > 60 * 1000) {//一分钟
-                        notifyService
-                                .alarm("Task's status have " + time / 1000 + " seconds not updated, last Status is: " + status,
-                                        null, true);
-                    }
+                } else if (status.getTaskStatus() == null && shouldAlarm(status)) {
+                    notifyService.alarm("Task's status is not Update recently: " + status, null, true);
                 }
-                //TODO 已经报警，不能再报警
             }
         }
+    }
+
+    /**
+     * 同一个Task在5分钟内只报警一次
+     */
+    private boolean shouldAlarm(Status status) {
+        boolean shouldAlarm = true;
+        Long statusStartAlarmAddTime = alarmingStatusMap.get(status);
+        if (statusStartAlarmAddTime != null) {
+            long lastTime = System.currentTimeMillis() - statusStartAlarmAddTime;
+            if (lastTime < 5 * DateUtils.MILLIS_PER_MINUTE) {
+                shouldAlarm = false;
+            }
+        }
+        return shouldAlarm;
     }
 }

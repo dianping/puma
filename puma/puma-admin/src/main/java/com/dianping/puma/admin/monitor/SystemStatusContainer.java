@@ -15,10 +15,14 @@
  */
 package com.dianping.puma.admin.monitor;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.dianping.puma.admin.service.SyncTaskService;
@@ -29,6 +33,7 @@ import com.dianping.puma.core.monitor.TaskStatusEvent;
 import com.dianping.puma.core.monitor.TaskStatusEvent.Status;
 import com.dianping.puma.core.sync.model.task.SyncTask;
 import com.dianping.puma.core.sync.model.task.Type;
+import com.dianping.puma.core.sync.model.taskexecutor.TaskStatus;
 
 /**
  * 此类存放admin所知晓的所有Task(SyncTask,CatchupTask,DumpTask)，来源包括：<br>
@@ -49,6 +54,7 @@ public class SystemStatusContainer implements EventListener {
     @Autowired
     private NotifyService notifyService;
 
+    @PostConstruct
     public void init() {
         //加载数据库的所有SyncTask
         List<SyncTask> syncTasks = syncTaskService.findAll();
@@ -56,9 +62,34 @@ public class SystemStatusContainer implements EventListener {
         if (syncTasks != null) {
             for (SyncTask syncTask : syncTasks) {
                 Status s = new Status();
+                s.setTaskStatus(TaskStatus.WAITING);
                 s.setTaskId(syncTask.getId());
                 s.setType(Type.SYNC);
                 syncTaskStatusMap.put(s.getTaskId(), s);
+            }
+        }
+    }
+
+    /**
+     * 启动一个定时任务
+     */
+    @Scheduled(cron = "0/10 * * * * ?")
+    public void monitor() {
+        //如果有Status超过60秒没有更新状态，则状态无用，要删除其状态
+        deleteTaskStatusLaterThan60s(syncTaskStatusMap);
+        deleteTaskStatusLaterThan60s(catchupTaskStatusMap);
+        deleteTaskStatusLaterThan60s(dumpTaskStatusMap);
+    }
+
+    private void deleteTaskStatusLaterThan60s(ConcurrentHashMap<Long, Status> taskStatusMap) {
+        if (taskStatusMap.size() > 0) {
+            for (Status status : taskStatusMap.values()) {
+                Date lastUpdateTime = status.getGmtCreate();
+                Date curTime = new Date();
+                long time = curTime.getTime() - lastUpdateTime.getTime();
+                if (time > 60 * 1000) {//超过一分钟的状态，都无用
+                    status.setTaskStatus(null);
+                }
             }
         }
     }
@@ -87,21 +118,39 @@ public class SystemStatusContainer implements EventListener {
     public void addStatus(Type type, long taskId) {
         switch (type) {
             case SYNC:
-                if (syncTaskStatusMap.contains(taskId)) {
+                if (syncTaskStatusMap.get(taskId) != null) {
                     notifyService.alarm("Status is already exist! Why add again?! Receive Status is [taskId=" + taskId + ",type="
                             + type + "]", null, true);
+                } else {
+                    Status s = new Status();
+                    s.setTaskId(taskId);
+                    s.setType(Type.SYNC);
+                    s.setTaskStatus(TaskStatus.WAITING);
+                    syncTaskStatusMap.put(s.getTaskId(), s);
                 }
                 break;
             case CATCHUP:
-                if (catchupTaskStatusMap.contains(taskId)) {
+                if (catchupTaskStatusMap.get(taskId) != null) {
                     notifyService.alarm("Status is already exist! Why add again?! Receive Status is [taskId=" + taskId + ",type="
                             + type + "]", null, true);
+                } else {
+                    Status s = new Status();
+                    s.setTaskId(taskId);
+                    s.setType(Type.CATCHUP);
+                    s.setTaskStatus(TaskStatus.WAITING);
+                    catchupTaskStatusMap.put(s.getTaskId(), s);
                 }
                 break;
             case DUMP:
-                if (dumpTaskStatusMap.contains(taskId)) {
+                if (dumpTaskStatusMap.get(taskId) != null) {
                     notifyService.alarm("Status is already exist! Why add again?! Receive Status is [taskId=" + taskId + ",type="
                             + type + "]", null, true);
+                } else {
+                    Status s = new Status();
+                    s.setTaskId(taskId);
+                    s.setType(Type.DUMP);
+                    s.setTaskStatus(TaskStatus.WAITING);
+                    dumpTaskStatusMap.put(s.getTaskId(), s);
                 }
                 break;
             default:
@@ -115,24 +164,18 @@ public class SystemStatusContainer implements EventListener {
     public void updateStatus(Status status) {
         switch (status.getType()) {
             case SYNC:
-                if (syncTaskStatusMap.contains(status.getTaskId())) {
+                if (syncTaskStatusMap.get(status.getTaskId()) != null) {
                     syncTaskStatusMap.put(status.getTaskId(), status);
-                } else {
-                    notifyService.alarm("Receive A Status which is not exist in Admin! Receive Status is " + status, null, true);
                 }
                 break;
             case CATCHUP:
-                if (catchupTaskStatusMap.contains(status.getTaskId())) {
+                if (catchupTaskStatusMap.get(status.getTaskId()) != null) {
                     catchupTaskStatusMap.put(status.getTaskId(), status);
-                } else {
-                    notifyService.alarm("Receive A Status which is not exist in Admin! Receive Status is " + status, null, true);
                 }
                 break;
             case DUMP:
-                if (dumpTaskStatusMap.contains(status.getTaskId())) {
+                if (dumpTaskStatusMap.get(status.getTaskId()) != null) {
                     dumpTaskStatusMap.put(status.getTaskId(), status);
-                } else {
-                    notifyService.alarm("Receive A Status which is not exist in Admin! Receive Status is " + status, null, true);
                 }
                 break;
             default:

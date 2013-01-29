@@ -9,7 +9,6 @@
                   <tr>
                      <th>源数据库</th>
                      <th>目标数据库</th>
-                     <th>PumaClientName</th>
                      <th>SyncServer名称</th>
                      <th>状态</th>
                      <th>操作</th>
@@ -20,7 +19,6 @@
                   <tr>
                      <td>$syncTask.srcMysqlName</td>
                      <td>$syncTask.destMysqlName</td>
-                     <td>$syncTask.pumaClientName</td>
                      <td>$syncTask.syncServerName</td>
                      <td statusOfId="$syncTask.id"></td>
                      <td><a refresh="" href="javascript:;"
@@ -85,7 +83,7 @@
 				pumadmin.appError("错误信息", data.errorMsg);
 			} else {
 				var status = data.status;
-				if (status) {
+				if (status && status.taskStatus) {
 					$("td[statusOfId='" + id + "']").text(
 							status.taskStatus);
 				} else {

@@ -24,22 +24,6 @@ public class Config {
     private String localPort;
     private String syncServerName;
 
-    public Config() {
-        //        Properties p = new Properties();
-        //        try {
-        //            p.load(Config.class.getResourceAsStream("/puma-syncserver-config.properties"));
-        //        } catch (IOException e) {
-        //            throw new RuntimeException(e.getMessage(), e);
-        //        }
-        //        pumaServerHost = p.getProperty("pumaServerHost", "127.0.0.1");
-        //        pumaServerPort = Integer.parseInt(p.getProperty("pumaServerPort", "8080"));
-        //        dumpTempDir = p.getProperty("dumpTempDir", "/tmp/puma-syncserver");
-        //        //获取本地ip
-        //        for (String ip : IPUtils.getNoLoopbackIP4Addresses()) {
-        //
-        //        }
-    }
-
     @PostConstruct
     public void init() {
         //获取本地ip

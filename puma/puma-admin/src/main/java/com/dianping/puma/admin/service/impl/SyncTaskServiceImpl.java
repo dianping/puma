@@ -9,6 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.dianping.puma.admin.monitor.SystemStatusContainer;
 import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.admin.util.MysqlMetaInfoFetcher;
 import com.dianping.puma.core.monitor.SwallowEventPulisher;
@@ -37,6 +38,8 @@ public class SyncTaskServiceImpl implements SyncTaskService {
     SwallowEventPulisher taskEventPublisher;
     @Autowired
     SwallowEventPulisher statusActionEventPublisher;
+    @Autowired
+    SystemStatusContainer systemStatusContainer;
 
     @Override
     public Long create(SyncTask syncTask) {
@@ -60,6 +63,9 @@ public class SyncTaskServiceImpl implements SyncTaskService {
         Key<SyncTask> key = this.syncTaskDao.save(syncTask);
         this.syncTaskDao.getDatastore().ensureIndexes();
         Long id = (Long) key.getId();
+
+        //更新本地状态
+        systemStatusContainer.addStatus(Type.SYNC, id);
 
         //通知
         TaskEvent event = new TaskEvent();
@@ -227,7 +233,7 @@ public class SyncTaskServiceImpl implements SyncTaskService {
         event.setSyncServerName(syncTask.getSyncServerName());
         statusActionEventPublisher.publish(event);
     }
-    
+
     @Override
     public List<SyncTask> findAll() {
         QueryResults<SyncTask> result = syncTaskDao.find();

@@ -3,6 +3,7 @@ package com.dianping.puma.admin.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.dianping.puma.admin.monitor.SystemStatusContainer;
 import com.dianping.puma.admin.service.CatchupTaskService;
 import com.dianping.puma.core.monitor.SwallowEventPulisher;
 import com.dianping.puma.core.monitor.TaskEvent;
@@ -18,6 +19,8 @@ public class CatchupTaskServiceImpl implements CatchupTaskService {
     CatchupTaskDao catchupTaskDao;
     @Autowired
     SwallowEventPulisher taskEventPublisher;
+    @Autowired
+    SystemStatusContainer systemStatusContainer;
 
     @Override
     public Long create(CatchupTask catchupTask, BinlogInfo binlogInfo) {
@@ -36,6 +39,9 @@ public class CatchupTaskServiceImpl implements CatchupTaskService {
         Key<CatchupTask> key = this.catchupTaskDao.save(catchupTask);
         this.catchupTaskDao.getDatastore().ensureIndexes();
         Long id = (Long) key.getId();
+
+        //更新本地状态
+        systemStatusContainer.addStatus(Type.CATCHUP, id);
 
         //通知
         TaskEvent event = new TaskEvent();

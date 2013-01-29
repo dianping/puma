@@ -3,6 +3,7 @@ package com.dianping.puma.admin.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.dianping.puma.admin.monitor.SystemStatusContainer;
 import com.dianping.puma.admin.service.DumpTaskService;
 import com.dianping.puma.core.monitor.SwallowEventPulisher;
 import com.dianping.puma.core.monitor.TaskEvent;
@@ -18,6 +19,8 @@ public class DumpTaskServiceImpl implements DumpTaskService {
     DumpTaskDao dumpTaskDao;
     @Autowired
     SwallowEventPulisher taskEventPublisher;
+    @Autowired
+    SystemStatusContainer systemStatusContainer;
 
     @Override
     public Long create(DumpTask dumptask) {
@@ -29,6 +32,9 @@ public class DumpTaskServiceImpl implements DumpTaskService {
         Key<DumpTask> key = this.dumpTaskDao.save(dumptask);
         this.dumpTaskDao.getDatastore().ensureIndexes();
         Long id = (Long) key.getId();
+
+        //更新本地状态
+        systemStatusContainer.addStatus(Type.DUMP, id);
 
         //通知
         TaskEvent event = new TaskEvent();
@@ -47,11 +53,6 @@ public class DumpTaskServiceImpl implements DumpTaskService {
 
     @Override
     public void updateSyncTaskId(Long dumptaskId, Long syncTaskId) {
-        //        UpdateOperations<DumpTask> ops = this.dumpTaskDao.getDatastore().createUpdateOperations(DumpTask.class)
-        //                .set("syncTaskId", syncTaskId);
-        //        Query<DumpTask> q = dumpTaskDao.getDatastore().createQuery(DumpTask.class);
-        //        q.field("id").equal(dumptaskId);
-
         DumpTask dumptask = this.find(dumptaskId);
         dumptask.setSyncTaskId(syncTaskId);
         this.dumpTaskDao.save(dumptask);

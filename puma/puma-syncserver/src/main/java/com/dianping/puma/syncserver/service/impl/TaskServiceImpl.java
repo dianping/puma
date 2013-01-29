@@ -18,7 +18,6 @@ import com.dianping.puma.syncserver.service.TaskService;
 import com.google.code.morphia.Key;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
-import com.google.code.morphia.query.UpdateOperations;
 
 @Service
 public class TaskServiceImpl implements TaskService {
@@ -56,17 +55,17 @@ public class TaskServiceImpl implements TaskService {
     public void recordBinlog(Type type, long taskId, BinlogInfo binlogInfo) {
         switch (type) {
             case SYNC:
-                UpdateOperations<SyncTask> ops1 = this.syncTaskDao.getDatastore().createUpdateOperations(SyncTask.class)
-                        .set("binlogInfo", binlogInfo);
-                this.syncTaskDao.getDatastore().update(new Key<SyncTask>(SyncTask.class, taskId), ops1);
+                SyncTask syncTask = this.find(Type.SYNC, taskId);
+                syncTask.setBinlogInfo(binlogInfo);
+                this.syncTaskDao.save(syncTask);
             case CATCHUP:
-                UpdateOperations<CatchupTask> ops2 = this.catchupTaskDao.getDatastore().createUpdateOperations(CatchupTask.class)
-                        .set("binlogInfo", binlogInfo);
-                this.catchupTaskDao.getDatastore().update(new Key<CatchupTask>(CatchupTask.class, taskId), ops2);
+                CatchupTask catchupTask = this.find(Type.CATCHUP, taskId);
+                catchupTask.setBinlogInfo(binlogInfo);
+                this.catchupTaskDao.save(catchupTask);
             case DUMP:
-                UpdateOperations<DumpTask> ops3 = this.dumpTaskDao.getDatastore().createUpdateOperations(DumpTask.class)
-                        .set("binlogInfo", binlogInfo);
-                this.dumpTaskDao.getDatastore().update(new Key<DumpTask>(DumpTask.class, taskId), ops3);
+                DumpTask dumptask = this.find(Type.DUMP, taskId);
+                dumptask.setBinlogInfo(binlogInfo);
+                this.dumpTaskDao.save(dumptask);
         }
     }
 

@@ -10,11 +10,10 @@ import org.springframework.stereotype.Service;
 
 import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.core.monitor.NotifyService;
-import com.dianping.puma.core.monitor.TaskStatusEvent.Status;
 import com.dianping.puma.core.sync.model.task.SyncTask;
 import com.dianping.puma.core.sync.model.task.SyncTaskStatusAction;
 import com.dianping.puma.core.sync.model.task.Type;
-import com.dianping.puma.core.sync.model.taskexecutor.TaskStatus;
+import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 
 /**
  * 监控状态，报警<br>
@@ -37,17 +36,17 @@ public class StatusMonitor {
     public void monitor() {
         //如果有Status超过60秒没有更新，就报警
         //如果有fail的task，就报警
-        ConcurrentHashMap<Integer, Status> taskStatusMap = systemStatusContainer.getTaskStatusMap();
+        ConcurrentHashMap<Integer, TaskExecutorStatus> taskStatusMap = systemStatusContainer.getTaskStatusMap();
         check(taskStatusMap);
     }
 
-    private void check(ConcurrentHashMap<Integer, Status> taskStatusMap) {
+    private void check(ConcurrentHashMap<Integer, TaskExecutorStatus> taskStatusMap) {
         if (taskStatusMap.size() > 0) {
-            for (Status status : taskStatusMap.values()) {
-                if (status.getTaskStatus() == TaskStatus.FAILED && shouldAlarm(status)) {
+            for (TaskExecutorStatus status : taskStatusMap.values()) {
+                if (status.getStatus() == TaskExecutorStatus.Status.FAILED && shouldAlarm(status)) {
                     notifyService.alarm("Task failed: " + status, null, true);
                     alarmingStatusMap.put(status.hashCode(), System.currentTimeMillis());
-                } else if (status.getTaskStatus() == null && shouldAlarm(status)) {
+                } else if (status.getStatus() == null && shouldAlarm(status)) {
                     notifyService.alarm("Task's status is not Update recently: " + status, null, true);
                     alarmingStatusMap.put(status.hashCode(), System.currentTimeMillis());
                 }
@@ -59,7 +58,7 @@ public class StatusMonitor {
      * 同一个SyncTask在5分钟内只报警一次，暂停状态的不报警<br>
      * CatchupTask和DumpTask永远仅报警一次
      */
-    private boolean shouldAlarm(Status status) {
+    private boolean shouldAlarm(TaskExecutorStatus status) {
         boolean shouldAlarm = true;
         Long statusStartAlarmAddTime = alarmingStatusMap.get(status.hashCode());
         if (statusStartAlarmAddTime != null) {

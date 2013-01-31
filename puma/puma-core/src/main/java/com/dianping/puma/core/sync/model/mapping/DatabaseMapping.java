@@ -3,7 +3,7 @@ package com.dianping.puma.core.sync.model.mapping;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DatabaseMapping {
+public class DatabaseMapping implements Cloneable {
 
     private String from;
     private String to;

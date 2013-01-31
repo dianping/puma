@@ -19,15 +19,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.dianping.puma.core.monitor.TaskStatusEvent;
-import com.dianping.puma.core.monitor.TaskStatusEvent.Status;
 import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.task.Type;
-import com.dianping.puma.core.sync.model.taskexecutor.TaskStatus;
+import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.syncserver.conf.Config;
 import com.dianping.puma.syncserver.job.container.DefaultTaskExecutorContainer;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
@@ -37,7 +36,7 @@ import com.dianping.puma.syncserver.service.TaskService;
  * @author wukezhu
  */
 @Service
-public class SystemStatusContainer {
+public class SystemStatusContainer implements InitializingBean {
 
     @Autowired
     private DefaultTaskExecutorContainer taskExecutorContainer;
@@ -46,20 +45,16 @@ public class SystemStatusContainer {
     @Autowired
     private TaskService taskService;
 
+    public static SystemStatusContainer instance;
+
     @SuppressWarnings("rawtypes")
     public TaskStatusEvent getTaskStatusEvent() {
         TaskStatusEvent event = new TaskStatusEvent();
-        List<Status> statusList = new ArrayList<Status>();
+        List<TaskExecutorStatus> statusList = new ArrayList<TaskExecutorStatus>();
         ConcurrentHashMap<Integer, TaskExecutor> taskExecutorMap = taskExecutorContainer.getTaskExecutorMap();
         for (TaskExecutor executor : taskExecutorMap.values()) {
-            long taskId = executor.getTask().getId();
-            TaskStatus taskStatus = executor.getStatus();
-            Status status = new Status();
-            status.setTaskId(taskId);
-            status.setType(executor.getTask().getType());
-            status.setTaskStatus(taskStatus);
-            status.setBinlogInfo(executor.getTask().getBinlogInfo());
-            statusList.add(status);
+            TaskExecutorStatus taskStatus = executor.getTaskExecutorStatus();
+            statusList.add(taskStatus);
         }
         event.setStatusList(statusList);
         event.setSyncServerName(config.getSyncServerName());
@@ -67,19 +62,14 @@ public class SystemStatusContainer {
     }
 
     /**
-     * 记录SyncTask的binlog位置
+     * 记录binlog位置
      */
-    @SuppressWarnings("rawtypes")
-    @Scheduled(cron = "0/3 * * * * ?")
-    public void recordBinlog() {
-        ConcurrentHashMap<Integer, TaskExecutor> taskExecutorMap = taskExecutorContainer.getTaskExecutorMap();
-        for (TaskExecutor taskExecutor : taskExecutorMap.values()) {
-            if (taskExecutor.getTask().getType() == Type.SYNC) {
-                long taskId = taskExecutor.getTask().getId();
-                BinlogInfo binlogInfo = taskExecutor.getTask().getBinlogInfo();
-                Type type = taskExecutor.getTask().getType();
-                taskService.recordBinlog(type, taskId, binlogInfo);
-            }
-        }
+    public void recordBinlog(Type type, long taskId, BinlogInfo binlogInfo) {
+        taskService.recordBinlog(type, taskId, binlogInfo);
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        instance = this;
     }
 }

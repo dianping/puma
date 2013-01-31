@@ -134,8 +134,8 @@
 			pumadmin.appError("访问发生错误", data.errorMsg);
 		} else {
 			var status = data.status;
-			if (status) {
-				$("#catchupStatus").text(status.taskStatus);
+			if (status && status.status) {
+				$("#catchupStatus").text(status.status);
 			} else {
 				$("#catchupStatus").text("无状态(可能不在运行)");
 			}

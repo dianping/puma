@@ -1,5 +1,7 @@
 package com.dianping.puma.syncserver.job.executor.builder;
 
+import java.io.IOException;
+
 import org.springframework.stereotype.Service;
 
 import com.dianping.puma.core.sync.model.task.DumpTask;
@@ -12,8 +14,13 @@ public class DumpTaskExecutorStrategy implements TaskExecutorStrategy<DumpTask, 
     @Override
     public DumpTaskExecutor build(DumpTask task) {
         //根据Task创建TaskExecutor
-        DumpTaskExecutor excutor = new DumpTaskExecutor(task);
-        return excutor;
+        DumpTaskExecutor excutor;
+        try {
+            excutor = new DumpTaskExecutor(task);
+            return excutor;
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     @Override

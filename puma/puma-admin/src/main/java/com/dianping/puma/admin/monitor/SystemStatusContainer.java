@@ -30,10 +30,9 @@ import com.dianping.puma.core.monitor.Event;
 import com.dianping.puma.core.monitor.EventListener;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.monitor.TaskStatusEvent;
-import com.dianping.puma.core.monitor.TaskStatusEvent.Status;
 import com.dianping.puma.core.sync.model.task.SyncTask;
 import com.dianping.puma.core.sync.model.task.Type;
-import com.dianping.puma.core.sync.model.taskexecutor.TaskStatus;
+import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 
 /**
  * 此类存放admin所知晓的所有Task(SyncTask,CatchupTask,DumpTask)，来源包括：<br>
@@ -46,7 +45,7 @@ import com.dianping.puma.core.sync.model.taskexecutor.TaskStatus;
 @Service("systemStatusContainer")
 public class SystemStatusContainer implements EventListener {
 
-    private ConcurrentHashMap<Integer, Status> taskStatusMap = new ConcurrentHashMap<Integer, Status>();
+    private ConcurrentHashMap<Integer, TaskExecutorStatus> taskStatusMap = new ConcurrentHashMap<Integer, TaskExecutorStatus>();
     @Autowired
     private SyncTaskService syncTaskService;
     @Autowired
@@ -59,11 +58,11 @@ public class SystemStatusContainer implements EventListener {
         //将SyncTask放到syncTaskStatusMap中
         if (syncTasks != null) {
             for (SyncTask syncTask : syncTasks) {
-                Status s = new Status();
-                s.setTaskStatus(TaskStatus.WAITING);
-                s.setTaskId(syncTask.getId());
-                s.setType(Type.SYNC);
-                taskStatusMap.put(s.hashCode(), s);
+                TaskExecutorStatus status = new TaskExecutorStatus();
+                status.setTaskId(syncTask.getId());
+                status.setType(syncTask.getType());
+                status.setStatus(TaskExecutorStatus.Status.WAITING);
+                taskStatusMap.put(status.hashCode(), status);
             }
         }
     }
@@ -77,21 +76,22 @@ public class SystemStatusContainer implements EventListener {
         deleteTaskStatusLaterThan60s(taskStatusMap);
     }
 
-    private void deleteTaskStatusLaterThan60s(ConcurrentHashMap<Integer, Status> taskStatusMap) {
+    private void deleteTaskStatusLaterThan60s(ConcurrentHashMap<Integer, TaskExecutorStatus> taskStatusMap) {
         if (taskStatusMap.size() > 0) {
-            for (Status status : taskStatusMap.values()) {
+            for (TaskExecutorStatus status : taskStatusMap.values()) {
                 Date lastUpdateTime = status.getGmtCreate();
                 Date curTime = new Date();
                 long time = curTime.getTime() - lastUpdateTime.getTime();
                 if (time > 60 * 1000) {//超过一分钟的状态，都无用
-                    status.setTaskStatus(null);
+                    status.setStatus(null);
+                    status.setDetail(null);
                 }
             }
         }
     }
 
-    public Status getStatus(Type type, long taskId) {
-        Status status = taskStatusMap.get(Status.calHashCode(type, taskId));
+    public TaskExecutorStatus getStatus(Type type, long taskId) {
+        TaskExecutorStatus status = taskStatusMap.get(TaskExecutorStatus.calHashCode(type, taskId));
         return status;
     }
 
@@ -99,23 +99,24 @@ public class SystemStatusContainer implements EventListener {
      * admin创建新的SyncTask,DumpTask,CatchupTask后，调用此方法，添加Status
      */
     public void addStatus(Type type, long taskId) {
-        if (taskStatusMap.get(Status.calHashCode(type, taskId)) != null) {
+        if (taskStatusMap.get(TaskExecutorStatus.calHashCode(type, taskId)) != null) {
             notifyService.alarm("Status is already exist! Why add again?! Receive Status is [taskId=" + taskId + ",type=" + type
                     + "]", null, true);
         } else {
-            Status s = new Status();
-            s.setTaskId(taskId);
-            s.setType(type);
-            s.setTaskStatus(TaskStatus.WAITING);
-            taskStatusMap.put(s.hashCode(), s);
+            TaskExecutorStatus status = new TaskExecutorStatus();
+            status.setTaskId(taskId);
+            status.setType(type);
+            status.setStatus(TaskExecutorStatus.Status.WAITING);
+            taskStatusMap.put(status.hashCode(), status);
         }
     }
 
     /**
      * 更新状态(从SyncServer收到状态心跳后，更新状态)
      */
-    public void updateStatus(Status status) {
+    public void updateStatus(TaskExecutorStatus status) {
         if (taskStatusMap.get(status.hashCode()) != null) {
+            status.setGmtCreate(new Date());
             taskStatusMap.put(status.hashCode(), status);
         } else {
             //收到的status对应的在admin这边不存在，则忽略
@@ -126,16 +127,16 @@ public class SystemStatusContainer implements EventListener {
     public void onEvent(Event event) {
         if (event instanceof TaskStatusEvent) {
             TaskStatusEvent e = (TaskStatusEvent) event;
-            List<Status> statusList = e.getStatusList();
+            List<TaskExecutorStatus> statusList = e.getStatusList();
             if (statusList != null) {
-                for (Status status : statusList) {
+                for (TaskExecutorStatus status : statusList) {
                     updateStatus(status);
                 }
             }
         }
     }
 
-    public ConcurrentHashMap<Integer, Status> getTaskStatusMap() {
+    public ConcurrentHashMap<Integer, TaskExecutorStatus> getTaskStatusMap() {
         return taskStatusMap;
     }
 

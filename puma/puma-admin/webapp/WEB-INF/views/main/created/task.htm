@@ -48,7 +48,7 @@ blockquote button {
                <span>$task.transaction</span>
             </blockquote>
             <blockquote>
-               <strong class="">创建时的Binlog起始位置：</strong> <span>$task.binlogInfo.binlogFile
+               <strong class="">Binlog位置：</strong> <span>$task.binlogInfo.binlogFile
                   $task.binlogInfo.binlogPosition</span> <strong
                   class="actionText">创建时间：</strong> <span>${dateFormatUtils.format($task.gmtCreate,"yyyy年MM月dd日
                   HH时mm分")}</span> <strong class="actionText">最后更新时间：</strong>
@@ -70,7 +70,10 @@ blockquote button {
                </div>
                <p id="status">
                   <strong style="color: #DF3A01">
-                     #if($status.taskStatus) $status.taskStatus
+                     #if($status.status) $status.status 
+                        #if($status.detail)
+                           ($status.detail)
+                        #end
                      #else 无状态(可能不在运行) #end </strong>
                </p>
             </blockquote>
@@ -143,13 +146,17 @@ blockquote button {
 			pumadmin.appError("错误信息", data.errorMsg);
 		} else {
 			var status = data.status;
-			if (status && status.taskStatus) {
-				$("#status > strong").text(status.taskStatus);
+			if (status && status.status) {
+		        var text = status.status;
+                if (status.detail) {
+                    text += " (" + status.detail + ")";
+                }
+				$("#status > strong").text(text);
 			} else {
 				$("#status > strong").text("无状态(可能不在运行)");
 			}
-			var d1 = Date.parse(status.lastUpdateTime);
-			$("#gmtModified").text(d1.toString('yyyy年MM月dd日 HH时mm分'));
+			//var d1 = Date.parse(status.lastUpdateTime);
+			//$("#gmtModified").text(d1.toString('yyyy年MM月dd日 HH时mm分'));
 		}
 	}
 	function pause() {

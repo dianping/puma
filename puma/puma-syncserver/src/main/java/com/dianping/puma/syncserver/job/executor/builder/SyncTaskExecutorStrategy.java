@@ -21,6 +21,9 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
         //根据Task创建TaskExecutor
         String srcMysqlName = task.getSrcMysqlName();
         PumaServerConfig pumaServerConfig = pumaServerConfigService.find(srcMysqlName);
+        if(pumaServerConfig==null){
+            throw new IllegalArgumentException("PumaServer is null, maybe PumaServer with srcMysqlName["+srcMysqlName+"] is not setting.");
+        }
         String pumaServerHostAndPort = pumaServerConfig.getHosts().get(0);
         String pumaServerHost = pumaServerHostAndPort;
         int pumaServerPort = 80;

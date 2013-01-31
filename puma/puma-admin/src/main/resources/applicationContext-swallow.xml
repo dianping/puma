@@ -13,13 +13,16 @@
     <bean id="taskEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPulisher"
         init-method="init">
         <property name="topic" value="puma_task_event" />
-        <property name="notifyService" ref="notifyService" />
     </bean>
 
     <bean id="statusActionEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPulisher"
         init-method="init">
         <property name="topic" value="puma_status_action_event" />
-        <property name="notifyService" ref="notifyService" />
+    </bean>
+
+    <bean id="taskDeleteEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPulisher"
+        init-method="init">
+        <property name="topic" value="puma_task_delete_event" />
     </bean>
 
     <bean id="statusEventSubscriber"
@@ -27,7 +30,8 @@
         init-method="init">
         <property name="topic" value="puma_status_event" />
         <property name="notifyService" ref="notifyService" />
-        <property name="clazz" value="com.dianping.puma.core.monitor.TaskStatusEvent"/>
+        <property name="clazz"
+            value="com.dianping.puma.core.monitor.TaskStatusEvent" />
         <property name="listeners">
             <list>
                 <ref bean="systemStatusContainer" />

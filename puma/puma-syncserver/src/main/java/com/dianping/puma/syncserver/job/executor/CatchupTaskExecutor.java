@@ -35,7 +35,7 @@ public class CatchupTaskExecutor extends AbstractTaskExecutor<CatchupTask> {
                 && syncBinlogInfo.getBinlogPosition() - catchupBinlogInfo.getBinlogPosition() >= 0
                 && syncBinlogInfo.getBinlogPosition() - catchupBinlogInfo.getBinlogPosition() < threshold) {
             //停止SyncTaskExecutor
-            this.syncTaskExecutor.pause();
+            this.syncTaskExecutor.pause("Auto paused because CatchupExcutor is close to SyncTaskExecutor.");
             //因为syncTaskExecutor的执行是在另外的线程中，故stop后再次获取syncTaskExecutor的binlogInfo才是真正的binlogInfo
             syncBinlogInfo = this.syncTaskExecutor.getTask().getBinlogInfo();
             //此时再判断，如果需要catchupTaskExecutor可以追赶一下，如果不需要，则停止并记录状态

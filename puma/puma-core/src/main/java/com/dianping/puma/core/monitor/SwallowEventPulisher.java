@@ -11,7 +11,6 @@ import com.dianping.swallow.producer.impl.ProducerFactoryImpl;
 public class SwallowEventPulisher implements EventPublisher {
     private String topic;
     private Producer producer;
-    private NotifyService notifyService;
 
     public void init() throws RemoteServiceInitFailedException {
         ProducerConfig config = new ProducerConfig();
@@ -20,20 +19,12 @@ public class SwallowEventPulisher implements EventPublisher {
     }
 
     @Override
-    public void publish(Event event) {
-        try {
-            producer.sendMessage(event, event.getSyncServerName());
-        } catch (SendFailedException e) {
-            notifyService.alarm(e.getMessage(), e, false);
-        }
+    public void publish(Event event) throws SendFailedException {
+        producer.sendMessage(event, event.getSyncServerName());
     }
 
     public void setTopic(String topic) {
         this.topic = topic;
-    }
-
-    public void setNotifyService(NotifyService notifyService) {
-        this.notifyService = notifyService;
     }
 
 }

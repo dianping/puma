@@ -4,39 +4,38 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import com.dianping.puma.core.sync.model.config.PumaSyncServerConfig;
 import com.dianping.puma.core.util.IPUtils;
 import com.dianping.puma.syncserver.service.PumaSyncServerConfigService;
 
-@Service
-public class Config {
+public class Config implements InitializingBean {
     private static final Logger LOG = LoggerFactory.getLogger(Config.class);
     @Autowired
     private PumaSyncServerConfigService configService;
-
-    @Value(value = "#{'${puma.dump.tempDir}'}")
-    private String dumpTempDir;
-    @Value(value = "#{'${puma.pumaSyncServer.port}'}")
-    private String localPort;
     private String syncServerName;
+    private static Config instance;
+
+    //    @Value(value = "#{'${puma.dump.tempDir}'}")
+    private String tempDir;
+    //    @Value(value = "#{'${puma.pumaSyncServer.port}'}")
+    private String localPort;
 
     @PostConstruct
     public void init() {
         //获取本地ip
         for (String ip : IPUtils.getNoLoopbackIP4Addresses()) {
             String host = ip + ':' + localPort;
-            LOG.info("Try this ip to find syncServerName from db : " + ip);
+            LOG.info("Try this localhost to find syncServerName from db : " + host);
             PumaSyncServerConfig config = configService.find(host);
             if (config != null) {
                 syncServerName = config.getName();
                 LOG.info("Match syncServerName: " + syncServerName);
                 break;
             } else {
-                LOG.info("Not match any syncServerName: " + ip);
+                LOG.info("Not match any syncServerName: " + host);
             }
         }
         if (syncServerName == null) {
@@ -46,25 +45,38 @@ public class Config {
 
     }
 
-    public String getDumpTempDir() {
-        return dumpTempDir;
+    public String getLocalPort() {
+        return localPort;
     }
 
-    public void setDumpTempDir(String dumpTempDir) {
-        this.dumpTempDir = dumpTempDir;
+    public void setLocalPort(String localPort) {
+        this.localPort = localPort;
+    }
+
+    public void setTempDir(String tempDir) {
+        this.tempDir = tempDir;
+    }
+
+    public String getTempDir() {
+        return tempDir;
     }
 
     public String getSyncServerName() {
         return syncServerName;
     }
 
-    public void setSyncServerName(String syncServerName) {
-        this.syncServerName = syncServerName;
+    @Override
+    public String toString() {
+        return "Config [configService=" + configService + ", syncServerName=" + syncServerName + ", tempDir=" + tempDir
+                + ", localPort=" + localPort + "]";
     }
 
     @Override
-    public String toString() {
-        return "Config [dumpTempDir=" + dumpTempDir + ", localPort=" + localPort + ", syncServerName=" + syncServerName + "]";
+    public void afterPropertiesSet() throws Exception {
+        instance = this;
     }
 
+    public static Config getInstance() {
+        return instance;
+    }
 }

@@ -27,7 +27,6 @@ import com.dianping.puma.admin.service.DumpTaskService;
 import com.dianping.puma.admin.service.PumaSyncServerConfigService;
 import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.admin.util.GsonUtil;
-import com.dianping.puma.core.monitor.TaskStatusEvent.Status;
 import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.config.PumaSyncServerConfig;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
@@ -38,6 +37,7 @@ import com.dianping.puma.core.sync.model.task.CatchupTask;
 import com.dianping.puma.core.sync.model.task.DumpTask;
 import com.dianping.puma.core.sync.model.task.SyncTask;
 import com.dianping.puma.core.sync.model.task.Type;
+import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 
 /**
  * @author wukezhu
@@ -85,7 +85,7 @@ public class ModifyController {
         SyncTask syncTask = this.syncTaskService.find(taskId);
         session.setAttribute("syncTask", syncTask);
 
-        Status status = systemStatusContainer.getStatus(Type.SYNC, taskId);
+        TaskExecutorStatus status = systemStatusContainer.getStatus(Type.SYNC, taskId);
         map.put("status", status);
 
         map.put("modifyActive", "active");
@@ -243,7 +243,7 @@ public class ModifyController {
             //查询dumpTaskId对应的状态
             dumpTask = this.dumpTaskService.find(dumpTask.getId());
             session.setAttribute("dumpTask", dumpTask);
-            Status status = systemStatusContainer.getStatus(Type.DUMP, dumpTask.getId());
+            TaskExecutorStatus status = systemStatusContainer.getStatus(Type.DUMP, dumpTask.getId());
             if (status != null) {
                 map.put("status", status);
                 if (status.getBinlogInfo() != null) {
@@ -350,7 +350,7 @@ public class ModifyController {
             catchupTask = this.catchupTaskService.find(catchupTask.getId());
             map.put("catchupTask", catchupTask);
 
-            Status status = systemStatusContainer.getStatus(Type.CATCHUP, catchupTask.getId());
+            TaskExecutorStatus status = systemStatusContainer.getStatus(Type.CATCHUP, catchupTask.getId());
             if (status != null) {
                 map.put("status", status);
                 if (status.getBinlogInfo() != null) {
@@ -402,6 +402,34 @@ public class ModifyController {
             LOG.error(e.getMessage(), e);
         }
         return GsonUtil.toJson(map);
+    }
+
+    /**
+     * 查看CatchupTask的状态
+     */
+    @RequestMapping(value = "/modify/delTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object delete(HttpSession session, Long id) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            //检查参数
+            if (id == null) {
+                throw new IllegalArgumentException("id不能为空！");
+            }
+            //删除
+            this.syncTaskService.delete(id);
+
+            map.put("success", true);
+        } catch (IllegalArgumentException e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", errorMsg);
+            LOG.error(e.getMessage(), e);
+        }
+        return GsonUtil.toJson(map);
+
     }
 
 }

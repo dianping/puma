@@ -19,6 +19,7 @@ import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -26,10 +27,12 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.task.DumpTask;
-import com.dianping.puma.core.sync.model.taskexecutor.TaskStatus;
+import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
+import com.dianping.puma.syncserver.conf.Config;
 
 /**
  * @author wukezhu
@@ -37,9 +40,6 @@ import com.dianping.puma.core.sync.model.taskexecutor.TaskStatus;
 public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
     private static final Logger LOG = LoggerFactory.getLogger(DumpTaskExecutor.class);
     private final static Pattern BINLOG_LINE_PATTERN = Pattern.compile("^.+LOG_FILE='(.*)',\\s+.+LOG_POS=([0-9]+);$");
-
-    private static final String BASE_DIR = "/data/appdatas/puma/syncserver/";
-    private static final String SHELL_DIR = BASE_DIR + "shell/";
 
     private final String uuid;
     private final String dumpOutputDir;
@@ -54,14 +54,16 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
     private DumpTask dumpTask;
 
     private Process proc;
-    private TaskStatus status;
+    protected TaskExecutorStatus status;
 
-    public DumpTaskExecutor(DumpTask dumpTask) {
+    public DumpTaskExecutor(DumpTask dumpTask) throws IOException {
         this.uuid = UUID.randomUUID().toString();
-        //        this.uuid = sessionId;
-        this.dumpOutputDir = BASE_DIR + "dump/" + uuid + "/";
-        new File(dumpOutputDir).mkdir();
+        this.dumpOutputDir = Config.getInstance().getTempDir() + "/dump/" + uuid + "/";
+        FileUtils.forceMkdir(new File(dumpOutputDir));
         this.dumpTask = dumpTask;
+        this.status = new TaskExecutorStatus();
+        status.setTaskId(dumpTask.getId());
+        status.setType(dumpTask.getType());
     }
 
     /**
@@ -72,7 +74,7 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         thread = new Thread() {
             public void run() {
                 LOG.info("started dump.");
-                setStatus(TaskStatus.DUMPING);
+                status.setStatus(TaskExecutorStatus.Status.DUMPING);
                 try {
                     //(1) dump
                     //目前dump的数据库配置只允许一个
@@ -95,41 +97,46 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
                     while (lineIterators.hasNext()) {
                         String line = lineIterators.next();
                         //获取binlog位置
-                        if (StringUtils.isBlank(dumpTask.getBinlogInfo().getBinlogFile())
-                                || dumpTask.getBinlogInfo().getBinlogPosition() <= 0) {
+                        if (status.getBinlogInfo() == null) {
                             Matcher matcher = BINLOG_LINE_PATTERN.matcher(line);
                             if (matcher.matches()) {
-                                dumpTask.getBinlogInfo().setBinlogFile(matcher.group(1));
-                                dumpTask.getBinlogInfo().setBinlogPosition(Long.parseLong(matcher.group(2)));
+                                BinlogInfo binlogInfo = new BinlogInfo();
+                                binlogInfo.setBinlogFile(matcher.group(1));
+                                binlogInfo.setBinlogPosition(Long.parseLong(matcher.group(2)));
+                                status.setBinlogInfo(binlogInfo);
                             }
                         }
                         //table更名
                         for (int i = 0; i < srcTableNames.size(); i++) {
                             String srcTableName = srcTableNames.get(i);
                             String destTableName = destTableNames.get(i);
-                            String originLine = line;
-                            line = line.replace("INSERT INTO `" + srcTableName + "`", "INSERT INTO `" + destTableName + "`");
-                            line = line.replace("table `" + srcTableName + "`", "table `" + destTableName + "`");
-                            line = line.replace("TABLE `" + srcTableName + "`", "TABLE `" + destTableName + "`");
-                            if (!StringUtils.equals(line, originLine)) {//line已经改变，即table被替换过，则不需要再查找
-                                break;
+                            if (!StringUtils.equalsIgnoreCase(srcTableName, destTableName)) {
+                                String originLine = line;
+                                line = line.replace("INSERT INTO `" + srcTableName + "`", "INSERT INTO `" + destTableName + "`");
+                                line = line.replace("table `" + srcTableName + "`", "table `" + destTableName + "`");
+                                line = line.replace("TABLE `" + srcTableName + "`", "TABLE `" + destTableName + "`");
+                                if (!StringUtils.equals(line, originLine)) {//line已经改变，即table被替换过，则不需要再查找
+                                    break;
+                                }
                             }
                         }
-                        //替换 CREATE TABLE 为 CREATE TABLE IF NOT EXISTS
-                        line = line.replace("CREATE TABLE", "CREATE TABLE IF NOT EXISTS");
+                        //(不自动创建table) 替换 CREATE TABLE 为 CREATE TABLE IF NOT EXISTS
+                        //                        if (StringUtils.startsWith(line, "CREATE TABLE")) {
+                        //                            line = line.replace("CREATE TABLE", "CREATE TABLE IF NOT EXISTS");
+                        //                        }
 
                         deelFileWriter.println(line);
                     }
                     deelFileWriter.close();
-                    if (StringUtils.isBlank(dumpTask.getBinlogInfo().getBinlogFile())
-                            || dumpTask.getBinlogInfo().getBinlogPosition() <= 0) {
+                    if (StringUtils.isBlank(status.getBinlogInfo().getBinlogFile())
+                            || status.getBinlogInfo().getBinlogPosition() <= 0) {
                         throw new DumpException("binlogFile or binlogPos is Error: binlogFile="
-                                + dumpTask.getBinlogInfo().getBinlogFile() + ",binlogPos="
-                                + dumpTask.getBinlogInfo().getBinlogPosition());
+                                + status.getBinlogInfo().getBinlogFile() + ",binlogPos="
+                                + status.getBinlogInfo().getBinlogPosition());
                     }
-                    LOG.info("binlog info:" + dumpTask.getBinlogInfo());
+                    LOG.info("binlog info:" + status.getBinlogInfo());
                     //(2) load
-                    setStatus(TaskStatus.LOADING);
+                    status.setStatus(TaskExecutorStatus.Status.LOADING);
                     LOG.info("started load.");
                     //执行load脚本
                     srcDatabaseName = databaseMapping.getFrom();
@@ -137,16 +144,16 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
                     if (StringUtils.isNotBlank(output)) {
                         throw new DumpException("mysqlload output is not empty , so consided to be failed: " + output);
                     }
-                    setStatus(TaskStatus.SUCCEED);
+                    succeed();
                     LOG.info("load done.");
                 } catch (Exception e) {
-                    setStatus(TaskStatus.FAILED);
+                    fail(e.getMessage());
                     LOG.error("dump error: " + e.getMessage(), e);
                 }
             }
         };
         thread.start();
-        this.setStatus(TaskStatus.RUNNING);
+        status.setStatus(TaskExecutorStatus.Status.RUNNING);
     }
 
     /**
@@ -187,14 +194,15 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         List<String> cmdlist = new ArrayList<String>();
         cmdlist.add("mysqldump");
         String hostWithPort = dumpTask.getSrcMysqlHost().getHost();
-        String[] hostWithPortSplits;
-        if (StringUtils.indexOf(hostWithPort, ':') != -1) {
-            hostWithPortSplits = hostWithPort.split(":");
-        } else {
-            hostWithPortSplits = new String[] { hostWithPort, "3306" };
+        String host = hostWithPort;
+        int port = 3306;
+        if (StringUtils.contains(hostWithPort, ':')) {
+            String[] splits = hostWithPort.split(":");
+            host = splits[0];
+            port = Integer.parseInt(splits[1]);
         }
-        cmdlist.add("--host=" + hostWithPortSplits[0]);
-        cmdlist.add("--port=" + hostWithPortSplits[1]);
+        cmdlist.add("--host=" + host);
+        cmdlist.add("--port=" + port);
         cmdlist.add("--user=" + dumpTask.getSrcMysqlHost().getUsername());
         cmdlist.add("--password=" + dumpTask.getSrcMysqlHost().getPassword());
         for (String opt : dumpTask.getOptions()) {
@@ -212,16 +220,25 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
 
     private String _mysqlload(String databaseName) throws ExecuteException, IOException, InterruptedException {
         List<String> cmdlist = new ArrayList<String>();
-        cmdlist.add(SHELL_DIR + "mysqlload.sh");
-        cmdlist.add("--user=" + dumpTask.getDestMysqlHost().getUsername());
+        //        cmdlist.add(Config.getInstance().getTempDir() + "/shell/mysqlload.sh");
+        cmdlist.add("mysql");
+        cmdlist.add("-u" + dumpTask.getDestMysqlHost().getUsername());
         String hostWithPort = dumpTask.getSrcMysqlHost().getHost();
-        String[] hostWithPortSplits = hostWithPort.split(":");
-        cmdlist.add("--host=" + hostWithPortSplits[0]);
-        cmdlist.add("--port=" + hostWithPortSplits[1]);
-        cmdlist.add("--password=" + dumpTask.getDestMysqlHost().getPassword());
-        cmdlist.add(_getSourceFile(databaseName));
+        String host = hostWithPort;
+        int port = 3306;
+        if (StringUtils.contains(hostWithPort, ':')) {
+            String[] splits = hostWithPort.split(":");
+            host = splits[0];
+            port = Integer.parseInt(splits[1]);
+        }
+        cmdlist.add("-h" + host);
+        cmdlist.add("-P" + port);
+        cmdlist.add("-p" + dumpTask.getDestMysqlHost().getPassword());
+        //        cmdlist.add("<");
+        //        cmdlist.add(_getSourceFile(databaseName));
         LOG.info("start loading " + databaseName + " ...");
-        return _executeByApache(cmdlist.toArray(new String[0]));
+        InputStream inputstream = new FileInputStream(_getSourceFile(databaseName));
+        return _executeByApache(cmdlist.toArray(new String[0]),inputstream );
     }
 
     @SuppressWarnings("unused")
@@ -235,6 +252,21 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         } finally {
             IOUtils.closeQuietly(input);
         }
+    }
+
+    private String _executeByApache(String[] cmdarray, InputStream inputstream) throws ExecuteException, IOException, InterruptedException {
+        DefaultExecuteResultHandler resultHandler = new DefaultExecuteResultHandler();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, null, inputstream);
+        executor.setStreamHandler(streamHandler);
+        CommandLine cmdLine = new CommandLine(cmdarray[0]);
+        for (int i = 1; i < cmdarray.length; i++) {
+            cmdLine.addArgument(cmdarray[i]);
+        }
+        LOG.info("execute(by apache) shell script, cmd is: " + cmdLine.toString());
+        executor.execute(cmdLine, resultHandler);
+        resultHandler.waitFor();
+        return outputStream.toString();
     }
 
     private String _executeByApache(String[] cmdarray) throws ExecuteException, IOException, InterruptedException {
@@ -258,27 +290,24 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
     }
 
     @Override
-    public void pause() {
+    public void pause(String detail) {
         throw new UnsupportedOperationException("DumpTaskExecutor not support stop() method!");
     }
 
     @Override
-    public TaskStatus getStatus() {
+    public TaskExecutorStatus getTaskExecutorStatus() {
         return status;
-    }
-
-    public void setStatus(TaskStatus status) {
-        this.status = status;
     }
 
     @Override
     public void succeed() {
-        this.setStatus(TaskStatus.SUCCEED);
+        status.setStatus(TaskExecutorStatus.Status.SUCCEED);
     }
 
     @Override
-    public void fail() {
-        this.setStatus(TaskStatus.FAILED);
+    public void fail(String detail) {
+        status.setStatus(TaskExecutorStatus.Status.FAILED);
+        status.setDetail(detail);
     }
 
     //    public static void main(String[] args) throws ExecuteException, IOException, InterruptedException {

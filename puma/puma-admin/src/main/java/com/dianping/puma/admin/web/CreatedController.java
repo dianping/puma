@@ -21,10 +21,10 @@ import org.springframework.web.servlet.ModelAndView;
 import com.dianping.puma.admin.monitor.SystemStatusContainer;
 import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.admin.util.GsonUtil;
-import com.dianping.puma.core.monitor.TaskStatusEvent.Status;
 import com.dianping.puma.core.sync.model.task.SyncTask;
 import com.dianping.puma.core.sync.model.task.SyncTaskStatusAction;
 import com.dianping.puma.core.sync.model.task.Type;
+import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 
 /**
  * 查看已经创建的所有任务
@@ -37,7 +37,6 @@ public class CreatedController {
     @Autowired
     private SystemStatusContainer systemStatusContainer;
 
-    private static final String errorMsg = "对不起，出了一点错误，请刷新页面试试。";
     private static final int PAGESIZE = 8;
 
     @RequestMapping(value = { "/created" })
@@ -66,7 +65,7 @@ public class CreatedController {
     public Object status(HttpSession session, Long taskId) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            Status syncStatus = systemStatusContainer.getStatus(Type.SYNC, taskId);
+            TaskExecutorStatus syncStatus = systemStatusContainer.getStatus(Type.SYNC, taskId);
             map.put("status", syncStatus);
             map.put("success", true);
         } catch (IllegalArgumentException e) {
@@ -74,7 +73,7 @@ public class CreatedController {
             map.put("errorMsg", e.getMessage());
         } catch (Exception e) {
             map.put("success", false);
-            map.put("errorMsg", errorMsg);
+            map.put("errorMsg", e.getMessage());
             LOG.error(e.getMessage(), e);
         }
         return GsonUtil.toJson(map);
@@ -87,7 +86,7 @@ public class CreatedController {
     public ModelAndView task(HttpSession session, @PathVariable("id") Long taskId) {
         Map<String, Object> map = new HashMap<String, Object>();
         SyncTask syncTask = this.syncTaskService.find(taskId);
-        Status syncStatus = systemStatusContainer.getStatus(Type.SYNC, taskId);
+        TaskExecutorStatus syncStatus = systemStatusContainer.getStatus(Type.SYNC, taskId);
         map.put("task", syncTask);
         map.put("status", syncStatus);
         map.put("createdActive", "active");
@@ -112,7 +111,7 @@ public class CreatedController {
             map.put("errorMsg", e.getMessage());
         } catch (Exception e) {
             map.put("success", false);
-            map.put("errorMsg", errorMsg);
+            map.put("errorMsg", e.getMessage());
             LOG.error(e.getMessage(), e);
         }
         return GsonUtil.toJson(map);
@@ -133,7 +132,7 @@ public class CreatedController {
             map.put("errorMsg", e.getMessage());
         } catch (Exception e) {
             map.put("success", false);
-            map.put("errorMsg", errorMsg);
+            map.put("errorMsg", e.getMessage());
             LOG.error(e.getMessage(), e);
         }
         return GsonUtil.toJson(map);
@@ -154,7 +153,7 @@ public class CreatedController {
             map.put("errorMsg", e.getMessage());
         } catch (Exception e) {
             map.put("success", false);
-            map.put("errorMsg", errorMsg);
+            map.put("errorMsg", e.getMessage());
             LOG.error(e.getMessage(), e);
         }
         return GsonUtil.toJson(map);

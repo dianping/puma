@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.dianping.puma.api.Configuration;
 import com.dianping.puma.api.ConfigurationBuilder;
@@ -15,13 +14,14 @@ import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.monitor.NotifyService;
+import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.task.AbstractTask;
-import com.dianping.puma.core.sync.model.taskexecutor.TaskStatus;
+import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
+import com.dianping.puma.syncserver.monitor.SystemStatusContainer;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
 public abstract class AbstractTaskExecutor<T extends AbstractTask> implements TaskExecutor<T>, SpeedControllable {
@@ -34,17 +34,18 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     protected String pumaServerHost;
     protected int pumaServerPort;
     protected String target;
-    protected TaskStatus status;
+    protected TaskExecutorStatus status;
 
     private long sleepTime = 0;
-    @Autowired
-    private NotifyService notifyService;
 
     public AbstractTaskExecutor(T abstractTask, String pumaServerHost, int pumaServerPort, String target) {
         this.abstractTask = abstractTask;
         this.pumaServerHost = pumaServerHost;
         this.pumaServerPort = pumaServerPort;
         this.target = target;
+        this.status = new TaskExecutorStatus();
+        status.setTaskId(abstractTask.getId());
+        status.setType(abstractTask.getType());
         //初始化PumaClient
         this.init();
     }
@@ -67,37 +68,37 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     }
 
     @Override
-    public void pause() {
-        this.setStatus(TaskStatus.SUSPPENDED);
+    public void pause(String detail) {
         this.pumaClient.stop();
+        this.status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
+        this.status.setDetail(detail);
     }
 
     @Override
     public void succeed() {
-        this.setStatus(TaskStatus.SUCCEED);
         this.pumaClient.stop();
+        this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
+        this.status.setDetail(null);
     }
 
     @Override
-    public void fail() {
-        this.setStatus(TaskStatus.FAILED);
+    public void fail(String detail) {
         this.pumaClient.stop();
+        this.status.setStatus(TaskExecutorStatus.Status.FAILED);
+        this.status.setDetail(detail);
     }
 
     @Override
     public void start() {
         //启动
         pumaClient.start();
-        this.setStatus(TaskStatus.RUNNING);
+        this.status.setDetail(null);
+        this.status.setStatus(TaskExecutorStatus.Status.RUNNING);
     }
 
     @Override
-    public TaskStatus getStatus() {
+    public TaskExecutorStatus getTaskExecutorStatus() {
         return status;
-    }
-
-    public void setStatus(TaskStatus status) {
-        this.status = status;
     }
 
     private void init() {
@@ -131,28 +132,60 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         }
         //注册监听器
         pumaClient.register(new EventListener() {
+
+            private boolean dataChange = false;
+
+            private void recordBinlog(ChangedEvent event) {
+                //动态更新binlog和binlogPos
+                if (event != null) {
+                    BinlogInfo binlogInfo = new BinlogInfo();
+                    binlogInfo.setBinlogFile(event.getBinlog());
+                    binlogInfo.setBinlogPosition(event.getBinlogPos());
+                    status.setBinlogInfo(binlogInfo);
+                }
+            }
+
             @Override
             public void onSkipEvent(ChangedEvent event) {
-                //动态更新binlog和binlogPos
-                abstractTask.getBinlogInfo().setBinlogPosition(event.getBinlogPos());
-                abstractTask.getBinlogInfo().setBinlogFile(event.getBinlog());
+                recordBinlog(event);
                 LOG.info("onSkipEvent: " + event);
             }
 
             @Override
             public boolean onException(ChangedEvent event, Exception e) {
-                fail();
-                notifyService.alarm("PumaClient[Event=" + event + "] onException: " + e.getMessage(), e, true);
+                recordBinlog(event);
+                fail(e.getMessage());
                 return false;
             }
 
             @Override
             public void onEvent(ChangedEvent event) throws Exception {
+                if (!abstractTask.getBinlogInfo().isSkipToNextPos()) {
+                    if (event instanceof RowChangedEvent) {
+                        if (((RowChangedEvent) event).isTransactionBegin()) {
+                        } else if (((RowChangedEvent) event).isTransactionCommit()) {
+                            if (dataChange) {
+                                //提交事务
+                                mysqlExecutor.commit();
+                                dataChange = false;
+                                //保存binlog信息到数据库
+                                BinlogInfo binlogInfo = new BinlogInfo();
+                                binlogInfo.setSkipToNextPos(true);
+                                binlogInfo.setBinlogFile(event.getBinlog());
+                                binlogInfo.setBinlogPosition(event.getBinlogPos());
+                                SystemStatusContainer.instance.recordBinlog(abstractTask.getType(), abstractTask.getId(),
+                                        binlogInfo);
+                            }
+                        } else {
+                            //执行子类的具体操作
+                            AbstractTaskExecutor.this.onEvent(event);
+                            dataChange = true;
+                        }
+                    }
+                }
+
                 //动态更新binlog和binlogPos
-                abstractTask.getBinlogInfo().setBinlogPosition(event.getBinlogPos());
-                abstractTask.getBinlogInfo().setBinlogFile(event.getBinlog());
-                //执行子类的具体操作
-                AbstractTaskExecutor.this.onEvent(event);
+                recordBinlog(event);
                 //速度调控
                 if (sleepTime > 0) {
                     TimeUnit.MILLISECONDS.sleep(sleepTime);

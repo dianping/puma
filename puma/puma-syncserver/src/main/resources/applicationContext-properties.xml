@@ -7,12 +7,15 @@
             http://www.springframework.org/schema/context
             http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
-    <bean id="propertyConfigurer"
-        class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="locations"
-            value="classpath:puma.syncserver.config.properties" />
+    <bean name="placeholder" lazy-init="false"
+        class="com.dianping.lion.client.InitializeConfig">
+        <property name="propertiesPath" value="puma.syncserver.config.properties" />
     </bean>
 
+    <bean id="config" class="com.dianping.puma.syncserver.conf.Config">
+        <property name="tempDir" value="${puma.syncserver.tempDir}" />
+        <property name="localPort" value="${puma.syncserver.port}" />
+    </bean>
 
 
 </beans>

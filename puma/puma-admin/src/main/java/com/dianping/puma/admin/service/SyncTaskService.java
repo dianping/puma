@@ -30,4 +30,6 @@ public interface SyncTaskService {
 
     List<SyncTask> findAll();
 
+    void delete(long id);
+
 }

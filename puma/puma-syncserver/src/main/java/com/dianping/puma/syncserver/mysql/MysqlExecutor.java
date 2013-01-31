@@ -1,5 +1,6 @@
 package com.dianping.puma.syncserver.mysql;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,10 +34,11 @@ public class MysqlExecutor {
     private static final int UPDTAE_TO_NULL = 4;//将对应的列都设置为null
 
     private final JdbcTemplate jdbcTemplate;
+    private final SingleConnectionDataSource dataSource;
 
     public MysqlExecutor(String host, String username, String password) {
-        SingleConnectionDataSource dataSource = new SingleConnectionDataSource("jdbc:mysql://" + host + "/", username, password,
-                true);
+        dataSource = new SingleConnectionDataSource("jdbc:mysql://" + host + "/", username, password, true);
+        dataSource.setAutoCommit(false);
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
@@ -46,12 +48,17 @@ public class MysqlExecutor {
             String sql = ((DdlEvent) event).getSql();
             if (StringUtils.isNotBlank(sql)) {
                 //ddl不做命名的替换！直接执行
-                LOG.info("execute ddl sql: " + sql);
-                jdbcTemplate.update(sql);
+                LOG.info("[Not Execute]execute ddl sql: " + sql);
+                //ddl不做执行
+                //                jdbcTemplate.update(sql);
             }
         } else if (event instanceof RowChangedEvent) {
             _execute(mysqlMapping, (RowChangedEvent) event);
         }
+    }
+
+    public void commit() throws SQLException {
+        dataSource.getConnection().commit();
     }
 
     private void _execute(MysqlMapping mysqlMapping, RowChangedEvent rowChangedEvent) {
@@ -202,8 +209,13 @@ public class MysqlExecutor {
      */
     private ColumnMapping findColumnMapping(List<ColumnMapping> columnConfigs, String srcColumnName) {
         for (ColumnMapping columnConfig : columnConfigs) {
-            if (StringUtils.equals(srcColumnName, columnConfig.getFrom()) || StringUtils.equals("*", columnConfig.getFrom())) {
+            if (StringUtils.equals(srcColumnName, columnConfig.getFrom())) {
                 return columnConfig;
+            } else if (StringUtils.equals("*", columnConfig.getFrom())) {
+                ColumnMapping c = new ColumnMapping();
+                c.setFrom(srcColumnName);
+                c.setTo(srcColumnName);
+                return c;
             }
         }
         return null;

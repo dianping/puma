@@ -11,6 +11,7 @@ import com.dianping.puma.core.sync.dao.task.DumpTaskDao;
 import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.task.DumpTask;
 import com.dianping.puma.core.sync.model.task.Type;
+import com.dianping.swallow.common.producer.exceptions.SendFailedException;
 import com.google.code.morphia.Key;
 
 @Service
@@ -29,19 +30,22 @@ public class DumpTaskServiceImpl implements DumpTaskService {
         binlogBin.setBinlogPosition(-1);
         dumptask.setBinlogInfo(binlogBin);
 
+        //保存数据库
         Key<DumpTask> key = this.dumpTaskDao.save(dumptask);
         this.dumpTaskDao.getDatastore().ensureIndexes();
         Long id = (Long) key.getId();
-
-        //更新本地状态
-        systemStatusContainer.addStatus(Type.DUMP, id);
-
         //通知
         TaskEvent event = new TaskEvent();
         event.setTaskId(id);
         event.setType(Type.DUMP);
         event.setSyncServerName(dumptask.getSyncServerName());
-        taskEventPublisher.publish(event);
+        try {
+            taskEventPublisher.publish(event);
+        } catch (SendFailedException e) {
+            throw new RuntimeException("已经创建任务，但给SyncServer发送通知失败，您需要重新创建任务才能再次dump！");
+        }
+        //更新本地状态
+        systemStatusContainer.addStatus(Type.DUMP, id);
 
         return id;
     }

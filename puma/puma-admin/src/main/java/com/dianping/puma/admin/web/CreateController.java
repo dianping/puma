@@ -24,7 +24,6 @@ import com.dianping.puma.admin.service.MysqlConfigService;
 import com.dianping.puma.admin.service.PumaSyncServerConfigService;
 import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.admin.util.GsonUtil;
-import com.dianping.puma.core.monitor.TaskStatusEvent.Status;
 import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.config.MysqlConfig;
 import com.dianping.puma.core.sync.model.config.MysqlHost;
@@ -36,6 +35,7 @@ import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.task.DumpTask;
 import com.dianping.puma.core.sync.model.task.SyncTask;
 import com.dianping.puma.core.sync.model.task.Type;
+import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 
 /**
  * (1) 以create为整个controller，所有中间状态存放在session <br>
@@ -59,8 +59,6 @@ public class CreateController {
     private SyncTaskService syncTaskService;
     @Autowired
     private SystemStatusContainer systemStatusContainer;
-
-    private static final String errorMsg = "对不起，出了一点错误，请刷新页面试试。";
 
     @RequestMapping(value = { "/create" })
     public ModelAndView create(HttpSession session) {
@@ -133,7 +131,7 @@ public class CreateController {
             map.put("errorMsg", e.getMessage());
         } catch (Exception e) {
             map.put("success", false);
-            map.put("errorMsg", errorMsg);
+            map.put("errorMsg", e.getMessage());
             LOG.error(e.getMessage(), e);
         }
         return GsonUtil.toJson(map);
@@ -210,7 +208,7 @@ public class CreateController {
             map.put("errorMsg", e.getMessage());
         } catch (Exception e) {
             map.put("success", false);
-            map.put("errorMsg", errorMsg);
+            map.put("errorMsg", e.getMessage());
             LOG.error(e.getMessage(), e);
         }
         return GsonUtil.toJson(map);
@@ -231,7 +229,7 @@ public class CreateController {
                 throw new IllegalArgumentException("dumpTask为空，可能是会话已经过期！");
             }
 
-            Status status = systemStatusContainer.getStatus(Type.DUMP, dumpTask.getId());
+            TaskExecutorStatus status = systemStatusContainer.getStatus(Type.DUMP, dumpTask.getId());
             if (status != null) {
                 map.put("status", status);
                 if (status.getBinlogInfo() != null) {
@@ -245,7 +243,7 @@ public class CreateController {
             map.put("errorMsg", e.getMessage());
         } catch (Exception e) {
             map.put("success", false);
-            map.put("errorMsg", errorMsg);
+            map.put("errorMsg", e.getMessage());
             LOG.error(e.getMessage(), e);
         }
         return GsonUtil.toJson(map);
@@ -340,7 +338,7 @@ public class CreateController {
             map.put("errorMsg", e.getMessage());
         } catch (Exception e) {
             map.put("success", false);
-            map.put("errorMsg", errorMsg);
+            map.put("errorMsg", e.getMessage());
             LOG.error(e.getMessage(), e);
         }
         return GsonUtil.toJson(map);

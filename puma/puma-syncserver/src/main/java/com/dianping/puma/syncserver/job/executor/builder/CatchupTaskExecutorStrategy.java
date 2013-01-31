@@ -1,5 +1,6 @@
 package com.dianping.puma.syncserver.job.executor.builder;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,9 +26,13 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
         String srcMysqlName = task.getSrcMysqlName();
         PumaServerConfig pumaServerConfig = pumaServerConfigService.find(srcMysqlName);
         String pumaServerHostAndPort = pumaServerConfig.getHosts().get(0);
-        String[] splits = pumaServerHostAndPort.split(":");
-        String pumaServerHost = splits[0];
-        int pumaServerPort = Integer.parseInt(splits[1]);
+        String pumaServerHost = pumaServerHostAndPort;
+        int pumaServerPort = 80;
+        if (StringUtils.contains(pumaServerHostAndPort, ':')) {
+            String[] splits = pumaServerHostAndPort.split(":");
+            pumaServerHost = splits[0];
+            pumaServerPort = Integer.parseInt(splits[1]);
+        }
         String target = pumaServerConfig.getTarget();
         //从taskContainer获取syncTaskExecutor
         SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) taskExecutionContainer.get(Type.SYNC, task.getSyncTaskId());

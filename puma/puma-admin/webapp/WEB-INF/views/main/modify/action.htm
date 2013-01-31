@@ -70,7 +70,7 @@ blockquote button {
                </div>
                <p id="status">
                   <strong style="color: #DF3A01">
-                     #if($status.taskStatus) $status.taskStatus
+                     #if($status.status) $status.status
                      #else 无状态(可能不在运行) #end </strong>
                </p>
             </blockquote>
@@ -143,8 +143,8 @@ blockquote button {
 			pumadmin.appError("错误信息", data.errorMsg);
 		} else {
 			var status = data.status;
-			if (status) {
-				$("#status > strong").text(status.taskStatus);
+			if (status && status.status) {
+				$("#status > strong").text(status.status);
 			} else {
 				$("#status > strong").text("无状态(可能不在运行)");
 			}

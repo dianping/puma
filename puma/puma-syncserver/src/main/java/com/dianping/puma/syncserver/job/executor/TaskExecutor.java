@@ -16,7 +16,7 @@
 package com.dianping.puma.syncserver.job.executor;
 
 import com.dianping.puma.core.sync.model.task.Task;
-import com.dianping.puma.core.sync.model.taskexecutor.TaskStatus;
+import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 
 /**
  * @author Leo Liang
@@ -26,13 +26,13 @@ public interface TaskExecutor<T extends Task> {
     /** 开始 */
     void start();
 
-    void pause();
+    void pause(String detail);
 
     void succeed();
 
-    void fail();
+    void fail(String detail);
 
-    TaskStatus getStatus();
+    TaskExecutorStatus getTaskExecutorStatus();
 
     T getTask();
 }

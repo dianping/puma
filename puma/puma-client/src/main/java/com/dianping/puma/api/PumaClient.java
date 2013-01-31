@@ -178,6 +178,7 @@ public class PumaClient {
                 } catch (Exception e) {
                     log.warn("Connection problem occurs." + e);
                     log.warn("Puma client reconnecting...");
+                    eventListener.onException(null, e);
                 } finally {
                     if (is != null) {
                         try {

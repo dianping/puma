@@ -13,15 +13,14 @@
     <bean id="statusEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPulisher"
         init-method="init">
         <property name="topic" value="puma_status_event" />
-        <property name="notifyService" ref="notifyService" />
     </bean>
 
     <bean id="taskEventSubscriber"
         class="com.dianping.puma.syncserver.monitor.TaskEventSubscriber"
         init-method="init">
         <property name="topic" value="puma_task_event" />
-        <property name="notifyService" ref="notifyService" />
-        <property name="clazz" value="com.dianping.puma.core.monitor.TaskEvent"/>
+        <property name="clazz"
+            value="com.dianping.puma.core.monitor.TaskEvent" />
         <property name="listeners">
             <list>
                 <ref bean="taskChecker" />
@@ -34,7 +33,22 @@
         init-method="init">
         <property name="topic" value="puma_status_action_event" />
         <property name="notifyService" ref="notifyService" />
-        <property name="clazz" value="com.dianping.puma.core.monitor.SyncTaskStatusActionEvent"/>
+        <property name="clazz"
+            value="com.dianping.puma.core.monitor.SyncTaskStatusActionEvent" />
+        <property name="listeners">
+            <list>
+                <ref bean="taskChecker" />
+            </list>
+        </property>
+    </bean>
+
+    <bean id="taskDeleteEventSubscriber"
+        class="com.dianping.puma.syncserver.monitor.StatusActionEventSubscriber"
+        init-method="init">
+        <property name="topic" value="puma_task_delete_event" />
+        <property name="notifyService" ref="notifyService" />
+        <property name="clazz"
+            value="com.dianping.puma.core.monitor.SyncTaskDeleteEvent" />
         <property name="listeners">
             <list>
                 <ref bean="taskChecker" />

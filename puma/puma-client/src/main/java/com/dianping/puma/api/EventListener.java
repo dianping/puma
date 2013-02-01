@@ -22,6 +22,14 @@ public interface EventListener {
 	 * @return 是否可以跳过此事件
 	 */
 	public boolean onException(ChangedEvent event, Exception e);
+	
+	   /**
+     * 连接事件异常回调函数
+     * 
+     * @param e
+     *            发生的异常
+     */
+    public void onConnectException(Exception e);
 
 	/**
 	 * 事件跳过时候的回调函数

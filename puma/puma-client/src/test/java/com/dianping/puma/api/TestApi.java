@@ -59,6 +59,10 @@ public class TestApi {
 				System.out.println("********************Received " + event);
 
 			}
+
+            @Override
+            public void onConnectException(Exception e) {
+            }
 		});
 		pc.start();
 	}

@@ -1,5 +1,8 @@
 package com.dianping.puma.syncserver.mysql;
 
+import java.beans.PropertyVetoException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,8 +11,6 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
@@ -20,6 +21,7 @@ import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.syncserver.util.SyncConfigPatternParser;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 public class MysqlExecutor {
 
@@ -33,24 +35,41 @@ public class MysqlExecutor {
     public static final int REPLACE_INTO = 3;//插入，如果已存在则更新
     private static final int UPDTAE_TO_NULL = 4;//将对应的列都设置为null
 
-    private final JdbcTemplate jdbcTemplate;
-    private final SingleConnectionDataSource dataSource;
+    private ComboPooledDataSource dataSource;
+    private Connection conn = null;
 
     public MysqlExecutor(String host, String username, String password) {
-        dataSource = new SingleConnectionDataSource("jdbc:mysql://" + host + "/", username, password, true);
-        dataSource.setAutoCommit(false);
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        try {
+            dataSource = new ComboPooledDataSource();
+            dataSource.setJdbcUrl("jdbc:mysql://" + host + "/");
+            dataSource.setUser(username);
+            dataSource.setPassword(password);
+            dataSource.setDriverClass("com.mysql.jdbc.Driver");
+            dataSource.setMinPoolSize(1);
+            dataSource.setMaxPoolSize(1);
+            dataSource.setInitialPoolSize(1);
+            dataSource.setMaxIdleTime(300);
+            dataSource.setIdleConnectionTestPeriod(60);
+            dataSource.setAcquireRetryAttempts(3);
+            dataSource.setAcquireRetryDelay(300);
+            dataSource.setMaxStatements(0);
+            dataSource.setMaxStatementsPerConnection(100);
+            dataSource.setNumHelperThreads(6);
+            dataSource.setMaxAdministrativeTaskTime(5);
+            dataSource.setPreferredTestQuery("SELECT 1");
+        } catch (PropertyVetoException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
-    public void execute(ChangedEvent event) {
-        LOG.info("********************Received " + event);
+    public void execute(ChangedEvent event) throws SQLException {
         if (event instanceof DdlEvent) {
             String sql = ((DdlEvent) event).getSql();
             if (StringUtils.isNotBlank(sql)) {
                 //ddl不做命名的替换！直接执行
                 LOG.info("[Not Execute]execute ddl sql: " + sql);
                 //ddl不做执行
-                //                jdbcTemplate.update(sql);
+                //jdbcTemplate.update(sql);
             }
         } else if (event instanceof RowChangedEvent) {
             _execute(mysqlMapping, (RowChangedEvent) event);
@@ -58,13 +77,40 @@ public class MysqlExecutor {
     }
 
     public void commit() throws SQLException {
-        dataSource.getConnection().commit();
+        if (conn != null) {
+            conn.commit();
+            try {
+                conn.close();
+            } catch (Exception e) {
+                //ignore
+            }
+            conn = null;
+        }
     }
 
-    private void _execute(MysqlMapping mysqlMapping, RowChangedEvent rowChangedEvent) {
+    private void _execute(MysqlMapping mysqlMapping, RowChangedEvent rowChangedEvent) throws SQLException {
         MysqlUpdateStatement mus = convert(mysqlMapping, rowChangedEvent);
         LOG.info("execute dml sql statement: " + mus);
-        jdbcTemplate.update(mus.getSql(), mus.getArgs());
+        PreparedStatement ps = null;
+        try {
+            if (conn == null) {
+                conn = dataSource.getConnection();
+                conn.setAutoCommit(false);
+            }
+            ps = conn.prepareStatement(mus.getSql());
+            for (int i = 1; i <= mus.getArgs().length; i++) {
+                ps.setObject(i, mus.getArgs()[i - 1]);
+            }
+            ps.execute();
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+        }
     }
 
     /**
@@ -249,22 +295,6 @@ public class MysqlExecutor {
 
     public void setMysqlMapping(MysqlMapping mysqlMapping) {
         this.mysqlMapping = mysqlMapping;
-    }
-
-    public static void main(String[] args44) {
-        MysqlExecutor mysqlExecutor = new MysqlExecutor("localhost:3306", "root", "root");
-        String sql = "INSERT INTO `test`.`test4` VALUES (?,?,?,?)";
-        int id = 35685;
-        for (int j = 0; j < 1000; j++) {
-            List<Object[]> argslist = new ArrayList<Object[]>();
-            for (int i = 0; i < 1000; i++) {
-                Object[] args = new Object[] { Integer.valueOf(id), "name1", "name2", "desc" };
-                argslist.add(args);
-                id++;
-            }
-            mysqlExecutor.jdbcTemplate.batchUpdate(sql, argslist);
-        }
-
     }
 
 }

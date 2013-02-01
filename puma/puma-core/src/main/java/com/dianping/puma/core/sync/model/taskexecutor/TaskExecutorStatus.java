@@ -102,7 +102,8 @@ public class TaskExecutorStatus {
         LOADING("Dump：Loading操作进行中"),
         SUSPPENDED("已暂停"),
         FAILED("结束-失败"),
-        SUCCEED("结束-成功");
+        SUCCEED("结束-成功"),
+        RECONNECTING("重新连接PumaServer中");
 
         private final String desc;
 

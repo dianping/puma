@@ -21,6 +21,7 @@ import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.task.AbstractTask;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
+import com.dianping.puma.core.util.DefaultPullStrategy;
 import com.dianping.puma.syncserver.monitor.SystemStatusContainer;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
@@ -135,6 +136,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
             private boolean dataChange = false;
 
+            private DefaultPullStrategy defaultPullStrategy = new DefaultPullStrategy(500, 10000);
+
             private void recordBinlog(ChangedEvent event) {
                 //动态更新binlog和binlogPos
                 if (event != null) {
@@ -160,26 +163,29 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
             @Override
             public void onEvent(ChangedEvent event) throws Exception {
+                LOG.info("********************Received " + event);
                 if (!abstractTask.getBinlogInfo().isSkipToNextPos()) {
-                    if (event instanceof RowChangedEvent) {
-                        if (((RowChangedEvent) event).isTransactionBegin()) {
-                        } else if (((RowChangedEvent) event).isTransactionCommit()) {
-                            if (dataChange) {
-                                //提交事务
-                                mysqlExecutor.commit();
-                                dataChange = false;
-                                //保存binlog信息到数据库
-                                BinlogInfo binlogInfo = new BinlogInfo();
-                                binlogInfo.setSkipToNextPos(true);
-                                binlogInfo.setBinlogFile(event.getBinlog());
-                                binlogInfo.setBinlogPosition(event.getBinlogPos());
-                                SystemStatusContainer.instance.recordBinlog(abstractTask.getType(), abstractTask.getId(),
-                                        binlogInfo);
+                    if (containDatabase(event.getDatabase())) {
+                        if (event instanceof RowChangedEvent) {
+                            if (((RowChangedEvent) event).isTransactionBegin()) {
+                            } else if (((RowChangedEvent) event).isTransactionCommit()) {
+                                if (dataChange) {
+                                    //提交事务
+                                    mysqlExecutor.commit();
+                                    dataChange = false;
+                                    //保存binlog信息到数据库
+                                    BinlogInfo binlogInfo = new BinlogInfo();
+                                    binlogInfo.setSkipToNextPos(true);
+                                    binlogInfo.setBinlogFile(event.getBinlog());
+                                    binlogInfo.setBinlogPosition(event.getBinlogPos());
+                                    SystemStatusContainer.instance.recordBinlog(abstractTask.getType(), abstractTask.getId(),
+                                            binlogInfo);
+                                }
+                            } else {
+                                //执行子类的具体操作
+                                AbstractTaskExecutor.this.onEvent(event);
+                                dataChange = true;
                             }
-                        } else {
-                            //执行子类的具体操作
-                            AbstractTaskExecutor.this.onEvent(event);
-                            dataChange = true;
                         }
                     }
                 }
@@ -191,7 +197,23 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
                     TimeUnit.MILLISECONDS.sleep(sleepTime);
                 }
             }
+
+            @Override
+            public void onConnectException(Exception e) {
+                status.setStatus(TaskExecutorStatus.Status.RECONNECTING);
+                status.setDetail("PumaClient connected failed, reconnecting...");
+                defaultPullStrategy.fail(true);
+            }
         });
+    }
+
+    private boolean containDatabase(String database) {
+        for (DatabaseMapping dbMapping : this.abstractTask.getMysqlMapping().getDatabases()) {
+            if (StringUtils.equalsIgnoreCase(dbMapping.getFrom(), database)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

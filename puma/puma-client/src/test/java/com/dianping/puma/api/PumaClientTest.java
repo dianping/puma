@@ -317,6 +317,10 @@ public class PumaClientTest {
             public void onEvent(ChangedEvent event) throws Exception {
                 eventsReceived.add(event);
             }
+
+            @Override
+            public void onConnectException(Exception e) {
+            }
         });
 
         client.start();
@@ -448,6 +452,10 @@ public class PumaClientTest {
                     throw new Exception();
                 }
                 eventsReceived.add(event);
+            }
+
+            @Override
+            public void onConnectException(Exception e) {
             }
         });
 
@@ -581,6 +589,10 @@ public class PumaClientTest {
                     throw new Exception();
                 }
                 eventsReceived.add(event);
+            }
+
+            @Override
+            public void onConnectException(Exception e) {
             }
         });
 

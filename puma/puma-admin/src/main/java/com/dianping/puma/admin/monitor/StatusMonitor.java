@@ -43,8 +43,8 @@ public class StatusMonitor {
     private void check(ConcurrentHashMap<Integer, TaskExecutorStatus> taskStatusMap) {
         if (taskStatusMap.size() > 0) {
             for (TaskExecutorStatus status : taskStatusMap.values()) {
-                if (status.getStatus() == TaskExecutorStatus.Status.FAILED && shouldAlarm(status)) {
-                    notifyService.alarm("Task failed: " + status, null, true);
+                if ((status.getStatus() == TaskExecutorStatus.Status.FAILED|| status.getStatus() == TaskExecutorStatus.Status.RECONNECTING) && shouldAlarm(status)) {
+                    notifyService.alarm("Task status error: " + status, null, true);
                     alarmingStatusMap.put(status.hashCode(), System.currentTimeMillis());
                 } else if (status.getStatus() == null && shouldAlarm(status)) {
                     notifyService.alarm("Task's status is not Update recently: " + status, null, true);

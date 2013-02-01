@@ -194,6 +194,10 @@
             <groupId>com.dianping</groupId>
             <artifactId>file-queue</artifactId>
         </dependency>
+        <dependency>
+            <groupId>c3p0</groupId>
+            <artifactId>c3p0</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <finalName>puma-syncserver</finalName>

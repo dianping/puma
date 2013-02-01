@@ -91,7 +91,7 @@ public class PumaClient {
 
         } catch (Exception ex) {
             log.error("Connect to puma server failed. " + config, ex);
-            eventListener.onException(null, ex);
+            eventListener.onConnectException(ex);
         }
 
         return null;
@@ -178,7 +178,7 @@ public class PumaClient {
                 } catch (Exception e) {
                     log.warn("Connection problem occurs." + e);
                     log.warn("Puma client reconnecting...");
-                    eventListener.onException(null, e);
+                    eventListener.onConnectException(e);
                 } finally {
                     if (is != null) {
                         try {

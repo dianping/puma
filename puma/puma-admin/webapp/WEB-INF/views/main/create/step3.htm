@@ -47,16 +47,12 @@
                     </label> <span class="input-large uneditable-input">$dumpTask.srcMysqlHost.host</span>
                     <label>选择目标数据库(${destMysqlConfig.name})的Host:
                     </label> <span class="input-large uneditable-input">$dumpTask.destMysqlHost.host</span>
-                    <label>serverId：</label><input
-                     type="text" disabled="disabled"
-                     value="$dumpTask.srcMysqlHost.serverId"
-                     style="margin-left: 16px;">
                   #else 
                     <label>选择源数据库(${srcMysqlConfig.name})的Host:
                     </label> <select name="srcMysqlHost"
                      style="margin-left: 16px; margin-right: 16px;">
-                     #foreach($destHost in ${destMysqlConfig.hosts})
-                     <option value="$destHost.host">$destHost.host</option>
+                     #foreach($srcHost in ${srcMysqlConfig.hosts})
+                     <option value="$srcHost.host">$srcHost.host</option>
                      #end
                      </select> <label>选择目标数据库(${destMysqlConfig.name})的Host:
                      </label> <select name="destMysqlHost"
@@ -65,10 +61,6 @@
                      <option value="$destHost.host">$destHost.host</option>
                      #end
                      </select> 
-                     <label>serverId：</label><input
-                     type="text" name="serverId"
-                     value="$!srcMysqlHost.serverId"
-                     style="margin-left: 16px;">
                   #end 
                   <label>binlog文件：</label><input type="text"
                      name="binlogFile" style="margin-left: 16px;"

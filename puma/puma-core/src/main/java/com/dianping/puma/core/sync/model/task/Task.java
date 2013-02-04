@@ -1,6 +1,7 @@
 package com.dianping.puma.core.sync.model.task;
 
 import com.dianping.puma.core.sync.model.BaseEntity;
+import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.config.MysqlHost;
 import com.google.code.morphia.annotations.Indexed;
 import com.google.code.morphia.utils.IndexDirection;
@@ -29,11 +30,22 @@ public abstract class Task extends BaseEntity {
     private String syncServerName;
     // SyncTaskId
     private Long syncTaskId;
-    //状态
-    private TaskState taskState;
+    //    //状态
+    //    private TaskState taskState;
+
+    //  源：BinlogInfo
+    private BinlogInfo binlogInfo;
 
     protected Task(Type type) {
         this.type = type;
+    }
+
+    public BinlogInfo getBinlogInfo() {
+        return binlogInfo;
+    }
+
+    public void setBinlogInfo(BinlogInfo binlogInfo) {
+        this.binlogInfo = binlogInfo;
     }
 
     public Long getSyncTaskId() {
@@ -92,25 +104,19 @@ public abstract class Task extends BaseEntity {
         this.syncServerName = syncServerName;
     }
 
-    public TaskState getTaskState() {
-        return taskState;
-    }
-
-    public void setTaskState(TaskState taskState) {
-        this.taskState = taskState;
-    }
-
-    public enum Type {
-        SYNC,
-        DUMP,
-        CATCHUP
-    }
-
     @Override
     public String toString() {
-        return "Task [type=" + type + ", srcMysqlName=" + srcMysqlName + ", destMysqlName=" + destMysqlName + ", destMysqlHost="
-                + destMysqlHost + ", syncServerName=" + syncServerName + ", syncTaskId=" + syncTaskId + ", taskState=" + taskState
-                + "]";
+        return "Task [type=" + type + ", srcMysqlName=" + srcMysqlName + ", srcMysqlHost=" + srcMysqlHost + ", destMysqlName="
+                + destMysqlName + ", destMysqlHost=" + destMysqlHost + ", syncServerName=" + syncServerName + ", syncTaskId="
+                + syncTaskId + ", binlogInfo=" + binlogInfo + "]";
     }
+
+    //    public TaskState getTaskState() {
+    //        return taskState;
+    //    }
+    //
+    //    public void setTaskState(TaskState taskState) {
+    //        this.taskState = taskState;
+    //    }
 
 }

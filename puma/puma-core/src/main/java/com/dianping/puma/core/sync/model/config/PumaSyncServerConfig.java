@@ -15,6 +15,7 @@ public class PumaSyncServerConfig {
     @Indexed(value = IndexDirection.ASC, name = "name", unique = true, dropDups = true)
     private String name;
     //pumaSyncServer host
+    @Indexed(value = IndexDirection.ASC, name = "host", unique = true, dropDups = true)
     private String host;
 
     public ObjectId getId() {

@@ -18,15 +18,12 @@ package com.dianping.puma.api;
 import com.dianping.puma.core.event.ChangedEvent;
 
 /**
- * TODO Comment of TestApi
- * 
  * @author Leo Liang
- * 
  */
 public class TestApi {
-	public static void main(String[] args) {
-		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
-		configBuilder.ddl(true);
+    public static void main(String[] args) {
+        ConfigurationBuilder configBuilder = new ConfigurationBuilder();
+        configBuilder.ddl(true);
         configBuilder.dml(true);
         configBuilder.host("127.0.0.1");
         configBuilder.port(7862);
@@ -36,30 +33,39 @@ public class TestApi {
         configBuilder.target("7-43");
         configBuilder.timeStamp(1351202896L);
         configBuilder.transaction(true);
-		PumaClient pc = new PumaClient(configBuilder.build());
-		pc.register(new EventListener() {
+        PumaClient pc = new PumaClient(configBuilder.build());
+        pc.register(new EventListener() {
 
-		    private long time = -1L;
-			@Override
-			public void onSkipEvent(ChangedEvent event) {
-				System.out.println(">>>>>>>>>>>>>>>>>>Skip " + event);
-			}
+            private long time = -1L;
 
-			@Override
-			public boolean onException(ChangedEvent event, Exception e) {
-				System.out.println("-------------Exception " + e);
-				return true;
-			}
+            @Override
+            public void onSkipEvent(ChangedEvent event) {
+                System.out.println(">>>>>>>>>>>>>>>>>>Skip " + event);
+            }
 
-			@Override
-			public void onEvent(ChangedEvent event) throws Exception {
-			    if(time == -1L || time != event.getExecuteTime()){
-			        time = event.getExecuteTime();
-			    }
-				System.out.println("********************Received " + event);
+            @Override
+            public boolean onException(ChangedEvent event, Exception e) {
+                System.out.println("-------------Exception " + e);
+                return true;
+            }
 
-			}
-		});
-		pc.start();
-	}
+            @Override
+            public void onEvent(ChangedEvent event) throws Exception {
+                if (time == -1L || time != event.getExecuteTime()) {
+                    time = event.getExecuteTime();
+                }
+                System.out.println("********************Received " + event);
+
+            }
+
+            @Override
+            public void onConnectException(Exception e) {
+            }
+
+            @Override
+            public void onConnected() {
+            }
+        });
+        pc.start();
+    }
 }

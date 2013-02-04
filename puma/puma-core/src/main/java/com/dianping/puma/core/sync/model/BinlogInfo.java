@@ -1,8 +1,12 @@
 package com.dianping.puma.core.sync.model;
 
 public class BinlogInfo {
-    protected String binlogFile;
-    protected long binlogPosition;
+    private String binlogFile;
+    private long binlogPosition;
+    /** 是否需要从下一个事件pos开始，如果是，则需要skip所有事件直到遇到第一个非binlogPosition<br> 
+     * 对于admin端创建的SyncTask,不需要skip；对于PumaClient记录的binlog，需要skip
+     * */
+    private boolean skipToNextPos = false;
 
     public String getBinlogFile() {
         return binlogFile;
@@ -20,9 +24,12 @@ public class BinlogInfo {
         this.binlogPosition = binlogPosition;
     }
 
-    @Override
-    public String toString() {
-        return "BinlogPos [BinlogFile=" + binlogFile + ", BinlogPosition=" + binlogPosition + "]";
+    public boolean isSkipToNextPos() {
+        return skipToNextPos;
+    }
+
+    public void setSkipToNextPos(boolean skipToNextPos) {
+        this.skipToNextPos = skipToNextPos;
     }
 
     @Override
@@ -31,6 +38,7 @@ public class BinlogInfo {
         int result = 1;
         result = prime * result + ((binlogFile == null) ? 0 : binlogFile.hashCode());
         result = prime * result + (int) (binlogPosition ^ (binlogPosition >>> 32));
+        result = prime * result + (skipToNextPos ? 1231 : 1237);
         return result;
     }
 
@@ -50,7 +58,14 @@ public class BinlogInfo {
             return false;
         if (binlogPosition != other.binlogPosition)
             return false;
+        if (skipToNextPos != other.skipToNextPos)
+            return false;
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "BinlogInfo [binlogFile=" + binlogFile + ", binlogPosition=" + binlogPosition + ", next=" + skipToNextPos + "]";
     }
 
 }

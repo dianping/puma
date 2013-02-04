@@ -1,6 +1,6 @@
 package com.dianping.puma.core.sync.model.mapping;
 
-public class ColumnMapping {
+public class ColumnMapping implements Cloneable {
     private String from;
     private String to;
     private boolean primary;

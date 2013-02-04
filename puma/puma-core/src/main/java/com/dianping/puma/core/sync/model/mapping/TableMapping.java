@@ -3,10 +3,18 @@ package com.dianping.puma.core.sync.model.mapping;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TableMapping {
+public class TableMapping implements Cloneable {
     private String from;
     private String to;
     private boolean partOf = false;
+
+    public TableMapping() {
+        //默认设置列映射为*->*
+        ColumnMapping c = new ColumnMapping();
+        c.setFrom("*");
+        c.setTo("*");
+        columns.add(c);
+    }
 
     private List<ColumnMapping> columns = new ArrayList<ColumnMapping>();
 

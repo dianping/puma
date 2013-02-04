@@ -1,62 +1,82 @@
 package com.dianping.puma.syncserver.conf;
 
-import java.io.IOException;
-import java.util.Properties;
+import javax.annotation.PostConstruct;
 
-public class Config {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 
-    private static Config instance = new Config();
+import com.dianping.puma.core.sync.model.config.PumaSyncServerConfig;
+import com.dianping.puma.core.util.IPUtils;
+import com.dianping.puma.syncserver.service.PumaSyncServerConfigService;
+
+public class Config implements InitializingBean {
+    private static final Logger LOG = LoggerFactory.getLogger(Config.class);
+    @Autowired
+    private PumaSyncServerConfigService configService;
+    private String syncServerName;
+    private static Config instance;
+
+    //    @Value(value = "#{'${puma.dump.tempDir}'}")
+    private String tempDir;
+    //    @Value(value = "#{'${puma.pumaSyncServer.port}'}")
+    private String localPort;
+
+    @PostConstruct
+    public void init() {
+        //获取本地ip
+        for (String ip : IPUtils.getNoLoopbackIP4Addresses()) {
+            String host = ip + ':' + localPort;
+            LOG.info("Try this localhost to find syncServerName from db : " + host);
+            PumaSyncServerConfig config = configService.find(host);
+            if (config != null) {
+                syncServerName = config.getName();
+                LOG.info("Match syncServerName: " + syncServerName);
+                break;
+            } else {
+                LOG.info("Not match any syncServerName: " + host);
+            }
+        }
+        if (syncServerName == null) {
+            throw new RuntimeException("Cannot try to find the syncServerName, please check the SyncServerConfig in DB.");
+        }
+        LOG.info("Properties: " + this.toString());
+
+    }
+
+    public String getLocalPort() {
+        return localPort;
+    }
+
+    public void setLocalPort(String localPort) {
+        this.localPort = localPort;
+    }
+
+    public void setTempDir(String tempDir) {
+        this.tempDir = tempDir;
+    }
+
+    public String getTempDir() {
+        return tempDir;
+    }
+
+    public String getSyncServerName() {
+        return syncServerName;
+    }
+
+    @Override
+    public String toString() {
+        return "Config [configService=" + configService + ", syncServerName=" + syncServerName + ", tempDir=" + tempDir
+                + ", localPort=" + localPort + "]";
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        instance = this;
+    }
 
     public static Config getInstance() {
         return instance;
     }
-
-    /**
-     * 重新读取本地config文件
-     */
-    public static void reload() {
-        instance = new Config();
-    }
-
-    private String pumaServerHost;
-    private int pumaServerPort;
-
-    private String dumpTempDir;
-
-    private Config() {
-        Properties p = new Properties();
-        try {
-            p.load(Config.class.getResourceAsStream("/puma-syncserver-config.properties"));
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-        pumaServerHost = p.getProperty("pumaServerHost", "127.0.0.1");
-        pumaServerPort = Integer.parseInt(p.getProperty("pumaServerPort", "8080"));
-        dumpTempDir = p.getProperty("dumpTempDir", "/tmp/puma-syncserver");
-    }
-
-    public String getPumaServerHost() {
-        return pumaServerHost;
-    }
-
-    public void setPumaServerHost(String pumaServerHost) {
-        this.pumaServerHost = pumaServerHost;
-    }
-
-    public int getPumaServerPort() {
-        return pumaServerPort;
-    }
-
-    public void setPumaServerPort(int pumaServerPort) {
-        this.pumaServerPort = pumaServerPort;
-    }
-
-    public String getDumpTempDir() {
-        return dumpTempDir;
-    }
-
-    public void setDumpTempDir(String dumpTempDir) {
-        this.dumpTempDir = dumpTempDir;
-    }
-
 }

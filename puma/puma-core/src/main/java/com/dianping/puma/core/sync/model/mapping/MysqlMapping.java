@@ -3,7 +3,7 @@ package com.dianping.puma.core.sync.model.mapping;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MysqlMapping {
+public class MysqlMapping  implements Cloneable {
     private List<DatabaseMapping> databases = new ArrayList<DatabaseMapping>();
 
     public List<DatabaseMapping> getDatabases() {

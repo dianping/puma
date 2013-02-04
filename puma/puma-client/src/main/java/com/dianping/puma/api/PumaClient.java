@@ -16,12 +16,20 @@ import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.core.util.StreamUtils;
 
 public class PumaClient {
-    private static final Logger log    = Logger.getLogger(PumaClient.class);
-    private Configuration       config;
-    private EventListener       eventListener;
-    private volatile boolean    active = false;
-    private SeqFileHolder       seqFileHolder;
-    private EventCodec          codec;
+    private static final Logger log = Logger.getLogger(PumaClient.class);
+    private Configuration config;
+    private EventListener eventListener;
+    private volatile boolean active = false;
+    private SeqFileHolder seqFileHolder;
+    private EventCodec codec;
+    private Thread subscribeThread;
+
+    //    private volatile boolean done = false;
+    //    private HttpURLConnection connection;
+
+    public SeqFileHolder getSeqFileHolder() {
+        return seqFileHolder;
+    }
 
     public PumaClient(Configuration config) {
         if (config == null) {
@@ -39,12 +47,13 @@ public class PumaClient {
 
     public void stop() {
         active = false;
+        subscribeThread.interrupt();
     }
 
     public void start() {
         config.validate();
 
-        Thread subscribeThread = PumaThreadUtils.createThread(new PumaClientTask(), "PumaClientSub", false);
+        subscribeThread = PumaThreadUtils.createThread(new PumaClientTask(), "PumaClientSub", false);
 
         active = true;
         subscribeThread.start();
@@ -83,10 +92,13 @@ public class PumaClient {
 
             out.close();
 
+            eventListener.onConnected();
+
             return connection.getInputStream();
 
         } catch (Exception ex) {
             log.error("Connect to puma server failed. " + config, ex);
+            eventListener.onConnectException(ex);
         }
 
         return null;
@@ -173,6 +185,7 @@ public class PumaClient {
                 } catch (Exception e) {
                     log.warn("Connection problem occurs." + e);
                     log.warn("Puma client reconnecting...");
+                    eventListener.onConnectException(e);
                 } finally {
                     if (is != null) {
                         try {

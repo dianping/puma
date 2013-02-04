@@ -65,18 +65,13 @@ blockquote button {
                      onclick="pause();">暂停</button>
                   <button class="btn btn-mini btn-primary"
                      onclick="rerun();">恢复运行</button>
-                  <button class="btn btn-mini btn-primary"
-                     onclick="resolved();">修复</button>
                   <button class="btn btn-mini btn-success"
-                     onclick="refleshState();">刷新状态</button>
+                     onclick="refreshStatus();">刷新状态</button>
                </div>
-               <p id="state">
-                  <strong style="color: #DF3A01">$state.state</strong> (<span
-                     style="color:">$state.detail</span>)
-               </p>
-               <p style="font-size: 12px;">
-                  状态的最后更新时间：<span id="lastUpdateTime">${dateFormatUtils.format($state.lastUpdateTime,"yyyy年MM月dd日
-                     HH时mm分")}</span>
+               <p id="status">
+                  <strong style="color: #DF3A01">
+                     #if($status.status) $status.status
+                     #else 无状态(可能不在运行) #end </strong>
                </p>
             </blockquote>
          </div>
@@ -128,30 +123,31 @@ blockquote button {
    </div>
 </div>
 <script>
-	function refleshState() {
-		$("#state > strong").text("");
-		$("#state > span").text("");
+	function refreshStatus() {
+		$("#status > strong").text("");
+		$("#status > span").text("");
 		var param = new Object();
 		param.taskId = '$task.id';
-		var url = window.contextpath + '/created/state';
+		var url = window.contextpath + '/created/status';
 		$.ajax({
 			type : 'POST',
 			url : url,
 			data : param,
 			dataType : "json",
-			success : refleshStateDone,
+			success : refreshStatusDone,
 			error : pumadmin.httpError
 		});
 	}
-	function refleshStateDone(data) {
+	function refreshStatusDone(data) {
 		if (data.success == false) {
 			pumadmin.appError("错误信息", data.errorMsg);
 		} else {
-			var state = data.state;
-			$("#state > strong").text(state.state);
-			$("#state > span").text(state.detail);
-			var d1 = Date.parse(state.lastUpdateTime);
-			$("#lastUpdateTime").text(d1.toString('yyyy年MM月dd日 HH时mm分'));
+			var status = data.status;
+			if (status && status.status) {
+				$("#status > strong").text(status.status);
+			} else {
+				$("#status > strong").text("无状态(可能不在运行)");
+			}
 		}
 	}
 	function pause() {
@@ -171,7 +167,7 @@ blockquote button {
 		if (data.success == false) {
 			pumadmin.appError("错误信息", data.errorMsg);
 		} else {
-			refleshState();
+			refreshStatus();
 		}
 	}
 	function rerun() {

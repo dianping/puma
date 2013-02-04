@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.dianping.puma.admin.monitor.SystemStatusContainer;
 import com.dianping.puma.admin.service.CatchupTaskService;
 import com.dianping.puma.admin.service.DumpTaskService;
 import com.dianping.puma.admin.service.PumaSyncServerConfigService;
@@ -35,7 +36,8 @@ import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.task.CatchupTask;
 import com.dianping.puma.core.sync.model.task.DumpTask;
 import com.dianping.puma.core.sync.model.task.SyncTask;
-import com.dianping.puma.core.sync.model.task.TaskState;
+import com.dianping.puma.core.sync.model.task.Type;
+import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 
 /**
  * @author wukezhu
@@ -51,6 +53,8 @@ public class ModifyController {
     private SyncTaskService syncTaskService;
     @Autowired
     private CatchupTaskService catchupTaskService;
+    @Autowired
+    private SystemStatusContainer systemStatusContainer;
 
     private static final String errorMsg = "对不起，出了一点错误，请刷新页面试试。";
     private static final int PAGESIZE = 8;
@@ -80,6 +84,10 @@ public class ModifyController {
         Map<String, Object> map = new HashMap<String, Object>();
         SyncTask syncTask = this.syncTaskService.find(taskId);
         session.setAttribute("syncTask", syncTask);
+
+        TaskExecutorStatus status = systemStatusContainer.getStatus(Type.SYNC, taskId);
+        map.put("status", status);
+
         map.put("modifyActive", "active");
         map.put("path", "modify");
         map.put("subPath", "step1");
@@ -222,9 +230,9 @@ public class ModifyController {
     /**
      * 刷新DumpTask的状态
      */
-    @RequestMapping(value = "/modify/refleshDumpState", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "/modify/refreshDumpStatus", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object refleshDumpState(HttpSession session) {
+    public Object refreshDumpStatus(HttpSession session) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             DumpTask dumpTask = (DumpTask) session.getAttribute("dumpTask");
@@ -232,13 +240,15 @@ public class ModifyController {
             if (dumpTask == null) {
                 throw new IllegalArgumentException("dumpTask为空，可能是会话已经过期！");
             }
-            //查询dumpTaskId对应的DumpTaskState
+            //查询dumpTaskId对应的状态
             dumpTask = this.dumpTaskService.find(dumpTask.getId());
             session.setAttribute("dumpTask", dumpTask);
-            TaskState taskState = dumpTask.getTaskState();
-            map.put("dumpTaskState", taskState);
-            if (taskState.getBinlogInfo() != null) {
-                session.setAttribute("binlogInfo", taskState.getBinlogInfo());
+            TaskExecutorStatus status = systemStatusContainer.getStatus(Type.DUMP, dumpTask.getId());
+            if (status != null) {
+                map.put("status", status);
+                if (status.getBinlogInfo() != null) {
+                    session.setAttribute("binlogInfo", status.getBinlogInfo());
+                }
             }
 
             map.put("success", true);
@@ -273,8 +283,7 @@ public class ModifyController {
 
     @RequestMapping(value = "/modify/createCatchupTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object createCatchupTask(HttpSession session, String binlogFile, String binlogPosition, String pumaClientName,
-                                    Long serverId) {
+    public Object createCatchupTask(HttpSession session, String binlogFile, String binlogPosition, String pumaClientName) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             //检查参数
@@ -301,7 +310,6 @@ public class ModifyController {
                 binlogInfo.setBinlogFile(binlogFile);
                 binlogInfo.setBinlogPosition(Long.parseLong(binlogPosition));
             }
-            catchupTask.setBinlogInfo(binlogInfo);
             catchupTask.setDdl(syncTask.isDdl());
             catchupTask.setDml(syncTask.isDml());
             catchupTask.setPumaClientName(pumaClientName);
@@ -309,7 +317,7 @@ public class ModifyController {
             catchupTask.setTransaction(syncTask.isTransaction());
             catchupTask.setSyncTaskId(syncTask.getId());
             //保存到数据库
-            catchupTaskService.create(catchupTask);
+            catchupTaskService.create(catchupTask, binlogInfo);
             //保存catchupTask到session
             session.setAttribute("catchupTask", catchupTask);
 
@@ -328,9 +336,9 @@ public class ModifyController {
     /**
      * 查看CatchupTask的状态
      */
-    @RequestMapping(value = "/modify/refleshCatchupTaskState", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "/modify/refreshCatchupStatus", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object refleshCatchupTaskState(HttpSession session) {
+    public Object refreshCatchupStatus(HttpSession session) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             CatchupTask catchupTask = (CatchupTask) session.getAttribute("catchupTask");
@@ -341,10 +349,13 @@ public class ModifyController {
             //重新查询
             catchupTask = this.catchupTaskService.find(catchupTask.getId());
             map.put("catchupTask", catchupTask);
-            TaskState taskState = catchupTask.getTaskState();
-            map.put("catchupTaskState", taskState);
-            if (taskState.getBinlogInfo() != null) {
-                session.setAttribute("binlogInfo", taskState.getBinlogInfo());
+
+            TaskExecutorStatus status = systemStatusContainer.getStatus(Type.CATCHUP, catchupTask.getId());
+            if (status != null) {
+                map.put("status", status);
+                if (status.getBinlogInfo() != null) {
+                    session.setAttribute("binlogInfo", status.getBinlogInfo());
+                }
             }
 
             map.put("success", true);
@@ -391,6 +402,34 @@ public class ModifyController {
             LOG.error(e.getMessage(), e);
         }
         return GsonUtil.toJson(map);
+    }
+
+    /**
+     * 查看CatchupTask的状态
+     */
+    @RequestMapping(value = "/modify/delTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Object delete(HttpSession session, Long id) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            //检查参数
+            if (id == null) {
+                throw new IllegalArgumentException("id不能为空！");
+            }
+            //删除
+            this.syncTaskService.delete(id);
+
+            map.put("success", true);
+        } catch (IllegalArgumentException e) {
+            map.put("success", false);
+            map.put("errorMsg", e.getMessage());
+        } catch (Exception e) {
+            map.put("success", false);
+            map.put("errorMsg", errorMsg);
+            LOG.error(e.getMessage(), e);
+        }
+        return GsonUtil.toJson(map);
+
     }
 
 }

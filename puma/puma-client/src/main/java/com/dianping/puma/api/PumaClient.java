@@ -22,8 +22,10 @@ public class PumaClient {
     private volatile boolean active = false;
     private SeqFileHolder seqFileHolder;
     private EventCodec codec;
-    private volatile boolean done = false;
-    private HttpURLConnection connection;
+    private Thread subscribeThread;
+
+    //    private volatile boolean done = false;
+    //    private HttpURLConnection connection;
 
     public SeqFileHolder getSeqFileHolder() {
         return seqFileHolder;
@@ -45,19 +47,13 @@ public class PumaClient {
 
     public void stop() {
         active = false;
-    }
-
-    public void disconnect() {
-        if (connection != null) {
-            connection.disconnect();
-        }
-        done = true;
+        subscribeThread.interrupt();
     }
 
     public void start() {
         config.validate();
 
-        Thread subscribeThread = PumaThreadUtils.createThread(new PumaClientTask(), "PumaClientSub", false);
+        subscribeThread = PumaThreadUtils.createThread(new PumaClientTask(), "PumaClientSub", false);
 
         active = true;
         subscribeThread.start();
@@ -80,7 +76,7 @@ public class PumaClient {
         try {
             final URL url = new URL(config.buildUrl());
 
-            connection = (HttpURLConnection) url.openConnection();
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(3000);
             connection.setDoOutput(true);
@@ -124,7 +120,7 @@ public class PumaClient {
         public void run() {
 
             // reconnect while there is some connection problem
-            while (!done) {
+            while (true) {
                 InputStream is = null;
 
                 if (checkStop()) {
@@ -143,7 +139,7 @@ public class PumaClient {
                     }
 
                     // loop read event from the input stream
-                    while (!done) {
+                    while (true) {
                         if (checkStop()) {
                             break;
                         }
@@ -153,7 +149,7 @@ public class PumaClient {
                         boolean listenerCallSuccess = true;
 
                         // call event listener until success
-                        while (!done) {
+                        while (true) {
                             if (checkStop()) {
                                 break;
                             }

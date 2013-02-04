@@ -78,7 +78,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
     @Override
     public void disconnect(String detail) {
-        this.pumaClient.disconnect();
+        this.pumaClient.stop();
         this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
         this.status.setDetail(detail);
         LOG.info("TaskExecutor[" + this.toString() + "] disconnected...");

@@ -21,7 +21,7 @@ public class LionDynamicConfig implements DynamicConfig {
         String env = EnvZooKeeperConfig.getEnv();
         try {
             cc = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
-            if (!"dev".equals(env) && !"qa".equals(env) && "alpha".equals(env)) {
+            if (!"dev".equals(env) && !"qa".equals(env) && !"alpha".equals(env)) {
                 LOG.warn("not dev, qa or alpha, ignore lion local config");
             } else {
                 // 如果本地文件存在，则使用Lion本地文件

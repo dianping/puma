@@ -35,4 +35,6 @@ public interface TaskExecutor<T extends Task> {
     TaskExecutorStatus getTaskExecutorStatus();
 
     T getTask();
+
+    void disconnect(String detail);
 }

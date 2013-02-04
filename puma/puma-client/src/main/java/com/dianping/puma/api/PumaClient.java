@@ -22,6 +22,7 @@ public class PumaClient {
     private volatile boolean active = false;
     private SeqFileHolder seqFileHolder;
     private EventCodec codec;
+    private HttpURLConnection connection;
 
     public SeqFileHolder getSeqFileHolder() {
         return seqFileHolder;
@@ -43,6 +44,12 @@ public class PumaClient {
 
     public void stop() {
         active = false;
+    }
+
+    public void disconnect() {
+        if (connection != null) {
+            connection.disconnect();
+        }
     }
 
     public void start() {
@@ -71,7 +78,7 @@ public class PumaClient {
         try {
             final URL url = new URL(config.buildUrl());
 
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(3000);
             connection.setDoOutput(true);
@@ -86,6 +93,8 @@ public class PumaClient {
             out.print(requestParams);
 
             out.close();
+
+            eventListener.onConnected();
 
             return connection.getInputStream();
 

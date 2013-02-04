@@ -238,7 +238,7 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         //        cmdlist.add(_getSourceFile(databaseName));
         LOG.info("start loading " + databaseName + " ...");
         InputStream inputstream = new FileInputStream(_getSourceFile(databaseName));
-        return _executeByApache(cmdlist.toArray(new String[0]),inputstream );
+        return _executeByApache(cmdlist.toArray(new String[0]), inputstream);
     }
 
     @SuppressWarnings("unused")
@@ -254,7 +254,8 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         }
     }
 
-    private String _executeByApache(String[] cmdarray, InputStream inputstream) throws ExecuteException, IOException, InterruptedException {
+    private String _executeByApache(String[] cmdarray, InputStream inputstream) throws ExecuteException, IOException,
+            InterruptedException {
         DefaultExecuteResultHandler resultHandler = new DefaultExecuteResultHandler();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, null, inputstream);
@@ -308,6 +309,11 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
     public void fail(String detail) {
         status.setStatus(TaskExecutorStatus.Status.FAILED);
         status.setDetail(detail);
+    }
+
+    @Override
+    public void disconnect(String detail) {
+        throw new UnsupportedOperationException("DumpTaskExecutor not support stop() method!");
     }
 
     //    public static void main(String[] args) throws ExecuteException, IOException, InterruptedException {

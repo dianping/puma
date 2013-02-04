@@ -73,6 +73,15 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         this.pumaClient.stop();
         this.status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
         this.status.setDetail(detail);
+        LOG.info("TaskExecutor[" + this.toString() + "] paused...");
+    }
+
+    @Override
+    public void disconnect(String detail) {
+        this.pumaClient.disconnect();
+        this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
+        this.status.setDetail(detail);
+        LOG.info("TaskExecutor[" + this.toString() + "] disconnected...");
     }
 
     @Override
@@ -80,6 +89,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         this.pumaClient.stop();
         this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
         this.status.setDetail(null);
+        LOG.info("TaskExecutor[" + this.toString() + "] succeeded...");
     }
 
     @Override
@@ -87,6 +97,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         this.pumaClient.stop();
         this.status.setStatus(TaskExecutorStatus.Status.FAILED);
         this.status.setDetail(detail);
+        LOG.info("TaskExecutor[" + this.toString() + "] failed...");
     }
 
     @Override
@@ -95,6 +106,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         pumaClient.start();
         this.status.setDetail(null);
         this.status.setStatus(TaskExecutorStatus.Status.RUNNING);
+        LOG.info("TaskExecutor[" + this.toString() + "] started...");
     }
 
     @Override
@@ -145,13 +157,16 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
                     binlogInfo.setBinlogFile(event.getBinlog());
                     binlogInfo.setBinlogPosition(event.getBinlogPos());
                     status.setBinlogInfo(binlogInfo);
+                    abstractTask.setBinlogInfo(binlogInfo);
                 }
             }
 
             @Override
             public void onSkipEvent(ChangedEvent event) {
                 recordBinlog(event);
-                LOG.info("onSkipEvent: " + event);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("onSkipEvent: " + event);
+                }
             }
 
             @Override
@@ -163,7 +178,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
             @Override
             public void onEvent(ChangedEvent event) throws Exception {
-                LOG.info("********************Received " + event);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("********************Received " + event);
+                }
                 if (!abstractTask.getBinlogInfo().isSkipToNextPos()) {
                     if (containDatabase(event.getDatabase())) {
                         if (event instanceof RowChangedEvent) {
@@ -203,6 +220,12 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
                 status.setStatus(TaskExecutorStatus.Status.RECONNECTING);
                 status.setDetail("PumaClient connected failed, reconnecting...");
                 defaultPullStrategy.fail(true);
+            }
+
+            @Override
+            public void onConnected() {
+                status.setStatus(TaskExecutorStatus.Status.RUNNING);
+                status.setDetail("PumaClient connected.");
             }
         });
     }
@@ -268,6 +291,13 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     @Override
     public void resetSpeed() {
         sleepTime = 0;
+    }
+
+    @Override
+    public String toString() {
+        return "AbstractTaskExecutor [abstractTask=" + abstractTask + ", configuration=" + configuration + ", pumaServerHost="
+                + pumaServerHost + ", pumaServerPort=" + pumaServerPort + ", target=" + target + ", status=" + status
+                + ", sleepTime=" + sleepTime + "]";
     }
 
 }

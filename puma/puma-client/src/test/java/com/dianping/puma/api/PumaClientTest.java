@@ -98,8 +98,7 @@ public class PumaClientTest {
         builder.binlogPos(4);
         builder.serverId(1111);
         Configuration conf = builder.build();
-        Assert.assertEquals(
-                "seq=-1&name=test&target=fff&ddl=true&dml=false&ts=true&codec=json&dt=cat.a&dt=cat.b*&dt=me.d",
+        Assert.assertEquals("seq=-1&name=test&target=fff&ddl=true&dml=false&ts=true&codec=json&dt=cat.a&dt=cat.b*&dt=me.d",
                 conf.buildRequestParamString(-1));
     }
 
@@ -121,8 +120,7 @@ public class PumaClientTest {
         builder.binlogPos(4);
         builder.serverId(1111);
         Configuration conf = builder.build();
-        Assert.assertEquals(
-                "seq=-2&name=test&target=fff&ddl=true&dml=false&ts=true&codec=json&dt=cat.a&dt=cat.b*&dt=me.d",
+        Assert.assertEquals("seq=-2&name=test&target=fff&ddl=true&dml=false&ts=true&codec=json&dt=cat.a&dt=cat.b*&dt=me.d",
                 conf.buildRequestParamString(-2));
     }
 
@@ -144,8 +142,7 @@ public class PumaClientTest {
         builder.binlogPos(4);
         builder.serverId(1111);
         Configuration conf = builder.build();
-        Assert.assertEquals(
-                "seq=10&name=test&target=fff&ddl=true&dml=false&ts=true&codec=json&dt=cat.a&dt=cat.b*&dt=me.d",
+        Assert.assertEquals("seq=10&name=test&target=fff&ddl=true&dml=false&ts=true&codec=json&dt=cat.a&dt=cat.b*&dt=me.d",
                 conf.buildRequestParamString(10));
     }
 
@@ -171,7 +168,7 @@ public class PumaClientTest {
                 "seq=-3&binlog=fff&binlogPos=4&serverId=1111&name=test&target=fff&ddl=true&dml=false&ts=true&codec=json&dt=cat.a&dt=cat.b*&dt=me.d",
                 conf.buildRequestParamString(-3));
     }
-    
+
     @Test
     public void testParamWithTimeStamp() {
         ConfigurationBuilder builder = new ConfigurationBuilder();
@@ -321,6 +318,11 @@ public class PumaClientTest {
             @Override
             public void onConnectException(Exception e) {
             }
+
+            @Override
+            public void onConnected() {
+
+            }
         });
 
         client.start();
@@ -456,6 +458,11 @@ public class PumaClientTest {
 
             @Override
             public void onConnectException(Exception e) {
+            }
+
+            @Override
+            public void onConnected() {
+
             }
         });
 
@@ -593,6 +600,11 @@ public class PumaClientTest {
 
             @Override
             public void onConnectException(Exception e) {
+            }
+
+            @Override
+            public void onConnected() {
+
             }
         });
 

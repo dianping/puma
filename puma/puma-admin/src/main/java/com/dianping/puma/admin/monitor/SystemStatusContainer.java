@@ -72,19 +72,21 @@ public class SystemStatusContainer implements EventListener {
      */
     @Scheduled(cron = "0/10 * * * * ?")
     public void monitor() {
-        //如果有Status超过60秒没有更新状态，则状态无用，要删除其状态
+        //对于Sync，如果有Status超过60秒没有更新状态，则状态无用，要删除其状态
         deleteTaskStatusLaterThan60s(taskStatusMap);
     }
 
     private void deleteTaskStatusLaterThan60s(ConcurrentHashMap<Integer, TaskExecutorStatus> taskStatusMap) {
         if (taskStatusMap.size() > 0) {
             for (TaskExecutorStatus status : taskStatusMap.values()) {
-                Date lastUpdateTime = status.getGmtCreate();
-                Date curTime = new Date();
-                long time = curTime.getTime() - lastUpdateTime.getTime();
-                if (time > 60 * 1000) {//超过一分钟的状态，都无用
-                    status.setStatus(null);
-                    status.setDetail(null);
+                if (status.getType() == Type.SYNC) {
+                    Date lastUpdateTime = status.getGmtCreate();
+                    Date curTime = new Date();
+                    long time = curTime.getTime() - lastUpdateTime.getTime();
+                    if (time > 60 * 1000) {//超过一分钟的状态，都无用
+                        status.setStatus(null);
+                        status.setDetail(null);
+                    }
                 }
             }
         }

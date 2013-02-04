@@ -67,7 +67,9 @@ public class MysqlExecutor {
             String sql = ((DdlEvent) event).getSql();
             if (StringUtils.isNotBlank(sql)) {
                 //ddl不做命名的替换！直接执行
-                LOG.info("[Not Execute]execute ddl sql: " + sql);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("[Not Execute]execute ddl sql: " + sql);
+                }
                 //ddl不做执行
                 //jdbcTemplate.update(sql);
             }
@@ -90,7 +92,9 @@ public class MysqlExecutor {
 
     private void _execute(MysqlMapping mysqlMapping, RowChangedEvent rowChangedEvent) throws SQLException {
         MysqlUpdateStatement mus = convert(mysqlMapping, rowChangedEvent);
-        LOG.info("execute dml sql statement: " + mus);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("execute dml sql statement: " + mus);
+        }
         PreparedStatement ps = null;
         try {
             if (conn == null) {

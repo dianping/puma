@@ -32,7 +32,7 @@
     </bean>
     <bean id="notifyService" class="com.dianping.puma.core.monitor.DefaultNotifyService">
         <property name="alarmService" ref="commonAlarmSerivce" />
-        <property name="devMode" value="true" />
+        <property name="devMode" value="${puma.syncserver.notify.devMode}" />
     </bean>
 
     <!-- executor -->

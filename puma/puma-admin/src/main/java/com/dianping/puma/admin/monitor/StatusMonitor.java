@@ -43,7 +43,8 @@ public class StatusMonitor {
     private void check(ConcurrentHashMap<Integer, TaskExecutorStatus> taskStatusMap) {
         if (taskStatusMap.size() > 0) {
             for (TaskExecutorStatus status : taskStatusMap.values()) {
-                if ((status.getStatus() == TaskExecutorStatus.Status.FAILED|| status.getStatus() == TaskExecutorStatus.Status.RECONNECTING) && shouldAlarm(status)) {
+                if ((status.getStatus() == TaskExecutorStatus.Status.FAILED || status.getStatus() == TaskExecutorStatus.Status.RECONNECTING)
+                        && shouldAlarm(status)) {
                     notifyService.alarm("Task status error: " + status, null, true);
                     alarmingStatusMap.put(status.hashCode(), System.currentTimeMillis());
                 } else if (status.getStatus() == null && shouldAlarm(status)) {
@@ -75,10 +76,10 @@ public class StatusMonitor {
                     break;
             }
         }
-        //暂停状态的SyncTask不报警
+        //暂停状态或不存在(已经删除)的SyncTask不报警
         if (shouldAlarm && status.getType() == Type.SYNC) {
             SyncTask syncTask = syncTaskService.find(status.getTaskId());
-            if (syncTask.getSyncTaskStatusAction() == SyncTaskStatusAction.PAUSE) {
+            if (syncTask == null || syncTask.getSyncTaskStatusAction() == SyncTaskStatusAction.PAUSE) {
                 shouldAlarm = false;
             }
         }

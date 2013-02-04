@@ -35,7 +35,7 @@
     </bean>
     <bean id="notifyService" class="com.dianping.puma.core.monitor.DefaultNotifyService">
         <property name="alarmService" ref="commonAlarmSerivce" />
-        <property name="devMode" value="true" />
+        <property name="devMode" value="${puma.admin.notify.devMode}" />
     </bean>
 
     <bean id="mongoClient" class="com.dianping.puma.core.sync.dao.MongoClient">

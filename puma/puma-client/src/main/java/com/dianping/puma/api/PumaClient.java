@@ -22,6 +22,7 @@ public class PumaClient {
     private volatile boolean active = false;
     private SeqFileHolder seqFileHolder;
     private EventCodec codec;
+    private volatile boolean done = false;
     private HttpURLConnection connection;
 
     public SeqFileHolder getSeqFileHolder() {
@@ -50,6 +51,7 @@ public class PumaClient {
         if (connection != null) {
             connection.disconnect();
         }
+        done = true;
     }
 
     public void start() {
@@ -122,7 +124,7 @@ public class PumaClient {
         public void run() {
 
             // reconnect while there is some connection problem
-            while (true) {
+            while (!done) {
                 InputStream is = null;
 
                 if (checkStop()) {
@@ -141,7 +143,7 @@ public class PumaClient {
                     }
 
                     // loop read event from the input stream
-                    while (true) {
+                    while (!done) {
                         if (checkStop()) {
                             break;
                         }
@@ -151,7 +153,7 @@ public class PumaClient {
                         boolean listenerCallSuccess = true;
 
                         // call event listener until success
-                        while (true) {
+                        while (!done) {
                             if (checkStop()) {
                                 break;
                             }

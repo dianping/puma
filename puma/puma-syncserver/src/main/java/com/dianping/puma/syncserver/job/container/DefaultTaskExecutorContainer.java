@@ -137,9 +137,9 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
     public void deleteSyncTask(long taskId) {
         SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) this.get(Type.SYNC, taskId);
         if (syncTaskExecutor != null) {
-            syncTaskExecutor.disconnect("Disconnect because the StatusAction is deleted.");
             this.delete(Type.SYNC, taskId);
             LOG.info(syncTaskExecutor + " is deleted.");
+            syncTaskExecutor.disconnect("Disconnect because the StatusAction is deleted.");
         }
     }
 

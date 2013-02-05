@@ -115,10 +115,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
     public void changeStatus(long syncTaskId, SyncTaskStatusAction statusAction) {
         SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) this.get(Type.SYNC, syncTaskId);
         if (syncTaskExecutor != null) {
-            if (statusAction == SyncTaskStatusAction.PAUSE
-                    && (syncTaskExecutor.getTaskExecutorStatus().getStatus() == TaskExecutorStatus.Status.PREPARING
-                            || syncTaskExecutor.getTaskExecutorStatus().getStatus() == TaskExecutorStatus.Status.RUNNING || syncTaskExecutor
-                            .getTaskExecutorStatus().getStatus() == TaskExecutorStatus.Status.FAILED)) {
+            if (statusAction == SyncTaskStatusAction.PAUSE) {
                 syncTaskExecutor.pause("Stop because the StatusAction is Pause.");
             } else if (statusAction == SyncTaskStatusAction.RESTART
                     && (syncTaskExecutor.getTaskExecutorStatus().getStatus() == TaskExecutorStatus.Status.SUSPPENDED

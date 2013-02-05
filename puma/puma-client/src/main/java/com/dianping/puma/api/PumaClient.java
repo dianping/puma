@@ -47,7 +47,9 @@ public class PumaClient {
 
     public void stop() {
         active = false;
-        subscribeThread.interrupt();
+        if (subscribeThread != null) {
+            subscribeThread.interrupt();
+        }
     }
 
     public void start() {

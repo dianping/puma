@@ -80,7 +80,7 @@ public class BinlogIndexKey implements DataIndexKey<BinlogIndexKey> {
     @Override
     public int compareTo(BinlogIndexKey key) {
         if (this.serverId == key.getServerId()) {
-            if (this.binlogFile == key.getBinlogFile()) {
+            if (this.binlogFile.equals(key.getBinlogFile())) {
                 if (this.binlogPos == key.getBinlogPos()) {
                     return 0;
                 } else {

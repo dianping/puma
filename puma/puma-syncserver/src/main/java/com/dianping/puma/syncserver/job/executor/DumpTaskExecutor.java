@@ -223,7 +223,7 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         //        cmdlist.add(Config.getInstance().getTempDir() + "/shell/mysqlload.sh");
         cmdlist.add("mysql");
         cmdlist.add("-u" + dumpTask.getDestMysqlHost().getUsername());
-        String hostWithPort = dumpTask.getSrcMysqlHost().getHost();
+        String hostWithPort = dumpTask.getDestMysqlHost().getHost();
         String host = hostWithPort;
         int port = 3306;
         if (StringUtils.contains(hostWithPort, ':')) {
@@ -254,11 +254,12 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         }
     }
 
+    //TODO 有错为何没有输出
     private String _executeByApache(String[] cmdarray, InputStream inputstream) throws ExecuteException, IOException,
             InterruptedException {
         DefaultExecuteResultHandler resultHandler = new DefaultExecuteResultHandler();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, null, inputstream);
+        PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, outputStream, inputstream);
         executor.setStreamHandler(streamHandler);
         CommandLine cmdLine = new CommandLine(cmdarray[0]);
         for (int i = 1; i < cmdarray.length; i++) {

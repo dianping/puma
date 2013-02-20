@@ -27,13 +27,13 @@ import java.util.Date;
  */
 public final class DatetimeColumn implements Column {
 	private static final long	serialVersionUID	= 8987206727200074893L;
-	private final Date			value;
+	private final String			value;
 
-	private DatetimeColumn(Date value) {
+	private DatetimeColumn(String value) {
 		this.value = value;
 	}
 
-	public Date getValue() {
+	public String getValue() {
 		return this.value;
 	}
 
@@ -47,7 +47,7 @@ public final class DatetimeColumn implements Column {
 		return String.valueOf(value);
 	}
 
-	public static final DatetimeColumn valueOf(Date value) {
+	public static final DatetimeColumn valueOf(String value) {
 		return new DatetimeColumn(value);
 	}
 }

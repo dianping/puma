@@ -23,9 +23,9 @@
                      <td statusOfId="$syncTask.id"></td>
                      <td><a refresh="" href="javascript:;"
                         onclick="refreshStatus(this);"
-                        taskId="$syncTask.id" style="margin-right: 10px">刷新状态</a><!-- <a
+                        taskId="$syncTask.id" style="margin-right: 10px">刷新状态</a><a
                         href="${rc.contextPath}/modify/$syncTask.id"
-                        style="margin-right: 10px">修改</a> --><a
+                        style="margin-right: 10px">修改</a><a
                         href="javascript:openDelTaskModal('${syncTask.id}');">删除</a></td>
                   </tr>
                   #end
@@ -63,29 +63,25 @@
       </div>
    </div>
 </div>
- <!-- 删除任务 -->
-      <div aria-hidden="true" data-backdrop="true" role="dialog"
-         tabindex="-1" class="modal hide" id="delTaskModal"
-         style="display: none;">
-         <div class="modal-header">
-            <button aria-hidden="true" data-dismiss="modal"
-               class="close" type="button">×</button>
-            <h3>
-               删除任务
-            </h3>
-         </div>
-         <div class="modal-body">
-            <p style="text-align: center;">
-               <i class="icon-warning-sign"></i> 您是否确定要删除该任务？
-            </p>
-            <input id="delId" type="hidden" value="">
-         </div>
-         <div class="modal-footer">
-            <button onclick="delTask()"
-               class="btn btn-primary">确定</button>
-            <button data-dismiss="modal" class="btn">取消</button>
-         </div>
-      </div>
+<!-- 删除任务 -->
+<div aria-hidden="true" data-backdrop="true" role="dialog" tabindex="-1"
+   class="modal hide" id="delTaskModal" style="display: none;">
+   <div class="modal-header">
+      <button aria-hidden="true" data-dismiss="modal" class="close"
+         type="button">×</button>
+      <h3>删除任务</h3>
+   </div>
+   <div class="modal-body">
+      <p style="text-align: center;">
+         <i class="icon-warning-sign"></i> 您是否确定要删除该任务？
+      </p>
+      <input id="delId" type="hidden" value="">
+   </div>
+   <div class="modal-footer">
+      <button onclick="delTask()" class="btn btn-primary">确定</button>
+      <button data-dismiss="modal" class="btn">取消</button>
+   </div>
+</div>
 <script>
 	function refreshStatus(td) {
 		var param = new Object();
@@ -123,35 +119,35 @@
 		});
 	}
 	function openDelTaskModal(id) {
-        // 从tr获取siteCode。 判断siteCode，显示不同的图标和文案
-        $("#delTaskModal").modal('show');
-        $("#delId").val(id);
-    }
+		// 从tr获取siteCode。 判断siteCode，显示不同的图标和文案
+		$("#delTaskModal").modal('show');
+		$("#delId").val(id);
+	}
 	function delTask() {
-        var id = $("#delId").val();
-        var url = window.contextpath + '/modify/delTask';
-        var param = new Object();
-        param.id = id;
-        $.ajax({
-            type : 'POST',
-            url : url,
-            data : param,
-            dataType : "json",
-            success : delTaskDone(id),
-            error : pumadmin.httpError
-        });
-    }
-    function delTaskDone(id) {
-        return function(data) {
-            if (data.success == false) {
-                pumadmin.appError("出错啦，亲", data.errorMsg);
-            } else {
-                $('#delTaskModal').modal('hide');
-                $('#' + id).fadeOut();
-                $('#' + id).fadeIn('slow');
-                $('#' + id).fadeOut('slow');
-            }
-        }
-    }
+		var id = $("#delId").val();
+		var url = window.contextpath + '/modify/delTask';
+		var param = new Object();
+		param.id = id;
+		$.ajax({
+			type : 'POST',
+			url : url,
+			data : param,
+			dataType : "json",
+			success : delTaskDone(id),
+			error : pumadmin.httpError
+		});
+	}
+	function delTaskDone(id) {
+		return function(data) {
+			if (data.success == false) {
+				pumadmin.appError("出错啦，亲", data.errorMsg);
+			} else {
+				$('#delTaskModal').modal('hide');
+				$('#' + id).fadeOut();
+				$('#' + id).fadeIn('slow');
+				$('#' + id).fadeOut('slow');
+			}
+		}
+	}
 </script>
 #parse("main/modify/initJs.htm")

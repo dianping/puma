@@ -206,16 +206,17 @@ public class SyncTaskServiceImpl implements SyncTaskService {
         SyncTask syncTask = this.find(id);
         syncTask.setMysqlMapping(newMysqlMapping);
         syncTask.setBinlogInfo(binlogInfo);
+        syncTask.setSyncTaskStatusAction(SyncTaskStatusAction.RESTART);
         this.syncTaskDao.save(syncTask);
         //通知
-        TaskEvent event = new TaskEvent();
-        event.setTaskId(id);
-        event.setType(Type.SYNC);
+        SyncTaskStatusActionEvent event = new SyncTaskStatusActionEvent();
+        event.setSyncTaskId(id);
+        event.setTaskStatusAction(SyncTaskStatusAction.RESTART);
         event.setSyncServerName(syncTask.getSyncServerName());
         try {
-            taskEventPublisher.publish(event);
+            statusActionEventPublisher.publish(event);
         } catch (SendFailedException e) {
-            throw new RuntimeException("已经修改任务，但给SyncServer发送通知失败，SyncServer需要在重启后才能感知。或者您可以再次修改，以便再次发送通知！", e);
+            throw new RuntimeException("已经修改任务，但给SyncServer发送通知失败，您可以在\"任务的状态控制\"页面控制状态，以便再次发送通知！", e);
         }
     }
 

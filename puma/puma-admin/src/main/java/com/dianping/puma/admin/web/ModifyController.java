@@ -389,6 +389,7 @@ public class ModifyController {
             BinlogInfo binlogInfo = new BinlogInfo();
             binlogInfo.setBinlogFile(binlogFile);
             binlogInfo.setBinlogPosition(Long.parseLong(binlogPos));
+            binlogInfo.setSkipToNextPos(true);
             //保存到数据库
             syncTaskService.modify(syncTask.getId(), binlogInfo, newMysqlMapping);
 

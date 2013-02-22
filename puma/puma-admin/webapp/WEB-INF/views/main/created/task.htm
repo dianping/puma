@@ -48,8 +48,8 @@ blockquote button {
                <span>$task.transaction</span>
             </blockquote>
             <blockquote>
-               <strong class="">Binlog位置：</strong> <span>$task.binlogInfo.binlogFile
-                  $task.binlogInfo.binlogPosition</span> <strong
+               <strong class="">Binlog位置：</strong> <span>$status.binlogInfo.binlogFile
+                  $status.binlogInfo.binlogPosition</span> <strong
                   class="actionText">创建时间：</strong> <span>${dateFormatUtils.format($task.gmtCreate,"yyyy年MM月dd日
                   HH时mm分")}</span> <strong class="actionText">最后更新时间：</strong>
                <span>${dateFormatUtils.format($task.gmtModified,"yyyy年MM月dd日

@@ -57,7 +57,18 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
      * @param event 事件
      * @throws Exception
      */
-    protected abstract void onEvent(ChangedEvent event) throws Exception;
+    protected abstract void execute(ChangedEvent event) throws Exception;
+
+    protected void binlogChanged(ChangedEvent event) {
+        //动态更新binlog和binlogPos
+        if (event != null) {
+            BinlogInfo binlogInfo = new BinlogInfo();
+            binlogInfo.setBinlogFile(event.getBinlog());
+            binlogInfo.setBinlogPosition(event.getBinlogPos());
+            status.setBinlogInfo(binlogInfo);
+            abstractTask.setBinlogInfo(binlogInfo);
+        }
+    }
 
     public void setAbstractTask(T abstractTask) {
         this.abstractTask = abstractTask;
@@ -150,20 +161,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
             private DefaultPullStrategy defaultPullStrategy = new DefaultPullStrategy(500, 10000);
 
-            private void recordBinlog(ChangedEvent event) {
-                //动态更新binlog和binlogPos
-                if (event != null) {
-                    BinlogInfo binlogInfo = new BinlogInfo();
-                    binlogInfo.setBinlogFile(event.getBinlog());
-                    binlogInfo.setBinlogPosition(event.getBinlogPos());
-                    status.setBinlogInfo(binlogInfo);
-                    abstractTask.setBinlogInfo(binlogInfo);
-                }
-            }
-
             @Override
             public void onSkipEvent(ChangedEvent event) {
-                recordBinlog(event);
+                binlogChanged(event);
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("onSkipEvent: " + event);
                 }
@@ -171,7 +171,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
             @Override
             public boolean onException(ChangedEvent event, Exception e) {
-                recordBinlog(event);
+                binlogChanged(event);
                 fail(e.getMessage());
                 return false;
             }
@@ -200,7 +200,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
                                 }
                             } else {
                                 //执行子类的具体操作
-                                AbstractTaskExecutor.this.onEvent(event);
+                                AbstractTaskExecutor.this.execute(event);
                                 dataChange = true;
                             }
                         }
@@ -208,7 +208,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
                 }
 
                 //动态更新binlog和binlogPos
-                recordBinlog(event);
+                binlogChanged(event);
                 //速度调控
                 if (sleepTime > 0) {
                     TimeUnit.MILLISECONDS.sleep(sleepTime);

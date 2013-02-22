@@ -13,7 +13,7 @@
         <property name="user" value="binlog" />
         <property name="password" value="binlog" />
         <property name="defaultBinlogFileName" value="mysql-bin.000081" />
-        <property name="defaultBinlogPosition" value="13168" />
+        <property name="defaultBinlogPosition" value="743649513" />
         <property name="parser" ref="defaultParser-7_43" />
         <property name="serverId" value="9988" />
         <property name="dataHandler" ref="datahandler-7_43" />

@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.dianping.puma</groupId>
     <artifactId>parent</artifactId>
-    <version>0.1.1</version>
+    <version>0.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>arch-puma</name>
     <modules>

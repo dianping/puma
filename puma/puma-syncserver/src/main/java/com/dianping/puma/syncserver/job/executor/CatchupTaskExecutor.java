@@ -15,7 +15,7 @@ public class CatchupTaskExecutor extends AbstractTaskExecutor<CatchupTask> {
 
     private int threshold = 50;
 
-    /** 追赶的binlog的终点 */
+    //    /** 追赶的binlog的终点 */
     //    private BinlogInfo binlogInfoEnd;
 
     public CatchupTaskExecutor(CatchupTask catchupTask, String pumaServerHost, int pumaServerPort, String target,
@@ -25,11 +25,24 @@ public class CatchupTaskExecutor extends AbstractTaskExecutor<CatchupTask> {
     }
 
     @Override
-    protected void onEvent(ChangedEvent event) throws Exception {
+    protected void execute(ChangedEvent event) throws Exception {
         //执行同步
         mysqlExecutor.execute(event);
-        BinlogInfo catchupBinlogInfo = this.getTask().getBinlogInfo();
-        BinlogInfo syncBinlogInfo = this.syncTaskExecutor.getTask().getBinlogInfo();
+    }
+
+    public int getThreshold() {
+        return threshold;
+    }
+
+    public void setThreshold(int threshold) {
+        this.threshold = threshold;
+    }
+
+    @Override
+    protected void binlogChanged(ChangedEvent event) {
+        super.binlogChanged(event);
+        BinlogInfo catchupBinlogInfo = this.status.getBinlogInfo();
+        BinlogInfo syncBinlogInfo = this.syncTaskExecutor.getTaskExecutorStatus().getBinlogInfo();
         //(1) 如果CatchupExcutor比SyncTaskExecutor慢且很接近(或者相等)
         if (StringUtils.equals(syncBinlogInfo.getBinlogFile(), catchupBinlogInfo.getBinlogFile())
                 && syncBinlogInfo.getBinlogPosition() - catchupBinlogInfo.getBinlogPosition() >= 0
@@ -49,14 +62,6 @@ public class CatchupTaskExecutor extends AbstractTaskExecutor<CatchupTask> {
             //(2) 如果CatchupExcutor比SyncTaskExecutor快，则放慢CatchupExcutor
             this.speedDown();
         }
-    }
-
-    public int getThreshold() {
-        return threshold;
-    }
-
-    public void setThreshold(int threshold) {
-        this.threshold = threshold;
     }
 
 }

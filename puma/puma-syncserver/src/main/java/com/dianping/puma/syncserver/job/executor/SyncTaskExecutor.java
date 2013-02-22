@@ -14,7 +14,7 @@ public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTask> {
     }
 
     @Override
-    protected void onEvent(ChangedEvent event) throws Exception {
+    protected void execute(ChangedEvent event) throws Exception {
         //执行同步
         mysqlExecutor.execute(event);
     }

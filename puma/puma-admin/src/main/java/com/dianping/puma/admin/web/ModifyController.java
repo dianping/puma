@@ -70,7 +70,7 @@ public class ModifyController {
         int offset = pageNum == null ? 0 : (pageNum - 1) * PAGESIZE;
         List<SyncTask> syncTasks = syncTaskService.find(offset, PAGESIZE);
         map.put("syncTasks", syncTasks);
-        map.put("modifyActive", "active");
+        map.put("createdActive", "active");
         map.put("subPath", "list");
         map.put("path", "modify");
         return new ModelAndView("main/container", map);
@@ -88,7 +88,7 @@ public class ModifyController {
         TaskExecutorStatus status = systemStatusContainer.getStatus(Type.SYNC, taskId);
         map.put("status", status);
 
-        map.put("modifyActive", "active");
+        map.put("createdActive", "active");
         map.put("path", "modify");
         map.put("subPath", "step1");
         return new ModelAndView("main/container", map);
@@ -181,7 +181,7 @@ public class ModifyController {
         session.setAttribute("dumpMapping", dumpMapping);
 
         map.put("syncServerConfigs", syncServerConfigs);
-        map.put("modifyActive", "active");
+        map.put("createdActive", "active");
         map.put("path", "modify");
         map.put("subPath", "step2");
         return new ModelAndView("main/container", map);
@@ -275,7 +275,7 @@ public class ModifyController {
 
         map.put("syncServerConfigs", syncServerConfigs);
         map.put("pumaClientName", "Catchup-" + UUID.randomUUID());
-        map.put("modifyActive", "active");
+        map.put("createdActive", "active");
         map.put("path", "modify");
         map.put("subPath", "step3");
         return new ModelAndView("main/container", map);

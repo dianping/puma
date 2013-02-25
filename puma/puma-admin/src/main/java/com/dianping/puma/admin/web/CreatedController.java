@@ -52,7 +52,7 @@ public class CreatedController {
         List<SyncTask> syncTasks = syncTaskService.find(offset, PAGESIZE);
         map.put("syncTasks", syncTasks);
         map.put("createdActive", "active");
-        map.put("subPath", "view");
+        map.put("subPath", "list");
         map.put("path", "created");
         return new ModelAndView("main/container", map);
     }

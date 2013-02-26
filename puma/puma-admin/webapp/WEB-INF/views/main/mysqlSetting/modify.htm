@@ -13,7 +13,7 @@
                      onsubmit="pumadmin.submit(this);return false;"
                      method="post" onSuccess="modifyMysqlConfigDone">
                      <div class="control-group">
-                        <label class="control-label">数据库名称</label>
+                        <label class="control-label">实例名称</label>
                         <div class="controls">
                            <input type="text" disabled="disabled"
                               value="${mysqlConfig.name}"> <input
@@ -61,7 +61,7 @@
                            <button type="button"
                               style="margin-right: 20px"
                               onclick="pumadmin.addMysqlHostInput()"
-                              class="btn">增加mysql输入框</button>
+                              class="btn">新增Mysql服务器</button>
                            <button type="submit" class="btn btn-primary">
                               确定</button>
                         </div>

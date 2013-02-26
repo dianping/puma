@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -33,6 +32,7 @@ import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.task.DumpTask;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.syncserver.conf.Config;
+import com.dianping.puma.syncserver.util.ProcessBuilderWrapper;
 
 /**
  * @author wukezhu
@@ -128,7 +128,7 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
                         deelFileWriter.println(line);
                     }
                     deelFileWriter.close();
-                    if (StringUtils.isBlank(status.getBinlogInfo().getBinlogFile())
+                    if (status.getBinlogInfo() == null || StringUtils.isBlank(status.getBinlogInfo().getBinlogFile())
                             || status.getBinlogInfo().getBinlogPosition() <= 0) {
                         throw new DumpException("binlogFile or binlogPos is Error: binlogFile="
                                 + status.getBinlogInfo().getBinlogFile() + ",binlogPos="
@@ -215,14 +215,13 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
             cmdlist.add(tableName);
         }
         LOG.info("start dumping " + databaseName + " ...");
-        return _executeByApache(cmdlist.toArray(new String[0]));
+        return _executeByProcessBuilder(cmdlist);
     }
 
     private String _mysqlload(String databaseName) throws ExecuteException, IOException, InterruptedException {
         List<String> cmdlist = new ArrayList<String>();
-        //        cmdlist.add(Config.getInstance().getTempDir() + "/shell/mysqlload.sh");
-        cmdlist.add("mysql");
-        cmdlist.add("-u" + dumpTask.getDestMysqlHost().getUsername());
+        cmdlist.add(Config.getInstance().getTempDir() + "/shell/mysqlload.sh");
+        cmdlist.add("--user=" + dumpTask.getDestMysqlHost().getUsername());
         String hostWithPort = dumpTask.getDestMysqlHost().getHost();
         String host = hostWithPort;
         int port = 3306;
@@ -231,54 +230,45 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
             host = splits[0];
             port = Integer.parseInt(splits[1]);
         }
-        cmdlist.add("-h" + host);
-        cmdlist.add("-P" + port);
-        cmdlist.add("-p" + dumpTask.getDestMysqlHost().getPassword());
-        //        cmdlist.add("<");
-        //        cmdlist.add(_getSourceFile(databaseName));
+        cmdlist.add("--host=" + host);
+        cmdlist.add("--port=" + port);
+        cmdlist.add("--password=" + dumpTask.getDestMysqlHost().getPassword());
+        cmdlist.add(_getSourceFile(databaseName));
         LOG.info("start loading " + databaseName + " ...");
-        InputStream inputstream = new FileInputStream(_getSourceFile(databaseName));
-        return _executeByApache(cmdlist.toArray(new String[0]), inputstream);
+        return _executeByProcessBuilder(cmdlist);
     }
 
     @SuppressWarnings("unused")
-    private String _execute(String[] cmdarray) throws IOException {
-        LOG.info("execute shell script, cmd is: " + Arrays.toString(cmdarray));
+    private String _execute(List<String> cmd) throws IOException, InterruptedException {
+        LOG.info("execute shell script, cmd is: " + StringUtils.join(cmd, ' '));
         InputStream input = null;
         try {
-            proc = Runtime.getRuntime().exec(cmdarray);
+            proc = Runtime.getRuntime().exec(cmd.toArray(new String[0]));
             input = proc.getInputStream();
+            proc.waitFor();
             return IOUtils.toString(input);
         } finally {
             IOUtils.closeQuietly(input);
         }
     }
 
-    //TODO 有错为何没有输出
-    private String _executeByApache(String[] cmdarray, InputStream inputstream) throws ExecuteException, IOException,
-            InterruptedException {
-        DefaultExecuteResultHandler resultHandler = new DefaultExecuteResultHandler();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, outputStream, inputstream);
-        executor.setStreamHandler(streamHandler);
-        CommandLine cmdLine = new CommandLine(cmdarray[0]);
-        for (int i = 1; i < cmdarray.length; i++) {
-            cmdLine.addArgument(cmdarray[i]);
-        }
-        LOG.info("execute(by apache) shell script, cmd is: " + cmdLine.toString());
-        executor.execute(cmdLine, resultHandler);
-        resultHandler.waitFor();
-        return outputStream.toString();
+    private String _executeByProcessBuilder(List<String> cmd) throws IOException, InterruptedException {
+        LOG.info("execute shell script, cmd is: " + StringUtils.join(cmd, ' '));
+        ProcessBuilderWrapper pbd = new ProcessBuilderWrapper(cmd);
+        LOG.info("Command has terminated with status: " + pbd.getStatus());
+        LOG.info("Output:\n" + pbd.getInfos());
+        return pbd.getErrors();
     }
 
-    private String _executeByApache(String[] cmdarray) throws ExecuteException, IOException, InterruptedException {
+    @SuppressWarnings("unused")
+    private String _executeByApache(List<String> cmd) throws ExecuteException, IOException, InterruptedException {
         DefaultExecuteResultHandler resultHandler = new DefaultExecuteResultHandler();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
         executor.setStreamHandler(streamHandler);
-        CommandLine cmdLine = new CommandLine(cmdarray[0]);
-        for (int i = 1; i < cmdarray.length; i++) {
-            cmdLine.addArgument(cmdarray[i]);
+        CommandLine cmdLine = new CommandLine(cmd.get(0));
+        for (int i = 1; i < cmd.size(); i++) {
+            cmdLine.addArgument(cmd.get(i));
         }
         LOG.info("execute(by apache) shell script, cmd is: " + cmdLine.toString());
         executor.execute(cmdLine, resultHandler);

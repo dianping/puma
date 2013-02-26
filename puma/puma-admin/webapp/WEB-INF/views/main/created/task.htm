@@ -22,18 +22,19 @@ blockquote button {
 }
 </style>
 <div class="container"
-   style="margin: 0 auto; width: 100%; margin-bottom: 50px; height: 650px;">
+   style="margin: 0 auto; width: 100%; margin-bottom: 50px;">
    <div>
       <a style="float: right;" href="${rc.contextPath}/created"><span>
             返回查看所有任务</span></a>
       <p class="legend">详细信息</p>
-      <div id="container" style="height: 550px;">
+      <div id="container" style="">
          <div
             style="padding: 10px 10px 10px 10px; background-color: #F7F7F9;">
             <blockquote>
                <strong>源数据库：</strong> <span>$task.srcMysqlName</span> <strong
                   class="actionText">目标数据库：</strong> <span>$task.destMysqlName</span>
                <strong class="actionText">目标数据库Host：</strong> <span>$task.destMysqlHost.host</span>
+               <strong class="actionText">状态控制命令：</strong><span>$task.syncTaskStatusAction</span>
             </blockquote>
             <blockquote>
                <strong>SyncServer名称：</strong> <span>$task.syncServerName</span>

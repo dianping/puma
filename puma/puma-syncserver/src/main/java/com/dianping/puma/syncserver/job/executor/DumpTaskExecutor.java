@@ -220,25 +220,16 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
 
     private String _mysqlload(String databaseName) throws ExecuteException, IOException, InterruptedException {
         List<String> cmdlist = new ArrayList<String>();
-        //        cmdlist.add(Config.getInstance().getTempDir() + "/shell/mysqlload.sh");
-        cmdlist.add("mysql");
-        cmdlist.add("-u" + dumpTask.getDestMysqlHost().getUsername());
-        String hostWithPort = dumpTask.getDestMysqlHost().getHost();
-        String host = hostWithPort;
-        int port = 3306;
-        if (StringUtils.contains(hostWithPort, ':')) {
-            String[] splits = hostWithPort.split(":");
-            host = splits[0];
-            port = Integer.parseInt(splits[1]);
-        }
-        cmdlist.add("-h" + host);
-        cmdlist.add("-P" + port);
-        cmdlist.add("-p" + dumpTask.getDestMysqlHost().getPassword());
-        //        cmdlist.add("<");
-        //        cmdlist.add(_getSourceFile(databaseName));
+        cmdlist.add(Config.getInstance().getTempDir() + "/shell/mysqlload.sh");
+        cmdlist.add("--user=" + dumpTask.getDestMysqlHost().getUsername());
+        String hostWithPort = dumpTask.getSrcMysqlHost().getHost();
+        String[] hostWithPortSplits = hostWithPort.split(":");
+        cmdlist.add("--host=" + hostWithPortSplits[0]);
+        cmdlist.add("--port=" + hostWithPortSplits[1]);
+        cmdlist.add("--password=" + dumpTask.getDestMysqlHost().getPassword());
+        cmdlist.add(_getSourceFile(databaseName));
         LOG.info("start loading " + databaseName + " ...");
-        InputStream inputstream = new FileInputStream(_getSourceFile(databaseName));
-        return _executeByApache(cmdlist.toArray(new String[0]), inputstream);
+        return _executeByApache(cmdlist.toArray(new String[0]));
     }
 
     @SuppressWarnings("unused")
@@ -252,23 +243,6 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         } finally {
             IOUtils.closeQuietly(input);
         }
-    }
-
-    //TODO 有错为何没有输出
-    private String _executeByApache(String[] cmdarray, InputStream inputstream) throws ExecuteException, IOException,
-            InterruptedException {
-        DefaultExecuteResultHandler resultHandler = new DefaultExecuteResultHandler();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, outputStream, inputstream);
-        executor.setStreamHandler(streamHandler);
-        CommandLine cmdLine = new CommandLine(cmdarray[0]);
-        for (int i = 1; i < cmdarray.length; i++) {
-            cmdLine.addArgument(cmdarray[i]);
-        }
-        LOG.info("execute(by apache) shell script, cmd is: " + cmdLine.toString());
-        executor.execute(cmdLine, resultHandler);
-        resultHandler.waitFor();
-        return outputStream.toString();
     }
 
     private String _executeByApache(String[] cmdarray) throws ExecuteException, IOException, InterruptedException {

@@ -151,6 +151,8 @@
 			if (status.binlogInfo && status.binlogInfo.binlogFile) {
 				$('#dumpBinlogFile').val(status.binlogInfo.binlogFile);
 				$('#dumpBinlogPos').val(status.binlogInfo.binlogPosition);
+			}
+			if (status.status == 'SUCCESS') {
 				//把文案显示成“下一步”
 				$("#dumpStepButton").addClass("btn-success");
 				$("#dumpStepButton").text("下一步");

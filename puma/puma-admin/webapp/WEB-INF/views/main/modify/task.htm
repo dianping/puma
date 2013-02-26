@@ -48,8 +48,12 @@ blockquote button {
                <span>$task.transaction</span>
             </blockquote>
             <blockquote>
-               <strong class="">创建时的Binlog起始位置：</strong> <span>$task.binlogInfo.binlogFile
-                  $task.binlogInfo.binlogPosition</span> <strong
+               <strong class="">创建时的Binlog起始位置：</strong> <span>
+                  #if($status && $status.binlogInfo)
+                  $status.binlogInfo.binlogFile
+                  $status.binlogInfo.binlogPosition #else
+                  $task.binlogInfo.binlogFile
+                  $task.binlogInfo.binlogPosition #end </span> <strong
                   class="actionText">创建时间：</strong> <span>${dateFormatUtils.format($task.createTime,"yyyy年MM月dd日
                   HH时mm分")}</span> <strong class="actionText">最后更新时间：</strong>
                <span>${dateFormatUtils.format($task.lastUpdateTime,"yyyy年MM月dd日
@@ -70,8 +74,8 @@ blockquote button {
                </div>
                <p id="status">
                   <strong style="color: #DF3A01">
-                     #if($status.status) $status.status
-                     #else 无状态(可能不在运行) #end </strong>
+                     #if($status.status) $status.status #else
+                     无状态(可能不在运行) #end </strong>
                </p>
             </blockquote>
          </div>

@@ -22,18 +22,19 @@ blockquote button {
 }
 </style>
 <div class="container"
-   style="margin: 0 auto; width: 100%; margin-bottom: 50px; height: 650px;">
+   style="margin: 0 auto; width: 100%; margin-bottom: 50px;">
    <div>
       <a style="float: right;" href="${rc.contextPath}/created"><span>
             返回查看所有任务</span></a>
       <p class="legend">详细信息</p>
-      <div id="container" style="height: 550px;">
+      <div id="container" style="">
          <div
             style="padding: 10px 10px 10px 10px; background-color: #F7F7F9;">
             <blockquote>
                <strong>源数据库：</strong> <span>$task.srcMysqlName</span> <strong
                   class="actionText">目标数据库：</strong> <span>$task.destMysqlName</span>
                <strong class="actionText">目标数据库Host：</strong> <span>$task.destMysqlHost.host</span>
+               <strong class="actionText">状态控制命令：</strong><span>$task.syncTaskStatusAction</span>
             </blockquote>
             <blockquote>
                <strong>SyncServer名称：</strong> <span>$task.syncServerName</span>
@@ -48,8 +49,12 @@ blockquote button {
                <span>$task.transaction</span>
             </blockquote>
             <blockquote>
-               <strong class="">Binlog位置：</strong> <span>$status.binlogInfo.binlogFile
-                  $status.binlogInfo.binlogPosition</span> <strong
+               <strong class="">Binlog位置：</strong> <span>
+                  #if($status && $status.binlogInfo)
+                  $status.binlogInfo.binlogFile
+                  $status.binlogInfo.binlogPosition #else
+                  $task.binlogInfo.binlogFile
+                  $task.binlogInfo.binlogPosition #end</span> <strong
                   class="actionText">创建时间：</strong> <span>${dateFormatUtils.format($task.gmtCreate,"yyyy年MM月dd日
                   HH时mm分")}</span> <strong class="actionText">最后更新时间：</strong>
                <span>${dateFormatUtils.format($task.gmtModified,"yyyy年MM月dd日
@@ -70,11 +75,9 @@ blockquote button {
                </div>
                <p id="status">
                   <strong style="color: #DF3A01">
-                     #if($status.status) $status.status 
-                        #if($status.detail)
-                           ($status.detail)
-                        #end
-                     #else 无状态(可能不在运行) #end </strong>
+                     #if($status.status) $status.status
+                     #if($status.detail) ($status.detail) #end #else
+                     无状态(可能不在运行) #end </strong>
                </p>
             </blockquote>
          </div>
@@ -147,10 +150,10 @@ blockquote button {
 		} else {
 			var status = data.status;
 			if (status && status.status) {
-		        var text = status.status;
-                if (status.detail) {
-                    text += " (" + status.detail + ")";
-                }
+				var text = status.status;
+				if (status.detail) {
+					text += " (" + status.detail + ")";
+				}
 				$("#status > strong").text(text);
 			} else {
 				$("#status > strong").text("无状态(可能不在运行)");

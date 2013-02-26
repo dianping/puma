@@ -1,7 +1,14 @@
 package com.dianping.puma.syncserver.conf;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -9,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.dianping.puma.core.sync.model.config.PumaSyncServerConfig;
 import com.dianping.puma.core.util.IPUtils;
+import com.dianping.puma.syncserver.job.executor.DumpTaskExecutor;
 import com.dianping.puma.syncserver.service.PumaSyncServerConfigService;
 
 public class Config implements InitializingBean {
@@ -24,7 +32,7 @@ public class Config implements InitializingBean {
     private String localPort;
 
     @PostConstruct
-    public void init() {
+    public void init() throws FileNotFoundException, IOException {
         //获取本地ip
         for (String ip : IPUtils.getNoLoopbackIP4Addresses()) {
             String host = ip + ':' + localPort;
@@ -42,7 +50,10 @@ public class Config implements InitializingBean {
             throw new RuntimeException("Cannot try to find the syncServerName, please check the SyncServerConfig in DB.");
         }
         LOG.info("Properties: " + this.toString());
-
+        //复制mysqlload.sh到shell目录
+        InputStream ins = DumpTaskExecutor.class.getClassLoader().getResourceAsStream("shell/mysqlload.sh");
+        File mysqlLoadShell = new File(tempDir + "/shell/mysqlload.sh");
+        IOUtils.copy(ins, new FileOutputStream(mysqlLoadShell));
     }
 
     public String getLocalPort() {
@@ -78,5 +89,12 @@ public class Config implements InitializingBean {
 
     public static Config getInstance() {
         return instance;
+    }
+
+    public static void main(String[] args) throws FileNotFoundException, IOException {
+        //复制mysqlload.sh到shell目录
+        InputStream ins = Config.class.getClassLoader().getResourceAsStream("shell/mysqlload.sh");
+        File mysqlLoadShell = new File("/home/wukezhu/mysqlload.sh");
+        IOUtils.copy(ins, new FileOutputStream(mysqlLoadShell));
     }
 }

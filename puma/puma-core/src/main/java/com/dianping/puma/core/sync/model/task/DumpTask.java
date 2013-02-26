@@ -14,9 +14,9 @@ public class DumpTask extends Task {
     //Dump配置：映射配置(DumpConfig)
     private DumpMapping dumpMapping;
 
-    private List<String> options = Arrays.asList(new String[] { "--no-autocommit", " --disable-keys", "--quick",
+    private List<String> options = Arrays.asList(new String[] { "--no-autocommit", "--disable-keys", "--quick",
             "--add-drop-database=false","--no-create-info", "--add-drop-table=false", "--skip-add-locks", "--default-character-set=utf8",
-            "--max_allowed_packet=16777216", " --net_buffer_length=16384", "-i", "--master-data=2", "--single-transaction" });
+            "--max_allowed_packet=16777216", "--net_buffer_length=16384", "-i", "--master-data=2", "--single-transaction" });
 
     public DumpTask() {
         super(Type.DUMP);

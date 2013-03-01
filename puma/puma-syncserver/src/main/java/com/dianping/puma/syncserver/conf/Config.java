@@ -8,6 +8,7 @@ import java.io.InputStream;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ import com.dianping.puma.syncserver.service.PumaSyncServerConfigService;
 
 public class Config implements InitializingBean {
     private static final Logger LOG = LoggerFactory.getLogger(Config.class);
+    private static final String SHELL_PATH = "shell/mysqlload.sh";
     @Autowired
     private PumaSyncServerConfigService configService;
     private String syncServerName;
@@ -51,8 +53,9 @@ public class Config implements InitializingBean {
         }
         LOG.info("Properties: " + this.toString());
         //复制mysqlload.sh到shell目录
-        InputStream ins = DumpTaskExecutor.class.getClassLoader().getResourceAsStream("shell/mysqlload.sh");
-        File mysqlLoadShell = new File(tempDir + "/shell/mysqlload.sh");
+        InputStream ins = DumpTaskExecutor.class.getClassLoader().getResourceAsStream(SHELL_PATH);
+        File mysqlLoadShell = new File(tempDir + "/" + SHELL_PATH);
+        FileUtils.touch(new File(tempDir + "/" + SHELL_PATH));
         IOUtils.copy(ins, new FileOutputStream(mysqlLoadShell));
     }
 

@@ -51,6 +51,7 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
         InputStream propIn = null;
 
         try {
+            //TODO 后续改为从lion读取，不从hdfs.properties直接读取
             propIn = DefaultBucketManager.class.getClassLoader().getResourceAsStream("hdfs.properties");
             prop.load(propIn);
 

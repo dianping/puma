@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,6 +46,7 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
     private final String uuid;
     private final String dumpOutputDir;
     private Thread thread;
+    private Timer timer = new Timer();
 
     private Executor executor = new DefaultExecutor();
     {
@@ -215,7 +218,11 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
             cmdlist.add(tableName);
         }
         LOG.info("start dumping " + databaseName + " ...");
-        return _executeByProcessBuilder(cmdlist);
+        //启动线程监控outputFile的大小
+        timer.schedule(new FileSizeMonitor(new File(outputFile)), 0, 5000);
+        String output = _executeByProcessBuilder(cmdlist);
+        timer.cancel();
+        return output;
     }
 
     private String _mysqlload(String databaseName) throws ExecuteException, IOException, InterruptedException {
@@ -305,6 +312,30 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
     @Override
     public void disconnect(String detail) {
         throw new UnsupportedOperationException("DumpTaskExecutor not support stop() method!");
+    }
+
+    private class FileSizeMonitor extends TimerTask {
+        private File file;
+
+        private FileSizeMonitor(File file) {
+            super();
+            this.file = file;
+        }
+
+        @Override
+        public void run() {
+            String msg;
+            if(file.exists()){
+                long bytes = FileUtils.sizeOf(file);
+                double mbytes = bytes / 1000000.0;
+                msg = "dump file's size is " + mbytes + "M";
+            }else{
+                msg = "dump file is not exists yet.";
+            }
+            status.setDetail(msg);
+            LOG.info(msg);
+        }
+
     }
 
     //    public static void main(String[] args) throws ExecuteException, IOException, InterruptedException {

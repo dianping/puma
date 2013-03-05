@@ -17,12 +17,12 @@ package com.dianping.puma.storage;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 import java.util.TreeMap;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -31,43 +31,28 @@ import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.security.SecurityUtil;
 import org.apache.hadoop.security.UserGroupInformation;
+import org.apache.log4j.Logger;
 
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
- * TODO Comment of HDFSBucketIndex
- * 
  * @author Leo Liang
- * 
  */
 public class HDFSBucketIndex extends AbstractBucketIndex {
 
+    private static final Logger logger = Logger.getLogger(HDFSBucketIndex.class);
+
     private Configuration hdfsConfig;
-    private FileSystem    fileSystem;
+    private FileSystem fileSystem;
+    private String hdfsConfigStr;
 
     public void initHdfsConfiguration() {
         hdfsConfig = new Configuration();
-        Properties prop = new Properties();
-        InputStream propIn = null;
 
-        try {
-            //TODO 后续改为从lion读取，不从hdfs.properties直接读取
-            propIn = DefaultBucketManager.class.getClassLoader().getResourceAsStream("hdfs.properties");
-            prop.load(propIn);
-
-            for (String key : prop.stringPropertyNames()) {
-                hdfsConfig.set(key, prop.getProperty(key));
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (propIn != null) {
-                try {
-                    propIn.close();
-                } catch (IOException e) {
-                    // ignore
-                }
-            }
+        Properties prop = parseConfigStr(hdfsConfigStr);
+        logger.info("hdfs properties: " + prop);
+        for (String key : prop.stringPropertyNames()) {
+            hdfsConfig.set(key, prop.getProperty(key));
         }
 
         UserGroupInformation.setConfiguration(hdfsConfig);
@@ -79,9 +64,25 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 
     }
 
+    private Properties parseConfigStr(String hdfsConfigStr) {
+        Properties prop = new Properties();
+        if (StringUtils.isNotBlank(hdfsConfigStr)) {
+            String[] lines = StringUtils.split(hdfsConfigStr, IOUtils.LINE_SEPARATOR);
+            for (String line : lines) {
+                String[] entry = StringUtils.split(line, '=');
+                String key = entry[0];
+                String value = entry[1];
+                prop.setProperty(key, value);
+            }
+        } else {
+            throw new IllegalArgumentException("hdfsConfigStr must not be empty!");
+        }
+
+        return prop;
+    }
+
     /*
      * (non-Javadoc)
-     * 
      * @see com.dianping.puma.storage.BucketIndex#init()
      */
     @Override
@@ -109,8 +110,7 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 
                             for (Path subFile : listedFiles) {
                                 if (subFile.getName().startsWith(getBucketFilePrefix())
-                                        && StringUtils.isNumeric(subFile.getName().substring(
-                                                getBucketFilePrefix().length()))) {
+                                        && StringUtils.isNumeric(subFile.getName().substring(getBucketFilePrefix().length()))) {
                                     String path = pathname.getName() + PATH_SEPARATOR + subFile.getName();
                                     newIndex.put(convertToSequence(path), path);
                                 }
@@ -125,14 +125,12 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
     }
 
     @Override
-    protected Bucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB)
-            throws IOException {
+    protected Bucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB) throws IOException {
         return new HDFSBucket(fileSystem, baseDir, path, startingSeq, !isMaster());
     }
 
     /*
      * (non-Javadoc)
-     * 
      * @see com.dianping.puma.storage.AbstractBucketIndex#close()
      */
     @Override
@@ -148,14 +146,11 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 
     /*
      * (non-Javadoc)
-     * 
-     * @see
-     * com.dianping.puma.storage.AbstractBucketIndex#doGetNextWriteBucket(java
-     * .lang.String, java.lang.String, com.dianping.puma.storage.Sequence)
+     * @see com.dianping.puma.storage.AbstractBucketIndex#doGetNextWriteBucket(java .lang.String, java.lang.String,
+     * com.dianping.puma.storage.Sequence)
      */
     @Override
-    protected Bucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence)
-            throws IOException {
+    protected Bucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence) throws IOException {
         return null;
     }
 
@@ -190,10 +185,7 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
 
     /*
      * (non-Javadoc)
-     * 
-     * @see
-     * com.dianping.puma.storage.AbstractBucketIndex#removeBucket(java.lang.
-     * String)
+     * @see com.dianping.puma.storage.AbstractBucketIndex#removeBucket(java.lang. String)
      */
     @Override
     public boolean removeBucket(String path) throws StorageClosedException {
@@ -219,4 +211,9 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
             return false;
         }
     }
+
+    public void setHdfsConfigStr(String hdfsConfigStr) {
+        this.hdfsConfigStr = hdfsConfigStr;
+    }
+
 }

@@ -6,17 +6,11 @@
     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
- 
     <bean name="placeholder" lazy-init="false"
         class="com.dianping.puma.config.InitializeConfig">
         <property name="propertiesPath" value="applicationContext.properties" />
     </bean>
-<!--     
-    <bean
-        class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="locations" value="classpath:applicationContext.properties" />
-    </bean>
--->
+
     <bean id="commonAlarmSerivce" class="com.dianping.dpsf.spring.ProxyBeanFactory"
         init-method="init">
         <property name="serviceName"

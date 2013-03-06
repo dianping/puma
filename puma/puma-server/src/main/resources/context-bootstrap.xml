@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+
+    <bean name="placeholder" lazy-init="false"
+        class="com.dianping.puma.config.InitializeConfig">
+        <property name="propertiesPath" value="applicationContext.properties" />
+    </bean>
+
+    <bean id="commonAlarmSerivce" class="com.dianping.dpsf.spring.ProxyBeanFactory"
+        init-method="init">
+        <property name="serviceName"
+            value="http://service.dianping.com/hawk/alarm/commonAlarmSerivce" />
+        <property name="iface"
+            value="com.dianping.hawk.common.alarm.service.CommonAlarmService" />
+        <property name="serialize" value="java" />
+        <property name="callMethod" value="sync" />
+        <property name="timeout" value="5000" />
+    </bean>
+
+    <bean id="notifyService" class="com.dianping.puma.core.monitor.DefaultNotifyService">
+        <property name="alarmService" ref="commonAlarmSerivce" />
+        <property name="devMode" value="true" />
+    </bean>
+
+    <bean id="notifiableBean" abstract="true">
+        <property name="notifyService" ref="notifyService" />
+    </bean>
+
+    <bean id="statusReportTask" class="com.dianping.puma.server.StatusReportTask"
+        parent="notifiableBean" init-method="start" />
+
+    <bean id="dailyReportTask" class="com.dianping.puma.server.DailyReportTask"
+        parent="notifiableBean" init-method="start" />
+
+    <bean id="binlogPositionHolder"
+        class="com.dianping.puma.server.MMapBasedBinlogPositionHolder"
+        init-method="init">
+        <property name="baseDir" value="/data/appdatas/puma/" />
+    </bean>
+
+    <bean id="archiveStrategy" class="com.dianping.puma.storage.DefaultArchiveStrategy">
+        <property name="maxMasterFileCount" value="1" />
+    </bean>
+
+    <bean id="cleanupStrategy" class="com.dianping.puma.storage.DefaultCleanupStrategy">
+        <property name="preservedDay" value="14" />
+    </bean>
+
+    <bean id="jsonCodec" class="com.dianping.puma.core.codec.JsonEventCodec" />
+
+    <bean id="servers" class="java.util.ArrayList">
+        <constructor-arg>
+            <list>
+                <ref bean="${puma.mysqlServerName}" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <import resource="${puma.mysqlServerName}.xml" />
+
+</beans>
+
+
+    

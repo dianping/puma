@@ -1,0 +1,224 @@
+<style>
+#container dt {
+	width: 250px;
+}
+
+.actionText {
+	margin-left: 35px;
+}
+
+#container span {
+	color: #DF3A01;
+}
+
+#container a>span {
+	color: #0088CC;
+}
+
+#container strong {
+	font-weight: normal;
+	color: #485764;
+}
+
+blockquote button {
+	margin-right: 10px;
+}
+</style>
+<div class="container"
+   style="margin: 0 auto; width: 100%; margin-bottom: 50px; height: 1250px;">
+   <ul id="stepsBreak" class="breadcrumb">
+      <li class="step_active">第1步: 修改 <span class="divider">&gt;</span></li>
+      <li class="step_undo">第2步: mysqldump <span class="divider">&gt;</span></li>
+      <li class="step_undo">第3步: 暂停与追赶</li>
+   </ul>
+   <div class="container"
+      style="margin: 0 auto; width: 100%; margin-bottom: 50px; height: 1050px;">
+      <div>
+         <button
+            style="float: right; margin-top: 0px; margin-right: 20px;"
+            type="button" onclick="$('#databaseForm').submit();"
+            class="btn btn-primary">下一步</button>
+         <p class="legend">详细信息</p>
+         <div id="container" style="height: 100%;">
+            <div
+               style="padding: 10px 10px 10px 10px; background-color: #F7F7F9;">
+               <blockquote>
+                  <strong>源数据库：</strong> <span>$syncTask.srcMysqlName</span>
+                  <strong class="actionText">目标数据库：</strong> <span>$syncTask.destMysqlName</span>
+                  <strong class="actionText">目标数据库Host：</strong> <span>$syncTask.destMysqlHost.host</span>
+               </blockquote>
+               <blockquote>
+                  <strong>SyncServer名称：</strong> <span>$syncTask.syncServerName</span>
+                  <strong class="actionText">PumaClient名称：</strong> <span>$syncTask.pumaClientName</span>
+                  <strong class="actionText">PumaClient的ServerId：</strong>
+                  <span>$syncTask.serverId</span>
+               </blockquote>
+               <blockquote>
+                  <strong class="">PumaClient的ddl值：</strong> <span>$syncTask.ddl</span>
+                  <strong class="actionText">PumaClient的dml值：</strong> <span>$syncTask.dml</span>
+                  <strong class="actionText">PumaClient的transaction值：</strong>
+                  <span>$syncTask.transaction</span>
+               </blockquote>
+               <blockquote>
+                  <strong class="">创建时的Binlog起始位置：</strong> <span>$syncTask.binlogInfo.binlogFile
+                     $syncTask.binlogInfo.binlogPosition</span> <strong
+                     class="actionText">创建时间：</strong> <span>${dateFormatUtils.format($syncTask.gmtCreate,"yyyy年MM月dd日
+                     HH时mm分")}</span> <strong class="actionText">最后更新时间：</strong>
+                  <span>${dateFormatUtils.format($syncTask.gmtModified,"yyyy年MM月dd日
+                     HH时mm分")}</span>
+               </blockquote>
+            </div>
+            <hr>
+            <div>
+               <h4>状态</h4>
+               <blockquote>
+                  <p id="status">
+                     <strong style="color: #DF3A01">#if($status.status)
+                        $status.status #else 无状态(可能不在运行) #end</strong>
+                  </p>
+               </blockquote>
+            </div>
+            <div>
+               <div
+                  style="float: right; margin-top: 0px; margin-right: 20px;">
+                  <a href="javascript:addDatabaseDiv();"><i
+                     class="icon-plus"></i>新增数据库同步</a>
+               </div>
+               <h4>映射配置</h4>
+               <div
+                  style="padding: 20px 10px 10px 10px; border: 1px solid #E5E5E5; border-radius: 4px 4px 4px 4px; background-color: #F7F7F9;">
+                  <form id="databaseForm" class="form-horizontal"
+                     method="post"
+                     onsubmit="submit0(this);return false;"
+                     onSuccess="onSuccess"
+                     action="${rc.contextPath}/modify/step1Save">
+                     #foreach($database in
+                     $syncTask.mysqlMapping.databases)
+                     <div>
+                        <a
+                           style="float: right; margin-top: 0px; margin-right: 10px;"
+                           href="javascript:;"
+                           onclick="removeDatabaseDiv(this);"><i
+                           class="icon-remove"></i>删除该库同步</a> <a
+                           style="float: right; margin-top: 0px; margin-right: 10px;"
+                           href="javascript:;"
+                           onclick="addTableDiv(this);"><i
+                           class="icon-plus"></i>新增表同步</a>
+                        <div style="font-weight: bold;"
+                           class="control-group">
+                           <label class="control-label">实例名称</label>
+                           <div class="controls">
+                              <input type="text" placeholder="源实例名称"
+                                 name="databaseFrom"
+                                 value="$database.from">&nbsp;&nbsp;<i
+                                 class="icon-arrow-right"></i>&nbsp;&nbsp;<input
+                                 placeholder="目标实例名称" type="text"
+                                 name="databaseTo" value="$database.to">
+                           </div>
+                        </div>
+                        <input name="count" autocomplete="off"
+                           type="hidden" value="$database.tables.size()">
+                        #foreach($table in $database.tables)
+                        <div class="control-group">
+                           <label class="control-label">表名</label>
+                           <div class="controls">
+                              <input placeholder="源表名称" type="text"
+                                 name="tableFrom" value="$table.from">&nbsp;&nbsp;<i
+                                 class="icon-arrow-right"></i>&nbsp;&nbsp;<input
+                                 placeholder="目标表名称" type="text"
+                                 name="tableTo" value="$table.to">&nbsp;&nbsp;
+                              <a href="javascript:;"
+                                 onclick="removeTableDiv(this);"><i
+                                 class="icon-remove"></i></a>
+                           </div>
+                        </div>
+                        #end
+                     </div>
+                     #end
+                  </form>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div style="display: none" id="copySource">
+      <div id="addTableDiv">
+         <div class="control-group">
+            <label class="control-label">表名</label>
+            <div class="controls">
+               <input placeholder="源表名称" type="text" name="tableFrom">&nbsp;&nbsp;<i
+                  class="icon-arrow-right"></i>&nbsp;&nbsp;<input
+                  placeholder="目标表名称" type="text" name="tableTo">&nbsp;&nbsp;
+               <a href="javascript:;" onclick="removeTableDiv(this);"><i
+                  class="icon-remove"></i></a>
+            </div>
+         </div>
+      </div>
+      <div id="addDatabaseDiv">
+         <div>
+            <hr>
+            <a
+               style="float: right; margin-top: 0px; margin-right: 10px;"
+               href="javascript:;" onclick="removeDatabaseDiv(this);"><i
+               class="icon-remove"></i>删除该库同步</a> <a
+               style="float: right; margin-top: 0px; margin-right: 10px;"
+               href="javascript:;" onclick="addTableDiv(this);"><i
+               class="icon-plus"></i>新增表同步</a>
+            <div style="font-weight: bold;" class="control-group">
+               <label class="control-label">实例名称</label>
+               <div class="controls">
+                  <input type="text" placeholder="源实例名称"
+                     name="databaseFrom">&nbsp;&nbsp;<i
+                     class="icon-arrow-right"></i>&nbsp;&nbsp;<input
+                     placeholder="目标实例名称" type="text" name="databaseTo">
+               </div>
+            </div>
+            <input type="hidden" autocomplete="off" name="count"
+               value="0">
+         </div>
+      </div>
+   </div>
+</div>
+
+<script>
+	function submit0(form) {
+		//$("#syncXml").val(window.xmlEditor.getValue());
+		$.ajax({
+			type : $(form).attr('method'),
+			url : $(form).attr('action'),
+			data : $(form).serialize(),
+			dataType : "json",
+			success : onSuccess,
+			error : pumadmin.httpError
+		});
+		return false;
+	}
+	function onSuccess(data) {
+		if (data.success == false) {
+			pumadmin.appError("错误信息", data.errorMsg);
+		} else {
+			window.location = "${rc.contextPath}/modify/step2";
+		}
+	}
+	function addTableDiv(aLink) {
+		var form = $(aLink).parent();
+		$(form).append($('#addTableDiv').html());
+		var count = Number($(form).children("input[name='count']").val());
+		$(form).children("input[name='count']").val(count + 1);
+	}
+	function removeTableDiv(aLink) {
+		var control = $(aLink).parent().parent();
+		var form = $(control).parent();
+		var count = Number($(form).children("input[name='count']").val());
+		$(form).children("input[name='count']").val(count - 1);
+		$(control).remove();
+	}
+	function removeDatabaseDiv(aLink) {
+		var dbDiv = $(aLink).parent();
+		$(dbDiv).remove();
+	}
+	function addDatabaseDiv() {
+		var form = $("#databaseForm");
+		$(form).append($('#addDatabaseDiv').html());
+	}
+</script>

@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+            http://www.springframework.org/schema/beans 
+            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context-3.0.xsd
+            http://www.springframework.org/schema/task   
+    http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+
+    <!-- annotation scan -->
+    <context:component-scan base-package="com.dianping.puma" />
+
+    <task:annotation-driven />
+
+    <import resource="applicationContext-properties.xml" />
+
+    <import resource="applicationContext-swallow.xml" />
+
+    <!-- 报警 -->
+    <bean id="commonAlarmSerivce" class="com.dianping.dpsf.spring.ProxyBeanFactory"
+        init-method="init">
+        <property name="serviceName"
+            value="http://service.dianping.com/hawk/alarm/commonAlarmSerivce" />
+        <property name="iface"
+            value="com.dianping.hawk.common.alarm.service.CommonAlarmService" />
+        <property name="serialize" value="java" />
+        <property name="callMethod" value="sync" />
+        <property name="timeout" value="5000" />
+    </bean>
+    <bean id="notifyService" class="com.dianping.puma.core.monitor.DefaultNotifyService">
+        <property name="alarmService" ref="commonAlarmSerivce" />
+        <property name="devMode" value="${puma.syncserver.notify.devMode}" />
+    </bean>
+
+    <!-- executor -->
+    <bean
+        class="com.dianping.puma.syncserver.job.executor.builder.DefaultTaskExecutorBuilder">
+        <property name="strategys">
+            <list>
+                <ref bean="syncTaskExecutorStrategy" />
+                <ref bean="catchupTaskExecutorStrategy" />
+                <ref bean="dumpTaskExecutorStrategy" />
+            </list>
+        </property>
+    </bean>
+
+
+    <!-- 数据库 -->
+    <bean id="mongoClient" class="com.dianping.puma.core.sync.dao.MongoClient">
+    </bean>
+
+    <bean id="seqGen"
+        class="com.dianping.puma.core.sync.dao.MongoSeqGeneratorServiceImpl">
+        <property name="mongoClient">
+            <ref bean="mongoClient" />
+        </property>
+        <property name="dbName" value="puma_admin" />
+        <property name="collName" value="seq" />
+    </bean>
+
+</beans>

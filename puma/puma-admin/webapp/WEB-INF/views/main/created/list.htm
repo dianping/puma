@@ -1,0 +1,177 @@
+<div class="container"
+   style="margin: 0 auto; width: 100%; margin-bottom: 50px; height: 650px;">
+   <div>
+      <p class="legend">所有同步</p>
+      <div id="container" style="height: 550px;">
+         <div id="resultDiv" style="height: 400px; overflow-y: auto;">
+            <table class="table table-hover table-striped">
+               <thead>
+                  <tr>
+                     <th>源数据库</th>
+                     <th>目标数据库</th>
+                     <!-- <th>SyncServer名称</th>
+                     <th>状态控制命令</th>  -->
+                     <th>状态</th>
+                     <th>Binlog进度</th>
+                     <th>状态刷新</th>
+                     <th>操作</th>
+                  </tr>
+               </thead>
+               <tbody id="resultTable">
+                  #foreach($syncTask in $syncTasks)
+                  <tr id="${syncTask.id}">
+                     <td>$syncTask.srcMysqlName</td>
+                     <td>$syncTask.destMysqlName</td>
+                     <!-- <td>$syncTask.syncServerName</td>  -->
+                     <!-- <td>$syncTask.syncTaskStatusAction</td> -->
+                     <td statusOfId="$syncTask.id"></td>
+                     <td binlogOfId="$syncTask.id"></td>
+                     <td><a class="btn btn-mini btn-info"
+                        refresh="" href="javascript:;"
+                        onclick="refreshStatus(this);"
+                        taskId="$syncTask.id" style="margin-right: 10px">刷新状态</a></td>
+                     <td><a
+                        href="${rc.contextPath}/created/task/$syncTask.id"
+                        style="margin-right: 10px">详细</a><a
+                        href="${rc.contextPath}/modify/$syncTask.id"
+                        style="margin-right: 10px">修改</a><a
+                        href="javascript:openDelTaskModal('${syncTask.id}');">删除</a></td>
+                  </tr>
+                  #end
+               </tbody>
+            </table>
+            #if(${syncTasks.size()} == 0)
+            <div id="noResultDiv" class="alert alert-warn"
+               style="text-align: center;">
+               <br>
+               <p>
+                  <i class="icon-warning-sign"></i> 您尚未添加任何同步，请点击左边菜单的<span
+                     style="color: red">“创建同步任务”</span>的按钮进行添加。
+               </p>
+               <br>
+            </div>
+            #end
+         </div>
+         #if(!$pageNum) #set($pageNum=1) #end #set($nextPage = $pageNum
+         + 1) #set($prePage = $pageNum - 1)
+         <ul class="pager">
+            #if($prePage >= 1)
+            <li id="prePage"><a
+               href="${rc.contextPath}/created/${prePage}">&larr; 上页</a></li>
+            #else
+            <li class="disabled" id="prePage"><a
+               href="javascript:;">&larr; 上页</a></li> #end
+            #if(${syncTasks.size()} <= 8)
+            <li class="disabled" id="nextPage"><a
+               href="javascript:;">下页 &rarr;</a></li> #else
+            <li id="nextPage"><a
+               href="${rc.contextPath}/created/${nextPage}">下页
+                  &rarr;</a></li> #end
+
+         </ul>
+      </div>
+   </div>
+</div>
+<!-- 删除任务 -->
+<div aria-hidden="true" data-backdrop="true" role="dialog" tabindex="-1"
+   class="modal hide" id="delTaskModal" style="display: none;">
+   <div class="modal-header">
+      <button aria-hidden="true" data-dismiss="modal" class="close"
+         type="button">×</button>
+      <h3>删除任务</h3>
+   </div>
+   <div class="modal-body">
+      <p style="text-align: center;">
+         <i class="icon-warning-sign"></i> 您是否确定要删除该任务？
+      </p>
+      <input id="delId" type="hidden" value="">
+   </div>
+   <div class="modal-footer">
+      <button onclick="delTask()" class="btn btn-primary">确定</button>
+      <button data-dismiss="modal" class="btn">取消</button>
+   </div>
+</div>
+<script>
+	function refreshStatus(td) {
+		var param = new Object();
+		var taskId = $(td).attr("taskId");
+		param.taskId = taskId;
+		$("td[statusOfId='" + taskId + "']").text("");
+		var url = window.contextpath + '/created/status';
+		$.ajax({
+			type : 'POST',
+			url : url,
+			data : param,
+			dataType : "json",
+			success : refreshStatusDone(taskId),
+			error : pumadmin.httpError
+		});
+	}
+	function refreshStatusDone(id) {
+		return function(data) {
+			if (data.success == false) {
+				pumadmin.appError("错误信息", data.errorMsg);
+			} else {
+				var status = data.status;
+				if (status && status.status) {
+					var text = status.status;
+					if (text == "WAITING" || text == "PREPARING"
+							|| text == "DUMPING" || text == "LOADING") {
+					    text = "<span style='color:yellow'>" + text + "</span>";
+					} else if (text == "RUNNING" || text == "SUSPPENDED"
+							|| text == "SUCCEED") {
+						text = "<span style='color:green'>" + text + "</span>";
+					} else {
+						text = "<span style='color:red'>" + text + "</span>";
+					}
+					$("td[statusOfId='" + id + "']").html(text);
+					$("td[binlogOfId='" + id + "']").text(
+							status.binlogInfo.binlogFile + " "
+									+ status.binlogInfo.binlogPosition);
+				} else {
+					$("td[statusOfId='" + id + "']").html(
+							"<span style='color:red'>无状态(可能不在运行)</span>");
+					$("td[binlogOfId='" + id + "']").text("--");
+				}
+			}
+		}
+	}
+	function init() {
+		var trs = $("a[refresh]");
+		$.each(trs, function(i, el) {
+			$(el).click();
+		});
+	}
+	function openDelTaskModal(id) {
+		// 从tr获取siteCode。 判断siteCode，显示不同的图标和文案
+		$("#delTaskModal").modal('show');
+		$("#delId").val(id);
+	}
+	function delTask() {
+		var id = $("#delId").val();
+		var url = window.contextpath + '/modify/delTask';
+		var param = new Object();
+		param.id = id;
+		$.ajax({
+			type : 'POST',
+			url : url,
+			data : param,
+			dataType : "json",
+			success : delTaskDone(id),
+			error : pumadmin.httpError
+		});
+	}
+	function delTaskDone(id) {
+		return function(data) {
+			if (data.success == false) {
+				pumadmin.appError("出错啦，亲", data.errorMsg);
+			} else {
+				$('#delTaskModal').modal('hide');
+				$('#' + id).fadeOut();
+				$('#' + id).fadeIn('slow');
+				$('#' + id).fadeOut('slow');
+			}
+		}
+	}
+</script>
+#parse("main/created/initJs.htm")

@@ -1,0 +1,211 @@
+<style>
+#container dt {
+	width: 250px;
+}
+
+.actionText {
+	margin-left: 35px;
+}
+
+#container span {
+	color: #DF3A01;
+	border-bottom: 1px dotted #999;
+}
+
+#container strong {
+	font-weight: normal;
+	color: #485764;
+}
+
+blockquote button {
+	margin-right: 10px;
+}
+</style>
+<div class="container"
+   style="margin: 0 auto; width: 100%; margin-bottom: 50px;">
+   <div>
+      <a style="float: right;" href="${rc.contextPath}/created"><span>
+            返回查看所有任务</span></a>
+      <p class="legend">详细信息</p>
+      <div id="container" style="">
+         <div
+            style="padding: 10px 10px 10px 10px; background-color: #F7F7F9;">
+            <blockquote>
+               <strong>源数据库：</strong> <span>$task.srcMysqlName</span> <strong
+                  class="actionText">目标数据库：</strong> <span>$task.destMysqlName</span>
+               <strong class="actionText">目标数据库Host：</strong> <span>$task.destMysqlHost.host</span>
+               <strong class="actionText">状态控制命令：</strong><span>$task.syncTaskStatusAction</span>
+            </blockquote>
+            <blockquote>
+               <strong>SyncServer名称：</strong> <span>$task.syncServerName</span>
+               <strong class="actionText">PumaClient名称：</strong> <span>$task.pumaClientName</span>
+               <strong class="actionText">PumaClient的ServerId：</strong>
+               <span>$task.serverId</span>
+            </blockquote>
+            <blockquote>
+               <strong class="">PumaClient的ddl值：</strong> <span>$task.ddl</span>
+               <strong class="actionText">PumaClient的dml值：</strong> <span>$task.dml</span>
+               <strong class="actionText">PumaClient的transaction值：</strong>
+               <span>$task.transaction</span>
+            </blockquote>
+            <blockquote>
+               <strong class="">Binlog位置：</strong> <span>
+                  #if($status && $status.binlogInfo)
+                  $status.binlogInfo.binlogFile
+                  $status.binlogInfo.binlogPosition #else
+                  $task.binlogInfo.binlogFile
+                  $task.binlogInfo.binlogPosition #end</span> <strong
+                  class="actionText">创建时间：</strong> <span>${dateFormatUtils.format($task.gmtCreate,"yyyy年MM月dd日
+                  HH时mm分")}</span> <strong class="actionText">最后更新时间：</strong>
+               <span>${dateFormatUtils.format($task.gmtModified,"yyyy年MM月dd日
+                  HH时mm分")}</span>
+            </blockquote>
+         </div>
+         <hr>
+         <div>
+            <h4>状态</h4>
+            <blockquote>
+               <div style="margin-right: 20px; float: right">
+                  <button class="btn btn-mini btn-danger"
+                     onclick="pause();">暂停</button>
+                  <button class="btn btn-mini btn-primary"
+                     onclick="rerun();">恢复运行</button>
+                  <button class="btn btn-mini btn-success"
+                     onclick="refreshStatus();">刷新状态</button>
+               </div>
+               <p id="status">
+                  <strong style="color: #DF3A01">
+                     #if($status.status) $status.status
+                     #if($status.detail) ($status.detail) #end #else
+                     无状态(可能不在运行) #end </strong>
+               </p>
+            </blockquote>
+         </div>
+         <div>
+            <h4>映射配置</h4>
+            #foreach($database in $task.mysqlMapping.databases)
+            <div class="accordion" id="accordion2">
+               <div class="accordion-group">
+                  <div class="accordion-heading">
+                     <a style="text-align: center;"
+                        class="accordion-toggle" data-toggle="collapse"
+                        data-parent="#accordion2" href="#collapseOne">
+                        <span>$database.from -> $database.to</span>
+                     </a>
+                  </div>
+                  <div id="collapseOne"
+                     class="accordion-body in collapse"
+                     style="height: auto;">
+                     <div class="accordion-inner">
+                        <div
+                           style="padding: 0px 0px 0px 0px; background-color: #F5F5F5; border: 0px solid rgba(0, 0, 0, 0); border-radius: 4px 4px 4px 4px;">
+                           <div id="tables"
+                              style="width: 500px; margin: 0 auto;">
+                              <table class="table table-hover">
+                                 <thead>
+                                    <tr>
+                                       <th>源表</th>
+                                       <th>目标表</th>
+                                    </tr>
+                                 </thead>
+                                 <tbody>
+                                    #foreach($table in $database.tables)
+                                    <tr>
+                                       <td>$table.from</td>
+                                       <td>$table.to</td>
+                                    </tr>
+                                    #end
+                                 </tbody>
+                              </table>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            #end
+         </div>
+      </div>
+   </div>
+</div>
+<script>
+	function refreshStatus() {
+		$("#status > strong").text("");
+		$("#status > span").text("");
+		var param = new Object();
+		param.taskId = '$task.id';
+		var url = window.contextpath + '/created/status';
+		$.ajax({
+			type : 'POST',
+			url : url,
+			data : param,
+			dataType : "json",
+			success : refreshStatusDone,
+			error : pumadmin.httpError
+		});
+	}
+	function refreshStatusDone(data) {
+		if (data.success == false) {
+			pumadmin.appError("错误信息", data.errorMsg);
+		} else {
+			var status = data.status;
+			if (status && status.status) {
+				var text = status.status;
+				if (status.detail) {
+					text += " (" + status.detail + ")";
+				}
+				$("#status > strong").text(text);
+			} else {
+				$("#status > strong").text("无状态(可能不在运行)");
+			}
+			//var d1 = Date.parse(status.lastUpdateTime);
+			//$("#gmtModified").text(d1.toString('yyyy年MM月dd日 HH时mm分'));
+		}
+	}
+	function pause() {
+		var param = new Object();
+		param.taskId = '$task.id';
+		var url = window.contextpath + '/created/pause';
+		$.ajax({
+			type : 'POST',
+			url : url,
+			data : param,
+			dataType : "json",
+			success : pauseDone,
+			error : pumadmin.httpError
+		});
+	}
+	function pauseDone(data) {
+		if (data.success == false) {
+			pumadmin.appError("错误信息", data.errorMsg);
+		} else {
+			refreshStatus();
+		}
+	}
+	function rerun() {
+		var param = new Object();
+		param.taskId = '$task.id';
+		var url = window.contextpath + '/created/rerun';
+		$.ajax({
+			type : 'POST',
+			url : url,
+			data : param,
+			dataType : "json",
+			success : pauseDone,
+			error : pumadmin.httpError
+		});
+	}
+	function resolved() {
+		var param = new Object();
+		param.taskId = '$task.id';
+		var url = window.contextpath + '/created/resolved';
+		$.ajax({
+			type : 'POST',
+			url : url,
+			data : param,
+			dataType : "json",
+			success : pauseDone,
+			error : pumadmin.httpError
+		});
+	}
+</script>

@@ -86,6 +86,7 @@ public class Handler implements PageHandler<Context> {
         try {
             channel = storage.getChannel(seq, serverId, binlogFile, binlogPos, timeStamp);
         } catch (StorageException e1) {
+            log.error(e1.getMessage(), e1);
             throw new IOException(e1);
         }
 

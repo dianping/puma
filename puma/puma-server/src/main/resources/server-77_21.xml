@@ -38,6 +38,14 @@
         <property name="tableMetasInfoFetcher" ref="tableMetasInfoFetcher-77_21" />
     </bean>
 
+    <bean id="archiveStrategy-77_21" class="com.dianping.puma.storage.DefaultArchiveStrategy">
+        <property name="maxMasterFileCount" value="1" />
+    </bean>
+
+    <bean id="cleanupStrategy-77_21" class="com.dianping.puma.storage.DefaultCleanupStrategy">
+        <property name="preservedDay" value="14" />
+    </bean>
+
     <bean id="tableMetasInfoFetcher-77_21"
         class="com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher">
         <property name="metaDBHost" value="10.1.77.21" />
@@ -60,8 +68,8 @@
         <property name="codec" ref="jsonCodec" />
         <property name="masterBucketIndex" ref="localBucketIndex-77_21" />
         <property name="slaveBucketIndex" ref="hdfsBucketIndex-77_21" />
-        <property name="archiveStrategy" ref="archiveStrategy" />
-        <property name="cleanupStrategy" ref="cleanupStrategy" />
+        <property name="archiveStrategy" ref="archiveStrategy-77_21" />
+        <property name="cleanupStrategy" ref="cleanupStrategy-77_21" />
         <property name="name" value="storage-77_21" />
         <property name="binlogIndexBaseDir" value="/data/appdatas/puma/binlogIndex/77_21/" />
         <property name="timeStampIndexBaseDir"

@@ -23,6 +23,7 @@ public class SqlBuildUtil {
         _ve.setProperty("class.resource.loader.cache", true);
         _ve.setProperty("class.resource.loader.modificationCheckInterval", "-1");
         _ve.setProperty("input.encoding", "UTF-8");
+        _ve.setProperty("runtime.log", "/tmp/velocity.log");
         _ve.init();
     }
 

@@ -24,7 +24,7 @@
 
     <bean id="notifyService" class="com.dianping.puma.core.monitor.DefaultNotifyService">
         <property name="alarmService" ref="commonAlarmSerivce" />
-        <property name="devMode" value="true" />
+        <property name="devMode" value="${puma.server.notify.devMode}" />
     </bean>
 
     <bean id="notifiableBean" abstract="true">
@@ -43,25 +43,9 @@
         <property name="baseDir" value="/data/appdatas/puma/" />
     </bean>
 
-    <bean id="archiveStrategy" class="com.dianping.puma.storage.DefaultArchiveStrategy">
-        <property name="maxMasterFileCount" value="1" />
-    </bean>
-
-    <bean id="cleanupStrategy" class="com.dianping.puma.storage.DefaultCleanupStrategy">
-        <property name="preservedDay" value="14" />
-    </bean>
-
     <bean id="jsonCodec" class="com.dianping.puma.core.codec.JsonEventCodec" />
 
-    <bean id="servers" class="java.util.ArrayList">
-        <constructor-arg>
-            <list>
-                <ref bean="${puma.mysqlServerName}" />
-            </list>
-        </constructor-arg>
-    </bean>
-
-    <import resource="${puma.mysqlServerName}.xml" />
+    <import resource="serverConfig-${puma.server.env}.xml" />
 
 </beans>
 

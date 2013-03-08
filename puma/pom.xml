@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.dianping.puma</groupId>
     <artifactId>parent</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.1.1</version>
     <packaging>pom</packaging>
     <name>arch-puma</name>
     <modules>
@@ -30,12 +30,12 @@
             <dependency>
                 <groupId>com.dianping.puma</groupId>
                 <artifactId>puma-core</artifactId>
-                <version>0.1.1-SNAPSHOT</version>
+                <version>0.1.1</version>
             </dependency>
             <dependency>
                 <groupId>com.dianping.puma</groupId>
                 <artifactId>puma-client</artifactId>
-                <version>0.1.1-SNAPSHOT</version>
+                <version>0.1.1</version>
             </dependency>
             <dependency>
                 <groupId>com.dianping.hawk</groupId>
@@ -232,12 +232,12 @@
             <dependency>
                 <groupId>com.dianping.swallow</groupId>
                 <artifactId>swallow-producerclient</artifactId>
-                <version>0.6.4</version>
+                <version>0.6.5</version>
             </dependency>
             <dependency>
                 <groupId>com.dianping.swallow</groupId>
                 <artifactId>swallow-consumerclient</artifactId>
-                <version>0.6.4</version>
+                <version>0.6.5</version>
             </dependency>
             <dependency>
                 <groupId>com.dianping.hawk</groupId>
@@ -249,12 +249,6 @@
                 <groupId>com.dianping.dpsf</groupId>
                 <artifactId>dpsf-net</artifactId>
                 <version>1.6.3</version>
-            </dependency>
-            <!-- 文件队列 -->
-            <dependency>
-                <groupId>com.dianping</groupId>
-                <artifactId>file-queue</artifactId>
-                <version>1.1.1</version>
             </dependency>
 
         </dependencies>

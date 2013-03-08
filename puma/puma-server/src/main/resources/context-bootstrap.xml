@@ -53,15 +53,7 @@
 
     <bean id="jsonCodec" class="com.dianping.puma.core.codec.JsonEventCodec" />
 
-    <bean id="servers" class="java.util.ArrayList">
-        <constructor-arg>
-            <list>
-                <ref bean="${puma.mysqlServerName}" />
-            </list>
-        </constructor-arg>
-    </bean>
-
-    <import resource="${puma.mysqlServerName}.xml" />
+    <import resource="serverConfig-${puma.server.env}.xml" />
 
 </beans>
 

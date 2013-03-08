@@ -12,10 +12,10 @@
         <property name="port" value="3306" />
         <property name="user" value="binlog" />
         <property name="password" value="binlog" />
-        <property name="defaultBinlogFileName" value="mysql-bin.001086" />
-        <property name="defaultBinlogPosition" value="1002222242" />
+        <property name="defaultBinlogFileName" value="host_77-21.000422" />
+        <property name="defaultBinlogPosition" value="258286730" />
         <property name="parser" ref="defaultParser-dianping-qa" />
-        <property name="serverId" value="9988" />
+        <property name="serverId" value="8886" />
         <property name="dataHandler" ref="datahandler-dianping-qa" />
         <property name="dispatcher" ref="dispatcher-dianping-qa" />
         <property name="binlogPositionHolder" ref="binlogPositionHolder" />
@@ -40,6 +40,14 @@
         <property name="tableMetasInfoFetcher" ref="tableMetasInfoFetcher-dianping-qa" />
     </bean>
 
+    <bean id="archiveStrategy-dianping-qa" class="com.dianping.puma.storage.DefaultArchiveStrategy">
+        <property name="maxMasterFileCount" value="1" />
+    </bean>
+
+    <bean id="cleanupStrategy-dianping-qa" class="com.dianping.puma.storage.DefaultCleanupStrategy">
+        <property name="preservedDay" value="14" />
+    </bean>
+
     <bean id="tableMetasInfoFetcher-dianping-qa"
         class="com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher">
         <property name="metaDBHost" value="10.1.77.21" />
@@ -59,8 +67,8 @@
         <property name="codec" ref="jsonCodec" />
         <property name="masterBucketIndex" ref="localBucketIndex-dianping-qa" />
         <property name="slaveBucketIndex" ref="hdfsBucketIndex-dianping-qa" />
-        <property name="archiveStrategy" ref="archiveStrategy" />
-        <property name="cleanupStrategy" ref="cleanupStrategy" />
+        <property name="archiveStrategy" ref="archiveStrategy-dianping-qa" />
+        <property name="cleanupStrategy" ref="cleanupStrategy-dianping-qa" />
         <property name="name" value="storage-dianping-qa" />
         <property name="binlogIndexBaseDir"
             value="/data/appdatas/puma/binlogIndex/dianping-qa/" />

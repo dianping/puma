@@ -12,10 +12,10 @@
         <property name="port" value="3306" />
         <property name="user" value="binlog" />
         <property name="password" value="binlog" />
-        <property name="defaultBinlogFileName" value="mysql-bin.001086" />
-        <property name="defaultBinlogPosition" value="1002222242" />
+        <property name="defaultBinlogFileName" value="mysql-bin.000145" />
+        <property name="defaultBinlogPosition" value="267009424" />
         <property name="parser" ref="defaultParser-dianping-alpha" />
-        <property name="serverId" value="9988" />
+        <property name="serverId" value="8888" />
         <property name="dataHandler" ref="datahandler-dianping-alpha" />
         <property name="dispatcher" ref="dispatcher-dianping-alpha" />
         <property name="binlogPositionHolder" ref="binlogPositionHolder" />
@@ -40,6 +40,14 @@
         <property name="tableMetasInfoFetcher" ref="tableMetasInfoFetcher-dianping-alpha" />
     </bean>
 
+    <bean id="archiveStrategy-dianping-alpha" class="com.dianping.puma.storage.DefaultArchiveStrategy">
+        <property name="maxMasterFileCount" value="1" />
+    </bean>
+
+    <bean id="cleanupStrategy-dianping-alpha" class="com.dianping.puma.storage.DefaultCleanupStrategy">
+        <property name="preservedDay" value="14" />
+    </bean>
+
     <bean id="tableMetasInfoFetcher-dianping-alpha"
         class="com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher">
         <property name="metaDBHost" value="192.168.7.106" />
@@ -59,8 +67,8 @@
         <property name="codec" ref="jsonCodec" />
         <property name="masterBucketIndex" ref="localBucketIndex-dianping-alpha" />
         <property name="slaveBucketIndex" ref="hdfsBucketIndex-dianping-alpha" />
-        <property name="archiveStrategy" ref="archiveStrategy" />
-        <property name="cleanupStrategy" ref="cleanupStrategy" />
+        <property name="archiveStrategy" ref="archiveStrategy-dianping-alpha" />
+        <property name="cleanupStrategy" ref="cleanupStrategy-dianping-alpha" />
         <property name="name" value="storage-dianping-alpha" />
         <property name="binlogIndexBaseDir"
             value="/data/appdatas/puma/binlogIndex/dianping-alpha/" />

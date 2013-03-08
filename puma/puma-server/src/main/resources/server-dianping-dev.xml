@@ -12,10 +12,10 @@
         <property name="port" value="3306" />
         <property name="user" value="binlog" />
         <property name="password" value="binlog" />
-        <property name="defaultBinlogFileName" value="mysql-bin.001086" />
-        <property name="defaultBinlogPosition" value="1002222242" />
+        <property name="defaultBinlogFileName" value="mysql-bin.000014" />
+        <property name="defaultBinlogPosition" value="397550508" />
         <property name="parser" ref="defaultParser-dianping-dev" />
-        <property name="serverId" value="9988" />
+        <property name="serverId" value="8887" />
         <property name="dataHandler" ref="datahandler-dianping-dev" />
         <property name="dispatcher" ref="dispatcher-dianping-dev" />
         <property name="binlogPositionHolder" ref="binlogPositionHolder" />
@@ -40,6 +40,14 @@
         <property name="tableMetasInfoFetcher" ref="tableMetasInfoFetcher-dianping-dev" />
     </bean>
 
+    <bean id="archiveStrategy-dianping-dev" class="com.dianping.puma.storage.DefaultArchiveStrategy">
+        <property name="maxMasterFileCount" value="1" />
+    </bean>
+
+    <bean id="cleanupStrategy-dianping-dev" class="com.dianping.puma.storage.DefaultCleanupStrategy">
+        <property name="preservedDay" value="14" />
+    </bean>
+
     <bean id="tableMetasInfoFetcher-dianping-dev"
         class="com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher">
         <property name="metaDBHost" value="192.168.8.41" />
@@ -59,8 +67,8 @@
         <property name="codec" ref="jsonCodec" />
         <property name="masterBucketIndex" ref="localBucketIndex-dianping-dev" />
         <property name="slaveBucketIndex" ref="hdfsBucketIndex-dianping-dev" />
-        <property name="archiveStrategy" ref="archiveStrategy" />
-        <property name="cleanupStrategy" ref="cleanupStrategy" />
+        <property name="archiveStrategy" ref="archiveStrategy-dianping-dev" />
+        <property name="cleanupStrategy" ref="cleanupStrategy-dianping-dev" />
         <property name="name" value="storage-dianping-dev" />
         <property name="binlogIndexBaseDir"
             value="/data/appdatas/puma/binlogIndex/dianping-dev/" />
@@ -69,16 +77,18 @@
     </bean>
 
     <bean id="localBucketIndex-dianping-dev" class="com.dianping.puma.storage.LocalFileBucketIndex"
-    init-method="start">
+        init-method="start">
         <property name="bucketFilePrefix" value="bucket-" />
         <property name="maxBucketLengthMB" value="1000" />
-        <property name="baseDir" value="/data/appdatas/puma/storage/dianping-dev/" />
+        <property name="baseDir"
+            value="/data/appdatas/puma/storage/dianping-dev/" />
     </bean>
     <bean id="hdfsBucketIndex-dianping-dev" class="com.dianping.puma.storage.HDFSBucketIndex"
         init-method="start">
         <property name="bucketFilePrefix" value="bucket-" />
         <property name="maxBucketLengthMB" value="1000" />
-        <property name="baseDir" value="/user/workcron/puma/storage/dianping-dev/" />
+        <property name="baseDir"
+            value="/user/workcron/puma/storage/dianping-dev/" />
         <property name="hdfsConfigStr" value="${puma.hdfs.config}" />
     </bean>
 </beans>

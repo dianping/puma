@@ -10,12 +10,12 @@
         <constructor-arg>
             <list>
                 <ref bean="server-7_43" />
-                <ref bean="server-77_21" />
+                <!-- <ref bean="server-77_21" />  -->
             </list>
         </constructor-arg>
     </bean>
 
     <import resource="server-7_43.xml" />
-    <import resource="server-77_21.xml" />
+    <!-- <import resource="server-77_21.xml" />  -->
 
 </beans>

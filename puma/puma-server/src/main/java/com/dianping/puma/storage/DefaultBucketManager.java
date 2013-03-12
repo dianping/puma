@@ -143,10 +143,13 @@ public class DefaultBucketManager implements BucketManager {
 
 					try {
 						archiveStrategy.archive(masterIndex, slaveIndex);
-						Thread.sleep(5 * 1000);
 					} catch (Exception e) {
 						log.error("Archive Job failed.", e);
 					}
+					try {
+                        Thread.sleep(5 * 1000);
+                    } catch (InterruptedException e) {
+                    }
 
 				}
 			}
@@ -171,10 +174,13 @@ public class DefaultBucketManager implements BucketManager {
 
 					try {
 						cleanupStrategy.cleanup(slaveIndex);
-						Thread.sleep(5 * 1000);
 					} catch (Exception e) {
 						log.error("Cleanup Job failed.", e);
 					}
+					try {
+                        Thread.sleep(5 * 1000);
+                    } catch (InterruptedException e) {
+                    }
 
 				}
 			}

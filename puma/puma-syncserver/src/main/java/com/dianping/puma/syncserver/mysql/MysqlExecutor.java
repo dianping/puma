@@ -82,7 +82,19 @@ public class MysqlExecutor {
         if (conn != null) {
             conn.commit();
             try {
-                conn.close();
+                conn.close();//释放连接到连接池
+            } catch (Exception e) {
+                //ignore
+            }
+            conn = null;
+        }
+    }
+
+    public void rollback() throws SQLException {
+        if (conn != null) {
+            conn.rollback();
+            try {
+                conn.close();//释放连接到连接池
             } catch (Exception e) {
                 //ignore
             }

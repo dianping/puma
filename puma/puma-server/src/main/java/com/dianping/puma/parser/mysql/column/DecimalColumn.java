@@ -58,9 +58,6 @@ public final class DecimalColumn implements Column {
 	}
 
 	public static final DecimalColumn valueOf(BigDecimal value, int precision, int scale) {
-	    if(value == null){
-            throw new NullPointerException("value should not be null !");
-        }
 		if (precision < scale) {
 			throw new IllegalArgumentException("invalid precision: " + precision + ", scale: " + scale);
 		}

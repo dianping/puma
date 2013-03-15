@@ -48,9 +48,6 @@ public final class DateColumn implements Column {
 	}
 
 	public static final DateColumn valueOf(Date value) {
-	    if(value == null){
-            throw new NullPointerException("value should not be null !");
-        }
 		return new DateColumn(value);
 	}
 }

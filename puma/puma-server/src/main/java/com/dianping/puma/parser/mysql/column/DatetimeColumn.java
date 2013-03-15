@@ -48,6 +48,9 @@ public final class DatetimeColumn implements Column {
 	}
 
 	public static final DatetimeColumn valueOf(String value) {
+	    if(value == null){
+            throw new NullPointerException("value should not be null !");
+        }
 		return new DatetimeColumn(value);
 	}
 }

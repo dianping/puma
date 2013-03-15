@@ -70,6 +70,9 @@ public final class BitColumn implements Column {
 	}
 
 	public static final BitColumn valueOf(int length, byte[] value) {
+	    if(value == null){
+            throw new NullPointerException("value should not be null !");
+        }
 		if (length < 0 || length > (value.length << 3)) {
 			throw new IllegalArgumentException("invalid length: " + length);
 		}
@@ -77,6 +80,9 @@ public final class BitColumn implements Column {
 	}
 
 	public static final BitColumn valueOf(int length, BitSet value) {
+	    if(value == null){
+            throw new NullPointerException("value should not be null !");
+        }
 		return valueOf(length, CodecUtils.toByteArray(value));
 	}
 }

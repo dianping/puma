@@ -48,6 +48,9 @@ public final class TimeColumn implements Column {
 	}
 
 	public static final TimeColumn valueOf(Time value) {
+	    if(value == null){
+            throw new NullPointerException("value should not be null !");
+        }
 		return new TimeColumn(value);
 	}
 }

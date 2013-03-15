@@ -93,7 +93,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
         }
-        this.pumaClient.stop();
+        if (this.pumaClient != null) {
+            this.pumaClient.stop();
+        }
         this.status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
         this.status.setDetail(detail);
         LOG.info("TaskExecutor[" + this.toString() + "] paused...");
@@ -108,7 +110,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
         }
-        this.pumaClient.stop();
+        if (this.pumaClient != null) {
+            this.pumaClient.stop();
+        }
         this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
         this.status.setDetail(detail);
         LOG.info("TaskExecutor[" + this.toString() + "] disconnected...");
@@ -123,7 +127,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
         }
-        this.pumaClient.stop();
+        if (this.pumaClient != null) {
+            this.pumaClient.stop();
+        }
         this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
         this.status.setDetail(null);
         LOG.info("TaskExecutor[" + this.toString() + "] succeeded...");
@@ -138,7 +144,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
         }
-        this.pumaClient.stop();
+        if (this.pumaClient != null) {
+            this.pumaClient.stop();
+        }
         this.status.setStatus(TaskExecutorStatus.Status.FAILED);
         this.status.setDetail(detail);
         LOG.info("TaskExecutor[" + this.toString() + "] failed...");
@@ -147,6 +155,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     @Override
     public void start() {
         //读取binlog位置，创建PumaClient，设置PumaCleint的config，再启动
+        if (this.pumaClient != null) {
+            this.pumaClient.stop();
+        }
         pumaClient = createPumaClient(abstractTask.getBinlogInfo());
         pumaClient.start();
         this.status.setDetail(null);

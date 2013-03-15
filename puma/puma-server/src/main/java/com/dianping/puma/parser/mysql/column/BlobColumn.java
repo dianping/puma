@@ -48,6 +48,9 @@ public final class BlobColumn implements Column {
 	}
 
 	public static final BlobColumn valueOf(byte[] value) {
+	    if(value == null){
+            throw new NullPointerException("value should not be null !");
+        }
 		return new BlobColumn(value);
 	}
 }

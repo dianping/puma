@@ -46,6 +46,9 @@ public final class StringColumn implements Column {
 	}
 
 	public static final StringColumn valueOf(byte[] value) {
+	    if(value == null){
+	        throw new NullPointerException("value should not be null !");
+	    }
 		return new StringColumn(value);
 	}
 }

@@ -134,6 +134,7 @@ public class DefaultBucketManager implements BucketManager {
 		Thread archiveThread = PumaThreadUtils.createThread(new Runnable() {
 			@Override
 			public void run() {
+			    int failedCount = 0;
 				while (true) {
 					try {
 						checkClosed();
@@ -143,11 +144,13 @@ public class DefaultBucketManager implements BucketManager {
 
 					try {
 						archiveStrategy.archive(masterIndex, slaveIndex);
+						failedCount = 0;
 					} catch (Exception e) {
 						log.error("Archive Job failed.", e);
+					    failedCount = (++failedCount) % 10;
 					}
 					try {
-                        Thread.sleep(5 * 1000);
+                        Thread.sleep((failedCount + 1) * 5000);
                     } catch (InterruptedException e) {
                     }
 
@@ -165,6 +168,7 @@ public class DefaultBucketManager implements BucketManager {
 		Thread archiveThread = PumaThreadUtils.createThread(new Runnable() {
 			@Override
 			public void run() {
+			    int failedCount = 0;
 				while (true) {
 					try {
 						checkClosed();
@@ -174,11 +178,13 @@ public class DefaultBucketManager implements BucketManager {
 
 					try {
 						cleanupStrategy.cleanup(slaveIndex);
+					    failedCount = 0;
 					} catch (Exception e) {
 						log.error("Cleanup Job failed.", e);
+					    failedCount = (++failedCount) % 10;
 					}
 					try {
-                        Thread.sleep(5 * 1000);
+                        Thread.sleep((failedCount + 1) * 5000);
                     } catch (InterruptedException e) {
                     }
 

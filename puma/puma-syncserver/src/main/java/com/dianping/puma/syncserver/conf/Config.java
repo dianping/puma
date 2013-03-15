@@ -54,9 +54,11 @@ public class Config implements InitializingBean {
         LOG.info("Properties: " + this.toString());
         //复制mysqlload.sh到shell目录
         InputStream ins = DumpTaskExecutor.class.getClassLoader().getResourceAsStream(SHELL_PATH);
-        File mysqlLoadShell = new File(tempDir + "/" + SHELL_PATH);
-        FileUtils.touch(new File(tempDir + "/" + SHELL_PATH));
+        String shellFilePath = tempDir + "/" + SHELL_PATH;
+        File mysqlLoadShell = new File(shellFilePath);
+        FileUtils.touch(mysqlLoadShell);
         IOUtils.copy(ins, new FileOutputStream(mysqlLoadShell));
+        LOG.info("created shell : " + shellFilePath);
     }
 
     public String getLocalPort() {

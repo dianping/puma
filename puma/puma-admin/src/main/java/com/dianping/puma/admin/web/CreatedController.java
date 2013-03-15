@@ -66,6 +66,10 @@ public class CreatedController {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             TaskExecutorStatus syncStatus = systemStatusContainer.getStatus(Type.SYNC, taskId);
+            //从数据库查询binlog位置即可，不需要从SyncServer实时发过来的status中的binlog获取
+            SyncTask syncTask = this.syncTaskService.find(taskId);
+            syncStatus.setBinlogInfo(syncTask.getBinlogInfo());
+
             map.put("status", syncStatus);
             map.put("success", true);
         } catch (IllegalArgumentException e) {
@@ -80,7 +84,7 @@ public class CreatedController {
     }
 
     /**
-     * 查询SyncTask状态
+     * 查询SyncTask
      */
     @RequestMapping(value = "/created/task/{id}", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
     public ModelAndView task(HttpSession session, @PathVariable("id") Long taskId) {

@@ -211,22 +211,26 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         for (String opt : dumpTask.getOptions()) {
             cmdlist.add(opt);
         }
-        String outputFile = _getDumpFile(databaseName);
-        cmdlist.add("--result-file=" + outputFile);
+        String outputFileName = _getDumpFile(databaseName);
+        cmdlist.add("--result-file=" + outputFileName);
         cmdlist.add(databaseName);
         for (String tableName : tableNames) {
             cmdlist.add(tableName);
         }
         LOG.info("start dumping " + databaseName + " ...");
         //启动线程监控outputFile的大小
-        timer.schedule(new FileSizeMonitor(new File(outputFile)), 0, 5000);
+        File outputFile = new File(outputFileName);
+        timer.schedule(new FileSizeMonitor(outputFile), 0, 5000);
         String output = _executeByProcessBuilder(cmdlist);
         timer.cancel();
+        //取消后，再监控一次文件大小
+        monitorFileSize(outputFile);
         return output;
     }
 
     private String _mysqlload(String databaseName) throws ExecuteException, IOException, InterruptedException {
         List<String> cmdlist = new ArrayList<String>();
+        cmdlist.add("sh");
         cmdlist.add(Config.getInstance().getTempDir() + "/shell/mysqlload.sh");
         cmdlist.add("--user=" + dumpTask.getDestMysqlHost().getUsername());
         String hostWithPort = dumpTask.getDestMysqlHost().getHost();
@@ -314,6 +318,19 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         throw new UnsupportedOperationException("DumpTaskExecutor not support stop() method!");
     }
 
+    private void monitorFileSize(File file) {
+        String msg;
+        if (file.exists()) {
+            long bytes = FileUtils.sizeOf(file);
+            double mbytes = bytes / 1000000.0;
+            msg = "dump file's size is " + mbytes + "M";
+        } else {
+            msg = "dump file is not exists yet.";
+        }
+        status.setDetail(msg);
+        LOG.info(msg);
+    }
+
     private class FileSizeMonitor extends TimerTask {
         private File file;
 
@@ -324,16 +341,7 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
 
         @Override
         public void run() {
-            String msg;
-            if(file.exists()){
-                long bytes = FileUtils.sizeOf(file);
-                double mbytes = bytes / 1000000.0;
-                msg = "dump file's size is " + mbytes + "M";
-            }else{
-                msg = "dump file is not exists yet.";
-            }
-            status.setDetail(msg);
-            LOG.info(msg);
+            monitorFileSize(file);
         }
 
     }

@@ -117,7 +117,7 @@
 					var text = status.status;
 					if (text == "WAITING" || text == "PREPARING"
 							|| text == "DUMPING" || text == "LOADING") {
-					    text = "<span style='color:yellow'>" + text + "</span>";
+						text = "<span style='color:blue'>" + text + "</span>";
 					} else if (text == "RUNNING" || text == "SUSPPENDED"
 							|| text == "SUCCEED") {
 						text = "<span style='color:green'>" + text + "</span>";
@@ -131,6 +131,13 @@
 				} else {
 					$("td[statusOfId='" + id + "']").html(
 							"<span style='color:red'>无状态(可能不在运行)</span>");
+					$("td[binlogOfId='" + id + "']").text("--");
+				}
+				if (status && status.binlogInfo) {
+					$("td[binlogOfId='" + id + "']").text(
+							status.binlogInfo.binlogFile + " "
+									+ status.binlogInfo.binlogPosition);
+				} else {
 					$("td[binlogOfId='" + id + "']").text("--");
 				}
 			}

@@ -10,12 +10,12 @@
         <constructor-arg>
             <list>
                 <ref bean="server-7_43" />
-                <ref bean="server-dianping-dev" />
+                <!-- <ref bean="server-dianping-dev" />  -->
             </list>
         </constructor-arg>
     </bean>
 
     <import resource="server-7_43.xml" />
-    <import resource="server-dianping-dev.xml" />
+    <!-- <import resource="server-dianping-dev.xml" />  -->
 
 </beans>

@@ -15,7 +15,6 @@
  */
 package com.dianping.puma.parser.mysql.column;
 
-import java.util.Date;
 
 /**
  * 

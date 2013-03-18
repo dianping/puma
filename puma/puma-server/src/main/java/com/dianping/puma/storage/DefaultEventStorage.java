@@ -153,7 +153,7 @@ public class DefaultEventStorage implements EventStorage {
         String nowDate = sdf.format(new Date());
 
         if (processingServerId.get() == null) {
-            processingServerId.set(event.getServerId());
+            processingServerId.set(event.getBinlogServerId());
         }
 
         if (lastDate.get() == null) {
@@ -169,10 +169,10 @@ public class DefaultEventStorage implements EventStorage {
                 writingBucket.stop();
                 writingBucket = bucketManager.getNextWriteBucket();
                 newL1Index = true;
-            } else if (!processingServerId.get().equals(event.getServerId())) {
+            } else if (!processingServerId.get().equals(event.getBinlogServerId())) {
                 writingBucket.stop();
                 writingBucket = bucketManager.getNextWriteBucket();
-                processingServerId.set(event.getServerId());
+                processingServerId.set(event.getBinlogServerId());
                 newL1Index = true;
             } else {
                 if (!lastDate.get().equals(nowDate)) {
@@ -201,7 +201,7 @@ public class DefaultEventStorage implements EventStorage {
 
     private void updateIndex(ChangedEvent event, boolean newL1Index, long newSeq) throws IOException {
         TimeStampIndexKey timestampKey = new TimeStampIndexKey(event.getExecuteTime());
-        BinlogIndexKey binlogKey = new BinlogIndexKey(event.getBinlog(), event.getBinlogPos(), event.getServerId());
+        BinlogIndexKey binlogKey = new BinlogIndexKey(event.getBinlog(), event.getBinlogPos(), event.getBinlogServerId());
 
         if (newL1Index) {
             timeStampIndex.addL1Index(timestampKey, writingBucket.getBucketFileName().replace('/', '-'));

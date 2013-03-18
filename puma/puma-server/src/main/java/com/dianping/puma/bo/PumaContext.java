@@ -46,6 +46,7 @@ public class PumaContext implements Serializable {
 	private Map<Long, TableMapEvent>	tableMaps				= new LRUCache<Long, TableMapEvent>(300);
 	private String						masterUrl;
 	private long						nextBinlogPos;
+    private long dbServerId;
 
 	/**
 	 * @return the nextBinlogPos
@@ -258,4 +259,11 @@ public class PumaContext implements Serializable {
 		this.serverStatus = serverStatus;
 	}
 
+    public void setDBServerId(long dbServerId) {
+        this.dbServerId = dbServerId;
+    }
+
+    public long getDBServerId(){
+        return this.dbServerId;
+    }
 }

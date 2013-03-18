@@ -53,6 +53,7 @@ public class ReplicationBasedServer extends AbstractServer {
     private int                 port     = 3306;
     private String              host;
     private String              user;
+    private long                dbServerId;
     private String              password;
     private String              database;
 
@@ -73,6 +74,7 @@ public class ReplicationBasedServer extends AbstractServer {
 
                 getContext().setBinlogFileName(posInfo.getBinlogFileName());
                 getContext().setBinlogStartPos(posInfo.getBinlogPosition());
+                getContext().setDBServerId(dbServerId);
                 getContext().setMasterUrl(host, port);
 
                 SystemStatusContainer.instance.updateServerStatus(getServerName(), host, port, database, getContext()
@@ -386,6 +388,20 @@ public class ReplicationBasedServer extends AbstractServer {
      */
     public void setDatabase(String database) {
         this.database = database;
+    }
+
+    /**
+     * @return the dbServerId
+     */
+    public long getDbServerId() {
+        return dbServerId;
+    }
+
+    /**
+     * @param dbServerId the dbServerId to set
+     */
+    public void setDbServerId(long dbServerId) {
+        this.dbServerId = dbServerId;
     }
 
 }

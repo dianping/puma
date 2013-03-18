@@ -63,11 +63,11 @@ public class PumaClient {
 
     private boolean checkStop() {
         if (!active) {
-            log.info("Puma client[" + config.getName() + "] stopped.");
+            log.info("Puma client[" + config.getName() + "] checked active is false.");
             return true;
         }
         if (Thread.currentThread().isInterrupted()) {
-            log.info("Puma client[" + config.getName() + "] stopped since interrupted.");
+            log.info("Puma client[" + config.getName() + "] checked thread is interrupted.");
             return true;
         }
 
@@ -126,6 +126,7 @@ public class PumaClient {
                 InputStream is = null;
 
                 if (checkStop()) {
+                    log.info("Puma client[" + config.getName() + "] stopped.");
                     break;
                 }
 

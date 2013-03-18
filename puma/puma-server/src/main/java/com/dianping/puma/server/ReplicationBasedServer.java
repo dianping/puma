@@ -53,6 +53,7 @@ public class ReplicationBasedServer extends AbstractServer {
     private int                 port     = 3306;
     private String              host;
     private String              user;
+    private long                dbServerId;
     private String              password;
     private String              database;
 
@@ -73,6 +74,7 @@ public class ReplicationBasedServer extends AbstractServer {
 
                 getContext().setBinlogFileName(posInfo.getBinlogFileName());
                 getContext().setBinlogStartPos(posInfo.getBinlogPosition());
+                getContext().setDBServerId(dbServerId);
                 getContext().setMasterUrl(host, port);
 
                 SystemStatusContainer.instance.updateServerStatus(getServerName(), host, port, database, getContext()
@@ -82,7 +84,7 @@ public class ReplicationBasedServer extends AbstractServer {
 
                 if (auth()) {
                     log.info("Server logined... serverId: " + getServerId() + " host: " + host + " port: " + port
-                            + " user: " + user + " database: " + database);
+                            + " user: " + user + " database: " + database + " dbServerId: " + getDbServerId());
 
                     if (dumpBinlog()) {
                         log.info("Dump binlog command success.");
@@ -102,7 +104,7 @@ public class ReplicationBasedServer extends AbstractServer {
                             + host + ":" + port + "] for 3 times.", e, true);
                     failCount = 0;
                 }
-                log.error("Exception occurs. serverId: " + getServerId() + ". Reconnect...", e);
+                log.error("Exception occurs. serverId: " + getServerId() + " dbServerId: " + getDbServerId() + ". Reconnect...", e);
                 Thread.sleep(((failCount % 10) + 1) * 2000);
             }
         } while (!isStop());
@@ -386,6 +388,20 @@ public class ReplicationBasedServer extends AbstractServer {
      */
     public void setDatabase(String database) {
         this.database = database;
+    }
+
+    /**
+     * @return the dbServerId
+     */
+    public long getDbServerId() {
+        return dbServerId;
+    }
+
+    /**
+     * @param dbServerId the dbServerId to set
+     */
+    public void setDbServerId(long dbServerId) {
+        this.dbServerId = dbServerId;
     }
 
 }

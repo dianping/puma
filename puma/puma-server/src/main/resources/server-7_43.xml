@@ -19,6 +19,7 @@
         <property name="dataHandler" ref="datahandler-7_43" />
         <property name="dispatcher" ref="dispatcher-7_43" />
         <property name="binlogPositionHolder" ref="binlogPositionHolder" />
+        <property name="dbServerId" value="1"/>
     </bean>
 
     <bean id="dispatcher-7_43"

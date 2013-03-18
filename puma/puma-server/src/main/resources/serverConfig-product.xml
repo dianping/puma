@@ -9,7 +9,6 @@
     <bean id="servers" class="java.util.ArrayList">
         <constructor-arg>
             <list>
-                <ref bean="server-dianping-dev" />
                 <ref bean="server-dianping-alpha" />
                 <ref bean="server-dianping-qa" />
                 <ref bean="server-dianping" />
@@ -17,7 +16,6 @@
         </constructor-arg>
     </bean>
 
-    <import resource="server-dianping-dev.xml" />
     <import resource="server-dianping-alpha.xml" />
     <import resource="server-dianping-qa.xml" />
     <import resource="server-dianping.xml" />

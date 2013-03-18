@@ -19,6 +19,7 @@
         <property name="dataHandler" ref="datahandler-dianping-dev" />
         <property name="dispatcher" ref="dispatcher-dianping-dev" />
         <property name="binlogPositionHolder" ref="binlogPositionHolder" />
+        <property name="dbServerId" value="3083306041"/>
     </bean>
 
     <bean id="dispatcher-dianping-dev"

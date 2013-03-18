@@ -63,11 +63,11 @@ public class PumaClient {
 
     private boolean checkStop() {
         if (!active) {
-            log.info("Puma client stopped.");
+            log.info("Puma client[" + config.getName() + "] stopped.");
             return true;
         }
         if (Thread.currentThread().isInterrupted()) {
-            log.info("Puma client stopped since interrupted.");
+            log.info("Puma client[" + config.getName() + "] stopped since interrupted.");
             return true;
         }
 
@@ -99,7 +99,7 @@ public class PumaClient {
             return connection.getInputStream();
 
         } catch (Exception ex) {
-            log.error("Connect to puma server failed. " + config, ex);
+            log.error("Puma client[" + config.getName() + "] Connect to puma server failed. " + config, ex);
             eventListener.onConnectException(ex);
         }
 
@@ -136,7 +136,7 @@ public class PumaClient {
                     // reconnect case
                     if (is == null) {
                         Thread.sleep(100);
-                        log.info("Puma client reconnecting...");
+                        log.info("Puma client[" + config.getName() + "] reconnecting...");
                         continue;
                     }
 
@@ -161,10 +161,10 @@ public class PumaClient {
                                 listenerCallSuccess = true;
                                 break;
                             } catch (Exception e) {
-                                log.warn("Exception occurs in eventListerner. Event: " + event, e);
+                                log.warn("Puma client[" + config.getName() + "] Exception occurs in eventListerner. Event: " + event, e);
 
                                 if (eventListener.onException(event, e)) {
-                                    log.warn("Event(" + event + ") skipped. ");
+                                    log.warn("Puma client[" + config.getName() + "] Event(" + event + ") skipped. ");
                                     eventListener.onSkipEvent(event);
                                     listenerCallSuccess = true;
                                     break;
@@ -185,8 +185,8 @@ public class PumaClient {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 } catch (Exception e) {
-                    log.warn("Connection problem occurs." + e);
-                    log.warn("Puma client reconnecting...");
+                    log.warn("Puma client[" + config.getName() + "] Connection problem occurs." + e);
+                    log.warn("Puma client[" + config.getName() + "] reconnecting...");
                     eventListener.onConnectException(e);
                 } finally {
                     if (is != null) {

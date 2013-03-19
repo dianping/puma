@@ -16,12 +16,12 @@
          </button>
          <p class="legend">填写同步的配置</p>
          <div style="height: 700px">
-            <span>选择源数据库: </span> <select name="srcMysql"
+            <span>选择源实例: </span> <select name="srcMysql"
                style="margin-left: 16px; margin-right: 16px;">
                #foreach($mysqlConfig in ${mysqlConfigs})
                <option value="${mysqlConfig.name}">${mysqlConfig.name}</option>
                #end
-            </select> <span>选择目标数据库: </span> <select name="destMysql"
+            </select> <span>选择目标实例: </span> <select name="destMysql"
                style="margin-left: 16px;">
                #foreach($mysqlConfig in ${mysqlConfigs})
                <option value="${mysqlConfig.name}">${mysqlConfig.name}</option>
@@ -38,12 +38,12 @@
                      href="javascript:;" onclick="addTableDiv(this);"><i
                      class="icon-plus"></i>新增表同步</a>
                   <div style="font-weight: bold;" class="control-group">
-                     <label class="control-label">实例名称</label>
+                     <label class="control-label">数据库名称</label>
                      <div class="controls">
-                        <input type="text" placeholder="源实例名称"
+                        <input type="text" placeholder="源数据库名"
                            name="databaseFrom" value="">&nbsp;&nbsp;<i
                            class="icon-arrow-right"></i>&nbsp;&nbsp;<input
-                           placeholder="目标实例名称" type="text"
+                           placeholder="目标数据库名" type="text"
                            name="databaseTo" value="">
                      </div>
                   </div>
@@ -82,7 +82,7 @@
             href="javascript:;" onclick="addTableDiv(this);"><i
             class="icon-plus"></i>新增表同步</a>
          <div style="font-weight: bold;" class="control-group">
-            <label class="control-label">实例名称</label>
+            <label class="control-label">数据库名称</label>
             <div class="controls">
                <input type="text" placeholder="源实例名称" name="name">&nbsp;&nbsp;<i
                   class="icon-arrow-right"></i>&nbsp;&nbsp;<input

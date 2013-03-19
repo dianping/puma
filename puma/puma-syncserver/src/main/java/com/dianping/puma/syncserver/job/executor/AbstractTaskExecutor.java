@@ -257,6 +257,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
             public void onConnectException(Exception e) {
                 status.setStatus(TaskExecutorStatus.Status.RECONNECTING);
                 status.setDetail("PumaClient connected failed, reconnecting...");
+                LOG.info("PumaClient connected failed, reconnecting...");
                 defaultPullStrategy.fail(true);
             }
 
@@ -264,6 +265,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
             public void onConnected() {
                 status.setStatus(TaskExecutorStatus.Status.RUNNING);
                 status.setDetail("PumaClient connected.");
+                LOG.info("PumaClient connected.");
             }
         });
 

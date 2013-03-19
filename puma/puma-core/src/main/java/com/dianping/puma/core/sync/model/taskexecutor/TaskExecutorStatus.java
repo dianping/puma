@@ -16,8 +16,10 @@ public class TaskExecutorStatus {
     private Type type;
 
     private Status status;
-
+    /** 类似Sql Thread的 binlog位置 */
     private BinlogInfo binlogInfo;
+    /** 类似IO Thread的 binlog位置 */
+    private BinlogInfo binlogInfoOfIOThread;
     //  详细detail信息
     private String detail;
 
@@ -69,6 +71,14 @@ public class TaskExecutorStatus {
 
     public void setGmtCreate(Date gmtCreate) {
         this.gmtCreate = gmtCreate;
+    }
+
+    public BinlogInfo getBinlogInfoOfIOThread() {
+        return binlogInfoOfIOThread;
+    }
+
+    public void setBinlogInfoOfIOThread(BinlogInfo binlogInfoOfIOThread) {
+        this.binlogInfoOfIOThread = binlogInfoOfIOThread;
     }
 
     @Override

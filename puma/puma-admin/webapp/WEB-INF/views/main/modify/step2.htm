@@ -26,8 +26,9 @@
                      onsubmit="createDumpTask(this);return false;"
                      action="${rc.contextPath}/modify/createDumpTask">
                      <label style="">DumpTask状态(<a
-                        href="javascript:refreshDumpStatus();">刷新状态</a>&nbsp;&nbsp;自动每隔5秒刷新<input
-                        type="checkbox" id="autoRefresh"> )：<span
+                        href="javascript:refreshDumpStatus();">刷新状态</a>&nbsp;&nbsp;自动每隔3秒刷新<input
+                        type="checkbox" checked="checked"
+                        id="autoRefresh"> )：<span
                         style="font-size: 12px; color: red"
                         id="dumpStatus"> </span>
                      </label> <br> binlog文件：<input class="input-mini"
@@ -162,9 +163,9 @@
 				$("#dumpStepButton").addClass("btn-success");
 				$("#dumpStepButton").text("下一步");
 			}
-			//如果设置自动刷新，则5秒后再次调用
-			if ($('#autoRefresh').attr("checked") == true) {
-				setTimeout(refreshDumpStatus, 5000);
+			//如果设置自动刷新，则3秒后再次调用
+			if ($('#autoRefresh').is(':checked')) {
+				setTimeout(refreshDumpStatus, 3000);
 			}
 		}
 	}

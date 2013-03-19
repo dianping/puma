@@ -346,9 +346,9 @@ public class ModifyController {
             if (catchupTask == null) {
                 throw new IllegalArgumentException("CatchupTask为空，可能是会话已经过期！");
             }
-            //重新查询
-            catchupTask = this.catchupTaskService.find(catchupTask.getId());
-            map.put("catchupTask", catchupTask);
+            //            重新查询
+            //            catchupTask = this.catchupTaskService.find(catchupTask.getId());
+            //            map.put("catchupTask", catchupTask);
 
             TaskExecutorStatus status = systemStatusContainer.getStatus(Type.CATCHUP, catchupTask.getId());
             if (status != null) {

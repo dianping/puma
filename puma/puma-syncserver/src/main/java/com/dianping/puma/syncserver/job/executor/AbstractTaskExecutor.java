@@ -64,7 +64,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
      */
     protected abstract void execute(ChangedEvent event) throws Exception;
 
-    protected void binlogChanged(ChangedEvent event) {
+    /**
+     * 更新sql thread的binlog信息，和保存binlog信息到数据库
+     */
+    protected void binlogOfSqlThreadChanged(ChangedEvent event) {
         //动态更新binlog和binlogPos
         if (event != null) {
             BinlogInfo binlogInfo = new BinlogInfo();
@@ -72,6 +75,18 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
             binlogInfo.setBinlogPosition(event.getBinlogPos());
             status.setBinlogInfo(binlogInfo);
             abstractTask.setBinlogInfo(binlogInfo);
+            //保存binlog信息到数据库
+            saveBinlogToDB(event);
+        }
+    }
+
+    protected void binlogOfIOThreadChanged(ChangedEvent event) {
+        //动态更新binlog和binlogPos
+        if (event != null) {
+            BinlogInfo binlogInfo = new BinlogInfo();
+            binlogInfo.setBinlogFile(event.getBinlog());
+            binlogInfo.setBinlogPosition(event.getBinlogPos());
+            status.setBinlogInfoOfIOThread(binlogInfo);
         }
     }
 
@@ -98,7 +113,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         }
         this.status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
         this.status.setDetail(detail);
-        LOG.info("TaskExecutor[" + this.toString() + "] paused...");
+        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] paused... cause:" + detail);
     }
 
     @Override
@@ -115,7 +130,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         }
         this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
         this.status.setDetail(detail);
-        LOG.info("TaskExecutor[" + this.toString() + "] disconnected...");
+        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] disconnected... cause:" + detail);
     }
 
     @Override
@@ -132,7 +147,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         }
         this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
         this.status.setDetail(null);
-        LOG.info("TaskExecutor[" + this.toString() + "] succeeded...");
+        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] succeeded...");
     }
 
     @Override
@@ -149,7 +164,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         }
         this.status.setStatus(TaskExecutorStatus.Status.FAILED);
         this.status.setDetail(detail);
-        LOG.info("TaskExecutor[" + this.toString() + "] failed...");
+        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] failed... cause:" + detail);
     }
 
     @Override
@@ -162,7 +177,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         pumaClient.start();
         this.status.setDetail(null);
         this.status.setStatus(TaskExecutorStatus.Status.RUNNING);
-        LOG.info("TaskExecutor[" + this.toString() + "] started...");
+        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] started...");
     }
 
     @Override
@@ -197,6 +212,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
             private DefaultPullStrategy defaultPullStrategy = new DefaultPullStrategy(500, 10000);
 
+            private int commitBinlogCount = 0;
+
             @Override
             public void onSkipEvent(ChangedEvent event) {
                 if (LOG.isDebugEnabled()) {
@@ -221,20 +238,20 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
                             if (((RowChangedEvent) event).isTransactionBegin()) {
                             } else if (((RowChangedEvent) event).isTransactionCommit()) {
                                 if (dataChange) {
-                                    //提交事务
+                                    //提交事务(datachange了，则该commit肯定是属于当前做了数据操作的事务的，故mysqlExecutor.commit();)
                                     mysqlExecutor.commit();
                                     dataChange = false;
-                                    //遇到commit事件，才保存binlog信息到数据库
-                                    BinlogInfo binlogInfo = new BinlogInfo();
-                                    binlogInfo.setSkipToNextPos(true);
-                                    binlogInfo.setBinlogFile(event.getBinlog());
-                                    binlogInfo.setBinlogPosition(event.getBinlogPos());
-                                    SystemStatusContainer.instance.recordBinlog(abstractTask.getType(), abstractTask.getId(),
-                                            binlogInfo);
-                                    //遇到commit事件，才更新binlog和binlogPos
-                                    binlogChanged(event);
-
+                                    //遇到commit事件，操作数据库了，更新sql thread 的 binlog和binlogPos和保存binlog信息到数据库
+                                    binlogOfSqlThreadChanged(event);
+                                } else if (++commitBinlogCount > 1000) {
+                                    //只要累计遇到无关的commit事件1000个，(无论是否属于在乎的database和table)，更新sql thread 的 binlog和binlogPos和保存binlog信息到数据库，为的是即使当前task更新不频繁，也不要让它的binlog落后太多
+                                    binlogOfSqlThreadChanged(event);
+                                    commitBinlogCount = 0;
                                 }
+
+                                //实时更新io thread binlog位置(该io binlog位置也必须都是commmit事件的位置，这样的位置才是一个合理状态的位置，否则如果是一半事务的binlog位置，那么从该binlog位置订阅将是错误的状态)
+                                binlogOfIOThreadChanged(event);
+
                             } else {
                                 //执行子类的具体操作
                                 AbstractTaskExecutor.this.execute(event);
@@ -248,7 +265,11 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
                 //速度调控
                 if (sleepTime > 0) {
-                    TimeUnit.MILLISECONDS.sleep(sleepTime);
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(sleepTime);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
 
             }
@@ -257,7 +278,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
             public void onConnectException(Exception e) {
                 status.setStatus(TaskExecutorStatus.Status.RECONNECTING);
                 status.setDetail("PumaClient connected failed, reconnecting...");
-                LOG.info("PumaClient connected failed, reconnecting...");
+                LOG.info("PumaClient[" + getTask().getPumaClientName() + "] connected failed, reconnecting...");
                 defaultPullStrategy.fail(true);
             }
 
@@ -265,11 +286,19 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
             public void onConnected() {
                 status.setStatus(TaskExecutorStatus.Status.RUNNING);
                 status.setDetail("PumaClient connected.");
-                LOG.info("PumaClient connected.");
+                LOG.info("PumaClient[" + getTask().getPumaClientName() + "] connected.");
             }
         });
 
         return pumaClient;
+    }
+
+    private void saveBinlogToDB(ChangedEvent event) {
+        BinlogInfo binlogInfo = new BinlogInfo();
+        binlogInfo.setSkipToNextPos(true);
+        binlogInfo.setBinlogFile(event.getBinlog());
+        binlogInfo.setBinlogPosition(event.getBinlogPos());
+        SystemStatusContainer.instance.recordBinlog(abstractTask.getType(), abstractTask.getId(), binlogInfo);
     }
 
     private boolean containDatabase(String database) {
@@ -321,6 +350,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         if (sleepTime >= 500) {
             sleepTime -= 500;
         }
+        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] speedUp. sleepTime:" + sleepTime + "ms.");
     }
 
     @Override
@@ -328,11 +358,13 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         if (sleepTime < 3000) {
             sleepTime += 500;
         }
+        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] speedDown. sleepTime:" + sleepTime + "ms.");
     }
 
     @Override
     public void resetSpeed() {
         sleepTime = 0;
+        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] resetSpeed. sleepTime:" + sleepTime + "ms.");
     }
 
     @Override

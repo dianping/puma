@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,9 +37,12 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     protected int pumaServerPort;
     protected String target;
     protected TaskExecutorStatus status;
-    private boolean dataChange = false;
+    /** 标识对目标数据库的会话。是否已经开始了事务（如果是，可能需要commmit或rollback否则由于数据库是可重复读级别，会一直锁住数据库。当开始insert/update/delete操作，无论执行是否成功，都已经开始事务） */
+    private boolean transactionStart = false;
 
     private long sleepTime = 0;
+
+    private CircularFifoBuffer lastEvents = new CircularFifoBuffer(10);
 
     public AbstractTaskExecutor(T abstractTask, String pumaServerHost, int pumaServerPort, String target) {
         this.abstractTask = abstractTask;
@@ -73,10 +77,11 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
             BinlogInfo binlogInfo = new BinlogInfo();
             binlogInfo.setBinlogFile(event.getBinlog());
             binlogInfo.setBinlogPosition(event.getBinlogPos());
+            binlogInfo.setSkipToNextPos(true);
             status.setBinlogInfo(binlogInfo);
             abstractTask.setBinlogInfo(binlogInfo);
             //保存binlog信息到数据库
-            saveBinlogToDB(event);
+            saveBinlogToDB(binlogInfo);
         }
     }
 
@@ -102,8 +107,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     @Override
     public void pause(String detail) {
         try {
-            if (dataChange) {
+            if (transactionStart) {
                 mysqlExecutor.rollback();
+                transactionStart = false;
             }
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
@@ -119,8 +125,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     @Override
     public void disconnect(String detail) {
         try {
-            if (dataChange) {
+            if (transactionStart) {
                 mysqlExecutor.rollback();
+                transactionStart = false;
             }
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
@@ -136,8 +143,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     @Override
     public void succeed() {
         try {
-            if (dataChange) {
+            if (transactionStart) {
                 mysqlExecutor.rollback();
+                transactionStart = false;
             }
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
@@ -153,8 +161,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     @Override
     public void fail(String detail) {
         try {
-            if (dataChange) {
+            if (transactionStart) {
                 mysqlExecutor.rollback();
+                transactionStart = false;
             }
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
@@ -173,7 +182,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         if (this.pumaClient != null) {
             this.pumaClient.stop();
         }
-        pumaClient = createPumaClient(abstractTask.getBinlogInfo());
+        pumaClient = createPumaClient();
         pumaClient.start();
         this.status.setDetail(null);
         this.status.setStatus(TaskExecutorStatus.Status.RUNNING);
@@ -185,7 +194,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         return status;
     }
 
-    private PumaClient createPumaClient(BinlogInfo startedBinlogInfo) {
+    private PumaClient createPumaClient() {
+        final BinlogInfo startedBinlogInfo = abstractTask.getBinlogInfo();
         LOG.info("initing PumaClient...");
         ConfigurationBuilder configBuilder = new ConfigurationBuilder();
         configBuilder.ddl(abstractTask.isDdl());
@@ -211,8 +221,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         pumaClient.register(new EventListener() {
 
             private DefaultPullStrategy defaultPullStrategy = new DefaultPullStrategy(500, 10000);
-
+            /** 记录一个收到多少个commit事件 */
             private int commitBinlogCount = 0;
+            /** 对于PumaClient记录的binlog，需要在一开始skip */
+            private boolean skipToNextPos = startedBinlogInfo.isSkipToNextPos();
 
             @Override
             public void onSkipEvent(ChangedEvent event) {
@@ -223,7 +235,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
             @Override
             public boolean onException(ChangedEvent event, Exception e) {
-                fail(e.getMessage());
+                fail(e.getMessage() + " .event is " + event);
+                LOG.info("Print last 10 row change events: " + lastEvents.toString());
                 return false;
             }
 
@@ -232,35 +245,40 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("********************Received " + event);
                 }
-                if (!abstractTask.getBinlogInfo().isSkipToNextPos()) {//对于PumaClient记录的binlog，需要在一开始skip
-                    if (containDatabase(event.getDatabase())) {
-                        if (event instanceof RowChangedEvent) {
-                            if (((RowChangedEvent) event).isTransactionBegin()) {
-                            } else if (((RowChangedEvent) event).isTransactionCommit()) {
-                                if (dataChange) {
-                                    //提交事务(datachange了，则该commit肯定是属于当前做了数据操作的事务的，故mysqlExecutor.commit();)
-                                    mysqlExecutor.commit();
-                                    dataChange = false;
-                                    //遇到commit事件，操作数据库了，更新sql thread 的 binlog和binlogPos和保存binlog信息到数据库
-                                    binlogOfSqlThreadChanged(event);
-                                } else if (++commitBinlogCount > 1000) {
-                                    //只要累计遇到无关的commit事件1000个，(无论是否属于在乎的database和table)，更新sql thread 的 binlog和binlogPos和保存binlog信息到数据库，为的是即使当前task更新不频繁，也不要让它的binlog落后太多
-                                    binlogOfSqlThreadChanged(event);
-                                    commitBinlogCount = 0;
-                                }
-
-                                //实时更新io thread binlog位置(该io binlog位置也必须都是commmit事件的位置，这样的位置才是一个合理状态的位置，否则如果是一半事务的binlog位置，那么从该binlog位置订阅将是错误的状态)
-                                binlogOfIOThreadChanged(event);
-
-                            } else {
-                                //执行子类的具体操作
-                                AbstractTaskExecutor.this.execute(event);
-                                dataChange = true;
+                if (!skipToNextPos) {
+                    if (event instanceof RowChangedEvent) {
+                        //------------- (1) 【事务开始事件】--------------
+                        if (((RowChangedEvent) event).isTransactionBegin()) {
+                        } else if (((RowChangedEvent) event).isTransactionCommit()) {
+                            //--------- (2) 【事务提交事件】--------------
+                            if (containDatabase(event.getDatabase()) && transactionStart) {
+                                //提交事务(datachange了，则该commit肯定是属于当前做了数据操作的事务的，故mysqlExecutor.commit();)
+                                mysqlExecutor.commit();
+                                transactionStart = false;
+                                //遇到commit事件，操作数据库了，更新sqlbinlog和保存binlog到数据库
+                                binlogOfSqlThreadChanged(event);
                             }
+                            //只要累计遇到的commit事件1000个(无论是否属于抓取的database)，都更新sqlbinlog和保存binlog到数据库，为的是即使当前task更新不频繁，也不要让它的binlog落后太多
+                            if (++commitBinlogCount > 1000) {
+                                binlogOfSqlThreadChanged(event);
+                                commitBinlogCount = 0;
+                            }
+                            //实时更新iobinlog位置(该io binlog位置也必须都是commmit事件的位置，这样的位置才是一个合理状态的位置，否则如果是一半事务的binlog位置，那么从该binlog位置订阅将是错误的状态)
+                            binlogOfIOThreadChanged(event);
+
+                        } else if (containDatabase(event.getDatabase())) {
+                            //--------- (3) 【数据操作事件】--------------
+                            //可执行的event，保存到内存，出错时打印出来
+                            lastEvents.add(event);
+                            //标识事务开始
+                            transactionStart = true;
+                            //执行子类的具体操作
+                            AbstractTaskExecutor.this.execute(event);
                         }
                     }
                 } else {
-                    abstractTask.getBinlogInfo().setSkipToNextPos(false);
+                    skipToNextPos = false;
+                    LOG.info("********************skip this event(because skipToNextPos is true) : " + event);
                 }
 
                 //速度调控
@@ -293,11 +311,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         return pumaClient;
     }
 
-    private void saveBinlogToDB(ChangedEvent event) {
-        BinlogInfo binlogInfo = new BinlogInfo();
-        binlogInfo.setSkipToNextPos(true);
-        binlogInfo.setBinlogFile(event.getBinlog());
-        binlogInfo.setBinlogPosition(event.getBinlogPos());
+    private void saveBinlogToDB(BinlogInfo binlogInfo) {
         SystemStatusContainer.instance.recordBinlog(abstractTask.getType(), abstractTask.getId(), binlogInfo);
     }
 
@@ -371,7 +385,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     public String toString() {
         return "AbstractTaskExecutor [abstractTask=" + abstractTask + ", pumaClient=" + pumaClient + ", mysqlExecutor="
                 + mysqlExecutor + ", pumaServerHost=" + pumaServerHost + ", pumaServerPort=" + pumaServerPort + ", target="
-                + target + ", status=" + status + ", dataChange=" + dataChange + ", sleepTime=" + sleepTime + "]";
+                + target + ", status=" + status + ", transactionStart=" + transactionStart + ", sleepTime=" + sleepTime
+                + ", lastEvents=" + lastEvents + "]";
     }
 
 }

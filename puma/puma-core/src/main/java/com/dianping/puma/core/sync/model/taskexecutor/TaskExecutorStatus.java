@@ -90,6 +90,22 @@ public class TaskExecutorStatus {
         return result;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof TaskExecutorStatus))
+            return false;
+        TaskExecutorStatus other = (TaskExecutorStatus) obj;
+        if (taskId != other.taskId)
+            return false;
+        if (type != other.type)
+            return false;
+        return true;
+    }
+
     public static int calHashCode(Type type, long taskId) {
         final int prime = 31;
         int result = 1;

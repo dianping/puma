@@ -66,7 +66,8 @@ public class CreatedController {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             TaskExecutorStatus syncStatus = systemStatusContainer.getStatus(Type.SYNC, taskId);
-            //从数据库查询binlog位置即可，不需要从SyncServer实时发过来的status中的binlog获取
+            //binlog信息，从数据库查询binlog位置即可，不需要从SyncServer实时发过来的status中的binlog获取
+            //binlogInfoOfIOThread则是从status中获取
             SyncTask syncTask = this.syncTaskService.find(taskId);
             syncStatus.setBinlogInfo(syncTask.getBinlogInfo());
 

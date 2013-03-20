@@ -140,6 +140,7 @@ public class PumaClient {
                         log.info("Puma client[" + config.getName() + "] reconnecting...");
                         continue;
                     }
+                    log.info("Puma client[" + config.getName() + "] connected.");
 
                     // loop read event from the input stream
                     while (true) {

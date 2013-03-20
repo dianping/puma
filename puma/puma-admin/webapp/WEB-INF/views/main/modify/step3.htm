@@ -139,10 +139,12 @@
 			} else {
 				$("#catchupStatus").text("无状态(可能不在运行)");
 			}
-			if (status.binlogInfo && status.binlogInfo.binlogFile) {
-				$('#catchupTaskBinlogFile').val(status.binlogInfo.binlogFile);
-				$('#catchupTaskBinlogPos')
-						.val(status.binlogInfo.binlogPosition);
+			if (status.binlogInfoOfIOThread
+					&& status.binlogInfoOfIOThread.binlogFile) {
+				$('#catchupTaskBinlogFile').val(
+						status.binlogInfoOfIOThread.binlogFile);
+				$('#catchupTaskBinlogPos').val(
+						status.binlogInfoOfIOThread.binlogPosition);
 			}
 		}
 	}

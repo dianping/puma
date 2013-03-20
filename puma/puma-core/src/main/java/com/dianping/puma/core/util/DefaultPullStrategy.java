@@ -30,9 +30,7 @@ public class DefaultPullStrategy implements PullStrategy {
             failCnt = 0;
         }
         if (shouldSleep && sleepTime > 0) {
-            if (log.isDebugEnabled()) {
-                log.debug("sleep " + sleepTime + " at " + this.getClass().getSimpleName());
-            }
+            log.info("sleep " + sleepTime + " at " + this.getClass().getSimpleName());
             try {
                 Thread.sleep(sleepTime);
             } catch (InterruptedException e) {

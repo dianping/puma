@@ -209,12 +209,12 @@ public class SyncTaskServiceImpl implements SyncTaskService {
         syncTask.setSyncTaskStatusAction(SyncTaskStatusAction.RESTART);
         this.syncTaskDao.save(syncTask);
         //通知
-        SyncTaskStatusActionEvent event = new SyncTaskStatusActionEvent();
-        event.setSyncTaskId(id);
-        event.setTaskStatusAction(SyncTaskStatusAction.RESTART);
+        TaskEvent event = new TaskEvent();
+        event.setTaskId(id);
+        event.setType(Type.SYNC);
         event.setSyncServerName(syncTask.getSyncServerName());
         try {
-            statusActionEventPublisher.publish(event);
+            taskEventPublisher.publish(event);
         } catch (SendFailedException e) {
             throw new RuntimeException("已经修改任务，但给SyncServer发送通知失败，您可以在\"任务的状态控制\"页面控制状态，以便再次发送通知！", e);
         }

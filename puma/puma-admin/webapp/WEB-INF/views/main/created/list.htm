@@ -7,13 +7,13 @@
             <table class="table table-hover table-striped">
                <thead>
                   <tr>
-                     <th>源数据库</th>
-                     <th>目标数据库</th>
+                     <th>源实例名</th>
+                     <th>目标实例名</th>
                      <!-- <th>SyncServer名称</th>
                      <th>状态控制命令</th>  -->
                      <th>状态</th>
                      <th>Binlog进度</th>
-                     <th>状态刷新</th>
+                     <th>状态</th>
                      <th>操作</th>
                   </tr>
                </thead>
@@ -25,16 +25,17 @@
                      <!-- <td>$syncTask.syncServerName</td>  -->
                      <!-- <td>$syncTask.syncTaskStatusAction</td> -->
                      <td statusOfId="$syncTask.id"></td>
-                     <td binlogOfId="$syncTask.id"></td>
+                     <td>已执行：<span binlogOfId="$syncTask.id"></span> <br>已收到：<span
+                        binlogioOfId="$syncTask.id"></span></td>
                      <td><a class="btn btn-mini btn-info"
                         refresh="" href="javascript:;"
                         onclick="refreshStatus(this);"
-                        taskId="$syncTask.id" style="margin-right: 10px">刷新状态</a></td>
+                        taskId="$syncTask.id" style="margin-right: 0px">刷新</a></td>
                      <td><a
                         href="${rc.contextPath}/created/task/$syncTask.id"
-                        style="margin-right: 10px">详细</a><a
+                        style="margin-right: 5px">详细</a><a
                         href="${rc.contextPath}/modify/$syncTask.id"
-                        style="margin-right: 10px">修改</a><a
+                        style="margin-right: 5px">修改</a><a
                         href="javascript:openDelTaskModal('${syncTask.id}');">删除</a></td>
                   </tr>
                   #end
@@ -113,11 +114,12 @@
 				pumadmin.appError("错误信息", data.errorMsg);
 			} else {
 				var status = data.status;
+				//从status的状态信息
 				if (status && status.status) {
 					var text = status.status;
 					if (text == "WAITING" || text == "PREPARING"
 							|| text == "DUMPING" || text == "LOADING") {
-					    text = "<span style='color:yellow'>" + text + "</span>";
+						text = "<span style='color:blue'>" + text + "</span>";
 					} else if (text == "RUNNING" || text == "SUSPPENDED"
 							|| text == "SUCCEED") {
 						text = "<span style='color:green'>" + text + "</span>";
@@ -125,13 +127,27 @@
 						text = "<span style='color:red'>" + text + "</span>";
 					}
 					$("td[statusOfId='" + id + "']").html(text);
-					$("td[binlogOfId='" + id + "']").text(
-							status.binlogInfo.binlogFile + " "
-									+ status.binlogInfo.binlogPosition);
 				} else {
 					$("td[statusOfId='" + id + "']").html(
 							"<span style='color:red'>无状态(可能不在运行)</span>");
-					$("td[binlogOfId='" + id + "']").text("--");
+				}
+				//status的binlogio信息
+				if (status && status.binlogInfoOfIOThread) {
+					$("span[binlogioOfId='" + id + "']")
+							.text(
+									status.binlogInfoOfIOThread.binlogFile
+											+ " "
+											+ status.binlogInfoOfIOThread.binlogPosition);
+				} else {
+					$("span[binlogioOfId='" + id + "']").text("--");
+				}
+				//数据库获取的binlog信息
+				if (status && status.binlogInfo) {
+					$("span[binlogOfId='" + id + "']").text(
+							status.binlogInfo.binlogFile + " "
+									+ status.binlogInfo.binlogPosition);
+				} else {
+					$("span[binlogOfId='" + id + "']").text("--");
 				}
 			}
 		}

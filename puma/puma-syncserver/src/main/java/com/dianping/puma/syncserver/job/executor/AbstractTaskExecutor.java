@@ -10,6 +10,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dianping.lion.client.ConfigCache;
+import com.dianping.lion.client.LionException;
 import com.dianping.puma.api.Configuration;
 import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
@@ -259,7 +261,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
                                 binlogOfSqlThreadChanged(event);
                             }
                             //只要累计遇到的commit事件1000个(无论是否属于抓取的database)，都更新sqlbinlog和保存binlog到数据库，为的是即使当前task更新不频繁，也不要让它的binlog落后太多
-                            if (++commitBinlogCount > 1000) {
+                            if (++commitBinlogCount > getSaveCommitCount()) {
                                 binlogOfSqlThreadChanged(event);
                                 commitBinlogCount = 0;
                             }
@@ -387,6 +389,19 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
                 + mysqlExecutor + ", pumaServerHost=" + pumaServerHost + ", pumaServerPort=" + pumaServerPort + ", target="
                 + target + ", status=" + status + ", transactionStart=" + transactionStart + ", sleepTime=" + sleepTime
                 + ", lastEvents=" + lastEvents + "]";
+    }
+
+    private int getSaveCommitCount() {
+        int count = 50000;//默认是5万
+        try {
+            Integer t = ConfigCache.getInstance().getIntProperty("puma.syncserver.saveCommitCount");
+            if (t != null) {
+                count = t.intValue();
+            }
+        } catch (LionException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return count;
     }
 
 }

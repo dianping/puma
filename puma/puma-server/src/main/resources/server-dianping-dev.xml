@@ -19,6 +19,7 @@
         <property name="dataHandler" ref="datahandler-dianping-dev" />
         <property name="dispatcher" ref="dispatcher-dianping-dev" />
         <property name="binlogPositionHolder" ref="binlogPositionHolder" />
+        <property name="dbServerId" value="3083306041" />
     </bean>
 
     <bean id="dispatcher-dianping-dev"
@@ -83,13 +84,12 @@
         <property name="baseDir"
             value="/data/appdatas/puma/storage/dianping-dev/" />
     </bean>
-    <bean id="hdfsBucketIndex-dianping-dev" class="com.dianping.puma.storage.HDFSBucketIndex"
+    <bean id="hdfsBucketIndex-dianping-dev" class="com.dianping.puma.storage.LocalFileBucketIndex"
         init-method="start">
         <property name="bucketFilePrefix" value="bucket-" />
         <property name="maxBucketLengthMB" value="1000" />
         <property name="baseDir"
-            value="/user/workcron/puma/storage/dianping-dev/" />
-        <property name="hdfsConfigStr" value="${puma.hdfs.config}" />
+            value="/data/appdatas/puma/storage/slave/dianping-dev/" />
     </bean>
 </beans>
 

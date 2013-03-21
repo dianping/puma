@@ -16,8 +16,10 @@ public class TaskExecutorStatus {
     private Type type;
 
     private Status status;
-
+    /** 类似Sql Thread的 binlog位置 */
     private BinlogInfo binlogInfo;
+    /** 类似IO Thread的 binlog位置 */
+    private BinlogInfo binlogInfoOfIOThread;
     //  详细detail信息
     private String detail;
 
@@ -71,6 +73,14 @@ public class TaskExecutorStatus {
         this.gmtCreate = gmtCreate;
     }
 
+    public BinlogInfo getBinlogInfoOfIOThread() {
+        return binlogInfoOfIOThread;
+    }
+
+    public void setBinlogInfoOfIOThread(BinlogInfo binlogInfoOfIOThread) {
+        this.binlogInfoOfIOThread = binlogInfoOfIOThread;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -78,6 +88,22 @@ public class TaskExecutorStatus {
         result = prime * result + (int) (taskId ^ (taskId >>> 32));
         result = prime * result + ((type == null) ? 0 : type.hashCode());
         return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof TaskExecutorStatus))
+            return false;
+        TaskExecutorStatus other = (TaskExecutorStatus) obj;
+        if (taskId != other.taskId)
+            return false;
+        if (type != other.type)
+            return false;
+        return true;
     }
 
     public static int calHashCode(Type type, long taskId) {

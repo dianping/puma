@@ -111,7 +111,7 @@ public class Handler implements PageHandler<Context> {
                     log.error("Cat failed.");
                 }
                 SystemStatusContainer.instance.removeClient(payload.getClientName());
-                log.info("Client(" + payload.getClientName() + ") failed. " + e);
+                log.info("Client(" + payload.getClientName() + ") failed. ", e);
                 break;
             }
         }

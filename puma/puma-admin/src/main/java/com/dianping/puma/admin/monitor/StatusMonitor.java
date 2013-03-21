@@ -32,7 +32,7 @@ public class StatusMonitor {
     /** 存放正在报警的task的status，同一个Task在5分钟内只报警一次 */
     private HashMap<Integer, Long> alarmingStatusMap = new HashMap<Integer, Long>();
 
-    @Scheduled(cron = "0/10 * * * * ?")
+    @Scheduled(cron = "0/30 * * * * ?")
     public void monitor() {
         //如果有Status超过60秒没有更新，就报警
         //如果有fail的task，就报警
@@ -50,13 +50,18 @@ public class StatusMonitor {
                 } else if (status.getStatus() == null && shouldAlarm(status)) {
                     notifyService.alarm("Task's status is not Update recently: " + status, null, true);
                     alarmingStatusMap.put(status.hashCode(), System.currentTimeMillis());
+                } else if (status.getStatus() == TaskExecutorStatus.Status.RUNNING) {
+                    if (alarmingStatusMap.get(status.hashCode()) != null) {//本次状态是RUNNING且已经报过警，说明是恢复
+                        notifyService.alarm("Task's status resume RUNNING again: " + status, null, true);
+                        alarmingStatusMap.remove(status.hashCode());
+                    }
                 }
             }
         }
     }
 
     /**
-     * 同一个SyncTask在5分钟内只报警一次，暂停状态的不报警<br>
+     * 同一个SyncTask在15分钟内只报警一次，暂停状态的不报警<br>
      * CatchupTask和DumpTask永远仅报警一次
      */
     private boolean shouldAlarm(TaskExecutorStatus status) {
@@ -70,7 +75,7 @@ public class StatusMonitor {
                     break;
                 case SYNC:
                     long lastTime = System.currentTimeMillis() - statusStartAlarmAddTime;
-                    if (lastTime < 5 * DateUtils.MILLIS_PER_MINUTE) {
+                    if (lastTime < 15 * DateUtils.MILLIS_PER_MINUTE) {
                         shouldAlarm = false;
                     }
                     break;

@@ -55,15 +55,15 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
     private void refreshSyncTask(ConcurrentHashMap<Integer, TaskExecutor> taskExecutorMap, TaskExecutor taskExecutor,
                                  TaskExecutor newTaskExecutor) {
         //验证
-        if (!(taskExecutor instanceof SyncTaskExecutor && taskExecutor instanceof SyncTaskExecutor)) {
+        if (!(taskExecutor instanceof SyncTaskExecutor && newTaskExecutor instanceof SyncTaskExecutor)) {
             return;
         }
         SyncTaskExecutor syncTaskExecutor0 = (SyncTaskExecutor) taskExecutor;
         SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) newTaskExecutor;
-        if (syncTaskExecutor0.getTask().getSyncTaskStatusAction() != SyncTaskStatusAction.RESTART
-                && (syncTaskExecutor.getTaskExecutorStatus().getStatus() != TaskExecutorStatus.Status.SUSPPENDED)
-                || syncTaskExecutor.getTaskExecutorStatus().getStatus() != TaskExecutorStatus.Status.FAILED
-                || syncTaskExecutor.getTaskExecutorStatus().getStatus() != TaskExecutorStatus.Status.SUCCEED) {
+        if (syncTaskExecutor.getTask().getSyncTaskStatusAction() != SyncTaskStatusAction.RESTART
+                || (syncTaskExecutor0.getTaskExecutorStatus().getStatus() != TaskExecutorStatus.Status.SUSPPENDED)
+                && syncTaskExecutor0.getTaskExecutorStatus().getStatus() != TaskExecutorStatus.Status.FAILED
+                && syncTaskExecutor0.getTaskExecutorStatus().getStatus() != TaskExecutorStatus.Status.SUCCEED) {
             notifyService.alarm("Ignored a TaskExecutor which status is not correct: " + newTaskExecutor.getTask(), null, false);
             return;
         }

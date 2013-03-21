@@ -12,13 +12,14 @@
         <property name="port" value="3306" />
         <property name="user" value="binlog" />
         <property name="password" value="binlog" />
-        <property name="defaultBinlogFileName" value="mysql-bin.000085" />
-        <property name="defaultBinlogPosition" value="283118688" />
+        <property name="defaultBinlogFileName" value="mysql-bin.000094" />
+        <property name="defaultBinlogPosition" value="541331564" />
         <property name="parser" ref="defaultParser-7_43" />
         <property name="serverId" value="9988" />
         <property name="dataHandler" ref="datahandler-7_43" />
         <property name="dispatcher" ref="dispatcher-7_43" />
         <property name="binlogPositionHolder" ref="binlogPositionHolder" />
+        <property name="dbServerId" value="1"/>
     </bean>
 
     <bean id="dispatcher-7_43"

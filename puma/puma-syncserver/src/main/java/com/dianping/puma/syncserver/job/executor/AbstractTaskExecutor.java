@@ -259,11 +259,13 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
                                 transactionStart = false;
                                 //遇到commit事件，操作数据库了，更新sqlbinlog和保存binlog到数据库
                                 binlogOfSqlThreadChanged(event);
-                            }
-                            //只要累计遇到的commit事件1000个(无论是否属于抓取的database)，都更新sqlbinlog和保存binlog到数据库，为的是即使当前task更新不频繁，也不要让它的binlog落后太多
-                            if (++commitBinlogCount > getSaveCommitCount()) {
-                                binlogOfSqlThreadChanged(event);
                                 commitBinlogCount = 0;
+                            } else {
+                                //只要累计遇到的commit事件1000个(无论是否属于抓取的database)，都更新sqlbinlog和保存binlog到数据库，为的是即使当前task更新不频繁，也不要让它的binlog落后太多
+                                if (++commitBinlogCount > getSaveCommitCount()) {
+                                    binlogOfSqlThreadChanged(event);
+                                    commitBinlogCount = 0;
+                                }
                             }
                             //实时更新iobinlog位置(该io binlog位置也必须都是commmit事件的位置，这样的位置才是一个合理状态的位置，否则如果是一半事务的binlog位置，那么从该binlog位置订阅将是错误的状态)
                             binlogOfIOThreadChanged(event);

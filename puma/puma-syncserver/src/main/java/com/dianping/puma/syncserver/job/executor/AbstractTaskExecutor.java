@@ -237,7 +237,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
             @Override
             public boolean onException(ChangedEvent event, Exception e) {
-                fail(e.getMessage() + " .event is " + event);
+                fail(e.getMessage() + " .event is " + StringUtils.abbreviate(event.toString(), 1000));
                 LOG.info("Print last 10 row change events: " + lastEvents.toString());
                 return false;
             }

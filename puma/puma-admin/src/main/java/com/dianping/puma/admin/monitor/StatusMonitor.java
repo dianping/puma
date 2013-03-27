@@ -4,10 +4,14 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.dianping.lion.client.ConfigCache;
+import com.dianping.lion.client.LionException;
 import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.sync.model.task.SyncTask;
@@ -23,13 +27,16 @@ import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
  */
 @Service
 public class StatusMonitor {
+
+    private static final Logger LOG = LoggerFactory.getLogger(StatusMonitor.class);
+
     @Autowired
     private SyncTaskService syncTaskService;
     @Autowired
     private SystemStatusContainer systemStatusContainer;
     @Autowired
     private NotifyService notifyService;
-    /** 存放正在报警的task的status，同一个Task在5分钟内只报警一次 */
+    /** 存放正在报警的task的status，同一个Task在getAlarmInterval()分钟内只报警一次 */
     private HashMap<Integer, Long> alarmingStatusMap = new HashMap<Integer, Long>();
 
     @Scheduled(cron = "0/30 * * * * ?")
@@ -52,7 +59,7 @@ public class StatusMonitor {
                     alarmingStatusMap.put(status.hashCode(), System.currentTimeMillis());
                 } else if (status.getStatus() == TaskExecutorStatus.Status.RUNNING) {
                     if (alarmingStatusMap.get(status.hashCode()) != null) {//本次状态是RUNNING且已经报过警，说明是恢复
-                        notifyService.alarm("Task's status resume RUNNING again: " + status, null, true);
+                        notifyService.recover("Task is RUNNING again: " + status, true);
                         alarmingStatusMap.remove(status.hashCode());
                     }
                 }
@@ -75,7 +82,7 @@ public class StatusMonitor {
                     break;
                 case SYNC:
                     long lastTime = System.currentTimeMillis() - statusStartAlarmAddTime;
-                    if (lastTime < 15 * DateUtils.MILLIS_PER_MINUTE) {
+                    if (lastTime < getAlarmInterval() * DateUtils.MILLIS_PER_MINUTE) {
                         shouldAlarm = false;
                     }
                     break;
@@ -89,6 +96,19 @@ public class StatusMonitor {
             }
         }
         return shouldAlarm;
+    }
+
+    private int getAlarmInterval() {
+        int count = 15;//默认是15分钟
+        try {
+            Integer t = ConfigCache.getInstance().getIntProperty("puma.admin.alarmInterval");
+            if (t != null) {
+                count = t.intValue();
+            }
+        } catch (LionException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return count;
     }
 
 }

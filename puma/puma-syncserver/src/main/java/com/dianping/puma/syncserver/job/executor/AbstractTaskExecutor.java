@@ -237,8 +237,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
             @Override
             public boolean onException(ChangedEvent event, Exception e) {
-                fail(e.getMessage() + " .event is " + StringUtils.abbreviate(event.toString(), 1000));
-                LOG.info("Print last 10 row change events: " + lastEvents.toString());
+                fail(abstractTask.getSrcMysqlName() + "->" + abstractTask.getDestMysqlName() + ":" + e.getMessage() + ". Event="
+                        + event);
+                LOG.error("Print last 10 row change events: " + lastEvents.toString(), e);
                 return false;
             }
 
@@ -299,8 +300,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
             @Override
             public void onConnectException(Exception e) {
                 status.setStatus(TaskExecutorStatus.Status.RECONNECTING);
-                status.setDetail("PumaClient connected failed, reconnecting...");
-                LOG.info("PumaClient[" + getTask().getPumaClientName() + "] connected failed, reconnecting...");
+                String detail = abstractTask.getSrcMysqlName() + "->" + abstractTask.getDestMysqlName()
+                        + ":PumaClient connected failed, reconnecting...";
+                status.setDetail(detail);
+                LOG.error(detail, e);
                 defaultPullStrategy.fail(true);
             }
 

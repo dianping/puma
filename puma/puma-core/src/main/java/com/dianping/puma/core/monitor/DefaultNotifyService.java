@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.dianping.hawk.common.alarm.service.CommonAlarmService;
@@ -38,6 +39,7 @@ public class DefaultNotifyService implements NotifyService {
 
 	private static final Logger	log					= Logger.getLogger(DefaultNotifyService.class);
 	private static final String	MAIL_ALARM_TITLE	= "[Puma] Alarm Notify";
+	private static final String MAIL_RECOVERY_TITLE = "[Puma] Recovery Notify";
 	private static final String	KEY_MAIL_TO			= "puma.notify.mailTo";
 	private static final String	KEY_SMS_TO			= "puma.notify.smsTo";
 	private CommonAlarmService	alarmService;
@@ -79,7 +81,7 @@ public class DefaultNotifyService implements NotifyService {
 				if (sendSms) {
 					List<String> numbers = getPhoneNums();
 					if (numbers != null && numbers.size() > 0) {
-						this.alarmService.sendSmsMessage("[Puma Alarm]" + "_" + localIP + ":" + msg, numbers);
+						this.alarmService.sendSmsMessage("[Puma Alarm]" + "_" + localIP + ":" + StringUtils.abbreviate(msg, 1000), numbers);
 					}
 				}
 			} catch (Exception e) {
@@ -87,6 +89,28 @@ public class DefaultNotifyService implements NotifyService {
 			}
 		}
 	}
+
+	@Override
+    public void recover(String msg, boolean sendSms) {
+        log.info(MAIL_RECOVERY_TITLE + " : " + msg);
+
+        if (!devMode) {
+            StringBuilder body = new StringBuilder();
+            body.append("<strong>").append(msg).append("</strong><br/>");
+            body.append("<br/>");
+            try {
+                this.alarmService.sendEmail(body.toString(), MAIL_RECOVERY_TITLE + "_" + localIP, getMailTos());
+                if (sendSms) {
+                    List<String> numbers = getPhoneNums();
+                    if (numbers != null && numbers.size() > 0) {
+                        this.alarmService.sendSmsMessage("[Puma Recovery]" + "_" + localIP + ":" + StringUtils.abbreviate(msg, 1000), numbers);
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Alarm failed. BODY: " + body);
+            }
+        }
+    }
 
 	@Override
 	public void report(String title, Map<String, Map<String, String>> msg) {

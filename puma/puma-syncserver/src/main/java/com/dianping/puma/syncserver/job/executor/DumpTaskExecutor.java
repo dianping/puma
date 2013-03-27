@@ -147,7 +147,7 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
                     if (StringUtils.isNotBlank(output)) {
                         throw new DumpException("mysqlload output is not empty , so consided to be failed: " + output);
                     }
-                    succeed();
+                    status.setStatus(TaskExecutorStatus.Status.SUCCEED);
                     LOG.info("load done.");
                 } catch (Exception e) {
                     fail(e.getMessage());
@@ -304,17 +304,15 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
 
     @Override
     public void succeed() {
-        status.setStatus(TaskExecutorStatus.Status.SUCCEED);
+        throw new UnsupportedOperationException("DumpTaskExecutor not support stop() method!");
     }
 
-    @Override
-    public void fail(String detail) {
+    private void fail(String detail) {
         status.setStatus(TaskExecutorStatus.Status.FAILED);
         status.setDetail(detail);
     }
 
-    @Override
-    public void disconnect(String detail) {
+    public void stop(String detail) {
         throw new UnsupportedOperationException("DumpTaskExecutor not support stop() method!");
     }
 

@@ -25,4 +25,6 @@ public interface NotifyService {
 	public void alarm(String msg, Throwable t, boolean sendSms);
 
 	public void report(String title, Map<String, Map<String, String>> msg);
+
+    void recover(String msg, boolean sendSms);
 }

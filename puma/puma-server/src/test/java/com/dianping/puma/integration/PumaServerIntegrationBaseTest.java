@@ -61,31 +61,26 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
  * TODO Comment of PumaServerIntegrationTest
  * 
  * @author Leo Liang
- * 
  */
 public abstract class PumaServerIntegrationBaseTest {
-    private static final String      dbConfigFile          = "PumaServerIntegrationTest.properties";
+    private static final String dbConfigFile = "PumaServerIntegrationTest.properties";
     protected static MysqlDataSource ds;
-    protected static String          host;
-    protected static int             port;
-    private static String            pwd;
-    private static String            user;
-    protected static String          db;
-    protected static long            serverId;
+    protected static String host;
+    protected static int port;
+    private static String pwd;
+    private static String user;
+    protected static String db;
+    protected static long serverId;
     protected ReplicationBasedServer server;
-    protected DefaultEventStorage    storage;
-    protected LocalFileBucketIndex   masterIndex;
-    protected LocalFileBucketIndex   slaveIndex;
-    protected FileDumpSender         sender;
-    private static File              storageMasterBaseDir  = new File(System.getProperty("java.io.tmpdir", "."), "Puma");
-    private static File              storageSlaveBaseDir   = new File(System.getProperty("java.io.tmpdir", "."),
-                                                                   "Puma/bak/");
-    private static File              confBaseDir           = new File(System.getProperty("java.io.tmpdir", "."),
-                                                                   "PumaConf/");
-    private static File              binlogIndexBaseDir    = new File(System.getProperty("java.io.tmpdir", "."),
-                                                                   "binlogIndex/");
-    private static File              timeStampIndexBaseDir = new File(System.getProperty("java.io.tmpdir", "."),
-                                                                   "timeIndex/");
+    protected DefaultEventStorage storage;
+    protected LocalFileBucketIndex masterIndex;
+    protected LocalFileBucketIndex slaveIndex;
+    protected FileDumpSender sender;
+    private static File storageMasterBaseDir = new File(System.getProperty("java.io.tmpdir", "."), "Puma");
+    private static File storageSlaveBaseDir = new File(System.getProperty("java.io.tmpdir", "."), "Puma/bak/");
+    private static File confBaseDir = new File(System.getProperty("java.io.tmpdir", "."), "PumaConf/");
+    private static File binlogIndexBaseDir = new File(System.getProperty("java.io.tmpdir", "."), "binlogIndex/");
+    private static File timeStampIndexBaseDir = new File(System.getProperty("java.io.tmpdir", "."), "timeIndex/");
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -111,6 +106,11 @@ public abstract class PumaServerIntegrationBaseTest {
             @Override
             public void alarm(String msg, Throwable t, boolean sendSms) {
                 System.out.println("alarm-----" + msg + ": " + t);
+            }
+
+            @Override
+            public void recover(String msg, boolean sendSms) {
+                System.out.println("recover-----" + msg);
             }
         };
 
@@ -234,8 +234,7 @@ public abstract class PumaServerIntegrationBaseTest {
             ChangedEvent event = channel.next();
             if (!needTs) {
                 if (event instanceof RowChangedEvent) {
-                    if (((RowChangedEvent) event).isTransactionBegin()
-                            || ((RowChangedEvent) event).isTransactionCommit()) {
+                    if (((RowChangedEvent) event).isTransactionBegin() || ((RowChangedEvent) event).isTransactionCommit()) {
                         continue;
                     }
                 }
@@ -247,8 +246,8 @@ public abstract class PumaServerIntegrationBaseTest {
         return result;
     }
 
-    protected List<ChangedEvent> getEvents(int n, long seq, long serverId, String binlog, long binlogPos,
-            long timeStamp, boolean needTs) throws Exception {
+    protected List<ChangedEvent> getEvents(int n, long seq, long serverId, String binlog, long binlogPos, long timeStamp,
+                                           boolean needTs) throws Exception {
         waitForSync(50);
         List<ChangedEvent> result = new ArrayList<ChangedEvent>();
         EventChannel channel = storage.getChannel(seq, serverId, binlog, binlogPos, timeStamp);
@@ -256,8 +255,7 @@ public abstract class PumaServerIntegrationBaseTest {
             ChangedEvent event = channel.next();
             if (!needTs) {
                 if (event instanceof RowChangedEvent) {
-                    if (((RowChangedEvent) event).isTransactionBegin()
-                            || ((RowChangedEvent) event).isTransactionCommit()) {
+                    if (((RowChangedEvent) event).isTransactionBegin() || ((RowChangedEvent) event).isTransactionCommit()) {
                         continue;
                     }
                 }
@@ -498,7 +496,7 @@ public abstract class PumaServerIntegrationBaseTest {
 
     protected static class BinlogInfo {
         private String file;
-        private long   pos;
+        private long pos;
 
         /**
          * @param file

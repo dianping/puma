@@ -1,5 +1,7 @@
 package com.dianping.puma.core.sync.model.task;
 
+import java.util.Map;
+
 import com.dianping.puma.core.sync.model.BaseEntity;
 import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.config.MysqlHost;
@@ -32,9 +34,10 @@ public abstract class Task extends BaseEntity {
     private Long syncTaskId;
     //    //状态
     //    private TaskState taskState;
-
     //  源：BinlogInfo
     private BinlogInfo binlogInfo;
+    /** errorCode对应的Handler */
+    private Map<Integer, String> errorCodeHandlerNameMap;
 
     protected Task(Type type) {
         this.type = type;
@@ -104,11 +107,19 @@ public abstract class Task extends BaseEntity {
         this.syncServerName = syncServerName;
     }
 
+    public Map<Integer, String> getErrorCodeHandlerNameMap() {
+        return errorCodeHandlerNameMap;
+    }
+
+    public void setErrorCodeHandlerNameMap(Map<Integer, String> errorCodeHandlerNameMap) {
+        this.errorCodeHandlerNameMap = errorCodeHandlerNameMap;
+    }
+
     @Override
     public String toString() {
         return "Task [type=" + type + ", srcMysqlName=" + srcMysqlName + ", srcMysqlHost=" + srcMysqlHost + ", destMysqlName="
                 + destMysqlName + ", destMysqlHost=" + destMysqlHost + ", syncServerName=" + syncServerName + ", syncTaskId="
-                + syncTaskId + ", binlogInfo=" + binlogInfo + "]";
+                + syncTaskId + ", binlogInfo=" + binlogInfo + ", errorCodeHandlerMap=" + errorCodeHandlerNameMap + "]";
     }
 
     //    public TaskState getTaskState() {

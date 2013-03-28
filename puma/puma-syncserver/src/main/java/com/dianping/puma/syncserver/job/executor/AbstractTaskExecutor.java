@@ -3,6 +3,7 @@ package com.dianping.puma.syncserver.job.executor;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
@@ -26,6 +27,10 @@ import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.task.AbstractTask;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.core.util.DefaultPullStrategy;
+import com.dianping.puma.syncserver.job.executor.failhandler.HandleContext;
+import com.dianping.puma.syncserver.job.executor.failhandler.HandleResult;
+import com.dianping.puma.syncserver.job.executor.failhandler.Handler;
+import com.dianping.puma.syncserver.job.executor.failhandler.HandlerContainer;
 import com.dianping.puma.syncserver.monitor.SystemStatusContainer;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
@@ -236,11 +241,38 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
             @Override
             public boolean onException(ChangedEvent event, Exception e) {
-                //TODO 针对策略，调用策略的处理
-                fail(abstractTask.getSrcMysqlName() + "->" + abstractTask.getDestMysqlName() + ":" + e.getMessage() + ". Event="
-                        + event);
-                LOG.error("Print last 10 row change events: " + lastEvents.toString(), e);
-                return false;
+                //针对策略，调用策略的处理
+                boolean ignoreFailEvent = false;
+                if (e instanceof SQLException) {
+                    SQLException se = (SQLException) e;
+                    Integer errorCode = se.getErrorCode();
+                    Map<Integer, String> errorCodeHandlerMap = abstractTask.getErrorCodeHandlerNameMap();
+                    if (errorCodeHandlerMap != null) {
+                        String handlerName = errorCodeHandlerMap.get(errorCode);
+                        if (handlerName != null) {
+                            Handler handler = HandlerContainer.getHandler(handlerName);
+                            if (handler != null) {
+                                try {
+                                    LOG.info("Invoke handler(" + handler.getName() + "), event : " + event);
+                                    HandleContext context = new HandleContext();
+                                    context.setChangedEvent(event);
+                                    HandleResult handleResult = handler.handle(context);
+                                    ignoreFailEvent = handleResult.isIgnoreFailEvent();
+                                } catch (RuntimeException re) {
+                                    LOG.warn(
+                                            "Unexpected RuntimeException on handler(" + handler + "), ignoreFailEvent keep false.",
+                                            e);
+                                }
+                            }
+                        }
+                    }
+                }
+                if (!ignoreFailEvent) {
+                    fail(abstractTask.getSrcMysqlName() + "->" + abstractTask.getDestMysqlName() + ":" + e.getMessage()
+                            + ". Event=" + event);
+                    LOG.info("Print last 10 row change events: " + lastEvents.toString());
+                }
+                return ignoreFailEvent;
             }
 
             @Override

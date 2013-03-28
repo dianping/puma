@@ -29,9 +29,9 @@ public class MysqlExecutor {
 
     private MysqlMapping mysqlMapping;
 
-    public static final int INSERT = 0;
-    public static final int DELETE = 1;
-    public static final int UPDATE = 2;
+    public static final int INSERT = RowChangedEvent.INSERT;
+    public static final int DELETE = RowChangedEvent.DELETE;
+    public static final int UPDATE = RowChangedEvent.UPDATE;
     public static final int REPLACE_INTO = 3;//插入，如果已存在则更新
     private static final int UPDTAE_TO_NULL = 4;//将对应的列都设置为null
 

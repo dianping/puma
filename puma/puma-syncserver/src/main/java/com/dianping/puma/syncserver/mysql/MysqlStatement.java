@@ -2,7 +2,7 @@ package com.dianping.puma.syncserver.mysql;
 
 import java.util.Arrays;
 
-public class MysqlUpdateStatement {
+public class MysqlStatement {
 
     private String sql;
     private Object[] args;
@@ -25,7 +25,7 @@ public class MysqlUpdateStatement {
 
     @Override
     public String toString() {
-        return "MysqlUpdateStatement [sql=" + sql + ", args=" + Arrays.toString(args) + "]";
+        return "MysqlStatement [sql=" + sql + ", args=" + Arrays.toString(args) + "]";
     }
 
 }

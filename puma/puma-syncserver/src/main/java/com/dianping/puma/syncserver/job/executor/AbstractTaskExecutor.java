@@ -250,18 +250,18 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
                     if (errorCodeHandlerMap != null) {
                         String handlerName = errorCodeHandlerMap.get(errorCode);
                         if (handlerName != null) {
-                            Handler handler = HandlerContainer.getHandler(handlerName);
+                            Handler handler = HandlerContainer.getInstance().getHandler(handlerName);
                             if (handler != null) {
                                 try {
                                     LOG.info("Invoke handler(" + handler.getName() + "), event : " + event);
                                     HandleContext context = new HandleContext();
+                                    context.setMysqlExecutor(mysqlExecutor);
                                     context.setChangedEvent(event);
                                     HandleResult handleResult = handler.handle(context);
                                     ignoreFailEvent = handleResult.isIgnoreFailEvent();
                                 } catch (RuntimeException re) {
-                                    LOG.warn(
-                                            "Unexpected RuntimeException on handler(" + handler + "), ignoreFailEvent keep false.",
-                                            e);
+                                    LOG.warn("Unexpected RuntimeException on handler(" + handler.getName()
+                                            + "), ignoreFailEvent keep false.", re);
                                 }
                             }
                         }
@@ -277,9 +277,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
             @Override
             public void onEvent(ChangedEvent event) throws Exception {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("********************Received " + event);
-                }
+//                if (LOG.isDebugEnabled()) {
+//                    LOG.debug("********************Received " + event);
+//                }
                 if (!skipToNextPos) {
                     if (event instanceof RowChangedEvent) {
                         //------------- (1) 【事务开始事件】--------------

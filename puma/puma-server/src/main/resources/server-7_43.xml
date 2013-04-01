@@ -12,8 +12,8 @@
         <property name="port" value="3306" />
         <property name="user" value="binlog" />
         <property name="password" value="binlog" />
-        <property name="defaultBinlogFileName" value="mysql-bin.000094" />
-        <property name="defaultBinlogPosition" value="541331564" />
+        <property name="defaultBinlogFileName" value="mysql-bin.000101" />
+        <property name="defaultBinlogPosition" value="280676161" />
         <property name="parser" ref="defaultParser-7_43" />
         <property name="serverId" value="9988" />
         <property name="dataHandler" ref="datahandler-7_43" />

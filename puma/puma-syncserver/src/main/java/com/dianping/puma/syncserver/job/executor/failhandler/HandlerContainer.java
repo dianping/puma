@@ -2,7 +2,15 @@ package com.dianping.puma.syncserver.job.executor.failhandler;
 
 import java.util.Map;
 
-public class HandlerContainer {
+import org.springframework.beans.factory.InitializingBean;
+
+public class HandlerContainer implements InitializingBean {
+
+    private static HandlerContainer instance;
+
+    public static HandlerContainer getInstance() {
+        return instance;
+    }
 
     private Map<String, Handler> handlers;
 
@@ -14,9 +22,16 @@ public class HandlerContainer {
         this.handlers = handlers;
     }
 
-    public static Handler getHandler(String handlerName) {
-        // TODO Auto-generated method stub
+    public Handler getHandler(String handlerName) {
+        if (handlers != null) {
+            return handlers.get(handlerName);
+        }
         return null;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        instance = this;
     }
 
 }

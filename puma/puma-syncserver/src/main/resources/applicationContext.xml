@@ -73,8 +73,8 @@
         class="com.dianping.puma.syncserver.job.executor.failhandler.HandlerContainer">
         <property name="handlers">
             <util:map map-class="java.util.HashMap">
-                <entry key-ref="DeleteDuplicateRecord" value-ref="deleteDuplicateRecordHandler" />
-                <entry key-ref="NoOperation" value-ref="noOperationHandler" />
+                <entry key="DeleteDuplicateRecord" value-ref="deleteDuplicateRecordHandler" />
+                <entry key="NoOperation" value-ref="noOperationHandler" />
             </util:map>
         </property>
     </bean>

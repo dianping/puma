@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,7 @@ public class MysqlExecutor {
     public static final int REPLACE_INTO = 3;//插入，如果已存在则更新
     private static final int UPDTAE_TO_NULL = 4;//将对应的列都设置为null
     public static final int SELECT = 5;//查询
+    private static BasicRowProcessor processor = new BasicRowProcessor();
 
     private ComboPooledDataSource dataSource;
     private Connection conn = null;
@@ -65,9 +67,9 @@ public class MysqlExecutor {
     }
 
     /**
-     * 执行event(如果event是查询，则根据event中的主键的newValue，进行查询，返回ResultSet，其他update/insert/delete情况返回null)
+     * 执行event(如果event是查询，则根据event中的主键的newValue，进行查询，可以返回结果(使用Map)，其他update/insert/delete情况返回null)
      */
-    public ResultSet execute(ChangedEvent event) throws SQLException {
+    public Map<String, Object> execute(ChangedEvent event) throws SQLException {
         if (event instanceof DdlEvent) {
             String sql = ((DdlEvent) event).getSql();
             if (StringUtils.isNotBlank(sql)) {
@@ -108,8 +110,8 @@ public class MysqlExecutor {
         }
     }
 
-    private ResultSet _execute(RowChangedEvent rowChangedEvent) throws SQLException {
-        ResultSet re = null;
+    private Map<String, Object> _execute(RowChangedEvent rowChangedEvent) throws SQLException {
+        Map<String, Object> rowMap = null;
         MysqlStatement mus = convertStatement(rowChangedEvent);
         if (LOG.isDebugEnabled()) {
             LOG.debug("execute dml sql statement: " + mus);
@@ -126,7 +128,10 @@ public class MysqlExecutor {
             }
             ps.execute();
             if (rowChangedEvent.getActionType() == SELECT) {
-                re = ps.getResultSet();
+                ResultSet resultSet = ps.getResultSet();
+                if (resultSet.next()) {
+                    rowMap = processor.toMap(resultSet);
+                }
             }
         } finally {
             if (ps != null) {
@@ -137,7 +142,7 @@ public class MysqlExecutor {
                 }
             }
         }
-        return re;
+        return rowMap;
     }
 
     /**
@@ -278,7 +283,7 @@ public class MysqlExecutor {
             case SELECT:
                 for (Map.Entry<String, ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
                     if (columnName2ColumnInfo.getValue().isKey()) {//select 语句只使用关键字作where条件
-                        args.add(columnName2ColumnInfo.getValue().getOldValue());
+                        args.add(columnName2ColumnInfo.getValue().getNewValue());
                     }
                 }
                 break;

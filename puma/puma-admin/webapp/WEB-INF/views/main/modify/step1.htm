@@ -67,6 +67,12 @@ blockquote button {
                   <span>${dateFormatUtils.format($syncTask.gmtModified,"yyyy年MM月dd日
                      HH时mm分")}</span>
                </blockquote>
+               <blockquote>
+                  #foreach($entry in
+                  $syncTask.errorCodeHandlerNameMap.entrySet()) <strong
+                     class="actionText">$entry.key错误码的处理方式：</strong><span>
+                     $entry.value</span> #end
+               </blockquote>
             </div>
             <hr>
             <div>

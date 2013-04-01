@@ -12,6 +12,9 @@
         <property name="propertiesPath" value="puma-admin-config.properties" />
     </bean>
 
+    <bean id="config" class="com.dianping.puma.admin.config.Config">
+        <property name="errorCodeHandler" value="${puma.admin.errorCodeHandler}" />
+    </bean>
 
 
 </beans>

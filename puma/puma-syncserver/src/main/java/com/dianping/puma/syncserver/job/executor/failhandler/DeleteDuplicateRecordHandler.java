@@ -50,6 +50,7 @@ public class DeleteDuplicateRecordHandler implements Handler {
                     } else {
                         msgSB.append("Select the duplicate row return no result, select event is: " + selectEvent);
                     }
+                    //这段代码也可以使用replace语法
                     //构造删除event，并执行event，删除dest的对应重复了的记录
                     RowChangedEvent deleteChangedEvent = getDeleteEvent(changedEvent);
                     mysqlExecutor.execute(deleteChangedEvent);

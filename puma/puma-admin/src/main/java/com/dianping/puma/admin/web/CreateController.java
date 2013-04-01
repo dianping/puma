@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.dianping.puma.admin.config.Config;
 import com.dianping.puma.admin.monitor.SystemStatusContainer;
 import com.dianping.puma.admin.service.DumpTaskService;
 import com.dianping.puma.admin.service.MysqlConfigService;
@@ -256,6 +257,7 @@ public class CreateController {
         //查询所有syncServer
         List<PumaSyncServerConfig> syncServerConfigs = pumaSyncServerConfigService.findAll();
 
+        map.put("errorCodeHandlerMap", Config.getInstance().getErrorCodeHandlerMap());
         map.put("syncServerConfigs", syncServerConfigs);
         map.put("pumaClientName", "SyncTask-" + UUID.randomUUID());
         map.put("createActive", "active");
@@ -271,7 +273,7 @@ public class CreateController {
     @ResponseBody
     public Object createSyncTask(HttpSession session, String syncServerName, String srcMysqlHost, String destMysqlHost,
                                  String binlogFile, String binlogPosition, Boolean ddl, Boolean dml, String pumaClientName,
-                                 Boolean transaction) {
+                                 Boolean transaction, Integer[] errorCodes, String[] handlers) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             //检查参数
@@ -286,6 +288,10 @@ public class CreateController {
             }
             if (StringUtils.isBlank(pumaClientName)) {
                 throw new IllegalArgumentException("pumaClientName不能为空");
+            }
+            if ((errorCodes != null && handlers == null) || (errorCodes == null && handlers != null)
+                    || (errorCodes != null && handlers != null && errorCodes.length != handlers.length)) {
+                throw new IllegalArgumentException("errorCodes长度必须和handlers一致");
             }
             //从session拿出
             DumpTask dumpTask = (DumpTask) session.getAttribute("dumpTask");
@@ -312,6 +318,16 @@ public class CreateController {
                 syncTask.setDestMysqlHost(getMysqlHost(destMysqlConfig, destMysqlHost));
                 syncTask.setServerId(srcMysqlHost0.getServerId());
             }
+            //解析errorCode,handler
+            Map<Integer, String> errorCodeHandlerNames = new HashMap<Integer, String>();
+            if (errorCodes != null) {
+                for (int i = 0; i < errorCodes.length; i++) {
+                    Integer errorCode = errorCodes[i];
+                    String handler = handlers[i];
+                    errorCodeHandlerNames.put(errorCode, handler);
+                }
+            }
+            syncTask.setErrorCodeHandlerNameMap(errorCodeHandlerNames);
             syncTask.setMysqlMapping(mysqlMapping);
             syncTask.setSyncServerName(syncServerName);
             BinlogInfo binlogInfo = new BinlogInfo();

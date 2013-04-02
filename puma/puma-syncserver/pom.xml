@@ -94,6 +94,10 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
+        <dependency>
+            <groupId>commons-dbutils</groupId>
+            <artifactId>commons-dbutils</artifactId>
+        </dependency>
         <!-- SpringMVC & Velocity -->
         <dependency>
             <groupId>org.springframework</groupId>

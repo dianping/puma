@@ -3,11 +3,13 @@ package com.dianping.puma.syncserver.mysql;
 import java.beans.PropertyVetoException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,11 +31,13 @@ public class MysqlExecutor {
 
     private MysqlMapping mysqlMapping;
 
-    public static final int INSERT = 0;
-    public static final int DELETE = 1;
-    public static final int UPDATE = 2;
+    public static final int INSERT = RowChangedEvent.INSERT;
+    public static final int DELETE = RowChangedEvent.DELETE;
+    public static final int UPDATE = RowChangedEvent.UPDATE;
     public static final int REPLACE_INTO = 3;//插入，如果已存在则更新
     private static final int UPDTAE_TO_NULL = 4;//将对应的列都设置为null
+    public static final int SELECT = 5;//查询
+    private static BasicRowProcessor processor = new BasicRowProcessor();
 
     private ComboPooledDataSource dataSource;
     private Connection conn = null;
@@ -62,7 +66,10 @@ public class MysqlExecutor {
         }
     }
 
-    public void execute(ChangedEvent event) throws SQLException {
+    /**
+     * 执行event(如果event是查询，则根据event中的主键的newValue，进行查询，可以返回结果(使用Map)，其他update/insert/delete情况返回null)
+     */
+    public Map<String, Object> execute(ChangedEvent event) throws SQLException {
         if (event instanceof DdlEvent) {
             String sql = ((DdlEvent) event).getSql();
             if (StringUtils.isNotBlank(sql)) {
@@ -74,8 +81,9 @@ public class MysqlExecutor {
                 //jdbcTemplate.update(sql);
             }
         } else if (event instanceof RowChangedEvent) {
-            _execute(mysqlMapping, (RowChangedEvent) event);
+            return _execute((RowChangedEvent) event);
         }
+        return null;
     }
 
     public void commit() throws SQLException {
@@ -102,8 +110,9 @@ public class MysqlExecutor {
         }
     }
 
-    private void _execute(MysqlMapping mysqlMapping, RowChangedEvent rowChangedEvent) throws SQLException {
-        MysqlUpdateStatement mus = convert(mysqlMapping, rowChangedEvent);
+    private Map<String, Object> _execute(RowChangedEvent rowChangedEvent) throws SQLException {
+        Map<String, Object> rowMap = null;
+        MysqlStatement mus = convertStatement(rowChangedEvent);
         if (LOG.isDebugEnabled()) {
             LOG.debug("execute dml sql statement: " + mus);
         }
@@ -118,6 +127,12 @@ public class MysqlExecutor {
                 ps.setObject(i, mus.getArgs()[i - 1]);
             }
             ps.execute();
+            if (rowChangedEvent.getActionType() == SELECT) {
+                ResultSet resultSet = ps.getResultSet();
+                if (resultSet.next()) {
+                    rowMap = processor.toMap(resultSet);
+                }
+            }
         } finally {
             if (ps != null) {
                 try {
@@ -127,13 +142,14 @@ public class MysqlExecutor {
                 }
             }
         }
+        return rowMap;
     }
 
     /**
-     * 将RowChangedEvent转化成MysqlUpdateStatement(Mysql操作对象)
+     * 将RowChangedEvent转化成MysqlStatement(Mysql操作对象)
      */
-    private MysqlUpdateStatement convert(MysqlMapping mysqlMapping, RowChangedEvent rowChangedEvent) {
-        MysqlUpdateStatement mus = new MysqlUpdateStatement();
+    private MysqlStatement convertStatement(RowChangedEvent rowChangedEvent) {
+        MysqlStatement mus = new MysqlStatement();
         RowChangedEvent event = rowChangedEvent.clone();
 
         //获取来源的database,column
@@ -214,6 +230,9 @@ public class MysqlExecutor {
             case REPLACE_INTO:
                 sql = SqlBuildUtil.buildReplaceSql(event);
                 break;
+            case SELECT:
+                sql = SqlBuildUtil.buildSelectSql(event);
+                break;
         }
         return sql;
     }
@@ -259,6 +278,13 @@ public class MysqlExecutor {
                 }
                 for (Map.Entry<String, ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
                     args.add(columnName2ColumnInfo.getValue().getOldValue());
+                }
+                break;
+            case SELECT:
+                for (Map.Entry<String, ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
+                    if (columnName2ColumnInfo.getValue().isKey()) {//select 语句只使用关键字作where条件
+                        args.add(columnName2ColumnInfo.getValue().getNewValue());
+                    }
                 }
                 break;
         }

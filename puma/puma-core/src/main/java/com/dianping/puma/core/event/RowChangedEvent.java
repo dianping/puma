@@ -172,7 +172,12 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
         } catch (CloneNotSupportedException e1) {
             throw new RuntimeException(e1);
         }
-        e.columns = new HashMap<String, RowChangedEvent.ColumnInfo>(columns);
+        e.columns = new HashMap<String, ColumnInfo>();
+        for (Map.Entry<String, ColumnInfo> entry : this.columns.entrySet()) {
+            ColumnInfo columnInfo0 = entry.getValue();
+            ColumnInfo columnInfo = new ColumnInfo(columnInfo0.isKey, columnInfo0.oldValue, columnInfo0.newValue);
+            e.columns.put(entry.getKey(), columnInfo);
+        }
         return e;
     }
 

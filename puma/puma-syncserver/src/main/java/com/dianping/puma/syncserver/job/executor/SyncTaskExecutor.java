@@ -1,5 +1,7 @@
 package com.dianping.puma.syncserver.job.executor;
 
+import java.sql.SQLException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +16,7 @@ public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTask> {
     }
 
     @Override
-    protected void execute(ChangedEvent event) throws Exception {
+    protected void execute(ChangedEvent event) throws SQLException {
         //执行同步
         mysqlExecutor.execute(event);
     }

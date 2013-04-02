@@ -3,6 +3,7 @@ package com.dianping.puma.syncserver.job.executor;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
@@ -26,6 +27,10 @@ import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.task.AbstractTask;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.core.util.DefaultPullStrategy;
+import com.dianping.puma.syncserver.job.executor.failhandler.HandleContext;
+import com.dianping.puma.syncserver.job.executor.failhandler.HandleResult;
+import com.dianping.puma.syncserver.job.executor.failhandler.Handler;
+import com.dianping.puma.syncserver.job.executor.failhandler.HandlerContainer;
 import com.dianping.puma.syncserver.monitor.SystemStatusContainer;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
@@ -68,7 +73,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
      * @param event 事件
      * @throws Exception
      */
-    protected abstract void execute(ChangedEvent event) throws Exception;
+    protected abstract void execute(ChangedEvent event) throws SQLException;
 
     /**
      * 更新sql thread的binlog信息，和保存binlog信息到数据库
@@ -125,7 +130,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     }
 
     @Override
-    public void disconnect(String detail) {
+    public void stop(String detail) {
         try {
             if (transactionStart) {
                 mysqlExecutor.rollback();
@@ -139,7 +144,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         }
         this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
         this.status.setDetail(detail);
-        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] disconnected... cause:" + detail);
+        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] stop... cause:" + detail);
     }
 
     @Override
@@ -160,8 +165,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] succeeded...");
     }
 
-    @Override
-    public void fail(String detail) {
+    private void fail(String detail) {
         try {
             if (transactionStart) {
                 mysqlExecutor.rollback();
@@ -237,17 +241,45 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
             @Override
             public boolean onException(ChangedEvent event, Exception e) {
-                fail(abstractTask.getSrcMysqlName() + "->" + abstractTask.getDestMysqlName() + ":" + e.getMessage() + ". Event="
-                        + event);
-                LOG.error("Print last 10 row change events: " + lastEvents.toString(), e);
-                return false;
+                //针对策略，调用策略的处理
+                boolean ignoreFailEvent = false;
+                if (e instanceof SQLException) {
+                    SQLException se = (SQLException) e;
+                    Integer errorCode = se.getErrorCode();
+                    Map<Integer, String> errorCodeHandlerMap = abstractTask.getErrorCodeHandlerNameMap();
+                    if (errorCodeHandlerMap != null) {
+                        String handlerName = errorCodeHandlerMap.get(errorCode);
+                        if (handlerName != null) {
+                            Handler handler = HandlerContainer.getInstance().getHandler(handlerName);
+                            if (handler != null) {
+                                try {
+                                    LOG.info("Invoke handler(" + handler.getName() + "), event : " + event);
+                                    HandleContext context = new HandleContext();
+                                    context.setMysqlExecutor(mysqlExecutor);
+                                    context.setChangedEvent(event);
+                                    HandleResult handleResult = handler.handle(context);
+                                    ignoreFailEvent = handleResult.isIgnoreFailEvent();
+                                } catch (RuntimeException re) {
+                                    LOG.warn("Unexpected RuntimeException on handler(" + handler.getName()
+                                            + "), ignoreFailEvent keep false.", re);
+                                }
+                            }
+                        }
+                    }
+                }
+                if (!ignoreFailEvent) {
+                    fail(abstractTask.getSrcMysqlName() + "->" + abstractTask.getDestMysqlName() + ":" + e.getMessage()
+                            + ". Event=" + event);
+                    LOG.info("Print last 10 row change events: " + lastEvents.toString());
+                }
+                return ignoreFailEvent;
             }
 
             @Override
             public void onEvent(ChangedEvent event) throws Exception {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("********************Received " + event);
-                }
+//                if (LOG.isDebugEnabled()) {
+//                    LOG.debug("********************Received " + event);
+//                }
                 if (!skipToNextPos) {
                     if (event instanceof RowChangedEvent) {
                         //------------- (1) 【事务开始事件】--------------

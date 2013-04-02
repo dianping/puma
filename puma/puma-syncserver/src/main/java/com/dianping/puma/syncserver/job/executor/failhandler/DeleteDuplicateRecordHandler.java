@@ -39,7 +39,7 @@ public class DeleteDuplicateRecordHandler implements Handler {
                     StringBuilder msgSB = new StringBuilder();
                     //查询重复的记录是什么，发邮件出来
                     RowChangedEvent selectEvent = getSelectEvent(changedEvent);
-                    LOG.info("selectEvent:" + selectEvent);
+                    LOG.info("SelectEvent:" + selectEvent);
                     Map<String, Object> resultMap = mysqlExecutor.execute(selectEvent);
                     if (resultMap != null) {
                         Map<String, Object> rowMap = resultMap;
@@ -50,17 +50,17 @@ public class DeleteDuplicateRecordHandler implements Handler {
                     //这段代码也可以使用replace语法
                     //构造删除event，并执行event，删除dest的对应重复了的记录
                     RowChangedEvent deleteChangedEvent = getDeleteEvent(changedEvent);
-                    LOG.info("deleteChangedEvent:" + deleteChangedEvent);
+                    LOG.info("DeleteChangedEvent:" + deleteChangedEvent);
                     mysqlExecutor.execute(deleteChangedEvent);
-                    msgSB.append("||Delete Event: " + deleteChangedEvent.toString());
+                    msgSB.append("<br/><br/>Delete Event: " + deleteChangedEvent.toString());
                     //重新尝试插入该event
-                    LOG.info("insertChangedEvent:" + changedEvent);
+                    LOG.info("InsertChangedEvent:" + changedEvent);
                     mysqlExecutor.execute(changedEvent);
-                    msgSB.append("||Insert Event: " + changedEvent.toString());
+                    msgSB.append("<br/><br/>Insert Event: " + changedEvent.toString());
                     //成功处理
                     result.setIgnoreFailEvent(true);
 
-                    String msg = "Handle(" + getName() + "): " + msgSB.toString();
+                    String msg = "Handle(" + getName() + "): <br/><br/>" + msgSB.toString();
                     LOG.info(msg);
                     notifyService.alarm(msg, null, false);
                 } catch (SQLException e) {

@@ -42,6 +42,7 @@ import com.dianping.puma.syncserver.util.ProcessBuilderWrapper;
 public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
     private static final Logger LOG = LoggerFactory.getLogger(DumpTaskExecutor.class);
     private final static Pattern BINLOG_LINE_PATTERN = Pattern.compile("^.+LOG_FILE='(.*)',\\s+.+LOG_POS=([0-9]+);$");
+    protected static final String CHARSET = "iso-8859-1";
 
     private final String uuid;
     private final String dumpOutputDir;
@@ -94,8 +95,8 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
                         throw new DumpException("mysqldump output is not empty , so consided to be failed: " + output);
                     }
                     LOG.info("dump done.");
-                    LineIterator lineIterators = IOUtils.lineIterator(new FileInputStream(_getDumpFile(srcDatabaseName)), "UTF-8");
-                    PrintWriter deelFileWriter = new PrintWriter(new File(_getSourceFile(srcDatabaseName)), "UTF-8");
+                    LineIterator lineIterators = IOUtils.lineIterator(new FileInputStream(_getDumpFile(srcDatabaseName)), CHARSET);
+                    PrintWriter deelFileWriter = new PrintWriter(new File(_getSourceFile(srcDatabaseName)), CHARSET);
                     deelFileWriter.println("CREATE DATABASE IF NOT EXISTS " + destDatabaseName + ";USE " + destDatabaseName + ";");//添加select database语句
                     while (lineIterators.hasNext()) {
                         String line = lineIterators.next();
@@ -232,6 +233,7 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         List<String> cmdlist = new ArrayList<String>();
         cmdlist.add("sh");
         cmdlist.add(Config.getInstance().getTempDir() + "/shell/mysqlload.sh");
+        cmdlist.add("--default-character-set=utf8");
         cmdlist.add("--user=" + dumpTask.getDestMysqlHost().getUsername());
         String hostWithPort = dumpTask.getDestMysqlHost().getHost();
         String host = hostWithPort;

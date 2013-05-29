@@ -257,6 +257,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
                                     HandleContext context = new HandleContext();
                                     context.setMysqlExecutor(mysqlExecutor);
                                     context.setChangedEvent(event);
+                                    context.setTask(abstractTask);
                                     HandleResult handleResult = handler.handle(context);
                                     ignoreFailEvent = handleResult.isIgnoreFailEvent();
                                 } catch (RuntimeException re) {
@@ -277,9 +278,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
             @Override
             public void onEvent(ChangedEvent event) throws Exception {
-//                if (LOG.isDebugEnabled()) {
-//                    LOG.debug("********************Received " + event);
-//                }
+                //                if (LOG.isDebugEnabled()) {
+                //                    LOG.debug("********************Received " + event);
+                //                }
                 if (!skipToNextPos) {
                     if (event instanceof RowChangedEvent) {
                         //------------- (1) 【事务开始事件】--------------

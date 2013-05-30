@@ -160,13 +160,14 @@ public class MysqlExecutor {
         //2.根据"来源actionType,database,table,column"和Sync，得到dest的actionType,database,table,column
         List<DatabaseMapping> databases = mysqlMapping.getDatabases();
         DatabaseMapping database = findDatabaseMapping(databases, databaseName);
-        if (database.getTo().equals("*")) {//如果是database匹配*
+
+        if (database.getTo().equalsIgnoreCase("*")) {//如果是database匹配*
             //event就是rowChangedEvent;
         } else {//如果是database不匹配*
             event.setDatabase(database.getTo());
             List<TableMapping> tables = database.getTables();
             TableMapping table = findTableConfig(tables, tableName);
-            if (table.getTo().equals("*")) {//如果是table匹配*
+            if (table.getTo().equalsIgnoreCase("*")) {//如果是table匹配*
                 //如果是*，则和原来的一致
             } else {
                 if (table.getTo().startsWith("#partition")) {//如果是自定义#partition，则计算出table名称
@@ -297,9 +298,9 @@ public class MysqlExecutor {
      */
     private ColumnMapping findColumnMapping(List<ColumnMapping> columnConfigs, String srcColumnName) {
         for (ColumnMapping columnConfig : columnConfigs) {
-            if (StringUtils.equals(srcColumnName, columnConfig.getFrom())) {
+            if (StringUtils.equalsIgnoreCase(srcColumnName, columnConfig.getFrom())) {
                 return columnConfig;
-            } else if (StringUtils.equals("*", columnConfig.getFrom())) {
+            } else if (StringUtils.equalsIgnoreCase("*", columnConfig.getFrom())) {
                 ColumnMapping c = new ColumnMapping();
                 c.setFrom(srcColumnName);
                 c.setTo(srcColumnName);
@@ -315,7 +316,8 @@ public class MysqlExecutor {
      */
     private TableMapping findTableConfig(List<TableMapping> tables, String srcTableName) {
         for (TableMapping tableConfig : tables) {
-            if (StringUtils.equals(srcTableName, tableConfig.getFrom()) || StringUtils.equals("*", tableConfig.getFrom())) {
+            if (StringUtils.equalsIgnoreCase(srcTableName, tableConfig.getFrom())
+                    || StringUtils.equalsIgnoreCase("*", tableConfig.getFrom())) {
                 return tableConfig;
             }
         }
@@ -328,7 +330,8 @@ public class MysqlExecutor {
      */
     private DatabaseMapping findDatabaseMapping(List<DatabaseMapping> databases, String srcDatabaseName) {
         for (DatabaseMapping databaseConfig : databases) {
-            if (StringUtils.equals(srcDatabaseName, databaseConfig.getFrom()) || StringUtils.equals("*", databaseConfig.getFrom())) {
+            if (StringUtils.equalsIgnoreCase(srcDatabaseName, databaseConfig.getFrom())
+                    || StringUtils.equalsIgnoreCase("*", databaseConfig.getFrom())) {
                 return databaseConfig;
             }
         }

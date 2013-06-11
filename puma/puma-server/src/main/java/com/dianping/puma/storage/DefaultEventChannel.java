@@ -56,6 +56,8 @@ public class DefaultEventChannel implements EventChannel {
 
                 if(ele != null){
                 	event = ele.getChangedEvent();
+                }else{
+                	event = null;
                 }
 
             } catch (EOFException e) {

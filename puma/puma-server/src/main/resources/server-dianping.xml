@@ -88,8 +88,9 @@
         <property name="bucketFilePrefix" value="bucket-" />
         <property name="maxBucketLengthMB" value="1000" />
         <property name="baseDir" value="/user/workcron/puma/storage/Dianping/" />
-        <property name="hdfsConfigStr" value="${puma.hdfs.config}" />
+        <property name="hdfsConfig" ref="hdfsConfig" />
     </bean>
+    
 </beans>
 
 

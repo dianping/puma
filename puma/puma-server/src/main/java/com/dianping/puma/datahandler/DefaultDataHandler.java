@@ -44,9 +44,9 @@ import com.dianping.puma.parser.mysql.event.WriteRowsEvent;
  */
 @ThreadUnSafe
 public class DefaultDataHandler extends AbstractDataHandler {
-    private Logger        log    = Logger.getLogger(DefaultDataHandler.class);
-    private TableMetaInfo tableMetaInfo;
-    private int           rowPos = 0;
+    private Logger                   log    = Logger.getLogger(DefaultDataHandler.class);
+    private Map<Long, TableMetaInfo> tableMetaInfos;
+    private int                      rowPos = 0;
 
     @Override
     protected void doProcess(DataHandlerResult result, BinlogEvent binlogEvent, PumaContext context, byte eventType) {
@@ -55,8 +55,16 @@ public class DefaultDataHandler extends AbstractDataHandler {
             case BinlogConstanst.TABLE_MAP_EVENT:
                 TableMapEvent tableMapEvent = (TableMapEvent) binlogEvent;
 
-                tableMetaInfo = getTableMetasInfoFetcher().getTableMetaInfo(tableMapEvent.getDatabaseName(),
-                        tableMapEvent.getTableName());
+                if (tableMetaInfos == null) {
+                    tableMetaInfos = new HashMap<Long, TableMetaInfo>();
+                }
+
+                TableMetaInfo tableMetaInfo = getTableMetasInfoFetcher().getTableMetaInfo(
+                        tableMapEvent.getDatabaseName(), tableMapEvent.getTableName());
+
+                if (tableMetaInfo != null) {
+                    tableMetaInfos.put(tableMapEvent.getTableId(), tableMetaInfo);
+                }
                 if (tableMetaInfo == null) {
                     skipEvent(result, context);
                     return;
@@ -71,7 +79,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 
                 break;
             case BinlogConstanst.WRITE_ROWS_EVENT:
-                if (tableMetaInfo == null) {
+                if (tableMetaInfos == null || tableMetaInfos.isEmpty()) {
                     skipEvent(result, context);
                     return;
                 }
@@ -80,21 +88,21 @@ public class DefaultDataHandler extends AbstractDataHandler {
                 break;
 
             case BinlogConstanst.UPDATE_ROWS_EVENT:
-                if (tableMetaInfo == null) {
+                if (tableMetaInfos == null || tableMetaInfos.isEmpty()) {
                     skipEvent(result, context);
                     return;
                 }
                 processUpdateRowEvent(result, binlogEvent, context);
                 break;
             case BinlogConstanst.DELETE_ROWS_EVENT:
-                if (tableMetaInfo == null) {
+                if (tableMetaInfos == null || tableMetaInfos.isEmpty()) {
                     skipEvent(result, context);
                     return;
                 }
                 processDeleteRowEvent(result, binlogEvent, context);
                 break;
             case BinlogConstanst.XID_EVENT:
-                if (tableMetaInfo == null) {
+                if (tableMetaInfos == null || tableMetaInfos.isEmpty()) {
                     skipEvent(result, context);
                     return;
                 }
@@ -113,11 +121,13 @@ public class DefaultDataHandler extends AbstractDataHandler {
         ChangedEvent dataChangedEvent = new RowChangedEvent();
         ((RowChangedEvent) dataChangedEvent).setTransactionCommit(true);
         dataChangedEvent.setExecuteTime(binlogEvent.getHeader().getTimestamp());
-        dataChangedEvent.setDatabase(tableMetaInfo.getDatabase());
+        dataChangedEvent.setDatabase(tableMetaInfos.values().iterator().next().getDatabase());
 
         result.setData(dataChangedEvent);
         result.setEmpty(false);
         result.setFinished(true);
+        tableMetaInfos.clear();
+        tableMetaInfos = null;
     }
 
     /**
@@ -134,7 +144,14 @@ public class DefaultDataHandler extends AbstractDataHandler {
             result.setFinished(true);
         } else {
             RowChangedEvent rowChangedEvent = new RowChangedEvent();
-            Map<String, ColumnInfo> columns = initColumns(deleteRowsEvent, rowChangedEvent, RowChangedEvent.DELETE);
+            TableMetaInfo tableMetaInfo = tableMetaInfos.get(deleteRowsEvent.getTableId());
+
+            if (tableMetaInfo == null) {
+                skipEvent(result, context);
+                return;
+            }
+            Map<String, ColumnInfo> columns = initColumns(deleteRowsEvent, rowChangedEvent, RowChangedEvent.DELETE,
+                    tableMetaInfo);
 
             for (int columnPos = 0, columnIndex = 0; columnPos < deleteRowsEvent.getColumnCount().intValue(); columnPos++) {
                 if (deleteRowsEvent.getUsedColumns().get(columnPos)) {
@@ -171,7 +188,14 @@ public class DefaultDataHandler extends AbstractDataHandler {
             result.setFinished(true);
         } else {
             RowChangedEvent rowChangedEvent = new RowChangedEvent();
-            Map<String, ColumnInfo> columns = initColumns(updateRowsEvent, rowChangedEvent, RowChangedEvent.UPDATE);
+            TableMetaInfo tableMetaInfo = tableMetaInfos.get(updateRowsEvent.getTableId());
+
+            if (tableMetaInfo == null) {
+                skipEvent(result, context);
+                return;
+            }
+            Map<String, ColumnInfo> columns = initColumns(updateRowsEvent, rowChangedEvent, RowChangedEvent.UPDATE,
+                    tableMetaInfo);
 
             for (int columnPos = 0, columnAfterIndex = 0, columnBeforeIndex = 0; columnPos < updateRowsEvent
                     .getColumnCount().intValue(); columnPos++) {
@@ -218,7 +242,14 @@ public class DefaultDataHandler extends AbstractDataHandler {
             result.setFinished(true);
         } else {
             RowChangedEvent rowChangedEvent = new RowChangedEvent();
-            Map<String, ColumnInfo> columns = initColumns(writeRowsEvent, rowChangedEvent, RowChangedEvent.INSERT);
+            TableMetaInfo tableMetaInfo = tableMetaInfos.get(writeRowsEvent.getTableId());
+
+            if (tableMetaInfo == null) {
+                skipEvent(result, context);
+                return;
+            }
+            Map<String, ColumnInfo> columns = initColumns(writeRowsEvent, rowChangedEvent, RowChangedEvent.INSERT,
+                    tableMetaInfo);
 
             for (int columnPos = 0, columnIndex = 0; columnPos < writeRowsEvent.getColumnCount().intValue(); columnPos++) {
                 if (writeRowsEvent.getUsedColumns().get(columnPos)) {
@@ -306,7 +337,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
     }
 
     private Map<String, ColumnInfo> initColumns(AbstractRowsEvent rowsEvent, RowChangedEvent rowChangedData,
-            int actionType) {
+            int actionType, TableMetaInfo tableMetaInfo) {
         Map<String, ColumnInfo> columns = new HashMap<String, ColumnInfo>();
         rowChangedData.setActionType(actionType);
         rowChangedData.setExecuteTime(rowsEvent.getHeader().getTimestamp());

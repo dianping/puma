@@ -99,32 +99,36 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
         if (value != null) {
             switch (tableMeta.getRawTypeCodes().get(pos)) {
                 case BinlogConstanst.MYSQL_TYPE_TINY:
-                    if ((Integer) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
+                    if ((value instanceof Integer) && (Integer) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
                         newValue = Integer.valueOf((Integer) value + (1 << 8));
                     }
                     break;
                 case BinlogConstanst.MYSQL_TYPE_INT24:
-                    if ((Integer) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
+                    if ((value instanceof Integer) && (Integer) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
                         newValue = Integer.valueOf((Integer) value + (1 << 24));
                     }
                     break;
                 case BinlogConstanst.MYSQL_TYPE_SHORT:
-                    if ((Integer) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
+                    if ((value instanceof Integer) && (Integer) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
                         newValue = Integer.valueOf((Integer) value + (1 << 16));
                     }
                     break;
                 case BinlogConstanst.MYSQL_TYPE_INT:
-                    if ((Integer) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
+                    if ((value instanceof Integer) && (Integer) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
                         newValue = Long.valueOf((Integer) value) + (1L << 32);
                     } else {
-                        newValue = Long.valueOf((Integer) value);
+                        if (value instanceof Integer) {
+                            newValue = Long.valueOf((Integer) value);
+                        }
                     }
                     break;
                 case BinlogConstanst.MYSQL_TYPE_LONGLONG:
-                    if ((Long) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
+                    if ((value instanceof Long) && (Long) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
                         newValue = BigInteger.valueOf((Long) value).add(BigInteger.ONE.shiftLeft(64));
                     } else {
-                        newValue = BigInteger.valueOf((Long) value);
+                        if (value instanceof Long) {
+                            newValue = BigInteger.valueOf((Long) value);
+                        }
                     }
                     break;
                 default:

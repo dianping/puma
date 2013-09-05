@@ -140,7 +140,9 @@ public class DefaultDataHandler extends AbstractDataHandler {
                 if (deleteRowsEvent.getUsedColumns().get(columnPos)) {
                     Column binlogColumn = deleteRowsEvent.getRows().get(rowPos).getColumns().get(columnIndex);
                     String columnName = tableMetaInfo.getColumns().get(columnPos + 1);
-                    checkUnknownColumnName(context, columnName, columnPos + 1);
+                    if (!checkUnknownColumnName(result, context, columnName, columnPos + 1)) {
+                        return;
+                    }
                     ColumnInfo columnInfo = new ColumnInfo(tableMetaInfo.getKeys().contains(columnName),
                             convertUnsignedValueIfNeeded(columnPos + 1, binlogColumn.getValue(), tableMetaInfo), null);
                     columns.put(columnName, columnInfo);
@@ -174,7 +176,9 @@ public class DefaultDataHandler extends AbstractDataHandler {
             for (int columnPos = 0, columnAfterIndex = 0, columnBeforeIndex = 0; columnPos < updateRowsEvent
                     .getColumnCount().intValue(); columnPos++) {
                 String columnName = tableMetaInfo.getColumns().get(columnPos + 1);
-                checkUnknownColumnName(context, columnName, columnPos + 1);
+                if (!checkUnknownColumnName(result, context, columnName, columnPos + 1)) {
+                    return;
+                }
                 Column afterColumn = null;
                 Column beforeColumn = null;
                 if (updateRowsEvent.getUsedColumnsAfter().get(columnPos)) {
@@ -220,7 +224,9 @@ public class DefaultDataHandler extends AbstractDataHandler {
                 if (writeRowsEvent.getUsedColumns().get(columnPos)) {
                     Column binlogColumn = writeRowsEvent.getRows().get(rowPos).getColumns().get(columnIndex);
                     String columnName = tableMetaInfo.getColumns().get(columnPos + 1);
-                    checkUnknownColumnName(context, columnName, columnPos + 1);
+                    if (!checkUnknownColumnName(result, context, columnName, columnPos + 1)) {
+                        return;
+                    }
                     ColumnInfo columnInfo = new ColumnInfo(tableMetaInfo.getKeys().contains(columnName), null,
                             convertUnsignedValueIfNeeded(columnPos + 1, binlogColumn.getValue(), tableMetaInfo));
                     columns.put(columnName, columnInfo);
@@ -235,7 +241,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
         }
     }
 
-    protected void checkUnknownColumnName(PumaContext context, String columnName, int pos) {
+    protected boolean checkUnknownColumnName(DataHandlerResult result, PumaContext context, String columnName, int pos) {
         if (columnName == null) {
             StringBuilder msg = new StringBuilder();
             msg.append("Unknown column for Binlog:  ").append(context.getBinlogFileName()).append(" BinlogPos: ")
@@ -245,7 +251,13 @@ public class DefaultDataHandler extends AbstractDataHandler {
             if (getNotifyService() != null) {
                 getNotifyService().alarm(msg.toString(), null, false);
             }
+
+            skipEvent(result, context);
+
+            return false;
         }
+
+        return true;
     }
 
     protected void skipEvent(DataHandlerResult result, PumaContext context) {

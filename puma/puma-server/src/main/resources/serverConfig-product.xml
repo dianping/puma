@@ -10,12 +10,12 @@
 		<constructor-arg>
 			<list>
 				<ref bean="server-dianping" />
-				<ref bean="server-dianpingMC" />
+				<ref bean="server-tuangou2010" />
 			</list>
 		</constructor-arg>
 	</bean>
 
 	<import resource="server-dianping.xml" />
-	<import resource="server-dianpingMC.xml" />
+	<import resource="server-tuangou2010.xml" />
 
 </beans>

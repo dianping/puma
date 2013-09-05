@@ -64,11 +64,11 @@ public class DefaultDataHandler extends AbstractDataHandler {
 
                 if (tableMetaInfo != null) {
                     tableMetaInfos.put(tableMapEvent.getTableId(), tableMetaInfo);
-                }
-                if (tableMetaInfo == null) {
+                } else {
                     skipEvent(result, context);
                     return;
                 }
+
                 fillRawTypeCodes(tableMapEvent, tableMetaInfo);
                 fillRawNullAbilities(tableMapEvent, tableMetaInfo);
 
@@ -143,13 +143,14 @@ public class DefaultDataHandler extends AbstractDataHandler {
             result.setEmpty(true);
             result.setFinished(true);
         } else {
-            RowChangedEvent rowChangedEvent = new RowChangedEvent();
             TableMetaInfo tableMetaInfo = tableMetaInfos.get(deleteRowsEvent.getTableId());
 
             if (tableMetaInfo == null) {
                 skipEvent(result, context);
                 return;
             }
+
+            RowChangedEvent rowChangedEvent = new RowChangedEvent();
             Map<String, ColumnInfo> columns = initColumns(deleteRowsEvent, rowChangedEvent, RowChangedEvent.DELETE,
                     tableMetaInfo);
 
@@ -187,13 +188,14 @@ public class DefaultDataHandler extends AbstractDataHandler {
             result.setEmpty(true);
             result.setFinished(true);
         } else {
-            RowChangedEvent rowChangedEvent = new RowChangedEvent();
             TableMetaInfo tableMetaInfo = tableMetaInfos.get(updateRowsEvent.getTableId());
 
             if (tableMetaInfo == null) {
                 skipEvent(result, context);
                 return;
             }
+
+            RowChangedEvent rowChangedEvent = new RowChangedEvent();
             Map<String, ColumnInfo> columns = initColumns(updateRowsEvent, rowChangedEvent, RowChangedEvent.UPDATE,
                     tableMetaInfo);
 
@@ -241,13 +243,14 @@ public class DefaultDataHandler extends AbstractDataHandler {
             result.setEmpty(true);
             result.setFinished(true);
         } else {
-            RowChangedEvent rowChangedEvent = new RowChangedEvent();
             TableMetaInfo tableMetaInfo = tableMetaInfos.get(writeRowsEvent.getTableId());
 
             if (tableMetaInfo == null) {
                 skipEvent(result, context);
                 return;
             }
+
+            RowChangedEvent rowChangedEvent = new RowChangedEvent();
             Map<String, ColumnInfo> columns = initColumns(writeRowsEvent, rowChangedEvent, RowChangedEvent.INSERT,
                     tableMetaInfo);
 

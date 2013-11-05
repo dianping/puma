@@ -15,7 +15,8 @@
  */
 package com.dianping.puma.storage;
 
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+
 
 /**
  * TODO Comment of LongIndexItemConvertor
@@ -29,7 +30,7 @@ public class LongIndexItemConvertor implements IndexItemConvertor<Long> {
      */
     @Override
     public Long convertFromString(String stringValue) {
-        if(StringUtils.isNumeric(stringValue)){
+        if(NumberUtils.isNumber(stringValue)){
             return Long.valueOf(stringValue);
         }
         return null;

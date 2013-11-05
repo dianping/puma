@@ -1,5 +1,6 @@
 package com.dianping.puma.syncserver.job.executor;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +8,9 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,21 +38,21 @@ import com.dianping.puma.syncserver.monitor.SystemStatusContainer;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
 public abstract class AbstractTaskExecutor<T extends AbstractTask> implements TaskExecutor<T>, SpeedControllable {
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractTaskExecutor.class);
+    private static final Logger  LOG              = LoggerFactory.getLogger(AbstractTaskExecutor.class);
 
-    protected T abstractTask;
-    protected PumaClient pumaClient;
-    protected MysqlExecutor mysqlExecutor;
-    protected String pumaServerHost;
-    protected int pumaServerPort;
-    protected String target;
+    protected T                  abstractTask;
+    protected PumaClient         pumaClient;
+    protected MysqlExecutor      mysqlExecutor;
+    protected String             pumaServerHost;
+    protected int                pumaServerPort;
+    protected String             target;
     protected TaskExecutorStatus status;
     /** 标识对目标数据库的会话。是否已经开始了事务（如果是，可能需要commmit或rollback否则由于数据库是可重复读级别，会一直锁住数据库。当开始insert/update/delete操作，无论执行是否成功，都已经开始事务） */
-    private boolean transactionStart = false;
+    private boolean              transactionStart = false;
 
-    private long sleepTime = 0;
+    private long                 sleepTime        = 0;
 
-    private CircularFifoBuffer lastEvents = new CircularFifoBuffer(10);
+    private CircularFifoBuffer   lastEvents       = new CircularFifoBuffer(10);
 
     public AbstractTaskExecutor(T abstractTask, String pumaServerHost, int pumaServerPort, String target) {
         this.abstractTask = abstractTask;
@@ -62,8 +65,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         //        BinlogInfo startedBinlogInfo = abstractTask.getBinlogInfo();
         //初始化mysqlExecutor
         LOG.info("initing MysqlExecutor...");
-        mysqlExecutor = new MysqlExecutor(abstractTask.getDestMysqlHost().getHost(), abstractTask.getDestMysqlHost().getUsername(),
-                abstractTask.getDestMysqlHost().getPassword());
+        mysqlExecutor = new MysqlExecutor(abstractTask.getDestMysqlHost().getHost(), abstractTask.getDestMysqlHost().getUsername(), abstractTask.getDestMysqlHost().getPassword());
         mysqlExecutor.setMysqlMapping(abstractTask.getMysqlMapping());
     }
 
@@ -220,17 +222,36 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         Configuration configuration = configBuilder.build();
         LOG.info("PumaClient's config is: " + configuration);
         PumaClient pumaClient = new PumaClient(configuration);
-        if (startedBinlogInfo != null) {
-            pumaClient.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_BINLOGINFO);
+
+        //读取本地文件，获取seq
+        Long seq = null;
+        File file = new File("/data/appdatas/puma-syncserver/" + abstractTask.getPumaClientName() + "/seq");
+        if (file.exists()) {
+            try {
+                seq = NumberUtils.toLong(StringUtils.trim(FileUtils.readFileToString(file)));
+                LOG.info("PumaClient[" + abstractTask.getPumaClientName() + "] Read from file, Seq is:" + seq);
+                FileUtils.deleteQuietly(file);
+            } catch (Exception e1) {
+                LOG.warn("File error, igore this seq settiing.", e1);
+            }
         }
+        if (seq == null && startedBinlogInfo != null) {
+            seq = SubscribeConstant.SEQ_FROM_BINLOGINFO;
+        }
+        if (seq == null) {
+            seq = SubscribeConstant.SEQ_FROM_LATEST;
+        }
+        LOG.info("PumaClient[" + abstractTask.getPumaClientName() + "] Seq is:" + seq);
+        pumaClient.getSeqFileHolder().saveSeq(seq);
+
         //注册监听器
         pumaClient.register(new EventListener() {
 
             private DefaultPullStrategy defaultPullStrategy = new DefaultPullStrategy(500, 10000);
             /** 记录一个收到多少个commit事件 */
-            private int commitBinlogCount = 0;
+            private int                 commitBinlogCount   = 0;
             /** 对于PumaClient记录的binlog，需要在一开始skip */
-            private boolean skipToNextPos = startedBinlogInfo.isSkipToNextPos();
+            private boolean             skipToNextPos       = startedBinlogInfo.isSkipToNextPos();
 
             @Override
             public void onSkipEvent(ChangedEvent event) {
@@ -261,16 +282,14 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
                                     HandleResult handleResult = handler.handle(context);
                                     ignoreFailEvent = handleResult.isIgnoreFailEvent();
                                 } catch (RuntimeException re) {
-                                    LOG.warn("Unexpected RuntimeException on handler(" + handler.getName()
-                                            + "), ignoreFailEvent keep false.", re);
+                                    LOG.warn("Unexpected RuntimeException on handler(" + handler.getName() + "), ignoreFailEvent keep false.", re);
                                 }
                             }
                         }
                     }
                 }
                 if (!ignoreFailEvent) {
-                    fail(abstractTask.getSrcMysqlName() + "->" + abstractTask.getDestMysqlName() + ":" + e.getMessage()
-                            + ". Event=" + event);
+                    fail(abstractTask.getSrcMysqlName() + "->" + abstractTask.getDestMysqlName() + ":" + e.getMessage() + ". Event=" + event);
                     LOG.info("Print last 10 row change events: " + lastEvents.toString());
                 }
                 return ignoreFailEvent;
@@ -333,8 +352,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
             @Override
             public void onConnectException(Exception e) {
                 status.setStatus(TaskExecutorStatus.Status.RECONNECTING);
-                String detail = abstractTask.getSrcMysqlName() + "->" + abstractTask.getDestMysqlName()
-                        + ":PumaClient connected failed, reconnecting...";
+                String detail = abstractTask.getSrcMysqlName() + "->" + abstractTask.getDestMysqlName() + ":PumaClient connected failed, reconnecting...";
                 status.setDetail(detail);
                 LOG.error(detail, e);
                 defaultPullStrategy.fail(true);
@@ -423,10 +441,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
     @Override
     public String toString() {
-        return "AbstractTaskExecutor [abstractTask=" + abstractTask + ", pumaClient=" + pumaClient + ", mysqlExecutor="
-                + mysqlExecutor + ", pumaServerHost=" + pumaServerHost + ", pumaServerPort=" + pumaServerPort + ", target="
-                + target + ", status=" + status + ", transactionStart=" + transactionStart + ", sleepTime=" + sleepTime
-                + ", lastEvents=" + lastEvents + "]";
+        return "AbstractTaskExecutor [abstractTask=" + abstractTask + ", pumaClient=" + pumaClient + ", mysqlExecutor=" + mysqlExecutor + ", pumaServerHost=" + pumaServerHost + ", pumaServerPort="
+                + pumaServerPort + ", target=" + target + ", status=" + status + ", transactionStart=" + transactionStart + ", sleepTime=" + sleepTime + ", lastEvents=" + lastEvents + "]";
     }
 
     private int getSaveCommitCount() {

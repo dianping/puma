@@ -62,22 +62,6 @@ public class DefaultDataIndexTest {
 
     @Test
     public void testFind() throws IOException {
-        createL1IndexFile(new String[] { "0=1000", "6=2000" });
-        Map<String, String[]> l2IndexFiles = new HashMap<String, String[]>();
-        l2IndexFiles.put("1000", new String[] { "0=10000", "1=10001", "2=10002", "3=10003", "4=10004", "5=10005" });
-        l2IndexFiles.put("2000", new String[] { "6=10006", "7=10007", "8=10008", "9=10009", "10=10010", "11=10011" });
-        createL2IndexFile(l2IndexFiles);
-        DefaultDataIndexImpl<TimeStampIndexKey, Long> index = new DefaultDataIndexImpl<TimeStampIndexKey, Long>(
-                baseDir.getAbsolutePath(), new LongIndexItemConvertor(), new TimeStampIndexKeyConvertor());
-        index.start();
-        Assert.assertEquals(10005L, index.find(new TimeStampIndexKey(5)).longValue());
-        Assert.assertEquals(10011L, index.find(new TimeStampIndexKey(11)).longValue());
-        Assert.assertEquals(10000L, index.find(new TimeStampIndexKey(0)).longValue());
-        Assert.assertEquals(10006L, index.find(new TimeStampIndexKey(6)).longValue());
-    }
-
-    @Test
-    public void testFind2() throws IOException {
         createL1IndexFile(new String[] { "0!binlog01!0=1000", "0!binlog02!0=2000" });
         Map<String, String[]> l2IndexFiles = new HashMap<String, String[]>();
         l2IndexFiles.put("1000", new String[] { "0!binlog01!0=10000", "0!binlog01!1=10001", "0!binlog01!2=10002",

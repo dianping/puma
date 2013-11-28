@@ -15,7 +15,9 @@
  */
 package com.dianping.puma.api;
 
+import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.RowChangedEvent;
 
 /**
  * @author Leo Liang
@@ -23,20 +25,25 @@ import com.dianping.puma.core.event.ChangedEvent;
 public class TestApi {
     public static void main(String[] args) {
         ConfigurationBuilder configBuilder = new ConfigurationBuilder();
-        configBuilder.ddl(true);
+        configBuilder.ddl(false);
         configBuilder.dml(true);
-        configBuilder.host("127.0.0.1");
-        configBuilder.port(7862);
-        configBuilder.serverId(1111);
-        configBuilder.name("testClient");
-        configBuilder.tables("Cat", "*");
-        configBuilder.target("7-43");
-        configBuilder.timeStamp(1351202896L);
-        configBuilder.transaction(true);
-        PumaClient pc = new PumaClient(configBuilder.build());
-        pc.register(new EventListener() {
 
-            private long time = -1L;
+        configBuilder.host("10.1.6.127");
+        configBuilder.port(80);
+        configBuilder.target("dianping");
+
+        configBuilder.serverId(3013306121L);
+        configBuilder.binlog("mysql-bin.003320");
+        configBuilder.binlogPos(417592256L);
+        configBuilder.name("testClient");
+
+        configBuilder.tables("Dianping", "*");
+        configBuilder.transaction(false);
+
+        PumaClient pc = new PumaClient(configBuilder.build());
+        pc.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_BINLOGINFO);
+
+        pc.register(new EventListener() {
 
             @Override
             public void onSkipEvent(ChangedEvent event) {
@@ -51,10 +58,13 @@ public class TestApi {
 
             @Override
             public void onEvent(ChangedEvent event) throws Exception {
-                if (time == -1L || time != event.getExecuteTime()) {
-                    time = event.getExecuteTime();
+                // biz logic
+                if (event instanceof RowChangedEvent) {
+                    RowChangedEvent rce = (RowChangedEvent) event;
+                    if (rce.getTable().equals("TG_Order") && rce.getActionType() == RowChangedEvent.INSERT) {
+                        System.out.println(rce);
+                    }
                 }
-                System.out.println("********************Received " + event);
 
             }
 

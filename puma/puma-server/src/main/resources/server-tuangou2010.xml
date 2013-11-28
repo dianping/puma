@@ -42,11 +42,11 @@
     </bean>
 
     <bean id="archiveStrategy-tuangou2010" class="com.dianping.puma.storage.DefaultArchiveStrategy">
-        <property name="maxMasterFileCount" value="10" />
+        <property name="maxMasterFileCount" value="50" />
     </bean>
 
     <bean id="cleanupStrategy-tuangou2010" class="com.dianping.puma.storage.DefaultCleanupStrategy">
-        <property name="preservedDay" value="14" />
+        <property name="preservedDay" value="5" />
     </bean>
 
     <bean id="tableMetasInfoFetcher-tuangou2010"

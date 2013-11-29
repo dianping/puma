@@ -73,8 +73,6 @@
         <property name="name" value="storage-tuangou2010" />
         <property name="binlogIndexBaseDir"
             value="/data/appdatas/puma/binlogIndex/tuangou2010/" />
-        <property name="timeStampIndexBaseDir"
-            value="/data/appdatas/puma/timeStampIndex/tuangou2010/" />
     </bean>
 
     <bean id="localBucketIndex-tuangou2010" class="com.dianping.puma.storage.LocalFileBucketIndex"

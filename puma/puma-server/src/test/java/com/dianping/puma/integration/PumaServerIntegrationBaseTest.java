@@ -172,7 +172,6 @@ public abstract class PumaServerIntegrationBaseTest {
         storage.setMasterBucketIndex(masterIndex);
         storage.setSlaveBucketIndex(slaveIndex);
         storage.setBinlogIndexBaseDir(binlogIndexBaseDir.getAbsolutePath());
-        storage.setTimeStampIndexBaseDir(timeStampIndexBaseDir.getAbsolutePath());
         storage.start();
 
         // init sender

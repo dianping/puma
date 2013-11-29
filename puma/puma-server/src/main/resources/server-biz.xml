@@ -63,7 +63,6 @@
 		<property name="cleanupStrategy" ref="cleanupStrategy-biz" />
 		<property name="name" value="storage-biz" />
 		<property name="binlogIndexBaseDir" value="/data/appdatas/puma/binlogIndex/biz/" />
-		<property name="timeStampIndexBaseDir" value="/data/appdatas/puma/timeStampIndex/biz/" />
 	</bean>
 
 	<bean id="localBucketIndex-biz" class="com.dianping.puma.storage.LocalFileBucketIndex" init-method="start">

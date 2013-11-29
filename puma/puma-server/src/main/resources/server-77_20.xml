@@ -13,7 +13,7 @@
         <property name="user" value="binlog" />
         <property name="password" value="binlog" />
         <property name="defaultBinlogFileName" value="host_77-20.005160" />
-        <property name="defaultBinlogPosition" value="992126036" />
+        <property name="defaultBinlogPosition" value="4" />
         <property name="parser" ref="defaultParser-77_20" />
         <property name="serverId" value="8887" />
         <property name="dataHandler" ref="datahandler-77_20" />

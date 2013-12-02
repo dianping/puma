@@ -104,9 +104,9 @@ public class Handler implements PageHandler<Context> {
                         res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
                         res.getOutputStream().write(data);
                         res.getOutputStream().flush();
+                        // status report
+                        SystemStatusContainer.instance.updateClientSeq(payload.getClientName(), event.getSeq());
                     }
-                    // status report
-                    SystemStatusContainer.instance.updateClientSeq(payload.getClientName(), event.getSeq());
                 }
             } catch (Exception e) {
                 try {
@@ -121,6 +121,7 @@ public class Handler implements PageHandler<Context> {
         }
 
         channel.close();
+        SystemStatusContainer.instance.removeClient(payload.getClientName());
         long end = System.currentTimeMillis();
         String ipAddress = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
         Cat.getProducer().logEvent("ChannelClosed", ipAddress, Message.SUCCESS, "duration=" + (end - start));

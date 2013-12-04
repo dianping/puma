@@ -50,7 +50,7 @@ public class BufferedEventChannel implements EventChannel {
     private void extract() {
         while (!stopped) {
             try {
-                eventBuffer.offer(eventChannel.next());
+                eventBuffer.put(eventChannel.next());
             } catch (Throwable e) {
             }
         }

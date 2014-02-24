@@ -73,8 +73,6 @@
         <property name="name" value="storage-dianping-qa" />
         <property name="binlogIndexBaseDir"
             value="/data/appdatas/puma/binlogIndex/dianping-qa/" />
-        <property name="timeStampIndexBaseDir"
-            value="/data/appdatas/puma/timeStampIndex/dianping-qa/" />
     </bean>
 
     <bean id="localBucketIndex-dianping-qa" class="com.dianping.puma.storage.LocalFileBucketIndex"
@@ -90,7 +88,7 @@
         <property name="maxBucketLengthMB" value="1000" />
         <property name="baseDir"
             value="/user/workcron/puma/storage/dianping-qa/" />
-        <property name="hdfsConfigStr" value="${puma.hdfs.config}" />
+        <property name="hdfsConfig" ref="hdfsConfig" />
     </bean>
 </beans>
 

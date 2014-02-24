@@ -162,7 +162,7 @@ public abstract class AbstractBucket implements Bucket {
         checkClosed();
         return doHasRemainingForWrite();
     }
-    
+
     protected boolean readable() throws IOException {
         while (dataLengthBuf.hasRemaining()) {
             int b = input.read();
@@ -195,8 +195,9 @@ public abstract class AbstractBucket implements Bucket {
             throw new IOException(String.format("Seek %d pos failed(%s).", pos, getFileName()));
         }
 
-        for (int i = 0; i < pos; i++) {
-            input.read();
+        int count = pos;
+        while (count > 0) {
+            count -= input.skipBytes(count);
         }
 
     }

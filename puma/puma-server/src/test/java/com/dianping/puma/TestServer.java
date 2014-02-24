@@ -154,7 +154,7 @@ public class TestServer {
 	@Test
 	public void test() throws Exception {
 		// open the page in the default browser
-		display("/puma/channel/status");
+//		display("/puma/channel/status");
 
 		System.out.println(String.format("[%s] [INFO] Press any key to stop server ... ", getTimestamp()));
 		System.in.read();

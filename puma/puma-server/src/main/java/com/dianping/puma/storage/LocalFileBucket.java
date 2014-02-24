@@ -1,5 +1,6 @@
 package com.dianping.puma.storage;
 
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,6 +16,7 @@ import java.util.zip.GZIPInputStream;
  */
 public class LocalFileBucket extends AbstractBucket {
 
+    private static final int BUF_SIZE = 1024 * 4;
     private RandomAccessFile file;
 
     public LocalFileBucket(File file, Sequence startingSequence, int maxSizeMB, String fileName, boolean compress)
@@ -22,9 +24,9 @@ public class LocalFileBucket extends AbstractBucket {
         super(startingSequence, maxSizeMB, fileName, compress);
         this.file = new RandomAccessFile(file, "rw");
         if (!compress) {
-            input = new DataInputStream(new FileInputStream(file));
+            input = new DataInputStream(new BufferedInputStream(new FileInputStream(file), BUF_SIZE));
         } else {
-            input = new DataInputStream(new GZIPInputStream(new FileInputStream(file)));
+            input = new DataInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(file), BUF_SIZE)));
         }
     }
 

@@ -20,6 +20,7 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.filter.EventFilterChainFactory;
+import com.dianping.puma.storage.BufferedEventChannel;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.EventStorage;
 import com.dianping.puma.storage.exception.StorageException;
@@ -84,7 +85,8 @@ public class Handler implements PageHandler<Context> {
         EventStorage storage = ComponentContainer.SPRING.lookup("storage-" + payload.getTarget(), EventStorage.class);
         EventChannel channel;
         try {
-            channel = storage.getChannel(seq, serverId, binlogFile, binlogPos, timeStamp);
+            channel = new BufferedEventChannel(storage.getChannel(seq, serverId, binlogFile, binlogPos, timeStamp),
+                    5000);
         } catch (StorageException e1) {
             log.error(e1.getMessage(), e1);
             throw new IOException(e1);
@@ -96,13 +98,15 @@ public class Handler implements PageHandler<Context> {
             try {
                 filterChain.reset();
                 ChangedEvent event = channel.next();
-                if (filterChain.doNext(event)) {
-                    byte[] data = codec.encode(event);
-                    res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
-                    res.getOutputStream().write(data);
-                    res.getOutputStream().flush();
-                    // status report
-                    SystemStatusContainer.instance.updateClientSeq(payload.getClientName(), event.getSeq());
+                if (event != null) {
+                    if (filterChain.doNext(event)) {
+                        byte[] data = codec.encode(event);
+                        res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
+                        res.getOutputStream().write(data);
+                        res.getOutputStream().flush();
+                        // status report
+                        SystemStatusContainer.instance.updateClientSeq(payload.getClientName(), event.getSeq());
+                    }
                 }
             } catch (Exception e) {
                 try {
@@ -116,6 +120,8 @@ public class Handler implements PageHandler<Context> {
             }
         }
 
+        channel.close();
+        SystemStatusContainer.instance.removeClient(payload.getClientName());
         long end = System.currentTimeMillis();
         String ipAddress = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
         Cat.getProducer().logEvent("ChannelClosed", ipAddress, Message.SUCCESS, "duration=" + (end - start));

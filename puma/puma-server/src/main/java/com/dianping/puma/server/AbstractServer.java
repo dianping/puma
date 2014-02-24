@@ -42,6 +42,8 @@ public abstract class AbstractServer implements Server, Notifiable {
     private volatile boolean       stop     = false;
     protected BinlogPositionHolder binlogPositionHolder;
 
+    protected String               name;
+
     /**
      * @param binlogPositionHolder
      *            the binlogPositionHolder to set
@@ -138,7 +140,15 @@ public abstract class AbstractServer implements Server, Notifiable {
         return String.valueOf(serverId);
     }
 
-    /*
+    public String getName() {
+   	return name;
+   }
+
+	public void setName(String name) {
+   	this.name = name;
+   }
+
+	/*
      * (non-Javadoc)
      * 
      * @see com.dianping.puma.server.Server#stop()

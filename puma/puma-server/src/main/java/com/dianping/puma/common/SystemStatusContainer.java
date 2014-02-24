@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -35,6 +36,7 @@ public enum SystemStatusContainer {
 	private ConcurrentMap<String, AtomicLong>	serverParsedRowDeleteCount	= new ConcurrentHashMap<String, AtomicLong>();
 	private ConcurrentMap<String, AtomicLong>	serverParsedRowInsertCount	= new ConcurrentHashMap<String, AtomicLong>();
 	private ConcurrentMap<String, AtomicLong>	serverParsedDdlCount		= new ConcurrentHashMap<String, AtomicLong>();
+	private ConcurrentMap<String, AtomicBoolean>	 stopTheWorlds		= new ConcurrentHashMap<String, AtomicBoolean>();
 
 	public void updateServerStatus(String name, String host, int port, String db, String binlogFile, long binlogPos) {
 		serverStatus.put(name, new ServerStatus(binlogFile, binlogPos, host, port, db));
@@ -248,4 +250,18 @@ public enum SystemStatusContainer {
 		}
 
 	}
+
+	public boolean isStopTheWorld(String serverName) {
+		AtomicBoolean stopTheWorld = stopTheWorlds.get(serverName);
+		return (stopTheWorld != null) ? stopTheWorld.get() : false;
+	}
+	
+	public void stopTheWorld(String serverName){
+		stopTheWorlds.put(serverName, new AtomicBoolean(true));
+	}
+
+	public void startTheWorld(String serverName){
+		stopTheWorlds.put(serverName, new AtomicBoolean(false));
+	}
+
 }

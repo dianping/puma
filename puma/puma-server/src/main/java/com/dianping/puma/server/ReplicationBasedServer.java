@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -113,6 +114,14 @@ public class ReplicationBasedServer extends AbstractServer {
 
     private void processBinlog() throws IOException {
         while (!isStop()) {
+      	   if(SystemStatusContainer.instance.isStopTheWorld(this.getName())){
+      	   	try{
+      	   		TimeUnit.SECONDS.sleep(1);
+      	   	}catch(InterruptedException e){
+      	   		//ignore
+      	   	}
+      	   }
+
             BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(is, PacketType.BINLOG_PACKET,
                     getContext());
             if (!binlogPacket.isOk()) {

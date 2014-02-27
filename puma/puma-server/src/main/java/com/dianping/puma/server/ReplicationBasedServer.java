@@ -114,6 +114,7 @@ public class ReplicationBasedServer extends AbstractServer {
 
     private void processBinlog() throws IOException {
         while (!isStop()) {
+      	   // only slow down parsing, not stop
       	   if(SystemStatusContainer.instance.isStopTheWorld(this.getName())){
       	   	try{
       	   		TimeUnit.SECONDS.sleep(1);

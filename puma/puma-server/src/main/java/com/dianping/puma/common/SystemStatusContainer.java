@@ -22,6 +22,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.dianping.cat.Cat;
+
 /**
  * @author Leo Liang
  * 
@@ -29,14 +31,23 @@ import java.util.concurrent.atomic.AtomicLong;
 public enum SystemStatusContainer {
 	instance;
 
-	private Map<String, ServerStatus>			serverStatus				= new ConcurrentHashMap<String, ServerStatus>();
-	private Map<String, ClientStatus>			clientStatus				= new ConcurrentHashMap<String, ClientStatus>();
-	private Map<String, Long>					storageStatus				= new ConcurrentHashMap<String, Long>();
-	private ConcurrentMap<String, AtomicLong>	serverParsedRowUpdateCount	= new ConcurrentHashMap<String, AtomicLong>();
-	private ConcurrentMap<String, AtomicLong>	serverParsedRowDeleteCount	= new ConcurrentHashMap<String, AtomicLong>();
-	private ConcurrentMap<String, AtomicLong>	serverParsedRowInsertCount	= new ConcurrentHashMap<String, AtomicLong>();
-	private ConcurrentMap<String, AtomicLong>	serverParsedDdlCount		= new ConcurrentHashMap<String, AtomicLong>();
-	private ConcurrentMap<String, AtomicBoolean>	 stopTheWorlds		= new ConcurrentHashMap<String, AtomicBoolean>();
+	private Map<String, ServerStatus> serverStatus = new ConcurrentHashMap<String, ServerStatus>();
+
+	private Map<String, ClientStatus> clientStatus = new ConcurrentHashMap<String, ClientStatus>();
+
+	private Map<String, Long> storageStatus = new ConcurrentHashMap<String, Long>();
+
+	private ConcurrentMap<String, AtomicLong> serverParsedRowUpdateCount = new ConcurrentHashMap<String, AtomicLong>();
+
+	private ConcurrentMap<String, AtomicLong> serverParsedRowDeleteCount = new ConcurrentHashMap<String, AtomicLong>();
+
+	private ConcurrentMap<String, AtomicLong> serverParsedRowInsertCount = new ConcurrentHashMap<String, AtomicLong>();
+
+	private ConcurrentMap<String, AtomicLong> serverParsedDdlCount = new ConcurrentHashMap<String, AtomicLong>();
+
+	private ConcurrentMap<String, AtomicBoolean> stopTheWorlds = new ConcurrentHashMap<String, AtomicBoolean>();
+	
+	private static final String CAT_KEY_EVENT_PARSED = "EventParsed-";
 
 	public void updateServerStatus(String name, String host, int port, String db, String binlogFile, long binlogPos) {
 		serverStatus.put(name, new ServerStatus(binlogFile, binlogPos, host, port, db));
@@ -45,30 +56,35 @@ public enum SystemStatusContainer {
 	public void incServerRowUpdateCounter(String name) {
 		serverParsedRowUpdateCount.putIfAbsent(name, new AtomicLong(0));
 		serverParsedRowUpdateCount.get(name).incrementAndGet();
+		Cat.logMetricForCount(CAT_KEY_EVENT_PARSED + name);
 	}
 
 	public void incServerRowDeleteCounter(String name) {
 		serverParsedRowDeleteCount.putIfAbsent(name, new AtomicLong(0));
 		serverParsedRowDeleteCount.get(name).incrementAndGet();
+		Cat.logMetricForCount(CAT_KEY_EVENT_PARSED + name);
 	}
 
 	public void incServerRowInsertCounter(String name) {
 		serverParsedRowInsertCount.putIfAbsent(name, new AtomicLong(0));
 		serverParsedRowInsertCount.get(name).incrementAndGet();
+		Cat.logMetricForCount(CAT_KEY_EVENT_PARSED + name);
 	}
 
 	public void incServerDdlCounter(String name) {
 		serverParsedDdlCount.putIfAbsent(name, new AtomicLong(0));
 		serverParsedDdlCount.get(name).incrementAndGet();
+		Cat.logMetricForCount(CAT_KEY_EVENT_PARSED + name);
 	}
 
-	public void addClientStatus(String name, long seq, String target, boolean dml, boolean ddl, boolean ts,
-			String[] dt, String codec) {
+	public void addClientStatus(String name, long seq, String target, boolean dml, boolean ddl, boolean ts, String[] dt,
+	      String codec) {
 		clientStatus.put(name, new ClientStatus(target, dml, ddl, ts, codec, dt, seq));
 	}
 
 	public void updateClientSeq(String name, long seq) {
 		clientStatus.get(name).setSeq(seq);
+		Cat.logMetricForCount("ClientConsumed-" + name);
 	}
 
 	public void removeClient(String name) {
@@ -77,6 +93,7 @@ public enum SystemStatusContainer {
 
 	public void updateStorageStatus(String name, long seq) {
 		storageStatus.put(name, seq);
+		Cat.logMetricForCount("StorageStored-" + name);
 	}
 
 	public ServerStatus getServerStatus(String name) {
@@ -120,16 +137,22 @@ public enum SystemStatusContainer {
 	}
 
 	public static class ClientStatus {
-		private String		target;
-		private boolean		dml;
-		private boolean		ddl;
-		private boolean		needTsInfo;
-		private String		codec;
-		private String[]	dt;
-		private long		seq;
+		private String target;
+
+		private boolean dml;
+
+		private boolean ddl;
+
+		private boolean needTsInfo;
+
+		private String codec;
+
+		private String[] dt;
+
+		private long seq;
 
 		public ClientStatus(String target, boolean dml, boolean ddl, boolean needTsInfo, String codec, String[] dt,
-				long seq) {
+		      long seq) {
 			super();
 			this.target = target;
 			this.dml = dml;
@@ -142,7 +165,7 @@ public enum SystemStatusContainer {
 
 		/**
 		 * @param seq
-		 *            the seq to set
+		 *           the seq to set
 		 */
 		public void setSeq(long seq) {
 			this.seq = seq;
@@ -200,11 +223,15 @@ public enum SystemStatusContainer {
 	}
 
 	public static class ServerStatus {
-		private String	binlogFile;
-		private long	binlogPos;
-		private String	host;
-		private int		port;
-		private String	db;
+		private String binlogFile;
+
+		private long binlogPos;
+
+		private String host;
+
+		private int port;
+
+		private String db;
 
 		public ServerStatus(String binlogFile, long binlogPos, String host, int port, String db) {
 			this.binlogFile = binlogFile;
@@ -255,12 +282,12 @@ public enum SystemStatusContainer {
 		AtomicBoolean stopTheWorld = stopTheWorlds.get(serverName);
 		return (stopTheWorld != null) ? stopTheWorld.get() : false;
 	}
-	
-	public void stopTheWorld(String serverName){
+
+	public void stopTheWorld(String serverName) {
 		stopTheWorlds.put(serverName, new AtomicBoolean(true));
 	}
 
-	public void startTheWorld(String serverName){
+	public void startTheWorld(String serverName) {
 		stopTheWorlds.put(serverName, new AtomicBoolean(false));
 	}
 

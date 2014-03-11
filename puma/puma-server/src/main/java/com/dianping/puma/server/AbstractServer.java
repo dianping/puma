@@ -137,7 +137,7 @@ public abstract class AbstractServer implements Server, Notifiable {
      */
     @Override
     public String getServerName() {
-        return String.valueOf(serverId);
+        return name;
     }
 
     public String getName() {

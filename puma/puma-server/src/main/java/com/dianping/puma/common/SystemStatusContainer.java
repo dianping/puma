@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.dianping.cat.Cat;
@@ -46,35 +47,46 @@ public enum SystemStatusContainer {
 	private ConcurrentMap<String, AtomicLong> serverParsedDdlCount = new ConcurrentHashMap<String, AtomicLong>();
 
 	private ConcurrentMap<String, AtomicBoolean> stopTheWorlds = new ConcurrentHashMap<String, AtomicBoolean>();
-	
+
+	private ConcurrentMap<String, AtomicInteger> metrics = new ConcurrentHashMap<String, AtomicInteger>();
+
 	private static final String CAT_KEY_EVENT_PARSED = "EventParsed-";
 
 	public void updateServerStatus(String name, String host, int port, String db, String binlogFile, long binlogPos) {
 		serverStatus.put(name, new ServerStatus(binlogFile, binlogPos, host, port, db));
 	}
 
+	private void logMetricForCount(String name) {
+		metrics.putIfAbsent(name, new AtomicInteger(0));
+		int count = metrics.get(name).incrementAndGet();
+		if (count != 0 && count % 100 == 0) {
+			metrics.get(name).getAndAdd(-100);
+			Cat.logMetricForCount(name, 100);
+		}
+	}
+
 	public void incServerRowUpdateCounter(String name) {
 		serverParsedRowUpdateCount.putIfAbsent(name, new AtomicLong(0));
 		serverParsedRowUpdateCount.get(name).incrementAndGet();
-		Cat.logMetricForCount(CAT_KEY_EVENT_PARSED + name);
+		logMetricForCount(CAT_KEY_EVENT_PARSED + name);
 	}
 
 	public void incServerRowDeleteCounter(String name) {
 		serverParsedRowDeleteCount.putIfAbsent(name, new AtomicLong(0));
 		serverParsedRowDeleteCount.get(name).incrementAndGet();
-		Cat.logMetricForCount(CAT_KEY_EVENT_PARSED + name);
+		logMetricForCount(CAT_KEY_EVENT_PARSED + name);
 	}
 
 	public void incServerRowInsertCounter(String name) {
 		serverParsedRowInsertCount.putIfAbsent(name, new AtomicLong(0));
 		serverParsedRowInsertCount.get(name).incrementAndGet();
-		Cat.logMetricForCount(CAT_KEY_EVENT_PARSED + name);
+		logMetricForCount(CAT_KEY_EVENT_PARSED + name);
 	}
 
 	public void incServerDdlCounter(String name) {
 		serverParsedDdlCount.putIfAbsent(name, new AtomicLong(0));
 		serverParsedDdlCount.get(name).incrementAndGet();
-		Cat.logMetricForCount(CAT_KEY_EVENT_PARSED + name);
+		logMetricForCount(CAT_KEY_EVENT_PARSED + name);
 	}
 
 	public void addClientStatus(String name, long seq, String target, boolean dml, boolean ddl, boolean ts, String[] dt,
@@ -84,7 +96,7 @@ public enum SystemStatusContainer {
 
 	public void updateClientSeq(String name, long seq) {
 		clientStatus.get(name).setSeq(seq);
-		Cat.logMetricForCount("ClientConsumed-" + name);
+		logMetricForCount("ClientConsumed-" + name);
 	}
 
 	public void removeClient(String name) {
@@ -93,7 +105,7 @@ public enum SystemStatusContainer {
 
 	public void updateStorageStatus(String name, long seq) {
 		storageStatus.put(name, seq);
-		Cat.logMetricForCount("StorageStored-" + name);
+		logMetricForCount("StorageStored-" + name);
 	}
 
 	public ServerStatus getServerStatus(String name) {

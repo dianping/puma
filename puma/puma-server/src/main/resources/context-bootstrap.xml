@@ -42,10 +42,6 @@
 		<property name="baseDir" value="/data/appdatas/puma/" />
 	</bean>
 
-	<bean id="hdfsConfig" class="com.dianping.puma.storage.DefaultHDFSConfigImpl"
-		init-method="init">
-		<property name="hdfsConfigStr" value="${puma.hdfs.config}" />
-	</bean>
 	<bean id="jsonCodec" class="com.dianping.puma.core.codec.JsonEventCodec" />
 
 	<import resource="serverConfig-${puma.server.env}.xml" />

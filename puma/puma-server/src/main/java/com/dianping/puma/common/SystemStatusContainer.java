@@ -46,7 +46,7 @@ public enum SystemStatusContainer {
 	private ConcurrentMap<String, AtomicLong> serverParsedDdlCount = new ConcurrentHashMap<String, AtomicLong>();
 
 	private ConcurrentMap<String, AtomicBoolean> stopTheWorlds = new ConcurrentHashMap<String, AtomicBoolean>();
-	
+
 	private static final String CAT_KEY_EVENT_PARSED = "EventParsed-";
 
 	public void updateServerStatus(String name, String host, int port, String db, String binlogFile, long binlogPos) {
@@ -279,6 +279,9 @@ public enum SystemStatusContainer {
 	}
 
 	public boolean isStopTheWorld(String serverName) {
+		if (serverName == null) {
+			return false;
+		}
 		AtomicBoolean stopTheWorld = stopTheWorlds.get(serverName);
 		return (stopTheWorld != null) ? stopTheWorld.get() : false;
 	}

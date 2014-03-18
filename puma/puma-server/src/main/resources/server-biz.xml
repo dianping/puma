@@ -48,7 +48,7 @@
     </bean>
 
     <bean id="cleanupStrategy-biz" class="com.dianping.puma.storage.DefaultCleanupStrategy">
-        <property name="preservedDay" value="1" />
+        <property name="preservedDay" value="2" />
     </bean>
 
     <bean id="tableMetasInfoFetcher-biz"

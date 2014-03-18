@@ -291,6 +291,9 @@ public enum SystemStatusContainer {
 	}
 
 	public boolean isStopTheWorld(String serverName) {
+		if (serverName == null) {
+			return false;
+		}
 		AtomicBoolean stopTheWorld = stopTheWorlds.get(serverName);
 		return (stopTheWorld != null) ? stopTheWorld.get() : false;
 	}

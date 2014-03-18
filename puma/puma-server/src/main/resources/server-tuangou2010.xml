@@ -20,6 +20,7 @@
         <property name="dispatcher" ref="dispatcher-tuangou2010" />
         <property name="binlogPositionHolder" ref="binlogPositionHolder" />
         <property name="dbServerId" value="3013307205"/>
+        <property name="name" value="tuangou2010" />
     </bean>
 
     <bean id="dispatcher-tuangou2010"
@@ -42,11 +43,12 @@
     </bean>
 
     <bean id="archiveStrategy-tuangou2010" class="com.dianping.puma.storage.DefaultArchiveStrategy">
-        <property name="maxMasterFileCount" value="50" />
+        <property name="maxMasterFileCount" value="10" />
+        <property name="serverName" value="tuangou2010" />
     </bean>
 
     <bean id="cleanupStrategy-tuangou2010" class="com.dianping.puma.storage.DefaultCleanupStrategy">
-        <property name="preservedDay" value="5" />
+        <property name="preservedDay" value="2" />
     </bean>
 
     <bean id="tableMetasInfoFetcher-tuangou2010"
@@ -66,8 +68,8 @@
     <bean id="storage-tuangou2010" class="com.dianping.puma.storage.DefaultEventStorage"
         init-method="start">
         <property name="codec" ref="jsonCodec" />
-        <property name="masterBucketIndex" ref="localBucketIndex-tuangou2010" />
-        <property name="slaveBucketIndex" ref="hdfsBucketIndex-tuangou2010" />
+        <property name="masterBucketIndex" ref="masterBucketIndex-tuangou2010" />
+        <property name="slaveBucketIndex" ref="slaveBucketIndex-tuangou2010" />
         <property name="archiveStrategy" ref="archiveStrategy-tuangou2010" />
         <property name="cleanupStrategy" ref="cleanupStrategy-tuangou2010" />
         <property name="name" value="storage-tuangou2010" />
@@ -75,18 +77,17 @@
             value="/data/appdatas/puma/binlogIndex/tuangou2010/" />
     </bean>
 
-    <bean id="localBucketIndex-tuangou2010" class="com.dianping.puma.storage.LocalFileBucketIndex"
+    <bean id="masterBucketIndex-tuangou2010" class="com.dianping.puma.storage.LocalFileBucketIndex"
         init-method="start">
         <property name="bucketFilePrefix" value="bucket-" />
         <property name="maxBucketLengthMB" value="1000" />
-        <property name="baseDir" value="/data/appdatas/puma/storage/tuangou2010/" />
+        <property name="baseDir" value="/data/appdatas/puma/storage/tuangou2010/master/" />
     </bean>
-    <bean id="hdfsBucketIndex-tuangou2010" class="com.dianping.puma.storage.HDFSBucketIndex"
+    <bean id="slaveBucketIndex-tuangou2010" class="com.dianping.puma.storage.LocalFileBucketIndex"
         init-method="start">
         <property name="bucketFilePrefix" value="bucket-" />
         <property name="maxBucketLengthMB" value="1000" />
-        <property name="baseDir" value="/user/workcron/puma/storage/tuangou2010/" />
-        <property name="hdfsConfig" ref="hdfsConfig" />
+        <property name="baseDir" value="/data/appdatas/puma/storage/tuangou2010/slave/" />
     </bean>
     
 </beans>

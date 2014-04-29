@@ -21,21 +21,7 @@
 
     <import resource="applicationContext-swallow.xml" />
 
-    <!-- 报警 -->
-    <bean id="commonAlarmSerivce" class="com.dianping.dpsf.spring.ProxyBeanFactory"
-        init-method="init">
-        <property name="serviceName"
-            value="http://service.dianping.com/hawk/alarm/commonAlarmSerivce" />
-        <property name="iface"
-            value="com.dianping.hawk.common.alarm.service.CommonAlarmService" />
-        <property name="serialize" value="java" />
-        <property name="callMethod" value="sync" />
-        <property name="timeout" value="5000" />
-    </bean>
-    <bean id="notifyService" class="com.dianping.puma.core.monitor.DefaultNotifyService">
-        <property name="alarmService" ref="commonAlarmSerivce" />
-        <property name="devMode" value="${puma.syncserver.notify.devMode}" />
-    </bean>
+    <bean id="notifyService" class="com.dianping.puma.core.monitor.DefaultNotifyService"/>
 
     <!-- executor -->
     <bean

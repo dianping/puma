@@ -69,12 +69,20 @@
     <bean id="noOperationHandler"
         class="com.dianping.puma.syncserver.job.executor.failhandler.NoOperationHandler" />
 
+    <bean id="retryHandler"
+        class="com.dianping.puma.syncserver.job.executor.failhandler.RetryHandler" />
+
+    <bean id="stopOnFailedHandler"
+        class="com.dianping.puma.syncserver.job.executor.failhandler.StopOnFailedHandler" />
+
     <bean id="failHandlerContainer"
         class="com.dianping.puma.syncserver.job.executor.failhandler.HandlerContainer">
         <property name="handlers">
             <util:map map-class="java.util.HashMap">
                 <entry key="DeleteDuplicateRecord" value-ref="deleteDuplicateRecordHandler" />
                 <entry key="NoOperation" value-ref="noOperationHandler" />
+                <entry key="Retry" value-ref="retryHandler" />
+                <entry key="StopOnFailed" value-ref="stopOnFailedHandler" />
             </util:map>
         </property>
     </bean>

@@ -38,6 +38,8 @@ public abstract class Task extends BaseEntity {
     private BinlogInfo binlogInfo;
     /** errorCode对应的Handler */
     private Map<Integer, String> errorCodeHandlerNameMap;
+    /** 默认handler */
+    private String defaultHandler;
 
     protected Task(Type type) {
         this.type = type;
@@ -115,12 +117,22 @@ public abstract class Task extends BaseEntity {
         this.errorCodeHandlerNameMap = errorCodeHandlerNameMap;
     }
 
-    @Override
-    public String toString() {
-        return "Task [type=" + type + ", srcMysqlName=" + srcMysqlName + ", srcMysqlHost=" + srcMysqlHost + ", destMysqlName="
-                + destMysqlName + ", destMysqlHost=" + destMysqlHost + ", syncServerName=" + syncServerName + ", syncTaskId="
-                + syncTaskId + ", binlogInfo=" + binlogInfo + ", errorCodeHandlerMap=" + errorCodeHandlerNameMap + "]";
-    }
+    public String getDefaultHandler() {
+   	return defaultHandler;
+   }
+
+	public void setDefaultHandler(String defaultHandler) {
+   	this.defaultHandler = defaultHandler;
+   }
+
+	@Override
+   public String toString() {
+	   return String
+	         .format(
+	               "Task [type=%s, srcMysqlName=%s, srcMysqlHost=%s, destMysqlName=%s, destMysqlHost=%s, syncServerName=%s, syncTaskId=%s, binlogInfo=%s, errorCodeHandlerNameMap=%s, defaultHandler=%s]",
+	               type, srcMysqlName, srcMysqlHost, destMysqlName, destMysqlHost, syncServerName, syncTaskId,
+	               binlogInfo, errorCodeHandlerNameMap, defaultHandler);
+   }
 
     //    public TaskState getTaskState() {
     //        return taskState;

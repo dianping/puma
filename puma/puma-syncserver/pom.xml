@@ -29,10 +29,6 @@
             <artifactId>puma-client</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.dianping.hawk</groupId>
-            <artifactId>hawk-common</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.dianping.dpsf</groupId>
             <artifactId>dpsf-net</artifactId>
         </dependency>

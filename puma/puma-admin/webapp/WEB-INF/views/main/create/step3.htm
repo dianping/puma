@@ -70,8 +70,8 @@ th {
             <label>默认Handler<span style="font-size: 10px">
                 (该项是设置遇到异常时使用的默认策略。注意：如果是Sql异常且ErrorCode有匹配的handler能处理，则不会使用默认策略)</span></label> <select class="span10" name="defaultHandler"
               style="">
-              <option value="stopOnFailed">失败时停止</option>
-              <option value="retry">失败时重试</option>
+              <option value="StopOnFailed">失败时停止</option>
+              <option value="Retry">失败时重试</option>
             </select>
           </div>
           <button id="createSyncTaskButton" style="float: right; margin-right: 20px;" type="submit"

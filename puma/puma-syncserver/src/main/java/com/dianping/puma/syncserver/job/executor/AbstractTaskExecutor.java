@@ -295,6 +295,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
                 // 如果没有handler能处理，则使用默认策略
                 if (!hasHandler) {
                     String handlerName = AbstractTaskExecutor.this.abstractTask.getDefaultHandler();
+                    LOG.info("No ErrorCode match, try to use default handler:" + handlerName);
                     if (handlerName != null) {
                         Handler handler = HandlerContainer.getInstance().getHandler(handlerName);
                         if (handler != null) {
@@ -306,6 +307,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
                 // 如果连默认handler也没有(兼容)，则使用FailHandler策略
                 if (!hasHandler) {
+                    LOG.info("No handler found, use handler:" + StopOnFailedHandler.NAME);
                     Handler handler = HandlerContainer.getInstance().getHandler(StopOnFailedHandler.NAME);
                     ignoreFailEvent = handleError(event, handler, e);
                 }
@@ -334,9 +336,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
             @Override
             public void onEvent(ChangedEvent event) throws Exception {
-                // if (LOG.isDebugEnabled()) {
-                // LOG.debug("********************Received " + event);
-                // }
+                //LOG.info("********************Received " + event);
                 if (!skipToNextPos) {
                     if (event instanceof RowChangedEvent) {
                         // ------------- (1) 【事务开始事件】--------------
@@ -493,6 +493,14 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
             LOG.error(e.getMessage(), e);
         }
         return count;
+    }
+
+    public TaskExecutorStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TaskExecutorStatus status) {
+        this.status = status;
     }
 
 }

@@ -12,6 +12,7 @@
                      <!-- <th>SyncServer名称</th>
                      <th>状态控制命令</th>  -->
                      <th>状态</th>
+                     <th>状态信息</th>
                      <th>Binlog进度</th>
                      <th>状态</th>
                      <th>操作</th>
@@ -25,6 +26,7 @@
                      <!-- <td>$syncTask.syncServerName</td>  -->
                      <!-- <td>$syncTask.syncTaskStatusAction</td> -->
                      <td statusOfId="$syncTask.id"></td>
+                     <td detailOfId="$syncTask.id"></td>
                      <td>已执行：<span binlogOfId="$syncTask.id"></span> <br>已收到：<span
                         binlogioOfId="$syncTask.id"></span></td>
                      <td><a class="btn btn-mini btn-info"
@@ -131,6 +133,7 @@
 					$("td[statusOfId='" + id + "']").html(
 							"<span style='color:red'>无状态(可能不在运行)</span>");
 				}
+				$("td[detailOfId='" + id + "']").html(status.detail.trunc(30));
 				//status的binlogio信息
 				if (status && status.binlogInfoOfIOThread) {
 					$("span[binlogioOfId='" + id + "']")

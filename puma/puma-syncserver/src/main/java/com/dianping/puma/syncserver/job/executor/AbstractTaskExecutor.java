@@ -71,10 +71,6 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         status.setTaskId(abstractTask.getId());
         status.setType(abstractTask.getType());
         // BinlogInfo startedBinlogInfo = abstractTask.getBinlogInfo();
-        // 初始化mysqlExecutor
-        LOG.info("initing MysqlExecutor...");
-        mysqlExecutor = new MysqlExecutor(abstractTask.getDestMysqlHost().getHost(), abstractTask.getDestMysqlHost().getUsername(), abstractTask.getDestMysqlHost().getPassword());
-        mysqlExecutor.setMysqlMapping(abstractTask.getMysqlMapping());
     }
 
     /**
@@ -125,7 +121,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     public void pause(String detail) {
         try {
             if (transactionStart) {
-                mysqlExecutor.rollback();
+                releaseMysqlExecutor();
                 transactionStart = false;
             }
         } catch (SQLException e) {
@@ -143,7 +139,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     public void stop(String detail) {
         try {
             if (transactionStart) {
-                mysqlExecutor.rollback();
+                releaseMysqlExecutor();
                 transactionStart = false;
             }
         } catch (SQLException e) {
@@ -157,11 +153,19 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] stop... cause:" + detail);
     }
 
+    private void releaseMysqlExecutor() throws SQLException {
+        if(mysqlExecutor != null){
+            mysqlExecutor.rollback();
+            mysqlExecutor.close();
+            mysqlExecutor = null;
+        }
+    }
+
     @Override
     public void succeed() {
         try {
             if (transactionStart) {
-                mysqlExecutor.rollback();
+                releaseMysqlExecutor();
                 transactionStart = false;
             }
         } catch (SQLException e) {
@@ -178,7 +182,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     public void fail(String detail) {
         try {
             if (transactionStart) {
-                mysqlExecutor.rollback();
+                releaseMysqlExecutor();
                 transactionStart = false;
             }
         } catch (SQLException e) {
@@ -194,6 +198,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
     @Override
     public void start() {
+        // 初始化mysqlExecutor
+        mysqlExecutor = new MysqlExecutor(abstractTask.getDestMysqlHost().getHost(), abstractTask.getDestMysqlHost().getUsername(), abstractTask.getDestMysqlHost().getPassword(), abstractTask.getMysqlMapping());
+
         // 读取binlog位置，创建PumaClient，设置PumaCleint的config，再启动
         if (this.pumaClient != null) {
             this.pumaClient.stop();
@@ -202,7 +209,29 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         pumaClient.start();
         this.status.setDetail(null);
         this.status.setStatus(TaskExecutorStatus.Status.RUNNING);
-        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] started...");
+        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] started.");
+    }
+
+    public void restart() {
+        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] restarting...");
+        try {
+            if (transactionStart) {
+                releaseMysqlExecutor();
+                transactionStart = false;
+            }
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        if (this.pumaClient != null) {
+            this.pumaClient.stop();
+            this.pumaClient = null;
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+            }
+        }
+
+        start();
     }
 
     @Override
@@ -279,7 +308,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
                 if (e instanceof SQLException) {
                     SQLException se = (SQLException) e;
-                    Integer errorCode = se.getErrorCode();
+                    int errorCode = se.getErrorCode();
                     Map<Integer, String> errorCodeHandlerMap = abstractTask.getErrorCodeHandlerNameMap();
                     if (errorCodeHandlerMap != null) {
                         String handlerName = errorCodeHandlerMap.get(errorCode);

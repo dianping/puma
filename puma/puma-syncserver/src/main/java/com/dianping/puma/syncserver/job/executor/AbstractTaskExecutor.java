@@ -120,10 +120,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     @Override
     public void pause(String detail) {
         try {
-            if (transactionStart) {
+//            if (transactionStart) {
                 releaseMysqlExecutor();
                 transactionStart = false;
-            }
+//            }
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -138,10 +138,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     @Override
     public void stop(String detail) {
         try {
-            if (transactionStart) {
+//            if (transactionStart) {
                 releaseMysqlExecutor();
                 transactionStart = false;
-            }
+//            }
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -164,10 +164,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     @Override
     public void succeed() {
         try {
-            if (transactionStart) {
+//            if (transactionStart) {
                 releaseMysqlExecutor();
                 transactionStart = false;
-            }
+//            }
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -181,10 +181,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
     public void fail(String detail) {
         try {
-            if (transactionStart) {
+//            if (transactionStart) {
                 releaseMysqlExecutor();
                 transactionStart = false;
-            }
+//            }
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -215,10 +215,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     public void restart() {
         LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] restarting...");
         try {
-            if (transactionStart) {
+//            if (transactionStart) {
                 releaseMysqlExecutor();
                 transactionStart = false;
-            }
+//            }
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
         }

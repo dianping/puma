@@ -74,6 +74,13 @@ public class MysqlExecutor {
     }
 
     public void close(){
+        if(conn != null){
+            try {
+                conn.close();
+            } catch (SQLException e) {
+              //ignore
+            }
+        }
         conn = null;
         dataSource.close();
     }

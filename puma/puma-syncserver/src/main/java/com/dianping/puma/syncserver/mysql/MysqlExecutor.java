@@ -27,22 +27,28 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 public class MysqlExecutor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MysqlExecutor.class);
+    private static final Logger      LOG            = LoggerFactory.getLogger(MysqlExecutor.class);
 
-    private MysqlMapping mysqlMapping;
 
-    public static final int INSERT = RowChangedEvent.INSERT;
-    public static final int DELETE = RowChangedEvent.DELETE;
-    public static final int UPDATE = RowChangedEvent.UPDATE;
-    public static final int REPLACE_INTO = 3;//插入，如果已存在则更新
-    private static final int UPDTAE_TO_NULL = 4;//将对应的列都设置为null
-    public static final int SELECT = 5;//查询
-    private static BasicRowProcessor processor = new BasicRowProcessor();
+    public static final int          INSERT         = RowChangedEvent.INSERT;
+    public static final int          DELETE         = RowChangedEvent.DELETE;
+    public static final int          UPDATE         = RowChangedEvent.UPDATE;
+    public static final int          REPLACE_INTO   = 3;                                            //插入，如果已存在则更新
+    private static final int         UPDTAE_TO_NULL = 4;                                            //将对应的列都设置为null
+    public static final int          SELECT         = 5;                                            //查询
+    private static BasicRowProcessor processor      = new BasicRowProcessor();
 
-    private ComboPooledDataSource dataSource;
-    private Connection conn = null;
+    private ComboPooledDataSource    dataSource;
+    private MysqlMapping             mysqlMapping;
+    private Connection               conn           = null;
 
-    public MysqlExecutor(String host, String username, String password) {
+    public MysqlExecutor(String host, String username, String password, MysqlMapping mysqlMapping) {
+        this.mysqlMapping = mysqlMapping;
+
+        initDataSource(host, username, password);
+    }
+
+    private void initDataSource(String host, String username, String password){
         try {
             dataSource = new ComboPooledDataSource();
             dataSource.setJdbcUrl("jdbc:mysql://" + host + "/");
@@ -61,9 +67,22 @@ public class MysqlExecutor {
             dataSource.setNumHelperThreads(6);
             dataSource.setMaxAdministrativeTaskTime(5);
             dataSource.setPreferredTestQuery("SELECT 1");
+            dataSource.setTestConnectionOnCheckin(true);
         } catch (PropertyVetoException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+    }
+
+    public void close(){
+        if(conn != null){
+            try {
+                conn.close();
+            } catch (SQLException e) {
+              //ignore
+            }
+        }
+        conn = null;
+        dataSource.close();
     }
 
     /**
@@ -316,8 +335,7 @@ public class MysqlExecutor {
      */
     private TableMapping findTableConfig(List<TableMapping> tables, String srcTableName) {
         for (TableMapping tableConfig : tables) {
-            if (StringUtils.equalsIgnoreCase(srcTableName, tableConfig.getFrom())
-                    || StringUtils.equalsIgnoreCase("*", tableConfig.getFrom())) {
+            if (StringUtils.equalsIgnoreCase(srcTableName, tableConfig.getFrom()) || StringUtils.equalsIgnoreCase("*", tableConfig.getFrom())) {
                 return tableConfig;
             }
         }
@@ -330,16 +348,11 @@ public class MysqlExecutor {
      */
     private DatabaseMapping findDatabaseMapping(List<DatabaseMapping> databases, String srcDatabaseName) {
         for (DatabaseMapping databaseConfig : databases) {
-            if (StringUtils.equalsIgnoreCase(srcDatabaseName, databaseConfig.getFrom())
-                    || StringUtils.equalsIgnoreCase("*", databaseConfig.getFrom())) {
+            if (StringUtils.equalsIgnoreCase(srcDatabaseName, databaseConfig.getFrom()) || StringUtils.equalsIgnoreCase("*", databaseConfig.getFrom())) {
                 return databaseConfig;
             }
         }
         return null;
-    }
-
-    public void setMysqlMapping(MysqlMapping mysqlMapping) {
-        this.mysqlMapping = mysqlMapping;
     }
 
 }

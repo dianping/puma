@@ -34,6 +34,7 @@ import com.dianping.puma.syncserver.job.executor.failhandler.HandleContext;
 import com.dianping.puma.syncserver.job.executor.failhandler.HandleResult;
 import com.dianping.puma.syncserver.job.executor.failhandler.Handler;
 import com.dianping.puma.syncserver.job.executor.failhandler.HandlerContainer;
+import com.dianping.puma.syncserver.job.executor.failhandler.StopOnFailedHandler;
 import com.dianping.puma.syncserver.monitor.SystemStatusContainer;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
@@ -41,12 +42,19 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     private static final Logger  LOG              = LoggerFactory.getLogger(AbstractTaskExecutor.class);
 
     protected T                  abstractTask;
+
     protected PumaClient         pumaClient;
+
     protected MysqlExecutor      mysqlExecutor;
+
     protected String             pumaServerHost;
+
     protected int                pumaServerPort;
+
     protected String             target;
+
     protected TaskExecutorStatus status;
+
     /** 标识对目标数据库的会话。是否已经开始了事务（如果是，可能需要commmit或rollback否则由于数据库是可重复读级别，会一直锁住数据库。当开始insert/update/delete操作，无论执行是否成功，都已经开始事务） */
     private boolean              transactionStart = false;
 
@@ -62,11 +70,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         this.status = new TaskExecutorStatus();
         status.setTaskId(abstractTask.getId());
         status.setType(abstractTask.getType());
-        //        BinlogInfo startedBinlogInfo = abstractTask.getBinlogInfo();
-        //初始化mysqlExecutor
-        LOG.info("initing MysqlExecutor...");
-        mysqlExecutor = new MysqlExecutor(abstractTask.getDestMysqlHost().getHost(), abstractTask.getDestMysqlHost().getUsername(), abstractTask.getDestMysqlHost().getPassword());
-        mysqlExecutor.setMysqlMapping(abstractTask.getMysqlMapping());
+        // BinlogInfo startedBinlogInfo = abstractTask.getBinlogInfo();
     }
 
     /**
@@ -81,7 +85,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
      * 更新sql thread的binlog信息，和保存binlog信息到数据库
      */
     protected void binlogOfSqlThreadChanged(ChangedEvent event) {
-        //动态更新binlog和binlogPos
+        // 动态更新binlog和binlogPos
         if (event != null) {
             BinlogInfo binlogInfo = new BinlogInfo();
             binlogInfo.setBinlogFile(event.getBinlog());
@@ -89,13 +93,13 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
             binlogInfo.setSkipToNextPos(true);
             status.setBinlogInfo(binlogInfo);
             abstractTask.setBinlogInfo(binlogInfo);
-            //保存binlog信息到数据库
+            // 保存binlog信息到数据库
             saveBinlogToDB(binlogInfo);
         }
     }
 
     protected void binlogOfIOThreadChanged(ChangedEvent event) {
-        //动态更新binlog和binlogPos
+        // 动态更新binlog和binlogPos
         if (event != null) {
             BinlogInfo binlogInfo = new BinlogInfo();
             binlogInfo.setBinlogFile(event.getBinlog());
@@ -116,10 +120,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     @Override
     public void pause(String detail) {
         try {
-            if (transactionStart) {
-                mysqlExecutor.rollback();
+//            if (transactionStart) {
+                releaseMysqlExecutor();
                 transactionStart = false;
-            }
+//            }
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -134,10 +138,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     @Override
     public void stop(String detail) {
         try {
-            if (transactionStart) {
-                mysqlExecutor.rollback();
+//            if (transactionStart) {
+                releaseMysqlExecutor();
                 transactionStart = false;
-            }
+//            }
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -149,13 +153,21 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] stop... cause:" + detail);
     }
 
+    private void releaseMysqlExecutor() throws SQLException {
+        if(mysqlExecutor != null){
+            mysqlExecutor.rollback();
+            mysqlExecutor.close();
+            mysqlExecutor = null;
+        }
+    }
+
     @Override
     public void succeed() {
         try {
-            if (transactionStart) {
-                mysqlExecutor.rollback();
+//            if (transactionStart) {
+                releaseMysqlExecutor();
                 transactionStart = false;
-            }
+//            }
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -167,12 +179,12 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] succeeded...");
     }
 
-    private void fail(String detail) {
+    public void fail(String detail) {
         try {
-            if (transactionStart) {
-                mysqlExecutor.rollback();
+//            if (transactionStart) {
+                releaseMysqlExecutor();
                 transactionStart = false;
-            }
+//            }
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -186,7 +198,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
     @Override
     public void start() {
-        //读取binlog位置，创建PumaClient，设置PumaCleint的config，再启动
+        // 初始化mysqlExecutor
+        mysqlExecutor = new MysqlExecutor(abstractTask.getDestMysqlHost().getHost(), abstractTask.getDestMysqlHost().getUsername(), abstractTask.getDestMysqlHost().getPassword(), abstractTask.getMysqlMapping());
+
+        // 读取binlog位置，创建PumaClient，设置PumaCleint的config，再启动
         if (this.pumaClient != null) {
             this.pumaClient.stop();
         }
@@ -194,7 +209,29 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         pumaClient.start();
         this.status.setDetail(null);
         this.status.setStatus(TaskExecutorStatus.Status.RUNNING);
-        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] started...");
+        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] started.");
+    }
+
+    public void restart() {
+        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] restarting...");
+        try {
+//            if (transactionStart) {
+                releaseMysqlExecutor();
+                transactionStart = false;
+//            }
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        if (this.pumaClient != null) {
+            this.pumaClient.stop();
+            this.pumaClient = null;
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+            }
+        }
+
+        start();
     }
 
     @Override
@@ -223,7 +260,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         LOG.info("PumaClient's config is: " + configuration);
         PumaClient pumaClient = new PumaClient(configuration);
 
-        //读取本地文件，获取seq
+        // 读取本地文件，获取seq
         Long seq = null;
         File file = new File("/data/appdatas/puma-syncserver/" + abstractTask.getPumaClientName() + "/seq");
         if (file.exists()) {
@@ -244,12 +281,14 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         LOG.info("PumaClient[" + abstractTask.getPumaClientName() + "] Seq is:" + seq);
         pumaClient.getSeqFileHolder().saveSeq(seq);
 
-        //注册监听器
+        // 注册监听器
         pumaClient.register(new EventListener() {
 
             private DefaultPullStrategy defaultPullStrategy = new DefaultPullStrategy(500, 10000);
+
             /** 记录一个收到多少个commit事件 */
             private int                 commitBinlogCount   = 0;
+
             /** 对于PumaClient记录的binlog，需要在一开始skip */
             private boolean             skipToNextPos       = startedBinlogInfo.isSkipToNextPos();
 
@@ -262,74 +301,101 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
             @Override
             public boolean onException(ChangedEvent event, Exception e) {
-                //针对策略，调用策略的处理
+                // 针对策略，调用策略的处理
                 boolean ignoreFailEvent = false;
+
+                boolean hasHandler = false;
+
                 if (e instanceof SQLException) {
                     SQLException se = (SQLException) e;
-                    Integer errorCode = se.getErrorCode();
+                    int errorCode = se.getErrorCode();
                     Map<Integer, String> errorCodeHandlerMap = abstractTask.getErrorCodeHandlerNameMap();
                     if (errorCodeHandlerMap != null) {
                         String handlerName = errorCodeHandlerMap.get(errorCode);
                         if (handlerName != null) {
                             Handler handler = HandlerContainer.getInstance().getHandler(handlerName);
                             if (handler != null) {
-                                try {
-                                    LOG.info("Invoke handler(" + handler.getName() + "), event : " + event);
-                                    HandleContext context = new HandleContext();
-                                    context.setMysqlExecutor(mysqlExecutor);
-                                    context.setChangedEvent(event);
-                                    context.setTask(abstractTask);
-                                    HandleResult handleResult = handler.handle(context);
-                                    ignoreFailEvent = handleResult.isIgnoreFailEvent();
-                                } catch (RuntimeException re) {
-                                    LOG.warn("Unexpected RuntimeException on handler(" + handler.getName() + "), ignoreFailEvent keep false.", re);
-                                }
+                                ignoreFailEvent = handleError(event, handler, e);
+                                hasHandler = true;// 有handler能处理
                             }
                         }
                     }
                 }
-                if (!ignoreFailEvent) {
-                    fail(abstractTask.getSrcMysqlName() + "->" + abstractTask.getDestMysqlName() + ":" + e.getMessage() + ". Event=" + event);
-                    LOG.info("Print last 10 row change events: " + lastEvents.toString());
+                // 如果没有handler能处理，则使用默认策略
+                if (!hasHandler) {
+                    String handlerName = AbstractTaskExecutor.this.abstractTask.getDefaultHandler();
+                    LOG.info("No ErrorCode match, try to use default handler:" + handlerName);
+                    if (handlerName != null) {
+                        Handler handler = HandlerContainer.getInstance().getHandler(handlerName);
+                        if (handler != null) {
+                            ignoreFailEvent = handleError(event, handler, e);
+                            hasHandler = true;// 有handler能处理
+                        }
+                    }
+                }
+
+                // 如果连默认handler也没有(兼容)，则使用FailHandler策略
+                if (!hasHandler) {
+                    LOG.info("No handler found, use handler:" + StopOnFailedHandler.NAME);
+                    Handler handler = HandlerContainer.getInstance().getHandler(StopOnFailedHandler.NAME);
+                    ignoreFailEvent = handleError(event, handler, e);
+                }
+
+                return ignoreFailEvent;
+            }
+
+            private boolean handleError(ChangedEvent event, Handler handler, Exception e) {
+                boolean ignoreFailEvent = false;
+                try {
+                    LOG.info("Invoke handler(" + handler.getName() + "), event : " + event);
+                    HandleContext context = new HandleContext();
+                    context.setMysqlExecutor(mysqlExecutor);
+                    context.setChangedEvent(event);
+                    context.setTask(abstractTask);
+                    context.setExecutor(AbstractTaskExecutor.this);
+                    context.setException(e);
+                    context.setLastEvents(lastEvents);
+                    HandleResult handleResult = handler.handle(context);
+                    ignoreFailEvent = handleResult.isIgnoreFailEvent();
+                } catch (RuntimeException re) {
+                    LOG.warn("Unexpected RuntimeException on handler(" + handler.getName() + "), ignoreFailEvent keep false.", re);
                 }
                 return ignoreFailEvent;
             }
 
             @Override
             public void onEvent(ChangedEvent event) throws Exception {
-                //                if (LOG.isDebugEnabled()) {
-                //                    LOG.debug("********************Received " + event);
-                //                }
+                //LOG.info("********************Received " + event);
                 if (!skipToNextPos) {
                     if (event instanceof RowChangedEvent) {
-                        //------------- (1) 【事务开始事件】--------------
+                        // ------------- (1) 【事务开始事件】--------------
                         if (((RowChangedEvent) event).isTransactionBegin()) {
                         } else if (((RowChangedEvent) event).isTransactionCommit()) {
-                            //--------- (2) 【事务提交事件】--------------
+                            // --------- (2) 【事务提交事件】--------------
                             if (containDatabase(event.getDatabase()) && transactionStart) {
-                                //提交事务(datachange了，则该commit肯定是属于当前做了数据操作的事务的，故mysqlExecutor.commit();)
+                                // 提交事务(datachange了，则该commit肯定是属于当前做了数据操作的事务的，故mysqlExecutor.commit();)
                                 mysqlExecutor.commit();
                                 transactionStart = false;
-                                //遇到commit事件，操作数据库了，更新sqlbinlog和保存binlog到数据库
+                                // 遇到commit事件，操作数据库了，更新sqlbinlog和保存binlog到数据库
                                 binlogOfSqlThreadChanged(event);
                                 commitBinlogCount = 0;
                             } else {
-                                //只要累计遇到的commit事件1000个(无论是否属于抓取的database)，都更新sqlbinlog和保存binlog到数据库，为的是即使当前task更新不频繁，也不要让它的binlog落后太多
+                                // 只要累计遇到的commit事件1000个(无论是否属于抓取的database)，都更新sqlbinlog和保存binlog到数据库，为的是即使当前task更新不频繁，也不要让它的binlog落后太多
                                 if (++commitBinlogCount > getSaveCommitCount()) {
                                     binlogOfSqlThreadChanged(event);
                                     commitBinlogCount = 0;
                                 }
                             }
-                            //实时更新iobinlog位置(该io binlog位置也必须都是commmit事件的位置，这样的位置才是一个合理状态的位置，否则如果是一半事务的binlog位置，那么从该binlog位置订阅将是错误的状态)
+                            // 实时更新iobinlog位置(该io binlog位置也必须都是commmit事件的位置，这样的位置才是一个合理状态的位置，否则如果是一半事务的binlog位置，那么从该binlog位置订阅将是错误的状态)
                             binlogOfIOThreadChanged(event);
 
                         } else if (containDatabase(event.getDatabase())) {
-                            //--------- (3) 【数据操作事件】--------------
-                            //可执行的event，保存到内存，出错时打印出来
+                            // --------- (3) 【数据操作事件】--------------
+                            // 可执行的event，保存到内存，出错时打印出来
                             lastEvents.add(event);
-                            //标识事务开始
+                            // 标识事务开始
                             transactionStart = true;
-                            //执行子类的具体操作
+                            // 执行子类的具体操作
                             AbstractTaskExecutor.this.execute(event);
                         }
                     }
@@ -338,7 +404,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
                     LOG.info("********************skip this event(because skipToNextPos is true) : " + event);
                 }
 
-                //速度调控
+                // 速度调控
                 if (sleepTime > 0) {
                     try {
                         TimeUnit.MILLISECONDS.sleep(sleepTime);
@@ -389,12 +455,12 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
         List<DatabaseMapping> databases = mysqlMapping.getDatabases();
         if (databases != null) {
             for (DatabaseMapping database : databases) {
-                //解析database
+                // 解析database
                 String databaseFrom = database.getFrom();
-                //解析table
+                // 解析table
                 List<TableMapping> tables = database.getTables();
                 if (tables != null) {
-                    //如果table中有一个是*，则只需要设置一个*；否则，添加所有table配置
+                    // 如果table中有一个是*，则只需要设置一个*；否则，添加所有table配置
                     List<String> tableFroms = new ArrayList<String>();
                     boolean star = false;
                     for (TableMapping table : tables) {
@@ -446,7 +512,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     }
 
     private int getSaveCommitCount() {
-        int count = 50000;//默认是5万
+        int count = 50000;// 默认是5万
         try {
             Integer t = ConfigCache.getInstance().getIntProperty("puma.syncserver.saveCommitCount");
             if (t != null) {
@@ -456,6 +522,14 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
             LOG.error(e.getMessage(), e);
         }
         return count;
+    }
+
+    public TaskExecutorStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TaskExecutorStatus status) {
+        this.status = status;
     }
 
 }

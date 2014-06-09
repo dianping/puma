@@ -273,7 +273,7 @@ public class CreateController {
     @ResponseBody
     public Object createSyncTask(HttpSession session, String syncServerName, String srcMysqlHost, String destMysqlHost,
                                  String binlogFile, String binlogPosition, Boolean ddl, Boolean dml, String pumaClientName,
-                                 Boolean transaction, Integer[] errorCodes, String[] handlers) {
+                                 Boolean transaction, Integer[] errorCodes, String[] handlers, String defaultHandler) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             //检查参数
@@ -292,6 +292,9 @@ public class CreateController {
             if ((errorCodes != null && handlers == null) || (errorCodes == null && handlers != null)
                     || (errorCodes != null && handlers != null && errorCodes.length != handlers.length)) {
                 throw new IllegalArgumentException("errorCodes长度必须和handlers一致");
+            }
+            if (StringUtils.isBlank(defaultHandler)) {
+            	throw new IllegalArgumentException("defaultHandler不能为空");
             }
             //从session拿出
             DumpTask dumpTask = (DumpTask) session.getAttribute("dumpTask");
@@ -328,6 +331,7 @@ public class CreateController {
                 }
             }
             syncTask.setErrorCodeHandlerNameMap(errorCodeHandlerNames);
+            syncTask.setDefaultHandler(StringUtils.trim(defaultHandler));
             syncTask.setMysqlMapping(mysqlMapping);
             syncTask.setSyncServerName(syncServerName);
             BinlogInfo binlogInfo = new BinlogInfo();

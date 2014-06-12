@@ -75,6 +75,7 @@
         <property name="name" value="storage-biz" />
         <property name="binlogIndexBaseDir"
             value="/data/appdatas/puma/binlogIndex/biz/" />
+        <property name="acceptedTablesConfigKey" value="puma.biz_acceptedTables"/>
     </bean>
 
     <bean id="masterBucketIndex-biz" class="com.dianping.puma.storage.LocalFileBucketIndex"

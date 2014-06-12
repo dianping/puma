@@ -9,10 +9,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+
+import com.dianping.lion.client.ConfigCache;
+import com.dianping.lion.client.ConfigChange;
+import com.dianping.lion.client.LionException;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.storage.exception.InvalidSequenceException;
 import com.dianping.puma.storage.exception.StorageClosedException;
@@ -21,6 +28,7 @@ import com.dianping.puma.storage.exception.StorageLifeCycleException;
 import com.dianping.puma.storage.exception.StorageWriteException;
 
 public class DefaultEventStorage implements EventStorage {
+	 private static final Logger               log                = Logger.getLogger(DefaultEventStorage.class);
     private BucketManager                     bucketManager;
     private Bucket                            writingBucket;
     private EventCodec                        codec;
@@ -37,8 +45,14 @@ public class DefaultEventStorage implements EventStorage {
     private DataIndex<BinlogIndexKey, Long>   binlogIndex;
     private AtomicReference<BinlogIndexKey>   lastBinlogIndexKey = new AtomicReference<BinlogIndexKey>(null);
     private AtomicReference<Long>             processingServerId = new AtomicReference<Long>(null);
+    private String                            acceptedTablesConfigKey;
+    private List<String>                      acceptedTables;
 
-    /**
+    public void setAcceptedTablesConfigKey(String acceptedTablesConfigKey) {
+        this.acceptedTablesConfigKey = acceptedTablesConfigKey;
+	 }
+
+	 /**
      * @param binlogIndexBaseDir
      *            the binlogIndexBaseDir to set
      */
@@ -69,6 +83,8 @@ public class DefaultEventStorage implements EventStorage {
                 new BinlogIndexKeyConvertor());
 
         cleanupStrategy.addDataIndex(binlogIndex);
+        
+        initAcceptedTableList();
 
         try {
             bucketManager.start();
@@ -77,6 +93,50 @@ public class DefaultEventStorage implements EventStorage {
         } catch (Exception e) {
             throw new StorageLifeCycleException("Storage init failed", e);
         }
+    }
+    
+    private void initAcceptedTableList() {
+   	 if (StringUtils.isNotBlank(acceptedTablesConfigKey)) {
+   		 try {
+	         String acceptedTablesStr = ConfigCache.getInstance().getProperty(acceptedTablesConfigKey);
+	         
+	         acceptedTables = constructAcceptedTablesList(acceptedTablesStr);
+	         
+	         ConfigCache.getInstance().addChange(new ConfigChange() {
+					
+					@Override
+					public void onChange(String key, String value) {
+						if (acceptedTablesConfigKey.equals(key)) {
+							acceptedTables = constructAcceptedTablesList(value);
+						}
+					}
+				});
+	         
+	         return;
+	         
+         } catch (LionException e) {
+	         log.warn(String.format("Get acceptedTablesConfig[%s] failed.", acceptedTablesConfigKey));
+         }
+   	 }
+   	 
+   	 acceptedTables = null;
+    }
+    
+    private List<String> constructAcceptedTablesList(String acceptedTablesStr) {
+   	 if (StringUtils.isNotBlank(acceptedTablesStr)) {
+   		 String[] acceptedTablesArr = StringUtils.split(acceptedTablesStr, ",");
+   		 if (acceptedTablesArr != null && acceptedTablesArr.length > 0) {
+   		     List<String> resList = new ArrayList<String>(acceptedTablesArr.length);
+   		     for (String acceptedTable : acceptedTablesArr) {
+   		   	  if (StringUtils.isNotBlank(acceptedTable)) {
+   		   		  resList.add(StringUtils.trim(acceptedTable).toLowerCase());
+   		   	  }
+   		     }
+   		     
+   		     return resList;
+   		 }
+   	 }
+   	 return null;
     }
 
     /**
@@ -133,6 +193,10 @@ public class DefaultEventStorage implements EventStorage {
         if (stopped) {
             throw new StorageClosedException("Storage has been closed.");
         }
+        
+		  if (!needStore(event)) {
+			  return;
+		  }
 
         SimpleDateFormat sdf = new SimpleDateFormat(datePattern);
         String nowDate = sdf.format(new Date());
@@ -183,6 +247,24 @@ public class DefaultEventStorage implements EventStorage {
             throw new StorageWriteException("Failed to write event.", e);
         }
     }
+    
+	private boolean needStore(ChangedEvent event) {
+		if (acceptedTables == null || acceptedTables.isEmpty()) {
+			return true;
+		}
+		
+		if (event instanceof RowChangedEvent) {
+			RowChangedEvent rce = (RowChangedEvent) event;
+			
+			if (StringUtils.isNotBlank(rce.getTable())) {
+				return acceptedTables.contains(rce.getTable().toLowerCase());
+			}
+			
+			return true;
+		} else {
+			return true;
+		}
+	}
 
     private void updateIndex(ChangedEvent event, boolean newL1Index, long newSeq) throws IOException {
         BinlogIndexKey binlogKey = new BinlogIndexKey(event.getBinlog(), event.getBinlogPos(),

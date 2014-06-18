@@ -24,10 +24,10 @@ import com.dianping.puma.storage.BufferedEventChannel;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.EventStorage;
 import com.dianping.puma.storage.exception.StorageException;
-import com.site.web.mvc.PageHandler;
-import com.site.web.mvc.annotation.InboundActionMeta;
-import com.site.web.mvc.annotation.OutboundActionMeta;
-import com.site.web.mvc.annotation.PayloadMeta;
+import org.unidal.web.mvc.PageHandler;
+import org.unidal.web.mvc.annotation.InboundActionMeta;
+import org.unidal.web.mvc.annotation.OutboundActionMeta;
+import org.unidal.web.mvc.annotation.PayloadMeta;
 
 public class Handler implements PageHandler<Context> {
     private static final Logger log = Logger.getLogger(Handler.class);

@@ -1,7 +1,7 @@
 package com.dianping.puma.channel.page.admin;
 
 import com.dianping.puma.channel.ChannelPage;
-import com.site.web.mvc.ViewModel;
+import org.unidal.web.mvc.ViewModel;
 
 public class Model extends ViewModel<ChannelPage, Action, Context> {
 	public Model(Context ctx) {

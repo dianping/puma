@@ -1,7 +1,7 @@
 package com.dianping.puma.channel.page.acceptor;
 
 import com.dianping.puma.channel.ChannelPage;
-import com.site.web.mvc.view.BaseJspViewer;
+import org.unidal.web.mvc.view.BaseJspViewer;
 
 public class JspViewer extends BaseJspViewer<ChannelPage, Action, Context, Model> {
 	@Override

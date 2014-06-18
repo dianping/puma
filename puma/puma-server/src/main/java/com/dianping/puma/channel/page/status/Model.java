@@ -2,7 +2,7 @@ package com.dianping.puma.channel.page.status;
 
 import com.dianping.puma.channel.ChannelPage;
 import com.dianping.puma.common.SystemStatusContainer;
-import com.site.web.mvc.ViewModel;
+import org.unidal.web.mvc.ViewModel;
 
 public class Model extends ViewModel<ChannelPage, Action, Context> {
 	private SystemStatusContainer	systemStatus;

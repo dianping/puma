@@ -1,7 +1,7 @@
 package com.dianping.puma.channel;
 
-import com.site.web.mvc.Page;
-import com.site.web.mvc.annotation.ModuleMeta;
+import org.unidal.web.mvc.Page;
+import org.unidal.web.mvc.annotation.ModuleMeta;
 
 public enum ChannelPage implements Page {
 

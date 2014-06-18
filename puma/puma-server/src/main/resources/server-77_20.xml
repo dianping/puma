@@ -12,7 +12,7 @@
         <property name="port" value="3306" />
         <property name="user" value="binlog" />
         <property name="password" value="binlog" />
-        <property name="defaultBinlogFileName" value="host_77-20.005160" />
+        <property name="defaultBinlogFileName" value="host_77-20.006428" />
         <property name="defaultBinlogPosition" value="4" />
         <property name="parser" ref="defaultParser-77_20" />
         <property name="serverId" value="8887" />
@@ -20,6 +20,7 @@
         <property name="dispatcher" ref="dispatcher-77_20" />
         <property name="binlogPositionHolder" ref="binlogPositionHolder" />
         <property name="dbServerId" value="12190" />
+        <property name="name" value="77_20" />
     </bean>
 
     <bean id="dispatcher-77_20"
@@ -43,6 +44,7 @@
 
     <bean id="archiveStrategy-77_20" class="com.dianping.puma.storage.DefaultArchiveStrategy">
         <property name="maxMasterFileCount" value="1" />
+        <property name="serverName" value="77_20" />
     </bean>
 
     <bean id="cleanupStrategy-77_20" class="com.dianping.puma.storage.DefaultCleanupStrategy">

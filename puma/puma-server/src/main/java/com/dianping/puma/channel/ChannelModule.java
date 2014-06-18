@@ -1,8 +1,8 @@
 package com.dianping.puma.channel;
 
-import com.site.web.mvc.AbstractModule;
-import com.site.web.mvc.annotation.ModuleMeta;
-import com.site.web.mvc.annotation.ModulePagesMeta;
+import org.unidal.web.mvc.AbstractModule;
+import org.unidal.web.mvc.annotation.ModuleMeta;
+import org.unidal.web.mvc.annotation.ModulePagesMeta;
 
 @ModuleMeta(name = "channel", defaultInboundAction = "acceptor", defaultTransition = "default", defaultErrorAction = "default")
 @ModulePagesMeta({

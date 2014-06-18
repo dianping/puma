@@ -16,9 +16,9 @@ import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 
 import com.dianping.puma.servlet.PumaListener;
-import com.site.test.browser.Browser;
-import com.site.test.browser.DefaultBrowser;
-import com.site.web.MVC;
+import org.unidal.test.browser.Browser;
+import org.unidal.test.browser.DefaultBrowser;
+import org.unidal.web.MVC;
 
 public class TestServer {
 	private static TestServer	s_instance;
@@ -154,7 +154,7 @@ public class TestServer {
 	@Test
 	public void test() throws Exception {
 		// open the page in the default browser
-//		display("/puma/channel/status");
+		display("/puma/channel/status");
 
 		System.out.println(String.format("[%s] [INFO] Press any key to stop server ... ", getTimestamp()));
 		System.in.read();

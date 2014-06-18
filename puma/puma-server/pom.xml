@@ -66,9 +66,14 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.site.common</groupId>
+            <groupId>org.unidal.framework</groupId>
+            <artifactId>foundation-service</artifactId>
+            <version>2.0.9</version>
+        </dependency>
+		<dependency>
+			<groupId>org.unidal.framework</groupId>
 			<artifactId>test-framework</artifactId>
-			<version>1.0.1</version>
+			<version>2.0.6</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -81,9 +86,9 @@
 			<version>1.0.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.site.common</groupId>
+			<groupId>org.unidal.framework</groupId>
 			<artifactId>web-framework</artifactId>
-			<version>1.0.14</version>
+			<version>2.0.10</version>
 		</dependency>
 		<dependency>
 			<groupId>com.dp.cosmos</groupId>

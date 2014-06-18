@@ -1,8 +1,8 @@
 <plexus>
 	<components>
 		<component>
-			<role>com.site.web.mvc.model.ModuleRegistry</role>
-			<implementation>com.site.web.mvc.model.ModuleRegistry</implementation>
+			<role>org.unidal.web.mvc.model.ModuleRegistry</role>
+			<implementation>org.unidal.web.mvc.model.ModuleRegistry</implementation>
 			<configuration>
 				<modules>
 					<module default="true">com.dianping.puma.channel.ChannelModule</module>
@@ -29,6 +29,11 @@
 		<component>
 			<role>com.dianping.puma.channel.page.status.JspViewer</role>
 			<implementation>com.dianping.puma.channel.page.status.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.puma.channel.page.admin.Handler</role>
@@ -42,6 +47,11 @@
 		<component>
 			<role>com.dianping.puma.channel.page.admin.JspViewer</role>
 			<implementation>com.dianping.puma.channel.page.admin.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
 		</component>
 	</components>
 </plexus>

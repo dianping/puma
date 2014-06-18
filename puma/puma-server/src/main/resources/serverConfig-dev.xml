@@ -9,13 +9,13 @@
     <bean id="servers" class="java.util.ArrayList">
         <constructor-arg>
             <list>
-                <ref bean="server-localhost" />
+                <ref bean="server-77_20" />
                 <!-- <ref bean="server-dianping-dev" />  -->
             </list>
         </constructor-arg>
     </bean>
 
-    <import resource="server-localhost.xml" />
+    <import resource="server-77_20.xml" />
     <!-- <import resource="server-dianping-dev.xml" />  -->
 
 </beans>

@@ -343,15 +343,13 @@ org.eclipse.jdt.core.compiler.compliance=1.6
 	<distributionManagement>
 		<repository>
 			<id>dianping.repo</id>
-			<name>internal corporate repository</name>
-			<url>http://mvn.dianpingoa.com/artifactory/dianping-releases
-            </url>
+			<name>Dian Ping internal repository for released artifacts</name>
+			<url>http://mvn.dianpingoa.com/dianping-releases</url>
 		</repository>
 		<snapshotRepository>
 			<id>dianping.repo.snapshots</id>
-			<name>internal corporate snapshots repository</name>
-			<url>http://mvn.dianpingoa.com/artifactory/dianping-snapshots
-            </url>
+			<name>Dian Ping internal repository for snapshots artifacts</name>
+			<url>http://mvn.dianpingoa.com/dianping-snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 	<properties>

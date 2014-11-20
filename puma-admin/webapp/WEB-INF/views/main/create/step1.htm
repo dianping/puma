@@ -1,0 +1,158 @@
+<div class="container"
+   style="margin: 0 auto; width: 100%; margin-bottom: 50px;">
+   <ul id="stepsBreak" class="breadcrumb">
+      <li class="step_active">第1步: 填写基础配置 <span class="divider">&gt;</span></li>
+      <li class="step_undo">第2步: 创建DumpTask <span class="divider">&gt;</span>
+      </li>
+      <li class="step_undo">第3步: 创建SyncTask</li>
+   </ul>
+   <div>
+      <form id="databaseForm" class="form-horizontal" method="post"
+         onsubmit="submit0(this);return false;" onSuccess="onSuccess"
+         action="${rc.contextPath}/create/step1Save">
+         <button type="submit" style="float: right;"
+            class="btn btn-success">
+            下一步</a>
+         </button>
+         <p class="legend">填写同步的配置</p>
+         <div style="height: 700px">
+            <span>选择源实例: </span> <select name="srcMysql"
+               style="margin-left: 16px; margin-right: 16px;">
+               #foreach($mysqlConfig in ${mysqlConfigs})
+               <option value="${mysqlConfig.name}">${mysqlConfig.name}</option>
+               #end
+            </select> <span>选择目标实例: </span> <select name="destMysql"
+               style="margin-left: 16px;">
+               #foreach($mysqlConfig in ${mysqlConfigs})
+               <option value="${mysqlConfig.name}">${mysqlConfig.name}</option>
+               #end
+            </select>
+            <hr>
+            <label>映射关系 <!-- (<a href="javascript:loadXmlSample();">加载示例</a> ) -->
+            </label>
+            <div
+               style="padding: 20px 10px 10px 10px; border: 1px solid #E5E5E5; border-radius: 4px 4px 4px 4px; background-color: #F7F7F9;">
+               <div>
+                  <a
+                     style="float: right; margin-top: 0px; margin-right: 10px;"
+                     href="javascript:;" onclick="addTableDiv(this);"><i
+                     class="icon-plus"></i>新增表同步</a>
+                  <div style="font-weight: bold;" class="control-group">
+                     <label class="control-label">数据库名称</label>
+                     <div class="controls">
+                        <input type="text" placeholder="源数据库名"
+                           name="databaseFrom" value="">&nbsp;&nbsp;<i
+                           class="icon-arrow-right"></i>&nbsp;&nbsp;<input
+                           placeholder="目标数据库名" type="text"
+                           name="databaseTo" value="">
+                     </div>
+                  </div>
+                  <input name="count" autocomplete="off" type="hidden"
+                     value="0">
+               </div>
+            </div>
+            <!-- <div id="xmlEditor"
+                        style="width: 50%; height: 550px; border: 1px solid #A9E2F3; border-radius: 3px 3px 3px 3px; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;"></div>
+                         -->
+         </div>
+         <input id="syncXml" type="hidden" name="syncXml" value="">
+      </form>
+   </div>
+</div>
+<div style="display: none" id="copySource">
+   <div id="addTableDiv">
+      <div class="control-group">
+         <label class="control-label">表名</label>
+         <div class="controls">
+            <input placeholder="源表名称" type="text" name="tableFrom">&nbsp;&nbsp;<i
+               class="icon-arrow-right"></i>&nbsp;&nbsp;<input
+               placeholder="目标表名称" type="text" name="tableTo">&nbsp;&nbsp;
+            <a href="javascript:;" onclick="removeTableDiv(this);"><i
+               class="icon-remove"></i></a>
+         </div>
+      </div>
+   </div>
+   <div id="addDatabaseDiv">
+      <div>
+         <hr>
+         <a style="float: right; margin-top: 0px; margin-right: 10px;"
+            href="javascript:;" onclick="removeDatabaseDiv(this);"><i
+            class="icon-remove"></i>删除该库同步</a> <a
+            style="float: right; margin-top: 0px; margin-right: 10px;"
+            href="javascript:;" onclick="addTableDiv(this);"><i
+            class="icon-plus"></i>新增表同步</a>
+         <div style="font-weight: bold;" class="control-group">
+            <label class="control-label">数据库名称</label>
+            <div class="controls">
+               <input type="text" placeholder="源实例名称" name="name">&nbsp;&nbsp;<i
+                  class="icon-arrow-right"></i>&nbsp;&nbsp;<input
+                  placeholder="目标实例名称" type="text" name="name">
+            </div>
+         </div>
+         <input type="hidden" autocomplete="off" name="count" value="0">
+      </div>
+   </div>
+</div>
+<script>
+	function addTableDiv(aLink) {
+		var form = $(aLink).parent();
+		$(form).append($('#addTableDiv').html());
+		var count = Number($(form).children("input[name='count']").val());
+		$(form).children("input[name='count']").val(count + 1);
+	}
+	function removeTableDiv(aLink) {
+		var control = $(aLink).parent().parent();
+		var form = $(control).parent();
+		var count = Number($(form).children("input[name='count']").val());
+		$(form).children("input[name='count']").val(count - 1);
+		$(control).remove();
+	}
+	function removeDatabaseDiv(aLink) {
+		var dbDiv = $(aLink).parent();
+		$(dbDiv).remove();
+	}
+	function addDatabaseDiv() {
+		var form = $("#databaseForm");
+		$(form).append($('#addDatabaseDiv').html());
+	}
+	function submit0(form) {
+		//$("#syncXml").val(window.xmlEditor.getValue());
+		$.ajax({
+			type : $(form).attr('method'),
+			url : $(form).attr('action'),
+			data : $(form).serialize(),
+			dataType : "json",
+			success : onSuccess,
+			error : pumadmin.httpError
+		});
+		return false;
+	}
+	function onSuccess(data) {
+		if (data.success == false) {
+			pumadmin.appError("错误信息", data.errorMsg);
+		} else {
+			window.location = "${rc.contextPath}/create/step2";
+		}
+	}
+	function loadXmlSample() {
+		var param = new Object();
+		var url = window.contextpath + '/create/loadXmlSample';
+		$.ajax({
+			type : 'POST',
+			url : url,
+			data : param,
+			dataType : "json",
+			success : loadXmlSampleDone,
+			error : pumadmin.httpError
+		});
+	}
+	function loadXmlSampleDone(data) {
+		if (data.success == false) {
+			pumadmin.appError("错误信息", data.errorMsg);
+		} else {
+			//window.xmlEditor.setValue(data.sampleXml);
+			//window.xmlEditor.moveCursorTo(0, 0);
+		}
+	}
+</script>
+#parse("main/create/initJs.htm")

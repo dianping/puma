@@ -1,0 +1,65 @@
+<div class="container"
+   style="margin: 0 auto; width: 100%; margin-bottom: 50px;">
+   <div>
+      <a style="float: right;"
+         href="${rc.contextPath}/pumaServerSetting"><span>
+            查看已有配置</span></a>
+      <p class="legend">填写PumaServer的配置</p>
+      <div id="container" style="">
+         <div class="container-fluid">
+            <div class="row-fluid">
+               <div class="span8">
+                  <form class="form-horizontal"
+                     action="${rc.contextPath}/pumaServerSetting/create"
+                     onsubmit="pumadmin.submit(this);return false;"
+                     onSuccess="savePumaServerConfigDone" method="post">
+                     <div class="control-group">
+                        <label class="control-label">实例名称</label>
+                        <div class="controls">
+                           <input type="text" name="mysqlName">
+                        </div>
+                     </div>
+                     <div class="control-group">
+                        <label class="control-label">Target名称</label>
+                        <div class="controls">
+                           <input type="text" name="target">
+                        </div>
+                     </div>
+                     <div id="pumaServerHostInput">
+                        <hr>
+                        <div class="control-group">
+                           <label class="control-label">Puma
+                              Server Host</label>
+                           <div class="controls">
+                              <input type="text" name="host">
+                           </div>
+                        </div>
+                     </div>
+                     <div class="control-group">
+                        <div class="controls">
+                           <button type="button"
+                              style="margin-right: 20px"
+                              onclick="pumadmin.addPumaServerHostInput()"
+                              class="btn">增加host输入框</button>
+                           <button type="submit" class="btn btn-primary">
+                              确定</button>
+                        </div>
+                     </div>
+                  </form>
+                  <div id="pumaServerHostInputDemo"
+                     style="display: none">
+                     <hr>
+                     <div class="control-group">
+                        <label class="control-label">Puma Server
+                           Host</label>
+                        <div class="controls">
+                           <input type="text" name="host">
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

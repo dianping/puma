@@ -9,7 +9,7 @@
 	<artifactId>puma-server</artifactId>
 	<groupId>com.dianping.puma</groupId>
     <version>0.2.0</version>
-	<name>Puma Server</name>
+	<name>puma-server</name>
 	<packaging>war</packaging>
 	<dependencies>
 		<dependency>

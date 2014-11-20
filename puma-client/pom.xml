@@ -9,7 +9,7 @@
 	<artifactId>puma-client</artifactId>
 	<groupId>com.dianping.puma</groupId>
     <version>0.2.0</version>
-	<name>Puma Client</name>
+	<name>puma-client</name>
 	<dependencies>
 		<dependency>
 			<groupId>com.dianping.puma</groupId>

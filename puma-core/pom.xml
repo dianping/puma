@@ -9,7 +9,7 @@
     <artifactId>puma-core</artifactId>
     <groupId>com.dianping.puma</groupId>
     <version>0.2.0</version>
-    <name>Puma Core</name>
+    <name>puma-core</name>
     <dependencies>
         <dependency>
             <groupId>com.dianping.lion</groupId>

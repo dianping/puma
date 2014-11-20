@@ -9,7 +9,7 @@
     <artifactId>puma-syncserver</artifactId>
     <groupId>com.dianping.puma</groupId>
     <version>0.2.0</version>
-    <name>Puma SyncServer</name>
+    <name>puma-syncserver</name>
     <packaging>war</packaging>
     <dependencies>
         <!-- 內部jar -->

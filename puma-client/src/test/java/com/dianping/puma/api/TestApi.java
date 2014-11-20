@@ -24,6 +24,8 @@ import com.dianping.puma.core.event.RowChangedEvent;
  */
 public class TestApi {
 	public static void main(String[] args) {
+		System.setProperty("os.name", "linux");
+		
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
 		configBuilder.ddl(false);
 		configBuilder.dml(true);
@@ -42,7 +44,7 @@ public class TestApi {
 		configBuilder.transaction(false);
 
 		PumaClient pc = new PumaClient(configBuilder.build());
-		pc.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_BINLOGINFO);
+		//pc.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_BINLOGINFO);
 
 		pc.register(new EventListener() {
 

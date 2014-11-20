@@ -33,18 +33,21 @@ import com.dianping.puma.core.constant.SubscribeConstant;
  * 
  */
 public class FileSequenceHolder implements SequenceHolder {
-	private static final int	MAX_FILE_LENGTH	= 100;
-	private String				seqFileBase;
-	private Configuration		config;
-	private MappedByteBuffer	buf;
-	private RandomAccessFile	file;
-	private long				seq;
-	private static final byte[]	BUF_MASK		= new byte[MAX_FILE_LENGTH];
+	private static final int MAX_FILE_LENGTH = 100;
+	private String seqFileBase;
+	private Configuration config;
+	private MappedByteBuffer buf;
+	private RandomAccessFile file;
+	private long seq;
+	private static final byte[] BUF_MASK = new byte[MAX_FILE_LENGTH];
 
 	public FileSequenceHolder(Configuration config) {
 		this.seqFileBase = config.getSeqFileBase();
 		this.config = config;
 
+		if (seqFileBase.startsWith("memcached")) {
+			this.seqFileBase = "/tmp";
+		}
 		String filePath = getSeqConfigFilePath();
 		File seqFile = new File(filePath);
 		initSeq(seqFile);

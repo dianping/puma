@@ -56,7 +56,11 @@ public class MemcachedSequenceHolder implements SequenceHolder {
 		key = path.toString();
 		logger.info("puma cache key:" + key);
 
-		fileSequenceHolder = new FileSequenceHolder(config);
+		try {
+			fileSequenceHolder = new FileSequenceHolder(config);
+		} catch (Throwable e) {
+			logger.warn("error while initializing file sequence:", e);
+		}
 		initSeq();
 	}
 
@@ -73,12 +77,17 @@ public class MemcachedSequenceHolder implements SequenceHolder {
 		} catch (RuntimeException e) {
 			logger.warn("error while reading seq from cache:" + cacheKey + ", caused by:" + e.getMessage());
 		}
-		this.seq = fileSequenceHolder.getSeq();
+		if (fileSequenceHolder != null) {
+			this.seq = fileSequenceHolder.getSeq();
+		}
 		logger.warn("use seq stored in local seq file:" + this.seq);
 	}
 
 	public synchronized void saveSeq(long seq) {
-		fileSequenceHolder.saveSeq(seq);
+		try {
+			fileSequenceHolder.saveSeq(seq);
+		} catch (Throwable e) {
+		}
 		CacheKey cacheKey = new CacheKey(key, null);
 		try {
 			cacheService.set(cacheKey, seq);

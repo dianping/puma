@@ -340,20 +340,6 @@ org.eclipse.jdt.core.compiler.compliance=1.6
 			</plugin>
 		</plugins>
 	</build>
-	<distributionManagement>
-		<repository>
-			<id>dianping.repo</id>
-			<name>internal corporate repository</name>
-			<url>http://192.168.8.45:8080/artifactory/dianping-releases
-            </url>
-		</repository>
-		<snapshotRepository>
-			<id>dianping.repo.snapshots</id>
-			<name>internal corporate snapshots repository</name>
-			<url>http://192.168.8.45:8080/artifactory/dianping-snapshots
-            </url>
-		</snapshotRepository>
-	</distributionManagement>
 	<properties>
 		<project.build.sourceEncoding>utf-8
 		</project.build.sourceEncoding>

@@ -106,7 +106,7 @@
 		</dependency>
 	</dependencies>
 	<build>
-        <finalName>puma</finalName>
+        <finalName>${artifactId}-${env}-${version}</finalName>
         <sourceDirectory>src/main/java</sourceDirectory>
         <testSourceDirectory>src/test/java</testSourceDirectory>
         <scriptSourceDirectory>scripts</scriptSourceDirectory>

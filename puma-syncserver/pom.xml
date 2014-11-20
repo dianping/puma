@@ -187,7 +187,7 @@
         </dependency>
     </dependencies>
     <build>
-        <finalName>puma-syncserver</finalName>
+        <finalName>${artifactId}-${env}-${version}</finalName>
         <sourceDirectory>src/main/java</sourceDirectory>
         <testSourceDirectory>src/test/java</testSourceDirectory>
         <scriptSourceDirectory>scripts</scriptSourceDirectory>

@@ -6,7 +6,7 @@
 	<artifactId>parent</artifactId>
 	<version>0.2.0</version>
 	<packaging>pom</packaging>
-	<name>arch-puma</name>
+	<name>parent</name>
 	<modules>
 		<module>puma-server</module>
 		<module>puma-client</module>

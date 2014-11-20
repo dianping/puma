@@ -7,13 +7,10 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>puma-syncserver</artifactId>
+    <groupId>com.dianping.puma</groupId>
+    <version>0.2.0</version>
     <name>Puma SyncServer</name>
     <packaging>war</packaging>
-
-    <properties>
-        <env>dev</env>
-    </properties>
-
     <dependencies>
         <!-- 內部jar -->
         <dependency>
@@ -35,11 +32,6 @@
         <dependency>
             <groupId>com.dianping.lion</groupId>
             <artifactId>lion-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.dianping.lion</groupId>
-            <artifactId>lion-${env}</artifactId>
-            <version>1.0.0</version>
         </dependency>
         <!-- 日志系统 -->
         <dependency>

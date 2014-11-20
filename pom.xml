@@ -231,18 +231,18 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>14.0.1</version>
+				<version>15.1</version>
 			</dependency>
 			<!-- swallow -->
 			<dependency>
 				<groupId>com.dianping.swallow</groupId>
 				<artifactId>swallow-producerclient</artifactId>
-				<version>0.6.5</version>
+				<version>0.6.10</version>
 			</dependency>
 			<dependency>
 				<groupId>com.dianping.swallow</groupId>
 				<artifactId>swallow-consumerclient</artifactId>
-				<version>0.6.5</version>
+				<version>0.6.10</version>
 			</dependency>
 			<dependency>
 				<groupId>com.dianping.hawk</groupId>

@@ -10,8 +10,8 @@
         parent="notifiableBean">
         <property name="host" value="192.168.8.41" />
         <property name="port" value="3306" />
-        <property name="user" value="binlog" />
-        <property name="password" value="binlog" />
+        <property name="user" value="root" />
+        <property name="password" value="123456" />
         <property name="defaultBinlogFileName" value="mysql-bin.000014" />
         <property name="defaultBinlogPosition" value="397550508" />
         <property name="parser" ref="defaultParser-dianping-dev" />

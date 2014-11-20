@@ -23,59 +23,59 @@ import com.dianping.puma.core.event.RowChangedEvent;
  * @author Leo Liang
  */
 public class TestApi {
-    public static void main(String[] args) {
-        ConfigurationBuilder configBuilder = new ConfigurationBuilder();
-        configBuilder.ddl(false);
-        configBuilder.dml(true);
+	public static void main(String[] args) {
+		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
+		configBuilder.ddl(false);
+		configBuilder.dml(true);
 
-        configBuilder.host("10.1.6.127");
-        configBuilder.port(80);
-        configBuilder.target("dianping");
+		configBuilder.host("localhost");
+		configBuilder.port(8080);
+		configBuilder.target("test");
 
-        configBuilder.serverId(3013306121L);
-        configBuilder.binlog("mysql-bin.003320");
-        configBuilder.binlogPos(417592256L);
-        configBuilder.name("testClient");
+		configBuilder.serverId(1);
+		configBuilder.binlog("mysql-bin.000014");
+		configBuilder.binlogPos(4);
+		configBuilder.name("testClient");
+		configBuilder.seqFileBase("memcached");
+		configBuilder.failIfSeqNotFound(false);
 
-        configBuilder.tables("Dianping", "*");
-        configBuilder.transaction(false);
+		configBuilder.tables("test", "table1");
+		configBuilder.transaction(false);
 
-        PumaClient pc = new PumaClient(configBuilder.build());
-        pc.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_BINLOGINFO);
+		PumaClient pc = new PumaClient(configBuilder.build());
+		pc.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_BINLOGINFO);
 
-        pc.register(new EventListener() {
+		pc.register(new EventListener() {
 
-            @Override
-            public void onSkipEvent(ChangedEvent event) {
-                System.out.println(">>>>>>>>>>>>>>>>>>Skip " + event);
-            }
+			@Override
+			public void onSkipEvent(ChangedEvent event) {
+				System.out.println(">>>>>>>>>>>>>>>>>>Skip " + event);
+			}
 
-            @Override
-            public boolean onException(ChangedEvent event, Exception e) {
-                System.out.println("-------------Exception " + e);
-                return true;
-            }
+			@Override
+			public boolean onException(ChangedEvent event, Exception e) {
+				System.out.println("-------------Exception " + e);
+				return true;
+			}
 
-            @Override
-            public void onEvent(ChangedEvent event) throws Exception {
-                // biz logic
-                if (event instanceof RowChangedEvent) {
-                    RowChangedEvent rce = (RowChangedEvent) event;
-                    if (rce.getTable().equals("TG_Order") && rce.getActionType() == RowChangedEvent.INSERT) {
-                        System.out.println(rce);
-                    }
-                }
+			@Override
+			public void onEvent(ChangedEvent event) throws Exception {
+				// biz logic
+				if (event instanceof RowChangedEvent) {
+					RowChangedEvent rce = (RowChangedEvent) event;
+					System.out.println(rce);
+				}
 
-            }
+			}
 
-            @Override
-            public void onConnectException(Exception e) {
-            }
+			@Override
+			public void onConnectException(Exception e) {
+			}
 
-            @Override
-            public void onConnected() {
-            }
-        });
-        pc.start();
-    }
+			@Override
+			public void onConnected() {
+			}
+		});
+		pc.start();
+	}
 }

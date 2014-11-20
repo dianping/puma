@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.api;
+package com.dianping.puma.api.sequence;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -23,6 +23,7 @@ import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
 
+import com.dianping.puma.api.Configuration;
 import com.dianping.puma.core.constant.SubscribeConstant;
 
 /**
@@ -31,7 +32,7 @@ import com.dianping.puma.core.constant.SubscribeConstant;
  * @author Leo Liang
  * 
  */
-public class MMapBasedSeqFileHolder implements SeqFileHolder {
+public class FileSequenceHolder implements SequenceHolder {
 	private static final int	MAX_FILE_LENGTH	= 100;
 	private String				seqFileBase;
 	private Configuration		config;
@@ -40,7 +41,7 @@ public class MMapBasedSeqFileHolder implements SeqFileHolder {
 	private long				seq;
 	private static final byte[]	BUF_MASK		= new byte[MAX_FILE_LENGTH];
 
-	public MMapBasedSeqFileHolder(Configuration config) {
+	public FileSequenceHolder(Configuration config) {
 		this.seqFileBase = config.getSeqFileBase();
 		this.config = config;
 

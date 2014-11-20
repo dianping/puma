@@ -132,7 +132,7 @@ public class DefaultEventStorage implements EventStorage {
    		   		  resList.add(StringUtils.trim(acceptedTable).toLowerCase());
    		   	  }
    		     }
-   		     
+	         log.info("accepted tables:" + resList);
    		     return resList;
    		 }
    	 }
@@ -257,6 +257,9 @@ public class DefaultEventStorage implements EventStorage {
 			RowChangedEvent rce = (RowChangedEvent) event;
 			
 			if (StringUtils.isNotBlank(rce.getTable())) {
+				if(log.isDebugEnabled()) {
+					log.debug("table:" + rce.getTable().toLowerCase());
+				}
 				return acceptedTables.contains(rce.getTable().toLowerCase());
 			}
 			

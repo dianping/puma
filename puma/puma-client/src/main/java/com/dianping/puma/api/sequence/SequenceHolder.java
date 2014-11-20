@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.api;
+package com.dianping.puma.api.sequence;
 
 /**
  * seq文件的操作类
@@ -21,7 +21,7 @@ package com.dianping.puma.api;
  * @author Leo Liang
  * 
  */
-public interface SeqFileHolder {
+public interface SequenceHolder {
 
 	public void saveSeq(long seq);
 

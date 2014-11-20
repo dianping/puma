@@ -19,6 +19,8 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.dianping.puma.api.sequence.FileSequenceHolder;
+
 /**
  * TODO Comment of MMapBasedSeqFileHolderTest
  * 
@@ -33,7 +35,7 @@ public class MMapBasedSeqFileHolderTest {
 		builder.host("192.168.1.23");
 		builder.port(23);
 		builder.seqFileBase(System.getProperty("java.io.tmpdir", ".") + "test");
-		MMapBasedSeqFileHolder holder = new MMapBasedSeqFileHolder(builder.build());
+		FileSequenceHolder holder = new FileSequenceHolder(builder.build());
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < times; i++) {
 			holder.saveSeq((long) i);

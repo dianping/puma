@@ -180,7 +180,7 @@
         </dependency>
     </dependencies>
     <build>
-        <finalName>puma-admin</finalName>
+        <finalName>${artifactId}-${env}-${version}</finalName>
         <sourceDirectory>src/main/java</sourceDirectory>
         <testSourceDirectory>src/test/java</testSourceDirectory>
         <scriptSourceDirectory>scripts</scriptSourceDirectory>

@@ -37,7 +37,6 @@ public class TestApi {
 		configBuilder.binlogPos(4);
 		configBuilder.name("testClient");
 		configBuilder.seqFileBase("memcached");
-		configBuilder.failIfSeqNotFound(false);
 
 		configBuilder.tables("test", "table1");
 		configBuilder.transaction(false);

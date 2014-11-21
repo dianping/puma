@@ -37,7 +37,7 @@ public class MemcachedSequenceHolder implements SequenceHolder {
 	private long seq;
 	private static SpringContainer SPRING_CONTAINER = new SpringContainer();
 	private CacheService cacheService;
-	private String key = null;
+	private CacheKey cacheKey = null;
 	private static Logger logger = LoggerFactory.getLogger(MemcachedSequenceHolder.class);
 	private SequenceHolder fileSequenceHolder = null;
 
@@ -47,14 +47,13 @@ public class MemcachedSequenceHolder implements SequenceHolder {
 		cacheService = (CacheService) SPRING_CONTAINER.getBean("cacheService");
 		StringBuilder path = new StringBuilder();
 		String[] hostArr = config.getHost().split("\\.");
-		path.append("puma-seq-");
 		path.append(config.getName()).append("-");
 		for (String hostPart : hostArr) {
 			path.append(hostPart).append("-");
 		}
 		path.append(config.getPort()).append("-").append(config.getTarget());
-		key = path.toString();
-		logger.info("puma cache key:" + key);
+		cacheKey = new CacheKey("puma-seq", path.toString());
+		logger.info("puma cache key:" + path.toString());
 
 		try {
 			fileSequenceHolder = new FileSequenceHolder(config);
@@ -65,7 +64,6 @@ public class MemcachedSequenceHolder implements SequenceHolder {
 	}
 
 	private void initSeq() {
-		CacheKey cacheKey = new CacheKey(key, null);
 		try {
 			Object seqFromCache = cacheService.get(cacheKey);
 			if (seqFromCache != null) {
@@ -88,7 +86,6 @@ public class MemcachedSequenceHolder implements SequenceHolder {
 			fileSequenceHolder.saveSeq(seq);
 		} catch (Throwable e) {
 		}
-		CacheKey cacheKey = new CacheKey(key, null);
 		try {
 			cacheService.set(cacheKey, seq);
 		} catch (CacheException e) {

@@ -15,7 +15,6 @@
  */
 package com.dianping.puma.api;
 
-import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 

@@ -57,7 +57,7 @@ public class ModifyController {
     private SystemStatusContainer systemStatusContainer;
 
     private static final String errorMsg = "对不起，出了一点错误，请刷新页面试试。";
-    private static final int PAGESIZE = 8;
+    private static final int PAGESIZE = 30;
 
     @RequestMapping(value = { "/modify" })
     public ModelAndView modify(HttpServletRequest request, HttpServletResponse response) {

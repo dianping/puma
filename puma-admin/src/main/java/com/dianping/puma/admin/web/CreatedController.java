@@ -37,7 +37,7 @@ public class CreatedController {
     @Autowired
     private SystemStatusContainer systemStatusContainer;
 
-    private static final int PAGESIZE = 8;
+    private static final int PAGESIZE = 30;
 
     @RequestMapping(value = { "/created" })
     public ModelAndView created(HttpServletRequest request, HttpServletResponse response) {

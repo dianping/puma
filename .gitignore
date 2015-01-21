@@ -59,6 +59,11 @@ Thumbs.db
 .classpath
 .settings/
 
+# IntelliJ generated files #
+############################
+*.iml
+/.idea
+
 # temp folder #
 ######################
 target/

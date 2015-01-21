@@ -22,6 +22,6 @@ public interface TaskService {
     /**
      * 记录task的binlog
      */
-    void recordBinlog(Type type, long taskId, BinlogInfo binlogInfo);
+    void recordBinlog(String syncServerName, Type type, long taskId, BinlogInfo binlogInfo);
 
 }

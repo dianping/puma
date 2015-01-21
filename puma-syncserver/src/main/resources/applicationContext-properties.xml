@@ -17,5 +17,8 @@
         <property name="localPort" value="${puma.syncserver.port}" />
     </bean>
 
+    <bean id="binlogInfoService" class="com.dianping.puma.syncserver.service.impl.MMapBasedBinlogInfoServiceImpl" init-method="init">
+        <property name="baseDir" value="/data/appdatas/puma/" />
+    </bean>
 
 </beans>

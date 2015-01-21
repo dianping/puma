@@ -65,7 +65,7 @@ public class SystemStatusContainer implements InitializingBean {
      * 记录binlog位置
      */
     public void recordBinlog(Type type, long taskId, BinlogInfo binlogInfo) {
-        taskService.recordBinlog(type, taskId, binlogInfo);
+        taskService.recordBinlog(config.getSyncServerName(), type, taskId, binlogInfo);
     }
 
     @Override

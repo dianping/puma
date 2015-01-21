@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Build-Jdk: 1.6.0_65
+Built-By: lixt
+Created-By: IntelliJ IDEA
+

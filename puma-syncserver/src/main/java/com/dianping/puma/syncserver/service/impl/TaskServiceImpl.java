@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.dianping.puma.syncserver.service.BinlogInfoService;
-import net.sf.ehcache.concurrent.Sync;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,22 +39,22 @@ public class TaskServiceImpl implements TaskService {
         QueryResults<SyncTask> result = syncTaskDao.find(q);
 
         // Sync tasks stored in local files.
-        List<Long> localSyncTaskIds = binlogInfoService.findSyncTaskIds();
+        List<String> localSyncTaskClientNames = binlogInfoService.findSyncTaskClientNames();
         // Sync tasks stored in remote MongoDB.
         List<SyncTask> remoteSyncTasks = result.asList();
-        List<Long> remoteSyncTaskIds = this.findSyncTaskId(remoteSyncTasks);
+        List<String> remoteSyncTaskClientNames = this.findSyncTaskClientNames(remoteSyncTasks);
 
         // Tasks found.
         List<SyncTask> syncTasks = new ArrayList<SyncTask>();
 
         // Old && Modified && New sync tasks.
         for (SyncTask remoteSyncTask: remoteSyncTasks) {
-            long remoteSyncTaskId = remoteSyncTask.getSyncTaskId();
+            String remoteSyncTaskClientName = remoteSyncTask.getPumaClientName();
 
-            if (localSyncTaskIds.contains(remoteSyncTaskId)) {
+            if (localSyncTaskClientNames.contains(remoteSyncTaskClientName)) {
                 if (remoteSyncTask.getExecuted()) {
                     // Old sync tasks.
-                    remoteSyncTask.setBinlogInfo(binlogInfoService.getBinlogInfo(remoteSyncTaskId));
+                    remoteSyncTask.setBinlogInfo(binlogInfoService.getBinlogInfo(remoteSyncTaskClientName));
                     syncTasks.add(remoteSyncTask);
                 } else {
                     // @TODO
@@ -67,36 +66,34 @@ public class TaskServiceImpl implements TaskService {
                     // Local file lost.
                 } else {
                     // New sync tasks.
-                    binlogInfoService.saveBinlogInfo(remoteSyncTaskId, remoteSyncTask.getBinlogInfo());
-                    SyncTask syncTask = this.find(Type.SYNC, remoteSyncTaskId);
-                    syncTasks.add(syncTask);
+                    binlogInfoService.saveBinlogInfo(remoteSyncTaskClientName, remoteSyncTask.getBinlogInfo());
+                    syncTasks.add(remoteSyncTask);
                     // Update mongoDB.
-                    syncTask.setExecuted(true);
-                    this.syncTaskDao.save(syncTask);
+                    remoteSyncTask.setExecuted(true);
+                    this.syncTaskDao.save(remoteSyncTask);
                 }
             }
         }
 
         // Removed sync tasks.
-        for (Long localSyncTaskId: localSyncTaskIds) {
-            if (!remoteSyncTaskIds.contains(localSyncTaskId)) {
+        for (String localSyncTaskClientName: localSyncTaskClientNames) {
+            if (!remoteSyncTaskClientNames.contains(localSyncTaskClientName)) {
                 // Removed sync tasks.
-                binlogInfoService.removeBinlogInfo(localSyncTaskId);
+                binlogInfoService.removeBinlogInfo(localSyncTaskClientName);
             }
         }
 
         return syncTasks;
     }
 
-    private List<Long> findSyncTaskId(List<SyncTask> syncTasks) {
-        List<Long> syncTaskIds = new ArrayList<Long>();
-        for(SyncTask syncTask: syncTasks) {
-            syncTaskIds.add(syncTask.getSyncTaskId());
+    private List<String> findSyncTaskClientNames(List<SyncTask> syncTasks) {
+        List<String> syncTaskClientNames = new ArrayList<String>();
+        for (SyncTask syncTask: syncTasks) {
+            syncTaskClientNames.add(syncTask.getPumaClientName());
         }
-        return syncTaskIds;
+        return syncTaskClientNames;
     }
 
-    // Find a task with its correct binlog info.
     @SuppressWarnings("unchecked")
     @Override
     public <T extends Task> T find(Type type, long taskId) {
@@ -107,24 +104,32 @@ public class TaskServiceImpl implements TaskService {
                   new Key<SyncTask>(SyncTask.class, taskId));
             task.setExecuted(true);
             this.syncTaskDao.save((SyncTask)task);
+
+            if (task != null) {
+                BinlogInfo binlogInfo = task.getBinlogInfo();
+                binlogInfoService.saveBinlogInfo(((SyncTask) task).getPumaClientName(), binlogInfo);
+            }
+
             break;
         case CATCHUP:
             task = (T) catchupTaskDao.getDatastore().getByKey(CatchupTask.class,
                   new Key<CatchupTask>(CatchupTask.class, taskId));
             task.setExecuted(true);
             this.catchupTaskDao.save((CatchupTask)task);
+
+            if (task != null) {
+                BinlogInfo binlogInfo = task.getBinlogInfo();
+                binlogInfoService.saveBinlogInfo(((CatchupTask) task).getPumaClientName(), binlogInfo);
+            }
+
             break;
         case DUMP:
             task = (T) dumpTaskDao.getDatastore().getByKey(DumpTask.class,
                   new Key<DumpTask>(DumpTask.class, taskId));
             task.setExecuted(true);
             this.dumpTaskDao.save((DumpTask)task);
-            break;
-        }
 
-        if (task != null) {
-            BinlogInfo binlogInfo = task.getBinlogInfo();
-            binlogInfoService.saveBinlogInfo(taskId, binlogInfo);
+            break;
         }
 
         return task;
@@ -132,6 +137,15 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void recordBinlog(String syncServerName, Type type, long taskId, BinlogInfo binlogInfo) {
-        binlogInfoService.saveBinlogInfo(taskId, binlogInfo);
+        Task task = this.find(type, taskId);
+
+        switch (type) {
+        case SYNC:
+            binlogInfoService.saveBinlogInfo(((SyncTask)task).getPumaClientName(), binlogInfo);
+            break;
+        case CATCHUP:
+            binlogInfoService.saveBinlogInfo(((CatchupTask)task).getPumaClientName(), binlogInfo);
+            break;
+        }
     }
 }

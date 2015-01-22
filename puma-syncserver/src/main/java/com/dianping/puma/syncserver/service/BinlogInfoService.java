@@ -7,11 +7,11 @@ import java.util.List;
 public interface BinlogInfoService {
 	public void setBaseDir(String baseDir);
 
-	public BinlogInfo getBinlogInfo(long taskId);
+	public BinlogInfo getBinlogInfo(String clientName);
 
-	public void saveBinlogInfo(long taskId, BinlogInfo binlogInfo);
+	public void saveBinlogInfo(String clientName, BinlogInfo binlogInfo);
 
-	public void removeBinlogInfo(long taskId);
+	public void removeBinlogInfo(String clientName);
 
-	public List<Long> findSyncTaskIds();
+	public List<String> findSyncTaskClientNames();
 }

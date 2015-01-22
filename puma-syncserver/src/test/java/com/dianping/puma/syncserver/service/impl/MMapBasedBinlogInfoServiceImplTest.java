@@ -14,7 +14,7 @@ public class MMapBasedBinlogInfoServiceImplTest extends TestCase {
 
 	public void setUp() throws Exception {
 		super.setUp();
-		mMapBasedBinlogInfoService.setBaseDir("data/appdata/puma/syncserver");
+		mMapBasedBinlogInfoService.setBaseDir("/data/appdatas/puma/syncserver/");
 		mMapBasedBinlogInfoService.init();
 	}
 
@@ -23,42 +23,33 @@ public class MMapBasedBinlogInfoServiceImplTest extends TestCase {
 	}
 
 	@Test
-	public void testInit() throws Exception {
-		BinlogInfo binlogInfo = new BinlogInfo();
-		binlogInfo.setBinlogFile("a");
-		binlogInfo.setBinlogPosition(987);
-
-		Assert.assertEquals(binlogInfo, mMapBasedBinlogInfoService.getBinlogInfo(1230));
-	}
-
-	@Test
 	public void testGetBinlogInfo() throws Exception {
 		BinlogInfo binlogInfo = new BinlogInfo();
 		binlogInfo.setBinlogFile("a");
 		binlogInfo.setBinlogPosition(999888777);
-		mMapBasedBinlogInfoService.saveBinlogInfo(123, binlogInfo);
-		Assert.assertEquals(binlogInfo, mMapBasedBinlogInfoService.getBinlogInfo(123));
+		mMapBasedBinlogInfoService.saveBinlogInfo("no-1", binlogInfo);
+		Assert.assertEquals(binlogInfo, mMapBasedBinlogInfoService.getBinlogInfo("no-1"));
 	}
 
 	@Test
 	public void testSaveBinlogInfo() throws Exception {
 		BinlogInfo binlogInfo = new BinlogInfo();
-		binlogInfo.setBinlogFile("a");
+		binlogInfo.setBinlogFile("b");
 		binlogInfo.setBinlogPosition(987);
-		mMapBasedBinlogInfoService.saveBinlogInfo(1230, binlogInfo);
-		Assert.assertEquals(binlogInfo, mMapBasedBinlogInfoService.getBinlogInfo(1230));
+		mMapBasedBinlogInfoService.saveBinlogInfo("no-2", binlogInfo);
+		Assert.assertEquals(binlogInfo, mMapBasedBinlogInfoService.getBinlogInfo("no-2"));
 	}
 
 	@Test
 	public void testRemoveBinlogInfo() throws Exception {
-		mMapBasedBinlogInfoService.removeBinlogInfo(123);
-		Assert.assertEquals(null, mMapBasedBinlogInfoService.getBinlogInfo(123));
+		mMapBasedBinlogInfoService.removeBinlogInfo("no-2");
+		Assert.assertEquals(null, mMapBasedBinlogInfoService.getBinlogInfo("no-2"));
 	}
 
 	@Test
 	public void testFindSyncTaskIds() throws Exception {
-		List<Long> syncTaskIds = new ArrayList<Long>();
-		syncTaskIds.add((long) 1230);
-		Assert.assertEquals(syncTaskIds, mMapBasedBinlogInfoService.findSyncTaskIds());
+		List<String> syncTaskClientNames = new ArrayList<String>();
+		syncTaskClientNames.add("no-1");
+		Assert.assertEquals(syncTaskClientNames, mMapBasedBinlogInfoService.findSyncTaskClientNames());
 	}
 }

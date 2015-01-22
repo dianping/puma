@@ -18,7 +18,11 @@
     </bean>
 
     <bean id="binlogInfoService" class="com.dianping.puma.syncserver.service.impl.MMapBasedBinlogInfoServiceImpl" init-method="init">
+<<<<<<< HEAD
         <property name="baseDir" value="/data/appdatas/puma/" />
+=======
+        <property name="baseDir" value="/data/appdatas/puma/syncserver/" />
+>>>>>>> 692a38483d8b86cc391587d855ef041a5ec1aacc
     </bean>
 
 </beans>

@@ -45,6 +45,7 @@ public abstract class Task extends BaseEntity {
 
     protected Task(Type type) {
         this.type = type;
+        this.executed = false;
     }
 
     public BinlogInfo getBinlogInfo() {

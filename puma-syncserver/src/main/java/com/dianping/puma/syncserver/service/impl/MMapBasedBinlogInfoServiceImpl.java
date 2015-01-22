@@ -1,7 +1,10 @@
 package com.dianping.puma.syncserver.service.impl;
 
 import com.dianping.puma.core.sync.model.BinlogInfo;
+<<<<<<< HEAD
 import com.dianping.puma.core.sync.model.task.SyncTask;
+=======
+>>>>>>> 692a38483d8b86cc391587d855ef041a5ec1aacc
 import com.dianping.puma.syncserver.service.BinlogInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,8 +12,13 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.Iterator;
+=======
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+>>>>>>> 692a38483d8b86cc391587d855ef041a5ec1aacc
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,6 +28,10 @@ public class MMapBasedBinlogInfoServiceImpl implements BinlogInfoService {
 	private static final Logger log = LoggerFactory.getLogger(MMapBasedBinlogInfoServiceImpl.class);
 
 	private File baseDir;
+<<<<<<< HEAD
+=======
+	private File doneDir;
+>>>>>>> 692a38483d8b86cc391587d855ef041a5ec1aacc
 	private final Map<String, BinlogInfo> binlogInfoFile = new ConcurrentHashMap<String, BinlogInfo>();
 	private final Map<String, MappedByteBuffer> mappedByteBufferMapping = new ConcurrentHashMap<String, MappedByteBuffer>();
 	private static final int MAX_FILE_SIZE = 200;
@@ -33,6 +45,7 @@ public class MMapBasedBinlogInfoServiceImpl implements BinlogInfoService {
 	}
 
 	@Override
+<<<<<<< HEAD
 	public synchronized BinlogInfo getBinlogInfo(long taskId) {
 		return binlogInfoFile.get(getConfFileName(taskId));
 	}
@@ -41,6 +54,16 @@ public class MMapBasedBinlogInfoServiceImpl implements BinlogInfoService {
 	public synchronized void saveBinlogInfo(long taskId, BinlogInfo binlogInfo) {
 		binlogInfoFile.put(getConfFileName(taskId), binlogInfo);
 		saveToFile(taskId, binlogInfo);
+=======
+	public synchronized BinlogInfo getBinlogInfo(String clientName) {
+		return binlogInfoFile.get(getBinlogFileName(clientName));
+	}
+
+	@Override
+	public synchronized void saveBinlogInfo(String clientName, BinlogInfo binlogInfo) {
+		binlogInfoFile.put(getBinlogFileName(clientName), binlogInfo);
+		saveToFile(clientName, binlogInfo);
+>>>>>>> 692a38483d8b86cc391587d855ef041a5ec1aacc
 	}
 
 	public void init() {
@@ -64,6 +87,7 @@ public class MMapBasedBinlogInfoServiceImpl implements BinlogInfoService {
 				loadFromFile(config);
 			}
 		}
+<<<<<<< HEAD
 	}
 
 	@Override
@@ -80,16 +104,49 @@ public class MMapBasedBinlogInfoServiceImpl implements BinlogInfoService {
 	@Override
 	public List<Long> findSyncTaskIds() {
 		List<Long> syncTaskIds = new ArrayList<Long>();
+=======
+
+		this.doneDir = new File(this.baseDir.getAbsolutePath() + "/done/");
+		if (!doneDir.exists()) {
+			if (!doneDir.mkdirs()) {
+				throw new RuntimeException("Fail to make dir for " + doneDir.getAbsolutePath());
+			}
+		}
+	}
+
+	@Override
+	public void removeBinlogInfo(String clientName) {
+		String filename = getBinlogFileName(clientName);
+		binlogInfoFile.remove(filename);
+		mappedByteBufferMapping.remove(filename);
+
+		File undoneFile = new File(baseDir, getBinlogFileName(clientName));
+		File doneFile   = new File(doneDir, getBinlogDoneFileName(clientName));
+		undoneFile.renameTo(doneFile);
+		undoneFile.delete();
+	}
+
+	@Override
+	public List<String> findSyncTaskClientNames() {
+		List<String> syncTaskClientNames = new ArrayList<String>();
+>>>>>>> 692a38483d8b86cc391587d855ef041a5ec1aacc
 		List<String> binlogInfoFileNames = new ArrayList<String>();
 		binlogInfoFileNames.addAll(binlogInfoFile.keySet());
 
 		for (String filename: binlogInfoFileNames) {
 			filename = filename.replace(SUFFIX, "");
 			filename = filename.replace(PREFIX, "");
+<<<<<<< HEAD
 			syncTaskIds.add(Long.parseLong(filename));
 		}
 
 		return syncTaskIds;
+=======
+			syncTaskClientNames.add(filename);
+		}
+
+		return syncTaskClientNames;
+>>>>>>> 692a38483d8b86cc391587d855ef041a5ec1aacc
 	}
 
 	private void loadFromFile(String filename) {
@@ -131,8 +188,13 @@ public class MMapBasedBinlogInfoServiceImpl implements BinlogInfoService {
 		}
 	}
 
+<<<<<<< HEAD
 	private void saveToFile(long taskId, BinlogInfo binlogInfo) {
 		String path = new File(baseDir, getConfFileName(taskId)).getAbsolutePath();
+=======
+	private void saveToFile(String clientName, BinlogInfo binlogInfo) {
+		String path = new File(baseDir, getBinlogFileName(clientName)).getAbsolutePath();
+>>>>>>> 692a38483d8b86cc391587d855ef041a5ec1aacc
 		if (!mappedByteBufferMapping.containsKey(path)) {
 			File f = new File(path);
 			if (!f.exists()) {
@@ -158,7 +220,18 @@ public class MMapBasedBinlogInfoServiceImpl implements BinlogInfoService {
 		mbb.put("\n".getBytes());
 	}
 
+<<<<<<< HEAD
 	private static String getConfFileName(long taskId) {
 		return PREFIX + String.valueOf(taskId) + SUFFIX;
+=======
+	private static String getBinlogFileName(String clientName) {
+		return PREFIX + clientName + SUFFIX;
+	}
+
+	private static String getBinlogDoneFileName(String clientName) {
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss");
+		String date = formatter.format(System.currentTimeMillis());
+		return PREFIX + clientName + SUFFIX + "." + date;
+>>>>>>> 692a38483d8b86cc391587d855ef041a5ec1aacc
 	}
 }

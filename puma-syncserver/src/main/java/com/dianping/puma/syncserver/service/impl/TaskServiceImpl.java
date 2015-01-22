@@ -3,6 +3,7 @@ package com.dianping.puma.syncserver.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.dianping.puma.core.sync.model.task.*;
 import com.dianping.puma.syncserver.service.BinlogInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,11 +12,6 @@ import com.dianping.puma.core.sync.dao.task.CatchupTaskDao;
 import com.dianping.puma.core.sync.dao.task.DumpTaskDao;
 import com.dianping.puma.core.sync.dao.task.SyncTaskDao;
 import com.dianping.puma.core.sync.model.BinlogInfo;
-import com.dianping.puma.core.sync.model.task.CatchupTask;
-import com.dianping.puma.core.sync.model.task.DumpTask;
-import com.dianping.puma.core.sync.model.task.SyncTask;
-import com.dianping.puma.core.sync.model.task.Task;
-import com.dianping.puma.core.sync.model.task.Type;
 import com.dianping.puma.syncserver.service.TaskService;
 import com.google.code.morphia.Key;
 import com.google.code.morphia.query.Query;
@@ -136,16 +132,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void recordBinlog(String syncServerName, Type type, long taskId, BinlogInfo binlogInfo) {
-        Task task = this.find(type, taskId);
-
-        switch (type) {
-        case SYNC:
-            binlogInfoService.saveBinlogInfo(((SyncTask)task).getPumaClientName(), binlogInfo);
-            break;
-        case CATCHUP:
-            binlogInfoService.saveBinlogInfo(((CatchupTask)task).getPumaClientName(), binlogInfo);
-            break;
-        }
+    public void recordBinlog(AbstractTask abstractTask, BinlogInfo binlogInfo) {
+        binlogInfoService.saveBinlogInfo(abstractTask.getPumaClientName(), binlogInfo);
     }
 }

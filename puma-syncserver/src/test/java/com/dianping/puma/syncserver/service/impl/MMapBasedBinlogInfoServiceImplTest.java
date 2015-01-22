@@ -26,7 +26,7 @@ public class MMapBasedBinlogInfoServiceImplTest extends TestCase {
 	public void testGetBinlogInfo() throws Exception {
 		BinlogInfo binlogInfo = new BinlogInfo();
 		binlogInfo.setBinlogFile("a");
-		binlogInfo.setBinlogPosition(999888777);
+		binlogInfo.setBinlogPosition(999888);
 		mMapBasedBinlogInfoService.saveBinlogInfo("no-1", binlogInfo);
 		Assert.assertEquals(binlogInfo, mMapBasedBinlogInfoService.getBinlogInfo("no-1"));
 	}

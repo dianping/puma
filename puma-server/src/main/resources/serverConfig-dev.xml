@@ -1,21 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
-    xmlns:tx="http://www.springframework.org/schema/tx"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
-    <bean id="servers" class="java.util.ArrayList">
-        <constructor-arg>
-            <list>
-                <ref bean="server-77_20" />
-                <!-- <ref bean="server-dianping-dev" />  -->
-            </list>
-        </constructor-arg>
-    </bean>
+	<bean id="servers" class="java.util.ArrayList">
+		<constructor-arg>
+			<list>
+				<ref bean="server-7_43" />
+				<!--  <ref bean="server-77_20" /> -->
+				<!-- <ref bean="server-dianping-dev" />  -->
+			</list>
+		</constructor-arg>
+	</bean>
 
-    <import resource="server-77_20.xml" />
-    <!-- <import resource="server-dianping-dev.xml" />  -->
+	<import resource="server-7_43.xml" />
+	<!--  <import resource="server-77_20.xml" /> -->
+	<!-- <import resource="server-dianping-dev.xml" />  -->
 
 </beans>

@@ -104,7 +104,8 @@ color: #797268;
 			ServerStatus ss = entry.getValue();
 	%>	
 			<%="<tr><td>" + entry.getKey() + "</td><td>" + ss.getHost() + "</td><td>" + ss.getPort() + "</td><td>" %>
-			<% if(ss.getDb() == null || ss.getDb().length()==0){ %> All <% }else{ %> ss.getDb() <% } %> 
+			<% if(ss.getDb() == null || ss.getDb().length()==0){ %> All <% }else{ %> <%= ss.getDb() %> 
+			<% } %> 
 			<%="</td><td>" + ss.getBinlogFile() + "</td><td>" + ss.getBinlogPos() + "</td><td>" + (insertCounter.get(entry.getKey()) == null ? 0: insertCounter.get(entry.getKey()).longValue()) + "</td><td>" + (deleteCounter.get(entry.getKey()) == null ? 0: deleteCounter.get(entry.getKey()).longValue())  + "</td><td>" + (updateCounter.get(entry.getKey()) == null ? 0: updateCounter.get(entry.getKey()).longValue()) + "</td><td>" + (ddlCounter.get(entry.getKey()) == null ? 0: ddlCounter.get(entry.getKey()).longValue())+ "</td></tr>" %>
 	<%
 		}

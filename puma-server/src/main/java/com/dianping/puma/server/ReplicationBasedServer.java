@@ -413,5 +413,23 @@ public class ReplicationBasedServer extends AbstractServer {
     public void setDbServerId(long dbServerId) {
         this.dbServerId = dbServerId;
     }
+    
+    /**
+     * init member variables
+     */
+    public boolean init(){
+    	//setHost()
+    	return false;
+    }
+    /**
+     * constructed function
+     */
+    public ReplicationBasedServer(){
+    	if(init()){
+    		log.info("server constructed success... serverId:"+getServerId()+" serverName:"+getServerName());
+    	}else{
+    		log.error("Server constructed failed... serverId:"+getServerId()+" serverName:"+getServerName());
+    	}
+    }
 
 }

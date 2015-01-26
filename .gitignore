@@ -58,6 +58,7 @@ Thumbs.db
 .project
 .classpath
 .settings/
+.metadata/
 
 # temp folder #
 ######################

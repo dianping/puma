@@ -2,15 +2,26 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
 	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
-    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
+	<bean id="webAppConfig" lazy-init="false"
+	class="com.dianping.puma.config.InitializeWebAppConfig">
+		<property name ="webAppName" value="puma-server_1"/>
+	</bean>
+	
 	<bean name="placeholder" lazy-init="false"
 		class="com.dianping.puma.config.InitializeConfig">
 		<property name="propertiesPath" value="applicationContext.properties" />
 	</bean>
-
+	
+    <!-- annotation scan -->
+    <context:component-scan base-package="com.dianping.puma" />
+    
 	<bean id="notifyService" class="com.dianping.puma.core.monitor.DefaultNotifyService"/>
 
 	<bean id="notifiableBean" abstract="true">
@@ -29,8 +40,12 @@
 	</bean>
 
 	<bean id="jsonCodec" class="com.dianping.puma.core.codec.JsonEventCodec" />
+	
+	<bean id="mongoClient" class="com.dianping.puma.core.sync.dao.MongoClient">
+		<property name="configFileName" value="puma-mongo.properties"/>
+    </bean>
 
-	<import resource="serverConfig-${puma.server.env}.xml" />
+	<!-- <import resource="serverConfig-${puma.server.env}.xml" /> -->
 
 </beans>
 

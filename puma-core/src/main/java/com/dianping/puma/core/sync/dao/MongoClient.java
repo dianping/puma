@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.dianping.puma.core.sync.config.ConfigChangeListener;
 import com.dianping.puma.core.sync.config.DynamicConfig;
@@ -28,6 +29,8 @@ public class MongoClient implements ConfigChangeListener {
     private static final String MONGO_SERVER_URI_KEYNAME = "puma.mongoServerUri";
 
     private static final String DB_NAME = "puma";
+    
+    private String configFileName = "puma-mongo.lion.properties";
 
     private static MongoOptions mongoOptions;
     static {
@@ -60,7 +63,7 @@ public class MongoClient implements ConfigChangeListener {
     public MongoClient(DynamicConfig dynamicConfig) {
         if (dynamicConfig == null) {
             //从动态配置中获取mongo服务器地址
-            dynamicConfig = new LionDynamicConfig("puma-mongo.lion.properties");
+            dynamicConfig = new LionDynamicConfig(configFileName);
         }
         this.dynamicConfig = dynamicConfig;
         this.dynamicConfig.setConfigChangeListener(this);
@@ -143,5 +146,13 @@ public class MongoClient implements ConfigChangeListener {
     public Mongo getMongo() {
         return mongo;
     }
+
+	public void setConfigFileName(String configFileName) {
+		this.configFileName = configFileName;
+	}
+
+	public String getConfigFileName() {
+		return configFileName;
+	}
 
 }

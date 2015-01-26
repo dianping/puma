@@ -436,7 +436,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
     }
 
     private void saveBinlogToDB(BinlogInfo binlogInfo) {
-        SystemStatusContainer.instance.recordBinlog(abstractTask.getType(), abstractTask.getId(), binlogInfo);
+        SystemStatusContainer.instance.recordBinlog(abstractTask, binlogInfo);
     }
 
     private boolean containDatabase(String database) {

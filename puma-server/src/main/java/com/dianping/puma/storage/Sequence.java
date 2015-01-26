@@ -110,6 +110,14 @@ public class Sequence {
         offset = (int) (seq & 0xFFFFFFFF);
     }
 
+    public static void main(String[] args) {
+    	Sequence seq = new Sequence(-7883269483600871731l);
+    	System.out.println(seq);
+    	seq = new Sequence(-7883269483756777604l);
+    	System.out.println(seq);
+    	
+    }
+    
     /*
      * (non-Javadoc)
      * 

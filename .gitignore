@@ -60,6 +60,11 @@ Thumbs.db
 .settings/
 .metadata/
 
+# IntelliJ generated files #
+############################
+*.iml
+/.idea
+
 # temp folder #
 ######################
 target/

@@ -41,8 +41,11 @@ public abstract class Task extends BaseEntity {
     /** 默认handler */
     private String defaultHandler;
 
+    private boolean executed;
+
     protected Task(Type type) {
         this.type = type;
+        this.executed = false;
     }
 
     public BinlogInfo getBinlogInfo() {
@@ -124,6 +127,14 @@ public abstract class Task extends BaseEntity {
 	public void setDefaultHandler(String defaultHandler) {
    	this.defaultHandler = defaultHandler;
    }
+
+    public boolean getExecuted() {
+        return executed;
+    }
+
+    public void setExecuted(boolean executed) {
+        this.executed = executed;
+    }
 
 	@Override
    public String toString() {

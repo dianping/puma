@@ -32,8 +32,9 @@ public class MongoDBTest {
 		PumaServerDetailConfig config=new PumaServerDetailConfig();
 		PumaServerDetailConfigDao dao=new PumaServerDetailConfigDao(mongoClient);
 		PumaServerConfigServiceImpl service = new PumaServerConfigServiceImpl();
-		service.setPumaServerDetailConfigDao(dao);
 		
+		service.setPumaServerDetailConfigDao(dao);
+		config = service.find("webApp_1").get(0);
 		config.setWebAppName("webApp_1");
 		config.setDbHost("127.0.0.1");
 		config.setDbPort(3306);
@@ -51,6 +52,7 @@ public class MongoDBTest {
 		config.setDispatcherName("dispatcher-7_43");
 		List<FileSenderConfig> fileConfigs=new ArrayList<FileSenderConfig>();
 		FileSenderConfig fileConfig=new FileSenderConfig();
+		fileConfig.setFileSenderName("fileDumpSender-7_43");
 		fileConfig.setBinlogIndexBaseDir("/data/appdatas/puma/binlogIndex/7_43/");
 		fileConfig.setStorageAcceptedTablesConfigKey("puma.7_43_acceptedTables");
 		fileConfig.setMasterBucketFilePrefix("bucket-");
@@ -68,7 +70,7 @@ public class MongoDBTest {
 		fileConfigs.add(fileConfig);
 		
 		config.setFileSenders(fileConfigs);
-		service.save(config);
+		service.modify(config);
 		
 		
 		//DefaultNotifyService notifyService = new DefaultNotifyService();

@@ -94,6 +94,7 @@ public class DefaultServerManager implements ServerManager {
 		server.setPassword(config.getDbPassword());
 		server.setDefaultBinlogFileName(config.getDefaultBinlogFileName());
 		server.setDefaultBinlogPosition(config.getDefaultBinlogPosition());
+		server.setBinlogPositionHolder(binlogPositionHolder);
 		// parser
 		Parser parser = new DefaultBinlogParser();
 		parser.start();
@@ -144,7 +145,7 @@ public class DefaultServerManager implements ServerManager {
 				slaveBucketIndex
 						.setBaseDir(senderItem.getStorageSlaveBaseDir());
 				slaveBucketIndex.start();
-				storage.setMasterBucketIndex(slaveBucketIndex);
+				storage.setSlaveBucketIndex(slaveBucketIndex);
 				// archive strategy
 				DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
 				archiveStrategy.setServerName(config.getServerName());

@@ -1,0 +1,40 @@
+<div class="container"
+     style="margin: 0 auto; width: 100%; margin-bottom: 50px;">
+    <div>
+        <a style="float: right;" href="${rc.contextPath}/serverConfig/create">
+            <span>创建配置</span>
+        </a>
+        <p class="legend">已有的配置</p>
+        <div id="container" style="height: 600px;">
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <table class="table table-hover table-striped">
+
+                        <thead>
+                        <tr>
+                            <th>Puma Server</th>
+                            <th>Host</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        #foreach($serverConfig in ${serverConfigs})
+                        <tr>
+                            <td>${serverConfig.name}</td>
+                            <td>
+                                #foreach($host in ${serverConfig.hosts})
+                                ${host}
+                                #end
+                            </td>
+                            <td></td>
+                        </tr>
+                        #end
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

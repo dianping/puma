@@ -30,8 +30,6 @@ public class MongoClient implements ConfigChangeListener {
 
     private static final String DB_NAME = "puma";
     
-    private String configFileName = "puma-mongo.lion.properties";
-
     private static MongoOptions mongoOptions;
     static {
         //读取properties配置(如果存在configFile，则使用configFile)
@@ -63,7 +61,7 @@ public class MongoClient implements ConfigChangeListener {
     public MongoClient(DynamicConfig dynamicConfig) {
         if (dynamicConfig == null) {
             //从动态配置中获取mongo服务器地址
-            dynamicConfig = new LionDynamicConfig(configFileName);
+            dynamicConfig = new LionDynamicConfig("puma-mongo.lion.properties");
         }
         this.dynamicConfig = dynamicConfig;
         this.dynamicConfig.setConfigChangeListener(this);
@@ -146,13 +144,5 @@ public class MongoClient implements ConfigChangeListener {
     public Mongo getMongo() {
         return mongo;
     }
-
-	public void setConfigFileName(String configFileName) {
-		this.configFileName = configFileName;
-	}
-
-	public String getConfigFileName() {
-		return configFileName;
-	}
-
+    
 }

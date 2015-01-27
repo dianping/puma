@@ -11,7 +11,7 @@
 
 	<bean id="webAppConfig" lazy-init="false"
 	class="com.dianping.puma.config.InitializeWebAppConfig">
-		<property name ="webAppName" value="puma-server_1"/>
+		<property name ="webAppName" value="webApp_1"/>
 	</bean>
 	
 	<bean name="placeholder" lazy-init="false"
@@ -42,7 +42,6 @@
 	<bean id="jsonCodec" class="com.dianping.puma.core.codec.JsonEventCodec" />
 	
 	<bean id="mongoClient" class="com.dianping.puma.core.sync.dao.MongoClient">
-		<property name="configFileName" value="puma-mongo.properties"/>
     </bean>
 
 	<!-- <import resource="serverConfig-${puma.server.env}.xml" /> -->

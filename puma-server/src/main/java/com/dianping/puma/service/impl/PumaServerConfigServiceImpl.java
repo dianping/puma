@@ -19,6 +19,10 @@ public class PumaServerConfigServiceImpl implements PumaServerConfigService {
 	@Autowired
 	PumaServerDetailConfigDao pumaServerDetailConfigDao;
 
+	public void setPumaServerDetailConfigDao(PumaServerDetailConfigDao pumaServerDetailConfigDao){
+		this.pumaServerDetailConfigDao=pumaServerDetailConfigDao;
+	}
+	
 	@Override
 	public ObjectId save(PumaServerDetailConfig pumaServerDetailConfig) {
 		Key<PumaServerDetailConfig> key = this.pumaServerDetailConfigDao

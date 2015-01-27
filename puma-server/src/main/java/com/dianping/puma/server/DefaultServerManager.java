@@ -6,10 +6,12 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.dianping.puma.ComponentContainer;
 import com.dianping.puma.bo.PositionInfo;
 import com.dianping.puma.bo.PumaContext;
+import com.dianping.puma.config.InitializeWebAppConfig;
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.server.model.FileSenderConfig;
@@ -28,6 +30,7 @@ import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.LocalFileBucketIndex;
 
+@Service("serverManager")
 public class DefaultServerManager implements ServerManager {
 
 	private static Logger log = Logger.getLogger(ServerManager.class);
@@ -52,7 +55,8 @@ public class DefaultServerManager implements ServerManager {
 
 	@Override
 	public void init() {
-		webAppName = ComponentContainer.SPRING.lookup(BEAN_WEBAPPCONFIG);
+		InitializeWebAppConfig webAppConfig = ComponentContainer.SPRING.lookup(BEAN_WEBAPPCONFIG);
+		webAppName = webAppConfig.getWebAppName();
 		notifyService = ComponentContainer.SPRING.lookup(BEAN_NOTIFYSERVICE);
 		binlogPositionHolder = ComponentContainer.SPRING
 				.lookup(BEAN_BINLOGPOSITIONHOLDER);
@@ -61,6 +65,7 @@ public class DefaultServerManager implements ServerManager {
 
 	@Override
 	public List<Server> constructServers() throws Exception {
+		log.info("starting construct servers.........");
 		List<PumaServerDetailConfig> pumaServerDetailConfigs = getServerDetailConfig(webAppName);
 		if (pumaServerDetailConfigs != null
 				&& pumaServerDetailConfigs.size() > 0) {
@@ -71,12 +76,14 @@ public class DefaultServerManager implements ServerManager {
 				servers.add(server);
 			}
 		}
+		log.info("ended construct servers.........");
 		return servers;
 	}
 
 	@Override
 	public Server construct(PumaServerDetailConfig config)
 			throws Exception {
+		log.info("construct server "+config.getServerName()+".......");
 		ReplicationBasedServer server = new ReplicationBasedServer();
 		server.setNotifyService(notifyService);
 		server.setName(config.getServerName());
@@ -215,6 +222,7 @@ public class DefaultServerManager implements ServerManager {
 	}
 
 	private List<PumaServerDetailConfig> getServerDetailConfig(String webAppName) {
+		log.info("starting get detail config.........");
 		return pumaServerConfigService.find(webAppName);
 	}
 

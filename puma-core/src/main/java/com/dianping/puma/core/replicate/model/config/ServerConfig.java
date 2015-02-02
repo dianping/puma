@@ -6,8 +6,6 @@ import com.google.code.morphia.annotations.Indexed;
 import com.google.code.morphia.utils.IndexDirection;
 import org.bson.types.ObjectId;
 
-import java.util.List;
-
 @Entity
 public class ServerConfig {
 
@@ -17,9 +15,9 @@ public class ServerConfig {
 	@Indexed(value = IndexDirection.ASC, name = "name", unique = true, dropDups = true)
 	private String name;
 
-	private List<String> hosts;
+	private String host;
 
-	private List<String> ports;
+	private String port;
 
 	public ObjectId getId() {
 		return id;
@@ -37,19 +35,19 @@ public class ServerConfig {
 		this.name = name;
 	}
 
-	public List<String> getHosts() {
-		return hosts;
+	public String getHost() {
+		return host;
 	}
 
-	public void setHosts(List<String> hosts) {
-		this.hosts = hosts;
+	public void setHost(String host) {
+		this.host = host;
 	}
 
-	public List<String> getPorts() {
-		return ports;
+	public String getPort() {
+		return port;
 	}
 
-	public void setPorts(List<String> ports) {
-		this.ports = ports;
+	public void setPort(String port) {
+		this.port = port;
 	}
 }

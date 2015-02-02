@@ -49,22 +49,14 @@ public class ServerConfigController {
 
 	@RequestMapping(value = { "/serverConfig/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(String name, String[] host, String[] port) {
+	public String createPost(String name, String host, String port) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		ServerConfig serverConfig = new ServerConfig();
-		List<String> hosts = new ArrayList<String>();
-		List<String> ports = new ArrayList<String>();
-
-		for(int i = 0; i != host.length; ++i) {
-			hosts.add(host[i]);
-			ports.add(port[i]);
-		}
-
 		serverConfig.setName(name);
-		serverConfig.setHosts(hosts);
-		serverConfig.setPorts(ports);
+		serverConfig.setHost(host);
+		serverConfig.setPort(port);
 
 		try {
 			this.serverConfigService.save(serverConfig);

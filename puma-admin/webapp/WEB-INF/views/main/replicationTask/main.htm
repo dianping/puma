@@ -1,0 +1,36 @@
+<div class="container"
+     style="margin: 0 auto; width: 100%; margin-bottom: 50px;">
+    <div>
+        <a style="float: right;" href="${rc.contextPath}/replicationTask/create">
+            <span>新任务</span>
+        </a>
+        <p class="legend">已有的配置</p>
+        <div id="container" style="height: 600px;">
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <table class="table table-hover table-striped">
+
+                        <thead>
+                        <tr>
+                            <th>数据库实例</th>
+                            <th>Puma Server</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        #foreach($replicationTask in ${replicationTasks})
+                        <tr>
+                            <td>${replicationTask.dbInstanceConfig.name}</td>
+                            <td>${replicationTask.serverConfig.name}</td>
+                            <td></td>
+                        </tr>
+                        #end
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

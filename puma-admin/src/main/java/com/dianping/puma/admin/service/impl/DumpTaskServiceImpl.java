@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.dianping.puma.admin.monitor.SystemStatusContainer;
 import com.dianping.puma.admin.service.DumpTaskService;
-import com.dianping.puma.core.monitor.SwallowEventPulisher;
+import com.dianping.puma.core.monitor.SwallowEventPublisher;
 import com.dianping.puma.core.monitor.TaskEvent;
 import com.dianping.puma.core.sync.dao.task.DumpTaskDao;
 import com.dianping.puma.core.sync.model.BinlogInfo;
@@ -19,7 +19,7 @@ public class DumpTaskServiceImpl implements DumpTaskService {
     @Autowired
     DumpTaskDao dumpTaskDao;
     @Autowired
-    SwallowEventPulisher taskEventPublisher;
+    SwallowEventPublisher taskEventPublisher;
     @Autowired
     SystemStatusContainer systemStatusContainer;
 

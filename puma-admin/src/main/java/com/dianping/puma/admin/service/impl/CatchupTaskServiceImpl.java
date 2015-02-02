@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.dianping.puma.admin.monitor.SystemStatusContainer;
 import com.dianping.puma.admin.service.CatchupTaskService;
-import com.dianping.puma.core.monitor.SwallowEventPulisher;
+import com.dianping.puma.core.monitor.SwallowEventPublisher;
 import com.dianping.puma.core.monitor.TaskEvent;
 import com.dianping.puma.core.sync.dao.task.CatchupTaskDao;
 import com.dianping.puma.core.sync.model.BinlogInfo;
@@ -19,7 +19,7 @@ public class CatchupTaskServiceImpl implements CatchupTaskService {
     @Autowired
     CatchupTaskDao catchupTaskDao;
     @Autowired
-    SwallowEventPulisher taskEventPublisher;
+    SwallowEventPublisher taskEventPublisher;
     @Autowired
     SystemStatusContainer systemStatusContainer;
 

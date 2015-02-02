@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import com.dianping.puma.admin.monitor.SystemStatusContainer;
 import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.admin.util.MysqlMetaInfoFetcher;
-import com.dianping.puma.core.monitor.SwallowEventPulisher;
+import com.dianping.puma.core.monitor.SwallowEventPublisher;
 import com.dianping.puma.core.monitor.SyncTaskDeleteEvent;
 import com.dianping.puma.core.monitor.SyncTaskStatusActionEvent;
 import com.dianping.puma.core.monitor.TaskEvent;
@@ -39,15 +39,16 @@ import com.google.code.morphia.query.QueryResults;
 
 @Service
 public class SyncTaskServiceImpl implements SyncTaskService {
+
 	private static final Logger LOG = LoggerFactory.getLogger(SyncTaskServiceImpl.class);
 	@Autowired
 	SyncTaskDao syncTaskDao;
 	@Autowired
-	SwallowEventPulisher taskEventPublisher;
+	SwallowEventPublisher taskEventPublisher;
 	@Autowired
-	SwallowEventPulisher taskDeleteEventPublisher;
+	SwallowEventPublisher taskDeleteEventPublisher;
 	@Autowired
-	SwallowEventPulisher statusActionEventPublisher;
+	SwallowEventPublisher statusActionEventPublisher;
 	@Autowired
 	SystemStatusContainer systemStatusContainer;
 	private static final int retries = 5;
@@ -238,6 +239,7 @@ public class SyncTaskServiceImpl implements SyncTaskService {
 	}
 
 	/**
+	 * 
 	 * 如果“table下的字段没有被重命名,partOf为false”，那么该table可以被dump
 	 */
 	private boolean shouldDump(TableMapping tableConfig) {

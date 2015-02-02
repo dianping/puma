@@ -10,17 +10,17 @@
             http://www.springframework.org/schema/task   
     http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 
-    <bean id="taskEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPulisher"
+    <bean id="taskEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPublisher"
         init-method="init">
         <property name="topic" value="puma_task_event" />
     </bean>
 
-    <bean id="statusActionEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPulisher"
+    <bean id="statusActionEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPublisher"
         init-method="init">
         <property name="topic" value="puma_status_action_event" />
     </bean>
 
-    <bean id="taskDeleteEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPulisher"
+    <bean id="taskDeleteEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPublisher"
         init-method="init">
         <property name="topic" value="puma_task_delete_event" />
     </bean>

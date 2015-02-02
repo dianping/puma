@@ -1,0 +1,113 @@
+<div class="container"
+     style="margin: 0 auto; width: 100%; margin-bottom: 50px;">
+   <ul id="stepsBreak" class="breadcrumb">
+      <li class="step_active">第1步: 填写基础配置 <span class="divider">&gt;</span></li>
+      <li class="step_undo">第2步: 创建DumpTask <span class="divider">&gt;</span>
+      </li>
+      <li class="step_undo">第3步: 创建SyncTask</li>
+   </ul>
+   <div>
+      <form id="databaseForm" class="form-horizontal" method="post"
+            onsubmit="submit0(this);return false;" onSuccess="onSuccess"
+            action="${rc.contextPath}/replicationTask/create">
+         <button type="submit" style="float: right;" class="btn btn-success">
+            下一步</a>
+         </button>
+         <p class="legend">填写同步的配置</p>
+         <div style="height: 700px">
+            <span>数据库实例</span>
+            <select name="dbInstanceName" style="margin-left: 16px; margin-right: 16px;">
+               #foreach($dbInstanceConfig in ${dbInstanceConfigs})
+               <option value="${dbInstanceConfig.name}">${dbInstanceConfig.name}</option>
+               #end
+            </select>
+
+            <span>服务器</span>
+            <select name="serverName" style="margin-left: 16px;">
+               #foreach($serverConfig in ${serverConfigs})
+               <option value="${serverConfig.name}">${serverConfig.name}</option>
+               #end
+            </select>
+
+            <div class="control-group">
+               <label class="control-label">binlog文件</label>
+               <div class="controls">
+                  <input type="text" name="binlogFile">
+               </div>
+            </div>
+
+            <div class="control-group">
+               <label class="control-label">binlog位置</label>
+               <div class="controls">
+                  <input type="text" name="binlogPosition">
+               </div>
+            </div>
+
+         </div>
+         <input id="syncXml" type="hidden" name="syncXml" value="">
+      </form>
+   </div>
+</div>
+<script>
+   function addTableDiv(aLink) {
+      var form = $(aLink).parent();
+      $(form).append($('#addTableDiv').html());
+      var count = Number($(form).children("input[name='count']").val());
+      $(form).children("input[name='count']").val(count + 1);
+   }
+   function removeTableDiv(aLink) {
+      var control = $(aLink).parent().parent();
+      var form = $(control).parent();
+      var count = Number($(form).children("input[name='count']").val());
+      $(form).children("input[name='count']").val(count - 1);
+      $(control).remove();
+   }
+   function removeDatabaseDiv(aLink) {
+      var dbDiv = $(aLink).parent();
+      $(dbDiv).remove();
+   }
+   function addDatabaseDiv() {
+      var form = $("#databaseForm");
+      $(form).append($('#addDatabaseDiv').html());
+   }
+   function submit0(form) {
+      //$("#syncXml").val(window.xmlEditor.getValue());
+      $.ajax({
+         type : $(form).attr('method'),
+         url : $(form).attr('action'),
+         data : $(form).serialize(),
+         dataType : "json",
+         success : onSuccess,
+         error : pumadmin.httpError
+      });
+      return false;
+   }
+   function onSuccess(data) {
+      if (data.success == false) {
+         pumadmin.appError("错误信息", data.errorMsg);
+      } else {
+         window.location = "${rc.contextPath}/replicationTask";
+      }
+   }
+   function loadXmlSample() {
+      var param = new Object();
+      var url = window.contextpath + '/create/loadXmlSample';
+      $.ajax({
+         type : 'POST',
+         url : url,
+         data : param,
+         dataType : "json",
+         success : loadXmlSampleDone,
+         error : pumadmin.httpError
+      });
+   }
+   function loadXmlSampleDone(data) {
+      if (data.success == false) {
+         pumadmin.appError("错误信息", data.errorMsg);
+      } else {
+         //window.xmlEditor.setValue(data.sampleXml);
+         //window.xmlEditor.moveCursorTo(0, 0);
+      }
+   }
+</script>
+#parse("main/create/initJs.htm")

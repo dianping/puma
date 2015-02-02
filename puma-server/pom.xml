@@ -121,6 +121,10 @@
             <groupId>com.dianping.swallow</groupId>
             <artifactId>swallow-producerclient</artifactId>
         </dependency>
+        <dependency>
+            <groupId>c3p0</groupId>
+            <artifactId>c3p0</artifactId>
+        </dependency>
 	</dependencies>
 	<build>
         <finalName>${artifactId}-${env}-${version}</finalName>

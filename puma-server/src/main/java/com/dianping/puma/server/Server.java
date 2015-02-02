@@ -14,6 +14,8 @@ package com.dianping.puma.server;
 
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.LifeCycle;
+import com.dianping.puma.core.server.model.ServerTaskActionStatus;
+import com.dianping.puma.core.server.model.TaskExecutorStatus;
 
 /**
  * @author Leo Liang
@@ -40,4 +42,12 @@ public interface Server extends LifeCycle<Exception> {
 	public String getServerName();
 
 	public void setBinlogPositionHolder(BinlogPositionHolder holder);
+	
+	public  ServerTaskActionStatus getTaskActionStatus();
+	
+	public void setTaskActionStatus(ServerTaskActionStatus taskActionStatus);
+	
+	public void setTaskExecutorStatus(TaskExecutorStatus taskExecutorStatus);
+	
+	public TaskExecutorStatus getTaskExecutorStatus();
 }

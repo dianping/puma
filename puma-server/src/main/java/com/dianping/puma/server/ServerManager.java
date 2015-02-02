@@ -1,34 +1,45 @@
 package com.dianping.puma.server;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
-import com.dianping.puma.core.server.model.PumaServerDetailConfig;
+import com.dianping.puma.core.monitor.ServerTaskActionEvent;
+import com.dianping.puma.core.server.model.ServerTask;
 
 public interface ServerManager {
 
 	public void init();
 
-	public Server construct(PumaServerDetailConfig config)
+	public Server construct(ServerTask config)
 			throws Exception;
 
-	public List<Server> constructServers() throws Exception;
+	public ConcurrentHashMap<Long,Server> constructServers() throws Exception;
 
 	public void initContext(Server server);
 
-	public int indexOf(String serverName);
+	public boolean contain(Long taskId);
 
-	public boolean contain(String serverName);
+	public boolean addServer(Server server);
 
-	public boolean add(Server server);
+	public void remove(Long taskId);
 
-	public void remove(String serverName);
+	public void startServer(final Server server);
 
-	public void start(final Server server);
-
-	public void stop(Server server);
+	public void stopServer(Server server);
 	
 	public void stopServers();
 	
-	public List<Server> getServers();
-
+	public ConcurrentHashMap<Long,Server> getServers();
+	
+	public void startEvent(ServerTaskActionEvent event);
+	
+	public void stopEvent(ServerTaskActionEvent event);
+	
+	public void restartEvent(ServerTaskActionEvent event);
+	
+	public void addEvent(ServerTaskActionEvent event);
+	
+	public void deleteEvent(ServerTaskActionEvent event);
+	
+	public void updateEvent(ServerTaskActionEvent event);
 }

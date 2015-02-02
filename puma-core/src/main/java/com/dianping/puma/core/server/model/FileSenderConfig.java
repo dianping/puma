@@ -1,30 +1,29 @@
 package com.dianping.puma.core.server.model;
 
 public class FileSenderConfig {
-	
-	
+
 	private String fileSenderName;
-	
-private String storageName;
-	
+
+	private String storageName;
+
 	private String binlogIndexBaseDir;
-	
+
 	private String storageAcceptedTablesConfigKey;
-	
+
 	private String masterBucketFilePrefix;
-	
+
 	private int maxMasterBucketLengthMB;
-	
+
 	private String storageMasterBaseDir;
-	
+
 	private String slaveBucketFilePrefix;
-	
+
 	private int maxSlaveBucketLengthMB;
-	
+
 	private String storageSlaveBaseDir;
 
 	private int maxMasterFileCount;
-	
+
 	private int preservedDay;
 
 	public void setFileSenderName(String fileSenderName) {
@@ -34,7 +33,7 @@ private String storageName;
 	public String getFileSenderName() {
 		return fileSenderName;
 	}
-	
+
 	public void setStorageName(String storageName) {
 		this.storageName = storageName;
 	}
@@ -107,7 +106,7 @@ private String storageName;
 	public String getStorageSlaveBaseDir() {
 		return storageSlaveBaseDir;
 	}
-	
+
 	public void setMaxMasterFileCount(int maxMasterFileCount) {
 		this.maxMasterFileCount = maxMasterFileCount;
 	}

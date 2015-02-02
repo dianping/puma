@@ -19,6 +19,8 @@ import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.monitor.Notifiable;
 import com.dianping.puma.core.monitor.NotifyService;
+import com.dianping.puma.core.server.model.ServerTaskActionStatus;
+import com.dianping.puma.core.server.model.TaskExecutorStatus;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.dispatcher.Dispatcher;
@@ -43,6 +45,10 @@ public abstract class AbstractServer implements Server, Notifiable {
     protected BinlogPositionHolder binlogPositionHolder;
 
     protected String               name;
+    
+    protected ServerTaskActionStatus taskActionStatus;
+    
+    protected TaskExecutorStatus taskExecutorStatus;
 
     /**
      * @param binlogPositionHolder
@@ -175,5 +181,25 @@ public abstract class AbstractServer implements Server, Notifiable {
         stop = false;
         doStart();
     }
+    
+    @Override
+	public void setTaskActionStatus(ServerTaskActionStatus taskActionStatus) {
+		this.taskActionStatus = taskActionStatus;
+	}
+    
+    @Override
+	public ServerTaskActionStatus getTaskActionStatus() {
+		return taskActionStatus;
+	}
+    
+    @Override
+	public void setTaskExecutorStatus(TaskExecutorStatus taskExecutorStatus) {
+		this.taskExecutorStatus = taskExecutorStatus;
+	}
+    
+    @Override
+	public TaskExecutorStatus getTaskExecutorStatus() {
+		return taskExecutorStatus;
+	}
 
 }

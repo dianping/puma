@@ -6,18 +6,15 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.dianping.puma.core.codec.JsonEventCodec;
-import com.dianping.puma.core.monitor.DefaultNotifyService;
-import com.dianping.puma.core.server.dao.PumaServerDetailConfigDao;
+
+import com.dianping.puma.core.server.dao.ServerTaskDao;
 import com.dianping.puma.core.server.model.FileSenderConfig;
-import com.dianping.puma.core.server.model.PumaServerDetailConfig;
+import com.dianping.puma.core.server.model.ServerTask;
 import com.dianping.puma.core.sync.dao.MongoClient;
-import com.dianping.puma.sender.dispatcher.SimpleDispatherImpl;
-import com.dianping.puma.server.MMapBasedBinlogPositionHolder;
-import com.dianping.puma.service.impl.PumaServerConfigServiceImpl;
+import com.dianping.puma.service.impl.ServerTaskServiceImpl;
 
 
-public class MongoDBTest {
+public class ServerTaskTest {
 	
 	private MongoClient mongoClient;
 	
@@ -29,13 +26,13 @@ public class MongoDBTest {
 	@Test
 	public void insert(){
 		System.out.println("starting .........");
-		PumaServerDetailConfig config=new PumaServerDetailConfig();
-		PumaServerDetailConfigDao dao=new PumaServerDetailConfigDao(mongoClient);
-		PumaServerConfigServiceImpl service = new PumaServerConfigServiceImpl();
+		ServerTask config=new ServerTask();
+		ServerTaskDao dao=new ServerTaskDao(mongoClient);
+		ServerTaskServiceImpl service = new ServerTaskServiceImpl();
 		
-		service.setPumaServerDetailConfigDao(dao);
-		config = service.find("webApp_1").get(0);
-		config.setWebAppName("webApp_1");
+		service.setServerTaskDao(dao);
+		//config = service.find("localhost:8080").get(0);
+		config.setServerName("localhost:8080");
 		config.setDbHost("127.0.0.1");
 		config.setDbPort(3306);
 		config.setDbPassword("admin");
@@ -43,8 +40,8 @@ public class MongoDBTest {
 		config.setDefaultBinlogFileName("mysql-bin.000002");
 		config.setDefaultBinlogPosition(106);
 		config.setDbServerId(1);
-		config.setServerId(9988);
-		config.setServerName("server-7_43");
+		config.setTaskId(9988);
+		config.setTaskName("server-7_43");
 		config.setMetaDBHost("127.0.0.1");
 		config.setMetaDBPort(3306);
 		config.setMetaDBPassword("admin");
@@ -70,17 +67,10 @@ public class MongoDBTest {
 		fileConfigs.add(fileConfig);
 		
 		config.setFileSenders(fileConfigs);
+		
+		//config.g
 		service.modify(config);
-		
-		
-		//DefaultNotifyService notifyService = new DefaultNotifyService();
-		
-		//MMapBasedBinlogPositionHolder binlogPositionHolder =new MMapBasedBinlogPositionHolder();
-		
-		//binlogPositionHolder.setBaseDir("/data/appdatas/puma/");
-		
-		//JsonEventCodec jsonCodec=new JsonEventCodec();
-		
+
 		System.out.println("ended.............");
 		
 	}

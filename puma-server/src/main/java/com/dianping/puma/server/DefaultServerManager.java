@@ -1,21 +1,26 @@
 package com.dianping.puma.server;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.dianping.puma.ComponentContainer;
 import com.dianping.puma.bo.PositionInfo;
 import com.dianping.puma.bo.PumaContext;
-import com.dianping.puma.config.InitializeWebAppConfig;
+import com.dianping.puma.config.ServerConfig;
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.monitor.NotifyService;
+import com.dianping.puma.core.monitor.ServerTaskActionEvent;
 import com.dianping.puma.core.server.model.FileSenderConfig;
-import com.dianping.puma.core.server.model.PumaServerDetailConfig;
+import com.dianping.puma.core.server.model.ServerTask;
+import com.dianping.puma.core.server.model.ServerTaskActionStatus;
+import com.dianping.puma.core.server.model.TaskExecutorStatus;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.datahandler.DefaultDataHandler;
 import com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher;
@@ -24,7 +29,7 @@ import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatherImpl;
-import com.dianping.puma.service.impl.PumaServerConfigServiceImpl;
+import com.dianping.puma.service.ServerTaskService;
 import com.dianping.puma.storage.DefaultArchiveStrategy;
 import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
@@ -35,59 +40,59 @@ public class DefaultServerManager implements ServerManager {
 
 	private static Logger log = Logger.getLogger(ServerManager.class);
 
-	private static List<Server> servers = null;
+	private static ConcurrentHashMap<Long,Server> serverTasks = null;
 
 	@Autowired
-	PumaServerConfigServiceImpl pumaServerConfigService;
+	private ServerTaskService serverTaskService;
 
-	private static final String BEAN_WEBAPPCONFIG = "webAppConfig";
 	private static final String BEAN_NOTIFYSERVICE = "notifyService";
 	private static final String BEAN_BINLOGPOSITIONHOLDER = "binlogPositionHolder";
 	private static final String BEAN_JSONCODEC = "jsonCodec";
 
-	private String webAppName;
-
+	private String serverName;
+	@Autowired
 	private BinlogPositionHolder binlogPositionHolder = null;
+	@Autowired
+	private NotifyService notifyService = null;
+	@Autowired
+	private JsonEventCodec jsonCodec = null;
+	@Autowired
+	private ServerConfig serverConfig = null;
 
-	static NotifyService notifyService = null;
-
-	static JsonEventCodec jsonCodec = null;
-
-	@Override
+	@PostConstruct
 	public void init() {
-		InitializeWebAppConfig webAppConfig = ComponentContainer.SPRING.lookup(BEAN_WEBAPPCONFIG);
-		webAppName = webAppConfig.getWebAppName();
-		notifyService = ComponentContainer.SPRING.lookup(BEAN_NOTIFYSERVICE);
-		binlogPositionHolder = ComponentContainer.SPRING
-				.lookup(BEAN_BINLOGPOSITIONHOLDER);
-		jsonCodec = ComponentContainer.SPRING.lookup(BEAN_JSONCODEC);
+		//notifyService = ComponentContainer.SPRING.lookup(BEAN_NOTIFYSERVICE);
+		//binlogPositionHolder = ComponentContainer.SPRING
+		//		.lookup(BEAN_BINLOGPOSITIONHOLDER);
+		//jsonCodec = ComponentContainer.SPRING.lookup(BEAN_JSONCODEC);
+		serverName = serverConfig.getServerName();
 	}
 
 	@Override
-	public List<Server> constructServers() throws Exception {
+	public ConcurrentHashMap<Long,Server> constructServers() throws Exception {
 		log.info("starting construct servers.........");
-		List<PumaServerDetailConfig> pumaServerDetailConfigs = getServerDetailConfig(webAppName);
-		if (pumaServerDetailConfigs != null
-				&& pumaServerDetailConfigs.size() > 0) {
-			servers = new ArrayList<Server>();
+		List<ServerTask> pumaServerTaskConfigs = getServerTask(serverName);
+		if (pumaServerTaskConfigs != null
+				&& pumaServerTaskConfigs.size() > 0) {
+			serverTasks = new ConcurrentHashMap<Long,Server>();
 			Server server = null;
-			for (PumaServerDetailConfig config : pumaServerDetailConfigs) {
+			for (ServerTask config : pumaServerTaskConfigs) {
 				server = construct(config);
-				servers.add(server);
+				serverTasks.put(server.getServerId(), server);
 			}
 		}
 		log.info("ended construct servers.........");
-		return servers;
+		return serverTasks;
 	}
 
 	@Override
-	public Server construct(PumaServerDetailConfig config)
+	public Server construct(ServerTask config)
 			throws Exception {
-		log.info("construct server "+config.getServerName()+".......");
+		log.info("construct server "+config.getTaskName()+".......");
 		ReplicationBasedServer server = new ReplicationBasedServer();
 		server.setNotifyService(notifyService);
-		server.setName(config.getServerName());
-		server.setServerId(config.getServerId());
+		server.setName(config.getTaskName());
+		server.setServerId(config.getTaskId());
 		server.setHost(config.getDbHost());
 		server.setPort(config.getDbPort());
 		server.setUser(config.getDbUser());
@@ -95,6 +100,8 @@ public class DefaultServerManager implements ServerManager {
 		server.setDefaultBinlogFileName(config.getDefaultBinlogFileName());
 		server.setDefaultBinlogPosition(config.getDefaultBinlogPosition());
 		server.setBinlogPositionHolder(binlogPositionHolder);
+		server.setTaskActionStatus(ServerTaskActionStatus.NONE);
+		server.setTaskExecutorStatus(TaskExecutorStatus.WAITING);
 		// parser
 		Parser parser = new DefaultBinlogParser();
 		parser.start();
@@ -148,7 +155,7 @@ public class DefaultServerManager implements ServerManager {
 				storage.setSlaveBucketIndex(slaveBucketIndex);
 				// archive strategy
 				DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
-				archiveStrategy.setServerName(config.getServerName());
+				archiveStrategy.setServerName(config.getTaskName());
 				archiveStrategy.setMaxMasterFileCount(senderItem
 						.getMaxMasterFileCount());
 				storage.setArchiveStrategy(archiveStrategy);
@@ -169,36 +176,24 @@ public class DefaultServerManager implements ServerManager {
 	}
 
 	@Override
-	public List<Server> getServers() {
-		return servers;
+	public ConcurrentHashMap<Long,Server> getServers() {
+		return serverTasks;
 	}
 	
 	@Override
-	public int indexOf(String serverName) {
-		for (int index = 0; index < servers.size(); index++) {
-			if (servers.get(index).getServerName().equals(serverName)) {
-				return index;
-			}
-		}
-		return -1;
-	}
-	
-	@Override
-	public boolean contain(String serverName) {
-		for (Server server : servers) {
-			if (server.getServerName().equals(serverName)) {
+	public boolean contain(Long taskId) {
+		if(serverTasks.containsKey(taskId)){
 				return true;
 			}
-		}
 		return false;
 	}
 
 	@Override
-	public boolean add(Server server) {
-		if (server != null && !servers.contains(server)) {
+	public boolean addServer(Server server) {
+		if (server != null &&!serverTasks.containsKey(server.getServerName())&& !serverTasks.contains(server)) {
 			initContext(server);
-			start(server);
-			servers.add(server);
+			startServer(server);
+			serverTasks.put(server.getServerId(), server);
 			log.info("Server " + server.getServerName()
 					+ " started at binlogFile: "
 					+ server.getContext().getBinlogFileName() + " position: "
@@ -209,59 +204,45 @@ public class DefaultServerManager implements ServerManager {
 	}
 
 	@Override
-	public void remove(String serverName) {
-		Iterator<Server> iterator = servers.iterator();
-		Server server = null;
-		while (iterator.hasNext()) {
-			server = iterator.next();
-			if (server.getServerName().equals(serverName)) {
-				stop(server);
-				iterator.remove();
-				log.info("Server " + server.getServerName() + " removed.");
-			}
-		}
+	public void remove(Long taskId) {
+		serverTasks.remove(taskId);
 	}
 
-	private List<PumaServerDetailConfig> getServerDetailConfig(String webAppName) {
+	private List<ServerTask> getServerTask(String serverName) {
 		log.info("starting get detail config.........");
-		return pumaServerConfigService.find(webAppName);
+		return serverTaskService.find(serverName);
 	}
 
 	@Override
 	public void initContext(Server server) {
-		String serverName = server.getServerName();
-		PositionInfo posInfo = binlogPositionHolder.getPositionInfo(serverName,
+		String taskName = server.getServerName();
+		PositionInfo posInfo = binlogPositionHolder.getPositionInfo(taskName,
 				server.getDefaultBinlogFileName(), server
 						.getDefaultBinlogPosition());
 		PumaContext context = new PumaContext();
 
 		context.setPumaServerId(server.getServerId());
-		context.setPumaServerName(serverName);
+		context.setPumaServerName(taskName);
 		context.setBinlogFileName(posInfo.getBinlogFileName());
 		context.setBinlogStartPos(posInfo.getBinlogPosition());
 		server.setContext(context);
 	}
 
 	@Override
-	public void stop(Server server) {
-		try {
-			server.stop();
-			log.info("Server " + server.getServerName() + " stopped.");
-		} catch (Exception e) {
-			log.error("Stop Server" + server.getServerName() + " failed.", e);
-		}
+	public void stopServer(Server server) {
+	
 	}
 
 	@Override
 	public void stopServers() {
 		log.info("Stopping...");
-		for (Server server : servers) {
-			stop(server);
+		for (Map.Entry<Long, Server> item:serverTasks.entrySet()) {
+			stopServer(item.getValue());
 		}
 	}
 
 	@Override
-	public void start(final Server server) {
+	public void startServer(final Server server) {
 		PumaThreadUtils.createThread(new Runnable() {
 			@Override
 			public void run() {
@@ -275,15 +256,84 @@ public class DefaultServerManager implements ServerManager {
 		}, server.getServerName() + "_Connector", false).start();
 	}
 
-	public void setWebAppName(String webAppName) {
-		this.webAppName = webAppName;
-	}
-
-	public String getWebAppName() {
-		return webAppName;
-	}
-
 	public BinlogPositionHolder getBinlogPositionHolder() {
 		return binlogPositionHolder;
 	}
+	
+	@Override
+	public void startEvent(ServerTaskActionEvent event){
+		if(serverTasks!=null&&serverTasks.containsKey(event.getTaskId())){
+			Server task = serverTasks.get(event.getTaskId());
+			task.setTaskActionStatus(ServerTaskActionStatus.START);
+			if(task.getTaskExecutorStatus()==TaskExecutorStatus.WAITING){
+				task.setTaskExecutorStatus(TaskExecutorStatus.PREPARING);
+				startServer(task);
+				task.setTaskExecutorStatus(TaskExecutorStatus.RUNNING);
+				
+			}
+		}
+	}
+	
+	@Override
+	public void stopEvent(ServerTaskActionEvent event){
+		if(serverTasks!=null){
+			if(serverTasks.containsKey(event.getTaskId())){
+				Server task = serverTasks.get(event.getTaskId());
+				task.setTaskActionStatus(ServerTaskActionStatus.STOP);
+				if(task.getTaskExecutorStatus()==TaskExecutorStatus.RUNNING){
+					
+				try {
+					task.setTaskExecutorStatus(TaskExecutorStatus.STOPPING);
+					task.stop();
+					task.setTaskExecutorStatus(TaskExecutorStatus.STOPPED);
+					log.info("Server " + task.getServerName() + " stopped.");
+				} catch (Exception e) {
+					log.error("Stop Server" + task.getServerName() + " failed.", e);
+					task.setTaskExecutorStatus(TaskExecutorStatus.FAILED);
+				}
+			}
+			}
+		}
+	}
+	
+	@Override
+	public void restartEvent(ServerTaskActionEvent event){
+		if(serverTasks!=null){
+			if(serverTasks.containsKey(event.getTaskId())){
+				Server task = serverTasks.get(event.getTaskId());
+				task.setTaskActionStatus(ServerTaskActionStatus.RESTART);
+				if(task.getTaskExecutorStatus()==TaskExecutorStatus.STOPPED||task.getTaskExecutorStatus()==TaskExecutorStatus.FAILED){
+					task.setTaskExecutorStatus(TaskExecutorStatus.PREPARING);
+					startServer(task);
+					task.setTaskExecutorStatus(TaskExecutorStatus.RUNNING);
+				}
+			}
+		}
+	}
+	
+	@Override
+	public void addEvent(ServerTaskActionEvent event){
+		if(serverTasks==null){
+			serverTasks=new ConcurrentHashMap<Long,Server>();
+		}
+		if(!serverTasks.containsKey(event.getTaskId())){
+			ServerTask serverTask = serverTaskService.find(event.getTaskId());
+			try {
+				Server task = construct(serverTask);
+				initContext(task);
+				startServer(task);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	@Override
+	public void deleteEvent(ServerTaskActionEvent event){
+		
+	}
+	
+	@Override
+	public void updateEvent(ServerTaskActionEvent event){}
+
 }

@@ -1,26 +1,23 @@
 package com.dianping.puma.core.server.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.bson.types.ObjectId;
-
 import com.google.code.morphia.annotations.Entity;
-import com.google.code.morphia.annotations.Id;
 import com.google.code.morphia.annotations.Indexed;
 import com.google.code.morphia.utils.IndexDirection;
 
 @Entity
-public class PumaServerDetailConfig {
+public class ServerTask extends BaseEntity{
+	
 
-	@Id
-	private ObjectId id;
-	@Indexed(value = IndexDirection.ASC,name="webAppNameIndex")
-	private String webAppName;
-	
-	private long serverId;
-	
+	@Indexed(value = IndexDirection.ASC,name="hostIndex")
 	private String serverName;
+	
+	@Indexed(value = IndexDirection.ASC, name = "taskIdIndex", unique = true, dropDups = true)
+	private long taskId;
+	
+	@Indexed(value = IndexDirection.ASC, name = "taskNameIndex", unique = true, dropDups = true)
+	private String taskName;
 
 	private String dbHost;
 
@@ -47,30 +44,8 @@ public class PumaServerDetailConfig {
 	private String dispatcherName;
 	
 	private List<FileSenderConfig> fileSenders;
-
-	public void setId(ObjectId id) {
-		this.id = id;
-	}
-
-	public ObjectId getId() {
-		return id;
-	}
-
-	public void setWebAppName(String webAppName) {
-		this.webAppName = webAppName;
-	}
-
-	public String getWebAppName() {
-		return webAppName;
-	}
-
-	public void setServerId(long serverId) {
-		this.serverId = serverId;
-	}
-
-	public long getServerId() {
-		return serverId;
-	}
+	
+	private ServerTaskActionStatus statusAction;
 
 	public void setServerName(String serverName) {
 		this.serverName = serverName;
@@ -78,6 +53,22 @@ public class PumaServerDetailConfig {
 
 	public String getServerName() {
 		return serverName;
+	}
+
+	public void setTaskId(long taskId) {
+		this.taskId = taskId;
+	}
+
+	public long getTaskId() {
+		return taskId;
+	}
+
+	public void setTaskName(String taskName) {
+		this.taskName = taskName;
+	}
+
+	public String getTaskName() {
+		return taskName;
 	}
 
 	public void setDbHost(String dbHost) {
@@ -184,4 +175,12 @@ public class PumaServerDetailConfig {
 		return fileSenders;
 	}
 
+	public void setStatusAction(ServerTaskActionStatus statusAction) {
+		this.statusAction = statusAction;
+	}
+
+	public ServerTaskActionStatus getStatusAction() {
+		return statusAction;
+	}
+	
 }

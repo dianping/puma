@@ -68,3 +68,9 @@ Thumbs.db
 # temp folder #
 ######################
 target/
+/puma-admin/src/main/webapp/META-INF/MANIFEST.MF
+/puma-admin/src/main/webapp/WEB-INF/web.xml
+/puma-admin/webapp/META-INF/MANIFEST.MF
+/puma-client/src/main/java/META-INF/MANIFEST.MF
+/puma-syncserver/src/main/webapp/META-INF/MANIFEST.MF
+/puma-syncserver/src/main/webapp/WEB-INF/web.xml

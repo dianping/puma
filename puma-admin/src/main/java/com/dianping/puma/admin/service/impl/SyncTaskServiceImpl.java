@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import com.dianping.puma.admin.monitor.SystemStatusContainer;
 import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.admin.util.MysqlMetaInfoFetcher;
-import com.dianping.puma.core.monitor.SwallowEventPulisher;
+import com.dianping.puma.core.monitor.SwallowEventPublisher;
 import com.dianping.puma.core.monitor.SyncTaskDeleteEvent;
 import com.dianping.puma.core.monitor.SyncTaskStatusActionEvent;
 import com.dianping.puma.core.monitor.TaskEvent;
@@ -37,11 +37,11 @@ public class SyncTaskServiceImpl implements SyncTaskService {
     @Autowired
     SyncTaskDao syncTaskDao;
     @Autowired
-    SwallowEventPulisher taskEventPublisher;
+    SwallowEventPublisher taskEventPublisher;
     @Autowired
-    SwallowEventPulisher taskDeleteEventPublisher;
+    SwallowEventPublisher taskDeleteEventPublisher;
     @Autowired
-    SwallowEventPulisher statusActionEventPublisher;
+    SwallowEventPublisher statusActionEventPublisher;
     @Autowired
     SystemStatusContainer systemStatusContainer;
 

@@ -31,4 +31,11 @@ public class DBInstanceConfigServiceImpl implements DBInstanceConfigService {
 		QueryResults<DBInstanceConfig> result = dbInstanceConfigDao.find(q);
 		return result.asList();
 	}
+
+	@Override
+	public DBInstanceConfig find(String name) {
+		Query<DBInstanceConfig> q = dbInstanceConfigDao.getDatastore().createQuery(DBInstanceConfig.class);
+		q.field("name").equal(name);
+		return dbInstanceConfigDao.findOne(q);
+	}
 }

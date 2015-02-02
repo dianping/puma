@@ -8,7 +8,7 @@ import com.dianping.swallow.producer.ProducerConfig;
 import com.dianping.swallow.producer.ProducerMode;
 import com.dianping.swallow.producer.impl.ProducerFactoryImpl;
 
-public class SwallowEventPulisher implements EventPublisher {
+public class SwallowEventPublisher implements EventPublisher {
     private String topic;
     private Producer producer;
 

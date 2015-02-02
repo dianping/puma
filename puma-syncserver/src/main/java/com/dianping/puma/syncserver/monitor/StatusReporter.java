@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.dianping.puma.core.monitor.SwallowEventPulisher;
+import com.dianping.puma.core.monitor.SwallowEventPublisher;
 import com.dianping.puma.core.monitor.TaskStatusEvent;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
 
@@ -17,7 +17,7 @@ import com.dianping.swallow.common.producer.exceptions.SendFailedException;
 @Service
 public class StatusReporter {
     @Autowired
-    private SwallowEventPulisher statusEventPublisher;
+    private SwallowEventPublisher statusEventPublisher;
     @Autowired
     private SystemStatusContainer systemStatusContainer;
 

@@ -1,7 +1,7 @@
 <div class="container"
      style="margin: 0 auto; width: 100%; margin-bottom: 50px;">
     <div>
-        <a style="float: right;" href="${rc.contextPath}/replicationTaskConfig/create">
+        <a style="float: right;" href="${rc.contextPath}/replicationTask/create">
             <span>新任务</span>
         </a>
         <p class="legend">已有的配置</p>
@@ -19,10 +19,10 @@
                         </thead>
 
                         <tbody>
-                        #foreach($replicationTaskConfig in ${replicationTaskConfigs})
+                        #foreach($replicationTask in ${replicationTasks})
                         <tr>
-                            <td>${replicationTaskConfig.dbInstanceConfig.name}</td>
-                            <td>${replicationTaskConfig.serverConfig.name}</td>
+                            <td>${replicationTask.dbInstanceConfig.name}</td>
+                            <td>${replicationTask.serverConfig.name}</td>
                             <td></td>
                         </tr>
                         #end

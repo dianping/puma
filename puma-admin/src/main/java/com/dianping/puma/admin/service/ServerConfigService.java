@@ -10,4 +10,6 @@ public interface ServerConfigService {
 	ObjectId save(ServerConfig serverConfig);
 
 	List<ServerConfig> findAll();
+
+	ServerConfig find(String name);
 }

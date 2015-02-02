@@ -11,4 +11,6 @@ public interface DBInstanceConfigService {
 
 	List<DBInstanceConfig> findAll();
 
+	DBInstanceConfig find(String name);
+
 }

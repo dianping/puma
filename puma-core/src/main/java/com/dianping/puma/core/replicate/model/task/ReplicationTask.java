@@ -1,12 +1,14 @@
-package com.dianping.puma.core.replicate.model.config;
+package com.dianping.puma.core.replicate.model.task;
 
+import com.dianping.puma.core.replicate.model.config.DBInstanceConfig;
+import com.dianping.puma.core.replicate.model.config.ServerConfig;
 import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
 import org.bson.types.ObjectId;
 
 @Entity
-public class ReplicationTaskConfig {
+public class ReplicationTask {
 
 	@Id
 	private ObjectId id;

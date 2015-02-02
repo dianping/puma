@@ -31,4 +31,11 @@ public class ServerConfigServiceImpl implements ServerConfigService {
 		QueryResults<ServerConfig> result = serverConfigDao.find(q);
 		return result.asList();
 	}
+
+	@Override
+	public ServerConfig find(String name) {
+		Query<ServerConfig> q = serverConfigDao.getDatastore().createQuery(ServerConfig.class);
+		q.field("name").equal(name);
+		return serverConfigDao.findOne(q);
+	}
 }

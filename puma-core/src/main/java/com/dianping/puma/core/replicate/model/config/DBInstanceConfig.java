@@ -7,8 +7,6 @@ import com.google.code.morphia.annotations.Id;
 import com.google.code.morphia.annotations.Indexed;
 import com.google.code.morphia.utils.IndexDirection;
 
-import java.util.List;
-
 @Entity
 public class DBInstanceConfig {
 
@@ -18,9 +16,9 @@ public class DBInstanceConfig {
 	@Indexed(value = IndexDirection.ASC, name = "name", unique = true, dropDups = true)
 	private String name;
 
-	private List<DBInstanceHost> dbInstanceHosts;
+	private DBInstanceHost dbInstanceHost;
 
-	private List<DBInstanceHost> dbInstanceMetaHosts;
+	private DBInstanceHost dbInstanceMetaHost;
 
 	public ObjectId getId() {
 		return id;
@@ -38,19 +36,19 @@ public class DBInstanceConfig {
 		this.name = name;
 	}
 
-	public List<DBInstanceHost> getDbInstanceHosts() {
-		return dbInstanceHosts;
+	public DBInstanceHost getDbInstanceHost() {
+		return dbInstanceHost;
 	}
 
-	public void setDbInstanceHosts(List<DBInstanceHost> dbInstanceHosts) {
-		this.dbInstanceHosts = dbInstanceHosts;
+	public void setDbInstanceHost(DBInstanceHost dbInstanceHost) {
+		this.dbInstanceHost = dbInstanceHost;
 	}
 
-	public List<DBInstanceHost> getDbInstanceMetaHosts() {
-		return dbInstanceMetaHosts;
+	public DBInstanceHost getDbInstanceMetaHost() {
+		return dbInstanceMetaHost;
 	}
 
-	public void setDbInstanceMetaHosts(List<DBInstanceHost> dbInstanceMetaHosts) {
-		this.dbInstanceMetaHosts = dbInstanceMetaHosts;
+	public void setDbInstanceMetaHost(DBInstanceHost dbInstanceMetaHost) {
+		this.dbInstanceMetaHost = dbInstanceMetaHost;
 	}
 }

@@ -5,9 +5,10 @@ import com.dianping.puma.admin.service.ReplicationTaskService;
 import com.dianping.puma.admin.service.ServerConfigService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.replicate.model.config.DBInstanceConfig;
+import com.dianping.puma.core.replicate.model.config.FileSenderConfig;
 import com.dianping.puma.core.replicate.model.config.ServerConfig;
 import com.dianping.puma.core.replicate.model.task.ReplicationTask;
-import com.dianping.puma.core.sync.model.BinlogInfo;
+import com.dianping.puma.core.replicate.model.BinlogInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +20,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.Timestamp;
+import java.util.*;
 
 @Controller
 public class ReplicationTaskController {
@@ -75,7 +75,33 @@ public class ReplicationTaskController {
 		binlogInfo.setBinlogFile(binlogFile);
 		binlogInfo.setBinlogPosition(Long.parseLong(binlogPosition));
 
+		Timestamp timestamp = new Timestamp((new Date()).getTime());
+		long taskId = timestamp.getTime();
+		String taskName = timestamp.toString();
+
+		List<FileSenderConfig> fileSenderConfigs = new ArrayList<FileSenderConfig>();
+		FileSenderConfig fileSenderConfig = new FileSenderConfig();
+		fileSenderConfig.setMasterBucketFilePrefix("bucket-");
+		fileSenderConfig.setMaxMasterBucketLengthMB(1000);
+		fileSenderConfig.setStorageMasterBaseDir("/data/appdatas/puma/storage/slave/" + taskName);
+		fileSenderConfig.setSlaveBucketFilePrefix("bucket-");
+		fileSenderConfig.setMaxSlaveBucketLengthMB(1000);
+		fileSenderConfig.setStorageSlaveBaseDir("/data/appdatas/puma/storage/slave/" + taskName);
+		fileSenderConfig.setFileSenderName("storage-" + taskName);
+		fileSenderConfig.setStorageName("storage-" + taskName);
+		fileSenderConfig.setPreservedDay(2);
+		fileSenderConfig.setMaxMasterFileCount(50);
+		fileSenderConfigs.add(fileSenderConfig);
+
 		ReplicationTask replicationTask = new ReplicationTask();
+
+		// @TODO
+		replicationTask.setTaskId(taskId);
+		replicationTask.setTaskName(taskName);
+
+		replicationTask.setDispatchName("dispatch-" + taskName);
+		replicationTask.setFileSenderConfigs(fileSenderConfigs);
+
 		replicationTask.setDbInstanceConfig(dbInstanceConfig);
 		replicationTask.setServerConfig(serverConfig);
 		replicationTask.setBinlogInfo(binlogInfo);

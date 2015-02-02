@@ -1,4 +1,4 @@
-package com.dianping.puma.core.replicate.dao.config;
+package com.dianping.puma.core.replicate.dao.task;
 
 import com.dianping.puma.core.replicate.model.task.ReplicationTask;
 import com.dianping.puma.core.sync.dao.MongoClient;
@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service("replicationTaskConfigDao")
-public class ReplicationTaskConfigDao extends BasicDAO<ReplicationTask, String> {
+public class ReplicationTaskDao extends BasicDAO<ReplicationTask, String> {
 
 	@Autowired
-	public ReplicationTaskConfigDao(MongoClient mongoClient) {
+	public ReplicationTaskDao(MongoClient mongoClient) {
 		super(mongoClient.getDatastore());
 	}
 }

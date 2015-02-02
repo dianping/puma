@@ -15,7 +15,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,41 +47,35 @@ public class DBInstanceConfigController {
 		return new ModelAndView("main/container", map);
 	}
 
-	@RequestMapping(value = { "/dbInstanceConfig/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = {
+			"/dbInstanceConfig/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(String name, String[] host, String[] port, String[] username, String[] password,
-			String[] metaHost, String[] metaPort, String[] metaUsername, String[] metaPassword) {
+	public String createPost(String name, String host, String port, String username, String password,
+			String metaHost, String metaPort, String metaUsername, String metaPassword) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		DBInstanceConfig dbInstanceConfig = new DBInstanceConfig();
-		List<DBInstanceHost> dbInstanceHosts = new ArrayList<DBInstanceHost>();
-		List<DBInstanceHost> dbInstanceMetaHosts = new ArrayList<DBInstanceHost>();
+		DBInstanceHost dbInstanceHost = new DBInstanceHost();
+		DBInstanceHost dbInstanceMetaHost = new DBInstanceHost();
 
-		for(int i = 0; i != host.length; ++i) {
-			DBInstanceHost dbInstanceHost = new DBInstanceHost();
-			dbInstanceHost.setHost(host[i]);
-			dbInstanceHost.setPort(port[i]);
-			dbInstanceHost.setUsername(username[i]);
-			dbInstanceHost.setPassword(password[i]);
-			dbInstanceHosts.add(dbInstanceHost);
+		dbInstanceHost.setHost(host);
+		dbInstanceHost.setPort(port);
+		dbInstanceHost.setUsername(username);
+		dbInstanceHost.setPassword(password);
 
-			DBInstanceHost dbInstanceMetaHost = new DBInstanceHost();
-			dbInstanceMetaHost.setHost(metaHost[i]);
-			dbInstanceMetaHost.setPort(metaPort[i]);
-			dbInstanceMetaHost.setUsername(metaUsername[i]);
-			dbInstanceMetaHost.setPassword(metaPassword[i]);
-			dbInstanceMetaHosts.add(dbInstanceMetaHost);
-		}
+		dbInstanceMetaHost.setHost(metaHost);
+		dbInstanceMetaHost.setPort(metaPort);
+		dbInstanceMetaHost.setUsername(metaUsername);
+		dbInstanceMetaHost.setPassword(metaPassword);
 
 		dbInstanceConfig.setName(name);
-		dbInstanceConfig.setDbInstanceHosts(dbInstanceHosts);
-		dbInstanceConfig.setDbInstanceMetaHosts(dbInstanceMetaHosts);
+		dbInstanceConfig.setDbInstanceHost(dbInstanceHost);
+		dbInstanceConfig.setDbInstanceMetaHost(dbInstanceMetaHost);
 
 		try {
 			this.dbInstanceConfigService.save(dbInstanceConfig);
-		}
-		catch(Exception e) {
+		} catch (Exception e) {
 			map.put("success", false);
 		}
 

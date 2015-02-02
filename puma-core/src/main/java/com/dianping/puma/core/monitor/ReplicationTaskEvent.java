@@ -1,19 +1,19 @@
 package com.dianping.puma.core.monitor;
 
-import com.dianping.puma.core.replicate.model.task.Type;
+import com.dianping.puma.core.replicate.model.task.ActionType;
 
 public class ReplicationTaskEvent extends Event {
 
-	private Type type;
+	private ActionType actionType;
 
 	private long taskId;
 
-	public Type getType() {
-		return type;
+	public ActionType getActionType() {
+		return actionType;
 	}
 
-	public void setType(Type type) {
-		this.type = type;
+	public void setActionType(ActionType actionType) {
+		this.actionType = actionType;
 	}
 
 	public long getTaskId() {

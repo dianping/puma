@@ -3,10 +3,9 @@ package com.dianping.puma.admin.service.impl;
 import com.dianping.puma.admin.service.ReplicationTaskService;
 import com.dianping.puma.core.monitor.ReplicationTaskEvent;
 import com.dianping.puma.core.monitor.SwallowEventPublisher;
-import com.dianping.puma.core.monitor.TaskEvent;
-import com.dianping.puma.core.replicate.dao.config.ReplicationTaskConfigDao;
+import com.dianping.puma.core.replicate.dao.task.ReplicationTaskDao;
+import com.dianping.puma.core.replicate.model.task.ActionType;
 import com.dianping.puma.core.replicate.model.task.ReplicationTask;
-import com.dianping.puma.core.replicate.model.task.Type;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
 import com.google.code.morphia.Key;
 import com.google.code.morphia.query.Query;
@@ -21,18 +20,18 @@ import java.util.List;
 public class ReplicationTaskServiceImpl implements ReplicationTaskService {
 
 	@Autowired
-	ReplicationTaskConfigDao replicationTaskConfigDao;
+	ReplicationTaskDao replicationTaskDao;
 
 	@Autowired
 	SwallowEventPublisher taskEventPublisher;
 
 	@Override
 	public ObjectId save(ReplicationTask replicationTask) {
-		Key<ReplicationTask> key = this.replicationTaskConfigDao.save(replicationTask);
-		this.replicationTaskConfigDao.getDatastore().ensureIndexes();
+		Key<ReplicationTask> key = this.replicationTaskDao.save(replicationTask);
+		this.replicationTaskDao.getDatastore().ensureIndexes();
 
 		ReplicationTaskEvent event = new ReplicationTaskEvent();
-		event.setType(Type.REPLICATION);
+		event.setActionType(ActionType.ADD);
 		event.setTaskId((Long) key.getId());
 
 		try {
@@ -47,8 +46,8 @@ public class ReplicationTaskServiceImpl implements ReplicationTaskService {
 
 	@Override
 	public List<ReplicationTask> findAll() {
-		Query<ReplicationTask> q = replicationTaskConfigDao.getDatastore().createQuery(ReplicationTask.class);
-		QueryResults<ReplicationTask> result = replicationTaskConfigDao.find(q);
+		Query<ReplicationTask> q = replicationTaskDao.getDatastore().createQuery(ReplicationTask.class);
+		QueryResults<ReplicationTask> result = replicationTaskDao.find(q);
 		return result.asList();
 	}
 }

@@ -15,9 +15,8 @@ public class ServerConfig {
 	@Indexed(value = IndexDirection.ASC, name = "name", unique = true, dropDups = true)
 	private String name;
 
+	// host:port
 	private String host;
-
-	private String port;
 
 	public ObjectId getId() {
 		return id;
@@ -41,13 +40,5 @@ public class ServerConfig {
 
 	public void setHost(String host) {
 		this.host = host;
-	}
-
-	public String getPort() {
-		return port;
-	}
-
-	public void setPort(String port) {
-		this.port = port;
 	}
 }

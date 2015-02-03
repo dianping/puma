@@ -15,29 +15,30 @@ import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.server.DefaultServerManager;
 import com.dianping.puma.server.Server;
 import com.dianping.puma.server.ServerManager;
+import com.dianping.puma.server.TaskManager;
 
 public class PumaListener implements ServletContextListener {
 
 	private static Logger log = Logger.getLogger(PumaListener.class);
 
-	private ServerManager serverManager;
+	private TaskManager taskManager;
 
 	private static final String BEAN_SERVERMANAGER = "taskManager";
 	
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
-		serverManager.stopServers();
+		taskManager.stopServers();
 	}
 
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
-		serverManager =  ComponentContainer.SPRING.lookup(BEAN_SERVERMANAGER);
+		taskManager =  ComponentContainer.SPRING.lookup(BEAN_SERVERMANAGER);
 		//serverManager = new DefaultServerManager();
 		Runtime.getRuntime().addShutdownHook(
 				PumaThreadUtils.createThread(new Runnable() {
 					@Override
 					public void run() {
-						serverManager.stopServers();
+						taskManager.stopServers();
 					}
 				}, "ShutdownHook", false));
 	}

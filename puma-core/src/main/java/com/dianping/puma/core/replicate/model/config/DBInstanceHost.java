@@ -3,15 +3,15 @@ package com.dianping.puma.core.replicate.model.config;
 public class DBInstanceHost {
 
 	private String host;
-	private String port;
+	private int port;
 	private String username;
 	private String password;
 
-	public String getPort() {
+	public int getPort() {
 		return port;
 	}
 
-	public void setPort(String port) {
+	public void setPort(int port) {
 		this.port = port;
 	}
 

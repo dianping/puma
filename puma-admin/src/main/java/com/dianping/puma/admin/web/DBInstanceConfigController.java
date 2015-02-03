@@ -60,12 +60,12 @@ public class DBInstanceConfigController {
 		DBInstanceHost dbInstanceMetaHost = new DBInstanceHost();
 
 		dbInstanceHost.setHost(host);
-		dbInstanceHost.setPort(port);
+		dbInstanceHost.setPort(Integer.parseInt(port));
 		dbInstanceHost.setUsername(username);
 		dbInstanceHost.setPassword(password);
 
 		dbInstanceMetaHost.setHost(metaHost);
-		dbInstanceMetaHost.setPort(metaPort);
+		dbInstanceMetaHost.setPort(Integer.parseInt(port));
 		dbInstanceMetaHost.setUsername(metaUsername);
 		dbInstanceMetaHost.setPassword(metaPassword);
 

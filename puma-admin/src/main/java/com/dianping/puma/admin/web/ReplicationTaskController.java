@@ -87,7 +87,7 @@ public class ReplicationTaskController {
 		fileSenderConfig.setSlaveBucketFilePrefix("bucket-");
 		fileSenderConfig.setMaxSlaveBucketLengthMB(1000);
 		fileSenderConfig.setStorageSlaveBaseDir("/data/appdatas/puma/storage/slave/" + taskName);
-		fileSenderConfig.setFileSenderName("storage-" + taskName);
+		fileSenderConfig.setFileSenderName("fileSender-" + taskName);
 		fileSenderConfig.setStorageName("storage-" + taskName);
 		fileSenderConfig.setPreservedDay(2);
 		fileSenderConfig.setMaxMasterFileCount(50);

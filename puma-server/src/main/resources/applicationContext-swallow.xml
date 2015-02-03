@@ -10,7 +10,7 @@
             http://www.springframework.org/schema/task   
     http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 
-    <bean id="statusEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPulisher"
+    <bean id="statusEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPublisher"
         init-method="init">
         <property name="topic" value="puma_server_status_event" />
     </bean>

@@ -16,6 +16,7 @@ public class ServerConfig {
 	private String name;
 
 	// host:port
+	@Indexed(value = IndexDirection.ASC, name = "host", unique = true, dropDups = true)
 	private String host;
 
 	public ObjectId getId() {

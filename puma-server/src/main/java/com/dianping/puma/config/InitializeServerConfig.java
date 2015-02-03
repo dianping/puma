@@ -7,17 +7,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.dianping.puma.core.server.model.ServerBaseConfig;
+import com.dianping.puma.core.replicate.model.config.ServerConfig;
 import com.dianping.puma.core.util.IPUtils;
-import com.dianping.puma.service.ServerBaseConfigService;
+import com.dianping.puma.service.ServerConfigService;
 
 
-public class ServerConfig implements InitializingBean {
+public class InitializeServerConfig implements InitializingBean {
 
-	private static final Logger LOG=LoggerFactory.getLogger(ServerConfig.class);
+	private static final Logger LOG=LoggerFactory.getLogger(InitializeServerConfig.class);
 
 	@Autowired
-	private ServerBaseConfigService serverBaseConfigService;
+	private ServerConfigService serverConfigService;
 	
 	private String serverName;
 	
@@ -25,13 +25,13 @@ public class ServerConfig implements InitializingBean {
 	
 	private String localPort;
 
-	private static ServerConfig instance;
+	private static InitializeServerConfig instance;
 
 	@PostConstruct
 	public void init() {
 		for (String ip : IPUtils.getNoLoopbackIP4Addresses()) {
 			String host = ip + ':' + localPort;
-			ServerBaseConfig serverConfig = serverBaseConfigService.find(host);
+			ServerConfig serverConfig = serverConfigService.find(host);
 			if(serverConfig!=null){
 				this.serverName=serverConfig.getName();
 				this.serverHost=serverConfig.getHost();
@@ -39,10 +39,8 @@ public class ServerConfig implements InitializingBean {
 			}
 		}
 		if (serverName == null) {
-			this.serverName = "pumaServer";
-			this.serverHost = "";
 			LOG.error("Not match any serverName....." );
-            //throw new RuntimeException("Cannot try to find the ServerName, please check the PuamServerBaseConfig in DB.");
+            throw new RuntimeException("Cannot try to find the ServerName, please check the PuamServerBaseConfig in DB.");
         }
 	}
 
@@ -51,7 +49,7 @@ public class ServerConfig implements InitializingBean {
 		instance = this;
 	}
 
-	public static ServerConfig getInstance() {
+	public static InitializeServerConfig getInstance() {
 		return instance;
 	}
 

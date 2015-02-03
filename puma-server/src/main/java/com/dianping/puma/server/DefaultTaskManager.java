@@ -16,9 +16,12 @@ import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.config.InitializeServerConfig;
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.monitor.NotifyService;
-import com.dianping.puma.core.monitor.ServerTaskActionEvent;
-import com.dianping.puma.core.server.model.FileSenderConfig;
-import com.dianping.puma.core.server.model.ServerTask;
+import com.dianping.puma.core.monitor.ReplicationTaskEvent;
+import com.dianping.puma.core.monitor.ReplicationTaskStatusEvent;
+import com.dianping.puma.core.replicate.model.config.FileSenderConfig;
+import com.dianping.puma.core.replicate.model.task.ReplicationTask;
+import com.dianping.puma.core.replicate.model.task.StatusActionType;
+import com.dianping.puma.core.replicate.model.task.StatusExecutorType;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.datahandler.DefaultDataHandler;
 import com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher;
@@ -27,21 +30,21 @@ import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatherImpl;
-import com.dianping.puma.service.ServerTaskService;
+import com.dianping.puma.service.ReplicationTaskService;
 import com.dianping.puma.storage.DefaultArchiveStrategy;
 import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.LocalFileBucketIndex;
 
-@Service("serverManager")
-public class DefaultServerManager implements ServerManager {
+@Service("taskManager")
+public class DefaultTaskManager implements TaskManager {
 
-	private static Logger log = Logger.getLogger(DefaultServerManager.class);
+	private static Logger log = Logger.getLogger(DefaultTaskManager.class);
 
 	private static ConcurrentHashMap<Long, Server> serverTasks = null;
 
 	@Autowired
-	private ServerTaskService serverTaskService;
+	private ReplicationTaskService replicationTaskService;
 
 	private static final String BEAN_NOTIFYSERVICE = "notifyService";
 	private static final String BEAN_BINLOGPOSITIONHOLDER = "binlogPositionHolder";
@@ -59,22 +62,19 @@ public class DefaultServerManager implements ServerManager {
 
 	@PostConstruct
 	public void init() {
-		// notifyService = ComponentContainer.SPRING.lookup(BEAN_NOTIFYSERVICE);
-		// binlogPositionHolder = ComponentContainer.SPRING
-		// .lookup(BEAN_BINLOGPOSITIONHOLDER);
-		// jsonCodec = ComponentContainer.SPRING.lookup(BEAN_JSONCODEC);
 		serverName = serverConfig.getServerName();
 	}
 
 	@Override
 	public ConcurrentHashMap<Long, Server> constructServers() throws Exception {
 		log.info("starting construct servers.........");
-		List<ServerTask> pumaServerTaskConfigs = getServerTask(serverName);
-		if (pumaServerTaskConfigs != null && pumaServerTaskConfigs.size() > 0) {
+		List<ReplicationTask> replicationTasks = replicationTaskService
+				.find(serverName);
+		if (replicationTasks != null && replicationTasks.size() > 0) {
 			serverTasks = new ConcurrentHashMap<Long, Server>();
 			Server server = null;
-			for (ServerTask config : pumaServerTaskConfigs) {
-				server = construct(config);
+			for (ReplicationTask replicationTask : replicationTasks) {
+				server = construct(replicationTask);
 				serverTasks.put(server.getServerId(), server);
 			}
 		}
@@ -83,31 +83,42 @@ public class DefaultServerManager implements ServerManager {
 	}
 
 	@Override
-	public Server construct(ServerTask config) throws Exception {
-		log.info("construct server " + config.getTaskName() + ".......");
+	public Server construct(ReplicationTask replicationTask) throws Exception {
+		log.info("construct server " + replicationTask.getTaskName()
+				+ ".......");
 		ReplicationBasedServer server = new ReplicationBasedServer();
 		server.setNotifyService(notifyService);
-		server.setName(config.getTaskName());
-		server.setServerId(config.getTaskId());
-		server.setHost(config.getDbHost());
-		server.setPort(config.getDbPort());
-		server.setUser(config.getDbUser());
-		server.setPassword(config.getDbPassword());
-		server.setDefaultBinlogFileName(config.getDefaultBinlogFileName());
-		server.setDefaultBinlogPosition(config.getDefaultBinlogPosition());
+		server.setName(replicationTask.getTaskName());
+		server.setServerId(replicationTask.getTaskId());
+		server.setHost(replicationTask.getDbInstanceConfig()
+				.getDbInstanceHost().getHost());
+		server.setPort(replicationTask.getDbInstanceConfig()
+				.getDbInstanceHost().getPort());
+		server.setUser(replicationTask.getDbInstanceConfig()
+				.getDbInstanceHost().getUsername());
+		server.setPassword(replicationTask.getDbInstanceConfig()
+				.getDbInstanceHost().getPassword());
+		server.setDefaultBinlogFileName(replicationTask.getBinlogInfo()
+				.getBinlogFile());
+		server.setDefaultBinlogPosition(replicationTask.getBinlogInfo()
+				.getBinlogPosition());
 		server.setBinlogPositionHolder(binlogPositionHolder);
-		// server.setTaskActionStatus(ServerTaskActionStatus.NONE);
-		// server.setTaskExecutorStatus(TaskExecutorStatus.WAITING);
+		server.setStatusActionType(StatusActionType.START);
+		server.setStatusExecutorType(StatusExecutorType.WAITING);
 		// parser
 		Parser parser = new DefaultBinlogParser();
 		parser.start();
 		server.setParser(parser);
 		// tableMetaInfo
 		DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
-		tableMetaInfo.setMetaDBHost(config.getMetaDBHost());
-		tableMetaInfo.setMetaDBPort(config.getMetaDBPort());
-		tableMetaInfo.setMetaDBUser(config.getMetaDBUser());
-		tableMetaInfo.setMetaDBPassword(config.getMetaDBPassword());
+		tableMetaInfo.setMetaDBHost(replicationTask.getDbInstanceConfig()
+				.getDbInstanceMetaHost().getHost());
+		tableMetaInfo.setMetaDBPort(replicationTask.getDbInstanceConfig()
+				.getDbInstanceMetaHost().getPort());
+		tableMetaInfo.setMetaDBUser(replicationTask.getDbInstanceConfig()
+				.getDbInstanceMetaHost().getUsername());
+		tableMetaInfo.setMetaDBPassword(replicationTask.getDbInstanceConfig()
+				.getDbInstanceMetaHost().getPassword());
 		// handler
 		DefaultDataHandler dataHandler = new DefaultDataHandler();
 		dataHandler.setNotifyService(notifyService);
@@ -116,12 +127,13 @@ public class DefaultServerManager implements ServerManager {
 		server.setDataHandler(dataHandler);
 		// dispatcher
 		SimpleDispatherImpl dispatcher = new SimpleDispatherImpl();
-		dispatcher.setName(config.getDispatcherName());
+		dispatcher.setName(replicationTask.getDispatchName());
 		// file senders
 		List<Sender> senders = null;
-		if (config.getFileSenders() != null) {
+		if (replicationTask.getFileSenderConfigs() != null) {
 			senders = new ArrayList<Sender>();
-			for (FileSenderConfig senderItem : config.getFileSenders()) {
+			for (FileSenderConfig senderItem : replicationTask
+					.getFileSenderConfigs()) {
 				FileDumpSender sender = new FileDumpSender();
 				sender.setName(senderItem.getFileSenderName());
 				sender.setNotifyService(notifyService);
@@ -151,7 +163,7 @@ public class DefaultServerManager implements ServerManager {
 				storage.setSlaveBucketIndex(slaveBucketIndex);
 				// archive strategy
 				DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
-				archiveStrategy.setServerName(config.getTaskName());
+				archiveStrategy.setServerName(replicationTask.getTaskName());
 				archiveStrategy.setMaxMasterFileCount(senderItem
 						.getMaxMasterFileCount());
 				storage.setArchiveStrategy(archiveStrategy);
@@ -205,11 +217,6 @@ public class DefaultServerManager implements ServerManager {
 		serverTasks.remove(taskId);
 	}
 
-	private List<ServerTask> getServerTask(String serverName) {
-		log.info("starting get detail config.........");
-		return serverTaskService.find(serverName);
-	}
-
 	@Override
 	public void initContext(Server server) {
 		String taskName = server.getServerName();
@@ -227,7 +234,13 @@ public class DefaultServerManager implements ServerManager {
 
 	@Override
 	public void stopServer(Server server) {
-
+		try {
+			server.stop();
+			log.info("Server " + server.getServerName() + " stopped.");
+		} catch (Exception e) {
+			log.error("Stop Server" + server.getServerName() + " failed.", e);
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -258,32 +271,77 @@ public class DefaultServerManager implements ServerManager {
 	}
 
 	@Override
-	public void startEvent(ServerTaskActionEvent event) {
+	public void startEvent(ReplicationTaskStatusEvent event) {
+		if (serverTasks != null && serverTasks.containsKey(event.getTaskId())) {
+			Server task = serverTasks.get(event.getTaskId());
+			task.setStatusExecutorType(StatusExecutorType.PREPARING);
+			startServer(task);
+			task.setStatusExecutorType(StatusExecutorType.RUNNING);
+		}
+	}
+
+	@Override
+	public void stopEvent(ReplicationTaskStatusEvent event) {
+		if (serverTasks != null) {
+			if (serverTasks.containsKey(event.getTaskId())) {
+				Server task = serverTasks.get(event.getTaskId());
+				try {
+					task.setStatusExecutorType(StatusExecutorType.STOPPING);
+					task.stop();
+					task.setStatusExecutorType(StatusExecutorType.STOPPED);
+					log.info("Server " + task.getServerName() + " stopped.");
+				} catch (Exception e) {
+					log.error(
+							"Stop Server" + task.getServerName() + " failed.",
+							e);
+					task.setStatusExecutorType(StatusExecutorType.FAILED);
+				}
+			}
+		}
+	}
+
+	@Override
+	public void restartEvent(ReplicationTaskStatusEvent event) {
+		if (serverTasks != null) {
+			if (serverTasks.containsKey(event.getTaskId())) {
+				Server task = serverTasks.get(event.getTaskId());
+				if (task.getStatusExecutorType() == StatusExecutorType.STOPPED
+						|| task.getStatusExecutorType() == StatusExecutorType.FAILED) {
+					task.setStatusExecutorType(StatusExecutorType.PREPARING);
+					startServer(task);
+					task.setStatusExecutorType(StatusExecutorType.RUNNING);
+				}
+			}
+		}
+	}
+
+	@Override
+	public void addEvent(ReplicationTaskEvent event) {
+		if (serverTasks == null) {
+			serverTasks = new ConcurrentHashMap<Long, Server>();
+		}
+		if (!serverTasks.containsKey(event.getTaskId())) {
+			ReplicationTask serverTask = replicationTaskService.find(event
+					.getTaskId());
+			try {
+				Server task = construct(serverTask);
+				serverTasks.put(task.getServerId(), task);
+				initContext(task);
+				startServer(task);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@Override
+	public void deleteEvent(ReplicationTaskEvent event) {
 
 	}
 
 	@Override
-	public void stopEvent(ServerTaskActionEvent event) {
-
-	}
-
-	@Override
-	public void restartEvent(ServerTaskActionEvent event) {
-
-	}
-
-	@Override
-	public void addEvent(ServerTaskActionEvent event) {
-
-	}
-
-	@Override
-	public void deleteEvent(ServerTaskActionEvent event) {
-
-	}
-
-	@Override
-	public void updateEvent(ServerTaskActionEvent event) {
+	public void updateEvent(ReplicationTaskEvent event) {
 	}
 
 }

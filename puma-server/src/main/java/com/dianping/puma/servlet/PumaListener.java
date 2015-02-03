@@ -22,7 +22,7 @@ public class PumaListener implements ServletContextListener {
 
 	private ServerManager serverManager;
 
-	private static final String BEAN_SERVERMANAGER = "serverManager";
+	private static final String BEAN_SERVERMANAGER = "taskManager";
 	
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {

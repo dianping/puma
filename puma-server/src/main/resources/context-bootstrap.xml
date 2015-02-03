@@ -21,7 +21,7 @@
     
     <task:annotation-driven />
       
-	<bean id="serverConfig" class="com.dianping.puma.config.ServerConfig">
+	<bean id="serverConfig" class="com.dianping.puma.config.InitializeServerConfig">
 		<property name="localPort" value="8080" />
 	</bean>
 	

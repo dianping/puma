@@ -19,8 +19,8 @@ import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.monitor.Notifiable;
 import com.dianping.puma.core.monitor.NotifyService;
-import com.dianping.puma.core.server.model.ServerTaskActionStatus;
-import com.dianping.puma.core.server.model.TaskExecutorStatus;
+import com.dianping.puma.core.replicate.model.task.StatusActionType;
+import com.dianping.puma.core.replicate.model.task.StatusExecutorType;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.dispatcher.Dispatcher;
@@ -46,9 +46,9 @@ public abstract class AbstractServer implements Server, Notifiable {
 
     protected String               name;
     
-    protected ServerTaskActionStatus taskActionStatus;
+    protected StatusActionType statusActionType;
     
-    protected TaskExecutorStatus taskExecutorStatus;
+    protected StatusExecutorType statusExecutorType;
 
     /**
      * @param binlogPositionHolder
@@ -181,25 +181,25 @@ public abstract class AbstractServer implements Server, Notifiable {
         stop = false;
         doStart();
     }
-    
+
     @Override
-	public void setTaskActionStatus(ServerTaskActionStatus taskActionStatus) {
-		this.taskActionStatus = taskActionStatus;
+	public void setStatusActionType(StatusActionType statusActionType) {
+		this.statusActionType = statusActionType;
 	}
-    
+
     @Override
-	public ServerTaskActionStatus getTaskActionStatus() {
-		return taskActionStatus;
+	public StatusActionType getStatusActionType() {
+		return statusActionType;
 	}
-    
+
     @Override
-	public void setTaskExecutorStatus(TaskExecutorStatus taskExecutorStatus) {
-		this.taskExecutorStatus = taskExecutorStatus;
+	public void setStatusExecutorType(StatusExecutorType statusExecutorType) {
+		this.statusExecutorType = statusExecutorType;
 	}
-    
+
     @Override
-	public TaskExecutorStatus getTaskExecutorStatus() {
-		return taskExecutorStatus;
+	public StatusExecutorType getStatusExecutorType() {
+		return statusExecutorType;
 	}
 
 }

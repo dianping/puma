@@ -1,6 +1,5 @@
 package com.dianping.puma.server;
 
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.dianping.puma.core.monitor.ServerTaskActionEvent;

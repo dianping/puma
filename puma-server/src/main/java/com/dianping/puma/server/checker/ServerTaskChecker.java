@@ -13,10 +13,12 @@ import org.springframework.stereotype.Service;
 import com.dianping.puma.core.monitor.Event;
 import com.dianping.puma.core.monitor.EventListener;
 import com.dianping.puma.core.monitor.NotifyService;
-import com.dianping.puma.core.monitor.ServerTaskActionEvent;
-import com.dianping.puma.core.server.model.ServerTaskActionStatus;
+import com.dianping.puma.core.monitor.ReplicationTaskEvent;
+import com.dianping.puma.core.monitor.ReplicationTaskStatusEvent;
+import com.dianping.puma.core.replicate.model.task.ActionType;
+import com.dianping.puma.core.replicate.model.task.StatusActionType;
 import com.dianping.puma.server.Server;
-import com.dianping.puma.server.ServerManager;
+import com.dianping.puma.server.TaskManager;
 
 @Service("serverTaskChecker")
 public class ServerTaskChecker implements EventListener {
@@ -27,14 +29,14 @@ public class ServerTaskChecker implements EventListener {
 	private NotifyService notifyService;
 
 	@Autowired
-	private ServerManager serverManager;
+	private TaskManager taskManager;
 
 	@PostConstruct
 	public void init() {
 		ConcurrentHashMap<Long, Server> configedServers = null;
 
 		try {
-			configedServers = serverManager.constructServers();
+			configedServers = taskManager.constructServers();
 		} catch (Exception e) {
 			LOG.error("constructed servers failed....");
 			e.printStackTrace();
@@ -45,8 +47,8 @@ public class ServerTaskChecker implements EventListener {
 					+ " servers configured.");
 			// start servers
 			for (Map.Entry<Long, Server> item : configedServers.entrySet()) {
-				serverManager.initContext(item.getValue());
-				// serverManager.start(item.getValue());
+				taskManager.initContext(item.getValue());
+				taskManager.startServer(item.getValue());
 				LOG.info("Server " + item.getValue().getServerName()
 						+ " started at binlogFile: "
 						+ item.getValue().getContext().getBinlogFileName()
@@ -59,27 +61,32 @@ public class ServerTaskChecker implements EventListener {
 	@Override
 	public void onEvent(Event event) {
 		LOG.info("Receive event: " + event);
-		if (event instanceof ServerTaskActionEvent) {
-			ServerTaskActionEvent taskActionEvent = (ServerTaskActionEvent) event;
-			ServerTaskActionStatus action = taskActionEvent
-					.getTaskStatusAction();
+		if (event instanceof ReplicationTaskStatusEvent) {
+			ReplicationTaskStatusEvent taskStatusEvent = (ReplicationTaskStatusEvent) event;
+			StatusActionType action = taskStatusEvent.getStatusActionType();
 			switch (action) {
 			case START:
-				serverManager.startEvent(taskActionEvent);
+				taskManager.startEvent(taskStatusEvent);
 				break;
 			case STOP:
-				serverManager.stopEvent(taskActionEvent);
+				taskManager.stopEvent(taskStatusEvent);
 				break;
 			case RESTART:
-				serverManager.restartEvent(taskActionEvent);
+				taskManager.restartEvent(taskStatusEvent);
+			}
+		} else if (event instanceof ReplicationTaskEvent) {
+			ReplicationTaskEvent taskEvent = (ReplicationTaskEvent) event;
+			ActionType action = taskEvent.getActionType();
+			switch (action) {
 			case ADD:
-				serverManager.addEvent(taskActionEvent);
+				taskManager.addEvent(taskEvent);
 			case DELETE:
-				serverManager.deleteEvent(taskActionEvent);
+				taskManager.deleteEvent(taskEvent);
 			case UPDATE:
-				serverManager.updateEvent(taskActionEvent);
+				taskManager.updateEvent(taskEvent);
 			}
 		}
+
 	}
 
 }

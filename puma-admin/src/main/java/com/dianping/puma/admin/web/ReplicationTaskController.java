@@ -77,20 +77,21 @@ public class ReplicationTaskController {
 
 		Timestamp timestamp = new Timestamp((new Date()).getTime());
 		long taskId = timestamp.getTime();
-		String taskName = timestamp.toString();
+		String taskName = String.valueOf(taskId);
 
 		List<FileSenderConfig> fileSenderConfigs = new ArrayList<FileSenderConfig>();
 		FileSenderConfig fileSenderConfig = new FileSenderConfig();
 		fileSenderConfig.setMasterBucketFilePrefix("bucket-");
 		fileSenderConfig.setMaxMasterBucketLengthMB(1000);
-		fileSenderConfig.setStorageMasterBaseDir("/data/appdatas/puma/storage/slave/" + taskName);
+		fileSenderConfig.setStorageMasterBaseDir("/data/appdatas/puma/storage/master/" + taskName);
 		fileSenderConfig.setSlaveBucketFilePrefix("bucket-");
 		fileSenderConfig.setMaxSlaveBucketLengthMB(1000);
 		fileSenderConfig.setStorageSlaveBaseDir("/data/appdatas/puma/storage/slave/" + taskName);
-		fileSenderConfig.setFileSenderName("storage-" + taskName);
+		fileSenderConfig.setFileSenderName("fileSender-" + taskName);
 		fileSenderConfig.setStorageName("storage-" + taskName);
 		fileSenderConfig.setPreservedDay(2);
 		fileSenderConfig.setMaxMasterFileCount(50);
+		fileSenderConfig.setBinlogIndexBaseDir("/data/appdatas/puma/binlogIndex/" + taskName);
 		fileSenderConfigs.add(fileSenderConfig);
 
 		ReplicationTask replicationTask = new ReplicationTask();

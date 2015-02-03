@@ -77,7 +77,7 @@ public class ReplicationTaskController {
 
 		Timestamp timestamp = new Timestamp((new Date()).getTime());
 		long taskId = timestamp.getTime();
-		String taskName = timestamp.toString();
+		String taskName = String.valueOf(taskId);
 
 		List<FileSenderConfig> fileSenderConfigs = new ArrayList<FileSenderConfig>();
 		FileSenderConfig fileSenderConfig = new FileSenderConfig();

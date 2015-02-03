@@ -18,7 +18,7 @@
     <bean id="taskEventSubscriber"
         class="com.dianping.puma.monitor.ServerTaskEventSubscriber"
         init-method="init">
-        <property name="topic" value="puma_server_task_event" />
+        <property name="topic" value="puma_task_event" />
         <property name="clazz"
             value="com.dianping.puma.core.monitor.ServerTaskActionEvent" />
         <property name="listeners">

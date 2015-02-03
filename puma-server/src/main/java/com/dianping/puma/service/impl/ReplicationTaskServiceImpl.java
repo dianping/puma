@@ -8,8 +8,6 @@ import org.springframework.stereotype.Service;
 
 import com.dianping.puma.core.replicate.dao.task.ReplicationTaskDao;
 import com.dianping.puma.core.replicate.model.task.ReplicationTask;
-import com.dianping.puma.core.server.dao.ServerTaskDao;
-import com.dianping.puma.core.server.model.ServerTask;
 import com.dianping.puma.service.ReplicationTaskService;
 import com.google.code.morphia.Key;
 import com.google.code.morphia.query.Query;

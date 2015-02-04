@@ -52,13 +52,13 @@ public class DefaultTaskManager implements TaskManager {
 
 	private String serverName;
 	@Autowired
-	private BinlogPositionHolder binlogPositionHolder = null;
+	private BinlogPositionHolder binlogPositionHolder;
 	@Autowired
-	private NotifyService notifyService = null;
+	private NotifyService notifyService;
 	@Autowired
-	private JsonEventCodec jsonCodec = null;
+	private JsonEventCodec jsonCodec;
 	@Autowired
-	private InitializeServerConfig serverConfig = null;
+	private InitializeServerConfig serverConfig;
 
 	@PostConstruct
 	public void init() {
@@ -174,6 +174,7 @@ public class DefaultTaskManager implements TaskManager {
 				storage.setBinlogIndexBaseDir(senderItem
 						.getBinlogIndexBaseDir());
 				storage.start();
+				sender.setStorage(storage);
 				senders.add(sender);
 			}
 		}

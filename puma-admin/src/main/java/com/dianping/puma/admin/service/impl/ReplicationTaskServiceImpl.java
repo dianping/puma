@@ -32,6 +32,7 @@ public class ReplicationTaskServiceImpl implements ReplicationTaskService {
 
 		ReplicationTaskEvent event = new ReplicationTaskEvent();
 		event.setActionType(ActionType.ADD);
+		event.setReplicationServerName(replicationTask.getReplicationServerName());
 		event.setTaskId(replicationTask.getTaskId());
 
 		try {

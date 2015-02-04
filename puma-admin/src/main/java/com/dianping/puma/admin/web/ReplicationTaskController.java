@@ -68,9 +68,6 @@ public class ReplicationTaskController {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		DBInstanceConfig dbInstanceConfig = dbInstanceConfigService.find(dbInstanceName);
-		ServerConfig serverConfig = serverConfigService.find(serverName);
-
 		BinlogInfo binlogInfo = new BinlogInfo();
 		binlogInfo.setBinlogFile(binlogFile);
 		binlogInfo.setBinlogPosition(Long.parseLong(binlogPosition));
@@ -103,8 +100,12 @@ public class ReplicationTaskController {
 		replicationTask.setDispatchName("dispatch-" + taskName);
 		replicationTask.setFileSenderConfigs(fileSenderConfigs);
 
-		replicationTask.setDbInstanceConfig(dbInstanceConfig);
-		replicationTask.setServerConfig(serverConfig);
+		replicationTask.setDbInstanceName(dbInstanceName);
+		DBInstanceConfig dbInstanceConfig = dbInstanceConfigService.find(dbInstanceName);
+		replicationTask.setDbInstanceHost(dbInstanceConfig.getDbInstanceHost());
+		replicationTask.setDbInstanceMetaHost(dbInstanceConfig.getDbInstanceMetaHost());
+
+		replicationTask.setReplicationServerName(serverName);
 		replicationTask.setBinlogInfo(binlogInfo);
 
 		try {

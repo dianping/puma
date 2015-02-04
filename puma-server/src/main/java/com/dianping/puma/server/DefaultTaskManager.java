@@ -86,14 +86,10 @@ public class DefaultTaskManager implements TaskManager {
 		server.setNotifyService(notifyService);
 		server.setName(replicationTask.getTaskName());
 		server.setServerId(replicationTask.getTaskId());
-		server.setHost(replicationTask.getDbInstanceConfig()
-				.getDbInstanceHost().getHost());
-		server.setPort(replicationTask.getDbInstanceConfig()
-				.getDbInstanceHost().getPort());
-		server.setUser(replicationTask.getDbInstanceConfig()
-				.getDbInstanceHost().getUsername());
-		server.setPassword(replicationTask.getDbInstanceConfig()
-				.getDbInstanceHost().getPassword());
+		server.setHost(replicationTask.getDbInstanceHost().getHost());
+		server.setPort(replicationTask.getDbInstanceHost().getPort());
+		server.setUser(replicationTask.getDbInstanceHost().getUsername());
+		server.setPassword(replicationTask.getDbInstanceHost().getPassword());
 		server.setDefaultBinlogFileName(replicationTask.getBinlogInfo()
 				.getBinlogFile());
 		server.setDefaultBinlogPosition(replicationTask.getBinlogInfo()
@@ -107,14 +103,10 @@ public class DefaultTaskManager implements TaskManager {
 		server.setParser(parser);
 		// tableMetaInfo
 		DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
-		tableMetaInfo.setMetaDBHost(replicationTask.getDbInstanceConfig()
-				.getDbInstanceMetaHost().getHost());
-		tableMetaInfo.setMetaDBPort(replicationTask.getDbInstanceConfig()
-				.getDbInstanceMetaHost().getPort());
-		tableMetaInfo.setMetaDBUser(replicationTask.getDbInstanceConfig()
-				.getDbInstanceMetaHost().getUsername());
-		tableMetaInfo.setMetaDBPassword(replicationTask.getDbInstanceConfig()
-				.getDbInstanceMetaHost().getPassword());
+		tableMetaInfo.setMetaDBHost(replicationTask.getDbInstanceMetaHost().getHost());
+		tableMetaInfo.setMetaDBPort(replicationTask.getDbInstanceMetaHost().getPort());
+		tableMetaInfo.setMetaDBUser(replicationTask.getDbInstanceMetaHost().getUsername());
+		tableMetaInfo.setMetaDBPassword(replicationTask.getDbInstanceMetaHost().getPassword());
 		// handler
 		DefaultDataHandler dataHandler = new DefaultDataHandler();
 		dataHandler.setNotifyService(notifyService);

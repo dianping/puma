@@ -21,8 +21,8 @@
                         <tbody>
                         #foreach($replicationTask in ${replicationTasks})
                         <tr>
-                            <td>${replicationTask.dbInstanceConfig.name}</td>
-                            <td>${replicationTask.serverConfig.name}</td>
+                            <td>${replicationTask.dbInstanceName}</td>
+                            <td>${replicationTask.replicationServerName}</td>
                             <td></td>
                         </tr>
                         #end

@@ -39,8 +39,7 @@ public class ServerTaskChecker implements EventListener {
 			configedServers = taskManager.constructServers();
 		} catch (Exception e) {
 			LOG.error("constructed servers failed....");
-			e.printStackTrace();
-			return;
+            throw new RuntimeException("Cannot try to constructServers , please check the ReplicationTask in DB.");
 		}
 		if (configedServers != null) {
 			LOG.info("Starting " + configedServers.size()

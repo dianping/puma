@@ -40,7 +40,7 @@ public class InitializeServerConfig implements InitializingBean {
 		}
 		if (serverName == null) {
 			LOG.error("Not match any serverName....." );
-            throw new RuntimeException("Cannot try to find the ServerName, please check the PuamServerBaseConfig in DB.");
+            throw new RuntimeException("Cannot try to find the ServerName, please check the ServerConfig in DB.");
         }
 	}
 

@@ -335,11 +335,46 @@ public class DefaultTaskManager implements TaskManager {
 
 	@Override
 	public void deleteEvent(ReplicationTaskEvent event) {
-
+		if (serverTasks != null&&serverTasks.containsKey(event.getTaskId())) {
+			Server task = serverTasks.get(event.getTaskId());
+			try {
+				task.setStatusExecutorType(StatusExecutorType.STOPPING);
+				task.stop();
+				task.setStatusExecutorType(StatusExecutorType.STOPPED);
+				serverTasks.remove(event.getTaskId());
+			} catch (Exception e) {
+				log.error("delete Server" + task.getServerName() + " failed.",e);
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override
 	public void updateEvent(ReplicationTaskEvent event) {
+		if (serverTasks != null&&serverTasks.containsKey(event.getTaskId())) {
+			Server task = serverTasks.get(event.getTaskId());
+			try {
+				task.setStatusExecutorType(StatusExecutorType.STOPPING);
+				task.stop();
+				task.setStatusExecutorType(StatusExecutorType.STOPPED);
+				serverTasks.remove(event.getTaskId());
+			} catch (Exception e) {
+				log.error("delete Server" + task.getServerName() + " failed.",e);
+				e.printStackTrace();
+			}
+			ReplicationTask serverTask = replicationTaskService.find(event
+					.getTaskId());
+			try {
+				task = construct(serverTask);
+				serverTasks.put(task.getServerId(), task);
+				initContext(task);
+				startServer(task);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+		}
 	}
 
 }

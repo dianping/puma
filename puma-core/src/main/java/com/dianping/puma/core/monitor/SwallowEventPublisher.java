@@ -20,7 +20,11 @@ public class SwallowEventPublisher implements EventPublisher {
 
     @Override
     public void publish(Event event) throws SendFailedException {
-        producer.sendMessage(event, event.getSyncServerName());
+        if (event instanceof ReplicationEvent) {
+            producer.sendMessage(event, ((ReplicationEvent) event).getReplicationServerName());
+        } else {
+            producer.sendMessage(event, event.getSyncServerName());
+        }
     }
 
     public void setTopic(String topic) {

@@ -2,7 +2,7 @@ package com.dianping.puma.core.monitor;
 
 import com.dianping.puma.core.replicate.model.task.ActionType;
 
-public class ReplicationTaskEvent extends Event {
+public class ReplicationTaskEvent extends ReplicationEvent {
 
 	private ActionType actionType;
 

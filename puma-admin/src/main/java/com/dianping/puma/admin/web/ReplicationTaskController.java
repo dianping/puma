@@ -112,6 +112,7 @@ public class ReplicationTaskController {
 		}
 		catch(Exception e) {
 			map.put("success", false);
+			map.put("errorMsg", e.getMessage());
 		}
 
 		map.put("success", true);

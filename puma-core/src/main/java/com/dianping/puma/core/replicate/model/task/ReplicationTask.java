@@ -1,15 +1,12 @@
 package com.dianping.puma.core.replicate.model.task;
 
-import com.dianping.puma.core.replicate.model.config.DBInstanceConfig;
+import com.dianping.puma.core.replicate.model.config.DBInstanceHost;
 import com.dianping.puma.core.replicate.model.config.FileSenderConfig;
-import com.dianping.puma.core.replicate.model.config.ServerConfig;
 import com.dianping.puma.core.replicate.model.BaseEntity;
 import com.dianping.puma.core.replicate.model.BinlogInfo;
 import com.google.code.morphia.annotations.Entity;
-import com.google.code.morphia.annotations.Id;
 import com.google.code.morphia.annotations.Indexed;
 import com.google.code.morphia.utils.IndexDirection;
-import org.bson.types.ObjectId;
 
 import java.util.List;
 
@@ -22,9 +19,13 @@ public class ReplicationTask extends BaseEntity {
 	@Indexed(value = IndexDirection.ASC, name = "name", unique = true, dropDups = true)
 	private String taskName;
 
-	private DBInstanceConfig dbInstanceConfig;
+	private String dbInstanceName;
 
-	private ServerConfig serverConfig;
+	private DBInstanceHost dbInstanceHost;
+
+	private DBInstanceHost dbInstanceMetaHost;
+
+	private String replicationServerName;
 
 	private BinlogInfo binlogInfo;
 
@@ -48,6 +49,38 @@ public class ReplicationTask extends BaseEntity {
 		this.taskName = taskName;
 	}
 
+	public String getDbInstanceName() {
+		return dbInstanceName;
+	}
+
+	public void setDbInstanceName(String dbInstanceName) {
+		this.dbInstanceName = dbInstanceName;
+	}
+
+	public DBInstanceHost getDbInstanceHost() {
+		return dbInstanceHost;
+	}
+
+	public void setDbInstanceHost(DBInstanceHost dbInstanceHost) {
+		this.dbInstanceHost = dbInstanceHost;
+	}
+
+	public DBInstanceHost getDbInstanceMetaHost() {
+		return dbInstanceMetaHost;
+	}
+
+	public void setDbInstanceMetaHost(DBInstanceHost dbInstanceMetaHost) {
+		this.dbInstanceMetaHost = dbInstanceMetaHost;
+	}
+
+	public String getReplicationServerName() {
+		return replicationServerName;
+	}
+
+	public void setReplicationServerName(String replicationServerName) {
+		this.replicationServerName = replicationServerName;
+	}
+
 	public List<FileSenderConfig> getFileSenderConfigs() {
 		return fileSenderConfigs;
 	}
@@ -62,22 +95,6 @@ public class ReplicationTask extends BaseEntity {
 
 	public void setDispatchName(String dispatchName) {
 		this.dispatchName = dispatchName;
-	}
-
-	public DBInstanceConfig getDbInstanceConfig() {
-		return dbInstanceConfig;
-	}
-
-	public void setDbInstanceConfig(DBInstanceConfig dbInstanceConfig) {
-		this.dbInstanceConfig = dbInstanceConfig;
-	}
-
-	public ServerConfig getServerConfig() {
-		return serverConfig;
-	}
-
-	public void setServerConfig(ServerConfig serverConfig) {
-		this.serverConfig = serverConfig;
 	}
 
 	public BinlogInfo getBinlogInfo() {

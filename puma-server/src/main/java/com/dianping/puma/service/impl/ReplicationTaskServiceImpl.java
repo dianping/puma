@@ -30,7 +30,7 @@ public class ReplicationTaskServiceImpl implements ReplicationTaskService {
 	public List<ReplicationTask> find(String serverName) {
 		Query<ReplicationTask> q = this.replicationTaskConfigDao.getDatastore()
 				.createQuery(ReplicationTask.class);
-		q.field("serverConfig.name").equal(serverName);
+		q.field("replicationServerName").equal(serverName);
 		QueryResults<ReplicationTask> result = this.replicationTaskConfigDao
 				.find(q);
 		return result.asList();

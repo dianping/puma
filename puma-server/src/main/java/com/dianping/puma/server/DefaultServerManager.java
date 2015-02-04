@@ -43,10 +43,6 @@ public class DefaultServerManager implements ServerManager {
 	@Autowired
 	private ServerTaskService serverTaskService;
 
-	private static final String BEAN_NOTIFYSERVICE = "notifyService";
-	private static final String BEAN_BINLOGPOSITIONHOLDER = "binlogPositionHolder";
-	private static final String BEAN_JSONCODEC = "jsonCodec";
-
 	private String serverName;
 	@Autowired
 	private BinlogPositionHolder binlogPositionHolder = null;
@@ -162,6 +158,8 @@ public class DefaultServerManager implements ServerManager {
 				storage.setBinlogIndexBaseDir(senderItem
 						.getBinlogIndexBaseDir());
 				storage.start();
+				sender.setStorage(storage);
+				sender.start();
 				senders.add(sender);
 			}
 		}

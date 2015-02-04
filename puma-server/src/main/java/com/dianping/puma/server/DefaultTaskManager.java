@@ -46,10 +46,6 @@ public class DefaultTaskManager implements TaskManager {
 	@Autowired
 	private ReplicationTaskService replicationTaskService;
 
-	private static final String BEAN_NOTIFYSERVICE = "notifyService";
-	private static final String BEAN_BINLOGPOSITIONHOLDER = "binlogPositionHolder";
-	private static final String BEAN_JSONCODEC = "jsonCodec";
-
 	private String serverName;
 	@Autowired
 	private BinlogPositionHolder binlogPositionHolder;
@@ -175,6 +171,7 @@ public class DefaultTaskManager implements TaskManager {
 						.getBinlogIndexBaseDir());
 				storage.start();
 				sender.setStorage(storage);
+				sender.start();
 				senders.add(sender);
 			}
 		}

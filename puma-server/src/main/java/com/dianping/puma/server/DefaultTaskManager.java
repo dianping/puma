@@ -97,6 +97,7 @@ public class DefaultTaskManager implements TaskManager {
 		server.setPassword(replicationTask.getDbInstanceHost().getPassword());
 		server.setDefaultBinlogFileName(replicationTask.getBinlogInfo()
 				.getBinlogFile());
+		server.setDbServerId(1);
 		server.setDefaultBinlogPosition(replicationTask.getBinlogInfo()
 				.getBinlogPosition());
 		server.setBinlogPositionHolder(binlogPositionHolder);

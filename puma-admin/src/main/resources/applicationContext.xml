@@ -27,7 +27,7 @@
     <bean id="mongoClient" class="com.dianping.puma.core.sync.dao.MongoClient">
     </bean>
 
-    <bean id="seqGen"
+    <bean id="seqGeneratorService"
         class="com.dianping.puma.core.sync.dao.MongoSeqGeneratorServiceImpl">
         <property name="mongoClient">
             <ref bean="mongoClient" />

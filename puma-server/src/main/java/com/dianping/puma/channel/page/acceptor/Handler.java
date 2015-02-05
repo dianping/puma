@@ -85,7 +85,7 @@ public class Handler implements PageHandler<Context> {
 		long binlogPos = payload.getBinlogPos();
 		long timeStamp = payload.getTimestamp();
 		//EventStorage storage = ComponentContainer.SPRING.lookup("storage-" + payload.getTarget(), EventStorage.class);
-		EventStorage storage = DefaultTaskManager.getTaskStorage("storage-" + payload.getTarget());
+		EventStorage storage = DefaultTaskManager.getTaskStorage(Long.parseLong(payload.getTarget()));
 		log.info("Client(" + payload.getClientName() + ") get storage-"+payload.getTarget()+".");
 		EventChannel channel;
 		try {

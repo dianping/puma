@@ -32,9 +32,9 @@ public class ServerConfigServiceImpl implements ServerConfigService {
 
 	@Override
 	public ServerConfig find(String host) {
-		Query q = this.serverConfigDao.getDatastore().createQuery(
+		Query<ServerConfig> q = this.serverConfigDao.getDatastore().createQuery(
 				ServerConfig.class);
-		q.field("host").equals(host);
+		q.field("host").equal(host);
 		return this.serverConfigDao.findOne(q);
 	}
 

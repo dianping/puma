@@ -313,15 +313,19 @@ public class DefaultTaskManager implements TaskManager {
 		if (!serverTasks.containsKey(event.getTaskId())) {
 			ReplicationTask serverTask = replicationTaskService.find(event
 					.getTaskId());
+			Server task =null;
 			try {
-				Server task = construct(serverTask);
+				task = construct(serverTask);
 				serverTasks.put(task.getServerId(), task);
+				task.setStatusExecutorType(StatusExecutorType.PREPARING);
 				initContext(task);
 				startServer(task);
+				task.setStatusExecutorType(StatusExecutorType.RUNNING);
 				log.info("Server " + task.getServerName() + " started at binlogFile: "
 						+ task.getContext().getBinlogFileName() + " position: "
 						+ task.getContext().getBinlogStartPos());
 			} catch (Exception e) {
+				log.error("add Server" + task.getServerName() + " failed.",e);
 				e.printStackTrace();
 			}
 		}
@@ -359,12 +363,15 @@ public class DefaultTaskManager implements TaskManager {
 			ReplicationTask serverTask = replicationTaskService.find(event
 					.getTaskId());
 			try {
+				task.setStatusExecutorType(StatusExecutorType.PREPARING);
 				task = construct(serverTask);
 				serverTasks.put(task.getServerId(), task);
 				initContext(task);
 				startServer(task);
+				task.setStatusExecutorType(StatusExecutorType.RUNNING);
 
 			} catch (Exception e) {
+				log.error("start Server" + task.getServerName() + " failed.",e);
 				e.printStackTrace();
 			}
 			

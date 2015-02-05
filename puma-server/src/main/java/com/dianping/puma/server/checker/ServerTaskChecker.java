@@ -72,6 +72,7 @@ public class ServerTaskChecker implements EventListener {
 				break;
 			case RESTART:
 				taskManager.restartEvent(taskStatusEvent);
+				break;
 			}
 		} else if (event instanceof ReplicationTaskEvent) {
 			ReplicationTaskEvent taskEvent = (ReplicationTaskEvent) event;
@@ -79,10 +80,13 @@ public class ServerTaskChecker implements EventListener {
 			switch (action) {
 			case ADD:
 				taskManager.addEvent(taskEvent);
+				break;
 			case DELETE:
 				taskManager.deleteEvent(taskEvent);
+				break;
 			case UPDATE:
 				taskManager.updateEvent(taskEvent);
+				break;
 			}
 		}
 

@@ -165,6 +165,10 @@ public class DefaultEventStorage implements EventStorage {
 		this.name = name;
 	}
 
+	public String getName() {
+		return name;
+	}
+	
 	public void setMasterBucketIndex(BucketIndex masterBucketIndex) {
 		this.masterBucketIndex = masterBucketIndex;
 	}

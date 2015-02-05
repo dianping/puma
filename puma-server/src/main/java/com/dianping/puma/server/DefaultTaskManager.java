@@ -34,6 +34,7 @@ import com.dianping.puma.service.ReplicationTaskService;
 import com.dianping.puma.storage.DefaultArchiveStrategy;
 import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
+import com.dianping.puma.storage.EventStorage;
 import com.dianping.puma.storage.LocalFileBucketIndex;
 
 @Service("taskManager")
@@ -42,7 +43,9 @@ public class DefaultTaskManager implements TaskManager {
 	private static Logger log = Logger.getLogger(DefaultTaskManager.class);
 
 	private static ConcurrentHashMap<Long, Server> serverTasks = null;
-
+	
+	private static ConcurrentHashMap<String,EventStorage> taskStorage = null;
+	
 	@Autowired
 	private ReplicationTaskService replicationTaskService;
 
@@ -59,15 +62,17 @@ public class DefaultTaskManager implements TaskManager {
 	@PostConstruct
 	public void init() {
 		serverName = serverConfig.getServerName();
+		taskStorage = new ConcurrentHashMap<String,EventStorage>();
+		serverTasks = new ConcurrentHashMap<Long, Server>();
 	}
+	
 
 	@Override
 	public ConcurrentHashMap<Long, Server> constructServers() throws Exception {
 		log.info("starting construct servers.........");
 		List<ReplicationTask> replicationTasks = replicationTaskService
 				.find(serverName);
-		if (replicationTasks != null && replicationTasks.size() > 0) {
-			serverTasks = new ConcurrentHashMap<Long, Server>();
+		if (replicationTasks != null && replicationTasks.size() > 0) {			
 			Server server = null;
 			for (ReplicationTask replicationTask : replicationTasks) {
 				server = construct(replicationTask);
@@ -95,7 +100,6 @@ public class DefaultTaskManager implements TaskManager {
 		server.setDefaultBinlogPosition(replicationTask.getBinlogInfo()
 				.getBinlogPosition());
 		server.setBinlogPositionHolder(binlogPositionHolder);
-		server.setStatusActionType(StatusActionType.START);
 		server.setStatusExecutorType(StatusExecutorType.WAITING);
 		// parser
 		Parser parser = new DefaultBinlogParser();
@@ -165,6 +169,7 @@ public class DefaultTaskManager implements TaskManager {
 				sender.setStorage(storage);
 				sender.start();
 				senders.add(sender);
+				taskStorage.put(storage.getName(), storage);
 			}
 		}
 		dispatcher.setSenders(senders);
@@ -249,8 +254,7 @@ public class DefaultTaskManager implements TaskManager {
 				try {
 					server.start();
 				} catch (Exception e) {
-					log.error("Start server: " + server.getServerName()
-							+ " failed.", e);
+					log.error("Start server: " + server.getServerName()+ " failed.", e);
 				}
 			}
 		}, server.getServerName() + "_Connector", false).start();
@@ -281,9 +285,7 @@ public class DefaultTaskManager implements TaskManager {
 					task.setStatusExecutorType(StatusExecutorType.STOPPED);
 					log.info("Server " + task.getServerName() + " stopped.");
 				} catch (Exception e) {
-					log.error(
-							"Stop Server" + task.getServerName() + " failed.",
-							e);
+					log.error("Stop Server" + task.getServerName() + " failed.", e);
 					task.setStatusExecutorType(StatusExecutorType.FAILED);
 				}
 			}
@@ -307,9 +309,6 @@ public class DefaultTaskManager implements TaskManager {
 
 	@Override
 	public void addEvent(ReplicationTaskEvent event) {
-		if (serverTasks == null) {
-			serverTasks = new ConcurrentHashMap<Long, Server>();
-		}
 		if (!serverTasks.containsKey(event.getTaskId())) {
 			ReplicationTask serverTask = replicationTaskService.find(event
 					.getTaskId());
@@ -318,7 +317,9 @@ public class DefaultTaskManager implements TaskManager {
 				serverTasks.put(task.getServerId(), task);
 				initContext(task);
 				startServer(task);
-
+				log.info("Server " + task.getServerName() + " started at binlogFile: "
+						+ task.getContext().getBinlogFileName() + " position: "
+						+ task.getContext().getBinlogStartPos());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -367,6 +368,10 @@ public class DefaultTaskManager implements TaskManager {
 			}
 			
 		}
+	}
+	
+	public static EventStorage getTaskStorage(String storageName){
+		return taskStorage.get(storageName);
 	}
 
 }

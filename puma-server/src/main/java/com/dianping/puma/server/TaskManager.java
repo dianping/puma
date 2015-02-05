@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.dianping.puma.core.monitor.ReplicationTaskEvent;
 import com.dianping.puma.core.monitor.ReplicationTaskStatusEvent;
 import com.dianping.puma.core.replicate.model.task.ReplicationTask;
+import com.dianping.puma.storage.EventStorage;
 
 public interface TaskManager {
 
@@ -42,4 +43,5 @@ public interface TaskManager {
 	public void deleteEvent(ReplicationTaskEvent event);
 	
 	public void updateEvent(ReplicationTaskEvent event);
+	
 }

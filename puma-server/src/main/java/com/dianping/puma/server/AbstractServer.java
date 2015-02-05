@@ -15,6 +15,8 @@
  */
 package com.dianping.puma.server;
 
+import java.util.List;
+
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.monitor.Notifiable;
@@ -23,6 +25,7 @@ import com.dianping.puma.core.replicate.model.task.StatusActionType;
 import com.dianping.puma.core.replicate.model.task.StatusExecutorType;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.parser.Parser;
+import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.Dispatcher;
 
 /**
@@ -201,5 +204,10 @@ public abstract class AbstractServer implements Server, Notifiable {
 	public StatusExecutorType getStatusExecutorType() {
 		return statusExecutorType;
 	}
+    
+    @Override
+    public List<Sender> getFileSender(){
+    	return dispatcher.getSenders();
+    }
 
 }

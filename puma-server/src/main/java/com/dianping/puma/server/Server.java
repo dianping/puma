@@ -12,10 +12,13 @@
  */
 package com.dianping.puma.server;
 
+import java.util.List;
+
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.LifeCycle;
 import com.dianping.puma.core.replicate.model.task.StatusActionType;
 import com.dianping.puma.core.replicate.model.task.StatusExecutorType;
+import com.dianping.puma.sender.Sender;
 
 /**
  * @author Leo Liang
@@ -50,4 +53,6 @@ public interface Server extends LifeCycle<Exception> {
 	public void setStatusExecutorType(StatusExecutorType statusExecutorType);
 
 	public StatusExecutorType getStatusExecutorType();
+	
+	public List<Sender> getFileSender();
 }

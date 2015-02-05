@@ -18,6 +18,7 @@ package com.dianping.puma.sender;
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.LifeCycle;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.storage.EventStorage;
 
 /**
  * TODO Comment of Sender
@@ -29,4 +30,6 @@ public interface Sender extends LifeCycle<Exception> {
 	public String getName();
 
 	public void send(ChangedEvent event, PumaContext context) throws SenderException;
+	
+	public EventStorage getStorage();
 }

@@ -36,7 +36,12 @@ public class FileDumpSender extends AbstractSender {
 	public void setStorage(EventStorage storage) {
 		this.storage = storage;
 	}
-
+	
+	@Override
+	public EventStorage getStorage(){
+		return storage;
+	}
+	
 	@Override
 	public void stop() throws Exception {
 		storage.stop();

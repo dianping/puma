@@ -44,7 +44,7 @@ public class DefaultTaskManager implements TaskManager {
 
 	private static ConcurrentHashMap<Long, Server> serverTasks = null;
 	
-	private static ConcurrentHashMap<String,EventStorage> taskStorage = null;
+	//private static ConcurrentHashMap<String,EventStorage> taskStorage = null;
 	
 	@Autowired
 	private ReplicationTaskService replicationTaskService;
@@ -62,7 +62,7 @@ public class DefaultTaskManager implements TaskManager {
 	@PostConstruct
 	public void init() {
 		serverName = serverConfig.getServerName();
-		taskStorage = new ConcurrentHashMap<String,EventStorage>();
+		//taskStorage = new ConcurrentHashMap<String,EventStorage>();
 		serverTasks = new ConcurrentHashMap<Long, Server>();
 	}
 	
@@ -170,7 +170,7 @@ public class DefaultTaskManager implements TaskManager {
 				sender.setStorage(storage);
 				sender.start();
 				senders.add(sender);
-				taskStorage.put(storage.getName(), storage);
+				//taskStorage.put(storage.getName(), storage);
 			}
 		}
 		dispatcher.setSenders(senders);
@@ -378,8 +378,13 @@ public class DefaultTaskManager implements TaskManager {
 		}
 	}
 	
-	public static EventStorage getTaskStorage(String storageName){
-		return taskStorage.get(storageName);
+	public static EventStorage getTaskStorage(String taskId){
+		//return taskStorage.get(storageName);
+		List<Sender> senders =  serverTasks.get(taskId).getFileSender();
+		if(senders!=null&&senders.size()>0){
+			return senders.get(0).getStorage();
+		}
+		return null;
 	}
 
 }

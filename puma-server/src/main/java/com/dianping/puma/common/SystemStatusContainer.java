@@ -17,6 +17,7 @@ package com.dianping.puma.common;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -24,6 +25,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.dianping.cat.Cat;
+import com.dianping.puma.core.monitor.ReplicationTaskReportEvent;
+import com.dianping.puma.core.replicate.model.BinlogInfo;
+import com.dianping.puma.core.replicate.model.task.TaskExecutorStatus;
+import com.dianping.puma.server.AbstractServer;
+import com.dianping.puma.server.DefaultTaskManager;
+import com.dianping.puma.server.ReplicationBasedServer;
+import com.dianping.puma.server.Server;
 
 /**
  * @author Leo Liang
@@ -50,10 +58,14 @@ public enum SystemStatusContainer {
 
 	private ConcurrentMap<String, AtomicInteger> metrics = new ConcurrentHashMap<String, AtomicInteger>();
 
+	private ConcurrentMap<String, TaskExecutorStatus> taskExecutorStatus = new ConcurrentHashMap<String, TaskExecutorStatus>();
+
 	private static final String CAT_KEY_EVENT_PARSED = "EventParsed-";
 
-	public void updateServerStatus(String name, String host, int port, String db, String binlogFile, long binlogPos) {
-		serverStatus.put(name, new ServerStatus(binlogFile, binlogPos, host, port, db));
+	public void updateServerStatus(String name, String host, int port,
+			String db, String binlogFile, long binlogPos) {
+		serverStatus.put(name, new ServerStatus(binlogFile, binlogPos, host,
+				port, db));
 	}
 
 	private void logMetricForCount(String name) {
@@ -89,9 +101,10 @@ public enum SystemStatusContainer {
 		logMetricForCount(CAT_KEY_EVENT_PARSED + name);
 	}
 
-	public void addClientStatus(String name, long seq, String target, boolean dml, boolean ddl, boolean ts, String[] dt,
-	      String codec) {
-		clientStatus.put(name, new ClientStatus(target, dml, ddl, ts, codec, dt, seq));
+	public void addClientStatus(String name, long seq, String target,
+			boolean dml, boolean ddl, boolean ts, String[] dt, String codec) {
+		clientStatus.put(name, new ClientStatus(target, dml, ddl, ts, codec,
+				dt, seq));
 	}
 
 	public void updateClientSeq(String name, long seq) {
@@ -148,6 +161,70 @@ public enum SystemStatusContainer {
 		return Collections.unmodifiableMap(storageStatus);
 	}
 
+	public Map<String, TaskExecutorStatus> listExecutorStatus() {
+		setExecutorStatus();
+		return Collections.unmodifiableMap(taskExecutorStatus);
+	}
+
+	private void setExecutorStatus(){
+		Map<String, Server> serverTasks = DefaultTaskManager.instance.getServerTasks();
+		TaskExecutorStatus  executorStatus = null;
+		for(Entry<String, Server> serverItem:serverTasks.entrySet()){
+			String taskName = serverItem.getKey();
+			if(taskExecutorStatus.containsKey(taskName)){
+				executorStatus=taskExecutorStatus.get(taskName);
+			}else{
+				executorStatus=new TaskExecutorStatus();
+			}
+			executorStatus.setServerName(DefaultTaskManager.instance.getServerName());
+			Server task = serverItem.getValue();
+			executorStatus.setTaskId(task.getServerId());
+			executorStatus.setTaskName(task.getServerName());
+			BinlogInfo binlogInfo = null;
+			if(executorStatus.getStartBinlogInfo() == null){
+				binlogInfo=new BinlogInfo();
+				executorStatus.setStartBinlogInfo(binlogInfo);
+			}
+			binlogInfo=executorStatus.getStartBinlogInfo();
+			binlogInfo.setBinlogFile(task.getDefaultBinlogFileName());
+			binlogInfo.setBinlogPosition(task.getDefaultBinlogPosition());
+			if(executorStatus.getCurrentBinlogInfo() == null){
+				binlogInfo=new BinlogInfo();
+				executorStatus.setCurrentBinlogInfo(binlogInfo);
+			}
+			binlogInfo=executorStatus.getCurrentBinlogInfo();
+			binlogInfo.setBinlogFile(task.getContext().getBinlogFileName());
+			binlogInfo.setBinlogPosition(task.getContext().getBinlogStartPos());
+			executorStatus.setDbServerId(task.getContext().getDBServerId());
+			if(task instanceof ReplicationBasedServer){
+				executorStatus.setHost(((ReplicationBasedServer)task).getHost());
+				executorStatus.setPort(((ReplicationBasedServer)task).getPort());
+			}
+			executorStatus.setExecutorStatus(task.getStatusExecutorType());
+			executorStatus.setInsertCount(0);
+			executorStatus.setUpdateCount(0);
+			executorStatus.setDeleteCount(0);
+			executorStatus.setDdlCount(0);
+			Map<String, AtomicLong> insertCount = listServerRowInsertCounters();
+			if(insertCount.containsKey(taskName)){
+				executorStatus.setInsertCount(insertCount.get(taskName).longValue());
+			}
+			Map<String, AtomicLong> updateCount = listServerRowUpdateCounters();
+			if(updateCount.containsKey(taskName)){
+				executorStatus.setUpdateCount(updateCount.get(taskName).longValue());
+			}
+			Map<String, AtomicLong> deleteCount = listServerRowDeleteCounters();
+			if(deleteCount.containsKey(taskName)){
+				executorStatus.setDeleteCount(deleteCount.get(taskName).longValue());
+			}
+			Map<String, AtomicLong> ddlCount = listServerDdlCounters();
+			if(ddlCount.containsKey(taskName)){
+				executorStatus.setDdlCount(ddlCount.get(taskName).longValue());
+			}
+			taskExecutorStatus.put(taskName,executorStatus);
+		}
+	}
+
 	public static class ClientStatus {
 		private String target;
 
@@ -163,8 +240,8 @@ public enum SystemStatusContainer {
 
 		private long seq;
 
-		public ClientStatus(String target, boolean dml, boolean ddl, boolean needTsInfo, String codec, String[] dt,
-		      long seq) {
+		public ClientStatus(String target, boolean dml, boolean ddl,
+				boolean needTsInfo, String codec, String[] dt, long seq) {
 			super();
 			this.target = target;
 			this.dml = dml;
@@ -177,7 +254,7 @@ public enum SystemStatusContainer {
 
 		/**
 		 * @param seq
-		 *           the seq to set
+		 *            the seq to set
 		 */
 		public void setSeq(long seq) {
 			this.seq = seq;
@@ -245,7 +322,8 @@ public enum SystemStatusContainer {
 
 		private String db;
 
-		public ServerStatus(String binlogFile, long binlogPos, String host, int port, String db) {
+		public ServerStatus(String binlogFile, long binlogPos, String host,
+				int port, String db) {
 			this.binlogFile = binlogFile;
 			this.binlogPos = binlogPos;
 			this.host = host;
@@ -306,4 +384,5 @@ public enum SystemStatusContainer {
 		stopTheWorlds.put(serverName, new AtomicBoolean(false));
 	}
 
+	
 }

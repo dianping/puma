@@ -7,6 +7,8 @@ public class ReplicationTaskStatusEvent extends ReplicationEvent {
 	private StatusActionType statusActionType;
 
 	private long taskId;
+	
+	private String taskName;
 
 	public StatusActionType getStatusActionType() {
 		return statusActionType;
@@ -22,5 +24,13 @@ public class ReplicationTaskStatusEvent extends ReplicationEvent {
 
 	public void setTaskId(long taskId) {
 		this.taskId = taskId;
+	}
+
+	public void setTaskName(String taskName) {
+		this.taskName = taskName;
+	}
+
+	public String getTaskName() {
+		return taskName;
 	}
 }

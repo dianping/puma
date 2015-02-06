@@ -33,7 +33,7 @@ public class ServerTaskChecker implements EventListener {
 
 	@PostConstruct
 	public void init() {
-		ConcurrentHashMap<Long, Server> configedServers = null;
+		ConcurrentHashMap<String, Server> configedServers = null;
 
 		try {
 			configedServers = taskManager.constructServers();
@@ -45,7 +45,7 @@ public class ServerTaskChecker implements EventListener {
 			LOG.info("Starting " + configedServers.size()
 					+ " servers configured.");
 			// start servers
-			for (Map.Entry<Long, Server> item : configedServers.entrySet()) {
+			for (Map.Entry<String, Server> item : configedServers.entrySet()) {
 				taskManager.initContext(item.getValue());
 				taskManager.startServer(item.getValue());
 				LOG.info("Server " + item.getValue().getServerName()

@@ -1,6 +1,7 @@
 package com.dianping.puma.server;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -8,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PostConstruct;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +22,6 @@ import com.dianping.puma.core.monitor.ReplicationTaskEvent;
 import com.dianping.puma.core.monitor.ReplicationTaskStatusEvent;
 import com.dianping.puma.core.replicate.model.config.FileSenderConfig;
 import com.dianping.puma.core.replicate.model.task.ReplicationTask;
-import com.dianping.puma.core.replicate.model.task.StatusActionType;
 import com.dianping.puma.core.replicate.model.task.StatusExecutorType;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.datahandler.DefaultDataHandler;
@@ -38,11 +39,13 @@ import com.dianping.puma.storage.EventStorage;
 import com.dianping.puma.storage.LocalFileBucketIndex;
 
 @Service("taskManager")
-public class DefaultTaskManager implements TaskManager {
+public class DefaultTaskManager implements TaskManager, InitializingBean {
 
 	private static Logger log = Logger.getLogger(DefaultTaskManager.class);
 
-	private static ConcurrentHashMap<Long, Server> serverTasks = null;
+	private ConcurrentHashMap<String, Server> serverTasks = null;
+
+	public static DefaultTaskManager instance;
 	
 	@Autowired
 	private ReplicationTaskService replicationTaskService;
@@ -60,20 +63,19 @@ public class DefaultTaskManager implements TaskManager {
 	@PostConstruct
 	public void init() {
 		serverName = serverConfig.getServerName();
-		serverTasks = new ConcurrentHashMap<Long, Server>();
+		serverTasks = new ConcurrentHashMap<String, Server>();
 	}
-	
 
 	@Override
-	public ConcurrentHashMap<Long, Server> constructServers() throws Exception {
+	public ConcurrentHashMap<String, Server> constructServers() throws Exception {
 		log.info("starting construct servers.........");
 		List<ReplicationTask> replicationTasks = replicationTaskService
 				.find(serverName);
-		if (replicationTasks != null && replicationTasks.size() > 0) {			
+		if (replicationTasks != null && replicationTasks.size() > 0) {
 			Server server = null;
 			for (ReplicationTask replicationTask : replicationTasks) {
 				server = construct(replicationTask);
-				serverTasks.put(server.getServerId(), server);
+				serverTasks.put(server.getServerName(), server);
 			}
 		}
 		log.info("ended construct servers.........");
@@ -105,10 +107,14 @@ public class DefaultTaskManager implements TaskManager {
 		server.setParser(parser);
 		// tableMetaInfo
 		DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
-		tableMetaInfo.setMetaDBHost(replicationTask.getDbInstanceMetaHost().getHost());
-		tableMetaInfo.setMetaDBPort(replicationTask.getDbInstanceMetaHost().getPort());
-		tableMetaInfo.setMetaDBUser(replicationTask.getDbInstanceMetaHost().getUsername());
-		tableMetaInfo.setMetaDBPassword(replicationTask.getDbInstanceMetaHost().getPassword());
+		tableMetaInfo.setMetaDBHost(replicationTask.getDbInstanceMetaHost()
+				.getHost());
+		tableMetaInfo.setMetaDBPort(replicationTask.getDbInstanceMetaHost()
+				.getPort());
+		tableMetaInfo.setMetaDBUser(replicationTask.getDbInstanceMetaHost()
+				.getUsername());
+		tableMetaInfo.setMetaDBPassword(replicationTask.getDbInstanceMetaHost()
+				.getPassword());
 		// handler
 		DefaultDataHandler dataHandler = new DefaultDataHandler();
 		dataHandler.setNotifyService(notifyService);
@@ -176,13 +182,8 @@ public class DefaultTaskManager implements TaskManager {
 	}
 
 	@Override
-	public ConcurrentHashMap<Long, Server> getServers() {
-		return serverTasks;
-	}
-
-	@Override
-	public boolean contain(Long taskId) {
-		if (serverTasks.containsKey(taskId)) {
+	public boolean contain(String taskName) {
+		if (serverTasks.containsKey(taskName)) {
 			return true;
 		}
 		return false;
@@ -194,7 +195,7 @@ public class DefaultTaskManager implements TaskManager {
 				&& !serverTasks.contains(server)) {
 			initContext(server);
 			startServer(server);
-			serverTasks.put(server.getServerId(), server);
+			serverTasks.put(server.getServerName(), server);
 			log.info("Server " + server.getServerName()
 					+ " started at binlogFile: "
 					+ server.getContext().getBinlogFileName() + " position: "
@@ -205,8 +206,8 @@ public class DefaultTaskManager implements TaskManager {
 	}
 
 	@Override
-	public void remove(Long taskId) {
-		serverTasks.remove(taskId);
+	public void remove(String taskName) {
+		serverTasks.remove(taskName);
 	}
 
 	@Override
@@ -238,7 +239,7 @@ public class DefaultTaskManager implements TaskManager {
 	@Override
 	public void stopServers() {
 		log.info("Stopping...");
-		for (Map.Entry<Long, Server> item : serverTasks.entrySet()) {
+		for (Map.Entry<String, Server> item : serverTasks.entrySet()) {
 			stopServer(item.getValue());
 		}
 	}
@@ -251,7 +252,8 @@ public class DefaultTaskManager implements TaskManager {
 				try {
 					server.start();
 				} catch (Exception e) {
-					log.error("Start server: " + server.getServerName()+ " failed.", e);
+					log.error("Start server: " + server.getServerName()
+							+ " failed.", e);
 				}
 			}
 		}, server.getServerName() + "_Connector", false).start();
@@ -263,8 +265,8 @@ public class DefaultTaskManager implements TaskManager {
 
 	@Override
 	public void startEvent(ReplicationTaskStatusEvent event) {
-		if (serverTasks != null && serverTasks.containsKey(event.getTaskId())) {
-			Server task = serverTasks.get(event.getTaskId());
+		if (serverTasks != null && serverTasks.containsKey(event.getTaskName())) {
+			Server task = serverTasks.get(event.getTaskName());
 			task.setStatusExecutorType(StatusExecutorType.PREPARING);
 			startServer(task);
 			task.setStatusExecutorType(StatusExecutorType.RUNNING);
@@ -274,15 +276,17 @@ public class DefaultTaskManager implements TaskManager {
 	@Override
 	public void stopEvent(ReplicationTaskStatusEvent event) {
 		if (serverTasks != null) {
-			if (serverTasks.containsKey(event.getTaskId())) {
-				Server task = serverTasks.get(event.getTaskId());
+			if (serverTasks.containsKey(event.getTaskName())) {
+				Server task = serverTasks.get(event.getTaskName());
 				try {
 					task.setStatusExecutorType(StatusExecutorType.STOPPING);
 					task.stop();
 					task.setStatusExecutorType(StatusExecutorType.STOPPED);
 					log.info("Server " + task.getServerName() + " stopped.");
 				} catch (Exception e) {
-					log.error("Stop Server" + task.getServerName() + " failed.", e);
+					log.error(
+							"Stop Server" + task.getServerName() + " failed.",
+							e);
 					task.setStatusExecutorType(StatusExecutorType.FAILED);
 				}
 			}
@@ -292,8 +296,8 @@ public class DefaultTaskManager implements TaskManager {
 	@Override
 	public void restartEvent(ReplicationTaskStatusEvent event) {
 		if (serverTasks != null) {
-			if (serverTasks.containsKey(event.getTaskId())) {
-				Server task = serverTasks.get(event.getTaskId());
+			if (serverTasks.containsKey(event.getTaskName())) {
+				Server task = serverTasks.get(event.getTaskName());
 				if (task.getStatusExecutorType() == StatusExecutorType.STOPPED
 						|| task.getStatusExecutorType() == StatusExecutorType.FAILED) {
 					task.setStatusExecutorType(StatusExecutorType.PREPARING);
@@ -306,22 +310,23 @@ public class DefaultTaskManager implements TaskManager {
 
 	@Override
 	public void addEvent(ReplicationTaskEvent event) {
-		if (!serverTasks.containsKey(event.getTaskId())) {
+		if (!serverTasks.containsKey(event.getTaskName())) {
 			ReplicationTask serverTask = replicationTaskService.find(event
 					.getTaskId());
-			Server task =null;
+			Server task = null;
 			try {
 				task = construct(serverTask);
-				serverTasks.put(task.getServerId(), task);
+				serverTasks.put(task.getServerName(), task);
 				task.setStatusExecutorType(StatusExecutorType.PREPARING);
 				initContext(task);
 				startServer(task);
 				task.setStatusExecutorType(StatusExecutorType.RUNNING);
-				log.info("Server " + task.getServerName() + " started at binlogFile: "
+				log.info("Server " + task.getServerName()
+						+ " started at binlogFile: "
 						+ task.getContext().getBinlogFileName() + " position: "
 						+ task.getContext().getBinlogStartPos());
 			} catch (Exception e) {
-				log.error("add Server" + task.getServerName() + " failed.",e);
+				log.error("add Server" + task.getServerName() + " failed.", e);
 				e.printStackTrace();
 			}
 		}
@@ -329,15 +334,16 @@ public class DefaultTaskManager implements TaskManager {
 
 	@Override
 	public void deleteEvent(ReplicationTaskEvent event) {
-		if (serverTasks != null&&serverTasks.containsKey(event.getTaskId())) {
-			Server task = serverTasks.get(event.getTaskId());
+		if (serverTasks != null && serverTasks.containsKey(event.getTaskName())) {
+			Server task = serverTasks.get(event.getTaskName());
 			try {
 				task.setStatusExecutorType(StatusExecutorType.STOPPING);
 				task.stop();
 				task.setStatusExecutorType(StatusExecutorType.STOPPED);
-				serverTasks.remove(event.getTaskId());
+				serverTasks.remove(event.getTaskName());
 			} catch (Exception e) {
-				log.error("delete Server" + task.getServerName() + " failed.",e);
+				log.error("delete Server" + task.getServerName() + " failed.",
+						e);
 				e.printStackTrace();
 			}
 		}
@@ -345,41 +351,55 @@ public class DefaultTaskManager implements TaskManager {
 
 	@Override
 	public void updateEvent(ReplicationTaskEvent event) {
-		if (serverTasks != null&&serverTasks.containsKey(event.getTaskId())) {
-			Server task = serverTasks.get(event.getTaskId());
+		if (serverTasks != null && serverTasks.containsKey(event.getTaskName())) {
+			Server task = serverTasks.get(event.getTaskName());
 			try {
 				task.setStatusExecutorType(StatusExecutorType.STOPPING);
 				task.stop();
 				task.setStatusExecutorType(StatusExecutorType.STOPPED);
-				serverTasks.remove(event.getTaskId());
+				serverTasks.remove(event.getTaskName());
 			} catch (Exception e) {
-				log.error("delete Server" + task.getServerName() + " failed.",e);
+				log.error("delete Server" + task.getServerName() + " failed.",
+						e);
 				e.printStackTrace();
 			}
 			ReplicationTask serverTask = replicationTaskService.find(event
 					.getTaskId());
 			try {
-				task.setStatusExecutorType(StatusExecutorType.PREPARING);
 				task = construct(serverTask);
-				serverTasks.put(task.getServerId(), task);
+				serverTasks.put(task.getServerName(), task);
+				task.setStatusExecutorType(StatusExecutorType.PREPARING);
 				initContext(task);
 				startServer(task);
 				task.setStatusExecutorType(StatusExecutorType.RUNNING);
 
 			} catch (Exception e) {
-				log.error("start Server" + task.getServerName() + " failed.",e);
+				log.error("start Server" + task.getServerName()
+								+ " failed.", e);
 				e.printStackTrace();
 			}
-			
+
 		}
 	}
-	
-	public static EventStorage getTaskStorage(long taskId){
-		List<Sender> senders =  serverTasks.get(taskId).getFileSender();
-		if(senders!=null&&senders.size()>0){
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		instance = this;
+	}
+
+	public EventStorage getTaskStorage(String taskName) {
+		List<Sender> senders = serverTasks.get(taskName).getFileSender();
+		if (senders != null && senders.size() > 0) {
 			return senders.get(0).getStorage();
 		}
 		return null;
 	}
 
+	public Map<String, Server> getServerTasks(){
+		return Collections.unmodifiableMap(serverTasks);
+	}
+	
+	public String getServerName(){
+		return serverName;
+	}
 }

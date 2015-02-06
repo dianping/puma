@@ -55,4 +55,5 @@ public interface Server extends LifeCycle<Exception> {
 	public StatusExecutorType getStatusExecutorType();
 	
 	public List<Sender> getFileSender();
+
 }

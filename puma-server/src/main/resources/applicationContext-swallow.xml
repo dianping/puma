@@ -12,7 +12,7 @@
 
     <bean id="statusEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPublisher"
         init-method="init">
-        <property name="topic" value="puma_server_status_event" />
+        <property name="topic" value="puma_status_event" />
     </bean>
 
     <bean id="taskEventSubscriber"

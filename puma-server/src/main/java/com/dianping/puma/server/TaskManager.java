@@ -14,23 +14,21 @@ public interface TaskManager {
 	public Server construct(ReplicationTask replicationTask)
 			throws Exception;
 
-	public ConcurrentHashMap<Long,Server> constructServers() throws Exception;
+	public ConcurrentHashMap<String,Server> constructServers() throws Exception;
 
 	public void initContext(Server server);
 
-	public boolean contain(Long taskId);
+	public boolean contain(String taskName);
 
 	public boolean addServer(Server server);
 
-	public void remove(Long taskId);
+	public void remove(String taskName);
 
 	public void startServer(final Server server);
 
 	public void stopServer(Server server);
 	
 	public void stopServers();
-	
-	public ConcurrentHashMap<Long,Server> getServers();
 	
 	public void startEvent(ReplicationTaskStatusEvent event);
 	

@@ -1,4 +1,4 @@
-package com.dianping.puma.core.replicate.model;
+package com.dianping.puma.core.model;
 
 public class BinlogInfo {
     private String binlogFile;

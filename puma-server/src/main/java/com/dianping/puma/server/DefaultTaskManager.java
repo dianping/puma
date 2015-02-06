@@ -19,7 +19,7 @@ import com.dianping.puma.config.InitializeServerConfig;
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.monitor.ReplicationTaskEvent;
-import com.dianping.puma.core.monitor.ReplicationTaskStatusEvent;
+import com.dianping.puma.core.monitor.ReplicationTaskStatusActionEvent;
 import com.dianping.puma.core.replicate.model.config.FileSenderConfig;
 import com.dianping.puma.core.replicate.model.task.ReplicationTask;
 import com.dianping.puma.core.replicate.model.task.StatusExecutorType;
@@ -264,9 +264,9 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 	}
 
 	@Override
-	public void startEvent(ReplicationTaskStatusEvent event) {
-		if (serverTasks != null && serverTasks.containsKey(event.getTaskName())) {
-			Server task = serverTasks.get(event.getTaskName());
+	public void startEvent(ReplicationTaskStatusActionEvent event) {
+		if (serverTasks != null && serverTasks.containsKey(event.getTaskId())) {
+			Server task = serverTasks.get(event.getTaskId());
 			task.setStatusExecutorType(StatusExecutorType.PREPARING);
 			startServer(task);
 			task.setStatusExecutorType(StatusExecutorType.RUNNING);
@@ -274,7 +274,7 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 	}
 
 	@Override
-	public void stopEvent(ReplicationTaskStatusEvent event) {
+	public void stopEvent(ReplicationTaskStatusActionEvent event) {
 		if (serverTasks != null) {
 			if (serverTasks.containsKey(event.getTaskName())) {
 				Server task = serverTasks.get(event.getTaskName());
@@ -294,7 +294,7 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 	}
 
 	@Override
-	public void restartEvent(ReplicationTaskStatusEvent event) {
+	public void restartEvent(ReplicationTaskStatusActionEvent event) {
 		if (serverTasks != null) {
 			if (serverTasks.containsKey(event.getTaskName())) {
 				Server task = serverTasks.get(event.getTaskName());

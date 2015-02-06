@@ -23,7 +23,11 @@
                         <tr>
                             <td>${replicationTask.dbInstanceName}</td>
                             <td>${replicationTask.replicationServerName}</td>
-                            <td></td>
+                            <td>
+                                <a href="javascript:pumadmin.openDelReplicationTaskModal('${replicationTask.id}')">
+                                    <span class="label">删除 »</span>
+                                </a>
+                            </td>
                         </tr>
                         #end
                         </tbody>
@@ -34,3 +38,27 @@
         </div>
     </div>
 </div>
+
+<div aria-hidden="true" data-backdrop="true" role="dialog" tabindex="-1"
+     class="modal hide" id="delReplicationTaskModal" style="display: none;">
+    <div class="modal-header">
+        <button aria-hidden="true" data-dismiss="modal" class="close"
+                type="button">×</button>
+        <h3>删除配置</h3>
+    </div>
+    <form action="${rc.contextPath}/replicationTask/delete"
+          method="post" onsubmit="pumadmin.submit(this);return false;"
+          onSuccess="deleteReplicationTaskDone">
+        <div class="modal-body">
+            <p style="text-align: center;">
+                <i class="icon-warning-sign"></i> 您是否确定要删除该配置 ？
+            </p>
+            <input id="delId" name="id" type="hidden" value="">
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">确定</button>
+            <button data-dismiss="modal" class="btn">取消</button>
+        </div>
+    </form>
+</div>
+

@@ -3,9 +3,8 @@ package com.dianping.puma.server;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.dianping.puma.core.monitor.ReplicationTaskEvent;
-import com.dianping.puma.core.monitor.ReplicationTaskStatusEvent;
+import com.dianping.puma.core.monitor.ReplicationTaskStatusActionEvent;
 import com.dianping.puma.core.replicate.model.task.ReplicationTask;
-import com.dianping.puma.storage.EventStorage;
 
 public interface TaskManager {
 
@@ -30,11 +29,13 @@ public interface TaskManager {
 	
 	public void stopServers();
 	
-	public void startEvent(ReplicationTaskStatusEvent event);
+	//public ConcurrentHashMap<Long,Server> getServers();
 	
-	public void stopEvent(ReplicationTaskStatusEvent event);
+	public void startEvent(ReplicationTaskStatusActionEvent event);
+
+	public void stopEvent(ReplicationTaskStatusActionEvent event);
 	
-	public void restartEvent(ReplicationTaskStatusEvent event);
+	public void restartEvent(ReplicationTaskStatusActionEvent event);
 	
 	public void addEvent(ReplicationTaskEvent event);
 	

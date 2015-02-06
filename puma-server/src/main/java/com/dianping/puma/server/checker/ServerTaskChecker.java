@@ -14,7 +14,7 @@ import com.dianping.puma.core.monitor.Event;
 import com.dianping.puma.core.monitor.EventListener;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.monitor.ReplicationTaskEvent;
-import com.dianping.puma.core.monitor.ReplicationTaskStatusEvent;
+import com.dianping.puma.core.monitor.ReplicationTaskStatusActionEvent;
 import com.dianping.puma.core.replicate.model.task.ActionType;
 import com.dianping.puma.core.replicate.model.task.StatusActionType;
 import com.dianping.puma.server.Server;
@@ -60,8 +60,8 @@ public class ServerTaskChecker implements EventListener {
 	@Override
 	public void onEvent(Event event) {
 		LOG.info("Receive event: " + event);
-		if (event instanceof ReplicationTaskStatusEvent) {
-			ReplicationTaskStatusEvent taskStatusEvent = (ReplicationTaskStatusEvent) event;
+		if (event instanceof ReplicationTaskStatusActionEvent) {
+			ReplicationTaskStatusActionEvent taskStatusEvent = (ReplicationTaskStatusActionEvent) event;
 			StatusActionType action = taskStatusEvent.getStatusActionType();
 			switch (action) {
 			case START:

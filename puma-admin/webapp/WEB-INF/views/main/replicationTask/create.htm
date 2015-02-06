@@ -13,8 +13,8 @@
          <button type="submit" style="float: right;" class="btn btn-success">
             下一步</a>
          </button>
-         <p class="legend">填写同步的配置</p>
-         <div style="height: 700px">
+         <p class="legend">基本设置</p>
+         <div style="height: 60px">
             <span>数据库实例</span>
             <select name="dbInstanceName" style="margin-left: 16px; margin-right: 16px;">
                #foreach($dbInstanceConfig in ${dbInstanceConfigs})
@@ -28,22 +28,52 @@
                <option value="${serverConfig.name}">${serverConfig.name}</option>
                #end
             </select>
-
-            <div class="control-group">
-               <label class="control-label">binlog文件</label>
-               <div class="controls">
-                  <input type="text" name="binlogFile">
-               </div>
-            </div>
-
-            <div class="control-group">
-               <label class="control-label">binlog位置</label>
-               <div class="controls">
-                  <input type="text" name="binlogPosition">
-               </div>
-            </div>
-
          </div>
+
+         <p class="legend">binlog设置</p>
+         <div style="height: 60px">
+            binlog文件
+            <input type="text" name="binlogFile">
+            binlog位置
+            <input type="text" name="binlogPosition">
+         </div>
+
+         <p class="legend">高级设置</p>
+         <div style="height: 300px">
+            <label for="taskName">任务名称</label>
+            <input type="text" name="taskName" id="taskName">
+
+            <label for="masterStorageBaseDir">master文件存储路径</label>
+            <input type="text" name="masterStorageBaseDir" id="masterStorageBaseDir">
+
+            <label for="masterBucketFilePrefix">master文件前缀</label>
+            <input type="text" name="masterBucketFilePrefix" id="masterBucketFilePrefix">
+
+            <label for="maxMasterBucketLengthMB">master文件大小(MB)</label>
+            <input type="number" name="maxMasterBucketLengthMB" id="maxMasterBucketLengthMB">
+
+            <label for="maxMasterFileCount">master文件数目</label>
+            <input type="number" name="maxMasterFileCount" id="maxMasterFileCount">
+
+            <label for="slaveStorageBaseDir">slave文件存储路径</label>
+            <input type="text" name="slaveStorageBaseDir" id="slaveStorageBaseDir">
+
+            <label for="slaveBucketFilePrefix">slave文件前缀</label>
+            <input type="text" name="slaveBucketFilePrefix" id="slaveBucketFilePrefix">
+
+            <label for="maxSlaveBucketLengthMB">slave文件大小(MB)</label>
+            <input type="number" name="maxSlaveBucketLengthMB" id="maxSlaveBucketLengthMB">
+
+            <label for="maxSlaveFileCount">slave文件数目</label>
+            <input type="number" name="maxSlaveFileCount" id="maxSlaveFileCount">
+
+            <label for="preservedDay">文件保存天数</label>
+            <input type="number" name="preservedDay" id="preservedDay">
+
+            <label for="binlogIndexBaseDir">binlog index存储路径</label>
+            <input type="text" name="binlogIndexBaseDir" id="binlogIndexBaseDir">
+         </div>
+
          <input id="syncXml" type="hidden" name="syncXml" value="">
       </form>
    </div>

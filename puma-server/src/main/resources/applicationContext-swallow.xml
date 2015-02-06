@@ -33,7 +33,7 @@
         init-method="init">
         <property name="topic" value="puma_task_event" />
         <property name="clazz"
-            value="com.dianping.puma.core.monitor.ReplicationTaskStatusEvent" />
+            value="com.dianping.puma.core.monitor.ReplicationTaskStatusActionEvent" />
         <property name="listeners">
             <list>
                 <ref bean="serverTaskChecker" />

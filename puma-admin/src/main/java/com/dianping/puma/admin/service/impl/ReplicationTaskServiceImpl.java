@@ -51,4 +51,11 @@ public class ReplicationTaskServiceImpl implements ReplicationTaskService {
 		QueryResults<ReplicationTask> result = replicationTaskDao.find(q);
 		return result.asList();
 	}
+
+	@Override
+	public void remove(ObjectId id) {
+		Query<ReplicationTask> q = replicationTaskDao.getDatastore().createQuery(ReplicationTask.class);
+		q.field("_id").equal(id);
+		replicationTaskDao.deleteByQuery(q);
+	}
 }

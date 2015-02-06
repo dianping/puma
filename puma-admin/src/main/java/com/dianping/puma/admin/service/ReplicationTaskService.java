@@ -10,4 +10,6 @@ public interface ReplicationTaskService {
 	ObjectId save(ReplicationTask replicationTask);
 
 	List<ReplicationTask> findAll();
+
+	void remove(ObjectId id);
 }

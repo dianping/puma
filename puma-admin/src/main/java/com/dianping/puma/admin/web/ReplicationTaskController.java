@@ -8,7 +8,8 @@ import com.dianping.puma.core.replicate.model.config.DBInstanceConfig;
 import com.dianping.puma.core.replicate.model.config.FileSenderConfig;
 import com.dianping.puma.core.replicate.model.config.ServerConfig;
 import com.dianping.puma.core.replicate.model.task.ReplicationTask;
-import com.dianping.puma.core.replicate.model.BinlogInfo;
+import com.dianping.puma.core.model.BinlogInfo;
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,6 +119,28 @@ public class ReplicationTaskController {
 
 		map.put("success", true);
 
+		return GsonUtil.toJson(map);
+	}
+
+	@RequestMapping(value = { "/replicationTask/delete" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String delete(String id) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		try {
+			if (id == null) {
+				throw new IllegalArgumentException("id不能为空");
+			}
+			this.replicationTaskService.remove(new ObjectId(id));
+
+			map.put("success", true);
+		} catch (IllegalArgumentException e) {
+			map.put("success", false);
+			map.put("errorMsg", e.getMessage());
+		} catch (Exception e) {
+			map.put("success", false);
+			map.put("errorMsg", e.getMessage());
+			LOG.error(e.getMessage(), e);
+		}
 		return GsonUtil.toJson(map);
 	}
 }

@@ -122,6 +122,17 @@
 				w.location = w.contextpath + '/pumaSyncServerSetting';
 			}
 		},
+		"openDelReplicationTaskModal" : function(id) {
+			$("#delReplicationTaskModal").modal('show');
+			$("#delId").val(id);
+		},
+		"deleteReplicationTaskDone": function(data) {
+			if (data.success === false) {
+				pumadmin.appError("错误信息", data.errorMsg);
+			} else {
+				w.location = w.contextpath + '/replicationTask';
+			}
+		},
 		"saveBinlog" : function() {
 			var param = new Object();
 			param.binlogFile = $("#binlogFileInput").val();

@@ -14,7 +14,7 @@ import java.util.List;
 public class ReplicationTask extends BaseEntity {
 
 	@Indexed(value = IndexDirection.ASC, name = "name", unique = true, dropDups = true)
-	private long taskId;
+	private String taskId;
 
 	@Indexed(value = IndexDirection.ASC, name = "name", unique = true, dropDups = true)
 	private String taskName;
@@ -33,11 +33,11 @@ public class ReplicationTask extends BaseEntity {
 
 	private String dispatchName;
 
-	public long getTaskId() {
+	public String getTaskId() {
 		return taskId;
 	}
 
-	public void setTaskId(long taskId) {
+	public void setTaskId(String taskId) {
 		this.taskId = taskId;
 	}
 

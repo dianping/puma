@@ -12,8 +12,10 @@
 
                         <thead>
                         <tr>
-                            <th>数据库实例</th>
-                            <th>Puma Server</th>
+                            <th>源数据库实例</th>
+                            <th>主从复制服务器</th>
+                            <th>状态</th>
+                            <th>日志进度</th>
                             <th>操作</th>
                         </tr>
                         </thead>
@@ -23,7 +25,14 @@
                         <tr>
                             <td>${replicationTask.dbInstanceName}</td>
                             <td>${replicationTask.replicationServerName}</td>
+                            <td id="status"></td>
+                            <td id="binlogInfo"></td>
                             <td>
+                                <a id="refresh"
+                                   task-id="$replicationTask.taskId"
+                                   class="btn btn-mini btn-info"
+                                   style="margin-left: 0">刷新
+                                </a>
                                 <a href="javascript:pumadmin.openDelReplicationTaskModal('${replicationTask.id}')">
                                     <span class="label">删除 »</span>
                                 </a>
@@ -62,3 +71,41 @@
     </form>
 </div>
 
+<script type="text/javascript" src="/style/bs/jquery-1.7.2.js"></script>
+<script>
+
+    $("#refresh").click(function() {
+        refreshReplicationTaskStatus($(this).attr('task-id'));
+    });
+
+    function refreshReplicationTaskStatus(taskId) {
+        var url = window.contextpath + '/replicationTask/refresh';
+        $.ajax(url, {
+            type    : 'POST',
+            data    : {taskId: taskId},
+            dataType: 'json',
+            success : showReplicationTaskStatus(taskId),
+            error   : pumadmin.httpError
+        });
+    }
+
+    function showReplicationTaskStatus(taskId) {
+        return function(data) {
+            if (!data.success) {
+                pumadmin.appError('错误信息', data.errorMsg);
+            } else {
+                var status = data.status;
+                var text = status.status;
+                var binlogInfo = status.binlogInfo;
+
+
+                if (!binlogInfo) {
+                    $("#binlogInfo").text('--');
+                } else {
+
+                }
+            }
+        }
+    }
+
+</script>

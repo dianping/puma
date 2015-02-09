@@ -6,7 +6,7 @@ public class ReplicationTaskEvent extends ReplicationEvent {
 
 	private ActionType actionType;
 
-	private long taskId;
+	private String taskId;
 
 	private String taskName;
 	
@@ -18,11 +18,11 @@ public class ReplicationTaskEvent extends ReplicationEvent {
 		this.actionType = actionType;
 	}
 
-	public long getTaskId() {
+	public String getTaskId() {
 		return taskId;
 	}
 
-	public void setTaskId(long taskId) {
+	public void setTaskId(String taskId) {
 		this.taskId = taskId;
 	}
 

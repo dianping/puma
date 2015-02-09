@@ -1,9 +1,11 @@
 package com.dianping.puma.admin.web;
 
+import com.dianping.puma.admin.monitor.ReplicationTaskStatusContainer;
 import com.dianping.puma.admin.service.DBInstanceConfigService;
 import com.dianping.puma.admin.service.ReplicationTaskService;
 import com.dianping.puma.admin.service.ServerConfigService;
 import com.dianping.puma.admin.util.GsonUtil;
+import com.dianping.puma.core.model.replication.ReplicationTaskStatus;
 import com.dianping.puma.core.replicate.model.config.DBInstanceConfig;
 import com.dianping.puma.core.replicate.model.config.FileSenderConfig;
 import com.dianping.puma.core.replicate.model.config.ServerConfig;
@@ -37,6 +39,9 @@ public class ReplicationTaskController {
 
 	@Autowired
 	ServerConfigService serverConfigService;
+
+	@Autowired
+	ReplicationTaskStatusContainer replicationTaskStatusContainer;
 
 	@RequestMapping(value = { "/replicationTask" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
@@ -95,7 +100,7 @@ public class ReplicationTaskController {
 		ReplicationTask replicationTask = new ReplicationTask();
 
 		// @TODO
-		replicationTask.setTaskId(taskId);
+		replicationTask.setTaskId(taskName);
 		replicationTask.setTaskName(taskName);
 
 		replicationTask.setDispatchName("dispatch-" + taskName);
@@ -121,6 +126,24 @@ public class ReplicationTaskController {
 
 		return GsonUtil.toJson(map);
 	}
+
+	@RequestMapping(value = { "/replicationTask/refresh" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public Object refresh(String taskId) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			ReplicationTaskStatus status = replicationTaskStatusContainer.getStatus(taskId);
+			map.put("status", status);
+			map.put("success", true);
+		} catch(Exception e) {
+			map.put("errorMsg", e.getMessage());
+			map.put("success", false);
+		}
+
+		return GsonUtil.toJson(map);
+	}
+
 
 	@RequestMapping(value = { "/replicationTask/delete" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody

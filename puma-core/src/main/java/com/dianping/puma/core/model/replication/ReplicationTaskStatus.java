@@ -66,6 +66,11 @@ public class ReplicationTaskStatus extends TaskStatus {
 	}
 
 	public enum Status {
-		WAITING
+		WAITING,
+		PREPARING,
+		RUNNING,
+		STOPPING,
+		STOPPED,
+		FAILED
 	}
 }

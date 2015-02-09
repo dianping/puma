@@ -19,11 +19,13 @@ import java.util.List;
 
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
+import com.dianping.puma.core.model.replication.ReplicationTaskStatus;
 import com.dianping.puma.core.monitor.Notifiable;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.replicate.model.task.StatusActionType;
 import com.dianping.puma.core.replicate.model.task.StatusExecutorType;
 import com.dianping.puma.datahandler.DataHandler;
+import com.dianping.puma.monitor.ReplicationTaskStatusContainer;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.Dispatcher;
@@ -42,13 +44,14 @@ public abstract class AbstractServer implements Server, Notifiable {
     protected Parser               parser;
     protected DataHandler          dataHandler;
     protected Dispatcher           dispatcher;
-    private long                   serverId = 6789;
+    private String                 serverId;
     protected NotifyService        notifyService;
     private volatile boolean       stop     = false;
     protected BinlogPositionHolder binlogPositionHolder;
 
     protected String               name;
-    
+
+    protected ReplicationTaskStatus.Status taskStatus;
     protected StatusActionType statusActionType;
     
     protected StatusExecutorType statusExecutorType;
@@ -127,7 +130,7 @@ public abstract class AbstractServer implements Server, Notifiable {
     /**
      * @return the serverId
      */
-    public long getServerId() {
+    public String getServerId() {
         return serverId;
     }
 
@@ -135,7 +138,7 @@ public abstract class AbstractServer implements Server, Notifiable {
      * @param serverId
      *            the serverId to set
      */
-    public void setServerId(long serverId) {
+    public void setServerId(String serverId) {
         this.serverId = serverId;
     }
 
@@ -196,18 +199,15 @@ public abstract class AbstractServer implements Server, Notifiable {
 	}
 
     @Override
-	public void setStatusExecutorType(StatusExecutorType statusExecutorType) {
-		this.statusExecutorType = statusExecutorType;
-	}
-
-    @Override
-	public StatusExecutorType getStatusExecutorType() {
-		return statusExecutorType;
-	}
-    
-    @Override
     public List<Sender> getFileSender(){
     	return dispatcher.getSenders();
     }
 
+    public ReplicationTaskStatus.Status getTaskStatus() {
+        return taskStatus;
+    }
+
+    public void setTaskStatus(ReplicationTaskStatus.Status taskStatus) {
+        this.taskStatus = taskStatus;
+    }
 }

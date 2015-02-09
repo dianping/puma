@@ -25,10 +25,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.dianping.cat.Cat;
-import com.dianping.puma.core.monitor.ReplicationTaskReportEvent;
-import com.dianping.puma.core.replicate.model.BinlogInfo;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.replicate.model.task.TaskExecutorStatus;
-import com.dianping.puma.server.AbstractServer;
 import com.dianping.puma.server.DefaultTaskManager;
 import com.dianping.puma.server.ReplicationBasedServer;
 import com.dianping.puma.server.Server;
@@ -141,6 +139,22 @@ public enum SystemStatusContainer {
 		return Collections.unmodifiableMap(clientStatus);
 	}
 
+	public AtomicLong getServerRowUpdateCounter(String taskId) {
+		return serverParsedRowUpdateCount.get(taskId);
+	}
+
+	public AtomicLong getServerRowDeleteCounter(String taskId) {
+		return serverParsedRowDeleteCount.get(taskId);
+	}
+
+	public AtomicLong getServerRowInsertCounter(String taskId) {
+		return serverParsedRowInsertCount.get(taskId);
+	}
+
+	public AtomicLong getServerDdlCounter(String taskId) {
+		return serverParsedDdlCount.get(taskId);
+	}
+
 	public Map<String, AtomicLong> listServerRowUpdateCounters() {
 		return Collections.unmodifiableMap(serverParsedRowUpdateCount);
 	}
@@ -161,10 +175,12 @@ public enum SystemStatusContainer {
 		return Collections.unmodifiableMap(storageStatus);
 	}
 
+	/*
 	public Map<String, TaskExecutorStatus> listExecutorStatus() {
 		setExecutorStatus();
 		return Collections.unmodifiableMap(taskExecutorStatus);
 	}
+
 
 	private void setExecutorStatus(){
 		Map<String, Server> serverTasks = DefaultTaskManager.instance.getServerTasks();
@@ -200,7 +216,7 @@ public enum SystemStatusContainer {
 				executorStatus.setHost(((ReplicationBasedServer)task).getHost());
 				executorStatus.setPort(((ReplicationBasedServer)task).getPort());
 			}
-			executorStatus.setExecutorStatus(task.getStatusExecutorType());
+			executorStatus.setExecutorStatus(task.getTaskStatus());
 			executorStatus.setInsertCount(0);
 			executorStatus.setUpdateCount(0);
 			executorStatus.setDeleteCount(0);
@@ -223,7 +239,7 @@ public enum SystemStatusContainer {
 			}
 			taskExecutorStatus.put(taskName,executorStatus);
 		}
-	}
+	}*/
 
 	public static class ClientStatus {
 		private String target;

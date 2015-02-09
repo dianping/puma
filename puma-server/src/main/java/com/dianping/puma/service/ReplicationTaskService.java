@@ -18,8 +18,8 @@ public interface ReplicationTaskService {
 	ReplicationTask find(ObjectId id);
 	
 	List<ReplicationTask> find(String serverName);
-	
-	ReplicationTask find(long taskId);
+
+	ReplicationTask findByTaskId(String taskId);
 	
 	List<ReplicationTask> findAll();
 	

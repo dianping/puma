@@ -1,5 +1,6 @@
 package com.dianping.puma.monitor;
 
+import com.dianping.puma.core.monitor.ReplicationTaskStatusEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -17,14 +18,15 @@ public class ServerTaskStatusPublisher {
 
 	@Autowired
 	private InitializeServerConfig serverConfig;
+
+	@Autowired
+	private ReplicationTaskStatusContainer replicationTaskStatusContainer;
 	
 	@Scheduled(cron = "0/5 * * * * ?")
 	public void report() throws SendFailedException {
-		ReplicationTaskReportEvent event = TaskExecutorStatusContainer.instance
-				.getReportEvent();
+		ReplicationTaskStatusEvent event = new ReplicationTaskStatusEvent();
+		event.setReplicationTaskStatuses(replicationTaskStatusContainer.getAll());
 		event.setReplicationServerName(serverConfig.getServerName());
-		if (event.getStatusList() != null && event.getStatusList().size() > 0) {
-			statusEventPublisher.publish(event);
-		}
+		statusEventPublisher.publish(event);
 	}
 }

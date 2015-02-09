@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
+import com.dianping.puma.core.model.replication.ReplicationTaskStatus;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +101,7 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 		server.setDefaultBinlogPosition(replicationTask.getBinlogInfo()
 				.getBinlogPosition());
 		server.setBinlogPositionHolder(binlogPositionHolder);
-		server.setStatusExecutorType(StatusExecutorType.WAITING);
+		server.setTaskStatus(ReplicationTaskStatus.Status.WAITING);
 		// parser
 		Parser parser = new DefaultBinlogParser();
 		parser.start();
@@ -267,9 +268,9 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 	public void startEvent(ReplicationTaskStatusActionEvent event) {
 		if (serverTasks != null && serverTasks.containsKey(event.getTaskId())) {
 			Server task = serverTasks.get(event.getTaskId());
-			task.setStatusExecutorType(StatusExecutorType.PREPARING);
+			task.setTaskStatus(ReplicationTaskStatus.Status.PREPARING);
 			startServer(task);
-			task.setStatusExecutorType(StatusExecutorType.RUNNING);
+			task.setTaskStatus(ReplicationTaskStatus.Status.RUNNING);
 		}
 	}
 
@@ -279,15 +280,15 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 			if (serverTasks.containsKey(event.getTaskName())) {
 				Server task = serverTasks.get(event.getTaskName());
 				try {
-					task.setStatusExecutorType(StatusExecutorType.STOPPING);
+					task.setTaskStatus(ReplicationTaskStatus.Status.STOPPING);
 					task.stop();
-					task.setStatusExecutorType(StatusExecutorType.STOPPED);
+					task.setTaskStatus(ReplicationTaskStatus.Status.STOPPED);
 					log.info("Server " + task.getServerName() + " stopped.");
 				} catch (Exception e) {
 					log.error(
 							"Stop Server" + task.getServerName() + " failed.",
 							e);
-					task.setStatusExecutorType(StatusExecutorType.FAILED);
+					task.setTaskStatus(ReplicationTaskStatus.Status.FAILED);
 				}
 			}
 		}
@@ -298,11 +299,11 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 		if (serverTasks != null) {
 			if (serverTasks.containsKey(event.getTaskName())) {
 				Server task = serverTasks.get(event.getTaskName());
-				if (task.getStatusExecutorType() == StatusExecutorType.STOPPED
-						|| task.getStatusExecutorType() == StatusExecutorType.FAILED) {
-					task.setStatusExecutorType(StatusExecutorType.PREPARING);
+				if (task.getTaskStatus() == ReplicationTaskStatus.Status.STOPPED
+						|| task.getTaskStatus() == ReplicationTaskStatus.Status.FAILED) {
+					task.setTaskStatus(ReplicationTaskStatus.Status.PREPARING);
 					startServer(task);
-					task.setStatusExecutorType(StatusExecutorType.RUNNING);
+					task.setTaskStatus(ReplicationTaskStatus.Status.RUNNING);
 				}
 			}
 		}
@@ -311,16 +312,15 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 	@Override
 	public void addEvent(ReplicationTaskEvent event) {
 		if (!serverTasks.containsKey(event.getTaskName())) {
-			ReplicationTask serverTask = replicationTaskService.find(event
-					.getTaskId());
+			ReplicationTask serverTask = replicationTaskService.findByTaskId(event.getTaskId());
 			Server task = null;
 			try {
 				task = construct(serverTask);
 				serverTasks.put(task.getServerName(), task);
-				task.setStatusExecutorType(StatusExecutorType.PREPARING);
+				task.setTaskStatus(ReplicationTaskStatus.Status.PREPARING);
 				initContext(task);
 				startServer(task);
-				task.setStatusExecutorType(StatusExecutorType.RUNNING);
+				task.setTaskStatus(ReplicationTaskStatus.Status.RUNNING);
 				log.info("Server " + task.getServerName()
 						+ " started at binlogFile: "
 						+ task.getContext().getBinlogFileName() + " position: "
@@ -337,9 +337,9 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 		if (serverTasks != null && serverTasks.containsKey(event.getTaskName())) {
 			Server task = serverTasks.get(event.getTaskName());
 			try {
-				task.setStatusExecutorType(StatusExecutorType.STOPPING);
+				task.setTaskStatus(ReplicationTaskStatus.Status.STOPPING);
 				task.stop();
-				task.setStatusExecutorType(StatusExecutorType.STOPPED);
+				task.setTaskStatus(ReplicationTaskStatus.Status.STOPPED);
 				serverTasks.remove(event.getTaskName());
 			} catch (Exception e) {
 				log.error("delete Server" + task.getServerName() + " failed.",
@@ -354,24 +354,24 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 		if (serverTasks != null && serverTasks.containsKey(event.getTaskName())) {
 			Server task = serverTasks.get(event.getTaskName());
 			try {
-				task.setStatusExecutorType(StatusExecutorType.STOPPING);
+				task.setTaskStatus(ReplicationTaskStatus.Status.STOPPING);
 				task.stop();
-				task.setStatusExecutorType(StatusExecutorType.STOPPED);
+				task.setTaskStatus(ReplicationTaskStatus.Status.STOPPED);
 				serverTasks.remove(event.getTaskName());
 			} catch (Exception e) {
 				log.error("delete Server" + task.getServerName() + " failed.",
 						e);
 				e.printStackTrace();
 			}
-			ReplicationTask serverTask = replicationTaskService.find(event
+			ReplicationTask serverTask = replicationTaskService.findByTaskId(event
 					.getTaskId());
 			try {
 				task = construct(serverTask);
 				serverTasks.put(task.getServerName(), task);
-				task.setStatusExecutorType(StatusExecutorType.PREPARING);
+				task.setTaskStatus(ReplicationTaskStatus.Status.PREPARING);
 				initContext(task);
 				startServer(task);
-				task.setStatusExecutorType(StatusExecutorType.RUNNING);
+				task.setTaskStatus(ReplicationTaskStatus.Status.RUNNING);
 
 			} catch (Exception e) {
 				log.error("start Server" + task.getServerName()

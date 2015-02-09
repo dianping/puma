@@ -37,7 +37,7 @@ public class ReplicationTaskServiceImpl implements ReplicationTaskService {
 	}
 
 	@Override
-	public ReplicationTask find(long taskId) {
+	public ReplicationTask findByTaskId(String taskId) {
 		Query<ReplicationTask> q = this.replicationTaskConfigDao.getDatastore()
 				.createQuery(ReplicationTask.class);
 		q.field("taskId").equal(taskId);

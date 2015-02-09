@@ -1,6 +1,6 @@
 package com.dianping.puma.core.replicate.model.task;
 
-import com.dianping.puma.core.replicate.model.BinlogInfo;
+import com.dianping.puma.core.model.BinlogInfo;
 
 public class TaskExecutorStatus {
 

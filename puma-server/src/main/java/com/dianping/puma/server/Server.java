@@ -16,6 +16,7 @@ import java.util.List;
 
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.LifeCycle;
+import com.dianping.puma.core.model.replication.ReplicationTaskStatus;
 import com.dianping.puma.core.replicate.model.task.StatusActionType;
 import com.dianping.puma.core.replicate.model.task.StatusExecutorType;
 import com.dianping.puma.sender.Sender;
@@ -38,22 +39,22 @@ public interface Server extends LifeCycle<Exception> {
 
 	public void setDefaultBinlogPosition(Long binlogFileName);
 
-	public void setServerId(long serverId);
+	public void setServerId(String serverId);
 
-	public long getServerId();
+	public String getServerId();
 
 	public String getServerName();
 
 	public void setBinlogPositionHolder(BinlogPositionHolder holder);
 
+	public ReplicationTaskStatus.Status getTaskStatus();
+
+	public void setTaskStatus(ReplicationTaskStatus.Status taskStatus);
+
 	public void setStatusActionType(StatusActionType statusActionType);
 
 	public StatusActionType getStatusActionType();
 
-	public void setStatusExecutorType(StatusExecutorType statusExecutorType);
-
-	public StatusExecutorType getStatusExecutorType();
-	
 	public List<Sender> getFileSender();
 
 }

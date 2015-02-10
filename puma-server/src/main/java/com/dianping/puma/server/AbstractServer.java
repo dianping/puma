@@ -44,7 +44,7 @@ public abstract class AbstractServer implements Server, Notifiable {
     protected Parser               parser;
     protected DataHandler          dataHandler;
     protected Dispatcher           dispatcher;
-    private String                 serverId;
+    private long                   serverId;
     protected NotifyService        notifyService;
     private volatile boolean       stop     = false;
     protected BinlogPositionHolder binlogPositionHolder;
@@ -130,7 +130,7 @@ public abstract class AbstractServer implements Server, Notifiable {
     /**
      * @return the serverId
      */
-    public String getServerId() {
+    public long getServerId() {
         return serverId;
     }
 
@@ -138,7 +138,7 @@ public abstract class AbstractServer implements Server, Notifiable {
      * @param serverId
      *            the serverId to set
      */
-    public void setServerId(String serverId) {
+    public void setServerId(long serverId) {
         this.serverId = serverId;
     }
 

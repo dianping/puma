@@ -1,7 +1,7 @@
 #set($layout = "shareLayout.htm")
 <div class="container" style="width: 1240px;">
    <div class="row">
-      <div class="span3">
+      <div class="col-md-3">
          <ul class="well nav nav-pills nav-stacked">
             <!--   <ul class="well nav nav-list affix">   -->
             <!--<li class="$!{readmeActive}"><a
@@ -65,9 +65,9 @@
          </ul>
       </div>
       #if(${subPath})
-      <div class="span12">#parse("main/${path}/${subPath}.htm")</div>
+      <div class="col-md-9">#parse("main/${path}/${subPath}.htm")</div>
       #else
-      <div class="span12">#parse("main/${path}/main.htm")</div>
+      <div class="col-md-9">#parse("main/${path}/main.htm")</div>
       #end
    </div>
 </div>

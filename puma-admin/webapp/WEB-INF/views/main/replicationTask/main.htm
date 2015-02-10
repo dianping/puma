@@ -1,5 +1,21 @@
-<div class="container"
-     style="margin: 0 auto; width: 100%; margin-bottom: 50px;">
+<div class="container" style="margin: 0 auto; width: 100%; margin-bottom: 50px;">
+
+    <div class="panel panel-default">
+        <div class="panel-heading">Panel</div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>源数据库实例</th>
+                <th>主从复制服务器</th>
+                <th>状态</th>
+                <th>日志进度</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+
+
     <div>
         <a style="float: right;" href="${rc.contextPath}/replicationTask/create">
             <span>新任务</span>
@@ -25,12 +41,11 @@
                         <tr>
                             <td>${replicationTask.dbInstanceName}</td>
                             <td>${replicationTask.replicationServerName}</td>
-                            <td id="status"></td>
-                            <td id="binlogInfo"></td>
+                            <td class="class-status"></td>
+                            <td class="class-binlogInfo"></td>
                             <td>
-                                <a id="refresh"
-                                   task-id="$replicationTask.taskId"
-                                   class="btn btn-mini btn-info"
+                                <a task-id="$replicationTask.taskId"
+                                   class="btn btn-mini btn-info refresh-button"
                                    style="margin-left: 0">刷新
                                 </a>
                                 <a href="javascript:pumadmin.openDelReplicationTaskModal('${replicationTask.id}')">
@@ -74,7 +89,7 @@
 <script type="text/javascript" src="/style/bs/jquery-1.7.2.js"></script>
 <script>
 
-    $("#refresh").click(function() {
+    $(".refresh-button").click(function() {
         refreshReplicationTaskStatus($(this).attr('task-id'));
     });
 
@@ -90,20 +105,22 @@
     }
 
     function showReplicationTaskStatus(taskId) {
-        return function(data) {
-            if (!data.success) {
-                pumadmin.appError('错误信息', data.errorMsg);
+        return function(response) {
+            if (!response.success) {
+                pumadmin.appError('错误信息', response.err);
             } else {
+                var data = response.data;
+
                 var status = data.status;
-                var text = status.status;
-                var binlogInfo = status.binlogInfo;
+                var binlogInfo = data.binlogInfo;
 
+                var statusText = status;
+                $(".class-status").text(statusText);
 
-                if (!binlogInfo) {
-                    $("#binlogInfo").text('--');
-                } else {
-
-                }
+                var binlogInfoText = "已执行:";
+                binlogInfoText += (binlogInfo === undefined || binlogInfo === null)
+                    ? "--" : (binlogInfo.binlogFile + " " + binlogInfo.binlogPosition);
+                $(".class-binlogInfo").text(binlogInfoText);
             }
         }
     }

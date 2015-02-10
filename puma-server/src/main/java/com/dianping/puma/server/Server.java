@@ -39,9 +39,9 @@ public interface Server extends LifeCycle<Exception> {
 
 	public void setDefaultBinlogPosition(Long binlogFileName);
 
-	public void setServerId(String serverId);
+	public void setServerId(long serverId);
 
-	public String getServerId();
+	public long getServerId();
 
 	public String getServerName();
 

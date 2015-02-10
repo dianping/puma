@@ -17,16 +17,12 @@ public class ServerTaskStatusPublisher {
 	private SwallowEventPublisher statusEventPublisher;
 
 	@Autowired
-	private InitializeServerConfig serverConfig;
-
-	@Autowired
 	private ReplicationTaskStatusContainer replicationTaskStatusContainer;
-	
+
 	@Scheduled(cron = "0/5 * * * * ?")
 	public void report() throws SendFailedException {
 		ReplicationTaskStatusEvent event = new ReplicationTaskStatusEvent();
 		event.setReplicationTaskStatuses(replicationTaskStatusContainer.getAll());
-		event.setReplicationServerName(serverConfig.getServerName());
 		statusEventPublisher.publish(event);
 	}
 }

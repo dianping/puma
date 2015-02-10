@@ -9,6 +9,7 @@ import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.monitor.ReplicationTaskReportEvent;
 import com.dianping.puma.core.replicate.model.task.TaskExecutorStatus;
 
+/*
 public enum TaskExecutorStatusContainer {
 	instance;
 	
@@ -22,4 +23,4 @@ public enum TaskExecutorStatusContainer {
 		event.setStatusList(taskStatusList);
 		return event;
 	}
-}
+}*/

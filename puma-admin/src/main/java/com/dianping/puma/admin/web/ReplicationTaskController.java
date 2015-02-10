@@ -133,11 +133,12 @@ public class ReplicationTaskController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			ReplicationTaskStatus status = replicationTaskStatusContainer.getStatus(taskId);
-			map.put("status", status);
+			ReplicationTaskStatus taskStatus = replicationTaskStatusContainer.get(taskId);
+
+			map.put("data", taskStatus);
 			map.put("success", true);
 		} catch(Exception e) {
-			map.put("errorMsg", e.getMessage());
+			map.put("err", e.getMessage());
 			map.put("success", false);
 		}
 

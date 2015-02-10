@@ -90,7 +90,7 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 		ReplicationBasedServer server = new ReplicationBasedServer();
 		server.setNotifyService(notifyService);
 		server.setName(replicationTask.getTaskName());
-		server.setServerId(replicationTask.getTaskId());
+		server.setServerId(replicationTask.getTaskId().hashCode());
 		server.setHost(replicationTask.getDbInstanceHost().getHost());
 		server.setPort(replicationTask.getDbInstanceHost().getPort());
 		server.setUser(replicationTask.getDbInstanceHost().getUsername());

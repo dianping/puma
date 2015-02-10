@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service("replicationTaskStatusContainer")
 public class ReplicationTaskStatusContainer implements EventListener {
 
-	private ConcurrentHashMap<String, ReplicationTaskStatus> statusMap
+	private ConcurrentHashMap<String, ReplicationTaskStatus> taskStatusMap
 			= new ConcurrentHashMap<String, ReplicationTaskStatus>();
 
 	@Autowired
@@ -31,20 +31,27 @@ public class ReplicationTaskStatusContainer implements EventListener {
 				ReplicationTaskStatus replicationTaskStatus = new ReplicationTaskStatus();
 				replicationTaskStatus.setTaskId(replicationTask.getTaskId());
 				replicationTaskStatus.setStatus(ReplicationTaskStatus.Status.WAITING);
-				statusMap.put(replicationTask.getTaskId(), replicationTaskStatus);
+				taskStatusMap.put(replicationTask.getTaskId(), replicationTaskStatus);
 			}
 		}
 	}
 
-	public void updateStatus(ReplicationTaskStatus replicationTaskStatus) {
-		if (statusMap.get(replicationTaskStatus.getTaskId()) != null) {
-			replicationTaskStatus.setGmtCreate(new Date());
-			statusMap.put(replicationTaskStatus.getTaskId(), replicationTaskStatus);
-		}
+	public ReplicationTaskStatus get(String taskId) {
+		return taskStatusMap.get(taskId);
 	}
 
-	public ReplicationTaskStatus getStatus(String taskId) {
-		return statusMap.get(taskId);
+	public void add(String taskId) {
+		ReplicationTaskStatus taskStatus = new ReplicationTaskStatus();
+		taskStatus.setGmtCreate(new Date());
+		taskStatus.setTaskId(taskId);
+		taskStatus.setStatus(ReplicationTaskStatus.Status.WAITING);
+		taskStatusMap.put(taskId, taskStatus);
+	}
+
+	public void update(ReplicationTaskStatus taskStatus) {
+		if (taskStatusMap.get(taskStatus.getTaskId()) != null) {
+			taskStatusMap.put(taskStatus.getTaskId(), taskStatus);
+		}
 	}
 
 	@Override
@@ -55,7 +62,7 @@ public class ReplicationTaskStatusContainer implements EventListener {
 
 			if (replicationTaskStatuses != null) {
 				for (ReplicationTaskStatus replicationTaskStatus: replicationTaskStatuses) {
-					updateStatus(replicationTaskStatus);
+					update(replicationTaskStatus);
 				}
 			}
 		}

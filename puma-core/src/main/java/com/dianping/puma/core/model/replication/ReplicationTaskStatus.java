@@ -71,6 +71,7 @@ public class ReplicationTaskStatus extends TaskStatus {
 		RUNNING,
 		STOPPING,
 		STOPPED,
-		FAILED
+		FAILED,
+		ERROR
 	}
 }

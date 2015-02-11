@@ -23,7 +23,7 @@
          <div class="form-group">
             <label for="serverName" class="control-label col-md-2">主从复制服务器</label>
             <div class="col-md-7">
-               <select id="serverName" name="serverName" class="form-control">
+               <select id="serverName" name="replicationServerName" class="form-control">
                   #foreach($serverConfig in ${serverConfigs})
                   <option value="${serverConfig.name}">${serverConfig.name}</option>
                   #end
@@ -50,7 +50,7 @@
          <div class="form-group">
             <label for="taskName" class="control-label col-md-2">任务名称</label>
             <div class="col-md-7">
-               <input id="taskName" name="taskName" type="text" class="form-control">
+               <input id="taskName" name="taskId" type="text" class="form-control">
             </div>
          </div>
 

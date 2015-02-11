@@ -70,7 +70,11 @@ public class ReplicationTaskController {
 
 	@RequestMapping(value = { "/replicationTask/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(String dbInstanceName, String serverName, String binlogFile, String binlogPosition) {
+	public String createPost(String dbInstanceName, String replicationServerName, String binlogFile,
+			String binlogPosition, String taskId, String masterStorageBaseDir, String masterBucketFilePrefix,
+			int maxMasterBucketLengthMB, int maxMasterFileCount, String slaveStorageBaseDir,
+			String slaveBucketFilePrefix, int maxSlaveBucketLengthMB, int maxSlaveFileCount,
+			int preservedDay, String binlogIndexBaseDir) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
@@ -78,32 +82,28 @@ public class ReplicationTaskController {
 		binlogInfo.setBinlogFile(binlogFile);
 		binlogInfo.setBinlogPosition(Long.parseLong(binlogPosition));
 
-		Timestamp timestamp = new Timestamp((new Date()).getTime());
-		long taskId = timestamp.getTime();
-		String taskName = String.valueOf(taskId);
-
 		List<FileSenderConfig> fileSenderConfigs = new ArrayList<FileSenderConfig>();
 		FileSenderConfig fileSenderConfig = new FileSenderConfig();
-		fileSenderConfig.setMasterBucketFilePrefix("bucket-");
-		fileSenderConfig.setMaxMasterBucketLengthMB(1000);
-		fileSenderConfig.setStorageMasterBaseDir("/data/appdatas/puma/storage/master/" + taskName);
-		fileSenderConfig.setSlaveBucketFilePrefix("bucket-");
-		fileSenderConfig.setMaxSlaveBucketLengthMB(1000);
-		fileSenderConfig.setStorageSlaveBaseDir("/data/appdatas/puma/storage/slave/" + taskName);
-		fileSenderConfig.setFileSenderName("fileSender-" + taskName);
-		fileSenderConfig.setStorageName("storage-" + taskName);
-		fileSenderConfig.setPreservedDay(2);
-		fileSenderConfig.setMaxMasterFileCount(50);
-		fileSenderConfig.setBinlogIndexBaseDir("/data/appdatas/puma/binlogIndex/" + taskName);
+		fileSenderConfig.setMasterBucketFilePrefix(masterBucketFilePrefix);
+		fileSenderConfig.setMaxMasterBucketLengthMB(maxMasterBucketLengthMB);
+		fileSenderConfig.setStorageMasterBaseDir(masterStorageBaseDir);
+		fileSenderConfig.setSlaveBucketFilePrefix(slaveBucketFilePrefix);
+		fileSenderConfig.setMaxSlaveBucketLengthMB(maxSlaveBucketLengthMB);
+		fileSenderConfig.setStorageSlaveBaseDir(slaveStorageBaseDir);
+		fileSenderConfig.setFileSenderName("fileSender-" + taskId);
+		fileSenderConfig.setStorageName("storage-" + taskId);
+		fileSenderConfig.setPreservedDay(preservedDay);
+		fileSenderConfig.setMaxMasterFileCount(maxMasterFileCount);
+		fileSenderConfig.setBinlogIndexBaseDir(binlogIndexBaseDir);
 		fileSenderConfigs.add(fileSenderConfig);
 
 		ReplicationTask replicationTask = new ReplicationTask();
 
 		// @TODO
-		replicationTask.setTaskId(taskName);
-		replicationTask.setTaskName(taskName);
+		replicationTask.setTaskId(taskId);
+		replicationTask.setTaskName(taskId);
 
-		replicationTask.setDispatchName("dispatch-" + taskName);
+		replicationTask.setDispatchName("dispatch-" + taskId);
 		replicationTask.setFileSenderConfigs(fileSenderConfigs);
 
 		replicationTask.setDbInstanceName(dbInstanceName);
@@ -111,7 +111,7 @@ public class ReplicationTaskController {
 		replicationTask.setDbInstanceHost(dbInstanceConfig.getDbInstanceHost());
 		replicationTask.setDbInstanceMetaHost(dbInstanceConfig.getDbInstanceMetaHost());
 
-		replicationTask.setReplicationServerName(serverName);
+		replicationTask.setReplicationServerName(replicationServerName);
 		replicationTask.setBinlogInfo(binlogInfo);
 
 		try {

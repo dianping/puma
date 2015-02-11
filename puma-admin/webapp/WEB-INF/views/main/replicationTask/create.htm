@@ -11,7 +11,7 @@
 
          <div class="form-group">
             <label for="dbInstanceName" class="control-label col-md-2">源数据库</label>
-            <div class="col-md-6">
+            <div class="col-md-7">
                <select id="dbInstanceName" name="dbInstanceName" class="form-control">
                   #foreach($dbInstanceConfig in ${dbInstanceConfigs})
                   <option value="${dbInstanceConfig.name}">${dbInstanceConfig.name}</option>
@@ -22,7 +22,7 @@
 
          <div class="form-group">
             <label for="serverName" class="control-label col-md-2">主从复制服务器</label>
-            <div class="col-md-6">
+            <div class="col-md-7">
                <select id="serverName" name="serverName" class="form-control">
                   #foreach($serverConfig in ${serverConfigs})
                   <option value="${serverConfig.name}">${serverConfig.name}</option>
@@ -33,14 +33,14 @@
 
          <div class="form-group">
             <label for="binlogFile" class="control-label col-md-2">日志文件</label>
-            <div class="col-md-6">
+            <div class="col-md-7">
                <input id="binlogFile" name="binlogFile" type="text" class="form-control">
             </div>
          </div>
 
          <div class="form-group">
             <label for="binlogPosition" class="control-label col-md-2">日志位置</label>
-            <div class="col-md-6">
+            <div class="col-md-7">
                <input id="binlogPosition" name="binlogPosition" type="text" class="form-control">
             </div>
          </div>
@@ -49,77 +49,77 @@
 
          <div class="form-group">
             <label for="taskName" class="control-label col-md-2">任务名称</label>
-            <div class="col-md-6">
+            <div class="col-md-7">
                <input id="taskName" name="taskName" type="text" class="form-control">
             </div>
          </div>
 
          <div class="form-group">
             <label for="masterStorageBaseDir" class="control-label col-md-2">主存储文件路径</label>
-            <div class="col-md-6">
+            <div class="col-md-7">
                <input id="masterStorageBaseDir" name="masterStorageBaseDir" type="text" class="form-control">
             </div>
          </div>
 
          <div class="form-group">
             <label for="masterBucketFilePrefix" class="control-label col-md-2">主存储文件前缀</label>
-            <div class="col-md-6">
+            <div class="col-md-7">
                <input id="masterBucketFilePrefix" name="masterBucketFilePrefix" type="text" class="form-control">
             </div>
          </div>
 
          <div class="form-group">
             <label for="maxMasterBucketLengthMB" class="control-label col-md-2">主存储文件大小</label>
-            <div class="col-md-6">
+            <div class="col-md-7">
                <input id="maxMasterBucketLengthMB" name="maxMasterBucketLengthMB" type="text" class="form-control">
             </div>
          </div>
 
          <div class="form-group">
             <label for="maxMasterFileCount" class="control-label col-md-2">主存储文件数目</label>
-            <div class="col-md-6">
+            <div class="col-md-7">
                <input id="maxMasterFileCount" name="maxMasterFileCount" type="text" class="form-control">
             </div>
          </div>
 
          <div class="form-group">
             <label for="slaveStorageBaseDir" class="control-label col-md-2">副存储文件路径</label>
-            <div class="col-md-6">
+            <div class="col-md-7">
                <input id="slaveStorageBaseDir" name="slaveStorageBaseDir" type="text" class="form-control">
             </div>
          </div>
 
          <div class="form-group">
             <label for="slaveBucketFilePrefix" class="control-label col-md-2">副存储文件前缀</label>
-            <div class="col-md-6">
+            <div class="col-md-7">
                <input id="slaveBucketFilePrefix" name="slaveBucketFilePrefix" type="text" class="form-control">
             </div>
          </div>
 
          <div class="form-group">
             <label for="maxSlaveBucketLengthMB" class="control-label col-md-2">副存储文件大小</label>
-            <div class="col-md-6">
+            <div class="col-md-7">
                <input id="maxSlaveBucketLengthMB" name="maxSlaveBucketLengthMB" type="text" class="form-control">
             </div>
          </div>
 
          <div class="form-group">
             <label for="maxSlaveFileCount" class="control-label col-md-2">副存储文件数目</label>
-            <div class="col-md-6">
+            <div class="col-md-7">
                <input id="maxSlaveFileCount" name="maxSlaveFileCount" type="text" class="form-control">
             </div>
          </div>
 
          <div class="form-group">
             <label for="preservedDay" class="control-label col-md-2">存储文件保存天数</label>
-            <div class="col-md-6">
+            <div class="col-md-7">
                <input id="preservedDay" name="preservedDay" type="number" class="form-control">
             </div>
          </div>
 
          <div class="form-group">
             <label for="binlogIndexBaseDir" class="control-label col-md-2">日志索引保存路径</label>
-            <div class="col-md-6">
+            <div class="col-md-7">
                <input id="binlogIndexBaseDir" name="binlogIndexBaseDir" type="text" class="form-control">
             </div>
          </div>
@@ -128,6 +128,8 @@
       </form>
    </div>
 </div>
+<script type="text/javascript" src="/style/bs/jquery-2.1.3.js"></script>
+<script type="text/javascript" src="/js/replication-task/create.js"></script>
 <script>
    function submit0(form) {
       //$("#syncXml").val(window.xmlEditor.getValue());

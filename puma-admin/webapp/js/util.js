@@ -1,5 +1,5 @@
 function removeTableColors(table) {
-    table.removeClass("avtive");
+    table.removeClass("active");
     table.removeClass("success");
     table.removeClass("warning");
     table.removeClass("danger");

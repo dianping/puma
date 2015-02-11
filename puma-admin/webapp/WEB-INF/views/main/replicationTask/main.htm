@@ -1,11 +1,13 @@
-<div class="container" style="margin: 0 auto; width: 100%; margin-bottom: 50px;">
+<div class="container-fluid">
 
-    <div class="panel panel-default">
-        <div class="panel-heading container-fluid">
-            <a style="float:right" href="${rc.contextPath}/replicationTask/create">添加新任务</a>
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <a class="glyphicon glyphicon-plus"
+               style="float:right; color:white"
+               href="${rc.contextPath}/replicationTask/create"></a>
             主从复制任务
         </div>
-        <table class="table table-hover">
+        <table id="replicationTaskTable" class="table table-hover">
             <thead>
             <tr>
                 <th class="col-md-2">数据库</th>
@@ -25,14 +27,11 @@
                 <td id="binlogInfo-$replicationTask.taskId"></td>
                 <td>
                     <a id="refresh-$replicationTask.taskId"
-                       role="button"
-                       class="btn-xs glyphicon glyphicon-repeat refresh-btn"
-                       task-id="$replicationTask.taskId" ></a>
+                       class="glyphicon glyphicon-repeat"
+                       href="javascript:updateReplicationTask(${replicationTask.taskId});"></a>
                     <a id="delete-$replicationTask.taskId"
-                       role="button"
-                       class="btn-xs glyphicon glyphicon-remove delete-btn"
-                       task-id="$replicationTask.taskId"
-                       data-toggle="modal" data-target="#deleteReplicationTaskModal"></a>
+                       class="glyphicon glyphicon-remove"
+                       href="javascript:removeReplicationTaskModal(${replicationTask.taskId})"></a>
                 </td>
             </tr>
             #end
@@ -42,7 +41,7 @@
 </div>
 
 <div class="modal fade"
-     id="deleteReplicationTaskModal"
+     id="removeReplicationTaskModal"
      tabindex="-1"
      role="dialog"
      aria-hidden="true">
@@ -74,93 +73,4 @@
     </div>
 </div>
 
-<!--div aria-hidden="true" data-backdrop="true" role="dialog" tabindex="-1"
-     class="modal fade" id="delReplicationTaskModal">
-    <div class="modal-header">
-        <button aria-hidden="true" data-dismiss="modal" class="close"
-                type="button">×</button>
-        <h3>删除配置</h3>
-    </div>
-    <form action="${rc.contextPath}/replicationTask/delete"
-          method="post" onsubmit="pumadmin.submit(this);return false;"
-          onSuccess="deleteReplicationTaskDone">
-        <div class="modal-body">
-            <p style="text-align: center;">
-                <i class="icon-warning-sign"></i> 您是否确定要删除该配置 ？
-            </p>
-            <input id="delId" name="id" type="hidden" value="">
-        </div>
-        <div class="modal-footer">
-            <button type="submit" class="btn btn-primary">确定</button>
-            <button data-dismiss="modal" class="btn">取消</button>
-        </div>
-    </form>
-</div-->
-
-<script type="text/javascript" src="/style/bs/jquery-2.1.3.js"></script>
-<script type="text/javascript" src="/js/util.js"></script>
-<script>
-
-    /*
-    $(".delete-btn").click(function() {
-        $("#delReplicationTaskModal").modal('show');
-        $("#delId").val($(this).attr('task-id'));
-    });*/
-
-    $(".refresh-btn").click(function() {
-        refreshReplicationTaskStatus($(this).attr('task-id'));
-    });
-
-    function refreshReplicationTaskStatus(taskId) {
-        var url = window.contextpath + '/replicationTask/refresh';
-        $.ajax(url, {
-            type    : 'POST',
-            data    : {taskId: taskId},
-            dataType: 'json',
-            success : showReplicationTaskStatus(taskId),
-            error   : pumadmin.httpError
-        });
-    }
-
-    function showReplicationTaskStatus(taskId) {
-        var trTaskId         = '#tr-' + taskId;
-        var statusTaskId     = '#status-' + taskId;
-        var binlogInfoTaskId = '#binlogInfo-' + taskId;
-
-        return function(response) {
-            if (!response.success) {
-                pumadmin.appError('错误信息', response.err);
-            } else {
-                removeTableColors($(trTaskId));
-
-                var data       = response.data;
-                var status     = data.status;
-                var binlogInfo = data.binlogInfo;
-
-                var statusText = "";
-                var trClass    = "";
-                var binlogInfoText = "已执行：" + binlogInfo.binlogFile + " | " + binlogInfo.binlogPosition;
-
-                switch (status) {
-                    case 'WAITING':
-                        statusText = "等待中";
-                        trClass = "warning";
-                        break;
-                    case 'RUNNING':
-                        statusText = "运行中";
-                        trClass = "";
-                        break;
-                    case 'FAILURE':
-                        statusText = "失败";
-                        trClass = "danger";
-                        break;
-                }
-
-                $(trTaskId).addClass(trClass);
-                $(statusTaskId).text(statusText);
-                $(binlogInfoTaskId).text(binlogInfoText);
-            }
-        }
-    }
-
-</script>
+<script type="text/javascript" src="js/replication-task/main.js"></script>

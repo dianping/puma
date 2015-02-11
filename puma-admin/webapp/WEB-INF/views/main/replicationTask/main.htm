@@ -1,70 +1,81 @@
 <div class="container" style="margin: 0 auto; width: 100%; margin-bottom: 50px;">
 
     <div class="panel panel-default">
-        <div class="panel-heading">Panel</div>
-        <table class="table">
+        <div class="panel-heading container-fluid">
+            <a style="float:right" href="${rc.contextPath}/replicationTask/create">添加新任务</a>
+            主从复制任务
+        </div>
+        <table class="table table-hover">
             <thead>
             <tr>
-                <th>源数据库实例</th>
-                <th>主从复制服务器</th>
-                <th>状态</th>
-                <th>日志进度</th>
-                <th>操作</th>
+                <th class="col-md-2">数据库</th>
+                <th class="col-md-2">服务器</th>
+                <th class="col-md-2">状态</th>
+                <th class="col-md-4">日志进度</th>
+                <th class="col-md-2">操作</th>
             </tr>
             </thead>
+
+            <tbody>
+            #foreach($replicationTask in ${replicationTasks})
+            <tr id="tr-$replicationTask.taskId">
+                <td>${replicationTask.dbInstanceName}</td>
+                <td>${replicationTask.replicationServerName}</td>
+                <td id="status-$replicationTask.taskId"></td>
+                <td id="binlogInfo-$replicationTask.taskId"></td>
+                <td>
+                    <a id="refresh-$replicationTask.taskId"
+                       role="button"
+                       class="btn-xs glyphicon glyphicon-repeat refresh-btn"
+                       task-id="$replicationTask.taskId" ></a>
+                    <a id="delete-$replicationTask.taskId"
+                       role="button"
+                       class="btn-xs glyphicon glyphicon-remove delete-btn"
+                       task-id="$replicationTask.taskId"
+                       data-toggle="modal" data-target="#deleteReplicationTaskModal"></a>
+                </td>
+            </tr>
+            #end
+            </tbody>
         </table>
     </div>
+</div>
 
+<div class="modal fade"
+     id="deleteReplicationTaskModal"
+     tabindex="-1"
+     role="dialog"
+     aria-hidden="true">
 
-    <div>
-        <a style="float: right;" href="${rc.contextPath}/replicationTask/create">
-            <span>新任务</span>
-        </a>
-        <p class="legend">已有的配置</p>
-        <div id="container" style="height: 600px;">
-            <div class="container-fluid">
-                <div class="row-fluid">
-                    <table class="table table-hover table-striped">
-
-                        <thead>
-                        <tr>
-                            <th>源数据库实例</th>
-                            <th>主从复制服务器</th>
-                            <th>状态</th>
-                            <th>日志进度</th>
-                            <th>操作</th>
-                        </tr>
-                        </thead>
-
-                        <tbody>
-                        #foreach($replicationTask in ${replicationTasks})
-                        <tr>
-                            <td>${replicationTask.dbInstanceName}</td>
-                            <td>${replicationTask.replicationServerName}</td>
-                            <td class="class-status"></td>
-                            <td class="class-binlogInfo"></td>
-                            <td>
-                                <a task-id="$replicationTask.taskId"
-                                   class="btn btn-mini btn-info refresh-button"
-                                   style="margin-left: 0">刷新
-                                </a>
-                                <a href="javascript:pumadmin.openDelReplicationTaskModal('${replicationTask.id}')">
-                                    <span class="label">删除 »</span>
-                                </a>
-                            </td>
-                        </tr>
-                        #end
-                        </tbody>
-
-                    </table>
-                </div>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h3 class="modal-title">删除任务</h3>
             </div>
+
+            <form action="${rc.contextPath}/replicationTask/delete"
+                  method="post" onsubmit="pumadmin.submit(this);return false;"
+                  onSuccess="deleteReplicationTaskDone">
+                <div class="modal-body">
+                    <p style="text-align: center;">
+                        <i class="icon-warning-sign"></i> 您是否确定要删除该配置 ？
+                    </p>
+                    <input id="delId" name="id" type="hidden" value="">
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">确定</button>
+                    <button data-dismiss="modal" class="btn">取消</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-<div aria-hidden="true" data-backdrop="true" role="dialog" tabindex="-1"
-     class="modal hide" id="delReplicationTaskModal" style="display: none;">
+<!--div aria-hidden="true" data-backdrop="true" role="dialog" tabindex="-1"
+     class="modal fade" id="delReplicationTaskModal">
     <div class="modal-header">
         <button aria-hidden="true" data-dismiss="modal" class="close"
                 type="button">×</button>
@@ -84,12 +95,19 @@
             <button data-dismiss="modal" class="btn">取消</button>
         </div>
     </form>
-</div>
+</div-->
 
-<script type="text/javascript" src="/style/bs/jquery-1.7.2.js"></script>
+<script type="text/javascript" src="/style/bs/jquery-2.1.3.js"></script>
+<script type="text/javascript" src="/js/util.js"></script>
 <script>
 
-    $(".refresh-button").click(function() {
+    /*
+    $(".delete-btn").click(function() {
+        $("#delReplicationTaskModal").modal('show');
+        $("#delId").val($(this).attr('task-id'));
+    });*/
+
+    $(".refresh-btn").click(function() {
         refreshReplicationTaskStatus($(this).attr('task-id'));
     });
 
@@ -105,22 +123,42 @@
     }
 
     function showReplicationTaskStatus(taskId) {
+        var trTaskId         = '#tr-' + taskId;
+        var statusTaskId     = '#status-' + taskId;
+        var binlogInfoTaskId = '#binlogInfo-' + taskId;
+
         return function(response) {
             if (!response.success) {
                 pumadmin.appError('错误信息', response.err);
             } else {
-                var data = response.data;
+                removeTableColors($(trTaskId));
 
-                var status = data.status;
+                var data       = response.data;
+                var status     = data.status;
                 var binlogInfo = data.binlogInfo;
 
-                var statusText = status;
-                $(".class-status").text(statusText);
+                var statusText = "";
+                var trClass    = "";
+                var binlogInfoText = "已执行：" + binlogInfo.binlogFile + " | " + binlogInfo.binlogPosition;
 
-                var binlogInfoText = "已执行:";
-                binlogInfoText += (binlogInfo === undefined || binlogInfo === null)
-                    ? "--" : (binlogInfo.binlogFile + " " + binlogInfo.binlogPosition);
-                $(".class-binlogInfo").text(binlogInfoText);
+                switch (status) {
+                    case 'WAITING':
+                        statusText = "等待中";
+                        trClass = "warning";
+                        break;
+                    case 'RUNNING':
+                        statusText = "运行中";
+                        trClass = "";
+                        break;
+                    case 'FAILURE':
+                        statusText = "失败";
+                        trClass = "danger";
+                        break;
+                }
+
+                $(trTaskId).addClass(trClass);
+                $(statusTaskId).text(statusText);
+                $(binlogInfoTaskId).text(binlogInfoText);
             }
         }
     }

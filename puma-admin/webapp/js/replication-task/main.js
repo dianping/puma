@@ -51,9 +51,9 @@ function setReplicationTaskStatus(taskId, status) {
   }
 
   removeTableColors($("#replicationTaskTable"));
-  $("#tr-" + taskId).addClass(colorClass);
-  $("#status-" + taskId).text(textStatus);
-  $("#binlogInfo-" + taskId).text(textBinlogInfo);
+  $("#" + escape("tr-" + taskId)).addClass(colorClass);
+  $("#" + escape("status-" + taskId)).text(textStatus);
+  $('#' + escape("binlogInfo-" + taskId)).text(textBinlogInfo);
 }
 
 /**
@@ -76,5 +76,27 @@ function updateReplicationTask(taskId) {
     },
     error   : pumadmin.httpError
   });
+}
+
+function removeReplicationTask() {
+  var url = window.contextpath + 'replicationTask/remove';
+  $.ajax(url, {
+    type    : 'POST',
+    data    : {taskId: $("#removeReplicationTaskInput").val()},
+    dataType: 'json',
+    success : function(response) {
+      if (!response.success) {
+        pumadmin.appError('错误信息', response.err);
+      } else {
+        window.location = window.contextpath + '/replicationTask';
+      }
+    },
+    error   : pumadmin.httpError
+  });
+}
+
+function removeReplicationTaskModal(taskId) {
+  $("#removeReplicationTaskInput").val(taskId);
+  $("#removeReplicationTaskModal").modal('show');
 }
 

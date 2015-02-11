@@ -28,9 +28,7 @@ public class ReplicationTaskStatusContainer implements EventListener {
 		List<ReplicationTask> replicationTasks = replicationTaskService.findAll();
 		if (replicationTasks != null) {
 			for (ReplicationTask replicationTask: replicationTasks) {
-				ReplicationTaskStatus replicationTaskStatus = new ReplicationTaskStatus();
-				replicationTaskStatus.setTaskId(replicationTask.getTaskId());
-				replicationTaskStatus.setStatus(ReplicationTaskStatus.Status.WAITING);
+				ReplicationTaskStatus replicationTaskStatus = new ReplicationTaskStatus(replicationTask.getTaskId());
 				taskStatusMap.put(replicationTask.getTaskId(), replicationTaskStatus);
 			}
 		}
@@ -41,11 +39,12 @@ public class ReplicationTaskStatusContainer implements EventListener {
 	}
 
 	public void add(String taskId) {
-		ReplicationTaskStatus taskStatus = new ReplicationTaskStatus();
-		taskStatus.setGmtCreate(new Date());
-		taskStatus.setTaskId(taskId);
-		taskStatus.setStatus(ReplicationTaskStatus.Status.WAITING);
+		ReplicationTaskStatus taskStatus = new ReplicationTaskStatus(taskId);
 		taskStatusMap.put(taskId, taskStatus);
+	}
+
+	public void remove(String taskId) {
+		taskStatusMap.remove(taskId);
 	}
 
 	public void update(ReplicationTaskStatus taskStatus) {

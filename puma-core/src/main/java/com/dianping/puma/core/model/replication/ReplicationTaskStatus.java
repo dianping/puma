@@ -3,6 +3,8 @@ package com.dianping.puma.core.model.replication;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.TaskStatus;
 
+import java.util.Date;
+
 public class ReplicationTaskStatus extends TaskStatus {
 
 	private Status status;
@@ -16,6 +18,13 @@ public class ReplicationTaskStatus extends TaskStatus {
 	private long rowsUpdate;
 
 	private long ddls;
+
+	public ReplicationTaskStatus(String taskId) {
+		super.setTaskId(taskId);
+		super.setGmtCreate(new Date());
+
+		status = Status.CONNECTING;
+	}
 
 	public Status getStatus() {
 		return status;
@@ -66,6 +75,7 @@ public class ReplicationTaskStatus extends TaskStatus {
 	}
 
 	public enum Status {
+		CONNECTING,
 		WAITING,
 		PREPARING,
 		RUNNING,

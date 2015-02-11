@@ -11,5 +11,5 @@ public interface ReplicationTaskService {
 
 	List<ReplicationTask> findAll();
 
-	void remove(ObjectId id);
+	void remove(String taskId);
 }

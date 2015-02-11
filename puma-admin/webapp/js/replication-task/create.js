@@ -18,7 +18,7 @@ function setTaskId() {
     var dbInstanceName = $("#dbInstanceName").val();
     var taskServerName = $("#serverName").val();
 
-    var taskId = dbInstanceName + '#' + taskServerName;
+    var taskId = dbInstanceName + '@' + taskServerName;
     $("#taskName").val(taskId);
     setStorageDefaultValue(taskId);
 }

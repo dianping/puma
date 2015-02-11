@@ -54,9 +54,9 @@ public class ReplicationTaskServiceImpl implements ReplicationTaskService {
 	}
 
 	@Override
-	public void remove(ObjectId id) {
+	public void remove(String taskId) {
 		Query<ReplicationTask> q = replicationTaskDao.getDatastore().createQuery(ReplicationTask.class);
-		q.field("_id").equal(id);
+		q.field("taskId").equal(taskId);
 		replicationTaskDao.deleteByQuery(q);
 	}
 }

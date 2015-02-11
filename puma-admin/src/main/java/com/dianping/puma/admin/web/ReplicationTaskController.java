@@ -116,13 +116,14 @@ public class ReplicationTaskController {
 
 		try {
 			this.replicationTaskService.save(replicationTask);
+			map.put("success", true);
+
+			replicationTaskStatusContainer.add(taskId);
 		}
 		catch(Exception e) {
 			map.put("success", false);
-			map.put("errorMsg", e.getMessage());
+			map.put("err", e.getMessage());
 		}
-
-		map.put("success", true);
 
 		return GsonUtil.toJson(map);
 	}
@@ -146,23 +147,24 @@ public class ReplicationTaskController {
 	}
 
 
-	@RequestMapping(value = { "/replicationTask/delete" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = { "/replicationTask/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String delete(String id) {
+	public String remove(String taskId) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		try {
-			if (id == null) {
+			if (taskId == null) {
 				throw new IllegalArgumentException("id不能为空");
 			}
-			this.replicationTaskService.remove(new ObjectId(id));
-
+			this.replicationTaskService.remove(taskId);
 			map.put("success", true);
+
+			replicationTaskStatusContainer.remove(taskId);
 		} catch (IllegalArgumentException e) {
 			map.put("success", false);
-			map.put("errorMsg", e.getMessage());
+			map.put("err", e.getMessage());
 		} catch (Exception e) {
 			map.put("success", false);
-			map.put("errorMsg", e.getMessage());
+			map.put("err", e.getMessage());
 			LOG.error(e.getMessage(), e);
 		}
 		return GsonUtil.toJson(map);

@@ -28,10 +28,10 @@
                 <td>
                     <a id="refresh-$replicationTask.taskId"
                        class="glyphicon glyphicon-repeat"
-                       href="javascript:updateReplicationTask(${replicationTask.taskId});"></a>
+                       href="javascript:updateReplicationTask('${replicationTask.taskId}');"></a>
                     <a id="delete-$replicationTask.taskId"
                        class="glyphicon glyphicon-remove"
-                       href="javascript:removeReplicationTaskModal(${replicationTask.taskId})"></a>
+                       href="javascript:removeReplicationTaskModal('${replicationTask.taskId}')"></a>
                 </td>
             </tr>
             #end
@@ -40,11 +40,8 @@
     </div>
 </div>
 
-<div class="modal fade"
-     id="removeReplicationTaskModal"
-     tabindex="-1"
-     role="dialog"
-     aria-hidden="true">
+<div id="removeReplicationTaskModal" class="modal fade" tabindex="-1"
+     role="dialog" aria-hidden="true">
 
     <div class="modal-dialog">
         <div class="modal-content">
@@ -52,18 +49,18 @@
                 <button type="button" class="close" data-dismiss="modal">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                <h3 class="modal-title">删除任务</h3>
+                <h4 class="modal-title">删除任务</h4>
             </div>
 
-            <form action="${rc.contextPath}/replicationTask/delete"
-                  method="post" onsubmit="pumadmin.submit(this);return false;"
-                  onSuccess="deleteReplicationTaskDone">
+            <form onsubmit="javascript:removeReplicationTask();">
+
                 <div class="modal-body">
-                    <p style="text-align: center;">
+                    <h5 style="text-align: center;">
                         <i class="icon-warning-sign"></i> 您是否确定要删除该配置 ？
-                    </p>
-                    <input id="delId" name="id" type="hidden" value="">
+                    </h5>
+                    <input id="removeReplicationTaskInput" name="id" type="hidden" value="">
                 </div>
+
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">确定</button>
                     <button data-dismiss="modal" class="btn">取消</button>

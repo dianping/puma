@@ -20,6 +20,10 @@ public class ReplicationTaskStatus extends TaskStatus {
 
 	private long ddls;
 
+	public ReplicationTaskStatus() {
+		super.setGmtCreate(new Date());
+	}
+
 	public ReplicationTaskStatus(String taskId) {
 		super.setTaskId(taskId);
 		super.setGmtCreate(new Date());

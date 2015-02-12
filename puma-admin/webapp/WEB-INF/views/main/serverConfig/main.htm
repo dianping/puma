@@ -22,11 +22,7 @@
                         #foreach($serverConfig in ${serverConfigs})
                         <tr>
                             <td>${serverConfig.name}</td>
-                            <td>
-                                #foreach($host in ${serverConfig.hosts})
-                                ${host}
-                                #end
-                            </td>
+                            <td>${serverConfig.host}</td>
                             <td></td>
                         </tr>
                         #end

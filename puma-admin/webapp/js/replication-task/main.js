@@ -1,17 +1,4 @@
 /**
- * Init the replication task table.
- */
-(function init() {
-  var status = {
-    status: 'CONNECTING'
-  };
-  var trs = $("tr[id|='tr']");
-  trs.each(function(i, tr) {
-    setReplicationTaskStatus(tr.id.replace('tr-', ''), status);
-  });
-}());
-
-/**
  * Set replication task status.
  *
  * @param taskId
@@ -102,9 +89,16 @@ function removeReplicationTaskModal(taskId) {
 
 var rTask = {
 
-  setRTask: function(id, status) {
-    var status     = status.status
-      , binlogInfo = status.binlogInfo
+  init: function() {
+    var trs = $("tr[id|='tr']");
+    trs.each(function(i, tr) {
+      rTask.updateRTask(tr.id.replace('tr-', ''));
+    });
+  },
+
+  setRTask: function(id, data) {
+    var status     = data.status
+      , binlogInfo = data.binlogInfo
       ;
 
     var textStatus     = ''
@@ -161,4 +155,6 @@ var rTask = {
     rTask.setRTask(id, response.data);
   }
 };
+
+rTask.init();
 

@@ -26,6 +26,7 @@ public class ServerTaskStatusPublisher {
 	@Scheduled(cron = "0/5 * * * * ?")
 	public void report() throws SendFailedException {
 		ReplicationTaskStatusEvent event = new ReplicationTaskStatusEvent();
+		event.setSyncServerName("nonsense");
 		event.setReplicationServerName(taskManager.getServerName());
 		event.setReplicationTaskStatuses(replicationTaskStatusContainer.getAll());
 		statusEventPublisher.publish(event);

@@ -55,15 +55,10 @@ public class ReplicationTaskStatusContainer implements EventListener {
 
 	@Override
 	public void onEvent(Event event) {
-		System.out.println("fuck");
 		if (event instanceof ReplicationTaskStatusEvent) {
 			ReplicationTaskStatusEvent replicationTaskStatusEvent = (ReplicationTaskStatusEvent) event;
 			List<ReplicationTaskStatus> replicationTaskStatuses = replicationTaskStatusEvent.getReplicationTaskStatuses();
 
-			System.out.println("a");
-			System.out.println(replicationTaskStatusEvent.getReplicationServerName());
-			System.out.println("c");
-			System.out.println(replicationTaskStatusEvent.getSyncServerName());
 			if (replicationTaskStatuses != null) {
 				for (ReplicationTaskStatus replicationTaskStatus: replicationTaskStatuses) {
 					update(replicationTaskStatus);

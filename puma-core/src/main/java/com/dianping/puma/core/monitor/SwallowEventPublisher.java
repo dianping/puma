@@ -23,8 +23,7 @@ public class SwallowEventPublisher implements EventPublisher {
         if (event instanceof ReplicationEvent) {
             if (event instanceof ReplicationTaskEvent) {
                 producer.sendMessage(event, ((ReplicationTaskEvent) event).getReplicationServerName());
-            } else {
-                System.out.println("Send message");
+            } else if (event instanceof ReplicationTaskStatusEvent) {
                 producer.sendMessage(event, "replication");
             }
         } else {

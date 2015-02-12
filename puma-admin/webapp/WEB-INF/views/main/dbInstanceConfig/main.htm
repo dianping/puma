@@ -22,11 +22,7 @@
                         #foreach($dbInstanceConfig in ${dbInstanceConfigs})
                         <tr>
                             <td>${dbInstanceConfig.name}</td>
-                            <td>
-                                #foreach($dbInstanceHost in ${dbInstanceConfig.hosts})
-                                ${dbInstanceHost.host}
-                                #end
-                            </td>
+                            <td>${dbInstanceConfig.dbInstanceHost.host}</td>
                             <td></td>
                         </tr>
                         #end

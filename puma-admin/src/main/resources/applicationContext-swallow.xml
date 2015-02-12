@@ -29,7 +29,6 @@
         class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
         init-method="init">
         <property name="topic" value="puma_status_event" />
-        <property name="type" value="sync_server"/>
         <property name="notifyService" ref="notifyService" />
         <property name="clazz"
             value="com.dianping.puma.core.monitor.TaskStatusEvent" />
@@ -44,7 +43,7 @@
           class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
           init-method="init">
         <property name="topic" value="puma_status_event"/>
-        <property name="type" value="replication_server"/>
+        <property name="type" value="replication"/>
         <property name="notifyService" ref="notifyService"/>
         <property name="clazz"
                   value="com.dianping.puma.core.monitor.ReplicationTaskStatusEvent" />

@@ -128,18 +128,18 @@ public class ReplicationTaskController {
 		return GsonUtil.toJson(map);
 	}
 
-	@RequestMapping(value = { "/replicationTask/refresh" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = { "/replicationTask/update" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public Object refresh(String taskId) {
+	public Object update(String id) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			ReplicationTaskStatus taskStatus = replicationTaskStatusContainer.get(taskId);
+			ReplicationTaskStatus taskStatus = replicationTaskStatusContainer.get(id);
 
 			map.put("data", taskStatus);
 			map.put("success", true);
 		} catch(Exception e) {
-			map.put("err", e.getMessage());
+			map.put("error", e.getMessage());
 			map.put("success", false);
 		}
 

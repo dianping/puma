@@ -42,5 +42,6 @@ public interface TaskManager {
 	public void deleteEvent(ReplicationTaskEvent event);
 	
 	public void updateEvent(ReplicationTaskEvent event);
-	
+
+	public String getServerName();
 }

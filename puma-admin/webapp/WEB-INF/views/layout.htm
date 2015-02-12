@@ -9,17 +9,23 @@
    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog"
       tabindex="-1" class="modal hide fade" id="errorMsg"
       style="display: none;">
-      <div class="modal-header">
-         <button aria-hidden="true" data-dismiss="modal" class="close"
-            type="button">×</button>
-         <h3></h3>
+
+      <div class="modal-dialog">
+         <div class="modal-content">
+            <div class="modal-header">
+               <button aria-hidden="true" data-dismiss="modal" class="close"
+                       type="button">×</button>
+               <h3></h3>
+            </div>
+            <div class="modal-body">
+               <p style="text-align: center"></p>
+            </div>
+            <div class="modal-footer">
+               <button data-dismiss="modal" class="btn btn-info">关闭</button>
+            </div>
+         </div>
       </div>
-      <div class="modal-body">
-         <p style="text-align: center"></p>
-      </div>
-      <div class="modal-footer">
-         <button data-dismiss="modal" class="btn btn-info">关闭</button>
-      </div>
+
    </div>
    <script type="text/javascript"
       src="${rc.contextPath}/style/bs/jquery-2.1.3.js"></script>

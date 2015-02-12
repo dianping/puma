@@ -2,6 +2,7 @@ package com.dianping.puma.core.model.replication;
 
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.TaskStatus;
+import com.dianping.puma.core.replicate.model.task.ReplicationTask;
 
 import java.util.Date;
 

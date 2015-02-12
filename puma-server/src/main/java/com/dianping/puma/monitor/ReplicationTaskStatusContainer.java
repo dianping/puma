@@ -25,36 +25,14 @@ public class ReplicationTaskStatusContainer {
 
 	private ConcurrentMap<String, ReplicationTaskStatus> taskStatusMap = new ConcurrentHashMap<String, ReplicationTaskStatus>();
 
+	public void add(String taskId, ReplicationTaskStatus taskStatus) {
+		taskStatusMap.put(taskId, taskStatus);
+	}
+
 	public ReplicationTaskStatus get(String taskId) {
 		ReplicationTaskStatus taskStatus = taskStatusMap.get(taskId);
-		if (taskStatus == null) {
-			taskStatus = new ReplicationTaskStatus();
-			taskStatusMap.put(taskId, taskStatus);
-		}
 
-		taskStatus.setTaskId(taskId);
-
-		// Status.
-		Map<String, Server> serverTaskMap = DefaultTaskManager.instance.getServerTasks();
-		taskStatus.setStatus(DefaultTaskManager.instance.getServerTasks().get(taskId).getTaskStatus());
-
-		// Binary log info.
-		BinlogInfo binlogInfo = new BinlogInfo();
-		binlogInfo.setBinlogFile(SystemStatusContainer.instance.getServerStatus(taskId).getBinlogFile());
-		binlogInfo.setBinlogPosition(SystemStatusContainer.instance.getServerStatus(taskId).getBinlogPos());
-		taskStatus.setBinlogInfo(binlogInfo);
-
-		// Row or DDL changes.
-		AtomicLong rowsInsert = SystemStatusContainer.instance.getServerRowInsertCounter(taskId);
-		taskStatus.setRowsInsert(rowsInsert == null ? 0 : rowsInsert.longValue());
-		AtomicLong rowsDelete = SystemStatusContainer.instance.getServerRowDeleteCounter(taskId);
-		taskStatus.setRowsDelete(rowsDelete == null ? 0 : rowsDelete.longValue());
-		AtomicLong rowsUpdate = SystemStatusContainer.instance.getServerRowUpdateCounter(taskId);
-		taskStatus.setRowsUpdate(rowsUpdate == null ? 0 : rowsUpdate.longValue());
-		AtomicLong ddls = SystemStatusContainer.instance.getServerDdlCounter(taskId);
-		taskStatus.setDdls(ddls == null ? 0 : ddls.longValue());
-
-		return taskStatus;
+		return taskStatus == null ? null : fetch(taskId);
 	}
 
 	public List<ReplicationTaskStatus> getAll() {
@@ -63,10 +41,40 @@ public class ReplicationTaskStatusContainer {
 		List<ReplicationTask> replicationTasks = replicationTaskService.find(DefaultTaskManager.instance.getServerName());
 		if (replicationTasks != null) {
 			for (ReplicationTask replicationTask: replicationTasks) {
-				taskStatuses.add(get(replicationTask.getTaskId()));
+				ReplicationTaskStatus taskStatus = get(replicationTask.getTaskId());
+				if (taskStatus != null) {
+					taskStatuses.add(taskStatus);
+				}
 			}
 		}
 
 		return taskStatuses;
+	}
+
+	private ReplicationTaskStatus fetch(String taskId) {
+		ReplicationTaskStatus taskStatus = taskStatusMap.get(taskId);
+
+		if (taskStatus != null) {
+			// Status.
+			taskStatus.setStatus(DefaultTaskManager.instance.getServerTasks().get(taskId).getTaskStatus());
+
+			// Binary log info.
+			BinlogInfo binlogInfo = new BinlogInfo();
+			binlogInfo.setBinlogFile(SystemStatusContainer.instance.getServerStatus(taskId).getBinlogFile());
+			binlogInfo.setBinlogPosition(SystemStatusContainer.instance.getServerStatus(taskId).getBinlogPos());
+			taskStatus.setBinlogInfo(binlogInfo);
+
+			// Row or DDL changes.
+			AtomicLong rowsInsert = SystemStatusContainer.instance.getServerRowInsertCounter(taskId);
+			taskStatus.setRowsInsert(rowsInsert == null ? 0 : rowsInsert.longValue());
+			AtomicLong rowsDelete = SystemStatusContainer.instance.getServerRowDeleteCounter(taskId);
+			taskStatus.setRowsDelete(rowsDelete == null ? 0 : rowsDelete.longValue());
+			AtomicLong rowsUpdate = SystemStatusContainer.instance.getServerRowUpdateCounter(taskId);
+			taskStatus.setRowsUpdate(rowsUpdate == null ? 0 : rowsUpdate.longValue());
+			AtomicLong ddls = SystemStatusContainer.instance.getServerDdlCounter(taskId);
+			taskStatus.setDdls(ddls == null ? 0 : ddls.longValue());
+		}
+
+		return taskStatus;
 	}
 }

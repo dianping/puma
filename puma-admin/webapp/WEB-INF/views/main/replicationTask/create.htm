@@ -1,8 +1,7 @@
 <div class="container" style="margin: 0 auto; width: 100%; margin-bottom: 50px;">
    <div>
-      <form id="databaseForm" class="form-horizontal" method="post"
-            onsubmit="submit0(this);return false;" onSuccess="onSuccess"
-            action="${rc.contextPath}/replicationTask/create">
+      <form class="form-horizontal" method="post" action="${rc.contextPath}/replicationTask/create"
+            onsubmit="createSubmit(this);return false;">
          <button type="submit" style="float: right;" class="btn btn-success">
             下一步</a>
          </button>
@@ -48,9 +47,9 @@
          <p class="legend">高级设置</p>
 
          <div class="form-group">
-            <label for="taskName" class="control-label col-md-2">任务名称</label>
+            <label for="taskId" class="control-label col-md-2">任务名称</label>
             <div class="col-md-7">
-               <input id="taskName" name="taskId" type="text" class="form-control">
+               <input id="taskId" name="taskId" type="text" class="form-control">
             </div>
          </div>
 
@@ -130,7 +129,7 @@
 </div>
 <script type="text/javascript" src="/style/bs/jquery-2.1.3.js"></script>
 <script type="text/javascript" src="/js/replication-task/create.js"></script>
-<script>
+<!--script>
    function submit0(form) {
       //$("#syncXml").val(window.xmlEditor.getValue());
       $.ajax({
@@ -170,4 +169,4 @@
          //window.xmlEditor.moveCursorTo(0, 0);
       }
    }
-</script>
+</script-->

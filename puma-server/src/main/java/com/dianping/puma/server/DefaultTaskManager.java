@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PostConstruct;
 
 import com.dianping.puma.core.model.replication.ReplicationTaskStatus;
+import com.dianping.puma.monitor.ReplicationTaskStatusContainer;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +61,8 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 	private JsonEventCodec jsonCodec;
 	@Autowired
 	private InitializeServerConfig serverConfig;
+	@Autowired
+	private ReplicationTaskStatusContainer replicationTaskStatusContainer;
 
 	@PostConstruct
 	public void init() {
@@ -179,6 +182,12 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 		dispatcher.setSenders(senders);
 		dispatcher.start();
 		server.setDispatcher(dispatcher);
+
+		// Add to container.
+		ReplicationTaskStatus taskStatus = new ReplicationTaskStatus(replicationTask.getTaskId());
+		taskStatus.setStatus(ReplicationTaskStatus.Status.WAITING);
+		replicationTaskStatusContainer.add(replicationTask.getTaskId(), taskStatus);
+
 		return server;
 	}
 

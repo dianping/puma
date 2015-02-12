@@ -100,3 +100,65 @@ function removeReplicationTaskModal(taskId) {
   $("#removeReplicationTaskModal").modal('show');
 }
 
+var rTask = {
+
+  setRTask: function(id, status) {
+    var status     = status.status
+      , binlogInfo = status.binlogInfo
+      ;
+
+    var textStatus     = ''
+      , textBinlogInfo = '已执行：'
+      , colorClass     = ''
+      ;
+
+    switch(status) {
+      case 'CONNECTING':
+        textStatus     = '连接中';
+        textBinlogInfo += '--';
+        colorClass     = 'warning';
+        break;
+      case 'WAITING':
+        textStatus     = '等待中';
+        textBinlogInfo += '--';
+        colorClass     = 'warning';
+        break;
+      case 'RUNNING':
+        textStatus     = '运行中';
+        textBinlogInfo += binlogInfo.binlogFile + ' | ' + binlogInfo.binlogPosition;
+        colorClass     = '';
+        break;
+      case 'FAILURE':
+        textStatus     = '失败';
+        textBinlogInfo += binlogInfo.binlogFile + ' | ' + binlogInfo.binlogPosition;
+        colorClass     = 'danger';
+        break;
+    }
+
+    removeTableColors($("#replicationTaskTable"));
+    $("#" + escape("tr-" + id)).addClass(colorClass);
+    $("#" + escape("status-" + id)).text(textStatus);
+    $('#' + escape("binlogInfo-" + id)).text(textBinlogInfo);
+  },
+
+  updateRTask: function(id) {
+    var url = window.contextpath + 'replicationTask/update';
+    $.ajax(url, {
+      type    : 'POST',
+      data    : {id: id},
+      dataType: 'json',
+      success : function(response) {
+        rTask.updateRTaskOnSuccess(id, response);
+      }
+    });
+  },
+
+  updateRTaskOnSuccess: function(id, response) {
+    if (!response.success) {
+      return alert(response.error);
+    }
+
+    rTask.setRTask(id, response.data);
+  }
+};
+

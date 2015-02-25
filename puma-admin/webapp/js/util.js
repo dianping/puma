@@ -14,7 +14,12 @@ var util = {
       success : function (res) {
         if (res.success) {
           window.location = $(form).attr('target')
+        } else {
+          alert("failure");
         }
+      },
+      error  : function() {
+        alert('error');
       }
     });
   }

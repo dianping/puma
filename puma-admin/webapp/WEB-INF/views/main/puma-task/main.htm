@@ -1,0 +1,37 @@
+<div class="container-fluid">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            数据处理任务
+            <a class="glyphicon glyphicon-plus" href="${rc.contextPath}/puma-task/create/"
+               style="float: right; color: white"></a>
+        </div>
+
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <td class="col-md-2">数据库</td>
+                <td class="col-md-2">服务器</td>
+                <td class="col-md-2">任务状态</td>
+                <td class="col-md-4">日志进度</td>
+                <td class="col-md-1">操作</td>
+            </tr>
+            </thead>
+
+            <tbody>
+            #foreach($pumaTask in ${entities})
+            <tr>
+                <td>${pumaTask.srcDBInstanceName}</td>
+                <td>${pumaTask.pumaServerName}</td>
+                <td></td>
+                <td></td>
+                <td>
+                    <a class="glyphicon glyphicon-pencil"></a>
+                    <a class="glyphicon glyphicon-remove"></a>
+                </td>
+            </tr>
+            #end
+            </tbody>
+
+        </table>
+    </div>
+</div>

@@ -1,0 +1,33 @@
+<div class="container-fluid">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            数据同步服务器配置
+            <a class="glyphicon glyphicon-plus" href="${rc.contextPath}/sync-server/create/"
+               style="float: right; color: white"></a>
+        </div>
+
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <td class="col-md-5">服务器名称</td>
+                <td class="col-md-6">服务器地址</td>
+                <td class="col-md-1">操作</td>
+            </tr>
+            </thead>
+
+            <tbody>
+            #foreach($syncServer in ${entities})
+            <tr>
+                <td>${syncServer.name}</td>
+                <td>${syncServer.host}:${syncServer.port}</td>
+                <td>
+                    <a class="glyphicon glyphicon-pencil"></a>
+                    <a class="glyphicon glyphicon-remove"></a>
+                </td>
+            </tr>
+            #end
+            </tbody>
+
+        </table>
+    </div>
+</div>

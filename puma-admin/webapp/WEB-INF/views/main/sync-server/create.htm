@@ -1,16 +1,16 @@
-<script type="text/javascript" src="/js/views/puma-server.js"></script>
+<script type="text/javascript" src="/js/views/sync-server.js"></script>
 <div class="container-fluid">
    <div class="panel panel-primary">
       <div class="panel-heading">
          <div class="btn-group-sm pull-right">
             <button class="btn btn-default">取消</button>
-            <button class="btn btn-success" type="submit" form="puma-server-create-form">保存</button>
+            <button class="btn btn-success" type="submit" form="sync-server-create-form">保存</button>
          </div>
-         <h5>新增数据源服务器</h5>
+         <h5>新增数据同步服务器</h5>
       </div>
 
-      <form id="puma-server-create-form" class="form-horizontal" method="post"
-            action="${rc.contextPath}/puma-server/create" target="${rc.contextPath}/puma-server">
+      <form id="sync-server-create-form" class="form-horizontal" method="post"
+            action="${rc.contextPath}/sync-server/create" target="${rc.contextPath}/sync-server">
          <div class="panel-body">
             <div class="form-group has-success has-feedback">
                <label class="col-md-2 control-label" for="name">服务器名称</label>

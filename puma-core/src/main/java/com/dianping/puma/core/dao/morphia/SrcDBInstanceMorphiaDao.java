@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service("dbInstanceConfigDao")
+@Service("srcDBInstanceDao")
 public class SrcDBInstanceMorphiaDao extends BasicDAO<SrcDBInstanceMorphiaEntity, String>
 		implements SrcDBInstanceDao {
 

@@ -3,14 +3,17 @@
 <script type="text/javascript" src="/js/util.js"></script>
 <div class="container" style="width: 1240px;">
    <div class="row">
-      <div class="col-md-3">
+
+      <ul class="nav nav-stacked well col-md-3">
+         <li>
+            <a href="${rc.contextPath}/srcDBInstance">源数据库配置</a>
+         </li>
+         <li>
+            <a href="${rc.contextPath}/dstDBInstance">目标数据库配置</a>
+         </li>
+      </ul>
+      <!--div class="col-md-3">
          <ul class="well nav nav-pills nav-stacked">
-            <!--   <ul class="well nav nav-list affix">   -->
-            <!--<li class="$!{readmeActive}"><a
-               href="${rc.contextPath}/readme"><i
-                  class="icon-file #if(${readmeActive})icon-white #end"></i>
-                  使用说明 </a></li>
-            <li class="divider_line"></li>-->
             <li class="nav-header"><i class="icon-tasks"></i> 配置管理</li>
             <li class="$!{mysqlSettingActive}"><a
                href="${rc.contextPath}/mysqlSetting"><i
@@ -55,17 +58,9 @@
                </a>
             </li>
 
-            <!-- <li class="$!{modifyActive}"><a
-               href="${rc.contextPath}/modify"><i
-                  class="icon-edit #if(${modifyActive})icon-white #end"></i>
-                  修改同步任务 </a></li>-->
-            <!-- <li class="$!{deleteActive}"><a
-               href="${rc.contextPath}/delete"><i
-                  class="icon-remove-circle #if(${deleteActive})icon-white #end"></i>
-                  删除同步任务 </a></li>-->
             <li class="divider_line"></li>
          </ul>
-      </div>
+      </div-->
       #if(${subPath})
       <div class="col-md-9">#parse("main/${path}/${subPath}.htm")</div>
       #else

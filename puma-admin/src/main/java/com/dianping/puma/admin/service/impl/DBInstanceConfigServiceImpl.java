@@ -1,23 +1,35 @@
 package com.dianping.puma.admin.service.impl;
 
-import com.dianping.puma.admin.service.DBInstanceConfigService;
-import com.dianping.puma.core.replicate.dao.config.DBInstanceConfigDao;
-import com.dianping.puma.core.replicate.model.config.DBInstanceConfig;
-import com.google.code.morphia.Key;
-import com.google.code.morphia.query.Query;
-import com.google.code.morphia.query.QueryResults;
-import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.dianping.puma.core.entity.SrcDBInstanceEntity;
 
-import java.util.List;
-
+/*
 @Service("dbInstanceConfigService")
 public class DBInstanceConfigServiceImpl implements DBInstanceConfigService {
 
 	@Autowired
-	DBInstanceConfigDao dbInstanceConfigDao;
+	SrcDBInstanceDao srcDbInstanceDao;
 
+	@Override
+	public SrcDBInstanceEntity findById(String id) {
+		return srcDbInstanceDao.findById(id);
+	}
+
+	@Override
+	public SrcDBInstanceEntity findByName(String name) {
+		return srcDbInstanceDao.findByName(name);
+	}
+
+	@Override
+	public List<SrcDBInstanceEntity> findAll() {
+		return srcDbInstanceDao.findAll();
+	}
+
+	@Override
+	public void create(SrcDBInstanceEntity config) {
+		srcDbInstanceDao.create(config);
+	}
+
+	/*
 	@Override
 	public ObjectId save(DBInstanceConfig dbInstanceConfig) {
 		Key<DBInstanceConfig> key = this.dbInstanceConfigDao.save(dbInstanceConfig);
@@ -38,4 +50,4 @@ public class DBInstanceConfigServiceImpl implements DBInstanceConfigService {
 		q.field("name").equal(name);
 		return dbInstanceConfigDao.findOne(q);
 	}
-}
+}*/

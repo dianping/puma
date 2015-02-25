@@ -19,13 +19,12 @@ import java.util.List;
 
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
-import com.dianping.puma.core.model.replication.ReplicationTaskStatus;
+import com.dianping.puma.core.entity.replication.ReplicationTaskStatus;
 import com.dianping.puma.core.monitor.Notifiable;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.replicate.model.task.StatusActionType;
 import com.dianping.puma.core.replicate.model.task.StatusExecutorType;
 import com.dianping.puma.datahandler.DataHandler;
-import com.dianping.puma.monitor.ReplicationTaskStatusContainer;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.Dispatcher;

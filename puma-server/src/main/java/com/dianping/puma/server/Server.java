@@ -16,9 +16,8 @@ import java.util.List;
 
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.LifeCycle;
-import com.dianping.puma.core.model.replication.ReplicationTaskStatus;
+import com.dianping.puma.core.entity.replication.ReplicationTaskStatus;
 import com.dianping.puma.core.replicate.model.task.StatusActionType;
-import com.dianping.puma.core.replicate.model.task.StatusExecutorType;
 import com.dianping.puma.sender.Sender;
 
 /**

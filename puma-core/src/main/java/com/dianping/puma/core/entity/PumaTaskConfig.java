@@ -1,6 +1,4 @@
-package com.dianping.puma.core.model.task;
-
-import com.dianping.puma.core.model.BinlogInfo;
+package com.dianping.puma.core.entity;
 
 public class PumaTaskConfig {
 

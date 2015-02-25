@@ -6,7 +6,7 @@ import com.google.code.morphia.dao.BasicDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service("dbInstanceConfigDao")
+//@Service("dbInstanceConfigDao")
 public class DBInstanceConfigDao extends BasicDAO<DBInstanceConfig, String> {
 
 	@Autowired

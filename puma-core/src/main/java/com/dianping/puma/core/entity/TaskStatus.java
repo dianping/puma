@@ -1,4 +1,4 @@
-package com.dianping.puma.core.model;
+package com.dianping.puma.core.entity;
 
 import java.util.Date;
 

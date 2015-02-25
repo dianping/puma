@@ -5,7 +5,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
-import com.dianping.puma.core.model.replication.ReplicationTaskStatus;
 import com.dianping.puma.monitor.ReplicationTaskStatusContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,0 +1,33 @@
+<div class="container-fluid">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            目标数据库实例
+            <a class="glyphicon glyphicon-plus" href="${rc.contextPath}/dstDBInstance/create/"
+               style="float: right; color: white"></a>
+        </div>
+
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <td class="col-md-5">数据库名称</td>
+                <td class="col-md-6">数据库地址</td>
+                <td class="col-md-1">操作</td>
+            </tr>
+            </thead>
+
+            <tbody>
+            #foreach($dstDBInstance in ${entities})
+            <tr>
+                <td>${dstDBInstance.name}</td>
+                <td>${dstDBInstance.host}:${dstDBInstance.port}</td>
+                <td>
+                    <a class="glyphicon glyphicon-pencil"></a>
+                    <a class="glyphicon glyphicon-remove"></a>
+                </td>
+            </tr>
+            #end
+            </tbody>
+
+        </table>
+    </div>
+</div>

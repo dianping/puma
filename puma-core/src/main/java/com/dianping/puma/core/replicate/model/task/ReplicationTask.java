@@ -3,7 +3,7 @@ package com.dianping.puma.core.replicate.model.task;
 import com.dianping.puma.core.replicate.model.config.DBInstanceHost;
 import com.dianping.puma.core.replicate.model.config.FileSenderConfig;
 import com.dianping.puma.core.replicate.model.BaseEntity;
-import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.entity.BinlogInfo;
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Indexed;
 import com.google.code.morphia.utils.IndexDirection;

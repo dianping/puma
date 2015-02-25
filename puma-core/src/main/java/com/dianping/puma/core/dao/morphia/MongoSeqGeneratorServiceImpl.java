@@ -1,14 +1,13 @@
-package com.dianping.puma.core.sync.dao;
-
-import org.springframework.stereotype.Service;
+package com.dianping.puma.core.dao.morphia;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Leo Liang
  */
-//@Service("seqGeneratorService")
+@Service("seqGeneratorService")
 public class MongoSeqGeneratorServiceImpl implements SeqGeneratorService {
 
     private final static String COLUMN_SEQ = "seq";

@@ -1,8 +1,6 @@
-package com.dianping.puma.core.model.config;
+package com.dianping.puma.core.entity;
 
-import com.dianping.puma.core.model.BaseConfig;
-
-public class DBInstanceConfig extends BaseConfig {
+public class DstDBInstanceEntity extends BaseEntity {
 
 	private String name;
 

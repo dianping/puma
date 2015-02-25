@@ -1,18 +1,16 @@
 package com.dianping.puma.monitor;
 
 import com.dianping.puma.common.SystemStatusContainer;
-import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.replication.ReplicationTaskStatus;
+import com.dianping.puma.core.entity.BinlogInfo;
+import com.dianping.puma.core.entity.replication.ReplicationTaskStatus;
 import com.dianping.puma.core.replicate.model.task.ReplicationTask;
 import com.dianping.puma.server.DefaultTaskManager;
-import com.dianping.puma.server.Server;
 import com.dianping.puma.service.ReplicationTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;

@@ -18,44 +18,50 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 @Controller
-public class DBInstanceConfigController {
+public class SrcDBInstanceController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DBInstanceConfigController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SrcDBInstanceController.class);
 
 	@Autowired
-	SrcDBInstanceService dbInstanceConfigService;
+	SrcDBInstanceService srcDBInstanceService;
 
-	@RequestMapping(value = { "/dbInstanceConfigg" })
+	@RequestMapping(value = { "/srcDBInstance" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		List<SrcDBInstanceEntity> dbInstanceEntities = dbInstanceConfigService.findAll();
+		List<SrcDBInstanceEntity> srcDBInstanceEntities = srcDBInstanceService.findAll();
 
-		map.put("dbInstanceConfigs", dbInstanceEntities);
+		map.put("entities", srcDBInstanceEntities);
 		map.put("path", "srcDBInstance");
 		return new ModelAndView("main/container", map);
 	}
 
-	@RequestMapping(value = { "/dbInstanceConfig/create" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/srcDBInstance/create" })
 	public ModelAndView create(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
-
-		map.put("path", "dbInstanceConfig");
+		map.put("path", "srcDBInstance");
 		map.put("subPath", "create");
 		return new ModelAndView("main/container", map);
 	}
 
-	@RequestMapping(value = {
-			"/dbInstanceConfig/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = { "/srcDBInstance/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(String name, String host, String port, String username, String password,
-			String metaHost, String metaPort, String metaUsername, String metaPassword) {
+	public String createPost(
+			String name,
+			String host,
+			String port,
+			String username,
+			String password,
+			String metaHost,
+			String metaPort,
+			String metaUsername,
+			String metaPassword) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		SrcDBInstanceEntity srcDbInstanceEntity = new SrcDBInstanceEntity();
+		srcDbInstanceEntity.setName(name);
 		srcDbInstanceEntity.setHost(host);
 		srcDbInstanceEntity.setPort(port);
 		srcDbInstanceEntity.setUsername(username);
@@ -66,12 +72,11 @@ public class DBInstanceConfigController {
 		srcDbInstanceEntity.setMetaPassword(metaPassword);
 
 		try {
-			this.dbInstanceConfigService.create(srcDbInstanceEntity);
+			this.srcDBInstanceService.create(srcDbInstanceEntity);
+			map.put("success", true);
 		} catch (Exception e) {
 			map.put("success", false);
 		}
-
-		map.put("success", true);
 
 		return GsonUtil.toJson(map);
 	}

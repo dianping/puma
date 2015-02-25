@@ -1,10 +1,10 @@
-package com.dianping.puma.core.model;
+package com.dianping.puma.core.entity;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 
-public abstract class BaseConfig implements Serializable {
+public abstract class BaseEntity implements Serializable {
 
 	private static final long serialVersionUID = 8121775127353895000L;
 
@@ -16,7 +16,7 @@ public abstract class BaseConfig implements Serializable {
 
 	private Long version;
 
-	public BaseConfig() {
+	public BaseEntity() {
 		this.id = UUID.randomUUID().toString();
 		this.upgrade();
 	}

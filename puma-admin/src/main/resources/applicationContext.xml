@@ -24,6 +24,9 @@
 
     <bean id="notifyService" class="com.dianping.puma.core.monitor.DefaultNotifyService"/>
 
+    <bean id="mongoClient2" class="com.dianping.puma.core.dao.morphia.MongoClient">
+    </bean>
+
     <bean id="mongoClient" class="com.dianping.puma.core.sync.dao.MongoClient">
     </bean>
 

@@ -21,7 +21,7 @@ import java.util.Map;
 @Controller
 public class ServerConfigController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DBInstanceConfigController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ServerConfigController.class);
 
 	@Autowired
 	ServerConfigService serverConfigService;

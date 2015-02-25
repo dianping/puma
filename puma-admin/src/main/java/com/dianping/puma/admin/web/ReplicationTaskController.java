@@ -1,17 +1,16 @@
 package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.monitor.ReplicationTaskStatusContainer;
-import com.dianping.puma.admin.service.DBInstanceConfigService;
 import com.dianping.puma.admin.service.ReplicationTaskService;
 import com.dianping.puma.admin.service.ServerConfigService;
+import com.dianping.puma.admin.service.SrcDBInstanceService;
 import com.dianping.puma.admin.util.GsonUtil;
-import com.dianping.puma.core.model.replication.ReplicationTaskStatus;
-import com.dianping.puma.core.replicate.model.config.DBInstanceConfig;
+import com.dianping.puma.core.entity.SrcDBInstanceEntity;
+import com.dianping.puma.core.entity.replication.ReplicationTaskStatus;
 import com.dianping.puma.core.replicate.model.config.FileSenderConfig;
 import com.dianping.puma.core.replicate.model.config.ServerConfig;
 import com.dianping.puma.core.replicate.model.task.ReplicationTask;
-import com.dianping.puma.core.model.BinlogInfo;
-import org.bson.types.ObjectId;
+import com.dianping.puma.core.entity.BinlogInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,19 +22,18 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.sql.Timestamp;
 import java.util.*;
 
 @Controller
 public class ReplicationTaskController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DBInstanceConfigController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ReplicationTaskController.class);
 
 	@Autowired
 	ReplicationTaskService replicationTaskService;
 
 	@Autowired
-	DBInstanceConfigService dbInstanceConfigService;
+	SrcDBInstanceService dbInstanceConfigService;
 
 	@Autowired
 	ServerConfigService serverConfigService;
@@ -58,10 +56,10 @@ public class ReplicationTaskController {
 	public ModelAndView create(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		List<DBInstanceConfig> dbInstanceConfigs = dbInstanceConfigService.findAll();
+		List<SrcDBInstanceEntity> dbInstanceEntities = dbInstanceConfigService.findAll();
 		List<ServerConfig> serverConfigs = serverConfigService.findAll();
 
-		map.put("dbInstanceConfigs", dbInstanceConfigs);
+		map.put("dbInstanceConfigs", dbInstanceEntities);
 		map.put("serverConfigs", serverConfigs);
 		map.put("path", "replicationTask");
 		map.put("subPath", "create");
@@ -107,9 +105,10 @@ public class ReplicationTaskController {
 		replicationTask.setFileSenderConfigs(fileSenderConfigs);
 
 		replicationTask.setDbInstanceName(dbInstanceName);
-		DBInstanceConfig dbInstanceConfig = dbInstanceConfigService.find(dbInstanceName);
+		/*
+		DBInstanceConfig dbInstanceConfig = dbInstanceConfigService.findByName(dbInstanceName);
 		replicationTask.setDbInstanceHost(dbInstanceConfig.getDbInstanceHost());
-		replicationTask.setDbInstanceMetaHost(dbInstanceConfig.getDbInstanceMetaHost());
+		replicationTask.setDbInstanceMetaHost(dbInstanceConfig.getDbInstanceMetaHost());*/
 
 		replicationTask.setReplicationServerName(replicationServerName);
 		replicationTask.setBinlogInfo(binlogInfo);

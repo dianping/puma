@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
-import com.dianping.puma.core.model.replication.ReplicationTaskStatus;
+import com.dianping.puma.core.entity.replication.ReplicationTaskStatus;
 import com.dianping.puma.monitor.ReplicationTaskStatusContainer;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
@@ -24,7 +24,6 @@ import com.dianping.puma.core.monitor.ReplicationTaskEvent;
 import com.dianping.puma.core.monitor.ReplicationTaskStatusActionEvent;
 import com.dianping.puma.core.replicate.model.config.FileSenderConfig;
 import com.dianping.puma.core.replicate.model.task.ReplicationTask;
-import com.dianping.puma.core.replicate.model.task.StatusExecutorType;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.datahandler.DefaultDataHandler;
 import com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher;

@@ -1,6 +1,6 @@
 package com.dianping.puma.core.monitor;
 
-import com.dianping.puma.core.model.replication.ReplicationTaskStatus;
+import com.dianping.puma.core.entity.replication.ReplicationTaskStatus;
 
 import java.util.List;
 

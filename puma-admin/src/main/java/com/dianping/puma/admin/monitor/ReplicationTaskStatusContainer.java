@@ -1,7 +1,7 @@
 package com.dianping.puma.admin.monitor;
 
 import com.dianping.puma.admin.service.ReplicationTaskService;
-import com.dianping.puma.core.model.replication.ReplicationTaskStatus;
+import com.dianping.puma.core.entity.replication.ReplicationTaskStatus;
 import com.dianping.puma.core.monitor.Event;
 import com.dianping.puma.core.monitor.EventListener;
 import com.dianping.puma.core.monitor.ReplicationTaskStatusEvent;
@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 

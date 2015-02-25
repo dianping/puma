@@ -1,8 +1,6 @@
-package com.dianping.puma.core.model.config;
+package com.dianping.puma.core.entity;
 
-import com.dianping.puma.core.model.BaseConfig;
-
-public class PumaServerConfig extends BaseConfig {
+public class PumaServerConfig extends BaseEntity {
 
 	private String name;
 

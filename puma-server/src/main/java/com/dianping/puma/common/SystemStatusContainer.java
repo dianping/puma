@@ -17,7 +17,6 @@ package com.dianping.puma.common;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -25,11 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.dianping.cat.Cat;
-import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.replicate.model.task.TaskExecutorStatus;
-import com.dianping.puma.server.DefaultTaskManager;
-import com.dianping.puma.server.ReplicationBasedServer;
-import com.dianping.puma.server.Server;
 
 /**
  * @author Leo Liang

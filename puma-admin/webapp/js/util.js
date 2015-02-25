@@ -1,14 +1,24 @@
-function formSubmit(form) {
-  $.ajax({
-    type    : $(form).attr('method'),
-    url     : $(form).attr('action'),
-    data    : $(form).serialize(),
-    dataType: "json",
-    success : $(form).attr('onSuccess'),
-    error   : pumadmin.httpError
-  });
-  return false;
-}
+var util = {
+
+  /**
+   *
+   *
+   * @param form
+   */
+  submit: function (form) {
+    $.ajax({
+      url     : $(form).attr('action'),
+      type    : $(form).attr('method'),
+      data    : $(form).serialize(),
+      dataType: 'json',
+      success : function (res) {
+        if (res.success) {
+          window.location = $(form).attr('target')
+        }
+      }
+    });
+  }
+};
 
 function removeTableColors(table) {
   table.removeClass("active");

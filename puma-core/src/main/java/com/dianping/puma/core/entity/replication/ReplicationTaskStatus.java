@@ -1,8 +1,7 @@
-package com.dianping.puma.core.model.replication;
+package com.dianping.puma.core.entity.replication;
 
-import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.TaskStatus;
-import com.dianping.puma.core.replicate.model.task.ReplicationTask;
+import com.dianping.puma.core.entity.BinlogInfo;
+import com.dianping.puma.core.entity.TaskStatus;
 
 import java.util.Date;
 

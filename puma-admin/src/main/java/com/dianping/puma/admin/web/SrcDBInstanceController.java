@@ -49,6 +49,7 @@ public class SrcDBInstanceController {
 	@ResponseBody
 	public String createPost(
 			String name,
+			Integer serverId,
 			String host,
 			String port,
 			String username,
@@ -62,6 +63,7 @@ public class SrcDBInstanceController {
 
 		SrcDBInstanceEntity srcDbInstanceEntity = new SrcDBInstanceEntity();
 		srcDbInstanceEntity.setName(name);
+		srcDbInstanceEntity.setServerId(serverId);
 		srcDbInstanceEntity.setHost(host);
 		srcDbInstanceEntity.setPort(port);
 		srcDbInstanceEntity.setUsername(username);

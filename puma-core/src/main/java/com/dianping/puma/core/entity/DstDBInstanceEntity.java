@@ -4,6 +4,8 @@ public class DstDBInstanceEntity extends BaseEntity {
 
 	private String name;
 
+	private Integer serverId;
+
 	private String host;
 
 	private String port;
@@ -26,6 +28,14 @@ public class DstDBInstanceEntity extends BaseEntity {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Integer getServerId() {
+		return serverId;
+	}
+
+	public void setServerId(Integer serverId) {
+		this.serverId = serverId;
 	}
 
 	public String getHost() {

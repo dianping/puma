@@ -49,6 +49,7 @@ public class DstDBInstanceController {
 	@ResponseBody
 	public String createPost(
 			String name,
+			Integer serverId,
 			String host,
 			String port,
 			String username,
@@ -62,6 +63,7 @@ public class DstDBInstanceController {
 
 		DstDBInstanceEntity dstDBInstanceEntity = new DstDBInstanceEntity();
 		dstDBInstanceEntity.setName(name);
+		dstDBInstanceEntity.setServerId(serverId);
 		dstDBInstanceEntity.setHost(host);
 		dstDBInstanceEntity.setPort(port);
 		dstDBInstanceEntity.setUsername(username);

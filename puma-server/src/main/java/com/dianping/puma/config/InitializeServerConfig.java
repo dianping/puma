@@ -14,7 +14,7 @@ import com.dianping.puma.service.ServerConfigService;
 
 public class InitializeServerConfig implements InitializingBean {
 
-	private static final Logger LOG=LoggerFactory.getLogger(InitializeServerConfig.class);
+	private static final Logger LOG = LoggerFactory.getLogger(InitializeServerConfig.class);
 
 	@Autowired
 	private ServerConfigService serverConfigService;

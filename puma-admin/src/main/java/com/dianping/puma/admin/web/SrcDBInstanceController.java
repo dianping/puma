@@ -1,8 +1,8 @@
 package com.dianping.puma.admin.web;
 
-import com.dianping.puma.admin.service.SrcDBInstanceService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.entity.SrcDBInstanceEntity;
+import com.dianping.puma.core.service.SrcDBInstanceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

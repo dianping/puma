@@ -65,7 +65,7 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 
 	@PostConstruct
 	public void init() {
-		serverName = serverConfig.getServerName();
+		serverName = serverConfig.getName();
 		serverTasks = new ConcurrentHashMap<String, Server>();
 	}
 

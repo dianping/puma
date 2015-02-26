@@ -17,8 +17,8 @@ public class SrcDBInstanceMorphiaDao extends BasicDAO<SrcDBInstanceMorphiaEntity
 		implements SrcDBInstanceDao {
 
 	@Autowired
-	public SrcDBInstanceMorphiaDao(MongoClient mongoClient2) {
-		super(mongoClient2.getDatastore());
+	public SrcDBInstanceMorphiaDao(MongoClient mongoClient) {
+		super(mongoClient.getDatastore());
 	}
 
 	public SrcDBInstanceEntity find(String id) {

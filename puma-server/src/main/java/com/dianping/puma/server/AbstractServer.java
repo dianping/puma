@@ -144,7 +144,7 @@ public abstract class AbstractServer implements Server, Notifiable {
     /*
      * (non-Javadoc)
      * 
-     * @see com.dianping.puma.server.Server#getServerName()
+     * @see com.dianping.puma.server.Server#getName()
      */
     @Override
     public String getServerName() {

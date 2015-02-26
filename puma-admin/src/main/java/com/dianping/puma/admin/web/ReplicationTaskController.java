@@ -3,7 +3,7 @@ package com.dianping.puma.admin.web;
 import com.dianping.puma.admin.monitor.ReplicationTaskStatusContainer;
 import com.dianping.puma.admin.service.ReplicationTaskService;
 import com.dianping.puma.admin.service.ServerConfigService;
-import com.dianping.puma.admin.service.SrcDBInstanceService;
+import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.entity.SrcDBInstanceEntity;
 import com.dianping.puma.core.entity.replication.ReplicationTaskStatus;

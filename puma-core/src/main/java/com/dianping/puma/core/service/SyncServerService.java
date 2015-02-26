@@ -1,4 +1,4 @@
-package com.dianping.puma.admin.service;
+package com.dianping.puma.core.service;
 
 import com.dianping.puma.core.entity.SyncServerEntity;
 

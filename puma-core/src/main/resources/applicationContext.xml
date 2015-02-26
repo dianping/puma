@@ -11,32 +11,21 @@
     http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 
     <!-- annotation scan -->
-    <context:component-scan base-package="com.dianping.puma">
-        <context:exclude-filter type="annotation"
-            expression="org.springframework.stereotype.Controller" />
-    </context:component-scan>
-
-    <task:annotation-driven />
-
-    <import resource="applicationContext-properties.xml" />
-
-    <import resource="applicationContext-swallow.xml" />
-
-    <bean id="notifyService" class="com.dianping.puma.core.monitor.DefaultNotifyService"/>
+    <context:component-scan base-package="com.dianping.puma"/>
 
     <!--bean id="mongoClient2" class="com.dianping.puma.core.dao.morphia.MongoClient">
-    </bean>
+    </bean-->
 
-    <bean id="mongoClient" class="com.dianping.puma.core.sync.dao.MongoClient">
+    <bean id="mongoClient" class="com.dianping.puma.core.dao.morphia.MongoClient">
     </bean>
 
     <bean id="seqGeneratorService"
-        class="com.dianping.puma.core.sync.dao.MongoSeqGeneratorServiceImpl">
+        class="com.dianping.puma.core.dao.morphia.MongoSeqGeneratorServiceImpl">
         <property name="mongoClient">
             <ref bean="mongoClient" />
         </property>
         <property name="dbName" value="puma_admin" />
         <property name="collName" value="seq" />
-    </bean-->
+    </bean>
 
 </beans>

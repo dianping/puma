@@ -1,8 +1,8 @@
-package com.dianping.puma.admin.service.impl;
+package com.dianping.puma.core.service.impl;
 
-import com.dianping.puma.admin.service.PumaServerService;
 import com.dianping.puma.core.dao.PumaServerDao;
 import com.dianping.puma.core.entity.PumaServerEntity;
+import com.dianping.puma.core.service.PumaServerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +17,10 @@ public class PumaServerServiceImpl implements PumaServerService {
 	@Override
 	public PumaServerEntity find(String id) {
 		return pumaServerDao.find(id);
+	}
+
+	public PumaServerEntity findByHostAndPort(String host, String port) {
+		return pumaServerDao.findByHostAndPort(host, port);
 	}
 
 	@Override

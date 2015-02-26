@@ -187,10 +187,10 @@ public enum SystemStatusContainer {
 			}else{
 				executorStatus=new TaskExecutorStatus();
 			}
-			executorStatus.setServerName(DefaultTaskManager.instance.getServerName());
+			executorStatus.setServerName(DefaultTaskManager.instance.getName());
 			Server task = serverItem.getValue();
 			executorStatus.setTaskId(task.getServerId());
-			executorStatus.setTaskName(task.getServerName());
+			executorStatus.setTaskName(task.getName());
 			BinlogInfo binlogInfo = null;
 			if(executorStatus.getStartBinlogInfo() == null){
 				binlogInfo=new BinlogInfo();

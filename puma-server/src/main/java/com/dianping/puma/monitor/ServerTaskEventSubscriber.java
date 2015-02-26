@@ -14,7 +14,7 @@ public class ServerTaskEventSubscriber extends SwallowEventSubscriber {
 	
 	@PostConstruct
 	public void init(){
-		super.setType(serverConfig.getServerName());
+		super.setType(serverConfig.getName());
 		super.init();
 	}
 

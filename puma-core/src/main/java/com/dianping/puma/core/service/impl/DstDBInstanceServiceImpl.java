@@ -1,8 +1,8 @@
-package com.dianping.puma.admin.service.impl;
+package com.dianping.puma.core.service.impl;
 
-import com.dianping.puma.admin.service.DstDBInstanceService;
 import com.dianping.puma.core.dao.DstDBInstanceDao;
 import com.dianping.puma.core.entity.DstDBInstanceEntity;
+import com.dianping.puma.core.service.DstDBInstanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -17,8 +17,8 @@ public class DstDBInstanceMorphiaDao extends BasicDAO<DstDBInstanceMorphiaEntity
 		implements DstDBInstanceDao {
 
 	@Autowired
-	public DstDBInstanceMorphiaDao(MongoClient mongoClient2) {
-		super(mongoClient2.getDatastore());
+	public DstDBInstanceMorphiaDao(MongoClient mongoClient) {
+		super(mongoClient.getDatastore());
 	}
 
 	public DstDBInstanceEntity find(String id) {

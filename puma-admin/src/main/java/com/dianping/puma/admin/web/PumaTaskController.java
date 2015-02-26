@@ -1,13 +1,13 @@
 package com.dianping.puma.admin.web;
 
-import com.dianping.puma.admin.service.PumaServerService;
 import com.dianping.puma.admin.service.PumaTaskService;
-import com.dianping.puma.admin.service.SrcDBInstanceService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.entity.BinlogInfo;
 import com.dianping.puma.core.entity.PumaServerEntity;
 import com.dianping.puma.core.entity.PumaTaskEntity;
 import com.dianping.puma.core.entity.SrcDBInstanceEntity;
+import com.dianping.puma.core.service.PumaServerService;
+import com.dianping.puma.core.service.SrcDBInstanceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +63,8 @@ public class PumaTaskController {
 		return new ModelAndView("main/container", map);
 	}
 
-	@RequestMapping(value = { "/puma-task/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = {
+			"/puma-task/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String createPost(
 			String srcDBInstanceName,
@@ -88,8 +89,7 @@ public class PumaTaskController {
 			map.put("success", true);
 
 			//replicationTaskStatusContainer.add(taskId);
-		}
-		catch(Exception e) {
+		} catch (Exception e) {
 			map.put("success", false);
 		}
 

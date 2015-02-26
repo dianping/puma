@@ -22,7 +22,7 @@
     <task:annotation-driven />
       
 	<bean id="serverConfig" class="com.dianping.puma.config.InitializeServerConfig">
-		<property name="localPort" value="8080" />
+		<property name="port" value="8080" />
 	</bean>
 	
 	<!-- <import resource="serverConfig-${puma.server.env}.xml" /> -->
@@ -48,8 +48,11 @@
 
 	<bean id="jsonCodec" class="com.dianping.puma.core.codec.JsonEventCodec" />
 
-	<bean id="mongoClient" class="com.dianping.puma.core.sync.dao.MongoClient">
+	<bean id="mongoClient" class="com.dianping.puma.core.dao.morphia.MongoClient">
 	</bean>
+
+	<!--bean id="mongoClient2" class="com.dianping.puma.core.dao.morphia.MongoClient">
+	</bean-->
 
 </beans>
 

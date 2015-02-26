@@ -1,7 +1,7 @@
 package com.dianping.puma.core.replicate.dao.config;
 
 import com.dianping.puma.core.replicate.model.config.ServerConfig;
-import com.dianping.puma.core.sync.dao.MongoClient;
+import com.dianping.puma.core.dao.morphia.MongoClient;
 import com.google.code.morphia.dao.BasicDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

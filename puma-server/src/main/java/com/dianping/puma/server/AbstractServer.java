@@ -21,6 +21,7 @@ import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.constant.Controller;
 import com.dianping.puma.core.constant.Status;
+import com.dianping.puma.core.container.PumaTaskStateContainer;
 import com.dianping.puma.core.entity.replication.ReplicationTaskStatus;
 import com.dianping.puma.core.monitor.Notifiable;
 import com.dianping.puma.core.monitor.NotifyService;
@@ -30,6 +31,7 @@ import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.Dispatcher;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * TODO Comment of AbstractServer
@@ -39,6 +41,8 @@ import com.dianping.puma.sender.dispatcher.Dispatcher;
 @ThreadUnSafe
 public abstract class AbstractServer implements Server, Notifiable {
 	private PumaContext context;
+
+	private String taskId;
 
 	private String defaultBinlogFileName;
 
@@ -62,13 +66,14 @@ public abstract class AbstractServer implements Server, Notifiable {
 
 	protected Status status;
 
-	protected Controller controller;
-
 	protected ReplicationTaskStatus.Status taskStatus;
 
 	protected StatusActionType statusActionType;
 
 	protected StatusExecutorType statusExecutorType;
+
+	@Autowired
+	PumaTaskStateContainer pumaTaskStateContainer;
 
 	/**
 	 * @param binlogPositionHolder the binlogPositionHolder to set
@@ -203,12 +208,12 @@ public abstract class AbstractServer implements Server, Notifiable {
 		this.status = status;
 	}
 
-	public Controller getController() {
-		return controller;
+	public String getTaskId() {
+		return taskId;
 	}
 
-	public void setController(Controller controller) {
-		this.controller = controller;
+	public void setTaskId(String taskId) {
+		this.taskId = taskId;
 	}
 
 	@Override

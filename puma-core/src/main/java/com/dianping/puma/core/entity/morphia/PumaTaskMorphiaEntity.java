@@ -1,9 +1,9 @@
 package com.dianping.puma.core.entity.morphia;
 
 import com.dianping.puma.core.entity.PumaTaskEntity;
-import org.springframework.stereotype.Service;
+import com.google.code.morphia.annotations.Entity;
 
-@Service("PumaTask")
+@Entity("PumaTask")
 public class PumaTaskMorphiaEntity extends BaseMorphiaEntity<PumaTaskEntity> {
 
 	public PumaTaskMorphiaEntity() {}

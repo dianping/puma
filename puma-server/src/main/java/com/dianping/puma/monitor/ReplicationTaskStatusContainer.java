@@ -1,5 +1,6 @@
 package com.dianping.puma.monitor;
 
+/*
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.entity.replication.ReplicationTaskStatus;
@@ -14,7 +15,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
-
+*/
+/*
 @Service("replicationTaskStatusContainer")
 public class ReplicationTaskStatusContainer {
 
@@ -75,4 +77,4 @@ public class ReplicationTaskStatusContainer {
 
 		return taskStatus;
 	}
-}
+}*/

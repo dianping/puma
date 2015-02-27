@@ -98,6 +98,9 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 
 		ReplicationBasedServer server = new ReplicationBasedServer();
 
+		// Task id
+		server.
+
 		// Source database.
 		String srcDBInstanceName = pumaTask.getSrcDBInstanceName();
 		SrcDBInstanceEntity srcDBInstance = srcDBInstanceService.findByName(srcDBInstanceName);
@@ -112,7 +115,7 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 		server.setDefaultBinlogFileName(binlogInfo.getBinlogFile());
 		server.setDefaultBinlogPosition(binlogInfo.getBinlogPosition());
 		server.setBinlogPositionHolder(binlogPositionHolder);
-		server.setPumaTaskStatus(Status.WAITING);
+		server.setStatus(Status.WAITING);
 
 		// Parser.
 		Parser parser = new DefaultBinlogParser();
@@ -386,11 +389,11 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 			try {
 				task = construct(pumaTask);
 				serverTasks.put(taskId, task);
-				task.setPumaTaskStatus(Status.PREPARING);
+				task.setStatus(Status.PREPARING);
 
 				initContext(task);
 				startServer(task);
-				task.setPumaTaskStatus(Status.RUNNING);
+				task.setStatus(Status.RUNNING);
 			} catch (Exception e) {
 				LOG.error("Create puma task `{}` error: {}.", taskId, e.getMessage());
 			}
@@ -409,9 +412,9 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 		if (serverTasks != null && serverTasks.containsKey(taskId)) {
 			Server task = serverTasks.get(taskId);
 			try {
-				task.setPumaTaskStatus(Status.STOPPING);
+				task.setStatus(Status.STOPPING);
 				task.stop();
-				task.setPumaTaskStatus(Status.STOPPED);
+				task.setStatus(Status.STOPPED);
 				serverTasks.remove(taskId);
 			} catch (Exception e) {
 				LOG.error("Remove puma task `{}` error: {}.", taskId, e.getMessage());

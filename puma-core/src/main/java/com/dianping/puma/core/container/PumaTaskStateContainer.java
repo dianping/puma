@@ -1,4 +1,4 @@
-package com.dianping.puma.admin.container;
+package com.dianping.puma.core.container;
 
 import com.dianping.puma.core.model.PumaTaskState;
 import com.dianping.puma.core.monitor.Event;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service("pumaTaskStateContainer")
-public class PumaTaskStateContainer implements EventListener {
+public class PumaTaskStateContainer {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PumaTaskStateContainer.class);
 
@@ -21,6 +21,10 @@ public class PumaTaskStateContainer implements EventListener {
 
 	public PumaTaskState get(String taskId) {
 		return stateMap.get(taskId);
+	}
+
+	public List<String> getAllTaskIds() {
+		return new ArrayList<String>(stateMap.keySet());
 	}
 
 	public List<PumaTaskState> getAll() {
@@ -42,22 +46,5 @@ public class PumaTaskStateContainer implements EventListener {
 
 	public void remove(String taskId) {
 		stateMap.remove(taskId);
-	}
-
-	@Override
-	public void onEvent(Event event) {
-		LOG.info("Receive event.");
-
-		if (event instanceof PumaTaskStateEvent) {
-			LOG.info("Receive puma task state event.");
-
-			PumaTaskStateEvent pumaTaskStateEvent = (PumaTaskStateEvent) event;
-			List<String> taskIds = pumaTaskStateEvent.getTaskIds();
-			List<PumaTaskState> states = pumaTaskStateEvent.getStates();
-
-			for (int i = 0; i != taskIds.size() && i != states.size(); ++i) {
-				this.update(taskIds.get(i), states.get(i));
-			}
-		}
 	}
 }

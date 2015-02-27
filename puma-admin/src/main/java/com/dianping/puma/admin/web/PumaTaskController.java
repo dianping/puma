@@ -1,6 +1,7 @@
 package com.dianping.puma.admin.web;
 
-import com.dianping.puma.admin.container.PumaTaskStateContainer;
+import com.dianping.puma.admin.reporter.PumaTaskOperationReporter;
+import com.dianping.puma.core.container.PumaTaskStateContainer;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.model.BinlogInfo;
@@ -8,9 +9,6 @@ import com.dianping.puma.core.entity.PumaServerEntity;
 import com.dianping.puma.core.entity.PumaTaskEntity;
 import com.dianping.puma.core.entity.SrcDBInstanceEntity;
 import com.dianping.puma.core.constant.Operation;
-import com.dianping.puma.core.model.PumaTaskOperation;
-import com.dianping.puma.core.monitor.PumaTaskOperationEvent;
-import com.dianping.puma.core.monitor.SwallowEventPublisher;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import org.slf4j.Logger;
@@ -46,7 +44,7 @@ public class PumaTaskController {
 	PumaTaskStateContainer pumaTaskStateContainer;
 
 	@Autowired
-	SwallowEventPublisher pumaTaskEventPublisher;
+	PumaTaskOperationReporter pumaTaskOperationReporter;
 
 	@RequestMapping(value = { "/puma-task" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
@@ -102,13 +100,7 @@ public class PumaTaskController {
 			this.pumaTaskStateContainer.create(pumaTaskEntity.getId());
 
 			// Publish puma task operation event to puma server.
-			PumaTaskOperationEvent event = new PumaTaskOperationEvent();
-			event.setPumaServerName(pumaServerName);
-			event.setTaskId(pumaTaskEntity.getId());
-			PumaTaskOperation operation = new PumaTaskOperation();
-			operation.setOperation(Operation.ADD);
-			event.setOperation(operation);
-			this.pumaTaskEventPublisher.publish(event);
+			this.pumaTaskOperationReporter.report(pumaServerName, pumaTaskEntity.getId(), Operation.CREATE);
 
 			map.put("success", true);
 		} catch (Exception e) {

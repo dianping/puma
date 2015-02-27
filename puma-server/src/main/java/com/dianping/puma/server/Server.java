@@ -48,13 +48,9 @@ public interface Server extends LifeCycle<Exception> {
 
 	public void setBinlogPositionHolder(BinlogPositionHolder holder);
 
-	public Status getPumaTaskStatus();
+	public Status getStatus();
 
-	public void setPumaTaskStatus(Status status);
-
-	public Controller getPumaTaskController();
-
-	public void setPumaTaskController(Controller controller);
+	public void setStatus(Status status);
 
 	public ReplicationTaskStatus.Status getTaskStatus();
 

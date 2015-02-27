@@ -10,6 +10,18 @@
             http://www.springframework.org/schema/task   
     http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 
+    <bean id="pumaTaskOperationEventPublisher"
+          class="com.dianping.puma.core.monitor.SwallowEventPublisher"
+          init-method="init">
+        <property name="topic" value="puma_task_operation" />
+    </bean>
+
+    <bean id="pumaTaskControllerEventPublisher"
+          class="com.dianping.puma.core.monitor.SwallowEventPublisher"
+          init-method="init">
+        <property name="topic" value="puma_task_controller" />
+    </bean>
+
     <bean id="pumaTaskEventPublisher"
           class="com.dianping.puma.core.monitor.SwallowEventPublisher"
           init-method="init">
@@ -57,7 +69,7 @@
                   value="com.dianping.puma.core.monitor.PumaTaskStateEvent" />
         <property name="listeners">
             <list>
-                <ref bean="pumaTaskStateContainer" />
+                <ref bean="pumaTaskStateChecker" />
             </list>
         </property>
     </bean>

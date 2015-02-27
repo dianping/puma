@@ -1,5 +1,6 @@
 package com.dianping.puma.admin.web;
 
+/*
 import com.dianping.puma.admin.monitor.ReplicationTaskStatusContainer;
 import com.dianping.puma.admin.service.ReplicationTaskService;
 import com.dianping.puma.admin.service.ServerConfigService;
@@ -105,10 +106,9 @@ public class ReplicationTaskController {
 		replicationTask.setFileSenderConfigs(fileSenderConfigs);
 
 		replicationTask.setDbInstanceName(dbInstanceName);
-		/*
 		DBInstanceConfig dbInstanceConfig = dbInstanceConfigService.findByName(dbInstanceName);
 		replicationTask.setDbInstanceHost(dbInstanceConfig.getDbInstanceHost());
-		replicationTask.setDbInstanceMetaHost(dbInstanceConfig.getDbInstanceMetaHost());*/
+		replicationTask.setDbInstanceMetaHost(dbInstanceConfig.getDbInstanceMetaHost());
 
 		replicationTask.setReplicationServerName(replicationServerName);
 		replicationTask.setBinlogInfo(binlogInfo);
@@ -169,3 +169,4 @@ public class ReplicationTaskController {
 		return GsonUtil.toJson(map);
 	}
 }
+*/

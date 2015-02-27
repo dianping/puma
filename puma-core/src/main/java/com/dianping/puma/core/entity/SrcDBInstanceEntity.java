@@ -8,7 +8,7 @@ public class SrcDBInstanceEntity extends BaseEntity {
 
 	private String host;
 
-	private String port;
+	private Integer port;
 
 	private String username;
 
@@ -16,7 +16,7 @@ public class SrcDBInstanceEntity extends BaseEntity {
 
 	private String metaHost;
 
-	private String metaPort;
+	private Integer metaPort;
 
 	private String metaUsername;
 
@@ -46,11 +46,11 @@ public class SrcDBInstanceEntity extends BaseEntity {
 		this.host = host;
 	}
 
-	public String getPort() {
+	public Integer getPort() {
 		return port;
 	}
 
-	public void setPort(String port) {
+	public void setPort(Integer port) {
 		this.port = port;
 	}
 
@@ -78,11 +78,11 @@ public class SrcDBInstanceEntity extends BaseEntity {
 		this.metaHost = metaHost;
 	}
 
-	public String getMetaPort() {
+	public Integer getMetaPort() {
 		return metaPort;
 	}
 
-	public void setMetaPort(String metaPort) {
+	public void setMetaPort(Integer metaPort) {
 		this.metaPort = metaPort;
 	}
 

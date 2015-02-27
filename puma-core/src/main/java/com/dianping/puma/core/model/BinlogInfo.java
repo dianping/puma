@@ -1,4 +1,4 @@
-package com.dianping.puma.core.entity;
+package com.dianping.puma.core.model;
 
 public class BinlogInfo {
 

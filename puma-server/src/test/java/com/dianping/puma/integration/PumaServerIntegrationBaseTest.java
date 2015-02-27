@@ -127,7 +127,7 @@ public abstract class PumaServerIntegrationBaseTest {
         tableMetaInfoFetcher.setMetaDBHost(host);
         tableMetaInfoFetcher.setMetaDBPassword(pwd);
         tableMetaInfoFetcher.setMetaDBPort(port);
-        tableMetaInfoFetcher.setMetaDBUser(user);
+        tableMetaInfoFetcher.setMetaDBUsername(user);
 
         // init dataHandler
         DefaultDataHandler dataHandler = new DefaultDataHandler();
@@ -191,7 +191,7 @@ public abstract class PumaServerIntegrationBaseTest {
         server.setDatabase(db);
         server.setServerId(System.currentTimeMillis());
         server.setEncoding("UTF-8");
-        server.setUser(user);
+        server.setUsername(user);
         server.setPort(port);
         server.setHost(host);
         server.setPassword(pwd);

@@ -51,11 +51,11 @@ public class SrcDBInstanceController {
 			String name,
 			Integer serverId,
 			String host,
-			String port,
+			Integer port,
 			String username,
 			String password,
 			String metaHost,
-			String metaPort,
+			Integer metaPort,
 			String metaUsername,
 			String metaPassword) {
 

@@ -16,6 +16,8 @@ import java.util.List;
 
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.LifeCycle;
+import com.dianping.puma.core.constant.Controller;
+import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.replication.ReplicationTaskStatus;
 import com.dianping.puma.core.replicate.model.task.StatusActionType;
 import com.dianping.puma.sender.Sender;
@@ -45,6 +47,14 @@ public interface Server extends LifeCycle<Exception> {
 	public String getServerName();
 
 	public void setBinlogPositionHolder(BinlogPositionHolder holder);
+
+	public Status getPumaTaskStatus();
+
+	public void setPumaTaskStatus(Status status);
+
+	public Controller getPumaTaskController();
+
+	public void setPumaTaskController(Controller controller);
 
 	public ReplicationTaskStatus.Status getTaskStatus();
 

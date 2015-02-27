@@ -8,6 +8,8 @@ public interface PumaTaskDao {
 
 	PumaTaskEntity find(String id);
 
+	List<PumaTaskEntity> findByPumaServerName(String pumaServerName);
+
 	List<PumaTaskEntity> findAll();
 
 	void create(PumaTaskEntity entity);

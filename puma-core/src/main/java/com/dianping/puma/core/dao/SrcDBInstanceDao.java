@@ -8,6 +8,8 @@ public interface SrcDBInstanceDao {
 
 	SrcDBInstanceEntity find(String id);
 
+	SrcDBInstanceEntity findByName(String name);
+
 	List<SrcDBInstanceEntity> findAll();
 
 	void create(SrcDBInstanceEntity entity);

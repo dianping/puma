@@ -12,32 +12,35 @@
 
     <bean id="statusEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPublisher"
         init-method="init">
-        <property name="topic" value="puma_status_event" />
+        <property name="topic" value="puma_task" />
     </bean>
 
-    <bean id="taskEventSubscriber"
-        class="com.dianping.puma.monitor.ServerTaskEventSubscriber"
+    <bean id="pumaTaskOperationEventSubscriber"
+        class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
         init-method="init">
-        <property name="topic" value="puma_task_event" />
+        <property name="topic" value="puma_task_operation" />
+        <property name="type" value="#{serverConfig.name}" />
         <property name="clazz"
-            value="com.dianping.puma.core.monitor.ReplicationTaskEvent" />
+            value="com.dianping.puma.core.monitor.PumaTaskOperationEvent" />
         <property name="listeners">
             <list>
-                <ref bean="serverTaskChecker" />
+                <ref bean="pumaTaskChecker" />
             </list>
         </property>
     </bean>
 
-	<bean id="taskStatusEventSubscriber"
-        class="com.dianping.puma.monitor.ServerTaskEventSubscriber"
-        init-method="init">
-        <property name="topic" value="puma_task_event" />
+    <bean id="pumaTaskControllerEventSubscriber"
+          class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
+          init-method="init">
+        <property name="topic" value="puma_task_controller" />
+        <property name="type" value="#{serverConfig.name}" />
         <property name="clazz"
-            value="com.dianping.puma.core.monitor.ReplicationTaskStatusActionEvent" />
+                  value="com.dianping.puma.core.monitor.PumaTaskControllerEvent" />
         <property name="listeners">
             <list>
-                <ref bean="serverTaskChecker" />
+                <ref bean="pumaTaskChecker" />
             </list>
         </property>
     </bean>
+
 </beans>

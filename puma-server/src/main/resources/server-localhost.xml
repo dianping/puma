@@ -10,7 +10,7 @@
         parent="notifiableBean">
         <property name="host" value="127.0.0.1" />
         <property name="port" value="3306" />
-        <property name="user" value="root" />
+        <property name="username" value="root" />
         <property name="password" value="123456" />
         <property name="defaultBinlogFileName" value="mysql-bin.000011" />
         <property name="defaultBinlogPosition" value="491" />
@@ -55,7 +55,7 @@
         class="com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher">
         <property name="metaDBHost" value="127.0.0.1" />
         <property name="metaDBPort" value="3306" />
-        <property name="metaDBUser" value="root" />
+        <property name="metaDBUsername" value="root" />
         <property name="metaDBPassword" value="123456" />
     </bean>
 

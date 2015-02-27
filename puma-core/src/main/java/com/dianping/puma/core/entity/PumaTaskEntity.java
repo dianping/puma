@@ -1,5 +1,7 @@
 package com.dianping.puma.core.entity;
 
+import com.dianping.puma.core.model.BinlogInfo;
+
 public class PumaTaskEntity extends BaseEntity {
 
 	private String srcDBInstanceName;

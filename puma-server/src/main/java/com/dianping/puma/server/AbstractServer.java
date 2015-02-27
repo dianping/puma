@@ -1,9 +1,9 @@
 /**
  * Project: ${puma-server.aid}
- * 
+ *
  * File Created at 2012-6-21
  * $Id$
- * 
+ *
  * Copyright 2010 dianping.com.
  * All rights reserved.
  *
@@ -19,6 +19,8 @@ import java.util.List;
 
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
+import com.dianping.puma.core.constant.Controller;
+import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.replication.ReplicationTaskStatus;
 import com.dianping.puma.core.monitor.Notifiable;
 import com.dianping.puma.core.monitor.NotifyService;
@@ -31,182 +33,204 @@ import com.dianping.puma.sender.dispatcher.Dispatcher;
 
 /**
  * TODO Comment of AbstractServer
- * 
+ *
  * @author Leo Liang
- * 
  */
 @ThreadUnSafe
 public abstract class AbstractServer implements Server, Notifiable {
-    private PumaContext            context;
-    private String                 defaultBinlogFileName;
-    private Long                   defaultBinlogPosition;
-    protected Parser               parser;
-    protected DataHandler          dataHandler;
-    protected Dispatcher           dispatcher;
-    private long                   serverId;
-    protected NotifyService        notifyService;
-    private volatile boolean       stop     = false;
-    protected BinlogPositionHolder binlogPositionHolder;
+	private PumaContext context;
 
-    protected String               name;
+	private String defaultBinlogFileName;
 
-    protected ReplicationTaskStatus.Status taskStatus;
-    protected StatusActionType statusActionType;
-    
-    protected StatusExecutorType statusExecutorType;
+	private Long defaultBinlogPosition;
 
-    /**
-     * @param binlogPositionHolder
-     *            the binlogPositionHolder to set
-     */
-    public void setBinlogPositionHolder(BinlogPositionHolder binlogPositionHolder) {
-        this.binlogPositionHolder = binlogPositionHolder;
-    }
+	protected Parser parser;
 
-    /**
-     * @param notifyService
-     *            the notifyService to set
-     */
-    public void setNotifyService(NotifyService notifyService) {
-        this.notifyService = notifyService;
-    }
+	protected DataHandler dataHandler;
 
-    public void setContext(PumaContext context) {
-        this.context = context;
-    }
+	protected Dispatcher dispatcher;
 
-    public PumaContext getContext() {
-        return context;
-    }
+	private long serverId;
 
-    public String getDefaultBinlogFileName() {
-        return defaultBinlogFileName;
-    }
+	protected NotifyService notifyService;
 
-    public void setDefaultBinlogFileName(String binlogFileName) {
-        this.defaultBinlogFileName = binlogFileName;
-    }
+	private volatile boolean stop = false;
 
-    /**
-     * @return the defaultBinlogPosition
-     */
-    public Long getDefaultBinlogPosition() {
-        return defaultBinlogPosition;
-    }
+	protected BinlogPositionHolder binlogPositionHolder;
 
-    /**
-     * @param defaultBinlogPosition
-     *            the defaultBinlogPosition to set
-     */
-    public void setDefaultBinlogPosition(Long defaultBinlogPosition) {
-        this.defaultBinlogPosition = defaultBinlogPosition;
-    }
+	protected String name;
 
-    /**
-     * @param parser
-     *            the parser to set
-     */
-    public void setParser(Parser parser) {
-        this.parser = parser;
-    }
+	protected Status status;
 
-    /**
-     * @param dataHandler
-     *            the dataHandler to set
-     */
-    public void setDataHandler(DataHandler dataHandler) {
-        this.dataHandler = dataHandler;
-    }
+	protected Controller controller;
 
-    /**
-     * @param dispatcher
-     *            the dispatcher to set
-     */
-    public void setDispatcher(Dispatcher dispatcher) {
-        this.dispatcher = dispatcher;
-    }
+	protected ReplicationTaskStatus.Status taskStatus;
 
-    /**
-     * @return the serverId
-     */
-    public long getServerId() {
-        return serverId;
-    }
+	protected StatusActionType statusActionType;
 
-    /**
-     * @param serverId
-     *            the serverId to set
-     */
-    public void setServerId(long serverId) {
-        this.serverId = serverId;
-    }
+	protected StatusExecutorType statusExecutorType;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.dianping.puma.server.Server#getName()
-     */
-    @Override
-    public String getServerName() {
-        return name;
-    }
+	/**
+	 * @param binlogPositionHolder the binlogPositionHolder to set
+	 */
+	public void setBinlogPositionHolder(BinlogPositionHolder binlogPositionHolder) {
+		this.binlogPositionHolder = binlogPositionHolder;
+	}
 
-    public String getName() {
-   	return name;
-   }
+	/**
+	 * @param notifyService the notifyService to set
+	 */
+	public void setNotifyService(NotifyService notifyService) {
+		this.notifyService = notifyService;
+	}
 
-	public void setName(String name) {
-   	this.name = name;
-   }
+	public void setContext(PumaContext context) {
+		this.context = context;
+	}
+
+	public PumaContext getContext() {
+		return context;
+	}
+
+	public String getDefaultBinlogFileName() {
+		return defaultBinlogFileName;
+	}
+
+	public void setDefaultBinlogFileName(String binlogFileName) {
+		this.defaultBinlogFileName = binlogFileName;
+	}
+
+	/**
+	 * @return the defaultBinlogPosition
+	 */
+	public Long getDefaultBinlogPosition() {
+		return defaultBinlogPosition;
+	}
+
+	/**
+	 * @param defaultBinlogPosition the defaultBinlogPosition to set
+	 */
+	public void setDefaultBinlogPosition(Long defaultBinlogPosition) {
+		this.defaultBinlogPosition = defaultBinlogPosition;
+	}
+
+	/**
+	 * @param parser the parser to set
+	 */
+	public void setParser(Parser parser) {
+		this.parser = parser;
+	}
+
+	/**
+	 * @param dataHandler the dataHandler to set
+	 */
+	public void setDataHandler(DataHandler dataHandler) {
+		this.dataHandler = dataHandler;
+	}
+
+	/**
+	 * @param dispatcher the dispatcher to set
+	 */
+	public void setDispatcher(Dispatcher dispatcher) {
+		this.dispatcher = dispatcher;
+	}
+
+	/**
+	 * @return the serverId
+	 */
+	public long getServerId() {
+		return serverId;
+	}
+
+	/**
+	 * @param serverId the serverId to set
+	 */
+	public void setServerId(long serverId) {
+		this.serverId = serverId;
+	}
 
 	/*
-     * (non-Javadoc)
+	  * (non-Javadoc)
+	  *
+	  * @see com.dianping.puma.server.Server#getName()
+	  */
+	@Override
+	public String getServerName() {
+		return name;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/*
+	  * (non-Javadoc)
      * 
      * @see com.dianping.puma.server.Server#stop()
      */
-    @Override
-    public void stop() throws Exception {
-        doStop();
-        stop = true;
+	@Override
+	public void stop() throws Exception {
+		doStop();
+		stop = true;
 
-        parser.stop();
-        dataHandler.stop();
-        dispatcher.stop();
-    }
+		parser.stop();
+		dataHandler.stop();
+		dispatcher.stop();
+	}
 
-    public boolean isStop() {
-        return stop;
-    }
+	public boolean isStop() {
+		return stop;
+	}
 
-    protected abstract void doStop() throws Exception;
+	protected abstract void doStop() throws Exception;
 
-    protected abstract void doStart() throws Exception;
+	protected abstract void doStart() throws Exception;
 
-    public void start() throws Exception {
-        stop = false;
-        doStart();
-    }
+	public void start() throws Exception {
+		stop = false;
+		doStart();
+	}
 
-    @Override
+	public Status getStatus() {
+		return status;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+
+	public Controller getController() {
+		return controller;
+	}
+
+	public void setController(Controller controller) {
+		this.controller = controller;
+	}
+
+	@Override
 	public void setStatusActionType(StatusActionType statusActionType) {
 		this.statusActionType = statusActionType;
 	}
 
-    @Override
+	@Override
 	public StatusActionType getStatusActionType() {
 		return statusActionType;
 	}
 
-    @Override
-    public List<Sender> getFileSender(){
-    	return dispatcher.getSenders();
-    }
+	@Override
+	public List<Sender> getFileSender() {
+		return dispatcher.getSenders();
+	}
 
-    public ReplicationTaskStatus.Status getTaskStatus() {
-        return taskStatus;
-    }
+	public ReplicationTaskStatus.Status getTaskStatus() {
+		return taskStatus;
+	}
 
-    public void setTaskStatus(ReplicationTaskStatus.Status taskStatus) {
-        this.taskStatus = taskStatus;
-    }
+	public void setTaskStatus(ReplicationTaskStatus.Status taskStatus) {
+		this.taskStatus = taskStatus;
+	}
 }

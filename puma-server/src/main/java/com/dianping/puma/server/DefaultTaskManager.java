@@ -1,6 +1,5 @@
 package com.dianping.puma.server;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -8,9 +7,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
+import com.dianping.puma.core.constant.Status;
+import com.dianping.puma.core.entity.PumaTaskEntity;
+import com.dianping.puma.core.entity.SrcDBInstanceEntity;
 import com.dianping.puma.core.entity.replication.ReplicationTaskStatus;
+import com.dianping.puma.core.monitor.PumaTaskOperationEvent;
+import com.dianping.puma.core.service.PumaTaskService;
+import com.dianping.puma.core.service.SrcDBInstanceService;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.monitor.ReplicationTaskStatusContainer;
-import org.apache.log4j.Logger;
+import com.dianping.puma.storage.DefaultEventStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,10 +28,7 @@ import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.config.InitializeServerConfig;
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.monitor.NotifyService;
-import com.dianping.puma.core.monitor.ReplicationTaskEvent;
 import com.dianping.puma.core.monitor.ReplicationTaskStatusActionEvent;
-import com.dianping.puma.core.replicate.model.config.FileSenderConfig;
-import com.dianping.puma.core.replicate.model.task.ReplicationTask;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.datahandler.DefaultDataHandler;
 import com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher;
@@ -31,18 +36,13 @@ import com.dianping.puma.parser.DefaultBinlogParser;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
-import com.dianping.puma.sender.dispatcher.SimpleDispatherImpl;
 import com.dianping.puma.service.ReplicationTaskService;
-import com.dianping.puma.storage.DefaultArchiveStrategy;
-import com.dianping.puma.storage.DefaultCleanupStrategy;
-import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.EventStorage;
-import com.dianping.puma.storage.LocalFileBucketIndex;
 
 @Service("taskManager")
 public class DefaultTaskManager implements TaskManager, InitializingBean {
 
-	private static Logger log = Logger.getLogger(DefaultTaskManager.class);
+	private static Logger LOG = LoggerFactory.getLogger(DefaultTaskManager.class);
 
 	private ConcurrentHashMap<String, Server> serverTasks = null;
 
@@ -50,6 +50,12 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 	
 	@Autowired
 	private ReplicationTaskService replicationTaskService;
+
+	@Autowired
+	private PumaTaskService pumaTaskService;
+
+	@Autowired
+	private SrcDBInstanceService srcDBInstanceService;
 
 	private String serverName;
 	@Autowired
@@ -71,23 +77,76 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 
 	@Override
 	public ConcurrentHashMap<String, Server> constructServers() throws Exception {
-		log.info("starting construct servers.........");
-		List<ReplicationTask> replicationTasks = replicationTaskService
-				.find(serverName);
-		if (replicationTasks != null && replicationTasks.size() > 0) {
-			Server server = null;
-			for (ReplicationTask replicationTask : replicationTasks) {
-				server = construct(replicationTask);
+		LOG.info("starting construct servers.........");
+
+		List<PumaTaskEntity> pumaTasks = pumaTaskService.findByPumaServerName(serverName);
+		if (pumaTasks != null && !pumaTasks.isEmpty()) {
+			Server server;
+			for (PumaTaskEntity pumaTask: pumaTasks) {
+				server = construct(pumaTask);
 				serverTasks.put(server.getServerName(), server);
 			}
 		}
-		log.info("ended construct servers.........");
+
+		LOG.info("ended construct servers.........");
 		return serverTasks;
 	}
 
 	@Override
+	public Server construct(PumaTaskEntity pumaTask) throws Exception {
+		LOG.info("Construct server: {}.", pumaTask.getId());
+
+		ReplicationBasedServer server = new ReplicationBasedServer();
+
+		// Source database.
+		String srcDBInstanceName = pumaTask.getSrcDBInstanceName();
+		SrcDBInstanceEntity srcDBInstance = srcDBInstanceService.findByName(srcDBInstanceName);
+		server.setServerId(srcDBInstance.getServerId());
+		server.setHost(srcDBInstance.getHost());
+		server.setPort(srcDBInstance.getPort());
+		server.setUsername(srcDBInstance.getUsername());
+		server.setPassword(srcDBInstance.getPassword());
+
+		// Bin log information.
+		BinlogInfo binlogInfo = pumaTask.getBinlogInfo();
+		server.setDefaultBinlogFileName(binlogInfo.getBinlogFile());
+		server.setDefaultBinlogPosition(binlogInfo.getBinlogPosition());
+		server.setBinlogPositionHolder(binlogPositionHolder);
+		server.setPumaTaskStatus(Status.WAITING);
+
+		// Parser.
+		Parser parser = new DefaultBinlogParser();
+		parser.start();
+		server.setParser(parser);
+
+		// Table meta information.
+		DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
+		tableMetaInfo.setMetaDBHost(srcDBInstance.getMetaHost());
+		tableMetaInfo.setMetaDBPort(srcDBInstance.getMetaPort());
+		tableMetaInfo.setMetaDBUsername(srcDBInstance.getMetaUsername());
+		tableMetaInfo.setMetaDBPassword(srcDBInstance.getMetaPassword());
+
+		// Handler.
+		DefaultDataHandler dataHandler = new DefaultDataHandler();
+		dataHandler.setNotifyService(notifyService);
+		dataHandler.setTableMetasInfoFetcher(tableMetaInfo);
+		dataHandler.start();
+		server.setDataHandler(dataHandler);
+
+		// File senders.
+		FileDumpSender sender = new FileDumpSender();
+		DefaultEventStorage storage = new DefaultEventStorage();
+		storage.start();
+		sender.setStorage(storage);
+		sender.start();
+
+		return server;
+	}
+
+	/*
+	@Override
 	public Server construct(ReplicationTask replicationTask) throws Exception {
-		log.info("construct server " + replicationTask.getTaskName()
+		LOG.info("construct server " + replicationTask.getTaskName()
 				+ ".......");
 		ReplicationBasedServer server = new ReplicationBasedServer();
 		server.setNotifyService(notifyService);
@@ -95,11 +154,10 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 		server.setServerId(replicationTask.getTaskId().hashCode());
 		server.setHost(replicationTask.getDbInstanceHost().getHost());
 		server.setPort(replicationTask.getDbInstanceHost().getPort());
-		server.setUser(replicationTask.getDbInstanceHost().getUsername());
+		server.setUsername(replicationTask.getDbInstanceHost().getUsername());
 		server.setPassword(replicationTask.getDbInstanceHost().getPassword());
 		server.setDefaultBinlogFileName(replicationTask.getBinlogInfo()
 				.getBinlogFile());
-		server.setDbServerId(1);
 		server.setDefaultBinlogPosition(replicationTask.getBinlogInfo()
 				.getBinlogPosition());
 		server.setBinlogPositionHolder(binlogPositionHolder);
@@ -114,7 +172,7 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 				.getHost());
 		tableMetaInfo.setMetaDBPort(replicationTask.getDbInstanceMetaHost()
 				.getPort());
-		tableMetaInfo.setMetaDBUser(replicationTask.getDbInstanceMetaHost()
+		tableMetaInfo.setMetaDBUsername(replicationTask.getDbInstanceMetaHost()
 				.getUsername());
 		tableMetaInfo.setMetaDBPassword(replicationTask.getDbInstanceMetaHost()
 				.getPassword());
@@ -188,7 +246,7 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 		replicationTaskStatusContainer.add(replicationTask.getTaskId(), taskStatus);
 
 		return server;
-	}
+	}*/
 
 	@Override
 	public boolean contain(String taskName) {
@@ -205,7 +263,7 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 			initContext(server);
 			startServer(server);
 			serverTasks.put(server.getServerName(), server);
-			log.info("Server " + server.getServerName()
+			LOG.info("Server " + server.getServerName()
 					+ " started at binlogFile: "
 					+ server.getContext().getBinlogFileName() + " position: "
 					+ server.getContext().getBinlogStartPos());
@@ -238,16 +296,16 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 	public void stopServer(Server server) {
 		try {
 			server.stop();
-			log.info("Server " + server.getServerName() + " stopped.");
+			LOG.info("Server " + server.getServerName() + " stopped.");
 		} catch (Exception e) {
-			log.error("Stop Server" + server.getServerName() + " failed.", e);
+			LOG.error("Stop Server" + server.getServerName() + " failed.", e);
 			e.printStackTrace();
 		}
 	}
 
 	@Override
 	public void stopServers() {
-		log.info("Stopping...");
+		LOG.info("Stopping...");
 		for (Map.Entry<String, Server> item : serverTasks.entrySet()) {
 			stopServer(item.getValue());
 		}
@@ -261,7 +319,7 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 				try {
 					server.start();
 				} catch (Exception e) {
-					log.error("Start server: " + server.getServerName()
+					LOG.error("Start server: " + server.getServerName()
 							+ " failed.", e);
 				}
 			}
@@ -291,9 +349,9 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 					task.setTaskStatus(ReplicationTaskStatus.Status.STOPPING);
 					task.stop();
 					task.setTaskStatus(ReplicationTaskStatus.Status.STOPPED);
-					log.info("Server " + task.getServerName() + " stopped.");
+					LOG.info("Server " + task.getServerName() + " stopped.");
 				} catch (Exception e) {
-					log.error(
+					LOG.error(
 							"Stop Server" + task.getServerName() + " failed.",
 							e);
 					task.setTaskStatus(ReplicationTaskStatus.Status.FAILED);
@@ -318,6 +376,51 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 	}
 
 	@Override
+	public void createEvent(PumaTaskOperationEvent event) {
+		String taskId = event.getTaskId();
+
+		if (!serverTasks.containsKey(taskId)) {
+			PumaTaskEntity pumaTask = pumaTaskService.find(taskId);
+			Server task = null;
+
+			try {
+				task = construct(pumaTask);
+				serverTasks.put(taskId, task);
+				task.setPumaTaskStatus(Status.PREPARING);
+
+				initContext(task);
+				startServer(task);
+				task.setPumaTaskStatus(Status.RUNNING);
+			} catch (Exception e) {
+				LOG.error("Create puma task `{}` error: {}.", taskId, e.getMessage());
+			}
+		}
+	}
+
+	@Override
+	public void updateEvent(PumaTaskOperationEvent event) {
+
+	}
+
+	@Override
+	public void removeEvent(PumaTaskOperationEvent event) {
+		String taskId = event.getTaskId();
+
+		if (serverTasks != null && serverTasks.containsKey(taskId)) {
+			Server task = serverTasks.get(taskId);
+			try {
+				task.setPumaTaskStatus(Status.STOPPING);
+				task.stop();
+				task.setPumaTaskStatus(Status.STOPPED);
+				serverTasks.remove(taskId);
+			} catch (Exception e) {
+				LOG.error("Remove puma task `{}` error: {}.", taskId, e.getMessage());
+			}
+		}
+	}
+
+	/*
+	@Override
 	public void addEvent(ReplicationTaskEvent event) {
 		if (!serverTasks.containsKey(event.getTaskName())) {
 			ReplicationTask serverTask = replicationTaskService.findByTaskId(event.getTaskId());
@@ -329,17 +432,18 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 				initContext(task);
 				startServer(task);
 				task.setTaskStatus(ReplicationTaskStatus.Status.RUNNING);
-				log.info("Server " + task.getServerName()
+				LOG.info("Server " + task.getServerName()
 						+ " started at binlogFile: "
 						+ task.getContext().getBinlogFileName() + " position: "
 						+ task.getContext().getBinlogStartPos());
 			} catch (Exception e) {
-				log.error("add Server" + task.getServerName() + " failed.", e);
+				LOG.error("add Server" + task.getServerName() + " failed.", e);
 				e.printStackTrace();
 			}
 		}
-	}
+	}*/
 
+	/*
 	@Override
 	public void deleteEvent(ReplicationTaskEvent event) {
 		if (serverTasks != null && serverTasks.containsKey(event.getTaskName())) {
@@ -350,13 +454,14 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 				task.setTaskStatus(ReplicationTaskStatus.Status.STOPPED);
 				serverTasks.remove(event.getTaskName());
 			} catch (Exception e) {
-				log.error("delete Server" + task.getServerName() + " failed.",
+				LOG.error("delete Server" + task.getServerName() + " failed.",
 						e);
 				e.printStackTrace();
 			}
 		}
-	}
+	}*/
 
+	/*
 	@Override
 	public void updateEvent(ReplicationTaskEvent event) {
 		if (serverTasks != null && serverTasks.containsKey(event.getTaskName())) {
@@ -367,7 +472,7 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 				task.setTaskStatus(ReplicationTaskStatus.Status.STOPPED);
 				serverTasks.remove(event.getTaskName());
 			} catch (Exception e) {
-				log.error("delete Server" + task.getServerName() + " failed.",
+				LOG.error("delete Server" + task.getServerName() + " failed.",
 						e);
 				e.printStackTrace();
 			}
@@ -382,13 +487,13 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 				task.setTaskStatus(ReplicationTaskStatus.Status.RUNNING);
 
 			} catch (Exception e) {
-				log.error("start Server" + task.getServerName()
-								+ " failed.", e);
+				LOG.error("start Server" + task.getServerName()
+						+ " failed.", e);
 				e.printStackTrace();
 			}
 
 		}
-	}
+	}*/
 
 	@Override
 	public void afterPropertiesSet() throws Exception {

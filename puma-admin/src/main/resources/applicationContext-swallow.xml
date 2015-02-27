@@ -10,6 +10,12 @@
             http://www.springframework.org/schema/task   
     http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 
+    <bean id="pumaTaskEventPublisher"
+          class="com.dianping.puma.core.monitor.SwallowEventPublisher"
+          init-method="init">
+        <property name="topic" value="puma_task_event" />
+    </bean>
+
     <bean id="taskEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPublisher"
         init-method="init">
         <property name="topic" value="puma_task_event" />
@@ -39,17 +45,19 @@
         </property>
     </bean>
 
-    <bean id="replicationTaskStatusSubscriber"
+    <bean id="pumaTaskStateSubscriber"
           class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
           init-method="init">
+        <!--@TODO-->
         <property name="topic" value="puma_status_event"/>
+        <!--@TODO-->
         <property name="type" value="replication"/>
         <property name="notifyService" ref="notifyService"/>
         <property name="clazz"
-                  value="com.dianping.puma.core.monitor.ReplicationTaskStatusEvent" />
+                  value="com.dianping.puma.core.monitor.PumaTaskStateEvent" />
         <property name="listeners">
             <list>
-                <ref bean="replicationTaskStatusContainer" />
+                <ref bean="pumaTaskStateContainer" />
             </list>
         </property>
     </bean>

@@ -50,6 +50,22 @@
 
 	<bean id="mongoClient" class="com.dianping.puma.core.dao.morphia.MongoClient">
 	</bean>
+	
+	<bean id="defaultSender" class="com.dianping.puma.sender.FileDumpSender">
+		<property name="storage">
+			<bean class="com.dianping.puma.storage.DefaultEventStorage">
+				<property name="name" value="" />
+
+				<property name="masterBucketIndex">
+					<bean class="com.dianping.puma.storage.LocalFileBucketIndex">
+						<property name="bucketFilePrefix" value=""/>
+						<property name="maxBucketLengthMB" value="0"/>
+						<property name="baseDir" value=""/>
+					</bean>
+				</property>
+			</bean>
+		</property>
+	</bean>
 
 	<!--bean id="mongoClient2" class="com.dianping.puma.core.dao.morphia.MongoClient">
 	</bean-->

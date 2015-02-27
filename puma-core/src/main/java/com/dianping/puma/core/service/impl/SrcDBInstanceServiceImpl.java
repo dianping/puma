@@ -20,6 +20,11 @@ public class SrcDBInstanceServiceImpl implements SrcDBInstanceService {
 	}
 
 	@Override
+	public SrcDBInstanceEntity findByName(String name) {
+		return srcDbInstanceDao.findByName(name);
+	}
+
+	@Override
 	public List<SrcDBInstanceEntity> findAll() {
 		return srcDbInstanceDao.findAll();
 	}

@@ -53,7 +53,7 @@ public class ReplicationBasedServer extends AbstractServer {
     private static final Logger log      = Logger.getLogger(ReplicationBasedServer.class);
     private int                 port     = 3306;
     private String              host;
-    private String              user;
+    private String username;
     private long                dbServerId;
     private String              password;
     private String              database;
@@ -85,7 +85,7 @@ public class ReplicationBasedServer extends AbstractServer {
 
                 if (auth()) {
                     log.info("Server logined... serverId: " + getServerId() + " host: " + host + " port: " + port
-                            + " user: " + user + " database: " + database + " dbServerId: " + getDbServerId());
+                            + " username: " + username + " database: " + database + " dbServerId: " + getDbServerId());
 
                     if (dumpBinlog()) {
                         log.info("Dump binlog command success.");
@@ -296,7 +296,7 @@ public class ReplicationBasedServer extends AbstractServer {
                 PacketType.AUTHENTICATE_PACKET, getContext());
 
         authPacket.setPassword(password);
-        authPacket.setUser(user);
+        authPacket.setUser(username);
         authPacket.setDatabase(database);
         authPacket.buildPacket(getContext());
         authPacket.write(os, getContext());
@@ -362,12 +362,12 @@ public class ReplicationBasedServer extends AbstractServer {
         this.host = host;
     }
 
-    public String getUser() {
-        return user;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUser(String user) {
-        this.user = user;
+    public void setUsername(String user) {
+        this.username = user;
     }
 
     public String getPassword() {

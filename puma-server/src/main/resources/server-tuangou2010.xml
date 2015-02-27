@@ -10,7 +10,7 @@
         parent="notifiableBean">
         <property name="host" value="${puma.tuangou_host}" />
         <property name="port" value="${puma.tuangou_port}" />
-        <property name="user" value="${puma.tuangou_username}" />
+        <property name="username" value="${puma.tuangou_username}" />
         <property name="password" value="${puma.tuangou_password}" />
         <property name="defaultBinlogFileName" value="mysql-bin.000093" />
         <property name="defaultBinlogPosition" value="574522159" />
@@ -55,7 +55,7 @@
         class="com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher">
         <property name="metaDBHost" value="${puma.tuangou_host}" />
         <property name="metaDBPort" value="${puma.tuangou_port}" />
-        <property name="metaDBUser" value="${puma.tuangou_username}" />
+        <property name="metaDBUsername" value="${puma.tuangou_username}" />
         <property name="metaDBPassword" value="${puma.tuangou_password}" />
     </bean>
 

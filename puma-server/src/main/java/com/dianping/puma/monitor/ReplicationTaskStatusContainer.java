@@ -1,7 +1,7 @@
 package com.dianping.puma.monitor;
 
 import com.dianping.puma.common.SystemStatusContainer;
-import com.dianping.puma.core.entity.BinlogInfo;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.entity.replication.ReplicationTaskStatus;
 import com.dianping.puma.core.replicate.model.task.ReplicationTask;
 import com.dianping.puma.server.DefaultTaskManager;

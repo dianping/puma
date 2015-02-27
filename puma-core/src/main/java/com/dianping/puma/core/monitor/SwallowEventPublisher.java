@@ -20,12 +20,9 @@ public class SwallowEventPublisher implements EventPublisher {
 
     @Override
     public void publish(Event event) throws SendFailedException {
-        if (event instanceof ReplicationEvent) {
-            if (event instanceof ReplicationTaskEvent) {
-                producer.sendMessage(event, ((ReplicationTaskEvent) event).getReplicationServerName());
-            } else if (event instanceof ReplicationTaskStatusEvent) {
-                producer.sendMessage(event, "replication");
-            }
+        if (event instanceof PumaTaskEvent) {
+            String pumaServerName = ((PumaTaskEvent) event).getPumaServerName();
+            producer.sendMessage(event, pumaServerName);
         } else {
             if (event instanceof TaskEvent) {
                 producer.sendMessage(event, event.getSyncServerName());

@@ -28,6 +28,13 @@ public class SrcDBInstanceMorphiaDao extends BasicDAO<SrcDBInstanceMorphiaEntity
 		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();
 	}
 
+	public SrcDBInstanceEntity findByName(String name) {
+		Query<SrcDBInstanceMorphiaEntity> q = this.getDatastore().createQuery(SrcDBInstanceMorphiaEntity.class).disableValidation();
+		q.field("entity.name").equal(name);
+		SrcDBInstanceMorphiaEntity morphiaEntity = this.findOne(q);
+		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();
+	}
+
 	public List<SrcDBInstanceEntity> findAll() {
 		Query<SrcDBInstanceMorphiaEntity> q = this.getDatastore().createQuery(SrcDBInstanceMorphiaEntity.class);
 		QueryResults<SrcDBInstanceMorphiaEntity> result = this.find(q);

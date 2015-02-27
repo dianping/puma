@@ -39,7 +39,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 	private AtomicReference<Map<String, TableMetaInfo>> tableMetaInfoCache = new AtomicReference<Map<String, TableMetaInfo>>();
 	private int metaDBPort = 3306;
 	private String metaDBHost;
-	private String metaDBUser;
+	private String metaDBUsername;
 	private String metaDBPassword;
 	private MysqlDataSource metaDs;
 
@@ -59,12 +59,12 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 		this.metaDBHost = metaDBHost;
 	}
 
-	public String getMetaDBUser() {
-		return metaDBUser;
+	public String getMetaDBUsername() {
+		return metaDBUsername;
 	}
 
-	public void setMetaDBUser(String metaDBUser) {
-		this.metaDBUser = metaDBUser;
+	public void setMetaDBUsername(String metaDBUsername) {
+		this.metaDBUsername = metaDBUsername;
 	}
 
 	public String getMetaDBPassword() {
@@ -180,7 +180,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 		if (metaDs == null) {
 			metaDs = new MysqlDataSource();
 			metaDs.setUrl("jdbc:mysql://" + metaDBHost + ":" + metaDBPort);
-			metaDs.setUser(metaDBUser);
+			metaDs.setUser(metaDBUsername);
 			metaDs.setPassword(metaDBPassword);
 		}
 	}

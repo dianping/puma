@@ -17,7 +17,7 @@
 		
 		<property name="host" value="127.0.0.1" />
 		<property name="port" value="3306" />
-		<property name="user" value="root" />
+		<property name="username" value="root" />
 		<property name="password" value="admin" />
 		<property name="name" value="server-7_43" />
 		<!-- 
@@ -68,12 +68,12 @@
 		<!-- 
 		<property name="metaDBHost" value="192.168.7.43" />
 		<property name="metaDBPort" value="3306" />
-		<property name="metaDBUser" value="binlog" />
+		<property name="metaDBUsername" value="binlog" />
 		<property name="metaDBPassword" value="binlog" />
 		 -->
 		<property name="metaDBHost" value="127.0.0.1" />
 		<property name="metaDBPort" value="3306" />
-		<property name="metaDBUser" value="root" />
+		<property name="metaDBUsername" value="root" />
 		<property name="metaDBPassword" value="admin" />
 	</bean>
 

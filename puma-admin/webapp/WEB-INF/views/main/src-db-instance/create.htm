@@ -12,11 +12,12 @@
       <form id="src-db-instance-create-form" class="form-horizontal" method="post"
             action="${rc.contextPath}/src-db-instance/create" target="${rc.contextPath}/src-db-instance">
          <div class="panel-body">
-            <div class="form-group has-success has-feedback">
+
+            <div id="name-form-group" class="form-group has-feedback">
                <label class="col-md-2 control-label" for="name">数据库实例名称</label>
                <div class="col-md-7">
                   <input id="name" name="name" class="form-control" #if(${entity}) value="${entity.name}" #end>
-                  <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
+                  <span id="name-feedback-icon" class="glyphicon form-control-feedback" aria-hidden="true"></span>
                </div>
                <div class="col-md-3" hidden="hidden">
                   <p class="help-block">hello</p>

@@ -12,25 +12,36 @@
       <form id="puma-server-create-form" class="form-horizontal" method="post"
             action="${rc.contextPath}/puma-server/create" target="${rc.contextPath}/puma-server">
          <div class="panel-body">
-            <div class="form-group has-success has-feedback">
+
+            <div class="form-group">
                <label class="col-md-2 control-label" for="name">服务器名称</label>
-               <div class="col-md-7">
-                  <input id="name" name="name" class="form-control">
-                  <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
+               <div class="col-md-7 validation-div">
+                  <input id="name" name="name" class="validation-input form-control"
+                         format="server-name" placeholder="name">
+                  <span class="validation-span"></span>
                </div>
+
                <div class="col-md-3" hidden="hidden">
                   <p class="help-block">hello</p>
                </div>
             </div>
 
             <div class="form-group">
+
                <label class="col-md-2 control-label" for="host">IP地址</label>
-               <div class="col-md-5">
-                  <input id="host" name="host" class="form-control">
+               <div class="col-md-5 validation-div">
+                  <input id="host" name="host" class="form-control validation-input"
+                         format="host" placeholder="host">
+                  <span class="validation-span"></span>
                </div>
-               <div class="col-md-2">
-                  <input id="port" name="port" class="form-control">
+
+               <label class="sr-only" for="port">IP端口</label>
+               <div class="col-md-2 validation-div">
+                  <input id="port" name="port" class="form-control validation-input"
+                         format="port" placeholder="port">
+                  <span class="validation-span" aria-hidden="true"></span>
                </div>
+
             </div>
          </div>
       </form>

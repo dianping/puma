@@ -26,26 +26,42 @@ public class DstDBInstanceController {
 	@Autowired
 	DstDBInstanceService dstDBInstanceService;
 
-	@RequestMapping(value = { "/dstDBInstance" })
+	@RequestMapping(value = { "/dst-db-instance" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		List<DstDBInstanceEntity> dstDBInstanceEntities = dstDBInstanceService.findAll();
 
 		map.put("entities", dstDBInstanceEntities);
-		map.put("path", "dstDBInstance");
+		map.put("path", "dst-db-instance");
 		return new ModelAndView("main/container", map);
 	}
 
-	@RequestMapping(value = { "/dstDBInstance/create" })
+	@RequestMapping(value = { "/dst-db-instance/create" })
 	public ModelAndView create(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("path", "dstDBInstance");
+		map.put("path", "dst-db-instance");
 		map.put("subPath", "create");
 		return new ModelAndView("main/container", map);
 	}
 
-	@RequestMapping(value = { "/dstDBInstance/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = { "/dst-db-instance/update" })
+	public ModelAndView update(String id) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			DstDBInstanceEntity entity = dstDBInstanceService.find(id);
+			map.put("entity", entity);
+			map.put("path", "dst-db-instance");
+			map.put("subPath", "create");
+		} catch (Exception e) {
+			// @TODO: error page.
+		}
+
+		return new ModelAndView("main/container", map);
+	}
+
+	@RequestMapping(value = { "/dst-db-instance/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String createPost(
 			String name,
@@ -75,6 +91,21 @@ public class DstDBInstanceController {
 
 		try {
 			this.dstDBInstanceService.create(dstDBInstanceEntity);
+			map.put("success", true);
+		} catch (Exception e) {
+			map.put("success", false);
+		}
+
+		return GsonUtil.toJson(map);
+	}
+
+	@RequestMapping(value = { "/dst-db-instance/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String createPost(String id) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			this.dstDBInstanceService.remove(id);
 			map.put("success", true);
 		} catch (Exception e) {
 			map.put("success", false);

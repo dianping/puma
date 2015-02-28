@@ -43,6 +43,22 @@ public class PumaServerController {
 		return new ModelAndView("main/container", map);
 	}
 
+	@RequestMapping(value = { "/puma-server/update" })
+	public ModelAndView update(String id) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			PumaServerEntity entity = pumaServerService.find(id);
+			map.put("entity", entity);
+			map.put("path", "puma-server");
+			map.put("subPath", "create");
+		} catch (Exception e) {
+			// @TODO: error page.
+		}
+
+		return new ModelAndView("main/container", map);
+	}
+
 	@RequestMapping(value = { "/puma-server/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String createPost(String name, String host, String port) {
@@ -55,6 +71,21 @@ public class PumaServerController {
 
 		try {
 			this.pumaServerService.create(pumaServerEntity);
+			map.put("success", true);
+		} catch (Exception e) {
+			map.put("success", false);
+		}
+
+		return GsonUtil.toJson(map);
+	}
+
+	@RequestMapping(value = { "/puma-server/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String removePost(String id) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			this.pumaServerService.remove(id);
 			map.put("success", true);
 		} catch (Exception e) {
 			map.put("success", false);

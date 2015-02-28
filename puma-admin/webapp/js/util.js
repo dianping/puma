@@ -18,8 +18,8 @@ var util = {
           alert("failure");
         }
       },
-      error  : function() {
-        alert('error');
+      error  : function(err) {
+        alert(err);
       }
     });
   }

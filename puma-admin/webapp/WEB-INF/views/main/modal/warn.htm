@@ -1,0 +1,24 @@
+<script type="text/javascript" src="/js/views/modal.js"></script>
+<div class="modal fade" id="warn-modal" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"></h4>
+            </div>
+
+            <div class="modal-body">
+                <h4 class="text-center"></h4>
+            </div>
+
+            <div class="modal-footer">
+                <form id="warn-modal-form" method="post" location="${rc.contextPath}">
+                    <input name="id" hidden="hidden">
+                    <button class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary">确定</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

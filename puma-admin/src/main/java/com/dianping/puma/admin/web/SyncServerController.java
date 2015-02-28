@@ -43,6 +43,22 @@ public class SyncServerController {
 		return new ModelAndView("main/container", map);
 	}
 
+	@RequestMapping(value = { "/sync-server/update" })
+	public ModelAndView update(String id) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			SyncServerEntity entity = syncServerService.find(id);
+			map.put("entity", entity);
+			map.put("path", "sync-server");
+			map.put("subPath", "create");
+		} catch (Exception e) {
+			// @TODO: error page.
+		}
+
+		return new ModelAndView("main/container", map);
+	}
+
 	@RequestMapping(value = { "/sync-server/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String createPost(String name, String host, String port) {
@@ -55,6 +71,21 @@ public class SyncServerController {
 
 		try {
 			this.syncServerService.create(syncServerEntity);
+			map.put("success", true);
+		} catch (Exception e) {
+			map.put("success", false);
+		}
+
+		return GsonUtil.toJson(map);
+	}
+
+	@RequestMapping(value = { "/sync-server/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String removePost(String id) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			this.syncServerService.remove(id);
 			map.put("success", true);
 		} catch (Exception e) {
 			map.put("success", false);

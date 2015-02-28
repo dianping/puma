@@ -26,26 +26,42 @@ public class SrcDBInstanceController {
 	@Autowired
 	SrcDBInstanceService srcDBInstanceService;
 
-	@RequestMapping(value = { "/srcDBInstance" })
+	@RequestMapping(value = { "/src-db-instance" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		List<SrcDBInstanceEntity> srcDBInstanceEntities = srcDBInstanceService.findAll();
 
 		map.put("entities", srcDBInstanceEntities);
-		map.put("path", "srcDBInstance");
+		map.put("path", "src-db-instance");
 		return new ModelAndView("main/container", map);
 	}
 
-	@RequestMapping(value = { "/srcDBInstance/create" })
+	@RequestMapping(value = { "/src-db-instance/create" })
 	public ModelAndView create(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("path", "srcDBInstance");
+		map.put("path", "src-db-instance");
 		map.put("subPath", "create");
 		return new ModelAndView("main/container", map);
 	}
 
-	@RequestMapping(value = { "/srcDBInstance/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = { "/src-db-instance/update" })
+	public ModelAndView update(String id) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			SrcDBInstanceEntity entity = srcDBInstanceService.find(id);
+			map.put("entity", entity);
+			map.put("path", "src-db-instance");
+			map.put("subPath", "create");
+		} catch (Exception e) {
+			// @TODO: error page.
+		}
+
+		return new ModelAndView("main/container", map);
+	}
+
+	@RequestMapping(value = { "/src-db-instance/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String createPost(
 			String name,
@@ -75,6 +91,21 @@ public class SrcDBInstanceController {
 
 		try {
 			this.srcDBInstanceService.create(srcDbInstanceEntity);
+			map.put("success", true);
+		} catch (Exception e) {
+			map.put("success", false);
+		}
+
+		return GsonUtil.toJson(map);
+	}
+
+	@RequestMapping(value = { "/src-db-instance/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String removePost(String id) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			this.srcDBInstanceService.remove(id);
 			map.put("success", true);
 		} catch (Exception e) {
 			map.put("success", false);

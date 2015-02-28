@@ -12,8 +12,8 @@ public class BaseMorphiaEntity<T> {
 	@Id
 	ObjectId objectId;
 
-	@Indexed(value = IndexDirection.ASC, name = "uniqueId", unique = true, dropDups = true)
-	String uniqueId;
+	@Indexed(value = IndexDirection.ASC, name = "id", unique = true, dropDups = true)
+	String id;
 
 	@Embedded
 	T entity;
@@ -21,7 +21,7 @@ public class BaseMorphiaEntity<T> {
 	public BaseMorphiaEntity() {}
 
 	public BaseMorphiaEntity(T entity) {
-		this.uniqueId = ((BaseEntity) entity).getId();
+		this.id = ((BaseEntity) entity).getId();
 		this.entity = entity;
 	}
 

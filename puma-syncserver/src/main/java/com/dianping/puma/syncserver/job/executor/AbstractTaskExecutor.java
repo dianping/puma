@@ -22,6 +22,7 @@ import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
@@ -398,6 +399,11 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
                             // 执行子类的具体操作
                             AbstractTaskExecutor.this.execute(event);
                         }
+                    }
+                    else if (event instanceof DdlEvent) {
+                        lastEvents.add(event);
+                        // 执行子类的具体操作
+                        AbstractTaskExecutor.this.execute(event);
                     }
                 } else {
                     skipToNextPos = false;

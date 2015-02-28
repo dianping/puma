@@ -422,6 +422,7 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 	/*
 	@Override
 	public void addEvent(ReplicationTaskEvent event) {
+		log.info("Adding event " + event.getTaskName() + ".");
 		if (!serverTasks.containsKey(event.getTaskName())) {
 			ReplicationTask serverTask = replicationTaskService.findByTaskId(event.getTaskId());
 			Server task = null;
@@ -446,6 +447,7 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 	/*
 	@Override
 	public void deleteEvent(ReplicationTaskEvent event) {
+		log.info("Deleting event " + event.getTaskName() + ".");
 		if (serverTasks != null && serverTasks.containsKey(event.getTaskName())) {
 			Server task = serverTasks.get(event.getTaskName());
 			try {
@@ -464,6 +466,7 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 	/*
 	@Override
 	public void updateEvent(ReplicationTaskEvent event) {
+		log.info("Updating event " + event.getTaskName() + ".");
 		if (serverTasks != null && serverTasks.containsKey(event.getTaskName())) {
 			Server task = serverTasks.get(event.getTaskName());
 			try {

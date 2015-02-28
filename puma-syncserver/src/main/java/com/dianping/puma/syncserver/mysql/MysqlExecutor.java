@@ -98,6 +98,7 @@ public class MysqlExecutor {
                 }
                 //ddl不做执行
                 //jdbcTemplate.update(sql);
+                executeDdl((DdlEvent)event);
             }
         } else if (event instanceof RowChangedEvent) {
             return _execute((RowChangedEvent) event);
@@ -129,6 +130,35 @@ public class MysqlExecutor {
         }
     }
 
+    //执行ddlEvent
+    private void executeDdl(DdlEvent ddlEvent){
+    	PreparedStatement ps = null;
+    	Connection conn=null;
+    	try{
+    	 conn = dataSource.getConnection();
+    		ps = conn.prepareStatement(ddlEvent.getSql());
+    		ps.executeUpdate();
+    	}catch(SQLException e){
+    		//ignore
+    	}finally{
+    		if (ps != null) {
+                try {
+                    ps.close();
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+    		if (conn != null) {
+    	        try {
+    	            conn.close();//释放连接到连接池
+    	        } catch (Exception e) {
+    	             //ignore
+    	        }
+    	        conn = null;
+    	    }
+    	}
+    }
+    
     private Map<String, Object> _execute(RowChangedEvent rowChangedEvent) throws SQLException {
         Map<String, Object> rowMap = null;
         MysqlStatement mus = convertStatement(rowChangedEvent);

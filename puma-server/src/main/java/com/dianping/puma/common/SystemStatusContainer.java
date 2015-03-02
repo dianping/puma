@@ -178,7 +178,7 @@ public enum SystemStatusContainer {
 
 
 	private void setExecutorStatus(){
-		Map<String, Server> serverTasks = DefaultTaskManager.instance.getServerTasks();
+		Map<String, Server> serverTasks = DefaultTaskManager.instance.getTaskExecutorMap();
 		TaskExecutorStatus  executorStatus = null;
 		for(Entry<String, Server> serverItem:serverTasks.entrySet()){
 			String taskName = serverItem.getKey();

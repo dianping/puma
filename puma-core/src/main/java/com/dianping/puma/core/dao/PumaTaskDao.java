@@ -1,20 +1,20 @@
 package com.dianping.puma.core.dao;
 
-import com.dianping.puma.core.entity.PumaTaskEntity;
+import com.dianping.puma.core.entity.PumaTask;
 
 import java.util.List;
 
 public interface PumaTaskDao {
 
-	PumaTaskEntity find(String id);
+	PumaTask find(String id);
 
-	List<PumaTaskEntity> findByPumaServerName(String pumaServerName);
+	List<PumaTask> findByPumaServerName(String pumaServerName);
 
-	List<PumaTaskEntity> findAll();
+	List<PumaTask> findAll();
 
-	void create(PumaTaskEntity entity);
+	void create(PumaTask entity);
 
-	void update(PumaTaskEntity entity);
+	void update(PumaTask entity);
 
 	void remove(String id);
 }

@@ -8,7 +8,7 @@ public interface PumaServerDao {
 
 	PumaServerEntity find(String id);
 
-	PumaServerEntity findByHostAndPort(String host, String port);
+	PumaServerEntity findByHostAndPort(String host, Integer port);
 
 	List<PumaServerEntity> findAll();
 

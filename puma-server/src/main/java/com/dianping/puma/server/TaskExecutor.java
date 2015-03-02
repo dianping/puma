@@ -16,9 +16,9 @@ import java.util.List;
 
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.LifeCycle;
-import com.dianping.puma.core.constant.Controller;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.replication.ReplicationTaskStatus;
+import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.replicate.model.task.StatusActionType;
 import com.dianping.puma.sender.Sender;
 
@@ -26,11 +26,19 @@ import com.dianping.puma.sender.Sender;
  * @author Leo Liang
  * 
  */
-public interface Server extends LifeCycle<Exception> {
+public interface TaskExecutor extends LifeCycle<Exception> {
 
 	public void setContext(PumaContext context);
 
 	public PumaContext getContext();
+
+	public String getTaskId();
+
+	public void setTaskId(String taskId);
+
+	public String getTaskName();
+
+	public void setTaskName(String taskName);
 
 	public String getDefaultBinlogFileName();
 
@@ -46,7 +54,7 @@ public interface Server extends LifeCycle<Exception> {
 
 	public String getServerName();
 
-	public void setBinlogPositionHolder(BinlogPositionHolder holder);
+	public void setBinlogInfoHolder(BinlogInfoHolder holder);
 
 	public Status getStatus();
 

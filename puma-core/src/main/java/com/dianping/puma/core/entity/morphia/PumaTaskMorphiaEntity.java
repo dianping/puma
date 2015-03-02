@@ -1,14 +1,14 @@
 package com.dianping.puma.core.entity.morphia;
 
-import com.dianping.puma.core.entity.PumaTaskEntity;
+import com.dianping.puma.core.entity.PumaTask;
 import com.google.code.morphia.annotations.Entity;
 
 @Entity("PumaTask")
-public class PumaTaskMorphiaEntity extends BaseMorphiaEntity<PumaTaskEntity> {
+public class PumaTaskMorphiaEntity extends BaseMorphiaEntity<PumaTask> {
 
 	public PumaTaskMorphiaEntity() {}
 
-	public PumaTaskMorphiaEntity(PumaTaskEntity pumaTaskEntity) {
-		super(pumaTaskEntity);
+	public PumaTaskMorphiaEntity(PumaTask pumaTask) {
+		super(pumaTask);
 	}
 }

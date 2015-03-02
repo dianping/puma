@@ -8,14 +8,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PostConstruct;
 
 import com.dianping.puma.core.constant.Status;
-import com.dianping.puma.core.entity.PumaTaskEntity;
+import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstanceEntity;
 import com.dianping.puma.core.entity.replication.ReplicationTaskStatus;
+import com.dianping.puma.core.holder.BinlogInfoHolder;
+import com.dianping.puma.core.monitor.PumaTaskControllerEvent;
 import com.dianping.puma.core.monitor.PumaTaskOperationEvent;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.monitor.ReplicationTaskStatusContainer;
+import com.dianping.puma.server.builder.TaskExecutorBuilder;
 import com.dianping.puma.storage.DefaultEventStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,12 +25,10 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.dianping.puma.bo.PositionInfo;
 import com.dianping.puma.bo.PumaContext;
-import com.dianping.puma.config.InitializeServerConfig;
+import com.dianping.puma.config.Config;
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.monitor.NotifyService;
-import com.dianping.puma.core.monitor.ReplicationTaskStatusActionEvent;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.datahandler.DefaultDataHandler;
 import com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher;
@@ -36,20 +36,19 @@ import com.dianping.puma.parser.DefaultBinlogParser;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
-import com.dianping.puma.service.ReplicationTaskService;
 import com.dianping.puma.storage.EventStorage;
 
 @Service("taskManager")
-public class DefaultTaskManager implements TaskManager, InitializingBean {
+public class DefaultTaskExecutorContainer implements TaskExecutorContainer, InitializingBean {
 
-	private static Logger LOG = LoggerFactory.getLogger(DefaultTaskManager.class);
+	private static Logger LOG = LoggerFactory.getLogger(DefaultTaskExecutorContainer.class);
 
-	private ConcurrentHashMap<String, Server> serverTasks = null;
+	private ConcurrentHashMap<String, TaskExecutor> taskExecutorMap = new ConcurrentHashMap<String, TaskExecutor>();
 
-	public static DefaultTaskManager instance;
-	
+	public static DefaultTaskExecutorContainer instance;
+
 	@Autowired
-	private ReplicationTaskService replicationTaskService;
+	private TaskExecutorBuilder taskExecutorBuilder;
 
 	@Autowired
 	private PumaTaskService pumaTaskService;
@@ -57,49 +56,45 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 	@Autowired
 	private SrcDBInstanceService srcDBInstanceService;
 
-	private String serverName;
+	private String pumaServerName;
 	@Autowired
-	private BinlogPositionHolder binlogPositionHolder;
+	private BinlogInfoHolder binlogInfoHolder;
 	@Autowired
 	private NotifyService notifyService;
 	@Autowired
 	private JsonEventCodec jsonCodec;
 	@Autowired
-	private InitializeServerConfig serverConfig;
-	@Autowired
-	private ReplicationTaskStatusContainer replicationTaskStatusContainer;
+	private Config pumaServerConfig;
 
 	@PostConstruct
 	public void init() {
-		serverName = serverConfig.getName();
-		serverTasks = new ConcurrentHashMap<String, Server>();
+		pumaServerName = pumaServerConfig.getName();
 	}
 
 	@Override
-	public ConcurrentHashMap<String, Server> constructServers() throws Exception {
+	public ConcurrentHashMap<String, TaskExecutor> constructServers() throws Exception {
 		LOG.info("starting construct servers.........");
 
-		List<PumaTaskEntity> pumaTasks = pumaTaskService.findByPumaServerName(serverName);
+		List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerName(pumaServerName);
 		if (pumaTasks != null && !pumaTasks.isEmpty()) {
-			Server server;
-			for (PumaTaskEntity pumaTask: pumaTasks) {
-				server = construct(pumaTask);
-				serverTasks.put(server.getServerName(), server);
+			TaskExecutor taskExecutor;
+			for (PumaTask pumaTask: pumaTasks) {
+				taskExecutor = construct(pumaTask);
+				taskExecutorMap.put(taskExecutor.getServerName(), taskExecutor);
 			}
 		}
 
 		LOG.info("ended construct servers.........");
-		return serverTasks;
+		return taskExecutorMap;
 	}
 
 	@Override
-	public Server construct(PumaTaskEntity pumaTask) throws Exception {
+	public TaskExecutor construct(PumaTask pumaTask) throws Exception {
 		LOG.info("Construct server: {}.", pumaTask.getId());
 
-		ReplicationBasedServer server = new ReplicationBasedServer();
+		ReplicationBasedTaskExecutor server = new ReplicationBasedTaskExecutor();
 
 		// Task id
-		server.
 
 		// Source database.
 		String srcDBInstanceName = pumaTask.getSrcDBInstanceName();
@@ -114,7 +109,7 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 		BinlogInfo binlogInfo = pumaTask.getBinlogInfo();
 		server.setDefaultBinlogFileName(binlogInfo.getBinlogFile());
 		server.setDefaultBinlogPosition(binlogInfo.getBinlogPosition());
-		server.setBinlogPositionHolder(binlogPositionHolder);
+		server.setBinlogInfoHolder(binlogInfoHolder);
 		server.setStatus(Status.WAITING);
 
 		// Parser.
@@ -252,24 +247,53 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 	}*/
 
 	@Override
+	public void submit(TaskExecutor taskExecutor) {
+		if (taskExecutor == null || taskExecutorMap.containsKey(taskExecutor.getServerName())
+				|| taskExecutorMap.contains(taskExecutor)) {
+			LOG.info("Submit puma task {} error.", taskExecutor.getServerName());
+		}
+
+		initContext(taskExecutor);
+		startExecutor(taskExecutor);
+		taskExecutor.setStatus(Status.RUNNING);
+		taskExecutorMap.put(taskExecutor.getServerName(), taskExecutor);
+		LOG.info("Server " + taskExecutor.getServerName()
+				+ " started at binlogFile: "
+				+ taskExecutor.getContext().getBinlogFileName() + " position: "
+				+ taskExecutor.getContext().getBinlogStartPos());
+	}
+
+	@Override
+	public void withdraw(TaskExecutor taskExecutor) {
+		try {
+			taskExecutor.stop();
+			taskExecutor.setStatus(Status.STOPPED);
+			taskExecutorMap.remove(taskExecutor.getTaskId());
+		}
+		catch (Exception e) {
+			LOG.error("Withdraw puma task `{}` error: {}.", taskExecutor.getTaskId(), e.getMessage());
+		}
+	}
+
+	@Override
 	public boolean contain(String taskName) {
-		if (serverTasks.containsKey(taskName)) {
+		if (taskExecutorMap.containsKey(taskName)) {
 			return true;
 		}
 		return false;
 	}
 
 	@Override
-	public boolean addServer(Server server) {
-		if (server != null && !serverTasks.containsKey(server.getServerName())
-				&& !serverTasks.contains(server)) {
-			initContext(server);
-			startServer(server);
-			serverTasks.put(server.getServerName(), server);
-			LOG.info("Server " + server.getServerName()
+	public boolean addServer(TaskExecutor taskExecutor) {
+		if (taskExecutor != null && !taskExecutorMap.containsKey(taskExecutor.getServerName())
+				&& !taskExecutorMap.contains(taskExecutor)) {
+			initContext(taskExecutor);
+			startExecutor(taskExecutor);
+			taskExecutorMap.put(taskExecutor.getServerName(), taskExecutor);
+			LOG.info("Server " + taskExecutor.getServerName()
 					+ " started at binlogFile: "
-					+ server.getContext().getBinlogFileName() + " position: "
-					+ server.getContext().getBinlogStartPos());
+					+ taskExecutor.getContext().getBinlogFileName() + " position: "
+					+ taskExecutor.getContext().getBinlogStartPos());
 			return true;
 		}
 		return false;
@@ -277,208 +301,147 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 
 	@Override
 	public void remove(String taskName) {
-		serverTasks.remove(taskName);
+		taskExecutorMap.remove(taskName);
 	}
 
 	@Override
-	public void initContext(Server server) {
-		String taskName = server.getServerName();
-		PositionInfo posInfo = binlogPositionHolder.getPositionInfo(taskName,
-				server.getDefaultBinlogFileName(), server
-						.getDefaultBinlogPosition());
+	public void initContext(TaskExecutor taskExecutor) {
+		String taskName = taskExecutor.getServerName();
+		BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(taskName);
+
 		PumaContext context = new PumaContext();
 
-		context.setPumaServerId(server.getServerId());
+		if (binlogInfo == null) {
+			context.setBinlogFileName(taskExecutor.getDefaultBinlogFileName());
+			context.setBinlogStartPos(taskExecutor.getDefaultBinlogPosition());
+		} else {
+			context.setBinlogFileName(binlogInfo.getBinlogFile());
+			context.setBinlogStartPos(binlogInfo.getBinlogPosition());
+		}
+
+		context.setPumaServerId(taskExecutor.getServerId());
 		context.setPumaServerName(taskName);
-		context.setBinlogFileName(posInfo.getBinlogFileName());
-		context.setBinlogStartPos(posInfo.getBinlogPosition());
-		server.setContext(context);
+		taskExecutor.setContext(context);
 	}
 
 	@Override
-	public void stopServer(Server server) {
+	public void stopExecutor(TaskExecutor taskExecutor) {
+		taskExecutor.setStatus(Status.STOPPING);
+
 		try {
-			server.stop();
-			LOG.info("Server " + server.getServerName() + " stopped.");
+			taskExecutor.stop();
+			LOG.info("Server " + taskExecutor.getServerName() + " stopped.");
 		} catch (Exception e) {
-			LOG.error("Stop Server" + server.getServerName() + " failed.", e);
+			LOG.error("Stop Server" + taskExecutor.getServerName() + " failed.", e);
 			e.printStackTrace();
 		}
+
+		taskExecutor.setStatus(Status.STOPPED);
 	}
 
 	@Override
 	public void stopServers() {
 		LOG.info("Stopping...");
-		for (Map.Entry<String, Server> item : serverTasks.entrySet()) {
-			stopServer(item.getValue());
+		for (Map.Entry<String, TaskExecutor> item : taskExecutorMap.entrySet()) {
+			stopExecutor(item.getValue());
 		}
 	}
 
 	@Override
-	public void startServer(final Server server) {
+	public void startExecutor(final TaskExecutor taskExecutor) {
+		taskExecutor.setStatus(Status.PREPARING);
+
 		PumaThreadUtils.createThread(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					server.start();
+					taskExecutor.start();
 				} catch (Exception e) {
-					LOG.error("Start server: " + server.getServerName()
+					LOG.error("Start server: " + taskExecutor.getServerName()
 							+ " failed.", e);
 				}
 			}
-		}, server.getServerName() + "_Connector", false).start();
+		}, taskExecutor.getServerName() + "_Connector", false).start();
+
+		taskExecutor.setStatus(Status.RUNNING);
 	}
 
-	public BinlogPositionHolder getBinlogPositionHolder() {
-		return binlogPositionHolder;
+	public BinlogInfoHolder getBinlogInfoHolder() {
+		return binlogInfoHolder;
 	}
 
 	@Override
-	public void startEvent(ReplicationTaskStatusActionEvent event) {
-		if (serverTasks != null && serverTasks.containsKey(event.getTaskId())) {
-			Server task = serverTasks.get(event.getTaskId());
-			task.setTaskStatus(ReplicationTaskStatus.Status.PREPARING);
-			startServer(task);
-			task.setTaskStatus(ReplicationTaskStatus.Status.RUNNING);
+	public void pauseEvent(PumaTaskControllerEvent event) throws Exception {
+		String taskId = event.getTaskId();
+		TaskExecutor taskExecutor = taskExecutorMap.get(taskId);
+
+		if (taskExecutor == null) {
+			throw new Exception("Puma task not exist");
 		}
-	}
 
-	@Override
-	public void stopEvent(ReplicationTaskStatusActionEvent event) {
-		if (serverTasks != null) {
-			if (serverTasks.containsKey(event.getTaskName())) {
-				Server task = serverTasks.get(event.getTaskName());
-				try {
-					task.setTaskStatus(ReplicationTaskStatus.Status.STOPPING);
-					task.stop();
-					task.setTaskStatus(ReplicationTaskStatus.Status.STOPPED);
-					LOG.info("Server " + task.getServerName() + " stopped.");
-				} catch (Exception e) {
-					LOG.error(
-							"Stop Server" + task.getServerName() + " failed.",
-							e);
-					task.setTaskStatus(ReplicationTaskStatus.Status.FAILED);
-				}
-			}
+		if (taskExecutor.getStatus() != Status.STOPPED && taskExecutor.getStatus() != Status.FAILED) {
+			stopExecutor(taskExecutor);
 		}
+		taskExecutor.setStatus(Status.FAILED);
 	}
 
 	@Override
-	public void restartEvent(ReplicationTaskStatusActionEvent event) {
-		if (serverTasks != null) {
-			if (serverTasks.containsKey(event.getTaskName())) {
-				Server task = serverTasks.get(event.getTaskName());
-				if (task.getTaskStatus() == ReplicationTaskStatus.Status.STOPPED
-						|| task.getTaskStatus() == ReplicationTaskStatus.Status.FAILED) {
-					task.setTaskStatus(ReplicationTaskStatus.Status.PREPARING);
-					startServer(task);
-					task.setTaskStatus(ReplicationTaskStatus.Status.RUNNING);
-				}
-			}
+	public void resumeEvent(PumaTaskControllerEvent event) throws Exception {
+		String taskId = event.getTaskId();
+		TaskExecutor taskExecutor = taskExecutorMap.get(taskId);
+
+		if (taskExecutor == null) {
+			throw new Exception("Puma task not exist");
 		}
+
+		if (taskExecutor.getStatus() == Status.STOPPED || taskExecutor.getStatus() == Status.FAILED) {
+			startExecutor(taskExecutor);
+		}
+		taskExecutor.setStatus(Status.FAILED);
 	}
 
 	@Override
-	public void createEvent(PumaTaskOperationEvent event) {
+	public void createEvent(PumaTaskOperationEvent event) throws Exception {
 		String taskId = event.getTaskId();
 
-		if (!serverTasks.containsKey(taskId)) {
-			PumaTaskEntity pumaTask = pumaTaskService.find(taskId);
-			Server task = null;
-
-			try {
-				task = construct(pumaTask);
-				serverTasks.put(taskId, task);
-				task.setStatus(Status.PREPARING);
-
-				initContext(task);
-				startServer(task);
-				task.setStatus(Status.RUNNING);
-			} catch (Exception e) {
-				LOG.error("Create puma task `{}` error: {}.", taskId, e.getMessage());
-			}
+		if (taskExecutorMap.containsKey(taskId)) {
+			throw new Exception("Duplicated puma task.");
 		}
+
+		PumaTask pumaTask = pumaTaskService.find(taskId);
+		TaskExecutor taskExecutor = taskExecutorBuilder.build(pumaTask);
+		submit(taskExecutor);
 	}
 
 	@Override
-	public void updateEvent(PumaTaskOperationEvent event) {
+	public void updateEvent(PumaTaskOperationEvent event) throws Exception {
 
 	}
 
 	@Override
-	public void removeEvent(PumaTaskOperationEvent event) {
+	public void removeEvent(PumaTaskOperationEvent event) throws Exception {
 		String taskId = event.getTaskId();
+		TaskExecutor taskExecutor = taskExecutorMap.get(taskId);
 
-		if (serverTasks != null && serverTasks.containsKey(taskId)) {
-			Server task = serverTasks.get(taskId);
-			try {
-				task.setStatus(Status.STOPPING);
-				task.stop();
-				task.setStatus(Status.STOPPED);
-				serverTasks.remove(taskId);
-			} catch (Exception e) {
-				LOG.error("Remove puma task `{}` error: {}.", taskId, e.getMessage());
-			}
+		if (taskExecutor == null) {
+			throw new Exception("Puma task not exist.");
 		}
+
+		withdraw(taskExecutor);
 	}
-
-	/*
-	@Override
-	public void addEvent(ReplicationTaskEvent event) {
-		log.info("Adding event " + event.getTaskName() + ".");
-		if (!serverTasks.containsKey(event.getTaskName())) {
-			ReplicationTask serverTask = replicationTaskService.findByTaskId(event.getTaskId());
-			Server task = null;
-			try {
-				task = construct(serverTask);
-				serverTasks.put(task.getServerName(), task);
-				task.setTaskStatus(ReplicationTaskStatus.Status.PREPARING);
-				initContext(task);
-				startServer(task);
-				task.setTaskStatus(ReplicationTaskStatus.Status.RUNNING);
-				LOG.info("Server " + task.getServerName()
-						+ " started at binlogFile: "
-						+ task.getContext().getBinlogFileName() + " position: "
-						+ task.getContext().getBinlogStartPos());
-			} catch (Exception e) {
-				LOG.error("add Server" + task.getServerName() + " failed.", e);
-				e.printStackTrace();
-			}
-		}
-	}*/
-
-	/*
-	@Override
-	public void deleteEvent(ReplicationTaskEvent event) {
-		log.info("Deleting event " + event.getTaskName() + ".");
-		if (serverTasks != null && serverTasks.containsKey(event.getTaskName())) {
-			Server task = serverTasks.get(event.getTaskName());
-			try {
-				task.setTaskStatus(ReplicationTaskStatus.Status.STOPPING);
-				task.stop();
-				task.setTaskStatus(ReplicationTaskStatus.Status.STOPPED);
-				serverTasks.remove(event.getTaskName());
-			} catch (Exception e) {
-				LOG.error("delete Server" + task.getServerName() + " failed.",
-						e);
-				e.printStackTrace();
-			}
-		}
-	}*/
 
 	/*
 	@Override
 	public void updateEvent(ReplicationTaskEvent event) {
-		log.info("Updating event " + event.getTaskName() + ".");
-		if (serverTasks != null && serverTasks.containsKey(event.getTaskName())) {
-			Server task = serverTasks.get(event.getTaskName());
+		if (taskExecutorMap != null && taskExecutorMap.containsKey(event.getTaskName())) {
+			Server task = taskExecutorMap.get(event.getTaskName());
 			try {
 				task.setTaskStatus(ReplicationTaskStatus.Status.STOPPING);
 				task.stop();
 				task.setTaskStatus(ReplicationTaskStatus.Status.STOPPED);
-				serverTasks.remove(event.getTaskName());
+				taskExecutorMap.remove(event.getTaskName());
 			} catch (Exception e) {
-				LOG.error("delete Server" + task.getServerName() + " failed.",
+				LOG.error("delete Server" + task.getPumaServerName() + " failed.",
 						e);
 				e.printStackTrace();
 			}
@@ -486,14 +449,14 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 					.getTaskId());
 			try {
 				task = construct(serverTask);
-				serverTasks.put(task.getServerName(), task);
+				taskExecutorMap.put(task.getPumaServerName(), task);
 				task.setTaskStatus(ReplicationTaskStatus.Status.PREPARING);
 				initContext(task);
-				startServer(task);
+				startExecutor(task);
 				task.setTaskStatus(ReplicationTaskStatus.Status.RUNNING);
 
 			} catch (Exception e) {
-				LOG.error("start Server" + task.getServerName()
+				LOG.error("start Server" + task.getPumaServerName()
 						+ " failed.", e);
 				e.printStackTrace();
 			}
@@ -507,18 +470,18 @@ public class DefaultTaskManager implements TaskManager, InitializingBean {
 	}
 
 	public EventStorage getTaskStorage(String taskName) {
-		List<Sender> senders = serverTasks.get(taskName).getFileSender();
+		List<Sender> senders = taskExecutorMap.get(taskName).getFileSender();
 		if (senders != null && senders.size() > 0) {
 			return senders.get(0).getStorage();
 		}
 		return null;
 	}
 
-	public Map<String, Server> getServerTasks(){
-		return Collections.unmodifiableMap(serverTasks);
+	public Map<String, TaskExecutor> getTaskExecutorMap(){
+		return Collections.unmodifiableMap(taskExecutorMap);
 	}
 	
-	public String getServerName(){
-		return serverName;
+	public String getPumaServerName(){
+		return pumaServerName;
 	}
 }

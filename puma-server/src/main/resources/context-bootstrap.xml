@@ -21,9 +21,9 @@
     
     <task:annotation-driven />
       
-	<bean id="serverConfig" class="com.dianping.puma.config.InitializeServerConfig">
+	<!--bean id="serverConfig" class="com.dianping.puma.config.Config">
 		<property name="port" value="8080" />
-	</bean>
+	</bean-->
 	
 	<!-- <import resource="serverConfig-${puma.server.env}.xml" /> -->
 	
@@ -35,13 +35,13 @@
 		<property name="notifyService" ref="notifyService" />
 	</bean>
 
-	<bean id="statusReportTask" class="com.dianping.puma.server.StatusReportTask"
+	<bean id="statusReportTask" class="com.dianping.puma.reporter.StatusReportTask"
 		parent="notifiableBean" init-method="start" />
 
-	<bean id="dailyReportTask" class="com.dianping.puma.server.DailyReportTask"
+	<bean id="dailyReportTask" class="com.dianping.puma.reporter.DailyReportTask"
 		parent="notifiableBean" init-method="start" />
 
-	<bean id="binlogPositionHolder" class="com.dianping.puma.server.MMapBasedBinlogPositionHolder"
+	<bean id="binlogPositionHolder" class="com.dianping.puma.core.holder.impl.DefaultBinlogInfoHolder"
 		init-method="init">
 		<property name="baseDir" value="/data/appdatas/puma/" />
 	</bean>

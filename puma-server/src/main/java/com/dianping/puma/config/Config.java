@@ -9,10 +9,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
-public class InitializeServerConfig implements InitializingBean {
+@Service("pumaServerConfig")
+public class Config implements InitializingBean {
 
-	private static final Logger LOG = LoggerFactory.getLogger(InitializeServerConfig.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Config.class);
 
 	@Autowired
 	PumaServerService pumaServerService;
@@ -21,9 +24,8 @@ public class InitializeServerConfig implements InitializingBean {
 
 	private String host;
 
-	private String port;
-
-	private static InitializeServerConfig instance;
+	@Value("8080")
+	private Integer port;
 
 	@PostConstruct
 	public void init() {
@@ -38,19 +40,13 @@ public class InitializeServerConfig implements InitializingBean {
 		}
 
 		if (this.name == null) {
-			LOG.error("Not match any server in DB.....");
-			throw new RuntimeException("Cannot try to find the ServerName, please check the PumaServer in DB.");
+			LOG.error("Initialize puma server error: No matched server found in DB.");
+			throw new RuntimeException("Initialize puma server error: No matched server found in DB.");
 		}
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
-		instance = this;
-	}
-
-	public static InitializeServerConfig getInstance() {
-		return instance;
-	}
+	public void afterPropertiesSet() throws Exception {}
 
 	public String getName() {
 		return this.name;
@@ -68,11 +64,11 @@ public class InitializeServerConfig implements InitializingBean {
 		this.host = host;
 	}
 
-	public String getPort() {
+	public Integer getPort() {
 		return this.port;
 	}
 
-	public void setPort(String port) {
+	public void setPort(Integer port) {
 		this.port = port;
 	}
 }

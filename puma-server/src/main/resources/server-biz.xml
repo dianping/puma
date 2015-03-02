@@ -6,7 +6,7 @@
     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
-    <bean id="server-biz" class="com.dianping.puma.server.ReplicationBasedServer"
+    <bean id="server-biz" class="com.dianping.puma.server.ReplicationBasedTaskExecutor"
         parent="notifiableBean">
         <property name="host" value="${puma.biz_host}" />
         <property name="port" value="${puma.biz_port}" />

@@ -21,10 +21,10 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.concurrent.TimeUnit;
 
+import com.dianping.puma.core.model.BinlogInfo;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.dianping.puma.bo.PositionInfo;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.event.ChangedEvent;
@@ -48,9 +48,9 @@ import com.dianping.puma.parser.mysql.packet.PacketType;
  * 
  */
 @ThreadUnSafe
-public class ReplicationBasedServer extends AbstractServer {
+public class ReplicationBasedTaskExecutor extends AbstractTaskExecutor {
 
-    private static final Logger log      = Logger.getLogger(ReplicationBasedServer.class);
+    private static final Logger log      = Logger.getLogger(ReplicationBasedTaskExecutor.class);
     private int                 port     = 3306;
     private String              host;
     private String username;
@@ -70,11 +70,15 @@ public class ReplicationBasedServer extends AbstractServer {
         do {
             try {
                 // 读position/file文件
-                PositionInfo posInfo = binlogPositionHolder.getPositionInfo(getContext().getPumaServerName(),
-                        getContext().getBinlogFileName(), getContext().getBinlogStartPos());
+                BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(getContext().getPumaServerName());
+                if (binlogInfo == null) {
+                    binlogInfo = new BinlogInfo();
+                    binlogInfo.setBinlogFile(getContext().getBinlogFileName());
+                    binlogInfo.setBinlogPosition(getContext().getBinlogStartPos());
+                }
 
-                getContext().setBinlogFileName(posInfo.getBinlogFileName());
-                getContext().setBinlogStartPos(posInfo.getBinlogPosition());
+                getContext().setBinlogFileName(binlogInfo.getBinlogFile());
+                getContext().setBinlogStartPos(binlogInfo.getBinlogPosition());
                 getContext().setDBServerId(dbServerId);
                 getContext().setMasterUrl(host, port);
 
@@ -179,8 +183,7 @@ public class ReplicationBasedServer extends AbstractServer {
                 && (dataHandlerResult.getData() instanceof DdlEvent || (dataHandlerResult.getData() instanceof RowChangedEvent && ((RowChangedEvent) dataHandlerResult
                         .getData()).isTransactionCommit()))) {
             // save position
-            binlogPositionHolder.savePositionInfo(getServerName(), new PositionInfo(binlogEvent.getHeader()
-                    .getNextPosition(), getContext().getBinlogFileName()));
+            binlogInfoHolder.setBinlogInfo(this.getServerName(), new BinlogInfo(getContext().getBinlogFileName(), binlogEvent.getHeader().getNextPosition()));
         }
     }
 
@@ -200,26 +203,29 @@ public class ReplicationBasedServer extends AbstractServer {
                 && !((RowChangedEvent) changedEvent).isTransactionCommit()) {
             switch (((RowChangedEvent) changedEvent).getActionType()) {
                 case RowChangedEvent.INSERT:
+                    pumaTaskStateContainer.get(this.getTaskId()).getBinlogStat().incrRowsInsert();
                     SystemStatusContainer.instance.incServerRowInsertCounter(getServerName());
                     break;
                 case RowChangedEvent.UPDATE:
+                    pumaTaskStateContainer.get(this.getTaskId()).getBinlogStat().incrRowsUpdate();
                     SystemStatusContainer.instance.incServerRowUpdateCounter(getServerName());
                     break;
                 case RowChangedEvent.DELETE:
+                    pumaTaskStateContainer.get(this.getTaskId()).getBinlogStat().incrRowsDelete();
                     SystemStatusContainer.instance.incServerRowDeleteCounter(getServerName());
                     break;
                 default:
                     break;
             }
         } else if (changedEvent instanceof DdlEvent) {
+            pumaTaskStateContainer.get(this.getTaskId()).getBinlogStat().incrDdls();
             SystemStatusContainer.instance.incServerDdlCounter(getServerName());
         }
     }
 
     protected void processRotateEvent(BinlogEvent binlogEvent) {
         RotateEvent rotateEvent = (RotateEvent) binlogEvent;
-        binlogPositionHolder.savePositionInfo(getServerName(), new PositionInfo(rotateEvent.getFirstEventPosition(),
-                rotateEvent.getNextBinlogFileName()));
+        binlogInfoHolder.setBinlogInfo(getServerName(), new BinlogInfo(rotateEvent.getNextBinlogFileName(), rotateEvent.getFirstEventPosition()));
         getContext().setBinlogFileName(rotateEvent.getNextBinlogFileName());
         getContext().setBinlogStartPos(rotateEvent.getFirstEventPosition());
         // status report
@@ -273,8 +279,7 @@ public class ReplicationBasedServer extends AbstractServer {
                     startPos = 0;
                 }
                 String binlogFile = dumpCommandResultPacket.getMessage().substring(startPos);
-                binlogPositionHolder.savePositionInfo(getServerName(), new PositionInfo(getContext()
-                        .getBinlogStartPos(), binlogFile));
+                binlogInfoHolder.setBinlogInfo(getServerName(), new BinlogInfo(binlogFile, getContext().getBinlogStartPos()));
                 getContext().setBinlogFileName(binlogFile);
             }
             return true;

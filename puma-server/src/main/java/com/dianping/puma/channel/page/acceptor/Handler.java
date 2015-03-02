@@ -16,7 +16,6 @@ import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageManager;
-import com.dianping.puma.ComponentContainer;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.codec.EventCodecFactory;
@@ -24,7 +23,7 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.filter.EventFilterChainFactory;
-import com.dianping.puma.server.DefaultTaskManager;
+import com.dianping.puma.server.DefaultTaskExecutorContainer;
 import com.dianping.puma.storage.BufferedEventChannel;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.EventStorage;
@@ -85,7 +84,7 @@ public class Handler implements PageHandler<Context> {
 		long binlogPos = payload.getBinlogPos();
 		long timeStamp = payload.getTimestamp();
 		//EventStorage storage = ComponentContainer.SPRING.lookup("storage-" + payload.getTarget(), EventStorage.class);
-		EventStorage storage = DefaultTaskManager.instance.getTaskStorage(payload.getTarget());
+		EventStorage storage = DefaultTaskExecutorContainer.instance.getTaskStorage(payload.getTarget());
 		log.info("Client(" + payload.getClientName() + ") get storage-"+payload.getTarget()+".");
 		EventChannel channel;
 		try {

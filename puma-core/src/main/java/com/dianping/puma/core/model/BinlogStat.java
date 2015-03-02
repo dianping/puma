@@ -41,4 +41,20 @@ public class BinlogStat {
 	public void setDdls(Long ddls) {
 		this.ddls = ddls;
 	}
+
+	public void incrRowsInsert() {
+		++this.rowsInsert;
+	}
+
+	public void incrRowsDelete() {
+		++this.rowsDelete;
+	}
+
+	public void incrRowsUpdate() {
+		++this.rowsUpdate;
+	}
+
+	public void incrDdls() {
+		++this.ddls;
+	}
 }

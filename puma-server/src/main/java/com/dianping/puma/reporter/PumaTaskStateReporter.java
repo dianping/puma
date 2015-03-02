@@ -1,6 +1,6 @@
 package com.dianping.puma.reporter;
 
-import com.dianping.puma.config.InitializeServerConfig;
+import com.dianping.puma.config.Config;
 import com.dianping.puma.core.container.PumaTaskStateContainer;
 import com.dianping.puma.core.monitor.PumaTaskStateEvent;
 import com.dianping.puma.core.monitor.SwallowEventPublisher;
@@ -16,10 +16,10 @@ public class PumaTaskStateReporter {
 	private static final Logger LOG = LoggerFactory.getLogger(PumaTaskStateReporter.class);
 
 	@Autowired
-	SwallowEventPublisher publisher;
+	SwallowEventPublisher pumaTaskStatePublisher;
 
 	@Autowired
-	InitializeServerConfig serverConfig;
+	Config pumaServerConfig;
 
 	@Autowired
 	PumaTaskStateContainer pumaTaskStateContainer;
@@ -28,11 +28,10 @@ public class PumaTaskStateReporter {
 	public void report() {
 		try {
 			PumaTaskStateEvent event = new PumaTaskStateEvent();
-			event.setPumaServerName(serverConfig.getName());
+			event.setPumaServerName(pumaServerConfig.getName());
 			event.setTaskIds(pumaTaskStateContainer.getAllTaskIds());
 			event.setStates(pumaTaskStateContainer.getAll());
-
-			publisher.publish(event);
+			pumaTaskStatePublisher.publish(event);
 		} catch (Exception e) {
 			LOG.error("Report puma task state error: {}.", e.getMessage());
 		}

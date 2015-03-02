@@ -2,7 +2,9 @@ package com.dianping.puma.core.entity;
 
 import com.dianping.puma.core.model.BinlogInfo;
 
-public class PumaTaskEntity extends BaseEntity {
+public class PumaTask extends BaseEntity {
+
+	private String name;
 
 	private String srcDBInstanceName;
 
@@ -11,6 +13,14 @@ public class PumaTaskEntity extends BaseEntity {
 	private BinlogInfo binlogInfo;
 
 	private int preservedDay;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	public String getSrcDBInstanceName() {
 		return srcDBInstanceName;

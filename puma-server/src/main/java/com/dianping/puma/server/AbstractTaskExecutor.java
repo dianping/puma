@@ -19,10 +19,11 @@ import java.util.List;
 
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
-import com.dianping.puma.core.constant.Controller;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.container.PumaTaskStateContainer;
 import com.dianping.puma.core.entity.replication.ReplicationTaskStatus;
+import com.dianping.puma.core.holder.BinlogInfoHolder;
+import com.dianping.puma.core.model.PumaTaskState;
 import com.dianping.puma.core.monitor.Notifiable;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.replicate.model.task.StatusActionType;
@@ -39,10 +40,12 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Leo Liang
  */
 @ThreadUnSafe
-public abstract class AbstractServer implements Server, Notifiable {
+public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 	private PumaContext context;
 
 	private String taskId;
+
+	private String taskName;
 
 	private String defaultBinlogFileName;
 
@@ -60,9 +63,11 @@ public abstract class AbstractServer implements Server, Notifiable {
 
 	private volatile boolean stop = false;
 
-	protected BinlogPositionHolder binlogPositionHolder;
+	protected BinlogInfoHolder binlogInfoHolder;
 
 	protected String name;
+
+	protected PumaTaskState state;
 
 	protected Status status;
 
@@ -75,11 +80,31 @@ public abstract class AbstractServer implements Server, Notifiable {
 	@Autowired
 	PumaTaskStateContainer pumaTaskStateContainer;
 
+	@Override
+	public String getTaskId() {
+		return taskId;
+	}
+
+	@Override
+	public void setTaskId(String taskId) {
+		this.taskId = taskId;
+	}
+
+	@Override
+	public String getTaskName() {
+		return taskName;
+	}
+
+	@Override
+	public void setTaskName(String taskName) {
+		this.taskName = taskName;
+	}
+
 	/**
-	 * @param binlogPositionHolder the binlogPositionHolder to set
+	 * @param binlogInfoHolder the binlogPositionHolder to set
 	 */
-	public void setBinlogPositionHolder(BinlogPositionHolder binlogPositionHolder) {
-		this.binlogPositionHolder = binlogPositionHolder;
+	public void setBinlogInfoHolder(BinlogInfoHolder binlogInfoHolder) {
+		this.binlogInfoHolder = binlogInfoHolder;
 	}
 
 	/**
@@ -201,19 +226,18 @@ public abstract class AbstractServer implements Server, Notifiable {
 	}
 
 	public Status getStatus() {
-		return status;
+		PumaTaskState state = pumaTaskStateContainer.get(taskId);
+		if (state != null) {
+			return state.getStatus();
+		}
+		return null;
 	}
 
 	public void setStatus(Status status) {
-		this.status = status;
-	}
-
-	public String getTaskId() {
-		return taskId;
-	}
-
-	public void setTaskId(String taskId) {
-		this.taskId = taskId;
+		PumaTaskState state = pumaTaskStateContainer.get(taskId);
+		if (state != null) {
+			state.setStatus(status);
+		}
 	}
 
 	@Override
@@ -237,5 +261,13 @@ public abstract class AbstractServer implements Server, Notifiable {
 
 	public void setTaskStatus(ReplicationTaskStatus.Status taskStatus) {
 		this.taskStatus = taskStatus;
+	}
+
+	public PumaTaskState getState() {
+		return state;
+	}
+
+	public void setState(PumaTaskState state) {
+		this.state = state;
 	}
 }

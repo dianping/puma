@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.server;
+package com.dianping.puma.reporter;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -48,7 +48,7 @@ public class DailyReportTask implements Task, Notifiable {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.dianping.puma.server.Task#start()
+	 * @see com.dianping.puma.reporter.Task#start()
 	 */
 	@Override
 	public void start() {

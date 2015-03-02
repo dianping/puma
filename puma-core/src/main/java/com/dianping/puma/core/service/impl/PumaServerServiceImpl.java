@@ -19,7 +19,7 @@ public class PumaServerServiceImpl implements PumaServerService {
 		return pumaServerDao.find(id);
 	}
 
-	public PumaServerEntity findByHostAndPort(String host, String port) {
+	public PumaServerEntity findByHostAndPort(String host, Integer port) {
 		return pumaServerDao.findByHostAndPort(host, port);
 	}
 

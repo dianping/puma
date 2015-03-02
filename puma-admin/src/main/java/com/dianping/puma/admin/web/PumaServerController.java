@@ -61,7 +61,7 @@ public class PumaServerController {
 
 	@RequestMapping(value = { "/puma-server/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(String name, String host, String port) {
+	public String createPost(String name, String host, Integer port) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		PumaServerEntity pumaServerEntity = new PumaServerEntity();

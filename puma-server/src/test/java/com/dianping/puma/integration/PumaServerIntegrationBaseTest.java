@@ -46,8 +46,8 @@ import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatherImpl;
-import com.dianping.puma.server.MMapBasedBinlogPositionHolder;
-import com.dianping.puma.server.ReplicationBasedServer;
+import com.dianping.puma.core.holder.impl.DefaultBinlogInfoHolder;
+import com.dianping.puma.server.ReplicationBasedTaskExecutor;
 import com.dianping.puma.storage.ArchiveStrategy;
 import com.dianping.puma.storage.BucketIndex;
 import com.dianping.puma.storage.CleanupStrategy;
@@ -71,7 +71,7 @@ public abstract class PumaServerIntegrationBaseTest {
     private static String user;
     protected static String db;
     protected static long serverId;
-    protected ReplicationBasedServer server;
+    protected ReplicationBasedTaskExecutor server;
     protected DefaultEventStorage storage;
     protected LocalFileBucketIndex masterIndex;
     protected LocalFileBucketIndex slaveIndex;
@@ -114,7 +114,7 @@ public abstract class PumaServerIntegrationBaseTest {
             }
         };
 
-        MMapBasedBinlogPositionHolder binlogPositionHolder = new MMapBasedBinlogPositionHolder();
+        DefaultBinlogInfoHolder binlogPositionHolder = new DefaultBinlogInfoHolder();
         binlogPositionHolder.setBaseDir(confBaseDir.getAbsolutePath());
         binlogPositionHolder.init();
 
@@ -187,7 +187,7 @@ public abstract class PumaServerIntegrationBaseTest {
         dispatcher.setSenders(Arrays.asList(new Sender[] { sender }));
 
         // init server
-        server = new ReplicationBasedServer();
+        server = new ReplicationBasedTaskExecutor();
         server.setDatabase(db);
         server.setServerId(System.currentTimeMillis());
         server.setEncoding("UTF-8");
@@ -202,7 +202,7 @@ public abstract class PumaServerIntegrationBaseTest {
         server.setDataHandler(dataHandler);
         server.setDispatcher(dispatcher);
         server.setNotifyService(mockNotifyService);
-        server.setBinlogPositionHolder(binlogPositionHolder);
+        server.setBinlogInfoHolder(binlogPositionHolder);
 
         PumaContext context = new PumaContext();
 

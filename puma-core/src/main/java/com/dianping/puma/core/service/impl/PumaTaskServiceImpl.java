@@ -2,7 +2,7 @@ package com.dianping.puma.core.service.impl;
 
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.dao.PumaTaskDao;
-import com.dianping.puma.core.entity.PumaTaskEntity;
+import com.dianping.puma.core.entity.PumaTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,27 +15,27 @@ public class PumaTaskServiceImpl implements PumaTaskService {
 	PumaTaskDao pumaTaskDao;
 
 	@Override
-	public PumaTaskEntity find(String id) {
+	public PumaTask find(String id) {
 		return pumaTaskDao.find(id);
 	}
 
 	@Override
-	public List<PumaTaskEntity> findByPumaServerName(String pumaServerName) {
+	public List<PumaTask> findByPumaServerName(String pumaServerName) {
 		return pumaTaskDao.findByPumaServerName(pumaServerName);
 	}
 
 	@Override
-	public List<PumaTaskEntity> findAll() {
+	public List<PumaTask> findAll() {
 		return pumaTaskDao.findAll();
 	}
 
 	@Override
-	public void create(PumaTaskEntity entity) {
+	public void create(PumaTask entity) {
 		pumaTaskDao.create(entity);
 	}
 
 	@Override
-	public void update(PumaTaskEntity entity) {
+	public void update(PumaTask entity) {
 		pumaTaskDao.update(entity);
 	}
 

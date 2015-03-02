@@ -8,6 +8,13 @@ public class BinlogInfo {
 
     private Boolean skipToNextPos;
 
+    public BinlogInfo() {}
+
+    public BinlogInfo(String binlogFile, Long binlogPosition) {
+        this.binlogFile = binlogFile;
+        this.binlogPosition = binlogPosition;
+    }
+
     public String getBinlogFile() {
         return binlogFile;
     }

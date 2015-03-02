@@ -6,7 +6,7 @@ import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.entity.PumaServerEntity;
-import com.dianping.puma.core.entity.PumaTaskEntity;
+import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstanceEntity;
 import com.dianping.puma.core.constant.Operation;
 import com.dianping.puma.core.service.PumaServerService;
@@ -50,7 +50,7 @@ public class PumaTaskController {
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		List<PumaTaskEntity> pumaTaskEntities = pumaTaskService.findAll();
+		List<PumaTask> pumaTaskEntities = pumaTaskService.findAll();
 
 		map.put("entities", pumaTaskEntities);
 		map.put("path", "puma-task");
@@ -83,24 +83,24 @@ public class PumaTaskController {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		PumaTaskEntity pumaTaskEntity = new PumaTaskEntity();
-		pumaTaskEntity.setSrcDBInstanceName(srcDBInstanceName);
-		pumaTaskEntity.setPumaServerName(pumaServerName);
+		PumaTask pumaTask = new PumaTask();
+		pumaTask.setSrcDBInstanceName(srcDBInstanceName);
+		pumaTask.setPumaServerName(pumaServerName);
 		BinlogInfo binlogInfo = new BinlogInfo();
 		binlogInfo.setBinlogFile(binlogFile);
 		binlogInfo.setBinlogPosition(binlogPosition);
-		pumaTaskEntity.setBinlogInfo(binlogInfo);
-		pumaTaskEntity.setPreservedDay(preservedDay);
+		pumaTask.setBinlogInfo(binlogInfo);
+		pumaTask.setPreservedDay(preservedDay);
 
 		try {
 			// Persistent.
-			this.pumaTaskService.create(pumaTaskEntity);
+			this.pumaTaskService.create(pumaTask);
 
 			// Add puma task state to the state container.
-			this.pumaTaskStateContainer.create(pumaTaskEntity.getId());
+			this.pumaTaskStateContainer.create(pumaTask.getId());
 
 			// Publish puma task operation event to puma server.
-			this.pumaTaskOperationReporter.report(pumaServerName, pumaTaskEntity.getId(), Operation.CREATE);
+			this.pumaTaskOperationReporter.report(pumaServerName, pumaTask.getId(), Operation.CREATE);
 
 			map.put("success", true);
 		} catch (Exception e) {

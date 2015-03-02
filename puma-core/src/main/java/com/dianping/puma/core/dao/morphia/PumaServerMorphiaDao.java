@@ -27,7 +27,7 @@ public class PumaServerMorphiaDao extends BasicDAO<PumaServerMorphiaEntity, Stri
 		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();
 	}
 
-	public PumaServerEntity findByHostAndPort(String host, String port) {
+	public PumaServerEntity findByHostAndPort(String host, Integer port) {
 		Query<PumaServerMorphiaEntity> q = this.getDatastore().createQuery(PumaServerMorphiaEntity.class).disableValidation();
 		q.field("entity.host").equal(host);
 		q.field("entity.port").equal(port);

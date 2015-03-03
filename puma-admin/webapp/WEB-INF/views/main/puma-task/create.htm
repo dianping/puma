@@ -12,7 +12,8 @@
       <form id="puma-task-create-form" class="form-horizontal" method="post"
             action="${rc.contextPath}/puma-task/create" target="${rc.contextPath}/puma-task">
          <div class="panel-body">
-            <div class="form-group has-success has-feedback">
+
+            <div class="form-group">
                <label class="col-md-2 control-label" for="srcDBInstanceName">源数据库</label>
                <div class="col-md-7">
                   <select id="srcDBInstanceName" name="srcDBInstanceName" class="form-control">
@@ -20,14 +21,13 @@
                      <option value="${srcDBInstance.name}">${srcDBInstance.name}</option>
                      #end
                   </select>
-                  <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
                </div>
                <div class="col-md-3" hidden="hidden">
                   <p class="help-block">hello</p>
                </div>
             </div>
 
-            <div class="form-group has-success has-feedback">
+            <div class="form-group">
                <label class="col-md-2 control-label" for="srcDBInstanceName">数据处理服务器</label>
                <div class="col-md-7">
                   <select id="pumaServerName" name="pumaServerName" class="form-control">
@@ -35,27 +35,28 @@
                      <option value="${pumaServer.name}">${pumaServer.name}</option>
                      #end
                   </select>
-                  <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
                </div>
                <div class="col-md-3" hidden="hidden">
                   <p class="help-block">hello</p>
                </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group has-feedback">
                <label class="col-md-2 control-label" for="binlogFile">数据库日志</label>
                <div class="col-md-5">
-                  <input id="binlogFile" name="binlogFile" class="form-control">
+                  <input id="binlogFile" name="binlogFile" class="form-control validation-input" format="bin-log-file">
                </div>
+
+               <label class="sr-only" for="binlogPosition">数据库日志位置</label>
                <div class="col-md-2">
-                  <input id="binlogPosition" name="binlogPosition" class="form-control">
+                  <input id="binlogPosition" name="binlogPosition" class="form-control validation-input" format="bin-log-position">
                </div>
             </div>
 
             <div class="form-group">
                <label class="col-md-2 control-label" for="preservedDay">数据存储天数</label>
                <div class="col-md-7">
-                  <input id="preservedDay" name="preservedDay" class="form-control">
+                  <input id="preservedDay" name="preservedDay" class="form-control validation-input" format="day">
                </div>
             </div>
          </div>

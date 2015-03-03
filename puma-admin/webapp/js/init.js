@@ -3,6 +3,10 @@ $(function() {
   $(".validation-input").on('change', function() {
     var div  = $(this).parent();
     var span = $(this).next();
+    if (span.size() === 0) {
+      $(this).after("<span></span>");
+      span = $(this).next();
+    }
 
     var input  = $(this).val();
     var format = $(this).attr('format');
@@ -19,6 +23,18 @@ $(function() {
 
       case 'port':
         regexp = /^[0-9]{1,5}$/;
+        break;
+
+      case 'bin-log-file':
+        regexp = /^[\w\-. ]+$/;
+        break;
+
+      case 'bin-log-position':
+        regexp = /^[0-9]{1,20}$/;
+        break;
+
+      case 'day':
+        regexp = /^[1-9]{1,2}$/;
         break;
 
       default: alert("regexp error");

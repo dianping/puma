@@ -30,7 +30,7 @@
             value="com.dianping.puma.core.monitor.PumaTaskOperationEvent" />
         <property name="listeners">
             <list>
-                <ref bean="pumaTaskChecker" />
+                <ref bean="pumaTaskOperationChecker" />
             </list>
         </property>
     </bean>
@@ -44,7 +44,7 @@
                   value="com.dianping.puma.core.monitor.PumaTaskControllerEvent" />
         <property name="listeners">
             <list>
-                <ref bean="pumaTaskChecker" />
+                <ref bean="pumaTaskControllerChecker" />
             </list>
         </property>
     </bean>

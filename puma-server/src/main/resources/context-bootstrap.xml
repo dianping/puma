@@ -16,6 +16,8 @@
 		<property name="propertiesPath" value="applicationContext.properties" />
 	</bean>
 
+	<bean id="intervalConfig" class="com.dianping.puma.config.InitializeInvervalConfig">
+	</bean>
 	<!-- annotation scan -->
 	<context:component-scan base-package="com.dianping.puma" />
     
@@ -69,7 +71,16 @@
 
 	<!--bean id="mongoClient2" class="com.dianping.puma.core.dao.morphia.MongoClient">
 	</bean-->
-
+	<task:scheduled-tasks scheduler="pumaScheduledSeqTask">  
+        <task:scheduled ref="pumaMonitorSeqTask" method="runTask" cron="${intervalConfig.seqInterval}"/> 
+    </task:scheduled-tasks>  
+    <task:scheduled-tasks scheduler="pumaScheduledClientIpTask">  
+        <task:scheduled ref="pumaMonitorClientIpTask" method="runTask" cron="${intervalConfig.clientIpInterval}"/>  
+    </task:scheduled-tasks>  
+    <task:scheduled-tasks scheduler="pumaScheduledServerInfoTask">  
+        <task:scheduled ref="pumaMonitorServerInfoTask" method="runTask" cron="${intervalConfig.serverInfoInterval}"/>   
+    </task:scheduled-tasks>  
+    
 </beans>
 
 

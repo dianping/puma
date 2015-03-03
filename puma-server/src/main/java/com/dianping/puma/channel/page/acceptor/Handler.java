@@ -65,10 +65,9 @@ public class Handler implements PageHandler<Context> {
 		HttpServletResponse res = ctx.getHttpServletResponse();
 
 		// status report
-		SystemStatusContainer.instance.addClientStatus(payload.getClientName(), payload.getSeq(), payload.getTarget(),
+		SystemStatusContainer.instance.addClientStatus(payload.getClientName(),NetUtils.getIpAddr(ctx.getHttpServletRequest()), payload.getSeq(), payload.getTarget(),
 				payload.isDml(), payload.isDdl(), payload.isNeedsTransactionMeta(), payload.getDatabaseTables(),
 				payload.getCodecType());
-
 		log.info("Client(" + payload.getClientName() + ") connected.");
 
 		EventCodec codec = EventCodecFactory.createCodec(payload.getCodecType());
@@ -109,6 +108,9 @@ public class Handler implements PageHandler<Context> {
 						res.getOutputStream().flush();
 						// status report
 						SystemStatusContainer.instance.updateClientSeq(payload.getClientName(), event.getSeq());
+						//record success client seq
+						SystemStatusContainer.instance.updateClientSuccessSeq(payload.getClientName(), event.getSeq());
+					
 					}
 				}
 			} catch (Exception e) {

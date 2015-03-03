@@ -37,6 +37,8 @@ public enum SystemStatusContainer {
 
 	private Map<String, ClientStatus> clientStatus = new ConcurrentHashMap<String, ClientStatus>();
 
+	private Map<String, Long> clientSuccessSeq = new ConcurrentHashMap<String, Long>();
+
 	private Map<String, Long> storageStatus = new ConcurrentHashMap<String, Long>();
 
 	private ConcurrentMap<String, AtomicLong> serverParsedRowUpdateCount = new ConcurrentHashMap<String, AtomicLong>();
@@ -94,15 +96,19 @@ public enum SystemStatusContainer {
 		logMetricForCount(CAT_KEY_EVENT_PARSED + name);
 	}
 
-	public void addClientStatus(String name, long seq, String target,
+	public void addClientStatus(String name, String ip,long seq, String target,
 			boolean dml, boolean ddl, boolean ts, String[] dt, String codec) {
 		clientStatus.put(name, new ClientStatus(target, dml, ddl, ts, codec,
-				dt, seq));
+				dt, seq, ip));
 	}
 
 	public void updateClientSeq(String name, long seq) {
 		clientStatus.get(name).setSeq(seq);
 		logMetricForCount("ClientConsumed-" + name);
+	}
+
+	public void updateClientSuccessSeq(String name, long seq) {
+		clientSuccessSeq.put(name, seq);
 	}
 
 	public void removeClient(String name) {
@@ -122,6 +128,10 @@ public enum SystemStatusContainer {
 		return clientStatus.get(name);
 	}
 
+	public Long getClientSuccessSeq(String name) {
+		return clientSuccessSeq.get(name);
+	}
+
 	public long getStorageStatus(String name) {
 		return storageStatus.get(name);
 	}
@@ -132,6 +142,10 @@ public enum SystemStatusContainer {
 
 	public Map<String, ClientStatus> listClientStatus() {
 		return Collections.unmodifiableMap(clientStatus);
+	}
+
+	public Map<String, Long> listClientSuccessSeq() {
+		return Collections.unmodifiableMap(clientSuccessSeq);
 	}
 
 	public AtomicLong getServerRowUpdateCounter(String taskId) {
@@ -250,9 +264,11 @@ public enum SystemStatusContainer {
 		private String[] dt;
 
 		private long seq;
+		
+		private String ip;
 
 		public ClientStatus(String target, boolean dml, boolean ddl,
-				boolean needTsInfo, String codec, String[] dt, long seq) {
+				boolean needTsInfo, String codec, String[] dt, long seq,String ip) {
 			super();
 			this.target = target;
 			this.dml = dml;
@@ -261,6 +277,7 @@ public enum SystemStatusContainer {
 			this.codec = codec;
 			this.dt = dt;
 			this.seq = seq;
+			this.ip = ip;
 		}
 
 		/**
@@ -276,6 +293,14 @@ public enum SystemStatusContainer {
 		 */
 		public long getSeq() {
 			return seq;
+		}
+
+		public void setIp(String ip) {
+			this.ip = ip;
+		}
+
+		public String getIp() {
+			return ip;
 		}
 
 		/**
@@ -395,5 +420,4 @@ public enum SystemStatusContainer {
 		stopTheWorlds.put(serverName, new AtomicBoolean(false));
 	}
 
-	
 }

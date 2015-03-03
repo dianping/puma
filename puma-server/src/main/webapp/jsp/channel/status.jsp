@@ -133,12 +133,18 @@ color: #797268;
 <caption>Clients</caption>
 	<tr><th>Name</th><th>Target</th><th>Seq</th><th>Db&table</th><th>codec</th><th>NeedDdl</th><th>NeedDml</th><th>NeedTransactionInfo</th></tr>
 	<% 
-		Map<String, ClientStatus> clients = model.getSystemStatus().listClientStatus(); 
+		Map<String, ClientStatus> clients = model.getSystemStatus().listClientStatus();
+		Map<String, Long> clientSussessSeq = model.getSystemStatus().listClientSuccessSeq();
 		for(Map.Entry<String, ClientStatus> entry : clients.entrySet()) {
 			ClientStatus cs = entry.getValue();
 	%>	
 			<%="<tr><td>" + entry.getKey() + "</td><td>" + cs.getTarget() + "</td><td>" %>
             <%=cs.getSeq() + "<br/>" + new Sequence(cs.getSeq()) %> 
+            <%="</td><td>" %>
+            <%if(clientSussessSeq.containsKey(entry.getKey())) {%>
+            <%= clientSussessSeq.get(entry.getKey())%>
+            <%}{ %>
+            <%= ""%> <% }%>
             <%="</td><td>" %>
 			<% for(String dt: cs.getDt()){
 			%> 

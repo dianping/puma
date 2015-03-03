@@ -101,7 +101,7 @@ public class DstDBInstanceController {
 
 	@RequestMapping(value = { "/dst-db-instance/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(String id) {
+	public String removePost(String id) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {

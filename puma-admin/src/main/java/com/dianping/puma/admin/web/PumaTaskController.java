@@ -112,4 +112,19 @@ public class PumaTaskController {
 
 		return GsonUtil.toJson(map);
 	}
+
+	@RequestMapping(value = { "/puma-task/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String removePost(String id) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			this.pumaTaskService.remove(id);
+			map.put("success", true);
+		} catch (Exception e) {
+			map.put("success", false);
+		}
+
+		return GsonUtil.toJson(map);
+	}
 }

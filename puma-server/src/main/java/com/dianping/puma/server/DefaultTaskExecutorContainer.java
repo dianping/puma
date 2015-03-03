@@ -9,8 +9,7 @@ import javax.annotation.PostConstruct;
 
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.PumaTask;
-import com.dianping.puma.core.entity.SrcDBInstanceEntity;
-import com.dianping.puma.core.entity.replication.ReplicationTaskStatus;
+import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.monitor.PumaTaskControllerEvent;
 import com.dianping.puma.core.monitor.PumaTaskOperationEvent;
@@ -25,7 +24,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.config.Config;
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.monitor.NotifyService;
@@ -57,12 +55,16 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 	private SrcDBInstanceService srcDBInstanceService;
 
 	private String pumaServerName;
+
 	@Autowired
 	private BinlogInfoHolder binlogInfoHolder;
+
 	@Autowired
 	private NotifyService notifyService;
+
 	@Autowired
 	private JsonEventCodec jsonCodec;
+
 	@Autowired
 	private Config pumaServerConfig;
 
@@ -78,7 +80,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 		List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerName(pumaServerName);
 		if (pumaTasks != null && !pumaTasks.isEmpty()) {
 			TaskExecutor taskExecutor;
-			for (PumaTask pumaTask: pumaTasks) {
+			for (PumaTask pumaTask : pumaTasks) {
 				taskExecutor = construct(pumaTask);
 				taskExecutorMap.put(taskExecutor.getServerName(), taskExecutor);
 			}
@@ -92,18 +94,18 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 	public TaskExecutor construct(PumaTask pumaTask) throws Exception {
 		LOG.info("Construct server: {}.", pumaTask.getId());
 
-		ReplicationBasedTaskExecutor server = new ReplicationBasedTaskExecutor();
+		DefaultTaskExecutor server = new DefaultTaskExecutor();
 
 		// Task id
 
 		// Source database.
 		String srcDBInstanceName = pumaTask.getSrcDBInstanceName();
-		SrcDBInstanceEntity srcDBInstance = srcDBInstanceService.findByName(srcDBInstanceName);
+		SrcDBInstance srcDBInstance = srcDBInstanceService.findByName(srcDBInstanceName);
 		server.setServerId(srcDBInstance.getServerId());
-		server.setHost(srcDBInstance.getHost());
+		server.setDBHost(srcDBInstance.getHost());
 		server.setPort(srcDBInstance.getPort());
-		server.setUsername(srcDBInstance.getUsername());
-		server.setPassword(srcDBInstance.getPassword());
+		server.setDBUsername(srcDBInstance.getUsername());
+		server.setDBPassword(srcDBInstance.getPassword());
 
 		// Bin log information.
 		BinlogInfo binlogInfo = pumaTask.getBinlogInfo();
@@ -150,10 +152,10 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 		server.setNotifyService(notifyService);
 		server.setName(replicationTask.getTaskName());
 		server.setServerId(replicationTask.getTaskId().hashCode());
-		server.setHost(replicationTask.getDbInstanceHost().getHost());
+		server.setDBHost(replicationTask.getDbInstanceHost().getDBHost());
 		server.setPort(replicationTask.getDbInstanceHost().getPort());
-		server.setUsername(replicationTask.getDbInstanceHost().getUsername());
-		server.setPassword(replicationTask.getDbInstanceHost().getPassword());
+		server.setDBUsername(replicationTask.getDbInstanceHost().getDBUsername());
+		server.setDBPassword(replicationTask.getDbInstanceHost().getDBPassword());
 		server.setDefaultBinlogFileName(replicationTask.getBinlogInfo()
 				.getBinlogFile());
 		server.setDefaultBinlogPosition(replicationTask.getBinlogInfo()
@@ -167,13 +169,13 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 		// tableMetaInfo
 		DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
 		tableMetaInfo.setMetaDBHost(replicationTask.getDbInstanceMetaHost()
-				.getHost());
+				.getDBHost());
 		tableMetaInfo.setMetaDBPort(replicationTask.getDbInstanceMetaHost()
 				.getPort());
 		tableMetaInfo.setMetaDBUsername(replicationTask.getDbInstanceMetaHost()
-				.getUsername());
+				.getDBUsername());
 		tableMetaInfo.setMetaDBPassword(replicationTask.getDbInstanceMetaHost()
-				.getPassword());
+				.getDBPassword());
 		// handler
 		DefaultDataHandler dataHandler = new DefaultDataHandler();
 		dataHandler.setNotifyService(notifyService);
@@ -247,187 +249,161 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 	}*/
 
 	@Override
-	public void submit(TaskExecutor taskExecutor) {
-		if (taskExecutor == null || taskExecutorMap.containsKey(taskExecutor.getServerName())
-				|| taskExecutorMap.contains(taskExecutor)) {
-			LOG.info("Submit puma task {} error.", taskExecutor.getServerName());
+	public void startExecutor(final TaskExecutor taskExecutor) throws Exception {
+		if (taskExecutor == null) {
+			throw new Exception("Null puma task executor supplied.");
 		}
 
-		initContext(taskExecutor);
-		startExecutor(taskExecutor);
-		taskExecutor.setStatus(Status.RUNNING);
-		taskExecutorMap.put(taskExecutor.getServerName(), taskExecutor);
-		LOG.info("Server " + taskExecutor.getServerName()
-				+ " started at binlogFile: "
-				+ taskExecutor.getContext().getBinlogFileName() + " position: "
-				+ taskExecutor.getContext().getBinlogStartPos());
-	}
+		if (taskExecutor.getStatus() == Status.PREPARING || taskExecutor.getStatus() == Status.RUNNING) {
+			throw new Exception("Puma task is preparing or running.");
+		}
 
-	@Override
-	public void withdraw(TaskExecutor taskExecutor) {
+		taskExecutor.setStatus(Status.PREPARING);
+		taskExecutor.initContext();
+
 		try {
-			taskExecutor.stop();
-			taskExecutor.setStatus(Status.STOPPED);
-			taskExecutorMap.remove(taskExecutor.getTaskId());
+			PumaThreadUtils.createThread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						taskExecutor.start();
+					} catch (Exception e) {
+						taskExecutor.setStatus(Status.FAILED);
+						LOG.error("Start puma task `{}` error: {}.", taskExecutor.getTaskName(), e.getMessage());
+						e.printStackTrace();
+					}
+				}
+			}, taskExecutor.getTaskId() , false).start();
+		} catch (Exception e) {
+			taskExecutor.setStatus(Status.FAILED);
+			throw e;
 		}
-		catch (Exception e) {
-			LOG.error("Withdraw puma task `{}` error: {}.", taskExecutor.getTaskId(), e.getMessage());
-		}
+
+		taskExecutor.setStatus(Status.RUNNING);
 	}
 
 	@Override
-	public boolean contain(String taskName) {
-		if (taskExecutorMap.containsKey(taskName)) {
-			return true;
-		}
-		return false;
-	}
-
-	@Override
-	public boolean addServer(TaskExecutor taskExecutor) {
-		if (taskExecutor != null && !taskExecutorMap.containsKey(taskExecutor.getServerName())
-				&& !taskExecutorMap.contains(taskExecutor)) {
-			initContext(taskExecutor);
-			startExecutor(taskExecutor);
-			taskExecutorMap.put(taskExecutor.getServerName(), taskExecutor);
-			LOG.info("Server " + taskExecutor.getServerName()
-					+ " started at binlogFile: "
-					+ taskExecutor.getContext().getBinlogFileName() + " position: "
-					+ taskExecutor.getContext().getBinlogStartPos());
-			return true;
-		}
-		return false;
-	}
-
-	@Override
-	public void remove(String taskName) {
-		taskExecutorMap.remove(taskName);
-	}
-
-	@Override
-	public void initContext(TaskExecutor taskExecutor) {
-		String taskName = taskExecutor.getServerName();
-		BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(taskName);
-
-		PumaContext context = new PumaContext();
-
-		if (binlogInfo == null) {
-			context.setBinlogFileName(taskExecutor.getDefaultBinlogFileName());
-			context.setBinlogStartPos(taskExecutor.getDefaultBinlogPosition());
-		} else {
-			context.setBinlogFileName(binlogInfo.getBinlogFile());
-			context.setBinlogStartPos(binlogInfo.getBinlogPosition());
+	public void stopExecutor(TaskExecutor taskExecutor) throws Exception {
+		if (taskExecutor == null) {
+			throw new Exception("Null puma task executor supplied.");
 		}
 
-		context.setPumaServerId(taskExecutor.getServerId());
-		context.setPumaServerName(taskName);
-		taskExecutor.setContext(context);
-	}
+		if (taskExecutor.getStatus() == Status.STOPPED || taskExecutor.getStatus() == Status.FAILED) {
+			throw new Exception("Puma task is stopped or failed.");
+		}
 
-	@Override
-	public void stopExecutor(TaskExecutor taskExecutor) {
 		taskExecutor.setStatus(Status.STOPPING);
 
 		try {
 			taskExecutor.stop();
-			LOG.info("Server " + taskExecutor.getServerName() + " stopped.");
 		} catch (Exception e) {
-			LOG.error("Stop Server" + taskExecutor.getServerName() + " failed.", e);
-			e.printStackTrace();
+			taskExecutor.setStatus(Status.FAILED);
+			throw e;
 		}
 
 		taskExecutor.setStatus(Status.STOPPED);
 	}
 
 	@Override
-	public void stopServers() {
-		LOG.info("Stopping...");
-		for (Map.Entry<String, TaskExecutor> item : taskExecutorMap.entrySet()) {
-			stopExecutor(item.getValue());
-		}
-	}
-
-	@Override
-	public void startExecutor(final TaskExecutor taskExecutor) {
-		taskExecutor.setStatus(Status.PREPARING);
-
-		PumaThreadUtils.createThread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					taskExecutor.start();
-				} catch (Exception e) {
-					LOG.error("Start server: " + taskExecutor.getServerName()
-							+ " failed.", e);
-				}
-			}
-		}, taskExecutor.getServerName() + "_Connector", false).start();
-
-		taskExecutor.setStatus(Status.RUNNING);
-	}
-
-	public BinlogInfoHolder getBinlogInfoHolder() {
-		return binlogInfoHolder;
-	}
-
-	@Override
-	public void pauseEvent(PumaTaskControllerEvent event) throws Exception {
-		String taskId = event.getTaskId();
-		TaskExecutor taskExecutor = taskExecutorMap.get(taskId);
-
+	public void submit(TaskExecutor taskExecutor) throws Exception {
 		if (taskExecutor == null) {
-			throw new Exception("Puma task not exist");
+			throw new Exception("Null puma task executor supplied.");
 		}
 
-		if (taskExecutor.getStatus() != Status.STOPPED && taskExecutor.getStatus() != Status.FAILED) {
-			stopExecutor(taskExecutor);
-		}
-		taskExecutor.setStatus(Status.FAILED);
-	}
-
-	@Override
-	public void resumeEvent(PumaTaskControllerEvent event) throws Exception {
-		String taskId = event.getTaskId();
-		TaskExecutor taskExecutor = taskExecutorMap.get(taskId);
-
-		if (taskExecutor == null) {
-			throw new Exception("Puma task not exist");
-		}
-
-		if (taskExecutor.getStatus() == Status.STOPPED || taskExecutor.getStatus() == Status.FAILED) {
-			startExecutor(taskExecutor);
-		}
-		taskExecutor.setStatus(Status.FAILED);
-	}
-
-	@Override
-	public void createEvent(PumaTaskOperationEvent event) throws Exception {
-		String taskId = event.getTaskId();
+		String taskId = taskExecutor.getTaskId();
 
 		if (taskExecutorMap.containsKey(taskId)) {
 			throw new Exception("Duplicated puma task.");
 		}
 
-		PumaTask pumaTask = pumaTaskService.find(taskId);
-		TaskExecutor taskExecutor = taskExecutorBuilder.build(pumaTask);
-		submit(taskExecutor);
+		startExecutor(taskExecutor);
+		taskExecutorMap.put(taskId, taskExecutor);
 	}
 
 	@Override
-	public void updateEvent(PumaTaskOperationEvent event) throws Exception {
-
-	}
-
-	@Override
-	public void removeEvent(PumaTaskOperationEvent event) throws Exception {
-		String taskId = event.getTaskId();
-		TaskExecutor taskExecutor = taskExecutorMap.get(taskId);
-
+	public void withdraw(TaskExecutor taskExecutor) throws Exception {
 		if (taskExecutor == null) {
+			throw new Exception("Null puma task executor supplied.");
+		}
+
+		String taskId = taskExecutor.getTaskId();
+
+		if (!taskExecutorMap.containsKey(taskId)) {
 			throw new Exception("Puma task not exist.");
 		}
 
-		withdraw(taskExecutor);
+		stopExecutor(taskExecutor);
+		taskExecutorMap.remove(taskId);
+	}
+
+	@Override
+	public void pauseEvent(PumaTaskControllerEvent event) {
+		String taskId = event.getTaskId();
+		TaskExecutor taskExecutor = taskExecutorMap.get(taskId);
+
+		try {
+			stopExecutor(taskExecutor);
+		} catch (Exception e) {
+			LOG.error("Puma task `{}` pause event error: {}.", taskId, e.getMessage());
+		}
+	}
+
+	@Override
+	public void resumeEvent(PumaTaskControllerEvent event) {
+		String taskId = event.getTaskId();
+		TaskExecutor taskExecutor = taskExecutorMap.get(taskId);
+
+		try {
+			startExecutor(taskExecutor);
+		} catch (Exception e) {
+			LOG.error("Puma task `{}` resume event error: {}.", taskId, e.getMessage());
+		}
+	}
+
+	@Override
+	public void createEvent(PumaTaskOperationEvent event) {
+		String taskId = event.getTaskId();
+
+		try {
+			PumaTask pumaTask = pumaTaskService.find(taskId);
+			TaskExecutor taskExecutor = taskExecutorBuilder.build(pumaTask);
+			submit(taskExecutor);
+		} catch (Exception e) {
+			LOG.error("Puma task `{}` create event error: {}.", taskId, e.getMessage());
+		}
+	}
+
+	@Override
+	public void updateEvent(PumaTaskOperationEvent event) {
+
+	}
+
+	@Override
+	public void removeEvent(PumaTaskOperationEvent event) {
+		String taskId = event.getTaskId();
+
+		try {
+			TaskExecutor taskExecutor = taskExecutorMap.get(taskId);
+			withdraw(taskExecutor);
+		} catch (Exception e) {
+			LOG.error("Puma task `{}` remove event error: {}.", taskId, e.getMessage());
+		}
+	}
+
+	@Override
+	public void stopServers() {
+		LOG.info("Stopping...");
+		for (Map.Entry<String, TaskExecutor> item : taskExecutorMap.entrySet()) {
+			try {
+				stopExecutor(item.getValue());
+			} catch (Exception e) {
+				LOG.error("Stop servers error: {}.", e.getMessage());
+			}
+		}
+	}
+
+	public BinlogInfoHolder getBinlogInfoHolder() {
+		return binlogInfoHolder;
 	}
 
 	/*
@@ -477,11 +453,11 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 		return null;
 	}
 
-	public Map<String, TaskExecutor> getTaskExecutorMap(){
+	public Map<String, TaskExecutor> getTaskExecutorMap() {
 		return Collections.unmodifiableMap(taskExecutorMap);
 	}
-	
-	public String getPumaServerName(){
+
+	public String getPumaServerName() {
 		return pumaServerName;
 	}
 }

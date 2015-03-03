@@ -1,20 +1,20 @@
 package com.dianping.puma.core.service;
 
-import com.dianping.puma.core.entity.PumaServerEntity;
+import com.dianping.puma.core.entity.PumaServer;
 
 import java.util.List;
 
 public interface PumaServerService {
 
-	PumaServerEntity find(String id);
+	PumaServer find(String id);
 
-	PumaServerEntity findByHostAndPort(String host, Integer port);
+	PumaServer findByHostAndPort(String host, Integer port);
 
-	List<PumaServerEntity> findAll();
+	List<PumaServer> findAll();
 
-	void create(PumaServerEntity entity);
+	void create(PumaServer entity);
 
-	void update(PumaServerEntity entity);
+	void update(PumaServer entity);
 
 	void remove(String id);
 }

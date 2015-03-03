@@ -5,9 +5,9 @@ import com.dianping.puma.core.container.PumaTaskStateContainer;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.entity.PumaServerEntity;
+import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.entity.PumaTask;
-import com.dianping.puma.core.entity.SrcDBInstanceEntity;
+import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.constant.Operation;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
@@ -22,6 +22,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,8 +62,8 @@ public class PumaTaskController {
 	public ModelAndView create(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		List<SrcDBInstanceEntity> srcDBInstanceEntities = srcDBInstanceService.findAll();
-		List<PumaServerEntity> pumaServerEntities = pumaServerService.findAll();
+		List<SrcDBInstance> srcDBInstanceEntities = srcDBInstanceService.findAll();
+		List<PumaServer> pumaServerEntities = pumaServerService.findAll();
 
 		map.put("srcDBInstanceEntities", srcDBInstanceEntities);
 		map.put("pumaServerEntities", pumaServerEntities);
@@ -84,6 +85,8 @@ public class PumaTaskController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		PumaTask pumaTask = new PumaTask();
+		Date now = new Date();
+		pumaTask.setName(srcDBInstanceName + "@" + pumaServerName + "-" + now.toString());
 		pumaTask.setSrcDBInstanceName(srcDBInstanceName);
 		pumaTask.setPumaServerName(pumaServerName);
 		BinlogInfo binlogInfo = new BinlogInfo();

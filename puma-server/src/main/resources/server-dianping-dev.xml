@@ -6,12 +6,12 @@
 	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
 	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
-    <bean id="server-dianping-dev" class="com.dianping.puma.server.ReplicationBasedTaskExecutor"
+    <bean id="server-dianping-dev" class="com.dianping.puma.server.DefaultTaskExecutor"
         parent="notifiableBean">
-        <property name="host" value="192.168.8.41" />
+        <property name="DBHost" value="192.168.8.41" />
         <property name="port" value="3306" />
-        <property name="username" value="root" />
-        <property name="password" value="123456" />
+        <property name="DBUsername" value="root" />
+        <property name="DBPassword" value="123456" />
         <property name="defaultBinlogFileName" value="mysql-bin.000014" />
         <property name="defaultBinlogPosition" value="397550508" />
         <property name="parser" ref="defaultParser-dianping-dev" />
@@ -23,7 +23,7 @@
     </bean>
 
     <bean id="dispatcher-dianping-dev"
-        class="com.dianping.puma.sender.dispatcher.SimpleDispatherImpl"
+        class="com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl"
         init-method="start">
         <property name="name" value="dispatcher-dianping-dev" />
         <property name="senders">

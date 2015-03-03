@@ -208,7 +208,7 @@ public enum SystemStatusContainer {
 			binlogInfo.setBinlogPosition(task.getContext().getBinlogStartPos());
 			executorStatus.setDbServerId(task.getContext().getDBServerId());
 			if(task instanceof ReplicationBasedServer){
-				executorStatus.setHost(((ReplicationBasedServer)task).getHost());
+				executorStatus.setDBHost(((ReplicationBasedServer)task).getDBHost());
 				executorStatus.setPort(((ReplicationBasedServer)task).getPort());
 			}
 			executorStatus.setExecutorStatus(task.getTaskStatus());

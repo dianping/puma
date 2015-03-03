@@ -44,8 +44,11 @@ public class PumaTaskChecker implements EventListener {
 	@PostConstruct
 	public void init() {
 		String pumaServerName = pumaServerConfig.getName();
+
+		// Throws puma task service exceptions.
 		List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerName(pumaServerName);
 
+		// Swallows puma task executors exceptions.
 		for (PumaTask pumaTask: pumaTasks) {
 			try {
 				TaskExecutor taskExecutor = taskExecutorBuilder.build(pumaTask);

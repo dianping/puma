@@ -45,9 +45,9 @@ import com.dianping.puma.parser.DefaultBinlogParser;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
-import com.dianping.puma.sender.dispatcher.SimpleDispatherImpl;
+import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
 import com.dianping.puma.core.holder.impl.DefaultBinlogInfoHolder;
-import com.dianping.puma.server.ReplicationBasedTaskExecutor;
+import com.dianping.puma.server.DefaultTaskExecutor;
 import com.dianping.puma.storage.ArchiveStrategy;
 import com.dianping.puma.storage.BucketIndex;
 import com.dianping.puma.storage.CleanupStrategy;
@@ -71,7 +71,7 @@ public abstract class PumaServerIntegrationBaseTest {
     private static String user;
     protected static String db;
     protected static long serverId;
-    protected ReplicationBasedTaskExecutor server;
+    protected DefaultTaskExecutor server;
     protected DefaultEventStorage storage;
     protected LocalFileBucketIndex masterIndex;
     protected LocalFileBucketIndex slaveIndex;
@@ -182,19 +182,19 @@ public abstract class PumaServerIntegrationBaseTest {
         sender.start();
 
         // init dispatcher
-        SimpleDispatherImpl dispatcher = new SimpleDispatherImpl();
+        SimpleDispatcherImpl dispatcher = new SimpleDispatcherImpl();
         dispatcher.setName("test-dispatcher");
         dispatcher.setSenders(Arrays.asList(new Sender[] { sender }));
 
         // init server
-        server = new ReplicationBasedTaskExecutor();
+        server = new DefaultTaskExecutor();
         server.setDatabase(db);
         server.setServerId(System.currentTimeMillis());
         server.setEncoding("UTF-8");
-        server.setUsername(user);
+        server.setDBUsername(user);
         server.setPort(port);
-        server.setHost(host);
-        server.setPassword(pwd);
+        server.setDBHost(host);
+        server.setDBPassword(pwd);
         BinlogInfo binlogInfo = getLatestBinlogInfo();
         server.setDefaultBinlogFileName(binlogInfo.getFile());
         server.setDefaultBinlogPosition(binlogInfo.getPos());

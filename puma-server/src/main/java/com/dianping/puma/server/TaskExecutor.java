@@ -30,6 +30,8 @@ public interface TaskExecutor extends LifeCycle<Exception> {
 
 	public void setContext(PumaContext context);
 
+	public void initContext();
+
 	public PumaContext getContext();
 
 	public String getTaskId();

@@ -1,18 +1,18 @@
 package com.dianping.puma.core.service;
 
-import com.dianping.puma.core.entity.DstDBInstanceEntity;
+import com.dianping.puma.core.entity.DstDBInstance;
 
 import java.util.List;
 
 public interface DstDBInstanceService {
 
-	DstDBInstanceEntity find(String id);
+	DstDBInstance find(String id);
 
-	List<DstDBInstanceEntity> findAll();
+	List<DstDBInstance> findAll();
 
-	void create(DstDBInstanceEntity entity);
+	void create(DstDBInstance entity);
 
-	void update(DstDBInstanceEntity entity);
+	void update(DstDBInstance entity);
 
 	void remove(String id);
 }

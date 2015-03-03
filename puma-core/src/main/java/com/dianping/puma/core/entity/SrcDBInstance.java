@@ -1,6 +1,6 @@
 package com.dianping.puma.core.entity;
 
-public class SrcDBInstanceEntity extends BaseEntity {
+public class SrcDBInstance extends BaseEntity {
 
 	private String name;
 

@@ -10,6 +10,13 @@ public class BinlogStat {
 
 	private Long ddls;
 
+	public BinlogStat() {
+		rowsInsert = 0L;
+		rowsDelete = 0L;
+		rowsUpdate = 0L;
+		ddls = 0L;
+	}
+
 	public Long getRowsInsert() {
 		return rowsInsert;
 	}

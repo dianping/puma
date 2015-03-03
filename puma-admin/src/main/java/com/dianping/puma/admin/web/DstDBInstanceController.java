@@ -1,7 +1,7 @@
 package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.util.GsonUtil;
-import com.dianping.puma.core.entity.DstDBInstanceEntity;
+import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.service.DstDBInstanceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public class DstDBInstanceController {
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		List<DstDBInstanceEntity> dstDBInstanceEntities = dstDBInstanceService.findAll();
+		List<DstDBInstance> dstDBInstanceEntities = dstDBInstanceService.findAll();
 
 		map.put("entities", dstDBInstanceEntities);
 		map.put("path", "dst-db-instance");
@@ -50,7 +50,7 @@ public class DstDBInstanceController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			DstDBInstanceEntity entity = dstDBInstanceService.find(id);
+			DstDBInstance entity = dstDBInstanceService.find(id);
 			map.put("entity", entity);
 			map.put("path", "dst-db-instance");
 			map.put("subPath", "create");
@@ -77,20 +77,20 @@ public class DstDBInstanceController {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		DstDBInstanceEntity dstDBInstanceEntity = new DstDBInstanceEntity();
-		dstDBInstanceEntity.setName(name);
-		dstDBInstanceEntity.setServerId(serverId);
-		dstDBInstanceEntity.setHost(host);
-		dstDBInstanceEntity.setPort(port);
-		dstDBInstanceEntity.setUsername(username);
-		dstDBInstanceEntity.setPassword(password);
-		dstDBInstanceEntity.setMetaHost(metaHost);
-		dstDBInstanceEntity.setMetaPort(metaPort);
-		dstDBInstanceEntity.setMetaUsername(metaUsername);
-		dstDBInstanceEntity.setMetaPassword(metaPassword);
+		DstDBInstance dstDBInstance = new DstDBInstance();
+		dstDBInstance.setName(name);
+		dstDBInstance.setServerId(serverId);
+		dstDBInstance.setHost(host);
+		dstDBInstance.setPort(port);
+		dstDBInstance.setUsername(username);
+		dstDBInstance.setPassword(password);
+		dstDBInstance.setMetaHost(metaHost);
+		dstDBInstance.setMetaPort(metaPort);
+		dstDBInstance.setMetaUsername(metaUsername);
+		dstDBInstance.setMetaPassword(metaPassword);
 
 		try {
-			this.dstDBInstanceService.create(dstDBInstanceEntity);
+			this.dstDBInstanceService.create(dstDBInstance);
 			map.put("success", true);
 		} catch (Exception e) {
 			map.put("success", false);

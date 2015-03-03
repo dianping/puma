@@ -14,12 +14,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
 
 /**
  * TODO Comment of MMapBasedBinlogPositionHolder
  *
  * @author Leo Liang
  */
+@Service("binlogInfoHolder")
 public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 
 	private static final Logger log = Logger.getLogger(DefaultBinlogInfoHolder.class);
@@ -38,8 +43,10 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 
 	private static final byte[] BUF_MASK = new byte[MAX_FILE_SIZE];
 
+	@Value("/data/appdatas/puma/binlog/")
 	private File baseDir;
 
+	@PostConstruct
 	public void init() {
 		if (!baseDir.exists()) {
 			if (!baseDir.mkdirs()) {
@@ -72,8 +79,8 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 		this.saveToFile(taskName, binlogInfo);
 	}
 
-	private void loadFromFile(String ServerName) {
-		String path = (new File(baseDir, ServerName)).getAbsolutePath();
+	private void loadFromFile(String taskName) {
+		String path = (new File(baseDir, taskName)).getAbsolutePath();
 		File f = new File(path);
 
 		FileReader fr = null;
@@ -88,7 +95,7 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 			BinlogInfo binlogInfo = new BinlogInfo(binlogFile, binlogPosition);
 			mappedByteBufferMapping.put(path,
 					new RandomAccessFile(f, "rwd").getChannel().map(MapMode.READ_WRITE, 0, MAX_FILE_SIZE));
-			binlogInfoMap.put(ServerName.substring(PREFIX.length(), ServerName.lastIndexOf(SUFFIX)), binlogInfo);
+			binlogInfoMap.put(taskName.substring(PREFIX.length(), taskName.lastIndexOf(SUFFIX)), binlogInfo);
 
 		} catch (Exception e) {
 			log.error("Read file " + f.getAbsolutePath() + " failed.", e);
@@ -112,8 +119,8 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 
 	}
 
-	private synchronized void saveToFile(String serverName, BinlogInfo binlogInfo) {
-		String path = new File(baseDir, getConfFileName(serverName)).getAbsolutePath();
+	private synchronized void saveToFile(String taskName, BinlogInfo binlogInfo) {
+		String path = new File(baseDir, getConfFileName(taskName)).getAbsolutePath();
 
 		if (!mappedByteBufferMapping.containsKey(path)) {
 			File f = new File(path);

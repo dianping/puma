@@ -6,12 +6,12 @@
 	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
 	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
-    <bean id="server-tuangou2010" class="com.dianping.puma.server.ReplicationBasedTaskExecutor"
+    <bean id="server-tuangou2010" class="com.dianping.puma.server.DefaultTaskExecutor"
         parent="notifiableBean">
-        <property name="host" value="${puma.tuangou_host}" />
+        <property name="DBHost" value="${puma.tuangou_host}" />
         <property name="port" value="${puma.tuangou_port}" />
-        <property name="username" value="${puma.tuangou_username}" />
-        <property name="password" value="${puma.tuangou_password}" />
+        <property name="DBUsername" value="${puma.tuangou_username}" />
+        <property name="DBPassword" value="${puma.tuangou_password}" />
         <property name="defaultBinlogFileName" value="mysql-bin.000093" />
         <property name="defaultBinlogPosition" value="574522159" />
         <property name="parser" ref="defaultParser-tuangou2010" />
@@ -24,7 +24,7 @@
     </bean>
 
     <bean id="dispatcher-tuangou2010"
-        class="com.dianping.puma.sender.dispatcher.SimpleDispatherImpl"
+        class="com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl"
         init-method="start">
         <property name="name" value="dispatcher-tuangou2010" />
         <property name="senders">

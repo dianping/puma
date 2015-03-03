@@ -15,42 +15,25 @@ public interface TaskExecutorContainer {
 
 	public ConcurrentHashMap<String,TaskExecutor> constructServers() throws Exception;
 
-	public void initContext(TaskExecutor taskExecutor);
+	public void startExecutor(final TaskExecutor taskExecutor) throws Exception;
 
-	public void submit(TaskExecutor taskExecutor);
+	public void stopExecutor(TaskExecutor taskExecutor) throws Exception;
 
-	public void withdraw(TaskExecutor taskExecutor);
+	public void submit(TaskExecutor taskExecutor) throws Exception;
 
-	public boolean contain(String taskName);
+	public void withdraw(TaskExecutor taskExecutor) throws Exception;
 
-	public boolean addServer(TaskExecutor taskExecutor);
-
-	public void remove(String taskName);
-
-	public void startExecutor(final TaskExecutor taskExecutor);
-
-	public void stopExecutor(TaskExecutor taskExecutor);
-	
 	public void stopServers();
 	
-	//public ConcurrentHashMap<Long,Server> getServers();
+	public void pauseEvent(PumaTaskControllerEvent event);
 	
-	public void pauseEvent(PumaTaskControllerEvent event) throws Exception;
-	
-	public void resumeEvent(PumaTaskControllerEvent event) throws Exception;
+	public void resumeEvent(PumaTaskControllerEvent event);
 
-	public void createEvent(PumaTaskOperationEvent event) throws Exception;
+	public void createEvent(PumaTaskOperationEvent event);
 
-	public void updateEvent(PumaTaskOperationEvent event) throws Exception;
+	public void updateEvent(PumaTaskOperationEvent event);
 
-	public void removeEvent(PumaTaskOperationEvent event) throws Exception;
+	public void removeEvent(PumaTaskOperationEvent event);
 
-	/*
-	public void addEvent(ReplicationTaskEvent event);
-	
-	public void deleteEvent(ReplicationTaskEvent event);
-	
-	public void updateEvent(ReplicationTaskEvent event);
-	*/
 	public String getPumaServerName();
 }

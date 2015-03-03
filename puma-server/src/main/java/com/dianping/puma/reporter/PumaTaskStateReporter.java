@@ -24,6 +24,7 @@ public class PumaTaskStateReporter {
 	@Autowired
 	PumaTaskStateContainer pumaTaskStateContainer;
 
+	/*
 	@Scheduled(cron = "0/5 * * * * ?")
 	public void report() {
 		try {
@@ -35,5 +36,5 @@ public class PumaTaskStateReporter {
 		} catch (Exception e) {
 			LOG.error("Report puma task state error: {}.", e.getMessage());
 		}
-	}
+	}*/
 }

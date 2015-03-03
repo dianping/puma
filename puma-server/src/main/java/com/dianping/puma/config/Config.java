@@ -2,7 +2,7 @@ package com.dianping.puma.config;
 
 import javax.annotation.PostConstruct;
 
-import com.dianping.puma.core.entity.PumaServerEntity;
+import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.util.IPUtils;
 import org.slf4j.Logger;
@@ -30,11 +30,12 @@ public class Config implements InitializingBean {
 	@PostConstruct
 	public void init() {
 		for (String ip : IPUtils.getNoLoopbackIP4Addresses()) {
-			PumaServerEntity entity = pumaServerService.findByHostAndPort(ip, port);
+			PumaServer entity = pumaServerService.findByHostAndPort(ip, port);
 			if (entity != null) {
 				this.name = entity.getName();
 				this.host = entity.getHost();
 				this.port = entity.getPort();
+				LOG.info("Initialize puma server: name `{}`, host `{}`, port `{}`.", new Object[] { name, host, port });
 				break;
 			}
 		}

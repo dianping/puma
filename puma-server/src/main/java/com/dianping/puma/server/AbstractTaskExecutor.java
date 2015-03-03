@@ -77,9 +77,6 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 
 	protected StatusExecutorType statusExecutorType;
 
-	@Autowired
-	PumaTaskStateContainer pumaTaskStateContainer;
-
 	@Override
 	public String getTaskId() {
 		return taskId;
@@ -225,19 +222,12 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 		doStart();
 	}
 
-	public Status getStatus() {
-		PumaTaskState state = pumaTaskStateContainer.get(taskId);
-		if (state != null) {
-			return state.getStatus();
-		}
-		return null;
+	@Override public Status getStatus() {
+		return status;
 	}
 
-	public void setStatus(Status status) {
-		PumaTaskState state = pumaTaskStateContainer.get(taskId);
-		if (state != null) {
-			state.setStatus(status);
-		}
+	@Override public void setStatus(Status status) {
+		this.status = status;
 	}
 
 	@Override

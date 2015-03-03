@@ -1,7 +1,7 @@
 package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.util.GsonUtil;
-import com.dianping.puma.core.entity.SrcDBInstanceEntity;
+import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public class SrcDBInstanceController {
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		List<SrcDBInstanceEntity> srcDBInstanceEntities = srcDBInstanceService.findAll();
+		List<SrcDBInstance> srcDBInstanceEntities = srcDBInstanceService.findAll();
 
 		map.put("entities", srcDBInstanceEntities);
 		map.put("path", "src-db-instance");
@@ -50,7 +50,7 @@ public class SrcDBInstanceController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			SrcDBInstanceEntity entity = srcDBInstanceService.find(id);
+			SrcDBInstance entity = srcDBInstanceService.find(id);
 			map.put("entity", entity);
 			map.put("path", "src-db-instance");
 			map.put("subPath", "create");
@@ -77,20 +77,20 @@ public class SrcDBInstanceController {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		SrcDBInstanceEntity srcDbInstanceEntity = new SrcDBInstanceEntity();
-		srcDbInstanceEntity.setName(name);
-		srcDbInstanceEntity.setServerId(serverId);
-		srcDbInstanceEntity.setHost(host);
-		srcDbInstanceEntity.setPort(port);
-		srcDbInstanceEntity.setUsername(username);
-		srcDbInstanceEntity.setPassword(password);
-		srcDbInstanceEntity.setMetaHost(metaHost);
-		srcDbInstanceEntity.setMetaPort(metaPort);
-		srcDbInstanceEntity.setMetaUsername(metaUsername);
-		srcDbInstanceEntity.setMetaPassword(metaPassword);
+		SrcDBInstance srcDbInstance = new SrcDBInstance();
+		srcDbInstance.setName(name);
+		srcDbInstance.setServerId(serverId);
+		srcDbInstance.setHost(host);
+		srcDbInstance.setPort(port);
+		srcDbInstance.setUsername(username);
+		srcDbInstance.setPassword(password);
+		srcDbInstance.setMetaHost(metaHost);
+		srcDbInstance.setMetaPort(metaPort);
+		srcDbInstance.setMetaUsername(metaUsername);
+		srcDbInstance.setMetaPassword(metaPassword);
 
 		try {
-			this.srcDBInstanceService.create(srcDbInstanceEntity);
+			this.srcDBInstanceService.create(srcDbInstance);
 			map.put("success", true);
 		} catch (Exception e) {
 			map.put("success", false);

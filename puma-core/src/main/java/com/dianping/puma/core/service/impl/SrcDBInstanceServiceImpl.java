@@ -1,7 +1,7 @@
 package com.dianping.puma.core.service.impl;
 
 import com.dianping.puma.core.dao.SrcDBInstanceDao;
-import com.dianping.puma.core.entity.SrcDBInstanceEntity;
+import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,27 +15,27 @@ public class SrcDBInstanceServiceImpl implements SrcDBInstanceService {
 	SrcDBInstanceDao srcDbInstanceDao;
 
 	@Override
-	public SrcDBInstanceEntity find(String id) {
+	public SrcDBInstance find(String id) {
 		return srcDbInstanceDao.find(id);
 	}
 
 	@Override
-	public SrcDBInstanceEntity findByName(String name) {
+	public SrcDBInstance findByName(String name) {
 		return srcDbInstanceDao.findByName(name);
 	}
 
 	@Override
-	public List<SrcDBInstanceEntity> findAll() {
+	public List<SrcDBInstance> findAll() {
 		return srcDbInstanceDao.findAll();
 	}
 
 	@Override
-	public void create(SrcDBInstanceEntity entity) {
+	public void create(SrcDBInstance entity) {
 		srcDbInstanceDao.create(entity);
 	}
 
 	@Override
-	public void update(SrcDBInstanceEntity entity) {
+	public void update(SrcDBInstance entity) {
 		srcDbInstanceDao.update(entity);
 	}
 

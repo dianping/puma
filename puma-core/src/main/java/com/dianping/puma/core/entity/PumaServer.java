@@ -1,6 +1,6 @@
 package com.dianping.puma.core.entity;
 
-public class PumaServerEntity extends BaseEntity {
+public class PumaServer extends BaseEntity {
 
 	private String name;
 

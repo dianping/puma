@@ -1,6 +1,6 @@
 package com.dianping.puma.core.entity;
 
-public class DstDBInstanceEntity extends BaseEntity {
+public class DstDBInstance extends BaseEntity {
 
 	private String name;
 

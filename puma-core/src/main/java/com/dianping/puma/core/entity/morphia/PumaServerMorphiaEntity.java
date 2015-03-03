@@ -1,14 +1,14 @@
 package com.dianping.puma.core.entity.morphia;
 
-import com.dianping.puma.core.entity.PumaServerEntity;
+import com.dianping.puma.core.entity.PumaServer;
 import com.google.code.morphia.annotations.Entity;
 
 @Entity("PumaServer")
-public class PumaServerMorphiaEntity extends BaseMorphiaEntity<PumaServerEntity> {
+public class PumaServerMorphiaEntity extends BaseMorphiaEntity<PumaServer> {
 
 	public PumaServerMorphiaEntity() {}
 
-	public PumaServerMorphiaEntity(PumaServerEntity pumaServerEntity) {
-		super(pumaServerEntity);
+	public PumaServerMorphiaEntity(PumaServer pumaServer) {
+		super(pumaServer);
 	}
 }

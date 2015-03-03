@@ -1,7 +1,7 @@
 package com.dianping.puma.core.dao.morphia;
 
 import com.dianping.puma.core.dao.SrcDBInstanceDao;
-import com.dianping.puma.core.entity.SrcDBInstanceEntity;
+import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.entity.morphia.SrcDBInstanceMorphiaEntity;
 import com.google.code.morphia.dao.BasicDAO;
 import com.google.code.morphia.query.Query;
@@ -21,39 +21,39 @@ public class SrcDBInstanceMorphiaDao extends BasicDAO<SrcDBInstanceMorphiaEntity
 		super(mongoClient.getDatastore());
 	}
 
-	public SrcDBInstanceEntity find(String id) {
+	public SrcDBInstance find(String id) {
 		Query<SrcDBInstanceMorphiaEntity> q = this.getDatastore().createQuery(SrcDBInstanceMorphiaEntity.class);
 		q.field("id").equal(id);
 		SrcDBInstanceMorphiaEntity morphiaEntity = this.findOne(q);
 		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();
 	}
 
-	public SrcDBInstanceEntity findByName(String name) {
+	public SrcDBInstance findByName(String name) {
 		Query<SrcDBInstanceMorphiaEntity> q = this.getDatastore().createQuery(SrcDBInstanceMorphiaEntity.class).disableValidation();
 		q.field("entity.name").equal(name);
 		SrcDBInstanceMorphiaEntity morphiaEntity = this.findOne(q);
 		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();
 	}
 
-	public List<SrcDBInstanceEntity> findAll() {
+	public List<SrcDBInstance> findAll() {
 		Query<SrcDBInstanceMorphiaEntity> q = this.getDatastore().createQuery(SrcDBInstanceMorphiaEntity.class);
 		QueryResults<SrcDBInstanceMorphiaEntity> result = this.find(q);
 		List<SrcDBInstanceMorphiaEntity> morphiaEntities = result.asList();
 
-		List<SrcDBInstanceEntity> entities = new ArrayList<SrcDBInstanceEntity>();
+		List<SrcDBInstance> entities = new ArrayList<SrcDBInstance>();
 		for(SrcDBInstanceMorphiaEntity morphiaEntity: morphiaEntities) {
 			entities.add(morphiaEntity.getEntity());
 		}
 		return entities;
 	}
 
-	public void create(SrcDBInstanceEntity entity) {
+	public void create(SrcDBInstance entity) {
 		SrcDBInstanceMorphiaEntity morphiaEntity = new SrcDBInstanceMorphiaEntity(entity);
 		this.save(morphiaEntity);
 		this.getDatastore().ensureIndexes();
 	}
 
-	public void update(SrcDBInstanceEntity entity) {
+	public void update(SrcDBInstance entity) {
 		this.create(entity);
 	}
 

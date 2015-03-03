@@ -1,20 +1,20 @@
 package com.dianping.puma.core.service;
 
-import com.dianping.puma.core.entity.SrcDBInstanceEntity;
+import com.dianping.puma.core.entity.SrcDBInstance;
 
 import java.util.List;
 
 public interface SrcDBInstanceService {
 
-	SrcDBInstanceEntity find(String id);
+	SrcDBInstance find(String id);
 
-	SrcDBInstanceEntity findByName(String name);
+	SrcDBInstance findByName(String name);
 
-	List<SrcDBInstanceEntity> findAll();
+	List<SrcDBInstance> findAll();
 
-	void create(SrcDBInstanceEntity entity);
+	void create(SrcDBInstance entity);
 
-	void update(SrcDBInstanceEntity entity);
+	void update(SrcDBInstance entity);
 
 	void remove(String id);
 }

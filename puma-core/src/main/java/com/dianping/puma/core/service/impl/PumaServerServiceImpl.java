@@ -1,7 +1,7 @@
 package com.dianping.puma.core.service.impl;
 
 import com.dianping.puma.core.dao.PumaServerDao;
-import com.dianping.puma.core.entity.PumaServerEntity;
+import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.service.PumaServerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,26 +15,26 @@ public class PumaServerServiceImpl implements PumaServerService {
 	PumaServerDao pumaServerDao;
 
 	@Override
-	public PumaServerEntity find(String id) {
+	public PumaServer find(String id) {
 		return pumaServerDao.find(id);
 	}
 
-	public PumaServerEntity findByHostAndPort(String host, Integer port) {
+	public PumaServer findByHostAndPort(String host, Integer port) {
 		return pumaServerDao.findByHostAndPort(host, port);
 	}
 
 	@Override
-	public List<PumaServerEntity> findAll() {
+	public List<PumaServer> findAll() {
 		return pumaServerDao.findAll();
 	}
 
 	@Override
-	public void create(PumaServerEntity entity) {
+	public void create(PumaServer entity) {
 		pumaServerDao.create(entity);
 	}
 
 	@Override
-	public void update(PumaServerEntity entity) {
+	public void update(PumaServer entity) {
 		pumaServerDao.update(entity);
 	}
 

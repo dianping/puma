@@ -30,9 +30,9 @@ import com.dianping.puma.sender.Sender;
  * @author Leo Liang
  * 
  */
-public class SimpleDispatherImpl extends AbstractDispatcher {
+public class SimpleDispatcherImpl extends AbstractDispatcher {
 
-	private static final Logger	log	= Logger.getLogger(SimpleDispatherImpl.class);
+	private static final Logger	log	= Logger.getLogger(SimpleDispatcherImpl.class);
 	private List<Sender>		senders;
 
 	/**

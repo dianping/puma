@@ -1,7 +1,7 @@
 package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.util.GsonUtil;
-import com.dianping.puma.core.entity.PumaServerEntity;
+import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.service.PumaServerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,7 @@ public class PumaServerController {
 	@RequestMapping(value = { "/puma-server" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		List<PumaServerEntity> pumaServerEntities = pumaServerService.findAll();
+		List<PumaServer> pumaServerEntities = pumaServerService.findAll();
 		map.put("entities", pumaServerEntities);
 		map.put("path", "puma-server");
 		return new ModelAndView("main/container", map);
@@ -48,7 +48,7 @@ public class PumaServerController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			PumaServerEntity entity = pumaServerService.find(id);
+			PumaServer entity = pumaServerService.find(id);
 			map.put("entity", entity);
 			map.put("path", "puma-server");
 			map.put("subPath", "create");
@@ -64,13 +64,13 @@ public class PumaServerController {
 	public String createPost(String name, String host, Integer port) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		PumaServerEntity pumaServerEntity = new PumaServerEntity();
-		pumaServerEntity.setName(name);
-		pumaServerEntity.setHost(host);
-		pumaServerEntity.setPort(port);
+		PumaServer pumaServer = new PumaServer();
+		pumaServer.setName(name);
+		pumaServer.setHost(host);
+		pumaServer.setPort(port);
 
 		try {
-			this.pumaServerService.create(pumaServerEntity);
+			this.pumaServerService.create(pumaServer);
 			map.put("success", true);
 		} catch (Exception e) {
 			map.put("success", false);

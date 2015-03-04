@@ -13,7 +13,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ServerStatus;
-import com.dianping.puma.config.InitializeInvervalConfig;
+import com.dianping.puma.config.TaskInvervalConfig;
 import com.dianping.puma.core.service.PumaTaskService;
 
 @Component("pumaMonitorServerInfoTask")
@@ -28,7 +28,7 @@ public class PumaMonitorServerInfoTask implements PumaMonitorTask {
 	private Map<String, Long> preDdlCount;
 
 	@Autowired
-	private InitializeInvervalConfig intervalConfig;
+	private TaskInvervalConfig intervalConfig;
 	
 	public PumaMonitorServerInfoTask() {
 		preUpdateCount = new HashMap<String, Long>();

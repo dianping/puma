@@ -2,26 +2,26 @@ package com.dianping.puma.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.stereotype.Service;
 
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
+@Service("invervalConfig")
+public class TaskInvervalConfig {
 
-public class InitializeInvervalConfig {
-
-	private static final Logger LOG = LoggerFactory.getLogger(InitializeInvervalConfig.class);
+	private static final Logger LOG = LoggerFactory.getLogger(TaskInvervalConfig.class);
 	
 	private static final String SEQ_INTERVAL_NAME="puma.server.interval.seq";
 	
 	private static final String CLIENTIP_INTERVAL_NAME="puma.server.interval.ip";
 	
-	private static final String SERVERINFO_INTERVAL_NAME="puma.server.interval.seq";
+	private static final String SERVERINFO_INTERVAL_NAME="puma.server.interval.serverInfo";
 	
 	private String seqInterval;
 	private String clientIpInterval;
 	private String serverInfoInterval;
 
-	public InitializeInvervalConfig(){
+	public TaskInvervalConfig(){
 		seqInterval = "0/"+getInterval(SEQ_INTERVAL_NAME)+" * * * * ?";
 		clientIpInterval = "0/"+getInterval(CLIENTIP_INTERVAL_NAME)+" * * * * ?";
 		serverInfoInterval = "0/"+getInterval(SERVERINFO_INTERVAL_NAME)+" * * * * ?";

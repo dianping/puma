@@ -9,13 +9,13 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ClientStatus;
-import com.dianping.puma.config.InitializeInvervalConfig;
+import com.dianping.puma.config.TaskInvervalConfig;
 
 @Component("pumaMonitorClientIpTask")
 public class PumaMonitorClientIpTask implements PumaMonitorTask {
 
 	@Autowired
-	private InitializeInvervalConfig intervalConfig;
+	private TaskInvervalConfig intervalConfig;
 	
 	@Override
 	public void runTask() {

@@ -10,6 +10,12 @@ public class PumaTaskState {
 
 	private BinlogStat binlogStat;
 
+	public PumaTaskState() {
+		status = Status.WAITING;
+		binlogInfo = new BinlogInfo();
+		binlogStat = new BinlogStat();
+	}
+
 	public Status getStatus() {
 		return status;
 	}

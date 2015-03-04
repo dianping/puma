@@ -2,6 +2,7 @@ package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.reporter.PumaTaskOperationReporter;
 import com.dianping.puma.core.container.PumaTaskStateContainer;
+import com.dianping.puma.core.model.PumaTaskState;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.model.BinlogInfo;
@@ -122,6 +123,27 @@ public class PumaTaskController {
 			this.pumaTaskService.remove(id);
 			map.put("success", true);
 		} catch (Exception e) {
+			map.put("success", false);
+		}
+
+		return GsonUtil.toJson(map);
+	}
+
+	@RequestMapping(value = { "/puma-task/refresh" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String refreshPost(String id) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			PumaTaskState state = this.pumaTaskStateContainer.get(id);
+			if (state == null) {
+				throw new Exception("Puma task state not found.");
+			}
+
+			map.put("state", state);
+			map.put("success", true);
+		} catch (Exception e) {
+			map.put("err", "world");
 			map.put("success", false);
 		}
 

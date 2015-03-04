@@ -100,7 +100,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 				setBinlogInfo(binlogInfo);
 
-				SystemStatusContainer.instance.updateServerStatus(getTaskName(), dbHost, port, database, getContext()
+				SystemStatusContainer.instance.updateServerStatus(getTaskId(), dbHost, port, database, getContext()
 						.getBinlogFileName(), getContext().getBinlogStartPos());
 
 				connect();
@@ -206,7 +206,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				dataHandlerResult.getData() instanceof RowChangedEvent && ((RowChangedEvent) dataHandlerResult
 						.getData()).isTransactionCommit()))) {
 			// save position
-			binlogInfoHolder.setBinlogInfo(getTaskName(),
+			binlogInfoHolder.setBinlogInfo(getTaskId(),
 					new BinlogInfo(getContext().getBinlogFileName(), binlogEvent.getHeader().getNextPosition()));
 		}
 	}
@@ -228,22 +228,22 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			switch (((RowChangedEvent) changedEvent).getActionType()) {
 			case RowChangedEvent.INSERT:
 				incrRowsInsert();
-				SystemStatusContainer.instance.incServerRowInsertCounter(getTaskName());
+				SystemStatusContainer.instance.incServerRowInsertCounter(getTaskId());
 				break;
 			case RowChangedEvent.UPDATE:
 				incrRowsUpdate();
-				SystemStatusContainer.instance.incServerRowUpdateCounter(getTaskName());
+				SystemStatusContainer.instance.incServerRowUpdateCounter(getTaskId());
 				break;
 			case RowChangedEvent.DELETE:
 				incrRowsDelete();
-				SystemStatusContainer.instance.incServerRowDeleteCounter(getTaskName());
+				SystemStatusContainer.instance.incServerRowDeleteCounter(getTaskId());
 				break;
 			default:
 				break;
 			}
 		} else if (changedEvent instanceof DdlEvent) {
 			incrDdls();
-			SystemStatusContainer.instance.incServerDdlCounter(getTaskName());
+			SystemStatusContainer.instance.incServerDdlCounter(getTaskId());
 		}
 	}
 
@@ -256,7 +256,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 		setBinlogInfo(new BinlogInfo(rotateEvent.getNextBinlogFileName(), rotateEvent.getFirstEventPosition()));
 		// status report
-		SystemStatusContainer.instance.updateServerStatus(getTaskName(), dbHost, port, database, getContext()
+		SystemStatusContainer.instance.updateServerStatus(getTaskId(), dbHost, port, database, getContext()
 				.getBinlogFileName(), getContext().getBinlogStartPos());
 	}
 

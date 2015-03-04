@@ -2,8 +2,6 @@ package com.dianping.puma.monitor;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +11,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ServerStatus;
-import com.dianping.puma.config.TaskInvervalConfig;
-import com.dianping.puma.core.service.PumaTaskService;
+import com.dianping.puma.config.TaskIntervalConfig;
 
 @Component("pumaMonitorServerInfoTask")
 public class PumaMonitorServerInfoTask implements PumaMonitorTask {
@@ -28,7 +25,7 @@ public class PumaMonitorServerInfoTask implements PumaMonitorTask {
 	private Map<String, Long> preDdlCount;
 
 	@Autowired
-	private TaskInvervalConfig intervalConfig;
+	private TaskIntervalConfig intervalConfig;
 	
 	public PumaMonitorServerInfoTask() {
 		preUpdateCount = new HashMap<String, Long>();

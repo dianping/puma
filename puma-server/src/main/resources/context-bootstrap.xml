@@ -69,13 +69,13 @@
 
 	<!--bean id="mongoClient2" class="com.dianping.puma.core.dao.morphia.MongoClient">
 	</bean-->
-	<task:scheduled-tasks scheduler="pumaScheduledSeqTask">  
+	<task:scheduled-tasks>
         <task:scheduled ref="pumaMonitorSeqTask" method="runTask" cron="#{intervalConfig.seqInterval}"/> 
     </task:scheduled-tasks>  
-    <task:scheduled-tasks scheduler="pumaScheduledClientIpTask">  
+    <task:scheduled-tasks>
         <task:scheduled ref="pumaMonitorClientIpTask" method="runTask" cron="#{intervalConfig.clientIpInterval}"/>  
     </task:scheduled-tasks>  
-    <task:scheduled-tasks scheduler="pumaScheduledServerInfoTask">  
+    <task:scheduled-tasks>
         <task:scheduled ref="pumaMonitorServerInfoTask" method="runTask" cron="#{intervalConfig.serverInfoInterval}"/>   
     </task:scheduled-tasks>  
     

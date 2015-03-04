@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service;
 
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
-@Service("invervalConfig")
-public class TaskInvervalConfig {
+@Service("intervalConfig")
+public class TaskIntervalConfig {
 
-	private static final Logger LOG = LoggerFactory.getLogger(TaskInvervalConfig.class);
+	private static final Logger LOG = LoggerFactory.getLogger(TaskIntervalConfig.class);
 	
 	private static final String SEQ_INTERVAL_NAME="puma.server.interval.seq";
 	
@@ -21,7 +21,7 @@ public class TaskInvervalConfig {
 	private String clientIpInterval;
 	private String serverInfoInterval;
 
-	public TaskInvervalConfig(){
+	public TaskIntervalConfig(){
 		seqInterval = "0/"+getInterval(SEQ_INTERVAL_NAME)+" * * * * ?";
 		clientIpInterval = "0/"+getInterval(CLIENTIP_INTERVAL_NAME)+" * * * * ?";
 		serverInfoInterval = "0/"+getInterval(SERVERINFO_INTERVAL_NAME)+" * * * * ?";

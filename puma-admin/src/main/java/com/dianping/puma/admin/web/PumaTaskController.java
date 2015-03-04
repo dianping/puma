@@ -23,7 +23,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Date;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,8 +86,8 @@ public class PumaTaskController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		PumaTask pumaTask = new PumaTask();
-		Date now = new Date();
-		pumaTask.setName(srcDBInstanceName + "@" + pumaServerName + "-" + now.toString());
+		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+		pumaTask.setName(srcDBInstanceName + "@" + pumaServerName + "-" + timestamp.getTime());
 		pumaTask.setSrcDBInstanceName(srcDBInstanceName);
 		pumaTask.setPumaServerName(pumaServerName);
 		BinlogInfo binlogInfo = new BinlogInfo();

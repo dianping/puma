@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
+
 @Service("intervalConfig")
 public class TaskIntervalConfig {
 

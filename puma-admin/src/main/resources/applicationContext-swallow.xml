@@ -60,13 +60,9 @@
     <bean id="pumaTaskStateSubscriber"
           class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
           init-method="init">
-        <!--@TODO-->
-        <property name="topic" value="puma_status_event"/>
-        <!--@TODO-->
-        <property name="type" value="replication"/>
+        <property name="topic" value="puma_task_state"/>
         <property name="notifyService" ref="notifyService"/>
-        <property name="clazz"
-                  value="com.dianping.puma.core.monitor.PumaTaskStateEvent" />
+        <property name="clazz" value="com.dianping.puma.core.monitor.PumaTaskStateEvent" />
         <property name="listeners">
             <list>
                 <ref bean="pumaTaskStateChecker" />

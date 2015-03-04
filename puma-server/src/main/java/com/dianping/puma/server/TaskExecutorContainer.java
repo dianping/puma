@@ -1,5 +1,6 @@
 package com.dianping.puma.server;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.dianping.puma.core.entity.PumaTask;
@@ -14,6 +15,10 @@ public interface TaskExecutorContainer {
 	public TaskExecutor construct(PumaTask pumaTask) throws Exception;
 
 	public ConcurrentHashMap<String,TaskExecutor> constructServers() throws Exception;
+
+	public TaskExecutor get(String taskId);
+
+	public List<TaskExecutor> getAll();
 
 	public void startExecutor(final TaskExecutor taskExecutor) throws Exception;
 

@@ -1,5 +1,6 @@
 package com.dianping.puma.server;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -247,6 +248,16 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 
 		return server;
 	}*/
+
+	@Override
+	public TaskExecutor get(String taskId) {
+		return taskExecutorMap.get(taskId);
+	}
+
+	@Override
+	public List<TaskExecutor> getAll() {
+		return new ArrayList<TaskExecutor>(taskExecutorMap.values());
+	}
 
 	@Override
 	public void startExecutor(final TaskExecutor taskExecutor) throws Exception {

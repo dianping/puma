@@ -42,22 +42,11 @@ public class PumaMonitorServerInfoTask implements PumaMonitorTask {
 		Map<String,AtomicLong> deleteCount=SystemStatusContainer.instance.listServerRowDeleteCounters();
 		Map<String,AtomicLong> ddlCount=SystemStatusContainer.instance.listServerDdlCounters();
 		for(Map.Entry<String,ServerStatus> serverStatus:serverStatuses.entrySet()){
-			if(!preInsertCount.containsKey(serverStatus.getKey())){
-				preInsertCount.put(serverStatus.getKey(), (long)0);
-			}
-			if(!preDeleteCount.containsKey(serverStatus.getKey())){
-				preDeleteCount.put(serverStatus.getKey(), (long)0);
-			}
-			if(!preUpdateCount.containsKey(serverStatus.getKey())){
-				preUpdateCount.put(serverStatus.getKey(), (long)0);
-			}
-			if(!preDdlCount.containsKey(serverStatus.getKey())){
-				preDdlCount.put(serverStatus.getKey(), (long)0);
-			}
-			String insertName = "insert.empty";
-			String deleteName = "delete.empty";
-			String updateName = "update.empty";
-			String ddlName = "ddl.empty";
+			initPreCount(serverStatus.getKey());
+			String insertName = " = 0";
+			String deleteName = " = 0";
+			String updateName = " = 0";
+			String ddlName = " = 0";
 			if(insertCount.containsKey(serverStatus.getKey())){
 				insertName = getEventName(preInsertCount.get(serverStatus.getKey()).longValue(),insertCount.get(serverStatus.getKey()).longValue());
 			}
@@ -70,6 +59,10 @@ public class PumaMonitorServerInfoTask implements PumaMonitorTask {
 			if(ddlCount.containsKey(serverStatus.getKey())){
 				ddlName = getEventName(preDdlCount.get(serverStatus.getKey()).longValue(),ddlCount.get(serverStatus.getKey()).longValue());
 			}
+			preInsertCount.put(serverStatus.getKey(), insertCount.get(serverStatus.getKey()).longValue());
+			preUpdateCount.put(serverStatus.getKey(), updateCount.get(serverStatus.getKey()).longValue());
+			preDeleteCount.put(serverStatus.getKey(), deleteCount.get(serverStatus.getKey()).longValue());
+			preDdlCount.put(serverStatus.getKey(), ddlCount.get(serverStatus.getKey()).longValue());
 			Cat.getProducer().logEvent("Puma.server."+serverStatus.getKey()+".insert", insertName, Message.SUCCESS, "name = "+serverStatus.getKey()+"&duration = "+intervalConfig.getServerInfoInterval());
 			Cat.getProducer().logEvent("Puma.server."+serverStatus.getKey()+".delete", deleteName, Message.SUCCESS, "name = "+serverStatus.getKey()+"&duration = "+intervalConfig.getServerInfoInterval());
 			Cat.getProducer().logEvent("Puma.server."+serverStatus.getKey()+".update", updateName, Message.SUCCESS, "name = "+serverStatus.getKey()+"&duration = "+intervalConfig.getServerInfoInterval());
@@ -81,21 +74,39 @@ public class PumaMonitorServerInfoTask implements PumaMonitorTask {
 	private String getEventName(long preValue,long curValue){
 		String eventName;
 		long dValue = curValue - preValue;
-		if(dValue < 2){
-			eventName=" < 2 ";
+		if(dValue == 0){
+			eventName = " = 0 ";
+		}else if(dValue < 2){
+			eventName = " < 2 ";
 		}else if(dValue < 4){
-			eventName=" < 4 ";
+			eventName = " < 4 ";
 		}else if(dValue < 8){
-			eventName=" < 8 ";
+			eventName = " < 8 ";
 		}else if(dValue < 16){
-			eventName=" < 16 ";
+			eventName = " < 16 ";
 		}else if(dValue < 32){
-			eventName=" < 32 ";
+			eventName = " < 32 ";
 		}else if(dValue < 64){
-			eventName=" < 64 ";
+			eventName = " < 64 ";
 		}else{
-			eventName=" > 64 ";
+			eventName = " > 64 ";
 		}
 		return eventName;
+	}
+	
+	private void initPreCount(String key)
+	{
+		if(!preInsertCount.containsKey(key)){
+			preInsertCount.put(key, (long)0);
+		}
+		if(!preDeleteCount.containsKey(key)){
+			preDeleteCount.put(key, (long)0);
+		}
+		if(!preUpdateCount.containsKey(key)){
+			preUpdateCount.put(key, (long)0);
+		}
+		if(!preDdlCount.containsKey(key)){
+			preDdlCount.put(key, (long)0);
+		}
 	}
 }

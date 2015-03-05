@@ -96,3 +96,12 @@ strong.stronger {
 .no-under a a:hover {
 	text-decoration: none;
 }
+
+.validation-help {
+	display: block;
+	margin-top: 5px;
+}
+
+.validation-help span {
+	color: red;
+}

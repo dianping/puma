@@ -1,10 +1,12 @@
-<script type="text/javascript" src="${rc.contextPath}/js/views/src-db-instance.js"></script>
+<script type="text/javascript" src="${rc.contextPath}/js/views/src-db-instance.js"
+        xmlns:p="http://www.w3.org/1999/html"></script>
+<script type="text/javascript" src="${rc.contextPath}/js/validation.js"></script>
 <div class="container-fluid">
    <div class="panel panel-primary">
       <div class="panel-heading">
          <div class="btn-group-sm pull-right">
-            <button class="btn btn btn-default">取消</button>
-            <button class="btn btn-success" type="submit" form="src-db-instance-create-form">保存</button>
+            <button class="btn btn btn-default" onclick="javascript:history.back();">返回</button>
+            <button class="btn btn-success validation-button" type="submit" form="src-db-instance-create-form">保存</button>
          </div>
          <h5>新增源数据库实例</h5>
       </div>
@@ -13,73 +15,102 @@
             action="${rc.contextPath}/src-db-instance/create" target="${rc.contextPath}/src-db-instance">
          <div class="panel-body">
 
-            <div class="form-group has-feedback">
+            <div class="form-group">
                <label class="col-md-2 control-label" for="name">数据库实例名称</label>
                <div class="col-md-7">
                   <input id="name" name="name" class="form-control validation-input" format="db-name"
                          #if(${entity}) value="${entity.name}" #end>
-                  <span id="name-feedback-icon" class="glyphicon form-control-feedback" aria-hidden="true"></span>
                </div>
-               <div class="col-md-3" hidden="hidden">
-                  <p class="help-block">hello</p>
+               <div class="col-md-3 validation-help">
+                  <span hidden="hidden">无效数据库实例名称</span>
                </div>
             </div>
 
             <div class="form-group">
                <label class="col-md-2 control-label" for="serverId">Server ID</label>
                <div class="col-md-7">
-                  <input id="serverId" name="serverId" class="form-control validation-input" format="db-server-id">
+                  <input id="serverId" name="serverId" class="form-control validation-input" format="db-server-id"
+                         #if(${entity}) value="${entity.serverId}" #end>
+               </div>
+               <div class="col-md-3 validation-help">
+                  <span hidden="hidden">无效Server ID</span>
                </div>
             </div>
 
             <div class="form-group">
                <label class="col-md-2 control-label" for="host">IP地址(数据)</label>
                <div class="col-md-5">
-                  <input id="host" name="host" class="form-control validation-input" format="host">
+                  <input id="host" name="host" class="form-control validation-input" format="host"
+                         placeholder="e.g. 127.0.0.1" #if(${entity}) value="${entity.host}" #end>
                </div>
 
                <label class="sr-only control-label" for="port">IP端口(数据)</label>
                <div class="col-md-2">
-                  <input id="port" name="port" class="form-control validation-input" format="port">
+                  <input id="port" name="port" class="form-control validation-input" format="port"
+                         placeholder="e.g. 3306" #if(${entity}) value="${entity.port}" #end>
+               </div>
+               <div class="col-md-3 validation-help">
+                  <span hidden="hidden">无效IP地址</span>
                </div>
             </div>
 
             <div class="form-group">
                <label class="col-md-2 control-label" for="username">用户名(数据)</label>
                <div class="col-md-7">
-                  <input id="username" name="username" class="form-control validation-input" format="username">
+                  <input id="username" name="username" class="form-control validation-input" format="username"
+                         #if(${entity}) value="${entity.username}" #end>
+               </div>
+               <div class="col-md-3 validation-help">
+                  <span hidden="hidden">无效用户名(数据)</span>
                </div>
             </div>
 
             <div class="form-group">
                <label class="col-md-2 control-label" for="password">密码(数据)</label>
                <div class="col-md-7">
-                  <input id="password" type="password" name="password" class="form-control validation-input" format="password">
+                  <input id="password" type="password" name="password" class="form-control validation-input" format="password"
+                         #if(${entity}) value="${entity.password}" #end>
+               </div>
+               <div class="col-md-3 validation-help">
+                  <span hidden="hidden">无效密码(数据)</span>
                </div>
             </div>
 
             <div class="form-group">
                <label class="col-md-2 control-label" for="metaHost">IP地址(元数据)</label>
                <div class="col-md-5">
-                  <input id="metaHost" name="metaHost" class="form-control validation-input" format="host">
+                  <input id="metaHost" name="metaHost" class="form-control validation-input" format="host"
+                         placeholder="e.g. 127.0.0.1" #if(${entity}) value="${entity.metaHost}" #end>
                </div>
                <label class="sr-only control-label" for="metaPort">IP端口(元数据)</label>
                <div class="col-md-2">
-                  <input id="metaPort" name="metaPort" class="form-control validation-input" format="port">
+                  <input id="metaPort" name="metaPort" class="form-control validation-input" format="port"
+                         placeholder="e.g. 3306" #if(${entity}) value="${entity.metaPort}" #end>
+               </div>
+               <div class="col-md-3 validation-help">
+                  <span hidden="hidden">无效IP地址</span>
                </div>
             </div>
 
             <div class="form-group">
                <label class="col-md-2 control-label" for="metaUsername">用户名(元数据)</label>
                <div class="col-md-7">
-                  <input id="metaUsername" name="metaUsername" class="form-control validation-input" format="username">
+                  <input id="metaUsername" name="metaUsername" class="form-control validation-input" format="username"
+                         #if(${entity}) value="${entity.metaUsername}" #end>
+               </div>
+               <div class="col-md-3 validation-help">
+                  <span hidden="hidden">无效用户名(元数据)</span>
                </div>
             </div>
 
             <div class="form-group">
                <label class="col-md-2 control-label" for="metaPassword">密码(元数据)</label>
                <div class="col-md-7">
-                  <input id="metaPassword" type="password" name="metaPassword" class="form-control validation-input" format="password">
+                  <input id="metaPassword" type="password" name="metaPassword" class="form-control validation-input" format="password"
+                         #if(${entity}) value="${entity.metaPassword}" #end>
+               </div>
+               <div class="col-md-3 validation-help">
+                  <span hidden="hidden">无效密码(元数据)</span>
                </div>
             </div>
          </div>

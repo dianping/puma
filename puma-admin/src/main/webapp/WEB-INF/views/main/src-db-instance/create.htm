@@ -13,10 +13,11 @@
             action="${rc.contextPath}/src-db-instance/create" target="${rc.contextPath}/src-db-instance">
          <div class="panel-body">
 
-            <div id="name-form-group" class="form-group has-feedback">
+            <div class="form-group has-feedback">
                <label class="col-md-2 control-label" for="name">数据库实例名称</label>
                <div class="col-md-7">
-                  <input id="name" name="name" class="form-control" #if(${entity}) value="${entity.name}" #end>
+                  <input id="name" name="name" class="form-control validation-input" format="db-name"
+                         #if(${entity}) value="${entity.name}" #end>
                   <span id="name-feedback-icon" class="glyphicon form-control-feedback" aria-hidden="true"></span>
                </div>
                <div class="col-md-3" hidden="hidden">
@@ -27,55 +28,58 @@
             <div class="form-group">
                <label class="col-md-2 control-label" for="serverId">Server ID</label>
                <div class="col-md-7">
-                  <input id="serverId" name="serverId" class="form-control">
+                  <input id="serverId" name="serverId" class="form-control validation-input" format="db-server-id">
                </div>
             </div>
 
             <div class="form-group">
                <label class="col-md-2 control-label" for="host">IP地址(数据)</label>
                <div class="col-md-5">
-                  <input id="host" name="host" class="form-control">
+                  <input id="host" name="host" class="form-control validation-input" format="host">
                </div>
+
+               <label class="sr-only control-label" for="port">IP端口(数据)</label>
                <div class="col-md-2">
-                  <input id="port" name="port" class="form-control">
+                  <input id="port" name="port" class="form-control validation-input" format="port">
                </div>
             </div>
 
             <div class="form-group">
                <label class="col-md-2 control-label" for="username">用户名(数据)</label>
                <div class="col-md-7">
-                  <input id="username" name="username" class="form-control">
+                  <input id="username" name="username" class="form-control validation-input" format="username">
                </div>
             </div>
 
             <div class="form-group">
                <label class="col-md-2 control-label" for="password">密码(数据)</label>
                <div class="col-md-7">
-                  <input id="password" name="password" class="form-control">
+                  <input id="password" type="password" name="password" class="form-control validation-input" format="password">
                </div>
             </div>
 
             <div class="form-group">
                <label class="col-md-2 control-label" for="metaHost">IP地址(元数据)</label>
                <div class="col-md-5">
-                  <input id="metaHost" name="metaHost" class="form-control">
+                  <input id="metaHost" name="metaHost" class="form-control validation-input" format="host">
                </div>
+               <label class="sr-only control-label" for="metaPort">IP端口(元数据)</label>
                <div class="col-md-2">
-                  <input id="metaPort" name="metaPort" class="form-control">
+                  <input id="metaPort" name="metaPort" class="form-control validation-input" format="port">
                </div>
             </div>
 
             <div class="form-group">
                <label class="col-md-2 control-label" for="metaUsername">用户名(元数据)</label>
                <div class="col-md-7">
-                  <input id="metaUsername" name="metaUsername" class="form-control">
+                  <input id="metaUsername" name="metaUsername" class="form-control validation-input" format="username">
                </div>
             </div>
 
             <div class="form-group">
                <label class="col-md-2 control-label" for="metaPassword">密码(元数据)</label>
                <div class="col-md-7">
-                  <input id="metaPassword" name="metaPassword" class="form-control">
+                  <input id="metaPassword" type="password" name="metaPassword" class="form-control validation-input" format="password">
                </div>
             </div>
          </div>

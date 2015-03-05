@@ -4,8 +4,6 @@ $(function() {
     event.preventDefault();
     util.submit($(this));
   });
-
-  util.validate('name', 'dbName');
   /*
   // Source database name dynamic checking.
   $("#name").on("change", function() {

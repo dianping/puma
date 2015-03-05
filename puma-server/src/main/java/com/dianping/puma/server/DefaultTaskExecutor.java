@@ -100,7 +100,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 				setBinlogInfo(binlogInfo);
 
-				SystemStatusContainer.instance.updateServerStatus(getTaskId(), dbHost, port, database, getContext()
+				SystemStatusContainer.instance.updateServerStatus(getTaskName(), dbHost, port, database, getContext()
 						.getBinlogFileName(), getContext().getBinlogStartPos());
 
 				connect();
@@ -193,7 +193,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		setBinlogInfo(new BinlogInfo(getBinlogInfo().getBinlogFile(), binlogEvent.getHeader().getNextPosition()));
 
 		// status report
-		SystemStatusContainer.instance.updateServerStatus(getTaskId(), dbHost, port, database, getContext()
+		SystemStatusContainer.instance.updateServerStatus(getTaskName(), dbHost, port, database, getContext()
 				.getBinlogFileName(), getContext().getBinlogStartPos());
 
 		// 只有整个binlogEvent分发完了才save
@@ -228,22 +228,22 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			switch (((RowChangedEvent) changedEvent).getActionType()) {
 			case RowChangedEvent.INSERT:
 				incrRowsInsert();
-				SystemStatusContainer.instance.incServerRowInsertCounter(getTaskId());
+				SystemStatusContainer.instance.incServerRowInsertCounter(getTaskName());
 				break;
 			case RowChangedEvent.UPDATE:
 				incrRowsUpdate();
-				SystemStatusContainer.instance.incServerRowUpdateCounter(getTaskId());
+				SystemStatusContainer.instance.incServerRowUpdateCounter(getTaskName());
 				break;
 			case RowChangedEvent.DELETE:
 				incrRowsDelete();
-				SystemStatusContainer.instance.incServerRowDeleteCounter(getTaskId());
+				SystemStatusContainer.instance.incServerRowDeleteCounter(getTaskName());
 				break;
 			default:
 				break;
 			}
 		} else if (changedEvent instanceof DdlEvent) {
 			incrDdls();
-			SystemStatusContainer.instance.incServerDdlCounter(getTaskId());
+			SystemStatusContainer.instance.incServerDdlCounter(getTaskName());
 		}
 	}
 
@@ -256,7 +256,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 		setBinlogInfo(new BinlogInfo(rotateEvent.getNextBinlogFileName(), rotateEvent.getFirstEventPosition()));
 		// status report
-		SystemStatusContainer.instance.updateServerStatus(getTaskId(), dbHost, port, database, getContext()
+		SystemStatusContainer.instance.updateServerStatus(getTaskName(), dbHost, port, database, getContext()
 				.getBinlogFileName(), getContext().getBinlogStartPos());
 	}
 

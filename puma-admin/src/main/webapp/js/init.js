@@ -14,6 +14,7 @@ $(function() {
     var regexp;
     switch(format) {
       case 'server-name':
+      case 'db-name':
         regexp = /^\w{1,30}$/;
         break;
 
@@ -25,16 +26,28 @@ $(function() {
         regexp = /^[0-9]{1,5}$/;
         break;
 
+      case 'db-server-id':
+        regexp = /^\d{1,30}$/;
+        break;
+
+      case 'username':
+        regexp = /^\w{1,30}$/;
+        break;
+
+      case 'password':
+        regexp = /^.{1,30}$/;
+        break;
+
       case 'bin-log-file':
         regexp = /^[\w\-. ]+$/;
         break;
 
       case 'bin-log-position':
-        regexp = /^[0-9]{1,20}$/;
+        regexp = /^\d{1,30}$/;
         break;
 
       case 'day':
-        regexp = /^[1-9]{1,2}$/;
+        regexp = /^\d{1,2}$/;
         break;
 
       default: alert("regexp error");
@@ -46,4 +59,6 @@ $(function() {
       util.validate.error(div, span);
     }
   });
+
+  $(".validation-input").trigger('change');
 });

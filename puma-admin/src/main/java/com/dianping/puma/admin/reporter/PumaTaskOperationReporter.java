@@ -14,9 +14,9 @@ public class PumaTaskOperationReporter {
 	@Autowired
 	SwallowEventPublisher pumaTaskOperationEventPublisher;
 
-	public void report(String pumaServerName, String taskId, Operation operation) throws SendFailedException {
+	public void report(String pumaServerId, String taskId, Operation operation) throws SendFailedException {
 		PumaTaskOperationEvent event = new PumaTaskOperationEvent();
-		event.setPumaServerName(pumaServerName);
+		event.setPumaServerId(pumaServerId);
 		event.setTaskId(taskId);
 
 		PumaTaskOperation pumaTaskOperation = new PumaTaskOperation();

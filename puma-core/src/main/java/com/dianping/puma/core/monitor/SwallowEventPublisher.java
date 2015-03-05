@@ -25,8 +25,8 @@ public class SwallowEventPublisher implements EventPublisher {
             if (event instanceof PumaTaskStateEvent) {
                 producer.sendMessage(event);
             } else {
-                String pumaServerName = ((PumaTaskEvent) event).getPumaServerName();
-                producer.sendMessage(event, pumaServerName);
+                String pumaServerId = ((PumaTaskEvent) event).getPumaServerId();
+                producer.sendMessage(event, pumaServerId);
             }
 
         } else {

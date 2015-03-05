@@ -37,7 +37,7 @@ public class PumaTaskStateReporter {
 	public void report() {
 		try {
 			PumaTaskStateEvent event = new PumaTaskStateEvent();
-			event.setPumaServerName(pumaServerConfig.getName());
+			event.setPumaServerId(pumaServerConfig.getId());
 
 			List<TaskExecutor> taskExecutors = taskExecutorContainer.getAll();
 			for (TaskExecutor taskExecutor: taskExecutors) {

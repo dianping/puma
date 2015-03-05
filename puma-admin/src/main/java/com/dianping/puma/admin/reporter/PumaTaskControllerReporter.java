@@ -14,9 +14,9 @@ public class PumaTaskControllerReporter {
 	@Autowired
 	SwallowEventPublisher pumaTaskControllerEventPublisher;
 
-	public void report(String pumaServerName, String taskId, Controller controller) throws SendFailedException {
+	public void report(String pumaServerId, String taskId, Controller controller) throws SendFailedException {
 		PumaTaskControllerEvent event = new PumaTaskControllerEvent();
-		event.setPumaServerName(pumaServerName);
+		event.setPumaServerId(pumaServerId);
 		event.setTaskId(taskId);
 
 		PumaTaskController pumaTaskOperation = new PumaTaskController();

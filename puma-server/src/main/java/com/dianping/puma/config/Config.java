@@ -20,6 +20,8 @@ public class Config implements InitializingBean {
 	@Autowired
 	PumaServerService pumaServerService;
 
+	private String id;
+
 	private String name;
 
 	private String host;
@@ -32,6 +34,7 @@ public class Config implements InitializingBean {
 		for (String ip : IPUtils.getNoLoopbackIP4Addresses()) {
 			PumaServer entity = pumaServerService.findByHostAndPort(ip, port);
 			if (entity != null) {
+				this.id   = entity.getId();
 				this.name = entity.getName();
 				this.host = entity.getHost();
 				this.port = entity.getPort();
@@ -40,7 +43,7 @@ public class Config implements InitializingBean {
 			}
 		}
 
-		if (this.name == null) {
+		if (this.id == null) {
 			LOG.error("Initialize puma server error: No matched server found in DB.");
 			throw new RuntimeException("Initialize puma server error: No matched server found in DB.");
 		}
@@ -48,6 +51,14 @@ public class Config implements InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
 
 	public String getName() {
 		return this.name;

@@ -6,6 +6,7 @@ import com.dianping.puma.core.entity.morphia.SrcDBInstanceMorphiaEntity;
 import com.google.code.morphia.dao.BasicDAO;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
+import com.google.code.morphia.query.UpdateOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,7 +55,13 @@ public class SrcDBInstanceMorphiaDao extends BasicDAO<SrcDBInstanceMorphiaEntity
 	}
 
 	public void update(SrcDBInstance entity) {
-		this.create(entity);
+		SrcDBInstanceMorphiaEntity morphiaEntity = new SrcDBInstanceMorphiaEntity(entity);
+		Query<SrcDBInstanceMorphiaEntity> q = this.getDatastore().createQuery(SrcDBInstanceMorphiaEntity.class);
+		q.field("id").equal(morphiaEntity.getId());
+		UpdateOperations<SrcDBInstanceMorphiaEntity> uop = this.getDatastore().createUpdateOperations(SrcDBInstanceMorphiaEntity.class);
+		uop.set("entity", entity);
+		this.update(q, uop);
+		this.getDatastore().ensureIndexes();
 	}
 
 	public void remove(String id) {

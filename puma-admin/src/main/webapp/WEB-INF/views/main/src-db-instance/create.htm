@@ -1,5 +1,4 @@
-<script type="text/javascript" src="${rc.contextPath}/js/views/src-db-instance.js"
-        xmlns:p="http://www.w3.org/1999/html"></script>
+<script type="text/javascript" src="${rc.contextPath}/js/views/src-db-instance.js"></script>
 <script type="text/javascript" src="${rc.contextPath}/js/validation.js"></script>
 <div class="container-fluid">
    <div class="panel panel-primary">
@@ -14,6 +13,13 @@
       <form id="src-db-instance-create-form" class="form-horizontal" method="post"
             action="${rc.contextPath}/src-db-instance/create" target="${rc.contextPath}/src-db-instance">
          <div class="panel-body">
+
+            #if(${entity})
+            <div class="form-group" hidden="hidden">
+               <label class="sr-only" for="id"></label>
+               <input id="id" name="id" value="${entity.id}">
+            </div>
+            #end
 
             <div class="form-group">
                <label class="col-md-2 control-label" for="name">数据库实例名称</label>

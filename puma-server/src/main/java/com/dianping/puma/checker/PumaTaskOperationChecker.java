@@ -38,10 +38,10 @@ public class PumaTaskOperationChecker implements EventListener {
 
 	@PostConstruct
 	public void init() {
-		String pumaServerName = pumaServerConfig.getName();
+		String pumaServerId = pumaServerConfig.getId();
 
 		// Throws puma task service exceptions.
-		List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerName(pumaServerName);
+		List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerId(pumaServerId);
 
 		// Swallows puma task executors exceptions.
 		for (PumaTask pumaTask : pumaTasks) {

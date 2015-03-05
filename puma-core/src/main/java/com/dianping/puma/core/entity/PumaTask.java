@@ -6,6 +6,10 @@ public class PumaTask extends BaseEntity {
 
 	private String name;
 
+	private String srcDBInstanceId;
+
+	private String pumaServerId;
+
 	private String srcDBInstanceName;
 
 	private String pumaServerName;
@@ -20,6 +24,22 @@ public class PumaTask extends BaseEntity {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getSrcDBInstanceId() {
+		return srcDBInstanceId;
+	}
+
+	public void setSrcDBInstanceId(String srcDBInstanceId) {
+		this.srcDBInstanceId = srcDBInstanceId;
+	}
+
+	public String getPumaServerId() {
+		return pumaServerId;
+	}
+
+	public void setPumaServerId(String pumaServerId) {
+		this.pumaServerId = pumaServerId;
 	}
 
 	public String getSrcDBInstanceName() {

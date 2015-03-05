@@ -8,7 +8,9 @@ public interface PumaTaskService {
 
 	PumaTask find(String id);
 
-	List<PumaTask> findByPumaServerName(String pumaServerName);
+	List<PumaTask> findBySrcDBInstanceId(String srcDBInstanceId);
+
+	List<PumaTask> findByPumaServerId(String pumaServerName);
 
 	List<PumaTask> findAll();
 

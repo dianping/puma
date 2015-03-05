@@ -20,6 +20,22 @@ public class BaseMorphiaEntity<T> {
 
 	public BaseMorphiaEntity() {}
 
+	public ObjectId getObjectId() {
+		return objectId;
+	}
+
+	public void setObjectId(ObjectId objectId) {
+		this.objectId = objectId;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
 	public BaseMorphiaEntity(T entity) {
 		this.id = ((BaseEntity) entity).getId();
 		this.entity = entity;

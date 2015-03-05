@@ -2,13 +2,13 @@ package com.dianping.puma.core.monitor;
 
 public class PumaTaskEvent extends Event {
 
-	String pumaServerName;
+	String pumaServerId;
 
-	public String getPumaServerName() {
-		return pumaServerName;
+	public String getPumaServerId() {
+		return pumaServerId;
 	}
 
-	public void setPumaServerName(String pumaServerName) {
-		this.pumaServerName = pumaServerName;
+	public void setPumaServerId(String pumaServerId) {
+		this.pumaServerId = pumaServerId;
 	}
 }

@@ -51,6 +51,10 @@ public class SrcDBInstanceController {
 
 		try {
 			SrcDBInstance entity = srcDBInstanceService.find(id);
+
+
+
+
 			map.put("entity", entity);
 			map.put("path", "src-db-instance");
 			map.put("subPath", "create");
@@ -64,6 +68,7 @@ public class SrcDBInstanceController {
 	@RequestMapping(value = { "/src-db-instance/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String createPost(
+			String id,
 			String name,
 			Integer serverId,
 			String host,
@@ -77,22 +82,35 @@ public class SrcDBInstanceController {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		SrcDBInstance srcDbInstance = new SrcDBInstance();
-		srcDbInstance.setName(name);
-		srcDbInstance.setServerId(serverId);
-		srcDbInstance.setHost(host);
-		srcDbInstance.setPort(port);
-		srcDbInstance.setUsername(username);
-		srcDbInstance.setPassword(password);
-		srcDbInstance.setMetaHost(metaHost);
-		srcDbInstance.setMetaPort(metaPort);
-		srcDbInstance.setMetaUsername(metaUsername);
-		srcDbInstance.setMetaPassword(metaPassword);
-
 		try {
-			this.srcDBInstanceService.create(srcDbInstance);
+			SrcDBInstance srcDbInstance;
+
+			if (id != null) {
+				srcDbInstance = srcDBInstanceService.find(id);
+			} else {
+				srcDbInstance = new SrcDBInstance();
+			}
+
+			srcDbInstance.setName(name);
+			srcDbInstance.setServerId(serverId);
+			srcDbInstance.setHost(host);
+			srcDbInstance.setPort(port);
+			srcDbInstance.setUsername(username);
+			srcDbInstance.setPassword(password);
+			srcDbInstance.setMetaHost(metaHost);
+			srcDbInstance.setMetaPort(metaPort);
+			srcDbInstance.setMetaUsername(metaUsername);
+			srcDbInstance.setMetaPassword(metaPassword);
+
+			if (id != null) {
+				srcDBInstanceService.update(srcDbInstance);
+			} else {
+				srcDBInstanceService.create(srcDbInstance);
+			}
+
 			map.put("success", true);
 		} catch (Exception e) {
+			map.put("err", e.getMessage());
 			map.put("success", false);
 		}
 

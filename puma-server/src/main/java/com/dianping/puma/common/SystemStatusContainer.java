@@ -348,6 +348,7 @@ public enum SystemStatusContainer {
 	}
 
 	public static class ServerStatus {
+		
 		private String binlogFile;
 
 		private long binlogPos;

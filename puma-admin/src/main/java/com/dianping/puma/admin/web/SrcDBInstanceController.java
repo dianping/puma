@@ -1,7 +1,9 @@
 package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.util.GsonUtil;
+import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
+import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,9 @@ public class SrcDBInstanceController {
 
 	@Autowired
 	SrcDBInstanceService srcDBInstanceService;
+
+	@Autowired
+	PumaTaskService pumaTaskService;
 
 	@RequestMapping(value = { "/src-db-instance" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
@@ -50,14 +55,18 @@ public class SrcDBInstanceController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
+			List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceId(id);
+			if (pumaTasks != null && pumaTasks.size() != 0) {
+				map.put("lock", true);
+			} else {
+				map.put("lock", false);
+			}
+
 			SrcDBInstance entity = srcDBInstanceService.find(id);
-
-
-
-
 			map.put("entity", entity);
 			map.put("path", "src-db-instance");
 			map.put("subPath", "create");
+
 		} catch (Exception e) {
 			// @TODO: error page.
 		}
@@ -123,8 +132,15 @@ public class SrcDBInstanceController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			this.srcDBInstanceService.remove(id);
-			map.put("success", true);
+			List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceId(id);
+			if (pumaTasks != null && pumaTasks.size() != 0) {
+				map.put("lock", true);
+				map.put("success", false);
+			} else {
+				this.srcDBInstanceService.remove(id);
+				map.put("lock", false);
+				map.put("success", true);
+			}
 		} catch (Exception e) {
 			map.put("success", false);
 		}

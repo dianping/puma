@@ -23,7 +23,7 @@ $(function() {
 
   // Validate.
   function validate(inputElement) {
-    if (!isWhite(inputElement)) {
+    if (!isWhite(inputElement) && !isDisabled(inputElement)) {
       var div = inputElement.parent();
       var span = inputElement.next();
 
@@ -52,6 +52,11 @@ $(function() {
   // Check the given input is white.
   function isWhite(inputElement) {
     return inputElement.val().trim() === '';
+  }
+
+  // Check the given input is disabled.
+  function isDisabled(inputElement) {
+    return inputElement.attr('disabled') === 'disabled';
   }
 
   // Format and regexp map.

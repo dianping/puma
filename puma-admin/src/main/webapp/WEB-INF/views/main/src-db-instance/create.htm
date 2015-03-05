@@ -5,9 +5,12 @@
       <div class="panel-heading">
          <div class="btn-group-sm pull-right">
             <button class="btn btn btn-default" onclick="javascript:history.back();">返回</button>
-            <button class="btn btn-success validation-button" type="submit" form="src-db-instance-create-form">保存</button>
+            <button class="btn btn-success validation-button" type="submit"
+                    form="src-db-instance-create-form" #if(${lock}) disabled="disabled" #end>保存</button>
          </div>
-         <h5>新增源数据库实例</h5>
+         <h5>新增源数据库实例
+            #if(${lock})<span class="orange-warning">(锁定)</span>#end
+         </h5>
       </div>
 
       <form id="src-db-instance-create-form" class="form-horizontal" method="post"
@@ -25,7 +28,7 @@
                <label class="col-md-2 control-label" for="name">数据库实例名称</label>
                <div class="col-md-7">
                   <input id="name" name="name" class="form-control validation-input" format="db-name"
-                         #if(${entity}) value="${entity.name}" #end>
+                         #if(${entity}) value="${entity.name}" #end #if(${lock}) disabled="disabled" #end>
                </div>
                <div class="col-md-3 validation-help">
                   <span hidden="hidden">无效数据库实例名称</span>
@@ -36,7 +39,7 @@
                <label class="col-md-2 control-label" for="serverId">Server ID</label>
                <div class="col-md-7">
                   <input id="serverId" name="serverId" class="form-control validation-input" format="db-server-id"
-                         #if(${entity}) value="${entity.serverId}" #end>
+                         #if(${entity}) value="${entity.serverId}" #end #if(${lock}) disabled="disabled" #end>
                </div>
                <div class="col-md-3 validation-help">
                   <span hidden="hidden">无效Server ID</span>
@@ -47,13 +50,15 @@
                <label class="col-md-2 control-label" for="host">IP地址(数据)</label>
                <div class="col-md-5">
                   <input id="host" name="host" class="form-control validation-input" format="host"
-                         placeholder="e.g. 127.0.0.1" #if(${entity}) value="${entity.host}" #end>
+                         placeholder="e.g. 127.0.0.1" #if(${entity}) value="${entity.host}" #end
+                         #if(${lock}) disabled="disabled" #end>
                </div>
 
                <label class="sr-only control-label" for="port">IP端口(数据)</label>
                <div class="col-md-2">
                   <input id="port" name="port" class="form-control validation-input" format="port"
-                         placeholder="e.g. 3306" #if(${entity}) value="${entity.port}" #end>
+                         placeholder="e.g. 3306" #if(${entity}) value="${entity.port}" #end
+                         #if(${lock}) disabled="disabled" #end>
                </div>
                <div class="col-md-3 validation-help">
                   <span hidden="hidden">无效IP地址</span>
@@ -64,7 +69,7 @@
                <label class="col-md-2 control-label" for="username">用户名(数据)</label>
                <div class="col-md-7">
                   <input id="username" name="username" class="form-control validation-input" format="username"
-                         #if(${entity}) value="${entity.username}" #end>
+                         #if(${entity}) value="${entity.username}" #end #if(${lock}) disabled="disabled" #end>
                </div>
                <div class="col-md-3 validation-help">
                   <span hidden="hidden">无效用户名(数据)</span>
@@ -75,7 +80,7 @@
                <label class="col-md-2 control-label" for="password">密码(数据)</label>
                <div class="col-md-7">
                   <input id="password" type="password" name="password" class="form-control validation-input" format="password"
-                         #if(${entity}) value="${entity.password}" #end>
+                         #if(${entity}) value="${entity.password}" #end #if(${lock}) disabled="disabled" #end>
                </div>
                <div class="col-md-3 validation-help">
                   <span hidden="hidden">无效密码(数据)</span>
@@ -86,12 +91,14 @@
                <label class="col-md-2 control-label" for="metaHost">IP地址(元数据)</label>
                <div class="col-md-5">
                   <input id="metaHost" name="metaHost" class="form-control validation-input" format="host"
-                         placeholder="e.g. 127.0.0.1" #if(${entity}) value="${entity.metaHost}" #end>
+                         placeholder="e.g. 127.0.0.1" #if(${entity}) value="${entity.metaHost}" #end
+                         #if(${lock}) disabled="disabled" #end>
                </div>
                <label class="sr-only control-label" for="metaPort">IP端口(元数据)</label>
                <div class="col-md-2">
                   <input id="metaPort" name="metaPort" class="form-control validation-input" format="port"
-                         placeholder="e.g. 3306" #if(${entity}) value="${entity.metaPort}" #end>
+                         placeholder="e.g. 3306" #if(${entity}) value="${entity.metaPort}" #end
+                         #if(${lock}) disabled="disabled" #end>
                </div>
                <div class="col-md-3 validation-help">
                   <span hidden="hidden">无效IP地址</span>
@@ -102,7 +109,7 @@
                <label class="col-md-2 control-label" for="metaUsername">用户名(元数据)</label>
                <div class="col-md-7">
                   <input id="metaUsername" name="metaUsername" class="form-control validation-input" format="username"
-                         #if(${entity}) value="${entity.metaUsername}" #end>
+                         #if(${entity}) value="${entity.metaUsername}" #end #if(${lock}) disabled="disabled" #end>
                </div>
                <div class="col-md-3 validation-help">
                   <span hidden="hidden">无效用户名(元数据)</span>
@@ -113,7 +120,7 @@
                <label class="col-md-2 control-label" for="metaPassword">密码(元数据)</label>
                <div class="col-md-7">
                   <input id="metaPassword" type="password" name="metaPassword" class="form-control validation-input" format="password"
-                         #if(${entity}) value="${entity.metaPassword}" #end>
+                         #if(${entity}) value="${entity.metaPassword}" #end #if(${lock}) disabled="disabled" #end>
                </div>
                <div class="col-md-3 validation-help">
                   <span hidden="hidden">无效密码(元数据)</span>

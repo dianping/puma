@@ -23,8 +23,8 @@
                #end
             </select> <span>选择目标实例: </span> <select name="destMysql"
                style="margin-left: 16px;">
-             #foreach($srcDBInstance in ${srcDBInstances})
-               <option value="${srcDBInstance.id}">${srcDBInstance.name}</option>
+             #foreach($destDBInstance in ${destDBInstances})
+               <option value="${destDBInstance.id}">${destDBInstance.name}</option>
                #end
             </select>
             <hr>

@@ -25,8 +25,10 @@ import com.dianping.puma.admin.service.MysqlConfigService;
 import com.dianping.puma.admin.service.PumaSyncServerConfigService;
 import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.admin.util.GsonUtil;
+import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.entity.SyncServerEntity;
+import com.dianping.puma.core.service.DstDBInstanceService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.core.service.SyncServerService;
 import com.dianping.puma.core.sync.model.BinlogInfo;
@@ -57,6 +59,8 @@ public class SyncTaskCreateController {
     @Autowired
     private SrcDBInstanceService srcDBInstanceService;
     @Autowired
+    private DstDBInstanceService dstDBInstanceService;
+    @Autowired
     private DumpTaskService dumpTaskService;
     @Autowired
     private SyncServerService syncServerService;
@@ -70,8 +74,9 @@ public class SyncTaskCreateController {
         Map<String, Object> map = new HashMap<String, Object>();
         //查询MysqlConfig
         List<SrcDBInstance> srcDBInstances = srcDBInstanceService.findAll();
-
+        List<DstDBInstance> destDBInstances = dstDBInstanceService.findAll();
         map.put("srcDBInstances", srcDBInstances);
+        map.put("destDBInstances", destDBInstances);
         map.put("createActive", "active");
         map.put("path", "sync-task");
         map.put("subPath", "step1");
@@ -127,7 +132,7 @@ public class SyncTaskCreateController {
             //保存到session
             session.setAttribute("mysqlMapping", mysqlMapping);
             SrcDBInstance srcDBInstance = srcDBInstanceService.find(srcMysql);//.findByName();
-            SrcDBInstance destDBInstance = srcDBInstanceService.find(destMysql);//.findByName(destMysql);
+            DstDBInstance destDBInstance = dstDBInstanceService.find(destMysql);//.findByName(destMysql);
             session.setAttribute("srcDBInstance", srcDBInstance);
             session.setAttribute("destDBInstance", destDBInstance);
 
@@ -149,12 +154,12 @@ public class SyncTaskCreateController {
         Map<String, Object> map = new HashMap<String, Object>();
         //从session拿出srcMysql，destMysql查询mysql配置
         SrcDBInstance srcDBInstance = (SrcDBInstance) session.getAttribute("srcDBInstance");
-        SrcDBInstance destDBInstance = (SrcDBInstance) session.getAttribute("destDBInstance");
+        DstDBInstance destDBInstance = (DstDBInstance) session.getAttribute("destDBInstance");
         //查询所有syncServer
         List<SyncServerEntity> syncServers = syncServerService.findAll();
         //从会话中取出保存的mysqlMapping，计算出dumpMapping
         MysqlMapping mysqlMapping = (MysqlMapping) session.getAttribute("mysqlMapping");
-        MysqlHost mysqlHost = getMysqlHost(srcDBInstance);
+        MysqlHost mysqlHost = getSrcMysqlHost(srcDBInstance);
         DumpMapping dumpMapping = this.syncTaskService.convertMysqlMappingToDumpMapping(mysqlHost,
                 mysqlMapping);
         session.setAttribute("dumpMapping", dumpMapping);
@@ -189,12 +194,12 @@ public class SyncTaskCreateController {
             }
             //从session拿出srcMysql，destMysql查询mysql配置
             SrcDBInstance srcDBInstance = (SrcDBInstance) session.getAttribute("srcDBInstance");
-            SrcDBInstance destDBInstance = (SrcDBInstance) session.getAttribute("destDBInstance");
+            DstDBInstance destDBInstance = (DstDBInstance) session.getAttribute("destDBInstance");
             DumpMapping dumpMapping = (DumpMapping) session.getAttribute("dumpMapping");
             //根据选择的srcMysqlHost，找出其MysqlHost对象
-            MysqlHost srcMysqlHost0 = getMysqlHost(srcDBInstance);
+            MysqlHost srcMysqlHost0 = getSrcMysqlHost(srcDBInstance);
             //根据选择的destMysqlHost，找出其MysqlHost对象
-            MysqlHost destMysqlHost0 = getMysqlHost(destDBInstance);
+            MysqlHost destMysqlHost0 = getDstMysqlHost(destDBInstance);
             //查询所有syncServer
             DumpTask dumpTask = new DumpTask();
             dumpTask.setSrcMysqlName(srcDBInstance.getName());
@@ -319,14 +324,14 @@ public class SyncTaskCreateController {
                     throw new IllegalArgumentException("destMysqlHost不能为空");
                 }
                 SrcDBInstance srcDBInstance = (SrcDBInstance) session.getAttribute("srcDBInstance");
-                SrcDBInstance destDBInstance = (SrcDBInstance) session.getAttribute("destDBInstance");
+                DstDBInstance destDBInstance = (DstDBInstance) session.getAttribute("destDBInstance");
                 syncTask.setSrcDBInstanceId(srcDBInstance.getId());
                 syncTask.setSrcMysqlName(srcDBInstance.getName());
-                MysqlHost srcMysqlHost0 = getMysqlHost(srcDBInstance);
+                MysqlHost srcMysqlHost0 = getSrcMysqlHost(srcDBInstance);
                 syncTask.setSrcMysqlHost(srcMysqlHost0);
                 syncTask.setDestDBInstanceId(destDBInstance.getId());
                 syncTask.setDestMysqlName(destDBInstance.getName());
-                syncTask.setDestMysqlHost(getMysqlHost(destDBInstance));
+                syncTask.setDestMysqlHost(getDstMysqlHost(destDBInstance));
                 syncTask.setServerId(srcMysqlHost0.getServerId());
             }
             //解析errorCode,handler
@@ -388,7 +393,16 @@ public class SyncTaskCreateController {
         return mysqlHost;
     }
     
-    private MysqlHost getMysqlHost(SrcDBInstance dbInstance){
+    private MysqlHost getSrcMysqlHost(SrcDBInstance dbInstance){
+    	MysqlHost mysqlHost = new MysqlHost();
+    	mysqlHost.setHost(dbInstance.getHost() + ":"+dbInstance.getPort());
+    	mysqlHost.setPassword(dbInstance.getPassword());
+    	mysqlHost.setUsername(dbInstance.getUsername());
+    	mysqlHost.setServerId(dbInstance.getServerId());
+    	return mysqlHost;
+    }
+    
+    private MysqlHost getDstMysqlHost(DstDBInstance dbInstance){
     	MysqlHost mysqlHost = new MysqlHost();
     	mysqlHost.setHost(dbInstance.getHost() + ":"+dbInstance.getPort());
     	mysqlHost.setPassword(dbInstance.getPassword());

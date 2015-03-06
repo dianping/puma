@@ -67,11 +67,11 @@ public class DstDBInstanceController {
 			String name,
 			Integer serverId,
 			String host,
-			String port,
+			int port,
 			String username,
 			String password,
 			String metaHost,
-			String metaPort,
+			int metaPort,
 			String metaUsername,
 			String metaPassword) {
 

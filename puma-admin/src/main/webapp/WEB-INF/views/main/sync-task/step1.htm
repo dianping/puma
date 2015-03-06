@@ -19,12 +19,12 @@
             <span>选择源实例: </span> <select name="srcMysql"
                style="margin-left: 16px; margin-right: 16px;">
                #foreach($srcDBInstance in ${srcDBInstances})
-               <option value="${srcDBInstance.name}">${srcDBInstance.name}</option>
+               <option value="${srcDBInstance.id}">${srcDBInstance.name}</option>
                #end
             </select> <span>选择目标实例: </span> <select name="destMysql"
                style="margin-left: 16px;">
              #foreach($srcDBInstance in ${srcDBInstances})
-               <option value="${srcDBInstance.name}">${srcDBInstance.name}</option>
+               <option value="${srcDBInstance.id}">${srcDBInstance.name}</option>
                #end
             </select>
             <hr>

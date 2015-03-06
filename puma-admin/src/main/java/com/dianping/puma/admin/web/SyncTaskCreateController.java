@@ -126,8 +126,8 @@ public class SyncTaskCreateController {
 
             //保存到session
             session.setAttribute("mysqlMapping", mysqlMapping);
-            SrcDBInstance srcDBInstance = srcDBInstanceService.findByName(srcMysql);
-            SrcDBInstance destDBInstance = srcDBInstanceService.findByName(destMysql);
+            SrcDBInstance srcDBInstance = srcDBInstanceService.find(srcMysql);//.findByName();
+            SrcDBInstance destDBInstance = srcDBInstanceService.find(destMysql);//.findByName(destMysql);
             session.setAttribute("srcDBInstance", srcDBInstance);
             session.setAttribute("destDBInstance", destDBInstance);
 
@@ -318,13 +318,15 @@ public class SyncTaskCreateController {
                 if (StringUtils.isBlank(destMysqlHost)) {
                     throw new IllegalArgumentException("destMysqlHost不能为空");
                 }
-                MysqlConfig srcMysqlConfig = (MysqlConfig) session.getAttribute("srcMysqlConfig");
-                MysqlConfig destMysqlConfig = (MysqlConfig) session.getAttribute("destMysqlConfig");
-                syncTask.setSrcMysqlName(srcMysqlConfig.getName());
-                MysqlHost srcMysqlHost0 = getMysqlHost(srcMysqlConfig, srcMysqlHost);
+                SrcDBInstance srcDBInstance = (SrcDBInstance) session.getAttribute("srcDBInstance");
+                SrcDBInstance destDBInstance = (SrcDBInstance) session.getAttribute("destDBInstance");
+                syncTask.setSrcDBInstanceId(srcDBInstance.getId());
+                syncTask.setSrcMysqlName(srcDBInstance.getName());
+                MysqlHost srcMysqlHost0 = getMysqlHost(srcDBInstance);
                 syncTask.setSrcMysqlHost(srcMysqlHost0);
-                syncTask.setDestMysqlName(destMysqlConfig.getName());
-                syncTask.setDestMysqlHost(getMysqlHost(destMysqlConfig, destMysqlHost));
+                syncTask.setDestDBInstanceId(destDBInstance.getId());
+                syncTask.setDestMysqlName(destDBInstance.getName());
+                syncTask.setDestMysqlHost(getMysqlHost(destDBInstance));
                 syncTask.setServerId(srcMysqlHost0.getServerId());
             }
             //解析errorCode,handler

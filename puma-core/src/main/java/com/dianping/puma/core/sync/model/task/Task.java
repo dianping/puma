@@ -25,6 +25,8 @@ public abstract class Task extends BaseEntity {
     
     //  源：具体host
     private MysqlHost srcMysqlHost;
+    
+    private String destDBInstanceId;
     //    目标：目标的数据库名称
     @Indexed(value = IndexDirection.ASC, name = "destMysqlName", unique = false, dropDups = true)
     private String destMysqlName;
@@ -95,7 +97,15 @@ public abstract class Task extends BaseEntity {
         this.srcMysqlHost = srcMysqlHost;
     }
 
-    public void setSrcMysqlName(String srcMysqlName) {
+    public void setDestDBInstanceId(String destDBInstanceId) {
+		this.destDBInstanceId = destDBInstanceId;
+	}
+
+	public String getDestDBInstanceId() {
+		return destDBInstanceId;
+	}
+
+	public void setSrcMysqlName(String srcMysqlName) {
         this.srcMysqlName = srcMysqlName;
     }
 

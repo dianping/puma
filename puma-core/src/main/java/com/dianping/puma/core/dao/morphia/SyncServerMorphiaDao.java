@@ -29,7 +29,7 @@ public class SyncServerMorphiaDao extends BasicDAO<SyncServerMorphiaEntity, Stri
 	}
 
 	public SyncServerEntity findByHost(String host,int port){
-		Query<SyncServerMorphiaEntity> q = this.getDatastore().createQuery(SyncServerMorphiaEntity.class).disableValidation();
+		Query<SyncServerMorphiaEntity> q = this.getDatastore().createQuery(SyncServerMorphiaEntity.class);
 		q.field("entity.host").equal(host);
 		q.field("entity.port").equal(port);
 		SyncServerMorphiaEntity morphiaEntity = this.findOne(q);

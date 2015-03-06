@@ -61,7 +61,7 @@ public class SyncServerController {
 
 	@RequestMapping(value = { "/sync-server/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(String name, String host, String port) {
+	public String createPost(String name, String host, int port) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		SyncServerEntity syncServerEntity = new SyncServerEntity();

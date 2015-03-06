@@ -33,7 +33,7 @@ public class Config implements InitializingBean {
     //    @Value(value = "#{'${puma.dump.tempDir}'}")
     private String tempDir;
     //    @Value(value = "#{'${puma.pumaSyncServer.port}'}")
-    private String localPort;
+    private int localPort;
 
     @PostConstruct
     public void init() throws FileNotFoundException, IOException {
@@ -41,7 +41,7 @@ public class Config implements InitializingBean {
         for (String ip : IPUtils.getNoLoopbackIP4Addresses()) {
             String host = ip + ':' + localPort;
             LOG.info("Try this localhost to find syncServerName from db : " + host);
-            SyncServerEntity config = syncServerService.findByHost(ip,Integer.parseInt(localPort));
+            SyncServerEntity config = syncServerService.findByHost(ip,localPort);
             if (config != null) {
                 syncServerName = config.getName();
                 LOG.info("Match syncServerName: " + syncServerName);
@@ -63,11 +63,11 @@ public class Config implements InitializingBean {
         LOG.info("created shell : " + shellFilePath);
     }
 
-    public String getLocalPort() {
+    public int getLocalPort() {
         return localPort;
     }
 
-    public void setLocalPort(String localPort) {
+    public void setLocalPort(int localPort) {
         this.localPort = localPort;
     }
 

@@ -73,7 +73,7 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
          String pumaServerHost = pumaServer.getHost();
          int pumaServerPort = pumaServer.getPort();
          
-         String target = "dianping";
+         String target = pumaTask.get(0).getId();
         //从taskContainer获取syncTaskExecutor
         SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) taskExecutionContainer.get(Type.SYNC, task.getSyncTaskId());
         return new CatchupTaskExecutor(task, pumaServerHost, pumaServerPort, target, syncTaskExecutor);

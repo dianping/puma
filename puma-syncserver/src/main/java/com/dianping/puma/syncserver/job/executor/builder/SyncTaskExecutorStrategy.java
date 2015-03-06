@@ -70,7 +70,7 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
         String pumaServerHost = pumaServer.getHost();
         int pumaServerPort = pumaServer.getPort();
         
-        String target = "dianping";
+        String target = pumaTask.get(0).getId();
 
         SyncTaskExecutor excutor = new SyncTaskExecutor(task, pumaServerHost, pumaServerPort, target);
         return excutor;

@@ -24,8 +24,10 @@ public class PumaMonitorSeqTask implements PumaMonitorTask {
 			entity.setName(clientStatus.getKey());
 			entity.setIp(clientStatus.getValue().getIp());
 			entity.setTarget(clientStatus.getValue().getTarget());
-			entity.setSeq(clientSuccessSeq.get(clientStatus.getKey()).longValue());
-			pumaClientInfoService.create(entity);
+			if(clientSuccessSeq.containsKey(clientStatus.getKey())){
+				entity.setSeq(clientSuccessSeq.get(clientStatus.getKey()).longValue());
+				pumaClientInfoService.create(entity);
+			}
 		}
 	}
 }

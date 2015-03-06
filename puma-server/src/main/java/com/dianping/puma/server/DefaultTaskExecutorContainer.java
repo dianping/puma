@@ -456,8 +456,8 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 		instance = this;
 	}
 
-	public EventStorage getTaskStorage(String taskName) {
-		List<Sender> senders = taskExecutorMap.get(taskName).getFileSender();
+	public EventStorage getTaskStorage(String taskId) {
+		List<Sender> senders = taskExecutorMap.get(taskId).getFileSender();
 		if (senders != null && senders.size() > 0) {
 			return senders.get(0).getStorage();
 		}

@@ -5,6 +5,7 @@ import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
+import com.mongodb.MongoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +75,8 @@ public class SrcDBInstanceController {
 		return new ModelAndView("main/container", map);
 	}
 
-	@RequestMapping(value = { "/src-db-instance/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = {
+			"/src-db-instance/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String createPost(
 			String id,
@@ -95,9 +97,18 @@ public class SrcDBInstanceController {
 			SrcDBInstance srcDbInstance;
 
 			if (id != null) {
+				// Update.
 				srcDbInstance = srcDBInstanceService.find(id);
 			} else {
-				srcDbInstance = new SrcDBInstance();
+				// Create.
+
+				// Duplicated name checking.
+				srcDbInstance = srcDBInstanceService.findByName(name);
+				if (srcDbInstance == null) {
+					srcDbInstance = new SrcDBInstance();
+				} else {
+					throw new Exception("duplicated");
+				}
 			}
 
 			srcDbInstance.setName(name);
@@ -118,30 +129,37 @@ public class SrcDBInstanceController {
 			}
 
 			map.put("success", true);
+		} catch (MongoException e) {
+			map.put("error", "storage");
+			map.put("success", false);
 		} catch (Exception e) {
-			map.put("err", e.getMessage());
+			map.put("error", e.getMessage());
 			map.put("success", false);
 		}
 
 		return GsonUtil.toJson(map);
 	}
 
-	@RequestMapping(value = { "/src-db-instance/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = {
+			"/src-db-instance/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String removePost(String id) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
 			List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceId(id);
+
 			if (pumaTasks != null && pumaTasks.size() != 0) {
-				map.put("lock", true);
-				map.put("success", false);
-			} else {
-				this.srcDBInstanceService.remove(id);
-				map.put("lock", false);
-				map.put("success", true);
+				throw new Exception("lock");
 			}
+
+			this.srcDBInstanceService.remove(id);
+			map.put("success", true);
+		} catch (MongoException e) {
+			map.put("error", "storage");
+			map.put("success", false);
 		} catch (Exception e) {
+			map.put("error", e.getMessage());
 			map.put("success", false);
 		}
 

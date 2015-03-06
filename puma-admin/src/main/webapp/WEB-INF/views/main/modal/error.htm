@@ -1,4 +1,4 @@
-<script type="text/javascript" src="${rc.contextPath}/js/modal.js"></script>
+<script type="text/javascript" src="${rc.contextPath}/js/puma-modal.js"></script>
 <div class="modal fade" id="error-modal" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -13,11 +13,7 @@
             </div>
 
             <div class="modal-footer">
-                <form id="warn-modal-form" method="post" location="${rc.contextPath}">
-                    <input name="id" hidden="hidden">
-                    <button class="btn btn-default" data-dismiss="modal">取消</button>
-                    <button type="submit" class="btn btn-primary">确定</button>
-                </form>
+                <button class="btn btn-default btn-primary" data-dismiss="modal">确定</button>
             </div>
         </div>
     </div>

@@ -1,4 +1,3 @@
-<script type="text/javascript" src="${rc.contextPath}/js/views/src-db-instance.js"></script>
 <script type="text/javascript" src="${rc.contextPath}/js/validation.js"></script>
 <div class="container-fluid">
    <div class="panel panel-primary">
@@ -9,11 +8,11 @@
                     form="src-db-instance-create-form" #if(${lock}) disabled="disabled" #end>保存</button>
          </div>
          <h5>新增源数据库实例
-            #if(${lock})<span class="orange-warning">(锁定)</span>#end
+            #if(${lock})<span class="orange-warning">(已锁定，请先删除相关任务)</span>#end
          </h5>
       </div>
 
-      <form id="src-db-instance-create-form" class="form-horizontal" method="post"
+      <form id="src-db-instance-create-form" class="form-horizontal puma-form" method="post"
             action="${rc.contextPath}/src-db-instance/create" target="${rc.contextPath}/src-db-instance">
          <div class="panel-body">
 

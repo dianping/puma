@@ -1,0 +1,16 @@
+a:hover.operation-icon {
+    text-decoration: none;
+}
+
+.orange-warning {
+    color: orange;
+}
+
+.validation-help {
+    display: block;
+    margin-top: 5px;
+}
+
+.validation-help span {
+    color: red;
+}

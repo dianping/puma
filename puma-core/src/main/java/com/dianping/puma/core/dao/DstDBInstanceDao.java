@@ -8,6 +8,8 @@ public interface DstDBInstanceDao {
 
 	DstDBInstance find(String id);
 
+	DstDBInstance findByName(String name);
+
 	List<DstDBInstance> findAll();
 
 	void create(DstDBInstance entity);

@@ -6,6 +6,7 @@ import com.dianping.puma.core.entity.morphia.DstDBInstanceMorphiaEntity;
 import com.google.code.morphia.dao.BasicDAO;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
+import com.google.code.morphia.query.UpdateOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,13 @@ public class DstDBInstanceMorphiaDao extends BasicDAO<DstDBInstanceMorphiaEntity
 	public DstDBInstance find(String id) {
 		Query<DstDBInstanceMorphiaEntity> q = this.getDatastore().createQuery(DstDBInstanceMorphiaEntity.class);
 		q.field("id").equal(id);
+		DstDBInstanceMorphiaEntity morphiaEntity = this.findOne(q);
+		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();
+	}
+
+	public DstDBInstance findByName(String name) {
+		Query<DstDBInstanceMorphiaEntity> q = this.getDatastore().createQuery(DstDBInstanceMorphiaEntity.class);
+		q.field("entity.name").equal(name);
 		DstDBInstanceMorphiaEntity morphiaEntity = this.findOne(q);
 		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();
 	}
@@ -47,7 +55,13 @@ public class DstDBInstanceMorphiaDao extends BasicDAO<DstDBInstanceMorphiaEntity
 	}
 
 	public void update(DstDBInstance entity) {
-		this.create(entity);
+		DstDBInstanceMorphiaEntity morphiaEntity = new DstDBInstanceMorphiaEntity(entity);
+		Query<DstDBInstanceMorphiaEntity> q = this.getDatastore().createQuery(DstDBInstanceMorphiaEntity.class);
+		q.field("id").equal(morphiaEntity.getId());
+		UpdateOperations<DstDBInstanceMorphiaEntity> uop = this.getDatastore().createUpdateOperations(DstDBInstanceMorphiaEntity.class);
+		uop.set("entity", entity);
+		this.update(q, uop);
+		this.getDatastore().ensureIndexes();
 	}
 
 	public void remove(String id) {

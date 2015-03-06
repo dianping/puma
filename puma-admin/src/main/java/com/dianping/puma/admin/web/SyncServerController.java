@@ -3,6 +3,7 @@ package com.dianping.puma.admin.web;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.entity.SyncServerEntity;
 import com.dianping.puma.core.service.SyncServerService;
+import com.dianping.puma.core.sync.model.task.SyncTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,7 @@ public class SyncServerController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
+
 			SyncServerEntity entity = syncServerService.find(id);
 			map.put("entity", entity);
 			map.put("path", "sync-server");

@@ -20,6 +20,11 @@ public class DstDBInstanceServiceImpl implements DstDBInstanceService {
 	}
 
 	@Override
+	public DstDBInstance findByName(String name) {
+		return dstDbInstanceDao.findByName(name);
+	}
+
+	@Override
 	public List<DstDBInstance> findAll() {
 		return dstDbInstanceDao.findAll();
 	}

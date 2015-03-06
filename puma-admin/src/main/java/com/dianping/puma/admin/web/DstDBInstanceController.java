@@ -2,7 +2,10 @@ package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.entity.DstDBInstance;
+import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.service.DstDBInstanceService;
+import com.dianping.puma.core.service.PumaTaskService;
+import com.mongodb.MongoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +28,9 @@ public class DstDBInstanceController {
 
 	@Autowired
 	DstDBInstanceService dstDBInstanceService;
+
+	@Autowired
+	PumaTaskService pumaTaskService;
 
 	@RequestMapping(value = { "/dst-db-instance" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
@@ -49,6 +55,13 @@ public class DstDBInstanceController {
 	public ModelAndView update(String id) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
+		List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceId(id);
+		if (pumaTasks != null && pumaTasks.size() != 0) {
+			map.put("lock", true);
+		} else {
+			map.put("lock", false);
+		}
+
 		try {
 			DstDBInstance entity = dstDBInstanceService.find(id);
 			map.put("entity", entity);
@@ -64,6 +77,7 @@ public class DstDBInstanceController {
 	@RequestMapping(value = { "/dst-db-instance/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String createPost(
+			String id,
 			String name,
 			Integer serverId,
 			String host,
@@ -77,22 +91,47 @@ public class DstDBInstanceController {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		DstDBInstance dstDBInstance = new DstDBInstance();
-		dstDBInstance.setName(name);
-		dstDBInstance.setServerId(serverId);
-		dstDBInstance.setHost(host);
-		dstDBInstance.setPort(port);
-		dstDBInstance.setUsername(username);
-		dstDBInstance.setPassword(password);
-		dstDBInstance.setMetaHost(metaHost);
-		dstDBInstance.setMetaPort(metaPort);
-		dstDBInstance.setMetaUsername(metaUsername);
-		dstDBInstance.setMetaPassword(metaPassword);
+		DstDBInstance dstDBInstance;
 
 		try {
-			this.dstDBInstanceService.create(dstDBInstance);
+			if (id != null) {
+				// Update.
+				dstDBInstance = dstDBInstanceService.find(id);
+			} else {
+				// Create.
+
+				// Duplicated name?
+				dstDBInstance = dstDBInstanceService.findByName(name);
+				if (dstDBInstance == null) {
+					dstDBInstance = new DstDBInstance();
+				} else {
+					throw new Exception("duplicated");
+				}
+			}
+
+			dstDBInstance.setName(name);
+			dstDBInstance.setServerId(serverId);
+			dstDBInstance.setHost(host);
+			dstDBInstance.setPort(port);
+			dstDBInstance.setUsername(username);
+			dstDBInstance.setPassword(password);
+			dstDBInstance.setMetaHost(metaHost);
+			dstDBInstance.setMetaPort(metaPort);
+			dstDBInstance.setMetaUsername(metaUsername);
+			dstDBInstance.setMetaPassword(metaPassword);
+
+			if (id != null) {
+				dstDBInstanceService.update(dstDBInstance);
+			} else {
+				dstDBInstanceService.create(dstDBInstance);
+			}
+
 			map.put("success", true);
+		} catch (MongoException e) {
+			map.put("error", "storage");
+			map.put("success", false);
 		} catch (Exception e) {
+			map.put("error", e.getMessage());
 			map.put("success", false);
 		}
 
@@ -105,9 +144,19 @@ public class DstDBInstanceController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
+			List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceId(id);
+
+			if (pumaTasks != null && pumaTasks.size() != 0) {
+				throw new Exception("lock");
+			}
+
 			this.dstDBInstanceService.remove(id);
 			map.put("success", true);
+		} catch (MongoException e) {
+			map.put("error", "storage");
+			map.put("success", false);
 		} catch (Exception e) {
+			map.put("error", e.getMessage());
 			map.put("success", false);
 		}
 

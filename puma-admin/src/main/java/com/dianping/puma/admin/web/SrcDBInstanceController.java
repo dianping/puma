@@ -94,38 +94,38 @@ public class SrcDBInstanceController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			SrcDBInstance srcDbInstance;
+			SrcDBInstance srcDBInstance;
 
 			if (id != null) {
 				// Update.
-				srcDbInstance = srcDBInstanceService.find(id);
+				srcDBInstance = srcDBInstanceService.find(id);
 			} else {
 				// Create.
 
 				// Duplicated name?
-				srcDbInstance = srcDBInstanceService.findByName(name);
-				if (srcDbInstance == null) {
-					srcDbInstance = new SrcDBInstance();
+				srcDBInstance = srcDBInstanceService.findByName(name);
+				if (srcDBInstance == null) {
+					srcDBInstance = new SrcDBInstance();
 				} else {
 					throw new Exception("duplicated");
 				}
 			}
 
-			srcDbInstance.setName(name);
-			srcDbInstance.setServerId(serverId);
-			srcDbInstance.setHost(host);
-			srcDbInstance.setPort(port);
-			srcDbInstance.setUsername(username);
-			srcDbInstance.setPassword(password);
-			srcDbInstance.setMetaHost(metaHost);
-			srcDbInstance.setMetaPort(metaPort);
-			srcDbInstance.setMetaUsername(metaUsername);
-			srcDbInstance.setMetaPassword(metaPassword);
+			srcDBInstance.setName(name);
+			srcDBInstance.setServerId(serverId);
+			srcDBInstance.setHost(host);
+			srcDBInstance.setPort(port);
+			srcDBInstance.setUsername(username);
+			srcDBInstance.setPassword(password);
+			srcDBInstance.setMetaHost(metaHost);
+			srcDBInstance.setMetaPort(metaPort);
+			srcDBInstance.setMetaUsername(metaUsername);
+			srcDBInstance.setMetaPassword(metaPassword);
 
 			if (id != null) {
-				srcDBInstanceService.update(srcDbInstance);
+				srcDBInstanceService.update(srcDBInstance);
 			} else {
-				srcDBInstanceService.create(srcDbInstance);
+				srcDBInstanceService.create(srcDBInstance);
 			}
 
 			map.put("success", true);

@@ -53,7 +53,7 @@ public enum SystemStatusContainer {
 
 	private ConcurrentMap<String, AtomicInteger> metrics = new ConcurrentHashMap<String, AtomicInteger>();
 
-	private ConcurrentMap<String, TaskExecutorStatus> taskExecutorStatus = new ConcurrentHashMap<String, TaskExecutorStatus>();
+	//private ConcurrentMap<String, TaskExecutorStatus> taskExecutorStatus = new ConcurrentHashMap<String, TaskExecutorStatus>();
 
 	private static final String CAT_KEY_EVENT_PARSED = "EventParsed-";
 

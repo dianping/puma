@@ -11,7 +11,11 @@ import com.dianping.puma.core.monitor.ReplicationTaskStatusActionEvent;
 public interface TaskExecutorContainer {
 
 	public void init();
+	/*
+	public TaskExecutor construct(PumaTask pumaTask) throws Exception;
 
+	public ConcurrentHashMap<String,TaskExecutor> constructServers() throws Exception;
+	*/
 	public TaskExecutor get(String taskId);
 
 	public List<TaskExecutor> getAll();

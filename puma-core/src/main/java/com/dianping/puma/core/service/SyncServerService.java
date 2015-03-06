@@ -15,4 +15,6 @@ public interface SyncServerService {
 	void update(SyncServerEntity entity);
 
 	void remove(String id);
+
+	SyncServerEntity findByHost(String host, int port);
 }

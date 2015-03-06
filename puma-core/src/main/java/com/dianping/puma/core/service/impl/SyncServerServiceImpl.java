@@ -38,4 +38,8 @@ public class SyncServerServiceImpl implements SyncServerService {
 	public void remove(String id) {
 		syncServerDao.remove(id);
 	}
+	@Override
+	public SyncServerEntity findByHost(String host, int port){
+		return syncServerDao.findByHost(host, port);
+	}
 }

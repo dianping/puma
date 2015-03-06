@@ -85,6 +85,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 	private static final Logger LOG = LoggerFactory.getLogger(DefaultTaskExecutorBuilder.class);
 
 	public TaskExecutor build(PumaTask pumaTask) throws Exception {
+		
 		try {
 			DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
 
@@ -94,7 +95,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			taskExecutor.setTaskId(taskId);
 			taskExecutor.setTaskName(taskName);
 			taskExecutor.setNotifyService(notifyService);
-			taskExecutor.setServerId(taskId.hashCode());
+			//taskExecutor.setServerId(taskId.hashCode());
 
 			// Bin log.
 			taskExecutor.setBinlogInfoHolder(binlogInfoHolder);
@@ -156,7 +157,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 
 			// Archive strategy.
 			DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
-			archiveStrategy.setServerName(taskId);
+			archiveStrategy.setServerName(taskName);
 			archiveStrategy.setMaxMasterFileCount(maxMasterFileCount);
 			storage.setArchiveStrategy(archiveStrategy);
 

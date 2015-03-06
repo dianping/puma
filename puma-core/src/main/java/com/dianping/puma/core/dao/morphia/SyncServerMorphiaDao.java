@@ -2,6 +2,7 @@ package com.dianping.puma.core.dao.morphia;
 
 import com.dianping.puma.core.dao.SyncServerDao;
 import com.dianping.puma.core.entity.SyncServerEntity;
+import com.dianping.puma.core.entity.morphia.PumaServerMorphiaEntity;
 import com.dianping.puma.core.entity.morphia.SyncServerMorphiaEntity;
 import com.google.code.morphia.dao.BasicDAO;
 import com.google.code.morphia.query.Query;
@@ -27,6 +28,14 @@ public class SyncServerMorphiaDao extends BasicDAO<SyncServerMorphiaEntity, Stri
 		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();
 	}
 
+	public SyncServerEntity findByHost(String host,int port){
+		Query<SyncServerMorphiaEntity> q = this.getDatastore().createQuery(SyncServerMorphiaEntity.class).disableValidation();
+		q.field("entity.host").equal(host);
+		q.field("entity.port").equal(port);
+		SyncServerMorphiaEntity morphiaEntity = this.findOne(q);
+		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();
+	}
+	
 	public List<SyncServerEntity> findAll() {
 		Query<SyncServerMorphiaEntity> q = this.getDatastore().createQuery(SyncServerMorphiaEntity.class);
 		QueryResults<SyncServerMorphiaEntity> result = this.find(q);

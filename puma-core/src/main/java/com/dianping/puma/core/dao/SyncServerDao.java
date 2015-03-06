@@ -8,6 +8,8 @@ public interface SyncServerDao {
 
 	SyncServerEntity find(String id);
 
+	SyncServerEntity findByHost(String host,int port);
+	
 	List<SyncServerEntity> findAll();
 
 	void create(SyncServerEntity entity);

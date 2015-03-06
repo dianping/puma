@@ -50,11 +50,11 @@ public interface TaskExecutor extends LifeCycle<Exception> {
 
 	public void setDefaultBinlogPosition(Long binlogFileName);
 
-	public void setServerId(long serverId);
+	//public void setServerId(long serverId);
 
-	public long getServerId();
+	//public long getServerId();
 
-	public String getServerName();
+	//public String getServerName();
 
 	public void setBinlogInfoHolder(BinlogInfoHolder holder);
 

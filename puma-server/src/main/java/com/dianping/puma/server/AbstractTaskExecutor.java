@@ -57,7 +57,7 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 
 	protected Dispatcher dispatcher;
 
-	private long serverId;
+	//private long serverId;
 
 	protected NotifyService notifyService;
 
@@ -65,7 +65,7 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 
 	protected BinlogInfoHolder binlogInfoHolder;
 
-	protected String name;
+	//protected String name;
 
 	protected PumaTaskState state;
 
@@ -162,9 +162,11 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 		this.dispatcher = dispatcher;
 	}
 
+	
 	/**
 	 * @return the serverId
 	 */
+	/*
 	public long getServerId() {
 		return serverId;
 	}
@@ -172,15 +174,18 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 	/**
 	 * @param serverId the serverId to set
 	 */
+	/*
 	public void setServerId(long serverId) {
 		this.serverId = serverId;
 	}
-
+    */
+	
 	/*
 	  * (non-Javadoc)
 	  *
 	  * @see com.dianping.puma.server.Server#getName()
 	  */
+	/*
 	@Override
 	public String getServerName() {
 		return name;
@@ -193,6 +198,7 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 	public void setName(String name) {
 		this.name = name;
 	}
+	*/
 
 	/*
 	  * (non-Javadoc)

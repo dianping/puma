@@ -106,7 +106,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				connect();
 
 				if (auth()) {
-					LOG.info("Server logined... serverId: " + getServerId() + " host: " + dbHost + " port: " + port
+					LOG.info("Server logined... taskName: " + getTaskName() + " host: " + dbHost + " port: " + port
 							+ " username: " + dbUsername + " database: " + database + " dbServerId: " + getDbServerId());
 
 					if (dumpBinlog()) {
@@ -128,7 +128,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 					failCount = 0;
 				}
 				LOG.error(
-						"Exception occurs. serverId: " + getServerId() + " dbServerId: " + getDbServerId() + ". Reconnect...",
+						"Exception occurs. taskName: " + getTaskName() + " dbServerId: " + getDbServerId() + ". Reconnect...",
 						e);
 				Thread.sleep(((failCount % 10) + 1) * 2000);
 			}
@@ -139,7 +139,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	private void processBinlog() throws IOException {
 		while (!isStop()) {
 			// only slow down parsing, not stop
-			if (SystemStatusContainer.instance.isStopTheWorld(this.getName())) {
+			if (SystemStatusContainer.instance.isStopTheWorld(this.getTaskName())) {
 				try {
 					TimeUnit.SECONDS.sleep(1);
 				} catch (InterruptedException e) {
@@ -382,7 +382,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	public void initContext() {
 		PumaContext context = new PumaContext();
 
-		BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(this.getTaskId());
+		BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(this.getTaskName());
 
 
 		if (binlogInfo == null) {
@@ -501,4 +501,5 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		Long ddls = this.binlogStat.getDdls();
 		binlogStat.setDdls(ddls + 1);
 	}
+
 }

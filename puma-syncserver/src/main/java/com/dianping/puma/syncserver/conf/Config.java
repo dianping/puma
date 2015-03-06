@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.dianping.puma.core.entity.SyncServerEntity;
+import com.dianping.puma.core.service.SyncServerService;
 import com.dianping.puma.core.sync.model.config.PumaSyncServerConfig;
 import com.dianping.puma.core.util.IPUtils;
 import com.dianping.puma.syncserver.job.executor.DumpTaskExecutor;
@@ -24,7 +26,7 @@ public class Config implements InitializingBean {
     private static final Logger LOG = LoggerFactory.getLogger(Config.class);
     private static final String SHELL_PATH = "shell/mysqlload.sh";
     @Autowired
-    private PumaSyncServerConfigService configService;
+    private SyncServerService syncServerService;
     private String syncServerName;
     private static Config instance;
 
@@ -39,7 +41,7 @@ public class Config implements InitializingBean {
         for (String ip : IPUtils.getNoLoopbackIP4Addresses()) {
             String host = ip + ':' + localPort;
             LOG.info("Try this localhost to find syncServerName from db : " + host);
-            PumaSyncServerConfig config = configService.find(host);
+            SyncServerEntity config = syncServerService.findByHost(ip,Integer.parseInt(localPort));
             if (config != null) {
                 syncServerName = config.getName();
                 LOG.info("Match syncServerName: " + syncServerName);
@@ -83,7 +85,7 @@ public class Config implements InitializingBean {
 
     @Override
     public String toString() {
-        return "Config [configService=" + configService + ", syncServerName=" + syncServerName + ", tempDir=" + tempDir
+        return "Config [configService=" + syncServerService + ", syncServerName=" + syncServerName + ", tempDir=" + tempDir
                 + ", localPort=" + localPort + "]";
     }
 

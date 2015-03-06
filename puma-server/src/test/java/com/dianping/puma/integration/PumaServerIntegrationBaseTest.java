@@ -189,7 +189,7 @@ public abstract class PumaServerIntegrationBaseTest {
         // init server
         server = new DefaultTaskExecutor();
         server.setDatabase(db);
-        server.setServerId(System.currentTimeMillis());
+        server.setTaskId(Long.toString(System.currentTimeMillis()));
         server.setEncoding("UTF-8");
         server.setDBUsername(user);
         server.setPort(port);
@@ -206,8 +206,8 @@ public abstract class PumaServerIntegrationBaseTest {
 
         PumaContext context = new PumaContext();
 
-        context.setPumaServerId(server.getServerId());
-        context.setPumaServerName(server.getServerName());
+        context.setPumaServerId(server.getTaskId());
+        context.setPumaServerName(server.getTaskName());
         context.setBinlogFileName(server.getDefaultBinlogFileName());
         context.setBinlogStartPos(server.getDefaultBinlogPosition());
         server.setContext(context);

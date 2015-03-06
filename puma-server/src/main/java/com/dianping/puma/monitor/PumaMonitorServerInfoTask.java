@@ -47,6 +47,7 @@ public class PumaMonitorServerInfoTask implements PumaMonitorTask {
 		Map<String,AtomicLong> deleteCount=SystemStatusContainer.instance.listServerRowDeleteCounters();
 		Map<String,AtomicLong> ddlCount=SystemStatusContainer.instance.listServerDdlCounters();
 		for(Map.Entry<String,ServerStatus> serverStatus:serverStatuses.entrySet()){
+			LOG.info("ServerInfo Cat monitoring "+serverStatus.getKey()+" ....");
 			initPreCount(serverStatus.getKey());
 			String insertName = " = 0";
 			String deleteName = " = 0";

@@ -1,0 +1,161 @@
+<style>
+#form input {
+	margin-left: 16px;
+}
+
+#form select {
+	margin-left: 16px;
+}
+
+#form span.uneditable-input {
+	margin-left: 16px;
+}
+
+th {
+	width: 150px;
+}
+</style>
+<div style="">
+  <ul id="stepsBreak" class="breadcrumb">
+    <li class="step_done">第1步: 填写基础配置 <span class="divider">&gt;</span></li>
+    <li class="step_done">第2步: 创建DumpTask <span class="divider">&gt;</span>
+    </li>
+    <li class="step_active">第3步: 创建SyncTask</li>
+  </ul>
+  <a style="float: right; margin-right: 20px;" type="button" href="${rc.contextPath}/sync-task/create/step2" class="btn">上一步</a>
+  <p class="legend">创建同步任务</p>
+  <div id="saveSyncTaskError" style="margin-top: 20px; display: none;" class="alert alert-error">
+    <button type="button" class="close" data-dismiss="alert">×</button>
+    <p>
+      创建失败！详细原因：<span id="saveSyncTaskErrorCause"></span>
+    </p>
+  </div>
+  <div id="saveSyncTaskSuccess" style="margin-top: 20px; display: none;" class="alert alert-success">
+    <button type="button" class="close" data-dismiss="alert">×</button>
+    创建任务信息成功！
+  </div>
+  <h5 style="">请为同步任务，分配一台Puma-SyncServer，如有需要可以修改binlog信息</h5>
+  <div
+    style="padding: 10px 10px 0px 10px; background-color: white; border: 1px solid rgba(0, 0, 0, 0.15); border-radius: 4px 4px 4px 4px;">
+    <form id="form" method="post" onsubmit="createSyncTask(this);return false;"
+      action="${rc.contextPath}/sync-task/create/createSyncTask">
+      <div class="container-fluid">
+        <div class="row-fluid">
+          <div class="span5">
+            #if($dumpTask) <label>选择源数据库(${srcDBInstance.name})的Host: </label> <span
+              class="input-large uneditable-input">$dumpTask.srcMysqlHost.host</span> <label>选择目标数据库(${destDBInstance.name})的Host:
+            </label> <span class="input-large uneditable-input">$dumpTask.destMysqlHost.host</span> #else <label>选择源数据库(${srcDBInstance.name})的Host:
+            </label> <select name="srcMysqlHost" style="margin-left: 16px; margin-right: 16px;">
+              <option value="$srcHost.host">$srcDBInstance.host</option>
+            </select> <label>选择目标数据库(${destDBInstance.name})的Host: </label> <select name="destMysqlHost"
+              style="margin-left: 16px; margin-right: 16px;"> 
+              <option value="$destHost.host">$destDBInstance.host</option>
+            </select> #end <label>binlog文件：</label><input type="text" name="binlogFile" style="margin-left: 16px;"
+              value="$!{binlogInfo.binlogFile}"><label> binlog位置：</label><input type="text"
+              name="binlogPosition" style="margin-left: 16px;" value="$!{binlogInfo.binlogPosition}"> <label>选择SyncServer服务器作为同步任务的执行者:
+            </label> <select name="syncServerName" style="margin-left: 16px;"> #foreach($syncServer in
+              ${syncServers})
+              <option value="${syncServerConfig.name}">${syncServer.name}</option> #end
+            </select>
+          </div>
+          <div class="span5">
+            <label>pumaClientName：</label><input type="text" name="pumaClientName" value="${pumaClientName}"
+              style="margin-left: 16px;"> <label>ddl：</label><input type="text" name="ddl"
+              style="margin-left: 16px;" placeholder="可选，默认为true"> <label>dml：</label><input type="text"
+              name="dml" style="margin-left: 16px;" placeholder="可选，默认为true"> <label>transaction：</label><input
+              type="text" name="transaction" style="margin-left: 16px;" placeholder="可选，默认为true">
+          </div>
+          <div class="span5">
+            <label>默认Handler<span style="font-size: 10px">
+                (该项是设置遇到异常时使用的默认策略。注意：如果是Sql异常且ErrorCode有匹配的handler能处理，则不会使用默认策略)</span></label> <select class="span10" name="defaultHandler"
+              style="">
+              <option value="StopOnFailed">失败时停止</option>
+              <option value="Retry">失败时重试</option>
+            </select>
+          </div>
+          <button id="createSyncTaskButton" style="float: right; margin-right: 20px;" type="submit"
+            class="btn btn-success">创建任务</button>
+        </div>
+        <hr>
+        <div class="row-fluid">
+          <div style="text-align: right;">
+            <a onclick="addTr(this);" href="javascript:;" style="margin-right: 10px;"><i class="icon-plus"></i>添加Handler</a>
+            <table style="margin: auto; text-align: center; width: 500px;">
+              <thead>
+                <tr>
+                  <th>ErrorCode</th>
+                  <th>Handler</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="tbody">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div style="display: none">
+  <table>
+    <tbody id="addTr">
+      <tr>
+        <td><select onchange="changeSelect(this)" class="span10" name="errorCodes" style="">
+            #foreach($entry in ${errorCodeHandlerMap.entrySet()})
+            <option value="${entry.key.errorCode}">${entry.key.errorCode}(${entry.key.desc})</option> #end
+        </select></td>
+        <td></td>
+        <td><a href="javascript:;" onclick="removeTr(this);"><i class="icon-remove"></i></a></td>
+      </tr>
+    </tbody>
+  </table>
+  <table>
+    <tbody>
+      <tr>
+        #foreach($entry in ${errorCodeHandlerMap.entrySet()})
+        <td id="key_${entry.key.errorCode}"><select class="span10" name="handlers" style="">
+            #foreach($handler in ${entry.value})
+            <option value="${handler}">$handler</option> #end
+        </select></td> #end
+      </tr>
+    </tbody>
+  </table>
+</div>
+<script>
+	function addTr() {
+		$('#tbody').append($('#addTr').html());
+		$('select', $('#tbody > tr:last')).trigger("change");
+	}
+	function removeTr(aLink) {
+		var tr = $(aLink).parent().parent();
+		$(tr).remove();
+	}
+	function changeSelect(selectDiv) {
+		var errorCode = $(selectDiv).val();
+		$(selectDiv).parent().next().html($("#key_" + errorCode).html());
+	}
+	function createSyncTask(form) {
+		$('#saveSyncTaskError').hide();
+		$.ajax({
+			type : $(form).attr('method'),
+			url : $(form).attr('action'),
+			data : $(form).serialize(),
+			dataType : "json",
+			success : createSyncTaskDone,
+			error : pumadmin.httpError
+		});
+		return false;
+	}
+	function createSyncTaskDone(data) {
+		if (data.success == false) {
+			//pumadmin.appError("错误信息", data.errorMsg);
+			$("#saveSyncTaskErrorCause").text(data.errorMsg);
+			$('#saveSyncTaskError').show();
+		} else {
+			$("#createSyncTaskButton").attr("disabled", "disabled");
+			$('#saveSyncTaskSuccess').show();
+		}
+	}
+</script>

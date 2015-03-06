@@ -73,6 +73,181 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 	public void init() {
 		pumaServerName = pumaServerConfig.getName();
 	}
+    /*
+	@Override
+	public ConcurrentHashMap<String, TaskExecutor> constructServers() throws Exception {
+		LOG.info("starting construct servers.........");
+
+		List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerName(pumaServerName);
+		if (pumaTasks != null && !pumaTasks.isEmpty()) {
+			TaskExecutor taskExecutor;
+			for (PumaTask pumaTask : pumaTasks) {
+				taskExecutor = construct(pumaTask);
+				taskExecutorMap.put(taskExecutor.getServerName(), taskExecutor);
+			}
+		}
+
+		LOG.info("ended construct servers.........");
+		return taskExecutorMap;
+	}
+
+	@Override
+	public TaskExecutor construct(PumaTask pumaTask) throws Exception {
+		LOG.info("Construct server: {}.", pumaTask.getId());
+
+		DefaultTaskExecutor server = new DefaultTaskExecutor();
+
+		// Task id
+
+		// Source database.
+		String srcDBInstanceName = pumaTask.getSrcDBInstanceName();
+		SrcDBInstance srcDBInstance = srcDBInstanceService.findByName(srcDBInstanceName);
+		server.setServerId(srcDBInstance.getServerId());
+		server.setDBHost(srcDBInstance.getHost());
+		server.setPort(srcDBInstance.getPort());
+		server.setDBUsername(srcDBInstance.getUsername());
+		server.setDBPassword(srcDBInstance.getPassword());
+
+		// Bin log information.
+		BinlogInfo binlogInfo = pumaTask.getBinlogInfo();
+		server.setDefaultBinlogFileName(binlogInfo.getBinlogFile());
+		server.setDefaultBinlogPosition(binlogInfo.getBinlogPosition());
+		server.setBinlogInfoHolder(binlogInfoHolder);
+		server.setStatus(Status.WAITING);
+
+		// Parser.
+		Parser parser = new DefaultBinlogParser();
+		parser.start();
+		server.setParser(parser);
+
+		// Table meta information.
+		DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
+		tableMetaInfo.setMetaDBHost(srcDBInstance.getMetaHost());
+		tableMetaInfo.setMetaDBPort(srcDBInstance.getMetaPort());
+		tableMetaInfo.setMetaDBUsername(srcDBInstance.getMetaUsername());
+		tableMetaInfo.setMetaDBPassword(srcDBInstance.getMetaPassword());
+
+		// Handler.
+		DefaultDataHandler dataHandler = new DefaultDataHandler();
+		dataHandler.setNotifyService(notifyService);
+		dataHandler.setTableMetasInfoFetcher(tableMetaInfo);
+		dataHandler.start();
+		server.setDataHandler(dataHandler);
+
+		// File senders.
+		FileDumpSender sender = new FileDumpSender();
+		DefaultEventStorage storage = new DefaultEventStorage();
+		storage.start();
+		sender.setStorage(storage);
+		sender.start();
+
+		return server;
+	}
+    */
+	/*
+	@Override
+	public Server construct(ReplicationTask replicationTask) throws Exception {
+		LOG.info("construct server " + replicationTask.getTaskName()
+				+ ".......");
+		ReplicationBasedServer server = new ReplicationBasedServer();
+		server.setNotifyService(notifyService);
+		server.setName(replicationTask.getTaskName());
+		server.setServerId(replicationTask.getTaskId().hashCode());
+		server.setDBHost(replicationTask.getDbInstanceHost().getDBHost());
+		server.setPort(replicationTask.getDbInstanceHost().getPort());
+		server.setDBUsername(replicationTask.getDbInstanceHost().getDBUsername());
+		server.setDBPassword(replicationTask.getDbInstanceHost().getDBPassword());
+		server.setDefaultBinlogFileName(replicationTask.getBinlogInfo()
+				.getBinlogFile());
+		server.setDefaultBinlogPosition(replicationTask.getBinlogInfo()
+				.getBinlogPosition());
+		server.setBinlogPositionHolder(binlogPositionHolder);
+		server.setTaskStatus(ReplicationTaskStatus.Status.WAITING);
+		// parser
+		Parser parser = new DefaultBinlogParser();
+		parser.start();
+		server.setParser(parser);
+		// tableMetaInfo
+		DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
+		tableMetaInfo.setMetaDBHost(replicationTask.getDbInstanceMetaHost()
+				.getDBHost());
+		tableMetaInfo.setMetaDBPort(replicationTask.getDbInstanceMetaHost()
+				.getPort());
+		tableMetaInfo.setMetaDBUsername(replicationTask.getDbInstanceMetaHost()
+				.getDBUsername());
+		tableMetaInfo.setMetaDBPassword(replicationTask.getDbInstanceMetaHost()
+				.getDBPassword());
+		// handler
+		DefaultDataHandler dataHandler = new DefaultDataHandler();
+		dataHandler.setNotifyService(notifyService);
+		dataHandler.setTableMetasInfoFetcher(tableMetaInfo);
+		dataHandler.start();
+		server.setDataHandler(dataHandler);
+		// dispatcher
+		SimpleDispatherImpl dispatcher = new SimpleDispatherImpl();
+		dispatcher.setName(replicationTask.getDispatchName());
+		// file senders
+		List<Sender> senders = null;
+		if (replicationTask.getFileSenderConfigs() != null) {
+			senders = new ArrayList<Sender>();
+			for (FileSenderConfig senderItem : replicationTask
+					.getFileSenderConfigs()) {
+				FileDumpSender sender = new FileDumpSender();
+				sender.setName(senderItem.getFileSenderName());
+				sender.setNotifyService(notifyService);
+				// storage
+				DefaultEventStorage storage = new DefaultEventStorage();
+				storage.setCodec(jsonCodec);
+				storage.setName(senderItem.getStorageName());
+				// master storage
+				LocalFileBucketIndex masterBucketIndex = new LocalFileBucketIndex();
+				masterBucketIndex.setBucketFilePrefix(senderItem
+						.getMasterBucketFilePrefix());
+				masterBucketIndex.setMaxBucketLengthMB(senderItem
+						.getMaxMasterBucketLengthMB());
+				masterBucketIndex.setBaseDir(senderItem
+						.getStorageMasterBaseDir());
+				masterBucketIndex.start();
+				storage.setMasterBucketIndex(masterBucketIndex);
+				// slave storage
+				LocalFileBucketIndex slaveBucketIndex = new LocalFileBucketIndex();
+				slaveBucketIndex.setBucketFilePrefix(senderItem
+						.getSlaveBucketFilePrefix());
+				slaveBucketIndex.setMaxBucketLengthMB(senderItem
+						.getMaxSlaveBucketLengthMB());
+				slaveBucketIndex
+						.setBaseDir(senderItem.getStorageSlaveBaseDir());
+				slaveBucketIndex.start();
+				storage.setSlaveBucketIndex(slaveBucketIndex);
+				// archive strategy
+				DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
+				archiveStrategy.setServerName(replicationTask.getTaskName());
+				archiveStrategy.setMaxMasterFileCount(senderItem
+						.getMaxMasterFileCount());
+				storage.setArchiveStrategy(archiveStrategy);
+				// cleanup strategy
+				DefaultCleanupStrategy cleanupStrategy = new DefaultCleanupStrategy();
+				cleanupStrategy.setPreservedDay(senderItem.getPreservedDay());
+				storage.setCleanupStrategy(cleanupStrategy);
+				storage.setBinlogIndexBaseDir(senderItem
+						.getBinlogIndexBaseDir());
+				storage.start();
+				sender.setStorage(storage);
+				sender.start();
+				senders.add(sender);
+			}
+		}
+		dispatcher.setSenders(senders);
+		dispatcher.start();
+		server.setDispatcher(dispatcher);
+
+		// Add to container.
+		ReplicationTaskStatus taskStatus = new ReplicationTaskStatus(replicationTask.getTaskId());
+		taskStatus.setStatus(ReplicationTaskStatus.Status.WAITING);
+		replicationTaskStatusContainer.add(replicationTask.getTaskId(), taskStatus);
+
+		return server;
+	}*/
 
 	@Override
 	public TaskExecutor get(String taskId) {

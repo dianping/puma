@@ -73,6 +73,24 @@ public class PumaTaskController {
 		return new ModelAndView("main/container", map);
 	}
 
+	@RequestMapping(value = { "/puma-task/update" }, method = RequestMethod.GET)
+	public ModelAndView update(String id) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			PumaTask pumaTask = pumaTaskService.find(id);
+
+			map.put("lock", true);
+			map.put("entity", pumaTask);
+			map.put("path", "puma-task");
+			map.put("subPath", "create");
+		} catch (Exception e) {
+			// @TODO: error page.
+		}
+
+		return new ModelAndView("main/container", map);
+	}
+
 	@RequestMapping(value = {
 			"/puma-task/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody

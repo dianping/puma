@@ -3,22 +3,34 @@
    <div class="panel panel-primary">
       <div class="panel-heading">
          <div class="btn-group-sm pull-right">
-            <button class="btn btn-default">取消</button>
-            <button class="btn btn-success" type="submit" form="puma-task-create-form">保存</button>
+            <button class="btn btn-default" onclick="javascript:history.back();">取消</button>
+            <button class="btn btn-success" type="submit" form="puma-task-create-form"
+                    #if(${lock}) disabled="disabled" #end>保存</button>
          </div>
-         <h5>新增数据处理任务</h5>
+         <h5>
+            新增数据处理任务 #if(${lock})<span class="orange-warning">(已锁定，请先删除相关任务)</span>#end
+         </h5>
       </div>
 
-      <form id="puma-task-create-form" class="form-horizontal" method="post"
+      <form id="puma-task-create-form" class="form-horizontal puma-form" method="post"
             action="${rc.contextPath}/puma-task/create" target="${rc.contextPath}/puma-task">
          <div class="panel-body">
+
+            #if(${entity})
+            <div class="form-group" hidden="hidden">
+               <label class="sr-only" for="id"></label>
+               <input id="id" name="id" value="${entity.id}">
+            </div>
+            #end
 
             <div class="form-group">
                <label class="col-md-2 control-label" for="srcDBInstanceId">源数据库</label>
                <div class="col-md-7">
                   <select id="srcDBInstanceId" name="srcDBInstanceId" class="form-control">
                      #foreach($srcDBInstance in ${srcDBInstanceEntities})
-                     <option value="${srcDBInstance.id}">${srcDBInstance.name}</option>
+                     <option value="${srcDBInstance.id}">
+                        ${srcDBInstance.name}
+                     </option>
                      #end
                   </select>
                </div>

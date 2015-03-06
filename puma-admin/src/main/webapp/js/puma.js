@@ -77,7 +77,7 @@ $(function() {
         setPumaTaskBinlogInfo(tdBinlogInfo, state.binlogInfo);
       }
     });
-  });
+  }).trigger('click');
 });
 
 

@@ -17,9 +17,12 @@ public abstract class Task extends BaseEntity {
 
     private static final long serialVersionUID = -2446587945497295737L;
     private Type type;
+    
+    private String srcDBInstanceId;
     //    源：源数据库名称(如Dianping)
     @Indexed(value = IndexDirection.ASC, name = "srcMysqlName", unique = false, dropDups = true)
     private String srcMysqlName;
+    
     //  源：具体host
     private MysqlHost srcMysqlHost;
     //    目标：目标的数据库名称
@@ -76,7 +79,15 @@ public abstract class Task extends BaseEntity {
         return srcMysqlName;
     }
 
-    public MysqlHost getSrcMysqlHost() {
+    public void setSrcDBInstanceId(String srcDBInstanceId) {
+		this.srcDBInstanceId = srcDBInstanceId;
+	}
+
+	public String getSrcDBInstanceId() {
+		return srcDBInstanceId;
+	}
+
+	public MysqlHost getSrcMysqlHost() {
         return srcMysqlHost;
     }
 

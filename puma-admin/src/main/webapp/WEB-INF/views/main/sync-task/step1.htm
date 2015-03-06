@@ -24,7 +24,7 @@
             </select> <span>选择目标实例: </span> <select name="destMysql"
                style="margin-left: 16px;">
              #foreach($srcDBInstance in ${srcDBInstances})
-               <option value="${mysqlConfig.name}">${srcDBInstance.name}</option>
+               <option value="${srcDBInstance.name}">${srcDBInstance.name}</option>
                #end
             </select>
             <hr>

@@ -46,16 +46,16 @@ th {
               class="input-large uneditable-input">$dumpTask.srcMysqlHost.host</span> <label>选择目标数据库(${destDBInstance.name})的Host:
             </label> <span class="input-large uneditable-input">$dumpTask.destMysqlHost.host</span> #else <label>选择源数据库(${srcDBInstance.name})的Host:
             </label> <select name="srcMysqlHost" style="margin-left: 16px; margin-right: 16px;">
-              <option value="$srcHost.host">$srcDBInstance.host</option>
+              <option value="$srcDBInstance.host">$srcDBInstance.host</option>
             </select> <label>选择目标数据库(${destDBInstance.name})的Host: </label> <select name="destMysqlHost"
               style="margin-left: 16px; margin-right: 16px;"> 
-              <option value="$destHost.host">$destDBInstance.host</option>
+              <option value="$destDBInstance.host">$destDBInstance.host</option>
             </select> #end <label>binlog文件：</label><input type="text" name="binlogFile" style="margin-left: 16px;"
               value="$!{binlogInfo.binlogFile}"><label> binlog位置：</label><input type="text"
               name="binlogPosition" style="margin-left: 16px;" value="$!{binlogInfo.binlogPosition}"> <label>选择SyncServer服务器作为同步任务的执行者:
             </label> <select name="syncServerName" style="margin-left: 16px;"> #foreach($syncServer in
               ${syncServers})
-              <option value="${syncServerConfig.name}">${syncServer.name}</option> #end
+              <option value="${syncServer.name}">${syncServer.name}</option> #end
             </select>
           </div>
           <div class="span5">

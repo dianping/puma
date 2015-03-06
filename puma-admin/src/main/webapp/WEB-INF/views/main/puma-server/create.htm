@@ -1,41 +1,56 @@
-<script type="text/javascript" src="${rc.contextPath}/js/views/puma-server.js"></script>
 <div class="container-fluid">
    <div class="panel panel-primary">
       <div class="panel-heading">
          <div class="btn-group-sm pull-right">
-            <button class="btn btn-default">取消</button>
-            <button class="btn btn-success" type="submit" form="puma-server-create-form">保存</button>
+            <button class="btn btn-default" onclick="javascript:history.back();">取消</button>
+            <button class="btn btn-success validation-button" type="submit" form="puma-server-create-form"
+                    #if(${lock}) disabled="disabled" #end>保存</button>
          </div>
-         <h5>新增数据处理服务器</h5>
+         <h5>
+            新增数据处理服务器 #if(${lock})<span class="orange-warning">(已锁定，请先删除相关任务)</span>#end
+         </h5>
       </div>
 
-      <form id="puma-server-create-form" class="form-horizontal" method="post"
+      <form id="puma-server-create-form" class="form-horizontal puma-form" method="post"
             action="${rc.contextPath}/puma-server/create" target="${rc.contextPath}/puma-server">
          <div class="panel-body">
+
+            #if(${entity})
+            <div class="form-group" hidden="hidden">
+               <label class="sr-only" for="id"></label>
+               <input id="id" name="id" value="${entity.id}">
+            </div>
+            #end
 
             <div class="form-group">
                <label class="col-md-2 control-label" for="name">服务器名称</label>
                <div class="col-md-7 validation-div">
-                  <input id="name" name="name" class="validation-input form-control"
-                         format="server-name" placeholder="name">
+                  <input id="name" name="name" class="form-control validation-input" format="server-name"
+                         #if(${entity}) value="${entity.name}" #end #if(${lock}) disabled="disabled" #end>
                </div>
 
-               <div class="col-md-3" hidden="hidden">
-                  <p class="help-block">hello</p>
+               <div class="col-md-3 validation-help">
+                  <span hidden="hidden">无效服务器名称</span>
                </div>
             </div>
 
             <div class="form-group">
                <label class="col-md-2 control-label" for="host">IP地址</label>
                <div class="col-md-5">
-                  <input id="host" name="host" class="form-control validation-input"
-                         format="host" placeholder="host">
+                  <input id="host" name="host" class="form-control validation-input" format="host"
+                         placeholder="e.g. 127.0.0.1" #if(${entity}) value="${entity.host}" #end
+                         #if(${lock}) disabled="disabled" #end>
                </div>
 
                <label class="sr-only" for="port">IP端口</label>
                <div class="col-md-2 validation-div">
-                  <input id="port" name="port" class="form-control validation-input"
-                         format="port" placeholder="port">
+                  <input id="port" name="port" class="form-control validation-input" format="port"
+                         placeholder="e.g. 8080" #if(${entity}) value="${entity.port}" #end
+                         #if(${lock}) disabled="disabled" #end>
+               </div>
+
+               <div class="col-md-3 validation-help">
+                  <span hidden="hidden">无效IP地址</span>
                </div>
             </div>
          </div>

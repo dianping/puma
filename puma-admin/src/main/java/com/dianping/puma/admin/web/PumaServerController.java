@@ -2,7 +2,10 @@ package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.entity.PumaServer;
+import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.service.PumaServerService;
+import com.dianping.puma.core.service.PumaTaskService;
+import com.mongodb.MongoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +29,9 @@ public class PumaServerController {
 	@Autowired
 	PumaServerService pumaServerService;
 
+	@Autowired
+	PumaTaskService pumaTaskService;
+
 	@RequestMapping(value = { "/puma-server" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -48,6 +54,13 @@ public class PumaServerController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
+			List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerId(id);
+			if (pumaTasks != null && pumaTasks.size() != 0) {
+				map.put("lock", true);
+			} else {
+				map.put("lock", false);
+			}
+
 			PumaServer entity = pumaServerService.find(id);
 			map.put("entity", entity);
 			map.put("path", "puma-server");
@@ -61,18 +74,44 @@ public class PumaServerController {
 
 	@RequestMapping(value = { "/puma-server/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(String name, String host, Integer port) {
+	public String createPost(String id, String name, String host, Integer port) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		PumaServer pumaServer = new PumaServer();
-		pumaServer.setName(name);
-		pumaServer.setHost(host);
-		pumaServer.setPort(port);
-
 		try {
-			this.pumaServerService.create(pumaServer);
+			PumaServer pumaServer;
+
+			// Create or update?
+			if (id != null) {
+				// Update.
+				pumaServer = pumaServerService.find(id);
+			} else {
+				// Create.
+
+				// Duplicated name?
+				pumaServer = pumaServerService.findByName(name);
+				if (pumaServer == null) {
+					pumaServer = new PumaServer();
+				} else {
+					throw new Exception("duplicated");
+				}
+			}
+
+			pumaServer.setName(name);
+			pumaServer.setHost(host);
+			pumaServer.setPort(port);
+
+			if (id != null) {
+				pumaServerService.update(pumaServer);
+			} else {
+				pumaServerService.create(pumaServer);
+			}
+
 			map.put("success", true);
+		} catch (MongoException e) {
+			map.put("error", "storage");
+			map.put("success", false);
 		} catch (Exception e) {
+			map.put("error", e.getMessage());
 			map.put("success", false);
 		}
 
@@ -85,9 +124,19 @@ public class PumaServerController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			this.pumaServerService.remove(id);
+			List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerId(id);
+
+			if (pumaTasks != null && pumaTasks.size() != 0) {
+				throw new Exception("lock");
+			}
+
+			pumaServerService.remove(id);
 			map.put("success", true);
+		} catch (MongoException e) {
+			map.put("error", "storage");
+			map.put("success", false);
 		} catch (Exception e) {
+			map.put("error", e.getMessage());
 			map.put("success", false);
 		}
 

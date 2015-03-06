@@ -102,7 +102,7 @@ public class SrcDBInstanceController {
 			} else {
 				// Create.
 
-				// Duplicated name checking.
+				// Duplicated name?
 				srcDbInstance = srcDBInstanceService.findByName(name);
 				if (srcDbInstance == null) {
 					srcDbInstance = new SrcDBInstance();

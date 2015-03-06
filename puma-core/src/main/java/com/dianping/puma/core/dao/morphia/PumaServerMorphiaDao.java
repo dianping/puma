@@ -6,6 +6,7 @@ import com.dianping.puma.core.entity.morphia.PumaServerMorphiaEntity;
 import com.google.code.morphia.dao.BasicDAO;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
+import com.google.code.morphia.query.UpdateOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,13 @@ public class PumaServerMorphiaDao extends BasicDAO<PumaServerMorphiaEntity, Stri
 	public PumaServer find(String id) {
 		Query<PumaServerMorphiaEntity> q = this.getDatastore().createQuery(PumaServerMorphiaEntity.class);
 		q.field("id").equal(id);
+		PumaServerMorphiaEntity morphiaEntity = this.findOne(q);
+		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();
+	}
+
+	public PumaServer findByName(String name) {
+		Query<PumaServerMorphiaEntity> q = this.getDatastore().createQuery(PumaServerMorphiaEntity.class);
+		q.field("entity.name").equal(name);
 		PumaServerMorphiaEntity morphiaEntity = this.findOne(q);
 		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();
 	}
@@ -54,7 +62,13 @@ public class PumaServerMorphiaDao extends BasicDAO<PumaServerMorphiaEntity, Stri
 	}
 
 	public void update(PumaServer entity) {
-		this.create(entity);
+		PumaServerMorphiaEntity morphiaEntity = new PumaServerMorphiaEntity(entity);
+		Query<PumaServerMorphiaEntity> q = this.getDatastore().createQuery(PumaServerMorphiaEntity.class);
+		q.field("id").equal(morphiaEntity.getId());
+		UpdateOperations<PumaServerMorphiaEntity> uop = this.getDatastore().createUpdateOperations(PumaServerMorphiaEntity.class);
+		uop.set("entity", entity);
+		this.update(q, uop);
+		this.getDatastore().ensureIndexes();
 	}
 
 	public void remove(String id) {

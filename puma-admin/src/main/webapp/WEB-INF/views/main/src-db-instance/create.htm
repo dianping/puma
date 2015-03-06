@@ -4,11 +4,11 @@
       <div class="panel-heading">
          <div class="btn-group-sm pull-right">
             <button class="btn btn btn-default" onclick="javascript:history.back();">返回</button>
-            <button class="btn btn-success validation-button" type="submit"
-                    form="src-db-instance-create-form" #if(${lock}) disabled="disabled" #end>保存</button>
+            <button class="btn btn-success" type="submit" form="src-db-instance-create-form"
+                    #if(${lock}) disabled="disabled" #end>保存</button>
          </div>
-         <h5>新增源数据库实例
-            #if(${lock})<span class="orange-warning">(已锁定，请先删除相关任务)</span>#end
+         <h5>
+            新增源数据库实例 #if(${lock})<span class="orange-warning">(已锁定，请先删除相关任务)</span>#end
          </h5>
       </div>
 

@@ -20,6 +20,11 @@ public class PumaTaskServiceImpl implements PumaTaskService {
 	}
 
 	@Override
+	public PumaTask findByName(String name) {
+		return pumaTaskDao.findByName(name);
+	}
+
+	@Override
 	public List<PumaTask> findBySrcDBInstanceId(String srcDBInstanceId) {
 		return pumaTaskDao.findBySrcDBInstanceId(srcDBInstanceId);
 	}

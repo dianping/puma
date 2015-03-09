@@ -344,9 +344,11 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 			throw new Exception("Puma task not exist.");
 		}
 
-		SystemStatusContainer.instance.removeAll(taskName);
+		SystemStatusContainer.instance.stopTheWorld(taskName);
 		stopExecutor(taskExecutor);
 		taskExecutorMap.remove(taskName);
+		SystemStatusContainer.instance.removeAll(taskName);
+
 	}
 
 	@Override
@@ -378,7 +380,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 		String taskName = event.getTaskName();
 
 		try {
-			PumaTask pumaTask = pumaTaskService.find(taskName);
+			PumaTask pumaTask = pumaTaskService.findByName(taskName);
 			TaskExecutor taskExecutor = taskExecutorBuilder.build(pumaTask);
 			submit(taskExecutor);
 		} catch (Exception e) {

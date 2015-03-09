@@ -207,8 +207,9 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
      */
 	@Override
 	public void stop() throws Exception {
-		doStop();
 		stop = true;
+		doStop();
+		//stop = true;
 
 		parser.stop();
 		dataHandler.stop();

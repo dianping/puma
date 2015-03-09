@@ -108,7 +108,7 @@ public class PumaTaskController {
 	public String createPost(
 			String srcDBInstanceName,
 			String pumaServerName,
-			String pumaTaskName,
+			String name,
 			String binlogFile,
 			Long binlogPosition,
 			int preservedDay) {
@@ -121,7 +121,7 @@ public class PumaTaskController {
 			SrcDBInstance srcDBInstance = srcDBInstanceService.findByName(srcDBInstanceName);
 			PumaServer pumaServer = pumaServerService.findByName(pumaServerName);
 
-			pumaTask.setName(pumaTaskName);
+			pumaTask.setName(name);
 			pumaTask.setSrcDBInstanceId(srcDBInstance.getId());
 			pumaTask.setPumaServerId(pumaServer.getId());
 			BinlogInfo binlogInfo = new BinlogInfo();

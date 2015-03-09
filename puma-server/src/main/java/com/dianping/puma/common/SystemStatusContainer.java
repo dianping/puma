@@ -67,7 +67,7 @@ public enum SystemStatusContainer {
 		serverStatus.remove(taskName);
 		clientStatus.remove(taskName);
 		clientSuccessSeq.remove(taskName);
-		storageStatus.remove(taskName);
+		storageStatus.remove("storage-" + taskName);
 		serverParsedRowInsertCount.remove(taskName);
 		serverParsedRowUpdateCount.remove(taskName);
 		serverParsedRowDeleteCount.remove(taskName);

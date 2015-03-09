@@ -27,6 +27,13 @@ public class PumaTaskMorphiaDao extends BasicDAO<PumaTaskMorphiaEntity, String> 
 		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();
 	}
 
+	public PumaTask findByName(String name) {
+		Query<PumaTaskMorphiaEntity> q = this.getDatastore().createQuery(PumaTaskMorphiaEntity.class).disableValidation();
+		q.field("entity.name").equal(name);
+		PumaTaskMorphiaEntity morphiaEntity = this.findOne(q);
+		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();
+	}
+
 	public List<PumaTask> findBySrcDBInstanceId(String srcDBInstanceId) {
 		Query<PumaTaskMorphiaEntity> q = this.getDatastore().createQuery(PumaTaskMorphiaEntity.class).disableValidation();
 		q.field("entity.srcDBInstanceId").equal(srcDBInstanceId);

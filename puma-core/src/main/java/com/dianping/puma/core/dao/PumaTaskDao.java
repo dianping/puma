@@ -8,6 +8,8 @@ public interface PumaTaskDao {
 
 	PumaTask find(String id);
 
+	PumaTask findByName(String name);
+
 	List<PumaTask> findBySrcDBInstanceId(String srcDBInstanceId);
 
 	List<PumaTask> findByPumaServerId(String pumaServerName);

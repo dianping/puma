@@ -24,6 +24,6 @@
 项目设计
 --------
 
-### 设计文档：[文档地址](https://docs.google.com/a/dianping.com/document/d/17AAC6TOHi367_J_M7FmmKByIGZhAz8J0ov6EtM5HsXM/edit "点击进入谷歌文档")
+### 设计文档：[文档地址](https://dper-my.sharepoint.cn/personal/xiang_wu_dianping_com/_layouts/15/WopiFrame.aspx?sourcedoc=%7BEFB7C377-F83F-4977-896A-CBD794B927B4%7D&file=Puma%E8%AF%A6%E7%BB%86%E8%AE%BE%E8%AE%A1.docx&action=default&DefaultItemOpen=1)
 
 

@@ -9,6 +9,7 @@ import com.mongodb.MongoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -31,6 +32,9 @@ public class SrcDBInstanceController {
 
 	@Autowired
 	PumaTaskService pumaTaskService;
+
+	@Value("3306")
+	Integer dbPort;
 
 	@RequestMapping(value = { "/src-db-instance" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
@@ -82,14 +86,9 @@ public class SrcDBInstanceController {
 			String id,
 			String name,
 			Integer serverId,
-			String host,
-			Integer port,
+			String ip,
 			String username,
-			String password,
-			String metaHost,
-			Integer metaPort,
-			String metaUsername,
-			String metaPassword) {
+			String password) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
@@ -113,14 +112,20 @@ public class SrcDBInstanceController {
 
 			srcDBInstance.setName(name);
 			srcDBInstance.setServerId(serverId);
+
+			// Split host and port.
+			String[] hostAndPort = ip.split(":");
+			String host = hostAndPort[0];
+			Integer port = hostAndPort.length == 1 ? dbPort : Integer.parseInt(hostAndPort[1]);
+
 			srcDBInstance.setHost(host);
 			srcDBInstance.setPort(port);
 			srcDBInstance.setUsername(username);
 			srcDBInstance.setPassword(password);
-			srcDBInstance.setMetaHost(metaHost);
-			srcDBInstance.setMetaPort(metaPort);
-			srcDBInstance.setMetaUsername(metaUsername);
-			srcDBInstance.setMetaPassword(metaPassword);
+			srcDBInstance.setMetaHost(host);
+			srcDBInstance.setMetaPort(port);
+			srcDBInstance.setMetaUsername(username);
+			srcDBInstance.setMetaPassword(password);
 
 			if (id != null) {
 				srcDBInstanceService.update(srcDBInstance);

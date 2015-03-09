@@ -7,6 +7,7 @@ import com.dianping.puma.core.sync.model.task.SyncTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,6 +27,9 @@ public class SyncServerController {
 
 	@Autowired
 	SyncServerService syncServerService;
+
+	@Value("8080")
+	Integer serverPort;
 
 	@RequestMapping(value = { "/sync-server" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
@@ -63,11 +67,17 @@ public class SyncServerController {
 
 	@RequestMapping(value = { "/sync-server/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(String name, String host, int port) {
+	public String createPost(String name, String ip) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		SyncServerEntity syncServerEntity = new SyncServerEntity();
 		syncServerEntity.setName(name);
+
+		// Split host and port.
+		String[] hostAndPort = ip.split(":");
+		String host = hostAndPort[0];
+		Integer port = hostAndPort.length == 1 ? serverPort : Integer.parseInt(hostAndPort[1]);
+
 		syncServerEntity.setHost(host);
 		syncServerEntity.setPort(port);
 

@@ -9,6 +9,7 @@ import com.mongodb.MongoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -31,6 +32,9 @@ public class PumaServerController {
 
 	@Autowired
 	PumaTaskService pumaTaskService;
+
+	@Value("8080")
+	Integer serverPort;
 
 	@RequestMapping(value = { "/puma-server" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
@@ -74,7 +78,7 @@ public class PumaServerController {
 
 	@RequestMapping(value = { "/puma-server/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(String id, String name, String host, Integer port) {
+	public String createPost(String id, String name, String ip) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
@@ -95,6 +99,11 @@ public class PumaServerController {
 					throw new Exception("duplicated");
 				}
 			}
+
+			// Split host and port.
+			String[] hostAndPort = ip.split(":");
+			String host = hostAndPort[0];
+			Integer port = hostAndPort.length == 1 ? serverPort : Integer.parseInt(hostAndPort[1]);
 
 			pumaServer.setName(name);
 			pumaServer.setHost(host);

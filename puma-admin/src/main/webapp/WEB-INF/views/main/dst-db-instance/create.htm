@@ -45,47 +45,41 @@
             </div>
 
             <div class="form-group">
-               <label class="col-md-2 control-label" for="host">IP地址(数据)</label>
-               <div class="col-md-5">
-                  <input id="host" name="host" class="form-control validation-input" format="host"
-                         placeholder="e.g. 127.0.0.1" #if(${entity}) value="${entity.host}" #end
+               <label class="col-md-2 control-label" for="ip">IP地址</label>
+               <div class="col-md-7">
+                  <input id="ip" name="ip" class="form-control validation-input" format="ip"
+                         placeholder="若不指定端口号，默认为3306" #if(${entity}) value="${entity.host}:${entity.port}" #end
                          #if(${lock}) disabled="disabled" #end>
                </div>
 
-               <label class="sr-only control-label" for="port">IP端口(数据)</label>
-               <div class="col-md-2">
-                  <input id="port" name="port" class="form-control validation-input" format="port"
-                         placeholder="e.g. 3306" #if(${entity}) value="${entity.port}" #end
-                         #if(${lock}) disabled="disabled" #end>
-               </div>
                <div class="col-md-3 validation-help">
                   <span hidden="hidden">无效IP地址</span>
                </div>
             </div>
 
             <div class="form-group">
-               <label class="col-md-2 control-label" for="username">用户名(数据)</label>
+               <label class="col-md-2 control-label" for="username">用户名</label>
                <div class="col-md-7">
                   <input id="username" name="username" class="form-control validation-input" format="username"
                          #if(${entity}) value="${entity.username}" #end #if(${lock}) disabled="disabled" #end>
                </div>
                <div class="col-md-3 validation-help">
-                  <span hidden="hidden">无效用户名(数据)</span>
+                  <span hidden="hidden">无效用户名</span>
                </div>
             </div>
 
             <div class="form-group">
-               <label class="col-md-2 control-label" for="password">密码(数据)</label>
+               <label class="col-md-2 control-label" for="password">密码</label>
                <div class="col-md-7">
                   <input id="password" type="password" name="password" class="form-control validation-input" format="password"
                          #if(${entity}) value="${entity.password}" #end #if(${lock}) disabled="disabled" #end>
                </div>
                <div class="col-md-3 validation-help">
-                  <span hidden="hidden">无效密码(数据)</span>
+                  <span hidden="hidden">无效密码</span>
                </div>
             </div>
 
-            <div class="form-group">
+            <!--div class="form-group">
                <label class="col-md-2 control-label" for="metaHost">IP地址(元数据)</label>
                <div class="col-md-5">
                   <input id="metaHost" name="metaHost" class="form-control validation-input" format="host"
@@ -123,7 +117,7 @@
                <div class="col-md-3 validation-help">
                   <span hidden="hidden">无效密码(元数据)</span>
                </div>
-            </div>
+            </div-->
 
          </div>
       </form>

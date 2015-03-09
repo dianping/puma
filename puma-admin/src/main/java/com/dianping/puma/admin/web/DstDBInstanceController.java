@@ -9,6 +9,7 @@ import com.mongodb.MongoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -31,6 +32,9 @@ public class DstDBInstanceController {
 
 	@Autowired
 	PumaTaskService pumaTaskService;
+
+	@Value("3306")
+	Integer dbPort;
 
 	@RequestMapping(value = { "/dst-db-instance" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
@@ -80,14 +84,9 @@ public class DstDBInstanceController {
 			String id,
 			String name,
 			Integer serverId,
-			String host,
-			int port,
+			String ip,
 			String username,
-			String password,
-			String metaHost,
-			int metaPort,
-			String metaUsername,
-			String metaPassword) {
+			String password) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
@@ -111,14 +110,20 @@ public class DstDBInstanceController {
 
 			dstDBInstance.setName(name);
 			dstDBInstance.setServerId(serverId);
+
+			// Split host and port.
+			String[] hostAndPort = ip.split(":");
+			String host = hostAndPort[0];
+			Integer port = hostAndPort.length == 1 ? dbPort : Integer.parseInt(hostAndPort[1]);
+
 			dstDBInstance.setHost(host);
 			dstDBInstance.setPort(port);
 			dstDBInstance.setUsername(username);
 			dstDBInstance.setPassword(password);
-			dstDBInstance.setMetaHost(metaHost);
-			dstDBInstance.setMetaPort(metaPort);
-			dstDBInstance.setMetaUsername(metaUsername);
-			dstDBInstance.setMetaPassword(metaPassword);
+			dstDBInstance.setMetaHost(host);
+			dstDBInstance.setMetaPort(port);
+			dstDBInstance.setMetaUsername(username);
+			dstDBInstance.setMetaPassword(password);
 
 			if (id != null) {
 				dstDBInstanceService.update(dstDBInstance);

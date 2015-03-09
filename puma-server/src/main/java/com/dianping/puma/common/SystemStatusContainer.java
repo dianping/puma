@@ -63,6 +63,19 @@ public enum SystemStatusContainer {
 				port, db));
 	}
 
+	public void removeAll(String taskName) {
+		serverStatus.remove(taskName);
+		clientStatus.remove(taskName);
+		clientSuccessSeq.remove(taskName);
+		storageStatus.remove(taskName);
+		serverParsedRowInsertCount.remove(taskName);
+		serverParsedRowUpdateCount.remove(taskName);
+		serverParsedRowDeleteCount.remove(taskName);
+		serverParsedDdlCount.remove(taskName);
+		stopTheWorlds.remove(taskName);
+		metrics.remove(taskName);
+	}
+
 	private void logMetricForCount(String name) {
 		metrics.putIfAbsent(name, new AtomicInteger(0));
 		int count = metrics.get(name).incrementAndGet();

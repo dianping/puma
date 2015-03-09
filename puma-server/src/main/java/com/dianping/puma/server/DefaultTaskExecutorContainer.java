@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
+import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
@@ -343,6 +344,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 			throw new Exception("Puma task not exist.");
 		}
 
+		SystemStatusContainer.instance.removeAll(taskName);
 		stopExecutor(taskExecutor);
 		taskExecutorMap.remove(taskName);
 	}

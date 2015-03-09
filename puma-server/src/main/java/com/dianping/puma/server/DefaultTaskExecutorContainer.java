@@ -369,7 +369,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 		try {
 			startExecutor(taskExecutor);
 		} catch (Exception e) {
-			LOG.error("Puma task `{}` resume event error: {}.", taskName, e.getMessage());
+			LOG.error("Puma task `{}` resume event error: {}.", taskName, e.toString());
 		}
 	}
 
@@ -382,7 +382,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 			TaskExecutor taskExecutor = taskExecutorBuilder.build(pumaTask);
 			submit(taskExecutor);
 		} catch (Exception e) {
-			LOG.error("Puma task `{}` create event error: {}.", taskName, e.getMessage());
+			LOG.error("Puma task `{}` create event error: {}.", taskName, e.toString());
 		}
 	}
 

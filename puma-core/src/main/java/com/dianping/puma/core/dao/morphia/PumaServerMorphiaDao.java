@@ -29,7 +29,7 @@ public class PumaServerMorphiaDao extends BasicDAO<PumaServerMorphiaEntity, Stri
 	}
 
 	public PumaServer findByName(String name) {
-		Query<PumaServerMorphiaEntity> q = this.getDatastore().createQuery(PumaServerMorphiaEntity.class);
+		Query<PumaServerMorphiaEntity> q = this.getDatastore().createQuery(PumaServerMorphiaEntity.class).disableValidation();
 		q.field("entity.name").equal(name);
 		PumaServerMorphiaEntity morphiaEntity = this.findOne(q);
 		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();

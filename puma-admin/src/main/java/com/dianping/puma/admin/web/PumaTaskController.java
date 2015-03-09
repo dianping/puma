@@ -139,7 +139,7 @@ public class PumaTaskController {
 			this.pumaTaskStateContainer.create(pumaTask.getId());
 
 			// Publish puma task operation event to puma server.
-			this.pumaTaskOperationReporter.report(pumaServer.getId(), pumaTask.getId(), Operation.CREATE);
+			this.pumaTaskOperationReporter.report(pumaServer.getId(), pumaTask.getId(), pumaTask.getName(), Operation.CREATE);
 
 			map.put("success", true);
 		} catch (MongoException e) {
@@ -169,7 +169,7 @@ public class PumaTaskController {
 			this.pumaTaskService.remove(id);
 
 			// Publish puma task operation event to puma server.
-			this.pumaTaskOperationReporter.report(pumaTask.getPumaServerId(), pumaTask.getId(), Operation.REMOVE);
+			this.pumaTaskOperationReporter.report(pumaTask.getPumaServerId(), pumaTask.getId(), pumaTask.getName(), Operation.REMOVE);
 
 			map.put("success", true);
 		} catch (MongoException e) {

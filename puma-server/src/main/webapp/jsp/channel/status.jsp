@@ -131,7 +131,7 @@ color: #797268;
 <br>
 <table class="mytable">
 <caption>Clients</caption>
-	<tr><th>Name</th><th>Target</th><th>Seq</th><th>Db&table</th><th>codec</th><th>NeedDdl</th><th>NeedDml</th><th>NeedTransactionInfo</th></tr>
+	<tr><th>Name</th><th>Target</th><th>Seq</th><th>SuccessSeq</th><th>Db&table</th><th>codec</th><th>NeedDdl</th><th>NeedDml</th><th>NeedTransactionInfo</th></tr>
 	<% 
 		Map<String, ClientStatus> clients = model.getSystemStatus().listClientStatus();
 		Map<String, Long> clientSussessSeq = model.getSystemStatus().listClientSuccessSeq();
@@ -142,7 +142,7 @@ color: #797268;
             <%=cs.getSeq() + "<br/>" + new Sequence(cs.getSeq()) %> 
             <%="</td><td>" %>
             <%if(clientSussessSeq.containsKey(entry.getKey())) {%>
-            <%= clientSussessSeq.get(entry.getKey())%>
+            <%= clientSussessSeq.get(entry.getKey()) + "<br/>" + new Sequence(clientSussessSeq.get(entry.getKey())) %>
             <%}{ %>
             <%= ""%> <% }%>
             <%="</td><td>" %>

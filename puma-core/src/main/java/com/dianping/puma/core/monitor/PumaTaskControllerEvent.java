@@ -6,6 +6,8 @@ public class PumaTaskControllerEvent extends PumaTaskEvent {
 
 	private String taskId;
 
+	private String taskName;
+	
 	private PumaTaskController controller;
 
 	public String getTaskId() {
@@ -22,5 +24,13 @@ public class PumaTaskControllerEvent extends PumaTaskEvent {
 
 	public void setController(PumaTaskController controller) {
 		this.controller = controller;
+	}
+
+	public void setTaskName(String taskName) {
+		this.taskName = taskName;
+	}
+
+	public String getTaskName() {
+		return taskName;
 	}
 }

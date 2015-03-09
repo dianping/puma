@@ -135,7 +135,7 @@ public class MysqlExecutor {
     	PreparedStatement ps = null;
     	Connection conn=null;
     	try{
-    	 conn = dataSource.getConnection();
+    		conn = dataSource.getConnection();
     		ps = conn.prepareStatement(ddlEvent.getSql());
     		ps.executeUpdate();
     	}catch(SQLException e){

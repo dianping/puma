@@ -70,7 +70,7 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
         String pumaServerHost = pumaServer.getHost();
         int pumaServerPort = pumaServer.getPort();
         
-        String target = pumaTask.get(0).getId();
+        String target = pumaTask.get(0).getName();
 
         SyncTaskExecutor excutor = new SyncTaskExecutor(task, pumaServerHost, pumaServerPort, target);
         return excutor;

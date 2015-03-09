@@ -51,6 +51,7 @@
 	<bean id="mongoClient" class="com.dianping.puma.core.dao.morphia.MongoClient">
 	</bean>
 	
+	<!--
 	<bean id="defaultSender" class="com.dianping.puma.sender.FileDumpSender">
 		<property name="storage">
 			<bean class="com.dianping.puma.storage.DefaultEventStorage">
@@ -66,19 +67,19 @@
 			</bean>
 		</property>
 	</bean>
-
+    -->
 	<!--bean id="mongoClient2" class="com.dianping.puma.core.dao.morphia.MongoClient">
 	</bean-->
 	<task:scheduled-tasks>
-        <task:scheduled ref="pumaMonitorSeqTask" method="runTask" cron="#{intervalConfig.seqInterval}"/> 
+        <task:scheduled ref="pumaMonitorSeqTask" method="runTask" fixed-delay="#{intervalConfig.seqInterval}"/> 
     </task:scheduled-tasks>  
-    <task:scheduled-tasks>  
-        <task:scheduled ref="pumaMonitorClientIpTask" method="runTask" cron="#{intervalConfig.clientIpInterval}"/>  
+    <task:scheduled-tasks>
+        <task:scheduled ref="pumaMonitorClientIpTask" method="runTask" fixed-delay="#{intervalConfig.clientIpInterval}"/>  
     </task:scheduled-tasks>  
-    <task:scheduled-tasks>  
-        <task:scheduled ref="pumaMonitorServerInfoTask" method="runTask" cron="#{intervalConfig.serverInfoInterval}"/>
-    </task:scheduled-tasks>  
-    
+    <task:scheduled-tasks>
+        <task:scheduled ref="pumaMonitorServerInfoTask" method="runTask" fixed-delay="#{intervalConfig.serverInfoInterval}"/>   
+    </task:scheduled-tasks>
+   
 </beans>
 
 

@@ -250,8 +250,8 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 	}*/
 
 	@Override
-	public TaskExecutor get(String taskId) {
-		return taskExecutorMap.get(taskId);
+	public TaskExecutor get(String taskName) {
+		return taskExecutorMap.get(taskName);
 	}
 
 	@Override
@@ -284,7 +284,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 						e.printStackTrace();
 					}
 				}
-			}, taskExecutor.getTaskId() , false).start();
+			}, taskExecutor.getTaskName() , false).start();
 		} catch (Exception e) {
 			taskExecutor.setStatus(Status.FAILED);
 			throw e;
@@ -321,14 +321,14 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 			throw new Exception("Null puma task executor supplied.");
 		}
 
-		String taskId = taskExecutor.getTaskId();
+		String taskName = taskExecutor.getTaskName();
 
-		if (taskExecutorMap.containsKey(taskId)) {
+		if (taskExecutorMap.containsKey(taskName)) {
 			throw new Exception("Duplicated puma task.");
 		}
 
 		startExecutor(taskExecutor);
-		taskExecutorMap.put(taskId, taskExecutor);
+		taskExecutorMap.put(taskName, taskExecutor);
 	}
 
 	@Override
@@ -337,50 +337,50 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 			throw new Exception("Null puma task executor supplied.");
 		}
 
-		String taskId = taskExecutor.getTaskId();
+		String taskName = taskExecutor.getTaskName();
 
-		if (!taskExecutorMap.containsKey(taskId)) {
+		if (!taskExecutorMap.containsKey(taskName)) {
 			throw new Exception("Puma task not exist.");
 		}
 
 		stopExecutor(taskExecutor);
-		taskExecutorMap.remove(taskId);
+		taskExecutorMap.remove(taskName);
 	}
 
 	@Override
 	public void pauseEvent(PumaTaskControllerEvent event) {
-		String taskId = event.getTaskId();
-		TaskExecutor taskExecutor = taskExecutorMap.get(taskId);
+		String taskName = event.getTaskName();
+		TaskExecutor taskExecutor = taskExecutorMap.get(taskName);
 
 		try {
 			stopExecutor(taskExecutor);
 		} catch (Exception e) {
-			LOG.error("Puma task `{}` pause event error: {}.", taskId, e.getMessage());
+			LOG.error("Puma task `{}` pause event error: {}.", taskName, e.getMessage());
 		}
 	}
 
 	@Override
 	public void resumeEvent(PumaTaskControllerEvent event) {
-		String taskId = event.getTaskId();
-		TaskExecutor taskExecutor = taskExecutorMap.get(taskId);
+		String taskName = event.getTaskName();
+		TaskExecutor taskExecutor = taskExecutorMap.get(taskName);
 
 		try {
 			startExecutor(taskExecutor);
 		} catch (Exception e) {
-			LOG.error("Puma task `{}` resume event error: {}.", taskId, e.getMessage());
+			LOG.error("Puma task `{}` resume event error: {}.", taskName, e.getMessage());
 		}
 	}
 
 	@Override
 	public void createEvent(PumaTaskOperationEvent event) {
-		String taskId = event.getTaskId();
+		String taskName = event.getTaskName();
 
 		try {
-			PumaTask pumaTask = pumaTaskService.find(taskId);
+			PumaTask pumaTask = pumaTaskService.find(taskName);
 			TaskExecutor taskExecutor = taskExecutorBuilder.build(pumaTask);
 			submit(taskExecutor);
 		} catch (Exception e) {
-			LOG.error("Puma task `{}` create event error: {}.", taskId, e.getMessage());
+			LOG.error("Puma task `{}` create event error: {}.", taskName, e.getMessage());
 		}
 	}
 
@@ -391,13 +391,13 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 
 	@Override
 	public void removeEvent(PumaTaskOperationEvent event) {
-		String taskId = event.getTaskId();
+		String taskName = event.getTaskName();
 
 		try {
-			TaskExecutor taskExecutor = taskExecutorMap.get(taskId);
+			TaskExecutor taskExecutor = taskExecutorMap.get(taskName);
 			withdraw(taskExecutor);
 		} catch (Exception e) {
-			LOG.error("Puma task `{}` remove event error: {}.", taskId, e.getMessage());
+			LOG.error("Puma task `{}` remove event error: {}.", taskName, e.getMessage());
 		}
 	}
 
@@ -456,8 +456,8 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 		instance = this;
 	}
 
-	public EventStorage getTaskStorage(String taskId) {
-		List<Sender> senders = taskExecutorMap.get(taskId).getFileSender();
+	public EventStorage getTaskStorage(String taskName) {
+		List<Sender> senders = taskExecutorMap.get(taskName).getFileSender();
 		if (senders != null && senders.size() > 0) {
 			return senders.get(0).getStorage();
 		}

@@ -18,14 +18,18 @@ public class TaskIntervalConfig {
 	
 	private static final String SERVERINFO_INTERVAL_NAME="puma.server.interval.serverInfo";
 	
-	private String seqInterval;
-	private String clientIpInterval;
-	private String serverInfoInterval;
+	private long seqInterval;
+	private long clientIpInterval;
+	private long serverInfoInterval;
 
 	public TaskIntervalConfig(){
-		seqInterval = "0/"+getInterval(SEQ_INTERVAL_NAME)+" * * * * ?";
+	/*	seqInterval = "0/"+getInterval(SEQ_INTERVAL_NAME)+" * * * * ?";
 		clientIpInterval = "0/"+getInterval(CLIENTIP_INTERVAL_NAME)+" * * * * ?";
 		serverInfoInterval = "0/"+getInterval(SERVERINFO_INTERVAL_NAME)+" * * * * ?";
+	*/
+		seqInterval = getInterval(SEQ_INTERVAL_NAME);
+		clientIpInterval = getInterval(CLIENTIP_INTERVAL_NAME);
+		serverInfoInterval = getInterval(SERVERINFO_INTERVAL_NAME);
 	}
 	
 	protected long getInterval(String intervalName) {
@@ -41,27 +45,27 @@ public class TaskIntervalConfig {
 		return interval;
 	}
 
-	public void setSeqInterval(String seqInterval) {
+	public void setSeqInterval(long seqInterval) {
 		this.seqInterval = seqInterval;
 	}
 
-	public String getSeqInterval() {
+	public long getSeqInterval() {
 		return seqInterval;
 	}
 
-	public void setClientIpInterval(String clientIpInterval) {
+	public void setClientIpInterval(long clientIpInterval) {
 		this.clientIpInterval = clientIpInterval;
 	}
 
-	public String getClientIpInterval() {
+	public long getClientIpInterval() {
 		return clientIpInterval;
 	}
 
-	public void setServerInfoInterval(String serverInfoInterval) {
+	public void setServerInfoInterval(long serverInfoInterval) {
 		this.serverInfoInterval = serverInfoInterval;
 	}
 
-	public String getServerInfoInterval() {
+	public long getServerInfoInterval() {
 		return serverInfoInterval;
 	}
 	

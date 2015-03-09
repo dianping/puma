@@ -12,7 +12,14 @@ $(function() {
     $(".validation-input").each(function(i, inputElement) {
       if (!isValid($(inputElement))) {
         isAllValid = false;
-        $(inputElement).parent().next().children().show(0).delay(1500).hide(0);
+        var help = $(inputElement).parent().next();
+        if (!help.hasClass('validation-help')) {
+          help = help.next().next();
+        }
+
+        if (help.children().css('display') === 'none') {
+          help.children().show(0).delay(1500).hide(0);
+        }
       }
     });
 
@@ -63,6 +70,10 @@ $(function() {
   function genRegExp(format) {
     var regexp;
     switch (format) {
+      case 'puma-task-name':
+        regexp = /^[@\w]{1,30}$/;
+        break;
+
       case 'server-name':
       case 'db-name':
         regexp = /^\w{1,30}$/;

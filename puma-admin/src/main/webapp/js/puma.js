@@ -78,6 +78,18 @@ $(function() {
       }
     });
   }).trigger('click');
+
+  $("#srcDBInstanceName").on('change', function() {
+    $("#name").val(genPumaTaskName());
+  }).trigger('change');
+
+  $("#pumaServerName").on('change', function() {
+    $("#name").val(genPumaTaskName());
+  }).trigger('change');
+
+  function genPumaTaskName() {
+    return $("#srcDBInstanceName").val() + '@' + $("#pumaServerName").val();
+  }
 });
 
 

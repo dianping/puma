@@ -22,5 +22,4 @@ public interface PumaServerConfigService {
     PumaServerConfig find(ObjectId objectId);
 
     PumaServerConfig find(String name);
-
 }

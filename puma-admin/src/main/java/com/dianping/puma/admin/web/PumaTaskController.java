@@ -1,6 +1,8 @@
 package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.reporter.PumaTaskOperationReporter;
+import com.dianping.puma.admin.service.PumaServerConfigService;
+import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.core.container.PumaTaskStateContainer;
 import com.dianping.puma.core.model.PumaTaskState;
 import com.dianping.puma.core.service.PumaTaskService;
@@ -12,6 +14,9 @@ import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.constant.Operation;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
+import com.dianping.swallow.common.producer.exceptions.SendFailedException;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +52,12 @@ public class PumaTaskController {
 
 	@Autowired
 	PumaTaskOperationReporter pumaTaskOperationReporter;
+
+	@Autowired
+	SyncTaskService syncTaskService;
+
+	@Autowired
+	PumaServerConfigService pumaServerConfigService;
 
 	@RequestMapping(value = { "/puma-task" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
@@ -95,8 +106,9 @@ public class PumaTaskController {
 			"/puma-task/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String createPost(
-			String srcDBInstanceId,
-			String pumaServerId,
+			String srcDBInstanceName,
+			String pumaServerName,
+			String pumaTaskName,
 			String binlogFile,
 			Long binlogPosition,
 			int preservedDay) {
@@ -105,14 +117,13 @@ public class PumaTaskController {
 
 		try {
 			PumaTask pumaTask = new PumaTask();
-			Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
-			SrcDBInstance srcDBInstance = srcDBInstanceService.find(srcDBInstanceId);
-			PumaServer pumaServer = pumaServerService.find(pumaServerId);
+			SrcDBInstance srcDBInstance = srcDBInstanceService.findByName(srcDBInstanceName);
+			PumaServer pumaServer = pumaServerService.findByName(pumaServerName);
 
-			pumaTask.setName(srcDBInstance.getName() + "@" + pumaServer.getName() + "-" + timestamp.getTime());
-			pumaTask.setSrcDBInstanceId(srcDBInstanceId);
-			pumaTask.setPumaServerId(pumaServerId);
+			pumaTask.setName(pumaTaskName);
+			pumaTask.setSrcDBInstanceId(srcDBInstance.getId());
+			pumaTask.setPumaServerId(pumaServer.getId());
 			BinlogInfo binlogInfo = new BinlogInfo();
 			binlogInfo.setBinlogFile(binlogFile);
 			binlogInfo.setBinlogPosition(binlogPosition);
@@ -128,12 +139,21 @@ public class PumaTaskController {
 			this.pumaTaskStateContainer.create(pumaTask.getId());
 
 			// Publish puma task operation event to puma server.
-			this.pumaTaskOperationReporter.report(pumaServerId, pumaTask.getId(), Operation.CREATE);
+			this.pumaTaskOperationReporter.report(pumaServer.getId(), pumaTask.getId(), Operation.CREATE);
 
 			map.put("success", true);
+		} catch (MongoException e) {
+			map.put("error", "storage");
+			map.put("success", false);
+		} catch (SendFailedException e) {
+			map.put("error", "notify");
+			map.put("success", false);
 		} catch (Exception e) {
+			map.put("error", e.getMessage());
 			map.put("success", false);
 		}
+
+		map.put("success", true);
 
 		return GsonUtil.toJson(map);
 	}
@@ -144,11 +164,26 @@ public class PumaTaskController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
+			PumaTask pumaTask = pumaTaskService.find(id);
+
 			this.pumaTaskService.remove(id);
+
+			// Publish puma task operation event to puma server.
+			this.pumaTaskOperationReporter.report(pumaTask.getPumaServerId(), pumaTask.getId(), Operation.REMOVE);
+
 			map.put("success", true);
+		} catch (MongoException e) {
+			map.put("error", "storage");
+			map.put("success", false);
+		} catch (SendFailedException e) {
+			map.put("error", "notify");
+			map.put("success", false);
 		} catch (Exception e) {
+			map.put("error", e.getMessage());
 			map.put("success", false);
 		}
+
+		map.put("success", true);
 
 		return GsonUtil.toJson(map);
 	}
@@ -166,8 +201,11 @@ public class PumaTaskController {
 
 			map.put("state", state);
 			map.put("success", true);
+		} catch (MongoException e) {
+			map.put("error", "storage");
+			map.put("success", false);
 		} catch (Exception e) {
-			map.put("err", "world");
+			map.put("error", e.getMessage());
 			map.put("success", false);
 		}
 

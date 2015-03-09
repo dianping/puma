@@ -3,7 +3,7 @@
       <div class="panel-heading">
          <div class="btn-group-sm pull-right">
             <button class="btn btn-default" onclick="javascript:history.back();">取消</button>
-            <button class="btn btn-success" type="submit" form="puma-task-create-form"
+            <button class="btn btn-success validation-button" type="submit" form="puma-task-create-form"
                     #if(${lock}) disabled="disabled" #end>保存</button>
          </div>
          <h5>
@@ -23,11 +23,11 @@
             #end
 
             <div class="form-group">
-               <label class="col-md-2 control-label" for="srcDBInstanceId">源数据库</label>
+               <label class="col-md-2 control-label" for="srcDBInstanceName">源数据库</label>
                <div class="col-md-7">
-                  <select id="srcDBInstanceId" name="srcDBInstanceId" class="form-control">
+                  <select id="srcDBInstanceName" name="srcDBInstanceName" class="form-control">
                      #foreach($srcDBInstance in ${srcDBInstanceEntities})
-                     <option value="${srcDBInstance.id}">
+                     <option value="${srcDBInstance.name}">
                         ${srcDBInstance.name}
                      </option>
                      #end
@@ -39,11 +39,13 @@
             </div>
 
             <div class="form-group">
-               <label class="col-md-2 control-label" for="pumaServerId">数据处理服务器</label>
+               <label class="col-md-2 control-label" for="pumaServerName">数据处理服务器</label>
                <div class="col-md-7">
-                  <select id="pumaServerId" name="pumaServerId" class="form-control">
+                  <select id="pumaServerName" name="pumaServerName" class="form-control">
                      #foreach($pumaServer in ${pumaServerEntities})
-                     <option value="${pumaServer.id}">${pumaServer.name}</option>
+                     <option value="${pumaServer.name}">
+                        ${pumaServer.name}
+                     </option>
                      #end
                   </select>
                </div>
@@ -52,15 +54,30 @@
                </div>
             </div>
 
-            <div class="form-group has-feedback">
+            <div class="form-group">
+               <label class="col-md-2 control-label" for="name">任务名称</label>
+               <div class="col-md-7">
+                  <input id="name" name="name" class="form-control validation-input" format="puma-task-name">
+               </div>
+               <div class="col-md-3 validation-help">
+                  <span hidden="hidden">无效任务名称</span>
+               </div>
+            </div>
+
+            <div class="form-group">
                <label class="col-md-2 control-label" for="binlogFile">数据库日志</label>
                <div class="col-md-5">
-                  <input id="binlogFile" name="binlogFile" class="form-control validation-input" format="bin-log-file">
+                  <input id="binlogFile" name="binlogFile" class="form-control validation-input"
+                         format="bin-log-file" placeholder="文件名">
                </div>
 
                <label class="sr-only" for="binlogPosition">数据库日志位置</label>
                <div class="col-md-2">
-                  <input id="binlogPosition" name="binlogPosition" class="form-control validation-input" format="bin-log-position">
+                  <input id="binlogPosition" name="binlogPosition" class="form-control validation-input"
+                         format="bin-log-position" placeholder="位置">
+               </div>
+               <div class="col-md-3 validation-help">
+                  <span hidden="hidden">无效数据库日志</span>
                </div>
             </div>
 
@@ -68,6 +85,9 @@
                <label class="col-md-2 control-label" for="preservedDay">数据存储天数</label>
                <div class="col-md-7">
                   <input id="preservedDay" name="preservedDay" class="form-control validation-input" format="day">
+               </div>
+               <div class="col-md-3 validation-help">
+                  <span hidden="hidden">无效数据存储天数</span>
                </div>
             </div>
          </div>

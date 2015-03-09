@@ -56,5 +56,4 @@ public class PumaServerConfigServiceImpl implements PumaServerConfigService {
         q.field("mysqlName").equal(name);
         return pumaServerConfigDao.findOne(q);
     }
-
 }

@@ -54,7 +54,7 @@ public class PumaClientTest {
         builder.serverId(1111);
         PumaClient pumaClient = new PumaClient(builder.build());
         Assert.assertNotNull(getValue(pumaClient, "config"));
-        Assert.assertNotNull(getValue(pumaClient, "seqFileHolder"));
+        Assert.assertNotNull(getValue(pumaClient, "sequenceHolder"));
         Assert.assertNotNull(getValue(pumaClient, "codec"));
         Assert.assertEquals(false, getValue(pumaClient, "active"));
     }

@@ -13,6 +13,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.base.Strings;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecuteResultHandler;
 import org.apache.commons.exec.DefaultExecutor;
@@ -91,7 +92,7 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
                     List<String> srcTableNames = getSrcTableNames(tableMappings);
                     List<String> destTableNames = getDestTableNames(tableMappings);
                     String output = _mysqldump(srcDatabaseName, srcTableNames);
-                    if (StringUtils.isNotBlank(output)) {
+                    if (hasException(output)) {
                         throw new DumpException("mysqldump output is not empty , so consided to be failed: " + output);
                     }
                     LOG.info("dump done.");
@@ -145,7 +146,7 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
                     //执行load脚本
                     srcDatabaseName = databaseMapping.getFrom();
                     output = _mysqlload(srcDatabaseName);
-                    if (StringUtils.isNotBlank(output)) {
+                    if (hasException(output)) {
                         throw new DumpException("mysqlload output is not empty , so consided to be failed: " + output);
                     }
                     status.setStatus(TaskExecutorStatus.Status.SUCCEED);
@@ -184,6 +185,23 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
             }
         }
         return destTableNames;
+    }
+
+    private boolean hasException(String output){
+        if(Strings.isNullOrEmpty(output)){
+            return false;
+        }
+        String[] lines = output.split("\r\n|\r|\n");
+        for(String line : lines){
+            if(Strings.isNullOrEmpty(line)){
+                continue;
+            }
+            if(line.startsWith("Warning:")){
+                continue;
+            }
+            return true;
+        }
+        return false;
     }
 
     private String _getDumpFile(String databaseName) {

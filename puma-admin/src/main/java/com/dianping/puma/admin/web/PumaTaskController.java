@@ -1,5 +1,6 @@
 package com.dianping.puma.admin.web;
 
+import com.dianping.puma.admin.reporter.PumaTaskControllerReporter;
 import com.dianping.puma.admin.reporter.PumaTaskOperationReporter;
 import com.dianping.puma.admin.service.PumaServerConfigService;
 import com.dianping.puma.admin.service.SyncTaskService;
@@ -15,7 +16,6 @@ import com.dianping.puma.core.constant.Operation;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
-import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +51,9 @@ public class PumaTaskController {
 
 	@Autowired
 	PumaTaskOperationReporter pumaTaskOperationReporter;
+
+	@Autowired
+	PumaTaskControllerReporter pumaTaskControllerReporter;
 
 	@Autowired
 	SyncTaskService syncTaskService;
@@ -200,6 +202,52 @@ public class PumaTaskController {
 			}
 
 			map.put("state", state);
+			map.put("success", true);
+		} catch (MongoException e) {
+			map.put("error", "storage");
+			map.put("success", false);
+		} catch (Exception e) {
+			map.put("error", e.getMessage());
+			map.put("success", false);
+		}
+
+		return GsonUtil.toJson(map);
+	}
+
+	@RequestMapping(value = { "/puma-task/resume" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String resumePost(String id) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			PumaTask pumaTask = pumaTaskService.find(id);
+
+			// Publish puma task controller event to puma server.
+			this.pumaTaskControllerReporter.report(pumaTask.getPumaServerId(), pumaTask.getId(), pumaTask.getName(), com.dianping.puma.core.constant.Controller.RESUME);
+
+			map.put("success", true);
+		} catch (MongoException e) {
+			map.put("error", "storage");
+			map.put("success", false);
+		} catch (Exception e) {
+			map.put("error", e.getMessage());
+			map.put("success", false);
+		}
+
+		return GsonUtil.toJson(map);
+	}
+
+	@RequestMapping(value = { "/puma-task/pause" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String pausePost(String id) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			PumaTask pumaTask = pumaTaskService.find(id);
+
+			// Publish puma task controller event to puma server.
+			this.pumaTaskControllerReporter.report(pumaTask.getPumaServerId(), pumaTask.getId(), pumaTask.getName(), com.dianping.puma.core.constant.Controller.PAUSE);
+
 			map.put("success", true);
 		} catch (MongoException e) {
 			map.put("error", "storage");

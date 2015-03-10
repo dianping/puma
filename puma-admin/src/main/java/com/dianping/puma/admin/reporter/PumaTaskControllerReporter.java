@@ -14,14 +14,15 @@ public class PumaTaskControllerReporter {
 	@Autowired
 	SwallowEventPublisher pumaTaskControllerEventPublisher;
 
-	public void report(String pumaServerId, String taskId, Controller controller) throws SendFailedException {
+	public void report(String pumaServerId, String taskId, String taskName, Controller controller) throws SendFailedException {
 		PumaTaskControllerEvent event = new PumaTaskControllerEvent();
 		event.setPumaServerId(pumaServerId);
 		event.setTaskId(taskId);
+		event.setTaskName(taskName);
 
-		PumaTaskController pumaTaskOperation = new PumaTaskController();
-		pumaTaskOperation.setController(controller);
-		event.setController(pumaTaskOperation);
+		PumaTaskController pumaTaskController = new PumaTaskController();
+		pumaTaskController.setController(controller);
+		event.setController(pumaTaskController);
 
 		pumaTaskControllerEventPublisher.publish(event);
 	}

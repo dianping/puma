@@ -12,8 +12,8 @@
                 <td class="col-md-2">数据库</td>
                 <td class="col-md-2">服务器</td>
                 <td class="col-md-2">任务状态</td>
-                <td class="col-md-4">日志进度</td>
-                <td class="col-md-1">操作</td>
+                <td class="col-md-3">日志进度</td>
+                <td class="col-md-2">操作</td>
             </tr>
             </thead>
 
@@ -25,6 +25,12 @@
                 <td class="puma-task-state"></td>
                 <td class="puma-task-bin-log-info"></td>
                 <td>
+                    <a href="#" class="operation-icon puma-task-resume" data-id="${pumaTask.id}">
+                        <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+                    </a>
+                    <a href="#" class="operation-icon puma-task-pause" data-id="${pumaTask.id}">
+                        <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
+                    </a>
                     <a href="#" class="operation-icon puma-task-refresh" data-id="${pumaTask.id}">
                         <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
                     </a>

@@ -19,12 +19,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
+import com.dianping.puma.sender.Sender;
+import com.dianping.puma.storage.DefaultEventStorage;
 import org.apache.commons.lang.StringUtils;
 
 import com.dianping.puma.common.SystemStatusContainer;
@@ -501,5 +504,12 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		Long ddls = this.binlogStat.getDdls();
 		binlogStat.setDdls(ddls + 1);
 	}
+
+	/*
+	public void setPreservedDay(int preservedDay) {
+		List<Sender> senders = getFileSender();
+		DefaultEventStorage storage = senders.get(0).getStorage();
+
+	}*/
 
 }

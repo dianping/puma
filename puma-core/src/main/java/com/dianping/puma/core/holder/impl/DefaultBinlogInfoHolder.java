@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
+import java.sql.Timestamp;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,13 +28,13 @@ import javax.annotation.PostConstruct;
 @Service("binlogInfoHolder")
 public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 
-	private static final Logger log = Logger.getLogger(DefaultBinlogInfoHolder.class);
+	private static final Logger LOG = Logger.getLogger(DefaultBinlogInfoHolder.class);
 
 	private final Map<String, BinlogInfo> binlogInfoMap = new ConcurrentHashMap<String, BinlogInfo>();
 
 	private final Map<String, MappedByteBuffer> mappedByteBufferMapping = new ConcurrentHashMap<String, MappedByteBuffer>();
 
-	private static final String SUFFIX = ".pumaconf";
+	private static final String SUFFIX = ".binlog";
 
 	private static final String PREFIX = "server-";
 
@@ -46,6 +47,9 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 	@Value("/data/appdatas/puma/binlog/")
 	private File baseDir;
 
+	@Value("/data/appdatas/puma/binlog/bak/")
+	private File bakDir;
+
 	@PostConstruct
 	public void init() {
 		if (!baseDir.exists()) {
@@ -53,11 +57,18 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 				throw new RuntimeException("Fail to make dir for " + baseDir.getAbsolutePath());
 			}
 		}
+
+		if (!bakDir.exists()) {
+			if (!bakDir.mkdirs()) {
+				throw new RuntimeException("Fail to make dir for " + bakDir.getAbsolutePath());
+			}
+		}
+
 		String[] configs = baseDir.list(new FilenameFilter() {
 
 			@Override
 			public boolean accept(File dir, String name) {
-				if (name.endsWith(SUFFIX) && name.startsWith(PREFIX)) {
+				if (name.endsWith(SUFFIX)) {
 					return true;
 				}
 				return false;
@@ -65,7 +76,7 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 		});
 		if (configs != null) {
 			for (String config : configs) {
-				loadFromFile(config);
+				loadFromFile(file2task(config));
 			}
 		}
 	}
@@ -79,8 +90,28 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 		this.saveToFile(taskName, binlogInfo);
 	}
 
+	public synchronized void remove(String taskName) {
+		binlogInfoMap.remove(taskName);
+		removeFile(taskName);
+	}
+
+	private void removeFile(String taskName) {
+		String path = (new File(baseDir, task2file(taskName))).getAbsolutePath();
+
+		// Remove from the file cache.
+		mappedByteBufferMapping.remove(taskName);
+
+		// Remove the file to the backup folder.
+		File f = new File(path);
+		if (f.exists() && f.renameTo(new File(bakDir, genBakFileName(taskName)))) {
+			LOG.info("Remove bin log file success.");
+		} else {
+         LOG.warn("Remove bin log file failure.");
+		}
+	}
+
 	private void loadFromFile(String taskName) {
-		String path = (new File(baseDir, taskName)).getAbsolutePath();
+		String path = (new File(baseDir, task2file(taskName))).getAbsolutePath();
 		File f = new File(path);
 
 		FileReader fr = null;
@@ -93,26 +124,26 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 			String binlogPositionStr = br.readLine();
 			long binlogPosition = binlogPositionStr == null ? DEFAULT_BINLOGPOS : Long.parseLong(binlogPositionStr);
 			BinlogInfo binlogInfo = new BinlogInfo(binlogFile, binlogPosition);
-			mappedByteBufferMapping.put(path,
+			mappedByteBufferMapping.put(taskName,
 					new RandomAccessFile(f, "rwd").getChannel().map(MapMode.READ_WRITE, 0, MAX_FILE_SIZE));
-			binlogInfoMap.put(taskName.substring(PREFIX.length(), taskName.lastIndexOf(SUFFIX)), binlogInfo);
+			binlogInfoMap.put(taskName, binlogInfo);
 
 		} catch (Exception e) {
-			log.error("Read file " + f.getAbsolutePath() + " failed.", e);
+			LOG.error("Read file " + f.getAbsolutePath() + " failed.", e);
 			throw new RuntimeException("Read file " + f.getAbsolutePath() + " failed.", e);
 		} finally {
 			if (fr != null) {
 				try {
 					fr.close();
 				} catch (IOException e) {
-					log.error("Close file " + f.getAbsolutePath() + " failed.");
+					LOG.error("Close file " + f.getAbsolutePath() + " failed.");
 				}
 			}
 			if (br != null) {
 				try {
 					br.close();
 				} catch (IOException e) {
-					log.error("Close file " + f.getAbsolutePath() + " failed.");
+					LOG.error("Close file " + f.getAbsolutePath() + " failed.");
 				}
 			}
 		}
@@ -120,16 +151,16 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 	}
 
 	private synchronized void saveToFile(String taskName, BinlogInfo binlogInfo) {
-		String path = new File(baseDir, getConfFileName(taskName)).getAbsolutePath();
+		String path = new File(baseDir, task2file(taskName)).getAbsolutePath();
 
-		if (!mappedByteBufferMapping.containsKey(path)) {
+		if (!mappedByteBufferMapping.containsKey(taskName)) {
 			File f = new File(path);
 			if (!f.exists()) {
 				try {
 					if (!f.createNewFile()) {
 						throw new RuntimeException("Can not create file(" + f.getAbsolutePath() + ")");
 					}
-					mappedByteBufferMapping.put(path,
+					mappedByteBufferMapping.put(taskName,
 							new RandomAccessFile(f, "rwd").getChannel().map(MapMode.READ_WRITE, 0, MAX_FILE_SIZE));
 				} catch (IOException e) {
 					throw new RuntimeException("Create file(" + path + " failed.", e);
@@ -137,7 +168,7 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 			}
 		}
 
-		MappedByteBuffer mbb = mappedByteBufferMapping.get(path);
+		MappedByteBuffer mbb = mappedByteBufferMapping.get(taskName);
 		mbb.position(0);
 		mbb.put(BUF_MASK);
 		mbb.position(0);
@@ -147,13 +178,21 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 		mbb.put("\n".getBytes());
 	}
 
-	private static String getConfFileName(String serverName) {
-		return PREFIX + serverName + SUFFIX;
-	}
-
 	@Override
 	public void setBaseDir(String baseDir) {
 		this.baseDir = new File(baseDir);
 	}
 
+	private String task2file(String taskName) {
+		return taskName + SUFFIX;
+	}
+
+	private String file2task(String filename) {
+		return filename.substring(0, filename.indexOf(SUFFIX));
+	}
+
+	private String genBakFileName(String taskName) {
+		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+		return taskName + '-' + timestamp.getTime() + SUFFIX;
+	}
 }

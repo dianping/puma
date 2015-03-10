@@ -1,4 +1,4 @@
-$(function() {
+$(function(w) {
 
   // Operations.
 
@@ -90,6 +90,52 @@ $(function() {
   function genPumaTaskName() {
     return $("#srcDBInstanceName").val() + '@' + $("#pumaServerName").val();
   }
+
+  // Puma task resume.
+  $(".puma-task-resume").on('click', function(event) {
+    event.preventDefault();
+    var id = $(this).attr('data-id');
+
+    $.ajax({
+      url     : window.contextpath + '/puma-task' + '/resume',
+      type    : 'POST',
+      data    : {id: id},
+      dataType: 'json',
+      success : function(res) {
+        if (res.success) {
+          window.location = window.contextpath + '/puma-task';
+        } else {
+          w.pumaModal.error[res.error]();
+        }
+      },
+      error   : function() {
+        w.pumaModal.error['network']();
+      }
+    });
+  });
+
+  // Puma task pause.
+  $(".puma-task-pause").on('click', function(event) {
+    event.preventDefault();
+    var id = $(this).attr('data-id');
+
+    $.ajax({
+      url     : window.contextpath + '/puma-task' + '/pause',
+      type    : 'POST',
+      data    : {id: id},
+      dataType: 'json',
+      success : function(res) {
+        if (res.success) {
+          window.location = window.contextpath + '/puma-task';
+        } else {
+          w.pumaModal.error[res.error]();
+        }
+      },
+      error   : function() {
+        w.pumaModal.error['network']();
+      }
+    });
+  });
 });
 
 

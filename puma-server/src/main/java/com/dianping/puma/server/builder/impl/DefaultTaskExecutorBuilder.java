@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,7 +80,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 	@Value("50")
 	int maxSlaveFileCount;
 
-	@Value("/data/appdatas/puma/storage/binlogIndex/")
+	@Value("/data/appdatas/puma/binlogIndex/")
 	String binlogIndexBaseDir;
 
 	private static final Logger LOG = LoggerFactory.getLogger(DefaultTaskExecutorBuilder.class);

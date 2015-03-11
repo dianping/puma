@@ -72,7 +72,7 @@ public class SyncTaskServiceImpl implements SyncTaskService {
 					if (!CollectionUtils.isEmpty(tasks)) {
 						for (SyncTask task : tasks) {
 							TaskExecutorStatus syncStatus = systemStatusContainer.getStatus(Type.SYNC, task.getId());
-							if (syncStatus != null&& syncStatus.getStatus().equals(Status.FAILED)) {
+							if (syncStatus != null&& syncStatus.getStatus()!= null&& syncStatus.getStatus().equals(Status.FAILED)) {
 								for (int i = 0; i < retries; i++) {
 									try {
 										Thread.sleep(100);

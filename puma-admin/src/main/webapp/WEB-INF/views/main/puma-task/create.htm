@@ -25,7 +25,7 @@
             <div class="form-group">
                <label class="col-md-2 control-label" for="srcDBInstanceName">源数据库</label>
                <div class="col-md-7">
-                  <select id="srcDBInstanceName" name="srcDBInstanceName" class="form-control">
+                  <select id="srcDBInstanceName" name="srcDBInstanceName" class="form-control" #if(${entity}) disabled="disabled" #end>
                      #foreach($srcDBInstance in ${srcDBInstanceEntities})
                      <option value="${srcDBInstance.name}"
                              #if(${entity.srcDBInstanceName} == ${srcDBInstance.name}) selected="selected" #end>
@@ -42,7 +42,7 @@
             <div class="form-group">
                <label class="col-md-2 control-label" for="pumaServerName">数据处理服务器</label>
                <div class="col-md-7">
-                  <select id="pumaServerName" name="pumaServerName" class="form-control">
+                  <select id="pumaServerName" name="pumaServerName" class="form-control" #if(${entity}) disabled="disabled" #end>
                      #foreach($pumaServer in ${pumaServerEntities})
                      <option value="${pumaServer.name}"
                              #if(${entity.pumaServerName} == ${pumaServer.name}) selected="selected" #end>
@@ -60,7 +60,7 @@
                <label class="col-md-2 control-label" for="name">任务名称</label>
                <div class="col-md-7">
                   <input id="name" name="name" class="form-control validation-input" format="puma-task-name"
-                         #if(${entity}) value="${entity.name}" #end>
+                         #if(${entity}) value="${entity.name}" #end #if(${entity}) disabled="disabled" #end>
                </div>
                <div class="col-md-3 validation-help">
                   <span hidden="hidden">无效任务名称</span>

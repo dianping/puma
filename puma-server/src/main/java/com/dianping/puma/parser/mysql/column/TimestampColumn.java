@@ -26,10 +26,13 @@ import java.sql.Timestamp;
  * 
  */
 public final class TimestampColumn implements Column {
-	private static final long	serialVersionUID	= 3097163231761587681L;
-	private final Timestamp		value;
+	private static final long serialVersionUID = 3097163231761587681L;
+	private final Timestamp value;
 
 	private TimestampColumn(Timestamp value) {
+		if (value.getTime() <= 1000) {
+			value = new java.sql.Timestamp(1000);
+		}
 		this.value = value;
 	}
 
@@ -44,10 +47,16 @@ public final class TimestampColumn implements Column {
 	}
 
 	public Timestamp getValue() {
+		if (this.value.getTime() <= 1000) {
+			return new java.sql.Timestamp(1000);
+		}
 		return this.value;
 	}
 
 	public static final TimestampColumn valueOf(Timestamp value) {
+		if (value.getTime() <= 1) {
+			value = new java.sql.Timestamp(1000);
+		}
 		return new TimestampColumn(value);
 	}
 }

@@ -105,6 +105,7 @@ public class ReplicationBasedServer extends AbstractServer {
                             + host + ":" + port + "] for 3 times.", e, true);
                     failCount = 0;
                 }
+                e.printStackTrace();
                 log.error("Exception occurs. serverId: " + getServerId() + " dbServerId: " + getDbServerId() + ". Reconnect...", e);
                 Thread.sleep(((failCount % 10) + 1) * 2000);
             }

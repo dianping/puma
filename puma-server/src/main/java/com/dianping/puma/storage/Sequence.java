@@ -111,11 +111,8 @@ public class Sequence {
     }
 
     public static void main(String[] args) {
-    	Sequence seq = new Sequence(-7883269483600871731l);
+    	Sequence seq = new Sequence(-7869618084825256538l);
     	System.out.println(seq);
-    	seq = new Sequence(-7883269483756777604l);
-    	System.out.println(seq);
-    	
     }
     
     /*

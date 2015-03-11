@@ -49,10 +49,10 @@ public class PumaMonitorServerInfoTask implements PumaMonitorTask {
 		for(Map.Entry<String,ServerStatus> serverStatus:serverStatuses.entrySet()){
 			LOG.info("ServerInfo Cat monitoring "+serverStatus.getKey()+" ....");
 			initPreCount(serverStatus.getKey());
-			String insertName = " = 0";
-			String deleteName = " = 0";
-			String updateName = " = 0";
-			String ddlName = " = 0";
+			String insertName = " = 0 ";
+			String deleteName = " = 0 ";
+			String updateName = " = 0 ";
+			String ddlName = " = 0 ";
 			if(insertCount.containsKey(serverStatus.getKey())){
 				insertName = getEventName(preInsertCount.get(serverStatus.getKey()).longValue(),insertCount.get(serverStatus.getKey()).longValue());
 				preInsertCount.put(serverStatus.getKey(), insertCount.get(serverStatus.getKey()).longValue());

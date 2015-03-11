@@ -226,6 +226,15 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 
 	public void start() throws Exception {
 		stop = false;
+		parser.start();
+		dataHandler.start();
+		for(Sender sender: dispatcher.getSenders()){
+			sender.getStorage().getMasterBucketIndex().start();
+			sender.getStorage().getSlaveBucketIndex().start();
+			sender.getStorage().start();
+			sender.start();
+		}
+		dispatcher.start();
 		doStart();
 	}
 

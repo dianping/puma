@@ -66,6 +66,7 @@ public class DefaultEventStorage implements EventStorage {
 	/**
 	 * @return the masterBucketIndex
 	 */
+	@Override
 	public BucketIndex getMasterBucketIndex() {
 		return masterBucketIndex;
 	}
@@ -73,6 +74,7 @@ public class DefaultEventStorage implements EventStorage {
 	/**
 	 * @return the slaveBucketIndex
 	 */
+	@Override
 	public BucketIndex getSlaveBucketIndex() {
 		return slaveBucketIndex;
 	}

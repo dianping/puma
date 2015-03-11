@@ -114,7 +114,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 
 			// Parser.
 			Parser parser = new DefaultBinlogParser();
-			parser.start();
+			//parser.start();
 			taskExecutor.setParser(parser);
 
 			// Handler.
@@ -126,7 +126,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			tableMetaInfo.setMetaDBUsername(srcDBInstance.getUsername());
 			tableMetaInfo.setMetaDBPassword(srcDBInstance.getPassword());
 			dataHandler.setTableMetasInfoFetcher(tableMetaInfo);
-			dataHandler.start();
+			//dataHandler.start();
 			taskExecutor.setDataHandler(dataHandler);
 
 			// File sender.
@@ -145,7 +145,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			masterBucketIndex.setBaseDir(masterStorageBaseDir + taskName);
 			masterBucketIndex.setBucketFilePrefix(masterBucketFilePrefix);
 			masterBucketIndex.setMaxBucketLengthMB(maxMasterBucketLengthMB);
-			masterBucketIndex.start();
+			//masterBucketIndex.start();
 			storage.setMasterBucketIndex(masterBucketIndex);
 
 			// File sender slave storage.
@@ -153,7 +153,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			slaveBucketIndex.setBaseDir(slaveStorageBaseDir + taskName);
 			slaveBucketIndex.setBucketFilePrefix(slaveBucketFilePrefix);
 			slaveBucketIndex.setMaxBucketLengthMB(maxSlaveBucketLengthMB);
-			slaveBucketIndex.start();
+			//slaveBucketIndex.start();
 			storage.setSlaveBucketIndex(slaveBucketIndex);
 
 			// Archive strategy.
@@ -168,16 +168,16 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			storage.setCleanupStrategy(cleanupStrategy);
 
 			storage.setBinlogIndexBaseDir(binlogIndexBaseDir + taskName);
-			storage.start();
+			//storage.start();
 			sender.setStorage(storage);
-			sender.start();
+			//sender.start();
 			senders.add(sender);
 
 			// Dispatch.
 			SimpleDispatcherImpl dispatcher = new SimpleDispatcherImpl();
 			dispatcher.setName(dispatchName + taskName);
 			dispatcher.setSenders(senders);
-			dispatcher.start();
+			//dispatcher.start();
 			taskExecutor.setDispatcher(dispatcher);
 
 			// Set puma task status.

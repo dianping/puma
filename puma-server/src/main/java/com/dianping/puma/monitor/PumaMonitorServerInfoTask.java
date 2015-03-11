@@ -62,7 +62,7 @@ public class PumaMonitorServerInfoTask implements PumaMonitorTask {
 				preUpdateCount.put(serverStatus.getKey(), updateCount.get(serverStatus.getKey()).longValue());
 			}
 			if(deleteCount.containsKey(serverStatus.getKey())){
-				insertName = getEventName(preDeleteCount.get(serverStatus.getKey()).longValue(),deleteCount.get(serverStatus.getKey()).longValue());
+				deleteName = getEventName(preDeleteCount.get(serverStatus.getKey()).longValue(),deleteCount.get(serverStatus.getKey()).longValue());
 				preDeleteCount.put(serverStatus.getKey(), deleteCount.get(serverStatus.getKey()).longValue());
 			}
 			if(ddlCount.containsKey(serverStatus.getKey())){

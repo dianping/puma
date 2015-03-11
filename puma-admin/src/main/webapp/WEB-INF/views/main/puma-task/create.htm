@@ -28,7 +28,7 @@
                   <select id="srcDBInstanceName" name="srcDBInstanceName" class="form-control">
                      #foreach($srcDBInstance in ${srcDBInstanceEntities})
                      <option value="${srcDBInstance.name}"
-                             #if(${entity.srcDBInstanceName} == ${srcDBInstance.name}) selected="selected" #else disabled="disabled" #end>
+                             #if(${entity}) #if(${entity.srcDBInstanceName} == ${srcDBInstance.name}) selected="selected" #else disabled="disabled" #end #end>
                         ${srcDBInstance.name}
                      </option>
                      #end
@@ -45,7 +45,7 @@
                   <select id="pumaServerName" name="pumaServerName" class="form-control">
                      #foreach($pumaServer in ${pumaServerEntities})
                      <option value="${pumaServer.name}"
-                             #if(${entity.pumaServerName} == ${pumaServer.name}) selected="selected" #else disabled="disabled" #end>
+                             #if(${entity}) #if(${entity.pumaServerName} == ${pumaServer.name}) selected="selected" #else disabled="disabled" #end #end>
                         ${pumaServer.name}
                      </option>
                      #end

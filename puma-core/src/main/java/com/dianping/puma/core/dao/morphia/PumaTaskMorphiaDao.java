@@ -6,6 +6,7 @@ import com.dianping.puma.core.entity.morphia.PumaTaskMorphiaEntity;
 import com.google.code.morphia.dao.BasicDAO;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
+import com.google.code.morphia.query.UpdateOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -79,7 +80,13 @@ public class PumaTaskMorphiaDao extends BasicDAO<PumaTaskMorphiaEntity, String> 
 	}
 
 	public void update(PumaTask entity) {
-		this.create(entity);
+		PumaTaskMorphiaEntity morphiaEntity = new PumaTaskMorphiaEntity(entity);
+		Query<PumaTaskMorphiaEntity> q = this.getDatastore().createQuery(PumaTaskMorphiaEntity.class);
+		q.field("id").equal(morphiaEntity.getId());
+		UpdateOperations<PumaTaskMorphiaEntity> uop = this.getDatastore().createUpdateOperations(PumaTaskMorphiaEntity.class);
+		uop.set("entity", entity);
+		this.update(q, uop);
+		this.getDatastore().ensureIndexes();
 	}
 
 	public void remove(String id) {

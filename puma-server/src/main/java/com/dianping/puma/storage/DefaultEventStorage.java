@@ -149,6 +149,10 @@ public class DefaultEventStorage implements EventStorage {
 		return null;
 	}
 
+	public CleanupStrategy getCleanupStrategy() {
+		return cleanupStrategy;
+	}
+
 	/**
 	 * @param cleanupStrategy
 	 *            the cleanupStrategy to set

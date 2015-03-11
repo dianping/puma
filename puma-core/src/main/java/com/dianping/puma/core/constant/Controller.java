@@ -4,5 +4,5 @@ public enum Controller {
 	START,
 	STOP,
 	PAUSE,
-	RESUME
+	RESUME,
 }

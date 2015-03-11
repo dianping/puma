@@ -19,6 +19,8 @@ import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.server.builder.TaskExecutorBuilder;
+import com.dianping.puma.storage.CleanupStrategy;
+import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -180,6 +182,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 			taskExecutorMap.remove(taskExecutor.getTaskName());
 			SystemStatusContainer.instance.removeAll(taskExecutor.getTaskName());
 			binlogInfoHolder.remove(taskExecutor.getTaskName());
+			binlogInfoHolder.clean(taskExecutor.getTaskName());
 		}
 	}
 
@@ -222,7 +225,8 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 
 	@Override
 	public void updateEvent(PumaTaskOperationEvent event) {
-
+		removeEvent(event);
+		createEvent(event);
 	}
 
 	@Override
@@ -238,6 +242,29 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 			}
 		} else {
 			LOG.warn("Puma task `{}` remove event warn: {}.", taskName, "Task not found");
+		}
+	}
+
+	@Override
+	public void prolongEvent(PumaTaskOperationEvent event) {
+		String taskName = event.getTaskName();
+		TaskExecutor taskExecutor = taskExecutorMap.get(taskName);
+
+		if (taskExecutor != null) {
+			List<Sender> senders = taskExecutor.getFileSender();
+			EventStorage storage = senders.get(0).getStorage();
+			DefaultEventStorage defaultEventStorage = (DefaultEventStorage) storage;
+			try {
+				PumaTask pumaTask = pumaTaskService.findByName(taskName);
+				CleanupStrategy cleanupStrategy = defaultEventStorage.getCleanupStrategy();
+				((DefaultCleanupStrategy) cleanupStrategy).setPreservedDay(pumaTask.getPreservedDay());
+
+			} catch (Exception e) {
+				LOG.error("Puma task `{}` prolong event error: {}.", taskName, e.getMessage());
+			}
+
+		} else {
+			LOG.warn("Puma task `{}` prolong event warn: {}.", taskName, "Task not found");
 		}
 	}
 

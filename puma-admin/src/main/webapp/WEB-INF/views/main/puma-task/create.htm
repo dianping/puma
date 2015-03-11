@@ -7,7 +7,7 @@
                     #if(${lock}) disabled="disabled" #end>保存</button>
          </div>
          <h5>
-            新增数据处理任务 #if(${lock})<span class="orange-warning">(已锁定，请先删除相关任务)</span>#end
+            新增数据处理任务
          </h5>
       </div>
 
@@ -27,7 +27,8 @@
                <div class="col-md-7">
                   <select id="srcDBInstanceName" name="srcDBInstanceName" class="form-control">
                      #foreach($srcDBInstance in ${srcDBInstanceEntities})
-                     <option value="${srcDBInstance.name}">
+                     <option value="${srcDBInstance.name}"
+                             #if(${entity.srcDBInstanceName} == ${srcDBInstance.name}) selected="selected" #end>
                         ${srcDBInstance.name}
                      </option>
                      #end
@@ -43,7 +44,8 @@
                <div class="col-md-7">
                   <select id="pumaServerName" name="pumaServerName" class="form-control">
                      #foreach($pumaServer in ${pumaServerEntities})
-                     <option value="${pumaServer.name}">
+                     <option value="${pumaServer.name}"
+                             #if(${entity.pumaServerName} == ${pumaServer.name}) selected="selected" #end>
                         ${pumaServer.name}
                      </option>
                      #end
@@ -57,7 +59,8 @@
             <div class="form-group">
                <label class="col-md-2 control-label" for="name">任务名称</label>
                <div class="col-md-7">
-                  <input id="name" name="name" class="form-control validation-input" format="puma-task-name">
+                  <input id="name" name="name" class="form-control validation-input" format="puma-task-name"
+                         #if(${entity}) value="${entity.name}" #end>
                </div>
                <div class="col-md-3 validation-help">
                   <span hidden="hidden">无效任务名称</span>
@@ -68,13 +71,13 @@
                <label class="col-md-2 control-label" for="binlogFile">数据库日志</label>
                <div class="col-md-5">
                   <input id="binlogFile" name="binlogFile" class="form-control validation-input"
-                         format="bin-log-file" placeholder="文件名">
+                         format="bin-log-file" placeholder="文件名" #if(${entity}) value="${entity.binlogInfo.binlogFile}" #end>
                </div>
 
                <label class="sr-only" for="binlogPosition">数据库日志位置</label>
                <div class="col-md-2">
                   <input id="binlogPosition" name="binlogPosition" class="form-control validation-input"
-                         format="bin-log-position" placeholder="位置">
+                         format="bin-log-position" placeholder="位置" #if(${entity}) value="${entity.binlogInfo.binlogPosition}" #end>
                </div>
                <div class="col-md-3 validation-help">
                   <span hidden="hidden">无效数据库日志</span>
@@ -84,7 +87,8 @@
             <div class="form-group">
                <label class="col-md-2 control-label" for="preservedDay">数据存储天数</label>
                <div class="col-md-7">
-                  <input id="preservedDay" name="preservedDay" class="form-control validation-input" format="day">
+                  <input id="preservedDay" name="preservedDay" class="form-control validation-input" format="day"
+                         #if(${entity}) value="${entity.preservedDay}" #end>
                </div>
                <div class="col-md-3 validation-help">
                   <span hidden="hidden">无效数据存储天数</span>

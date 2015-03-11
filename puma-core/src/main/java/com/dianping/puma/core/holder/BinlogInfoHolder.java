@@ -15,4 +15,6 @@ public interface BinlogInfoHolder {
 	public void setBinlogInfo(String taskName, BinlogInfo binlogInfo);
 
 	public void remove(String taskName);
+
+	public void clean(String taskName);
 }

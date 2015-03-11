@@ -9,6 +9,8 @@ import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -49,6 +51,18 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 
 	@Value("/data/appdatas/puma/binlog/bak/")
 	private File bakDir;
+
+	@Value("/data/appdatas/puma/bak/")
+	File storageBakDir;
+
+	@Value("/data/appdatas/puma/storage/master/")
+	File masterStorageBaseDir;
+
+	@Value("/data/appdatas/puma/storage/slave/")
+	File slaveStorageBaseDir;
+
+	@Value("/data/appdatas/puma/binlogIndex/")
+	File binlogIndexBaseDir;
 
 	@PostConstruct
 	public void init() {
@@ -194,5 +208,60 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 	private String genBakFileName(String taskName) {
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 		return taskName + '-' + timestamp.getTime() + SUFFIX;
+	}
+
+	public void clean(final String taskName) {
+		if (!storageBakDir.exists()) {
+			if (!storageBakDir.mkdirs()) {
+				throw new RuntimeException("Fail to make dir for " + storageBakDir.getAbsolutePath());
+			}
+		}
+
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+		String folderName = simpleDateFormat.format(new Date());
+		String newBinlogIndex = folderName + "/binlogIndex/" + taskName;
+		String newStorageMaster = folderName + "/storage/master/" + taskName;
+		String newStorageSlave = folderName + "/storage/slave/" + taskName;
+
+
+		File newBinlogIndexFolder = new File(storageBakDir, newBinlogIndex);
+		File newStorageMasterFolder = new File(storageBakDir, newStorageMaster);
+		File newStorageSlaveFolder = new File(storageBakDir, newStorageSlave);
+
+		if (!newBinlogIndexFolder.exists()) {
+			if (!newBinlogIndexFolder.mkdirs()) {
+				throw new RuntimeException("Fail to make dir for " + newBinlogIndexFolder.getAbsolutePath());
+			}
+		}
+
+		if (!newStorageMasterFolder.exists()) {
+			if (!newStorageMasterFolder.mkdirs()) {
+				throw new RuntimeException("Fail to make dir for " + newStorageMasterFolder.getAbsolutePath());
+			}
+		}
+
+		if (!newStorageSlaveFolder.exists()) {
+			if (!newStorageSlaveFolder.mkdirs()) {
+				throw new RuntimeException("Fail to make dir for " + newStorageSlaveFolder.getAbsolutePath());
+			}
+		}
+
+		// Bin log index.
+		File file1 = new File(binlogIndexBaseDir.getAbsolutePath(), taskName);
+		if (file1.exists() && file1.renameTo(newBinlogIndexFolder)) {
+			LOG.info("Backup bin log index success.");
+		}
+
+		// Master.
+		File file2 = new File(masterStorageBaseDir.getAbsolutePath(), taskName);
+		if (file2.exists() && file2.renameTo(newStorageMasterFolder)) {
+			LOG.info("Backup storage master success.");
+		}
+
+		// Slave.
+		File file3 = new File(slaveStorageBaseDir.getAbsolutePath(), taskName);
+		if (file3.exists() && file3.renameTo(newStorageSlaveFolder)) {
+			LOG.info("Backup storage slave success.");
+		}
 	}
 }

@@ -40,5 +40,7 @@ public interface TaskExecutorContainer {
 
 	public void removeEvent(PumaTaskOperationEvent event);
 
+	public void prolongEvent(PumaTaskOperationEvent event);
+
 	public String getPumaServerName();
 }

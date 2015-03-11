@@ -91,9 +91,14 @@ public class PumaTaskController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
+			List<SrcDBInstance> srcDBInstanceEntities = srcDBInstanceService.findAll();
+			List<PumaServer> pumaServerEntities = pumaServerService.findAll();
+
+			map.put("srcDBInstanceEntities", srcDBInstanceEntities);
+			map.put("pumaServerEntities", pumaServerEntities);
+
 			PumaTask pumaTask = pumaTaskService.find(id);
 
-			map.put("lock", true);
 			map.put("entity", pumaTask);
 			map.put("path", "puma-task");
 			map.put("subPath", "create");
@@ -108,6 +113,7 @@ public class PumaTaskController {
 			"/puma-task/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String createPost(
+			String id,
 			String srcDBInstanceName,
 			String pumaServerName,
 			String name,
@@ -117,8 +123,36 @@ public class PumaTaskController {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
+		Operation operation;
+
 		try {
-			PumaTask pumaTask = new PumaTask();
+			PumaTask pumaTask;
+
+			// Create or update?
+			if (id != null) {
+				// Update.
+				pumaTask = pumaTaskService.find(id);
+
+				if (!binlogFile.equals(pumaTask.getBinlogInfo().getBinlogFile())
+						|| !binlogPosition.equals(pumaTask.getBinlogInfo().getBinlogPosition())) {
+					operation = Operation.UPDATE;
+				} else {
+					operation = Operation.PROLONG;
+				}
+
+			} else {
+				// Create.
+				operation = Operation.CREATE;
+
+				// Duplicated name?
+				pumaTask = pumaTaskService.findByName(name);
+				if (pumaTask == null) {
+					pumaTask = new PumaTask();
+				} else {
+					throw new Exception("duplicated");
+				}
+			}
+
 
 			SrcDBInstance srcDBInstance = srcDBInstanceService.findByName(srcDBInstanceName);
 			PumaServer pumaServer = pumaServerService.findByName(pumaServerName);
@@ -134,14 +168,17 @@ public class PumaTaskController {
 			pumaTask.setSrcDBInstanceName(srcDBInstance.getName());
 			pumaTask.setPumaServerName(pumaServer.getName());
 
-			// Persistent.
-			this.pumaTaskService.create(pumaTask);
+			if (id != null) {
+				this.pumaTaskService.update(pumaTask);
+			} else {
+				this.pumaTaskService.create(pumaTask);
+			}
 
 			// Add puma task state to the state container.
 			this.pumaTaskStateContainer.create(pumaTask.getId());
 
 			// Publish puma task operation event to puma server.
-			this.pumaTaskOperationReporter.report(pumaServer.getId(), pumaTask.getId(), pumaTask.getName(), Operation.CREATE);
+			this.pumaTaskOperationReporter.report(pumaServer.getId(), pumaTask.getId(), pumaTask.getName(), operation);
 
 			map.put("success", true);
 		} catch (MongoException e) {

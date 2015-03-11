@@ -96,7 +96,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			taskExecutor.setTaskId(taskId);
 			taskExecutor.setTaskName(taskName);
 			taskExecutor.setNotifyService(notifyService);
-			//taskExecutor.setServerId(taskId.hashCode());
+			taskExecutor.setServerId(taskId.hashCode());
 
 			// Bin log.
 			taskExecutor.setBinlogInfoHolder(binlogInfoHolder);

@@ -45,6 +45,8 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 
 	private String taskId;
 
+	private long serverId;
+
 	private String taskName;
 
 	private String defaultBinlogFileName;
@@ -163,23 +165,14 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 	}
 
 	
-	/**
-	 * @return the serverId
-	 */
-	/*
 	public long getServerId() {
 		return serverId;
 	}
 
-	/**
-	 * @param serverId the serverId to set
-	 */
-	/*
 	public void setServerId(long serverId) {
 		this.serverId = serverId;
 	}
-    */
-	
+
 	/*
 	  * (non-Javadoc)
 	  *

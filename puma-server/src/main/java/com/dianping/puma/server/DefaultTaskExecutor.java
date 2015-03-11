@@ -290,7 +290,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		dumpBinlogPacket.setBinlogFileName(getContext().getBinlogFileName());
 		dumpBinlogPacket.setBinlogFlag(0);
 		dumpBinlogPacket.setBinlogPosition(getContext().getBinlogStartPos());
-		dumpBinlogPacket.setServerId(getDbServerId());
+		dumpBinlogPacket.setServerId(getServerId());
 		dumpBinlogPacket.buildPacket(getContext());
 
 		dumpBinlogPacket.write(os, getContext());

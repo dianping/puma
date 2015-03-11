@@ -21,6 +21,7 @@
             <tbody>
             #foreach($pumaTask in ${entities})
             <tr>
+             	<td>${pumaTask.name}</td>
                 <td>${pumaTask.srcDBInstanceName}</td>
                 <td>${pumaTask.pumaServerName}</td>
                 <td class="puma-task-state"></td>

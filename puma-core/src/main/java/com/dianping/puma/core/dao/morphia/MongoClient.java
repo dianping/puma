@@ -68,6 +68,10 @@ public class MongoClient implements ConfigChangeListener {
         mongo = new Mongo(replicaSetSeeds, mongoOptions);
         //创建Datastore
         datastore = new Morphia().createDatastore(mongo, DB_NAME);
+        LOG.info("mongo client address " + mongo.getAddress());
+        for(ServerAddress address : replicaSetSeeds){
+        	LOG.info("mongo ServerAddress " +address.getHost().toString());
+        }
         //at application start
         //map classes before calling with morphia map* methods
         datastore.ensureIndexes(); //creates indexes from @Index annotations in your entities

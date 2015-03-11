@@ -154,7 +154,7 @@ public abstract class AbstractBucket implements Bucket {
 
     @Override
     public void start() throws IOException {
-
+    	stopped = false;
     }
 
     @Override

@@ -225,7 +225,6 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 	protected abstract void doStart() throws Exception;
 
 	public void start() throws Exception {
-		stop = false;
 		parser.start();
 		dataHandler.start();
 		for(Sender sender: dispatcher.getSenders()){
@@ -235,6 +234,7 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 			sender.start();
 		}
 		dispatcher.start();
+		stop = false;
 		doStart();
 	}
 

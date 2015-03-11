@@ -221,11 +221,11 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 		}
 		if (db != null && db.length() > 0 && !db.equalsIgnoreCase(queryEvent.getDatabaseName())) {
 			log.info("ddl ignored:" + sql + ", from " + queryEvent.getDatabaseName());
-			return;
+		} else {
+			// Refresh table meta
+			tableMetasInfoFetcher.refreshTableMeta();
+			log.info("ddl refreshed meta");
 		}
-		// Refresh table meta
-		tableMetasInfoFetcher.refreshTableMeta();
-		log.info("ddl refreshed meta");
 		ChangedEvent dataChangedEvent = new DdlEvent();
 		DdlEvent ddlEvent = (DdlEvent) dataChangedEvent;
 		ddlEvent.setSql(sql);

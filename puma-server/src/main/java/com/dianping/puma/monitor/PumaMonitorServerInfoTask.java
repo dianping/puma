@@ -95,8 +95,18 @@ public class PumaMonitorServerInfoTask implements PumaMonitorTask {
 			eventName = " <= 64 ";
 		}else if(dValue <= 128){
 			eventName = " <= 128 ";
+		}else if(dValue <= 256){
+			eventName = " <= 256 ";
+		}else if(dValue <= 512){
+			eventName = " <= 512 ";
+		}else if(dValue <= 1024){
+			eventName = " <= 1024 ";
+		}else if(dValue <= 2048){
+			eventName = " <= 2048 ";
+		}else if(dValue <= 4096){
+			eventName = " <= 4096 ";
 		}else{
-			eventName = " > 128 ";
+			eventName = " > 4096 ";
 		}
 		return eventName;
 	}

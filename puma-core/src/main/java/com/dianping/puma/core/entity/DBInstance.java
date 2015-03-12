@@ -4,7 +4,7 @@ public class DBInstance extends BaseEntity {
 
 	private String name;
 
-	private Integer serverId;
+	private Long serverId;
 
 	private String host;
 
@@ -30,11 +30,11 @@ public class DBInstance extends BaseEntity {
 		this.name = name;
 	}
 
-	public Integer getServerId() {
+	public Long getServerId() {
 		return serverId;
 	}
 
-	public void setServerId(Integer serverId) {
+	public void setServerId(Long serverId) {
 		this.serverId = serverId;
 	}
 

@@ -83,7 +83,7 @@ public class DstDBInstanceController {
 	public String createPost(
 			String id,
 			String name,
-			Integer serverId,
+			Long serverId,
 			String ip,
 			String username,
 			String password) {

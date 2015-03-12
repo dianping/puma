@@ -81,20 +81,22 @@ public class PumaMonitorServerInfoTask implements PumaMonitorTask {
 		long dValue = curValue - preValue;
 		if(dValue == 0){
 			eventName = " = 0 ";
-		}else if(dValue < 2){
-			eventName = " < 2 ";
-		}else if(dValue < 4){
-			eventName = " < 4 ";
-		}else if(dValue < 8){
-			eventName = " < 8 ";
-		}else if(dValue < 16){
-			eventName = " < 16 ";
-		}else if(dValue < 32){
-			eventName = " < 32 ";
-		}else if(dValue < 64){
-			eventName = " < 64 ";
+		}else if(dValue <= 2){
+			eventName = " <= 2 ";
+		}else if(dValue <= 4){
+			eventName = " <= 4 ";
+		}else if(dValue <= 8){
+			eventName = " <= 8 ";
+		}else if(dValue <= 16){
+			eventName = " <= 16 ";
+		}else if(dValue <= 32){
+			eventName = " <= 32 ";
+		}else if(dValue <= 64){
+			eventName = " <= 64 ";
+		}else if(dValue <= 128){
+			eventName = " <= 128 ";
 		}else{
-			eventName = " > 64 ";
+			eventName = " > 128 ";
 		}
 		return eventName;
 	}

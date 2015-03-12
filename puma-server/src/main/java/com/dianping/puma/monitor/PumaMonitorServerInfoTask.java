@@ -42,12 +42,11 @@ public class PumaMonitorServerInfoTask implements PumaMonitorTask {
 	public void runTask() {
 		LOG.info("ServerInfo Cat monitoring....");
 		Map<String, ServerStatus> serverStatuses = SystemStatusContainer.instance.listServerStatus();
-		Map<String,AtomicLong> insertCount=SystemStatusContainer.instance.listServerRowInsertCounters();
-		Map<String,AtomicLong> updateCount=SystemStatusContainer.instance.listServerRowUpdateCounters();
-		Map<String,AtomicLong> deleteCount=SystemStatusContainer.instance.listServerRowDeleteCounters();
-		Map<String,AtomicLong> ddlCount=SystemStatusContainer.instance.listServerDdlCounters();
+		Map<String,AtomicLong> insertCount = SystemStatusContainer.instance.listServerRowInsertCounters();
+		Map<String,AtomicLong> updateCount = SystemStatusContainer.instance.listServerRowUpdateCounters();
+		Map<String,AtomicLong> deleteCount = SystemStatusContainer.instance.listServerRowDeleteCounters();
+		Map<String,AtomicLong> ddlCount = SystemStatusContainer.instance.listServerDdlCounters();
 		for(Map.Entry<String,ServerStatus> serverStatus:serverStatuses.entrySet()){
-			LOG.info("ServerInfo Cat monitoring "+serverStatus.getKey()+" ....");
 			initPreCount(serverStatus.getKey());
 			String insertName = " = 0 ";
 			String deleteName = " = 0 ";

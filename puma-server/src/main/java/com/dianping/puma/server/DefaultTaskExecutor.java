@@ -207,6 +207,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				&& (dataHandlerResult.getData() instanceof DdlEvent || (
 				dataHandlerResult.getData() instanceof RowChangedEvent && ((RowChangedEvent) dataHandlerResult
 						.getData()).isTransactionCommit()))) {
+			LOG.info("Save occurs: {}, {}.", getContext().getBinlogFileName(), binlogEvent.getHeader().getNextPosition());
 			// save position
 			binlogInfoHolder.setBinlogInfo(getTaskName(),
 					new BinlogInfo(getContext().getBinlogFileName(), binlogEvent.getHeader().getNextPosition()));

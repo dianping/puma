@@ -366,6 +366,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
             @Override
             public void onEvent(ChangedEvent event) throws Exception {
+                LOG.info(event.toString());
                 //LOG.info("********************Received " + event);
                 if (!skipToNextPos) {
                     if (event instanceof RowChangedEvent) {

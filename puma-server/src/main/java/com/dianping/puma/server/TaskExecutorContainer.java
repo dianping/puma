@@ -1,12 +1,9 @@
 package com.dianping.puma.server;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
-import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.monitor.PumaTaskControllerEvent;
 import com.dianping.puma.core.monitor.PumaTaskOperationEvent;
-import com.dianping.puma.core.monitor.ReplicationTaskStatusActionEvent;
 
 public interface TaskExecutorContainer {
 

@@ -33,6 +33,11 @@
             <groupId>com.dianping.lion</groupId>
             <artifactId>lion-client</artifactId>
         </dependency>
+        <!-- zebra -->
+        <dependency>
+            <groupId>com.dianping.zebra</groupId>
+            <artifactId>zebra-api</artifactId>
+        </dependency>
         <!-- 日志系统 -->
         <dependency>
             <groupId>org.slf4j</groupId>

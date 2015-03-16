@@ -44,7 +44,7 @@ public class PumaClientTest {
         builder.host("111.3.3");
         builder.name("test");
         builder.port(123);
-        builder.seqFileBase("11111");
+        builder.seqFileBase("/tmp/11111");
         builder.tables("cat", "a", "b*");
         builder.tables("me", "d");
         builder.target("fff");
@@ -68,7 +68,7 @@ public class PumaClientTest {
         builder.host("111.3.3");
         builder.name("test");
         builder.port(123);
-        builder.seqFileBase("11111");
+        builder.seqFileBase("/tmp/11111");
         builder.tables("cat", "a", "b*");
         builder.tables("me", "d");
         builder.target("fff");
@@ -89,7 +89,7 @@ public class PumaClientTest {
         builder.host("111.3.3");
         builder.name("test");
         builder.port(123);
-        builder.seqFileBase("11111");
+        builder.seqFileBase("/tmp/11111");
         builder.tables("cat", "a", "b*");
         builder.tables("me", "d");
         builder.target("fff");
@@ -111,7 +111,7 @@ public class PumaClientTest {
         builder.host("111.3.3");
         builder.name("test");
         builder.port(123);
-        builder.seqFileBase("11111");
+        builder.seqFileBase("/tmp/11111");
         builder.tables("cat", "a", "b*");
         builder.tables("me", "d");
         builder.target("fff");
@@ -133,7 +133,7 @@ public class PumaClientTest {
         builder.host("111.3.3");
         builder.name("test");
         builder.port(123);
-        builder.seqFileBase("11111");
+        builder.seqFileBase("/tmp/11111");
         builder.tables("cat", "a", "b*");
         builder.tables("me", "d");
         builder.target("fff");
@@ -155,7 +155,7 @@ public class PumaClientTest {
         builder.host("111.3.3");
         builder.name("test");
         builder.port(123);
-        builder.seqFileBase("11111");
+        builder.seqFileBase("/tmp/11111");
         builder.tables("cat", "a", "b*");
         builder.tables("me", "d");
         builder.target("fff");
@@ -178,7 +178,7 @@ public class PumaClientTest {
         builder.host("111.3.3");
         builder.name("test");
         builder.port(123);
-        builder.seqFileBase("11111");
+        builder.seqFileBase("/tmp/11111");
         builder.tables("cat", "a", "b*");
         builder.tables("me", "d");
         builder.target("fff");

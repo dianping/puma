@@ -9,6 +9,12 @@ import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
  * http://www.dozer.cc
  */
 public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
+    private final ShardSyncTask task;
+
+    public ShardSyncTaskExecutor(ShardSyncTask task) {
+        this.task = task;
+    }
+
     @Override
     public void start() {
 
@@ -31,7 +37,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     @Override
     public ShardSyncTask getTask() {
-        return null;
+        return task;
     }
 
     @Override

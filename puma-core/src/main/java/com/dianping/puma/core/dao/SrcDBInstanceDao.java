@@ -6,15 +6,17 @@ import java.util.List;
 
 public interface SrcDBInstanceDao {
 
-	SrcDBInstance find(String id);
+    SrcDBInstance find(String id);
 
-	SrcDBInstance findByName(String name);
+    SrcDBInstance findByName(String name);
 
-	List<SrcDBInstance> findAll();
+    List<SrcDBInstance> findAll();
 
-	void create(SrcDBInstance entity);
+    List<SrcDBInstance> findByIp(String ip);
 
-	void update(SrcDBInstance entity);
+    void create(SrcDBInstance entity);
 
-	void remove(String id);
+    void update(SrcDBInstance entity);
+
+    void remove(String id);
 }

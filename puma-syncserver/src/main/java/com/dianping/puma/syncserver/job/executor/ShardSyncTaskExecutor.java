@@ -3,6 +3,9 @@ package com.dianping.puma.syncserver.job.executor;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
+import com.dianping.puma.core.service.PumaServerService;
+import com.dianping.puma.core.service.PumaTaskService;
+import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.core.sync.model.task.ShardSyncTask;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.zebra.config.LionKey;
@@ -36,6 +39,13 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     private volatile boolean switchOn;
 
+    private PumaServerService pumaServerService;
+
+    private PumaTaskService pumaTaskService;
+
+    private SrcDBInstanceService srcDBInstanceService;
+
+
     public ShardSyncTaskExecutor(ShardSyncTask task) {
         Preconditions.checkNotNull(task, "task");
         Preconditions.checkNotNull(task.getRuleName(), "task.ruleName");
@@ -58,8 +68,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
         //todo:init
     }
 
-    protected void initPumaClient(){
-        if(!switchOn && !Strings.isNullOrEmpty(originGroupDataSource)){
+    protected void initPumaClient() {
+        if (!switchOn && !Strings.isNullOrEmpty(originGroupDataSource)) {
             //初始化迁移程序
         }
 
@@ -85,7 +95,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
             }
         }
 
-        if(needMaster) {
+        if (needMaster) {
             initGroupDataSource(originGroupDataSource);
         }
     }

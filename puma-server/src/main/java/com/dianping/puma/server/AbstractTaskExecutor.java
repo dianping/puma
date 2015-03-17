@@ -58,7 +58,9 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 
 	protected NotifyService notifyService;
 
-	private volatile boolean stop = false;
+	private volatile boolean stop = true;
+
+	private volatile boolean pause = false;
 
 	protected BinlogInfoHolder binlogInfoHolder;
 
@@ -187,16 +189,7 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
      * 
      * @see com.dianping.puma.server.Server#stop()
      */
-	@Override
-	public void stop() throws Exception {
-		stop = true;
-		doStop();
-		//stop = true;
 
-		parser.stop();
-		dataHandler.stop();
-		dispatcher.stop();
-	}
 
 	public boolean isStop() {
 		return stop;
@@ -206,18 +199,33 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 
 	protected abstract void doStart() throws Exception;
 
+	@Override
 	public void start() throws Exception {
+		stop = false;
+
 		parser.start();
 		dataHandler.start();
-		for(Sender sender: dispatcher.getSenders()){
-			sender.getStorage().getMasterBucketIndex().start();
-			sender.getStorage().getSlaveBucketIndex().start();
-			sender.getStorage().start();
-			sender.start();
-		}
 		dispatcher.start();
-		stop = false;
 		doStart();
+	}
+
+	@Override
+	public void stop() throws Exception {
+		stop = true;
+
+		parser.stop();
+		dataHandler.stop();
+		dispatcher.stop();
+
+		doStop();
+	}
+
+	public void resume() throws Exception {
+		stop = false;
+	}
+
+	public void pause() throws Exception {
+		stop = true;
 	}
 
 	@Override public Status getStatus() {

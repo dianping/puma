@@ -62,4 +62,7 @@ public interface TaskExecutor extends LifeCycle<Exception> {
 
 	public List<Sender> getFileSender();
 
+	public void resume() throws Exception;
+
+	public void pause() throws Exception;
 }

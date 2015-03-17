@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.dianping.cat.Cat;
-import com.dianping.puma.core.replicate.model.task.TaskExecutorStatus;
 
 /**
  * @author Leo Liang

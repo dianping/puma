@@ -1,14 +1,15 @@
 package com.dianping.puma.sender;
 
-import org.apache.log4j.Logger;
 
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.monitor.Notifiable;
 import com.dianping.puma.core.monitor.NotifyService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractSender implements Sender, Notifiable {
-	private static final Logger	log				= Logger.getLogger(AbstractSender.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractSender.class);
 	private String				name;
 	private int					maxTryTimes		= 3;
 	private boolean				canMissEvent	= false;
@@ -107,6 +108,8 @@ public abstract class AbstractSender implements Sender, Notifiable {
 	public void send(ChangedEvent event, PumaContext context) throws SenderException {
 		long retryCount = 0;
 		while (true) {
+			//LOG.info("Enter `send` infinite loop!");
+
 			if (isStop()) {
 				break;
 			}
@@ -114,9 +117,10 @@ public abstract class AbstractSender implements Sender, Notifiable {
 				doSend(event, context);
 				break;
 			} catch (Exception e) {
+				LOG.error("Send error!");
 				if (retryCount++ > maxTryTimes) {
 					if (canMissEvent) {
-						log.error(String.format(MSG_SKIP, maxTryTimes, context.getPumaServerName(),
+						LOG.error(String.format(MSG_SKIP, maxTryTimes, context.getPumaServerName(),
 								context.getBinlogFileName(), context.getBinlogStartPos(), context.getNextBinlogPos()));
 						if (this.notifyService != null) {
 							this.notifyService.alarm(
@@ -127,7 +131,7 @@ public abstract class AbstractSender implements Sender, Notifiable {
 						return;
 					} else {
 						if (retryCount % 100 == 0) {
-							log.error(String.format(MSG_LOOP_FAILED, maxTryTimes, context.getPumaServerName(),
+							LOG.error(String.format(MSG_LOOP_FAILED, maxTryTimes, context.getPumaServerName(),
 									context.getBinlogFileName(), context.getBinlogStartPos(),
 									context.getNextBinlogPos()));
 							if (this.notifyService != null) {
@@ -146,6 +150,8 @@ public abstract class AbstractSender implements Sender, Notifiable {
 				}
 			}
 		}
+
+		//LOG.info("Exit `send` infinite loop!");
 	}
 
 	protected abstract void doSend(ChangedEvent event, PumaContext context) throws SenderException;

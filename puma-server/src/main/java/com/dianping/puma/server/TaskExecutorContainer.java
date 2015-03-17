@@ -26,9 +26,9 @@ public interface TaskExecutorContainer {
 	public void withdraw(TaskExecutor taskExecutor) throws Exception;
 
 	public void stopServers();
-	
+
 	public void pauseEvent(PumaTaskControllerEvent event);
-	
+
 	public void resumeEvent(PumaTaskControllerEvent event);
 
 	public void createEvent(PumaTaskOperationEvent event);

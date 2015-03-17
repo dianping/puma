@@ -11,13 +11,11 @@ import javax.annotation.PostConstruct;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.PumaTask;
-import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.monitor.PumaTaskControllerEvent;
 import com.dianping.puma.core.monitor.PumaTaskOperationEvent;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
-import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.server.builder.TaskExecutorBuilder;
 import com.dianping.puma.storage.CleanupStrategy;
 import com.dianping.puma.storage.DefaultCleanupStrategy;
@@ -32,11 +30,6 @@ import com.dianping.puma.config.Config;
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.util.PumaThreadUtils;
-import com.dianping.puma.datahandler.DefaultDataHandler;
-import com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher;
-import com.dianping.puma.parser.DefaultBinlogParser;
-import com.dianping.puma.parser.Parser;
-import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.storage.EventStorage;
 
@@ -206,7 +199,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 		try {
 			startExecutor(taskExecutor);
 		} catch (Exception e) {
-			LOG.error("Puma task `{}` resume event error: {}.", taskName, e.toString());
+			LOG.error("Puma task `{}` resume event error: {}.", taskName, e.getMessage());
 		}
 	}
 

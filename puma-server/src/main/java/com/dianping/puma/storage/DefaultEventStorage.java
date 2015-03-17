@@ -94,7 +94,11 @@ public class DefaultEventStorage implements EventStorage {
 		initAcceptedTableList();
 
 		try {
+			masterBucketIndex.start();
+			slaveBucketIndex.start();
 			bucketManager.start();
+
+			writingBucket = null;
 
 			binlogIndex.start();
 		} catch (Exception e) {

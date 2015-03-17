@@ -140,6 +140,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 	private void processBinlog() throws IOException {
 		while (!isStop()) {
+			//LOG.info("Enter `processBinlog` infinite loop!");
+
 			// only slow down parsing, not stop
 			if (SystemStatusContainer.instance.isStopTheWorld(this.getTaskName())) {
 				try {
@@ -159,6 +161,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			}
 
 		}
+
+		//LOG.info("Exit `processBinlog` infinite loop!");
 	}
 
 	protected void processBinlogPacket(BinlogPacket binlogPacket) throws IOException {

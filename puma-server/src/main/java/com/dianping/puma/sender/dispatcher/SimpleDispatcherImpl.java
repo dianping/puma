@@ -51,10 +51,19 @@ public class SimpleDispatcherImpl extends AbstractDispatcher {
 	}
 
 	@Override
+	public void start() throws Exception {
+		for (Sender sender: senders) {
+			sender.start();
+		}
+		super.start();
+	}
+
+	@Override
 	public void stop() throws Exception {
 		for (Sender sender : senders) {
 			sender.stop();
 		}
+		super.stop();
 	}
 
 	@Override

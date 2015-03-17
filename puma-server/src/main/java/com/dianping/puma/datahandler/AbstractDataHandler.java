@@ -211,6 +211,7 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 	 * @param sql
 	 */
 	protected void handleDDlEvent(DataHandlerResult result, QueryEvent queryEvent, String sql) {
+		/*
 		log.info("ddl:" + sql + ", from " + queryEvent.getDatabaseName());
 		String db = "";
 		try {
@@ -223,9 +224,10 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 			log.info("ddl ignored:" + sql + ", from " + queryEvent.getDatabaseName());
 		} else {
 			// Refresh table meta
+			*/
 			tableMetasInfoFetcher.refreshTableMeta();
 			log.info("ddl refreshed meta");
-		}
+		//}
 		ChangedEvent dataChangedEvent = new DdlEvent();
 		DdlEvent ddlEvent = (DdlEvent) dataChangedEvent;
 		ddlEvent.setSql(sql);

@@ -178,7 +178,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
                 .host(pumaServer.getHost())
                 .target(pumaTask.getName());
 
-        configBuilder.name(String.format("ShardSyncTask-%s-%s(seq:%d)", task.getId(), ds, seq));
+        configBuilder.name(String.format("ShardSyncTask-%s-%s-s(seq:%d)", task.getId(), ds, tables.hashCode(), seq));
 
         for (String tb : tables) {
             configBuilder.tables(ds, tb);
@@ -195,7 +195,10 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
         return client;
     }
 
-    private GroupDataSource initGroupDataSource(String jdbcRef) {
+    protected GroupDataSource initGroupDataSource(String jdbcRef) {
+        if (dataSourcePool.containsKey(jdbcRef)) {
+            return (GroupDataSource) dataSourcePool.get(dataSourcePool);
+        }
         GroupDataSource ds = new GroupDataSource(jdbcRef);
         ds.setRouterType(RouterType.FAIL_OVER.getRouterType());
         ds.init();

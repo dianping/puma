@@ -3,6 +3,8 @@ package com.dianping.puma.syncserver.job.executor;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
 import com.dianping.puma.core.sync.model.task.ShardSyncTask;
+import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
+import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
@@ -11,6 +13,10 @@ import com.google.gson.Gson;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
+import java.io.InputStreamReader;
 
 import static org.mockito.Mockito.*;
 
@@ -25,6 +31,44 @@ public class ShardSyncTaskExecutorTest {
         this.task.setTableName("table1");
         this.target = new ShardSyncTaskExecutor(task);
         this.target.setConfigCache(configCache);
+    }
+
+    @Test
+    public void initPumaClientsAndDataSourcesTest() {
+        ShardSyncTaskExecutor spy = spy(target);
+
+        doAnswer(new Answer<GroupDataSource>() {
+            @Override
+            public GroupDataSource answer(InvocationOnMock invocationOnMock) throws Throwable {
+                System.out.println("init ds:" + invocationOnMock.getArguments()[0].toString());
+                GroupDataSource ds = new GroupDataSource(invocationOnMock.getArguments()[0].toString());
+                return ds;
+            }
+        }).when(spy).initGroupDataSource(anyString());
+
+        doReturn(null).when(spy).initPumaClient(any(GroupDataSourceConfig.class), anyLong(), anySet());
+
+
+        TableShardRuleConfig tableShardRuleConfig = buildTableConfigFromFile("initPumaClientsAndDataSourcesTest.json");
+        spy.tableShardRuleConfig = tableShardRuleConfig;
+        spy.initRouterConfig();
+        spy.switchOn = false;
+        spy.originGroupDataSource = "origin";
+
+        spy.initPumaClientsAndDataSources();
+
+
+        verify(spy, times(7)).initGroupDataSource(anyString());
+        verify(spy, times(1)).initGroupDataSource("origin");
+        verify(spy, times(1)).initGroupDataSource("ds0");
+        verify(spy, times(2)).initGroupDataSource("ds1");
+        verify(spy, times(1)).initGroupDataSource("ds2");
+        verify(spy, times(1)).initGroupDataSource("ds3");
+        verify(spy, times(1)).initGroupDataSource("ds8");
+        verify(spy, times(0)).initGroupDataSource("ds4");
+        verify(spy, times(0)).initGroupDataSource("ds5");
+
+        verify(spy,times(8)).initPumaClient(any(GroupDataSourceConfig.class), anyLong(), anySet());
     }
 
     @Test
@@ -51,6 +95,7 @@ public class ShardSyncTaskExecutorTest {
         config.setTableName("test1");
 
         TableShardDimensionConfig dimensionConfig = new TableShardDimensionConfig();
+        dimensionConfig.setMaster(true);
         dimensionConfig.setTableName("test1");
         dimensionConfig.setDbIndexes("db1");
         dimensionConfig.setDbRule("(#id# % 4 / 4)");
@@ -63,6 +108,10 @@ public class ShardSyncTaskExecutorTest {
         target.initRouterConfig();
 
         Assert.assertEquals(1, target.routerRule.getTableShardRules().size());
+    }
+
+    private TableShardRuleConfig buildTableConfigFromFile(String file) {
+        return new Gson().fromJson(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("shard-configs/" + file)), TableShardRuleConfig.class);
     }
 
     private RouterRuleConfig buildRouterRuleConfig() {

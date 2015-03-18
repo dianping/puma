@@ -20,7 +20,6 @@ import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
-import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
 import com.dianping.zebra.shard.router.DataSourceRouter;
 import com.dianping.zebra.shard.router.DataSourceRouterImpl;
@@ -29,15 +28,11 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 
 import javax.sql.DataSource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,7 +49,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     private ConfigCache configService;
 
-    private Map<String, GroupDataSource> dataSourcePool;
+    private Map<String, DataSource> dataSourcePool = new HashMap<String, DataSource>();
 
     private List<PumaClient> pumaClientList = new ArrayList<PumaClient>();
 
@@ -106,7 +101,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
     protected void initRouter() {
         DataSourceRouterImpl routerImpl = new DataSourceRouterImpl();
         routerImpl.setRouterRule(routerRule);
-        routerImpl.setDataSourcePool(Maps.<String, DataSource>newHashMap(dataSourcePool));
+        routerImpl.setDataSourcePool(dataSourcePool);
         this.router = routerImpl;
     }
 

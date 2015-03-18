@@ -22,19 +22,27 @@ import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
+import com.dianping.zebra.shard.router.DataSourceRouter;
 import com.dianping.zebra.shard.router.DataSourceRouterImpl;
-import com.dianping.zebra.shard.router.rule.RouterRule;
-import com.dianping.zebra.shard.router.rule.RouterRuleBuilder;
-import com.google.common.base.Preconditions;
+import com.dianping.zebra.shard.router.rule.*;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Dozer @ 2015-02
@@ -62,12 +70,16 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     private SrcDBInstanceService srcDBInstanceService;
 
-    private DataSourceRouterImpl router;
+    private DataSourceRouter router;
+
+    private RouterRule routerRule;
+
+    private static final Pattern JDBC_URL_PATTERN = Pattern.compile("jdbc:mysql://([^:]+):\\d+/([^\\?]+).*");
 
     public ShardSyncTaskExecutor(ShardSyncTask task) {
-        Preconditions.checkNotNull(task, "task");
-        Preconditions.checkNotNull(task.getRuleName(), "task.ruleName");
-        Preconditions.checkNotNull(task.getTableName(), "task.tableName");
+        checkNotNull(task, "task");
+        checkNotNull(task.getRuleName(), "task.ruleName");
+        checkNotNull(task.getTableName(), "task.tableName");
         this.task = task;
 
         try {
@@ -78,43 +90,59 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
     }
 
     public void init() throws LionException {
-        Preconditions.checkNotNull(configService, "configService");
+        checkNotNull(configService, "configService");
         initAndConvertConfig();
+        initRouterConfig();
+        initPumaClientsAndDataSources();
         initRouter();
-        initDs();
-        initPumaClients();
-        //todo:init pumaclient
-        //todo:init
+    }
+
+    protected void initRouterConfig() {
+        RouterRuleConfig routerRuleConfig = new RouterRuleConfig();
+        routerRuleConfig.setTableShardConfigs(Lists.newArrayList(tableShardRuleConfig));
+        this.routerRule = RouterRuleBuilder.build(routerRuleConfig);
     }
 
     protected void initRouter() {
-        this.router = new DataSourceRouterImpl();
-        RouterRuleConfig routerRuleConfig = new RouterRuleConfig();
-        routerRuleConfig.setTableShardConfigs(Lists.newArrayList(tableShardRuleConfig));
-        RouterRule routerRule = RouterRuleBuilder.build(routerRuleConfig);
-        this.router.setRouterRule(routerRule);
+        DataSourceRouterImpl routerImpl = new DataSourceRouterImpl();
+        routerImpl.setRouterRule(routerRule);
+        routerImpl.setDataSourcePool(Maps.<String, DataSource>newHashMap(dataSourcePool));
+        this.router = routerImpl;
     }
 
-    protected void initPumaClients() {
+    protected void initPumaClientsAndDataSources() {
         if (!switchOn && !Strings.isNullOrEmpty(originGroupDataSource)) {
-            Preconditions.checkNotNull(dataSourcePool.get(originGroupDataSource), "originGroupDataSource");
-            initPumaClient(dataSourcePool.get(originGroupDataSource).getConfig(), SubscribeConstant.SEQ_FROM_LATEST, String.format("%s-%s-%s-New-to-Shard", task.getRuleName(), task.getTableName(), task.getId()));
-            initPumaClient(dataSourcePool.get(originGroupDataSource).getConfig(), SubscribeConstant.SEQ_FROM_OLDEST, String.format("%s-%s-%s-Old-to-Shard", task.getRuleName(), task.getTableName(), task.getId()));
+            GroupDataSource ds = initGroupDataSource(originGroupDataSource);
+            initPumaClient(ds.getConfig(), SubscribeConstant.SEQ_FROM_LATEST, Sets.newHashSet(task.getTableName()));
+            initPumaClient(ds.getConfig(), SubscribeConstant.SEQ_FROM_OLDEST, Sets.newHashSet(task.getTableName()));
         }
 
-        for (TableShardDimensionConfig dimensionConfig : tableShardRuleConfig.getDimensionConfigs()) {
-            if (dimensionConfig.isMaster()) {
-                String[] dbs = dimensionConfig.getDbIndexes().split(",");
-                for (String jdbcRef : dbs) {
-                    Preconditions.checkNotNull(dataSourcePool.get(jdbcRef), jdbcRef);
-                    initPumaClient(dataSourcePool.get(jdbcRef).getConfig(), SubscribeConstant.SEQ_FROM_OLDEST, String.format("%s-%s-%s-Master-to-Other", task.getRuleName(), task.getTableName(), task.getId()));
-                }
+        TableShardRule tableShardRule = routerRule.getTableShardRules().get(task.getTableName());
+        for (DimensionRule dimensionRule : tableShardRule.getDimensionRules()) {
+            DimensionRuleImpl dimensionRuleImpl = (DimensionRuleImpl) dimensionRule;
+            if (dimensionRuleImpl == null || !dimensionRuleImpl.isMaster()) {
+                continue;
+            }
+
+            initPumaClientsAndDataSources(dimensionRuleImpl.getDataSourceProvider().getAllDBAndTables());
+            for (DimensionRule rule : dimensionRuleImpl.getWhiteListRules()) {
+                initPumaClientsAndDataSources(rule.getAllDBAndTables());
             }
         }
     }
 
-    protected void initPumaClient(GroupDataSourceConfig config, long seq, String name) {
-        Preconditions.checkNotNull(config, "ds");
+    protected void initPumaClientsAndDataSources(Map<String, Set<String>> all) {
+        for (Map.Entry<String, Set<String>> entity : all.entrySet()) {
+            if (dataSourcePool.containsKey(entity.getKey())) {
+                continue;
+            }
+            GroupDataSource groupDataSource = initGroupDataSource(entity.getKey());
+            initPumaClient(groupDataSource.getConfig(), SubscribeConstant.SEQ_FROM_OLDEST, entity.getValue());
+        }
+    }
+
+    protected PumaClient initPumaClient(GroupDataSourceConfig config, long seq, Set<String> tables) {
+        checkNotNull(config, "ds");
 
         List<DataSourceConfig> dataSourceConfigs = FluentIterable.from(config.getDataSourceConfigs().values()).filter(new Predicate<DataSourceConfig>() {
             @Override
@@ -123,55 +151,59 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
             }
         }).toList();
 
-        Preconditions.checkArgument(dataSourceConfigs.size() == 1, config.toString());
+        checkArgument(dataSourceConfigs.size() == 1, config.toString());
 
         DataSourceConfig dsConfig = dataSourceConfigs.get(0);
 
-        String ip = dsConfig.getJdbcUrl().replace("jdbc:mysql://", "");
-        ip = ip.substring(0, ip.indexOf(":"));
-        Preconditions.checkArgument(ip.matches("\\d+\\.\\d+\\.\\d+\\.\\d+"), dsConfig.getJdbcUrl());
+        Matcher matcher = JDBC_URL_PATTERN.matcher(dsConfig.getJdbcUrl());
+        checkArgument(matcher.matches(), dsConfig.getJdbcUrl());
 
+        String ip = matcher.group(1);
+        String ds = matcher.group(2);
 
         List<SrcDBInstance> dbs = srcDBInstanceService.findByIp(ip);
-        Preconditions.checkArgument(dbs.size() == 1, ip);
+        checkArgument(dbs.size() == 1, ip);
         SrcDBInstance db = dbs.get(0);
 
         List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceId(db.getId());
-        Preconditions.checkArgument(pumaTasks.size() >= 1, "no puma task for db %s", db.getId());
-        PumaTask task = pumaTasks.get(0);
+        checkArgument(pumaTasks.size() >= 1, "no puma task for db %s", db.getId());
+        PumaTask pumaTask = pumaTasks.get(0);
 
-        PumaServer pumaServer = pumaServerService.find(task.getPumaServerId());
-        Preconditions.checkNotNull(pumaServer, "puma server %s not exists", task.getPumaServerId());
+        PumaServer pumaServer = pumaServerService.find(pumaTask.getPumaServerId());
+        checkNotNull(pumaServer, "puma server %s not exists", pumaTask.getPumaServerId());
 
         ConfigurationBuilder configBuilder = new ConfigurationBuilder();
-//        configBuilder.dml(true).ddl(false).transaction(false).tables()//todo:解析table
-    }
 
-    protected void initDs() {
-        //没有启用切换，说明需要同步老库，那么需要初始化主维度
-        boolean needMaster = !switchOn && !Strings.isNullOrEmpty(originGroupDataSource);
+        configBuilder.dml(true)
+                .ddl(false)
+                .transaction(false)
+                .port(pumaServer.getPort())
+                .host(pumaServer.getHost())
+                .target(pumaTask.getName());
 
-        for (TableShardDimensionConfig dimensionConfig : tableShardRuleConfig.getDimensionConfigs()) {
-            if (dimensionConfig.isMaster() && !needMaster) {
-                continue;
-            }
+        configBuilder.name(String.format("ShardSyncTask-%s-%s(seq:%d)", task.getId(), ds, seq));
 
-            String[] dbs = dimensionConfig.getDbIndexes().split(",");
-            for (String jdbcRef : dbs) {
-                initGroupDataSource(jdbcRef);
-            }
+        for (String tb : tables) {
+            configBuilder.tables(ds, tb);
         }
 
-        if (needMaster) {
-            initGroupDataSource(originGroupDataSource);
+        PumaClient client = new PumaClient(configBuilder.build());
+
+        //如果 seq 是默认值，那说明还没初始化过，如果不是默认值，以前跑过了。
+        if (client.getSeqFileHolder().getSeq() < 0l) {
+            client.getSeqFileHolder().saveSeq(seq);
         }
+
+        pumaClientList.add(client);
+        return client;
     }
 
-    private void initGroupDataSource(String jdbcRef) {
+    private GroupDataSource initGroupDataSource(String jdbcRef) {
         GroupDataSource ds = new GroupDataSource(jdbcRef);
         ds.setRouterType(RouterType.FAIL_OVER.getRouterType());
         ds.init();
         dataSourcePool.put(jdbcRef, ds);
+        return ds;
     }
 
     protected void initAndConvertConfig() throws LionException {
@@ -189,7 +221,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
                 return;
             }
         }
-        Preconditions.checkNotNull(this.tableShardRuleConfig, "tableShardRuleConfig");
+        checkNotNull(this.tableShardRuleConfig, "tableShardRuleConfig");
     }
 
     @Override

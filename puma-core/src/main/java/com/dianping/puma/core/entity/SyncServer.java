@@ -1,20 +1,10 @@
 package com.dianping.puma.core.entity;
 
-public class SyncServerEntity extends BaseEntity {
-
-	private String name;
+public class SyncServer extends BaseEntity {
 
 	private String host;
 
 	private int port;
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
 
 	public String getHost() {
 		return host;

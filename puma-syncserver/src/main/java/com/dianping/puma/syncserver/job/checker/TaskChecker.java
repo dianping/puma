@@ -4,17 +4,12 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import com.dianping.puma.core.monitor.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.dianping.puma.core.monitor.Event;
-import com.dianping.puma.core.monitor.EventListener;
-import com.dianping.puma.core.monitor.NotifyService;
-import com.dianping.puma.core.monitor.SyncTaskDeleteEvent;
-import com.dianping.puma.core.monitor.SyncTaskStatusActionEvent;
-import com.dianping.puma.core.monitor.TaskEvent;
 import com.dianping.puma.core.sync.model.task.SyncTask;
 import com.dianping.puma.core.sync.model.task.Task;
 import com.dianping.puma.syncserver.conf.Config;
@@ -65,10 +60,20 @@ public class TaskChecker implements EventListener {
     @Override
     public void onEvent(Event event) {
         LOG.info("Receive event: " + event);
+
+        if (event instanceof SyncTaskOperationEvent) {
+
+        } else if (event instanceof SyncTaskControllerEvent) {
+
+        } else {
+
+        }
+
+
         if (event instanceof SyncTaskStatusActionEvent) {
             //收到状态变化的事件，通知Container修改状态
             taskExecutionContainer.changeStatus(((SyncTaskStatusActionEvent) event).getSyncTaskId(),
-                    ((SyncTaskStatusActionEvent) event).getTaskStatusAction());
+                  ((SyncTaskStatusActionEvent) event).getTaskStatusAction());
         } else if (event instanceof SyncTaskDeleteEvent) {
             //收到状态变化的事件，通知Container修改状态
             taskExecutionContainer.deleteSyncTask(((SyncTaskDeleteEvent) event).getSyncTaskId());

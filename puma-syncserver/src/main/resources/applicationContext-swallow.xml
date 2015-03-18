@@ -15,6 +15,20 @@
         <property name="topic" value="puma_status_event" />
     </bean>
 
+    <bean id="syncTaskOperationEventSubscriber"
+          class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
+          init-method="init">
+        <property name="topic" value="sync_task_operation" />
+        <property name="type" value="#{config.syncServerName}" />
+        <property name="clazz"
+                  value="com.dianping.puma.core.monitor.SyncTaskOperationEvent" />
+        <property name="listeners">
+            <list>
+                <ref bean="taskChecker" />
+            </list>
+        </property>
+    </bean>
+
     <bean id="taskEventSubscriber"
         class="com.dianping.puma.syncserver.monitor.TaskEventSubscriber"
         init-method="init">

@@ -15,12 +15,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.dianping.puma.core.entity.SyncServerEntity;
+import com.dianping.puma.core.entity.SyncServer;
 import com.dianping.puma.core.service.SyncServerService;
-import com.dianping.puma.core.sync.model.config.PumaSyncServerConfig;
 import com.dianping.puma.core.util.IPUtils;
 import com.dianping.puma.syncserver.job.executor.DumpTaskExecutor;
-import com.dianping.puma.syncserver.service.PumaSyncServerConfigService;
+import org.springframework.stereotype.Service;
 
 public class Config implements InitializingBean {
     private static final Logger LOG = LoggerFactory.getLogger(Config.class);
@@ -41,7 +40,7 @@ public class Config implements InitializingBean {
         for (String ip : IPUtils.getNoLoopbackIP4Addresses()) {
             String host = ip + ':' + localPort;
             LOG.info("Try this localhost to find syncServerName from db : " + host);
-            SyncServerEntity config = syncServerService.findByHost(ip,localPort);
+            SyncServer config = syncServerService.findByHost(ip,localPort);
             if (config != null) {
                 syncServerName = config.getName();
                 LOG.info("Match syncServerName: " + syncServerName);

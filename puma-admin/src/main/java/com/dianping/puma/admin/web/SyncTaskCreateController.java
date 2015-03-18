@@ -8,6 +8,11 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpSession;
 
+import com.dianping.puma.admin.reporter.SyncTaskOperationReporter;
+import com.dianping.puma.core.constant.Operation;
+import com.dianping.puma.core.constant.SyncType;
+import com.dianping.puma.core.entity.PumaTask;
+import com.dianping.puma.core.service.PumaTaskService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,20 +26,17 @@ import org.springframework.web.servlet.ModelAndView;
 import com.dianping.puma.admin.config.Config;
 import com.dianping.puma.admin.monitor.SystemStatusContainer;
 import com.dianping.puma.admin.service.DumpTaskService;
-import com.dianping.puma.admin.service.MysqlConfigService;
-import com.dianping.puma.admin.service.PumaSyncServerConfigService;
 import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.entity.SrcDBInstance;
-import com.dianping.puma.core.entity.SyncServerEntity;
+import com.dianping.puma.core.entity.SyncServer;
 import com.dianping.puma.core.service.DstDBInstanceService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.core.service.SyncServerService;
 import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.config.MysqlConfig;
 import com.dianping.puma.core.sync.model.config.MysqlHost;
-import com.dianping.puma.core.sync.model.config.PumaSyncServerConfig;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.DumpMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
@@ -67,16 +69,30 @@ public class SyncTaskCreateController {
     @Autowired
     private SyncTaskService syncTaskService;
     @Autowired
+    private com.dianping.puma.core.service.SyncTaskService syncTaskService2;
+    @Autowired
+    private com.dianping.puma.core.service.DumpTaskService dumpTaskService2;
+
+    @Autowired
+    private PumaTaskService pumaTaskService;
+    @Autowired
     private SystemStatusContainer systemStatusContainer;
+
+    @Autowired
+    private SyncTaskOperationReporter syncTaskOperationReporter;
 
     @RequestMapping(value = { "/sync-task/create" })
     public ModelAndView create(HttpSession session) {
         Map<String, Object> map = new HashMap<String, Object>();
         //查询MysqlConfig
-        List<SrcDBInstance> srcDBInstances = srcDBInstanceService.findAll();
-        List<DstDBInstance> destDBInstances = dstDBInstanceService.findAll();
-        map.put("srcDBInstances", srcDBInstances);
-        map.put("destDBInstances", destDBInstances);
+        List<PumaTask> pumaTasks = pumaTaskService.findAll();
+        List<DstDBInstance> dstDBInstances = dstDBInstanceService.findAll();
+
+        //List<SrcDBInstance> srcDBInstances = srcDBInstanceService.findAll();
+        //List<DstDBInstance> destDBInstances = dstDBInstanceService.findAll();
+        //map.put("srcDBInstances", srcDBInstances);
+        map.put("pumaTasks", pumaTasks);
+        map.put("dstDBInstances", dstDBInstances);
         map.put("createActive", "active");
         map.put("path", "sync-task");
         map.put("subPath", "step1");
@@ -85,8 +101,15 @@ public class SyncTaskCreateController {
 
     @RequestMapping(value = "/sync-task/create/step1Save", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object step1Save(HttpSession session, String srcMysql, String destMysql, String databaseFrom, String databaseTo,
-                            String[] tableFrom, String[] tableTo) {
+    public Object step1Save(
+          HttpSession session,
+          String pumaTaskName,
+          String dstDBInstanceName,
+          String databaseFrom,
+          String databaseTo,
+          String[] tableFrom,
+          String[] tableTo) {
+
         //清除之前的状态
     	LOG.info("create sync task step 1 save");
         session.removeAttribute("dumpMapping");
@@ -97,8 +120,8 @@ public class SyncTaskCreateController {
 
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            if (StringUtils.isBlank(srcMysql) || StringUtils.isBlank(destMysql)) {
-                throw new IllegalArgumentException("srcMysql和destMysql都不能为空。(srcMysql=" + srcMysql + ", destMysql=" + destMysql
+            if (StringUtils.isBlank(pumaTaskName) || StringUtils.isBlank(dstDBInstanceName)) {
+                throw new IllegalArgumentException("srcMysql和destMysql都不能为空。(srcMysql=" + pumaTaskName + ", destMysql=" + dstDBInstanceName
                         + ")");
             }
             if (tableFrom == null && tableTo == null) {
@@ -108,10 +131,11 @@ public class SyncTaskCreateController {
                 throw new IllegalArgumentException("源表个数和目标表的个数不一致。(tableFrom=" + tableFrom + ", tableTo=" + tableTo + ")");
             }
             //判断该srcMysql和destMysql是否重复
+            /*
             if (this.syncTaskService.existsBySrcAndDest(srcMysql, destMysql)) {
                 throw new IllegalArgumentException("创建失败，已有相同的配置存在。(srcMysqlName=" + srcMysql + ", destMysqlName=" + destMysql
                         + ")");
-            }
+            }*/
             //解析mapping
             //有xml改为表格提交
             //            MysqlMapping mysqlMapping = SyncXmlParser.parse2(syncXml);
@@ -130,11 +154,13 @@ public class SyncTaskCreateController {
             mysqlMapping.addDatabase(database);
 
             //保存到session
+            session.setAttribute("pumaTaskName", pumaTaskName);
+            session.setAttribute("dstDBInstanceName", dstDBInstanceName);
             session.setAttribute("mysqlMapping", mysqlMapping);
-            SrcDBInstance srcDBInstance = srcDBInstanceService.find(srcMysql);//.findByName();
-            DstDBInstance destDBInstance = dstDBInstanceService.find(destMysql);//.findByName(destMysql);
-            session.setAttribute("srcDBInstance", srcDBInstance);
-            session.setAttribute("destDBInstance", destDBInstance);
+            //SrcDBInstance srcDBInstance = srcDBInstanceService.find(srcMysql);//.findByName();
+            //DstDBInstance destDBInstance = dstDBInstanceService.find(destMysql);//.findByName(destMysql);
+            //session.setAttribute("srcDBInstance", srcDBInstance);
+            //session.setAttribute("destDBInstance", destDBInstance);
 
             map.put("success", true);
         } catch (IllegalArgumentException e) {
@@ -153,19 +179,26 @@ public class SyncTaskCreateController {
     public ModelAndView step2(HttpSession session) throws SQLException {
         Map<String, Object> map = new HashMap<String, Object>();
         //从session拿出srcMysql，destMysql查询mysql配置
-        SrcDBInstance srcDBInstance = (SrcDBInstance) session.getAttribute("srcDBInstance");
-        DstDBInstance destDBInstance = (DstDBInstance) session.getAttribute("destDBInstance");
+        //SrcDBInstance srcDBInstance = (SrcDBInstance) session.getAttribute("srcDBInstance");
+        //DstDBInstance destDBInstance = (DstDBInstance) session.getAttribute("destDBInstance");
         //查询所有syncServer
-        List<SyncServerEntity> syncServers = syncServerService.findAll();
+        List<SyncServer> syncServers = syncServerService.findAll();
         //从会话中取出保存的mysqlMapping，计算出dumpMapping
         MysqlMapping mysqlMapping = (MysqlMapping) session.getAttribute("mysqlMapping");
-        MysqlHost mysqlHost = getSrcMysqlHost(srcDBInstance);
+        //MysqlHost mysqlHost = getSrcMysqlHost(srcDBInstance);
+        DstDBInstance dstDBInstance = dstDBInstanceService.findByName((String) session.getAttribute("dstDBInstanceName"));
+        MysqlHost mysqlHost = new MysqlHost();
+        mysqlHost.setHost(dstDBInstance.getHost() + ":" + dstDBInstance.getPort());
+        mysqlHost.setServerId(dstDBInstance.getServerId());
+        mysqlHost.setUsername(dstDBInstance.getUsername());
+        mysqlHost.setPassword(dstDBInstance.getPassword());
+
         DumpMapping dumpMapping = this.syncTaskService.convertMysqlMappingToDumpMapping(mysqlHost,
                 mysqlMapping);
         session.setAttribute("dumpMapping", dumpMapping);
 
-        map.put("srcDBInstance", srcDBInstance);
-        map.put("destDBInstance", destDBInstance);
+        //map.put("srcDBInstance", srcDBInstance);
+        //map.put("destDBInstance", destDBInstance);
         map.put("syncServers", syncServers);
         map.put("dumpMapping", dumpMapping);
         map.put("createActive", "active");
@@ -179,27 +212,48 @@ public class SyncTaskCreateController {
      */
     @RequestMapping(value = "/sync-task/create/createDumpTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object createDumpTask(HttpSession session, String srcMysqlHost, String destMysqlHost, String syncServerName) {
+    public Object createDumpTask(HttpSession session, String syncServerName) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             //检查参数
+            /*
             if (StringUtils.isBlank(srcMysqlHost)) {
                 throw new IllegalArgumentException("srcMysqlHost不能为空");
             }
             if (StringUtils.isBlank(destMysqlHost)) {
                 throw new IllegalArgumentException("destMysqlHost不能为空");
-            }
+            }*/
             if (StringUtils.isBlank(syncServerName)) {
                 throw new IllegalArgumentException("syncServerHost不能为空");
             }
             //从session拿出srcMysql，destMysql查询mysql配置
-            SrcDBInstance srcDBInstance = (SrcDBInstance) session.getAttribute("srcDBInstance");
-            DstDBInstance destDBInstance = (DstDBInstance) session.getAttribute("destDBInstance");
-            DumpMapping dumpMapping = (DumpMapping) session.getAttribute("dumpMapping");
+            //SrcDBInstance srcDBInstance = (SrcDBInstance) session.getAttribute("srcDBInstanceName");
+            //DstDBInstance destDBInstance = (DstDBInstance) session.getAttribute("dstDBInstanceName");
+            //DumpMapping dumpMapping = (DumpMapping) session.getAttribute("dumpMapping");
             //根据选择的srcMysqlHost，找出其MysqlHost对象
-            MysqlHost srcMysqlHost0 = getSrcMysqlHost(srcDBInstance);
+            //MysqlHost srcMysqlHost0 = getSrcMysqlHost(srcDBInstance);
             //根据选择的destMysqlHost，找出其MysqlHost对象
-            MysqlHost destMysqlHost0 = getDstMysqlHost(destDBInstance);
+            //MysqlHost destMysqlHost0 = getDstMysqlHost(destDBInstance);
+
+            com.dianping.puma.core.entity.DumpTask dumpTask = new com.dianping.puma.core.entity.DumpTask();
+
+            String taskName = "hello";
+            dumpTask.setName(taskName);
+            dumpTask.setSyncType(SyncType.DUMP);
+
+            String pumaTaskName = (String) session.getAttribute("pumaTaskName");
+            dumpTask.setPumaTaskName(pumaTaskName);
+
+            String dstDBInstanceName = (String) session.getAttribute("dstDBInstanceName");
+            dumpTask.setDstDBInstanceName(dstDBInstanceName);
+            dumpTask.setSyncServerName(syncServerName);
+            dumpTask.setDumpMapping((DumpMapping) session.getAttribute("dumpMapping"));
+
+            dumpTaskService2.create(dumpTask);
+
+            syncTaskOperationReporter.report(syncServerName, SyncType.DUMP, taskName, Operation.CREATE);
+
+            /*
             //查询所有syncServer
             DumpTask dumpTask = new DumpTask();
             dumpTask.setSrcMysqlName(srcDBInstance.getName());
@@ -209,7 +263,7 @@ public class SyncTaskCreateController {
             dumpTask.setDumpMapping(dumpMapping);
             dumpTask.setSyncServerName(syncServerName);
             //保存dumpTask到数据库
-            dumpTaskService.create(dumpTask);
+            dumpTaskService.create(dumpTask);*/
             //保存dumpTask到session
             session.setAttribute("dumpTask", dumpTask);
             LOG.info("created dumpTask: " + dumpTask);
@@ -266,7 +320,7 @@ public class SyncTaskCreateController {
     public ModelAndView step3(HttpSession session) throws SQLException {
         Map<String, Object> map = new HashMap<String, Object>();
         //查询所有syncServer
-        List<SyncServerEntity> syncServers = syncServerService.findAll();
+        List<SyncServer> syncServers = syncServerService.findAll();
 
         map.put("errorCodeHandlerMap", Config.getInstance().getErrorCodeHandlerMap());
         map.put("syncServers", syncServers);

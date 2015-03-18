@@ -2,8 +2,6 @@ package com.dianping.puma.core.entity;
 
 public class DBInstance extends BaseEntity {
 
-	private String name;
-
 	private Long serverId;
 
 	private String host;
@@ -21,14 +19,6 @@ public class DBInstance extends BaseEntity {
 	private String metaUsername;
 
 	private String metaPassword;
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
 
 	public Long getServerId() {
 		return serverId;

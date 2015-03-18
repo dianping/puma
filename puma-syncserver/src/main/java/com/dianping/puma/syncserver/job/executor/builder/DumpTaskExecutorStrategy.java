@@ -2,9 +2,10 @@ package com.dianping.puma.syncserver.job.executor.builder;
 
 import java.io.IOException;
 
+import com.dianping.puma.core.constant.SyncType;
+import com.dianping.puma.core.entity.DumpTask;
 import org.springframework.stereotype.Service;
 
-import com.dianping.puma.core.sync.model.task.DumpTask;
 import com.dianping.puma.core.sync.model.task.Type;
 import com.dianping.puma.syncserver.job.executor.DumpTaskExecutor;
 
@@ -26,5 +27,10 @@ public class DumpTaskExecutorStrategy implements TaskExecutorStrategy<DumpTask, 
     @Override
     public Type getType() {
         return Type.DUMP;
+    }
+
+    @Override
+    public SyncType getSyncType() {
+        return SyncType.DUMP;
     }
 }

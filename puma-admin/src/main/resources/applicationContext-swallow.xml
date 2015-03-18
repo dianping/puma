@@ -22,6 +22,18 @@
         <property name="topic" value="puma_task_controller" />
     </bean>
 
+    <bean id="syncTaskOperationEventPublisher"
+          class="com.dianping.puma.core.monitor.SwallowEventPublisher"
+          init-method="init">
+        <property name="topic" value="sync_task_operation"/>
+    </bean>
+
+    <bean id="syncTaskControllerEventPublisher"
+          class="com.dianping.puma.core.monitor.SwallowEventPublisher"
+          init-method="init">
+        <property name="topic" value="sync_task_controller"/>
+    </bean>
+
     <bean id="pumaTaskEventPublisher"
           class="com.dianping.puma.core.monitor.SwallowEventPublisher"
           init-method="init">

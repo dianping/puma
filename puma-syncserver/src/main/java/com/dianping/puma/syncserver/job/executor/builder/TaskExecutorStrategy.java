@@ -15,6 +15,7 @@
  */
 package com.dianping.puma.syncserver.job.executor.builder;
 
+import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.sync.model.task.Task;
 import com.dianping.puma.core.sync.model.task.Type;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
@@ -27,5 +28,7 @@ public interface TaskExecutorStrategy<T extends Task, R extends TaskExecutor> {
     public R build(T task);
 
     public Type getType();
+
+    public SyncType getSyncType();
 
 }

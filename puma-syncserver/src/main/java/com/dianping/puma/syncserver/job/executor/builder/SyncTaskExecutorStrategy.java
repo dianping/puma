@@ -2,6 +2,7 @@ package com.dianping.puma.syncserver.job.executor.builder;
 
 import java.util.List;
 
+import com.dianping.puma.core.constant.SyncType;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -81,5 +82,8 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
         return Type.SYNC;
     }
     
-    
+    @Override
+    public SyncType getSyncType() {
+        return SyncType.SYNC;
+    }
 }

@@ -53,11 +53,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     private List<PumaClient> pumaClientList = new ArrayList<PumaClient>();
 
-    private TableShardRuleConfig tableShardRuleConfig;
+    protected TableShardRuleConfig tableShardRuleConfig;
 
-    private String originGroupDataSource;
+    protected String originGroupDataSource;
 
-    private volatile boolean switchOn;
+    protected volatile boolean switchOn;
 
     private PumaServerService pumaServerService;
 
@@ -90,6 +90,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
         initRouterConfig();
         initPumaClientsAndDataSources();
         initRouter();
+
+        //todo:start puma client
     }
 
     protected void initRouterConfig() {
@@ -249,8 +251,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     }
 
-    public void setConfigService(ConfigCache configService) {
-        this.configService = configService;
+    public void setConfigCache(ConfigCache configCache) {
+        this.configService = configCache;
     }
 
     public void setPumaServerService(PumaServerService pumaServerService) {

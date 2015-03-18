@@ -24,7 +24,7 @@ $(function() {
     });
 
     if (!isAllValid) {
-      event.preventDefault()
+      event.preventDefault();
     }
   });
 

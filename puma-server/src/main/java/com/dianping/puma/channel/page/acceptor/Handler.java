@@ -68,6 +68,7 @@ public class Handler implements PageHandler<Context> {
 		SystemStatusContainer.instance.addClientStatus(payload.getClientName(),NetUtils.getIpAddr(ctx.getHttpServletRequest()), payload.getSeq(), payload.getTarget(),
 				payload.isDml(), payload.isDdl(), payload.isNeedsTransactionMeta(), payload.getDatabaseTables(),
 				payload.getCodecType());
+		SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(),payload.getBinlog(),payload.getBinlogPos());
 		log.info("Client(" + payload.getClientName() + ") connected.");
 
 		EventCodec codec = EventCodecFactory.createCodec(payload.getCodecType());
@@ -110,6 +111,8 @@ public class Handler implements PageHandler<Context> {
 						SystemStatusContainer.instance.updateClientSeq(payload.getClientName(), event.getSeq());
 						//record success client seq
 						SystemStatusContainer.instance.updateClientSuccessSeq(payload.getClientName(), event.getSeq());
+						//update binlog
+						SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(),payload.getBinlog(),payload.getBinlogPos());
 					
 					}
 				}

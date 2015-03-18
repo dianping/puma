@@ -1,0 +1,10 @@
+<testng-results>
+  <reporter-output>
+  </reporter-output>
+  <suite name="puma-syncserver" duration-ms="3" started-at="2015-03-16T15:38:29Z" finished-at="2015-03-16T15:38:29Z">
+    <groups>
+    </groups>
+    <test name="com.dianping.puma.syncserver.mysql.MysqlExecutorTest" duration-ms="3" started-at="2015-03-16T15:38:29Z" finished-at="2015-03-16T15:38:29Z">
+    </test>
+  </suite>
+</testng-results>

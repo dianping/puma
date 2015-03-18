@@ -79,6 +79,9 @@
     <task:scheduled-tasks>
         <task:scheduled ref="pumaMonitorServerInfoTask" method="runTask" fixed-delay="#{intervalConfig.serverInfoInterval}"/>   
     </task:scheduled-tasks>
+    <task:scheduled-tasks>
+        <task:scheduled ref="pumaMonitorSyncProcessTask" method="runTask" fixed-delay="#{intervalConfig.syncProcessInterval}"/>   
+    </task:scheduled-tasks>
    
 </beans>
 

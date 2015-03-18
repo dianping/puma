@@ -220,7 +220,8 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 		} catch (RuntimeException e) {
 			log.warn("", e);
 		}
-		if (db != null && db.length() > 0 && !db.equalsIgnoreCase(queryEvent.getDatabaseName())) {
+		if (StringUtils.isNotBlank(queryEvent.getDatabaseName()) && StringUtils.isNotBlank(db)
+				&& !db.equalsIgnoreCase(queryEvent.getDatabaseName())) {
 			log.info("ddl ignored:" + sql + ", from " + queryEvent.getDatabaseName());
 		} else {
 			// Refresh table meta

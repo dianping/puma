@@ -67,7 +67,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     private DataSourceRouter router;
 
-    private RouterRule routerRule;
+    protected RouterRule routerRule;
 
     private static final Pattern JDBC_URL_PATTERN = Pattern.compile("jdbc:mysql://([^:]+):\\d+/([^\\?]+).*");
 

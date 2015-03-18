@@ -22,10 +22,14 @@ import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
+import com.dianping.zebra.shard.router.DataSourceRouterImpl;
+import com.dianping.zebra.shard.router.rule.RouterRule;
+import com.dianping.zebra.shard.router.rule.RouterRuleBuilder;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -58,6 +62,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     private SrcDBInstanceService srcDBInstanceService;
 
+    private DataSourceRouterImpl router;
 
     public ShardSyncTaskExecutor(ShardSyncTask task) {
         Preconditions.checkNotNull(task, "task");
@@ -75,10 +80,19 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
     public void init() throws LionException {
         Preconditions.checkNotNull(configService, "configService");
         initAndConvertConfig();
+        initRouter();
         initDs();
         initPumaClients();
         //todo:init pumaclient
         //todo:init
+    }
+
+    protected void initRouter() {
+        this.router = new DataSourceRouterImpl();
+        RouterRuleConfig routerRuleConfig = new RouterRuleConfig();
+        routerRuleConfig.setTableShardConfigs(Lists.newArrayList(tableShardRuleConfig));
+        RouterRule routerRule = RouterRuleBuilder.build(routerRuleConfig);
+        this.router.setRouterRule(routerRule);
     }
 
     protected void initPumaClients() {

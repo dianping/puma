@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.dianping.puma.core.constant.SyncType;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -64,6 +65,7 @@ public class SyncTaskServiceImpl implements SyncTaskService {
 
 		@Override
 		public void run() {
+			/*
 			while (true) {
 				try {
 					Thread.sleep(60000);
@@ -91,7 +93,7 @@ public class SyncTaskServiceImpl implements SyncTaskService {
 				} catch (Throwable e) {
 					LOG.error("error with restart task listener:", e);
 				}
-			}
+			}*/
 		}
 	}
 
@@ -130,7 +132,7 @@ public class SyncTaskServiceImpl implements SyncTaskService {
 		}
 
 		// 更新本地状态
-		systemStatusContainer.addStatus(Type.SYNC, id);
+		//systemStatusContainer.addStatus(SyncType.SYNC, id);
 
 		return id;
 	}

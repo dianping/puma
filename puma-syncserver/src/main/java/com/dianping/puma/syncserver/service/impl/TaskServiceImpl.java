@@ -13,13 +13,7 @@ import com.dianping.puma.syncserver.service.TaskService;
 
 @Service
 public class TaskServiceImpl implements TaskService {
-    @Autowired
-    SyncTaskDao syncTaskDao;
-    @Autowired
-    CatchupTaskDao catchupTaskDao;
-    @Autowired
-    DumpTaskDao dumpTaskDao;
-    @Autowired
+
     BinlogInfoService binlogInfoService;
 
     @Override

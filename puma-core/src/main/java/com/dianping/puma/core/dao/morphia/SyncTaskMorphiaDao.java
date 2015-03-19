@@ -52,11 +52,21 @@ public class SyncTaskMorphiaDao extends BasicDAO<SyncTaskMorphia, String> implem
 		return syncTasks;
 	}
 
+	@Override
 	public void create(SyncTask syncTask) {
 		SyncTaskMorphia syncTaskMorphia = new SyncTaskMorphia(syncTask);
 		this.save(syncTaskMorphia);
 		this.getDatastore().ensureIndexes();
 	}
+
+	@Override
+	public void remove(String name) {
+		Query<SyncTaskMorphia> q = this.getDatastore().createQuery(SyncTaskMorphia.class);
+		q.field("name").equal(name);
+		this.deleteByQuery(q);
+	}
+
+
 	@Override
 	public List<SyncTask> find(int offset, int limit) {
 		Query<SyncTaskMorphia> q = this.getDatastore().createQuery(SyncTaskMorphia.class);

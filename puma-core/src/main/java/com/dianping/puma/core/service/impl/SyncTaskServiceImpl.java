@@ -32,6 +32,10 @@ public class SyncTaskServiceImpl implements SyncTaskService {
 	public void create(SyncTask syncTask) {
 		syncTaskDao.create(syncTask);
 	}
+
+	public void remove(String name) {
+		syncTaskDao.remove(name);
+	}
 	
 	public List<SyncTask> find(int offset, int limit) {
 		return syncTaskDao.find(offset,limit);

@@ -13,9 +13,12 @@ import javax.servlet.http.HttpSession;
 import com.dianping.puma.admin.reporter.SyncTaskOperationReporter;
 import com.dianping.puma.core.constant.Operation;
 import com.dianping.puma.core.constant.SyncType;
+import com.dianping.puma.core.container.SyncTaskStateContainer;
 import com.dianping.puma.core.entity.*;
 import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.model.SyncTaskState;
 import com.dianping.puma.core.service.PumaTaskService;
+import com.mongodb.MongoException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,18 +45,20 @@ import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.core.entity.DumpTask;
+
 /**
  * (1) 以create为整个controller，所有中间状态存放在session <br>
  * (2) 编写SyncTask的service <br>
  * (3) pumaSyncServer的id与host的映射 <br>
  * (4) 保存binlog信息，创建同步任务，启动任务
- * 
+ *
  * @author wukezhu
  */
 @Controller
 public class SyncTaskCreateController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SyncTaskCreateController.class);
+
 	// private SyncConfigService syncConfigService;
 	/*
 	 * @Autowired private SrcDBInstanceService srcDBInstanceService;
@@ -63,19 +68,24 @@ public class SyncTaskCreateController {
 
 	@Autowired
 	private SyncServerService syncServerService;
-	
+
 	@Autowired
 	private SyncTaskService syncTaskService;
+
 	@Autowired
 	private DumpTaskService dumpTaskService;
 
 	@Autowired
 	private PumaTaskService pumaTaskService;
+
 	@Autowired
 	private SystemStatusContainer systemStatusContainer;
 
 	@Autowired
 	private SyncTaskOperationReporter syncTaskOperationReporter;
+
+	@Autowired
+	SyncTaskStateContainer syncTaskStateContainer;
 
 	@RequestMapping(value = { "/sync-task/create" })
 	public ModelAndView create(HttpSession session) {
@@ -166,8 +176,8 @@ public class SyncTaskCreateController {
 	@RequestMapping(method = RequestMethod.GET, value = { "/sync-task/create/step2" })
 	public ModelAndView step2(HttpSession session) throws SQLException {
 		Map<String, Object> map = new HashMap<String, Object>();
-		DumpTask dumpTask = (DumpTask)session.getAttribute("dumpTask"); 
-		if(dumpTask == null){
+		DumpTask dumpTask = (DumpTask) session.getAttribute("dumpTask");
+		if (dumpTask == null) {
 			// 从会话中取出保存的mysqlMapping，计算出dumpMapping
 			MysqlMapping mysqlMapping = (MysqlMapping) session.getAttribute("mysqlMapping");
 			// MysqlHost mysqlHost = getSrcMysqlHost(srcDBInstance);
@@ -178,12 +188,12 @@ public class SyncTaskCreateController {
 			mysqlHost.setServerId(dstDBInstance.getServerId());
 			mysqlHost.setUsername(dstDBInstance.getUsername());
 			mysqlHost.setPassword(dstDBInstance.getPassword());
-	
+
 			DumpMapping dumpMapping = this.convertMysqlMappingToDumpMapping(mysqlHost, mysqlMapping);
 			session.setAttribute("dumpMapping", dumpMapping);
 			map.put("dumpTaskName", "DumpTask-" + UUID.randomUUID());
 			map.put("dumpMapping", dumpMapping);
-		}else{
+		} else {
 			map.put("dumpTaskName", dumpTask.getName());
 			map.put("dumpMapping", dumpTask.getDumpMapping());
 		}
@@ -198,13 +208,13 @@ public class SyncTaskCreateController {
 	 */
 	@RequestMapping(value = "/sync-task/create/createDumpTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public Object createDumpTask(HttpSession session,String dumpTaskName) {
+	public Object createDumpTask(HttpSession session, String dumpTaskName) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		try {
 			// 检查参数
 
 			DumpTask dumpTask = new DumpTask();
-			String syncServerName = (String)session.getAttribute("syncServerName");
+			String syncServerName = (String) session.getAttribute("syncServerName");
 			dumpTask.setName(dumpTaskName);
 			dumpTask.setSyncType(SyncType.DUMP);
 			dumpTask.setController(com.dianping.puma.core.constant.Controller.START);
@@ -321,6 +331,8 @@ public class SyncTaskCreateController {
 
 			// 创建SyncTask
 			SyncTask syncTask = new SyncTask();
+			syncTask.setName(pumaClientName);
+			syncTask.setSyncType(SyncType.SYNC);
 			syncTask.setPumaTaskName(pumaTaskName);
 			syncTask.setDstDBInstanceName(dstDBInstanceName);
 			// 解析errorCode,handler
@@ -353,6 +365,12 @@ public class SyncTaskCreateController {
 				long dumpTaskId = dumpTask.getId();
 				this.dumpTaskService.updateSyncTaskId(dumpTaskId, syncTaskId);
 			}*/
+
+			syncTaskStateContainer.create(syncTask.getName());
+
+			syncTaskOperationReporter
+					.report(syncTask.getSyncServerName(), SyncType.SYNC, syncTask.getName(), Operation.CREATE);
+
 			LOG.info("created syncTask : " + syncTask);
 
 			map.put("success", true);
@@ -367,7 +385,6 @@ public class SyncTaskCreateController {
 		return GsonUtil.toJson(map);
 
 	}
-
 
 	private DumpMapping convertMysqlMappingToDumpMapping(MysqlHost mysqlHost, MysqlMapping mysqlMapping)
 			throws SQLException {
@@ -438,7 +455,6 @@ public class SyncTaskCreateController {
 	}
 
 	/**
-	 * 
 	 * 如果“table下的字段没有被重命名,partOf为false”，那么该table可以被dump
 	 */
 	private boolean shouldDump(TableMapping tableConfig) {
@@ -452,5 +468,30 @@ public class SyncTaskCreateController {
 			}
 		}
 		return true;
+	}
+
+	@RequestMapping(value = {
+			"/sync-task/refresh" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String refreshPost(String name) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			SyncTaskState state = this.syncTaskStateContainer.get(name);
+			if (state == null) {
+				throw new Exception("Sync task state not found.");
+			}
+
+			map.put("state", state);
+			map.put("success", true);
+		} catch (MongoException e) {
+			map.put("error", "storage");
+			map.put("success", false);
+		} catch (Exception e) {
+			map.put("error", e.getMessage());
+			map.put("success", false);
+		}
+
+		return GsonUtil.toJson(map);
 	}
 }

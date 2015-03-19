@@ -13,6 +13,8 @@ public interface SyncTaskDao {
 	List<SyncTask> findAll();
 
 	void create(SyncTask syncTask);
+
+	void remove(String name);
 	
 	List<SyncTask> find(int offset, int limit);
 }

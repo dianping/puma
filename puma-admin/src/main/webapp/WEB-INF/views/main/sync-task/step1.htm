@@ -15,7 +15,7 @@
 	          <div class="form-group">
 	               <label class="col-md-2 control-label" for="pumaTaskName">Server任务源:</label>
 	               <div class="col-md-7">
-	                <select name="pumaTaskName" class="form-control">
+	                <select id="pumaTaskName" name="pumaTaskName" class="form-control">
 		               #foreach($pumaTask in ${pumaTasks})
 		               <option value="${pumaTask.name}">${pumaTask.name}</option>
 		               #end
@@ -26,9 +26,9 @@
 	               </div>
 	            </div>
 	            <div class="form-group">
-	              <label class="col-md-2 control-label" for="destMysql">目标实例:</label>
+	              <label class="col-md-2 control-label" for="dstDBInstanceName">目标实例:</label>
 	              <div class="col-md-7">
-	                 <select name="dstDBInstanceName" class="form-control">
+	                 <select id="dstDBInstanceName" name="dstDBInstanceName" class="form-control">
              			#foreach($dstDBInstance in ${dstDBInstances})
                			<option value="${dstDBInstance.name}">${dstDBInstance.name}</option>
                			#end

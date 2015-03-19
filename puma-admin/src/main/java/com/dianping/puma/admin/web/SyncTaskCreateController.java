@@ -59,10 +59,6 @@ public class SyncTaskCreateController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SyncTaskCreateController.class);
 
-	// private SyncConfigService syncConfigService;
-	/*
-	 * @Autowired private SrcDBInstanceService srcDBInstanceService;
-	 */
 	@Autowired
 	private DstDBInstanceService dstDBInstanceService;
 
@@ -181,6 +177,8 @@ public class SyncTaskCreateController {
 			// 从会话中取出保存的mysqlMapping，计算出dumpMapping
 			MysqlMapping mysqlMapping = (MysqlMapping) session.getAttribute("mysqlMapping");
 			// MysqlHost mysqlHost = getSrcMysqlHost(srcDBInstance);
+			String pumaTaskName = (String) session.getAttribute("pumaTaskName");
+			String dstDBInstanceName = (String) session.getAttribute("dstDBInstanceName");
 			DstDBInstance dstDBInstance = dstDBInstanceService.findByName((String) session
 					.getAttribute("dstDBInstanceName"));
 			MysqlHost mysqlHost = new MysqlHost();
@@ -191,7 +189,7 @@ public class SyncTaskCreateController {
 
 			DumpMapping dumpMapping = this.convertMysqlMappingToDumpMapping(mysqlHost, mysqlMapping);
 			session.setAttribute("dumpMapping", dumpMapping);
-			map.put("dumpTaskName", "DumpTask-" + UUID.randomUUID());
+			map.put("dumpTaskName", "DumpTask-" + pumaTaskName +"@"+ dstDBInstanceName);
 			map.put("dumpMapping", dumpMapping);
 		} else {
 			map.put("dumpTaskName", dumpTask.getName());
@@ -287,8 +285,12 @@ public class SyncTaskCreateController {
 	public ModelAndView step3(HttpSession session) throws SQLException {
 		Map<String, Object> map = new HashMap<String, Object>();
 		// 查询所有syncServer
+		String pumaTaskName = (String) session.getAttribute("pumaTaskName");
+		String dstDBInstanceName = (String) session.getAttribute("dstDBInstanceName");
+
 		map.put("errorCodeHandlerMap", Config.getInstance().getErrorCodeHandlerMap());
-		map.put("pumaClientName", "SyncTask-" + UUID.randomUUID());
+
+		map.put("pumaClientName", "SyncTask-" + pumaTaskName +"@"+ dstDBInstanceName);
 		map.put("createActive", "active");
 		map.put("path", "sync-task");
 		map.put("subPath", "step3");
@@ -365,8 +367,6 @@ public class SyncTaskCreateController {
 				long dumpTaskId = dumpTask.getId();
 				this.dumpTaskService.updateSyncTaskId(dumpTaskId, syncTaskId);
 			}*/
-
-			syncTaskStateContainer.create(syncTask.getName());
 
 			syncTaskOperationReporter
 					.report(syncTask.getSyncServerName(), SyncType.SYNC, syncTask.getName(), Operation.CREATE);

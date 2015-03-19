@@ -12,12 +12,13 @@ import org.springframework.stereotype.Service;
 
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
-import com.dianping.puma.admin.service.SyncTaskService;
+import com.dianping.puma.core.service.SyncTaskService;
 import com.dianping.puma.core.monitor.NotifyService;
-import com.dianping.puma.core.sync.model.task.SyncTask;
+import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.sync.model.task.SyncTaskStatusAction;
 import com.dianping.puma.core.sync.model.task.Type;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
+import com.dianping.puma.core.constant.Controller;
 
 /**
  * 监控状态，报警<br>
@@ -90,8 +91,8 @@ public class StatusMonitor {
         }
         //暂停状态或不存在(已经删除)的SyncTask不报警
         if (shouldAlarm && status.getType() == Type.SYNC) {
-            SyncTask syncTask = syncTaskService.find(status.getTaskId());
-            if (syncTask == null || syncTask.getSyncTaskStatusAction() == SyncTaskStatusAction.PAUSE) {
+            SyncTask syncTask = syncTaskService.find(status.getTaskName());
+            if (syncTask == null || syncTask.getController() == Controller.PAUSE) {
                 shouldAlarm = false;
             }
         }

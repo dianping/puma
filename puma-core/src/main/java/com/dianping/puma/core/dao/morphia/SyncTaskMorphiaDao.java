@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service("syncTaskDao2")
+@Service("syncTaskDao")
 public class SyncTaskMorphiaDao extends BasicDAO<SyncTaskMorphia, String> implements SyncTaskDao {
 
 	@Autowired
@@ -56,5 +56,17 @@ public class SyncTaskMorphiaDao extends BasicDAO<SyncTaskMorphia, String> implem
 		SyncTaskMorphia syncTaskMorphia = new SyncTaskMorphia(syncTask);
 		this.save(syncTaskMorphia);
 		this.getDatastore().ensureIndexes();
+	}
+	@Override
+	public List<SyncTask> find(int offset, int limit) {
+		Query<SyncTaskMorphia> q = this.getDatastore().createQuery(SyncTaskMorphia.class);
+		q.offset(offset);
+		q.limit(limit);
+		QueryResults<SyncTaskMorphia> result = this.find(q);
+		List<SyncTask> syncTasks = new ArrayList<SyncTask>();
+		for(SyncTaskMorphia syncTaskMorphia: result.asList()) {
+			syncTasks.add(syncTaskMorphia.getEntity());
+		}
+		return syncTasks;
 	}
 }

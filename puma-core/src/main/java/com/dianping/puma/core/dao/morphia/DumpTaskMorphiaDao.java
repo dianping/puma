@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service("dumpTaskDao2")
+@Service("dumpTaskDao")
 public class DumpTaskMorphiaDao extends BasicDAO<DumpTaskMorphia, String> implements DumpTaskDao {
 
 	@Autowired

@@ -6,7 +6,7 @@ import java.util.List;
 import com.dianping.puma.core.sync.model.mapping.DumpMapping;
 import com.google.code.morphia.annotations.Entity;
 
-@Entity
+
 public class DumpTask extends Task {
 
     private static final long serialVersionUID = 1174973531845800248L;

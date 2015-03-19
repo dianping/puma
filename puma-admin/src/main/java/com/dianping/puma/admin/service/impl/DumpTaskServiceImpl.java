@@ -14,7 +14,6 @@ import com.dianping.puma.core.sync.model.task.Type;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
 import com.google.code.morphia.Key;
 
-@Service
 public class DumpTaskServiceImpl implements DumpTaskService {
     @Autowired
     DumpTaskDao dumpTaskDao;

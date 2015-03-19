@@ -38,7 +38,6 @@ import com.google.code.morphia.Key;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
 
-@Service
 public class SyncTaskServiceImpl implements SyncTaskService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SyncTaskServiceImpl.class);
@@ -171,91 +170,7 @@ public class SyncTaskServiceImpl implements SyncTaskService {
 		return oldMysqlMapping.compare(newMysqlMapping);
 	}
 
-	@Override
-	public DumpMapping convertMysqlMappingToDumpMapping(MysqlHost mysqlHost, MysqlMapping mysqlMapping)
-			throws SQLException {
-		DumpMapping dumpMapping = new DumpMapping();
-		// dumpDatabaseMappings
-		// 遍历SyncConfig的DatabaseMapping，支持db和table名称改变，字段名称不支持改变。
-		List<DatabaseMapping> databaseMappings = mysqlMapping.getDatabases();
-		List<DatabaseMapping> dumpDatabaseMappings = new ArrayList<DatabaseMapping>();
-		dumpMapping.setDatabaseMappings(dumpDatabaseMappings);
-		for (DatabaseMapping databaseMapping : databaseMappings) {
-			String databaseConfigFrom = databaseMapping.getFrom();
-			String databaseConfigTo = databaseMapping.getTo();
-			List<TableMapping> dumpTableConfigs = new ArrayList<TableMapping>();
-			// 遍历table配置
-			List<TableMapping> tableConfigs = databaseMapping.getTables();
-			for (TableMapping tableConfig : tableConfigs) {
-				String tableConfigFrom = tableConfig.getFrom();
-				String tableConfigTo = tableConfig.getTo();
-				// 如果是from=*,to=*，则需要从数据库获取实际的表（排除已经列出的table配置）
-				if (StringUtils.equals(tableConfigFrom, "*") && StringUtils.equals(tableConfigTo, "*")) {
-					// 访问数据库，得到该数据库下的所有表名(*配置是在最后的，所以排除已经列出的table配置就是排除dumpTableConfigs)
-					MysqlMetaInfoFetcher mysqlExecutor = new MysqlMetaInfoFetcher(mysqlHost.getHost(),
-							mysqlHost.getUsername(), mysqlHost.getPassword());
-					List<String> tableNames;
-					try {
-						tableNames = mysqlExecutor.getTables(databaseConfigFrom);
-					} finally {
-						mysqlExecutor.close();
-					}
-					getRidOf(tableNames, dumpTableConfigs);
-					for (String tableName : tableNames) {
-						TableMapping dumpTableConfig = new TableMapping();
-						dumpTableConfig.setFrom(tableName);
-						dumpTableConfig.setTo(tableName);
-						dumpTableConfigs.add(dumpTableConfig);
-					}
-				} else {// 如果“table下的字段没有被重命名,partOf为false”，那么该table可以被dump
-					if (shouldDump(tableConfig)) {
-						TableMapping dumpTableConfig = new TableMapping();
-						dumpTableConfig.setFrom(tableConfig.getFrom());
-						dumpTableConfig.setTo(tableConfig.getTo());
-						dumpTableConfigs.add(dumpTableConfig);
-					}
-				}
-			}
-			// database需要dump(如果下属table没有需要dump则该database也不需要)
-			if (dumpTableConfigs.size() > 0) {
-				DatabaseMapping dumpDatabaseMapping = new DatabaseMapping();
-				dumpDatabaseMapping.setFrom(databaseConfigFrom);
-				dumpDatabaseMapping.setTo(databaseConfigTo);
-				dumpDatabaseMapping.setTables(dumpTableConfigs);
-				dumpDatabaseMappings.add(dumpDatabaseMapping);
-			}
-		}
-
-		return dumpMapping;
-	}
-
-	/**
-	 * 从tableNames中去掉已经存在dumpTableConfigs(以TableConfig.getFrom()判断)中的表名
-	 */
-	private void getRidOf(List<String> tableNames, List<TableMapping> dumpTableConfigs) {
-		Collection<String> dumpTableNames = new ArrayList<String>();
-		for (TableMapping tableConfig : dumpTableConfigs) {
-			dumpTableNames.add(tableConfig.getFrom());
-		}
-		tableNames.removeAll(dumpTableNames);
-	}
-
-	/**
-	 * 
-	 * 如果“table下的字段没有被重命名,partOf为false”，那么该table可以被dump
-	 */
-	private boolean shouldDump(TableMapping tableConfig) {
-		if (tableConfig.isPartOf()) {
-			return false;
-		}
-		List<ColumnMapping> columnConfigs = tableConfig.getColumns();
-		for (ColumnMapping columnConfig : columnConfigs) {
-			if (!StringUtils.equalsIgnoreCase(columnConfig.getFrom(), columnConfig.getTo())) {
-				return false;
-			}
-		}
-		return true;
-	}
+	
 
 	@Override
 	public void modify(Long id, BinlogInfo binlogInfo, MysqlMapping newMysqlMapping) {

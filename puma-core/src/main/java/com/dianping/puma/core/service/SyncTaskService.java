@@ -13,4 +13,6 @@ public interface SyncTaskService {
 	List<SyncTask> findAll();
 
 	void create(SyncTask syncTask);
+	
+	List<SyncTask> find(int offset, int limit);
 }

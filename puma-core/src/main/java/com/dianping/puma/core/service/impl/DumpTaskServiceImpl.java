@@ -8,21 +8,21 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service("dumpTaskService2")
+@Service("dumpTaskService")
 public class DumpTaskServiceImpl implements DumpTaskService {
 
 	@Autowired
-	DumpTaskDao dumpTaskDao2;
+	DumpTaskDao dumpTaskDao;
 
 	public DumpTask find(String name) {
-		return dumpTaskDao2.find(name);
+		return dumpTaskDao.find(name);
 	}
 
 	public List<DumpTask> findAll() {
-		return dumpTaskDao2.findAll();
+		return dumpTaskDao.findAll();
 	}
 
 	public void create(DumpTask dumpTask) {
-		dumpTaskDao2.create(dumpTask);
+		dumpTaskDao.create(dumpTask);
 	}
 }

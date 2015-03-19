@@ -3,7 +3,7 @@ package com.dianping.puma.admin.web;
 import com.dianping.puma.admin.reporter.PumaTaskControllerReporter;
 import com.dianping.puma.admin.reporter.PumaTaskOperationReporter;
 import com.dianping.puma.admin.service.PumaServerConfigService;
-import com.dianping.puma.admin.service.SyncTaskService;
+import com.dianping.puma.core.service.SyncTaskService;
 import com.dianping.puma.core.container.PumaTaskStateContainer;
 import com.dianping.puma.core.model.PumaTaskState;
 import com.dianping.puma.core.service.PumaTaskService;

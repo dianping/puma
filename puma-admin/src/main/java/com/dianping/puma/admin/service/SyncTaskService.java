@@ -22,8 +22,6 @@ public interface SyncTaskService {
 
     MysqlMapping compare(MysqlMapping oldMysqlMapping, MysqlMapping newMysqlMapping) throws CloneNotSupportedException;
 
-    DumpMapping convertMysqlMappingToDumpMapping(MysqlHost mysqlHost, MysqlMapping mysqlMapping) throws SQLException;
-
     void modify(Long id, BinlogInfo binlogInfo, MysqlMapping newMysqlMapping);
 
     void updateStatusAction(Long taskId, SyncTaskStatusAction statusAction);

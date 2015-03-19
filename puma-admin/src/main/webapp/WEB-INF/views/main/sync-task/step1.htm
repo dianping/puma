@@ -13,7 +13,8 @@
          <div class="panel-body">
          
 	          <div class="form-group">
-	               <label class="col-md-2 control-label" for="pumaTaskName">Server任务源:</label>
+	          
+	               <label class="col-md-3 control-label" for="pumaTaskName">Server任务源:</label>
 	               <div class="col-md-7">
 	                <select id="pumaTaskName" name="pumaTaskName" class="form-control">
 		               #foreach($pumaTask in ${pumaTasks})
@@ -26,7 +27,7 @@
 	               </div>
 	            </div>
 	            <div class="form-group">
-	              <label class="col-md-2 control-label" for="dstDBInstanceName">目标实例:</label>
+	              <label class="col-md-3 control-label" for="dstDBInstanceName">目标实例:</label>
 	              <div class="col-md-7">
 	                 <select id="dstDBInstanceName" name="dstDBInstanceName" class="form-control">
              			#foreach($dstDBInstance in ${dstDBInstances})
@@ -38,7 +39,19 @@
 	                 <p class="help-block">hello</p>
 	              </div>
 	           </div>
-	         
+	            <div class="form-group">
+	          <label class="col-md-3 control-label" for="syncServerName">SyncServer服务器:</label>
+	          <div class="col-md-7">
+	               <select id="syncServerName" name="syncServerName" class="form-control">
+	              #foreach($syncServer in ${syncServers})
+                        <option value="${syncServer.name}">${syncServer.name}</option>
+                  #end
+	              </select>
+	          </div>
+	          <div class="col-md-3" hidden="hidden">
+	          	<p class="help-block">hello</p>
+	          </div>
+	     </div>
 	       </div>
 	         <div class="panel panel-default"  style="border-bottom:0px;-webkit-box-shadow: 0 0px 1px rgba(0, 0, 0, .05);
           box-shadow: 0 0px 1px rgba(0, 0, 0, .05);">
@@ -50,15 +63,15 @@
 		           </div>
 		           <div class="panel-body" name="form_body_mapping">
 			           <div class="form-group">
-			           	 <label class="col-md-2 control-label">数据库名称</label>
+			           	 <label class="col-md-3 control-label">数据库名称</label>
 			           <div class="col-md-3">
-		  				 <input name="databaseFrom" class="form-control" placeholder="源数据库名称" />
+		  				 <input name="databaseFrom" class="form-control validation-input" format = "database-name" placeholder="源数据库名称" />
 		  			   </div>
 		  			   <div class="col-sm-1">
 		  			     <span class="glyphicon glyphicon-arrow-right" aria-hidden="true" style="margin-top:8px; margin-left:9px"></span>
 		  			   </div>
 		  			   <div class="col-md-3">
-		  				 <input name="databaseTo" class="form-control" placeholder="目标数据库名称" />
+		  				 <input name="databaseTo" class="form-control validation-input" format = "database-name" placeholder="目标数据库名称" />
 		  			   </div>
 		  			   <input type="hidden" autocomplete="off" name="count" value="0">
 		           	 </div>
@@ -133,15 +146,15 @@
 <div style="display: none" id="copySource">
  <div id="add_table_div">
    	 <div class="form-group">
-		<label class="col-md-2 control-label">表名称</label>
+		<label class="col-md-3 control-label">表名称</label>
 		<div class="col-md-3">
-		  <input name="tableFrom" class="form-control" placeholder="源表名称" />
+		  <input name="tableFrom" class="form-control" format="table-name"  placeholder="源表名称" />
 	   </div>
 	   <div class="col-sm-1">
 		  <span class="glyphicon glyphicon-arrow-right" aria-hidden="true" style="margin-top:8px; margin-left:9px"></span>
 	   </div>
 	   <div class="col-md-3">
-		<input name="tableTo" class="form-control" placeholder="目标表名称" />
+		<input name="tableTo" class="form-control"  format="table-name" placeholder="目标表名称" />
 	   </div>
 	   <div class="col-sm-1">
 		 <a href="javascript:;" onclick="removeTableMapping(this);" >

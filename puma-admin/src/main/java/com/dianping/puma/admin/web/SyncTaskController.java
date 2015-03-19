@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.dianping.puma.admin.monitor.SystemStatusContainer;
-import com.dianping.puma.admin.service.SyncTaskService;
-import com.dianping.puma.core.sync.model.task.SyncTask;
+import com.dianping.puma.core.service.SyncTaskService;
+import com.dianping.puma.core.entity.SyncTask;
 
 @Controller
 public class SyncTaskController {

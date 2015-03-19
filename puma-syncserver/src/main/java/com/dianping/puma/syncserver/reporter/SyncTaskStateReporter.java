@@ -3,6 +3,7 @@ package com.dianping.puma.syncserver.reporter;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
 import org.springframework.scheduling.annotation.Scheduled;
 
+/*
 @Service
 public class StatusReporter {
 	@Autowired
@@ -10,11 +11,6 @@ public class StatusReporter {
 	@Autowired
 	private SystemStatusContainer systemStatusContainer;
 
-	/**
-	 * 启动一个定时任务汇报状态
-	 *
-	 * @throws SendFailedException
-	 */
 	@Scheduled(cron = "0/5 * * * * ?")
 	public void report() throws SendFailedException {
 		TaskStatusEvent event = systemStatusContainer.getTaskStatusEvent();
@@ -31,4 +27,4 @@ public class SyncTaskStateReporter {
 	public void report() throws SendFailedException {
 
 	}
-}
+}*/

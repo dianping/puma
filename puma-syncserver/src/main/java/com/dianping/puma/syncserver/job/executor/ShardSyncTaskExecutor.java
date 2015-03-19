@@ -139,18 +139,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
     }
 
     protected PumaClient initPumaClient(GroupDataSourceConfig config, long seq, Set<String> tables) {
-        checkNotNull(config, "ds");
-
-        List<DataSourceConfig> dataSourceConfigs = FluentIterable.from(config.getDataSourceConfigs().values()).filter(new Predicate<DataSourceConfig>() {
-            @Override
-            public boolean apply(DataSourceConfig dataSourceConfig) {
-                return dataSourceConfig.isCanWrite();
-            }
-        }).toList();
-
-        checkArgument(dataSourceConfigs.size() == 1, config.toString());
-
-        DataSourceConfig dsConfig = dataSourceConfigs.get(0);
+        DataSourceConfig dsConfig = findTheOnlyWriteDataSourceConfig(config);
 
         Matcher matcher = JDBC_URL_PATTERN.matcher(dsConfig.getJdbcUrl());
         checkArgument(matcher.matches(), dsConfig.getJdbcUrl());
@@ -193,6 +182,19 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
         pumaClientList.add(client);
         return client;
+    }
+
+    protected DataSourceConfig findTheOnlyWriteDataSourceConfig(GroupDataSourceConfig config) {
+        checkNotNull(config, "ds");
+        List<DataSourceConfig> dataSourceConfigs = FluentIterable.from(config.getDataSourceConfigs().values()).filter(new Predicate<DataSourceConfig>() {
+            @Override
+            public boolean apply(DataSourceConfig dataSourceConfig) {
+                return dataSourceConfig.isCanWrite();
+            }
+        }).toList();
+
+        checkArgument(dataSourceConfigs.size() == 1, config.toString());
+        return dataSourceConfigs.get(0);
     }
 
     protected GroupDataSource initGroupDataSource(String jdbcRef) {

@@ -5,6 +5,7 @@ import com.dianping.lion.client.LionException;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.sync.model.task.ShardSyncTask;
+import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
@@ -35,6 +36,37 @@ public class ShardSyncTaskExecutorTest {
         this.task.setTableName("table1");
         this.target = new ShardSyncTaskExecutor(task);
         this.target.setConfigCache(configCache);
+    }
+
+    @Test
+    public void initPumaClientTest() {
+
+    }
+
+    @Test
+    public void findTheOnlyWriteDataSourceConfigTestSuccess() {
+        GroupDataSourceConfig config = new GroupDataSourceConfig();
+        DataSourceConfig ds1 = new DataSourceConfig();
+        ds1.setCanWrite(true);
+        DataSourceConfig ds2 = new DataSourceConfig();
+        ds2.setCanWrite(false);
+        config.getDataSourceConfigs().put("1", ds1);
+        config.getDataSourceConfigs().put("2", ds2);
+
+        Assert.assertEquals(ds1, target.findTheOnlyWriteDataSourceConfig(config));
+    }
+
+    @Test(expected = Exception.class)
+    public void findTheOnlyWriteDataSourceConfigTestFailed() {
+        GroupDataSourceConfig config = new GroupDataSourceConfig();
+        DataSourceConfig ds1 = new DataSourceConfig();
+        ds1.setCanWrite(true);
+        DataSourceConfig ds2 = new DataSourceConfig();
+        ds2.setCanWrite(true);
+        config.getDataSourceConfigs().put("1", ds1);
+        config.getDataSourceConfigs().put("2", ds2);
+
+        target.findTheOnlyWriteDataSourceConfig(config);
     }
 
     @Test

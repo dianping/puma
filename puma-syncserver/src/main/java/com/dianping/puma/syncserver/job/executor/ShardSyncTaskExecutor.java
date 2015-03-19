@@ -134,7 +134,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
                 continue;
             }
             GroupDataSource groupDataSource = initGroupDataSource(entity.getKey());
-            initPumaClient(groupDataSource.getConfig(), SubscribeConstant.SEQ_FROM_OLDEST, entity.getValue());
+            initPumaClient(groupDataSource.getConfig(), SubscribeConstant.SEQ_FROM_LATEST, entity.getValue());
         }
     }
 

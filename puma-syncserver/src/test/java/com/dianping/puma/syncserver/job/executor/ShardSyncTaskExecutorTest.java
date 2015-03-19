@@ -2,6 +2,8 @@ package com.dianping.puma.syncserver.job.executor;
 
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
+import com.dianping.puma.api.PumaClient;
+import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.sync.model.task.ShardSyncTask;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
@@ -13,10 +15,12 @@ import com.google.gson.Gson;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.InputStreamReader;
+import java.util.Set;
 
 import static org.mockito.Mockito.*;
 
@@ -46,7 +50,14 @@ public class ShardSyncTaskExecutorTest {
             }
         }).when(spy).initGroupDataSource(anyString());
 
-        doReturn(null).when(spy).initPumaClient(any(GroupDataSourceConfig.class), anyLong(), anySet());
+        doAnswer(new Answer<PumaClient>() {
+            @Override
+            public PumaClient answer(InvocationOnMock invocationOnMock) throws Throwable {
+                System.out.println("init pumaclient:" + invocationOnMock.getArguments()[1]);
+                System.out.println("init pumaclient:" + invocationOnMock.getArguments()[2]);
+                return null;
+            }
+        }).when(spy).initPumaClient(any(GroupDataSourceConfig.class), anyLong(), anySet());
 
 
         TableShardRuleConfig tableShardRuleConfig = buildTableConfigFromFile("initPumaClientsAndDataSourcesTest.json");
@@ -68,7 +79,40 @@ public class ShardSyncTaskExecutorTest {
         verify(spy, times(0)).initGroupDataSource("ds4");
         verify(spy, times(0)).initGroupDataSource("ds5");
 
-        verify(spy,times(8)).initPumaClient(any(GroupDataSourceConfig.class), anyLong(), anySet());
+        verify(spy, times(8)).initPumaClient(any(GroupDataSourceConfig.class), anyLong(), anySet());
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("table1")));
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_OLDEST), argThat(new SetMatchers("table1")));
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("table1_0", "table1_1")));
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("table1_2", "table1_3")));
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("table1_4", "table1_5")));
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("table1_6", "table1_7")));
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("ds1_white")));
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("ds8_white")));
+    }
+
+    class SetMatchers extends ArgumentMatcher<Set<String>> {
+        private final String[] expects;
+
+        public SetMatchers(String... expects) {
+            this.expects = expects;
+        }
+
+        @Override
+        public boolean matches(Object argument) {
+            Set<String> args = (Set<String>) argument;
+
+            if (expects.length != args.size()) {
+                return false;
+            }
+
+            for (String expect : expects) {
+                if (!args.contains(expect)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 
     @Test

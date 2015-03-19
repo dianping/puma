@@ -2,10 +2,11 @@
   "tableName": "table1",
   "dimensionConfigs": [
     {
+      "tableName": "table1",
       "dbRule": "(#id# % 4 )",
       "dbIndexes": "ds0,ds1,ds2,ds3",
-      "tbRule": "(#id# % 10)",
-      "tbSuffix": "alldb:[_0,_9]",
+      "tbRule": "(#id# % 2)",
+      "tbSuffix": "alldb:[_0,_7]",
       "isMaster": true,
       "exceptions": [
         {
@@ -21,6 +22,7 @@
       ]
     },
     {
+      "tableName": "table1",
       "dbRule": "(#uid# % 2 )",
       "dbIndexes": "ds4,ds5",
       "tbRule": "(#uid# % 4)",

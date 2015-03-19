@@ -27,6 +27,19 @@ public class SyncTaskMorphiaDao extends BasicDAO<SyncTaskMorphia, String> implem
 		return (syncTaskMorphia == null) ? null : syncTaskMorphia.getEntity();
 	}
 
+	public List<SyncTask> findBySyncServerName(String syncServerName) {
+		Query<SyncTaskMorphia> q = this.getDatastore().createQuery(SyncTaskMorphia.class).disableValidation();
+		q.field("entity.syncServerName").equal(syncServerName);
+		QueryResults<SyncTaskMorphia> result = this.find(q);
+		List<SyncTaskMorphia> syncTaskMorphias = result.asList();
+
+		List<SyncTask> entities = new ArrayList<SyncTask>();
+		for (SyncTaskMorphia syncTaskMorphia: syncTaskMorphias) {
+			entities.add(syncTaskMorphia.getEntity());
+		}
+		return entities;
+	}
+
 	public List<SyncTask> findAll() {
 		Query<SyncTaskMorphia> q = this.getDatastore().createQuery(SyncTaskMorphia.class);
 		QueryResults<SyncTaskMorphia> result = this.find(q);

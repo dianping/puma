@@ -18,6 +18,10 @@ public class SyncTaskServiceImpl implements SyncTaskService {
 		return syncTaskDao.find(name);
 	}
 
+	public List<SyncTask> findBySyncServerName(String syncServerName) {
+		return syncTaskDao.findBySyncServerName(syncServerName);
+	}
+
 	public List<SyncTask> findAll() {
 		return syncTaskDao.findAll();
 	}

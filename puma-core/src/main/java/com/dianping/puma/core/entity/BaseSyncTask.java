@@ -1,6 +1,10 @@
 package com.dianping.puma.core.entity;
 
+import com.dianping.puma.core.constant.Controller;
 import com.dianping.puma.core.constant.SyncType;
+import com.dianping.puma.core.model.BinlogInfo;
+
+import java.util.Map;
 
 public abstract class BaseSyncTask extends BaseEntity {
 
@@ -11,6 +15,14 @@ public abstract class BaseSyncTask extends BaseEntity {
 	private String dstDBInstanceName;
 
 	private String syncServerName;
+
+	private BinlogInfo binlogInfo;
+
+	private Controller controller;
+
+	private Map<Integer, String> errorCodeHandlerNameMap;
+
+	private String defaultHandler;
 
 	public SyncType getSyncType() {
 		return syncType;
@@ -42,5 +54,37 @@ public abstract class BaseSyncTask extends BaseEntity {
 
 	public void setSyncServerName(String syncServerName) {
 		this.syncServerName = syncServerName;
+	}
+
+	public BinlogInfo getBinlogInfo() {
+		return binlogInfo;
+	}
+
+	public void setBinlogInfo(BinlogInfo binlogInfo) {
+		this.binlogInfo = binlogInfo;
+	}
+
+	public Controller getController() {
+		return controller;
+	}
+
+	public void setController(Controller controller) {
+		this.controller = controller;
+	}
+
+	public Map<Integer, String> getErrorCodeHandlerNameMap() {
+		return errorCodeHandlerNameMap;
+	}
+
+	public void setErrorCodeHandlerNameMap(Map<Integer, String> errorCodeHandlerNameMap) {
+		this.errorCodeHandlerNameMap = errorCodeHandlerNameMap;
+	}
+
+	public String getDefaultHandler() {
+		return defaultHandler;
+	}
+
+	public void setDefaultHandler(String defaultHandler) {
+		this.defaultHandler = defaultHandler;
 	}
 }

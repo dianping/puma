@@ -2,7 +2,8 @@ package com.dianping.puma.syncserver.service;
 
 import java.util.List;
 
-import com.dianping.puma.core.sync.model.BinlogInfo;
+import com.dianping.puma.core.entity.AbstractBaseSyncTask;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.task.AbstractTask;
 import com.dianping.puma.core.sync.model.task.SyncTask;
 import com.dianping.puma.core.sync.model.task.Task;
@@ -23,6 +24,6 @@ public interface TaskService {
     /**
      * 记录task的binlog
      */
-    void recordBinlog(AbstractTask task, BinlogInfo binlogInfo);
+    void recordBinlog(AbstractBaseSyncTask task, BinlogInfo binlogInfo);
 
 }

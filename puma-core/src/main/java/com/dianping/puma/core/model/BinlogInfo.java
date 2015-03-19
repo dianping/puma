@@ -31,7 +31,7 @@ public class BinlogInfo {
         this.binlogPosition = binlogPosition;
     }
 
-    public Boolean getSkipToNextPos() {
+    public Boolean isSkipToNextPos() {
         return skipToNextPos;
     }
 

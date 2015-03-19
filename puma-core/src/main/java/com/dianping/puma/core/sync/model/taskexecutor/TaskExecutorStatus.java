@@ -2,7 +2,8 @@ package com.dianping.puma.core.sync.model.taskexecutor;
 
 import java.util.Date;
 
-import com.dianping.puma.core.sync.model.BinlogInfo;
+import com.dianping.puma.core.constant.SyncType;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.task.Type;
 
 public class TaskExecutorStatus {
@@ -12,6 +13,10 @@ public class TaskExecutorStatus {
     }
 
     private long taskId;
+
+    private String taskName;
+
+    private SyncType syncType;
 
     private Type type;
 
@@ -31,6 +36,22 @@ public class TaskExecutorStatus {
 
     public void setTaskId(long taskId) {
         this.taskId = taskId;
+    }
+
+    public SyncType getSyncType() {
+        return syncType;
+    }
+
+    public void setSyncType(SyncType syncType) {
+        this.syncType = syncType;
+    }
+
+    public String getTaskName() {
+        return taskName;
+    }
+
+    public void setTaskName(String taskName) {
+        this.taskName = taskName;
     }
 
     public Type getType() {
@@ -106,12 +127,17 @@ public class TaskExecutorStatus {
         return true;
     }
 
+    /*
     public static int calHashCode(Type type, long taskId) {
         final int prime = 31;
         int result = 1;
         result = prime * result + (int) (taskId ^ (taskId >>> 32));
         result = prime * result + ((type == null) ? 0 : type.hashCode());
         return result;
+    }*/
+
+    public static int calHashCode(SyncType syncType, String taskName) {
+       return syncType.hashCode() + taskName.hashCode();
     }
 
     @Override

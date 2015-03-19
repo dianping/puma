@@ -13,6 +13,10 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.dianping.puma.core.entity.DstDBInstance;
+import com.dianping.puma.core.entity.DumpTask;
+import com.dianping.puma.core.entity.SrcDBInstance;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.google.common.base.Strings;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecuteResultHandler;
@@ -29,10 +33,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
-import com.dianping.puma.core.sync.model.task.DumpTask;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.syncserver.conf.Config;
 import com.dianping.puma.syncserver.util.ProcessBuilderWrapper;
@@ -49,6 +51,26 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
     private final String dumpOutputDir;
     private Thread thread;
     private Timer timer = new Timer();
+
+    private SrcDBInstance srcDBInstance;
+
+    private DstDBInstance dstDBInstance;
+
+    public DstDBInstance getDstDBInstance() {
+        return dstDBInstance;
+    }
+
+    public void setDstDBInstance(DstDBInstance dstDBInstance) {
+        this.dstDBInstance = dstDBInstance;
+    }
+
+    public SrcDBInstance getSrcDBInstance() {
+        return srcDBInstance;
+    }
+
+    public void setSrcDBInstance(SrcDBInstance srcDBInstance) {
+        this.srcDBInstance = srcDBInstance;
+    }
 
     private Executor executor = new DefaultExecutor();
     {
@@ -67,8 +89,10 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         FileUtils.forceMkdir(new File(dumpOutputDir));
         this.dumpTask = dumpTask;
         this.status = new TaskExecutorStatus();
-        status.setTaskId(dumpTask.getId());
-        status.setType(dumpTask.getType());
+        status.setTaskName(dumpTask.getName());
+        status.setSyncType(dumpTask.getSyncType());
+        //status.setTaskId(dumpTask.getId());
+        //status.setType(dumpTask.getType());
     }
 
     /**
@@ -215,18 +239,22 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
     private String _mysqldump(String databaseName, List<String> tableNames) throws IOException, InterruptedException {
         List<String> cmdlist = new ArrayList<String>();
         cmdlist.add("mysqldump");
-        String hostWithPort = dumpTask.getSrcMysqlHost().getHost();
-        String host = hostWithPort;
-        int port = 3306;
-        if (StringUtils.contains(hostWithPort, ':')) {
+        //String hostWithPort = dumpTask.getSrcMysqlHost().getHost();
+        //String host = hostWithPort;
+        String host = srcDBInstance.getHost();
+        //int port = 3306
+        int port = srcDBInstance.getPort();
+        /*if (StringUtils.contains(hostWithPort, ':')) {
             String[] splits = hostWithPort.split(":");
             host = splits[0];
             port = Integer.parseInt(splits[1]);
-        }
+        }*/
         cmdlist.add("--host=" + host);
         cmdlist.add("--port=" + port);
-        cmdlist.add("--user=" + dumpTask.getSrcMysqlHost().getUsername());
-        cmdlist.add("--password=" + dumpTask.getSrcMysqlHost().getPassword());
+        //cmdlist.add("--user=" + dumpTask.getSrcMysqlHost().getUsername());
+        //cmdlist.add("--password=" + dumpTask.getSrcMysqlHost().getPassword());
+        cmdlist.add("--user=" + srcDBInstance.getUsername());
+        cmdlist.add("--password=" + srcDBInstance.getPassword());
         for (String opt : dumpTask.getOptions()) {
             cmdlist.add(opt);
         }
@@ -252,18 +280,23 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         cmdlist.add("sh");
         cmdlist.add(Config.getInstance().getTempDir() + "/shell/mysqlload.sh");
         cmdlist.add("--default-character-set=utf8");
-        cmdlist.add("--user=" + dumpTask.getDestMysqlHost().getUsername());
-        String hostWithPort = dumpTask.getDestMysqlHost().getHost();
+        cmdlist.add("--user=" + dstDBInstance.getUsername());
+        String host = dstDBInstance.getHost();
+        int port = dstDBInstance.getPort();
+        //cmdlist.add("--user=" + dumpTask.getDestMysqlHost().getUsername());
+        //String hostWithPort = dumpTask.getDestMysqlHost().getHost();
+        /*
         String host = hostWithPort;
         int port = 3306;
         if (StringUtils.contains(hostWithPort, ':')) {
             String[] splits = hostWithPort.split(":");
             host = splits[0];
             port = Integer.parseInt(splits[1]);
-        }
+        }*/
         cmdlist.add("--host=" + host);
         cmdlist.add("--port=" + port);
-        cmdlist.add("--password=" + dumpTask.getDestMysqlHost().getPassword());
+        cmdlist.add("--password=" + dstDBInstance.getPassword());
+        //cmdlist.add("--password=" + dumpTask.getDestMysqlHost().getPassword());
         cmdlist.add(_getSourceFile(databaseName));
         LOG.info("start loading " + databaseName + " ...");
         return _executeByProcessBuilder(cmdlist);

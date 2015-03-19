@@ -19,13 +19,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.dianping.puma.core.entity.AbstractBaseSyncTask;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.task.AbstractTask;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dianping.puma.core.monitor.TaskStatusEvent;
-import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.task.Type;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.syncserver.conf.Config;
@@ -65,7 +66,7 @@ public class SystemStatusContainer implements InitializingBean {
     /**
      * 记录binlog位置
      */
-    public void recordBinlog(AbstractTask abstractTask, BinlogInfo binlogInfo) {
+    public void recordBinlog(AbstractBaseSyncTask abstractTask, BinlogInfo binlogInfo) {
         taskService.recordBinlog(abstractTask, binlogInfo);
     }
 

@@ -4,27 +4,30 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import com.dianping.puma.core.constant.Operation;
+import com.dianping.puma.core.constant.SyncType;
+import com.dianping.puma.core.entity.BaseSyncTask;
+import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.monitor.*;
+import com.dianping.puma.core.service.BaseSyncTaskService;
+import com.dianping.puma.core.service.SyncTaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.dianping.puma.core.sync.model.task.SyncTask;
-import com.dianping.puma.core.sync.model.task.Task;
 import com.dianping.puma.syncserver.conf.Config;
 import com.dianping.puma.syncserver.job.container.TaskExecutionContainer;
 import com.dianping.puma.syncserver.job.executor.TaskExecutionException;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 import com.dianping.puma.syncserver.job.executor.builder.TaskExecutorBuilder;
-import com.dianping.puma.syncserver.service.TaskService;
 
 @Service("taskChecker")
 public class TaskChecker implements EventListener {
     private static final Logger LOG = LoggerFactory.getLogger(TaskChecker.class);
 
     @Autowired
-    private TaskService taskService;
+    private SyncTaskService syncTaskService;
     @Autowired
     private TaskExecutionContainer taskExecutionContainer;
     @Autowired
@@ -34,12 +37,16 @@ public class TaskChecker implements EventListener {
     @Autowired
     private NotifyService notifyService;
 
+    @Autowired
+    BaseSyncTaskService baseSyncTaskService;
+
     @SuppressWarnings("rawtypes")
     @PostConstruct
     public void init() {
         //加载所有Task
         String syncServerName = config.getSyncServerName();
-        List<SyncTask> syncTasks = taskService.findSyncTasks(syncServerName);
+
+        List<SyncTask> syncTasks = syncTaskService.findBySyncServerName(syncServerName);
         //构造成SyncTaskExecutor
         if (syncTasks != null && syncTasks.size() > 0) {
             for (SyncTask syncTask : syncTasks) {
@@ -63,13 +70,38 @@ public class TaskChecker implements EventListener {
 
         if (event instanceof SyncTaskOperationEvent) {
 
+            SyncTaskOperationEvent syncTaskOperationEvent = (SyncTaskOperationEvent) event;
+            String taskName = syncTaskOperationEvent.getTaskName();
+            Operation operation = syncTaskOperationEvent.getOperation();
+            SyncType syncType = syncTaskOperationEvent.getSyncType();
+
+            switch (operation) {
+            case CREATE:
+                BaseSyncTask task = baseSyncTaskService.find(syncType, taskName);
+                TaskExecutor executor = taskExecutorBuilder.build(task);
+
+                try {
+                    taskExecutionContainer.submit(executor);
+                } catch (TaskExecutionException e) {
+                    notifyService.alarm(e.getMessage(), e, false);
+                }
+                break;
+
+            case REMOVE:
+                taskExecutionContainer.deleteSyncTask(taskName);
+            }
+
         } else if (event instanceof SyncTaskControllerEvent) {
 
-        } else {
+            SyncTaskControllerEvent syncTaskControllerEvent = (SyncTaskControllerEvent) event;
+            taskExecutionContainer.changeStatus(syncTaskControllerEvent.getTaskName(), syncTaskControllerEvent.getController());
 
+        } else {
+            LOG.error("Receive error event.");
         }
 
 
+        /*
         if (event instanceof SyncTaskStatusActionEvent) {
             //收到状态变化的事件，通知Container修改状态
             taskExecutionContainer.changeStatus(((SyncTaskStatusActionEvent) event).getSyncTaskId(),
@@ -88,6 +120,6 @@ public class TaskChecker implements EventListener {
             } catch (TaskExecutionException e) {
                 notifyService.alarm(e.getMessage(), e, false);
             }
-        }
+        }*/
     }
 }

@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.dianping.puma.core.entity.AbstractBaseSyncTask;
+import com.dianping.puma.core.entity.DstDBInstance;
+import com.dianping.puma.core.model.BinlogInfo;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -26,11 +29,9 @@ import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
-import com.dianping.puma.core.sync.model.task.AbstractTask;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.core.util.DefaultPullStrategy;
 import com.dianping.puma.syncserver.job.executor.failhandler.HandleContext;
@@ -41,8 +42,9 @@ import com.dianping.puma.syncserver.job.executor.failhandler.StopOnFailedHandler
 import com.dianping.puma.syncserver.monitor.SystemStatusContainer;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
-public abstract class AbstractTaskExecutor<T extends AbstractTask> implements TaskExecutor<T>, SpeedControllable {
 
+public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
+		implements TaskExecutor<T>, SpeedControllable {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractTaskExecutor.class);
 
 	protected T abstractTask;
@@ -57,12 +59,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
 	protected String target;
 
+	protected DstDBInstance dstDBInstance;
+
 	protected TaskExecutorStatus status;
 
-	/**
-	 * 标识对目标数据库的会话。是否已经开始了事务（如果是，可能需要commmit或rollback否则由于数据库是可重复读级别，会一直锁住数据库。
-	 * 当开始insert/update/delete操作，无论执行是否成功，都已经开始事务）
-	 */
 	private boolean transactionStart = false;
 
 	private long sleepTime = 0;
@@ -75,16 +75,18 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 		this.pumaServerPort = pumaServerPort;
 		this.target = target;
 		this.status = new TaskExecutorStatus();
-		status.setTaskId(abstractTask.getId());
-		status.setType(abstractTask.getType());
+
+		status.setTaskName(abstractTask.getName());
+		status.setSyncType(abstractTask.getSyncType());
+		//status.setTaskId(abstractTask.getId());
+		//status.setType(abstractTask.getType());
 		// BinlogInfo startedBinlogInfo = abstractTask.getBinlogInfo();
 	}
 
 	/**
 	 * 事件到达回调函数
-	 * 
-	 * @param event
-	 *            事件
+	 *
+	 * @param event 事件
 	 * @throws Exception
 	 */
 	protected abstract void execute(ChangedEvent event) throws SQLException;
@@ -128,10 +130,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 	@Override
 	public void pause(String detail) {
 		try {
-			// if (transactionStart) {
+			//            if (transactionStart) {
 			releaseMysqlExecutor();
 			transactionStart = false;
-			// }
+			//            }
 		} catch (SQLException e) {
 			LOG.error(e.getMessage(), e);
 		}
@@ -146,10 +148,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 	@Override
 	public void stop(String detail) {
 		try {
-			// if (transactionStart) {
+			//            if (transactionStart) {
 			releaseMysqlExecutor();
 			transactionStart = false;
-			// }
+			//            }
 		} catch (SQLException e) {
 			LOG.error(e.getMessage(), e);
 		}
@@ -172,10 +174,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 	@Override
 	public void succeed() {
 		try {
-			// if (transactionStart) {
+			//            if (transactionStart) {
 			releaseMysqlExecutor();
 			transactionStart = false;
-			// }
+			//            }
 		} catch (SQLException e) {
 			LOG.error(e.getMessage(), e);
 		}
@@ -189,10 +191,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 
 	public void fail(String detail) {
 		try {
-			// if (transactionStart) {
+			//            if (transactionStart) {
 			releaseMysqlExecutor();
 			transactionStart = false;
-			// }
+			//            }
 		} catch (SQLException e) {
 			LOG.error(e.getMessage(), e);
 		}
@@ -213,8 +215,11 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 	@Override
 	public void start() {
 		// 初始化mysqlExecutor
-		mysqlExecutor = new MysqlExecutor(abstractTask.getDestMysqlHost().getHost(), abstractTask.getDestMysqlHost()
-				.getUsername(), abstractTask.getDestMysqlHost().getPassword(), abstractTask.getMysqlMapping());
+		//mysqlExecutor = new MysqlExecutor(abstractTask.getDestMysqlHost().getHost(),
+				//abstractTask.getDestMysqlHost().getUsername(), abstractTask.getDestMysqlHost().getPassword(),
+				//abstractTask.getMysqlMapping());
+		mysqlExecutor = new MysqlExecutor((dstDBInstance.getHost() + ":" + dstDBInstance.getPort()),
+				dstDBInstance.getUsername(), dstDBInstance.getPassword(), abstractTask.getMysqlMapping());
 
 		// 读取binlog位置，创建PumaClient，设置PumaCleint的config，再启动
 		if (this.pumaClient != null) {
@@ -230,10 +235,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 	public void restart() {
 		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] restarting...");
 		try {
-			// if (transactionStart) {
+			//            if (transactionStart) {
 			releaseMysqlExecutor();
 			transactionStart = false;
-			// }
+			//            }
 		} catch (SQLException e) {
 			LOG.error(e.getMessage(), e);
 		}
@@ -262,7 +267,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 		configBuilder.dml(abstractTask.isDml());
 		configBuilder.host(pumaServerHost);
 		configBuilder.port(pumaServerPort);
-		configBuilder.serverId(abstractTask.getServerId());
+		configBuilder.serverId(abstractTask.getPumaClientServerId());
 		configBuilder.name(abstractTask.getPumaClientName());
 		configBuilder.target(target);
 		configBuilder.transaction(abstractTask.isTransaction());
@@ -373,15 +378,16 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 					HandleResult handleResult = handler.handle(context);
 					ignoreFailEvent = handleResult.isIgnoreFailEvent();
 				} catch (RuntimeException re) {
-					LOG.warn("Unexpected RuntimeException on handler(" + handler.getName()
-							+ "), ignoreFailEvent keep false.", re);
+					LOG.warn(
+							"Unexpected RuntimeException on handler(" + handler.getName() + "), ignoreFailEvent keep false.",
+							re);
 				}
 				return ignoreFailEvent;
 			}
 
 			@Override
 			public void onEvent(ChangedEvent event) throws Exception {
-				// LOG.info("********************Received " + event);
+				//LOG.info("********************Received " + event);
 				if (!skipToNextPos) {
 					if (event instanceof RowChangedEvent) {
 						// ------------- (1) 【事务开始事件】--------------
@@ -402,8 +408,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 									commitBinlogCount = 0;
 								}
 							}
-							// 实时更新iobinlog位置(该io
-							// binlog位置也必须都是commmit事件的位置，这样的位置才是一个合理状态的位置，否则如果是一半事务的binlog位置，那么从该binlog位置订阅将是错误的状态)
+							// 实时更新iobinlog位置(该io binlog位置也必须都是commmit事件的位置，这样的位置才是一个合理状态的位置，否则如果是一半事务的binlog位置，那么从该binlog位置订阅将是错误的状态)
 							binlogOfIOThreadChanged(event);
 
 						} else if (containDatabase(event.getDatabase())) {
@@ -439,7 +444,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 			@Override
 			public void onConnectException(Exception e) {
 				status.setStatus(TaskExecutorStatus.Status.RECONNECTING);
-				String detail = abstractTask.getSrcMysqlName() + "->" + abstractTask.getDestMysqlName()
+				String detail = abstractTask.getPumaTaskName() + "->" + abstractTask.getDstDBInstanceName()
 						+ ":PumaClient connected failed, reconnecting...";
 				status.setDetail(detail);
 				LOG.error(detail, e);
@@ -530,8 +535,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractTask> implements Ta
 	@Override
 	public String toString() {
 		return "AbstractTaskExecutor [abstractTask=" + abstractTask + ", pumaClient=" + pumaClient + ", mysqlExecutor="
-				+ mysqlExecutor + ", pumaServerHost=" + pumaServerHost + ", pumaServerPort=" + pumaServerPort
-				+ ", target=" + target + ", status=" + status + ", transactionStart=" + transactionStart
+				+ mysqlExecutor + ", pumaServerHost=" + pumaServerHost + ", pumaServerPort="
+				+ pumaServerPort + ", target=" + target + ", status=" + status + ", transactionStart=" + transactionStart
 				+ ", sleepTime=" + sleepTime + ", lastEvents=" + lastEvents + "]";
 	}
 

@@ -2,13 +2,13 @@ package com.dianping.puma.syncserver.job.executor;
 
 import java.sql.SQLException;
 
+import com.dianping.puma.core.entity.CatchupTask;
+import com.dianping.puma.core.model.BinlogInfo;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.sync.model.BinlogInfo;
-import com.dianping.puma.core.sync.model.task.CatchupTask;
 
 public class CatchupTaskExecutor extends AbstractTaskExecutor<CatchupTask> {
     protected static final Logger LOG = LoggerFactory.getLogger(CatchupTaskExecutor.class);

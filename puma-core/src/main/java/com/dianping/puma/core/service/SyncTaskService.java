@@ -8,6 +8,8 @@ public interface SyncTaskService {
 
 	SyncTask find(String name);
 
+	List<SyncTask> findBySyncServerName(String syncServerName);
+
 	List<SyncTask> findAll();
 
 	void create(SyncTask syncTask);

@@ -240,6 +240,7 @@ public class SyncTaskCreateController {
             String taskName = "hello";
             dumpTask.setName(taskName);
             dumpTask.setSyncType(SyncType.DUMP);
+            dumpTask.setController(com.dianping.puma.core.constant.Controller.START);
 
             String pumaTaskName = (String) session.getAttribute("pumaTaskName");
             dumpTask.setPumaTaskName(pumaTaskName);

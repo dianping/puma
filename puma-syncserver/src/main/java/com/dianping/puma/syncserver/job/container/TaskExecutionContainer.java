@@ -15,6 +15,8 @@
  */
 package com.dianping.puma.syncserver.job.container;
 
+import com.dianping.puma.core.constant.Controller;
+import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.monitor.SyncTaskOperationEvent;
 import com.dianping.puma.core.sync.model.task.SyncTaskStatusAction;
 import com.dianping.puma.core.sync.model.task.Type;
@@ -29,9 +31,9 @@ public interface TaskExecutionContainer {
 
     public void submit(TaskExecutor taskExecutor) throws TaskExecutionException;
 
-    public TaskExecutor get(Type type, long taskId);
+    public TaskExecutor get(SyncType syncType, String taskName);
 
-    public void changeStatus(long syncTaskId, SyncTaskStatusAction statusAction);
+    public void changeStatus(String taskName, Controller controller);
 
-    public void deleteSyncTask(long taskId);
+    public void deleteSyncTask(String taskName);
 }

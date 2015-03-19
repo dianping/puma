@@ -2,11 +2,11 @@ package com.dianping.puma.syncserver.job.executor;
 
 import java.sql.SQLException;
 
+import com.dianping.puma.core.entity.SyncTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.sync.model.task.SyncTask;
 
 public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTask> {
     protected static final Logger LOG = LoggerFactory.getLogger(SyncTaskExecutor.class);

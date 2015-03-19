@@ -2,15 +2,15 @@ package com.dianping.puma.syncserver.job.container;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.dianping.puma.core.constant.Controller;
+import com.dianping.puma.core.constant.SyncType;
+import com.dianping.puma.core.entity.BaseSyncTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dianping.puma.core.monitor.NotifyService;
-import com.dianping.puma.core.sync.model.task.SyncTaskStatusAction;
-import com.dianping.puma.core.sync.model.task.Task;
-import com.dianping.puma.core.sync.model.task.Type;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.syncserver.job.executor.CatchupTaskExecutor;
 import com.dianping.puma.syncserver.job.executor.DumpTaskExecutor;
@@ -33,11 +33,12 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
     @Override
     public void submit(final TaskExecutor newTaskExecutor) throws TaskExecutionException {
         LOG.info("TaskExecutor submit: " + newTaskExecutor.getTask());
-        Task task = newTaskExecutor.getTask();
-        Type type = task.getType();
+        BaseSyncTask task = newTaskExecutor.getTask();
+        SyncType syncType = task.getSyncType();
+        //Type type = task.getType();
         //获取已有的TaskExecutor
         //执行taskExecutor
-        TaskExecutor taskExecutor = taskExecutorMap.get(TaskExecutorStatus.calHashCode(type, newTaskExecutor.getTask().getId()));
+        TaskExecutor taskExecutor = taskExecutorMap.get(TaskExecutorStatus.calHashCode(syncType, newTaskExecutor.getTask().getId()));
         if (taskExecutor != null) {
             //如果有的话，一定是SyncTaskExecutor，是修改后重启
             refreshSyncTask(taskExecutorMap, taskExecutor, newTaskExecutor);
@@ -60,7 +61,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
         }
         SyncTaskExecutor syncTaskExecutor0 = (SyncTaskExecutor) taskExecutor;
         SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) newTaskExecutor;
-        if (syncTaskExecutor.getTask().getSyncTaskStatusAction() != SyncTaskStatusAction.RESTART
+        if (syncTaskExecutor.getTask().getController() != Controller.RESUME
                 || (syncTaskExecutor0.getTaskExecutorStatus().getStatus() != TaskExecutorStatus.Status.SUSPPENDED)
                 && syncTaskExecutor0.getTaskExecutorStatus().getStatus() != TaskExecutorStatus.Status.FAILED
                 && syncTaskExecutor0.getTaskExecutorStatus().getStatus() != TaskExecutorStatus.Status.SUCCEED) {
@@ -68,7 +69,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
             return;
         }
         //使用新的newTaskExecutor替换现有的taskExecutor
-        taskExecutorMap.put(TaskExecutorStatus.calHashCode(newTaskExecutor.getTask().getType(), newTaskExecutor.getTask().getId()),
+        taskExecutorMap.put(TaskExecutorStatus.calHashCode(newTaskExecutor.getTask().getSyncType(), newTaskExecutor.getTask().getId()),
                 newTaskExecutor);
         taskExecutor.pause("Pause this old SyncTaskExecutor, because is replace by a new SyncTaskExecutor.");
         newTaskExecutor.start();
@@ -79,12 +80,13 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
      * 接着如果是Sync且StatusAction是START/RESTART，则启动即可；如果是Dump/Catchup，则直接启动
      */
     private void startTask(ConcurrentHashMap<Integer, TaskExecutor> taskExecutorMap, TaskExecutor newTaskExecutor) {
-        taskExecutorMap.put(TaskExecutorStatus.calHashCode(newTaskExecutor.getTask().getType(), newTaskExecutor.getTask().getId()),
+        taskExecutorMap.put(TaskExecutorStatus.calHashCode(newTaskExecutor.getTask().getSyncType(), newTaskExecutor.getTask().getId()),
                 newTaskExecutor);
         if (newTaskExecutor instanceof SyncTaskExecutor) {
             SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) newTaskExecutor;
-            if (syncTaskExecutor.getTask().getSyncTaskStatusAction() == SyncTaskStatusAction.RESTART
-                    || syncTaskExecutor.getTask().getSyncTaskStatusAction() == SyncTaskStatusAction.START) {
+
+            if (syncTaskExecutor.getTask().getController() == Controller.RESUME
+                    || syncTaskExecutor.getTask().getController() == Controller.START) {
                 syncTaskExecutor.start();
             } else {
                 syncTaskExecutor.pause("Stop because the StatusAction is Pause.");
@@ -98,12 +100,12 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
     }
 
     @Override
-    public TaskExecutor get(Type type, long taskId) {
-        return taskExecutorMap.get(TaskExecutorStatus.calHashCode(type, taskId));
+    public TaskExecutor get(SyncType syncType, String taskName) {
+        return taskExecutorMap.get(TaskExecutorStatus.calHashCode(syncType, taskName));
     }
 
-    private void delete(Type type, long taskId) {
-        taskExecutorMap.remove(TaskExecutorStatus.calHashCode(type, taskId));
+    private void delete(SyncType syncType, String taskName) {
+        taskExecutorMap.remove(TaskExecutorStatus.calHashCode(syncType, taskName));
     }
 
     /**
@@ -112,12 +114,12 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
      * taskStatusActionEvent的StatusAction是RESTART，旧的SyncTaskExecutor状态是SUSPPENDED/FAILED/SUCCEED
      */
     @Override
-    public void changeStatus(long syncTaskId, SyncTaskStatusAction statusAction) {
-        SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) this.get(Type.SYNC, syncTaskId);
+    public void changeStatus(String taskName, Controller controller) {
+        SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) this.get(SyncType.SYNC, taskName);
         if (syncTaskExecutor != null) {
-            if (statusAction == SyncTaskStatusAction.PAUSE) {
+            if (controller == Controller.PAUSE) {
                 syncTaskExecutor.pause("Stop because the StatusAction is Pause.");
-            } else if (statusAction == SyncTaskStatusAction.RESTART
+            } else if (controller == Controller.RESUME
                     && (syncTaskExecutor.getTaskExecutorStatus().getStatus() == TaskExecutorStatus.Status.SUSPPENDED
                             || syncTaskExecutor.getTaskExecutorStatus().getStatus() == TaskExecutorStatus.Status.SUCCEED || syncTaskExecutor
                             .getTaskExecutorStatus().getStatus() == TaskExecutorStatus.Status.FAILED)) {
@@ -131,10 +133,10 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
     }
 
     @Override
-    public void deleteSyncTask(long taskId) {
-        SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) this.get(Type.SYNC, taskId);
+    public void deleteSyncTask(String taskName) {
+        SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) this.get(SyncType.SYNC, taskName);
         if (syncTaskExecutor != null) {
-            this.delete(Type.SYNC, taskId);
+            this.delete(SyncType.SYNC, taskName);
             LOG.info(syncTaskExecutor + " is deleted.");
             syncTaskExecutor.stop("Disconnect because the StatusAction is deleted.");
         }

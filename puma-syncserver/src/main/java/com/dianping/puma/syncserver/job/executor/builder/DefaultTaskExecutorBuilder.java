@@ -2,8 +2,8 @@ package com.dianping.puma.syncserver.job.executor.builder;
 
 import java.util.List;
 
-import com.dianping.puma.core.sync.model.task.Task;
-import com.dianping.puma.core.sync.model.task.Type;
+import com.dianping.puma.core.constant.SyncType;
+import com.dianping.puma.core.entity.BaseSyncTask;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 
 @SuppressWarnings("rawtypes")
@@ -12,10 +12,10 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
     private List<TaskExecutorStrategy> strategys;
 
     @SuppressWarnings("unchecked")
-    public TaskExecutor build(Task task) {
-        Type type = task.getType();
+    public TaskExecutor build(BaseSyncTask task) {
+        SyncType syncType = task.getSyncType();
         for (TaskExecutorStrategy strategy : strategys) {
-            if (strategy.getType() == type) {
+            if (strategy.getSyncType() == syncType) {
                 return strategy.build(task);
             }
         }

@@ -4,9 +4,9 @@ import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 
 public abstract class AbstractBaseSyncTask extends BaseSyncTask {
 
-	private String clientName;
+	private String pumaClientName;
 
-	private long clientId;
+	private long pumaClientServerId;
 
 	private boolean ddl;
 
@@ -16,20 +16,20 @@ public abstract class AbstractBaseSyncTask extends BaseSyncTask {
 
 	private MysqlMapping mysqlMapping;
 
-	public String getClientName() {
-		return clientName;
+	public String getPumaClientName() {
+		return pumaClientName;
 	}
 
-	public void setClientName(String clientName) {
-		this.clientName = clientName;
+	public void setPumaClientName(String pumaClientName) {
+		this.pumaClientName = pumaClientName;
 	}
 
-	public long getClientId() {
-		return clientId;
+	public long getPumaClientServerId() {
+		return pumaClientServerId;
 	}
 
-	public void setClientId(long clientId) {
-		this.clientId = clientId;
+	public void setPumaClientServerId(long pumaClientServerId) {
+		this.pumaClientServerId = pumaClientServerId;
 	}
 
 	public boolean isDdl() {

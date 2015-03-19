@@ -13,32 +13,35 @@
          <div class="panel-body">
          
 	          <div class="form-group">
-	               <label class="col-md-2 control-label" for="srcMysql">选择源实例:</label>
+	               <label class="col-md-2 control-label" for="pumaTaskName">Server任务源:</label>
 	               <div class="col-md-7">
-	                  <select id="srcMysql" name="srcMysql" class="form-control">
-	                    #foreach($srcDBInstance in ${srcDBInstances})
-			               <option value="${srcDBInstance.id}">${srcDBInstance.name}</option>
-			            #end
-	                  </select>
+	                <select name="pumaTaskName" class="form-control">
+		               #foreach($pumaTask in ${pumaTasks})
+		               <option value="${pumaTask.name}">${pumaTask.name}</option>
+		               #end
+            		</select>
 	               </div>
 	               <div class="col-md-3" hidden="hidden">
 	                  <p class="help-block">hello</p>
 	               </div>
 	            </div>
 	            <div class="form-group">
-	              <label class="col-md-2 control-label" for="destMysql">选择目标实例:</label>
+	              <label class="col-md-2 control-label" for="destMysql">目标实例:</label>
 	              <div class="col-md-7">
-	                 <select id="destMysql" name="destMysql" class="form-control">
-	                    #foreach($destDBInstance in ${destDBInstances})
-	              <option value="${destDBInstance.id}">${destDBInstance.name}</option>
-	              #end
-	                 </select>
+	                 <select name="dstDBInstanceName" class="form-control">
+             			#foreach($dstDBInstance in ${dstDBInstances})
+               			<option value="${dstDBInstance.name}">${dstDBInstance.name}</option>
+               			#end
+            		</select>
 	              </div>
 	              <div class="col-md-3" hidden="hidden">
 	                 <p class="help-block">hello</p>
 	              </div>
 	           </div>
-	           <div class="panel panel-default">
+	         
+	       </div>
+	         <div class="panel panel-default"  style="border-bottom:0px;-webkit-box-shadow: 0 0px 1px rgba(0, 0, 0, .05);
+          box-shadow: 0 0px 1px rgba(0, 0, 0, .05);">
 		           <div class="panel-heading">
 		           	 <div class="btn-group-sm pull-right">
 		           	 	<button class="btn btn-success" type="button" onclick="addTableMapping(this);">新增表同步</button>
@@ -60,8 +63,8 @@
 		  			   <input type="hidden" autocomplete="off" name="count" value="0">
 		           	 </div>
 	           	 	
-	            </div>
-	       </div>
+	            	</div>
+	       		</div>
        </form>
    </div>
 </div>

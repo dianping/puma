@@ -24,6 +24,7 @@ import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
+import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
 import com.dianping.zebra.shard.router.DataSourceRouter;
 import com.dianping.zebra.shard.router.DataSourceRouterImpl;
@@ -127,6 +128,9 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
             }
 
             RowChangedEvent rowEvent = (RowChangedEvent) event;
+
+            rowEvent.setTable(task.getTableName());
+
             String tempSql = rowChangedEventToSql(rowEvent);
             List<Object> args = rowChangedEventToArgs(rowEvent);
 
@@ -256,6 +260,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
         routerImpl.setRouterRule(routerRule);
         routerImpl.setDataSourcePool(dataSourcePool);
         this.router = routerImpl;
+        this.router.init();
     }
 
     protected void initPumaClientsAndDataSources() {
@@ -372,6 +377,9 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
         for (TableShardRuleConfig tableConfig : tempRouterRuleConfig.getTableShardConfigs()) {
             if (task.getTableName().equals(tableConfig.getTableName())) {
                 this.tableShardRuleConfig = tableConfig;
+                for (TableShardDimensionConfig dimension : this.tableShardRuleConfig.getDimensionConfigs()) {
+                    dimension.setTableName(task.getTableName());
+                }
                 return;
             }
         }

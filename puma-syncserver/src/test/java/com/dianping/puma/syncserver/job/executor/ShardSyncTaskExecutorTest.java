@@ -24,7 +24,9 @@ import com.google.gson.Gson;
 import junit.framework.Assert;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -49,6 +51,7 @@ public class ShardSyncTaskExecutorTest {
         this.target = new ShardSyncTaskExecutor(task);
         this.target.setConfigCache(configCache);
     }
+
 
     @Test
     public void initPumaClientTest() throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
@@ -99,7 +102,7 @@ public class ShardSyncTaskExecutorTest {
         Assert.assertTrue(clientConfig.getDatabaseTablesMapping().containsKey("db1"));
         Assert.assertEquals(tables.toString(), clientConfig.getDatabaseTablesMapping().get("db1").toString());
 
-        Assert.assertEquals("ShardSyncTask-11-db1-debug",clientConfig.getName());
+        Assert.assertEquals("ShardSyncTask-11-db1-debug", clientConfig.getName());
         System.out.println("PumaClient :" + clientConfig.getName());
     }
 

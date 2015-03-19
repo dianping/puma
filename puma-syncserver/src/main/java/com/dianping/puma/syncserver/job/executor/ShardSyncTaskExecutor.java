@@ -4,11 +4,13 @@ import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
 import com.dianping.puma.api.ConfigurationBuilder;
+import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
+import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
@@ -33,6 +35,7 @@ import com.google.gson.Gson;
 
 import javax.sql.DataSource;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,9 +52,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     private ConfigCache configService;
 
-    private Map<String, DataSource> dataSourcePool = new HashMap<String, DataSource>();
+    private volatile Map<String, DataSource> dataSourcePool = new ConcurrentHashMap<String, DataSource>();
 
     private List<PumaClient> pumaClientList = new ArrayList<PumaClient>();
+
+    protected Processer processer = new Processer();
 
     protected TableShardRuleConfig tableShardRuleConfig;
 
@@ -94,6 +99,42 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
         //todo:start puma client
     }
 
+    protected void startPumaClient() {
+        for (PumaClient client : pumaClientList) {
+            client.register(processer);
+            client.start();
+        }
+    }
+
+    class Processer implements EventListener {
+        @Override
+        public void onEvent(ChangedEvent event) throws Exception {
+            //to sql
+            //call router
+            //execute on ds
+        }
+
+        @Override
+        public boolean onException(ChangedEvent event, Exception e) {
+            return false;
+        }
+
+        @Override
+        public void onConnectException(Exception e) {
+
+        }
+
+        @Override
+        public void onConnected() {
+
+        }
+
+        @Override
+        public void onSkipEvent(ChangedEvent event) {
+
+        }
+    }
+
     protected void initRouterConfig() {
         RouterRuleConfig routerRuleConfig = new RouterRuleConfig();
         routerRuleConfig.setTableShardConfigs(Lists.newArrayList(tableShardRuleConfig));
@@ -110,8 +151,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
     protected void initPumaClientsAndDataSources() {
         if (!switchOn && !Strings.isNullOrEmpty(originGroupDataSource)) {
             GroupDataSource ds = initGroupDataSource(originGroupDataSource);
-            initPumaClient(ds.getConfig(), SubscribeConstant.SEQ_FROM_LATEST, Sets.newHashSet(task.getTableName()), "migrate-new");
-            initPumaClient(ds.getConfig(), SubscribeConstant.SEQ_FROM_OLDEST, Sets.newHashSet(task.getTableName()), "migrate-old");
+            initPumaClient(ds.getConfig(), SubscribeConstant.SEQ_FROM_LATEST, Sets.newHashSet(task.getTableName()), "migrate");
         }
 
         TableShardRule tableShardRule = routerRule.getTableShardRules().get(task.getTableName());

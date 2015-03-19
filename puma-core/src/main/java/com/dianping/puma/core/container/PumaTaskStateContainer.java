@@ -1,10 +1,6 @@
 package com.dianping.puma.core.container;
 
-import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.core.model.PumaTaskState;
-import com.dianping.puma.core.monitor.Event;
-import com.dianping.puma.core.monitor.EventListener;
-import com.dianping.puma.core.monitor.PumaTaskStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

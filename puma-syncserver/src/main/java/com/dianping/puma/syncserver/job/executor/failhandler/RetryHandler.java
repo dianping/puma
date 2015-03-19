@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.dianping.puma.core.entity.AbstractBaseSyncTask;
 import com.dianping.puma.core.entity.BaseSyncTask;
+import com.dianping.puma.core.model.SyncTaskState;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +43,9 @@ public class RetryHandler implements Handler {
         Exception exception = context.getException();
         ChangedEvent changedEvent = context.getChangedEvent();
 
-        TaskExecutorStatus status = executor.getStatus();
-        status.setDetail("RetryHandler retrying, cause: " + task.getPumaTaskName() + "->" + task.getDstDBInstanceName() + ":" + exception.getMessage() + ". Event=" + changedEvent + ", at "
+        SyncTaskState state = executor.getState();
+        //TaskExecutorStatus status = executor.getStatus();
+        state.setDetail("RetryHandler retrying, cause: " + task.getPumaTaskName() + "->" + task.getDstDBInstanceName() + ":" + exception.getMessage() + ". Event=" + changedEvent + ", at "
                 + DateFormatUtils.format(new Date(), PATTERN));
 
         //思路：errorcode不是-1时，认为是正常的sql异常，则重试; 否则认为是网络之类的不可恢复问题，则重启task

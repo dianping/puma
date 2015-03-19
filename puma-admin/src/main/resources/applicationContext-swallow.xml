@@ -22,6 +22,19 @@
         <property name="topic" value="puma_task_controller" />
     </bean>
 
+    <bean id="pumaTaskStateSubscriber"
+          class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
+          init-method="init">
+        <property name="topic" value="puma_task_state"/>
+        <property name="notifyService" ref="notifyService"/>
+        <property name="clazz" value="com.dianping.puma.core.monitor.PumaTaskStateEvent" />
+        <property name="listeners">
+            <list>
+                <ref bean="pumaTaskStateChecker" />
+            </list>
+        </property>
+    </bean>
+
     <bean id="syncTaskOperationEventPublisher"
           class="com.dianping.puma.core.monitor.SwallowEventPublisher"
           init-method="init">
@@ -32,6 +45,19 @@
           class="com.dianping.puma.core.monitor.SwallowEventPublisher"
           init-method="init">
         <property name="topic" value="sync_task_controller"/>
+    </bean>
+
+    <bean id="syncTaskStateSubscriber"
+          class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
+          init-method="init">
+        <property name="topic" value="sync_task_state"/>
+        <property name="notifyService" ref="notifyService"/>
+        <property name="clazz" value="com.dianping.puma.core.monitor.SyncTaskStateEvent" />
+        <property name="listeners">
+            <list>
+                <ref bean="syncTaskStateChecker" />
+            </list>
+        </property>
     </bean>
 
     <bean id="pumaTaskEventPublisher"
@@ -65,19 +91,6 @@
         <property name="listeners">
             <list>
                 <ref bean="systemStatusContainer" />
-            </list>
-        </property>
-    </bean>
-
-    <bean id="pumaTaskStateSubscriber"
-          class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
-          init-method="init">
-        <property name="topic" value="puma_task_state"/>
-        <property name="notifyService" ref="notifyService"/>
-        <property name="clazz" value="com.dianping.puma.core.monitor.PumaTaskStateEvent" />
-        <property name="listeners">
-            <list>
-                <ref bean="pumaTaskStateChecker" />
             </list>
         </property>
     </bean>

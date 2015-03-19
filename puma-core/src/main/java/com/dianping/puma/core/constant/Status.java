@@ -4,8 +4,13 @@ public enum Status {
 	WAITING("等待中"),
 	PREPARING("准备中"),
 	RUNNING("运行中"),
+	SUSPENDED("已暂停"),
 	STOPPING("停止中"),
 	STOPPED("已停止"),
+	SUCCESS("结束-成功"),
+	RECONNECTING("重新连接"),
+	DUMPING("DUMP中"),
+	LOADING("载入中"),
 	FAILED("已失败");
 
 	private final String desc;

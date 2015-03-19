@@ -52,6 +52,7 @@ import com.dianping.puma.core.entity.DumpTask;
  */
 @Controller
 public class SyncTaskCreateController {
+
 	private static final Logger LOG = LoggerFactory.getLogger(SyncTaskCreateController.class);
 	// private SyncConfigService syncConfigService;
 	/*

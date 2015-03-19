@@ -3,6 +3,7 @@ package com.dianping.puma.syncserver.job.container;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.dianping.puma.core.constant.Controller;
+import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.entity.BaseSyncTask;
 import org.slf4j.Logger;
@@ -62,9 +63,9 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
         SyncTaskExecutor syncTaskExecutor0 = (SyncTaskExecutor) taskExecutor;
         SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) newTaskExecutor;
         if (syncTaskExecutor.getTask().getController() != Controller.RESUME
-                || (syncTaskExecutor0.getTaskExecutorStatus().getStatus() != TaskExecutorStatus.Status.SUSPPENDED)
-                && syncTaskExecutor0.getTaskExecutorStatus().getStatus() != TaskExecutorStatus.Status.FAILED
-                && syncTaskExecutor0.getTaskExecutorStatus().getStatus() != TaskExecutorStatus.Status.SUCCEED) {
+              || syncTaskExecutor0.getState().getStatus() != Status.SUSPENDED
+              && syncTaskExecutor0.getState().getStatus() != Status.FAILED
+              && syncTaskExecutor0.getState().getStatus() != Status.SUCCESS) {
             notifyService.alarm("Ignored a TaskExecutor which status is not correct: " + newTaskExecutor.getTask(), null, false);
             return;
         }
@@ -120,9 +121,9 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
             if (controller == Controller.PAUSE) {
                 syncTaskExecutor.pause("Stop because the StatusAction is Pause.");
             } else if (controller == Controller.RESUME
-                    && (syncTaskExecutor.getTaskExecutorStatus().getStatus() == TaskExecutorStatus.Status.SUSPPENDED
-                            || syncTaskExecutor.getTaskExecutorStatus().getStatus() == TaskExecutorStatus.Status.SUCCEED || syncTaskExecutor
-                            .getTaskExecutorStatus().getStatus() == TaskExecutorStatus.Status.FAILED)) {
+                  && (syncTaskExecutor.getState().getStatus() == Status.SUSPENDED
+                  || syncTaskExecutor.getState().getStatus() == Status.SUCCESS
+                  || syncTaskExecutor.getState().getStatus() == Status.FAILED)) {
                 syncTaskExecutor.start();
             }
         }

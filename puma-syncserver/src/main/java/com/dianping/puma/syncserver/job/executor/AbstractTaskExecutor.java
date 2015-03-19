@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.AbstractBaseSyncTask;
 import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.model.SyncTaskState;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -61,6 +63,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 
 	protected DstDBInstance dstDBInstance;
 
+	protected SyncTaskState state;
+
 	protected TaskExecutorStatus status;
 
 	private boolean transactionStart = false;
@@ -74,10 +78,14 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 		this.pumaServerHost = pumaServerHost;
 		this.pumaServerPort = pumaServerPort;
 		this.target = target;
-		this.status = new TaskExecutorStatus();
 
-		status.setTaskName(abstractTask.getName());
-		status.setSyncType(abstractTask.getSyncType());
+		this.state = new SyncTaskState();
+		state.setTaskName(abstractTask.getName());
+		state.setSyncType(abstractTask.getSyncType());
+
+		//this.status = new TaskExecutorStatus();
+		//status.setTaskName(abstractTask.getName());
+		//status.setSyncType(abstractTask.getSyncType());
 		//status.setTaskId(abstractTask.getId());
 		//status.setType(abstractTask.getType());
 		// BinlogInfo startedBinlogInfo = abstractTask.getBinlogInfo();
@@ -101,7 +109,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 			binlogInfo.setBinlogFile(event.getBinlog());
 			binlogInfo.setBinlogPosition(event.getBinlogPos());
 			binlogInfo.setSkipToNextPos(true);
-			status.setBinlogInfo(binlogInfo);
+			state.setBinlogInfo(binlogInfo);
+			//status.setBinlogInfo(binlogInfo);
 			abstractTask.setBinlogInfo(binlogInfo);
 			// 保存binlog信息到数据库
 			saveBinlogToDB(binlogInfo);
@@ -114,7 +123,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 			BinlogInfo binlogInfo = new BinlogInfo();
 			binlogInfo.setBinlogFile(event.getBinlog());
 			binlogInfo.setBinlogPosition(event.getBinlogPos());
-			status.setBinlogInfoOfIOThread(binlogInfo);
+			state.setBinlogInfoOfIOThread(binlogInfo);
+			//status.setBinlogInfoOfIOThread(binlogInfo);
 		}
 	}
 
@@ -140,8 +150,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 		if (this.pumaClient != null) {
 			this.pumaClient.stop();
 		}
-		this.status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
-		this.status.setDetail(detail);
+		state.setStatus(Status.SUSPENDED);
+		state.setDetail(detail);
+		//this.status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
+		//this.status.setDetail(detail);
 		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] paused... cause:" + detail);
 	}
 
@@ -158,8 +170,11 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 		if (this.pumaClient != null) {
 			this.pumaClient.stop();
 		}
-		this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
-		this.status.setDetail(detail);
+		state.setStatus(Status.SUCCESS);
+		state.setDetail(detail);
+
+		//this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
+		//this.status.setDetail(detail);
 		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] stop... cause:" + detail);
 	}
 
@@ -184,8 +199,11 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 		if (this.pumaClient != null) {
 			this.pumaClient.stop();
 		}
-		this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
-		this.status.setDetail(null);
+		state.setStatus(Status.RUNNING);
+		state.setDetail(null);
+
+		//this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
+		//this.status.setDetail(null);
 		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] succeeded...");
 	}
 
@@ -201,14 +219,17 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 		if (this.pumaClient != null) {
 			this.pumaClient.stop();
 		}
-		this.status.setStatus(TaskExecutorStatus.Status.FAILED);
+		state.setStatus(Status.FAILED);
+
+		//this.status.setStatus(TaskExecutorStatus.Status.FAILED);
 		Cat.getProducer().logEvent(
 				"Puma.syncserver." + abstractTask.getSyncServerName() + ".fail",
 				abstractTask.getSyncServerName(),
 				Message.SUCCESS,
 				"syncServerName = " + abstractTask.getSyncServerName() + "&pumaClientName= "
 						+ abstractTask.getPumaClientName() + "&casedetail=" + detail);
-		this.status.setDetail(detail);
+		state.setDetail(detail);
+		//this.status.setDetail(detail);
 		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] failed... cause:" + detail);
 	}
 
@@ -227,8 +248,11 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 		}
 		pumaClient = createPumaClient();
 		pumaClient.start();
-		this.status.setDetail(null);
-		this.status.setStatus(TaskExecutorStatus.Status.RUNNING);
+		state.setStatus(Status.RUNNING);
+		state.setDetail(null);
+
+		//this.status.setDetail(null);
+		//this.status.setStatus(TaskExecutorStatus.Status.RUNNING);
 		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] started.");
 	}
 
@@ -443,18 +467,23 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 
 			@Override
 			public void onConnectException(Exception e) {
-				status.setStatus(TaskExecutorStatus.Status.RECONNECTING);
+				state.setStatus(Status.RECONNECTING);
+				//status.setStatus(TaskExecutorStatus.Status.RECONNECTING);
 				String detail = abstractTask.getPumaTaskName() + "->" + abstractTask.getDstDBInstanceName()
 						+ ":PumaClient connected failed, reconnecting...";
-				status.setDetail(detail);
+				state.setDetail(detail);
+				//status.setDetail(detail);
 				LOG.error(detail, e);
 				defaultPullStrategy.fail(true);
 			}
 
 			@Override
 			public void onConnected() {
-				status.setStatus(TaskExecutorStatus.Status.RUNNING);
-				status.setDetail("PumaClient connected.");
+				state.setStatus(Status.RUNNING);
+				state.setDetail("PumaClient connected.");
+
+				//status.setStatus(TaskExecutorStatus.Status.RUNNING);
+				//status.setDetail("PumaClient connected.");
 				LOG.info("PumaClient[" + getTask().getPumaClientName() + "] connected.");
 			}
 		});
@@ -561,4 +590,11 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 		this.status = status;
 	}
 
+	public SyncTaskState getState() {
+		return state;
+	}
+
+	public void setState(SyncTaskState state) {
+		this.state = state;
+	}
 }

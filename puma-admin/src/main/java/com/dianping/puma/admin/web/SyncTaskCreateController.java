@@ -11,7 +11,7 @@ import javax.servlet.http.HttpSession;
 import com.dianping.puma.admin.reporter.SyncTaskOperationReporter;
 import com.dianping.puma.core.constant.Operation;
 import com.dianping.puma.core.constant.SyncType;
-import com.dianping.puma.core.entity.PumaTask;
+import com.dianping.puma.core.entity.*;
 import com.dianping.puma.core.service.PumaTaskService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -28,9 +28,6 @@ import com.dianping.puma.admin.monitor.SystemStatusContainer;
 import com.dianping.puma.admin.service.DumpTaskService;
 import com.dianping.puma.admin.service.SyncTaskService;
 import com.dianping.puma.admin.util.GsonUtil;
-import com.dianping.puma.core.entity.DstDBInstance;
-import com.dianping.puma.core.entity.SrcDBInstance;
-import com.dianping.puma.core.entity.SyncServer;
 import com.dianping.puma.core.service.DstDBInstanceService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.core.service.SyncServerService;
@@ -41,9 +38,7 @@ import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.DumpMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
-import com.dianping.puma.core.sync.model.task.DumpTask;
 import com.dianping.puma.core.sync.model.task.SyncTask;
-import com.dianping.puma.core.sync.model.task.Type;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 
 /**
@@ -296,7 +291,7 @@ public class SyncTaskCreateController {
                 throw new IllegalArgumentException("dumpTask为空，可能是会话已经过期！");
             }
 
-            TaskExecutorStatus status = systemStatusContainer.getStatus(Type.DUMP, dumpTask.getId());
+            TaskExecutorStatus status = systemStatusContainer.getStatus(SyncType.DUMP, dumpTask.getName());
             if (status != null) {
                 map.put("status", status);
                 if (status.getBinlogInfo() != null) {
@@ -341,6 +336,7 @@ public class SyncTaskCreateController {
                                  String binlogFile, String binlogPosition, Boolean ddl, Boolean dml, String pumaClientName,
                                  Boolean transaction, Integer[] errorCodes, String[] handlers, String defaultHandler) {
         Map<String, Object> map = new HashMap<String, Object>();
+        /*
         try {
             //检查参数
             if (StringUtils.isBlank(syncServerName)) {
@@ -428,7 +424,7 @@ public class SyncTaskCreateController {
             map.put("success", false);
             map.put("errorMsg", e.getMessage());
             LOG.error(e.getMessage(), e);
-        }
+        }*/
         return GsonUtil.toJson(map);
 
     }

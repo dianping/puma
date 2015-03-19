@@ -1,6 +1,6 @@
 package com.dianping.puma.syncserver.service.impl;
 
-import com.dianping.puma.core.sync.model.BinlogInfo;
+import com.dianping.puma.core.model.BinlogInfo;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.junit.Test;
@@ -26,7 +26,7 @@ public class MMapBasedBinlogInfoServiceImplTest extends TestCase {
 	public void testGetBinlogInfo() throws Exception {
 		BinlogInfo binlogInfo = new BinlogInfo();
 		binlogInfo.setBinlogFile("a");
-		binlogInfo.setBinlogPosition(999888);
+		binlogInfo.setBinlogPosition(999888L);
 		mMapBasedBinlogInfoService.saveBinlogInfo("no-1", binlogInfo);
 		Assert.assertEquals(binlogInfo, mMapBasedBinlogInfoService.getBinlogInfo("no-1"));
 	}
@@ -35,7 +35,7 @@ public class MMapBasedBinlogInfoServiceImplTest extends TestCase {
 	public void testSaveBinlogInfo() throws Exception {
 		BinlogInfo binlogInfo = new BinlogInfo();
 		binlogInfo.setBinlogFile("b");
-		binlogInfo.setBinlogPosition(987);
+		binlogInfo.setBinlogPosition(987L);
 		mMapBasedBinlogInfoService.saveBinlogInfo("no-2", binlogInfo);
 		Assert.assertEquals(binlogInfo, mMapBasedBinlogInfoService.getBinlogInfo("no-2"));
 	}

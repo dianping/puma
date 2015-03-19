@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
+import com.dianping.puma.core.constant.SyncType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -92,22 +93,24 @@ public class SystemStatusContainer implements EventListener {
         }
     }
 
-    public TaskExecutorStatus getStatus(Type type, long taskId) {
-        TaskExecutorStatus status = taskStatusMap.get(TaskExecutorStatus.calHashCode(type, taskId));
+    public TaskExecutorStatus getStatus(SyncType syncType, String taskName) {
+        TaskExecutorStatus status = taskStatusMap.get(TaskExecutorStatus.calHashCode(syncType, taskName));
         return status;
     }
 
     /**
      * admin创建新的SyncTask,DumpTask,CatchupTask后，调用此方法，添加Status
      */
-    public void addStatus(Type type, long taskId) {
-        if (taskStatusMap.get(TaskExecutorStatus.calHashCode(type, taskId)) != null) {
-            notifyService.alarm("Status is already exist! Why add again?! Receive Status is [taskId=" + taskId + ",type=" + type
+    public void addStatus(SyncType syncType, String taskName) {
+        if (taskStatusMap.get(TaskExecutorStatus.calHashCode(syncType, taskName)) != null) {
+            notifyService.alarm("Status is already exist! Why add again?! Receive Status is [taskId=" + taskName + ",type=" + syncType
                     + "]", null, true);
         } else {
             TaskExecutorStatus status = new TaskExecutorStatus();
-            status.setTaskId(taskId);
-            status.setType(type);
+            //status.setTaskId(task);
+            //status.setType(type);
+            status.setSyncType(syncType);
+            status.setTaskName(taskName);
             status.setStatus(TaskExecutorStatus.Status.WAITING);
             taskStatusMap.put(status.hashCode(), status);
         }

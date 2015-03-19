@@ -84,7 +84,7 @@ public class ShardSyncTaskExecutorTest {
         target.setSrcDBInstanceService(srcDBInstanceService);
 
         //run
-        PumaClient actual = target.initPumaClient(config, seq, tables);
+        PumaClient actual = target.initPumaClient(config, seq, tables, "debug");
 
 
         //verify
@@ -148,7 +148,7 @@ public class ShardSyncTaskExecutorTest {
                 System.out.println("init pumaclient:" + invocationOnMock.getArguments()[2]);
                 return null;
             }
-        }).when(spy).initPumaClient(any(GroupDataSourceConfig.class), anyLong(), anySet());
+        }).when(spy).initPumaClient(any(GroupDataSourceConfig.class), anyLong(), anySet(), anyString());
 
 
         TableShardRuleConfig tableShardRuleConfig = buildTableConfigFromFile("initPumaClientsAndDataSourcesTest.json");
@@ -170,15 +170,15 @@ public class ShardSyncTaskExecutorTest {
         verify(spy, times(0)).initGroupDataSource("ds4");
         verify(spy, times(0)).initGroupDataSource("ds5");
 
-        verify(spy, times(8)).initPumaClient(any(GroupDataSourceConfig.class), anyLong(), anySet());
-        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("table1")));
-        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_OLDEST), argThat(new SetMatchers("table1")));
-        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("table1_0", "table1_1")));
-        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("table1_2", "table1_3")));
-        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("table1_4", "table1_5")));
-        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("table1_6", "table1_7")));
-        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("ds1_white")));
-        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("ds8_white")));
+        verify(spy, times(8)).initPumaClient(any(GroupDataSourceConfig.class), anyLong(), anySet(), anyString());
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("table1")), eq("migrate-new"));
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_OLDEST), argThat(new SetMatchers("table1")), eq("migrate-old"));
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("table1_0", "table1_1")), eq("master"));
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("table1_2", "table1_3")), eq("master"));
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("table1_4", "table1_5")), eq("master"));
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("table1_6", "table1_7")), eq("master"));
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("ds1_white")), anyString());
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("ds8_white")), anyString());
     }
 
     class SetMatchers extends ArgumentMatcher<Set<String>> {

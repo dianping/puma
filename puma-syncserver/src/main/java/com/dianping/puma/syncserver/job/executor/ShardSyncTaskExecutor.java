@@ -110,8 +110,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
     protected void initPumaClientsAndDataSources() {
         if (!switchOn && !Strings.isNullOrEmpty(originGroupDataSource)) {
             GroupDataSource ds = initGroupDataSource(originGroupDataSource);
-            initPumaClient(ds.getConfig(), SubscribeConstant.SEQ_FROM_LATEST, Sets.newHashSet(task.getTableName()));
-            initPumaClient(ds.getConfig(), SubscribeConstant.SEQ_FROM_OLDEST, Sets.newHashSet(task.getTableName()));
+            initPumaClient(ds.getConfig(), SubscribeConstant.SEQ_FROM_LATEST, Sets.newHashSet(task.getTableName()), "migrate-new");
+            initPumaClient(ds.getConfig(), SubscribeConstant.SEQ_FROM_OLDEST, Sets.newHashSet(task.getTableName()), "migrate-old");
         }
 
         TableShardRule tableShardRule = routerRule.getTableShardRules().get(task.getTableName());
@@ -121,24 +121,26 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
                 continue;
             }
 
-            initPumaClientsAndDataSources(dimensionRuleImpl.getDataSourceProvider().getAllDBAndTables());
+            initPumaClientsAndDataSources(dimensionRuleImpl.getDataSourceProvider().getAllDBAndTables(), "master");
+
+            int index = 0;
             for (DimensionRule rule : dimensionRuleImpl.getWhiteListRules()) {
-                initPumaClientsAndDataSources(rule.getAllDBAndTables());
+                initPumaClientsAndDataSources(rule.getAllDBAndTables(), "white" + String.valueOf(index++));
             }
         }
     }
 
-    protected void initPumaClientsAndDataSources(Map<String, Set<String>> all) {
+    protected void initPumaClientsAndDataSources(Map<String, Set<String>> all, String name) {
         for (Map.Entry<String, Set<String>> entity : all.entrySet()) {
             if (dataSourcePool.containsKey(entity.getKey())) {
                 continue;
             }
             GroupDataSource groupDataSource = initGroupDataSource(entity.getKey());
-            initPumaClient(groupDataSource.getConfig(), SubscribeConstant.SEQ_FROM_LATEST, entity.getValue());
+            initPumaClient(groupDataSource.getConfig(), SubscribeConstant.SEQ_FROM_LATEST, entity.getValue(), name);
         }
     }
 
-    protected PumaClient initPumaClient(GroupDataSourceConfig config, long seq, Set<String> tables) {
+    protected PumaClient initPumaClient(GroupDataSourceConfig config, long seq, Set<String> tables, String name) {
         DataSourceConfig dsConfig = findTheOnlyWriteDataSourceConfig(config);
 
         Matcher matcher = JDBC_URL_PATTERN.matcher(dsConfig.getJdbcUrl());
@@ -167,7 +169,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
                 .host(pumaServer.getHost())
                 .target(pumaTask.getName());
 
-        configBuilder.name(String.format("ShardSyncTask-%s-%s-s(seq:%d)", task.getId(), ds, tables.hashCode(), seq));
+        configBuilder.name(String.format("ShardSyncTask-%s-%s-%s", task.getId(), ds, name));
 
         for (String tb : tables) {
             configBuilder.tables(ds, tb);

@@ -11,11 +11,13 @@ import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.core.sync.model.task.ShardSyncTask;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
+import com.dianping.puma.syncserver.mysql.SqlBuildUtil;
 import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
@@ -25,6 +27,8 @@ import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
 import com.dianping.zebra.shard.router.DataSourceRouter;
 import com.dianping.zebra.shard.router.DataSourceRouterImpl;
+import com.dianping.zebra.shard.router.RouterTarget;
+import com.dianping.zebra.shard.router.TargetedSql;
 import com.dianping.zebra.shard.router.rule.*;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
@@ -32,9 +36,13 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,11 +56,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * http://www.dozer.cc
  */
 public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
+    public static final int INSERT = RowChangedEvent.INSERT;
+    public static final int DELETE = RowChangedEvent.DELETE;
+    public static final int UPDATE = RowChangedEvent.UPDATE;
+    public static final int REPLACE_INTO = 3;
+    private static final int UPDTAE_TO_NULL = 4;
+    public static final int SELECT = 5;
+
     private final ShardSyncTask task;
 
     private ConfigCache configService;
 
-    private volatile Map<String, DataSource> dataSourcePool = new ConcurrentHashMap<String, DataSource>();
+    private final Map<String, DataSource> dataSourcePool = new ConcurrentHashMap<String, DataSource>();
 
     private List<PumaClient> pumaClientList = new ArrayList<PumaClient>();
 
@@ -62,7 +77,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     protected String originGroupDataSource;
 
-    protected volatile boolean switchOn;
+    protected boolean switchOn;
 
     private PumaServerService pumaServerService;
 
@@ -95,8 +110,6 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
         initRouterConfig();
         initPumaClientsAndDataSources();
         initRouter();
-
-        //todo:start puma client
     }
 
     protected void startPumaClient() {
@@ -109,9 +122,106 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
     class Processer implements EventListener {
         @Override
         public void onEvent(ChangedEvent event) throws Exception {
-            //to sql
-            //call router
-            //execute on ds
+            if (!(event instanceof RowChangedEvent)) {
+                return;
+            }
+
+            RowChangedEvent rowEvent = (RowChangedEvent) event;
+            String tempSql = rowChangedEventToSql(rowEvent);
+            List<Object> args = rowChangedEventToArgs(rowEvent);
+
+            if (Strings.isNullOrEmpty(tempSql)) {
+                return;
+            }
+
+            RouterTarget routerTarget = router.getTarget(tempSql, args);
+
+            for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
+                JdbcTemplate jdbcTemplate = new JdbcTemplate(targetedSql.getDataSource());
+                for (String sql : targetedSql.getSqls()) {
+                    try {
+                        jdbcTemplate.execute(sql);
+                    } catch (Exception exp) {
+                        //todo:
+                    }
+                }
+            }
+        }
+
+        protected List<Object> rowChangedEventToArgs(RowChangedEvent event) {
+            int actionType = event.getActionType();
+            Map<String, RowChangedEvent.ColumnInfo> columnMap = event.getColumns();
+            List<Object> args = new ArrayList<Object>();
+            switch (actionType) {
+                case REPLACE_INTO:
+                    for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
+                        args.add(columnName2ColumnInfo.getValue().getNewValue());
+                    }
+                    for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
+                        if (!columnName2ColumnInfo.getValue().isKey()) {
+                            args.add(columnName2ColumnInfo.getValue().getNewValue());
+                        }
+                    }
+                    break;
+                case INSERT:
+                    for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
+                        args.add(columnName2ColumnInfo.getValue().getNewValue());
+                    }
+                    break;
+                case UPDATE:
+                    for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
+                        args.add(columnName2ColumnInfo.getValue().getNewValue());
+                    }
+                    for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
+                        args.add(columnName2ColumnInfo.getValue().getOldValue());
+                    }
+                    break;
+                case DELETE:
+                    for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
+                        args.add(columnName2ColumnInfo.getValue().getOldValue());
+                    }
+                    break;
+                case UPDTAE_TO_NULL:
+                    for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
+                        if (!columnName2ColumnInfo.getValue().isKey()) { //primery key 不能update to null
+                            args.add(columnName2ColumnInfo.getValue().getNewValue());
+                        }
+                    }
+                    for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
+                        args.add(columnName2ColumnInfo.getValue().getOldValue());
+                    }
+                    break;
+                case SELECT:
+                    //ignore
+                    break;
+            }
+            return args;
+        }
+
+        protected String rowChangedEventToSql(RowChangedEvent event) {
+            String sql = null;
+            int actionType = event.getActionType();
+            switch (actionType) {
+                case INSERT:
+                    sql = SqlBuildUtil.buildInsertSql(event);
+                    break;
+                case UPDATE:
+                    sql = SqlBuildUtil.buildUpdateSql(event);
+                    break;
+                case DELETE:
+                    sql = SqlBuildUtil.buildDeleteSql(event);
+                    break;
+                case UPDTAE_TO_NULL:
+                    sql = SqlBuildUtil.buildUpdateToNullSql(event);
+                    break;
+                case REPLACE_INTO:
+                    sql = SqlBuildUtil.buildReplaceSql(event);
+                    break;
+                case SELECT:
+                    //ignore
+                    break;
+            }
+            return sql;
         }
 
         @Override
@@ -270,7 +380,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     @Override
     public void start() {
-
+        startPumaClient();
     }
 
     @Override

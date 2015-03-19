@@ -2,8 +2,15 @@ package com.dianping.puma.syncserver.job.executor;
 
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
+import com.dianping.puma.api.Configuration;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.constant.SubscribeConstant;
+import com.dianping.puma.core.entity.PumaServer;
+import com.dianping.puma.core.entity.PumaTask;
+import com.dianping.puma.core.entity.SrcDBInstance;
+import com.dianping.puma.core.service.PumaServerService;
+import com.dianping.puma.core.service.PumaTaskService;
+import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.core.sync.model.task.ShardSyncTask;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
@@ -12,8 +19,10 @@ import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import junit.framework.Assert;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
@@ -21,6 +30,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Random;
 import java.util.Set;
 
 import static org.mockito.Mockito.*;
@@ -34,13 +45,61 @@ public class ShardSyncTaskExecutorTest {
     public void init() {
         this.task.setRuleName("test");
         this.task.setTableName("table1");
+        this.task.setId(11l);
         this.target = new ShardSyncTaskExecutor(task);
         this.target.setConfigCache(configCache);
     }
 
     @Test
-    public void initPumaClientTest() {
+    public void initPumaClientTest() throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        //prepare
+        GroupDataSourceConfig config = new GroupDataSourceConfig();
+        DataSourceConfig ds1 = new DataSourceConfig();
+        ds1.setCanWrite(true);
+        ds1.setJdbcUrl("jdbc:mysql://1.1.1.1:3306/db1?a=b");
+        config.getDataSourceConfigs().put("db1", ds1);
 
+        long seq = -(new Random().nextInt(100) + 1);
+        Set<String> tables = Sets.newHashSet("t1", "t2");
+
+        SrcDBInstanceService srcDBInstanceService = mock(SrcDBInstanceService.class);
+        SrcDBInstance instance = new SrcDBInstance();
+        when(srcDBInstanceService.findByIp("1.1.1.1")).thenReturn(Lists.newArrayList(instance));
+
+        PumaTaskService pumaTaskService = mock(PumaTaskService.class);
+        PumaTask pumaTask = new PumaTask();
+        PumaServer pumaServer = new PumaServer();
+        pumaServer.setHost("2.2.2.2");
+        pumaServer.setPort(12345);
+        String targetName = "test-puma-test";
+        pumaTask.setPumaServerId(pumaServer.getId());
+        pumaTask.setName(targetName);
+        when(pumaTaskService.findBySrcDBInstanceId(instance.getId())).thenReturn(Lists.newArrayList(pumaTask));
+
+        PumaServerService pumaServerService = mock(PumaServerService.class);
+        when(pumaServerService.find(pumaServer.getId())).thenReturn(pumaServer);
+
+        target.setPumaServerService(pumaServerService);
+        target.setPumaTaskService(pumaTaskService);
+        target.setSrcDBInstanceService(srcDBInstanceService);
+
+        //run
+        PumaClient actual = target.initPumaClient(config, seq, tables);
+
+
+        //verify
+        Configuration clientConfig = (Configuration) FieldUtils.readField(actual, "config", true);
+        Assert.assertEquals(pumaServer.getHost(), clientConfig.getHost());
+        Assert.assertEquals(pumaServer.getPort().intValue(), clientConfig.getPort());
+        Assert.assertEquals(pumaTask.getName(), clientConfig.getTarget());
+        Assert.assertEquals(true, clientConfig.isNeedDml());
+        Assert.assertEquals(false, clientConfig.isNeedDdl());
+        Assert.assertEquals(false, clientConfig.isNeedTransactionInfo());
+        Assert.assertEquals(seq, actual.getSeqFileHolder().getSeq());
+        Assert.assertTrue(clientConfig.getDatabaseTablesMapping().containsKey("db1"));
+        Assert.assertEquals(tables.toString(), clientConfig.getDatabaseTablesMapping().get("db1").toString());
+
+        System.out.println("PumaClient :" + clientConfig.getName());
     }
 
     @Test

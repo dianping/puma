@@ -148,7 +148,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
         String ds = matcher.group(2);
 
         List<SrcDBInstance> dbs = srcDBInstanceService.findByIp(ip);
-        checkArgument(dbs.size() == 1, ip);
+        checkArgument(dbs.size() >= 1, ip);
         SrcDBInstance db = dbs.get(0);
 
         List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceId(db.getId());

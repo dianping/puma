@@ -1,4 +1,9 @@
-UPDATE `${event.database}`.`${event.table}`
+UPDATE
+#if (${event.database} == "")
+`${event.table}`
+#else
+`${event.database}`.`${event.table}`
+#end
 SET
 #foreach($name2ColumnInfo in $event.columns.entrySet())
   #if(!$name2ColumnInfo.value.isKey())##primery key 不能update to null

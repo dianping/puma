@@ -1,5 +1,9 @@
-INSERT INTO 
- `${event.database}`.`${event.table}`
+INSERT INTO
+#if (${event.database} == "")
+`${event.table}`
+#else
+`${event.database}`.`${event.table}`
+#end
 (
 #set($ask = "" )
 #foreach($name2ColumnInfo in $event.columns.entrySet())

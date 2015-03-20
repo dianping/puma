@@ -1,17 +1,13 @@
 package com.dianping.puma.admin.web;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import javax.servlet.http.HttpSession;
 
 import com.dianping.puma.admin.reporter.SyncTaskOperationReporter;
 import com.dianping.puma.core.constant.Operation;
+import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.container.SyncTaskStateContainer;
 import com.dianping.puma.core.entity.*;
@@ -373,6 +369,8 @@ public class SyncTaskCreateController {
 				this.dumpTaskService.updateSyncTaskId(dumpTaskId, syncTaskId);
 			}*/
 
+			syncTaskStateContainer.create(syncTask.getName());
+
 			syncTaskOperationReporter
 					.report(syncTask.getSyncServerName(), SyncType.SYNC, syncTask.getName(), Operation.CREATE);
 
@@ -483,8 +481,13 @@ public class SyncTaskCreateController {
 
 		try {
 			SyncTaskState state = this.syncTaskStateContainer.get(name);
+
 			if (state == null) {
 				throw new Exception("Sync task state not found.");
+			}
+
+			if ((new Date()).getTime() - state.getGmtCreate().getTime() > 60*1000) {
+				state.setStatus(Status.DISCONNECTED);
 			}
 
 			map.put("state", state);

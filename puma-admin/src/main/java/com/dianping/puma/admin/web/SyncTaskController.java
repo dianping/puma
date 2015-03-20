@@ -10,7 +10,10 @@ import javax.servlet.http.HttpServletResponse;
 import com.dianping.puma.admin.reporter.SyncTaskOperationReporter;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.constant.Operation;
+import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
+import com.dianping.puma.core.container.SyncTaskStateContainer;
+import com.dianping.puma.core.model.SyncTaskState;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
 import com.mongodb.MongoException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +35,7 @@ public class SyncTaskController {
 	private SyncTaskService syncTaskService;
 
 	@Autowired
-	private SystemStatusContainer systemStatusContainer;
+	private SyncTaskStateContainer syncTaskStateContainer;
 
 	@Autowired
 	private SyncTaskOperationReporter syncTaskOperationReporter;

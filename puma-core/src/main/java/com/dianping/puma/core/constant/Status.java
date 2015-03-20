@@ -11,7 +11,8 @@ public enum Status {
 	RECONNECTING("重新连接"),
 	DUMPING("DUMP中"),
 	LOADING("载入中"),
-	FAILED("已失败");
+	FAILED("已失败"),
+	DISCONNECTED("失去连接");
 
 	private final String desc;
 

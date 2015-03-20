@@ -23,6 +23,8 @@ import com.dianping.puma.core.sync.model.task.Type;
 import com.dianping.puma.syncserver.job.executor.TaskExecutionException;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 
+import java.util.List;
+
 /**
  * @author Leo Liang
  */
@@ -36,4 +38,6 @@ public interface TaskExecutionContainer {
     public void changeStatus(String taskName, Controller controller);
 
     public void deleteSyncTask(String taskName);
+
+    public List<TaskExecutor> toList();
 }

@@ -1,5 +1,19 @@
 $(function(w) {
 
+  var STATE_MAP = {
+    WAITING     : "等待中",
+    PREPARING   : "准备中",
+    RUNNING     : "运行中",
+    SUSPENDED   : "已暂停",
+    STOPPING    : "已停止",
+    SUCCESS     : "结束-成功",
+    RECONNECTING: "重新连接",
+    DUMPING     : "备份中",
+    LOADING     : "加载中",
+    FAILED      : "结束-失败",
+    DISCONNECTED: "失去连接"
+  };
+
   // Operations.
 
   // Refresh puma task state.
@@ -101,7 +115,7 @@ $(function(w) {
 
   // Set sync task status.
   function setSyncTaskStatus(td, status) {
-    td.text(status.desc);
+    td.text(STATE_MAP[status]);
   }
 
   // Set sync task bin log info.
@@ -126,7 +140,7 @@ $(function(w) {
         alert(err);
       } else {
         setSyncTaskStatus(tdStatus, state.status);
-        setSyncTaskBinlogInfo(tdBinlogInfo, state.binlogInfo);
+        setSyncTaskBinlogInfo(tdBinlogInfo, state.binlogInfoOfIOThread);
       }
     });
   }).trigger('click');

@@ -3,7 +3,8 @@ DELETE FROM
 `${event.table}`
 #else
 `${event.database}`.`${event.table}`
-#endWHERE
+#end
+WHERE
 #foreach($name2ColumnInfo in $event.columns.entrySet())
   #if(!${name2ColumnInfo.value.oldValue})
     `${name2ColumnInfo.key}` is ?

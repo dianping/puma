@@ -14,7 +14,7 @@ public class ShardSyncTaskExecutorStrategy implements TaskExecutorStrategy<Shard
 
     @Autowired
     private PumaServerService pumaServerService;
-    
+
     @Autowired
     private PumaTaskService pumaTaskService;
 
@@ -23,7 +23,12 @@ public class ShardSyncTaskExecutorStrategy implements TaskExecutorStrategy<Shard
 
     @Override
     public ShardSyncTaskExecutor build(ShardSyncTask task) {
-        return null;
+        ShardSyncTaskExecutor executor = new ShardSyncTaskExecutor(task);
+        executor.setPumaServerService(pumaServerService);
+        executor.setSrcDBInstanceService(srcDBInstanceService);
+        executor.setPumaTaskService(pumaTaskService);
+        executor.init();
+        return executor;
     }
 
     @Override

@@ -64,7 +64,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     private final ShardSyncTask task;
 
-    private ConfigCache configService;
+    private ConfigCache configCache;
 
     private final Map<String, DataSource> dataSourcePool = new ConcurrentHashMap<String, DataSource>();
 
@@ -103,14 +103,14 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
         this.task = task;
 
         try {
-            this.configService = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
+            this.configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
         } catch (LionException e) {
             throw new RuntimeException("Lion Init Failed");
         }
     }
 
-    public void init() throws LionException {
-        checkNotNull(configService, "configService");
+    public void init() {
+        checkNotNull(configCache, "configCache");
         initAndConvertConfig();
         initRouterConfig();
         initPumaClientsAndDataSources();
@@ -380,13 +380,18 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
         return ds;
     }
 
-    protected void initAndConvertConfig() throws LionException {
-        RouterRuleConfig tempRouterRuleConfig = new Gson().fromJson(configService.getProperty(LionKey.getShardConfigKey(task.getRuleName())), RouterRuleConfig.class);
-        this.originGroupDataSource = configService.getProperty(LionKey.getShardOriginDatasourceKey(task.getRuleName()));
-        String switchOnStr = configService.getProperty(LionKey.getShardSiwtchOnKey(task.getRuleName()));
-        this.switchOn = switchOnStr == null || "true".equals(switchOnStr);
-        findTableRuleConfig(tempRouterRuleConfig);
-        convertRuleConfigForRouting();
+    protected void initAndConvertConfig() {
+        try {
+            RouterRuleConfig tempRouterRuleConfig = new Gson().fromJson(configCache.getProperty(LionKey.getShardConfigKey(task.getRuleName())), RouterRuleConfig.class);
+            this.originGroupDataSource = configCache.getProperty(LionKey.getShardOriginDatasourceKey(task.getRuleName()));
+            String switchOnStr = configCache.getProperty(LionKey.getShardSiwtchOnKey(task.getRuleName()));
+            this.switchOn = switchOnStr == null || "true".equals(switchOnStr);
+            findTableRuleConfig(tempRouterRuleConfig);
+            convertRuleConfigForRouting();
+        } catch (LionException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     protected void convertRuleConfigForRouting() {
@@ -444,7 +449,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
     }
 
     public void setConfigCache(ConfigCache configCache) {
-        this.configService = configCache;
+        this.configCache = configCache;
     }
 
     public void setPumaServerService(PumaServerService pumaServerService) {

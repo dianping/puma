@@ -145,7 +145,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
                 JdbcTemplate jdbcTemplate = new JdbcTemplate(targetedSql.getDataSource());
                 for (String sql : targetedSql.getSqls()) {
                     try {
-                        jdbcTemplate.update(sql, args);
+                        jdbcTemplate.update(sql, args.toArray());
                     } catch (Exception exp) {
                         exp.printStackTrace();
                     }

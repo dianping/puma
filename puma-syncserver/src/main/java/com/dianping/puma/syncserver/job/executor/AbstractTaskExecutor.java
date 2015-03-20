@@ -42,7 +42,6 @@ import com.dianping.puma.syncserver.job.executor.failhandler.HandleResult;
 import com.dianping.puma.syncserver.job.executor.failhandler.Handler;
 import com.dianping.puma.syncserver.job.executor.failhandler.HandlerContainer;
 import com.dianping.puma.syncserver.job.executor.failhandler.StopOnFailedHandler;
-import com.dianping.puma.syncserver.monitor.SystemStatusContainer;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
 

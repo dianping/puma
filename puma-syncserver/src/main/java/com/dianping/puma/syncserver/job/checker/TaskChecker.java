@@ -8,6 +8,8 @@ import com.dianping.puma.core.constant.Operation;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.entity.BaseSyncTask;
 import com.dianping.puma.core.entity.SyncTask;
+import com.dianping.puma.core.holder.BinlogInfoHolder;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.monitor.*;
 import com.dianping.puma.core.service.BaseSyncTaskService;
 import com.dianping.puma.core.service.SyncTaskService;
@@ -40,6 +42,9 @@ public class TaskChecker implements EventListener {
     @Autowired
     BaseSyncTaskService baseSyncTaskService;
 
+    @Autowired
+    BinlogInfoHolder binlogInfoHolder;
+
     @SuppressWarnings("rawtypes")
     @PostConstruct
     public void init() {
@@ -50,6 +55,10 @@ public class TaskChecker implements EventListener {
         //构造成SyncTaskExecutor
         if (syncTasks != null && syncTasks.size() > 0) {
             for (SyncTask syncTask : syncTasks) {
+                BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(syncTask.getName());
+                if (binlogInfo != null) {
+                    syncTask.setBinlogInfo(binlogInfo);
+                }
                 TaskExecutor executor = taskExecutorBuilder.build(syncTask);
                 //将Task交给Container
                 try {

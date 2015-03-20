@@ -1,3 +1,87 @@
+<div class="container-fluid">
+   <div class="panel panel-primary">
+      <div class="panel-heading">
+         <div class="btn-group-sm pull-right">
+            <button class="btn btn-success validation-button" type="submit" form="sync-task-create-step1">下一步</button>
+         </div>
+         <h5>
+            	填写同步的配置
+         </h5>
+      </div>
+       <form id="sync-task-create-step1" class="form-horizontal puma-form" method="post"
+         action="${rc.contextPath}/sync-task/create/step1Save"  target="${rc.contextPath}/sync-task/create/step2">
+         <div class="panel-body">
+         
+	          <div class="form-group">
+	          
+	               <label class="col-md-3 control-label" for="pumaTaskName">Server任务源:</label>
+	               <div class="col-md-7">
+	                <select id="pumaTaskName" name="pumaTaskName" class="form-control">
+		               #foreach($pumaTask in ${pumaTasks})
+		               <option value="${pumaTask.name}">${pumaTask.name}</option>
+		               #end
+            		</select>
+	               </div>
+	               <div class="col-md-3" hidden="hidden">
+	                  <p class="help-block">hello</p>
+	               </div>
+	            </div>
+	            <div class="form-group">
+	              <label class="col-md-3 control-label" for="dstDBInstanceName">目标实例:</label>
+	              <div class="col-md-7">
+	                 <select id="dstDBInstanceName" name="dstDBInstanceName" class="form-control">
+             			#foreach($dstDBInstance in ${dstDBInstances})
+               			<option value="${dstDBInstance.name}">${dstDBInstance.name}</option>
+               			#end
+            		</select>
+	              </div>
+	              <div class="col-md-3" hidden="hidden">
+	                 <p class="help-block">hello</p>
+	              </div>
+	           </div>
+	            <div class="form-group">
+	          <label class="col-md-3 control-label" for="syncServerName">SyncServer服务器:</label>
+	          <div class="col-md-7">
+	               <select id="syncServerName" name="syncServerName" class="form-control">
+	              #foreach($syncServer in ${syncServers})
+                        <option value="${syncServer.name}">${syncServer.name}</option>
+                  #end
+	              </select>
+	          </div>
+	          <div class="col-md-3" hidden="hidden">
+	          	<p class="help-block">hello</p>
+	          </div>
+	     </div>
+	       </div>
+	         <div class="panel panel-default"  style="border-bottom:0px;-webkit-box-shadow: 0 0px 1px rgba(0, 0, 0, .05);
+          box-shadow: 0 0px 1px rgba(0, 0, 0, .05);">
+		           <div class="panel-heading">
+		           	 <div class="btn-group-sm pull-right">
+		           	 	<button class="btn btn-success" type="button" onclick="addTableMapping(this);">新增表同步</button>
+		           	 </div>
+		           		<h5>映射关系</h5>
+		           </div>
+		           <div class="panel-body" name="form_body_mapping">
+			           <div class="form-group">
+			           	 <label class="col-md-3 control-label">数据库名称</label>
+			           <div class="col-md-3">
+		  				 <input name="databaseFrom" class="form-control validation-input" format = "database-name" placeholder="源数据库名称" />
+		  			   </div>
+		  			   <div class="col-sm-1">
+		  			     <span class="glyphicon glyphicon-arrow-right" aria-hidden="true" style="margin-top:8px; margin-left:9px"></span>
+		  			   </div>
+		  			   <div class="col-md-3">
+		  				 <input name="databaseTo" class="form-control validation-input" format = "database-name" placeholder="目标数据库名称" />
+		  			   </div>
+		  			   <input type="hidden" autocomplete="off" name="count" value="0">
+		           	 </div>
+	           	 	
+	            	</div>
+	       		</div>
+       </form>
+   </div>
+</div>
+<!--
 <div class="container"
    style="margin: 0 auto; width: 100%; margin-bottom: 50px;">
    <ul id="stepsBreak" class="breadcrumb">
@@ -16,20 +100,20 @@
          </button>
          <p class="legend">填写同步的配置</p>
          <div style="height: 700px">
-            <span>选择源实例: </span> <select name="srcMysql"
+            <span>选择源实例: </span> <select name="pumaTaskName"
                style="margin-left: 16px; margin-right: 16px;">
-               #foreach($srcDBInstance in ${srcDBInstances})
-               <option value="${srcDBInstance.id}">${srcDBInstance.name}</option>
+               #foreach($pumaTask in ${pumaTasks})
+               <option value="${pumaTask.name}">${pumaTask.name}</option>
                #end
-            </select> <span>选择目标实例: </span> <select name="destMysql"
+            </select> <span>选择目标实例: </span> <select name="dstDBInstanceName"
                style="margin-left: 16px;">
-             #foreach($destDBInstance in ${destDBInstances})
-               <option value="${destDBInstance.id}">${destDBInstance.name}</option>
+             #foreach($dstDBInstance in ${dstDBInstances})
+               <option value="${dstDBInstance.name}">${dstDBInstance.name}</option>
                #end
             </select>
             <hr>
             <label>映射关系 <!-- (<a href="javascript:loadXmlSample();">加载示例</a> ) -->
-            </label>
+       <!-- </label>
             <div
                style="padding: 20px 10px 10px 10px; border: 1px solid #E5E5E5; border-radius: 4px 4px 4px 4px; background-color: #F7F7F9;">
                <div>
@@ -54,12 +138,32 @@
             <!-- <div id="xmlEditor"
                         style="width: 50%; height: 550px; border: 1px solid #A9E2F3; border-radius: 3px 3px 3px 3px; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;"></div>
                          -->
-         </div>
+		<!--</div>
          <input id="syncXml" type="hidden" name="syncXml" value="">
       </form>
    </div>
-</div>
+</div>  -->
 <div style="display: none" id="copySource">
+ <div id="add_table_div">
+   	 <div class="form-group">
+		<label class="col-md-3 control-label">表名称</label>
+		<div class="col-md-3">
+		  <input name="tableFrom" class="form-control" format="table-name"  placeholder="源表名称" />
+	   </div>
+	   <div class="col-sm-1">
+		  <span class="glyphicon glyphicon-arrow-right" aria-hidden="true" style="margin-top:8px; margin-left:9px"></span>
+	   </div>
+	   <div class="col-md-3">
+		<input name="tableTo" class="form-control"  format="table-name" placeholder="目标表名称" />
+	   </div>
+	   <div class="col-sm-1">
+		 <a href="javascript:;" onclick="removeTableMapping(this);" >
+		 	<span class="glyphicon glyphicon-remove" aria-hidden="true"  style="margin-top:8px;"></span>
+         </a>
+	   </div>
+	  </div>
+   </div>
+   <!--
    <div id="addTableDiv">
       <div class="control-group">
          <label class="control-label">表名</label>
@@ -72,6 +176,7 @@
          </div>
       </div>
    </div>
+  
    <div id="addDatabaseDiv">
       <div>
          <hr>
@@ -92,14 +197,31 @@
          <input type="hidden" autocomplete="off" name="count" value="0">
       </div>
    </div>
+ -->
 </div>
+
 <script>
+	function addTableMapping(aLink){
+		var form = $(aLink).parent().parent().parent().children("div[name='form_body_mapping']");
+		$(form).append($('#add_table_div').html());
+		var count = Number($(form).children("input[name='count']").val());
+		$(form).children("input[name='count']").val(count + 1);
+	}
+	
+	function removeTableMapping(aLink) {
+		var control = $(aLink).parent().parent();
+		var form = $(control).parent();
+		var count = Number($(form).children("input[name='count']").val());
+		$(form).children("input[name='count']").val(count - 1);
+		$(control).remove();
+	}
 	function addTableDiv(aLink) {
 		var form = $(aLink).parent();
 		$(form).append($('#addTableDiv').html());
 		var count = Number($(form).children("input[name='count']").val());
 		$(form).children("input[name='count']").val(count + 1);
 	}
+	
 	function removeTableDiv(aLink) {
 		var control = $(aLink).parent().parent();
 		var form = $(control).parent();

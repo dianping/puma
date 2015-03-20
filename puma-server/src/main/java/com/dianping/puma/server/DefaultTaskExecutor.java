@@ -140,6 +140,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 	private void processBinlog() throws IOException {
 		while (!isStop()) {
+			//LOG.info("Enter `processBinlog` infinite loop!");
+
 			// only slow down parsing, not stop
 			if (SystemStatusContainer.instance.isStopTheWorld(this.getTaskName())) {
 				try {
@@ -159,6 +161,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			}
 
 		}
+
+		//LOG.info("Exit `processBinlog` infinite loop!");
 	}
 
 	protected void processBinlogPacket(BinlogPacket binlogPacket) throws IOException {
@@ -207,6 +211,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				&& (dataHandlerResult.getData() instanceof DdlEvent || (
 				dataHandlerResult.getData() instanceof RowChangedEvent && ((RowChangedEvent) dataHandlerResult
 						.getData()).isTransactionCommit()))) {
+			//LOG.info("Save occurs: {}, {}.", getContext().getBinlogFileName(), binlogEvent.getHeader().getNextPosition());
 			// save position
 			binlogInfoHolder.setBinlogInfo(getTaskName(),
 					new BinlogInfo(getContext().getBinlogFileName(), binlogEvent.getHeader().getNextPosition()));

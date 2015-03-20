@@ -1,6 +1,6 @@
 package com.dianping.puma.syncserver.service.impl;
 
-import com.dianping.puma.core.sync.model.BinlogInfo;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.syncserver.service.BinlogInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

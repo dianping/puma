@@ -2,41 +2,44 @@ package com.dianping.puma.core.entity;
 
 public class PumaClientInfoEntity extends BaseEntity {
 
-private String target;
-private String name;
-private String ip;
-private long seq;
+	private String target;
 
-public void setTarget(String target) {
-	this.target = target;
-}
+	private String name;
 
-public String getTarget() {
-	return target;
-}
+	private String ip;
 
-public void setName(String name) {
-	this.name = name;
-}
+	private long seq;
 
-public String getName() {
-	return name;
-}
+	public void setTarget(String target) {
+		this.target = target;
+	}
 
-public void setIp(String ip) {
-	this.ip = ip;
-}
+	public String getTarget() {
+		return target;
+	}
 
-public String getIp() {
-	return ip;
-}
+	public void setName(String name) {
+		this.name = name;
+	}
 
-public void setSeq(long seq) {
-	this.seq = seq;
-}
+	public String getName() {
+		return name;
+	}
 
-public long getSeq() {
-	return seq;
-}
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
+
+	public String getIp() {
+		return ip;
+	}
+
+	public void setSeq(long seq) {
+		this.seq = seq;
+	}
+
+	public long getSeq() {
+		return seq;
+	}
 
 }

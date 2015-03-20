@@ -43,7 +43,7 @@ public class ShardSyncTaskExecutorTest {
     public void init() {
         this.task.setRuleName("test");
         this.task.setTableName("table1");
-        this.task.setId(11l);
+        this.task.setName("task");
         this.target = new ShardSyncTaskExecutor(task);
         this.target.setConfigCache(configCache);
     }
@@ -96,7 +96,7 @@ public class ShardSyncTaskExecutorTest {
         Assert.assertTrue(clientConfig.getDatabaseTablesMapping().containsKey("db1"));
         Assert.assertEquals(tables.toString(), clientConfig.getDatabaseTablesMapping().get("db1").toString());
 
-        Assert.assertEquals("ShardSyncTask-11-db1-debug", clientConfig.getName());
+        Assert.assertEquals("ShardSyncTask-task-db1-debug", clientConfig.getName());
         System.out.println("PumaClient :" + clientConfig.getName());
     }
 

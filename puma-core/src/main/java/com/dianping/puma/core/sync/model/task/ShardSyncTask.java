@@ -1,9 +1,11 @@
 package com.dianping.puma.core.sync.model.task;
 
+import com.dianping.puma.core.constant.SyncType;
+import com.dianping.puma.core.entity.BaseSyncTask;
 import com.google.code.morphia.annotations.Entity;
 
 @Entity
-public class ShardSyncTask extends AbstractTask {
+public class ShardSyncTask extends BaseSyncTask {
 
     private static final long serialVersionUID = 1L;
 
@@ -14,7 +16,7 @@ public class ShardSyncTask extends AbstractTask {
     private String tableName;
 
     public ShardSyncTask() {
-        super(Type.SHARD_SYNC);
+        this.setSyncType(SyncType.SYNC.SHARD_SYNC);
     }
 
     public String getRuleName() {

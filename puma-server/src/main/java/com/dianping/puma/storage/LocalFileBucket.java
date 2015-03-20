@@ -36,7 +36,7 @@ public class LocalFileBucket extends AbstractBucket {
 
     protected void doClose() throws IOException {
         file.close();
-        file = null;
+        //file = null;
     }
 
     protected boolean doHasRemainingForWrite() throws IOException {

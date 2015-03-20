@@ -15,10 +15,10 @@
  */
 package com.dianping.puma.syncserver.job.executor;
 
-import com.dianping.puma.core.sync.model.task.Task;
+import com.dianping.puma.core.entity.BaseSyncTask;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 
-public interface TaskExecutor<T extends Task> {
+public interface TaskExecutor<T extends BaseSyncTask> {
 
     /** 开始任务，状态设置为运行中 */
     void start();

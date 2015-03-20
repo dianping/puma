@@ -7,6 +7,7 @@ import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.constant.SubscribeConstant;
+import com.dianping.puma.core.entity.BaseSyncTask;
 import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
@@ -54,7 +55,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
+public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
     public static final int INSERT = RowChangedEvent.INSERT;
     public static final int DELETE = RowChangedEvent.DELETE;
     public static final int UPDATE = RowChangedEvent.UPDATE;
@@ -105,8 +106,6 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
         this.task = task;
 
         this.status = new TaskExecutorStatus();
-        this.status.setTaskId(this.task.getId());
-        this.status.setType(this.task.getType());
 
         try {
             this.configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
@@ -357,7 +356,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
                 .host(pumaServer.getHost())
                 .target(pumaTask.getName());
 
-        configBuilder.name(String.format("ShardSyncTask-%s-%s-%s", task.getId(), ds, name));
+        configBuilder.name(String.format("ShardSyncTask-%s-%s-%s", task.getName(), ds, name));
 
         for (String tb : tables) {
             configBuilder.tables(ds, tb);
@@ -456,8 +455,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
     }
 
     @Override
-    public ShardSyncTask getTask() {
-        return task;
+    public BaseSyncTask getTask() {
+        return this.task;
     }
 
     @Override

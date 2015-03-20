@@ -1,20 +1,20 @@
 package com.dianping.puma.core.dao;
 
-import com.dianping.puma.core.entity.SyncServerEntity;
+import com.dianping.puma.core.entity.SyncServer;
 
 import java.util.List;
 
 public interface SyncServerDao {
 
-	SyncServerEntity find(String id);
+	SyncServer find(String id);
 
-	SyncServerEntity findByHost(String host,int port);
+	SyncServer findByHost(String host,int port);
 	
-	List<SyncServerEntity> findAll();
+	List<SyncServer> findAll();
 
-	void create(SyncServerEntity entity);
+	void create(SyncServer entity);
 
-	void update(SyncServerEntity entity);
+	void update(SyncServer entity);
 
 	void remove(String id);
 }

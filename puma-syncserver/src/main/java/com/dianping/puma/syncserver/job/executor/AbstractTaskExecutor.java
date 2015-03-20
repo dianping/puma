@@ -7,6 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.dianping.puma.core.constant.Status;
+import com.dianping.puma.core.entity.AbstractBaseSyncTask;
+import com.dianping.puma.core.entity.DstDBInstance;
+import com.dianping.puma.core.holder.BinlogInfoHolder;
+import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.model.SyncTaskState;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -14,6 +20,8 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
 import com.dianping.puma.api.Configuration;
@@ -24,11 +32,9 @@ import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
-import com.dianping.puma.core.sync.model.task.AbstractTask;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.core.util.DefaultPullStrategy;
 import com.dianping.puma.syncserver.job.executor.failhandler.HandleContext;
@@ -36,506 +42,571 @@ import com.dianping.puma.syncserver.job.executor.failhandler.HandleResult;
 import com.dianping.puma.syncserver.job.executor.failhandler.Handler;
 import com.dianping.puma.syncserver.job.executor.failhandler.HandlerContainer;
 import com.dianping.puma.syncserver.job.executor.failhandler.StopOnFailedHandler;
-import com.dianping.puma.syncserver.monitor.SystemStatusContainer;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
-public abstract class AbstractTaskExecutor<T extends AbstractTask> implements TaskExecutor<T>, SpeedControllable {
-    private static final Logger  LOG              = LoggerFactory.getLogger(AbstractTaskExecutor.class);
 
-    protected T                  abstractTask;
+public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
+		implements TaskExecutor<T>, SpeedControllable {
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractTaskExecutor.class);
 
-    protected PumaClient         pumaClient;
+	protected T abstractTask;
 
-    protected MysqlExecutor      mysqlExecutor;
+	protected PumaClient pumaClient;
 
-    protected String             pumaServerHost;
+	protected MysqlExecutor mysqlExecutor;
 
-    protected int                pumaServerPort;
+	protected String pumaServerHost;
 
-    protected String             target;
+	protected int pumaServerPort;
 
-    protected TaskExecutorStatus status;
+	protected String target;
 
-    /** 标识对目标数据库的会话。是否已经开始了事务（如果是，可能需要commmit或rollback否则由于数据库是可重复读级别，会一直锁住数据库。当开始insert/update/delete操作，无论执行是否成功，都已经开始事务） */
-    private boolean              transactionStart = false;
+	protected DstDBInstance dstDBInstance;
 
-    private long                 sleepTime        = 0;
+	protected SyncTaskState state;
 
-    private CircularFifoBuffer   lastEvents       = new CircularFifoBuffer(10);
+	protected TaskExecutorStatus status;
 
-    public AbstractTaskExecutor(T abstractTask, String pumaServerHost, int pumaServerPort, String target) {
-        this.abstractTask = abstractTask;
-        this.pumaServerHost = pumaServerHost;
-        this.pumaServerPort = pumaServerPort;
-        this.target = target;
-        this.status = new TaskExecutorStatus();
-        status.setTaskId(abstractTask.getId());
-        status.setType(abstractTask.getType());
-        // BinlogInfo startedBinlogInfo = abstractTask.getBinlogInfo();
-    }
+	private boolean transactionStart = false;
 
-    /**
-     * 事件到达回调函数
-     * 
-     * @param event 事件
-     * @throws Exception
-     */
-    protected abstract void execute(ChangedEvent event) throws SQLException;
+	private long sleepTime = 0;
 
-    /**
-     * 更新sql thread的binlog信息，和保存binlog信息到数据库
-     */
-    protected void binlogOfSqlThreadChanged(ChangedEvent event) {
-        // 动态更新binlog和binlogPos
-        if (event != null) {
-            BinlogInfo binlogInfo = new BinlogInfo();
-            binlogInfo.setBinlogFile(event.getBinlog());
-            binlogInfo.setBinlogPosition(event.getBinlogPos());
-            binlogInfo.setSkipToNextPos(true);
-            status.setBinlogInfo(binlogInfo);
-            abstractTask.setBinlogInfo(binlogInfo);
-            // 保存binlog信息到数据库
-            saveBinlogToDB(binlogInfo);
-        }
-    }
+	private CircularFifoBuffer lastEvents = new CircularFifoBuffer(10);
 
-    protected void binlogOfIOThreadChanged(ChangedEvent event) {
-        // 动态更新binlog和binlogPos
-        if (event != null) {
-            BinlogInfo binlogInfo = new BinlogInfo();
-            binlogInfo.setBinlogFile(event.getBinlog());
-            binlogInfo.setBinlogPosition(event.getBinlogPos());
-            status.setBinlogInfoOfIOThread(binlogInfo);
-        }
-    }
+	private BinlogInfoHolder binlogInfoHolder;
 
-    public void setAbstractTask(T abstractTask) {
-        this.abstractTask = abstractTask;
-    }
+	public AbstractTaskExecutor(T abstractTask, String pumaServerHost, int pumaServerPort, String target, DstDBInstance dstDBInstance) {
+		this.abstractTask = abstractTask;
+		this.pumaServerHost = pumaServerHost;
+		this.pumaServerPort = pumaServerPort;
+		this.target = target;
 
-    @Override
-    public T getTask() {
-        return abstractTask;
-    }
+		this.state = new SyncTaskState();
+		state.setTaskName(abstractTask.getName());
+		state.setSyncType(abstractTask.getSyncType());
+		this.dstDBInstance = dstDBInstance;
 
-    @Override
-    public void pause(String detail) {
-        try {
-//            if (transactionStart) {
-                releaseMysqlExecutor();
-                transactionStart = false;
-//            }
-        } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        if (this.pumaClient != null) {
-            this.pumaClient.stop();
-        }
-        this.status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
-        this.status.setDetail(detail);
-        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] paused... cause:" + detail);
-    }
+		//this.status = new TaskExecutorStatus();
+		//status.setTaskName(abstractTask.getName());
+		//status.setSyncType(abstractTask.getSyncType());
+		//status.setTaskId(abstractTask.getId());
+		//status.setType(abstractTask.getType());
+		// BinlogInfo startedBinlogInfo = abstractTask.getBinlogInfo();
+	}
 
-    @Override
-    public void stop(String detail) {
-        try {
-//            if (transactionStart) {
-                releaseMysqlExecutor();
-                transactionStart = false;
-//            }
-        } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        if (this.pumaClient != null) {
-            this.pumaClient.stop();
-        }
-        this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
-        this.status.setDetail(detail);
-        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] stop... cause:" + detail);
-    }
+	public BinlogInfoHolder getBinlogInfoHolder() {
+		return binlogInfoHolder;
+	}
 
-    private void releaseMysqlExecutor() throws SQLException {
-        if(mysqlExecutor != null){
-            mysqlExecutor.rollback();
-            mysqlExecutor.close();
-            mysqlExecutor = null;
-        }
-    }
+	public void setBinlogInfoHolder(BinlogInfoHolder binlogInfoHolder) {
+		this.binlogInfoHolder = binlogInfoHolder;
+	}
 
-    @Override
-    public void succeed() {
-        try {
-//            if (transactionStart) {
-                releaseMysqlExecutor();
-                transactionStart = false;
-//            }
-        } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        if (this.pumaClient != null) {
-            this.pumaClient.stop();
-        }
-        this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
-        this.status.setDetail(null);
-        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] succeeded...");
-    }
+	/**
+	 * 事件到达回调函数
+	 *
+	 * @param event 事件
+	 * @throws Exception
+	 */
+	protected abstract void execute(ChangedEvent event) throws SQLException;
 
-    public void fail(String detail) {
-        try {
-//            if (transactionStart) {
-                releaseMysqlExecutor();
-                transactionStart = false;
-//            }
-        } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        if (this.pumaClient != null) {
-            this.pumaClient.stop();
-        }
-        this.status.setStatus(TaskExecutorStatus.Status.FAILED);
-        this.status.setDetail(detail);
-        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] failed... cause:" + detail);
-    }
+	/**
+	 * 更新sql thread的binlog信息，和保存binlog信息到数据库
+	 */
+	protected void binlogOfSqlThreadChanged(ChangedEvent event) {
+		// 动态更新binlog和binlogPos
+		if (event != null) {
+			BinlogInfo binlogInfo = new BinlogInfo();
+			binlogInfo.setBinlogFile(event.getBinlog());
+			binlogInfo.setBinlogPosition(event.getBinlogPos());
+			binlogInfo.setSkipToNextPos(true);
+			state.setBinlogInfo(binlogInfo);
+			//status.setBinlogInfo(binlogInfo);
+			abstractTask.setBinlogInfo(binlogInfo);
+			// 保存binlog信息到数据库
+			saveBinlogToDB(binlogInfo);
+		}
+	}
 
-    @Override
-    public void start() {
-        // 初始化mysqlExecutor
-        mysqlExecutor = new MysqlExecutor(abstractTask.getDestMysqlHost().getHost(), abstractTask.getDestMysqlHost().getUsername(), abstractTask.getDestMysqlHost().getPassword(), abstractTask.getMysqlMapping());
+	protected void binlogOfIOThreadChanged(ChangedEvent event) {
+		// 动态更新binlog和binlogPos
+		if (event != null) {
+			BinlogInfo binlogInfo = new BinlogInfo();
+			binlogInfo.setBinlogFile(event.getBinlog());
+			binlogInfo.setBinlogPosition(event.getBinlogPos());
+			state.setBinlogInfoOfIOThread(binlogInfo);
+			//status.setBinlogInfoOfIOThread(binlogInfo);
+		}
+	}
 
-        // 读取binlog位置，创建PumaClient，设置PumaCleint的config，再启动
-        if (this.pumaClient != null) {
-            this.pumaClient.stop();
-        }
-        pumaClient = createPumaClient();
-        pumaClient.start();
-        this.status.setDetail(null);
-        this.status.setStatus(TaskExecutorStatus.Status.RUNNING);
-        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] started.");
-    }
+	public void setAbstractTask(T abstractTask) {
+		this.abstractTask = abstractTask;
+	}
 
-    public void restart() {
-        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] restarting...");
-        try {
-//            if (transactionStart) {
-                releaseMysqlExecutor();
-                transactionStart = false;
-//            }
-        } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        if (this.pumaClient != null) {
-            this.pumaClient.stop();
-            this.pumaClient = null;
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-            }
-        }
+	@Override
+	public T getTask() {
+		return abstractTask;
+	}
 
-        start();
-    }
+	@Override
+	public void pause(String detail) {
+		try {
+			//            if (transactionStart) {
+			releaseMysqlExecutor();
+			transactionStart = false;
+			//            }
+		} catch (SQLException e) {
+			LOG.error(e.getMessage(), e);
+		}
+		if (this.pumaClient != null) {
+			this.pumaClient.stop();
+		}
+		state.setStatus(Status.SUSPENDED);
+		state.setDetail(detail);
+		//this.status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
+		//this.status.setDetail(detail);
+		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] paused... cause:" + detail);
+	}
 
-    @Override
-    public TaskExecutorStatus getTaskExecutorStatus() {
-        return status;
-    }
+	@Override
+	public void stop(String detail) {
+		try {
+			//            if (transactionStart) {
+			releaseMysqlExecutor();
+			transactionStart = false;
+			//            }
+		} catch (SQLException e) {
+			LOG.error(e.getMessage(), e);
+		}
+		if (this.pumaClient != null) {
+			this.pumaClient.stop();
+		}
+		state.setStatus(Status.SUCCESS);
+		state.setDetail(detail);
 
-    private PumaClient createPumaClient() {
-        final BinlogInfo startedBinlogInfo = abstractTask.getBinlogInfo();
-        LOG.info("initing PumaClient...");
-        ConfigurationBuilder configBuilder = new ConfigurationBuilder();
-        configBuilder.ddl(abstractTask.isDdl());
-        configBuilder.dml(abstractTask.isDml());
-        configBuilder.host(pumaServerHost);
-        configBuilder.port(pumaServerPort);
-        configBuilder.serverId(abstractTask.getServerId());
-        configBuilder.name(abstractTask.getPumaClientName());
-        configBuilder.target(target);
-        configBuilder.transaction(abstractTask.isTransaction());
-        if (startedBinlogInfo != null) {
-            configBuilder.binlog(startedBinlogInfo.getBinlogFile());
-            configBuilder.binlogPos(startedBinlogInfo.getBinlogPosition());
-        }
-        _parseSourceDatabaseTables(abstractTask.getMysqlMapping(), configBuilder);
-        Configuration configuration = configBuilder.build();
-        LOG.info("PumaClient's config is: " + configuration);
-        PumaClient pumaClient = new PumaClient(configuration);
+		//this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
+		//this.status.setDetail(detail);
+		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] stop... cause:" + detail);
+	}
 
-        // 读取本地文件，获取seq
-        Long seq = null;
-        File file = new File("/data/appdatas/puma-syncserver/" + abstractTask.getPumaClientName() + "/seq");
-        if (file.exists()) {
-            try {
-                seq = NumberUtils.toLong(StringUtils.trim(FileUtils.readFileToString(file)));
-                LOG.info("PumaClient[" + abstractTask.getPumaClientName() + "] Read from file, Seq is:" + seq);
-                FileUtils.deleteQuietly(file);
-            } catch (Exception e1) {
-                LOG.warn("File error, igore this seq settiing.", e1);
-            }
-        }
-        if (seq == null && startedBinlogInfo != null) {
-            seq = SubscribeConstant.SEQ_FROM_BINLOGINFO;
-        }
-        if (seq == null) {
-            seq = SubscribeConstant.SEQ_FROM_LATEST;
-        }
-        LOG.info("PumaClient[" + abstractTask.getPumaClientName() + "] Seq is:" + seq);
-        pumaClient.getSeqFileHolder().saveSeq(seq);
+	private void releaseMysqlExecutor() throws SQLException {
+		if (mysqlExecutor != null) {
+			mysqlExecutor.rollback();
+			mysqlExecutor.close();
+			mysqlExecutor = null;
+		}
+	}
 
-        // 注册监听器
-        pumaClient.register(new EventListener() {
+	@Override
+	public void succeed() {
+		try {
+			//            if (transactionStart) {
+			releaseMysqlExecutor();
+			transactionStart = false;
+			//            }
+		} catch (SQLException e) {
+			LOG.error(e.getMessage(), e);
+		}
+		if (this.pumaClient != null) {
+			this.pumaClient.stop();
+		}
+		state.setStatus(Status.RUNNING);
+		state.setDetail(null);
 
-            private DefaultPullStrategy defaultPullStrategy = new DefaultPullStrategy(500, 10000);
+		//this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
+		//this.status.setDetail(null);
+		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] succeeded...");
+	}
 
-            /** 记录一个收到多少个commit事件 */
-            private int                 commitBinlogCount   = 0;
+	public void fail(String detail) {
+		try {
+			//            if (transactionStart) {
+			releaseMysqlExecutor();
+			transactionStart = false;
+			//            }
+		} catch (SQLException e) {
+			LOG.error(e.getMessage(), e);
+		}
+		if (this.pumaClient != null) {
+			this.pumaClient.stop();
+		}
+		state.setStatus(Status.FAILED);
 
-            /** 对于PumaClient记录的binlog，需要在一开始skip */
-            private boolean             skipToNextPos       = startedBinlogInfo.isSkipToNextPos();
+		//this.status.setStatus(TaskExecutorStatus.Status.FAILED);
+		Cat.getProducer().logEvent(
+				"Puma.syncserver." + abstractTask.getSyncServerName() + ".fail",
+				abstractTask.getSyncServerName(),
+				Message.SUCCESS,
+				"syncServerName = " + abstractTask.getSyncServerName() + "&pumaClientName= "
+						+ abstractTask.getPumaClientName() + "&casedetail=" + detail);
+		state.setDetail(detail);
+		//this.status.setDetail(detail);
+		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] failed... cause:" + detail);
+	}
 
-            @Override
-            public void onSkipEvent(ChangedEvent event) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("onSkipEvent: " + event);
-                }
-            }
+	@Override
+	public void start() {
+		// 初始化mysqlExecutor
+		//mysqlExecutor = new MysqlExecutor(abstractTask.getDestMysqlHost().getHost(),
+				//abstractTask.getDestMysqlHost().getUsername(), abstractTask.getDestMysqlHost().getPassword(),
+				//abstractTask.getMysqlMapping());
+		mysqlExecutor = new MysqlExecutor((dstDBInstance.getHost() + ":" + dstDBInstance.getPort()),
+				dstDBInstance.getUsername(), dstDBInstance.getPassword(), abstractTask.getMysqlMapping());
 
-            @Override
-            public boolean onException(ChangedEvent event, Exception e) {
-                // 针对策略，调用策略的处理
-                boolean ignoreFailEvent = false;
+		// 读取binlog位置，创建PumaClient，设置PumaCleint的config，再启动
+		if (this.pumaClient != null) {
+			this.pumaClient.stop();
+		}
+		pumaClient = createPumaClient();
+		pumaClient.start();
+		state.setStatus(Status.RUNNING);
+		state.setDetail(null);
 
-                boolean hasHandler = false;
+		//this.status.setDetail(null);
+		//this.status.setStatus(TaskExecutorStatus.Status.RUNNING);
+		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] started.");
+	}
 
-                if (e instanceof SQLException) {
-                    SQLException se = (SQLException) e;
-                    int errorCode = se.getErrorCode();
-                    Map<Integer, String> errorCodeHandlerMap = abstractTask.getErrorCodeHandlerNameMap();
-                    if (errorCodeHandlerMap != null) {
-                        String handlerName = errorCodeHandlerMap.get(errorCode);
-                        if (handlerName != null) {
-                            Handler handler = HandlerContainer.getInstance().getHandler(handlerName);
-                            if (handler != null) {
-                                ignoreFailEvent = handleError(event, handler, e);
-                                hasHandler = true;// 有handler能处理
-                            }
-                        }
-                    }
-                }
-                // 如果没有handler能处理，则使用默认策略
-                if (!hasHandler) {
-                    String handlerName = AbstractTaskExecutor.this.abstractTask.getDefaultHandler();
-                    LOG.info("No ErrorCode match, try to use default handler:" + handlerName);
-                    if (handlerName != null) {
-                        Handler handler = HandlerContainer.getInstance().getHandler(handlerName);
-                        if (handler != null) {
-                            ignoreFailEvent = handleError(event, handler, e);
-                            hasHandler = true;// 有handler能处理
-                        }
-                    }
-                }
+	public void restart() {
+		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] restarting...");
+		try {
+			//            if (transactionStart) {
+			releaseMysqlExecutor();
+			transactionStart = false;
+			//            }
+		} catch (SQLException e) {
+			LOG.error(e.getMessage(), e);
+		}
+		if (this.pumaClient != null) {
+			this.pumaClient.stop();
+			this.pumaClient = null;
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+			}
+		}
 
-                // 如果连默认handler也没有(兼容)，则使用FailHandler策略
-                if (!hasHandler) {
-                    LOG.info("No handler found, use handler:" + StopOnFailedHandler.NAME);
-                    Handler handler = HandlerContainer.getInstance().getHandler(StopOnFailedHandler.NAME);
-                    ignoreFailEvent = handleError(event, handler, e);
-                }
+		start();
+	}
 
-                return ignoreFailEvent;
-            }
+	@Override
+	public TaskExecutorStatus getTaskExecutorStatus() {
+		return status;
+	}
 
-            private boolean handleError(ChangedEvent event, Handler handler, Exception e) {
-                boolean ignoreFailEvent = false;
-                try {
-                    LOG.info("Invoke handler(" + handler.getName() + "), event : " + event);
-                    HandleContext context = new HandleContext();
-                    context.setMysqlExecutor(mysqlExecutor);
-                    context.setChangedEvent(event);
-                    context.setTask(abstractTask);
-                    context.setExecutor(AbstractTaskExecutor.this);
-                    context.setException(e);
-                    context.setLastEvents(lastEvents);
-                    HandleResult handleResult = handler.handle(context);
-                    ignoreFailEvent = handleResult.isIgnoreFailEvent();
-                } catch (RuntimeException re) {
-                    LOG.warn("Unexpected RuntimeException on handler(" + handler.getName() + "), ignoreFailEvent keep false.", re);
-                }
-                return ignoreFailEvent;
-            }
+	private PumaClient createPumaClient() {
+		final BinlogInfo startedBinlogInfo = abstractTask.getBinlogInfo();
+		LOG.info("initing PumaClient...");
+		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
+		configBuilder.ddl(abstractTask.isDdl());
+		configBuilder.dml(abstractTask.isDml());
+		configBuilder.host(pumaServerHost);
+		configBuilder.port(pumaServerPort);
+		configBuilder.serverId(abstractTask.getPumaClientServerId());
+		configBuilder.name(abstractTask.getPumaClientName());
+		configBuilder.target(target);
+		configBuilder.transaction(abstractTask.isTransaction());
+		if (startedBinlogInfo != null) {
+			configBuilder.binlog(startedBinlogInfo.getBinlogFile());
+			configBuilder.binlogPos(startedBinlogInfo.getBinlogPosition());
+		}
+		_parseSourceDatabaseTables(abstractTask.getMysqlMapping(), configBuilder);
+		Configuration configuration = configBuilder.build();
+		LOG.info("PumaClient's config is: " + configuration);
+		PumaClient pumaClient = new PumaClient(configuration);
 
-            @Override
-            public void onEvent(ChangedEvent event) throws Exception {
-                //LOG.info("********************Received " + event);
-                if (!skipToNextPos) {
-                    if (event instanceof RowChangedEvent) {
-                        // ------------- (1) 【事务开始事件】--------------
-                        if (((RowChangedEvent) event).isTransactionBegin()) {
-                        } else if (((RowChangedEvent) event).isTransactionCommit()) {
-                            // --------- (2) 【事务提交事件】--------------
-                            if (containDatabase(event.getDatabase()) && transactionStart) {
-                                // 提交事务(datachange了，则该commit肯定是属于当前做了数据操作的事务的，故mysqlExecutor.commit();)
-                                mysqlExecutor.commit();
-                                transactionStart = false;
-                                // 遇到commit事件，操作数据库了，更新sqlbinlog和保存binlog到数据库
-                                binlogOfSqlThreadChanged(event);
-                                commitBinlogCount = 0;
-                            } else {
-                                // 只要累计遇到的commit事件1000个(无论是否属于抓取的database)，都更新sqlbinlog和保存binlog到数据库，为的是即使当前task更新不频繁，也不要让它的binlog落后太多
-                                if (++commitBinlogCount > getSaveCommitCount()) {
-                                    binlogOfSqlThreadChanged(event);
-                                    commitBinlogCount = 0;
-                                }
-                            }
-                            // 实时更新iobinlog位置(该io binlog位置也必须都是commmit事件的位置，这样的位置才是一个合理状态的位置，否则如果是一半事务的binlog位置，那么从该binlog位置订阅将是错误的状态)
-                            binlogOfIOThreadChanged(event);
+		// 读取本地文件，获取seq
+		Long seq = null;
+		File file = new File("/data/appdatas/puma-syncserver/" + abstractTask.getPumaClientName() + "/seq");
+		if (file.exists()) {
+			try {
+				seq = NumberUtils.toLong(StringUtils.trim(FileUtils.readFileToString(file)));
+				LOG.info("PumaClient[" + abstractTask.getPumaClientName() + "] Read from file, Seq is:" + seq);
+				FileUtils.deleteQuietly(file);
+			} catch (Exception e1) {
+				LOG.warn("File error, igore this seq settiing.", e1);
+			}
+		}
+		if (seq == null && startedBinlogInfo != null) {
+			seq = SubscribeConstant.SEQ_FROM_BINLOGINFO;
+		}
+		if (seq == null) {
+			seq = SubscribeConstant.SEQ_FROM_LATEST;
+		}
+		LOG.info("PumaClient[" + abstractTask.getPumaClientName() + "] Seq is:" + seq);
+		pumaClient.getSeqFileHolder().saveSeq(seq);
 
-                        } else if (containDatabase(event.getDatabase())) {
-                            // --------- (3) 【数据操作事件】--------------
-                            // 可执行的event，保存到内存，出错时打印出来
-                            lastEvents.add(event);
-                            // 标识事务开始
-                            transactionStart = true;
-                            // 执行子类的具体操作
-                            AbstractTaskExecutor.this.execute(event);
-                        }
-                    }
-                    else if (event instanceof DdlEvent) {
-                        lastEvents.add(event);
-                        // 执行子类的具体操作
-                        AbstractTaskExecutor.this.execute(event);
-                    }
-                } else {
-                    skipToNextPos = false;
-                    LOG.info("********************skip this event(because skipToNextPos is true) : " + event);
-                }
+		// 注册监听器
+		pumaClient.register(new EventListener() {
 
-                // 速度调控
-                if (sleepTime > 0) {
-                    try {
-                        TimeUnit.MILLISECONDS.sleep(sleepTime);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                }
+			private DefaultPullStrategy defaultPullStrategy = new DefaultPullStrategy(500, 10000);
 
-            }
+			/** 记录一个收到多少个commit事件 */
+			private int commitBinlogCount = 0;
 
-            @Override
-            public void onConnectException(Exception e) {
-                status.setStatus(TaskExecutorStatus.Status.RECONNECTING);
-                String detail = abstractTask.getSrcMysqlName() + "->" + abstractTask.getDestMysqlName() + ":PumaClient connected failed, reconnecting...";
-                status.setDetail(detail);
-                LOG.error(detail, e);
-                defaultPullStrategy.fail(true);
-            }
+			/** 对于PumaClient记录的binlog，需要在一开始skip */
+			private boolean skipToNextPos = startedBinlogInfo.isSkipToNextPos();
 
-            @Override
-            public void onConnected() {
-                status.setStatus(TaskExecutorStatus.Status.RUNNING);
-                status.setDetail("PumaClient connected.");
-                LOG.info("PumaClient[" + getTask().getPumaClientName() + "] connected.");
-            }
-        });
+			@Override
+			public void onSkipEvent(ChangedEvent event) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("onSkipEvent: " + event);
+				}
+			}
 
-        return pumaClient;
-    }
+			@Override
+			public boolean onException(ChangedEvent event, Exception e) {
+				// 针对策略，调用策略的处理
+				boolean ignoreFailEvent = false;
 
-    private void saveBinlogToDB(BinlogInfo binlogInfo) {
-        SystemStatusContainer.instance.recordBinlog(abstractTask, binlogInfo);
-    }
+				boolean hasHandler = false;
 
-    private boolean containDatabase(String database) {
-        for (DatabaseMapping dbMapping : this.abstractTask.getMysqlMapping().getDatabases()) {
-            if (StringUtils.equalsIgnoreCase(dbMapping.getFrom(), database)) {
-                return true;
-            }
-        }
-        return false;
-    }
+				if (e instanceof SQLException) {
+					SQLException se = (SQLException) e;
+					int errorCode = se.getErrorCode();
+					Map<Integer, String> errorCodeHandlerMap = abstractTask.getErrorCodeHandlerNameMap();
+					if (errorCodeHandlerMap != null) {
+						String handlerName = errorCodeHandlerMap.get(errorCode);
+						if (handlerName != null) {
+							Handler handler = HandlerContainer.getInstance().getHandler(handlerName);
+							if (handler != null) {
+								ignoreFailEvent = handleError(event, handler, e);
+								hasHandler = true;// 有handler能处理
+							}
+						}
+					}
+				}
+				// 如果没有handler能处理，则使用默认策略
+				if (!hasHandler) {
+					String handlerName = AbstractTaskExecutor.this.abstractTask.getDefaultHandler();
+					LOG.info("No ErrorCode match, try to use default handler:" + handlerName);
+					if (handlerName != null) {
+						Handler handler = HandlerContainer.getInstance().getHandler(handlerName);
+						if (handler != null) {
+							ignoreFailEvent = handleError(event, handler, e);
+							hasHandler = true;// 有handler能处理
+						}
+					}
+				}
 
-    /**
-     * 设置同步源的数据库和表
-     */
-    private void _parseSourceDatabaseTables(MysqlMapping mysqlMapping, ConfigurationBuilder configBuilder) {
-        List<DatabaseMapping> databases = mysqlMapping.getDatabases();
-        if (databases != null) {
-            for (DatabaseMapping database : databases) {
-                // 解析database
-                String databaseFrom = database.getFrom();
-                // 解析table
-                List<TableMapping> tables = database.getTables();
-                if (tables != null) {
-                    // 如果table中有一个是*，则只需要设置一个*；否则，添加所有table配置
-                    List<String> tableFroms = new ArrayList<String>();
-                    boolean star = false;
-                    for (TableMapping table : tables) {
-                        if (StringUtils.equals(table.getFrom(), "*")) {
-                            star = true;
-                            break;
-                        } else {
-                            tableFroms.add(table.getFrom());
-                        }
-                    }
-                    if (star) {
-                        configBuilder.tables(databaseFrom, "*");
-                    } else {
-                        for (String tableFrom : tableFroms) {
-                            configBuilder.tables(databaseFrom, tableFrom);
-                        }
-                    }
-                }
-            }
-        }
-    }
+				// 如果连默认handler也没有(兼容)，则使用FailHandler策略
+				if (!hasHandler) {
+					LOG.info("No handler found, use handler:" + StopOnFailedHandler.NAME);
+					Handler handler = HandlerContainer.getInstance().getHandler(StopOnFailedHandler.NAME);
+					ignoreFailEvent = handleError(event, handler, e);
+				}
 
-    @Override
-    public void speedUp() {
-        if (sleepTime >= 500) {
-            sleepTime -= 500;
-        }
-        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] speedUp. sleepTime:" + sleepTime + "ms.");
-    }
+				return ignoreFailEvent;
+			}
 
-    @Override
-    public void speedDown() {
-        if (sleepTime < 3000) {
-            sleepTime += 500;
-        }
-        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] speedDown. sleepTime:" + sleepTime + "ms.");
-    }
+			private boolean handleError(ChangedEvent event, Handler handler, Exception e) {
+				boolean ignoreFailEvent = false;
+				try {
+					LOG.info("Invoke handler(" + handler.getName() + "), event : " + event);
+					HandleContext context = new HandleContext();
+					context.setMysqlExecutor(mysqlExecutor);
+					context.setChangedEvent(event);
+					context.setTask(abstractTask);
+					context.setExecutor(AbstractTaskExecutor.this);
+					context.setException(e);
+					context.setLastEvents(lastEvents);
+					HandleResult handleResult = handler.handle(context);
+					ignoreFailEvent = handleResult.isIgnoreFailEvent();
+				} catch (RuntimeException re) {
+					LOG.warn(
+							"Unexpected RuntimeException on handler(" + handler.getName() + "), ignoreFailEvent keep false.",
+							re);
+				}
+				return ignoreFailEvent;
+			}
 
-    @Override
-    public void resetSpeed() {
-        sleepTime = 0;
-        LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] resetSpeed. sleepTime:" + sleepTime + "ms.");
-    }
+			@Override
+			public void onEvent(ChangedEvent event) throws Exception {
+				//LOG.info("********************Received " + event);
+				if (!skipToNextPos) {
+					if (event instanceof RowChangedEvent) {
+						// ------------- (1) 【事务开始事件】--------------
+						if (((RowChangedEvent) event).isTransactionBegin()) {
+						} else if (((RowChangedEvent) event).isTransactionCommit()) {
+							// --------- (2) 【事务提交事件】--------------
+							if (containDatabase(event.getDatabase()) && transactionStart) {
+								// 提交事务(datachange了，则该commit肯定是属于当前做了数据操作的事务的，故mysqlExecutor.commit();)
+								mysqlExecutor.commit();
+								transactionStart = false;
+								// 遇到commit事件，操作数据库了，更新sqlbinlog和保存binlog到数据库
+								binlogOfSqlThreadChanged(event);
+								commitBinlogCount = 0;
+							} else {
+								// 只要累计遇到的commit事件1000个(无论是否属于抓取的database)，都更新sqlbinlog和保存binlog到数据库，为的是即使当前task更新不频繁，也不要让它的binlog落后太多
+								if (++commitBinlogCount > getSaveCommitCount()) {
+									binlogOfSqlThreadChanged(event);
+									commitBinlogCount = 0;
+								}
+							}
+							// 实时更新iobinlog位置(该io binlog位置也必须都是commmit事件的位置，这样的位置才是一个合理状态的位置，否则如果是一半事务的binlog位置，那么从该binlog位置订阅将是错误的状态)
+							binlogOfIOThreadChanged(event);
 
-    @Override
-    public String toString() {
-        return "AbstractTaskExecutor [abstractTask=" + abstractTask + ", pumaClient=" + pumaClient + ", mysqlExecutor=" + mysqlExecutor + ", pumaServerHost=" + pumaServerHost + ", pumaServerPort="
-                + pumaServerPort + ", target=" + target + ", status=" + status + ", transactionStart=" + transactionStart + ", sleepTime=" + sleepTime + ", lastEvents=" + lastEvents + "]";
-    }
+						} else if (containDatabase(event.getDatabase())) {
+							// --------- (3) 【数据操作事件】--------------
+							// 可执行的event，保存到内存，出错时打印出来
+							lastEvents.add(event);
+							// 标识事务开始
+							transactionStart = true;
+							// 执行子类的具体操作
+							AbstractTaskExecutor.this.execute(event);
+						}
+					} else if (event instanceof DdlEvent) {
+						lastEvents.add(event);
+						// 执行子类的具体操作
+						AbstractTaskExecutor.this.execute(event);
+						binlogOfSqlThreadChanged(event);
+					}
+				} else {
+					skipToNextPos = false;
+					LOG.info("********************skip this event(because skipToNextPos is true) : " + event);
+				}
 
-    private int getSaveCommitCount() {
-        int count = 50000;// 默认是5万
-        try {
-            Integer t = ConfigCache.getInstance().getIntProperty("puma.syncserver.saveCommitCount");
-            if (t != null) {
-                count = t.intValue();
-            }
-        } catch (LionException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return count;
-    }
+				// 速度调控
+				if (sleepTime > 0) {
+					try {
+						TimeUnit.MILLISECONDS.sleep(sleepTime);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+				}
 
-    public TaskExecutorStatus getStatus() {
-        return status;
-    }
+			}
 
-    public void setStatus(TaskExecutorStatus status) {
-        this.status = status;
-    }
+			@Override
+			public void onConnectException(Exception e) {
+				state.setStatus(Status.RECONNECTING);
+				//status.setStatus(TaskExecutorStatus.Status.RECONNECTING);
+				String detail = abstractTask.getPumaTaskName() + "->" + abstractTask.getDstDBInstanceName()
+						+ ":PumaClient connected failed, reconnecting...";
+				state.setDetail(detail);
+				//status.setDetail(detail);
+				LOG.error(detail, e);
+				defaultPullStrategy.fail(true);
+			}
 
+			@Override
+			public void onConnected() {
+				state.setStatus(Status.RUNNING);
+				state.setDetail("PumaClient connected.");
+
+				//status.setStatus(TaskExecutorStatus.Status.RUNNING);
+				//status.setDetail("PumaClient connected.");
+				LOG.info("PumaClient[" + getTask().getPumaClientName() + "] connected.");
+			}
+		});
+
+		return pumaClient;
+	}
+
+	private void saveBinlogToDB(BinlogInfo binlogInfo) {
+		binlogInfoHolder.setBinlogInfo(abstractTask.getName(), binlogInfo);
+	}
+
+	private boolean containDatabase(String database) {
+		for (DatabaseMapping dbMapping : this.abstractTask.getMysqlMapping().getDatabases()) {
+			if (StringUtils.equalsIgnoreCase(dbMapping.getFrom(), database)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * 设置同步源的数据库和表
+	 */
+	private void _parseSourceDatabaseTables(MysqlMapping mysqlMapping, ConfigurationBuilder configBuilder) {
+		List<DatabaseMapping> databases = mysqlMapping.getDatabases();
+		if (databases != null) {
+			for (DatabaseMapping database : databases) {
+				// 解析database
+				String databaseFrom = database.getFrom();
+				// 解析table
+				List<TableMapping> tables = database.getTables();
+				if (tables != null) {
+					// 如果table中有一个是*，则只需要设置一个*；否则，添加所有table配置
+					List<String> tableFroms = new ArrayList<String>();
+					boolean star = false;
+					for (TableMapping table : tables) {
+						if (StringUtils.equals(table.getFrom(), "*")) {
+							star = true;
+							break;
+						} else {
+							tableFroms.add(table.getFrom());
+						}
+					}
+					if (star) {
+						configBuilder.tables(databaseFrom, "*");
+					} else {
+						for (String tableFrom : tableFroms) {
+							configBuilder.tables(databaseFrom, tableFrom);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	@Override
+	public void speedUp() {
+		if (sleepTime >= 500) {
+			sleepTime -= 500;
+		}
+		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] speedUp. sleepTime:" + sleepTime + "ms.");
+	}
+
+	@Override
+	public void speedDown() {
+		if (sleepTime < 3000) {
+			sleepTime += 500;
+		}
+		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] speedDown. sleepTime:" + sleepTime + "ms.");
+	}
+
+	@Override
+	public void resetSpeed() {
+		sleepTime = 0;
+		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] resetSpeed. sleepTime:" + sleepTime + "ms.");
+	}
+
+	@Override
+	public String toString() {
+		return "AbstractTaskExecutor [abstractTask=" + abstractTask + ", pumaClient=" + pumaClient + ", mysqlExecutor="
+				+ mysqlExecutor + ", pumaServerHost=" + pumaServerHost + ", pumaServerPort="
+				+ pumaServerPort + ", target=" + target + ", status=" + status + ", transactionStart=" + transactionStart
+				+ ", sleepTime=" + sleepTime + ", lastEvents=" + lastEvents + "]";
+	}
+
+	private int getSaveCommitCount() {
+		int count = 50000;// 默认是5万
+		try {
+			Integer t = ConfigCache.getInstance().getIntProperty("puma.syncserver.saveCommitCount");
+			if (t != null) {
+				count = t.intValue();
+			}
+		} catch (LionException e) {
+			LOG.error(e.getMessage(), e);
+		}
+		return count;
+	}
+
+	public TaskExecutorStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(TaskExecutorStatus status) {
+		this.status = status;
+	}
+
+	public SyncTaskState getState() {
+		return state;
+	}
+
+	public void setState(SyncTaskState state) {
+		this.state = state;
+	}
 }

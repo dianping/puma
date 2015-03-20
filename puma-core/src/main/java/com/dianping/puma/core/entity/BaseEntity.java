@@ -10,6 +10,8 @@ public abstract class BaseEntity implements Serializable {
 
 	private String id;
 
+	private String name;
+
 	private Date gmtCreate;
 
 	private Date gmtModify;
@@ -38,6 +40,12 @@ public abstract class BaseEntity implements Serializable {
 
 	public String getId() {
 		return id;
+	}
+
+	public String getName() { return name; }
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public Date getGmtCreate() {

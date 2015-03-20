@@ -21,19 +21,17 @@ public class SwallowEventPublisher implements EventPublisher {
     @Override
     public void publish(Event event) throws SendFailedException {
         if (event instanceof PumaTaskEvent) {
-
             if (event instanceof PumaTaskStateEvent) {
                 producer.sendMessage(event);
             } else {
                 String pumaServerId = ((PumaTaskEvent) event).getPumaServerId();
                 producer.sendMessage(event, pumaServerId);
             }
-
         } else {
-            if (event instanceof TaskEvent) {
-                producer.sendMessage(event, event.getSyncServerName());
+            if (event instanceof SyncTaskStateEvent) {
+                producer.sendMessage(event);
             } else {
-                producer.sendMessage(event, "sync_server");
+                producer.sendMessage(event, ((SyncTaskEvent) event).getSyncServerName());
             }
         }
     }

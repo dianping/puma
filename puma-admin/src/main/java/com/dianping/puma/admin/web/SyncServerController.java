@@ -1,9 +1,8 @@
 package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.util.GsonUtil;
-import com.dianping.puma.core.entity.SyncServerEntity;
+import com.dianping.puma.core.entity.SyncServer;
 import com.dianping.puma.core.service.SyncServerService;
-import com.dianping.puma.core.sync.model.task.SyncTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +33,7 @@ public class SyncServerController {
 	@RequestMapping(value = { "/sync-server" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		List<SyncServerEntity> syncServerEntities = syncServerService.findAll();
+		List<SyncServer> syncServerEntities = syncServerService.findAll();
 		map.put("entities", syncServerEntities);
 		map.put("path", "sync-server");
 		return new ModelAndView("main/container", map);
@@ -54,7 +53,7 @@ public class SyncServerController {
 
 		try {
 
-			SyncServerEntity entity = syncServerService.find(id);
+			SyncServer entity = syncServerService.find(id);
 			map.put("entity", entity);
 			map.put("path", "sync-server");
 			map.put("subPath", "create");
@@ -70,19 +69,19 @@ public class SyncServerController {
 	public String createPost(String name, String ip) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		SyncServerEntity syncServerEntity = new SyncServerEntity();
-		syncServerEntity.setName(name);
+		SyncServer syncServer = new SyncServer();
+		syncServer.setName(name);
 
 		// Split host and port.
 		String[] hostAndPort = ip.split(":");
 		String host = hostAndPort[0];
 		Integer port = hostAndPort.length == 1 ? serverPort : Integer.parseInt(hostAndPort[1]);
 
-		syncServerEntity.setHost(host);
-		syncServerEntity.setPort(port);
+		syncServer.setHost(host);
+		syncServer.setPort(port);
 
 		try {
-			this.syncServerService.create(syncServerEntity);
+			this.syncServerService.create(syncServer);
 			map.put("success", true);
 		} catch (Exception e) {
 			map.put("success", false);

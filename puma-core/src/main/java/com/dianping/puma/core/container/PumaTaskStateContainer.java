@@ -1,16 +1,13 @@
 package com.dianping.puma.core.container;
 
-import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.core.model.PumaTaskState;
-import com.dianping.puma.core.monitor.Event;
-import com.dianping.puma.core.monitor.EventListener;
-import com.dianping.puma.core.monitor.PumaTaskStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service("pumaTaskStateContainer")
@@ -28,8 +25,8 @@ public class PumaTaskStateContainer {
 		return new ArrayList<String>(stateMap.keySet());
 	}
 
-	public List<PumaTaskState> getAll() {
-		return new ArrayList<PumaTaskState>(stateMap.values());
+	public final Map<String, PumaTaskState> getAll() {
+		return stateMap;
 	}
 
 	public void add(String taskId, PumaTaskState state) {
@@ -42,7 +39,11 @@ public class PumaTaskStateContainer {
 	}
 
 	public void update(String taskId, PumaTaskState state) {
-		stateMap.replace(taskId, state);
+		stateMap.put(taskId, state);
+	}
+
+	public void updateAll(Map<String, PumaTaskState> stateMap) {
+		this.stateMap.putAll(stateMap);
 	}
 
 	public void remove(String taskId) {

@@ -10,21 +10,21 @@ $(function() {
     var isAllValid = true;
 
     $(".validation-input").each(function(i, inputElement) {
-      if (!isValid($(inputElement))) {
-        isAllValid = false;
-        var help = $(inputElement).parent().next();
-        if (!help.hasClass('validation-help')) {
-          help = help.next().next();
-        }
+    	  if (!isValid($(inputElement))) {
+    	        isAllValid = false;
+    	        var help = $(inputElement).parent().next();
+    	        if (!help.hasClass('validation-help')) {
+    	          help = help.next().next();
+    	        }
 
-        if (help.children().css('display') === 'none') {
-          help.children().show(0).delay(1500).hide(0);
-        }
-      }
+    	        if (help.children().css('display') === 'none') {
+    	          help.children().show(0).delay(1500).hide(0);
+    	        }
+    	      }
     });
 
     if (!isAllValid) {
-      event.preventDefault()
+      event.preventDefault();
     }
   });
 
@@ -71,7 +71,10 @@ $(function() {
     var regexp;
     switch (format) {
       case 'puma-task-name':
-        regexp = /^[@\w]{1,30}$/;
+      case 'dump-task-name':
+      case 'sync-task-name':
+      case 'catchup-task-name':
+        regexp = /^[-@\w]{1,50}$/;
         break;
 
       case 'server-name':
@@ -106,7 +109,10 @@ $(function() {
       case 'day':
         regexp = /^\d{1,2}$/;
         break;
-
+      case 'database-name':
+      case 'table-name':
+    	  regexp = /\S/;
+    	  break;
       default:
         regexp = undefined;
     }

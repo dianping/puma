@@ -1,3 +1,4 @@
+/*
 package com.dianping.puma.admin.web;
 
 import java.sql.SQLException;
@@ -10,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.dianping.puma.core.constant.SyncType;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,9 +41,11 @@ import com.dianping.puma.core.sync.model.task.SyncTask;
 import com.dianping.puma.core.sync.model.task.Type;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 
+*/
 /**
  * @author wukezhu
- */
+ *//*
+
 @Controller
 public class ModifyController {
     private static final Logger LOG = LoggerFactory.getLogger(ModifyController.class);
@@ -76,9 +80,11 @@ public class ModifyController {
         return new ModelAndView("main/container", map);
     }
 
-    /**
+    */
+/**
      * 显示待修改SyncTask的页面
-     */
+     *//*
+
     @RequestMapping(value = "/modify/{taskId}", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
     public ModelAndView task(HttpSession session, @PathVariable("taskId") Long taskId) {
         Map<String, Object> map = new HashMap<String, Object>();
@@ -187,9 +193,11 @@ public class ModifyController {
         return new ModelAndView("main/container", map);
     }
 
-    /**
+    */
+/**
      * 创建DumpTask
-     */
+     *//*
+
     @RequestMapping(value = "/modify/createDumpTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object createDumpTask(HttpSession session, String srcMysqlHost, String syncServerName) {
@@ -227,9 +235,11 @@ public class ModifyController {
 
     }
 
-    /**
+    */
+/**
      * 刷新DumpTask的状态
-     */
+     *//*
+
     @RequestMapping(value = "/modify/refreshDumpStatus", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object refreshDumpStatus(HttpSession session) {
@@ -264,9 +274,11 @@ public class ModifyController {
 
     }
 
-    /**
+    */
+/**
      * 创建CatchupTask的页面
-     */
+     *//*
+
     @RequestMapping(method = RequestMethod.GET, value = { "/modify/step3" })
     public ModelAndView step3(HttpSession session) throws SQLException {
         Map<String, Object> map = new HashMap<String, Object>();
@@ -333,9 +345,11 @@ public class ModifyController {
         return GsonUtil.toJson(map);
     }
 
-    /**
+    */
+/**
      * 查看CatchupTask的状态
-     */
+     *//*
+
     @RequestMapping(value = "/modify/refreshCatchupStatus", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object refreshCatchupStatus(HttpSession session) {
@@ -350,7 +364,7 @@ public class ModifyController {
             //            catchupTask = this.catchupTaskService.find(catchupTask.getId());
             //            map.put("catchupTask", catchupTask);
 
-            TaskExecutorStatus status = systemStatusContainer.getStatus(Type.CATCHUP, catchupTask.getId());
+            TaskExecutorStatus status = systemStatusContainer.getStatus(SyncType.CATCHUP, catchupTask.getId());
             if (status != null) {
                 map.put("status", status);
                 if (status.getBinlogInfo() != null) {
@@ -405,9 +419,11 @@ public class ModifyController {
         return GsonUtil.toJson(map);
     }
 
-    /**
+    */
+/**
      * 查看CatchupTask的状态
-     */
+     *//*
+
     @RequestMapping(value = "/modify/delTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object delete(HttpSession session, Long id) {
@@ -434,3 +450,4 @@ public class ModifyController {
     }
 
 }
+*/

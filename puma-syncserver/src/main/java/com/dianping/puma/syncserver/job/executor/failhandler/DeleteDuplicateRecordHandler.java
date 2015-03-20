@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.dianping.puma.core.entity.BaseSyncTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +33,8 @@ public class DeleteDuplicateRecordHandler implements Handler {
         result.setIgnoreFailEvent(false);
         MysqlExecutor mysqlExecutor = context.getMysqlExecutor();
         ChangedEvent changedEvent0 = context.getChangedEvent();
-        Task task = context.getTask();
-        String taskInfo = "[" + task.getSrcMysqlName() + "->" + task.getDestMysqlName() + "]";
+        BaseSyncTask task = context.getTask();
+        String taskInfo = "[" + task.getPumaTaskName() + "->" + task.getDstDBInstanceName() + "]";
         RowChangedEvent changedEvent = null;
         if (changedEvent0 instanceof RowChangedEvent) {//只处理RowChangedEvent
             changedEvent = (RowChangedEvent) changedEvent0;

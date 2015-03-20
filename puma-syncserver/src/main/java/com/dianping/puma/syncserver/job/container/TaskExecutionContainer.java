@@ -15,10 +15,15 @@
  */
 package com.dianping.puma.syncserver.job.container;
 
+import com.dianping.puma.core.constant.Controller;
+import com.dianping.puma.core.constant.SyncType;
+import com.dianping.puma.core.monitor.SyncTaskOperationEvent;
 import com.dianping.puma.core.sync.model.task.SyncTaskStatusAction;
 import com.dianping.puma.core.sync.model.task.Type;
 import com.dianping.puma.syncserver.job.executor.TaskExecutionException;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
+
+import java.util.List;
 
 /**
  * @author Leo Liang
@@ -28,9 +33,11 @@ public interface TaskExecutionContainer {
 
     public void submit(TaskExecutor taskExecutor) throws TaskExecutionException;
 
-    public TaskExecutor get(Type type, long taskId);
+    public TaskExecutor get(SyncType syncType, String taskName);
 
-    public void changeStatus(long syncTaskId, SyncTaskStatusAction statusAction);
+    public void changeStatus(String taskName, Controller controller);
 
-    public void deleteSyncTask(long taskId);
+    public void deleteSyncTask(String taskName);
+
+    public List<TaskExecutor> toList();
 }

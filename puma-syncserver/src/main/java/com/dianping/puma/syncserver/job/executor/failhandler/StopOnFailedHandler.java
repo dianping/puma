@@ -1,5 +1,6 @@
 package com.dianping.puma.syncserver.job.executor.failhandler;
 
+import com.dianping.puma.core.entity.BaseSyncTask;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,12 +24,12 @@ public class StopOnFailedHandler implements Handler {
     @SuppressWarnings("rawtypes")
     public HandleResult handle(HandleContext context) {
         AbstractTaskExecutor executor = context.getExecutor();
-        Task task = context.getTask();
+        BaseSyncTask task = context.getTask();
         Exception exception = context.getException();
         ChangedEvent changedEvent = context.getChangedEvent();
         CircularFifoBuffer lastEvents = context.getLastEvents();
 
-        executor.fail(task.getSrcMysqlName() + "->" + task.getDestMysqlName() + ":" + exception.getMessage() + ". Event=" + changedEvent);
+        executor.fail(task.getPumaTaskName() + "->" + task.getDstDBInstanceName() + ":" + exception.getMessage() + ". Event=" + changedEvent);
         LOG.info("Print last 10 row change events: " + lastEvents.toString());
 
         HandleResult result = new HandleResult();

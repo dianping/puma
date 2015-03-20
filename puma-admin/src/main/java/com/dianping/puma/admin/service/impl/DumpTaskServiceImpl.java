@@ -14,7 +14,6 @@ import com.dianping.puma.core.sync.model.task.Type;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
 import com.google.code.morphia.Key;
 
-@Service
 public class DumpTaskServiceImpl implements DumpTaskService {
     @Autowired
     DumpTaskDao dumpTaskDao;
@@ -45,7 +44,7 @@ public class DumpTaskServiceImpl implements DumpTaskService {
             throw new RuntimeException("已经创建任务，但给SyncServer发送通知失败，您需要重新创建任务才能再次dump！");
         }
         //更新本地状态
-        systemStatusContainer.addStatus(Type.DUMP, id);
+        //systemStatusContainer.addStatus(Type.DUMP, id);
 
         return id;
     }

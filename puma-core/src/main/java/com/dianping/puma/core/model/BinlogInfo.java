@@ -6,7 +6,7 @@ public class BinlogInfo {
 
     private Long binlogPosition;
 
-    private Boolean skipToNextPos;
+    private Boolean skipToNextPos = false;
 
     public BinlogInfo() {}
 
@@ -31,7 +31,7 @@ public class BinlogInfo {
         this.binlogPosition = binlogPosition;
     }
 
-    public Boolean getSkipToNextPos() {
+    public Boolean isSkipToNextPos() {
         return skipToNextPos;
     }
 

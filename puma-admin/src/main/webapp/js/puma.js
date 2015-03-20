@@ -1,5 +1,19 @@
 $(function(w) {
 
+  var STATE_MAP = {
+    WAITING     : "等待中",
+    PREPARING   : "准备中",
+    RUNNING     : "运行中",
+    SUSPENDED   : "已暂停",
+    STOPPING    : "已停止",
+    SUCCESS     : "成功",
+    RECONNECTING: "重新连接",
+    DUMPING     : "备份中",
+    LOADING     : "加载中",
+    FAILED      : "失败",
+    DISCONNECTED: "失去连接"
+  };
+
   // Operations.
 
   // Refresh puma task state.
@@ -75,6 +89,58 @@ $(function(w) {
       } else {
         setPumaTaskStatus(tdStatus, state.status);
         setPumaTaskBinlogInfo(tdBinlogInfo, state.binlogInfo);
+      }
+    });
+  }).trigger('click');
+
+  // Refresh sync task state.
+  function refreshSyncTaskState(name, cb) {
+    $.ajax({
+      url     : window.contextpath + '/sync-task/refresh',
+      type    : 'POST',
+      data    : {name: name},
+      dataType: 'json',
+      success : function(res) {
+        if (!res.success) {
+          return cb(res.err);
+        }
+
+        cb(null, res.state);
+      },
+      error  : function() {
+        cb('网络出现问题');
+      }
+    });
+  }
+
+  // Set sync task status.
+  function setSyncTaskStatus(td, status) {
+    td.text(STATE_MAP[status]);
+  }
+
+  // Set sync task bin log info.
+  function setSyncTaskBinlogInfo(td, binlogInfo) {
+    var binlogFileStr = ((binlogInfo && binlogInfo.binlogFile) ? binlogInfo.binlogFile : '--');
+    var binlogFilePositionStr = ((binlogInfo && binlogInfo.binlogPosition) ? binlogInfo.binlogPosition : '--');
+
+    td.text(binlogFileStr + ' | ' + binlogFilePositionStr);
+  }
+
+  // sync-task
+  $(".sync-task-refresh").on('click', function(event) {
+    event.preventDefault();
+
+    var taskName     = $(this).attr('data-name');
+    var parent       = $(this).parent();
+    var tdBinlogInfo = parent.prev();
+    var tdStatus     = tdBinlogInfo.prev();
+
+    refreshSyncTaskState(taskName, function(err, state) {
+      if (err) {
+        alert(err);
+      } else {
+        setSyncTaskStatus(tdStatus, state.status);
+        setSyncTaskBinlogInfo(tdBinlogInfo, state.binlogInfoOfIOThread);
       }
     });
   }).trigger('click');

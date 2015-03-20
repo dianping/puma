@@ -17,9 +17,7 @@ import java.util.List;
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.LifeCycle;
 import com.dianping.puma.core.constant.Status;
-import com.dianping.puma.core.entity.replication.ReplicationTaskStatus;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
-import com.dianping.puma.core.replicate.model.task.StatusActionType;
 import com.dianping.puma.sender.Sender;
 
 /**
@@ -62,14 +60,9 @@ public interface TaskExecutor extends LifeCycle<Exception> {
 
 	public void setStatus(Status status);
 
-	public ReplicationTaskStatus.Status getTaskStatus();
-
-	public void setTaskStatus(ReplicationTaskStatus.Status taskStatus);
-
-	public void setStatusActionType(StatusActionType statusActionType);
-
-	public StatusActionType getStatusActionType();
-
 	public List<Sender> getFileSender();
 
+	public void resume() throws Exception;
+
+	public void pause() throws Exception;
 }

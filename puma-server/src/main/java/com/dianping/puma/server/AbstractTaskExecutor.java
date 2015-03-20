@@ -20,19 +20,14 @@ import java.util.List;
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.constant.Status;
-import com.dianping.puma.core.container.PumaTaskStateContainer;
-import com.dianping.puma.core.entity.replication.ReplicationTaskStatus;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.PumaTaskState;
 import com.dianping.puma.core.monitor.Notifiable;
 import com.dianping.puma.core.monitor.NotifyService;
-import com.dianping.puma.core.replicate.model.task.StatusActionType;
-import com.dianping.puma.core.replicate.model.task.StatusExecutorType;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.Dispatcher;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * TODO Comment of AbstractServer
@@ -63,7 +58,9 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 
 	protected NotifyService notifyService;
 
-	private volatile boolean stop = false;
+	private volatile boolean stop = true;
+
+	private volatile boolean pause = false;
 
 	protected BinlogInfoHolder binlogInfoHolder;
 
@@ -72,12 +69,6 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 	protected PumaTaskState state;
 
 	protected Status status;
-
-	protected ReplicationTaskStatus.Status taskStatus;
-
-	protected StatusActionType statusActionType;
-
-	protected StatusExecutorType statusExecutorType;
 
 	@Override
 	public String getTaskId() {
@@ -198,16 +189,7 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
      * 
      * @see com.dianping.puma.server.Server#stop()
      */
-	@Override
-	public void stop() throws Exception {
-		stop = true;
-		doStop();
-		//stop = true;
 
-		parser.stop();
-		dataHandler.stop();
-		dispatcher.stop();
-	}
 
 	public boolean isStop() {
 		return stop;
@@ -217,18 +199,33 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 
 	protected abstract void doStart() throws Exception;
 
+	@Override
 	public void start() throws Exception {
+		stop = false;
+
 		parser.start();
 		dataHandler.start();
-		for(Sender sender: dispatcher.getSenders()){
-			sender.getStorage().getMasterBucketIndex().start();
-			sender.getStorage().getSlaveBucketIndex().start();
-			sender.getStorage().start();
-			sender.start();
-		}
 		dispatcher.start();
-		stop = false;
 		doStart();
+	}
+
+	@Override
+	public void stop() throws Exception {
+		stop = true;
+
+		parser.stop();
+		dataHandler.stop();
+		dispatcher.stop();
+
+		doStop();
+	}
+
+	public void resume() throws Exception {
+		stop = false;
+	}
+
+	public void pause() throws Exception {
+		stop = true;
 	}
 
 	@Override public Status getStatus() {
@@ -240,26 +237,8 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 	}
 
 	@Override
-	public void setStatusActionType(StatusActionType statusActionType) {
-		this.statusActionType = statusActionType;
-	}
-
-	@Override
-	public StatusActionType getStatusActionType() {
-		return statusActionType;
-	}
-
-	@Override
 	public List<Sender> getFileSender() {
 		return dispatcher.getSenders();
-	}
-
-	public ReplicationTaskStatus.Status getTaskStatus() {
-		return taskStatus;
-	}
-
-	public void setTaskStatus(ReplicationTaskStatus.Status taskStatus) {
-		this.taskStatus = taskStatus;
 	}
 
 	public PumaTaskState getState() {

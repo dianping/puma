@@ -10,14 +10,14 @@
             http://www.springframework.org/schema/task   
     http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 
-    <!-- annotation scan -->
-    <context:component-scan base-package="com.dianping.puma"/>
-
-    <!--bean id="mongoClient2" class="com.dianping.puma.core.dao.morphia.MongoClient">
-    </bean-->
+    <!-- annotation scan --><!--
+    <context:component-scan base-package="com.dianping.puma.core"/>
 
     <bean id="mongoClient" class="com.dianping.puma.core.dao.morphia.MongoClient">
     </bean>
+	
+    --><!--<bean id="mongoClient" class="com.dianping.puma.core.sync.dao.MongoClient">
+    </bean>  --><!--
 
     <bean id="seqGeneratorService"
         class="com.dianping.puma.core.dao.morphia.MongoSeqGeneratorServiceImpl">
@@ -28,4 +28,4 @@
         <property name="collName" value="seq" />
     </bean>
 
-</beans>
+--></beans>

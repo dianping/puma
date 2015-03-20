@@ -7,7 +7,7 @@ import com.dianping.puma.core.dao.morphia.MongoBaseDao;
 import com.dianping.puma.core.dao.morphia.MongoClient;
 import com.dianping.puma.core.sync.model.task.SyncTask;
 
-@Service
+
 public class SyncTaskDao extends MongoBaseDao<SyncTask> {
 
     @Autowired

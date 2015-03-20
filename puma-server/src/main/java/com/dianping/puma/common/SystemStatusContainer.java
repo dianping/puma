@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.dianping.cat.Cat;
-import com.dianping.puma.core.replicate.model.task.TaskExecutorStatus;
 
 /**
  * @author Leo Liang
@@ -123,7 +122,12 @@ public enum SystemStatusContainer {
 	public void updateClientSuccessSeq(String name, long seq) {
 		clientSuccessSeq.put(name, seq);
 	}
-
+	
+	public void updateClientBinlog(String name,String binlogFile,long binlogPos){
+		clientStatus.get(name).setBinlogFile(binlogFile);
+		clientStatus.get(name).setBinlogPos(binlogPos);
+	}
+	
 	public void removeClient(String name) {
 		clientStatus.remove(name);
 	}
@@ -280,6 +284,10 @@ public enum SystemStatusContainer {
 		
 		private String ip;
 
+		private String binlogFile;
+		
+		private long binlogPos;
+		
 		public ClientStatus(String target, boolean dml, boolean ddl,
 				boolean needTsInfo, String codec, String[] dt, long seq,String ip) {
 			super();
@@ -356,6 +364,22 @@ public enum SystemStatusContainer {
 		 */
 		public String[] getDt() {
 			return dt;
+		}
+
+		public void setBinlogFile(String binlogFile) {
+			this.binlogFile = binlogFile;
+		}
+
+		public String getBinlogFile() {
+			return binlogFile;
+		}
+
+		public void setBinlogPos(long binlogPos) {
+			this.binlogPos = binlogPos;
+		}
+
+		public long getBinlogPos() {
+			return binlogPos;
 		}
 
 	}

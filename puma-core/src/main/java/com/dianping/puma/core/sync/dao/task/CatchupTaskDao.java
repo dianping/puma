@@ -7,7 +7,7 @@ import com.dianping.puma.core.dao.morphia.MongoBaseDao;
 import com.dianping.puma.core.dao.morphia.MongoClient;
 import com.dianping.puma.core.sync.model.task.CatchupTask;
 
-@Service
+@Service("catchupTaskDao")
 public class CatchupTaskDao extends MongoBaseDao<CatchupTask> {
 
     @Autowired

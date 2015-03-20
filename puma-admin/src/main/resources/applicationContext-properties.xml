@@ -16,5 +16,4 @@
         <property name="errorCodeHandler" value="${puma.admin.errorCodeHandler}" />
     </bean>
 
-
 </beans>

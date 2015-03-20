@@ -1,5 +1,6 @@
 package com.dianping.puma.syncserver.job.executor.builder;
 
+import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
@@ -34,5 +35,10 @@ public class ShardSyncTaskExecutorStrategy implements TaskExecutorStrategy<Shard
     @Override
     public Type getType() {
         return Type.SHARD_SYNC;
+    }
+
+    @Override
+    public SyncType getSyncType() {
+        return SyncType.SHARD_SYNC;
     }
 }

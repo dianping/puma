@@ -213,7 +213,6 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 	protected void handleDDlEvent(DataHandlerResult result, QueryEvent queryEvent, String sql) {
         tableMetasInfoFetcher.refreshTableMeta();
         log.info("ddl refreshed meta");
-
 		ChangedEvent dataChangedEvent = new DdlEvent();
 		DdlEvent ddlEvent = (DdlEvent) dataChangedEvent;
 		ddlEvent.setSql(sql);

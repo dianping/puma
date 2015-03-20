@@ -2,19 +2,9 @@ package com.dianping.puma.core.entity;
 
 public class PumaServer extends BaseEntity {
 
-	private String name;
-
 	private String host;
 
 	private Integer port;
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
 
 	public String getHost() {
 		return host;

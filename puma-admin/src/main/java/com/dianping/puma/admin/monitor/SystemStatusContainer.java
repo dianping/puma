@@ -21,17 +21,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
+import com.dianping.puma.core.constant.SyncType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.dianping.puma.admin.service.SyncTaskService;
+import com.dianping.puma.core.service.SyncTaskService;
 import com.dianping.puma.core.monitor.Event;
 import com.dianping.puma.core.monitor.EventListener;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.monitor.TaskStatusEvent;
-import com.dianping.puma.core.sync.model.task.SyncTask;
-import com.dianping.puma.core.sync.model.task.Type;
+import com.dianping.puma.core.entity.SyncTask;
+import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 
 /**
@@ -59,8 +60,8 @@ public class SystemStatusContainer implements EventListener {
         if (syncTasks != null) {
             for (SyncTask syncTask : syncTasks) {
                 TaskExecutorStatus status = new TaskExecutorStatus();
-                status.setTaskId(syncTask.getId());
-                status.setType(syncTask.getType());
+                status.setTaskName(syncTask.getName());
+                status.setSyncType(syncTask.getSyncType());
                 status.setStatus(TaskExecutorStatus.Status.WAITING);
                 taskStatusMap.put(status.hashCode(), status);
             }
@@ -79,7 +80,7 @@ public class SystemStatusContainer implements EventListener {
     private void deleteTaskStatusLaterThan60s(ConcurrentHashMap<Integer, TaskExecutorStatus> taskStatusMap) {
         if (taskStatusMap.size() > 0) {
             for (TaskExecutorStatus status : taskStatusMap.values()) {
-                if (status.getType() == Type.SYNC) {
+                if (status.getSyncType() == SyncType.SYNC) {
                     Date lastUpdateTime = status.getGmtCreate();
                     Date curTime = new Date();
                     long time = curTime.getTime() - lastUpdateTime.getTime();
@@ -92,22 +93,24 @@ public class SystemStatusContainer implements EventListener {
         }
     }
 
-    public TaskExecutorStatus getStatus(Type type, long taskId) {
-        TaskExecutorStatus status = taskStatusMap.get(TaskExecutorStatus.calHashCode(type, taskId));
+    public TaskExecutorStatus getStatus(SyncType syncType, String taskName) {
+        TaskExecutorStatus status = taskStatusMap.get(TaskExecutorStatus.calHashCode(syncType, taskName));
         return status;
     }
 
     /**
      * admin创建新的SyncTask,DumpTask,CatchupTask后，调用此方法，添加Status
      */
-    public void addStatus(Type type, long taskId) {
-        if (taskStatusMap.get(TaskExecutorStatus.calHashCode(type, taskId)) != null) {
-            notifyService.alarm("Status is already exist! Why add again?! Receive Status is [taskId=" + taskId + ",type=" + type
+    public void addStatus(SyncType syncType, String taskName) {
+        if (taskStatusMap.get(TaskExecutorStatus.calHashCode(syncType, taskName)) != null) {
+            notifyService.alarm("Status is already exist! Why add again?! Receive Status is [taskId=" + taskName + ",type=" + syncType
                     + "]", null, true);
         } else {
             TaskExecutorStatus status = new TaskExecutorStatus();
-            status.setTaskId(taskId);
-            status.setType(type);
+            //status.setTaskId(task);
+            //status.setType(type);
+            status.setSyncType(syncType);
+            status.setTaskName(taskName);
             status.setStatus(TaskExecutorStatus.Status.WAITING);
             taskStatusMap.put(status.hashCode(), status);
         }

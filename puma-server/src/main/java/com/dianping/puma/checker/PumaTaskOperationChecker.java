@@ -62,8 +62,7 @@ public class PumaTaskOperationChecker implements EventListener {
 			LOG.info("Receive puma task operation event.");
 
 			PumaTaskOperationEvent pumaTaskOperationEvent = (PumaTaskOperationEvent) event;
-			PumaTaskOperation pumaTaskOperation = pumaTaskOperationEvent.getOperation();
-			Operation operation = pumaTaskOperation.getOperation();
+			Operation operation = pumaTaskOperationEvent.getOperation();
 
 			switch (operation) {
 			case CREATE:

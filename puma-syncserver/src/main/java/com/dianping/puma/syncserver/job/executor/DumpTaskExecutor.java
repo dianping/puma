@@ -13,6 +13,12 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.dianping.puma.core.constant.Status;
+import com.dianping.puma.core.entity.DstDBInstance;
+import com.dianping.puma.core.entity.DumpTask;
+import com.dianping.puma.core.entity.SrcDBInstance;
+import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.model.SyncTaskState;
 import com.google.common.base.Strings;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecuteResultHandler;
@@ -29,10 +35,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dianping.puma.core.sync.model.BinlogInfo;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
-import com.dianping.puma.core.sync.model.task.DumpTask;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.syncserver.conf.Config;
 import com.dianping.puma.syncserver.util.ProcessBuilderWrapper;
@@ -50,6 +54,26 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
     private Thread thread;
     private Timer timer = new Timer();
 
+    private SrcDBInstance srcDBInstance;
+
+    private DstDBInstance dstDBInstance;
+
+    public DstDBInstance getDstDBInstance() {
+        return dstDBInstance;
+    }
+
+    public void setDstDBInstance(DstDBInstance dstDBInstance) {
+        this.dstDBInstance = dstDBInstance;
+    }
+
+    public SrcDBInstance getSrcDBInstance() {
+        return srcDBInstance;
+    }
+
+    public void setSrcDBInstance(SrcDBInstance srcDBInstance) {
+        this.srcDBInstance = srcDBInstance;
+    }
+
     private Executor executor = new DefaultExecutor();
     {
         executor.setExitValue(1);
@@ -57,6 +81,8 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         executor.setWatchdog(watchdog);
     }
     private DumpTask dumpTask;
+
+    protected SyncTaskState state;
 
     private Process proc;
     protected TaskExecutorStatus status;
@@ -66,9 +92,15 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         this.dumpOutputDir = Config.getInstance().getTempDir() + "/dump/" + uuid + "/";
         FileUtils.forceMkdir(new File(dumpOutputDir));
         this.dumpTask = dumpTask;
-        this.status = new TaskExecutorStatus();
-        status.setTaskId(dumpTask.getId());
-        status.setType(dumpTask.getType());
+        state = new SyncTaskState();
+        state.setTaskName(dumpTask.getName());
+        state.setSyncType(dumpTask.getSyncType());
+
+        //this.status = new TaskExecutorStatus();
+        //status.setTaskName(dumpTask.getName());
+        //status.setSyncType(dumpTask.getSyncType());
+        //status.setTaskId(dumpTask.getId());
+        //status.setType(dumpTask.getType());
     }
 
     /**
@@ -79,7 +111,8 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         thread = new Thread() {
             public void run() {
                 LOG.info("started dump.");
-                status.setStatus(TaskExecutorStatus.Status.DUMPING);
+                state.setStatus(Status.DUMPING);
+                //status.setStatus(TaskExecutorStatus.Status.DUMPING);
                 try {
                     //(1) dump
                     //目前dump的数据库配置只允许一个
@@ -102,13 +135,13 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
                     while (lineIterators.hasNext()) {
                         String line = lineIterators.next();
                         //获取binlog位置
-                        if (status.getBinlogInfo() == null) {
+                        if (state.getBinlogInfo() == null) {
                             Matcher matcher = BINLOG_LINE_PATTERN.matcher(line);
                             if (matcher.matches()) {
                                 BinlogInfo binlogInfo = new BinlogInfo();
                                 binlogInfo.setBinlogFile(matcher.group(1));
                                 binlogInfo.setBinlogPosition(Long.parseLong(matcher.group(2)));
-                                status.setBinlogInfo(binlogInfo);
+                                state.setBinlogInfo(binlogInfo);
                             }
                         }
                         //table更名
@@ -133,15 +166,15 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
                         deelFileWriter.println(line);
                     }
                     deelFileWriter.close();
-                    if (status.getBinlogInfo() == null || StringUtils.isBlank(status.getBinlogInfo().getBinlogFile())
-                            || status.getBinlogInfo().getBinlogPosition() <= 0) {
+                    if (state.getBinlogInfo() == null || StringUtils.isBlank(state.getBinlogInfo().getBinlogFile())
+                            || state.getBinlogInfo().getBinlogPosition() <= 0) {
                         throw new DumpException("binlogFile or binlogPos is Error: binlogFile="
-                                + status.getBinlogInfo().getBinlogFile() + ",binlogPos="
-                                + status.getBinlogInfo().getBinlogPosition());
+                                + state.getBinlogInfo().getBinlogFile() + ",binlogPos="
+                                + state.getBinlogInfo().getBinlogPosition());
                     }
-                    LOG.info("binlog info:" + status.getBinlogInfo());
+                    LOG.info("binlog info:" + state.getBinlogInfo());
                     //(2) load
-                    status.setStatus(TaskExecutorStatus.Status.LOADING);
+                    state.setStatus(Status.LOADING);
                     LOG.info("started load.");
                     //执行load脚本
                     srcDatabaseName = databaseMapping.getFrom();
@@ -149,7 +182,7 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
                     if (hasException(output)) {
                         throw new DumpException("mysqlload output is not empty , so consided to be failed: " + output);
                     }
-                    status.setStatus(TaskExecutorStatus.Status.SUCCEED);
+                    state.setStatus(Status.SUCCESS);
                     LOG.info("load done.");
                 } catch (Exception e) {
                     fail(e.getMessage());
@@ -158,7 +191,7 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
             }
         };
         thread.start();
-        status.setStatus(TaskExecutorStatus.Status.RUNNING);
+        state.setStatus(Status.RUNNING);
     }
 
     /**
@@ -215,18 +248,22 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
     private String _mysqldump(String databaseName, List<String> tableNames) throws IOException, InterruptedException {
         List<String> cmdlist = new ArrayList<String>();
         cmdlist.add("mysqldump");
-        String hostWithPort = dumpTask.getSrcMysqlHost().getHost();
-        String host = hostWithPort;
-        int port = 3306;
-        if (StringUtils.contains(hostWithPort, ':')) {
+        //String hostWithPort = dumpTask.getSrcMysqlHost().getHost();
+        //String host = hostWithPort;
+        String host = srcDBInstance.getHost();
+        //int port = 3306
+        int port = srcDBInstance.getPort();
+        /*if (StringUtils.contains(hostWithPort, ':')) {
             String[] splits = hostWithPort.split(":");
             host = splits[0];
             port = Integer.parseInt(splits[1]);
-        }
+        }*/
         cmdlist.add("--host=" + host);
         cmdlist.add("--port=" + port);
-        cmdlist.add("--user=" + dumpTask.getSrcMysqlHost().getUsername());
-        cmdlist.add("--password=" + dumpTask.getSrcMysqlHost().getPassword());
+        //cmdlist.add("--user=" + dumpTask.getSrcMysqlHost().getUsername());
+        //cmdlist.add("--password=" + dumpTask.getSrcMysqlHost().getPassword());
+        cmdlist.add("--user=" + srcDBInstance.getUsername());
+        cmdlist.add("--password=" + srcDBInstance.getPassword());
         for (String opt : dumpTask.getOptions()) {
             cmdlist.add(opt);
         }
@@ -252,18 +289,23 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         cmdlist.add("sh");
         cmdlist.add(Config.getInstance().getTempDir() + "/shell/mysqlload.sh");
         cmdlist.add("--default-character-set=utf8");
-        cmdlist.add("--user=" + dumpTask.getDestMysqlHost().getUsername());
-        String hostWithPort = dumpTask.getDestMysqlHost().getHost();
+        cmdlist.add("--user=" + dstDBInstance.getUsername());
+        String host = dstDBInstance.getHost();
+        int port = dstDBInstance.getPort();
+        //cmdlist.add("--user=" + dumpTask.getDestMysqlHost().getUsername());
+        //String hostWithPort = dumpTask.getDestMysqlHost().getHost();
+        /*
         String host = hostWithPort;
         int port = 3306;
         if (StringUtils.contains(hostWithPort, ':')) {
             String[] splits = hostWithPort.split(":");
             host = splits[0];
             port = Integer.parseInt(splits[1]);
-        }
+        }*/
         cmdlist.add("--host=" + host);
         cmdlist.add("--port=" + port);
-        cmdlist.add("--password=" + dumpTask.getDestMysqlHost().getPassword());
+        cmdlist.add("--password=" + dstDBInstance.getPassword());
+        //cmdlist.add("--password=" + dumpTask.getDestMysqlHost().getPassword());
         cmdlist.add(_getSourceFile(databaseName));
         LOG.info("start loading " + databaseName + " ...");
         return _executeByProcessBuilder(cmdlist);
@@ -328,8 +370,8 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
     }
 
     private void fail(String detail) {
-        status.setStatus(TaskExecutorStatus.Status.FAILED);
-        status.setDetail(detail);
+        state.setStatus(Status.FAILED);
+        state.setDetail(detail);
     }
 
     public void stop(String detail) {
@@ -345,7 +387,7 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         } else {
             msg = "dump file is not exists yet.";
         }
-        status.setDetail(msg);
+        state.setDetail(msg);
         LOG.info(msg);
     }
 
@@ -362,6 +404,14 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
             monitorFileSize(file);
         }
 
+    }
+
+    public SyncTaskState getState() {
+        return state;
+    }
+
+    public void setState(SyncTaskState state) {
+        this.state = state;
     }
 
     //    public static void main(String[] args) throws ExecuteException, IOException, InterruptedException {

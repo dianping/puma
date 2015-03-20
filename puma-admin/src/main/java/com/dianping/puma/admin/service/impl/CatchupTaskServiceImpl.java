@@ -53,7 +53,7 @@ public class CatchupTaskServiceImpl implements CatchupTaskService {
         }
 
         //更新本地状态
-        systemStatusContainer.addStatus(Type.CATCHUP, id);
+        //systemStatusContainer.addStatus(Type.CATCHUP, id);
 
         return id;
     }

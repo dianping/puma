@@ -1,8 +1,8 @@
 package com.dianping.puma.syncserver.service;
 
-import java.util.List;
+import com.dianping.puma.core.model.BinlogInfo;
 
-import com.dianping.puma.core.sync.model.BinlogInfo;
+import java.util.List;
 
 public interface BinlogInfoService {
 	public void setBaseDir(String baseDir);

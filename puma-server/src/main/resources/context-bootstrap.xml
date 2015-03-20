@@ -41,16 +41,22 @@
 	<bean id="dailyReportTask" class="com.dianping.puma.reporter.DailyReportTask"
 		parent="notifiableBean" init-method="start" />
 
-	<bean id="binlogPositionHolder" class="com.dianping.puma.core.holder.impl.DefaultBinlogInfoHolder"
-		init-method="init">
-		<property name="baseDir" value="/data/appdatas/puma/" />
+	<bean id="binlogInfoHolder"
+		  class="com.dianping.puma.core.holder.impl.DefaultBinlogInfoHolder"
+		  init-method="init">
+		<property name="baseDir" value="/data/appdatas/puma/binlog/"/>
+		<property name="bakDir" value="/data/appdatas/puma/binlog/bak/"/>
+		<property name="storageBakDir" value="/data/appdatas/puma/bak/"/>
+		<property name="masterStorageBaseDir" value="/data/appdatas/puma/storage/master/"/>
+		<property name="slaveStorageBaseDir" value="/data/appdatas/puma/storage/slave/"/>
+		<property name="binlogIndexBaseDir" value="/data/appdatas/puma/binlogIndex/"/>
 	</bean>
 
 	<bean id="jsonCodec" class="com.dianping.puma.core.codec.JsonEventCodec" />
 
 	<bean id="mongoClient" class="com.dianping.puma.core.dao.morphia.MongoClient">
 	</bean>
-	
+
 	<!--
 	<bean id="defaultSender" class="com.dianping.puma.sender.FileDumpSender">
 		<property name="storage">
@@ -78,6 +84,9 @@
     </task:scheduled-tasks>  
     <task:scheduled-tasks>
         <task:scheduled ref="pumaMonitorServerInfoTask" method="runTask" fixed-delay="#{intervalConfig.serverInfoInterval}"/>   
+    </task:scheduled-tasks>
+    <task:scheduled-tasks>
+        <task:scheduled ref="pumaMonitorSyncProcessTask" method="runTask" fixed-delay="#{intervalConfig.syncProcessInterval}"/>   
     </task:scheduled-tasks>
    
 </beans>

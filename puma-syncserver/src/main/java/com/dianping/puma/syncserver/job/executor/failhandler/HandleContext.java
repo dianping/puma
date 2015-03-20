@@ -1,9 +1,9 @@
 package com.dianping.puma.syncserver.job.executor.failhandler;
 
+import com.dianping.puma.core.entity.BaseSyncTask;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.sync.model.task.Task;
 import com.dianping.puma.syncserver.job.executor.AbstractTaskExecutor;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
@@ -15,7 +15,7 @@ public class HandleContext {
 
     private MysqlExecutor        mysqlExecutor;
 
-    private Task                 task;
+    private BaseSyncTask                 task;
 
     private AbstractTaskExecutor executor;
 
@@ -45,11 +45,11 @@ public class HandleContext {
         this.mysqlExecutor = mysqlExecutor;
     }
 
-    public Task getTask() {
+    public BaseSyncTask getTask() {
         return task;
     }
 
-    public void setTask(Task task) {
+    public void setTask(BaseSyncTask task) {
         this.task = task;
     }
 

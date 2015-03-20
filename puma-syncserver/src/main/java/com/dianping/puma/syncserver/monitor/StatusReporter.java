@@ -26,12 +26,13 @@ public class StatusReporter {
      * 
      * @throws SendFailedException
      */
+    /*
     @Scheduled(cron = "0/5 * * * * ?")
     public void report() throws SendFailedException {
         TaskStatusEvent event = systemStatusContainer.getTaskStatusEvent();
         if (event.getStatusList() != null && event.getStatusList().size() > 0) {
             statusEventPublisher.publish(event);
         }
-    }
+    }*/
 
 }

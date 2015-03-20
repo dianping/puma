@@ -19,10 +19,7 @@ public class PumaTaskOperationReporter {
 		event.setPumaServerId(pumaServerId);
 		event.setTaskId(taskId);
 		event.setTaskName(taskName);
-
-		PumaTaskOperation pumaTaskOperation = new PumaTaskOperation();
-		pumaTaskOperation.setOperation(operation);
-		event.setOperation(pumaTaskOperation);
+		event.setOperation(operation);
 
 		pumaTaskOperationEventPublisher.publish(event);
 	}

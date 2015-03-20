@@ -150,7 +150,7 @@ public class ShardSyncTaskExecutorTest {
 
 
         TableShardRuleConfig tableShardRuleConfig = buildTableConfigFromFile("initPumaClientsAndDataSourcesTest.json");
-        spy.tableShardRuleConfig = tableShardRuleConfig;
+        spy.tableShardRuleConfigOrigin = tableShardRuleConfig;
         spy.tableShardRuleConfigForRouting = tableShardRuleConfig;
         spy.initRouterConfig();
         spy.switchOn = false;
@@ -220,7 +220,7 @@ public class ShardSyncTaskExecutorTest {
         verify(configCache, times(1)).getProperty("shardds.test.switch");
         verify(configCache, times(1)).getProperty("shardds.test.origin");
 
-        Assert.assertEquals("table1", target.tableShardRuleConfig.getTableName());
+        Assert.assertEquals("table1", target.tableShardRuleConfigOrigin.getTableName());
         Assert.assertEquals(1, target.tableShardRuleConfigForRouting.getDimensionConfigs().size());
         Assert.assertEquals("table", target.originGroupDataSource);
         Assert.assertEquals(false, target.switchOn);
@@ -241,11 +241,11 @@ public class ShardSyncTaskExecutorTest {
 
         config.setDimensionConfigs(Lists.newArrayList(dimensionConfig));
 
-        target.tableShardRuleConfig = config;
+        target.tableShardRuleConfigOrigin = config;
         target.tableShardRuleConfigForRouting = config;
         target.initRouterConfig();
 
-        Assert.assertEquals(1, target.routerRule.getTableShardRules().size());
+        Assert.assertEquals(1, target.routerRuleOrigin.getTableShardRules().size());
     }
 
     private TableShardRuleConfig buildTableConfigFromFile(String file) {

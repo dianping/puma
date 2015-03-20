@@ -72,7 +72,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     protected Processer processer = new Processer();
 
-    protected TableShardRuleConfig tableShardRuleConfig;
+    protected TableShardRuleConfig tableShardRuleConfigOrigin;
 
     protected TableShardRuleConfig tableShardRuleConfigForRouting;
 
@@ -86,11 +86,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     private SrcDBInstanceService srcDBInstanceService;
 
-    protected RouterRule routerRule;
+    protected RouterRule routerRuleOrigin;
 
     protected RouterRule routerRuleForRouting;
 
-    protected DataSourceRouter router;
+    protected DataSourceRouter routerForMigrate;
 
     protected DataSourceRouter routerForRouting;
 
@@ -132,7 +132,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
             }
             RowChangedEvent rowEvent = (RowChangedEvent) event;
 
-            DataSourceRouter targetRouter = task.getTableName().equals(rowEvent.getTable()) ? router : routerForRouting;
+            DataSourceRouter targetRouter = task.getTableName().equals(rowEvent.getTable()) ? routerForMigrate : routerForRouting;
 
             rowEvent.setTable(task.getTableName());
             rowEvent.setDatabase("");
@@ -257,8 +257,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     protected void initRouterConfig() {
         RouterRuleConfig routerRuleConfig = new RouterRuleConfig();
-        routerRuleConfig.setTableShardConfigs(Lists.newArrayList(tableShardRuleConfig));
-        this.routerRule = RouterRuleBuilder.build(routerRuleConfig);
+        routerRuleConfig.setTableShardConfigs(Lists.newArrayList(tableShardRuleConfigOrigin));
+        this.routerRuleOrigin = RouterRuleBuilder.build(routerRuleConfig);
 
         RouterRuleConfig routerRuleConfigForRouting = new RouterRuleConfig();
         routerRuleConfigForRouting.setTableShardConfigs(Lists.newArrayList(tableShardRuleConfigForRouting));
@@ -272,11 +272,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
         this.routerForRouting = routerImplForRouting;
         this.routerForRouting.init();
 
-        DataSourceRouterImpl router = new DataSourceRouterImpl();
-        router.setRouterRule(routerRuleForRouting);
-        router.setDataSourcePool(dataSourcePool);
-        this.router = router;
-        this.router.init();
+        DataSourceRouterImpl routerForMigrate = new DataSourceRouterImpl();
+        routerForMigrate.setRouterRule(routerRuleOrigin);
+        routerForMigrate.setDataSourcePool(dataSourcePool);
+        this.routerForMigrate = routerForMigrate;
+        this.routerForMigrate.init();
     }
 
     protected void initPumaClientsAndDataSources() {
@@ -285,7 +285,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
             initPumaClient(ds.getConfig(), Sets.newHashSet(task.getTableName()), "migrate");
         }
 
-        TableShardRule tableShardRule = routerRule.getTableShardRules().get(task.getTableName());
+        TableShardRule tableShardRule = routerRuleOrigin.getTableShardRules().get(task.getTableName());
         for (DimensionRule dimensionRule : tableShardRule.getDimensionRules()) {
             DimensionRuleImpl dimensionRuleImpl = (DimensionRuleImpl) dimensionRule;
             if (dimensionRuleImpl == null || !dimensionRuleImpl.isMaster()) {
@@ -348,7 +348,9 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
         PumaClient client = new PumaClient(configBuilder.build());
 
-        client.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_LATEST);
+        if (client.getSeqFileHolder().getSeq() == SubscribeConstant.SEQ_FROM_OLDEST) {
+            client.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_LATEST);
+        }
 
         pumaClientList.add(client);
         return client;
@@ -388,7 +390,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
     }
 
     protected void convertRuleConfigForRouting() {
-        this.tableShardRuleConfigForRouting = SerializationUtils.clone(this.tableShardRuleConfig);
+        this.tableShardRuleConfigForRouting = SerializationUtils.clone(this.tableShardRuleConfigOrigin);
         Iterator<TableShardDimensionConfig> iterator = this.tableShardRuleConfigForRouting.getDimensionConfigs().iterator();
         while (iterator.hasNext() && iterator.next().isMaster()) {
             iterator.remove();
@@ -401,14 +403,14 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
     protected void findTableRuleConfig(RouterRuleConfig tempRouterRuleConfig) {
         for (TableShardRuleConfig tableConfig : tempRouterRuleConfig.getTableShardConfigs()) {
             if (task.getTableName().equals(tableConfig.getTableName())) {
-                this.tableShardRuleConfig = tableConfig;
-                for (TableShardDimensionConfig dimension : this.tableShardRuleConfig.getDimensionConfigs()) {
+                this.tableShardRuleConfigOrigin = tableConfig;
+                for (TableShardDimensionConfig dimension : this.tableShardRuleConfigOrigin.getDimensionConfigs()) {
                     dimension.setTableName(task.getTableName());
                 }
                 return;
             }
         }
-        checkNotNull(this.tableShardRuleConfig, "tableShardRuleConfig");
+        checkNotNull(this.tableShardRuleConfigOrigin, "tableShardRuleConfigOrigin");
     }
 
     @Override

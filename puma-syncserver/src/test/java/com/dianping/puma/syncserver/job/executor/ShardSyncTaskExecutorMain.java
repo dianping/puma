@@ -5,6 +5,7 @@ import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.core.sync.model.task.ShardSyncTask;
+import com.google.common.collect.Lists;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
@@ -27,7 +28,6 @@ public class ShardSyncTaskExecutorMain {
         shardSyncTaskExecutor.setPumaServerService(ctx.getBean(PumaServerService.class));
 
         shardSyncTaskExecutor.init();
-
 
         shardSyncTaskExecutor.start();
     }

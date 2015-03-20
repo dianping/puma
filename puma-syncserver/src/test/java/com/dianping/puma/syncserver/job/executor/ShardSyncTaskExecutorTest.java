@@ -24,9 +24,7 @@ import com.google.gson.Gson;
 import junit.framework.Assert;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -157,6 +155,7 @@ public class ShardSyncTaskExecutorTest {
 
         TableShardRuleConfig tableShardRuleConfig = buildTableConfigFromFile("initPumaClientsAndDataSourcesTest.json");
         spy.tableShardRuleConfig = tableShardRuleConfig;
+        spy.tableShardRuleConfigForRouting = tableShardRuleConfig;
         spy.initRouterConfig();
         spy.switchOn = false;
         spy.originGroupDataSource = "origin";
@@ -211,7 +210,10 @@ public class ShardSyncTaskExecutorTest {
 
     @Test
     public void initAndConvertConfigTest() throws LionException {
-        RouterRuleConfig config = buildRouterRuleConfig();
+        RouterRuleConfig config = new RouterRuleConfig();
+        TableShardRuleConfig tConfig = buildTableConfigFromFile("initPumaClientsAndDataSourcesTest.json");
+        config.setTableShardConfigs(Lists.newArrayList(tConfig));
+
         when(configCache.getProperty("shardds.test.shard")).thenReturn(new Gson().toJson(config));
         when(configCache.getProperty("shardds.test.switch")).thenReturn("false");
         when(configCache.getProperty("shardds.test.origin")).thenReturn("table");
@@ -223,6 +225,7 @@ public class ShardSyncTaskExecutorTest {
         verify(configCache, times(1)).getProperty("shardds.test.origin");
 
         Assert.assertEquals("table1", target.tableShardRuleConfig.getTableName());
+        Assert.assertEquals(1, target.tableShardRuleConfigForRouting.getDimensionConfigs().size());
         Assert.assertEquals("table", target.originGroupDataSource);
         Assert.assertEquals(false, target.switchOn);
     }
@@ -243,6 +246,7 @@ public class ShardSyncTaskExecutorTest {
         config.setDimensionConfigs(Lists.newArrayList(dimensionConfig));
 
         target.tableShardRuleConfig = config;
+        target.tableShardRuleConfigForRouting = config;
         target.initRouterConfig();
 
         Assert.assertEquals(1, target.routerRule.getTableShardRules().size());
@@ -250,15 +254,5 @@ public class ShardSyncTaskExecutorTest {
 
     private TableShardRuleConfig buildTableConfigFromFile(String file) {
         return new Gson().fromJson(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("shard-configs/" + file)), TableShardRuleConfig.class);
-    }
-
-    private RouterRuleConfig buildRouterRuleConfig() {
-        RouterRuleConfig config = new RouterRuleConfig();
-        TableShardRuleConfig tableConfig1 = new TableShardRuleConfig();
-        tableConfig1.setTableName("table1");
-        TableShardRuleConfig tableConfig2 = new TableShardRuleConfig();
-        tableConfig2.setTableName("table2");
-        config.setTableShardConfigs(Lists.newArrayList(tableConfig1, tableConfig2));
-        return config;
     }
 }

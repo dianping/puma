@@ -37,13 +37,11 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
+import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -76,6 +74,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     protected TableShardRuleConfig tableShardRuleConfig;
 
+    protected TableShardRuleConfig tableShardRuleConfigForRouting;
+
     protected String originGroupDataSource;
 
     protected boolean switchOn;
@@ -86,9 +86,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     private SrcDBInstanceService srcDBInstanceService;
 
-    private DataSourceRouter router;
+    protected DataSourceRouter router;
 
     protected RouterRule routerRule;
+
+    protected RouterRule routerRuleForRouting;
 
     private static final Pattern JDBC_URL_PATTERN = Pattern.compile("jdbc:mysql://([^:]+):\\d+/([^\\?]+).*");
 
@@ -253,11 +255,15 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
         RouterRuleConfig routerRuleConfig = new RouterRuleConfig();
         routerRuleConfig.setTableShardConfigs(Lists.newArrayList(tableShardRuleConfig));
         this.routerRule = RouterRuleBuilder.build(routerRuleConfig);
+
+        RouterRuleConfig routerRuleConfigForRouting = new RouterRuleConfig();
+        routerRuleConfigForRouting.setTableShardConfigs(Lists.newArrayList(tableShardRuleConfigForRouting));
+        this.routerRuleForRouting = RouterRuleBuilder.build(routerRuleConfigForRouting);
     }
 
     protected void initRouter() {
         DataSourceRouterImpl routerImpl = new DataSourceRouterImpl();
-        routerImpl.setRouterRule(routerRule);
+        routerImpl.setRouterRule(routerRuleForRouting);
         routerImpl.setDataSourcePool(dataSourcePool);
         this.router = routerImpl;
         this.router.init();
@@ -371,6 +377,18 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
         String switchOnStr = configService.getProperty(LionKey.getShardSiwtchOnKey(task.getRuleName()));
         this.switchOn = switchOnStr == null || "true".equals(switchOnStr);
         findTableRuleConfig(tempRouterRuleConfig);
+        convertRuleConfigForRouting();
+    }
+
+    protected void convertRuleConfigForRouting() {
+        this.tableShardRuleConfigForRouting = SerializationUtils.clone(this.tableShardRuleConfig);
+        Iterator<TableShardDimensionConfig> iterator = this.tableShardRuleConfigForRouting.getDimensionConfigs().iterator();
+        while (iterator.hasNext() && iterator.next().isMaster()) {
+            iterator.remove();
+        }
+        for (TableShardDimensionConfig config : this.tableShardRuleConfigForRouting.getDimensionConfigs()) {
+            config.setMaster(true);
+        }
     }
 
     protected void findTableRuleConfig(RouterRuleConfig tempRouterRuleConfig) {

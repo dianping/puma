@@ -441,7 +441,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     @Override
     public TaskExecutorStatus getTaskExecutorStatus() {
-        return null;
+        return this.status;
     }
 
     @Override

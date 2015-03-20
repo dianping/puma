@@ -6,7 +6,6 @@ import com.dianping.lion.client.LionException;
 import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
-import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
@@ -272,7 +271,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
     protected void initPumaClientsAndDataSources() {
         if (!switchOn && !Strings.isNullOrEmpty(originGroupDataSource)) {
             GroupDataSource ds = initGroupDataSource(originGroupDataSource);
-            initPumaClient(ds.getConfig(), SubscribeConstant.SEQ_FROM_LATEST, Sets.newHashSet(task.getTableName()), "migrate");
+            initPumaClient(ds.getConfig(), Sets.newHashSet(task.getTableName()), "migrate");
         }
 
         TableShardRule tableShardRule = routerRule.getTableShardRules().get(task.getTableName());
@@ -297,11 +296,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
                 continue;
             }
             GroupDataSource groupDataSource = initGroupDataSource(entity.getKey());
-            initPumaClient(groupDataSource.getConfig(), SubscribeConstant.SEQ_FROM_LATEST, entity.getValue(), name);
+            initPumaClient(groupDataSource.getConfig(), entity.getValue(), name);
         }
     }
 
-    protected PumaClient initPumaClient(GroupDataSourceConfig config, long seq, Set<String> tables, String name) {
+    protected PumaClient initPumaClient(GroupDataSourceConfig config, Set<String> tables, String name) {
         DataSourceConfig dsConfig = findTheOnlyWriteDataSourceConfig(config);
 
         Matcher matcher = JDBC_URL_PATTERN.matcher(dsConfig.getJdbcUrl());
@@ -337,11 +336,6 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
         }
 
         PumaClient client = new PumaClient(configBuilder.build());
-
-        //如果 seq 是默认值，那说明还没初始化过，如果不是默认值，以前跑过了。
-        if (client.getSeqFileHolder().getSeq() < 0l) {
-            client.getSeqFileHolder().saveSeq(seq);
-        }
 
         pumaClientList.add(client);
         return client;

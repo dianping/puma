@@ -4,7 +4,6 @@ import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
 import com.dianping.puma.api.Configuration;
 import com.dianping.puma.api.PumaClient;
-import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
@@ -31,7 +30,6 @@ import org.mockito.stubbing.Answer;
 
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Random;
 import java.util.Set;
 
 import static org.mockito.Mockito.*;
@@ -60,7 +58,6 @@ public class ShardSyncTaskExecutorTest {
         ds1.setJdbcUrl("jdbc:mysql://1.1.1.1:3306/db1?a=b");
         config.getDataSourceConfigs().put("db1", ds1);
 
-        long seq = -(new Random().nextInt(100) + 1);
         Set<String> tables = Sets.newHashSet("t1", "t2");
 
         SrcDBInstanceService srcDBInstanceService = mock(SrcDBInstanceService.class);
@@ -85,7 +82,7 @@ public class ShardSyncTaskExecutorTest {
         target.setSrcDBInstanceService(srcDBInstanceService);
 
         //run
-        PumaClient actual = target.initPumaClient(config, seq, tables, "debug");
+        PumaClient actual = target.initPumaClient(config, tables, "debug");
 
 
         //verify
@@ -96,7 +93,6 @@ public class ShardSyncTaskExecutorTest {
         Assert.assertEquals(true, clientConfig.isNeedDml());
         Assert.assertEquals(false, clientConfig.isNeedDdl());
         Assert.assertEquals(false, clientConfig.isNeedTransactionInfo());
-        Assert.assertEquals(seq, actual.getSeqFileHolder().getSeq());
         Assert.assertTrue(clientConfig.getDatabaseTablesMapping().containsKey("db1"));
         Assert.assertEquals(tables.toString(), clientConfig.getDatabaseTablesMapping().get("db1").toString());
 
@@ -150,7 +146,7 @@ public class ShardSyncTaskExecutorTest {
                 System.out.println("init pumaclient:" + invocationOnMock.getArguments()[2]);
                 return null;
             }
-        }).when(spy).initPumaClient(any(GroupDataSourceConfig.class), anyLong(), anySet(), anyString());
+        }).when(spy).initPumaClient(any(GroupDataSourceConfig.class), anySet(), anyString());
 
 
         TableShardRuleConfig tableShardRuleConfig = buildTableConfigFromFile("initPumaClientsAndDataSourcesTest.json");
@@ -173,14 +169,14 @@ public class ShardSyncTaskExecutorTest {
         verify(spy, times(0)).initGroupDataSource("ds4");
         verify(spy, times(0)).initGroupDataSource("ds5");
 
-        verify(spy, times(7)).initPumaClient(any(GroupDataSourceConfig.class), anyLong(), anySet(), anyString());
-        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("table1")), eq("migrate"));
-        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("table1_0", "table1_1")), eq("master"));
-        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("table1_2", "table1_3")), eq("master"));
-        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("table1_4", "table1_5")), eq("master"));
-        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("table1_6", "table1_7")), eq("master"));
-        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("ds1_white")), anyString());
-        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), eq(SubscribeConstant.SEQ_FROM_LATEST), argThat(new SetMatchers("ds8_white")), anyString());
+        verify(spy, times(7)).initPumaClient(any(GroupDataSourceConfig.class), anySet(), anyString());
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1")), eq("migrate"));
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_0", "table1_1")), eq("master"));
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_2", "table1_3")), eq("master"));
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_4", "table1_5")), eq("master"));
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_6", "table1_7")), eq("master"));
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), argThat(new SetMatchers("ds1_white")), anyString());
+        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), argThat(new SetMatchers("ds8_white")), anyString());
     }
 
     class SetMatchers extends ArgumentMatcher<Set<String>> {

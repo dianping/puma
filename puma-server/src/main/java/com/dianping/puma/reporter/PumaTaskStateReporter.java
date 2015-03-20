@@ -5,6 +5,7 @@ import com.dianping.puma.core.container.PumaTaskStateContainer;
 import com.dianping.puma.core.model.PumaTaskState;
 import com.dianping.puma.core.monitor.PumaTaskStateEvent;
 import com.dianping.puma.core.monitor.SwallowEventPublisher;
+import com.dianping.puma.server.AbstractTaskExecutor;
 import com.dianping.puma.server.DefaultTaskExecutor;
 import com.dianping.puma.server.TaskExecutor;
 import com.dianping.puma.server.TaskExecutorContainer;
@@ -39,6 +40,7 @@ public class PumaTaskStateReporter {
 			PumaTaskStateEvent event = new PumaTaskStateEvent();
 			event.setPumaServerId(pumaServerConfig.getId());
 
+			/*
 			List<TaskExecutor> taskExecutors = taskExecutorContainer.getAll();
 			for (TaskExecutor taskExecutor: taskExecutors) {
 				DefaultTaskExecutor defaultTaskExecutor = (DefaultTaskExecutor) taskExecutor;
@@ -48,13 +50,21 @@ public class PumaTaskStateReporter {
 				state.setBinlogInfo(defaultTaskExecutor.getBinlogInfo());
 				state.setBinlogStat(defaultTaskExecutor.getBinlogStat());
 				pumaTaskStateContainer.add(taskId, state);
-			}
+			}*/
 
-			event.setTaskIds(pumaTaskStateContainer.getAllTaskIds());
-			event.setStates(pumaTaskStateContainer.getAll());
+			fetch();
+			event.setStateMap(pumaTaskStateContainer.getAll());
 			pumaTaskStatePublisher.publish(event);
 		} catch (Exception e) {
 			LOG.error("Report puma task state error: {}.", e.getMessage());
+		}
+	}
+
+	private void fetch() {
+		List<TaskExecutor> taskExecutors = taskExecutorContainer.getAll();
+		for (TaskExecutor taskExecutor: taskExecutors) {
+			PumaTaskState state = ((AbstractTaskExecutor)taskExecutor).getState();
+			pumaTaskStateContainer.add(taskExecutor.getTaskId(), state);
 		}
 	}
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service("pumaTaskStateContainer")
@@ -24,8 +25,8 @@ public class PumaTaskStateContainer {
 		return new ArrayList<String>(stateMap.keySet());
 	}
 
-	public List<PumaTaskState> getAll() {
-		return new ArrayList<PumaTaskState>(stateMap.values());
+	public final Map<String, PumaTaskState> getAll() {
+		return stateMap;
 	}
 
 	public void add(String taskId, PumaTaskState state) {
@@ -38,7 +39,11 @@ public class PumaTaskStateContainer {
 	}
 
 	public void update(String taskId, PumaTaskState state) {
-		stateMap.replace(taskId, state);
+		stateMap.put(taskId, state);
+	}
+
+	public void updateAll(Map<String, PumaTaskState> stateMap) {
+		this.stateMap.putAll(stateMap);
 	}
 
 	public void remove(String taskId) {

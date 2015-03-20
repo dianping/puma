@@ -26,12 +26,8 @@ public class PumaTaskStateChecker implements EventListener {
 
 		try {
 			PumaTaskStateEvent pumaTaskStateEvent = (PumaTaskStateEvent) event;
-			List<String> taskIds = pumaTaskStateEvent.getTaskIds();
-			List<PumaTaskState> states = pumaTaskStateEvent.getStates();
 
-			for (int i = 0; i != taskIds.size() && i != states.size(); ++i) {
-				pumaTaskStateContainer.update(taskIds.get(i), states.get(i));
-			}
+			pumaTaskStateContainer.updateAll(pumaTaskStateEvent.getStateMap());
 		} catch (Exception e) {
 			LOG.error("Receive puma task state event error: {}.", e.getMessage());
 		}

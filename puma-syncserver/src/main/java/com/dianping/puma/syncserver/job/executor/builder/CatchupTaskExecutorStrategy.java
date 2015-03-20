@@ -26,6 +26,9 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
 	@Autowired
 	private TaskExecutionContainer taskExecutionContainer;
 
+	@Autowired
+	private BinlogInfoHolder binlogInfoHolder;
+
 	/*
 	 @Override
 	 public CatchupTaskExecutor build(CatchupTask task) {
@@ -96,9 +99,6 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
 		task.setPumaClientServerId(srcDBInstance.getServerId());
 
 		CatchupTaskExecutor executor = new CatchupTaskExecutor(task, pumaServerHost, pumaServerPort, target, syncTaskExecutor, dstDBInstance);
-		BinlogInfoHolder binlogInfoHolder = new DefaultBinlogInfoHolder();
-		binlogInfoHolder.setBaseDir("/data/appdatas/sync/binlog/");
-		binlogInfoHolder.setBakDir("/data/appdatas/");
 		executor.setBinlogInfoHolder(binlogInfoHolder);
 
 		return executor;

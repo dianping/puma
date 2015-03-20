@@ -12,6 +12,14 @@ public interface BinlogInfoHolder {
 
 	public void setBakDir(String bakDir);
 
+	public void setMasterStorageBaseDir(String masterStorageBaseDir);
+
+	public void setSlaveStorageBaseDir(String slaveStorageBaseDir);
+
+	public void setBinlogIndexBaseDir(String binlogIndexBaseDir);
+
+	public void setStorageBakDir(String storageBakDir);
+
 	public BinlogInfo getBinlogInfo(String taskName);
 
 	public void setBinlogInfo(String taskName, BinlogInfo binlogInfo);

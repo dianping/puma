@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +28,6 @@ import javax.annotation.PostConstruct;
  *
  * @author Leo Liang
  */
-@Service("binlogInfoHolder")
 public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 
 	private static final Logger LOG = Logger.getLogger(DefaultBinlogInfoHolder.class);
@@ -46,23 +46,17 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 
 	private static final byte[] BUF_MASK = new byte[MAX_FILE_SIZE];
 
-	@Value("/data/appdatas/puma/binlog/")
 	private File baseDir;
 
-	@Value("/data/appdatas/puma/binlog/bak/")
 	private File bakDir;
 
-	@Value("/data/appdatas/puma/bak/")
-	File storageBakDir;
+	private File storageBakDir;
 
-	@Value("/data/appdatas/puma/storage/master/")
-	File masterStorageBaseDir;
+	private File masterStorageBaseDir;
 
-	@Value("/data/appdatas/puma/storage/slave/")
-	File slaveStorageBaseDir;
+	private File slaveStorageBaseDir;
 
-	@Value("/data/appdatas/puma/binlogIndex/")
-	File binlogIndexBaseDir;
+	private File binlogIndexBaseDir;
 
 	@PostConstruct
 	public void init() {
@@ -200,6 +194,26 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 	@Override
 	public void setBakDir(String bakDir) {
 		this.bakDir = new File(bakDir);
+	}
+
+	@Override
+	public void setStorageBakDir(String storageBakDir) {
+		this.storageBakDir = new File(storageBakDir);
+	}
+
+	@Override
+	public void setMasterStorageBaseDir(String masterStorageBaseDir) {
+		this.masterStorageBaseDir = new File(masterStorageBaseDir);
+	}
+
+	@Override
+	public void setSlaveStorageBaseDir(String slaveStorageBaseDir) {
+		this.slaveStorageBaseDir = new File(slaveStorageBaseDir);
+	}
+
+	@Override
+	public void setBinlogIndexBaseDir(String binlogIndexBaseDir) {
+		this.binlogIndexBaseDir = new File(binlogIndexBaseDir);
 	}
 
 	private String task2file(String taskName) {

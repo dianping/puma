@@ -54,6 +54,9 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
     @Autowired
     DstDBInstanceService dstDBInstanceService;
 
+    @Autowired
+    BinlogInfoHolder binlogInfoHolder;
+
     @Override
     public SyncTaskExecutor build(SyncTask task) {
         //根据Task创建TaskExecutor
@@ -84,9 +87,6 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
         DstDBInstance dstDBInstance = dstDBInstanceService.findByName(task.getDstDBInstanceName());
 
         SyncTaskExecutor excutor = new SyncTaskExecutor(task, pumaServerHost, pumaServerPort, target, dstDBInstance);
-        BinlogInfoHolder binlogInfoHolder = new DefaultBinlogInfoHolder();
-        binlogInfoHolder.setBaseDir("/data/appdatas/sync/binlog/");
-        binlogInfoHolder.setBakDir("/data/appdatas/");
         excutor.setBinlogInfoHolder(binlogInfoHolder);
 
         return excutor;

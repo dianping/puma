@@ -6,11 +6,11 @@ $(function(w) {
     RUNNING     : "运行中",
     SUSPENDED   : "已暂停",
     STOPPING    : "已停止",
-    SUCCESS     : "结束-成功",
+    SUCCESS     : "成功",
     RECONNECTING: "重新连接",
     DUMPING     : "备份中",
     LOADING     : "加载中",
-    FAILED      : "结束-失败",
+    FAILED      : "失败",
     DISCONNECTED: "失去连接"
   };
 

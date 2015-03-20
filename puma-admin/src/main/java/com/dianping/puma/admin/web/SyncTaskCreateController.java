@@ -261,11 +261,11 @@ public class SyncTaskCreateController {
 				throw new IllegalArgumentException("dumpTask为空，可能是会话已经过期！");
 			}
 
-			TaskExecutorStatus status = systemStatusContainer.getStatus(SyncType.DUMP, dumpTask.getName());
-			if (status != null) {
-				map.put("status", status);
-				if (status.getBinlogInfo() != null) {
-					session.setAttribute("binlogInfo", status.getBinlogInfo());
+			SyncTaskState state = syncTaskStateContainer.get(dumpTask.getName());
+			if (state != null) {
+				map.put("state", state);
+				if (state.getBinlogInfo() != null) {
+					session.setAttribute("binlogInfo", state.getBinlogInfo());
 				}
 			}
 
@@ -288,6 +288,9 @@ public class SyncTaskCreateController {
 		// 查询所有syncServer
 		String pumaTaskName = (String) session.getAttribute("pumaTaskName");
 		String dstDBInstanceName = (String) session.getAttribute("dstDBInstanceName");
+
+		map.put("binlogInfo", session.getAttribute("binlogInfo"));
+		session.removeAttribute("binlogInfo");
 
 		map.put("errorCodeHandlerMap", Config.getInstance().getErrorCodeHandlerMap());
 

@@ -53,7 +53,7 @@ public class SystemStatusContainer implements InitializingBean {
     public TaskStatusEvent getTaskStatusEvent() {
         TaskStatusEvent event = new TaskStatusEvent();
         List<TaskExecutorStatus> statusList = new ArrayList<TaskExecutorStatus>();
-        ConcurrentHashMap<Integer, TaskExecutor> taskExecutorMap = taskExecutorContainer.getTaskExecutorMap();
+        ConcurrentHashMap<String, TaskExecutor> taskExecutorMap = taskExecutorContainer.getTaskExecutorMap();
         for (TaskExecutor executor : taskExecutorMap.values()) {
             TaskExecutorStatus taskStatus = executor.getTaskExecutorStatus();
             statusList.add(taskStatus);

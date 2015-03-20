@@ -11,4 +11,6 @@ public interface DumpTaskService {
 	List<DumpTask> findAll();
 
 	void create(DumpTask dumpTask);
+
+	void remove(String name);
 }

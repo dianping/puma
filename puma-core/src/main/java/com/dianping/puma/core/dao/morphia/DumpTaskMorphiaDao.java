@@ -44,4 +44,10 @@ public class DumpTaskMorphiaDao extends BasicDAO<DumpTaskMorphia, String> implem
 		this.save(syncTaskMorphia);
 		this.getDatastore().ensureIndexes();
 	}
+
+	public void remove(String name) {
+		Query<DumpTaskMorphia> q = this.getDatastore().createQuery(DumpTaskMorphia.class);
+		q.field("name").equal(name);
+		this.deleteByQuery(q);
+	}
 }

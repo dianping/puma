@@ -25,4 +25,8 @@ public class DumpTaskServiceImpl implements DumpTaskService {
 	public void create(DumpTask dumpTask) {
 		dumpTaskDao.create(dumpTask);
 	}
+
+	public void remove(String name) {
+		dumpTaskDao.remove(name);
+	}
 }

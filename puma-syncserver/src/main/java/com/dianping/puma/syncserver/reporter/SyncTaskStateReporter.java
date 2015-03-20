@@ -7,6 +7,7 @@ import com.dianping.puma.core.monitor.SyncTaskStateEvent;
 import com.dianping.puma.syncserver.conf.Config;
 import com.dianping.puma.syncserver.job.container.TaskExecutionContainer;
 import com.dianping.puma.syncserver.job.executor.AbstractTaskExecutor;
+import com.dianping.puma.syncserver.job.executor.DumpTaskExecutor;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,14 @@ public class SyncTaskStateReporter {
 	private void fetch() {
 		List<TaskExecutor> taskExecutors = taskExecutionContainer.toList();
 		for(TaskExecutor taskExecutor: taskExecutors) {
-			SyncTaskState state = ((AbstractTaskExecutor)taskExecutor).getState();
+			SyncTaskState state;
+
+			if (taskExecutor instanceof DumpTaskExecutor) {
+				state = ((DumpTaskExecutor)taskExecutor).getState();
+			} else {
+				state = ((AbstractTaskExecutor)taskExecutor).getState();
+			}
+
 			state.setGmtCreate(new Date());
 			syncTaskStateContainer.add(taskExecutor.getTask().getName(), state);
 		}

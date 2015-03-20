@@ -9,6 +9,7 @@ import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.entity.BaseSyncTask;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
+import com.dianping.puma.core.service.DumpTaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +31,16 @@ import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
 	private static final Logger LOG = LoggerFactory.getLogger(DefaultTaskExecutorContainer.class);
 
-	private ConcurrentHashMap<Integer, TaskExecutor> taskExecutorMap = new ConcurrentHashMap<Integer, TaskExecutor>();
+	private ConcurrentHashMap<String, TaskExecutor> taskExecutorMap = new ConcurrentHashMap<String, TaskExecutor>();
 
 	@Autowired
 	private NotifyService notifyService;
 
 	@Autowired
 	BinlogInfoHolder binlogInfoHolder;
+
+	@Autowired
+	DumpTaskService dumpTaskService;
 
 	@Override
 	public void submit(final TaskExecutor newTaskExecutor) throws TaskExecutionException {
@@ -62,7 +66,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
 	 * 此情形，是对SyncTask修改后的重启。 故需验证，只允许以下情形出现：<br>
 	 * 新SyncTaskExecutor的StatusAction是RESTART，旧的SyncTaskExecutor状态是SUSPPENDED/FAILED/SUCCEED
 	 */
-	private void refreshSyncTask(ConcurrentHashMap<Integer, TaskExecutor> taskExecutorMap, TaskExecutor taskExecutor,
+	private void refreshSyncTask(ConcurrentHashMap<String, TaskExecutor> taskExecutorMap, TaskExecutor taskExecutor,
 			TaskExecutor newTaskExecutor) {
 		//验证
 		if (!(taskExecutor instanceof SyncTaskExecutor && newTaskExecutor instanceof SyncTaskExecutor)) {
@@ -79,9 +83,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
 			return;
 		}
 		//使用新的newTaskExecutor替换现有的taskExecutor
-		taskExecutorMap.put(TaskExecutorStatus
-				.calHashCode(newTaskExecutor.getTask().getSyncType(), newTaskExecutor.getTask().getId()),
-				newTaskExecutor);
+		taskExecutorMap.put(newTaskExecutor.getTask().getName(), newTaskExecutor);
 		taskExecutor.pause("Pause this old SyncTaskExecutor, because is replace by a new SyncTaskExecutor.");
 		newTaskExecutor.start();
 	}
@@ -90,10 +92,16 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
 	 * 新的TaskExecutor(Sync,Dump,Catchup)，无论如何先put到container。 <br>
 	 * 接着如果是Sync且StatusAction是START/RESTART，则启动即可；如果是Dump/Catchup，则直接启动
 	 */
-	private void startTask(ConcurrentHashMap<Integer, TaskExecutor> taskExecutorMap, TaskExecutor newTaskExecutor) {
-		taskExecutorMap.put(TaskExecutorStatus
-				.calHashCode(newTaskExecutor.getTask().getSyncType(), newTaskExecutor.getTask().getId()),
-				newTaskExecutor);
+	private void startTask(ConcurrentHashMap<String, TaskExecutor> taskExecutorMap, TaskExecutor newTaskExecutor) {
+		String taskName = newTaskExecutor.getTask().getName();
+
+		String dumpTaskName = taskName.replace("SyncTask", "DumpTask");
+		if (taskExecutorMap.get(dumpTaskName) != null) {
+			taskExecutorMap.remove(dumpTaskName);
+			dumpTaskService.remove(dumpTaskName);
+		}
+
+		taskExecutorMap.put(newTaskExecutor.getTask().getName(), newTaskExecutor);
 		if (newTaskExecutor instanceof SyncTaskExecutor) {
 			SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) newTaskExecutor;
 
@@ -114,11 +122,11 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
 
 	@Override
 	public TaskExecutor get(SyncType syncType, String taskName) {
-		return taskExecutorMap.get(TaskExecutorStatus.calHashCode(syncType, taskName));
+		return taskExecutorMap.get(taskName);
 	}
 
 	private void delete(SyncType syncType, String taskName) {
-		taskExecutorMap.remove(TaskExecutorStatus.calHashCode(syncType, taskName));
+		taskExecutorMap.remove(taskName);
 	}
 
 	/**
@@ -141,7 +149,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
 		}
 	}
 
-	public ConcurrentHashMap<Integer, TaskExecutor> getTaskExecutorMap() {
+	public ConcurrentHashMap<String, TaskExecutor> getTaskExecutorMap() {
 		return taskExecutorMap;
 	}
 

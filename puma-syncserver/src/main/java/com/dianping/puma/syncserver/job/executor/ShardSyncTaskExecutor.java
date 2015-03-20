@@ -6,6 +6,7 @@ import com.dianping.lion.client.LionException;
 import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
+import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
@@ -85,11 +86,13 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     private SrcDBInstanceService srcDBInstanceService;
 
-    protected DataSourceRouter router;
-
     protected RouterRule routerRule;
 
     protected RouterRule routerRuleForRouting;
+
+    protected DataSourceRouter router;
+
+    protected DataSourceRouter routerForRouting;
 
     private static final Pattern JDBC_URL_PATTERN = Pattern.compile("jdbc:mysql://([^:]+):\\d+/([^\\?]+).*");
 
@@ -129,6 +132,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
             }
             RowChangedEvent rowEvent = (RowChangedEvent) event;
 
+            DataSourceRouter targetRouter = task.getTableName().equals(rowEvent.getTable()) ? router : routerForRouting;
+
             rowEvent.setTable(task.getTableName());
             rowEvent.setDatabase("");
 
@@ -139,7 +144,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
                 return;
             }
 
-            RouterTarget routerTarget = router.getTarget(tempSql, args);
+            RouterTarget routerTarget = targetRouter.getTarget(tempSql, args);
 
             for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
                 JdbcTemplate jdbcTemplate = new JdbcTemplate(targetedSql.getDataSource());
@@ -261,10 +266,16 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
     }
 
     protected void initRouter() {
-        DataSourceRouterImpl routerImpl = new DataSourceRouterImpl();
-        routerImpl.setRouterRule(routerRuleForRouting);
-        routerImpl.setDataSourcePool(dataSourcePool);
-        this.router = routerImpl;
+        DataSourceRouterImpl routerImplForRouting = new DataSourceRouterImpl();
+        routerImplForRouting.setRouterRule(routerRuleForRouting);
+        routerImplForRouting.setDataSourcePool(dataSourcePool);
+        this.routerForRouting = routerImplForRouting;
+        this.routerForRouting.init();
+
+        DataSourceRouterImpl router = new DataSourceRouterImpl();
+        router.setRouterRule(routerRuleForRouting);
+        router.setDataSourcePool(dataSourcePool);
+        this.router = router;
         this.router.init();
     }
 
@@ -336,6 +347,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
         }
 
         PumaClient client = new PumaClient(configBuilder.build());
+
+        client.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_LATEST);
 
         pumaClientList.add(client);
         return client;

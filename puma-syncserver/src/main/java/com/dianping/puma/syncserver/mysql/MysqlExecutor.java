@@ -424,13 +424,17 @@ public class MysqlExecutor {
 		} else if (StringUtils.startsWithIgnoreCase(sql, "RENAME ")) {
 			sql = sql.toLowerCase().trim();
 			String database = event.getDatabase();
-			String tableSrc;
-			String tableDes;
+			String tableSrc = null;
+			String tableDes = null;
 			String temp;
 			int positionTo = sql.indexOf(" to ", 0);
 			String sqlLeft = sql.substring(0, positionTo);
 			String sqlRight = sql.substring(positionTo + 4, sql.length());
-			int positionStart = sqlLeft.indexOf(" ", 0);
+			int positionStart = sqlLeft.indexOf(" table ", 0);
+			if (positionStart == -1) {
+				return "";
+			}
+			positionStart = positionStart + 7;
 			int positionCenter = sqlLeft.indexOf(".", positionStart);
 			if (positionCenter > -1) {
 				temp = sqlLeft.substring(positionStart + 1, positionCenter);
@@ -447,11 +451,39 @@ public class MysqlExecutor {
 					positionCenter + 1, sqlRight.length());
 			tableDes = StringUtils.remove(temp, "`");
 			tableSrc = getMappingTable(database, tableSrc);
-			tableDes = getMappingTable(database, tableDes);
+			// tableDes = getMappingTable(database, tableDes);
 			database = getMappingDatabase(database);
-			return "RENAME " + database + "." + tableSrc + " TO " + database + "." + tableDes;
+			if (database != null || tableSrc != null) {
+				renameMappingTable(database, tableSrc, tableDes);
+			}
 		}
 		return "";
+	}
+
+	private boolean renameMappingTable(String database, String tableName, String newTableName) {
+		List<DatabaseMapping> databases = mysqlMapping.getDatabases();
+		DatabaseMapping databaseMapping = findDatabaseMapping(databases, database);
+		if (databaseMapping == null) {
+			return false;
+		}
+		if (databaseMapping.getTo().equalsIgnoreCase("*")) {// 如果是database匹配*
+			// database保持原值
+			return true;
+		} else {// 如果是database不匹配*
+			database = databaseMapping.getTo();
+			List<TableMapping> tables = databaseMapping.getTables();
+			TableMapping table = findTableConfig(tables, tableName);
+			if (table == null) {
+				return false;
+			}
+			if (table.getTo().equalsIgnoreCase("*")) {// 如果是table匹配*
+				// 如果是*，则和原来的一致
+				return true;
+			} else {
+				table.setFrom(newTableName);
+				return true;
+			}
+		}
 	}
 
 	private String getMappingTable(String database, String tableName) {

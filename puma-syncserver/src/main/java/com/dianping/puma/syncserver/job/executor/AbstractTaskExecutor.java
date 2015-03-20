@@ -459,6 +459,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 						lastEvents.add(event);
 						// 执行子类的具体操作
 						AbstractTaskExecutor.this.execute(event);
+						binlogOfSqlThreadChanged(event);
 					}
 				} else {
 					skipToNextPos = false;

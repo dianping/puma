@@ -5,6 +5,8 @@ import java.io.IOException;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.entity.DumpTask;
 import com.dianping.puma.core.entity.PumaTask;
+import com.dianping.puma.core.entity.SrcDBInstance;
+import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.service.DstDBInstanceService;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;

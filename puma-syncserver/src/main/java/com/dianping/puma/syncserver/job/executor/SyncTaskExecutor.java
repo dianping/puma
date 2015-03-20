@@ -2,6 +2,7 @@ package com.dianping.puma.syncserver.job.executor;
 
 import java.sql.SQLException;
 
+import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.model.SyncTaskState;
 import org.slf4j.Logger;
@@ -14,8 +15,8 @@ public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTask> {
 
     protected SyncTaskState state;
 
-    public SyncTaskExecutor(SyncTask syncTask, String pumaServerHost, int pumaServerPort, String target) {
-        super(syncTask, pumaServerHost, pumaServerPort, target);
+    public SyncTaskExecutor(SyncTask syncTask, String pumaServerHost, int pumaServerPort, String target, DstDBInstance dstDBInstance) {
+        super(syncTask, pumaServerHost, pumaServerPort, target, dstDBInstance);
     }
 
     @Override

@@ -1,12 +1,14 @@
 package com.dianping.puma.syncserver.job.executor.builder;
 
 import com.dianping.puma.core.constant.SyncType;
-import com.dianping.puma.core.entity.SyncTask;
+import com.dianping.puma.core.entity.*;
+import com.dianping.puma.core.holder.BinlogInfoHolder;
+import com.dianping.puma.core.holder.impl.DefaultBinlogInfoHolder;
+import com.dianping.puma.core.service.DstDBInstanceService;
+import com.dianping.puma.core.service.SrcDBInstanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.dianping.puma.core.entity.PumaServer;
-import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.sync.model.task.Type;
@@ -46,6 +48,12 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
     @Autowired
     private PumaTaskService pumaTaskService;
 
+    @Autowired
+    SrcDBInstanceService srcDBInstanceService;
+
+    @Autowired
+    DstDBInstanceService dstDBInstanceService;
+
     @Override
     public SyncTaskExecutor build(SyncTask task) {
         //根据Task创建TaskExecutor
@@ -70,7 +78,17 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
         
         String target = pumaTask.getName();
 
-        SyncTaskExecutor excutor = new SyncTaskExecutor(task, pumaServerHost, pumaServerPort, target);
+        SrcDBInstance srcDBInstance = srcDBInstanceService.findByName(pumaTask.getSrcDBInstanceName());
+        task.setPumaClientServerId(srcDBInstance.getServerId());
+
+        DstDBInstance dstDBInstance = dstDBInstanceService.findByName(task.getDstDBInstanceName());
+
+        SyncTaskExecutor excutor = new SyncTaskExecutor(task, pumaServerHost, pumaServerPort, target, dstDBInstance);
+        BinlogInfoHolder binlogInfoHolder = new DefaultBinlogInfoHolder();
+        binlogInfoHolder.setBaseDir("/data/appdatas/sync/binlog/");
+        binlogInfoHolder.setBakDir("/data/appdatas/");
+        excutor.setBinlogInfoHolder(binlogInfoHolder);
+
         return excutor;
     }
 

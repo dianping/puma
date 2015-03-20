@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.AbstractBaseSyncTask;
 import com.dianping.puma.core.entity.DstDBInstance;
+import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.SyncTaskState;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
@@ -73,7 +74,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 
 	private CircularFifoBuffer lastEvents = new CircularFifoBuffer(10);
 
-	public AbstractTaskExecutor(T abstractTask, String pumaServerHost, int pumaServerPort, String target) {
+	private BinlogInfoHolder binlogInfoHolder;
+
+	public AbstractTaskExecutor(T abstractTask, String pumaServerHost, int pumaServerPort, String target, DstDBInstance dstDBInstance) {
 		this.abstractTask = abstractTask;
 		this.pumaServerHost = pumaServerHost;
 		this.pumaServerPort = pumaServerPort;
@@ -82,6 +85,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 		this.state = new SyncTaskState();
 		state.setTaskName(abstractTask.getName());
 		state.setSyncType(abstractTask.getSyncType());
+		this.dstDBInstance = dstDBInstance;
 
 		//this.status = new TaskExecutorStatus();
 		//status.setTaskName(abstractTask.getName());
@@ -89,6 +93,14 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 		//status.setTaskId(abstractTask.getId());
 		//status.setType(abstractTask.getType());
 		// BinlogInfo startedBinlogInfo = abstractTask.getBinlogInfo();
+	}
+
+	public BinlogInfoHolder getBinlogInfoHolder() {
+		return binlogInfoHolder;
+	}
+
+	public void setBinlogInfoHolder(BinlogInfoHolder binlogInfoHolder) {
+		this.binlogInfoHolder = binlogInfoHolder;
 	}
 
 	/**
@@ -492,7 +504,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 	}
 
 	private void saveBinlogToDB(BinlogInfo binlogInfo) {
-		SystemStatusContainer.instance.recordBinlog(abstractTask, binlogInfo);
+		binlogInfoHolder.setBinlogInfo(abstractTask.getName(), binlogInfo);
 	}
 
 	private boolean containDatabase(String database) {

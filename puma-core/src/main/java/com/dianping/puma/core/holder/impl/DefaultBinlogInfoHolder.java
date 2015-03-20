@@ -197,6 +197,11 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 		this.baseDir = new File(baseDir);
 	}
 
+	@Override
+	public void setBakDir(String bakDir) {
+		this.bakDir = new File(bakDir);
+	}
+
 	private String task2file(String taskName) {
 		return taskName + SUFFIX;
 	}

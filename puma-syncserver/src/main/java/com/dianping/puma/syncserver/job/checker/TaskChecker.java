@@ -35,7 +35,7 @@ public class TaskChecker implements EventListener {
     @Autowired
     private Config config;
     @Autowired
-    private NotifyService notifyService;
+    NotifyService notifyService;
 
     @Autowired
     BaseSyncTaskService baseSyncTaskService;

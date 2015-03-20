@@ -26,11 +26,12 @@
           init-method="init">
         <property name="topic" value="sync_task_operation" />
         <property name="type" value="#{config.syncServerName}" />
+        <property name="notifyService" ref="notifyService"/>
         <property name="clazz"
                   value="com.dianping.puma.core.monitor.SyncTaskOperationEvent" />
         <property name="listeners">
             <list>
-                <ref bean="taskChecker" />
+                <ref bean="taskChecker"/>
             </list>
         </property>
     </bean>

@@ -6,7 +6,7 @@ public class BinlogInfo {
 
     private Long binlogPosition;
 
-    private Boolean skipToNextPos;
+    private Boolean skipToNextPos = false;
 
     public BinlogInfo() {}
 

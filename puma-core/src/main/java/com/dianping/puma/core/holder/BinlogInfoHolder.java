@@ -10,6 +10,8 @@ public interface BinlogInfoHolder {
 
 	public void setBaseDir(String baseDir);
 
+	public void setBakDir(String bakDir);
+
 	public BinlogInfo getBinlogInfo(String taskName);
 
 	public void setBinlogInfo(String taskName, BinlogInfo binlogInfo);

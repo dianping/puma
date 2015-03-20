@@ -1,12 +1,15 @@
 package com.dianping.puma.syncserver.job.executor.builder;
 
 import com.dianping.puma.core.constant.SyncType;
-import com.dianping.puma.core.entity.CatchupTask;
+import com.dianping.puma.core.entity.*;
+import com.dianping.puma.core.holder.BinlogInfoHolder;
+import com.dianping.puma.core.holder.impl.DefaultBinlogInfoHolder;
+import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.service.DstDBInstanceService;
+import com.dianping.puma.core.service.SrcDBInstanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.dianping.puma.core.entity.PumaServer;
-import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.sync.model.task.Type;
@@ -49,6 +52,12 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
 	@Autowired
 	private PumaTaskService pumaTaskService;
 
+	@Autowired
+	private DstDBInstanceService dstDBInstanceService;
+
+	@Autowired
+	SrcDBInstanceService srcDBInstanceService;
+
 	@Override
 	public CatchupTaskExecutor build(CatchupTask task) {
 		//根据Task创建TaskExecutor
@@ -80,7 +89,19 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
 		//从taskContainer获取syncTaskExecutor
 		SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) taskExecutionContainer
 				.get(SyncType.SYNC, task.getName());
-		return new CatchupTaskExecutor(task, pumaServerHost, pumaServerPort, target, syncTaskExecutor);
+
+		DstDBInstance dstDBInstance = dstDBInstanceService.findByName(task.getDstDBInstanceName());
+
+		SrcDBInstance srcDBInstance = srcDBInstanceService.findByName(pumaTask.getSrcDBInstanceName());
+		task.setPumaClientServerId(srcDBInstance.getServerId());
+
+		CatchupTaskExecutor executor = new CatchupTaskExecutor(task, pumaServerHost, pumaServerPort, target, syncTaskExecutor, dstDBInstance);
+		BinlogInfoHolder binlogInfoHolder = new DefaultBinlogInfoHolder();
+		binlogInfoHolder.setBaseDir("/data/appdatas/sync/binlog/");
+		binlogInfoHolder.setBakDir("/data/appdatas/");
+		executor.setBinlogInfoHolder(binlogInfoHolder);
+
+		return executor;
 	}
 
 	@Override

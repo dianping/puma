@@ -395,7 +395,7 @@ public class MysqlExecutor {
 	}
 
 	public String convertDdlEventSql(DdlEvent event) {
-		String sql = event.getSql();
+		String sql = StringUtils.normalizeSpace(event.getSql());
 		if (StringUtils.startsWithIgnoreCase(sql, "ALTER ")) {
 			sql = StringUtils.lowerCase(sql).trim();
 			String database = event.getDatabase();
@@ -454,37 +454,13 @@ public class MysqlExecutor {
 			// tableDes = getMappingTable(database, tableDes);
 			database = getMappingDatabase(database);
 			if (database != null || tableSrc != null) {
-				renameMappingTable(database, tableSrc, tableDes);
+				//renameMappingTable(database, tableSrc, tableDes);
 			}
 		}
 		return "";
 	}
 
-	private boolean renameMappingTable(String database, String tableName, String newTableName) {
-		List<DatabaseMapping> databases = mysqlMapping.getDatabases();
-		DatabaseMapping databaseMapping = findDatabaseMapping(databases, database);
-		if (databaseMapping == null) {
-			return false;
-		}
-		if (databaseMapping.getTo().equalsIgnoreCase("*")) {// 如果是database匹配*
-			// database保持原值
-			return true;
-		} else {// 如果是database不匹配*
-			database = databaseMapping.getTo();
-			List<TableMapping> tables = databaseMapping.getTables();
-			TableMapping table = findTableConfig(tables, tableName);
-			if (table == null) {
-				return false;
-			}
-			if (table.getTo().equalsIgnoreCase("*")) {// 如果是table匹配*
-				// 如果是*，则和原来的一致
-				return true;
-			} else {
-				table.setFrom(newTableName);
-				return true;
-			}
-		}
-	}
+	
 
 	private String getMappingTable(String database, String tableName) {
 		List<DatabaseMapping> databases = mysqlMapping.getDatabases();

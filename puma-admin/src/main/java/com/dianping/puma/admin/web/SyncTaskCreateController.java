@@ -32,6 +32,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.dianping.puma.admin.config.Config;
 import com.dianping.puma.admin.monitor.SystemStatusContainer;
 import com.dianping.puma.core.service.DumpTaskService;
+import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.core.service.SyncTaskService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.admin.util.MysqlMetaInfoFetcher;
@@ -59,6 +60,9 @@ public class SyncTaskCreateController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SyncTaskCreateController.class);
 
+	@Autowired
+	private SrcDBInstanceService srcDBInstanceService;
+	
 	@Autowired
 	private DstDBInstanceService dstDBInstanceService;
 
@@ -179,13 +183,14 @@ public class SyncTaskCreateController {
 			// MysqlHost mysqlHost = getSrcMysqlHost(srcDBInstance);
 			String pumaTaskName = (String) session.getAttribute("pumaTaskName");
 			String dstDBInstanceName = (String) session.getAttribute("dstDBInstanceName");
-			DstDBInstance dstDBInstance = dstDBInstanceService.findByName((String) session
-					.getAttribute("dstDBInstanceName"));
+			PumaTask pumaTask = pumaTaskService.findByName(pumaTaskName);
+				
+			SrcDBInstance srcDBInstance = srcDBInstanceService.findByName(pumaTask.getSrcDBInstanceName());
 			MysqlHost mysqlHost = new MysqlHost();
-			mysqlHost.setHost(dstDBInstance.getHost() + ":" + dstDBInstance.getPort());
-			mysqlHost.setServerId(dstDBInstance.getServerId());
-			mysqlHost.setUsername(dstDBInstance.getUsername());
-			mysqlHost.setPassword(dstDBInstance.getPassword());
+			mysqlHost.setHost(srcDBInstance.getHost() + ":" + srcDBInstance.getPort());
+			mysqlHost.setServerId(srcDBInstance.getServerId());
+			mysqlHost.setUsername(srcDBInstance.getUsername());
+			mysqlHost.setPassword(srcDBInstance.getPassword());
 
 			DumpMapping dumpMapping = this.convertMysqlMappingToDumpMapping(mysqlHost, mysqlMapping);
 			session.setAttribute("dumpMapping", dumpMapping);

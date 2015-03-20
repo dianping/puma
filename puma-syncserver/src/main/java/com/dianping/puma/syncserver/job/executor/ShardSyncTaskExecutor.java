@@ -127,10 +127,10 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
             if (!(event instanceof RowChangedEvent)) {
                 return;
             }
-
             RowChangedEvent rowEvent = (RowChangedEvent) event;
 
             rowEvent.setTable(task.getTableName());
+            rowEvent.setDatabase("");
 
             String tempSql = rowChangedEventToSql(rowEvent);
             List<Object> args = rowChangedEventToArgs(rowEvent);
@@ -145,9 +145,9 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
                 JdbcTemplate jdbcTemplate = new JdbcTemplate(targetedSql.getDataSource());
                 for (String sql : targetedSql.getSqls()) {
                     try {
-                        jdbcTemplate.execute(sql);
+                        jdbcTemplate.update(sql, args);
                     } catch (Exception exp) {
-                        //todo:
+                        exp.printStackTrace();
                     }
                 }
             }

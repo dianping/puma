@@ -7,10 +7,6 @@ import java.util.Map;
 
 public class PumaTaskStateEvent extends PumaTaskEvent {
 
-	private List<String> taskIds;
-
-	private List<PumaTaskState> states;
-
 	private Map<String, PumaTaskState> stateMap;
 
 	public Map<String, PumaTaskState> getStateMap() {
@@ -19,21 +15,5 @@ public class PumaTaskStateEvent extends PumaTaskEvent {
 
 	public void setStateMap(Map<String, PumaTaskState> stateMap) {
 		this.stateMap = stateMap;
-	}
-
-	public List<String> getTaskIds() {
-		return taskIds;
-	}
-
-	public void setTaskIds(List<String> taskIds) {
-		this.taskIds = taskIds;
-	}
-
-	public List<PumaTaskState> getStates() {
-		return states;
-	}
-
-	public void setStates(List<PumaTaskState> states) {
-		this.states = states;
 	}
 }

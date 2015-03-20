@@ -63,7 +63,11 @@ public class PumaTaskStateReporter {
 	private void fetch() {
 		List<TaskExecutor> taskExecutors = taskExecutorContainer.getAll();
 		for (TaskExecutor taskExecutor: taskExecutors) {
-			PumaTaskState state = ((AbstractTaskExecutor)taskExecutor).getState();
+			DefaultTaskExecutor defaultTaskExecutor = (DefaultTaskExecutor)taskExecutor;
+			PumaTaskState state = new PumaTaskState();
+			state.setStatus(defaultTaskExecutor.getStatus());
+			state.setBinlogInfo(defaultTaskExecutor.getBinlogInfo());
+			state.setBinlogStat(defaultTaskExecutor.getBinlogStat());
 			pumaTaskStateContainer.add(taskExecutor.getTaskId(), state);
 		}
 	}

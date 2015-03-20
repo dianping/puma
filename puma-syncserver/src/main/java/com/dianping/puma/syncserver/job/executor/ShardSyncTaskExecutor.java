@@ -72,7 +72,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     private List<PumaClient> pumaClientList = new ArrayList<PumaClient>();
 
-    protected Processer processer = new Processer();
+    protected Processor processor = new Processor();
 
     protected TableShardRuleConfig tableShardRuleConfigOrigin;
 
@@ -125,12 +125,19 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     protected void startPumaClient() {
         for (PumaClient client : pumaClientList) {
-            client.register(processer);
+            client.register(processor);
             client.start();
         }
     }
 
-    class Processer implements EventListener {
+    class Processor implements EventListener {
+        private final ThreadLocal<Integer> retryTimes;
+
+        public Processor() {
+            retryTimes = new ThreadLocal<Integer>();
+            retryTimes.set(0);
+        }
+
         @Override
         public void onEvent(ChangedEvent event) throws Exception {
             if (!(event instanceof RowChangedEvent)) {
@@ -242,6 +249,10 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
         @Override
         public boolean onException(ChangedEvent event, Exception e) {
+            //todo: 记录异常
+            //todo: 判断异常类型做不同处理
+
+            //todo: 判断是否需要重试，判断重试次数
             return false;
         }
 

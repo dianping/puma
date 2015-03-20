@@ -64,6 +64,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
 
     private final ShardSyncTask task;
 
+    protected final TaskExecutorStatus status;
+
     private ConfigCache configCache;
 
     private final Map<String, DataSource> dataSourcePool = new ConcurrentHashMap<String, DataSource>();
@@ -101,6 +103,10 @@ public class ShardSyncTaskExecutor implements TaskExecutor<ShardSyncTask> {
         checkNotNull(task.getRuleName(), "task.ruleName");
         checkNotNull(task.getTableName(), "task.tableName");
         this.task = task;
+
+        this.status = new TaskExecutorStatus();
+        this.status.setTaskId(this.task.getId());
+        this.status.setType(this.task.getType());
 
         try {
             this.configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());

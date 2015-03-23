@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.syncserver.job.executor.exception.DdlRenameException;
 
 public class CatchupTaskExecutor extends AbstractTaskExecutor<CatchupTask> {
     protected static final Logger LOG = LoggerFactory.getLogger(CatchupTaskExecutor.class);
@@ -28,7 +29,7 @@ public class CatchupTaskExecutor extends AbstractTaskExecutor<CatchupTask> {
     }
 
     @Override
-    protected void execute(ChangedEvent event) throws SQLException {
+    protected void execute(ChangedEvent event) throws SQLException, DdlRenameException {
         //执行同步
         mysqlExecutor.execute(event);
     }

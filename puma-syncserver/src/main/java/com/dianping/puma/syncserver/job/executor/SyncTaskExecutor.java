@@ -9,20 +9,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.syncserver.job.executor.exception.DdlRenameException;
 
 public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTask> {
-    protected static final Logger LOG = LoggerFactory.getLogger(SyncTaskExecutor.class);
+	protected static final Logger LOG = LoggerFactory.getLogger(SyncTaskExecutor.class);
 
-    protected SyncTaskState state;
+	protected SyncTaskState state;
 
-    public SyncTaskExecutor(SyncTask syncTask, String pumaServerHost, int pumaServerPort, String target, DstDBInstance dstDBInstance) {
-        super(syncTask, pumaServerHost, pumaServerPort, target, dstDBInstance);
-    }
+	public SyncTaskExecutor(SyncTask syncTask, String pumaServerHost, int pumaServerPort, String target,
+			DstDBInstance dstDBInstance) {
+		super(syncTask, pumaServerHost, pumaServerPort, target, dstDBInstance);
+	}
 
-    @Override
-    protected void execute(ChangedEvent event) throws SQLException {
-        //执行同步
-        mysqlExecutor.execute(event);
-    }
+	@Override
+	protected void execute(ChangedEvent event) throws SQLException, DdlRenameException {
+		// 执行同步
+		mysqlExecutor.execute(event);
+	}
 
 }

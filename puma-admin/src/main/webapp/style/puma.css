@@ -24,3 +24,43 @@ a:hover.operation-icon {
 	border-top: 1px solid #e5e5e5;
 }
 
+.nav-local {
+	background-color:#337ab7;
+}
+
+.container-local {
+	margin-right: auto;
+	margin-left: auto;
+	min-height:500px;
+}
+
+.navbar-log-local,
+.navbar-brand-local,
+.navbar-log-local:hover,
+.navbar-brand-local:hover{
+	color: #fff;
+}
+
+.container-left-local{
+	padding-left:0px;
+	padding-right:8px;
+	width:20%
+}
+.container-right-local{
+	padding-left:8px;
+	padding-right:0px;
+	width:80%
+}
+
+.container-fluid{
+	padding-left:0px;
+	padding-right:0px;
+}
+.navbar-right-log-local,
+.navbar-right-log-local li,
+.navbar-right-log-local li a,
+.navbar-right-log-local li:hover,
+.navbar-right-log-local li a:hover,
+.navbar-right-log-local li a:focus{
+	background-color:#337ab7;
+}

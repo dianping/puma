@@ -70,7 +70,11 @@ public class PumaClient {
 		subscribeThread.start();
 	}
 
-	private boolean checkStop() {
+    public Configuration getConfig() {
+        return config;
+    }
+
+    private boolean checkStop() {
 		if (!active) {
 			log.info("Puma client[" + config.getName() + "] checked active is false.");
 			return true;

@@ -1,5 +1,6 @@
 package com.dianping.puma.syncserver.job.executor;
 
+import com.dianping.cat.Cat;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
@@ -39,6 +40,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.SerializationUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
@@ -56,6 +61,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * http://www.dozer.cc
  */
 public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
+    private static final Logger logger = LoggerFactory.getLogger(ShardSyncTaskExecutor.class);
+
     public static final int INSERT = RowChangedEvent.INSERT;
     public static final int DELETE = RowChangedEvent.DELETE;
     public static final int UPDATE = RowChangedEvent.UPDATE;
@@ -72,8 +79,6 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
     private final Map<String, DataSource> dataSourcePool = new ConcurrentHashMap<String, DataSource>();
 
     private List<PumaClient> pumaClientList = new ArrayList<PumaClient>();
-
-    protected Processor processor = new Processor();
 
     protected TableShardRuleConfig tableShardRuleConfigOrigin;
 
@@ -124,21 +129,30 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
 
     protected void startPumaClient() {
         for (PumaClient client : pumaClientList) {
-            client.register(processor);
+            client.register(new Processor(client.getConfig().getName()));
             client.start();
         }
     }
 
     class Processor implements EventListener {
-        private final ThreadLocal<Integer> retryTimes;
+        protected volatile int tryTimes = 0;
 
-        public Processor() {
-            retryTimes = new ThreadLocal<Integer>();
-            retryTimes.set(0);
+        protected final int MAX_TRY_TIMES = 2;
+
+        private final String name;
+
+        public Processor(String name) {
+            this.name = name;
         }
 
         @Override
         public void onEvent(ChangedEvent event) throws Exception {
+            tryTimes++;
+            onEventIntenal(event);
+            tryTimes = 0;
+        }
+
+        protected void onEventIntenal(ChangedEvent event) {
             if (!(event instanceof RowChangedEvent)) {
                 return;
             }
@@ -161,10 +175,9 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
             for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
                 JdbcTemplate jdbcTemplate = new JdbcTemplate(targetedSql.getDataSource());
                 for (String sql : targetedSql.getSqls()) {
-                    try {
-                        jdbcTemplate.update(sql, args.toArray());
-                    } catch (Exception exp) {
-                        exp.printStackTrace();
+                    int rows = jdbcTemplate.update(sql, args.toArray());
+                    if (rows != 1) {
+                        throw new EmptyResultDataAccessException("error effective dated row:" + rows, 1);
                     }
                 }
             }
@@ -248,16 +261,32 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
 
         @Override
         public boolean onException(ChangedEvent event, Exception e) {
-            //todo: 记录异常
-            //todo: 判断异常类型做不同处理
+            if (tryTimes >= MAX_TRY_TIMES) {
+                logException(event, e);
+                return true;
+            }
 
-            //todo: 判断是否需要重试，判断重试次数
-            return false;
+            if (e instanceof DuplicateKeyException) {
+                logException(event, e);
+                return true;
+            } else if (e instanceof EmptyResultDataAccessException) {
+                logException(event, e);
+                return true;
+            } else {
+                logException(event, e);
+                return false;
+            }
+        }
+
+        public void logException(ChangedEvent event, Exception exp) {
+            String msg = String.format("Name: %s Event: %s TryTimes: %s", this.name, event.toString(), tryTimes);
+            Cat.logError(msg, exp);
+            logger.error(msg, exp);
         }
 
         @Override
         public void onConnectException(Exception e) {
-
+            Cat.logError("Client Connect Error:" + this.name, e);
         }
 
         @Override

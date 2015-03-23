@@ -7,6 +7,8 @@ import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
+import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
@@ -27,9 +29,12 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
 import java.util.Set;
 
 import static org.mockito.Mockito.*;
@@ -224,6 +229,19 @@ public class ShardSyncTaskExecutorTest {
         Assert.assertEquals(1, target.tableShardRuleConfigForRouting.getDimensionConfigs().size());
         Assert.assertEquals("table", target.originGroupDataSource);
         Assert.assertEquals(false, target.switchOn);
+    }
+
+    @Test
+    public void processOnExceptionTest() throws Exception {
+        ShardSyncTaskExecutor.Processor processor = spy(target.new Processor("test"));
+        Assert.assertEquals(true, processor.onException(new RowChangedEvent(), new DuplicateKeyException("dp")));
+        Assert.assertEquals(true, processor.onException(new RowChangedEvent(), new EmptyResultDataAccessException("error", 1)));
+        Assert.assertEquals(false, processor.onException(new RowChangedEvent(), new SQLException("error")));
+
+        processor.tryTimes = processor.MAX_TRY_TIMES + 1;
+        Assert.assertEquals(true, processor.onException(new RowChangedEvent(), new SQLException("error")));
+
+        verify(processor, times(4)).logException(any(ChangedEvent.class), any(Exception.class));
     }
 
     @Test

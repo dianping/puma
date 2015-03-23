@@ -148,11 +148,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
         @Override
         public void onEvent(ChangedEvent event) throws Exception {
             tryTimes++;
-            onEventIntenal(event);
+            onEventInternal(event);
             tryTimes = 0;
         }
 
-        protected void onEventIntenal(ChangedEvent event) {
+        protected void onEventInternal(ChangedEvent event) {
             if (!(event instanceof RowChangedEvent)) {
                 return;
             }

@@ -37,7 +37,6 @@ public class PumaMonitorSeqTask implements PumaMonitorTask {
 	 */
 
 	public void runTask() {
-		/*
 		Map<String, ClientStatus> clientStatuses = SystemStatusContainer.instance.listClientStatus();
 		Map<String, Long> clientSuccessSeq = SystemStatusContainer.instance.listClientSuccessSeq();
 		for (Map.Entry<String, ClientStatus> clientStatus : clientStatuses.entrySet()) {
@@ -51,7 +50,6 @@ public class PumaMonitorSeqTask implements PumaMonitorTask {
 								+ intervalConfig.getServerInfoInterval());
 			}
 		}
-		*/
 	}
 
 }

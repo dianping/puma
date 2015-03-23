@@ -130,8 +130,11 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 			br = new BufferedReader(fr);
 			String binlogFile = br.readLine();
 			String binlogPositionStr = br.readLine();
+			String isSkipToNextPosStr = br.readLine();
 			long binlogPosition = binlogPositionStr == null ? DEFAULT_BINLOGPOS : Long.parseLong(binlogPositionStr);
+			boolean isSkipToNextPos = Boolean.valueOf(isSkipToNextPosStr);
 			BinlogInfo binlogInfo = new BinlogInfo(binlogFile, binlogPosition);
+			binlogInfo.setSkipToNextPos(isSkipToNextPos);
 			mappedByteBufferMapping.put(taskName,
 					new RandomAccessFile(f, "rwd").getChannel().map(MapMode.READ_WRITE, 0, MAX_FILE_SIZE));
 			binlogInfoMap.put(taskName, binlogInfo);
@@ -183,6 +186,8 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 		mbb.put((binlogInfo.getBinlogFile() == null ? "" : binlogInfo.getBinlogFile()).getBytes());
 		mbb.put("\n".getBytes());
 		mbb.put(String.valueOf(binlogInfo.getBinlogPosition()).getBytes());
+		mbb.put("\n".getBytes());
+		mbb.put(String.valueOf(binlogInfo.isSkipToNextPos()).getBytes());
 		mbb.put("\n".getBytes());
 	}
 

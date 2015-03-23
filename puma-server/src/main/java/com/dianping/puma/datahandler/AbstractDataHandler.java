@@ -168,6 +168,7 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 		if (result != null && !result.isEmpty() && result.getData() != null) {
 			result.getData().setBinlog(context.getBinlogFileName());
 			result.getData().setBinlogPos(context.getBinlogStartPos());
+			result.getData().setBinlogNextPos(binlogEvent.getHeader().getNextPosition());
 			result.getData().setServerId(binlogEvent.getHeader().getServerId());
 			result.getData().setBinlogServerId(context.getDBServerId());
 		}

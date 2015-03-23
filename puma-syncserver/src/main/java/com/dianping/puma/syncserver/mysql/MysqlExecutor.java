@@ -89,7 +89,8 @@ public class MysqlExecutor {
 	/**
 	 * 执行event(如果event是查询，则根据event中的主键的newValue，进行查询，可以返回结果(使用Map)，其他update/
 	 * insert/delete情况返回null)
-	 * @throws DdlRenameException 
+	 * 
+	 * @throws DdlRenameException
 	 */
 	public Map<String, Object> execute(ChangedEvent event) throws SQLException {
 		if (event instanceof DdlEvent) {
@@ -147,7 +148,7 @@ public class MysqlExecutor {
 			Log.info("ddl sync final sql: " + sql);
 			ps = conn.prepareStatement(sql);
 			ps.executeUpdate();
-		}finally {
+		} finally {
 			if (ps != null) {
 				try {
 					ps.close();
@@ -463,7 +464,7 @@ public class MysqlExecutor {
 		return "";
 	}
 
-	public String convertDdlEventSql(DdlEvent event) throws DdlRenameException{
+	public String convertDdlEventSql(DdlEvent event) throws DdlRenameException {
 		String sql = StringUtils.normalizeSpace(event.getSql().toLowerCase());
 		Log.info("ddl sql: " + sql);
 		String database = event.getDatabase();
@@ -475,22 +476,23 @@ public class MysqlExecutor {
 			database = temp;
 		}
 		String tableName = getTableName(sql, positionStart + 6, positionEnd);
-		tableName = getMappingTable(database, tableName);
-		database = getMappingDatabase(database);
-		if (StringUtils.startsWithIgnoreCase(sql, "ALTER ")) {
+		String mappingTableName = getMappingTable(database, tableName);
+		String mappingDatabase = getMappingDatabase(database);
+		if (StringUtils.startsWithIgnoreCase(sql, "alter ")) {
 			if (StringUtils.contains(sql, " rename ")) {
-				if (!StringUtils.isBlank(database) || !StringUtils.isBlank(tableName)) {
+				if (!StringUtils.isBlank(mappingDatabase) || !StringUtils.isBlank(mappingTableName)) {
 					// 停止任務
-					throw new DdlRenameException("Rename error : ddl sql = "+event.getSql());
+					throw new DdlRenameException("Rename error : ddl sql = " + event.getSql());
 				}
 			} else {
-				if (!StringUtils.isBlank(database) || !StringUtils.isBlank(tableName)) {
-					return "ALTER TABLE " + database + "." + tableName + " "
-							+ StringUtils.replace(remainSql, " " + tableName + ".", " ");
+				if (!StringUtils.isBlank(mappingDatabase) || !StringUtils.isBlank(mappingTableName)) {
+					remainSql = StringUtils.replace(StringUtils.replace(remainSql, " `" + tableName + "`.", " `"+mappingTableName+"`."), " "
+							+ tableName + ".", " "+mappingTableName+".");
+					return "ALTER TABLE `" + mappingDatabase + "`.`" + mappingTableName + "` " + remainSql;
 				}
 			}
 		} else if (StringUtils.startsWithIgnoreCase(sql, "RENAME ")) {
-			if (!StringUtils.isBlank(database) || !StringUtils.isBlank(tableName)) {
+			if (!StringUtils.isBlank(mappingDatabase) || !StringUtils.isBlank(mappingTableName)) {
 				// 停止任務
 			}
 		}

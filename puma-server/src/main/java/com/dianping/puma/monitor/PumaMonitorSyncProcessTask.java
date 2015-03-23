@@ -33,8 +33,8 @@ public class PumaMonitorSyncProcessTask implements PumaMonitorTask {
 							serverStatus.getBinlogFile(), serverStatus.getBinlogPos()),
 					Message.SUCCESS,
 					"srcbinlog = " + serverStatus.getBinlogFile() + "," + Long.toString(serverStatus.getBinlogPos())
-							+ "&desbinlog = " + serverStatus.getBinlogFile() + ","
-							+ Long.toString(serverStatus.getBinlogPos()));
+							+ "&desbinlog = " + clientStatus.getValue().getBinlogFile() + ","
+							+ Long.toString(clientStatus.getValue().getBinlogPos()));
 		}
 	}
 

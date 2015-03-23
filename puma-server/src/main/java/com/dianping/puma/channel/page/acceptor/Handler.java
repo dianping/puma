@@ -112,7 +112,7 @@ public class Handler implements PageHandler<Context> {
 						//record success client seq
 						SystemStatusContainer.instance.updateClientSuccessSeq(payload.getClientName(), event.getSeq());
 						//update binlog
-						SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(),payload.getBinlog(),payload.getBinlogPos());
+						SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(),event.getBinlog(),event.getBinlogPos());
 					
 					}
 				}

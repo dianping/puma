@@ -1,5 +1,6 @@
 package com.dianping.puma.core.service;
 
+import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.entity.SyncTask;
 
 import java.util.List;
@@ -17,4 +18,6 @@ public interface SyncTaskService {
 	void remove(String name);
 	
 	List<SyncTask> find(int offset, int limit);
+	
+	void updateStatusAction(String name,ActionController controller);
 }

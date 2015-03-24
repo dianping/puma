@@ -1,6 +1,6 @@
 package com.dianping.puma.core.constant;
 
-public enum Controller {
+public enum ActionController {
 	START,
 	STOP,
 	PAUSE,

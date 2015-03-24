@@ -1,16 +1,16 @@
 package com.dianping.puma.core.model;
 
-import com.dianping.puma.core.constant.Controller;
+import com.dianping.puma.core.constant.ActionController;
 
 public class PumaTaskController {
 
-	private Controller controller;
+	private ActionController controller;
 
-	public Controller getController() {
+	public ActionController getController() {
 		return controller;
 	}
 
-	public void setController(Controller controller) {
+	public void setController(ActionController controller) {
 		this.controller = controller;
 	}
 }

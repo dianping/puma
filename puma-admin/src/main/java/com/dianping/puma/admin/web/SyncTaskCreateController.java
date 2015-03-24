@@ -216,7 +216,7 @@ public class SyncTaskCreateController {
 			String syncServerName = (String) session.getAttribute("syncServerName");
 			dumpTask.setName(dumpTaskName);
 			dumpTask.setSyncType(SyncType.DUMP);
-			dumpTask.setController(com.dianping.puma.core.constant.Controller.START);
+			dumpTask.setController(com.dianping.puma.core.constant.ActionController.START);
 
 			String pumaTaskName = (String) session.getAttribute("pumaTaskName");
 			dumpTask.setPumaTaskName(pumaTaskName);
@@ -350,7 +350,7 @@ public class SyncTaskCreateController {
 					errorCodeHandlerNames.put(errorCode, handler);
 				}
 			}
-			syncTask.setController(com.dianping.puma.core.constant.Controller.START);
+			syncTask.setController(com.dianping.puma.core.constant.ActionController.START);
 			syncTask.setErrorCodeHandlerNameMap(errorCodeHandlerNames);
 			syncTask.setDefaultHandler(StringUtils.trim(defaultHandler));
 			syncTask.setMysqlMapping(mysqlMapping);

@@ -15,7 +15,7 @@
  */
 package com.dianping.puma.syncserver.job.container;
 
-import com.dianping.puma.core.constant.Controller;
+import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.monitor.SyncTaskOperationEvent;
 import com.dianping.puma.core.sync.model.task.SyncTaskStatusAction;
@@ -35,7 +35,7 @@ public interface TaskExecutionContainer {
 
     public TaskExecutor get(SyncType syncType, String taskName);
 
-    public void changeStatus(String taskName, Controller controller);
+    public void changeStatus(String taskName, ActionController controller);
 
     public void deleteSyncTask(String taskName);
 

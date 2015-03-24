@@ -1,6 +1,6 @@
 package com.dianping.puma.checker;
 
-import com.dianping.puma.core.constant.Controller;
+import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.model.PumaTaskController;
 import com.dianping.puma.core.monitor.Event;
 import com.dianping.puma.core.monitor.EventListener;
@@ -28,7 +28,7 @@ public class PumaTaskControllerChecker implements EventListener {
 
 			PumaTaskControllerEvent pumaTaskControllerEvent = (PumaTaskControllerEvent) event;
 			PumaTaskController pumaTaskController = pumaTaskControllerEvent.getController();
-			Controller controller = pumaTaskController.getController();
+			ActionController controller = pumaTaskController.getController();
 
 			switch (controller) {
 			case PAUSE:

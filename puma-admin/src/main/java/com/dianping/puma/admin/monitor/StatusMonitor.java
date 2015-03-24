@@ -18,7 +18,7 @@ import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.sync.model.task.SyncTaskStatusAction;
 import com.dianping.puma.core.sync.model.task.Type;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
-import com.dianping.puma.core.constant.Controller;
+import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.SyncType;
 
 /**
@@ -93,7 +93,7 @@ public class StatusMonitor {
         //暂停状态或不存在(已经删除)的SyncTask不报警
         if (shouldAlarm && status.getSyncType() == SyncType.SYNC) {
             SyncTask syncTask = syncTaskService.find(status.getTaskName());
-            if (syncTask == null || syncTask.getController() == Controller.PAUSE) {
+            if (syncTask == null || syncTask.getController() == ActionController.PAUSE) {
                 shouldAlarm = false;
             }
         }

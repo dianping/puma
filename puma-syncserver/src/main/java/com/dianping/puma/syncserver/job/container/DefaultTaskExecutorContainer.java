@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.dianping.puma.core.constant.Controller;
+import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.entity.BaseSyncTask;
@@ -74,7 +74,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
 		}
 		SyncTaskExecutor syncTaskExecutor0 = (SyncTaskExecutor) taskExecutor;
 		SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) newTaskExecutor;
-		if (syncTaskExecutor.getTask().getController() != Controller.RESUME
+		if (syncTaskExecutor.getTask().getController() != ActionController.RESUME
 				|| syncTaskExecutor0.getState().getStatus() != Status.SUSPENDED
 				&& syncTaskExecutor0.getState().getStatus() != Status.FAILED
 				&& syncTaskExecutor0.getState().getStatus() != Status.SUCCESS) {
@@ -105,8 +105,8 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
 		if (newTaskExecutor instanceof SyncTaskExecutor) {
 			SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) newTaskExecutor;
 
-			if (syncTaskExecutor.getTask().getController() == Controller.RESUME
-					|| syncTaskExecutor.getTask().getController() == Controller.START) {
+			if (syncTaskExecutor.getTask().getController() == ActionController.RESUME
+					|| syncTaskExecutor.getTask().getController() == ActionController.START) {
 				syncTaskExecutor.start();
 			} else {
 				syncTaskExecutor.pause("Stop because the StatusAction is Pause.");
@@ -135,12 +135,12 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
 	 * taskStatusActionEvent的StatusAction是RESTART，旧的SyncTaskExecutor状态是SUSPPENDED/FAILED/SUCCEED
 	 */
 	@Override
-	public void changeStatus(String taskName, Controller controller) {
+	public void changeStatus(String taskName, ActionController controller) {
 		SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) this.get(SyncType.SYNC, taskName);
 		if (syncTaskExecutor != null) {
-			if (controller == Controller.PAUSE) {
+			if (controller == ActionController.PAUSE) {
 				syncTaskExecutor.pause("Stop because the StatusAction is Pause.");
-			} else if (controller == Controller.RESUME
+			} else if (controller == ActionController.RESUME
 					&& (syncTaskExecutor.getState().getStatus() == Status.SUSPENDED
 					|| syncTaskExecutor.getState().getStatus() == Status.SUCCESS
 					|| syncTaskExecutor.getState().getStatus() == Status.FAILED)) {

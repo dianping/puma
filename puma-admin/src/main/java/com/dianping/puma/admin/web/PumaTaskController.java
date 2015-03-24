@@ -260,7 +260,7 @@ public class PumaTaskController {
 			PumaTask pumaTask = pumaTaskService.find(id);
 
 			// Publish puma task controller event to puma server.
-			this.pumaTaskControllerReporter.report(pumaTask.getPumaServerId(), pumaTask.getId(), pumaTask.getName(), com.dianping.puma.core.constant.Controller.RESUME);
+			this.pumaTaskControllerReporter.report(pumaTask.getPumaServerId(), pumaTask.getId(), pumaTask.getName(), com.dianping.puma.core.constant.ActionController.RESUME);
 
 			map.put("success", true);
 		} catch (MongoException e) {
@@ -283,7 +283,7 @@ public class PumaTaskController {
 			PumaTask pumaTask = pumaTaskService.find(id);
 
 			// Publish puma task controller event to puma server.
-			this.pumaTaskControllerReporter.report(pumaTask.getPumaServerId(), pumaTask.getId(), pumaTask.getName(), com.dianping.puma.core.constant.Controller.PAUSE);
+			this.pumaTaskControllerReporter.report(pumaTask.getPumaServerId(), pumaTask.getId(), pumaTask.getName(), com.dianping.puma.core.constant.ActionController.PAUSE);
 
 			map.put("success", true);
 		} catch (MongoException e) {

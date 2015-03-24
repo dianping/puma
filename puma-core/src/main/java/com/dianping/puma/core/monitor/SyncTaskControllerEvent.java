@@ -1,12 +1,12 @@
 package com.dianping.puma.core.monitor;
 
-import com.dianping.puma.core.constant.Controller;
+import com.dianping.puma.core.constant.ActionController;
 
 public class SyncTaskControllerEvent extends SyncTaskEvent {
 
 	private String taskName;
 
-	private Controller controller;
+	private ActionController controller;
 
 	public void setTaskName(String taskName) {
 		this.taskName = taskName;
@@ -16,11 +16,11 @@ public class SyncTaskControllerEvent extends SyncTaskEvent {
 		return taskName;
 	}
 
-	public Controller getController() {
+	public ActionController getController() {
 		return controller;
 	}
 
-	public void setController(Controller controller) {
+	public void setController(ActionController controller) {
 		this.controller = controller;
 	}
 }

@@ -21,12 +21,15 @@
             <tbody>
              #foreach($syncTask in ${syncTasks})
             <tr>
-                <td>${syncTask.pumaTaskName}</td>
+                <td><a href="" target="_blank">${syncTask.pumaTaskName}</td>
                 <td>${syncTask.dstDBInstanceName}</td>
                 <td>${syncTask.syncServerName}</td>
                 <td class="sync-task-status"></td>
                 <td class="sync-task-bin-log-info"></td>
                 <td>
+                    <a href="${rc.contextPath}/sync-task/detail/${syncTask.name}"  target="_self" class="no-under" data-name="${syncTask.name}">
+                        <span class="glyphicon glyphicon-list-alt" ></span>
+                    </a>
                     <a href="#" class="no-under sync-task-refresh" data-name="${syncTask.name}">
                         <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
                     </a>

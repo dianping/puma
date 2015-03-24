@@ -1,6 +1,6 @@
 package com.dianping.puma.core.entity;
 
-import com.dianping.puma.core.constant.Controller;
+import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.model.BinlogInfo;
 
@@ -18,7 +18,7 @@ public abstract class BaseSyncTask extends BaseEntity {
 
 	private BinlogInfo binlogInfo;
 
-	private Controller controller;
+	private ActionController controller;
 
 	private Map<Integer, String> errorCodeHandlerNameMap;
 
@@ -64,11 +64,11 @@ public abstract class BaseSyncTask extends BaseEntity {
 		this.binlogInfo = binlogInfo;
 	}
 
-	public Controller getController() {
+	public ActionController getController() {
 		return controller;
 	}
 
-	public void setController(Controller controller) {
+	public void setController(ActionController controller) {
 		this.controller = controller;
 	}
 

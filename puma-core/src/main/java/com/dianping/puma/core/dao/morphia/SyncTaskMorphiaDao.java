@@ -1,5 +1,6 @@
 package com.dianping.puma.core.dao.morphia;
 
+import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.dao.SyncTaskDao;
 import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.entity.morphia.SyncTaskMorphia;
@@ -78,5 +79,11 @@ public class SyncTaskMorphiaDao extends BasicDAO<SyncTaskMorphia, String> implem
 			syncTasks.add(syncTaskMorphia.getEntity());
 		}
 		return syncTasks;
+	}
+	
+	public void updateStatusAction(String name,ActionController controller){
+		SyncTask syncTask = this.find(name);
+		syncTask.setController(controller);
+		this.create(syncTask);
 	}
 }

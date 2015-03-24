@@ -490,7 +490,9 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
 
     @Override
     public void stop(String detail) {
-
+        for (PumaClient client : pumaClientList) {
+            client.stop();
+        }
     }
 
     public void setConfigCache(ConfigCache configCache) {

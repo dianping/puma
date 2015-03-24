@@ -70,7 +70,7 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
         if(pumaTaskName == null){
             throw new IllegalArgumentException("SyncTask srcDBInstanceId  is null, maybe SyncTask with srcDBInstanceId["+pumaTaskName+"] is not setting.");
         }
-        PumaTask pumaTask = pumaTaskService.findByName(pumaTaskName);
+        PumaTask pumaTask = pumaTaskService.find(pumaTaskName);
         
         if(pumaTask == null){
             throw new IllegalArgumentException("PumaTask is null, maybe PumaTask with srcDBInstanceId["+pumaTaskName+"] is not setting.");
@@ -85,12 +85,12 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
         
         String target = pumaTask.getName();
 
-        SrcDBInstance srcDBInstance = srcDBInstanceService.findByName(pumaTask.getSrcDBInstanceName());
+        SrcDBInstance srcDBInstance = srcDBInstanceService.find(pumaTask.getSrcDBInstanceName());
         task.setPumaClientServerId(srcDBInstance.getServerId());
 
-        DstDBInstance dstDBInstance = dstDBInstanceService.findByName(task.getDstDBInstanceName());
+        DstDBInstance dstDBInstance = dstDBInstanceService.find(task.getDstDBInstanceName());
 
-        SyncTaskExecutor excutor = new SyncTaskExecutor(task, pumaServerHost, pumaServerPort, target, dstDBInstance);
+        SyncTaskExecutor excutor = new SyncTaskExecutor(task, new SyncTaskState(), pumaServerHost, pumaServerPort, target, dstDBInstance);
         excutor.setBinlogInfoHolder(binlogInfoHolder);
         excutor.setNotifyService(notifyService);
         return excutor;

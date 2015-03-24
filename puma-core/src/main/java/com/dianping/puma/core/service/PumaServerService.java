@@ -6,17 +6,15 @@ import java.util.List;
 
 public interface PumaServerService {
 
-	PumaServer find(String id);
+	PumaServer find(String name);
 
-	PumaServer findByName(String name);
-
-	PumaServer findByHostAndPort(String host, Integer port);
+	PumaServer findByHost(String host);
 
 	List<PumaServer> findAll();
 
-	void create(PumaServer entity);
+	void create(PumaServer pumaServer);
 
-	void update(PumaServer entity);
+	void update(PumaServer pumaServer);
 
-	void remove(String id);
+	void remove(String name);
 }

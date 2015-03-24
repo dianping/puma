@@ -2,10 +2,11 @@ package com.dianping.puma.core.dao.morphia;
 
 import com.dianping.puma.core.dao.SyncServerDao;
 import com.dianping.puma.core.entity.SyncServer;
-import com.dianping.puma.core.entity.morphia.SyncServerMorphiaEntity;
+import com.dianping.puma.core.entity.morphia.SyncServerMorphia;
 import com.google.code.morphia.dao.BasicDAO;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
+import com.google.code.morphia.query.UpdateOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,53 +14,59 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("syncServerDao")
-public class SyncServerMorphiaDao extends BasicDAO<SyncServerMorphiaEntity, String> implements SyncServerDao{
+public class SyncServerMorphiaDao extends BasicDAO<SyncServerMorphia, String> implements SyncServerDao{
 
 	@Autowired
 	public SyncServerMorphiaDao(MongoClient mongoClient) {
 		super(mongoClient.getDatastore());
 	}
 
-	public SyncServer find(String id) {
-		Query<SyncServerMorphiaEntity> q = this.getDatastore().createQuery(SyncServerMorphiaEntity.class);
-		q.field("id").equal(id);
-		SyncServerMorphiaEntity morphiaEntity = this.findOne(q);
-		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();
+	public SyncServer find(String name) {
+		Query<SyncServerMorphia> q = this.getDatastore().createQuery(SyncServerMorphia.class);
+		q.field("name").equal(name);
+		SyncServerMorphia syncServerMorphia = this.findOne(q);
+		return (syncServerMorphia == null) ? null : syncServerMorphia.getEntity();
 	}
 
 	public SyncServer findByHost(String host,int port){
-		Query<SyncServerMorphiaEntity> q = this.getDatastore().createQuery(SyncServerMorphiaEntity.class).disableValidation();
+		Query<SyncServerMorphia> q = this.getDatastore().createQuery(SyncServerMorphia.class).disableValidation();
 		q.field("entity.host").equal(host);
 		q.field("entity.port").equal(port);
-		SyncServerMorphiaEntity morphiaEntity = this.findOne(q);
-		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();
+		SyncServerMorphia syncServerMorphia = this.findOne(q);
+		return (syncServerMorphia == null) ? null : syncServerMorphia.getEntity();
 	}
 	
 	public List<SyncServer> findAll() {
-		Query<SyncServerMorphiaEntity> q = this.getDatastore().createQuery(SyncServerMorphiaEntity.class);
-		QueryResults<SyncServerMorphiaEntity> result = this.find(q);
-		List<SyncServerMorphiaEntity> morphiaEntities = result.asList();
+		Query<SyncServerMorphia> q = this.getDatastore().createQuery(SyncServerMorphia.class);
+		QueryResults<SyncServerMorphia> result = this.find(q);
+		List<SyncServerMorphia> syncServerMorphias = result.asList();
 
-		List<SyncServer> entities = new ArrayList<SyncServer>();
-		for (SyncServerMorphiaEntity morphiaEntity: morphiaEntities) {
-			entities.add(morphiaEntity.getEntity());
+		List<SyncServer> syncServers = new ArrayList<SyncServer>();
+		for (SyncServerMorphia syncServerMorphia: syncServerMorphias) {
+			syncServers.add(syncServerMorphia.getEntity());
 		}
-		return entities;
+		return syncServers;
 	}
 
-	public void create(SyncServer entity) {
-		SyncServerMorphiaEntity morphiaEntity = new SyncServerMorphiaEntity(entity);
-		this.save(morphiaEntity);
+	public void create(SyncServer syncServer) {
+		SyncServerMorphia syncServerMorphia = new SyncServerMorphia(syncServer);
+		this.save(syncServerMorphia);
 		this.getDatastore().ensureIndexes();
 	}
 
-	public void update(SyncServer entity) {
-		this.create(entity);
+	public void update(SyncServer syncServer) {
+		SyncServerMorphia syncServerMorphia = new SyncServerMorphia(syncServer);
+		Query<SyncServerMorphia> q = this.getDatastore().createQuery(SyncServerMorphia.class);
+		q.field("name").equal(syncServerMorphia.getName());
+		UpdateOperations<SyncServerMorphia> uop = this.getDatastore().createUpdateOperations(SyncServerMorphia.class);
+		uop.set("entity", syncServerMorphia);
+		this.update(q, uop);
+		this.getDatastore().ensureIndexes();
 	}
 
-	public void remove(String id) {
-		Query<SyncServerMorphiaEntity> q = this.getDatastore().createQuery(SyncServerMorphiaEntity.class);
-		q.field("id").equal(id);
+	public void remove(String name) {
+		Query<SyncServerMorphia> q = this.getDatastore().createQuery(SyncServerMorphia.class);
+		q.field("name").equal(name);
 		this.deleteByQuery(q);
 	}
 }

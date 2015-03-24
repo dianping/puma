@@ -8,8 +8,6 @@ public abstract class BaseEntity implements Serializable {
 
 	private static final long serialVersionUID = 8121775127353895000L;
 
-	private String id;
-
 	private String name;
 
 	private Date gmtCreate;
@@ -19,7 +17,6 @@ public abstract class BaseEntity implements Serializable {
 	private Long version;
 
 	public BaseEntity() {
-		this.id = UUID.randomUUID().toString();
 		this.upgrade();
 	}
 
@@ -36,10 +33,6 @@ public abstract class BaseEntity implements Serializable {
 			this.version = 1L;
 		}
 		++this.version;
-	}
-
-	public String getId() {
-		return id;
 	}
 
 	public String getName() { return name; }

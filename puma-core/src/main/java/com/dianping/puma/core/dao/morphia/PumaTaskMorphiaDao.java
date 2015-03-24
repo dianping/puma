@@ -2,7 +2,7 @@ package com.dianping.puma.core.dao.morphia;
 
 import com.dianping.puma.core.dao.PumaTaskDao;
 import com.dianping.puma.core.entity.PumaTask;
-import com.dianping.puma.core.entity.morphia.PumaTaskMorphiaEntity;
+import com.dianping.puma.core.entity.morphia.PumaTaskMorphia;
 import com.google.code.morphia.dao.BasicDAO;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
@@ -14,84 +14,77 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("pumaTaskDao")
-public class PumaTaskMorphiaDao extends BasicDAO<PumaTaskMorphiaEntity, String> implements PumaTaskDao {
+public class PumaTaskMorphiaDao extends BasicDAO<PumaTaskMorphia, String> implements PumaTaskDao {
 
 	@Autowired
 	public PumaTaskMorphiaDao(MongoClient mongoClient) {
 		super(mongoClient.getDatastore());
 	}
 
-	public PumaTask find(String id) {
-		Query<PumaTaskMorphiaEntity> q = this.getDatastore().createQuery(PumaTaskMorphiaEntity.class);
-		q.field("id").equal(id);
-		PumaTaskMorphiaEntity morphiaEntity = this.findOne(q);
-		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();
+	public PumaTask find(String name) {
+		Query<PumaTaskMorphia> q = this.getDatastore().createQuery(PumaTaskMorphia.class);
+		q.field("name").equal(name);
+		PumaTaskMorphia pumaTaskMorphia = this.findOne(q);
+		return (pumaTaskMorphia == null) ? null : pumaTaskMorphia.getEntity();
 	}
 
-	public PumaTask findByName(String name) {
-		Query<PumaTaskMorphiaEntity> q = this.getDatastore().createQuery(PumaTaskMorphiaEntity.class).disableValidation();
-		q.field("entity.name").equal(name);
-		PumaTaskMorphiaEntity morphiaEntity = this.findOne(q);
-		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();
-	}
+	public List<PumaTask> findBySrcDBInstanceName(String srcDBInstanceName) {
+		Query<PumaTaskMorphia> q = this.getDatastore().createQuery(PumaTaskMorphia.class).disableValidation();
+		q.field("entity.srcDBInstanceName").equal(srcDBInstanceName);
+		QueryResults<PumaTaskMorphia> result = this.find(q);
+		List<PumaTaskMorphia> pumaTaskMorphias = result.asList();
 
-	public List<PumaTask> findBySrcDBInstanceId(String srcDBInstanceId) {
-		Query<PumaTaskMorphiaEntity> q = this.getDatastore().createQuery(PumaTaskMorphiaEntity.class).disableValidation();
-		q.field("entity.srcDBInstanceId").equal(srcDBInstanceId);
-		QueryResults<PumaTaskMorphiaEntity> result = this.find(q);
-		List<PumaTaskMorphiaEntity> morphiaEntities = result.asList();
-
-		List<PumaTask> entities = new ArrayList<PumaTask>();
-		for (PumaTaskMorphiaEntity morphiaEntity: morphiaEntities) {
-			entities.add(morphiaEntity.getEntity());
+		List<PumaTask> pumaTasks = new ArrayList<PumaTask>();
+		for (PumaTaskMorphia pumaTaskMorphia: pumaTaskMorphias) {
+			pumaTasks.add(pumaTaskMorphia.getEntity());
 		}
-		return entities;
+		return pumaTasks;
 	}
 
-	public List<PumaTask> findByPumaServerId(String pumaServerName) {
-		Query<PumaTaskMorphiaEntity> q = this.getDatastore().createQuery(PumaTaskMorphiaEntity.class).disableValidation();
-		q.field("entity.pumaServerId").equal(pumaServerName);
-		QueryResults<PumaTaskMorphiaEntity> result = this.find(q);
-		List<PumaTaskMorphiaEntity> morphiaEntities = result.asList();
+	public List<PumaTask> findByPumaServerName(String pumaServerName) {
+		Query<PumaTaskMorphia> q = this.getDatastore().createQuery(PumaTaskMorphia.class).disableValidation();
+		q.field("entity.pumaServerName").equal(pumaServerName);
+		QueryResults<PumaTaskMorphia> result = this.find(q);
+		List<PumaTaskMorphia> pumaTaskMorphias = result.asList();
 
-		List<PumaTask> entities = new ArrayList<PumaTask>();
-		for (PumaTaskMorphiaEntity morphiaEntity: morphiaEntities) {
-			entities.add(morphiaEntity.getEntity());
+		List<PumaTask> pumaTasks = new ArrayList<PumaTask>();
+		for (PumaTaskMorphia pumaTaskMorphia: pumaTaskMorphias) {
+			pumaTasks.add(pumaTaskMorphia.getEntity());
 		}
-		return entities;
+		return pumaTasks;
 	}
 
 	public List<PumaTask> findAll() {
-		Query<PumaTaskMorphiaEntity> q = this.getDatastore().createQuery(PumaTaskMorphiaEntity.class);
-		QueryResults<PumaTaskMorphiaEntity> result = this.find(q);
-		List<PumaTaskMorphiaEntity> morphiaEntities = result.asList();
+		Query<PumaTaskMorphia> q = this.getDatastore().createQuery(PumaTaskMorphia.class);
+		QueryResults<PumaTaskMorphia> result = this.find(q);
+		List<PumaTaskMorphia> pumaTaskMorphias = result.asList();
 
-		List<PumaTask> entities = new ArrayList<PumaTask>();
-		for (PumaTaskMorphiaEntity morphiaEntity: morphiaEntities) {
-			entities.add(morphiaEntity.getEntity());
+		List<PumaTask> pumaTasks = new ArrayList<PumaTask>();
+		for (PumaTaskMorphia pumaTaskMorphia: pumaTaskMorphias) {
+			pumaTasks.add(pumaTaskMorphia.getEntity());
 		}
-		return entities;
+		return pumaTasks;
 	}
 
-	public void create(PumaTask entity) {
-		PumaTaskMorphiaEntity morphiaEntity = new PumaTaskMorphiaEntity(entity);
-		this.save(morphiaEntity);
+	public void create(PumaTask pumaTask) {
+		PumaTaskMorphia pumaTaskMorphia = new PumaTaskMorphia(pumaTask);
+		this.save(pumaTaskMorphia);
 		this.getDatastore().ensureIndexes();
 	}
 
-	public void update(PumaTask entity) {
-		PumaTaskMorphiaEntity morphiaEntity = new PumaTaskMorphiaEntity(entity);
-		Query<PumaTaskMorphiaEntity> q = this.getDatastore().createQuery(PumaTaskMorphiaEntity.class);
-		q.field("id").equal(morphiaEntity.getId());
-		UpdateOperations<PumaTaskMorphiaEntity> uop = this.getDatastore().createUpdateOperations(PumaTaskMorphiaEntity.class);
-		uop.set("entity", entity);
+	public void update(PumaTask pumaTask) {
+		PumaTaskMorphia pumaTaskMorphia = new PumaTaskMorphia(pumaTask);
+		Query<PumaTaskMorphia> q = this.getDatastore().createQuery(PumaTaskMorphia.class);
+		q.field("name").equal(pumaTask.getName());
+		UpdateOperations<PumaTaskMorphia> uop = this.getDatastore().createUpdateOperations(PumaTaskMorphia.class);
+		uop.set("entity", pumaTaskMorphia);
 		this.update(q, uop);
 		this.getDatastore().ensureIndexes();
 	}
 
-	public void remove(String id) {
-		Query<PumaTaskMorphiaEntity> q = this.getDatastore().createQuery(PumaTaskMorphiaEntity.class);
-		q.field("id").equal(id);
+	public void remove(String name) {
+		Query<PumaTaskMorphia> q = this.getDatastore().createQuery(PumaTaskMorphia.class);
+		q.field("name").equal(name);
 		this.deleteByQuery(q);
 	}
 }

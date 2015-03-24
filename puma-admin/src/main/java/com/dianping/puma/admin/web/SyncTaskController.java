@@ -8,14 +8,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.dianping.puma.admin.reporter.SyncTaskOperationReporter;
+import com.dianping.puma.admin.remote.reporter.SyncTaskOperationReporter;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
-import com.dianping.puma.core.container.SyncTaskStateContainer;
-import com.dianping.puma.core.model.SyncTaskState;
+import com.dianping.puma.core.model.state.TaskStateContainer;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
 import com.mongodb.MongoException;
 
@@ -30,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.dianping.puma.admin.monitor.SystemStatusContainer;
 import com.dianping.puma.core.service.SyncTaskService;
 import com.dianping.puma.core.entity.SyncTask;
 
@@ -42,7 +40,7 @@ public class SyncTaskController {
 	private SyncTaskService syncTaskService;
 
 	@Autowired
-	private SyncTaskStateContainer syncTaskStateContainer;
+	private TaskStateContainer syncTaskStateContainer;
 
 	@Autowired
 	private SyncTaskOperationReporter syncTaskOperationReporter;

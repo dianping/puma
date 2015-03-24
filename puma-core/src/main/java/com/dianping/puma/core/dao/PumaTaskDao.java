@@ -6,19 +6,17 @@ import java.util.List;
 
 public interface PumaTaskDao {
 
-	PumaTask find(String id);
+	PumaTask find(String name);
 
-	PumaTask findByName(String name);
+	List<PumaTask> findBySrcDBInstanceName(String srcDBInstanceName);
 
-	List<PumaTask> findBySrcDBInstanceId(String srcDBInstanceId);
-
-	List<PumaTask> findByPumaServerId(String pumaServerName);
+	List<PumaTask> findByPumaServerName(String pumaServerName);
 
 	List<PumaTask> findAll();
 
-	void create(PumaTask entity);
+	void create(PumaTask pumaTask);
 
-	void update(PumaTask entity);
+	void update(PumaTask pumaTask);
 
-	void remove(String id);
+	void remove(String name);
 }

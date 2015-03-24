@@ -6,16 +6,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import com.dianping.puma.core.entity.AbstractBaseSyncTask;
 import com.dianping.puma.core.entity.BaseSyncTask;
-import com.dianping.puma.core.model.SyncTaskState;
+import com.dianping.puma.core.model.state.BaseSyncTaskState;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.sync.model.task.Task;
-import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.syncserver.job.executor.AbstractTaskExecutor;
 
 public class RetryHandler implements Handler {
@@ -43,7 +40,7 @@ public class RetryHandler implements Handler {
         Exception exception = context.getException();
         ChangedEvent changedEvent = context.getChangedEvent();
 
-        SyncTaskState state = executor.getState();
+        BaseSyncTaskState state = executor.getTaskState();
         //TaskExecutorStatus status = executor.getStatus();
         state.setDetail("RetryHandler retrying, cause: " + task.getPumaTaskName() + "->" + task.getDstDBInstanceName() + ":" + exception.getMessage() + ". Event=" + changedEvent + ", at "
                 + DateFormatUtils.format(new Date(), PATTERN));

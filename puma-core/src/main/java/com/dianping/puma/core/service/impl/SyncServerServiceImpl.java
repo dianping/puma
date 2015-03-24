@@ -15,8 +15,8 @@ public class SyncServerServiceImpl implements SyncServerService {
 	SyncServerDao syncServerDao;
 
 	@Override
-	public SyncServer find(String id) {
-		return syncServerDao.find(id);
+	public SyncServer find(String name) {
+		return syncServerDao.find(name);
 	}
 
 	@Override
@@ -25,18 +25,18 @@ public class SyncServerServiceImpl implements SyncServerService {
 	}
 
 	@Override
-	public void create(SyncServer entity) {
-		syncServerDao.create(entity);
+	public void create(SyncServer syncServer) {
+		syncServerDao.create(syncServer);
 	}
 
 	@Override
-	public void update(SyncServer entity) {
-		syncServerDao.update(entity);
+	public void update(SyncServer syncServer) {
+		syncServerDao.update(syncServer);
 	}
 
 	@Override
-	public void remove(String id) {
-		syncServerDao.remove(id);
+	public void remove(String name) {
+		syncServerDao.remove(name);
 	}
 	@Override
 	public SyncServer findByHost(String host, int port){

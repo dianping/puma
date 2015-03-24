@@ -27,10 +27,10 @@
           init-method="init">
         <property name="topic" value="puma_task_state"/>
         <property name="notifyService" ref="notifyService"/>
-        <property name="clazz" value="com.dianping.puma.core.monitor.PumaTaskStateEvent" />
+        <property name="clazz" value="com.dianping.puma.core.monitor.event.PumaTaskStateEvent" />
         <property name="listeners">
             <list>
-                <ref bean="pumaTaskStateChecker" />
+                <ref bean="taskStateReceiver" />
             </list>
         </property>
     </bean>
@@ -52,45 +52,10 @@
           init-method="init">
         <property name="topic" value="sync_task_state"/>
         <property name="notifyService" ref="notifyService"/>
-        <property name="clazz" value="com.dianping.puma.core.monitor.SyncTaskStateEvent" />
+        <property name="clazz" value="com.dianping.puma.core.monitor.event.SyncTaskStateEvent" />
         <property name="listeners">
             <list>
-                <ref bean="syncTaskStateChecker" />
-            </list>
-        </property>
-    </bean>
-
-    <bean id="pumaTaskEventPublisher"
-          class="com.dianping.puma.core.monitor.SwallowEventPublisher"
-          init-method="init">
-        <property name="topic" value="puma_task_event" />
-    </bean>
-
-    <bean id="taskEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPublisher"
-        init-method="init">
-        <property name="topic" value="puma_task_event" />
-    </bean>
-
-    <bean id="statusActionEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPublisher"
-        init-method="init">
-        <property name="topic" value="puma_status_action_event" />
-    </bean>
-
-    <bean id="taskDeleteEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPublisher"
-        init-method="init">
-        <property name="topic" value="puma_task_delete_event" />
-    </bean>
-
-    <bean id="statusEventSubscriber"
-        class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
-        init-method="init">
-        <property name="topic" value="puma_status_event" />
-        <property name="notifyService" ref="notifyService" />
-        <property name="clazz"
-            value="com.dianping.puma.core.monitor.TaskStatusEvent" />
-        <property name="listeners">
-            <list>
-                <ref bean="systemStatusContainer" />
+                <ref bean="taskStateReceiver" />
             </list>
         </property>
     </bean>

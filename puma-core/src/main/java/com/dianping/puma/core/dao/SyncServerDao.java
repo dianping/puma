@@ -6,15 +6,15 @@ import java.util.List;
 
 public interface SyncServerDao {
 
-	SyncServer find(String id);
+	SyncServer find(String name);
 
 	SyncServer findByHost(String host,int port);
 	
 	List<SyncServer> findAll();
 
-	void create(SyncServer entity);
+	void create(SyncServer syncServer);
 
-	void update(SyncServer entity);
+	void update(SyncServer syncServer);
 
-	void remove(String id);
+	void remove(String name);
 }

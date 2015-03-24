@@ -6,13 +6,13 @@ import java.util.List;
 
 public interface SyncServerService {
 
-	SyncServer find(String id);
+	SyncServer find(String name);
 
 	List<SyncServer> findAll();
 
-	void create(SyncServer entity);
+	void create(SyncServer syncServer);
 
-	void update(SyncServer entity);
+	void update(SyncServer syncServer);
 
 	void remove(String id);
 

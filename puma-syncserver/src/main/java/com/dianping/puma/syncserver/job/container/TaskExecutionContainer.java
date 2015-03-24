@@ -33,11 +33,13 @@ public interface TaskExecutionContainer {
 
     public void submit(TaskExecutor taskExecutor) throws TaskExecutionException;
 
-    public TaskExecutor get(SyncType syncType, String taskName);
+    public TaskExecutor get(String taskName);
 
     public void changeStatus(String taskName, ActionController controller);
 
     public void deleteSyncTask(String taskName);
 
     public List<TaskExecutor> toList();
+
+    public List<TaskExecutor> getAll();
 }

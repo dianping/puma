@@ -91,12 +91,10 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
 
 			// Base.
-			String taskId = pumaTask.getId();
 			String taskName = pumaTask.getName();
-			taskExecutor.setTaskId(taskId);
 			taskExecutor.setTaskName(taskName);
 			taskExecutor.setNotifyService(notifyService);
-			taskExecutor.setServerId(taskId.hashCode());
+			taskExecutor.setServerId(taskName.hashCode());
 
 			// Bin log.
 			taskExecutor.setBinlogInfoHolder(binlogInfoHolder);

@@ -1,7 +1,8 @@
 package com.dianping.puma.admin.config;
 
-import com.dianping.puma.core.container.PumaTaskStateContainer;
 import com.dianping.puma.core.entity.PumaTask;
+import com.dianping.puma.core.model.state.PumaTaskState;
+import com.dianping.puma.core.model.state.TaskStateContainer;
 import com.dianping.puma.core.service.PumaTaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,7 @@ public class PumaTaskStateContainerConfig {
 	private static final Logger LOG = LoggerFactory.getLogger(PumaTaskStateContainerConfig.class);
 
 	@Autowired
-	PumaTaskStateContainer pumaTaskStateContainer;
+	TaskStateContainer taskStateContainer;
 
 	@Autowired
 	PumaTaskService pumaTaskService;
@@ -27,7 +28,8 @@ public class PumaTaskStateContainerConfig {
 		List<PumaTask> pumaTasks = pumaTaskService.findAll();
 
 		for (PumaTask pumaTask: pumaTasks) {
-			pumaTaskStateContainer.create(pumaTask.getId());
+			PumaTaskState taskState = new PumaTaskState();
+			taskStateContainer.add(pumaTask.getName(), taskState);
 		}
 	}
 }

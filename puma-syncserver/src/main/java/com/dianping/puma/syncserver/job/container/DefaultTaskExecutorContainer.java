@@ -51,7 +51,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
 		//获取已有的TaskExecutor
 		//执行taskExecutor
 		TaskExecutor taskExecutor = taskExecutorMap
-				.get(TaskExecutorStatus.calHashCode(syncType, newTaskExecutor.getTask().getId()));
+				.get(TaskExecutorStatus.calHashCode(syncType, newTaskExecutor.getTask().getName()));
 		if (taskExecutor != null) {
 			//如果有的话，一定是SyncTaskExecutor，是修改后重启
 			refreshSyncTask(taskExecutorMap, taskExecutor, newTaskExecutor);
@@ -121,7 +121,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
 	}
 
 	@Override
-	public TaskExecutor get(SyncType syncType, String taskName) {
+	public TaskExecutor get(String taskName) {
 		return taskExecutorMap.get(taskName);
 	}
 
@@ -155,7 +155,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
 
 	@Override
 	public void deleteSyncTask(String taskName) {
-		SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) this.get(SyncType.SYNC, taskName);
+		SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) this.get(taskName);
 		if (syncTaskExecutor != null) {
 			this.delete(SyncType.SYNC, taskName);
 			binlogInfoHolder.remove(taskName);
@@ -166,6 +166,11 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
 
 	@Override
 	public List<TaskExecutor> toList() {
+		return new ArrayList<TaskExecutor>(taskExecutorMap.values());
+	}
+
+	@Override
+	public List<TaskExecutor> getAll() {
 		return new ArrayList<TaskExecutor>(taskExecutorMap.values());
 	}
 

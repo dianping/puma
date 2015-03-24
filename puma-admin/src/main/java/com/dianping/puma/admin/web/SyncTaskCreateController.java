@@ -7,12 +7,14 @@ import javax.servlet.http.HttpSession;
 
 import com.dianping.puma.admin.reporter.SyncTaskOperationReporter;
 import com.dianping.puma.core.constant.ActionOperation;
+import com.dianping.puma.admin.remote.reporter.SyncTaskOperationReporter;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
-import com.dianping.puma.core.container.SyncTaskStateContainer;
 import com.dianping.puma.core.entity.*;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.SyncTaskState;
+import com.dianping.puma.core.model.state.BaseSyncTaskState;
+import com.dianping.puma.core.model.state.TaskState;
+import com.dianping.puma.core.model.state.TaskStateContainer;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.mongodb.MongoException;
 import org.apache.commons.lang.StringUtils;
@@ -26,7 +28,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.dianping.puma.admin.config.Config;
-import com.dianping.puma.admin.monitor.SystemStatusContainer;
 import com.dianping.puma.core.service.DumpTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.core.service.SyncTaskService;
@@ -40,7 +41,6 @@ import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.DumpMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
-import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.core.entity.DumpTask;
 
 /**
@@ -75,13 +75,10 @@ public class SyncTaskCreateController {
 	private PumaTaskService pumaTaskService;
 
 	@Autowired
-	private SystemStatusContainer systemStatusContainer;
-
-	@Autowired
 	private SyncTaskOperationReporter syncTaskOperationReporter;
 
 	@Autowired
-	SyncTaskStateContainer syncTaskStateContainer;
+	TaskStateContainer syncTaskStateContainer;
 
 	@RequestMapping(value = { "/sync-task/create" })
 	public ModelAndView create(HttpSession session) {
@@ -179,9 +176,9 @@ public class SyncTaskCreateController {
 			// MysqlHost mysqlHost = getSrcMysqlHost(srcDBInstance);
 			String pumaTaskName = (String) session.getAttribute("pumaTaskName");
 			String dstDBInstanceName = (String) session.getAttribute("dstDBInstanceName");
-			PumaTask pumaTask = pumaTaskService.findByName(pumaTaskName);
+			PumaTask pumaTask = pumaTaskService.find(pumaTaskName);
 				
-			SrcDBInstance srcDBInstance = srcDBInstanceService.findByName(pumaTask.getSrcDBInstanceName());
+			SrcDBInstance srcDBInstance = srcDBInstanceService.find(pumaTask.getSrcDBInstanceName());
 			MysqlHost mysqlHost = new MysqlHost();
 			mysqlHost.setHost(srcDBInstance.getHost() + ":" + srcDBInstance.getPort());
 			mysqlHost.setServerId(srcDBInstance.getServerId());
@@ -261,7 +258,7 @@ public class SyncTaskCreateController {
 				throw new IllegalArgumentException("dumpTask为空，可能是会话已经过期！");
 			}
 
-			SyncTaskState state = syncTaskStateContainer.get(dumpTask.getName());
+			TaskState state = syncTaskStateContainer.get(dumpTask.getName());
 			if (state != null) {
 				map.put("state", state);
 				if (state.getBinlogInfo() != null) {
@@ -372,7 +369,10 @@ public class SyncTaskCreateController {
 				this.dumpTaskService.updateSyncTaskId(dumpTaskId, syncTaskId);
 			}*/
 
-			syncTaskStateContainer.create(syncTask.getName());
+			// Add to status container.
+			BaseSyncTaskState state = new BaseSyncTaskState();
+			state.setStatus(Status.WAITING);
+			syncTaskStateContainer.add(syncTask.getName(), state);
 
 			syncTaskOperationReporter
 					.report(syncTask.getSyncServerName(), SyncType.SYNC, syncTask.getName(), ActionOperation.CREATE);
@@ -483,13 +483,13 @@ public class SyncTaskCreateController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			SyncTaskState state = this.syncTaskStateContainer.get(name);
+			TaskState state = this.syncTaskStateContainer.get(name);
 
 			if (state == null) {
 				throw new Exception("Sync task state not found.");
 			}
 
-			if ((new Date()).getTime() - state.getGmtCreate().getTime() > 60*1000) {
+			if ((new Date()).getTime() - state.getGmtUpdate().getTime() > 60*1000) {
 				state.setStatus(Status.DISCONNECTED);
 			}
 

@@ -35,8 +35,6 @@ public class StatusMonitor {
     @Autowired
     private SyncTaskService syncTaskService;
     @Autowired
-    private SystemStatusContainer systemStatusContainer;
-    @Autowired
     private NotifyService notifyService;
     /** 存放正在报警的task的status，同一个Task在getAlarmInterval()分钟内只报警一次 */
     private HashMap<Integer, Long> alarmingStatusMap = new HashMap<Integer, Long>();
@@ -45,8 +43,8 @@ public class StatusMonitor {
     public void monitor() {
         //如果有Status超过60秒没有更新，就报警
         //如果有fail的task，就报警
-        ConcurrentHashMap<Integer, TaskExecutorStatus> taskStatusMap = systemStatusContainer.getTaskStatusMap();
-        check(taskStatusMap);
+        //ConcurrentHashMap<Integer, TaskExecutorStatus> taskStatusMap = systemStatusContainer.getTaskStatusMap();
+        //check(taskStatusMap);
     }
 
     private void check(ConcurrentHashMap<Integer, TaskExecutorStatus> taskStatusMap) {

@@ -58,7 +58,7 @@ public class PumaServerController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerId(id);
+			List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerName(id);
 			if (pumaTasks != null && pumaTasks.size() != 0) {
 				map.put("lock", true);
 			} else {
@@ -92,7 +92,7 @@ public class PumaServerController {
 				// Create.
 
 				// Duplicated name?
-				pumaServer = pumaServerService.findByName(name);
+				pumaServer = pumaServerService.find(name);
 				if (pumaServer == null) {
 					pumaServer = new PumaServer();
 				} else {
@@ -129,17 +129,17 @@ public class PumaServerController {
 
 	@RequestMapping(value = { "/puma-server/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String removePost(String id) {
+	public String removePost(String name) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerId(id);
+			List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerName(name);
 
 			if (pumaTasks != null && pumaTasks.size() != 0) {
 				throw new Exception("lock");
 			}
 
-			pumaServerService.remove(id);
+			pumaServerService.remove(name);
 			map.put("success", true);
 		} catch (MongoException e) {
 			map.put("error", "storage");

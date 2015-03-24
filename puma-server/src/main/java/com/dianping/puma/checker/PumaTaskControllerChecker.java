@@ -1,10 +1,9 @@
 package com.dianping.puma.checker;
 
 import com.dianping.puma.core.constant.ActionController;
-import com.dianping.puma.core.model.PumaTaskController;
-import com.dianping.puma.core.monitor.Event;
+import com.dianping.puma.core.monitor.event.Event;
 import com.dianping.puma.core.monitor.EventListener;
-import com.dianping.puma.core.monitor.PumaTaskControllerEvent;
+import com.dianping.puma.core.monitor.event.PumaTaskControllerEvent;
 import com.dianping.puma.server.TaskExecutorContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +26,7 @@ public class PumaTaskControllerChecker implements EventListener {
 			LOG.info("Receive puma task controller event.");
 
 			PumaTaskControllerEvent pumaTaskControllerEvent = (PumaTaskControllerEvent) event;
-			PumaTaskController pumaTaskController = pumaTaskControllerEvent.getController();
-			ActionController controller = pumaTaskController.getController();
+			ActionController controller = pumaTaskControllerEvent.getController();
 
 			switch (controller) {
 			case PAUSE:

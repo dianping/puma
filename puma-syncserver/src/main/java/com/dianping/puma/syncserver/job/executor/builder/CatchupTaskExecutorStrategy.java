@@ -6,6 +6,7 @@ import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.holder.impl.DefaultBinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.monitor.NotifyService;
+import com.dianping.puma.core.model.state.CatchupTaskState;
 import com.dianping.puma.core.service.DstDBInstanceService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +78,7 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
 					"SyncTask srcDBInstanceId  is null, maybe SyncTask with srcDBInstanceId[" + pumaTaskName
 							+ "] is not setting.");
 		}
-		PumaTask pumaTask = pumaTaskService.findByName(pumaTaskName);
+		PumaTask pumaTask = pumaTaskService.find(pumaTaskName);
 
 		if (pumaTask == null) {
 			throw new IllegalArgumentException(
@@ -93,17 +94,17 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
 		String pumaServerHost = pumaServer.getHost();
 		int pumaServerPort = pumaServer.getPort();
 
-		String target = pumaTask.getId();
+		String target = pumaTask.getName();
 		//从taskContainer获取syncTaskExecutor
 		SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) taskExecutionContainer
-				.get(SyncType.SYNC, task.getName());
+				.get(task.getName());
 
-		DstDBInstance dstDBInstance = dstDBInstanceService.findByName(task.getDstDBInstanceName());
+		DstDBInstance dstDBInstance = dstDBInstanceService.find(task.getDstDBInstanceName());
 
-		SrcDBInstance srcDBInstance = srcDBInstanceService.findByName(pumaTask.getSrcDBInstanceName());
+		SrcDBInstance srcDBInstance = srcDBInstanceService.find(pumaTask.getSrcDBInstanceName());
 		task.setPumaClientServerId(srcDBInstance.getServerId());
 
-		CatchupTaskExecutor executor = new CatchupTaskExecutor(task, pumaServerHost, pumaServerPort, target, syncTaskExecutor, dstDBInstance);
+		CatchupTaskExecutor executor = new CatchupTaskExecutor(task, new CatchupTaskState(), pumaServerHost, pumaServerPort, target, syncTaskExecutor, dstDBInstance);
 		executor.setBinlogInfoHolder(binlogInfoHolder);
 		executor.setNotifyService(notifyService);
 		return executor;

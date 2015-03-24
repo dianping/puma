@@ -12,9 +12,6 @@ public class BaseMorphiaEntity<T> {
 	@Id
 	ObjectId objectId;
 
-	@Indexed(value = IndexDirection.ASC, name = "id", unique = true, dropDups = true)
-	String id;
-
 	@Indexed(value = IndexDirection.ASC, name = "name", unique = true, dropDups = true)
 	String name;
 
@@ -31,14 +28,6 @@ public class BaseMorphiaEntity<T> {
 		this.objectId = objectId;
 	}
 
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -48,7 +37,6 @@ public class BaseMorphiaEntity<T> {
 	}
 
 	public BaseMorphiaEntity(T entity) {
-		this.id = ((BaseEntity) entity).getId();
 		this.name = ((BaseEntity) entity).getName();
 		this.entity = entity;
 	}

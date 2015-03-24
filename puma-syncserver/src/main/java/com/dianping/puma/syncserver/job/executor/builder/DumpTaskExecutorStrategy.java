@@ -8,6 +8,7 @@ import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.monitor.NotifyService;
+import com.dianping.puma.core.model.state.DumpTaskState;
 import com.dianping.puma.core.service.DstDBInstanceService;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
@@ -35,14 +36,14 @@ public class DumpTaskExecutorStrategy implements TaskExecutorStrategy<DumpTask, 
         DumpTaskExecutor excutor;
         try {
             String pumaTaskName = task.getPumaTaskName();
-            PumaTask pumaTask = pumaTaskService.findByName(pumaTaskName);
+            PumaTask pumaTask = pumaTaskService.find(pumaTaskName);
             String srcDBInstanceName = pumaTask.getSrcDBInstanceName();
             String dstDBInstanceName = task.getDstDBInstanceName();
 
-            excutor = new DumpTaskExecutor(task);
-            excutor.setSrcDBInstance(srcDBInstanceService.findByName(srcDBInstanceName));
-            excutor.setDstDBInstance(dstDBInstanceService.findByName(dstDBInstanceName));
-           
+            excutor = new DumpTaskExecutor(task, new DumpTaskState());
+            excutor.setSrcDBInstance(srcDBInstanceService.find(srcDBInstanceName));
+            excutor.setDstDBInstance(dstDBInstanceService.find(dstDBInstanceName));
+
             return excutor;
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);

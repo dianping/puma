@@ -56,10 +56,10 @@ public class DstDBInstanceController {
 	}
 
 	@RequestMapping(value = { "/dst-db-instance/update" })
-	public ModelAndView update(String id) {
+	public ModelAndView update(String name) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceId(id);
+		List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceName(name);
 		if (pumaTasks != null && pumaTasks.size() != 0) {
 			map.put("lock", true);
 		} else {
@@ -67,7 +67,7 @@ public class DstDBInstanceController {
 		}
 
 		try {
-			DstDBInstance entity = dstDBInstanceService.find(id);
+			DstDBInstance entity = dstDBInstanceService.find(name);
 			map.put("entity", entity);
 			map.put("path", "dst-db-instance");
 			map.put("subPath", "create");
@@ -100,7 +100,7 @@ public class DstDBInstanceController {
 				// Create.
 
 				// Duplicated name?
-				dstDBInstance = dstDBInstanceService.findByName(name);
+				dstDBInstance = dstDBInstanceService.find(name);
 				if (dstDBInstance == null) {
 					dstDBInstance = new DstDBInstance();
 				} else {
@@ -149,7 +149,7 @@ public class DstDBInstanceController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceId(id);
+			List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceName(id);
 
 			if (pumaTasks != null && pumaTasks.size() != 0) {
 				throw new Exception("lock");

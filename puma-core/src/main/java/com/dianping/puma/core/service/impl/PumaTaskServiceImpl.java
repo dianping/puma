@@ -15,23 +15,18 @@ public class PumaTaskServiceImpl implements PumaTaskService {
 	PumaTaskDao pumaTaskDao;
 
 	@Override
-	public PumaTask find(String id) {
-		return pumaTaskDao.find(id);
+	public PumaTask find(String name) {
+		return pumaTaskDao.find(name);
 	}
 
 	@Override
-	public PumaTask findByName(String name) {
-		return pumaTaskDao.findByName(name);
+	public List<PumaTask> findBySrcDBInstanceName(String srcDBInstanceName) {
+		return pumaTaskDao.findBySrcDBInstanceName(srcDBInstanceName);
 	}
 
 	@Override
-	public List<PumaTask> findBySrcDBInstanceId(String srcDBInstanceId) {
-		return pumaTaskDao.findBySrcDBInstanceId(srcDBInstanceId);
-	}
-
-	@Override
-	public List<PumaTask> findByPumaServerId(String pumaServerName) {
-		return pumaTaskDao.findByPumaServerId(pumaServerName);
+	public List<PumaTask> findByPumaServerName(String pumaServerName) {
+		return pumaTaskDao.findByPumaServerName(pumaServerName);
 	}
 
 	@Override
@@ -40,17 +35,17 @@ public class PumaTaskServiceImpl implements PumaTaskService {
 	}
 
 	@Override
-	public void create(PumaTask entity) {
-		pumaTaskDao.create(entity);
+	public void create(PumaTask pumaTask) {
+		pumaTaskDao.create(pumaTask);
 	}
 
 	@Override
-	public void update(PumaTask entity) {
-		pumaTaskDao.update(entity);
+	public void update(PumaTask pumaTask) {
+		pumaTaskDao.update(pumaTask);
 	}
 
 	@Override
-	public void remove(String id) {
-		pumaTaskDao.remove(id);
+	public void remove(String name) {
+		pumaTaskDao.remove(name);
 	}
 }

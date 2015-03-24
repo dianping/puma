@@ -15,13 +15,8 @@ public class SrcDBInstanceServiceImpl implements SrcDBInstanceService {
 	SrcDBInstanceDao srcDbInstanceDao;
 
 	@Override
-	public SrcDBInstance find(String id) {
-		return srcDbInstanceDao.find(id);
-	}
-
-	@Override
-	public SrcDBInstance findByName(String name) {
-		return srcDbInstanceDao.findByName(name);
+	public SrcDBInstance find(String name) {
+		return srcDbInstanceDao.find(name);
 	}
 
 	@Override
@@ -30,17 +25,17 @@ public class SrcDBInstanceServiceImpl implements SrcDBInstanceService {
 	}
 
 	@Override
-	public void create(SrcDBInstance entity) {
-		srcDbInstanceDao.create(entity);
+	public void create(SrcDBInstance srcDBInstance) {
+		srcDbInstanceDao.create(srcDBInstance);
 	}
 
 	@Override
-	public void update(SrcDBInstance entity) {
-		srcDbInstanceDao.update(entity);
+	public void update(SrcDBInstance srcDBInstance) {
+		srcDbInstanceDao.update(srcDBInstance);
 	}
 
 	@Override
-	public void remove(String id) {
-		srcDbInstanceDao.remove(id);
+	public void remove(String name) {
+		srcDbInstanceDao.remove(name);
 	}
 }

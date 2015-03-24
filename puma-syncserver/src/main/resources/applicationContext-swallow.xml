@@ -41,7 +41,7 @@
         init-method="init">
         <property name="topic" value="puma_task_event" />
         <property name="clazz"
-            value="com.dianping.puma.core.monitor.TaskEvent" />
+            value="com.dianping.puma.core.monitor.event.TaskEvent" />
         <property name="listeners">
             <list>
                 <ref bean="taskChecker" />

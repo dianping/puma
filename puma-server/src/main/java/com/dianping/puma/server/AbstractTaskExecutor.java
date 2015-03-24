@@ -21,7 +21,7 @@ import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
-import com.dianping.puma.core.model.PumaTaskState;
+import com.dianping.puma.core.model.state.PumaTaskState;
 import com.dianping.puma.core.monitor.Notifiable;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.datahandler.DataHandler;

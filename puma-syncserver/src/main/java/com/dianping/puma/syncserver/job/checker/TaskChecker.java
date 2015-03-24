@@ -11,6 +11,9 @@ import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.monitor.*;
+import com.dianping.puma.core.monitor.event.Event;
+import com.dianping.puma.core.monitor.event.SyncTaskControllerEvent;
+import com.dianping.puma.core.monitor.event.SyncTaskOperationEvent;
 import com.dianping.puma.core.service.BaseSyncTaskService;
 import com.dianping.puma.core.service.SyncTaskService;
 import org.slf4j.Logger;
@@ -26,89 +29,93 @@ import com.dianping.puma.syncserver.job.executor.builder.TaskExecutorBuilder;
 
 @Service("taskChecker")
 public class TaskChecker implements EventListener {
-    private static final Logger LOG = LoggerFactory.getLogger(TaskChecker.class);
 
-    @Autowired
-    private SyncTaskService syncTaskService;
-    @Autowired
-    private TaskExecutionContainer taskExecutionContainer;
-    @Autowired
-    private TaskExecutorBuilder taskExecutorBuilder;
-    @Autowired
-    private Config config;
-    @Autowired
-    NotifyService notifyService;
+	private static final Logger LOG = LoggerFactory.getLogger(TaskChecker.class);
 
-    @Autowired
-    BaseSyncTaskService baseSyncTaskService;
+	@Autowired
+	private SyncTaskService syncTaskService;
 
-    @Autowired
-    BinlogInfoHolder binlogInfoHolder;
+	@Autowired
+	private TaskExecutionContainer taskExecutionContainer;
 
-    @SuppressWarnings("rawtypes")
-    @PostConstruct
-    public void init() {
-        //加载所有Task
-        String syncServerName = config.getSyncServerName();
+	@Autowired
+	private TaskExecutorBuilder taskExecutorBuilder;
 
-        List<SyncTask> syncTasks = syncTaskService.findBySyncServerName(syncServerName);
-        //构造成SyncTaskExecutor
-        if (syncTasks != null && syncTasks.size() > 0) {
-            for (SyncTask syncTask : syncTasks) {
-                BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(syncTask.getName());
-                if (binlogInfo != null) {
-                    syncTask.setBinlogInfo(binlogInfo);
-                }
-                TaskExecutor executor = taskExecutorBuilder.build(syncTask);
-                //将Task交给Container
-                try {
-                    taskExecutionContainer.submit(executor);
-                } catch (TaskExecutionException e) {
-                    notifyService.alarm(e.getMessage(), e, false);
-                }
-            }
-        }
-        LOG.info("TaskChecker loaded " + (syncTasks != null ? syncTasks.size() : 0) + " tasks.");
-        LOG.info("TaskChecker inited.");
-    }
+	@Autowired
+	private Config config;
 
-    @SuppressWarnings("rawtypes")
-    @Override
-    public void onEvent(Event event) {
-        LOG.info("Receive event: " + event);
+	@Autowired
+	NotifyService notifyService;
 
-        if (event instanceof SyncTaskOperationEvent) {
+	@Autowired
+	BaseSyncTaskService baseSyncTaskService;
 
-            SyncTaskOperationEvent syncTaskOperationEvent = (SyncTaskOperationEvent) event;
-            String taskName = syncTaskOperationEvent.getTaskName();
-            ActionOperation operation = syncTaskOperationEvent.getOperation();
-            SyncType syncType = syncTaskOperationEvent.getSyncType();
+	@Autowired
+	BinlogInfoHolder binlogInfoHolder;
 
-            switch (operation) {
-            case CREATE:
-                BaseSyncTask task = baseSyncTaskService.find(syncType, taskName);
-                TaskExecutor executor = taskExecutorBuilder.build(task);
+	@SuppressWarnings("rawtypes")
+	@PostConstruct
+	public void init() {
+		//加载所有Task
+		String syncServerName = config.getSyncServerName();
 
-                try {
-                    taskExecutionContainer.submit(executor);
-                } catch (TaskExecutionException e) {
-                    notifyService.alarm(e.getMessage(), e, false);
-                }
-                break;
+		List<SyncTask> syncTasks = syncTaskService.findBySyncServerName(syncServerName);
+		//构造成SyncTaskExecutor
+		if (syncTasks != null && syncTasks.size() > 0) {
+			for (SyncTask syncTask : syncTasks) {
+				BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(syncTask.getName());
+				if (binlogInfo != null) {
+					syncTask.setBinlogInfo(binlogInfo);
+				}
+				TaskExecutor executor = taskExecutorBuilder.build(syncTask);
+				//将Task交给Container
+				try {
+					taskExecutionContainer.submit(executor);
+				} catch (TaskExecutionException e) {
+					notifyService.alarm(e.getMessage(), e, false);
+				}
+			}
+		}
+		LOG.info("TaskChecker loaded " + (syncTasks != null ? syncTasks.size() : 0) + " tasks.");
+		LOG.info("TaskChecker inited.");
+	}
 
-            case REMOVE:
-                taskExecutionContainer.deleteSyncTask(taskName);
-            }
+	@SuppressWarnings("rawtypes")
+	@Override
+	public void onEvent(Event event) {
+		LOG.info("Receive event: " + event);
 
-        } else if (event instanceof SyncTaskControllerEvent) {
+		if (event instanceof SyncTaskOperationEvent) {
 
-            SyncTaskControllerEvent syncTaskControllerEvent = (SyncTaskControllerEvent) event;
-            taskExecutionContainer.changeStatus(syncTaskControllerEvent.getTaskName(), syncTaskControllerEvent.getController());
+			SyncTaskOperationEvent syncTaskOperationEvent = (SyncTaskOperationEvent) event;
+			String taskName = syncTaskOperationEvent.getTaskName();
+			ActionOperation operation = syncTaskOperationEvent.getOperation();
 
-        } else {
-            LOG.error("Receive error event.");
-        }
+			switch (operation) {
+			case CREATE:
+				BaseSyncTask task = baseSyncTaskService.find(SyncType.SYNC, taskName);
+				TaskExecutor executor = taskExecutorBuilder.build(task);
 
+				try {
+					taskExecutionContainer.submit(executor);
+				} catch (TaskExecutionException e) {
+					notifyService.alarm(e.getMessage(), e, false);
+				}
+				break;
+
+			case REMOVE:
+				taskExecutionContainer.deleteSyncTask(taskName);
+			}
+
+		} else if (event instanceof SyncTaskControllerEvent) {
+
+			SyncTaskControllerEvent syncTaskControllerEvent = (SyncTaskControllerEvent) event;
+			taskExecutionContainer
+					.changeStatus(syncTaskControllerEvent.getTaskName(), syncTaskControllerEvent.getController());
+
+		} else {
+			LOG.error("Receive error event.");
+		}
 
         /*
         if (event instanceof SyncTaskStatusActionEvent) {
@@ -130,5 +137,5 @@ public class TaskChecker implements EventListener {
                 notifyService.alarm(e.getMessage(), e, false);
             }
         }*/
-    }
+	}
 }

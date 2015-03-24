@@ -216,7 +216,7 @@ public class ModifyController {
             dumpTask.setDestMysqlName(syncTask.getDestMysqlName());
             dumpTask.setDestMysqlHost(syncTask.getDestMysqlHost());
             dumpTask.setDumpMapping(dumpMapping);
-            dumpTask.setSyncServerName(syncServerName);
+            dumpTask.setServerName(syncServerName);
             //保存dumpTask到数据库
             dumpTaskService.create(dumpTask);
             //保存dumpTask到session
@@ -316,7 +316,7 @@ public class ModifyController {
             catchupTask.setDestMysqlName(syncTask.getDestMysqlName());
             catchupTask.setDestMysqlHost(syncTask.getDestMysqlHost());
             catchupTask.setMysqlMapping(additionalMysqlMapping);
-            catchupTask.setSyncServerName(syncTask.getSyncServerName());
+            catchupTask.setServerName(syncTask.getServerName());
             BinlogInfo binlogInfo = new BinlogInfo();
             if (StringUtils.isNotBlank(binlogFile) && StringUtils.isNotBlank(binlogPosition)) {
                 binlogInfo.setBinlogFile(binlogFile);

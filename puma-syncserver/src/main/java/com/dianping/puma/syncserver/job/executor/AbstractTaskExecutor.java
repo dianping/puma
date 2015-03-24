@@ -14,7 +14,6 @@ import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.SyncTaskState;
 import com.dianping.puma.core.monitor.NotifyService;
-
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -47,8 +46,9 @@ import com.dianping.puma.syncserver.job.executor.failhandler.HandlerContainer;
 import com.dianping.puma.syncserver.job.executor.failhandler.StopOnFailedHandler;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
-public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> implements TaskExecutor<T>,
-		SpeedControllable {
+
+public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S extends BaseSyncTaskState>
+		implements TaskExecutor<T, S>, SpeedControllable {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractTaskExecutor.class);
 
 	protected T abstractTask;
@@ -65,7 +65,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 
 	protected DstDBInstance dstDBInstance;
 
-	protected SyncTaskState state;
+	protected S state;
 
 	protected TaskExecutorStatus status;
 
@@ -79,16 +79,13 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 	
 	private NotifyService notifyService;
 
-	public AbstractTaskExecutor(T abstractTask, String pumaServerHost, int pumaServerPort, String target,
-			DstDBInstance dstDBInstance) {
+	public AbstractTaskExecutor(T abstractTask, S taskState, String pumaServerHost, int pumaServerPort, String target, DstDBInstance dstDBInstance) {
 		this.abstractTask = abstractTask;
 		this.pumaServerHost = pumaServerHost;
 		this.pumaServerPort = pumaServerPort;
 		this.target = target;
 
-		this.state = new SyncTaskState();
-		state.setTaskName(abstractTask.getName());
-		state.setSyncType(abstractTask.getSyncType());
+		this.state = taskState;
 		this.dstDBInstance = dstDBInstance;
 
 		// this.status = new TaskExecutorStatus();
@@ -628,11 +625,11 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 		this.status = status;
 	}
 
-	public SyncTaskState getState() {
+	public S getTaskState() {
 		return state;
 	}
 
-	public void setState(SyncTaskState state) {
+	public void setState(S state) {
 		this.state = state;
 	}
 }

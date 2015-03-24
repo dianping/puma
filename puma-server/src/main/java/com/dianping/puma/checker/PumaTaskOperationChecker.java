@@ -3,10 +3,9 @@ package com.dianping.puma.checker;
 import com.dianping.puma.config.Config;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.entity.PumaTask;
-import com.dianping.puma.core.model.PumaTaskOperation;
-import com.dianping.puma.core.monitor.Event;
+import com.dianping.puma.core.monitor.event.Event;
 import com.dianping.puma.core.monitor.EventListener;
-import com.dianping.puma.core.monitor.PumaTaskOperationEvent;
+import com.dianping.puma.core.monitor.event.PumaTaskOperationEvent;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.server.TaskExecutor;
 import com.dianping.puma.server.TaskExecutorContainer;
@@ -25,7 +24,7 @@ public class PumaTaskOperationChecker implements EventListener {
 	public static final Logger LOG = LoggerFactory.getLogger(PumaTaskOperationChecker.class);
 
 	@Autowired
-	private Config pumaServerConfig;
+	private PumaServerConfig pumaServerConfig;
 
 	@Autowired
 	private PumaTaskService pumaTaskService;
@@ -41,7 +40,7 @@ public class PumaTaskOperationChecker implements EventListener {
 		String pumaServerId = pumaServerConfig.getId();
 
 		// Throws puma task service exceptions.
-		List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerId(pumaServerId);
+		List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerName(pumaServerId);
 
 		// Swallows puma task executors exceptions.
 		for (PumaTask pumaTask : pumaTasks) {

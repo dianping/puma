@@ -28,7 +28,7 @@
         <property name="type" value="#{pumaServerConfig.id}" />
         <property name="notifyService" ref="notifyService"/>
         <property name="clazz"
-            value="com.dianping.puma.core.monitor.PumaTaskOperationEvent" />
+            value="com.dianping.puma.core.monitor.event.PumaTaskOperationEvent" />
         <property name="listeners">
             <list>
                 <ref bean="pumaTaskOperationChecker" />
@@ -43,7 +43,7 @@
         <property name="type" value="#{pumaServerConfig.id}" />
         <property name="notifyService" ref="notifyService"/>
         <property name="clazz"
-                  value="com.dianping.puma.core.monitor.PumaTaskControllerEvent" />
+                  value="com.dianping.puma.core.monitor.event.PumaTaskControllerEvent" />
         <property name="listeners">
             <list>
                 <ref bean="pumaTaskControllerChecker" />

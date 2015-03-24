@@ -5,13 +5,13 @@ $(function(w) {
     var button  = $(event.relatedTarget);
     var subpath = button.data('subpath');
     var path    = button.data('path');
-    var id      = button.data('id');
+    var name    = button.data('name');
 
     var modal = $(this);
 
     modal.find('.modal-title').text('警告');
     modal.find('.modal-text').text(warnText(path));
-    modal.find('#modal-form-id').val(id);
+    modal.find('#modal-form-name').val(name);
     modal.find('.puma-form')
       .attr('action', window.contextpath + '/' + path + '/' + subpath)
       .attr('target', window.contextpath + '/' + path);

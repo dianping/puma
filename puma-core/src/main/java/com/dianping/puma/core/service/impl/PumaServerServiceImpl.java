@@ -15,17 +15,12 @@ public class PumaServerServiceImpl implements PumaServerService {
 	PumaServerDao pumaServerDao;
 
 	@Override
-	public PumaServer find(String id) {
-		return pumaServerDao.find(id);
+	public PumaServer find(String name) {
+		return pumaServerDao.find(name);
 	}
 
-	@Override
-	public PumaServer findByName(String name) {
-		return pumaServerDao.findByName(name);
-	}
-
-	public PumaServer findByHostAndPort(String host, Integer port) {
-		return pumaServerDao.findByHostAndPort(host, port);
+	public PumaServer findByHost(String host) {
+		return pumaServerDao.findByHost(host);
 	}
 
 	@Override
@@ -34,17 +29,17 @@ public class PumaServerServiceImpl implements PumaServerService {
 	}
 
 	@Override
-	public void create(PumaServer entity) {
-		pumaServerDao.create(entity);
+	public void create(PumaServer pumaServer) {
+		pumaServerDao.create(pumaServer);
 	}
 
 	@Override
-	public void update(PumaServer entity) {
-		pumaServerDao.update(entity);
+	public void update(PumaServer pumaServer) {
+		pumaServerDao.update(pumaServer);
 	}
 
 	@Override
-	public void remove(String id) {
-		pumaServerDao.remove(id);
+	public void remove(String name) {
+		pumaServerDao.remove(name);
 	}
 }

@@ -92,16 +92,15 @@ public class SrcDBInstanceController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			SrcDBInstance srcDBInstance;
+			boolean create;
 
-			if (name != null) {
-				// Update.
-				srcDBInstance = srcDBInstanceService.find(name);
-			} else {
-				// Create.
+			SrcDBInstance srcDBInstance = srcDBInstanceService.find(name);
 
-				// Duplicated name?
+			if (srcDBInstance == null) {
+				create = true;
 				srcDBInstance = new SrcDBInstance();
+			} else {
+				create = false;
 			}
 
 			srcDBInstance.setName(name);
@@ -121,10 +120,10 @@ public class SrcDBInstanceController {
 			srcDBInstance.setMetaUsername(username);
 			srcDBInstance.setMetaPassword(password);
 
-			if (name != null) {
-				srcDBInstanceService.update(srcDBInstance);
-			} else {
+			if (create) {
 				srcDBInstanceService.create(srcDBInstance);
+			} else {
+				srcDBInstanceService.update(srcDBInstance);
 			}
 
 			map.put("success", true);

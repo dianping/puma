@@ -102,8 +102,8 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			taskExecutor.setBinlogStat(new BinlogStat());
 
 			// Source database.
-			String srcDBInstanceId = pumaTask.getSrcDBInstanceId();
-			SrcDBInstance srcDBInstance = srcDBInstanceService.find(srcDBInstanceId);
+			String srcDBInstanceName = pumaTask.getSrcDBInstanceName();
+			SrcDBInstance srcDBInstance = srcDBInstanceService.find(srcDBInstanceName);
 			taskExecutor.setDbServerId(srcDBInstance.getServerId());
 			taskExecutor.setDBHost(srcDBInstance.getHost());
 			taskExecutor.setPort(srcDBInstance.getPort());

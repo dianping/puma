@@ -52,7 +52,7 @@ public class SrcDBInstanceMorphiaDao extends BasicDAO<SrcDBInstanceMorphia, Stri
 		Query<SrcDBInstanceMorphia> q = this.getDatastore().createQuery(SrcDBInstanceMorphia.class);
 		q.field("name").equal(srcDBInstance.getName());
 		UpdateOperations<SrcDBInstanceMorphia> uop = this.getDatastore().createUpdateOperations(SrcDBInstanceMorphia.class);
-		uop.set("entity", srcDBInstanceMorphia);
+		uop.set("entity", srcDBInstance);
 		this.update(q, uop);
 		this.getDatastore().ensureIndexes();
 	}

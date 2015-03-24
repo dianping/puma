@@ -61,7 +61,7 @@ public class PumaTaskController {
 	SyncTaskService syncTaskService;
 
 	@RequestMapping(value = { "/puma-task" })
-	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
+	public ModelAndView view() {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		List<PumaTask> pumaTaskEntities = pumaTaskService.findAll();
@@ -121,48 +121,36 @@ public class PumaTaskController {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		ActionOperation operation;
-
 		try {
-			PumaTask pumaTask;
+			ActionOperation operation;
 
-			// Create or update?
-			if (name != null) {
-				// Update.
-				pumaTask = pumaTaskService.find(name);
-
+			PumaTask pumaTask = pumaTaskService.find(name);
+			if (pumaTask == null) {
+				pumaTask = new PumaTask();
+				operation = ActionOperation.CREATE;
+			} else {
 				if (!binlogFile.equals(pumaTask.getBinlogInfo().getBinlogFile())
 						|| !binlogPosition.equals(pumaTask.getBinlogInfo().getBinlogPosition())) {
 					operation = ActionOperation.UPDATE;
 				} else {
 					operation = ActionOperation.PROLONG;
 				}
-
-			} else {
-				// Create.
-				operation = ActionOperation.CREATE;
-				pumaTask = new PumaTask();
 			}
 
-
-			SrcDBInstance srcDBInstance = srcDBInstanceService.find(srcDBInstanceName);
-			PumaServer pumaServer = pumaServerService.find(pumaServerName);
-
 			pumaTask.setName(name);
-			pumaTask.setSrcDBInstanceId(srcDBInstance.getName());
-			pumaTask.setPumaServerId(pumaServer.getName());
+			pumaTask.setSrcDBInstanceName(srcDBInstanceName);
+			pumaTask.setPumaServerName(pumaServerName);
 			BinlogInfo binlogInfo = new BinlogInfo();
 			binlogInfo.setBinlogFile(binlogFile);
 			binlogInfo.setBinlogPosition(binlogPosition);
 			pumaTask.setBinlogInfo(binlogInfo);
 			pumaTask.setPreservedDay(preservedDay);
-			pumaTask.setSrcDBInstanceName(srcDBInstance.getName());
-			pumaTask.setPumaServerName(pumaServer.getName());
 
-			if (name != null) {
-				this.pumaTaskService.update(pumaTask);
+			// Save puma task state to persistent storage.
+			if (operation == ActionOperation.CREATE) {
+				pumaTaskService.create(pumaTask);
 			} else {
-				this.pumaTaskService.create(pumaTask);
+				pumaTaskService.update(pumaTask);
 			}
 
 			// Add puma task state to the state container.
@@ -172,7 +160,7 @@ public class PumaTaskController {
 			pumaTaskStateService.add(taskState);
 
 			// Publish puma task operation event to puma server.
-			this.pumaTaskOperationReporter.report(pumaServer.getName(), pumaTask.getName(), operation);
+			this.pumaTaskOperationReporter.report(pumaServerName, name, operation);
 
 			map.put("success", true);
 		} catch (MongoException e) {

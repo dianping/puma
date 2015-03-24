@@ -59,7 +59,7 @@ public class SyncServerMorphiaDao extends BasicDAO<SyncServerMorphia, String> im
 		Query<SyncServerMorphia> q = this.getDatastore().createQuery(SyncServerMorphia.class);
 		q.field("name").equal(syncServerMorphia.getName());
 		UpdateOperations<SyncServerMorphia> uop = this.getDatastore().createUpdateOperations(SyncServerMorphia.class);
-		uop.set("entity", syncServerMorphia);
+		uop.set("entity", syncServer);
 		this.update(q, uop);
 		this.getDatastore().ensureIndexes();
 	}

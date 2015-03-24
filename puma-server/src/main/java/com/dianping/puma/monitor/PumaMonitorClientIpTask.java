@@ -15,7 +15,7 @@ import com.dianping.puma.config.TaskLionConfig;
 public class PumaMonitorClientIpTask implements PumaMonitorTask {
 
 	@Autowired
-	private TaskLionConfig intervalConfig;
+	private TaskLionConfig taskLionConfig;
 
 	@Override
 	public void runTask() {
@@ -23,7 +23,7 @@ public class PumaMonitorClientIpTask implements PumaMonitorTask {
 		for (Map.Entry<String, ClientStatus> clientStatus : clientStatuses.entrySet()) {
 			Cat.getProducer().logEvent("Puma.server." + clientStatus.getKey() + ".ip", clientStatus.getValue().getIp(),
 					Message.SUCCESS,
-					"name = " + clientStatus.getKey() + "&duration = " + intervalConfig.getClientIpInterval());
+					"name = " + clientStatus.getKey() + "&duration = " + taskLionConfig.getClientIpInterval());
 		}
 	}
 

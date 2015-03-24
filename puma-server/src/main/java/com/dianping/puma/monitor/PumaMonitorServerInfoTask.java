@@ -29,7 +29,7 @@ public class PumaMonitorServerInfoTask implements PumaMonitorTask {
 	private Map<String, Long> preDdlCount;
 
 	@Autowired
-	private TaskLionConfig intervalConfig;
+	private TaskLionConfig taskLionConfig;
 	
 	public PumaMonitorServerInfoTask() {
 		preUpdateCount = new HashMap<String, Long>();
@@ -68,10 +68,10 @@ public class PumaMonitorServerInfoTask implements PumaMonitorTask {
 				ddlName = getEventName(preDdlCount.get(serverStatus.getKey()).longValue(),ddlCount.get(serverStatus.getKey()).longValue());
 				preDdlCount.put(serverStatus.getKey(), ddlCount.get(serverStatus.getKey()).longValue());
 			}
-			Cat.getProducer().logEvent("Puma.server."+serverStatus.getKey()+".insert", insertName, Message.SUCCESS, "name = "+serverStatus.getKey()+"&duration = "+intervalConfig.getServerInfoInterval());
-			Cat.getProducer().logEvent("Puma.server."+serverStatus.getKey()+".delete", deleteName, Message.SUCCESS, "name = "+serverStatus.getKey()+"&duration = "+intervalConfig.getServerInfoInterval());
-			Cat.getProducer().logEvent("Puma.server."+serverStatus.getKey()+".update", updateName, Message.SUCCESS, "name = "+serverStatus.getKey()+"&duration = "+intervalConfig.getServerInfoInterval());
-			Cat.getProducer().logEvent("Puma.server."+serverStatus.getKey()+".ddl", ddlName, Message.SUCCESS, "name = "+serverStatus.getKey()+"&duration = "+intervalConfig.getServerInfoInterval());
+			Cat.getProducer().logEvent("Puma.server."+serverStatus.getKey()+".insert", insertName, Message.SUCCESS, "name = "+serverStatus.getKey()+"&duration = "+taskLionConfig.getServerInfoInterval());
+			Cat.getProducer().logEvent("Puma.server."+serverStatus.getKey()+".delete", deleteName, Message.SUCCESS, "name = "+serverStatus.getKey()+"&duration = "+taskLionConfig.getServerInfoInterval());
+			Cat.getProducer().logEvent("Puma.server."+serverStatus.getKey()+".update", updateName, Message.SUCCESS, "name = "+serverStatus.getKey()+"&duration = "+taskLionConfig.getServerInfoInterval());
+			Cat.getProducer().logEvent("Puma.server."+serverStatus.getKey()+".ddl", ddlName, Message.SUCCESS, "name = "+serverStatus.getKey()+"&duration = "+taskLionConfig.getServerInfoInterval());
 		}
 
 	}

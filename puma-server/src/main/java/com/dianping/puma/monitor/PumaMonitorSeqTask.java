@@ -20,7 +20,7 @@ public class PumaMonitorSeqTask implements PumaMonitorTask {
 	private PumaClientInfoService pumaClientInfoService;
 
 	@Autowired
-	private TaskLionConfig intervalConfig;
+	private TaskLionConfig taskLionConfig;
 
 	/*
 	 * public void runTask() { Map<String, ClientStatus> clientStatuses =
@@ -47,7 +47,7 @@ public class PumaMonitorSeqTask implements PumaMonitorTask {
 						Message.SUCCESS,
 						"name = " + clientStatus.getKey() + "&target = " + clientStatus.getValue().getTarget()
 								+ "&seq=" + clientSuccessSeq.get(clientStatus.getKey()).longValue() + "&duration = "
-								+ intervalConfig.getServerInfoInterval());
+								+ taskLionConfig.getServerInfoInterval());
 			}
 		}
 	}

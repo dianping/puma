@@ -7,6 +7,7 @@ import com.dianping.puma.core.entity.DumpTask;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
+import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.service.DstDBInstanceService;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
@@ -27,7 +28,7 @@ public class DumpTaskExecutorStrategy implements TaskExecutorStrategy<DumpTask, 
 
     @Autowired
     PumaTaskService pumaTaskService;
-
+  
     @Override
     public DumpTaskExecutor build(DumpTask task) {
         //根据Task创建TaskExecutor
@@ -41,7 +42,7 @@ public class DumpTaskExecutorStrategy implements TaskExecutorStrategy<DumpTask, 
             excutor = new DumpTaskExecutor(task);
             excutor.setSrcDBInstance(srcDBInstanceService.findByName(srcDBInstanceName));
             excutor.setDstDBInstance(dstDBInstanceService.findByName(dstDBInstanceName));
-
+           
             return excutor;
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);

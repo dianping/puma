@@ -13,6 +13,8 @@ import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.SyncTaskState;
+import com.dianping.puma.core.monitor.NotifyService;
+
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -74,6 +76,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 	private CircularFifoBuffer lastEvents = new CircularFifoBuffer(10);
 
 	private BinlogInfoHolder binlogInfoHolder;
+	
+	private NotifyService notifyService;
 
 	public AbstractTaskExecutor(T abstractTask, String pumaServerHost, int pumaServerPort, String target,
 			DstDBInstance dstDBInstance) {
@@ -97,6 +101,14 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 
 	public BinlogInfoHolder getBinlogInfoHolder() {
 		return binlogInfoHolder;
+	}
+
+	public void setNotifyService(NotifyService notifyService) {
+		this.notifyService = notifyService;
+	}
+
+	public NotifyService getNotifyService() {
+		return notifyService;
 	}
 
 	public void setBinlogInfoHolder(BinlogInfoHolder binlogInfoHolder) {
@@ -243,7 +255,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 						+ abstractTask.getPumaClientName() + "&casedetail=" + detail);
 		state.setDetail(detail);
 		// this.status.setDetail(detail);
-		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] failed... cause:" + detail);
+		
+		LOG.error("TaskExecutor[" + this.getTask().getPumaClientName() + "] failed... cause:" + detail);
 	}
 
 	@Override
@@ -466,7 +479,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 							try {
 								AbstractTaskExecutor.this.execute(event);
 							} catch (DdlRenameException e) {
-								AbstractTaskExecutor.this.fail("case rename operation ," + e);
+								AbstractTaskExecutor.this.fail("case by db rename operation ," + e);
+								notifyService.alarm("case by db rename operation ," + e, e, true);
 								return;
 							}
 						}

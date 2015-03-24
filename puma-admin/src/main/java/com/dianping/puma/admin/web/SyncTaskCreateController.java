@@ -6,7 +6,7 @@ import java.util.*;
 import javax.servlet.http.HttpSession;
 
 import com.dianping.puma.admin.reporter.SyncTaskOperationReporter;
-import com.dianping.puma.core.constant.Operation;
+import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.container.SyncTaskStateContainer;
@@ -228,7 +228,7 @@ public class SyncTaskCreateController {
 
 			dumpTaskService.create(dumpTask);
 
-			syncTaskOperationReporter.report(syncServerName, SyncType.DUMP, dumpTaskName, Operation.CREATE);
+			syncTaskOperationReporter.report(syncServerName, SyncType.DUMP, dumpTaskName, ActionOperation.CREATE);
 
 			// 保存dumpTask到session
 			session.setAttribute("dumpTask", dumpTask);
@@ -375,7 +375,7 @@ public class SyncTaskCreateController {
 			syncTaskStateContainer.create(syncTask.getName());
 
 			syncTaskOperationReporter
-					.report(syncTask.getSyncServerName(), SyncType.SYNC, syncTask.getName(), Operation.CREATE);
+					.report(syncTask.getSyncServerName(), SyncType.SYNC, syncTask.getName(), ActionOperation.CREATE);
 
 			LOG.info("created syncTask : " + syncTask);
 

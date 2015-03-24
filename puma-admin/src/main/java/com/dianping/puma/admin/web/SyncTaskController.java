@@ -11,7 +11,7 @@ import javax.servlet.http.HttpSession;
 import com.dianping.puma.admin.reporter.SyncTaskOperationReporter;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.constant.ActionController;
-import com.dianping.puma.core.constant.Operation;
+import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.container.SyncTaskStateContainer;
@@ -80,7 +80,7 @@ public class SyncTaskController {
 			syncTaskService.remove(id);
 
 			// Publish puma task operation event to puma server.
-			syncTaskOperationReporter.report(syncTask.getSyncServerName(), SyncType.SYNC, id, Operation.REMOVE);
+			syncTaskOperationReporter.report(syncTask.getSyncServerName(), SyncType.SYNC, id, ActionOperation.REMOVE);
 
 			map.put("success", true);
 		} catch (MongoException e) {
@@ -106,14 +106,14 @@ public class SyncTaskController {
     @ResponseBody
     public Object status(HttpSession session, String taskName) {
         Map<String, Object> map = new HashMap<String, Object>();
-        /* try {
+         try {
         	SyncTaskState syncTaskState = syncTaskStateContainer.get(taskName);
             //binlog信息，从数据库查询binlog位置即可，不需要从SyncServer实时发过来的status中的binlog获取
             //binlogInfoOfIOThread则是从status中获取
             SyncTask syncTask = this.syncTaskService.find(taskName);
-            syncStatus.setBinlogInfo(syncTask.getBinlogInfo());
+            syncTaskState.setBinlogInfo(syncTask.getBinlogInfo());
 
-            map.put("status", syncStatus);
+            map.put("status", syncTaskState);
             map.put("success", true);
         } catch (IllegalArgumentException e) {
             map.put("success", false);
@@ -122,7 +122,7 @@ public class SyncTaskController {
             map.put("success", false);
             map.put("errorMsg", e.getMessage());
             LOG.error(e.getMessage(), e);
-        }*/
+        }
         return GsonUtil.toJson(map);
     }
 
@@ -169,11 +169,11 @@ public class SyncTaskController {
      */
     @RequestMapping(value = "/sync-task/rerun", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object rerun(HttpSession session, Long taskId) {
+    public Object rerun(HttpSession session, String taskName) {
         Map<String, Object> map = new HashMap<String, Object>();
 
         try {
-            this.syncTaskService.updateStatusAction(taskId, ActionController.RESUME);
+            this.syncTaskService.updateStatusAction(taskName, ActionController.RESUME);
             map.put("success", true);
         } catch (IllegalArgumentException e) {
             map.put("success", false);
@@ -191,11 +191,11 @@ public class SyncTaskController {
      */
     @RequestMapping(value = "/sync-task/resolved", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Object resolved(HttpSession session, Long taskId) {
+    public Object resolved(HttpSession session, String taskName) {
         Map<String, Object> map = new HashMap<String, Object>();
         
         try {
-            this.syncTaskService.updateStatusAction(taskId, ActionController.RESTART);
+            this.syncTaskService.updateStatusAction(taskName, ActionController.RESUME);
             map.put("success", true);
         } catch (IllegalArgumentException e) {
             map.put("success", false);

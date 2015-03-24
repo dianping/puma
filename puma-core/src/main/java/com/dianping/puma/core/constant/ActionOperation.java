@@ -1,6 +1,6 @@
 package com.dianping.puma.core.constant;
 
-public enum Operation {
+public enum ActionOperation {
 	CREATE,
 	UPDATE,
 	REMOVE,

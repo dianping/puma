@@ -1,6 +1,6 @@
 package com.dianping.puma.admin.reporter;
 
-import com.dianping.puma.core.constant.Operation;
+import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.model.PumaTaskOperation;
 import com.dianping.puma.core.monitor.PumaTaskOperationEvent;
 import com.dianping.puma.core.monitor.SwallowEventPublisher;
@@ -14,7 +14,7 @@ public class PumaTaskOperationReporter {
 	@Autowired
 	SwallowEventPublisher pumaTaskOperationEventPublisher;
 
-	public void report(String pumaServerId, String taskId, String taskName, Operation operation) throws SendFailedException {
+	public void report(String pumaServerId, String taskId, String taskName, ActionOperation operation) throws SendFailedException {
 		PumaTaskOperationEvent event = new PumaTaskOperationEvent();
 		event.setPumaServerId(pumaServerId);
 		event.setTaskId(taskId);

@@ -5,6 +5,7 @@ import com.dianping.puma.core.entity.*;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.holder.impl.DefaultBinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.service.DstDBInstanceService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,10 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
 	@Autowired
 	private BinlogInfoHolder binlogInfoHolder;
 
+	  
+    @Autowired
+    NotifyService notifyService;
+    
 	/*
 	 @Override
 	 public CatchupTaskExecutor build(CatchupTask task) {
@@ -100,7 +105,7 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
 
 		CatchupTaskExecutor executor = new CatchupTaskExecutor(task, pumaServerHost, pumaServerPort, target, syncTaskExecutor, dstDBInstance);
 		executor.setBinlogInfoHolder(binlogInfoHolder);
-
+		executor.setNotifyService(notifyService);
 		return executor;
 	}
 

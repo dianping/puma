@@ -1,6 +1,6 @@
 package com.dianping.puma.core.monitor;
 
-import com.dianping.puma.core.constant.Operation;
+import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.constant.SyncType;
 
 public class SyncTaskOperationEvent extends SyncTaskEvent {
@@ -9,7 +9,7 @@ public class SyncTaskOperationEvent extends SyncTaskEvent {
 
 	private String taskName;
 
-	private Operation operation;
+	private ActionOperation operation;
 
 	public SyncType getSyncType() {
 		return syncType;
@@ -27,11 +27,11 @@ public class SyncTaskOperationEvent extends SyncTaskEvent {
 		this.taskName = taskName;
 	}
 
-	public Operation getOperation() {
+	public ActionOperation getOperation() {
 		return operation;
 	}
 
-	public void setOperation(Operation operation) {
+	public void setOperation(ActionOperation operation) {
 		this.operation = operation;
 	}
 }

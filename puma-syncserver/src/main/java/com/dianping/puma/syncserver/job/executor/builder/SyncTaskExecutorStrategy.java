@@ -4,6 +4,7 @@ import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.entity.*;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.holder.impl.DefaultBinlogInfoHolder;
+import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.service.DstDBInstanceService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +57,10 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
 
     @Autowired
     BinlogInfoHolder binlogInfoHolder;
-
+    
+    @Autowired
+    NotifyService notifyService;
+    
     @Override
     public SyncTaskExecutor build(SyncTask task) {
         //根据Task创建TaskExecutor
@@ -88,7 +92,7 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
 
         SyncTaskExecutor excutor = new SyncTaskExecutor(task, pumaServerHost, pumaServerPort, target, dstDBInstance);
         excutor.setBinlogInfoHolder(binlogInfoHolder);
-
+        excutor.setNotifyService(notifyService);
         return excutor;
     }
 

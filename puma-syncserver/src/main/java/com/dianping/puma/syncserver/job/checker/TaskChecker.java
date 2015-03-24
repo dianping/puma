@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import com.dianping.puma.core.constant.Operation;
+import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.entity.BaseSyncTask;
 import com.dianping.puma.core.entity.SyncTask;
@@ -81,7 +81,7 @@ public class TaskChecker implements EventListener {
 
             SyncTaskOperationEvent syncTaskOperationEvent = (SyncTaskOperationEvent) event;
             String taskName = syncTaskOperationEvent.getTaskName();
-            Operation operation = syncTaskOperationEvent.getOperation();
+            ActionOperation operation = syncTaskOperationEvent.getOperation();
             SyncType syncType = syncTaskOperationEvent.getSyncType();
 
             switch (operation) {

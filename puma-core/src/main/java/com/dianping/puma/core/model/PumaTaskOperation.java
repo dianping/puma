@@ -1,16 +1,16 @@
 package com.dianping.puma.core.model;
 
-import com.dianping.puma.core.constant.Operation;
+import com.dianping.puma.core.constant.ActionOperation;
 
 public class PumaTaskOperation {
 
-	Operation operation;
+	ActionOperation operation;
 
-	public Operation getOperation() {
+	public ActionOperation getOperation() {
 		return operation;
 	}
 
-	public void setOperation(Operation operation) {
+	public void setOperation(ActionOperation operation) {
 		this.operation = operation;
 	}
 }

@@ -1,6 +1,6 @@
 package com.dianping.puma.core.monitor;
 
-import com.dianping.puma.core.constant.Operation;
+import com.dianping.puma.core.constant.ActionOperation;
 
 public class PumaTaskOperationEvent extends PumaTaskEvent {
 
@@ -8,7 +8,7 @@ public class PumaTaskOperationEvent extends PumaTaskEvent {
 	
 	private String taskName;
 
-	private Operation operation;
+	private ActionOperation operation;
 
 	public String getTaskId() {
 		return taskId;
@@ -26,11 +26,11 @@ public class PumaTaskOperationEvent extends PumaTaskEvent {
 		return taskName;
 	}
 
-	public Operation getOperation() {
+	public ActionOperation getOperation() {
 		return operation;
 	}
 
-	public void setOperation(Operation operation) {
+	public void setOperation(ActionOperation operation) {
 		this.operation = operation;
 	}
 }

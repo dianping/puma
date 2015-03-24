@@ -12,7 +12,7 @@ import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
-import com.dianping.puma.core.constant.Operation;
+import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
@@ -123,7 +123,7 @@ public class PumaTaskController {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		Operation operation;
+		ActionOperation operation;
 
 		try {
 			PumaTask pumaTask;
@@ -135,14 +135,14 @@ public class PumaTaskController {
 
 				if (!binlogFile.equals(pumaTask.getBinlogInfo().getBinlogFile())
 						|| !binlogPosition.equals(pumaTask.getBinlogInfo().getBinlogPosition())) {
-					operation = Operation.UPDATE;
+					operation = ActionOperation.UPDATE;
 				} else {
-					operation = Operation.PROLONG;
+					operation = ActionOperation.PROLONG;
 				}
 
 			} else {
 				// Create.
-				operation = Operation.CREATE;
+				operation = ActionOperation.CREATE;
 
 				// Duplicated name?
 				pumaTask = pumaTaskService.findByName(name);
@@ -208,7 +208,7 @@ public class PumaTaskController {
 			this.pumaTaskService.remove(id);
 
 			// Publish puma task operation event to puma server.
-			this.pumaTaskOperationReporter.report(pumaTask.getPumaServerId(), pumaTask.getId(), pumaTask.getName(), Operation.REMOVE);
+			this.pumaTaskOperationReporter.report(pumaTask.getPumaServerId(), pumaTask.getId(), pumaTask.getName(), ActionOperation.REMOVE);
 
 			map.put("success", true);
 		} catch (MongoException e) {

@@ -1,7 +1,7 @@
 package com.dianping.puma.checker;
 
 import com.dianping.puma.config.Config;
-import com.dianping.puma.core.constant.Operation;
+import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.model.PumaTaskOperation;
 import com.dianping.puma.core.monitor.Event;
@@ -62,7 +62,7 @@ public class PumaTaskOperationChecker implements EventListener {
 			LOG.info("Receive puma task operation event.");
 
 			PumaTaskOperationEvent pumaTaskOperationEvent = (PumaTaskOperationEvent) event;
-			Operation operation = pumaTaskOperationEvent.getOperation();
+			ActionOperation operation = pumaTaskOperationEvent.getOperation();
 
 			switch (operation) {
 			case CREATE:

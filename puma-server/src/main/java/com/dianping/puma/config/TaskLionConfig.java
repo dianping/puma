@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
 
-@Service("intervalConfig")
-public class TaskIntervalConfig {
+@Service("taskLionConfig")
+public class TaskLionConfig {
 
-	private static final Logger LOG = LoggerFactory.getLogger(TaskIntervalConfig.class);
+	private static final Logger LOG = LoggerFactory.getLogger(TaskLionConfig.class);
 	
 	private static final String SEQ_INTERVAL_NAME = "puma.server.interval.seq";
 	
@@ -20,12 +20,13 @@ public class TaskIntervalConfig {
 	
 	private static final String SYNCPROCESS_INTERVAL_NAME = "puma.server.interval.syncProcess";
 	
+	private static final String SYNCPROCESS_DIFF_FILE_NUM ="puma.server.syncProcess.diffNumFile";
 	private long seqInterval;
 	private long clientIpInterval;
 	private long serverInfoInterval;
 	private long syncProcessInterval;
-	
-	public TaskIntervalConfig(){
+	private long syncProcessDfileNum;
+	public TaskLionConfig(){
 	/*	seqInterval = "0/"+getInterval(SEQ_INTERVAL_NAME)+" * * * * ?";
 		clientIpInterval = "0/"+getInterval(CLIENTIP_INTERVAL_NAME)+" * * * * ?";
 		serverInfoInterval = "0/"+getInterval(SERVERINFO_INTERVAL_NAME)+" * * * * ?";
@@ -33,7 +34,8 @@ public class TaskIntervalConfig {
 		seqInterval = getInterval(SEQ_INTERVAL_NAME);
 		clientIpInterval = getInterval(CLIENTIP_INTERVAL_NAME);
 		serverInfoInterval = getInterval(SERVERINFO_INTERVAL_NAME);
-		setSyncProcessInterval(getInterval(SYNCPROCESS_INTERVAL_NAME));
+		syncProcessInterval = getInterval(SYNCPROCESS_INTERVAL_NAME);
+		syncProcessDfileNum = getDiffFileNum(SYNCPROCESS_DIFF_FILE_NUM);
 	}
 	
 	protected long getInterval(String intervalName) {
@@ -49,6 +51,18 @@ public class TaskIntervalConfig {
 		return interval;
 	}
 
+	private int getDiffFileNum(String keyName){
+		int numFile = 2;
+		try {
+			Integer temp = ConfigCache.getInstance().getIntProperty(keyName);
+			if (temp != null) {
+				numFile = temp.intValue();
+			}
+		} catch (LionException e) {
+			LOG.error(e.getMessage(), e);
+		}
+		return numFile;
+	}
 	public void setSeqInterval(long seqInterval) {
 		this.seqInterval = seqInterval;
 	}
@@ -79,6 +93,14 @@ public class TaskIntervalConfig {
 
 	public long getSyncProcessInterval() {
 		return syncProcessInterval;
+	}
+
+	public void setSyncProcessDfileNum(long syncProcessDfileNum) {
+		this.syncProcessDfileNum = syncProcessDfileNum;
+	}
+
+	public long getSyncProcessDfileNum() {
+		return syncProcessDfileNum;
 	}
 	
 }

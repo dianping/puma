@@ -1,6 +1,6 @@
 package com.dianping.puma.admin.reporter;
 
-import com.dianping.puma.core.constant.Operation;
+import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.monitor.SwallowEventPublisher;
 import com.dianping.puma.core.monitor.SyncTaskOperationEvent;
@@ -14,7 +14,7 @@ public class SyncTaskOperationReporter {
 	@Autowired
 	SwallowEventPublisher syncTaskOperationEventPublisher;
 
-	public void report(String syncServerName, SyncType syncType, String taskName, Operation operation) throws
+	public void report(String syncServerName, SyncType syncType, String taskName, ActionOperation operation) throws
 			SendFailedException {
 		SyncTaskOperationEvent event = new SyncTaskOperationEvent();
 		event.setSyncServerName(syncServerName);

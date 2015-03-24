@@ -9,7 +9,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ClientStatus;
-import com.dianping.puma.config.TaskIntervalConfig;
+import com.dianping.puma.config.TaskLionConfig;
 import com.dianping.puma.core.entity.PumaClientInfoEntity;
 import com.dianping.puma.service.PumaClientInfoService;
 
@@ -20,7 +20,7 @@ public class PumaMonitorSeqTask implements PumaMonitorTask {
 	private PumaClientInfoService pumaClientInfoService;
 
 	@Autowired
-	private TaskIntervalConfig intervalConfig;
+	private TaskLionConfig intervalConfig;
 
 	/*
 	 * public void runTask() { Map<String, ClientStatus> clientStatuses =

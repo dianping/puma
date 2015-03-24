@@ -13,7 +13,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ServerStatus;
-import com.dianping.puma.config.TaskIntervalConfig;
+import com.dianping.puma.config.TaskLionConfig;
 
 @Component("pumaMonitorServerInfoTask")
 public class PumaMonitorServerInfoTask implements PumaMonitorTask {
@@ -29,7 +29,7 @@ public class PumaMonitorServerInfoTask implements PumaMonitorTask {
 	private Map<String, Long> preDdlCount;
 
 	@Autowired
-	private TaskIntervalConfig intervalConfig;
+	private TaskLionConfig intervalConfig;
 	
 	public PumaMonitorServerInfoTask() {
 		preUpdateCount = new HashMap<String, Long>();

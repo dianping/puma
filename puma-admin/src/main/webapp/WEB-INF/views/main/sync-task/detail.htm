@@ -68,7 +68,7 @@
 		        <button class="btn btn-success" type="button" onclick="rerun();">回复运行</button>
 		        <button class="btn btn-success" type="button" onclick="refreshStatus();">刷新</button>
 		    </div>
-		  <h5>映射关系<label class="panel-heading-label"> 状态：<span class="panel-heading-span">
+		  <h5>映射关系<label class="panel-heading-label"> 状态：<span class="panel-heading-span" id="syncStateStatus">
 		   #if($syncState.status) 
 		   	$syncState.status
                    #else
@@ -134,9 +134,9 @@
 				if (status.detail) {
 					text += " (" + status.detail + ")";
 				}
-				$("#status > strong").text(text);
+				$("#syncStateStatus").text(text);
 			} else {
-				$("#status > strong").text("无状态(可能不在运行)");
+				$("#syncStateStatus").text("无状态(可能不在运行)");
 			}
 			//var d1 = Date.parse(status.lastUpdateTime);
 			//$("#gmtModified").text(d1.toString('yyyy年MM月dd日 HH时mm分'));

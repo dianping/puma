@@ -58,7 +58,7 @@ public class PumaServerMorphiaDao extends BasicDAO<PumaServerMorphia, String> im
 		Query<PumaServerMorphia> q = this.getDatastore().createQuery(PumaServerMorphia.class);
 		q.field("name").equal(pumaServerMorphia.getName());
 		UpdateOperations<PumaServerMorphia> uop = this.getDatastore().createUpdateOperations(PumaServerMorphia.class);
-		uop.set("entity", pumaServerMorphia);
+		uop.set("entity", pumaServer);
 		this.update(q, uop);
 		this.getDatastore().ensureIndexes();
 	}

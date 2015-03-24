@@ -1,6 +1,7 @@
 package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.util.GsonUtil;
+import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.service.PumaServerService;
@@ -54,18 +55,18 @@ public class PumaServerController {
 	}
 
 	@RequestMapping(value = { "/puma-server/update" })
-	public ModelAndView update(String id) {
+	public ModelAndView update(String name) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerName(id);
+			List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerName(name);
 			if (pumaTasks != null && pumaTasks.size() != 0) {
 				map.put("lock", true);
 			} else {
 				map.put("lock", false);
 			}
 
-			PumaServer entity = pumaServerService.find(id);
+			PumaServer entity = pumaServerService.find(name);
 			map.put("entity", entity);
 			map.put("path", "puma-server");
 			map.put("subPath", "create");
@@ -78,26 +79,18 @@ public class PumaServerController {
 
 	@RequestMapping(value = { "/puma-server/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(String id, String name, String ip) {
+	public String createPost(String name, String ip) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			PumaServer pumaServer;
+			ActionOperation operation;
 
-			// Create or update?
-			if (id != null) {
-				// Update.
-				pumaServer = pumaServerService.find(id);
+			PumaServer pumaServer = pumaServerService.find(name);
+			if (pumaServer == null) {
+				operation = ActionOperation.CREATE;
+				pumaServer = new PumaServer();
 			} else {
-				// Create.
-
-				// Duplicated name?
-				pumaServer = pumaServerService.find(name);
-				if (pumaServer == null) {
-					pumaServer = new PumaServer();
-				} else {
-					throw new Exception("duplicated");
-				}
+				operation = ActionOperation.UPDATE;
 			}
 
 			// Split host and port.
@@ -109,10 +102,10 @@ public class PumaServerController {
 			pumaServer.setHost(host);
 			pumaServer.setPort(port);
 
-			if (id != null) {
-				pumaServerService.update(pumaServer);
-			} else {
+			if (operation == ActionOperation.CREATE) {
 				pumaServerService.create(pumaServer);
+			} else {
+				pumaServerService.update(pumaServer);
 			}
 
 			map.put("success", true);

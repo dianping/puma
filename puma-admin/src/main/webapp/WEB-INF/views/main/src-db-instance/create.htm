@@ -19,7 +19,7 @@
                <label class="col-md-2 control-label" for="name">数据库实例名称</label>
                <div class="col-md-7">
                   <input id="name" name="name" class="form-control validation-input" format="db-name"
-                         #if(${entity}) value="${entity.name}" #end #if(${lock}) disabled="disabled" #end>
+                         #if(${entity}) value="${entity.name}" readonly="readonly" #end>
                </div>
                <div class="col-md-3 validation-help">
                   <span hidden="hidden">无效数据库实例名称</span>

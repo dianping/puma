@@ -1,8 +1,12 @@
 package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.util.GsonUtil;
+import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.entity.SyncServer;
+import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.service.SyncServerService;
+import com.dianping.puma.core.service.SyncTaskService;
+import com.mongodb.MongoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +31,9 @@ public class SyncServerController {
 	@Autowired
 	SyncServerService syncServerService;
 
+	@Autowired
+	SyncTaskService syncTaskService;
+
 	@Value("8080")
 	Integer serverPort;
 
@@ -48,12 +55,12 @@ public class SyncServerController {
 	}
 
 	@RequestMapping(value = { "/sync-server/update" })
-	public ModelAndView update(String id) {
+	public ModelAndView update(String name) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
 
-			SyncServer entity = syncServerService.find(id);
+			SyncServer entity = syncServerService.find(name);
 			map.put("entity", entity);
 			map.put("path", "sync-server");
 			map.put("subPath", "create");
@@ -69,21 +76,38 @@ public class SyncServerController {
 	public String createPost(String name, String ip) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		SyncServer syncServer = new SyncServer();
-		syncServer.setName(name);
-
-		// Split host and port.
-		String[] hostAndPort = ip.split(":");
-		String host = hostAndPort[0];
-		Integer port = hostAndPort.length == 1 ? serverPort : Integer.parseInt(hostAndPort[1]);
-
-		syncServer.setHost(host);
-		syncServer.setPort(port);
-
 		try {
-			this.syncServerService.create(syncServer);
+			ActionOperation operation;
+
+			SyncServer syncServer = syncServerService.find(name);
+			if (syncServer == null) {
+				operation = ActionOperation.CREATE;
+				syncServer = new SyncServer();
+			} else {
+				operation = ActionOperation.UPDATE;
+			}
+
+			// Split host and port.
+			String[] hostAndPort = ip.split(":");
+			String host = hostAndPort[0];
+			Integer port = hostAndPort.length == 1 ? serverPort : Integer.parseInt(hostAndPort[1]);
+
+			syncServer.setName(name);
+			syncServer.setHost(host);
+			syncServer.setPort(port);
+
+			if (operation == ActionOperation.CREATE) {
+				syncServerService.create(syncServer);
+			} else {
+				syncServerService.update(syncServer);
+			}
+
 			map.put("success", true);
+		} catch (MongoException e) {
+			map.put("error", "storage");
+			map.put("success", false);
 		} catch (Exception e) {
+			map.put("error", e.getMessage());
 			map.put("success", false);
 		}
 
@@ -92,13 +116,23 @@ public class SyncServerController {
 
 	@RequestMapping(value = { "/sync-server/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String removePost(String id) {
+	public String removePost(String name) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			this.syncServerService.remove(id);
+			List<SyncTask> pumaTasks = syncTaskService.findBySyncServerName(name);
+
+			if (pumaTasks != null && pumaTasks.size() != 0) {
+				throw new Exception("lock");
+			}
+
+			syncServerService.remove(name);
 			map.put("success", true);
+		} catch (MongoException e) {
+			map.put("error", "storage");
+			map.put("success", false);
 		} catch (Exception e) {
+			map.put("error", e.getMessage());
 			map.put("success", false);
 		}
 

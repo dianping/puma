@@ -1,16 +1,12 @@
 package com.dianping.puma.core.monitor.event;
 
-import com.dianping.puma.core.monitor.event.TaskEvent;
+import com.dianping.puma.core.constant.ActionOperation;
 
 public class TaskOperationEvent extends TaskEvent {
 
 	private String taskName;
 
 	private ActionOperation operation;
-
-	public String getTaskName() {
-		return taskName;
-	}
 
 	public void setTaskName(String taskName) {
 		this.taskName = taskName;

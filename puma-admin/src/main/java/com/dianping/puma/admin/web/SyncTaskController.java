@@ -12,13 +12,12 @@ import com.dianping.puma.admin.remote.reporter.SyncTaskOperationReporter;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.ActionOperation;
-import com.dianping.puma.core.constant.Status;
-import com.dianping.puma.core.constant.SyncType;
+import com.dianping.puma.core.model.state.SyncTaskState;
 import com.dianping.puma.core.model.state.TaskStateContainer;
+import com.dianping.puma.core.service.SyncTaskStateService;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
 import com.mongodb.MongoException;
 
-import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +35,12 @@ import com.dianping.puma.core.entity.SyncTask;
 public class SyncTaskController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SyncTaskController.class);
+
 	@Autowired
 	private SyncTaskService syncTaskService;
+
+	@Autowired
+	SyncTaskStateService syncTaskStateService;
 
 	@Autowired
 	private TaskStateContainer syncTaskStateContainer;
@@ -66,7 +69,8 @@ public class SyncTaskController {
 		return new ModelAndView("main/container", map);
 	}
 
-	@RequestMapping(value = { "/sync-task/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = {
+			"/sync-task/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String removePost(String id) {
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -78,7 +82,7 @@ public class SyncTaskController {
 			syncTaskService.remove(id);
 
 			// Publish puma task operation event to puma server.
-			syncTaskOperationReporter.report(syncTask.getSyncServerName(), SyncType.SYNC, id, ActionOperation.REMOVE);
+			syncTaskOperationReporter.report(syncTask.getSyncServerName(), syncTask.getName(), ActionOperation.REMOVE);
 
 			map.put("success", true);
 		} catch (MongoException e) {
@@ -97,113 +101,113 @@ public class SyncTaskController {
 		return GsonUtil.toJson(map);
 	}
 
-    /**
-     * 查询SyncTask状态
-     */
-    @RequestMapping(value = "/sync-task/status", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public Object status(HttpSession session, String taskName) {
-        Map<String, Object> map = new HashMap<String, Object>();
-         try {
-        	SyncTaskState syncTaskState = syncTaskStateContainer.get(taskName);
-            //binlog信息，从数据库查询binlog位置即可，不需要从SyncServer实时发过来的status中的binlog获取
-            //binlogInfoOfIOThread则是从status中获取
-            SyncTask syncTask = this.syncTaskService.find(taskName);
-            syncTaskState.setBinlogInfo(syncTask.getBinlogInfo());
+	/**
+	 * 查询SyncTask状态
+	 */
+	@RequestMapping(value = "/sync-task/status", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public Object status(HttpSession session, String taskName) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		try {
+			SyncTaskState syncTaskState = syncTaskStateService.find(taskName);
+			//binlog信息，从数据库查询binlog位置即可，不需要从SyncServer实时发过来的status中的binlog获取
+			//binlogInfoOfIOThread则是从status中获取
+			SyncTask syncTask = this.syncTaskService.find(taskName);
+			syncTaskState.setBinlogInfo(syncTask.getBinlogInfo());
 
-            map.put("status", syncTaskState);
-            map.put("success", true);
-        } catch (IllegalArgumentException e) {
-            map.put("success", false);
-            map.put("errorMsg", e.getMessage());
-        } catch (Exception e) {
-            map.put("success", false);
-            map.put("errorMsg", e.getMessage());
-            LOG.error(e.getMessage(), e);
-        }
-        return GsonUtil.toJson(map);
-    }
+			map.put("status", syncTaskState);
+			map.put("success", true);
+		} catch (IllegalArgumentException e) {
+			map.put("success", false);
+			map.put("errorMsg", e.getMessage());
+		} catch (Exception e) {
+			map.put("success", false);
+			map.put("errorMsg", e.getMessage());
+			LOG.error(e.getMessage(), e);
+		}
+		return GsonUtil.toJson(map);
+	}
 
-    /**
-     * 查询SyncTask
-     */
-    @RequestMapping(value = "/sync-task/detail/{taskName}", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
-    public ModelAndView task(HttpSession session, @PathVariable String taskName) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        SyncTask syncTask = this.syncTaskService.find(taskName);
-        SyncTaskState syncState = syncTaskStateContainer.get(taskName);
-        map.put("syncTask", syncTask);
-        map.put("syncState", syncState);
-        map.put("createdActive", "active");
-        map.put("subPath", "detail");
-        map.put("path", "sync-task");
-        return new ModelAndView("main/container", map);
-    }
+	/**
+	 * 查询SyncTask
+	 */
+	@RequestMapping(value = "/sync-task/detail/{taskName}", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+	public ModelAndView task(HttpSession session, @PathVariable String taskName) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		SyncTask syncTask = this.syncTaskService.find(taskName);
+		SyncTaskState syncTaskState = syncTaskStateService.find(taskName);
+		map.put("syncTask", syncTask);
+		map.put("syncTaskState", syncTaskState);
+		map.put("createdActive", "active");
+		map.put("subPath", "detail");
+		map.put("path", "sync-task");
+		return new ModelAndView("main/container", map);
+	}
 
-    /**
-     * 暂停SyncTask状态
-     */
-    @RequestMapping(value = "/sync-task/pause", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public Object pause(HttpSession session, String taskName) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        try {
-            this.syncTaskService.updateStatusAction(taskName, ActionController.PAUSE);
-            map.put("success", true);
-        } catch (IllegalArgumentException e) {
-            map.put("success", false);
-            map.put("errorMsg", e.getMessage());
-        } catch (Exception e) {
-            map.put("success", false);
-            map.put("errorMsg", e.getMessage());
-            LOG.error(e.getMessage(), e);
-        }
-        
-        return GsonUtil.toJson(map);
-    }
+	/**
+	 * 暂停SyncTask状态
+	 */
+	@RequestMapping(value = "/sync-task/pause", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public Object pause(HttpSession session, String taskName) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		try {
+			this.syncTaskService.updateStatusAction(taskName, ActionController.PAUSE);
+			map.put("success", true);
+		} catch (IllegalArgumentException e) {
+			map.put("success", false);
+			map.put("errorMsg", e.getMessage());
+		} catch (Exception e) {
+			map.put("success", false);
+			map.put("errorMsg", e.getMessage());
+			LOG.error(e.getMessage(), e);
+		}
 
-    /**
-     * 恢复SyncTask的运行
-     */
-    @RequestMapping(value = "/sync-task/rerun", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public Object rerun(HttpSession session, String taskName) {
-        Map<String, Object> map = new HashMap<String, Object>();
+		return GsonUtil.toJson(map);
+	}
 
-        try {
-            this.syncTaskService.updateStatusAction(taskName, ActionController.RESUME);
-            map.put("success", true);
-        } catch (IllegalArgumentException e) {
-            map.put("success", false);
-            map.put("errorMsg", e.getMessage());
-        } catch (Exception e) {
-            map.put("success", false);
-            map.put("errorMsg", e.getMessage());
-            LOG.error(e.getMessage(), e);
-        }
-        return GsonUtil.toJson(map);
-    }
+	/**
+	 * 恢复SyncTask的运行
+	 */
+	@RequestMapping(value = "/sync-task/rerun", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public Object rerun(HttpSession session, String taskName) {
+		Map<String, Object> map = new HashMap<String, Object>();
 
-    /**
-     * 修复SyncTask
-     */
-    @RequestMapping(value = "/sync-task/resolved", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public Object resolved(HttpSession session, String taskName) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        
-        try {
-            this.syncTaskService.updateStatusAction(taskName, ActionController.RESUME);
-            map.put("success", true);
-        } catch (IllegalArgumentException e) {
-            map.put("success", false);
-            map.put("errorMsg", e.getMessage());
-        } catch (Exception e) {
-            map.put("success", false);
-            map.put("errorMsg", e.getMessage());
-            LOG.error(e.getMessage(), e);
-        }
-        return GsonUtil.toJson(map);
-    }
+		try {
+			this.syncTaskService.updateStatusAction(taskName, ActionController.RESUME);
+			map.put("success", true);
+		} catch (IllegalArgumentException e) {
+			map.put("success", false);
+			map.put("errorMsg", e.getMessage());
+		} catch (Exception e) {
+			map.put("success", false);
+			map.put("errorMsg", e.getMessage());
+			LOG.error(e.getMessage(), e);
+		}
+		return GsonUtil.toJson(map);
+	}
+
+	/**
+	 * 修复SyncTask
+	 */
+	@RequestMapping(value = "/sync-task/resolved", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public Object resolved(HttpSession session, String taskName) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			this.syncTaskService.updateStatusAction(taskName, ActionController.RESUME);
+			map.put("success", true);
+		} catch (IllegalArgumentException e) {
+			map.put("success", false);
+			map.put("errorMsg", e.getMessage());
+		} catch (Exception e) {
+			map.put("success", false);
+			map.put("errorMsg", e.getMessage());
+			LOG.error(e.getMessage(), e);
+		}
+		return GsonUtil.toJson(map);
+	}
 
 }

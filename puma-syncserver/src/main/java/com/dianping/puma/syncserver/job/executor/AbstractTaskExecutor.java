@@ -12,7 +12,7 @@ import com.dianping.puma.core.entity.AbstractBaseSyncTask;
 import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.SyncTaskState;
+import com.dianping.puma.core.model.state.BaseSyncTaskState;
 import com.dianping.puma.core.monitor.NotifyService;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.io.FileUtils;

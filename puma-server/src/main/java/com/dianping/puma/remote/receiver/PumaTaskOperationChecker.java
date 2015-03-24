@@ -1,6 +1,6 @@
 package com.dianping.puma.remote.receiver;
 
-import com.dianping.puma.config.Config;
+import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.monitor.event.Event;

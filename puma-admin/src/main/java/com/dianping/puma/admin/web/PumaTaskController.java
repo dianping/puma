@@ -192,7 +192,7 @@ public class PumaTaskController {
 			pumaTaskStateService.remove(name);
 
 			// Publish puma task operation event to puma server.
-			this.pumaTaskOperationReporter.report(pumaTask.getPumaServerId(), pumaTask.getId(), pumaTask.getName(), ActionOperation.REMOVE);
+			this.pumaTaskOperationReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(), ActionOperation.REMOVE);
 
 			map.put("success", true);
 		} catch (MongoException e) {
@@ -245,7 +245,7 @@ public class PumaTaskController {
 			PumaTask pumaTask = pumaTaskService.find(name);
 
 			// Publish puma task controller event to puma server.
-			this.pumaTaskControllerReporter.report(pumaTask.getPumaServerId(), pumaTask.getId(), pumaTask.getName(), com.dianping.puma.core.constant.ActionController.RESUME);
+			this.pumaTaskControllerReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(), com.dianping.puma.core.constant.ActionController.RESUME);
 
 			map.put("success", true);
 		} catch (MongoException e) {
@@ -268,7 +268,7 @@ public class PumaTaskController {
 			PumaTask pumaTask = pumaTaskService.find(name);
 
 			// Publish puma task controller event to puma server.
-			this.pumaTaskControllerReporter.report(pumaTask.getPumaServerId(), pumaTask.getId(), pumaTask.getName(), com.dianping.puma.core.constant.ActionController.PAUSE);
+			this.pumaTaskControllerReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(), com.dianping.puma.core.constant.ActionController.PAUSE);
 
 			map.put("success", true);
 		} catch (MongoException e) {

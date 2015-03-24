@@ -1,6 +1,6 @@
 package com.dianping.puma.core.model.state;
 
-import com.dianping.puma.core.constant.Controller;
+import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
@@ -17,7 +17,7 @@ public abstract class TaskState {
 
 	private Status status;
 
-	private Controller controller;
+	private ActionController controller;
 
 	private BinlogInfo binlogInfo;
 
@@ -51,11 +51,11 @@ public abstract class TaskState {
 		this.detail = detail;
 	}
 
-	public Controller getController() {
+	public ActionController getController() {
 		return controller;
 	}
 
-	public void setController(Controller controller) {
+	public void setController(ActionController controller) {
 		this.controller = controller;
 	}
 

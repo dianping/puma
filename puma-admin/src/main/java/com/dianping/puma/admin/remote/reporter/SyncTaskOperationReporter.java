@@ -1,7 +1,6 @@
 package com.dianping.puma.admin.remote.reporter;
 
 import com.dianping.puma.core.constant.ActionOperation;
-import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.monitor.SwallowEventPublisher;
 import com.dianping.puma.core.monitor.event.SyncTaskOperationEvent;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;

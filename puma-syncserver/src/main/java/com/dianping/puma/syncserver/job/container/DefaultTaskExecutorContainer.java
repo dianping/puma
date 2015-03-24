@@ -75,9 +75,9 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
 		SyncTaskExecutor syncTaskExecutor0 = (SyncTaskExecutor) taskExecutor;
 		SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) newTaskExecutor;
 		if (syncTaskExecutor.getTask().getController() != ActionController.RESUME
-				|| syncTaskExecutor0.getState().getStatus() != Status.SUSPENDED
-				&& syncTaskExecutor0.getState().getStatus() != Status.FAILED
-				&& syncTaskExecutor0.getState().getStatus() != Status.SUCCESS) {
+				|| syncTaskExecutor0.getTaskState().getStatus() != Status.SUSPENDED
+				&& syncTaskExecutor0.getTaskState().getStatus() != Status.FAILED
+				&& syncTaskExecutor0.getTaskState().getStatus() != Status.SUCCESS) {
 			notifyService
 					.alarm("Ignored a TaskExecutor which status is not correct: " + newTaskExecutor.getTask(), null, false);
 			return;
@@ -136,14 +136,14 @@ public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
 	 */
 	@Override
 	public void changeStatus(String taskName, ActionController controller) {
-		SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) this.get(SyncType.SYNC, taskName);
+		SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) this.get(taskName);
 		if (syncTaskExecutor != null) {
 			if (controller == ActionController.PAUSE) {
 				syncTaskExecutor.pause("Stop because the StatusAction is Pause.");
 			} else if (controller == ActionController.RESUME
-					&& (syncTaskExecutor.getState().getStatus() == Status.SUSPENDED
-					|| syncTaskExecutor.getState().getStatus() == Status.SUCCESS
-					|| syncTaskExecutor.getState().getStatus() == Status.FAILED)) {
+					&& (syncTaskExecutor.getTaskState().getStatus() == Status.SUSPENDED
+					|| syncTaskExecutor.getTaskState().getStatus() == Status.SUCCESS
+					|| syncTaskExecutor.getTaskState().getStatus() == Status.FAILED)) {
 				syncTaskExecutor.start();
 			}
 		}

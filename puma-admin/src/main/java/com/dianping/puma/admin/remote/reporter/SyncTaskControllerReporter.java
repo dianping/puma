@@ -1,6 +1,6 @@
 package com.dianping.puma.admin.remote.reporter;
 
-import com.dianping.puma.core.constant.Controller;
+import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.monitor.SwallowEventPublisher;
 import com.dianping.puma.core.monitor.event.SyncTaskControllerEvent;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
@@ -13,7 +13,7 @@ public class SyncTaskControllerReporter {
 	@Autowired
 	SwallowEventPublisher syncTaskControllerEventPublisher;
 
-	public void report(String syncServerName, String taskName, Controller controller) throws SendFailedException {
+	public void report(String syncServerName, String taskName, ActionController controller) throws SendFailedException {
 		SyncTaskControllerEvent event = new SyncTaskControllerEvent();
 		event.setServerName(syncServerName);
 		event.setTaskName(taskName);

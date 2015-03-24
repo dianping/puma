@@ -1,5 +1,6 @@
 package com.dianping.puma.admin.web;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -224,22 +225,21 @@ public class SyncTaskController {
     /**
      * 显示待修改SyncTask的页面
      */
-    @RequestMapping(value = "/modify/{taskName}", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "sync-task/modify/{taskName}", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
     public ModelAndView modify(HttpSession session, @PathVariable String taskName) {
         Map<String, Object> map = new HashMap<String, Object>();
         SyncTask syncTask = this.syncTaskService.find(taskName);
         session.setAttribute("syncTask", syncTask);
-
-        TaskExecutorStatus status = systemStatusContainer.getStatus(Type.SYNC, taskId);
-        map.put("status", status);
+        SyncTaskState syncTaskState = syncTaskStateService.find(taskName);
+        map.put("status", syncTaskState);
 
         map.put("createdActive", "active");
-        map.put("path", "modify");
+        map.put("path", "sync-task/modify");
         map.put("subPath", "step1");
         return new ModelAndView("main/container", map);
     }
 
-    @RequestMapping(value = "/modify/step1Save", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "sync-task/modify/step1Save", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object step1Save(HttpSession session, String[] databaseFrom, String[] databaseTo, String[] tableFrom, String[] tableTo,
                             Integer count[]) {
@@ -313,7 +313,7 @@ public class SyncTaskController {
 
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = { "/modify/step2" })
+    @RequestMapping(method = RequestMethod.GET, value = { "sync-task/modify/step2" })
     public ModelAndView step2(HttpSession session) throws SQLException {
         Map<String, Object> map = new HashMap<String, Object>();
      /*   SyncTask syncTask = (SyncTask) session.getAttribute("syncTask");
@@ -335,7 +335,7 @@ public class SyncTaskController {
     /**
      * 创建DumpTask
      */
-    @RequestMapping(value = "/modify/createDumpTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "sync-task/modify/createDumpTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object createDumpTask(HttpSession session, String srcMysqlHost, String syncServerName) {
         Map<String, Object> map = new HashMap<String, Object>();
@@ -375,7 +375,7 @@ public class SyncTaskController {
     /**
      * 刷新DumpTask的状态
      */
-    @RequestMapping(value = "/modify/refreshDumpStatus", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "sync-task/modify/refreshDumpStatus", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object refreshDumpStatus(HttpSession session) {
         Map<String, Object> map = new HashMap<String, Object>();
@@ -412,7 +412,7 @@ public class SyncTaskController {
     /**
      * 创建CatchupTask的页面
      */
-    @RequestMapping(method = RequestMethod.GET, value = { "/modify/step3" })
+    @RequestMapping(method = RequestMethod.GET, value = { "sync-task/modify/step3" })
     public ModelAndView step3(HttpSession session) throws SQLException {
         Map<String, Object> map = new HashMap<String, Object>();
         /*//查询所有syncServer
@@ -426,7 +426,7 @@ public class SyncTaskController {
         return new ModelAndView("main/container", map);
     }
 
-    @RequestMapping(value = "/modify/createCatchupTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "sync-task/modify/createCatchupTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object createCatchupTask(HttpSession session, String binlogFile, String binlogPosition, String pumaClientName) {
         Map<String, Object> map = new HashMap<String, Object>();
@@ -481,7 +481,7 @@ public class SyncTaskController {
     /**
      * 查看CatchupTask的状态
      */
-    @RequestMapping(value = "/modify/refreshCatchupStatus", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "sync-task/modify/refreshCatchupStatus", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object refreshCatchupStatus(HttpSession session) {
         Map<String, Object> map = new HashMap<String, Object>();
@@ -516,7 +516,7 @@ public class SyncTaskController {
 
     }
 
-    @RequestMapping(value = "/modify/updateSyncTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "sync-task/modify/updateSyncTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object updateSyncTask(HttpSession session, String binlogFile, String binlogPos) {
         Map<String, Object> map = new HashMap<String, Object>();
@@ -553,7 +553,7 @@ public class SyncTaskController {
     /**
      * 查看CatchupTask的状态
      */
-    @RequestMapping(value = "/modify/delTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    @RequestMapping(value = "sync-task/modify/delTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object delete(HttpSession session, Long id) {
         Map<String, Object> map = new HashMap<String, Object>();

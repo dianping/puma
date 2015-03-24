@@ -21,7 +21,7 @@
             <tbody>
              #foreach($syncTask in ${syncTasks})
             <tr>
-                <td><a href="" target="_blank">${syncTask.pumaTaskName}</td>
+                <td>${syncTask.pumaTaskName}</td>
                 <td>${syncTask.dstDBInstanceName}</td>
                 <td>${syncTask.syncServerName}</td>
                 <td class="sync-task-status"></td>

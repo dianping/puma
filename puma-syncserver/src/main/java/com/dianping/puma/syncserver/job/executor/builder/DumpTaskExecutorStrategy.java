@@ -2,6 +2,7 @@ package com.dianping.puma.syncserver.job.executor.builder;
 
 import java.io.IOException;
 
+import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.entity.DumpTask;
 import com.dianping.puma.core.entity.PumaTask;
@@ -43,6 +44,12 @@ public class DumpTaskExecutorStrategy implements TaskExecutorStrategy<DumpTask, 
             excutor = new DumpTaskExecutor(task, new DumpTaskState());
             excutor.setSrcDBInstance(srcDBInstanceService.find(srcDBInstanceName));
             excutor.setDstDBInstance(dstDBInstanceService.find(dstDBInstanceName));
+
+            DumpTaskState dumpTaskState = new DumpTaskState();
+            dumpTaskState.setTaskName(task.getName());
+            dumpTaskState.setStatus(Status.PREPARING);
+            dumpTaskState.setBinlogInfo(task.getBinlogInfo());
+            excutor.setTaskState(dumpTaskState);
 
             return excutor;
         } catch (IOException e) {

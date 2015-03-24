@@ -25,7 +25,7 @@ import java.util.List;
  * @author Leo Liang
  */
 @SuppressWarnings("rawtypes")
-public interface TaskExecutionContainer {
+public interface TaskExecutorContainer {
 
     public void submit(TaskExecutor taskExecutor) throws TaskExecutionException;
 

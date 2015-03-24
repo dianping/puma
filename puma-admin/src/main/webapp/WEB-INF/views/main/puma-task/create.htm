@@ -15,13 +15,6 @@
             action="${rc.contextPath}/puma-task/create" target="${rc.contextPath}/puma-task">
          <div class="panel-body">
 
-            #if(${entity})
-            <div class="form-group" hidden="hidden">
-               <label class="sr-only" for="id"></label>
-               <input id="id" name="id" value="${entity.id}">
-            </div>
-            #end
-
             <div class="form-group">
                <label class="col-md-2 control-label" for="srcDBInstanceName">源数据库</label>
                <div class="col-md-7">

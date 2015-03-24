@@ -1,4 +1,4 @@
-package com.dianping.puma.syncserver.conf;
+package com.dianping.puma.syncserver.config;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,15 +19,14 @@ import com.dianping.puma.core.entity.SyncServer;
 import com.dianping.puma.core.service.SyncServerService;
 import com.dianping.puma.core.util.IPUtils;
 import com.dianping.puma.syncserver.job.executor.DumpTaskExecutor;
-import org.springframework.stereotype.Service;
 
-public class Config implements InitializingBean {
-    private static final Logger LOG = LoggerFactory.getLogger(Config.class);
+public class SyncServerConfig implements InitializingBean {
+    private static final Logger LOG = LoggerFactory.getLogger(SyncServerConfig.class);
     private static final String SHELL_PATH = "shell/mysqlload.sh";
     @Autowired
     private SyncServerService syncServerService;
     private String syncServerName;
-    private static Config instance;
+    private static SyncServerConfig instance;
 
     //    @Value(value = "#{'${puma.dump.tempDir}'}")
     private String tempDir;
@@ -93,13 +92,13 @@ public class Config implements InitializingBean {
         instance = this;
     }
 
-    public static Config getInstance() {
+    public static SyncServerConfig getInstance() {
         return instance;
     }
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
         //复制mysqlload.sh到shell目录
-        InputStream ins = Config.class.getClassLoader().getResourceAsStream("shell/mysqlload.sh");
+        InputStream ins = SyncServerConfig.class.getClassLoader().getResourceAsStream("shell/mysqlload.sh");
         File mysqlLoadShell = new File("/home/wukezhu/mysqlload.sh");
         IOUtils.copy(ins, new FileOutputStream(mysqlLoadShell));
     }

@@ -16,9 +16,9 @@ public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTask, SyncTaskSta
 
 	protected SyncTaskState state;
 
-	public SyncTaskExecutor(SyncTask syncTask, SyncTaskState syncTaskState, String pumaServerHost, int pumaServerPort,
+	public SyncTaskExecutor(SyncTask syncTask, String pumaServerHost, int pumaServerPort,
 			String target, DstDBInstance dstDBInstance) {
-		super(syncTask, syncTaskState, pumaServerHost, pumaServerPort, target, dstDBInstance);
+		super(syncTask, pumaServerHost, pumaServerPort, target, dstDBInstance);
 	}
 
 	@Override

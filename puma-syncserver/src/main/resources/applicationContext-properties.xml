@@ -12,16 +12,10 @@
 		<property name="propertiesPath" value="puma.syncserver.config.properties" />
 	</bean>
 
-	<bean id="config" class="com.dianping.puma.syncserver.conf.Config">
+	<bean id="syncServerConfig" class="com.dianping.puma.syncserver.config.SyncServerConfig">
 		<property name="tempDir" value="${puma.syncserver.tempDir}" />
 		<property name="localPort" value="${puma.syncserver.port}" />
 	</bean>
-
-	<!--bean id="binlogInfoService"
-		class="com.dianping.puma.syncserver.service.impl.MMapBasedBinlogInfoServiceImpl"
-		init-method="init">
-		<property name="baseDir" value="/data/appdatas/puma/syncserver/" />
-	</bean-->
 
 	<bean id="binlogInfoHolder"
 		  class="com.dianping.puma.core.holder.impl.DefaultBinlogInfoHolder"

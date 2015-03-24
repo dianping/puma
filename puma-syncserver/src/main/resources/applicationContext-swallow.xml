@@ -1,14 +1,9 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
-    xmlns:context="http://www.springframework.org/schema/context"
-    xsi:schemaLocation="
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
             http://www.springframework.org/schema/beans 
-            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-            http://www.springframework.org/schema/context
-            http://www.springframework.org/schema/context/spring-context-3.0.xsd
-            http://www.springframework.org/schema/task   
-    http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
     <bean id="syncTaskStatePublisher"
           class="com.dianping.puma.core.monitor.SwallowEventPublisher"
@@ -16,63 +11,32 @@
         <property name="topic" value="sync_task_state" />
     </bean>
 
-    <bean id="statusEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPublisher"
-        init-method="init">
-        <property name="topic" value="puma_status_event" />
-    </bean>
-
     <bean id="syncTaskOperationEventSubscriber"
           class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
           init-method="init">
         <property name="topic" value="sync_task_operation" />
-        <property name="type" value="#{config.syncServerName}" />
+        <property name="type" value="#{syncServerConfig.syncServerName}" />
         <property name="notifyService" ref="notifyService"/>
         <property name="clazz"
-                  value="com.dianping.puma.core.monitor.SyncTaskOperationEvent" />
+                  value="com.dianping.puma.core.monitor.event.SyncTaskOperationEvent" />
         <property name="listeners">
             <list>
-                <ref bean="taskChecker"/>
+                <ref bean="syncTaskOperationReceiver"/>
             </list>
         </property>
     </bean>
 
-    <bean id="taskEventSubscriber"
-        class="com.dianping.puma.syncserver.monitor.TaskEventSubscriber"
-        init-method="init">
-        <property name="topic" value="puma_task_event" />
+    <bean id="dumpTaskOperationEventSubscriber"
+          class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
+          init-method="init">
+        <property name="topic" value="sync_task_operation" />
+        <property name="type" value="#{syncServerConfig.syncServerName}" />
+        <property name="notifyService" ref="notifyService"/>
         <property name="clazz"
-            value="com.dianping.puma.core.monitor.event.TaskEvent" />
+                  value="com.dianping.puma.core.monitor.event.DumpTaskOperationEvent" />
         <property name="listeners">
             <list>
-                <ref bean="taskChecker" />
-            </list>
-        </property>
-    </bean>
-
-    <bean id="statusActionEventSubscriber"
-        class="com.dianping.puma.syncserver.monitor.StatusActionEventSubscriber"
-        init-method="init">
-        <property name="topic" value="puma_status_action_event" />
-        <property name="notifyService" ref="notifyService" />
-        <property name="clazz"
-            value="com.dianping.puma.core.monitor.SyncTaskStatusActionEvent" />
-        <property name="listeners">
-            <list>
-                <ref bean="taskChecker" />
-            </list>
-        </property>
-    </bean>
-
-    <bean id="taskDeleteEventSubscriber"
-        class="com.dianping.puma.syncserver.monitor.StatusActionEventSubscriber"
-        init-method="init">
-        <property name="topic" value="puma_task_delete_event" />
-        <property name="notifyService" ref="notifyService" />
-        <property name="clazz"
-            value="com.dianping.puma.core.monitor.SyncTaskDeleteEvent" />
-        <property name="listeners">
-            <list>
-                <ref bean="taskChecker" />
+                <ref bean="dumpTaskOperationReceiver"/>
             </list>
         </property>
     </bean>

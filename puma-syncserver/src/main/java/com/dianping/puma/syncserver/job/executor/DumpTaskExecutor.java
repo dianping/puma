@@ -18,7 +18,6 @@ import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.entity.DumpTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.state.BaseSyncTaskState;
 import com.dianping.puma.core.model.state.DumpTaskState;
 import com.google.common.base.Strings;
 import org.apache.commons.exec.CommandLine;
@@ -39,7 +38,7 @@ import org.slf4j.LoggerFactory;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
-import com.dianping.puma.syncserver.conf.Config;
+import com.dianping.puma.syncserver.config.SyncServerConfig;
 import com.dianping.puma.syncserver.util.ProcessBuilderWrapper;
 
 /**
@@ -90,7 +89,7 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask, DumpTaskState> {
 
     public DumpTaskExecutor(DumpTask dumpTask, DumpTaskState dumpTaskState) throws IOException {
         this.uuid = UUID.randomUUID().toString();
-        this.dumpOutputDir = Config.getInstance().getTempDir() + "/dump/" + uuid + "/";
+        this.dumpOutputDir = SyncServerConfig.getInstance().getTempDir() + "/dump/" + uuid + "/";
         FileUtils.forceMkdir(new File(dumpOutputDir));
         this.dumpTask = dumpTask;
         state = dumpTaskState;
@@ -286,7 +285,7 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask, DumpTaskState> {
     private String _mysqlload(String databaseName) throws ExecuteException, IOException, InterruptedException {
         List<String> cmdlist = new ArrayList<String>();
         cmdlist.add("sh");
-        cmdlist.add(Config.getInstance().getTempDir() + "/shell/mysqlload.sh");
+        cmdlist.add(SyncServerConfig.getInstance().getTempDir() + "/shell/mysqlload.sh");
         cmdlist.add("--default-character-set=utf8");
         cmdlist.add("--user=" + dstDBInstance.getUsername());
         String host = dstDBInstance.getHost();
@@ -407,6 +406,10 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask, DumpTaskState> {
 
     public DumpTaskState getTaskState() {
         return state;
+    }
+
+    public void setTaskState(DumpTaskState taskState) {
+        this.state = taskState;
     }
 
     public void setState(DumpTaskState state) {

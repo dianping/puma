@@ -3,8 +3,6 @@ package com.dianping.puma.syncserver.job.executor.builder;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.entity.*;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
-import com.dianping.puma.core.holder.impl.DefaultBinlogInfoHolder;
-import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.model.state.CatchupTaskState;
 import com.dianping.puma.core.service.DstDBInstanceService;
@@ -15,7 +13,7 @@ import org.springframework.stereotype.Service;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.sync.model.task.Type;
-import com.dianping.puma.syncserver.job.container.TaskExecutionContainer;
+import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;
 import com.dianping.puma.syncserver.job.executor.CatchupTaskExecutor;
 import com.dianping.puma.syncserver.job.executor.SyncTaskExecutor;
 
@@ -26,7 +24,7 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
     private PumaServerConfigService pumaServerConfigService;
     */
 	@Autowired
-	private TaskExecutionContainer taskExecutionContainer;
+	private TaskExecutorContainer taskExecutorContainer;
 
 	@Autowired
 	private BinlogInfoHolder binlogInfoHolder;
@@ -96,7 +94,7 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
 
 		String target = pumaTask.getName();
 		//从taskContainer获取syncTaskExecutor
-		SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) taskExecutionContainer
+		SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) taskExecutorContainer
 				.get(task.getName());
 
 		DstDBInstance dstDBInstance = dstDBInstanceService.find(task.getDstDBInstanceName());

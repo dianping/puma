@@ -1,8 +1,10 @@
 package com.dianping.puma.syncserver.job.executor.builder;
 
+import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.entity.*;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.state.SyncTaskState;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.service.DstDBInstanceService;
@@ -90,10 +92,23 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
 
         DstDBInstance dstDBInstance = dstDBInstanceService.find(task.getDstDBInstanceName());
 
-        SyncTaskExecutor excutor = new SyncTaskExecutor(task, new SyncTaskState(), pumaServerHost, pumaServerPort, target, dstDBInstance);
-        excutor.setBinlogInfoHolder(binlogInfoHolder);
-        excutor.setNotifyService(notifyService);
-        return excutor;
+        SyncTaskExecutor executor = new SyncTaskExecutor(task, pumaServerHost, pumaServerPort, target, dstDBInstance);
+        executor.setBinlogInfoHolder(binlogInfoHolder);
+        executor.setNotifyService(notifyService);
+
+        SyncTaskState syncTaskState = new SyncTaskState();
+        syncTaskState.setTaskName(task.getName());
+        syncTaskState.setStatus(Status.PREPARING);
+
+        BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(task.getName());
+        if (binlogInfo == null) {
+            binlogInfo = task.getBinlogInfo();
+        }
+        syncTaskState.setBinlogInfo(binlogInfo);
+
+        executor.setTaskState(syncTaskState);
+
+        return executor;
     }
 
     @Override

@@ -75,7 +75,7 @@ public class PumaTaskMorphiaDao extends BasicDAO<PumaTaskMorphia, String> implem
 	public void update(PumaTask pumaTask) {
 		PumaTaskMorphia pumaTaskMorphia = new PumaTaskMorphia(pumaTask);
 		Query<PumaTaskMorphia> q = this.getDatastore().createQuery(PumaTaskMorphia.class);
-		q.field("name").equal(pumaTask.getName());
+		q.field("name").equal(pumaTaskMorphia.getName());
 		UpdateOperations<PumaTaskMorphia> uop = this.getDatastore().createUpdateOperations(PumaTaskMorphia.class);
 		uop.set("entity", pumaTask);
 		this.update(q, uop);

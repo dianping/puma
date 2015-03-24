@@ -28,7 +28,7 @@ import com.dianping.puma.syncserver.job.executor.TaskExecutor;
  */
 @Service
 @SuppressWarnings("rawtypes")
-public class DefaultTaskExecutorContainer implements TaskExecutionContainer {
+public class DefaultTaskExecutorContainer implements TaskExecutorContainer {
 	private static final Logger LOG = LoggerFactory.getLogger(DefaultTaskExecutorContainer.class);
 
 	private ConcurrentHashMap<String, TaskExecutor> taskExecutorMap = new ConcurrentHashMap<String, TaskExecutor>();

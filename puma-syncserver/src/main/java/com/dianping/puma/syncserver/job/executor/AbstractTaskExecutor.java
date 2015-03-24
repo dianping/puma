@@ -79,13 +79,12 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 	
 	private NotifyService notifyService;
 
-	public AbstractTaskExecutor(T abstractTask, S taskState, String pumaServerHost, int pumaServerPort, String target, DstDBInstance dstDBInstance) {
+	public AbstractTaskExecutor(T abstractTask, String pumaServerHost, int pumaServerPort, String target, DstDBInstance dstDBInstance) {
 		this.abstractTask = abstractTask;
 		this.pumaServerHost = pumaServerHost;
 		this.pumaServerPort = pumaServerPort;
 		this.target = target;
 
-		this.state = taskState;
 		this.dstDBInstance = dstDBInstance;
 
 		// this.status = new TaskExecutorStatus();
@@ -629,7 +628,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 		return state;
 	}
 
-	public void setState(S state) {
+	public void setTaskState(S state) {
 		this.state = state;
 	}
 }

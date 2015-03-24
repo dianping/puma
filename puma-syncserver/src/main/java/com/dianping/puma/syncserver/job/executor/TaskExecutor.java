@@ -45,6 +45,8 @@ public interface TaskExecutor<T extends BaseSyncTask, S extends TaskState> {
 
     S getTaskState();
 
+    void setTaskState(S taskState);
+
     /** 结束任务，状态设置为成功 */
     void stop(String detail);
 

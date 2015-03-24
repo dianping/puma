@@ -21,8 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.dianping.puma.syncserver.conf.Config;
-import com.dianping.puma.syncserver.job.container.TaskExecutionContainer;
+import com.dianping.puma.syncserver.config.SyncServerConfig;
+import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;
 import com.dianping.puma.syncserver.job.executor.TaskExecutionException;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 import com.dianping.puma.syncserver.job.executor.builder.TaskExecutorBuilder;
@@ -36,13 +36,13 @@ public class TaskChecker implements EventListener {
 	private SyncTaskService syncTaskService;
 
 	@Autowired
-	private TaskExecutionContainer taskExecutionContainer;
+	private TaskExecutorContainer taskExecutorContainer;
 
 	@Autowired
 	private TaskExecutorBuilder taskExecutorBuilder;
 
 	@Autowired
-	private Config config;
+	private SyncServerConfig syncServerConfig;
 
 	@Autowired
 	NotifyService notifyService;
@@ -57,7 +57,7 @@ public class TaskChecker implements EventListener {
 	@PostConstruct
 	public void init() {
 		//加载所有Task
-		String syncServerName = config.getSyncServerName();
+		String syncServerName = syncServerConfig.getSyncServerName();
 
 		List<SyncTask> syncTasks = syncTaskService.findBySyncServerName(syncServerName);
 		//构造成SyncTaskExecutor
@@ -70,7 +70,7 @@ public class TaskChecker implements EventListener {
 				TaskExecutor executor = taskExecutorBuilder.build(syncTask);
 				//将Task交给Container
 				try {
-					taskExecutionContainer.submit(executor);
+					taskExecutorContainer.submit(executor);
 				} catch (TaskExecutionException e) {
 					notifyService.alarm(e.getMessage(), e, false);
 				}
@@ -97,20 +97,20 @@ public class TaskChecker implements EventListener {
 				TaskExecutor executor = taskExecutorBuilder.build(task);
 
 				try {
-					taskExecutionContainer.submit(executor);
+					taskExecutorContainer.submit(executor);
 				} catch (TaskExecutionException e) {
 					notifyService.alarm(e.getMessage(), e, false);
 				}
 				break;
 
 			case REMOVE:
-				taskExecutionContainer.deleteSyncTask(taskName);
+				taskExecutorContainer.deleteSyncTask(taskName);
 			}
 
 		} else if (event instanceof SyncTaskControllerEvent) {
 
 			SyncTaskControllerEvent syncTaskControllerEvent = (SyncTaskControllerEvent) event;
-			taskExecutionContainer
+			taskExecutorContainer
 					.changeStatus(syncTaskControllerEvent.getTaskName(), syncTaskControllerEvent.getController());
 
 		} else {

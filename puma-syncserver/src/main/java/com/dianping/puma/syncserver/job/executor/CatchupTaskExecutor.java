@@ -23,9 +23,9 @@ public class CatchupTaskExecutor extends AbstractTaskExecutor<CatchupTask, Catch
     //    /** 追赶的binlog的终点 */
     //    private BinlogInfo binlogInfoEnd;
 
-    public CatchupTaskExecutor(CatchupTask catchupTask, CatchupTaskState catchupTaskState, String pumaServerHost, int pumaServerPort, String target,
+    public CatchupTaskExecutor(CatchupTask catchupTask, String pumaServerHost, int pumaServerPort, String target,
                                SyncTaskExecutor syncTaskExecutor, DstDBInstance dstDBInstance) {
-        super(catchupTask, catchupTaskState, pumaServerHost, pumaServerPort, target, dstDBInstance);
+        super(catchupTask, pumaServerHost, pumaServerPort, target, dstDBInstance);
         this.syncTaskExecutor = syncTaskExecutor;
     }
 

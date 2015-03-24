@@ -5,7 +5,9 @@ import com.dianping.puma.core.monitor.EventListener;
 import com.dianping.puma.core.monitor.event.SyncTaskControllerEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
+@Service("syncTaskControllerReceiver")
 public class SyncTaskControllerReceiver implements EventListener {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SyncTaskControllerEvent.class);

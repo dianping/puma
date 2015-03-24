@@ -72,14 +72,14 @@ public class SyncTaskController {
 	@RequestMapping(value = {
 			"/sync-task/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String removePost(String id) {
+	public String removePost(String name) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
 			// Actually name here.
-			SyncTask syncTask = syncTaskService.find(id);
+			SyncTask syncTask = syncTaskService.find(name);
 
-			syncTaskService.remove(id);
+			syncTaskService.remove(name);
 
 			// Publish puma task operation event to puma server.
 			syncTaskOperationReporter.report(syncTask.getSyncServerName(), syncTask.getName(), ActionOperation.REMOVE);

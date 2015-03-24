@@ -36,14 +36,14 @@ public class PumaTaskStateServiceImpl implements PumaTaskStateService {
 	}
 
 	public List<PumaTaskState> findAll() {
-		List<PumaTaskState> taskStates = new ArrayList<PumaTaskState>();
-		for (Map.Entry<String, TaskState> taskStateEntry: taskStateContainer.getAll().entrySet()) {
-			TaskState taskState = taskStateEntry.getValue();
+		List<PumaTaskState> syncTaskStates = new ArrayList<PumaTaskState>();
+		List<TaskState> taskStates = taskStateContainer.getAll();
+		for (TaskState taskState: taskStates) {
 			if (taskState instanceof PumaTaskState) {
-				taskStates.add((PumaTaskState) taskState);
+				syncTaskStates.add((PumaTaskState) taskState);
 			}
 		}
-		return taskStates;
+		return syncTaskStates;
 	}
 
 	public void remove(String taskName) {

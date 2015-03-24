@@ -1,6 +1,7 @@
 package com.dianping.puma.core.constant;
 
 public enum Status {
+	INITIALIZING("初始化中"),
 	WAITING("等待中"),
 	PREPARING("准备中"),
 	RUNNING("运行中"),

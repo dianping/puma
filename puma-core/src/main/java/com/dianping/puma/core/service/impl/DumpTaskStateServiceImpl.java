@@ -25,14 +25,14 @@ public class DumpTaskStateServiceImpl implements DumpTaskStateService {
 
 	@Override
 	public List<DumpTaskState> findAll() {
-		List<DumpTaskState> taskStates = new ArrayList<DumpTaskState>();
-		for (Map.Entry<String, TaskState> taskStateEntry: taskStateContainer.getAll().entrySet()) {
-			TaskState taskState = taskStateEntry.getValue();
+		List<DumpTaskState> syncTaskStates = new ArrayList<DumpTaskState>();
+		List<TaskState> taskStates = taskStateContainer.getAll();
+		for (TaskState taskState: taskStates) {
 			if (taskState instanceof DumpTaskState) {
-				taskStates.add((DumpTaskState) taskState);
+				syncTaskStates.add((DumpTaskState) taskState);
 			}
 		}
-		return taskStates;
+		return syncTaskStates;
 	}
 
 	@Override

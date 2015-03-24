@@ -84,10 +84,10 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
 			throw new IllegalArgumentException(
 					"PumaTask is null, maybe PumaTask with srcDBInstanceId[" + pumaTaskName + "] is not setting.");
 		}
-		PumaServer pumaServer = pumaServerService.find(pumaTask.getPumaServerId());
+		PumaServer pumaServer = pumaServerService.find(pumaTask.getPumaServerName());
 		if (pumaServer == null) {
 			throw new IllegalArgumentException(
-					"PumaServer is null, maybe PumaServer with PumaServerId[" + pumaTask.getPumaServerId()
+					"PumaServer is null, maybe PumaServer with PumaServerId[" + pumaTask.getPumaServerName()
 							+ "] is not setting.");
 		}
 

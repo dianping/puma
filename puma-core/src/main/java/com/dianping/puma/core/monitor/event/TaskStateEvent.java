@@ -2,17 +2,17 @@ package com.dianping.puma.core.monitor.event;
 
 import com.dianping.puma.core.model.state.TaskState;
 
-import java.util.Map;
+import java.util.List;
 
 public class TaskStateEvent<T extends TaskState> extends TaskEvent {
 
-	private Map<String, T> taskStates;
+	private List<T> taskStates;
 
-	public Map<String, T> getTaskStates() {
+	public List<T> getTaskStates() {
 		return taskStates;
 	}
 
-	public void setTaskStates(Map<String, T> taskStates) {
+	public void setTaskStates(List<T> taskStates) {
 		this.taskStates = taskStates;
 	}
 }

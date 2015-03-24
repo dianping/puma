@@ -2,6 +2,8 @@ package com.dianping.puma.core.model.state;
 
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,8 +18,8 @@ public class DefaultTaskStateContainer implements TaskStateContainer {
 	}
 
 	@Override
-	public Map<String, TaskState> getAll() {
-		return taskStates;
+	public List<TaskState> getAll() {
+		return new ArrayList<TaskState>(taskStates.values());
 	}
 
 	@Override

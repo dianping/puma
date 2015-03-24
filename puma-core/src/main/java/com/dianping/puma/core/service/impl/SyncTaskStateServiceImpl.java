@@ -26,14 +26,14 @@ public class SyncTaskStateServiceImpl implements SyncTaskStateService {
 
 	@Override
 	public List<SyncTaskState> findAll() {
-		List<SyncTaskState> taskStates = new ArrayList<SyncTaskState>();
-		for (Map.Entry<String, TaskState> taskStateEntry: taskStateContainer.getAll().entrySet()) {
-			TaskState taskState = taskStateEntry.getValue();
+		List<SyncTaskState> syncTaskStates = new ArrayList<SyncTaskState>();
+		List<TaskState> taskStates = taskStateContainer.getAll();
+		for (TaskState taskState: taskStates) {
 			if (taskState instanceof SyncTaskState) {
-				taskStates.add((SyncTaskState) taskState);
+				syncTaskStates.add((SyncTaskState) taskState);
 			}
 		}
-		return taskStates;
+		return syncTaskStates;
 	}
 
 	@Override

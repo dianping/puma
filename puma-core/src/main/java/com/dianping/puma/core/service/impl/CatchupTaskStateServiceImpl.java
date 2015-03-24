@@ -25,14 +25,14 @@ public class CatchupTaskStateServiceImpl implements CatchupTaskStateService {
 
 	@Override
 	public List<CatchupTaskState> findAll() {
-		List<CatchupTaskState> taskStates = new ArrayList<CatchupTaskState>();
-		for (Map.Entry<String, TaskState> taskStateEntry: taskStateContainer.getAll().entrySet()) {
-			TaskState taskState = taskStateEntry.getValue();
+		List<CatchupTaskState> syncTaskStates = new ArrayList<CatchupTaskState>();
+		List<TaskState> taskStates = taskStateContainer.getAll();
+		for (TaskState taskState: taskStates) {
 			if (taskState instanceof CatchupTaskState) {
-				taskStates.add((CatchupTaskState) taskState);
+				syncTaskStates.add((CatchupTaskState) taskState);
 			}
 		}
-		return taskStates;
+		return syncTaskStates;
 	}
 
 	@Override

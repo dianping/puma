@@ -1,4 +1,4 @@
-package com.dianping.puma.checker;
+package com.dianping.puma.remote.receiver;
 
 import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.monitor.event.Event;

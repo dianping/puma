@@ -1,4 +1,4 @@
-package com.dianping.puma.checker;
+package com.dianping.puma.remote.receiver;
 
 import com.dianping.puma.config.Config;
 import com.dianping.puma.core.constant.ActionOperation;
@@ -37,10 +37,10 @@ public class PumaTaskOperationChecker implements EventListener {
 
 	@PostConstruct
 	public void init() {
-		String pumaServerId = pumaServerConfig.getId();
+		String pumaServerName = pumaServerConfig.getName();
 
 		// Throws puma task service exceptions.
-		List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerName(pumaServerId);
+		List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerName(pumaServerName);
 
 		// Swallows puma task executors exceptions.
 		for (PumaTask pumaTask : pumaTasks) {

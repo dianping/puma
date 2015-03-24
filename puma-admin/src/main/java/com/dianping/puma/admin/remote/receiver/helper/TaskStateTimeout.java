@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -23,10 +24,10 @@ public class TaskStateTimeout {
 	int timeoutSeconds;
 
 	@Scheduled(cron = "0/5 * * * * ?")
-	public void clean() {
-		for (Iterator<Map.Entry<String, TaskState>> it = taskStateContainer.getAll().entrySet().iterator(); it.hasNext();) {
-			TaskState taskState = it.next().getValue();
+	public void timeout() {
+		List<TaskState> taskStates = taskStateContainer.getAll();
 
+		for (TaskState taskState: taskStates) {
 			Date pre = new Date();
 			Date post = DateUtils.addSeconds(taskState.getGmtUpdate(), timeoutSeconds);
 

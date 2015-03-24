@@ -23,6 +23,10 @@ public abstract class TaskState {
 
 	private BinlogStat binlogStat;
 
+	public TaskState() {
+		gmtUpdate = new Date();
+	}
+
 	public Date getGmtUpdate() {
 		return gmtUpdate;
 	}

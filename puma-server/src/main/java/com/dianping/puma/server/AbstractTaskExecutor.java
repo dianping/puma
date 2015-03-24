@@ -229,11 +229,11 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 	}
 
 	@Override public Status getStatus() {
-		return status;
+		return this.state.getStatus();
 	}
 
 	@Override public void setStatus(Status status) {
-		this.status = status;
+		this.state.setStatus(status);
 	}
 
 	@Override
@@ -241,11 +241,11 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 		return dispatcher.getSenders();
 	}
 
-	public PumaTaskState getState() {
+	public PumaTaskState getTaskState() {
 		return state;
 	}
 
-	public void setState(PumaTaskState state) {
+	public void setTaskState(PumaTaskState state) {
 		this.state = state;
 	}
 }

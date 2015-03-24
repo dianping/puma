@@ -6,6 +6,7 @@ import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogStat;
+import com.dianping.puma.core.model.state.PumaTaskState;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.datahandler.DefaultDataHandler;
@@ -89,6 +90,11 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 		
 		try {
 			DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
+
+			PumaTaskState taskState = new PumaTaskState();
+			taskState.setTaskName(pumaTask.getName());
+			taskState.setStatus(Status.PREPARING);
+			taskExecutor.setTaskState(taskState);
 
 			// Base.
 			String taskName = pumaTask.getName();

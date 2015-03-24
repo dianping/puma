@@ -2,6 +2,7 @@ package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.remote.reporter.PumaTaskControllerReporter;
 import com.dianping.puma.admin.remote.reporter.PumaTaskOperationReporter;
+import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.state.TaskStateContainer;
 import com.dianping.puma.core.service.*;
@@ -244,8 +245,11 @@ public class PumaTaskController {
 		try {
 			PumaTask pumaTask = pumaTaskService.find(name);
 
+			PumaTaskState taskState = pumaTaskStateService.find(name);
+			taskState.setStatus(Status.PREPARING);
+
 			// Publish puma task controller event to puma server.
-			this.pumaTaskControllerReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(), com.dianping.puma.core.constant.ActionController.RESUME);
+			this.pumaTaskControllerReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(), ActionController.RESUME);
 
 			map.put("success", true);
 		} catch (MongoException e) {
@@ -267,8 +271,10 @@ public class PumaTaskController {
 		try {
 			PumaTask pumaTask = pumaTaskService.find(name);
 
-			// Publish puma task controller event to puma server.
-			this.pumaTaskControllerReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(), com.dianping.puma.core.constant.ActionController.PAUSE);
+			PumaTaskState taskState = pumaTaskStateService.find(name);
+			taskState.setStatus(Status.STOPPING);
+
+			pumaTaskControllerReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(), com.dianping.puma.core.constant.ActionController.PAUSE);
 
 			map.put("success", true);
 		} catch (MongoException e) {

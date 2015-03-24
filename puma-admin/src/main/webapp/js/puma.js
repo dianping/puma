@@ -6,7 +6,8 @@ $(function(w) {
     PREPARING   : "准备中",
     RUNNING     : "运行中",
     SUSPENDED   : "已暂停",
-    STOPPING    : "已停止",
+    STOPPING    : "停止中",
+    STOPPED     : "已停止",
     SUCCESS     : "成功",
     RECONNECTING: "重新连接",
     DUMPING     : "备份中",
@@ -136,12 +137,12 @@ $(function(w) {
   // Puma task resume.
   $(".puma-task-resume").on('click', function(event) {
     event.preventDefault();
-    var id = $(this).attr('data-id');
+    var name = $(this).attr('data-name');
 
     $.ajax({
       url     : window.contextpath + '/puma-task' + '/resume',
       type    : 'POST',
-      data    : {id: id},
+      data    : {name: name},
       dataType: 'json',
       success : function(res) {
         if (res.success) {
@@ -159,12 +160,12 @@ $(function(w) {
   // Puma task pause.
   $(".puma-task-pause").on('click', function(event) {
     event.preventDefault();
-    var id = $(this).attr('data-id');
+    var name = $(this).attr('data-name');
 
     $.ajax({
       url     : window.contextpath + '/puma-task' + '/pause',
       type    : 'POST',
-      data    : {id: id},
+      data    : {name: name},
       dataType: 'json',
       success : function(res) {
         if (res.success) {

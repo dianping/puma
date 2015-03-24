@@ -474,39 +474,39 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	}
 
 	public BinlogInfo getBinlogInfo() {
-		return this.binlogInfo;
+		return this.state.getBinlogInfo();
 	}
 
 	public void setBinlogInfo(BinlogInfo binlogInfo) {
-		this.binlogInfo = binlogInfo;
+		this.state.setBinlogInfo(binlogInfo);
 	}
 
 	public BinlogStat getBinlogStat() {
-		return this.binlogStat;
+		return this.state.getBinlogStat();
 	}
 
 	public void setBinlogStat(BinlogStat binlogStat) {
-		this.binlogStat = binlogStat;
+		this.state.setBinlogStat(binlogStat);
 	}
 
 	public void incrRowsInsert() {
-		Long rowsInsert = this.binlogStat.getRowsInsert();
-		binlogStat.setRowsInsert(rowsInsert + 1);
+		Long rowsInsert = this.state.getBinlogStat().getRowsInsert();
+		this.getBinlogStat().setRowsInsert(rowsInsert + 1);
 	}
 
 	public void incrRowsUpdate() {
-		Long rowsUpdate = this.binlogStat.getRowsUpdate();
-		binlogStat.setRowsUpdate(rowsUpdate + 1);
+		Long rowsUpdate = this.state.getBinlogStat().getRowsUpdate();
+		this.state.getBinlogStat().setRowsUpdate(rowsUpdate + 1);
 	}
 
 	public void incrRowsDelete() {
-		Long rowsDelete = this.binlogStat.getRowsDelete();
-		binlogStat.setRowsDelete(rowsDelete + 1);
+		Long rowsDelete = this.state.getBinlogStat().getRowsDelete();
+		this.state.getBinlogStat().setRowsDelete(rowsDelete + 1);
 	}
 
 	public void incrDdls() {
-		Long ddls = this.binlogStat.getDdls();
-		binlogStat.setDdls(ddls + 1);
+		Long ddls = this.state.getBinlogStat().getDdls();
+		this.state.getBinlogStat().setDdls(ddls + 1);
 	}
 
 	/*

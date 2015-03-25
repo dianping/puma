@@ -40,7 +40,7 @@
     <bean id="mongoClient" class="com.dianping.puma.core.dao.morphia.helper.MongoClient">
     </bean>
 
-    <bean id="seqGen"
+    <bean id="seqGeneratorService"
         class="com.dianping.puma.core.dao.morphia.helper.MongoSeqGeneratorServiceImpl">
         <property name="mongoClient">
             <ref bean="mongoClient" />

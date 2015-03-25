@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 /**
  * @author Leo Liang
  */
-@Service("seqGeneratorService")
+//@Service("seqGeneratorService")
 public class MongoSeqGeneratorServiceImpl implements SeqGeneratorService {
 
     private final static String COLUMN_SEQ = "seq";

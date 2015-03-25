@@ -7,6 +7,8 @@ import com.dianping.puma.core.entity.morphia.SyncTaskMorphia;
 import com.google.code.morphia.dao.BasicDAO;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
+import com.google.code.morphia.query.UpdateOperations;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -80,10 +82,16 @@ public class SyncTaskMorphiaDao extends BasicDAO<SyncTaskMorphia, String> implem
 		}
 		return syncTasks;
 	}
-	
+
 	public void updateStatusAction(String name,ActionController controller){
 		SyncTask syncTask = this.find(name);
 		syncTask.setController(controller);
-		this.create(syncTask);
+		SyncTaskMorphia syncTaskMorphia = new SyncTaskMorphia(syncTask);
+		Query<SyncTaskMorphia> q=this.getDatastore().createQuery(SyncTaskMorphia.class);
+		q.field("name").equal(syncTaskMorphia.getName());
+		UpdateOperations<SyncTaskMorphia> uop=this.getDatastore().createUpdateOperations(SyncTaskMorphia.class);
+		uop.set("entity", syncTask);
+		this.update(q,uop);
+		this.getDatastore().ensureIndexes();
 	}
 }

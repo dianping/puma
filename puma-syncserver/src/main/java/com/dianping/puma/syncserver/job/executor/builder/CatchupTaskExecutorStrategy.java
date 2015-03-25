@@ -1,5 +1,6 @@
 package com.dianping.puma.syncserver.job.executor.builder;
 
+import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.entity.*;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
@@ -102,9 +103,16 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
 		SrcDBInstance srcDBInstance = srcDBInstanceService.find(pumaTask.getSrcDBInstanceName());
 		task.setPumaClientServerId(srcDBInstance.getServerId());
 
-		CatchupTaskExecutor executor = new CatchupTaskExecutor(task, new CatchupTaskState(), pumaServerHost, pumaServerPort, target, syncTaskExecutor, dstDBInstance);
+		CatchupTaskExecutor executor = new CatchupTaskExecutor(task, pumaServerHost, pumaServerPort, target, syncTaskExecutor, dstDBInstance);
 		executor.setBinlogInfoHolder(binlogInfoHolder);
 		executor.setNotifyService(notifyService);
+
+		CatchupTaskState catchupTaskState = new CatchupTaskState();
+		catchupTaskState.setTaskName(task.getName());
+		catchupTaskState.setStatus(Status.PREPARING);
+
+		executor.setTaskState(catchupTaskState);
+
 		return executor;
 	}
 

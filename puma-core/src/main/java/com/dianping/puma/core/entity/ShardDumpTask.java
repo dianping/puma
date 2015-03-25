@@ -14,7 +14,7 @@ public class ShardDumpTask extends DumpTask {
     //每个规则下可能有多个逻辑表，每个任务只能选择一个逻辑表
     private String tableName;
 
-    private List<String> options = Arrays.asList("--disable-keys", "--skip-comments", "--quick",
+    private List<String> options = Arrays.asList("--complete-insert", "--disable-keys", "--skip-comments", "--quick",
             "--add-drop-database=false", "--no-create-info", "--add-drop-table=false", "--skip-add-locks",
             "--default-character-set=utf8", "--max_allowed_packet=16777216", "--net_buffer_length=16384",
             "-i", "--master-data=2", "--single-transaction", "--hex-blob", "--extended-inser=false", "--compact");

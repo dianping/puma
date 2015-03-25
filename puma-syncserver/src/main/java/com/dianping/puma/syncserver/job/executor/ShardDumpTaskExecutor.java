@@ -17,6 +17,8 @@ import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
 import com.dianping.zebra.shard.router.DataSourceRouter;
 import com.dianping.zebra.shard.router.DataSourceRouterImpl;
+import com.dianping.zebra.shard.router.RouterTarget;
+import com.dianping.zebra.shard.router.TargetedSql;
 import com.dianping.zebra.shard.router.rule.*;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -24,12 +26,10 @@ import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.plugin.dom.exception.InvalidAccessException;
 
 import javax.sql.DataSource;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
@@ -75,7 +75,9 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
 
     protected Map<String, DataSourceConfig> targetDataSourceConfigMap = new HashMap<String, DataSourceConfig>();
 
-    protected Map<String, DataSource> dataSourcePool = new HashMap<String, DataSource>();
+    protected Map<String, BufferedWriter> bufferedWriterMap = new HashMap<String, BufferedWriter>();
+
+    protected Map<String, DataSource> dataSourceMap = new HashMap<String, DataSource>();
 
     public ShardDumpTaskExecutor(ShardDumpTask task) {
         checkNotNull(task, "task");
@@ -105,7 +107,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
     protected void initRouter() {
         DataSourceRouterImpl routerImplForRouting = new DataSourceRouterImpl();
         routerImplForRouting.setRouterRule(routerRule);
-        routerImplForRouting.setDataSourcePool(dataSourcePool);
+        routerImplForRouting.setDataSourcePool(dataSourceMap);
         this.router = routerImplForRouting;
         this.router.init();
     }
@@ -147,7 +149,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
         return dataSourceConfig;
     }
 
-    private String mysqldump() throws IOException, InterruptedException {
+    protected String mysqldump() throws IOException, InterruptedException {
         List<String> cmdlist = new ArrayList<String>();
         cmdlist.add("mysqldump");
 
@@ -164,7 +166,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
         cmdlist.add("--password=" + originDataSourceConfig.getPassword());
         cmdlist.addAll(task.getOptions());
 
-        String outputFileName = getDumpFile(ds);
+        String outputFileName = getDumpFile(originGroupDataSource);
         cmdlist.add("--result-file=" + outputFileName);
         cmdlist.add(ds);
         cmdlist.add(task.getTableName());
@@ -245,12 +247,48 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
             configManager.init();
             DataSourceConfig config = findSingleMasterDataSourceConfig(configManager.getGroupDataSourceConfig());
             this.targetDataSourceConfigMap.put(entity.getKey(), config);
-            initDataSourcePool(entity.getKey(), config);
-        }
-    }
+            this.dataSourceMap.put(entity.getKey(), new DataSource() {
+                @Override
+                public Connection getConnection() throws SQLException {
+                    return null;
+                }
 
-    protected void initDataSourcePool(String key, DataSourceConfig config) {
-        dataSourcePool.put(key, new DataSourceWrap(config));
+                @Override
+                public Connection getConnection(String username, String password) throws SQLException {
+                    return null;
+                }
+
+                @Override
+                public PrintWriter getLogWriter() throws SQLException {
+                    return null;
+                }
+
+                @Override
+                public void setLogWriter(PrintWriter out) throws SQLException {
+
+                }
+
+                @Override
+                public void setLoginTimeout(int seconds) throws SQLException {
+
+                }
+
+                @Override
+                public int getLoginTimeout() throws SQLException {
+                    return 0;
+                }
+
+                @Override
+                public <T> T unwrap(Class<T> iface) throws SQLException {
+                    return null;
+                }
+
+                @Override
+                public boolean isWrapperFor(Class<?> iface) throws SQLException {
+                    return false;
+                }
+            });
+        }
     }
 
     protected void initRouterConfig() {
@@ -294,59 +332,6 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
         checkNotNull(this.tableShardRuleConfig, "tableShardRuleConfig");
     }
 
-    static class DataSourceWrap implements DataSource {
-
-        private final DataSourceConfig config;
-
-        public DataSourceWrap(DataSourceConfig config) {
-            this.config = config;
-        }
-
-        public DataSourceConfig getConfig() {
-            return config;
-        }
-
-        @Override
-        public Connection getConnection() throws SQLException {
-            throw new InvalidAccessException("datasource");
-        }
-
-        @Override
-        public Connection getConnection(String username, String password) throws SQLException {
-            throw new InvalidAccessException("datasource");
-        }
-
-        @Override
-        public PrintWriter getLogWriter() throws SQLException {
-            throw new InvalidAccessException("datasource");
-        }
-
-        @Override
-        public void setLogWriter(PrintWriter out) throws SQLException {
-            throw new InvalidAccessException("datasource");
-        }
-
-        @Override
-        public void setLoginTimeout(int seconds) throws SQLException {
-            throw new InvalidAccessException("datasource");
-        }
-
-        @Override
-        public int getLoginTimeout() throws SQLException {
-            throw new InvalidAccessException("datasource");
-        }
-
-        @Override
-        public <T> T unwrap(Class<T> iface) throws SQLException {
-            return (T) iface;
-        }
-
-        @Override
-        public boolean isWrapperFor(Class<?> iface) throws SQLException {
-            return iface.getClass().equals(iface);
-        }
-    }
-
     @Override
     public void start() {
         try {
@@ -355,6 +340,76 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+
+
+        try {
+            processOriginDumpFile(getDumpFile(originGroupDataSource));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            for (BufferedWriter writer : bufferedWriterMap.values()) {
+                writer.flush();
+                writer.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //分割
+
+        //执行
+    }
+
+    protected BufferedWriter getWriter(String ds) throws FileNotFoundException, UnsupportedEncodingException {
+        if (!bufferedWriterMap.containsKey(ds)) {
+            bufferedWriterMap.put(ds, createWriter(getDumpFile(ds)));
+        }
+        return bufferedWriterMap.get(ds);
+    }
+
+    protected BufferedWriter createWriter(String path) throws FileNotFoundException, UnsupportedEncodingException {
+        File f = new File(path);
+        if (f.exists()) {
+            f.delete();
+        }
+        FileOutputStream fstream = new FileOutputStream(f);
+        return new BufferedWriter(new OutputStreamWriter(fstream, "utf8"));
+    }
+
+    protected void processOriginDumpFile(String filePath) throws IOException {
+        FileInputStream fstream = null;
+        BufferedReader br = null;
+        try {
+            fstream = new FileInputStream(filePath);
+            br = new BufferedReader(new InputStreamReader(fstream, "utf8"));
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (!line.startsWith("INSERT INTO")) {
+                    continue;
+                }
+
+                distrubuteSql(line);
+            }
+        } finally {
+            if (fstream != null) {
+                fstream.close();
+            }
+            if (br != null) {
+                br.close();
+            }
+        }
+    }
+
+    protected void distrubuteSql(String sql) throws IOException {
+        RouterTarget target = router.getTarget(sql, new ArrayList<Object>());
+        for (TargetedSql targetedSql : target.getTargetedSqls()) {
+            for (String sqlStr : targetedSql.getSqls()) {
+                getWriter(targetedSql.getDataSourceName()).write(sqlStr);
+                getWriter(targetedSql.getDataSourceName()).newLine();
+            }
         }
     }
 

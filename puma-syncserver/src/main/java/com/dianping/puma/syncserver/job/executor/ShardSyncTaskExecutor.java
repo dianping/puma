@@ -460,7 +460,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
                 return;
             }
         }
-        checkNotNull(this.tableShardRuleConfigOrigin, "tableShardRuleConfigOrigin");
+        checkNotNull(this.tableShardRuleConfigOrigin, "tableShardRuleConfig");
     }
 
     @Override

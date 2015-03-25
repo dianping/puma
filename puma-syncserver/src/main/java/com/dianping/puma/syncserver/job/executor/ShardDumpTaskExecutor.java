@@ -5,6 +5,8 @@ import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
 import com.dianping.puma.core.entity.ShardDumpTask;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
+import com.dianping.puma.syncserver.conf.Config;
+import com.dianping.puma.syncserver.util.ProcessBuilderWrapper;
 import com.dianping.zebra.config.ConfigService;
 import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
@@ -19,18 +21,22 @@ import com.dianping.zebra.shard.router.rule.*;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sun.plugin.dom.exception.InvalidAccessException;
 
 import javax.sql.DataSource;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -39,9 +45,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * http://www.dozer.cc
  */
 public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
+    private static final Logger logger = LoggerFactory.getLogger(ShardDumpTaskExecutor.class);
+
+    private static final Pattern JDBC_URL_PATTERN = Pattern.compile("jdbc:mysql://([^:]+):(\\d+)/([^\\?]+).*");
+
     protected final ShardDumpTask task;
 
     protected final TaskExecutorStatus status;
+
+    protected final String dumpOutputDir;
+
+    protected final String uuid;
 
     protected boolean switchOn;
 
@@ -51,7 +65,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
 
     protected String originGroupDataSource;
 
-    protected TableShardRuleConfig tableShardRuleConfigOrigin;
+    protected TableShardRuleConfig tableShardRuleConfig;
 
     protected RouterRule routerRule;
 
@@ -68,7 +82,8 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
         checkNotNull(task.getRuleName(), "task.ruleName");
         checkNotNull(task.getTableName(), "task.tableName");
         this.task = task;
-
+        this.uuid = UUID.randomUUID().toString();
+        this.dumpOutputDir = Config.getInstance() == null ? "/tmp/" : Config.getInstance().getTempDir() + "/dump/" + uuid + "/";
         this.status = new TaskExecutorStatus();
 
         try {
@@ -80,6 +95,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
 
     public void init() {
         checkNotNull(configCache, "configCache");
+        initConfigService();
         initAndConvertConfig();
         initRouterConfig();
         initDataSourceConfig();
@@ -131,9 +147,77 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
         return dataSourceConfig;
     }
 
+    private String mysqldump() throws IOException, InterruptedException {
+        List<String> cmdlist = new ArrayList<String>();
+        cmdlist.add("mysqldump");
+
+        Matcher matcher = JDBC_URL_PATTERN.matcher(originDataSourceConfig.getJdbcUrl());
+        checkArgument(matcher.matches(), originDataSourceConfig.getJdbcUrl());
+
+        String ip = matcher.group(1);
+        String port = matcher.group(2);
+        String ds = matcher.group(3);
+
+        cmdlist.add("--host=" + ip);
+        cmdlist.add("--port=" + port);
+        cmdlist.add("--user=" + originDataSourceConfig.getUsername());
+        cmdlist.add("--password=" + originDataSourceConfig.getPassword());
+        cmdlist.addAll(task.getOptions());
+
+        String outputFileName = getDumpFile(ds);
+        cmdlist.add("--result-file=" + outputFileName);
+        cmdlist.add(ds);
+        cmdlist.add(task.getTableName());
+
+        logger.info("start dumping " + ds + " ...");
+        String output = executeByProcessBuilder(cmdlist);
+        return output;
+    }
+
+    protected String getDumpFile(String databaseName) {
+        return dumpOutputDir + databaseName + ".dump.sql";
+    }
+
+
+//    private String _mysqlload(String databaseName) throws ExecuteException, IOException, InterruptedException {
+//        List<String> cmdlist = new ArrayList<String>();
+//        cmdlist.add("sh");
+//        cmdlist.add(Config.getInstance().getTempDir() + "/shell/mysqlload.sh");
+//        cmdlist.add("--default-character-set=utf8");
+//        cmdlist.add("--user=" + dstDBInstance.getUsername());
+//        String host = dstDBInstance.getHost();
+//        int port = dstDBInstance.getPort();
+//        //cmdlist.add("--user=" + dumpTask.getDestMysqlHost().getUsername());
+//        //String hostWithPort = dumpTask.getDestMysqlHost().getHost();
+//        /*
+//        String host = hostWithPort;
+//        int port = 3306;
+//        if (StringUtils.contains(hostWithPort, ':')) {
+//            String[] splits = hostWithPort.split(":");
+//            host = splits[0];
+//            port = Integer.parseInt(splits[1]);
+//        }*/
+//        cmdlist.add("--host=" + host);
+//        cmdlist.add("--port=" + port);
+//        cmdlist.add("--password=" + dstDBInstance.getPassword());
+//        //cmdlist.add("--password=" + dumpTask.getDestMysqlHost().getPassword());
+//        cmdlist.add(_getSourceFile(databaseName));
+//        LOG.info("start loading " + databaseName + " ...");
+//        return _executeByProcessBuilder(cmdlist);
+//    }
+
+    protected String executeByProcessBuilder(List<String> cmd) throws IOException, InterruptedException {
+        logger.info("execute shell script, cmd is: " + StringUtils.join(cmd, ' '));
+        ProcessBuilderWrapper pbd = new ProcessBuilderWrapper(cmd);
+        logger.info("Command has terminated with status: " + pbd.getStatus());
+        logger.info("Output:\n" + pbd.getInfos());
+        return pbd.getErrors();
+    }
+
     protected void initDataSourceConfig() {
         if (!switchOn && !Strings.isNullOrEmpty(originGroupDataSource)) {
             DefaultDataSourceConfigManager configManager = new DefaultDataSourceConfigManager(this.originGroupDataSource, this.configService);
+            configManager.init();
             this.originDataSourceConfig = findSingleMasterDataSourceConfig(configManager.getGroupDataSourceConfig());
         }
 
@@ -158,6 +242,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
                 continue;
             }
             DefaultDataSourceConfigManager configManager = new DefaultDataSourceConfigManager(entity.getKey(), this.configService);
+            configManager.init();
             DataSourceConfig config = findSingleMasterDataSourceConfig(configManager.getGroupDataSourceConfig());
             this.targetDataSourceConfigMap.put(entity.getKey(), config);
             initDataSourcePool(entity.getKey(), config);
@@ -170,7 +255,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
 
     protected void initRouterConfig() {
         RouterRuleConfig routerRuleConfig = new RouterRuleConfig();
-        routerRuleConfig.setTableShardConfigs(Lists.newArrayList(tableShardRuleConfigOrigin));
+        routerRuleConfig.setTableShardConfigs(Lists.newArrayList(tableShardRuleConfig));
         this.routerRule = RouterRuleBuilder.build(routerRuleConfig);
     }
 
@@ -188,7 +273,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
     }
 
     protected void removeNotMasterDimension() {
-        Iterator<TableShardDimensionConfig> iterator = tableShardRuleConfigOrigin.getDimensionConfigs().iterator();
+        Iterator<TableShardDimensionConfig> iterator = tableShardRuleConfig.getDimensionConfigs().iterator();
         while (iterator.hasNext()) {
             if (!iterator.next().isMaster()) {
                 iterator.remove();
@@ -199,14 +284,14 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
     protected void findTableRuleConfig(RouterRuleConfig tempRouterRuleConfig) {
         for (TableShardRuleConfig tableConfig : tempRouterRuleConfig.getTableShardConfigs()) {
             if (task.getTableName().equals(tableConfig.getTableName())) {
-                this.tableShardRuleConfigOrigin = tableConfig;
-                for (TableShardDimensionConfig dimension : this.tableShardRuleConfigOrigin.getDimensionConfigs()) {
+                this.tableShardRuleConfig = tableConfig;
+                for (TableShardDimensionConfig dimension : this.tableShardRuleConfig.getDimensionConfigs()) {
                     dimension.setTableName(task.getTableName());
                 }
                 return;
             }
         }
-        checkNotNull(this.tableShardRuleConfigOrigin, "tableShardRuleConfigOrigin");
+        checkNotNull(this.tableShardRuleConfig, "tableShardRuleConfig");
     }
 
     static class DataSourceWrap implements DataSource {
@@ -264,7 +349,13 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
 
     @Override
     public void start() {
-
+        try {
+            mysqldump();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

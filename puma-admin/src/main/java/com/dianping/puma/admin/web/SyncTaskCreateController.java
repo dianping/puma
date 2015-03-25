@@ -15,7 +15,7 @@ import com.dianping.puma.core.model.state.BaseSyncTaskState;
 import com.dianping.puma.core.model.state.SyncTaskState;
 import com.dianping.puma.core.model.state.TaskState;
 import com.dianping.puma.core.model.state.TaskStateContainer;
-import com.dianping.puma.core.service.PumaTaskService;
+import com.dianping.puma.core.service.*;
 import com.mongodb.MongoException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -28,13 +28,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.dianping.puma.admin.config.Config;
-import com.dianping.puma.core.service.DumpTaskService;
-import com.dianping.puma.core.service.SrcDBInstanceService;
-import com.dianping.puma.core.service.SyncTaskService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.admin.util.MysqlMetaInfoFetcher;
-import com.dianping.puma.core.service.DstDBInstanceService;
-import com.dianping.puma.core.service.SyncServerService;
 import com.dianping.puma.core.sync.model.config.MysqlHost;
 import com.dianping.puma.core.sync.model.mapping.ColumnMapping;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
@@ -79,6 +74,9 @@ public class SyncTaskCreateController {
 
 	@Autowired
 	TaskStateContainer syncTaskStateContainer;
+
+	@Autowired
+	SyncTaskStateService syncTaskStateService;
 
 	@RequestMapping(value = { "/sync-task/create" })
 	public ModelAndView create(HttpSession session) {
@@ -483,17 +481,17 @@ public class SyncTaskCreateController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			TaskState state = this.syncTaskStateContainer.get(name);
+			SyncTaskState syncTaskState = syncTaskStateService.find(name);
 
-			if (state == null) {
+			if (syncTaskState == null) {
 				throw new Exception("Sync task state not found.");
 			}
 
-			if ((new Date()).getTime() - state.getGmtUpdate().getTime() > 60*1000) {
-				state.setStatus(Status.DISCONNECTED);
+			if ((new Date()).getTime() - syncTaskState.getGmtUpdate().getTime() > 60*1000) {
+				syncTaskState.setStatus(Status.DISCONNECTED);
 			}
 
-			map.put("state", state);
+			map.put("state", syncTaskState);
 			map.put("success", true);
 		} catch (MongoException e) {
 			map.put("error", "storage");

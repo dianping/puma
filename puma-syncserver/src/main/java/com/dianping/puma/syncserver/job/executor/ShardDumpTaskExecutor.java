@@ -350,14 +350,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
             e.printStackTrace();
         }
 
-        try {
-            for (BufferedWriter writer : bufferedWriterMap.values()) {
-                writer.flush();
-                writer.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
         //分割
 
         //执行
@@ -393,6 +386,11 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
                 }
 
                 distrubuteSql(line);
+            }
+
+            for (BufferedWriter writer : bufferedWriterMap.values()) {
+                writer.flush();
+                writer.close();
             }
         } finally {
             if (fstream != null) {

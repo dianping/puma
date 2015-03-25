@@ -8,16 +8,14 @@ import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.constant.SubscribeConstant;
-import com.dianping.puma.core.entity.BaseSyncTask;
-import com.dianping.puma.core.entity.PumaServer;
-import com.dianping.puma.core.entity.PumaTask;
-import com.dianping.puma.core.entity.SrcDBInstance;
+import com.dianping.puma.core.entity.*;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
+import com.dianping.puma.core.model.state.SyncTaskState;
+import com.dianping.puma.core.model.state.TaskState;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
-import com.dianping.puma.core.entity.ShardSyncTask;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.syncserver.mysql.SqlBuildUtil;
 import com.dianping.zebra.config.LionKey;
@@ -60,7 +58,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
+public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, TaskState> {
     private static final Logger logger = LoggerFactory.getLogger(ShardSyncTaskExecutor.class);
 
     public static final int INSERT = RowChangedEvent.INSERT;
@@ -72,7 +70,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
 
     private final ShardSyncTask task;
 
-    protected final TaskExecutorStatus status;
+    protected final TaskState status;
 
     private ConfigCache configCache;
 
@@ -110,7 +108,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
         checkNotNull(task.getTableName(), "task.tableName");
         this.task = task;
 
-        this.status = new TaskExecutorStatus();
+        this.status = new SyncTaskState();
 
         try {
             this.configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
@@ -369,12 +367,12 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
         checkArgument(dbs.size() >= 1, ip);
         SrcDBInstance db = dbs.get(0);
 
-        List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceId(db.getId());
-        checkArgument(pumaTasks.size() >= 1, "no puma task for db %s", db.getId());
+        List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceName(db.getName());
+        checkArgument(pumaTasks.size() >= 1, "no puma task for db %s", db.getName());
         PumaTask pumaTask = pumaTasks.get(0);
 
-        PumaServer pumaServer = pumaServerService.find(pumaTask.getPumaServerId());
-        checkNotNull(pumaServer, "puma server %s not exists", pumaTask.getPumaServerId());
+        PumaServer pumaServer = pumaServerService.find(pumaTask.getPumaServerName());
+        checkNotNull(pumaServer, "puma server %s not exists", pumaTask.getPumaServerName());
 
         ConfigurationBuilder configBuilder = new ConfigurationBuilder();
 
@@ -480,12 +478,22 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
 
     @Override
     public TaskExecutorStatus getTaskExecutorStatus() {
-        return this.status;
+        return null;
     }
 
     @Override
     public BaseSyncTask getTask() {
         return this.task;
+    }
+
+    @Override
+    public TaskState getTaskState() {
+        return null;
+    }
+
+    @Override
+    public void setTaskState(TaskState taskState) {
+
     }
 
     @Override

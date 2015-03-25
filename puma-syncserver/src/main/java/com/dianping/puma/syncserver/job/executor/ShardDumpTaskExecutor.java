@@ -4,8 +4,9 @@ import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
 import com.dianping.puma.core.entity.ShardDumpTask;
+import com.dianping.puma.core.model.state.TaskState;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
-import com.dianping.puma.syncserver.conf.Config;
+import com.dianping.puma.syncserver.config.SyncServerConfig;
 import com.dianping.puma.syncserver.util.ProcessBuilderWrapper;
 import com.dianping.zebra.config.ConfigService;
 import com.dianping.zebra.config.LionKey;
@@ -44,7 +45,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
+public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskState> {
     private static final Logger logger = LoggerFactory.getLogger(ShardDumpTaskExecutor.class);
 
     private static final Pattern JDBC_URL_PATTERN = Pattern.compile("jdbc:mysql://([^:]+):(\\d+)/([^\\?]+).*");
@@ -85,7 +86,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
         checkNotNull(task.getTableName(), "task.tableName");
         this.task = task;
         this.uuid = UUID.randomUUID().toString();
-        this.dumpOutputDir = Config.getInstance() == null ? "/tmp/" : Config.getInstance().getTempDir() + "/dump/" + uuid + "/";
+        this.dumpOutputDir = SyncServerConfig.getInstance() == null ? "/tmp/" : SyncServerConfig.getInstance().getTempDir() + "/dump/" + uuid + "/";
         this.status = new TaskExecutorStatus();
 
         try {
@@ -425,12 +426,22 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
 
     @Override
     public TaskExecutorStatus getTaskExecutorStatus() {
-        return null;
+        return this.status;
     }
 
     @Override
     public ShardDumpTask getTask() {
         return null;
+    }
+
+    @Override
+    public TaskState getTaskState() {
+        return null;
+    }
+
+    @Override
+    public void setTaskState(TaskState taskState) {
+
     }
 
     @Override

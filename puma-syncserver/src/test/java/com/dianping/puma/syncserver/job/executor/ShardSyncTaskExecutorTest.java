@@ -6,13 +6,13 @@ import com.dianping.puma.api.Configuration;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.entity.PumaTask;
+import com.dianping.puma.core.entity.ShardSyncTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
-import com.dianping.puma.core.entity.ShardSyncTask;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
@@ -75,12 +75,12 @@ public class ShardSyncTaskExecutorTest {
         pumaServer.setHost("2.2.2.2");
         pumaServer.setPort(12345);
         String targetName = "test-puma-test";
-        pumaTask.setPumaServerId(pumaServer.getId());
+        pumaTask.setPumaServerName(pumaServer.getName());
         pumaTask.setName(targetName);
-        when(pumaTaskService.findBySrcDBInstanceId(instance.getId())).thenReturn(Lists.newArrayList(pumaTask));
+        when(pumaTaskService.findBySrcDBInstanceName(instance.getName())).thenReturn(Lists.newArrayList(pumaTask));
 
         PumaServerService pumaServerService = mock(PumaServerService.class);
-        when(pumaServerService.find(pumaServer.getId())).thenReturn(pumaServer);
+        when(pumaServerService.find(pumaServer.getName())).thenReturn(pumaServer);
 
         target.setPumaServerService(pumaServerService);
         target.setPumaTaskService(pumaTaskService);

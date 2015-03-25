@@ -212,28 +212,18 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 	 * @param sql
 	 */
 	protected void handleDDlEvent(DataHandlerResult result, QueryEvent queryEvent, String sql) {
-		/*
-		log.info("ddl:" + sql + ", from " + queryEvent.getDatabaseName());
-		String db = "";
-		try {
-			db = sql.substring(0, sql.indexOf("."));
-			db = db.substring(db.indexOf("`") + 1, db.indexOf("`", db.indexOf("`") + 1));
-		} catch (RuntimeException e) {
-			log.warn("", e);
-		}
-		if (StringUtils.isNotBlank(queryEvent.getDatabaseName()) && StringUtils.isNotBlank(db)
-				&& !db.equalsIgnoreCase(queryEvent.getDatabaseName())) {
-			log.info("ddl ignored:" + sql + ", from " + queryEvent.getDatabaseName());
-		} else {
-			// Refresh table meta
-			*/
-			tableMetasInfoFetcher.refreshTableMeta();
-			log.info("ddl refreshed meta");
-		//}
+		tableMetasInfoFetcher.refreshTableMeta();
 		ChangedEvent dataChangedEvent = new DdlEvent();
 		DdlEvent ddlEvent = (DdlEvent) dataChangedEvent;
 		ddlEvent.setSql(sql);
-		ddlEvent.setDatabase(queryEvent.getDatabaseName());
+		String database = getDateBase(sql);
+		if (!StringUtils.isBlank(database)) {
+			ddlEvent.setDatabase(database);
+		} else {
+			ddlEvent.setDatabase(queryEvent.getDatabaseName());
+		}
+		log.info("DDL event, sql=" + sql + "  ,database =" + database + "  queryEvent.getDatabaseName()"
+				+ queryEvent.getDatabaseName());
 		ddlEvent.setExecuteTime(queryEvent.getHeader().getTimestamp());
 
 		result.setData(dataChangedEvent);
@@ -243,5 +233,27 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 
 	protected abstract void doProcess(DataHandlerResult result, BinlogEvent binlogEvent, PumaContext context,
 			byte eventType);
+
+	private String getDateBase(String strSql) {
+		String sql = StringUtils.normalizeSpace(strSql.toLowerCase());
+		String database = null;
+		int positionStart = StringUtils.indexOf(sql, "table ");
+		if (positionStart > -1) {
+			int positionEnd = StringUtils.indexOf(sql, " ", positionStart + 6);
+			database = getDatabaseName(sql, positionStart + 6, positionEnd);
+		}
+		return database;
+	}
+
+	private String getDatabaseName(String sql, int positionStart, int positionEnd) {
+		sql = StringUtils.substring(sql, positionStart, positionEnd);
+		int positionCenter = StringUtils.indexOf(sql, ".", 0);
+		String database = null;
+		if (positionCenter > -1) {
+			String temp = StringUtils.substring(sql, 0, positionCenter);
+			database = StringUtils.remove(temp, "`");
+		}
+		return database;
+	}
 
 }

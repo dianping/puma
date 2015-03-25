@@ -398,112 +398,90 @@ public class MysqlExecutor {
 		return null;
 	}
 
-	public String convertDdlEventSql1(DdlEvent event) {
-		String sql = StringUtils.normalizeSpace(event.getSql().toLowerCase());
-		if (StringUtils.startsWithIgnoreCase(sql, "ALTER ")) {
-			sql = StringUtils.lowerCase(sql).trim();
-			String database = event.getDatabase();
-			int positionStart = StringUtils.indexOf(sql, "table ");
-			int positionEnd = sql.indexOf(" ", positionStart + 6);
-			String nextSql = sql.substring(positionEnd + 1, sql.length());
-			String temp;
-			String tableName;
-			int positionCenter = sql.indexOf(".");
-			if (positionCenter > -1) {
-				temp = sql.substring(positionStart + 6, positionCenter);
-				database = StringUtils.remove(temp, "`");
-				temp = sql.substring(positionCenter + 1, positionEnd);
-				tableName = StringUtils.remove(temp, "`");
-			} else {
-				temp = sql.substring(positionStart + 6, positionEnd);
-				tableName = StringUtils.remove(temp, "`");
-			}
-			tableName = getMappingTable(database, tableName);
-			database = getMappingDatabase(database);
-			if (database == null || tableName == null) {
-				return "";
-			}
-			return "ALTER TABLE " + database + "." + tableName + " "
-					+ StringUtils.replace(nextSql, " " + tableName + ".", " ");
-		} else if (StringUtils.startsWithIgnoreCase(sql, "RENAME ")) {
-			sql = sql.toLowerCase().trim();
-			String database = event.getDatabase();
-			String tableSrc = null;
-			String tableDes = null;
-			String temp;
-			int positionTo = sql.indexOf(" to ", 0);
-			String sqlLeft = sql.substring(0, positionTo);
-			String sqlRight = sql.substring(positionTo + 4, sql.length());
-			int positionStart = sqlLeft.indexOf(" table ", 0);
-			if (positionStart == -1) {
-				return "";
-			}
-			positionStart = positionStart + 7;
-			int positionCenter = sqlLeft.indexOf(".", positionStart);
-			if (positionCenter > -1) {
-				temp = sqlLeft.substring(positionStart + 1, positionCenter);
-				database = StringUtils.remove(temp, "`");
-				temp = sqlLeft.substring(positionCenter + 1, sqlLeft.length());
-				tableSrc = StringUtils.remove(temp, "`");
-			} else {
-				temp = sqlLeft.substring(positionStart + 1, sqlLeft.length());
-				tableSrc = StringUtils.remove(temp, "`");
-			}
-
-			positionCenter = sqlRight.indexOf(".", 0);
-			temp = positionCenter == -1 ? sqlRight.substring(0, sqlRight.length()) : sqlRight.substring(
-					positionCenter + 1, sqlRight.length());
-			tableDes = StringUtils.remove(temp, "`");
-			tableSrc = getMappingTable(database, tableSrc);
-			// tableDes = getMappingTable(database, tableDes);
-			database = getMappingDatabase(database);
-			if (database != null || tableSrc != null) {
-				// renameMappingTable(database, tableSrc, tableDes);
-			}
-		}
-		return "";
-	}
+	/*
+	 * public String convertDdlEventSql(DdlEvent event) { String sql =
+	 * StringUtils.normalizeSpace(event.getSql().toLowerCase()); if
+	 * (StringUtils.startsWithIgnoreCase(sql, "ALTER ")) { sql =
+	 * StringUtils.lowerCase(sql).trim(); String database = event.getDatabase();
+	 * int positionStart = StringUtils.indexOf(sql, "table "); int positionEnd =
+	 * sql.indexOf(" ", positionStart + 6); String nextSql =
+	 * sql.substring(positionEnd + 1, sql.length()); String temp; String
+	 * tableName; int positionCenter = sql.indexOf("."); if (positionCenter >
+	 * -1) { temp = sql.substring(positionStart + 6, positionCenter); database =
+	 * StringUtils.remove(temp, "`"); temp = sql.substring(positionCenter + 1,
+	 * positionEnd); tableName = StringUtils.remove(temp, "`"); } else { temp =
+	 * sql.substring(positionStart + 6, positionEnd); tableName =
+	 * StringUtils.remove(temp, "`"); } tableName = getMappingTable(database,
+	 * tableName); database = getMappingDatabase(database); if (database == null
+	 * || tableName == null) { return ""; } return "ALTER TABLE " + database +
+	 * "." + tableName + " " + StringUtils.replace(nextSql, " " + tableName +
+	 * ".", " "); } else if (StringUtils.startsWithIgnoreCase(sql, "RENAME ")) {
+	 * sql = sql.toLowerCase().trim(); String database = event.getDatabase();
+	 * String tableSrc = null; String tableDes = null; String temp; int
+	 * positionTo = sql.indexOf(" to ", 0); String sqlLeft = sql.substring(0,
+	 * positionTo); String sqlRight = sql.substring(positionTo + 4,
+	 * sql.length()); int positionStart = sqlLeft.indexOf(" table ", 0); if
+	 * (positionStart == -1) { return ""; } positionStart = positionStart + 7;
+	 * int positionCenter = sqlLeft.indexOf(".", positionStart); if
+	 * (positionCenter > -1) { temp = sqlLeft.substring(positionStart + 1,
+	 * positionCenter); database = StringUtils.remove(temp, "`"); temp =
+	 * sqlLeft.substring(positionCenter + 1, sqlLeft.length()); tableSrc =
+	 * StringUtils.remove(temp, "`"); } else { temp =
+	 * sqlLeft.substring(positionStart + 1, sqlLeft.length()); tableSrc =
+	 * StringUtils.remove(temp, "`"); }
+	 * 
+	 * positionCenter = sqlRight.indexOf(".", 0); temp = positionCenter == -1 ?
+	 * sqlRight.substring(0, sqlRight.length()) : sqlRight.substring(
+	 * positionCenter + 1, sqlRight.length()); tableDes =
+	 * StringUtils.remove(temp, "`"); tableSrc = getMappingTable(database,
+	 * tableSrc); // tableDes = getMappingTable(database, tableDes); database =
+	 * getMappingDatabase(database); if (database != null || tableSrc != null) {
+	 * // renameMappingTable(database, tableSrc, tableDes); } } return ""; }
+	 */
 
 	public String convertDdlEventSql(DdlEvent event) throws DdlRenameException {
 		String sql = StringUtils.normalizeSpace(event.getSql().toLowerCase());
 		Log.info("ddl sql: " + sql);
 		String database = event.getDatabase();
 		int positionStart = StringUtils.indexOf(sql, "table ");
-		int positionEnd = StringUtils.indexOf(sql, " ", positionStart + 6);
-		String remainSql = StringUtils.substring(sql, positionEnd + 1, sql.length());
-		String temp = getDatabaseName(sql, positionStart + 6);
-		if (!StringUtils.isBlank(temp)) {
-			database = temp;
-		}
-		String tableName = getTableName(sql, positionStart + 6, positionEnd);
-		String mappingTableName = getMappingTable(database, tableName);
-		String mappingDatabase = getMappingDatabase(database);
-		if (StringUtils.startsWithIgnoreCase(sql, "alter ")) {
-			if (StringUtils.contains(sql, " rename ")) {
+		if (positionStart > -1) {
+			int positionEnd = StringUtils.indexOf(sql, " ", positionStart + 6);
+			String remainSql = StringUtils.substring(sql, positionEnd + 1, sql.length());
+			String temp = getDatabaseName(sql, positionStart + 6,positionEnd);
+			if (!StringUtils.isBlank(temp)) {
+				database = temp;
+			}
+			String tableName = getTableName(sql, positionStart + 6, positionEnd);
+			String mappingTableName = getMappingTable(database, tableName);
+			String mappingDatabase = getMappingDatabase(database);
+			if (StringUtils.startsWithIgnoreCase(sql, "alter ")) {
+				if (StringUtils.contains(sql, " rename ")) {
+					if (!StringUtils.isBlank(mappingDatabase) || !StringUtils.isBlank(mappingTableName)) {
+						// 停止任務
+						throw new DdlRenameException("Rename error : ddl sql = " + event.getSql());
+					}
+				} else {
+					if (!StringUtils.isBlank(mappingDatabase) || !StringUtils.isBlank(mappingTableName)) {
+						remainSql = StringUtils.replace(StringUtils.replace(remainSql, " `" + tableName + "`.", " `"
+								+ mappingTableName + "`."), " " + tableName + ".", " " + mappingTableName + ".");
+						return "ALTER TABLE `" + mappingDatabase + "`.`" + mappingTableName + "` " + remainSql;
+					}
+				}
+			} else if (StringUtils.startsWithIgnoreCase(sql, "RENAME ")) {
 				if (!StringUtils.isBlank(mappingDatabase) || !StringUtils.isBlank(mappingTableName)) {
 					// 停止任務
-					throw new DdlRenameException("Rename error : ddl sql = " + event.getSql());
 				}
-			} else {
-				if (!StringUtils.isBlank(mappingDatabase) || !StringUtils.isBlank(mappingTableName)) {
-					remainSql = StringUtils.replace(StringUtils.replace(remainSql, " `" + tableName + "`.", " `"+mappingTableName+"`."), " "
-							+ tableName + ".", " "+mappingTableName+".");
-					return "ALTER TABLE `" + mappingDatabase + "`.`" + mappingTableName + "` " + remainSql;
-				}
-			}
-		} else if (StringUtils.startsWithIgnoreCase(sql, "RENAME ")) {
-			if (!StringUtils.isBlank(mappingDatabase) || !StringUtils.isBlank(mappingTableName)) {
-				// 停止任務
 			}
 		}
 		return null;
 	}
 
-	private String getDatabaseName(String sql, int positionStart) {
-		int positionCenter = sql.indexOf(".");
+	private String getDatabaseName(String sql, int positionStart, int positionEnd) {
+		sql = StringUtils.substring(sql, positionStart, positionEnd);
+		int positionCenter = StringUtils.indexOf(sql, ".", 0);
 		String database = null;
 		if (positionCenter > -1) {
-			String temp = sql.substring(positionStart, positionCenter);
+			String temp =StringUtils.substring(sql,0, positionCenter);
 			database = StringUtils.remove(temp, "`");
 		}
 		return database;
@@ -511,13 +489,14 @@ public class MysqlExecutor {
 
 	private String getTableName(String sql, int positionStart, int positionEnd) {
 		String tableName = null;
-		int positionCenter = sql.indexOf(".");
+		sql = StringUtils.substring(sql, positionStart, positionEnd);
+		int positionCenter = StringUtils.indexOf(sql, ".", 0);
 		String temp;
 		if (positionCenter > -1) {
-			temp = sql.substring(positionCenter + 1, positionEnd);
+			temp = StringUtils.substring(sql,positionCenter + 1, sql.length());
 			tableName = StringUtils.remove(temp, "`");
 		} else {
-			temp = sql.substring(positionStart, positionEnd);
+			temp = StringUtils.substring(sql,positionStart, sql.length());
 			tableName = StringUtils.remove(temp, "`");
 		}
 		return tableName;

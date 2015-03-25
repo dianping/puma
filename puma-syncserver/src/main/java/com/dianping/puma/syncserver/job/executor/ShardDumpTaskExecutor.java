@@ -24,6 +24,7 @@ import com.dianping.zebra.shard.router.rule.*;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,32 +183,25 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
     }
 
 
-//    private String _mysqlload(String databaseName) throws ExecuteException, IOException, InterruptedException {
-//        List<String> cmdlist = new ArrayList<String>();
-//        cmdlist.add("sh");
-//        cmdlist.add(Config.getInstance().getTempDir() + "/shell/mysqlload.sh");
-//        cmdlist.add("--default-character-set=utf8");
-//        cmdlist.add("--user=" + dstDBInstance.getUsername());
-//        String host = dstDBInstance.getHost();
-//        int port = dstDBInstance.getPort();
-//        //cmdlist.add("--user=" + dumpTask.getDestMysqlHost().getUsername());
-//        //String hostWithPort = dumpTask.getDestMysqlHost().getHost();
-//        /*
-//        String host = hostWithPort;
-//        int port = 3306;
-//        if (StringUtils.contains(hostWithPort, ':')) {
-//            String[] splits = hostWithPort.split(":");
-//            host = splits[0];
-//            port = Integer.parseInt(splits[1]);
-//        }*/
-//        cmdlist.add("--host=" + host);
-//        cmdlist.add("--port=" + port);
-//        cmdlist.add("--password=" + dstDBInstance.getPassword());
-//        //cmdlist.add("--password=" + dumpTask.getDestMysqlHost().getPassword());
-//        cmdlist.add(_getSourceFile(databaseName));
-//        LOG.info("start loading " + databaseName + " ...");
-//        return _executeByProcessBuilder(cmdlist);
-//    }
+    private String mysqlload(String id, DataSourceConfig config) throws ExecuteException, IOException, InterruptedException {
+        Matcher matcher = JDBC_URL_PATTERN.matcher(config.getJdbcUrl());
+        checkArgument(matcher.matches(), config.getJdbcUrl());
+
+        String ip = matcher.group(1);
+        String port = matcher.group(2);
+        String ds = matcher.group(3);
+
+        List<String> cmdlist = new ArrayList<String>();
+        cmdlist.add("mysql -f");
+        cmdlist.add("'--database=" + ds + "'");
+        cmdlist.add("'--user=" + config.getUsername() + "'");
+        cmdlist.add("'--host=" + ip + "'");
+        cmdlist.add("'--port=" + port + "'");
+        cmdlist.add("'--password=" + config.getPassword() + "'");
+        cmdlist.add("< '" + getDumpFile(id) + "'");
+        logger.info("start loading " + id + " ...");
+        return executeByProcessBuilder(Lists.newArrayList("sh", "-c", StringUtils.join(cmdlist, " ")));
+    }
 
     protected String executeByProcessBuilder(List<String> cmd) throws IOException, InterruptedException {
         logger.info("execute shell script, cmd is: " + StringUtils.join(cmd, ' '));
@@ -350,10 +344,24 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
             e.printStackTrace();
         }
 
+        try {
+            loadDumpFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         //分割
 
         //执行
+    }
+
+    protected void loadDumpFile() throws IOException, InterruptedException {
+        for (String key : bufferedWriterMap.keySet()) {
+            DataSourceConfig config = targetDataSourceConfigMap.get(key);
+            mysqlload(key, config);
+        }
     }
 
     protected BufferedWriter getWriter(String ds) throws FileNotFoundException, UnsupportedEncodingException {

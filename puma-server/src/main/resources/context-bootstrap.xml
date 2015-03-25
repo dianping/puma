@@ -57,6 +57,14 @@
 	<bean id="mongoClient" class="com.dianping.puma.core.dao.morphia.helper.MongoClient">
 	</bean>
 
+   <bean id="seqGeneratorService"
+        class="com.dianping.puma.core.dao.morphia.helper.MongoSeqGeneratorServiceImpl">
+        <property name="mongoClient">
+            <ref bean="mongoClient" />
+        </property>
+        <property name="dbName" value="puma_admin" />
+        <property name="collName" value="seq" />
+    </bean>
 	<!--
 	<bean id="defaultSender" class="com.dianping.puma.sender.FileDumpSender">
 		<property name="storage">

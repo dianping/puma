@@ -20,8 +20,8 @@
 	<bean id="binlogInfoHolder"
 		  class="com.dianping.puma.core.holder.impl.DefaultBinlogInfoHolder"
 		  init-method="init">
-		<property name="baseDir" value="/data/appdatas/syncserver/binlog/"/>
-		<property name="bakDir" value="/data/appdatas/syncserver/binlog/bak/"/>
+		<property name="baseDir" value="/data/appdatas/puma-syncserver/binlog/"/>
+		<property name="bakDir" value="/data/appdatas/puma-syncserver/binlog/bak/"/>
 	</bean>
 
 </beans>

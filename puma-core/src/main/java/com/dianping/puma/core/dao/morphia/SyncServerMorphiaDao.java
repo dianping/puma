@@ -28,10 +28,9 @@ public class SyncServerMorphiaDao extends MongoBaseDao<SyncServerMorphia> implem
 		return (syncServerMorphia == null) ? null : syncServerMorphia.getEntity();
 	}
 
-	public SyncServer findByHost(String host,int port){
+	public SyncServer findByHost(String host){
 		Query<SyncServerMorphia> q = this.getDatastore().createQuery(SyncServerMorphia.class).disableValidation();
 		q.field("entity.host").equal(host);
-		q.field("entity.port").equal(port);
 		SyncServerMorphia syncServerMorphia = this.findOne(q);
 		return (syncServerMorphia == null) ? null : syncServerMorphia.getEntity();
 	}

@@ -16,5 +16,5 @@ public interface SyncServerService {
 
 	void remove(String id);
 
-	SyncServer findByHost(String host, int port);
+	SyncServer findByHost(String host);
 }

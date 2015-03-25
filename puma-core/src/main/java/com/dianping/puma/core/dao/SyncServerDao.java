@@ -8,7 +8,7 @@ public interface SyncServerDao {
 
 	SyncServer find(String name);
 
-	SyncServer findByHost(String host,int port);
+	SyncServer findByHost(String host);
 	
 	List<SyncServer> findAll();
 

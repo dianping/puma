@@ -3,7 +3,7 @@ package com.dianping.puma.core.entity.morphia;
 import com.dianping.puma.core.entity.PumaServer;
 import com.google.code.morphia.annotations.Entity;
 
-@Entity("PumaServer")
+@Entity("PumaServer_")
 public class PumaServerMorphia extends BaseMorphiaEntity<PumaServer> {
 
 	public PumaServerMorphia() {}

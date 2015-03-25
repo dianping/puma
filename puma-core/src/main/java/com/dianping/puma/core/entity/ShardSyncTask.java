@@ -1,4 +1,4 @@
-package com.dianping.puma.core.sync.model.task;
+package com.dianping.puma.core.entity;
 
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.entity.BaseSyncTask;

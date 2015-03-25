@@ -17,7 +17,7 @@ import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
-import com.dianping.puma.core.sync.model.task.ShardSyncTask;
+import com.dianping.puma.core.entity.ShardSyncTask;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.syncserver.mysql.SqlBuildUtil;
 import com.dianping.zebra.config.LionKey;

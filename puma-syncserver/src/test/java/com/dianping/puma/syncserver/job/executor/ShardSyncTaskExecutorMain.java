@@ -4,7 +4,7 @@ import com.dianping.lion.client.LionException;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
-import com.dianping.puma.core.sync.model.task.ShardSyncTask;
+import com.dianping.puma.core.entity.ShardSyncTask;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**

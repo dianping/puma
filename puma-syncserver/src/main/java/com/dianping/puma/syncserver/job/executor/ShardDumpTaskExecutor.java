@@ -192,7 +192,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
         String ds = matcher.group(3);
 
         List<String> cmdlist = new ArrayList<String>();
-        cmdlist.add("mysql -f");
+        cmdlist.add("mysql -f --default-character-set=utf8");
         cmdlist.add("'--database=" + ds + "'");
         cmdlist.add("'--user=" + config.getUsername() + "'");
         cmdlist.add("'--host=" + ip + "'");

@@ -32,6 +32,21 @@
         </property>
     </bean>
 
+    <bean id="syncTaskControllerEventSubscriber"
+          class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
+          init-method="init">
+        <property name="topic" value="sync_task_controller" />
+        <property name="type" value="#{syncServerConfig.syncServerName}" />
+        <property name="notifyService" ref="notifyService"/>
+        <property name="clazz"
+                  value="com.dianping.puma.core.monitor.event.SyncTaskControllerEvent" />
+        <property name="listeners">
+            <list>
+                <ref bean="syncTaskControllerReceiver"/>
+            </list>
+        </property>
+    </bean>
+
     <bean id="dumpTaskOperationEventSubscriber"
           class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
           init-method="init">

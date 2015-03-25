@@ -11,13 +11,9 @@ import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ClientStatus;
 import com.dianping.puma.config.TaskLionConfig;
 import com.dianping.puma.core.entity.PumaClientInfoEntity;
-import com.dianping.puma.service.PumaClientInfoService;
 
 @Component("pumaMonitorSeqTask")
 public class PumaMonitorSeqTask implements PumaMonitorTask {
-
-	@Autowired
-	private PumaClientInfoService pumaClientInfoService;
 
 	@Autowired
 	private TaskLionConfig taskLionConfig;

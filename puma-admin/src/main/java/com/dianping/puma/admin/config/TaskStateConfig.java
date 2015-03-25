@@ -27,7 +27,7 @@ public class TaskStateConfig {
 		for (PumaTask pumaTask: pumaTasks) {
 			PumaTaskState taskState = new PumaTaskState();
 			taskState.setTaskName(pumaTask.getName());
-			taskState.setStatus(Status.INITIALIZING);
+			taskState.setStatus(Status.PREPARING);
 			taskStateContainer.add(pumaTask.getName(), taskState);
 		}
 	}

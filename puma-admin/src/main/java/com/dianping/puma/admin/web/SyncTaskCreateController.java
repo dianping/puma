@@ -12,6 +12,7 @@ import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.entity.*;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.state.BaseSyncTaskState;
+import com.dianping.puma.core.model.state.SyncTaskState;
 import com.dianping.puma.core.model.state.TaskState;
 import com.dianping.puma.core.model.state.TaskStateContainer;
 import com.dianping.puma.core.service.PumaTaskService;

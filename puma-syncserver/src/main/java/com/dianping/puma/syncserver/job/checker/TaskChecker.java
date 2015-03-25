@@ -4,16 +4,11 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import com.dianping.puma.core.constant.ActionOperation;
-import com.dianping.puma.core.constant.SyncType;
-import com.dianping.puma.core.entity.BaseSyncTask;
 import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.monitor.*;
 import com.dianping.puma.core.monitor.event.Event;
-import com.dianping.puma.core.monitor.event.SyncTaskControllerEvent;
-import com.dianping.puma.core.monitor.event.SyncTaskOperationEvent;
 import com.dianping.puma.core.service.BaseSyncTaskService;
 import com.dianping.puma.core.service.SyncTaskService;
 import org.slf4j.Logger;
@@ -83,6 +78,7 @@ public class TaskChecker implements EventListener {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void onEvent(Event event) {
+		/*
 		LOG.info("Receive event: " + event);
 
 		if (event instanceof SyncTaskOperationEvent) {
@@ -115,27 +111,6 @@ public class TaskChecker implements EventListener {
 
 		} else {
 			LOG.error("Receive error event.");
-		}
-
-        /*
-        if (event instanceof SyncTaskStatusActionEvent) {
-            //收到状态变化的事件，通知Container修改状态
-            taskExecutionContainer.changeStatus(((SyncTaskStatusActionEvent) event).getSyncTaskId(),
-                  ((SyncTaskStatusActionEvent) event).getTaskStatusAction());
-        } else if (event instanceof SyncTaskDeleteEvent) {
-            //收到状态变化的事件，通知Container修改状态
-            taskExecutionContainer.deleteSyncTask(((SyncTaskDeleteEvent) event).getSyncTaskId());
-        } else if (event instanceof TaskEvent) {
-            //收到task的事件（创建或修改）
-            //查询出该Task
-            Task task = taskService.find(((TaskEvent) event).getType(), ((TaskEvent) event).getTaskId());
-            TaskExecutor executor = taskExecutorBuilder.build(task);
-            //将Task交给Container
-            try {
-                taskExecutionContainer.submit(executor);
-            } catch (TaskExecutionException e) {
-                notifyService.alarm(e.getMessage(), e, false);
-            }
-        }*/
+		}*/
 	}
 }

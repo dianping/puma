@@ -10,7 +10,6 @@ import com.dianping.cat.message.Message;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ClientStatus;
 import com.dianping.puma.config.TaskLionConfig;
-import com.dianping.puma.core.entity.PumaClientInfoEntity;
 
 @Component("pumaMonitorSeqTask")
 public class PumaMonitorSeqTask implements PumaMonitorTask {

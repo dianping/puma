@@ -12,7 +12,8 @@ import com.dianping.puma.core.entity.AbstractBaseSyncTask;
 import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.SyncTaskState;
+import com.dianping.puma.core.model.state.BaseSyncTaskState;
+import com.dianping.puma.core.monitor.NotifyService;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -37,6 +38,7 @@ import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.core.util.DefaultPullStrategy;
+import com.dianping.puma.syncserver.job.executor.exception.DdlRenameException;
 import com.dianping.puma.syncserver.job.executor.failhandler.HandleContext;
 import com.dianping.puma.syncserver.job.executor.failhandler.HandleResult;
 import com.dianping.puma.syncserver.job.executor.failhandler.Handler;
@@ -45,8 +47,8 @@ import com.dianping.puma.syncserver.job.executor.failhandler.StopOnFailedHandler
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
 
-public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
-		implements TaskExecutor<T>, SpeedControllable {
+public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S extends BaseSyncTaskState>
+		implements TaskExecutor<T, S>, SpeedControllable {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractTaskExecutor.class);
 
 	protected T abstractTask;
@@ -63,7 +65,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 
 	protected DstDBInstance dstDBInstance;
 
-	protected SyncTaskState state;
+	protected S state;
 
 	protected TaskExecutorStatus status;
 
@@ -74,6 +76,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 	private CircularFifoBuffer lastEvents = new CircularFifoBuffer(10);
 
 	private BinlogInfoHolder binlogInfoHolder;
+	
+	private NotifyService notifyService;
 
 	public AbstractTaskExecutor(T abstractTask, String pumaServerHost, int pumaServerPort, String target, DstDBInstance dstDBInstance) {
 		this.abstractTask = abstractTask;
@@ -81,21 +85,26 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 		this.pumaServerPort = pumaServerPort;
 		this.target = target;
 
-		this.state = new SyncTaskState();
-		state.setTaskName(abstractTask.getName());
-		state.setSyncType(abstractTask.getSyncType());
 		this.dstDBInstance = dstDBInstance;
 
-		//this.status = new TaskExecutorStatus();
-		//status.setTaskName(abstractTask.getName());
-		//status.setSyncType(abstractTask.getSyncType());
-		//status.setTaskId(abstractTask.getId());
-		//status.setType(abstractTask.getType());
+		// this.status = new TaskExecutorStatus();
+		// status.setTaskName(abstractTask.getName());
+		// status.setSyncType(abstractTask.getSyncType());
+		// status.setTaskId(abstractTask.getId());
+		// status.setType(abstractTask.getType());
 		// BinlogInfo startedBinlogInfo = abstractTask.getBinlogInfo();
 	}
 
 	public BinlogInfoHolder getBinlogInfoHolder() {
 		return binlogInfoHolder;
+	}
+
+	public void setNotifyService(NotifyService notifyService) {
+		this.notifyService = notifyService;
+	}
+
+	public NotifyService getNotifyService() {
+		return notifyService;
 	}
 
 	public void setBinlogInfoHolder(BinlogInfoHolder binlogInfoHolder) {
@@ -104,11 +113,12 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 
 	/**
 	 * 事件到达回调函数
-	 *
-	 * @param event 事件
+	 * 
+	 * @param event
+	 *            事件
 	 * @throws Exception
 	 */
-	protected abstract void execute(ChangedEvent event) throws SQLException;
+	protected abstract void execute(ChangedEvent event) throws SQLException,DdlRenameException;
 
 	/**
 	 * 更新sql thread的binlog信息，和保存binlog信息到数据库
@@ -121,7 +131,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 			binlogInfo.setBinlogPosition(event.getBinlogPos());
 			binlogInfo.setSkipToNextPos(true);
 			state.setBinlogInfo(binlogInfo);
-			//status.setBinlogInfo(binlogInfo);
+			// status.setBinlogInfo(binlogInfo);
 			abstractTask.setBinlogInfo(binlogInfo);
 			// 保存binlog信息到数据库
 			saveBinlogToDB(binlogInfo);
@@ -135,7 +145,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 			binlogInfo.setBinlogFile(event.getBinlog());
 			binlogInfo.setBinlogPosition(event.getBinlogPos());
 			state.setBinlogInfoOfIOThread(binlogInfo);
-			//status.setBinlogInfoOfIOThread(binlogInfo);
+			// status.setBinlogInfoOfIOThread(binlogInfo);
 		}
 	}
 
@@ -151,10 +161,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 	@Override
 	public void pause(String detail) {
 		try {
-			//            if (transactionStart) {
+			// if (transactionStart) {
 			releaseMysqlExecutor();
 			transactionStart = false;
-			//            }
+			// }
 		} catch (SQLException e) {
 			LOG.error(e.getMessage(), e);
 		}
@@ -163,18 +173,18 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 		}
 		state.setStatus(Status.SUSPENDED);
 		state.setDetail(detail);
-		//this.status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
-		//this.status.setDetail(detail);
+		// this.status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
+		// this.status.setDetail(detail);
 		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] paused... cause:" + detail);
 	}
 
 	@Override
 	public void stop(String detail) {
 		try {
-			//            if (transactionStart) {
+			// if (transactionStart) {
 			releaseMysqlExecutor();
 			transactionStart = false;
-			//            }
+			// }
 		} catch (SQLException e) {
 			LOG.error(e.getMessage(), e);
 		}
@@ -184,8 +194,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 		state.setStatus(Status.SUCCESS);
 		state.setDetail(detail);
 
-		//this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
-		//this.status.setDetail(detail);
+		// this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
+		// this.status.setDetail(detail);
 		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] stop... cause:" + detail);
 	}
 
@@ -200,10 +210,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 	@Override
 	public void succeed() {
 		try {
-			//            if (transactionStart) {
+			// if (transactionStart) {
 			releaseMysqlExecutor();
 			transactionStart = false;
-			//            }
+			// }
 		} catch (SQLException e) {
 			LOG.error(e.getMessage(), e);
 		}
@@ -213,17 +223,17 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 		state.setStatus(Status.RUNNING);
 		state.setDetail(null);
 
-		//this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
-		//this.status.setDetail(null);
+		// this.status.setStatus(TaskExecutorStatus.Status.SUCCEED);
+		// this.status.setDetail(null);
 		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] succeeded...");
 	}
 
 	public void fail(String detail) {
 		try {
-			//            if (transactionStart) {
+			// if (transactionStart) {
 			releaseMysqlExecutor();
 			transactionStart = false;
-			//            }
+			// }
 		} catch (SQLException e) {
 			LOG.error(e.getMessage(), e);
 		}
@@ -232,7 +242,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 		}
 		state.setStatus(Status.FAILED);
 
-		//this.status.setStatus(TaskExecutorStatus.Status.FAILED);
+		// this.status.setStatus(TaskExecutorStatus.Status.FAILED);
 		Cat.getProducer().logEvent(
 				"Puma.syncserver." + abstractTask.getSyncServerName() + ".fail",
 				abstractTask.getSyncServerName(),
@@ -240,18 +250,21 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 				"syncServerName = " + abstractTask.getSyncServerName() + "&pumaClientName= "
 						+ abstractTask.getPumaClientName() + "&casedetail=" + detail);
 		state.setDetail(detail);
-		//this.status.setDetail(detail);
-		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] failed... cause:" + detail);
+		// this.status.setDetail(detail);
+		
+		LOG.error("TaskExecutor[" + this.getTask().getPumaClientName() + "] failed... cause:" + detail);
 	}
 
 	@Override
 	public void start() {
 		// 初始化mysqlExecutor
-		//mysqlExecutor = new MysqlExecutor(abstractTask.getDestMysqlHost().getHost(),
-				//abstractTask.getDestMysqlHost().getUsername(), abstractTask.getDestMysqlHost().getPassword(),
-				//abstractTask.getMysqlMapping());
-		mysqlExecutor = new MysqlExecutor((dstDBInstance.getHost() + ":" + dstDBInstance.getPort()),
-				dstDBInstance.getUsername(), dstDBInstance.getPassword(), abstractTask.getMysqlMapping());
+		// mysqlExecutor = new
+		// MysqlExecutor(abstractTask.getDestMysqlHost().getHost(),
+		// abstractTask.getDestMysqlHost().getUsername(),
+		// abstractTask.getDestMysqlHost().getPassword(),
+		// abstractTask.getMysqlMapping());
+		mysqlExecutor = new MysqlExecutor((dstDBInstance.getHost() + ":" + dstDBInstance.getPort()), dstDBInstance
+				.getUsername(), dstDBInstance.getPassword(), abstractTask.getMysqlMapping());
 
 		// 读取binlog位置，创建PumaClient，设置PumaCleint的config，再启动
 		if (this.pumaClient != null) {
@@ -262,18 +275,18 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 		state.setStatus(Status.RUNNING);
 		state.setDetail(null);
 
-		//this.status.setDetail(null);
-		//this.status.setStatus(TaskExecutorStatus.Status.RUNNING);
+		// this.status.setDetail(null);
+		// this.status.setStatus(TaskExecutorStatus.Status.RUNNING);
 		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] started.");
 	}
 
 	public void restart() {
 		LOG.info("TaskExecutor[" + this.getTask().getPumaClientName() + "] restarting...");
 		try {
-			//            if (transactionStart) {
+			// if (transactionStart) {
 			releaseMysqlExecutor();
 			transactionStart = false;
-			//            }
+			// }
 		} catch (SQLException e) {
 			LOG.error(e.getMessage(), e);
 		}
@@ -413,16 +426,15 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 					HandleResult handleResult = handler.handle(context);
 					ignoreFailEvent = handleResult.isIgnoreFailEvent();
 				} catch (RuntimeException re) {
-					LOG.warn(
-							"Unexpected RuntimeException on handler(" + handler.getName() + "), ignoreFailEvent keep false.",
-							re);
+					LOG.warn("Unexpected RuntimeException on handler(" + handler.getName()
+							+ "), ignoreFailEvent keep false.", re);
 				}
 				return ignoreFailEvent;
 			}
 
 			@Override
 			public void onEvent(ChangedEvent event) throws Exception {
-				//LOG.info("********************Received " + event);
+				// LOG.info("********************Received " + event);
 				if (!skipToNextPos) {
 					if (event instanceof RowChangedEvent) {
 						// ------------- (1) 【事务开始事件】--------------
@@ -443,7 +455,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 									commitBinlogCount = 0;
 								}
 							}
-							// 实时更新iobinlog位置(该io binlog位置也必须都是commmit事件的位置，这样的位置才是一个合理状态的位置，否则如果是一半事务的binlog位置，那么从该binlog位置订阅将是错误的状态)
+							// 实时更新iobinlog位置(该io
+							// binlog位置也必须都是commmit事件的位置，这样的位置才是一个合理状态的位置，否则如果是一半事务的binlog位置，那么从该binlog位置订阅将是错误的状态)
 							binlogOfIOThreadChanged(event);
 
 						} else if (containDatabase(event.getDatabase())) {
@@ -456,10 +469,19 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 							AbstractTaskExecutor.this.execute(event);
 						}
 					} else if (event instanceof DdlEvent) {
-						lastEvents.add(event);
-						// 执行子类的具体操作
-						AbstractTaskExecutor.this.execute(event);
+						if (containDatabase(event.getDatabase())) {
+							lastEvents.add(event);
+							// 执行子类的具体操作
+							try {
+								AbstractTaskExecutor.this.execute(event);
+							} catch (DdlRenameException e) {
+								AbstractTaskExecutor.this.fail("case by db rename operation ," + e);
+								notifyService.alarm("case by db rename operation ," + e, e, true);
+								return;
+							}
+						}
 						binlogOfSqlThreadChanged(event);
+						binlogOfIOThreadChanged(event);
 					}
 				} else {
 					skipToNextPos = false;
@@ -480,11 +502,11 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 			@Override
 			public void onConnectException(Exception e) {
 				state.setStatus(Status.RECONNECTING);
-				//status.setStatus(TaskExecutorStatus.Status.RECONNECTING);
+				// status.setStatus(TaskExecutorStatus.Status.RECONNECTING);
 				String detail = abstractTask.getPumaTaskName() + "->" + abstractTask.getDstDBInstanceName()
 						+ ":PumaClient connected failed, reconnecting...";
 				state.setDetail(detail);
-				//status.setDetail(detail);
+				// status.setDetail(detail);
 				LOG.error(detail, e);
 				defaultPullStrategy.fail(true);
 			}
@@ -494,8 +516,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 				state.setStatus(Status.RUNNING);
 				state.setDetail("PumaClient connected.");
 
-				//status.setStatus(TaskExecutorStatus.Status.RUNNING);
-				//status.setDetail("PumaClient connected.");
+				// status.setStatus(TaskExecutorStatus.Status.RUNNING);
+				// status.setDetail("PumaClient connected.");
 				LOG.info("PumaClient[" + getTask().getPumaClientName() + "] connected.");
 			}
 		});
@@ -576,8 +598,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 	@Override
 	public String toString() {
 		return "AbstractTaskExecutor [abstractTask=" + abstractTask + ", pumaClient=" + pumaClient + ", mysqlExecutor="
-				+ mysqlExecutor + ", pumaServerHost=" + pumaServerHost + ", pumaServerPort="
-				+ pumaServerPort + ", target=" + target + ", status=" + status + ", transactionStart=" + transactionStart
+				+ mysqlExecutor + ", pumaServerHost=" + pumaServerHost + ", pumaServerPort=" + pumaServerPort
+				+ ", target=" + target + ", status=" + status + ", transactionStart=" + transactionStart
 				+ ", sleepTime=" + sleepTime + ", lastEvents=" + lastEvents + "]";
 	}
 
@@ -602,11 +624,11 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask>
 		this.status = status;
 	}
 
-	public SyncTaskState getState() {
+	public S getTaskState() {
 		return state;
 	}
 
-	public void setState(SyncTaskState state) {
+	public void setTaskState(S state) {
 		this.state = state;
 	}
 }

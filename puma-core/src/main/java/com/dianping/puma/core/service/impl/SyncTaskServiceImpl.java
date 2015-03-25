@@ -1,5 +1,6 @@
 package com.dianping.puma.core.service.impl;
 
+import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.dao.SyncTaskDao;
 import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.service.SyncTaskService;
@@ -39,5 +40,9 @@ public class SyncTaskServiceImpl implements SyncTaskService {
 	
 	public List<SyncTask> find(int offset, int limit) {
 		return syncTaskDao.find(offset,limit);
+	}
+	
+	public void updateStatusAction(String name,ActionController controller){
+		syncTaskDao.updateStatusAction(name, controller);
 	}
 }

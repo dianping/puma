@@ -12,7 +12,8 @@
  */
 package com.dianping.puma.core.dao.morphia;
 
-import com.dianping.puma.core.sync.model.BaseEntity;
+import com.dianping.puma.core.dao.morphia.helper.SeqGeneratorService;
+import com.dianping.puma.core.entity.morphia.BaseMorphiaEntity;
 import com.google.code.morphia.Datastore;
 import com.google.code.morphia.Key;
 import com.google.code.morphia.dao.BasicDAO;
@@ -22,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * @author Leo Liang
  */
-public class MongoBaseDao<T extends BaseEntity> extends BasicDAO<T, Long> {
+public class MongoBaseDao<T extends BaseMorphiaEntity> extends BasicDAO<T, Long> {
 
     @Autowired
     protected SeqGeneratorService seqGeneratorService;

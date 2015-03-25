@@ -9,18 +9,13 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ClientStatus;
-import com.dianping.puma.config.TaskIntervalConfig;
-import com.dianping.puma.core.entity.PumaClientInfoEntity;
-import com.dianping.puma.service.PumaClientInfoService;
+import com.dianping.puma.config.TaskLionConfig;
 
 @Component("pumaMonitorSeqTask")
 public class PumaMonitorSeqTask implements PumaMonitorTask {
 
 	@Autowired
-	private PumaClientInfoService pumaClientInfoService;
-
-	@Autowired
-	private TaskIntervalConfig intervalConfig;
+	private TaskLionConfig taskLionConfig;
 
 	/*
 	 * public void runTask() { Map<String, ClientStatus> clientStatuses =
@@ -37,7 +32,6 @@ public class PumaMonitorSeqTask implements PumaMonitorTask {
 	 */
 
 	public void runTask() {
-		/*
 		Map<String, ClientStatus> clientStatuses = SystemStatusContainer.instance.listClientStatus();
 		Map<String, Long> clientSuccessSeq = SystemStatusContainer.instance.listClientSuccessSeq();
 		for (Map.Entry<String, ClientStatus> clientStatus : clientStatuses.entrySet()) {
@@ -48,10 +42,9 @@ public class PumaMonitorSeqTask implements PumaMonitorTask {
 						Message.SUCCESS,
 						"name = " + clientStatus.getKey() + "&target = " + clientStatus.getValue().getTarget()
 								+ "&seq=" + clientSuccessSeq.get(clientStatus.getKey()).longValue() + "&duration = "
-								+ intervalConfig.getServerInfoInterval());
+								+ taskLionConfig.getServerInfoInterval());
 			}
 		}
-		*/
 	}
 
 }

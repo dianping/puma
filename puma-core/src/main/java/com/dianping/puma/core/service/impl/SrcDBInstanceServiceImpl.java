@@ -10,42 +10,36 @@ import java.util.List;
 
 @Service("srcDBInstanceService")
 public class SrcDBInstanceServiceImpl implements SrcDBInstanceService {
+	@Autowired
+	SrcDBInstanceDao srcDbInstanceDao;
 
-    @Autowired
-    SrcDBInstanceDao srcDbInstanceDao;
+	@Override
+	public SrcDBInstance find(String name) {
+		return srcDbInstanceDao.find(name);
+	}
 
-    @Override
-    public SrcDBInstance find(String id) {
-        return srcDbInstanceDao.find(id);
-    }
+	@Override
+	public List<SrcDBInstance> findAll() {
+		return srcDbInstanceDao.findAll();
+	}
+
+	@Override
+	public void create(SrcDBInstance srcDBInstance) {
+		srcDbInstanceDao.create(srcDBInstance);
+	}
+
+	@Override
+	public void update(SrcDBInstance srcDBInstance) {
+		srcDbInstanceDao.update(srcDBInstance);
+	}
+
+	@Override
+	public void remove(String name) {
+		srcDbInstanceDao.remove(name);
+	}
 
     @Override
     public List<SrcDBInstance> findByIp(String ip) {
         return srcDbInstanceDao.findByIp(ip);
-    }
-
-    @Override
-    public SrcDBInstance findByName(String name) {
-        return srcDbInstanceDao.findByName(name);
-    }
-
-    @Override
-    public List<SrcDBInstance> findAll() {
-        return srcDbInstanceDao.findAll();
-    }
-
-    @Override
-    public void create(SrcDBInstance entity) {
-        srcDbInstanceDao.create(entity);
-    }
-
-    @Override
-    public void update(SrcDBInstance entity) {
-        srcDbInstanceDao.update(entity);
-    }
-
-    @Override
-    public void remove(String id) {
-        srcDbInstanceDao.remove(id);
     }
 }

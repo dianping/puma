@@ -5,15 +5,14 @@ import java.util.*;
 
 import javax.servlet.http.HttpSession;
 
-import com.dianping.puma.admin.reporter.SyncTaskOperationReporter;
-import com.dianping.puma.core.constant.Operation;
+import com.dianping.puma.core.constant.ActionOperation;
+import com.dianping.puma.admin.remote.reporter.SyncTaskOperationReporter;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
-import com.dianping.puma.core.container.SyncTaskStateContainer;
 import com.dianping.puma.core.entity.*;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.SyncTaskState;
-import com.dianping.puma.core.service.PumaTaskService;
+import com.dianping.puma.core.model.state.*;
+import com.dianping.puma.core.service.*;
 import com.mongodb.MongoException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -26,21 +25,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.dianping.puma.admin.config.Config;
-import com.dianping.puma.admin.monitor.SystemStatusContainer;
-import com.dianping.puma.core.service.DumpTaskService;
-import com.dianping.puma.core.service.SrcDBInstanceService;
-import com.dianping.puma.core.service.SyncTaskService;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.admin.util.MysqlMetaInfoFetcher;
-import com.dianping.puma.core.service.DstDBInstanceService;
-import com.dianping.puma.core.service.SyncServerService;
 import com.dianping.puma.core.sync.model.config.MysqlHost;
 import com.dianping.puma.core.sync.model.mapping.ColumnMapping;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.DumpMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
-import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.core.entity.DumpTask;
 
 /**
@@ -75,13 +67,16 @@ public class SyncTaskCreateController {
 	private PumaTaskService pumaTaskService;
 
 	@Autowired
-	private SystemStatusContainer systemStatusContainer;
-
-	@Autowired
 	private SyncTaskOperationReporter syncTaskOperationReporter;
 
 	@Autowired
-	SyncTaskStateContainer syncTaskStateContainer;
+	TaskStateContainer syncTaskStateContainer;
+
+	@Autowired
+	SyncTaskStateService syncTaskStateService;
+
+	@Autowired
+	DumpTaskStateService dumpTaskStateService;
 
 	@RequestMapping(value = { "/sync-task/create" })
 	public ModelAndView create(HttpSession session) {
@@ -179,9 +174,9 @@ public class SyncTaskCreateController {
 			// MysqlHost mysqlHost = getSrcMysqlHost(srcDBInstance);
 			String pumaTaskName = (String) session.getAttribute("pumaTaskName");
 			String dstDBInstanceName = (String) session.getAttribute("dstDBInstanceName");
-			PumaTask pumaTask = pumaTaskService.findByName(pumaTaskName);
+			PumaTask pumaTask = pumaTaskService.find(pumaTaskName);
 				
-			SrcDBInstance srcDBInstance = srcDBInstanceService.findByName(pumaTask.getSrcDBInstanceName());
+			SrcDBInstance srcDBInstance = srcDBInstanceService.find(pumaTask.getSrcDBInstanceName());
 			MysqlHost mysqlHost = new MysqlHost();
 			mysqlHost.setHost(srcDBInstance.getHost() + ":" + srcDBInstance.getPort());
 			mysqlHost.setServerId(srcDBInstance.getServerId());
@@ -216,7 +211,7 @@ public class SyncTaskCreateController {
 			String syncServerName = (String) session.getAttribute("syncServerName");
 			dumpTask.setName(dumpTaskName);
 			dumpTask.setSyncType(SyncType.DUMP);
-			dumpTask.setController(com.dianping.puma.core.constant.Controller.START);
+			dumpTask.setController(com.dianping.puma.core.constant.ActionController.START);
 
 			String pumaTaskName = (String) session.getAttribute("pumaTaskName");
 			dumpTask.setPumaTaskName(pumaTaskName);
@@ -228,7 +223,7 @@ public class SyncTaskCreateController {
 
 			dumpTaskService.create(dumpTask);
 
-			syncTaskOperationReporter.report(syncServerName, SyncType.DUMP, dumpTaskName, Operation.CREATE);
+			syncTaskOperationReporter.report(syncServerName, dumpTaskName, ActionOperation.CREATE);
 
 			// 保存dumpTask到session
 			session.setAttribute("dumpTask", dumpTask);
@@ -261,11 +256,11 @@ public class SyncTaskCreateController {
 				throw new IllegalArgumentException("dumpTask为空，可能是会话已经过期！");
 			}
 
-			SyncTaskState state = syncTaskStateContainer.get(dumpTask.getName());
-			if (state != null) {
-				map.put("state", state);
-				if (state.getBinlogInfo() != null) {
-					session.setAttribute("binlogInfo", state.getBinlogInfo());
+			DumpTaskState dumpTaskState = dumpTaskStateService.find(dumpTask.getName());
+			if (dumpTaskState != null) {
+				map.put("state", dumpTaskState);
+				if (dumpTaskState.getBinlogInfo() != null) {
+					session.setAttribute("binlogInfo", dumpTaskState.getBinlogInfo());
 				}
 			}
 
@@ -350,7 +345,7 @@ public class SyncTaskCreateController {
 					errorCodeHandlerNames.put(errorCode, handler);
 				}
 			}
-			syncTask.setController(com.dianping.puma.core.constant.Controller.START);
+			syncTask.setController(com.dianping.puma.core.constant.ActionController.START);
 			syncTask.setErrorCodeHandlerNameMap(errorCodeHandlerNames);
 			syncTask.setDefaultHandler(StringUtils.trim(defaultHandler));
 			syncTask.setMysqlMapping(mysqlMapping);
@@ -372,10 +367,13 @@ public class SyncTaskCreateController {
 				this.dumpTaskService.updateSyncTaskId(dumpTaskId, syncTaskId);
 			}*/
 
-			syncTaskStateContainer.create(syncTask.getName());
+			// Add to status container.
+			BaseSyncTaskState state = new BaseSyncTaskState();
+			state.setStatus(Status.WAITING);
+			syncTaskStateContainer.add(syncTask.getName(), state);
 
 			syncTaskOperationReporter
-					.report(syncTask.getSyncServerName(), SyncType.SYNC, syncTask.getName(), Operation.CREATE);
+					.report(syncTask.getSyncServerName(), syncTask.getName(), ActionOperation.CREATE);
 
 			LOG.info("created syncTask : " + syncTask);
 
@@ -483,17 +481,17 @@ public class SyncTaskCreateController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			SyncTaskState state = this.syncTaskStateContainer.get(name);
+			SyncTaskState syncTaskState = syncTaskStateService.find(name);
 
-			if (state == null) {
+			if (syncTaskState == null) {
 				throw new Exception("Sync task state not found.");
 			}
 
-			if ((new Date()).getTime() - state.getGmtCreate().getTime() > 60*1000) {
-				state.setStatus(Status.DISCONNECTED);
+			if ((new Date()).getTime() - syncTaskState.getGmtUpdate().getTime() > 60*1000) {
+				syncTaskState.setStatus(Status.DISCONNECTED);
 			}
 
-			map.put("state", state);
+			map.put("state", syncTaskState);
 			map.put("success", true);
 		} catch (MongoException e) {
 			map.put("error", "storage");

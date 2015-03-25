@@ -6,9 +6,7 @@ import java.util.List;
 
 public interface SrcDBInstanceDao {
 
-    SrcDBInstance find(String id);
-
-    SrcDBInstance findByName(String name);
+	SrcDBInstance find(String name);
 
     List<SrcDBInstance> findAll();
 

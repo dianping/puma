@@ -1,0 +1,175 @@
+<div class="container-fluid">
+   <div class="panel panel-primary">
+      <div class="panel-heading">
+         <div class="btn-group-sm pull-right">
+            <a class="btn btn-success" href="${rc.contextPath}/sync-task/">返回</a>
+         </div>
+         <h5>
+           	同步任务详情
+         </h5>
+      </div>
+      <div class="panel-body">
+       <div class="form-group-label">
+	        <label class="col-md-label" for="syncServerName">同步服务器:</label>
+	        <label  id="syncServerName" class="col-md-label-text">${syncTask.syncServerName}</label>
+	        <label class="col-md-label" for="name">同步任务名称:</label>
+	        <label  id="name" class="col-md-label-text">${syncTask.name}</label>
+	    </div>
+        <div class="form-group-label">
+	       <label class="col-md-label" for="pumaClientServerId">Puma serverId:</label>
+	       <label  id="pumaClientServerId" class="col-md-label-text">${syncTask.pumaClientServerId}</label>
+	       <label class="col-md-label" for="pumaTaskName">Server任务源:</label>
+	       <label  id="pumaServerName" class="col-md-label-text">${syncTask.pumaTaskName}</label>
+	    </div>
+	    <div class="form-group-label">
+	       <label class="col-md-label" for="dstDBInstanceName">目标数据库:</label>
+	       <label  id="dstDBInstanceName" class="col-md-label-text">${syncTask.dstDBInstanceName}</label>
+	         <label class="col-md-label" for="binlog">Binlog信息:</label>
+	        <label  id="binlog" class="col-md-label-text">
+  				#if($syncState && $syncState.binlogInfoOfIOThread)
+                  $syncState.binlogInfoOfIOThread.binlogFile &nbsp;
+                  $syncState.binlogInfoOfIOThread.binlogPosition #else
+                  $syncTask.binlogInfo.binlogFile &nbsp;
+                  $syncTask.binlogInfo.binlogPosition #end
+			</label>
+	    </div>
+	     
+	     <div class="form-group-label">
+	        <label class="col-md-label" for="createDate">创建时间:</label>
+	        <label  id="createDate" class="col-md-label-text">${dateFormatUtils.format($syncTask.gmtCreate,"yyyy年MM月dd日
+                  HH时mm分")}</label>
+            <label class="col-md-label" for="updateDate">更新时间:</label>
+	        <label  id="updateDate" class="col-md-label-text">${dateFormatUtils.format($syncTask.gmtModify,"yyyy年MM月dd日
+                  HH时mm分")}</label>
+	    </div>
+	    <div class="form-group-label">
+	        <label class="col-md-label" for="ddl">ddl:</label>
+	        <label  id="ddl" class="col-md-label-text">${syncTask.ddl}</label>
+	        <label class="col-md-label" for="dml">dml:</label>
+	        <label  id="dml" class="col-md-label-text">${syncTask.dml}</label>
+	      
+	    </div>
+	   <div class="form-group-label">
+	      <label class="col-md-label" for="transaction">transaction:</label>
+	      <label  id="transaction" class="col-md-label-text">${syncTask.transaction}</label>
+           #foreach($entry in $syncTask.errorCodeHandlerNameMap.entrySet())
+	       <label class="col-md-label" >$entry.key错误码的处理：</label>
+	       <label class="col-md-label-text">
+                 $entry.value
+	       </label>
+	       #end
+	    </div>
+      </div>
+      
+       <div class="panel panel-default panel-local">
+		  <div class="panel-heading">
+		   <div class="btn-group-sm pull-right">
+		   	<button class="btn btn-success" type="button" onclick="addDatabaseMapping(this);">新增库同步</button>
+		   	<button class="btn btn-success" type="button" onclick="addTableMapping(this);">新增表同步</button>
+		   </div>
+		  <h5>映射关系<label class="panel-heading-label"> 状态：<span class="panel-heading-span" id="syncStateStatus">
+		   #if($syncState.status) 
+		   	$syncState.status
+                 #else
+                    	无状态(可能不在运行) 
+                 #end
+		  </span></label> </h5>
+		  </div>
+		    <div class="panel-body in collapse" id="div_body_mapping">
+		      #foreach($database in $syncTask.mysqlMapping.databases)
+				<div class="form-group">
+			       <label class="col-md-3 control-label">数据库名称</label>
+			         <div class="col-md-3">
+		  				 <input name="databaseFrom" class="form-control validation-input" value="${database.from}" format = "database-name" placeholder="源数据库名称" />
+		  			 </div>
+		  			 <div class="col-sm-1">
+		  			     <span class="glyphicon glyphicon-arrow-right" aria-hidden="true" style="margin-top:8px; margin-left:9px"></span>
+		  			 </div>
+		  			 <div class="col-md-3">
+		  				 <input name="databaseTo" class="form-control validation-input" value="${database.to}" format = "database-name" placeholder="目标数据库名称" />
+		  			 </div>
+		           </div><!--
+				 <div class="form-group">
+				 	<label class="col-md-3 control-label panel-label-local-left">数据库名称</label>
+				 	<a data-toggle="collapse" href="#collapse_1">
+				    <label class="col-md-3 control-label panel-label-local" >$database.from</label>
+			  			<div class="col-sm-1">
+			  			 	<span class="glyphicon glyphicon-arrow-right" aria-hidden="true" style="margin-top:8px; margin-left:9px"></span>
+			  			</div>
+			  	     <label class="col-md-3 control-label panel-label-local">$database.to</label>
+			  	     </a>
+			      </div>
+	          --><hr/>
+	           <div id="collapse_1">
+	           
+	           #foreach($table in $database.tables)
+	            <div class="form-group">
+					<label class="col-md-3 control-label">表名称</label>
+					<div class="col-md-3">
+					  <input name="tableFrom" class="form-control" value="${table.from}" format="table-name"  placeholder="源表名称" />
+				   </div>
+				   <div class="col-sm-1">
+					  <span class="glyphicon glyphicon-arrow-right" aria-hidden="true" style="margin-top:8px; margin-left:9px"></span>
+				   </div>
+				   <div class="col-md-3">
+					<input name="tableTo" class="form-control" value="${table.to}"  format="table-name" placeholder="目标表名称" />
+				   </div>
+				   <div class="col-sm-1">
+					 <a href="javascript:;" onclick="removeTableMapping(this);" >
+					 	<span class="glyphicon glyphicon-remove" aria-hidden="true"  style="margin-top:8px;"></span>
+			         </a>
+				   </div>
+				  </div><!--
+	           <div class="form-group panel-form-group-sub">
+				 <label class="col-md-3 control-label panel-label-local-left">表名称</label>
+				 <label class="col-md-3 control-label"  style="text-align:center">${table.from}</label>
+			  	 <div class="col-sm-1">
+			  		<span class="glyphicon glyphicon-arrow-right" aria-hidden="true" style="margin-top:8px; margin-left:9px"></span>
+			  	 </div>
+			  	 <label class="col-md-3 control-label " style="text-align:center">${table.to}</label>
+			    </div>-->
+			   #end
+			  </div>
+			 #end
+			</div>
+			
+			<div style="display: none" id="copySource">
+			 <div id="add_table_div">
+			   	 <div class="form-group">
+					<label class="col-md-3 control-label">表名称</label>
+					<div class="col-md-3">
+					  <input name="tableFrom" class="form-control" format="table-name"  placeholder="源表名称" />
+				   </div>
+				   <div class="col-sm-1">
+					  <span class="glyphicon glyphicon-arrow-right" aria-hidden="true" style="margin-top:8px; margin-left:9px"></span>
+				   </div>
+				   <div class="col-md-3">
+					<input name="tableTo" class="form-control"  format="table-name" placeholder="目标表名称" />
+				   </div>
+				   <div class="col-sm-1">
+					 <a href="javascript:;" onclick="removeTableMapping(this);" >
+					 	<span class="glyphicon glyphicon-remove" aria-hidden="true"  style="margin-top:8px;"></span>
+			         </a>
+				   </div>
+				  </div>
+			 </div>
+   			</div>
+	  </div>
+   </div>
+</div>
+<script>
+	function addTableMapping(aLink){
+		var form = $(aLink).parent().parent().parent().children("div[name='form_body_mapping']");
+		$(form).append($('#add_table_div').html());
+		var count = Number($(form).children("input[name='count']").val());
+		$(form).children("input[name='count']").val(count + 1);
+	}
+	
+	function removeTableMapping(aLink) {
+		var control = $(aLink).parent().parent();
+		var form = $(control).parent();
+		var count = Number($(form).children("input[name='count']").val());
+		$(form).children("input[name='count']").val(count - 1);
+		$(control).remove();
+	}
+</script>

@@ -6,9 +6,7 @@ import java.util.List;
 
 public interface DstDBInstanceDao {
 
-	DstDBInstance find(String id);
-
-	DstDBInstance findByName(String name);
+	DstDBInstance find(String name);
 
 	List<DstDBInstance> findAll();
 

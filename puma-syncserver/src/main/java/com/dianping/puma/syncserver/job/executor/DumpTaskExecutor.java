@@ -18,7 +18,7 @@ import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.entity.DumpTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.SyncTaskState;
+import com.dianping.puma.core.model.state.DumpTaskState;
 import com.google.common.base.Strings;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecuteResultHandler;
@@ -38,13 +38,13 @@ import org.slf4j.LoggerFactory;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
-import com.dianping.puma.syncserver.conf.Config;
+import com.dianping.puma.syncserver.config.SyncServerConfig;
 import com.dianping.puma.syncserver.util.ProcessBuilderWrapper;
 
 /**
  * @author wukezhu
  */
-public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
+public class DumpTaskExecutor implements TaskExecutor<DumpTask, DumpTaskState> {
     private static final Logger LOG = LoggerFactory.getLogger(DumpTaskExecutor.class);
     private final static Pattern BINLOG_LINE_PATTERN = Pattern.compile("^.+LOG_FILE='(.*)',\\s+.+LOG_POS=([0-9]+);$");
     protected static final String CHARSET = "iso-8859-1";
@@ -82,19 +82,17 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
     }
     private DumpTask dumpTask;
 
-    protected SyncTaskState state;
+    protected DumpTaskState state;
 
     private Process proc;
     protected TaskExecutorStatus status;
 
-    public DumpTaskExecutor(DumpTask dumpTask) throws IOException {
+    public DumpTaskExecutor(DumpTask dumpTask, DumpTaskState dumpTaskState) throws IOException {
         this.uuid = UUID.randomUUID().toString();
-        this.dumpOutputDir = Config.getInstance().getTempDir() + "/dump/" + uuid + "/";
+        this.dumpOutputDir = SyncServerConfig.getInstance().getTempDir() + "/dump/" + uuid + "/";
         FileUtils.forceMkdir(new File(dumpOutputDir));
         this.dumpTask = dumpTask;
-        state = new SyncTaskState();
-        state.setTaskName(dumpTask.getName());
-        state.setSyncType(dumpTask.getSyncType());
+        state = dumpTaskState;
 
         //this.status = new TaskExecutorStatus();
         //status.setTaskName(dumpTask.getName());
@@ -287,7 +285,7 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
     private String _mysqlload(String databaseName) throws ExecuteException, IOException, InterruptedException {
         List<String> cmdlist = new ArrayList<String>();
         cmdlist.add("sh");
-        cmdlist.add(Config.getInstance().getTempDir() + "/shell/mysqlload.sh");
+        cmdlist.add(SyncServerConfig.getInstance().getTempDir() + "/shell/mysqlload.sh");
         cmdlist.add("--default-character-set=utf8");
         cmdlist.add("--user=" + dstDBInstance.getUsername());
         String host = dstDBInstance.getHost();
@@ -406,11 +404,15 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
 
     }
 
-    public SyncTaskState getState() {
+    public DumpTaskState getTaskState() {
         return state;
     }
 
-    public void setState(SyncTaskState state) {
+    public void setTaskState(DumpTaskState taskState) {
+        this.state = taskState;
+    }
+
+    public void setState(DumpTaskState state) {
         this.state = state;
     }
 

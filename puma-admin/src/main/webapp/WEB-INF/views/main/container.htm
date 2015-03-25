@@ -7,10 +7,11 @@
 <script type="text/javascript" src="${rc.contextPath}/js/validation.js"></script>
 <script type="text/javascript" src="${rc.contextPath}/js/puma-form.js"></script>
 <script type="text/javascript" src="${rc.contextPath}/js/puma-modal.js"></script>
-<div class="container" style="width: 1240px;">
-   <div class="row">
+<div class="container bs-docs-container container-local">
+   <!--<div class="row">-->
+   	<div class="col-md-3 container-left-local" >
 
-      <ul class="nav nav-stacked well col-md-3">
+      <ul class="nav nav-stacked well ">
          <li>
             <a href="${rc.contextPath}/src-db-instance">源数据库配置</a>
          </li>
@@ -30,6 +31,7 @@
             <a href="${rc.contextPath}/sync-task">数据同步任务</a>
          </li>
       </ul>
+      </div>
       <!--div class="col-md-3">
          <ul class="well nav nav-pills nav-stacked">
             <li class="nav-header"><i class="icon-tasks"></i> 配置管理</li>
@@ -80,11 +82,11 @@
          </ul>
       </div-->
       #if(${subPath})
-      <div class="col-md-9">#parse("main/${path}/${subPath}.htm")</div>
+      <div class="col-md-9 container-right-local">#parse("main/${path}/${subPath}.htm")</div>
       #else
-      <div class="col-md-9">#parse("main/${path}/main.htm")</div>
+      <div class="col-md-9 container-right-local">#parse("main/${path}/main.htm")</div>
       #end
-   </div>
+   <!--</div>-->
 </div>
 
 #parse("main/modal/warn.htm")

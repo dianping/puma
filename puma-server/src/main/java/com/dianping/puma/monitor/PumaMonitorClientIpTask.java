@@ -9,13 +9,13 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ClientStatus;
-import com.dianping.puma.config.TaskIntervalConfig;
+import com.dianping.puma.config.TaskLionConfig;
 
 @Component("pumaMonitorClientIpTask")
 public class PumaMonitorClientIpTask implements PumaMonitorTask {
 
 	@Autowired
-	private TaskIntervalConfig intervalConfig;
+	private TaskLionConfig taskLionConfig;
 
 	@Override
 	public void runTask() {
@@ -23,7 +23,7 @@ public class PumaMonitorClientIpTask implements PumaMonitorTask {
 		for (Map.Entry<String, ClientStatus> clientStatus : clientStatuses.entrySet()) {
 			Cat.getProducer().logEvent("Puma.server." + clientStatus.getKey() + ".ip", clientStatus.getValue().getIp(),
 					Message.SUCCESS,
-					"name = " + clientStatus.getKey() + "&duration = " + intervalConfig.getClientIpInterval());
+					"name = " + clientStatus.getKey() + "&duration = " + taskLionConfig.getClientIpInterval());
 		}
 	}
 

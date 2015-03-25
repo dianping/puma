@@ -13,14 +13,14 @@
     <!-- annotation scan --><!--
     <context:component-scan base-package="com.dianping.puma.core"/>
 
-    <bean id="mongoClient" class="com.dianping.puma.core.dao.morphia.MongoClient">
+    <bean id="mongoClient" class="com.dianping.puma.core.dao.morphia.helper.MongoClient">
     </bean>
 	
     --><!--<bean id="mongoClient" class="com.dianping.puma.core.sync.dao.MongoClient">
     </bean>  --><!--
 
     <bean id="seqGeneratorService"
-        class="com.dianping.puma.core.dao.morphia.MongoSeqGeneratorServiceImpl">
+        class="com.dianping.puma.core.dao.morphia.helper.MongoSeqGeneratorServiceImpl">
         <property name="mongoClient">
             <ref bean="mongoClient" />
         </property>

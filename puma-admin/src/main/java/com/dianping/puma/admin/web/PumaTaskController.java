@@ -1,18 +1,18 @@
 package com.dianping.puma.admin.web;
 
-import com.dianping.puma.admin.reporter.PumaTaskControllerReporter;
-import com.dianping.puma.admin.reporter.PumaTaskOperationReporter;
-import com.dianping.puma.admin.service.PumaServerConfigService;
-import com.dianping.puma.core.service.SyncTaskService;
-import com.dianping.puma.core.container.PumaTaskStateContainer;
-import com.dianping.puma.core.model.PumaTaskState;
-import com.dianping.puma.core.service.PumaTaskService;
+import com.dianping.puma.admin.remote.reporter.PumaTaskControllerReporter;
+import com.dianping.puma.admin.remote.reporter.PumaTaskOperationReporter;
+import com.dianping.puma.core.constant.ActionController;
+import com.dianping.puma.core.constant.Status;
+import com.dianping.puma.core.model.state.TaskStateContainer;
+import com.dianping.puma.core.service.*;
+import com.dianping.puma.core.model.state.PumaTaskState;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
-import com.dianping.puma.core.constant.Operation;
+import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
@@ -47,7 +47,10 @@ public class PumaTaskController {
 	PumaServerService pumaServerService;
 
 	@Autowired
-	PumaTaskStateContainer pumaTaskStateContainer;
+	TaskStateContainer taskStateContainer;
+
+	@Autowired
+	PumaTaskStateService pumaTaskStateService;
 
 	@Autowired
 	PumaTaskOperationReporter pumaTaskOperationReporter;
@@ -58,11 +61,8 @@ public class PumaTaskController {
 	@Autowired
 	SyncTaskService syncTaskService;
 
-	@Autowired
-	PumaServerConfigService pumaServerConfigService;
-
 	@RequestMapping(value = { "/puma-task" })
-	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
+	public ModelAndView view() {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		List<PumaTask> pumaTaskEntities = pumaTaskService.findAll();
@@ -113,72 +113,55 @@ public class PumaTaskController {
 			"/puma-task/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String createPost(
-			String id,
+			String name,
 			String srcDBInstanceName,
 			String pumaServerName,
-			String name,
 			String binlogFile,
 			Long binlogPosition,
 			int preservedDay) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		Operation operation;
-
 		try {
-			PumaTask pumaTask;
+			ActionOperation operation;
 
-			// Create or update?
-			if (id != null) {
-				// Update.
-				pumaTask = pumaTaskService.find(id);
-
+			PumaTask pumaTask = pumaTaskService.find(name);
+			if (pumaTask == null) {
+				pumaTask = new PumaTask();
+				operation = ActionOperation.CREATE;
+			} else {
 				if (!binlogFile.equals(pumaTask.getBinlogInfo().getBinlogFile())
 						|| !binlogPosition.equals(pumaTask.getBinlogInfo().getBinlogPosition())) {
-					operation = Operation.UPDATE;
+					operation = ActionOperation.UPDATE;
 				} else {
-					operation = Operation.PROLONG;
-				}
-
-			} else {
-				// Create.
-				operation = Operation.CREATE;
-
-				// Duplicated name?
-				pumaTask = pumaTaskService.findByName(name);
-				if (pumaTask == null) {
-					pumaTask = new PumaTask();
-				} else {
-					throw new Exception("duplicated");
+					operation = ActionOperation.PROLONG;
 				}
 			}
 
-
-			SrcDBInstance srcDBInstance = srcDBInstanceService.findByName(srcDBInstanceName);
-			PumaServer pumaServer = pumaServerService.findByName(pumaServerName);
-
 			pumaTask.setName(name);
-			pumaTask.setSrcDBInstanceId(srcDBInstance.getId());
-			pumaTask.setPumaServerId(pumaServer.getId());
+			pumaTask.setSrcDBInstanceName(srcDBInstanceName);
+			pumaTask.setPumaServerName(pumaServerName);
 			BinlogInfo binlogInfo = new BinlogInfo();
 			binlogInfo.setBinlogFile(binlogFile);
 			binlogInfo.setBinlogPosition(binlogPosition);
 			pumaTask.setBinlogInfo(binlogInfo);
 			pumaTask.setPreservedDay(preservedDay);
-			pumaTask.setSrcDBInstanceName(srcDBInstance.getName());
-			pumaTask.setPumaServerName(pumaServer.getName());
 
-			if (id != null) {
-				this.pumaTaskService.update(pumaTask);
+			// Save puma task state to persistent storage.
+			if (operation == ActionOperation.CREATE) {
+				pumaTaskService.create(pumaTask);
 			} else {
-				this.pumaTaskService.create(pumaTask);
+				pumaTaskService.update(pumaTask);
 			}
 
 			// Add puma task state to the state container.
-			this.pumaTaskStateContainer.create(pumaTask.getId());
+			PumaTaskState taskState = new PumaTaskState();
+			taskState.setTaskName(pumaTask.getName());
+			taskState.setStatus(Status.PREPARING);
+			pumaTaskStateService.add(taskState);
 
 			// Publish puma task operation event to puma server.
-			this.pumaTaskOperationReporter.report(pumaServer.getId(), pumaTask.getId(), pumaTask.getName(), operation);
+			this.pumaTaskOperationReporter.report(pumaServerName, name, operation);
 
 			map.put("success", true);
 		} catch (MongoException e) {
@@ -199,16 +182,18 @@ public class PumaTaskController {
 
 	@RequestMapping(value = { "/puma-task/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String removePost(String id) {
+	public String removePost(String name) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			PumaTask pumaTask = pumaTaskService.find(id);
+			PumaTask pumaTask = pumaTaskService.find(name);
 
-			this.pumaTaskService.remove(id);
+			this.pumaTaskService.remove(name);
+
+			pumaTaskStateService.remove(name);
 
 			// Publish puma task operation event to puma server.
-			this.pumaTaskOperationReporter.report(pumaTask.getPumaServerId(), pumaTask.getId(), pumaTask.getName(), Operation.REMOVE);
+			this.pumaTaskOperationReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(), ActionOperation.REMOVE);
 
 			map.put("success", true);
 		} catch (MongoException e) {
@@ -229,16 +214,17 @@ public class PumaTaskController {
 
 	@RequestMapping(value = { "/puma-task/refresh" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String refreshPost(String id) {
+	public String refreshPost(String name) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			PumaTaskState state = this.pumaTaskStateContainer.get(id);
-			if (state == null) {
+			PumaTaskState taskState = pumaTaskStateService.find(name);
+
+			if (taskState == null) {
 				throw new Exception("Puma task state not found.");
 			}
 
-			map.put("state", state);
+			map.put("state", taskState);
 			map.put("success", true);
 		} catch (MongoException e) {
 			map.put("error", "storage");
@@ -253,14 +239,17 @@ public class PumaTaskController {
 
 	@RequestMapping(value = { "/puma-task/resume" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String resumePost(String id) {
+	public String resumePost(String name) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			PumaTask pumaTask = pumaTaskService.find(id);
+			PumaTask pumaTask = pumaTaskService.find(name);
+
+			PumaTaskState taskState = pumaTaskStateService.find(name);
+			taskState.setStatus(Status.PREPARING);
 
 			// Publish puma task controller event to puma server.
-			this.pumaTaskControllerReporter.report(pumaTask.getPumaServerId(), pumaTask.getId(), pumaTask.getName(), com.dianping.puma.core.constant.Controller.RESUME);
+			this.pumaTaskControllerReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(), ActionController.RESUME);
 
 			map.put("success", true);
 		} catch (MongoException e) {
@@ -276,14 +265,16 @@ public class PumaTaskController {
 
 	@RequestMapping(value = { "/puma-task/pause" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String pausePost(String id) {
+	public String pausePost(String name) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			PumaTask pumaTask = pumaTaskService.find(id);
+			PumaTask pumaTask = pumaTaskService.find(name);
 
-			// Publish puma task controller event to puma server.
-			this.pumaTaskControllerReporter.report(pumaTask.getPumaServerId(), pumaTask.getId(), pumaTask.getName(), com.dianping.puma.core.constant.Controller.PAUSE);
+			PumaTaskState taskState = pumaTaskStateService.find(name);
+			taskState.setStatus(Status.STOPPING);
+
+			pumaTaskControllerReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(), com.dianping.puma.core.constant.ActionController.PAUSE);
 
 			map.put("success", true);
 		} catch (MongoException e) {

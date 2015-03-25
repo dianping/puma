@@ -15,18 +15,11 @@
             action="${rc.contextPath}/sync-server/create" target="${rc.contextPath}/sync-server">
          <div class="panel-body">
 
-            #if(${entity})
-            <div class="form-group" hidden="hidden">
-               <label class="sr-only" for="id"></label>
-               <input id="id" name="id" value="${entity.id}">
-            </div>
-            #end
-
             <div class="form-group">
                <label class="col-md-2 control-label" for="name">服务器名称</label>
                <div class="col-md-7 validation-div">
                   <input id="name" name="name" class="form-control validation-input" format="server-name"
-                         #if(${entity}) value="${entity.name}" #end #if(${lock}) disabled="disabled" #end>
+                         #if(${entity}) value="${entity.name}" readonly="readonly" #end>
                </div>
 
                <div class="col-md-3 validation-help">

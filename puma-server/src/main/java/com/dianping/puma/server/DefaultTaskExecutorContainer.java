@@ -12,8 +12,8 @@ import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
-import com.dianping.puma.core.monitor.PumaTaskControllerEvent;
-import com.dianping.puma.core.monitor.PumaTaskOperationEvent;
+import com.dianping.puma.core.monitor.event.PumaTaskControllerEvent;
+import com.dianping.puma.core.monitor.event.PumaTaskOperationEvent;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.server.builder.TaskExecutorBuilder;
@@ -26,7 +26,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.dianping.puma.config.Config;
+import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.util.PumaThreadUtils;
@@ -63,7 +63,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 	private JsonEventCodec jsonCodec;
 
 	@Autowired
-	private Config pumaServerConfig;
+	private PumaServerConfig pumaServerConfig;
 
 	@PostConstruct
 	public void init() {
@@ -208,7 +208,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 		String taskName = event.getTaskName();
 
 		try {
-			PumaTask pumaTask = pumaTaskService.findByName(taskName);
+			PumaTask pumaTask = pumaTaskService.find(taskName);
 			TaskExecutor taskExecutor = taskExecutorBuilder.build(pumaTask);
 			submit(taskExecutor);
 		} catch (Exception e) {
@@ -248,7 +248,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 			EventStorage storage = senders.get(0).getStorage();
 			DefaultEventStorage defaultEventStorage = (DefaultEventStorage) storage;
 			try {
-				PumaTask pumaTask = pumaTaskService.findByName(taskName);
+				PumaTask pumaTask = pumaTaskService.find(taskName);
 				CleanupStrategy cleanupStrategy = defaultEventStorage.getCleanupStrategy();
 				((DefaultCleanupStrategy) cleanupStrategy).setPreservedDay(pumaTask.getPreservedDay());
 

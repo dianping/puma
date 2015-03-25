@@ -3,12 +3,12 @@
     <parent>
         <groupId>com.dianping.puma</groupId>
         <artifactId>parent</artifactId>
-        <version>0.2.3-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>puma-admin</artifactId>
     <groupId>com.dianping.puma</groupId>
-    <version>0.2.3-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <name>puma-admin</name>
     <packaging>war</packaging>
     <dependencies>
@@ -59,12 +59,12 @@
             <artifactId>gson</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>

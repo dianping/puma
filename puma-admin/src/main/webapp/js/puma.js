@@ -1,11 +1,13 @@
 $(function(w) {
 
   var STATE_MAP = {
+    INITIALIZING: "初始化中",
     WAITING     : "等待中",
     PREPARING   : "准备中",
     RUNNING     : "运行中",
     SUSPENDED   : "已暂停",
-    STOPPING    : "已停止",
+    STOPPING    : "停止中",
+    STOPPED     : "已停止",
     SUCCESS     : "成功",
     RECONNECTING: "重新连接",
     DUMPING     : "备份中",
@@ -17,11 +19,11 @@ $(function(w) {
   // Operations.
 
   // Refresh puma task state.
-  function refreshPumaTaskState(id, cb) {
+  function refreshPumaTaskState(name, cb) {
     $.ajax({
       url     : window.contextpath + '/puma-task/refresh',
       type    : 'POST',
-      data    : {id: id},
+      data    : {name: name},
       dataType: 'json',
       success : function(res) {
         if (!res.success) {
@@ -38,32 +40,7 @@ $(function(w) {
 
   // Set puma task status.
   function setPumaTaskStatus(td, status) {
-    var statusStr;
-
-    switch (status) {
-      case 'WAITING':
-        statusStr = '等待中';
-        break;
-      case 'PREPARING':
-        statusStr = '准备中';
-        break;
-      case 'RUNNING':
-        statusStr = '运行中';
-        break;
-      case 'STOPPING':
-        statusStr = '停止中';
-        break;
-      case 'STOPPED':
-        statusStr = '已停止';
-        break;
-      case 'FAILED':
-        statusStr = '已失败';
-        break;
-      default:
-        statusStr = '内部错误';
-    }
-
-    td.text(statusStr);
+    td.text(STATE_MAP[status]);
   }
 
   // Set puma task bin log info.
@@ -78,7 +55,7 @@ $(function(w) {
   $(".puma-task-refresh").on('click', function(event) {
     event.preventDefault();
 
-    var taskId       = $(this).attr('data-id');
+    var taskId       = $(this).attr('data-name');
     var parent       = $(this).parent();
     var tdBinlogInfo = parent.prev();
     var tdStatus     = tdBinlogInfo.prev();
@@ -160,12 +137,12 @@ $(function(w) {
   // Puma task resume.
   $(".puma-task-resume").on('click', function(event) {
     event.preventDefault();
-    var id = $(this).attr('data-id');
+    var name = $(this).attr('data-name');
 
     $.ajax({
       url     : window.contextpath + '/puma-task' + '/resume',
       type    : 'POST',
-      data    : {id: id},
+      data    : {name: name},
       dataType: 'json',
       success : function(res) {
         if (res.success) {
@@ -183,12 +160,12 @@ $(function(w) {
   // Puma task pause.
   $(".puma-task-pause").on('click', function(event) {
     event.preventDefault();
-    var id = $(this).attr('data-id');
+    var name = $(this).attr('data-name');
 
     $.ajax({
       url     : window.contextpath + '/puma-task' + '/pause',
       type    : 'POST',
-      data    : {id: id},
+      data    : {name: name},
       dataType: 'json',
       success : function(res) {
         if (res.success) {

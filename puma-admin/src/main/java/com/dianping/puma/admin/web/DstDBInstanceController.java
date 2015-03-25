@@ -1,6 +1,7 @@
 package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.util.GsonUtil;
+import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.service.DstDBInstanceService;
@@ -56,10 +57,10 @@ public class DstDBInstanceController {
 	}
 
 	@RequestMapping(value = { "/dst-db-instance/update" })
-	public ModelAndView update(String id) {
+	public ModelAndView update(String name) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceId(id);
+		List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceName(name);
 		if (pumaTasks != null && pumaTasks.size() != 0) {
 			map.put("lock", true);
 		} else {
@@ -67,7 +68,7 @@ public class DstDBInstanceController {
 		}
 
 		try {
-			DstDBInstance entity = dstDBInstanceService.find(id);
+			DstDBInstance entity = dstDBInstanceService.find(name);
 			map.put("entity", entity);
 			map.put("path", "dst-db-instance");
 			map.put("subPath", "create");
@@ -81,7 +82,6 @@ public class DstDBInstanceController {
 	@RequestMapping(value = { "/dst-db-instance/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String createPost(
-			String id,
 			String name,
 			Long serverId,
 			String ip,
@@ -90,22 +90,15 @@ public class DstDBInstanceController {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		DstDBInstance dstDBInstance;
-
 		try {
-			if (id != null) {
-				// Update.
-				dstDBInstance = dstDBInstanceService.find(id);
-			} else {
-				// Create.
+			ActionOperation operation;
 
-				// Duplicated name?
-				dstDBInstance = dstDBInstanceService.findByName(name);
-				if (dstDBInstance == null) {
-					dstDBInstance = new DstDBInstance();
-				} else {
-					throw new Exception("duplicated");
-				}
+			DstDBInstance dstDBInstance = dstDBInstanceService.find(name);
+			if (dstDBInstance == null) {
+				operation = ActionOperation.CREATE;
+				dstDBInstance = new DstDBInstance();
+			} else {
+				operation = ActionOperation.UPDATE;
 			}
 
 			dstDBInstance.setName(name);
@@ -125,10 +118,10 @@ public class DstDBInstanceController {
 			dstDBInstance.setMetaUsername(username);
 			dstDBInstance.setMetaPassword(password);
 
-			if (id != null) {
-				dstDBInstanceService.update(dstDBInstance);
-			} else {
+			if (operation == ActionOperation.CREATE) {
 				dstDBInstanceService.create(dstDBInstance);
+			} else {
+				dstDBInstanceService.update(dstDBInstance);
 			}
 
 			map.put("success", true);
@@ -145,17 +138,17 @@ public class DstDBInstanceController {
 
 	@RequestMapping(value = { "/dst-db-instance/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String removePost(String id) {
+	public String removePost(String name) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceId(id);
+			List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceName(name);
 
 			if (pumaTasks != null && pumaTasks.size() != 0) {
 				throw new Exception("lock");
 			}
 
-			this.dstDBInstanceService.remove(id);
+			this.dstDBInstanceService.remove(name);
 			map.put("success", true);
 		} catch (MongoException e) {
 			map.put("error", "storage");

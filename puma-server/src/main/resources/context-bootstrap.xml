@@ -54,7 +54,7 @@
 
 	<bean id="jsonCodec" class="com.dianping.puma.core.codec.JsonEventCodec" />
 
-	<bean id="mongoClient" class="com.dianping.puma.core.dao.morphia.MongoClient">
+	<bean id="mongoClient" class="com.dianping.puma.core.dao.morphia.helper.MongoClient">
 	</bean>
 
 	<!--
@@ -74,19 +74,19 @@
 		</property>
 	</bean>
     -->
-	<!--bean id="mongoClient2" class="com.dianping.puma.core.dao.morphia.MongoClient">
+	<!--bean id="mongoClient2" class="com.dianping.puma.core.dao.morphia.helper.MongoClient">
 	</bean-->
 	<task:scheduled-tasks>
-        <task:scheduled ref="pumaMonitorSeqTask" method="runTask" fixed-delay="#{intervalConfig.seqInterval}"/> 
+        <task:scheduled ref="pumaMonitorSeqTask" method="runTask" fixed-delay="#{taskLionConfig.seqInterval}"/> 
     </task:scheduled-tasks>  
     <task:scheduled-tasks>
-        <task:scheduled ref="pumaMonitorClientIpTask" method="runTask" fixed-delay="#{intervalConfig.clientIpInterval}"/>  
+        <task:scheduled ref="pumaMonitorClientIpTask" method="runTask" fixed-delay="#{taskLionConfig.clientIpInterval}"/>  
     </task:scheduled-tasks>  
     <task:scheduled-tasks>
-        <task:scheduled ref="pumaMonitorServerInfoTask" method="runTask" fixed-delay="#{intervalConfig.serverInfoInterval}"/>   
+        <task:scheduled ref="pumaMonitorServerInfoTask" method="runTask" fixed-delay="#{taskLionConfig.serverInfoInterval}"/>   
     </task:scheduled-tasks>
     <task:scheduled-tasks>
-        <task:scheduled ref="pumaMonitorSyncProcessTask" method="runTask" fixed-delay="#{intervalConfig.syncProcessInterval}"/>   
+        <task:scheduled ref="pumaMonitorSyncProcessTask" method="runTask" fixed-delay="#{taskLionConfig.syncProcessInterval}"/>   
     </task:scheduled-tasks>
    
 </beans>

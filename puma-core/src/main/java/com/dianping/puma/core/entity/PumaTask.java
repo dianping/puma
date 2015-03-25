@@ -4,10 +4,6 @@ import com.dianping.puma.core.model.BinlogInfo;
 
 public class PumaTask extends BaseEntity {
 
-	private String srcDBInstanceId;
-
-	private String pumaServerId;
-
 	private String srcDBInstanceName;
 
 	private String pumaServerName;
@@ -15,22 +11,6 @@ public class PumaTask extends BaseEntity {
 	private BinlogInfo binlogInfo;
 
 	private int preservedDay;
-
-	public String getSrcDBInstanceId() {
-		return srcDBInstanceId;
-	}
-
-	public void setSrcDBInstanceId(String srcDBInstanceId) {
-		this.srcDBInstanceId = srcDBInstanceId;
-	}
-
-	public String getPumaServerId() {
-		return pumaServerId;
-	}
-
-	public void setPumaServerId(String pumaServerId) {
-		this.pumaServerId = pumaServerId;
-	}
 
 	public String getSrcDBInstanceName() {
 		return srcDBInstanceName;

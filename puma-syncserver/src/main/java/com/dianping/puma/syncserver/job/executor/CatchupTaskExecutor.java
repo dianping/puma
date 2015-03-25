@@ -5,13 +5,15 @@ import java.sql.SQLException;
 import com.dianping.puma.core.entity.CatchupTask;
 import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.model.state.CatchupTaskState;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.syncserver.job.executor.exception.DdlRenameException;
 
-public class CatchupTaskExecutor extends AbstractTaskExecutor<CatchupTask> {
+public class CatchupTaskExecutor extends AbstractTaskExecutor<CatchupTask, CatchupTaskState> {
     protected static final Logger LOG = LoggerFactory.getLogger(CatchupTaskExecutor.class);
     /** 追赶的SyncTaskExecutor */
     private SyncTaskExecutor syncTaskExecutor;
@@ -28,7 +30,7 @@ public class CatchupTaskExecutor extends AbstractTaskExecutor<CatchupTask> {
     }
 
     @Override
-    protected void execute(ChangedEvent event) throws SQLException {
+    protected void execute(ChangedEvent event) throws SQLException, DdlRenameException {
         //执行同步
         mysqlExecutor.execute(event);
     }

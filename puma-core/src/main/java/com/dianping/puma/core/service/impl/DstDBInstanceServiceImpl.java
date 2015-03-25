@@ -15,13 +15,8 @@ public class DstDBInstanceServiceImpl implements DstDBInstanceService {
 	DstDBInstanceDao dstDbInstanceDao;
 
 	@Override
-	public DstDBInstance find(String id) {
-		return dstDbInstanceDao.find(id);
-	}
-
-	@Override
-	public DstDBInstance findByName(String name) {
-		return dstDbInstanceDao.findByName(name);
+	public DstDBInstance find(String name) {
+		return dstDbInstanceDao.find(name);
 	}
 
 	@Override
@@ -30,17 +25,17 @@ public class DstDBInstanceServiceImpl implements DstDBInstanceService {
 	}
 
 	@Override
-	public void create(DstDBInstance entity) {
-		dstDbInstanceDao.create(entity);
+	public void create(DstDBInstance dstDBInstance) {
+		dstDbInstanceDao.create(dstDBInstance);
 	}
 
 	@Override
-	public void update(DstDBInstance entity) {
-		dstDbInstanceDao.update(entity);
+	public void update(DstDBInstance dstDBInstance) {
+		dstDbInstanceDao.update(dstDBInstance);
 	}
 
 	@Override
-	public void remove(String id) {
-		dstDbInstanceDao.remove(id);
+	public void remove(String name) {
+		dstDbInstanceDao.remove(name);
 	}
 }

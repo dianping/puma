@@ -37,11 +37,11 @@
 
 
     <!-- 数据库 -->
-    <bean id="mongoClient" class="com.dianping.puma.core.dao.morphia.MongoClient">
+    <bean id="mongoClient" class="com.dianping.puma.core.dao.morphia.helper.MongoClient">
     </bean>
 
-    <bean id="seqGen"
-        class="com.dianping.puma.core.dao.morphia.MongoSeqGeneratorServiceImpl">
+    <bean id="seqGeneratorService"
+        class="com.dianping.puma.core.dao.morphia.helper.MongoSeqGeneratorServiceImpl">
         <property name="mongoClient">
             <ref bean="mongoClient" />
         </property>

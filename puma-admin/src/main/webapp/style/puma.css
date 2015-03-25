@@ -14,3 +14,141 @@ a:hover.operation-icon {
 .validation-help span {
     color: red;
 }
+
+.bs-docs-footer {
+	padding-top: 40px;
+	padding-bottom: 40px;
+	margin-top: 100px;
+	color: #767676;
+	text-align: center;
+	border-top: 1px solid #e5e5e5;
+}
+
+.nav-local {
+	background-color:#337ab7;
+}
+
+.container-local {
+	margin-right: auto;
+	margin-left: auto;
+	min-height:500px;
+}
+
+.navbar-log-local,
+.navbar-brand-local,
+.navbar-log-local:hover,
+.navbar-brand-local:hover{
+	color: #fff;
+}
+
+.container-left-local{
+	padding-left:0px;
+	padding-right:8px;
+	width:20%
+}
+.container-right-local{
+	padding-left:8px;
+	padding-right:0px;
+	width:80%
+}
+
+.container-fluid{
+	padding-left:0px;
+	padding-right:0px;
+}
+.navbar-right-log-local,
+.navbar-right-log-local li,
+.navbar-right-log-local li a,
+.navbar-right-log-local li:hover,
+.navbar-right-log-local li a:hover,
+.navbar-right-log-local li a:focus{
+	background-color:#337ab7;
+}
+.panel-local{
+	border-bottom:0px;
+	-webkit-box-shadow: 0 0px 1px rgba(0, 0, 0, .05);
+    box-shadow: 0 0px 1px rgba(0, 0, 0, .05);
+}
+
+
+
+
+
+/*sync detail page*/
+
+
+.col-md-label{
+	float:left;
+	text-align:right;
+	font-size:14px;
+	padding-left:10px;
+	padding-right:5px;
+	width:15%;
+	font-weight:normal;
+	line-height:30px;
+}
+
+.col-md-label-text{
+	float:left;
+	text-align:left;
+	font-weight: bold;
+	font-size:14px;
+	padding-left:5px;
+	padding-right:10px;
+	width:33%;
+	line-height:30px;
+}
+
+.col-md-label-s{
+	
+	float:left;
+	text-align:left;
+	font-size:14px;
+	padding-left:15px;
+	padding-right:5px;
+	width:11%;
+	font-weight:normal;
+	line-height:30px;
+}
+
+.col-md-label-text-s{
+	float:left;
+	text-align:left;
+	font-weight: bold;
+	font-size:14px;
+	padding-left:5px;
+	padding-right:10px;
+	width:17%;
+	line-height:30px;
+}
+
+.form-group-label{
+	clear:both;
+}
+
+.panel-heading-span{
+	color:#DF3A01;
+	font-weight:bold;
+}
+.panel-heading-label{
+	width:350px; 
+	float:right; 
+	padding-right:20px;
+}
+
+.panel-label-local{
+	color:#DF3A01;
+	font-weight:bold;
+	text-align:center;
+}
+.form-group a{
+	color:#DF3A01;
+}
+.panel-label-local-left{
+	text-align:right;
+}
+
+.panel-form-group-sub label{
+	font-weight:normal;
+}
+

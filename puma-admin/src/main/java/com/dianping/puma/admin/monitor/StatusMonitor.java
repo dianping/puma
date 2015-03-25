@@ -18,7 +18,7 @@ import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.sync.model.task.SyncTaskStatusAction;
 import com.dianping.puma.core.sync.model.task.Type;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
-import com.dianping.puma.core.constant.Controller;
+import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.SyncType;
 
 /**
@@ -35,8 +35,6 @@ public class StatusMonitor {
     @Autowired
     private SyncTaskService syncTaskService;
     @Autowired
-    private SystemStatusContainer systemStatusContainer;
-    @Autowired
     private NotifyService notifyService;
     /** 存放正在报警的task的status，同一个Task在getAlarmInterval()分钟内只报警一次 */
     private HashMap<Integer, Long> alarmingStatusMap = new HashMap<Integer, Long>();
@@ -45,8 +43,8 @@ public class StatusMonitor {
     public void monitor() {
         //如果有Status超过60秒没有更新，就报警
         //如果有fail的task，就报警
-        ConcurrentHashMap<Integer, TaskExecutorStatus> taskStatusMap = systemStatusContainer.getTaskStatusMap();
-        check(taskStatusMap);
+        //ConcurrentHashMap<Integer, TaskExecutorStatus> taskStatusMap = systemStatusContainer.getTaskStatusMap();
+        //check(taskStatusMap);
     }
 
     private void check(ConcurrentHashMap<Integer, TaskExecutorStatus> taskStatusMap) {
@@ -93,7 +91,7 @@ public class StatusMonitor {
         //暂停状态或不存在(已经删除)的SyncTask不报警
         if (shouldAlarm && status.getSyncType() == SyncType.SYNC) {
             SyncTask syncTask = syncTaskService.find(status.getTaskName());
-            if (syncTask == null || syncTask.getController() == Controller.PAUSE) {
+            if (syncTask == null || syncTask.getController() == ActionController.PAUSE) {
                 shouldAlarm = false;
             }
         }

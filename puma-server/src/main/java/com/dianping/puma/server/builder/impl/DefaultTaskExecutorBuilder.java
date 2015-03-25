@@ -6,6 +6,7 @@ import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogStat;
+import com.dianping.puma.core.model.state.PumaTaskState;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.datahandler.DefaultDataHandler;
@@ -90,13 +91,16 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 		try {
 			DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
 
+			PumaTaskState taskState = new PumaTaskState();
+			taskState.setTaskName(pumaTask.getName());
+			taskState.setStatus(Status.PREPARING);
+			taskExecutor.setTaskState(taskState);
+
 			// Base.
-			String taskId = pumaTask.getId();
 			String taskName = pumaTask.getName();
-			taskExecutor.setTaskId(taskId);
 			taskExecutor.setTaskName(taskName);
 			taskExecutor.setNotifyService(notifyService);
-			taskExecutor.setServerId(taskId.hashCode());
+			taskExecutor.setServerId(taskName.hashCode());
 
 			// Bin log.
 			taskExecutor.setBinlogInfoHolder(binlogInfoHolder);
@@ -104,8 +108,8 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			taskExecutor.setBinlogStat(new BinlogStat());
 
 			// Source database.
-			String srcDBInstanceId = pumaTask.getSrcDBInstanceId();
-			SrcDBInstance srcDBInstance = srcDBInstanceService.find(srcDBInstanceId);
+			String srcDBInstanceName = pumaTask.getSrcDBInstanceName();
+			SrcDBInstance srcDBInstance = srcDBInstanceService.find(srcDBInstanceName);
 			taskExecutor.setDbServerId(srcDBInstance.getServerId());
 			taskExecutor.setDBHost(srcDBInstance.getHost());
 			taskExecutor.setPort(srcDBInstance.getPort());

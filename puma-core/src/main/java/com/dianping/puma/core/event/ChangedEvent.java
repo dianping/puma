@@ -66,8 +66,9 @@ public abstract class ChangedEvent implements Serializable {
 	private long				serverId;
 	private String				binlog;
 	private long				binlogPos;
+	private long 				binlogNextPos;
 	private long                binlogServerId;
-
+	
 	/**
      * @return the binlogServerId
      */
@@ -117,6 +118,14 @@ public abstract class ChangedEvent implements Serializable {
 	 */
 	public long getBinlogPos() {
 		return binlogPos;
+	}
+
+	public void setBinlogNextPos(long binlogNextPos) {
+		this.binlogNextPos = binlogNextPos;
+	}
+
+	public long getBinlogNextPos() {
+		return binlogNextPos;
 	}
 
 	/**

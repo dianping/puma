@@ -7,17 +7,15 @@ import java.util.List;
 
 public interface SrcDBInstanceService {
 
-	SrcDBInstance find(String id);
-
-	SrcDBInstance findByName(String name);
+	SrcDBInstance find(String name);
 
     List<SrcDBInstance> findByIp(String ip);
 
     List<SrcDBInstance> findAll();
 
-	void create(SrcDBInstance entity);
+	void create(SrcDBInstance srcDBInstance);
 
-	void update(SrcDBInstance entity);
+	void update(SrcDBInstance srcDBInstance);
 
-	void remove(String id);
+	void remove(String name);
 }

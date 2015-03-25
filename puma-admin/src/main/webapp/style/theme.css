@@ -1,9 +1,6 @@
-body {
-	padding-top: 60px;
-	/*position: relative;*/
-	/*background: url(bg.png) repeat;*/
+.nav-header{
+	
 }
-
 .table tbody tr.goldtime td {
 	background-color: #F2DEDE;
 }

@@ -56,18 +56,18 @@ public class SrcDBInstanceController {
 	}
 
 	@RequestMapping(value = { "/src-db-instance/update" })
-	public ModelAndView update(String id) {
+	public ModelAndView update(String name) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceId(id);
+			List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceName(name);
 			if (pumaTasks != null && pumaTasks.size() != 0) {
 				map.put("lock", true);
 			} else {
 				map.put("lock", false);
 			}
 
-			SrcDBInstance entity = srcDBInstanceService.find(id);
+			SrcDBInstance entity = srcDBInstanceService.find(name);
 			map.put("entity", entity);
 			map.put("path", "src-db-instance");
 			map.put("subPath", "create");
@@ -83,7 +83,6 @@ public class SrcDBInstanceController {
 			"/src-db-instance/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String createPost(
-			String id,
 			String name,
 			Long serverId,
 			String ip,
@@ -93,21 +92,15 @@ public class SrcDBInstanceController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			SrcDBInstance srcDBInstance;
+			boolean create;
 
-			if (id != null) {
-				// Update.
-				srcDBInstance = srcDBInstanceService.find(id);
+			SrcDBInstance srcDBInstance = srcDBInstanceService.find(name);
+
+			if (srcDBInstance == null) {
+				create = true;
+				srcDBInstance = new SrcDBInstance();
 			} else {
-				// Create.
-
-				// Duplicated name?
-				srcDBInstance = srcDBInstanceService.findByName(name);
-				if (srcDBInstance == null) {
-					srcDBInstance = new SrcDBInstance();
-				} else {
-					throw new Exception("duplicated");
-				}
+				create = false;
 			}
 
 			srcDBInstance.setName(name);
@@ -127,10 +120,10 @@ public class SrcDBInstanceController {
 			srcDBInstance.setMetaUsername(username);
 			srcDBInstance.setMetaPassword(password);
 
-			if (id != null) {
-				srcDBInstanceService.update(srcDBInstance);
-			} else {
+			if (create) {
 				srcDBInstanceService.create(srcDBInstance);
+			} else {
+				srcDBInstanceService.update(srcDBInstance);
 			}
 
 			map.put("success", true);
@@ -148,17 +141,17 @@ public class SrcDBInstanceController {
 	@RequestMapping(value = {
 			"/src-db-instance/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String removePost(String id) {
+	public String removePost(String name) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceId(id);
+			List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceName(name);
 
 			if (pumaTasks != null && pumaTasks.size() != 0) {
 				throw new Exception("lock");
 			}
 
-			this.srcDBInstanceService.remove(id);
+			this.srcDBInstanceService.remove(name);
 			map.put("success", true);
 		} catch (MongoException e) {
 			map.put("error", "storage");

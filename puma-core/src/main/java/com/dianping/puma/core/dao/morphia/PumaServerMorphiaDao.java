@@ -1,9 +1,9 @@
 package com.dianping.puma.core.dao.morphia;
 
 import com.dianping.puma.core.dao.PumaServerDao;
+import com.dianping.puma.core.dao.morphia.helper.MongoClient;
 import com.dianping.puma.core.entity.PumaServer;
-import com.dianping.puma.core.entity.morphia.PumaServerMorphiaEntity;
-import com.google.code.morphia.dao.BasicDAO;
+import com.dianping.puma.core.entity.morphia.PumaServerMorphia;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
 import com.google.code.morphia.query.UpdateOperations;
@@ -14,66 +14,58 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("pumaServerDao")
-public class PumaServerMorphiaDao extends BasicDAO<PumaServerMorphiaEntity, String> implements PumaServerDao {
+public class PumaServerMorphiaDao extends MongoBaseDao<PumaServerMorphia> implements PumaServerDao {
 
 	@Autowired
 	public PumaServerMorphiaDao(MongoClient mongoClient) {
 		super(mongoClient.getDatastore());
 	}
 
-	public PumaServer find(String id) {
-		Query<PumaServerMorphiaEntity> q = this.getDatastore().createQuery(PumaServerMorphiaEntity.class);
-		q.field("id").equal(id);
-		PumaServerMorphiaEntity morphiaEntity = this.findOne(q);
-		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();
+	public PumaServer find(String name) {
+		Query<PumaServerMorphia> q = this.getDatastore().createQuery(PumaServerMorphia.class);
+		q.field("name").equal(name);
+		PumaServerMorphia pumaServerMorphia = this.findOne(q);
+		return (pumaServerMorphia == null) ? null : pumaServerMorphia.getEntity();
 	}
 
-	public PumaServer findByName(String name) {
-		Query<PumaServerMorphiaEntity> q = this.getDatastore().createQuery(PumaServerMorphiaEntity.class).disableValidation();
-		q.field("entity.name").equal(name);
-		PumaServerMorphiaEntity morphiaEntity = this.findOne(q);
-		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();
-	}
-
-	public PumaServer findByHostAndPort(String host, Integer port) {
-		Query<PumaServerMorphiaEntity> q = this.getDatastore().createQuery(PumaServerMorphiaEntity.class).disableValidation();
+	public PumaServer findByHost(String host) {
+		Query<PumaServerMorphia> q = this.getDatastore().createQuery(PumaServerMorphia.class).disableValidation();
 		q.field("entity.host").equal(host);
-		q.field("entity.port").equal(port);
-		PumaServerMorphiaEntity morphiaEntity = this.findOne(q);
-		return (morphiaEntity == null) ? null : morphiaEntity.getEntity();
+		PumaServerMorphia pumaServerMorphia = this.findOne(q);
+		return (pumaServerMorphia == null) ? null : pumaServerMorphia.getEntity();
 	}
 
 	public List<PumaServer> findAll() {
-		Query<PumaServerMorphiaEntity> q = this.getDatastore().createQuery(PumaServerMorphiaEntity.class);
-		QueryResults<PumaServerMorphiaEntity> result = this.find(q);
-		List<PumaServerMorphiaEntity> morphiaEntities = result.asList();
+		Query<PumaServerMorphia> q = this.getDatastore().createQuery(PumaServerMorphia.class);
+		QueryResults<PumaServerMorphia> result = this.find(q);
+		List<PumaServerMorphia> pumaServerMorphias = result.asList();
 
-		List<PumaServer> entities = new ArrayList<PumaServer>();
-		for (PumaServerMorphiaEntity morphiaEntity: morphiaEntities) {
-			entities.add(morphiaEntity.getEntity());
+		List<PumaServer> pumaServers = new ArrayList<PumaServer>();
+		for (PumaServerMorphia pumaServerMorphia: pumaServerMorphias) {
+			pumaServers.add(pumaServerMorphia.getEntity());
 		}
-		return entities;
+		return pumaServers;
 	}
 
-	public void create(PumaServer entity) {
-		PumaServerMorphiaEntity morphiaEntity = new PumaServerMorphiaEntity(entity);
-		this.save(morphiaEntity);
+	public void create(PumaServer pumaServer) {
+		PumaServerMorphia pumaServerMorphia = new PumaServerMorphia(pumaServer);
+		this.save(pumaServerMorphia);
 		this.getDatastore().ensureIndexes();
 	}
 
-	public void update(PumaServer entity) {
-		PumaServerMorphiaEntity morphiaEntity = new PumaServerMorphiaEntity(entity);
-		Query<PumaServerMorphiaEntity> q = this.getDatastore().createQuery(PumaServerMorphiaEntity.class);
-		q.field("id").equal(morphiaEntity.getId());
-		UpdateOperations<PumaServerMorphiaEntity> uop = this.getDatastore().createUpdateOperations(PumaServerMorphiaEntity.class);
-		uop.set("entity", entity);
+	public void update(PumaServer pumaServer) {
+		PumaServerMorphia pumaServerMorphia = new PumaServerMorphia(pumaServer);
+		Query<PumaServerMorphia> q = this.getDatastore().createQuery(PumaServerMorphia.class);
+		q.field("name").equal(pumaServerMorphia.getName());
+		UpdateOperations<PumaServerMorphia> uop = this.getDatastore().createUpdateOperations(PumaServerMorphia.class);
+		uop.set("entity", pumaServer);
 		this.update(q, uop);
 		this.getDatastore().ensureIndexes();
 	}
 
-	public void remove(String id) {
-		Query<PumaServerMorphiaEntity> q = this.getDatastore().createQuery(PumaServerMorphiaEntity.class);
-		q.field("id").equal(id);
+	public void remove(String name) {
+		Query<PumaServerMorphia> q = this.getDatastore().createQuery(PumaServerMorphia.class);
+		q.field("name").equal(name);
 		this.deleteByQuery(q);
 	}
 }

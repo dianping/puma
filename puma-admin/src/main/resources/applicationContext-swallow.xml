@@ -1,14 +1,8 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
-    xmlns:context="http://www.springframework.org/schema/context"
-    xsi:schemaLocation="
-            http://www.springframework.org/schema/beans 
-            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-            http://www.springframework.org/schema/context
-            http://www.springframework.org/schema/context/spring-context-3.0.xsd
-            http://www.springframework.org/schema/task   
-    http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
     <bean id="pumaTaskOperationEventPublisher"
           class="com.dianping.puma.core.monitor.SwallowEventPublisher"
@@ -26,11 +20,12 @@
           class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
           init-method="init">
         <property name="topic" value="puma_task_state"/>
+        <property name="type" value="puma"/>
         <property name="notifyService" ref="notifyService"/>
-        <property name="clazz" value="com.dianping.puma.core.monitor.PumaTaskStateEvent" />
+        <property name="clazz" value="com.dianping.puma.core.monitor.event.PumaTaskStateEvent" />
         <property name="listeners">
             <list>
-                <ref bean="pumaTaskStateChecker" />
+                <ref bean="taskStateReceiver" />
             </list>
         </property>
     </bean>
@@ -51,46 +46,26 @@
           class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
           init-method="init">
         <property name="topic" value="sync_task_state"/>
+        <property name="type" value="sync"/>
         <property name="notifyService" ref="notifyService"/>
-        <property name="clazz" value="com.dianping.puma.core.monitor.SyncTaskStateEvent" />
+        <property name="clazz" value="com.dianping.puma.core.monitor.event.SyncTaskStateEvent" />
         <property name="listeners">
             <list>
-                <ref bean="syncTaskStateChecker" />
+                <ref bean="syncTaskStateReceiver" />
             </list>
         </property>
     </bean>
 
-    <bean id="pumaTaskEventPublisher"
-          class="com.dianping.puma.core.monitor.SwallowEventPublisher"
+    <bean id="dumpTaskStateSubscriber"
+          class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
           init-method="init">
-        <property name="topic" value="puma_task_event" />
-    </bean>
-
-    <bean id="taskEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPublisher"
-        init-method="init">
-        <property name="topic" value="puma_task_event" />
-    </bean>
-
-    <bean id="statusActionEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPublisher"
-        init-method="init">
-        <property name="topic" value="puma_status_action_event" />
-    </bean>
-
-    <bean id="taskDeleteEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPublisher"
-        init-method="init">
-        <property name="topic" value="puma_task_delete_event" />
-    </bean>
-
-    <bean id="statusEventSubscriber"
-        class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
-        init-method="init">
-        <property name="topic" value="puma_status_event" />
-        <property name="notifyService" ref="notifyService" />
-        <property name="clazz"
-            value="com.dianping.puma.core.monitor.TaskStatusEvent" />
+        <property name="topic" value="sync_task_state"/>
+        <property name="type" value="dump"/>
+        <property name="notifyService" ref="notifyService"/>
+        <property name="clazz" value="com.dianping.puma.core.monitor.event.DumpTaskStateEvent" />
         <property name="listeners">
             <list>
-                <ref bean="systemStatusContainer" />
+                <ref bean="dumpTaskStateReceiver" />
             </list>
         </property>
     </bean>

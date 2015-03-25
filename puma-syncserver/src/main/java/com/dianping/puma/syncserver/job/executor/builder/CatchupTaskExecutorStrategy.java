@@ -1,10 +1,11 @@
 package com.dianping.puma.syncserver.job.executor.builder;
 
+import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.entity.*;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
-import com.dianping.puma.core.holder.impl.DefaultBinlogInfoHolder;
-import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.monitor.NotifyService;
+import com.dianping.puma.core.model.state.CatchupTaskState;
 import com.dianping.puma.core.service.DstDBInstanceService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Service;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.sync.model.task.Type;
-import com.dianping.puma.syncserver.job.container.TaskExecutionContainer;
+import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;
 import com.dianping.puma.syncserver.job.executor.CatchupTaskExecutor;
 import com.dianping.puma.syncserver.job.executor.SyncTaskExecutor;
 
@@ -24,11 +25,15 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
     private PumaServerConfigService pumaServerConfigService;
     */
 	@Autowired
-	private TaskExecutionContainer taskExecutionContainer;
+	private TaskExecutorContainer taskExecutorContainer;
 
 	@Autowired
 	private BinlogInfoHolder binlogInfoHolder;
 
+	  
+    @Autowired
+    NotifyService notifyService;
+    
 	/*
 	 @Override
 	 public CatchupTaskExecutor build(CatchupTask task) {
@@ -72,34 +77,41 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
 					"SyncTask srcDBInstanceId  is null, maybe SyncTask with srcDBInstanceId[" + pumaTaskName
 							+ "] is not setting.");
 		}
-		PumaTask pumaTask = pumaTaskService.findByName(pumaTaskName);
+		PumaTask pumaTask = pumaTaskService.find(pumaTaskName);
 
 		if (pumaTask == null) {
 			throw new IllegalArgumentException(
 					"PumaTask is null, maybe PumaTask with srcDBInstanceId[" + pumaTaskName + "] is not setting.");
 		}
-		PumaServer pumaServer = pumaServerService.find(pumaTask.getPumaServerId());
+		PumaServer pumaServer = pumaServerService.find(pumaTask.getPumaServerName());
 		if (pumaServer == null) {
 			throw new IllegalArgumentException(
-					"PumaServer is null, maybe PumaServer with PumaServerId[" + pumaTask.getPumaServerId()
+					"PumaServer is null, maybe PumaServer with PumaServerId[" + pumaTask.getPumaServerName()
 							+ "] is not setting.");
 		}
 
 		String pumaServerHost = pumaServer.getHost();
 		int pumaServerPort = pumaServer.getPort();
 
-		String target = pumaTask.getId();
+		String target = pumaTask.getName();
 		//从taskContainer获取syncTaskExecutor
-		SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) taskExecutionContainer
-				.get(SyncType.SYNC, task.getName());
+		SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) taskExecutorContainer
+				.get(task.getName());
 
-		DstDBInstance dstDBInstance = dstDBInstanceService.findByName(task.getDstDBInstanceName());
+		DstDBInstance dstDBInstance = dstDBInstanceService.find(task.getDstDBInstanceName());
 
-		SrcDBInstance srcDBInstance = srcDBInstanceService.findByName(pumaTask.getSrcDBInstanceName());
+		SrcDBInstance srcDBInstance = srcDBInstanceService.find(pumaTask.getSrcDBInstanceName());
 		task.setPumaClientServerId(srcDBInstance.getServerId());
 
 		CatchupTaskExecutor executor = new CatchupTaskExecutor(task, pumaServerHost, pumaServerPort, target, syncTaskExecutor, dstDBInstance);
 		executor.setBinlogInfoHolder(binlogInfoHolder);
+		executor.setNotifyService(notifyService);
+
+		CatchupTaskState catchupTaskState = new CatchupTaskState();
+		catchupTaskState.setTaskName(task.getName());
+		catchupTaskState.setStatus(Status.PREPARING);
+
+		executor.setTaskState(catchupTaskState);
 
 		return executor;
 	}

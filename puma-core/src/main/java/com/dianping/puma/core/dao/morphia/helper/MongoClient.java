@@ -1,4 +1,4 @@
-package com.dianping.puma.core.dao.morphia;
+package com.dianping.puma.core.dao.morphia.helper;
 
 import com.dianping.puma.core.sync.config.ConfigChangeListener;
 import com.dianping.puma.core.sync.config.DynamicConfig;

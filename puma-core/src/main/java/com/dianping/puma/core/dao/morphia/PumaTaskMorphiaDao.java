@@ -1,9 +1,9 @@
 package com.dianping.puma.core.dao.morphia;
 
 import com.dianping.puma.core.dao.PumaTaskDao;
+import com.dianping.puma.core.dao.morphia.helper.MongoClient;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.morphia.PumaTaskMorphia;
-import com.google.code.morphia.dao.BasicDAO;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
 import com.google.code.morphia.query.UpdateOperations;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("pumaTaskDao")
-public class PumaTaskMorphiaDao extends BasicDAO<PumaTaskMorphia, String> implements PumaTaskDao {
+public class PumaTaskMorphiaDao extends MongoBaseDao<PumaTaskMorphia> implements PumaTaskDao {
 
 	@Autowired
 	public PumaTaskMorphiaDao(MongoClient mongoClient) {

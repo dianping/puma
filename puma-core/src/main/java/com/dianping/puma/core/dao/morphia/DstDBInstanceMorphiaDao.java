@@ -1,9 +1,9 @@
 package com.dianping.puma.core.dao.morphia;
 
 import com.dianping.puma.core.dao.DstDBInstanceDao;
+import com.dianping.puma.core.dao.morphia.helper.MongoClient;
 import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.entity.morphia.DstDBInstanceMorphia;
-import com.google.code.morphia.dao.BasicDAO;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
 import com.google.code.morphia.query.UpdateOperations;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("dstDBInstanceDao")
-public class DstDBInstanceMorphiaDao extends BasicDAO<DstDBInstanceMorphia, String>
+public class DstDBInstanceMorphiaDao extends MongoBaseDao<DstDBInstanceMorphia>
 		implements DstDBInstanceDao {
 
 	@Autowired

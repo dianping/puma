@@ -1,4 +1,4 @@
-package com.dianping.puma.core.dao.morphia;
+package com.dianping.puma.core.dao.morphia.helper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

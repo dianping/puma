@@ -1,9 +1,9 @@
 package com.dianping.puma.core.dao.morphia;
 
 import com.dianping.puma.core.dao.SrcDBInstanceDao;
+import com.dianping.puma.core.dao.morphia.helper.MongoClient;
 import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.entity.morphia.SrcDBInstanceMorphia;
-import com.google.code.morphia.dao.BasicDAO;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
 import com.google.code.morphia.query.UpdateOperations;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("srcDBInstanceDao")
-public class SrcDBInstanceMorphiaDao extends BasicDAO<SrcDBInstanceMorphia, String>
+public class SrcDBInstanceMorphiaDao extends MongoBaseDao<SrcDBInstanceMorphia>
 		implements SrcDBInstanceDao {
 
 	@Autowired
@@ -50,7 +50,7 @@ public class SrcDBInstanceMorphiaDao extends BasicDAO<SrcDBInstanceMorphia, Stri
 	public void update(SrcDBInstance srcDBInstance) {
 		SrcDBInstanceMorphia srcDBInstanceMorphia = new SrcDBInstanceMorphia(srcDBInstance);
 		Query<SrcDBInstanceMorphia> q = this.getDatastore().createQuery(SrcDBInstanceMorphia.class);
-		q.field("name").equal(srcDBInstance.getName());
+		q.field("name").equal(srcDBInstanceMorphia.getName());
 		UpdateOperations<SrcDBInstanceMorphia> uop = this.getDatastore().createUpdateOperations(SrcDBInstanceMorphia.class);
 		uop.set("entity", srcDBInstance);
 		this.update(q, uop);

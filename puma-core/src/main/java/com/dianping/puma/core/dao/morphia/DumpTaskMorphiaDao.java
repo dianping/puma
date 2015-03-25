@@ -1,9 +1,9 @@
 package com.dianping.puma.core.dao.morphia;
 
 import com.dianping.puma.core.dao.DumpTaskDao;
+import com.dianping.puma.core.dao.morphia.helper.MongoClient;
 import com.dianping.puma.core.entity.DumpTask;
 import com.dianping.puma.core.entity.morphia.DumpTaskMorphia;
-import com.google.code.morphia.dao.BasicDAO;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("dumpTaskDao")
-public class DumpTaskMorphiaDao extends BasicDAO<DumpTaskMorphia, String> implements DumpTaskDao {
+public class DumpTaskMorphiaDao extends MongoBaseDao<DumpTaskMorphia> implements DumpTaskDao {
 
 	@Autowired
 	public DumpTaskMorphiaDao(MongoClient mongoClient) {

@@ -5,12 +5,15 @@ import com.google.code.morphia.annotations.Embedded;
 import com.google.code.morphia.annotations.Id;
 import com.google.code.morphia.annotations.Indexed;
 import com.google.code.morphia.utils.IndexDirection;
-import org.bson.types.ObjectId;
 
-public class BaseMorphiaEntity<T> {
+import java.io.Serializable;
+
+public class BaseMorphiaEntity<T> implements Serializable {
+
+	private static final long serialVersionUID = 8121775127353895001L;
 
 	@Id
-	ObjectId objectId;
+	private Long id;
 
 	@Indexed(value = IndexDirection.ASC, name = "name", unique = true, dropDups = true)
 	String name;
@@ -20,12 +23,12 @@ public class BaseMorphiaEntity<T> {
 
 	public BaseMorphiaEntity() {}
 
-	public ObjectId getObjectId() {
-		return objectId;
+	public Long getId() {
+		return id;
 	}
 
-	public void setObjectId(ObjectId objectId) {
-		this.objectId = objectId;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public String getName() {

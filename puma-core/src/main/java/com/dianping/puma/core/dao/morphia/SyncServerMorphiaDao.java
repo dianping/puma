@@ -1,9 +1,9 @@
 package com.dianping.puma.core.dao.morphia;
 
 import com.dianping.puma.core.dao.SyncServerDao;
+import com.dianping.puma.core.dao.morphia.helper.MongoClient;
 import com.dianping.puma.core.entity.SyncServer;
 import com.dianping.puma.core.entity.morphia.SyncServerMorphia;
-import com.google.code.morphia.dao.BasicDAO;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
 import com.google.code.morphia.query.UpdateOperations;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("syncServerDao")
-public class SyncServerMorphiaDao extends BasicDAO<SyncServerMorphia, String> implements SyncServerDao{
+public class SyncServerMorphiaDao extends MongoBaseDao<SyncServerMorphia> implements SyncServerDao{
 
 	@Autowired
 	public SyncServerMorphiaDao(MongoClient mongoClient) {

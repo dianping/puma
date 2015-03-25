@@ -1,5 +1,7 @@
-package com.dianping.puma.core.dao.morphia;
+package com.dianping.puma.core.dao.morphia.helper;
 
+import com.dianping.puma.core.dao.morphia.helper.MongoClient;
+import com.dianping.puma.core.dao.morphia.helper.SeqGeneratorService;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.springframework.stereotype.Service;

@@ -33,7 +33,7 @@
                   $syncTask.binlogInfo.binlogPosition #end
 			</label>
 	    </div>
-	     
+
 	     <div class="form-group-label">
 	        <label class="col-md-label" for="createDate">创建时间:</label>
 	        <label  id="createDate" class="col-md-label-text">${dateFormatUtils.format($syncTask.gmtCreate,"yyyy年MM月dd日
@@ -47,7 +47,7 @@
 	        <label  id="ddl" class="col-md-label-text">${syncTask.ddl}</label>
 	        <label class="col-md-label" for="dml">dml:</label>
 	        <label  id="dml" class="col-md-label-text">${syncTask.dml}</label>
-	      
+
 	    </div>
 	   <div class="form-group-label">
 	      <label class="col-md-label" for="transaction">transaction:</label>
@@ -60,7 +60,7 @@
 	       #end
 	    </div>
       </div>
-      
+
        <div class="panel panel-default panel-local">
 		  <div class="panel-heading">
 		    <div class="btn-group-sm pull-right">
@@ -68,13 +68,17 @@
 		        <button class="btn btn-success" type="button" onclick="rerun();">恢复运行</button>
 		        <button class="btn btn-success" type="button" onclick="refreshStatus();">刷新</button>
 		    </div>
-		  <h5>映射关系<label class="panel-heading-label"> 状态：<span class="panel-heading-span" id="syncStateStatus">
-		   #if($syncState.status) 
-		   	$syncState.status
-                   #else
-                     	无状态(可能不在运行) 
-                     #end
-		  </span></label> </h5>
+		  <h5>映射关系
+			  <label class="panel-heading-label"> 状态：
+				  <span class="panel-heading-span" id="syncStateStatus">
+					  #if($syncTaskState.status)
+					  $syncTaskState.status
+					  #else
+					  无状态(可能不在运行)
+					  #end
+				  </span>
+			  </label>
+		  </h5>
 		  </div>
 		    <div class="panel-body in collapse" id="div_body_mapping">
 		      #foreach($database in $syncTask.mysqlMapping.databases)
@@ -88,7 +92,7 @@
 			  	     <label class="col-md-3 control-label panel-label-local">$database.to</label>
 			  	     </a>
 			      </div>
-	            
+
 	          <hr/>
 	           <div id="collapse_1">
 	           #foreach($table in $database.tables)

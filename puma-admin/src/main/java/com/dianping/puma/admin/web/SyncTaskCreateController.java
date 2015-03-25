@@ -11,10 +11,7 @@ import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.entity.*;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.state.BaseSyncTaskState;
-import com.dianping.puma.core.model.state.SyncTaskState;
-import com.dianping.puma.core.model.state.TaskState;
-import com.dianping.puma.core.model.state.TaskStateContainer;
+import com.dianping.puma.core.model.state.*;
 import com.dianping.puma.core.service.*;
 import com.mongodb.MongoException;
 import org.apache.commons.lang.StringUtils;
@@ -77,6 +74,9 @@ public class SyncTaskCreateController {
 
 	@Autowired
 	SyncTaskStateService syncTaskStateService;
+
+	@Autowired
+	DumpTaskStateService dumpTaskStateService;
 
 	@RequestMapping(value = { "/sync-task/create" })
 	public ModelAndView create(HttpSession session) {
@@ -256,11 +256,11 @@ public class SyncTaskCreateController {
 				throw new IllegalArgumentException("dumpTask为空，可能是会话已经过期！");
 			}
 
-			TaskState state = syncTaskStateContainer.get(dumpTask.getName());
-			if (state != null) {
-				map.put("state", state);
-				if (state.getBinlogInfo() != null) {
-					session.setAttribute("binlogInfo", state.getBinlogInfo());
+			DumpTaskState dumpTaskState = dumpTaskStateService.find(dumpTask.getName());
+			if (dumpTaskState != null) {
+				map.put("state", dumpTaskState);
+				if (dumpTaskState.getBinlogInfo() != null) {
+					session.setAttribute("binlogInfo", dumpTaskState.getBinlogInfo());
 				}
 			}
 

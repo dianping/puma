@@ -1,5 +1,6 @@
 package com.dianping.puma.core.monitor;
 
+import com.dianping.puma.core.model.state.DumpTaskState;
 import com.dianping.puma.core.monitor.event.*;
 import com.dianping.swallow.common.message.Destination;
 import com.dianping.swallow.common.producer.exceptions.RemoteServiceInitFailedException;
@@ -23,8 +24,16 @@ public class SwallowEventPublisher implements EventPublisher {
 	@Override
 	public void publish(Event event) throws SendFailedException {
 		if (event instanceof TaskStateEvent) {
-			// Task state event, sent by servers to admin.
-			producer.sendMessage(event);
+
+			if (event instanceof SyncTaskStateEvent) {
+				producer.sendMessage(event, "sync");
+			} else if (event instanceof DumpTaskStateEvent) {
+				producer.sendMessage(event, "dump");
+			} else if (event instanceof CatchupTaskStateEvent) {
+				producer.sendMessage(event, "catchup");
+			} else if (event instanceof PumaTaskStateEvent) {
+				producer.sendMessage(event, "puma");
+			}
 		} else {
 			// Task operation or controller event, sent by admin to servers.
 			producer.sendMessage(event, event.getServerName());

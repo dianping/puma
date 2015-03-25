@@ -20,6 +20,7 @@
           class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
           init-method="init">
         <property name="topic" value="puma_task_state"/>
+        <property name="type" value="puma"/>
         <property name="notifyService" ref="notifyService"/>
         <property name="clazz" value="com.dianping.puma.core.monitor.event.PumaTaskStateEvent" />
         <property name="listeners">
@@ -45,11 +46,26 @@
           class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
           init-method="init">
         <property name="topic" value="sync_task_state"/>
+        <property name="type" value="sync"/>
         <property name="notifyService" ref="notifyService"/>
         <property name="clazz" value="com.dianping.puma.core.monitor.event.SyncTaskStateEvent" />
         <property name="listeners">
             <list>
                 <ref bean="syncTaskStateReceiver" />
+            </list>
+        </property>
+    </bean>
+
+    <bean id="dumpTaskStateSubscriber"
+          class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
+          init-method="init">
+        <property name="topic" value="sync_task_state"/>
+        <property name="type" value="dump"/>
+        <property name="notifyService" ref="notifyService"/>
+        <property name="clazz" value="com.dianping.puma.core.monitor.event.DumpTaskStateEvent" />
+        <property name="listeners">
+            <list>
+                <ref bean="dumpTaskStateReceiver" />
             </list>
         </property>
     </bean>

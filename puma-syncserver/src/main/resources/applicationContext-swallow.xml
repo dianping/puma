@@ -11,6 +11,12 @@
         <property name="topic" value="sync_task_state" />
     </bean>
 
+    <bean id="dumpTaskStatePublisher"
+          class="com.dianping.puma.core.monitor.SwallowEventPublisher"
+          init-method="init">
+        <property name="topic" value="sync_task_state" />
+    </bean>
+
     <bean id="syncTaskOperationEventSubscriber"
           class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
           init-method="init">

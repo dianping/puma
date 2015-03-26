@@ -74,12 +74,12 @@ $(function() {
       case 'dump-task-name':
       case 'sync-task-name':
       case 'catchup-task-name':
-        regexp = /^[-@\w]{1,50}$/;
+        regexp = /^[-@\w]{1,100}$/;
         break;
 
       case 'server-name':
       case 'db-name':
-        regexp = /^\w{1,30}$/;
+        regexp = /^[-\w]{1,50}$/;
         break;
 
       case 'ip':

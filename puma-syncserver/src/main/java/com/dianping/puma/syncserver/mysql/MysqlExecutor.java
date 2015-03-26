@@ -456,19 +456,19 @@ public class MysqlExecutor {
 			String mappingDatabase = getMappingDatabase(database);
 			if (StringUtils.startsWithIgnoreCase(sql, "alter ")) {
 				if (StringUtils.contains(sql, " rename ")) {
-					if (!StringUtils.isBlank(mappingDatabase) || !StringUtils.isBlank(mappingTableName)) {
+					if (!StringUtils.isBlank(mappingDatabase) && !StringUtils.isBlank(mappingTableName)) {
 						// 停止任務
 						throw new DdlRenameException("Rename error : ddl sql = " + event.getSql());
 					}
 				} else {
-					if (!StringUtils.isBlank(mappingDatabase) || !StringUtils.isBlank(mappingTableName)) {
+					if (!StringUtils.isBlank(mappingDatabase) && !StringUtils.isBlank(mappingTableName)) {
 						remainSql = StringUtils.replace(StringUtils.replace(remainSql, " `" + tableName + "`.", " `"
 								+ mappingTableName + "`."), " " + tableName + ".", " " + mappingTableName + ".");
 						return "ALTER TABLE `" + mappingDatabase + "`.`" + mappingTableName + "` " + remainSql;
 					}
 				}
 			} else if (StringUtils.startsWithIgnoreCase(sql, "RENAME ")) {
-				if (!StringUtils.isBlank(mappingDatabase) || !StringUtils.isBlank(mappingTableName)) {
+				if (!StringUtils.isBlank(mappingDatabase) && !StringUtils.isBlank(mappingTableName)) {
 					// 停止任務
 				}
 			}

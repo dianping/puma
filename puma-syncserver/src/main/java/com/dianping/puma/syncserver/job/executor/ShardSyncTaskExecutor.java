@@ -120,7 +120,6 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, TaskSta
 
     protected void startPumaClient() {
         for (PumaClient client : pumaClientList) {
-            client.register(new Processor(client.getConfig().getName()));
             client.start();
         }
     }
@@ -355,7 +354,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, TaskSta
                 .host(pumaServer.getHost())
                 .target(pumaTask.getName());
 
-        configBuilder.name(String.format("ShardSyncTask-%s-%s-%s", task.getName(), ds, name));
+        String fullName = String.format("ShardSyncTask-%s-%s-%s", task.getName(), ds, name);
+        configBuilder.name(fullName);
 
         for (String tb : tables) {
             configBuilder.tables(ds, tb);
@@ -366,6 +366,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, TaskSta
         if (client.getSeqFileHolder().getSeq() == SubscribeConstant.SEQ_FROM_OLDEST) {
             client.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_LATEST);
         }
+
+        client.register(new Processor(fullName));
 
         pumaClientList.add(client);
         return client;

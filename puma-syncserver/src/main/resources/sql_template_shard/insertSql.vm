@@ -1,0 +1,14 @@
+INSERT INTO
+`${event.table}`
+(
+#set($ask = "" )
+#foreach($name2ColumnInfo in $event.columns.entrySet())
+  `${name2ColumnInfo.key}`
+  #set($ask = "${ask},?")
+  #if($velocityCount < ${event.columns.size()})
+    ,
+  #end
+#end
+) 
+VALUES 
+(${ask.substring(1)})

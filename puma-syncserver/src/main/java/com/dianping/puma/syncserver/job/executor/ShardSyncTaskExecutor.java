@@ -64,8 +64,6 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, TaskSta
     public static final int INSERT = RowChangedEvent.INSERT;
     public static final int DELETE = RowChangedEvent.DELETE;
     public static final int UPDATE = RowChangedEvent.UPDATE;
-    public static final int REPLACE_INTO = 3;
-    private static final int UPDTAE_TO_NULL = 4;
     public static final int SELECT = 5;
 
     private final ShardSyncTask task;
@@ -186,16 +184,6 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, TaskSta
             Map<String, RowChangedEvent.ColumnInfo> columnMap = event.getColumns();
             List<Object> args = new ArrayList<Object>();
             switch (actionType) {
-                case REPLACE_INTO:
-                    for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
-                        args.add(columnName2ColumnInfo.getValue().getNewValue());
-                    }
-                    for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
-                        if (!columnName2ColumnInfo.getValue().isKey()) {
-                            args.add(columnName2ColumnInfo.getValue().getNewValue());
-                        }
-                    }
-                    break;
                 case INSERT:
                     for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
                         args.add(columnName2ColumnInfo.getValue().getNewValue());
@@ -206,26 +194,17 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, TaskSta
                         args.add(columnName2ColumnInfo.getValue().getNewValue());
                     }
                     for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
-                        args.add(columnName2ColumnInfo.getValue().getOldValue());
+                        if (columnName2ColumnInfo.getValue().getOldValue() != null) {
+                            args.add(columnName2ColumnInfo.getValue().getOldValue());
+                        }
                     }
                     break;
                 case DELETE:
                     for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
-                        args.add(columnName2ColumnInfo.getValue().getOldValue());
-                    }
-                    break;
-                case UPDTAE_TO_NULL:
-                    for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
-                        if (!columnName2ColumnInfo.getValue().isKey()) { //primery key 不能update to null
-                            args.add(columnName2ColumnInfo.getValue().getNewValue());
+                        if (columnName2ColumnInfo.getValue().getOldValue() != null) {
+                            args.add(columnName2ColumnInfo.getValue().getOldValue());
                         }
                     }
-                    for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
-                        args.add(columnName2ColumnInfo.getValue().getOldValue());
-                    }
-                    break;
-                case SELECT:
-                    //ignore
                     break;
             }
             return args;
@@ -236,22 +215,13 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, TaskSta
             int actionType = event.getActionType();
             switch (actionType) {
                 case INSERT:
-                    sql = SqlBuildUtil.buildInsertSql(event);
+                    sql = SqlBuildUtil.buildSql(event, "/sql_template_shard/insertSql.vm");
                     break;
                 case UPDATE:
-                    sql = SqlBuildUtil.buildUpdateSql(event);
+                    sql = SqlBuildUtil.buildSql(event, "/sql_template_shard/updateSql.vm");
                     break;
                 case DELETE:
-                    sql = SqlBuildUtil.buildDeleteSql(event);
-                    break;
-                case UPDTAE_TO_NULL:
-                    sql = SqlBuildUtil.buildUpdateToNullSql(event);
-                    break;
-                case REPLACE_INTO:
-                    sql = SqlBuildUtil.buildReplaceSql(event);
-                    break;
-                case SELECT:
-                    //ignore
+                    sql = SqlBuildUtil.buildSql(event, "/sql_template_shard/deleteSql.vm");
                     break;
             }
             return sql;

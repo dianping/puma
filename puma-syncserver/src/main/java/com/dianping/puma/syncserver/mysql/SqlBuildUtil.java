@@ -51,7 +51,7 @@ public class SqlBuildUtil {
         return buildSql(event, "/sql_template/selectSql.vm");
     }
 
-    private static String buildSql(RowChangedEvent event, String file) {
+    public static String buildSql(RowChangedEvent event, String file) {
         //取得velocity的模版
         Template t = _ve.getTemplate(file);
         //取得velocity的上下文context

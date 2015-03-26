@@ -1,0 +1,20 @@
+UPDATE
+`${event.table}`
+SET
+#foreach($name2ColumnInfo in $event.columns.entrySet())
+    `${name2ColumnInfo.key}` = ?
+  #if($velocityCount < ${event.columns.size()})
+     ,
+  #end
+#end
+WHERE
+#foreach($name2ColumnInfo in $event.columns.entrySet())
+  #if(!${name2ColumnInfo.value.oldValue})
+    `${name2ColumnInfo.key}` is null
+  #else
+    `${name2ColumnInfo.key}` = ?
+  #end
+  #if($velocityCount < ${event.columns.size()})
+     AND
+  #end
+#end

@@ -61,11 +61,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, TaskState> {
     private static final Logger logger = LoggerFactory.getLogger(ShardSyncTaskExecutor.class);
 
-    public static final int INSERT = RowChangedEvent.INSERT;
-    public static final int DELETE = RowChangedEvent.DELETE;
-    public static final int UPDATE = RowChangedEvent.UPDATE;
-    public static final int SELECT = 5;
-
     private final ShardSyncTask task;
 
     protected final TaskState status;
@@ -184,12 +179,12 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, TaskSta
             Map<String, RowChangedEvent.ColumnInfo> columnMap = event.getColumns();
             List<Object> args = new ArrayList<Object>();
             switch (actionType) {
-                case INSERT:
+                case RowChangedEvent.INSERT:
                     for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
                         args.add(columnName2ColumnInfo.getValue().getNewValue());
                     }
                     break;
-                case UPDATE:
+                case RowChangedEvent.UPDATE:
                     for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
                         args.add(columnName2ColumnInfo.getValue().getNewValue());
                     }
@@ -199,7 +194,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, TaskSta
                         }
                     }
                     break;
-                case DELETE:
+                case RowChangedEvent.DELETE:
                     for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
                         if (columnName2ColumnInfo.getValue().getOldValue() != null) {
                             args.add(columnName2ColumnInfo.getValue().getOldValue());
@@ -214,13 +209,13 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, TaskSta
             String sql = null;
             int actionType = event.getActionType();
             switch (actionType) {
-                case INSERT:
+                case RowChangedEvent.INSERT:
                     sql = SqlBuildUtil.buildSql(event, "/sql_template_shard/insertSql.vm");
                     break;
-                case UPDATE:
+                case RowChangedEvent.UPDATE:
                     sql = SqlBuildUtil.buildSql(event, "/sql_template_shard/updateSql.vm");
                     break;
-                case DELETE:
+                case RowChangedEvent.DELETE:
                     sql = SqlBuildUtil.buildSql(event, "/sql_template_shard/deleteSql.vm");
                     break;
             }
@@ -241,8 +236,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, TaskSta
                 logException(event, e);
                 if (event instanceof RowChangedEvent) {
                     RowChangedEvent rowChangedEvent = (RowChangedEvent) event;
-                    if (rowChangedEvent.getActionType() == UPDATE) {
-                        rowChangedEvent.setActionType(INSERT);
+                    if (rowChangedEvent.getActionType() == RowChangedEvent.UPDATE) {
+                        rowChangedEvent.setActionType(RowChangedEvent.INSERT);
                         return false;
                     }
                 }

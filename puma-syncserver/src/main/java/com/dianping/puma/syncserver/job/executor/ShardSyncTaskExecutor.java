@@ -269,6 +269,13 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, TaskSta
                 return true;
             } else if (e instanceof EmptyResultDataAccessException) {
                 logException(event, e);
+                if (event instanceof RowChangedEvent) {
+                    RowChangedEvent rowChangedEvent = (RowChangedEvent) event;
+                    if (rowChangedEvent.getActionType() == UPDATE) {
+                        rowChangedEvent.setActionType(INSERT);
+                        return false;
+                    }
+                }
                 return true;
             } else {
                 logException(event, e);

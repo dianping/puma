@@ -39,7 +39,7 @@ public class SyncServerServiceImpl implements SyncServerService {
 		syncServerDao.remove(name);
 	}
 	@Override
-	public SyncServer findByHost(String host, int port){
-		return syncServerDao.findByHost(host, port);
+	public SyncServer findByHost(String host){
+		return syncServerDao.findByHost(host);
 	}
 }

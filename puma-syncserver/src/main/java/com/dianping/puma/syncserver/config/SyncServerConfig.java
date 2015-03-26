@@ -39,7 +39,7 @@ public class SyncServerConfig implements InitializingBean {
         for (String ip : IPUtils.getNoLoopbackIP4Addresses()) {
             String host = ip + ':' + localPort;
             LOG.info("Try this localhost to find syncServerName from db : " + host);
-            SyncServer config = syncServerService.findByHost(ip,localPort);
+            SyncServer config = syncServerService.findByHost(ip);
             if (config != null) {
                 syncServerName = config.getName();
                 LOG.info("Match syncServerName: " + syncServerName);

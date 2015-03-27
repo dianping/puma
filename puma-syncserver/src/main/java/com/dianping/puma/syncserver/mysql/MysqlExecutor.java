@@ -429,6 +429,7 @@ public class MysqlExecutor {
 			} else if (StringUtils.startsWithIgnoreCase(sql, "RENAME ")) {
 				if (!StringUtils.isBlank(mappingDatabase) && !StringUtils.isBlank(mappingTableName)) {
 					// 停止任務
+					throw new DdlRenameException("Rename error : ddl sql = " + event.getSql());
 				}
 			}
 		}
@@ -437,7 +438,7 @@ public class MysqlExecutor {
 
 	public String convertDdlEventSql(DdlEvent event) throws DdlRenameException {
 		if (event.getEventType() == null) {
-			convertDdlEventSql_(event);
+			return convertDdlEventSql_(event);
 		}
 		switch (event.getEventType()) {
 		case DDL_ALTER:

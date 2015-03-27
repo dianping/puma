@@ -52,6 +52,14 @@
 		<property name="binlogIndexBaseDir" value="/data/appdatas/puma/binlogIndex/"/>
 	</bean>
 
+	<bean id="binlogInfoBackup"
+		  class="com.dianping.puma.core.storage.backup.LocalFileBasedBackup"
+		  init-method="init">
+		<property name="workingBaseFolder" value="/data/appdatas/puma/binlog/" />
+		<property name="backupBaseFolder" value="/data/appdatas/puma/bak/binlog/" />
+		<property name="backupDay" value="2" />
+	</bean>
+
 	<bean id="jsonCodec" class="com.dianping.puma.core.codec.JsonEventCodec" />
 
 	<bean id="mongoClient" class="com.dianping.puma.core.dao.morphia.helper.MongoClient">

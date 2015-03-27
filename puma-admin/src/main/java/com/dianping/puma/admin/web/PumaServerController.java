@@ -4,8 +4,10 @@ import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.entity.PumaTask;
+import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.PumaTaskService;
+import com.dianping.puma.core.service.SyncTaskService;
 import com.mongodb.MongoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +36,9 @@ public class PumaServerController {
 	@Autowired
 	PumaTaskService pumaTaskService;
 
+	@Autowired
+	SyncTaskService syncTaskService;
+
 	@Value("8080")
 	Integer serverPort;
 
@@ -60,7 +65,8 @@ public class PumaServerController {
 
 		try {
 			List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerName(name);
-			if (pumaTasks != null && pumaTasks.size() != 0) {
+			List<SyncTask> syncTasks = syncTaskService.findByPumaServerName(name);
+			if (pumaTasks != null && pumaTasks.size() != 0 && syncTasks != null && syncTasks.size() != 0) {
 				map.put("lock", true);
 			} else {
 				map.put("lock", false);
@@ -77,7 +83,8 @@ public class PumaServerController {
 		return new ModelAndView("main/container", map);
 	}
 
-	@RequestMapping(value = { "/puma-server/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = {
+			"/puma-server/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String createPost(String name, String ip) {
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -120,15 +127,16 @@ public class PumaServerController {
 		return GsonUtil.toJson(map);
 	}
 
-	@RequestMapping(value = { "/puma-server/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = {
+			"/puma-server/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String removePost(String name) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
 			List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerName(name);
-
-			if (pumaTasks != null && pumaTasks.size() != 0) {
+			List<SyncTask> syncTasks = syncTaskService.findByPumaServerName(name);
+			if (pumaTasks != null && pumaTasks.size() != 0 && syncTasks != null && syncTasks.size() != 0) {
 				throw new Exception("lock");
 			}
 

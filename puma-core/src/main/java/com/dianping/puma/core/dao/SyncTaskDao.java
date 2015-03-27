@@ -11,6 +11,10 @@ public interface SyncTaskDao {
 
 	List<SyncTask> findBySyncServerName(String syncServerName);
 
+	List<SyncTask> findByDstDBInstanceName(String dstDBInstanceName);
+
+	List<SyncTask> findByPumaServerName(String pumaServerName);
+
 	List<SyncTask> findAll();
 
 	void create(SyncTask syncTask);

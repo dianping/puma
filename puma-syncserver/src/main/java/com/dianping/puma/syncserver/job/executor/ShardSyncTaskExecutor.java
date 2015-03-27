@@ -104,6 +104,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
 
         this.status = new ShardSyncTaskState();
         this.status.setStatus(Status.INITIALIZING);
+        this.status.setTaskName(task.getName());
 
         try {
             this.configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());

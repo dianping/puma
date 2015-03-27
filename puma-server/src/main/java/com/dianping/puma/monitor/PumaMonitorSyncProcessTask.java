@@ -37,8 +37,7 @@ public class PumaMonitorSyncProcessTask implements PumaMonitorTask {
 				if (clientStatus.getValue().getBinlogFile() == null || serverStatus.getBinlogFile() == null) {
 					return;
 				}
-				int dfileNum = getDiffNum(clientStatus.getValue().getBinlogFile(), clientStatus.getValue().getBinlogPos(),
-						serverStatus.getBinlogFile(), serverStatus.getBinlogPos()) ;
+				int dfileNum = getDiffNum(serverStatus.getBinlogFile(), serverStatus.getBinlogPos(),clientStatus.getValue().getBinlogFile(), clientStatus.getValue().getBinlogPos()) ;
 				Cat.getProducer().logEvent(
 						"Puma.server." + clientStatus.getKey() + ".process",
 						getEventName(dfileNum),

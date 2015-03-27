@@ -13,7 +13,7 @@
                 <td class="col-md-2">规则名</td>
                 <td class="col-md-2">表名</td>
                 <td class="col-md-1">状态</td>
-                <td class="col-md-4">日志进度</td>
+                <!--<td class="col-md-4">日志进度</td>-->
                 <td class="col-md-1">操作</td>
             </tr>
             </thead>
@@ -26,21 +26,14 @@
                 <td>${shardSyncTask.tableName}</td>
                 <td class="sync-task-status">
                     #if(${shardSyncTaskStates[$shardSyncTask.getName()]})
-                        ${shardSyncTaskStates[$shardSyncTask.getName()].getStatus().getDesc()}
+                    ${shardSyncTaskStates[$shardSyncTask.getName()].getStatus().getDesc()}
                     #end
                 </td>
-                <td class="sync-task-bin-log-info">
-                </td>
+                <!--<td class="sync-task-bin-log-info">-->
+                <!--</td>-->
                 <td>
-                    <a href="${rc.contextPath}/shard-sync-task/detail/${shardSyncTask.name}" target="_self"
-                       class="no-under" data-name="${shardSyncTask.name}">
-                        <span class="glyphicon glyphicon-list-alt"></span>
-                    </a>
-                    <a href="#" class="no-under sync-task-refresh" data-name="${shardSyncTask.name}">
-                        <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
-                    </a>
                     <a href="#" data-toggle="modal" data-target="#warn-modal" data-subpath="remove"
-                       data-path="sync-task" data-name="${shardSyncTask.name}" class="no-under">
+                       data-path="shard-sync-task" data-name="${shardSyncTask.name}" class="no-under">
                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                     </a>
                 </td>

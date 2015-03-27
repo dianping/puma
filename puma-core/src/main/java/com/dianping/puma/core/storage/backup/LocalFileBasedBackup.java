@@ -39,7 +39,7 @@ public class LocalFileBasedBackup implements Backup {
 			File backupFolder = new File(backupBaseFolder.getAbsolutePath(), folderName);
 			File workingFolder = new File(workingBaseFolder.getAbsolutePath(), folderName);
 			deleteFolder(backupFolder, new AlwaysDeleteStrategy());
-			FileUtils.moveDirectoryToDirectory(workingFolder, backupFolder, true);
+			FileUtils.moveDirectoryToDirectory(workingFolder, backupBaseFolder, true);
 		} catch (Exception e) {
 			throw new BackupException(String.format("Backup error: %s.", e.getMessage()));
 		}
@@ -60,12 +60,14 @@ public class LocalFileBasedBackup implements Backup {
 	public void delete() {
 		DeleteStrategy deleteStrategy = new ExpiredDeleteStrategy(backupDay);
 
-		for (File backupFolder: FileUtils.listFiles(backupBaseFolder, null, false)) {
-			if (deleteStrategy.canDelete(backupFolder)) {
-				try {
-					FileUtils.deleteDirectory(backupFolder);
-				} catch (Exception e) {
-					LOG.error("Scheduled clean backup files error.", new StorageCleanException(e));
+		for (File backupFolder: backupBaseFolder.listFiles()) {
+			if (backupFolder.isDirectory()) {
+				if (deleteStrategy.canDelete(backupFolder)) {
+					try {
+						FileUtils.deleteDirectory(backupFolder);
+					} catch (Exception e) {
+						LOG.error("Scheduled clean backup files error.", new StorageCleanException(e));
+					}
 				}
 			}
 		}

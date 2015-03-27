@@ -17,7 +17,7 @@ public class ExpiredDeleteStrategy implements DeleteStrategy {
 
 	@Override
 	public boolean canDelete(File fileToClean) {
-		return DateUtils.addDays(new Date(fileToClean.lastModified()), expireDate).after(new Date());
+		return DateUtils.addDays(new Date(fileToClean.lastModified()), expireDate).before(new Date());
 	}
 
 	public int getExpireDate() {

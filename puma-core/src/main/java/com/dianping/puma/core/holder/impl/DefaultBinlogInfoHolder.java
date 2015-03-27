@@ -14,8 +14,10 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.dianping.puma.core.exception.BackupException;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.storage.backup.Backup;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -241,12 +243,9 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 			}
 		}
 
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-		String folderName = simpleDateFormat.format(new Date());
-		String newBinlogIndex = folderName + "/binlogIndex/" + taskName;
-		String newStorageMaster = folderName + "/storage/master/" + taskName;
-		String newStorageSlave = folderName + "/storage/slave/" + taskName;
-
+		String newBinlogIndex = "/binlogIndex/" + taskName;
+		String newStorageMaster = "/storage/master/" + taskName;
+		String newStorageSlave = "/storage/slave/" + taskName;
 
 		File newBinlogIndexFolder = new File(storageBakDir, newBinlogIndex);
 		File newStorageMasterFolder = new File(storageBakDir, newStorageMaster);

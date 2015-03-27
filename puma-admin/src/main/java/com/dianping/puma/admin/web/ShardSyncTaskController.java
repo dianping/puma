@@ -78,6 +78,15 @@ public class ShardSyncTaskController {
         return "redirect:/shard-sync-task";
     }
 
+    @RequestMapping(value = {"/shard-sync-task/remove}"}, method = RequestMethod.POST)
+    public String remove(String taskName, String syncServerName) throws SendFailedException {
+        shardSyncTaskService.remove(taskName);
+
+        shardSyncTaskOperationReporter.report(syncServerName, taskName, ActionOperation.REMOVE);
+
+        return "redirect:/shard-sync-task";
+    }
+
     @RequestMapping(value = {"/shard-sync-task"})
     public ModelAndView index(HttpServletRequest request, HttpServletResponse response) {
         return index(request, response, 1);

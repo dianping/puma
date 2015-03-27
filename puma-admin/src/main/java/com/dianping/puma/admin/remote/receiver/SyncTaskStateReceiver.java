@@ -18,7 +18,7 @@ import java.util.List;
 
 @Service("syncTaskStateReceiver")
 public class SyncTaskStateReceiver implements EventListener {
-	private static final Logger LOG = LoggerFactory.getLogger(PumaTaskStateReceiver.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SyncTaskStateReceiver.class);
 
 	@Autowired
 	SyncTaskStateService syncTaskStateService;

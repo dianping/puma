@@ -78,7 +78,7 @@ public class ShardSyncTaskController {
         return "redirect:/shard-sync-task";
     }
 
-    @RequestMapping(value = {"/shard-sync-task/remove}"}, method = RequestMethod.POST)
+    @RequestMapping(value = {"/shard-sync-task/remove}"}, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public String remove(String name) throws SendFailedException {
 
         ShardSyncTask task = shardSyncTaskService.find(name);

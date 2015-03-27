@@ -352,7 +352,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
                 .host(pumaServer.getHost())
                 .target(pumaTask.getName());
 
-        String fullName = String.format("%s-%s-%s", task.getName(), ds, name);
+        String fullName = String.format("%s-%s-%s-%s", task.getSyncServerName(), task.getName(), ds, name);
         configBuilder.name(fullName);
 
         for (String tb : tables) {

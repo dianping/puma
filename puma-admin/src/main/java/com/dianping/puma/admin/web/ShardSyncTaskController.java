@@ -1,6 +1,7 @@
 package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.remote.reporter.ShardSyncTaskControllerReporter;
+import com.dianping.puma.admin.remote.reporter.ShardSyncTaskOperationReporter;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.entity.ShardSyncTask;
 import com.dianping.puma.core.entity.SyncServer;
@@ -48,6 +49,9 @@ public class ShardSyncTaskController {
     @Autowired
     private ShardSyncTaskControllerReporter shardSyncTaskControllerReporter;
 
+    @Autowired
+    private ShardSyncTaskOperationReporter shardSyncTaskOperationReporter;
+
 
     @RequestMapping(value = {"/shard-sync-task/create"}, method = RequestMethod.GET)
     public ModelAndView create() {
@@ -69,7 +73,7 @@ public class ShardSyncTaskController {
         task.setName("ShardSyncTask-" + ruleName + "-" + tableName);
         shardSyncTaskService.create(task);
 
-        shardSyncTaskControllerReporter.report(syncServerName, task.getName(), ActionOperation.CREATE);
+        shardSyncTaskOperationReporter.report(syncServerName, task.getName(), ActionOperation.CREATE);
 
         return "redirect:/shard-sync-task";
     }

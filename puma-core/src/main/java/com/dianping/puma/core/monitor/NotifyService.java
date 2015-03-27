@@ -22,6 +22,7 @@ import java.util.Map;
  * 
  */
 public interface NotifyService {
+
 	public void alarm(String msg, Throwable t, boolean sendSms);
 
 	public void report(String title, Map<String, Map<String, String>> msg);

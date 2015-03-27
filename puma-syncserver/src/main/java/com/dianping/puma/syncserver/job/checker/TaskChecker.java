@@ -1,85 +1,114 @@
 package com.dianping.puma.syncserver.job.checker;
 
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
+import com.dianping.puma.core.entity.ShardSyncTask;
 import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.monitor.*;
+import com.dianping.puma.core.monitor.EventListener;
+import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.monitor.event.Event;
 import com.dianping.puma.core.service.BaseSyncTaskService;
+import com.dianping.puma.core.service.ShardSyncTaskService;
 import com.dianping.puma.core.service.SyncTaskService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.dianping.puma.syncserver.config.SyncServerConfig;
 import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;
 import com.dianping.puma.syncserver.job.executor.TaskExecutionException;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 import com.dianping.puma.syncserver.job.executor.builder.TaskExecutorBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import java.util.List;
 
 @Service("taskChecker")
 public class TaskChecker implements EventListener {
 
-	private static final Logger LOG = LoggerFactory.getLogger(TaskChecker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TaskChecker.class);
 
-	@Autowired
-	private SyncTaskService syncTaskService;
+    @Autowired
+    private SyncTaskService syncTaskService;
 
-	@Autowired
-	private TaskExecutorContainer taskExecutorContainer;
+    @Autowired
+    private ShardSyncTaskService shardSyncTaskService;
 
-	@Autowired
-	private TaskExecutorBuilder taskExecutorBuilder;
+    @Autowired
+    private TaskExecutorContainer taskExecutorContainer;
 
-	@Autowired
-	private SyncServerConfig syncServerConfig;
+    @Autowired
+    private TaskExecutorBuilder taskExecutorBuilder;
 
-	@Autowired
-	NotifyService notifyService;
+    @Autowired
+    private SyncServerConfig syncServerConfig;
 
-	@Autowired
-	BaseSyncTaskService baseSyncTaskService;
+    @Autowired
+    NotifyService notifyService;
 
-	@Autowired
-	BinlogInfoHolder binlogInfoHolder;
+    @Autowired
+    BaseSyncTaskService baseSyncTaskService;
 
-	@SuppressWarnings("rawtypes")
-	@PostConstruct
-	public void init() {
-		//加载所有Task
-		String syncServerName = syncServerConfig.getSyncServerName();
+    @Autowired
+    BinlogInfoHolder binlogInfoHolder;
 
-		List<SyncTask> syncTasks = syncTaskService.findBySyncServerName(syncServerName);
-		//构造成SyncTaskExecutor
-		if (syncTasks != null && syncTasks.size() > 0) {
-			for (SyncTask syncTask : syncTasks) {
-				BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(syncTask.getName());
-				if (binlogInfo != null) {
-					syncTask.setBinlogInfo(binlogInfo);
-				}
-				TaskExecutor executor = taskExecutorBuilder.build(syncTask);
-				//将Task交给Container
-				try {
-					taskExecutorContainer.submit(executor);
-				} catch (TaskExecutionException e) {
-					notifyService.alarm(e.getMessage(), e, false);
-				}
-			}
-		}
-		LOG.info("TaskChecker loaded " + (syncTasks != null ? syncTasks.size() : 0) + " tasks.");
-		LOG.info("TaskChecker inited.");
-	}
+    @SuppressWarnings("rawtypes")
+    @PostConstruct
+    public void init() {
+        loadSyncTask();
+        loadShardSyncTask();
+        LOG.info("TaskChecker inited.");
+    }
 
-	@SuppressWarnings("rawtypes")
-	@Override
-	public void onEvent(Event event) {
-		/*
-		LOG.info("Receive event: " + event);
+    private void loadShardSyncTask() {
+        //加载所有Task
+        String syncServerName = syncServerConfig.getSyncServerName();
+
+        List<ShardSyncTask> tasks = shardSyncTaskService.findBySyncServerName(syncServerName);
+
+        if (tasks != null && tasks.size() > 0) {
+            for (ShardSyncTask syncTask : tasks) {
+                TaskExecutor executor = taskExecutorBuilder.build(syncTask);
+                //将Task交给Container
+                try {
+                    taskExecutorContainer.submit(executor);
+                } catch (TaskExecutionException e) {
+                    notifyService.alarm(e.getMessage(), e, false);
+                }
+            }
+        }
+        LOG.info("TaskChecker loaded " + (tasks != null ? tasks.size() : 0) + " tasks.");
+    }
+
+    private void loadSyncTask() {
+        //加载所有Task
+        String syncServerName = syncServerConfig.getSyncServerName();
+
+        List<SyncTask> syncTasks = syncTaskService.findBySyncServerName(syncServerName);
+        //构造成SyncTaskExecutor
+        if (syncTasks != null && syncTasks.size() > 0) {
+            for (SyncTask syncTask : syncTasks) {
+                BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(syncTask.getName());
+                if (binlogInfo != null) {
+                    syncTask.setBinlogInfo(binlogInfo);
+                }
+                TaskExecutor executor = taskExecutorBuilder.build(syncTask);
+                //将Task交给Container
+                try {
+                    taskExecutorContainer.submit(executor);
+                } catch (TaskExecutionException e) {
+                    notifyService.alarm(e.getMessage(), e, false);
+                }
+            }
+        }
+        LOG.info("TaskChecker loaded " + (syncTasks != null ? syncTasks.size() : 0) + " tasks.");
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public void onEvent(Event event) {
+        /*
+        LOG.info("Receive event: " + event);
 
 		if (event instanceof SyncTaskOperationEvent) {
 
@@ -112,5 +141,5 @@ public class TaskChecker implements EventListener {
 		} else {
 			LOG.error("Receive error event.");
 		}*/
-	}
+    }
 }

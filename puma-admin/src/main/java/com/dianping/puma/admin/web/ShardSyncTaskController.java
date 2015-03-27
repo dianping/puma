@@ -50,12 +50,12 @@ public class ShardSyncTaskController {
     }
 
     @RequestMapping(value = {"/shard-sync-task/create"}, method = RequestMethod.POST)
-    public String create(String tableName, String ruleName,String syncServerName) {
+    public String create(String tableName, String ruleName, String syncServerName) {
         ShardSyncTask task = new ShardSyncTask();
         task.setTableName(tableName);
         task.setRuleName(ruleName);
         task.setSyncServerName(syncServerName);
-        task.setName(ruleName + "-" + tableName);
+        task.setName("ShardSyncTask-" + ruleName + "-" + tableName);
         shardSyncTaskService.create(task);
 
         return "redirect:/shard-sync-task";

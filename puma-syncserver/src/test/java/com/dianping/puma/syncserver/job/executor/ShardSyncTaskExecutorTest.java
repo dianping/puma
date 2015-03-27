@@ -101,6 +101,7 @@ public class ShardSyncTaskExecutorTest {
         Assert.assertTrue(clientConfig.getDatabaseTablesMapping().containsKey("db1"));
         Assert.assertEquals(tables.toString(), clientConfig.getDatabaseTablesMapping().get("db1").toString());
 
+        Assert.assertEquals("task-db1-debug", clientConfig.getName());
         System.out.println("PumaClient :" + clientConfig.getName());
     }
 

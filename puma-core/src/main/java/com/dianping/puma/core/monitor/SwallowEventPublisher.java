@@ -33,6 +33,8 @@ public class SwallowEventPublisher implements EventPublisher {
 				producer.sendMessage(event, "catchup");
 			} else if (event instanceof PumaTaskStateEvent) {
 				producer.sendMessage(event, "puma");
+			} else if (event instanceof ShardSyncTaskStateEvent) {
+				producer.sendMessage(event, "shardsync");
 			}
 		} else {
 			// Task operation or controller event, sent by admin to servers.

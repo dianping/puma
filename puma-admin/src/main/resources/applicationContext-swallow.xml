@@ -46,7 +46,7 @@
           class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
           init-method="init">
         <property name="topic" value="sync_task_state"/>
-        <property name="type" value="sync"/>
+        <property name="type" value="shardsync"/>
         <property name="notifyService" ref="notifyService"/>
         <property name="clazz" value="com.dianping.puma.core.monitor.event.ShardSyncTaskStateEvent"/>
         <property name="listeners">

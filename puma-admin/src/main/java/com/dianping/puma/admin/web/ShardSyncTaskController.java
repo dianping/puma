@@ -2,7 +2,9 @@ package com.dianping.puma.admin.web;
 
 import com.dianping.puma.core.entity.ShardSyncTask;
 import com.dianping.puma.core.entity.SyncServer;
+import com.dianping.puma.core.model.state.ShardSyncTaskState;
 import com.dianping.puma.core.service.ShardSyncTaskService;
+import com.dianping.puma.core.service.ShardSyncTaskStateService;
 import com.dianping.puma.core.service.SyncServerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +38,9 @@ public class ShardSyncTaskController {
 
     @Autowired
     private SyncServerService syncServerService;
+
+    @Autowired
+    private ShardSyncTaskStateService shardSyncTaskStateService;
 
 
     @RequestMapping(value = {"/shard-sync-task/create"}, method = RequestMethod.GET)
@@ -72,7 +77,17 @@ public class ShardSyncTaskController {
         Map<String, Object> map = new HashMap<String, Object>();
         int offset = pageNum == null ? 0 : (pageNum - 1) * PAGESIZE;
         List<ShardSyncTask> shardSyncTasks = shardSyncTaskService.find(offset, PAGESIZE);
+        Map<String, ShardSyncTaskState> states = new HashMap<String, ShardSyncTaskState>();
+        for (ShardSyncTask task : shardSyncTasks) {
+            ShardSyncTaskState state = shardSyncTaskStateService.find(task.getName());
+            if (state != null) {
+//                state.getBinlogInfo()
+                states.put(task.getName(), state);
+            }
+        }
+
         map.put("shardSyncTasks", shardSyncTasks);
+        map.put("shardSyncTaskStates", states);
         map.put("createdActive", "active");
         map.put("subPath", "main");
         map.put("path", "shard-sync-task");

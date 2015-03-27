@@ -24,8 +24,17 @@
                 <td>${shardSyncTask.syncServerName}</td>
                 <td>${shardSyncTask.ruleName}</td>
                 <td>${shardSyncTask.tableName}</td>
-                <td class="sync-task-status"></td>
-                <td class="sync-task-bin-log-info"></td>
+                <td class="sync-task-status">
+                    #if(${shardSyncTaskStates[$shardSyncTask.getName()]})
+                        ${shardSyncTaskStates[$shardSyncTask.getName()].getStatus().getDesc()}
+                    #end
+                </td>
+                <td class="sync-task-bin-log-info">
+                    #if(${shardSyncTaskStates[$shardSyncTask.getName()]}
+                    && ${shardSyncTaskStates[$shardSyncTask.getName()].getBinlogInfo()})
+                        ${shardSyncTaskStates[$shardSyncTask.getName()].getStatus().getBinlogInfo()}
+                    #end
+                </td>
                 <td>
                     <a href="${rc.contextPath}/shard-sync-task/detail/${shardSyncTask.name}" target="_self"
                        class="no-under" data-name="${shardSyncTask.name}">

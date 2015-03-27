@@ -30,6 +30,18 @@
         </property>
     </bean>
 
+    <bean id="shardSyncTaskOperationEventPublisher"
+          class="com.dianping.puma.core.monitor.SwallowEventPublisher"
+          init-method="init">
+        <property name="topic" value="shard_sync_task_operation"/>
+    </bean>
+
+    <bean id="shardSyncTaskControllerEventPublisher"
+          class="com.dianping.puma.core.monitor.SwallowEventPublisher"
+          init-method="init">
+        <property name="topic" value="shard_sync_task_controller"/>
+    </bean>
+
     <bean id="syncTaskOperationEventPublisher"
           class="com.dianping.puma.core.monitor.SwallowEventPublisher"
           init-method="init">

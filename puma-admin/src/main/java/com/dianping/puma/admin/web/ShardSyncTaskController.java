@@ -1,11 +1,14 @@
 package com.dianping.puma.admin.web;
 
+import com.dianping.puma.admin.remote.reporter.ShardSyncTaskControllerReporter;
+import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.entity.ShardSyncTask;
 import com.dianping.puma.core.entity.SyncServer;
 import com.dianping.puma.core.model.state.ShardSyncTaskState;
 import com.dianping.puma.core.service.ShardSyncTaskService;
 import com.dianping.puma.core.service.ShardSyncTaskStateService;
 import com.dianping.puma.core.service.SyncServerService;
+import com.dianping.swallow.common.producer.exceptions.SendFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +45,9 @@ public class ShardSyncTaskController {
     @Autowired
     private ShardSyncTaskStateService shardSyncTaskStateService;
 
+    @Autowired
+    private ShardSyncTaskControllerReporter shardSyncTaskControllerReporter;
+
 
     @RequestMapping(value = {"/shard-sync-task/create"}, method = RequestMethod.GET)
     public ModelAndView create() {
@@ -55,13 +61,15 @@ public class ShardSyncTaskController {
     }
 
     @RequestMapping(value = {"/shard-sync-task/create"}, method = RequestMethod.POST)
-    public String create(String tableName, String ruleName, String syncServerName) {
+    public String create(String tableName, String ruleName, String syncServerName) throws SendFailedException {
         ShardSyncTask task = new ShardSyncTask();
         task.setTableName(tableName);
         task.setRuleName(ruleName);
         task.setSyncServerName(syncServerName);
         task.setName("ShardSyncTask-" + ruleName + "-" + tableName);
         shardSyncTaskService.create(task);
+
+        shardSyncTaskControllerReporter.report(syncServerName, task.getName(), ActionOperation.CREATE);
 
         return "redirect:/shard-sync-task";
     }

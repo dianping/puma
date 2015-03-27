@@ -1,7 +1,9 @@
 package com.dianping.puma.admin.web;
 
 import com.dianping.puma.core.entity.ShardSyncTask;
+import com.dianping.puma.core.entity.SyncServer;
 import com.dianping.puma.core.service.ShardSyncTaskService;
+import com.dianping.puma.core.service.SyncServerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,20 +34,27 @@ public class ShardSyncTaskController {
     @Autowired
     private ShardSyncTaskService shardSyncTaskService;
 
+    @Autowired
+    private SyncServerService syncServerService;
+
 
     @RequestMapping(value = {"/shard-sync-task/create"}, method = RequestMethod.GET)
     public ModelAndView create() {
+        List<SyncServer> syncServers = syncServerService.findAll();
+
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("subPath", "create");
         map.put("path", "shard-sync-task");
+        map.put("syncServers", syncServers);
         return new ModelAndView("main/container", map);
     }
 
     @RequestMapping(value = {"/shard-sync-task/create"}, method = RequestMethod.POST)
-    public String create(String tableName, String ruleName) {
+    public String create(String tableName, String ruleName,String syncServerName) {
         ShardSyncTask task = new ShardSyncTask();
         task.setTableName(tableName);
         task.setRuleName(ruleName);
+        task.setSyncServerName(syncServerName);
         task.setName(ruleName + "-" + tableName);
         shardSyncTaskService.create(task);
 

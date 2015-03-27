@@ -31,6 +31,7 @@
                 <ref bean="syncTaskExecutorStrategy" />
                 <ref bean="catchupTaskExecutorStrategy" />
                 <ref bean="dumpTaskExecutorStrategy" />
+                <ref bean="shardSyncTaskExecutorStrategy" />
             </list>
         </property>
     </bean>

@@ -9,8 +9,9 @@
         <table class="table table-hover">
             <thead>
             <tr>
+                <td class="col-md-2">服务器</td>
                 <td class="col-md-2">规则名</td>
-                <td class="col-md-1">表名</td>
+                <td class="col-md-2">表名</td>
                 <td class="col-md-1">状态</td>
                 <td class="col-md-4">日志进度</td>
                 <td class="col-md-1">操作</td>
@@ -20,6 +21,7 @@
             <tbody>
             #foreach($shardSyncTask in ${shardSyncTasks})
             <tr>
+                <td>${shardSyncTask.syncServerName}</td>
                 <td>${shardSyncTask.ruleName}</td>
                 <td>${shardSyncTask.tableName}</td>
                 <td class="sync-task-status"></td>

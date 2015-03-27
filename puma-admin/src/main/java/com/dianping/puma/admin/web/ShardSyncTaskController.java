@@ -79,10 +79,13 @@ public class ShardSyncTaskController {
     }
 
     @RequestMapping(value = {"/shard-sync-task/remove}"}, method = RequestMethod.POST)
-    public String remove(String taskName, String syncServerName) throws SendFailedException {
-        shardSyncTaskService.remove(taskName);
+    public String remove(String name) throws SendFailedException {
 
-        shardSyncTaskOperationReporter.report(syncServerName, taskName, ActionOperation.REMOVE);
+        ShardSyncTask task = shardSyncTaskService.find(name);
+        if (task != null) {
+            shardSyncTaskService.remove(name);
+            shardSyncTaskOperationReporter.report(task.getSyncServerName(), task.getName(), ActionOperation.REMOVE);
+        }
 
         return "redirect:/shard-sync-task";
     }

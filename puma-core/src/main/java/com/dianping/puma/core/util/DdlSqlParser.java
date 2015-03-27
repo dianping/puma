@@ -90,6 +90,7 @@ public class DdlSqlParser {
 			case DDL_CREATE_SERVER:
 				break;
 			case DDL_CREATE_TABLE:
+				sqlNames = parseNames(strSql);
 				break;
 			case DDL_CREATE_TRIGGER:
 				break;
@@ -125,6 +126,7 @@ public class DdlSqlParser {
 			case DDL_DROP_SERVER:
 				break;
 			case DDL_DROP_TABLE:
+				sqlNames = parseNames(strSql);
 				break;
 			case DDL_DROP_TRIGGER:
 				break;

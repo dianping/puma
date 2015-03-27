@@ -136,7 +136,6 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
         public void onEvent(ChangedEvent event) throws Exception {
             tryTimes++;
             onEventInternal(event);
-            status.setBinlogInfo(new BinlogInfo(event.getBinlog(), event.getBinlogPos()));
             tryTimes = 0;
         }
 

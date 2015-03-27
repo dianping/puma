@@ -81,7 +81,6 @@ public class ShardSyncTaskController {
         for (ShardSyncTask task : shardSyncTasks) {
             ShardSyncTaskState state = shardSyncTaskStateService.find(task.getName());
             if (state != null) {
-//                state.getBinlogInfo()
                 states.put(task.getName(), state);
             }
         }

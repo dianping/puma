@@ -30,10 +30,6 @@
                     #end
                 </td>
                 <td class="sync-task-bin-log-info">
-                    #if(${shardSyncTaskStates[$shardSyncTask.getName()]}
-                    && ${shardSyncTaskStates[$shardSyncTask.getName()].getBinlogInfo()})
-                        ${shardSyncTaskStates[$shardSyncTask.getName()].getStatus().getBinlogInfo()}
-                    #end
                 </td>
                 <td>
                     <a href="${rc.contextPath}/shard-sync-task/detail/${shardSyncTask.name}" target="_self"

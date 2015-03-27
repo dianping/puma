@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 public class ShardSyncTaskStateReporter {
 
     @Autowired
-    SwallowEventPublisher syncTaskStatePublisher;
+    SwallowEventPublisher publisher;
 
     @Autowired
     ShardSyncTaskStateService shardSyncTaskStateService;
@@ -26,6 +26,6 @@ public class ShardSyncTaskStateReporter {
         ShardSyncTaskStateEvent event = new ShardSyncTaskStateEvent();
         event.setServerName(syncServerConfig.getSyncServerName());
         event.setTaskStates(shardSyncTaskStateService.findAll());
-        syncTaskStatePublisher.publish(event);
+        publisher.publish(event);
     }
 }

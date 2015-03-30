@@ -98,10 +98,26 @@ public class Handler implements PageHandler<Context> {
 
 		endCatTransaction();
 
+		int count = 0;
+
 		while (true) {
 			try {
 				filterChain.reset();
+
+				Transaction t = null;
+				++count;
+				if (count == 1000) {
+					t = Cat.getProducer().newTransaction("next", payload.getClientName());
+				}
+
 				ChangedEvent event = channel.next();
+
+				if (count == 1000 && t != null) {
+					t.setStatus("0");
+					t.complete();
+					count = 0;
+				}
+
 				if (event != null) {
 
 					if (event instanceof RowChangedEvent) {

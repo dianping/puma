@@ -439,6 +439,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 
 				Transaction t = Cat.getProducer().newTransaction("onEvent", abstractTask.getName());
 
+				Transaction t1 = Cat.getProducer().newTransaction("onEventWithoutSleep", abstractTask.getName());
+
 				// LOG.info("********************Received " + event);
 				if (!skipToNextPos) {
 					if (event instanceof RowChangedEvent) {
@@ -448,7 +450,11 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 							// --------- (2) 【事务提交事件】--------------
 							if (containDatabase(event.getDatabase()) && transactionStart) {
 								// 提交事务(datachange了，则该commit肯定是属于当前做了数据操作的事务的，故mysqlExecutor.commit();)
+								Transaction t2 = Cat.getProducer().newTransaction("COMMIT", abstractTask.getName());
 								mysqlExecutor.commit();
+								t2.setStatus("0");
+								t2.complete();
+
 								transactionStart = false;
 								// 遇到commit事件，操作数据库了，更新sqlbinlog和保存binlog到数据库
 								binlogOfSqlThreadChanged(event);
@@ -493,6 +499,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 					skipToNextPos = false;
 					LOG.info("********************skip this event(because skipToNextPos is true) : " + event);
 				}
+
+				t1.setStatus("0");
+				t1.complete();
 
 				// 速度调控
 				if (sleepTime > 0) {

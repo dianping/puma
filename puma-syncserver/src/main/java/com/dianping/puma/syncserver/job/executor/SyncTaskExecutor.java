@@ -18,8 +18,6 @@ public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTask, SyncTaskSta
 
 	protected SyncTaskState state;
 
-	private int count = 0;
-
 	public SyncTaskExecutor(SyncTask syncTask, String pumaServerHost, int pumaServerPort,
 			String target, DstDBInstance dstDBInstance) {
 		super(syncTask, pumaServerHost, pumaServerPort, target, dstDBInstance);
@@ -27,15 +25,10 @@ public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTask, SyncTaskSta
 
 	@Override
 	protected void execute(ChangedEvent event) throws SQLException, DdlRenameException {
-		if (count++ == 10) {
-			Transaction t = Cat.getProducer().newTransaction("Execution", this.getTask().getName());
-			mysqlExecutor.execute(event);
-			t.setStatus("0");
-			t.complete();
-			count = 0;
-		} else {
-			mysqlExecutor.execute(event);
-		}
+		Transaction t = Cat.getProducer().newTransaction("SQLExecution", this.getTask().getName());
+		mysqlExecutor.execute(event);
+		t.setStatus("0");
+		t.complete();
 	}
 
 }

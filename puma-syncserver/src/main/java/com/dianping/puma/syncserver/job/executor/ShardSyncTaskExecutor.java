@@ -73,9 +73,9 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
 
     private ConfigCache configCache;
 
-    private GroupDataSource originDataSource;
+    protected GroupDataSource originDataSource;
 
-    private final Map<String, DataSource> dataSourcePool = new ConcurrentHashMap<String, DataSource>();
+    protected final Map<String, DataSource> dataSourcePool = new ConcurrentHashMap<String, DataSource>();
 
     private Map<String, PumaClient> pumaClientList = new ConcurrentHashMap<String, PumaClient>();
 
@@ -313,17 +313,12 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
 
     protected void initDataSources() {
         if (!switchOn && !Strings.isNullOrEmpty(originDsJdbcRef)) {
-            this.originDataSource = new GroupDataSource(originDsJdbcRef);
-            originDataSource.setRouterType(RouterType.FAIL_OVER.getRouterType());
-            originDataSource.init();
+            this.originDataSource =initGroupDataSource(originDsJdbcRef);
         }
 
         TableShardRule tableShardRule = routerRuleOrigin.getTableShardRules().get(task.getTableName());
         for (DimensionRule dimensionRule : tableShardRule.getDimensionRules()) {
-            DimensionRuleImpl dimensionRuleImpl = (DimensionRuleImpl) dimensionRule;
-            if (dimensionRuleImpl == null || !dimensionRuleImpl.isMaster()) {
-                continue;
-            }
+            DimensionRuleImpl dimensionRuleImpl = (DimensionRuleImpl)  dimensionRule;
 
             initDataSources(dimensionRuleImpl.getDataSourceProvider().getAllDBAndTables());
 
@@ -337,12 +332,17 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
         for (Map.Entry<String, Set<String>> entity : all.entrySet()) {
             String jdbcRef = entity.getKey();
             if (!dataSourcePool.containsKey(jdbcRef)) {
-                GroupDataSource ds = new GroupDataSource(jdbcRef);
-                ds.setRouterType(RouterType.FAIL_OVER.getRouterType());
-                ds.init();
+                GroupDataSource ds = initGroupDataSource(jdbcRef);
                 dataSourcePool.put(jdbcRef, ds);
             }
         }
+    }
+
+    protected GroupDataSource initGroupDataSource(String jdbcRef) {
+        GroupDataSource ds = new GroupDataSource(jdbcRef);
+        ds.setRouterType(RouterType.FAIL_OVER.getRouterType());
+        ds.init();
+        return ds;
     }
 
     protected void initPumaClient() {
@@ -371,9 +371,13 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
             if (pumaClientList.containsKey(entity.getKey())) {
                 continue;
             }
-            GroupDataSource ds = (GroupDataSource) dataSourcePool.get(entity.getKey());
-            initPumaClient(entity.getKey(), ds.getConfig(), entity.getValue(), name, false);
+            GroupDataSourceConfig config = getGroupDataSourceConfig(entity.getKey());
+            initPumaClient(entity.getKey(), config, entity.getValue(), name, false);
         }
+    }
+
+    protected GroupDataSourceConfig getGroupDataSourceConfig(String jdbcRef) {
+        return ((GroupDataSource) dataSourcePool.get(jdbcRef)).getConfig();
     }
 
     protected PumaClient initPumaClient(String jdbcRef, GroupDataSourceConfig config, Set<String> tables, String name, boolean isMigrate) {

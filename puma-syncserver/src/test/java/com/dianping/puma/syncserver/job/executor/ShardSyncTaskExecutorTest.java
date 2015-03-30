@@ -15,6 +15,7 @@ import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
+import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
@@ -26,6 +27,8 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 
@@ -128,58 +131,75 @@ public class ShardSyncTaskExecutorTest {
         target.findTheOnlyWriteDataSourceConfig(config);
     }
 
-//    @Test
-//    public void initPumaClientsAndDataSourcesTest() {
-//        ShardSyncTaskExecutor spy = spy(target);
-//
-//        doAnswer(new Answer<GroupDataSource>() {
-//            @Override
-//            public GroupDataSource answer(InvocationOnMock invocationOnMock) throws Throwable {
-//                System.out.println("init ds:" + invocationOnMock.getArguments()[0].toString());
-//                GroupDataSource ds = new GroupDataSource(invocationOnMock.getArguments()[0].toString());
-//                return ds;
-//            }
-//        }).when(spy).initGroupDataSource(anyString());
-//
-//        doAnswer(new Answer<PumaClient>() {
-//            @Override
-//            public PumaClient answer(InvocationOnMock invocationOnMock) throws Throwable {
-//                System.out.println("init pumaclient:" + invocationOnMock.getArguments()[1]);
-//                System.out.println("init pumaclient:" + invocationOnMock.getArguments()[2]);
-//                return null;
-//            }
-//        }).when(spy).initPumaClient(any(GroupDataSourceConfig.class), anySet(), anyString(), anyBoolean());
-//
-//
-//        TableShardRuleConfig tableShardRuleConfig = buildTableConfigFromFile("initPumaClientsAndDataSourcesTest.json");
-//        spy.tableShardRuleConfigOrigin = tableShardRuleConfig;
-//        spy.tableShardRuleConfigList = Lists.newArrayList(tableShardRuleConfig);
-//        spy.initRouterRule();
-//        spy.switchOn = false;
-//        spy.originDsJdbcRef = "origin";
-//
-//        spy.initPumaClient();
-//
-//
-//        verify(spy, times(7)).initGroupDataSource(anyString());
-//        verify(spy, times(1)).initGroupDataSource("origin");
-//        verify(spy, times(1)).initGroupDataSource("ds0");
-//        verify(spy, times(2)).initGroupDataSource("ds1");
-//        verify(spy, times(1)).initGroupDataSource("ds2");
-//        verify(spy, times(1)).initGroupDataSource("ds3");
-//        verify(spy, times(1)).initGroupDataSource("ds8");
-//        verify(spy, times(0)).initGroupDataSource("ds4");
-//        verify(spy, times(0)).initGroupDataSource("ds5");
-//
-//        verify(spy, times(7)).initPumaClient(any(GroupDataSourceConfig.class), anySet(), anyString(), anyBoolean());
-//        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1")), eq("migrate"), eq(true));
-//        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_0", "table1_1")), eq("master"), eq(false));
-//        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_2", "table1_3")), eq("master"), eq(false));
-//        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_4", "table1_5")), eq("master"), eq(false));
-//        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_6", "table1_7")), eq("master"), eq(false));
-//        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), argThat(new SetMatchers("ds1_white")), anyString(), eq(false));
-//        verify(spy, times(1)).initPumaClient(any(GroupDataSourceConfig.class), argThat(new SetMatchers("ds8_white")), anyString(), eq(false));
-//    }
+    @Test
+    public void initDataSourceTest() {
+        ShardSyncTaskExecutor spy = spy(target);
+
+        doAnswer(new Answer<GroupDataSource>() {
+            @Override
+            public GroupDataSource answer(InvocationOnMock invocationOnMock) throws Throwable {
+                System.out.println("init ds:" + invocationOnMock.getArguments()[0].toString());
+                GroupDataSource ds = new GroupDataSource(invocationOnMock.getArguments()[0].toString());
+                return ds;
+            }
+        }).when(spy).initGroupDataSource(anyString());
+
+
+        TableShardRuleConfig tableShardRuleConfig = buildTableConfigFromFile("initPumaClientsAndDataSourcesTest.json");
+        spy.tableShardRuleConfigOrigin = tableShardRuleConfig;
+        spy.switchOn = false;
+        spy.originDsJdbcRef = "origin";
+        spy.initRouterRule();
+
+        spy.initDataSources();
+
+        verify(spy, times(8)).initGroupDataSource(anyString());
+        verify(spy, times(1)).initGroupDataSource("origin");
+        verify(spy, times(1)).initGroupDataSource("ds0");
+        verify(spy, times(1)).initGroupDataSource("ds1");
+        verify(spy, times(1)).initGroupDataSource("ds2");
+        verify(spy, times(1)).initGroupDataSource("ds3");
+        verify(spy, times(1)).initGroupDataSource("ds4");
+        verify(spy, times(1)).initGroupDataSource("ds5");
+        verify(spy, times(1)).initGroupDataSource("ds8");
+    }
+
+    @Test
+    public void initPumaClientsTest() {
+        ShardSyncTaskExecutor spy = spy(target);
+
+        doReturn(null).when(spy).getGroupDataSourceConfig(anyString());
+
+        doAnswer(new Answer<PumaClient>() {
+            @Override
+            public PumaClient answer(InvocationOnMock invocationOnMock) throws Throwable {
+                System.out.println("init pumaclient:" + invocationOnMock.getArguments()[1]);
+                System.out.println("init pumaclient:" + invocationOnMock.getArguments()[2]);
+                System.out.println("init pumaclient:" + invocationOnMock.getArguments()[3]);
+                return null;
+            }
+        }).when(spy).initPumaClient(anyString(), any(GroupDataSourceConfig.class), anySet(), anyString(), anyBoolean());
+
+
+        TableShardRuleConfig tableShardRuleConfig = buildTableConfigFromFile("initPumaClientsAndDataSourcesTest.json");
+        spy.tableShardRuleConfigOrigin = tableShardRuleConfig;
+        spy.tableShardRuleConfigList = Lists.newArrayList(tableShardRuleConfig);
+        spy.initRouterRule();
+        spy.switchOn = false;
+        spy.originDsJdbcRef = "origin";
+        spy.originDataSource = new GroupDataSource();
+
+        spy.initPumaClient();
+
+        verify(spy, times(7)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), anySet(), anyString(), anyBoolean());
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1")), eq("migrate"), eq(true));
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_0", "table1_1")), eq("master"), eq(false));
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_2", "table1_3")), eq("master"), eq(false));
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_4", "table1_5")), eq("master"), eq(false));
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_6", "table1_7")), eq("master"), eq(false));
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("ds1_white")), anyString(), eq(false));
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("ds8_white")), anyString(), eq(false));
+    }
 
     class SetMatchers extends ArgumentMatcher<Set<String>> {
         private final String[] expects;

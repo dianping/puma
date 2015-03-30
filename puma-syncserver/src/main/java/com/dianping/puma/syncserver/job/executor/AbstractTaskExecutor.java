@@ -47,7 +47,6 @@ import com.dianping.puma.syncserver.job.executor.failhandler.HandlerContainer;
 import com.dianping.puma.syncserver.job.executor.failhandler.StopOnFailedHandler;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
-
 public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S extends BaseSyncTaskState>
 		implements TaskExecutor<T, S>, SpeedControllable {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractTaskExecutor.class);
@@ -77,10 +76,11 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 	private CircularFifoBuffer lastEvents = new CircularFifoBuffer(10);
 
 	private BinlogInfoHolder binlogInfoHolder;
-	
+
 	private NotifyService notifyService;
 
-	public AbstractTaskExecutor(T abstractTask, String pumaServerHost, int pumaServerPort, String target, DstDBInstance dstDBInstance) {
+	public AbstractTaskExecutor(T abstractTask, String pumaServerHost, int pumaServerPort, String target,
+			DstDBInstance dstDBInstance) {
 		this.abstractTask = abstractTask;
 		this.pumaServerHost = pumaServerHost;
 		this.pumaServerPort = pumaServerPort;
@@ -114,12 +114,11 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 
 	/**
 	 * 事件到达回调函数
-	 * 
-	 * @param event
-	 *            事件
+	 *
+	 * @param event 事件
 	 * @throws Exception
 	 */
-	protected abstract void execute(ChangedEvent event) throws SQLException,DdlRenameException;
+	protected abstract void execute(ChangedEvent event) throws SQLException, DdlRenameException;
 
 	/**
 	 * 更新sql thread的binlog信息，和保存binlog信息到数据库
@@ -252,7 +251,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 						+ abstractTask.getPumaClientName() + "&casedetail=" + detail);
 		state.setDetail(detail);
 		// this.status.setDetail(detail);
-		
+
 		LOG.error("TaskExecutor[" + this.getTask().getPumaClientName() + "] failed... cause:" + detail);
 	}
 
@@ -438,13 +437,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 			@Override
 			public void onEvent(ChangedEvent event) throws Exception {
 
-				Transaction t = null;
-				++eventCount;
-				if (eventCount == 1000) {
-					t = Cat.getProducer().newTransaction("onEvent", abstractTask.getName());
-					Cat.logEvent("Detail", event.toString());
-					Cat.logEvent("SkipToNextPos", String.valueOf(skipToNextPos));
-				}
+				Transaction t = Cat.getProducer().newTransaction("onEvent", abstractTask.getName());
+				Cat.logEvent("Detail", event.toString());
 
 				// LOG.info("********************Received " + event);
 				if (!skipToNextPos) {
@@ -455,6 +449,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 							// --------- (2) 【事务提交事件】--------------
 							if (containDatabase(event.getDatabase()) && transactionStart) {
 								// 提交事务(datachange了，则该commit肯定是属于当前做了数据操作的事务的，故mysqlExecutor.commit();)
+								mysqlExecutor.commit();
 								transactionStart = false;
 								// 遇到commit事件，操作数据库了，更新sqlbinlog和保存binlog到数据库
 								binlogOfSqlThreadChanged(event);
@@ -509,11 +504,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 					}
 				}
 
-				if (eventCount == 1000 && t != null) {
-					t.setStatus("0");
-					t.complete();
-					eventCount = 0;
-				}
+				t.setStatus("0");
+				t.complete();
 			}
 
 			@Override

@@ -438,7 +438,6 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 			public void onEvent(ChangedEvent event) throws Exception {
 
 				Transaction t = Cat.getProducer().newTransaction("onEvent", abstractTask.getName());
-				Cat.logEvent("Detail", event.toString());
 
 				// LOG.info("********************Received " + event);
 				if (!skipToNextPos) {

@@ -45,8 +45,12 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -69,15 +73,17 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
 
     private ConfigCache configCache;
 
+    private GroupDataSource originDataSource;
+
     private final Map<String, DataSource> dataSourcePool = new ConcurrentHashMap<String, DataSource>();
 
-    private List<PumaClient> pumaClientList = new ArrayList<PumaClient>();
+    private Map<String, PumaClient> pumaClientList = new ConcurrentHashMap<String, PumaClient>();
 
     protected TableShardRuleConfig tableShardRuleConfigOrigin;
 
-    protected TableShardRuleConfig tableShardRuleConfigForRouting;
+    protected List<TableShardRuleConfig> tableShardRuleConfigList = new CopyOnWriteArrayList<TableShardRuleConfig>();
 
-    protected String originGroupDataSource;
+    protected String originDsJdbcRef;
 
     protected boolean switchOn;
 
@@ -89,11 +95,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
 
     protected RouterRule routerRuleOrigin;
 
-    protected RouterRule routerRuleForRouting;
+    protected List<RouterRule> routerRuleList = new CopyOnWriteArrayList<RouterRule>();
 
     protected DataSourceRouter routerForMigrate;
 
-    protected DataSourceRouter routerForRouting;
+    protected List<DataSourceRouter> routerList = new CopyOnWriteArrayList<DataSourceRouter>();
 
     private static final Pattern JDBC_URL_PATTERN = Pattern.compile("jdbc:mysql://([^:]+):\\d+/([^\\?]+).*");
 
@@ -119,9 +125,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
         try {
             checkNotNull(configCache, "configCache");
             initAndConvertConfig();
-            initRouterConfig();
-            initPumaClientsAndDataSources();
+            initRouterRule();
+            initDataSources();
             initRouter();
+            initPumaClient();
+
             inited = true;
         } catch (Exception exp) {
             this.status.setStatus(Status.FAILED);
@@ -135,8 +143,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
 
         private final String name;
 
-        public Processor(String name) {
+        private final DataSourceRouter router;
+
+        public Processor(String name, DataSourceRouter router) {
             this.name = name;
+            this.router = router;
         }
 
         @Override
@@ -152,8 +163,6 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
             }
             RowChangedEvent rowEvent = (RowChangedEvent) event;
 
-            DataSourceRouter targetRouter = task.getTableName().equals(rowEvent.getTable()) ? routerForMigrate : routerForRouting;
-
             rowEvent.setTable(task.getTableName());
             rowEvent.setDatabase("");
 
@@ -164,7 +173,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
                 return;
             }
 
-            RouterTarget routerTarget = targetRouter.getTarget(tempSql, args);
+            RouterTarget routerTarget = this.router.getTarget(tempSql, args);
 
             for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
                 JdbcTemplate jdbcTemplate = new JdbcTemplate(targetedSql.getDataSource());
@@ -273,34 +282,40 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
         }
     }
 
-    protected void initRouterConfig() {
+    protected void initRouterRule() {
         RouterRuleConfig routerRuleConfig = new RouterRuleConfig();
         routerRuleConfig.setTableShardConfigs(Lists.newArrayList(tableShardRuleConfigOrigin));
         this.routerRuleOrigin = RouterRuleBuilder.build(routerRuleConfig);
 
-        RouterRuleConfig routerRuleConfigForRouting = new RouterRuleConfig();
-        routerRuleConfigForRouting.setTableShardConfigs(Lists.newArrayList(tableShardRuleConfigForRouting));
-        this.routerRuleForRouting = RouterRuleBuilder.build(routerRuleConfigForRouting);
+        for (TableShardRuleConfig config : tableShardRuleConfigList) {
+            RouterRuleConfig tempRouterRuleConfig = new RouterRuleConfig();
+            tempRouterRuleConfig.setTableShardConfigs(Lists.newArrayList(config));
+            routerRuleList.add(RouterRuleBuilder.build(tempRouterRuleConfig));
+        }
     }
 
     protected void initRouter() {
-        DataSourceRouterImpl routerImplForRouting = new DataSourceRouterImpl();
-        routerImplForRouting.setRouterRule(routerRuleForRouting);
-        routerImplForRouting.setDataSourcePool(dataSourcePool);
-        this.routerForRouting = routerImplForRouting;
-        this.routerForRouting.init();
-
         DataSourceRouterImpl routerForMigrate = new DataSourceRouterImpl();
         routerForMigrate.setRouterRule(routerRuleOrigin);
         routerForMigrate.setDataSourcePool(dataSourcePool);
         this.routerForMigrate = routerForMigrate;
         this.routerForMigrate.init();
+
+        for (RouterRule routerRule : routerRuleList) {
+            DataSourceRouterImpl tempRouter = new DataSourceRouterImpl();
+            tempRouter.setRouterRule(routerRule);
+            tempRouter.setDataSourcePool(dataSourcePool);
+            tempRouter.init();
+
+            routerList.add(tempRouter);
+        }
     }
 
-    protected void initPumaClientsAndDataSources() {
-        if (!switchOn && !Strings.isNullOrEmpty(originGroupDataSource)) {
-            GroupDataSource ds = initGroupDataSource(originGroupDataSource);
-            initPumaClient(ds.getConfig(), Sets.newHashSet(task.getTableName()), "migrate");
+    protected void initDataSources() {
+        if (!switchOn && !Strings.isNullOrEmpty(originDsJdbcRef)) {
+            this.originDataSource = new GroupDataSource(originDsJdbcRef);
+            originDataSource.setRouterType(RouterType.FAIL_OVER.getRouterType());
+            originDataSource.init();
         }
 
         TableShardRule tableShardRule = routerRuleOrigin.getTableShardRules().get(task.getTableName());
@@ -310,26 +325,58 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
                 continue;
             }
 
-            initPumaClientsAndDataSources(dimensionRuleImpl.getDataSourceProvider().getAllDBAndTables(), "master");
+            initDataSources(dimensionRuleImpl.getDataSourceProvider().getAllDBAndTables());
+
+            for (DimensionRule rule : dimensionRuleImpl.getWhiteListRules()) {
+                initDataSources(rule.getAllDBAndTables());
+            }
+        }
+    }
+
+    protected void initDataSources(Map<String, Set<String>> all) {
+        for (Map.Entry<String, Set<String>> entity : all.entrySet()) {
+            String jdbcRef = entity.getKey();
+            if (!dataSourcePool.containsKey(jdbcRef)) {
+                GroupDataSource ds = new GroupDataSource(jdbcRef);
+                ds.setRouterType(RouterType.FAIL_OVER.getRouterType());
+                ds.init();
+                dataSourcePool.put(jdbcRef, ds);
+            }
+        }
+    }
+
+    protected void initPumaClient() {
+        if (originDataSource != null) {
+            initPumaClient(originDsJdbcRef, originDataSource.getConfig(), Sets.newHashSet(task.getTableName()), "migrate", true);
+        }
+
+        TableShardRule tableShardRule = routerRuleOrigin.getTableShardRules().get(task.getTableName());
+        for (DimensionRule dimensionRule : tableShardRule.getDimensionRules()) {
+            DimensionRuleImpl dimensionRuleImpl = (DimensionRuleImpl) dimensionRule;
+            if (dimensionRuleImpl == null || !dimensionRuleImpl.isMaster()) {
+                continue;
+            }
+
+            initPumaClient(dimensionRuleImpl.getDataSourceProvider().getAllDBAndTables(), "master");
 
             int index = 0;
             for (DimensionRule rule : dimensionRuleImpl.getWhiteListRules()) {
-                initPumaClientsAndDataSources(rule.getAllDBAndTables(), "white" + String.valueOf(index++));
+                initPumaClient(rule.getAllDBAndTables(), "white" + String.valueOf(index++));
             }
         }
     }
 
-    protected void initPumaClientsAndDataSources(Map<String, Set<String>> all, String name) {
+    protected void initPumaClient(Map<String, Set<String>> all, String name) {
         for (Map.Entry<String, Set<String>> entity : all.entrySet()) {
-            if (dataSourcePool.containsKey(entity.getKey())) {
+            if (pumaClientList.containsKey(entity.getKey())) {
                 continue;
             }
-            GroupDataSource groupDataSource = initGroupDataSource(entity.getKey());
-            initPumaClient(groupDataSource.getConfig(), entity.getValue(), name);
+            GroupDataSource ds = (GroupDataSource) dataSourcePool.get(entity.getKey());
+            initPumaClient(entity.getKey(), ds.getConfig(), entity.getValue(), name, false);
         }
     }
 
-    protected PumaClient initPumaClient(GroupDataSourceConfig config, Set<String> tables, String name) {
+    protected PumaClient initPumaClient(String jdbcRef, GroupDataSourceConfig config, Set<String> tables, String name, boolean isMigrate) {
         DataSourceConfig dsConfig = findTheOnlyWriteDataSourceConfig(config);
 
         Matcher matcher = JDBC_URL_PATTERN.matcher(dsConfig.getJdbcUrl());
@@ -371,9 +418,15 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
             client.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_LATEST);
         }
 
-        client.register(new Processor(fullName));
+        if (isMigrate) {
+            client.register(new Processor(fullName, routerForMigrate));
+        } else {
+            for (DataSourceRouter router : routerList) {
+                client.register(new Processor(fullName, router));
+            }
+        }
 
-        pumaClientList.add(client);
+        pumaClientList.put(jdbcRef, client);
         return client;
     }
 
@@ -390,43 +443,36 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
         return dataSourceConfigs.get(0);
     }
 
-    protected GroupDataSource initGroupDataSource(String jdbcRef) {
-        if (dataSourcePool.containsKey(jdbcRef)) {
-            return (GroupDataSource) dataSourcePool.get(dataSourcePool);
-        }
-        GroupDataSource ds = new GroupDataSource(jdbcRef);
-        ds.setRouterType(RouterType.FAIL_OVER.getRouterType());
-        ds.init();
-        dataSourcePool.put(jdbcRef, ds);
-        return ds;
-    }
-
     protected void initAndConvertConfig() {
         try {
             RouterRuleConfig tempRouterRuleConfig = new Gson().fromJson(configCache.getProperty(LionKey.getShardConfigKey(task.getRuleName())), RouterRuleConfig.class);
-            this.originGroupDataSource = configCache.getProperty(LionKey.getShardOriginDatasourceKey(task.getRuleName()));
+            this.originDsJdbcRef = configCache.getProperty(LionKey.getShardOriginDatasourceKey(task.getRuleName()));
             String switchOnStr = configCache.getProperty(LionKey.getShardSiwtchOnKey(task.getRuleName()));
             this.switchOn = switchOnStr == null || "true".equals(switchOnStr);
-            findTableRuleConfig(tempRouterRuleConfig);
-            convertRuleConfigForRouting();
+
+            convertOriginRuleConfig(tempRouterRuleConfig);
+            convertRuleConfigList();
         } catch (LionException e) {
             throw new RuntimeException(e);
         }
 
     }
 
-    protected void convertRuleConfigForRouting() {
-        this.tableShardRuleConfigForRouting = SerializationUtils.clone(this.tableShardRuleConfigOrigin);
-        Iterator<TableShardDimensionConfig> iterator = this.tableShardRuleConfigForRouting.getDimensionConfigs().iterator();
-        while (iterator.hasNext() && iterator.next().isMaster()) {
-            iterator.remove();
-        }
-        for (TableShardDimensionConfig config : this.tableShardRuleConfigForRouting.getDimensionConfigs()) {
-            config.setMaster(true);
+    protected void convertRuleConfigList() {
+        for (TableShardDimensionConfig dc : this.tableShardRuleConfigOrigin.getDimensionConfigs()) {
+            if (dc.isMaster()) {
+                continue;
+            }
+
+            TableShardRuleConfig tempConfig = new TableShardRuleConfig();
+            TableShardDimensionConfig tempDimensionConfig = SerializationUtils.clone(dc);
+            tempDimensionConfig.setMaster(true);
+            tempConfig.setDimensionConfigs(Lists.newArrayList(tempDimensionConfig));
+            tableShardRuleConfigList.add(tempConfig);
         }
     }
 
-    protected void findTableRuleConfig(RouterRuleConfig tempRouterRuleConfig) {
+    protected void convertOriginRuleConfig(RouterRuleConfig tempRouterRuleConfig) {
         for (TableShardRuleConfig tableConfig : tempRouterRuleConfig.getTableShardConfigs()) {
             if (task.getTableName().equals(tableConfig.getTableName())) {
                 this.tableShardRuleConfigOrigin = tableConfig;
@@ -446,7 +492,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
         }
 
         try {
-            for (PumaClient client : pumaClientList) {
+            for (PumaClient client : pumaClientList.values()) {
                 client.start();
             }
             this.status.setStatus(Status.RUNNING);
@@ -462,7 +508,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
         }
 
         try {
-            for (PumaClient client : pumaClientList) {
+            for (PumaClient client : pumaClientList.values()) {
                 client.stop();
             }
             this.status.setStatus(Status.SUSPENDED);
@@ -503,7 +549,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
         }
 
         try {
-            for (PumaClient client : pumaClientList) {
+            for (PumaClient client : pumaClientList.values()) {
                 client.stop();
             }
             this.status.setStatus(Status.STOPPED);

@@ -441,7 +441,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 				Transaction t = null;
 				++eventCount;
 				if (eventCount == 1000) {
-					t = Cat.getProducer().newTransaction("onEvent", abstractTask.getName() + " " + event.getDatabase() + " " + event.getTable());
+					t = Cat.getProducer().newTransaction("onEvent", abstractTask.getName());
+					Cat.logEvent("Detail", event.toString());
 				}
 
 				// LOG.info("********************Received " + event);

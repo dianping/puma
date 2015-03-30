@@ -26,32 +26,33 @@ public class PumaMonitorSyncProcessTask implements PumaMonitorTask {
 
 	@Autowired
 	private NotifyService notifyService;
-	
+
 	@Override
 	public void runTask() {
 		Map<String, ClientStatus> clientStatuses = SystemStatusContainer.instance.listClientStatus();
 		Map<String, ServerStatus> serverStatuses = SystemStatusContainer.instance.listServerStatus();
-		try{
+		try {
 			for (Map.Entry<String, ClientStatus> clientStatus : clientStatuses.entrySet()) {
 				ServerStatus serverStatus = serverStatuses.get(clientStatus.getValue().getTarget());
 				if (clientStatus.getValue().getBinlogFile() == null || serverStatus.getBinlogFile() == null) {
 					return;
 				}
-				int dfileNum = getDiffNum(serverStatus.getBinlogFile(), serverStatus.getBinlogPos(),clientStatus.getValue().getBinlogFile(), clientStatus.getValue().getBinlogPos()) ;
+				int dfileNum = getDiffNum(serverStatus.getBinlogFile(), serverStatus.getBinlogPos(), clientStatus
+						.getValue().getBinlogFile(), clientStatus.getValue().getBinlogPos());
 				Cat.getProducer().logEvent(
 						"Puma.server." + clientStatus.getKey() + ".process",
 						getEventName(dfileNum),
 						Message.SUCCESS,
-						"srcbinlog = " + serverStatus.getBinlogFile() + "," + Long.toString(serverStatus.getBinlogPos())
-								+ "&desbinlog = " + clientStatus.getValue().getBinlogFile() + ","
+						"srcbinlog = " + serverStatus.getBinlogFile() + ","
+								+ Long.toString(serverStatus.getBinlogPos()) + "&desbinlog = "
+								+ clientStatus.getValue().getBinlogFile() + ","
 								+ Long.toString(clientStatus.getValue().getBinlogPos()));
-				if(dfileNum>=taskLionConfig.getSyncProcessDfileNum()){
+				if (dfileNum >= taskLionConfig.getSyncProcessDfileNum()) {
 					throw new MonitorThresholdException();
 				}
 			}
-			
-		}
-		catch(MonitorThresholdException e){
+
+		} catch (MonitorThresholdException e) {
 			notifyService.alarm(" diff num of file between sync and server binlog process :", e, true);
 		}
 	}

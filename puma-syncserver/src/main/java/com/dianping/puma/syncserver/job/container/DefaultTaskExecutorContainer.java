@@ -164,9 +164,9 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer {
         ShardSyncTaskExecutor shardSyncTaskExecutor = (ShardSyncTaskExecutor) this.get(taskName);
         if (shardSyncTaskExecutor != null) {
             this.delete(SyncType.SHARD_SYNC, taskName);
-            binlogInfoHolder.remove(taskName);
             LOG.info(shardSyncTaskExecutor + " is deleted.");
             shardSyncTaskExecutor.stop("Disconnect because the StatusAction is deleted.");
+            binlogInfoHolder.remove(taskName);
         }
     }
 

@@ -5,6 +5,7 @@ import com.dianping.puma.core.entity.ShardSyncTask;
 import com.dianping.puma.core.monitor.EventListener;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.monitor.event.Event;
+import com.dianping.puma.core.monitor.event.ShardSyncTaskOperationEvent;
 import com.dianping.puma.core.monitor.event.SyncTaskOperationEvent;
 import com.dianping.puma.core.service.ShardSyncTaskService;
 import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;
@@ -35,11 +36,11 @@ public class ShardSyncTaskOperationReceiver implements EventListener {
 
     @Override
     public void onEvent(Event event) {
-        if (event instanceof SyncTaskOperationEvent) {
+        if (event instanceof ShardSyncTaskOperationEvent) {
             LOG.info("Receive shard sync task operation event.");
 
-            String taskName = ((SyncTaskOperationEvent) event).getTaskName();
-            ActionOperation operation = ((SyncTaskOperationEvent) event).getOperation();
+            String taskName = ((ShardSyncTaskOperationEvent) event).getTaskName();
+            ActionOperation operation = ((ShardSyncTaskOperationEvent) event).getOperation();
 
             switch (operation) {
                 case CREATE:

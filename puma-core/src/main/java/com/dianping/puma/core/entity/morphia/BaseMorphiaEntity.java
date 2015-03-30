@@ -8,7 +8,7 @@ import com.google.code.morphia.utils.IndexDirection;
 
 import java.io.Serializable;
 
-public class BaseMorphiaEntity<T> implements Serializable {
+public class BaseMorphiaEntity<T extends BaseEntity> implements Serializable {
 
 	private static final long serialVersionUID = 8121775127353895001L;
 
@@ -29,6 +29,7 @@ public class BaseMorphiaEntity<T> implements Serializable {
 
 	public void setId(Long id) {
 		this.id = id;
+		this.entity.setId(id);
 	}
 
 	public String getName() {

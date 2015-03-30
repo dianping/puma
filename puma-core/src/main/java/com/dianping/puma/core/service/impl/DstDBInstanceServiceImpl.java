@@ -20,6 +20,12 @@ public class DstDBInstanceServiceImpl implements DstDBInstanceService {
 	}
 
 	@Override
+	public DstDBInstance find(long id) {
+		return dstDbInstanceDao.find(id);
+	}
+
+	
+	@Override
 	public List<DstDBInstance> findAll() {
 		return dstDbInstanceDao.findAll();
 	}
@@ -37,5 +43,10 @@ public class DstDBInstanceServiceImpl implements DstDBInstanceService {
 	@Override
 	public void remove(String name) {
 		dstDbInstanceDao.remove(name);
+	}
+	
+	@Override
+	public void remove(long id) {
+		dstDbInstanceDao.remove(id);
 	}
 }

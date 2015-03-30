@@ -5,6 +5,8 @@ import com.dianping.puma.core.entity.SyncServer;
 import java.util.List;
 
 public interface SyncServerService {
+	
+	SyncServer find(long id);
 
 	SyncServer find(String name);
 
@@ -14,7 +16,9 @@ public interface SyncServerService {
 
 	void update(SyncServer syncServer);
 
-	void remove(String id);
+	void remove(String name);
+	
+	void remove(long id);
 
 	SyncServer findByHost(String host);
 }

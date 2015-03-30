@@ -6,6 +6,8 @@ import com.dianping.puma.core.entity.SyncTask;
 import java.util.List;
 
 public interface SyncTaskService {
+	
+	SyncTask find(long id);
 
 	SyncTask find(String name);
 
@@ -20,6 +22,8 @@ public interface SyncTaskService {
 	void create(SyncTask syncTask);
 
 	void remove(String name);
+	
+	void remove(long id);
 	
 	List<SyncTask> find(int offset, int limit);
 	

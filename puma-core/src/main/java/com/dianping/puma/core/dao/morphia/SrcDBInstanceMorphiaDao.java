@@ -23,6 +23,13 @@ public class SrcDBInstanceMorphiaDao extends MongoBaseDao<SrcDBInstanceMorphia>
     }
 
 
+    public SrcDBInstance find(long id) {
+		Query<SrcDBInstanceMorphia> q = this.getDatastore().createQuery(SrcDBInstanceMorphia.class);
+		q.field("_id").equal(id);
+		SrcDBInstanceMorphia srcDBInstanceMorphia = this.findOne(q);
+		return (srcDBInstanceMorphia == null) ? null : srcDBInstanceMorphia.getEntity();
+	}
+    
 	public SrcDBInstance find(String name) {
 		Query<SrcDBInstanceMorphia> q = this.getDatastore().createQuery(SrcDBInstanceMorphia.class);
 		q.field("name").equal(name);
@@ -61,6 +68,12 @@ public class SrcDBInstanceMorphiaDao extends MongoBaseDao<SrcDBInstanceMorphia>
 	public void remove(String name) {
 		Query<SrcDBInstanceMorphia> q = this.getDatastore().createQuery(SrcDBInstanceMorphia.class);
 		q.field("name").equal(name);
+		this.deleteByQuery(q);
+	}
+	
+	public void remove(long id) {
+		Query<SrcDBInstanceMorphia> q = this.getDatastore().createQuery(SrcDBInstanceMorphia.class);
+		q.field("id").equal(id);
 		this.deleteByQuery(q);
 	}
 

@@ -18,6 +18,11 @@ public class PumaTaskServiceImpl implements PumaTaskService {
 	public PumaTask find(String name) {
 		return pumaTaskDao.find(name);
 	}
+	
+	@Override
+	public PumaTask find(long id) {
+		return pumaTaskDao.find(id);
+	}
 
 	@Override
 	public List<PumaTask> findBySrcDBInstanceName(String srcDBInstanceName) {
@@ -47,5 +52,10 @@ public class PumaTaskServiceImpl implements PumaTaskService {
 	@Override
 	public void remove(String name) {
 		pumaTaskDao.remove(name);
+	}
+	
+	@Override
+	public void remove(long id) {
+		pumaTaskDao.remove(id);
 	}
 }

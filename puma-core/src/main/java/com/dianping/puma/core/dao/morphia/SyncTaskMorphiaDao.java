@@ -23,6 +23,13 @@ public class SyncTaskMorphiaDao extends MongoBaseDao<SyncTaskMorphia> implements
 		super(mongoClient.getDatastore());
 	}
 
+	public SyncTask find(long id) {
+		Query<SyncTaskMorphia> q = this.getDatastore().createQuery(SyncTaskMorphia.class);
+		q.field("id").equal(id);
+		SyncTaskMorphia syncTaskMorphia = this.findOne(q);
+		return (syncTaskMorphia == null) ? null : syncTaskMorphia.getEntity();
+	}
+	
 	public SyncTask find(String name) {
 		Query<SyncTaskMorphia> q = this.getDatastore().createQuery(SyncTaskMorphia.class);
 		q.field("name").equal(name);
@@ -92,6 +99,13 @@ public class SyncTaskMorphiaDao extends MongoBaseDao<SyncTaskMorphia> implements
 	public void remove(String name) {
 		Query<SyncTaskMorphia> q = this.getDatastore().createQuery(SyncTaskMorphia.class);
 		q.field("name").equal(name);
+		this.deleteByQuery(q);
+	}
+	
+	@Override
+	public void remove(long id) {
+		Query<SyncTaskMorphia> q = this.getDatastore().createQuery(SyncTaskMorphia.class);
+		q.field("id").equal(id);
 		this.deleteByQuery(q);
 	}
 

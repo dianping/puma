@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface PumaServerDao {
 
+	PumaServer find(long id);
+	
 	PumaServer find(String name);
 
 	PumaServer findByHost(String host);
@@ -17,4 +19,6 @@ public interface PumaServerDao {
 	void update(PumaServer pumaServer);
 
 	void remove(String name);
+	
+	void remove(long id);
 }

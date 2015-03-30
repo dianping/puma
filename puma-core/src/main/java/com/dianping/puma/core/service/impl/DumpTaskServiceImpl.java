@@ -17,6 +17,10 @@ public class DumpTaskServiceImpl implements DumpTaskService {
 	public DumpTask find(String name) {
 		return dumpTaskDao.find(name);
 	}
+	
+	public DumpTask find(long id) {
+		return dumpTaskDao.find(id);
+	}
 
 	public List<DumpTask> findAll() {
 		return dumpTaskDao.findAll();
@@ -28,5 +32,9 @@ public class DumpTaskServiceImpl implements DumpTaskService {
 
 	public void remove(String name) {
 		dumpTaskDao.remove(name);
+	}
+	
+	public void remove(long id) {
+		dumpTaskDao.remove(id);
 	}
 }

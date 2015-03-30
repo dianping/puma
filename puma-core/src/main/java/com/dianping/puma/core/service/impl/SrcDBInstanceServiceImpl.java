@@ -19,6 +19,11 @@ public class SrcDBInstanceServiceImpl implements SrcDBInstanceService {
 	}
 
 	@Override
+	public SrcDBInstance find(long id) {
+		return srcDbInstanceDao.find(id);
+	}
+
+	@Override
 	public List<SrcDBInstance> findAll() {
 		return srcDbInstanceDao.findAll();
 	}
@@ -36,6 +41,11 @@ public class SrcDBInstanceServiceImpl implements SrcDBInstanceService {
 	@Override
 	public void remove(String name) {
 		srcDbInstanceDao.remove(name);
+	}
+	
+	@Override
+	public void remove(long id) {
+		srcDbInstanceDao.remove(id);
 	}
 
     @Override

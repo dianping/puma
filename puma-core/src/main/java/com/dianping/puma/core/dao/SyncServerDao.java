@@ -5,6 +5,8 @@ import com.dianping.puma.core.entity.SyncServer;
 import java.util.List;
 
 public interface SyncServerDao {
+	
+	SyncServer find(long id);
 
 	SyncServer find(String name);
 
@@ -17,4 +19,6 @@ public interface SyncServerDao {
 	void update(SyncServer syncServer);
 
 	void remove(String name);
+	
+	void remove(long id);
 }

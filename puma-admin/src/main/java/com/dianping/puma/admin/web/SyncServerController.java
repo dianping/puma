@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -54,20 +55,22 @@ public class SyncServerController {
 		return new ModelAndView("main/container", map);
 	}
 
-	@RequestMapping(value = { "/sync-server/update" })
-	public ModelAndView update(String name) {
+	@RequestMapping(value = { "/sync-server/update/{id}" })
+	public ModelAndView update(@PathVariable long id) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			List<SyncTask> syncTasks = syncTaskService.findBySyncServerName(name);
+			SyncServer entity = syncServerService.find(id);
+			if (entity != null) {
+				List<SyncTask> syncTasks = syncTaskService.findBySyncServerName(entity.getName());
 
-			if (syncTasks != null && syncTasks.size() != 0) {
-				map.put("lock", true);
-			} else {
-				map.put("lock", false);
+				if (syncTasks != null && syncTasks.size() != 0) {
+					map.put("lock", true);
+				} else {
+					map.put("lock", false);
+				}
 			}
-
-			SyncServer entity = syncServerService.find(name);
+			// SyncServer entity = syncServerService.find(name);
 			map.put("entity", entity);
 			map.put("path", "sync-server");
 			map.put("subPath", "create");

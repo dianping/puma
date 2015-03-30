@@ -7,6 +7,8 @@ import com.dianping.puma.core.entity.morphia.DstDBInstanceMorphia;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
 import com.google.code.morphia.query.UpdateOperations;
+import com.mongodb.WriteResult;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,13 @@ public class DstDBInstanceMorphiaDao extends MongoBaseDao<DstDBInstanceMorphia>
 		super(mongoClient.getDatastore());
 	}
 
+	public DstDBInstance find(long id) {
+		Query<DstDBInstanceMorphia> q = this.getDatastore().createQuery(DstDBInstanceMorphia.class);
+		q.field("id").equal(id);
+		DstDBInstanceMorphia dstDBInstanceMorphia = this.findOne(q);
+		return (dstDBInstanceMorphia == null) ? null : dstDBInstanceMorphia.getEntity();
+	}
+	
 	public DstDBInstance find(String name) {
 		Query<DstDBInstanceMorphia> q = this.getDatastore().createQuery(DstDBInstanceMorphia.class);
 		q.field("name").equal(name);
@@ -60,6 +69,12 @@ public class DstDBInstanceMorphiaDao extends MongoBaseDao<DstDBInstanceMorphia>
 	public void remove(String name) {
 		Query<DstDBInstanceMorphia> q = this.getDatastore().createQuery(DstDBInstanceMorphia.class);
 		q.field("name").equal(name);
+		this.deleteByQuery(q);
+	}
+
+	public void remove(long id) {
+		Query<DstDBInstanceMorphia> q = this.getDatastore().createQuery(DstDBInstanceMorphia.class);
+		q.field("id").equal(id);
 		this.deleteByQuery(q);
 	}
 }

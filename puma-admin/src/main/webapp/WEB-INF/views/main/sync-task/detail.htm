@@ -80,21 +80,21 @@
 			  </label>
 		  </h5>
 		  </div>
-		    <div class="panel-body in collapse" id="div_body_mapping">
+		    <div class="panel-body" id="div_body_mapping">
 		      #foreach($database in $syncTask.mysqlMapping.databases)
 				 <div class="form-group">
 				 	<label class="col-md-3 control-label panel-label-local-left">数据库名称</label>
 				 	<a data-toggle="collapse" href="#collapse_1">
 				    <label class="col-md-3 control-label panel-label-local" >$database.from</label>
 			  			<div class="col-sm-1">
-			  			 	<span class="glyphicon glyphicon-arrow-right" aria-hidden="true" style="margin-top:8px; margin-left:9px"></span>
+			  			 	<span class="glyphicon glyphicon-arrow-right" aria-hidden="true" style="margin-top:2px; margin-left:9px"></span>
 			  			</div>
 			  	     <label class="col-md-3 control-label panel-label-local">$database.to</label>
 			  	     </a>
 			      </div>
 
 	          <hr/>
-	           <div id="collapse_1">
+	           <div id="collapse_1" class="in collapse">
 	           #foreach($table in $database.tables)
 	           <div class="form-group panel-form-group-sub">
 				 <label class="col-md-3 control-label panel-label-local-left">表名称</label>

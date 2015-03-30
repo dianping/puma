@@ -61,7 +61,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSyncTaskState> {
     private static final Logger logger = LoggerFactory.getLogger(ShardSyncTaskExecutor.class);
 
-    private final ShardSyncTask task;
+    private ShardSyncTask task;
 
     protected ShardSyncTaskState status;
 

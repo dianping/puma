@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
+import com.dianping.puma.core.event.RowChangedEvent;
 import org.apache.log4j.Logger;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
@@ -102,6 +103,13 @@ public class Handler implements PageHandler<Context> {
 				filterChain.reset();
 				ChangedEvent event = channel.next();
 				if (event != null) {
+
+					if (event instanceof RowChangedEvent) {
+						if (((RowChangedEvent) event).isTransactionBegin()) {
+							continue;
+						}
+					}
+
 					if (filterChain.doNext(event)) {
 						byte[] data = codec.encode(event);
 						res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));

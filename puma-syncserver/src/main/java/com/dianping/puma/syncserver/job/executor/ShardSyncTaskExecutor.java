@@ -143,11 +143,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
 
         private final String name;
 
-        private final DataSourceRouter router;
+        private final List<DataSourceRouter> routers;
 
-        public Processor(String name, DataSourceRouter router) {
+        public Processor(String name, List<DataSourceRouter> routers) {
             this.name = name;
-            this.router = router;
+            this.routers = routers;
         }
 
         @Override
@@ -173,14 +173,16 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
                 return;
             }
 
-            RouterTarget routerTarget = this.router.getTarget(tempSql, args);
+            for (DataSourceRouter router : routers) {
+                RouterTarget routerTarget = router.getTarget(tempSql, args);
 
-            for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
-                JdbcTemplate jdbcTemplate = new JdbcTemplate(targetedSql.getDataSource());
-                for (String sql : targetedSql.getSqls()) {
-                    int rows = jdbcTemplate.update(sql, args.toArray());
-                    if (rows != 1) {
-                        throw new EmptyResultDataAccessException("error effective dated row:" + rows, 1);
+                for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
+                    JdbcTemplate jdbcTemplate = new JdbcTemplate(targetedSql.getDataSource());
+                    for (String sql : targetedSql.getSqls()) {
+                        int rows = jdbcTemplate.update(sql, args.toArray());
+                        if (rows != 1) {
+                            throw new EmptyResultDataAccessException("error effective dated row:" + rows, 1);
+                        }
                     }
                 }
             }
@@ -423,11 +425,9 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
         }
 
         if (isMigrate) {
-            client.register(new Processor(fullName, routerForMigrate));
+            client.register(new Processor(fullName, Lists.newArrayList(routerForMigrate)));
         } else {
-            for (DataSourceRouter router : routerList) {
-                client.register(new Processor(fullName, router));
-            }
+            client.register(new Processor(fullName, routerList));
         }
 
         pumaClientList.put(jdbcRef, client);

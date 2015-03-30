@@ -358,6 +358,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 			/** 记录一个收到多少个commit事件 */
 			private int commitBinlogCount = 0;
 
+			private int eventCount = 0;
+
 			/** 对于PumaClient记录的binlog，需要在一开始skip */
 			private boolean skipToNextPos = startedBinlogInfo.isSkipToNextPos();
 
@@ -435,6 +437,13 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 
 			@Override
 			public void onEvent(ChangedEvent event) throws Exception {
+
+				Transaction t = null;
+				++eventCount;
+				if (eventCount == 1000) {
+					t = Cat.getProducer().newTransaction("onEvent", abstractTask.getName() + " " + event.getDatabase() + " " + event.getTable());
+				}
+
 				// LOG.info("********************Received " + event);
 				if (!skipToNextPos) {
 					if (event instanceof RowChangedEvent) {
@@ -444,11 +453,6 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 							// --------- (2) 【事务提交事件】--------------
 							if (containDatabase(event.getDatabase()) && transactionStart) {
 								// 提交事务(datachange了，则该commit肯定是属于当前做了数据操作的事务的，故mysqlExecutor.commit();)
-								Cat.getProducer().logEvent("COMMIT", abstractTask.getName());
-								Transaction t = Cat.getProducer().newTransaction("COMMIT", abstractTask.getName());
-								mysqlExecutor.commit();
-								Cat.getProducer().logEvent("COMMIT", abstractTask.getName());
-								t.complete();
 								transactionStart = false;
 								// 遇到commit事件，操作数据库了，更新sqlbinlog和保存binlog到数据库
 								binlogOfSqlThreadChanged(event);
@@ -456,7 +460,6 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 							} else {
 								// 只要累计遇到的commit事件1000个(无论是否属于抓取的database)，都更新sqlbinlog和保存binlog到数据库，为的是即使当前task更新不频繁，也不要让它的binlog落后太多
 								if (++commitBinlogCount > getSaveCommitCount()) {
-									Cat.getProducer().logEvent("ELSE.COMMIT", abstractTask.getName());
 									binlogOfSqlThreadChanged(event);
 									commitBinlogCount = 0;
 								}
@@ -473,25 +476,17 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 							transactionStart = true;
 							// 执行子类的具体操作
 
-							Cat.getProducer().logEvent("DML", abstractTask.getName());
-							Transaction t = Cat.getProducer().newTransaction("DML", abstractTask.getName());
 							AbstractTaskExecutor.this.execute(event);
-							Cat.getProducer().logEvent("DML", abstractTask.getName());
-							t.complete();
 						}
 					} else if (event instanceof DdlEvent) {
 						if (containDatabase(event.getDatabase())) {
 							lastEvents.add(event);
 							// 执行子类的具体操作
-							Transaction t = Cat.getProducer().newTransaction("DDL", abstractTask.getName());
 							try {
 								AbstractTaskExecutor.this.execute(event);
-								Cat.getProducer().logEvent("DDL", abstractTask.getName());
-								t.complete();
 							} catch (DdlRenameException e) {
 								AbstractTaskExecutor.this.fail("case by db rename operation ," + e);
 								Cat.getProducer().logError("case by db rename operation ," + e, e);
-								t.complete();
 								return;
 							}
 						}
@@ -510,6 +505,12 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 					} catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
 					}
+				}
+
+				if (eventCount == 1000 && t != null) {
+					t.setStatus("0");
+					t.complete();
+					eventCount = 0;
 				}
 			}
 

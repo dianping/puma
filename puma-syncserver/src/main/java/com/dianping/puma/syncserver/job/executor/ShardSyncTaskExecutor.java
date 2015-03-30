@@ -313,12 +313,12 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
 
     protected void initDataSources() {
         if (!switchOn && !Strings.isNullOrEmpty(originDsJdbcRef)) {
-            this.originDataSource =initGroupDataSource(originDsJdbcRef);
+            this.originDataSource = initGroupDataSource(originDsJdbcRef);
         }
 
         TableShardRule tableShardRule = routerRuleOrigin.getTableShardRules().get(task.getTableName());
         for (DimensionRule dimensionRule : tableShardRule.getDimensionRules()) {
-            DimensionRuleImpl dimensionRuleImpl = (DimensionRuleImpl)  dimensionRule;
+            DimensionRuleImpl dimensionRuleImpl = (DimensionRuleImpl) dimensionRule;
 
             initDataSources(dimensionRuleImpl.getDataSourceProvider().getAllDBAndTables());
 
@@ -469,6 +469,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
             }
 
             TableShardRuleConfig tempConfig = new TableShardRuleConfig();
+            tempConfig.setTableName(task.getTableName());
+
             TableShardDimensionConfig tempDimensionConfig = SerializationUtils.clone(dc);
             tempDimensionConfig.setMaster(true);
             tempConfig.setDimensionConfigs(Lists.newArrayList(tempDimensionConfig));

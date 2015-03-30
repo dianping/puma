@@ -446,7 +446,6 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 								// 提交事务(datachange了，则该commit肯定是属于当前做了数据操作的事务的，故mysqlExecutor.commit();)
 								Transaction t = Cat.getProducer().newTransaction("COMMIT", abstractTask.getName());
 								mysqlExecutor.commit();
-								t.setStatus("0");
 								t.complete();
 								transactionStart = false;
 								// 遇到commit事件，操作数据库了，更新sqlbinlog和保存binlog到数据库
@@ -455,6 +454,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 							} else {
 								// 只要累计遇到的commit事件1000个(无论是否属于抓取的database)，都更新sqlbinlog和保存binlog到数据库，为的是即使当前task更新不频繁，也不要让它的binlog落后太多
 								if (++commitBinlogCount > getSaveCommitCount()) {
+									Cat.getProducer().logEvent("ELSE.COMMIT", abstractTask.getName());
 									binlogOfSqlThreadChanged(event);
 									commitBinlogCount = 0;
 								}
@@ -474,7 +474,6 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 
 							Transaction t = Cat.getProducer().newTransaction("DML", abstractTask.getName());
 							AbstractTaskExecutor.this.execute(event);
-							t.setStatus("0");
 							t.complete();
 						}
 					} else if (event instanceof DdlEvent) {
@@ -484,7 +483,6 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 							try {
 								Transaction t = Cat.getProducer().newTransaction("DDL", abstractTask.getName());
 								AbstractTaskExecutor.this.execute(event);
-								t.setStatus("0");
 								t.complete();
 							} catch (DdlRenameException e) {
 								AbstractTaskExecutor.this.fail("case by db rename operation ," + e);

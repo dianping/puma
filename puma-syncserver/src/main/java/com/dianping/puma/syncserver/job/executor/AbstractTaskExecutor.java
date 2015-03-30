@@ -435,9 +435,6 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 
 			@Override
 			public void onEvent(ChangedEvent event) throws Exception {
-
-				Transaction t = Cat.getProducer().newTransaction("Time", abstractTask.getName());
-
 				// LOG.info("********************Received " + event);
 				if (!skipToNextPos) {
 					if (event instanceof RowChangedEvent) {
@@ -500,9 +497,6 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 						Thread.currentThread().interrupt();
 					}
 				}
-
-				t.complete();
-
 			}
 
 			@Override

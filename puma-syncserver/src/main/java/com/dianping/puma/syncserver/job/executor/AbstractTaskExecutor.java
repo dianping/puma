@@ -444,7 +444,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 							// --------- (2) 【事务提交事件】--------------
 							if (containDatabase(event.getDatabase()) && transactionStart) {
 								// 提交事务(datachange了，则该commit肯定是属于当前做了数据操作的事务的，故mysqlExecutor.commit();)
+								Transaction t = Cat.getProducer().newTransaction("COMMIT", abstractTask.getName());
 								mysqlExecutor.commit();
+								t.setStatus("0");
+								t.complete();
 								transactionStart = false;
 								// 遇到commit事件，操作数据库了，更新sqlbinlog和保存binlog到数据库
 								binlogOfSqlThreadChanged(event);
@@ -467,17 +470,25 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 							// 标识事务开始
 							transactionStart = true;
 							// 执行子类的具体操作
+
+
+							Transaction t = Cat.getProducer().newTransaction("DML", abstractTask.getName());
 							AbstractTaskExecutor.this.execute(event);
+							t.setStatus("0");
+							t.complete();
 						}
 					} else if (event instanceof DdlEvent) {
 						if (containDatabase(event.getDatabase())) {
 							lastEvents.add(event);
 							// 执行子类的具体操作
 							try {
+								Transaction t = Cat.getProducer().newTransaction("DDL", abstractTask.getName());
 								AbstractTaskExecutor.this.execute(event);
+								t.setStatus("0");
+								t.complete();
 							} catch (DdlRenameException e) {
 								AbstractTaskExecutor.this.fail("case by db rename operation ," + e);
-								Cat.getProducer().logError("case by db rename operation ," + e, e );
+								Cat.getProducer().logError("case by db rename operation ," + e, e);
 								return;
 							}
 						}

@@ -63,6 +63,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
 
     private ShardSyncTask task;
 
+    private volatile boolean inited = false;
+
     protected ShardSyncTaskState status;
 
     private ConfigCache configCache;
@@ -120,6 +122,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
             initRouterConfig();
             initPumaClientsAndDataSources();
             initRouter();
+            inited = true;
         } catch (Exception exp) {
             this.status.setStatus(Status.FAILED);
         }
@@ -438,6 +441,10 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
 
     @Override
     public void start() {
+        if (!inited) {
+            return;
+        }
+
         try {
             for (PumaClient client : pumaClientList) {
                 client.start();
@@ -450,6 +457,10 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
 
     @Override
     public void pause(String detail) {
+        if (!inited) {
+            return;
+        }
+
         try {
             for (PumaClient client : pumaClientList) {
                 client.stop();
@@ -487,6 +498,10 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
 
     @Override
     public void stop(String detail) {
+        if (!inited) {
+            return;
+        }
+
         try {
             for (PumaClient client : pumaClientList) {
                 client.stop();

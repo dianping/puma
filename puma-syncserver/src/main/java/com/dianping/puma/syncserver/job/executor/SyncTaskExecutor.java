@@ -2,6 +2,8 @@ package com.dianping.puma.syncserver.job.executor;
 
 import java.sql.SQLException;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Transaction;
 import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.model.state.SyncTaskState;
@@ -16,6 +18,8 @@ public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTask, SyncTaskSta
 
 	protected SyncTaskState state;
 
+	private int count = 0;
+
 	public SyncTaskExecutor(SyncTask syncTask, String pumaServerHost, int pumaServerPort,
 			String target, DstDBInstance dstDBInstance) {
 		super(syncTask, pumaServerHost, pumaServerPort, target, dstDBInstance);
@@ -23,8 +27,15 @@ public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTask, SyncTaskSta
 
 	@Override
 	protected void execute(ChangedEvent event) throws SQLException, DdlRenameException {
-		// 执行同步
-		mysqlExecutor.execute(event);
+		if (count++ == 1000) {
+			Transaction t = Cat.getProducer().newTransaction("SQL.execution", this.getTask().getName());
+			mysqlExecutor.execute(event);
+			t.setStatus("0");
+			t.complete();
+			count = 0;
+		} else {
+			mysqlExecutor.execute(event);
+		}
 	}
 
 }

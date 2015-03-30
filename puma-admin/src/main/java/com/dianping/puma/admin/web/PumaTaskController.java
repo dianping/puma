@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -86,8 +87,8 @@ public class PumaTaskController {
 		return new ModelAndView("main/container", map);
 	}
 
-	@RequestMapping(value = { "/puma-task/update" }, method = RequestMethod.GET)
-	public ModelAndView update(String name) {
+	@RequestMapping(value = { "/puma-task/update/{id}" }, method = RequestMethod.GET)
+	public ModelAndView update(@PathVariable long id) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
@@ -97,7 +98,7 @@ public class PumaTaskController {
 			map.put("srcDBInstanceEntities", srcDBInstanceEntities);
 			map.put("pumaServerEntities", pumaServerEntities);
 
-			PumaTask pumaTask = pumaTaskService.find(name);
+			PumaTask pumaTask = pumaTaskService.find(id);
 
 			map.put("entity", pumaTask);
 			map.put("path", "puma-task");

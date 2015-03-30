@@ -82,27 +82,27 @@
 		  </div>
 		    <div class="panel-body" id="div_body_mapping">
 		      #foreach($database in $syncTask.mysqlMapping.databases)
-				 <div class="form-group">
-				 	<label class="col-md-3 control-label panel-label-local-left">数据库名称</label>
+				 <div class="panel-group">
+				 	<label class="col-md-3  panel-label-local-left">数据库名称</label>
 				 	<a data-toggle="collapse" href="#collapse_1">
-				    <label class="col-md-3 control-label panel-label-local" >$database.from</label>
+				    <label class="col-md-3  panel-label-local" >$database.from</label>
 			  			<div class="col-sm-1">
 			  			 	<span class="glyphicon glyphicon-arrow-right" aria-hidden="true" style="margin-top:2px; margin-left:9px"></span>
 			  			</div>
-			  	     <label class="col-md-3 control-label panel-label-local">$database.to</label>
+			  	     <label class="col-md-3  panel-label-local">$database.to</label>
 			  	     </a>
 			      </div>
-
-	          <hr/>
+			      
+			    <hr/>
 	           <div id="collapse_1" class="in collapse">
 	           #foreach($table in $database.tables)
-	           <div class="form-group panel-form-group-sub">
-				 <label class="col-md-3 control-label panel-label-local-left">表名称</label>
-				 <label class="col-md-3 control-label"  style="text-align:center">${table.from}</label>
+	           <div class="panel-group-sub">
+				 <label class="col-md-3  panel-label-local-left">表名称</label>
+				 <label class="col-md-3 panel-label-local"  style="text-align:center">${table.from}</label>
 			  	 <div class="col-sm-1">
 			  		<span class="glyphicon glyphicon-arrow-right" aria-hidden="true" style="margin-top:8px; margin-left:9px"></span>
 			  	 </div>
-			  	 <label class="col-md-3 control-label " style="text-align:center">${table.to}</label>
+			  	 <label class="col-md-3 panel-label-local" style="text-align:center">${table.to}</label>
 			    </div>
 			 	#end
 			  </div>

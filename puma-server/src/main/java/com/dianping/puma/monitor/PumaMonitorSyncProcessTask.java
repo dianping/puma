@@ -35,11 +35,11 @@ public class PumaMonitorSyncProcessTask implements PumaMonitorTask {
 		int dfileNum = 0;
 		try {
 			for (Map.Entry<String, ClientStatus> clientStatus : clientStatuses.entrySet()) {
+				Log.info("puma Monitor SyncProcess : client is " +clientStatus.getKey());
 				ServerStatus serverStatus = serverStatuses.get(clientStatus.getValue().getTarget());
 				if (clientStatus.getValue().getBinlogFile() == null || serverStatus.getBinlogFile() == null) {
-					return;
+					continue;
 				}
-				Log.info("puma Monitor SyncProcess : client is " +clientStatus.getKey());
 				dfileNum = getDiffNum(serverStatus.getBinlogFile(), serverStatus.getBinlogPos(), clientStatus
 						.getValue().getBinlogFile(), clientStatus.getValue().getBinlogPos());
 				Cat.getProducer().logEvent(

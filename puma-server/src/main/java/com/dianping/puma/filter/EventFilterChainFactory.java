@@ -1,9 +1,9 @@
 /**
  * Project: puma-server
- * 
+ *
  * File Created at 2012-7-7
  * $Id$
- * 
+ *
  * Copyright 2010 dianping.com.
  * All rights reserved.
  *
@@ -20,9 +20,8 @@ import java.util.List;
 
 /**
  * TODO Comment of EventFilterChainFactory
- * 
+ *
  * @author Leo Liang
- * 
  */
 public final class EventFilterChainFactory {
 	private EventFilterChainFactory() {

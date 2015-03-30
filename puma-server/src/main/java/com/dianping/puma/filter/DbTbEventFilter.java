@@ -11,10 +11,13 @@ import com.dianping.puma.core.event.ChangedEvent;
 
 public class DbTbEventFilter extends AbstractEventFilter {
 
-	private Map<String, Boolean>	dbtbMap			= new ConcurrentHashMap<String, Boolean>();
-	private List<String>			tbPrefixList	= new ArrayList<String>();
-	private static final String		DB_TB_SPLIT_STR	= ".";
-	private static final String		SUFIX_ANY		= "*";
+	private Map<String, Boolean> dbtbMap = new ConcurrentHashMap<String, Boolean>();
+
+	private List<String> tbPrefixList = new ArrayList<String>();
+
+	private static final String DB_TB_SPLIT_STR = ".";
+
+	private static final String SUFIX_ANY = "*";
 
 	public void init(String[] dts) {
 		if (dts != null && dts.length > 0) {

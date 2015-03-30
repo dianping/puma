@@ -7,6 +7,8 @@ import javax.servlet.http.HttpSession;
 
 import com.dianping.puma.admin.remote.reporter.ShardSyncTaskControllerReporter;
 import com.dianping.puma.admin.remote.reporter.ShardSyncTaskOperationReporter;
+import com.dianping.puma.admin.remote.reporter.SyncTaskControllerReporter;
+import com.dianping.puma.admin.remote.reporter.SyncTaskOperationReporter;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
@@ -72,6 +74,12 @@ public class SyncTaskCreateController {
 
 	@Autowired
 	private ShardSyncTaskControllerReporter shardSyncTaskControllerReporter;
+
+	@Autowired
+	private SyncTaskOperationReporter syncTaskOperationReporter;
+
+	@Autowired
+	private SyncTaskControllerReporter syncTaskControllerReporter;
 
 	@Autowired
 	TaskStateContainer syncTaskStateContainer;
@@ -227,7 +235,7 @@ public class SyncTaskCreateController {
 
 			dumpTaskService.create(dumpTask);
 
-			shardSyncTaskOperationReporter.report(syncServerName, dumpTaskName, ActionOperation.CREATE);
+			//dumpTaskOperationReporter.report(syncServerName, dumpTaskName, ActionOperation.CREATE);
 
 			// 保存dumpTask到session
 			session.setAttribute("dumpTask", dumpTask);
@@ -376,7 +384,7 @@ public class SyncTaskCreateController {
 			state.setStatus(Status.WAITING);
 			syncTaskStateContainer.add(syncTask.getName(), state);
 
-			shardSyncTaskOperationReporter
+			syncTaskOperationReporter
 					.report(syncTask.getSyncServerName(), syncTask.getName(), ActionOperation.CREATE);
 
 			LOG.info("created syncTask : " + syncTask);

@@ -3,6 +3,7 @@ package com.dianping.puma.monitor;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +32,15 @@ public class PumaMonitorSyncProcessTask implements PumaMonitorTask {
 	public void runTask() {
 		Map<String, ClientStatus> clientStatuses = SystemStatusContainer.instance.listClientStatus();
 		Map<String, ServerStatus> serverStatuses = SystemStatusContainer.instance.listServerStatus();
+		int dfileNum = 0;
 		try {
 			for (Map.Entry<String, ClientStatus> clientStatus : clientStatuses.entrySet()) {
 				ServerStatus serverStatus = serverStatuses.get(clientStatus.getValue().getTarget());
 				if (clientStatus.getValue().getBinlogFile() == null || serverStatus.getBinlogFile() == null) {
 					return;
 				}
-				int dfileNum = getDiffNum(serverStatus.getBinlogFile(), serverStatus.getBinlogPos(), clientStatus
+				Log.info("puma Monitor SyncProcess : client is " +clientStatus.getKey());
+				dfileNum = getDiffNum(serverStatus.getBinlogFile(), serverStatus.getBinlogPos(), clientStatus
 						.getValue().getBinlogFile(), clientStatus.getValue().getBinlogPos());
 				Cat.getProducer().logEvent(
 						"Puma.server." + clientStatus.getKey() + ".process",
@@ -54,6 +57,7 @@ public class PumaMonitorSyncProcessTask implements PumaMonitorTask {
 
 		} catch (MonitorThresholdException e) {
 			notifyService.alarm(" diff num of file between sync and server binlog process :", e, true);
+			Cat.getProducer().logError(" diff num of file between sync and server binlog process :" +Integer.toString(dfileNum), e);
 		}
 	}
 

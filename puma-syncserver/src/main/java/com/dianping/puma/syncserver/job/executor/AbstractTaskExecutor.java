@@ -477,7 +477,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 								AbstractTaskExecutor.this.execute(event);
 							} catch (DdlRenameException e) {
 								AbstractTaskExecutor.this.fail("case by db rename operation ," + e);
-								notifyService.alarm("case by db rename operation ," + e, e, true);
+								Cat.getProducer().logError("case by db rename operation ," + e, e );
 								return;
 							}
 						}

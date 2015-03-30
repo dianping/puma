@@ -38,7 +38,7 @@ public class PumaMonitorSeqTask implements PumaMonitorTask {
 			if (clientSuccessSeq.containsKey(clientStatus.getKey())) {
 				Cat.getProducer().logEvent(
 						"Puma.server." + clientStatus.getKey() + ".seq",
-						"sequence",
+						Long.toString(clientSuccessSeq.get(clientStatus.getKey())),
 						Message.SUCCESS,
 						"name = " + clientStatus.getKey() + "&target = " + clientStatus.getValue().getTarget()
 								+ "&seq=" + clientSuccessSeq.get(clientStatus.getKey()).longValue() + "&duration = "

@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Transaction;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.lang.StringUtils;
 import org.mortbay.log.Log;
@@ -136,6 +138,9 @@ public class MysqlExecutor {
 
 	// 执行ddlEvent
 	private void executeDdl(DdlEvent ddlEvent) throws SQLException {
+
+		Transaction t = Cat.getProducer().newTransaction("Time", "sql");
+
 		PreparedStatement ps = null;
 		Connection conn = null;
 		try {
@@ -163,11 +168,15 @@ public class MysqlExecutor {
 					// ignore
 				}
 				conn = null;
+				t.complete();
 			}
 		}
 	}
 
 	private Map<String, Object> executeDml(RowChangedEvent rowChangedEvent) throws SQLException {
+
+		Transaction t = Cat.getProducer().newTransaction("Time", "sql");
+
 		Map<String, Object> rowMap = null;
 		MysqlStatement mus = convertStatement(rowChangedEvent);
 		if (LOG.isDebugEnabled()) {
@@ -198,6 +207,7 @@ public class MysqlExecutor {
 					// ignore
 				}
 			}
+			t.complete();
 		}
 		return rowMap;
 	}

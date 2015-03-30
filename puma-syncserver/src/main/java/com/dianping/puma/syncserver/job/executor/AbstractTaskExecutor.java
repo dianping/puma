@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.dianping.cat.message.Transaction;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.AbstractBaseSyncTask;
 import com.dianping.puma.core.entity.DstDBInstance;
@@ -434,6 +435,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 
 			@Override
 			public void onEvent(ChangedEvent event) throws Exception {
+
+				Transaction t = Cat.getProducer().newTransaction("Time", abstractTask.getName());
+
 				// LOG.info("********************Received " + event);
 				if (!skipToNextPos) {
 					if (event instanceof RowChangedEvent) {
@@ -496,6 +500,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 						Thread.currentThread().interrupt();
 					}
 				}
+
+				t.complete();
 
 			}
 

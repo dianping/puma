@@ -7,12 +7,12 @@ import com.dianping.lion.client.LionException;
 import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
+import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.entity.*;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.model.state.SyncTaskState;
-import com.dianping.puma.core.model.state.TaskState;
+import com.dianping.puma.core.model.state.ShardSyncTaskState;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
@@ -58,12 +58,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, TaskState> {
+public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSyncTaskState> {
     private static final Logger logger = LoggerFactory.getLogger(ShardSyncTaskExecutor.class);
 
-    private final ShardSyncTask task;
+    private ShardSyncTask task;
 
-    protected final TaskState status;
+    private volatile boolean inited = false;
+
+    protected ShardSyncTaskState status;
 
     private ConfigCache configCache;
 
@@ -96,31 +98,33 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, TaskSta
     private static final Pattern JDBC_URL_PATTERN = Pattern.compile("jdbc:mysql://([^:]+):\\d+/([^\\?]+).*");
 
     public ShardSyncTaskExecutor(ShardSyncTask task) {
-        checkNotNull(task, "task");
-        checkNotNull(task.getRuleName(), "task.ruleName");
-        checkNotNull(task.getTableName(), "task.tableName");
-        this.task = task;
-
-        this.status = new SyncTaskState();
-
         try {
+            this.status = new ShardSyncTaskState();
+            this.status.setStatus(Status.INITIALIZING);
+
+            checkNotNull(task, "task");
+            checkNotNull(task.getRuleName(), "task.ruleName");
+            checkNotNull(task.getTableName(), "task.tableName");
+            this.task = task;
+
+            this.status.setTaskName(task.getName());
+
             this.configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
-        } catch (LionException e) {
-            throw new RuntimeException("Lion Init Failed");
+        } catch (Exception e) {
+            this.status.setStatus(Status.FAILED);
         }
     }
 
     public void init() {
-        checkNotNull(configCache, "configCache");
-        initAndConvertConfig();
-        initRouterConfig();
-        initPumaClientsAndDataSources();
-        initRouter();
-    }
-
-    protected void startPumaClient() {
-        for (PumaClient client : pumaClientList) {
-            client.start();
+        try {
+            checkNotNull(configCache, "configCache");
+            initAndConvertConfig();
+            initRouterConfig();
+            initPumaClientsAndDataSources();
+            initRouter();
+            inited = true;
+        } catch (Exception exp) {
+            this.status.setStatus(Status.FAILED);
         }
     }
 
@@ -354,7 +358,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, TaskSta
                 .host(pumaServer.getHost())
                 .target(pumaTask.getName());
 
-        String fullName = String.format("ShardSyncTask-%s-%s-%s", task.getName(), ds, name);
+        String fullName = String.format("%s-%s-%s", task.getName(), ds, name);
         configBuilder.name(fullName);
 
         for (String tb : tables) {
@@ -437,12 +441,34 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, TaskSta
 
     @Override
     public void start() {
-        startPumaClient();
+        if (!inited) {
+            return;
+        }
+
+        try {
+            for (PumaClient client : pumaClientList) {
+                client.start();
+            }
+            this.status.setStatus(Status.RUNNING);
+        } catch (Exception exp) {
+            this.status.setStatus(Status.FAILED);
+        }
     }
 
     @Override
     public void pause(String detail) {
+        if (!inited) {
+            return;
+        }
 
+        try {
+            for (PumaClient client : pumaClientList) {
+                client.stop();
+            }
+            this.status.setStatus(Status.SUSPENDED);
+        } catch (Exception exp) {
+            this.status.setStatus(Status.FAILED);
+        }
     }
 
     @Override
@@ -461,19 +487,28 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, TaskSta
     }
 
     @Override
-    public TaskState getTaskState() {
-        return null;
+    public ShardSyncTaskState getTaskState() {
+        return this.status;
     }
 
     @Override
-    public void setTaskState(TaskState taskState) {
-
+    public void setTaskState(ShardSyncTaskState status) {
+        this.status = status;
     }
 
     @Override
     public void stop(String detail) {
-        for (PumaClient client : pumaClientList) {
-            client.stop();
+        if (!inited) {
+            return;
+        }
+
+        try {
+            for (PumaClient client : pumaClientList) {
+                client.stop();
+            }
+            this.status.setStatus(Status.STOPPED);
+        } catch (Exception exp) {
+            this.status.setStatus(Status.FAILED);
         }
     }
 

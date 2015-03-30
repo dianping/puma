@@ -7,13 +7,13 @@
     <bean id="pumaTaskOperationEventPublisher"
           class="com.dianping.puma.core.monitor.SwallowEventPublisher"
           init-method="init">
-        <property name="topic" value="puma_task_operation" />
+        <property name="topic" value="puma_task_operation"/>
     </bean>
 
     <bean id="pumaTaskControllerEventPublisher"
           class="com.dianping.puma.core.monitor.SwallowEventPublisher"
           init-method="init">
-        <property name="topic" value="puma_task_controller" />
+        <property name="topic" value="puma_task_controller"/>
     </bean>
 
     <bean id="pumaTaskStateSubscriber"
@@ -22,12 +22,24 @@
         <property name="topic" value="puma_task_state"/>
         <property name="type" value="puma"/>
         <property name="notifyService" ref="notifyService"/>
-        <property name="clazz" value="com.dianping.puma.core.monitor.event.PumaTaskStateEvent" />
+        <property name="clazz" value="com.dianping.puma.core.monitor.event.PumaTaskStateEvent"/>
         <property name="listeners">
             <list>
-                <ref bean="taskStateReceiver" />
+                <ref bean="taskStateReceiver"/>
             </list>
         </property>
+    </bean>
+
+    <bean id="shardSyncTaskOperationEventPublisher"
+          class="com.dianping.puma.core.monitor.SwallowEventPublisher"
+          init-method="init">
+        <property name="topic" value="shard_sync_task_operation"/>
+    </bean>
+
+    <bean id="shardSyncTaskControllerEventPublisher"
+          class="com.dianping.puma.core.monitor.SwallowEventPublisher"
+          init-method="init">
+        <property name="topic" value="shard_sync_task_controller"/>
     </bean>
 
     <bean id="syncTaskOperationEventPublisher"
@@ -42,16 +54,30 @@
         <property name="topic" value="sync_task_controller"/>
     </bean>
 
+    <bean id="shardSyncTaskStateSubscriber"
+          class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
+          init-method="init">
+        <property name="topic" value="sync_task_state"/>
+        <property name="type" value="shardsync"/>
+        <property name="notifyService" ref="notifyService"/>
+        <property name="clazz" value="com.dianping.puma.core.monitor.event.ShardSyncTaskStateEvent"/>
+        <property name="listeners">
+            <list>
+                <ref bean="shardSyncTaskStateReceiver"/>
+            </list>
+        </property>
+    </bean>
+
     <bean id="syncTaskStateSubscriber"
           class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
           init-method="init">
         <property name="topic" value="sync_task_state"/>
         <property name="type" value="sync"/>
         <property name="notifyService" ref="notifyService"/>
-        <property name="clazz" value="com.dianping.puma.core.monitor.event.SyncTaskStateEvent" />
+        <property name="clazz" value="com.dianping.puma.core.monitor.event.SyncTaskStateEvent"/>
         <property name="listeners">
             <list>
-                <ref bean="syncTaskStateReceiver" />
+                <ref bean="syncTaskStateReceiver"/>
             </list>
         </property>
     </bean>
@@ -62,10 +88,10 @@
         <property name="topic" value="sync_task_state"/>
         <property name="type" value="dump"/>
         <property name="notifyService" ref="notifyService"/>
-        <property name="clazz" value="com.dianping.puma.core.monitor.event.DumpTaskStateEvent" />
+        <property name="clazz" value="com.dianping.puma.core.monitor.event.DumpTaskStateEvent"/>
         <property name="listeners">
             <list>
-                <ref bean="dumpTaskStateReceiver" />
+                <ref bean="dumpTaskStateReceiver"/>
             </list>
         </property>
     </bean>

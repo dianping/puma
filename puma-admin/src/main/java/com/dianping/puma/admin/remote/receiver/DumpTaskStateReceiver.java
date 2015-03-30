@@ -17,7 +17,7 @@ import java.util.List;
 @Service("dumpTaskStateReceiver")
 public class DumpTaskStateReceiver implements EventListener {
 
-	private static final Logger LOG = LoggerFactory.getLogger(PumaTaskStateReceiver.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DumpTaskStateReceiver.class);
 
 	@Autowired
 	DumpTaskStateService dumpTaskStateService;

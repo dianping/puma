@@ -1,0 +1,46 @@
+<div class="container-fluid">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <a class="glyphicon glyphicon-plus btn-sm" href="${rc.contextPath}/shard-sync-task/create/"
+               style="float: right; color: white; font-size: 16px;"></a>
+            <h5>分库分表数据同步任务</h5>
+        </div>
+
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <td class="col-md-2">服务器</td>
+                <td class="col-md-2">规则名</td>
+                <td class="col-md-2">表名</td>
+                <td class="col-md-1">状态</td>
+                <!--<td class="col-md-4">日志进度</td>-->
+                <td class="col-md-1">操作</td>
+            </tr>
+            </thead>
+
+            <tbody>
+            #foreach($shardSyncTask in ${shardSyncTasks})
+            <tr>
+                <td>${shardSyncTask.syncServerName}</td>
+                <td>${shardSyncTask.ruleName}</td>
+                <td>${shardSyncTask.tableName}</td>
+                <td class="sync-task-status">
+                    #if(${shardSyncTaskStates[$shardSyncTask.getName()]})
+                    ${shardSyncTaskStates[$shardSyncTask.getName()].getStatus().getDesc()}
+                    #end
+                </td>
+                <!--<td class="sync-task-bin-log-info">-->
+                <!--</td>-->
+                <td>
+                    <a href="#" data-toggle="modal" data-target="#warn-modal" data-subpath="remove"
+                       data-path="shard-sync-task" data-name="${shardSyncTask.name}" class="no-under">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                    </a>
+                </td>
+            </tr>
+            #end
+            </tbody>
+
+        </table>
+    </div>
+</div>

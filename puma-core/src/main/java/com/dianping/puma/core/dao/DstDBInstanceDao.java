@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface DstDBInstanceDao {
 
+	DstDBInstance find(long id);
+	
 	DstDBInstance find(String name);
 
 	List<DstDBInstance> findAll();
@@ -14,5 +16,7 @@ public interface DstDBInstanceDao {
 
 	void update(DstDBInstance entity);
 
-	void remove(String id);
+	void remove(String name);
+	
+	void remove(long id);
 }

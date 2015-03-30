@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface SrcDBInstanceDao {
 
+	SrcDBInstance find(long id);
+	
 	SrcDBInstance find(String name);
 
     List<SrcDBInstance> findAll();
@@ -16,5 +18,7 @@ public interface SrcDBInstanceDao {
 
     void update(SrcDBInstance entity);
 
-    void remove(String id);
+    void remove(String name);
+    
+    void remove(long id);
 }

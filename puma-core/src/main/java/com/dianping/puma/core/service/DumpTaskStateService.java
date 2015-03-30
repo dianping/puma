@@ -5,7 +5,7 @@ import com.dianping.puma.core.model.state.DumpTaskState;
 import java.util.List;
 
 public interface DumpTaskStateService {
-
+	
 	DumpTaskState find(String taskName);
 
 	List<DumpTaskState> findAll();

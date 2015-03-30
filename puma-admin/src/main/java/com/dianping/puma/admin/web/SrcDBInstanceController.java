@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -55,19 +56,21 @@ public class SrcDBInstanceController {
 		return new ModelAndView("main/container", map);
 	}
 
-	@RequestMapping(value = { "/src-db-instance/update" })
-	public ModelAndView update(String name) {
+	@RequestMapping(value = { "/src-db-instance/update/{id}" },method = RequestMethod.GET)
+	public ModelAndView update(@PathVariable long id) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceName(name);
-			if (pumaTasks != null && pumaTasks.size() != 0) {
-				map.put("lock", true);
-			} else {
-				map.put("lock", false);
+			SrcDBInstance entity = srcDBInstanceService.find(id);
+			if(entity != null){
+				List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceName(entity.getName());
+				if (pumaTasks != null && pumaTasks.size() != 0) {
+					map.put("lock", true);
+				} else {
+					map.put("lock", false);
+				}
 			}
-
-			SrcDBInstance entity = srcDBInstanceService.find(name);
+			//SrcDBInstance entity = srcDBInstanceService.find(name);
 			map.put("entity", entity);
 			map.put("path", "src-db-instance");
 			map.put("subPath", "create");

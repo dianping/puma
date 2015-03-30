@@ -5,6 +5,8 @@ import com.dianping.puma.core.entity.PumaTask;
 import java.util.List;
 
 public interface PumaTaskDao {
+	
+	PumaTask find(long id);
 
 	PumaTask find(String name);
 
@@ -19,4 +21,6 @@ public interface PumaTaskDao {
 	void update(PumaTask pumaTask);
 
 	void remove(String name);
+	
+	void remove(long id);
 }

@@ -18,6 +18,11 @@ public class SyncServerServiceImpl implements SyncServerService {
 	public SyncServer find(String name) {
 		return syncServerDao.find(name);
 	}
+	
+	@Override
+	public SyncServer find(long id) {
+		return syncServerDao.find(id);
+	}
 
 	@Override
 	public List<SyncServer> findAll() {
@@ -38,6 +43,12 @@ public class SyncServerServiceImpl implements SyncServerService {
 	public void remove(String name) {
 		syncServerDao.remove(name);
 	}
+	
+	@Override
+	public void remove(long id) {
+		syncServerDao.remove(id);
+	}
+	
 	@Override
 	public SyncServer findByHost(String host){
 		return syncServerDao.findByHost(host);

@@ -136,16 +136,19 @@ public class SyncTaskController {
 	/**
 	 * 查询SyncTask
 	 */
-	@RequestMapping(value = "/sync-task/detail/{taskName}", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
-	public ModelAndView task(HttpSession session, @PathVariable String taskName) {
+	@RequestMapping(value = "/sync-task/detail/{id}", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+	public ModelAndView task(HttpSession session, @PathVariable long id) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		SyncTask syncTask = this.syncTaskService.find(taskName);
-		SyncTaskState syncTaskState = syncTaskStateService.find(taskName);
-		map.put("syncTask", syncTask);
-		map.put("syncTaskState", syncTaskState);
-		map.put("createdActive", "active");
-		map.put("subPath", "detail");
-		map.put("path", "sync-task");
+		SyncTask syncTask = this.syncTaskService.find(id);
+		if(syncTask!=null)
+		{
+			SyncTaskState syncTaskState = syncTaskStateService.find(syncTask.getName());
+			map.put("syncTask", syncTask);
+			map.put("syncTaskState", syncTaskState);
+			map.put("createdActive", "active");
+			map.put("subPath", "detail");
+			map.put("path", "sync-task");
+		}
 		return new ModelAndView("main/container", map);
 	}
 

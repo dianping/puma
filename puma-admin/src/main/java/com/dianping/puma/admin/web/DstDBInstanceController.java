@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -56,19 +57,21 @@ public class DstDBInstanceController {
 		return new ModelAndView("main/container", map);
 	}
 
-	@RequestMapping(value = { "/dst-db-instance/update" })
-	public ModelAndView update(String name) {
+	@RequestMapping(value = { "/dst-db-instance/update/{id}" })
+	public ModelAndView update(@PathVariable long id) {
 		Map<String, Object> map = new HashMap<String, Object>();
-
-		List<SyncTask> syncTasks = syncTaskService.findByDstDBInstanceName(name);
-		if (syncTasks != null && syncTasks.size() != 0) {
-			map.put("lock", true);
-		} else {
-			map.put("lock", false);
-		}
-
 		try {
-			DstDBInstance entity = dstDBInstanceService.find(name);
+			DstDBInstance entity = dstDBInstanceService.find(id);
+			if (entity != null) {
+				List<SyncTask> syncTasks = syncTaskService.findByDstDBInstanceName(entity.getName());
+				if (syncTasks != null && syncTasks.size() != 0) {
+					map.put("lock", true);
+				} else {
+					map.put("lock", false);
+				}
+			}
+
+			// DstDBInstance entity = dstDBInstanceService.find(name);
 			map.put("entity", entity);
 			map.put("path", "dst-db-instance");
 			map.put("subPath", "create");
@@ -81,12 +84,7 @@ public class DstDBInstanceController {
 
 	@RequestMapping(value = { "/dst-db-instance/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(
-			String name,
-			Long serverId,
-			String ip,
-			String username,
-			String password) {
+	public String createPost(String name, Long serverId, String ip, String username, String password) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 

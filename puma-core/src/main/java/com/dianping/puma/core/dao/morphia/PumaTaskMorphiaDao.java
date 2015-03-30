@@ -21,6 +21,13 @@ public class PumaTaskMorphiaDao extends MongoBaseDao<PumaTaskMorphia> implements
 		super(mongoClient.getDatastore());
 	}
 
+	public PumaTask find(long id) {
+		Query<PumaTaskMorphia> q = this.getDatastore().createQuery(PumaTaskMorphia.class);
+		q.field("id").equal(id);
+		PumaTaskMorphia pumaTaskMorphia = this.findOne(q);
+		return (pumaTaskMorphia == null) ? null : pumaTaskMorphia.getEntity();
+	}
+
 	public PumaTask find(String name) {
 		Query<PumaTaskMorphia> q = this.getDatastore().createQuery(PumaTaskMorphia.class);
 		q.field("name").equal(name);
@@ -85,6 +92,12 @@ public class PumaTaskMorphiaDao extends MongoBaseDao<PumaTaskMorphia> implements
 	public void remove(String name) {
 		Query<PumaTaskMorphia> q = this.getDatastore().createQuery(PumaTaskMorphia.class);
 		q.field("name").equal(name);
+		this.deleteByQuery(q);
+	}
+	
+	public void remove(long id) {
+		Query<PumaTaskMorphia> q = this.getDatastore().createQuery(PumaTaskMorphia.class);
+		q.field("id").equal(id);
 		this.deleteByQuery(q);
 	}
 }

@@ -21,6 +21,14 @@ public class SyncServerMorphiaDao extends MongoBaseDao<SyncServerMorphia> implem
 		super(mongoClient.getDatastore());
 	}
 
+
+	public SyncServer find(long id) {
+		Query<SyncServerMorphia> q = this.getDatastore().createQuery(SyncServerMorphia.class);
+		q.field("id").equal(id);
+		SyncServerMorphia syncServerMorphia = this.findOne(q);
+		return (syncServerMorphia == null) ? null : syncServerMorphia.getEntity();
+	}
+
 	public SyncServer find(String name) {
 		Query<SyncServerMorphia> q = this.getDatastore().createQuery(SyncServerMorphia.class);
 		q.field("name").equal(name);
@@ -66,6 +74,12 @@ public class SyncServerMorphiaDao extends MongoBaseDao<SyncServerMorphia> implem
 	public void remove(String name) {
 		Query<SyncServerMorphia> q = this.getDatastore().createQuery(SyncServerMorphia.class);
 		q.field("name").equal(name);
+		this.deleteByQuery(q);
+	}
+	
+	public void remove(long id) {
+		Query<SyncServerMorphia> q = this.getDatastore().createQuery(SyncServerMorphia.class);
+		q.field("id").equal(id);
 		this.deleteByQuery(q);
 	}
 }

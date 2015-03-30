@@ -9,7 +9,7 @@ public interface SyncTaskStateService {
 	void add(SyncTaskState taskState);
 
 	void addAll(List<SyncTaskState> taskStates);
-
+	
 	SyncTaskState find(String taskName);
 
 	List<SyncTaskState> findAll();

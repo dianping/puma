@@ -15,6 +15,6 @@ public interface CatchupTaskStateService {
 	void addAll(List<CatchupTaskState> taskStates);
 
 	void remove(String taskName);
-
+	
 	void removeAll();
 }

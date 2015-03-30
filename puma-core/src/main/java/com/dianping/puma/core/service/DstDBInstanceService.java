@@ -5,6 +5,8 @@ import com.dianping.puma.core.entity.DstDBInstance;
 import java.util.List;
 
 public interface DstDBInstanceService {
+	
+	DstDBInstance find(long id);
 
 	DstDBInstance find(String name);
 
@@ -15,4 +17,6 @@ public interface DstDBInstanceService {
 	void update(DstDBInstance dstDBInstance);
 
 	void remove(String name);
+	
+	void remove(long id);
 }

@@ -18,6 +18,11 @@ public class PumaServerServiceImpl implements PumaServerService {
 	public PumaServer find(String name) {
 		return pumaServerDao.find(name);
 	}
+	
+	@Override
+	public PumaServer find(long id) {
+		return pumaServerDao.find(id);
+	}
 
 	public PumaServer findByHost(String host) {
 		return pumaServerDao.findByHost(host);
@@ -41,5 +46,10 @@ public class PumaServerServiceImpl implements PumaServerService {
 	@Override
 	public void remove(String name) {
 		pumaServerDao.remove(name);
+	}
+	
+	@Override
+	public void remove(long id) {
+		pumaServerDao.remove(id);
 	}
 }

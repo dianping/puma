@@ -5,6 +5,8 @@ import com.dianping.puma.core.entity.DumpTask;
 import java.util.List;
 
 public interface DumpTaskService {
+	
+	DumpTask find(long id);
 
 	DumpTask find(String name);
 
@@ -13,4 +15,6 @@ public interface DumpTaskService {
 	void create(DumpTask dumpTask);
 
 	void remove(String name);
+	
+	void remove(long id);
 }

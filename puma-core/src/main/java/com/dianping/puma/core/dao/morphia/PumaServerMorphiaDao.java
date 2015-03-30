@@ -21,6 +21,14 @@ public class PumaServerMorphiaDao extends MongoBaseDao<PumaServerMorphia> implem
 		super(mongoClient.getDatastore());
 	}
 
+	public PumaServer find(long id) {
+		Query<PumaServerMorphia> q = this.getDatastore().createQuery(PumaServerMorphia.class);
+		q.field("id").equal(id);
+		PumaServerMorphia pumaServerMorphia = this.findOne(q);
+		return (pumaServerMorphia == null) ? null : pumaServerMorphia.getEntity();
+	}
+
+	
 	public PumaServer find(String name) {
 		Query<PumaServerMorphia> q = this.getDatastore().createQuery(PumaServerMorphia.class);
 		q.field("name").equal(name);
@@ -66,6 +74,12 @@ public class PumaServerMorphiaDao extends MongoBaseDao<PumaServerMorphia> implem
 	public void remove(String name) {
 		Query<PumaServerMorphia> q = this.getDatastore().createQuery(PumaServerMorphia.class);
 		q.field("name").equal(name);
+		this.deleteByQuery(q);
+	}
+	
+	public void remove(long id) {
+		Query<PumaServerMorphia> q = this.getDatastore().createQuery(PumaServerMorphia.class);
+		q.field("id").equal(id);
 		this.deleteByQuery(q);
 	}
 }

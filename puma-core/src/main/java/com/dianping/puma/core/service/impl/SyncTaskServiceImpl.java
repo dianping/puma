@@ -26,6 +26,14 @@ public class SyncTaskServiceImpl implements SyncTaskService {
 		return syncTaskDao.findBySyncServerName(syncServerName);
 	}
 
+	public List<SyncTask> findByDstDBInstanceName(String dstDBInstanceName) {
+		return syncTaskDao.findByDstDBInstanceName(dstDBInstanceName);
+	}
+
+	public List<SyncTask> findByPumaServerName(String pumaServerName) {
+		return syncTaskDao.findByPumaServerName(pumaServerName);
+	}
+
 	public List<SyncTask> findAll() {
 		return syncTaskDao.findAll();
 	}

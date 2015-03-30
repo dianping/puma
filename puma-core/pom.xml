@@ -72,5 +72,10 @@
             <groupId>com.dianping.swallow</groupId>
             <artifactId>swallow-producerclient</artifactId>
         </dependency>
+         <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+           	<version>2.6</version>
+        </dependency>
     </dependencies>
 </project>

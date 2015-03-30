@@ -87,7 +87,7 @@ public class PumaTaskController {
 	}
 
 	@RequestMapping(value = { "/puma-task/update" }, method = RequestMethod.GET)
-	public ModelAndView update(String id) {
+	public ModelAndView update(String name) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
@@ -97,7 +97,7 @@ public class PumaTaskController {
 			map.put("srcDBInstanceEntities", srcDBInstanceEntities);
 			map.put("pumaServerEntities", pumaServerEntities);
 
-			PumaTask pumaTask = pumaTaskService.find(id);
+			PumaTask pumaTask = pumaTaskService.find(name);
 
 			map.put("entity", pumaTask);
 			map.put("path", "puma-task");

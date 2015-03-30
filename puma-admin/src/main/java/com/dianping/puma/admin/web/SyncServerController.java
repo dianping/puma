@@ -59,6 +59,13 @@ public class SyncServerController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
+			List<SyncTask> syncTasks = syncTaskService.findBySyncServerName(name);
+
+			if (syncTasks != null && syncTasks.size() != 0) {
+				map.put("lock", true);
+			} else {
+				map.put("lock", false);
+			}
 
 			SyncServer entity = syncServerService.find(name);
 			map.put("entity", entity);

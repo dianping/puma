@@ -17,6 +17,9 @@ package com.dianping.puma.core.event;
 
 import java.io.Serializable;
 
+import com.dianping.puma.core.util.constant.DdlEventSubType;
+import com.dianping.puma.core.util.constant.DdlEventType;
+
 /**
  * <p>
  * 变更时间的基类
@@ -43,7 +46,10 @@ import java.io.Serializable;
 public class DdlEvent extends ChangedEvent implements Serializable {
 	private static final long	serialVersionUID	= -5676914333310337620L;
 	private String				sql;
-
+	
+	private DdlEventType  eventType;
+	
+	private DdlEventSubType eventSubType;
 	/**
 	 * @return the sql
 	 */
@@ -107,6 +113,22 @@ public class DdlEvent extends ChangedEvent implements Serializable {
 			return false;
 		}
 		return true;
+	}
+
+	public void setEventType(DdlEventType eventType) {
+		this.eventType = eventType;
+	}
+
+	public DdlEventType getEventType() {
+		return eventType;
+	}
+
+	public void setEventSubType(DdlEventSubType eventSubType) {
+		this.eventSubType = eventSubType;
+	}
+
+	public DdlEventSubType getEventSubType() {
+		return eventSubType;
 	}
 
 }

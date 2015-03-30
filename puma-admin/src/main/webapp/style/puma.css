@@ -146,9 +146,21 @@ a:hover.operation-icon {
 }
 .panel-label-local-left{
 	text-align:right;
+	float:left;
 }
 
 .panel-form-group-sub label{
 	font-weight:normal;
+	
 }
+
+.panel-form-group-sub{
+	clear: both;
+	display:block;
+	line-height:30px;
+	margin-right: -15px;
+	margin-left: -15px;
+	margin-bottom: 15px;
+}
+
 

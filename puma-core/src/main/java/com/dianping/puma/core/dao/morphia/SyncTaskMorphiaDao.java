@@ -43,6 +43,32 @@ public class SyncTaskMorphiaDao extends MongoBaseDao<SyncTaskMorphia> implements
 		return entities;
 	}
 
+	public List<SyncTask> findByDstDBInstanceName(String dstDBInstanceName) {
+		Query<SyncTaskMorphia> q = this.getDatastore().createQuery(SyncTaskMorphia.class).disableValidation();
+		q.field("entity.dstDBInstanceName").equal(dstDBInstanceName);
+		QueryResults<SyncTaskMorphia> result = this.find(q);
+		List<SyncTaskMorphia> syncTaskMorphias = result.asList();
+
+		List<SyncTask> entities = new ArrayList<SyncTask>();
+		for (SyncTaskMorphia syncTaskMorphia: syncTaskMorphias) {
+			entities.add(syncTaskMorphia.getEntity());
+		}
+		return entities;
+	}
+
+	public List<SyncTask> findByPumaServerName(String pumaServerName) {
+		Query<SyncTaskMorphia> q = this.getDatastore().createQuery(SyncTaskMorphia.class).disableValidation();
+		q.field("entity.pumaServerName").equal(pumaServerName);
+		QueryResults<SyncTaskMorphia> result = this.find(q);
+		List<SyncTaskMorphia> syncTaskMorphias = result.asList();
+
+		List<SyncTask> entities = new ArrayList<SyncTask>();
+		for (SyncTaskMorphia syncTaskMorphia: syncTaskMorphias) {
+			entities.add(syncTaskMorphia.getEntity());
+		}
+		return entities;
+	}
+
 	public List<SyncTask> findAll() {
 		Query<SyncTaskMorphia> q = this.getDatastore().createQuery(SyncTaskMorphia.class);
 		QueryResults<SyncTaskMorphia> result = this.find(q);

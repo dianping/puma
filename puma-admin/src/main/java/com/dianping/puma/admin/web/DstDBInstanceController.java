@@ -3,9 +3,9 @@ package com.dianping.puma.admin.web;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.entity.DstDBInstance;
-import com.dianping.puma.core.entity.PumaTask;
+import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.service.DstDBInstanceService;
-import com.dianping.puma.core.service.PumaTaskService;
+import com.dianping.puma.core.service.SyncTaskService;
 import com.mongodb.MongoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ public class DstDBInstanceController {
 	DstDBInstanceService dstDBInstanceService;
 
 	@Autowired
-	PumaTaskService pumaTaskService;
+	SyncTaskService syncTaskService;
 
 	@Value("3306")
 	Integer dbPort;
@@ -60,8 +60,8 @@ public class DstDBInstanceController {
 	public ModelAndView update(String name) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceName(name);
-		if (pumaTasks != null && pumaTasks.size() != 0) {
+		List<SyncTask> syncTasks = syncTaskService.findByDstDBInstanceName(name);
+		if (syncTasks != null && syncTasks.size() != 0) {
 			map.put("lock", true);
 		} else {
 			map.put("lock", false);
@@ -142,9 +142,9 @@ public class DstDBInstanceController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceName(name);
+			List<SyncTask> syncTasks = syncTaskService.findByDstDBInstanceName(name);
 
-			if (pumaTasks != null && pumaTasks.size() != 0) {
+			if (syncTasks != null && syncTasks.size() != 0) {
 				throw new Exception("lock");
 			}
 

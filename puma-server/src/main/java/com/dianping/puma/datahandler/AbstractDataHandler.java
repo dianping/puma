@@ -16,6 +16,7 @@
 package com.dianping.puma.datahandler;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -27,6 +28,8 @@ import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.monitor.Notifiable;
 import com.dianping.puma.core.monitor.NotifyService;
+import com.dianping.puma.core.util.DdlSqlParser;
+import com.dianping.puma.core.util.constant.DdlEventType;
 import com.dianping.puma.parser.mysql.BinlogConstanst;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
 import com.dianping.puma.parser.mysql.event.PumaIgnoreEvent;
@@ -216,14 +219,19 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 		ChangedEvent dataChangedEvent = new DdlEvent();
 		DdlEvent ddlEvent = (DdlEvent) dataChangedEvent;
 		ddlEvent.setSql(sql);
-		String database = getDateBase(sql);
-		if (!StringUtils.isBlank(database)) {
-			ddlEvent.setDatabase(database);
-		} else {
-			ddlEvent.setDatabase(queryEvent.getDatabaseName());
+		ddlEvent.setEventType(DdlSqlParser.getEventType(sql));
+		ddlEvent.setEventSubType(DdlSqlParser.getEventSubType(ddlEvent.getEventType(), sql));
+		List<String> sqlNames = DdlSqlParser.getSqlNames(ddlEvent.getEventType(), ddlEvent.getEventSubType(), sql);
+		if(sqlNames!=null&&sqlNames.size() > 0){
+			ddlEvent.setDatabase(!StringUtils.isBlank(sqlNames.get(0))?sqlNames.get(0):"");
+			ddlEvent.setTable(!StringUtils.isBlank(sqlNames.get(1))?sqlNames.get(1):"");
+			log.info("DDL event, sql=" + sql + "  ,database =" + sqlNames.get(0) + "  queryEvent.getDatabaseName()"
+					+ queryEvent.getDatabaseName());
 		}
-		log.info("DDL event, sql=" + sql + "  ,database =" + database + "  queryEvent.getDatabaseName()"
-				+ queryEvent.getDatabaseName());
+		if (!StringUtils.isBlank(ddlEvent.getDatabase())) {
+			ddlEvent.setDatabase(queryEvent.getDatabaseName());
+		} 
+
 		ddlEvent.setExecuteTime(queryEvent.getHeader().getTimestamp());
 
 		result.setData(dataChangedEvent);
@@ -234,7 +242,7 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 	protected abstract void doProcess(DataHandlerResult result, BinlogEvent binlogEvent, PumaContext context,
 			byte eventType);
 
-	private String getDateBase(String strSql) {
+	/*private String getDateBase(String strSql) {
 		String sql = StringUtils.normalizeSpace(strSql.toLowerCase());
 		String database = null;
 		int positionStart = StringUtils.indexOf(sql, "table ");
@@ -243,9 +251,9 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 			database = getDatabaseName(sql, positionStart + 6, positionEnd);
 		}
 		return database;
-	}
+	}*/
 
-	private String getDatabaseName(String sql, int positionStart, int positionEnd) {
+	/*private String getDatabaseName(String sql, int positionStart, int positionEnd) {
 		sql = StringUtils.substring(sql, positionStart, positionEnd);
 		int positionCenter = StringUtils.indexOf(sql, ".", 0);
 		String database = null;
@@ -254,6 +262,6 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 			database = StringUtils.remove(temp, "`");
 		}
 		return database;
-	}
+	}*/
 
 }

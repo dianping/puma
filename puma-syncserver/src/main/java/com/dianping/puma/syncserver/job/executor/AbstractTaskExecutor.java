@@ -145,6 +145,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 			binlogInfo.setBinlogFile(event.getBinlog());
 			binlogInfo.setBinlogPosition(event.getBinlogPos());
 			//更新pumaClient binlog
+			abstractTask.setBinlogInfo(binlogInfo);
 			this.pumaClient.getConfig().setBinlog(event.getBinlog());
 			this.pumaClient.getConfig().setBinlogPos(event.getBinlogPos());
 			state.setBinlogInfoOfIOThread(binlogInfo);

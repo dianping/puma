@@ -40,7 +40,6 @@ public class PumaMonitorServerInfoTask implements PumaMonitorTask {
 
 	@Override
 	public void runTask() {
-		LOG.info("ServerInfo Cat monitoring....");
 		Map<String, ServerStatus> serverStatuses = SystemStatusContainer.instance.listServerStatus();
 		Map<String,AtomicLong> insertCount = SystemStatusContainer.instance.listServerRowInsertCounters();
 		Map<String,AtomicLong> updateCount = SystemStatusContainer.instance.listServerRowUpdateCounters();

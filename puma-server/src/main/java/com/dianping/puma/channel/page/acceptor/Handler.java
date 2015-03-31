@@ -66,11 +66,14 @@ public class Handler implements PageHandler<Context> {
 		HttpServletResponse res = ctx.getHttpServletResponse();
 
 		// status report
-		SystemStatusContainer.instance.addClientStatus(payload.getClientName(),NetUtils.getIpAddr(ctx.getHttpServletRequest()), payload.getSeq(), payload.getTarget(),
-				payload.isDml(), payload.isDdl(), payload.isNeedsTransactionMeta(), payload.getDatabaseTables(),
-				payload.getCodecType());
-		SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(),payload.getBinlog(),payload.getBinlogPos());
+		SystemStatusContainer.instance.addClientStatus(payload.getClientName(), NetUtils.getIpAddr(ctx
+				.getHttpServletRequest()), payload.getSeq(), payload.getTarget(), payload.isDml(), payload.isDdl(),
+				payload.isNeedsTransactionMeta(), payload.getDatabaseTables(), payload.getCodecType());
+		SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(), payload.getBinlog(), payload
+				.getBinlogPos());
 		log.info("Client(" + payload.getClientName() + ") connected.");
+		log.info("Client(" + payload.getClientName() + ") target : " + payload.getTarget() + "  binlog : "
+				+ payload.getBinlog() + "  binlogPos : " + payload.getBinlogPos() + " .");
 
 		EventCodec codec = EventCodecFactory.createCodec(payload.getCodecType());
 		EventFilterChain filterChain = EventFilterChainFactory.createEventFilterChain(payload.isDdl(), payload.isDml(),
@@ -84,15 +87,22 @@ public class Handler implements PageHandler<Context> {
 		String binlogFile = payload.getBinlog();
 		long binlogPos = payload.getBinlogPos();
 		long timeStamp = payload.getTimestamp();
-		//EventStorage storage = ComponentContainer.SPRING.lookup("storage-" + payload.getTarget(), EventStorage.class);
+		// EventStorage storage = ComponentContainer.SPRING.lookup("storage-" +
+		// payload.getTarget(), EventStorage.class);
 		EventStorage storage = DefaultTaskExecutorContainer.instance.getTaskStorage(payload.getTarget());
-		log.info("Client(" + payload.getClientName() + ") get storage-"+payload.getTarget()+".");
+		log.info("Client(" + payload.getClientName() + ") get storage-" + payload.getTarget() + ".");
+		if (storage == null) {
+			SystemStatusContainer.instance.removeClient(payload.getClientName());
+			log.error("Client(" + payload.getClientName() + ") cannot get storage-" + payload.getTarget() + ".");
+			throw new IOException();
+		}
 		EventChannel channel;
 		try {
 			channel = new BufferedEventChannel(storage.getChannel(seq, serverId, binlogFile, binlogPos, timeStamp),
 					5000);
 		} catch (StorageException e1) {
-			log.error("error occured " + e1.getMessage() + ", from " + NetUtils.getIpAddr(ctx.getHttpServletRequest()), e1);
+			log.error("error occured " + e1.getMessage() + ", from " + NetUtils.getIpAddr(ctx.getHttpServletRequest()),
+					e1);
 			throw new IOException(e1);
 		}
 
@@ -133,11 +143,12 @@ public class Handler implements PageHandler<Context> {
 						res.getOutputStream().flush();
 						// status report
 						SystemStatusContainer.instance.updateClientSeq(payload.getClientName(), event.getSeq());
-						//record success client seq
+						// record success client seq
 						SystemStatusContainer.instance.updateClientSuccessSeq(payload.getClientName(), event.getSeq());
-						//update binlog
-						SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(),event.getBinlog(),event.getBinlogPos());
-					
+						// update binlog
+						SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(), event.getBinlog(),
+								event.getBinlogPos());
+
 					}
 				}
 			} catch (Exception e) {

@@ -33,9 +33,13 @@ public class PumaMonitorSyncProcessTask implements PumaMonitorTask {
 		Map<String, ClientStatus> clientStatuses = SystemStatusContainer.instance.listClientStatus();
 		Map<String, ServerStatus> serverStatuses = SystemStatusContainer.instance.listServerStatus();
 		int dfileNum = 0;
+		ClientStatus tempClientStatus = null;
+		String tempKey = null;
 		try {
 			for (Map.Entry<String, ClientStatus> clientStatus : clientStatuses.entrySet()) {
-				Log.info("puma Monitor SyncProcess : client is " +clientStatus.getKey());
+				Log.info("puma Monitor SyncProcess : client is " + clientStatus.getKey());
+				tempClientStatus = clientStatus.getValue();
+				tempKey = clientStatus.getKey();
 				ServerStatus serverStatus = serverStatuses.get(clientStatus.getValue().getTarget());
 				if (clientStatus.getValue().getBinlogFile() == null || serverStatus.getBinlogFile() == null) {
 					continue;
@@ -56,8 +60,13 @@ public class PumaMonitorSyncProcessTask implements PumaMonitorTask {
 			}
 
 		} catch (MonitorThresholdException e) {
-			notifyService.alarm(" diff num of file between sync and server binlog process :", e, true);
-			Cat.getProducer().logError(" diff num of file between sync and server binlog process :" +Integer.toString(dfileNum), e);
+			notifyService.alarm(" diff num of file between sync and server binlog process :  name = " + tempKey
+					+ " ip = " + tempClientStatus.getIp() + " target:" + tempClientStatus.getTarget() + " diff = "
+					+ Integer.toString(dfileNum), e, true);
+			Cat.getProducer().logError(
+					" diff num of file between sync and server binlog process :  name = " + tempKey + " ip = "
+							+ tempClientStatus.getIp() + " target:" + tempClientStatus.getTarget() + " diff = "
+							+ Integer.toString(dfileNum), e);
 		}
 	}
 

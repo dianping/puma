@@ -126,28 +126,8 @@ public class Handler implements PageHandler<Context> {
 
 				if (event != null) {
 
-					if (count >= 10000) {
-						byte[] data = codec.encode(event);
-						res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
-						res.getOutputStream().write(data);
-						res.getOutputStream().flush();
-						// status report
-						SystemStatusContainer.instance.updateClientSeq(payload.getClientName(), event.getSeq());
-						// record success client seq
-						SystemStatusContainer.instance.updateClientSuccessSeq(payload.getClientName(), event.getSeq());
-						// update binlog
-						SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(), event.getBinlog(),
-								event.getBinlogPos());
-						continue;
-					}
-
-					if (event instanceof RowChangedEvent) {
-						if (((RowChangedEvent) event).isTransactionBegin()) {
-							continue;
-						}
-					}
-
 					if (filterChain.doNext(event)) {
+
 						byte[] data = codec.encode(event);
 						res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
 						res.getOutputStream().write(data);

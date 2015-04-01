@@ -69,11 +69,6 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-all</artifactId>
-				<version>1.9.0</version>
-			</dependency>
-			<dependency>
 				<groupId>org.codehaus.jackson</groupId>
 				<artifactId>jackson-core-asl</artifactId>
 				<version>1.9.4</version>
@@ -168,11 +163,6 @@
 				<artifactId>commons-lang3</artifactId>
 				<version>3.3.2</version>
 			</dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>3.3.2</version>
-            </dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-exec</artifactId>
@@ -261,9 +251,9 @@
                 <version>2.7.1</version>
             </dependency>
 			<dependency>
-				<groupId>com.dianping.hawk</groupId>
-				<artifactId>hawk-client</artifactId>
-				<version>0.7.1</version>
+				<groupId>com.dianping.zebra</groupId>
+				<artifactId>zebra-ds-monitor-client</artifactId>
+				<version>2.7.1</version>
 			</dependency>
 			<!-- 远程调用Pigeon -->
 			<dependency>

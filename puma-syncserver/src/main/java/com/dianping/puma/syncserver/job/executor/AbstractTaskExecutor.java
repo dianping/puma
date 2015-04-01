@@ -443,6 +443,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 
 				Transaction t = null;
 
+				if (++eventCount > 1000) {
+					eventCount = 0;
+				}
+
 				if (eventCount == 1000) {
 					t = Cat.getProducer().newTransaction("event", abstractTask.getName());
 				}

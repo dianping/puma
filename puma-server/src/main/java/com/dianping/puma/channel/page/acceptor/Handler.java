@@ -115,7 +115,6 @@ public class Handler implements PageHandler<Context> {
 				filterChain.reset();
 
 				Transaction t = null;
-				++count;
 				if (count == 1000) {
 					t = Cat.getProducer().newTransaction("next", payload.getClientName());
 				}
@@ -125,17 +124,30 @@ public class Handler implements PageHandler<Context> {
 				if (count == 1000 && t != null) {
 					t.setStatus("0");
 					t.complete();
-					count = 0;
 				}
 
 				if (event != null) {
 
-					/*
+					if (count == 1000) {
+						byte[] data = codec.encode(event);
+						res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
+						res.getOutputStream().write(data);
+						res.getOutputStream().flush();
+						// status report
+						SystemStatusContainer.instance.updateClientSeq(payload.getClientName(), event.getSeq());
+						// record success client seq
+						SystemStatusContainer.instance.updateClientSuccessSeq(payload.getClientName(), event.getSeq());
+						// update binlog
+						SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(), event.getBinlog(),
+								event.getBinlogPos());
+						continue;
+					}
+
 					if (event instanceof RowChangedEvent) {
 						if (((RowChangedEvent) event).isTransactionBegin()) {
 							continue;
 						}
-					}*/
+					}
 
 					if (filterChain.doNext(event)) {
 						byte[] data = codec.encode(event);
@@ -161,6 +173,10 @@ public class Handler implements PageHandler<Context> {
 				SystemStatusContainer.instance.removeClient(payload.getClientName());
 				log.info("Client(" + payload.getClientName() + ") failed. ", e);
 				break;
+			} finally {
+				if (++count == 1000) {
+					count = 0;
+				}
 			}
 		}
 

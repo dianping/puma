@@ -447,6 +447,11 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 
 				// LOG.info("********************Received " + event);
 				if (!skipToNextPos) {
+
+					if (event != null && !containDatabase(event.getDatabase())) {
+						binlogOfIOThreadChanged(event);
+					}
+
 					if (event instanceof RowChangedEvent) {
 						// ------------- (1) 【事务开始事件】--------------
 						if (((RowChangedEvent) event).isTransactionBegin()) {

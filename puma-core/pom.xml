@@ -31,6 +31,10 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.dianping.hawk</groupId>
+            <artifactId>hawk-client</artifactId>
+        </dependency>
         <!-- 日志系统 -->
         <dependency>
             <groupId>org.slf4j</groupId>

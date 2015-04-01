@@ -170,7 +170,7 @@ public class Handler implements PageHandler<Context> {
 				}
 			} catch (Exception e) {
 				try {
-					Cat.getProducer().logError(e);
+					log.error("handle", e);
 				} catch (Exception ex) {
 					log.error("Cat failed.");
 				}

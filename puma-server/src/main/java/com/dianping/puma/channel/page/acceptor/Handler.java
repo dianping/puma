@@ -115,20 +115,20 @@ public class Handler implements PageHandler<Context> {
 				filterChain.reset();
 
 				Transaction t = null;
-				if (count == 1000) {
+				if (count == 10000) {
 					t = Cat.getProducer().newTransaction("next", payload.getClientName());
 				}
 
 				ChangedEvent event = channel.next();
 
-				if (count == 1000 && t != null) {
+				if (count == 10000 && t != null) {
 					t.setStatus("0");
 					t.complete();
 				}
 
 				if (event != null) {
 
-					if (count == 1000) {
+					if (count == 10000) {
 						byte[] data = codec.encode(event);
 						res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
 						res.getOutputStream().write(data);
@@ -174,7 +174,7 @@ public class Handler implements PageHandler<Context> {
 				log.info("Client(" + payload.getClientName() + ") failed. ", e);
 				break;
 			} finally {
-				if (++count == 1000) {
+				if (++count == 10000) {
 					count = 0;
 				}
 			}

@@ -130,11 +130,12 @@ public class Handler implements PageHandler<Context> {
 
 				if (event != null) {
 
+					/*
 					if (event instanceof RowChangedEvent) {
 						if (((RowChangedEvent) event).isTransactionBegin()) {
 							continue;
 						}
-					}
+					}*/
 
 					if (filterChain.doNext(event)) {
 						byte[] data = codec.encode(event);

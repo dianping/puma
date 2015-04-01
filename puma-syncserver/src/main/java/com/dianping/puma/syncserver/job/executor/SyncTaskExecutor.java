@@ -25,10 +25,7 @@ public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTask, SyncTaskSta
 
 	@Override
 	protected void execute(ChangedEvent event) throws SQLException, DdlRenameException {
-		Transaction t = Cat.getProducer().newTransaction("SQLExecution", this.getTask().getName());
 		mysqlExecutor.execute(event);
-		t.setStatus("0");
-		t.complete();
 	}
 
 }

@@ -173,12 +173,15 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
             if (!(event instanceof RowChangedEvent)) {
                 return;
             }
+            RowChangedEvent rowEvent = (RowChangedEvent) event;
+            if (rowEvent.isTransactionBegin() || rowEvent.isTransactionCommit()) {
+                return;
+            }
 
             Transaction t1 = Cat.newTransaction("ShardSyncTask", "ToSQL");
             String tempSql = null;
             List<Object> args = null;
             try {
-                RowChangedEvent rowEvent = (RowChangedEvent) event;
 
                 rowEvent.setTable(task.getTableName());
                 rowEvent.setDatabase("");

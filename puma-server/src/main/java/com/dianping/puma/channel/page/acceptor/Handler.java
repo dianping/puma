@@ -114,6 +114,10 @@ public class Handler implements PageHandler<Context> {
 			try {
 				filterChain.reset();
 
+				if (++count > 10000) {
+					count = 0;
+				}
+
 				Transaction t = null;
 				if (count == 10000) {
 					t = Cat.getProducer().newTransaction("next", payload.getClientName());
@@ -173,10 +177,6 @@ public class Handler implements PageHandler<Context> {
 				SystemStatusContainer.instance.removeClient(payload.getClientName());
 				log.info("Client(" + payload.getClientName() + ") failed. ", e);
 				break;
-			} finally {
-				if (++count == 10000) {
-					count = 0;
-				}
 			}
 		}
 

@@ -118,17 +118,11 @@ public class Handler implements PageHandler<Context> {
 					count = 0;
 				}
 
-				Transaction t = null;
 				if (count >= 10000) {
-					t = Cat.getProducer().newTransaction("next", payload.getClientName());
+					Cat.getProducer().logEvent("next", payload.getClientName());
 				}
 
 				ChangedEvent event = channel.next();
-
-				if (count >= 10000 && t != null) {
-					t.setStatus("0");
-					t.complete();
-				}
 
 				if (event != null) {
 

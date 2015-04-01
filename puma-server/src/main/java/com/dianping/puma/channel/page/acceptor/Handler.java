@@ -118,42 +118,16 @@ public class Handler implements PageHandler<Context> {
 					count = 0;
 				}
 
-				Transaction t = null;
-				if (count == 10000) {
-					t = Cat.getProducer().newTransaction("next", payload.getClientName());
+				if (count >= 10000) {
+					Cat.getProducer().logEvent("next", payload.getClientName());
 				}
 
 				ChangedEvent event = channel.next();
 
-				if (count == 10000 && t != null) {
-					t.setStatus("0");
-					t.complete();
-				}
-
 				if (event != null) {
 
-					if (count == 10000) {
-						byte[] data = codec.encode(event);
-						res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
-						res.getOutputStream().write(data);
-						res.getOutputStream().flush();
-						// status report
-						SystemStatusContainer.instance.updateClientSeq(payload.getClientName(), event.getSeq());
-						// record success client seq
-						SystemStatusContainer.instance.updateClientSuccessSeq(payload.getClientName(), event.getSeq());
-						// update binlog
-						SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(), event.getBinlog(),
-								event.getBinlogPos());
-						continue;
-					}
-
-					if (event instanceof RowChangedEvent) {
-						if (((RowChangedEvent) event).isTransactionBegin()) {
-							continue;
-						}
-					}
-
 					if (filterChain.doNext(event)) {
+
 						byte[] data = codec.encode(event);
 						res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
 						res.getOutputStream().write(data);
@@ -170,7 +144,7 @@ public class Handler implements PageHandler<Context> {
 				}
 			} catch (Exception e) {
 				try {
-					Cat.getProducer().logError(e);
+					log.error("handle", e);
 				} catch (Exception ex) {
 					log.error("Cat failed.");
 				}

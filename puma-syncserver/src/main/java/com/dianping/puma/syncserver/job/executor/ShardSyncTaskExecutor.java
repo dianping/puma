@@ -1,8 +1,6 @@
 package com.dianping.puma.syncserver.job.executor;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.message.Message;
-import com.dianping.cat.message.Transaction;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
@@ -154,19 +152,9 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
 
         @Override
         public void onEvent(ChangedEvent event) throws Exception {
-            Transaction t = Cat.newTransaction("ShardSyncTask", "OnEvent");
-            try {
-                tryTimes++;
-                onEventInternal(event);
-                tryTimes = 0;
-
-                t.setStatus(Message.SUCCESS);
-            } catch (Exception e) {
-                t.setStatus(e);
-                throw e;
-            } finally {
-                t.complete();
-            }
+            tryTimes++;
+            onEventInternal(event);
+            tryTimes = 0;
         }
 
         protected void onEventInternal(ChangedEvent event) throws Exception {
@@ -178,50 +166,30 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
                 return;
             }
 
-            Transaction t1 = Cat.newTransaction("ShardSyncTask", "ToSQL");
             String tempSql = null;
             List<Object> args = null;
-            try {
+            rowEvent.setTable(task.getTableName());
+            rowEvent.setDatabase("");
 
-                rowEvent.setTable(task.getTableName());
-                rowEvent.setDatabase("");
-
-                tempSql = rowChangedEventToSql(rowEvent);
-                args = rowChangedEventToArgs(rowEvent);
-                t1.setStatus(Message.SUCCESS);
-            } catch (Exception e) {
-                t1.setStatus(e);
-                throw e;
-            } finally {
-                t1.complete();
-            }
-
+            tempSql = rowChangedEventToSql(rowEvent);
+            args = rowChangedEventToArgs(rowEvent);
 
             if (Strings.isNullOrEmpty(tempSql)) {
                 return;
             }
 
-            Transaction t2 = Cat.newTransaction("ShardSyncTask", "ExecuteSql");
-            try {
-                for (DataSourceRouter router : routers) {
-                    RouterTarget routerTarget = router.getTarget(tempSql, args);
+            for (DataSourceRouter router : routers) {
+                RouterTarget routerTarget = router.getTarget(tempSql, args);
 
-                    for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
-                        JdbcTemplate jdbcTemplate = new JdbcTemplate(targetedSql.getDataSource());
-                        for (String sql : targetedSql.getSqls()) {
-                            int rows = jdbcTemplate.update(sql, args.toArray());
-                            if (rows != 1) {
-                                throw new EmptyResultDataAccessException("error effective dated row:" + rows, 1);
-                            }
+                for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
+                    JdbcTemplate jdbcTemplate = new JdbcTemplate(targetedSql.getDataSource());
+                    for (String sql : targetedSql.getSqls()) {
+                        int rows = jdbcTemplate.update(sql, args.toArray());
+                        if (rows != 1) {
+                            throw new EmptyResultDataAccessException("error effective dated row:" + rows, 1);
                         }
                     }
                 }
-                t2.setStatus(Message.SUCCESS);
-            } catch (Exception e) {
-                t2.setStatus(e);
-                throw e;
-            } finally {
-                t2.complete();
             }
         }
 
@@ -312,7 +280,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
 
         @Override
         public void onConnected() {
-
+            logger.info("{} connected to the server", this.name);
         }
 
         @Override

@@ -198,7 +198,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
                 return;
             }
 
-            Transaction t2 = Cat.newTransaction("ShardSyncTask", "ToSQL");
+            Transaction t2 = Cat.newTransaction("ShardSyncTask", "ExecuteSql");
             try {
                 for (DataSourceRouter router : routers) {
                     RouterTarget routerTarget = router.getTarget(tempSql, args);

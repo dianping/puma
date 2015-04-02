@@ -93,7 +93,11 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
 
         protected boolean checkHasRow(long index) {
             File file = new File(getDumpFile(index));
-            return file.exists() && file.length() > 0;
+            boolean hasRow = file.exists() && file.length() > 0;
+            if (!hasRow) {
+                file.delete();
+            }
+            return hasRow;
         }
 
         @Override
@@ -117,15 +121,15 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
                     break;
                 }
 
+                if (!checkHasRow(this.lastIndex)) {
+                    //todo: finish!
+                    break;
+                }
+
                 try {
                     waitForConvertQueue.put(lastIndex);
                 } catch (InterruptedException e) {
                     status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
-                    break;
-                }
-
-                if (!checkHasRow(this.lastIndex)) {
-                    //todo: finish!
                     break;
                 }
 

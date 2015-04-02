@@ -10,7 +10,7 @@ import com.dianping.puma.core.entity.ShardDumpTask;
 public class ShardDumpTaskExecutorMain {
     public static void main(String... args) {
         ShardDumpTask task = new ShardDumpTask();
-        task.setRuleName("pumadebug");
+//        task.setRuleName("pumadebug");
         task.setTableName("user");
 
         ShardDumpTaskExecutor target = new ShardDumpTaskExecutor(task);

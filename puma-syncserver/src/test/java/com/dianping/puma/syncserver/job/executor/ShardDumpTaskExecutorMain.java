@@ -1,5 +1,6 @@
 package com.dianping.puma.syncserver.job.executor;
 
+import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.entity.ShardDumpTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
 
@@ -28,8 +29,15 @@ public class ShardDumpTaskExecutorMain {
         src.setUsername("root");
         src.setPassword("root");
 
+        DstDBInstance dst = new DstDBInstance();
+        dst.setHost("127.0.0.1");
+        dst.setPort(3306);
+        dst.setUsername("root");
+        dst.setPassword("root");
+
         ShardDumpTaskExecutor target = new ShardDumpTaskExecutor(task);
         target.setSrcDBInstance(src);
+        target.setDstDBInstance(dst);
         target.init();
         target.start();
 

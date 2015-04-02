@@ -10,7 +10,6 @@ import com.dianping.puma.syncserver.config.SyncServerConfig;
 import com.dianping.puma.syncserver.util.ProcessBuilderWrapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,10 +79,6 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
         return String.format("%s%d-%d.dump.sql", dumpOutputDir, task.getShardRule().hashCode(), index);
     }
 
-    protected String getTargetFile(long index) {
-        return "~" + getDumpFile(index);
-    }
-
     class DumpWorker implements Runnable {
         protected long lastIndex;
 
@@ -110,30 +105,25 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
                     if (!Strings.isNullOrEmpty(output)) {
                         throw new IOException(output);
                     }
-                } catch (IOException e) {
+
+                    if (!checkHasRow(this.lastIndex)) {
+                        //todo: finish!
+                        break;
+                    }
+
+                    waitForConvertQueue.put(lastIndex);
+                    this.lastIndex = nextIndex;
+
+                } catch (InterruptedException e) {
+                    status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
+                    break;
+                } catch (Exception e) {
                     String msg = "Dump Failed!";
                     logger.error(msg, e);
                     Cat.logError(msg, e);
                     status.setStatus(TaskExecutorStatus.Status.FAILED);
                     break;
-                } catch (InterruptedException e) {
-                    status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
-                    break;
                 }
-
-                if (!checkHasRow(this.lastIndex)) {
-                    //todo: finish!
-                    break;
-                }
-
-                try {
-                    waitForConvertQueue.put(lastIndex);
-                } catch (InterruptedException e) {
-                    status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
-                    break;
-                }
-
-                this.lastIndex = nextIndex;
             }
         }
 
@@ -188,14 +178,15 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
                     if (!Strings.isNullOrEmpty(output)) {
                         throw new IOException(output);
                     }
-                } catch (IOException e) {
+                    waitForLoadQueue.put(index);
+                } catch (InterruptedException e) {
+                    status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
+                    break;
+                } catch (Exception e) {
                     String msg = "Convert Failed!";
                     logger.error(msg, e);
                     Cat.logError(msg, e);
                     status.setStatus(TaskExecutorStatus.Status.FAILED);
-                    break;
-                } catch (InterruptedException e) {
-                    status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
                     break;
                 }
             }
@@ -204,12 +195,35 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
 
     class LoadWorker implements Runnable {
 
-        @Override
-        public void run() {
-
+        protected void cleanUp(long index) {
+            new File(getDumpFile(index)).delete();
+            //todo: 回写数据库
         }
 
-        protected String mysqlload(long index) throws ExecuteException, IOException, InterruptedException {
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    Long index = waitForLoadQueue.take();
+                    String output = mysqlload(index);
+                    if (!Strings.isNullOrEmpty(output)) {
+                        throw new IOException(output);
+                    }
+                    cleanUp(index);
+                } catch (InterruptedException e) {
+                    status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
+                    break;
+                } catch (Exception e) {
+                    String msg = "Convert Failed!";
+                    logger.error(msg, e);
+                    Cat.logError(msg, e);
+                    status.setStatus(TaskExecutorStatus.Status.FAILED);
+                    break;
+                }
+            }
+        }
+
+        protected String mysqlload(long index) throws IOException, InterruptedException {
             checkNotNull(dstDBInstance, "dstDBInstance");
 
             List<String> cmdlist = new ArrayList<String>();

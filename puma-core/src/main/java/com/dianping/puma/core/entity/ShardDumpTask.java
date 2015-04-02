@@ -16,9 +16,13 @@ public class ShardDumpTask extends DumpTask {
 
     private String tableName;
 
+    private String targetTableName;
+
     private String shardRule;
 
     private long indexKey;
+
+    private String indexColumnName;
 
     private long maxKey;
 
@@ -91,5 +95,21 @@ public class ShardDumpTask extends DumpTask {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+    public String getIndexColumnName() {
+        return indexColumnName;
+    }
+
+    public void setIndexColumnName(String indexColumnName) {
+        this.indexColumnName = indexColumnName;
+    }
+
+    public String getTargetTableName() {
+        return targetTableName;
+    }
+
+    public void setTargetTableName(String targetTableName) {
+        this.targetTableName = targetTableName;
     }
 }

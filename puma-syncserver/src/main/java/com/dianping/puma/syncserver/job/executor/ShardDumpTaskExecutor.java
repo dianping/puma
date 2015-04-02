@@ -1,5 +1,6 @@
 package com.dianping.puma.syncserver.job.executor;
 
+import com.dianping.cat.Cat;
 import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.entity.ShardDumpTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
@@ -7,15 +8,19 @@ import com.dianping.puma.core.model.state.TaskState;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.syncserver.config.SyncServerConfig;
 import com.dianping.puma.syncserver.util.ProcessBuilderWrapper;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -37,57 +42,164 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
 
     protected volatile DstDBInstance dstDBInstance;
 
+    protected final BlockingQueue<Long> waitForConvertQueue = new LinkedBlockingQueue<Long>(5);
+
+    protected final BlockingQueue<Long> waitForLoadQueue = new LinkedBlockingQueue<Long>(5);
+
+    protected Thread dumpWorker;
+
+    protected Thread convertWorker;
+
+    protected Thread loadWorker;
+
     public ShardDumpTaskExecutor(ShardDumpTask task) {
         checkNotNull(task, "task");
         checkNotNull(task.getTableName(), "task.tableName");
+        checkNotNull(task.getIndexColumnName(), "task.indexColumnName");
 
         this.task = task;
-        this.dumpOutputDir = SyncServerConfig.getInstance() == null ? "/tmp/" : SyncServerConfig.getInstance().getTempDir() + "/dump/" + task.getName() + "/";
+        this.dumpOutputDir = (SyncServerConfig.getInstance() == null ? "/tmp/" : SyncServerConfig.getInstance().getTempDir() + "/dump/") + task.getName() + "/";
         this.status = new TaskExecutorStatus();
     }
 
     public void init() {
+        this.dumpWorker = new Thread(new DumpWorker());
+        this.convertWorker = new Thread(new ConvertWorker());
+        this.loadWorker = new Thread(new LoadWorker());
+        createOutPutDir();
     }
 
-
-    protected String mysqldump() throws IOException, InterruptedException {
-        checkNotNull(srcDBInstance, "srcDBInstance");
-
-        List<String> cmdlist = new ArrayList<String>();
-
-        cmdlist.add("mysqldump");
-        cmdlist.add("--host=" + srcDBInstance.getHost());
-        cmdlist.add("--port=" + srcDBInstance.getPort());
-        cmdlist.add("--user=" + srcDBInstance.getUsername());
-        cmdlist.add("--password=" + srcDBInstance.getPassword());
-        cmdlist.add("--where=" + task.getShardRule());
-        cmdlist.addAll(task.getOptions());
-        cmdlist.add("--result-file=" + getDumpFile());
-        cmdlist.add(task.getDataBase());
-        cmdlist.add(task.getTableName());
-
-        String output = executeByProcessBuilder(cmdlist);
-        return output;
+    protected void createOutPutDir() {
+        File theDir = new File(this.dumpOutputDir);
+        if (!theDir.exists()) {
+            theDir.mkdir();
+        }
     }
 
-    protected String getDumpFile() {
-        return String.format("%s%s/%d.dump.sql", dumpOutputDir, task.getName(), task.getShardRule().hashCode());
+    protected String getDumpFile(long index) {
+        return String.format("%s%d-%d.dump.sql", dumpOutputDir, task.getShardRule().hashCode(), index);
     }
 
+    class DumpWorker implements Runnable {
+        protected long lastIndex;
 
-    private String mysqlload() throws ExecuteException, IOException, InterruptedException {
-        checkNotNull(dstDBInstance, "dstDBInstance");
+        public DumpWorker() {
+            this.lastIndex = task.getIndexKey();
+        }
 
-        List<String> cmdlist = new ArrayList<String>();
-        cmdlist.add("mysql -f --default-character-set=utf8");
-        cmdlist.add("'--database=" + task.getDataBase() + "'");
-        cmdlist.add("'--user=" + dstDBInstance.getUsername() + "'");
-        cmdlist.add("'--host=" + dstDBInstance.getHost() + "'");
-        cmdlist.add("'--port=" + dstDBInstance.getPort() + "'");
-        cmdlist.add("'--password=" + dstDBInstance.getPassword() + "'");
-        cmdlist.add("< '" + getDumpFile() + "'");
+        protected boolean checkHasRow(long index) {
+            File file = new File(getDumpFile(index));
+            return file.exists() && file.length() > 0;
+        }
 
-        return executeByProcessBuilder(Lists.newArrayList("sh", "-c", StringUtils.join(cmdlist, " ")));
+        @Override
+        public void run() {
+            while (true) {
+                long nextIndex = increaseIndex();
+
+                try {
+                    String output = mysqldump(this.lastIndex, nextIndex);
+                    if (!Strings.isNullOrEmpty(output)) {
+                        throw new IOException(output);
+                    }
+                } catch (IOException e) {
+                    String msg = "Dump Failed!";
+                    logger.error(msg, e);
+                    Cat.logError(msg, e);
+                    status.setStatus(TaskExecutorStatus.Status.FAILED);
+                    break;
+                } catch (InterruptedException e) {
+                    status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
+                    break;
+                }
+
+                try {
+                    waitForConvertQueue.put(lastIndex);
+                } catch (InterruptedException e) {
+                    status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
+                    break;
+                }
+
+                if (!checkHasRow(this.lastIndex)) {
+                    //finish!
+                    break;
+                }
+
+                this.lastIndex = nextIndex;
+            }
+        }
+
+        protected long increaseIndex() {
+            return this.lastIndex + 1000000;
+        }
+
+        protected String mysqldump(long lastIndex, long nextIndex) throws IOException, InterruptedException {
+            checkNotNull(srcDBInstance, "srcDBInstance");
+
+            List<String> cmdlist = new ArrayList<String>();
+
+            cmdlist.add("mysqldump");
+            cmdlist.add("--host=" + srcDBInstance.getHost());
+            cmdlist.add("--port=" + srcDBInstance.getPort());
+            cmdlist.add("--user=" + srcDBInstance.getUsername());
+            cmdlist.add("--password=" + srcDBInstance.getPassword());
+            cmdlist.add("--where=" + String.format("%s AND %s > %d AND %s <= %d AND %s <= %d",
+                    task.getShardRule(),
+                    task.getIndexColumnName(), lastIndex,
+                    task.getIndexColumnName(), nextIndex,
+                    task.getIndexColumnName(), task.getMaxKey()));
+
+            cmdlist.addAll(task.getOptions());
+            cmdlist.add("--result-file=" + getDumpFile(lastIndex));
+            cmdlist.add(task.getDataBase());
+            cmdlist.add(task.getTableName());
+
+            return executeByProcessBuilder(cmdlist);
+        }
+    }
+
+    class ConvertWorker implements Runnable {
+
+        protected void convertTableName(long index) {
+
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    Long index = waitForConvertQueue.take();
+                    System.out.println(index);
+                } catch (InterruptedException e) {
+                    status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
+                    break;
+                }
+            }
+        }
+    }
+
+    class LoadWorker implements Runnable {
+
+        @Override
+        public void run() {
+
+        }
+
+        protected String mysqlload(long index) throws ExecuteException, IOException, InterruptedException {
+            checkNotNull(dstDBInstance, "dstDBInstance");
+
+            List<String> cmdlist = new ArrayList<String>();
+            cmdlist.add("mysql -f --default-character-set=utf8");
+            cmdlist.add("'--database=" + task.getDataBase() + "'");
+            cmdlist.add("'--user=" + dstDBInstance.getUsername() + "'");
+            cmdlist.add("'--host=" + dstDBInstance.getHost() + "'");
+            cmdlist.add("'--port=" + dstDBInstance.getPort() + "'");
+            cmdlist.add("'--password=" + dstDBInstance.getPassword() + "'");
+            cmdlist.add("< '" + getDumpFile(index) + "'");
+
+            return executeByProcessBuilder(Lists.newArrayList("sh", "-c", StringUtils.join(cmdlist, " ")));
+        }
+
     }
 
     protected String executeByProcessBuilder(List<String> cmd) throws IOException, InterruptedException {
@@ -100,7 +212,9 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
 
     @Override
     public void start() {
-
+        dumpWorker.start();
+        convertWorker.start();
+        loadWorker.start();
     }
 
     @Override

@@ -80,6 +80,10 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
         return String.format("%s%d-%d.dump.sql", dumpOutputDir, task.getShardRule().hashCode(), index);
     }
 
+    protected String getTargetFile(long index) {
+        return "~" + getDumpFile(index);
+    }
+
     class DumpWorker implements Runnable {
         protected long lastIndex;
 
@@ -121,7 +125,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
                 }
 
                 if (!checkHasRow(this.lastIndex)) {
-                    //finish!
+                    //todo: finish!
                     break;
                 }
 
@@ -160,8 +164,15 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
 
     class ConvertWorker implements Runnable {
 
-        protected void convertTableName(long index) {
-
+        protected String convertTableName(long index) throws IOException, InterruptedException {
+            List<String> cmdlist = new ArrayList<String>();
+            cmdlist.add("perl");
+            cmdlist.add("-i");
+            cmdlist.add("-p");
+            cmdlist.add("-e");
+            cmdlist.add("s/(^INSERT )(INTO )(`)([^`]+)(`)(.*$)/\\1IGNORE \\2\\3" + task.getTargetTableName() + "\\5\\6/g");
+            cmdlist.add(getDumpFile(index));
+            return executeByProcessBuilder(cmdlist);
         }
 
         @Override
@@ -169,7 +180,16 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
             while (true) {
                 try {
                     Long index = waitForConvertQueue.take();
-                    System.out.println(index);
+                    String output = convertTableName(index);
+                    if (!Strings.isNullOrEmpty(output)) {
+                        throw new IOException(output);
+                    }
+                } catch (IOException e) {
+                    String msg = "Convert Failed!";
+                    logger.error(msg, e);
+                    Cat.logError(msg, e);
+                    status.setStatus(TaskExecutorStatus.Status.FAILED);
+                    break;
                 } catch (InterruptedException e) {
                     status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
                     break;

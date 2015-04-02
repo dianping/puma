@@ -19,7 +19,8 @@ public class ShardDumpTaskExecutorMain {
         task.setIndexKey(0);
         task.setMaxKey(10000000);
         task.setName("debug");
-        task.setShardRule("id % 2 = 1");
+        task.setShardRule("id % 3 = 1");
+        task.setTargetTableName("user_1");
 
         SrcDBInstance src = new SrcDBInstance();
         src.setHost("127.0.0.1");

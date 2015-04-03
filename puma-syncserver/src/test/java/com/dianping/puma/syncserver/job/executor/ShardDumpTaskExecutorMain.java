@@ -4,21 +4,19 @@ import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.entity.ShardDumpTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
 
-import java.io.IOException;
-
 /**
  * Dozer @ 2015-02
  * mail@dozer.cc
  * http://www.dozer.cc
  */
 public class ShardDumpTaskExecutorMain {
-    public static void main(String... args) throws IOException {
+    public static void main(String... args) throws InterruptedException {
         ShardDumpTask task = new ShardDumpTask();
         task.setDataBase("test");
         task.setTableName("user");
         task.setIndexColumnName("id");
         task.setIndexKey(0);
-        task.setMaxKey(100000);
+        task.setMaxKey(10000000);
         task.setName("debug");
         task.setShardRule("id % 2 = 0");
         task.setTargetTableName("user_0");
@@ -41,6 +39,10 @@ public class ShardDumpTaskExecutorMain {
         target.init();
         target.start();
 
-        System.in.read();
+        while (target.getTaskState().getPercent() < 100) {
+            System.out.println(target.getTaskState().getStatus());
+            System.out.println(target.getTaskState().getPercent());
+            Thread.sleep(2000);
+        }
     }
 }

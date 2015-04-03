@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,13 +43,9 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
 
     protected volatile DstDBInstance dstDBInstance;
 
-    protected final BlockingQueue<Long> waitForConvertQueue = new LinkedBlockingQueue<Long>(5);
-
     protected final BlockingQueue<Long> waitForLoadQueue = new LinkedBlockingQueue<Long>(5);
 
     protected Thread dumpWorker;
-
-    protected Thread convertWorker;
 
     protected Thread loadWorker;
 
@@ -66,7 +63,6 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
 
     public void init() {
         this.dumpWorker = new Thread(new DumpWorker());
-        this.convertWorker = new Thread(new ConvertWorker());
         this.loadWorker = new Thread(new LoadWorker());
         createOutPutDir();
     }
@@ -89,13 +85,36 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
             this.lastIndex = task.getIndexKey();
         }
 
-        protected boolean checkHasRow(long index) {
-            File file = new File(getDumpFile(index));
-            boolean hasRow = file.exists() && file.length() > 0;
-            if (!hasRow) {
-                file.delete();
+        protected boolean checkHasData(long index) {
+            FileInputStream reader = null;
+            boolean hasData = false;
+            File file = null;
+            try {
+                file = new File(getDumpFile(index));
+                if (file.length() >= 1024 * 8) {
+                    hasData = true;
+                    return hasData;
+                }
+                reader = new FileInputStream(file);
+                byte[] data = new byte[(int) file.length()];
+                reader.read(data);
+
+                hasData = new String(data, "UTF-8").contains("INSERT");
+                return hasData;
+            } catch (IOException e) {
+                hasData = false;
+                return hasData;
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException ignoire) {
+                    }
+                }
+                if (!hasData && file != null) {
+                    file.delete();
+                }
             }
-            return hasRow;
         }
 
         @Override
@@ -109,12 +128,19 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
                         throw new IOException(output);
                     }
 
-                    if (!checkHasRow(this.lastIndex)) {
+                    if (!checkHasData(this.lastIndex)) {
                         //todo: finish!
                         break;
                     }
 
-                    waitForConvertQueue.put(lastIndex);
+                    output = convertTableName(this.lastIndex);
+                    if (!Strings.isNullOrEmpty(output)) {
+                        throw new IOException(output);
+                    }
+
+                    readAndSaveBinLogPostion(this.lastIndex);
+
+                    waitForLoadQueue.put(lastIndex);
                     this.lastIndex = nextIndex;
 
                 } catch (InterruptedException e) {
@@ -157,9 +183,6 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
 
             return executeByProcessBuilder(cmdlist);
         }
-    }
-
-    class ConvertWorker implements Runnable {
 
         protected String convertTableName(long index) throws IOException, InterruptedException {
             List<String> cmdlist = new ArrayList<String>();
@@ -172,31 +195,8 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
             return executeByProcessBuilder(cmdlist);
         }
 
-        protected void readBinLogPostion(long index) {
+        protected void readAndSaveBinLogPostion(long index) {
             //todo:load
-        }
-
-        @Override
-        public void run() {
-            while (true) {
-                try {
-                    Long index = waitForConvertQueue.take();
-                    String output = convertTableName(index);
-                    if (!Strings.isNullOrEmpty(output)) {
-                        throw new IOException(output);
-                    }
-                    waitForLoadQueue.put(index);
-                } catch (InterruptedException e) {
-                    status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
-                    break;
-                } catch (Exception e) {
-                    String msg = "Convert Failed!";
-                    logger.error(msg, e);
-                    Cat.logError(msg, e);
-                    status.setStatus(TaskExecutorStatus.Status.FAILED);
-                    break;
-                }
-            }
         }
     }
 
@@ -258,7 +258,6 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
     @Override
     public void start() {
         dumpWorker.start();
-        convertWorker.start();
         loadWorker.start();
     }
 

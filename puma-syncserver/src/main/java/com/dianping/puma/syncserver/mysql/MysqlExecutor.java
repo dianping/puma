@@ -45,6 +45,9 @@ public class MysqlExecutor {
 	private MysqlMapping mysqlMapping;
 	private Connection conn = null;
 
+	private String databaseToCommit = null;
+	private String tableToCommit = null;
+
 	public MysqlExecutor(String host, String username, String password, MysqlMapping mysqlMapping) {
 		this.mysqlMapping = mysqlMapping;
 
@@ -100,16 +103,20 @@ public class MysqlExecutor {
 		} else if (event instanceof RowChangedEvent) {
 			return executeDml((RowChangedEvent) event);
 		}
-		return null;
 	}
 
 	public void commit() throws SQLException {
 		if (conn != null) {
+			Transaction t = Cat.newTransaction("SQL.commit", databaseToCommit + "." + tableToCommit);
+
 			conn.commit();
 			try {
 				conn.close();// 释放连接到连接池
+				t.setStatus("0");
 			} catch (Exception e) {
-				// ignore
+				t.setStatus(e);
+			} finally {
+				t.complete();
 			}
 			conn = null;
 		}

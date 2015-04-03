@@ -14,9 +14,6 @@
         <module>puma-admin</module>
         <module>puma-syncserver</module>
     </modules>
-    <properties>
-        <env>qa</env>
-    </properties>
     <description>puma</description>
     <dependencyManagement>
         <dependencies>
@@ -369,5 +366,6 @@ org.eclipse.jdt.core.compiler.compliance=1.6
     <properties>
         <project.build.sourceEncoding>utf-8
         </project.build.sourceEncoding>
+        <env>qa</env>
     </properties>
 </project>

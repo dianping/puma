@@ -1,10 +1,11 @@
 package com.dianping.puma.syncserver.job.executor;
 
 import com.dianping.cat.Cat;
+import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.entity.ShardDumpTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
-import com.dianping.puma.core.model.state.TaskState;
+import com.dianping.puma.core.model.state.ShardDumpTaskState;
 import com.dianping.puma.core.service.ShardDumpTaskService;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.syncserver.config.SyncServerConfig;
@@ -30,12 +31,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskState> {
+public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardDumpTaskState> {
     private static final Logger logger = LoggerFactory.getLogger(ShardDumpTaskExecutor.class);
 
     protected final ShardDumpTask task;
 
-    protected final TaskExecutorStatus status;
+    protected final ShardDumpTaskState dumpStatus;
+
+    protected final ShardDumpTaskState loadStatus;
 
     protected final String dumpOutputDir;
 
@@ -58,7 +61,10 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
 
         this.task = task;
         this.dumpOutputDir = (SyncServerConfig.getInstance() == null ? "/tmp/" : SyncServerConfig.getInstance().getTempDir() + "/dump/") + task.getName() + "/";
-        this.status = new TaskExecutorStatus();
+        this.dumpStatus = new ShardDumpTaskState();
+        this.dumpStatus.setStatus(Status.PREPARING);
+        this.loadStatus = new ShardDumpTaskState();
+        this.loadStatus.setStatus(Status.PREPARING);
     }
 
     public void init() {
@@ -119,6 +125,8 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
 
         @Override
         public void run() {
+            dumpStatus.setStatus(Status.RUNNING);
+
             while (true) {
                 long nextIndex = increaseIndex();
 
@@ -129,7 +137,8 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
                     }
 
                     if (!checkHasData(this.lastIndex)) {
-                        //todo: finish!
+                        dumpStatus.setPercent(ShardDumpTaskState.PERCENT_MAX);
+                        waitForLoadQueue.put(-1l);
                         break;
                     }
 
@@ -140,17 +149,18 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
 
                     readAndSaveBinLogPostion(this.lastIndex);
 
+                    dumpStatus.setPercent((int) (this.lastIndex * 100 / task.getMaxKey()));
                     waitForLoadQueue.put(lastIndex);
                     this.lastIndex = nextIndex;
 
                 } catch (InterruptedException e) {
-                    status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
+                    dumpStatus.setStatus(Status.SUSPENDED);
                     break;
                 } catch (Exception e) {
                     String msg = "Dump Failed!";
                     logger.error(msg, e);
                     Cat.logError(msg, e);
-                    status.setStatus(TaskExecutorStatus.Status.FAILED);
+                    dumpStatus.setStatus(Status.FAILED);
                     break;
                 }
             }
@@ -197,34 +207,43 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
 
         protected void readAndSaveBinLogPostion(long index) {
             //todo:load
+            //todo:save to db
         }
     }
 
     class LoadWorker implements Runnable {
-
         protected void cleanUp(long index) {
             new File(getDumpFile(index)).delete();
-            //todo: 回写数据库
+            task.setIndexKey(index);
+            //todo:save to db
         }
 
         @Override
         public void run() {
+            loadStatus.setStatus(Status.RUNNING);
+
             while (true) {
                 try {
                     Long index = waitForLoadQueue.take();
+                    if (index < 0) {
+                        loadStatus.setPercent(ShardDumpTaskState.PERCENT_MAX);
+                        break;
+                    }
+
                     String output = mysqlload(index);
                     if (!Strings.isNullOrEmpty(output)) {
                         throw new IOException(output);
                     }
                     cleanUp(index);
+                    loadStatus.setPercent((int) (index * 100 / task.getMaxKey()));
                 } catch (InterruptedException e) {
-                    status.setStatus(TaskExecutorStatus.Status.SUSPPENDED);
+                    loadStatus.setStatus(Status.SUSPENDED);
                     break;
                 } catch (Exception e) {
                     String msg = "Convert Failed!";
                     logger.error(msg, e);
                     Cat.logError(msg, e);
-                    status.setStatus(TaskExecutorStatus.Status.FAILED);
+                    loadStatus.setStatus(Status.FAILED);
                     break;
                 }
             }
@@ -263,7 +282,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
 
     @Override
     public void pause(String detail) {
-
+        stop(detail);
     }
 
     @Override
@@ -273,27 +292,55 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
 
     @Override
     public TaskExecutorStatus getTaskExecutorStatus() {
-        return this.status;
+        return null;
     }
 
     @Override
     public ShardDumpTask getTask() {
-        return null;
+        return this.task;
     }
 
     @Override
-    public TaskState getTaskState() {
-        return null;
+    public ShardDumpTaskState getTaskState() {
+        ShardDumpTaskState status = new ShardDumpTaskState();
+        if (!dumpStatus.getStatus().equals(Status.RUNNING)) {
+            status.setStatus(dumpStatus.getStatus());
+        } else if (!loadStatus.getStatus().equals(Status.RUNNING)) {
+            status.setStatus(loadStatus.getStatus());
+        } else {
+            status.setStatus(Status.RUNNING);
+        }
+
+        status.setTaskName(this.task.getName());
+        status.setPercent((dumpStatus.getPercent() + loadStatus.getPercent()) / 2);
+        return status;
     }
 
     @Override
-    public void setTaskState(TaskState taskState) {
+    public void setTaskState(ShardDumpTaskState taskState) {
 
     }
 
     @Override
     public void stop(String detail) {
+        dumpWorker.interrupt();
+        loadWorker.interrupt();
 
+        while (!dumpWorker.isInterrupted() || loadWorker.isInterrupted()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+        cleanup();
+    }
+
+    protected void cleanup() {
+        File file = new File(this.dumpOutputDir);
+        if (file.exists()) {
+            file.delete();
+        }
     }
 
     public void setSrcDBInstance(SrcDBInstance srcDBInstance) {

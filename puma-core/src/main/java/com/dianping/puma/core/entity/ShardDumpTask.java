@@ -26,10 +26,10 @@ public class ShardDumpTask extends DumpTask {
 
     private long maxKey;
 
-    private List<String> options = Arrays.asList("--complete-insert", "--disable-keys", "--skip-comments", "--quick",
+    private List<String> options = Arrays.asList("--disable-keys", "--skip-comments", "--quick",
             "--add-drop-database=false", "--no-create-info", "--add-drop-table=false", "--skip-add-locks",
             "--default-character-set=utf8", "--max_allowed_packet=16777216", "--net_buffer_length=16384",
-            "-i", "--single-transaction", "--hex-blob", "--extended-insert=false", "--compact");
+            "-i", "--single-transaction", "--hex-blob", "--compact");
 
     @Override
     public List<String> getOptions() {

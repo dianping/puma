@@ -169,6 +169,10 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
             return executeByProcessBuilder(cmdlist);
         }
 
+        protected void readBinLogPostion(long index) {
+            //todo:load
+        }
+
         @Override
         public void run() {
             while (true) {

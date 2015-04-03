@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.lang.StringUtils;
@@ -34,18 +35,27 @@ public class MysqlExecutor {
 	private static final Logger LOG = LoggerFactory.getLogger(MysqlExecutor.class);
 
 	public static final int INSERT = RowChangedEvent.INSERT;
+
 	public static final int DELETE = RowChangedEvent.DELETE;
+
 	public static final int UPDATE = RowChangedEvent.UPDATE;
+
 	public static final int REPLACE_INTO = 3; // 插入，如果已存在则更新
+
 	private static final int UPDTAE_TO_NULL = 4; // 将对应的列都设置为null
+
 	public static final int SELECT = 5; // 查询
+
 	private static BasicRowProcessor processor = new BasicRowProcessor();
 
 	private ComboPooledDataSource dataSource;
+
 	private MysqlMapping mysqlMapping;
+
 	private Connection conn = null;
 
 	private String databaseToCommit = null;
+
 	private String tableToCommit = null;
 
 	public MysqlExecutor(String host, String username, String password, MysqlMapping mysqlMapping) {
@@ -94,31 +104,53 @@ public class MysqlExecutor {
 	/**
 	 * 执行event(如果event是查询，则根据event中的主键的newValue，进行查询，可以返回结果(使用Map)，其他update/
 	 * insert/delete情况返回null)
-	 * 
+	 *
 	 * @throws DdlRenameException
 	 */
 	public Map<String, Object> execute(ChangedEvent event) throws SQLException {
-		if (event instanceof DdlEvent) {
-			executeDdl((DdlEvent) event);
-		} else if (event instanceof RowChangedEvent) {
-			return executeDml((RowChangedEvent) event);
+		databaseToCommit = event.getDatabase();
+		tableToCommit = event.getTable();
+		Transaction t = Cat.newTransaction("SQL.Execute", event.getDatabase() + "." + event.getTable());
+
+		Map<String, Object> result = null;
+
+		try {
+			if (event instanceof DdlEvent) {
+				executeDdl((DdlEvent) event);
+			} else if (event instanceof RowChangedEvent) {
+				result = executeDml((RowChangedEvent) event);
+			}
+
+			t.setStatus("0");
+		} catch (SQLException e) {
+			t.setStatus(e);
+			throw e;
+		} finally {
+			t.complete();
 		}
+
+		return result;
 	}
 
 	public void commit() throws SQLException {
 		if (conn != null) {
-			Transaction t = Cat.newTransaction("SQL.commit", databaseToCommit + "." + tableToCommit);
+			Transaction t = Cat.newTransaction("SQL.Commit", databaseToCommit + "." + tableToCommit);
 
-			conn.commit();
 			try {
-				conn.close();// 释放连接到连接池
+				conn.commit();
 				t.setStatus("0");
-			} catch (Exception e) {
+			} catch (SQLException e) {
 				t.setStatus(e);
+				throw e;
 			} finally {
+				try {
+					conn.close();// 释放连接到连接池
+				} catch (Exception e) {
+
+				}
+				conn = null;
 				t.complete();
 			}
-			conn = null;
 		}
 	}
 
@@ -139,6 +171,9 @@ public class MysqlExecutor {
 		if (StringUtils.isBlank(ddlEvent.getSql())) {
 			return;
 		}
+
+		Transaction t = Cat.newTransaction("SQL.Execution.DDL", ddlEvent.getDatabase() + "." + ddlEvent.getTable());
+
 		PreparedStatement ps = null;
 		Connection conn = null;
 		try {
@@ -151,6 +186,11 @@ public class MysqlExecutor {
 			conn = dataSource.getConnection();
 			ps = conn.prepareStatement(sql);
 			ps.executeUpdate();
+
+			t.setStatus("0");
+		} catch (SQLException e) {
+			t.setStatus(e);
+			throw e;
 		} finally {
 			if (ps != null) {
 				try {
@@ -167,10 +207,14 @@ public class MysqlExecutor {
 				}
 				conn = null;
 			}
+			t.complete();
 		}
 	}
 
 	private Map<String, Object> executeDml(RowChangedEvent rowChangedEvent) throws SQLException {
+		Transaction t = Cat
+				.newTransaction("SQL.Execution.DML", rowChangedEvent.getDatabase() + "." + rowChangedEvent.getTable());
+
 		Map<String, Object> rowMap = null;
 		MysqlStatement mus = convertStatement(rowChangedEvent);
 		if (LOG.isDebugEnabled()) {
@@ -193,6 +237,11 @@ public class MysqlExecutor {
 					rowMap = processor.toMap(resultSet);
 				}
 			}
+
+			t.setStatus("0");
+		} catch (SQLException e) {
+			t.setStatus(e);
+			throw e;
 		} finally {
 			if (ps != null) {
 				try {
@@ -201,6 +250,7 @@ public class MysqlExecutor {
 					// ignore
 				}
 			}
+			t.complete();
 		}
 		return rowMap;
 	}

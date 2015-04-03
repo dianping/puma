@@ -441,16 +441,6 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 
 			@Override
 			public void onEvent(ChangedEvent event) throws Exception {
-				Transaction t = null;
-
-				if (++eventCount > 1000) {
-					eventCount = 0;
-				}
-
-				if (eventCount == 1000) {
-					t = Cat.getProducer().newTransaction("event", abstractTask.getName());
-				}
-
 				// LOG.info("********************Received " + event);
 				if (!skipToNextPos) {
 
@@ -510,11 +500,6 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 				} else {
 					skipToNextPos = false;
 					LOG.info("********************skip this event(because skipToNextPos is true) : " + event);
-				}
-
-				if (eventCount == 1000 && t != null) {
-					t.setStatus("0");
-					t.complete();
 				}
 
 				// 速度调控

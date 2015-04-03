@@ -5,6 +5,7 @@ import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.entity.ShardDumpTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.state.ShardDumpTaskState;
 import com.dianping.puma.core.service.ShardDumpTaskService;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
@@ -12,6 +13,7 @@ import com.dianping.puma.syncserver.config.SyncServerConfig;
 import com.dianping.puma.syncserver.util.ProcessBuilderWrapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
@@ -20,10 +22,13 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -34,6 +39,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardDumpTaskState> {
     private static final Logger logger = LoggerFactory.getLogger(ShardDumpTaskExecutor.class);
+
+    private static final Charset DEFAULT_CJARSET = Charset.forName("utf8");
+
+    private static final Pattern BINLOG_PATTERN = Pattern.compile(".*MASTER_LOG_FILE='([^']+)', MASTER_LOG_POS=(\\d+).*");
 
     protected final ShardDumpTask task;
 
@@ -74,6 +83,10 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardD
         createOutPutDir();
     }
 
+    protected synchronized void saveTask() {
+        shardDumpTaskService.update(this.task);
+    }
+
     protected void createOutPutDir() {
         File theDir = new File(this.dumpOutputDir);
         if (!theDir.exists()) {
@@ -102,11 +115,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardD
                     hasData = true;
                     return hasData;
                 }
-                reader = new FileInputStream(file);
-                byte[] data = new byte[(int) file.length()];
-                reader.read(data);
-
-                hasData = new String(data, "UTF-8").contains("INSERT");
+                hasData = FileUtils.fileRead(file).contains("INSERT");
                 return hasData;
             } catch (IOException e) {
                 hasData = false;
@@ -148,7 +157,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardD
                         throw new IOException(output);
                     }
 
-                    readAndSaveBinLogPostion(this.lastIndex);
+                    checkAndUpdateBinlogInfo(this.lastIndex);
 
                     dumpStatus.setPercent((int) (this.lastIndex * 100 / task.getMaxKey()));
                     waitForLoadQueue.put(lastIndex);
@@ -206,9 +215,46 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardD
             return executeByProcessBuilder(cmdlist);
         }
 
-        protected void readAndSaveBinLogPostion(long index) {
-            //todo:load
-            //todo:save to db
+        protected void checkAndUpdateBinlogInfo(long index) throws IOException {
+            //-- CHANGE MASTER TO MASTER_LOG_FILE='mysqlbin-log.000010', MASTER_LOG_POS=91841517;
+            String firstLine = readFirstLine(index);
+
+            Matcher result = BINLOG_PATTERN.matcher(firstLine);
+            if (!result.matches() || result.groupCount() != 2) {
+                throw new IOException("BINLOG read failed! " + firstLine);
+            }
+
+            String binlog = result.group(1);
+            long position = Long.parseLong(result.group(2));
+
+            checkAndUpdateBinlogInfo(binlog, position);
+        }
+
+        protected void checkAndUpdateBinlogInfo(String binlog, long position) throws IOException {
+            int oldBinlogIndex = getBinlogIndex(task.getBinlogInfo().getBinlogFile());
+            int newBinlogIndex = getBinlogIndex(binlog);
+
+            if (newBinlogIndex < oldBinlogIndex ||
+                    (newBinlogIndex == oldBinlogIndex && position < task.getBinlogInfo().getBinlogPosition())) {
+                BinlogInfo info = new BinlogInfo();
+                info.setBinlogFile(binlog);
+                info.setBinlogPosition(position);
+                task.setBinlogInfo(info);
+                saveTask();
+            }
+        }
+
+        protected int getBinlogIndex(String binlog) throws IOException {
+            //mysql-bin.0000001
+            int index = binlog.lastIndexOf(".");
+            if (index < 0 || index == binlog.length() - 1) {
+                throw new IOException("binlog file name error: " + binlog);
+            }
+            return Integer.parseInt(binlog.substring(index + 1));
+        }
+
+        protected String readFirstLine(long index) throws IOException {
+            return Files.readFirstLine(new File(getDumpFile(index)), DEFAULT_CJARSET);
         }
     }
 
@@ -216,7 +262,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardD
         protected void cleanUp(long index) {
             new File(getDumpFile(index)).delete();
             task.setIndexKey(index);
-            shardDumpTaskService.update(task);
+            saveTask();
         }
 
         @Override

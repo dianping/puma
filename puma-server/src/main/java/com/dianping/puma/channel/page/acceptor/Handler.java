@@ -154,7 +154,6 @@ public class Handler implements PageHandler<Context> {
 					}
 
 					if (filterChain.doNext(event)) {
-
 						byte[] data = codec.encode(event);
 						res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
 						res.getOutputStream().write(data);
@@ -170,11 +169,7 @@ public class Handler implements PageHandler<Context> {
 					}
 				}
 			} catch (Exception e) {
-				try {
-					log.error("handle", e);
-				} catch (Exception ex) {
-					log.error("Cat failed.");
-				}
+				Cat.getProducer().logError("puma.server.client.ChannelClosed.exception:",e);
 				SystemStatusContainer.instance.removeClient(payload.getClientName());
 				log.info("Client(" + payload.getClientName() + ") failed. ", e);
 				break;

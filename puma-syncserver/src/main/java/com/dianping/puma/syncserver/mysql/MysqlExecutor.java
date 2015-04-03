@@ -96,16 +96,7 @@ public class MysqlExecutor {
 	 */
 	public Map<String, Object> execute(ChangedEvent event) throws SQLException {
 		if (event instanceof DdlEvent) {
-			String sql = ((DdlEvent) event).getSql();
-			if (StringUtils.isNotBlank(sql)) {
-				// ddl不做命名的替换！直接执行
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("[Not Execute]execute ddl sql: " + sql);
-				}
-				// ddl不做执行
-				// jdbcTemplate.update(sql);
-				executeDdl((DdlEvent) event);
-			}
+			executeDdl((DdlEvent) event);
 		} else if (event instanceof RowChangedEvent) {
 			return executeDml((RowChangedEvent) event);
 		}
@@ -138,6 +129,9 @@ public class MysqlExecutor {
 
 	// 执行ddlEvent
 	private void executeDdl(DdlEvent ddlEvent) throws SQLException {
+		if (StringUtils.isBlank(ddlEvent.getSql())) {
+			return;
+		}
 		PreparedStatement ps = null;
 		Connection conn = null;
 		try {

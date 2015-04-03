@@ -19,6 +19,7 @@ import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -251,12 +252,12 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 				"Puma.syncserver." + abstractTask.getSyncServerName() + ".fail",
 				abstractTask.getSyncServerName(),
 				Message.SUCCESS,
-				"syncServerName = " + abstractTask.getSyncServerName() + "&pumaClientName= "
-						+ abstractTask.getPumaClientName() + "&casedetail=" + detail);
+				"syncServerName = " + abstractTask.getSyncServerName() + "&syncTaskName= "
+						+ abstractTask.getName() + "&casedetail=" + detail);
 		state.setDetail(detail);
 		// this.status.setDetail(detail);
 
-		LOG.error("TaskExecutor[" + this.getTask().getPumaClientName() + "] failed... cause:" + detail);
+		LOG.error("TaskExecutor[" + this.getTask().getName() + "] failed... cause:" + detail);
 	}
 
 	@Override
@@ -440,7 +441,6 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 
 			@Override
 			public void onEvent(ChangedEvent event) throws Exception {
-
 				Transaction t = null;
 
 				if (++eventCount > 1000) {

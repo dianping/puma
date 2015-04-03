@@ -216,7 +216,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardD
         protected void cleanUp(long index) {
             new File(getDumpFile(index)).delete();
             task.setIndexKey(index);
-            //todo:save to db
+            shardDumpTaskService.update(task);
         }
 
         @Override

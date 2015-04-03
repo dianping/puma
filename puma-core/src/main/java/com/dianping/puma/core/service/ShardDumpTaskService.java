@@ -17,4 +17,6 @@ public interface ShardDumpTaskService {
     void remove(String name);
 
     List<ShardDumpTask> find(int offset, int limit);
+
+    void update(ShardDumpTask shardDumpTask);
 }

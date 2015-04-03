@@ -6,6 +6,7 @@ import com.dianping.puma.core.entity.ShardDumpTask;
 import com.dianping.puma.core.entity.morphia.ShardDumpTaskMorphia;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
+import com.google.code.morphia.query.UpdateOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -81,5 +82,16 @@ public class ShardDumpTaskMorphiaDao extends MongoBaseDao<ShardDumpTaskMorphia> 
             syncTasks.add(syncTaskMorphia.getEntity());
         }
         return syncTasks;
+    }
+
+    @Override
+    public void update(ShardDumpTask shardDumpTask) {
+        ShardDumpTaskMorphia syncServerMorphia = new ShardDumpTaskMorphia(shardDumpTask);
+        Query<ShardDumpTaskMorphia> q = this.getDatastore().createQuery(ShardDumpTaskMorphia.class);
+        q.field("name").equal(syncServerMorphia.getName());
+        UpdateOperations<ShardDumpTaskMorphia> uop = this.getDatastore().createUpdateOperations(ShardDumpTaskMorphia.class);
+        uop.set("entity", shardDumpTask);
+        this.update(q, uop);
+        this.getDatastore().ensureIndexes();
     }
 }

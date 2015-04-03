@@ -37,4 +37,8 @@ public class ShardDumpTaskServiceImpl implements ShardDumpTaskService {
     public List<ShardDumpTask> find(int offset, int limit) {
         return shardDumpTaskDao.find(offset, limit);
     }
+
+    public void update(ShardDumpTask shardDumpTask) {
+        shardDumpTaskDao.update(shardDumpTask);
+    }
 }

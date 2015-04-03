@@ -4,5 +4,6 @@ public enum Type {
     SYNC,
     DUMP,
     CATCHUP,
-    SHARD_SYNC
+    SHARD_SYNC,
+    SHARD_DUMP
 }

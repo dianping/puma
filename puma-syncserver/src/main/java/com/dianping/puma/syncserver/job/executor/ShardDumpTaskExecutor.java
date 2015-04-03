@@ -5,6 +5,7 @@ import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.entity.ShardDumpTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.model.state.TaskState;
+import com.dianping.puma.core.service.ShardDumpTaskService;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.syncserver.config.SyncServerConfig;
 import com.dianping.puma.syncserver.util.ProcessBuilderWrapper;
@@ -50,6 +51,8 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
     protected Thread convertWorker;
 
     protected Thread loadWorker;
+
+    private ShardDumpTaskService shardDumpTaskService;
 
     public ShardDumpTaskExecutor(ShardDumpTask task) {
         checkNotNull(task, "task");
@@ -294,19 +297,15 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, TaskSt
 
     }
 
-    public SrcDBInstance getSrcDBInstance() {
-        return srcDBInstance;
-    }
-
     public void setSrcDBInstance(SrcDBInstance srcDBInstance) {
         this.srcDBInstance = srcDBInstance;
     }
 
-    public DstDBInstance getDstDBInstance() {
-        return dstDBInstance;
-    }
-
     public void setDstDBInstance(DstDBInstance dstDBInstance) {
         this.dstDBInstance = dstDBInstance;
+    }
+
+    public void setShardDumpTaskService(ShardDumpTaskService shardDumpTaskService) {
+        this.shardDumpTaskService = shardDumpTaskService;
     }
 }

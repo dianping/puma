@@ -13,6 +13,7 @@ import com.dianping.puma.syncserver.util.ProcessBuilderWrapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -226,6 +227,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardD
                 try {
                     Long index = waitForLoadQueue.take();
                     if (index < 0) {
+                        cleanup();
                         loadStatus.setPercent(ShardDumpTaskState.PERCENT_MAX);
                         break;
                     }
@@ -337,9 +339,9 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardD
     }
 
     protected void cleanup() {
-        File file = new File(this.dumpOutputDir);
-        if (file.exists()) {
-            file.delete();
+        try {
+            FileUtils.deleteDirectory(dumpOutputDir);
+        } catch (IOException e) {
         }
     }
 

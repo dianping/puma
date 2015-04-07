@@ -38,7 +38,7 @@ public class TableMetaRefreshFilter implements InitializingBean{
 				List<String> filtedDatabasesList = new ArrayList<String>(filtedDatabasesArr.length);
 				for (String filtedDatabase : filtedDatabasesArr) {
 					if (StringUtils.isNotBlank(filtedDatabase)) {
-						filtedDatabasesList.add(filtedDatabase);
+						filtedDatabasesList.add(StringUtils.trim(filtedDatabase).toLowerCase());
 					}
 				}
 				log.info("filted databases:" + filtedDatabasesList);

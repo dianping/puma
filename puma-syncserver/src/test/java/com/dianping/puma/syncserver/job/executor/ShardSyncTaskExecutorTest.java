@@ -252,14 +252,12 @@ public class ShardSyncTaskExecutorTest {
     @Test
     public void processOnExceptionTest() throws Exception {
         ShardSyncTaskExecutor.Processor processor = spy(target.new Processor("test", null));
-        Assert.assertEquals(true, processor.onException(new RowChangedEvent(), new DuplicateKeyException("dp")));
-        Assert.assertEquals(true, processor.onException(new RowChangedEvent(), new EmptyResultDataAccessException("error", 1)));
         Assert.assertEquals(false, processor.onException(new RowChangedEvent(), new SQLException("error")));
 
         processor.tryTimes = processor.MAX_TRY_TIMES + 1;
         Assert.assertEquals(true, processor.onException(new RowChangedEvent(), new SQLException("error")));
 
-        verify(processor, times(4)).logException(any(ChangedEvent.class), any(Exception.class));
+        verify(processor, times(2)).logException(any(ChangedEvent.class), any(Exception.class));
     }
 
     @Test

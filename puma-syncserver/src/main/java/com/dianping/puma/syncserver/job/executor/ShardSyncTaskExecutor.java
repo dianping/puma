@@ -166,8 +166,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
                 return;
             }
 
-            String tempSql = null;
-            List<Object> args = null;
+            String tempSql;
+            List<Object> args;
             rowEvent.setTable(task.getTableName());
             rowEvent.setDatabase("");
 
@@ -184,13 +184,17 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
                 for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
                     JdbcTemplate jdbcTemplate = new JdbcTemplate(targetedSql.getDataSource());
                     for (String sql : targetedSql.getSqls()) {
-                        int rows = jdbcTemplate.update(sql, args.toArray());
-                        if (rows != 1) {
-                            throw new EmptyResultDataAccessException("error effective dated row:" + rows, 1);
-                        }
+                        jdbcTemplate.update(replaceInsert(sql), args.toArray());
                     }
                 }
             }
+        }
+
+        protected String replaceInsert(String sql) {
+            if (sql != null && sql.startsWith("INSERT")) {
+                sql = "REPLACE" + sql.substring(6);
+            }
+            return sql;
         }
 
         protected List<Object> rowChangedEventToArgs(RowChangedEvent event) {
@@ -199,18 +203,9 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
             List<Object> args = new ArrayList<Object>();
             switch (actionType) {
                 case RowChangedEvent.INSERT:
-                    for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
-                        args.add(columnName2ColumnInfo.getValue().getNewValue());
-                    }
-                    break;
                 case RowChangedEvent.UPDATE:
                     for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
                         args.add(columnName2ColumnInfo.getValue().getNewValue());
-                    }
-                    for (Map.Entry<String, RowChangedEvent.ColumnInfo> columnName2ColumnInfo : columnMap.entrySet()) {
-                        if (columnName2ColumnInfo.getValue().getOldValue() != null) {
-                            args.add(columnName2ColumnInfo.getValue().getOldValue());
-                        }
                     }
                     break;
                 case RowChangedEvent.DELETE:
@@ -229,15 +224,14 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
             int actionType = event.getActionType();
             switch (actionType) {
                 case RowChangedEvent.INSERT:
-                    sql = SqlBuildUtil.buildSql(event, "/sql_template_shard/insertSql.vm");
-                    break;
                 case RowChangedEvent.UPDATE:
-                    sql = SqlBuildUtil.buildSql(event, "/sql_template_shard/updateSql.vm");
+                    sql = SqlBuildUtil.buildSql(event, "/sql_template_shard/insertSql.vm");
                     break;
                 case RowChangedEvent.DELETE:
                     sql = SqlBuildUtil.buildSql(event, "/sql_template_shard/deleteSql.vm");
                     break;
             }
+
             return sql;
         }
 

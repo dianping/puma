@@ -232,7 +232,7 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 		}
 		//过滤系统的ddl引起的refresh慢查询
 		if (!(StringUtils.isNotBlank(ddlEvent.getDatabase())
-				&& TableMetaRefreshFilter.instance.getFiltedDatabases().contains(ddlEvent.getDatabase()))) {
+				&& TableMetaRefreshFilter.instance.getFiltedDatabases().contains(ddlEvent.getDatabase().toLowerCase()))) {
 			tableMetasInfoFetcher.refreshTableMeta();
 			log.info("table meta refresh.    DDL event sql:"+sql+".");
 		}

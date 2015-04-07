@@ -54,9 +54,9 @@ public class MysqlExecutor {
 
 	private Connection conn = null;
 
-	private String databaseToCommit = null;
+	private String curDatabaseName = null;
 
-	private String tableToCommit = null;
+	private String curTableName = null;
 
 	public MysqlExecutor(String host, String username, String password, MysqlMapping mysqlMapping) {
 		this.mysqlMapping = mysqlMapping;
@@ -108,25 +108,12 @@ public class MysqlExecutor {
 	 * @throws DdlRenameException
 	 */
 	public Map<String, Object> execute(ChangedEvent event) throws SQLException {
-		databaseToCommit = event.getDatabase();
-		tableToCommit = event.getTable();
-		Transaction t = Cat.newTransaction("SQL.Execute", event.getDatabase() + "." + event.getTable());
-
 		Map<String, Object> result = null;
 
-		try {
-			if (event instanceof DdlEvent) {
-				executeDdl((DdlEvent) event);
-			} else if (event instanceof RowChangedEvent) {
-				result = executeDml((RowChangedEvent) event);
-			}
-
-			t.setStatus("0");
-		} catch (SQLException e) {
-			t.setStatus(e);
-			throw e;
-		} finally {
-			t.complete();
+		if (event instanceof DdlEvent) {
+			executeDdl((DdlEvent) event);
+		} else if (event instanceof RowChangedEvent) {
+			result = executeDml((RowChangedEvent) event);
 		}
 
 		return result;
@@ -134,7 +121,7 @@ public class MysqlExecutor {
 
 	public void commit() throws SQLException {
 		if (conn != null) {
-			Transaction t = Cat.newTransaction("SQL.Commit", databaseToCommit + "." + tableToCommit);
+			Transaction t = Cat.newTransaction("SQL.Commit", curDatabaseName + "." + curTableName);
 
 			try {
 				conn.commit();
@@ -172,7 +159,9 @@ public class MysqlExecutor {
 			return;
 		}
 
-		Transaction t = Cat.newTransaction("SQL.Execution.DDL", ddlEvent.getDatabase() + "." + ddlEvent.getTable());
+		curDatabaseName = getMappingDatabase(ddlEvent.getDatabase());
+		curTableName = getMappingTable(ddlEvent.getDatabase(), ddlEvent.getTable());
+		Transaction t = Cat.newTransaction("SQL.DDLExecution", curDatabaseName + "." + curTableName);
 
 		PreparedStatement ps = null;
 		Connection conn = null;
@@ -212,8 +201,11 @@ public class MysqlExecutor {
 	}
 
 	private Map<String, Object> executeDml(RowChangedEvent rowChangedEvent) throws SQLException {
+		curDatabaseName = getMappingDatabase(rowChangedEvent.getDatabase());
+		curTableName = getMappingTable(rowChangedEvent.getDatabase(), rowChangedEvent.getTable());
+
 		Transaction t = Cat
-				.newTransaction("SQL.Execution.DML", rowChangedEvent.getDatabase() + "." + rowChangedEvent.getTable());
+				.newTransaction("SQL.Execution.DML", curDatabaseName + "." + curTableName);
 
 		Map<String, Object> rowMap = null;
 		MysqlStatement mus = convertStatement(rowChangedEvent);

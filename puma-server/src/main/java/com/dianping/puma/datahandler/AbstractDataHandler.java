@@ -230,7 +230,7 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 		}
 		if (!StringUtils.isBlank(ddlEvent.getDatabase())) {
 			ddlEvent.setDatabase(queryEvent.getDatabaseName());
-		} 
+		}
 
 		ddlEvent.setExecuteTime(queryEvent.getHeader().getTimestamp());
 

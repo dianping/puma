@@ -40,8 +40,6 @@ import com.google.gson.Gson;
 import org.apache.commons.lang3.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
@@ -237,28 +235,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
 
         @Override
         public boolean onException(ChangedEvent event, Exception e) {
-            if (tryTimes >= MAX_TRY_TIMES) {
-                logException(event, e);
-                return true;
-            }
-
-            if (e instanceof DuplicateKeyException) {
-                logException(event, e);
-                return true;
-            } else if (e instanceof EmptyResultDataAccessException) {
-                logException(event, e);
-                if (event instanceof RowChangedEvent) {
-                    RowChangedEvent rowChangedEvent = (RowChangedEvent) event;
-                    if (rowChangedEvent.getActionType() == RowChangedEvent.UPDATE) {
-                        rowChangedEvent.setActionType(RowChangedEvent.INSERT);
-                        return false;
-                    }
-                }
-                return true;
-            } else {
-                logException(event, e);
-                return false;
-            }
+            logException(event, e);
+            return tryTimes >= MAX_TRY_TIMES;
         }
 
         public void logException(ChangedEvent event, Exception exp) {

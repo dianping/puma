@@ -142,6 +142,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			// File sender storage.
 			DefaultEventStorage storage = new DefaultEventStorage();
 			storage.setName(storageName + taskName);
+			storage.setTaskName(taskName);
 			storage.setCodec(jsonCodec);
 
 			// File sender master storage.

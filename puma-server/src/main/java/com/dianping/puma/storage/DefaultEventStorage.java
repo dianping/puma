@@ -9,6 +9,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.dianping.puma.ComponentContainer;
+import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.model.container.storage.StorageStateContainer;
+import com.dianping.puma.core.model.state.Storage.StorageState;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -30,34 +34,55 @@ import com.dianping.puma.storage.exception.StorageWriteException;
 public class DefaultEventStorage implements EventStorage {
 	private static final Logger log = Logger
 			.getLogger(DefaultEventStorage.class);
+
 	private BucketManager bucketManager;
+
 	private Bucket writingBucket;
+
 	private EventCodec codec;
+
 	private List<WeakReference<EventChannel>> openChannels = new ArrayList<WeakReference<EventChannel>>();
+
 	private volatile boolean stopped = true;
+
 	private BucketIndex masterBucketIndex;
+
 	private BucketIndex slaveBucketIndex;
+
 	private ArchiveStrategy archiveStrategy;
+
 	private CleanupStrategy cleanupStrategy;
+
 	private String name;
+
+	private String taskName;
+
 	private static final String datePattern = "yyyy-MM-dd";
+
 	private AtomicReference<String> lastDate = new AtomicReference<String>();
+
 	private String binlogIndexBaseDir;
+
 	private DataIndex<BinlogIndexKey, Long> binlogIndex;
+
 	private AtomicReference<BinlogIndexKey> lastBinlogIndexKey = new AtomicReference<BinlogIndexKey>(
 			null);
+
 	private AtomicReference<Long> processingServerId = new AtomicReference<Long>(
 			null);
+
 	private String acceptedTablesConfigKey;
+
 	private List<String> acceptedTables;
+
+	StorageStateContainer storageStateContainer = ComponentContainer.SPRING.lookup("storageStateContainer");
 
 	public void setAcceptedTablesConfigKey(String acceptedTablesConfigKey) {
 		this.acceptedTablesConfigKey = acceptedTablesConfigKey;
 	}
 
 	/**
-	 * @param binlogIndexBaseDir
-	 *            the binlogIndexBaseDir to set
+	 * @param binlogIndexBaseDir the binlogIndexBaseDir to set
 	 */
 	public void setBinlogIndexBaseDir(String binlogIndexBaseDir) {
 		this.binlogIndexBaseDir = binlogIndexBaseDir;
@@ -92,6 +117,9 @@ public class DefaultEventStorage implements EventStorage {
 		cleanupStrategy.addDataIndex(binlogIndex);
 
 		initAcceptedTableList();
+
+		StorageState storageState = new StorageState(name, taskName);
+		storageStateContainer.add(storageState);
 
 		try {
 			masterBucketIndex.start();
@@ -160,16 +188,14 @@ public class DefaultEventStorage implements EventStorage {
 	}
 
 	/**
-	 * @param cleanupStrategy
-	 *            the cleanupStrategy to set
+	 * @param cleanupStrategy the cleanupStrategy to set
 	 */
 	public void setCleanupStrategy(CleanupStrategy cleanupStrategy) {
 		this.cleanupStrategy = cleanupStrategy;
 	}
 
 	/**
-	 * @param name
-	 *            the name to set
+	 * @param name the name to set
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -178,7 +204,15 @@ public class DefaultEventStorage implements EventStorage {
 	public String getName() {
 		return name;
 	}
-	
+
+	public String getTaskName() {
+		return taskName;
+	}
+
+	public void setTaskName(String taskName) {
+		this.taskName = taskName;
+	}
+
 	public void setMasterBucketIndex(BucketIndex masterBucketIndex) {
 		this.masterBucketIndex = masterBucketIndex;
 	}
@@ -188,8 +222,7 @@ public class DefaultEventStorage implements EventStorage {
 	}
 
 	/**
-	 * @param archiveStrategy
-	 *            the archiveStrategy to set
+	 * @param archiveStrategy the archiveStrategy to set
 	 */
 	public void setArchiveStrategy(ArchiveStrategy archiveStrategy) {
 		this.archiveStrategy = archiveStrategy;
@@ -207,8 +240,7 @@ public class DefaultEventStorage implements EventStorage {
 	}
 
 	/**
-	 * @param codec
-	 *            the codec to set
+	 * @param codec the codec to set
 	 */
 	public void setCodec(EventCodec codec) {
 		this.codec = codec;
@@ -269,6 +301,10 @@ public class DefaultEventStorage implements EventStorage {
 			bos.write(data);
 			writingBucket.append(bos.toByteArray());
 			bucketManager.updateLatestSequence(new Sequence(event.getSeq()));
+
+			storageStateContainer.setSeq(name, event.getSeq());
+			storageStateContainer.setBinlogInfo(name, new BinlogInfo(event.getBinlog(), event.getBinlogPos()));
+
 			SystemStatusContainer.instance.updateStorageStatus(name, event
 					.getSeq());
 		} catch (IOException e) {

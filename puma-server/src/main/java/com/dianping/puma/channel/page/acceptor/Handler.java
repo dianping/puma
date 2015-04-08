@@ -5,7 +5,10 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
-import com.dianping.puma.core.event.RowChangedEvent;
+import com.dianping.puma.ComponentContainer;
+import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.model.container.client.ClientStateContainer;
+import com.dianping.puma.core.model.state.client.ClientState;
 import org.apache.log4j.Logger;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
@@ -33,6 +36,8 @@ import com.dianping.puma.utils.NetUtils;
 
 public class Handler implements PageHandler<Context> {
 	private static final Logger log = Logger.getLogger(Handler.class);
+
+	ClientStateContainer clientStateContainer = ComponentContainer.SPRING.lookup("clientStateContainer");
 
 	protected void endCatTransaction() {
 		try {
@@ -65,9 +70,16 @@ public class Handler implements PageHandler<Context> {
 		Payload payload = ctx.getPayload();
 		HttpServletResponse res = ctx.getHttpServletResponse();
 
+		ClientState clientState = new ClientState(payload.getClientName(), payload.getTarget(),
+				NetUtils.getIpAddr(ctx.getHttpServletRequest()));
+		clientStateContainer.add(clientState);
+		clientStateContainer.setSeq(payload.getClientName(), payload.getSeq());
+		clientStateContainer.setBinlog(payload.getClientName(),
+				new BinlogInfo(payload.getBinlog(), payload.getBinlogPos()));
+
 		// status report
 		SystemStatusContainer.instance.addClientStatus(payload.getClientName(), NetUtils.getIpAddr(ctx
-				.getHttpServletRequest()), payload.getSeq(), payload.getTarget(), payload.isDml(), payload.isDdl(),
+						.getHttpServletRequest()), payload.getSeq(), payload.getTarget(), payload.isDml(), payload.isDdl(),
 				payload.isNeedsTransactionMeta(), payload.getDatabaseTables(), payload.getCodecType());
 		SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(), payload.getBinlog(), payload
 				.getBinlogPos());
@@ -92,6 +104,7 @@ public class Handler implements PageHandler<Context> {
 		EventStorage storage = DefaultTaskExecutorContainer.instance.getTaskStorage(payload.getTarget());
 		log.info("Client(" + payload.getClientName() + ") get storage-" + payload.getTarget() + ".");
 		if (storage == null) {
+			clientStateContainer.remove(payload.getClientName());
 			SystemStatusContainer.instance.removeClient(payload.getClientName());
 			log.error("Client(" + payload.getClientName() + ") cannot get storage-" + payload.getTarget() + ".");
 			throw new IOException();
@@ -127,6 +140,10 @@ public class Handler implements PageHandler<Context> {
 						res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
 						res.getOutputStream().write(data);
 						res.getOutputStream().flush();
+
+						clientStateContainer.setSeq(payload.getClientName(), event.getSeq());
+						clientStateContainer.setBinlog(payload.getClientName(), new BinlogInfo(event.getBinlog(), event.getBinlogPos()));
+
 						// status report
 						SystemStatusContainer.instance.updateClientSeq(payload.getClientName(), event.getSeq());
 						// record success client seq
@@ -138,7 +155,8 @@ public class Handler implements PageHandler<Context> {
 					}
 				}
 			} catch (Exception e) {
-				Cat.getProducer().logError("puma.server.client.ChannelClosed.exception:",e);
+				Cat.getProducer().logError("puma.server.client.ChannelClosed.exception:", e);
+				clientStateContainer.remove(payload.getClientName());
 				SystemStatusContainer.instance.removeClient(payload.getClientName());
 				log.info("Client(" + payload.getClientName() + ") failed. ", e);
 				break;
@@ -146,6 +164,7 @@ public class Handler implements PageHandler<Context> {
 		}
 
 		channel.close();
+		clientStateContainer.remove(payload.getClientName());
 		SystemStatusContainer.instance.removeClient(payload.getClientName());
 		long end = System.currentTimeMillis();
 		String ipAddress = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();

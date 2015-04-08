@@ -75,8 +75,6 @@ public class DefaultEventStorage implements EventStorage {
 
 	private List<String> acceptedTables;
 
-	StorageStateContainer storageStateContainer = ComponentContainer.SPRING.lookup("storageStateContainer");
-
 	public void setAcceptedTablesConfigKey(String acceptedTablesConfigKey) {
 		this.acceptedTablesConfigKey = acceptedTablesConfigKey;
 	}
@@ -119,6 +117,7 @@ public class DefaultEventStorage implements EventStorage {
 		initAcceptedTableList();
 
 		StorageState storageState = new StorageState(name, taskName);
+		StorageStateContainer storageStateContainer = ComponentContainer.SPRING.lookup("storageStateContainer");
 		storageStateContainer.add(storageState);
 
 		try {
@@ -302,6 +301,7 @@ public class DefaultEventStorage implements EventStorage {
 			writingBucket.append(bos.toByteArray());
 			bucketManager.updateLatestSequence(new Sequence(event.getSeq()));
 
+			StorageStateContainer storageStateContainer = ComponentContainer.SPRING.lookup("storageStateContainer");
 			storageStateContainer.setSeq(name, event.getSeq());
 			storageStateContainer.setBinlogInfo(name, new BinlogInfo(event.getBinlog(), event.getBinlogPos()));
 

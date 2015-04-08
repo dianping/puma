@@ -37,8 +37,6 @@ import com.dianping.puma.utils.NetUtils;
 public class Handler implements PageHandler<Context> {
 	private static final Logger log = Logger.getLogger(Handler.class);
 
-	ClientStateContainer clientStateContainer = ComponentContainer.SPRING.lookup("clientStateContainer");
-
 	protected void endCatTransaction() {
 		try {
 			// complete current transaction immediately (for abnormal case only)
@@ -72,6 +70,7 @@ public class Handler implements PageHandler<Context> {
 
 		ClientState clientState = new ClientState(payload.getClientName(), payload.getTarget(),
 				NetUtils.getIpAddr(ctx.getHttpServletRequest()));
+		ClientStateContainer clientStateContainer = ComponentContainer.SPRING.lookup("clientStateContainer");
 		clientStateContainer.add(clientState);
 		clientStateContainer.setSeq(payload.getClientName(), payload.getSeq());
 		clientStateContainer.setBinlog(payload.getClientName(),

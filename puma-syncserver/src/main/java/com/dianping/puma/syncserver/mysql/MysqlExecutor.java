@@ -104,7 +104,7 @@ public class MysqlExecutor {
 	/**
 	 * 执行event(如果event是查询，则根据event中的主键的newValue，进行查询，可以返回结果(使用Map)，其他update/
 	 * insert/delete情况返回null)
-	 *
+	 * 
 	 * @throws DdlRenameException
 	 */
 	public Map<String, Object> execute(ChangedEvent event) throws SQLException {
@@ -204,8 +204,7 @@ public class MysqlExecutor {
 		curDatabaseName = getMappingDatabase(rowChangedEvent.getDatabase());
 		curTableName = getMappingTable(rowChangedEvent.getDatabase(), rowChangedEvent.getTable());
 
-		Transaction t = Cat
-				.newTransaction("SQL.Execution.DML", curDatabaseName + "." + curTableName);
+		Transaction t = Cat.newTransaction("SQL.Execution.DML", curDatabaseName + "." + curTableName);
 
 		Map<String, Object> rowMap = null;
 		MysqlStatement mus = convertStatement(rowChangedEvent);
@@ -466,8 +465,8 @@ public class MysqlExecutor {
 					}
 				} else {
 					if (!StringUtils.isBlank(mappingDatabase) && !StringUtils.isBlank(mappingTableName)) {
-						remainSql = StringUtils.replace(StringUtils.replace(remainSql, " `" + tableName + "`.", " `"
-								+ mappingTableName + "`."), " " + tableName + ".", " " + mappingTableName + ".");
+						remainSql = StringUtils.replace(StringUtils.replace(remainSql, " `" + tableName.toLowerCase() + "`.", " `"
+								+ mappingTableName.toLowerCase() + "`."), " " + tableName.toLowerCase() + ".", " " + mappingTableName.toLowerCase() + ".");
 						return "ALTER TABLE `" + mappingDatabase + "`.`" + mappingTableName + "` " + remainSql;
 					}
 				}
@@ -504,6 +503,7 @@ public class MysqlExecutor {
 						throw new DdlRenameException("Rename error : ddl sql = " + event.getSql());
 					}
 				}
+				break;
 			case DDL_RENAME_USER:
 				// ignore
 				break;
@@ -555,10 +555,9 @@ public class MysqlExecutor {
 							// 停止任務
 							throw new DdlRenameException("Rename error : ddl sql = " + event.getSql());
 						}
-						remainSql = StringUtils
-								.replace(StringUtils.replace(remainSql, " `" + event.getTable() + "`.", " `"
-										+ tblMappingName + "`."), " " + event.getTable() + ".", " " + tblMappingName
-										+ ".");
+						remainSql = StringUtils.replace(StringUtils.replace(remainSql, " `"
+								+ event.getTable().toLowerCase() + "`.", " `" + tblMappingName.toLowerCase() + "`."),
+								" " + event.getTable().toLowerCase() + ".", " " + tblMappingName.toLowerCase() + ".");
 						return "ALTER TABLE `" + dbMappingName + "`.`" + tblMappingName + "` " + remainSql;
 					}
 				}

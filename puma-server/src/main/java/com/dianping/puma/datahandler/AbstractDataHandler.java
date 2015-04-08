@@ -227,7 +227,7 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 			log.info("DDL event, sql=" + sql + "  ,database =" + sqlNames.get(0) + "  queryEvent.getDatabaseName()"
 					+ queryEvent.getDatabaseName());
 		}
-		if (!StringUtils.isBlank(ddlEvent.getDatabase())) {
+		if (StringUtils.isBlank(ddlEvent.getDatabase())) {
 			ddlEvent.setDatabase(queryEvent.getDatabaseName());
 		}
 		//过滤系统的ddl引起的refresh慢查询

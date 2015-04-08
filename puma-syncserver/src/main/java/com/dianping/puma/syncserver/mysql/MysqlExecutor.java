@@ -465,8 +465,9 @@ public class MysqlExecutor {
 					}
 				} else {
 					if (!StringUtils.isBlank(mappingDatabase) && !StringUtils.isBlank(mappingTableName)) {
-						remainSql = StringUtils.replace(StringUtils.replace(remainSql, " `" + tableName.toLowerCase() + "`.", " `"
-								+ mappingTableName.toLowerCase() + "`."), " " + tableName.toLowerCase() + ".", " " + mappingTableName.toLowerCase() + ".");
+						remainSql = StringUtils.replace(StringUtils.replace(remainSql, " `" + tableName.toLowerCase()
+								+ "`.", " `" + mappingTableName.toLowerCase() + "`."), " " + tableName.toLowerCase()
+								+ ".", " " + mappingTableName.toLowerCase() + ".");
 						return "ALTER TABLE `" + mappingDatabase + "`.`" + mappingTableName + "` " + remainSql;
 					}
 				}
@@ -547,19 +548,20 @@ public class MysqlExecutor {
 					subSql = StringUtils.substringAfter(subSql, "if no exists ");
 				}
 				String remainSql = StringUtils.substringAfter(subSql, " ");
-				if (!StringUtils.isBlank(event.getDatabase()) && !StringUtils.isBlank(event.getTable())) {
-					String tblMappingName = getMappingTable(event.getDatabase(), event.getTable());
-					String dbMappingName = getMappingDatabase(event.getDatabase());
-					if (!StringUtils.isBlank(dbMappingName) && !StringUtils.isBlank(tblMappingName)) {
-						if (StringUtils.contains(strSql, " rename ")) {
-							// 停止任務
-							throw new DdlRenameException("Rename error : ddl sql = " + event.getSql());
-						}
-						remainSql = StringUtils.replace(StringUtils.replace(remainSql, " `"
-								+ event.getTable().toLowerCase() + "`.", " `" + tblMappingName.toLowerCase() + "`."),
-								" " + event.getTable().toLowerCase() + ".", " " + tblMappingName.toLowerCase() + ".");
-						return "ALTER TABLE `" + dbMappingName + "`.`" + tblMappingName + "` " + remainSql;
+				if (StringUtils.isBlank(event.getDatabase()) || StringUtils.isBlank(event.getTable())) {
+					return null;
+				}
+				String tblMappingName = getMappingTable(event.getDatabase(), event.getTable());
+				String dbMappingName = getMappingDatabase(event.getDatabase());
+				if (!StringUtils.isBlank(dbMappingName) && !StringUtils.isBlank(tblMappingName)) {
+					if (StringUtils.contains(strSql, " rename ")) {
+						// 停止任務
+						throw new DdlRenameException("Rename error : ddl sql = " + event.getSql());
 					}
+					remainSql = StringUtils.replace(StringUtils.replace(remainSql, " `"
+							+ event.getTable().toLowerCase() + "`.", " `" + tblMappingName.toLowerCase() + "`."), " "
+							+ event.getTable().toLowerCase() + ".", " " + tblMappingName.toLowerCase() + ".");
+					return "ALTER TABLE `" + dbMappingName + "`.`" + tblMappingName + "` " + remainSql;
 				}
 			}
 			break;

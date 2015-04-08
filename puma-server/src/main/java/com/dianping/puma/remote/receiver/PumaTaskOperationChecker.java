@@ -48,7 +48,7 @@ public class PumaTaskOperationChecker implements EventListener {
 				TaskExecutor taskExecutor = taskExecutorBuilder.build(pumaTask);
 				taskExecutorContainer.submit(taskExecutor);
 			} catch (Exception e) {
-				LOG.error("Initialize puma task `{}` error: {}.", pumaTask.getName(), e.getMessage());
+				LOG.error("Initialize puma task `{}` error: {}.", pumaTask.getName(), e.getStackTrace());
 			}
 		}
 	}

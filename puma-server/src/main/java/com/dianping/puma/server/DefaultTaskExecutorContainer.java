@@ -212,7 +212,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 			TaskExecutor taskExecutor = taskExecutorBuilder.build(pumaTask);
 			submit(taskExecutor);
 		} catch (Exception e) {
-			LOG.error("Puma task `{}` create event error: {}.", taskName, e.toString());
+			LOG.error("Puma task `{}` create event error: {}.", taskName, e.getStackTrace());
 		}
 	}
 

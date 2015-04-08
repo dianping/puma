@@ -215,25 +215,28 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 	 * @param sql
 	 */
 	protected void handleDDlEvent(DataHandlerResult result, QueryEvent queryEvent, String sql) {
-		tableMetasInfoFetcher.refreshTableMeta();
 		ChangedEvent dataChangedEvent = new DdlEvent();
 		DdlEvent ddlEvent = (DdlEvent) dataChangedEvent;
 		ddlEvent.setSql(sql);
 		ddlEvent.setEventType(DdlSqlParser.getEventType(sql));
 		ddlEvent.setEventSubType(DdlSqlParser.getEventSubType(ddlEvent.getEventType(), sql));
 		List<String> sqlNames = DdlSqlParser.getSqlNames(ddlEvent.getEventType(), ddlEvent.getEventSubType(), sql);
-		if(sqlNames!=null&&sqlNames.size() > 0){
-			ddlEvent.setDatabase(!StringUtils.isBlank(sqlNames.get(0))?sqlNames.get(0):"");
-			ddlEvent.setTable(!StringUtils.isBlank(sqlNames.get(1))?sqlNames.get(1):"");
+		if (sqlNames != null && sqlNames.size() > 0) {
+			ddlEvent.setDatabase(!StringUtils.isBlank(sqlNames.get(0)) ? sqlNames.get(0) : "");
+			ddlEvent.setTable(!StringUtils.isBlank(sqlNames.get(1)) ? sqlNames.get(1) : "");
 			log.info("DDL event, sql=" + sql + "  ,database =" + sqlNames.get(0) + "  queryEvent.getDatabaseName()"
 					+ queryEvent.getDatabaseName());
 		}
-		if (!StringUtils.isBlank(ddlEvent.getDatabase())) {
+		if (StringUtils.isBlank(ddlEvent.getDatabase())) {
 			ddlEvent.setDatabase(queryEvent.getDatabaseName());
 		}
-
+		//过滤系统的ddl引起的refresh慢查询
+		if (!(StringUtils.isNotBlank(ddlEvent.getDatabase())
+				&& TableMetaRefreshFilter.instance.getFiltedDatabases().contains(ddlEvent.getDatabase().toLowerCase()))) {
+			tableMetasInfoFetcher.refreshTableMeta();
+			log.info("table meta refresh.    DDL event sql:"+sql+".");
+		}
 		ddlEvent.setExecuteTime(queryEvent.getHeader().getTimestamp());
-
 		result.setData(dataChangedEvent);
 		result.setEmpty(false);
 		result.setFinished(true);
@@ -242,26 +245,22 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 	protected abstract void doProcess(DataHandlerResult result, BinlogEvent binlogEvent, PumaContext context,
 			byte eventType);
 
-	/*private String getDateBase(String strSql) {
-		String sql = StringUtils.normalizeSpace(strSql.toLowerCase());
-		String database = null;
-		int positionStart = StringUtils.indexOf(sql, "table ");
-		if (positionStart > -1) {
-			int positionEnd = StringUtils.indexOf(sql, " ", positionStart + 6);
-			database = getDatabaseName(sql, positionStart + 6, positionEnd);
-		}
-		return database;
-	}*/
+	/*
+	 * private String getDateBase(String strSql) { String sql =
+	 * StringUtils.normalizeSpace(strSql.toLowerCase()); String database = null;
+	 * int positionStart = StringUtils.indexOf(sql, "table "); if (positionStart
+	 * > -1) { int positionEnd = StringUtils.indexOf(sql, " ", positionStart +
+	 * 6); database = getDatabaseName(sql, positionStart + 6, positionEnd); }
+	 * return database; }
+	 */
 
-	/*private String getDatabaseName(String sql, int positionStart, int positionEnd) {
-		sql = StringUtils.substring(sql, positionStart, positionEnd);
-		int positionCenter = StringUtils.indexOf(sql, ".", 0);
-		String database = null;
-		if (positionCenter > -1) {
-			String temp = StringUtils.substring(sql, 0, positionCenter);
-			database = StringUtils.remove(temp, "`");
-		}
-		return database;
-	}*/
+	/*
+	 * private String getDatabaseName(String sql, int positionStart, int
+	 * positionEnd) { sql = StringUtils.substring(sql, positionStart,
+	 * positionEnd); int positionCenter = StringUtils.indexOf(sql, ".", 0);
+	 * String database = null; if (positionCenter > -1) { String temp =
+	 * StringUtils.substring(sql, 0, positionCenter); database =
+	 * StringUtils.remove(temp, "`"); } return database; }
+	 */
 
 }

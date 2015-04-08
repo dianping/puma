@@ -40,7 +40,7 @@
 
 	<bean id="dailyReportTask" class="com.dianping.puma.reporter.DailyReportTask"
 		parent="notifiableBean" init-method="start" />
-
+		
 	<bean id="binlogInfoHolder"
 		  class="com.dianping.puma.core.holder.impl.DefaultBinlogInfoHolder"
 		  init-method="init">

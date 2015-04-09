@@ -120,15 +120,9 @@ public class Handler implements PageHandler<Context> {
 
 		endCatTransaction();
 
-		int count = 0;
-
 		while (true) {
 			try {
 				filterChain.reset();
-
-				if (++count > 1000) {
-					count = 0;
-				}
 
 				ChangedEvent event = channel.next();
 

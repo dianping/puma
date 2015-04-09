@@ -32,7 +32,7 @@ public class BinlogFileLaggingMonitor implements InitializingBean {
 	@Autowired
 	ClientStateContainer clientStateContainer;
 
-	private static final String binlogFileLaggingThresholdKey = "puma.server.binlogFileLaggingThreshold";
+	private static final String binlogFileLaggingThresholdKey = "puma.server.binlogfile.lagging.threshold";
 
 	private int binlogFileLaggingThreshold;
 
@@ -57,6 +57,8 @@ public class BinlogFileLaggingMonitor implements InitializingBean {
 
 	@Scheduled(cron = "0/60 * * * * ?")
 	public void monitor() throws MonitorException {
+		LOG.info("Monitor binlog file based lagging.");
+
 		try {
 			for (StorageState storageState: storageStateContainer.getAll()) {
 				String storageBinlogFile = storageState.getBinlogInfo().getBinlogFile();

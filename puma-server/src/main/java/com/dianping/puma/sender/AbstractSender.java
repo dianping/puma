@@ -117,7 +117,7 @@ public abstract class AbstractSender implements Sender, Notifiable {
 				doSend(event, context);
 				break;
 			} catch (Exception e) {
-				LOG.error("Send error!");
+				LOG.error("Send error!", e);
 				if (retryCount++ > maxTryTimes) {
 					if (canMissEvent) {
 						LOG.error(String.format(MSG_SKIP, maxTryTimes, context.getPumaServerName(),

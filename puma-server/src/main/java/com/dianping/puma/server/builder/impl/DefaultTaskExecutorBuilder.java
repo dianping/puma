@@ -5,6 +5,7 @@ import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.core.model.state.PumaTaskState;
 import com.dianping.puma.core.monitor.NotifyService;
@@ -144,6 +145,13 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			storage.setName(storageName + taskName);
 			storage.setTaskName(taskName);
 			storage.setCodec(jsonCodec);
+
+			BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(taskName);
+			if (binlogInfo != null) {
+				storage.setBinlogInfo(binlogInfo);
+			} else {
+				storage.setBinlogInfo(pumaTask.getBinlogInfo());
+			}
 
 			// File sender master storage.
 			LocalFileBucketIndex masterBucketIndex = new LocalFileBucketIndex();

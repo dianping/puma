@@ -57,6 +57,8 @@ public class DefaultEventStorage implements EventStorage {
 
 	private String taskName;
 
+	private BinlogInfo binlogInfo;
+
 	private static final String datePattern = "yyyy-MM-dd";
 
 	private AtomicReference<String> lastDate = new AtomicReference<String>();
@@ -116,7 +118,7 @@ public class DefaultEventStorage implements EventStorage {
 
 		initAcceptedTableList();
 
-		StorageState storageState = new StorageState(name, taskName);
+		StorageState storageState = new StorageState(name, taskName, binlogInfo);
 		StorageStateContainer storageStateContainer = ComponentContainer.SPRING.lookup("storageStateContainer");
 		storageStateContainer.add(storageState);
 
@@ -210,6 +212,14 @@ public class DefaultEventStorage implements EventStorage {
 
 	public void setTaskName(String taskName) {
 		this.taskName = taskName;
+	}
+
+	public BinlogInfo getBinlogInfo() {
+		return binlogInfo;
+	}
+
+	public void setBinlogInfo(BinlogInfo binlogInfo) {
+		this.binlogInfo = binlogInfo;
 	}
 
 	public void setMasterBucketIndex(BucketIndex masterBucketIndex) {

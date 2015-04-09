@@ -11,9 +11,10 @@ public class StorageState extends State {
 
 	private BinlogInfo binlogInfo;
 
-	public StorageState(String name, String taskName) {
+	public StorageState(String name, String taskName, BinlogInfo binlogInfo) {
 		super(name);
 		this.taskName = taskName;
+		this.binlogInfo = binlogInfo;
 	}
 
 	public String getTaskName() {

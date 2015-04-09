@@ -12,6 +12,7 @@ import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
+import com.dianping.puma.core.model.AcceptedTables;
 import com.dianping.puma.core.monitor.event.PumaTaskControllerEvent;
 import com.dianping.puma.core.monitor.event.PumaTaskOperationEvent;
 import com.dianping.puma.core.service.PumaTaskService;
@@ -20,6 +21,8 @@ import com.dianping.puma.server.builder.TaskExecutorBuilder;
 import com.dianping.puma.storage.CleanupStrategy;
 import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
+
+import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -30,6 +33,11 @@ import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.util.PumaThreadUtils;
+import com.dianping.puma.datahandler.AbstractDataHandler;
+import com.dianping.puma.datahandler.DataHandler;
+import com.dianping.puma.datahandler.DefaultDataHandler;
+import com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher;
+import com.dianping.puma.datahandler.TableMetasInfoFetcher;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.storage.EventStorage;
 
@@ -257,6 +265,33 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 			}
 
 		} else {
+			LOG.warn("Puma task `{}` prolong event warn: {}.", taskName, "Task not found");
+		}
+	}
+	@Override
+	public void filterEvent(PumaTaskOperationEvent event){
+		String taskName = event.getTaskName();
+		TaskExecutor taskExecutor = taskExecutorMap.get(taskName);
+		if (taskExecutor != null) {
+			List<Sender> senders = taskExecutor.getFileSender();
+			EventStorage storage = senders.get(0).getStorage();
+			DefaultEventStorage defaultEventStorage = (DefaultEventStorage) storage;
+			AbstractDataHandler handler=(AbstractDataHandler)taskExecutor.getDataHandler();
+			TableMetasInfoFetcher tableMetasInfoFetcher=  handler.getTableMetasInfoFetcher();
+			try {
+				PumaTask pumaTask = pumaTaskService.find(taskName);
+				defaultEventStorage.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
+				List<String> databases=new ArrayList<String>();
+				for(Map.Entry<String,AcceptedTables> entry :pumaTask.getAcceptedDataInfos().entrySet()){
+					if(StringUtils.isNotBlank(entry.getKey())){
+						databases.add(entry.getKey().toLowerCase().trim());
+					}
+				}
+				tableMetasInfoFetcher.setDatabases(databases);
+			} catch (Exception e) {
+				LOG.error("Puma task `{}` prolong event error: {}.", taskName, e.getMessage());
+			}
+		}else{
 			LOG.warn("Puma task `{}` prolong event warn: {}.", taskName, "Task not found");
 		}
 	}

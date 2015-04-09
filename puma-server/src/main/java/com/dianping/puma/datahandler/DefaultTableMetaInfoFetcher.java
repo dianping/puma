@@ -92,7 +92,8 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 	public void setMetaDs(MysqlDataSource metaDs) {
 		this.metaDs = metaDs;
 	}
-
+	
+	@Override
 	public void setDatabases(List<String> databases) {
 		this.databases = databases;
 	}
@@ -101,6 +102,14 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 		return databases;
 	}
 
+	public boolean isRefresh(String database){
+		if(StringUtils.isNotBlank(database)){
+			if(databases.contains(database.toLowerCase().trim())){
+				return true;
+			}
+		}
+		return false;
+	}
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -108,8 +117,11 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 	 * com.dianping.puma.datahandler.TableMetasInfoFetcher#refreshTableMeta()
 	 */
 	@Override
-	public void refreshTableMeta() {
-
+	public void refreshTableMeta(String database,boolean isRefresh) {
+		if(!isRefresh&&!isRefresh(database)){
+			return ;
+		}
+		log.info("table meta refresh. ");
 		initDsIfNeeded();
 
 		Connection conn = null;
@@ -164,12 +176,12 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 		if (datas != null && datas.size() > 0) {
 			for (String data : datas) {
 				if(StringUtils.isNotBlank(data)){
-					remainSql += "'?',";
+					remainSql += "?,";
 					signal++;
 				}
 			}
 			if(signal > 0){
-				StringUtils.removeEnd(remainSql, ",");
+				remainSql = StringUtils.removeEnd(remainSql, ",");
 				remainSql += ")";
 			}else{
 				remainSql += "";
@@ -189,7 +201,6 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 					ps.setString(signal, data);
 					signal++;
 				}
-				
 			}
 		}
 	}

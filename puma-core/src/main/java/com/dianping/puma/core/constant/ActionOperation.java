@@ -5,4 +5,5 @@ public enum ActionOperation {
 	UPDATE,
 	REMOVE,
 	PROLONG,
+	FILTER
 }

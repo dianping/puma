@@ -84,7 +84,7 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 	 */
 	@Override
 	public void start() throws Exception {
-		tableMetasInfoFetcher.refreshTableMeta();
+		tableMetasInfoFetcher.refreshTableMeta(null,true);
 	}
 
 	/*
@@ -231,11 +231,13 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 			ddlEvent.setDatabase(queryEvent.getDatabaseName());
 		}
 		//过滤系统的ddl引起的refresh慢查询
-		if (!(StringUtils.isNotBlank(ddlEvent.getDatabase())
+		/*if (!(StringUtils.isNotBlank(ddlEvent.getDatabase())
 				&& TableMetaRefreshFilter.instance.getFiltedDatabases().contains(ddlEvent.getDatabase().toLowerCase()))) {
-			tableMetasInfoFetcher.refreshTableMeta();
+			tableMetasInfoFetcher.refreshTableMeta(ddlEvent.getDatabase().toLowerCase(),false);
 			log.info("table meta refresh.    DDL event sql:"+sql+".");
-		}
+		}*/
+		tableMetasInfoFetcher.refreshTableMeta(ddlEvent.getDatabase().toLowerCase(),false);
+		
 		ddlEvent.setExecuteTime(queryEvent.getHeader().getTimestamp());
 		result.setData(dataChangedEvent);
 		result.setEmpty(false);

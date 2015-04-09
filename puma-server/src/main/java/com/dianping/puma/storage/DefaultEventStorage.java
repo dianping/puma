@@ -7,9 +7,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.dianping.puma.ComponentContainer;
+import com.dianping.puma.core.model.AcceptedTables;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.container.storage.StorageStateContainer;
 import com.dianping.puma.core.model.state.Storage.StorageState;
@@ -23,6 +25,7 @@ import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.storage.exception.InvalidSequenceException;
@@ -77,6 +80,8 @@ public class DefaultEventStorage implements EventStorage {
 
 	private List<String> acceptedTables;
 
+	private Map<String,AcceptedTables> acceptedDataTables;
+	
 	public void setAcceptedTablesConfigKey(String acceptedTablesConfigKey) {
 		this.acceptedTablesConfigKey = acceptedTablesConfigKey;
 	}
@@ -255,13 +260,21 @@ public class DefaultEventStorage implements EventStorage {
 		this.codec = codec;
 	}
 
+	public void setAcceptedDataTables(Map<String,AcceptedTables> acceptedDataTables) {
+		this.acceptedDataTables = acceptedDataTables;
+	}
+
+	public Map<String,AcceptedTables> getAcceptedDataTables() {
+		return acceptedDataTables;
+	}
+
 	@Override
 	public synchronized void store(ChangedEvent event) throws StorageException {
 		if (stopped) {
 			throw new StorageClosedException("Storage has been closed.");
 		}
 
-		if (!needStore(event)) {
+		if (!needStoreNew(event)) {
 			return;
 		}
 
@@ -339,6 +352,35 @@ public class DefaultEventStorage implements EventStorage {
 
 			return true;
 		} else {
+			return true;
+		}
+	}
+	
+	private boolean needStoreNew(ChangedEvent event) {
+		if (acceptedDataTables == null || acceptedDataTables.isEmpty()) {
+			return true;
+		}
+		if (event instanceof RowChangedEvent||event instanceof DdlEvent) {
+			ChangedEvent ce = null;
+			if(event instanceof RowChangedEvent){
+				ce = (RowChangedEvent) event;
+			}else{
+				ce = (DdlEvent) event;
+			}
+			if(StringUtils.isNotBlank(ce.getDatabase())){
+				if(acceptedDataTables.containsKey(ce.getDatabase().toLowerCase())){
+					if (StringUtils.isNotBlank(ce.getTable())) {
+						if (log.isDebugEnabled()) {
+							log.debug("table:" + ce.getTable().toLowerCase());
+						}
+						return acceptedDataTables.get(ce.getDatabase().toLowerCase()).getTables().contains(ce.getTable().toLowerCase());
+					}
+					return true;
+				}
+				return false;
+			}
+			return true;
+		} else{
 			return true;
 		}
 	}

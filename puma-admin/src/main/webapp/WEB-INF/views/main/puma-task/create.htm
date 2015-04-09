@@ -87,6 +87,20 @@
                   <span hidden="hidden">无效数据存储天数</span>
                </div>
             </div>
+            
+              <div class="form-group">
+               <label class="col-md-2 control-label" for="acceptedDataInfoStr">处理数据库及表</label>
+               <div class="col-md-7">
+               	<textarea id="acceptedDataInfoStr" name="acceptedDataInfoStr"class="form-control" rows="3" placeholder='{"database1":{"tables":["table1","table2"]},"database2":{"tables":["table1","table2"]}}'>#if(${acceptedDataInfoStr})${acceptedDataInfoStr}#end</textarea>
+               	<!--
+                  <input id="preservedDay" name="preservedDay" class="form-control validation-input" format="day"
+                         #if(${entity}) value="${entity.preservedDay}" #end>
+               -->
+               </div>
+               <div class="col-md-3 validation-help">
+                  <span hidden="hidden">无效的数据格式</span>
+               </div>
+            </div>
          </div>
       </form>
    </div>

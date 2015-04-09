@@ -240,7 +240,12 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 	public List<Sender> getFileSender() {
 		return dispatcher.getSenders();
 	}
-
+	
+	@Override
+	public DataHandler getDataHandler(){
+		return this.dataHandler;
+	}
+	
 	public PumaTaskState getTaskState() {
 		return state;
 	}
@@ -248,4 +253,5 @@ public abstract class AbstractTaskExecutor implements TaskExecutor, Notifiable {
 	public void setTaskState(PumaTaskState state) {
 		this.state = state;
 	}
+	
 }

@@ -8,6 +8,7 @@ import com.dianping.puma.core.model.state.TaskStateContainer;
 import com.dianping.puma.core.service.*;
 import com.dianping.puma.core.model.state.PumaTaskState;
 import com.dianping.puma.admin.util.GsonUtil;
+import com.dianping.puma.core.model.AcceptedTables;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.entity.PumaTask;
@@ -37,6 +38,12 @@ import java.util.Map;
 public class PumaTaskController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PumaTaskController.class);
+
+	private static final int String = 0;
+
+	private static final Class<Void> AcceptedDataInfo = null;
+
+	private static final int Map = 0;
 
 	@Autowired
 	PumaTaskService pumaTaskService;
@@ -101,6 +108,9 @@ public class PumaTaskController {
 			PumaTask pumaTask = pumaTaskService.find(id);
 
 			map.put("entity", pumaTask);
+			if(pumaTask.getAcceptedDataInfos()!=null){
+				map.put("acceptedDataInfoStr", GsonUtil.toJson(pumaTask.getAcceptedDataInfos()));
+			}
 			map.put("path", "puma-task");
 			map.put("subPath", "create");
 		} catch (Exception e) {
@@ -119,7 +129,8 @@ public class PumaTaskController {
 			String pumaServerName,
 			String binlogFile,
 			Long binlogPosition,
-			int preservedDay) {
+			int preservedDay,
+			String acceptedDataInfoStr) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
@@ -134,8 +145,10 @@ public class PumaTaskController {
 				if (!binlogFile.equals(pumaTask.getBinlogInfo().getBinlogFile())
 						|| !binlogPosition.equals(pumaTask.getBinlogInfo().getBinlogPosition())) {
 					operation = ActionOperation.UPDATE;
-				} else {
+				} else if(pumaTask.getPreservedDay()!= preservedDay){
 					operation = ActionOperation.PROLONG;
+				}else{
+					operation = ActionOperation.FILTER;
 				}
 			}
 
@@ -147,7 +160,9 @@ public class PumaTaskController {
 			binlogInfo.setBinlogPosition(binlogPosition);
 			pumaTask.setBinlogInfo(binlogInfo);
 			pumaTask.setPreservedDay(preservedDay);
-
+			Map<String,AcceptedTables> acceptedDataInfoMap = GsonUtil.fromJson(acceptedDataInfoStr, Map.class);
+			pumaTask.setAcceptedDataInfos(acceptedDataInfoMap);
+			//pumaTask.setAcceptedDataInfos(acceptedDataInfos)
 			// Save puma task state to persistent storage.
 			if (operation == ActionOperation.CREATE) {
 				pumaTaskService.create(pumaTask);

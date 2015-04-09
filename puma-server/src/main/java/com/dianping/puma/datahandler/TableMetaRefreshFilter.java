@@ -32,7 +32,7 @@ public class TableMetaRefreshFilter implements InitializingBean{
 		initFilterDatabases();
 	}
 
-	private List<String> constructFiltedDatabasesList(String filtedDatabasesStr) {
+	private List<String> constructFilteredDatabasesList(String filtedDatabasesStr) {
 		if (StringUtils.isNotBlank(filtedDatabasesStr)) {
 			String[] filtedDatabasesArr = StringUtils.split(filtedDatabasesStr, ",");
 			if (filtedDatabasesArr != null && filtedDatabasesArr.length > 0) {
@@ -51,19 +51,19 @@ public class TableMetaRefreshFilter implements InitializingBean{
 
 	public void initFilterDatabases() {
 		try {
-			String filtedDatabasesStr = ConfigCache.getInstance().getProperty(PumaServerLionCommonKey.FILTED_DATABASES_CONFIG_KEY);
-			filtedDatabases = constructFiltedDatabasesList(filtedDatabasesStr);
+			String filtedDatabasesStr = ConfigCache.getInstance().getProperty(PumaServerLionCommonKey.FILTERED_DATABASES_CONFIG_KEY);
+			filtedDatabases = constructFilteredDatabasesList(filtedDatabasesStr);
 			ConfigCache.getInstance().addChange(new ConfigChange() {
 
 				@Override
 				public void onChange(String key, String value) {
-					if (PumaServerLionCommonKey.FILTED_DATABASES_CONFIG_KEY.equals(key)) {
-						filtedDatabases = constructFiltedDatabasesList(value);
+					if (PumaServerLionCommonKey.FILTERED_DATABASES_CONFIG_KEY.equals(key)) {
+						filtedDatabases = constructFilteredDatabasesList(value);
 					}
 				}
 			});
 		} catch (LionException e) {
-			log.warn(String.format("Get filtedDatabasesConfig[%s] failed.", PumaServerLionCommonKey.FILTED_DATABASES_CONFIG_KEY));
+			log.warn(String.format("Get filtedDatabasesConfig[%s] failed.", PumaServerLionCommonKey.FILTERED_DATABASES_CONFIG_KEY));
 		}
 	}
 

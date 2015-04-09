@@ -19,6 +19,7 @@ import com.dianping.puma.core.LifeCycle;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.state.PumaTaskState;
+import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.sender.Sender;
 
 /**
@@ -62,6 +63,8 @@ public interface TaskExecutor extends LifeCycle<Exception> {
 	public void setStatus(Status status);
 
 	public List<Sender> getFileSender();
+	
+	public DataHandler getDataHandler();
 
 	public void resume() throws Exception;
 

@@ -12,5 +12,5 @@ public class PumaServerLionCommonKey {
 	
 	public static final String SYNCPROCESS_DIFF_FILE_NUM ="puma.server.syncProcess.diffNumFile";
 	
-	public static final String FILTED_DATABASES_CONFIG_KEY = "puma.tablemeta.refresh.filtedDatabases";
+	public static final String FILTERED_DATABASES_CONFIG_KEY = "puma.tablemeta.refresh.filteredDatabases";
 }

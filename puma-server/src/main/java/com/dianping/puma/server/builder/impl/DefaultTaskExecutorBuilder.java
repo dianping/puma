@@ -6,6 +6,7 @@ import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.model.AcceptedTables;
 import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.core.model.state.PumaTaskState;
 import com.dianping.puma.core.monitor.NotifyService;
@@ -24,6 +25,8 @@ import com.dianping.puma.storage.DefaultArchiveStrategy;
 import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.LocalFileBucketIndex;
+
+import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +36,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service("taskExecutorBuilder")
 public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
@@ -126,6 +130,13 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			DefaultDataHandler dataHandler = new DefaultDataHandler();
 			dataHandler.setNotifyService(notifyService);
 			DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
+			List<String> databases=new ArrayList<String>();
+			for(Map.Entry<String,AcceptedTables> entry :pumaTask.getAcceptedDataInfos().entrySet()){
+				if(StringUtils.isNotBlank(entry.getKey())){
+					databases.add(entry.getKey().toLowerCase().trim());
+				}
+			}
+			tableMetaInfo.setDatabases(databases);
 			tableMetaInfo.setMetaDBHost(srcDBInstance.getMetaHost());
 			tableMetaInfo.setMetaDBPort(srcDBInstance.getMetaPort());
 			tableMetaInfo.setMetaDBUsername(srcDBInstance.getUsername());
@@ -133,7 +144,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			dataHandler.setTableMetasInfoFetcher(tableMetaInfo);
 			//dataHandler.start();
 			taskExecutor.setDataHandler(dataHandler);
-
+			
 			// File sender.
 			List<Sender> senders = new ArrayList<Sender>();
 			FileDumpSender sender = new FileDumpSender();
@@ -144,6 +155,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			DefaultEventStorage storage = new DefaultEventStorage();
 			storage.setName(storageName + taskName);
 			storage.setTaskName(taskName);
+			storage.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
 			storage.setCodec(jsonCodec);
 
 			BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(taskName);

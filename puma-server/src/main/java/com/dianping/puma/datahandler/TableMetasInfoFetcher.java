@@ -15,6 +15,8 @@
  */
 package com.dianping.puma.datahandler;
 
+import java.util.List;
+
 /**
  * TODO Comment of TableMetasInfoFetcher
  * 
@@ -22,8 +24,10 @@ package com.dianping.puma.datahandler;
  * 
  */
 public interface TableMetasInfoFetcher {
-	void refreshTableMeta();
+	void refreshTableMeta(String database,boolean isRefresh);
 
 	TableMetaInfo getTableMetaInfo(String database, String table);
+	
+	void setDatabases(List<String> databases);
 
 }

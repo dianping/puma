@@ -74,7 +74,7 @@ public class ClientLaggingMonitor implements InitializingBean {
 				for (ClientState clientState : clientStateContainer.getByTaskName(storageState.getTaskName())) {
 					String clientBinlogFile = clientState.getBinlogInfo().getBinlogFile();
 					String status = isBinlogFileLagging(clientBinlogFile, storageBinlogFile) ? "1" : Event.SUCCESS;
-					Cat.logEvent("Lagging.BinlogFile", clientState.getName(), status, "");
+					Cat.logEvent("ClientLagging.binlogFile", clientState.getName(), status, "");
 				}
 			}
 		} catch (Exception e) {
@@ -89,7 +89,7 @@ public class ClientLaggingMonitor implements InitializingBean {
 			for (ClientState clientState : clientStateContainer.getAll()) {
 				double clientSeqSpeedPerSecond = clientState.getSeqSpeedPerSecond();
 				String status = isSeqSpeedLagging(clientSeqSpeedPerSecond) ? "1" : Event.SUCCESS;
-				Cat.logEvent("Speed.ClientSeq", clientState.getName(), status, "");
+				Cat.logEvent("ClientLagging.seqSpeed", clientState.getName(), status, "");
 			}
 		} catch (Exception e) {
 			LOG.warn("Monitor client seq speed error: {}.", e.getStackTrace());

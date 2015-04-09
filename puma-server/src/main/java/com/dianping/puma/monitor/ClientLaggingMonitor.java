@@ -65,9 +65,7 @@ public class ClientLaggingMonitor implements InitializingBean {
 	}
 
 	@Scheduled(cron = "0/60 * * * * ?")
-	public void monitor() throws MonitorException {
-		LOG.info("Monitor binlog file based lagging.");
-
+	public void monitor() {
 		try {
 			for (StorageState storageState : storageStateContainer.getAll()) {
 				String storageBinlogFile = storageState.getBinlogInfo().getBinlogFile();
@@ -78,13 +76,12 @@ public class ClientLaggingMonitor implements InitializingBean {
 				}
 			}
 		} catch (Exception e) {
-			LOG.warn("Monitor binlog file based lagging error: {}.", e.getMessage());
-			throw new MonitorException(e);
+			LOG.warn("Monitor client binlog file error: {}.", e.getStackTrace());
 		}
 	}
 
 	@Scheduled(cron = "0/60 * * * * ?")
-	public void clientSeqSpeedMonitor() throws MonitorException {
+	public void clientSeqSpeedMonitor() {
 		try {
 			for (ClientState clientState : clientStateContainer.getAll()) {
 				double clientSeqSpeedPerSecond = clientState.getSeqSpeedPerSecond();
@@ -93,7 +90,6 @@ public class ClientLaggingMonitor implements InitializingBean {
 			}
 		} catch (Exception e) {
 			LOG.warn("Monitor client seq speed error: {}.", e.getStackTrace());
-			throw new MonitorException(e);
 		}
 	}
 

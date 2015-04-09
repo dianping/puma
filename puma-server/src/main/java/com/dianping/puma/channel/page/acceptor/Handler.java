@@ -82,6 +82,9 @@ public class Handler implements PageHandler<Context> {
 				payload.isNeedsTransactionMeta(), payload.getDatabaseTables(), payload.getCodecType());
 		SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(), payload.getBinlog(), payload
 				.getBinlogPos());
+
+		Cat.logEvent("ClientConnect.connecting", payload.getClientName());
+
 		log.info("Client(" + payload.getClientName() + ") connected.");
 		log.info("Client(" + payload.getClientName() + ") target : " + payload.getTarget() + "  binlog : "
 				+ payload.getBinlog() + "  binlogPos : " + payload.getBinlogPos() + " .");

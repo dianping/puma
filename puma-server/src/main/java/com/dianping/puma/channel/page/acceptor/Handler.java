@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
+import com.dianping.cat.message.Event;
 import com.dianping.puma.ComponentContainer;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.container.client.ClientStateContainer;
@@ -83,7 +84,7 @@ public class Handler implements PageHandler<Context> {
 		SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(), payload.getBinlog(), payload
 				.getBinlogPos());
 
-		Cat.logEvent("ClientConnect.connecting", payload.getClientName());
+		Cat.logEvent("ClientConnect.connecting", payload.getClientName(), Event.SUCCESS, "");
 
 		log.info("Client(" + payload.getClientName() + ") connected.");
 		log.info("Client(" + payload.getClientName() + ") target : " + payload.getTarget() + "  binlog : "

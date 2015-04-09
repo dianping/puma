@@ -20,6 +20,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 
 @Service("clientLaggingMonitor")
 public class ClientLaggingMonitor implements InitializingBean {
@@ -67,12 +68,18 @@ public class ClientLaggingMonitor implements InitializingBean {
 	@Scheduled(cron = "0/60 * * * * ?")
 	public void clientBinlogFileLaggingMonitor() throws MonitorException {
 		try {
-			for (StorageState storageState : storageStateContainer.getAll()) {
-				String storageBinlogFile = storageState.getBinlogInfo().getBinlogFile();
-				for (ClientState clientState : clientStateContainer.getByTaskName(storageState.getTaskName())) {
-					String clientBinlogFile = clientState.getBinlogInfo().getBinlogFile();
-					String status = isBinlogFileLagging(clientBinlogFile, storageBinlogFile) ? "1" : Event.SUCCESS;
-					Cat.logEvent("ClientLagging.binlogFile", clientState.getName(), status, "");
+			List<ClientState> clientStates = clientStateContainer.getAll();
+
+			if (clientStates.size() == 0) {
+				Cat.logEvent("ClientLagging.binlogFile", "NO CLIENT", Event.SUCCESS, "");
+			} else {
+				for (StorageState storageState : storageStateContainer.getAll()) {
+					String storageBinlogFile = storageState.getBinlogInfo().getBinlogFile();
+					for (ClientState clientState : clientStateContainer.getByTaskName(storageState.getTaskName())) {
+						String clientBinlogFile = clientState.getBinlogInfo().getBinlogFile();
+						String status = isBinlogFileLagging(clientBinlogFile, storageBinlogFile) ? "1" : Event.SUCCESS;
+						Cat.logEvent("ClientLagging.binlogFile", clientState.getName(), status, "");
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -84,10 +91,16 @@ public class ClientLaggingMonitor implements InitializingBean {
 	@Scheduled(cron = "0/60 * * * * ?")
 	public void clientSeqSpeedLaggingMonitor() throws MonitorException {
 		try {
-			for (ClientState clientState : clientStateContainer.getAll()) {
-				double clientSeqSpeedPerSecond = clientState.getSeqSpeedPerSecond();
-				String status = isSeqSpeedLagging(clientSeqSpeedPerSecond) ? "1" : Event.SUCCESS;
-				Cat.logEvent("ClientLagging.seqSpeed", clientState.getName(), status, "");
+			List<ClientState> clientStates = clientStateContainer.getAll();
+
+			if (clientStates.size() == 0) {
+				Cat.logEvent("ClientLagging.seqSpeed", "NO CLIENT", Event.SUCCESS, "");
+			} else {
+				for (ClientState clientState : clientStates) {
+					double clientSeqSpeedPerSecond = clientState.getSeqSpeedPerSecond();
+					String status = isSeqSpeedLagging(clientSeqSpeedPerSecond) ? "1" : Event.SUCCESS;
+					Cat.logEvent("ClientLagging.seqSpeed", clientState.getName(), status, "");
+				}
 			}
 		} catch (Exception e) {
 			LOG.warn("Monitor client seq speed lagging error: {}.", e.getStackTrace());

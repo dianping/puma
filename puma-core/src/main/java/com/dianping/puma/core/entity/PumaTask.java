@@ -1,5 +1,8 @@
 package com.dianping.puma.core.entity;
 
+import java.util.Map;
+
+import com.dianping.puma.core.model.AcceptedDataInfo;
 import com.dianping.puma.core.model.BinlogInfo;
 
 public class PumaTask extends BaseEntity {
@@ -11,6 +14,8 @@ public class PumaTask extends BaseEntity {
 	private BinlogInfo binlogInfo;
 
 	private int preservedDay;
+	
+	private Map<String,AcceptedDataInfo> acceptedDataInfos;
 
 	public String getSrcDBInstanceName() {
 		return srcDBInstanceName;
@@ -42,5 +47,13 @@ public class PumaTask extends BaseEntity {
 
 	public void setPreservedDay(int preservedDay) {
 		this.preservedDay = preservedDay;
+	}
+
+	public void setAcceptedDataInfos(Map<String,AcceptedDataInfo> acceptedDataInfos) {
+		this.acceptedDataInfos = acceptedDataInfos;
+	}
+
+	public Map<String,AcceptedDataInfo> getAcceptedDataInfos() {
+		return acceptedDataInfos;
 	}
 }

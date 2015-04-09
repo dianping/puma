@@ -21,11 +21,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.mysql.jdbc.PreparedStatement;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 /**
@@ -35,7 +38,8 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
  * 
  */
 public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
-	private static final Logger log = Logger.getLogger(DefaultTableMetaInfoFetcher.class);
+	private static final Logger log = Logger
+			.getLogger(DefaultTableMetaInfoFetcher.class);
 	private AtomicReference<Map<String, TableMetaInfo>> tableMetaInfoCache = new AtomicReference<Map<String, TableMetaInfo>>();
 	private int metaDBPort = 3306;
 	private String metaDBHost;
@@ -43,6 +47,12 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 	private String metaDBPassword;
 	private MysqlDataSource metaDs;
 
+	private List<String> databases;
+
+	private static final String QUERY_SQL = "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, COLUMN_KEY, COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS ";
+
+	private static final String REMAIN_SQL= " WHERE TABLE_SCHEMA IN( ";
+	
 	public int getMetaDBPort() {
 		return metaDBPort;
 	}
@@ -83,6 +93,14 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 		this.metaDs = metaDs;
 	}
 
+	public void setDatabases(List<String> databases) {
+		this.databases = databases;
+	}
+
+	public List<String> getDatabases() {
+		return databases;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -95,13 +113,19 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 		initDsIfNeeded();
 
 		Connection conn = null;
-		Statement stmt = null;
+		PreparedStatement ps = null;
+		//Statement stmt = null;
 		ResultSet rs = null;
 		try {
 			conn = metaDs.getConnection();
-			stmt = conn.createStatement();
-			rs = stmt
-					.executeQuery("SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, COLUMN_KEY, COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS");
+			String sql = getSqlQuery(QUERY_SQL,REMAIN_SQL,databases);
+			ps = (PreparedStatement) conn.prepareStatement(sql);
+			setStatementParams(ps,databases);
+			rs = ps.executeQuery();
+			// stmt = conn.createStatement();
+			// rs =
+			// stmt.executeQuery("SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, COLUMN_KEY, COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS");
+
 			if (rs != null) {
 				fillTableMetaCache(rs);
 			}
@@ -114,9 +138,15 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 				} catch (SQLException e) {
 				}
 			}
-			if (stmt != null) {
+			/*if (stmt != null) {
 				try {
 					stmt.close();
+				} catch (SQLException e) {
+				}
+			}*/
+			if (ps != null) {
+				try {
+					ps.close();
 				} catch (SQLException e) {
 				}
 			}
@@ -129,6 +159,40 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 		}
 	}
 
+	private String getSqlQuery(String baseSql,String remainSql,List<String> datas){
+		int signal=0;
+		if (datas != null && datas.size() > 0) {
+			for (String data : datas) {
+				if(StringUtils.isNotBlank(data)){
+					remainSql += "'?',";
+					signal++;
+				}
+			}
+			if(signal > 0){
+				StringUtils.removeEnd(remainSql, ",");
+				remainSql += ")";
+			}else{
+				remainSql += "";
+			}
+		}else{
+			return baseSql;
+		}
+		return baseSql + remainSql;
+	}
+	
+	private void setStatementParams(PreparedStatement ps,List<String> datas) throws SQLException{
+		int signal =0;
+		if (datas != null && datas.size() > 0) {
+			signal = 1;
+			for (String data : datas) {
+				if(StringUtils.isNotBlank(data)){
+					ps.setString(signal, data);
+					signal++;
+				}
+				
+			}
+		}
+	}
 	/**
 	 * @param newTableMeta
 	 * @param rs
@@ -168,7 +232,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 			}
 		}
 		tableMetaInfoCache.set(newTableMeta);
-		if(log.isDebugEnabled()) {
+		if (log.isDebugEnabled()) {
 			log.debug("tables meta info:" + newTableMeta);
 		}
 	}
@@ -193,4 +257,5 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 	public TableMetaInfo getTableMetaInfo(String database, String table) {
 		return tableMetaInfoCache.get().get(database + "." + table);
 	}
+
 }

@@ -12,30 +12,17 @@ public class TaskLionConfig {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TaskLionConfig.class);
 	
-	private static final String SEQ_INTERVAL_NAME = "puma.server.interval.seq";
-	
-	private static final String CLIENTIP_INTERVAL_NAME = "puma.server.interval.ip";
-	
-	private static final String SERVERINFO_INTERVAL_NAME = "puma.server.interval.serverInfo";
-	
-	private static final String SYNCPROCESS_INTERVAL_NAME = "puma.server.interval.syncProcess";
-	
-	private static final String SYNCPROCESS_DIFF_FILE_NUM ="puma.server.syncProcess.diffNumFile";
 	private long seqInterval;
 	private long clientIpInterval;
 	private long serverInfoInterval;
 	private long syncProcessInterval;
 	private long syncProcessDfileNum;
 	public TaskLionConfig(){
-	/*	seqInterval = "0/"+getInterval(SEQ_INTERVAL_NAME)+" * * * * ?";
-		clientIpInterval = "0/"+getInterval(CLIENTIP_INTERVAL_NAME)+" * * * * ?";
-		serverInfoInterval = "0/"+getInterval(SERVERINFO_INTERVAL_NAME)+" * * * * ?";
-	*/
-		seqInterval = getInterval(SEQ_INTERVAL_NAME);
-		clientIpInterval = getInterval(CLIENTIP_INTERVAL_NAME);
-		serverInfoInterval = getInterval(SERVERINFO_INTERVAL_NAME);
-		syncProcessInterval = getInterval(SYNCPROCESS_INTERVAL_NAME);
-		syncProcessDfileNum = getDiffFileNum(SYNCPROCESS_DIFF_FILE_NUM);
+		seqInterval = getInterval(PumaServerLionCommonKey.SEQ_INTERVAL_NAME);
+		clientIpInterval = getInterval(PumaServerLionCommonKey.CLIENTIP_INTERVAL_NAME);
+		serverInfoInterval = getInterval(PumaServerLionCommonKey.SERVERINFO_INTERVAL_NAME);
+		syncProcessInterval = getInterval(PumaServerLionCommonKey.SYNCPROCESS_INTERVAL_NAME);
+		syncProcessDfileNum = getDiffFileNum(PumaServerLionCommonKey.SYNCPROCESS_DIFF_FILE_NUM);
 	}
 	
 	protected long getInterval(String intervalName) {

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
+import com.dianping.puma.config.PumaServerLionCommonKey;
 
 
 @Service("tableMetaRefreshFilter")
@@ -24,7 +25,7 @@ public class TableMetaRefreshFilter implements InitializingBean{
 
 	private List<String> filtedDatabases;
 
-	private static final String filtedDatabasesConfigKey = "puma.tablemeta.refresh.filtedDatabases";
+	//private static final String filtedDatabasesConfigKey = "puma.tablemeta.refresh.filtedDatabases";
 
 	@PostConstruct
 	public void start() {
@@ -50,19 +51,19 @@ public class TableMetaRefreshFilter implements InitializingBean{
 
 	public void initFilterDatabases() {
 		try {
-			String filtedDatabasesStr = ConfigCache.getInstance().getProperty(filtedDatabasesConfigKey);
+			String filtedDatabasesStr = ConfigCache.getInstance().getProperty(PumaServerLionCommonKey.FILTED_DATABASES_CONFIG_KEY);
 			filtedDatabases = constructFiltedDatabasesList(filtedDatabasesStr);
 			ConfigCache.getInstance().addChange(new ConfigChange() {
 
 				@Override
 				public void onChange(String key, String value) {
-					if (filtedDatabasesConfigKey.equals(key)) {
+					if (PumaServerLionCommonKey.FILTED_DATABASES_CONFIG_KEY.equals(key)) {
 						filtedDatabases = constructFiltedDatabasesList(value);
 					}
 				}
 			});
 		} catch (LionException e) {
-			log.warn(String.format("Get filtedDatabasesConfig[%s] failed.", filtedDatabasesConfigKey));
+			log.warn(String.format("Get filtedDatabasesConfig[%s] failed.", PumaServerLionCommonKey.FILTED_DATABASES_CONFIG_KEY));
 		}
 	}
 

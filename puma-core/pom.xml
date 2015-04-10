@@ -13,6 +13,10 @@
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
+            <groupId>com.dianping.cat</groupId>
+            <artifactId>cat-client</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.dianping.lion</groupId>
             <artifactId>lion-client</artifactId>
         </dependency>

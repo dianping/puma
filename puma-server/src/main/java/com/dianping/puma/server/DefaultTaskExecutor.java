@@ -153,13 +153,21 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				}
 			}
 
-			BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(is, PacketType.BINLOG_PACKET,
-					getContext());
-			if (!binlogPacket.isOk()) {
-				LOG.error("Binlog packet response error.");
-				throw new IOException("Binlog packet response error.");
-			} else {
-				processBinlogPacket(binlogPacket);
+			String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
+			String eventStatus = "1";
+
+			try {
+				BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(is, PacketType.BINLOG_PACKET,
+						getContext());
+				if (!binlogPacket.isOk()) {
+					eventStatus = "1";
+					LOG.error("Binlog packet response error.");
+					throw new IOException("Binlog packet response error.");
+				} else {
+					processBinlogPacket(binlogPacket);
+				}
+			} finally {
+				Cat.logEvent("Slave.dbBinlog", eventName, eventStatus, "");
 			}
 
 		}
@@ -303,38 +311,50 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	 * @throws IOException
 	 */
 	private boolean dumpBinlog() throws IOException {
-		ComBinlogDumpPacket dumpBinlogPacket = (ComBinlogDumpPacket) PacketFactory.createCommandPacket(
-				PacketType.COM_BINLOG_DUMP_PACKET, getContext());
-		dumpBinlogPacket.setBinlogFileName(getContext().getBinlogFileName());
-		dumpBinlogPacket.setBinlogFlag(0);
-		dumpBinlogPacket.setBinlogPosition(getContext().getBinlogStartPos());
-		dumpBinlogPacket.setServerId(getServerId());
-		dumpBinlogPacket.buildPacket(getContext());
+		String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
+		String eventStatus = "1";
 
-		dumpBinlogPacket.write(os, getContext());
+		try {
+			ComBinlogDumpPacket dumpBinlogPacket = (ComBinlogDumpPacket) PacketFactory.createCommandPacket(
+					PacketType.COM_BINLOG_DUMP_PACKET, getContext());
+			dumpBinlogPacket.setBinlogFileName(getContext().getBinlogFileName());
+			dumpBinlogPacket.setBinlogFlag(0);
+			dumpBinlogPacket.setBinlogPosition(getContext().getBinlogStartPos());
+			dumpBinlogPacket.setServerId(getServerId());
+			dumpBinlogPacket.buildPacket(getContext());
 
-		OKErrorPacket dumpCommandResultPacket = (OKErrorPacket) PacketFactory.parsePacket(is,
-				PacketType.OKERROR_PACKET, getContext());
-		if (dumpCommandResultPacket.isOk()) {
-			if (StringUtils.isBlank(getContext().getBinlogFileName())
-					&& StringUtils.isNotBlank(dumpCommandResultPacket.getMessage())) {
-				String msg = dumpCommandResultPacket.getMessage();
-				int startPos = msg.lastIndexOf(' ');
-				if (startPos != -1) {
-					startPos += 1;
-				} else {
-					startPos = 0;
+			dumpBinlogPacket.write(os, getContext());
+
+			OKErrorPacket dumpCommandResultPacket = (OKErrorPacket) PacketFactory.parsePacket(is,
+					PacketType.OKERROR_PACKET, getContext());
+
+			if (dumpCommandResultPacket.isOk()) {
+				if (StringUtils.isBlank(getContext().getBinlogFileName())
+						&& StringUtils.isNotBlank(dumpCommandResultPacket.getMessage())) {
+					String msg = dumpCommandResultPacket.getMessage();
+					int startPos = msg.lastIndexOf(' ');
+					if (startPos != -1) {
+						startPos += 1;
+					} else {
+						startPos = 0;
+					}
+					String binlogFile = dumpCommandResultPacket.getMessage().substring(startPos);
+					binlogInfoHolder
+							.setBinlogInfo(getTaskName(), new BinlogInfo(binlogFile, getContext().getBinlogStartPos()));
+					getContext().setBinlogFileName(binlogFile);
 				}
-				String binlogFile = dumpCommandResultPacket.getMessage().substring(startPos);
-				binlogInfoHolder
-						.setBinlogInfo(getTaskName(), new BinlogInfo(binlogFile, getContext().getBinlogStartPos()));
-				getContext().setBinlogFileName(binlogFile);
+
+				eventStatus = Event.SUCCESS;
+				return true;
+			} else {
+				eventStatus = "1";
+				LOG.error("Dump binlog failed. Reason: " + dumpCommandResultPacket.getMessage());
+				return false;
 			}
-			return true;
-		} else {
-			LOG.error("Dump binlog failed. Reason: " + dumpCommandResultPacket.getMessage());
-			return false;
+		} finally {
+			Cat.logEvent("Slave.dbOK", eventName, eventStatus, "");
 		}
+
 	}
 
 	/**

@@ -154,20 +154,17 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			}
 
 			String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
-			String eventStatus = "1";
+			String eventStatus;
 
-			try {
-				BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(is, PacketType.BINLOG_PACKET,
-						getContext());
-				if (!binlogPacket.isOk()) {
-					eventStatus = "1";
-					LOG.error("Binlog packet response error.");
-					throw new IOException("Binlog packet response error.");
-				} else {
-					processBinlogPacket(binlogPacket);
-				}
-			} finally {
+			BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(is, PacketType.BINLOG_PACKET,
+					getContext());
+			if (!binlogPacket.isOk()) {
+				eventStatus = "1";
 				Cat.logEvent("Slave.dbBinlog", eventName, eventStatus, "");
+				LOG.error("Binlog packet response error.");
+				throw new IOException("Binlog packet response error.");
+			} else {
+				processBinlogPacket(binlogPacket);
 			}
 
 		}
@@ -456,7 +453,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		PumaContext context = new PumaContext();
 
 		BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(this.getTaskName());
-
 
 		if (binlogInfo == null) {
 			context.setBinlogStartPos(this.getBinlogInfo().getBinlogPosition());

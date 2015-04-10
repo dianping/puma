@@ -17,7 +17,11 @@ import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.mongodb.MongoException;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +34,9 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,6 +127,7 @@ public class PumaTaskController {
 		return new ModelAndView("main/container", map);
 	}
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = {
 			"/puma-task/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
@@ -159,10 +167,10 @@ public class PumaTaskController {
 			binlogInfo.setBinlogFile(binlogFile);
 			binlogInfo.setBinlogPosition(binlogPosition);
 			pumaTask.setBinlogInfo(binlogInfo);
-			pumaTask.setPreservedDay(preservedDay);
-			Map<String,AcceptedTables> acceptedDataInfoMap = GsonUtil.fromJson(acceptedDataInfoStr, Map.class);
-			pumaTask.setAcceptedDataInfos(acceptedDataInfoMap);
-			//pumaTask.setAcceptedDataInfos(acceptedDataInfos)
+			pumaTask.setPreservedDay(preservedDay);  
+			Type type = new TypeToken<HashMap<String,AcceptedTables>>() {}.getType(); 
+			Map<String,AcceptedTables> acceptedDataInfos = (Map<java.lang.String, AcceptedTables>) GsonUtil.fromJson(acceptedDataInfoStr, type);
+			pumaTask.setAcceptedDataInfos(formatAcceptedTable(acceptedDataInfos));
 			// Save puma task state to persistent storage.
 			if (operation == ActionOperation.CREATE) {
 				pumaTaskService.create(pumaTask);
@@ -196,6 +204,26 @@ public class PumaTaskController {
 		return GsonUtil.toJson(map);
 	}
 
+	private Map<String,AcceptedTables> formatAcceptedTable(Map<String,AcceptedTables> acceptedDataInfos){
+		 Map<String,AcceptedTables> result = new HashMap<String,AcceptedTables>();
+		 for(Map.Entry<String,AcceptedTables> entry:acceptedDataInfos.entrySet()){
+			 if(StringUtils.isNotBlank(entry.getKey()) && entry.getValue() != null 
+					 && entry.getValue().getTables() != null 
+					 && entry.getValue().getTables().size()>0){
+				 AcceptedTables acceptedTables = new AcceptedTables();	
+				 List<String> tables = new ArrayList<String>();
+				 for(String table:entry.getValue().getTables()){
+					 if(StringUtils.isNotBlank(table)){
+						 tables.add(table.trim().toLowerCase());
+					 }
+				 }
+				 acceptedTables.setTables(tables);
+				 result.put(entry.getKey().trim().toLowerCase(), acceptedTables);
+			 }
+		 }
+		return result;
+	}
+	
 	@RequestMapping(value = { "/puma-task/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String removePost(String name) {

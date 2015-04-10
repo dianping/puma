@@ -361,19 +361,13 @@ public class DefaultEventStorage implements EventStorage {
 			return true;
 		}
 		if (event instanceof RowChangedEvent||event instanceof DdlEvent) {
-			ChangedEvent ce = null;
-			if(event instanceof RowChangedEvent){
-				ce = (RowChangedEvent) event;
-			}else{
-				ce = (DdlEvent) event;
-			}
-			if(StringUtils.isNotBlank(ce.getDatabase())){
-				if(acceptedDataTables.containsKey(ce.getDatabase().toLowerCase())){
-					if (StringUtils.isNotBlank(ce.getTable())) {
+			if(StringUtils.isNotBlank(event.getDatabase().toLowerCase())){
+				if(acceptedDataTables.containsKey(event.getDatabase())){
+					if (StringUtils.isNotBlank(event.getTable())) {
 						if (log.isDebugEnabled()) {
-							log.debug("table:" + ce.getTable().toLowerCase());
+							log.debug("table:" + event.getTable().toLowerCase());
 						}
-						return acceptedDataTables.get(ce.getDatabase().toLowerCase()).getTables().contains(ce.getTable().toLowerCase());
+						return acceptedDataTables.get(event.getDatabase().toLowerCase()).getTables().contains((event.getTable().toLowerCase()));
 					}
 					return true;
 				}
@@ -384,7 +378,7 @@ public class DefaultEventStorage implements EventStorage {
 			return true;
 		}
 	}
-
+	
 	private void updateIndex(ChangedEvent event, boolean newL1Index, long newSeq)
 			throws IOException {
 		BinlogIndexKey binlogKey = new BinlogIndexKey(event.getBinlog(), event

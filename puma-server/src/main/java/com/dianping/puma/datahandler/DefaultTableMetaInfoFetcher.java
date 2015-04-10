@@ -63,9 +63,9 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 
 	private static final String WHERE_SQL = "WHERE ";
 
-	private static final String TABLE_SCHEMA = "TABLE_SCHEMA ";
+	private static final String TABLE_SCHEMA = "LOWER(TABLE_SCHEMA) ";
 
-	private static final String TABLE_NAME = "TABLE_NAME ";
+	private static final String TABLE_NAME = "LOWER(TABLE_NAME) ";
 
 	private static final String IN_SQL = "IN ";
 

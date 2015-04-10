@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.dianping.puma.core.model.AcceptedTables;
 import com.mysql.jdbc.PreparedStatement;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
@@ -47,12 +48,23 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 	private String metaDBPassword;
 	private MysqlDataSource metaDs;
 
-	private List<String> databases;
+	private Map<String,AcceptedTables> acceptedDataTables;
 
 	private static final String QUERY_SQL = "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, COLUMN_KEY, COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS ";
 
-	private static final String REMAIN_SQL= " WHERE TABLE_SCHEMA IN( ";
+	private static final String REMAIN_SQL= "WHERE TABLE_SCHEMA IN( ";
 	
+	private static final String WHERE_SQL="WHERE ";
+	private static final String TABLE_SCHEMA= "TABLE_SCHEMA ";
+	private static final String TABLE_NAME="TABLE_NAME ";
+	private static final String IN_SQL ="IN ";
+	private static final String AND_SQL=" AND ";
+	private static final String OR_SQL=" OR ";
+	private static final String EQUAL_SQL=" = ";
+	private static final String PREFIX_BRACKET=" ( ";
+	private static final String SUFIX_BRACKET=" ) ";
+	private static final String INFIX_REPLACE="?";
+	private static final String INFIX_DOT=",";
 	public int getMetaDBPort() {
 		return metaDBPort;
 	}
@@ -92,21 +104,19 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 	public void setMetaDs(MysqlDataSource metaDs) {
 		this.metaDs = metaDs;
 	}
-	
-	@Override
-	public void setDatabases(List<String> databases) {
-		this.databases = databases;
-	}
 
-	public List<String> getDatabases() {
-		return databases;
-	}
-
-	public boolean isRefresh(String database){
+	public boolean isRefresh(String database,String table){
+		if(acceptedDataTables==null&&acceptedDataTables.isEmpty()){
+			return true;
+		}
 		if(StringUtils.isNotBlank(database)){
-			if(databases.contains(database.toLowerCase().trim())){
+			if(acceptedDataTables.containsKey(database.toLowerCase())){
+				if(StringUtils.isNotBlank(table)){
+					return acceptedDataTables.get(database.toLowerCase()).getTables().contains(table.toLowerCase());
+				}
 				return true;
 			}
+			return false;
 		}
 		return false;
 	}
@@ -117,8 +127,8 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 	 * com.dianping.puma.datahandler.TableMetasInfoFetcher#refreshTableMeta()
 	 */
 	@Override
-	public void refreshTableMeta(String database,boolean isRefresh) {
-		if(!isRefresh&&!isRefresh(database)){
+	public void refreshTableMeta(String database,String table,boolean isRefresh) {
+		if(!isRefresh&&!isRefresh(database,table)){
 			return ;
 		}
 		log.info("table meta refresh. ");
@@ -130,9 +140,10 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 		ResultSet rs = null;
 		try {
 			conn = metaDs.getConnection();
-			String sql = getSqlQuery(QUERY_SQL,REMAIN_SQL,databases);
+			String sql = getSqlQuery();
+			log.info("table meta refresh SQL: " +sql);
 			ps = (PreparedStatement) conn.prepareStatement(sql);
-			setStatementParams(ps,databases);
+			setStatementParams(ps);
 			rs = ps.executeQuery();
 			// stmt = conn.createStatement();
 			// rs =
@@ -171,7 +182,49 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 		}
 	}
 
-	private String getSqlQuery(String baseSql,String remainSql,List<String> datas){
+	private String getSqlQuery(){
+		StringBuilder sqlStr=new StringBuilder();
+		sqlStr.append(QUERY_SQL);
+		if(acceptedDataTables==null&&acceptedDataTables.isEmpty()){
+			return QUERY_SQL;
+		}
+		sqlStr.append(WHERE_SQL);
+		for(Map.Entry<String,AcceptedTables> database:acceptedDataTables.entrySet()){
+			if(StringUtils.isNotBlank(database.getKey().trim())){
+				sqlStr.append(PREFIX_BRACKET+ TABLE_SCHEMA+EQUAL_SQL+INFIX_REPLACE);
+				if(database.getValue()!=null&&database.getValue().getTables().size()>0){
+					sqlStr.append(AND_SQL+TABLE_NAME+IN_SQL+PREFIX_BRACKET);
+					for(String table:database.getValue().getTables()){
+						sqlStr.append(INFIX_REPLACE+INFIX_DOT);
+					}
+					sqlStr=sqlStr.delete(sqlStr.length()-INFIX_DOT.length(), sqlStr.length());
+					sqlStr.append(SUFIX_BRACKET);
+				}
+				sqlStr.append(SUFIX_BRACKET+OR_SQL);
+			}
+		}
+		sqlStr = sqlStr.delete(sqlStr.length()-OR_SQL.length(), sqlStr.length());
+		return sqlStr.toString();
+	}
+	
+	
+	private void setStatementParams(PreparedStatement ps) throws SQLException{
+		if(acceptedDataTables==null&&acceptedDataTables.isEmpty()){
+			return;
+		}
+		int signal = 0;
+		for(Map.Entry<String,AcceptedTables> database:acceptedDataTables.entrySet()){
+			if(StringUtils.isNotBlank(database.getKey().trim())){
+				ps.setString(++signal, database.getKey().trim());
+				if(database.getValue()!=null&&database.getValue().getTables().size()>0){
+					for(String table:database.getValue().getTables()){
+						ps.setString(++signal, table);
+					}
+				}
+			}
+		}
+	}
+	/*private String getSqlQuery(String baseSql,String remainSql,List<String> datas){
 		int signal=0;
 		if (datas != null && datas.size() > 0) {
 			for (String data : datas) {
@@ -190,9 +243,9 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 			return baseSql;
 		}
 		return baseSql + remainSql;
-	}
+	}*/
 	
-	private void setStatementParams(PreparedStatement ps,List<String> datas) throws SQLException{
+	/*private void setStatementParams(PreparedStatement ps,List<String> datas) throws SQLException{
 		int signal =0;
 		if (datas != null && datas.size() > 0) {
 			signal = 1;
@@ -203,7 +256,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 				}
 			}
 		}
-	}
+	}*/
 	/**
 	 * @param newTableMeta
 	 * @param rs
@@ -267,6 +320,15 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 	@Override
 	public TableMetaInfo getTableMetaInfo(String database, String table) {
 		return tableMetaInfoCache.get().get(database + "." + table);
+	}
+	
+	@Override
+	public void setAcceptedDataTables(Map<String,AcceptedTables> acceptedDataTables) {
+		this.acceptedDataTables = acceptedDataTables;
+	}
+
+	public Map<String,AcceptedTables> getAcceptedDataTables() {
+		return acceptedDataTables;
 	}
 
 }

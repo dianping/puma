@@ -281,13 +281,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 			try {
 				PumaTask pumaTask = pumaTaskService.find(taskName);
 				defaultEventStorage.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
-				List<String> databases=new ArrayList<String>();
-				for(Map.Entry<String,AcceptedTables> entry :pumaTask.getAcceptedDataInfos().entrySet()){
-					if(StringUtils.isNotBlank(entry.getKey())){
-						databases.add(entry.getKey().toLowerCase().trim());
-					}
-				}
-				tableMetasInfoFetcher.setDatabases(databases);
+				tableMetasInfoFetcher.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
 			} catch (Exception e) {
 				LOG.error("Puma task `{}` prolong event error: {}.", taskName, e.getMessage());
 			}

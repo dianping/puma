@@ -130,13 +130,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			DefaultDataHandler dataHandler = new DefaultDataHandler();
 			dataHandler.setNotifyService(notifyService);
 			DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
-			List<String> databases=new ArrayList<String>();
-			for(Map.Entry<String,AcceptedTables> entry :pumaTask.getAcceptedDataInfos().entrySet()){
-				if(StringUtils.isNotBlank(entry.getKey())){
-					databases.add(entry.getKey().toLowerCase().trim());
-				}
-			}
-			tableMetaInfo.setDatabases(databases);
+			tableMetaInfo.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
 			tableMetaInfo.setMetaDBHost(srcDBInstance.getMetaHost());
 			tableMetaInfo.setMetaDBPort(srcDBInstance.getMetaPort());
 			tableMetaInfo.setMetaDBUsername(srcDBInstance.getUsername());

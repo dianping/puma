@@ -190,8 +190,8 @@ public class DdlSqlParser {
 			String subSql = StringUtils.substring(strSql, tblPosition, strSql.length());
 			if (StringUtils.startsWithIgnoreCase(subSql, "if exists ")) {
 				subSql = StringUtils.substringAfter(subSql, "if exists ");
-			} else if (StringUtils.startsWithIgnoreCase(subSql, "if no exists ")) {
-				subSql = StringUtils.substringAfter(subSql, "if no exists ");
+			} else if (StringUtils.startsWithIgnoreCase(subSql, "if not exists ")) {
+				subSql = StringUtils.substringAfter(subSql, "if not exists ");
 			}
 			String strTbl = StringUtils.substringBefore(subSql, INFIX_SINGLE_BLANK);
 			if (!StringUtils.isBlank(strTbl)) {

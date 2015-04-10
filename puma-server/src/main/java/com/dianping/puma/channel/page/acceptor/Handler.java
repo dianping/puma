@@ -5,19 +5,18 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
-import com.dianping.cat.message.Event;
 import com.dianping.puma.ComponentContainer;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.container.client.ClientStateContainer;
 import com.dianping.puma.core.model.state.client.ClientState;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageManager;
@@ -36,8 +35,9 @@ import com.dianping.puma.storage.exception.StorageException;
 import com.dianping.puma.utils.NetUtils;
 
 public class Handler implements PageHandler<Context> {
-	private static final Logger log = Logger.getLogger(Handler.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Handler.class);
 
+	/*
 	protected void endCatTransaction() {
 		try {
 			// complete current transaction immediately (for abnormal case only)
@@ -51,9 +51,9 @@ public class Handler implements PageHandler<Context> {
 			t2.setStatus(Message.SUCCESS);
 			t2.complete();
 		} catch (Exception e) {
-			log.error("Cat failed.");
+			LOG.error("Cat failed.");
 		}
-	}
+	}*/
 
 	@Override
 	@PayloadMeta(Payload.class)
@@ -65,9 +65,44 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "acceptor")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
-		long start = System.currentTimeMillis();
 		Payload payload = ctx.getPayload();
+
 		HttpServletResponse res = ctx.getHttpServletResponse();
+		String clientName = payload.getClientName();
+		String serverName = payload.getTarget();
+		boolean dml = payload.isDml();
+		boolean ddl = payload.isDdl();
+		boolean transaction = payload.isNeedsTransactionMeta();
+		String[] databaseTables = payload.getDatabaseTables();
+		String clientIPAddr = NetUtils.getIpAddr(ctx.getHttpServletRequest());
+		BinlogInfo binlogInfo = new BinlogInfo(payload.getBinlog(), payload.getBinlogPos());
+
+		// Client connecting.
+		Cat.logEvent("Client.Connecting", clientName + "(" + clientIPAddr + ")");
+		LOG.info("Client connecting: {}({}).", new Object[] { clientName, clientIPAddr });
+		LOG.info("Client connecting info: server={}, binlogInfo={}.", new Object[] { serverName, binlogInfo });
+
+		// Construct codec
+		EventCodec codec;
+		try {
+			codec = EventCodecFactory.createCodec(payload.getCodecType());
+		} catch (IllegalArgumentException e) {
+			LOG.error("Client construct event codec error: {}.", e.getStackTrace());
+			throw e;
+		}
+
+		// Construct server filter chain.
+		EventFilterChain filterChain;
+		try {
+			filterChain = EventFilterChainFactory.createEventFilterChain(payload.isDdl(), payload.isDml(),
+					payload.isNeedsTransactionMeta(), payload.getDatabaseTables());
+		} catch (IllegalArgumentException e) {
+			LOG.error("Client construct event filter chain error: {}.", e.getStackTrace());
+			throw e;
+		}
+
+		// Get storage and channel.
+		EventStorage storage = DefaultTaskExecutorContainer.instance.getTaskStorage(payload.getTarget());
 
 		ClientState clientState = new ClientState(payload.getClientName(), payload.getTarget(),
 				NetUtils.getIpAddr(ctx.getHttpServletRequest()));
@@ -84,16 +119,6 @@ public class Handler implements PageHandler<Context> {
 		SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(), payload.getBinlog(), payload
 				.getBinlogPos());
 
-		Cat.logEvent("ClientConnect.connecting", payload.getClientName(), Event.SUCCESS, "");
-
-		log.info("Client(" + payload.getClientName() + ") connected.");
-		log.info("Client(" + payload.getClientName() + ") target : " + payload.getTarget() + "  binlog : "
-				+ payload.getBinlog() + "  binlogPos : " + payload.getBinlogPos() + " .");
-
-		EventCodec codec = EventCodecFactory.createCodec(payload.getCodecType());
-		EventFilterChain filterChain = EventFilterChainFactory.createEventFilterChain(payload.isDdl(), payload.isDml(),
-				payload.isNeedsTransactionMeta(), payload.getDatabaseTables());
-
 		res.setContentType("application/octet-stream");
 		res.addHeader("Connection", "Keep-Alive");
 
@@ -102,27 +127,25 @@ public class Handler implements PageHandler<Context> {
 		String binlogFile = payload.getBinlog();
 		long binlogPos = payload.getBinlogPos();
 		long timeStamp = payload.getTimestamp();
-		// EventStorage storage = ComponentContainer.SPRING.lookup("storage-" +
-		// payload.getTarget(), EventStorage.class);
-		EventStorage storage = DefaultTaskExecutorContainer.instance.getTaskStorage(payload.getTarget());
-		log.info("Client(" + payload.getClientName() + ") get storage-" + payload.getTarget() + ".");
+		LOG.info("Client(" + payload.getClientName() + ") get storage-" + payload.getTarget() + ".");
 		if (storage == null) {
 			clientStateContainer.remove(payload.getClientName());
 			SystemStatusContainer.instance.removeClient(payload.getClientName());
-			log.error("Client(" + payload.getClientName() + ") cannot get storage-" + payload.getTarget() + ".");
+			LOG.error("Client(" + payload.getClientName() + ") cannot get storage-" + payload.getTarget() + ".");
 			throw new IOException();
 		}
+
 		EventChannel channel;
 		try {
 			channel = new BufferedEventChannel(storage.getChannel(seq, serverId, binlogFile, binlogPos, timeStamp),
 					5000);
 		} catch (StorageException e1) {
-			log.error("error occured " + e1.getMessage() + ", from " + NetUtils.getIpAddr(ctx.getHttpServletRequest()),
+			LOG.error("error occured " + e1.getMessage() + ", from " + NetUtils.getIpAddr(ctx.getHttpServletRequest()),
 					e1);
 			throw new IOException(e1);
 		}
 
-		endCatTransaction();
+		//endCatTransaction();
 
 		while (true) {
 			try {
@@ -139,7 +162,8 @@ public class Handler implements PageHandler<Context> {
 						res.getOutputStream().flush();
 
 						clientStateContainer.setSeq(payload.getClientName(), event.getSeq());
-						clientStateContainer.setBinlog(payload.getClientName(), new BinlogInfo(event.getBinlog(), event.getBinlogPos()));
+						clientStateContainer
+								.setBinlog(payload.getClientName(), new BinlogInfo(event.getBinlog(), event.getBinlogPos()));
 
 						// status report
 						SystemStatusContainer.instance.updateClientSeq(payload.getClientName(), event.getSeq());
@@ -155,7 +179,7 @@ public class Handler implements PageHandler<Context> {
 				Cat.getProducer().logError("puma.server.client.ChannelClosed.exception:", e);
 				clientStateContainer.remove(payload.getClientName());
 				SystemStatusContainer.instance.removeClient(payload.getClientName());
-				log.info("Client(" + payload.getClientName() + ") failed. ", e);
+				LOG.info("Client(" + payload.getClientName() + ") failed. ", e);
 				break;
 			}
 		}
@@ -163,8 +187,8 @@ public class Handler implements PageHandler<Context> {
 		channel.close();
 		clientStateContainer.remove(payload.getClientName());
 		SystemStatusContainer.instance.removeClient(payload.getClientName());
-		long end = System.currentTimeMillis();
-		String ipAddress = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
-		Cat.getProducer().logEvent("ChannelClosed", ipAddress, Message.SUCCESS, "duration=" + (end - start));
+		//long end = System.currentTimeMillis();
+		//String ipAddress = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
+		//Cat.getProducer().logEvent("ChannelClosed", ipAddress, Message.SUCCESS, "duration=" + (end - start));
 	}
 }

@@ -29,24 +29,28 @@ public final class EventFilterChainFactory {
 	}
 
 	public static EventFilterChain createEventFilterChain(boolean needDdl, boolean needDml, boolean needTsInfo,
-			String[] dts) {
-		List<EventFilter> eventFilterList = new ArrayList<EventFilter>();
-		// tsInfoFilter should be first
-		TransactionInfoEventFilter tsInfoFilter = new TransactionInfoEventFilter();
-		tsInfoFilter.init(needTsInfo);
-		eventFilterList.add(tsInfoFilter);
+			String[] dts) throws IllegalArgumentException {
+		try {
+			List<EventFilter> eventFilterList = new ArrayList<EventFilter>();
+			// tsInfoFilter should be first
+			TransactionInfoEventFilter tsInfoFilter = new TransactionInfoEventFilter();
+			tsInfoFilter.init(needTsInfo);
+			eventFilterList.add(tsInfoFilter);
 
-		DbTbEventFilter dbtbFilter = new DbTbEventFilter();
-		dbtbFilter.init(dts);
-		eventFilterList.add(dbtbFilter);
+			DbTbEventFilter dbtbFilter = new DbTbEventFilter();
+			dbtbFilter.init(dts);
+			eventFilterList.add(dbtbFilter);
 
-		DmlDdlEventFilter dmlDdlFilter = new DmlDdlEventFilter();
-		dmlDdlFilter.init(needDdl, needDml);
-		eventFilterList.add(dmlDdlFilter);
+			DmlDdlEventFilter dmlDdlFilter = new DmlDdlEventFilter();
+			dmlDdlFilter.init(needDdl, needDml);
+			eventFilterList.add(dmlDdlFilter);
 
-		EventFilterChain chain = new DefaultEventFilterChain();
-		chain.setEventFilters(eventFilterList);
+			EventFilterChain chain = new DefaultEventFilterChain();
+			chain.setEventFilters(eventFilterList);
 
-		return chain;
+			return chain;
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 }

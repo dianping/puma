@@ -26,10 +26,11 @@ public final class EventCodecFactory {
 
 	}
 
-	public static EventCodec createCodec(String type) {
+	public static EventCodec createCodec(String type) throws IllegalArgumentException {
 		if ("json".equals(type)) {
 			return new JsonEventCodec();
 		}
-		return null;
+
+		throw new IllegalArgumentException("Unsupported event codec type.");
 	}
 }

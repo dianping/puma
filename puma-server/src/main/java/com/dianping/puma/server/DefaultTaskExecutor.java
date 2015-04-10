@@ -20,6 +20,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.model.BinlogInfo;
@@ -273,14 +275,25 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	 * @throws IOException
 	 */
 	private void connect() throws IOException {
-		closeTransport();
-		this.pumaSocket = new Socket();
-		this.pumaSocket.setTcpNoDelay(false);
-		this.pumaSocket.setKeepAlive(true);
-		this.pumaSocket.connect(new InetSocketAddress(dbHost, port));
-		is = new BufferedInputStream(pumaSocket.getInputStream());
-		os = new BufferedOutputStream(pumaSocket.getOutputStream());
-		PacketFactory.parsePacket(is, PacketType.CONNECT_PACKET, getContext());
+		String eventStatus = "1";
+
+		try {
+			closeTransport();
+			this.pumaSocket = new Socket();
+			this.pumaSocket.setTcpNoDelay(false);
+			this.pumaSocket.setKeepAlive(true);
+			this.pumaSocket.connect(new InetSocketAddress(dbHost, port));
+			is = new BufferedInputStream(pumaSocket.getInputStream());
+			os = new BufferedOutputStream(pumaSocket.getOutputStream());
+			PacketFactory.parsePacket(is, PacketType.CONNECT_PACKET, getContext());
+
+			eventStatus = Event.SUCCESS;
+		} catch (Exception e) {
+			eventStatus = "1";
+		} finally {
+			String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
+			Cat.logEvent("Slave.dbConnect", eventName, eventStatus, "");
+		}
 	}
 
 	/**
@@ -344,12 +357,23 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		OKErrorPacket okErrorPacket = (OKErrorPacket) PacketFactory.parsePacket(is, PacketType.OKERROR_PACKET,
 				getContext());
 
+		boolean isAuth;
+
+		String eventStatus;
+		String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
+
 		if (okErrorPacket.isOk()) {
-			return true;
+			isAuth = true;
+			eventStatus = Event.SUCCESS;
 		} else {
+			isAuth = false;
+			eventStatus = "1";
 			LOG.error("Login failed. Reason: " + okErrorPacket.getMessage());
-			return false;
 		}
+
+		Cat.logEvent("Slave.dbAuth", eventName, eventStatus, "");
+
+		return isAuth;
 	}
 
 	protected void doStop() throws Exception {
@@ -357,32 +381,54 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	}
 
 	private void closeTransport() {
+		String eventStatus = "1";
+		String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
+
+		// Close in.
 		try {
 			if (this.is != null) {
 				this.is.close();
 			}
+			eventStatus = Event.SUCCESS;
 		} catch (IOException ioEx) {
-			LOG.warn("Server " + this.getTaskName() + " failed to close the inputstream.");
+			eventStatus = "1";
+			LOG.warn("Server " + this.getTaskName() + " failed to close the input stream.");
 		} finally {
 			this.is = null;
+			if (!eventStatus.equals(Event.SUCCESS)) {
+				Cat.logEvent("Slave.dbClose", eventName, eventStatus, "");
+			}
 		}
+
+		// Close os.
 		try {
 			if (this.os != null) {
 				this.os.close();
 			}
+			eventStatus = Event.SUCCESS;
 		} catch (IOException ioEx) {
-			LOG.warn("Server " + this.getTaskName() + " failed to close the outputstream");
+			eventStatus = "1";
+			LOG.warn("Server " + this.getTaskName() + " failed to close the output stream");
 		} finally {
 			this.os = null;
+			if (!eventStatus.equals(Event.SUCCESS)) {
+				Cat.logEvent("Slave.dbClose", eventName, eventStatus, "");
+			}
 		}
+
+		// Close socket.
 		try {
 			if (this.pumaSocket != null) {
 				this.pumaSocket.close();
+
+				eventStatus = Event.SUCCESS;
 			}
 		} catch (IOException ioEx) {
+			eventStatus = "1";
 			LOG.warn("Server " + this.getTaskName() + " failed to close the socket", ioEx);
 		} finally {
 			this.pumaSocket = null;
+			Cat.logEvent("Slave.dbClose", eventName, eventStatus, "");
 		}
 	}
 

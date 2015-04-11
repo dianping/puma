@@ -42,7 +42,7 @@
 		parent="notifiableBean" init-method="start" />
 		
 	<bean id="binlogInfoHolder"
-		  class="com.dianping.puma.core.holder.impl.DefaultBinlogInfoHolder"
+		  class="com.dianping.puma.core.storage.holder.impl.DefaultBinlogInfoHolder"
 		  init-method="init">
 		<property name="baseDir" value="/data/appdatas/puma/binlog/"/>
 		<property name="bakDir" value="/data/appdatas/puma/binlog/bak/"/>

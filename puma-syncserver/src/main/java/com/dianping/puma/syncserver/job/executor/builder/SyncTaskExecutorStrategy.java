@@ -3,7 +3,7 @@ package com.dianping.puma.syncserver.job.executor.builder;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.entity.*;
-import com.dianping.puma.core.holder.BinlogInfoHolder;
+import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.state.SyncTaskState;
 import com.dianping.puma.core.monitor.NotifyService;

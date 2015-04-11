@@ -1,4 +1,4 @@
-package com.dianping.puma.core.holder.impl;
+package com.dianping.puma.core.storage.holder.impl;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,19 +9,12 @@ import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.dianping.puma.core.exception.BackupException;
-import com.dianping.puma.core.holder.BinlogInfoHolder;
+import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.storage.backup.Backup;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 

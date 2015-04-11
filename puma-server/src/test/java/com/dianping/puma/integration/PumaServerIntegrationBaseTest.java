@@ -46,7 +46,7 @@ import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
-import com.dianping.puma.core.holder.impl.DefaultBinlogInfoHolder;
+import com.dianping.puma.core.storage.holder.impl.DefaultBinlogInfoHolder;
 import com.dianping.puma.server.DefaultTaskExecutor;
 import com.dianping.puma.storage.ArchiveStrategy;
 import com.dianping.puma.storage.BucketIndex;

@@ -4,7 +4,7 @@ import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.entity.BaseSyncTask;
-import com.dianping.puma.core.holder.BinlogInfoHolder;
+import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.service.DumpTaskService;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;

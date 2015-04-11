@@ -7,11 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import com.dianping.cat.message.Transaction;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.AbstractBaseSyncTask;
 import com.dianping.puma.core.entity.DstDBInstance;
-import com.dianping.puma.core.holder.BinlogInfoHolder;
+import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.state.BaseSyncTaskState;
 import com.dianping.puma.core.monitor.NotifyService;
@@ -19,7 +18,6 @@ import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

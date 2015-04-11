@@ -2,7 +2,7 @@ package com.dianping.puma.syncserver.job.checker;
 
 import com.dianping.puma.core.entity.ShardSyncTask;
 import com.dianping.puma.core.entity.SyncTask;
-import com.dianping.puma.core.holder.BinlogInfoHolder;
+import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.monitor.EventListener;
 import com.dianping.puma.core.monitor.NotifyService;

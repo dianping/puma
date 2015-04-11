@@ -4,9 +4,8 @@ import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
-import com.dianping.puma.core.holder.BinlogInfoHolder;
+import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.AcceptedTables;
 import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.core.model.state.PumaTaskState;
 import com.dianping.puma.core.monitor.NotifyService;
@@ -26,18 +25,15 @@ import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.LocalFileBucketIndex;
 
-import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service("taskExecutorBuilder")
 public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {

@@ -234,10 +234,14 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 			ddlEvent.setDatabase(StringUtils.isNotBlank(ddlResult.getDatabase()) ? ddlResult.getDatabase()
 					: StringUtils.EMPTY);
 			ddlEvent.setTable(StringUtils.isNotBlank(ddlResult.getTable()) ? ddlResult.getTable() : StringUtils.EMPTY);
-			log.info("DDL event, sql=" + sql + "  ,database =" + ddlResult.getDatabase() + " table ="
+			if(log.isDebugEnabled()){
+			log.debug("DDL event, sql=" + sql + "  ,database =" + ddlResult.getDatabase() + " table ="
 					+ ddlResult.getTable() + " queryEvent.getDatabaseName()" + queryEvent.getDatabaseName());
+			}
 		}else{
-			log.info("DDL event unable to get ddlResult , sql=" + sql );
+			if(log.isDebugEnabled()){
+				log.debug("DDL event unable to get ddlResult , sql=" + sql );
+			}
 		}
 		if (StringUtils.isBlank(ddlEvent.getDatabase())) {
 			ddlEvent.setDatabase(queryEvent.getDatabaseName());

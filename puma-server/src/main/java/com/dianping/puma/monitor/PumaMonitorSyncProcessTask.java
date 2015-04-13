@@ -35,38 +35,36 @@ public class PumaMonitorSyncProcessTask implements PumaMonitorTask {
 		int dfileNum = 0;
 		ClientStatus tempClientStatus = null;
 		String tempKey = null;
-		try {
-			for (Map.Entry<String, ClientStatus> clientStatus : clientStatuses.entrySet()) {
-				Log.info("puma Monitor SyncProcess : client is " + clientStatus.getKey());
-				tempClientStatus = clientStatus.getValue();
-				tempKey = clientStatus.getKey();
-				ServerStatus serverStatus = serverStatuses.get(clientStatus.getValue().getTarget());
-				if (clientStatus.getValue().getBinlogFile() == null || serverStatus.getBinlogFile() == null) {
-					continue;
-				}
-				dfileNum = getDiffNum(serverStatus.getBinlogFile(), serverStatus.getBinlogPos(), clientStatus
-						.getValue().getBinlogFile(), clientStatus.getValue().getBinlogPos());
-				Cat.getProducer().logEvent(
-						"Puma.server." + clientStatus.getKey() + ".process",
-						getEventName(dfileNum),
-						Message.SUCCESS,
-						"srcbinlog = " + serverStatus.getBinlogFile() + ","
-								+ Long.toString(serverStatus.getBinlogPos()) + "&desbinlog = "
-								+ clientStatus.getValue().getBinlogFile() + ","
-								+ Long.toString(clientStatus.getValue().getBinlogPos()));
+		for (Map.Entry<String, ClientStatus> clientStatus : clientStatuses.entrySet()) {
+			Log.info("puma Monitor SyncProcess : client is " + clientStatus.getKey());
+			tempClientStatus = clientStatus.getValue();
+			tempKey = clientStatus.getKey();
+			ServerStatus serverStatus = serverStatuses.get(clientStatus.getValue().getTarget());
+			if (clientStatus.getValue().getBinlogFile() == null || serverStatus.getBinlogFile() == null) {
+				continue;
+			}
+			dfileNum = getDiffNum(serverStatus.getBinlogFile(), serverStatus.getBinlogPos(), clientStatus.getValue()
+					.getBinlogFile(), clientStatus.getValue().getBinlogPos());
+			Cat.getProducer().logEvent(
+					"Puma.server." + clientStatus.getKey() + ".process",
+					getEventName(dfileNum),
+					Message.SUCCESS,
+					"srcbinlog = " + serverStatus.getBinlogFile() + "," + Long.toString(serverStatus.getBinlogPos())
+							+ "&desbinlog = " + clientStatus.getValue().getBinlogFile() + ","
+							+ Long.toString(clientStatus.getValue().getBinlogPos()));
+			try {
 				if (dfileNum >= taskLionConfig.getSyncProcessDfileNum()) {
 					throw new MonitorThresholdException();
 				}
+			} catch (MonitorThresholdException e) {
+				notifyService.alarm(" diff num of file between sync and server binlog process :  name = " + tempKey
+						+ " ip = " + tempClientStatus.getIp() + " target:" + tempClientStatus.getTarget() + " diff = "
+						+ Integer.toString(dfileNum), e, true);
+				Cat.getProducer().logError(
+						" diff num of file between sync and server binlog process :  name = " + tempKey + " ip = "
+								+ tempClientStatus.getIp() + " target:" + tempClientStatus.getTarget() + " diff = "
+								+ Integer.toString(dfileNum), e);
 			}
-
-		} catch (MonitorThresholdException e) {
-			notifyService.alarm(" diff num of file between sync and server binlog process :  name = " + tempKey
-					+ " ip = " + tempClientStatus.getIp() + " target:" + tempClientStatus.getTarget() + " diff = "
-					+ Integer.toString(dfileNum), e, true);
-			Cat.getProducer().logError(
-					" diff num of file between sync and server binlog process :  name = " + tempKey + " ip = "
-							+ tempClientStatus.getIp() + " target:" + tempClientStatus.getTarget() + " diff = "
-							+ Integer.toString(dfileNum), e);
 		}
 	}
 

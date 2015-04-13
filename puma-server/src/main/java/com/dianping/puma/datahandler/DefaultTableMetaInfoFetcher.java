@@ -162,6 +162,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 			log.info("table meta refresh SQL: " + sql);
 			ps = (PreparedStatement) conn.prepareStatement(sql);
 			setStatementParams(ps);
+			
 			rs = ps.executeQuery();
 			if (rs != null) {
 				fillTableMetaCache(rs);
@@ -266,6 +267,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 				newTmi.setTypes(new HashMap<String, String>());
 				newTmi.setSignedInfos(new HashMap<Integer, Boolean>());
 				newTableMeta.put(db + "." + tb, newTmi);
+				log.info("table meta info :"+db + "." + tb);
 				tmi = newTmi;
 			}
 			tmi.getColumns().put(colPosition, columnName);

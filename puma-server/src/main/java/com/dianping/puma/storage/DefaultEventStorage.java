@@ -373,7 +373,7 @@ public class DefaultEventStorage implements EventStorage {
 				}
 				return false;
 			}
-			return false;
+			return true;
 		} else{
 			return true;
 		}

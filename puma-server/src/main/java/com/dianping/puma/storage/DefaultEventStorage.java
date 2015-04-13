@@ -361,19 +361,20 @@ public class DefaultEventStorage implements EventStorage {
 			return true;
 		}
 		if (event instanceof RowChangedEvent||event instanceof DdlEvent) {
-			if(StringUtils.isNotBlank(event.getDatabase().toLowerCase())){
-				if(acceptedDataTables.containsKey(event.getDatabase().toLowerCase())){
+			if(StringUtils.isNotBlank(event.getDatabase())){
+				if(acceptedDataTables.containsKey(event.getDatabase())){
 					if (StringUtils.isNotBlank(event.getTable())) {
 						if (log.isDebugEnabled()) {
 							log.debug("table:" + event.getTable().toLowerCase());
 						}
-						return acceptedDataTables.get(event.getDatabase().toLowerCase()).getTables().contains((event.getTable().toLowerCase()));
+						return acceptedDataTables.get(event.getDatabase()).isContains((event.getTable()));
 					}
 					return true;
 				}
 				return false;
 			}
-			return true;
+			log.info("Changed EVENT database == blank.");
+			return false;
 		} else{
 			return true;
 		}

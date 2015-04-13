@@ -30,7 +30,9 @@ import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.monitor.Notifiable;
 import com.dianping.puma.core.monitor.NotifyService;
-import com.dianping.puma.core.util.DdlSqlParser;
+import com.dianping.puma.core.util.SimpleDdlParser;
+import com.dianping.puma.core.util.SimpleDdlParser.DdlResult;
+import com.dianping.puma.core.util.constant.DdlEventSubType;
 import com.dianping.puma.core.util.constant.DdlEventType;
 import com.dianping.puma.parser.mysql.BinlogConstanst;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
@@ -86,7 +88,7 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 	 */
 	@Override
 	public void start() throws Exception {
-		tableMetasInfoFetcher.refreshTableMeta(null,null,true);
+		tableMetasInfoFetcher.refreshTableMeta(null, null, true);
 	}
 
 	/*
@@ -183,7 +185,7 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 
 	protected void handleQueryEvent(BinlogEvent binlogEvent, DataHandlerResult result) {
 		QueryEvent queryEvent = (QueryEvent) binlogEvent;
-		String sql = StringUtils.trim(queryEvent.getSql());
+		String sql = StringUtils.normalizeSpace(queryEvent.getSql());
 		if (StringUtils.startsWithIgnoreCase(sql, "ALTER ") || StringUtils.startsWithIgnoreCase(sql, "CREATE ")
 				|| StringUtils.startsWithIgnoreCase(sql, "DROP ") || StringUtils.startsWithIgnoreCase(sql, "RENAME ")
 				|| StringUtils.startsWithIgnoreCase(sql, "TRUNCATE ")) {
@@ -220,26 +222,38 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 		ChangedEvent dataChangedEvent = new DdlEvent();
 		DdlEvent ddlEvent = (DdlEvent) dataChangedEvent;
 		ddlEvent.setSql(sql);
-		ddlEvent.setEventType(DdlSqlParser.getEventType(sql));
-		ddlEvent.setEventSubType(DdlSqlParser.getEventSubType(ddlEvent.getEventType(), sql));
-		List<String> sqlNames = DdlSqlParser.getSqlNames(ddlEvent.getEventType(), ddlEvent.getEventSubType(), sql);
-		if (sqlNames != null && sqlNames.size() > 0) {
-			ddlEvent.setDatabase(!StringUtils.isBlank(sqlNames.get(0)) ? sqlNames.get(0) : "");
-			ddlEvent.setTable(!StringUtils.isBlank(sqlNames.get(1)) ? sqlNames.get(1) : "");
-			log.info("DDL event, sql=" + sql + "  ,database =" + sqlNames.get(0) + "  queryEvent.getDatabaseName()"
-					+ queryEvent.getDatabaseName());
+		ddlEvent.setEventType(SimpleDdlParser.getEventType(sql));
+
+		ddlEvent.setEventSubType(SimpleDdlParser.getEventSubType(ddlEvent.getEventType(), sql));
+		if (ddlEvent.getEventType() == DdlEventType.DDL_DEFAULT
+				|| ddlEvent.getEventSubType() == DdlEventSubType.DDL_SUB_DEFAULT) {
+			log.info("DdlEvent Type do not found. ddl sql=" + sql);
+		}
+		DdlResult ddlResult = SimpleDdlParser.getDdlResult(ddlEvent.getEventType(), ddlEvent.getEventSubType(), sql);
+		if (ddlResult != null) {
+			ddlEvent.setDatabase(StringUtils.isNotBlank(ddlResult.getDatabase()) ? ddlResult.getDatabase()
+					: StringUtils.EMPTY);
+			ddlEvent.setTable(StringUtils.isNotBlank(ddlResult.getTable()) ? ddlResult.getTable() : StringUtils.EMPTY);
+			log.info("DDL event, sql=" + sql + "  ,database =" + ddlResult.getDatabase() + " table ="
+					+ ddlResult.getTable() + " queryEvent.getDatabaseName()" + queryEvent.getDatabaseName());
+		}else{
+			log.info("DDL event unable to get ddlResult , sql=" + sql );
 		}
 		if (StringUtils.isBlank(ddlEvent.getDatabase())) {
 			ddlEvent.setDatabase(queryEvent.getDatabaseName());
 		}
-		//过滤系统的ddl引起的refresh慢查询
-		/*if (!(StringUtils.isNotBlank(ddlEvent.getDatabase())
-				&& TableMetaRefreshFilter.instance.getFiltedDatabases().contains(ddlEvent.getDatabase().toLowerCase()))) {
-			tableMetasInfoFetcher.refreshTableMeta(ddlEvent.getDatabase().toLowerCase(),false);
-			log.info("table meta refresh.    DDL event sql:"+sql+".");
-		}*/
-		tableMetasInfoFetcher.refreshTableMeta(ddlEvent.getDatabase(),ddlEvent.getTable(),false);
-		
+		// 过滤系统的ddl引起的refresh慢查询
+		/*
+		 * if (!(StringUtils.isNotBlank(ddlEvent.getDatabase()) &&
+		 * TableMetaRefreshFilter
+		 * .instance.getFiltedDatabases().contains(ddlEvent
+		 * .getDatabase().toLowerCase()))) {
+		 * tableMetasInfoFetcher.refreshTableMeta
+		 * (ddlEvent.getDatabase().toLowerCase(),false);
+		 * log.info("table meta refresh.    DDL event sql:"+sql+"."); }
+		 */
+		tableMetasInfoFetcher.refreshTableMeta(ddlEvent.getDatabase(), ddlEvent.getTable(), false);
+
 		ddlEvent.setExecuteTime(queryEvent.getHeader().getTimestamp());
 		result.setData(dataChangedEvent);
 		result.setEmpty(false);
@@ -249,22 +263,5 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 	protected abstract void doProcess(DataHandlerResult result, BinlogEvent binlogEvent, PumaContext context,
 			byte eventType);
 
-	/*
-	 * private String getDateBase(String strSql) { String sql =
-	 * StringUtils.normalizeSpace(strSql.toLowerCase()); String database = null;
-	 * int positionStart = StringUtils.indexOf(sql, "table "); if (positionStart
-	 * > -1) { int positionEnd = StringUtils.indexOf(sql, " ", positionStart +
-	 * 6); database = getDatabaseName(sql, positionStart + 6, positionEnd); }
-	 * return database; }
-	 */
-
-	/*
-	 * private String getDatabaseName(String sql, int positionStart, int
-	 * positionEnd) { sql = StringUtils.substring(sql, positionStart,
-	 * positionEnd); int positionCenter = StringUtils.indexOf(sql, ".", 0);
-	 * String database = null; if (positionCenter > -1) { String temp =
-	 * StringUtils.substring(sql, 0, positionCenter); database =
-	 * StringUtils.remove(temp, "`"); } return database; }
-	 */
 
 }

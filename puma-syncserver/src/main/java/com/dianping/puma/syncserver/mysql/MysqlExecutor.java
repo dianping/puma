@@ -26,6 +26,8 @@ import com.dianping.puma.core.sync.model.mapping.ColumnMapping;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
+import com.dianping.puma.core.util.SimpleDdlParser;
+import com.dianping.puma.core.util.SimpleDdlParser.DdlResult;
 import com.dianping.puma.syncserver.job.executor.exception.DdlRenameException;
 import com.dianping.puma.syncserver.util.SyncConfigPatternParser;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
@@ -443,42 +445,15 @@ public class MysqlExecutor {
 	}
 
 	public String convertDdlEventSql_(DdlEvent event) throws DdlRenameException {
-		String sql = StringUtils.normalizeSpace(event.getSql().toLowerCase());
-		Log.info("ddl sql: " + sql);
-		String database = event.getDatabase();
-		int positionStart = StringUtils.indexOf(sql, "table ");
-		if (positionStart > -1) {
-			int positionEnd = StringUtils.indexOf(sql, " ", positionStart + 6);
-			String remainSql = StringUtils.substring(sql, positionEnd + 1, sql.length());
-			String temp = getDatabaseName(sql, positionStart + 6, positionEnd);
-			if (!StringUtils.isBlank(temp)) {
-				database = temp;
-			}
-			String tableName = getTableName(sql, positionStart + 6, positionEnd);
-			String mappingTableName = getMappingTable(database, tableName);
-			String mappingDatabase = getMappingDatabase(database);
-			if (StringUtils.startsWithIgnoreCase(sql, "alter ")) {
-				if (StringUtils.contains(sql, " rename ")) {
-					if (!StringUtils.isBlank(mappingDatabase) && !StringUtils.isBlank(mappingTableName)) {
-						// 停止任務
-						throw new DdlRenameException("Rename error : ddl sql = " + event.getSql());
-					}
-				} else {
-					if (!StringUtils.isBlank(mappingDatabase) && !StringUtils.isBlank(mappingTableName)) {
-						remainSql = StringUtils.replace(StringUtils.replace(remainSql, " `" + tableName.toLowerCase()
-								+ "`.", " `" + mappingTableName.toLowerCase() + "`."), " " + tableName.toLowerCase()
-								+ ".", " " + mappingTableName.toLowerCase() + ".");
-						return "ALTER TABLE `" + mappingDatabase + "`.`" + mappingTableName + "` " + remainSql;
-					}
-				}
-			} else if (StringUtils.startsWithIgnoreCase(sql, "RENAME ")) {
-				if (!StringUtils.isBlank(mappingDatabase) && !StringUtils.isBlank(mappingTableName)) {
-					// 停止任務
-					throw new DdlRenameException("Rename error : ddl sql = " + event.getSql());
-				}
-			}
+		String strSql = StringUtils.normalizeSpace(event.getSql());
+		DdlResult ddlResult = SimpleDdlParser.parseNames(strSql);
+		if (ddlResult == null) {
+			return null;
 		}
-		return null;
+		event.setDatabase(ddlResult.getDatabase());
+		event.setTable(ddlResult.getTable());
+		return DdlSqlParser.getRenameTableSql(event, getMappingDatabase(event.getDatabase()), getMappingTable(event
+				.getDatabase(), event.getTable()));
 	}
 
 	public String convertDdlEventSql(DdlEvent event) throws DdlRenameException {
@@ -497,14 +472,8 @@ public class MysqlExecutor {
 		case DDL_RENAME:
 			switch (event.getEventSubType()) {
 			case DDL_RENAME_TABLE:
-				if (!StringUtils.isBlank(event.getDatabase()) && !StringUtils.isBlank(event.getTable())) {
-					String tblMappingName = getMappingTable(event.getDatabase(), event.getTable());
-					String dbMappingName = getMappingDatabase(event.getDatabase());
-					if (!StringUtils.isBlank(dbMappingName) && !StringUtils.isBlank(tblMappingName)) {
-						throw new DdlRenameException("Rename error : ddl sql = " + event.getSql());
-					}
-				}
-				break;
+				return DdlSqlParser.getRenameTableSql(event, getMappingDatabase(event.getDatabase()), getMappingTable(
+						event.getDatabase(), event.getTable()));
 			case DDL_RENAME_USER:
 				// ignore
 				break;
@@ -538,33 +507,8 @@ public class MysqlExecutor {
 			// ignore
 			break;
 		case DDL_ALTER_TABLE:
-			String strSql = StringUtils.normalizeSpace(event.getSql().toLowerCase());
-			int tblPosition = StringUtils.indexOf(strSql, " table ") + 7;
-			if (tblPosition > 6) {
-				String subSql = StringUtils.substring(strSql, tblPosition, strSql.length());
-				if (StringUtils.startsWithIgnoreCase(subSql, "if exists ")) {
-					subSql = StringUtils.substringAfter(subSql, "if exists ");
-				} else if (StringUtils.startsWithIgnoreCase(subSql, "if no exists ")) {
-					subSql = StringUtils.substringAfter(subSql, "if no exists ");
-				}
-				String remainSql = StringUtils.substringAfter(subSql, " ");
-				if (StringUtils.isBlank(event.getDatabase()) || StringUtils.isBlank(event.getTable())) {
-					return null;
-				}
-				String tblMappingName = getMappingTable(event.getDatabase(), event.getTable());
-				String dbMappingName = getMappingDatabase(event.getDatabase());
-				if (!StringUtils.isBlank(dbMappingName) && !StringUtils.isBlank(tblMappingName)) {
-					if (StringUtils.contains(strSql, " rename ")) {
-						// 停止任務
-						throw new DdlRenameException("Rename error : ddl sql = " + event.getSql());
-					}
-					remainSql = StringUtils.replace(StringUtils.replace(remainSql, " `"
-							+ event.getTable().toLowerCase() + "`.", " `" + tblMappingName.toLowerCase() + "`."), " "
-							+ event.getTable().toLowerCase() + ".", " " + tblMappingName.toLowerCase() + ".");
-					return "ALTER TABLE `" + dbMappingName + "`.`" + tblMappingName + "` " + remainSql;
-				}
-			}
-			break;
+			return DdlSqlParser.getAlterTableSql(event, getMappingDatabase(event.getDatabase()), getMappingTable(event
+					.getDatabase(), event.getTable()));
 		case DDL_ALTER_TABLESPACE:
 			// ignore
 			break;
@@ -572,7 +516,8 @@ public class MysqlExecutor {
 		return null;
 	}
 
-	private String getDatabaseName(String sql, int positionStart, int positionEnd) {
+   /*	
+   private String getDatabaseName(String sql, int positionStart, int positionEnd) {
 		sql = StringUtils.substring(sql, positionStart, positionEnd);
 		int positionCenter = StringUtils.indexOf(sql, ".", 0);
 		String database = null;
@@ -597,7 +542,7 @@ public class MysqlExecutor {
 		}
 		return tableName;
 	}
-
+    */
 	private String getMappingTable(String database, String tableName) {
 		List<DatabaseMapping> databases = mysqlMapping.getDatabases();
 		DatabaseMapping databaseMapping = findDatabaseMapping(databases, database);

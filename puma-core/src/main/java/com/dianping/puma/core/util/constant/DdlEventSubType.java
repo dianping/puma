@@ -2,6 +2,8 @@ package com.dianping.puma.core.util.constant;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.dianping.puma.core.util.PatternUtils;
+
 public enum DdlEventSubType {
 	/* alter event */
 	DDL_ALTER_DATABASE, DDL_ALTER_EVENT, DDL_ALTER_FUNCTION, DDL_ALTER_PROCEDURE, DDL_ALTER_SERVER, DDL_ALTER_TABLE, DDL_ALTER_TABLESPACE,
@@ -17,6 +19,7 @@ public enum DdlEventSubType {
 	DDL_SUB_DEFAULT;
 
 	private static final String STR_SUB_DATABASE = "DATABASE";
+	private static final String STR_SUB_SCHEMA = "SCHEMA";
 	private static final String STR_SUB_EVENT = "EVENT";
 	private static final String STR_SUB_FUNCTION = "FUNCTION";
 	private static final String STR_SUB_PROCEDURE = "PROCEDURE";
@@ -27,121 +30,135 @@ public enum DdlEventSubType {
 	private static final String STR_SUB_TRIGGER = "TRIGGER";
 	private static final String STR_SUB_USER = "USER";
 	private static final String STR_SUB_VIEW = "VIEW";
+	
+	private static final String STR_UNIQUE_INDEX ="UNIQUE INDEX";
+	private static final String STR_FULLTEXT_INDEX ="FULLTEXT INDEX";
+	private static final String STR_SPATIAL_INDEX ="SPATIAL INDEX";
+	
 
-	public static DdlEventSubType getEventSubType(DdlEventType eventType, String strPrefix) {
-		if(StringUtils.isBlank(strPrefix)||eventType==DdlEventType.DDL_DEFAULT){
+	private static final String CREATE_VIEW_PATTERN = "^\\s*.*\\s*VIEW\\s*.*$";
+	
+	
+	public static DdlEventSubType getEventSubType(DdlEventType eventType,
+			String strPrefix) {
+		if (StringUtils.isBlank(strPrefix)
+				|| eventType == DdlEventType.DDL_DEFAULT) {
 			return DdlEventSubType.DDL_SUB_DEFAULT;
 		}
 		DdlEventSubType eventSubType = DdlEventSubType.DDL_SUB_DEFAULT;
 		switch (eventType) {
-			case DDL_ALTER:
-				eventSubType = getAlterEventType(strPrefix);
-				break;
-			case DDL_CREATE:
-				eventSubType = getCreateEventType(strPrefix);
-				break;
-			case DDL_DROP:
-				eventSubType = getDropEventType(strPrefix);
-				break;
-			case DDL_RENAME:
-				eventSubType = getRenameEventType(strPrefix);
-				break;
-			case DDL_TRUNCATE:
-				eventSubType = getTruncateEventType(strPrefix);
-				break;
-			case DDL_DEFAULT:
-				eventSubType =  DdlEventSubType.DDL_SUB_DEFAULT;
-				break;
+		case DDL_ALTER:
+			eventSubType = getAlterEventType(strPrefix);
+			break;
+		case DDL_CREATE:
+			eventSubType = getCreateEventType(strPrefix);
+			break;
+		case DDL_DROP:
+			eventSubType = getDropEventType(strPrefix);
+			break;
+		case DDL_RENAME:
+			eventSubType = getRenameEventType(strPrefix);
+			break;
+		case DDL_TRUNCATE:
+			eventSubType = getTruncateEventType(strPrefix);
+			break;
+		case DDL_DEFAULT:
+			eventSubType = DdlEventSubType.DDL_SUB_DEFAULT;
+			break;
 		}
 		return eventSubType;
 	}
 
 	private static DdlEventSubType getAlterEventType(String strPrefix) {
-		if (strPrefix.equalsIgnoreCase(STR_SUB_DATABASE)) {
+		if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_DATABASE)
+				|| StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_SCHEMA)) {
 			return DdlEventSubType.DDL_ALTER_DATABASE;
-		} else if (strPrefix.equalsIgnoreCase(STR_SUB_EVENT)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_EVENT)) {
 			return DdlEventSubType.DDL_ALTER_EVENT;
-		} else if (strPrefix.equalsIgnoreCase(STR_SUB_FUNCTION)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_FUNCTION)) {
 			return DdlEventSubType.DDL_ALTER_FUNCTION;
-		} else if (strPrefix.equalsIgnoreCase(STR_SUB_PROCEDURE)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_PROCEDURE)) {
 			return DdlEventSubType.DDL_ALTER_PROCEDURE;
-		} else if (strPrefix.equalsIgnoreCase(STR_SUB_SERVER)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_SERVER)) {
 			return DdlEventSubType.DDL_ALTER_SERVER;
-		} else if (strPrefix.equalsIgnoreCase(STR_SUB_TABLE)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_TABLE)) {
 			return DdlEventSubType.DDL_ALTER_TABLE;
-		} else if (strPrefix.equalsIgnoreCase(STR_SUB_TABLESPACE)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_TABLESPACE)) {
 			return DdlEventSubType.DDL_ALTER_TABLESPACE;
 		} else {
 			return DdlEventSubType.DDL_SUB_DEFAULT;
 		}
 	}
-	
+
 	private static DdlEventSubType getCreateEventType(String strPrefix) {
-		if (strPrefix.equalsIgnoreCase(STR_SUB_DATABASE)) {
+		if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_DATABASE)
+				|| StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_SCHEMA)) {
 			return DdlEventSubType.DDL_CREATE_DATABASE;
-		} else if (strPrefix.equalsIgnoreCase(STR_SUB_EVENT)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_EVENT)) {
 			return DdlEventSubType.DDL_CREATE_EVENT;
-		} else if (strPrefix.equalsIgnoreCase(STR_SUB_FUNCTION)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_FUNCTION)) {
 			return DdlEventSubType.DDL_CREATE_FUNCTION;
-		}else if (strPrefix.equalsIgnoreCase(STR_SUB_INDEX)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_INDEX)||StringUtils.startsWithIgnoreCase(strPrefix,STR_UNIQUE_INDEX)||
+				StringUtils.startsWithIgnoreCase(strPrefix,STR_FULLTEXT_INDEX)||StringUtils.startsWithIgnoreCase(strPrefix,STR_SPATIAL_INDEX)) {
 			return DdlEventSubType.DDL_CREATE_INDEX;
-		} else if (strPrefix.equalsIgnoreCase(STR_SUB_PROCEDURE)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_PROCEDURE)) {
 			return DdlEventSubType.DDL_CREATE_PROCEDURE;
-		} else if (strPrefix.equalsIgnoreCase(STR_SUB_SERVER)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_SERVER)) {
 			return DdlEventSubType.DDL_CREATE_SERVER;
-		} else if (strPrefix.equalsIgnoreCase(STR_SUB_TABLE)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_TABLE)) {
 			return DdlEventSubType.DDL_CREATE_TABLE;
-		} else if (strPrefix.equalsIgnoreCase(STR_SUB_TRIGGER)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_TRIGGER)) {
 			return DdlEventSubType.DDL_CREATE_TRIGGER;
-		}else if (strPrefix.equalsIgnoreCase(STR_SUB_USER)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_USER)) {
 			return DdlEventSubType.DDL_CREATE_USER;
-		}else if (strPrefix.equalsIgnoreCase(STR_SUB_VIEW)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_VIEW)||PatternUtils.isMatches(strPrefix, CREATE_VIEW_PATTERN)) {
 			return DdlEventSubType.DDL_CREATE_VIEW;
-		}else {
+		} else {
 			return DdlEventSubType.DDL_SUB_DEFAULT;
 		}
 	}
-	
+
 	private static DdlEventSubType getDropEventType(String strPrefix) {
-		if (strPrefix.equalsIgnoreCase(STR_SUB_DATABASE)) {
+		if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_DATABASE)
+				|| StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_SCHEMA)) {
 			return DdlEventSubType.DDL_DROP_DATABASE;
-		} else if (strPrefix.equalsIgnoreCase(STR_SUB_EVENT)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_EVENT)) {
 			return DdlEventSubType.DDL_DROP_EVENT;
-		} else if (strPrefix.equalsIgnoreCase(STR_SUB_FUNCTION)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_FUNCTION)) {
 			return DdlEventSubType.DDL_DROP_FUNCTION;
-		}else if (strPrefix.equalsIgnoreCase(STR_SUB_INDEX)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_INDEX)) {
 			return DdlEventSubType.DDL_DROP_INDEX;
-		} else if (strPrefix.equalsIgnoreCase(STR_SUB_PROCEDURE)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_PROCEDURE)) {
 			return DdlEventSubType.DDL_DROP_PROCEDURE;
-		} else if (strPrefix.equalsIgnoreCase(STR_SUB_SERVER)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_SERVER)) {
 			return DdlEventSubType.DDL_DROP_SERVER;
-		} else if (strPrefix.equalsIgnoreCase(STR_SUB_TABLE)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_TABLE)) {
 			return DdlEventSubType.DDL_DROP_TABLE;
-		} else if (strPrefix.equalsIgnoreCase(STR_SUB_TRIGGER)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_TRIGGER)) {
 			return DdlEventSubType.DDL_DROP_TRIGGER;
-		}else if (strPrefix.equalsIgnoreCase(STR_SUB_USER)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_USER)) {
 			return DdlEventSubType.DDL_DROP_USER;
-		}else if (strPrefix.equalsIgnoreCase(STR_SUB_VIEW)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_VIEW)) {
 			return DdlEventSubType.DDL_DROP_VIEW;
-		}else {
+		} else {
 			return DdlEventSubType.DDL_SUB_DEFAULT;
 		}
 	}
 
 	private static DdlEventSubType getRenameEventType(String strPrefix) {
-		if (strPrefix.equalsIgnoreCase(STR_SUB_TABLE)) {
+		if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_TABLE)) {
 			return DdlEventSubType.DDL_RENAME_TABLE;
-		}else if (strPrefix.equalsIgnoreCase(STR_SUB_USER)) {
+		} else if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_USER)) {
 			return DdlEventSubType.DDL_RENAME_USER;
-		}else {
+		} else {
 			return DdlEventSubType.DDL_SUB_DEFAULT;
 		}
 	}
-	
+
 	private static DdlEventSubType getTruncateEventType(String strPrefix) {
-		if (strPrefix.equalsIgnoreCase(STR_SUB_TABLE)) {
+		if (StringUtils.startsWithIgnoreCase(strPrefix,STR_SUB_TABLE)) {
 			return DdlEventSubType.DDL_TRUNCATE_TABLE;
-		}else {
+		} else {
 			return DdlEventSubType.DDL_SUB_DEFAULT;
 		}
 	}

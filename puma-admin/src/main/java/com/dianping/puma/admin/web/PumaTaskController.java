@@ -170,7 +170,7 @@ public class PumaTaskController {
 			pumaTask.setPreservedDay(preservedDay);  
 			Type type = new TypeToken<HashMap<String,AcceptedTables>>() {}.getType(); 
 			Map<String,AcceptedTables> acceptedDataInfos = (Map<java.lang.String, AcceptedTables>) GsonUtil.fromJson(acceptedDataInfoStr, type);
-			pumaTask.setAcceptedDataInfos(formatAcceptedTable(acceptedDataInfos));
+			pumaTask.setAcceptedDataInfos(acceptedDataInfos);
 			// Save puma task state to persistent storage.
 			if (operation == ActionOperation.CREATE) {
 				pumaTaskService.create(pumaTask);
@@ -202,26 +202,6 @@ public class PumaTaskController {
 		map.put("success", true);
 
 		return GsonUtil.toJson(map);
-	}
-
-	private Map<String,AcceptedTables> formatAcceptedTable(Map<String,AcceptedTables> acceptedDataInfos){
-		 Map<String,AcceptedTables> result = new HashMap<String,AcceptedTables>();
-		 for(Map.Entry<String,AcceptedTables> entry:acceptedDataInfos.entrySet()){
-			 if(StringUtils.isNotBlank(entry.getKey()) && entry.getValue() != null 
-					 && entry.getValue().getTables() != null 
-					 && entry.getValue().getTables().size()>0){
-				 AcceptedTables acceptedTables = new AcceptedTables();	
-				 List<String> tables = new ArrayList<String>();
-				 for(String table:entry.getValue().getTables()){
-					 if(StringUtils.isNotBlank(table)){
-						 tables.add(table.trim().toLowerCase());
-					 }
-				 }
-				 acceptedTables.setTables(tables);
-				 result.put(entry.getKey().trim().toLowerCase(), acceptedTables);
-			 }
-		 }
-		return result;
 	}
 	
 	@RequestMapping(value = { "/puma-task/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")

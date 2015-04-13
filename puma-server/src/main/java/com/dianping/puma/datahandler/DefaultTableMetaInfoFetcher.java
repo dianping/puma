@@ -18,10 +18,8 @@ package com.dianping.puma.datahandler;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -58,8 +56,6 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 	private Map<String, AcceptedTables> acceptedDataTables;
 
 	private static final String QUERY_SQL = "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, COLUMN_KEY, COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS ";
-
-	private static final String REMAIN_SQL = "WHERE TABLE_SCHEMA IN( ";
 
 	private static final String WHERE_SQL = "WHERE ";
 
@@ -167,10 +163,6 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 			ps = (PreparedStatement) conn.prepareStatement(sql);
 			setStatementParams(ps);
 			rs = ps.executeQuery();
-			// stmt = conn.createStatement();
-			// rs =
-			// stmt.executeQuery("SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, COLUMN_KEY, COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS");
-
 			if (rs != null) {
 				fillTableMetaCache(rs);
 			}
@@ -186,12 +178,6 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 				} catch (SQLException e) {
 				}
 			}
-			/*if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (SQLException e) {
-				}
-			}*/
 			if (ps != null) {
 				try {
 					ps.close();
@@ -250,39 +236,6 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 			}
 		}
 	}
-	/*private String getSqlQuery(String baseSql,String remainSql,List<String> datas){
-		int signal=0;
-		if (datas != null && datas.size() > 0) {
-			for (String data : datas) {
-				if(StringUtils.isNotBlank(data)){
-					remainSql += "?,";
-					signal++;
-				}
-			}
-			if(signal > 0){
-				remainSql = StringUtils.removeEnd(remainSql, ",");
-				remainSql += ")";
-			}else{
-				remainSql += "";
-			}
-		}else{
-			return baseSql;
-		}
-		return baseSql + remainSql;
-	}*/
-	
-	/*private void setStatementParams(PreparedStatement ps,List<String> datas) throws SQLException{
-		int signal =0;
-		if (datas != null && datas.size() > 0) {
-			signal = 1;
-			for (String data : datas) {
-				if(StringUtils.isNotBlank(data)){
-					ps.setString(signal, data);
-					signal++;
-				}
-			}
-		}
-	}*/
 
 	/**
 	 * @param newTableMeta

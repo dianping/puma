@@ -35,6 +35,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -149,6 +150,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			DefaultEventStorage storage = new DefaultEventStorage();
 			storage.setName(storageName + taskName);
 			storage.setTaskName(taskName);
+			
 			storage.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
 			storage.setCodec(jsonCodec);
 

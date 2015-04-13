@@ -121,36 +121,6 @@ public class FormatDescriptionEvent extends AbstractBinlogEvent {
 		}
 	}
 
-	private long versionProduct(int[] versionSplit) {
-		return ((versionSplit[0] * 256 + versionSplit[1]) * 256 + versionSplit[2]);
-	}
-
-    public static void doServerVersionSplit(String serverVersion, int[] versionSplit) {
-        String[] split = serverVersion.split("\\.");
-        if (split.length < 3) {
-            versionSplit[0] = 0;
-            versionSplit[1] = 0;
-            versionSplit[2] = 0;
-        } else {
-            int j = 0;
-            for (int i = 0; i <= 2; i++) {
-                String str = split[i];
-                for (j = 0; j < str.length(); j++) {
-                    if (Character.isDigit(str.charAt(j)) == false) {
-                        break;
-                    }
-                }
-                if (j > 0) {
-                    versionSplit[i] = Integer.valueOf(str.substring(0, j), 10);
-                } else {
-                    versionSplit[0] = 0;
-                    versionSplit[1] = 0;
-                    versionSplit[2] = 0;
-                }
-            }
-        }
-    }
-
     public static long versionProduct(int[] versionSplit) {
         return ((versionSplit[0] * 256 + versionSplit[1]) * 256 + versionSplit[2]);
     }

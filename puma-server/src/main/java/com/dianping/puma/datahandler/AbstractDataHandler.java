@@ -32,7 +32,6 @@ import com.dianping.puma.core.util.SimpleDdlParser;
 import com.dianping.puma.core.util.SimpleDdlParser.DdlResult;
 import com.dianping.puma.core.util.constant.DdlEventSubType;
 import com.dianping.puma.core.util.constant.DdlEventType;
-import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
 import com.dianping.puma.parser.mysql.event.PumaIgnoreEvent;
 import com.dianping.puma.parser.mysql.event.QueryEvent;

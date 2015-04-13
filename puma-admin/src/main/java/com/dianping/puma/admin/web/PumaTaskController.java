@@ -189,7 +189,6 @@ public class PumaTaskController {
 				}
 			}
 			pumaTask.setTableSet(tableSet);
-
 			// Save puma task state to persistent storage.
 			if (operation == ActionOperation.CREATE) {
 				pumaTaskService.create(pumaTask);

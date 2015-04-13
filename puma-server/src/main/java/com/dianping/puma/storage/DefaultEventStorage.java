@@ -350,7 +350,7 @@ public class DefaultEventStorage implements EventStorage {
 			throw new StorageWriteException("Failed to write event.", e);
 		}
 	}
-
+	
 	private void updateIndex(ChangedEvent event, boolean newL1Index, long newSeq)
 			throws IOException {
 		BinlogIndexKey binlogKey = new BinlogIndexKey(event.getBinlog(), event

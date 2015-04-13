@@ -27,6 +27,7 @@ import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.monitor.Notifiable;
 import com.dianping.puma.core.monitor.NotifyService;
+import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.core.util.SimpleDdlParser;
 import com.dianping.puma.core.util.SimpleDdlParser.DdlResult;
 import com.dianping.puma.core.util.constant.DdlEventSubType;
@@ -266,5 +267,4 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 
 	protected abstract void doProcess(DataHandlerResult result, BinlogEvent binlogEvent, PumaContext context,
 			byte eventType);
-
 }

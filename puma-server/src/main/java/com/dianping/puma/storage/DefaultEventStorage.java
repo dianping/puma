@@ -16,6 +16,7 @@ import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.monitor.StorageEventCountMonitor;
 import com.dianping.puma.monitor.StorageEventGroupMonitor;
+
 import org.apache.commons.lang.StringUtils;
 
 import com.dianping.lion.client.ConfigCache;
@@ -25,12 +26,15 @@ import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.DdlEvent;
+import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.storage.exception.InvalidSequenceException;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageException;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;
 import com.dianping.puma.storage.exception.StorageWriteException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -348,6 +352,50 @@ public class DefaultEventStorage implements EventStorage {
 			SystemStatusContainer.instance.updateStorageStatus(name, event.getSeq());
 		} catch (IOException e) {
 			throw new StorageWriteException("Failed to write event.", e);
+		}
+	}
+
+	private boolean needStore(ChangedEvent event) {
+		if (acceptedTables == null || acceptedTables.isEmpty()) {
+			return true;
+		}
+
+		if (event instanceof RowChangedEvent) {
+			RowChangedEvent rce = (RowChangedEvent) event;
+
+			if (StringUtils.isNotBlank(rce.getTable())) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("table:" + rce.getTable().toLowerCase());
+				}
+				return acceptedTables.contains(rce.getTable().toLowerCase());
+			}
+
+			return true;
+		} else {
+			return true;
+		}
+	}
+	
+	private boolean needStoreNew(ChangedEvent event) {
+		if (acceptedDataTables == null || acceptedDataTables.isEmpty()) {
+			return true;
+		}
+		if (event instanceof RowChangedEvent||event instanceof DdlEvent) {
+			if(StringUtils.isNotBlank(event.getDatabase())){
+				if(acceptedDataTables.containsKey(event.getDatabase())){
+					if (StringUtils.isNotBlank(event.getTable())) {
+						if (LOG.isDebugEnabled()) {
+							LOG.debug("table:" + event.getTable().toLowerCase());
+						}
+						return acceptedDataTables.get(event.getDatabase()).isContains((event.getTable()));
+					}
+					return true;
+				}
+				return false;
+			}
+			return false;
+		} else{
+			return true;
 		}
 	}
 	

@@ -17,6 +17,8 @@ public class PatternUtils {
 	private static final Logger LOG = LoggerFactory.getLogger(PatternUtils.class);
 	private static Map<String, WeakReference<Pattern>> patterns = new ConcurrentHashMap<String, WeakReference<Pattern>>();
 
+	private static Perl5Matcher matcher = new Perl5Matcher();
+	
 	public static Pattern getPattern(String strPattern) {
 		if (patterns.containsKey(strPattern) && patterns.get(strPattern).get() != null) {
 			return patterns.get(strPattern).get();
@@ -36,7 +38,7 @@ public class PatternUtils {
 	}
 	
 	public static boolean isMatches(String strQuery,String strPattern){
-		Perl5Matcher matcher = new Perl5Matcher();
+	
 		return matcher.matches(strQuery, PatternUtils.getPattern(strPattern));
 	}
 }

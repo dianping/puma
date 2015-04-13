@@ -170,9 +170,9 @@ public class SimpleDdlParser {
 		if (tblPosition >= PREFIX_TB.length()) {
 			String subSql = StringUtils.substring(strSql, tblPosition, strSql.length());
 			if (StringUtils.startsWithIgnoreCase(subSql, PREFIX_EXISTS)) {
-				subSql = StringUtils.substring(subSql, PREFIX_EXISTS.length() - 1);
+				subSql = StringUtils.substring(subSql, PREFIX_EXISTS.length());
 			} else if (StringUtils.startsWithIgnoreCase(subSql, PREFIX_NOT_EXISTS)) {
-				subSql = StringUtils.substring(subSql, PREFIX_NOT_EXISTS.length() - 1);
+				subSql = StringUtils.substring(subSql, PREFIX_NOT_EXISTS.length());
 			}
 			String strTbl = StringUtils.substringBefore(subSql, INFIX_SINGLE_BLANK);
 			if (StringUtils.isNotBlank(strTbl)) {
@@ -200,9 +200,9 @@ public class SimpleDdlParser {
 		if (dbPosition >= PREFIX_DB.length()) {
 			String subSql = StringUtils.substring(strSql, dbPosition, strSql.length());
 			if (StringUtils.startsWithIgnoreCase(subSql, PREFIX_EXISTS)) {
-				subSql = StringUtils.substring(subSql, PREFIX_EXISTS.length() - 1);
+				subSql = StringUtils.substring(subSql, PREFIX_EXISTS.length());
 			} else if (StringUtils.startsWithIgnoreCase(subSql, PREFIX_NOT_EXISTS)) {
-				subSql = StringUtils.substring(subSql, PREFIX_NOT_EXISTS.length() - 1);
+				subSql = StringUtils.substring(subSql, PREFIX_NOT_EXISTS.length());
 			}
 			dbName = StringUtils.remove(StringUtils.substringBefore(subSql, INFIX_SINGLE_BLANK), INFIX_DB_TB_QUOTE);
 		}

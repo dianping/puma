@@ -38,7 +38,6 @@ public class PatternUtils {
 	}
 	
 	public static boolean isMatches(String strQuery,String strPattern){
-	
 		return matcher.matches(strQuery, PatternUtils.getPattern(strPattern));
 	}
 }

@@ -70,8 +70,10 @@ public class DefaultDataHandler extends AbstractDataHandler {
 					log.debug("put meta info for table id:" + tableMapEvent.getTableId());
 				}
 			} else {
-				log.warn("meta info not found for:" + tableMapEvent.getDatabaseName() + "-"
+				if (log.isDebugEnabled()) {
+				log.debug("meta info not found for:" + tableMapEvent.getDatabaseName() + "-"
 						+ tableMapEvent.getTableName());
+				}
 				skipEvent(BinlogConstanst.TABLE_MAP_EVENT, result, context);
 				return;
 			}
@@ -312,7 +314,9 @@ public class DefaultDataHandler extends AbstractDataHandler {
 		msg.append("Skip one event#").append(eventType).append(", since there is no table meta info. Binlog: ")
 				.append(context.getBinlogFileName()).append(" Pos: ").append(context.getBinlogStartPos())
 				.append(" Skip to ").append(context.getNextBinlogPos());
-		log.warn(msg.toString());
+		if(log.isDebugEnabled()) {
+			log.debug(msg.toString());
+		}
 		if (getNotifyService() != null) {
 			getNotifyService().alarm(msg.toString(), null, false);
 		}

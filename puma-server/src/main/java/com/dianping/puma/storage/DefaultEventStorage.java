@@ -373,7 +373,6 @@ public class DefaultEventStorage implements EventStorage {
 				}
 				return false;
 			}
-			log.info("Changed EVENT database == blank.");
 			return false;
 		} else{
 			return true;

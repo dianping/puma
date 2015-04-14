@@ -26,11 +26,8 @@
 	       <label  id="dstDBInstanceName" class="col-md-label-text">${syncTask.dstDBInstanceName}</label>
 	         <label class="col-md-label" for="binlog">Binlog起始信息:</label>
 	        <label  id="binlog" class="col-md-label-text">
-  				#if($syncTaskState && $syncTaskState.binlogInfoOfIOThread)
-                  $syncTaskState.binlogInfoOfIOThread.binlogFile &nbsp;
-                  $syncTaskState.binlogInfoOfIOThread.binlogPosition #else
                   $syncTask.binlogInfo.binlogFile &nbsp;
-                  $syncTask.binlogInfo.binlogPosition #end
+                  $syncTask.binlogInfo.binlogPosition 
 			</label>
 	    </div>
  		<div class="form-group-label">

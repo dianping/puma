@@ -57,13 +57,11 @@ public class PumaMonitorSyncProcessTask implements PumaMonitorTask {
 					throw new MonitorThresholdException();
 				}
 			} catch (MonitorThresholdException e) {
-				notifyService.alarm(" diff num of file between sync and server binlog process :  name = " + tempKey
+				String errorMessage = " diff num of file between sync and server binlog process :  name = " + tempKey
 						+ " ip = " + tempClientStatus.getIp() + " target:" + tempClientStatus.getTarget() + " diff = "
-						+ Integer.toString(dfileNum), e, true);
-				Cat.getProducer().logError(
-						" diff num of file between sync and server binlog process :  name = " + tempKey + " ip = "
-								+ tempClientStatus.getIp() + " target:" + tempClientStatus.getTarget() + " diff = "
-								+ Integer.toString(dfileNum), e);
+						+ Integer.toString(dfileNum);
+				notifyService.alarm(errorMessage, e, true);
+				Cat.getProducer().logError(errorMessage, e);
 			}
 		}
 	}

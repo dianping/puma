@@ -24,16 +24,31 @@
 	    <div class="form-group-label">
 	       <label class="col-md-label" for="dstDBInstanceName">目标数据库:</label>
 	       <label  id="dstDBInstanceName" class="col-md-label-text">${syncTask.dstDBInstanceName}</label>
-	         <label class="col-md-label" for="binlog">Binlog信息:</label>
+	         <label class="col-md-label" for="binlog">Binlog起始信息:</label>
 	        <label  id="binlog" class="col-md-label-text">
-  				#if($syncState && $syncState.binlogInfoOfIOThread)
-                  $syncState.binlogInfoOfIOThread.binlogFile &nbsp;
-                  $syncState.binlogInfoOfIOThread.binlogPosition #else
+  				#if($syncTaskState && $syncTaskState.binlogInfoOfIOThread)
+                  $syncTaskState.binlogInfoOfIOThread.binlogFile &nbsp;
+                  $syncTaskState.binlogInfoOfIOThread.binlogPosition #else
                   $syncTask.binlogInfo.binlogFile &nbsp;
                   $syncTask.binlogInfo.binlogPosition #end
 			</label>
 	    </div>
-
+ 		<div class="form-group-label">
+	       <label class="col-md-label" for="binlogCommit">Binlog 最新Commit信息:</label>
+	       <label  id="binlogCommit" class="col-md-label-text">
+	       		#if($syncTaskState && $syncTaskState.binlogInfo) 
+	       		  $syncTaskState.binlogInfo.binlogFile &nbsp;
+                  $syncTaskState.binlogInfo.binlogPosition #else
+                  --&nbsp;-- #end
+                </label>
+	         <label class="col-md-label" for="binlogNew">Binlog最新信息:</label>
+	        <label  id="binlogNew" class="col-md-label-text">
+  				#if($syncTaskState && $syncTaskState.binlogInfoOfIOThread)
+                  $syncTaskState.binlogInfoOfIOThread.binlogFile &nbsp;
+                  $syncTaskState.binlogInfoOfIOThread.binlogPosition #else
+                  --&nbsp;-- #end
+			</label>
+	    </div>
 	     <div class="form-group-label">
 	        <label class="col-md-label" for="createDate">创建时间:</label>
 	        <label  id="createDate" class="col-md-label-text">${dateFormatUtils.format($syncTask.gmtCreate,"yyyy年MM月dd日

@@ -1,35 +1,33 @@
 package com.dianping.puma.monitor;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ClientStatus;
 import com.dianping.puma.common.SystemStatusContainer.ServerStatus;
-import com.dianping.puma.config.TaskLionConfig;
-import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.monitor.exception.MonitorThresholdException;
 
-@Component("pumaMonitorSyncProcessTask")
-public class PumaMonitorSyncProcessTask implements PumaMonitorTask {
-	private static final Logger LOG = LoggerFactory.getLogger(PumaMonitorSyncProcessTask.class);
+public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runnable {
 
-	@Autowired
-	private TaskLionConfig taskLionConfig;
+	private static final Logger LOG = LoggerFactory.getLogger(SyncProcessTaskMonitor.class);
 
-	@Autowired
-	private NotifyService notifyService;
+	private int numThreshold;
+
+	public SyncProcessTaskMonitor(long initialDelay, long period, TimeUnit unit) {
+		super(initialDelay, period, unit);
+		LOG.info("SyncProcess Task Monitor started.");
+	}
 
 	@Override
-	public void runTask() {
+	public void run() {
 		Map<String, ClientStatus> clientStatuses = SystemStatusContainer.instance.listClientStatus();
 		Map<String, ServerStatus> serverStatuses = SystemStatusContainer.instance.listServerStatus();
 		int dfileNum = 0;
@@ -53,14 +51,14 @@ public class PumaMonitorSyncProcessTask implements PumaMonitorTask {
 							+ "&desbinlog = " + clientStatus.getValue().getBinlogFile() + ","
 							+ Long.toString(clientStatus.getValue().getBinlogPos()));
 			try {
-				if (dfileNum >= taskLionConfig.getSyncProcessDfileNum()) {
+				if (dfileNum >= numThreshold) {
 					throw new MonitorThresholdException();
 				}
 			} catch (MonitorThresholdException e) {
 				String errorMessage = " diff num of file between sync and server binlog process :  name = " + tempKey
 						+ " ip = " + tempClientStatus.getIp() + " target:" + tempClientStatus.getTarget() + " diff = "
 						+ Integer.toString(dfileNum);
-				notifyService.alarm(errorMessage, e, true);
+				// notifyService.alarm(errorMessage, e, true);
 				Cat.getProducer().logError(errorMessage, e);
 			}
 		}
@@ -105,9 +103,24 @@ public class PumaMonitorSyncProcessTask implements PumaMonitorTask {
 				result = Integer.parseInt(strNum);
 			}
 		} catch (NumberFormatException e) {
-			LOG.info("convert string to int exception:" + e);
+			LOG.error("convert string to int exception:" + e);
 		}
 		return result;
+	}
+
+	@Override
+	public void doExecute() {
+		if (this.getExecutor() != null) {
+			this.getExecutor().scheduleWithFixedDelay(this, initialDelay, period, unit);
+		}
+	}
+
+	public void setNumThreshold(int numThreshold) {
+		this.numThreshold = numThreshold;
+	}
+
+	public int getNumThreshold() {
+		return numThreshold;
 	}
 
 }

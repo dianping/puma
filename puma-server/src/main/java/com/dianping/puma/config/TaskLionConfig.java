@@ -18,11 +18,11 @@ public class TaskLionConfig {
 	private long syncProcessInterval;
 	private long syncProcessDfileNum;
 	public TaskLionConfig(){
-		seqInterval = getInterval(PumaServerLionCommonKey.SEQ_INTERVAL_NAME);
-		clientIpInterval = getInterval(PumaServerLionCommonKey.CLIENTIP_INTERVAL_NAME);
-		serverInfoInterval = getInterval(PumaServerLionCommonKey.SERVERINFO_INTERVAL_NAME);
-		syncProcessInterval = getInterval(PumaServerLionCommonKey.SYNCPROCESS_INTERVAL_NAME);
-		syncProcessDfileNum = getDiffFileNum(PumaServerLionCommonKey.SYNCPROCESS_DIFF_FILE_NUM);
+		seqInterval = getInterval(ServerLionCommonKey.SEQ_INTERVAL_NAME);
+		clientIpInterval = getInterval(ServerLionCommonKey.CLIENTIP_INTERVAL_NAME);
+		serverInfoInterval = getInterval(ServerLionCommonKey.SERVERINFO_INTERVAL_NAME);
+		syncProcessInterval = getInterval(ServerLionCommonKey.SYNCPROCESS_INTERVAL_NAME);
+		syncProcessDfileNum = getDiffFileNum(ServerLionCommonKey.SYNCPROCESS_DIFF_FILE_NUM);
 	}
 	
 	protected long getInterval(String intervalName) {
@@ -50,6 +50,7 @@ public class TaskLionConfig {
 		}
 		return numFile;
 	}
+	
 	public void setSeqInterval(long seqInterval) {
 		this.seqInterval = seqInterval;
 	}

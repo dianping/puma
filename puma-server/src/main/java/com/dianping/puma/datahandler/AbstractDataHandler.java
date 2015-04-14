@@ -16,10 +16,7 @@
 package com.dianping.puma.datahandler;
 
 import java.math.BigInteger;
-import java.util.List;
 
-import com.dianping.cat.Cat;
-import com.dianping.cat.message.Transaction;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 

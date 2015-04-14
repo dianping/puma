@@ -1,6 +1,6 @@
 package com.dianping.puma.config;
 
-public class PumaServerLionCommonKey {
+public class ServerLionCommonKey {
 
 	public static final String SEQ_INTERVAL_NAME = "puma.server.interval.seq";
 	

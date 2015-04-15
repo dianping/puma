@@ -65,4 +65,6 @@ public class DDLResult {
 	public void setType(DDLType type) {
 		this.type = type;
 	}
+
+
 }

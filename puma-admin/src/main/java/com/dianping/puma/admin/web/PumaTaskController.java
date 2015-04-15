@@ -153,7 +153,8 @@ public class PumaTaskController {
 					operation = ActionOperation.UPDATE;
 				} else if(pumaTask.getPreservedDay()!= preservedDay){
 					operation = ActionOperation.PROLONG;
-				}else if(!acceptedDataInfos.equals(pumaTask.getAcceptedDataInfos())){
+				}else if((acceptedDataInfos != null && !acceptedDataInfos.equals(pumaTask.getAcceptedDataInfos()))
+						||(acceptedDataInfos == null && pumaTask.getAcceptedDataInfos() != null)){
 					operation = ActionOperation.FILTER;
 				}
 			}

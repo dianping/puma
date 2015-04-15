@@ -80,7 +80,7 @@ public class TaskMonitorManager {
 				}
 				try {
 					while (!executorService.awaitTermination(1, TimeUnit.SECONDS)) {
-						Log.info("Scheduled task monitor await Termination.");
+						Log.info("Scheduled task monitor awaitting Termination.");
 					}
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
@@ -103,8 +103,7 @@ public class TaskMonitorManager {
 	private void initTaskMonitor() {
 		constructTaskMonitor();
 		initScheduledExecutorService(MAXTHREADCOUNT);
-		taskMonitorContainer.setTaskMonitorExecutor(executorService);
-		taskMonitorContainer.execute();
+		taskMonitorContainer.execute(executorService);
 	}
 
 	private void constructTaskMonitor() {

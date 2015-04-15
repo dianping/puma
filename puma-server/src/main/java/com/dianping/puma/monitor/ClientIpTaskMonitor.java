@@ -1,6 +1,7 @@
 package com.dianping.puma.monitor;
 
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -30,10 +31,8 @@ public class ClientIpTaskMonitor extends AbstractTaskMonitor implements Runnable
 	}
 
 	@Override
-	public void doExecute() {
-		if (this.getExecutor() != null) {
-			this.getExecutor().scheduleWithFixedDelay(this, initialDelay, period, unit);
-		}
+	public void doExecute(ScheduledExecutorService executor) {
+		executor.scheduleWithFixedDelay(this, initialDelay, period, unit);
 	}
 
 }

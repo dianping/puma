@@ -14,11 +14,12 @@ import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ClientStatus;
-import com.dianping.puma.config.ServerLionCommonKey;
 
 public class ClientInfoTaskMonitor extends AbstractTaskMonitor {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ClientInfoTaskMonitor.class);
+
+	public static final String CLIENTINFO_INTERVAL_NAME = "puma.server.interval.clientInfo";
 
 	public ClientInfoTaskMonitor(long initialDelay, TimeUnit unit) {
 		super(initialDelay, unit);
@@ -27,11 +28,11 @@ public class ClientInfoTaskMonitor extends AbstractTaskMonitor {
 
 	@Override
 	public void doInit(){
-		this.setInterval(getLionInterval(ServerLionCommonKey.SEQ_INTERVAL_NAME));
+		this.setInterval(getLionInterval(CLIENTINFO_INTERVAL_NAME));
 		ConfigCache.getInstance().addChange(new ConfigChange() {
 			@Override
 			public void onChange(String key, String value) {
-				if (ServerLionCommonKey.SEQ_INTERVAL_NAME.equals(key)) {
+				if (CLIENTINFO_INTERVAL_NAME.equals(key)) {
 					ClientInfoTaskMonitor.this.setInterval(Long.parseLong(value));
 					if(future!=null){
 						future.cancel(true);

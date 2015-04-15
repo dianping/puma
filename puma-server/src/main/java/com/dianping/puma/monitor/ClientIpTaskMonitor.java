@@ -14,12 +14,13 @@ import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ClientStatus;
-import com.dianping.puma.config.ServerLionCommonKey;
 
 public class ClientIpTaskMonitor extends AbstractTaskMonitor implements Runnable {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ClientIpTaskMonitor.class);
 
+	public static final String CLIENTIP_INTERVAL_NAME = "puma.server.interval.ip";
+	
 	public ClientIpTaskMonitor(long initialDelay, TimeUnit unit) {
 		super(initialDelay, unit);
 		LOG.info("ClientIp Task Monitor started.");
@@ -27,11 +28,11 @@ public class ClientIpTaskMonitor extends AbstractTaskMonitor implements Runnable
 	
 	@Override
 	public void doInit(){
-		this.setInterval(getLionInterval(ServerLionCommonKey.CLIENTIP_INTERVAL_NAME));
+		this.setInterval(getLionInterval(CLIENTIP_INTERVAL_NAME));
 		ConfigCache.getInstance().addChange(new ConfigChange() {
 			@Override
 			public void onChange(String key, String value) {
-				if (ServerLionCommonKey.CLIENTIP_INTERVAL_NAME.equals(key)) {
+				if (CLIENTIP_INTERVAL_NAME.equals(key)) {
 					ClientIpTaskMonitor.this.setInterval(Long.parseLong(value));
 					if(future!=null){
 						future.cancel(true);

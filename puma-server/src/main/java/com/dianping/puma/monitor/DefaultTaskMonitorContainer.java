@@ -10,7 +10,6 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Component;
 
-import com.dianping.puma.config.ServerLionCommonKey;
 
 @Component("taskMonitorContainer")
 public class DefaultTaskMonitorContainer implements TaskMonitorContainer {
@@ -62,30 +61,30 @@ public class DefaultTaskMonitorContainer implements TaskMonitorContainer {
 	}
 	
 	private void constructTaskMonitor() {
-		constructSequenceTaskMonitor(ServerLionCommonKey.SEQ_INTERVAL_NAME);
-		constructClientIpTaskMonitor(ServerLionCommonKey.CLIENTIP_INTERVAL_NAME);
-		constructServerInfoTaskMonitor(ServerLionCommonKey.SERVERINFO_INTERVAL_NAME);
-		constructSyncProcessTaskMonitor(ServerLionCommonKey.SYNCPROCESS_INTERVAL_NAME);
+		constructClientInfoTaskMonitor();
+		constructClientIpTaskMonitor();
+		constructServerInfoTaskMonitor();
+		constructSyncProcessTaskMonitor();
 	}
 
-	private void constructSequenceTaskMonitor(String key) {
+	private void constructClientInfoTaskMonitor() {
 		AbstractTaskMonitor taskMonitor = new ClientInfoTaskMonitor(0, TimeUnit.MILLISECONDS);
-		this.register(key, taskMonitor);
+		this.register(ClientInfoTaskMonitor.CLIENTINFO_INTERVAL_NAME, taskMonitor);
 	}
 
-	private void constructClientIpTaskMonitor(String key) {
+	private void constructClientIpTaskMonitor() {
 		AbstractTaskMonitor taskMonitor = new ClientIpTaskMonitor(0, TimeUnit.MILLISECONDS);
-		this.register(key, taskMonitor);
+		this.register(ClientIpTaskMonitor.CLIENTIP_INTERVAL_NAME, taskMonitor);
 	}
 
-	private void constructServerInfoTaskMonitor(String key) {
+	private void constructServerInfoTaskMonitor() {
 		AbstractTaskMonitor taskMonitor = new ServerInfoTaskMonitor(0, TimeUnit.MILLISECONDS);
-		this.register(key, taskMonitor);
+		this.register(ServerInfoTaskMonitor.SERVERINFO_INTERVAL_NAME, taskMonitor);
 	}
 
-	private void constructSyncProcessTaskMonitor(String key) {
+	private void constructSyncProcessTaskMonitor() {
 		SyncProcessTaskMonitor taskMonitor = new SyncProcessTaskMonitor(0, TimeUnit.MILLISECONDS);
-		this.register(key, taskMonitor);
+		this.register(SyncProcessTaskMonitor.SYNCPROCESS_INTERVAL_NAME, taskMonitor);
 	}
 
 }

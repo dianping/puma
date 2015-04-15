@@ -7,6 +7,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,12 +17,13 @@ import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ServerStatus;
-import com.dianping.puma.config.ServerLionCommonKey;
 
 public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnable {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ServerInfoTaskMonitor.class);
-
+	
+	public static final String SERVERINFO_INTERVAL_NAME = "puma.server.interval.serverInfo";
+	
 	private Map<String, Long> preUpdateCount;
 
 	private Map<String, Long> preDeleteCount;
@@ -38,11 +40,11 @@ public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnab
 	
 	@Override
 	public void doInit(){
-		this.setInterval(getLionInterval(ServerLionCommonKey.SERVERINFO_INTERVAL_NAME));
+		this.setInterval(getLionInterval(SERVERINFO_INTERVAL_NAME));
 		ConfigCache.getInstance().addChange(new ConfigChange() {
 			@Override
 			public void onChange(String key, String value) {
-				if (ServerLionCommonKey.SERVERINFO_INTERVAL_NAME.equals(key)) {
+				if (SERVERINFO_INTERVAL_NAME.equals(key)) {
 					ServerInfoTaskMonitor.this.setInterval(Long.parseLong(value));
 					if(future!=null){
 						future.cancel(true);
@@ -76,6 +78,7 @@ public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnab
 		Map<String, AtomicLong> deleteCount = SystemStatusContainer.instance.listServerRowDeleteCounters();
 		Map<String, AtomicLong> ddlCount = SystemStatusContainer.instance.listServerDdlCounters();
 		for (Map.Entry<String, ServerStatus> serverStatus : serverStatuses.entrySet()) {
+			Log.info("puma server serverinfo monitoring.");
 			initPreCount(serverStatus.getKey());
 			String insertName = " = 0 ";
 			String deleteName = " = 0 ";

@@ -18,13 +18,16 @@ import com.dianping.lion.client.LionException;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ClientStatus;
 import com.dianping.puma.common.SystemStatusContainer.ServerStatus;
-import com.dianping.puma.config.ServerLionCommonKey;
 import com.dianping.puma.monitor.exception.MonitorThresholdException;
 
 public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runnable {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SyncProcessTaskMonitor.class);
 
+	public static final String SYNCPROCESS_INTERVAL_NAME = "puma.server.interval.syncProcess";
+	
+	public static final String SYNCPROCESS_DIFF_FILE_NUM ="puma.server.syncProcess.diffNumFile";
+	
 	private int numThreshold;
 
 	public SyncProcessTaskMonitor(long initialDelay, TimeUnit unit) {
@@ -34,12 +37,12 @@ public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runna
 
 	@Override
 	public void doInit(){
-		this.setInterval(getLionInterval(ServerLionCommonKey.SYNCPROCESS_INTERVAL_NAME));
-		this.numThreshold = getNumThreshold(ServerLionCommonKey.SYNCPROCESS_DIFF_FILE_NUM);
+		this.setInterval(getLionInterval(SYNCPROCESS_INTERVAL_NAME));
+		this.numThreshold = getNumThreshold(SYNCPROCESS_DIFF_FILE_NUM);
 		ConfigCache.getInstance().addChange(new ConfigChange() {
 			@Override
 			public void onChange(String key, String value) {
-				if (ServerLionCommonKey.SYNCPROCESS_INTERVAL_NAME.equals(key)) {
+				if (SYNCPROCESS_INTERVAL_NAME.equals(key)) {
 					SyncProcessTaskMonitor.this.setInterval(Long.parseLong(value));
 					if(future!=null){
 						future.cancel(true);
@@ -48,7 +51,7 @@ public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runna
 							SyncProcessTaskMonitor.this.execute(SyncProcessTaskMonitor.this.executor);
 						}
 					}
-				} else if (ServerLionCommonKey.SYNCPROCESS_DIFF_FILE_NUM.equals(key)) {
+				} else if (SYNCPROCESS_DIFF_FILE_NUM.equals(key)) {
 					numThreshold =Integer.getInteger(value).intValue();
 				}
 			}

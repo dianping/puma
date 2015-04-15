@@ -55,6 +55,7 @@ public class ClientIpTaskMonitor extends AbstractTaskMonitor implements Runnable
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Future doExecute(ScheduledExecutorService executor) {
 		return executor.scheduleWithFixedDelay(this, initialDelay, interval, unit);

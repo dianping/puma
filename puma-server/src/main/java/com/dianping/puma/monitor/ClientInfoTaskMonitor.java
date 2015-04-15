@@ -70,6 +70,7 @@ public class ClientInfoTaskMonitor extends AbstractTaskMonitor {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Future doExecute(ScheduledExecutorService executor) {
 		return executor.scheduleWithFixedDelay(this, initialDelay, interval, unit);

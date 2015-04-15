@@ -9,7 +9,7 @@ public interface TaskMonitorContainer {
 
 	public Map<String, AbstractTaskMonitor> getTaskMonitors();
 
-	public void execute(ScheduledExecutorService executor);
+	public void execute();
 
 	public void register(String name, AbstractTaskMonitor taskMonitor);
 

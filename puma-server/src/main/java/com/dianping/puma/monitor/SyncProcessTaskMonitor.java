@@ -97,6 +97,7 @@ public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runna
 	}
 
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Future doExecute(ScheduledExecutorService executor) {
 		return executor.scheduleWithFixedDelay(this, initialDelay, interval, unit);

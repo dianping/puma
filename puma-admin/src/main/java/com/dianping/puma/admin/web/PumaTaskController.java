@@ -312,6 +312,9 @@ public class PumaTaskController {
 	
 	private Map<String,AcceptedTables> getAcceptedDatas(String []acceptedDatabase,String []acceptedTable)
 	{
+		if(acceptedDatabase!=null&&acceptedTable!=null){
+			return null;
+		}
 		if(acceptedDatabase.length > 0&&acceptedTable.length > 0&&acceptedDatabase.length==acceptedTable.length)
 		{
 			Map<String,AcceptedTables> acceptedDataInfos = new HashMap<String,AcceptedTables>();

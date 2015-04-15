@@ -37,12 +37,11 @@ public class DefaultTaskMonitorContainer implements TaskMonitorContainer {
 		return taskMonitors;
 	}
 
-	public void execute(ScheduledExecutorService executor) {
+	public void execute() {
 		for (Map.Entry<String, AbstractTaskMonitor> taskMonitorEntry : taskMonitors.entrySet()) {
-			taskMonitorEntry.getValue().execute(executor);
+			taskMonitorEntry.getValue().execute(executorService);
 		}
 	}
-
 	public void register(String name, AbstractTaskMonitor taskMonitor) {
 		taskMonitors.put(name, taskMonitor);
 	}
@@ -57,7 +56,7 @@ public class DefaultTaskMonitorContainer implements TaskMonitorContainer {
 	{
 		constructTaskMonitor();
 		initScheduledExecutorService(MAXTHREADCOUNT);
-		this.execute(executorService);
+		this.execute();
 	}
 	
 	private void constructTaskMonitor() {

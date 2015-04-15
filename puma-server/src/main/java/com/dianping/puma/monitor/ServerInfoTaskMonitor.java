@@ -45,7 +45,7 @@ public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnab
 	}
 
 	@Override
-	public void run() {
+	public void doRun() {
 		Map<String, ServerStatus> serverStatuses = SystemStatusContainer.instance.listServerStatus();
 		Map<String, AtomicLong> insertCount = SystemStatusContainer.instance.listServerRowInsertCounters();
 		Map<String, AtomicLong> updateCount = SystemStatusContainer.instance.listServerRowUpdateCounters();

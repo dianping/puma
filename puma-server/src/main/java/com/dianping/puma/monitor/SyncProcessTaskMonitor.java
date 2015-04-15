@@ -28,7 +28,7 @@ public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runna
 	}
 
 	@Override
-	public void run() {
+	public void doRun() {
 		Map<String, ClientStatus> clientStatuses = SystemStatusContainer.instance.listClientStatus();
 		Map<String, ServerStatus> serverStatuses = SystemStatusContainer.instance.listServerStatus();
 		int dfileNum = 0;

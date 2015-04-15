@@ -12,7 +12,7 @@ import com.dianping.cat.message.Message;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ClientStatus;
 
-public class ClientInfoTaskMonitor extends AbstractTaskMonitor implements Runnable {
+public class ClientInfoTaskMonitor extends AbstractTaskMonitor {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ClientInfoTaskMonitor.class);
 
@@ -22,7 +22,7 @@ public class ClientInfoTaskMonitor extends AbstractTaskMonitor implements Runnab
 	}
 
 	@Override
-	public void run() {
+	public void doRun() {
 		Map<String, ClientStatus> clientStatuses = SystemStatusContainer.instance.listClientStatus();
 		Map<String, Long> clientSuccessSeq = SystemStatusContainer.instance.listClientSuccessSeq();
 		for (Map.Entry<String, ClientStatus> clientStatus : clientStatuses.entrySet()) {

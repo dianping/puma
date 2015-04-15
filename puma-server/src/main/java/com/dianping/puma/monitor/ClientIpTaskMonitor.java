@@ -22,7 +22,7 @@ public class ClientIpTaskMonitor extends AbstractTaskMonitor implements Runnable
 	}
 
 	@Override
-	public void run() {
+	public void doRun() {
 		Map<String, ClientStatus> clientStatuses = SystemStatusContainer.instance.listClientStatus();
 		for (Map.Entry<String, ClientStatus> clientStatus : clientStatuses.entrySet()) {
 			Cat.getProducer().logEvent("Puma.server." + clientStatus.getKey() + ".ip", clientStatus.getValue().getIp(),

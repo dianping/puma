@@ -3,7 +3,7 @@ package com.dianping.puma.monitor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public abstract class AbstractTaskMonitor {
+public abstract class AbstractTaskMonitor implements Runnable{
 
 	protected long initialDelay;
 	protected long period;
@@ -45,4 +45,9 @@ public abstract class AbstractTaskMonitor {
 	
 	public abstract void doExecute(ScheduledExecutorService executor);
 
+	public void run(){
+		doRun();
+	};
+	
+	public abstract void doRun();
 }

@@ -2,6 +2,7 @@ package com.dianping.puma.monitor;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -11,8 +12,11 @@ import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
+import com.dianping.lion.client.ConfigCache;
+import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ServerStatus;
+import com.dianping.puma.config.ServerLionCommonKey;
 
 public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnable {
 
@@ -26,18 +30,38 @@ public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnab
 
 	private Map<String, Long> preDdlCount;
 
-	public ServerInfoTaskMonitor(long initialDelay, long period, TimeUnit unit) {
-		super(initialDelay, period, unit);
-		init();
+	public ServerInfoTaskMonitor(long initialDelay, TimeUnit unit) {
+		super(initialDelay, unit);
+		initCount();
 		LOG.info("ServerInfo Task Monitor started.");
 	}
-
+	
 	@Override
-	public void doExecute(ScheduledExecutorService executor) {
-		executor.scheduleWithFixedDelay(this, initialDelay, period, unit);
+	public void doInit(){
+		this.setInterval(getLionInterval(ServerLionCommonKey.SERVERINFO_INTERVAL_NAME));
+		ConfigCache.getInstance().addChange(new ConfigChange() {
+			@Override
+			public void onChange(String key, String value) {
+				if (ServerLionCommonKey.SERVERINFO_INTERVAL_NAME.equals(key)) {
+					ServerInfoTaskMonitor.this.setInterval(Long.parseLong(value));
+					if(future!=null){
+						future.cancel(true);
+						if(ServerInfoTaskMonitor.this.executor!=null&&!ServerInfoTaskMonitor.this.executor.isShutdown()
+								&&!ServerInfoTaskMonitor.this.executor.isTerminated()){
+							ServerInfoTaskMonitor.this.execute(ServerInfoTaskMonitor.this.executor);
+						}
+					}
+				}
+			}
+		});
+	}
+	
+	@Override
+	public Future doExecute(ScheduledExecutorService executor) {
+		return executor.scheduleWithFixedDelay(this, initialDelay, interval, unit);
 	}
 
-	public void init() {
+	public void initCount() {
 		preUpdateCount = new HashMap<String, Long>();
 		preDeleteCount = new HashMap<String, Long>();
 		preInsertCount = new HashMap<String, Long>();
@@ -78,13 +102,13 @@ public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnab
 				preDdlCount.put(serverStatus.getKey(), ddlCount.get(serverStatus.getKey()).longValue());
 			}
 			Cat.getProducer().logEvent("Puma.server." + serverStatus.getKey() + ".insert", insertName, Message.SUCCESS,
-					"name = " + serverStatus.getKey() + "&duration = " + Long.toString(period));
+					"name = " + serverStatus.getKey() + "&duration = " + Long.toString(interval));
 			Cat.getProducer().logEvent("Puma.server." + serverStatus.getKey() + ".delete", deleteName, Message.SUCCESS,
-					"name = " + serverStatus.getKey() + "&duration = " + Long.toString(period));
+					"name = " + serverStatus.getKey() + "&duration = " + Long.toString(interval));
 			Cat.getProducer().logEvent("Puma.server." + serverStatus.getKey() + ".update", updateName, Message.SUCCESS,
-					"name = " + serverStatus.getKey() + "&duration = " + Long.toString(period));
+					"name = " + serverStatus.getKey() + "&duration = " + Long.toString(interval));
 			Cat.getProducer().logEvent("Puma.server." + serverStatus.getKey() + ".ddl", ddlName, Message.SUCCESS,
-					"name = " + serverStatus.getKey() + "&duration = " + Long.toString(period));
+					"name = " + serverStatus.getKey() + "&duration = " + Long.toString(interval));
 		}
 
 	}

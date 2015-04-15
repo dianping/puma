@@ -1,6 +1,7 @@
 package com.dianping.puma.monitor;
 
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -11,9 +12,13 @@ import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
+import com.dianping.lion.client.ConfigCache;
+import com.dianping.lion.client.ConfigChange;
+import com.dianping.lion.client.LionException;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ClientStatus;
 import com.dianping.puma.common.SystemStatusContainer.ServerStatus;
+import com.dianping.puma.config.ServerLionCommonKey;
 import com.dianping.puma.monitor.exception.MonitorThresholdException;
 
 public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runnable {
@@ -22,11 +27,34 @@ public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runna
 
 	private int numThreshold;
 
-	public SyncProcessTaskMonitor(long initialDelay, long period, TimeUnit unit) {
-		super(initialDelay, period, unit);
+	public SyncProcessTaskMonitor(long initialDelay, TimeUnit unit) {
+		super(initialDelay, unit);
 		LOG.info("SyncProcess Task Monitor started.");
 	}
 
+	@Override
+	public void doInit(){
+		this.setInterval(getLionInterval(ServerLionCommonKey.SYNCPROCESS_INTERVAL_NAME));
+		this.numThreshold = getNumThreshold(ServerLionCommonKey.SYNCPROCESS_DIFF_FILE_NUM);
+		ConfigCache.getInstance().addChange(new ConfigChange() {
+			@Override
+			public void onChange(String key, String value) {
+				if (ServerLionCommonKey.SYNCPROCESS_INTERVAL_NAME.equals(key)) {
+					SyncProcessTaskMonitor.this.setInterval(Long.parseLong(value));
+					if(future!=null){
+						future.cancel(true);
+						if(SyncProcessTaskMonitor.this.executor!=null&&!SyncProcessTaskMonitor.this.executor.isShutdown()
+								&&!SyncProcessTaskMonitor.this.executor.isTerminated()){
+							SyncProcessTaskMonitor.this.execute(SyncProcessTaskMonitor.this.executor);
+						}
+					}
+				} else if (ServerLionCommonKey.SYNCPROCESS_DIFF_FILE_NUM.equals(key)) {
+					numThreshold =Integer.getInteger(value).intValue();
+				}
+			}
+		});
+	}
+	
 	@Override
 	public void doRun() {
 		Map<String, ClientStatus> clientStatuses = SystemStatusContainer.instance.listClientStatus();
@@ -65,6 +93,20 @@ public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runna
 		}
 	}
 
+
+	@Override
+	public Future doExecute(ScheduledExecutorService executor) {
+		return executor.scheduleWithFixedDelay(this, initialDelay, interval, unit);
+	}
+
+	public void setNumThreshold(int numThreshold) {
+		this.numThreshold = numThreshold;
+	}
+
+	public int getNumThreshold() {
+		return numThreshold;
+	}
+	
 	private String getEventName(int dfileNum) {
 		String eventName;
 		if (dfileNum == 0) {
@@ -108,18 +150,19 @@ public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runna
 		}
 		return result;
 	}
-
-	@Override
-	public void doExecute(ScheduledExecutorService executor) {
-		executor.scheduleWithFixedDelay(this, initialDelay, period, unit);
+	
+	private int getNumThreshold(String keyName) {
+		int numFile = 2;
+		try {
+			Integer temp = ConfigCache.getInstance().getIntProperty(keyName);
+			if (temp != null) {
+				numFile = temp.intValue();
+			}
+		} catch (LionException e) {
+			LOG.error(e.getMessage(), e);
+		}
+		return numFile;
 	}
-
-	public void setNumThreshold(int numThreshold) {
-		this.numThreshold = numThreshold;
-	}
-
-	public int getNumThreshold() {
-		return numThreshold;
-	}
+	
 
 }

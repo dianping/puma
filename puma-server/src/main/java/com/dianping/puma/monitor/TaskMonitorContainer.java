@@ -15,4 +15,5 @@ public interface TaskMonitorContainer {
 
 	public void remove(AbstractTaskMonitor taskMonitor);
 
+	public void start();
 }

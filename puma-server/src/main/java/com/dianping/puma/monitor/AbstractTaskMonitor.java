@@ -1,19 +1,36 @@
 package com.dianping.puma.monitor;
 
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.dianping.lion.client.ConfigCache;
+import com.dianping.lion.client.LionException;
+
 public abstract class AbstractTaskMonitor implements Runnable{
 
-	protected long initialDelay;
-	protected long period;
-	protected TimeUnit unit;
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractTaskMonitor.class);
 	
-	public AbstractTaskMonitor(long initialDelay,long period,TimeUnit unit){
+	protected long initialDelay;
+	protected long interval;
+	protected TimeUnit unit;
+	protected ScheduledExecutorService executor;
+	@SuppressWarnings("unchecked")
+	protected Future future;
+	
+	public AbstractTaskMonitor(long initialDelay,TimeUnit unit){
 		this.initialDelay=initialDelay;
-		this.period=period;
 		this.unit=unit;
+		init();
 	}
+	
+	public void init(){
+		doInit();
+	}
+	public abstract void doInit();
 	
 	public void setInitialDelay(long initialDelay) {
 		this.initialDelay = initialDelay;
@@ -23,12 +40,12 @@ public abstract class AbstractTaskMonitor implements Runnable{
 		return initialDelay;
 	}
 
-	public void setPeriod(long period) {
-		this.period = period;
+	public void setInterval(long interval) {
+		this.interval = interval;
 	}
 
-	public long getPeriod() {
-		return period;
+	public long getInterval() {
+		return interval;
 	}
 
 	public void setUnit(TimeUnit unit) {
@@ -40,14 +57,29 @@ public abstract class AbstractTaskMonitor implements Runnable{
 	}
 	
 	public void execute(ScheduledExecutorService executor){
-		doExecute(executor);
+		this.executor = executor;
+		future = doExecute(executor);
 	}
 	
-	public abstract void doExecute(ScheduledExecutorService executor);
+	@SuppressWarnings("unchecked")
+	public abstract Future doExecute(ScheduledExecutorService executor);
 
 	public void run(){
 		doRun();
 	};
 	
 	public abstract void doRun();
+	
+	public long getLionInterval(String intervalName) {
+		long interval = 60000;
+		try {
+			Long temp = ConfigCache.getInstance().getLongProperty(intervalName);
+			if (temp != null) {
+				interval = temp.longValue();
+			}
+		} catch (LionException e) {
+			LOG.error(e.getMessage(), e);
+		}
+		return interval;
+	}
 }

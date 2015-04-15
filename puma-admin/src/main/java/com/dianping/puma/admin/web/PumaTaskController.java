@@ -115,9 +115,6 @@ public class PumaTaskController {
 			PumaTask pumaTask = pumaTaskService.find(id);
 
 			map.put("entity", pumaTask);
-			if(pumaTask.getAcceptedDataInfos()!=null){
-				map.put("acceptedDataInfoStr", GsonUtil.toJson(pumaTask.getAcceptedDataInfos()));
-			}
 			map.put("path", "puma-task");
 			map.put("subPath", "create");
 		} catch (Exception e) {
@@ -138,7 +135,8 @@ public class PumaTaskController {
 			String binlogFile,
 			Long binlogPosition,
 			int preservedDay,
-			String acceptedDataInfoStr) {
+			String acceptedDatabase[],
+			String acceptedTable[]) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
@@ -169,8 +167,8 @@ public class PumaTaskController {
 			pumaTask.setBinlogInfo(binlogInfo);
 			pumaTask.setPreservedDay(preservedDay);  
 			Type type = new TypeToken<HashMap<String,AcceptedTables>>() {}.getType(); 
-			Map<String,AcceptedTables> acceptedDataInfos = (Map<java.lang.String, AcceptedTables>) GsonUtil.fromJson(acceptedDataInfoStr, type);
-			pumaTask.setAcceptedDataInfos(acceptedDataInfos);
+			//Map<String,AcceptedTables> acceptedDataInfos = (Map<java.lang.String, AcceptedTables>) GsonUtil.fromJson(acceptedDataInfoStr, type);
+			pumaTask.setAcceptedDataInfos(getAcceptedDatas(acceptedDatabase,acceptedTable));
 			// Save puma task state to persistent storage.
 			if (operation == ActionOperation.CREATE) {
 				pumaTaskService.create(pumaTask);
@@ -310,5 +308,31 @@ public class PumaTaskController {
 		}
 
 		return GsonUtil.toJson(map);
+	}
+	
+	private Map<String,AcceptedTables> getAcceptedDatas(String []acceptedDatabase,String []acceptedTable)
+	{
+		if(acceptedDatabase.length > 0&&acceptedTable.length > 0&&acceptedDatabase.length==acceptedTable.length)
+		{
+			Map<String,AcceptedTables> acceptedDataInfos = new HashMap<String,AcceptedTables>();
+			int index = 0;
+			for(String database:acceptedDatabase){
+				if(StringUtils.isBlank(database)){
+					continue;
+				}
+				AcceptedTables acceptedTablses = new AcceptedTables();
+				String acceptedTbls[] = acceptedTable[index++].split("&");
+				List<String> tblList = new ArrayList<String>();
+				for(String tbl :acceptedTbls){
+					if(StringUtils.isNotBlank(tbl)){
+						tblList.add(tbl);
+					}
+				}
+				acceptedTablses.setTables(tblList);
+				acceptedDataInfos.put(database, acceptedTablses);
+			}
+			return acceptedDataInfos;
+		}
+		return null;
 	}
 }

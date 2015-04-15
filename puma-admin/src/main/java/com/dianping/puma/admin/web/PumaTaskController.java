@@ -141,23 +141,22 @@ public class PumaTaskController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			ActionOperation operation;
-
+			ActionOperation operation = null;
+			Map<String,AcceptedTables> acceptedDataInfos = getAcceptedDatas(acceptedDatabase,acceptedTable);
 			PumaTask pumaTask = pumaTaskService.find(name);
 			if (pumaTask == null) {
 				pumaTask = new PumaTask();
 				operation = ActionOperation.CREATE;
-			} else {
+			} else{
 				if (!binlogFile.equals(pumaTask.getBinlogInfo().getBinlogFile())
 						|| !binlogPosition.equals(pumaTask.getBinlogInfo().getBinlogPosition())) {
 					operation = ActionOperation.UPDATE;
 				} else if(pumaTask.getPreservedDay()!= preservedDay){
 					operation = ActionOperation.PROLONG;
-				}else{
+				}else if(!acceptedDataInfos.equals(pumaTask.getAcceptedDataInfos())){
 					operation = ActionOperation.FILTER;
 				}
 			}
-
 			pumaTask.setName(name);
 			pumaTask.setSrcDBInstanceName(srcDBInstanceName);
 			pumaTask.setPumaServerName(pumaServerName);
@@ -168,8 +167,9 @@ public class PumaTaskController {
 			pumaTask.setPreservedDay(preservedDay);  
 			Type type = new TypeToken<HashMap<String,AcceptedTables>>() {}.getType(); 
 			//Map<String,AcceptedTables> acceptedDataInfos = (Map<java.lang.String, AcceptedTables>) GsonUtil.fromJson(acceptedDataInfoStr, type);
-			pumaTask.setAcceptedDataInfos(getAcceptedDatas(acceptedDatabase,acceptedTable));
+			pumaTask.setAcceptedDataInfos(acceptedDataInfos);
 			// Save puma task state to persistent storage.
+			
 			if (operation == ActionOperation.CREATE) {
 				pumaTaskService.create(pumaTask);
 			} else {
@@ -312,7 +312,7 @@ public class PumaTaskController {
 	
 	private Map<String,AcceptedTables> getAcceptedDatas(String []acceptedDatabase,String []acceptedTable)
 	{
-		if(acceptedDatabase!=null&&acceptedTable!=null){
+		if(acceptedDatabase == null&&acceptedTable == null){
 			return null;
 		}
 		if(acceptedDatabase.length > 0&&acceptedTable.length > 0&&acceptedDatabase.length==acceptedTable.length)

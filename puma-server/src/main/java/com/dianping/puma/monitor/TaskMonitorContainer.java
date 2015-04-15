@@ -1,7 +1,6 @@
 package com.dianping.puma.monitor;
 
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 
 public interface TaskMonitorContainer {
 

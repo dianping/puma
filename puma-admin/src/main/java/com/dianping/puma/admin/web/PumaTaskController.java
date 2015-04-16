@@ -151,12 +151,14 @@ public class PumaTaskController {
 				if (!binlogFile.equals(pumaTask.getBinlogInfo().getBinlogFile())
 						|| !binlogPosition.equals(pumaTask.getBinlogInfo().getBinlogPosition())) {
 					operation = ActionOperation.UPDATE;
-				} else if(pumaTask.getPreservedDay()!= preservedDay){
-					operation = ActionOperation.PROLONG;
+				}else{
+					operation = ActionOperation.CHANGE;
+				} /*else if(pumaTask.getPreservedDay()!= preservedDay){
+					operation = ActionOperation.DEFAULT;
 				}else if((acceptedDataInfos != null && !acceptedDataInfos.equals(pumaTask.getAcceptedDataInfos()))
 						||(acceptedDataInfos == null && pumaTask.getAcceptedDataInfos() != null)){
-					operation = ActionOperation.FILTER;
-				}
+					operation = ActionOperation.DEFAULT;
+				}*/
 			}
 			pumaTask.setName(name);
 			pumaTask.setSrcDBInstanceName(srcDBInstanceName);

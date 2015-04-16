@@ -1,9 +1,9 @@
 /**
  * Project: ${puma-common.aid}
- * 
+ *
  * File Created at 2012-6-23
  * $Id$
- * 
+ *
  * Copyright 2010 dianping.com.
  * All rights reserved.
  *
@@ -23,19 +23,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 
  * @author Leo Liang
- * 
  */
 public final class PumaThreadUtils {
 
-	private static final String								PREFIX		= "Puma-thread-";
+	private static final String PREFIX = "Puma-thread-";
 
-	private static List<WeakReference<Thread>>				threadList	= Collections
-																				.synchronizedList(new ArrayList<WeakReference<Thread>>());
-	private static ConcurrentHashMap<String, AtomicInteger>	taskToSeq	= new ConcurrentHashMap<String, AtomicInteger>();
+	private static List<WeakReference<Thread>> threadList = Collections
+			.synchronizedList(new ArrayList<WeakReference<Thread>>());
 
-	private static ThreadGroup								threadGroup	= new ThreadGroup("pumaThreadGroup");
+	private static ConcurrentHashMap<String, AtomicInteger> taskToSeq = new ConcurrentHashMap<String, AtomicInteger>();
+
+	private static ThreadGroup threadGroup = new ThreadGroup("pumaThreadGroup");
 
 	private PumaThreadUtils() {
 

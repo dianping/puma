@@ -15,23 +15,30 @@ public class ScheduledExecutorUtils {
 	private static final String PREFIX = "threadfactory-";
 
 	private static final String INFIX = "-";
-	private static Map<String, WeakReference<ScheduledExecutorService>> scheduledExecutorServiceList = new ConcurrentHashMap<String, WeakReference<ScheduledExecutorService>>();
+	
+	private static Map<String, WeakReference<ScheduledExecutorService>> scheduledExecutorServices = new ConcurrentHashMap<String, WeakReference<ScheduledExecutorService>>();
 
 	public static ScheduledExecutorService createScheduledExecutorService(int poolSize, String factoryName) {
+		if(scheduledExecutorServices.containsKey(factoryName)&& scheduledExecutorServices.get(factoryName).get()!=null){
+			return scheduledExecutorServices.get(factoryName).get();
+		}
 		ScheduledExecutorService executorService = Executors.newScheduledThreadPool(poolSize, new PumaThreadFactory(
 				PREFIX + factoryName + Integer.toString(poolSize) + INFIX));
-		scheduledExecutorServiceList.put(factoryName, new WeakReference<ScheduledExecutorService>(executorService));
+		scheduledExecutorServices.put(factoryName, new WeakReference<ScheduledExecutorService>(executorService));
 		return executorService;
 	}
 
 	public static ScheduledExecutorService createSingleScheduledExecutorService(String factoryName) {
+		if(scheduledExecutorServices.containsKey(factoryName)&& scheduledExecutorServices.get(factoryName).get()!=null){
+			return scheduledExecutorServices.get(factoryName).get();
+		}
 		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(new PumaThreadFactory(PREFIX + factoryName
 				+ Integer.toString(1) + INFIX));
-		scheduledExecutorServiceList.put(factoryName, new WeakReference<ScheduledExecutorService>(executorService));
+		scheduledExecutorServices.put(factoryName, new WeakReference<ScheduledExecutorService>(executorService));
 		return executorService;
 	}
 
-	static class PumaThreadFactory implements ThreadFactory {
+	private static class PumaThreadFactory implements ThreadFactory {
 
 		private String factoryName;
 

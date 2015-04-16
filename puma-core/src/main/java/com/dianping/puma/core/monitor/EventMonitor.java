@@ -1,49 +1,24 @@
 package com.dianping.puma.core.monitor;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.message.Event;
 
-public class EventMonitor {
+public class EventMonitor extends AbstractMonitor {
 
-	private String type;
+	@Override
+	public void record(String name, String status) {
+		if (!isStopped()) {
+			startCountingIfNeeded(name);
+			incrCountingIfExists(name);
 
-	// Default logEvent interval is 1.
-	private long interval;
-
-	private long count = 0L;
-
-	public EventMonitor() {
-		this.interval = 1L;
-	}
-
-	public EventMonitor(long interval) {
-		this.interval = interval;
-	}
-
-	public void log(String name) {
-		if (doCount()) {
-			Cat.logEvent(this.type, name);
+			if (checkCountingIfExists(name)) {
+				Cat.logEvent(getType(), name, status, "");
+			}
 		}
 	}
 
-	public void logSuccess(String name) {
-		if (doCount()) {
-			Cat.logEvent(this.type, name, Event.SUCCESS, "");
-		}
-	}
+	@Override
+	protected void doStart() {}
 
-	public void logFailure(String name) {
-		if (doCount()) {
-			Cat.logEvent(this.type, name, "1", "");
-		}
-	}
-
-	private synchronized boolean doCount() {
-		if (++this.count == this.interval) {
-			this.count = 0;
-			return true;
-		} else {
-			return false;
-		}
-	}
+	@Override
+	protected void doStop() {}
 }

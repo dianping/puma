@@ -124,7 +124,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 			return true;
 		}
 		if (StringUtils.isNotBlank(database)) {
-			if (acceptedDataTables.containsKey(database.toLowerCase())) {
+			if (acceptedDataTables.containsKey(database)) {
 				if (StringUtils.isNotBlank(table)) {
 					return acceptedDataTables.get(database).getTables().contains(table);
 				}

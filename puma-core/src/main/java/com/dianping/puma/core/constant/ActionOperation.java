@@ -4,5 +4,6 @@ public enum ActionOperation {
 	CREATE,
 	UPDATE,
 	REMOVE,
+	FILTER,
 	CHANGE
 }

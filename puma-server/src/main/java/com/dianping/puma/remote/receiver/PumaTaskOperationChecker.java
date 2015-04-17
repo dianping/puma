@@ -76,10 +76,14 @@ public class PumaTaskOperationChecker implements EventListener {
 				LOG.info("Receive puma task operation event: REMOVE.");
 				taskExecutorContainer.removeEvent(pumaTaskOperationEvent);
 				break;
-			case CHANGE:
-				LOG.info("Receive puma task operation event: PROLONG or FILTER or UNCHANGE.");
+			case FILTER:
+				LOG.info("Receive puma task operation event: FILTER or CHANGE.");
 				taskExecutorContainer.prolongEvent(pumaTaskOperationEvent);
 				taskExecutorContainer.filterEvent(pumaTaskOperationEvent);
+				break;
+			case CHANGE:
+				LOG.info("Receive puma task operation event: PROLONG or CHANGE.");
+				taskExecutorContainer.prolongEvent(pumaTaskOperationEvent);
 				break;
 			default:
 				LOG.error("Receive illegal puma task operation event `{}`.", operation);

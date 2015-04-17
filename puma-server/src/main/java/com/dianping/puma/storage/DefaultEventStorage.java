@@ -365,7 +365,7 @@ public class DefaultEventStorage implements EventStorage {
 				if(acceptedDataTables.containsKey(event.getDatabase())){
 					if (StringUtils.isNotBlank(event.getTable())) {
 						if (log.isDebugEnabled()) {
-							log.debug("table:" + event.getTable().toLowerCase());
+							log.debug("table:" + event.getTable());
 						}
 						return acceptedDataTables.get(event.getDatabase()).isContains((event.getTable()));
 					}

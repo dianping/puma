@@ -120,13 +120,13 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 	}
 
 	public boolean isRefresh(String database, String table) {
-		if (acceptedDataTables == null && acceptedDataTables.isEmpty()) {
+		if (acceptedDataTables == null || acceptedDataTables.isEmpty()) {
 			return true;
 		}
 		if (StringUtils.isNotBlank(database)) {
 			if (acceptedDataTables.containsKey(database.toLowerCase())) {
 				if (StringUtils.isNotBlank(table)) {
-					return acceptedDataTables.get(database.toLowerCase()).getTables().contains(table.toLowerCase());
+					return acceptedDataTables.get(database).getTables().contains(table);
 				}
 				return true;
 			}
@@ -199,7 +199,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 	private String getSqlQuery() {
 		StringBuilder sqlStr = new StringBuilder();
 		sqlStr.append(QUERY_SQL);
-		if (acceptedDataTables == null && acceptedDataTables.isEmpty()) {
+		if (acceptedDataTables == null || acceptedDataTables.isEmpty()) {
 			return QUERY_SQL;
 		}
 		sqlStr.append(WHERE_SQL);
@@ -222,7 +222,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetasInfoFetcher {
 	}
 
 	private void setStatementParams(PreparedStatement ps) throws SQLException {
-		if (acceptedDataTables == null && acceptedDataTables.isEmpty()) {
+		if (acceptedDataTables == null || acceptedDataTables.isEmpty()) {
 			return;
 		}
 		int signal = 0;

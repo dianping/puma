@@ -10,12 +10,20 @@ public class TransactionMonitor extends AbstractMonitor {
 
 	private ConcurrentMap<String, Transaction> transactions = new ConcurrentHashMap<String, Transaction>();
 
+	public TransactionMonitor(String type) {
+		super(type);
+	}
+
+	public TransactionMonitor(String type, Long countThreshold) {
+		super(type, countThreshold);
+	}
+
 	public void recordBegin(String name) {
 		if (!isStopped()) {
 			startCountingIfNeeded(name);
 			incrCountingIfExists(name);
 			if (checkCountingIfExists(name)) {
-				transactions.put(name, Cat.newTransaction(getType(), name));
+				transactions.put(name, Cat.newTransaction(this.type, name));
 			}
 		}
 	}

@@ -4,6 +4,14 @@ import com.dianping.cat.Cat;
 
 public class EventMonitor extends AbstractMonitor {
 
+	public EventMonitor(String type) {
+		super(type);
+	}
+
+	public EventMonitor(String type, Long countThreshold) {
+		super(type, countThreshold);
+	}
+
 	@Override
 	public void record(String name, String status) {
 		if (!isStopped()) {
@@ -11,7 +19,7 @@ public class EventMonitor extends AbstractMonitor {
 			incrCountingIfExists(name);
 
 			if (checkCountingIfExists(name)) {
-				Cat.logEvent(getType(), name, status, "");
+				Cat.logEvent(this.type, name, status, "");
 			}
 		}
 	}

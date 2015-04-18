@@ -4,7 +4,7 @@ import java.util.concurrent.ConcurrentMap;
 
 public abstract class AbstractMonitor implements Monitor {
 
-	private String type;
+	protected String type;
 
 	private ConcurrentMap<String, Long> counts;
 
@@ -12,12 +12,14 @@ public abstract class AbstractMonitor implements Monitor {
 
 	private boolean stopped = true;
 
-	public String getType() {
-		return type;
+	public AbstractMonitor(String type) {
+		this.type = type;
+		this.countThreshold = 1L;
 	}
 
-	public void setType(String type) {
+	public AbstractMonitor(String type, Long countThreshold) {
 		this.type = type;
+		this.countThreshold = countThreshold;
 	}
 
 	protected void incrCountingIfExists(String name) {

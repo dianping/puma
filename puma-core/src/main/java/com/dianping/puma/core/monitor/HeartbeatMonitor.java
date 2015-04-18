@@ -1,10 +1,62 @@
 package com.dianping.puma.core.monitor;
 
-public abstract class HeartbeatMonitor implements Monitor {
+import com.dianping.cat.Cat;
+import com.dianping.puma.core.util.PumaThreadPool;
 
-	// Count for async input of heartbeat monitor.
-	private long iCount;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
-	// Count threshold for async input of heartbeat monitor.
-	private long iCountThreshold;
+public abstract class HeartbeatMonitor extends AbstractMonitor {
+
+	private int delaySeconds;
+
+	private int periodSeconds;
+
+	private ScheduledFuture scheduledFuture;
+
+	private ConcurrentMap<String, String> statuses = new ConcurrentHashMap<String, String>();
+
+	public HeartbeatMonitor(String type, int delaySeconds, int periodSeconds) {
+		super(type);
+		this.delaySeconds = delaySeconds;
+		this.periodSeconds = periodSeconds;
+	}
+
+	public HeartbeatMonitor(String type, int delaySeconds, int periodSeconds, Long countThreshold) {
+		super(type, countThreshold);
+		this.delaySeconds = delaySeconds;
+		this.periodSeconds = periodSeconds;
+	}
+
+	@Override
+	public void record(String name, String status) {
+		if (!isStopped()) {
+			startCountingIfNeeded(name);
+			incrCountingIfExists(name);
+
+			statuses.put(name, status);
+		}
+	}
+
+	@Override
+	protected void doStart() {
+		this.scheduledFuture = PumaThreadPool.schedule(new Runnable() {
+			@Override
+			public void run() {
+				for (Map.Entry entry: statuses.entrySet()) {
+					Cat.logEvent(type, (String) entry.getKey(), (String) entry.getValue(), "");
+				}
+			}
+		}, delaySeconds, periodSeconds, TimeUnit.SECONDS);
+	}
+
+	@Override
+	protected void doStop() {
+		if (this.scheduledFuture != null && !this.scheduledFuture.isCancelled()) {
+			this.scheduledFuture.cancel(true);
+		}
+	}
 }

@@ -100,7 +100,7 @@ public class DDLParser {
 	private static final String DROP_VIEW_PATTERN            = BEGIN + DROP + VIEW + IF_EXISTS + NAME + SPECIFICATION + SEMICOLON + END;
 
 	// DDL rename statements.
-	private static final String RENAME_DATABASE_PATTERN      = BEGIN + RENAME + DATABASE + NAME + SPECIFICATION + SEMICOLON + END;
+	private static final String RENAME_DATABASE_PATTERN      = BEGIN + RENAME + DATABASE + NAME + TO + NAME + SEMICOLON + END;
 	private static final String RENAME_TABLE_PATTERN         = BEGIN + RENAME + TABLE + NAME + TO + NAME + SPECIFICATION + SEMICOLON + END;
 
 	// DDL truncate statements.
@@ -251,14 +251,97 @@ public class DDLParser {
 	}
 
 	private static DDLResult parseDDLDrop(String queryString) {
+		PatternMatcher matcher = new Perl5Matcher();
+
+		// drop database statements.
+		if (parseDDL(matcher, queryString, DROP_DATABASE_PATTERN)) {
+			String name = parseDBName(matcher.getMatch().group(4));
+			return new DDLResult(DDLType.DROP_DATABASE, name, null);
+		}
+
+		// drop event statements.
+		if (parseDDL(matcher, queryString, DROP_EVENT_PATTERN)) {
+			return new DDLResult(DDLType.DROP_EVENT);
+		}
+
+		// drop function statements.
+		if (parseDDL(matcher, queryString, DROP_FUNCTION_PATTERN)) {
+			return new DDLResult(DDLType.DROP_FUNCTION);
+		}
+
+		// drop index statements.
+		if (parseDDL(matcher, queryString, DROP_INDEX_PATTERN)) {
+			return new DDLResult(DDLType.DROP_INDEX);
+		}
+
+		// drop logfile group statements.
+		if (parseDDL(matcher, queryString, DROP_LOGFILE_GROUP_PATTERN)) {
+			return new DDLResult(DDLType.DROP_LOGFILE_GROUP);
+		}
+
+		// drop procedure statements.
+		if (parseDDL(matcher, queryString, DROP_PROCEDURE_PATTERN)) {
+			return new DDLResult(DDLType.DROP_PROCEDURE);
+		}
+
+		// drop server statements.
+		if (parseDDL(matcher, queryString, DROP_SERVER_PATTERN)) {
+			return new DDLResult(DDLType.DROP_SERVER);
+		}
+
+		// drop table statements.
+		if (parseDDL(matcher, queryString, DROP_TABLE_PATTERN)) {
+			String names[] = parseDBTBName(matcher.getMatch().group(5));
+			return new DDLResult(DDLType.DROP_TABLE, names[0], names[1]);
+		}
+
+		// drop tablespace statements.
+		if (parseDDL(matcher, queryString, DROP_TABLESPACE_PATTERN)) {
+			return new DDLResult(DDLType.DROP_TABLESPACE);
+		}
+
+		// drop trigger statements.
+		if (parseDDL(matcher, queryString, DROP_TRIGGER_PATTERN)) {
+			return new DDLResult(DDLType.DROP_TRIGGER);
+		}
+
+		// drop view statements.
+		if (parseDDL(matcher, queryString, DROP_VIEW_PATTERN)) {
+			return new DDLResult(DDLType.DROP_VIEW);
+		}
+
 		return null;
 	}
 
 	private static DDLResult parseDDLRename(String queryString) {
+		PatternMatcher matcher = new Perl5Matcher();
+
+		// rename database statements.
+		if (parseDDL(matcher, queryString, RENAME_DATABASE_PATTERN)) {
+			String name = parseDBName(matcher.getMatch().group(3));
+			String oriName = parseDBName(matcher.getMatch().group(5));
+			return new DDLResult(DDLType.RENAME_DATABASE, name, null, oriName, null);
+		}
+
+		// rename table statements.
+		if (parseDDL(matcher, queryString, RENAME_TABLE_PATTERN)) {
+			String names[] = parseDBTBName(matcher.getMatch().group(3));
+			String oriNames[] = parseDBTBName(matcher.getMatch().group(5));
+			return new DDLResult(DDLType.RENAME_TABLE, names[0], names[1], oriNames[0], oriNames[1]);
+		}
+
 		return null;
 	}
 
 	private static DDLResult parseDDLTruncate(String queryString) {
+		PatternMatcher matcher = new Perl5Matcher();
+
+		// truncate table statements.
+		if (parseDDL(matcher, queryString, TRUNCATE_TABLE_PATTERN)) {
+			String names[] = parseDBTBName(matcher.getMatch().group(3));
+			return new DDLResult(DDLType.TRUNCATE_TABLE, names[0], names[1]);
+		}
+
 		return null;
 	}
 

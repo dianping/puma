@@ -26,6 +26,14 @@ public class DDLResult {
 		this.tableName = tableName;
 	}
 
+	public DDLResult(DDLType type, String schemaName, String tableName, String oriSchemaName, String oriTableName) {
+		this.type = type;
+		this.schemaName = schemaName;
+		this.tableName = tableName;
+		this.oriSchemaName = oriSchemaName;
+		this.oriTableName = oriTableName;
+	}
+
 	public String getSchemaName() {
 		return schemaName;
 	}

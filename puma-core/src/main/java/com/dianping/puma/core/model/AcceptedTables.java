@@ -15,42 +15,42 @@ public class AcceptedTables {
 	public List<String> getTables() {
 		return tables;
 	}
-	
+
 	@Override
-	public boolean equals(Object o){
-		if(o == this){
+	public boolean equals(Object o) {
+		if (o == this) {
 			return true;
 		}
-		if(!(o instanceof AcceptedTables)){
+		if (!(o instanceof AcceptedTables)) {
 			return false;
 		}
-		AcceptedTables m = (AcceptedTables)o;
-		if(m.tables == null){
-			if(this.tables != null)
+		AcceptedTables m = (AcceptedTables) o;
+		if (m.tables == null) {
+			if (this.tables != null)
 				return false;
-		}else{
-			if(this.tables == null)
+		} else {
+			if (this.tables == null)
 				return false;
-			else{
-				if(this.tables.size() == m.tables.size()){
-					for(String table : m.tables){
-						if(!this.tables.contains(table)){
+			else {
+				if (this.tables.size() == m.tables.size()) {
+					for (String table : m.tables) {
+						if (!this.tables.contains(table)) {
 							return false;
 						}
 					}
+				} else {
+					return false;
 				}
-				return false;
 			}
-				
 		}
 		return true;
 	}
-	
+
 	@Override
-	public int hashCode(){
+	public int hashCode() {
 		return tables.hashCode();
 	}
-	
+
 	public boolean isContains(String tableName) {
 		if (tables != null && tables.size() != 0) {
 			for (String table : tables) {

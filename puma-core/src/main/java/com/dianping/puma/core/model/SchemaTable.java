@@ -41,6 +41,30 @@ public class SchemaTable {
 		return compare(this.schema, schemaTable.schema) && compare(this.table, schemaTable.table);
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+
+		SchemaTable that = (SchemaTable) o;
+
+		if (schema != null ? !schema.equals(that.schema) : that.schema != null)
+			return false;
+		if (table != null ? !table.equals(that.table) : that.table != null)
+			return false;
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = schema != null ? schema.hashCode() : 0;
+		result = 31 * result + (table != null ? table.hashCode() : 0);
+		return result;
+	}
+
 	public String getFullName() {
 		return schema + SPLIT + table;
 	}

@@ -1,14 +1,13 @@
 package com.dianping.puma.parser.meta;
 
+import com.dianping.puma.core.model.SchemaTable;
+import com.dianping.puma.core.model.SchemaTableSet;
+
 public interface TableMetaCache {
 
-	TableMeta getTableMeta(String schema, String table);
+	TableMeta getTableMeta(SchemaTable schemaTable);
 
-	void clearTableMeta(String schema, String table);
+	void clearTableMeta(SchemaTable schemaTable);
 
-	void clearTableMetaBySchemaName(String schema);
-
-	void clearTableMetaAll();
-
-	void refreshTableMeta(Tables tables);
+	void refreshTableMeta(SchemaTableSet schemaTableSet);
 }

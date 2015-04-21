@@ -33,6 +33,37 @@
                     </div>
                 </div>
                 <div class="form-group">
+                    <label class="col-md-3 control-label" for="isMigrate">任务类型:</label>
+
+                    <div class="col-md-7">
+                        <select id="isMigrate" name="isMigrate" class="form-control">
+                            <option value="true">迁移任务</option>
+                            <option value="false">辅维度同步任务</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-3 control-label" for="binlogName">BinlogName:</label>
+
+                    <div class="col-md-7">
+                        <input class="form-control" id="binlogName" name="binlogName" type="text"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-3 control-label" for="binlogPos">BinlogPos:</label>
+
+                    <div class="col-md-7">
+                        <input class="form-control" id="binlogPos" name="binlogPos" type="text"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-3 control-label" for="seqTimestamp">开始同步时间:</label>
+
+                    <div class="col-md-7">
+                        <input class="form-control" id="seqTimestamp" name="seqTimestamp" type="text"/>
+                    </div>
+                </div>
+                <div class="form-group">
                     <label class="col-md-3 control-label"></label>
 
                     <div class="col-md-7">
@@ -43,3 +74,21 @@
         </form>
     </div>
 </div>
+<script>
+    var changeForm = function(){
+        if($('#isMigrate').val() == 'true'){
+            $('#binlogName').parent().parent().show();
+            $('#binlogPos').parent().parent().show();
+            $('#seqTimestamp').parent().parent().hide();
+        }else{
+            $('#binlogName').parent().parent().hide();
+            $('#binlogPos').parent().parent().hide();
+            $('#seqTimestamp').parent().parent().show();
+        }
+    }
+
+    $('#isMigrate').on('change',changeForm);
+
+    changeForm();
+
+</script>

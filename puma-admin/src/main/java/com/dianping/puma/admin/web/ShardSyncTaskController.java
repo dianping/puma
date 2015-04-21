@@ -16,10 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -68,12 +65,9 @@ public class ShardSyncTaskController {
     }
 
     @RequestMapping(value = {"/shard-sync-task/create"}, method = RequestMethod.POST)
-    public String create(String tableName, String ruleName, String syncServerName) throws SendFailedException {
-        ShardSyncTask task = new ShardSyncTask();
-        task.setTableName(tableName);
-        task.setRuleName(ruleName);
+    public String create(@ModelAttribute ShardSyncTask task, String syncServerName) throws SendFailedException {
         task.setSyncServerName(syncServerName);
-        task.setName("ShardSyncTask-" + ruleName + "-" + tableName);
+        task.setName("ShardSyncTask-" + task.getRuleName() + "-" + task.getTableName());
         shardSyncTaskService.create(task);
 
         shardSyncTaskOperationReporter.report(syncServerName, task.getName(), ActionOperation.CREATE);
@@ -87,11 +81,11 @@ public class ShardSyncTaskController {
         Map<String, Object> map = new HashMap<String, Object>();
 
         try {
-        ShardSyncTask task = shardSyncTaskService.find(name);
-        if (task != null) {
-            shardSyncTaskService.remove(name);
-            shardSyncTaskOperationReporter.report(task.getSyncServerName(), task.getName(), ActionOperation.REMOVE);
-        }
+            ShardSyncTask task = shardSyncTaskService.find(name);
+            if (task != null) {
+                shardSyncTaskService.remove(name);
+                shardSyncTaskOperationReporter.report(task.getSyncServerName(), task.getName(), ActionOperation.REMOVE);
+            }
 
             map.put("success", true);
         } catch (MongoException e) {

@@ -122,23 +122,12 @@ public abstract class AbstractSender implements Sender, Notifiable {
 					if (canMissEvent) {
 						LOG.error(String.format(MSG_SKIP, maxTryTimes, context.getPumaServerName(),
 								context.getBinlogFileName(), context.getBinlogStartPos(), context.getNextBinlogPos()));
-						if (this.notifyService != null) {
-							this.notifyService.alarm(
-									String.format(MSG_SKIP, maxTryTimes, context.getPumaServerName(),
-											context.getBinlogFileName(), context.getBinlogStartPos(),
-											context.getNextBinlogPos()), e, false);
-						}
 						return;
 					} else {
 						if (retryCount % 100 == 0) {
 							LOG.error(String.format(MSG_LOOP_FAILED, maxTryTimes, context.getPumaServerName(),
 									context.getBinlogFileName(), context.getBinlogStartPos(),
 									context.getNextBinlogPos()));
-							if (this.notifyService != null) {
-								this.notifyService.alarm(String.format(MSG_LOOP_FAILED, maxTryTimes,
-										context.getPumaServerName(), context.getBinlogFileName(),
-										context.getBinlogStartPos(), context.getNextBinlogPos()), e, true);
-							}
 						}
 					}
 				}

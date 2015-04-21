@@ -294,10 +294,6 @@ public class DefaultDataHandler extends AbstractDataHandler {
 					.append(context.getBinlogStartPos()).append(" Skip to ").append(context.getNextBinlogPos());
 			msg.append(" columnPos: ").append(pos);
 			log.warn(msg.toString());
-			if (getNotifyService() != null) {
-				getNotifyService().alarm(msg.toString(), null, false);
-			}
-
 			skipEvent((byte) 0, result, context);
 
 			return false;
@@ -316,9 +312,6 @@ public class DefaultDataHandler extends AbstractDataHandler {
 				.append(" Skip to ").append(context.getNextBinlogPos());
 		if(log.isDebugEnabled()) {
 			log.debug(msg.toString());
-		}
-		if (getNotifyService() != null) {
-			getNotifyService().alarm(msg.toString(), null, false);
 		}
 	}
 

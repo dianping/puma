@@ -63,7 +63,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSyncTaskState> {
     private static final Logger logger = LoggerFactory.getLogger(ShardSyncTaskExecutor.class);
 
-    private ShardSyncTask task;
+    protected ShardSyncTask task;
 
     private volatile boolean inited = false;
 
@@ -82,8 +82,6 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
     protected List<TableShardRuleConfig> tableShardRuleConfigList = new CopyOnWriteArrayList<TableShardRuleConfig>();
 
     protected String originDsJdbcRef;
-
-    protected boolean switchOn;
 
     private PumaServerService pumaServerService;
 
@@ -266,32 +264,36 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
         routerRuleConfig.setTableShardConfigs(Lists.newArrayList(tableShardRuleConfigOrigin));
         this.routerRuleOrigin = RouterRuleBuilder.build(routerRuleConfig);
 
-        for (TableShardRuleConfig config : tableShardRuleConfigList) {
-            RouterRuleConfig tempRouterRuleConfig = new RouterRuleConfig();
-            tempRouterRuleConfig.setTableShardConfigs(Lists.newArrayList(config));
-            routerRuleList.add(RouterRuleBuilder.build(tempRouterRuleConfig));
+        if (!task.isMigrate()) {
+            for (TableShardRuleConfig config : tableShardRuleConfigList) {
+                RouterRuleConfig tempRouterRuleConfig = new RouterRuleConfig();
+                tempRouterRuleConfig.setTableShardConfigs(Lists.newArrayList(config));
+                routerRuleList.add(RouterRuleBuilder.build(tempRouterRuleConfig));
+            }
         }
     }
 
     protected void initRouter() {
-        DataSourceRouterImpl routerForMigrate = new DataSourceRouterImpl();
-        routerForMigrate.setRouterRule(routerRuleOrigin);
-        routerForMigrate.setDataSourcePool(dataSourcePool);
-        this.routerForMigrate = routerForMigrate;
-        this.routerForMigrate.init();
+        if (task.isMigrate()) {
+            DataSourceRouterImpl routerForMigrate = new DataSourceRouterImpl();
+            routerForMigrate.setRouterRule(routerRuleOrigin);
+            routerForMigrate.setDataSourcePool(dataSourcePool);
+            this.routerForMigrate = routerForMigrate;
+            this.routerForMigrate.init();
+        } else {
+            for (RouterRule routerRule : routerRuleList) {
+                DataSourceRouterImpl tempRouter = new DataSourceRouterImpl();
+                tempRouter.setRouterRule(routerRule);
+                tempRouter.setDataSourcePool(dataSourcePool);
+                tempRouter.init();
 
-        for (RouterRule routerRule : routerRuleList) {
-            DataSourceRouterImpl tempRouter = new DataSourceRouterImpl();
-            tempRouter.setRouterRule(routerRule);
-            tempRouter.setDataSourcePool(dataSourcePool);
-            tempRouter.init();
-
-            routerList.add(tempRouter);
+                routerList.add(tempRouter);
+            }
         }
     }
 
     protected void initDataSources() {
-        if (!switchOn && !Strings.isNullOrEmpty(originDsJdbcRef)) {
+        if (task.isMigrate()) {
             this.originDataSource = initGroupDataSource(originDsJdbcRef);
         }
 
@@ -299,8 +301,12 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
         for (DimensionRule dimensionRule : tableShardRule.getDimensionRules()) {
             DimensionRuleImpl dimensionRuleImpl = (DimensionRuleImpl) dimensionRule;
 
-            initDataSources(dimensionRuleImpl.getDataSourceProvider().getAllDBAndTables());
+            if ((task.isMigrate() && !dimensionRuleImpl.isMaster()) ||
+                    (!task.isMigrate() && dimensionRuleImpl.isMaster())) {
+                continue;
+            }
 
+            initDataSources(dimensionRuleImpl.getDataSourceProvider().getAllDBAndTables());
             for (DimensionRule rule : dimensionRuleImpl.getWhiteListRules()) {
                 initDataSources(rule.getAllDBAndTables());
             }
@@ -325,22 +331,22 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
     }
 
     protected void initPumaClient() {
-        if (originDataSource != null) {
+        if (task.isMigrate()) {
             initPumaClient(originDsJdbcRef, originDataSource.getConfig(), Sets.newHashSet(task.getTableName()), "migrate", true);
-        }
+        } else {
+            TableShardRule tableShardRule = routerRuleOrigin.getTableShardRules().get(task.getTableName());
+            for (DimensionRule dimensionRule : tableShardRule.getDimensionRules()) {
+                DimensionRuleImpl dimensionRuleImpl = (DimensionRuleImpl) dimensionRule;
+                if (dimensionRuleImpl == null || !dimensionRuleImpl.isMaster()) {
+                    continue;
+                }
 
-        TableShardRule tableShardRule = routerRuleOrigin.getTableShardRules().get(task.getTableName());
-        for (DimensionRule dimensionRule : tableShardRule.getDimensionRules()) {
-            DimensionRuleImpl dimensionRuleImpl = (DimensionRuleImpl) dimensionRule;
-            if (dimensionRuleImpl == null || !dimensionRuleImpl.isMaster()) {
-                continue;
-            }
+                initPumaClient(dimensionRuleImpl.getDataSourceProvider().getAllDBAndTables(), "master");
 
-            initPumaClient(dimensionRuleImpl.getDataSourceProvider().getAllDBAndTables(), "master");
-
-            int index = 0;
-            for (DimensionRule rule : dimensionRuleImpl.getWhiteListRules()) {
-                initPumaClient(rule.getAllDBAndTables(), "white" + String.valueOf(index++));
+                int index = 0;
+                for (DimensionRule rule : dimensionRuleImpl.getWhiteListRules()) {
+                    initPumaClient(rule.getAllDBAndTables(), "white" + String.valueOf(index++));
+                }
             }
         }
     }
@@ -428,8 +434,10 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
         try {
             RouterRuleConfig tempRouterRuleConfig = new Gson().fromJson(configCache.getProperty(LionKey.getShardConfigKey(task.getRuleName())), RouterRuleConfig.class);
             this.originDsJdbcRef = configCache.getProperty(LionKey.getShardOriginDatasourceKey(task.getRuleName()));
-            String switchOnStr = configCache.getProperty(LionKey.getShardSiwtchOnKey(task.getRuleName()));
-            this.switchOn = switchOnStr == null || "true".equals(switchOnStr);
+
+            if (task.isMigrate() && Strings.isNullOrEmpty(this.originDsJdbcRef)) {
+                throw new IllegalArgumentException("no origin ds name!");
+            }
 
             convertOriginRuleConfig(tempRouterRuleConfig);
             convertRuleConfigList();

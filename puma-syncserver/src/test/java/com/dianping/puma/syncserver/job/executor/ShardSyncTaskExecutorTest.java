@@ -29,8 +29,6 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
@@ -132,7 +130,28 @@ public class ShardSyncTaskExecutorTest {
     }
 
     @Test
-    public void initDataSourceTest() {
+    public void initSyncDataSourceTest() {
+        ShardSyncTaskExecutor spy = initDataSourceTest(false);
+        verify(spy, times(2)).initGroupDataSource(anyString());
+        verify(spy, times(1)).initGroupDataSource("ds4");
+        verify(spy, times(1)).initGroupDataSource("ds5");
+    }
+
+
+    @Test
+    public void initMigrateDataSourceTest() {
+        ShardSyncTaskExecutor spy = initDataSourceTest(true);
+        verify(spy, times(6)).initGroupDataSource(anyString());
+        verify(spy, times(1)).initGroupDataSource("origin");
+        verify(spy, times(1)).initGroupDataSource("ds0");
+        verify(spy, times(1)).initGroupDataSource("ds1");
+        verify(spy, times(1)).initGroupDataSource("ds2");
+        verify(spy, times(1)).initGroupDataSource("ds3");
+        verify(spy, times(1)).initGroupDataSource("ds8");
+    }
+
+    private ShardSyncTaskExecutor initDataSourceTest(boolean isMigrate) {
+        task.setIsMigrate(isMigrate);
         ShardSyncTaskExecutor spy = spy(target);
 
         doAnswer(new Answer<GroupDataSource>() {
@@ -147,25 +166,36 @@ public class ShardSyncTaskExecutorTest {
 
         TableShardRuleConfig tableShardRuleConfig = buildTableConfigFromFile("initPumaClientsAndDataSourcesTest.json");
         spy.tableShardRuleConfigOrigin = tableShardRuleConfig;
-        spy.switchOn = false;
         spy.originDsJdbcRef = "origin";
         spy.initRouterRule();
 
         spy.initDataSources();
+        return spy;
+    }
 
-        verify(spy, times(8)).initGroupDataSource(anyString());
-        verify(spy, times(1)).initGroupDataSource("origin");
-        verify(spy, times(1)).initGroupDataSource("ds0");
-        verify(spy, times(1)).initGroupDataSource("ds1");
-        verify(spy, times(1)).initGroupDataSource("ds2");
-        verify(spy, times(1)).initGroupDataSource("ds3");
-        verify(spy, times(1)).initGroupDataSource("ds4");
-        verify(spy, times(1)).initGroupDataSource("ds5");
-        verify(spy, times(1)).initGroupDataSource("ds8");
+
+    @Test
+    public void initMigratePumaClientsTest() {
+        ShardSyncTaskExecutor spy = initPumaClientsTest(true);
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), anySet(), anyString(), anyBoolean());
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1")), eq("migrate"), eq(true));
     }
 
     @Test
-    public void initPumaClientsTest() {
+    public void initSyncPumaClientsTest() {
+        ShardSyncTaskExecutor spy = initPumaClientsTest(false);
+
+        verify(spy, times(6)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), anySet(), anyString(), anyBoolean());
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_0", "table1_1")), eq("master"), eq(false));
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_2", "table1_3")), eq("master"), eq(false));
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_4", "table1_5")), eq("master"), eq(false));
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_6", "table1_7")), eq("master"), eq(false));
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("ds1_white")), anyString(), eq(false));
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("ds8_white")), anyString(), eq(false));
+    }
+
+    private ShardSyncTaskExecutor initPumaClientsTest(boolean isMigrate) {
+        task.setIsMigrate(isMigrate);
         ShardSyncTaskExecutor spy = spy(target);
 
         doReturn(null).when(spy).getGroupDataSourceConfig(anyString());
@@ -185,20 +215,11 @@ public class ShardSyncTaskExecutorTest {
         spy.tableShardRuleConfigOrigin = tableShardRuleConfig;
         spy.tableShardRuleConfigList = Lists.newArrayList(tableShardRuleConfig);
         spy.initRouterRule();
-        spy.switchOn = false;
         spy.originDsJdbcRef = "origin";
         spy.originDataSource = new GroupDataSource();
 
         spy.initPumaClient();
-
-        verify(spy, times(7)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), anySet(), anyString(), anyBoolean());
-        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1")), eq("migrate"), eq(true));
-        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_0", "table1_1")), eq("master"), eq(false));
-        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_2", "table1_3")), eq("master"), eq(false));
-        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_4", "table1_5")), eq("master"), eq(false));
-        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_6", "table1_7")), eq("master"), eq(false));
-        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("ds1_white")), anyString(), eq(false));
-        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("ds8_white")), anyString(), eq(false));
+        return spy;
     }
 
     class SetMatchers extends ArgumentMatcher<Set<String>> {
@@ -239,14 +260,12 @@ public class ShardSyncTaskExecutorTest {
         target.initAndConvertConfig();
 
         verify(configCache, times(1)).getProperty("shardds.test.shard");
-        verify(configCache, times(1)).getProperty("shardds.test.switch");
         verify(configCache, times(1)).getProperty("shardds.test.origin");
 
         Assert.assertEquals("table1", target.tableShardRuleConfigOrigin.getTableName());
         Assert.assertEquals(1, target.tableShardRuleConfigList.size());
         Assert.assertEquals(1, target.tableShardRuleConfigList.get(0).getDimensionConfigs().size());
         Assert.assertEquals("table", target.originDsJdbcRef);
-        Assert.assertEquals(false, target.switchOn);
     }
 
     @Test

@@ -1,7 +1,6 @@
 package com.dianping.puma.core.entity;
 
 import com.dianping.puma.core.constant.SyncType;
-import com.dianping.puma.core.entity.BaseSyncTask;
 import com.google.code.morphia.annotations.Entity;
 
 @Entity
@@ -14,6 +13,9 @@ public class ShardSyncTask extends BaseSyncTask {
 
     //每个规则下可能有多个逻辑表，每个任务只能选择一个逻辑表
     private String tableName;
+
+    //是否为迁移任务
+    private boolean isMigrate;
 
     public ShardSyncTask() {
         this.setSyncType(SyncType.SYNC.SHARD_SYNC);
@@ -33,5 +35,13 @@ public class ShardSyncTask extends BaseSyncTask {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+    public boolean isMigrate() {
+        return isMigrate;
+    }
+
+    public void setIsMigrate(boolean isMigrate) {
+        this.isMigrate = isMigrate;
     }
 }

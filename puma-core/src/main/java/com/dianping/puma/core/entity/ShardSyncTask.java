@@ -17,6 +17,12 @@ public class ShardSyncTask extends BaseSyncTask {
     //是否为迁移任务
     private boolean isMigrate;
 
+    //迁移任务需要制定 binlogName
+    private String binlogName;
+
+    //迁移任务需要制定 binlogPos
+    private long binlogPos;
+
     public ShardSyncTask() {
         this.setSyncType(SyncType.SYNC.SHARD_SYNC);
     }
@@ -43,5 +49,21 @@ public class ShardSyncTask extends BaseSyncTask {
 
     public void setIsMigrate(boolean isMigrate) {
         this.isMigrate = isMigrate;
+    }
+
+    public String getBinlogName() {
+        return binlogName;
+    }
+
+    public void setBinlogName(String binlogName) {
+        this.binlogName = binlogName;
+    }
+
+    public long getBinlogPos() {
+        return binlogPos;
+    }
+
+    public void setBinlogPos(long binlogPos) {
+        this.binlogPos = binlogPos;
     }
 }

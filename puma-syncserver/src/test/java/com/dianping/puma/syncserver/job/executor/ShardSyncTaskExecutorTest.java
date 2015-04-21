@@ -47,6 +47,7 @@ public class ShardSyncTaskExecutorTest {
         this.task.setRuleName("test");
         this.task.setTableName("table1");
         this.task.setName("task");
+        this.task.setBinlogName("mysql-bin.000001");
         this.target = new ShardSyncTaskExecutor(task);
         this.target.setConfigCache(configCache);
     }
@@ -86,7 +87,6 @@ public class ShardSyncTaskExecutorTest {
 
         //run
         PumaClient actual = target.initPumaClient("debug", config, tables, "debug", true);
-
 
         //verify
         Configuration clientConfig = (Configuration) FieldUtils.readField(actual, "config", true);

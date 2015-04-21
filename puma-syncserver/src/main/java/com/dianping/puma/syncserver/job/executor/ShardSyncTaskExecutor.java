@@ -107,12 +107,14 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
             checkNotNull(task, "task");
             checkNotNull(task.getRuleName(), "task.ruleName");
             checkNotNull(task.getTableName(), "task.tableName");
+            checkArgument(!task.isMigrate() || !Strings.isNullOrEmpty(task.getBinlogName()), "task.binlogName");
             this.task = task;
 
             this.status.setTaskName(task.getName());
 
             this.configCache = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
         } catch (Exception e) {
+            Cat.logError("Shard Sync Task Init Failed!", e);
             this.status.setStatus(Status.FAILED);
         }
     }
@@ -401,15 +403,20 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
             configBuilder.tables(ds, tb);
         }
 
-        PumaClient client = new PumaClient(configBuilder.build());
-
-        if (client.getSeqFileHolder().getSeq() == SubscribeConstant.SEQ_FROM_OLDEST) {
-            client.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_LATEST);
+        if (isMigrate) {
+            configBuilder.binlog(task.getBinlogName());
+            configBuilder.binlogPos(task.getBinlogPos());
         }
 
+        PumaClient client = new PumaClient(configBuilder.build());
+
         if (isMigrate) {
+            client.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_BINLOGINFO);
             client.register(new Processor(fullName, Lists.newArrayList(routerForMigrate)));
         } else {
+            if (client.getSeqFileHolder().getSeq() == SubscribeConstant.SEQ_FROM_OLDEST) {
+                client.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_LATEST);
+            }
             client.register(new Processor(fullName, routerList));
         }
 

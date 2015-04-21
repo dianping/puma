@@ -334,7 +334,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
 
     protected void initPumaClient() {
         if (task.isMigrate()) {
-            initPumaClient(originDsJdbcRef, originDataSource.getConfig(), Sets.newHashSet(task.getTableName()), "migrate", true);
+            initPumaClient(originDsJdbcRef, originDataSource.getConfig(), Sets.newHashSet(task.getTableName()), "migrate");
         } else {
             TableShardRule tableShardRule = routerRuleOrigin.getTableShardRules().get(task.getTableName());
             for (DimensionRule dimensionRule : tableShardRule.getDimensionRules()) {
@@ -359,7 +359,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
                 continue;
             }
             GroupDataSourceConfig config = getGroupDataSourceConfig(entity.getKey());
-            initPumaClient(entity.getKey(), config, entity.getValue(), name, false);
+            initPumaClient(entity.getKey(), config, entity.getValue(), name);
         }
     }
 
@@ -367,7 +367,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
         return ((GroupDataSource) dataSourcePool.get(jdbcRef)).getConfig();
     }
 
-    protected PumaClient initPumaClient(String jdbcRef, GroupDataSourceConfig config, Set<String> tables, String name, boolean isMigrate) {
+    protected PumaClient initPumaClient(String jdbcRef, GroupDataSourceConfig config, Set<String> tables, String name) {
         DataSourceConfig dsConfig = findTheOnlyWriteDataSourceConfig(config);
 
         Matcher matcher = JDBC_URL_PATTERN.matcher(dsConfig.getJdbcUrl());
@@ -403,19 +403,25 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
             configBuilder.tables(ds, tb);
         }
 
-        if (isMigrate) {
+        if (task.isMigrate()) {
             configBuilder.binlog(task.getBinlogName());
             configBuilder.binlogPos(task.getBinlogPos());
+        } else if (task.getSeqTimestamp() != 0) {
+            configBuilder.timeStamp(task.getSeqTimestamp());
         }
 
         PumaClient client = new PumaClient(configBuilder.build());
 
-        if (isMigrate) {
+        if (task.isMigrate()) {
             client.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_BINLOGINFO);
             client.register(new Processor(fullName, Lists.newArrayList(routerForMigrate)));
         } else {
             if (client.getSeqFileHolder().getSeq() == SubscribeConstant.SEQ_FROM_OLDEST) {
-                client.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_LATEST);
+                if (task.getSeqTimestamp() != 0) {
+                    client.getSeqFileHolder().saveSeq(task.getSeqTimestamp());
+                } else {
+                    client.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_LATEST);
+                }
             }
             client.register(new Processor(fullName, routerList));
         }

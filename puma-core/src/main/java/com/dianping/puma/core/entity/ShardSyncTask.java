@@ -23,6 +23,9 @@ public class ShardSyncTask extends BaseSyncTask {
     //迁移任务需要制定 binlogPos
     private long binlogPos;
 
+    //可以制定 sequence
+    private long seqTimestamp;
+
     public ShardSyncTask() {
         this.setSyncType(SyncType.SYNC.SHARD_SYNC);
     }
@@ -65,5 +68,13 @@ public class ShardSyncTask extends BaseSyncTask {
 
     public void setBinlogPos(long binlogPos) {
         this.binlogPos = binlogPos;
+    }
+
+    public long getSeqTimestamp() {
+        return seqTimestamp;
+    }
+
+    public void setSeqTimestamp(long seqTimestamp) {
+        this.seqTimestamp = seqTimestamp;
     }
 }

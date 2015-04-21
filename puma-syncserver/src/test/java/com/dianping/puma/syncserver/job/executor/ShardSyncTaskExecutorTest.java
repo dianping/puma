@@ -86,7 +86,7 @@ public class ShardSyncTaskExecutorTest {
         target.setSrcDBInstanceService(srcDBInstanceService);
 
         //run
-        PumaClient actual = target.initPumaClient("debug", config, tables, "debug", true);
+        PumaClient actual = target.initPumaClient("debug", config, tables, "debug");
 
         //verify
         Configuration clientConfig = (Configuration) FieldUtils.readField(actual, "config", true);
@@ -177,21 +177,21 @@ public class ShardSyncTaskExecutorTest {
     @Test
     public void initMigratePumaClientsTest() {
         ShardSyncTaskExecutor spy = initPumaClientsTest(true);
-        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), anySet(), anyString(), anyBoolean());
-        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1")), eq("migrate"), eq(true));
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), anySet(), anyString());
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1")), eq("migrate"));
     }
 
     @Test
     public void initSyncPumaClientsTest() {
         ShardSyncTaskExecutor spy = initPumaClientsTest(false);
 
-        verify(spy, times(6)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), anySet(), anyString(), anyBoolean());
-        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_0", "table1_1")), eq("master"), eq(false));
-        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_2", "table1_3")), eq("master"), eq(false));
-        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_4", "table1_5")), eq("master"), eq(false));
-        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_6", "table1_7")), eq("master"), eq(false));
-        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("ds1_white")), anyString(), eq(false));
-        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("ds8_white")), anyString(), eq(false));
+        verify(spy, times(6)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), anySet(), anyString());
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_0", "table1_1")), eq("master"));
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_2", "table1_3")), eq("master"));
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_4", "table1_5")), eq("master"));
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1_6", "table1_7")), eq("master"));
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("ds1_white")), anyString());
+        verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("ds8_white")), anyString());
     }
 
     private ShardSyncTaskExecutor initPumaClientsTest(boolean isMigrate) {
@@ -208,7 +208,7 @@ public class ShardSyncTaskExecutorTest {
                 System.out.println("init pumaclient:" + invocationOnMock.getArguments()[3]);
                 return null;
             }
-        }).when(spy).initPumaClient(anyString(), any(GroupDataSourceConfig.class), anySet(), anyString(), anyBoolean());
+        }).when(spy).initPumaClient(anyString(), any(GroupDataSourceConfig.class), anySet(), anyString());
 
 
         TableShardRuleConfig tableShardRuleConfig = buildTableConfigFromFile("initPumaClientsAndDataSourcesTest.json");

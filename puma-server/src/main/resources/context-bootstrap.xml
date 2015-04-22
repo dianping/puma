@@ -92,7 +92,8 @@
 
 	<bean id="fetcherEventCountMonitor"
 		  class="com.dianping.puma.monitor.fetcher.FetcherEventCountMonitor"
-		  init-method="init" />
+		  init-method="init">
+	</bean>
 	
 </beans>
 

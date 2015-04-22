@@ -5,11 +5,9 @@ import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.core.monitor.EventMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 
-@Service("fetcherEventCountMonitor")
 public class FetcherEventCountMonitor {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FetcherEventCountMonitor.class);

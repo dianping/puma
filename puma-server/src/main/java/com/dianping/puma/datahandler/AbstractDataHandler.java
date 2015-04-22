@@ -188,6 +188,9 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 				|| StringUtils.startsWithIgnoreCase(sql, "TRUNCATE ")) {
 
 			handleDDlEvent(result, queryEvent, sql);
+			if (!StringUtils.startsWithIgnoreCase(sql, "CREATE ")){
+				log.info("DdlEvent ddl sql=" + sql);
+			}
 
 		} else if (StringUtils.equalsIgnoreCase(sql, "BEGIN")) {
 
@@ -231,14 +234,13 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 			ddlEvent.setDatabase(StringUtils.isNotBlank(ddlResult.getDatabase()) ? ddlResult.getDatabase()
 					: StringUtils.EMPTY);
 			ddlEvent.setTable(StringUtils.isNotBlank(ddlResult.getTable()) ? ddlResult.getTable() : StringUtils.EMPTY);
-			//if(log.isDebugEnabled()){
-			log.info("DDL event, sql=" + sql + "  ,database =" + ddlResult.getDatabase() + " table ="
-					+ ddlResult.getTable() + " queryEvent.getDatabaseName()" + queryEvent.getDatabaseName());
-			//}
-		}else{
-			//if(log.isDebugEnabled()){
-				log.info("DDL event unable to get ddlResult , sql=" + sql );
-			//}
+			if (ddlEvent.getEventType() != DdlEventType.DDL_CREATE) {
+				log.info("DDL event, sql=" + sql + "  ,database =" + ddlResult.getDatabase() + " table ="
+						+ ddlResult.getTable() + " queryEvent.getDatabaseName()" + queryEvent.getDatabaseName());
+			}
+		} else {
+			if (ddlEvent.getEventType() != DdlEventType.DDL_CREATE)
+				log.info("DDL event unable to get ddlResult , sql=" + sql);
 		}
 		if (StringUtils.isBlank(ddlEvent.getDatabase())) {
 			ddlEvent.setDatabase(queryEvent.getDatabaseName());
@@ -263,6 +265,5 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 
 	protected abstract void doProcess(DataHandlerResult result, BinlogEvent binlogEvent, PumaContext context,
 			byte eventType);
-
 
 }

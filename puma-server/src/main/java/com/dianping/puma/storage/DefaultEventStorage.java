@@ -373,6 +373,9 @@ public class DefaultEventStorage implements EventStorage {
 				}
 				return false;
 			}
+			if(event instanceof DdlEvent){
+				log.info(event.toString());
+			}
 			return true;
 		} else{
 			return true;

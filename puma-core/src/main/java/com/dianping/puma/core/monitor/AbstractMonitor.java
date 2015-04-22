@@ -42,7 +42,7 @@ public abstract class AbstractMonitor implements Monitor {
 		return count != null && count.equals(countThreshold);
 	}
 
-	protected boolean isStopped() {
+	public boolean isStopped() {
 		return stopped;
 	}
 

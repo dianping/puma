@@ -26,6 +26,7 @@ import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
+import com.dianping.puma.monitor.fetcher.FetcherEventCountMonitor;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.storage.DefaultEventStorage;
 import org.apache.commons.lang.StringUtils;
@@ -82,6 +83,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	private BinlogInfo binlogInfo;
 
 	private BinlogStat binlogStat;
+
+	private FetcherEventCountMonitor fetcherEventCountMonitor;
 
 	@Override
 	public void doStart() throws Exception {
@@ -164,6 +167,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				LOG.error("Binlog packet response error.");
 				throw new IOException("Binlog packet response error.");
 			} else {
+				fetcherEventCountMonitor.record(getTaskName());
 				processBinlogPacket(binlogPacket);
 			}
 
@@ -577,4 +581,12 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		DefaultEventStorage storage = senders.get(0).getStorage();
 
 	}*/
+
+	public FetcherEventCountMonitor getFetcherEventCountMonitor() {
+		return fetcherEventCountMonitor;
+	}
+
+	public void setFetcherEventCountMonitor(FetcherEventCountMonitor fetcherEventCountMonitor) {
+		this.fetcherEventCountMonitor = fetcherEventCountMonitor;
+	}
 }

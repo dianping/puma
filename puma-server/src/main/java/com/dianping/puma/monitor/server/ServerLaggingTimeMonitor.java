@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.Calendar;
 
 @Service("serverLaggingTimeMonitor")
 public class ServerLaggingTimeMonitor {

@@ -89,6 +89,10 @@
         <property name="dbName" value="puma_admin" />
         <property name="collName" value="seq" />
     </bean>
+
+	<bean id="fetcherEventCountMonitor"
+		  class="com.dianping.puma.monitor.fetcher.FetcherEventCountMonitor"
+		  init-method="init" />
 	
 </beans>
 

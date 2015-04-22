@@ -1,4 +1,4 @@
 package com.dianping.puma.monitor.fetcher;
 
-public class FetcherLaggingMonitor {
+public class FetcherLaggingTimeMonitor {
 }

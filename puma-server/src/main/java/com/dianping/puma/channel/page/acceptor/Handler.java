@@ -9,6 +9,7 @@ import com.dianping.puma.ComponentContainer;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.container.client.ClientStateContainer;
 import com.dianping.puma.core.model.state.client.ClientState;
+import com.dianping.puma.monitor.server.ServerLaggingTimeMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.web.mvc.PageHandler;
@@ -145,6 +146,8 @@ public class Handler implements PageHandler<Context> {
 			throw new IOException(e1);
 		}
 
+		ServerLaggingTimeMonitor serverLaggingTimeMonitor = ComponentContainer.SPRING.lookup("serverLaggingTimeMonitor");
+
 		//endCatTransaction();
 
 		while (true) {
@@ -154,6 +157,8 @@ public class Handler implements PageHandler<Context> {
 				ChangedEvent event = channel.next();
 
 				if (event != null) {
+
+					serverLaggingTimeMonitor.record(clientName, event.getExecuteTime());
 
 					if (filterChain.doNext(event)) {
 						byte[] data = codec.encode(event);

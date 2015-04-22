@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public abstract class HeartbeatMonitor extends AbstractMonitor {
+public class HeartbeatMonitor extends AbstractMonitor {
 
 	private int delaySeconds;
 
@@ -25,18 +25,9 @@ public abstract class HeartbeatMonitor extends AbstractMonitor {
 		this.periodSeconds = periodSeconds;
 	}
 
-	public HeartbeatMonitor(String type, int delaySeconds, int periodSeconds, Long countThreshold) {
-		super(type, countThreshold);
-		this.delaySeconds = delaySeconds;
-		this.periodSeconds = periodSeconds;
-	}
-
 	@Override
 	public void record(String name, String status) {
 		if (!isStopped()) {
-			startCountingIfNeeded(name);
-			incrCountingIfExists(name);
-
 			statuses.put(name, status);
 		}
 	}

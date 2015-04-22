@@ -198,7 +198,7 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 		} else {
 			result.setEmpty(true);
 			result.setFinished(true);
-			log.info("QueryEvent  sql=" + queryEvent.getSql());
+			//log.info("QueryEvent  sql=" + queryEvent.getSql());
 		}
 	}
 

@@ -3,6 +3,7 @@ package com.dianping.puma.monitor.parser;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.puma.MockTest;
 import com.dianping.puma.core.monitor.EventMonitor;
+import com.dianping.puma.monitor.ParserEventCountMonitor;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

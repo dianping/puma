@@ -1,7 +1,7 @@
 package com.dianping.puma.monitor.server;
 
 import com.dianping.puma.core.exception.ConfigException;
-import com.dianping.puma.core.model.state.SyncTaskState;
+import com.dianping.puma.monitor.ServerLaggingTimeMonitor;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

@@ -1,5 +1,6 @@
 package com.dianping.puma.monitor;
 
+import com.dianping.puma.monitor.todo.ClientLaggingMonitor;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

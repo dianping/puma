@@ -15,22 +15,16 @@ package com.dianping.puma.server;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.puma.ComponentContainer;
 import com.dianping.puma.bo.PumaContext;
-import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
-import com.dianping.puma.monitor.fetcher.FetcherEventCountMonitor;
-import com.dianping.puma.monitor.parser.ParserEventCountMonitor;
-import com.dianping.puma.sender.Sender;
-import com.dianping.puma.storage.DefaultEventStorage;
+import com.dianping.puma.monitor.FetcherEventCountMonitor;
+import com.dianping.puma.monitor.ParserEventCountMonitor;
 import org.apache.commons.lang.StringUtils;
 
 import com.dianping.puma.common.SystemStatusContainer;
@@ -50,8 +44,6 @@ import com.dianping.puma.parser.mysql.packet.PacketFactory;
 import com.dianping.puma.parser.mysql.packet.PacketType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * 基于MySQL复制机制的Server

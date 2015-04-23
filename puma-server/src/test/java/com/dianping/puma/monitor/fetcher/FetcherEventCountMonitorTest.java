@@ -1,14 +1,39 @@
 package com.dianping.puma.monitor.fetcher;
 
-import com.dianping.puma.ComponentContainer;
+import com.dianping.lion.client.ConfigCache;
+import com.dianping.puma.MockTest;
+import com.dianping.puma.core.monitor.EventMonitor;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 
-public class FetcherEventCountMonitorTest {
+import static org.mockito.Mockito.*;
 
-	FetcherEventCountMonitor fetcherEventCountMonitor = ComponentContainer.SPRING.lookup("fetcherEventCountMonitor");
+public class FetcherEventCountMonitorTest extends MockTest {
+
+	FetcherEventCountMonitor fetcherEventCountMonitor = new FetcherEventCountMonitor();
+
+	@Mock
+	EventMonitor eventMonitor;
+
+	@Mock
+	ConfigCache configCache;
+
+	@Before
+	public void before() {
+		fetcherEventCountMonitor.setEventMonitor(eventMonitor);
+
+		when(configCache.getLongProperty("puma.server.eventcount.fetcher.internal")).thenReturn(1000L);
+		fetcherEventCountMonitor.setConfigCache(configCache);
+
+		fetcherEventCountMonitor.init();
+	}
 
 	@Test
-	public void test() {
-		fetcherEventCountMonitor.record("hello");
+	public void testRecord() {
+		for (int i = 0; i != 1000; ++i) {
+			fetcherEventCountMonitor.record("name");
+		}
+		verify(eventMonitor, times(1000)).record("name", "0");
 	}
 }

@@ -13,6 +13,8 @@ public abstract class AbstractPumaMonitor implements PumaMonitor {
 
 	private Long countThreshold;
 
+	private Long countThresholdCache;
+
 	private boolean stopped = true;
 
 	public AbstractPumaMonitor() {}
@@ -44,7 +46,7 @@ public abstract class AbstractPumaMonitor implements PumaMonitor {
 
 	protected boolean checkCountingIfExists(String name) {
 		Long count = counts.get(name);
-		return count != null && count.equals(countThreshold);
+		return count != null && count.equals(countThresholdCache);
 	}
 
 	public boolean isStopped() {
@@ -55,8 +57,11 @@ public abstract class AbstractPumaMonitor implements PumaMonitor {
 
 	protected abstract void doStop();
 
+	protected abstract void doPause();
+
 	@Override
 	public void start() {
+		countThresholdCache = countThreshold;
 		stopped = false;
 		doStart();
 	}
@@ -64,13 +69,21 @@ public abstract class AbstractPumaMonitor implements PumaMonitor {
 	@Override
 	public void stop() {
 		stopped = true;
+		counts.clear();
 		doStop();
+	}
+
+	@Override
+	public void pause() {
+		stopped = true;
+		doPause();
 	}
 
 	public void setType(String type) {
 		this.type = type;
 	}
 
+	// Stop and start the monitor to valid new setting count threshold.
 	public void setCountThreshold(Long countThreshold) {
 		this.countThreshold = countThreshold;
 	}

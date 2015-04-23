@@ -57,7 +57,7 @@ public class EventMonitorTest extends MockTest {
 	}
 
 	@Test
-	public void testStartStop() {
+	public void testControl() {
 		// After starting the event monitor.
 		for (int i = 0; i != 1000; ++i) {
 			eventMonitor.record("name0", "0");
@@ -75,14 +75,30 @@ public class EventMonitorTest extends MockTest {
 		eventMonitor.start();
 
 		// After starting the event monitor.
-		for (int i = 0; i != 1000; ++i) {
+		for (int i = 0; i != 999; ++i) {
 			eventMonitor.record("name0", "0");
 		}
-		verify(monitor, times(2)).logEvent("type", "name0", "0", "");
+		verify(monitor, times(1)).logEvent("type", "name0", "0", "");
 
 		for (int i = 0; i != 1000; ++i) {
 			eventMonitor.record("name1", "0");
 		}
 		verify(monitor, times(1)).logEvent("type", "name1", "0", "");
+
+		eventMonitor.pause();
+
+		// After pausing the event monitor.
+		for (int i = 0; i != 1000; ++i) {
+			eventMonitor.record("name0", "0");
+		}
+		verify(monitor, times(1)).logEvent("type", "name0", "0", "");
+
+		eventMonitor.start();
+
+		// After starting the event monitor.
+		for (int i = 0; i != 1; ++i) {
+			eventMonitor.record("name0", "0");
+		}
+		verify(monitor, times(2)).logEvent("type", "name0", "0", "");
 	}
 }

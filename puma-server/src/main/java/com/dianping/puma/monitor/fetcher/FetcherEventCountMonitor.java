@@ -18,57 +18,49 @@ public class FetcherEventCountMonitor {
 
 	private static final String FETCHER_EVENT_COUNT_INTERNAL = "puma.server.eventcount.fetcher.internal";
 
-	private long fetcherEventCountInternal;
+	private EventMonitor eventMonitor = new EventMonitor();
 
-	private EventMonitor eventMonitor;
+	private ConfigCache configCache = ConfigCache.getInstance();
+
+	private long fetcherEventCountInternal;
 
 	public FetcherEventCountMonitor() {}
 
 	@PostConstruct
 	public void init() {
-		fetcherEventCountInternal = ConfigCache.getInstance().getLongProperty(FETCHER_EVENT_COUNT_INTERNAL);
+		fetcherEventCountInternal = configCache.getLongProperty(FETCHER_EVENT_COUNT_INTERNAL);
+		initMonitor(MONITOR_TITLE, fetcherEventCountInternal);
 
-		ConfigCache.getInstance().addChange(new ConfigChange() {
+		// Listen to lion changes.
+		configCache.addChange(new ConfigChange() {
 			@Override
 			public void onChange(String key, String value) {
 				if (key.equals(FETCHER_EVENT_COUNT_INTERNAL)) {
 					fetcherEventCountInternal = Long.parseLong(value);
-					stop();
-					initMonitor();
-					start();
+					initMonitor(MONITOR_TITLE, fetcherEventCountInternal);
 				}
 			}
 		});
-
-		initMonitor();
-		start();
 	}
 
 	public void record(String taskName) {
-		if (eventMonitor != null && !eventMonitor.isStopped()) {
+		if (eventMonitor != null) {
 			eventMonitor.record(taskName, "0");
 		}
 	}
 
-	private void initMonitor() {
-		if (eventMonitor != null && !eventMonitor.isStopped()) {
-			eventMonitor.stop();
-		}
-		LOG.info("Initialize fetcher event count monitor.");
-		eventMonitor = new EventMonitor(MONITOR_TITLE, fetcherEventCountInternal);
+	public void setEventMonitor(EventMonitor eventMonitor) {
+		this.eventMonitor = eventMonitor;
 	}
 
-	private void start() {
-		if (eventMonitor != null && eventMonitor.isStopped()) {
-			LOG.info("Start fetcher event count monitor.");
-			eventMonitor.start();
-		}
+	public void setConfigCache(ConfigCache configCache) {
+		this.configCache = configCache;
 	}
 
-	private void stop() {
-		if (eventMonitor != null && !eventMonitor.isStopped()) {
-			LOG.info("Stop fetcher event count monitor.");
-			eventMonitor.stop();
-		}
+	private void initMonitor(String type, long count) {
+		eventMonitor.stop();
+		eventMonitor.setType(type);
+		eventMonitor.setCountThreshold(count);
+		eventMonitor.start();
 	}
 }

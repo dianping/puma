@@ -50,4 +50,11 @@ public class HeartbeatMonitor extends AbstractPumaMonitor {
 			this.scheduledFuture.cancel(true);
 		}
 	}
+
+	@Override
+	protected void doPause() {
+		if (this.scheduledFuture != null && !this.scheduledFuture.isCancelled()) {
+			this.scheduledFuture.cancel(true);
+		}
+	}
 }

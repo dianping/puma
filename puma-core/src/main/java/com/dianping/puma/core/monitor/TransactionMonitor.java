@@ -58,4 +58,7 @@ public class TransactionMonitor extends AbstractPumaMonitor {
 
 	@Override
 	protected void doStop() {}
+
+	@Override
+	protected void doPause() {}
 }

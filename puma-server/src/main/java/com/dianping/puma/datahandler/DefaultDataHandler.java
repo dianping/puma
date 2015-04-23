@@ -93,6 +93,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 
 			processWriteRowEvent(result, binlogEvent, context);
 			break;
+
 		case BinlogConstants.UPDATE_ROWS_EVENT_V1:
 		case BinlogConstants.UPDATE_ROWS_EVENT:
 			if (tableMetaInfos == null || tableMetaInfos.isEmpty()) {

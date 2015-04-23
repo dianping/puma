@@ -211,7 +211,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			Cat.logEvent("Slave.dbBinlogFormat", eventName, "1", "");
 		}
 		fetcherEventDelayMonitor.record(getTaskName(), binlogEvent.getHeader().getTimestamp());
-
 		if (binlogEvent.getHeader().getEventType() != BinlogConstants.FORMAT_DESCRIPTION_EVENT) {
 			getContext().setNextBinlogPos(binlogEvent.getHeader().getNextPosition());
 		}

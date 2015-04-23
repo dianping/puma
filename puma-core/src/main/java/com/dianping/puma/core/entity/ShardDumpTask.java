@@ -22,9 +22,9 @@ public class ShardDumpTask extends DumpTask {
 
     private String shardRule;
 
-    private long indexKey;
-
     private String indexColumnName;
+
+    private long indexKey;
 
     private long indexIncrease = 1000000;
 

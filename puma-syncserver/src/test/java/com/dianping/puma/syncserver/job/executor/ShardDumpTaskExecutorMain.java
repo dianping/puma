@@ -18,12 +18,12 @@ public class ShardDumpTaskExecutorMain {
     public static void main(String... args) throws InterruptedException {
         ShardDumpTask task = new ShardDumpTask();
 
-        task.setIndexIncrease(200000);
+        task.setIndexIncrease(1000000);
         task.setDataBase("test");
         task.setTableName("user");
         task.setIndexColumnName("id");
         task.setIndexKey(0);
-        task.setMaxKey(2000000);
+        task.setMaxKey(100000000);
         task.setName("debug");
         task.setShardRule("id % 100 <> 0");
         task.setTargetTableName("user_0");

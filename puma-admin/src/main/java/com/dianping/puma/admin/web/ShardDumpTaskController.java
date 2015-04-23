@@ -5,12 +5,12 @@ import com.dianping.puma.admin.remote.reporter.ShardSyncTaskOperationReporter;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.constant.SyncType;
-import com.dianping.puma.core.entity.ShardSyncTask;
+import com.dianping.puma.core.entity.DstDBInstance;
+import com.dianping.puma.core.entity.ShardDumpTask;
+import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.entity.SyncServer;
 import com.dianping.puma.core.model.state.ShardSyncTaskState;
-import com.dianping.puma.core.service.ShardSyncTaskService;
-import com.dianping.puma.core.service.ShardSyncTaskStateService;
-import com.dianping.puma.core.service.SyncServerService;
+import com.dianping.puma.core.service.*;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
 import com.mongodb.MongoException;
 import org.slf4j.Logger;
@@ -33,13 +33,19 @@ import java.util.Map;
  */
 
 @Controller
-public class ShardSyncTaskController {
-    private static final Logger LOG = LoggerFactory.getLogger(ShardSyncTaskController.class);
+public class ShardDumpTaskController {
+    private static final Logger LOG = LoggerFactory.getLogger(ShardDumpTaskController.class);
 
-    private static final int PAGESIZE = 30;
+    private static final int PAGESIZE = 1000;
 
     @Autowired
-    private ShardSyncTaskService shardSyncTaskService;
+    private SrcDBInstanceService srcDBInstanceService;
+
+    @Autowired
+    private DstDBInstanceService dstDBInstanceService;
+
+    @Autowired
+    private ShardDumpTaskService shardDumpTaskService;
 
     @Autowired
     private SyncServerService syncServerService;
@@ -54,38 +60,45 @@ public class ShardSyncTaskController {
     private ShardSyncTaskOperationReporter shardSyncTaskOperationReporter;
 
 
-    @RequestMapping(value = {"/shard-sync-task/create"}, method = RequestMethod.GET)
+    @RequestMapping(value = {"shard-dump-task/create"}, method = RequestMethod.GET)
     public ModelAndView create() {
         List<SyncServer> syncServers = syncServerService.findAll();
+        List<DstDBInstance> dstDBInstances = dstDBInstanceService.findAll();
+        List<SrcDBInstance> srcDBInstances = srcDBInstanceService.findAll();
 
         Map<String, Object> map = new HashMap<String, Object>();
+
+
         map.put("subPath", "create");
-        map.put("path", "shard-sync-task");
+        map.put("path", "shard-dump-task");
         map.put("syncServers", syncServers);
+        map.put("dstDBInstances", dstDBInstances);
+        map.put("srcDBInstances", srcDBInstances);
+
         return new ModelAndView("main/container", map);
     }
 
-    @RequestMapping(value = {"/shard-sync-task/create"}, method = RequestMethod.POST)
-    public String create(@ModelAttribute ShardSyncTask task, String syncServerName) throws SendFailedException {
-        task.setSyncServerName(syncServerName);
-        task.setName(String.format("ShardSyncTask-%s-%s-%s", task.getRuleName(), task.getTableName(), task.isMigrate() ? "migrate" : "sync"));
-        shardSyncTaskService.create(task);
+    @RequestMapping(value = {"shard-dump-task/create"}, method = RequestMethod.POST)
+    public String create(@ModelAttribute ShardDumpTask task, String syncServerName) throws SendFailedException {
+//        task.setSyncServerName(syncServerName);
+//        task.setName(String.format("ShardSyncTask-%s-%s-%s", task.getRuleName(), task.getTableName(), task.isMigrate() ? "migrate" : "sync"));
+//        shardDumpTaskService.create(task);
+//
+//        shardSyncTaskOperationReporter.report(syncServerName, task.getName(), SyncType.SHARD_DUMP, ActionOperation.CREATE);
 
-        shardSyncTaskOperationReporter.report(syncServerName, task.getName(), SyncType.SHARD_SYNC, ActionOperation.CREATE);
-
-        return "redirect:/shard-sync-task";
+        return "redirect:/shard-dump-task";
     }
 
-    @RequestMapping(value = {"/shard-sync-task/remove"}, method = RequestMethod.POST)
+    @RequestMapping(value = {"shard-dump-task/remove"}, method = RequestMethod.POST)
     @ResponseBody
     public String remove(String name) throws SendFailedException {
         Map<String, Object> map = new HashMap<String, Object>();
 
         try {
-            ShardSyncTask task = shardSyncTaskService.find(name);
+            ShardDumpTask task = shardDumpTaskService.find(name);
             if (task != null) {
-                shardSyncTaskService.remove(name);
-                shardSyncTaskOperationReporter.report(task.getSyncServerName(), task.getName(), SyncType.SHARD_SYNC, ActionOperation.REMOVE);
+                shardDumpTaskService.remove(name);
+                shardSyncTaskOperationReporter.report(task.getSyncServerName(), task.getName(), SyncType.SHARD_DUMP, ActionOperation.REMOVE);
             }
 
             map.put("success", true);
@@ -105,19 +118,19 @@ public class ShardSyncTaskController {
         return GsonUtil.toJson(map);
     }
 
-    @RequestMapping(value = {"/shard-sync-task"})
+    @RequestMapping(value = {"shard-dump-task"})
     public ModelAndView index(HttpServletRequest request, HttpServletResponse response) {
         return index(request, response, 1);
     }
 
-    @RequestMapping(value = {"/shard-sync-task/{pageNum}"})
+    @RequestMapping(value = {"shard-dump-task/{pageNum}"})
     public ModelAndView index(HttpServletRequest request, HttpServletResponse response,
                               @PathVariable("pageNum") Integer pageNum) {
         Map<String, Object> map = new HashMap<String, Object>();
         int offset = pageNum == null ? 0 : (pageNum - 1) * PAGESIZE;
-        List<ShardSyncTask> shardSyncTasks = shardSyncTaskService.find(offset, PAGESIZE);
+        List<ShardDumpTask> shardSyncTasks = shardDumpTaskService.find(offset, PAGESIZE);
         Map<String, ShardSyncTaskState> states = new HashMap<String, ShardSyncTaskState>();
-        for (ShardSyncTask task : shardSyncTasks) {
+        for (ShardDumpTask task : shardSyncTasks) {
             ShardSyncTaskState state = shardSyncTaskStateService.find(task.getName());
             if (state != null) {
                 states.put(task.getName(), state);
@@ -128,7 +141,7 @@ public class ShardSyncTaskController {
         map.put("shardSyncTaskStates", states);
         map.put("createdActive", "active");
         map.put("subPath", "main");
-        map.put("path", "shard-sync-task");
+        map.put("path", "shard-dump-task");
         return new ModelAndView("main/container", map);
     }
 }

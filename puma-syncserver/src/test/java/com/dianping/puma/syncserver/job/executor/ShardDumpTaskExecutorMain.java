@@ -4,7 +4,10 @@ import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.entity.ShardDumpTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.service.ShardDumpTaskService;
-import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
+import static org.mockito.Mockito.*;
 
 /**
  * Dozer @ 2015-02
@@ -15,14 +18,14 @@ public class ShardDumpTaskExecutorMain {
     public static void main(String... args) throws InterruptedException {
         ShardDumpTask task = new ShardDumpTask();
 
-        task.setIndexIncrease(10000);
+        task.setIndexIncrease(200000);
         task.setDataBase("test");
         task.setTableName("user");
         task.setIndexColumnName("id");
         task.setIndexKey(0);
         task.setMaxKey(2000000);
         task.setName("debug");
-        task.setShardRule("id % 2 = 0");
+        task.setShardRule("id % 100 <> 0");
         task.setTargetTableName("user_0");
         task.setTargetDataBase("test1");
 
@@ -39,7 +42,20 @@ public class ShardDumpTaskExecutorMain {
         dst.setPassword("root");
 
         ShardDumpTaskExecutor target = new ShardDumpTaskExecutor(task);
-        target.setShardDumpTaskService(Mockito.mock(ShardDumpTaskService.class));
+
+        ShardDumpTaskService service = mock(ShardDumpTaskService.class);
+
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                ShardDumpTask temp = (ShardDumpTask) invocationOnMock.getArguments()[0];
+                System.out.println(temp.getBinlogInfo().getBinlogFile());
+                System.out.println(temp.getBinlogInfo().getBinlogPosition());
+                return null;
+            }
+        }).when(service).update(any(ShardDumpTask.class));
+
+        target.setShardDumpTaskService(service);
         target.setSrcDBInstance(src);
         target.setDstDBInstance(dst);
         target.init();

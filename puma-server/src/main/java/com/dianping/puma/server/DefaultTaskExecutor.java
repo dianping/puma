@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
+import com.dianping.puma.ComponentContainer;
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.model.BinlogInfo;
@@ -48,6 +49,7 @@ import com.dianping.puma.parser.mysql.packet.PacketFactory;
 import com.dianping.puma.parser.mysql.packet.PacketType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
@@ -84,7 +86,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 	private BinlogStat binlogStat;
 
-	private FetcherEventCountMonitor fetcherEventCountMonitor;
+	private FetcherEventCountMonitor fetcherEventCountMonitor = ComponentContainer.SPRING
+			.lookup("fetcherEventCountMonitor");
 
 	@Override
 	public void doStart() throws Exception {
@@ -573,20 +576,5 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	public void incrDdls() {
 		Long ddls = this.state.getBinlogStat().getDdls();
 		this.state.getBinlogStat().setDdls(ddls + 1);
-	}
-
-	/*
-	public void setPreservedDay(int preservedDay) {
-		List<Sender> senders = getFileSender();
-		DefaultEventStorage storage = senders.get(0).getStorage();
-
-	}*/
-
-	public FetcherEventCountMonitor getFetcherEventCountMonitor() {
-		return fetcherEventCountMonitor;
-	}
-
-	public void setFetcherEventCountMonitor(FetcherEventCountMonitor fetcherEventCountMonitor) {
-		this.fetcherEventCountMonitor = fetcherEventCountMonitor;
 	}
 }

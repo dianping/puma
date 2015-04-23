@@ -90,11 +90,6 @@
         <property name="collName" value="seq" />
     </bean>
 
-	<bean id="fetcherEventCountMonitor"
-		  class="com.dianping.puma.monitor.fetcher.FetcherEventCountMonitor"
-		  init-method="init">
-	</bean>
-	
 </beans>
 
 

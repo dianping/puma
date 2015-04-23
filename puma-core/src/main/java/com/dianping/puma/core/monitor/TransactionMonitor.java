@@ -6,7 +6,7 @@ import com.dianping.cat.message.Transaction;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class TransactionMonitor extends AbstractMonitor {
+public class TransactionMonitor extends AbstractPumaMonitor {
 
 	private ConcurrentMap<String, Transaction> transactions = new ConcurrentHashMap<String, Transaction>();
 

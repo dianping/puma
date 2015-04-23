@@ -1,31 +1,36 @@
 package com.dianping.puma.core.monitor;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public abstract class AbstractMonitor implements Monitor {
+public abstract class AbstractPumaMonitor implements PumaMonitor {
 
 	protected String type;
 
-	private ConcurrentMap<String, Long> counts;
+	protected Monitor monitor;
+
+	private ConcurrentMap<String, Long> counts = new ConcurrentHashMap<String, Long>();
 
 	private Long countThreshold;
 
 	private boolean stopped = true;
 
-	public AbstractMonitor(String type) {
+	public AbstractPumaMonitor() {}
+
+	public AbstractPumaMonitor(String type) {
 		this.type = type;
 		this.countThreshold = 1L;
 	}
 
-	public AbstractMonitor(String type, Long countThreshold) {
+	public AbstractPumaMonitor(String type, Long countThreshold) {
 		this.type = type;
 		this.countThreshold = countThreshold;
 	}
 
 	protected void incrCountingIfExists(String name) {
 		Long count = counts.get(name);
-		if (count != null && count.equals(countThreshold)) {
-			++count;
+		if (count != null) {
+			counts.put(name, count + 1);
 		}
 	}
 
@@ -60,5 +65,17 @@ public abstract class AbstractMonitor implements Monitor {
 	public void stop() {
 		stopped = true;
 		doStop();
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public void setCountThreshold(Long countThreshold) {
+		this.countThreshold = countThreshold;
+	}
+
+	public void setMonitor(Monitor monitor) {
+		this.monitor = monitor;
 	}
 }

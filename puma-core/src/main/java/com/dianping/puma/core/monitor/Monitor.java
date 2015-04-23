@@ -1,9 +1,14 @@
 package com.dianping.puma.core.monitor;
 
-import com.dianping.puma.core.LifeCycle;
-import com.dianping.puma.core.exception.MonitorException;
+import com.dianping.cat.Cat;
 
-public interface Monitor extends LifeCycle<MonitorException> {
+public class Monitor {
 
-	void record(String name, String status);
+	public void logEvent(String type, String name) {
+		Cat.logEvent(type, name);
+	}
+
+	public void logEvent(String type, String name, String status, String details) {
+		Cat.logEvent(type, name, status, details);
+	}
 }

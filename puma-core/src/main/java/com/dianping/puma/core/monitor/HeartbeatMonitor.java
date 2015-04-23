@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class HeartbeatMonitor extends AbstractMonitor {
+public class HeartbeatMonitor extends AbstractPumaMonitor {
 
 	private int delaySeconds;
 

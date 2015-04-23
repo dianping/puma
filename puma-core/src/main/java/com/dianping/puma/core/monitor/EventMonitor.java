@@ -2,7 +2,9 @@ package com.dianping.puma.core.monitor;
 
 import com.dianping.cat.Cat;
 
-public class EventMonitor extends AbstractMonitor {
+public class EventMonitor extends AbstractPumaMonitor {
+
+	public EventMonitor() { super(); }
 
 	public EventMonitor(String type) {
 		super(type);
@@ -19,7 +21,8 @@ public class EventMonitor extends AbstractMonitor {
 			incrCountingIfExists(name);
 
 			if (checkCountingIfExists(name)) {
-				Cat.logEvent(this.type, name, status, "");
+				resetCountingIfExists(name);
+				monitor.logEvent(type, name, status, "");
 			}
 		}
 	}

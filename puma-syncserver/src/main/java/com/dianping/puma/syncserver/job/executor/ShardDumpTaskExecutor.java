@@ -177,7 +177,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
         }
 
         protected long increaseIndex() {
-            return this.lastIndex + 1000000;
+            return this.lastIndex + task.getIndexIncrease();
         }
 
         protected String mysqldump(long lastIndex, long nextIndex) throws IOException, InterruptedException {
@@ -325,10 +325,12 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
     }
 
     protected String executeByProcessBuilder(List<String> cmd) throws IOException, InterruptedException {
-        logger.info("execute shell script, cmd is: " + StringUtils.join(cmd, ' '));
+        logger.debug("execute shell script, cmd is: {}", StringUtils.join(cmd, ' '));
         ProcessBuilderWrapper pbd = new ProcessBuilderWrapper(cmd);
-        logger.info("Command has terminated with status: " + pbd.getStatus());
-        logger.info("Output:\n" + pbd.getInfos());
+        logger.debug("Command has terminated with status: {}", pbd.getStatus());
+        if (!Strings.isNullOrEmpty(pbd.getInfos())) {
+            logger.debug("Output:\n{}", pbd.getInfos());
+        }
         return pbd.getErrors();
     }
 

@@ -26,11 +26,13 @@ public class ShardDumpTask extends DumpTask {
 
     private String indexColumnName;
 
+    private long indexIncrease = 1000000;
+
     private long maxKey;
 
     private List<String> options = Arrays.asList("--master-data=2", "--disable-keys", "--skip-comments", "--quick",
             "--add-drop-database=false", "--no-create-info", "--add-drop-table=false", "--skip-add-locks",
-            "--default-character-set=utf8", "--max_allowed_packet=16777216", "--net_buffer_length=16384",
+            "--default-character-set=utf8", "--max_allowed_packet=1073741824",
             "-i", "--single-transaction", "--hex-blob", "--compact");
 
     @Override
@@ -121,5 +123,13 @@ public class ShardDumpTask extends DumpTask {
 
     public void setTargetDataBase(String targetDataBase) {
         this.targetDataBase = targetDataBase;
+    }
+
+    public long getIndexIncrease() {
+        return indexIncrease;
+    }
+
+    public void setIndexIncrease(long indexIncrease) {
+        this.indexIncrease = indexIncrease;
     }
 }

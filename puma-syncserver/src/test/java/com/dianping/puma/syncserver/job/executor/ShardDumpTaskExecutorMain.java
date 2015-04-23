@@ -15,6 +15,7 @@ public class ShardDumpTaskExecutorMain {
     public static void main(String... args) throws InterruptedException {
         ShardDumpTask task = new ShardDumpTask();
 
+        task.setIndexIncrease(10000);
         task.setDataBase("test");
         task.setTableName("user");
         task.setIndexColumnName("id");

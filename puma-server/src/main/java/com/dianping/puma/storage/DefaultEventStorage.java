@@ -15,8 +15,8 @@ import com.dianping.puma.core.model.AcceptedTables;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.container.storage.StorageStateContainer;
 import com.dianping.puma.core.model.state.Storage.StorageState;
+import com.dianping.puma.monitor.StorageEventCountMonitor;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
@@ -33,10 +33,12 @@ import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageException;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;
 import com.dianping.puma.storage.exception.StorageWriteException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultEventStorage implements EventStorage {
-	private static final Logger log = Logger
-			.getLogger(DefaultEventStorage.class);
+
+	private static final Logger LOG = LoggerFactory.getLogger(DefaultEventStorage.class);
 
 	private BucketManager bucketManager;
 
@@ -81,6 +83,8 @@ public class DefaultEventStorage implements EventStorage {
 	private List<String> acceptedTables;
 
 	private Map<String,AcceptedTables> acceptedDataTables;
+
+	private StorageEventCountMonitor storageEventCountMonitor;
 	
 	public void setAcceptedTablesConfigKey(String acceptedTablesConfigKey) {
 		this.acceptedTablesConfigKey = acceptedTablesConfigKey;
@@ -127,6 +131,11 @@ public class DefaultEventStorage implements EventStorage {
 		StorageStateContainer storageStateContainer = ComponentContainer.SPRING.lookup("storageStateContainer");
 		storageStateContainer.add(storageState);
 
+		storageEventCountMonitor = ComponentContainer.SPRING.lookup("storageEventCountMonitor");
+		if (storageEventCountMonitor != null) {
+			LOG.info("Find `storageEventCountMonitor` spring bean success.");
+		}
+
 		try {
 			masterBucketIndex.start();
 			slaveBucketIndex.start();
@@ -161,7 +170,7 @@ public class DefaultEventStorage implements EventStorage {
 				return;
 
 			} catch (LionException e) {
-				log.warn(String.format("Get acceptedTablesConfig[%s] failed.",
+				LOG.warn(String.format("Get acceptedTablesConfig[%s] failed.",
 						acceptedTablesConfigKey));
 			}
 		}
@@ -182,7 +191,7 @@ public class DefaultEventStorage implements EventStorage {
 								.toLowerCase());
 					}
 				}
-				log.info("accepted tables:" + resList);
+				LOG.info("accepted tables:" + resList);
 				return resList;
 			}
 		}
@@ -324,6 +333,8 @@ public class DefaultEventStorage implements EventStorage {
 			writingBucket.append(bos.toByteArray());
 			bucketManager.updateLatestSequence(new Sequence(event.getSeq()));
 
+			storageEventCountMonitor.record(getTaskName());
+
 			StorageStateContainer storageStateContainer = ComponentContainer.SPRING.lookup("storageStateContainer");
 			storageStateContainer.setSeq(name, event.getSeq());
 			storageStateContainer.setBinlogInfo(name, new BinlogInfo(event.getBinlog(), event.getBinlogPos()));
@@ -344,8 +355,8 @@ public class DefaultEventStorage implements EventStorage {
 			RowChangedEvent rce = (RowChangedEvent) event;
 
 			if (StringUtils.isNotBlank(rce.getTable())) {
-				if (log.isDebugEnabled()) {
-					log.debug("table:" + rce.getTable().toLowerCase());
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("table:" + rce.getTable().toLowerCase());
 				}
 				return acceptedTables.contains(rce.getTable().toLowerCase());
 			}
@@ -364,8 +375,8 @@ public class DefaultEventStorage implements EventStorage {
 			if(StringUtils.isNotBlank(event.getDatabase())){
 				if(acceptedDataTables.containsKey(event.getDatabase())){
 					if (StringUtils.isNotBlank(event.getTable())) {
-						if (log.isDebugEnabled()) {
-							log.debug("table:" + event.getTable());
+						if (LOG.isDebugEnabled()) {
+							LOG.debug("table:" + event.getTable());
 						}
 						return acceptedDataTables.get(event.getDatabase()).isContains((event.getTable()));
 					}
@@ -374,7 +385,7 @@ public class DefaultEventStorage implements EventStorage {
 				return false;
 			}
 			if(event instanceof DdlEvent){
-				log.info(event.toString());
+				LOG.info(event.toString());
 			}
 			return true;
 		} else{

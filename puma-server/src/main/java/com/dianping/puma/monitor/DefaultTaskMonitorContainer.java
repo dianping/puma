@@ -54,16 +54,16 @@ public class DefaultTaskMonitorContainer implements TaskMonitorContainer {
 	@Override
 	public void start()
 	{
-		constructTaskMonitor();
+		//constructTaskMonitor();
 		initScheduledExecutorService(MAXTHREADCOUNT);
 		this.execute();
 	}
 	
 	private void constructTaskMonitor() {
-		constructClientInfoTaskMonitor();
-		constructClientIpTaskMonitor();
-		constructServerInfoTaskMonitor();
-		constructSyncProcessTaskMonitor();
+		//constructClientInfoTaskMonitor();
+		//constructClientIpTaskMonitor();
+		//constructServerInfoTaskMonitor();
+		//constructSyncProcessTaskMonitor();
 	}
 
 	private void constructClientInfoTaskMonitor() {

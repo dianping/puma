@@ -67,7 +67,7 @@ public class ShardSyncTaskController {
     @RequestMapping(value = {"/shard-sync-task/create"}, method = RequestMethod.POST)
     public String create(@ModelAttribute ShardSyncTask task, String syncServerName) throws SendFailedException {
         task.setSyncServerName(syncServerName);
-        task.setName("ShardSyncTask-" + task.getRuleName() + "-" + task.getTableName());
+        task.setName(String.format("ShardSyncTask-%s-%s-%s", task.getRuleName(), task.getTableName(), task.isMigrate() ? "migrate" : "sync"));
         shardSyncTaskService.create(task);
 
         shardSyncTaskOperationReporter.report(syncServerName, task.getName(), ActionOperation.CREATE);

@@ -6,7 +6,7 @@ import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.entity.ShardDumpTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.state.ShardDumpTaskState;
+import com.dianping.puma.core.model.state.ShardSyncTaskState;
 import com.dianping.puma.core.service.ShardDumpTaskService;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.syncserver.config.SyncServerConfig;
@@ -37,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardDumpTaskState> {
+public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardSyncTaskState> {
     private static final Logger logger = LoggerFactory.getLogger(ShardDumpTaskExecutor.class);
 
     private static final Charset DEFAULT_CJARSET = Charset.forName("utf8");
@@ -46,9 +46,9 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardD
 
     protected final ShardDumpTask task;
 
-    protected final ShardDumpTaskState dumpStatus;
+    protected final ShardSyncTaskState dumpStatus;
 
-    protected final ShardDumpTaskState loadStatus;
+    protected final ShardSyncTaskState loadStatus;
 
     protected final String dumpOutputDir;
 
@@ -71,9 +71,9 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardD
 
         this.task = task;
         this.dumpOutputDir = (SyncServerConfig.getInstance() == null ? "/tmp/" : SyncServerConfig.getInstance().getTempDir() + "/dump/") + task.getName() + "/";
-        this.dumpStatus = new ShardDumpTaskState();
+        this.dumpStatus = new ShardSyncTaskState();
         this.dumpStatus.setStatus(Status.PREPARING);
-        this.loadStatus = new ShardDumpTaskState();
+        this.loadStatus = new ShardSyncTaskState();
         this.loadStatus.setStatus(Status.PREPARING);
     }
 
@@ -147,7 +147,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardD
                     }
 
                     if (!checkHasData(this.lastIndex)) {
-                        dumpStatus.setPercent(ShardDumpTaskState.PERCENT_MAX);
+                        dumpStatus.setPercent(ShardSyncTaskState.PERCENT_MAX);
                         waitForLoadQueue.put(-1l);
                         break;
                     }
@@ -274,7 +274,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardD
                     Long index = waitForLoadQueue.take();
                     if (index < 0) {
                         cleanup();
-                        loadStatus.setPercent(ShardDumpTaskState.PERCENT_MAX);
+                        loadStatus.setPercent(ShardSyncTaskState.PERCENT_MAX);
                         break;
                     }
 
@@ -349,8 +349,8 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardD
     }
 
     @Override
-    public ShardDumpTaskState getTaskState() {
-        ShardDumpTaskState status = new ShardDumpTaskState();
+    public ShardSyncTaskState getTaskState() {
+        ShardSyncTaskState status = new ShardSyncTaskState();
         if (!dumpStatus.getStatus().equals(Status.RUNNING)) {
             status.setStatus(dumpStatus.getStatus());
         } else if (!loadStatus.getStatus().equals(Status.RUNNING)) {
@@ -365,7 +365,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardD
     }
 
     @Override
-    public void setTaskState(ShardDumpTaskState taskState) {
+    public void setTaskState(ShardSyncTaskState taskState) {
 
     }
 

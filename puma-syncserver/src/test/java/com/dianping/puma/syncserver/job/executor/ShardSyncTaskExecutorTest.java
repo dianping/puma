@@ -254,13 +254,13 @@ public class ShardSyncTaskExecutorTest {
         config.setTableShardConfigs(Lists.newArrayList(tConfig));
 
         when(configCache.getProperty("shardds.test.shard")).thenReturn(new Gson().toJson(config));
-        when(configCache.getProperty("shardds.test.switch")).thenReturn("false");
         when(configCache.getProperty("shardds.test.origin")).thenReturn("table");
 
         target.initAndConvertConfig();
 
         verify(configCache, times(1)).getProperty("shardds.test.shard");
         verify(configCache, times(1)).getProperty("shardds.test.origin");
+        verify(configCache, times(2)).getProperty(anyString());
 
         Assert.assertEquals("table1", target.tableShardRuleConfigOrigin.getTableName());
         Assert.assertEquals(1, target.tableShardRuleConfigList.size());

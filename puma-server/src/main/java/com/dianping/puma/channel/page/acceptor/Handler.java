@@ -150,7 +150,7 @@ public class Handler implements PageHandler<Context> {
 
 				Event event = channel.next();
 				if (event != null && event instanceof ChangedEvent) {
-					ChangedEvent changedEvent = (ChangedEvent) event;
+					ChangedEvent changedEvent=(ChangedEvent)event;
 					serverLaggingTimeMonitor.record(clientName, changedEvent.getExecuteTime());
 
 					if (filterChain.doNext(changedEvent)) {
@@ -167,11 +167,10 @@ public class Handler implements PageHandler<Context> {
 						// status report
 						SystemStatusContainer.instance.updateClientSeq(payload.getClientName(), changedEvent.getSeq());
 						// record success client seq
-						SystemStatusContainer.instance.updateClientSuccessSeq(payload.getClientName(), changedEvent
-								.getSeq());
+						SystemStatusContainer.instance.updateClientSuccessSeq(payload.getClientName(), changedEvent.getSeq());
 						// update binlog
-						SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(), changedEvent
-								.getBinlog(), changedEvent.getBinlogPos());
+						SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(), changedEvent.getBinlog(),
+								changedEvent.getBinlogPos());
 
 					}
 				}

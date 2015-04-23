@@ -11,7 +11,6 @@ import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import com.dianping.cat.Cat;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
@@ -19,6 +18,7 @@ import com.dianping.lion.client.LionException;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.HeartbeatEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
+
 import com.dianping.puma.core.util.ScheduledExecutorUtils;
 
 public class HeartbeatTask {
@@ -30,7 +30,6 @@ public class HeartbeatTask {
 	private long initialDelay;
 	private long interval;
 	private TimeUnit unit;
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Future future;
 
 	private HttpServletResponse response;
@@ -40,9 +39,6 @@ public class HeartbeatTask {
 	private EventCodec codec = null;
 
 	private ScheduledExecutorService executorService = null;
-
-	@Autowired
-	private HeartbeatScheduledExecutor heartbeatScheduledExecutor;
 
 	public void setInitialDelay(long initialDelay) {
 		this.initialDelay = initialDelay;
@@ -67,7 +63,7 @@ public class HeartbeatTask {
 	public TimeUnit getUnit() {
 		return unit;
 	}
-
+	
 	@SuppressWarnings("rawtypes")
 	public Future getFuture() {
 		return this.future;

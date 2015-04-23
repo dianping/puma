@@ -20,6 +20,7 @@ public class HeartbeatScheduledExecutor implements InitializingBean {
 
 	public HeartbeatScheduledExecutor() {
 		setExecutorService(ScheduledExecutorUtils.createScheduledExecutorService(MAX_THREAD_COUNT, THREAD_FACTORY_NAME));
+
 	}
 
 	@Override
@@ -41,5 +42,5 @@ public class HeartbeatScheduledExecutor implements InitializingBean {
 		}
 		return false;
 	}
-
 }
+

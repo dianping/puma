@@ -12,11 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
+import com.dianping.puma.monitor.MonitorScheduledExecutor;
 
 public abstract class AbstractTaskMonitor implements Runnable{
 
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractTaskMonitor.class);
-	
+
 	@Autowired
 	private MonitorScheduledExecutor monitorScheduledExecutor;
 	

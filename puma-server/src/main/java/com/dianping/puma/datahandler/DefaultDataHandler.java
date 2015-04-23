@@ -71,17 +71,10 @@ public class DefaultDataHandler extends AbstractDataHandler {
 				}
 			} else {
 				if (log.isDebugEnabled()) {
-<<<<<<< HEAD
 					log.debug("meta info not found for:" + tableMapEvent.getDatabaseName() + "-"
 							+ tableMapEvent.getTableName());
 				}
 				skipEvent(BinlogConstants.TABLE_MAP_EVENT, result, context);
-=======
-				log.debug("meta info not found for:" + tableMapEvent.getDatabaseName() + "-"
-						+ tableMapEvent.getTableName());
-				}
-				skipEvent(BinlogConstanst.TABLE_MAP_EVENT, result, context);
->>>>>>> delete log print..
 				return;
 			}
 

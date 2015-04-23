@@ -27,7 +27,6 @@ import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.monitor.FetcherEventCountMonitor;
 import com.dianping.puma.monitor.FetcherEventDelayMonitor;
 import com.dianping.puma.monitor.ParserEventCountMonitor;
-
 import org.apache.commons.lang.StringUtils;
 
 import com.dianping.puma.common.SystemStatusContainer;

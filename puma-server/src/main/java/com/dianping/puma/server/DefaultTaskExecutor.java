@@ -86,11 +86,15 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 	private BinlogStat binlogStat;
 
-	private FetcherEventCountMonitor fetcherEventCountMonitor = ComponentContainer.SPRING
-			.lookup("fetcherEventCountMonitor");
+	private FetcherEventCountMonitor fetcherEventCountMonitor;
 
 	@Override
 	public void doStart() throws Exception {
+
+		fetcherEventCountMonitor = ComponentContainer.SPRING.lookup("fetcherEventCountMonitor");
+		if (fetcherEventCountMonitor != null) {
+			LOG.info("Find `fetcherEventCountMonitor` spring bean success.");
+		}
 
 		long failCount = 0;
 		do {

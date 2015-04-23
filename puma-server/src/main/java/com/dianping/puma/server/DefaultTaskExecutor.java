@@ -28,6 +28,7 @@ import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.monitor.fetcher.FetcherEventCountMonitor;
+import com.dianping.puma.monitor.parser.ParserEventCountMonitor;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.storage.DefaultEventStorage;
 import org.apache.commons.lang.StringUtils;
@@ -88,12 +89,19 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 	private FetcherEventCountMonitor fetcherEventCountMonitor;
 
+	private ParserEventCountMonitor parserEventCountMonitor;
+
 	@Override
 	public void doStart() throws Exception {
 
 		fetcherEventCountMonitor = ComponentContainer.SPRING.lookup("fetcherEventCountMonitor");
 		if (fetcherEventCountMonitor != null) {
 			LOG.info("Find `fetcherEventCountMonitor` spring bean success.");
+		}
+
+		parserEventCountMonitor = ComponentContainer.SPRING.lookup("parserEventCountMonitor");
+		if (parserEventCountMonitor != null) {
+			LOG.info("Find `parserEventCountMonitor` spring bean success.");
 		}
 
 		long failCount = 0;
@@ -202,6 +210,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		do {
 			dataHandlerResult = dataHandler.process(binlogEvent, getContext());
 			if (dataHandlerResult != null && !dataHandlerResult.isEmpty()) {
+				parserEventCountMonitor.record(getTaskName());
+
 				ChangedEvent changedEvent = dataHandlerResult.getData();
 
 				updateOpsCounter(changedEvent);

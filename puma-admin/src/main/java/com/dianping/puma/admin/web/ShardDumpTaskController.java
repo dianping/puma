@@ -80,11 +80,16 @@ public class ShardDumpTaskController {
 
     @RequestMapping(value = {"shard-dump-task/create"}, method = RequestMethod.POST)
     public String create(@ModelAttribute ShardDumpTask task, String syncServerName) throws SendFailedException {
-//        task.setSyncServerName(syncServerName);
-//        task.setName(String.format("ShardSyncTask-%s-%s-%s", task.getRuleName(), task.getTableName(), task.isMigrate() ? "migrate" : "sync"));
-//        shardDumpTaskService.create(task);
-//
-//        shardSyncTaskOperationReporter.report(syncServerName, task.getName(), SyncType.SHARD_DUMP, ActionOperation.CREATE);
+        task.setSyncServerName(syncServerName);
+
+        task.setName(String.format("ShardDumpTask-%s-%s-%s-%s-%s-%s-%s",
+                task.getSrcDbName(), task.getDataBase(), task.getTableName(),
+                task.getDstDbName(), task.getTargetDataBase(), task.getTargetTableName(),
+                task.getShardRule().hashCode()));
+
+        shardDumpTaskService.create(task);
+
+        shardSyncTaskOperationReporter.report(syncServerName, task.getName(), SyncType.SHARD_DUMP, ActionOperation.CREATE);
 
         return "redirect:/shard-dump-task";
     }

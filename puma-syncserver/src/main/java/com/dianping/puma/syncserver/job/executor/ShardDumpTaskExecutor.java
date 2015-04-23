@@ -231,11 +231,21 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
         }
 
         protected void checkAndUpdateBinlogInfo(String binlog, long position) throws IOException {
-            int oldBinlogIndex = getBinlogIndex(task.getBinlogInfo().getBinlogFile());
-            int newBinlogIndex = getBinlogIndex(binlog);
+            boolean needToSet = false;
 
-            if (newBinlogIndex < oldBinlogIndex ||
-                    (newBinlogIndex == oldBinlogIndex && position < task.getBinlogInfo().getBinlogPosition())) {
+            if (task.getBinlogInfo() == null) {
+                needToSet = true;
+            } else {
+                int oldBinlogIndex = getBinlogIndex(task.getBinlogInfo().getBinlogFile());
+                int newBinlogIndex = getBinlogIndex(binlog);
+
+                if (newBinlogIndex < oldBinlogIndex ||
+                        (newBinlogIndex == oldBinlogIndex && position < task.getBinlogInfo().getBinlogPosition())) {
+                    needToSet = true;
+                }
+            }
+
+            if (needToSet) {
                 BinlogInfo info = new BinlogInfo();
                 info.setBinlogFile(binlog);
                 info.setBinlogPosition(position);
@@ -288,7 +298,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
                     loadStatus.setStatus(Status.SUSPENDED);
                     break;
                 } catch (Exception e) {
-                    String msg = "Convert Failed!";
+                    String msg = "Load Failed!";
                     logger.error(msg, e);
                     Cat.logError(msg, e);
                     loadStatus.setStatus(Status.FAILED);
@@ -302,7 +312,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
 
             List<String> cmdlist = new ArrayList<String>();
             cmdlist.add("mysql -f --default-character-set=utf8");
-            cmdlist.add("'--database=" + task.getDataBase() + "'");
+            cmdlist.add("'--database=" + task.getTargetDataBase() + "'");
             cmdlist.add("'--user=" + dstDBInstance.getUsername() + "'");
             cmdlist.add("'--host=" + dstDBInstance.getHost() + "'");
             cmdlist.add("'--port=" + dstDBInstance.getPort() + "'");

@@ -14,6 +14,8 @@ public class ShardDumpTask extends DumpTask {
 
     private String dataBase;
 
+    private String targetDataBase;
+
     private String tableName;
 
     private String targetTableName;
@@ -111,5 +113,13 @@ public class ShardDumpTask extends DumpTask {
 
     public void setTargetTableName(String targetTableName) {
         this.targetTableName = targetTableName;
+    }
+
+    public String getTargetDataBase() {
+        return targetDataBase;
+    }
+
+    public void setTargetDataBase(String targetDataBase) {
+        this.targetDataBase = targetDataBase;
     }
 }

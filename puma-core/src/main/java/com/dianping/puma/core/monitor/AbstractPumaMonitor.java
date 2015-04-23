@@ -7,7 +7,7 @@ public abstract class AbstractPumaMonitor implements PumaMonitor {
 
 	protected String type;
 
-	protected Monitor monitor;
+	protected Monitor monitor = new Monitor();
 
 	private ConcurrentMap<String, Long> counts = new ConcurrentHashMap<String, Long>();
 

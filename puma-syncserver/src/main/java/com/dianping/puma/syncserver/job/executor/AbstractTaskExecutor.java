@@ -18,6 +18,7 @@ import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +33,8 @@ import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
+import com.dianping.puma.core.event.Event;
+import com.dianping.puma.core.event.HeartbeatEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
@@ -46,8 +49,8 @@ import com.dianping.puma.syncserver.job.executor.failhandler.HandlerContainer;
 import com.dianping.puma.syncserver.job.executor.failhandler.StopOnFailedHandler;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
-public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S extends BaseSyncTaskState>
-		implements TaskExecutor<T, S>, SpeedControllable {
+public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S extends BaseSyncTaskState> implements
+		TaskExecutor<T, S>, SpeedControllable {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractTaskExecutor.class);
 
 	protected T abstractTask;
@@ -113,8 +116,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 
 	/**
 	 * 事件到达回调函数
-	 *
-	 * @param event 事件
+	 * 
+	 * @param event
+	 *            事件
 	 * @throws Exception
 	 */
 	protected abstract void execute(ChangedEvent event) throws SQLException, DdlRenameException;
@@ -143,7 +147,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 			BinlogInfo binlogInfo = new BinlogInfo();
 			binlogInfo.setBinlogFile(event.getBinlog());
 			binlogInfo.setBinlogPosition(event.getBinlogPos());
-			//更新pumaClient binlog
+			// 更新pumaClient binlog
 			abstractTask.setBinlogInfo(binlogInfo);
 			this.pumaClient.getConfig().setBinlog(event.getBinlog());
 			this.pumaClient.getConfig().setBinlogPos(event.getBinlogPos());
@@ -250,8 +254,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 				"Puma.syncserver." + abstractTask.getSyncServerName() + ".fail",
 				abstractTask.getSyncServerName(),
 				Message.SUCCESS,
-				"syncServerName = " + abstractTask.getSyncServerName() + "&syncTaskName= "
-						+ abstractTask.getName() + "&casedetail=" + detail);
+				"syncServerName = " + abstractTask.getSyncServerName() + "&syncTaskName= " + abstractTask.getName()
+						+ "&casedetail=" + detail);
 		state.setDetail(detail);
 		// this.status.setDetail(detail);
 
@@ -366,19 +370,24 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 			private boolean skipToNextPos = startedBinlogInfo.isSkipToNextPos();
 
 			@Override
-			public void onSkipEvent(ChangedEvent event) {
+			public void onSkipEvent(Event event) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("onSkipEvent: " + event);
 				}
 			}
 
 			@Override
-			public boolean onException(ChangedEvent event, Exception e) {
+			public boolean onException(Event event, Exception e) {
 				// 针对策略，调用策略的处理
 				boolean ignoreFailEvent = false;
 
 				boolean hasHandler = false;
-
+				ChangedEvent changedEvent = null;
+				if (event instanceof ChangedEvent) {
+					changedEvent = (ChangedEvent) event;
+				} else {
+					return true;
+				}
 				if (e instanceof SQLException) {
 					SQLException se = (SQLException) e;
 					int errorCode = se.getErrorCode();
@@ -388,7 +397,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 						if (handlerName != null) {
 							Handler handler = HandlerContainer.getInstance().getHandler(handlerName);
 							if (handler != null) {
-								ignoreFailEvent = handleError(event, handler, e);
+								ignoreFailEvent = handleError(changedEvent, handler, e);
 								hasHandler = true;// 有handler能处理
 							}
 						}
@@ -401,7 +410,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 					if (handlerName != null) {
 						Handler handler = HandlerContainer.getInstance().getHandler(handlerName);
 						if (handler != null) {
-							ignoreFailEvent = handleError(event, handler, e);
+							ignoreFailEvent = handleError(changedEvent, handler, e);
 							hasHandler = true;// 有handler能处理
 						}
 					}
@@ -411,7 +420,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 				if (!hasHandler) {
 					LOG.info("No handler found, use handler:" + StopOnFailedHandler.NAME);
 					Handler handler = HandlerContainer.getInstance().getHandler(StopOnFailedHandler.NAME);
-					ignoreFailEvent = handleError(event, handler, e);
+					ignoreFailEvent = handleError(changedEvent, handler, e);
 				}
 
 				return ignoreFailEvent;
@@ -438,62 +447,68 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 			}
 
 			@Override
-			public void onEvent(ChangedEvent event) throws Exception {
+			public void onEvent(Event event) throws Exception {
 				// LOG.info("********************Received " + event);
 				if (!skipToNextPos) {
-
-					if (event != null && !containDatabase(event.getDatabase())) {
-						binlogOfIOThreadChanged(event);
+					ChangedEvent changedEvent = null;
+					if (event instanceof HeartbeatEvent) {
+						Log.info("HeartbeatEvent onEvent.");
+						return ;
+					} else {
+						changedEvent = (ChangedEvent) event;
+					}
+					if (event != null && !containDatabase(changedEvent.getDatabase())) {
+						binlogOfIOThreadChanged(changedEvent);
 					}
 
 					if (event instanceof RowChangedEvent) {
 						// ------------- (1) 【事务开始事件】--------------
-						if (((RowChangedEvent) event).isTransactionBegin()) {
-						} else if (((RowChangedEvent) event).isTransactionCommit()) {
+						if (((RowChangedEvent) changedEvent).isTransactionBegin()) {
+						} else if (((RowChangedEvent) changedEvent).isTransactionCommit()) {
 							// --------- (2) 【事务提交事件】--------------
-							if (containDatabase(event.getDatabase()) && transactionStart) {
+							if (containDatabase(changedEvent.getDatabase()) && transactionStart) {
 								// 提交事务(datachange了，则该commit肯定是属于当前做了数据操作的事务的，故mysqlExecutor.commit();)
 								mysqlExecutor.commit();
 
 								transactionStart = false;
 								// 遇到commit事件，操作数据库了，更新sqlbinlog和保存binlog到数据库
-								binlogOfSqlThreadChanged(event);
+								binlogOfSqlThreadChanged(changedEvent);
 								commitBinlogCount = 0;
 							} else {
 								// 只要累计遇到的commit事件1000个(无论是否属于抓取的database)，都更新sqlbinlog和保存binlog到数据库，为的是即使当前task更新不频繁，也不要让它的binlog落后太多
 								if (++commitBinlogCount > getSaveCommitCount()) {
-									binlogOfSqlThreadChanged(event);
+									binlogOfSqlThreadChanged(changedEvent);
 									commitBinlogCount = 0;
 								}
 							}
 							// 实时更新iobinlog位置(该io
 							// binlog位置也必须都是commmit事件的位置，这样的位置才是一个合理状态的位置，否则如果是一半事务的binlog位置，那么从该binlog位置订阅将是错误的状态)
-							binlogOfIOThreadChanged(event);
+							binlogOfIOThreadChanged(changedEvent);
 
-						} else if (containDatabase(event.getDatabase())) {
+						} else if (containDatabase(changedEvent.getDatabase())) {
 							// --------- (3) 【数据操作事件】--------------
 							// 可执行的event，保存到内存，出错时打印出来
-							lastEvents.add(event);
+							lastEvents.add(changedEvent);
 							// 标识事务开始
 							transactionStart = true;
 							// 执行子类的具体操作
 
-							AbstractTaskExecutor.this.execute(event);
+							AbstractTaskExecutor.this.execute(changedEvent);
 						}
 					} else if (event instanceof DdlEvent) {
-						if (containDatabase(event.getDatabase())) {
+						if (containDatabase(changedEvent.getDatabase())) {
 							lastEvents.add(event);
 							// 执行子类的具体操作
 							try {
-								AbstractTaskExecutor.this.execute(event);
+								AbstractTaskExecutor.this.execute(changedEvent);
 							} catch (DdlRenameException e) {
 								AbstractTaskExecutor.this.fail("case by db rename operation ," + e);
 								Cat.getProducer().logError("case by db rename operation ," + e, e);
 								return;
 							}
 						}
-						binlogOfSqlThreadChanged(event);
-						binlogOfIOThreadChanged(event);
+						binlogOfSqlThreadChanged(changedEvent);
+						binlogOfIOThreadChanged(changedEvent);
 					}
 				} else {
 					skipToNextPos = false;

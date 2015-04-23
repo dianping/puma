@@ -1,9 +1,9 @@
 package com.dianping.puma.filter;
 
-import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.Event;
 
 public abstract class AbstractEventFilter implements EventFilter {
-	public boolean accept(ChangedEvent event, EventFilterChain eventfilterChain) {
+	public boolean accept(Event event, EventFilterChain eventfilterChain) {
 
 		if (checkEvent(event)) {
 			return eventfilterChain.doNext(event);
@@ -13,6 +13,6 @@ public abstract class AbstractEventFilter implements EventFilter {
 
 	}
 
-	protected abstract boolean checkEvent(ChangedEvent event);
+	protected abstract boolean checkEvent(Event event);
 
 }

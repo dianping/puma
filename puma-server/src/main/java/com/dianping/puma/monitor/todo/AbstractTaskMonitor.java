@@ -4,6 +4,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,10 +16,9 @@ public abstract class AbstractTaskMonitor implements Runnable{
 
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractTaskMonitor.class);
 	
-	protected long initialDelay;
-	protected long interval;
-	protected TimeUnit unit;
-	protected ScheduledExecutorService executor;
+	private long initialDelay;
+	private long interval;
+	private TimeUnit unit;
 	@SuppressWarnings("unchecked")
 	protected Future future;
 	
@@ -56,13 +57,13 @@ public abstract class AbstractTaskMonitor implements Runnable{
 		return unit;
 	}
 	
-	public void execute(ScheduledExecutorService executor){
-		this.executor = executor;
-		future = doExecute(executor);
+	@PostConstruct
+	public void execute(){
+		future = doExecute();
 	}
 	
 	@SuppressWarnings("unchecked")
-	public abstract Future doExecute(ScheduledExecutorService executor);
+	public abstract Future doExecute();
 
 	public void run(){
 		doRun();

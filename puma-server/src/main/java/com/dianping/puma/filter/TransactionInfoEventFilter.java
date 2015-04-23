@@ -1,6 +1,6 @@
 package com.dianping.puma.filter;
 
-import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.RowChangedEvent;
 
 public class TransactionInfoEventFilter implements EventFilter {
@@ -11,7 +11,7 @@ public class TransactionInfoEventFilter implements EventFilter {
 		this.needTsInfo = needTsInfo;
 	}
 
-	public boolean accept(ChangedEvent event, EventFilterChain eventfilterChain) {
+	public boolean accept(Event event, EventFilterChain eventfilterChain) {
 
 		if (event instanceof RowChangedEvent) {
 			RowChangedEvent rowEvent = (RowChangedEvent) event;

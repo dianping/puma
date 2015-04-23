@@ -11,6 +11,7 @@ import org.codehaus.jackson.map.SerializerProvider;
 
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
+import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.RowChangedEvent;
 
 public class JsonEventCodec implements EventCodec {
@@ -31,7 +32,7 @@ public class JsonEventCodec implements EventCodec {
 	}
 
 	@Override
-	public byte[] encode(ChangedEvent event) throws IOException {
+	public byte[] encode(Event event) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
 		byte[] data = om.writeValueAsBytes(event);
@@ -48,7 +49,7 @@ public class JsonEventCodec implements EventCodec {
 	}
 
 	@Override
-	public ChangedEvent decode(byte[] data) throws IOException {
+	public Event decode(byte[] data) throws IOException {
 		int type = data[0];
 		if (type == DDL_EVENT) {
 			return om.readValue(data, 1, data.length - 1, DdlEvent.class);

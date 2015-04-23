@@ -11,6 +11,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.Event;
 import com.dianping.puma.storage.exception.StorageException;
 
 /**
@@ -21,12 +22,12 @@ public class BufferedEventChannel implements EventChannel {
     private static final AtomicLong     seq     = new AtomicLong(0);
 
     private EventChannel                eventChannel;
-    private BlockingQueue<ChangedEvent> eventBuffer;
+    private BlockingQueue<Event> eventBuffer;
     private volatile boolean            stopped = false;
 
     public BufferedEventChannel(EventChannel eventChannel, int bufSize) {
         this.eventChannel = eventChannel;
-        this.eventBuffer = new ArrayBlockingQueue<ChangedEvent>(bufSize);
+        this.eventBuffer = new ArrayBlockingQueue<Event>(bufSize);
 
         Thread fillThread = new Thread(new Runnable() {
 
@@ -57,7 +58,7 @@ public class BufferedEventChannel implements EventChannel {
     }
 
     @Override
-    public ChangedEvent next() throws StorageException {
+    public Event next() throws StorageException {
         try {
             return eventBuffer.take();
         } catch (InterruptedException e) {

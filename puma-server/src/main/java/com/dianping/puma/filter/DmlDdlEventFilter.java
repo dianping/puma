@@ -2,6 +2,7 @@ package com.dianping.puma.filter;
 
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
+import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.RowChangedEvent;
 
 public class DmlDdlEventFilter extends AbstractEventFilter {
@@ -18,7 +19,7 @@ public class DmlDdlEventFilter extends AbstractEventFilter {
 		}
 	}
 
-	protected boolean checkEvent(ChangedEvent event) {
+	protected boolean checkEvent(Event event) {
 		if ((event instanceof RowChangedEvent) && (operationType & 2) != 0) {
 			return true;
 		} else if ((event instanceof DdlEvent) && (operationType & 1) != 0) {

@@ -16,6 +16,7 @@
 package com.dianping.puma.api;
 
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.RowChangedEvent;
 
 /**
@@ -48,18 +49,18 @@ public class TestApi {
 		pc.register(new EventListener() {
 
 			@Override
-			public void onSkipEvent(ChangedEvent event) {
+			public void onSkipEvent(Event event) {
 				System.out.println(">>>>>>>>>>>>>>>>>>Skip " + event);
 			}
 
 			@Override
-			public boolean onException(ChangedEvent event, Exception e) {
+			public boolean onException(Event event, Exception e) {
 				System.out.println("-------------Exception " + e);
 				return true;
 			}
 
 			@Override
-			public void onEvent(ChangedEvent event) throws Exception {
+			public void onEvent(Event event) throws Exception {
 				// biz logic
 				if (event instanceof RowChangedEvent) {
 					RowChangedEvent rce = (RowChangedEvent) event;

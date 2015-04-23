@@ -18,6 +18,7 @@ import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
+import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
 import com.dianping.puma.core.util.ByteArrayUtils;
@@ -212,7 +213,7 @@ public class PumaClientTest {
         configBuilder.binlogPos(4);
         configBuilder.serverId(1111);
 
-        List<ChangedEvent> eventsSent = new ArrayList<ChangedEvent>();
+        List<Event> eventsSent = new ArrayList<Event>();
 
         DdlEvent event1 = new DdlEvent();
         event1.setBinlog("dddd");
@@ -292,7 +293,7 @@ public class PumaClientTest {
         event6.setTransactionCommit(true);
         eventsSent.add(event6);
 
-        final List<ChangedEvent> eventsReceived = new ArrayList<ChangedEvent>();
+        final List<Event> eventsReceived = new ArrayList<Event>();
 
         StartMockPumaServer(eventsSent);
 
@@ -301,17 +302,17 @@ public class PumaClientTest {
         client.register(new EventListener() {
 
             @Override
-            public void onSkipEvent(ChangedEvent event) {
+            public void onSkipEvent(Event event) {
 
             }
 
             @Override
-            public boolean onException(ChangedEvent event, Exception e) {
+            public boolean onException(Event event, Exception e) {
                 return true;
             }
 
             @Override
-            public void onEvent(ChangedEvent event) throws Exception {
+            public void onEvent(Event event) throws Exception {
                 eventsReceived.add(event);
             }
 
@@ -349,7 +350,7 @@ public class PumaClientTest {
         configBuilder.binlogPos(4);
         configBuilder.serverId(1111);
 
-        List<ChangedEvent> eventsSent = new ArrayList<ChangedEvent>();
+        List<Event> eventsSent = new ArrayList<Event>();
 
         DdlEvent event1 = new DdlEvent();
         event1.setBinlog("dddd");
@@ -429,7 +430,7 @@ public class PumaClientTest {
         event6.setTransactionCommit(true);
         eventsSent.add(event6);
 
-        final List<ChangedEvent> eventsReceived = new ArrayList<ChangedEvent>();
+        final List<Event> eventsReceived = new ArrayList<Event>();
 
         StartMockPumaServer(eventsSent);
 
@@ -439,17 +440,17 @@ public class PumaClientTest {
             private int i = 0;
 
             @Override
-            public void onSkipEvent(ChangedEvent event) {
+            public void onSkipEvent(Event event) {
 
             }
 
             @Override
-            public boolean onException(ChangedEvent event, Exception e) {
+            public boolean onException(Event event, Exception e) {
                 return false;
             }
 
             @Override
-            public void onEvent(ChangedEvent event) throws Exception {
+            public void onEvent(Event event) throws Exception {
                 if (++i == 2) {
                     throw new Exception();
                 }
@@ -490,7 +491,7 @@ public class PumaClientTest {
         configBuilder.binlogPos(4);
         configBuilder.serverId(1111);
 
-        List<ChangedEvent> eventsSent = new ArrayList<ChangedEvent>();
+        ArrayList<Event> eventsSent = new ArrayList<Event>();
 
         DdlEvent event1 = new DdlEvent();
         event1.setBinlog("dddd");
@@ -570,8 +571,8 @@ public class PumaClientTest {
         event6.setTransactionCommit(true);
         eventsSent.add(event6);
 
-        final List<ChangedEvent> eventsReceived = new ArrayList<ChangedEvent>();
-        final List<ChangedEvent> eventsSkipped = new ArrayList<ChangedEvent>();
+        final List<Event> eventsReceived = new ArrayList<Event>();
+        final List<Event> eventsSkipped = new ArrayList<Event>();
 
         StartMockPumaServer(eventsSent);
 
@@ -581,17 +582,17 @@ public class PumaClientTest {
             private int i = 0;
 
             @Override
-            public void onSkipEvent(ChangedEvent event) {
+            public void onSkipEvent(Event event) {
                 eventsSkipped.add(event);
             }
 
             @Override
-            public boolean onException(ChangedEvent event, Exception e) {
+            public boolean onException(Event event, Exception e) {
                 return true;
             }
 
             @Override
-            public void onEvent(ChangedEvent event) throws Exception {
+            public void onEvent(Event event) throws Exception {
                 if (++i == 2) {
                     throw new Exception();
                 }
@@ -612,16 +613,16 @@ public class PumaClientTest {
 
         Thread.sleep(5 * 1000);
 
-        Assert.assertArrayEquals(Arrays.asList(new ChangedEvent[] { eventsSent.get(1) }).toArray(new ChangedEvent[0]),
+        Assert.assertArrayEquals(Arrays.asList(new ChangedEvent[] { (ChangedEvent) eventsSent.get(1) }).toArray(new ChangedEvent[0]),
                 eventsSkipped.toArray(new ChangedEvent[0]));
         eventsSent.remove(1);
         Assert.assertArrayEquals(eventsSent.toArray(new ChangedEvent[0]), eventsReceived.toArray(new ChangedEvent[0]));
     }
 
     /**
-     * @param eventSent
+     * @param eventsSent
      */
-    protected void StartMockPumaServer(final List<ChangedEvent> eventSent) {
+    protected void StartMockPumaServer(final List<Event> eventsSent) {
         PumaThreadUtils.createThread(new Runnable() {
 
             @Override
@@ -631,7 +632,7 @@ public class PumaClientTest {
                     ss.bind(new InetSocketAddress(7862));
                     Socket s = ss.accept();
                     EventCodec codec = new JsonEventCodec();
-                    for (ChangedEvent event : eventSent) {
+                    for (Event event : eventsSent) {
                         byte[] bytes = codec.encode(event);
                         s.getOutputStream().write(ByteArrayUtils.intToByteArray(bytes.length));
                         s.getOutputStream().write(bytes);

@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
+import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
 import com.dianping.puma.core.util.ByteArrayUtils;
@@ -167,7 +168,7 @@ public class JsonEventCodecTest {
         }
     }
 
-    private ChangedEvent readEvent(InputStream is) throws IOException {
+    private Event readEvent(InputStream is) throws IOException {
         byte[] lengthArray = new byte[4];
         StreamUtils.readFully(is, lengthArray, 0, 4);
         int length = ByteArrayUtils.byteArrayToInt(lengthArray, 0, 4);

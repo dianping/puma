@@ -3,13 +3,13 @@ package com.dianping.puma.monitor.todo;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
@@ -17,13 +17,14 @@ import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ServerStatus;
-
+import com.dianping.puma.monitor.MonitorScheduledExecutor;
+@Service("serverInfoTaskMonitor")
 public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnable {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ServerInfoTaskMonitor.class);
-	
+
 	public static final String SERVERINFO_INTERVAL_NAME = "puma.server.interval.serverInfo";
-	
+
 	private Map<String, Long> preUpdateCount;
 
 	private Map<String, Long> preDeleteCount;
@@ -37,31 +38,31 @@ public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnab
 		initCount();
 		LOG.info("ServerInfo Task Monitor started.");
 	}
-	
+
 	@Override
-	public void doInit(){
+	public void doInit() {
 		this.setInterval(getLionInterval(SERVERINFO_INTERVAL_NAME));
 		ConfigCache.getInstance().addChange(new ConfigChange() {
 			@Override
 			public void onChange(String key, String value) {
 				if (SERVERINFO_INTERVAL_NAME.equals(key)) {
 					ServerInfoTaskMonitor.this.setInterval(Long.parseLong(value));
-					if(future!=null){
+					if (future != null) {
 						future.cancel(true);
-						if(ServerInfoTaskMonitor.this.executor!=null&&!ServerInfoTaskMonitor.this.executor.isShutdown()
-								&&!ServerInfoTaskMonitor.this.executor.isTerminated()){
-							ServerInfoTaskMonitor.this.execute(ServerInfoTaskMonitor.this.executor);
+						if (MonitorScheduledExecutor.instance.isScheduledValid()) {
+							ServerInfoTaskMonitor.this.execute();
 						}
 					}
 				}
 			}
 		});
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
-	public Future doExecute(ScheduledExecutorService executor) {
-		return executor.scheduleWithFixedDelay(this, initialDelay, interval, unit);
+	public Future doExecute() {
+		return MonitorScheduledExecutor.instance.getExecutorService().scheduleWithFixedDelay(this, getInitialDelay(),
+				getInterval(), getUnit());
 	}
 
 	public void initCount() {
@@ -106,13 +107,13 @@ public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnab
 				preDdlCount.put(serverStatus.getKey(), ddlCount.get(serverStatus.getKey()).longValue());
 			}
 			Cat.getProducer().logEvent("Puma.server." + serverStatus.getKey() + ".insert", insertName, Message.SUCCESS,
-					"name = " + serverStatus.getKey() + "&duration = " + Long.toString(interval));
+					"name = " + serverStatus.getKey() + "&duration = " + Long.toString(getInterval()));
 			Cat.getProducer().logEvent("Puma.server." + serverStatus.getKey() + ".delete", deleteName, Message.SUCCESS,
-					"name = " + serverStatus.getKey() + "&duration = " + Long.toString(interval));
+					"name = " + serverStatus.getKey() + "&duration = " + Long.toString(getInterval()));
 			Cat.getProducer().logEvent("Puma.server." + serverStatus.getKey() + ".update", updateName, Message.SUCCESS,
-					"name = " + serverStatus.getKey() + "&duration = " + Long.toString(interval));
+					"name = " + serverStatus.getKey() + "&duration = " + Long.toString(getInterval()));
 			Cat.getProducer().logEvent("Puma.server." + serverStatus.getKey() + ".ddl", ddlName, Message.SUCCESS,
-					"name = " + serverStatus.getKey() + "&duration = " + Long.toString(interval));
+					"name = " + serverStatus.getKey() + "&duration = " + Long.toString(getInterval()));
 		}
 
 	}

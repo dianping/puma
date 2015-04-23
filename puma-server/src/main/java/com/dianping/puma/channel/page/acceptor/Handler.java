@@ -6,6 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
 import com.dianping.puma.ComponentContainer;
+import com.dianping.puma.channel.heartbeat.HeartbeatTask;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.container.client.ClientStateContainer;
 import com.dianping.puma.core.model.state.client.ClientState;
@@ -22,6 +23,7 @@ import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.codec.EventCodecFactory;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.filter.EventFilterChainFactory;
@@ -36,22 +38,16 @@ public class Handler implements PageHandler<Context> {
 	private static final Logger LOG = LoggerFactory.getLogger(Handler.class);
 
 	/*
-	protected void endCatTransaction() {
-		try {
-			// complete current transaction immediately (for abnormal case only)
-			MessageManager manager = Cat.getManager();
-			Transaction t1 = manager.getPeekTransaction();
-
-			t1.setStatus(Message.SUCCESS);
-			t1.complete();
-
-			Transaction t2 = manager.getPeekTransaction();
-			t2.setStatus(Message.SUCCESS);
-			t2.complete();
-		} catch (Exception e) {
-			LOG.error("Cat failed.");
-		}
-	}*/
+	 * protected void endCatTransaction() { try { // complete current
+	 * transaction immediately (for abnormal case only) MessageManager manager =
+	 * Cat.getManager(); Transaction t1 = manager.getPeekTransaction();
+	 * 
+	 * t1.setStatus(Message.SUCCESS); t1.complete();
+	 * 
+	 * Transaction t2 = manager.getPeekTransaction();
+	 * t2.setStatus(Message.SUCCESS); t2.complete(); } catch (Exception e) {
+	 * LOG.error("Cat failed."); } }
+	 */
 
 	@Override
 	@PayloadMeta(Payload.class)
@@ -92,8 +88,8 @@ public class Handler implements PageHandler<Context> {
 		// Construct server filter chain.
 		EventFilterChain filterChain;
 		try {
-			filterChain = EventFilterChainFactory.createEventFilterChain(payload.isDdl(), payload.isDml(),
-					payload.isNeedsTransactionMeta(), payload.getDatabaseTables());
+			filterChain = EventFilterChainFactory.createEventFilterChain(payload.isDdl(), payload.isDml(), payload
+					.isNeedsTransactionMeta(), payload.getDatabaseTables());
 		} catch (IllegalArgumentException e) {
 			LOG.error("Client construct event filter chain error: {}.", e.getStackTrace());
 			throw e;
@@ -102,17 +98,17 @@ public class Handler implements PageHandler<Context> {
 		// Get storage and channel.
 		EventStorage storage = DefaultTaskExecutorContainer.instance.getTaskStorage(payload.getTarget());
 
-		ClientState clientState = new ClientState(payload.getClientName(), payload.getTarget(),
-				NetUtils.getIpAddr(ctx.getHttpServletRequest()));
+		ClientState clientState = new ClientState(payload.getClientName(), payload.getTarget(), NetUtils.getIpAddr(ctx
+				.getHttpServletRequest()));
 		ClientStateContainer clientStateContainer = ComponentContainer.SPRING.lookup("clientStateContainer");
 		clientStateContainer.add(clientState);
 		clientStateContainer.setSeq(payload.getClientName(), payload.getSeq());
-		clientStateContainer.setBinlog(payload.getClientName(),
-				new BinlogInfo(payload.getBinlog(), payload.getBinlogPos()));
+		clientStateContainer.setBinlog(payload.getClientName(), new BinlogInfo(payload.getBinlog(), payload
+				.getBinlogPos()));
 
 		// status report
 		SystemStatusContainer.instance.addClientStatus(payload.getClientName(), NetUtils.getIpAddr(ctx
-						.getHttpServletRequest()), payload.getSeq(), payload.getTarget(), payload.isDml(), payload.isDdl(),
+				.getHttpServletRequest()), payload.getSeq(), payload.getTarget(), payload.isDml(), payload.isDdl(),
 				payload.isNeedsTransactionMeta(), payload.getDatabaseTables(), payload.getCodecType());
 		SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(), payload.getBinlog(), payload
 				.getBinlogPos());
@@ -143,37 +139,37 @@ public class Handler implements PageHandler<Context> {
 			throw new IOException(e1);
 		}
 
-		ServerEventDelayMonitor serverEventDelayMonitor = ComponentContainer.SPRING.lookup("serverEventDelayMonitor");
+		ServerEventDelayMonitor serverLaggingTimeMonitor = ComponentContainer.SPRING.lookup("serverLaggingTimeMonitor");
 
-		//endCatTransaction();
+		HeartbeatTask heartbeatTask = new HeartbeatTask(codec, res);
 
 		while (true) {
 			try {
 				filterChain.reset();
 
-				ChangedEvent event = channel.next();
+				Event event = channel.next();
+				if (event != null && event instanceof ChangedEvent) {
+					ChangedEvent changedEvent = (ChangedEvent) event;
+					serverLaggingTimeMonitor.record(clientName, changedEvent.getExecuteTime());
 
-				if (event != null) {
-
-					serverEventDelayMonitor.record(clientName, event.getExecuteTime());
-
-					if (filterChain.doNext(event)) {
-						byte[] data = codec.encode(event);
+					if (filterChain.doNext(changedEvent)) {
+						byte[] data = codec.encode(changedEvent);
 						res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
 						res.getOutputStream().write(data);
 						res.getOutputStream().flush();
 
-						clientStateContainer.setSeq(payload.getClientName(), event.getSeq());
-						clientStateContainer
-								.setBinlog(payload.getClientName(), new BinlogInfo(event.getBinlog(), event.getBinlogPos()));
+						clientStateContainer.setSeq(payload.getClientName(), changedEvent.getSeq());
+						clientStateContainer.setBinlog(payload.getClientName(), new BinlogInfo(
+								changedEvent.getBinlog(), changedEvent.getBinlogPos()));
 
 						// status report
-						SystemStatusContainer.instance.updateClientSeq(payload.getClientName(), event.getSeq());
+						SystemStatusContainer.instance.updateClientSeq(payload.getClientName(), changedEvent.getSeq());
 						// record success client seq
-						SystemStatusContainer.instance.updateClientSuccessSeq(payload.getClientName(), event.getSeq());
+						SystemStatusContainer.instance.updateClientSuccessSeq(payload.getClientName(), changedEvent
+								.getSeq());
 						// update binlog
-						SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(), event.getBinlog(),
-								event.getBinlogPos());
+						SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(), changedEvent
+								.getBinlog(), changedEvent.getBinlogPos());
 
 					}
 				}
@@ -189,8 +185,10 @@ public class Handler implements PageHandler<Context> {
 		channel.close();
 		clientStateContainer.remove(payload.getClientName());
 		SystemStatusContainer.instance.removeClient(payload.getClientName());
-		//long end = System.currentTimeMillis();
-		//String ipAddress = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
-		//Cat.getProducer().logEvent("ChannelClosed", ipAddress, Message.SUCCESS, "duration=" + (end - start));
+		// long end = System.currentTimeMillis();
+		// String ipAddress =
+		// NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
+		// Cat.getProducer().logEvent("ChannelClosed", ipAddress,
+		// Message.SUCCESS, "duration=" + (end - start));
 	}
 }

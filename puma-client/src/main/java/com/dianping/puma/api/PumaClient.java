@@ -14,7 +14,7 @@ import com.dianping.puma.api.sequence.MemcachedSequenceHolder;
 import com.dianping.puma.api.sequence.SequenceHolder;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.codec.EventCodecFactory;
-import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.core.util.StreamUtils;
@@ -120,7 +120,7 @@ public class PumaClient {
 
 	}
 
-	private ChangedEvent readEvent(InputStream is) throws IOException {
+	private Event readEvent(InputStream is) throws IOException {
 		byte[] lengthArray = new byte[4];
 		StreamUtils.readFully(is, lengthArray, 0, 4);
 		int length = ByteArrayUtils.byteArrayToInt(lengthArray, 0, 4);
@@ -161,7 +161,7 @@ public class PumaClient {
 							break;
 						}
 
-						ChangedEvent event = readEvent(is);
+						Event event = readEvent(is);
 
 						boolean listenerCallSuccess = true;
 

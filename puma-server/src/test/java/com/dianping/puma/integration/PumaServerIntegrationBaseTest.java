@@ -230,7 +230,7 @@ public abstract class PumaServerIntegrationBaseTest {
         List<ChangedEvent> result = new ArrayList<ChangedEvent>();
         EventChannel channel = storage.getChannel(-1, -1, null, -1, -1);
         for (int i = 0; i < n;) {
-            ChangedEvent event = channel.next();
+            ChangedEvent event = (ChangedEvent)channel.next();
             if (!needTs) {
                 if (event instanceof RowChangedEvent) {
                     if (((RowChangedEvent) event).isTransactionBegin() || ((RowChangedEvent) event).isTransactionCommit()) {
@@ -251,7 +251,7 @@ public abstract class PumaServerIntegrationBaseTest {
         List<ChangedEvent> result = new ArrayList<ChangedEvent>();
         EventChannel channel = storage.getChannel(seq, serverId, binlog, binlogPos, timeStamp);
         for (int i = 0; i < n;) {
-            ChangedEvent event = channel.next();
+            ChangedEvent event = (ChangedEvent)channel.next();
             if (!needTs) {
                 if (event instanceof RowChangedEvent) {
                     if (((RowChangedEvent) event).isTransactionBegin() || ((RowChangedEvent) event).isTransactionCommit()) {

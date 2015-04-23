@@ -11,6 +11,7 @@ import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.entity.*;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.state.ShardSyncTaskState;
 import com.dianping.puma.core.service.PumaServerService;
@@ -149,13 +150,13 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
         }
 
         @Override
-        public void onEvent(ChangedEvent event) throws Exception {
+        public void onEvent(Event event) throws Exception {
             tryTimes++;
             onEventInternal(event);
             tryTimes = 0;
         }
 
-        protected void onEventInternal(ChangedEvent event) throws Exception {
+        protected void onEventInternal(Event event) throws Exception {
             if (!(event instanceof RowChangedEvent)) {
                 return;
             }
@@ -234,12 +235,12 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
         }
 
         @Override
-        public boolean onException(ChangedEvent event, Exception e) {
+        public boolean onException(Event event, Exception e) {
             logException(event, e);
             return tryTimes >= MAX_TRY_TIMES;
         }
 
-        public void logException(ChangedEvent event, Exception exp) {
+        public void logException(Event event, Exception exp) {
             String msg = String.format("Name: %s Event: %s TryTimes: %s", this.name, event.toString(), tryTimes);
             Cat.logError(msg, exp);
             logger.error(msg, exp);
@@ -256,7 +257,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
         }
 
         @Override
-        public void onSkipEvent(ChangedEvent event) {
+        public void onSkipEvent(Event event) {
 
         }
     }

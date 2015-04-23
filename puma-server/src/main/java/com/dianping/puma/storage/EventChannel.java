@@ -2,7 +2,7 @@ package com.dianping.puma.storage;
 
 import java.io.IOException;
 
-import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.Event;
 import com.dianping.puma.storage.exception.StorageException;
 
 public interface EventChannel {
@@ -18,5 +18,5 @@ public interface EventChannel {
 	 * @return event which is not null
 	 * @throws IOException
 	 */
-	public ChangedEvent next() throws StorageException;
+	public Event next() throws StorageException;
 }

@@ -57,12 +57,11 @@ import java.io.Serializable;
  * @author Leo Liang
  * 
  */
-public abstract class ChangedEvent implements Serializable {
+public abstract class ChangedEvent extends Event implements Serializable {
 	private static final long	serialVersionUID	= -2358086827502066009L;
 	private long				executeTime;
 	private String				database;
 	private String				table;
-	private long				seq;
 	private long				serverId;
 	private String				binlog;
 	private long				binlogPos;
@@ -137,21 +136,6 @@ public abstract class ChangedEvent implements Serializable {
 	}
 
 	/**
-	 * @return the seq
-	 */
-	public long getSeq() {
-		return seq;
-	}
-
-	/**
-	 * @param seq
-	 *            the seq to set
-	 */
-	public void setSeq(long seq) {
-		this.seq = seq;
-	}
-
-	/**
 	 * @return the executeTime
 	 */
 	public long getExecuteTime() {
@@ -204,7 +188,7 @@ public abstract class ChangedEvent implements Serializable {
 	@Override
 	public String toString() {
 		return "ChangedEvent [executeTime=" + executeTime + ", database=" + database + ", table=" + table + ", seq="
-				+ seq + ", serverId=" + serverId + ", binlog=" + binlog + ", binlogPos=" + binlogPos + "]";
+				+ getSeq() + ", serverId=" + serverId + ", binlog=" + binlog + ", binlogPos=" + binlogPos + "]";
 	}
 
 	/*
@@ -221,7 +205,7 @@ public abstract class ChangedEvent implements Serializable {
 		result = prime * result + ((database == null) ? 0 : database.hashCode());
 		result = prime * result + (int) (executeTime ^ (executeTime >>> 32));
 		result = prime * result + (int) (serverId ^ (serverId >>> 32));
-		result = prime * result + (int) (seq ^ (seq >>> 32));
+		result = prime * result + (int) (getSeq() ^ (getSeq() >>> 32));
 		result = prime * result + ((table == null) ? 0 : table.hashCode());
 		return result;
 	}
@@ -266,7 +250,7 @@ public abstract class ChangedEvent implements Serializable {
 		if (serverId != other.serverId) {
 			return false;
 		}
-		if (seq != other.seq) {
+		if (getSeq() != other.getSeq()) {
 			return false;
 		}
 		if (table == null) {

@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.Event;
 import com.dianping.puma.storage.exception.InvalidSequenceException;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageException;
@@ -32,10 +33,10 @@ public class DefaultEventChannel implements EventChannel {
     }
 
     @Override
-    public ChangedEvent next() throws StorageException {
+    public Event next() throws StorageException {
         checkClosed();
 
-        ChangedEvent event = null;
+        Event event = null;
 
         while (event == null) {
             try {

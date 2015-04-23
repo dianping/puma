@@ -9,28 +9,32 @@ import java.util.concurrent.ThreadFactory;
 
 public class ScheduledExecutorUtils {
 
-	private static final String PREFIX = "threadfactory-";
+	private static final String PREFIX_FACTORY = "threadfactory-";
 
-	private static final String INFIX = "-";
-	
+	private static final String INFIX_MARK = "-";
+
+	private static final String PREFIX_POOLSIZE = "poolsize-";
+
 	private static Map<String, WeakReference<ScheduledExecutorService>> scheduledExecutorServices = new ConcurrentHashMap<String, WeakReference<ScheduledExecutorService>>();
 
 	public static ScheduledExecutorService createScheduledExecutorService(int poolSize, String factoryName) {
-		if(scheduledExecutorServices.containsKey(factoryName)&& scheduledExecutorServices.get(factoryName).get()!=null){
+		if (scheduledExecutorServices.containsKey(factoryName)
+				&& scheduledExecutorServices.get(factoryName).get() != null) {
 			return scheduledExecutorServices.get(factoryName).get();
 		}
 		ScheduledExecutorService executorService = Executors.newScheduledThreadPool(poolSize, new PumaThreadFactory(
-				PREFIX + factoryName + Integer.toString(poolSize) + INFIX));
+				PREFIX_FACTORY + factoryName + INFIX_MARK + PREFIX_POOLSIZE + Integer.toString(poolSize) + INFIX_MARK));
 		scheduledExecutorServices.put(factoryName, new WeakReference<ScheduledExecutorService>(executorService));
 		return executorService;
 	}
 
 	public static ScheduledExecutorService createSingleScheduledExecutorService(String factoryName) {
-		if(scheduledExecutorServices.containsKey(factoryName)&& scheduledExecutorServices.get(factoryName).get()!=null){
+		if (scheduledExecutorServices.containsKey(factoryName)
+				&& scheduledExecutorServices.get(factoryName).get() != null) {
 			return scheduledExecutorServices.get(factoryName).get();
 		}
-		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(new PumaThreadFactory(PREFIX + factoryName
-				+ Integer.toString(1) + INFIX));
+		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(new PumaThreadFactory(
+				PREFIX_FACTORY + factoryName + INFIX_MARK + PREFIX_POOLSIZE +  Integer.toString(1) + INFIX_MARK));
 		scheduledExecutorServices.put(factoryName, new WeakReference<ScheduledExecutorService>(executorService));
 		return executorService;
 	}

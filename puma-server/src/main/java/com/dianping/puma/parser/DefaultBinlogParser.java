@@ -24,17 +24,23 @@ import org.apache.log4j.Logger;
 
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadSafe;
-import com.dianping.puma.parser.mysql.BinlogConstanst;
+import com.dianping.puma.parser.mysql.BinlogConstants;
+import com.dianping.puma.parser.mysql.event.AnonymousGtidEvent;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
 import com.dianping.puma.parser.mysql.event.BinlogHeader;
 import com.dianping.puma.parser.mysql.event.DeleteRowsEvent;
 import com.dianping.puma.parser.mysql.event.FormatDescriptionEvent;
+import com.dianping.puma.parser.mysql.event.GtidEvent;
+import com.dianping.puma.parser.mysql.event.HeartbeatEvent;
+import com.dianping.puma.parser.mysql.event.IgnorableEvent;
 import com.dianping.puma.parser.mysql.event.IncidentEvent;
 import com.dianping.puma.parser.mysql.event.IntVarEvent;
+import com.dianping.puma.parser.mysql.event.PreviousGtidsEvent;
 import com.dianping.puma.parser.mysql.event.PumaIgnoreEvent;
 import com.dianping.puma.parser.mysql.event.QueryEvent;
 import com.dianping.puma.parser.mysql.event.RandEvent;
 import com.dianping.puma.parser.mysql.event.RotateEvent;
+import com.dianping.puma.parser.mysql.event.RowsQueryEvent;
 import com.dianping.puma.parser.mysql.event.StopEvent;
 import com.dianping.puma.parser.mysql.event.TableMapEvent;
 import com.dianping.puma.parser.mysql.event.UnknownEvent;
@@ -51,8 +57,8 @@ import com.dianping.puma.parser.mysql.event.XIDEvent;
  */
 @ThreadSafe
 public class DefaultBinlogParser implements Parser {
-	private static final Logger								log			= Logger.getLogger(DefaultBinlogParser.class);
-	private static Map<Byte, Class<? extends BinlogEvent>>	eventMaps	= new ConcurrentHashMap<Byte, Class<? extends BinlogEvent>>();
+	private static final Logger log = Logger.getLogger(DefaultBinlogParser.class);
+	private static Map<Byte, Class<? extends BinlogEvent>> eventMaps = new ConcurrentHashMap<Byte, Class<? extends BinlogEvent>>();
 
 	@Override
 	public BinlogEvent parse(ByteBuffer buf, PumaContext context) throws IOException {
@@ -85,20 +91,30 @@ public class DefaultBinlogParser implements Parser {
 	 */
 	@Override
 	public void start() throws Exception {
-		eventMaps.put(BinlogConstanst.UNKNOWN_EVENT, UnknownEvent.class);
-		eventMaps.put(BinlogConstanst.QUERY_EVENT, QueryEvent.class);
-		eventMaps.put(BinlogConstanst.STOP_EVENT, StopEvent.class);
-		eventMaps.put(BinlogConstanst.ROTATE_EVENT, RotateEvent.class);
-		eventMaps.put(BinlogConstanst.INTVAR_EVENT, IntVarEvent.class);
-		eventMaps.put(BinlogConstanst.RAND_EVENT, RandEvent.class);
-		eventMaps.put(BinlogConstanst.USER_VAR_EVENT, UserVarEvent.class);
-		eventMaps.put(BinlogConstanst.FORMAT_DESCRIPTION_EVENT, FormatDescriptionEvent.class);
-		eventMaps.put(BinlogConstanst.XID_EVENT, XIDEvent.class);
-		eventMaps.put(BinlogConstanst.TABLE_MAP_EVENT, TableMapEvent.class);
-		eventMaps.put(BinlogConstanst.WRITE_ROWS_EVENT, WriteRowsEvent.class);
-		eventMaps.put(BinlogConstanst.UPDATE_ROWS_EVENT, UpdateRowsEvent.class);
-		eventMaps.put(BinlogConstanst.DELETE_ROWS_EVENT, DeleteRowsEvent.class);
-		eventMaps.put(BinlogConstanst.INCIDENT_EVENT, IncidentEvent.class);
+		eventMaps.put(BinlogConstants.UNKNOWN_EVENT, UnknownEvent.class);
+		eventMaps.put(BinlogConstants.QUERY_EVENT, QueryEvent.class);
+		eventMaps.put(BinlogConstants.STOP_EVENT, StopEvent.class);
+		eventMaps.put(BinlogConstants.ROTATE_EVENT, RotateEvent.class);
+		eventMaps.put(BinlogConstants.INTVAR_EVENT, IntVarEvent.class);
+		eventMaps.put(BinlogConstants.RAND_EVENT, RandEvent.class);
+		eventMaps.put(BinlogConstants.USER_VAR_EVENT, UserVarEvent.class);
+		eventMaps.put(BinlogConstants.FORMAT_DESCRIPTION_EVENT, FormatDescriptionEvent.class);
+		eventMaps.put(BinlogConstants.XID_EVENT, XIDEvent.class);
+		eventMaps.put(BinlogConstants.TABLE_MAP_EVENT, TableMapEvent.class);
+		eventMaps.put(BinlogConstants.WRITE_ROWS_EVENT, WriteRowsEvent.class);
+		eventMaps.put(BinlogConstants.UPDATE_ROWS_EVENT, UpdateRowsEvent.class);
+		eventMaps.put(BinlogConstants.DELETE_ROWS_EVENT, DeleteRowsEvent.class);
+		eventMaps.put(BinlogConstants.INCIDENT_EVENT, IncidentEvent.class);
+		//mysql --5.6
+		eventMaps.put(BinlogConstants.WRITE_ROWS_EVENT_V5_6, WriteRowsEvent.class);
+		eventMaps.put(BinlogConstants.UPDATE_ROWS_EVENT_V5_6, UpdateRowsEvent.class);
+		eventMaps.put(BinlogConstants.DELETE_ROWS_EVENT_V5_6, DeleteRowsEvent.class);
+		eventMaps.put(BinlogConstants.HEARTBEAT_LOG_EVENT, HeartbeatEvent.class);
+		eventMaps.put(BinlogConstants.IGNORABLE_LOG_EVENT, IgnorableEvent.class);
+		eventMaps.put(BinlogConstants.ROWS_QUERY_LOG_EVENT, RowsQueryEvent.class);
+		eventMaps.put(BinlogConstants.GTID_LOG_EVENT, GtidEvent.class);
+		eventMaps.put(BinlogConstants.ANONYMOUS_GTID_LOG_EVENT, AnonymousGtidEvent.class);
+		eventMaps.put(BinlogConstants.PREVIOUS_GTIDS_LOG_EVENT, PreviousGtidsEvent.class);
 	}
 
 	/*

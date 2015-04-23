@@ -25,7 +25,7 @@ import org.apache.commons.lang.exception.NestableRuntimeException;
 
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.datatype.UnsignedLong;
-import com.dianping.puma.parser.mysql.BinlogConstanst;
+import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.Metadata;
 import com.dianping.puma.parser.mysql.Row;
 import com.dianping.puma.parser.mysql.column.BitColumn;
@@ -59,11 +59,13 @@ import com.dianping.puma.utils.PacketUtils;
  * 
  */
 public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
-	private static final long	serialVersionUID	= 2658456786993670332L;
-	protected long				tableId;
-	protected int				reserved;
-	protected UnsignedLong		columnCount;
-	protected TableMapEvent		tableMapEvent;
+	private static final long serialVersionUID = 2658456786993670332L;
+	protected long tableId;
+	protected int reserved;
+	protected UnsignedLong columnCount;
+	private int extraInfoLength;
+	private byte extraInfo[];
+	protected TableMapEvent tableMapEvent;
 
 	/*
 	 * (non-Javadoc)
@@ -72,8 +74,9 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 	 */
 	@Override
 	public String toString() {
-		return "AbstractRowsEvent [tableId=" + tableId + ", reserved=" + reserved + ", columnCount=" + columnCount
-				+ ", super.toString()=" + super.toString() + "]";
+		return "AbstractRowsEvent [tableId=" + tableId + ", reserved=" + reserved + ", extraInfoLength="
+				+ extraInfoLength + ", extraInfo=" + extraInfo + ", columnCount=" + columnCount + ", super.toString()="
+				+ super.toString() + "]";
 	}
 
 	/**
@@ -99,6 +102,22 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 		this.reserved = reserved;
 	}
 
+	public void setExtraInfoLength(int extraInfoLength) {
+		this.extraInfoLength = extraInfoLength;
+	}
+
+	public int getExtraInfoLength() {
+		return extraInfoLength;
+	}
+
+	public void setExtraInfo(byte extraInfo[]) {
+		this.extraInfo = extraInfo;
+	}
+
+	public byte[] getExtraInfo() {
+		return extraInfo;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -110,6 +129,13 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 	public void doParse(ByteBuffer buf, PumaContext context) throws IOException {
 		tableId = PacketUtils.readLong(buf, 6);
 		reserved = PacketUtils.readInt(buf, 2);
+		if (getHeader().getEventType() == BinlogConstants.WRITE_ROWS_EVENT_V5_6
+				|| getHeader().getEventType() == BinlogConstants.DELETE_ROWS_EVENT_V5_6
+				|| getHeader().getEventType() == BinlogConstants.UPDATE_ROWS_EVENT_V5_6) {
+			extraInfoLength = PacketUtils.readInt(buf, 2);
+			if (extraInfoLength > 2)
+				extraInfo = PacketUtils.readBytes(buf, extraInfoLength - 2);
+		}
 		columnCount = PacketUtils.readLengthCodedUnsignedLong(buf);
 		innderParse(buf, context);
 	}
@@ -134,7 +160,7 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 			int length = 0;
 			int meta = metadata.getMetadata(i);
 			int type = CodecUtils.toUnsigned(types[i]);
-			if (type == BinlogConstanst.MYSQL_TYPE_STRING && meta > 256) {
+			if (type == BinlogConstants.MYSQL_TYPE_STRING && meta > 256) {
 				int meta0 = meta >> 8;
 				int meta1 = meta & 0xFF;
 				if ((meta0 & 0x30) != 0x30) {
@@ -142,9 +168,9 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 					length = meta1 | (((meta0 & 0x30) ^ 0x30) << 4);
 				} else {
 					switch (meta0) {
-					case BinlogConstanst.MYSQL_TYPE_SET:
-					case BinlogConstanst.MYSQL_TYPE_ENUM:
-					case BinlogConstanst.MYSQL_TYPE_STRING:
+					case BinlogConstants.MYSQL_TYPE_SET:
+					case BinlogConstants.MYSQL_TYPE_ENUM:
+					case BinlogConstants.MYSQL_TYPE_STRING:
 						type = meta0;
 						length = meta1;
 						break;
@@ -164,77 +190,93 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 
 			int value = 0;
 			switch (type) {
-			case BinlogConstanst.MYSQL_TYPE_TINY:
+			case BinlogConstants.MYSQL_TYPE_TINY:
 				value = PacketUtils.readInt(buf, 1);
 				value = (value << 24) >> 24;
 				columns.add(TinyColumn.valueOf(value));
 				break;
-			case BinlogConstanst.MYSQL_TYPE_SHORT:
+			case BinlogConstants.MYSQL_TYPE_SHORT:
 				value = PacketUtils.readInt(buf, 2);
 				value = (value << 16) >> 16;
 				columns.add(ShortColumn.valueOf(value));
 				break;
-			case BinlogConstanst.MYSQL_TYPE_INT24:
+			case BinlogConstants.MYSQL_TYPE_INT24:
 				value = PacketUtils.readInt(buf, 3);
 				value = (value << 8) >> 8;
 				columns.add(Int24Column.valueOf(value));
 				break;
-			case BinlogConstanst.MYSQL_TYPE_INT:
+			case BinlogConstants.MYSQL_TYPE_INT:
 				columns.add(IntColumn.valueOf(PacketUtils.readInt(buf, 4)));
 				break;
-			case BinlogConstanst.MYSQL_TYPE_LONGLONG:
+			case BinlogConstants.MYSQL_TYPE_LONGLONG:
 				columns.add(LongLongColumn.valueOf(PacketUtils.readLong(buf, 8)));
 				break;
-			case BinlogConstanst.MYSQL_TYPE_FLOAT:
+			case BinlogConstants.MYSQL_TYPE_FLOAT:
 				columns.add(FloatColumn.valueOf(Float.intBitsToFloat(PacketUtils.readInt(buf, 4))));
 				break;
-			case BinlogConstanst.MYSQL_TYPE_DOUBLE:
+			case BinlogConstants.MYSQL_TYPE_DOUBLE:
 				columns.add(DoubleColumn.valueOf(Double.longBitsToDouble(PacketUtils.readLong(buf, 8))));
 				break;
-			case BinlogConstanst.MYSQL_TYPE_YEAR:
-				columns.add(YearColumn.valueOf(MySQLUtils.toYear((short)PacketUtils.readInt(buf, 1))));
+			case BinlogConstants.MYSQL_TYPE_YEAR:
+				columns.add(YearColumn.valueOf(MySQLUtils.toYear((short) PacketUtils.readInt(buf, 1))));
 				break;
-			case BinlogConstanst.MYSQL_TYPE_DATE:
+			case BinlogConstants.MYSQL_TYPE_DATE:
 				columns.add(DateColumn.valueOf(MySQLUtils.toDate(PacketUtils.readInt(buf, 3))));
 				break;
-			case BinlogConstanst.MYSQL_TYPE_TIME:
+			case BinlogConstants.MYSQL_TYPE_TIME:
 				columns.add(TimeColumn.valueOf(MySQLUtils.toTime(PacketUtils.readInt(buf, 3))));
 				break;
-			case BinlogConstanst.MYSQL_TYPE_TIMESTAMP:
+			case BinlogConstants.MYSQL_TYPE_TIMESTAMP:
 				columns.add(TimestampColumn.valueOf(MySQLUtils.toTimestamp(PacketUtils.readLong(buf, 4))));
 				break;
-			case BinlogConstanst.MYSQL_TYPE_DATETIME:
+			case BinlogConstants.MYSQL_TYPE_DATETIME:
 				columns.add(DatetimeColumn.valueOf(MySQLUtils.toDatetime(PacketUtils.readLong(buf, 8))));
 				break;
-			case BinlogConstanst.MYSQL_TYPE_ENUM:
+			case BinlogConstants.MYSQL_TYPE_ENUM:
 				columns.add(EnumColumn.valueOf(PacketUtils.readInt(buf, length)));
 				break;
-			case BinlogConstanst.MYSQL_TYPE_SET:
+			case BinlogConstants.MYSQL_TYPE_SET:
 				columns.add(SetColumn.valueOf(PacketUtils.readLong(buf, length)));
 				break;
-			case BinlogConstanst.MYSQL_TYPE_STRING:
+			case BinlogConstants.MYSQL_TYPE_STRING:
 				final int stringLength = length < 256 ? PacketUtils.readInt(buf, 1) : PacketUtils.readInt(buf, 2);
 				columns.add(StringColumn.valueOf(PacketUtils.readBytes(buf, stringLength)));
 				break;
-			case BinlogConstanst.MYSQL_TYPE_BIT:
+			case BinlogConstants.MYSQL_TYPE_BIT:
 				final int bitLength = (meta >> 8) * 8 + (meta & 0xFF);
 				columns.add(BitColumn.valueOf(bitLength, PacketUtils.readBit(buf, bitLength, false)));
 				break;
-			case BinlogConstanst.MYSQL_TYPE_NEWDECIMAL:
+			case BinlogConstants.MYSQL_TYPE_NEWDECIMAL:
 				final int precision = meta & 0xFF;
 				final int scale = meta >> 8;
 				final int decimalLength = MySQLUtils.getDecimalBinarySize(precision, scale);
 				columns.add(DecimalColumn.valueOf(MySQLUtils.toDecimal(precision, scale, PacketUtils.readBytes(buf,
 						decimalLength)), precision, scale));
 				break;
-			case BinlogConstanst.MYSQL_TYPE_BLOB:
+			case BinlogConstants.MYSQL_TYPE_BLOB:
 				final int blobLength = PacketUtils.readInt(buf, meta);
 				columns.add(BlobColumn.valueOf(PacketUtils.readBytes(buf, blobLength)));
 				break;
-			case BinlogConstanst.MYSQL_TYPE_VARCHAR:
-			case BinlogConstanst.MYSQL_TYPE_VAR_STRING:
+			case BinlogConstants.MYSQL_TYPE_VARCHAR:
+			case BinlogConstants.MYSQL_TYPE_VAR_STRING:
 				final int varcharLength = meta < 256 ? PacketUtils.readInt(buf, 1) : PacketUtils.readInt(buf, 2);
 				columns.add(StringColumn.valueOf(PacketUtils.readBytes(buf, varcharLength)));
+				break;
+			case BinlogConstants.MYSQL_TYPE_TIME2:
+				final int timeValue = CodecUtils.toBigEndian(PacketUtils.readInt(buf, 3));
+				final int timeNanos = CodecUtils.toBigEndian(PacketUtils.readInt(buf, (meta + 1) / 2));
+				columns.add(TimeColumn.valueOf(MySQLUtils.toTime2(timeValue, timeNanos)));
+				break;
+			case BinlogConstants.MYSQL_TYPE_DATETIME2:
+				final long dateTimeValue = CodecUtils.toBigEndian(PacketUtils.readLong(buf, 5));
+				final int dateTimenanos = CodecUtils.toBigEndian(PacketUtils.readInt(buf, (meta + 1) / 2));
+				columns.add(DatetimeColumn
+						.valueOf(String.valueOf(MySQLUtils.toDatetime2(dateTimeValue, dateTimenanos))));
+				break;
+			case BinlogConstants.MYSQL_TYPE_TIMESTAMP2:
+				final long timeStampValue = CodecUtils.toBigEndian(PacketUtils.readLong(buf, 4));
+				final int timeStampNanos = CodecUtils.toBigEndian(PacketUtils.readInt(buf, (meta + 1) / 2));
+				columns.add(TimestampColumn.valueOf(MySQLUtils.toTimestamp2(timeStampValue, timeStampNanos)));
 				break;
 			default:
 				throw new NestableRuntimeException("assertion failed, unknown column type: " + type);

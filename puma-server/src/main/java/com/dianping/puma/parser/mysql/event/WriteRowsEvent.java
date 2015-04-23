@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.dianping.puma.bo.PumaContext;
+import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.Row;
 import com.dianping.puma.utils.PacketUtils;
 

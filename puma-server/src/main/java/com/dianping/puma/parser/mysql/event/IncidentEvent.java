@@ -77,7 +77,6 @@ public class IncidentEvent extends AbstractBinlogEvent {
 	public void doParse(ByteBuffer buf, PumaContext context) throws IOException {
 		incidentNumber = PacketUtils.readInt(buf, 1);
 		messageLength = PacketUtils.readInt(buf, 1);
-
 		if (messageLength > 0) {
 			message = PacketUtils.readFixedLengthString(buf, messageLength);
 		}

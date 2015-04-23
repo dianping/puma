@@ -32,7 +32,7 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.datahandler.DataHandlerResult;
-import com.dianping.puma.parser.mysql.BinlogConstanst;
+import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
 import com.dianping.puma.parser.mysql.event.RotateEvent;
 import com.dianping.puma.parser.mysql.packet.AuthenticatePacket;
@@ -186,13 +186,11 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	protected void processBinlogPacket(BinlogPacket binlogPacket) throws IOException {
 		fetcherEventCountMonitor.record(getTaskName());
 		BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), getContext());
-
 		fetcherEventDelayMonitor.record(getTaskName(), binlogEvent.getHeader().getTimestamp());
-
-		if (binlogEvent.getHeader().getEventType() != BinlogConstanst.FORMAT_DESCRIPTION_EVENT) {
+		if (binlogEvent.getHeader().getEventType() != BinlogConstants.FORMAT_DESCRIPTION_EVENT) {
 			getContext().setNextBinlogPos(binlogEvent.getHeader().getNextPosition());
 		}
-		if (binlogEvent.getHeader().getEventType() == BinlogConstanst.ROTATE_EVENT) {
+		if (binlogEvent.getHeader().getEventType() == BinlogConstants.ROTATE_EVENT) {
 			processRotateEvent(binlogEvent);
 		} else {
 			processDataEvent(binlogEvent);
@@ -215,7 +213,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			}
 		} while (dataHandlerResult != null && !dataHandlerResult.isFinished());
 
-		if (binlogEvent.getHeader().getEventType() != BinlogConstanst.FORMAT_DESCRIPTION_EVENT) {
+		if (binlogEvent.getHeader().getEventType() != BinlogConstants.FORMAT_DESCRIPTION_EVENT) {
 			getContext().setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
 		}
 

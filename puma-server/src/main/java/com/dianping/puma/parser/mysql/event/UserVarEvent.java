@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import com.dianping.puma.bo.PumaContext;
-import com.dianping.puma.parser.mysql.BinlogConstanst;
+import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.variable.user.UserVariable;
 import com.dianping.puma.parser.mysql.variable.user.UserVariableDecimal;
 import com.dianping.puma.parser.mysql.variable.user.UserVariableInt;
@@ -116,15 +116,15 @@ public class UserVarEvent extends AbstractBinlogEvent {
 
 	protected UserVariable parseUserVariable(ByteBuffer buf) throws IOException {
 		switch (varType) {
-			case BinlogConstanst.DECIMAL_RESULT:
+			case BinlogConstants.DECIMAL_RESULT:
 				return new UserVariableDecimal(PacketUtils.readBytes(buf, varValueLength));
-			case BinlogConstanst.INT_RESULT:
+			case BinlogConstants.INT_RESULT:
 				return new UserVariableInt(PacketUtils.readLong(buf, varValueLength));
-			case BinlogConstanst.REAL_RESULT:
+			case BinlogConstants.REAL_RESULT:
 				return new UserVariableReal(Double.longBitsToDouble(PacketUtils.readLong(buf, varValueLength)));
-			case BinlogConstanst.ROW_RESULT:
+			case BinlogConstants.ROW_RESULT:
 				return new UserVariableRow(PacketUtils.readBytes(buf, varValueLength));
-			case BinlogConstanst.STRING_RESULT:
+			case BinlogConstants.STRING_RESULT:
 				return new UserVariableString(PacketUtils.readBytes(buf, varValueLength), varCollation);
 			default:
 				return null;

@@ -31,7 +31,7 @@ import com.dianping.puma.core.util.SimpleDdlParser;
 import com.dianping.puma.core.util.SimpleDdlParser.DdlResult;
 import com.dianping.puma.core.util.constant.DdlEventSubType;
 import com.dianping.puma.core.util.constant.DdlEventType;
-import com.dianping.puma.parser.mysql.BinlogConstanst;
+import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
 import com.dianping.puma.parser.mysql.event.PumaIgnoreEvent;
 import com.dianping.puma.parser.mysql.event.QueryEvent;
@@ -102,22 +102,22 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 		Object newValue = value;
 		if (value != null) {
 			switch (tableMeta.getRawTypeCodes().get(pos)) {
-			case BinlogConstanst.MYSQL_TYPE_TINY:
+			case BinlogConstants.MYSQL_TYPE_TINY:
 				if ((value instanceof Integer) && (Integer) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
 					newValue = Integer.valueOf((Integer) value + (1 << 8));
 				}
 				break;
-			case BinlogConstanst.MYSQL_TYPE_INT24:
+			case BinlogConstants.MYSQL_TYPE_INT24:
 				if ((value instanceof Integer) && (Integer) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
 					newValue = Integer.valueOf((Integer) value + (1 << 24));
 				}
 				break;
-			case BinlogConstanst.MYSQL_TYPE_SHORT:
+			case BinlogConstants.MYSQL_TYPE_SHORT:
 				if ((value instanceof Integer) && (Integer) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
 					newValue = Integer.valueOf((Integer) value + (1 << 16));
 				}
 				break;
-			case BinlogConstanst.MYSQL_TYPE_INT:
+			case BinlogConstants.MYSQL_TYPE_INT:
 				if ((value instanceof Integer) && (Integer) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
 					newValue = Long.valueOf((Integer) value) + (1L << 32);
 				} else {
@@ -126,7 +126,7 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 					}
 				}
 				break;
-			case BinlogConstanst.MYSQL_TYPE_LONGLONG:
+			case BinlogConstants.MYSQL_TYPE_LONGLONG:
 				if ((value instanceof Long) && (Long) value < 0 && !tableMeta.getSignedInfos().get(pos)) {
 					newValue = BigInteger.valueOf((Long) value).add(BigInteger.ONE.shiftLeft(64));
 				} else {
@@ -157,13 +157,13 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 		if (log.isDebugEnabled()) {
 			log.debug("event#" + eventType);
 		}
-		if (eventType == BinlogConstanst.STOP_EVENT || eventType == BinlogConstanst.ROTATE_EVENT) {
+		if (eventType == BinlogConstants.STOP_EVENT || eventType == BinlogConstants.ROTATE_EVENT) {
 			result.setEmpty(true);
 			result.setFinished(true);
-		} else if (eventType == BinlogConstanst.FORMAT_DESCRIPTION_EVENT) {
+		} else if (eventType == BinlogConstants.FORMAT_DESCRIPTION_EVENT) {
 			result.setEmpty(true);
 			result.setFinished(true);
-		} else if (eventType == BinlogConstanst.QUERY_EVENT) {
+		} else if (eventType == BinlogConstants.QUERY_EVENT) {
 			handleQueryEvent(binlogEvent, result);
 		} else {
 			doProcess(result, binlogEvent, context, eventType);

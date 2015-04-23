@@ -226,6 +226,17 @@ public final class MySQLUtils {
 		return new java.sql.Time(c.getTimeInMillis());
 	}
 
+	public static java.sql.Time toTime2(int value, int nanos) {
+		final int h = (value >> 12) & 0x3FF;
+		final int m = (value >> 6) & 0x3F;
+		final int s = (value >> 0) & 0x3F;
+		final Calendar c = Calendar.getInstance();
+        c.set(1970, 0, 1, h, m, s);
+        c.set(Calendar.MILLISECOND, 0);
+        final long millis = c.getTimeInMillis();
+        return new java.sql.Time(millis + (nanos / 1000000));
+	}
+	
 	public static String toDatetime(long value) {
 		int sec = (int) (value % 100);
 		if (value <= 1) {
@@ -250,11 +261,32 @@ public final class MySQLUtils {
 		}
 	}
 
+	public static java.util.Date toDatetime2(long value, int nanos) {
+		final long x = (value >> 22) & 0x1FFFFL;
+		final int year = (int)(x / 13);
+		final int month = (int)(x % 13);
+		final int day = ((int)(value >> 17)) & 0x1F;
+		final int hour = ((int)(value >> 12)) & 0x1F;
+		final int minute = ((int)(value >> 6)) & 0x3F;
+		final int second = ((int)(value >> 0)) & 0x3F;
+		final Calendar c = Calendar.getInstance();
+        c.set(year, month - 1, day, hour, minute, second);
+        c.set(Calendar.MILLISECOND, 0);
+        final long millis = c.getTimeInMillis();
+        return new java.util.Date(millis + (nanos / 1000000));
+	}
+	
 	public static java.sql.Timestamp toTimestamp(long value) {
 		if (value <= 1) {
 			return new java.sql.Timestamp(1000);
 		}
 		return new java.sql.Timestamp(value * 1000L);
+	}
+	
+	public static java.sql.Timestamp toTimestamp2(long seconds, int nanos) {
+		final java.sql.Timestamp r = new java.sql.Timestamp(seconds * 1000L);
+		r.setNanos(nanos);
+		return r;
 	}
 
 	public static BigDecimal toDecimal(int precision, int scale, byte[] value) {

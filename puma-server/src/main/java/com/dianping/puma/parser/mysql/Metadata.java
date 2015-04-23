@@ -32,9 +32,9 @@ import com.dianping.puma.utils.PacketUtils;
  */
 public final class Metadata implements Serializable {
 
-	private static final long	serialVersionUID	= -4925248968122255302L;
-	private final byte[]		type;
-	private final int[]			metadata;
+	private static final long serialVersionUID = -4925248968122255302L;
+	private final byte[] type;
+	private final int[] metadata;
 
 	public Metadata(byte[] type, int[] metadata) {
 		this.type = type;
@@ -65,26 +65,32 @@ public final class Metadata implements Serializable {
 		for (int i = 0; i < type.length; i++) {
 			int t = type[i] & 0xFF;
 			switch (t) {
-				case BinlogConstanst.MYSQL_TYPE_FLOAT:
-				case BinlogConstanst.MYSQL_TYPE_DOUBLE:
-				case BinlogConstanst.MYSQL_TYPE_TINY_BLOB:
-				case BinlogConstanst.MYSQL_TYPE_BLOB:
-				case BinlogConstanst.MYSQL_TYPE_MEDIUM_BLOB:
-				case BinlogConstanst.MYSQL_TYPE_LONG_BLOB:
-					metadata[i] = PacketUtils.readInt(buf, 1);
-					break;
-				case BinlogConstanst.MYSQL_TYPE_BIT:
-				case BinlogConstanst.MYSQL_TYPE_VARCHAR:
-				case BinlogConstanst.MYSQL_TYPE_NEWDECIMAL:
-					metadata[i] = PacketUtils.readInt(buf, 2);
-					break;
-				case BinlogConstanst.MYSQL_TYPE_SET:
-				case BinlogConstanst.MYSQL_TYPE_ENUM:
-				case BinlogConstanst.MYSQL_TYPE_STRING:
-					metadata[i] = CodecUtils.toInt(PacketUtils.readBytes(buf, 2), 0, 2); // Big-endian
-					break;
-				default:
-					metadata[i] = 0;
+			case BinlogConstants.MYSQL_TYPE_FLOAT:
+			case BinlogConstants.MYSQL_TYPE_DOUBLE:
+			case BinlogConstants.MYSQL_TYPE_TINY_BLOB:
+			case BinlogConstants.MYSQL_TYPE_BLOB:
+			case BinlogConstants.MYSQL_TYPE_MEDIUM_BLOB:
+			case BinlogConstants.MYSQL_TYPE_LONG_BLOB:
+			case BinlogConstants.MYSQL_TYPE_GEOMETRY:
+				metadata[i] = PacketUtils.readInt(buf, 1);
+				break;
+			case BinlogConstants.MYSQL_TYPE_BIT:
+			case BinlogConstants.MYSQL_TYPE_VARCHAR:
+			case BinlogConstants.MYSQL_TYPE_NEWDECIMAL:
+				metadata[i] = PacketUtils.readInt(buf, 2);// // Little-endian
+				break;
+			case BinlogConstants.MYSQL_TYPE_SET:
+			case BinlogConstants.MYSQL_TYPE_ENUM:
+			case BinlogConstants.MYSQL_TYPE_STRING:
+				metadata[i] = CodecUtils.toInt(PacketUtils.readBytes(buf, 2), 0, 2); // Big-endian
+				break;
+			case BinlogConstants.MYSQL_TYPE_TIMESTAMP2:
+			case BinlogConstants.MYSQL_TYPE_DATETIME2:
+			case BinlogConstants.MYSQL_TYPE_TIME2:
+				metadata[i] = PacketUtils.readInt(buf, 1);
+				break;
+			default:
+				metadata[i] = 0;
 			}
 		}
 		return new Metadata(type, metadata);

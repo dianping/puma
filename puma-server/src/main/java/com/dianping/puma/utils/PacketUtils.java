@@ -30,9 +30,9 @@ public final class PacketUtils {
 
 	}
 	
-	public static byte[] readBit(ByteBuffer buf, int length, boolean isBigEndian) throws IOException {
+	public static byte[] readBit(ByteBuffer buf, int length, boolean isLittleEndian) throws IOException {
 		final byte[] value = readBytes(buf, (int)((length + 7) >> 3));
-		return isBigEndian ? value : CodecUtils.toBigEndian(value);
+		return isLittleEndian ? value : CodecUtils.toBigEndian(value);
 	}
 
 	public static int readInt(ByteBuffer buf, int length) {

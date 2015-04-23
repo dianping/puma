@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.nio.ByteBuffer;
 
 import com.dianping.puma.bo.PumaContext;
+import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.utils.PacketUtils;
 
 /**
@@ -28,13 +29,15 @@ import com.dianping.puma.utils.PacketUtils;
  * 
  */
 public class BinlogHeader implements Serializable {
-	private static final long	serialVersionUID	= 5056491879587690096L;
-	private long				timestamp;
-	private byte				eventType;
-	private long				serverId;
-	private long				eventLength;
-	private long				nextPosition;
-	private int					flags;
+	private static final long serialVersionUID = 5056491879587690096L;
+	private long timestamp;
+	private byte eventType;
+	private long serverId;
+	private long eventLength;
+	private long nextPosition;
+	private int flags;
+	private int checksumAlg;
+	private long crc;
 
 	/**
 	 * @return the timestamp
@@ -126,6 +129,22 @@ public class BinlogHeader implements Serializable {
 		this.flags = flags;
 	}
 
+	public void setChecksumAlg(int checksumAlg) {
+		this.checksumAlg = checksumAlg;
+	}
+
+	public int getChecksumAlg() {
+		return checksumAlg;
+	}
+
+	public void setCrc(long crc) {
+		this.crc = crc;
+	}
+
+	public long getCrc() {
+		return crc;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -144,6 +163,22 @@ public class BinlogHeader implements Serializable {
 		eventLength = PacketUtils.readLong(buf, 4);
 		nextPosition = PacketUtils.readLong(buf, 4);
 		flags = PacketUtils.readInt(buf, 2);
+		/*if (eventType == BinlogConstants.FORMAT_DESCRIPTION_EVENT || eventType == BinlogConstants.ROTATE_EVENT) {
+			if (eventType == BinlogConstants.FORMAT_DESCRIPTION_EVENT) {
+
+				checksumAlg = BinlogConstants.CHECKSUM_ALG_UNDEF;
+				parseCheckSum(buf);
+			}
+			return;
+		}
+		// checksumAlg = descriptionEvent.getHeader().checksumAlg; // fetch checksum alg
+		parseCheckSum(buf);*/
+	}
+
+	private void parseCheckSum(ByteBuffer buf) {
+		if (checksumAlg != BinlogConstants.CHECKSUM_ALG_OFF && checksumAlg != BinlogConstants.CHECKSUM_ALG_UNDEF) {
+			crc = PacketUtils.readLong(buf, 4);
+		}
 	}
 
 }

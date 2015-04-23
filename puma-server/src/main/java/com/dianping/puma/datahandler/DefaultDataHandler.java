@@ -27,7 +27,7 @@ import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
-import com.dianping.puma.parser.mysql.BinlogConstanst;
+import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.column.Column;
 import com.dianping.puma.parser.mysql.event.AbstractRowsEvent;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
@@ -54,7 +54,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 			log.debug("event:" + eventType);
 		}
 		switch (eventType) {
-		case BinlogConstanst.TABLE_MAP_EVENT:
+		case BinlogConstants.TABLE_MAP_EVENT:
 			TableMapEvent tableMapEvent = (TableMapEvent) binlogEvent;
 
 			if (tableMetaInfos == null) {
@@ -74,7 +74,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 				log.debug("meta info not found for:" + tableMapEvent.getDatabaseName() + "-"
 						+ tableMapEvent.getTableName());
 				}
-				skipEvent(BinlogConstanst.TABLE_MAP_EVENT, result, context);
+				skipEvent(BinlogConstants.TABLE_MAP_EVENT, result, context);
 				return;
 			}
 
@@ -87,32 +87,32 @@ public class DefaultDataHandler extends AbstractDataHandler {
 			result.setFinished(true);
 
 			break;
-		case BinlogConstanst.WRITE_ROWS_EVENT:
+		case BinlogConstants.WRITE_ROWS_EVENT:
 			if (tableMetaInfos == null || tableMetaInfos.isEmpty()) {
-				skipEvent(BinlogConstanst.WRITE_ROWS_EVENT, result, context);
+				skipEvent(BinlogConstants.WRITE_ROWS_EVENT, result, context);
 				return;
 			}
 
 			processWriteRowEvent(result, binlogEvent, context);
 			break;
 
-		case BinlogConstanst.UPDATE_ROWS_EVENT:
+		case BinlogConstants.UPDATE_ROWS_EVENT:
 			if (tableMetaInfos == null || tableMetaInfos.isEmpty()) {
-				skipEvent(BinlogConstanst.UPDATE_ROWS_EVENT, result, context);
+				skipEvent(BinlogConstants.UPDATE_ROWS_EVENT, result, context);
 				return;
 			}
 			processUpdateRowEvent(result, binlogEvent, context);
 			break;
-		case BinlogConstanst.DELETE_ROWS_EVENT:
+		case BinlogConstants.DELETE_ROWS_EVENT:
 			if (tableMetaInfos == null || tableMetaInfos.isEmpty()) {
-				skipEvent(BinlogConstanst.DELETE_ROWS_EVENT, result, context);
+				skipEvent(BinlogConstants.DELETE_ROWS_EVENT, result, context);
 				return;
 			}
 			processDeleteRowEvent(result, binlogEvent, context);
 			break;
-		case BinlogConstanst.XID_EVENT:
+		case BinlogConstants.XID_EVENT:
 			if (tableMetaInfos == null || tableMetaInfos.isEmpty()) {
-				skipEvent(BinlogConstanst.XID_EVENT, result, context);
+				skipEvent(BinlogConstants.XID_EVENT, result, context);
 				return;
 			}
 			processTransactionCommitEvent(binlogEvent, result);
@@ -155,7 +155,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 			TableMetaInfo tableMetaInfo = tableMetaInfos.get(deleteRowsEvent.getTableId());
 
 			if (tableMetaInfo == null) {
-				skipEvent(BinlogConstanst.DELETE_ROWS_EVENT, result, context);
+				skipEvent(BinlogConstants.DELETE_ROWS_EVENT, result, context);
 				return;
 			}
 
@@ -200,7 +200,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 			TableMetaInfo tableMetaInfo = tableMetaInfos.get(updateRowsEvent.getTableId());
 
 			if (tableMetaInfo == null) {
-				skipEvent(BinlogConstanst.UPDATE_ROWS_EVENT, result, context);
+				skipEvent(BinlogConstants.UPDATE_ROWS_EVENT, result, context);
 				return;
 			}
 
@@ -258,7 +258,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 			TableMetaInfo tableMetaInfo = tableMetaInfos.get(writeRowsEvent.getTableId());
 
 			if (tableMetaInfo == null) {
-				skipEvent(BinlogConstanst.WRITE_ROWS_EVENT, result, context);
+				skipEvent(BinlogConstants.WRITE_ROWS_EVENT, result, context);
 				return;
 			}
 

@@ -43,4 +43,3 @@ public class HeartbeatScheduledExecutor implements InitializingBean {
 		return false;
 	}
 }
-

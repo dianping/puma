@@ -23,7 +23,7 @@ public class ShardDumpTaskExecutorMain {
         task.setTableName("user");
         task.setIndexColumnName("id");
         task.setIndexKey(0);
-        task.setMaxKey(100000000);
+        task.setMaxKey(10000000);
         task.setName("debug");
         task.setShardRule("id % 100 <> 0");
         task.setTargetTableName("user_0");

@@ -4,6 +4,7 @@ import com.dianping.puma.core.model.state.ShardSyncTaskState;
 import com.dianping.puma.core.service.ShardSyncTaskStateService;
 import com.dianping.puma.core.service.SyncTaskService;
 import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;
+import com.dianping.puma.syncserver.job.executor.ShardDumpTaskExecutor;
 import com.dianping.puma.syncserver.job.executor.ShardSyncTaskExecutor;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,10 @@ public class ShardSyncTaskStateCollector {
         for (TaskExecutor taskExecutor : taskExecutorContainer.getAll()) {
             if (taskExecutor instanceof ShardSyncTaskExecutor) {
                 ShardSyncTaskState shardSyncTaskState = ((ShardSyncTaskExecutor) taskExecutor).getTaskState();
+                shardSyncTaskState.setGmtUpdate(new Date());
+                shardSyncTaskStateService.add(shardSyncTaskState);
+            } else if (taskExecutor instanceof ShardDumpTaskExecutor) {
+                ShardSyncTaskState shardSyncTaskState = ((ShardDumpTaskExecutor) taskExecutor).getTaskState();
                 shardSyncTaskState.setGmtUpdate(new Date());
                 shardSyncTaskStateService.add(shardSyncTaskState);
             }

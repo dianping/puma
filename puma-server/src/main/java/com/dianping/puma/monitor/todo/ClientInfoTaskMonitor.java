@@ -25,7 +25,9 @@ public class ClientInfoTaskMonitor extends AbstractTaskMonitor {
 	private static final Logger LOG = LoggerFactory.getLogger(ClientInfoTaskMonitor.class);
 
 	public static final String CLIENTINFO_INTERVAL_NAME = "puma.server.interval.clientInfo";
-
+//	@Autowired
+//	private MonitorScheduledExecutor monitorScheduledExecutor;
+	
 	public ClientInfoTaskMonitor() {
 		super(0, TimeUnit.MILLISECONDS);
 		LOG.info("Sequence Task Monitor started.");
@@ -80,4 +82,12 @@ public class ClientInfoTaskMonitor extends AbstractTaskMonitor {
 				getInterval(), getUnit());
 	}
 
+//	public MonitorScheduledExecutor getMonitorScheduledExecutor() {
+//		return monitorScheduledExecutor;
+//	}
+//
+//	public void setMonitorScheduledExecutor(MonitorScheduledExecutor monitorScheduledExecutor) {
+//		this.monitorScheduledExecutor = monitorScheduledExecutor;
+//	}
+	
 }

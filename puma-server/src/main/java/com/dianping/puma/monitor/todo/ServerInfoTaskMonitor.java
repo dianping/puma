@@ -28,6 +28,9 @@ public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnab
 
 	public static final String SERVERINFO_INTERVAL_NAME = "puma.server.interval.serverInfo";
 
+//	@Autowired
+//	private MonitorScheduledExecutor monitorScheduledExecutor;
+	
 	private Map<String, Long> preUpdateCount;
 
 	private Map<String, Long> preDeleteCount;
@@ -170,4 +173,12 @@ public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnab
 		}
 	}
 
+//	public MonitorScheduledExecutor getMonitorScheduledExecutor() {
+//		return monitorScheduledExecutor;
+//	}
+//
+//	public void setMonitorScheduledExecutor(MonitorScheduledExecutor monitorScheduledExecutor) {
+//		this.monitorScheduledExecutor = monitorScheduledExecutor;
+//	}
+	
 }

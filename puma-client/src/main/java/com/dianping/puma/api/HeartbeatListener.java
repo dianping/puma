@@ -64,7 +64,6 @@ public class HeartbeatListener {
 				getInterval(), getUnit());
 	}
 
-
 	public void stop() {
 		if (future != null && !future.isCancelled() && !future.isDone()) {
 			future.cancel(true);

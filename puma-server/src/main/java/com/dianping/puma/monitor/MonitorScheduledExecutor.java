@@ -2,13 +2,14 @@ package com.dianping.puma.monitor;
 
 import java.util.concurrent.ScheduledExecutorService;
 
-
 import org.mortbay.log.Log;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.stereotype.Service;
+
 import com.dianping.puma.core.util.ScheduledExecutorUtils;
 import org.springframework.stereotype.Component;
 
-@Component("monitorScheduledExecutor")
+@Service("monitorScheduledExecutor")
 public class MonitorScheduledExecutor implements InitializingBean{
 	 
 	public static MonitorScheduledExecutor instance;

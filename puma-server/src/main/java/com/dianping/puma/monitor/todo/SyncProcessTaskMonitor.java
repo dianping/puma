@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dianping.cat.Cat;
@@ -31,7 +32,7 @@ public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runna
 	public static final String SYNCPROCESS_INTERVAL_NAME = "puma.server.interval.syncProcess";
 
 	public static final String SYNCPROCESS_DIFF_FILE_NUM = "puma.server.syncProcess.diffNumFile";
-	
+
 	private int numThreshold;
 
 	public SyncProcessTaskMonitor() {
@@ -168,5 +169,14 @@ public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runna
 		}
 		return numFile;
 	}
+
+//	public MonitorScheduledExecutor getMonitorScheduledExecutor() {
+//		return monitorScheduledExecutor;
+//	}
+//
+//	public void setMonitorScheduledExecutor(MonitorScheduledExecutor monitorScheduledExecutor) {
+//		this.monitorScheduledExecutor = monitorScheduledExecutor;
+//	}
+
 
 }

@@ -40,6 +40,9 @@ public class HeartbeatTask {
 
 	private ScheduledExecutorService executorService = null;
 
+	@Autowired
+	private HeartbeatScheduledExecutor heartbeatScheduledExecutor;
+
 	public void setInitialDelay(long initialDelay) {
 		this.initialDelay = initialDelay;
 	}

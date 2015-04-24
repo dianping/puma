@@ -3,8 +3,6 @@ package com.dianping.puma.api;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +64,7 @@ public class HeartbeatListener {
 				getInterval(), getUnit());
 	}
 
+
 	public void stop() {
 		if (future != null && !future.isCancelled() && !future.isDone()) {
 			future.cancel(true);
@@ -125,10 +124,10 @@ public class HeartbeatListener {
 		@Override
 		public void run() {
 			if (pumaClient.isHasHeartbeat()) {
-				Log.info("pumaClient receive heartbeat. reset heart beat mark.");
+				LOG.info("pumaClient receive heartbeat. reset heart beat mark.");
 				pumaClient.setHasHeartbeat(false);
 			} else {
-				Log.info("puma client no receive heartbeat. restart pumaClient.");
+				LOG.info("puma client no receive heartbeat. restart pumaClient.");
 				pumaClient.stop();
 				pumaClient.start();
 			}

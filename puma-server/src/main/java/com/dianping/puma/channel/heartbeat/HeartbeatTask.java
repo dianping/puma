@@ -18,7 +18,6 @@ import com.dianping.lion.client.LionException;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.HeartbeatEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
-
 import com.dianping.puma.core.util.ScheduledExecutorUtils;
 
 public class HeartbeatTask {
@@ -39,6 +38,8 @@ public class HeartbeatTask {
 	private EventCodec codec = null;
 
 	private ScheduledExecutorService executorService = null;
+
+	private static final String THREAD_FACTORY_NAME = "heartbeat";
 
 	public void setInitialDelay(long initialDelay) {
 		this.initialDelay = initialDelay;
@@ -73,6 +74,15 @@ public class HeartbeatTask {
 		this.future = future;
 	}
 
+
+	public void setExecutorService(ScheduledExecutorService executorService) {
+		this.executorService = executorService;
+	}
+
+	public ScheduledExecutorService getExecutorService() {
+		return executorService;
+	}
+	
 	public HeartbeatTask(EventCodec codec, HttpServletResponse response) {
 		this.initialDelay = 0;
 		this.unit = TimeUnit.MILLISECONDS;
@@ -103,10 +113,6 @@ public class HeartbeatTask {
 		});
 	}
 
-	public void execute() {
-		future = executorService.scheduleWithFixedDelay(new HeartbeatSender(), getInitialDelay(), getInterval(),
-				getUnit());
-	}
 
 	public boolean isFutureValid() {
 		if (getFuture() != null && !getFuture().isCancelled() && !getFuture().isDone()) {
@@ -120,7 +126,25 @@ public class HeartbeatTask {
 			getFuture().cancel(true);
 		}
 	}
+	
+	public void execute() {
+		future = getExecutorService().scheduleWithFixedDelay(new HeartbeatSender(),
+				getInitialDelay(), getInterval(), getUnit());
+	}
 
+	public boolean isExecutorServiceValid() {
+		if (getExecutorService() != null && !getExecutorService().isShutdown() && !getExecutorService().isTerminated()) {
+			return true;
+		}
+		return false;
+	}
+
+	public void shutdownExecutorService()
+	{
+		if(isExecutorServiceValid()){
+			getExecutorService().shutdown();
+		}
+	}
 	private long getLionInterval(String intervalName) {
 		long interval = 30000;
 		try {
@@ -133,6 +157,7 @@ public class HeartbeatTask {
 		}
 		return interval;
 	}
+
 
 	private class HeartbeatSender implements Runnable {
 		@Override

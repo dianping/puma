@@ -30,7 +30,6 @@ public class PumaClient {
 	private Thread subscribeThread;
 	private volatile boolean hasHeartbeat = false;
 	private PumaClientTask pumaClientTask;
-
 	private HeartbeatListener heartbeatListener;
 
 	public SequenceHolder getSeqFileHolder() {

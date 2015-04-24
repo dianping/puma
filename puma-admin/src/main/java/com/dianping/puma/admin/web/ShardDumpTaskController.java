@@ -12,6 +12,7 @@ import com.dianping.puma.core.entity.SyncServer;
 import com.dianping.puma.core.model.state.ShardSyncTaskState;
 import com.dianping.puma.core.service.*;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
+import com.google.common.base.Strings;
 import com.mongodb.MongoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,13 +62,17 @@ public class ShardDumpTaskController {
 
 
     @RequestMapping(value = {"shard-dump-task/create"}, method = RequestMethod.GET)
-    public ModelAndView create() {
+    public ModelAndView create(String name) {
         List<SyncServer> syncServers = syncServerService.findAll();
         List<DstDBInstance> dstDBInstances = dstDBInstanceService.findAll();
         List<SrcDBInstance> srcDBInstances = srcDBInstanceService.findAll();
 
         Map<String, Object> map = new HashMap<String, Object>();
 
+        if (!Strings.isNullOrEmpty(name)) {
+            ShardDumpTask task = shardDumpTaskService.find(name);
+            map.put("shardDumpTask", task);
+        }
 
         map.put("subPath", "create");
         map.put("path", "shard-dump-task");
@@ -77,6 +82,7 @@ public class ShardDumpTaskController {
 
         return new ModelAndView("main/container", map);
     }
+
 
     @RequestMapping(value = {"shard-dump-task/create"}, method = RequestMethod.POST)
     public String create(@ModelAttribute ShardDumpTask task, String syncServerName) throws SendFailedException {

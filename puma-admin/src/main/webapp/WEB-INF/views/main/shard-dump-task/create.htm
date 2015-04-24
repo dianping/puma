@@ -13,7 +13,11 @@
                     <div class="col-md-7">
                         <select id="syncServerName" name="syncServerName" class="form-control">
                             #foreach($syncServer in ${syncServers})
-                            <option value="${syncServer.name}">${syncServer.name}</option>
+                            <option
+                                  #if ( ${shardDumpTask} && ${syncServer.name} == ${shardDumpTask.syncServerName})
+                                  selected
+                                  #end
+                            value="${syncServer.name}">${syncServer.name}</option>
                             #end
                         </select>
                     </div>
@@ -23,7 +27,11 @@
                     <div class="col-md-7">
                         <select id="srcDbName" name="srcDbName" class="form-control">
                             #foreach($srcDBInstance in ${srcDBInstances})
-                            <option value="${srcDBInstance.name}">${srcDBInstance.name}</option>
+                            <option
+                                    #if ( ${shardDumpTask} && ${srcDBInstance.name} == ${shardDumpTask.srcDbName})
+                                    selected
+                                    #end
+                                    value="${srcDBInstance.name}">${srcDBInstance.name}</option>
                             #end
                         </select>
                     </div>
@@ -31,13 +39,21 @@
                 <div class="form-group">
                     <label class="col-md-3 control-label" for="dataBase">来源数据库:</label>
                     <div class="col-md-7">
-                        <input class="form-control" id="dataBase" name="dataBase" type="text"/>
+                        <input
+                                #if ( ${shardDumpTask})
+                                value="${shardDumpTask.dataBase}"
+                                #end
+                                class="form-control" id="dataBase" name="dataBase" type="text"/>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-md-3 control-label" for="tableName">来源表:</label>
                     <div class="col-md-7">
-                        <input class="form-control" id="tableName" name="tableName" type="text"/>
+                        <input
+                                #if ( ${shardDumpTask})
+                                value="${shardDumpTask.tableName}"
+                                #end
+                                class="form-control" id="tableName" name="tableName" type="text"/>
                     </div>
                 </div>
 
@@ -47,7 +63,11 @@
                     <div class="col-md-7">
                         <select id="dstDbName" name="dstDbName" class="form-control">
                             #foreach($dstDBInstance in ${dstDBInstances})
-                            <option value="${dstDBInstance.name}">${dstDBInstance.name}</option>
+                            <option
+                                    #if ( ${shardDumpTask} && ${dstDBInstance.name} == ${shardDumpTask.dstDbName})
+                                    selected
+                                    #end
+                                    value="${dstDBInstance.name}">${dstDBInstance.name}</option>
                             #end
                         </select>
                     </div>
@@ -55,48 +75,72 @@
                 <div class="form-group">
                     <label class="col-md-3 control-label" for="targetDataBase">目标数据库:</label>
                     <div class="col-md-7">
-                        <input class="form-control" id="targetDataBase" name="targetDataBase" type="text"/>
+                        <input
+                                #if ( ${shardDumpTask})
+                                value="${shardDumpTask.targetDataBase}"
+                                #end
+                                class="form-control" id="targetDataBase" name="targetDataBase" type="text"/>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-md-3 control-label" for="targetTableName">目标表:</label>
                     <div class="col-md-7">
-                        <input class="form-control" id="targetTableName" name="targetTableName" type="text"/>
+                        <input
+                                #if ( ${shardDumpTask})
+                                value="${shardDumpTask.targetTableName}"
+                                #end
+                                class="form-control" id="targetTableName" name="targetTableName" type="text"/>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="col-md-3 control-label" for="shardRule">Dump条件:</label>
                     <div class="col-md-7">
-                        <input class="form-control" id="shardRule" name="shardRule" type="text"/>
+                        <input
+                                #if ( ${shardDumpTask})
+                                value="${shardDumpTask.shardRule}"
+                                #end
+                                class="form-control" id="shardRule" name="shardRule" type="text"/>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="col-md-3 control-label" for="indexColumnName">分页字段名:</label>
                     <div class="col-md-7">
-                        <input class="form-control" id="indexColumnName" name="indexColumnName" type="text"/>
+                        <input
+                                #if ( ${shardDumpTask})
+                                value="${shardDumpTask.indexColumnName}"
+                                #end
+                                class="form-control" id="indexColumnName" name="indexColumnName" type="text"/>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="col-md-3 control-label" for="indexIncrease">分页大小:</label>
                     <div class="col-md-7">
-                        <input class="form-control" id="indexIncrease" name="indexIncrease" type="number"/>
+                        <input
+                                #if ( ${shardDumpTask})
+                                value="${shardDumpTask.indexIncrease}"
+                                #end
+                                class="form-control" id="indexIncrease" name="indexIncrease" type="number"/>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="col-md-3 control-label" for="indexKey">开始位置(>):</label>
                     <div class="col-md-7">
-                        <input class="form-control" id="indexKey" name="indexKey" type="number"/>
+                        <input value="0" class="form-control" id="indexKey" name="indexKey" type="number"/>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="col-md-3 control-label" for="maxKey">结束位置(<=):</label>
                     <div class="col-md-7">
-                        <input class="form-control" id="maxKey" name="maxKey" type="number"/>
+                        <input
+                                #if ( ${shardDumpTask})
+                                value="${shardDumpTask.maxKey}"
+                                #end
+                                class="form-control" id="maxKey" name="maxKey" type="number"/>
                     </div>
                 </div>
 

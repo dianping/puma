@@ -13,7 +13,7 @@
                 <td class="col-md-1">来源</td>
                 <td class="col-md-1">目标</td>
                 <td class="col-md-1">条件</td>
-                <td class="col-md-2">初始位置</td>
+                <td class="col-md-2">位置</td>
                 <td class="col-md-1">状态</td>
                 <td class="col-md-1">操作</td>
             </tr>
@@ -40,6 +40,10 @@
                     #end
                 </td>
                 <td>
+                    <a title="复制" href="${rc.contextPath}/shard-dump-task/create?name=${shardDumpTask.name}">
+                        <span class="glyphicon glyphicon-copy" aria-hidden="true"></span>
+                    </a>
+
                     <a href="#" data-toggle="modal" data-target="#warn-modal" data-subpath="remove"
                        data-path="shard-dump-task" data-name="${shardDumpTask.name}" class="no-under">
                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>

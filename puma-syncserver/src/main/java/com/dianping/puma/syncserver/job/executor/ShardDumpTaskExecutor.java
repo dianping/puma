@@ -80,15 +80,17 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
         this.loadStatus.setStatus(Status.PREPARING);
     }
 
-    private boolean isFinish() {
+    private boolean checkFinish() {
         if (this.task.getIndexKey() == FINISH_INDEX) {
+            loadStatus.setStatus(Status.SUCCESS);
+            dumpStatus.setStatus(Status.SUCCESS);
             return true;
         }
         return false;
     }
 
     public void init() {
-        if (isFinish()) {
+        if (checkFinish()) {
             return;
         }
 
@@ -352,7 +354,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
 
     @Override
     public void start() {
-        if (isFinish()) {
+        if (checkFinish()) {
             return;
         }
 
@@ -382,7 +384,17 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
 
     @Override
     public ShardSyncTaskState getTaskState() {
+        checkFinish();
+
         ShardSyncTaskState status = new ShardSyncTaskState();
+        status.setTaskName(this.task.getName());
+
+        if (Status.SUCCESS.equals(dumpStatus.getStatus()) && Status.SUCCESS.equals(loadStatus.getStatus())) {
+            status.setStatus(Status.SUCCESS);
+            status.setPercent(ShardSyncTaskState.PERCENT_MAX);
+            return status;
+        }
+
         if (!dumpStatus.getStatus().equals(Status.RUNNING)) {
             status.setStatus(dumpStatus.getStatus());
         } else if (!loadStatus.getStatus().equals(Status.RUNNING)) {
@@ -391,7 +403,6 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
             status.setStatus(Status.RUNNING);
         }
 
-        status.setTaskName(this.task.getName());
         status.setPercent((dumpStatus.getPercent() + loadStatus.getPercent()) / 2);
         return status;
     }

@@ -7,8 +7,10 @@ import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.dianping.cat.Cat;
 import com.dianping.lion.client.ConfigCache;
@@ -38,6 +40,9 @@ public class HeartbeatTask {
 	private EventCodec codec = null;
 
 	private ScheduledExecutorService executorService = null;
+
+	@Autowired
+	private HeartbeatScheduledExecutor heartbeatScheduledExecutor;
 
 	public void setInitialDelay(long initialDelay) {
 		this.initialDelay = initialDelay;
@@ -80,6 +85,8 @@ public class HeartbeatTask {
 		this.codec = codec;
 		this.response = response;
 		executorService = HeartbeatScheduledExecutor.instance.getExecutorService();
+		execute();
+		Log.info("puma server HeartbeatTask constructed.");
 	}
 
 	public void initConfig() {
@@ -106,7 +113,7 @@ public class HeartbeatTask {
 	}
 
 	public boolean isFutureValid() {
-		if (getFuture() != null && !getFuture().isCancelled()) {
+		if (getFuture() != null && !getFuture().isCancelled() && !getFuture().isDone()) {
 			return true;
 		}
 		return false;
@@ -142,7 +149,14 @@ public class HeartbeatTask {
 
 						response.getOutputStream().write(data);
 						response.getOutputStream().flush();
+						LOG.info("puma server heartbeat sended.");
 					} catch (IOException e) {
+						HeartbeatTask.this.cancelFuture();
+						try {
+							response.getOutputStream().close();
+						} catch (IOException e1) {
+							// ignore
+						}
 						Cat.getProducer().logError("puma.server.client.heartbeat.exception:", e);
 						LOG.error("heartbeat.exception: ", e);
 					}

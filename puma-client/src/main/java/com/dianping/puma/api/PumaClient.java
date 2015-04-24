@@ -31,6 +31,8 @@ public class PumaClient {
 	private volatile boolean hasHeartbeat = false;
 	private PumaClientTask pumaClientTask;
 
+	private HeartbeatListener heartbeatListener;
+
 	public SequenceHolder getSeqFileHolder() {
 		return sequenceHolder;
 	}
@@ -48,6 +50,7 @@ public class PumaClient {
 			this.sequenceHolder = new FileSequenceHolder(config);
 		}
 		codec = EventCodecFactory.createCodec(config.getCodecType());
+		heartbeatListener = new HeartbeatListener(this);
 	}
 
 	public void register(EventListener listener) {
@@ -59,6 +62,7 @@ public class PumaClient {
 		if (subscribeThread != null) {
 			subscribeThread.interrupt();
 		}
+		heartbeatListener.stop();
 	}
 
 	public void start() {
@@ -69,6 +73,7 @@ public class PumaClient {
 		pumaClientTask = new PumaClientTask();
 		subscribeThread = PumaThreadUtils.createThread(pumaClientTask, "PumaClientSub", false);
 		subscribeThread.start();
+		heartbeatListener.start();
 	}
 
 	public Configuration getConfig() {

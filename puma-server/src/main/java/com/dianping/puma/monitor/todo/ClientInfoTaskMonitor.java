@@ -4,8 +4,11 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dianping.cat.Cat;
@@ -22,7 +25,9 @@ public class ClientInfoTaskMonitor extends AbstractTaskMonitor {
 	private static final Logger LOG = LoggerFactory.getLogger(ClientInfoTaskMonitor.class);
 
 	public static final String CLIENTINFO_INTERVAL_NAME = "puma.server.interval.clientInfo";
-
+//	@Autowired
+//	private MonitorScheduledExecutor monitorScheduledExecutor;
+	
 	public ClientInfoTaskMonitor() {
 		super(0, TimeUnit.MILLISECONDS);
 		LOG.info("Sequence Task Monitor started.");
@@ -36,7 +41,7 @@ public class ClientInfoTaskMonitor extends AbstractTaskMonitor {
 			public void onChange(String key, String value) {
 				if (CLIENTINFO_INTERVAL_NAME.equals(key)) {
 					ClientInfoTaskMonitor.this.setInterval(Long.parseLong(value));
-					if (future != null) {
+					if (future != null && !future.isCancelled() && !future.isDone()) {
 						future.cancel(true);
 						if (MonitorScheduledExecutor.instance.isScheduledValid()) {
 							ClientInfoTaskMonitor.this.execute();
@@ -71,11 +76,18 @@ public class ClientInfoTaskMonitor extends AbstractTaskMonitor {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Future doExecute() {
-		return MonitorScheduledExecutor.instance.getExecutorService().scheduleWithFixedDelay(this, getInitialDelay(),
+	public void doExecute() {
+		 future = getMonitorScheduledExecutor().getExecutorService().scheduleWithFixedDelay(this, getInitialDelay(),
 				getInterval(), getUnit());
 	}
 
+//	public MonitorScheduledExecutor getMonitorScheduledExecutor() {
+//		return monitorScheduledExecutor;
+//	}
+//
+//	public void setMonitorScheduledExecutor(MonitorScheduledExecutor monitorScheduledExecutor) {
+//		this.monitorScheduledExecutor = monitorScheduledExecutor;
+//	}
+	
 }

@@ -4,10 +4,13 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang.StringUtils;
 import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dianping.cat.Cat;
@@ -29,11 +32,13 @@ public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runna
 	public static final String SYNCPROCESS_INTERVAL_NAME = "puma.server.interval.syncProcess";
 
 	public static final String SYNCPROCESS_DIFF_FILE_NUM = "puma.server.syncProcess.diffNumFile";
-
+//	@Autowired
+//	private MonitorScheduledExecutor monitorScheduledExecutor;
+	
 	private int numThreshold;
 
-	public SyncProcessTaskMonitor(long initialDelay, TimeUnit unit) {
-		super(initialDelay, unit);
+	public SyncProcessTaskMonitor() {
+		super(0, TimeUnit.MILLISECONDS);
 		LOG.info("SyncProcess Task Monitor started.");
 	}
 
@@ -46,7 +51,7 @@ public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runna
 			public void onChange(String key, String value) {
 				if (SYNCPROCESS_INTERVAL_NAME.equals(key)) {
 					SyncProcessTaskMonitor.this.setInterval(Long.parseLong(value));
-					if (future != null) {
+					if (future != null && !future.isCancelled() && !future.isDone()) {
 						future.cancel(true);
 						if (MonitorScheduledExecutor.instance.isScheduledValid()) {
 							SyncProcessTaskMonitor.this.execute();
@@ -96,10 +101,10 @@ public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runna
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@PostConstruct
 	@Override
-	public Future doExecute() {
-		return MonitorScheduledExecutor.instance.getExecutorService().scheduleWithFixedDelay(this, getInitialDelay(),
+	public void doExecute() {
+		future = getMonitorScheduledExecutor().getExecutorService().scheduleWithFixedDelay(this, getInitialDelay(),
 				getInterval(), getUnit());
 	}
 
@@ -167,5 +172,14 @@ public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runna
 		}
 		return numFile;
 	}
+
+//	public MonitorScheduledExecutor getMonitorScheduledExecutor() {
+//		return monitorScheduledExecutor;
+//	}
+//
+//	public void setMonitorScheduledExecutor(MonitorScheduledExecutor monitorScheduledExecutor) {
+//		this.monitorScheduledExecutor = monitorScheduledExecutor;
+//	}
+
 
 }

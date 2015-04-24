@@ -12,6 +12,7 @@ import org.codehaus.jackson.map.SerializerProvider;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.Event;
+import com.dianping.puma.core.event.HeartbeatEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 
 public class JsonEventCodec implements EventCodec {
@@ -39,8 +40,10 @@ public class JsonEventCodec implements EventCodec {
 
 		if (event instanceof DdlEvent) {
 			out.write(DDL_EVENT);
-		} else {
+		} else if(event instanceof RowChangedEvent){
 			out.write(DML_EVENT);
+		}else{
+			out.write(HEARTBEAT_EVENT);
 		}
 
 		out.write(data);
@@ -53,8 +56,10 @@ public class JsonEventCodec implements EventCodec {
 		int type = data[0];
 		if (type == DDL_EVENT) {
 			return om.readValue(data, 1, data.length - 1, DdlEvent.class);
-		} else {
+		} else if(type == DML_EVENT){
 			return om.readValue(data, 1, data.length - 1, RowChangedEvent.class);
+		}else{
+			return om.readValue(data, 1, data.length-1, HeartbeatEvent.class);
 		}
 	}
 

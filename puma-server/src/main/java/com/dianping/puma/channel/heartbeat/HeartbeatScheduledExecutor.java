@@ -19,9 +19,7 @@ public class HeartbeatScheduledExecutor implements InitializingBean {
 	private static final String THREAD_FACTORY_NAME = "heartbeat";
 
 	public HeartbeatScheduledExecutor() {
-		setExecutorService(ScheduledExecutorUtils
-				.createScheduledExecutorService(MAX_THREAD_COUNT,
-						THREAD_FACTORY_NAME));
+		setExecutorService(ScheduledExecutorUtils.createScheduledExecutorService(MAX_THREAD_COUNT, THREAD_FACTORY_NAME));
 	}
 
 	@Override
@@ -38,8 +36,7 @@ public class HeartbeatScheduledExecutor implements InitializingBean {
 	}
 
 	public boolean isExecutorServiceValid() {
-		if (getExecutorService() != null && !getExecutorService().isShutdown()
-				&& !getExecutorService().isTerminated()) {
+		if (getExecutorService() != null && !getExecutorService().isShutdown() && !getExecutorService().isTerminated()) {
 			return true;
 		}
 		return false;

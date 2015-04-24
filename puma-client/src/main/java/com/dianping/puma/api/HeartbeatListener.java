@@ -4,6 +4,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +40,6 @@ public class HeartbeatListener {
 		this.pumaClient = pumaClient;
 		this.unit = TimeUnit.MILLISECONDS;
 		this.executorService = ScheduledExecutorUtils.createSingleScheduledExecutorService(THREAD_FACTORY_NAME);
-		execute();
 	}
 
 	public long initInterval() {
@@ -52,7 +52,7 @@ public class HeartbeatListener {
 					if (future != null) {
 						future.cancel(true);
 						if (HeartbeatListener.this.isScheduledValid()) {
-							HeartbeatListener.this.execute();
+							HeartbeatListener.this.start();
 						}
 					}
 				}
@@ -61,9 +61,15 @@ public class HeartbeatListener {
 		return interval;
 	}
 
-	private void execute() {
+	public void start() {
 		future = getExecutorService().scheduleWithFixedDelay(new HeartbeatListenTask(), getInitialDelay(),
 				getInterval(), getUnit());
+	}
+
+	public void stop() {
+		if (future != null && !future.isCancelled() && !future.isDone()) {
+			future.cancel(true);
+		}
 	}
 
 	private long getLionInterval(String intervalName) {
@@ -119,8 +125,10 @@ public class HeartbeatListener {
 		@Override
 		public void run() {
 			if (pumaClient.isHasHeartbeat()) {
+				Log.info("pumaClient receive heartbeat. reset heart beat mark.");
 				pumaClient.setHasHeartbeat(false);
 			} else {
+				Log.info("puma client no receive heartbeat. restart pumaClient.");
 				pumaClient.stop();
 				pumaClient.start();
 			}

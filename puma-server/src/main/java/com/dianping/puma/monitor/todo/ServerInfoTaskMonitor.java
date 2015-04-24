@@ -6,9 +6,12 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.annotation.PostConstruct;
+
 import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dianping.cat.Cat;
@@ -25,6 +28,9 @@ public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnab
 
 	public static final String SERVERINFO_INTERVAL_NAME = "puma.server.interval.serverInfo";
 
+//	@Autowired
+//	private MonitorScheduledExecutor monitorScheduledExecutor;
+	
 	private Map<String, Long> preUpdateCount;
 
 	private Map<String, Long> preDeleteCount;
@@ -33,8 +39,8 @@ public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnab
 
 	private Map<String, Long> preDdlCount;
 
-	public ServerInfoTaskMonitor(long initialDelay, TimeUnit unit) {
-		super(initialDelay, unit);
+	public ServerInfoTaskMonitor() {
+		super(0, TimeUnit.MILLISECONDS);
 		initCount();
 		LOG.info("ServerInfo Task Monitor started.");
 	}
@@ -47,7 +53,7 @@ public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnab
 			public void onChange(String key, String value) {
 				if (SERVERINFO_INTERVAL_NAME.equals(key)) {
 					ServerInfoTaskMonitor.this.setInterval(Long.parseLong(value));
-					if (future != null) {
+					if (future != null && !future.isCancelled() && !future.isDone()) {
 						future.cancel(true);
 						if (MonitorScheduledExecutor.instance.isScheduledValid()) {
 							ServerInfoTaskMonitor.this.execute();
@@ -58,10 +64,10 @@ public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnab
 		});
 	}
 
-	@SuppressWarnings("unchecked")
+	@PostConstruct
 	@Override
-	public Future doExecute() {
-		return MonitorScheduledExecutor.instance.getExecutorService().scheduleWithFixedDelay(this, getInitialDelay(),
+	public void doExecute() {
+		future = getMonitorScheduledExecutor().getExecutorService().scheduleWithFixedDelay(this, getInitialDelay(),
 				getInterval(), getUnit());
 	}
 
@@ -167,4 +173,14 @@ public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnab
 			preDdlCount.put(key, (long) 0);
 		}
 	}
+
+//	public MonitorScheduledExecutor getMonitorScheduledExecutor() {
+//		return monitorScheduledExecutor;
+//	}
+//
+//	public void setMonitorScheduledExecutor(MonitorScheduledExecutor monitorScheduledExecutor) {
+//		this.monitorScheduledExecutor = monitorScheduledExecutor;
+//	}
+	
+	
 }

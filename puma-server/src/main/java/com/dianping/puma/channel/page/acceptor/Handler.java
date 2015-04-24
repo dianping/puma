@@ -189,6 +189,7 @@ public class Handler implements PageHandler<Context> {
 		clientStateContainer.remove(payload.getClientName());
 		SystemStatusContainer.instance.removeClient(payload.getClientName());
 		heartbeatTask.cancelFuture();
+		heartbeatTask = null;
 		// long end = System.currentTimeMillis();
 		// String ipAddress =
 		// NetworkInterfaceManager.INSTANCE.getLocalHostAddress();

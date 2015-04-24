@@ -4,8 +4,11 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dianping.cat.Cat;
@@ -22,7 +25,10 @@ public class ClientIpTaskMonitor extends AbstractTaskMonitor implements Runnable
 	private static final Logger LOG = LoggerFactory.getLogger(ClientIpTaskMonitor.class);
 
 	public static final String CLIENTIP_INTERVAL_NAME = "puma.server.interval.ip";
-
+	
+//	@Autowired
+//	private MonitorScheduledExecutor monitorScheduledExecutor;
+	
 	public ClientIpTaskMonitor() {
 		super(0, TimeUnit.MILLISECONDS);
 		LOG.info("ClientIp Task Monitor started.");
@@ -36,7 +42,7 @@ public class ClientIpTaskMonitor extends AbstractTaskMonitor implements Runnable
 			public void onChange(String key, String value) {
 				if (CLIENTIP_INTERVAL_NAME.equals(key)) {
 					ClientIpTaskMonitor.this.setInterval(Long.parseLong(value));
-					if (future != null) {
+					if (future != null && !future.isCancelled() && !future.isDone()) {
 						future.cancel(true);
 						if (MonitorScheduledExecutor.instance.isScheduledValid()) {
 							ClientIpTaskMonitor.this.execute();
@@ -55,12 +61,20 @@ public class ClientIpTaskMonitor extends AbstractTaskMonitor implements Runnable
 					Message.SUCCESS, "name = " + clientStatus.getKey() + "&duration = " + Long.toString(getInterval()));
 		}
 	}
-
-	@SuppressWarnings("unchecked")
+	
+	@PostConstruct
 	@Override
-	public Future doExecute() {
-		return MonitorScheduledExecutor.instance.getExecutorService().scheduleWithFixedDelay(this, getInitialDelay(),
+	public void doExecute() {
+		future = getMonitorScheduledExecutor().getExecutorService().scheduleWithFixedDelay(this, getInitialDelay(),
 				getInterval(), getUnit());
 	}
 
+//	public MonitorScheduledExecutor getMonitorScheduledExecutor() {
+//		return monitorScheduledExecutor;
+//	}
+//
+//	public void setMonitorScheduledExecutor(MonitorScheduledExecutor monitorScheduledExecutor) {
+//		this.monitorScheduledExecutor = monitorScheduledExecutor;
+//	}
+	
 }

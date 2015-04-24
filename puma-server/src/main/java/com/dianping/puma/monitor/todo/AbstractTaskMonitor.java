@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
@@ -15,6 +16,9 @@ import com.dianping.lion.client.LionException;
 public abstract class AbstractTaskMonitor implements Runnable{
 
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractTaskMonitor.class);
+	
+	@Autowired
+	private MonitorScheduledExecutor monitorScheduledExecutor;
 	
 	private long initialDelay;
 	private long interval;
@@ -31,6 +35,7 @@ public abstract class AbstractTaskMonitor implements Runnable{
 	public void init(){
 		doInit();
 	}
+	
 	public abstract void doInit();
 	
 	public void setInitialDelay(long initialDelay) {
@@ -57,13 +62,20 @@ public abstract class AbstractTaskMonitor implements Runnable{
 		return unit;
 	}
 	
-	@PostConstruct
-	public void execute(){
-		future = doExecute();
+	public MonitorScheduledExecutor getMonitorScheduledExecutor() {
+		return monitorScheduledExecutor;
+	}
+
+	public void setMonitorScheduledExecutor(MonitorScheduledExecutor monitorScheduledExecutor) {
+		this.monitorScheduledExecutor = monitorScheduledExecutor;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public abstract Future doExecute();
+	@PostConstruct
+	public void execute(){
+		doExecute();
+	}
+	
+	public abstract void doExecute();
 
 	public void run(){
 		doRun();
@@ -83,4 +95,5 @@ public abstract class AbstractTaskMonitor implements Runnable{
 		}
 		return interval;
 	}
+	
 }

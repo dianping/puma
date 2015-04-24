@@ -52,6 +52,8 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
 
     protected final String dumpOutputDir;
 
+    protected static final long FINISH_INDEX = Long.MIN_VALUE;
+
     protected volatile SrcDBInstance srcDBInstance;
 
     protected volatile DstDBInstance dstDBInstance;
@@ -69,6 +71,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
         checkNotNull(task.getTableName(), "task.tableName");
         checkNotNull(task.getIndexColumnName(), "task.indexColumnName");
 
+
         this.task = task;
         this.dumpOutputDir = (SyncServerConfig.getInstance() == null ? "/tmp/" : SyncServerConfig.getInstance().getTempDir() + "/dump/") + task.getName() + "/";
         this.dumpStatus = new ShardSyncTaskState();
@@ -77,7 +80,18 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
         this.loadStatus.setStatus(Status.PREPARING);
     }
 
+    private boolean isFinish() {
+        if (this.task.getIndexKey() == FINISH_INDEX) {
+            return true;
+        }
+        return false;
+    }
+
     public void init() {
+        if (isFinish()) {
+            return;
+        }
+
         this.dumpWorker = new Thread(new DumpWorker());
         this.loadWorker = new Thread(new LoadWorker());
         createOutPutDir();
@@ -148,7 +162,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
 
                     if (!checkHasData(this.lastIndex)) {
                         dumpStatus.setPercent(ShardSyncTaskState.PERCENT_MAX);
-                        waitForLoadQueue.put(-1l);
+                        waitForLoadQueue.put(FINISH_INDEX);
                         break;
                     }
 
@@ -282,7 +296,9 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
             while (true) {
                 try {
                     Long index = waitForLoadQueue.take();
-                    if (index < 0) {
+                    if (index == FINISH_INDEX) {
+                        //finish
+                        cleanUp(index);
                         cleanup();
                         loadStatus.setPercent(ShardSyncTaskState.PERCENT_MAX);
                         break;
@@ -336,6 +352,10 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
 
     @Override
     public void start() {
+        if (isFinish()) {
+            return;
+        }
+
         dumpWorker.start();
         loadWorker.start();
     }

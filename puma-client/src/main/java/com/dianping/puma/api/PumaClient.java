@@ -15,6 +15,7 @@ import com.dianping.puma.api.sequence.SequenceHolder;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.codec.EventCodecFactory;
 import com.dianping.puma.core.event.Event;
+import com.dianping.puma.core.event.HeartbeatEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.core.util.StreamUtils;
@@ -23,13 +24,12 @@ public class PumaClient {
 	private static final Logger log = LoggerFactory.getLogger(PumaClient.class);
 	private Configuration config;
 	private EventListener eventListener;
-	private volatile boolean active = false;
+	// private volatile boolean active = false;
 	private SequenceHolder sequenceHolder;
 	private EventCodec codec;
 	private Thread subscribeThread;
-
-	// private volatile boolean done = false;
-	// private HttpURLConnection connection;
+	private volatile boolean hasHeartbeat = false;
+	private PumaClientTask pumaClientTask;
 
 	public SequenceHolder getSeqFileHolder() {
 		return sequenceHolder;
@@ -55,7 +55,7 @@ public class PumaClient {
 	}
 
 	public void stop() {
-		active = false;
+		pumaClientTask.setActive(false);
 		if (subscribeThread != null) {
 			subscribeThread.interrupt();
 		}
@@ -63,28 +63,16 @@ public class PumaClient {
 
 	public void start() {
 		config.validate();
-
-		subscribeThread = PumaThreadUtils.createThread(new PumaClientTask(), "PumaClientSub", false);
-
-		active = true;
+		if (pumaClientTask != null) {
+			pumaClientTask = null;
+		}
+		pumaClientTask = new PumaClientTask();
+		subscribeThread = PumaThreadUtils.createThread(pumaClientTask, "PumaClientSub", false);
 		subscribeThread.start();
 	}
 
-    public Configuration getConfig() {
-        return config;
-    }
-
-    private boolean checkStop() {
-		if (!active) {
-			log.info("Puma client[" + config.getName() + "] checked active is false.");
-			return true;
-		}
-		if (Thread.currentThread().isInterrupted()) {
-			log.info("Puma client[" + config.getName() + "] checked thread is interrupted.");
-			return true;
-		}
-
-		return false;
+	public Configuration getConfig() {
+		return config;
 	}
 
 	private InputStream connect() {
@@ -129,24 +117,33 @@ public class PumaClient {
 		return codec.decode(data);
 	}
 
+	public void setHasHeartbeat(boolean hasHeartbeat) {
+		this.hasHeartbeat = hasHeartbeat;
+	}
+
+	public boolean isHasHeartbeat() {
+		return hasHeartbeat;
+	}
+
 	private class PumaClientTask implements Runnable {
+
+		private volatile boolean active = false;
+
+		public PumaClientTask() {
+			this.active = true;
+		}
 
 		@Override
 		public void run() {
-
 			// reconnect while there is some connection problem
 			while (true) {
 				InputStream is = null;
-
 				if (checkStop()) {
 					log.info("Puma client[" + config.getName() + "] stopped.");
 					break;
 				}
-
 				try {
-
 					is = connect();
-
 					// reconnect case
 					if (is == null) {
 						Thread.sleep(100);
@@ -154,50 +151,19 @@ public class PumaClient {
 						continue;
 					}
 					log.info("Puma client[" + config.getName() + "] connected.");
-
 					// loop read event from the input stream
 					while (true) {
 						if (checkStop()) {
 							break;
 						}
-
 						Event event = readEvent(is);
-
-						boolean listenerCallSuccess = true;
-
-						// call event listener until success
-						while (true) {
-							if (checkStop()) {
-								break;
-							}
-
-							try {
-								eventListener.onEvent(event);
-								listenerCallSuccess = true;
-								break;
-							} catch (Exception e) {
-								log.warn("Puma client[" + config.getName()
-										+ "] Exception occurs in eventListerner. Event: " + event, e);
-
-								if (eventListener.onException(event, e)) {
-									log.warn("Puma client[" + config.getName() + "] Event(" + event + ") skipped. ");
-									eventListener.onSkipEvent(event);
-									listenerCallSuccess = true;
-									break;
-								} else {
-									listenerCallSuccess = false;
-								}
-							}
-						}
-
-						// Maybe not because of the success of last event
-						// listener's run, but the stop command that system
-						// received. We shouldn't save in this case.
-						if (listenerCallSuccess) {
-							sequenceHolder.saveSeq(event.getSeq());
+						if (event instanceof HeartbeatEvent) {
+							callHeartbeatEvent(event);
+							continue;
+						} else {
+							callChangedEvent(event);
 						}
 					}
-
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 				} catch (Exception e) {
@@ -215,5 +181,62 @@ public class PumaClient {
 				}
 			}
 		}
+
+		private boolean checkStop() {
+			if (!active) {
+				log.info("Puma client[" + config.getName() + "] checked active is false.");
+				return true;
+			}
+			if (Thread.currentThread().isInterrupted()) {
+				log.info("Puma client[" + config.getName() + "] checked thread is interrupted.");
+				return true;
+			}
+
+			return false;
+		}
+
+		private void callHeartbeatEvent(Event event) {
+			setHasHeartbeat(true);
+			eventListener.onHeartbeatEvent(event);
+			log.info("Puma client[" + config.getName() + "] heartbeat.");
+		}
+
+		private void callChangedEvent(Event event) {
+			boolean listenerCallSuccess = true;
+			// call event listener until success
+			while (true) {
+				if (checkStop()) {
+					break;
+				}
+				try {
+					eventListener.onEvent(event);
+					listenerCallSuccess = true;
+					break;
+				} catch (Exception e) {
+					log.warn("Puma client[" + config.getName() + "] Exception occurs in eventListerner. Event: "
+							+ event, e);
+					if (eventListener.onException(event, e)) {
+						log.warn("Puma client[" + config.getName() + "] Event(" + event + ") skipped. ");
+						eventListener.onSkipEvent(event);
+						listenerCallSuccess = true;
+						break;
+					} else {
+						listenerCallSuccess = false;
+					}
+				}
+			}
+			// Maybe not because of the success of last event
+			// listener's run, but the stop command that system
+			// received. We shouldn't save in this case.
+			if (listenerCallSuccess) {
+				sequenceHolder.saveSeq(event.getSeq());
+			}
+		}
+
+		public void setActive(boolean active) {
+			this.active = active;
+		}
+
 	}
+
 }

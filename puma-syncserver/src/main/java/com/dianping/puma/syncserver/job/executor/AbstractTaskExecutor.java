@@ -546,8 +546,13 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 				// status.setDetail("PumaClient connected.");
 				LOG.info("PumaClient[" + getTask().getPumaClientName() + "] connected.");
 			}
-		});
+			@Override
+	        public void onHeartbeatEvent(Event event){
+	          	
+	        }
 
+		});
+		
 		return pumaClient;
 	}
 

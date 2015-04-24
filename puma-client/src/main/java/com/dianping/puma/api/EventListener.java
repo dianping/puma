@@ -38,4 +38,11 @@ public interface EventListener {
      * @param event 被跳过的事件
      */
     public void onSkipEvent(Event event);
+    
+    /**
+     *心跳事件的回调函数
+     *
+     * @param event
+     */
+    public void onHeartbeatEvent(Event event);
 }

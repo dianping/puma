@@ -76,6 +76,11 @@ public class TestApi {
 			@Override
 			public void onConnected() {
 			}
+			
+			@Override
+	        public void onHeartbeatEvent(Event event){
+	            	
+	        }
 		});
 		pc.start();
 	}

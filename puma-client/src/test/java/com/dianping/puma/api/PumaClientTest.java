@@ -324,6 +324,10 @@ public class PumaClientTest {
             public void onConnected() {
 
             }
+            @Override
+            public void onHeartbeatEvent(Event event){
+            	
+            }
         });
 
         client.start();
@@ -464,6 +468,10 @@ public class PumaClientTest {
             @Override
             public void onConnected() {
 
+            }
+            @Override
+            public void onHeartbeatEvent(Event event){
+            	
             }
         });
 
@@ -606,6 +614,10 @@ public class PumaClientTest {
             @Override
             public void onConnected() {
 
+            }
+            @Override
+            public void onHeartbeatEvent(Event event){
+            	
             }
         });
 

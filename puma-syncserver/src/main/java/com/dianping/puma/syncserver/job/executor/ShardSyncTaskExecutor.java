@@ -260,6 +260,10 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
         public void onSkipEvent(Event event) {
 
         }
+        @Override
+        public void onHeartbeatEvent(Event event){
+        	
+        }
     }
 
     protected void initRouterRule() {

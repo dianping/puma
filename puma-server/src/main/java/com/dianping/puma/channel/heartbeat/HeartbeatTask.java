@@ -2,9 +2,9 @@ package com.dianping.puma.channel.heartbeat;
 
 import java.io.IOException;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
@@ -17,11 +17,13 @@ import com.dianping.lion.client.LionException;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.HeartbeatEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
-import com.dianping.puma.monitor.MonitorScheduledExecutor;
+import com.dianping.puma.core.util.ScheduledExecutorUtils;
 
-public class HeartbeatTask implements Runnable {
+public class HeartbeatTask {
 
 	private static final Logger LOG = LoggerFactory.getLogger(HeartbeatTask.class);
+
+	private static final String HEARTBEAT_SENDER_INTERVAL_NAME = "puma.server.heartbeatsender.interval";
 
 	private long initialDelay;
 	private long interval;
@@ -35,34 +37,9 @@ public class HeartbeatTask implements Runnable {
 
 	private EventCodec codec = null;
 
-	private static final String HEARTBEAT_INTERVAL_NAME = "puma.server.heartbeat.interval";
+	private ScheduledExecutorService executorService = null;
 
-	public HeartbeatTask(EventCodec codec, HttpServletResponse response) {
-		this.initialDelay = 0;
-		this.unit = TimeUnit.MILLISECONDS;
-		initConfig();
-		event = new HeartbeatEvent();
-		this.codec = codec;
-		this.response = response;
-	}
-
-	public void initConfig() {
-		this.setInterval(getLionInterval(HEARTBEAT_INTERVAL_NAME));
-		ConfigCache.getInstance().addChange(new ConfigChange() {
-			@Override
-			public void onChange(String key, String value) {
-				if (HEARTBEAT_INTERVAL_NAME.equals(key)) {
-					HeartbeatTask.this.setInterval(Long.parseLong(value));
-					if (future != null) {
-						future.cancel(true);
-						if (MonitorScheduledExecutor.instance.isScheduledValid()) {
-							HeartbeatTask.this.execute();
-						}
-					}
-				}
-			}
-		});
-	}
+	private static final String THREAD_FACTORY_NAME = "heartbeat";
 
 	public void setInitialDelay(long initialDelay) {
 		this.initialDelay = initialDelay;
@@ -88,30 +65,61 @@ public class HeartbeatTask implements Runnable {
 		return unit;
 	}
 
-	@PostConstruct
+
+	public void setExecutorService(ScheduledExecutorService executorService) {
+		this.executorService = executorService;
+	}
+
+	public ScheduledExecutorService getExecutorService() {
+		return executorService;
+	}
+	
+	public HeartbeatTask(EventCodec codec, HttpServletResponse response) {
+		this.initialDelay = 0;
+		this.unit = TimeUnit.MILLISECONDS;
+		initConfig();
+		event = new HeartbeatEvent();
+		this.codec = codec;
+		this.response = response;
+		setExecutorService(ScheduledExecutorUtils.createSingleScheduledExecutorService(THREAD_FACTORY_NAME));
+	}
+
+	public void initConfig() {
+		this.setInterval(getLionInterval(HEARTBEAT_SENDER_INTERVAL_NAME));
+		ConfigCache.getInstance().addChange(new ConfigChange() {
+			@Override
+			public void onChange(String key, String value) {
+				if (HEARTBEAT_SENDER_INTERVAL_NAME.equals(key)) {
+					HeartbeatTask.this.setInterval(Long.parseLong(value));
+					if (future != null) {
+						future.cancel(true);
+						if (HeartbeatTask.this.isExecutorServiceValid()) {
+							HeartbeatTask.this.execute();
+						}
+					}
+				}
+			}
+		});
+	}
+	
 	public void execute() {
-		future = HeartbeatScheduledExecutor.instance.getExecutorService().scheduleWithFixedDelay(this,
+		future = getExecutorService().scheduleWithFixedDelay(new HeartbeatSender(),
 				getInitialDelay(), getInterval(), getUnit());
 	}
 
-	@Override
-	public void run() {
-		if (response != null) {
-			synchronized (response) {
-				try {
-					byte[] data = codec.encode(event);
-					response.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
-
-					response.getOutputStream().write(data);
-					response.getOutputStream().flush();
-				} catch (IOException e) {
-					Cat.getProducer().logError("puma.server.client.heartbeat.exception:", e);
-					LOG.error("heartbeat.exception: ", e);
-				}
-			}
+	public boolean isExecutorServiceValid() {
+		if (getExecutorService() != null && !getExecutorService().isShutdown() && !getExecutorService().isTerminated()) {
+			return true;
 		}
+		return false;
 	}
 
+	public void shutdownExecutorService()
+	{
+		if(isExecutorServiceValid()){
+			getExecutorService().shutdown();
+		}
+	}
 	private long getLionInterval(String intervalName) {
 		long interval = 60000;
 		try {
@@ -123,5 +131,28 @@ public class HeartbeatTask implements Runnable {
 			LOG.error(e.getMessage(), e);
 		}
 		return interval;
+	}
+
+
+	private class HeartbeatSender implements Runnable {
+
+		@Override
+		public void run() {
+			if (response != null) {
+				synchronized (response) {
+					try {
+						byte[] data = codec.encode(event);
+						response.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
+
+						response.getOutputStream().write(data);
+						response.getOutputStream().flush();
+					} catch (IOException e) {
+						Cat.getProducer().logError("puma.server.client.heartbeat.exception:", e);
+						LOG.error("heartbeat.exception: ", e);
+					}
+				}
+			}
+		}
+
 	}
 }

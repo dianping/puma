@@ -12,7 +12,7 @@
                 <td class="col-md-1">服务器</td>
                 <td class="col-md-1">来源</td>
                 <td class="col-md-1">目标</td>
-                <td class="col-md-2">条件</td>
+                <td class="col-md-1">条件</td>
                 <td class="col-md-2">初始位置</td>
                 <td class="col-md-1">状态</td>
                 <td class="col-md-1">操作</td>
@@ -28,18 +28,17 @@
                 <td>${shardDumpTask.shardRule}</td>
                 <td>
                     #if(${shardDumpTask.binlogInfo})
-                    ${shardDumpTask.binlogInfo.binlogFile} | ${shardDumpTask.binlogInfo.binlogPosition}
+                    ${shardDumpTask.binlogInfo.binlogFile}
+                    |
+                    ${shardDumpTask.binlogInfo.binlogPosition}
                     #end
                 </td>
                 <td class="sync-task-status">
                     #if(${shardDumpTaskStates[$shardDumpTask.getName()]})
                     ${shardDumpTaskStates[$shardDumpTask.getName()].getStatus().getDesc()}
-                    |
                     ${shardDumpTaskStates[$shardDumpTask.getName()].getPercent()}%
                     #end
                 </td>
-                <!--<td class="sync-task-bin-log-info">-->
-                <!--</td>-->
                 <td>
                     <a href="#" data-toggle="modal" data-target="#warn-modal" data-subpath="remove"
                        data-path="shard-dump-task" data-name="${shardDumpTask.name}" class="no-under">

@@ -1,7 +1,9 @@
 package com.dianping.puma.syncserver.job.checker;
 
+import com.dianping.puma.core.entity.ShardDumpTask;
 import com.dianping.puma.core.entity.ShardSyncTask;
 import com.dianping.puma.core.entity.SyncTask;
+import com.dianping.puma.core.service.ShardDumpTaskService;
 import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.monitor.EventListener;
@@ -35,6 +37,9 @@ public class TaskChecker implements EventListener {
     private ShardSyncTaskService shardSyncTaskService;
 
     @Autowired
+    private ShardDumpTaskService shardDumpTaskService;
+
+    @Autowired
     private TaskExecutorContainer taskExecutorContainer;
 
     @Autowired
@@ -57,7 +62,28 @@ public class TaskChecker implements EventListener {
     public void init() {
         loadSyncTask();
         loadShardSyncTask();
+        loadShardDumpTask();
         LOG.info("TaskChecker inited.");
+    }
+
+    private void loadShardDumpTask() {
+        //加载所有Task
+        String syncServerName = syncServerConfig.getSyncServerName();
+
+        List<ShardDumpTask> tasks = shardDumpTaskService.findBySyncServerName(syncServerName);
+
+        if (tasks != null && tasks.size() > 0) {
+            for (ShardDumpTask dumpTask : tasks) {
+                TaskExecutor executor = taskExecutorBuilder.build(dumpTask);
+                //将Task交给Container
+                try {
+                    taskExecutorContainer.submit(executor);
+                } catch (TaskExecutionException e) {
+                    notifyService.alarm(e.getMessage(), e, false);
+                }
+            }
+        }
+        LOG.info("TaskChecker loaded " + (tasks != null ? tasks.size() : 0) + " shard dump tasks.");
     }
 
     private void loadShardSyncTask() {
@@ -77,7 +103,7 @@ public class TaskChecker implements EventListener {
                 }
             }
         }
-        LOG.info("TaskChecker loaded " + (tasks != null ? tasks.size() : 0) + " tasks.");
+        LOG.info("TaskChecker loaded " + (tasks != null ? tasks.size() : 0) + " shard sync tasks.");
     }
 
     private void loadSyncTask() {

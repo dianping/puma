@@ -133,17 +133,17 @@ public class ShardDumpTaskController {
                               @PathVariable("pageNum") Integer pageNum) {
         Map<String, Object> map = new HashMap<String, Object>();
         int offset = pageNum == null ? 0 : (pageNum - 1) * PAGESIZE;
-        List<ShardDumpTask> shardSyncTasks = shardDumpTaskService.find(offset, PAGESIZE);
+        List<ShardDumpTask> shardDumpTasks = shardDumpTaskService.find(offset, PAGESIZE);
         Map<String, ShardSyncTaskState> states = new HashMap<String, ShardSyncTaskState>();
-        for (ShardDumpTask task : shardSyncTasks) {
+        for (ShardDumpTask task : shardDumpTasks) {
             ShardSyncTaskState state = shardSyncTaskStateService.find(task.getName());
             if (state != null) {
                 states.put(task.getName(), state);
             }
         }
 
-        map.put("shardSyncTasks", shardSyncTasks);
-        map.put("shardSyncTaskStates", states);
+        map.put("shardDumpTasks", shardDumpTasks);
+        map.put("shardDumpTaskStates", states);
         map.put("createdActive", "active");
         map.put("subPath", "main");
         map.put("path", "shard-dump-task");

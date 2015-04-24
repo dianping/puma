@@ -14,8 +14,8 @@ import com.dianping.puma.syncserver.util.ProcessBuilderWrapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,7 +90,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
     protected void createOutPutDir() {
         File theDir = new File(this.dumpOutputDir);
         if (!theDir.exists()) {
-            theDir.mkdir();
+            theDir.mkdirs();
         }
     }
 
@@ -115,7 +115,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
                     hasData = true;
                     return hasData;
                 }
-                hasData = FileUtils.fileRead(file).contains("INSERT");
+                hasData = FileUtils.readFileToString(file).contains("INSERT");
                 return hasData;
             } catch (IOException e) {
                 hasData = false;
@@ -398,7 +398,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
 
     protected void cleanup() {
         try {
-            FileUtils.deleteDirectory(dumpOutputDir);
+            FileUtils.deleteDirectory(new File(dumpOutputDir));
         } catch (IOException e) {
         }
     }

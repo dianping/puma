@@ -1,12 +1,17 @@
 package com.dianping.puma.core.entity;
 
+import com.dianping.puma.core.constant.SyncType;
 import com.google.code.morphia.annotations.Entity;
 
 import java.util.Arrays;
 import java.util.List;
 
 @Entity
-public class ShardDumpTask extends DumpTask {
+public class ShardDumpTask extends BaseSyncTask {
+
+    public ShardDumpTask() {
+        this.setSyncType(SyncType.SHARD_DUMP);
+    }
 
     private String srcDbName;
 
@@ -35,12 +40,10 @@ public class ShardDumpTask extends DumpTask {
             "--default-character-set=utf8", "--max_allowed_packet=1073741824",
             "-i", "--single-transaction", "--hex-blob", "--compact");
 
-    @Override
     public List<String> getOptions() {
         return options;
     }
 
-    @Override
     public void setOptions(List<String> options) {
         this.options = options;
     }

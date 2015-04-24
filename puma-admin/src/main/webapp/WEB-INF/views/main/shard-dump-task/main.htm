@@ -1,9 +1,9 @@
 <div class="container-fluid">
     <div class="panel panel-primary">
         <div class="panel-heading">
-            <a class="glyphicon glyphicon-plus btn-sm" href="${rc.contextPath}/shard-sync-task/create/"
+            <a class="glyphicon glyphicon-plus btn-sm" href="${rc.contextPath}/shard-dump-task/create/"
                style="float: right; color: white; font-size: 16px;"></a>
-            <h5>分库分表数据同步任务</h5>
+            <h5>分库分表数据Dump任务</h5>
         </div>
 
         <table class="table table-hover">
@@ -17,20 +17,20 @@
             </thead>
 
             <tbody>
-            #foreach($shardSyncTask in ${shardSyncTasks})
+            #foreach($shardDumpTask in ${shardDumpTasks})
             <tr>
-                <td>${shardSyncTask.name}</td>
-                <td>${shardSyncTask.syncServerName}</td>
+                <td>${shardDumpTask.name}</td>
+                <td>${shardDumpTask.syncServerName}</td>
                 <td class="sync-task-status">
-                    #if(${shardSyncTaskStates[$shardSyncTask.getName()]})
-                    ${shardSyncTaskStates[$shardSyncTask.getName()].getStatus().getDesc()}
+                    #if(${shardDumpTaskStates[$shardDumpTask.getName()]})
+                    ${shardDumpTaskStates[$shardDumpTask.getName()].getStatus().getDesc()}
                     #end
                 </td>
                 <!--<td class="sync-task-bin-log-info">-->
                 <!--</td>-->
                 <td>
                     <a href="#" data-toggle="modal" data-target="#warn-modal" data-subpath="remove"
-                       data-path="shard-sync-task" data-name="${shardSyncTask.name}" class="no-under">
+                       data-path="shard-dump-task" data-name="${shardDumpTask.name}" class="no-under">
                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                     </a>
                 </td>

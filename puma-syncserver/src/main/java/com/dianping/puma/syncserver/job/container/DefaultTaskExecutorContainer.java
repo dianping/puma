@@ -4,9 +4,9 @@ import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.entity.BaseSyncTask;
-import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.service.DumpTaskService;
+import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.syncserver.job.executor.*;
 import org.slf4j.Logger;
@@ -106,7 +106,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer {
             } else {
                 syncTaskExecutor.pause("Stop because the StatusAction is Pause.");
             }
-        } else if (newTaskExecutor instanceof ShardSyncTaskExecutor || newTaskExecutor instanceof DumpTaskExecutor || newTaskExecutor instanceof CatchupTaskExecutor) {
+        } else if (newTaskExecutor instanceof ShardDumpTaskExecutor || newTaskExecutor instanceof ShardSyncTaskExecutor || newTaskExecutor instanceof DumpTaskExecutor || newTaskExecutor instanceof CatchupTaskExecutor) {
             newTaskExecutor.start();
         } else {
             notifyService
@@ -167,6 +167,16 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer {
             LOG.info(shardSyncTaskExecutor + " is deleted.");
             shardSyncTaskExecutor.stop("Disconnect because the StatusAction is deleted.");
             binlogInfoHolder.remove(taskName);
+        }
+    }
+
+    @Override
+    public void deleteShardDumpTask(String taskName) {
+        ShardDumpTaskExecutor shardDumpTaskExecutor = (ShardDumpTaskExecutor) this.get(taskName);
+        if (shardDumpTaskExecutor != null) {
+            this.delete(SyncType.SHARD_DUMP, taskName);
+            LOG.info(shardDumpTaskExecutor + " is deleted.");
+            shardDumpTaskExecutor.stop("Disconnect because the StatusAction is deleted.");
         }
     }
 

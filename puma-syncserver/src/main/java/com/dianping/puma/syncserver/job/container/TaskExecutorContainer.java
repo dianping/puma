@@ -37,6 +37,8 @@ public interface TaskExecutorContainer {
 
     public void deleteShardSyncTask(String taskName);
 
+    public void deleteShardDumpTask(String taskName);
+
     public List<TaskExecutor> toList();
 
     public List<TaskExecutor> getAll();

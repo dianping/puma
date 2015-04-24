@@ -1,12 +1,14 @@
 package com.dianping.puma.syncserver.remote.receiver;
 
 import com.dianping.puma.core.constant.ActionOperation;
+import com.dianping.puma.core.constant.SyncType;
+import com.dianping.puma.core.entity.ShardDumpTask;
 import com.dianping.puma.core.entity.ShardSyncTask;
 import com.dianping.puma.core.monitor.EventListener;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.monitor.event.Event;
 import com.dianping.puma.core.monitor.event.ShardSyncTaskOperationEvent;
-import com.dianping.puma.core.monitor.event.SyncTaskOperationEvent;
+import com.dianping.puma.core.service.ShardDumpTaskService;
 import com.dianping.puma.core.service.ShardSyncTaskService;
 import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;
 import com.dianping.puma.syncserver.job.executor.TaskExecutionException;
@@ -26,6 +28,9 @@ public class ShardSyncTaskOperationReceiver implements EventListener {
     ShardSyncTaskService shardSyncTaskService;
 
     @Autowired
+    ShardDumpTaskService shardDumpTaskService;
+
+    @Autowired
     TaskExecutorBuilder taskExecutorBuilder;
 
     @Autowired
@@ -39,23 +44,37 @@ public class ShardSyncTaskOperationReceiver implements EventListener {
         if (event instanceof ShardSyncTaskOperationEvent) {
             LOG.info("Receive shard sync task operation event.");
 
-            String taskName = ((ShardSyncTaskOperationEvent) event).getTaskName();
+            ShardSyncTaskOperationEvent shardEvent = (ShardSyncTaskOperationEvent) event;
+            String taskName = shardEvent.getTaskName();
             ActionOperation operation = ((ShardSyncTaskOperationEvent) event).getOperation();
 
             switch (operation) {
                 case CREATE:
-                    ShardSyncTask syncTask = shardSyncTaskService.find(taskName);
-                    TaskExecutor taskExecutor = taskExecutorBuilder.build(syncTask);
+                    TaskExecutor taskExecutor = null;
 
-                    try {
-                        taskExecutorContainer.submit(taskExecutor);
-                    } catch (TaskExecutionException e) {
-                        notifyService.alarm(e.getMessage(), e, false);
+                    if (shardEvent.getSyncType().equals(SyncType.SHARD_SYNC)) {
+                        ShardSyncTask syncTask = shardSyncTaskService.find(taskName);
+                        taskExecutor = taskExecutorBuilder.build(syncTask);
+                    } else if (shardEvent.getSyncType().equals(SyncType.SHARD_DUMP)) {
+                        ShardDumpTask dumpTask = shardDumpTaskService.find(taskName);
+                        taskExecutor = taskExecutorBuilder.build(dumpTask);
                     }
-                    break;
 
+                    if (taskExecutor != null) {
+                        try {
+                            taskExecutorContainer.submit(taskExecutor);
+                        } catch (TaskExecutionException e) {
+                            notifyService.alarm(e.getMessage(), e, false);
+                        }
+                    }
+
+                    break;
                 case REMOVE:
-                    taskExecutorContainer.deleteShardSyncTask(taskName);
+                    if (shardEvent.getSyncType().equals(SyncType.SHARD_SYNC)) {
+                        taskExecutorContainer.deleteShardSyncTask(taskName);
+                    } else if (shardEvent.getSyncType().equals(SyncType.SHARD_DUMP)) {
+                        taskExecutorContainer.deleteShardDumpTask(taskName);
+                    }
             }
         }
     }

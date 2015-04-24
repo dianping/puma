@@ -113,6 +113,7 @@ public class Handler implements PageHandler<Context> {
 		SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(), payload.getBinlog(), payload
 				.getBinlogPos());
 
+
 		res.setContentType("application/octet-stream");
 		res.addHeader("Connection", "Keep-Alive");
 
@@ -154,7 +155,7 @@ public class Handler implements PageHandler<Context> {
 
 					if (filterChain.doNext(changedEvent)) {
 						byte[] data = codec.encode(changedEvent);
-						synchronized(res){
+						synchronized (res) {
 							res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
 							res.getOutputStream().write(data);
 							res.getOutputStream().flush();
@@ -178,7 +179,7 @@ public class Handler implements PageHandler<Context> {
 				Cat.getProducer().logError("puma.server.client.ChannelClosed.exception:", e);
 				clientStateContainer.remove(payload.getClientName());
 				SystemStatusContainer.instance.removeClient(payload.getClientName());
-				heartbeatTask.shutdownExecutorService();
+				heartbeatTask.cancelFuture();
 				LOG.info("Client(" + payload.getClientName() + ") failed. ", e);
 				break;
 			}
@@ -187,9 +188,11 @@ public class Handler implements PageHandler<Context> {
 		channel.close();
 		clientStateContainer.remove(payload.getClientName());
 		SystemStatusContainer.instance.removeClient(payload.getClientName());
-		heartbeatTask.shutdownExecutorService();
-		//long end = System.currentTimeMillis();
-		//String ipAddress = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
-		//Cat.getProducer().logEvent("ChannelClosed", ipAddress, Message.SUCCESS, "duration=" + (end - start));
+		heartbeatTask.cancelFuture();
+		// long end = System.currentTimeMillis();
+		// String ipAddress =
+		// NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
+		// Cat.getProducer().logEvent("ChannelClosed", ipAddress,
+		// Message.SUCCESS, "duration=" + (end - start));
 	}
 }

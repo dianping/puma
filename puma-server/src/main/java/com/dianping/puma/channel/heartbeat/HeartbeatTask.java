@@ -28,7 +28,7 @@ public class HeartbeatTask {
 	private long initialDelay;
 	private long interval;
 	private TimeUnit unit;
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Future future;
 
 	private HttpServletResponse response;
@@ -38,8 +38,6 @@ public class HeartbeatTask {
 	private EventCodec codec = null;
 
 	private ScheduledExecutorService executorService = null;
-
-	private static final String THREAD_FACTORY_NAME = "heartbeat";
 
 	public void setInitialDelay(long initialDelay) {
 		this.initialDelay = initialDelay;
@@ -65,15 +63,15 @@ public class HeartbeatTask {
 		return unit;
 	}
 
-
-	public void setExecutorService(ScheduledExecutorService executorService) {
-		this.executorService = executorService;
+	@SuppressWarnings("rawtypes")
+	public Future getFuture() {
+		return this.future;
 	}
 
-	public ScheduledExecutorService getExecutorService() {
-		return executorService;
+	public void setFuture(@SuppressWarnings("rawtypes") Future future) {
+		this.future = future;
 	}
-	
+
 	public HeartbeatTask(EventCodec codec, HttpServletResponse response) {
 		this.initialDelay = 0;
 		this.unit = TimeUnit.MILLISECONDS;
@@ -81,7 +79,7 @@ public class HeartbeatTask {
 		event = new HeartbeatEvent();
 		this.codec = codec;
 		this.response = response;
-		setExecutorService(ScheduledExecutorUtils.createSingleScheduledExecutorService(THREAD_FACTORY_NAME));
+		executorService = HeartbeatScheduledExecutor.instance.getExecutorService();
 	}
 
 	public void initConfig() {
@@ -93,7 +91,7 @@ public class HeartbeatTask {
 					HeartbeatTask.this.setInterval(Long.parseLong(value));
 					if (future != null) {
 						future.cancel(true);
-						if (HeartbeatTask.this.isExecutorServiceValid()) {
+						if (HeartbeatScheduledExecutor.instance.isExecutorServiceValid()) {
 							HeartbeatTask.this.execute();
 						}
 					}
@@ -101,27 +99,27 @@ public class HeartbeatTask {
 			}
 		});
 	}
-	
+
 	public void execute() {
-		future = getExecutorService().scheduleWithFixedDelay(new HeartbeatSender(),
-				getInitialDelay(), getInterval(), getUnit());
+		future = executorService.scheduleWithFixedDelay(new HeartbeatSender(), getInitialDelay(), getInterval(),
+				getUnit());
 	}
 
-	public boolean isExecutorServiceValid() {
-		if (getExecutorService() != null && !getExecutorService().isShutdown() && !getExecutorService().isTerminated()) {
+	public boolean isFutureValid() {
+		if (getFuture() != null && !getFuture().isCancelled()) {
 			return true;
 		}
 		return false;
 	}
 
-	public void shutdownExecutorService()
-	{
-		if(isExecutorServiceValid()){
-			getExecutorService().shutdown();
+	public void cancelFuture() {
+		if (isFutureValid()) {
+			getFuture().cancel(true);
 		}
 	}
+
 	private long getLionInterval(String intervalName) {
-		long interval = 60000;
+		long interval = 30000;
 		try {
 			Long temp = ConfigCache.getInstance().getLongProperty(intervalName);
 			if (temp != null) {
@@ -133,9 +131,7 @@ public class HeartbeatTask {
 		return interval;
 	}
 
-
 	private class HeartbeatSender implements Runnable {
-
 		@Override
 		public void run() {
 			if (response != null) {

@@ -46,11 +46,11 @@ public class MMapBasedBinlogInfoServiceImplTest extends TestCase {
 		Assert.assertEquals(null, mMapBasedBinlogInfoService.getBinlogInfo("no-2"));
 	}
 
-	@Test
+/*	@Test
 	public void testFindSyncTaskIds() throws Exception {
 		List<String> syncTaskClientNames = new ArrayList<String>();
 		syncTaskClientNames.add("no-1");
 		Assert.assertEquals(syncTaskClientNames, mMapBasedBinlogInfoService.findSyncTaskClientNames());
-	}
+	}*/
 	
 }

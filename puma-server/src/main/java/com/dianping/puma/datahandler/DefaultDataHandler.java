@@ -71,8 +71,8 @@ public class DefaultDataHandler extends AbstractDataHandler {
 				}
 			} else {
 				if (log.isDebugEnabled()) {
-				log.debug("meta info not found for:" + tableMapEvent.getDatabaseName() + "-"
-						+ tableMapEvent.getTableName());
+					log.debug("meta info not found for:" + tableMapEvent.getDatabaseName() + "-"
+							+ tableMapEvent.getTableName());
 				}
 				skipEvent(BinlogConstants.TABLE_MAP_EVENT, result, context);
 				return;
@@ -80,12 +80,9 @@ public class DefaultDataHandler extends AbstractDataHandler {
 
 			fillRawTypeCodes(tableMapEvent, tableMetaInfo);
 			fillRawNullAbilities(tableMapEvent, tableMetaInfo);
-
 			rowPos = 0;
-
 			result.setEmpty(true);
 			result.setFinished(true);
-
 			break;
 		case BinlogConstants.WRITE_ROWS_EVENT:
 			if (tableMetaInfos == null || tableMetaInfos.isEmpty()) {
@@ -207,7 +204,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 			RowChangedEvent rowChangedEvent = new RowChangedEvent();
 			Map<String, ColumnInfo> columns = initColumns(updateRowsEvent, rowChangedEvent, RowChangedEvent.UPDATE,
 					tableMetaInfo);
-			if(log.isDebugEnabled()) {
+			if (log.isDebugEnabled()) {
 				log.debug("update from " + tableMetaInfo.getDatabase() + "." + tableMetaInfo.getTable());
 			}
 
@@ -229,9 +226,9 @@ public class DefaultDataHandler extends AbstractDataHandler {
 					columnBeforeIndex++;
 				}
 				ColumnInfo columnInfo = new ColumnInfo(tableMetaInfo.getKeys().contains(columnName),
-						beforeColumn == null ? null : convertUnsignedValueIfNeeded(columnPos + 1,
-								beforeColumn.getValue(), tableMetaInfo), afterColumn == null ? null
-								: convertUnsignedValueIfNeeded(columnPos + 1, afterColumn.getValue(), tableMetaInfo));
+						beforeColumn == null ? null : convertUnsignedValueIfNeeded(columnPos + 1, beforeColumn
+								.getValue(), tableMetaInfo), afterColumn == null ? null : convertUnsignedValueIfNeeded(
+								columnPos + 1, afterColumn.getValue(), tableMetaInfo));
 				columns.put(columnName, columnInfo);
 			}
 
@@ -307,10 +304,10 @@ public class DefaultDataHandler extends AbstractDataHandler {
 		result.setEmpty(true);
 		result.setFinished(true);
 		StringBuilder msg = new StringBuilder();
-		msg.append("Skip one event#").append(eventType).append(", since there is no table meta info. Binlog: ")
-				.append(context.getBinlogFileName()).append(" Pos: ").append(context.getBinlogStartPos())
-				.append(" Skip to ").append(context.getNextBinlogPos());
-		if(log.isDebugEnabled()) {
+		msg.append("Skip one event#").append(eventType).append(", since there is no table meta info. Binlog: ").append(
+				context.getBinlogFileName()).append(" Pos: ").append(context.getBinlogStartPos()).append(" Skip to ")
+				.append(context.getNextBinlogPos());
+		if (log.isDebugEnabled()) {
 			log.debug(msg.toString());
 		}
 	}

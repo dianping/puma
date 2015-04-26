@@ -137,38 +137,37 @@ public class Handler implements PageHandler<Context> {
 			throw new IOException(e1);
 		}
 
-		ServerEventDelayMonitor serverLaggingTimeMonitor = ComponentContainer.SPRING.lookup("serverEventDelayMonitor");
+		ServerEventDelayMonitor serverEventDelayMonitor = ComponentContainer.SPRING.lookup("serverEventDelayMonitor");
 
 		HeartbeatTask heartbeatTask = new HeartbeatTask(codec, res, payload.getClientName());
 
 		while (true) {
 			try {
 				filterChain.reset();
+				ChangedEvent event = (ChangedEvent)channel.next();
 
-				Event event = channel.next();
-				if (event != null && event instanceof ChangedEvent) {
-					ChangedEvent changedEvent = (ChangedEvent) event;
-					serverLaggingTimeMonitor.record(clientName, changedEvent.getExecuteTime());
+				if (event != null) {
 
-					if (filterChain.doNext(changedEvent)) {
-						byte[] data = codec.encode(changedEvent);
-						synchronized (res) {
-							res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
-							res.getOutputStream().write(data);
-							res.getOutputStream().flush();
-						}
-						clientStateContainer.setSeq(payload.getClientName(), changedEvent.getSeq());
-						clientStateContainer.setBinlog(payload.getClientName(), new BinlogInfo(
-								changedEvent.getBinlog(), changedEvent.getBinlogPos()));
+					serverEventDelayMonitor.record(clientName, event.getExecuteTime());
+
+					if (filterChain.doNext(event)) {
+						byte[] data = codec.encode(event);
+						res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
+						res.getOutputStream().write(data);
+						res.getOutputStream().flush();
+
+						clientStateContainer.setSeq(payload.getClientName(), event.getSeq());
+						clientStateContainer
+								.setBinlog(payload.getClientName(), new BinlogInfo(event.getBinlog(), event.getBinlogPos()));
 
 						// status report
-						SystemStatusContainer.instance.updateClientSeq(payload.getClientName(), changedEvent.getSeq());
+						SystemStatusContainer.instance.updateClientSeq(payload.getClientName(), event.getSeq());
 						// record success client seq
 						SystemStatusContainer.instance.updateClientSuccessSeq(payload.getClientName(),
-								changedEvent.getSeq());
+								event.getSeq());
 						// update binlog
 						SystemStatusContainer.instance.updateClientBinlog(payload.getClientName(),
-								changedEvent.getBinlog(), changedEvent.getBinlogPos());
+								event.getBinlog(), event.getBinlogPos());
 
 					}
 				}

@@ -65,6 +65,14 @@ public class SchemaTable {
 		return result;
 	}
 
+	public boolean isSchemaAsterisk() {
+		return schema.equals(STAR);
+	}
+
+	public boolean isTableAsterisk() {
+		return table.equals(STAR);
+	}
+
 	public String getFullName() {
 		return schema + SPLIT + table;
 	}

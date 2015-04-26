@@ -1,8 +1,6 @@
 package com.dianping.puma.core.model;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class SchemaTableSet {
 
@@ -12,6 +10,19 @@ public class SchemaTableSet {
 
 	public List<SchemaTable> listSchemaTables() {
 		return this.schemaTables;
+	}
+
+	public Map<String, List<String>> mapSchemaTables() {
+		Map<String, List<String>> schemaTableMap = new HashMap<String, List<String>>();
+		for (SchemaTable schemaTable: listSchemaTables()) {
+			List<String> tables = schemaTableMap.get(schemaTable.getSchema());
+			if (tables == null) {
+				tables = new ArrayList<String>();
+			}
+			tables.add(schemaTable.getTable());
+			schemaTableMap.put(schemaTable.getSchema(), tables);
+		}
+		return schemaTableMap;
 	}
 
 	public void add(SchemaTable schemaTable) {

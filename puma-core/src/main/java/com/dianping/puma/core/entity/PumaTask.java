@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.dianping.puma.core.model.AcceptedTables;
 import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.model.SchemaTableSet;
 
 public class PumaTask extends BaseEntity {
 
@@ -14,7 +15,10 @@ public class PumaTask extends BaseEntity {
 	private BinlogInfo binlogInfo;
 
 	private int preservedDay;
-	
+
+	private SchemaTableSet schemaTableSet;
+
+	@Deprecated
 	private Map<String,AcceptedTables> acceptedDataInfos;
 
 	public String getSrcDBInstanceName() {
@@ -49,10 +53,20 @@ public class PumaTask extends BaseEntity {
 		this.preservedDay = preservedDay;
 	}
 
+	public SchemaTableSet getSchemaTableSet() {
+		return schemaTableSet;
+	}
+
+	public void setSchemaTableSet(SchemaTableSet schemaTableSet) {
+		this.schemaTableSet = schemaTableSet;
+	}
+
+	@Deprecated
 	public void setAcceptedDataInfos(Map<String,AcceptedTables> acceptedDataInfos) {
 		this.acceptedDataInfos = acceptedDataInfos;
 	}
 
+	@Deprecated
 	public Map<String,AcceptedTables> getAcceptedDataInfos() {
 		return acceptedDataInfos;
 	}

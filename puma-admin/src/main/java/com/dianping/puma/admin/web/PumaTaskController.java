@@ -4,7 +4,10 @@ import com.dianping.puma.admin.remote.reporter.PumaTaskControllerReporter;
 import com.dianping.puma.admin.remote.reporter.PumaTaskOperationReporter;
 import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.Status;
+import com.dianping.puma.core.model.SchemaTable;
+import com.dianping.puma.core.model.SchemaTableSet;
 import com.dianping.puma.core.model.state.TaskStateContainer;
+import com.dianping.puma.core.monitor.event.PumaTaskOperationEvent;
 import com.dianping.puma.core.service.*;
 import com.dianping.puma.core.model.state.PumaTaskState;
 import com.dianping.puma.admin.util.GsonUtil;
@@ -160,6 +163,10 @@ public class PumaTaskController {
 					operation = ActionOperation.DEFAULT;
 				}*/
 			}
+
+			PumaTaskOperationEvent event = new PumaTaskOperationEvent();
+			event.setOriPumaTask(pumaTask);
+
 			pumaTask.setName(name);
 			pumaTask.setSrcDBInstanceName(srcDBInstanceName);
 			pumaTask.setPumaServerName(pumaServerName);
@@ -171,8 +178,15 @@ public class PumaTaskController {
 			Type type = new TypeToken<HashMap<String,AcceptedTables>>() {}.getType(); 
 			//Map<String,AcceptedTables> acceptedDataInfos = (Map<java.lang.String, AcceptedTables>) GsonUtil.fromJson(acceptedDataInfoStr, type);
 			pumaTask.setAcceptedDataInfos(acceptedDataInfos);
+
+			// Accepted schema and tables.
+			SchemaTableSet schemaTableSet = new SchemaTableSet();
+			for (int i = 0; i != acceptedDatabase.length && i != acceptedTable.length; ++i) {
+				SchemaTable schemaTable = new SchemaTable(acceptedDatabase[i], acceptedTable[i]);
+				schemaTableSet.add(schemaTable);
+			}
+
 			// Save puma task state to persistent storage.
-			
 			if (operation == ActionOperation.CREATE) {
 				pumaTaskService.create(pumaTask);
 			} else {
@@ -186,7 +200,12 @@ public class PumaTaskController {
 			pumaTaskStateService.add(taskState);
 
 			// Publish puma task operation event to puma server.
-			this.pumaTaskOperationReporter.report(pumaServerName, name, operation);
+			//this.pumaTaskOperationReporter.report(pumaServerName, name, operation);
+			event.setServerName(pumaServerName);
+			event.setTaskName(name);
+			event.setPumaTask(pumaTask);
+			event.setOperation(operation);
+			pumaTaskOperationReporter.report(event);
 
 			map.put("success", true);
 		} catch (MongoException e) {

@@ -1,6 +1,5 @@
 package com.dianping.puma.core.monitor;
 
-import com.dianping.cat.Cat;
 import com.dianping.puma.core.util.PumaThreadPool;
 
 import java.util.Map;
@@ -18,6 +17,10 @@ public class HeartbeatMonitor extends AbstractPumaMonitor {
 	private ScheduledFuture scheduledFuture;
 
 	private ConcurrentMap<String, String> statuses = new ConcurrentHashMap<String, String>();
+
+	public HeartbeatMonitor() {
+		super();
+	}
 
 	public HeartbeatMonitor(String type, int delaySeconds, int periodSeconds) {
 		super(type);
@@ -38,7 +41,7 @@ public class HeartbeatMonitor extends AbstractPumaMonitor {
 			@Override
 			public void run() {
 				for (Map.Entry entry: statuses.entrySet()) {
-					Cat.logEvent(type, (String) entry.getKey(), (String) entry.getValue(), "");
+					monitor.logEvent(type, (String) entry.getKey(), (String) entry.getValue(), "");
 				}
 			}
 		}, delaySeconds, periodSeconds, TimeUnit.SECONDS);
@@ -46,6 +49,7 @@ public class HeartbeatMonitor extends AbstractPumaMonitor {
 
 	@Override
 	protected void doStop() {
+		statuses.clear();
 		if (this.scheduledFuture != null && !this.scheduledFuture.isCancelled()) {
 			this.scheduledFuture.cancel(true);
 		}
@@ -56,5 +60,13 @@ public class HeartbeatMonitor extends AbstractPumaMonitor {
 		if (this.scheduledFuture != null && !this.scheduledFuture.isCancelled()) {
 			this.scheduledFuture.cancel(true);
 		}
+	}
+
+	public void setDelaySeconds(int delaySeconds) {
+		this.delaySeconds = delaySeconds;
+	}
+
+	public void setPeriodSeconds(int periodSeconds) {
+		this.periodSeconds = periodSeconds;
 	}
 }

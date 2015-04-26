@@ -24,6 +24,7 @@ import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.monitor.FetcherEventCountMonitor;
+import com.dianping.puma.monitor.FetcherEventDelayMonitor;
 import com.dianping.puma.monitor.ParserEventCountMonitor;
 import org.apache.commons.lang.StringUtils;
 
@@ -81,6 +82,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 	private FetcherEventCountMonitor fetcherEventCountMonitor;
 
+	private FetcherEventDelayMonitor fetcherEventDelayMonitor;
+
 	private ParserEventCountMonitor parserEventCountMonitor;
 
 	@Override
@@ -89,6 +92,11 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		fetcherEventCountMonitor = ComponentContainer.SPRING.lookup("fetcherEventCountMonitor");
 		if (fetcherEventCountMonitor != null) {
 			LOG.info("Find `fetcherEventCountMonitor` spring bean success.");
+		}
+
+		fetcherEventDelayMonitor = ComponentContainer.SPRING.lookup("fetcherEventDelayMonitor");
+		if (fetcherEventDelayMonitor != null) {
+			LOG.info("Find `fetcherEventDelayMonitor` spring bean success.");
 		}
 
 		parserEventCountMonitor = ComponentContainer.SPRING.lookup("parserEventCountMonitor");
@@ -185,6 +193,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 	protected void processBinlogPacket(BinlogPacket binlogPacket) throws IOException {
 		BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), getContext());
+
+
 
 		if (binlogEvent.getHeader().getEventType() != BinlogConstanst.FORMAT_DESCRIPTION_EVENT) {
 			getContext().setNextBinlogPos(binlogEvent.getHeader().getNextPosition());

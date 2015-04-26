@@ -1,4 +1,4 @@
-package com.dianping.puma.monitor.fetcher;
+package com.dianping.puma.monitor;
 
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.puma.MockTest;

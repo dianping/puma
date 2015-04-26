@@ -3,6 +3,8 @@ package com.dianping.puma.remote.receiver;
 import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.entity.PumaTask;
+import com.dianping.puma.core.model.SchemaTableSet;
+import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
 import com.dianping.puma.core.monitor.event.Event;
 import com.dianping.puma.core.monitor.EventListener;
 import com.dianping.puma.core.monitor.event.PumaTaskOperationEvent;
@@ -91,5 +93,17 @@ public class PumaTaskOperationChecker implements EventListener {
 		} else {
 			LOG.error("Receive illegal puma task event `{}`.", event);
 		}
+	}
+
+	public void update(PumaTaskOperationEvent event) {
+		// Check preserved day.
+
+		// Publish accepted table changed event, force the storage filter to refresh.
+		SchemaTableSet schemaTableSet = event.getPumaTask().getSchemaTableSet();
+		SchemaTableSet oriSchemaTableSet = event.getOriPumaTask().getSchemaTableSet();
+
+		AcceptedTableChangedEvent acceptedTableChangedEvent = new AcceptedTableChangedEvent();
+		acceptedTableChangedEvent.setSchemaTableSet(schemaTableSet);
+		acceptedTableChangedEvent.setOriSchemaTableSet(oriSchemaTableSet);
 	}
 }

@@ -6,6 +6,8 @@ public class Event {
 
 	protected Date gmtCreate;
 
+	protected String name;
+
 	public Event() {
 		gmtCreate = new Date();
 	}
@@ -16,5 +18,13 @@ public class Event {
 
 	public void setGmtCreate(Date gmtCreate) {
 		this.gmtCreate = gmtCreate;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 }

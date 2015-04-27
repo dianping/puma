@@ -185,6 +185,7 @@ public class PumaTaskController {
 				SchemaTable schemaTable = new SchemaTable(acceptedDatabase[i], acceptedTable[i]);
 				schemaTableSet.add(schemaTable);
 			}
+			pumaTask.setSchemaTableSet(schemaTableSet);
 
 			// Save puma task state to persistent storage.
 			if (operation == ActionOperation.CREATE) {

@@ -18,6 +18,7 @@ import com.dianping.puma.core.model.container.storage.StorageStateContainer;
 import com.dianping.puma.core.model.state.Storage.StorageState;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.monitor.StorageEventCountMonitor;
+import com.dianping.puma.monitor.StorageEventGroupMonitor;
 import org.apache.commons.lang.StringUtils;
 
 import com.dianping.lion.client.ConfigCache;
@@ -89,6 +90,8 @@ public class DefaultEventStorage implements EventStorage {
 	private EventFilterChain storageEventFilterChain;
 
 	private StorageEventCountMonitor storageEventCountMonitor;
+
+	private StorageEventGroupMonitor storageEventGroupMonitor;
 	
 	public void setAcceptedTablesConfigKey(String acceptedTablesConfigKey) {
 		this.acceptedTablesConfigKey = acceptedTablesConfigKey;
@@ -131,13 +134,14 @@ public class DefaultEventStorage implements EventStorage {
 
 		initAcceptedTableList();
 
-		StorageState storageState = new StorageState(name, taskName, binlogInfo);
-		StorageStateContainer storageStateContainer = ComponentContainer.SPRING.lookup("storageStateContainer");
-		storageStateContainer.add(storageState);
-
 		storageEventCountMonitor = ComponentContainer.SPRING.lookup("storageEventCountMonitor");
 		if (storageEventCountMonitor != null) {
 			LOG.info("Find `storageEventCountMonitor` spring bean success.");
+		}
+
+		storageEventGroupMonitor = ComponentContainer.SPRING.lookup("storageEventGroupMonitor");
+		if (storageEventGroupMonitor != null) {
+			LOG.info("Find `storageEventGroupMonitor` spring bean success.");
 		}
 
 		try {
@@ -292,11 +296,8 @@ public class DefaultEventStorage implements EventStorage {
 		}
 
 		// Storage filter.
+		storageEventFilterChain.reset();
 		if (!storageEventFilterChain.doNext(event)) {
-			return;
-		}
-
-		if (!needStoreNew(event)) {
 			return;
 		}
 
@@ -347,13 +348,9 @@ public class DefaultEventStorage implements EventStorage {
 			bucketManager.updateLatestSequence(new Sequence(event.getSeq()));
 
 			storageEventCountMonitor.record(getTaskName());
+			storageEventGroupMonitor.record(event.getDatabase() + "." + event.getTable());
 
-			StorageStateContainer storageStateContainer = ComponentContainer.SPRING.lookup("storageStateContainer");
-			storageStateContainer.setSeq(name, event.getSeq());
-			storageStateContainer.setBinlogInfo(name, new BinlogInfo(event.getBinlog(), event.getBinlogPos()));
-
-			SystemStatusContainer.instance.updateStorageStatus(name, event
-					.getSeq());
+			SystemStatusContainer.instance.updateStorageStatus(name, event.getSeq());
 		} catch (IOException e) {
 			throw new StorageWriteException("Failed to write event.", e);
 		}

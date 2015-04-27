@@ -158,15 +158,26 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			EventFilterChain eventFilterChain = new DefaultEventFilterChain();
 			List<EventFilter> eventFilterList = new ArrayList<EventFilter>();
 
-			// Schema table filter.
-			DbTbEventFilter dbtbFilter = new DbTbEventFilter();
-			dbtbFilter.init(new String[]{});
-			eventCenter.register(dbtbFilter);
-			eventFilterList.add(dbtbFilter);
+			// DML event filter.
+			DMLEventFilter dmlEventFilter = new DMLEventFilter();
+			dmlEventFilter.setName(taskName);
+			dmlEventFilter.init(true);
+			eventCenter.register(dmlEventFilter);
+			eventFilterList.add(dmlEventFilter);
 
-			// Transaction begin filter.
-			TransactionBeginEventFilter transactionBeginEventFilter = new TransactionBeginEventFilter();
-			eventFilterList.add(transactionBeginEventFilter);
+			// DDL event filter.
+			DDLEventFilter ddlEventFilter = new DDLEventFilter();
+			ddlEventFilter.setName(taskName);
+			ddlEventFilter.init(true);
+			eventCenter.register(ddlEventFilter);
+			eventFilterList.add(ddlEventFilter);
+
+			// Transaction event filter.
+			TransactionEventFilter transactionEventFilter = new TransactionEventFilter();
+			transactionEventFilter.setName(taskName);
+			transactionEventFilter.init(false, true);
+			eventCenter.register(transactionEventFilter);
+			eventFilterList.add(transactionEventFilter);
 
 			eventFilterChain.setEventFilters(eventFilterList);
 			storage.setStorageEventFilterChain(eventFilterChain);

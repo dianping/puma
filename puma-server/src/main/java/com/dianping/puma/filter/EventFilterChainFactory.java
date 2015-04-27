@@ -28,31 +28,6 @@ public final class EventFilterChainFactory {
 
 	}
 
-	public static EventFilterChain createEventFilterChain(boolean needDDL, boolean needDML, boolean needBegin,
-			boolean needCommit, String[] schemaTables) throws IllegalArgumentException {
-		try {
-			List<EventFilter> eventFilterList = new ArrayList<EventFilter>();
-
-			// Schema table filter.
-			DbTbEventFilter dbtbFilter = new DbTbEventFilter();
-			dbtbFilter.init(schemaTables);
-			eventFilterList.add(dbtbFilter);
-
-			// Transaction begin filter.
-			if (!needBegin) {
-				TransactionBeginEventFilter transactionBeginEventFilter = new TransactionBeginEventFilter();
-				eventFilterList.add(transactionBeginEventFilter);
-			}
-
-			EventFilterChain chain = new DefaultEventFilterChain();
-			chain.setEventFilters(eventFilterList);
-
-			return chain;
-		} catch (Exception e) {
-			throw new IllegalArgumentException(e);
-		}
-	}
-
 	public static EventFilterChain createEventFilterChain(boolean needDdl, boolean needDml, boolean needTsInfo,
 			String[] dts) throws IllegalArgumentException {
 		try {

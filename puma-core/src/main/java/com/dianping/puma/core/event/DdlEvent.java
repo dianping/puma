@@ -19,6 +19,7 @@ import java.io.Serializable;
 
 import com.dianping.puma.core.util.constant.DdlEventSubType;
 import com.dianping.puma.core.util.constant.DdlEventType;
+import com.dianping.puma.core.util.sql.DDLType;
 
 /**
  * <p>
@@ -46,6 +47,8 @@ import com.dianping.puma.core.util.constant.DdlEventType;
 public class DdlEvent extends ChangedEvent implements Serializable {
 	private static final long	serialVersionUID	= -5676914333310337620L;
 	private String				sql;
+
+	private DDLType ddlType;
 	
 	private DdlEventType  eventType;
 	
@@ -131,4 +134,11 @@ public class DdlEvent extends ChangedEvent implements Serializable {
 		return eventSubType;
 	}
 
+	public DDLType getDDLType() {
+		return ddlType;
+	}
+
+	public void setDDLType(DDLType ddlType) {
+		this.ddlType = ddlType;
+	}
 }

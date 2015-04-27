@@ -13,8 +13,11 @@ public class SchemaTable {
 	// Full name format "schema.table".
 	private static final String SPLIT = ".";
 
-	// Match all the name.
+	// Meaning all.
 	private static final String STAR = "*";
+
+	// Meaning any.
+	private static final String HYPHEN = "-";
 
 	public SchemaTable() {}
 
@@ -94,6 +97,10 @@ public class SchemaTable {
 	}
 
 	private boolean compare(String a, String b) {
-		return (a.equals(STAR) && b != null) || a.equals(b);
+		if (a == null || b == null) {
+			return false;
+		} else {
+			return a.equals(STAR) || b.equals(HYPHEN) || a.equals(b);
+		}
 	}
 }

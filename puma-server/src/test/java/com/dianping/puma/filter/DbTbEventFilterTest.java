@@ -69,7 +69,7 @@ public class DbTbEventFilterTest {
 
 		// Case 2.
 		rowChangedEvent.setDatabase("schema");
-		rowChangedEvent.setTable("hello");
+		rowChangedEvent.setTable(null);
 		Assert.assertFalse(eventFilter.checkEvent(rowChangedEvent));
 
 		// Case 3.

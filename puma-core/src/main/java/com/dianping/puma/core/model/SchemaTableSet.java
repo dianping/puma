@@ -43,6 +43,15 @@ public class SchemaTableSet {
 		}
 	}
 
+	public boolean contains(SchemaTable schemaTable) {
+		for (SchemaTable tmpSchemaTable: listSchemaTables()) {
+			if (tmpSchemaTable.contains(schemaTable)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public SchemaTableSet getIncrement(SchemaTableSet schemaTableSet) {
 		SchemaTableSet result = new SchemaTableSet();
 		for (SchemaTable newSchemaTable: schemaTableSet.listSchemaTables()) {

@@ -58,9 +58,10 @@ public class DbTbEventFilter extends AbstractEventFilter implements EventListene
 		}
 	}
 
-	protected boolean checkEvent(ChangedEvent event) {
-		if (event != null) {
-			return newCheckEvent(event) || oldCheckEvent(event);
+	protected boolean checkEvent(Event event) {
+		if (event != null && event instanceof ChangedEvent) {
+			ChangedEvent changedEvent = (ChangedEvent) event;
+			return newCheckEvent(changedEvent) || oldCheckEvent(changedEvent);
 		}
 		return false;
 	}
@@ -70,7 +71,7 @@ public class DbTbEventFilter extends AbstractEventFilter implements EventListene
 		eventSchemaTable.setSchema(changedEvent.getDatabase());
 		eventSchemaTable.setTable(changedEvent.getTable());
 
-		for (SchemaTable schemaTable: schemaTableSet.listSchemaTables()) {
+		for (SchemaTable schemaTable : schemaTableSet.listSchemaTables()) {
 			if (schemaTable.contains(eventSchemaTable)) {
 				return true;
 			}
@@ -120,4 +121,5 @@ public class DbTbEventFilter extends AbstractEventFilter implements EventListene
 			addAcceptedTables(schemaTableSet);
 		}
 	}
+
 }

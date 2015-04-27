@@ -296,8 +296,6 @@ public class DefaultEventStorage implements EventStorage {
 			return;
 		}
 
-		Cat.logEvent("tables", event.getDatabase() + "." + event.getTable());
-
 		if (!needStoreNew(event)) {
 			return;
 		}

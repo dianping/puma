@@ -161,7 +161,6 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			// Schema table filter.
 			DbTbEventFilter dbtbFilter = new DbTbEventFilter();
 			dbtbFilter.init(new String[]{});
-			dbtbFilter.setName(taskName);
 			eventCenter.register(dbtbFilter);
 			eventFilterList.add(dbtbFilter);
 

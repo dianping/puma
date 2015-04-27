@@ -94,6 +94,6 @@ public class SchemaTable {
 	}
 
 	private boolean compare(String a, String b) {
-		return a.equals(STAR) || a.equals(b);
+		return (a.equals(STAR) && b != null) || a.equals(b);
 	}
 }

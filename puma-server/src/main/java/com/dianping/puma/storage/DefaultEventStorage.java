@@ -10,11 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.dianping.cat.Cat;
 import com.dianping.puma.ComponentContainer;
 import com.dianping.puma.core.model.AcceptedTables;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.container.storage.StorageStateContainer;
 import com.dianping.puma.core.model.state.Storage.StorageState;
+import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.monitor.StorageEventCountMonitor;
 import org.apache.commons.lang.StringUtils;
 
@@ -83,6 +85,8 @@ public class DefaultEventStorage implements EventStorage {
 	private List<String> acceptedTables;
 
 	private Map<String,AcceptedTables> acceptedDataTables;
+
+	private EventFilterChain storageEventFilterChain;
 
 	private StorageEventCountMonitor storageEventCountMonitor;
 	
@@ -273,6 +277,10 @@ public class DefaultEventStorage implements EventStorage {
 		this.acceptedDataTables = acceptedDataTables;
 	}
 
+	public void setStorageEventFilterChain(EventFilterChain storageEventFilterChain) {
+		this.storageEventFilterChain = storageEventFilterChain;
+	}
+
 	public Map<String,AcceptedTables> getAcceptedDataTables() {
 		return acceptedDataTables;
 	}
@@ -282,6 +290,13 @@ public class DefaultEventStorage implements EventStorage {
 		if (stopped) {
 			throw new StorageClosedException("Storage has been closed.");
 		}
+
+		// Storage filter.
+		if (!storageEventFilterChain.doNext(event)) {
+			return;
+		}
+
+		Cat.logEvent("tables", event.getDatabase() + "." + event.getTable());
 
 		if (!needStoreNew(event)) {
 			return;

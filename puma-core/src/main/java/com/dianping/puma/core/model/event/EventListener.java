@@ -1,6 +1,6 @@
 package com.dianping.puma.core.model.event;
 
-public interface EventListener {
+public interface EventListener<T extends Event> {
 
-	void onEvent(Event event);
+	void onEvent(T event);
 }

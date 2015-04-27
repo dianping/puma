@@ -4,6 +4,7 @@ import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
+import com.dianping.puma.core.model.event.EventCenter;
 import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
@@ -12,6 +13,7 @@ import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.datahandler.DefaultDataHandler;
 import com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher;
+import com.dianping.puma.filter.*;
 import com.dianping.puma.parser.DefaultBinlogParser;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.FileDumpSender;
@@ -46,6 +48,9 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 
 	@Autowired
 	NotifyService notifyService;
+
+	@Autowired
+	EventCenter eventCenter;
 
 	@Autowired
 	private JsonEventCodec jsonCodec;
@@ -149,6 +154,22 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			
 			storage.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
 			storage.setCodec(jsonCodec);
+
+			EventFilterChain eventFilterChain = new DefaultEventFilterChain();
+			List<EventFilter> eventFilterList = new ArrayList<EventFilter>();
+
+			// Schema table filter.
+			DbTbEventFilter dbtbFilter = new DbTbEventFilter();
+			dbtbFilter.init(new String[]{});
+			eventCenter.register(dbtbFilter);
+			eventFilterList.add(dbtbFilter);
+
+			// Transaction begin filter.
+			TransactionBeginEventFilter transactionBeginEventFilter = new TransactionBeginEventFilter();
+			eventFilterList.add(transactionBeginEventFilter);
+
+			eventFilterChain.setEventFilters(eventFilterList);
+			storage.setStorageEventFilterChain(eventFilterChain);
 
 			BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(taskName);
 			if (binlogInfo != null) {

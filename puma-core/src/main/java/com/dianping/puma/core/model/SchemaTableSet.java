@@ -65,4 +65,11 @@ public class SchemaTableSet {
 	public SchemaTableSet getDecrement(SchemaTableSet schemaTableSet) {
 		return schemaTableSet.getIncrement(this);
 	}
+
+	@Override
+	public String toString() {
+		return "SchemaTableSet{" +
+				"schemaTables=" + schemaTables +
+				'}';
+	}
 }

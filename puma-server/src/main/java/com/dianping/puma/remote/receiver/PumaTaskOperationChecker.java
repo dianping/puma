@@ -3,7 +3,7 @@ package com.dianping.puma.remote.receiver;
 import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.entity.PumaTask;
-import com.dianping.puma.core.model.SchemaTableSet;
+import com.dianping.puma.core.model.event.EventCenter;
 import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
 import com.dianping.puma.core.monitor.event.Event;
 import com.dianping.puma.core.monitor.EventListener;
@@ -37,6 +37,9 @@ public class PumaTaskOperationChecker implements EventListener {
 	@Autowired
 	private TaskExecutorContainer taskExecutorContainer;
 
+	@Autowired
+	EventCenter eventCenter;
+
 	@PostConstruct
 	public void init() {
 		String pumaServerName = pumaServerConfig.getName();
@@ -69,6 +72,7 @@ public class PumaTaskOperationChecker implements EventListener {
 			case CREATE:
 				LOG.info("Receive puma task operation event: CREATE.");
 				taskExecutorContainer.createEvent(pumaTaskOperationEvent);
+				publishAcceptedTableChangedEvent(pumaTaskOperationEvent);
 				break;
 			case UPDATE:
 				LOG.info("Receive puma task operation event: UPDATE.");
@@ -82,6 +86,7 @@ public class PumaTaskOperationChecker implements EventListener {
 				LOG.info("Receive puma task operation event: FILTER or CHANGE.");
 				taskExecutorContainer.prolongEvent(pumaTaskOperationEvent);
 				taskExecutorContainer.filterEvent(pumaTaskOperationEvent);
+				publishAcceptedTableChangedEvent(pumaTaskOperationEvent);
 				break;
 			case CHANGE:
 				LOG.info("Receive puma task operation event: PROLONG or CHANGE.");
@@ -95,15 +100,11 @@ public class PumaTaskOperationChecker implements EventListener {
 		}
 	}
 
-	public void update(PumaTaskOperationEvent event) {
-		// Check preserved day.
-
-		// Publish accepted table changed event, force the storage filter to refresh.
-		SchemaTableSet schemaTableSet = event.getPumaTask().getSchemaTableSet();
-		SchemaTableSet oriSchemaTableSet = event.getOriPumaTask().getSchemaTableSet();
-
+	private void publishAcceptedTableChangedEvent(PumaTaskOperationEvent event) {
 		AcceptedTableChangedEvent acceptedTableChangedEvent = new AcceptedTableChangedEvent();
-		acceptedTableChangedEvent.setSchemaTableSet(schemaTableSet);
-		acceptedTableChangedEvent.setOriSchemaTableSet(oriSchemaTableSet);
+		acceptedTableChangedEvent.setName(event.getTaskName());
+		acceptedTableChangedEvent.setSchemaTableSet(event.getPumaTask().getSchemaTableSet());
+
+		eventCenter.post(acceptedTableChangedEvent);
 	}
 }

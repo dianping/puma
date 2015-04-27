@@ -26,16 +26,9 @@ public class DDLEventFilter extends AbstractEventFilter implements EventListener
 
 	private List<DDLType> ddlTypes = new ArrayList<DDLType>();
 
-	public void init(boolean ddl) {
+	public void init(boolean ddl, List<DDLType> ddlTypes) {
 		this.ddl = ddl;
-
-		// Supported ddl types:
-		// 1. ALTER TABLE.
-		// 2. CREATE INDEX.
-		// 3. DROP INDEX.
-		ddlTypes.add(DDLType.ALTER_TABLE);
-		ddlTypes.add(DDLType.CREATE_INDEX);
-		ddlTypes.add(DDLType.DROP_INDEX);
+		this.ddlTypes = ddlTypes;
 	}
 
 	protected boolean checkEvent(ChangedEvent changedEvent) {
@@ -69,15 +62,23 @@ public class DDLEventFilter extends AbstractEventFilter implements EventListener
 			LOG.info("`DDLEventFilter` receives event: {}.", event.toString());
 
 			SchemaTableSet schemaTableSet = event.getSchemaTableSet();
-			addAcceptedTables(schemaTableSet);
+			setAcceptedTables(schemaTableSet);
 		}
-	}
-
-	private void addAcceptedTables(SchemaTableSet acceptedTables) {
-		this.acceptedTables = acceptedTables;
 	}
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public void setDdl(boolean ddl) {
+		this.ddl = ddl;
+	}
+
+	public void setAcceptedTables(SchemaTableSet acceptedTables) {
+		this.acceptedTables = acceptedTables;
+	}
+
+	public void setDdlTypes(List<DDLType> ddlTypes) {
+		this.ddlTypes = ddlTypes;
 	}
 }

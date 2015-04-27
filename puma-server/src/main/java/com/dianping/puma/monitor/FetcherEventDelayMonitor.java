@@ -5,9 +5,11 @@ import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.core.monitor.HeartbeatMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 
+@Service("fetcherEventDelayMonitor")
 public class FetcherEventDelayMonitor {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FetcherEventDelayMonitor.class);

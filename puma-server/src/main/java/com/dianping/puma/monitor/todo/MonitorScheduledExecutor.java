@@ -1,4 +1,4 @@
-package com.dianping.puma.monitor;
+package com.dianping.puma.monitor.todo;
 
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -7,7 +7,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 import com.dianping.puma.core.util.ScheduledExecutorUtils;
-import org.springframework.stereotype.Component;
 
 @Service("monitorScheduledExecutor")
 public class MonitorScheduledExecutor implements InitializingBean{

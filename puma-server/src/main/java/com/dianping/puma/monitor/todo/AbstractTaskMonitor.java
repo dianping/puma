@@ -1,7 +1,6 @@
 package com.dianping.puma.monitor.todo;
 
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
-import com.dianping.puma.monitor.MonitorScheduledExecutor;
 
 public abstract class AbstractTaskMonitor implements Runnable{
 

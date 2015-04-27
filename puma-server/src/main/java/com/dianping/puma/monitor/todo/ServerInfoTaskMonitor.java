@@ -2,16 +2,12 @@ package com.dianping.puma.monitor.todo;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-
-import javax.annotation.PostConstruct;
 
 import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dianping.cat.Cat;
@@ -27,9 +23,6 @@ public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnab
 	private static final Logger LOG = LoggerFactory.getLogger(ServerInfoTaskMonitor.class);
 
 	public static final String SERVERINFO_INTERVAL_NAME = "puma.server.interval.serverInfo";
-
-//	@Autowired
-//	private MonitorScheduledExecutor monitorScheduledExecutor;
 	
 	private Map<String, Long> preUpdateCount;
 
@@ -173,12 +166,4 @@ public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnab
 		}
 	}
 
-//	public MonitorScheduledExecutor getMonitorScheduledExecutor() {
-//		return monitorScheduledExecutor;
-//	}
-//
-//	public void setMonitorScheduledExecutor(MonitorScheduledExecutor monitorScheduledExecutor) {
-//		this.monitorScheduledExecutor = monitorScheduledExecutor;
-//	}
-	
 }

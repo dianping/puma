@@ -1,14 +1,10 @@
 package com.dianping.puma.monitor.todo;
 
 import java.util.Map;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dianping.cat.Cat;
@@ -17,7 +13,6 @@ import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ClientStatus;
-import com.dianping.puma.monitor.MonitorScheduledExecutor;
 
 @Service("SyncProcessTaskMonitor")
 public class ClientInfoTaskMonitor extends AbstractTaskMonitor {
@@ -25,8 +20,6 @@ public class ClientInfoTaskMonitor extends AbstractTaskMonitor {
 	private static final Logger LOG = LoggerFactory.getLogger(ClientInfoTaskMonitor.class);
 
 	public static final String CLIENTINFO_INTERVAL_NAME = "puma.server.interval.clientInfo";
-//	@Autowired
-//	private MonitorScheduledExecutor monitorScheduledExecutor;
 	
 	public ClientInfoTaskMonitor() {
 		super(0, TimeUnit.MILLISECONDS);
@@ -81,13 +74,5 @@ public class ClientInfoTaskMonitor extends AbstractTaskMonitor {
 		 future = getMonitorScheduledExecutor().getExecutorService().scheduleWithFixedDelay(this, getInitialDelay(),
 				getInterval(), getUnit());
 	}
-
-//	public MonitorScheduledExecutor getMonitorScheduledExecutor() {
-//		return monitorScheduledExecutor;
-//	}
-//
-//	public void setMonitorScheduledExecutor(MonitorScheduledExecutor monitorScheduledExecutor) {
-//		this.monitorScheduledExecutor = monitorScheduledExecutor;
-//	}
 	
 }

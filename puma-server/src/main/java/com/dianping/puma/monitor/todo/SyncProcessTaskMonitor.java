@@ -1,16 +1,12 @@
 package com.dianping.puma.monitor.todo;
 
 import java.util.Map;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.StringUtils;
 import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dianping.cat.Cat;
@@ -21,7 +17,6 @@ import com.dianping.lion.client.LionException;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ClientStatus;
 import com.dianping.puma.common.SystemStatusContainer.ServerStatus;
-import com.dianping.puma.monitor.MonitorScheduledExecutor;
 import com.dianping.puma.monitor.exception.MonitorThresholdException;
 
 @Service("syncProcessTaskMonitor")
@@ -169,14 +164,6 @@ public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runna
 		}
 		return numFile;
 	}
-
-//	public MonitorScheduledExecutor getMonitorScheduledExecutor() {
-//		return monitorScheduledExecutor;
-//	}
-//
-//	public void setMonitorScheduledExecutor(MonitorScheduledExecutor monitorScheduledExecutor) {
-//		this.monitorScheduledExecutor = monitorScheduledExecutor;
-//	}
 
 
 }

@@ -139,7 +139,7 @@ public class Handler implements PageHandler<Context> {
 			throw new IOException(e1);
 		}
 
-		ServerEventDelayMonitor serverLaggingTimeMonitor = ComponentContainer.SPRING.lookup("serverLaggingTimeMonitor");
+		ServerEventDelayMonitor serverLaggingTimeMonitor = ComponentContainer.SPRING.lookup("serverEventDelayMonitor");
 
 		HeartbeatTask heartbeatTask = new HeartbeatTask(codec, res);
 

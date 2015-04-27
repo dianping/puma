@@ -52,4 +52,5 @@ public class MMapBasedBinlogInfoServiceImplTest extends TestCase {
 		syncTaskClientNames.add("no-1");
 		Assert.assertEquals(syncTaskClientNames, mMapBasedBinlogInfoService.findSyncTaskClientNames());
 	}
+	
 }

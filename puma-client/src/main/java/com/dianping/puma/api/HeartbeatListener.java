@@ -124,8 +124,8 @@ public class HeartbeatListener {
 		}
 		return false;
 	}
+	
 	private class HeartbeatListenTask implements Runnable {
-
 		@Override
 		public void run() {
 			if (pumaClient.isHasHeartbeat()) {

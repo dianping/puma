@@ -162,10 +162,10 @@ public class PumaClient {
 						}
 						Event event = readEvent(is);
 						if (event instanceof HeartbeatEvent) {
-							callHeartbeatEvent(event);
+							onHeartbeatEvent(event);
 							continue;
 						} else {
-							callChangedEvent(event);
+							onChangedEvent(event);
 						}
 					}
 				} catch (InterruptedException e) {
@@ -199,13 +199,13 @@ public class PumaClient {
 			return false;
 		}
 
-		private void callHeartbeatEvent(Event event) {
+		private void onHeartbeatEvent(Event event) {
 			setHasHeartbeat(true);
 			eventListener.onHeartbeatEvent(event);
 			log.info("Puma client[" + config.getName() + "] heartbeat.");
 		}
 
-		private void callChangedEvent(Event event) {
+		private void onChangedEvent(Event event) {
 			boolean listenerCallSuccess = true;
 			// call event listener until success
 			while (true) {

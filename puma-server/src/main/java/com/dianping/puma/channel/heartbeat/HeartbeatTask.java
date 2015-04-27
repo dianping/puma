@@ -18,7 +18,6 @@ import com.dianping.lion.client.LionException;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.HeartbeatEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
-import com.dianping.puma.core.util.ScheduledExecutorUtils;
 
 public class HeartbeatTask {
 
@@ -95,7 +94,7 @@ public class HeartbeatTask {
 			public void onChange(String key, String value) {
 				if (HEARTBEAT_SENDER_INTERVAL_NAME.equals(key)) {
 					HeartbeatTask.this.setInterval(Long.parseLong(value));
-					if (future != null) {
+					if (HeartbeatTask.this.isFutureValid()) {
 						future.cancel(true);
 						if (HeartbeatScheduledExecutor.instance.isExecutorServiceValid()) {
 							HeartbeatTask.this.execute();

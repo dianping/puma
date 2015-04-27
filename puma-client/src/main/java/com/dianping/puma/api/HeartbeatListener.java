@@ -47,7 +47,7 @@ public class HeartbeatListener {
 			public void onChange(String key, String value) {
 				if (HEARTBEAT_CHECKER_INTERVAL_NAME.equals(key)) {
 					HeartbeatListener.this.setInterval(Long.parseLong(value));
-					if (future != null) {
+					if(HeartbeatListener.this.isFutureValid()){
 						future.cancel(true);
 						if (HeartbeatListener.this.isScheduledValid()) {
 							HeartbeatListener.this.start();
@@ -65,7 +65,7 @@ public class HeartbeatListener {
 	}
 
 	public void stop() {
-		if (future != null && !future.isCancelled() && !future.isDone()) {
+		if(isFutureValid()) {
 			future.cancel(true);
 		}
 	}
@@ -118,6 +118,12 @@ public class HeartbeatListener {
 		return executorService;
 	}
 
+	public boolean isFutureValid() {
+		if (future != null && !future.isCancelled() && !future.isDone()) {
+			return true;
+		}
+		return false;
+	}
 	private class HeartbeatListenTask implements Runnable {
 
 		@Override

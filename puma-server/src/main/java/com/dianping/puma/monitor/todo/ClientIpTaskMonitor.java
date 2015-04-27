@@ -16,7 +16,7 @@ import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ClientStatus;
 
-@Service("clientIpTaskMonitor")
+/*@Service("clientIpTaskMonitor")
 public class ClientIpTaskMonitor extends AbstractTaskMonitor implements Runnable {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ClientIpTaskMonitor.class);
@@ -64,3 +64,4 @@ public class ClientIpTaskMonitor extends AbstractTaskMonitor implements Runnable
 	}
 	
 }
+*/

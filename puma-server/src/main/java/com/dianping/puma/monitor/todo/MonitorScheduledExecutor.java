@@ -15,7 +15,7 @@ public class MonitorScheduledExecutor implements InitializingBean{
 	
 	private ScheduledExecutorService executorService = null;
 
-	private static final int MAX_THREAD_COUNT = 5;
+	private static final int MAX_THREAD_COUNT = 3;
 
 	private static final String THREAD_FACTORY_NAME = "monitor";
 

@@ -10,14 +10,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.message.Message;
+import com.dianping.cat.message.Event;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ClientStatus;
 import com.dianping.puma.common.SystemStatusContainer.ServerStatus;
-import com.dianping.puma.monitor.exception.MonitorThresholdException;
 
 @Service("syncProcessTaskMonitor")
 public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runnable {
@@ -77,20 +76,20 @@ public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runna
 			Cat.getProducer().logEvent(
 					"Puma.server." + clientStatus.getKey() + ".process",
 					getEventName(dfileNum),
-					Message.SUCCESS,
+					dfileNum >= numThreshold ? "" : Event.SUCCESS,
 					"srcbinlog = " + serverStatus.getBinlogFile() + "," + Long.toString(serverStatus.getBinlogPos())
 							+ "&desbinlog = " + clientStatus.getValue().getBinlogFile() + ","
 							+ Long.toString(clientStatus.getValue().getBinlogPos()));
-			try {
-				if (dfileNum >= numThreshold) {
-					throw new MonitorThresholdException();
-				}
-			} catch (MonitorThresholdException e) {
-				String errorMessage = " diff num of file between sync and server binlog process :  name = " + tempKey
-						+ " ip = " + tempClientStatus.getIp() + " target:" + tempClientStatus.getTarget() + " diff = "
-						+ Integer.toString(dfileNum);
-				Cat.getProducer().logError(errorMessage, e);
-			}
+			/*
+			 * try { if (dfileNum >= numThreshold) { throw new
+			 * MonitorThresholdException(); } } catch (MonitorThresholdException
+			 * e) { String errorMessage =
+			 * " diff num of file between sync and server binlog process :  name = "
+			 * + tempKey + " ip = " + tempClientStatus.getIp() + " target:" +
+			 * tempClientStatus.getTarget() + " diff = " +
+			 * Integer.toString(dfileNum);
+			 * Cat.getProducer().logError(errorMessage, e); }
+			 */
 		}
 	}
 
@@ -164,6 +163,5 @@ public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runna
 		}
 		return numFile;
 	}
-
 
 }

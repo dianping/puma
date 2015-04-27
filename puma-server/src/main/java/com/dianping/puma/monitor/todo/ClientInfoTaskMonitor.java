@@ -20,7 +20,7 @@ public class ClientInfoTaskMonitor extends AbstractTaskMonitor {
 	private static final Logger LOG = LoggerFactory.getLogger(ClientInfoTaskMonitor.class);
 
 	public static final String CLIENTINFO_INTERVAL_NAME = "puma.server.interval.clientInfo";
-	
+
 	public ClientInfoTaskMonitor() {
 		super(0, TimeUnit.MILLISECONDS);
 		LOG.info("Sequence Task Monitor started.");
@@ -52,16 +52,10 @@ public class ClientInfoTaskMonitor extends AbstractTaskMonitor {
 		for (Map.Entry<String, ClientStatus> clientStatus : clientStatuses.entrySet()) {
 			if (clientSuccessSeq.containsKey(clientStatus.getKey())) {
 				Cat.getProducer().logEvent(
-						"Puma.server." + clientStatus.getKey() + ".seq",
-						Long.toString(clientSuccessSeq.get(clientStatus.getKey())),
-						Message.SUCCESS,
-						"name = " + clientStatus.getKey() + "&target = " + clientStatus.getValue().getTarget()
-								+ "&seq=" + clientSuccessSeq.get(clientStatus.getKey()).longValue() + "&duration = "
-								+ Long.toString(getInterval()));
-				Cat.getProducer().logEvent(
-						"Puma.server." + clientStatus.getKey() + ".binlog",
-						clientStatus.getValue().getBinlogFile() + " "
-								+ Long.toString(clientStatus.getValue().getBinlogPos()),
+						"Puma.server." + clientStatus.getKey() + ".clientinfo",
+						clientStatus.getValue().getIp() + "  " + clientStatus.getValue().getBinlogFile() + "  "
+								+ Long.toString(clientStatus.getValue().getBinlogPos()) + "  "
+								+ Long.toString(clientSuccessSeq.get(clientStatus.getKey())),
 						Message.SUCCESS,
 						"name = " + clientStatus.getKey() + "&target = " + clientStatus.getValue().getTarget()
 								+ "&duration = " + Long.toString(getInterval()));
@@ -71,8 +65,8 @@ public class ClientInfoTaskMonitor extends AbstractTaskMonitor {
 
 	@Override
 	public void doExecute() {
-		 future = getMonitorScheduledExecutor().getExecutorService().scheduleWithFixedDelay(this, getInitialDelay(),
+		future = getMonitorScheduledExecutor().getExecutorService().scheduleWithFixedDelay(this, getInitialDelay(),
 				getInterval(), getUnit());
 	}
-	
+
 }

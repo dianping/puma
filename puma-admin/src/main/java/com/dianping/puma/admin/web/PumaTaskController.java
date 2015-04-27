@@ -182,8 +182,12 @@ public class PumaTaskController {
 			// Accepted schema and tables.
 			SchemaTableSet schemaTableSet = new SchemaTableSet();
 			for (int i = 0; i != acceptedDatabase.length && i != acceptedTable.length; ++i) {
-				SchemaTable schemaTable = new SchemaTable(acceptedDatabase[i], acceptedTable[i]);
-				schemaTableSet.add(schemaTable);
+				String tables[] = org.apache.commons.lang.StringUtils.split(acceptedTable[i], "&");
+				if (tables != null) {
+					for (int j = 0; j != tables.length; ++j) {
+						schemaTableSet.add(new SchemaTable(acceptedDatabase[i], tables[j]));
+					}
+				}
 			}
 			pumaTask.setSchemaTableSet(schemaTableSet);
 

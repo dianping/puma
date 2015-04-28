@@ -160,7 +160,7 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
 	}
 
 	@Override
-	public String getFullName() {
+	public String genFullName() {
 		if (isTransactionBegin || isTransactionCommit) {
 			return getDatabase();
 		} else {

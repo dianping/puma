@@ -191,7 +191,7 @@ public abstract class ChangedEvent extends Event implements Serializable {
 				+ getSeq() + ", serverId=" + serverId + ", binlog=" + binlog + ", binlogPos=" + binlogPos + "]";
 	}
 
-	abstract public String getFullName();
+	abstract public String genFullName();
 
 	/*
 	 * (non-Javadoc)

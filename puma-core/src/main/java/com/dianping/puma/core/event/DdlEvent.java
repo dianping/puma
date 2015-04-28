@@ -69,7 +69,7 @@ public class DdlEvent extends ChangedEvent implements Serializable {
 	}
 
 	@Override
-	public String getFullName() {
+	public String genFullName() {
 		return getDatabase() + "." + getTable();
 	}
 

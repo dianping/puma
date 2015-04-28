@@ -10,12 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.dianping.cat.Cat;
 import com.dianping.puma.ComponentContainer;
 import com.dianping.puma.core.model.AcceptedTables;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.container.storage.StorageStateContainer;
-import com.dianping.puma.core.model.state.Storage.StorageState;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.monitor.StorageEventCountMonitor;
 import com.dianping.puma.monitor.StorageEventGroupMonitor;
@@ -28,8 +25,6 @@ import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.event.DdlEvent;
-import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.storage.exception.InvalidSequenceException;
 import com.dianping.puma.storage.exception.StorageClosedException;
@@ -348,7 +343,7 @@ public class DefaultEventStorage implements EventStorage {
 			bucketManager.updateLatestSequence(new Sequence(event.getSeq()));
 
 			storageEventCountMonitor.record(getTaskName());
-			storageEventGroupMonitor.record(event.getFullName());
+			storageEventGroupMonitor.record(event.genFullName());
 
 			SystemStatusContainer.instance.updateStorageStatus(name, event.getSeq());
 		} catch (IOException e) {

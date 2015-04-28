@@ -25,6 +25,10 @@ public class DMLEventFilter extends AbstractEventFilter implements EventListener
 	}
 
 	protected boolean checkEvent(ChangedEvent changedEvent) {
+		if (changedEvent == null) {
+			return false;
+		}
+
 		if (changedEvent instanceof RowChangedEvent) {
 
 			// Transaction or not.
@@ -60,7 +64,7 @@ public class DMLEventFilter extends AbstractEventFilter implements EventListener
 		}
 	}
 
-	private void addAcceptedTables(SchemaTableSet acceptedTables) {
+	public void addAcceptedTables(SchemaTableSet acceptedTables) {
 		this.acceptedTables = acceptedTables;
 	}
 

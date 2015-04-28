@@ -4,10 +4,11 @@ import org.apache.commons.lang.StringUtils;
 
 public class SchemaTable {
 
-	// "name" for a specific schema, "*" for all the schema.
+	// schema.table: a specific table.
+	// schema.*    : all the tables in the given schema.
+	// *.table     : all the schemas with the given table.
+	// schema.null : schema, with no table.
 	private String schema;
-
-	// "name" for a specific table, "*" for all the schema.
 	private String table;
 
 	// Full name format "schema.table".
@@ -100,7 +101,7 @@ public class SchemaTable {
 		if (a == null || b == null) {
 			return false;
 		} else {
-			return a.equals(STAR) || b.equals(HYPHEN) || a.equals(b);
+			return a.equals(STAR) || a.equals(b);
 		}
 	}
 }

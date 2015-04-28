@@ -102,5 +102,4 @@ public class DbTbEventFilterTest {
 
 		verify(dbTbEventFilter, times(1)).onEvent(event);
 	}
-	
 }

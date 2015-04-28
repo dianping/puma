@@ -168,7 +168,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			// DDL event filter.
 			DDLEventFilter ddlEventFilter = new DDLEventFilter();
 			ddlEventFilter.setName(taskName);
-			ddlEventFilter.init(true);
+			ddlEventFilter.setDdl(true);
 			eventCenter.register(ddlEventFilter);
 			eventFilterList.add(ddlEventFilter);
 

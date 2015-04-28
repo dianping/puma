@@ -1,15 +1,9 @@
 package com.dianping.puma.filter;
 
-import com.dianping.puma.core.model.event.EventCenter;
-import com.dianping.puma.core.model.SchemaTable;
-import com.dianping.puma.core.model.SchemaTableSet;
-import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.dianping.puma.core.event.RowChangedEvent;
-
-import static org.mockito.Mockito.*;
 
 public class DbTbEventFilterTest {
 

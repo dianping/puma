@@ -1,6 +1,5 @@
 package com.dianping.puma.monitor.todo;
 
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -9,12 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.dianping.cat.Cat;
-import com.dianping.cat.message.Message;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
-import com.dianping.puma.common.SystemStatusContainer;
-import com.dianping.puma.common.SystemStatusContainer.ClientStatus;
 
 /*@Service("clientIpTaskMonitor")
 public class ClientIpTaskMonitor extends AbstractTaskMonitor implements Runnable {
@@ -51,8 +46,16 @@ public class ClientIpTaskMonitor extends AbstractTaskMonitor implements Runnable
 	public void doRun() {
 		Map<String, ClientStatus> clientStatuses = SystemStatusContainer.instance.listClientStatus();
 		for (Map.Entry<String, ClientStatus> clientStatus : clientStatuses.entrySet()) {
-			Cat.getProducer().logEvent("Puma.server." + clientStatus.getKey() + ".ip", clientStatus.getValue().getIp(),
-					Message.SUCCESS, "name = " + clientStatus.getKey() + "&duration = " + Long.toString(getInterval()));
+			if (clientSuccessSeq.containsKey(clientStatus.getKey())) {
+				Cat.getProducer().logEvent(
+						"Puma.server." + clientStatus.getKey() + ".clientinfo",
+						clientStatus.getValue().getIp() + "  " + clientStatus.getValue().getBinlogFile() + "  "
+								+ Long.toString(clientStatus.getValue().getBinlogPos()) + "  "
+								+ Long.toString(clientSuccessSeq.get(clientStatus.getKey())),
+						Message.SUCCESS,
+						"name = " + clientStatus.getKey() + "&target = " + clientStatus.getValue().getTarget()
+								+ "&duration = " + Long.toString(getInterval()));
+			}
 		}
 	}
 	

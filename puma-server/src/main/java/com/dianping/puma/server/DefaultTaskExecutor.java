@@ -175,7 +175,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				LOG.error("Binlog packet response error.");
 				throw new IOException("Binlog packet response error.");
 			} else {
-				fetcherEventCountMonitor.record(getTaskName());
 				processBinlogPacket(binlogPacket);
 			}
 
@@ -185,7 +184,10 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	}
 
 	protected void processBinlogPacket(BinlogPacket binlogPacket) throws IOException {
+		fetcherEventCountMonitor.record(getTaskName());
 		BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), getContext());
+
+		fetcherEventDelayMonitor.record(getTaskName(), binlogEvent.getHeader().getTimestamp());
 
 		if (binlogEvent.getHeader().getEventType() != BinlogConstanst.FORMAT_DESCRIPTION_EVENT) {
 			getContext().setNextBinlogPos(binlogEvent.getHeader().getNextPosition());

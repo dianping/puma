@@ -47,7 +47,8 @@ public class SchemaSet {
 		return false;
 	}
 
-	@Override public String toString() {
+	@Override
+	public String toString() {
 		return "SchemaSet{" +
 				"schemas=" + schemas +
 				'}';

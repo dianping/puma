@@ -14,7 +14,7 @@ public class Schema {
 
 	public boolean contains(Schema schema) {
 		if (schema != null) {
-			return this.schemaName.equals(ASTERISK) || this.schemaName.equals(schema.schemaName);
+			return (schemaName.equals(ASTERISK) && schema.getSchemaName() != null) || schemaName.equals(schema.schemaName);
 		}
 		return false;
 	}

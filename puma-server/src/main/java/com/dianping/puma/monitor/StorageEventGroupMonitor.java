@@ -12,7 +12,7 @@ public class StorageEventGroupMonitor {
 
 	private static final String MONITOR_TITLE = "EventGroup.storage";
 
-	private static final String STORAGE_EVENT_GROUP_INTERNAL = "puma.server.eventgroup.storage.internal";
+	private static final String STORAGE_EVENT_GROUP_INTERVAL = "puma.server.eventgroup.storage.interval";
 
 	private EventMonitor eventMonitor;
 
@@ -28,7 +28,7 @@ public class StorageEventGroupMonitor {
 
 	@PostConstruct
 	public void init() {
-		storageEventGroupInternal = configCache.getLongProperty(STORAGE_EVENT_GROUP_INTERNAL);
+		storageEventGroupInternal = configCache.getLongProperty(STORAGE_EVENT_GROUP_INTERVAL);
 		eventMonitor.setType(MONITOR_TITLE);
 		eventMonitor.setCountThreshold(storageEventGroupInternal);
 		eventMonitor.start();
@@ -36,7 +36,7 @@ public class StorageEventGroupMonitor {
 		configCache.addChange(new ConfigChange() {
 			@Override
 			public void onChange(String key, String value) {
-				if (key.equals(STORAGE_EVENT_GROUP_INTERNAL)) {
+				if (key.equals(STORAGE_EVENT_GROUP_INTERVAL)) {
 					storageEventGroupInternal = Long.parseLong(value);
 					eventMonitor.stop();
 					eventMonitor.setCountThreshold(storageEventGroupInternal);

@@ -62,7 +62,9 @@ public class DDLEventFilter extends AbstractEventFilter implements EventListener
 			LOG.info("`DDLEventFilter` receives event: {}.", event.toString());
 
 			TableSet tableSet = event.getTableSet();
-			setAcceptedTables(tableSet);
+			if (tableSet != null) {
+				setAcceptedTables(tableSet);
+			}
 		}
 	}
 

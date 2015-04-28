@@ -17,7 +17,7 @@ public class AcceptedTableChangedEvent extends Event {
 	@Override
 	public String toString() {
 		return "AcceptedTableChangedEvent{" +
-				"schemaTableSet=" + tableSet +
+				"tableSet=" + tableSet +
 				'}';
 	}
 }

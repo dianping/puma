@@ -12,7 +12,7 @@ public class StorageEventCountMonitor {
 
 	private static final String MONITOR_TITLE = "EventCount.storage";
 
-	private static final String STORAGE_EVENT_COUNT_INTERNAL = "puma.server.eventcount.storage.internal";
+	private static final String STORAGE_EVENT_COUNT_INTERVAL = "puma.server.eventcount.storage.interval";
 
 	private EventMonitor eventMonitor;
 
@@ -28,7 +28,7 @@ public class StorageEventCountMonitor {
 
 	@PostConstruct
 	public void init() {
-		storageEventCountInternal = configCache.getLongProperty(STORAGE_EVENT_COUNT_INTERNAL);
+		storageEventCountInternal = configCache.getLongProperty(STORAGE_EVENT_COUNT_INTERVAL);
 		eventMonitor.setType(MONITOR_TITLE);
 		eventMonitor.setCountThreshold(storageEventCountInternal);
 		eventMonitor.start();
@@ -36,7 +36,7 @@ public class StorageEventCountMonitor {
 		configCache.addChange(new ConfigChange() {
 			@Override
 			public void onChange(String key, String value) {
-				if (key.equals(STORAGE_EVENT_COUNT_INTERNAL)) {
+				if (key.equals(STORAGE_EVENT_COUNT_INTERVAL)) {
 					storageEventCountInternal = Long.parseLong(value);
 					eventMonitor.stop();
 					eventMonitor.setCountThreshold(storageEventCountInternal);

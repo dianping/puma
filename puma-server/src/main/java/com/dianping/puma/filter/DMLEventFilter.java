@@ -10,6 +10,8 @@ import com.google.common.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
+
 public class DMLEventFilter extends AbstractEventFilter implements EventListener<AcceptedTableChangedEvent> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DMLEventFilter.class);
@@ -56,7 +58,9 @@ public class DMLEventFilter extends AbstractEventFilter implements EventListener
 			LOG.info("`DMLEventFilter` receives event: {}.", event.toString());
 
 			TableSet tableSet = event.getTableSet();
-			setAcceptedTables(tableSet);
+			if (tableSet != null) {
+				setAcceptedTables(tableSet);
+			}
 		}
 	}
 

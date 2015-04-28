@@ -16,7 +16,7 @@ public class FetcherEventCountMonitor {
 
 	private static final String MONITOR_TITLE = "EventCount.fetcher";
 
-	private static final String FETCHER_EVENT_COUNT_INTERNAL = "puma.server.eventcount.fetcher.internal";
+	private static final String FETCHER_EVENT_COUNT_INTERVAL = "puma.server.eventcount.fetcher.interval";
 
 	private EventMonitor eventMonitor = new EventMonitor();
 
@@ -28,14 +28,14 @@ public class FetcherEventCountMonitor {
 
 	@PostConstruct
 	public void init() {
-		fetcherEventCountInternal = configCache.getLongProperty(FETCHER_EVENT_COUNT_INTERNAL);
+		fetcherEventCountInternal = configCache.getLongProperty(FETCHER_EVENT_COUNT_INTERVAL);
 		initMonitor(MONITOR_TITLE, fetcherEventCountInternal);
 
 		// Listen to lion changes.
 		configCache.addChange(new ConfigChange() {
 			@Override
 			public void onChange(String key, String value) {
-				if (key.equals(FETCHER_EVENT_COUNT_INTERNAL)) {
+				if (key.equals(FETCHER_EVENT_COUNT_INTERVAL)) {
 					fetcherEventCountInternal = Long.parseLong(value);
 					initMonitor(MONITOR_TITLE, fetcherEventCountInternal);
 				}

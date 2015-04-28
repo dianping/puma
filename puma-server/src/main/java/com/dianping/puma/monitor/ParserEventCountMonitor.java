@@ -12,7 +12,7 @@ public class ParserEventCountMonitor {
 
 	private static final String MONITOR_TITLE = "EventCount.parser";
 
-	private static final String PARSER_EVENT_COUNT_INTERNAL = "puma.server.eventcount.parser.internal";
+	private static final String PARSER_EVENT_COUNT_INTERVAL = "puma.server.eventcount.parser.interval";
 
 	private EventMonitor eventMonitor;
 
@@ -28,7 +28,7 @@ public class ParserEventCountMonitor {
 
 	@PostConstruct
 	public void init() {
-		parserEventCountInternal = configCache.getLongProperty(PARSER_EVENT_COUNT_INTERNAL);
+		parserEventCountInternal = configCache.getLongProperty(PARSER_EVENT_COUNT_INTERVAL);
 		eventMonitor.setType(MONITOR_TITLE);
 		eventMonitor.setCountThreshold(parserEventCountInternal);
 		eventMonitor.start();
@@ -36,7 +36,7 @@ public class ParserEventCountMonitor {
 		configCache.addChange(new ConfigChange() {
 			@Override
 			public void onChange(String key, String value) {
-				if (key.equals(PARSER_EVENT_COUNT_INTERNAL)) {
+				if (key.equals(PARSER_EVENT_COUNT_INTERVAL)) {
 					parserEventCountInternal = Long.parseLong(value);
 					eventMonitor.stop();
 					eventMonitor.setCountThreshold(parserEventCountInternal);

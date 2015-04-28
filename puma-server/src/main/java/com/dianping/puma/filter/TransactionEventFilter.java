@@ -61,11 +61,13 @@ public class TransactionEventFilter extends AbstractEventFilter implements Event
 			LOG.info("`TransactionEventFilter` receives event: {}.", event.toString());
 
 			TableSet tableSet = event.getTableSet();
-			SchemaSet schemaSet = new SchemaSet();
-			for (Table table : tableSet.listSchemaTables()) {
-				schemaSet.add(new Schema(table.getSchemaName()));
+			if (tableSet != null) {
+				SchemaSet schemaSet = new SchemaSet();
+				for (Table table : tableSet.listSchemaTables()) {
+					schemaSet.add(new Schema(table.getSchemaName()));
+				}
+				setAcceptedSchemas(schemaSet);
 			}
-			acceptedSchemas = schemaSet;
 		}
 	}
 

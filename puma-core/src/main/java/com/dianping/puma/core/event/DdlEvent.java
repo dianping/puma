@@ -68,6 +68,11 @@ public class DdlEvent extends ChangedEvent implements Serializable {
 		this.sql = sql;
 	}
 
+	@Override
+	public String getFullName() {
+		return getDatabase() + "." + getTable();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

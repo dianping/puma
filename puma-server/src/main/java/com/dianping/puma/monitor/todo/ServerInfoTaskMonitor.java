@@ -72,6 +72,7 @@ public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnab
 
 	@Override
 	public void doRun() {
+		/*
 		Map<String, ServerStatus> serverStatuses = SystemStatusContainer.instance.listServerStatus();
 		Map<String, AtomicLong> insertCount = SystemStatusContainer.instance.listServerRowInsertCounters();
 		Map<String, AtomicLong> updateCount = SystemStatusContainer.instance.listServerRowUpdateCounters();
@@ -113,6 +114,7 @@ public class ServerInfoTaskMonitor extends AbstractTaskMonitor implements Runnab
 			Cat.getProducer().logEvent("Puma.server." + serverStatus.getKey() + ".ddl", ddlName, Message.SUCCESS,
 					"name = " + serverStatus.getKey() + "&duration = " + Long.toString(getInterval()));
 		}
+		*/
 
 	}
 

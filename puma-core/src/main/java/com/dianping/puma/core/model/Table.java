@@ -54,6 +54,13 @@ public class Table {
 		return result;
 	}
 
+	@Override public String toString() {
+		return "Table{" +
+				"schemaName='" + schemaName + '\'' +
+				", tableName='" + tableName + '\'' +
+				'}';
+	}
+
 	public String getSchemaName() {
 		return schemaName;
 	}

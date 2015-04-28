@@ -71,8 +71,6 @@ public class Handler implements PageHandler<Context> {
 		String clientIPAddr = NetUtils.getIpAddr(ctx.getHttpServletRequest());
 		BinlogInfo binlogInfo = new BinlogInfo(payload.getBinlog(), payload.getBinlogPos());
 
-		// Client connecting.
-		Cat.logEvent("Client.Connecting", clientName + "(" + clientIPAddr + ")");
 		LOG.info("Client connecting: {}({}).", new Object[] { clientName, clientIPAddr });
 		LOG.info("Client connecting info: server={}, binlogInfo={}.", new Object[] { serverName, binlogInfo });
 

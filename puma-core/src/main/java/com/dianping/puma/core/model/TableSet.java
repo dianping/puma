@@ -77,8 +77,8 @@ public class TableSet {
 
 	@Override
 	public String toString() {
-		return "SchemaTableSet{" +
-				"schemaTables=" + tables +
+		return "TableSet{" +
+				"tables=" + tables +
 				'}';
 	}
 }

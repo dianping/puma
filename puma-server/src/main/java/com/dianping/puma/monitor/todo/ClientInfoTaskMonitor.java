@@ -1,18 +1,13 @@
 package com.dianping.puma.monitor.todo;
 
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.dianping.cat.Cat;
-import com.dianping.cat.message.Message;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
-import com.dianping.puma.common.SystemStatusContainer;
-import com.dianping.puma.common.SystemStatusContainer.ClientStatus;
 
 @Service("SyncProcessTaskMonitor")
 public class ClientInfoTaskMonitor extends AbstractTaskMonitor {
@@ -47,6 +42,7 @@ public class ClientInfoTaskMonitor extends AbstractTaskMonitor {
 
 	@Override
 	public void doRun() {
+		/*
 		Map<String, ClientStatus> clientStatuses = SystemStatusContainer.instance.listClientStatus();
 		Map<String, Long> clientSuccessSeq = SystemStatusContainer.instance.listClientSuccessSeq();
 		for (Map.Entry<String, ClientStatus> clientStatus : clientStatuses.entrySet()) {
@@ -60,7 +56,7 @@ public class ClientInfoTaskMonitor extends AbstractTaskMonitor {
 						"name = " + clientStatus.getKey() + "&target = " + clientStatus.getValue().getTarget()
 								+ "&duration = " + Long.toString(getInterval()));
 			}
-		}
+		}*/
 	}
 
 	@Override

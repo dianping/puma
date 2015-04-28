@@ -17,8 +17,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.concurrent.TimeUnit;
 
-import com.dianping.cat.Cat;
-import com.dianping.cat.message.Event;
 import com.dianping.puma.ComponentContainer;
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.model.BinlogInfo;
@@ -171,14 +169,9 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				}
 			}
 
-			String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
-			String eventStatus;
-
 			BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(is, PacketType.BINLOG_PACKET,
 					getContext());
 			if (!binlogPacket.isOk()) {
-				eventStatus = "1";
-				Cat.logEvent("Slave.dbBinlog", eventName, eventStatus, "");
 				LOG.error("Binlog packet response error.");
 				throw new IOException("Binlog packet response error.");
 			} else {
@@ -193,8 +186,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 	protected void processBinlogPacket(BinlogPacket binlogPacket) throws IOException {
 		BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), getContext());
-
-
 
 		if (binlogEvent.getHeader().getEventType() != BinlogConstanst.FORMAT_DESCRIPTION_EVENT) {
 			getContext().setNextBinlogPos(binlogEvent.getHeader().getNextPosition());
@@ -303,25 +294,14 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	 * @throws IOException
 	 */
 	private void connect() throws IOException {
-		String eventStatus = "1";
-
-		try {
-			closeTransport();
-			this.pumaSocket = new Socket();
-			this.pumaSocket.setTcpNoDelay(false);
-			this.pumaSocket.setKeepAlive(true);
-			this.pumaSocket.connect(new InetSocketAddress(dbHost, port));
-			is = new BufferedInputStream(pumaSocket.getInputStream());
-			os = new BufferedOutputStream(pumaSocket.getOutputStream());
-			PacketFactory.parsePacket(is, PacketType.CONNECT_PACKET, getContext());
-
-			eventStatus = Event.SUCCESS;
-		} catch (Exception e) {
-			eventStatus = "1";
-		} finally {
-			String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
-			Cat.logEvent("Slave.dbConnect", eventName, eventStatus, "");
-		}
+		closeTransport();
+		this.pumaSocket = new Socket();
+		this.pumaSocket.setTcpNoDelay(false);
+		this.pumaSocket.setKeepAlive(true);
+		this.pumaSocket.connect(new InetSocketAddress(dbHost, port));
+		is = new BufferedInputStream(pumaSocket.getInputStream());
+		os = new BufferedOutputStream(pumaSocket.getOutputStream());
+		PacketFactory.parsePacket(is, PacketType.CONNECT_PACKET, getContext());
 	}
 
 	/**
@@ -331,9 +311,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	 * @throws IOException
 	 */
 	private boolean dumpBinlog() throws IOException {
-		String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
-		String eventStatus = "1";
-
 		try {
 			ComBinlogDumpPacket dumpBinlogPacket = (ComBinlogDumpPacket) PacketFactory.createCommandPacket(
 					PacketType.COM_BINLOG_DUMP_PACKET, getContext());
@@ -364,15 +341,12 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 					getContext().setBinlogFileName(binlogFile);
 				}
 
-				eventStatus = Event.SUCCESS;
 				return true;
 			} else {
-				eventStatus = "1";
 				LOG.error("Dump binlog failed. Reason: " + dumpCommandResultPacket.getMessage());
 				return false;
 			}
 		} finally {
-			Cat.logEvent("Slave.dbOK", eventName, eventStatus, "");
 		}
 
 	}
@@ -399,19 +373,12 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 		boolean isAuth;
 
-		String eventStatus;
-		String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
-
 		if (okErrorPacket.isOk()) {
 			isAuth = true;
-			eventStatus = Event.SUCCESS;
 		} else {
 			isAuth = false;
-			eventStatus = "1";
 			LOG.error("Login failed. Reason: " + okErrorPacket.getMessage());
 		}
-
-		Cat.logEvent("Slave.dbAuth", eventName, eventStatus, "");
 
 		return isAuth;
 	}
@@ -421,23 +388,15 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	}
 
 	private void closeTransport() {
-		String eventStatus = "1";
-		String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
-
 		// Close in.
 		try {
 			if (this.is != null) {
 				this.is.close();
 			}
-			eventStatus = Event.SUCCESS;
 		} catch (IOException ioEx) {
-			eventStatus = "1";
 			LOG.warn("Server " + this.getTaskName() + " failed to close the input stream.");
 		} finally {
 			this.is = null;
-			if (!eventStatus.equals(Event.SUCCESS)) {
-				Cat.logEvent("Slave.dbClose", eventName, eventStatus, "");
-			}
 		}
 
 		// Close os.
@@ -445,30 +404,21 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			if (this.os != null) {
 				this.os.close();
 			}
-			eventStatus = Event.SUCCESS;
 		} catch (IOException ioEx) {
-			eventStatus = "1";
 			LOG.warn("Server " + this.getTaskName() + " failed to close the output stream");
 		} finally {
 			this.os = null;
-			if (!eventStatus.equals(Event.SUCCESS)) {
-				Cat.logEvent("Slave.dbClose", eventName, eventStatus, "");
-			}
 		}
 
 		// Close socket.
 		try {
 			if (this.pumaSocket != null) {
 				this.pumaSocket.close();
-
-				eventStatus = Event.SUCCESS;
 			}
 		} catch (IOException ioEx) {
-			eventStatus = "1";
 			LOG.warn("Server " + this.getTaskName() + " failed to close the socket", ioEx);
 		} finally {
 			this.pumaSocket = null;
-			Cat.logEvent("Slave.dbClose", eventName, eventStatus, "");
 		}
 	}
 

@@ -58,6 +58,7 @@ public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runna
 
 	@Override
 	public void doRun() {
+		/*
 		Map<String, ClientStatus> clientStatuses = SystemStatusContainer.instance.listClientStatus();
 		Map<String, ServerStatus> serverStatuses = SystemStatusContainer.instance.listServerStatus();
 		int dfileNum = 0;
@@ -80,17 +81,8 @@ public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runna
 					"srcbinlog = " + serverStatus.getBinlogFile() + "," + Long.toString(serverStatus.getBinlogPos())
 							+ "&desbinlog = " + clientStatus.getValue().getBinlogFile() + ","
 							+ Long.toString(clientStatus.getValue().getBinlogPos()));
-			/*
-			 * try { if (dfileNum >= numThreshold) { throw new
-			 * MonitorThresholdException(); } } catch (MonitorThresholdException
-			 * e) { String errorMessage =
-			 * " diff num of file between sync and server binlog process :  name = "
-			 * + tempKey + " ip = " + tempClientStatus.getIp() + " target:" +
-			 * tempClientStatus.getTarget() + " diff = " +
-			 * Integer.toString(dfileNum);
-			 * Cat.getProducer().logError(errorMessage, e); }
-			 */
 		}
+		*/
 	}
 
 	@Override

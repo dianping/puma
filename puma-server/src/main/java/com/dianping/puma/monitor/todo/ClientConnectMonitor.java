@@ -27,6 +27,7 @@ public class ClientConnectMonitor {
 
 	}
 
+	/*
 	@Scheduled(cron = "0/60 * * * * ?")
 	public void clientConnectedMonitor() throws MonitorException {
 		try {
@@ -42,5 +43,5 @@ public class ClientConnectMonitor {
 			LOG.warn("Monitor client connect error: {}.", e.getStackTrace());
 			throw new MonitorException(e);
 		}
-	}
+	}*/
 }

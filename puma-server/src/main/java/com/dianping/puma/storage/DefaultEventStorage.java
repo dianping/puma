@@ -348,7 +348,7 @@ public class DefaultEventStorage implements EventStorage {
 			bucketManager.updateLatestSequence(new Sequence(event.getSeq()));
 
 			storageEventCountMonitor.record(getTaskName());
-			storageEventGroupMonitor.record(event.getDatabase() + "." + event.getTable());
+			storageEventGroupMonitor.record(event.getFullName());
 
 			SystemStatusContainer.instance.updateStorageStatus(name, event.getSeq());
 		} catch (IOException e) {

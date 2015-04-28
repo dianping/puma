@@ -2,8 +2,8 @@ package com.dianping.puma.filter;
 
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.model.SchemaTable;
-import com.dianping.puma.core.model.SchemaTableSet;
+import com.dianping.puma.core.model.Table;
+import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.core.util.sql.DDLType;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,14 +27,14 @@ public class DDLEventFilterTest {
 		ddlTypes.add(DDLType.DROP_INDEX);
 		eventFilter.setDdlTypes(ddlTypes);
 
-		SchemaTableSet schemaTableSet = new SchemaTableSet();
-		SchemaTable schemaTable1 = new SchemaTable("schema", "table");
-		schemaTableSet.add(schemaTable1);
-		SchemaTable schemaTable2 = new SchemaTable("schema", "test");
-		schemaTableSet.add(schemaTable2);
-		SchemaTable schemaTable3 = new SchemaTable("puma", "*");
-		schemaTableSet.add(schemaTable3);
-		eventFilter.setAcceptedTables(schemaTableSet);
+		TableSet tableSet = new TableSet();
+		Table table1 = new Table("schema", "table");
+		tableSet.add(table1);
+		Table table2 = new Table("schema", "test");
+		tableSet.add(table2);
+		Table table3 = new Table("puma", "*");
+		tableSet.add(table3);
+		eventFilter.setAcceptedTables(tableSet);
 	}
 
 	@Test

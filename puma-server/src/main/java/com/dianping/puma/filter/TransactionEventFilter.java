@@ -2,8 +2,10 @@ package com.dianping.puma.filter;
 
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.model.SchemaTable;
-import com.dianping.puma.core.model.SchemaTableSet;
+import com.dianping.puma.core.model.Schema;
+import com.dianping.puma.core.model.SchemaSet;
+import com.dianping.puma.core.model.Table;
+import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
 import com.dianping.puma.core.model.event.EventListener;
 import com.google.common.eventbus.Subscribe;
@@ -20,12 +22,7 @@ public class TransactionEventFilter extends AbstractEventFilter implements Event
 
 	private boolean commit = true;
 
-	private SchemaTableSet acceptedTables = new SchemaTableSet();
-
-	public void init(boolean begin, boolean commit) {
-		this.begin = begin;
-		this.commit = commit;
-	}
+	private SchemaSet acceptedSchemas = new SchemaSet();
 
 	protected boolean checkEvent(ChangedEvent changedEvent) {
 		if (changedEvent instanceof RowChangedEvent) {
@@ -47,8 +44,8 @@ public class TransactionEventFilter extends AbstractEventFilter implements Event
 			}
 
 			// In accepted table list.
-			SchemaTable schemaTable = new SchemaTable(changedEvent.getDatabase(), "-");
-			if (!acceptedTables.contains(schemaTable)) {
+			Schema schema = new Schema(changedEvent.getDatabase());
+			if (!acceptedSchemas.contains(schema)) {
 				return false;
 			}
 
@@ -61,18 +58,30 @@ public class TransactionEventFilter extends AbstractEventFilter implements Event
 	@Subscribe
 	public void onEvent(AcceptedTableChangedEvent event) {
 		if (event.getName().equals(name)) {
-			LOG.info("`DMLEventFilter` receives event: {}.", event.toString());
+			LOG.info("`TransactionEventFilter` receives event: {}.", event.toString());
 
-			SchemaTableSet schemaTableSet = event.getSchemaTableSet();
-			addAcceptedTables(schemaTableSet);
+			TableSet tableSet = event.getTableSet();
+			SchemaSet schemaSet = new SchemaSet();
+			for (Table table : tableSet.listSchemaTables()) {
+				schemaSet.add(new Schema(table.getSchemaName()));
+			}
+			acceptedSchemas = schemaSet;
 		}
-	}
-
-	private void addAcceptedTables(SchemaTableSet acceptedTables) {
-		this.acceptedTables = acceptedTables;
 	}
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public void setBegin(boolean begin) {
+		this.begin = begin;
+	}
+
+	public void setCommit(boolean commit) {
+		this.commit = commit;
+	}
+
+	public void setAcceptedSchemas(SchemaSet acceptedSchemas) {
+		this.acceptedSchemas = acceptedSchemas;
 	}
 }

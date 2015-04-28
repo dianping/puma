@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.dianping.puma.core.model.AcceptedTables;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.SchemaTableSet;
+import com.dianping.puma.core.model.TableSet;
 
 public class PumaTask extends BaseEntity {
 
@@ -16,7 +16,7 @@ public class PumaTask extends BaseEntity {
 
 	private int preservedDay;
 
-	private SchemaTableSet schemaTableSet;
+	private TableSet tableSet;
 
 	@Deprecated
 	private Map<String,AcceptedTables> acceptedDataInfos;
@@ -53,12 +53,12 @@ public class PumaTask extends BaseEntity {
 		this.preservedDay = preservedDay;
 	}
 
-	public SchemaTableSet getSchemaTableSet() {
-		return schemaTableSet;
+	public TableSet getTableSet() {
+		return tableSet;
 	}
 
-	public void setSchemaTableSet(SchemaTableSet schemaTableSet) {
-		this.schemaTableSet = schemaTableSet;
+	public void setTableSet(TableSet tableSet) {
+		this.tableSet = tableSet;
 	}
 
 	@Deprecated

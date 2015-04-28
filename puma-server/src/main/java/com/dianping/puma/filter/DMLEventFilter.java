@@ -2,8 +2,8 @@ package com.dianping.puma.filter;
 
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.model.SchemaTable;
-import com.dianping.puma.core.model.SchemaTableSet;
+import com.dianping.puma.core.model.Table;
+import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
 import com.dianping.puma.core.model.event.EventListener;
 import com.google.common.eventbus.Subscribe;
@@ -18,7 +18,7 @@ public class DMLEventFilter extends AbstractEventFilter implements EventListener
 
 	private boolean dml = true;
 
-	private SchemaTableSet acceptedTables = new SchemaTableSet();
+	private TableSet acceptedTables = new TableSet();
 
 	public void init(boolean dml) {
 		this.dml = dml;
@@ -43,8 +43,8 @@ public class DMLEventFilter extends AbstractEventFilter implements EventListener
 			}
 
 			// In accepted table list.
-			SchemaTable schemaTable = new SchemaTable(changedEvent.getDatabase(), changedEvent.getTable());
-			if (!acceptedTables.contains(schemaTable)) {
+			Table table = new Table(changedEvent.getDatabase(), changedEvent.getTable());
+			if (!acceptedTables.contains(table)) {
 				return false;
 			}
 
@@ -59,12 +59,12 @@ public class DMLEventFilter extends AbstractEventFilter implements EventListener
 		if (event.getName().equals(name)) {
 			LOG.info("`DMLEventFilter` receives event: {}.", event.toString());
 
-			SchemaTableSet schemaTableSet = event.getSchemaTableSet();
-			addAcceptedTables(schemaTableSet);
+			TableSet tableSet = event.getTableSet();
+			addAcceptedTables(tableSet);
 		}
 	}
 
-	public void addAcceptedTables(SchemaTableSet acceptedTables) {
+	public void addAcceptedTables(TableSet acceptedTables) {
 		this.acceptedTables = acceptedTables;
 	}
 

@@ -4,8 +4,8 @@ import com.dianping.puma.admin.remote.reporter.PumaTaskControllerReporter;
 import com.dianping.puma.admin.remote.reporter.PumaTaskOperationReporter;
 import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.Status;
-import com.dianping.puma.core.model.SchemaTable;
-import com.dianping.puma.core.model.SchemaTableSet;
+import com.dianping.puma.core.model.Table;
+import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.core.model.state.TaskStateContainer;
 import com.dianping.puma.core.monitor.event.PumaTaskOperationEvent;
 import com.dianping.puma.core.service.*;
@@ -20,7 +20,6 @@ import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mongodb.MongoException;
 
@@ -180,16 +179,16 @@ public class PumaTaskController {
 			pumaTask.setAcceptedDataInfos(acceptedDataInfos);
 
 			// Accepted schema and tables.
-			SchemaTableSet schemaTableSet = new SchemaTableSet();
+			TableSet tableSet = new TableSet();
 			for (int i = 0; i != acceptedDatabase.length && i != acceptedTable.length; ++i) {
 				String tables[] = org.apache.commons.lang.StringUtils.split(acceptedTable[i], "&");
 				if (tables != null) {
 					for (int j = 0; j != tables.length; ++j) {
-						schemaTableSet.add(new SchemaTable(acceptedDatabase[i], tables[j]));
+						tableSet.add(new Table(acceptedDatabase[i], tables[j]));
 					}
 				}
 			}
-			pumaTask.setSchemaTableSet(schemaTableSet);
+			pumaTask.setTableSet(tableSet);
 
 			// Save puma task state to persistent storage.
 			if (operation == ActionOperation.CREATE) {

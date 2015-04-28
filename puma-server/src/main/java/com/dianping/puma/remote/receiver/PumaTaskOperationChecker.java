@@ -3,7 +3,7 @@ package com.dianping.puma.remote.receiver;
 import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.entity.PumaTask;
-import com.dianping.puma.core.model.SchemaTableSet;
+import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.core.model.event.EventCenter;
 import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
 import com.dianping.puma.core.monitor.event.Event;
@@ -52,7 +52,7 @@ public class PumaTaskOperationChecker implements EventListener {
 		for (PumaTask pumaTask : pumaTasks) {
 			try {
 				TaskExecutor taskExecutor = taskExecutorBuilder.build(pumaTask);
-				publishAcceptedTableChangedEvent(pumaTask.getName(), pumaTask.getSchemaTableSet());
+				publishAcceptedTableChangedEvent(pumaTask.getName(), pumaTask.getTableSet());
 				taskExecutorContainer.submit(taskExecutor);
 			} catch (Exception e) {
 				LOG.error("Initialize puma task `{}` error: {}.", pumaTask.getName(), e.getStackTrace());
@@ -75,7 +75,7 @@ public class PumaTaskOperationChecker implements EventListener {
 				LOG.info("Receive puma task operation event: CREATE.");
 				taskExecutorContainer.createEvent(pumaTaskOperationEvent);
 				publishAcceptedTableChangedEvent(pumaTaskOperationEvent.getTaskName(),
-						pumaTaskOperationEvent.getPumaTask().getSchemaTableSet());
+						pumaTaskOperationEvent.getPumaTask().getTableSet());
 				break;
 			case UPDATE:
 				LOG.info("Receive puma task operation event: UPDATE.");
@@ -90,7 +90,7 @@ public class PumaTaskOperationChecker implements EventListener {
 				taskExecutorContainer.prolongEvent(pumaTaskOperationEvent);
 				taskExecutorContainer.filterEvent(pumaTaskOperationEvent);
 				publishAcceptedTableChangedEvent(pumaTaskOperationEvent.getTaskName(),
-						pumaTaskOperationEvent.getPumaTask().getSchemaTableSet());
+						pumaTaskOperationEvent.getPumaTask().getTableSet());
 				break;
 			case CHANGE:
 				LOG.info("Receive puma task operation event: PROLONG or CHANGE.");
@@ -104,10 +104,10 @@ public class PumaTaskOperationChecker implements EventListener {
 		}
 	}
 
-	private void publishAcceptedTableChangedEvent(String name, SchemaTableSet schemaTableSet) {
+	private void publishAcceptedTableChangedEvent(String name, TableSet tableSet) {
 		AcceptedTableChangedEvent acceptedTableChangedEvent = new AcceptedTableChangedEvent();
 		acceptedTableChangedEvent.setName(name);
-		acceptedTableChangedEvent.setSchemaTableSet(schemaTableSet);
+		acceptedTableChangedEvent.setTableSet(tableSet);
 
 		eventCenter.post(acceptedTableChangedEvent);
 	}

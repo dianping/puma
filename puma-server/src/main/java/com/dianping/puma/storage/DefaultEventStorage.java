@@ -356,53 +356,6 @@ public class DefaultEventStorage implements EventStorage {
 		}
 	}
 
-	private boolean needStore(ChangedEvent event) {
-		if (acceptedTables == null || acceptedTables.isEmpty()) {
-			return true;
-		}
-
-		if (event instanceof RowChangedEvent) {
-			RowChangedEvent rce = (RowChangedEvent) event;
-
-			if (StringUtils.isNotBlank(rce.getTable())) {
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("table:" + rce.getTable().toLowerCase());
-				}
-				return acceptedTables.contains(rce.getTable().toLowerCase());
-			}
-
-			return true;
-		} else {
-			return true;
-		}
-	}
-	
-	private boolean needStoreNew(ChangedEvent event) {
-		if (acceptedDataTables == null || acceptedDataTables.isEmpty()) {
-			return true;
-		}
-		if (event instanceof RowChangedEvent||event instanceof DdlEvent) {
-			if(StringUtils.isNotBlank(event.getDatabase())){
-				if(acceptedDataTables.containsKey(event.getDatabase())){
-					if (StringUtils.isNotBlank(event.getTable())) {
-						if (LOG.isDebugEnabled()) {
-							LOG.debug("table:" + event.getTable());
-						}
-						return acceptedDataTables.get(event.getDatabase()).isContains((event.getTable()));
-					}
-					return true;
-				}
-				return false;
-			}
-			if(event instanceof DdlEvent){
-				LOG.info(event.toString());
-			}
-			return true;
-		} else{
-			return true;
-		}
-	}
-	
 	private void updateIndex(ChangedEvent event, boolean newL1Index, long newSeq)
 			throws IOException {
 		BinlogIndexKey binlogKey = new BinlogIndexKey(event.getBinlog(), event

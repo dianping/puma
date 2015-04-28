@@ -29,6 +29,10 @@ public class EventCenter {
 		eventBus.post(event);
 	}
 
+	public void unregister(Object eventListener) {
+		eventBus.unregister(eventListener);
+	}
+
 	private class DeadEventListener {
 
 		@Subscribe

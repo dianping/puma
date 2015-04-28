@@ -9,7 +9,6 @@ import com.dianping.puma.core.event.ChangedEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.dianping.puma.core.event.Event;
 
 public class DbTbEventFilter extends AbstractEventFilter {
 

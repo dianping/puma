@@ -2,6 +2,7 @@ package com.dianping.puma.filter;
 
 import java.util.List;
 
+import com.dianping.puma.core.event.ChangedEvent;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -19,7 +20,7 @@ public class TransactionInfoEventFilterTest {
 	{
 
 		@Override
-		public boolean doNext(Event event) {
+		public boolean doNext(ChangedEvent event) {
 			return true;
 		}
 

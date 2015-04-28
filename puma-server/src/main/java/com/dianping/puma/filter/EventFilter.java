@@ -1,9 +1,9 @@
 package com.dianping.puma.filter;
 
-import com.dianping.puma.core.event.Event;
+import com.dianping.puma.core.event.ChangedEvent;
 
 public interface EventFilter {
 
-	public boolean accept(Event event, EventFilterChain eventfilterChain);
+	public boolean accept(ChangedEvent changedEvent, EventFilterChain eventfilterChain);
 
 }

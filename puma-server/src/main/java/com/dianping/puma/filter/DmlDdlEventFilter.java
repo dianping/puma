@@ -19,7 +19,7 @@ public class DmlDdlEventFilter extends AbstractEventFilter {
 		}
 	}
 
-	protected boolean checkEvent(Event event) {
+	protected boolean checkEvent(ChangedEvent event) {
 		if ((event instanceof RowChangedEvent) && (operationType & 2) != 0) {
 			return true;
 		} else if ((event instanceof DdlEvent) && (operationType & 1) != 0) {

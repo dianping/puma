@@ -161,7 +161,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			// DML event filter.
 			DMLEventFilter dmlEventFilter = new DMLEventFilter();
 			dmlEventFilter.setName(taskName);
-			dmlEventFilter.init(true);
+			dmlEventFilter.setDml(true);
 			eventCenter.register(dmlEventFilter);
 			eventFilterList.add(dmlEventFilter);
 

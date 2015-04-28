@@ -20,10 +20,6 @@ public class DMLEventFilter extends AbstractEventFilter implements EventListener
 
 	private TableSet acceptedTables = new TableSet();
 
-	public void init(boolean dml) {
-		this.dml = dml;
-	}
-
 	protected boolean checkEvent(ChangedEvent changedEvent) {
 		if (changedEvent == null) {
 			return false;
@@ -60,15 +56,19 @@ public class DMLEventFilter extends AbstractEventFilter implements EventListener
 			LOG.info("`DMLEventFilter` receives event: {}.", event.toString());
 
 			TableSet tableSet = event.getTableSet();
-			addAcceptedTables(tableSet);
+			setAcceptedTables(tableSet);
 		}
-	}
-
-	public void addAcceptedTables(TableSet acceptedTables) {
-		this.acceptedTables = acceptedTables;
 	}
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public void setDml(boolean dml) {
+		this.dml = dml;
+	}
+
+	public void setAcceptedTables(TableSet acceptedTables) {
+		this.acceptedTables = acceptedTables;
 	}
 }

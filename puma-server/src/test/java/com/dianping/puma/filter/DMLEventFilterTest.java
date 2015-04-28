@@ -15,7 +15,7 @@ public class DMLEventFilterTest {
 	@Before
 	public void before() {
 		eventFilter.setName("puma");
-		eventFilter.init(true);
+		eventFilter.setDml(true);
 
 		TableSet tableSet = new TableSet();
 		Table table1 = new Table("schema", "table");
@@ -24,7 +24,7 @@ public class DMLEventFilterTest {
 		tableSet.add(table2);
 		Table table3 = new Table("puma", "*");
 		tableSet.add(table3);
-		eventFilter.addAcceptedTables(tableSet);
+		eventFilter.setAcceptedTables(tableSet);
 	}
 
 	@Test

@@ -92,6 +92,7 @@ public class FormatDescriptionEvent extends AbstractBinlogEvent {
 			this.setChecksumAlg(PacketUtils.readInt(buf, 1));
 		}
 		context.setChecksumAlg(this.getChecksumAlg());
+		context.setServerVersion(serverVersion);
 	}
 
 	private void doServerVersionSplit(String serverVersion, int[] versionSplit) {

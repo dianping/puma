@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.lang.StringUtils;

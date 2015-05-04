@@ -15,6 +15,8 @@
  */
 package com.dianping.puma.core.event;
 
+import com.dianping.puma.core.util.sql.DMLType;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -99,9 +101,19 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
 
 	private int actionType;
 
+	private DMLType dmlType;
+
 	private boolean isTransactionBegin = false;
 
 	private boolean isTransactionCommit = false;
+
+	public DMLType getDMLType() {
+		return dmlType;
+	}
+
+	public void setDMLType(DMLType dmlType) {
+		this.dmlType = dmlType;
+	}
 
 	/**
 	 * @return the isTransactionBegin
@@ -265,6 +277,8 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
 		public void setNewValue(Object newValue) {
 			this.newValue = newValue;
 		}
+
+
 
 		/*
 			* (non-Javadoc)

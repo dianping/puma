@@ -27,6 +27,9 @@ import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.monitor.FetcherEventCountMonitor;
 import com.dianping.puma.monitor.FetcherEventDelayMonitor;
 import com.dianping.puma.monitor.ParserEventCountMonitor;
+import com.dianping.puma.sender.Sender;
+
+import com.dianping.puma.storage.DefaultEventStorage;
 import org.apache.commons.lang.StringUtils;
 
 import com.dianping.puma.common.SystemStatusContainer;
@@ -47,6 +50,7 @@ import com.dianping.puma.parser.mysql.packet.ComBinlogDumpPacket;
 import com.dianping.puma.parser.mysql.packet.OKErrorPacket;
 import com.dianping.puma.parser.mysql.packet.PacketFactory;
 import com.dianping.puma.parser.mysql.packet.PacketType;
+import com.dianping.puma.parser.mysql.packet.QueryCommandPacket;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,7 +139,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				if (auth()) {
 					LOG.info("Server logined... taskName: " + getTaskName() + " host: " + dbHost + " port: " + port
 							+ " username: " + dbUsername + " database: " + database + " dbServerId: " + getDbServerId());
-
 					if (getContext().isCheckSum()) {
 						if (!updateSetting()) {
 							throw new IOException("update setting command failed.");
@@ -149,8 +152,9 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 					if (dumpBinlog()) {
 						LOG.info("Dump binlog command success.");
 						processBinlog();
+
 					} else {
-						throw new IOException("Dump binlog failed.");
+						throw new IOException("update setting command failed.");
 					}
 				} else {
 					throw new IOException("Login failed.");

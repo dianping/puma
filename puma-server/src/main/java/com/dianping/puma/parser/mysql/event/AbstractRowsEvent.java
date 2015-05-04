@@ -280,7 +280,6 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 				final long timeStampValue = PacketUtils.readLong(buf, 4, false);
 				final int timeStampNanos = PacketUtils.readInt(buf, (meta + 1) / 2, false);
 				columns.add(Timestamp2Column.valueOf(MySQLUtils.toTimestamp2(timeStampValue, timeStampNanos,meta)));
-
 				break;
 			default:
 				throw new NestableRuntimeException("assertion failed, unknown column type: " + type);

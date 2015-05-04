@@ -232,6 +232,7 @@ public final class MySQLUtils {
 		final int h = (value >> 12) & 0x3FF;
 		final int m = (value >> 6) & 0x3F;
 		final int s = (value >> 0) & 0x3F;
+
 		String format = "%02d:%02d:%02d";
 		if (meta > 0) {
 			format += (".%0" + String.valueOf(meta) + "d");
@@ -288,12 +289,7 @@ public final class MySQLUtils {
 		}
 		return new java.sql.Timestamp(value * 1000L);
 	}
-	
-	public static java.sql.Timestamp toTimestamp2(long seconds, int nanos) {
-		final java.sql.Timestamp r = new java.sql.Timestamp(seconds * 1000L);
-		r.setNanos(nanos);
-		return r;
-	}
+
 
 	public static String toTimestamp2(long value, int nanos, int meta) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

@@ -121,10 +121,10 @@ public class FormatDescriptionEvent extends AbstractBinlogEvent {
 		}
 	}
 
-    public static long versionProduct(int[] versionSplit) {
-        return ((versionSplit[0] * 256 + versionSplit[1]) * 256 + versionSplit[2]);
-    }
-    
+	private long versionProduct(int[] versionSplit) {
+		return ((versionSplit[0] * 256 + versionSplit[1]) * 256 + versionSplit[2]);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

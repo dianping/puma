@@ -145,7 +145,7 @@ public class ConnectPacket extends AbstractResponsePacket {
 			}
 		}
 	}
-	
+
 	private long versionProduct(int serverMajorVersion,int serverMinorVersion,int serverSubMinorVersion) {
 		return ((serverMajorVersion * 256 + serverMinorVersion) * 256 + serverSubMinorVersion);
 	}

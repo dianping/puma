@@ -52,6 +52,7 @@ public abstract class AbstractResponsePacket extends AbstractPacket implements R
 	public void readPacket(InputStream is, PumaContext context) throws IOException {
 		readHeader(is);
 		byte[] buf = new byte[length];
+
 		int lenRead = 0;
 		lenRead = PacketUtils.readFully(is, buf, 0, length);
 

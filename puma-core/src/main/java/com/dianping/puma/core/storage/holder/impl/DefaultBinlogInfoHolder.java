@@ -109,7 +109,7 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 		if (f.exists() && f.renameTo(new File(bakDir, genBakFileName(taskName)))) {
 			LOG.info("Remove bin log file success.");
 		} else {
-         LOG.warn("Remove bin log file failure.");
+			LOG.warn("Remove bin log file failure.");
 		}
 	}
 
@@ -130,6 +130,7 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 			boolean isSkipToNextPos = Boolean.valueOf(isSkipToNextPosStr);
 			BinlogInfo binlogInfo = new BinlogInfo(binlogFile, binlogPosition);
 			binlogInfo.setSkipToNextPos(isSkipToNextPos);
+			
 			mappedByteBufferMapping.put(taskName,
 					new RandomAccessFile(f, "rwd").getChannel().map(MapMode.READ_WRITE, 0, MAX_FILE_SIZE));
 			binlogInfoMap.put(taskName, binlogInfo);

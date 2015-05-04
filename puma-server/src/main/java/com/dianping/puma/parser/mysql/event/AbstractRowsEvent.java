@@ -32,6 +32,7 @@ import com.dianping.puma.parser.mysql.column.BitColumn;
 import com.dianping.puma.parser.mysql.column.BlobColumn;
 import com.dianping.puma.parser.mysql.column.Column;
 import com.dianping.puma.parser.mysql.column.DateColumn;
+import com.dianping.puma.parser.mysql.column.Datetime2Column;
 import com.dianping.puma.parser.mysql.column.DatetimeColumn;
 import com.dianping.puma.parser.mysql.column.DecimalColumn;
 import com.dianping.puma.parser.mysql.column.DoubleColumn;
@@ -44,7 +45,9 @@ import com.dianping.puma.parser.mysql.column.NullColumn;
 import com.dianping.puma.parser.mysql.column.SetColumn;
 import com.dianping.puma.parser.mysql.column.ShortColumn;
 import com.dianping.puma.parser.mysql.column.StringColumn;
+import com.dianping.puma.parser.mysql.column.Time2Column;
 import com.dianping.puma.parser.mysql.column.TimeColumn;
+import com.dianping.puma.parser.mysql.column.Timestamp2Column;
 import com.dianping.puma.parser.mysql.column.TimestampColumn;
 import com.dianping.puma.parser.mysql.column.TinyColumn;
 import com.dianping.puma.parser.mysql.column.YearColumn;
@@ -129,9 +132,9 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 	public void doParse(ByteBuffer buf, PumaContext context) throws IOException {
 		tableId = PacketUtils.readLong(buf, 6);
 		reserved = PacketUtils.readInt(buf, 2);
-		if (getHeader().getEventType() == BinlogConstants.WRITE_ROWS_EVENT_V5_6
-				|| getHeader().getEventType() == BinlogConstants.DELETE_ROWS_EVENT_V5_6
-				|| getHeader().getEventType() == BinlogConstants.UPDATE_ROWS_EVENT_V5_6) {
+		if (getHeader().getEventType() == BinlogConstants.WRITE_ROWS_EVENT
+				|| getHeader().getEventType() == BinlogConstants.DELETE_ROWS_EVENT
+				|| getHeader().getEventType() == BinlogConstants.UPDATE_ROWS_EVENT) {
 			extraInfoLength = PacketUtils.readInt(buf, 2);
 			if (extraInfoLength > 2)
 				extraInfo = PacketUtils.readBytes(buf, extraInfoLength - 2);
@@ -250,8 +253,9 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 				final int precision = meta & 0xFF;
 				final int scale = meta >> 8;
 				final int decimalLength = MySQLUtils.getDecimalBinarySize(precision, scale);
-				columns.add(DecimalColumn.valueOf(MySQLUtils.toDecimal(precision, scale, PacketUtils.readBytes(buf,
-						decimalLength)), precision, scale));
+				columns.add(DecimalColumn.valueOf(
+						MySQLUtils.toDecimal(precision, scale, PacketUtils.readBytes(buf, decimalLength)), precision,
+						scale));
 				break;
 			case BinlogConstants.MYSQL_TYPE_BLOB:
 				final int blobLength = PacketUtils.readInt(buf, meta);
@@ -263,20 +267,19 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 				columns.add(StringColumn.valueOf(PacketUtils.readBytes(buf, varcharLength)));
 				break;
 			case BinlogConstants.MYSQL_TYPE_TIME2:
-				final int timeValue = CodecUtils.toBigEndian(PacketUtils.readInt(buf, 3));
-				final int timeNanos = CodecUtils.toBigEndian(PacketUtils.readInt(buf, (meta + 1) / 2));
-				columns.add(TimeColumn.valueOf(MySQLUtils.toTime2(timeValue, timeNanos)));
+				final int timeValue = PacketUtils.readInt(buf, 3, false);
+				final int timeNanos = PacketUtils.readInt(buf, (meta + 1) / 2, false);
+				columns.add(Time2Column.valueOf(MySQLUtils.toTime2(timeValue, timeNanos,meta)));
 				break;
 			case BinlogConstants.MYSQL_TYPE_DATETIME2:
-				final long dateTimeValue = CodecUtils.toBigEndian(PacketUtils.readLong(buf, 5));
-				final int dateTimenanos = CodecUtils.toBigEndian(PacketUtils.readInt(buf, (meta + 1) / 2));
-				columns.add(DatetimeColumn
-						.valueOf(String.valueOf(MySQLUtils.toDatetime2(dateTimeValue, dateTimenanos))));
+				final long dateTimeValue = PacketUtils.readLong(buf, 5, false);
+				final int dateTimenanos = PacketUtils.readInt(buf, (meta + 1) / 2, false);
+				columns.add(Datetime2Column.valueOf(String.valueOf(MySQLUtils.toDatetime2(dateTimeValue, dateTimenanos,meta))));
 				break;
 			case BinlogConstants.MYSQL_TYPE_TIMESTAMP2:
-				final long timeStampValue = CodecUtils.toBigEndian(PacketUtils.readLong(buf, 4));
-				final int timeStampNanos = CodecUtils.toBigEndian(PacketUtils.readInt(buf, (meta + 1) / 2));
-				columns.add(TimestampColumn.valueOf(MySQLUtils.toTimestamp2(timeStampValue, timeStampNanos)));
+				final long timeStampValue = PacketUtils.readLong(buf, 4, false);
+				final int timeStampNanos = PacketUtils.readInt(buf, (meta + 1) / 2, false);
+				columns.add(Timestamp2Column.valueOf(MySQLUtils.toTimestamp2(timeStampValue, timeStampNanos,meta)));
 				break;
 			default:
 				throw new NestableRuntimeException("assertion failed, unknown column type: " + type);

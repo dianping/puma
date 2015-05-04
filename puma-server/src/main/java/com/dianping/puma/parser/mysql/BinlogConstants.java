@@ -50,17 +50,17 @@ public final class BinlogConstants {
 	public static final byte PRE_GA_WRITE_ROWS_EVENT = 20;
 	public static final byte PRE_GA_UPDATE_ROWS_EVENT = 21;
 	public static final byte PRE_GA_DELETE_ROWS_EVENT = 22;
-	public static final byte WRITE_ROWS_EVENT = 23;
-	public static final byte UPDATE_ROWS_EVENT = 24;
-	public static final byte DELETE_ROWS_EVENT = 25;
+	public static final byte WRITE_ROWS_EVENT_V1 = 23;
+	public static final byte UPDATE_ROWS_EVENT_V1 = 24;
+	public static final byte DELETE_ROWS_EVENT_V1 = 25;
 	public static final byte INCIDENT_EVENT = 26;
 	// mysql 5.6 new add event --start
 	public static final byte HEARTBEAT_LOG_EVENT = 27;
 	public static final byte IGNORABLE_LOG_EVENT = 28;
 	public static final byte ROWS_QUERY_LOG_EVENT = 29;
-	public static final byte WRITE_ROWS_EVENT_V5_6 = 30;
-	public static final byte UPDATE_ROWS_EVENT_V5_6 = 31;
-	public static final byte DELETE_ROWS_EVENT_V5_6 = 32;
+	public static final byte WRITE_ROWS_EVENT = 30;
+	public static final byte UPDATE_ROWS_EVENT = 31;
+	public static final byte DELETE_ROWS_EVENT = 32;
 	public static final byte GTID_LOG_EVENT = 33;
 	public static final byte ANONYMOUS_GTID_LOG_EVENT = 34;
 	public static final byte PREVIOUS_GTIDS_LOG_EVENT = 35;

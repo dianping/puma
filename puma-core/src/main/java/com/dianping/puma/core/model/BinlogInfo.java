@@ -38,4 +38,6 @@ public class BinlogInfo {
     public void setSkipToNextPos(Boolean skipToNextPos) {
         this.skipToNextPos = skipToNextPos;
     }
+
+	
 }

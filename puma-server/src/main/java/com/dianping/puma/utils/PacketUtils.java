@@ -29,9 +29,9 @@ public final class PacketUtils {
 	private PacketUtils() {
 
 	}
-	
+
 	public static byte[] readBit(ByteBuffer buf, int length, boolean isLittleEndian) throws IOException {
-		final byte[] value = readBytes(buf, (int)((length + 7) >> 3));
+		final byte[] value = readBytes(buf, (int) ((length + 7) >> 3));
 		return isLittleEndian ? value : CodecUtils.toBigEndian(value);
 	}
 
@@ -46,6 +46,22 @@ public final class PacketUtils {
 		return 0;
 	}
 
+	public static int readInt(ByteBuffer buf, int length, boolean isLittleEndian) {
+		if ((buf.position() + length) <= buf.limit() && length <= 4) {
+			int r = 0;
+			for (int i = 0; i < length; i++) {
+				if (isLittleEndian) {
+					r |= ((buf.get() & 0xff) << (i << 3));
+				} else {
+					r = (r << 8) | (buf.get() & 0xff);
+				}
+
+			}
+			return r;
+		}
+		return 0;
+	}
+
 	public static String readNullTerminatedString(ByteBuffer buf) {
 		return readNullTerminatedString(buf, "ASCII");
 	}
@@ -53,6 +69,7 @@ public final class PacketUtils {
 	public static String readNullTerminatedString(ByteBuffer buf, String encoding) {
 		int start = buf.position();
 		int len = 0;
+		
 		int maxLen = buf.limit();
 
 		while ((buf.position() < maxLen) && (buf.get() != 0)) {
@@ -71,6 +88,21 @@ public final class PacketUtils {
 			long r = 0;
 			for (int i = 0; i < length; i++) {
 				r |= (((long) buf.get() & 0xff) << (i << 3));
+			}
+			return r;
+		}
+		return 0;
+	}
+
+	public static long readLong(ByteBuffer buf, int length, boolean isLittleEndian) {
+		if ((buf.position() + length) <= buf.limit() && length <= 8) {
+			long r = 0;
+			for (int i = 0; i < length; i++) {
+				if (isLittleEndian) {
+					r |= (((long) buf.get() & 0xff) << (i << 3));
+				} else {
+					r = (r << 8) | (buf.get() & 0xff);
+				}
 			}
 			return r;
 		}

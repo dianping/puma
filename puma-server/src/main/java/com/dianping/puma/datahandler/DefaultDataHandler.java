@@ -84,6 +84,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 			result.setEmpty(true);
 			result.setFinished(true);
 			break;
+		case BinlogConstants.WRITE_ROWS_EVENT_V1:
 		case BinlogConstants.WRITE_ROWS_EVENT:
 			if (tableMetaInfos == null || tableMetaInfos.isEmpty()) {
 				skipEvent(BinlogConstants.WRITE_ROWS_EVENT, result, context);
@@ -92,7 +93,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 
 			processWriteRowEvent(result, binlogEvent, context);
 			break;
-
+		case BinlogConstants.UPDATE_ROWS_EVENT_V1:
 		case BinlogConstants.UPDATE_ROWS_EVENT:
 			if (tableMetaInfos == null || tableMetaInfos.isEmpty()) {
 				skipEvent(BinlogConstants.UPDATE_ROWS_EVENT, result, context);
@@ -100,6 +101,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 			}
 			processUpdateRowEvent(result, binlogEvent, context);
 			break;
+		case BinlogConstants.DELETE_ROWS_EVENT_V1:
 		case BinlogConstants.DELETE_ROWS_EVENT:
 			if (tableMetaInfos == null || tableMetaInfos.isEmpty()) {
 				skipEvent(BinlogConstants.DELETE_ROWS_EVENT, result, context);

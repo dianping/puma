@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import com.dianping.puma.bo.PumaContext;
+import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.utils.PacketUtils;
 
 /**
@@ -29,12 +30,12 @@ import com.dianping.puma.utils.PacketUtils;
  * 
  */
 public class FormatDescriptionEvent extends AbstractBinlogEvent {
-	private static final long	serialVersionUID	= 5209366431892413873L;
-	private int					binlogFormatVersion;
-	private String				serverVersion;
-	private long				createTimestamp;
-	private byte				headerLength;
-	private byte[]				eventTypes;
+	private static final long serialVersionUID = 5209366431892413873L;
+	private int binlogFormatVersion;
+	private String serverVersion;
+	private long createTimestamp;
+	private byte headerLength;
+	private byte[] eventTypes;
 
 	/**
 	 * @return the binlogFormatVersion
@@ -84,40 +85,45 @@ public class FormatDescriptionEvent extends AbstractBinlogEvent {
 		serverVersion = PacketUtils.readFixedLengthString(buf, 50);
 		createTimestamp = PacketUtils.readLong(buf, 4);
 		headerLength = buf.get();
-		eventTypes = PacketUtils.readBytes(buf, buf.remaining());
-
+		eventTypes = PacketUtils.readBytes(buf, buf.remaining() - 5);
+		int versionSplit[] = new int[] { 0, 0, 0 };
+		doServerVersionSplit(serverVersion, versionSplit);
+		if (versionProduct(versionSplit) >= BinlogConstants.checksumVersionProduct) {
+			this.setChecksumAlg(PacketUtils.readInt(buf, 1));
+		}
+		context.setChecksumAlg(this.getChecksumAlg());
 	}
 
-    public static void doServerVersionSplit(String serverVersion, int[] versionSplit) {
-        String[] split = serverVersion.split("\\.");
-        if (split.length < 3) {
-            versionSplit[0] = 0;
-            versionSplit[1] = 0;
-            versionSplit[2] = 0;
-        } else {
-            int j = 0;
-            for (int i = 0; i <= 2; i++) {
-                String str = split[i];
-                for (j = 0; j < str.length(); j++) {
-                    if (Character.isDigit(str.charAt(j)) == false) {
-                        break;
-                    }
-                }
-                if (j > 0) {
-                    versionSplit[i] = Integer.valueOf(str.substring(0, j), 10);
-                } else {
-                    versionSplit[0] = 0;
-                    versionSplit[1] = 0;
-                    versionSplit[2] = 0;
-                }
-            }
-        }
-    }
+	private void doServerVersionSplit(String serverVersion, int[] versionSplit) {
+		String[] split = serverVersion.split("\\.");
+		if (split.length < 3) {
+			versionSplit[0] = 0;
+			versionSplit[1] = 0;
+			versionSplit[2] = 0;
+		} else {
+			int j = 0;
+			for (int i = 0; i <= 2; i++) {
+				String str = split[i];
+				for (j = 0; j < str.length(); j++) {
+					if (Character.isDigit(str.charAt(j)) == false) {
+						break;
+					}
+				}
+				if (j > 0) {
+					versionSplit[i] = Integer.valueOf(str.substring(0, j), 10);
+				} else {
+					versionSplit[0] = 0;
+					versionSplit[1] = 0;
+					versionSplit[2] = 0;
+				}
+			}
+		}
+	}
 
-    public static long versionProduct(int[] versionSplit) {
-        return ((versionSplit[0] * 256 + versionSplit[1]) * 256 + versionSplit[2]);
-    }
-    
+	private long versionProduct(int[] versionSplit) {
+		return ((versionSplit[0] * 256 + versionSplit[1]) * 256 + versionSplit[2]);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

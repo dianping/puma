@@ -29,9 +29,9 @@ import com.dianping.puma.utils.PacketUtils;
  */
 public class RotateEvent extends AbstractBinlogEvent {
 
-	private static final long	serialVersionUID	= -3067716947078996892L;
-	private long				firstEventPosition;
-	private String				nextBinlogFileName;
+	private static final long serialVersionUID = -3067716947078996892L;
+	private long firstEventPosition;
+	private String nextBinlogFileName;
 
 	/**
 	 * @return the firstEventPosition
@@ -68,7 +68,8 @@ public class RotateEvent extends AbstractBinlogEvent {
 	@Override
 	public void doParse(ByteBuffer buf, PumaContext context) throws IOException {
 		firstEventPosition = PacketUtils.readLong(buf, 8);
-		nextBinlogFileName = PacketUtils.readFixedLengthString(buf, buf.remaining());
+		int lenRemaining = context.isCheckSum() ? buf.remaining() - 4 : buf.remaining();
+		nextBinlogFileName = PacketUtils.readFixedLengthString(buf, lenRemaining);
 	}
 
 }

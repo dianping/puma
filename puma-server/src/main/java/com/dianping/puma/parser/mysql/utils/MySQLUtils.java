@@ -16,8 +16,10 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import com.dianping.puma.utils.CodecUtils;
 
@@ -226,17 +228,18 @@ public final class MySQLUtils {
 		return new java.sql.Time(c.getTimeInMillis());
 	}
 
-	public static java.sql.Time toTime2(int value, int nanos) {
+	public static String toTime2(int value, int nanos, int meta) {
 		final int h = (value >> 12) & 0x3FF;
 		final int m = (value >> 6) & 0x3F;
 		final int s = (value >> 0) & 0x3F;
 		final Calendar c = Calendar.getInstance();
-        c.set(1970, 0, 1, h, m, s);
-        c.set(Calendar.MILLISECOND, 0);
-        final long millis = c.getTimeInMillis();
-        return new java.sql.Time(millis + (nanos / 1000000));
+		String format = "%02d:%02d:%02d";
+		if (meta > 0) {
+			format += (".%0" + String.valueOf(meta) + "d");
+		}
+		return String.format(format, h, m, s, nanos);
 	}
-	
+
 	public static String toDatetime(long value) {
 		int sec = (int) (value % 100);
 		if (value <= 1) {
@@ -261,32 +264,42 @@ public final class MySQLUtils {
 		}
 	}
 
-	public static java.util.Date toDatetime2(long value, int nanos) {
+	public static String toDatetime2(long value, int nanos, int meta) {
 		final long x = (value >> 22) & 0x1FFFFL;
-		final int year = (int)(x / 13);
-		final int month = (int)(x % 13);
-		final int day = ((int)(value >> 17)) & 0x1F;
-		final int hour = ((int)(value >> 12)) & 0x1F;
-		final int minute = ((int)(value >> 6)) & 0x3F;
-		final int second = ((int)(value >> 0)) & 0x3F;
-		final Calendar c = Calendar.getInstance();
-        c.set(year, month - 1, day, hour, minute, second);
-        c.set(Calendar.MILLISECOND, 0);
-        final long millis = c.getTimeInMillis();
-        return new java.util.Date(millis + (nanos / 1000000));
+		final int year = (int) (x / 13);
+		final int mon = (int) (x % 13);
+		final int day = ((int) (value >> 17)) & 0x1F;
+		final int hour = ((int) (value >> 12)) & 0x1F;
+		final int min = ((int) (value >> 6)) & 0x3F;
+		final int sec = ((int) (value >> 0)) & 0x3F;
+		// final Calendar c = Calendar.getInstance();
+		// c.set(year, mon - 1, day, hour, min, sec);
+		// c.set(Calendar.MILLISECOND, 0);
+		// final long millis = c.getTimeInMillis();
+		String format = "%04d-%02d-%02d %02d:%02d:%02d";
+		if (meta > 0) {
+			format += (".%0" + String.valueOf(meta) + "d");
+		}
+		return String.format(format, year, mon, day, hour, min, sec, nanos);
 	}
-	
+
 	public static java.sql.Timestamp toTimestamp(long value) {
 		if (value <= 1) {
 			return new java.sql.Timestamp(1000);
 		}
 		return new java.sql.Timestamp(value * 1000L);
 	}
-	
-	public static java.sql.Timestamp toTimestamp2(long seconds, int nanos) {
-		final java.sql.Timestamp r = new java.sql.Timestamp(seconds * 1000L);
-		r.setNanos(nanos);
-		return r;
+
+	public static String toTimestamp2(long value, int nanos, int meta) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Timestamp time = new java.sql.Timestamp(value * 1000L);
+		String strValue = sdf.format(time);
+		String strNanos = "";
+		if (meta > 0) {
+			String format = (".%0" + String.valueOf(meta) + "d");
+			strNanos = String.format(format, nanos);
+		}
+		return strValue + strNanos;
 	}
 
 	public static BigDecimal toDecimal(int precision, int scale, byte[] value) {

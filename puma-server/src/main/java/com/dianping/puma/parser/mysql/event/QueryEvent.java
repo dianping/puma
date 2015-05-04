@@ -43,15 +43,15 @@ import com.dianping.puma.utils.PacketUtils;
  */
 public class QueryEvent extends AbstractBinlogEvent {
 
-	private static final long		serialVersionUID	= 7603398043281876529L;
-	private long					threadId;
-	private long					execTime;
-	private int						databaseNameLength;
-	private int						errorCode;
-	private int						statusVariablesLength;
-	private List<StatusVariable>	statusVariables;
-	private String					databaseName;
-	private String					sql;
+	private static final long serialVersionUID = 7603398043281876529L;
+	private long threadId;
+	private long execTime;
+	private int databaseNameLength;
+	private int errorCode;
+	private int statusVariablesLength;
+	private List<StatusVariable> statusVariables;
+	private String databaseName;
+	private String sql;
 
 	/**
 	 * @return the threadId
@@ -118,7 +118,8 @@ public class QueryEvent extends AbstractBinlogEvent {
 		statusVariablesLength = PacketUtils.readInt(buf, 2);
 		statusVariables = parseStatusVariables(PacketUtils.readBytes(buf, statusVariablesLength));
 		databaseName = PacketUtils.readNullTerminatedString(buf);
-		sql = PacketUtils.readFixedLengthString(buf, buf.remaining());
+		int lenRemaining = context.isCheckSum() ? buf.remaining() - 4 : buf.remaining();
+		sql = PacketUtils.readFixedLengthString(buf, lenRemaining);
 
 	}
 
@@ -142,39 +143,39 @@ public class QueryEvent extends AbstractBinlogEvent {
 		while (!abort && buf.hasRemaining()) {
 			final byte type = buf.get();
 			switch (type) {
-				case BinlogConstants.Q_AUTO_INCREMENT:
-					parsedStatusVariables.add(QAutoIncrement.valueOf(buf));
-					break;
-				case BinlogConstants.Q_CATALOG_CODE:
-					parsedStatusVariables.add(QCatalogCode.valueOf(buf));
-					break;
-				case BinlogConstants.Q_CATALOG_NZ_CODE:
-					parsedStatusVariables.add(QCatalogNZCode.valueOf(buf));
-					break;
-				case BinlogConstants.Q_CHARSET_CODE:
-					parsedStatusVariables.add(QCharsetCode.valueOf(buf));
-					break;
-				case BinlogConstants.Q_CHARSET_DATABASE_CODE:
-					parsedStatusVariables.add(QCharsetDatabaseCode.valueOf(buf));
-					break;
-				case BinlogConstants.Q_FLAGS2_CODE:
-					parsedStatusVariables.add(QFlags2Code.valueOf(buf));
-					break;
-				case BinlogConstants.Q_LC_TIME_NAMES_CODE:
-					parsedStatusVariables.add(QLCTimeNamesCode.valueOf(buf));
-					break;
-				case BinlogConstants.Q_SQL_MODE_CODE:
-					parsedStatusVariables.add(QSQLModeCode.valueOf(buf));
-					break;
-				case BinlogConstants.Q_TABLE_MAP_FOR_UPDATE_CODE:
-					parsedStatusVariables.add(QTableMapForUpdateCode.valueOf(buf));
-					break;
-				case BinlogConstants.Q_TIME_ZONE_CODE:
-					parsedStatusVariables.add(QTimeZoneCode.valueOf(buf));
-					break;
-				default:
-					abort = true;
-					break;
+			case BinlogConstants.Q_AUTO_INCREMENT:
+				parsedStatusVariables.add(QAutoIncrement.valueOf(buf));
+				break;
+			case BinlogConstants.Q_CATALOG_CODE:
+				parsedStatusVariables.add(QCatalogCode.valueOf(buf));
+				break;
+			case BinlogConstants.Q_CATALOG_NZ_CODE:
+				parsedStatusVariables.add(QCatalogNZCode.valueOf(buf));
+				break;
+			case BinlogConstants.Q_CHARSET_CODE:
+				parsedStatusVariables.add(QCharsetCode.valueOf(buf));
+				break;
+			case BinlogConstants.Q_CHARSET_DATABASE_CODE:
+				parsedStatusVariables.add(QCharsetDatabaseCode.valueOf(buf));
+				break;
+			case BinlogConstants.Q_FLAGS2_CODE:
+				parsedStatusVariables.add(QFlags2Code.valueOf(buf));
+				break;
+			case BinlogConstants.Q_LC_TIME_NAMES_CODE:
+				parsedStatusVariables.add(QLCTimeNamesCode.valueOf(buf));
+				break;
+			case BinlogConstants.Q_SQL_MODE_CODE:
+				parsedStatusVariables.add(QSQLModeCode.valueOf(buf));
+				break;
+			case BinlogConstants.Q_TABLE_MAP_FOR_UPDATE_CODE:
+				parsedStatusVariables.add(QTableMapForUpdateCode.valueOf(buf));
+				break;
+			case BinlogConstants.Q_TIME_ZONE_CODE:
+				parsedStatusVariables.add(QTimeZoneCode.valueOf(buf));
+				break;
+			default:
+				abort = true;
+				break;
 			}
 		}
 		return parsedStatusVariables;

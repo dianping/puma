@@ -15,6 +15,7 @@ package com.dianping.puma.parser.mysql.packet;
 import java.nio.ByteBuffer;
 
 import com.dianping.puma.bo.PumaContext;
+import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.MySQLCommunicationConstant;
 import com.dianping.puma.parser.mysql.utils.MySQLUtils;
 import com.dianping.puma.utils.PacketUtils;
@@ -40,7 +41,10 @@ public class ConnectPacket extends AbstractResponsePacket {
 		} else {
 			context.setMaxThreeBytes(255 * 255 * 255);
 		}
-
+		if(versionProduct(context.getServerMajorVersion(), context.getServerMinorVersion(),
+				context.getServerSubMinorVersion()) >= BinlogConstants.checksumVersionProduct){
+			context.setChecksumAlg(BinlogConstants.CHECKSUM_ALG_CRC32);
+		}
 		context.setThreadId(PacketUtils.readLong(buf, 4));
 		context.setSeed(PacketUtils.readNullTerminatedString(buf));
 
@@ -140,6 +144,9 @@ public class ConnectPacket extends AbstractResponsePacket {
 				}
 			}
 		}
+	}
+	private long versionProduct(int serverMajorVersion,int serverMinorVersion,int serverSubMinorVersion) {
+		return ((serverMajorVersion * 256 + serverMinorVersion) * 256 + serverSubMinorVersion);
 	}
 
 }

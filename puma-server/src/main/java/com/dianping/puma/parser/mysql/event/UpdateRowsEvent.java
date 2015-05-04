@@ -34,10 +34,10 @@ import com.dianping.puma.utils.PacketUtils;
  */
 public class UpdateRowsEvent extends AbstractRowsEvent {
 
-	private static final long			serialVersionUID	= -877826157536949565L;
-	private BitSet						usedColumnsBefore;
-	private BitSet						usedColumnsAfter;
-	private List<UpdatedRowData<Row>>	rows;
+	private static final long serialVersionUID = -877826157536949565L;
+	private BitSet usedColumnsBefore;
+	private BitSet usedColumnsAfter;
+	private List<UpdatedRowData<Row>> rows;
 
 	/*
 	 * (non-Javadoc)
@@ -76,16 +76,18 @@ public class UpdateRowsEvent extends AbstractRowsEvent {
 		tableMapEvent = context.getTableMaps().get(tableId);
 		usedColumnsBefore = PacketUtils.readBitSet(buf, columnCount.intValue());
 		usedColumnsAfter = PacketUtils.readBitSet(buf, columnCount.intValue());
-
-		rows = parseRows(buf);
+		
+		rows = parseRows(buf, context);
 	}
 
-	protected List<UpdatedRowData<Row>> parseRows(ByteBuffer buf) throws IOException {
+	protected List<UpdatedRowData<Row>> parseRows(ByteBuffer buf, PumaContext context) throws IOException {
 		final List<UpdatedRowData<Row>> r = new LinkedList<UpdatedRowData<Row>>();
-		while (buf.hasRemaining()) {
+		boolean isRemaining = context.isCheckSum() ? buf.remaining() - 4 > 0 : buf.hasRemaining();
+		while (isRemaining) {
 			final Row before = parseRow(buf, usedColumnsBefore);
 			final Row after = parseRow(buf, usedColumnsAfter);
 			r.add(new UpdatedRowData<Row>(before, after));
+			isRemaining = context.isCheckSum() ? buf.remaining() - 4 > 0 : buf.hasRemaining();
 		}
 		return r;
 	}

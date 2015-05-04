@@ -25,7 +25,7 @@ import com.dianping.puma.utils.PacketUtils;
  * 
  */
 public abstract class AbstractResponsePacket extends AbstractPacket implements ResponsePacket {
-	private static final long	serialVersionUID	= 3648947016393523542L;
+	private static final long serialVersionUID = 3648947016393523542L;
 
 	protected void readHeader(InputStream is) throws IOException {
 		byte[] buf = new byte[4];
@@ -52,7 +52,9 @@ public abstract class AbstractResponsePacket extends AbstractPacket implements R
 	public void readPacket(InputStream is, PumaContext context) throws IOException {
 		readHeader(is);
 		byte[] buf = new byte[length];
-		int lenRead = PacketUtils.readFully(is, buf, 0, length);
+		;
+		int lenRead = 0;
+		lenRead = PacketUtils.readFully(is, buf, 0, length);
 
 		if (lenRead != length) {
 			throw new IOException("Short read, expected " + length + " bytes, only read " + lenRead);

@@ -101,14 +101,14 @@ public class DefaultBinlogParser implements Parser {
 		eventMaps.put(BinlogConstants.FORMAT_DESCRIPTION_EVENT, FormatDescriptionEvent.class);
 		eventMaps.put(BinlogConstants.XID_EVENT, XIDEvent.class);
 		eventMaps.put(BinlogConstants.TABLE_MAP_EVENT, TableMapEvent.class);
+		eventMaps.put(BinlogConstants.WRITE_ROWS_EVENT_V1, WriteRowsEvent.class);
+		eventMaps.put(BinlogConstants.UPDATE_ROWS_EVENT_V1, UpdateRowsEvent.class);
+		eventMaps.put(BinlogConstants.DELETE_ROWS_EVENT_V1, DeleteRowsEvent.class);
+		eventMaps.put(BinlogConstants.INCIDENT_EVENT, IncidentEvent.class);
+		//mysql --5.6
 		eventMaps.put(BinlogConstants.WRITE_ROWS_EVENT, WriteRowsEvent.class);
 		eventMaps.put(BinlogConstants.UPDATE_ROWS_EVENT, UpdateRowsEvent.class);
 		eventMaps.put(BinlogConstants.DELETE_ROWS_EVENT, DeleteRowsEvent.class);
-		eventMaps.put(BinlogConstants.INCIDENT_EVENT, IncidentEvent.class);
-		//mysql --5.6
-		eventMaps.put(BinlogConstants.WRITE_ROWS_EVENT_V5_6, WriteRowsEvent.class);
-		eventMaps.put(BinlogConstants.UPDATE_ROWS_EVENT_V5_6, UpdateRowsEvent.class);
-		eventMaps.put(BinlogConstants.DELETE_ROWS_EVENT_V5_6, DeleteRowsEvent.class);
 		eventMaps.put(BinlogConstants.HEARTBEAT_LOG_EVENT, HeartbeatEvent.class);
 		eventMaps.put(BinlogConstants.IGNORABLE_LOG_EVENT, IgnorableEvent.class);
 		eventMaps.put(BinlogConstants.ROWS_QUERY_LOG_EVENT, RowsQueryEvent.class);

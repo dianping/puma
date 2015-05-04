@@ -30,36 +30,39 @@ public final class PacketFactory {
 	public static ResponsePacket parsePacket(InputStream is, PacketType packetType, PumaContext context)
 			throws IOException {
 		switch (packetType) {
-			case CONNECT_PACKET:
-				ResponsePacket greetingPacket = new ConnectPacket();
-				greetingPacket.readPacket(is, context);
-				return greetingPacket;
-			case OKERROR_PACKET:
-				OKErrorPacket okErrorPacket = new OKErrorPacket();
-				okErrorPacket.readPacket(is, context);
-				return okErrorPacket;
-			case BINLOG_PACKET:
-				BinlogPacket binlogPacket = new BinlogPacket();
-				binlogPacket.readPacket(is, context);
-				return binlogPacket;
-			default:
-				return null;
+		case CONNECT_PACKET:
+			ResponsePacket greetingPacket = new ConnectPacket();
+			greetingPacket.readPacket(is, context);
+			return greetingPacket;
+		case OKERROR_PACKET:
+			OKErrorPacket okErrorPacket = new OKErrorPacket();
+			okErrorPacket.readPacket(is, context);
+			return okErrorPacket;
+		case BINLOG_PACKET:
+			BinlogPacket binlogPacket = new BinlogPacket();
+			binlogPacket.readPacket(is, context);
+			return binlogPacket;
+		default:
+			return null;
 		}
 	}
 
 	public static CommandPacket createCommandPacket(PacketType packetType, PumaContext context) {
 		switch (packetType) {
-			case AUTHENTICATE_PACKET:
-				AuthenticatePacket authenticatePacket = new AuthenticatePacket();
-				authenticatePacket.setSeed(context.getSeed());
-				authenticatePacket.setSeq(1);
-				return authenticatePacket;
-			case COM_BINLOG_DUMP_PACKET:
-				ComBinlogDumpPacket comBinlogDumpPacket = new ComBinlogDumpPacket();
-				comBinlogDumpPacket.setSeq(0);
-				return comBinlogDumpPacket;
-			default:
-				return null;
+		case AUTHENTICATE_PACKET:
+			AuthenticatePacket authenticatePacket = new AuthenticatePacket();
+			authenticatePacket.setSeed(context.getSeed());
+			authenticatePacket.setSeq(1);
+			return authenticatePacket;
+		case COM_BINLOG_DUMP_PACKET:
+			ComBinlogDumpPacket comBinlogDumpPacket = new ComBinlogDumpPacket();
+			comBinlogDumpPacket.setSeq(0);
+			return comBinlogDumpPacket;
+		case QUERY_COMMAND_PACKET:
+			QueryCommandPacket queryCommandPacket = new QueryCommandPacket();
+			return queryCommandPacket;
+		default:
+			return null;
 		}
 	}
 

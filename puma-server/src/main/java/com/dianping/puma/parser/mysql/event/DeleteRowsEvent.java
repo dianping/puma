@@ -33,9 +33,9 @@ import com.dianping.puma.utils.PacketUtils;
  */
 public class DeleteRowsEvent extends AbstractRowsEvent {
 
-	private static final long	serialVersionUID	= -4574646483606347256L;
-	private BitSet				usedColumns;
-	private List<Row>			rows;
+	private static final long serialVersionUID = -4574646483606347256L;
+	private BitSet usedColumns;
+	private List<Row> rows;
 
 	/**
 	 * @return the usedColumns
@@ -66,14 +66,16 @@ public class DeleteRowsEvent extends AbstractRowsEvent {
 	protected void innderParse(ByteBuffer buf, PumaContext context) throws IOException {
 		tableMapEvent = context.getTableMaps().get(tableId);
 		usedColumns = PacketUtils.readBitSet(buf, columnCount.intValue());
-		rows = parseRows(buf);
-
+		
+		rows = parseRows(buf, context);
 	}
 
-	protected List<Row> parseRows(ByteBuffer buf) throws IOException {
+	protected List<Row> parseRows(ByteBuffer buf, PumaContext context) throws IOException {
 		final List<Row> r = new LinkedList<Row>();
-		while (buf.hasRemaining()) {
+		boolean isRemaining = context.isCheckSum() ? buf.remaining() - 4 > 0 : buf.hasRemaining();
+		while (isRemaining) {
 			r.add(parseRow(buf, usedColumns));
+			isRemaining = context.isCheckSum() ? buf.remaining() - 4 > 0 : buf.hasRemaining();
 		}
 		return r;
 	}

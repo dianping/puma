@@ -17,6 +17,8 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.concurrent.TimeUnit;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
 import com.dianping.puma.ComponentContainer;
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.model.BinlogInfo;
@@ -24,6 +26,7 @@ import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.monitor.FetcherEventCountMonitor;
 import com.dianping.puma.monitor.FetcherEventDelayMonitor;
 import com.dianping.puma.monitor.ParserEventCountMonitor;
+
 import org.apache.commons.lang.StringUtils;
 
 import com.dianping.puma.common.SystemStatusContainer;
@@ -41,6 +44,8 @@ import com.dianping.puma.parser.mysql.packet.ComBinlogDumpPacket;
 import com.dianping.puma.parser.mysql.packet.OKErrorPacket;
 import com.dianping.puma.parser.mysql.packet.PacketFactory;
 import com.dianping.puma.parser.mysql.packet.PacketType;
+import com.dianping.puma.parser.mysql.packet.QueryCommandPacket;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,11 +134,17 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 					LOG.info("Server logined... taskName: " + getTaskName() + " host: " + dbHost + " port: " + port
 							+ " username: " + dbUsername + " database: " + database + " dbServerId: " + getDbServerId());
 
-					if (dumpBinlog()) {
-						LOG.info("Dump binlog command success.");
-						processBinlog();
+					if (updateSetting()) {
+						LOG.info("update setting command success.");
+
+						if (dumpBinlog()) {
+							LOG.info("Dump binlog command success.");
+							processBinlog();
+						} else {
+							throw new IOException("Dump binlog failed.");
+						}
 					} else {
-						throw new IOException("Dump binlog failed.");
+						throw new IOException("update setting command failed.");
 					}
 				} else {
 					throw new IOException("Login failed.");
@@ -147,9 +158,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 							+ dbHost + ":" + port + "] for 3 times.", e, true);
 					failCount = 0;
 				}
-				LOG.error(
-						"Exception occurs. taskName: " + getTaskName() + " dbServerId: " + getDbServerId() + ". Reconnect...",
-						e);
+				LOG.error("Exception occurs. taskName: " + getTaskName() + " dbServerId: " + getDbServerId()
+						+ ". Reconnect...", e);
 				Thread.sleep(((failCount % 10) + 1) * 2000);
 			}
 		} while (!isStop());
@@ -158,14 +168,14 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 	private void processBinlog() throws IOException {
 		while (!isStop()) {
-			//LOG.info("Enter `processBinlog` infinite loop!");
+			// LOG.info("Enter `processBinlog` infinite loop!");
 
 			// only slow down parsing, not stop
 			if (SystemStatusContainer.instance.isStopTheWorld(this.getTaskName())) {
 				try {
 					TimeUnit.SECONDS.sleep(1);
 				} catch (InterruptedException e) {
-					//ignore
+					// ignore
 				}
 			}
 
@@ -180,7 +190,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 		}
 
-		//LOG.info("Exit `processBinlog` infinite loop!");
+		// LOG.info("Exit `processBinlog` infinite loop!");
 	}
 
 	protected void processBinlogPacket(BinlogPacket binlogPacket) throws IOException {
@@ -229,13 +239,14 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				&& StringUtils.isNotBlank(getContext().getBinlogFileName())
 				&& dataHandlerResult != null
 				&& !dataHandlerResult.isEmpty()
-				&& (dataHandlerResult.getData() instanceof DdlEvent || (
-				dataHandlerResult.getData() instanceof RowChangedEvent && ((RowChangedEvent) dataHandlerResult
+				&& (dataHandlerResult.getData() instanceof DdlEvent || (dataHandlerResult.getData() instanceof RowChangedEvent && ((RowChangedEvent) dataHandlerResult
 						.getData()).isTransactionCommit()))) {
-			//LOG.info("Save occurs: {}, {}.", getContext().getBinlogFileName(), binlogEvent.getHeader().getNextPosition());
+			// LOG.info("Save occurs: {}, {}.",
+			// getContext().getBinlogFileName(),
+			// binlogEvent.getHeader().getNextPosition());
 			// save position
-			binlogInfoHolder.setBinlogInfo(getTaskName(),
-					new BinlogInfo(getContext().getBinlogFileName(), binlogEvent.getHeader().getNextPosition()));
+			binlogInfoHolder.setBinlogInfo(getTaskName(), new BinlogInfo(getContext().getBinlogFileName(), binlogEvent
+					.getHeader().getNextPosition()));
 		}
 	}
 
@@ -336,8 +347,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 						startPos = 0;
 					}
 					String binlogFile = dumpCommandResultPacket.getMessage().substring(startPos);
-					binlogInfoHolder
-							.setBinlogInfo(getTaskName(), new BinlogInfo(binlogFile, getContext().getBinlogStartPos()));
+					binlogInfoHolder.setBinlogInfo(getTaskName(), new BinlogInfo(binlogFile, getContext()
+							.getBinlogStartPos()));
 					getContext().setBinlogFileName(binlogFile);
 				}
 
@@ -381,6 +392,35 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		}
 
 		return isAuth;
+	}
+	/**
+	 * Send QueryCommand Packet to mysql master and parse the response
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	private boolean updateSetting() throws IOException {
+		QueryCommandPacket queryCommandPacket = (QueryCommandPacket) PacketFactory.createCommandPacket(
+				PacketType.QUERY_COMMAND_PACKET, getContext());
+		queryCommandPacket.setQueryString("set @master_binlog_checksum= '@@global.binlog_checksum'");
+		queryCommandPacket.buildPacket(getContext());
+		queryCommandPacket.write(os, getContext());
+		OKErrorPacket okErrorPacket = (OKErrorPacket) PacketFactory.parsePacket(is, PacketType.OKERROR_PACKET,
+				getContext());
+		boolean isUpdate;
+		String eventStatus;
+		String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
+		if (okErrorPacket.isOk()) {
+			isUpdate = true;
+			eventStatus = Message.SUCCESS;
+		} else {
+			isUpdate = false;
+			eventStatus = "1";
+			LOG.error("updateSetting failed. Reason: " + okErrorPacket.getMessage());
+		}
+
+		Cat.logEvent("Slave.dbUpdate", eventName, eventStatus, "");
+		return isUpdate;
 	}
 
 	protected void doStop() throws Exception {
@@ -435,7 +475,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			context.setBinlogStartPos(binlogInfo.getBinlogPosition());
 		}
 
-		//context.setPumaServerId(taskExecutor.getServerId());
+		// context.setPumaServerId(taskExecutor.getServerId());
 		context.setPumaServerName(this.getTaskName());
 		this.setContext(context);
 	}
@@ -488,7 +528,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	}
 
 	/**
-	 * @param database the database to set
+	 * @param database
+	 *            the database to set
 	 */
 	public void setDatabase(String database) {
 		this.database = database;
@@ -502,7 +543,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	}
 
 	/**
-	 * @param dbServerId the dbServerId to set
+	 * @param dbServerId
+	 *            the dbServerId to set
 	 */
 	public void setDbServerId(long dbServerId) {
 		this.dbServerId = dbServerId;

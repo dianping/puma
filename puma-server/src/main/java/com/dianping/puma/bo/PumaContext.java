@@ -16,6 +16,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 import com.dianping.puma.core.LRUCache;
+import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.event.TableMapEvent;
 
 /**
@@ -23,30 +24,31 @@ import com.dianping.puma.parser.mysql.event.TableMapEvent;
  * 
  */
 public class PumaContext implements Serializable {
-	private static final long			serialVersionUID		= -2280369356150286536L;
-	private String						serverVersion			= null;
-	private int							serverMajorVersion		= 0;
-	private int							serverMinorVersion		= 0;
-	private int							serverSubMinorVersion	= 0;
-	private int							maxThreeBytes			= 255 * 255 * 255;
-	private byte						protocolVersion			= 0;
-	private long						threadId;
-	private String						seed;
-	private int							serverCapabilities;
-	private int							serverCharsetIndex;
-	private int							serverStatus			= 0;
-	private int							clientParam				= 0;
-	private boolean						has41NewNewProt			= false;
-	private boolean						use41Extensions			= false;
-	private String						encoding				= "utf-8";
-	private String						binlogFileName;
-	private long						binlogStartPos;
-	private String						pumaServerId;
-	private String						pumaServerName;
-	private Map<Long, TableMapEvent>	tableMaps				= new LRUCache<Long, TableMapEvent>(300);
-	private String						masterUrl;
-	private long						nextBinlogPos;
-    private long dbServerId;
+	private static final long serialVersionUID = -2280369356150286536L;
+	private String serverVersion = null;
+	private int serverMajorVersion = 0;
+	private int serverMinorVersion = 0;
+	private int serverSubMinorVersion = 0;
+	private int maxThreeBytes = 255 * 255 * 255;
+	private byte protocolVersion = 0;
+	private long threadId;
+	private String seed;
+	private int serverCapabilities;
+	private int serverCharsetIndex;
+	private int serverStatus = 0;
+	private int clientParam = 0;
+	private boolean has41NewNewProt = false;
+	private boolean use41Extensions = false;
+	private String encoding = "utf-8";
+	private String binlogFileName;
+	private long binlogStartPos;
+	private String pumaServerId;
+	private String pumaServerName;
+	private Map<Long, TableMapEvent> tableMaps = new LRUCache<Long, TableMapEvent>(300);
+	private String masterUrl;
+	private long nextBinlogPos;
+	private long dbServerId;
+	private int checksumAlg;
 
 	/**
 	 * @return the nextBinlogPos
@@ -259,11 +261,26 @@ public class PumaContext implements Serializable {
 		this.serverStatus = serverStatus;
 	}
 
-    public void setDBServerId(long dbServerId) {
-        this.dbServerId = dbServerId;
-    }
+	public void setDBServerId(long dbServerId) {
+		this.dbServerId = dbServerId;
+	}
 
-    public long getDBServerId(){
-        return this.dbServerId;
-    }
+	public long getDBServerId() {
+		return this.dbServerId;
+	}
+
+	public int getChecksumAlg() {
+		return checksumAlg;
+	}
+
+	public void setChecksumAlg(int checksumAlg) {
+		this.checksumAlg = checksumAlg;
+	}
+
+	public boolean isCheckSum() {
+		if (checksumAlg != BinlogConstants.CHECKSUM_ALG_OFF && checksumAlg != BinlogConstants.CHECKSUM_ALG_UNDEF) {
+			return true;
+		}
+		return false;
+	}
 }

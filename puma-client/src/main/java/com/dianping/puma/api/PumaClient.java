@@ -14,6 +14,7 @@ import com.dianping.puma.api.sequence.MemcachedSequenceHolder;
 import com.dianping.puma.api.sequence.SequenceHolder;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.codec.EventCodecFactory;
+import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.HeartbeatEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
@@ -162,10 +163,10 @@ public class PumaClient {
 						}
 						Event event = readEvent(is);
 						if (event instanceof HeartbeatEvent) {
-							onHeartbeatEvent(event);
+							onHeartbeatEvent((HeartbeatEvent)event);
 							continue;
 						} else {
-							onChangedEvent(event);
+							onChangedEvent((ChangedEvent)event);
 						}
 					}
 				} catch (InterruptedException e) {
@@ -199,13 +200,12 @@ public class PumaClient {
 			return false;
 		}
 
-		private void onHeartbeatEvent(Event event) {
+		private void onHeartbeatEvent(HeartbeatEvent event) {
 			setHasHeartbeat(true);
-			eventListener.onHeartbeatEvent(event);
 			log.info("Puma client[" + config.getName() + "] heartbeat.");
 		}
 
-		private void onChangedEvent(Event event) {
+		private void onChangedEvent(ChangedEvent event) {
 			boolean listenerCallSuccess = true;
 			// call event listener until success
 			while (true) {

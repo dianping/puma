@@ -1,5 +1,6 @@
 package com.dianping.puma.api;
 
+import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.Event;
 
 public interface EventListener {
@@ -9,7 +10,7 @@ public interface EventListener {
      * @param event 事件
      * @throws Exception
      */
-    public void onEvent(Event event) throws Exception;
+    public void onEvent(ChangedEvent event) throws Exception;
 
     /**
      * 事件异常回调函数
@@ -18,7 +19,7 @@ public interface EventListener {
      * @param e 发生的异常
      * @return 是否可以跳过此事件
      */
-    public boolean onException(Event event, Exception e);
+    public boolean onException(ChangedEvent event, Exception e);
 
     /**
      * 连接事件异常回调函数
@@ -37,12 +38,6 @@ public interface EventListener {
      * 
      * @param event 被跳过的事件
      */
-    public void onSkipEvent(Event event);
+    public void onSkipEvent(ChangedEvent event);
     
-    /**
-     *心跳事件的回调函数
-     *
-     * @param event
-     */
-    public void onHeartbeatEvent(Event event);
 }

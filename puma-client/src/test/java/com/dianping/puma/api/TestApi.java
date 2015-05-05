@@ -49,18 +49,18 @@ public class TestApi {
 		pc.register(new EventListener() {
 
 			@Override
-			public void onSkipEvent(Event event) {
+			public void onSkipEvent(ChangedEvent event) {
 				System.out.println(">>>>>>>>>>>>>>>>>>Skip " + event);
 			}
 
 			@Override
-			public boolean onException(Event event, Exception e) {
+			public boolean onException(ChangedEvent event, Exception e) {
 				System.out.println("-------------Exception " + e);
 				return true;
 			}
 
 			@Override
-			public void onEvent(Event event) throws Exception {
+			public void onEvent(ChangedEvent event) throws Exception {
 				// biz logic
 				if (event instanceof RowChangedEvent) {
 					RowChangedEvent rce = (RowChangedEvent) event;
@@ -77,10 +77,6 @@ public class TestApi {
 			public void onConnected() {
 			}
 			
-			@Override
-	        public void onHeartbeatEvent(Event event){
-	            	
-	        }
 		});
 		pc.start();
 	}

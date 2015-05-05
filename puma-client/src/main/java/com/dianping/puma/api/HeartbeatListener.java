@@ -6,6 +6,8 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
@@ -47,7 +49,7 @@ public class HeartbeatListener {
 			public void onChange(String key, String value) {
 				if (HEARTBEAT_CHECKER_INTERVAL_NAME.equals(key)) {
 					HeartbeatListener.this.setInterval(Long.parseLong(value));
-					if(HeartbeatListener.this.isFutureValid()){
+					if (HeartbeatListener.this.isFutureValid()) {
 						future.cancel(true);
 						if (HeartbeatListener.this.isScheduledValid()) {
 							HeartbeatListener.this.start();
@@ -65,7 +67,7 @@ public class HeartbeatListener {
 	}
 
 	public void stop() {
-		if(isFutureValid()) {
+		if (isFutureValid()) {
 			future.cancel(true);
 		}
 	}
@@ -124,15 +126,19 @@ public class HeartbeatListener {
 		}
 		return false;
 	}
-	
+
 	private class HeartbeatListenTask implements Runnable {
 		@Override
 		public void run() {
 			if (pumaClient.isHasHeartbeat()) {
-				LOG.info("pumaClient receive heartbeat. reset heart beat mark.");
 				pumaClient.setHasHeartbeat(false);
+				LOG.info("PumaClient " + pumaClient.getConfig().getName()
+						+ " receive heartbeat. reset heart beat mark.");
+				Cat.logEvent("ClientConnect.Heartbeated", pumaClient.getConfig().getName(), Message.SUCCESS, "");
 			} else {
-				LOG.info("puma client no receive heartbeat. restart pumaClient.");
+				LOG.info("PumaClient " + pumaClient.getConfig().getName()
+						+ " no receive heartbeat. restart pumaClient.");
+				Cat.logEvent("ClientConnect.Heartbeated", pumaClient.getConfig().getName(), "1", "");
 				pumaClient.stop();
 				pumaClient.start();
 			}

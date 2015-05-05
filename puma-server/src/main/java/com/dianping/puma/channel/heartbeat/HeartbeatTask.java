@@ -15,8 +15,11 @@ import com.dianping.cat.Cat;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
+import com.dianping.puma.ComponentContainer;
+import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.HeartbeatEvent;
+import com.dianping.puma.core.model.container.client.ClientStateContainer;
 import com.dianping.puma.core.util.ByteArrayUtils;
 
 public class HeartbeatTask {
@@ -24,11 +27,11 @@ public class HeartbeatTask {
 	private static final Logger LOG = LoggerFactory.getLogger(HeartbeatTask.class);
 
 	private static final String HEARTBEAT_SENDER_INTERVAL_NAME = "puma.server.heartbeatsender.interval";
-
+	private String clientName;
 	private long initialDelay;
 	private long interval;
 	private TimeUnit unit;
-	
+
 	private Future future;
 
 	private HttpServletResponse response;
@@ -42,40 +45,7 @@ public class HeartbeatTask {
 	@Autowired
 	private HeartbeatScheduledExecutor heartbeatScheduledExecutor;
 
-	public void setInitialDelay(long initialDelay) {
-		this.initialDelay = initialDelay;
-	}
-
-	public long getInitialDelay() {
-		return initialDelay;
-	}
-
-	public void setInterval(long interval) {
-		this.interval = interval;
-	}
-
-	public long getInterval() {
-		return interval;
-	}
-
-	public void setUnit(TimeUnit unit) {
-		this.unit = unit;
-	}
-
-	public TimeUnit getUnit() {
-		return unit;
-	}
-	
-	@SuppressWarnings("rawtypes")
-	public Future getFuture() {
-		return this.future;
-	}
-
-	public void setFuture(@SuppressWarnings("rawtypes") Future future) {
-		this.future = future;
-	}
-
-	public HeartbeatTask(EventCodec codec, HttpServletResponse response) {
+	public HeartbeatTask(EventCodec codec, HttpServletResponse response, String clientName) {
 		this.initialDelay = 0;
 		this.unit = TimeUnit.MILLISECONDS;
 		initConfig();
@@ -117,7 +87,7 @@ public class HeartbeatTask {
 			getFuture().cancel(true);
 		}
 	}
-	
+
 	public void execute() {
 		future = executorService.scheduleWithFixedDelay(new HeartbeatSender(), getInitialDelay(), getInterval(),
 				getUnit());
@@ -136,6 +106,14 @@ public class HeartbeatTask {
 		return interval;
 	}
 
+	public void setClientName(String clientName) {
+		this.clientName = clientName;
+	}
+
+	public String getClientName() {
+		return clientName;
+	}
+	
 	private class HeartbeatSender implements Runnable {
 		@Override
 		public void run() {
@@ -147,7 +125,7 @@ public class HeartbeatTask {
 
 						response.getOutputStream().write(data);
 						response.getOutputStream().flush();
-						LOG.info("puma server heartbeat sended.");
+						LOG.info(HeartbeatTask.this.clientName +" puma server heartbeat sended.");
 					} catch (IOException e) {
 						HeartbeatTask.this.cancelFuture();
 						try {
@@ -155,7 +133,11 @@ public class HeartbeatTask {
 						} catch (IOException e1) {
 							// ignore
 						}
-						Cat.getProducer().logError("puma.server.client.heartbeat.exception:", e);
+						ClientStateContainer clientStateContainer = ComponentContainer.SPRING.lookup("clientStateContainer");
+						clientStateContainer.remove(HeartbeatTask.this.clientName);
+						SystemStatusContainer.instance.removeClient(HeartbeatTask.this.clientName);
+						Cat.getProducer().logError(
+								"puma.server.client.heartbeat.exception: " + HeartbeatTask.this.clientName, e);
 						LOG.error("heartbeat.exception: ", e);
 					}
 				}
@@ -163,4 +145,38 @@ public class HeartbeatTask {
 		}
 
 	}
+
+	public void setInitialDelay(long initialDelay) {
+		this.initialDelay = initialDelay;
+	}
+
+	public long getInitialDelay() {
+		return initialDelay;
+	}
+
+	public void setInterval(long interval) {
+		this.interval = interval;
+	}
+
+	public long getInterval() {
+		return interval;
+	}
+
+	public void setUnit(TimeUnit unit) {
+		this.unit = unit;
+	}
+
+	public TimeUnit getUnit() {
+		return unit;
+	}
+
+	@SuppressWarnings("rawtypes")
+	public Future getFuture() {
+		return this.future;
+	}
+
+	public void setFuture(@SuppressWarnings("rawtypes") Future future) {
+		this.future = future;
+	}
+
 }

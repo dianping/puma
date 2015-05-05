@@ -4,8 +4,10 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.PumaThreadPool;
+import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.puma.syncserver.job.load.exception.LoadException;
 import com.dianping.puma.syncserver.job.load.model.BatchRows;
+import com.dianping.puma.syncserver.job.load.model.RowKey;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 
@@ -77,8 +79,16 @@ public class BatchLoader implements Loader {
 				@Override
 				public void run() {
 					try {
-						execute(row);
-						batchRows.remove(row);
+						int affectedRows = execute(row);
+
+						// If no row is updated by the UPDATE statement, use INSERT instead.
+						if (row.getDMLType() == DMLType.UPDATE && affectedRows == 0) {
+							row.setDMLType(DMLType.INSERT);
+							execute(row);
+						}
+
+						// If sql is success, removes it.
+						batchRows.remove(RowKey.getNewRowKey(row));
 					} catch (Exception e) {
 						batchSuccess = false;
 					} finally {
@@ -90,36 +100,41 @@ public class BatchLoader implements Loader {
 
 		try {
 			latch.await();
+
+			if (!batchSuccess) {
+				throw new LoadException("0");
+			}
+
 		} catch (InterruptedException e) {
 			// @TODO
 			throw new LoadException("0");
 		}
 	}
 
-	private void execute(ChangedEvent event) {
+	private int execute(ChangedEvent event) {
 		if (event instanceof DdlEvent) {
-			executeDDL((DdlEvent) event);
+			return executeDDL((DdlEvent) event);
 		} else {
-			executeDML((RowChangedEvent) event);
+			return executeDML((RowChangedEvent) event);
 		}
 	}
 
-	private void executeDML(RowChangedEvent dml) {
+	private int executeDML(RowChangedEvent dml) {
 		try {
 			String sql = LoadParser.parseSql(dml);
 			Object[] args = LoadParser.parseArgs(dml);
 			QueryRunner run = new QueryRunner(dataSource);
-			run.update(sql, args);
+			return run.update(sql, args);
 		} catch (SQLException e) {
 			throw new LoadException(String.valueOf(e.getErrorCode()), e.getMessage(), e.getCause());
 		}
 	}
 
-	private void executeDDL(DdlEvent ddl) {
+	private int executeDDL(DdlEvent ddl) {
 		try {
 			String sql = ddl.getSql();
 			QueryRunner runner = new QueryRunner(dataSource);
-			runner.update(sql);
+			return runner.update(sql);
 		} catch (SQLException e) {
 			throw new LoadException(String.valueOf(e.getErrorCode()), e.getMessage(), e.getCause());
 		}

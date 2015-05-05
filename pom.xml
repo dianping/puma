@@ -45,7 +45,7 @@
             <dependency>
                 <groupId>com.dianping</groupId>
                 <artifactId>avatar-cache</artifactId>
-                <version>2.5.10</version>
+                <version>2.6.5</version>
             </dependency>
             <dependency>
                 <groupId>com.dianping.lion</groupId>

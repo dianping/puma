@@ -134,20 +134,21 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 					LOG.info("Server logined... taskName: " + getTaskName() + " host: " + dbHost + " port: " + port
 							+ " username: " + dbUsername + " database: " + database + " dbServerId: " + getDbServerId());
 
-					if (updateSetting()) {
-						LOG.info("update setting command success.");
-
-						if (dumpBinlog()) {
-							LOG.info("Dump binlog command success.");
-							processBinlog();
-						} else {
-							throw new IOException("Dump binlog failed.");
+					if (getContext().isCheckSum()) {
+						if (!updateSetting()) {
+							throw new IOException("Login failed.");
 						}
+						LOG.info("update setting command success.");
+					}
+
+					if (dumpBinlog()) {
+						LOG.info("Dump binlog command success.");
+						processBinlog();
 					} else {
-						throw new IOException("update setting command failed.");
+						throw new IOException("Dump binlog failed.");
 					}
 				} else {
-					throw new IOException("Login failed.");
+					throw new IOException("update setting command failed.");
 				}
 			} catch (Throwable e) {
 				if (isStop()) {
@@ -393,6 +394,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 		return isAuth;
 	}
+
 	/**
 	 * Send QueryCommand Packet to mysql master and parse the response
 	 * 

@@ -15,7 +15,8 @@ public class RowsQueryEvent extends AbstractBinlogEvent {
 
 	@Override
 	public void doParse(ByteBuffer buf, PumaContext context) throws IOException {
-		rowsQuery = PacketUtils.readNullTerminatedString(buf);
+		int lenRemaining = context.isCheckSum() ? buf.remaining() - 4 : buf.remaining();
+		rowsQuery = PacketUtils.readFixedLengthString(buf, lenRemaining);
 	}
 
 	public void setRowsQuery(String rowsQuery) {

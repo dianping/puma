@@ -65,7 +65,7 @@ public abstract class AbstractBinlogEvent implements BinlogEvent {
 	 */
 	@Override
 	public String toString() {
-		return "AbstractBinlogEvent [header=" + header + "]";
+		return "AbstractBinlogEvent [header=" + header + ", checksumAlg=" + checksumAlg + ",crc =" + crc + "]";
 	}
 
 	public void setChecksumAlg(int checksumAlg) {

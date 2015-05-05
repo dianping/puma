@@ -128,7 +128,7 @@ public class HeartbeatTask {
 						response.getOutputStream().write(data);
 						response.getOutputStream().flush();
 						LOG.info(HeartbeatTask.this.clientName + " puma server heartbeat sended.");
-						Cat.logEvent("ClientConnect.Heartbeated", HeartbeatTask.this.clientName, Message.SUCCESS, "");
+						Cat.logEvent("ClientConnect.heartbeated", HeartbeatTask.this.clientName, Message.SUCCESS, "");
 					} catch (IOException e) {
 						HeartbeatTask.this.cancelFuture();
 						try {
@@ -140,7 +140,7 @@ public class HeartbeatTask {
 								.lookup("clientStateContainer");
 						clientStateContainer.remove(HeartbeatTask.this.clientName);
 						SystemStatusContainer.instance.removeClient(HeartbeatTask.this.clientName);
-						Cat.logEvent("ClientConnect.Heartbeated", HeartbeatTask.this.clientName, "1", "");
+						Cat.logEvent("ClientConnect.heartbeated", HeartbeatTask.this.clientName, "1", "");
 						LOG.error("heartbeat.exception: ", e);
 					}
 				}

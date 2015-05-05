@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
@@ -46,6 +47,7 @@ public class HeartbeatTask {
 	private HeartbeatScheduledExecutor heartbeatScheduledExecutor;
 
 	public HeartbeatTask(EventCodec codec, HttpServletResponse response, String clientName) {
+		this.clientName = clientName;
 		this.initialDelay = 0;
 		this.unit = TimeUnit.MILLISECONDS;
 		initConfig();
@@ -113,7 +115,7 @@ public class HeartbeatTask {
 	public String getClientName() {
 		return clientName;
 	}
-	
+
 	private class HeartbeatSender implements Runnable {
 		@Override
 		public void run() {
@@ -125,7 +127,8 @@ public class HeartbeatTask {
 
 						response.getOutputStream().write(data);
 						response.getOutputStream().flush();
-						LOG.info(HeartbeatTask.this.clientName +" puma server heartbeat sended.");
+						LOG.info(HeartbeatTask.this.clientName + " puma server heartbeat sended.");
+						Cat.logEvent("ClientConnect.Heartbeated", HeartbeatTask.this.clientName, Message.SUCCESS, "");
 					} catch (IOException e) {
 						HeartbeatTask.this.cancelFuture();
 						try {
@@ -133,11 +136,11 @@ public class HeartbeatTask {
 						} catch (IOException e1) {
 							// ignore
 						}
-						ClientStateContainer clientStateContainer = ComponentContainer.SPRING.lookup("clientStateContainer");
+						ClientStateContainer clientStateContainer = ComponentContainer.SPRING
+								.lookup("clientStateContainer");
 						clientStateContainer.remove(HeartbeatTask.this.clientName);
 						SystemStatusContainer.instance.removeClient(HeartbeatTask.this.clientName);
-						Cat.getProducer().logError(
-								"puma.server.client.heartbeat.exception: " + HeartbeatTask.this.clientName, e);
+						Cat.logEvent("ClientConnect.Heartbeated", HeartbeatTask.this.clientName, "1", "");
 						LOG.error("heartbeat.exception: ", e);
 					}
 				}

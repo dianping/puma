@@ -7,7 +7,6 @@ import com.dianping.puma.core.util.PumaThreadPool;
 import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.puma.syncserver.job.load.exception.LoadException;
 import com.dianping.puma.syncserver.job.load.model.BatchRows;
-import com.dianping.puma.syncserver.job.load.model.RowKey;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 
@@ -88,7 +87,7 @@ public class BatchLoader implements Loader {
 						}
 
 						// If sql is success, removes it.
-						batchRows.remove(RowKey.getNewRowKey(row));
+						batchRows.remove(row);
 					} catch (Exception e) {
 						batchSuccess = false;
 					} finally {

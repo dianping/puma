@@ -22,43 +22,13 @@ public class LoadMerger {
 	}
 
 	private static void mergeInsert(RowChangedEvent row, BatchRows batchRows) {
-		RowKey rowKey = RowKey.getNewRowKey(row);
-		RowChangedEvent oriRow = batchRows.get(rowKey);
-
-		if (oriRow == null) {
-			batchRows.add(rowKey, row);
-		} else {
-
-			switch (row.getDMLType()) {
-			case INSERT:
-				// insert + insert = insert.
-				batchRows.replace(rowKey, row);
-				break;
-			case DELETE:
-				// delete + insert = insert.
-				batchRows.replace(rowKey, row);
-				break;
-			case UPDATE:
-				// update + insert = insert.
-				batchRows.replace(rowKey, row);
-			}
-
-		}
+		// INSERT statement overrides previous statements.
+		batchRows.replace(row);
 	}
 
 	private static void mergeDelete(RowChangedEvent row, BatchRows batchRows) {
-		RowKey rowKey = RowKey.getOldRowKey(row);
-		RowChangedEvent oriRow = batchRows.get(rowKey);
-
-		if (oriRow == null) {
-			batchRows.add(rowKey, row);
-		} else {
-			// DELETE statement overrides all the operations.
-			// insert + delete = delete.
-			// delete + delete = delete.
-			// update + delete = delete.
-			batchRows.replace(rowKey, row);
-		}
+		// DELETE statement overrides previous statements.
+		batchRows.replace(row);
 	}
 
 	private static void mergeUpdate(RowChangedEvent row, BatchRows batchRows) {
@@ -66,28 +36,18 @@ public class LoadMerger {
 		RowKey newRowKey = RowKey.getNewRowKey(row);
 
 		if (oldRowKey.equals(newRowKey)) {
+
 			RowChangedEvent oriRow = batchRows.get(newRowKey);
 
 			if (oriRow == null) {
-				batchRows.add(newRowKey, row);
+				batchRows.replace(row);
 			} else {
 
-				switch (row.getDMLType()) {
-				case INSERT:
+				if (row.getDMLType() == DMLType.INSERT) {
 					// insert + update = insert.
 					row.setDMLType(DMLType.INSERT);
-					batchRows.replace(newRowKey, row);
-					break;
-				case DELETE:
-					// delete + update = update.
-					batchRows.replace(newRowKey, row);
-					break;
-				case UPDATE:
-					// update + update = update.
-					batchRows.replace(newRowKey, row);
-					break;
 				}
-
+				batchRows.replace(row);
 			}
 		} else {
 			// Rare case.

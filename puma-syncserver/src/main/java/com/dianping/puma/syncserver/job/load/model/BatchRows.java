@@ -8,24 +8,44 @@ public class BatchRows {
 
 	private Map<RowKey, RowChangedEvent> batchRows = new HashMap<RowKey, RowChangedEvent>();
 
-	public void add(RowKey rowKey, RowChangedEvent row) {
-		batchRows.put(rowKey, row);
+	public void add(RowChangedEvent row) {
+		switch (row.getDMLType()) {
+		case INSERT:
+			batchRows.put(RowKey.getNewRowKey(row), row);
+			break;
+		case DELETE:
+			batchRows.put(RowKey.getOldRowKey(row), row);
+			break;
+		case UPDATE:
+			batchRows.put(RowKey.getNewRowKey(row), row);
+			break;
+		}
 	}
 
-	public void replace(RowKey rowKey, RowChangedEvent row) {
-		batchRows.put(rowKey, row);
+	public void replace(RowChangedEvent row) {
+		add(row);
 	}
 
-	public void remove(RowKey rowKey) {
+	public void remove(RowChangedEvent row) {
+		RowKey rowKey = null;
+
+		switch (row.getDMLType()) {
+		case INSERT:
+			rowKey = RowKey.getNewRowKey(row);
+			break;
+		case DELETE:
+			rowKey = RowKey.getOldRowKey(row);
+			break;
+		case UPDATE:
+			rowKey = RowKey.getNewRowKey(row);
+			break;
+		}
+
 		batchRows.remove(rowKey);
 	}
 
 	public void clear() {
 		batchRows.clear();
-	}
-
-	public boolean contain(RowKey rowKey) {
-		return batchRows.containsKey(rowKey);
 	}
 
 	public RowChangedEvent get(RowKey rowKey) {

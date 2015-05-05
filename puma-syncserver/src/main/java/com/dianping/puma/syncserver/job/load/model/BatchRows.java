@@ -20,6 +20,10 @@ public class BatchRows {
 		batchRows.remove(rowKey);
 	}
 
+	public void clear() {
+		batchRows.clear();
+	}
+
 	public boolean contain(RowKey rowKey) {
 		return batchRows.containsKey(rowKey);
 	}

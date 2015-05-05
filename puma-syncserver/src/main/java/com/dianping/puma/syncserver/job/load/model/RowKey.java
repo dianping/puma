@@ -12,7 +12,7 @@ public class RowKey {
 
 	private String table;
 
-	private Map<String, Object> priKeys;
+	private Map<String, Object> priKeys = new HashMap<String, Object>();
 
 	public RowKey() {}
 
@@ -32,12 +32,11 @@ public class RowKey {
 		this.table = table;
 	}
 
-	public Map<String, Object> getPriKeys() {
-		return priKeys;
-	}
-
-	public void setPriKeys(Map<String, Object> priKeys) {
-		this.priKeys = priKeys;
+	public void addPriKey(String name, Object value) {
+		// Primary key value should not be NULL.
+		if (value != null) {
+			priKeys.put(name, value);
+		}
 	}
 
 	@Override
@@ -72,13 +71,11 @@ public class RowKey {
 
 		rowKey.setSchema(row.getDatabase());
 		rowKey.setTable(row.getTable());
-		Map<String, Object> priKeys = new HashMap<String, Object>();
 		for (Map.Entry<String, ColumnInfo> entry: row.getColumns().entrySet()) {
 			if (entry.getValue().isKey()) {
-				priKeys.put(entry.getKey(), entry.getValue().getNewValue());
+				rowKey.addPriKey(entry.getKey(), entry.getValue().getNewValue());
 			}
 		}
-		rowKey.setPriKeys(priKeys);
 
 		return rowKey;
 	}
@@ -88,13 +85,11 @@ public class RowKey {
 
 		oriRowKey.setSchema(row.getDatabase());
 		oriRowKey.setTable(row.getTable());
-		Map<String, Object> priKeys = new HashMap<String, Object>();
 		for (Map.Entry<String, ColumnInfo> entry: row.getColumns().entrySet()) {
 			if (entry.getValue().isKey()) {
-				priKeys.put(entry.getKey(), entry.getValue().getOldValue());
+				oriRowKey.addPriKey(entry.getKey(), entry.getValue().getOldValue());
 			}
 		}
-		oriRowKey.setPriKeys(priKeys);
 
 		return oriRowKey;
 	}

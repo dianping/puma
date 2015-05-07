@@ -52,6 +52,7 @@ import com.dianping.puma.parser.mysql.packet.PacketFactory;
 import com.dianping.puma.parser.mysql.packet.PacketType;
 import com.dianping.puma.parser.mysql.packet.QueryCommandPacket;
 
+import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -450,16 +451,11 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		if (columnValues == null || columnValues.size() != 2 || columnValues.get(1) == null) {
 			LOG.warn("queryConfig failed Reason:unexcepted binlog format query result.");
 			isQuery = false;
-			// throw new
-			// IllegalStateException("unexcepted binlog format query result: " +
-			// rs.getFiledValues());
 		}
 		BinlogFormat binlogFormat = BinlogFormat.valuesOf(columnValues.get(1));
 		String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
 		if (binlogFormat == null || !binlogFormat.isRow()) {
 			isQuery = false;
-			// throw new IllegalStateException("unexcepted binlog format: "+
-			// binlogFormat.value);
 			LOG.warn("unexcepted binlog format: " + binlogFormat.value);
 		}
 

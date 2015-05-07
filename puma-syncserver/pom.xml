@@ -104,11 +104,6 @@
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-jdbc</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP-java6</artifactId>
-            <scope>compile</scope>
-        </dependency>
         <!-- SpringMVC & Velocity -->
         <dependency>
             <groupId>org.springframework</groupId>

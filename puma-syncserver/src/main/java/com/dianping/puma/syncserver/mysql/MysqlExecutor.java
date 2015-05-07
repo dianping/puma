@@ -11,8 +11,7 @@ import java.util.Map;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
-import com.dianping.puma.syncserver.job.BinlogInfoManager;
-import com.dianping.puma.syncserver.job.load.PooledLoader;
+import com.dianping.puma.syncserver.job.load.BatchLoader;
 import com.dianping.puma.syncserver.job.load.Loader;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.lang.StringUtils;
@@ -67,8 +66,7 @@ public class MysqlExecutor {
 	public MysqlExecutor(String host, String username, String password, MysqlMapping mysqlMapping) {
 		this.mysqlMapping = mysqlMapping;
 
-		loader = new PooledLoader(host, username, password, new BinlogInfoManager());
-		loader.start();
+		loader = new BatchLoader(host, username, password);
 		initDataSource(host, username, password);
 	}
 
@@ -116,15 +114,17 @@ public class MysqlExecutor {
 	 * @throws DdlRenameException
 	 */
 	public Map<String, Object> execute(ChangedEvent event) throws SQLException {
-		//loader.load(event);
+		Cat.logEvent("load", "load");
+		loader.load(event);
 
 		Map<String, Object> result = null;
 
+		/*
 		if (event instanceof DdlEvent) {
 			executeDdl((DdlEvent) event);
 		} else if (event instanceof RowChangedEvent) {
 			result = executeDml((RowChangedEvent) event);
-		}
+		}*/
 
 		return result;
 	}

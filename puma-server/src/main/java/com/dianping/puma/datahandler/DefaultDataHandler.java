@@ -350,11 +350,11 @@ public class DefaultDataHandler extends AbstractDataHandler {
 			int actionType, TableMetaInfo tableMetaInfo) {
 		Map<String, ColumnInfo> columns = new HashMap<String, ColumnInfo>();
 		if (actionType == 0) {
-			rowChangedData.setDmlType(DMLType.INSERT);
+			rowChangedData.setDMLType(DMLType.INSERT);
 		} else if (actionType == 1) {
-			rowChangedData.setDmlType(DMLType.DELETE);
+			rowChangedData.setDMLType(DMLType.DELETE);
 		} else {
-			rowChangedData.setDmlType(DMLType.UPDATE);
+			rowChangedData.setDMLType(DMLType.UPDATE);
 		}
 
 		rowChangedData.setActionType(actionType);

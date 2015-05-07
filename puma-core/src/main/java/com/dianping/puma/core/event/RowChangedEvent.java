@@ -117,7 +117,7 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
 		this.sync = sync;
 	}
 
-	public DMLType getDmlType() {
+	public DMLType getDMLType() {
 		return dmlType;
 	}
 

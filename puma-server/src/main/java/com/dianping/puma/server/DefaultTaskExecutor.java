@@ -48,9 +48,7 @@ import com.dianping.puma.parser.mysql.packet.ComBinlogDumpPacket;
 import com.dianping.puma.parser.mysql.packet.OKErrorPacket;
 import com.dianping.puma.parser.mysql.packet.PacketFactory;
 import com.dianping.puma.parser.mysql.packet.PacketType;
-import com.dianping.puma.parser.mysql.packet.QueryCommandPacket;
 
-import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -206,6 +204,13 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		fetcherEventCountMonitor.record(getTaskName());
 		BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), getContext());
 		fetcherEventDelayMonitor.record(getTaskName(), binlogEvent.getHeader().getTimestamp());
+		if (binlogEvent.getHeader().getEventType() == BinlogConstants.INTVAR_EVENT
+				|| binlogEvent.getHeader().getEventType() == BinlogConstants.RAND_EVENT
+				|| binlogEvent.getHeader().getEventType() == BinlogConstants.USER_VAR_EVENT) {
+			LOG.error("binlog_format is MIXED or STATEMENT ,System is not support.");
+			String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
+			Cat.logEvent("Slave.dbBinlogFormat", eventName, "1", "");
+		}
 		if (binlogEvent.getHeader().getEventType() != BinlogConstants.FORMAT_DESCRIPTION_EVENT) {
 			getContext().setNextBinlogPos(binlogEvent.getHeader().getNextPosition());
 		}
@@ -422,7 +427,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			LOG.error("updateSetting failed. Reason: " + okErrorPacket.getMessage());
 		}
 
-		Cat.logEvent("Slave.dbUpdate", eventName, eventStatus, "");
+		Cat.logEvent("Slave.dbSetCheckSum", eventName, eventStatus, "");
 		return okErrorPacket.isOk();
 	}
 
@@ -439,16 +444,19 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		List<String> columnValues = rs.getFiledValues();
 		boolean isQuery = true;
 		if (columnValues == null || columnValues.size() != 2 || columnValues.get(1) == null) {
-			Log.warn("queryConfig failed Reason:unexcepted binlog format query result.");
+			LOG.warn("queryConfig failed Reason:unexcepted binlog format query result.");
 			isQuery = false;
-			// throw new IllegalStateException("unexcepted binlog format query result: " + rs.getFiledValues());
+			// throw new
+			// IllegalStateException("unexcepted binlog format query result: " +
+			// rs.getFiledValues());
 		}
 		BinlogFormat binlogFormat = BinlogFormat.valuesOf(columnValues.get(1));
 		String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
 		if (binlogFormat == null || !binlogFormat.isRow()) {
 			isQuery = false;
-			// throw new IllegalStateException("unexcepted binlog format: "+ binlogFormat.value);
-			Log.warn("unexcepted binlog format: " + binlogFormat.value);
+			// throw new IllegalStateException("unexcepted binlog format: "+
+			// binlogFormat.value);
+			LOG.warn("unexcepted binlog format: " + binlogFormat.value);
 		}
 
 		Cat.logEvent("Slave.dbBinlogFormat", eventName, isQuery ? Message.SUCCESS : "1", "");

@@ -28,7 +28,6 @@ import com.dianping.puma.monitor.FetcherEventCountMonitor;
 import com.dianping.puma.monitor.FetcherEventDelayMonitor;
 import com.dianping.puma.monitor.ParserEventCountMonitor;
 import com.dianping.puma.sender.Sender;
-
 import com.dianping.puma.storage.DefaultEventStorage;
 import org.apache.commons.lang.StringUtils;
 
@@ -50,9 +49,7 @@ import com.dianping.puma.parser.mysql.packet.ComBinlogDumpPacket;
 import com.dianping.puma.parser.mysql.packet.OKErrorPacket;
 import com.dianping.puma.parser.mysql.packet.PacketFactory;
 import com.dianping.puma.parser.mysql.packet.PacketType;
-import com.dianping.puma.parser.mysql.packet.QueryCommandPacket;
 
-import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -216,6 +213,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			Cat.logEvent("Slave.dbBinlogFormat", eventName, "1", "");
 		}
 		fetcherEventDelayMonitor.record(getTaskName(), binlogEvent.getHeader().getTimestamp());
+
 		if (binlogEvent.getHeader().getEventType() != BinlogConstants.FORMAT_DESCRIPTION_EVENT) {
 			getContext().setNextBinlogPos(binlogEvent.getHeader().getNextPosition());
 		}
@@ -412,7 +410,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 		return isAuth;
 	}
-
+	
 	/**
 	 * Send QueryCommand Packet to update binlog_checksum
 	 * 
@@ -449,14 +447,14 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		List<String> columnValues = rs.getFiledValues();
 		boolean isQuery = true;
 		if (columnValues == null || columnValues.size() != 2 || columnValues.get(1) == null) {
-			LOG.warn("queryConfig failed Reason:unexcepted binlog format query result.");
+			LOG.error("queryConfig failed Reason:unexcepted binlog format query result.");
 			isQuery = false;
 		}
 		BinlogFormat binlogFormat = BinlogFormat.valuesOf(columnValues.get(1));
 		String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
 		if (binlogFormat == null || !binlogFormat.isRow()) {
 			isQuery = false;
-			LOG.warn("unexcepted binlog format: " + binlogFormat.value);
+			LOG.error("unexcepted binlog format: " + binlogFormat.value);
 		}
 
 		Cat.logEvent("Slave.dbBinlogFormat", eventName, isQuery ? Message.SUCCESS : "1", "");

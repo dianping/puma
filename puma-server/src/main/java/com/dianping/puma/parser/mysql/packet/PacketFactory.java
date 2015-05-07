@@ -42,6 +42,22 @@ public final class PacketFactory {
 			BinlogPacket binlogPacket = new BinlogPacket();
 			binlogPacket.readPacket(is, context);
 			return binlogPacket;
+		case RSHEADER_PACKET:
+			RSHeaderPacket rsHeaderPacket=new RSHeaderPacket();
+			rsHeaderPacket.readPacket(is, context);
+			return rsHeaderPacket;
+		case FIELD_PACKET:
+			FieldPacket feildPacket=new FieldPacket();
+			feildPacket.readPacket(is, context);
+			return feildPacket;
+		case ROWDATA_PACKET:
+			RowDataPacket rowDataPacket=new RowDataPacket();
+			rowDataPacket.readPacket(is, context);
+			return rowDataPacket;
+		case EOF_PACKET:
+			EofPacket eofPacket=new EofPacket();
+			eofPacket.readPacket(is, context);
+			return eofPacket;
 		default:
 			return null;
 		}

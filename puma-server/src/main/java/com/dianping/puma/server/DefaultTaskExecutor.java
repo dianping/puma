@@ -15,6 +15,7 @@ package com.dianping.puma.server;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.dianping.cat.Cat;
@@ -36,6 +37,9 @@ import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.datahandler.DataHandlerResult;
 import com.dianping.puma.parser.mysql.BinlogConstants;
+import com.dianping.puma.parser.mysql.QueryExecutor;
+import com.dianping.puma.parser.mysql.ResultSet;
+import com.dianping.puma.parser.mysql.UpdateExecutor;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
 import com.dianping.puma.parser.mysql.event.RotateEvent;
 import com.dianping.puma.parser.mysql.packet.AuthenticatePacket;
@@ -46,6 +50,7 @@ import com.dianping.puma.parser.mysql.packet.PacketFactory;
 import com.dianping.puma.parser.mysql.packet.PacketType;
 import com.dianping.puma.parser.mysql.packet.QueryCommandPacket;
 
+import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -136,11 +141,14 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 					if (getContext().isCheckSum()) {
 						if (!updateSetting()) {
-							throw new IOException("Login failed.");
+							throw new IOException("update setting command failed.");
 						}
 						LOG.info("update setting command success.");
 					}
-
+					if (!queryConfig()) {
+						throw new IOException("query config binlogformat failed.");
+					}
+					LOG.info("query config binlogformat is legal.");
 					if (dumpBinlog()) {
 						LOG.info("Dump binlog command success.");
 						processBinlog();
@@ -148,7 +156,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 						throw new IOException("Dump binlog failed.");
 					}
 				} else {
-					throw new IOException("update setting command failed.");
+					throw new IOException("Login failed.");
 				}
 			} catch (Throwable e) {
 				if (isStop()) {
@@ -396,33 +404,55 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	}
 
 	/**
-	 * Send QueryCommand Packet to mysql master and parse the response
+	 * Send QueryCommand Packet to update binlog_checksum
 	 * 
 	 * @return
 	 * @throws IOException
 	 */
 	private boolean updateSetting() throws IOException {
-		QueryCommandPacket queryCommandPacket = (QueryCommandPacket) PacketFactory.createCommandPacket(
-				PacketType.QUERY_COMMAND_PACKET, getContext());
-		queryCommandPacket.setQueryString("set @master_binlog_checksum= '@@global.binlog_checksum'");
-		queryCommandPacket.buildPacket(getContext());
-		queryCommandPacket.write(os, getContext());
-		OKErrorPacket okErrorPacket = (OKErrorPacket) PacketFactory.parsePacket(is, PacketType.OKERROR_PACKET,
-				getContext());
-		boolean isUpdate;
+		UpdateExecutor executor = new UpdateExecutor(is, os);
+		String cmd = "set @master_binlog_checksum= '@@global.binlog_checksum'";
+		OKErrorPacket okErrorPacket = executor.update(cmd, getContext());
 		String eventStatus;
 		String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
 		if (okErrorPacket.isOk()) {
-			isUpdate = true;
 			eventStatus = Message.SUCCESS;
 		} else {
-			isUpdate = false;
 			eventStatus = "1";
 			LOG.error("updateSetting failed. Reason: " + okErrorPacket.getMessage());
 		}
 
 		Cat.logEvent("Slave.dbUpdate", eventName, eventStatus, "");
-		return isUpdate;
+		return okErrorPacket.isOk();
+	}
+
+	/**
+	 * Send QueryCommand Packet to query binlog_format
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	private boolean queryConfig() throws IOException {
+		QueryExecutor executor = new QueryExecutor(is, os);
+		String cmd = "show global variables like 'binlog_format'";
+		ResultSet rs = executor.query(cmd, getContext());
+		List<String> columnValues = rs.getFiledValues();
+		boolean isQuery = true;
+		if (columnValues == null || columnValues.size() != 2 || columnValues.get(1) == null) {
+			Log.warn("queryConfig failed Reason:unexcepted binlog format query result.");
+			isQuery = false;
+			// throw new IllegalStateException("unexcepted binlog format query result: " + rs.getFiledValues());
+		}
+		BinlogFormat binlogFormat = BinlogFormat.valuesOf(columnValues.get(1));
+		String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
+		if (binlogFormat == null || !binlogFormat.isRow()) {
+			isQuery = false;
+			// throw new IllegalStateException("unexcepted binlog format: "+ binlogFormat.value);
+			Log.warn("unexcepted binlog format: " + binlogFormat.value);
+		}
+
+		Cat.logEvent("Slave.dbBinlogFormat", eventName, isQuery ? Message.SUCCESS : "1", "");
+		return true;
 	}
 
 	protected void doStop() throws Exception {
@@ -586,5 +616,37 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	public void incrDdls() {
 		Long ddls = this.state.getBinlogStat().getDdls();
 		this.state.getBinlogStat().setDdls(ddls + 1);
+	}
+
+	public static enum BinlogFormat {
+		STATEMENT("STATEMENT"), ROW("ROW"), MIXED("MIXED");
+
+		private String value;
+
+		private BinlogFormat(String value) {
+			this.value = value;
+		}
+
+		public boolean isRow() {
+			return this == ROW;
+		}
+
+		public boolean isStatement() {
+			return this == STATEMENT;
+		}
+
+		public boolean isMixed() {
+			return this == MIXED;
+		}
+
+		public static BinlogFormat valuesOf(String value) {
+			BinlogFormat[] formats = values();
+			for (BinlogFormat format : formats) {
+				if (format.value.equalsIgnoreCase(value)) {
+					return format;
+				}
+			}
+			return null;
+		}
 	}
 }

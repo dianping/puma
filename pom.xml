@@ -271,6 +271,11 @@
                 <artifactId>commons-dbutils</artifactId>
                 <version>1.5</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-jdbc</artifactId>
+                <version>7.0.57</version>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>

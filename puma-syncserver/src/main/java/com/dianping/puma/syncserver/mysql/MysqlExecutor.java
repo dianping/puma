@@ -11,6 +11,8 @@ import java.util.Map;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
+import com.dianping.puma.syncserver.job.load.BatchLoader;
+import com.dianping.puma.syncserver.job.load.Loader;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.lang.StringUtils;
 import org.mortbay.log.Log;
@@ -59,9 +61,12 @@ public class MysqlExecutor {
 
 	private String curTableName = null;
 
+	private Loader loader;
+
 	public MysqlExecutor(String host, String username, String password, MysqlMapping mysqlMapping) {
 		this.mysqlMapping = mysqlMapping;
 
+		loader = new BatchLoader(host, username, password);
 		initDataSource(host, username, password);
 	}
 
@@ -109,13 +114,17 @@ public class MysqlExecutor {
 	 * @throws DdlRenameException
 	 */
 	public Map<String, Object> execute(ChangedEvent event) throws SQLException {
+		Cat.logEvent("load", "load");
+		loader.load(event);
+
 		Map<String, Object> result = null;
 
+		/*
 		if (event instanceof DdlEvent) {
 			executeDdl((DdlEvent) event);
 		} else if (event instanceof RowChangedEvent) {
 			result = executeDml((RowChangedEvent) event);
-		}
+		}*/
 
 		return result;
 	}
@@ -209,6 +218,7 @@ public class MysqlExecutor {
 
 		Map<String, Object> rowMap = null;
 		MysqlStatement mus = convertStatement(rowChangedEvent);
+
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("execute dml sql statement: " + mus);
 		}

@@ -3,114 +3,211 @@ package com.dianping.puma.syncserver.job.load;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.PumaThreadPool;
 import com.dianping.puma.core.util.sql.DMLType;
+import com.dianping.puma.syncserver.job.BinlogInfoManager;
 import com.dianping.puma.syncserver.job.load.exception.LoadException;
-import com.dianping.puma.syncserver.job.load.model.BatchRows;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.dianping.puma.syncserver.job.load.model.RowPool;
+import com.dianping.puma.syncserver.job.load.status.LoaderStatus;
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.tomcat.jdbc.pool.DataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.beans.PropertyVetoException;
 import java.sql.SQLException;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ArrayBlockingQueue;
 
 public class BatchLoader implements Loader {
 
-	private int width = 5;
+	private static final Logger LOG = LoggerFactory.getLogger(BatchLoader.class);
 
-	private BatchRows batchRows = new BatchRows();
+	private LoaderStatus status;
 
-	private volatile boolean batchSuccess = true;
+	private int batchWidth = 10;
 
-	private ComboPooledDataSource dataSource = null;
+	private Thread loadThread;
 
-	public BatchLoader(String host, int port, String username, String password) {
-		initDataSource(host, port, username, password);
+	private Thread failThread;
+
+	private RowPool rowPool = new RowPool();
+
+	private ArrayBlockingQueue<ChangedEvent> rowStash = new ArrayBlockingQueue<ChangedEvent>(50);
+
+	private ArrayBlockingQueue<ChangedEvent> failStash = new ArrayBlockingQueue<ChangedEvent>(10);
+
+	private BinlogInfoManager binlogInfoManager;
+
+	private DataSource dataSource;
+
+	private String host;
+
+	private String username;
+
+	private String password;
+
+	public BatchLoader(String host, String username, String password, BinlogInfoManager binlogInfoManager) {
+		this.binlogInfoManager = binlogInfoManager;
 	}
 
-	private void initDataSource(String host, int port, String username, String password) {
+	public void start() {
+		initDataSource();
+		initFailThread();
+		failThread.run();
+		initLoadThread();
+		loadThread.run();
+
+		status = LoaderStatus.RUNNING;
+	}
+
+	public void restart() {
+		initDataSource();
+		initFailThread();
+		failThread.run();
+		initLoadThread();
+		loadThread.run();
+
+		status = LoaderStatus.RUNNING;
+	}
+
+	public void stop() {
+		status = LoaderStatus.STOPPED;
+
+		dataSource.close();
+		loadThread.interrupt();
+		failThread.interrupt();
+	}
+
+	public void pause() {
+		status = LoaderStatus.PAUSED;
+
+		dataSource.close();
+		loadThread.interrupt();
+		failThread.interrupt();
+	}
+
+	public void fail() {
+		status = LoaderStatus.FAILED;
+
+		dataSource.close();
+		loadThread.interrupt();
+		failThread.interrupt();
+	}
+
+	public void load(ChangedEvent row) {
 		try {
-			dataSource = new ComboPooledDataSource();
-			dataSource.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/");
-			dataSource.setUser(username);
-			dataSource.setPassword(password);
-			dataSource.setDriverClass("com.mysql.jdbc.Driver");
-			dataSource.setMinPoolSize(5);
-			dataSource.setMaxPoolSize(5);
-			dataSource.setInitialPoolSize(5);
-			dataSource.setMaxIdleTime(300);
-			dataSource.setIdleConnectionTestPeriod(60);
-			dataSource.setAcquireRetryAttempts(3);
-			dataSource.setAcquireRetryDelay(300);
-			dataSource.setMaxStatements(0);
-			dataSource.setMaxStatementsPerConnection(100);
-			dataSource.setNumHelperThreads(6);
-			dataSource.setMaxAdministrativeTaskTime(5);
-			dataSource.setPreferredTestQuery("SELECT 1");
-			dataSource.setTestConnectionOnCheckin(true);
-		} catch (PropertyVetoException e) {
-			throw new IllegalStateException(e.getCause());
-		}
-	}
-
-	public void load(ChangedEvent event) throws LoadException {
-		if (event instanceof DdlEvent) {
-			batchExecute();
-
-			DdlEvent ddl = (DdlEvent) event;
-			execute(ddl);
-		} else {
-			RowChangedEvent row = (RowChangedEvent) event;
-
-			LoadMerger.merge(row, batchRows);
-			if (batchRows.size() >= width) {
-				batchExecute();
+			rowStash.put(row);
+		} catch (InterruptedException e) {
+			if (!isHalt()) {
+				LOG.error("Load row({}) error: {}.", row, e.getStackTrace());
+				fail();
 			}
 		}
 	}
 
-	private void batchExecute() {
-		batchSuccess = true;
-		final CountDownLatch latch = new CountDownLatch(batchRows.size());
+	private boolean isHalt() {
+		return status != LoaderStatus.RUNNING;
+	}
 
-		for (final RowChangedEvent row: batchRows.listRows()) {
-			PumaThreadPool.execute(new Runnable() {
-				@Override
-				public void run() {
+	private void initDataSource() {
+		DataSource dataSource = new DataSource();
+		dataSource.setUrl("jdbc:mysql://" + host + "/");
+		dataSource.setUsername(username);
+		dataSource.setPassword(password);
+		dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+		dataSource.setMaxActive(10);
+		dataSource.setInitialSize(10);
+		dataSource.setMaxWait(1000);
+		dataSource.setMaxIdle(5);
+		dataSource.setMinIdle(5);
+		dataSource.setRemoveAbandoned(true);
+		dataSource.setRemoveAbandonedTimeout(180);
+	}
+
+	private void initLoadThread() {
+		loadThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				for (; ; ) {
+					ChangedEvent row;
 					try {
-						int affectedRows = execute(row);
-
-						// If no row is updated by the UPDATE statement, use INSERT instead.
-						if (row.getDMLType() == DMLType.UPDATE && affectedRows == 0) {
-							row.setDMLType(DMLType.INSERT);
-							execute(row);
+						row = rowStash.take();
+						rowPool.inject(row);
+						pooledExecute(row);
+					} catch (InterruptedException e) {
+						if (isHalt()) {
+							LOG.error("Load thread error: {}.", e.getStackTrace());
+							fail();
 						}
-
-						// If sql is success, removes it.
-						batchRows.remove(row);
-					} catch (Exception e) {
-						batchSuccess = false;
-					} finally {
-						latch.countDown();
+						break;
 					}
 				}
-			});
-		}
-
-		try {
-			latch.await();
-
-			if (!batchSuccess) {
-				throw new LoadException("0");
 			}
-
-		} catch (InterruptedException e) {
-			// @TODO
-			throw new LoadException("0");
-		}
+		});
 	}
 
-	private int execute(ChangedEvent event) {
+	private void initFailThread() {
+		failThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				for (; ; ) {
+					ChangedEvent row;
+					try {
+						row = failStash.take();
+						execute(row);
+					} catch (Exception e) {
+						if (!isHalt()) {
+							LOG.error("Fail thread error: {}.", e.getStackTrace());
+							fail();
+						}
+						break;
+					}
+				}
+			}
+		});
+	}
+
+	private void pooledExecute(final ChangedEvent row) {
+		PumaThreadPool.execute(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					execute(row);
+				} catch (SQLException se) {
+					if (!isHalt()) {
+						LOG.error("Execute row({}) error: {}.", row.toString(), se.getStackTrace());
+
+						try {
+							failStash.put(row);
+						} catch (InterruptedException ie) {
+							if (!isHalt()) {
+								LOG.error("Put row({}) into fail stash error: {}.", row.toString(), ie.getStackTrace());
+								fail();
+							}
+						}
+					}
+				}
+			}
+		});
+	}
+
+	private void execute(ChangedEvent row) throws SQLException {
+		int result = executeSQL(row);
+
+		// Update affects 0 rows, convert it to insert and execute again.
+		if (result == 0 && row instanceof RowChangedEvent
+				&& ((RowChangedEvent) row).getDMLType() == DMLType.UPDATE) {
+			((RowChangedEvent) row).setDMLType(DMLType.INSERT);
+			executeSQL(row);
+		}
+
+		if (rowPool.isFirst(row)) {
+			binlogInfoManager.setFirst(new BinlogInfo(row.getBinlog(), row.getBinlogPos()));
+		}
+		rowPool.extract(row);
+	}
+
+	private int executeSQL(ChangedEvent event) {
 		if (event instanceof DdlEvent) {
 			return executeDDL((DdlEvent) event);
 		} else {
@@ -120,11 +217,18 @@ public class BatchLoader implements Loader {
 
 	private int executeDML(RowChangedEvent dml) {
 		try {
+			// @TODO: should be done in transformer.
+			if (dml.getDMLType() == DMLType.INSERT) {
+				dml.setDMLType(DMLType.REPLACE);
+			}
+
 			String sql = LoadParser.parseSql(dml);
 			Object[] args = LoadParser.parseArgs(dml);
-			QueryRunner run = new QueryRunner(dataSource);
-			return run.update(sql, args);
+
+			QueryRunner runner = new QueryRunner(dataSource);
+			return runner.update(sql, args);
 		} catch (SQLException e) {
+			LOG.error("Execute ({}) error: {}.", dml.toString(), e.getStackTrace());
 			throw new LoadException(String.valueOf(e.getErrorCode()), e.getMessage(), e.getCause());
 		}
 	}
@@ -135,6 +239,7 @@ public class BatchLoader implements Loader {
 			QueryRunner runner = new QueryRunner(dataSource);
 			return runner.update(sql);
 		} catch (SQLException e) {
+			LOG.error("Execute ({}) error: {}.", ddl.toString(), e.getStackTrace());
 			throw new LoadException(String.valueOf(e.getErrorCode()), e.getMessage(), e.getCause());
 		}
 	}

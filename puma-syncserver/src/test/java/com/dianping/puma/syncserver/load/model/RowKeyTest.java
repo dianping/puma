@@ -2,11 +2,18 @@ package com.dianping.puma.syncserver.load.model;
 
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
+import com.dianping.puma.core.util.PumaThreadPool;
 import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.puma.syncserver.job.load.model.RowKey;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.junit.Assert;
 import org.junit.Test;
 
+import javax.sql.DataSource;
+import java.beans.PropertyVetoException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -126,5 +133,77 @@ public class RowKeyTest {
 		expected2.addPriKey("id", 1);
 
 		Assert.assertEquals(expected2, result2);
+	}
+
+	@Test
+	public void test() throws PropertyVetoException, SQLException {
+		final ComboPooledDataSource dataSource = new ComboPooledDataSource();
+		dataSource.setJdbcUrl("jdbc:mysql://192.168.224.102/");
+		dataSource.setUser("root");
+		dataSource.setPassword("123456");
+		dataSource.setDriverClass("com.mysql.jdbc.Driver");
+		dataSource.setMinPoolSize(10);
+		dataSource.setMaxPoolSize(10);
+		dataSource.setInitialPoolSize(10);
+		dataSource.setMaxIdleTime(300);
+		dataSource.setIdleConnectionTestPeriod(60);
+		dataSource.setAcquireRetryAttempts(3);
+		dataSource.setAcquireRetryDelay(300);
+		dataSource.setMaxStatements(0);
+		dataSource.setMaxStatementsPerConnection(100);
+		dataSource.setNumHelperThreads(6);
+		dataSource.setMaxAdministrativeTaskTime(5);
+		dataSource.setPreferredTestQuery("SELECT 1");
+		dataSource.setTestConnectionOnCheckin(true);
+
+		long begin, end;
+
+		begin = System.currentTimeMillis();
+		Connection conn0 = dataSource.getConnection();
+		conn0.close();
+		end = System.currentTimeMillis();
+		System.out.println("1:" + (end - begin));
+
+		begin = System.currentTimeMillis();
+		Connection conn1 = dataSource.getConnection();
+		conn1.close();
+		end = System.currentTimeMillis();
+		System.out.println("2:" + (end - begin));
+
+		begin = System.currentTimeMillis();
+		Connection conn2 = dataSource.getConnection();
+		conn2.close();
+		end = System.currentTimeMillis();
+		System.out.println("3:" + (end - begin));
+
+		begin = System.currentTimeMillis();
+		Connection conn3 = dataSource.getConnection();
+		conn3.close();
+		end = System.currentTimeMillis();
+		System.out.println("4:" + (end - begin));
+
+		begin = System.currentTimeMillis();
+		Connection conn4 = dataSource.getConnection();
+		conn4.close();
+		end = System.currentTimeMillis();
+		System.out.println("5:" + (end - begin));
+
+		begin = System.currentTimeMillis();
+		Connection conn5 = dataSource.getConnection();
+		conn5.close();
+		end = System.currentTimeMillis();
+		System.out.println("6:" + (end - begin));
+
+		begin = System.currentTimeMillis();
+		Connection conn6 = dataSource.getConnection();
+		conn6.close();
+		end = System.currentTimeMillis();
+		System.out.println("7:" + (end - begin));
+
+		begin = System.currentTimeMillis();
+		Connection conn7 = dataSource.getConnection();
+		conn7.close();
+		end = System.currentTimeMillis();
+		System.out.println("8:" + (end - begin));
 	}
 }

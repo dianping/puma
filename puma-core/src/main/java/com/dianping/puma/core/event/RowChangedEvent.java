@@ -107,6 +107,16 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
 
 	private boolean isTransactionCommit = false;
 
+	private boolean sync = false;
+
+	public boolean isSync() {
+		return sync;
+	}
+
+	public void setSync(boolean sync) {
+		this.sync = sync;
+	}
+
 	public DMLType getDMLType() {
 		return dmlType;
 	}

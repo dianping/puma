@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.dianping.puma.core.util.sql.DMLType;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.bo.PumaContext;
@@ -348,6 +349,14 @@ public class DefaultDataHandler extends AbstractDataHandler {
 	private Map<String, ColumnInfo> initColumns(AbstractRowsEvent rowsEvent, RowChangedEvent rowChangedData,
 			int actionType, TableMetaInfo tableMetaInfo) {
 		Map<String, ColumnInfo> columns = new HashMap<String, ColumnInfo>();
+		if (actionType == 0) {
+			rowChangedData.setDMLType(DMLType.INSERT);
+		} else if (actionType == 1) {
+			rowChangedData.setDMLType(DMLType.DELETE);
+		} else {
+			rowChangedData.setDMLType(DMLType.UPDATE);
+		}
+
 		rowChangedData.setActionType(actionType);
 		rowChangedData.setExecuteTime(rowsEvent.getHeader().getTimestamp());
 		rowChangedData.setColumns(columns);

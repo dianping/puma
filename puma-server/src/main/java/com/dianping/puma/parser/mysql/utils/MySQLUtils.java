@@ -272,10 +272,7 @@ public final class MySQLUtils {
 		final int hour = ((int) (value >> 12)) & 0x1F;
 		final int min = ((int) (value >> 6)) & 0x3F;
 		final int sec = ((int) (value >> 0)) & 0x3F;
-		// final Calendar c = Calendar.getInstance();
-		// c.set(year, mon - 1, day, hour, min, sec);
-		// c.set(Calendar.MILLISECOND, 0);
-		// final long millis = c.getTimeInMillis();
+
 		String format = "%04d-%02d-%02d %02d:%02d:%02d";
 		if (meta > 0) {
 			format += (".%0" + String.valueOf(meta) + "d");
@@ -290,18 +287,6 @@ public final class MySQLUtils {
 		return new java.sql.Timestamp(value * 1000L);
 	}
 
-
-	public static String toTimestamp2(long value, int nanos, int meta) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		Timestamp time = new java.sql.Timestamp(value * 1000L);
-		String strValue = sdf.format(time);
-		String strNanos = "";
-		if (meta > 0) {
-			String format = (".%0" + String.valueOf(meta) + "d");
-			strNanos = String.format(format, nanos);
-		}
-		return strValue + strNanos;
-	}
 
 	public static BigDecimal toDecimal(int precision, int scale, byte[] value) {
 		boolean positive = (value[0] & 0x80) == 0x80;

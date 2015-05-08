@@ -287,7 +287,18 @@ public final class MySQLUtils {
 		return new java.sql.Timestamp(value * 1000L);
 	}
 
-
+	public static String toTimestamp2(long value, int nanos, int meta) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Timestamp time = new java.sql.Timestamp(value * 1000L);
+		String strValue = sdf.format(time);
+		String strNanos = "";
+		if (meta > 0) {
+			String format = (".%0" + String.valueOf(meta) + "d");
+			strNanos = String.format(format, nanos);
+		}
+		return strValue + strNanos;
+	} 
+	
 	public static BigDecimal toDecimal(int precision, int scale, byte[] value) {
 		boolean positive = (value[0] & 0x80) == 0x80;
 		value[0] ^= 0x80;

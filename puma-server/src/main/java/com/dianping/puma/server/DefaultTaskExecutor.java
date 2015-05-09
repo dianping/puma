@@ -29,6 +29,7 @@ import com.dianping.puma.monitor.FetcherEventDelayMonitor;
 import com.dianping.puma.monitor.ParserEventCountMonitor;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.storage.DefaultEventStorage;
+
 import org.apache.commons.lang.StringUtils;
 
 import com.dianping.puma.common.SystemStatusContainer;
@@ -211,6 +212,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			LOG.error("binlog_format is MIXED or STATEMENT ,System is not support.");
 			String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
 			Cat.logEvent("Slave.dbBinlogFormat", eventName, "1", "");
+			stopTask();
 		}
 		fetcherEventDelayMonitor.record(getTaskName(), binlogEvent.getHeader().getTimestamp());
 
@@ -465,6 +467,16 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		closeTransport();
 	}
 
+	private void stopTask(){
+		String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
+		try {
+			stop();
+			Cat.logEvent("Slave.doStop", eventName, Message.SUCCESS, "");
+		} catch (Exception e) {
+			LOG.error("task " + getTaskName() + "stop error.");
+			Cat.logEvent("Slave.doStop", eventName, "1", "");
+		}
+	}
 	private void closeTransport() {
 		// Close in.
 		try {

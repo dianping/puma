@@ -1,4 +1,4 @@
-package com.dianping.puma.core.model.state.Storage;
+package com.dianping.puma.core.model.state.storage;
 
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.state.State;

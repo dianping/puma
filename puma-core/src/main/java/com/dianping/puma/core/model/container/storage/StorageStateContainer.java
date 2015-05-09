@@ -2,7 +2,8 @@ package com.dianping.puma.core.model.container.storage;
 
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.container.AbstractStateContainer;
-import com.dianping.puma.core.model.state.Storage.StorageState;
+import com.dianping.puma.core.model.state.storage.StorageState;
+
 import org.springframework.stereotype.Service;
 
 @Service("storageStateContainer")

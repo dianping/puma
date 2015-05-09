@@ -149,11 +149,11 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 					}
 					LOG.info("query config binlogformat is legal.");
 					if (dumpBinlog()) {
-						LOG.info("Dump binlog command success.");
+						LOG.info("dump binlog command success.");
 						processBinlog();
 
 					} else {
-						throw new IOException("update setting command failed.");
+						throw new IOException("dump binlog command failed.");
 					}
 				} else {
 					throw new IOException("Login failed.");
@@ -166,6 +166,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 					this.notifyService.alarm("[" + getContext().getPumaServerName() + "]" + "Failed to dump mysql["
 							+ dbHost + ":" + port + "] for 3 times.", e, true);
 					failCount = 0;
+					stopTask();
 				}
 				LOG.error("Exception occurs. taskName: " + getTaskName() + " dbServerId: " + getDbServerId()
 						+ ". Reconnect...", e);
@@ -470,7 +471,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	private void stopTask(){
 		String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
 		try {
-			stop();
+			DefaultTaskExecutorContainer.instance.stopExecutor(this);
 			Cat.logEvent("Slave.doStop", eventName, Message.SUCCESS, "");
 		} catch (Exception e) {
 			LOG.error("task " + getTaskName() + "stop error.");

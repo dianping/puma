@@ -93,26 +93,27 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	private FetcherEventDelayMonitor fetcherEventDelayMonitor;
 
 	private ParserEventCountMonitor parserEventCountMonitor;
-
-	@Override
-	public void doStart() throws Exception {
-
+	
+	public DefaultTaskExecutor(){
 		fetcherEventCountMonitor = ComponentContainer.SPRING.lookup("fetcherEventCountMonitor");
 		if (fetcherEventCountMonitor != null) {
 			LOG.info("Find `fetcherEventCountMonitor` spring bean success.");
 		}
-
 		fetcherEventDelayMonitor = ComponentContainer.SPRING.lookup("fetcherEventDelayMonitor");
 		if (fetcherEventDelayMonitor != null) {
 			LOG.info("Find `fetcherEventDelayMonitor` spring bean success.");
 		}
-
 		parserEventCountMonitor = ComponentContainer.SPRING.lookup("parserEventCountMonitor");
 		if (parserEventCountMonitor != null) {
 			LOG.info("Find `parserEventCountMonitor` spring bean success.");
 		}
 
+	}
+	
+	@Override
+	public void doStart() throws Exception {
 		long failCount = 0;
+		boolean isNeedStop = false;
 		do {
 			try {
 				// 读position/file文件
@@ -140,11 +141,13 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 							+ " username: " + dbUsername + " database: " + database + " dbServerId: " + getDbServerId());
 					if (getContext().isCheckSum()) {
 						if (!updateSetting()) {
+							isNeedStop = true;
 							throw new IOException("update setting command failed.");
 						}
 						LOG.info("update setting command success.");
 					}
 					if (!queryConfig()) {
+						isNeedStop = true;
 						throw new IOException("query config binlogformat failed.");
 					}
 					LOG.info("query config binlogformat is legal.");
@@ -156,9 +159,13 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 						throw new IOException("dump binlog command failed.");
 					}
 				} else {
+					isNeedStop = true;
 					throw new IOException("Login failed.");
 				}
 			} catch (Throwable e) {
+				if(isNeedStop){
+					stopTask();
+				}
 				if (isStop()) {
 					return;
 				}
@@ -166,7 +173,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 					this.notifyService.alarm("[" + getContext().getPumaServerName() + "]" + "Failed to dump mysql["
 							+ dbHost + ":" + port + "] for 3 times.", e, true);
 					failCount = 0;
-					stopTask();
 				}
 				LOG.error("Exception occurs. taskName: " + getTaskName() + " dbServerId: " + getDbServerId()
 						+ ". Reconnect...", e);

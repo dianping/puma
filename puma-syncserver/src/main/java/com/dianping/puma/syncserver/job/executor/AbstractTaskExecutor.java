@@ -253,7 +253,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 		Cat.getProducer().logEvent(
 				"Puma.syncserver." + abstractTask.getSyncServerName() + ".fail",
 				abstractTask.getSyncServerName(),
-				Message.SUCCESS,
+				"1",
 				"syncServerName = " + abstractTask.getSyncServerName() + "&syncTaskName= " + abstractTask.getName()
 						+ "&casedetail=" + detail);
 		state.setDetail(detail);

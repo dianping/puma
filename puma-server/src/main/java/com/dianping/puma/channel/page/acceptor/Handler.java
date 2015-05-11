@@ -134,6 +134,8 @@ public class Handler implements PageHandler<Context> {
 		} catch (StorageException e1) {
 			LOG.error("error occured " + e1.getMessage() + ", from " + NetUtils.getIpAddr(ctx.getHttpServletRequest()),
 					e1);
+			clientStateContainer.remove(payload.getClientName());
+			SystemStatusContainer.instance.removeClient(payload.getClientName());
 			throw new IOException(e1);
 		}
 

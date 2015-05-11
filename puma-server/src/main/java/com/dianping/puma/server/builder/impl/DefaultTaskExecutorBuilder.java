@@ -14,6 +14,9 @@ import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.datahandler.DefaultDataHandler;
 import com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.filter.*;
+import com.dianping.puma.monitor.FetcherEventCountMonitor;
+import com.dianping.puma.monitor.FetcherEventDelayMonitor;
+import com.dianping.puma.monitor.ParserEventCountMonitor;
 import com.dianping.puma.parser.DefaultBinlogParser;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.FileDumpSender;
@@ -39,6 +42,13 @@ import java.util.List;
 
 @Service("taskExecutorBuilder")
 public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
+
+	@Autowired
+	private FetcherEventCountMonitor fetcherEventCountMonitor;
+	@Autowired
+	private FetcherEventDelayMonitor fetcherEventDelayMonitor;
+	@Autowired
+	private ParserEventCountMonitor parserEventCountMonitor;
 
 	@Autowired
 	SrcDBInstanceService srcDBInstanceService;
@@ -94,10 +104,13 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 	private static final Logger LOG = LoggerFactory.getLogger(DefaultTaskExecutorBuilder.class);
 
 	public TaskExecutor build(PumaTask pumaTask) throws Exception {
-		
+
 		try {
 			DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
-
+			taskExecutor.setFetcherEventCountMonitor(fetcherEventCountMonitor);
+			taskExecutor.setFetcherEventDelayMonitor(fetcherEventDelayMonitor);
+			taskExecutor.setParserEventCountMonitor(parserEventCountMonitor);
+			
 			PumaTaskState taskState = new PumaTaskState();
 			taskState.setTaskName(pumaTask.getName());
 			taskState.setStatus(Status.PREPARING);
@@ -125,7 +138,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 
 			// Parser.
 			Parser parser = new DefaultBinlogParser();
-			//parser.start();
+			// parser.start();
 			taskExecutor.setParser(parser);
 
 			// Handler.
@@ -138,9 +151,9 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			tableMetaInfo.setMetaDBUsername(srcDBInstance.getUsername());
 			tableMetaInfo.setMetaDBPassword(srcDBInstance.getPassword());
 			dataHandler.setTableMetasInfoFetcher(tableMetaInfo);
-			//dataHandler.start();
+			// dataHandler.start();
 			taskExecutor.setDataHandler(dataHandler);
-			
+
 			// File sender.
 			List<Sender> senders = new ArrayList<Sender>();
 			FileDumpSender sender = new FileDumpSender();
@@ -151,7 +164,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			DefaultEventStorage storage = new DefaultEventStorage();
 			storage.setName(storageName + taskName);
 			storage.setTaskName(taskName);
-			
+
 			storage.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
 			storage.setCodec(jsonCodec);
 
@@ -195,7 +208,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			masterBucketIndex.setBaseDir(masterStorageBaseDir + taskName);
 			masterBucketIndex.setBucketFilePrefix(masterBucketFilePrefix);
 			masterBucketIndex.setMaxBucketLengthMB(maxMasterBucketLengthMB);
-			//masterBucketIndex.start();
+			// masterBucketIndex.start();
 			storage.setMasterBucketIndex(masterBucketIndex);
 
 			// File sender slave storage.
@@ -203,7 +216,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			slaveBucketIndex.setBaseDir(slaveStorageBaseDir + taskName);
 			slaveBucketIndex.setBucketFilePrefix(slaveBucketFilePrefix);
 			slaveBucketIndex.setMaxBucketLengthMB(maxSlaveBucketLengthMB);
-			//slaveBucketIndex.start();
+			// slaveBucketIndex.start();
 			storage.setSlaveBucketIndex(slaveBucketIndex);
 
 			// Archive strategy.
@@ -218,16 +231,16 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			storage.setCleanupStrategy(cleanupStrategy);
 
 			storage.setBinlogIndexBaseDir(binlogIndexBaseDir + taskName);
-			//storage.start();
+			// storage.start();
 			sender.setStorage(storage);
-			//sender.start();
+			// sender.start();
 			senders.add(sender);
 
 			// Dispatch.
 			SimpleDispatcherImpl dispatcher = new SimpleDispatcherImpl();
 			dispatcher.setName(dispatchName + taskName);
 			dispatcher.setSenders(senders);
-			//dispatcher.start();
+			// dispatcher.start();
 			taskExecutor.setDispatcher(dispatcher);
 
 			// Set puma task status.

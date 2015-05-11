@@ -53,6 +53,7 @@ import com.dianping.puma.parser.mysql.packet.PacketType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 基于MySQL复制机制的Server
@@ -93,22 +94,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	private FetcherEventDelayMonitor fetcherEventDelayMonitor;
 
 	private ParserEventCountMonitor parserEventCountMonitor;
-
-	public DefaultTaskExecutor() {
-		fetcherEventCountMonitor = ComponentContainer.SPRING.lookup("fetcherEventCountMonitor");
-		if (fetcherEventCountMonitor != null) {
-			LOG.info("Find `fetcherEventCountMonitor` spring bean success.");
-		}
-		fetcherEventDelayMonitor = ComponentContainer.SPRING.lookup("fetcherEventDelayMonitor");
-		if (fetcherEventDelayMonitor != null) {
-			LOG.info("Find `fetcherEventDelayMonitor` spring bean success.");
-		}
-		parserEventCountMonitor = ComponentContainer.SPRING.lookup("parserEventCountMonitor");
-		if (parserEventCountMonitor != null) {
-			LOG.info("Find `parserEventCountMonitor` spring bean success.");
-		}
-
-	}
 
 	@Override
 	public void doStart() throws Exception {
@@ -645,6 +630,18 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	public void incrDdls() {
 		Long ddls = this.state.getBinlogStat().getDdls();
 		this.state.getBinlogStat().setDdls(ddls + 1);
+	}
+
+	public void setFetcherEventCountMonitor(FetcherEventCountMonitor fetcherEventCountMonitor) {
+		this.fetcherEventCountMonitor = fetcherEventCountMonitor;
+	}
+
+	public void setFetcherEventDelayMonitor(FetcherEventDelayMonitor fetcherEventDelayMonitor) {
+		this.fetcherEventDelayMonitor = fetcherEventDelayMonitor;
+	}
+
+	public void setParserEventCountMonitor(ParserEventCountMonitor parserEventCountMonitor) {
+		this.parserEventCountMonitor = parserEventCountMonitor;
 	}
 
 	public static enum BinlogFormat {

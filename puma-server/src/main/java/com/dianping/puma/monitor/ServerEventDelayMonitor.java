@@ -1,8 +1,11 @@
 package com.dianping.puma.monitor;
 
+import com.dianping.cat.Cat;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.core.monitor.HeartbeatMonitor;
+import com.dianping.puma.monitor.exception.ServerEventDelayMonitorException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -54,12 +57,18 @@ public class ServerEventDelayMonitor {
 	}
 
 	public void record(String taskName, long execTime) {
-		heartbeatMonitor.record(taskName, genStatus(execTime));
+		heartbeatMonitor.record(taskName, genStatus(taskName, execTime));
 	}
 
-	private String genStatus(long execSeconds) {
+	private String genStatus(String taskName, long execSeconds) {
 		long diff = System.currentTimeMillis() / 1000 - execSeconds;
-		return (diff < serverEventDelayThreshold) ? "0" : "1";
+		if (diff < serverEventDelayThreshold) {
+			return "0";
+		} else {
+			Cat.logError("Puma.server.eventDelay", new ServerEventDelayMonitorException("puma taskname is " + taskName
+					+ ".  Delay time is " + Long.toString(diff)));
+			return "1";
+		}
 	}
 
 	public void setHeartbeatMonitor(HeartbeatMonitor heartbeatMonitor) {

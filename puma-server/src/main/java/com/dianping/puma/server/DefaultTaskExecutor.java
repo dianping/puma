@@ -28,6 +28,8 @@ import com.dianping.puma.monitor.FetcherEventCountMonitor;
 import com.dianping.puma.monitor.FetcherEventDelayMonitor;
 import com.dianping.puma.monitor.ParserEventCountMonitor;
 import com.dianping.puma.sender.Sender;
+import com.dianping.puma.server.exception.ServerEventFetcherException;
+import com.dianping.puma.server.exception.ServerEventParserException;
 import com.dianping.puma.storage.DefaultEventStorage;
 
 import org.apache.commons.lang.StringUtils;
@@ -149,7 +151,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				}
 			} catch (Throwable e) {
 				if (isNeedStop) {
-					Cat.logError("Puma.server.failed", e);
+					Cat.logError("Puma.server.failed", new ServerEventFetcherException(e));
 					stopTask();
 				}
 				if (isStop()) {
@@ -205,7 +207,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			LOG.error("binlog_format is MIXED or STATEMENT ,System is not support.");
 			String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
 			Cat.logEvent("Slave.dbBinlogFormat", eventName, "1", "");
-			Cat.logError("Puma.server.mixedorstatement.format", new Exception(
+			Cat.logError("Puma.server.mixedorstatement.format", new ServerEventParserException(
 					"binlog_format is MIXED or STATEMENT ,System is not support."));
 			stopTask();
 		}

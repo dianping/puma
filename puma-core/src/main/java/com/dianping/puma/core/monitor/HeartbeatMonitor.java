@@ -43,6 +43,9 @@ public class HeartbeatMonitor extends AbstractPumaMonitor {
 				for (Map.Entry entry: statuses.entrySet()) {
 					monitor.logEvent(type, (String) entry.getKey(), (String) entry.getValue(), "");
 				}
+				for (Map.Entry entry: statuses.entrySet()) {
+					statuses.put((String) entry.getKey(), "0");
+				}
 			}
 		}, delaySeconds, periodSeconds, TimeUnit.SECONDS);
 	}

@@ -250,10 +250,11 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 		state.setStatus(Status.FAILED);
 
 		// this.status.setStatus(TaskExecutorStatus.Status.FAILED);
-		Cat.logEvent("Puma.syncserver.failed",abstractTask.getSyncServerName(),"1", detail);
+		Cat.logEvent("Puma.syncserver.failed", abstractTask.getSyncServerName(), "1", detail);
 		state.setDetail(detail);
 		// this.status.setDetail(detail);
-		Cat.logError("Puma.syncserver.failed",new Exception("syncserver: "+abstractTask.getSyncServerName()+"detail"));
+		Cat.logError("Puma.syncserver.failed",
+				new TaskExecutionException("syncserver: " + abstractTask.getSyncServerName() + "detail"));
 		LOG.error("TaskExecutor[" + this.getTask().getName() + "] failed... cause:" + detail);
 	}
 

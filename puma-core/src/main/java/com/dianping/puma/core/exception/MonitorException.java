@@ -13,4 +13,8 @@ public class MonitorException extends PumaException {
 	public MonitorException(Throwable e) {
 		super(e);
 	}
+	
+	public MonitorException(String msg, Throwable e) {
+		super(msg, e);
+	}
 }

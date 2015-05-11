@@ -13,4 +13,8 @@ public class PumaException extends Exception {
 	public PumaException(Throwable e) {
 		super(e);
 	}
+
+	public PumaException(String msg, Throwable e) {
+		super(msg, e);
+	}
 }

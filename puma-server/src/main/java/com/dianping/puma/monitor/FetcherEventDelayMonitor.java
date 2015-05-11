@@ -56,18 +56,12 @@ public class FetcherEventDelayMonitor {
 	}
 
 	public void record(String taskName, long execTime) {
-		heartbeatMonitor.record(taskName, genStatus(taskName, execTime));
+		heartbeatMonitor.record(taskName, genStatus(execTime));
 	}
 
-	private String genStatus(String taskName, long execSeconds) {
+	private String genStatus(long execSeconds) {
 		long diff = System.currentTimeMillis() / 1000 - execSeconds;
-		if (diff < fetcherEventDelayThreshold) {
-			return "0";
-		} else {
-			Cat.logError("Puma.fetcher.eventDelay", new Exception("puma taskname is " + taskName + ".  Delay time is "
-					+ Long.toString(diff)));
-			return "1";
-		}
+		return diff < fetcherEventDelayThreshold ? "0" : "1";
 	}
 
 	public void setHeartbeatMonitor(HeartbeatMonitor heartbeatMonitor) {

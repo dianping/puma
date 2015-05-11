@@ -11,12 +11,14 @@ import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
 import com.dianping.puma.ComponentContainer;
+import com.dianping.puma.channel.exception.HeartbeatSenderException;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.HeartbeatEvent;
@@ -141,7 +143,8 @@ public class HeartbeatTask {
 						clientStateContainer.remove(HeartbeatTask.this.clientName);
 						SystemStatusContainer.instance.removeClient(HeartbeatTask.this.clientName);
 						Cat.logEvent("ClientConnect.heartbeated", HeartbeatTask.this.clientName, "1", "");
-						Cat.logError("ClientConnect.heartbeated.closed: ", e);
+						Cat.logError("ClientConnect.heartbeated.closed: ", new HeartbeatSenderException(
+								"ClientConnect.heartbeated.closed", e));
 						LOG.error("ClientConnect.heartbeated.closed: ", e);
 					}
 				}

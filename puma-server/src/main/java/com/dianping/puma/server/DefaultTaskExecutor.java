@@ -164,7 +164,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				}
 			} catch (Throwable e) {
 				if (isNeedStop) {
-					Cat.logError("puma.server.failed", e);
+					Cat.logError("Puma.server.failed", e);
 					stopTask();
 				}
 				if (isStop()) {
@@ -220,7 +220,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			LOG.error("binlog_format is MIXED or STATEMENT ,System is not support.");
 			String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
 			Cat.logEvent("Slave.dbBinlogFormat", eventName, "1", "");
-			Cat.logError("puma.server.mixedorstatement.format", new Exception(
+			Cat.logError("Puma.server.mixedorstatement.format", new Exception(
 					"binlog_format is MIXED or STATEMENT ,System is not support."));
 			stopTask();
 		}

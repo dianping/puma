@@ -64,7 +64,7 @@ public class FetcherEventDelayMonitor {
 		if (diff < fetcherEventDelayThreshold) {
 			return "0";
 		} else {
-			Cat.logError("Puma.Fetcher.EventDelay", new Exception("puma taskname is " + taskName + ".  Delay time is "
+			Cat.logError("Puma.fetcher.eventDelay", new Exception("puma taskname is " + taskName + ".  Delay time is "
 					+ Long.toString(diff)));
 			return "1";
 		}

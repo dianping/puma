@@ -33,6 +33,7 @@
     <mvc:resources mapping="/image/**" location="/image/" />
     <mvc:resources mapping="*.html" location="*.html" />
     <mvc:resources mapping="/js/**" location="/js/"/>
+    <mvc:resources mapping="/resources/**" location="/resources/"/>
 
     <!-- Saves a locale change using a cookie -->
     <!-- <bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver" 

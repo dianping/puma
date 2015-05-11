@@ -126,7 +126,7 @@ public class HeartbeatListener {
 		}
 		return false;
 	}
-	
+
 	private class HeartbeatListenTask implements Runnable {
 		@Override
 		public void run() {
@@ -139,6 +139,8 @@ public class HeartbeatListener {
 				LOG.info("PumaClient " + pumaClient.getConfig().getName()
 						+ " no receive heartbeat. restart pumaClient.");
 				Cat.logEvent("ClientConnect.heartbeated", pumaClient.getConfig().getName(), "1", "");
+				Cat.logError("ClientConnect.heartbeated.disappeared", new Exception("PumaClient "
+						+ pumaClient.getConfig().getName() + " no receive heartbeat. restart pumaClient."));
 				pumaClient.stop();
 				pumaClient.start();
 			}

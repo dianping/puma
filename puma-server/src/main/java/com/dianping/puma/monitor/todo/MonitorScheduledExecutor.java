@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.dianping.puma.core.util.ScheduledExecutorUtils;
 
-@Service("monitorScheduledExecutor")
+//@Service("monitorScheduledExecutor")
 public class MonitorScheduledExecutor implements InitializingBean{
 	 
 	public static MonitorScheduledExecutor instance;

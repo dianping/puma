@@ -93,8 +93,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	private FetcherEventDelayMonitor fetcherEventDelayMonitor;
 
 	private ParserEventCountMonitor parserEventCountMonitor;
-	
-	public DefaultTaskExecutor(){
+
+	public DefaultTaskExecutor() {
 		fetcherEventCountMonitor = ComponentContainer.SPRING.lookup("fetcherEventCountMonitor");
 		if (fetcherEventCountMonitor != null) {
 			LOG.info("Find `fetcherEventCountMonitor` spring bean success.");
@@ -109,7 +109,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		}
 
 	}
-	
+
 	@Override
 	public void doStart() throws Exception {
 		long failCount = 0;
@@ -163,7 +163,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 					throw new IOException("Login failed.");
 				}
 			} catch (Throwable e) {
-				if(isNeedStop){
+				if (isNeedStop) {
+					Cat.logError("puma.server.failed", e);
 					stopTask();
 				}
 				if (isStop()) {
@@ -219,6 +220,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			LOG.error("binlog_format is MIXED or STATEMENT ,System is not support.");
 			String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
 			Cat.logEvent("Slave.dbBinlogFormat", eventName, "1", "");
+			Cat.logError("puma.server.mixedorstatement.format", new Exception(
+					"binlog_format is MIXED or STATEMENT ,System is not support."));
 			stopTask();
 		}
 		fetcherEventDelayMonitor.record(getTaskName(), binlogEvent.getHeader().getTimestamp());
@@ -419,7 +422,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 		return isAuth;
 	}
-	
+
 	/**
 	 * Send QueryCommand Packet to update binlog_checksum
 	 * 
@@ -474,7 +477,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		closeTransport();
 	}
 
-	private void stopTask(){
+	private void stopTask() {
 		String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
 		try {
 			DefaultTaskExecutorContainer.instance.stopExecutor(this);
@@ -484,6 +487,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			Cat.logEvent("Slave.doStop", eventName, "1", "");
 		}
 	}
+
 	private void closeTransport() {
 		// Close in.
 		try {

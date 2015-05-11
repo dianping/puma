@@ -141,7 +141,8 @@ public class HeartbeatTask {
 						clientStateContainer.remove(HeartbeatTask.this.clientName);
 						SystemStatusContainer.instance.removeClient(HeartbeatTask.this.clientName);
 						Cat.logEvent("ClientConnect.heartbeated", HeartbeatTask.this.clientName, "1", "");
-						LOG.error("heartbeat.exception: ", e);
+						Cat.logError("ClientConnect.heartbeated.closed: ", e);
+						LOG.error("ClientConnect.heartbeated.closed: ", e);
 					}
 				}
 			}

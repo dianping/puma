@@ -18,7 +18,7 @@ import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ClientStatus;
 import com.dianping.puma.common.SystemStatusContainer.ServerStatus;
 
-@Service("syncProcessTaskMonitor")
+//@Service("syncProcessTaskMonitor")
 public class SyncProcessTaskMonitor extends AbstractTaskMonitor implements Runnable {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SyncProcessTaskMonitor.class);

@@ -172,7 +172,7 @@ public class Handler implements PageHandler<Context> {
 					}
 				}
 			} catch (Exception e) {
-				Cat.getProducer().logError("puma.server.client.ChannelClosed.exception:", e);
+				Cat.logError("Puma.client.channelClosed:", e);
 				clientStateContainer.remove(payload.getClientName());
 				SystemStatusContainer.instance.removeClient(payload.getClientName());
 				heartbeatTask.cancelFuture();

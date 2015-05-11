@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.List;
 
-@Service("clientConnectMonitor")
+//@Service("clientConnectMonitor")
 public class ClientConnectMonitor {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ClientConnectMonitor.class);

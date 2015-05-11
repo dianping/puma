@@ -250,15 +250,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 		state.setStatus(Status.FAILED);
 
 		// this.status.setStatus(TaskExecutorStatus.Status.FAILED);
-		Cat.getProducer().logEvent(
-				"Puma.syncserver." + abstractTask.getSyncServerName() + ".fail",
-				abstractTask.getSyncServerName(),
-				"1",
-				"syncServerName = " + abstractTask.getSyncServerName() + "&syncTaskName= " + abstractTask.getName()
-						+ "&casedetail=" + detail);
+		Cat.logEvent("Puma.syncserver.failed",abstractTask.getSyncServerName(),"1", detail);
 		state.setDetail(detail);
 		// this.status.setDetail(detail);
-
+		Cat.logError("Puma.syncserver.failed",new Exception("syncserver: "+abstractTask.getSyncServerName()+"detail"));
 		LOG.error("TaskExecutor[" + this.getTask().getName() + "] failed... cause:" + detail);
 	}
 
@@ -270,8 +265,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 		// abstractTask.getDestMysqlHost().getUsername(),
 		// abstractTask.getDestMysqlHost().getPassword(),
 		// abstractTask.getMysqlMapping());
-		mysqlExecutor = new MysqlExecutor((dstDBInstance.getHost() + ":" + dstDBInstance.getPort()), dstDBInstance
-				.getUsername(), dstDBInstance.getPassword(), abstractTask.getMysqlMapping());
+		mysqlExecutor = new MysqlExecutor((dstDBInstance.getHost() + ":" + dstDBInstance.getPort()),
+				dstDBInstance.getUsername(), dstDBInstance.getPassword(), abstractTask.getMysqlMapping());
 
 		// 读取binlog位置，创建PumaClient，设置PumaCleint的config，再启动
 		if (this.pumaClient != null) {
@@ -445,7 +440,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 			public void onEvent(ChangedEvent event) throws Exception {
 				// LOG.info("********************Received " + event);
 				if (!skipToNextPos) {
-			
+
 					if (event != null && !containDatabase(event.getDatabase())) {
 						binlogOfIOThreadChanged(event);
 					}
@@ -537,7 +532,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 			}
 
 		});
-		
+
 		return pumaClient;
 	}
 

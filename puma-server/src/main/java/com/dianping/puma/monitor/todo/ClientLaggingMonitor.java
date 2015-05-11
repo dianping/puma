@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 
-@Service("clientLaggingMonitor")
+//@Service("clientLaggingMonitor")
 public class ClientLaggingMonitor implements InitializingBean {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ClientLaggingMonitor.class);

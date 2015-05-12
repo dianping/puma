@@ -6,43 +6,50 @@ import java.util.concurrent.*;
 
 public class BatchRowPool {
 
-	private int poolSize;
-
-	private BlockingQueue<BatchRow> batchRows;
-
-	private BatchRow batchRow;
+	private LinkedBlockingDeque<BatchRow> batchRows;
 
 	public BatchRowPool(int poolSize) {
-		this.poolSize = poolSize;
-		batchRows = new ArrayBlockingQueue<BatchRow>(poolSize);
-		batchRow = new BatchRow();
+		batchRows = new LinkedBlockingDeque<BatchRow>(poolSize);
 	}
 
-	public void put(BatchRow batchRow) throws InterruptedException {
-		if (this.batchRow == null) {
-			this.batchRow = batchRow;
+	public void put(ChangedEvent event) throws InterruptedException {
+		BatchRow last = batchRows.peekLast();
+		if (last == null) {
+			batchRows.put(new BatchRow(event));
 		} else {
-			batchRows.put(this.batchRow);
-			this.batchRow = batchRow;
-		}
-	}
-
-	public void put(ChangedEvent row) throws InterruptedException {
-		if (batchRow == null) {
-			batchRow = new BatchRow(row);
-		} else {
-			if (!batchRow.addRow(row)) {
-				batchRows.put(batchRow);
-				batchRow = new BatchRow(row);
+			if (!last.addRow(event)) {
+				batchRows.put(new BatchRow(event));
 			}
 		}
 	}
 
-	public BatchRow take() throws InterruptedException {
-		if (batchRows.isEmpty() && batchRow != null) {
-			batchRows.put(batchRow);
-			batchRow = new BatchRow();
+	public void put(BatchRow batchRow) throws InterruptedException {
+		batchRows.put(batchRow);
+	}
+
+	/*
+	public void put(BatchRow batchRow) throws InterruptedException {
+		if (this.buffer == null) {
+			this.buffer = batchRow;
+		} else {
+			batchRows.put(this.buffer);
+			this.buffer = batchRow;
 		}
+	}*/
+
+	/*
+	public void put(ChangedEvent row) throws InterruptedException {
+		if (buffer.size() == 0) {
+			buffer.addRow(row);
+		} else {
+			if (!buffer.addRow(row)) {
+				batchRows.put(buffer);
+				buffer = new BatchRow(row);
+			}
+		}
+	}*/
+
+	public BatchRow take() throws InterruptedException {
 		return batchRows.take();
 	}
 }

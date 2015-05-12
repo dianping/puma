@@ -22,7 +22,7 @@ public class LoadParserTest {
 		RowChangedEvent.ColumnInfo name = new RowChangedEvent.ColumnInfo(false, "Peter", "Linda");
 		columnInfoMap.put("name", name);
 		event0.setColumns(columnInfoMap);
-		event0.setDMLType(DMLType.INSERT);
+		event0.setDmlType(DMLType.INSERT);
 
 		String sql0 = LoadParser.parseSql(event0);
 		System.out.println(sql0);
@@ -42,7 +42,7 @@ public class LoadParserTest {
 		RowChangedEvent.ColumnInfo name = new RowChangedEvent.ColumnInfo(false, "Peter", "Linda");
 		columnInfoMap.put("name", name);
 		event0.setColumns(columnInfoMap);
-		event0.setDMLType(DMLType.DELETE);
+		event0.setDmlType(DMLType.DELETE);
 
 		Object[] args0 = LoadParser.parseArgs(event0);
 		System.out.println(Arrays.toString(args0));

@@ -39,7 +39,7 @@ public class LoadParser {
 	}
 
 	public static String parseSql(RowChangedEvent event) {
-		switch (event.getDMLType()) {
+		switch (event.getDmlType()) {
 		case INSERT:
 			return parseSql(event, it);
 		case DELETE:
@@ -57,7 +57,7 @@ public class LoadParser {
 		List<Object> args = new ArrayList<Object>();
 		Map<String, ColumnInfo> columnInfoMap = event.getColumns();
 
-		switch (event.getDMLType()) {
+		switch (event.getDmlType()) {
 		case INSERT:
 			for (Map.Entry<String, ColumnInfo> columnName2ColumnInfo : columnInfoMap.entrySet()) {
 				args.add(columnName2ColumnInfo.getValue().getNewValue());
@@ -73,7 +73,9 @@ public class LoadParser {
 				args.add(columnName2ColumnInfo.getValue().getNewValue());
 			}
 			for (Map.Entry<String, ColumnInfo> columnName2ColumnInfo : columnInfoMap.entrySet()) {
-				args.add(columnName2ColumnInfo.getValue().getOldValue());
+				if (columnName2ColumnInfo.getValue().isKey()) {
+					args.add(columnName2ColumnInfo.getValue().getOldValue());
+				}
 			}
 			break;
 		case REPLACE:

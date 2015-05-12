@@ -2,13 +2,13 @@ package com.dianping.puma.syncserver.job.load;
 
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.sql.DMLType;
-import com.dianping.puma.syncserver.job.load.model.BatchRows;
 import com.dianping.puma.syncserver.job.load.model.RowKey;
 
+/*
 public class LoadMerger {
 
 	public static void merge(RowChangedEvent row, BatchRows batchRows) {
-		switch (row.getDMLType()) {
+		switch (row.getDmlType()) {
 		case INSERT:
 			mergeInsert(row, batchRows);
 			break;
@@ -43,9 +43,9 @@ public class LoadMerger {
 				batchRows.replace(row);
 			} else {
 
-				if (row.getDMLType() == DMLType.INSERT) {
+				if (row.getDmlType() == DMLType.INSERT) {
 					// insert + update = insert.
-					row.setDMLType(DMLType.INSERT);
+					row.setDmlType(DMLType.INSERT);
 				}
 				batchRows.replace(row);
 			}
@@ -54,13 +54,13 @@ public class LoadMerger {
 			// UPDATE statement updates primary key value.
 			// update = delete + insert.
 			RowChangedEvent oldRow = row.clone();
-			oldRow.setDMLType(DMLType.DELETE);
+			oldRow.setDmlType(DMLType.DELETE);
 			RowChangedEvent newRow = row.clone();
-			newRow.setDMLType(DMLType.INSERT);
+			newRow.setDmlType(DMLType.INSERT);
 
 			merge(oldRow, batchRows);
 			merge(newRow, batchRows);
 		}
 
 	}
-}
+}*/

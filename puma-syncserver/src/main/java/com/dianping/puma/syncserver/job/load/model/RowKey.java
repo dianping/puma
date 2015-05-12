@@ -66,7 +66,25 @@ public class RowKey {
 		return result;
 	}
 
-	public static RowKey getNewRowKey(RowChangedEvent row) {
+	public static boolean equals(RowChangedEvent aRow, RowChangedEvent bRow) {
+		return RowKey.getRowKey(aRow).equals(RowKey.getRowKey(bRow));
+	}
+
+	public static RowKey getRowKey(RowChangedEvent row) {
+		switch (row.getDmlType()) {
+		case INSERT:
+			return getNewRowKey(row);
+		case DELETE:
+			return getOldRowKey(row);
+		case UPDATE:
+		case REPLACE:
+			return getNewRowKey(row);
+		}
+
+		return null;
+	}
+
+	private static RowKey getNewRowKey(RowChangedEvent row) {
 		RowKey rowKey = new RowKey();
 
 		rowKey.setSchema(row.getDatabase());
@@ -80,7 +98,7 @@ public class RowKey {
 		return rowKey;
 	}
 
-	public static RowKey getOldRowKey(RowChangedEvent row) {
+	private static RowKey getOldRowKey(RowChangedEvent row) {
 		RowKey oriRowKey = new RowKey();
 
 		oriRowKey.setSchema(row.getDatabase());

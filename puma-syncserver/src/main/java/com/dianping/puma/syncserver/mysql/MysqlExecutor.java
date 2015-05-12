@@ -116,16 +116,15 @@ public class MysqlExecutor {
 	 * @throws DdlRenameException
 	 */
 	public Map<String, Object> execute(ChangedEvent event) throws SQLException {
-		loader.load(event);
+		//loader.load(event);
 
 		Map<String, Object> result = null;
 
-		/*
 		if (event instanceof DdlEvent) {
 			executeDdl((DdlEvent) event);
 		} else if (event instanceof RowChangedEvent) {
 			result = executeDml((RowChangedEvent) event);
-		}*/
+		}
 
 		return result;
 	}

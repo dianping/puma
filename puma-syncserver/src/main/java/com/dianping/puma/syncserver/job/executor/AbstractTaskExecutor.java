@@ -453,7 +453,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 							// --------- (2) 【事务提交事件】--------------
 							if (containDatabase(event.getDatabase()) && transactionStart) {
 								// 提交事务(datachange了，则该commit肯定是属于当前做了数据操作的事务的，故mysqlExecutor.commit();)
-								//mysqlExecutor.commit();
+								mysqlExecutor.commit();
 
 								transactionStart = false;
 								// 遇到commit事件，操作数据库了，更新sqlbinlog和保存binlog到数据库

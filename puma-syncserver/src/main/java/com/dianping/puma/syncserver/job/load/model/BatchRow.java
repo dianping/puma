@@ -13,9 +13,11 @@ import java.util.List;
 
 public class BatchRow {
 
-	private int batchRowMaxSize = 1000;
+	private final static int volume = 1000;
 
-	private int batchRowSize;
+	private int size;
+
+	private boolean saturate = false;
 
 	private BinlogInfo binlogInfo;
 
@@ -34,47 +36,73 @@ public class BatchRow {
 	public BatchRow() {}
 
 	public BatchRow(ChangedEvent row) {
-		init(row);
+		addFirstRow(row);
 	}
 
-	private void init(ChangedEvent row) {
-		binlogInfo = new BinlogInfo(row.getBinlog(), row.getBinlogPos());
-		++batchRowSize;
+	public boolean addRow(ChangedEvent event) {
+		if (saturate) {
+			return false;
+		} else {
+			if (size == 0) {
+				addFirstRow(event);
+				return true;
+			} else {
+				RowChangedEvent row = (RowChangedEvent) event;
+				if (checkRow(row)) {
+					params.add(LoadParser.parseArgs(row));
+					rowKeys.add(RowKey.getRowKey(row));
+					binlogInfo = new BinlogInfo(row.getBinlog(), row.getBinlogPos());
+					++size;
+					return true;
+				} else {
+					saturate = true;
+					return false;
+				}
+			}
+		}
+	}
 
-		if (row instanceof RowChangedEvent) {
+	private void addFirstRow(ChangedEvent event) {
+		binlogInfo = new BinlogInfo(event.getBinlog(), event.getBinlogPos());
+		++size;
+
+		if (event instanceof RowChangedEvent) {
+			RowChangedEvent row = (RowChangedEvent) event;
 			ddl = false;
 			table = new Table(row.getDatabase(), row.getTable());
-			dmlType = ((RowChangedEvent) row).getDmlType();
-			sql = LoadParser.parseSql((RowChangedEvent) row);
-			params.add(LoadParser.parseArgs((RowChangedEvent) row));
-			rowKeys.add(RowKey.getRowKey((RowChangedEvent) row));
+			dmlType = row.getDmlType();
+			sql = LoadParser.parseSql(row);
+			params.add(LoadParser.parseArgs(row));
+			rowKeys.add(RowKey.getRowKey(row));
 		} else {
 			ddl = true;
-			sql = ((DdlEvent) row).getSql();
+			saturate = true;
+			sql = ((DdlEvent) event).getSql();
 		}
 	}
 
-	public boolean addRow(ChangedEvent row) {
-		if (batchRowSize == 0) {
-			init(row);
-			return true;
-		} else {
-			if (row instanceof RowChangedEvent) {
-				if (check((RowChangedEvent) row)) {
-					params.add(LoadParser.parseArgs((RowChangedEvent) row));
-					rowKeys.add(RowKey.getRowKey((RowChangedEvent) row));
-					++batchRowSize;
-					return true;
-				}
-				return false;
-			}
+	private boolean checkRow(RowChangedEvent row) {
+		if (!this.table.equals(new Table(row.getDatabase(), row.getTable()))) {
 			return false;
 		}
+		if (row.getDmlType() != dmlType) {
+			return false;
+		}
+		if (size >= volume) {
+			return false;
+		}
+		if (rowKeys.contains(RowKey.getRowKey(row))) {
+			return false;
+		}
+		return true;
 	}
 
-	private boolean check(RowChangedEvent row) {
-		Table table = new Table(row.getDatabase(), row.getTable());
-		return this.table.equals(table) && row.getDmlType() == dmlType && batchRowSize <= batchRowMaxSize;
+	public int size() {
+		return size;
+	}
+
+	public BinlogInfo getBinlogInfo() {
+		return binlogInfo;
 	}
 
 	public List<RowKey> listRowKeys() {

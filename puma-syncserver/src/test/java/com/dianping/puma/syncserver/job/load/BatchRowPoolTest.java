@@ -1,4 +1,4 @@
-package com.dianping.puma.syncserver.load;
+package com.dianping.puma.syncserver.job.load;
 
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.sql.DMLType;

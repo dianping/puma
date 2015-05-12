@@ -1,15 +1,4 @@
-package com.dianping.puma.syncserver.load;
-
-import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
-import com.dianping.puma.core.util.sql.DMLType;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.Map;
+package com.dianping.puma.syncserver.job.load;
 
 /*
 public class LoadMergerTest {

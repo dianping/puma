@@ -11,6 +11,7 @@ import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.core.model.state.PumaTaskState;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
+import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.datahandler.DefaultDataHandler;
 import com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.filter.*;
@@ -182,6 +183,11 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			DDLEventFilter ddlEventFilter = new DDLEventFilter();
 			ddlEventFilter.setName(taskName);
 			ddlEventFilter.setDdl(true);
+			List<DDLType> ddlTypes = new ArrayList<DDLType>();
+			ddlTypes.add(DDLType.ALTER_TABLE);
+			ddlTypes.add(DDLType.CREATE_INDEX);
+			ddlTypes.add(DDLType.DROP_INDEX);
+			ddlEventFilter.setDdlTypes(ddlTypes);
 			eventCenter.register(ddlEventFilter);
 			eventFilterList.add(ddlEventFilter);
 

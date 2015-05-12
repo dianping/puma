@@ -99,6 +99,7 @@ public class PooledLoader implements Loader {
 
 	public void load(ChangedEvent row) {
 		try {
+			LOG.info("LOAD");
 			Cat.logEvent("event", "load");
 			batchRowPool.put(row);
 		} catch (InterruptedException e) {
@@ -115,11 +116,11 @@ public class PooledLoader implements Loader {
 
 	private void initDataSource() {
 		dataSource = new HikariDataSource();
-		dataSource.setJdbcUrl("jdbc:mysql://" + host + "/");
+		dataSource.setJdbcUrl("jdbc:mysql://" + host + "/?useServerPrepStmts=false&rewriteBatchedStatements=true");
 		dataSource.setUsername(username);
 		dataSource.setPassword(password);
 		dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-		dataSource.setMaximumPoolSize(10);
+		dataSource.setMaximumPoolSize(2);
 		dataSource.setAutoCommit(false);
 
 		/*
@@ -206,6 +207,7 @@ public class PooledLoader implements Loader {
 
 	private void batchExecute(BatchRow batchRow) throws SQLException {
 		Transaction t = Cat.newTransaction("load", "SQL");
+		LOG.info("Batch row size = {}.", batchRow.size());
 
 		Connection conn = dataSource.getConnection();
 		QueryRunner runner = new QueryRunner();

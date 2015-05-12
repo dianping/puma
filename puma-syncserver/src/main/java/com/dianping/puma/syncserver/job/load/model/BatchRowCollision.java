@@ -19,7 +19,7 @@ public class BatchRowCollision {
 
 	private volatile int ddlCount;
 
-	private BatchRow injecting;
+	private BatchRow buffer;
 
 	private volatile boolean locked = false;
 
@@ -30,7 +30,7 @@ public class BatchRowCollision {
 	}
 
 	public void inject(BatchRow batchRow) throws InterruptedException {
-		injecting = batchRow;
+		buffer = batchRow;
 
 		if (isCollision()) {
 			synchronized (lock) {
@@ -39,21 +39,23 @@ public class BatchRowCollision {
 			}
 		}
 
-		if (injecting.isDdl()) {
+		if (buffer.isDdl()) {
 			++ddlCount;
 		} else {
-			for (RowKey rowKey: injecting.listRowKeys()) {
+			for (RowKey rowKey: buffer.listRowKeys()) {
 				rowKeys.put(rowKey, true);
 				++dmlCount;
 			}
 		}
+
+		buffer = null;
 	}
 
 	public void extract(BatchRow row) {
 		if (row.isDdl()) {
 			--ddlCount;
 		} else {
-			for (RowKey rowKey: injecting.listRowKeys()) {
+			for (RowKey rowKey: row.listRowKeys()) {
 				rowKeys.remove(rowKey);
 				--dmlCount;
 			}
@@ -62,7 +64,6 @@ public class BatchRowCollision {
 		synchronized (lock) {
 			if (locked && !isCollision()) {
 				locked = false;
-				injecting = null;
 				lock.notify();
 			}
 		}
@@ -73,8 +74,8 @@ public class BatchRowCollision {
 	}
 
 	private boolean isCollision() {
-		if (injecting != null) {
-			if (injecting.isDdl()) {
+		if (buffer != null) {
+			if (buffer.isDdl()) {
 				return isDdlCollision();
 			} else {
 				return isDmlCollision();
@@ -84,7 +85,7 @@ public class BatchRowCollision {
 	}
 
 	private boolean isDmlCollision() {
-		if (injecting != null) {
+		if (buffer != null) {
 			if (dmlCount + ddlCount >= poolSize) {
 				return true;
 			}
@@ -93,7 +94,7 @@ public class BatchRowCollision {
 				return true;
 			}
 
-			for (RowKey rowKey: injecting.listRowKeys()) {
+			for (RowKey rowKey: buffer.listRowKeys()) {
 				if (rowKeys.containsKey(rowKey)) {
 					return true;
 				}
@@ -105,7 +106,7 @@ public class BatchRowCollision {
 	}
 
 	private boolean isDdlCollision() {
-		if (injecting != null) {
+		if (buffer != null) {
 			if (dmlCount + ddlCount >= poolSize) {
 				return true;
 			}

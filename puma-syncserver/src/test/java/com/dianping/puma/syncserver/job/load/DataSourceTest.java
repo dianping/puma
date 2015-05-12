@@ -1,10 +1,9 @@
-package com.dianping.puma.syncserver.load;
+package com.dianping.puma.syncserver.job.load;
 
 import com.dianping.puma.core.util.PumaThreadPool;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.tomcat.jdbc.pool.DataSource;
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 

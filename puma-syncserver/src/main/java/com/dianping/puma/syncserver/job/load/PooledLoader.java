@@ -28,7 +28,7 @@ public class PooledLoader implements Loader {
 
 	private Thread failThread;
 
-	private BatchRowCollision batchRowCollision = new BatchRowCollision(1);
+	private BatchRowCollision batchRowCollision = new BatchRowCollision(5);
 
 	private BatchRowPool batchRowPool = new BatchRowPool(20);
 
@@ -99,7 +99,6 @@ public class PooledLoader implements Loader {
 
 	public void load(ChangedEvent row) {
 		try {
-			LOG.info("LOAD");
 			Cat.logEvent("event", "load");
 			batchRowPool.put(row);
 		} catch (InterruptedException e) {
@@ -120,7 +119,7 @@ public class PooledLoader implements Loader {
 		dataSource.setUsername(username);
 		dataSource.setPassword(password);
 		dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-		dataSource.setMaximumPoolSize(2);
+		dataSource.setMaximumPoolSize(7);
 		dataSource.setAutoCommit(false);
 
 		/*
@@ -146,7 +145,7 @@ public class PooledLoader implements Loader {
 					BatchRow batchRow;
 					try {
 						batchRow = batchRowPool.take();
-						batchRowCollision.inject(batchRow);
+						batchRowCollision.put(batchRow);
 						pooledExecute(batchRow);
 					} catch (InterruptedException e) {
 						if (!isHalt()) {
@@ -217,7 +216,7 @@ public class PooledLoader implements Loader {
 
 			// @TODO: record bin log.
 
-			batchRowCollision.extract(batchRow);
+			batchRowCollision.remove(batchRow);
 		} catch (SQLException e) {
 			conn.rollback();
 		} finally {

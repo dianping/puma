@@ -29,7 +29,7 @@ public class BatchRowCollision {
 		this.poolSize = poolSize;
 	}
 
-	public void inject(BatchRow batchRow) throws InterruptedException {
+	public void put(BatchRow batchRow) throws InterruptedException {
 		buffer = batchRow;
 
 		if (isCollision()) {
@@ -51,7 +51,7 @@ public class BatchRowCollision {
 		buffer = null;
 	}
 
-	public void extract(BatchRow row) {
+	public void remove(BatchRow row) {
 		if (row.isDdl()) {
 			--ddlCount;
 		} else {
@@ -89,17 +89,14 @@ public class BatchRowCollision {
 			if (dmlCount + ddlCount >= poolSize) {
 				return true;
 			}
-
 			if (ddlCount > 0) {
 				return true;
 			}
-
 			for (RowKey rowKey: buffer.listRowKeys()) {
 				if (rowKeys.containsKey(rowKey)) {
 					return true;
 				}
 			}
-
 			return false;
 		}
 		return false;
@@ -110,15 +107,12 @@ public class BatchRowCollision {
 			if (dmlCount + ddlCount >= poolSize) {
 				return true;
 			}
-
 			if (ddlCount > 0) {
 				return true;
 			}
-
 			if (dmlCount > 0) {
 				return true;
 			}
-
 			return false;
 		}
 		return false;

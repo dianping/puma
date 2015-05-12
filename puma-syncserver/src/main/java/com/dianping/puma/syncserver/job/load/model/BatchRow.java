@@ -17,13 +17,11 @@ public class BatchRow {
 
 	private int size;
 
-	private boolean saturate = false;
-
 	private BinlogInfo binlogInfo;
 
 	private Table table;
 
-	private boolean ddl;
+	private boolean ddl = false;
 
 	private DMLType dmlType;
 
@@ -33,20 +31,19 @@ public class BatchRow {
 
 	private List<RowKey> rowKeys = new ArrayList<RowKey>();
 
-	public BatchRow() {}
+	public BatchRow() {
+	}
 
 	public BatchRow(ChangedEvent row) {
 		addFirstRow(row);
 	}
 
 	public boolean addRow(ChangedEvent event) {
-		if (saturate) {
-			return false;
+		if (size == 0) {
+			addFirstRow(event);
+			return true;
 		} else {
-			if (size == 0) {
-				addFirstRow(event);
-				return true;
-			} else {
+			if (event instanceof RowChangedEvent) {
 				RowChangedEvent row = (RowChangedEvent) event;
 				if (checkRow(row)) {
 					params.add(LoadParser.parseArgs(row));
@@ -55,9 +52,10 @@ public class BatchRow {
 					++size;
 					return true;
 				} else {
-					saturate = true;
 					return false;
 				}
+			} else {
+				return false;
 			}
 		}
 	}
@@ -76,19 +74,21 @@ public class BatchRow {
 			rowKeys.add(RowKey.getRowKey(row));
 		} else {
 			ddl = true;
-			saturate = true;
 			sql = ((DdlEvent) event).getSql();
 		}
 	}
 
 	private boolean checkRow(RowChangedEvent row) {
+		if (ddl) {
+			return false;
+		}
+		if (size >= volume) {
+			return false;
+		}
 		if (!this.table.equals(new Table(row.getDatabase(), row.getTable()))) {
 			return false;
 		}
 		if (row.getDmlType() != dmlType) {
-			return false;
-		}
-		if (size >= volume) {
 			return false;
 		}
 		if (rowKeys.contains(RowKey.getRowKey(row))) {

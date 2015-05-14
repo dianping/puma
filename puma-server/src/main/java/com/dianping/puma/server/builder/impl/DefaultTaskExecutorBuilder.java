@@ -189,7 +189,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			ddlTypes.add(DDLType.DROP_INDEX);
 			ddlEventFilter.setDdlTypes(ddlTypes);
 			eventCenter.register(ddlEventFilter);
-			//eventFilterList.add(ddlEventFilter);
+			eventFilterList.add(ddlEventFilter);
 
 			// Transaction event filter.
 			TransactionEventFilter transactionEventFilter = new TransactionEventFilter();

@@ -17,6 +17,9 @@ package com.dianping.puma.datahandler;
 
 import java.math.BigInteger;
 
+import com.dianping.puma.core.util.sql.DDLParser;
+import com.dianping.puma.core.util.sql.DDLResult;
+import com.dianping.puma.core.util.sql.DDLType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -258,6 +261,10 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 		 * log.info("table meta refresh.    DDL event sql:"+sql+"."); }
 		 */
 		tableMetasInfoFetcher.refreshTableMeta(ddlEvent.getDatabase(), ddlEvent.getTable(), false);
+
+		if (ddlEvent.getEventType() == DdlEventType.DDL_ALTER && ddlEvent.getEventSubType() == DdlEventSubType.DDL_ALTER_TABLE) {
+			ddlEvent.setDDLType(DDLType.ALTER_TABLE);
+		}
 
 		ddlEvent.setExecuteTime(queryEvent.getHeader().getTimestamp());
 		result.setData(dataChangedEvent);

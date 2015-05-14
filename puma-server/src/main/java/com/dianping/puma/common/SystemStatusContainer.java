@@ -114,13 +114,12 @@ public enum SystemStatusContainer {
 				dt, seq, ip));
 	}
 
-	public void updateClientSeq(String name, long seq) {
+	public void updateClientInfo(String name, long seq, String binlogFile,long binlogPos) {
 		clientStatus.get(name).setSeq(seq);
-		logMetricForCount("ClientConsumed-" + name);
-	}
-
-	public void updateClientSuccessSeq(String name, long seq) {
 		clientSuccessSeq.put(name, seq);
+		clientStatus.get(name).setBinlogFile(binlogFile);
+		clientStatus.get(name).setBinlogPos(binlogPos);
+		logMetricForCount("ClientConsumed-" + name);
 	}
 	
 	public void updateClientBinlog(String name,String binlogFile,long binlogPos){

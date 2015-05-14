@@ -10,19 +10,16 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
-import com.dianping.puma.ComponentContainer;
 import com.dianping.puma.channel.exception.HeartbeatSenderException;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.HeartbeatEvent;
-import com.dianping.puma.core.model.container.client.ClientStateContainer;
 import com.dianping.puma.core.util.ByteArrayUtils;
 
 public class HeartbeatTask {
@@ -44,9 +41,6 @@ public class HeartbeatTask {
 	private EventCodec codec = null;
 
 	private ScheduledExecutorService executorService = null;
-
-	@Autowired
-	private HeartbeatScheduledExecutor heartbeatScheduledExecutor;
 
 	public HeartbeatTask(EventCodec codec, HttpServletResponse response, String clientName) {
 		this.clientName = clientName;
@@ -138,9 +132,6 @@ public class HeartbeatTask {
 						} catch (IOException e1) {
 							// ignore
 						}
-						ClientStateContainer clientStateContainer = ComponentContainer.SPRING
-								.lookup("clientStateContainer");
-						clientStateContainer.remove(HeartbeatTask.this.clientName);
 						SystemStatusContainer.instance.removeClient(HeartbeatTask.this.clientName);
 						Cat.logEvent("ClientConnect.heartbeated", HeartbeatTask.this.clientName, "1", "");
 						Cat.logError("ClientConnect.heartbeated.closed: ", new HeartbeatSenderException(

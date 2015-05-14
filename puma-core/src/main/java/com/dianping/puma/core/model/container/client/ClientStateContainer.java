@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service("clientStateContainer")
+//@Service("clientStateContainer")
 public class ClientStateContainer extends AbstractStateContainer<ClientState> {
 
 	public void setSeq(String name, long seq) {

@@ -10,10 +10,4 @@ public interface Loader {
 	void start();
 
 	void stop();
-
-	void restart();
-
-	void pause();
-
-	void fail();
 }

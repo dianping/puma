@@ -18,7 +18,7 @@ public class BatchRowPoolTest {
 
 	@Before
 	public void before() {
-		batchRowPool = new BatchRowPool(10);
+		batchRowPool = new BatchRowPool();
 	}
 
 	@Test

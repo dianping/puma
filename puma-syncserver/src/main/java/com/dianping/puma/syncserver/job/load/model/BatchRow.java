@@ -9,7 +9,9 @@ import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.puma.syncserver.job.load.LoadParser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BatchRow {
 
@@ -29,7 +31,7 @@ public class BatchRow {
 
 	private List<Object[]> params = new ArrayList<Object[]>();
 
-	private List<RowKey> rowKeys = new ArrayList<RowKey>();
+	private Map<RowKey, Boolean> rowKeys = new HashMap<RowKey, Boolean>();
 
 	public BatchRow() {
 	}
@@ -47,7 +49,7 @@ public class BatchRow {
 				RowChangedEvent row = (RowChangedEvent) event;
 				if (checkRow(row)) {
 					params.add(LoadParser.parseArgs(row));
-					rowKeys.add(RowKey.getRowKey(row));
+					rowKeys.put(RowKey.getRowKey(row), true);
 					binlogInfo = new BinlogInfo(row.getBinlog(), row.getBinlogPos());
 					++size;
 					return true;
@@ -71,7 +73,7 @@ public class BatchRow {
 			dmlType = row.getDmlType();
 			sql = LoadParser.parseSql(row);
 			params.add(LoadParser.parseArgs(row));
-			rowKeys.add(RowKey.getRowKey(row));
+			rowKeys.put(RowKey.getRowKey(row), true);
 		} else {
 			ddl = true;
 			sql = ((DdlEvent) event).getSql();
@@ -91,7 +93,7 @@ public class BatchRow {
 		if (row.getDmlType() != dmlType) {
 			return false;
 		}
-		if (rowKeys.contains(RowKey.getRowKey(row))) {
+		if (rowKeys.containsKey(RowKey.getRowKey(row))) {
 			return false;
 		}
 		return true;
@@ -105,7 +107,7 @@ public class BatchRow {
 		return binlogInfo;
 	}
 
-	public List<RowKey> listRowKeys() {
+	public Map<RowKey, Boolean> getRowKeys() {
 		return rowKeys;
 	}
 

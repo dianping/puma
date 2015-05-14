@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+/*
 public class BatchRowCollision {
 
 	private static final Logger LOG = LoggerFactory.getLogger(BatchRowCollision.class);
@@ -117,4 +118,4 @@ public class BatchRowCollision {
 		}
 		return false;
 	}
-}
+}*/

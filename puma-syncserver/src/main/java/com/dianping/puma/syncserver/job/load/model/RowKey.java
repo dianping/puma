@@ -12,7 +12,7 @@ public class RowKey {
 
 	private String table;
 
-	private Map<String, Object> priKeys;
+	private Map<String, Object> priKeys = new HashMap<String, Object>();
 
 	public RowKey() {}
 
@@ -32,12 +32,11 @@ public class RowKey {
 		this.table = table;
 	}
 
-	public Map<String, Object> getPriKeys() {
-		return priKeys;
-	}
-
-	public void setPriKeys(Map<String, Object> priKeys) {
-		this.priKeys = priKeys;
+	public void addPriKey(String name, Object value) {
+		// Primary key value should not be NULL.
+		if (value != null) {
+			priKeys.put(name, value);
+		}
 	}
 
 	@Override
@@ -67,35 +66,50 @@ public class RowKey {
 		return result;
 	}
 
-	public static RowKey getNewRowKey(RowChangedEvent row) {
+	public static boolean equals(RowChangedEvent aRow, RowChangedEvent bRow) {
+		return RowKey.getRowKey(aRow).equals(RowKey.getRowKey(bRow));
+	}
+
+	public static RowKey getRowKey(RowChangedEvent row) {
+		switch (row.getDmlType()) {
+		case INSERT:
+			return getNewRowKey(row);
+		case DELETE:
+			return getOldRowKey(row);
+		case UPDATE:
+		case REPLACE:
+			return getNewRowKey(row);
+		}
+
+		return null;
+	}
+
+	private static RowKey getNewRowKey(RowChangedEvent row) {
 		RowKey rowKey = new RowKey();
 
 		rowKey.setSchema(row.getDatabase());
 		rowKey.setTable(row.getTable());
-		Map<String, Object> priKeys = new HashMap<String, Object>();
 		for (Map.Entry<String, ColumnInfo> entry: row.getColumns().entrySet()) {
 			if (entry.getValue().isKey()) {
-				priKeys.put(entry.getKey(), entry.getValue().getNewValue());
+				rowKey.addPriKey(entry.getKey(), entry.getValue().getNewValue());
 			}
 		}
-		rowKey.setPriKeys(priKeys);
 
 		return rowKey;
 	}
 
-	public static RowKey getOldRowKey(RowChangedEvent row) {
+	private static RowKey getOldRowKey(RowChangedEvent row) {
 		RowKey oriRowKey = new RowKey();
 
 		oriRowKey.setSchema(row.getDatabase());
 		oriRowKey.setTable(row.getTable());
-		Map<String, Object> priKeys = new HashMap<String, Object>();
 		for (Map.Entry<String, ColumnInfo> entry: row.getColumns().entrySet()) {
 			if (entry.getValue().isKey()) {
-				priKeys.put(entry.getKey(), entry.getValue().getOldValue());
+				oriRowKey.addPriKey(entry.getKey(), entry.getValue().getOldValue());
 			}
 		}
-		oriRowKey.setPriKeys(priKeys);
 
 		return oriRowKey;
 	}
 }
+

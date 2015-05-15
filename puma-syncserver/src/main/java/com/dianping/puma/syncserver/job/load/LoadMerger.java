@@ -8,7 +8,7 @@ import com.dianping.puma.syncserver.job.load.model.RowKey;
 public class LoadMerger {
 
 	public static void merge(RowChangedEvent row, BatchRows batchRows) {
-		switch (row.getDMLType()) {
+		switch (row.getDmlType()) {
 		case INSERT:
 			mergeInsert(row, batchRows);
 			break;
@@ -29,7 +29,7 @@ public class LoadMerger {
 			batchRows.add(rowKey, row);
 		} else {
 
-			switch (row.getDMLType()) {
+			switch (row.getDmlType()) {
 			case INSERT:
 				// insert + insert = insert.
 				batchRows.replace(rowKey, row);
@@ -73,7 +73,7 @@ public class LoadMerger {
 				batchRows.add(newRowKey, row);
 			} else {
 
-				switch (row.getDMLType()) {
+				switch (row.getDmlType()) {
 				case INSERT:
 					// insert + update = insert.
 					row.setDMLType(DMLType.INSERT);

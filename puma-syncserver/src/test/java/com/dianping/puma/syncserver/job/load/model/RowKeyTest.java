@@ -2,17 +2,13 @@ package com.dianping.puma.syncserver.job.load.model;
 
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
-import com.dianping.puma.core.util.PumaThreadPool;
 import com.dianping.puma.core.util.sql.DMLType;
-import com.dianping.puma.syncserver.job.load.model.RowKey;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.sql.DataSource;
 import java.beans.PropertyVetoException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;

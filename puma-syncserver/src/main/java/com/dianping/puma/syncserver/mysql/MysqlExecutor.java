@@ -11,8 +11,9 @@ import java.util.Map;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
-import com.dianping.puma.syncserver.job.load.BatchLoader;
+import com.dianping.puma.syncserver.job.BinlogInfoManager;
 import com.dianping.puma.syncserver.job.load.Loader;
+import com.dianping.puma.syncserver.job.load.PooledLoader;
 import com.dianping.puma.syncserver.job.transform.DefaultTransformer;
 import com.dianping.puma.syncserver.job.transform.Transformer;
 import org.apache.commons.dbutils.BasicRowProcessor;

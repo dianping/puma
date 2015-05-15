@@ -3,10 +3,12 @@ package com.dianping.puma.admin.web;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.entity.DstDBInstance;
+import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.service.DstDBInstanceService;
 import com.dianping.puma.core.service.SyncTaskService;
 import com.mongodb.MongoException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,17 +41,37 @@ public class DstDBInstanceController {
 	@Value("3306")
 	Integer dbPort;
 
+//	@RequestMapping(value = { "/dst-db-instance" })
+//	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
+//		Map<String, Object> map = new HashMap<String, Object>();
+//
+//		List<DstDBInstance> dstDBInstanceEntities = dstDBInstanceService.findAll();
+//
+//		map.put("entities", dstDBInstanceEntities);
+//		map.put("path", "dst-db-instance");
+//		return new ModelAndView("main/container", map);
+//	}
+
 	@RequestMapping(value = { "/dst-db-instance" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
-
-		List<DstDBInstance> dstDBInstanceEntities = dstDBInstanceService.findAll();
-
-		map.put("entities", dstDBInstanceEntities);
+//		List<DstDBInstance> dstDBInstanceEntities = dstDBInstanceService.findAll();
+//		map.put("entities", dstDBInstanceEntities);
 		map.put("path", "dst-db-instance");
-		return new ModelAndView("main/container", map);
+		return new ModelAndView("common/main-container", map);
 	}
 
+	@RequestMapping(value = { "/dst-db-instance/list" },method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String list(int page,int pageSize) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		long count = dstDBInstanceService.count();
+		List<DstDBInstance> dstDBInstanceEntities = dstDBInstanceService.findByPage(page, pageSize);
+		map.put("count", count);
+		map.put("list", dstDBInstanceEntities);
+		return GsonUtil.toJson(map);
+	}
+	
 	@RequestMapping(value = { "/dst-db-instance/create" })
 	public ModelAndView create(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();

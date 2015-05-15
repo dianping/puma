@@ -14,6 +14,7 @@ import com.dianping.puma.admin.remote.reporter.SyncTaskOperationReporter;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.ActionOperation;
+import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.state.SyncTaskState;
 import com.dianping.puma.core.model.state.TaskStateContainer;
 import com.dianping.puma.core.service.SyncTaskStateService;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.dianping.puma.core.service.SyncTaskService;
+import com.dianping.puma.core.entity.SyncServer;
 import com.dianping.puma.core.entity.SyncTask;
 
 @Controller
@@ -55,9 +57,18 @@ public class SyncTaskController {
 
 	private static final int PAGESIZE = 30;
 
+//	@RequestMapping(value = { "/sync-task" })
+//	public ModelAndView created(HttpServletRequest request, HttpServletResponse response) {
+//		return created0(request, response, 1);
+//	}
+	
 	@RequestMapping(value = { "/sync-task" })
-	public ModelAndView created(HttpServletRequest request, HttpServletResponse response) {
-		return created0(request, response, 1);
+	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		//List<SyncTask> syncTasks = syncTaskService.findAll();
+		//map.put("entities", syncTasks);
+		map.put("path", "sync-task");
+		return new ModelAndView("common/main-container", map);
 	}
 
 	@RequestMapping(value = { "/sync-task/{pageNum}" })
@@ -74,6 +85,19 @@ public class SyncTaskController {
 		return new ModelAndView("main/container", map);
 	}
 
+	@RequestMapping(value = { "/sync-task/list" }, method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String list(int page, int pageSize) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		long count = syncTaskService.count();
+		List<SyncTask> syncTasks = syncTaskService.findByPage(page, pageSize);
+		List<SyncTaskState> syncTaskStates = syncTaskStateService.findAll();
+		map.put("count", count);
+		map.put("list", syncTasks);
+		map.put("state", syncTaskStates);
+		return GsonUtil.toJson(map);
+	}
+	
 	@RequestMapping(value = {
 			"/sync-task/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
@@ -157,11 +181,13 @@ public class SyncTaskController {
 	 */
 	@RequestMapping(value = "/sync-task/pause", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public Object pause(HttpSession session, String taskName) {
+	public Object pause(HttpSession session, String name) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		try {
-			SyncTask syncTask = syncTaskService.find(taskName);
-			this.syncTaskService.updateStatusAction(taskName, ActionController.PAUSE);
+			SyncTask syncTask = syncTaskService.find(name);
+			SyncTaskState syncTaskState = syncTaskStateService.find(syncTask.getName());
+			syncTaskState.setStatus(Status.PREPARING);
+			this.syncTaskService.updateStatusAction(name, ActionController.PAUSE);
 			syncTaskControllerReporter.report(syncTask.getSyncServerName(), syncTask.getName(), ActionController.PAUSE);
 			map.put("success", true);
 		} catch (IllegalArgumentException e) {
@@ -179,14 +205,16 @@ public class SyncTaskController {
 	/**
 	 * 恢复SyncTask的运行
 	 */
-	@RequestMapping(value = "/sync-task/rerun", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = "/sync-task/resume", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public Object rerun(HttpSession session, String taskName) {
+	public Object rerun(HttpSession session, String name) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			SyncTask syncTask = syncTaskService.find(taskName);
-			this.syncTaskService.updateStatusAction(taskName, ActionController.RESUME);
+			SyncTask syncTask = syncTaskService.find(name);
+			SyncTaskState syncTaskState = syncTaskStateService.find(syncTask.getName());
+			syncTaskState.setStatus(Status.PREPARING);
+			this.syncTaskService.updateStatusAction(name, ActionController.RESUME);
 			syncTaskControllerReporter.report(syncTask.getSyncServerName(), syncTask.getName(), ActionController.RESUME);
 			map.put("success", true);
 		} catch (IllegalArgumentException e) {

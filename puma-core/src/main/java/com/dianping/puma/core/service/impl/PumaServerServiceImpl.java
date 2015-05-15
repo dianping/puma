@@ -18,7 +18,7 @@ public class PumaServerServiceImpl implements PumaServerService {
 	public PumaServer find(String name) {
 		return pumaServerDao.find(name);
 	}
-	
+
 	@Override
 	public PumaServer find(long id) {
 		return pumaServerDao.find(id);
@@ -31,6 +31,16 @@ public class PumaServerServiceImpl implements PumaServerService {
 	@Override
 	public List<PumaServer> findAll() {
 		return pumaServerDao.findAll();
+	}
+
+	@Override
+	public long count() {
+		return pumaServerDao.count();
+	}
+	
+	@Override
+	public List<PumaServer> findByPage(int page, int pageSize) {
+		return pumaServerDao.findByPage(page, pageSize);
 	}
 
 	@Override
@@ -47,7 +57,7 @@ public class PumaServerServiceImpl implements PumaServerService {
 	public void remove(String name) {
 		pumaServerDao.remove(name);
 	}
-	
+
 	@Override
 	public void remove(long id) {
 		pumaServerDao.remove(id);

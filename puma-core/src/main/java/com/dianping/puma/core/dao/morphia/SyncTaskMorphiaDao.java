@@ -123,6 +123,25 @@ public class SyncTaskMorphiaDao extends MongoBaseDao<SyncTaskMorphia> implements
 		return syncTasks;
 	}
 
+	public long count() {
+		Query<SyncTaskMorphia> q = this.getDatastore().createQuery(SyncTaskMorphia.class);
+		return this.count(q);
+	}
+
+	public List<SyncTask> findByPage(int page, int pageSize) {
+		Query<SyncTaskMorphia> q = this.getDatastore().createQuery(SyncTaskMorphia.class);
+		q.offset((page - 1) * pageSize);
+		q.limit(pageSize);
+		QueryResults<SyncTaskMorphia> result = this.find(q);
+		List<SyncTaskMorphia> syncTaskMorphias = result.asList();
+
+		List<SyncTask> syncTasks = new ArrayList<SyncTask>();
+		for (SyncTaskMorphia syncTaskMorphia : syncTaskMorphias) {
+			syncTasks.add(syncTaskMorphia.getEntity());
+		}
+		return syncTasks;
+	}
+	
 	public void updateStatusAction(String name,ActionController controller){
 		SyncTask syncTask = this.find(name);
 		syncTask.setController(controller);

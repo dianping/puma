@@ -12,6 +12,10 @@ public interface DstDBInstanceService {
 
 	List<DstDBInstance> findAll();
 
+	long count();
+
+	List<DstDBInstance> findByPage(int page, int pageSize);
+	
 	void create(DstDBInstance dstDBInstance);
 
 	void update(DstDBInstance dstDBInstance);

@@ -6,6 +6,7 @@ import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.mongodb.MongoException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,17 +39,37 @@ public class SrcDBInstanceController {
 	@Value("3306")
 	Integer dbPort;
 
+//	@RequestMapping(value = { "/src-db-instance" })
+//	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
+//		Map<String, Object> map = new HashMap<String, Object>();
+//
+//		List<SrcDBInstance> srcDBInstanceEntities = srcDBInstanceService.findAll();
+//
+//		map.put("entities", srcDBInstanceEntities);
+//		map.put("path", "src-db-instance");
+//		return new ModelAndView("main/container", map);
+//	}
+	
 	@RequestMapping(value = { "/src-db-instance" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
-
-		List<SrcDBInstance> srcDBInstanceEntities = srcDBInstanceService.findAll();
-
-		map.put("entities", srcDBInstanceEntities);
+//		List<SrcDBInstance> srcDBInstanceEntities = srcDBInstanceService.findAll();
+//		map.put("entities", srcDBInstanceEntities);
 		map.put("path", "src-db-instance");
-		return new ModelAndView("main/container", map);
+		return new ModelAndView("common/main-container", map);
 	}
 
+	@RequestMapping(value = { "/src-db-instance/list" }, method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String list(int page, int pageSize) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		long count = srcDBInstanceService.count();
+		List<SrcDBInstance> srcDBInstanceEntities = srcDBInstanceService.findByPage(page, pageSize);
+		map.put("count", count);
+		map.put("list", srcDBInstanceEntities);
+		return GsonUtil.toJson(map);
+	}
+	
 	@RequestMapping(value = { "/src-db-instance/create" })
 	public ModelAndView create(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();

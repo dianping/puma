@@ -18,7 +18,11 @@ public interface SyncTaskService {
 	List<SyncTask> findByPumaServerName(String pumaServerName);
 
 	List<SyncTask> findAll();
+	
+	long count();
 
+	List<SyncTask> findByPage(int page, int pageSize);
+	
 	void create(SyncTask syncTask);
 
 	void remove(String name);

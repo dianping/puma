@@ -7,6 +7,7 @@ import com.dianping.puma.core.entity.morphia.PumaTaskMorphia;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
 import com.google.code.morphia.query.UpdateOperations;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -73,6 +74,25 @@ public class PumaTaskMorphiaDao extends MongoBaseDao<PumaTaskMorphia> implements
 		return pumaTasks;
 	}
 
+	public long count() {
+		Query<PumaTaskMorphia> q = this.getDatastore().createQuery(PumaTaskMorphia.class);
+		return this.count(q);
+	}
+
+	public List<PumaTask> findByPage(int page, int pageSize) {
+		Query<PumaTaskMorphia> q = this.getDatastore().createQuery(PumaTaskMorphia.class);
+		q.offset((page - 1) * pageSize);
+		q.limit(pageSize);
+		QueryResults<PumaTaskMorphia> result = this.find(q);
+		List<PumaTaskMorphia> pumaTaskMorphias = result.asList();
+
+		List<PumaTask> pumaTasks = new ArrayList<PumaTask>();
+		for (PumaTaskMorphia pumaTaskMorphia : pumaTaskMorphias) {
+			pumaTasks.add(pumaTaskMorphia.getEntity());
+		}
+		return pumaTasks;
+	}
+	
 	public void create(PumaTask pumaTask) {
 		PumaTaskMorphia pumaTaskMorphia = new PumaTaskMorphia(pumaTask);
 		this.save(pumaTaskMorphia);

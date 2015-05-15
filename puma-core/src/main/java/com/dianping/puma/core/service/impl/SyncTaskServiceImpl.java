@@ -40,6 +40,17 @@ public class SyncTaskServiceImpl implements SyncTaskService {
 		return syncTaskDao.findAll();
 	}
 
+	@Override
+	public long count() {
+		return syncTaskDao.count();
+	}
+	
+	@Override
+	public List<SyncTask> findByPage(int page, int pageSize) {
+		return syncTaskDao.findByPage(page, pageSize);
+	}
+	
+	
 	public void create(SyncTask syncTask) {
 		syncTaskDao.create(syncTask);
 	}

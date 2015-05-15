@@ -5,7 +5,7 @@ import com.dianping.puma.core.entity.PumaServer;
 import java.util.List;
 
 public interface PumaServerService {
-	
+
 	PumaServer find(long id);
 
 	PumaServer find(String name);
@@ -14,11 +14,15 @@ public interface PumaServerService {
 
 	List<PumaServer> findAll();
 
+	long count();
+
+	List<PumaServer> findByPage(int page, int pageSize);
+
 	void create(PumaServer pumaServer);
 
 	void update(PumaServer pumaServer);
 
 	void remove(String name);
-	
+
 	void remove(long id);
 }

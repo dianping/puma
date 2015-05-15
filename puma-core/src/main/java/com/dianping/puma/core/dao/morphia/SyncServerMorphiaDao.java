@@ -7,6 +7,7 @@ import com.dianping.puma.core.entity.morphia.SyncServerMorphia;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
 import com.google.code.morphia.query.UpdateOperations;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -55,6 +56,25 @@ public class SyncServerMorphiaDao extends MongoBaseDao<SyncServerMorphia> implem
 		return syncServers;
 	}
 
+	public long count() {
+		Query<SyncServerMorphia> q = this.getDatastore().createQuery(SyncServerMorphia.class);
+		return this.count(q);
+	}
+
+	public List<SyncServer> findByPage(int page, int pageSize) {
+		Query<SyncServerMorphia> q = this.getDatastore().createQuery(SyncServerMorphia.class);
+		q.offset((page - 1) * pageSize);
+		q.limit(pageSize);
+		QueryResults<SyncServerMorphia> result = this.find(q);
+		List<SyncServerMorphia> syncServerMorphias = result.asList();
+
+		List<SyncServer> syncServers = new ArrayList<SyncServer>();
+		for (SyncServerMorphia syncServerMorphia : syncServerMorphias) {
+			syncServers.add(syncServerMorphia.getEntity());
+		}
+		return syncServers;
+	}
+	
 	public void create(SyncServer syncServer) {
 		SyncServerMorphia syncServerMorphia = new SyncServerMorphia(syncServer);
 		this.save(syncServerMorphia);

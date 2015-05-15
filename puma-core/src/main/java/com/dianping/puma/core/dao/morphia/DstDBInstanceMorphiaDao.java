@@ -7,7 +7,6 @@ import com.dianping.puma.core.entity.morphia.DstDBInstanceMorphia;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
 import com.google.code.morphia.query.UpdateOperations;
-import com.mongodb.WriteResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,6 +49,25 @@ public class DstDBInstanceMorphiaDao extends MongoBaseDao<DstDBInstanceMorphia>
 		return dstDBInstances;
 	}
 
+	public long count() {
+		Query<DstDBInstanceMorphia> q = this.getDatastore().createQuery(DstDBInstanceMorphia.class);
+		return this.count(q);
+	}
+
+	public List<DstDBInstance> findByPage(int page, int pageSize) {
+		Query<DstDBInstanceMorphia> q = this.getDatastore().createQuery(DstDBInstanceMorphia.class);
+		q.offset((page - 1) * pageSize);
+		q.limit(pageSize);
+		QueryResults<DstDBInstanceMorphia> result = this.find(q);
+		List<DstDBInstanceMorphia> dstDBInstanceMorphias = result.asList();
+
+		List<DstDBInstance> dstDBInstances = new ArrayList<DstDBInstance>();
+		for (DstDBInstanceMorphia dstDBInstanceMorphia : dstDBInstanceMorphias) {
+			dstDBInstances.add(dstDBInstanceMorphia.getEntity());
+		}
+		return dstDBInstances;
+	}
+	
 	public void create(DstDBInstance dstDBInstance) {
 		DstDBInstanceMorphia dstDBInstanceMorphia = new DstDBInstanceMorphia(dstDBInstance);
 		this.save(dstDBInstanceMorphia);

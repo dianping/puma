@@ -14,6 +14,10 @@ public interface SrcDBInstanceDao {
 
     List<SrcDBInstance> findByIp(String ip);
 
+	long count();
+
+	List<SrcDBInstance> findByPage(int page, int pageSize);
+	
     void create(SrcDBInstance entity);
 
     void update(SrcDBInstance entity);

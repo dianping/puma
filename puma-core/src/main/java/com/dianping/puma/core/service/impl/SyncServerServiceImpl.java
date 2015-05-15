@@ -3,6 +3,7 @@ package com.dianping.puma.core.service.impl;
 import com.dianping.puma.core.dao.SyncServerDao;
 import com.dianping.puma.core.entity.SyncServer;
 import com.dianping.puma.core.service.SyncServerService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,16 @@ public class SyncServerServiceImpl implements SyncServerService {
 		return syncServerDao.findAll();
 	}
 
+	@Override
+	public long count() {
+		return syncServerDao.count();
+	}
+	
+	@Override
+	public List<SyncServer> findByPage(int page, int pageSize) {
+		return syncServerDao.findByPage(page, pageSize);
+	}
+	
 	@Override
 	public void create(SyncServer syncServer) {
 		syncServerDao.create(syncServer);

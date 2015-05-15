@@ -3,6 +3,7 @@ package com.dianping.puma.core.service.impl;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.dao.PumaTaskDao;
 import com.dianping.puma.core.entity.PumaTask;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,16 @@ public class PumaTaskServiceImpl implements PumaTaskService {
 		return pumaTaskDao.findAll();
 	}
 
+	@Override
+	public long count() {
+		return pumaTaskDao.count();
+	}
+	
+	@Override
+	public List<PumaTask> findByPage(int page, int pageSize) {
+		return pumaTaskDao.findByPage(page, pageSize);
+	}
+	
 	@Override
 	public void create(PumaTask pumaTask) {
 		pumaTaskDao.create(pumaTask);

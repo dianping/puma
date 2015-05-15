@@ -12,6 +12,10 @@ public interface SyncServerService {
 
 	List<SyncServer> findAll();
 
+	long count();
+
+	List<SyncServer> findByPage(int page, int pageSize);
+	
 	void create(SyncServer syncServer);
 
 	void update(SyncServer syncServer);

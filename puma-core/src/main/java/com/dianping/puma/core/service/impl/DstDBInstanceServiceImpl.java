@@ -3,6 +3,7 @@ package com.dianping.puma.core.service.impl;
 import com.dianping.puma.core.dao.DstDBInstanceDao;
 import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.service.DstDBInstanceService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,17 @@ public class DstDBInstanceServiceImpl implements DstDBInstanceService {
 	public List<DstDBInstance> findAll() {
 		return dstDbInstanceDao.findAll();
 	}
-
+	
+	@Override
+	public long count() {
+		return dstDbInstanceDao.count();
+	}
+	
+	@Override
+	public List<DstDBInstance> findByPage(int page, int pageSize) {
+		return dstDbInstanceDao.findByPage(page, pageSize);
+	}
+	
 	@Override
 	public void create(DstDBInstance dstDBInstance) {
 		dstDbInstanceDao.create(dstDBInstance);

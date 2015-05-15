@@ -43,13 +43,34 @@ public class PumaServerController {
 	@Value("8080")
 	Integer serverPort;
 
+	// @RequestMapping(value = { "/puma-server" })
+	// public ModelAndView view(HttpServletRequest request, HttpServletResponse
+	// response) {
+	// Map<String, Object> map = new HashMap<String, Object>();
+	// List<PumaServer> pumaServerEntities = pumaServerService.findAll();
+	// map.put("entities", pumaServerEntities);
+	// map.put("path", "puma-server");
+	// return new ModelAndView("main/container", map);
+	// }
+
 	@RequestMapping(value = { "/puma-server" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		List<PumaServer> pumaServerEntities = pumaServerService.findAll();
-		map.put("entities", pumaServerEntities);
+//		List<PumaServer> pumaServerEntities = pumaServerService.findAll();
+//		map.put("entities", pumaServerEntities);
 		map.put("path", "puma-server");
-		return new ModelAndView("main/container", map);
+		return new ModelAndView("common/main-container", map);
+	}
+
+	@RequestMapping(value = { "/puma-server/list" }, method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String list(int page, int pageSize) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		long count = pumaServerService.count();
+		List<PumaServer> pumaServerEntities = pumaServerService.findByPage(page, pageSize);
+		map.put("count", count);
+		map.put("list", pumaServerEntities);
+		return GsonUtil.toJson(map);
 	}
 
 	@RequestMapping(value = { "/puma-server/create" })
@@ -57,8 +78,17 @@ public class PumaServerController {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("path", "puma-server");
 		map.put("subPath", "create");
-		return new ModelAndView("main/container", map);
+		return new ModelAndView("common/main-container", map);
 	}
+
+	// @RequestMapping(value = { "/puma-server/create" })
+	// public ModelAndView create(HttpServletRequest request,
+	// HttpServletResponse response) {
+	// Map<String, Object> map = new HashMap<String, Object>();
+	// map.put("path", "puma-server");
+	// map.put("subPath", "create");
+	// return new ModelAndView("main/container", map);
+	// }
 
 	@RequestMapping(value = { "/puma-server/update/{id}" })
 	public ModelAndView update(@PathVariable long id) {
@@ -66,7 +96,7 @@ public class PumaServerController {
 
 		try {
 			PumaServer entity = pumaServerService.find(id);
-			if(entity!=null){
+			if (entity != null) {
 				List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerName(entity.getName());
 				List<SyncTask> syncTasks = syncTaskService.findByPumaServerName(entity.getName());
 				if (pumaTasks != null && pumaTasks.size() != 0 && syncTasks != null && syncTasks.size() != 0) {
@@ -85,8 +115,7 @@ public class PumaServerController {
 		return new ModelAndView("main/container", map);
 	}
 
-	@RequestMapping(value = {
-			"/puma-server/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = { "/puma-server/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String createPost(String name, String ip) {
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -129,8 +158,7 @@ public class PumaServerController {
 		return GsonUtil.toJson(map);
 	}
 
-	@RequestMapping(value = {
-			"/puma-server/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = { "/puma-server/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String removePost(String name) {
 		Map<String, Object> map = new HashMap<String, Object>();

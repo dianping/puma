@@ -1,0 +1,119 @@
+<!-- #section:basics/content.breadcrumbs -->
+<div class="breadcrumbs" id="breadcrumbs">
+	<script type="text/javascript">
+		try {
+			ace.settings.check('breadcrumbs', 'fixed')
+		} catch (e) {
+		}
+	</script>
+
+	<ul class="breadcrumb">
+		<li><i class="ace-icon fa fa-home home-icon"></i> <a href="#">主页</a>
+		</li>
+
+		<li class="active">数据处理服务器配置</li>
+	</ul>
+	<!-- /.breadcrumb -->
+</div>
+
+<!-- /section:basics/content.breadcrumbs -->
+<div class="page-content">
+
+	<!-- /section:settings.box -->
+	<div class="page-content-area">
+		<div class="row">
+			<div class="col-xs-12">
+
+				<div class="row" ng-app="pageApp" ng-controller="pageCtrl"
+					ng-init="load()">
+					<div class="col-xs-12">
+
+						<div class="table-header">数据处理服务器列表</div>
+
+						<!-- <div class="table-responsive"> -->
+
+						<!-- <div class="dataTables_borderWrap"> -->
+						<div>
+							<div id="sample-table-2_wrapper"
+								class="dataTables_wrapper form-inline no-footer">
+								<div class="row">
+									<div class="col-xs-6">
+										<div class="dataTables_length" id="sample-table-2_length"></div>
+									</div>
+									<div class="col-xs-6">
+										<div id="sample-table-2_filter" class="dataTables_filter"></div>
+									</div>
+								</div>
+								<table id="sample-table-2"
+									class="table table-striped table-bordered table-hover dataTable no-footer"
+									role="grid" aria-describedby="sample-table-2_info">
+									<thead>
+										<tr role="row">
+											<th>数据处理服务器名称</th>
+											<th>处理服务器IP</th>
+											<th>操作</th>
+										</tr>
+									</thead>
+
+									<tbody>
+
+										<tr role="row" class="odd" ng-repeat="item in items">
+											<td><a href="#">{{item.name}}</a></td>
+											<td>{{item.host+':'+item.port}}</td>
+											<td>
+												<div class="hidden-sm hidden-xs action-buttons">
+													<a class="green" href="create/"> <i
+														class="ace-icon fa fa-plus-circle purple bigger-130"></i>
+													</a> <a class="green" href="/update/{{item.id}}"> <i
+														class="ace-icon fa fa-pencil bigger-130"></i>
+													</a> <a class="red" href="javascript:void(0)"
+														ng-click="dialog(item.name)"> <i
+														class="ace-icon fa fa-trash-o bigger-130"></i>
+													</a>
+												</div>
+
+											</td>
+										</tr>
+
+									</tbody>
+								</table>
+								<div class="row" ng-show="totalPage > 0">
+									<div class="col-xs-6">
+										<div class="dataTables_info" id="sample-table-2_info"
+											role="status" aria-live="polite">显示 {{startIndex}} 
+											 到 {{endIndex}}
+											 共 {{count}} </div>
+									</div>
+									<div class="col-xs-6">
+										<div class="dataTables_paginate paging_simple_numbers"
+											id="sample-table-2_paginate">
+											<ul class="pagination">
+												<li ng-class="{true:'active'}[currentPage==1]" class="paginate_button"
+													aria-controls="sample-table-2" tabindex="0"><a
+													href="javascript:void(0)" ng-click="currentPage = 1;load()">首页</a></li>
+												<li ng-class="{true:'disabled'}[currentPage == 1]" class="paginate_button"
+													aria-controls="sample-table-2" tabindex="0"><a
+													href="javascript:void(0)" ng-click="prev()">前一页</a></li>
+												<li ng-class="{true:'disabled'}[currentPage == totalPage]" class="paginate_button"
+													aria-controls="sample-table-2" tabindex="0"><a href="javascript:void(0)"
+													ng-click="next()">下一页</a></li>
+												<li ng-class="{true:'active'}[currentPage == totalPage]" class="paginate_button" aria-controls="sample-table-2"
+													tabindex="0"><a href="javascript:void(0)"
+													ng-click="currentPage=totalPage;load()">末页</a></li>
+											</ul>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+			</div>
+			<!-- /.col -->
+		</div>
+		<!-- /.row -->
+	</div>
+</div>
+<!-- /.page-content -->

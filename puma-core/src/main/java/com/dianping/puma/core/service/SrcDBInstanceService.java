@@ -14,6 +14,10 @@ public interface SrcDBInstanceService {
 
     List<SrcDBInstance> findAll();
 
+    long count();
+
+	List<SrcDBInstance> findByPage(int page, int pageSize);
+	
 	void create(SrcDBInstance srcDBInstance);
 
 	void update(SrcDBInstance srcDBInstance);

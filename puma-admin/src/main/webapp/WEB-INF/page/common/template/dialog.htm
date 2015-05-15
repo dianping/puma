@@ -1,0 +1,41 @@
+'\
+										<div class="widget-box">\
+											<div class="widget-header">\
+												<h4 class="widget-title">警告</h4>\
+											</div>\
+											<div class="widget-body">\
+												<div class="widget-main">\
+													<p class="alert alert-info">\
+														您确认要删除吗？\
+													</p>\
+												</div>\
+												<div class="modal-footer">\
+													<button type="button" class="btn btn-default" ng-click="closeThisDialog()">取消</button>\
+													<button type="button" class="btn btn-primary" ng-click="closeThisDialog() && remove(\'ss\')">确定</button>\
+												</div>\
+											</div>\
+										</div>'
+										
+										
+										
+										
+										
+										
+<script type="text/ng-template" id="removeTemplate.html">
+<div class="widget-box">
+	<div class="widget-header">
+		<h4 class="widget-title">警告</h4>
+	</div>
+	<div class="widget-body">
+		<div class="widget-main">
+			<p class="alert alert-info">
+				您确认要删除吗？
+			</p>
+		</div>
+		<div class="modal-footer">
+			<button type="button" class="btn btn-default" ng-click="closeThisDialog()">取消</button>
+			<button type="button" class="btn btn-primary" ng-click="remove(removeName) && closeThisDialog()">确定</button>
+		</div>
+	</div>
+</div>
+</script>

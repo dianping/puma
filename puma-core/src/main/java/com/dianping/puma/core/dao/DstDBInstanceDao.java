@@ -12,6 +12,10 @@ public interface DstDBInstanceDao {
 
 	List<DstDBInstance> findAll();
 
+	long count();
+
+	List<DstDBInstance> findByPage(int page, int pageSize);
+	
 	void create(DstDBInstance entity);
 
 	void update(DstDBInstance entity);

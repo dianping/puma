@@ -77,18 +77,40 @@ public class PumaTaskController {
 
 	@Autowired
 	SyncTaskService syncTaskService;
-
+//
+//	@RequestMapping(value = { "/puma-task" })
+//	public ModelAndView view() {
+//		Map<String, Object> map = new HashMap<String, Object>();
+//
+//		List<PumaTask> pumaTaskEntities = pumaTaskService.findAll();
+//
+//		map.put("entities", pumaTaskEntities);
+//		map.put("path", "puma-task");
+//		return new ModelAndView("main/container", map);
+//	}
+	
 	@RequestMapping(value = { "/puma-task" })
 	public ModelAndView view() {
 		Map<String, Object> map = new HashMap<String, Object>();
-
-		List<PumaTask> pumaTaskEntities = pumaTaskService.findAll();
-
-		map.put("entities", pumaTaskEntities);
+//		List<PumaTask> pumaTaskEntities = pumaTaskService.findAll();
+//		map.put("entities", pumaTaskEntities);
 		map.put("path", "puma-task");
-		return new ModelAndView("main/container", map);
+		return new ModelAndView("common/main-container", map);
 	}
 
+	@RequestMapping(value = { "/puma-task/list" }, method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String list(int page, int pageSize) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		long count = pumaTaskService.count();
+		List<PumaTask> pumaTaskEntities = pumaTaskService.findByPage(page, pageSize);
+		List<PumaTaskState> taskStates = pumaTaskStateService.findAll();
+		map.put("count", count);
+		map.put("list", pumaTaskEntities);
+		map.put("state", taskStates);
+		return GsonUtil.toJson(map);// map;
+	}
+	
 	@RequestMapping(value = { "/puma-task/create" }, method = RequestMethod.GET)
 	public ModelAndView create(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();

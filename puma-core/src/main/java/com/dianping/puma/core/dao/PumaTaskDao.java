@@ -16,6 +16,10 @@ public interface PumaTaskDao {
 
 	List<PumaTask> findAll();
 
+	long count();
+
+	List<PumaTask> findByPage(int page, int pageSize);
+	
 	void create(PumaTask pumaTask);
 
 	void update(PumaTask pumaTask);

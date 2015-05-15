@@ -28,7 +28,6 @@ public class PumaServerMorphiaDao extends MongoBaseDao<PumaServerMorphia> implem
 		return (pumaServerMorphia == null) ? null : pumaServerMorphia.getEntity();
 	}
 
-	
 	public PumaServer find(String name) {
 		Query<PumaServerMorphia> q = this.getDatastore().createQuery(PumaServerMorphia.class);
 		q.field("name").equal(name);
@@ -49,7 +48,26 @@ public class PumaServerMorphiaDao extends MongoBaseDao<PumaServerMorphia> implem
 		List<PumaServerMorphia> pumaServerMorphias = result.asList();
 
 		List<PumaServer> pumaServers = new ArrayList<PumaServer>();
-		for (PumaServerMorphia pumaServerMorphia: pumaServerMorphias) {
+		for (PumaServerMorphia pumaServerMorphia : pumaServerMorphias) {
+			pumaServers.add(pumaServerMorphia.getEntity());
+		}
+		return pumaServers;
+	}
+
+	public long count() {
+		Query<PumaServerMorphia> q = this.getDatastore().createQuery(PumaServerMorphia.class);
+		return this.count(q);
+	}
+
+	public List<PumaServer> findByPage(int page, int pageSize) {
+		Query<PumaServerMorphia> q = this.getDatastore().createQuery(PumaServerMorphia.class);
+		q.offset((page - 1) * pageSize);
+		q.limit(pageSize);
+		QueryResults<PumaServerMorphia> result = this.find(q);
+		List<PumaServerMorphia> pumaServerMorphias = result.asList();
+
+		List<PumaServer> pumaServers = new ArrayList<PumaServer>();
+		for (PumaServerMorphia pumaServerMorphia : pumaServerMorphias) {
 			pumaServers.add(pumaServerMorphia.getEntity());
 		}
 		return pumaServers;
@@ -76,7 +94,7 @@ public class PumaServerMorphiaDao extends MongoBaseDao<PumaServerMorphia> implem
 		q.field("name").equal(name);
 		this.deleteByQuery(q);
 	}
-	
+
 	public void remove(long id) {
 		Query<PumaServerMorphia> q = this.getDatastore().createQuery(PumaServerMorphia.class);
 		q.field("id").equal(id);

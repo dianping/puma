@@ -3,6 +3,7 @@ package com.dianping.puma.core.service.impl;
 import com.dianping.puma.core.dao.SrcDBInstanceDao;
 import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.service.SrcDBInstanceService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,16 @@ public class SrcDBInstanceServiceImpl implements SrcDBInstanceService {
 		return srcDbInstanceDao.findAll();
 	}
 
+	@Override
+	public long count() {
+		return srcDbInstanceDao.count();
+	}
+	
+	@Override
+	public List<SrcDBInstance> findByPage(int page, int pageSize) {
+		return srcDbInstanceDao.findByPage(page, pageSize);
+	}
+	
 	@Override
 	public void create(SrcDBInstance srcDBInstance) {
 		srcDbInstanceDao.create(srcDBInstance);

@@ -7,6 +7,7 @@ import com.dianping.puma.core.entity.morphia.SrcDBInstanceMorphia;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.QueryResults;
 import com.google.code.morphia.query.UpdateOperations;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +50,25 @@ public class SrcDBInstanceMorphiaDao extends MongoBaseDao<SrcDBInstanceMorphia>
 		return entities;
 	}
 
+	public long count() {
+		Query<SrcDBInstanceMorphia> q = this.getDatastore().createQuery(SrcDBInstanceMorphia.class);
+		return this.count(q);
+	}
+
+	public List<SrcDBInstance> findByPage(int page, int pageSize) {
+		Query<SrcDBInstanceMorphia> q = this.getDatastore().createQuery(SrcDBInstanceMorphia.class);
+		q.offset((page - 1) * pageSize);
+		q.limit(pageSize);
+		QueryResults<SrcDBInstanceMorphia> result = this.find(q);
+		List<SrcDBInstanceMorphia> srcDBInstanceMorphias = result.asList();
+
+		List<SrcDBInstance> entities = new ArrayList<SrcDBInstance>();
+		for (SrcDBInstanceMorphia srcDBInstanceMorphia : srcDBInstanceMorphias) {
+			entities.add(srcDBInstanceMorphia.getEntity());
+		}
+		return entities;
+	}
+	
 	public void create(SrcDBInstance srcDBInstance) {
 		SrcDBInstanceMorphia srcDBInstanceMorphia = new SrcDBInstanceMorphia(srcDBInstance);
 		this.save(srcDBInstanceMorphia);

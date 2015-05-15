@@ -56,8 +56,8 @@ public class PumaServerController {
 	@RequestMapping(value = { "/puma-server" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
-//		List<PumaServer> pumaServerEntities = pumaServerService.findAll();
-//		map.put("entities", pumaServerEntities);
+		// List<PumaServer> pumaServerEntities = pumaServerService.findAll();
+		// map.put("entities", pumaServerEntities);
 		map.put("path", "puma-server");
 		return new ModelAndView("common/main-container", map);
 	}
@@ -67,7 +67,8 @@ public class PumaServerController {
 	public String list(int page, int pageSize) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		long count = pumaServerService.count();
-		List<PumaServer> pumaServerEntities = pumaServerService.findByPage(page, pageSize);
+		List<PumaServer> pumaServerEntities = null;
+		pumaServerEntities = pumaServerService.findByPage(page, pageSize);
 		map.put("count", count);
 		map.put("list", pumaServerEntities);
 		return GsonUtil.toJson(map);
@@ -99,7 +100,7 @@ public class PumaServerController {
 			if (entity != null) {
 				List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerName(entity.getName());
 				List<SyncTask> syncTasks = syncTaskService.findByPumaServerName(entity.getName());
-				if (pumaTasks != null && pumaTasks.size() != 0 && syncTasks != null && syncTasks.size() != 0) {
+				if ((pumaTasks != null && pumaTasks.size() != 0) || (syncTasks != null && syncTasks.size() != 0)) {
 					map.put("lock", true);
 				} else {
 					map.put("lock", false);
@@ -112,12 +113,12 @@ public class PumaServerController {
 			// @TODO: error page.
 		}
 
-		return new ModelAndView("main/container", map);
+		return new ModelAndView("common/main-container", map);
 	}
 
 	@RequestMapping(value = { "/puma-server/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(String name, String ip) {
+	public String createPost(String name, String host, String port) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
@@ -132,13 +133,14 @@ public class PumaServerController {
 			}
 
 			// Split host and port.
-			String[] hostAndPort = ip.split(":");
-			String host = hostAndPort[0];
-			Integer port = hostAndPort.length == 1 ? serverPort : Integer.parseInt(hostAndPort[1]);
+			// String[] hostAndPort = ip.split(":");
+			// String host = hostAndPort[0];
+			// Integer port = hostAndPort.length == 1 ? serverPort :
+			// Integer.parseInt(hostAndPort[1]);
 
 			pumaServer.setName(name);
 			pumaServer.setHost(host);
-			pumaServer.setPort(port);
+			pumaServer.setPort(Integer.parseInt(port));
 
 			if (operation == ActionOperation.CREATE) {
 				pumaServerService.create(pumaServer);

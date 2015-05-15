@@ -1,5 +1,37 @@
 var pageApp = angular.module("pageApp", [ 'ngDialog' ]);
 
+pageApp.factory('pageService', [ '$http', '$location',
+		function($http, $location) {
+			var list = function(page, pageSize) {
+				return $http({
+					params : {
+						page : page,
+						pageSize : pageSize
+					},
+					url : $location.absUrl() + '/list'
+				});
+			};
+
+			var action = function(name, actionName) {
+				return $http({
+					method : 'POST',
+					params : {
+						name : name
+					},
+					url : $location.absUrl() + '/' + actionName
+				});
+			};
+
+			return {
+				list : function(page, pageSize) {
+					return list(page, pageSize);
+				},
+				action : function(name, actionName) {
+					return action(name, actionName);
+				}
+			};
+		} ]);
+
 pageApp
 		.controller(
 				'pageCtrl',
@@ -92,7 +124,7 @@ pageApp
 								for (var i = 0, len = $scope.states.length; i < len; i++) {
 									if ($scope.states[i].taskName == name) {
 										var result = pageService
-												.action(name,'refresh')
+												.action(name, 'refresh')
 												.success(
 														function(data) {
 															$scope.states[i] = data.state;
@@ -101,26 +133,34 @@ pageApp
 									}
 								}
 							};
-							
-							$scope.pause = function(name){
-								pageService.action(name,'pause').success(
-										function(data){
-											$scope.refresh(name);
-										});
-							};
-							
-							$scope.resume = function(name){
-								pageService.action(name,'resume').success(
-										function(data){
-											$scope.refresh(name);
-										});
-							};
-							
-							$rootScope.remove = function(name) {
-								pageService.action(name,'remove').success(
+
+							$scope.pause = function(name) {
+								pageService.action(name, 'pause').success(
 										function(data) {
-											$rootScope.load();
+											$scope.refresh(name);
 										});
+							};
+
+							$scope.resume = function(name) {
+								pageService.action(name, 'resume').success(
+										function(data) {
+											$scope.refresh(name);
+										});
+							};
+
+							$rootScope.remove = function(name) {
+								pageService
+										.action(name, 'remove')
+										.success(
+												function(data) {
+													$scope.count--;
+													if ($scope.count % $scope.pageSize == 0){
+														$scope.currentPage--;
+														if($scope.currentPage <= 0)
+															$scope.currentPage = 1;
+													}
+													$rootScope.load();
+												});
 								return true;
 							};
 
@@ -152,34 +192,52 @@ pageApp
 
 						} ]);
 
-pageApp.factory('pageService', [ '$http', '$location',
-		function($http, $location) {
-			var list = function(page, pageSize) {
-				return $http({
-					params : {
-						page : page,
-						pageSize : pageSize
-					},
-					url : $location.absUrl() + '/list'
+var formApp = angular.module("formApp", []);
+
+formApp
+		.factory(
+				'formService',
+				[
+						'$http',
+						'$window',
+						'$location',
+						function($http, $window, $location) {
+							var submit = function(data) {
+								return $http({
+									method : 'POST',
+									params : data,
+									url : $location.absUrl()
+								});
+							};
+							var redirect = function() {
+								return $window.location.href = 
+								'http://localhost:8082/puma-admin/puma-server/';
+							};
+
+							return {
+								submit : function(data) {
+									return submit(data);
+								},
+								redirect : function() {
+									return redirect();
+								}
+							};
+						} ]);
+
+formApp.controller('formCtrl', [ '$scope', '$window', 'formService',
+		function($scope, $window, formService) {
+
+			$scope.submit = function() {
+				formService.submit($scope.entity).success(function(data) {
+					if (data.success) {
+						formService.redirect();
+					} else {
+						return false;
+					}
 				});
 			};
-			
-			var action = function(name,actionName) {
-				return $http({
-					method : 'POST',
-					params : {
-						name : name
-					},
-					url : $location.absUrl() + '/' +actionName
-				});
-			};
-			
-			return {
-				list : function(page, pageSize) {
-					return list(page, pageSize);
-				},
-				action : function(name,actionName) {
-					return action(name,actionName);
-				}
+
+			$scope.goBack = function() {
+				$window.history.back();
 			};
 		} ]);

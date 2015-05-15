@@ -84,6 +84,7 @@ public class PumaServerMorphiaDao extends MongoBaseDao<PumaServerMorphia> implem
 		Query<PumaServerMorphia> q = this.getDatastore().createQuery(PumaServerMorphia.class);
 		q.field("name").equal(pumaServerMorphia.getName());
 		UpdateOperations<PumaServerMorphia> uop = this.getDatastore().createUpdateOperations(PumaServerMorphia.class);
+		pumaServer.setId(pumaServerMorphia.getId());
 		uop.set("entity", pumaServer);
 		this.update(q, uop);
 		this.getDatastore().ensureIndexes();

@@ -24,7 +24,7 @@
 		<div class="row">
 			<div class="col-xs-12">
 				<div class="row">
-					<div class="col-xs-12">
+					<div class="col-xs-12" ng-app="formApp" ng-controller="formCtrl">
 						<form class="form-horizontal" role="form">
 							<div class="puma-form-group-start"></div>
 							<!-- #section:elements.form -->
@@ -34,26 +34,52 @@
 
 								<div class="col-sm-9">
 									<input type="text" id="form-field-1" placeholder="服务器名称"
-										class="col-xs-10 col-sm-5">
+										class="col-xs-10 col-sm-5" ng-model="entity.name"
+										#if(${entity}) ng-init="entity.name='${entity.name}'" readonly="readonly" #end/>
 								</div>
 							</div>
 
 							<div class="form-group">
 								<label class="col-sm-3 control-label no-padding-right"
-									for="form-field-1"> 服务器IP </label>
+									for="form-field-1"> 服务器Host </label>
 
 								<div class="col-sm-9">
-									<input type="text" id="form-field-1" placeholder="服务器IP"
-										class="col-xs-10 col-sm-5">
+									<input type="text" id="form-field-1"
+										placeholder="若不指定端口号，默认为8080"
+										class="col-xs-10 col-sm-5" ng-model="entity.host"
+										#if(${entity}) ng-init="entity.host ='${entity.host}'"
+										#end
+                         				#if(${lock}) readonly="readonly"
+										#end />
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label no-padding-right"
+									for="form-field-1"> 服务器Port </label>
+
+								<div class="col-sm-9">
+									<input type="text" id="form-field-1"
+										placeholder="默认为8080"
+										class="col-xs-10 col-sm-5" ng-model="entity.port"
+										#if(${entity}) ng-init="entity.port ='${entity.port}'"
+										#end
+                         				#if(${lock}) readonly="readonly"
+										#end />
 								</div>
 							</div>
 							<div class="clearfix form-actions puma-form-actions">
 								<div class="col-md-offset-3 col-md-9">
-									<button class="btn btn-info" type="button">
-										<i class="ace-icon fa fa-check bigger-110"></i> 提交
-									</button>&nbsp; &nbsp; &nbsp;
-									<button class="btn" type="reset">
+									<button class="btn btn-info" type="button"
+										#if(${lock}) disabled="disabled" #end ng-click="submit()">
+										<i class="ace-icon fa fa-check bigger-110" "></i> 提交
+									</button>
+									&nbsp; &nbsp; &nbsp;
+									<button class="btn" type="button">
 										<i class="ace-icon fa fa-undo bigger-110"></i> 重置
+									</button>
+									&nbsp; &nbsp; &nbsp;
+									<button class="btn btn-info" type="button" ng-click="goBack()">
+										<i class="ace-icon fa fa-backward bigger-110"></i> 返回
 									</button>
 								</div>
 							</div>

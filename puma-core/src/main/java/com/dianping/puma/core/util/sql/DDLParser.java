@@ -133,6 +133,18 @@ public class DDLParser {
 		return null;
 	}
 
+	public static String replaceDdl(String queryString, String schema, String table, DDLType ddlType) {
+		PatternMatcher matcher = new Perl5Matcher();
+		switch (ddlType) {
+		case ALTER_TABLE:
+			parseDDL(matcher, queryString, ALTER_TABLE_PATTERN);
+			String name = matcher.getMatch().group(5);
+			return queryString.replace(name, " " + schema + "." + table);
+		default:
+			return null;
+		}
+	}
+
 	// Parse ddl alter statements.
 	private static DDLResult parseDDLAlter(String queryString) {
 		PatternMatcher matcher = new Perl5Matcher();

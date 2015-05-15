@@ -13,6 +13,8 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import com.dianping.puma.syncserver.job.load.BatchLoader;
 import com.dianping.puma.syncserver.job.load.Loader;
+import com.dianping.puma.syncserver.job.transform.DefaultTransformer;
+import com.dianping.puma.syncserver.job.transform.Transformer;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.lang.StringUtils;
 import org.mortbay.log.Log;
@@ -63,10 +65,17 @@ public class MysqlExecutor {
 
 	private Loader loader;
 
+	private Transformer transformer;
+
 	public MysqlExecutor(String host, String username, String password, MysqlMapping mysqlMapping) {
 		this.mysqlMapping = mysqlMapping;
 
-		loader = new BatchLoader(host, username, password);
+		DefaultTransformer defaultTransformer = new DefaultTransformer();
+		defaultTransformer.setMysqlMapping(mysqlMapping);
+		transformer = defaultTransformer;
+
+		loader = new PooledLoader(host, username, password, new BinlogInfoManager());
+		loader.start();
 		initDataSource(host, username, password);
 	}
 
@@ -114,7 +123,7 @@ public class MysqlExecutor {
 	 * @throws DdlRenameException
 	 */
 	public Map<String, Object> execute(ChangedEvent event) throws SQLException {
-		Cat.logEvent("load", "load");
+		transformer.transform(event);
 		loader.load(event);
 
 		Map<String, Object> result = null;

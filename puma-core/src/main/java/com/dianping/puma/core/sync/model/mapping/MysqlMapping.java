@@ -82,14 +82,49 @@ public class MysqlMapping implements Cloneable {
 	}
 
 	public String getSchema(String oriSchema) {
-		return "";
+		for (DatabaseMapping databaseMapping: databases) {
+			if (databaseMapping.getFrom().equals(oriSchema)) {
+				return databaseMapping.getTo();
+			}
+		}
+		return null;
 	}
 
-	public String getTable(String oriTable) {
-		return "";
+	public String getTable(String oriSchema, String oriTable) {
+		for (DatabaseMapping databaseMapping: databases) {
+			if (databaseMapping.getFrom().equals(oriSchema)) {
+				for (TableMapping tableMapping: databaseMapping.getTables()) {
+					if (tableMapping.getFrom().equals("*")) {
+						return oriTable;
+					}
+
+					if (tableMapping.getFrom().equals(oriTable)) {
+						return tableMapping.getTo();
+					}
+				}
+			}
+		}
+		return null;
 	}
 
-	public String getColumn(String oriColumn) {
-		return "";
+	public String getColumn(String oriSchema, String oriTable, String oriColumn) {
+		for (DatabaseMapping databaseMapping: databases) {
+			if (databaseMapping.getFrom().equals(oriSchema)) {
+				for (TableMapping tableMapping: databaseMapping.getTables()) {
+					if (tableMapping.getFrom().equals(oriTable)) {
+						for (ColumnMapping columnMapping: tableMapping.getColumns()) {
+							if (columnMapping.getFrom().equals("*")) {
+								return oriColumn;
+							}
+
+							if (columnMapping.getFrom().equals(oriColumn)) {
+								return columnMapping.getTo();
+							}
+						}
+					}
+				}
+			}
+		}
+		return null;
 	}
 }

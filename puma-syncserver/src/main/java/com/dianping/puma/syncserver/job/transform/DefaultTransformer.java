@@ -51,10 +51,10 @@ public class DefaultTransformer implements Transformer {
 			throw new TransformException(0,
 					String.format("Transformer(%s) is stopped for event(%s).", name, event.toString()));
 		}
-		transformSchema(event);
-		transformTable(event);
-		transformColumn(event);
 		transformSQL(event);
+		transformColumn(event);
+		transformTable(event);
+		transformSchema(event);
 	}
 
 	private void transformSchema(ChangedEvent event) {
@@ -72,9 +72,10 @@ public class DefaultTransformer implements Transformer {
 	}
 
 	private void transformTable(ChangedEvent event) {
+		String oriSchema = event.getDatabase();
 		String oriTable = event.getTable();
 		if (oriTable != null) {
-			String table = mysqlMapping.getTable(oriTable);
+			String table = mysqlMapping.getTable(oriSchema, oriTable);
 			if (table == null) {
 				LOG.error("Transformer({}) transform table failure for event({}).", name, event.toString());
 				throw new TransformException(2, String.format("Transformer(%s) transform table failure for event(%s).",
@@ -89,9 +90,12 @@ public class DefaultTransformer implements Transformer {
 		if (event instanceof RowChangedEvent) {
 			RowChangedEvent dmlEvent = (RowChangedEvent) event;
 
+			String oriSchema = event.getDatabase();
+			String oriTable = event.getTable();
+
 			Map<String, ColumnInfo> columns = new HashMap<String, ColumnInfo>();
 			for (String oriColumn : dmlEvent.getColumns().keySet()) {
-				String column = mysqlMapping.getColumn(oriColumn);
+				String column = mysqlMapping.getColumn(oriSchema, oriTable, oriColumn);
 				if (column == null) {
 					LOG.error("Transformer({}) transform column failure for event({}).", name, event.toString());
 					throw new TransformException(3, String.format("Transformer(%s) transform column failure for event(%s).",

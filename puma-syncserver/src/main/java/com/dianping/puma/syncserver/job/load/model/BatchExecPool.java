@@ -267,6 +267,7 @@ public class BatchExecPool {
 
 				// If the code runs to here, then the sql execution is failure.
 				exception = te;
+				LOG.error("Sql error: {}.", exception);
 				stop();
 			}
 		});

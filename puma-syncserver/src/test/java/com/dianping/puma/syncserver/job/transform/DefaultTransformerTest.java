@@ -30,8 +30,8 @@ public class DefaultTransformerTest extends MockTest {
 		transformer = new DefaultTransformer();
 		transformer.setName("puma");
 		when(mysqlMapping.getSchema("puma_ori_schema")).thenReturn("puma_schema");
-		when(mysqlMapping.getTable("puma_ori_table")).thenReturn("puma_table");
-		when(mysqlMapping.getColumn("puma_ori_column")).thenReturn("puma_column");
+		when(mysqlMapping.getTable("puma_ori_schema", "puma_ori_table")).thenReturn("puma_table");
+		when(mysqlMapping.getColumn("puma_ori_schema", "puma_ori_table", "puma_ori_column")).thenReturn("puma_column");
 		transformer.setMysqlMapping(mysqlMapping);
 		transformer.start();
 	}

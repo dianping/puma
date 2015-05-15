@@ -73,6 +73,7 @@ public class MysqlExecutor {
 		DefaultTransformer defaultTransformer = new DefaultTransformer();
 		defaultTransformer.setMysqlMapping(mysqlMapping);
 		transformer = defaultTransformer;
+		transformer.start();
 
 		loader = new PooledLoader(host, username, password, new BinlogInfoManager());
 		loader.start();

@@ -7,9 +7,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
 import com.dianping.puma.ComponentContainer;
+import com.dianping.puma.channel.exception.ChannelClosedException;
 import com.dianping.puma.channel.heartbeat.HeartbeatTask;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.monitor.ServerEventDelayMonitor;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.web.mvc.PageHandler;
@@ -131,7 +133,7 @@ public class Handler implements PageHandler<Context> {
 					}
 				}
 			} catch (Exception e) {
-				Cat.logError("Puma.client.channelClosed:", e);
+				Cat.logError("Puma.client.channelClosed:", new ChannelClosedException(e));
 				SystemStatusContainer.instance.removeClient(clientName);
 				heartbeatTask.cancelFuture();
 				LOG.info("Client(" +clientName + ") failed. ", e);

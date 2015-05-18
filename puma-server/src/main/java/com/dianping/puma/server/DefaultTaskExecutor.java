@@ -457,7 +457,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		}
 
 		Cat.logEvent("Slave.dbBinlogFormat", eventName, isQuery ? Message.SUCCESS : "1", "");
-		return true;
+		return isQuery;
 	}
 
 	protected void doStop() throws Exception {

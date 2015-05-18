@@ -1,6 +1,7 @@
-package com.dianping.puma.syncserver.job.load.model;
+package com.dianping.puma.syncserver.job.load.pool;
 
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.syncserver.job.load.model.BatchRow;
 
 import java.util.concurrent.*;
 

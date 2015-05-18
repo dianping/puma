@@ -70,4 +70,28 @@ public class BinlogInfo {
 				+ skipToNextPos + " ]";
 	}
 
+	public int compareTo(BinlogInfo binlogInfo) {
+		String leftBinlogFile = this.getBinlogFile();
+		int leftBinlogFileNum = Integer.parseInt(leftBinlogFile.substring(leftBinlogFile.indexOf(".")));
+		String rightBinlogFile = binlogInfo.getBinlogFile();
+		int rightBinlogFileNum = Integer.parseInt(rightBinlogFile.substring(rightBinlogFile.indexOf(".")));
+
+		if (leftBinlogFileNum < rightBinlogFileNum) {
+			return -1;
+		} else if (leftBinlogFileNum > rightBinlogFileNum) {
+			return 1;
+		} else {
+			long leftBinlogPosition = this.getBinlogPosition();
+			long rightBinlogPosition = binlogInfo.getBinlogPosition();
+
+			if (leftBinlogPosition < rightBinlogPosition) {
+				return -1;
+			} else if (leftBinlogPosition > rightBinlogPosition) {
+				return 1;
+			} else {
+				return 0;
+			}
+		}
+	}
+
 }

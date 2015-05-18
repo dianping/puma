@@ -2,11 +2,11 @@ package com.dianping.puma.syncserver.job.load;
 
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.monitor.EventMonitor;
-import com.dianping.puma.syncserver.job.binlog.BinlogInfoManager;
+import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
 import com.dianping.puma.syncserver.job.load.exception.LoadException;
-import com.dianping.puma.syncserver.job.load.model.BatchExecPool;
 import com.dianping.puma.syncserver.job.load.model.BatchRow;
-import com.dianping.puma.syncserver.job.load.model.BatchRowPool;
+import com.dianping.puma.syncserver.job.load.pool.BatchExecPool;
+import com.dianping.puma.syncserver.job.load.pool.BatchRowPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +17,6 @@ public class PooledLoader implements Loader {
 	private static final Logger LOG = LoggerFactory.getLogger(PooledLoader.class);
 
 	private boolean stopped = true;
-
 	private LoadException loadException = null;
 
 	// PooledLoader main modules.
@@ -27,7 +26,7 @@ public class PooledLoader implements Loader {
 
 	private String name;
 
-	private BinlogInfoManager binlogInfoManager;
+	private BinlogManager binlogManager;
 
 	// JDBC connection settings.
 	private String host;
@@ -91,6 +90,7 @@ public class PooledLoader implements Loader {
 		batchExecPool.setPassword(password);
 		batchExecPool.setPoolSize(5);
 		batchExecPool.setRetires(1);
+		batchExecPool.setBinlogManager(binlogManager);
 	}
 
 	private void initBatchRowPool() {
@@ -164,8 +164,8 @@ public class PooledLoader implements Loader {
 		this.name = name;
 	}
 
-	public void setBinlogInfoManager(BinlogInfoManager binlogInfoManager) {
-		this.binlogInfoManager = binlogInfoManager;
+	public void setBinlogManager(BinlogManager binlogManager) {
+		this.binlogManager = binlogManager;
 	}
 
 	public void setHost(String host) {

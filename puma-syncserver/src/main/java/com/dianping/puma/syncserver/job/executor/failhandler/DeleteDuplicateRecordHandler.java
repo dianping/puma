@@ -13,7 +13,6 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
 import com.dianping.puma.core.monitor.NotifyService;
-import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
 public class DeleteDuplicateRecordHandler implements Handler {
     private static final Logger LOG = LoggerFactory.getLogger(DeleteDuplicateRecordHandler.class);
@@ -30,7 +29,6 @@ public class DeleteDuplicateRecordHandler implements Handler {
     public HandleResult handle(HandleContext context) {
         HandleResult result = new HandleResult();
         result.setIgnoreFailEvent(false);
-        MysqlExecutor mysqlExecutor = context.getMysqlExecutor();
         ChangedEvent changedEvent0 = context.getChangedEvent();
         BaseSyncTask task = context.getTask();
         String taskInfo = "[" + task.getPumaTaskName() + "->" + task.getDstDBInstanceName() + "]";
@@ -43,22 +41,23 @@ public class DeleteDuplicateRecordHandler implements Handler {
                     //查询重复的记录是什么，发邮件出来
                     RowChangedEvent selectEvent = getSelectEvent(changedEvent);
                     LOG.info(taskInfo + " SelectEvent:" + selectEvent);
+                    /*
                     Map<String, Object> resultMap = mysqlExecutor.execute(selectEvent);
                     if (resultMap != null) {
                         Map<String, Object> rowMap = resultMap;
                         msgSB.append("Select the duplicate row: " + rowMap);
                     } else {
                         msgSB.append("Select the duplicate row return no result, select event is: " + selectEvent);
-                    }
+                    }*/
                     //这段代码也可以使用replace语法
                     //构造删除event，并执行event，删除dest的对应重复了的记录
                     RowChangedEvent deleteChangedEvent = getDeleteEvent(changedEvent);
                     LOG.info(taskInfo + " DeleteChangedEvent:" + deleteChangedEvent);
-                    mysqlExecutor.execute(deleteChangedEvent);
+                    //mysqlExecutor.execute(deleteChangedEvent);
                     msgSB.append("<br/><br/>Delete Event: " + deleteChangedEvent.toString());
                     //重新尝试插入该event
                     LOG.info(taskInfo + " InsertChangedEvent:" + changedEvent);
-                    mysqlExecutor.execute(changedEvent);
+                    //mysqlExecutor.execute(changedEvent);
                     msgSB.append("<br/><br/>Insert Event: " + changedEvent.toString());
                     //成功处理
                     result.setIgnoreFailEvent(true);
@@ -66,7 +65,7 @@ public class DeleteDuplicateRecordHandler implements Handler {
                     String msg = taskInfo + " Handle(" + getName() + "): <br/><br/>" + msgSB.toString();
                     LOG.info(msg);
                     notifyService.alarm(msg, null, false);
-                } catch (SQLException e) {
+                } catch (Exception e) {
                     String msg = taskInfo + " Unexpected SQLException on handler(" + getName() + "), ignoreFailEvent still false.";
                     notifyService.alarm(msg, e, true);
                     LOG.error(msg, e);
@@ -81,7 +80,7 @@ public class DeleteDuplicateRecordHandler implements Handler {
      */
     private RowChangedEvent getSelectEvent(RowChangedEvent changedEvent) {
         RowChangedEvent selectEvent = changedEvent.clone();
-        selectEvent.setActionType(MysqlExecutor.SELECT);
+        //selectEvent.setActionType(MysqlExecutor.SELECT);
         //        selectEvent.setDatabase(changedEvent.getDatabase());
         //        selectEvent.setTable(changedEvent.getTable());
         Map<String, ColumnInfo> columns = selectEvent.getColumns();

@@ -13,8 +13,7 @@ import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.state.BaseSyncTaskState;
-import com.dianping.puma.core.monitor.NotifyService;
-import com.dianping.puma.syncserver.job.binlog.BinlogInfoManager;
+import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
 import com.dianping.puma.syncserver.job.executor.exception.GException;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.io.FileUtils;
@@ -42,7 +41,6 @@ import com.dianping.puma.syncserver.job.executor.failhandler.HandleResult;
 import com.dianping.puma.syncserver.job.executor.failhandler.Handler;
 import com.dianping.puma.syncserver.job.executor.failhandler.HandlerContainer;
 import com.dianping.puma.syncserver.job.executor.failhandler.StopOnFailedHandler;
-import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
 public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S extends BaseSyncTaskState> implements
 		TaskExecutor<T, S>, SpeedControllable {
@@ -51,8 +49,6 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 	protected T abstractTask;
 
 	protected PumaClient pumaClient;
-
-	protected MysqlExecutor mysqlExecutor;
 
 	protected String pumaServerHost;
 
@@ -74,7 +70,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 
 	private BinlogInfoHolder binlogInfoHolder;
 
-	private BinlogInfoManager binlogInfoManager;
+	private BinlogManager binlogManager;
 
 	public AbstractTaskExecutor() {}
 
@@ -190,11 +186,12 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 	}
 
 	private void releaseMysqlExecutor() throws SQLException {
+		/*
 		if (mysqlExecutor != null) {
 			mysqlExecutor.rollback();
 			mysqlExecutor.close();
 			mysqlExecutor = null;
-		}
+		}*/
 	}
 
 	@Override
@@ -249,8 +246,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 		// abstractTask.getDestMysqlHost().getUsername(),
 		// abstractTask.getDestMysqlHost().getPassword(),
 		// abstractTask.getMysqlMapping());
+		/*
 		mysqlExecutor = new MysqlExecutor((dstDBInstance.getHost() + ":" + dstDBInstance.getPort()),
-				dstDBInstance.getUsername(), dstDBInstance.getPassword(), abstractTask.getMysqlMapping());
+				dstDBInstance.getUsername(), dstDBInstance.getPassword(), abstractTask.getMysqlMapping());*/
 
 		// 读取binlog位置，创建PumaClient，设置PumaCleint的config，再启动
 		if (this.pumaClient != null) {
@@ -403,7 +401,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 				try {
 					LOG.info("Invoke handler(" + handler.getName() + "), event : " + event);
 					HandleContext context = new HandleContext();
-					context.setMysqlExecutor(mysqlExecutor);
+					//context.setMysqlExecutor(mysqlExecutor);
 					context.setChangedEvent(event);
 					context.setTask(abstractTask);
 					context.setExecutor(AbstractTaskExecutor.this);
@@ -607,8 +605,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 
 	@Override
 	public String toString() {
-		return "AbstractTaskExecutor [abstractTask=" + abstractTask + ", pumaClient=" + pumaClient + ", mysqlExecutor="
-				+ mysqlExecutor + ", pumaServerHost=" + pumaServerHost + ", pumaServerPort=" + pumaServerPort
+		return "AbstractTaskExecutor [abstractTask=" + abstractTask + ", pumaClient=" + pumaClient + ", pumaServerHost=" + pumaServerHost + ", pumaServerPort=" + pumaServerPort
 				+ ", target=" + target + ", status=" + status + ", transactionStart=" + transactionStart
 				+ ", sleepTime=" + sleepTime + ", lastEvents=" + lastEvents + "]";
 	}
@@ -654,7 +651,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 		this.target = target;
 	}
 
-	public void setBinlogInfoManager(BinlogInfoManager binlogInfoManager) {
-		this.binlogInfoManager = binlogInfoManager;
+	public void setBinlogManager(BinlogManager binlogManager) {
+		this.binlogManager = binlogManager;
 	}
 }

@@ -1,10 +1,13 @@
-package com.dianping.puma.syncserver.job.load.model;
+package com.dianping.puma.syncserver.job.load.pool;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import com.dianping.puma.core.annotation.ThreadSafe;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.monitor.TransactionMonitor;
+import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
+import com.dianping.puma.syncserver.job.load.model.BatchRow;
+import com.dianping.puma.syncserver.job.load.model.RowKey;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
@@ -44,22 +47,17 @@ public class BatchExecPool {
 
 	// JDBC connection pool.
 	private HikariDataSource dataSource;
-
 	private String host;
-
 	private String username;
-
 	private String password;
 
 	// JDBC retry times.
 	private int retires;
 
+	private BinlogManager binlogManager;
+
 	// Used to block the put operation.
-	private volatile boolean locked = false;
-	//private final Object lock = new Object();
-
 	private Lock lock = new ReentrantLock();
-
 	private final Condition notConflict = lock.newCondition();
 
 	// Monitor.
@@ -172,35 +170,6 @@ public class BatchExecPool {
 		}
 	}
 
-	/*
-	private boolean checkDml(BatchRow batchRow) {
-		if (batchRow != null) {
-			if (dmlSize.get() + ddlSize.get() >= poolSize) {
-				LOG.info("size block, ({}), ({}).", dmlSize, poolSize);
-				return false;
-			}
-			if (ddlSize.get() > 0) {
-				LOG.info("ddl block");
-				return false;
-			}
-			for (RowKey rowKey : batchRow.getRowKeys().keySet()) {
-				if (rowKeys.containsKey(rowKey)) {
-					LOG.info("row block");
-					return false;
-				}
-			}
-			return true;
-		}
-		return true;
-	}
-
-	private boolean checkDdl(BatchRow batchRow) {
-		if (batchRow != null) {
-			return dmlSize.get() == 0 && ddlSize.get() == 0;
-		}
-		return true;
-	}*/
-
 	@ThreadUnSafe
 	private void register(BatchRow batchRow) {
 		if (batchRow.isDdl()) {
@@ -223,28 +192,6 @@ public class BatchExecPool {
 		}
 	}
 
-	/*
-	private void tryLock(BatchRow batchRow) throws InterruptedException {
-		synchronized (lock) {
-			if (!check(batchRow)) {
-				buffer = batchRow;
-				locked = true;
-				lock.wait();
-			}
-		}
-	}
-
-	private void tryUnlock(BatchRow batchRow) {
-		unregister(batchRow);
-		synchronized (lock) {
-			if (locked && check(buffer)) {
-				buffer = null;
-				locked = false;
-				lock.notify();
-			}
-		}
-	}*/
-
 	private void pooledBatchExecute(final BatchRow batchRow) {
 		threadPool.execute(new Runnable() {
 			@Override
@@ -255,6 +202,7 @@ public class BatchExecPool {
 					try {
 						batchExecute(batchRow);
 						remove(batchRow);
+						binlogManager.save(batchRow.getBinlogInfo());
 						return;
 					} catch (SQLException e) {
 						if (!stopped) {
@@ -305,5 +253,9 @@ public class BatchExecPool {
 
 	public void setRetires(int retires) {
 		this.retires = retires;
+	}
+
+	public void setBinlogManager(BinlogManager binlogManager) {
+		this.binlogManager = binlogManager;
 	}
 }

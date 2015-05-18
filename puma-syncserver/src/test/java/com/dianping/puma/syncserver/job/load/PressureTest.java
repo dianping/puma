@@ -1,13 +1,11 @@
 package com.dianping.puma.syncserver.job.load;
 
-import com.dianping.cat.Cat;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.PumaThreadPool;
 import com.dianping.puma.core.util.sql.DMLType;
-import com.dianping.puma.syncserver.job.load.model.BatchExecPool;
 import com.dianping.puma.syncserver.job.load.model.BatchRow;
+import com.dianping.puma.syncserver.job.load.pool.BatchExecPool;
 import com.zaxxer.hikari.HikariDataSource;
-import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.junit.Before;

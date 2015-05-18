@@ -3,7 +3,7 @@ package com.dianping.puma.syncserver.job.load;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.puma.syncserver.job.load.model.BatchRow;
-import com.dianping.puma.syncserver.job.load.model.BatchRowPool;
+import com.dianping.puma.syncserver.job.load.pool.BatchRowPool;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.junit.Assert;
 import org.junit.Before;

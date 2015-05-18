@@ -42,6 +42,7 @@ public class CatchupTaskExecutor extends AbstractTaskExecutor<CatchupTask, Catch
 
     @Override
     protected void binlogOfIOThreadChanged(ChangedEvent event) {
+        /*
         super.binlogOfIOThreadChanged(event);
         BinlogInfo catchupBinlogInfo = this.status.getBinlogInfoOfIOThread();
         BinlogInfo syncBinlogInfo = this.syncTaskExecutor.getTaskExecutorStatus().getBinlogInfoOfIOThread();
@@ -81,6 +82,7 @@ public class CatchupTaskExecutor extends AbstractTaskExecutor<CatchupTask, Catch
             this.syncTaskExecutor.speedDown();
 
         }
+        */
     }
 
 }

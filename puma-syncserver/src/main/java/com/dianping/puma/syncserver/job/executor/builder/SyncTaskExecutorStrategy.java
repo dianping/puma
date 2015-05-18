@@ -1,20 +1,15 @@
 package com.dianping.puma.syncserver.job.executor.builder;
 
-import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.entity.*;
 import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
-import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.state.SyncTaskState;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.service.DstDBInstanceService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
-import com.dianping.puma.syncserver.job.binlog.BinlogInfoManager;
-import com.dianping.puma.syncserver.job.binlog.LocalFileBinlogInfoManager;
+import com.dianping.puma.syncserver.job.binlogmanage.LocalFileBinlogManager;
 import com.dianping.puma.syncserver.job.load.PooledLoader;
 import com.dianping.puma.syncserver.job.transform.DefaultTransformer;
-import com.dianping.puma.syncserver.job.transform.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,7 +45,7 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
 
 		String name = task.getName();
 
-		LocalFileBinlogInfoManager binlogInfoManager = new LocalFileBinlogInfoManager();
+		LocalFileBinlogManager binlogInfoManager = new LocalFileBinlogManager();
 
 		// Client connection settings.
 		String pumaTaskName = task.getPumaTaskName();
@@ -65,7 +60,7 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
 		}
 		executor.setPumaServerHost(pumaServer.getHost());
 		executor.setPumaServerPort(pumaServer.getPort());
-		executor.setBinlogInfoManager(binlogInfoManager);
+		executor.setBinlogManager(binlogInfoManager);
 
 		// Transformer.
 		DefaultTransformer transformer = new DefaultTransformer();
@@ -84,7 +79,7 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
 		loader.setHost(dstDBInstance.getHost());
 		loader.setUsername(dstDBInstance.getUsername());
 		loader.setPassword(dstDBInstance.getPassword());
-		loader.setBinlogInfoManager(binlogInfoManager);
+		loader.setBinlogManager(binlogInfoManager);
 		executor.setLoader(loader);
 
 		return executor;

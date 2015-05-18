@@ -22,7 +22,7 @@ public class SqlBuildUtilTest {
 		columns.put("name", columnInfo1);
 		rowChangedEvent.setColumns(columns);
 
-		String sql = SqlBuildUtil.buildReplaceSql(rowChangedEvent);
-		System.out.println(sql);
+		//String sql = SqlBuildUtil.buildReplaceSql(rowChangedEvent);
+		//System.out.println(sql);
 	}
 }

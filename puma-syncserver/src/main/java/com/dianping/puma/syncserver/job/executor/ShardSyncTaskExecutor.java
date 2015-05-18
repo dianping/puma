@@ -18,7 +18,7 @@ import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
-import com.dianping.puma.syncserver.mysql.SqlBuildUtil;
+//import com.dianping.puma.syncserver.mysql.SqlBuildUtil;
 import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
@@ -224,10 +224,10 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
             switch (actionType) {
                 case RowChangedEvent.INSERT:
                 case RowChangedEvent.UPDATE:
-                    sql = SqlBuildUtil.buildSql(event, "/sql_template_shard/insertSql.vm");
+                    //sql = SqlBuildUtil.buildSql(event, "/sql_template_shard/insertSql.vm");
                     break;
                 case RowChangedEvent.DELETE:
-                    sql = SqlBuildUtil.buildSql(event, "/sql_template_shard/deleteSql.vm");
+                    //sql = SqlBuildUtil.buildSql(event, "/sql_template_shard/deleteSql.vm");
                     break;
             }
 

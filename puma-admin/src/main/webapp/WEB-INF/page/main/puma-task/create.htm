@@ -1,0 +1,204 @@
+<!-- #section:basics/content.breadcrumbs -->
+<div class="breadcrumbs" id="breadcrumbs">
+	<script type="text/javascript">
+		try {
+			ace.settings.check('breadcrumbs', 'fixed')
+		} catch (e) {
+		}
+	</script>
+
+	<ul class="breadcrumb">
+		<li><i class="ace-icon fa fa-home home-icon"></i> <a href="#">主页</a>
+		</li>
+
+		<li class="active">数据处理任务编辑</li>
+	</ul>
+	<!-- /.breadcrumb -->
+</div>
+
+<!-- /section:basics/content.breadcrumbs -->
+<div class="page-content">
+
+	<!-- /section:settings.box -->
+	<div class="page-content-area">
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="row">
+					<div class="col-xs-12" ng-app="formApp" ng-controller="formCtrl"
+						ng-init="backUrl = '${rc.contextPath}/puma-task'">
+						<form class="form-horizontal" role="form">
+							<div class="puma-form-group-start"></div>
+							<!-- #section:elements.form -->
+							<div class="form-group">
+								<label class="col-sm-3 control-label no-padding-right"
+									for="form-field-1">源数据库</label>
+
+								<div class="col-sm-9">
+									<select id="form-field-1"
+										class="puma-form-select col-xs-10 col-sm-5" ng-model="entity.srcDBInstanceName" #if(!${entity}) ng-change="change()" #end>
+										#foreach($srcDBInstance in ${srcDBInstanceEntities})
+										<option value="${srcDBInstance.name}"
+											#if(${entity}) #if(${entity.srcDBInstanceName} ==
+											${srcDBInstance.name}) ng-init="entity.srcDBInstanceName ='${entity.srcDBInstanceName}'"
+											#else disabled="disabled" #end #end>
+											${srcDBInstance.name}</option> #end
+									</select>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label class="col-sm-3 control-label no-padding-right"
+									for="form-field-1"> 数据处理服务器 </label>
+
+								<div class="col-sm-9">
+									<select id="form-field-1" 
+										class="col-xs-10 col-sm-5 puma-form-select" ng-model="entity.pumaServerName" #if(!${entity}) ng-change="change()" #end>
+										#foreach($pumaServer in ${pumaServerEntities})
+										<option value="${pumaServer.name}"
+											#if(${entity}) #if(${entity.pumaServerName} ==
+											${pumaServer.name}) ng-init="entity.pumaServerName ='${entity.pumaServerName}'"
+											#else disabled="disabled" #end #end>${pumaServer.name}</option>
+										#end
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label no-padding-right"
+									for="form-field-1"> 任务名称 </label>
+
+								<div class="col-sm-9">
+									<input id="form-field-1" type="text" class="col-xs-10 col-sm-5"
+										ng-model="entity.name"
+										#if(${entity})
+										 ng-init="entity.name ='${entity.name}'"
+										#end #if(${entity}) readonly="readonly" #end />
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label no-padding-right"
+									for="form-field-1"> 数据库日志 </label>
+
+								<div class="col-sm-9">
+									<input id="form-field-1"
+										class="col-xs-10 col-sm-3" type="text"
+										ng-model="entity.binlogInfo.binlogFile" placeholder="文件名"
+										#if(${entity}) ng-init="entity.binlogInfo.binlogFile ='${entity.binlogInfo.binlogFile}'"
+										#end /> <input id="
+										binlogPosition"
+										name="binlogPosition" class="col-xs-10 col-sm-2" type="text"
+										ng-model="entity.binlogInfo.binlogPosition" placeholder="位置"
+										#if(${entity}) ng-init="entity.binlogInfo.binlogPosition ='${entity.binlogInfo.binlogPosition}'"
+										#end />
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label no-padding-right"
+									for="form-field-1"> 存储天数 </label>
+
+								<div class="col-sm-9">
+									<input id="form-field-1" type="text"
+										class="col-xs-10 col-sm-5" ng-model="entity.preservedDay"
+										#if(${entity}) ng-init="entity.preservedDay ='${entity.preservedDay}'"
+										#end />
+								</div>
+							</div>
+							<div class="hr hr-24"></div>
+							
+							#foreach($acceptedDataInfo in
+							$entity.acceptedDataInfos.entrySet())
+							<div class="form-group">
+								<label class="col-sm-3 control-label no-padding-right"
+									for="form-field-1"> 处理数据库 </label>
+
+								<div class="col-sm-9">
+									<input id="form-field-1"
+										class="col-xs-10 col-sm-5" type="text" ng-model="entity.acceptedDatabase" 
+										ng-init="entity.acceptedDatabase='${acceptedDataInfo.key}'">
+										&nbsp;&nbsp;&nbsp;
+										
+									<a class="red" href="javascript:void(0)"> <i
+										class="ace-icon fa fa-plus-circle bigger-150"></i>
+									</a>
+									&nbsp;&nbsp;&nbsp;
+									<a class="red" href="javascript:void(0)"> <i
+										class="ace-icon fa fa-trash-o bigger-150"></i>
+									</a>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label no-padding-right"
+									for="form-field-1"> 数据库相关表 </label>
+
+								<div class="col-sm-9">
+									#set ($strtbl = "") #foreach($tableName in
+									$acceptedDataInfo.value.tables) #set($strtbl = $strtbl +
+									$tableName + "&") #end #set($strtbl=$strtbl.trim())
+									#if($strtbl.length() > 0) #set ($length = $strtbl.length() - 1)
+									#set ($strtbl = $strtbl.substring(0,$length)) #end
+									<textarea id="form-field-1"
+										class="col-xs-10 col-sm-5" rows="4" type="text"
+										ng-init="entity.acceptedTable='${strtbl}'"
+										ng-model="entity.acceptedTable"
+										placeholder='tableName&tableName&tableName'></textarea>
+									
+								</div>
+							</div>
+							#end
+							
+							<div class="form-group">
+								<label class="col-sm-3 control-label no-padding-right"
+									for="form-field-1"> 处理数据库 </label>
+
+								<div class="col-sm-9">
+									<input id="form-field-1"
+										class="col-xs-10 col-sm-5" type="text" value="">
+										&nbsp;&nbsp;&nbsp;
+										
+									<a class="red" href="javascript:void(0)"> <i
+										class="ace-icon fa fa-plus-circle bigger-150"></i>
+									</a>
+									&nbsp;&nbsp;&nbsp;
+									<a class="red" href="javascript:void(0)"> <i
+										class="ace-icon fa fa-trash-o bigger-150"></i>
+									</a>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label no-padding-right"
+									for="form-field-1"> 数据库相关表 </label>
+
+								<div class="col-sm-9">
+									<textarea id="form-field-1"
+										class="col-xs-10 col-sm-5" rows="4" type="text"
+										placeholder='tableName&tableName&tableName'></textarea>
+									
+								</div>
+							</div>
+							<div class="clearfix form-actions puma-form-actions">
+								<div class="col-md-offset-3 col-md-9">
+									<button class="btn btn-info" type="button"
+										 ng-click="submit()">
+										<i class="ace-icon fa fa-check bigger-110""></i> 提交
+									</button>
+									&nbsp; &nbsp; &nbsp;
+									<button class="btn" type="button">
+										<i class="ace-icon fa fa-undo bigger-110"></i> 重置
+									</button>
+									&nbsp; &nbsp; &nbsp;
+									<button class="btn btn-info" type="button" ng-click="goBack()">
+										<i class="ace-icon fa fa-backward bigger-110"></i> 返回
+									</button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+
+
+			</div>
+			<!-- /.col -->
+		</div>
+		<!-- /.row -->
+	</div>
+</div>
+<!-- /.page-content -->

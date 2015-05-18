@@ -40,20 +40,10 @@ public class SyncServerController {
 	@Value("8080")
 	Integer serverPort;
 
-//	@RequestMapping(value = { "/sync-server" })
-//	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
-//		Map<String, Object> map = new HashMap<String, Object>();
-//		List<SyncServer> syncServerEntities = syncServerService.findAll();
-//		map.put("entities", syncServerEntities);
-//		map.put("path", "sync-server");
-//		return new ModelAndView("main/container", map);
-//	}
 
 	@RequestMapping(value = { "/sync-server" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
-//		List<SyncServer> syncServerEntities = syncServerService.findAll();
-//		map.put("entities", syncServerEntities);
 		map.put("path", "sync-server");
 		return new ModelAndView("common/main-container", map);
 	}
@@ -74,7 +64,7 @@ public class SyncServerController {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("path", "sync-server");
 		map.put("subPath", "create");
-		return new ModelAndView("main/container", map);
+		return new ModelAndView("common/main-container", map);
 	}
 
 	@RequestMapping(value = { "/sync-server/update/{id}" })
@@ -92,7 +82,6 @@ public class SyncServerController {
 					map.put("lock", false);
 				}
 			}
-			// SyncServer entity = syncServerService.find(name);
 			map.put("entity", entity);
 			map.put("path", "sync-server");
 			map.put("subPath", "create");
@@ -100,12 +89,13 @@ public class SyncServerController {
 			// @TODO: error page.
 		}
 
-		return new ModelAndView("main/container", map);
+		return new ModelAndView("common/main-container", map);
 	}
+
 
 	@RequestMapping(value = { "/sync-server/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(String name, String ip) {
+	public String createPost(String name, String host, String port) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
@@ -116,17 +106,11 @@ public class SyncServerController {
 				operation = ActionOperation.CREATE;
 				syncServer = new SyncServer();
 			} else {
-				operation = ActionOperation.UPDATE;
+				throw new Exception("duplicate name.");
 			}
-
-			// Split host and port.
-			String[] hostAndPort = ip.split(":");
-			String host = hostAndPort[0];
-			Integer port = hostAndPort.length == 1 ? serverPort : Integer.parseInt(hostAndPort[1]);
-
 			syncServer.setName(name);
 			syncServer.setHost(host);
-			syncServer.setPort(port);
+			syncServer.setPort(port == null ? serverPort : Integer.parseInt(port));
 
 			if (operation == ActionOperation.CREATE) {
 				syncServerService.create(syncServer);
@@ -146,6 +130,45 @@ public class SyncServerController {
 		return GsonUtil.toJson(map);
 	}
 
+	@RequestMapping(value = { "/sync-server/update/{id}" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String updatePost(@PathVariable long id, String name, String host, String port) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			ActionOperation operation;
+
+			SyncServer syncServer = syncServerService.find(id);
+			if (syncServer == null) {
+				operation = ActionOperation.CREATE;
+				syncServer = new SyncServer();
+			} else {
+				operation = ActionOperation.UPDATE;
+			}
+
+			syncServer.setName(name);
+			syncServer.setHost(host);
+			syncServer.setPort(port == null ? serverPort : Integer.parseInt(port));
+
+			if (operation == ActionOperation.CREATE) {
+				syncServerService.create(syncServer);
+			} else {
+				syncServerService.update(syncServer);
+			}
+
+			map.put("success", true);
+		} catch (MongoException e) {
+			map.put("error", "storage");
+			map.put("success", false);
+		} catch (Exception e) {
+			map.put("error", e.getMessage());
+			map.put("success", false);
+		}
+
+		return GsonUtil.toJson(map);
+	}
+	
+	
 	@RequestMapping(value = { "/sync-server/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String removePost(String name) {

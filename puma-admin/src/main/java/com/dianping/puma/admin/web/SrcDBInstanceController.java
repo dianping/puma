@@ -39,22 +39,9 @@ public class SrcDBInstanceController {
 	@Value("3306")
 	Integer dbPort;
 
-//	@RequestMapping(value = { "/src-db-instance" })
-//	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
-//		Map<String, Object> map = new HashMap<String, Object>();
-//
-//		List<SrcDBInstance> srcDBInstanceEntities = srcDBInstanceService.findAll();
-//
-//		map.put("entities", srcDBInstanceEntities);
-//		map.put("path", "src-db-instance");
-//		return new ModelAndView("main/container", map);
-//	}
-	
 	@RequestMapping(value = { "/src-db-instance" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
-//		List<SrcDBInstance> srcDBInstanceEntities = srcDBInstanceService.findAll();
-//		map.put("entities", srcDBInstanceEntities);
 		map.put("path", "src-db-instance");
 		return new ModelAndView("common/main-container", map);
 	}
@@ -69,22 +56,22 @@ public class SrcDBInstanceController {
 		map.put("list", srcDBInstanceEntities);
 		return GsonUtil.toJson(map);
 	}
-	
+
 	@RequestMapping(value = { "/src-db-instance/create" })
 	public ModelAndView create(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("path", "src-db-instance");
 		map.put("subPath", "create");
-		return new ModelAndView("main/container", map);
+		return new ModelAndView("common/main-container", map);
 	}
 
-	@RequestMapping(value = { "/src-db-instance/update/{id}" },method = RequestMethod.GET)
+	@RequestMapping(value = { "/src-db-instance/update/{id}" }, method = RequestMethod.GET)
 	public ModelAndView update(@PathVariable long id) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
 			SrcDBInstance entity = srcDBInstanceService.find(id);
-			if(entity != null){
+			if (entity != null) {
 				List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceName(entity.getName());
 				if (pumaTasks != null && pumaTasks.size() != 0) {
 					map.put("lock", true);
@@ -92,7 +79,7 @@ public class SrcDBInstanceController {
 					map.put("lock", false);
 				}
 			}
-			//SrcDBInstance entity = srcDBInstanceService.find(name);
+			// SrcDBInstance entity = srcDBInstanceService.find(name);
 			map.put("entity", entity);
 			map.put("path", "src-db-instance");
 			map.put("subPath", "create");
@@ -101,18 +88,12 @@ public class SrcDBInstanceController {
 			// @TODO: error page.
 		}
 
-		return new ModelAndView("main/container", map);
+		return new ModelAndView("common/main-container", map);
 	}
 
-	@RequestMapping(value = {
-			"/src-db-instance/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = { "/src-db-instance/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(
-			String name,
-			Long serverId,
-			String ip,
-			String username,
-			String password) {
+	public String createPost(String name, Long serverId, String host, String port, String username, String password) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
@@ -126,22 +107,18 @@ public class SrcDBInstanceController {
 				srcDBInstance = new SrcDBInstance();
 			} else {
 				create = false;
+				throw new Exception("duplicate name.");
 			}
 
 			srcDBInstance.setName(name);
 			srcDBInstance.setServerId(serverId);
-
-			// Split host and port.
-			String[] hostAndPort = ip.split(":");
-			String host = hostAndPort[0];
-			Integer port = hostAndPort.length == 1 ? dbPort : Integer.parseInt(hostAndPort[1]);
-
+			int portInt = port == null ? dbPort : Integer.parseInt(port);
 			srcDBInstance.setHost(host);
-			srcDBInstance.setPort(port);
+			srcDBInstance.setPort(portInt);
 			srcDBInstance.setUsername(username);
 			srcDBInstance.setPassword(password);
 			srcDBInstance.setMetaHost(host);
-			srcDBInstance.setMetaPort(port);
+			srcDBInstance.setMetaPort(portInt);
 			srcDBInstance.setMetaUsername(username);
 			srcDBInstance.setMetaPassword(password);
 
@@ -163,8 +140,56 @@ public class SrcDBInstanceController {
 		return GsonUtil.toJson(map);
 	}
 
-	@RequestMapping(value = {
-			"/src-db-instance/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = { "/src-db-instance/update/{id}" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String updatePost(@PathVariable long id, String name, Long serverId, String host, String port,
+			String username, String password) {
+
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			boolean create;
+
+			SrcDBInstance srcDBInstance = srcDBInstanceService.find(id);
+
+			if (srcDBInstance == null) {
+				create = true;
+				srcDBInstance = new SrcDBInstance();
+			} else {
+				create = false;
+			}
+
+			srcDBInstance.setName(name);
+			srcDBInstance.setServerId(serverId);
+			int portInt = port == null ? dbPort : Integer.parseInt(port);
+			srcDBInstance.setHost(host);
+			srcDBInstance.setPort(portInt);
+			srcDBInstance.setUsername(username);
+			srcDBInstance.setPassword(password);
+			srcDBInstance.setMetaHost(host);
+			srcDBInstance.setMetaPort(portInt);
+			srcDBInstance.setMetaUsername(username);
+			srcDBInstance.setMetaPassword(password);
+
+			if (create) {
+				srcDBInstanceService.create(srcDBInstance);
+			} else {
+				srcDBInstanceService.update(srcDBInstance);
+			}
+
+			map.put("success", true);
+		} catch (MongoException e) {
+			map.put("error", "storage");
+			map.put("success", false);
+		} catch (Exception e) {
+			map.put("error", e.getMessage());
+			map.put("success", false);
+		}
+
+		return GsonUtil.toJson(map);
+	}
+
+	@RequestMapping(value = { "/src-db-instance/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String removePost(String name) {
 		Map<String, Object> map = new HashMap<String, Object>();

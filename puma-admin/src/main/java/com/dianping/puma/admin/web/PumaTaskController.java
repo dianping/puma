@@ -77,23 +77,10 @@ public class PumaTaskController {
 
 	@Autowired
 	SyncTaskService syncTaskService;
-//
-//	@RequestMapping(value = { "/puma-task" })
-//	public ModelAndView view() {
-//		Map<String, Object> map = new HashMap<String, Object>();
-//
-//		List<PumaTask> pumaTaskEntities = pumaTaskService.findAll();
-//
-//		map.put("entities", pumaTaskEntities);
-//		map.put("path", "puma-task");
-//		return new ModelAndView("main/container", map);
-//	}
-	
+
 	@RequestMapping(value = { "/puma-task" })
 	public ModelAndView view() {
 		Map<String, Object> map = new HashMap<String, Object>();
-//		List<PumaTask> pumaTaskEntities = pumaTaskService.findAll();
-//		map.put("entities", pumaTaskEntities);
 		map.put("path", "puma-task");
 		return new ModelAndView("common/main-container", map);
 	}
@@ -110,7 +97,7 @@ public class PumaTaskController {
 		map.put("state", taskStates);
 		return GsonUtil.toJson(map);// map;
 	}
-	
+
 	@RequestMapping(value = { "/puma-task/create" }, method = RequestMethod.GET)
 	public ModelAndView create(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -122,7 +109,7 @@ public class PumaTaskController {
 		map.put("pumaServerEntities", pumaServerEntities);
 		map.put("path", "puma-task");
 		map.put("subPath", "create");
-		return new ModelAndView("main/container", map);
+		return new ModelAndView("common/main-container", map);
 	}
 
 	@RequestMapping(value = { "/puma-task/update/{id}" }, method = RequestMethod.GET)
@@ -145,27 +132,104 @@ public class PumaTaskController {
 			// @TODO: error page.
 		}
 
-		return new ModelAndView("main/container", map);
+		return new ModelAndView("common/main-container", map);
 	}
 
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = {
-			"/puma-task/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = { "/puma-task/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(
-			String name,
-			String srcDBInstanceName,
-			String pumaServerName,
-			String binlogFile,
-			Long binlogPosition,
-			int preservedDay,
-			String acceptedDatabase[],
-			String acceptedTable[]) {
+	public String createPost(String name, String srcDBInstanceName, String pumaServerName, String binlogFile,
+			Long binlogPosition, int preservedDay, String acceptedDatabase[], String acceptedTable[]) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
 			ActionOperation operation = null;
+			Map<String, AcceptedTables> acceptedDataInfos = getAcceptedDatas(acceptedDatabase, acceptedTable);
+			PumaTask pumaTask = pumaTaskService.find(name);
+			if (pumaTask == null) {
+				pumaTask = new PumaTask();
+				operation = ActionOperation.CREATE;
+			} else {
+				throw new Exception("duplicate name.");
+			}
+
+			PumaTaskOperationEvent event = new PumaTaskOperationEvent();
+			event.setOriPumaTask(pumaTask);
+
+			pumaTask.setName(name);
+			pumaTask.setSrcDBInstanceName(srcDBInstanceName);
+			pumaTask.setPumaServerName(pumaServerName);
+			BinlogInfo binlogInfo = new BinlogInfo();
+			binlogInfo.setBinlogFile(binlogFile);
+			binlogInfo.setBinlogPosition(binlogPosition);
+			pumaTask.setBinlogInfo(binlogInfo);
+			pumaTask.setPreservedDay(preservedDay);
+			Type type = new TypeToken<HashMap<String, AcceptedTables>>() {
+			}.getType();
+			pumaTask.setAcceptedDataInfos(acceptedDataInfos);
+
+			// Accepted schema and tables.
+			TableSet tableSet = new TableSet();
+			for (int i = 0; i != acceptedDatabase.length && i != acceptedTable.length; ++i) {
+				String tables[] = org.apache.commons.lang.StringUtils.split(acceptedTable[i], "&");
+				if (tables != null) {
+					for (int j = 0; j != tables.length; ++j) {
+						tableSet.add(new Table(acceptedDatabase[i], tables[j]));
+					}
+				}
+			}
+			pumaTask.setTableSet(tableSet);
+			// Save puma task state to persistent storage.
+			if (operation == ActionOperation.CREATE) {
+				pumaTaskService.create(pumaTask);
+			} else {
+				pumaTaskService.update(pumaTask);
+			}
+
+			// Add puma task state to the state container.
+			PumaTaskState taskState = new PumaTaskState();
+			taskState.setTaskName(pumaTask.getName());
+			taskState.setStatus(Status.PREPARING);
+			pumaTaskStateService.add(taskState);
+
+			// Publish puma task operation event to puma server.
+			// this.pumaTaskOperationReporter.report(pumaServerName, name,
+			// operation);
+			event.setServerName(pumaServerName);
+			event.setTaskName(name);
+			event.setPumaTask(pumaTask);
+			event.setOperation(operation);
+			pumaTaskOperationReporter.report(event);
+
+			map.put("success", true);
+		} catch (MongoException e) {
+			map.put("error", "storage");
+			map.put("success", false);
+		} catch (SendFailedException e) {
+			map.put("error", "notify");
+			map.put("success", false);
+		} catch (Exception e) {
+			map.put("error", e.getMessage());
+			map.put("success", false);
+		}
+
+		map.put("success", true);
+
+		return GsonUtil.toJson(map);
+	}
+
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = { "/puma-task/update/{id}" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String updatePost(@PathVariable long id, String name, String srcDBInstanceName, String pumaServerName,
+			String binlogFile, Long binlogPosition, int preservedDay, String acceptedDatabase[], String acceptedTable[]) {
+
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			ActionOperation operation = null;
+
 			Map<String,AcceptedTables> acceptedDataInfos = getAcceptedDatas(acceptedDatabase,acceptedTable);
 			PumaTask oriPumaTask = pumaTaskService.find(name);
 			if (oriPumaTask == null) {
@@ -177,11 +241,12 @@ public class PumaTaskController {
 				}else if((acceptedDataInfos != null && !acceptedDataInfos.equals(oriPumaTask.getAcceptedDataInfos()))
 						||(acceptedDataInfos == null && oriPumaTask.getAcceptedDataInfos() != null)){
 					operation = ActionOperation.FILTER;
-				}else{
+				} else {
 					operation = ActionOperation.CHANGE;
-				}/* else if(pumaTask.getPreservedDay()!= preservedDay){
-					operation = ActionOperation.DEFAULT;
-				}*/
+				}/*
+				 * else if(pumaTask.getPreservedDay()!= preservedDay){ operation
+				 * = ActionOperation.DEFAULT; }
+				 */
 			}
 			PumaTaskOperationEvent event = new PumaTaskOperationEvent();
 			event.setOriPumaTask(oriPumaTask);
@@ -198,7 +263,6 @@ public class PumaTaskController {
 			pumaTask.setPreservedDay(preservedDay);  
 			pumaTask.setAcceptedDataInfos(acceptedDataInfos);
 
-			// Accepted schema and tables.
 			TableSet tableSet = new TableSet();
 			for (int i = 0; i != acceptedDatabase.length && i != acceptedTable.length; ++i) {
 				String tables[] = org.apache.commons.lang.StringUtils.split(acceptedTable[i], "&");
@@ -246,7 +310,7 @@ public class PumaTaskController {
 
 		return GsonUtil.toJson(map);
 	}
-	
+
 	@RequestMapping(value = { "/puma-task/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String removePost(String name) {
@@ -260,7 +324,8 @@ public class PumaTaskController {
 			pumaTaskStateService.remove(name);
 
 			// Publish puma task operation event to puma server.
-			this.pumaTaskOperationReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(), ActionOperation.REMOVE);
+			this.pumaTaskOperationReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(),
+					ActionOperation.REMOVE);
 
 			map.put("success", true);
 		} catch (MongoException e) {
@@ -316,7 +381,8 @@ public class PumaTaskController {
 			taskState.setStatus(Status.PREPARING);
 
 			// Publish puma task controller event to puma server.
-			this.pumaTaskControllerReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(), ActionController.RESUME);
+			this.pumaTaskControllerReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(),
+					ActionController.RESUME);
 
 			map.put("success", true);
 		} catch (MongoException e) {
@@ -341,7 +407,8 @@ public class PumaTaskController {
 			PumaTaskState taskState = pumaTaskStateService.find(name);
 			taskState.setStatus(Status.STOPPING);
 
-			pumaTaskControllerReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(), com.dianping.puma.core.constant.ActionController.PAUSE);
+			pumaTaskControllerReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(),
+					com.dianping.puma.core.constant.ActionController.PAUSE);
 
 			map.put("success", true);
 		} catch (MongoException e) {
@@ -354,25 +421,23 @@ public class PumaTaskController {
 
 		return GsonUtil.toJson(map);
 	}
-	
-	private Map<String,AcceptedTables> getAcceptedDatas(String []acceptedDatabase,String []acceptedTable)
-	{
-		if(acceptedDatabase == null&&acceptedTable == null){
+
+	private Map<String, AcceptedTables> getAcceptedDatas(String[] acceptedDatabase, String[] acceptedTable) {
+		if (acceptedDatabase == null && acceptedTable == null) {
 			return null;
 		}
-		if(acceptedDatabase.length > 0&&acceptedTable.length > 0&&acceptedDatabase.length==acceptedTable.length)
-		{
-			Map<String,AcceptedTables> acceptedDataInfos = new HashMap<String,AcceptedTables>();
+		if (acceptedDatabase.length > 0 && acceptedTable.length > 0 && acceptedDatabase.length == acceptedTable.length) {
+			Map<String, AcceptedTables> acceptedDataInfos = new HashMap<String, AcceptedTables>();
 			int index = 0;
-			for(String database:acceptedDatabase){
-				if(StringUtils.isBlank(database)){
+			for (String database : acceptedDatabase) {
+				if (StringUtils.isBlank(database)) {
 					continue;
 				}
 				AcceptedTables acceptedTablses = new AcceptedTables();
 				String acceptedTbls[] = acceptedTable[index++].split("&");
 				List<String> tblList = new ArrayList<String>();
-				for(String tbl :acceptedTbls){
-					if(StringUtils.isNotBlank(tbl)){
+				for (String tbl : acceptedTbls) {
+					if (StringUtils.isNotBlank(tbl)) {
 						tblList.add(tbl);
 					}
 				}

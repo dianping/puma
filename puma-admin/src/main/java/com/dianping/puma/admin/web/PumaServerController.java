@@ -43,21 +43,9 @@ public class PumaServerController {
 	@Value("8080")
 	Integer serverPort;
 
-	// @RequestMapping(value = { "/puma-server" })
-	// public ModelAndView view(HttpServletRequest request, HttpServletResponse
-	// response) {
-	// Map<String, Object> map = new HashMap<String, Object>();
-	// List<PumaServer> pumaServerEntities = pumaServerService.findAll();
-	// map.put("entities", pumaServerEntities);
-	// map.put("path", "puma-server");
-	// return new ModelAndView("main/container", map);
-	// }
-
 	@RequestMapping(value = { "/puma-server" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		// List<PumaServer> pumaServerEntities = pumaServerService.findAll();
-		// map.put("entities", pumaServerEntities);
 		map.put("path", "puma-server");
 		return new ModelAndView("common/main-container", map);
 	}
@@ -82,14 +70,6 @@ public class PumaServerController {
 		return new ModelAndView("common/main-container", map);
 	}
 
-	// @RequestMapping(value = { "/puma-server/create" })
-	// public ModelAndView create(HttpServletRequest request,
-	// HttpServletResponse response) {
-	// Map<String, Object> map = new HashMap<String, Object>();
-	// map.put("path", "puma-server");
-	// map.put("subPath", "create");
-	// return new ModelAndView("main/container", map);
-	// }
 
 	@RequestMapping(value = { "/puma-server/update/{id}" })
 	public ModelAndView update(@PathVariable long id) {
@@ -129,18 +109,47 @@ public class PumaServerController {
 				operation = ActionOperation.CREATE;
 				pumaServer = new PumaServer();
 			} else {
-				operation = ActionOperation.UPDATE;
+				throw new Exception("duplicate name.");
 			}
-
-			// Split host and port.
-			// String[] hostAndPort = ip.split(":");
-			// String host = hostAndPort[0];
-			// Integer port = hostAndPort.length == 1 ? serverPort :
-			// Integer.parseInt(hostAndPort[1]);
 
 			pumaServer.setName(name);
 			pumaServer.setHost(host);
-			pumaServer.setPort(Integer.parseInt(port));
+			pumaServer.setPort(port == null ? serverPort : Integer.parseInt(port));
+
+			if (operation == ActionOperation.CREATE) {
+				pumaServerService.create(pumaServer);
+			}
+			map.put("success", true);
+		} catch (MongoException e) {
+			map.put("error", "storage");
+			map.put("success", false);
+		} catch (Exception e) {
+			map.put("error", e.getMessage());
+			map.put("success", false);
+		}
+
+		return GsonUtil.toJson(map);
+	}
+
+	@RequestMapping(value = { "/puma-server/update/{id}" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String updatePost(@PathVariable long id, String name, String host, String port) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			ActionOperation operation;
+
+			PumaServer pumaServer = pumaServerService.find(id);
+			if (pumaServer == null) {
+				operation = ActionOperation.CREATE;
+				pumaServer = new PumaServer();
+			} else {
+				operation = ActionOperation.UPDATE;
+			}
+
+			pumaServer.setName(name);
+			pumaServer.setHost(host);
+			pumaServer.setPort(port == null ? serverPort : Integer.parseInt(port));
 
 			if (operation == ActionOperation.CREATE) {
 				pumaServerService.create(pumaServer);

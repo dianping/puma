@@ -41,29 +41,32 @@ public class DstDBInstanceController {
 	@Value("3306")
 	Integer dbPort;
 
-//	@RequestMapping(value = { "/dst-db-instance" })
-//	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
-//		Map<String, Object> map = new HashMap<String, Object>();
-//
-//		List<DstDBInstance> dstDBInstanceEntities = dstDBInstanceService.findAll();
-//
-//		map.put("entities", dstDBInstanceEntities);
-//		map.put("path", "dst-db-instance");
-//		return new ModelAndView("main/container", map);
-//	}
+	// @RequestMapping(value = { "/dst-db-instance" })
+	// public ModelAndView view(HttpServletRequest request, HttpServletResponse
+	// response) {
+	// Map<String, Object> map = new HashMap<String, Object>();
+	//
+	// List<DstDBInstance> dstDBInstanceEntities =
+	// dstDBInstanceService.findAll();
+	//
+	// map.put("entities", dstDBInstanceEntities);
+	// map.put("path", "dst-db-instance");
+	// return new ModelAndView("main/container", map);
+	// }
 
 	@RequestMapping(value = { "/dst-db-instance" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
-//		List<DstDBInstance> dstDBInstanceEntities = dstDBInstanceService.findAll();
-//		map.put("entities", dstDBInstanceEntities);
+		// List<DstDBInstance> dstDBInstanceEntities =
+		// dstDBInstanceService.findAll();
+		// map.put("entities", dstDBInstanceEntities);
 		map.put("path", "dst-db-instance");
 		return new ModelAndView("common/main-container", map);
 	}
 
-	@RequestMapping(value = { "/dst-db-instance/list" },method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = { "/dst-db-instance/list" }, method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String list(int page,int pageSize) {
+	public String list(int page, int pageSize) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		long count = dstDBInstanceService.count();
 		List<DstDBInstance> dstDBInstanceEntities = dstDBInstanceService.findByPage(page, pageSize);
@@ -71,13 +74,13 @@ public class DstDBInstanceController {
 		map.put("list", dstDBInstanceEntities);
 		return GsonUtil.toJson(map);
 	}
-	
+
 	@RequestMapping(value = { "/dst-db-instance/create" })
 	public ModelAndView create(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("path", "dst-db-instance");
 		map.put("subPath", "create");
-		return new ModelAndView("main/container", map);
+		return new ModelAndView("common/main-container", map);
 	}
 
 	@RequestMapping(value = { "/dst-db-instance/update/{id}" })
@@ -102,12 +105,12 @@ public class DstDBInstanceController {
 			// @TODO: error page.
 		}
 
-		return new ModelAndView("main/container", map);
+		return new ModelAndView("common/main-container", map);
 	}
 
 	@RequestMapping(value = { "/dst-db-instance/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(String name, Long serverId, String ip, String username, String password) {
+	public String createPost(String name, Long serverId, String host, String port, String username, String password) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
@@ -119,23 +122,70 @@ public class DstDBInstanceController {
 				operation = ActionOperation.CREATE;
 				dstDBInstance = new DstDBInstance();
 			} else {
+				throw new Exception("duplicate name.");
+			}
+
+			dstDBInstance.setName(name);
+			dstDBInstance.setServerId(serverId);
+
+			int portInt = port == null ? dbPort : Integer.parseInt(port);
+
+			dstDBInstance.setHost(host);
+			dstDBInstance.setPort(portInt);
+			dstDBInstance.setUsername(username);
+			dstDBInstance.setPassword(password);
+			dstDBInstance.setMetaHost(host);
+			dstDBInstance.setMetaPort(portInt);
+			dstDBInstance.setMetaUsername(username);
+			dstDBInstance.setMetaPassword(password);
+
+			if (operation == ActionOperation.CREATE) {
+				dstDBInstanceService.create(dstDBInstance);
+			} else {
+				dstDBInstanceService.update(dstDBInstance);
+			}
+
+			map.put("success", true);
+		} catch (MongoException e) {
+			map.put("error", "storage");
+			map.put("success", false);
+		} catch (Exception e) {
+			map.put("error", e.getMessage());
+			map.put("success", false);
+		}
+
+		return GsonUtil.toJson(map);
+	}
+
+	@RequestMapping(value = { "/dst-db-instance/update/{id}" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String updatePost(@PathVariable long id, String name, Long serverId, String host, String port,
+			String username, String password) {
+
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			ActionOperation operation;
+
+			DstDBInstance dstDBInstance = dstDBInstanceService.find(id);
+			if (dstDBInstance == null) {
+				operation = ActionOperation.CREATE;
+				dstDBInstance = new DstDBInstance();
+			} else {
 				operation = ActionOperation.UPDATE;
 			}
 
 			dstDBInstance.setName(name);
 			dstDBInstance.setServerId(serverId);
 
-			// Split host and port.
-			String[] hostAndPort = ip.split(":");
-			String host = hostAndPort[0];
-			Integer port = hostAndPort.length == 1 ? dbPort : Integer.parseInt(hostAndPort[1]);
+			int portInt = port == null ? dbPort : Integer.parseInt(port);
 
 			dstDBInstance.setHost(host);
-			dstDBInstance.setPort(port);
+			dstDBInstance.setPort(portInt);
 			dstDBInstance.setUsername(username);
 			dstDBInstance.setPassword(password);
 			dstDBInstance.setMetaHost(host);
-			dstDBInstance.setMetaPort(port);
+			dstDBInstance.setMetaPort(portInt);
 			dstDBInstance.setMetaUsername(username);
 			dstDBInstance.setMetaPassword(password);
 

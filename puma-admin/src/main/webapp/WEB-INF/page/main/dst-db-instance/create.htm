@@ -11,7 +11,7 @@
 		<li><i class="ace-icon fa fa-home home-icon"></i> <a href="#">主页</a>
 		</li>
 
-		<li class="active">数据处理服务器编辑</li>
+		<li class="active">目标数据实例编辑</li>
 	</ul>
 	<!-- /.breadcrumb -->
 </div>
@@ -24,7 +24,7 @@
 		<div class="row">
 			<div class="col-xs-12">
 				<div class="row">
-					<div class="col-xs-12" ng-app="formApp" ng-controller="formCtrl" ng-init="backUrl = '${rc.contextPath}/puma-server'">
+					<div class="col-xs-12" ng-app="formApp" ng-controller="formCtrl" ng-init="backUrl = '${rc.contextPath}/dst-db-instance/'">
 						<form class="form-horizontal" role="form">
 							<div class="puma-form-group-start"></div>
 							<!-- #section:elements.form -->
@@ -38,7 +38,20 @@
 										#if(${entity}) ng-init="entity.name='${entity.name}'" readonly="readonly" #end/>
 								</div>
 							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label no-padding-right"
+									for="form-field-1"> SERVER ID </label>
 
+								<div class="col-sm-9">
+									<input type="text" id="form-field-1"
+										placeholder="SERVER ID"
+										class="col-xs-10 col-sm-5" ng-model="entity.serverId"
+										#if(${entity}) ng-init="entity.serverId ='${entity.serverId}'"
+										#end
+                         				#if(${lock}) readonly="readonly"
+										#end />
+								</div>
+							</div>
 							<div class="form-group">
 								<label class="col-sm-3 control-label no-padding-right"
 									for="form-field-1"> 服务器Host </label>
@@ -62,6 +75,34 @@
 										placeholder="服务器Port"
 										class="col-xs-10 col-sm-5" ng-model="entity.port"
 										#if(${entity}) ng-init="entity.port ='${entity.port}'"
+										#end
+                         				#if(${lock}) readonly="readonly"
+										#end />
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label no-padding-right"
+									for="form-field-1"> 用户名 </label>
+
+								<div class="col-sm-9">
+									<input type="text" id="form-field-1"
+										placeholder="用户名"
+										class="col-xs-10 col-sm-5" ng-model="entity.username"
+										#if(${entity}) ng-init="entity.username ='${entity.username}'"
+										#end
+                         				#if(${lock}) readonly="readonly"
+										#end />
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label no-padding-right"
+									for="form-field-1"> 密码 </label>
+
+								<div class="col-sm-9">
+									<input type="password" id="form-field-1"
+										placeholder="密码"
+										class="col-xs-10 col-sm-5" ng-model="entity.password"
+										#if(${entity}) ng-init="entity.password ='${entity.password}'"
 										#end
                          				#if(${lock}) readonly="readonly"
 										#end />

@@ -14,6 +14,8 @@ import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.state.BaseSyncTaskState;
 import com.dianping.puma.core.monitor.NotifyService;
+import com.dianping.puma.syncserver.job.binlog.BinlogInfoManager;
+import com.dianping.puma.syncserver.job.executor.exception.GException;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -30,14 +32,11 @@ import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.event.DdlEvent;
-import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.core.util.DefaultPullStrategy;
-import com.dianping.puma.syncserver.job.executor.exception.DdlRenameException;
 import com.dianping.puma.syncserver.job.executor.failhandler.HandleContext;
 import com.dianping.puma.syncserver.job.executor.failhandler.HandleResult;
 import com.dianping.puma.syncserver.job.executor.failhandler.Handler;
@@ -75,7 +74,9 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 
 	private BinlogInfoHolder binlogInfoHolder;
 
-	private NotifyService notifyService;
+	private BinlogInfoManager binlogInfoManager;
+
+	public AbstractTaskExecutor() {}
 
 	public AbstractTaskExecutor(T abstractTask, String pumaServerHost, int pumaServerPort, String target,
 			DstDBInstance dstDBInstance) {
@@ -85,25 +86,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 		this.target = target;
 
 		this.dstDBInstance = dstDBInstance;
-
-		// this.status = new TaskExecutorStatus();
-		// status.setTaskName(abstractTask.getName());
-		// status.setSyncType(abstractTask.getSyncType());
-		// status.setTaskId(abstractTask.getId());
-		// status.setType(abstractTask.getType());
-		// BinlogInfo startedBinlogInfo = abstractTask.getBinlogInfo();
 	}
 
 	public BinlogInfoHolder getBinlogInfoHolder() {
 		return binlogInfoHolder;
-	}
-
-	public void setNotifyService(NotifyService notifyService) {
-		this.notifyService = notifyService;
-	}
-
-	public NotifyService getNotifyService() {
-		return notifyService;
 	}
 
 	public void setBinlogInfoHolder(BinlogInfoHolder binlogInfoHolder) {
@@ -117,11 +103,12 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 	 *            事件
 	 * @throws Exception
 	 */
-	protected abstract void execute(ChangedEvent event) throws SQLException, DdlRenameException;
+	protected abstract void execute(ChangedEvent event) throws GException;
 
 	/**
 	 * 更新sql thread的binlog信息，和保存binlog信息到数据库
 	 */
+	/*
 	protected void binlogOfSqlThreadChanged(ChangedEvent event) {
 		// 动态更新binlog和binlogPos
 		if (event != null) {
@@ -135,7 +122,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 			// 保存binlog信息到数据库
 			saveBinlogToDB(binlogInfo);
 		}
-	}
+	}*/
 
 	protected void binlogOfIOThreadChanged(ChangedEvent event) {
 		// 动态更新binlog和binlogPos
@@ -356,8 +343,6 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 			/** 记录一个收到多少个commit事件 */
 			private int commitBinlogCount = 0;
 
-			private int eventCount = 0;
-
 			/** 对于PumaClient记录的binlog，需要在一开始skip */
 			private boolean skipToNextPos = startedBinlogInfo.isSkipToNextPos();
 
@@ -435,6 +420,23 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 
 			@Override
 			public void onEvent(ChangedEvent event) throws Exception {
+				if (skipToNextPos) {
+					LOG.info("Skip to next position.");
+					skipToNextPos = false;
+				} else {
+					execute(event);
+				}
+
+				// Speed control.
+				if (sleepTime > 0) {
+					try {
+						TimeUnit.MILLISECONDS.sleep(sleepTime);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+				}
+
+				/*
 				// LOG.info("********************Received " + event);
 				if (!skipToNextPos) {
 
@@ -503,7 +505,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 					} catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
 					}
-				}
+				}*/
 			}
 
 			@Override
@@ -638,5 +640,21 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 
 	public void setTaskState(S state) {
 		this.state = state;
+	}
+
+	public void setPumaServerHost(String pumaServerHost) {
+		this.pumaServerHost = pumaServerHost;
+	}
+
+	public void setPumaServerPort(int pumaServerPort) {
+		this.pumaServerPort = pumaServerPort;
+	}
+
+	public void setTarget(String target) {
+		this.target = target;
+	}
+
+	public void setBinlogInfoManager(BinlogInfoManager binlogInfoManager) {
+		this.binlogInfoManager = binlogInfoManager;
 	}
 }

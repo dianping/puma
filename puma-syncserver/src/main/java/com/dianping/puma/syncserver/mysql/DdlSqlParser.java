@@ -3,7 +3,6 @@ package com.dianping.puma.syncserver.mysql;
 import org.apache.commons.lang.StringUtils;
 
 import com.dianping.puma.core.event.DdlEvent;
-import com.dianping.puma.syncserver.job.executor.exception.DdlRenameException;
 
 public class DdlSqlParser {
 
@@ -18,15 +17,14 @@ public class DdlSqlParser {
 
 	private static final String INFIX_RENAME = " RENAME ";
 
-	public static String getAlterTableSql(DdlEvent event, String dbMappingName, String tblMappingName)
-			throws DdlRenameException {
+	public static String getAlterTableSql(DdlEvent event, String dbMappingName, String tblMappingName) {
 		String strSql = StringUtils.normalizeSpace(event.getSql());
 		if (StringUtils.isBlank(dbMappingName) || StringUtils.isBlank(tblMappingName)) {
 			return null;
 		}
 		if (StringUtils.containsIgnoreCase(strSql, INFIX_RENAME)) {
 			// 停止任務
-			throw new DdlRenameException("Rename error : ddl sql = " + strSql);
+			//throw new DdlRenameException("Rename error : ddl sql = " + strSql);
 		}
 		int tblPosition = StringUtils.indexOfIgnoreCase(strSql, PREFIX_TB) + PREFIX_TB.length();
 		if (tblPosition >= PREFIX_TB.length()) {
@@ -46,10 +44,9 @@ public class DdlSqlParser {
 		return null;
 	}
 
-	public static String getRenameTableSql(DdlEvent event, String dbMappingName, String tblMappingName)
-			throws DdlRenameException {
+	public static String getRenameTableSql(DdlEvent event, String dbMappingName, String tblMappingName) {
 		if (!StringUtils.isBlank(dbMappingName) && !StringUtils.isBlank(tblMappingName)) {
-			throw new DdlRenameException("Rename error : ddl sql = " + event.getSql());
+			//throw new Exception("Rename error : ddl sql = " + event.getSql());
 		}
 		return null;
 	}

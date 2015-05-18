@@ -9,6 +9,12 @@ import com.dianping.puma.core.model.state.SyncTaskState;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.service.DstDBInstanceService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
+import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
+import com.dianping.puma.syncserver.job.binlog.BinlogInfoManager;
+import com.dianping.puma.syncserver.job.binlog.LocalFileBinlogInfoManager;
+import com.dianping.puma.syncserver.job.load.PooledLoader;
+import com.dianping.puma.syncserver.job.transform.DefaultTransformer;
+import com.dianping.puma.syncserver.job.transform.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,105 +25,129 @@ import com.dianping.puma.syncserver.job.executor.SyncTaskExecutor;
 
 @Service("syncTaskExecutorStrategy")
 public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, SyncTaskExecutor> {
-	/*
+
 	@Autowired
-    private PumaServerConfigService pumaServerConfigService;
+	private PumaServerService pumaServerService;
 
-    @Override
-    public SyncTaskExecutor build(SyncTask task) {
-        //根据Task创建TaskExecutor
-        String srcMysqlName = task.getSrcMysqlName();
-        PumaServerConfig pumaServerConfig = pumaServerConfigService.find(srcMysqlName);
-        if(pumaServerConfig==null){
-            throw new IllegalArgumentException("PumaServer is null, maybe PumaServer with srcMysqlName["+srcMysqlName+"] is not setting.");
-        }
-        String pumaServerHostAndPort = pumaServerConfig.getHosts().get(0);
-        String pumaServerHost = pumaServerHostAndPort;
-        int pumaServerPort = 80;
-        if (StringUtils.contains(pumaServerHostAndPort, ':')) {
-            String[] splits = pumaServerHostAndPort.split(":");
-            pumaServerHost = splits[0];
-            pumaServerPort = Integer.parseInt(splits[1]);
-        }
-        String target = pumaServerConfig.getTarget();
+	@Autowired
+	private PumaTaskService pumaTaskService;
 
-        SyncTaskExecutor excutor = new SyncTaskExecutor(task, pumaServerHost, pumaServerPort, target);
-        return excutor;
-    }
-	*/
-    @Autowired
-    private PumaServerService pumaServerService;
-    
-    @Autowired
-    private PumaTaskService pumaTaskService;
+	@Autowired
+	SrcDBInstanceService srcDBInstanceService;
 
-    @Autowired
-    SrcDBInstanceService srcDBInstanceService;
+	@Autowired
+	DstDBInstanceService dstDBInstanceService;
 
-    @Autowired
-    DstDBInstanceService dstDBInstanceService;
+	@Autowired
+	BinlogInfoHolder binlogInfoHolder;
 
-    @Autowired
-    BinlogInfoHolder binlogInfoHolder;
-    
-    @Autowired
-    NotifyService notifyService;
-    
-    @Override
-    public SyncTaskExecutor build(SyncTask task) {
-        //根据Task创建TaskExecutor
+	@Autowired
+	NotifyService notifyService;
 
-        String pumaTaskName = task.getPumaTaskName();
-        //String srcDBInstanceId = task.getSrcDBInstanceId();
-        if(pumaTaskName == null){
-            throw new IllegalArgumentException("SyncTask srcDBInstanceId  is null, maybe SyncTask with srcDBInstanceId["+pumaTaskName+"] is not setting.");
-        }
-        PumaTask pumaTask = pumaTaskService.find(pumaTaskName);
-        
-        if(pumaTask == null){
-            throw new IllegalArgumentException("PumaTask is null, maybe PumaTask with srcDBInstanceId["+pumaTaskName+"] is not setting.");
-        }
-        PumaServer pumaServer = pumaServerService.find(pumaTask.getPumaServerName());
-        if(pumaServer == null){
-            throw new IllegalArgumentException("PumaServer is null, maybe PumaServer with PumaServerId["+pumaTask.getPumaServerName()+"] is not setting.");
-        }
-        
-        String pumaServerHost = pumaServer.getHost();
-        int pumaServerPort = pumaServer.getPort();
-        
-        String target = pumaTask.getName();
+	@Override
+	public SyncTaskExecutor build(SyncTask task) {
+		SyncTaskExecutor executor = new SyncTaskExecutor();
 
-        SrcDBInstance srcDBInstance = srcDBInstanceService.find(pumaTask.getSrcDBInstanceName());
-        task.setPumaClientServerId(srcDBInstance.getServerId());
+		String name = task.getName();
 
-        DstDBInstance dstDBInstance = dstDBInstanceService.find(task.getDstDBInstanceName());
+		LocalFileBinlogInfoManager binlogInfoManager = new LocalFileBinlogInfoManager();
 
-        SyncTaskExecutor executor = new SyncTaskExecutor(task, pumaServerHost, pumaServerPort, target, dstDBInstance);
-        executor.setBinlogInfoHolder(binlogInfoHolder);
-        executor.setNotifyService(notifyService);
+		// Client connection settings.
+		String pumaTaskName = task.getPumaTaskName();
+		PumaTask pumaTask = pumaTaskService.find(pumaTaskName);
+		if (pumaTask == null) {
+			throw new IllegalArgumentException(String.format("Puma task is null in sync task(%s).", name));
+		}
+		executor.setTarget(pumaTask.getName());
+		PumaServer pumaServer = pumaServerService.find(pumaTask.getPumaServerName());
+		if (pumaServer == null) {
+			throw new IllegalArgumentException(String.format("Puma server is null in sync task(%s).", name));
+		}
+		executor.setPumaServerHost(pumaServer.getHost());
+		executor.setPumaServerPort(pumaServer.getPort());
+		executor.setBinlogInfoManager(binlogInfoManager);
 
-        SyncTaskState syncTaskState = new SyncTaskState();
-        syncTaskState.setTaskName(task.getName());
-        syncTaskState.setStatus(Status.PREPARING);
+		// Transformer.
+		DefaultTransformer transformer = new DefaultTransformer();
+		transformer.setName(name);
+		MysqlMapping mysqlMapping = task.getMysqlMapping();
+		transformer.setMysqlMapping(mysqlMapping);
+		executor.setTransformer(transformer);
 
-        BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(task.getName());
-        if (binlogInfo == null) {
-            binlogInfo = task.getBinlogInfo();
-        }
-        syncTaskState.setBinlogInfo(binlogInfo);
+		// Loader.
+		PooledLoader loader = new PooledLoader();
+		loader.setName(name);
+		DstDBInstance dstDBInstance = dstDBInstanceService.find(task.getDstDBInstanceName());
+		if (dstDBInstance == null) {
+			throw new IllegalArgumentException(String.format("Destination db instance is null in sync task(%s).", name));
+		}
+		loader.setHost(dstDBInstance.getHost());
+		loader.setUsername(dstDBInstance.getUsername());
+		loader.setPassword(dstDBInstance.getPassword());
+		loader.setBinlogInfoManager(binlogInfoManager);
+		executor.setLoader(loader);
 
-        executor.setTaskState(syncTaskState);
+		return executor;
 
-        return executor;
-    }
+		/*
+		//根据Task创建TaskExecutor
 
-    @Override
-    public Type getType() {
-        return Type.SYNC;
-    }
-    
-    @Override
-    public SyncType getSyncType() {
-        return SyncType.SYNC;
-    }
+		String pumaTaskName = task.getPumaTaskName();
+		//String srcDBInstanceId = task.getSrcDBInstanceId();
+		if (pumaTaskName == null) {
+			throw new IllegalArgumentException(
+					"SyncTask srcDBInstanceId  is null, maybe SyncTask with srcDBInstanceId[" + pumaTaskName
+							+ "] is not setting.");
+		}
+		PumaTask pumaTask = pumaTaskService.find(pumaTaskName);
+
+		if (pumaTask == null) {
+			throw new IllegalArgumentException(
+					"PumaTask is null, maybe PumaTask with srcDBInstanceId[" + pumaTaskName + "] is not setting.");
+		}
+		PumaServer pumaServer = pumaServerService.find(pumaTask.getPumaServerName());
+		if (pumaServer == null) {
+			throw new IllegalArgumentException(
+					"PumaServer is null, maybe PumaServer with PumaServerId[" + pumaTask.getPumaServerName()
+							+ "] is not setting.");
+		}
+
+		String pumaServerHost = pumaServer.getHost();
+		int pumaServerPort = pumaServer.getPort();
+
+		String target = pumaTask.getName();
+
+		SrcDBInstance srcDBInstance = srcDBInstanceService.find(pumaTask.getSrcDBInstanceName());
+		task.setPumaClientServerId(srcDBInstance.getServerId());
+
+		DstDBInstance dstDBInstance = dstDBInstanceService.find(task.getDstDBInstanceName());
+
+		SyncTaskExecutor executor = new SyncTaskExecutor(task, pumaServerHost, pumaServerPort, target, dstDBInstance);
+		executor.setBinlogInfoHolder(binlogInfoHolder);
+		executor.setNotifyService(notifyService);
+
+		SyncTaskState syncTaskState = new SyncTaskState();
+		syncTaskState.setTaskName(task.getName());
+		syncTaskState.setStatus(Status.PREPARING);
+
+		BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(task.getName());
+		if (binlogInfo == null) {
+			binlogInfo = task.getBinlogInfo();
+		}
+		syncTaskState.setBinlogInfo(binlogInfo);
+
+		executor.setTaskState(syncTaskState);
+
+		return executor;*/
+	}
+
+	@Override
+	public Type getType() {
+		return Type.SYNC;
+	}
+
+	@Override
+	public SyncType getSyncType() {
+		return SyncType.SYNC;
+	}
 }

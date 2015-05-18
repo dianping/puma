@@ -105,7 +105,6 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
 
 		CatchupTaskExecutor executor = new CatchupTaskExecutor(task, pumaServerHost, pumaServerPort, target, syncTaskExecutor, dstDBInstance);
 		executor.setBinlogInfoHolder(binlogInfoHolder);
-		executor.setNotifyService(notifyService);
 
 		CatchupTaskState catchupTaskState = new CatchupTaskState();
 		catchupTaskState.setTaskName(task.getName());

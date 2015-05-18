@@ -2,7 +2,7 @@ package com.dianping.puma.syncserver.job.load;
 
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.monitor.EventMonitor;
-import com.dianping.puma.syncserver.job.BinlogInfoManager;
+import com.dianping.puma.syncserver.job.binlog.BinlogInfoManager;
 import com.dianping.puma.syncserver.job.load.exception.LoadException;
 import com.dianping.puma.syncserver.job.load.model.BatchExecPool;
 import com.dianping.puma.syncserver.job.load.model.BatchRow;

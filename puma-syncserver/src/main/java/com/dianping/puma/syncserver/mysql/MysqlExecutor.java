@@ -11,7 +11,6 @@ import java.util.Map;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
-import com.dianping.puma.syncserver.job.BinlogInfoManager;
 import com.dianping.puma.syncserver.job.load.Loader;
 import com.dianping.puma.syncserver.job.load.PooledLoader;
 import com.dianping.puma.syncserver.job.transform.DefaultTransformer;
@@ -32,7 +31,6 @@ import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.util.SimpleDdlParser;
 import com.dianping.puma.core.util.SimpleDdlParser.DdlResult;
-import com.dianping.puma.syncserver.job.executor.exception.DdlRenameException;
 import com.dianping.puma.syncserver.util.SyncConfigPatternParser;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -464,7 +462,7 @@ public class MysqlExecutor {
 		return null;
 	}
 
-	public String convertDdlEventSql_(DdlEvent event) throws DdlRenameException {
+	public String convertDdlEventSql_(DdlEvent event) {
 		String strSql = StringUtils.normalizeSpace(event.getSql());
 		DdlResult ddlResult = SimpleDdlParser.parseNames(strSql);
 		if (ddlResult == null) {
@@ -476,7 +474,7 @@ public class MysqlExecutor {
 				.getDatabase(), event.getTable()));
 	}
 
-	public String convertDdlEventSql(DdlEvent event) throws DdlRenameException {
+	public String convertDdlEventSql(DdlEvent event) {
 		if (event.getEventType() == null) {
 			return convertDdlEventSql_(event);
 		}
@@ -509,7 +507,7 @@ public class MysqlExecutor {
 		return null;
 	}
 
-	public String convertAlterEventSql(DdlEvent event) throws DdlRenameException {
+	public String convertAlterEventSql(DdlEvent event) {
 		switch (event.getEventSubType()) {
 		case DDL_ALTER_DATABASE:
 			// ignore

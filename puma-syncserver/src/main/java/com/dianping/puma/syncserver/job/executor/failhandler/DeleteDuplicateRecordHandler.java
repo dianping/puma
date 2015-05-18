@@ -13,8 +13,6 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
 import com.dianping.puma.core.monitor.NotifyService;
-import com.dianping.puma.core.sync.model.task.Task;
-import com.dianping.puma.syncserver.job.executor.exception.DdlRenameException;
 import com.dianping.puma.syncserver.mysql.MysqlExecutor;
 
 public class DeleteDuplicateRecordHandler implements Handler {

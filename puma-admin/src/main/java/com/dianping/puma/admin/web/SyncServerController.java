@@ -95,6 +95,7 @@ public class SyncServerController {
 		return new ModelAndView("common/main-container", map);
 	}
 
+
 	@RequestMapping(value = { "/sync-server/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String createPost(@RequestBody SyncServerDto syncServerDto) {
@@ -132,9 +133,19 @@ public class SyncServerController {
 				operation = ActionOperation.CREATE;
 				syncServer = new SyncServer();
 			} else {
-				operation = ActionOperation.UPDATE;
+				throw new Exception("duplicate name.");
+			}
+			syncServer.setName(name);
+			syncServer.setHost(host);
+			syncServer.setPort(port == null ? serverPort : Integer.parseInt(port));
+
+			if (operation == ActionOperation.CREATE) {
+				syncServerService.create(syncServer);
+			} else {
+				syncServerService.update(syncServer);
 			}
 			SyncServerMapper.convertToSyncServer(syncServer, syncServerDto);
+
 			if (operation == ActionOperation.CREATE) {
 				syncServerService.create(syncServer);
 			} else {
@@ -151,7 +162,8 @@ public class SyncServerController {
 
 		return GsonUtil.toJson(map);
 	}
-
+	
+	
 	@RequestMapping(value = { "/sync-server/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String removePost(String name) {

@@ -133,6 +133,56 @@ public class DstDBInstanceController {
 				operation = ActionOperation.CREATE;
 				dstDBInstance = new DstDBInstance();
 			} else {
+				throw new Exception("duplicate name.");
+			}
+
+			dstDBInstance.setName(name);
+			dstDBInstance.setServerId(serverId);
+
+			int portInt = port == null ? dbPort : Integer.parseInt(port);
+
+			dstDBInstance.setHost(host);
+			dstDBInstance.setPort(portInt);
+			dstDBInstance.setUsername(username);
+			dstDBInstance.setPassword(password);
+			dstDBInstance.setMetaHost(host);
+			dstDBInstance.setMetaPort(portInt);
+			dstDBInstance.setMetaUsername(username);
+			dstDBInstance.setMetaPassword(password);
+
+			if (operation == ActionOperation.CREATE) {
+				dstDBInstanceService.create(dstDBInstance);
+			} else {
+				dstDBInstanceService.update(dstDBInstance);
+			}
+
+			map.put("success", true);
+		} catch (MongoException e) {
+			map.put("error", "storage");
+			map.put("success", false);
+		} catch (Exception e) {
+			map.put("error", e.getMessage());
+			map.put("success", false);
+		}
+
+		return GsonUtil.toJson(map);
+	}
+
+	@RequestMapping(value = { "/dst-db-instance/update/{id}" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@ResponseBody
+	public String updatePost(@PathVariable long id, String name, Long serverId, String host, String port,
+			String username, String password) {
+
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			ActionOperation operation;
+
+			DstDBInstance dstDBInstance = dstDBInstanceService.find(id);
+			if (dstDBInstance == null) {
+				operation = ActionOperation.CREATE;
+				dstDBInstance = new DstDBInstance();
+			} else {
 				operation = ActionOperation.UPDATE;
 			}
 			DBInstanceMapper.convertToDBInstance(dstDBInstance, dstDBInstanceDto);

@@ -338,5 +338,4 @@ public class PumaTaskController {
 
 		return GsonUtil.toJson(map);
 	}
-	
 }

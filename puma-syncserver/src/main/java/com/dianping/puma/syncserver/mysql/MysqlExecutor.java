@@ -76,7 +76,7 @@ public class MysqlExecutor {
 		transformer = defaultTransformer;
 		transformer.start();
 
-		loader = new PooledLoader(host, username, password, new BinlogInfoManager());
+		loader = new PooledLoader();
 		loader.start();
 		initDataSource(host, username, password);
 	}

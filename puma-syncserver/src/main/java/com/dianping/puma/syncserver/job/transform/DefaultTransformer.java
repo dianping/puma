@@ -30,12 +30,14 @@ public class DefaultTransformer implements Transformer {
 
 	@Override
 	public void start() {
+		LOG.info("Transformer({}) is starting.", name);
 		stopped = false;
 		transformException = null;
 	}
 
 	@Override
 	public void stop() {
+		LOG.info("Transformer({}) is stopping.", name);
 		stopped = true;
 	}
 

@@ -11,7 +11,7 @@ import java.util.Map;
 public class PooledLoaderTest {
 
 	public static void main(String[] args) {
-		PooledLoader loader = new PooledLoader("192.168.224.102:3306", "root", "123456", new BinlogInfoManager());
+		PooledLoader loader = new PooledLoader();
 
 		loader.start();
 		RowChangedEvent row = new RowChangedEvent();

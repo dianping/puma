@@ -1,6 +1,5 @@
 package com.dianping.puma.syncserver.job.load;
 
-import com.dianping.cat.Cat;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.monitor.EventMonitor;
 import com.dianping.puma.syncserver.job.BinlogInfoManager;
@@ -11,86 +10,78 @@ import com.dianping.puma.syncserver.job.load.model.BatchRowPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.SQLException;
+
 public class PooledLoader implements Loader {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PooledLoader.class);
-
-	private String name = "default";
 
 	private boolean stopped = true;
 
 	private LoadException loadException = null;
 
+	// PooledLoader main modules.
 	private Thread loopThread;
-
 	private BatchExecPool batchExecPool;
-
 	private BatchRowPool batchRowPool;
 
-	private BinlogInfoManager binlogInfoManager;
+	private String name;
 
-	// Monitor.
-	private EventMonitor loadEventMonitor = new EventMonitor("EventCount.load", 1L);
+	private BinlogInfoManager binlogInfoManager;
 
 	// JDBC connection settings.
 	private String host;
 	private String username;
 	private String password;
 
-	public PooledLoader(String host, String username, String password, BinlogInfoManager binlogInfoManager) {
-		this.host = host;
-		this.username = username;
-		this.password = password;
-		this.binlogInfoManager = binlogInfoManager;
-	}
+	// Monitor.
+	private EventMonitor loadEventMonitor = new EventMonitor("EventCount.load", 1L);
+
+	public PooledLoader() {}
 
 	public void start() {
 		LOG.info("PooledLoader({}) is starting.", name);
-
 		stopped = false;
 		loadException = null;
 
-		initBatchRowPool();
-		batchRowPool.start();
+		// Start monitors.
+		loadEventMonitor.start();
 
+		// Start batchExecPool.
 		initBatchExecPool();
 		batchExecPool.start();
 
-		loadEventMonitor.start();
+		// Start batchRowPool.
+		initBatchRowPool();
+		batchRowPool.start();
 
+		// Start the main loop thread.
 		initLoopThread();
 		loopThread.start();
 	}
 
 	public void stop() {
 		LOG.info("PooledLoader({}) is stopping.", name);
-
 		stopped = true;
 
+		// Stop the main loop thread.
+		loopThread.interrupt();
+		loopThread = null;
+
+		// Stop the batchRowPool.
 		batchRowPool.stop();
 		batchRowPool = null;
 
+		// Stop the batchExecPool.
 		batchExecPool.stop();
 		batchExecPool = null;
 
+		// Stop the monitor.
 		loadEventMonitor.stop();
-
-		loopThread.interrupt();
-		loopThread = null;
 	}
 
-	public void load(ChangedEvent event) {
-		if (!stopped) {
-			try {
-				LOG.info("load");
-				Cat.logEvent("EventCount.load", "default");
-				batchRowPool.put(event);
-			} catch (InterruptedException e) {
-				if (!stopped) {
-					handleException(e);
-				}
-			}
-		}
+	public LoadException exception() {
+		return loadException;
 	}
 
 	private void initBatchExecPool() {
@@ -114,6 +105,23 @@ public class PooledLoader implements Loader {
 		});
 	}
 
+	public void load(ChangedEvent event) throws LoadException {
+		if (stopped) {
+			LOG.error("Loader({}) is stopped for event({}).", name, event.toString());
+			throw new LoadException(0, String.format("Loader(%s) is stopped for event(%s).", name, event.toString()));
+		}
+
+		try {
+			loadEventMonitor.record(event.genFullName(), "0");
+			batchRowPool.put(event);
+		} catch (InterruptedException e) {
+			if (!stopped) {
+				LOG.error("Loader({}) loads event failure for event({}).", name, event.toString());
+				handleException(e);
+			}
+		}
+	}
+
 	private void loop() {
 		for (;;) {
 			try {
@@ -131,7 +139,8 @@ public class PooledLoader implements Loader {
 
 			} catch (InterruptedException e) {
 				if (!stopped) {
-					// @TODO Log error.
+					LOG.error("Loader({}) loops failure.", name);
+					handleException(e);
 				}
 				break;
 			}
@@ -139,7 +148,35 @@ public class PooledLoader implements Loader {
 	}
 
 	private void handleException(Exception e) {
-		LOG.error("error: {}.", e.getStackTrace());
+		if (e instanceof InterruptedException) {
+			loadException = new LoadException(1, e.getMessage(), e.getCause());
+		} else if (e instanceof SQLException) {
+			loadException = new LoadException(((SQLException) e).getErrorCode(), e.getMessage(), e.getCause());
+		} else {
+			loadException = new LoadException(-1, e.getMessage(), e.getCause());
+		}
+
+		// Stop the loader.
 		stop();
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setBinlogInfoManager(BinlogInfoManager binlogInfoManager) {
+		this.binlogInfoManager = binlogInfoManager;
+	}
+
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 }

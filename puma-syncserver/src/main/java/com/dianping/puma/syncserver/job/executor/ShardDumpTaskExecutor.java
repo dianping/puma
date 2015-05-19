@@ -201,7 +201,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
 
             List<String> cmdlist = new ArrayList<String>();
 
-            cmdlist.add("mysqldump");
+            cmdlist.add("/usr/local/mysql/bin/mysqldump");
             cmdlist.add("--host=" + srcDBInstance.getHost());
             cmdlist.add("--port=" + srcDBInstance.getPort());
             cmdlist.add("--user=" + srcDBInstance.getUsername());

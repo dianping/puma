@@ -19,6 +19,7 @@ public class MapDBBinlogManagerTest {
 
 	@After
 	public void after() {
+		binlogManager.delete();
 		binlogManager.stop();
 	}
 

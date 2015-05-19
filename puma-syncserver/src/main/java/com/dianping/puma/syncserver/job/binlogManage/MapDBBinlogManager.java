@@ -20,13 +20,15 @@ public class MapDBBinlogManager implements BinlogManager {
 	private BinlogManageException binlogManageException;
 
 	private DB db;
+
 	private ConcurrentNavigableMap<BinlogInfo, Boolean> binlogInfos;
 
 	public void start() {
 		stopped = false;
 		binlogManageException = null;
 
-		db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlog/", name)).closeOnJvmShutdown().make();
+		db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlog/", name)).closeOnJvmShutdown().transactionDisable()
+				.asyncWriteEnable().mmapFileEnableIfSupported().make();
 		binlogInfos = db.getTreeMap(name);
 	}
 

@@ -159,7 +159,10 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
                 try {
                     String output = mysqldump(this.lastIndex, nextIndex);
                     if (!Strings.isNullOrEmpty(output)) {
-                        throw new IOException(output);
+                  	  //hack,ignore this warning
+                  	  if(!output.contains("Warning: Using a password on the command line interface can be insecure.")){
+                  		  throw new IOException(output);
+                  	  }
                     }
 
                     if (!checkHasData(this.lastIndex)) {

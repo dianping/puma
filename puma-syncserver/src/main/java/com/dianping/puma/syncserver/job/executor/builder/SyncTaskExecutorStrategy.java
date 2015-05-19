@@ -7,7 +7,7 @@ import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.service.DstDBInstanceService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
-import com.dianping.puma.syncserver.job.binlogmanage.LocalFileBinlogManager;
+import com.dianping.puma.syncserver.job.binlogmanage.MapDBBinlogManager;
 import com.dianping.puma.syncserver.job.load.PooledLoader;
 import com.dianping.puma.syncserver.job.transform.DefaultTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +45,7 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
 
 		String name = task.getName();
 
-		LocalFileBinlogManager binlogInfoManager = new LocalFileBinlogManager();
+		MapDBBinlogManager binlogInfoManager = new MapDBBinlogManager();
 
 		// Client connection settings.
 		String pumaTaskName = task.getPumaTaskName();

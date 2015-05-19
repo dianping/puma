@@ -202,7 +202,7 @@ public class BatchExecPool {
 					try {
 						batchExecute(batchRow);
 						remove(batchRow);
-						binlogManager.save(batchRow.getBinlogInfo());
+						binlogManager.after(batchRow.getBinlogInfo());
 						return;
 					} catch (SQLException e) {
 						if (!stopped) {

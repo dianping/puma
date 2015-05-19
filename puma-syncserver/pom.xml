@@ -109,6 +109,10 @@
             <artifactId>HikariCP-java6</artifactId>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mapdb</groupId>
+            <artifactId>mapdb</artifactId>
+        </dependency>
         <!-- SpringMVC & Velocity -->
         <dependency>
             <groupId>org.springframework</groupId>

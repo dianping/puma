@@ -282,6 +282,11 @@
                 <version>2.3.7</version>
                 <scope>compile</scope>
             </dependency>
+            <dependency>
+                <groupId>org.mapdb</groupId>
+                <artifactId>mapdb</artifactId>
+                <version>1.0.7</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>

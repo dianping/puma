@@ -1,6 +1,10 @@
 package com.dianping.puma.core.model;
 
-public class BinlogInfo {
+import java.io.Serializable;
+
+public class BinlogInfo implements Serializable, Comparable<BinlogInfo> {
+
+	private static final long serialVersionUID = 5056491879587690001L;
 
 	private String binlogFile;
 
@@ -72,9 +76,9 @@ public class BinlogInfo {
 
 	public int compareTo(BinlogInfo binlogInfo) {
 		String leftBinlogFile = this.getBinlogFile();
-		int leftBinlogFileNum = Integer.parseInt(leftBinlogFile.substring(leftBinlogFile.indexOf(".")));
+		int leftBinlogFileNum = Integer.parseInt(leftBinlogFile.substring(leftBinlogFile.indexOf(".") + 1));
 		String rightBinlogFile = binlogInfo.getBinlogFile();
-		int rightBinlogFileNum = Integer.parseInt(rightBinlogFile.substring(rightBinlogFile.indexOf(".")));
+		int rightBinlogFileNum = Integer.parseInt(rightBinlogFile.substring(rightBinlogFile.indexOf(".") + 1));
 
 		if (leftBinlogFileNum < rightBinlogFileNum) {
 			return -1;

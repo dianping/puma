@@ -6,7 +6,11 @@ import com.dianping.puma.syncserver.job.binlogmanage.exception.BinlogManageExcep
 
 public interface BinlogManager extends LifeCycle<BinlogManageException> {
 
-	public void save(BinlogInfo binlogInfo);
+	public void before(BinlogInfo binlogInfo);
+
+	public void after(BinlogInfo binlogInfo);
 
 	public BinlogInfo getEarliest();
+
+	public void delete();
 }

@@ -31,3 +31,7 @@
   background-color: #F5F5F5;
   border-top: 1px solid #E5E5E5;
 }
+
+.puma-form-textarea{
+	padding: 5px 4px 6px;
+}

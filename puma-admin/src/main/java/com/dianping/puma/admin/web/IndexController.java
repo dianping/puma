@@ -22,7 +22,7 @@ public class IndexController {
 
         map.put("readmeActive", "active");
         map.put("path", "readme");
-        return new RedirectView(request.getContextPath() + "/puma-task");
+        return new RedirectView(request.getContextPath() + "/puma-monitor");
     }
 
     @RequestMapping(value = { "/delete" })

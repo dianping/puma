@@ -6,6 +6,7 @@ import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
+import com.dianping.puma.core.model.state.SyncTaskState;
 import com.dianping.puma.core.model.state.TaskStateContainer;
 import com.dianping.puma.core.monitor.event.PumaTaskOperationEvent;
 import com.dianping.puma.core.service.*;
@@ -16,6 +17,7 @@ import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
+import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
@@ -81,6 +83,10 @@ public class PumaTaskController {
 	@RequestMapping(value = { "/puma-task" })
 	public ModelAndView view() {
 		Map<String, Object> map = new HashMap<String, Object>();
+
+		List<PumaTask> pumaTaskEntities = pumaTaskService.findAll();
+
+		map.put("entities", pumaTaskEntities);
 		map.put("path", "puma-task");
 		return new ModelAndView("common/main-container", map);
 	}
@@ -91,11 +97,11 @@ public class PumaTaskController {
 		Map<String, Object> map = new HashMap<String, Object>();
 		long count = pumaTaskService.count();
 		List<PumaTask> pumaTaskEntities = pumaTaskService.findByPage(page, pageSize);
-		List<PumaTaskState> taskStates = pumaTaskStateService.findAll();
+		List<PumaTaskState> pumaTaskStates = pumaTaskStateService.findAll();
 		map.put("count", count);
 		map.put("list", pumaTaskEntities);
-		map.put("state", taskStates);
-		return GsonUtil.toJson(map);// map;
+		map.put("state", pumaTaskStates);
+		return GsonUtil.toJson(map);
 	}
 
 	@RequestMapping(value = { "/puma-task/create" }, method = RequestMethod.GET)
@@ -167,12 +173,15 @@ public class PumaTaskController {
 			pumaTask.setPreservedDay(preservedDay);
 			Type type = new TypeToken<HashMap<String, AcceptedTables>>() {
 			}.getType();
+			// Map<String,AcceptedTables> acceptedDataInfos =
+			// (Map<java.lang.String, AcceptedTables>)
+			// GsonUtil.fromJson(acceptedDataInfoStr, type);
 			pumaTask.setAcceptedDataInfos(acceptedDataInfos);
 
 			// Accepted schema and tables.
 			TableSet tableSet = new TableSet();
 			for (int i = 0; i != acceptedDatabase.length && i != acceptedTable.length; ++i) {
-				String tables[] = org.apache.commons.lang.StringUtils.split(acceptedTable[i], "&");
+				String tables[] = StringUtils.split(acceptedTable[i], "&");
 				if (tables != null) {
 					for (int j = 0; j != tables.length; ++j) {
 						tableSet.add(new Table(acceptedDatabase[i], tables[j]));
@@ -263,9 +272,10 @@ public class PumaTaskController {
 			pumaTask.setPreservedDay(preservedDay);  
 			pumaTask.setAcceptedDataInfos(acceptedDataInfos);
 
+			// Accepted schema and tables.
 			TableSet tableSet = new TableSet();
 			for (int i = 0; i != acceptedDatabase.length && i != acceptedTable.length; ++i) {
-				String tables[] = org.apache.commons.lang.StringUtils.split(acceptedTable[i], "&");
+				String tables[] = StringUtils.split(acceptedTable[i], "&");
 				if (tables != null) {
 					for (int j = 0; j != tables.length; ++j) {
 						tableSet.add(new Table(acceptedDatabase[i], tables[j]));
@@ -288,6 +298,8 @@ public class PumaTaskController {
 			pumaTaskStateService.add(taskState);
 
 			// Publish puma task operation event to puma server.
+			// this.pumaTaskOperationReporter.report(pumaServerName, name,
+			// operation);
 			event.setServerName(pumaServerName);
 			event.setTaskName(name);
 			event.setPumaTask(pumaTask);

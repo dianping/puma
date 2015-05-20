@@ -79,7 +79,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer {
         }
         //使用新的newTaskExecutor替换现有的taskExecutor
         taskExecutorMap.put(newTaskExecutor.getTask().getName(), newTaskExecutor);
-        taskExecutor.pause("Pause this old SyncTaskExecutor, because is replace by a new SyncTaskExecutor.");
+        //taskExecutor.pause("Pause this old SyncTaskExecutor, because is replace by a new SyncTaskExecutor.");
         newTaskExecutor.start();
     }
 
@@ -104,7 +104,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer {
                     || syncTaskExecutor.getTask().getController() == ActionController.START) {
                 syncTaskExecutor.start();
             } else {
-                syncTaskExecutor.pause("Stop because the StatusAction is Pause.");
+                //syncTaskExecutor.pause("Stop because the StatusAction is Pause.");
             }
         } else if (newTaskExecutor instanceof ShardDumpTaskExecutor || newTaskExecutor instanceof ShardSyncTaskExecutor || newTaskExecutor instanceof DumpTaskExecutor || newTaskExecutor instanceof CatchupTaskExecutor) {
             newTaskExecutor.start();
@@ -134,7 +134,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer {
         SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) this.get(taskName);
         if (syncTaskExecutor != null) {
             if (controller == ActionController.PAUSE) {
-                syncTaskExecutor.pause("Stop because the StatusAction is Pause.");
+                //syncTaskExecutor.pause("Stop because the StatusAction is Pause.");
             } else if (controller == ActionController.RESUME
                     && (syncTaskExecutor.getTaskState().getStatus() == Status.SUSPENDED
                     || syncTaskExecutor.getTaskState().getStatus() == Status.SUCCESS
@@ -155,7 +155,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer {
             this.delete(SyncType.SYNC, taskName);
             binlogInfoHolder.remove(taskName);
             LOG.info(syncTaskExecutor + " is deleted.");
-            syncTaskExecutor.stop("Disconnect because the StatusAction is deleted.");
+            syncTaskExecutor.stop();
         }
     }
 
@@ -165,7 +165,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer {
         if (shardSyncTaskExecutor != null) {
             this.delete(SyncType.SHARD_SYNC, taskName);
             LOG.info(shardSyncTaskExecutor + " is deleted.");
-            shardSyncTaskExecutor.stop("Disconnect because the StatusAction is deleted.");
+            shardSyncTaskExecutor.stop();
             binlogInfoHolder.remove(taskName);
         }
     }
@@ -176,7 +176,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer {
         if (shardDumpTaskExecutor != null) {
             this.delete(SyncType.SHARD_DUMP, taskName);
             LOG.info(shardDumpTaskExecutor + " is deleted.");
-            shardDumpTaskExecutor.stop("Disconnect because the StatusAction is deleted.");
+            shardDumpTaskExecutor.stop();
         }
     }
 

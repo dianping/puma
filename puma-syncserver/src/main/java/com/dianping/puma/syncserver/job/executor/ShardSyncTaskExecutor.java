@@ -507,32 +507,6 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
     }
 
     @Override
-    public void pause(String detail) {
-        if (!inited) {
-            return;
-        }
-
-        try {
-            for (PumaClient client : pumaClientList.values()) {
-                client.stop();
-            }
-            this.status.setStatus(Status.SUSPENDED);
-        } catch (Exception exp) {
-            this.status.setStatus(Status.FAILED);
-        }
-    }
-
-    @Override
-    public void succeed() {
-
-    }
-
-    @Override
-    public TaskExecutorStatus getTaskExecutorStatus() {
-        return null;
-    }
-
-    @Override
     public BaseSyncTask getTask() {
         return this.task;
     }
@@ -548,7 +522,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
     }
 
     @Override
-    public void stop(String detail) {
+    public void stop() {
         if (!inited) {
             return;
         }

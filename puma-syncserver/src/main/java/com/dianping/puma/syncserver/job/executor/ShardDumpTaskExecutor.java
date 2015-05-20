@@ -369,21 +369,6 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
     }
 
     @Override
-    public void pause(String detail) {
-        stop(detail);
-    }
-
-    @Override
-    public void succeed() {
-
-    }
-
-    @Override
-    public TaskExecutorStatus getTaskExecutorStatus() {
-        return null;
-    }
-
-    @Override
     public ShardDumpTask getTask() {
         return this.task;
     }
@@ -419,7 +404,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
     }
 
     @Override
-    public void stop(String detail) {
+    public void stop() {
         dumpWorker.interrupt();
         loadWorker.interrupt();
 

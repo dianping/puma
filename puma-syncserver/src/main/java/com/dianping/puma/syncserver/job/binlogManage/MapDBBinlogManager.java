@@ -23,6 +23,14 @@ public class MapDBBinlogManager implements BinlogManager {
 
 	private ConcurrentNavigableMap<BinlogInfo, Boolean> binlogInfos;
 
+	private BinlogInfo origin;
+
+	public MapDBBinlogManager() {}
+
+	public MapDBBinlogManager(BinlogInfo origin) {
+		this.origin = origin;
+	}
+
 	public void start() {
 		stopped = false;
 		binlogManageException = null;
@@ -72,7 +80,8 @@ public class MapDBBinlogManager implements BinlogManager {
 			throw new BinlogManageException(0, String.format("BinlogManager(%s) is stopped for binlogInfo.", name));
 		}
 
-		return binlogInfos.firstKey();
+		BinlogInfo earliest = binlogInfos.firstKey();
+		return (earliest == null) ? origin : earliest;
 	}
 
 	public void setName(String name) {

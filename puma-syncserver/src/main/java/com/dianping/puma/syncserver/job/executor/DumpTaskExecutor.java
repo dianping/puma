@@ -352,27 +352,12 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask, DumpTaskState> {
         return this.dumpTask;
     }
 
-    @Override
-    public void pause(String detail) {
-        throw new UnsupportedOperationException("DumpTaskExecutor not support stop() method!");
-    }
-
-    @Override
-    public TaskExecutorStatus getTaskExecutorStatus() {
-        return status;
-    }
-
-    @Override
-    public void succeed() {
-        throw new UnsupportedOperationException("DumpTaskExecutor not support stop() method!");
-    }
-
     private void fail(String detail) {
         state.setStatus(Status.FAILED);
         state.setDetail(detail);
     }
 
-    public void stop(String detail) {
+    public void stop() {
         throw new UnsupportedOperationException("DumpTaskExecutor not support stop() method!");
     }
 

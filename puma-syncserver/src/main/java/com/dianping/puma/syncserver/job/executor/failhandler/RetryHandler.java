@@ -62,7 +62,7 @@ public class RetryHandler implements Handler {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                executor.restart();
+                //executor.restart();
             }
         });
         sleep();

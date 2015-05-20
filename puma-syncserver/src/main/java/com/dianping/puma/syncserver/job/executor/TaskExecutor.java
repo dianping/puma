@@ -22,21 +22,7 @@ import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 
 public interface TaskExecutor<T extends BaseSyncTask, S extends TaskState> {
 
-    /** 开始任务，状态设置为运行中 */
     void start();
-
-    /** 暂停任务，状态设置为暂停 */
-    void pause(String detail);
-
-    /** 结束任务，状态设置为成功 */
-    void succeed();
-
-    //    void fail(String detail);
-
-    /***
-     * 获取任务的状态
-     */
-    TaskExecutorStatus getTaskExecutorStatus();
 
     /**
      * 获取任务的Task配置
@@ -48,7 +34,7 @@ public interface TaskExecutor<T extends BaseSyncTask, S extends TaskState> {
     void setTaskState(S taskState);
 
     /** 结束任务，状态设置为成功 */
-    void stop(String detail);
+    void stop();
 
     //    void disconnect(String detail);
 }

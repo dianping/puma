@@ -21,11 +21,17 @@ public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTask, SyncTaskSta
 
 	public SyncTaskExecutor() {}
 
-	/*
-	public SyncTaskExecutor(SyncTask syncTask, String pumaServerHost, int pumaServerPort,
-			String target, DstDBInstance dstDBInstance) {
-		super(syncTask, pumaServerHost, pumaServerPort, target, dstDBInstance);
-	}*/
+	@Override
+	protected void doStart() {
+		loader.start();
+		transformer.start();
+	}
+
+	@Override
+	protected void doStop() {
+		transformer.stop();
+		loader.stop();
+	}
 
 	@Override
 	protected void execute(ChangedEvent event) throws GException {

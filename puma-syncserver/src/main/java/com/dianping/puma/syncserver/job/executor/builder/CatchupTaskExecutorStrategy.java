@@ -104,13 +104,10 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
 		task.setPumaClientServerId(srcDBInstance.getServerId());
 
 		CatchupTaskExecutor executor = new CatchupTaskExecutor(task, pumaServerHost, pumaServerPort, target, syncTaskExecutor, dstDBInstance);
-		executor.setBinlogInfoHolder(binlogInfoHolder);
 
 		CatchupTaskState catchupTaskState = new CatchupTaskState();
 		catchupTaskState.setTaskName(task.getName());
 		catchupTaskState.setStatus(Status.PREPARING);
-
-		executor.setTaskState(catchupTaskState);
 
 		return executor;
 	}

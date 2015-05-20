@@ -2,14 +2,11 @@ package com.dianping.puma.syncserver.remote.receiver;
 
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.entity.SyncTask;
-import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.monitor.event.Event;
 import com.dianping.puma.core.monitor.EventListener;
 import com.dianping.puma.core.monitor.event.SyncTaskOperationEvent;
 import com.dianping.puma.core.service.SyncTaskService;
 import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;
-import com.dianping.puma.syncserver.job.executor.SyncTaskExecutor;
-import com.dianping.puma.syncserver.job.executor.TaskExecutionException;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 import com.dianping.puma.syncserver.job.executor.builder.TaskExecutorBuilder;
 import org.slf4j.Logger;
@@ -31,31 +28,53 @@ public class SyncTaskOperationReceiver implements EventListener {
 	@Autowired
 	TaskExecutorContainer taskExecutorContainer;
 
-	@Autowired NotifyService notifyService;
-
 	@Override
 	public void onEvent(Event event) {
 		if (event instanceof SyncTaskOperationEvent) {
-			LOG.info("Receive sync task operation event.");
+			LOG.info("Receive sync task operation event({}).", event.toString());
 
-			String taskName = ((SyncTaskOperationEvent) event).getTaskName();
+			String name = ((SyncTaskOperationEvent) event).getTaskName();
 			ActionOperation operation = ((SyncTaskOperationEvent) event).getOperation();
 
 			switch (operation) {
 			case CREATE:
-				SyncTask syncTask = syncTaskService.find(taskName);
-				TaskExecutor taskExecutor = taskExecutorBuilder.build(syncTask);
-
-				try {
-					taskExecutorContainer.submit(taskExecutor);
-				} catch (TaskExecutionException e) {
-					notifyService.alarm(e.getMessage(), e, false);
-				}
+				createSyncTask(name);
 				break;
-
+			case UPDATE:
+				updateSyncTask(name);
+				break;
 			case REMOVE:
-				taskExecutorContainer.deleteSyncTask(taskName);
+				removeSyncTask(name);
+				break;
 			}
 		}
+	}
+
+	private void createSyncTask(String name) {
+		LOG.info("Creating sync task({})...", name);
+
+		// Submit the new task.
+		SyncTask syncTask = syncTaskService.find(name);
+		TaskExecutor taskExecutor = taskExecutorBuilder.build(syncTask);
+		taskExecutorContainer.submit(name, taskExecutor);
+	}
+
+	private void updateSyncTask(String name) {
+		LOG.info("Updating sync task({})...", name);
+
+		// Withdraw the original task.
+		taskExecutorContainer.withdraw(name);
+
+		// Submit the new task.
+		SyncTask syncTask = syncTaskService.find(name);
+		TaskExecutor taskExecutor = taskExecutorBuilder.build(syncTask);
+		taskExecutorContainer.submit(name, taskExecutor);
+	}
+
+	private void removeSyncTask(String name) {
+		LOG.info("Removing sync task({})...", name);
+
+		// Withdraw the original task.
+		taskExecutorContainer.withdraw(name);
 	}
 }

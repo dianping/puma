@@ -30,9 +30,10 @@ public class SyncTaskStateCollector {
 
 		for (TaskExecutor taskExecutor: taskExecutorContainer.getAll()) {
 			if (taskExecutor instanceof SyncTaskExecutor) {
+				/*
 				SyncTaskState syncTaskState = ((SyncTaskExecutor) taskExecutor).getTaskState();
 				syncTaskState.setGmtUpdate(new Date());
-				syncTaskStateService.add(syncTaskState);
+				syncTaskStateService.add(syncTaskState);*/
 			}
 		}
 	}

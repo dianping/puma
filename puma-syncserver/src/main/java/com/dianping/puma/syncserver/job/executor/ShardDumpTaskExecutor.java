@@ -37,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardSyncTaskState> {
+public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
     private static final Logger logger = LoggerFactory.getLogger(ShardDumpTaskExecutor.class);
 
     private static final Charset DEFAULT_CJARSET = Charset.forName("utf8");
@@ -373,6 +373,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
         return this.task;
     }
 
+    /*
     @Override
     public ShardSyncTaskState getTaskState() {
         checkFinish();
@@ -401,7 +402,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
     @Override
     public void setTaskState(ShardSyncTaskState taskState) {
 
-    }
+    }*/
 
     @Override
     public void stop() {

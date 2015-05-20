@@ -31,13 +31,15 @@ public class ShardSyncTaskStateCollector {
 
         for (TaskExecutor taskExecutor : taskExecutorContainer.getAll()) {
             if (taskExecutor instanceof ShardSyncTaskExecutor) {
+                /*
                 ShardSyncTaskState shardSyncTaskState = ((ShardSyncTaskExecutor) taskExecutor).getTaskState();
                 shardSyncTaskState.setGmtUpdate(new Date());
-                shardSyncTaskStateService.add(shardSyncTaskState);
+                shardSyncTaskStateService.add(shardSyncTaskState);*/
             } else if (taskExecutor instanceof ShardDumpTaskExecutor) {
+                /*
                 ShardSyncTaskState shardSyncTaskState = ((ShardDumpTaskExecutor) taskExecutor).getTaskState();
                 shardSyncTaskState.setGmtUpdate(new Date());
-                shardSyncTaskStateService.add(shardSyncTaskState);
+                shardSyncTaskStateService.add(shardSyncTaskState);*/
             }
         }
     }

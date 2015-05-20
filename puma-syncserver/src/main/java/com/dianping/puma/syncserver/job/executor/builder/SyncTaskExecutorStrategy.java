@@ -55,15 +55,18 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
 		PumaServer pumaServer = pumaServerService.find(pumaServerName);
 		checkArgument(pumaServer != null, "Puma server is null in sync task(%s).", name);
 
-		// Binlog manager.
+		// Setting Task.
+		executor.setTask(task);
+
+		// Setting Binlog manager.
 		MapDBBinlogManager binlogInfoManager = new MapDBBinlogManager(task.getBinlogInfo());
 
-		// Puma client connection settings.
+		// Setting puma client connection settings.
 		executor.setPumaTask(pumaTask);
 		executor.setPumaServer(pumaServer);
 		executor.setBinlogManager(binlogInfoManager);
 
-		// Transformer.
+		// Setting transformer.
 		DefaultTransformer transformer = new DefaultTransformer();
 		transformer.setName(name);
 		MysqlMapping mysqlMapping = task.getMysqlMapping();
@@ -71,7 +74,7 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
 		transformer.setMysqlMapping(mysqlMapping);
 		executor.setTransformer(transformer);
 
-		// Loader.
+		// Setting loader.
 		PooledLoader loader = new PooledLoader();
 		loader.setName(name);
 		loader.setHost(dstDBInstance.getHost());

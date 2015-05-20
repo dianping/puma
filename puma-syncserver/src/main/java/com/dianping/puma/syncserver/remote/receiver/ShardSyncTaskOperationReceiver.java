@@ -11,6 +11,7 @@ import com.dianping.puma.core.monitor.event.ShardSyncTaskOperationEvent;
 import com.dianping.puma.core.service.ShardDumpTaskService;
 import com.dianping.puma.core.service.ShardSyncTaskService;
 import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;
+import com.dianping.puma.syncserver.job.container.exception.TECException;
 import com.dianping.puma.syncserver.job.executor.TaskExecutionException;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 import com.dianping.puma.syncserver.job.executor.builder.TaskExecutorBuilder;
@@ -62,8 +63,8 @@ public class ShardSyncTaskOperationReceiver implements EventListener {
 
                     if (taskExecutor != null) {
                         try {
-                            taskExecutorContainer.submit(taskExecutor);
-                        } catch (TaskExecutionException e) {
+                            taskExecutorContainer.submit(taskName, taskExecutor);
+                        } catch (TECException e) {
                             notifyService.alarm(e.getMessage(), e, false);
                         }
                     }
@@ -71,9 +72,9 @@ public class ShardSyncTaskOperationReceiver implements EventListener {
                     break;
                 case REMOVE:
                     if (shardEvent.getSyncType().equals(SyncType.SHARD_SYNC)) {
-                        taskExecutorContainer.deleteShardSyncTask(taskName);
+                        taskExecutorContainer.withdraw(taskName);
                     } else if (shardEvent.getSyncType().equals(SyncType.SHARD_DUMP)) {
-                        taskExecutorContainer.deleteShardDumpTask(taskName);
+                        taskExecutorContainer.withdraw(taskName);
                     }
             }
         }

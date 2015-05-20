@@ -15,31 +15,40 @@
  */
 package com.dianping.puma.syncserver.job.container;
 
-import com.dianping.puma.core.constant.ActionController;
-import com.dianping.puma.syncserver.job.executor.TaskExecutionException;
+import com.dianping.puma.syncserver.job.container.exception.TECException;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 
 import java.util.List;
 
-/**
- * @author Leo Liang
- */
-@SuppressWarnings("rawtypes")
 public interface TaskExecutorContainer {
 
-    public void submit(TaskExecutor taskExecutor) throws TaskExecutionException;
+    public void submit(String name, TaskExecutor taskExecutor) throws TECException;
 
-    public TaskExecutor get(String taskName);
+    public void withdraw(String name) throws TECException;
 
-    public void changeStatus(String taskName, ActionController controller);
+    public void start(String name) throws TECException;
 
-    public void deleteSyncTask(String taskName);
+    public void stop(String name) throws TECException;
 
-    public void deleteShardSyncTask(String taskName);
-
-    public void deleteShardDumpTask(String taskName);
-
-    public List<TaskExecutor> toList();
+    public TaskExecutor get(String name);
 
     public List<TaskExecutor> getAll();
+
+    public int size();
+
+    //public void submit(TaskExecutor taskExecutor) throws TaskExecutionException;
+
+    //public TaskExecutor get(String taskName);
+
+    //public void changeStatus(String taskName, ActionController controller);
+
+    //public void deleteSyncTask(String taskName);
+
+    //public void deleteShardSyncTask(String taskName);
+
+    //public void deleteShardDumpTask(String taskName);
+
+    //public List<TaskExecutor> toList();
+
+    //public List<TaskExecutor> getAll();
 }

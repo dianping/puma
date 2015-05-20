@@ -61,6 +61,7 @@ public class ShardDumpTaskExecutorMain {
         target.init();
         target.start();
 
+        /*
         while (target.getTaskState().getPercent() < 100) {
             System.out.println(target.getTaskState().getStatus());
             System.out.println(target.getTaskState().getPercent());
@@ -68,6 +69,6 @@ public class ShardDumpTaskExecutorMain {
         }
 
         System.out.println(target.getTaskState().getStatus());
-        System.out.println(target.getTaskState().getPercent());
+        System.out.println(target.getTaskState().getPercent());*/
     }
 }

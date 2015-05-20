@@ -19,22 +19,13 @@ import com.dianping.puma.core.entity.BaseSyncTask;
 import com.dianping.puma.core.model.state.BaseSyncTaskState;
 import com.dianping.puma.core.model.state.TaskState;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
+import com.dianping.puma.syncserver.job.executor.status.Status;
 
-public interface TaskExecutor<T extends BaseSyncTask, S extends TaskState> {
+public interface TaskExecutor<T extends BaseSyncTask> {
 
     void start();
 
-    /**
-     * 获取任务的Task配置
-     */
-    T getTask();
-
-    S getTaskState();
-
-    void setTaskState(S taskState);
-
-    /** 结束任务，状态设置为成功 */
     void stop();
 
-    //    void disconnect(String detail);
+    T getTask();
 }

@@ -12,6 +12,7 @@ import com.dianping.puma.core.model.state.BaseSyncTaskState;
 import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
 import com.dianping.puma.syncserver.job.binlogmanage.MapDBBinlogManager;
 import com.dianping.puma.syncserver.job.executor.exception.GException;
+import com.dianping.puma.syncserver.job.executor.status.Status;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +25,10 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.sync.model.mapping.TableMapping;
-import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.syncserver.job.executor.failhandler.Handler;
 import com.dianping.puma.syncserver.job.executor.failhandler.HandlerContainer;
 
-public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S extends BaseSyncTaskState> implements
-		TaskExecutor<T, S> {
+public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> implements TaskExecutor<T> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractTaskExecutor.class);
 
@@ -48,9 +47,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 
 	protected PumaClient pumaClient;
 
-	protected S state;
-
-	protected TaskExecutorStatus status;
+	protected Status status;
 
 	public AbstractTaskExecutor() {}
 
@@ -241,7 +238,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 		}
 	}
 
-	@Override public String toString() {
+	@Override
+	public String toString() {
 		return "AbstractTaskExecutor{" +
 				"stopped=" + stopped +
 				", gException=" + gException +
@@ -251,7 +249,6 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask, S ext
 				", dstDBInstance=" + dstDBInstance +
 				", binlogManager=" + binlogManager +
 				", pumaClient=" + pumaClient +
-				", state=" + state +
 				", status=" + status +
 				'}';
 	}

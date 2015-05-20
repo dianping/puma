@@ -22,9 +22,11 @@ public class SyncTaskControllerReceiver implements EventListener {
 		if (event instanceof SyncTaskControllerEvent) {
 			LOG.info("Receive sync task controller event.");
 
+			/*
 			SyncTaskControllerEvent syncTaskControllerEvent = (SyncTaskControllerEvent) event;
 			taskExecutorContainer
 					.changeStatus(syncTaskControllerEvent.getTaskName(), syncTaskControllerEvent.getController());
+			*/
 		}
 	}
 }

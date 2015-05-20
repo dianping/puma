@@ -80,8 +80,12 @@ public class MapDBBinlogManager implements BinlogManager {
 			throw new BinlogManageException(0, String.format("BinlogManager(%s) is stopped for binlogInfo.", name));
 		}
 
-		BinlogInfo earliest = binlogInfos.firstKey();
-		return (earliest == null) ? origin : earliest;
+
+		try {
+			return binlogInfos.firstKey();
+		} catch (Exception e) {
+			return origin;
+		}
 	}
 
 	public void setName(String name) {

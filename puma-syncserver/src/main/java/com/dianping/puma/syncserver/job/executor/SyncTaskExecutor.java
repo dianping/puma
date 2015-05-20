@@ -11,7 +11,7 @@ import com.dianping.puma.syncserver.job.transform.exception.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTask, SyncTaskState> {
+public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTask> {
 
 	protected static final Logger LOG = LoggerFactory.getLogger(SyncTaskExecutor.class);
 

@@ -8,6 +8,7 @@ import com.dianping.puma.core.monitor.event.DumpTaskOperationEvent;
 import com.dianping.puma.core.monitor.event.Event;
 import com.dianping.puma.core.service.DumpTaskService;
 import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;
+import com.dianping.puma.syncserver.job.container.exception.TECException;
 import com.dianping.puma.syncserver.job.executor.TaskExecutionException;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 import com.dianping.puma.syncserver.job.executor.builder.TaskExecutorBuilder;
@@ -47,14 +48,14 @@ public class DumpTaskOperationReceiver implements EventListener {
 				TaskExecutor taskExecutor = taskExecutorBuilder.build(syncTask);
 
 				try {
-					taskExecutorContainer.submit(taskExecutor);
-				} catch (TaskExecutionException e) {
+					taskExecutorContainer.submit(taskName, taskExecutor);
+				} catch (TECException e) {
 					notifyService.alarm(e.getMessage(), e, false);
 				}
 				break;
 
 			case REMOVE:
-				taskExecutorContainer.deleteSyncTask(taskName);
+				taskExecutorContainer.withdraw(taskName);
 			}
 		}
 	}

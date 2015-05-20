@@ -40,10 +40,10 @@ public class RetryHandler implements Handler {
         Exception exception = context.getException();
         ChangedEvent changedEvent = context.getChangedEvent();
 
-        BaseSyncTaskState state = executor.getTaskState();
+        //BaseSyncTaskState state = executor.getTaskState();
         //TaskExecutorStatus status = executor.getStatus();
-        state.setDetail("RetryHandler retrying, cause: " + task.getPumaTaskName() + "->" + task.getDstDBInstanceName() + ":" + exception.getMessage() + ". Event=" + changedEvent + ", at "
-                + DateFormatUtils.format(new Date(), PATTERN));
+       // state.setDetail("RetryHandler retrying, cause: " + task.getPumaTaskName() + "->" + task.getDstDBInstanceName() + ":" + exception.getMessage() + ". Event=" + changedEvent + ", at "
+         //       + DateFormatUtils.format(new Date(), PATTERN));
 
         //思路：errorcode不是-1时，认为是正常的sql异常，则重试; 否则认为是网络之类的不可恢复问题，则重启task
 

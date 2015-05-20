@@ -10,7 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CatchupTaskExecutor extends AbstractTaskExecutor<CatchupTask, CatchupTaskState> {
+public class CatchupTaskExecutor extends AbstractTaskExecutor<CatchupTask> {
     protected static final Logger LOG = LoggerFactory.getLogger(CatchupTaskExecutor.class);
     /** 追赶的SyncTaskExecutor */
     private SyncTaskExecutor syncTaskExecutor;

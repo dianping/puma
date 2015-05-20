@@ -44,7 +44,7 @@ import com.dianping.puma.syncserver.util.ProcessBuilderWrapper;
 /**
  * @author wukezhu
  */
-public class DumpTaskExecutor implements TaskExecutor<DumpTask, DumpTaskState> {
+public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
     private static final Logger LOG = LoggerFactory.getLogger(DumpTaskExecutor.class);
     private final static Pattern BINLOG_LINE_PATTERN = Pattern.compile("^.+LOG_FILE='(.*)',\\s+.+LOG_POS=([0-9]+);$");
     protected static final String CHARSET = "iso-8859-1";

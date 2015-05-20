@@ -61,7 +61,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSyncTaskState> {
+public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
     private static final Logger logger = LoggerFactory.getLogger(ShardSyncTaskExecutor.class);
 
     protected ShardSyncTask task;
@@ -509,16 +509,6 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask, ShardSy
     @Override
     public BaseSyncTask getTask() {
         return this.task;
-    }
-
-    @Override
-    public ShardSyncTaskState getTaskState() {
-        return this.status;
-    }
-
-    @Override
-    public void setTaskState(ShardSyncTaskState status) {
-        this.status = status;
     }
 
     @Override

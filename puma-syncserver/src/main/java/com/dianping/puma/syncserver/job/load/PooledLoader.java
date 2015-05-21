@@ -4,7 +4,7 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.monitor.EventMonitor;
 import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
 import com.dianping.puma.syncserver.job.load.exception.LoadException;
-import com.dianping.puma.syncserver.job.load.model.BatchRow;
+import com.dianping.puma.syncserver.job.load.row.BatchRow;
 import com.dianping.puma.syncserver.job.load.pool.BatchExecPool;
 import com.dianping.puma.syncserver.job.load.pool.BatchRowPool;
 import org.slf4j.Logger;

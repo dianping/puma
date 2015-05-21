@@ -1,4 +1,4 @@
-package com.dianping.puma.syncserver.job.load.model;
+package com.dianping.puma.syncserver.job.load.row;
 
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
@@ -33,11 +33,11 @@ public class BatchRow {
 	/** DDL or DML of batch rows. */
 	private boolean ddl = false;
 
+	/** Transaction commit of batch rows. */
+	private boolean commit;
+
 	/** DML type of batch rows. */
 	private DMLType dmlType;
-
-	/** Transaction commit of batch rows. */
-	private boolean isTransactionCommit;
 
 	/** Sql statement of batch rows. */
 	private String sql;
@@ -59,19 +59,23 @@ public class BatchRow {
 			addFirstRow(event);
 			return true;
 		} else {
-			if (event instanceof RowChangedEvent) {
-				RowChangedEvent row = (RowChangedEvent) event;
-				if (checkRow(row)) {
-					params.add(LoadParser.parseArgs(row));
-					rowKeys.put(RowKey.getRowKey(row), true);
-					binlogInfo = new BinlogInfo(row.getBinlog(), row.getBinlogPos());
-					++size;
-					return true;
-				} else {
-					return false;
-				}
-			} else {
+			if (!(event instanceof RowChangedEvent)) {
 				return false;
+			} else {
+				RowChangedEvent row = (RowChangedEvent) event;
+				if (row.isTransactionCommit()) {
+					return false;
+				} else {
+					if (checkRow(row)) {
+						params.add(LoadParser.parseArgs(row));
+						rowKeys.put(RowKey.getRowKey(row), true);
+						binlogInfo = new BinlogInfo(row.getBinlog(), row.getBinlogPos());
+						++size;
+						return true;
+					} else {
+						return false;
+					}
+				}
 			}
 		}
 	}
@@ -86,7 +90,7 @@ public class BatchRow {
 
 			if (row.isTransactionCommit()) {
 				ddl = false;
-				isTransactionCommit = true;
+				commit = true;
 			} else {
 				ddl = false;
 				table = new Table(row.getDatabase(), row.getTable());
@@ -103,6 +107,9 @@ public class BatchRow {
 
 	private boolean checkRow(RowChangedEvent row) {
 		if (ddl) {
+			return false;
+		}
+		if (commit) {
 			return false;
 		}
 		if (size >= maxSize) {
@@ -136,8 +143,8 @@ public class BatchRow {
 		return ddl;
 	}
 
-	public boolean isTransactionCommit() {
-		return isTransactionCommit;
+	public boolean isCommit() {
+		return commit;
 	}
 
 	public String getSql() {

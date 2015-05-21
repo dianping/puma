@@ -3,7 +3,7 @@ package com.dianping.puma.syncserver.job.load.pool;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.puma.syncserver.MockTest;
-import com.dianping.puma.syncserver.job.load.model.BatchRow;
+import com.dianping.puma.syncserver.job.load.row.BatchRow;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

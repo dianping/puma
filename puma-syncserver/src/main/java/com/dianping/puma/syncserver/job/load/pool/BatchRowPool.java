@@ -3,7 +3,7 @@ package com.dianping.puma.syncserver.job.load.pool;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.syncserver.job.LifeCycle;
 import com.dianping.puma.syncserver.job.load.exception.LoadException;
-import com.dianping.puma.syncserver.job.load.model.BatchRow;
+import com.dianping.puma.syncserver.job.load.row.BatchRow;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

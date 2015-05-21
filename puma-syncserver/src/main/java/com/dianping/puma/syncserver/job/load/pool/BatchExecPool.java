@@ -5,8 +5,8 @@ import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.syncserver.job.LifeCycle;
 import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
 import com.dianping.puma.syncserver.job.load.exception.LoadException;
-import com.dianping.puma.syncserver.job.load.model.BatchRow;
-import com.dianping.puma.syncserver.job.load.model.RowKey;
+import com.dianping.puma.syncserver.job.load.row.BatchRow;
+import com.dianping.puma.syncserver.job.load.row.RowKey;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
@@ -213,7 +213,7 @@ public class BatchExecPool implements LifeCycle<LoadException> {
 
 	private void beforePooledBatchExecute(BatchRow batchRow) {
 		if (isStrongConsistency) {
-			if (batchRow.isTransactionCommit()) {
+			if (batchRow.isCommit()) {
 				binlogManager.before(batchRow.getBinlogInfo());
 			}
 		} else {
@@ -223,7 +223,7 @@ public class BatchExecPool implements LifeCycle<LoadException> {
 
 	private void afterPooledBatchExecute(BatchRow batchRow) {
 		if (isStrongConsistency) {
-			if (batchRow.isTransactionCommit()) {
+			if (batchRow.isCommit()) {
 				binlogManager.after(batchRow.getBinlogInfo());
 			}
 		} else {
@@ -263,7 +263,7 @@ public class BatchExecPool implements LifeCycle<LoadException> {
 					try {
 
 						if (isStrongConsistency) {
-							if (batchRow.isTransactionCommit()) {
+							if (batchRow.isCommit()) {
 								commit(conn);
 							} else {
 								batchExecute(conn, batchRow);

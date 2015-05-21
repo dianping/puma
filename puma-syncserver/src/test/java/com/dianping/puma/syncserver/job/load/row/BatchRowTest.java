@@ -1,4 +1,4 @@
-package com.dianping.puma.syncserver.job.load.model;
+package com.dianping.puma.syncserver.job.load.row;
 
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
@@ -111,5 +111,43 @@ public class BatchRowTest {
 		columnInfoMap0.put("name", new ColumnInfo(false, "Peter", "Linda"));
 		row0.setColumns(columnInfoMap0);
 		Assert.assertFalse(batchRow.addRow(row0));
+	}
+
+	@Test
+	public void testAddRow2() {
+		// row0: puma.test | UPDATE | (1, "Peter")->(1, "Linda").
+		RowChangedEvent row0 = new RowChangedEvent();
+		row0.setDatabase("puma");
+		row0.setTable("test");
+		row0.setDmlType(DMLType.UPDATE);
+		Map<String, ColumnInfo> columnInfoMap0 = new HashMap<String, ColumnInfo>();
+		columnInfoMap0.put("id", new ColumnInfo(true, 1, 1));
+		columnInfoMap0.put("name", new ColumnInfo(false, "Peter", "Linda"));
+		row0.setColumns(columnInfoMap0);
+		Assert.assertTrue(batchRow.addRow(row0));
+
+		// row1: commit.
+		RowChangedEvent row1 = new RowChangedEvent();
+		row1.setTransactionCommit(true);
+		Assert.assertFalse(batchRow.addRow(row1));
+	}
+
+	@Test
+	public void testAddRow3() {
+		// row0: commit.
+		RowChangedEvent row0 = new RowChangedEvent();
+		row0.setTransactionCommit(true);
+		Assert.assertTrue(batchRow.addRow(row0));
+
+		// row1: puma.test | UPDATE | (1, "Peter")->(1, "Linda").
+		RowChangedEvent row1 = new RowChangedEvent();
+		row1.setDatabase("puma");
+		row1.setTable("test");
+		row1.setDmlType(DMLType.UPDATE);
+		Map<String, ColumnInfo> columnInfoMap1 = new HashMap<String, ColumnInfo>();
+		columnInfoMap1.put("id", new ColumnInfo(true, 1, 1));
+		columnInfoMap1.put("name", new ColumnInfo(false, "Peter", "Linda"));
+		row1.setColumns(columnInfoMap1);
+		Assert.assertFalse(batchRow.addRow(row1));
 	}
 }

@@ -1,9 +1,5 @@
 package com.dianping.puma.syncserver.job.load;
 
-import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.util.sql.DMLType;
-import com.dianping.puma.syncserver.job.load.model.RowKey;
-
 /*
 public class LoadMerger {
 

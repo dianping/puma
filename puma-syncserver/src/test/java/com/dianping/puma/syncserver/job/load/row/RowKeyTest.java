@@ -1,4 +1,4 @@
-package com.dianping.puma.syncserver.job.load.model;
+package com.dianping.puma.syncserver.job.load.row;
 
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;

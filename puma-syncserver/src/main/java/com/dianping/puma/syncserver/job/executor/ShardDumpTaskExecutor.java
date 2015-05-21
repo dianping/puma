@@ -311,7 +311,10 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask, ShardS
 
                     String output = mysqlload(index);
                     if (!Strings.isNullOrEmpty(output)) {
-                        throw new IOException(output);
+                  	  //hack,ignore this warning
+                  	  if(!output.contains("Warning: Using a password on the command line interface can be insecure.")){
+                  		  throw new IOException(output);
+                  	  }
                     }
                     cleanUp(index);
                     loadStatus.setPercent((int) (index * 100 / task.getMaxKey()));

@@ -20,6 +20,9 @@ public class BatchRowPool implements LifeCycle<LoadException> {
 	/** Pool exception, default is null. */
 	private LoadException loadException = null;
 
+	/** Current transaction state, -1 for begin, 0 for in, 1 for commit. */
+	int transaction = -1;
+
 	// Pool optional settings.
 	private String name = "BatchRowPool-" + RandomStringUtils.randomAlphabetic(5);
 

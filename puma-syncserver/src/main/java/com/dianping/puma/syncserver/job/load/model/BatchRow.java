@@ -15,24 +15,34 @@ import java.util.Map;
 
 public class BatchRow {
 
-	private final static int volume = 1000;
+	/** Maximum size of batch rows, default is 1000. */
+	private int maxSize = 1000;
 
+	/** Size of batch rows. */
 	private int size;
 
-	private BinlogInfo binlogInfo;
-
+	/** `Schema`.`table` of a DML sql statement. */
 	private Table table;
 
+	/** Minimum current binlog info of batch rows. */
+	private BinlogInfo binlogInfo;
+
+	/** Minimum next binlog info of batch rows. */
+	private BinlogInfo nextBinlogInfo;
+
+	/** DDL or DML of batch rows. */
 	private boolean ddl = false;
 
+	/** DML type of batch rows. */
 	private DMLType dmlType;
 
-	private boolean isTransactionBegin;
-
+	/** Transaction commit of batch rows. */
 	private boolean isTransactionCommit;
 
+	/** Sql statement of batch rows. */
 	private String sql;
 
+	/** Sql parameters of batch rows. */
 	private List<Object[]> params = new ArrayList<Object[]>();
 
 	private Map<RowKey, Boolean> rowKeys = new HashMap<RowKey, Boolean>();
@@ -68,16 +78,23 @@ public class BatchRow {
 
 	private void addFirstRow(ChangedEvent event) {
 		binlogInfo = new BinlogInfo(event.getBinlog(), event.getBinlogPos());
+		nextBinlogInfo = new BinlogInfo(event.getBinlog(), event.getBinlogNextPos());
 		++size;
 
 		if (event instanceof RowChangedEvent) {
 			RowChangedEvent row = (RowChangedEvent) event;
-			ddl = false;
-			table = new Table(row.getDatabase(), row.getTable());
-			dmlType = row.getDmlType();
-			sql = LoadParser.parseSql(row);
-			params.add(LoadParser.parseArgs(row));
-			rowKeys.put(RowKey.getRowKey(row), true);
+
+			if (row.isTransactionCommit()) {
+				ddl = false;
+				isTransactionCommit = true;
+			} else {
+				ddl = false;
+				table = new Table(row.getDatabase(), row.getTable());
+				dmlType = row.getDmlType();
+				sql = LoadParser.parseSql(row);
+				params.add(LoadParser.parseArgs(row));
+				rowKeys.put(RowKey.getRowKey(row), true);
+			}
 		} else {
 			ddl = true;
 			sql = ((DdlEvent) event).getSql();
@@ -88,7 +105,7 @@ public class BatchRow {
 		if (ddl) {
 			return false;
 		}
-		if (size >= volume) {
+		if (size >= maxSize) {
 			return false;
 		}
 		if (!this.table.equals(new Table(row.getDatabase(), row.getTable()))) {
@@ -117,10 +134,6 @@ public class BatchRow {
 
 	public boolean isDdl() {
 		return ddl;
-	}
-
-	public boolean isTransactionBegin() {
-		return isTransactionBegin;
 	}
 
 	public boolean isTransactionCommit() {

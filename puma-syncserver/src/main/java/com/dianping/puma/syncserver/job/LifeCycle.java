@@ -4,10 +4,13 @@ import org.apache.commons.lang3.exception.ContextedRuntimeException;
 
 public interface LifeCycle<T extends ContextedRuntimeException> {
 
+	// Start.
 	public void start();
 
+	// Stop.
 	public void stop();
 
+	// Destroy the persistent storage.
 	public void destroy();
 
 	public T exception();

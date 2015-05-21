@@ -20,30 +20,38 @@ public class DefaultTransformer implements Transformer {
 	private String name;
 
 	private boolean stopped = true;
-
 	private TransformException transformException = null;
 
 	private MysqlMapping mysqlMapping;
 
-	public DefaultTransformer() {
-	}
+	public DefaultTransformer() {}
 
 	@Override
 	public void start() {
-		LOG.info("Transformer({}) is starting.", name);
-		stopped = false;
-		transformException = null;
+		LOG.info("Starting transformer({})...", name);
+
+		if (!stopped) {
+			LOG.warn("Transformer({}) is already started.", name);
+		} else {
+			stopped = false;
+			transformException = null;
+		}
 	}
 
 	@Override
 	public void stop() {
-		LOG.info("Transformer({}) is stopping.", name);
-		stopped = true;
+		LOG.info("Stopping transformer({})...", name);
+
+		if (stopped) {
+			LOG.warn("Transformer({}) is already stopped.", name);
+		} else {
+			stopped = true;
+		}
 	}
 
 	@Override
 	public void destroy() {
-
+		// No persistent storage in transformer.
 	}
 
 	@Override

@@ -17,11 +17,14 @@ public class PooledLoader implements Loader {
 	private static final Logger LOG = LoggerFactory.getLogger(PooledLoader.class);
 
 	private boolean stopped = true;
+
 	private LoadException loadException = null;
 
 	// PooledLoader main modules.
 	private Thread loopThread;
+
 	private BatchExecPool batchExecPool;
+
 	private BatchRowPool batchRowPool;
 
 	private String name;
@@ -30,13 +33,16 @@ public class PooledLoader implements Loader {
 
 	// JDBC connection settings.
 	private String host;
+
 	private String username;
+
 	private String password;
 
 	// Monitor.
 	private EventMonitor loadEventMonitor = new EventMonitor("EventCount.load", 1L);
 
-	public PooledLoader() {}
+	public PooledLoader() {
+	}
 
 	public void start() {
 		LOG.info("PooledLoader({}) is starting.", name);
@@ -105,7 +111,9 @@ public class PooledLoader implements Loader {
 	private void initLoopThread() {
 		loopThread = new Thread(new Runnable() {
 			@Override
-			public void run() { loop(); }
+			public void run() {
+				loop();
+			}
 		});
 	}
 
@@ -115,30 +123,25 @@ public class PooledLoader implements Loader {
 			throw new LoadException(0, String.format("Loader(%s) is stopped for event(%s).", name, event.toString()));
 		}
 
-		try {
-			loadEventMonitor.record(event.genFullName(), "0");
-			batchRowPool.put(event);
-		} catch (InterruptedException e) {
-			if (!stopped) {
-				LOG.error("Loader({}) loads event failure for event({}).", name, event.toString());
-				handleException(e);
-			}
-		}
+		loadEventMonitor.record(event.genFullName(), "0");
+		batchRowPool.put(event);
 	}
 
 	private void loop() {
-		for (;;) {
+		for (; ; ) {
 			try {
+				/*
 				if (batchRowPool.hasException()) {
-					handleException(batchExecPool.getException());
+					handleException(batchExecPool.getLoadException());
 					break;
-				}
+				}*/
 				BatchRow batchRow = batchRowPool.take();
 
+				/*
 				if (batchExecPool.hasException()) {
-					handleException(batchExecPool.getException());
+					handleException(batchExecPool.getLoadException());
 					break;
-				}
+				}*/
 				batchExecPool.put(batchRow);
 
 			} catch (InterruptedException e) {

@@ -27,6 +27,10 @@ public class BatchRow {
 
 	private DMLType dmlType;
 
+	private boolean isTransactionBegin;
+
+	private boolean isTransactionCommit;
+
 	private String sql;
 
 	private List<Object[]> params = new ArrayList<Object[]>();
@@ -113,6 +117,14 @@ public class BatchRow {
 
 	public boolean isDdl() {
 		return ddl;
+	}
+
+	public boolean isTransactionBegin() {
+		return isTransactionBegin;
+	}
+
+	public boolean isTransactionCommit() {
+		return isTransactionCommit;
 	}
 
 	public String getSql() {

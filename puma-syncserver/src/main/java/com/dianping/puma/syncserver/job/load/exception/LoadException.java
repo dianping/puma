@@ -38,4 +38,8 @@ public class LoadException extends ContextedRuntimeException {
 	public String getErrorDesc() {
 		return errorDesc;
 	}
+
+	public static LoadException handleException(Exception e) {
+		return new LoadException(0);
+	}
 }

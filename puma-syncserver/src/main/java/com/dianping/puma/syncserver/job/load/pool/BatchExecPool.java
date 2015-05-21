@@ -1,16 +1,16 @@
 package com.dianping.puma.syncserver.job.load.pool;
 
-import com.dianping.cat.Cat;
-import com.dianping.cat.message.Transaction;
 import com.dianping.puma.core.annotation.ThreadSafe;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
-import com.dianping.puma.core.monitor.TransactionMonitor;
+import com.dianping.puma.syncserver.job.LifeCycle;
 import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
+import com.dianping.puma.syncserver.job.load.exception.LoadException;
 import com.dianping.puma.syncserver.job.load.model.BatchRow;
 import com.dianping.puma.syncserver.job.load.model.RowKey;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,18 +21,30 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class BatchExecPool {
+public class BatchExecPool implements LifeCycle<LoadException> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(BatchExecPool.class);
 
-	private String name = "name";
-
 	// Pool status.
 	private boolean stopped = true;
-	private Exception exception = null;
+	private LoadException loadException = null;
 
-	// Pool size.
-	private int poolSize;
+	// Pool prerequisite settings.
+	private String host;
+	private String username;
+	private String password;
+
+	// Pool optional settings.
+	private String name = "BatchExecPool-" + RandomStringUtils.randomAlphabetic(5);
+	private int poolSize = 1;
+	private boolean isStrongConsistency = false;
+	private int retries = 1;
+
+	// Connection cache.
+	private Connection cachedConn;
+
+	private boolean needNewConnection = true;
+
 	private volatile int dmlSize = 0;
 	private volatile int ddlSize = 0;
 
@@ -47,12 +59,6 @@ public class BatchExecPool {
 
 	// JDBC connection pool.
 	private HikariDataSource dataSource;
-	private String host;
-	private String username;
-	private String password;
-
-	// JDBC retry times.
-	private int retires;
 
 	private BinlogManager binlogManager;
 
@@ -60,40 +66,51 @@ public class BatchExecPool {
 	private Lock lock = new ReentrantLock();
 	private final Condition notConflict = lock.newCondition();
 
-	// Monitor.
-	private TransactionMonitor execMonitor = new TransactionMonitor("SQL.execute", 1L);
-	private TransactionMonitor connMonitor = new TransactionMonitor("SQL.connection", 1L);
-
 
 	public BatchExecPool() {
 	}
 
 	public void start() {
-		LOG.info("BatchExecPool({}) is starting.", name);
+		LOG.info("Starting batch execution pool({})...", name);
 
-		initThreadPool();
-		initDataSource();
-		//execMonitor.start();
-		//connMonitor.start();
-		stopped = false;
+		if (!stopped) {
+			LOG.warn("Batch execution pool({}) is already started.", name);
+		} else {
+			// Clear batch execution pool status.
+			stopped = false;
+			loadException = null;
+
+			// Initial JDBC data source.
+			initDataSource();
+
+			// Initial sql execution thread pool.
+			initThreadPool();
+		}
 	}
 
 	public void stop() {
-		LOG.info("BatchExecPool({}) is stopping.", name);
+		LOG.info("Stopping batch execution pool({})...", name);
 
-		stopped = true;
-		destroyThreadPool();
-		destroyDataSource();
-		//execMonitor.stop();
-		//connMonitor.stop();
+		if (stopped) {
+			LOG.warn("batch execution pool({}) is already stopped.", name);
+		} else {
+			// Clear batch execution pool status.
+			stopped = true;
+
+			// Destroy sql execution thread pool.
+			destroyThreadPool();
+
+			// Destroy JDBC data source.
+			destroyDataSource();
+		}
 	}
 
-	public boolean hasException() {
-		return exception != null;
+	public void destroy() {
+		// No persistent storage.
 	}
 
-	public Exception getException() {
-		return exception;
+	public LoadException exception() {
+		return loadException;
 	}
 
 	private void initThreadPool() {
@@ -134,7 +151,9 @@ public class BatchExecPool {
 			lock.unlock();
 		}
 
+		beforePooledBatchExecute(batchRow);
 		pooledBatchExecute(batchRow);
+		afterPooledBatchExecute(batchRow);
 	}
 
 	@ThreadSafe
@@ -192,19 +211,70 @@ public class BatchExecPool {
 		}
 	}
 
+	private void beforePooledBatchExecute(BatchRow batchRow) {
+		if (isStrongConsistency) {
+			if (batchRow.isTransactionCommit()) {
+				binlogManager.before(batchRow.getBinlogInfo());
+			}
+		} else {
+			binlogManager.before(batchRow.getBinlogInfo());
+		}
+	}
+
+	private void afterPooledBatchExecute(BatchRow batchRow) {
+		if (isStrongConsistency) {
+			if (batchRow.isTransactionCommit()) {
+				binlogManager.after(batchRow.getBinlogInfo());
+			}
+		} else {
+			binlogManager.after(batchRow.getBinlogInfo());
+		}
+	}
+
 	private void pooledBatchExecute(final BatchRow batchRow) {
+		try {
+			Connection conn;
+
+			if (isStrongConsistency) {
+				if (needNewConnection) {
+					conn = dataSource.getConnection();
+				} else {
+					conn = cachedConn;
+				}
+			} else {
+				conn = dataSource.getConnection();
+			}
+
+			pooledBatchExecute(conn, batchRow);
+		} catch (SQLException e) {
+			if (!stopped) {
+				loadException = LoadException.handleException(e);
+			}
+		}
+	}
+
+	private void pooledBatchExecute(final Connection conn, final BatchRow batchRow) {
 		threadPool.execute(new Runnable() {
 			@Override
 			public void run() {
-				Exception te = null;
+				LoadException te = null;
 
-				for (int count = 0; count <= retires; ++count) {
+				for (int count = 0; count <= retries; ++count) {
 					try {
-						batchExecute(batchRow);
+
+						if (isStrongConsistency) {
+							if (batchRow.isTransactionCommit()) {
+								commit(conn);
+							} else {
+								batchExecute(conn, batchRow);
+							}
+						} else {
+							batchExecute(conn, batchRow);
+							commit(conn);
+						}
 						remove(batchRow);
-						binlogManager.after(batchRow.getBinlogInfo());
 						return;
-					} catch (SQLException e) {
+					} catch (LoadException e) {
 						if (!stopped) {
 							te = e;
 							continue;
@@ -214,24 +284,28 @@ public class BatchExecPool {
 				}
 
 				// If the code runs to here, then the sql execution is failure.
-				exception = te;
-				LOG.error("Sql error: {}.", exception);
+				loadException = te;
+				LOG.error("Sql error: {}.", loadException);
 				stop();
 			}
 		});
 	}
 
-	private void batchExecute(BatchRow batchRow) throws SQLException {
-		Transaction t = Cat.newTransaction("SQL", "execute");
-		Connection conn = dataSource.getConnection();
+	private void batchExecute(Connection conn, BatchRow batchRow) {
 		try {
 			(new QueryRunner()).batch(conn, batchRow.getSql(), batchRow.getParams());
+		} catch (SQLException e) {
+			DbUtils.rollbackAndCloseQuietly(conn);
+			throw LoadException.handleException(e);
+		}
+	}
+
+	private void commit(Connection conn) {
+		try {
 			DbUtils.commitAndClose(conn);
 		} catch (SQLException e) {
 			DbUtils.rollbackAndCloseQuietly(conn);
-			throw e;
-		} finally {
-			t.complete();
+			throw LoadException.handleException(e);
 		}
 	}
 
@@ -251,8 +325,12 @@ public class BatchExecPool {
 		this.password = password;
 	}
 
-	public void setRetires(int retires) {
-		this.retires = retires;
+	public void setRetires(int retries) {
+		this.retries = retries;
+	}
+
+	public void setStrongConsistency(boolean isTransactionDisable) {
+		this.isStrongConsistency = isTransactionDisable;
 	}
 
 	public void setBinlogManager(BinlogManager binlogManager) {

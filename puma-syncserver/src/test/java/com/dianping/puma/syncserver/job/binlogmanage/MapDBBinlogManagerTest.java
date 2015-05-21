@@ -1,49 +1,62 @@
 package com.dianping.puma.syncserver.job.binlogmanage;
 
 import com.dianping.puma.core.model.BinlogInfo;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
+import org.apache.commons.lang.builder.EqualsBuilder;
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 public class MapDBBinlogManagerTest {
 
-	MapDBBinlogManager binlogManager;
-
-	@Before
-	public void before() {
-		binlogManager = new MapDBBinlogManager();
-		binlogManager.setName("puma");
-		binlogManager.start();
-	}
-
-	@After
-	public void after() {
-		binlogManager.delete();
-		binlogManager.stop();
-	}
-
 	@Test
-	public void testGetEarliest() {
-		BinlogInfo binlogInfo0 = new BinlogInfo("mysql-bin.000001", 4L);
-		BinlogInfo binlogInfo1 = new BinlogInfo("mysql-bin.000002", 4L);
-		BinlogInfo binlogInfo2 = new BinlogInfo("mysql-bin.000002", 10L);
-		BinlogInfo binlogInfo3 = new BinlogInfo("mysql-bin.000002", 5L);
+	public void testGetRecoveryPoint() {
+		MapDBBinlogManager binlogManager = new MapDBBinlogManager(new BinlogInfo("mysql-bin.000001", 4L));
+		binlogManager.setName("puma");
 
-		binlogManager.before(binlogInfo0);
-		binlogManager.before(binlogInfo1);
-		binlogManager.before(binlogInfo2);
+		binlogManager.start();
+		binlogManager.destroy();
+		binlogManager.start();
 
-		binlogManager.after(binlogInfo0);
-		Assert.assertEquals(binlogInfo1, binlogManager.getEarliest());
+		BinlogInfo expected, result;
 
-		binlogManager.after(binlogInfo1);
-		Assert.assertEquals(binlogInfo2, binlogManager.getEarliest());
+		expected = new BinlogInfo("mysql-bin.000001", 4L);
+		result = binlogManager.getRecovery();
+		assertTrue(EqualsBuilder.reflectionEquals(expected, result));
 
-		binlogManager.before(binlogInfo3);
-		Assert.assertEquals(binlogInfo3, binlogManager.getEarliest());
+		// (000002, 4L).
+		binlogManager.before(new BinlogInfo("mysql-bin.000002", 4L));
+		expected = new BinlogInfo("mysql-bin.000002", 4L);
+		result = binlogManager.getRecovery();
+		assertTrue(EqualsBuilder.reflectionEquals(expected, result));
 
-		binlogManager.after(binlogInfo2);
-		Assert.assertEquals(binlogInfo3, binlogManager.getEarliest());
+		// (000002, 4L), (000002, 10L).
+		binlogManager.before(new BinlogInfo("mysql-bin.000002", 10L));
+		expected = new BinlogInfo("mysql-bin.000002", 4L);
+		result = binlogManager.getRecovery();
+		assertTrue(EqualsBuilder.reflectionEquals(expected, result));
+
+		// (000002, 10L).
+		binlogManager.after(new BinlogInfo("mysql-bin.000002", 4L));
+		expected = new BinlogInfo("mysql-bin.000002", 10L);
+		result = binlogManager.getRecovery();
+		assertTrue(EqualsBuilder.reflectionEquals(expected, result));
+
+		// (000002, 10L), (000002, 12L).
+		binlogManager.before(new BinlogInfo("mysql-bin.000002", 12L));
+		expected = new BinlogInfo("mysql-bin.000002", 10L);
+		result = binlogManager.getRecovery();
+		assertTrue(EqualsBuilder.reflectionEquals(expected, result));
+
+		// (000002, 10L).
+		binlogManager.after(new BinlogInfo("mysql-bin.000002", 12L));
+		expected = new BinlogInfo("mysql-bin.000002", 10L);
+		result = binlogManager.getRecovery();
+		assertTrue(EqualsBuilder.reflectionEquals(expected, result));
+
+		// null.
+		binlogManager.after(new BinlogInfo("mysql-bin.000002", 10L));
+		expected = new BinlogInfo("mysql-bin.000002", 12L);
+		result = binlogManager.getRecovery();
+		assertTrue(EqualsBuilder.reflectionEquals(expected, result));
 	}
 }

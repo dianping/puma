@@ -67,15 +67,18 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 		stopped = false;
 		gException = null;
 
+		// 1. Start binlogManager.
 		MapDBBinlogManager mapDBBinlogManager = new MapDBBinlogManager();
 		mapDBBinlogManager.setName(task.getName());
 		binlogManager = mapDBBinlogManager;
 		binlogManager.start();
 
+		// 2. Start detailed modules.
+		doStart();
+
+		// 3. Start the puma client.
 		createPumaClient();
 		pumaClient.start();
-
-		doStart();
 	}
 
 	@Override

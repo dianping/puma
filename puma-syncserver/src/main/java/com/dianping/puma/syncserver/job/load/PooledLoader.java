@@ -79,6 +79,10 @@ public class PooledLoader implements Loader {
 		loadEventMonitor.stop();
 	}
 
+	public void destroy() {
+
+	}
+
 	public LoadException exception() {
 		return loadException;
 	}

@@ -10,7 +10,5 @@ public interface BinlogManager extends LifeCycle<BinlogManageException> {
 
 	public void after(BinlogInfo binlogInfo);
 
-	public BinlogInfo getEarliest();
-
-	public void delete();
+	public BinlogInfo getRecovery();
 }

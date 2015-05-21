@@ -8,5 +8,7 @@ public interface LifeCycle<T extends ContextedRuntimeException> {
 
 	public void stop();
 
+	public void destroy();
+
 	public T exception();
 }

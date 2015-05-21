@@ -42,6 +42,11 @@ public class DefaultTransformer implements Transformer {
 	}
 
 	@Override
+	public void destroy() {
+
+	}
+
+	@Override
 	public TransformException exception() {
 		return transformException;
 	}

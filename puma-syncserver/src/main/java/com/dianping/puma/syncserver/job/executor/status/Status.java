@@ -5,7 +5,7 @@ public enum Status {
 	CONNECTING,
 	CONNECTED,
 	RUNNING,
-	RETRING,
+	RETRYING,
 	STOPPED,
 	FAILED,
 }

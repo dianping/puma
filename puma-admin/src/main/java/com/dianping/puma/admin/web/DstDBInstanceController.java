@@ -135,27 +135,8 @@ public class DstDBInstanceController {
 			} else {
 				throw new Exception("duplicate name.");
 			}
-
-			dstDBInstance.setName(name);
-			dstDBInstance.setServerId(serverId);
-
-			int portInt = port == null ? dbPort : Integer.parseInt(port);
-
-			dstDBInstance.setHost(host);
-			dstDBInstance.setPort(portInt);
-			dstDBInstance.setUsername(username);
-			dstDBInstance.setPassword(password);
-			dstDBInstance.setMetaHost(host);
-			dstDBInstance.setMetaPort(portInt);
-			dstDBInstance.setMetaUsername(username);
-			dstDBInstance.setMetaPassword(password);
-
-			if (operation == ActionOperation.CREATE) {
-				dstDBInstanceService.create(dstDBInstance);
-			} else {
-				dstDBInstanceService.update(dstDBInstance);
-			}
-
+			DBInstanceMapper.convertToDBInstance(dstDBInstanceDto);
+			dstDBInstanceService.create(dstDBInstance);
 			map.put("success", true);
 		} catch (MongoException e) {
 			map.put("error", "storage");
@@ -170,8 +151,7 @@ public class DstDBInstanceController {
 
 	@RequestMapping(value = { "/dst-db-instance/update/{id}" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String updatePost(@PathVariable long id, String name, Long serverId, String host, String port,
-			String username, String password) {
+	public String updatePost(@PathVariable long id, @RequestBody DstDBInstanceDto dstDBInstanceDto) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 

@@ -14,7 +14,6 @@ import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
-import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
@@ -151,7 +150,6 @@ public class PumaTaskController {
 			operation = ActionOperation.CREATE;
 			
 			pumaTaskService.create(pumaTask);
-
 			// Add puma task state to the state container.
 			PumaTaskState taskState = new PumaTaskState();
 			taskState.setTaskName(pumaTask.getName());
@@ -187,7 +185,6 @@ public class PumaTaskController {
 
 		try {
 			ActionOperation operation = null;
-
 			PumaTaskOperationEvent event = new PumaTaskOperationEvent();
 			PumaTask pumaTask = pumaTaskService.find(id);
 			if (pumaTask == null) {

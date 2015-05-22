@@ -95,7 +95,6 @@ public class SyncServerController {
 		return new ModelAndView("common/main-container", map);
 	}
 
-
 	@RequestMapping(value = { "/sync-server/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String createPost(@RequestBody SyncServerDto syncServerDto) {
@@ -162,8 +161,7 @@ public class SyncServerController {
 
 		return GsonUtil.toJson(map);
 	}
-	
-	
+
 	@RequestMapping(value = { "/sync-server/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String removePost(String name) {

@@ -1,5 +1,8 @@
 package com.dianping.puma.admin.web;
 
+import com.dianping.puma.admin.model.SyncServerDto;
+import com.dianping.puma.admin.model.mapper.PumaServerMapper;
+import com.dianping.puma.admin.model.mapper.SyncServerMapper;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.entity.SyncServer;
@@ -14,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -40,14 +44,13 @@ public class SyncServerController {
 	@Value("8080")
 	Integer serverPort;
 
-
 	@RequestMapping(value = { "/sync-server" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("path", "sync-server");
 		return new ModelAndView("common/main-container", map);
 	}
-	
+
 	@RequestMapping(value = { "/sync-server/list" }, method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String list(int page, int pageSize) {
@@ -58,7 +61,7 @@ public class SyncServerController {
 		map.put("list", syncServerEntities);
 		return GsonUtil.toJson(map);
 	}
-	
+
 	@RequestMapping(value = { "/sync-server/create" })
 	public ModelAndView create(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -92,32 +95,19 @@ public class SyncServerController {
 		return new ModelAndView("common/main-container", map);
 	}
 
-
 	@RequestMapping(value = { "/sync-server/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(String name, String host, String port) {
+	public String createPost(@RequestBody SyncServerDto syncServerDto) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			ActionOperation operation;
 
-			SyncServer syncServer = syncServerService.find(name);
-			if (syncServer == null) {
-				operation = ActionOperation.CREATE;
-				syncServer = new SyncServer();
-			} else {
+			SyncServer syncServer = syncServerService.find(syncServerDto.getName());
+			if (syncServer != null) {
 				throw new Exception("duplicate name.");
 			}
-			syncServer.setName(name);
-			syncServer.setHost(host);
-			syncServer.setPort(port == null ? serverPort : Integer.parseInt(port));
-
-			if (operation == ActionOperation.CREATE) {
-				syncServerService.create(syncServer);
-			} else {
-				syncServerService.update(syncServer);
-			}
-
+			syncServer = SyncServerMapper.convertToSyncServer(syncServerDto);
+			syncServerService.create(syncServer);
 			map.put("success", true);
 		} catch (MongoException e) {
 			map.put("error", "storage");
@@ -132,12 +122,11 @@ public class SyncServerController {
 
 	@RequestMapping(value = { "/sync-server/update/{id}" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String updatePost(@PathVariable long id, String name, String host, String port) {
+	public String updatePost(@PathVariable long id, @RequestBody SyncServerDto syncServerDto) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
 			ActionOperation operation;
-
 			SyncServer syncServer = syncServerService.find(id);
 			if (syncServer == null) {
 				operation = ActionOperation.CREATE;
@@ -145,17 +134,12 @@ public class SyncServerController {
 			} else {
 				operation = ActionOperation.UPDATE;
 			}
-
-			syncServer.setName(name);
-			syncServer.setHost(host);
-			syncServer.setPort(port == null ? serverPort : Integer.parseInt(port));
-
+			SyncServerMapper.convertToSyncServer(syncServer, syncServerDto);
 			if (operation == ActionOperation.CREATE) {
 				syncServerService.create(syncServer);
 			} else {
 				syncServerService.update(syncServer);
 			}
-
 			map.put("success", true);
 		} catch (MongoException e) {
 			map.put("error", "storage");
@@ -167,8 +151,7 @@ public class SyncServerController {
 
 		return GsonUtil.toJson(map);
 	}
-	
-	
+
 	@RequestMapping(value = { "/sync-server/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String removePost(String name) {

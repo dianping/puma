@@ -94,6 +94,17 @@ public class SyncTaskMorphiaDao extends MongoBaseDao<SyncTaskMorphia> implements
 		this.save(syncTaskMorphia);
 		this.getDatastore().ensureIndexes();
 	}
+	
+	@Override
+	public void update(SyncTask syncTask){
+		SyncTaskMorphia syncTaskMorphia = new SyncTaskMorphia(syncTask);
+		Query<SyncTaskMorphia> q = this.getDatastore().createQuery(SyncTaskMorphia.class);
+		q.field("name").equal(syncTaskMorphia.getName());
+		UpdateOperations<SyncTaskMorphia> uop = this.getDatastore().createUpdateOperations(SyncTaskMorphia.class);
+		uop.set("entity", syncTask);
+		this.update(q, uop);
+		this.getDatastore().ensureIndexes();
+	}
 
 	@Override
 	public void remove(String name) {

@@ -24,6 +24,8 @@ public interface SyncTaskService {
 	List<SyncTask> findByPage(int page, int pageSize);
 	
 	void create(SyncTask syncTask);
+	
+	void update(SyncTask syncTask);
 
 	void remove(String name);
 	

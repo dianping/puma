@@ -30,8 +30,19 @@
   display: block;
   background-color: #F5F5F5;
   border-top: 1px solid #E5E5E5;
+  height:40px;
+  margin-top:20px;
+  margin-bottom:20px;
+  text-align:center;
+  padding-top:10px;
 }
 
 .puma-form-textarea{
 	padding: 5px 4px 6px;
+}
+
+.puma-form-operation{
+	float:left;
+	padding-left:15px;
+	padding-top:7px;
 }

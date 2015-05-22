@@ -1,5 +1,7 @@
 package com.dianping.puma.admin.web;
 
+import com.dianping.puma.admin.model.SrcDBInstanceDto;
+import com.dianping.puma.admin.model.mapper.DBInstanceMapper;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -68,7 +71,6 @@ public class SrcDBInstanceController {
 	@RequestMapping(value = { "/src-db-instance/update/{id}" }, method = RequestMethod.GET)
 	public ModelAndView update(@PathVariable long id) {
 		Map<String, Object> map = new HashMap<String, Object>();
-
 		try {
 			SrcDBInstance entity = srcDBInstanceService.find(id);
 			if (entity != null) {
@@ -93,41 +95,18 @@ public class SrcDBInstanceController {
 
 	@RequestMapping(value = { "/src-db-instance/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(String name, Long serverId, String host, String port, String username, String password) {
+	public String createPost(@RequestBody SrcDBInstanceDto srcDBInstanceDto) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			boolean create;
+			SrcDBInstance srcDBInstance = srcDBInstanceService.find(srcDBInstanceDto.getName());
 
-			SrcDBInstance srcDBInstance = srcDBInstanceService.find(name);
-
-			if (srcDBInstance == null) {
-				create = true;
-				srcDBInstance = new SrcDBInstance();
-			} else {
-				create = false;
+			if (srcDBInstance != null) {
 				throw new Exception("duplicate name.");
 			}
-
-			srcDBInstance.setName(name);
-			srcDBInstance.setServerId(serverId);
-			int portInt = port == null ? dbPort : Integer.parseInt(port);
-			srcDBInstance.setHost(host);
-			srcDBInstance.setPort(portInt);
-			srcDBInstance.setUsername(username);
-			srcDBInstance.setPassword(password);
-			srcDBInstance.setMetaHost(host);
-			srcDBInstance.setMetaPort(portInt);
-			srcDBInstance.setMetaUsername(username);
-			srcDBInstance.setMetaPassword(password);
-
-			if (create) {
-				srcDBInstanceService.create(srcDBInstance);
-			} else {
-				srcDBInstanceService.update(srcDBInstance);
-			}
-
+			DBInstanceMapper.convertToDBInstance(srcDBInstanceDto);
+			srcDBInstanceService.create(srcDBInstance);
 			map.put("success", true);
 		} catch (MongoException e) {
 			map.put("error", "storage");
@@ -142,9 +121,7 @@ public class SrcDBInstanceController {
 
 	@RequestMapping(value = { "/src-db-instance/update/{id}" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String updatePost(@PathVariable long id, String name, Long serverId, String host, String port,
-			String username, String password) {
-
+	public String updatePost(@PathVariable long id, @RequestBody SrcDBInstanceDto srcDBInstanceDto) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
@@ -158,18 +135,7 @@ public class SrcDBInstanceController {
 			} else {
 				create = false;
 			}
-
-			srcDBInstance.setName(name);
-			srcDBInstance.setServerId(serverId);
-			int portInt = port == null ? dbPort : Integer.parseInt(port);
-			srcDBInstance.setHost(host);
-			srcDBInstance.setPort(portInt);
-			srcDBInstance.setUsername(username);
-			srcDBInstance.setPassword(password);
-			srcDBInstance.setMetaHost(host);
-			srcDBInstance.setMetaPort(portInt);
-			srcDBInstance.setMetaUsername(username);
-			srcDBInstance.setMetaPassword(password);
+			DBInstanceMapper.convertToDBInstance(srcDBInstance, srcDBInstanceDto);
 
 			if (create) {
 				srcDBInstanceService.create(srcDBInstance);

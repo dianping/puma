@@ -55,6 +55,10 @@ public class SyncTaskServiceImpl implements SyncTaskService {
 		syncTaskDao.create(syncTask);
 	}
 
+	public void update(SyncTask syncTask){
+		syncTaskDao.update(syncTask);
+	}
+	
 	public void remove(String name) {
 		syncTaskDao.remove(name);
 	}

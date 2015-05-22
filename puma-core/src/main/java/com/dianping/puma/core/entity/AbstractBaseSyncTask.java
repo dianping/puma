@@ -13,6 +13,8 @@ public abstract class AbstractBaseSyncTask extends BaseSyncTask {
 	private boolean dml;
 
 	private boolean transaction;
+	
+	private boolean consistency;
 
 	private MysqlMapping mysqlMapping;
 
@@ -62,5 +64,13 @@ public abstract class AbstractBaseSyncTask extends BaseSyncTask {
 
 	public void setMysqlMapping(MysqlMapping mysqlMapping) {
 		this.mysqlMapping = mysqlMapping;
+	}
+
+	public boolean isConsistency() {
+		return consistency;
+	}
+
+	public void setConsistency(boolean consistency) {
+		this.consistency = consistency;
 	}
 }

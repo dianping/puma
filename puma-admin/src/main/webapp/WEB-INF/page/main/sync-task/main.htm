@@ -28,7 +28,7 @@
 					ng-init="load()">
 					<div class="col-xs-12">
 
-						<div class="table-header">数据同步任务列表</div>
+						<div class="table-header">数据同步任务列表 </div>
 
 						<!-- <div class="table-responsive"> -->
 
@@ -41,7 +41,9 @@
 										<div class="dataTables_length" id="sample-table-2_length"></div>
 									</div>
 									<div class="col-xs-6">
-										<div id="sample-table-2_filter" class="dataTables_filter"></div>
+										<div id="sample-table-2_filter" class="dataTables_filter">
+										
+										</div>
 									</div>
 								</div>
 								<table id="sample-table-2"
@@ -79,9 +81,9 @@
 													</a> <a class="blue" href="javascript:void(0)"
 													ng-click="refresh(item.name)"> <i
 														class="ace-icon fa fa-refresh bigger-130"></i>
-													</a> <a class="green" href="#"> <i
+													</a> <a class="green" href="${rc.contextPath}/sync-task/create/"> <i
 														class="ace-icon fa fa-plus-circle purple bigger-130"></i>
-													</a><a class="green" href="#"> <i
+													</a><a class="green" href="${rc.contextPath}/sync-task/update/{{item.id}}"> <i
 														class="ace-icon fa fa-pencil bigger-130"></i>
 													</a>  <a class="red" href="javascript:void(0)" 
 														ng-click="dialog(item.name)"> <i

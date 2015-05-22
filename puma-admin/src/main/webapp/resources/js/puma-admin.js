@@ -41,7 +41,7 @@ pageApp.controller('pageCtrl', [
 
 			$scope.currentPage = 1;
 			$scope.totalPage = 1;
-			$scope.pageSize = 3;
+			$scope.pageSize = 10;
 			$scope.pages = [];
 			$scope.endPage = 1;
 			$scope.count = 0;
@@ -171,42 +171,140 @@ var formApp = angular.module("formApp", []);
 formApp.factory('formService', [ '$http', '$location',
 		function($http, $location) {
 			var submit = function(data) {
-				console.log($location.absUrl());
+				return $http.post($location.absUrl(),angular.toJson(data));
+			};
+
+			var init = function(url, id) {
 				return $http({
-					method : 'POST',
-					params : data,
-					url : $location.absUrl()
+					method : 'GET',
+					params : {
+						id : id
+					},
+					url : url
 				});
+			};
+
+			var addMark = function(data) {
+				data.push({});
+			};
+
+			var removeMark = function(data, index) {
+				data.splice(index, 1);
 			};
 
 			return {
 				submit : function(data) {
 					return submit(data);
+				},
+				init : function(url, id) {
+					return init(url, id);
+				},
+				addMark : function(data) {
+					return addMark(data);
+				},
+				removeMark : function(data, index){
+					return removeMark(data, index);
 				}
 			};
 		} ]);
 
-formApp.controller('formCtrl', [ '$scope', '$window', 'formService',
-		function($scope, $window, formService) {
+formApp
+		.controller(
+				'formCtrl',
+				[
+						'$scope',
+						'$window',
+						'formService',
+						function($scope, $window, formService) {
 
-			$scope.submit = function() {
-				formService.submit($scope.entity).success(function(data) {
-					if (data.success) {
-						console.log($scope.backUrl);
-						$window.location.href = $scope.backUrl;
-					} else {
-						return false;
-					}
-				});
-			};
+							$scope.submit = function() {
+								console.log($scope.entity);
+								
+//								formService
+//										.submit($scope.entity)
+//										.success(
+//												function(data) {
+//													if (data.success) {
+//														console.log($scope.backUrl);
+//														$window.location.href = $scope.backUrl;
+//													} else {
+//														return false;
+//													}
+//												});
+							};
 
-			$scope.goBack = function() {
-				$window.history.back();
-			};
-			
-			$scope.change = function(){
-				$scope.entity.srcDBInstanceName = $scope.entity.srcDBInstanceName?$scope.entity.srcDBInstanceName : '';
-				$scope.entity.pumaServerName = $scope.entity.pumaServerName?$scope.entity.pumaServerName : '';
-				$scope.entity.name = $scope.entity.srcDBInstanceName + '@' + $scope.entity.pumaServerName;
-			}
-		} ]);
+							$scope.goBack = function() {
+								$window.history.back();
+							};
+
+							$scope.change = function() {
+								$scope.entity.srcDBInstanceName = $scope.entity.srcDBInstanceName ? $scope.entity.srcDBInstanceName
+										: '';
+								$scope.entity.pumaServerName = $scope.entity.pumaServerName ? $scope.entity.pumaServerName
+										: '';
+								$scope.entity.name = $scope.entity.srcDBInstanceName
+										+ '@' + $scope.entity.pumaServerName;
+							};
+							
+
+							$scope.initPumaTask = function(url, id) {
+								formService
+										.init(url, id)
+										.success(
+												function(data) {
+													$scope.entity = data.entity;
+													$scope.pumaServerEntities = data.pumaServerEntities;
+													$scope.srcDBInstanceEntities = data.srcDBInstanceEntities;
+													if(!$scope.entity){
+														$scope.entity = {};
+														$scope.entity.databases = [];
+														$scope.addMark($scope.entity.databases);
+													}
+												});
+							};
+							
+							$scope.addMark = function(data) {	
+								formService.addMark(data);
+							};
+							
+							$scope.removeMark = function(data,index) {
+								formService.removeMark(data, index);
+							};
+							
+							$scope.addMapping = function(data) {	
+								data.push({tableMappings:[{}]});
+							};
+							
+							$scope.changeSyncTask = function(){
+								$scope.entity.pumaTaskName = $scope.entity.pumaTaskName ? $scope.entity.pumaTaskName: '';
+								$scope.entity.dstDBInstanceName = $scope.entity.dstDBInstanceName ? $scope.entity.dstDBInstanceName: '';
+								$scope.entity.name = $scope.entity.pumaTaskName+ '@' + $scope.entity.dstDBInstanceName;
+							};
+							
+							$scope.initSyncTask =  function(url, id) {
+								formService
+								.init(url, id)
+								.success(
+										function(data) {
+											$scope.entity = data.entity;
+											$scope.pumaTasks = data.pumaTasks;
+											$scope.dstDBInstances = data.dstDBInstances;
+											$scope.syncServers = data.syncServers;
+											$scope.errorSet = data.errorSet;
+											//console.log($scope.entity);
+											if(!$scope.entity||!$scope.entity.errorList||!$scope.entity.errorList.errors){
+												$scope.entity = {};
+												$scope.entity.errorList = {};
+												$scope.entity.errorList.errors = [];
+												$scope.addMark($scope.entity.errorList.errors);
+											}
+											if(!$scope.entity||!$scope.entity.mysqlMapping||!$scope.entity.mysqlMapping.databaseMappings){
+												$scope.entity.mysqlMapping = {};
+												$scope.entity.mysqlMapping.databaseMappings = []; 
+												$scope.addMapping($scope.entity.mysqlMapping.databaseMappings);
+											}
+											
+										});
+							};
+
+						} ]);

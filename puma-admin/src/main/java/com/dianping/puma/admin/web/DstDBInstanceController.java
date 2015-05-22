@@ -1,9 +1,10 @@
 package com.dianping.puma.admin.web;
 
+import com.dianping.puma.admin.model.DstDBInstanceDto;
+import com.dianping.puma.admin.model.mapper.DBInstanceMapper;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.entity.DstDBInstance;
-import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.service.DstDBInstanceService;
 import com.dianping.puma.core.service.SyncTaskService;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -41,25 +43,9 @@ public class DstDBInstanceController {
 	@Value("3306")
 	Integer dbPort;
 
-	// @RequestMapping(value = { "/dst-db-instance" })
-	// public ModelAndView view(HttpServletRequest request, HttpServletResponse
-	// response) {
-	// Map<String, Object> map = new HashMap<String, Object>();
-	//
-	// List<DstDBInstance> dstDBInstanceEntities =
-	// dstDBInstanceService.findAll();
-	//
-	// map.put("entities", dstDBInstanceEntities);
-	// map.put("path", "dst-db-instance");
-	// return new ModelAndView("main/container", map);
-	// }
-
 	@RequestMapping(value = { "/dst-db-instance" })
 	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		// List<DstDBInstance> dstDBInstanceEntities =
-		// dstDBInstanceService.findAll();
-		// map.put("entities", dstDBInstanceEntities);
 		map.put("path", "dst-db-instance");
 		return new ModelAndView("common/main-container", map);
 	}
@@ -110,41 +96,17 @@ public class DstDBInstanceController {
 
 	@RequestMapping(value = { "/dst-db-instance/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(String name, Long serverId, String host, String port, String username, String password) {
+	public String createPost(@RequestBody DstDBInstanceDto dstDBInstanceDto) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			ActionOperation operation;
-
-			DstDBInstance dstDBInstance = dstDBInstanceService.find(name);
-			if (dstDBInstance == null) {
-				operation = ActionOperation.CREATE;
-				dstDBInstance = new DstDBInstance();
-			} else {
+			DstDBInstance dstDBInstance = dstDBInstanceService.find(dstDBInstanceDto.getName());
+			if (dstDBInstance != null) {
 				throw new Exception("duplicate name.");
 			}
-
-			dstDBInstance.setName(name);
-			dstDBInstance.setServerId(serverId);
-
-			int portInt = port == null ? dbPort : Integer.parseInt(port);
-
-			dstDBInstance.setHost(host);
-			dstDBInstance.setPort(portInt);
-			dstDBInstance.setUsername(username);
-			dstDBInstance.setPassword(password);
-			dstDBInstance.setMetaHost(host);
-			dstDBInstance.setMetaPort(portInt);
-			dstDBInstance.setMetaUsername(username);
-			dstDBInstance.setMetaPassword(password);
-
-			if (operation == ActionOperation.CREATE) {
-				dstDBInstanceService.create(dstDBInstance);
-			} else {
-				dstDBInstanceService.update(dstDBInstance);
-			}
-
+			DBInstanceMapper.convertToDBInstance(dstDBInstanceDto);
+			dstDBInstanceService.create(dstDBInstance);
 			map.put("success", true);
 		} catch (MongoException e) {
 			map.put("error", "storage");
@@ -159,8 +121,7 @@ public class DstDBInstanceController {
 
 	@RequestMapping(value = { "/dst-db-instance/update/{id}" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String updatePost(@PathVariable long id, String name, Long serverId, String host, String port,
-			String username, String password) {
+	public String updatePost(@PathVariable long id, @RequestBody DstDBInstanceDto dstDBInstanceDto) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
@@ -174,20 +135,7 @@ public class DstDBInstanceController {
 			} else {
 				operation = ActionOperation.UPDATE;
 			}
-
-			dstDBInstance.setName(name);
-			dstDBInstance.setServerId(serverId);
-
-			int portInt = port == null ? dbPort : Integer.parseInt(port);
-
-			dstDBInstance.setHost(host);
-			dstDBInstance.setPort(portInt);
-			dstDBInstance.setUsername(username);
-			dstDBInstance.setPassword(password);
-			dstDBInstance.setMetaHost(host);
-			dstDBInstance.setMetaPort(portInt);
-			dstDBInstance.setMetaUsername(username);
-			dstDBInstance.setMetaPassword(password);
+			DBInstanceMapper.convertToDBInstance(dstDBInstance, dstDBInstanceDto);
 
 			if (operation == ActionOperation.CREATE) {
 				dstDBInstanceService.create(dstDBInstance);

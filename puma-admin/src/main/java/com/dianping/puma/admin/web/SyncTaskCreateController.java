@@ -1,6 +1,9 @@
 package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.config.Config;
+import com.dianping.puma.admin.model.SyncTaskDto;
+import com.dianping.puma.admin.model.mapper.ErrorListMapper;
+import com.dianping.puma.admin.model.mapper.SyncTaskMapper;
 import com.dianping.puma.admin.remote.reporter.SyncTaskControllerReporter;
 import com.dianping.puma.admin.remote.reporter.SyncTaskOperationReporter;
 import com.dianping.puma.admin.util.GsonUtil;
@@ -18,17 +21,21 @@ import com.dianping.puma.core.service.*;
 import com.dianping.puma.core.sync.model.config.MysqlHost;
 import com.dianping.puma.core.sync.model.mapping.*;
 import com.mongodb.MongoException;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
+
 import java.sql.SQLException;
 import java.util.*;
 
@@ -77,24 +84,7 @@ public class SyncTaskCreateController {
 
     @Autowired
     DumpTaskStateService dumpTaskStateService;
-
-    @RequestMapping(value = {"/sync-task/create"})
-    public ModelAndView create(HttpSession session) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        // 查询MysqlConfig
-        List<PumaTask> pumaTasks = pumaTaskService.findAll();
-        List<DstDBInstance> dstDBInstances = dstDBInstanceService.findAll();
-        List<SyncServer> syncServers = syncServerService.findAll();
-
-        map.put("pumaTasks", pumaTasks);
-        map.put("dstDBInstances", dstDBInstances);
-        map.put("syncServers", syncServers);
-        map.put("createActive", "active");
-        map.put("path", "sync-task");
-        map.put("subPath", "step1");
-        return new ModelAndView("main/container", map);
-    }
-
+    
     @RequestMapping(value = "/sync-task/create/step1Save", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object step1Save(HttpSession session, String pumaTaskName, String dstDBInstanceName, String syncServerName,
@@ -474,33 +464,5 @@ public class SyncTaskCreateController {
         return true;
     }
 
-    @RequestMapping(value = {
-            "/sync-task/refresh"}, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public String refreshPost(String name) {
-        Map<String, Object> map = new HashMap<String, Object>();
-
-        try {
-            SyncTaskState syncTaskState = syncTaskStateService.find(name);
-
-            if (syncTaskState == null) {
-                throw new Exception("Sync task state not found.");
-            }
-
-            if ((new Date()).getTime() - syncTaskState.getGmtUpdate().getTime() > 60 * 1000) {
-                syncTaskState.setStatus(Status.DISCONNECTED);
-            }
-
-            map.put("state", syncTaskState);
-            map.put("success", true);
-        } catch (MongoException e) {
-            map.put("error", "storage");
-            map.put("success", false);
-        } catch (Exception e) {
-            map.put("error", e.getMessage());
-            map.put("success", false);
-        }
-
-        return GsonUtil.toJson(map);
-    }
+   
 }

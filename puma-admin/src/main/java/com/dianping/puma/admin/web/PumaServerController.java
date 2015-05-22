@@ -1,5 +1,7 @@
 package com.dianping.puma.admin.web;
 
+import com.dianping.puma.admin.model.PumaServerDto;
+import com.dianping.puma.admin.model.mapper.PumaServerMapper;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.entity.PumaServer;
@@ -9,12 +11,14 @@ import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SyncTaskService;
 import com.mongodb.MongoException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -22,6 +26,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +75,6 @@ public class PumaServerController {
 		return new ModelAndView("common/main-container", map);
 	}
 
-
 	@RequestMapping(value = { "/puma-server/update/{id}" })
 	public ModelAndView update(@PathVariable long id) {
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -98,27 +102,16 @@ public class PumaServerController {
 
 	@RequestMapping(value = { "/puma-server/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(String name, String host, String port) {
+	public String createPost(@RequestBody PumaServerDto pumaServerDto) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			ActionOperation operation;
-
-			PumaServer pumaServer = pumaServerService.find(name);
-			if (pumaServer == null) {
-				operation = ActionOperation.CREATE;
-				pumaServer = new PumaServer();
-			} else {
+			PumaServer pumaServer = pumaServerService.find(pumaServerDto.getName());
+			if (pumaServer != null) {
 				throw new Exception("duplicate name.");
 			}
-
-			pumaServer.setName(name);
-			pumaServer.setHost(host);
-			pumaServer.setPort(port == null ? serverPort : Integer.parseInt(port));
-
-			if (operation == ActionOperation.CREATE) {
-				pumaServerService.create(pumaServer);
-			}
+			pumaServer = PumaServerMapper.convertToPumaServer(pumaServerDto);
+			pumaServerService.create(pumaServer);
 			map.put("success", true);
 		} catch (MongoException e) {
 			map.put("error", "storage");
@@ -133,12 +126,11 @@ public class PumaServerController {
 
 	@RequestMapping(value = { "/puma-server/update/{id}" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String updatePost(@PathVariable long id, String name, String host, String port) {
+	public String updatePost(@PathVariable long id, @RequestBody PumaServerDto pumaServerDto) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
 			ActionOperation operation;
-
 			PumaServer pumaServer = pumaServerService.find(id);
 			if (pumaServer == null) {
 				operation = ActionOperation.CREATE;
@@ -146,17 +138,13 @@ public class PumaServerController {
 			} else {
 				operation = ActionOperation.UPDATE;
 			}
-
-			pumaServer.setName(name);
-			pumaServer.setHost(host);
-			pumaServer.setPort(port == null ? serverPort : Integer.parseInt(port));
-
+			PumaServerMapper.convertToPumaServer(pumaServer, pumaServerDto);
 			if (operation == ActionOperation.CREATE) {
 				pumaServerService.create(pumaServer);
 			} else {
+				pumaServer.setId(id);
 				pumaServerService.update(pumaServer);
 			}
-
 			map.put("success", true);
 		} catch (MongoException e) {
 			map.put("error", "storage");

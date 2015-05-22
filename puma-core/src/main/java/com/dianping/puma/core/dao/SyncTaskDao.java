@@ -29,6 +29,8 @@ public interface SyncTaskDao {
 	
 	void remove(long id);
 	
+	void update(SyncTask syncTask);
+	
 	List<SyncTask> find(int offset, int limit);
 	
 	void updateStatusAction(String name,ActionController controller);

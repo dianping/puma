@@ -29,10 +29,10 @@
 							<div class="puma-form-group-start"></div>
 							<!-- #section:elements.form -->
 							<div class="form-group">
-								<label class="col-sm-3 control-label no-padding-right"
+								<label class="col-sm-2 control-label no-padding-right"
 									for="form-field-1"> 服务器名称 </label>
 
-								<div class="col-sm-9">
+								<div class="col-sm-10">
 									<input type="text" id="form-field-1" placeholder="服务器名称"
 										class="col-xs-10 col-sm-5" ng-model="entity.name"
 										#if(${entity}) ng-init="entity.name='${entity.name}'" readonly="readonly" #end/>
@@ -40,10 +40,10 @@
 							</div>
 
 							<div class="form-group">
-								<label class="col-sm-3 control-label no-padding-right"
+								<label class="col-sm-2 control-label no-padding-right"
 									for="form-field-1"> 服务器Host </label>
 
-								<div class="col-sm-9">
+								<div class="col-sm-10">
 									<input type="text" id="form-field-1"
 										placeholder="服务器Host"
 										class="col-xs-10 col-sm-5" ng-model="entity.host"
@@ -54,10 +54,10 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="col-sm-3 control-label no-padding-right"
+								<label class="col-sm-2 control-label no-padding-right"
 									for="form-field-1"> 服务器Port </label>
 
-								<div class="col-sm-9">
+								<div class="col-sm-10">
 									<input type="text" id="form-field-1"
 										placeholder="服务器Port"
 										class="col-xs-10 col-sm-5" ng-model="entity.port"
@@ -68,7 +68,7 @@
 								</div>
 							</div>
 							<div class="clearfix form-actions puma-form-actions">
-								<div class="col-md-offset-3 col-md-9">
+								<div class="col-md-offset-2 col-md-10">
 									<button class="btn btn-info" type="button"
 										#if(${lock}) disabled="disabled" #end ng-click="submit()">
 										<i class="ace-icon fa fa-check bigger-110" "></i> 提交

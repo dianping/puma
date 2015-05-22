@@ -4,7 +4,7 @@ import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.PumaThreadPool;
 import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.puma.syncserver.job.load.row.BatchRow;
-import com.dianping.puma.syncserver.job.load.pool.BatchExecPool;
+import com.dianping.puma.syncserver.job.load.pool.WCBatchExecPool;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -24,20 +24,20 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 public class PressureTest {
 
-	BatchExecPool batchExecPool;
+	WCBatchExecPool WCBatchExecPool;
 
 	static long duration = 0;
 	static long count = 0;
 
 	@Before
 	public void before() {
-		batchExecPool = new BatchExecPool();
-		batchExecPool.setHost("192.168.224.98:3306");
-		batchExecPool.setUsername("root");
-		batchExecPool.setPassword("123456");
-		batchExecPool.setPoolSize(7);
-		batchExecPool.setRetires(0);
-		batchExecPool.start();
+		WCBatchExecPool = new WCBatchExecPool();
+		WCBatchExecPool.setHost("192.168.224.98:3306");
+		WCBatchExecPool.setUsername("root");
+		WCBatchExecPool.setPassword("123456");
+		WCBatchExecPool.setPoolSize(7);
+		WCBatchExecPool.setRetires(0);
+		WCBatchExecPool.start();
 	}
 
 	@Test
@@ -57,7 +57,7 @@ public class PressureTest {
 			batchRow.addRow(row);
 
 			long begin = System.currentTimeMillis();
-			batchExecPool.put(batchRow);
+			WCBatchExecPool.put(batchRow);
 			long end = System.currentTimeMillis();
 			duration += (end - begin);
 			System.out.println((i + 1) + ":" + duration);

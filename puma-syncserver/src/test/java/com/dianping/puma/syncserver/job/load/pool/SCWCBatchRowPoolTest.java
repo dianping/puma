@@ -13,7 +13,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.concurrent.BlockingDeque;
 
-public class SCBatchRowPoolTest extends MockTest {
+public class SCWCBatchRowPoolTest extends MockTest {
 
 	SCBatchRowPool scBatchRowPool;
 

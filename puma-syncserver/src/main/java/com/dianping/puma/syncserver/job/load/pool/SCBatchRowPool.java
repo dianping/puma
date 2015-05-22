@@ -4,78 +4,84 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.syncserver.job.load.exception.LoadException;
 import com.dianping.puma.syncserver.job.load.row.BatchRow;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 
-public class SCBatchRowPool {
+public class SCBatchRowPool implements BatchRowPool {
 
-	private static final Logger LOG = LoggerFactory.getLogger(BatchRowPool.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SCBatchRowPool.class);
 
-	/** Pool stopped or not, default is true. */
+	/** Pool stopped or not, default true. */
 	private boolean stopped = true;
 
-	/** Pool exception, default is null. */
+	/** Pool exception, default null. */
 	private LoadException loadException = null;
 
 	/** Current transaction state, -1 for begin, 0 for in, 1 for commit. */
 	int transaction = -1;
 
-	/** Pool optional settings: pool name, default to "SCBatchRowPool-XXXXX". */
-	private String name = "SCBatchRowPool-" + RandomStringUtils.randomAlphabetic(5);
+	/** Batch row pool title. */
+	private String title = "BatchRowPool-";
 
-	/** Pool optional settings: pool size, default to 100. */
+	/** Batch row pool name. */
+	private String name;
+
+	/** Batch row pool size, default 100. */
 	private int poolSize = 100;
 
-	/** Pool batch rows storage. */
+	/** Batch row pool bottom storage. */
 	protected BlockingDeque<BatchRow> batchRows;
 
 	public SCBatchRowPool() {}
 
+	@Override
 	public void start() {
-		LOG.info("Starting strong consistency batch row pool({})...", name);
+		LOG.info("Starting strong consistency batch row pool({})...", title + name);
 
 		if (!stopped) {
-			LOG.warn("Strong consistency batch row pool({}) is already started.", name);
+			LOG.warn("Strong consistency batch row pool({}) is already started.", title + name);
 		} else {
-			// Clear batch row pool status.
 			stopped = false;
 			loadException = null;
 
-			// Initialize blocking queue.
 			if (batchRows == null) {
 				batchRows = new LinkedBlockingDeque<BatchRow>(poolSize);
 			}
 		}
 	}
 
+	@Override
 	public void stop() {
-		LOG.info("Stopping strong consistency batch row pool({})...", name);
+		LOG.info("Stopping strong consistency batch row pool({})...", title + name);
 
 		if (stopped) {
-			LOG.warn("Strong consistency batch row pool({}) is already stopped.", name);
+			LOG.warn("Strong consistency batch row pool({}) is already stopped.", title + name);
 		} else {
-			// Clear batch row pool status.
 			stopped = true;
 
-			// Destroy blocking queue.
 			batchRows.clear();
 			batchRows = null;
 		}
 	}
 
-	public void destroy() {
-		// No persistent storage.
+	@Override
+	public void die() {
+		LOG.info("Dieing strong consistency batch row pool({})...", title + name);
+
+		// Batch row pool contains no persistent storage, just stop it.
+		stop();
 	}
 
+	@Override
 	public LoadException exception() {
 		return loadException;
 	}
 
-	public void put(ChangedEvent event) {
+	@Override
+	public void put(ChangedEvent event) throws LoadException {
 		if (event instanceof RowChangedEvent) {
 			RowChangedEvent row = (RowChangedEvent) event;
 
@@ -110,6 +116,16 @@ public class SCBatchRowPool {
 		}
 	}
 
+	@Override
+	public BatchRow take() throws LoadException {
+		try {
+			return batchRows.take();
+		} catch (InterruptedException e) {
+			loadException = LoadException.translate(e);
+			throw loadException;
+		}
+	}
+
 	private void batch(ChangedEvent event) {
 		try {
 			BatchRow last = batchRows.peekLast();
@@ -121,15 +137,7 @@ public class SCBatchRowPool {
 				}
 			}
 		} catch (InterruptedException e) {
-			throw LoadException.handleException(e);
-		}
-	}
-
-	public BatchRow take() {
-		try {
-			return batchRows.take();
-		} catch (InterruptedException e) {
-			throw LoadException.handleException(e);
+			throw LoadException.translate(e);
 		}
 	}
 

@@ -1,8 +1,12 @@
 package com.dianping.puma.syncserver.job.load.pool;
 
+import com.dianping.puma.core.annotation.ThreadSafe;
+import com.dianping.puma.core.annotation.ThreadUnSafe;
+import com.dianping.puma.syncserver.job.LifeCycle;
 import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
 import com.dianping.puma.syncserver.job.load.exception.LoadException;
 import com.dianping.puma.syncserver.job.load.row.BatchRow;
+import com.dianping.puma.syncserver.job.load.row.RowKey;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
@@ -12,44 +16,40 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class SCBatchExecPool implements BatchExecPool {
+public class WCBatchExecPool implements LifeCycle<LoadException> {
 
-	private static final Logger LOG = LoggerFactory.getLogger(SCBatchExecPool.class);
+	private static final Logger LOG = LoggerFactory.getLogger(WCBatchExecPool.class);
 
-	/** Pool stopped or not, default true. */
+	// Pool status.
 	private boolean stopped = true;
-
-	/** Pool exception, default null. */
 	private LoadException loadException = null;
 
-	/** Pool prerequisite settings: data source host. */
+	// Pool prerequisite settings.
 	private String host;
-
-	/** Pool prerequisite settings: data source username. */
 	private String username;
-
-	/** Pool prerequisite settings: data source password. */
 	private String password;
 
-	/** Pool optional settings: pool name, default "SCBatchRowPool-XXXXX". */
+	// Pool optional settings.
 	private String name = "BatchExecPool-" + RandomStringUtils.randomAlphabetic(5);
-
-	/** Pool optional settings: pool size, default 1. */
 	private int poolSize = 1;
-
-	/** Pool optional settings: sql retries, default 1. */
+	private boolean isStrongConsistency = false;
 	private int retries = 1;
 
+	// Connection cache.
 	private Connection cachedConn;
 
-	/** Pool current size. */
-	private int size = 0;
+	private boolean needNewConnection = true;
+
+	private volatile int dmlSize = 0;
+	private volatile int ddlSize = 0;
+
+	// Bottom implementation.
+	private ConcurrentMap<RowKey, Boolean> rowKeys = new ConcurrentHashMap<RowKey, Boolean>();
 
 	// Batch row which is blocked.
 	private BatchRow buffer;
@@ -67,7 +67,7 @@ public class SCBatchExecPool implements BatchExecPool {
 	private final Condition notConflict = lock.newCondition();
 
 
-	public SCBatchExecPool() {
+	public WCBatchExecPool() {
 	}
 
 	public void start() {
@@ -105,7 +105,7 @@ public class SCBatchExecPool implements BatchExecPool {
 		}
 	}
 
-	public void destroy() {
+	public void die() {
 		// No persistent storage.
 	}
 
@@ -137,6 +137,7 @@ public class SCBatchExecPool implements BatchExecPool {
 		dataSource = null;
 	}
 
+	@ThreadSafe
 	public void put(BatchRow batchRow) throws InterruptedException {
 		lock.lock();
 		try {
@@ -152,8 +153,10 @@ public class SCBatchExecPool implements BatchExecPool {
 
 		beforePooledBatchExecute(batchRow);
 		pooledBatchExecute(batchRow);
+		afterPooledBatchExecute(batchRow);
 	}
 
+	@ThreadSafe
 	private void remove(BatchRow batchRow) {
 		lock.lock();
 		try {
@@ -166,37 +169,83 @@ public class SCBatchExecPool implements BatchExecPool {
 		}
 	}
 
+	@ThreadSafe
 	private boolean check(BatchRow batchRow) {
-		return size < poolSize;
+		if (batchRow.isDdl()) {
+			return dmlSize == 0 && ddlSize == 0;
+		} else {
+			if (dmlSize + ddlSize >= poolSize) {
+				return false;
+			}
+			if (ddlSize > 0) {
+				return false;
+			}
+			for (RowKey rowKey : batchRow.getRowKeys().keySet()) {
+				if (rowKeys.containsKey(rowKey)) {
+					return false;
+				}
+			}
+			return true;
+		}
 	}
 
+	@ThreadUnSafe
 	private void register(BatchRow batchRow) {
-		++size;
+		if (batchRow.isDdl()) {
+			++ddlSize;
+		} else {
+			++dmlSize;
+			rowKeys.putAll(batchRow.getRowKeys());
+		}
 	}
 
+	@ThreadUnSafe
 	private void unregister(BatchRow batchRow) {
-		--size;
+		if (batchRow.isDdl()) {
+			--ddlSize;
+		} else {
+			--dmlSize;
+			for (RowKey rowKey : batchRow.getRowKeys().keySet()) {
+				rowKeys.remove(rowKey);
+			}
+		}
 	}
 
 	private void beforePooledBatchExecute(BatchRow batchRow) {
-		if (batchRow.isCommit()) {
+		if (isStrongConsistency) {
+			if (batchRow.isCommit()) {
+				binlogManager.before(batchRow.getBinlogInfo());
+			}
+		} else {
 			binlogManager.before(batchRow.getBinlogInfo());
 		}
 	}
 
 	private void afterPooledBatchExecute(BatchRow batchRow) {
-		if (batchRow.isCommit()) {
+		if (isStrongConsistency) {
+			if (batchRow.isCommit()) {
+				binlogManager.after(batchRow.getBinlogInfo());
+			}
+		} else {
 			binlogManager.after(batchRow.getBinlogInfo());
 		}
 	}
 
 	private void pooledBatchExecute(final BatchRow batchRow) {
 		try {
-			if (cachedConn == null || cachedConn.isClosed()) {
-				cachedConn = dataSource.getConnection();
+			Connection conn;
+
+			if (isStrongConsistency) {
+				if (needNewConnection) {
+					conn = dataSource.getConnection();
+				} else {
+					conn = cachedConn;
+				}
+			} else {
+				conn = dataSource.getConnection();
 			}
 
-			pooledBatchExecute(cachedConn, batchRow);
+			pooledBatchExecute(conn, batchRow);
 		} catch (SQLException e) {
 			if (!stopped) {
 				loadException = LoadException.translate(e);
@@ -212,13 +261,17 @@ public class SCBatchExecPool implements BatchExecPool {
 
 				for (int count = 0; count <= retries; ++count) {
 					try {
-						if (batchRow.isCommit()) {
-							commit(conn);
+
+						if (isStrongConsistency) {
+							if (batchRow.isCommit()) {
+								commit(conn);
+							} else {
+								batchExecute(conn, batchRow);
+							}
 						} else {
 							batchExecute(conn, batchRow);
+							commit(conn);
 						}
-
-						afterPooledBatchExecute(batchRow);
 						remove(batchRow);
 						return;
 					} catch (LoadException e) {
@@ -249,8 +302,7 @@ public class SCBatchExecPool implements BatchExecPool {
 
 	private void commit(Connection conn) {
 		try {
-			conn.commit();
-			//DbUtils.commitAndClose(conn);
+			DbUtils.commitAndClose(conn);
 		} catch (SQLException e) {
 			DbUtils.rollbackAndCloseQuietly(conn);
 			throw LoadException.translate(e);
@@ -275,6 +327,10 @@ public class SCBatchExecPool implements BatchExecPool {
 
 	public void setRetires(int retries) {
 		this.retries = retries;
+	}
+
+	public void setStrongConsistency(boolean isTransactionDisable) {
+		this.isStrongConsistency = isTransactionDisable;
 	}
 
 	public void setBinlogManager(BinlogManager binlogManager) {

@@ -2,6 +2,8 @@ package com.dianping.puma.syncserver.job.load.exception;
 
 import org.apache.commons.lang3.exception.ContextedRuntimeException;
 
+import java.sql.SQLException;
+
 public class LoadException extends ContextedRuntimeException {
 
 	/**
@@ -39,7 +41,12 @@ public class LoadException extends ContextedRuntimeException {
 		return errorDesc;
 	}
 
-	public static LoadException handleException(Exception e) {
-		return new LoadException(0);
+	public static LoadException translate(Exception e) {
+		if (e instanceof SQLException) {
+			SQLException se = (SQLException) e;
+			return new LoadException(se.getErrorCode(), se.getMessage(), se.getCause());
+		} else {
+			return new LoadException(-1, e.getMessage(), e.getCause());
+		}
 	}
 }

@@ -12,19 +12,19 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BatchRowPoolTest {
+public class WCBatchRowPoolTest {
 
-	BatchRowPool batchRowPool;
+	WCBatchRowPool WCBatchRowPool;
 
 	@Before
 	public void before() {
-		batchRowPool = new BatchRowPool();
-		batchRowPool.start();
+		WCBatchRowPool = new WCBatchRowPool();
+		WCBatchRowPool.start();
 	}
 
 	@After
 	public void after() {
-		batchRowPool.stop();
+		WCBatchRowPool.stop();
 	}
 
 	@Test
@@ -53,9 +53,9 @@ public class BatchRowPoolTest {
 		row1.setColumns(columnInfoMap1);
 		Assert.assertTrue(batchRow.addRow(row1));
 
-		batchRowPool.put(row0);
-		batchRowPool.put(row1);
-		BatchRow result = batchRowPool.take();
+		WCBatchRowPool.put(row0);
+		WCBatchRowPool.put(row1);
+		BatchRow result = WCBatchRowPool.take();
 		Assert.assertTrue(EqualsBuilder.reflectionEquals(batchRow.getParams(), result.getParams()));
 	}
 
@@ -81,11 +81,11 @@ public class BatchRowPoolTest {
 		columnInfoMap1.put("name", new RowChangedEvent.ColumnInfo(false, "Linda", "Russel"));
 		row1.setColumns(columnInfoMap1);
 
-		batchRowPool.put(row0);
-		batchRowPool.put(row1);
-		BatchRow result0 = batchRowPool.take();
+		WCBatchRowPool.put(row0);
+		WCBatchRowPool.put(row1);
+		BatchRow result0 = WCBatchRowPool.take();
 		BatchRow expected0 = new BatchRow(row0);
-		BatchRow result1 = batchRowPool.take();
+		BatchRow result1 = WCBatchRowPool.take();
 		BatchRow expected1 = new BatchRow(row1);
 		Assert.assertTrue(EqualsBuilder.reflectionEquals(expected0.getParams(), result0.getParams()));
 		Assert.assertTrue(EqualsBuilder.reflectionEquals(expected1.getParams(), result1.getParams()));

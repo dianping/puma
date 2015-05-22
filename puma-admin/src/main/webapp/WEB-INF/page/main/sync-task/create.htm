@@ -110,26 +110,28 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="col-sm-2 control-label no-padding-right">
-									<input type="checkbox" ng-model="entity.ddl" id="id-file-format" class="ace">
-									<span class="lbl"> ddl</span>
-								</label>
+								<label class="col-sm-2 control-label no-padding-right"
+									for="form-field-1"> consistency </label>
 								<div class="col-sm-10">
-									<label class="col-sm-2 control-label">
-										<input type="checkbox" ng-model="entity.dml" id="id-file-format" class="ace">
-										<span class="lbl"> dml</span>
-									</label>
-									<label class="col-sm-2 control-label">
-										<input type="checkbox" ng-model="entity.transaction" id="id-file-format" class="ace">
-										<span class="lbl"> transaction </span>
-									</label>
-									<label class="col-sm-2 control-label">
-										<input type="checkbox" ng-model="entity.consistency" id="id-file-format" class="ace">
-										<span class="lbl"> consistency</span>									
-									</label>
+									 <input id="form-field-1" type="text"
+										placeholder="consistency" class="col-xs-10 col-sm-2"
+										ng-model="entity.consistency" />
+									<label
+										class="col-sm-1 control-label" for="form-field-1"> dml
+									</label> <input id="form-field-1" type="text" placeholder="dml"
+										class="col-xs-10 col-sm-2" ng-model="entity.dml" />
 								</div>
 							</div>
-							
+							<div class="form-group">
+								<label class="col-sm-2 control-label no-padding-right"
+									for="form-field-1"> transaction </label>
+								<div class="col-sm-10">
+									<input id="form-field-1" type="text" placeholder="transaction"
+										class="col-xs-10 col-sm-2" ng-model="entity.transaction" />
+									<label class="col-sm-1 control-label" for="form-field-1"> ddl </label> 
+									<input id="form-field-1" type="text" placeholder="ddl" class="col-xs-10 col-sm-2" ng-model="entity.ddl" /> 
+								</div>
+							</div>
 							<div ng-repeat="itemError in entity.errorList.errors">
 								<div class="form-group">
 									<label class="col-sm-2 control-label no-padding-right"
@@ -142,7 +144,7 @@
 											ng-options="o.errorCode as (o.errorCode +'('+o.desc+')') for o in errorSet.errorCodes">
 											<option value="">请选择ErrorCode</option>
 										</select>
-										<label class="col-sm-1 control-label " for="form-field-1">  </label>
+										<label class="col-xs-10 col-sm-1"> </label>
 										 <select id="form-field-1" class="col-xs-10 col-sm-3 puma-form-select"
 											ng-model="itemError.selectedHandler.name"
 											placeholder="Handler"

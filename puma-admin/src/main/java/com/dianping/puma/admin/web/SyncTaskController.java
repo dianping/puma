@@ -291,10 +291,11 @@ public class SyncTaskController {
 				throw new Exception("duplicate name.");
 			}
 			syncTask = SyncTaskMapper.convertToSyncTask(syncTaskDto);
+			syncTask.setController(ActionController.START);
+			syncTaskService.create(syncTask);
 			BaseSyncTaskState state = new BaseSyncTaskState();
 			state.setStatus(Status.PREPARING);
 			syncTaskStateContainer.add(syncTask.getName(), state);
-			this.syncTaskService.updateStatusAction(syncTask.getName(), ActionController.START);
 			syncTaskOperationReporter.report(syncTask.getSyncServerName(), syncTask.getName(), ActionOperation.CREATE);
 			map.put("success", true);
 		} catch (IllegalArgumentException e) {
@@ -308,7 +309,6 @@ public class SyncTaskController {
 		return GsonUtil.toJson(map);
 	}
 
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value = { "/sync-task/update/{id}" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String updatePost(@PathVariable long id, @RequestBody SyncTaskDto syncTaskDto) {
@@ -331,8 +331,8 @@ public class SyncTaskController {
 			BaseSyncTaskState state = new BaseSyncTaskState();
 			state.setStatus(Status.PREPARING);
 			syncTaskStateContainer.add(syncTask.getName(), state);
-			this.syncTaskService.updateStatusAction(syncTask.getName(), ActionController.START);
 			syncTaskOperationReporter.report(syncTask.getSyncServerName(), syncTask.getName(), ActionOperation.UPDATE);
+			map.put("success", true);
 		} catch (IllegalArgumentException e) {
 			map.put("success", false);
 			map.put("errorMsg", e.getMessage());

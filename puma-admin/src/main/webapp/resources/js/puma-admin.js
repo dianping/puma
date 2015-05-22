@@ -220,17 +220,17 @@ formApp
 							$scope.submit = function() {
 								console.log($scope.entity);
 								
-//								formService
-//										.submit($scope.entity)
-//										.success(
-//												function(data) {
-//													if (data.success) {
-//														console.log($scope.backUrl);
-//														$window.location.href = $scope.backUrl;
-//													} else {
-//														return false;
-//													}
-//												});
+								formService
+										.submit($scope.entity)
+										.success(
+												function(data) {
+													if (data.success) {
+														console.log($scope.backUrl);
+														$window.location.href = $scope.backUrl;
+													} else {
+														return false;
+													}
+												});
 							};
 
 							$scope.goBack = function() {
@@ -291,7 +291,6 @@ formApp
 											$scope.dstDBInstances = data.dstDBInstances;
 											$scope.syncServers = data.syncServers;
 											$scope.errorSet = data.errorSet;
-											//console.log($scope.entity);
 											if(!$scope.entity||!$scope.entity.errorList||!$scope.entity.errorList.errors){
 												$scope.entity = {};
 												$scope.entity.errorList = {};

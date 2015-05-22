@@ -37,20 +37,4 @@ public interface TaskExecutorContainer {
     public List<TaskExecutor> getAll();
 
     public int size();
-
-    //public void submit(TaskExecutor taskExecutor) throws TaskExecutionException;
-
-    //public TaskExecutor get(String taskName);
-
-    //public void changeStatus(String taskName, ActionController controller);
-
-    //public void deleteSyncTask(String taskName);
-
-    //public void deleteShardSyncTask(String taskName);
-
-    //public void deleteShardDumpTask(String taskName);
-
-    //public List<TaskExecutor> toList();
-
-    //public List<TaskExecutor> getAll();
 }

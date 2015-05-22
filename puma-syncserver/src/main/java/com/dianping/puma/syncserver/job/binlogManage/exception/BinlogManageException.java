@@ -38,4 +38,8 @@ public class BinlogManageException extends ContextedRuntimeException {
 	public String getErrorDesc() {
 		return errorDesc;
 	}
+
+	public static BinlogManageException translate(Exception e) {
+		return new BinlogManageException(-1, e.getMessage(), e.getCause());
+	}
 }

@@ -15,114 +15,162 @@ public class MapDBBinlogManager implements BinlogManager {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MapDBBinlogManager.class);
 
-	private String name;
-
+	/**
+	 * MapDB binlog manager is stopped or not, default true.
+	 */
 	private boolean stopped = true;
-	private BinlogManageException binlogManageException;
 
+	/** MapDB binlog manager exception, default null. */
+	private BinlogManageException binlogManageException = null;
+
+	/**
+	 * MapDB.
+	 */
 	private DB db;
 
+	/**
+	 * Unfinished binlog infos.
+	 */
 	private ConcurrentNavigableMap<BinlogInfo, Boolean> unfinished;
 
+	/**
+	 * Finished binlog infos.
+	 */
 	private ConcurrentNavigableMap<BinlogInfo, Boolean> finished;
 
-	private BinlogInfo origin;
+	/**
+	 * MapDB binlog manager title.
+	 */
+	private String title = "BinlogManager-";
 
-	public MapDBBinlogManager() {}
+	/**
+	 * MapDB binlog manager name.
+	 */
+	private String name;
+
+	/**
+	 * The original binlog info, only for newly created task.
+	 */
+	private BinlogInfo origin;
 
 	public MapDBBinlogManager(BinlogInfo origin) {
 		this.origin = origin;
 	}
 
+	@Override
 	public void start() {
-		LOG.info("Starting binlog manager({})...", name);
+		LOG.info("Starting binlog manager({})...", title + name);
 
 		if (!stopped) {
-			LOG.warn("Binlog manager({}) is already started.", name);
+			LOG.warn("Binlog manager({}) is already started.", title + name);
 		} else {
-			stopped = false;
-			binlogManageException = null;
 
-			db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlogDB/", name)).closeOnJvmShutdown().transactionDisable()
-					.asyncWriteEnable().mmapFileEnableIfSupported().make();
+			try {
+				stopped = false;
 
-			// Read from the persistent storage.
-			unfinished = db.getTreeMap(name + "-unfinished");
-			finished = db.getTreeMap(name + "-finished");
+				db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlogDB/", title + name)).closeOnJvmShutdown()
+						.transactionDisable().asyncWriteEnable().mmapFileEnableIfSupported().make();
 
-			// Put into the original binlog position.
-			if (finished.isEmpty()) {
-				finished.put(origin, true);
-				db.commit();
+				// Read from the persistent storage.
+				unfinished = db.getTreeMap(title + name + "-unfinished");
+				finished = db.getTreeMap(title + name + "-finished");
+
+				// Put the origin into the finished container if empty.
+				if (finished.isEmpty()) {
+					finished.put(origin, true);
+					db.commit();
+				}
+			} catch (Exception e) {
+				binlogManageException = BinlogManageException.translate(e);
+				throw binlogManageException;
+			} finally {
+				stopped = false;
 			}
 		}
 	}
 
+	@Override
 	public void stop() {
-		LOG.info("Stopping binlog manager({})...", name);
+		LOG.info("Stopping binlog manager({})...", title + name);
 
 		if (stopped) {
-			LOG.info("Binlog manager({}) is already stopped.", name);
+			LOG.info("Binlog manager({}) is already stopped.", title + name);
 		} else {
+			try {
+				stopped = true;
+
+				// Commit before close.
+				db.commit();
+
+				// Close db.
+				db.close();
+			} catch (Exception e) {
+				binlogManageException = BinlogManageException.translate(e);
+				throw binlogManageException;
+			} finally {
+				stopped = true;
+			}
+		}
+	}
+
+	@Override
+	public void die() {
+		LOG.info("Destroying binlog manager({})...", title + name);
+
+		try {
+			if (stopped) {
+				db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlogDB/", title + name)).closeOnJvmShutdown()
+						.transactionDisable().asyncWriteEnable().mmapFileEnableIfSupported().make();
+			}
+
 			stopped = true;
 
-			// Release db resource.
+			// Delete persistent storage.
+			db.delete(title + name + "-unfinished");
+			db.delete(title + name + "-finished");
 			db.commit();
+
+			// Close db.
 			db.close();
+		} catch (Exception e) {
+			binlogManageException = BinlogManageException.translate(e);
+			throw binlogManageException;
+		} finally {
+			stopped = true;
 		}
 	}
 
-	public void die() {
-		LOG.info("Destroying binlog manager({})...", name);
-
-		if (stopped) {
-			db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlogDB/", name)).closeOnJvmShutdown().transactionDisable()
-					.asyncWriteEnable().mmapFileEnableIfSupported().make();
-		}
-
-		stopped = true;
-
-		// Delete persistent storage.
-		db.delete(name + "-unfinished");
-		db.delete(name + "-finished");
-		db.commit();
-
-		// Release db resource.
-		db.close();
-	}
-
+	@Override
 	public BinlogManageException exception() {
 		return binlogManageException;
 	}
 
 	@ThreadSafe
+	@Override
 	public void before(BinlogInfo binlogInfo) {
-		if (stopped) {
-			LOG.info("BinlogManager({}) is already stopped for binlogInfo({}).", name);
-			throw new BinlogManageException(0, String.format("BinlogManager(%s) is stopped for binlogInfo.", name));
+		try {
+			unfinished.put(binlogInfo, true);
+		} catch (Exception e) {
+			binlogManageException = BinlogManageException.translate(e);
+			throw binlogManageException;
 		}
-
-		unfinished.put(binlogInfo, true);
 	}
 
 	@ThreadSafe
+	@Override
 	public void after(BinlogInfo binlogInfo) {
-		if (stopped) {
-			LOG.info("BinlogManager({}) is already stopped for binlogInfo.", name);
-			throw new BinlogManageException(0, String.format("BinlogManager(%s) is stopped for binlogInfo.", name));
+		try {
+			finished.put(binlogInfo, true);
+			finished.pollFirstEntry();
+			unfinished.remove(binlogInfo);
+		} catch (Exception e) {
+			binlogManageException = BinlogManageException.translate(e);
+			throw binlogManageException;
 		}
-
-		finished.put(binlogInfo, true);
-		finished.pollFirstEntry();
-		unfinished.remove(binlogInfo);
 	}
 
+	@Override
 	public BinlogInfo getRecovery() {
-		if (stopped) {
-			LOG.info("BinlogManager({}) is already stopped for binlogInfo.", name);
-			throw new BinlogManageException(0, String.format("BinlogManager(%s) is stopped for binlogInfo.", name));
-		}
-
 		try {
 			return unfinished.firstKey();
 		} catch (NoSuchElementException e) {

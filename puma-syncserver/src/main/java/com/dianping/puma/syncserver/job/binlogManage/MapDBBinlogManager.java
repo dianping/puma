@@ -20,7 +20,9 @@ public class MapDBBinlogManager implements BinlogManager {
 	 */
 	private boolean stopped = true;
 
-	/** MapDB binlog manager exception, default null. */
+	/**
+	 * MapDB binlog manager exception, default null.
+	 */
 	private BinlogManageException binlogManageException = null;
 
 	/**

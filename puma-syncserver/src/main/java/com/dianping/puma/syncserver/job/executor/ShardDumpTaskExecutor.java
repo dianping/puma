@@ -10,6 +10,7 @@ import com.dianping.puma.core.model.state.ShardSyncTaskState;
 import com.dianping.puma.core.service.ShardDumpTaskService;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.syncserver.config.SyncServerConfig;
+import com.dianping.puma.syncserver.job.executor.exception.TEException;
 import com.dianping.puma.syncserver.util.ProcessBuilderWrapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -366,6 +367,16 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
 
         dumpWorker.start();
         loadWorker.start();
+    }
+
+    @Override
+    public void die() {
+
+    }
+
+    @Override
+    public TEException exception() {
+        return new TEException(0);
     }
 
     @Override

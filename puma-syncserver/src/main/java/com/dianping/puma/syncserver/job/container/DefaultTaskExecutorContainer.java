@@ -48,7 +48,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer {
 
 	@Override
 	public void submit(String name, TaskExecutor taskExecutor) throws TECException {
-		LOG.info("Submitting task executor({})...", name);
+		LOG.info("Submitting to task executor({})...", name);
 
 		// Put into the container.
 		TaskExecutor oriTaskExecutor = taskExecutorMap.putIfAbsent(name, taskExecutor);
@@ -95,6 +95,21 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer {
 		} else {
 			// In container.
 			taskExecutor.stop();
+		}
+	}
+
+	@Override
+	public void die(String name) throws TECException {
+		LOG.info("Dieing task executor({})...", name);
+
+		TaskExecutor taskExecutor = taskExecutorMap.get(name);
+		if (taskExecutor == null) {
+			// Not in container.
+			LOG.error("Dieing task executor({}) failure: not in container.", name);
+			throw new TECException(-1, String.format("Dieing task executor(%s) failure: not in container.", name));
+		} else {
+			// In container.
+			taskExecutor.die();
 		}
 	}
 

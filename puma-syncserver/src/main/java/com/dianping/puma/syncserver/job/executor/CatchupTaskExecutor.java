@@ -3,10 +3,7 @@ package com.dianping.puma.syncserver.job.executor;
 import com.dianping.puma.core.entity.CatchupTask;
 import com.dianping.puma.core.entity.DstDBInstance;
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.state.CatchupTaskState;
-import com.dianping.puma.syncserver.job.executor.exception.GException;
-import org.apache.commons.lang.StringUtils;
+import com.dianping.puma.syncserver.job.executor.exception.TEException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +30,10 @@ public class CatchupTaskExecutor extends AbstractTaskExecutor<CatchupTask> {
     protected void doStop() {}
 
     @Override
-    protected void execute(ChangedEvent event) throws GException {
+    protected void doDie() {}
+
+    @Override
+    protected void execute(ChangedEvent event) throws TEException {
         //执行同步
         //mysqlExecutor.execute(event);
     }

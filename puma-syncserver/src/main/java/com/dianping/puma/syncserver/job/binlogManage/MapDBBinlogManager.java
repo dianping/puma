@@ -43,7 +43,7 @@ public class MapDBBinlogManager implements BinlogManager {
 			stopped = false;
 			binlogManageException = null;
 
-			db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlog/", name)).closeOnJvmShutdown().transactionDisable()
+			db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlogDB/", name)).closeOnJvmShutdown().transactionDisable()
 					.asyncWriteEnable().mmapFileEnableIfSupported().make();
 
 			// Read from the persistent storage.
@@ -53,6 +53,7 @@ public class MapDBBinlogManager implements BinlogManager {
 			// Put into the original binlog position.
 			if (finished.isEmpty()) {
 				finished.put(origin, true);
+				db.commit();
 			}
 		}
 	}
@@ -71,17 +72,22 @@ public class MapDBBinlogManager implements BinlogManager {
 		}
 	}
 
-	public void destroy() {
+	public void die() {
 		LOG.info("Destroying binlog manager({})...", name);
+
+		if (stopped) {
+			db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlogDB/", name)).closeOnJvmShutdown().transactionDisable()
+					.asyncWriteEnable().mmapFileEnableIfSupported().make();
+		}
 
 		stopped = true;
 
 		// Delete persistent storage.
 		db.delete(name + "-unfinished");
 		db.delete(name + "-finished");
+		db.commit();
 
 		// Release db resource.
-		db.commit();
 		db.close();
 	}
 

@@ -19,6 +19,7 @@ import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
 //import com.dianping.puma.syncserver.mysql.SqlBuildUtil;
+import com.dianping.puma.syncserver.job.executor.exception.TEException;
 import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
@@ -504,6 +505,14 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
         } catch (Exception exp) {
             this.status.setStatus(Status.FAILED);
         }
+    }
+
+    @Override
+    public void die() {}
+
+    @Override
+    public TEException exception() {
+        return new TEException(0);
     }
 
     @Override

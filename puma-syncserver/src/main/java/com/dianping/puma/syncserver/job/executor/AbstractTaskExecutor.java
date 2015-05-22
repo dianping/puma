@@ -4,14 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.dianping.puma.core.entity.AbstractBaseSyncTask;
-import com.dianping.puma.core.entity.DstDBInstance;
-import com.dianping.puma.core.entity.PumaServer;
-import com.dianping.puma.core.entity.PumaTask;
-import com.dianping.puma.core.model.state.BaseSyncTaskState;
+import com.dianping.puma.core.entity.*;
 import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
-import com.dianping.puma.syncserver.job.binlogmanage.MapDBBinlogManager;
-import com.dianping.puma.syncserver.job.executor.exception.GException;
+import com.dianping.puma.syncserver.job.container.exception.TECException;
+import com.dianping.puma.syncserver.job.executor.exception.TEException;
 import com.dianping.puma.syncserver.job.executor.status.Status;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -33,13 +29,15 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractTaskExecutor.class);
 
 	private boolean stopped = true;
-	private GException gException;
+	private TEException teException;
 
 	protected T task;
 
 	protected PumaTask pumaTask;
 
 	protected PumaServer pumaServer;
+
+	protected SrcDBInstance srcDBInstance;
 
 	protected DstDBInstance dstDBInstance;
 
@@ -51,7 +49,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 
 	public AbstractTaskExecutor() {}
 
-	protected abstract void execute(ChangedEvent event) throws GException;
+	protected abstract void execute(ChangedEvent event) throws TEException;
 
 	public void setTask(T task) {
 		this.task = task;
@@ -65,36 +63,49 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 	@Override
 	public void start() {
 		stopped = false;
-		gException = null;
+		teException = null;
 
 		// 1. Start binlogManager.
-		MapDBBinlogManager mapDBBinlogManager = new MapDBBinlogManager();
-		mapDBBinlogManager.setName(task.getName());
-		binlogManager = mapDBBinlogManager;
 		binlogManager.start();
 
 		// 2. Start detailed modules.
 		doStart();
 
 		// 3. Start the puma client.
-		createPumaClient();
+		pumaClient = createPumaClient();
 		pumaClient.start();
 	}
 
 	@Override
 	public void stop() {
+		stopped = true;
+
 		doStop();
 
 		pumaClient.stop();
 
 		binlogManager.stop();
+	}
 
+	@Override
+	public void die() {
 		stopped = true;
+
+		doDie();
+
+		binlogManager.die();
+	}
+
+	@Override
+	public TEException exception() {
+		return teException;
 	}
 
 	protected abstract void doStart();
 
 	protected abstract void doStop();
+
+	protected abstract void doDie();
 
 	private PumaClient createPumaClient() {
 		LOG.info("Creating puma client...");
@@ -102,16 +113,20 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 		configBuilder.host(pumaServer.getHost());
 		configBuilder.port(pumaServer.getPort());
 		configBuilder.name(task.getPumaClientName());
-		configBuilder.serverId(task.getPumaClientServerId());
+		configBuilder.serverId(srcDBInstance.getServerId());
 		configBuilder.target(pumaTask.getName());
 		configBuilder.dml(true);
 		configBuilder.ddl(true);
-		configBuilder.transaction(false);
+		configBuilder.transaction(true);
+		configBuilder.binlog(binlogManager.getRecovery().getBinlogFile());
+		configBuilder.binlogPos(binlogManager.getRecovery().getBinlogPosition());
 		_parseSourceDatabaseTables(task.getMysqlMapping(), configBuilder);
 		Configuration configuration = configBuilder.build();
 		LOG.info("Puma client connecting settings: {}.", configuration.toString());
 
 		final PumaClient pumaClient = new PumaClient(configuration);
+		pumaClient.getSeqFileHolder().saveSeq(-3);
+
 		pumaClient.register(new EventListener() {
 
 			@Override
@@ -121,32 +136,32 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 
 			@Override
 			public boolean onException(ChangedEvent event, Exception e) {
-				if (!(e instanceof GException)) {
+				if (!(e instanceof TEException)) {
 					// Don't know how to deal, stop executor.
-					gException = new GException(-1, e.getMessage(), e.getCause());
+					teException = new TEException(-1, e.getMessage(), e.getCause());
 					stop();
 					return false;
 				} else {
 					// Standard exception, find solution in error code handler map.
-					GException ge = (GException) e;
+					TEException ge = (TEException) e;
 					Map<Integer, String> errorCodeHandlerMap = task.getErrorCodeHandlerNameMap();
 					if (errorCodeHandlerMap == null) {
 						// No error code handler map exists, stop executor.
-						gException = ge;
+						teException = ge;
 						stop();
 						return false;
 					} else {
 						String handlerName = errorCodeHandlerMap.get(ge.getErrorCode());
 						if (handlerName == null) {
 							// No error code handler name exists, stop executor.
-							gException = ge;
+							teException = ge;
 							stop();
 							return false;
 						} else {
 							Handler handler = HandlerContainer.getInstance().getHandler(handlerName);
 							if (handler == null) {
 								// No error code handler exists, stop executor.
-								gException = ge;
+								teException = ge;
 								stop();
 								return false;
 							} else {
@@ -166,7 +181,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 				try {
 					Thread.sleep(60000L);
 				} catch (InterruptedException e1) {
-					gException = new GException(-1, e1.getMessage(), e1.getCause());
+					teException = new TEException(-1, e1.getMessage(), e1.getCause());
 					stop();
 				}
 			}
@@ -245,7 +260,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 	public String toString() {
 		return "AbstractTaskExecutor{" +
 				"stopped=" + stopped +
-				", gException=" + gException +
+				", gException=" + teException +
 				", task=" + task +
 				", pumaTask=" + pumaTask +
 				", pumaServer=" + pumaServer +
@@ -262,6 +277,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 
 	public void setPumaServer(PumaServer pumaServer) {
 		this.pumaServer = pumaServer;
+	}
+
+	public void setSrcDBInstance(SrcDBInstance srcDBInstance) {
+		this.srcDBInstance = srcDBInstance;
 	}
 
 	public void setDstDBInstance(DstDBInstance dstDBInstance) {

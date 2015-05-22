@@ -19,6 +19,7 @@ import com.dianping.puma.core.entity.DumpTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.state.DumpTaskState;
+import com.dianping.puma.syncserver.job.executor.exception.TEException;
 import com.google.common.base.Strings;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecuteResultHandler;
@@ -190,6 +191,14 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         };
         thread.start();
         state.setStatus(Status.RUNNING);
+    }
+
+    public void die() {
+
+    }
+
+    public TEException exception() {
+        return new TEException(0);
     }
 
     /**

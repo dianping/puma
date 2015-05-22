@@ -50,7 +50,7 @@ public class DefaultTransformer implements Transformer {
 	}
 
 	@Override
-	public void destroy() {
+	public void die() {
 		// No persistent storage in transformer.
 	}
 

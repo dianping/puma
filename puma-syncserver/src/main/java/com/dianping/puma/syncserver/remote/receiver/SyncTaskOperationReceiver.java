@@ -53,10 +53,12 @@ public class SyncTaskOperationReceiver implements EventListener {
 	private void createSyncTask(String name) {
 		LOG.info("Creating sync task({})...", name);
 
-		// Submit the new task.
 		SyncTask syncTask = syncTaskService.find(name);
 		TaskExecutor taskExecutor = taskExecutorBuilder.build(syncTask);
+
 		taskExecutorContainer.submit(name, taskExecutor);
+
+		taskExecutorContainer.start(name);
 	}
 
 	private void updateSyncTask(String name) {
@@ -73,6 +75,8 @@ public class SyncTaskOperationReceiver implements EventListener {
 
 	private void removeSyncTask(String name) {
 		LOG.info("Removing sync task({})...", name);
+
+		taskExecutorContainer.die(name);
 
 		// Withdraw the original task.
 		taskExecutorContainer.withdraw(name);

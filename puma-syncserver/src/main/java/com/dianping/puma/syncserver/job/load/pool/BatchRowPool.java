@@ -65,7 +65,7 @@ public class BatchRowPool implements LifeCycle<LoadException> {
 		}
 	}
 
-	public void destroy() {
+	public void die() {
 		// No persistent storage.
 	}
 

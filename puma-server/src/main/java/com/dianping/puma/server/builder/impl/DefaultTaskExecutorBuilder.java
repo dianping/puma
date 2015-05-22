@@ -200,7 +200,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			// Transaction event filter.
 			TransactionEventFilter transactionEventFilter = new TransactionEventFilter();
 			transactionEventFilter.setName(taskName);
-			transactionEventFilter.setBegin(false);
+			transactionEventFilter.setBegin(true);
 			transactionEventFilter.setCommit(true);
 			eventCenter.register(transactionEventFilter);
 			eventFilterList.add(transactionEventFilter);

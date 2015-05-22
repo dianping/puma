@@ -14,7 +14,7 @@ public class MapDBBinlogManagerTest {
 		binlogManager.setName("puma");
 
 		binlogManager.start();
-		binlogManager.destroy();
+		binlogManager.die();
 		binlogManager.start();
 
 		BinlogInfo expected, result;

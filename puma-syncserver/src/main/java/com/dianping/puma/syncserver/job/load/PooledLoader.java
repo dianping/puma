@@ -4,6 +4,8 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.monitor.EventMonitor;
 import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
 import com.dianping.puma.syncserver.job.load.exception.LoadException;
+import com.dianping.puma.syncserver.job.load.pool.SCBatchExecPool;
+import com.dianping.puma.syncserver.job.load.pool.SCBatchRowPool;
 import com.dianping.puma.syncserver.job.load.row.BatchRow;
 import com.dianping.puma.syncserver.job.load.pool.BatchExecPool;
 import com.dianping.puma.syncserver.job.load.pool.BatchRowPool;
@@ -23,9 +25,9 @@ public class PooledLoader implements Loader {
 	// PooledLoader main modules.
 	private Thread loopThread;
 
-	private BatchExecPool batchExecPool;
+	private SCBatchExecPool batchExecPool;
 
-	private BatchRowPool batchRowPool;
+	private SCBatchRowPool batchRowPool;
 
 	private String name;
 
@@ -85,7 +87,7 @@ public class PooledLoader implements Loader {
 		loadEventMonitor.stop();
 	}
 
-	public void destroy() {
+	public void die() {
 
 	}
 
@@ -94,17 +96,17 @@ public class PooledLoader implements Loader {
 	}
 
 	private void initBatchExecPool() {
-		batchExecPool = new BatchExecPool();
+		batchExecPool = new SCBatchExecPool();
 		batchExecPool.setHost(host);
 		batchExecPool.setUsername(username);
 		batchExecPool.setPassword(password);
-		batchExecPool.setPoolSize(5);
+		batchExecPool.setPoolSize(1);
 		batchExecPool.setRetires(1);
 		batchExecPool.setBinlogManager(binlogManager);
 	}
 
 	private void initBatchRowPool() {
-		batchRowPool = new BatchRowPool();
+		batchRowPool = new SCBatchRowPool();
 		batchRowPool.setPoolSize(30);
 	}
 

@@ -3,7 +3,6 @@ package com.dianping.puma.syncserver.job.load.pool;
 import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
 import com.dianping.puma.syncserver.job.load.exception.LoadException;
 import com.dianping.puma.syncserver.job.load.row.BatchRow;
-import com.dianping.puma.syncserver.job.load.row.RowKey;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
@@ -13,8 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Condition;
@@ -53,9 +50,6 @@ public class SCBatchExecPool {
 
 	/** Pool current size. */
 	private int size = 0;
-
-	// Bottom implementation.
-	private ConcurrentMap<RowKey, Boolean> rowKeys = new ConcurrentHashMap<RowKey, Boolean>();
 
 	// Batch row which is blocked.
 	private BatchRow buffer;
@@ -158,7 +152,6 @@ public class SCBatchExecPool {
 
 		beforePooledBatchExecute(batchRow);
 		pooledBatchExecute(batchRow);
-		afterPooledBatchExecute(batchRow);
 	}
 
 	private void remove(BatchRow batchRow) {
@@ -199,7 +192,7 @@ public class SCBatchExecPool {
 
 	private void pooledBatchExecute(final BatchRow batchRow) {
 		try {
-			if (cachedConn == null) {
+			if (cachedConn == null || cachedConn.isClosed()) {
 				cachedConn = dataSource.getConnection();
 			}
 
@@ -225,6 +218,7 @@ public class SCBatchExecPool {
 							batchExecute(conn, batchRow);
 						}
 
+						afterPooledBatchExecute(batchRow);
 						remove(batchRow);
 						return;
 					} catch (LoadException e) {
@@ -255,7 +249,8 @@ public class SCBatchExecPool {
 
 	private void commit(Connection conn) {
 		try {
-			DbUtils.commitAndClose(conn);
+			conn.commit();
+			//DbUtils.commitAndClose(conn);
 		} catch (SQLException e) {
 			DbUtils.rollbackAndCloseQuietly(conn);
 			throw LoadException.handleException(e);

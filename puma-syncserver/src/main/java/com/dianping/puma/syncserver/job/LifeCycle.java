@@ -10,8 +10,8 @@ public interface LifeCycle<T extends ContextedRuntimeException> {
 	// Stop.
 	public void stop();
 
-	// Destroy the persistent storage.
-	public void destroy();
+	// Clean all the persistent storage.
+	public void die();
 
 	public T exception();
 }

@@ -2,8 +2,7 @@ package com.dianping.puma.syncserver.job.executor;
 
 import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.model.state.SyncTaskState;
-import com.dianping.puma.syncserver.job.executor.exception.GException;
+import com.dianping.puma.syncserver.job.executor.exception.TEException;
 import com.dianping.puma.syncserver.job.load.Loader;
 import com.dianping.puma.syncserver.job.load.exception.LoadException;
 import com.dianping.puma.syncserver.job.transform.Transformer;
@@ -34,7 +33,13 @@ public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTask> {
 	}
 
 	@Override
-	protected void execute(ChangedEvent event) throws GException {
+	protected void doDie() {
+		transformer.die();
+		loader.die();
+	}
+
+	@Override
+	protected void execute(ChangedEvent event) throws TEException {
 		// Transform.
 		TransformException te = transformer.exception();
 		if (te != null) {

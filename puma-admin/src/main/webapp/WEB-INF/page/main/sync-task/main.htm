@@ -28,7 +28,7 @@
 					ng-init="load()">
 					<div class="col-xs-12">
 
-						<div class="table-header">数据同步任务列表 </div>
+						<div class="table-header">数据同步任务列表</div>
 
 						<!-- <div class="table-responsive"> -->
 
@@ -42,7 +42,7 @@
 									</div>
 									<div class="col-xs-6">
 										<div id="sample-table-2_filter" class="dataTables_filter">
-										
+
 										</div>
 									</div>
 								</div>
@@ -66,10 +66,11 @@
 											<td><a href="#">{{item.pumaTaskName}}</a></td>
 											<td>{{item.dstDBInstanceName}}</td>
 											<td>{{item.syncServerName}}</td>
-											<td>{{state(item.name).strStatus}}</td>
+											<td><span
+												ng-class="{'label-success' :state(item.name).status == 'RUNNING','label-warning' : state(item.name).status== 'FAILED' }"
+												class="label label-sm">{{state(item.name).strStatus}}</span></td>
 											<td>{{state(item.name).binlogInfo.binlogFile}}&nbsp;
-											{{state(item.name).binlogInfo.binlogPosition}}
-											</td>
+												{{state(item.name).binlogInfo.binlogPosition}}</td>
 											<td>
 												<div class="hidden-sm hidden-xs action-buttons">
 													<a class="blue" href="javascript:void(0)"
@@ -79,13 +80,15 @@
 														ng-click="pause(item.name)"> <i
 														class="ace-icon fa fa-pause bigger-110"></i>
 													</a> <a class="blue" href="javascript:void(0)"
-													ng-click="refresh(item.name)"> <i
+														ng-click="refresh(item.name)"> <i
 														class="ace-icon fa fa-refresh bigger-130"></i>
-													</a> <a class="green" href="${rc.contextPath}/sync-task/create/"> <i
+													</a> <a class="green"
+														href="${rc.contextPath}/sync-task/create/"> <i
 														class="ace-icon fa fa-plus-circle purple bigger-130"></i>
-													</a><a class="green" href="${rc.contextPath}/sync-task/update/{{item.id}}"> <i
-														class="ace-icon fa fa-pencil bigger-130"></i>
-													</a>  <a class="red" href="javascript:void(0)" 
+													</a><a class="green"
+														href="${rc.contextPath}/sync-task/update/{{item.id}}">
+														<i class="ace-icon fa fa-pencil bigger-130"></i>
+													</a> <a class="red" href="javascript:void(0)"
 														ng-click="dialog(item.name)"> <i
 														class="ace-icon fa fa-trash-o bigger-130"></i>
 													</a>

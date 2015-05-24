@@ -87,25 +87,15 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 		binlogManager.stop();
 	}
 
-	@Override
 	public void die() {
 		stopped = true;
 
-		doDie();
-
-		binlogManager.die();
-	}
-
-	@Override
-	public TEException exception() {
-		return teException;
+		binlogManager.removeRecovery();
 	}
 
 	protected abstract void doStart();
 
 	protected abstract void doStop();
-
-	protected abstract void doDie();
 
 	private PumaClient createPumaClient() {
 		LOG.info("Creating puma client...");

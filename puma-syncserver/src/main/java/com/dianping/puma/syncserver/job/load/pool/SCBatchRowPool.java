@@ -43,6 +43,7 @@ public class SCBatchRowPool implements BatchRowPool {
 		} else {
 			stopped = false;
 
+			transaction = -1;
 			batchRows = new LinkedBlockingDeque<BatchRow>(poolSize);
 		}
 	}
@@ -62,14 +63,6 @@ public class SCBatchRowPool implements BatchRowPool {
 	}
 
 	@Override
-	public void die() {
-		LOG.info("Dieing strong consistency batch row pool({})...", title + name);
-
-		// Batch row pool contains no persistent storage, just stop it.
-		stop();
-	}
-
-	@Override
 	public void put(ChangedEvent event) throws LoadException {
 		if (event instanceof RowChangedEvent) {
 			RowChangedEvent row = (RowChangedEvent) event;
@@ -80,13 +73,11 @@ public class SCBatchRowPool implements BatchRowPool {
 					batch(event);
 				}
 				break;
-
 			case 0:
 				if (!row.isTransactionBegin()) {
 					batch(event);
 				}
 				break;
-
 			case 1:
 				break;
 			}

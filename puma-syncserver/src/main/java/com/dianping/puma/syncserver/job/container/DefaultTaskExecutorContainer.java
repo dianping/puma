@@ -109,7 +109,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer {
 			throw new TECException(-1, String.format("Dieing task executor(%s) failure: not in container.", name));
 		} else {
 			// In container.
-			taskExecutor.die();
+			//taskExecutor.die();
 		}
 	}
 

@@ -9,8 +9,6 @@ import com.dianping.puma.syncserver.job.load.row.BatchRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.SQLException;
-
 public class PooledLoader implements Loader {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PooledLoader.class);
@@ -95,6 +93,7 @@ public class PooledLoader implements Loader {
 
 	public PooledLoader() {}
 
+	@Override
 	public void start() {
 		LOG.info("Starting loader({})...", title + name);
 		stopped = false;
@@ -116,6 +115,7 @@ public class PooledLoader implements Loader {
 		loopThread.start();
 	}
 
+	@Override
 	public void stop() {
 		LOG.info("PooledLoader({}) is stopping.", name);
 		stopped = true;
@@ -136,12 +136,18 @@ public class PooledLoader implements Loader {
 		loadEventMonitor.stop();
 	}
 
-	public void die() {
-
+	@Override
+	public void asyncThrow() throws LoadException {
+		if (loadException != null) {
+			throw loadException;
+		}
 	}
 
-	public LoadException exception() {
-		return loadException;
+	@Override
+	public void load(ChangedEvent event) throws LoadException {
+		// Record total event loaded.
+		loadEventMonitor.record(event.genFullName(), "0");
+		batchRowPool.put(event);
 	}
 
 	private void initBatchRowPool() {
@@ -184,61 +190,25 @@ public class PooledLoader implements Loader {
 				try {
 					loop();
 				} catch (LoadException e) {
-					loadException = e;
-					stop();
+					if (!stopped) {
+						LOG.error("Pooled loader loop thread failure.", e);
+						loadException = e;
+						stop();
+					}
 				}
 			}
 		});
 	}
 
-	public void load(ChangedEvent event) throws LoadException {
-		if (stopped) {
-			LOG.error("Loader({}) is stopped for event({}).", name, event.toString());
-			throw new LoadException(0, String.format("Loader(%s) is stopped for event(%s).", name, event.toString()));
-		}
-
-		loadEventMonitor.record(event.genFullName(), "0");
-		batchRowPool.put(event);
-	}
-
 	private void loop() {
-		for (; ; ) {
-			try {
-				/*
-				if (batchRowPool.hasException()) {
-					translate(batchExecPool.getLoadException());
-					break;
-				}*/
-				BatchRow batchRow = batchRowPool.take();
+		while (true) {
+			// Take batch row from the batch row pool.
+			BatchRow batchRow = batchRowPool.take();
 
-				/*
-				if (batchExecPool.hasException()) {
-					translate(batchExecPool.getLoadException());
-					break;
-				}*/
-				batchExecPool.put(batchRow);
-
-			} catch (InterruptedException e) {
-				if (!stopped) {
-					LOG.error("Loader({}) loops failure.", name);
-					handleException(e);
-				}
-				break;
-			}
+			// Put batch row into the batch exec pool.
+			batchExecPool.asyncThrow();
+			batchExecPool.put(batchRow);
 		}
-	}
-
-	private void handleException(Exception e) {
-		if (e instanceof InterruptedException) {
-			loadException = new LoadException(1, e.getMessage(), e.getCause());
-		} else if (e instanceof SQLException) {
-			loadException = new LoadException(((SQLException) e).getErrorCode(), e.getMessage(), e.getCause());
-		} else {
-			loadException = new LoadException(-1, e.getMessage(), e.getCause());
-		}
-
-		// Stop the loader.
-		stop();
 	}
 
 	public void setName(String name) {

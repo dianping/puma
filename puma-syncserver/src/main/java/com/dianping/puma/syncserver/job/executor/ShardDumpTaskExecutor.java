@@ -370,16 +370,6 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
     }
 
     @Override
-    public void die() {
-
-    }
-
-    @Override
-    public TEException exception() {
-        return new TEException(0);
-    }
-
-    @Override
     public ShardDumpTask getTask() {
         return this.task;
     }

@@ -37,13 +37,16 @@ public class SCBatchExecPool implements BatchExecPool {
 	/** Pool prerequisite settings: data source password. */
 	private String password;
 
-	/** Pool optional settings: pool name, default "SCBatchRowPool-XXXXX". */
-	private String name = "BatchExecPool-" + RandomStringUtils.randomAlphabetic(5);
+	/** Batch exec pool title. */
+	private String title = "SCBatchExecPool-";
 
-	/** Pool optional settings: pool size, default 1. */
+	/** Batch exec pool name. */
+	private String name;
+
+	/** Batch exec pool size, always 1. */
 	private int poolSize = 1;
 
-	/** Pool optional settings: sql retries, default 1. */
+	/** Batch exec pool sql retries, default 1. */
 	private int retries = 1;
 
 	private Connection cachedConn;
@@ -66,15 +69,14 @@ public class SCBatchExecPool implements BatchExecPool {
 	private Lock lock = new ReentrantLock();
 	private final Condition notConflict = lock.newCondition();
 
+	public SCBatchExecPool() {}
 
-	public SCBatchExecPool() {
-	}
-
+	@Override
 	public void start() {
-		LOG.info("Starting batch execution pool({})...", name);
+		LOG.info("Starting batch execution pool({})...", title + name);
 
 		if (!stopped) {
-			LOG.warn("Batch execution pool({}) is already started.", name);
+			LOG.warn("Batch execution pool({}) is already started.", title + name);
 		} else {
 			// Clear batch execution pool status.
 			stopped = false;
@@ -88,11 +90,12 @@ public class SCBatchExecPool implements BatchExecPool {
 		}
 	}
 
+	@Override
 	public void stop() {
-		LOG.info("Stopping batch execution pool({})...", name);
+		LOG.info("Stopping batch execution pool({})...", title + name);
 
 		if (stopped) {
-			LOG.warn("batch execution pool({}) is already stopped.", name);
+			LOG.warn("batch execution pool({}) is already stopped.", title + name);
 		} else {
 			// Clear batch execution pool status.
 			stopped = true;
@@ -105,12 +108,31 @@ public class SCBatchExecPool implements BatchExecPool {
 		}
 	}
 
-	public void destroy() {
-		// No persistent storage.
+	@Override
+	public void asyncThrow() throws LoadException {
+		if (loadException != null) {
+			throw loadException;
+		}
 	}
 
-	public LoadException exception() {
-		return loadException;
+	@Override
+	public void put(BatchRow batchRow) throws LoadException {
+		lock.lock();
+		try {
+			buffer = batchRow;
+			while (!check(batchRow)) {
+				notConflict.await();
+			}
+			buffer = null;
+			register(batchRow);
+		} catch (Exception e) {
+			throw LoadException.translate(e);
+		} finally {
+			lock.unlock();
+		}
+
+		beforePooledBatchExecute(batchRow);
+		pooledBatchExecute(batchRow);
 	}
 
 	private void initThreadPool() {
@@ -135,23 +157,6 @@ public class SCBatchExecPool implements BatchExecPool {
 	private void destroyDataSource() {
 		dataSource.close();
 		dataSource = null;
-	}
-
-	public void put(BatchRow batchRow) throws InterruptedException {
-		lock.lock();
-		try {
-			buffer = batchRow;
-			while (!check(batchRow)) {
-				notConflict.await();
-			}
-			buffer = null;
-			register(batchRow);
-		} finally {
-			lock.unlock();
-		}
-
-		beforePooledBatchExecute(batchRow);
-		pooledBatchExecute(batchRow);
 	}
 
 	private void remove(BatchRow batchRow) {
@@ -255,6 +260,10 @@ public class SCBatchExecPool implements BatchExecPool {
 			DbUtils.rollbackAndCloseQuietly(conn);
 			throw LoadException.translate(e);
 		}
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public void setPoolSize(int poolSize) {

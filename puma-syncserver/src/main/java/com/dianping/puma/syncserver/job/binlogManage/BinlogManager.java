@@ -13,4 +13,6 @@ public interface BinlogManager extends LifeCycle {
 
 	/** Get the recovery binlog info point. */
 	public BinlogInfo getRecovery();
+
+	public void removeRecovery();
 }

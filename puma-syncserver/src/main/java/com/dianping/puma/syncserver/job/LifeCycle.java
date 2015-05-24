@@ -8,7 +8,4 @@ public interface LifeCycle {
 	// Stop.
 	public void stop();
 
-	// Clean all the persistent storage.
-	public void die();
-
 }

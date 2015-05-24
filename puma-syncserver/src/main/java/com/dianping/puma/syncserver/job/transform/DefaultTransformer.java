@@ -20,9 +20,6 @@ public class DefaultTransformer implements Transformer {
 	/** Transformer stopped or not, default true. */
 	private boolean stopped = true;
 
-	/** Transformer exception, default null. */
-	private TransformException transformException = null;
-
 	/** Transformer title. */
 	private String title = "Transform-";
 
@@ -45,7 +42,6 @@ public class DefaultTransformer implements Transformer {
 			LOG.warn("Transformer({}) is already started.", title + name);
 		} else {
 			stopped = false;
-			transformException = null;
 		}
 	}
 
@@ -58,17 +54,6 @@ public class DefaultTransformer implements Transformer {
 		} else {
 			stopped = true;
 		}
-	}
-
-	@Override
-	public void die() {
-		// Transformer contains no persistent storage, just stop it.
-		stop();
-	}
-
-	@Override
-	public TransformException exception() {
-		return transformException;
 	}
 
 	@Override

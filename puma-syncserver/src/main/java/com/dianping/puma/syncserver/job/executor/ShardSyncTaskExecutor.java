@@ -508,14 +508,6 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
     }
 
     @Override
-    public void die() {}
-
-    @Override
-    public TEException exception() {
-        return new TEException(0);
-    }
-
-    @Override
     public BaseSyncTask getTask() {
         return this.task;
     }

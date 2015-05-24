@@ -21,7 +21,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class WCBatchExecPool implements LifeCycle<LoadException> {
+public class WCBatchExecPool implements LifeCycle {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WCBatchExecPool.class);
 

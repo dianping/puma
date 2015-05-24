@@ -30,9 +30,6 @@ public class CatchupTaskExecutor extends AbstractTaskExecutor<CatchupTask> {
     protected void doStop() {}
 
     @Override
-    protected void doDie() {}
-
-    @Override
     protected void execute(ChangedEvent event) throws TEException {
         //执行同步
         //mysqlExecutor.execute(event);

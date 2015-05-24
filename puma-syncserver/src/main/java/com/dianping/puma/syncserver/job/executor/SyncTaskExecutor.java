@@ -33,40 +33,18 @@ public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTask> {
 	}
 
 	@Override
-	protected void doDie() {
-		transformer.die();
-		loader.die();
-	}
-
-	@Override
 	protected void execute(ChangedEvent event) throws TEException {
-		// Transform.
-		TransformException te = transformer.exception();
-		if (te != null) {
-			handleException(te);
-		} else {
-			try {
-				transformer.transform(event);
-			} catch (TransformException e) {
-				handleException(e);
-			}
-		}
+		try {
+			// Transformer.
+			transformer.transform(event);
 
-		// Load.
-		LoadException le = loader.exception();
-		if (le != null) {
-			handleException(le);
-		} else {
-			try {
-				loader.load(event);
-			} catch (LoadException e) {
-				handleException(e);
-			}
-		}
-	}
+			// Loader.
+			loader.asyncThrow();
+			loader.load(event);
 
-	private void handleException(Exception e) {
-		//
+		} catch (Exception e) {
+			throw TEException.translate(e);
+		}
 	}
 
 	public void setTransformer(Transformer transformer) {

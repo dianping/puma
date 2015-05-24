@@ -116,16 +116,12 @@ public class MapDBBinlogManager implements BinlogManager {
 	}
 
 	@Override
-	public void die() {
-		LOG.info("Destroying binlog manager({})...", title + name);
-
+	public void removeRecovery() {
 		try {
 			if (stopped) {
 				db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlogDB/", title + name)).closeOnJvmShutdown()
 						.transactionDisable().asyncWriteEnable().mmapFileEnableIfSupported().make();
 			}
-
-			stopped = true;
 
 			// Delete persistent storage.
 			db.delete(title + name + "-unfinished");
@@ -137,14 +133,7 @@ public class MapDBBinlogManager implements BinlogManager {
 		} catch (Exception e) {
 			binlogManageException = BinlogManageException.translate(e);
 			throw binlogManageException;
-		} finally {
-			stopped = true;
 		}
-	}
-
-	@Override
-	public BinlogManageException exception() {
-		return binlogManageException;
 	}
 
 	@ThreadSafe

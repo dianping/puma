@@ -1,8 +1,6 @@
 package com.dianping.puma.syncserver.job;
 
-import org.apache.commons.lang3.exception.ContextedRuntimeException;
-
-public interface LifeCycle<T extends ContextedRuntimeException> {
+public interface LifeCycle {
 
 	// Start.
 	public void start();
@@ -13,5 +11,4 @@ public interface LifeCycle<T extends ContextedRuntimeException> {
 	// Clean all the persistent storage.
 	public void die();
 
-	public T exception();
 }

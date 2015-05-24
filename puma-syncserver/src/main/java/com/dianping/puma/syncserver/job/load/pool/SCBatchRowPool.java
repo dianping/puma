@@ -17,14 +17,11 @@ public class SCBatchRowPool implements BatchRowPool {
 	/** Pool stopped or not, default true. */
 	private boolean stopped = true;
 
-	/** Pool exception, default null. */
-	private LoadException loadException = null;
-
 	/** Current transaction state, -1 for begin, 0 for in, 1 for commit. */
 	int transaction = -1;
 
 	/** Batch row pool title. */
-	private String title = "BatchRowPool-";
+	private String title = "SCBatchRowPool-";
 
 	/** Batch row pool name. */
 	private String name;
@@ -45,11 +42,8 @@ public class SCBatchRowPool implements BatchRowPool {
 			LOG.warn("Strong consistency batch row pool({}) is already started.", title + name);
 		} else {
 			stopped = false;
-			loadException = null;
 
-			if (batchRows == null) {
-				batchRows = new LinkedBlockingDeque<BatchRow>(poolSize);
-			}
+			batchRows = new LinkedBlockingDeque<BatchRow>(poolSize);
 		}
 	}
 
@@ -76,11 +70,6 @@ public class SCBatchRowPool implements BatchRowPool {
 	}
 
 	@Override
-	public LoadException exception() {
-		return loadException;
-	}
-
-	@Override
 	public void put(ChangedEvent event) throws LoadException {
 		if (event instanceof RowChangedEvent) {
 			RowChangedEvent row = (RowChangedEvent) event;
@@ -98,8 +87,7 @@ public class SCBatchRowPool implements BatchRowPool {
 				}
 				break;
 
-			case 1: // Fall through.
-			default:
+			case 1:
 				break;
 			}
 
@@ -121,8 +109,7 @@ public class SCBatchRowPool implements BatchRowPool {
 		try {
 			return batchRows.take();
 		} catch (InterruptedException e) {
-			loadException = LoadException.translate(e);
-			throw loadException;
+			throw LoadException.translate(e);
 		}
 	}
 

@@ -52,7 +52,7 @@ public class PumaTaskOperationChecker implements EventListener {
 		for (PumaTask pumaTask : pumaTasks) {
 			try {
 				TaskExecutor taskExecutor = taskExecutorBuilder.build(pumaTask);
-				publishAcceptedTableChangedEvent(pumaTask.getName(), pumaTask.getTableSet());
+				taskExecutorContainer.publishAcceptedTableChangedEvent(pumaTask.getName(), pumaTask.getTableSet());
 				taskExecutorContainer.submit(taskExecutor);
 			} catch (Exception e) {
 				LOG.error("Initialize puma task `{}` error: {}.", pumaTask.getName(), e.getStackTrace());
@@ -74,8 +74,6 @@ public class PumaTaskOperationChecker implements EventListener {
 			case CREATE:
 				LOG.info("Receive puma task operation event: CREATE.");
 				taskExecutorContainer.createEvent(pumaTaskOperationEvent);
-				publishAcceptedTableChangedEvent(pumaTaskOperationEvent.getTaskName(),
-						pumaTaskOperationEvent.getPumaTask().getTableSet());
 				break;
 			case UPDATE:
 				LOG.info("Receive puma task operation event: UPDATE.");
@@ -89,8 +87,6 @@ public class PumaTaskOperationChecker implements EventListener {
 				LOG.info("Receive puma task operation event: FILTER or CHANGE.");
 				taskExecutorContainer.prolongEvent(pumaTaskOperationEvent);
 				taskExecutorContainer.filterEvent(pumaTaskOperationEvent);
-				publishAcceptedTableChangedEvent(pumaTaskOperationEvent.getTaskName(),
-						pumaTaskOperationEvent.getPumaTask().getTableSet());
 				break;
 			case CHANGE:
 				LOG.info("Receive puma task operation event: PROLONG or CHANGE.");
@@ -104,11 +100,4 @@ public class PumaTaskOperationChecker implements EventListener {
 		}
 	}
 
-	private void publishAcceptedTableChangedEvent(String name, TableSet tableSet) {
-		AcceptedTableChangedEvent acceptedTableChangedEvent = new AcceptedTableChangedEvent();
-		acceptedTableChangedEvent.setName(name);
-		acceptedTableChangedEvent.setTableSet(tableSet);
-
-		eventCenter.post(acceptedTableChangedEvent);
-	}
 }

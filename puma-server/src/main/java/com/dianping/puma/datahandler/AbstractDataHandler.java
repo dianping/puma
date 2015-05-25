@@ -49,7 +49,7 @@ import com.dianping.puma.parser.mysql.event.QueryEvent;
 @ThreadUnSafe
 public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 	private static final Logger log = Logger.getLogger(AbstractDataHandler.class);
-	private TableMetasInfoFetcher tableMetasInfoFetcher;
+	private TableMetaInfoFetcher tableMetasInfoFetcher;
 	private NotifyService notifyService;
 
 	/**
@@ -70,7 +70,7 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 	/**
 	 * @return the tableMetasInfoFetcher
 	 */
-	public TableMetasInfoFetcher getTableMetasInfoFetcher() {
+	public TableMetaInfoFetcher getTableMetasInfoFetcher() {
 		return tableMetasInfoFetcher;
 	}
 
@@ -78,7 +78,7 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 	 * @param tableMetasInfoFetcher
 	 *            the tableMetasInfoFetcher to set
 	 */
-	public void setTableMetasInfoFetcher(TableMetasInfoFetcher tableMetasInfoFetcher) {
+	public void setTableMetasInfoFetcher(TableMetaInfoFetcher tableMetasInfoFetcher) {
 		this.tableMetasInfoFetcher = tableMetasInfoFetcher;
 	}
 
@@ -89,7 +89,7 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 	 */
 	@Override
 	public void start() throws Exception {
-		tableMetasInfoFetcher.refreshTableMeta(null, null, true);
+		tableMetasInfoFetcher.refreshTableMeta(null, true);
 	}
 
 	/*
@@ -192,9 +192,6 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 				|| StringUtils.startsWithIgnoreCase(sql, "TRUNCATE ")) {
 
 			handleDDlEvent(result, queryEvent, sql);
-			if (!StringUtils.startsWithIgnoreCase(sql, "CREATE ")){
-				log.info("DdlEvent ddl sql=" + sql);
-			}
 
 		} else if (StringUtils.equalsIgnoreCase(sql, "BEGIN")) {
 
@@ -243,29 +240,17 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 				log.info("DDL event, sql=" + sql + "  ,database =" + ddlResult.getDatabase() + " table ="
 						+ ddlResult.getTable() + " queryEvent.getDatabaseName()" + queryEvent.getDatabaseName());
 			}
-		} else {
-			if (ddlEvent.getEventType() != DdlEventType.DDL_CREATE)
-				log.info("DDL event unable to get ddlResult , sql=" + sql);
-		}
+		} 
 		if (StringUtils.isBlank(ddlEvent.getDatabase())) {
 			ddlEvent.setDatabase(queryEvent.getDatabaseName());
 		}
-		// 过滤系统的ddl引起的refresh慢查询
-		/*
-		 * if (!(StringUtils.isNotBlank(ddlEvent.getDatabase()) &&
-		 * TableMetaRefreshFilter
-		 * .instance.getFiltedDatabases().contains(ddlEvent
-		 * .getDatabase().toLowerCase()))) {
-		 * tableMetasInfoFetcher.refreshTableMeta
-		 * (ddlEvent.getDatabase().toLowerCase(),false);
-		 * log.info("table meta refresh.    DDL event sql:"+sql+"."); }
-		 */
-		tableMetasInfoFetcher.refreshTableMeta(ddlEvent.getDatabase(), ddlEvent.getTable(), false);
-
+		
 		if (ddlEvent.getEventType() == DdlEventType.DDL_ALTER && ddlEvent.getEventSubType() == DdlEventSubType.DDL_ALTER_TABLE) {
 			ddlEvent.setDDLType(DDLType.ALTER_TABLE);
 		}
-
+		
+		tableMetasInfoFetcher.refreshTableMeta(ddlEvent, false);
+		
 		ddlEvent.setExecuteTime(queryEvent.getHeader().getTimestamp());
 		result.setData(dataChangedEvent);
 		result.setEmpty(false);

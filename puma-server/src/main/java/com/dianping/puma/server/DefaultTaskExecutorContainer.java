@@ -12,6 +12,9 @@ import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
+import com.dianping.puma.core.model.TableSet;
+import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
+import com.dianping.puma.core.model.event.EventCenter;
 import com.dianping.puma.core.monitor.event.PumaTaskControllerEvent;
 import com.dianping.puma.core.monitor.event.PumaTaskOperationEvent;
 import com.dianping.puma.core.service.PumaTaskService;
@@ -32,7 +35,7 @@ import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.datahandler.AbstractDataHandler;
-import com.dianping.puma.datahandler.TableMetasInfoFetcher;
+import com.dianping.puma.datahandler.TableMetaInfoFetcher;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.storage.EventStorage;
 
@@ -67,6 +70,9 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 
 	@Autowired
 	private PumaServerConfig pumaServerConfig;
+
+	@Autowired
+	EventCenter eventCenter;
 
 	@PostConstruct
 	public void init() {
@@ -144,8 +150,8 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 	}
 
 	/**
-	 * Start the given task and submit it into the container. The start
-	 * action might fail but the submit action will always be successful.
+	 * Start the given task and submit it into the container. The start action
+	 * might fail but the submit action will always be successful.
 	 *
 	 * @param taskExecutor
 	 * @throws Exception
@@ -162,8 +168,8 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 	}
 
 	/**
-	 * Stop the given task and withdraw it from the container. The stop
-	 * action might fail but the withdraw action will always be successful.
+	 * Stop the given task and withdraw it from the container. The stop action
+	 * might fail but the withdraw action will always be successful.
 	 *
 	 * @param taskExecutor
 	 * @throws Exception
@@ -213,6 +219,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 		try {
 			PumaTask pumaTask = pumaTaskService.find(taskName);
 			TaskExecutor taskExecutor = taskExecutorBuilder.build(pumaTask);
+			publishAcceptedTableChangedEvent(event.getTaskName(), event.getPumaTask().getTableSet());
 			submit(taskExecutor);
 		} catch (Exception e) {
 			LOG.error("Puma task `{}` create event error: {}.", taskName, e.getStackTrace());
@@ -263,25 +270,21 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 			LOG.warn("Puma task `{}` prolong event warn: {}.", taskName, "Task not found");
 		}
 	}
+
 	@Override
-	public void filterEvent(PumaTaskOperationEvent event){
+	public void filterEvent(PumaTaskOperationEvent event) {
 		String taskName = event.getTaskName();
 		TaskExecutor taskExecutor = taskExecutorMap.get(taskName);
 		if (taskExecutor != null) {
-			List<Sender> senders = taskExecutor.getFileSender();
-			EventStorage storage = senders.get(0).getStorage();
-			DefaultEventStorage defaultEventStorage = (DefaultEventStorage) storage;
-			AbstractDataHandler handler=(AbstractDataHandler)taskExecutor.getDataHandler();
-			TableMetasInfoFetcher tableMetasInfoFetcher=  handler.getTableMetasInfoFetcher();
+			AbstractDataHandler handler = (AbstractDataHandler) taskExecutor.getDataHandler();
+			TableMetaInfoFetcher tableMetasInfoFetcher = handler.getTableMetasInfoFetcher();
 			try {
-				PumaTask pumaTask = pumaTaskService.find(taskName);
-				defaultEventStorage.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
-				tableMetasInfoFetcher.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
-				tableMetasInfoFetcher.refreshTableMeta(null, null, true);
+				publishAcceptedTableChangedEvent(event.getTaskName(), event.getPumaTask().getTableSet());
+				tableMetasInfoFetcher.refreshTableMeta(null, true);
 			} catch (Exception e) {
 				LOG.error("Puma task `{}` prolong event error: {}.", taskName, e.getMessage());
 			}
-		}else{
+		} else {
 			LOG.warn("Puma task `{}` prolong event warn: {}.", taskName, "Task not found");
 		}
 	}
@@ -302,8 +305,8 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 		return binlogInfoHolder;
 	}
 
-	/*
-	@Override
+/*	
+ * @Override
 	public void updateEvent(ReplicationTaskEvent event) {
 		if (taskExecutorMap != null && taskExecutorMap.containsKey(event.getTaskName())) {
 			Server task = taskExecutorMap.get(event.getTaskName());
@@ -313,12 +316,10 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 				task.setTaskStatus(ReplicationTaskStatus.Status.STOPPED);
 				taskExecutorMap.remove(event.getTaskName());
 			} catch (Exception e) {
-				LOG.error("delete Server" + task.getPumaServerId() + " failed.",
-						e);
+				LOG.error("delete Server" + task.getPumaServerId() + " failed.", e);
 				e.printStackTrace();
 			}
-			ReplicationTask serverTask = replicationTaskService.findByTaskId(event
-					.getTaskId());
+			ReplicationTask serverTask = replicationTaskService.findByTaskId(event.getTaskId());
 			try {
 				task = construct(serverTask);
 				taskExecutorMap.put(task.getPumaServerId(), task);
@@ -328,14 +329,13 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 				task.setTaskStatus(ReplicationTaskStatus.Status.RUNNING);
 
 			} catch (Exception e) {
-				LOG.error("start Server" + task.getPumaServerId()
-						+ " failed.", e);
+				LOG.error("start Server" + task.getPumaServerId() + " failed.", e);
 				e.printStackTrace();
 			}
 
 		}
-	}*/
-
+	}
+*/
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		instance = this;
@@ -360,13 +360,19 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 	}
 
 	public boolean canStop(TaskExecutor taskExecutor) {
-		return taskExecutor.getStatus() != Status.STOPPED
-				&& taskExecutor.getStatus() != Status.STOPPING
+		return taskExecutor.getStatus() != Status.STOPPED && taskExecutor.getStatus() != Status.STOPPING
 				&& taskExecutor.getStatus() != Status.FAILED;
 	}
 
 	public boolean canStart(TaskExecutor taskExecutor) {
-		return taskExecutor.getStatus() != Status.RUNNING
-				&& taskExecutor.getStatus() != Status.PREPARING;
+		return taskExecutor.getStatus() != Status.RUNNING && taskExecutor.getStatus() != Status.PREPARING;
+	}
+
+	public void publishAcceptedTableChangedEvent(String name, TableSet tableSet) {
+		AcceptedTableChangedEvent acceptedTableChangedEvent = new AcceptedTableChangedEvent();
+		acceptedTableChangedEvent.setName(name);
+		acceptedTableChangedEvent.setTableSet(tableSet);
+
+		eventCenter.post(acceptedTableChangedEvent);
 	}
 }

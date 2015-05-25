@@ -1,5 +1,6 @@
 package com.dianping.puma.server;
 
+import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.core.monitor.event.PumaTaskControllerEvent;
 import com.dianping.puma.core.monitor.event.PumaTaskOperationEvent;
 
@@ -42,4 +43,6 @@ public interface TaskExecutorContainer {
 	public void filterEvent(PumaTaskOperationEvent event);
 
 	public String getPumaServerName();
+	
+	public void publishAcceptedTableChangedEvent(String name, TableSet tableSet);
 }

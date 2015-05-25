@@ -7,11 +7,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.dianping.puma.ComponentContainer;
-import com.dianping.puma.core.model.AcceptedTables;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.monitor.StorageEventCountMonitor;
@@ -26,8 +24,6 @@ import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.event.DdlEvent;
-import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.storage.exception.InvalidSequenceException;
 import com.dianping.puma.storage.exception.StorageClosedException;
@@ -82,10 +78,6 @@ public class DefaultEventStorage implements EventStorage {
 
 	private String acceptedTablesConfigKey;
 
-	private List<String> acceptedTables;
-
-	private Map<String,AcceptedTables> acceptedDataTables;
-
 	private EventFilterChain storageEventFilterChain;
 
 	private StorageEventCountMonitor storageEventCountMonitor;
@@ -131,8 +123,6 @@ public class DefaultEventStorage implements EventStorage {
 
 		cleanupStrategy.addDataIndex(binlogIndex);
 
-		initAcceptedTableList();
-
 		storageEventCountMonitor = ComponentContainer.SPRING.lookup("storageEventCountMonitor");
 		if (storageEventCountMonitor != null) {
 			LOG.info("Find `storageEventCountMonitor` spring bean success.");
@@ -154,55 +144,6 @@ public class DefaultEventStorage implements EventStorage {
 		} catch (Exception e) {
 			throw new StorageLifeCycleException("Storage init failed", e);
 		}
-	}
-
-	private void initAcceptedTableList() {
-		if (StringUtils.isNotBlank(acceptedTablesConfigKey)) {
-			try {
-				String acceptedTablesStr = ConfigCache.getInstance()
-						.getProperty(acceptedTablesConfigKey);
-
-				acceptedTables = constructAcceptedTablesList(acceptedTablesStr);
-
-				ConfigCache.getInstance().addChange(new ConfigChange() {
-
-					@Override
-					public void onChange(String key, String value) {
-						if (acceptedTablesConfigKey.equals(key)) {
-							acceptedTables = constructAcceptedTablesList(value);
-						}
-					}
-				});
-
-				return;
-
-			} catch (LionException e) {
-				LOG.warn(String.format("Get acceptedTablesConfig[%s] failed.",
-						acceptedTablesConfigKey));
-			}
-		}
-
-		acceptedTables = null;
-	}
-
-	private List<String> constructAcceptedTablesList(String acceptedTablesStr) {
-		if (StringUtils.isNotBlank(acceptedTablesStr)) {
-			String[] acceptedTablesArr = StringUtils.split(acceptedTablesStr,
-					",");
-			if (acceptedTablesArr != null && acceptedTablesArr.length > 0) {
-				List<String> resList = new ArrayList<String>(
-						acceptedTablesArr.length);
-				for (String acceptedTable : acceptedTablesArr) {
-					if (StringUtils.isNotBlank(acceptedTable)) {
-						resList.add(StringUtils.trim(acceptedTable)
-								.toLowerCase());
-					}
-				}
-				LOG.info("accepted tables:" + resList);
-				return resList;
-			}
-		}
-		return null;
 	}
 
 	public CleanupStrategy getCleanupStrategy() {
@@ -276,16 +217,8 @@ public class DefaultEventStorage implements EventStorage {
 		this.codec = codec;
 	}
 
-	public void setAcceptedDataTables(Map<String,AcceptedTables> acceptedDataTables) {
-		this.acceptedDataTables = acceptedDataTables;
-	}
-
 	public void setStorageEventFilterChain(EventFilterChain storageEventFilterChain) {
 		this.storageEventFilterChain = storageEventFilterChain;
-	}
-
-	public Map<String,AcceptedTables> getAcceptedDataTables() {
-		return acceptedDataTables;
 	}
 
 	@Override
@@ -355,52 +288,6 @@ public class DefaultEventStorage implements EventStorage {
 		}
 	}
 
-	private boolean needStore(ChangedEvent event) {
-		if (acceptedTables == null || acceptedTables.isEmpty()) {
-			return true;
-		}
-
-		if (event instanceof RowChangedEvent) {
-			RowChangedEvent rce = (RowChangedEvent) event;
-
-			if (StringUtils.isNotBlank(rce.getTable())) {
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("table:" + rce.getTable().toLowerCase());
-				}
-				return acceptedTables.contains(rce.getTable().toLowerCase());
-			}
-
-			return true;
-		} else {
-			return true;
-		}
-	}
-	
-	private boolean needStoreNew(ChangedEvent event) {
-		if (acceptedDataTables == null || acceptedDataTables.isEmpty()) {
-			return true;
-		}
-		if (event instanceof RowChangedEvent||event instanceof DdlEvent) {
-			if(StringUtils.isNotBlank(event.getDatabase())){
-				if(acceptedDataTables.containsKey(event.getDatabase())){
-					if (StringUtils.isNotBlank(event.getTable())) {
-						if (LOG.isDebugEnabled()) {
-							LOG.debug("table:" + event.getTable().toLowerCase());
-						}
-						return acceptedDataTables.get(event.getDatabase()).isContains((event.getTable()));
-					}
-					return true;
-				}
-				return false;
-			}
-			if(event instanceof DdlEvent){
-				LOG.info(event.toString());
-			} 
-			return true;
-		} else{
-			return true;
-		}
-	}
 	
 	private void updateIndex(ChangedEvent event, boolean newL1Index, long newSeq)
 			throws IOException {

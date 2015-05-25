@@ -4,10 +4,12 @@ import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
+import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
 import com.dianping.puma.core.model.event.EventCenter;
 import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
+import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.core.model.state.PumaTaskState;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
@@ -111,7 +113,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			taskExecutor.setFetcherEventCountMonitor(fetcherEventCountMonitor);
 			taskExecutor.setFetcherEventDelayMonitor(fetcherEventDelayMonitor);
 			taskExecutor.setParserEventCountMonitor(parserEventCountMonitor);
-			
+
 			PumaTaskState taskState = new PumaTaskState();
 			taskState.setTaskName(pumaTask.getName());
 			taskState.setStatus(Status.PREPARING);
@@ -146,11 +148,17 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			DefaultDataHandler dataHandler = new DefaultDataHandler();
 			dataHandler.setNotifyService(notifyService);
 			DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
-			tableMetaInfo.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
+			// tableMetaInfo.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
 			tableMetaInfo.setMetaDBHost(srcDBInstance.getMetaHost());
 			tableMetaInfo.setMetaDBPort(srcDBInstance.getMetaPort());
 			tableMetaInfo.setMetaDBUsername(srcDBInstance.getUsername());
 			tableMetaInfo.setMetaDBPassword(srcDBInstance.getPassword());
+			// tableMeta refresh filter
+			TableMetaRefreshFilter tableMetaRefreshFilter = new TableMetaRefreshFilter();
+			tableMetaRefreshFilter.setName(taskName);
+			eventCenter.register(tableMetaRefreshFilter);
+			tableMetaInfo.setTableMetaRefreshFilter(tableMetaRefreshFilter);
+
 			dataHandler.setTableMetasInfoFetcher(tableMetaInfo);
 			// dataHandler.start();
 			taskExecutor.setDataHandler(dataHandler);
@@ -166,7 +174,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			storage.setName(storageName + taskName);
 			storage.setTaskName(taskName);
 
-			storage.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
+			// storage.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
 			storage.setCodec(jsonCodec);
 
 			EventFilterChain eventFilterChain = new DefaultEventFilterChain();
@@ -251,11 +259,12 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 
 			// Set puma task status.
 			taskExecutor.setStatus(Status.WAITING);
-
+			
 			return taskExecutor;
 		} catch (Exception e) {
 			LOG.error("Build puma task `{}` error: {}.", pumaTask.getName(), e.getMessage());
 			throw e;
 		}
 	}
+	
 }

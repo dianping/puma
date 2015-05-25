@@ -30,7 +30,7 @@ public interface TaskExecutorContainer {
 
     public void stop(String name) throws TECException;
 
-    public void die(String name) throws TECException;
+    public void removePersistence(String name) throws TECException;
 
     public TaskExecutor get(String name);
 

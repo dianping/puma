@@ -9,6 +9,7 @@ public enum Status {
 	STOPPING("停止中"),
 	STOPPED("已停止"),
 	SUCCESS("结束-成功"),
+	CONNECTED("已连接"),
 	RECONNECTING("重新连接"),
 	DUMPING("DUMP中"),
 	LOADING("载入中"),

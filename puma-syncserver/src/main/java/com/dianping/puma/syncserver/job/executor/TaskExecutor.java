@@ -7,4 +7,6 @@ import com.dianping.puma.syncserver.job.executor.exception.TEException;
 public interface TaskExecutor<T extends BaseSyncTask> extends LifeCycle {
 
     T getTask();
+
+    void removePersistence();
 }

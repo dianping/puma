@@ -55,11 +55,6 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 	}
 
 	@Override
-	public T getTask() {
-		return task;
-	}
-
-	@Override
 	public void start() {
 		stopped = false;
 		teException = null;
@@ -86,9 +81,13 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 		binlogManager.stop();
 	}
 
-	public void die() {
-		stopped = true;
+	@Override
+	public T getTask() {
+		return task;
+	}
 
+	@Override
+	public void removePersistence() {
 		binlogManager.removeRecovery();
 	}
 
@@ -165,6 +164,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 			@Override
 			public void onConnectException(Exception e) {
 				LOG.error("Puma client({}) connection exception occurs: {}.", task.getName(), e.getMessage());
+				status = Status.RECONNECTING;
 
 				// Sleep 60s.
 				try {
@@ -178,6 +178,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 			@Override
 			public void onConnected() {
 				LOG.info("Puma client({}) connected.", task.getName());
+				status = Status.CONNECTED;
 			}
 
 			@Override

@@ -1,5 +1,6 @@
 package com.dianping.puma.syncserver.remote.receiver;
 
+import com.dianping.cat.Cat;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.monitor.event.Event;
@@ -7,6 +8,7 @@ import com.dianping.puma.core.monitor.EventListener;
 import com.dianping.puma.core.monitor.event.SyncTaskOperationEvent;
 import com.dianping.puma.core.service.SyncTaskService;
 import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;
+import com.dianping.puma.syncserver.job.container.exception.TECException;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 import com.dianping.puma.syncserver.job.executor.builder.TaskExecutorBuilder;
 import org.slf4j.Logger;
@@ -30,23 +32,28 @@ public class SyncTaskOperationReceiver implements EventListener {
 
 	@Override
 	public void onEvent(Event event) {
-		if (event instanceof SyncTaskOperationEvent) {
-			LOG.info("Receive sync task operation event({}).", event.toString());
+		try {
+			if (event instanceof SyncTaskOperationEvent) {
+				LOG.info("Receive sync task operation event({}).", event.toString());
 
-			String name = ((SyncTaskOperationEvent) event).getTaskName();
-			ActionOperation operation = ((SyncTaskOperationEvent) event).getOperation();
+				String name = ((SyncTaskOperationEvent) event).getTaskName();
+				ActionOperation operation = ((SyncTaskOperationEvent) event).getOperation();
 
-			switch (operation) {
-			case CREATE:
-				createSyncTask(name);
-				break;
-			case UPDATE:
-				updateSyncTask(name);
-				break;
-			case REMOVE:
-				removeSyncTask(name);
-				break;
+				switch (operation) {
+				case CREATE:
+					createSyncTask(name);
+					break;
+				case UPDATE:
+					updateSyncTask(name);
+					break;
+				case REMOVE:
+					removeSyncTask(name);
+					break;
+				}
 			}
+		} catch (TECException e) {
+			LOG.error("Receiving sync task operation event({}) failure.", event.toString());
+			Cat.logError(e);
 		}
 	}
 
@@ -56,27 +63,42 @@ public class SyncTaskOperationReceiver implements EventListener {
 		SyncTask syncTask = syncTaskService.find(name);
 		TaskExecutor taskExecutor = taskExecutorBuilder.build(syncTask);
 
+		// Submit new task.
 		taskExecutorContainer.submit(name, taskExecutor);
 
+		// Start new task.
 		taskExecutorContainer.start(name);
 	}
 
 	private void updateSyncTask(String name) {
 		LOG.info("Updating sync task({})...", name);
 
-		// Withdraw the original task.
+		// Stop original task.
+		taskExecutorContainer.stop(name);
+
+		// Remove persistence.
+		taskExecutorContainer.removePersistence(name);
+
+		// Withdraw original task.
 		taskExecutorContainer.withdraw(name);
 
-		// Submit the new task.
+		// Submit new task.
 		SyncTask syncTask = syncTaskService.find(name);
 		TaskExecutor taskExecutor = taskExecutorBuilder.build(syncTask);
 		taskExecutorContainer.submit(name, taskExecutor);
+
+		// Start new task.
+		taskExecutorContainer.start(name);
 	}
 
 	private void removeSyncTask(String name) {
 		LOG.info("Removing sync task({})...", name);
 
-		taskExecutorContainer.die(name);
+		// Stop original task.
+		taskExecutorContainer.stop(name);
+
+		// Remove persistence.
+		taskExecutorContainer.removePersistence(name);
 
 		// Withdraw the original task.
 		taskExecutorContainer.withdraw(name);

@@ -98,18 +98,17 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer {
 		}
 	}
 
-	@Override
-	public void die(String name) throws TECException {
-		LOG.info("Dieing task executor({})...", name);
+	public void removePersistence(String name) throws TECException {
+		LOG.info("Removing task executor({}) persistence...", name);
 
 		TaskExecutor taskExecutor = taskExecutorMap.get(name);
 		if (taskExecutor == null) {
 			// Not in container.
-			LOG.error("Dieing task executor({}) failure: not in container.", name);
-			throw new TECException(-1, String.format("Dieing task executor(%s) failure: not in container.", name));
+			LOG.error("Removing task executor({}) persistence failure: not in container.", name);
+			throw new TECException(-1, String.format("Removing task executor(%s) persistence failure: not in container.", name));
 		} else {
 			// In container.
-			//taskExecutor.die();
+			taskExecutor.removePersistence();
 		}
 	}
 

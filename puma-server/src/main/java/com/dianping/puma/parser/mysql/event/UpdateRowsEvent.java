@@ -76,18 +76,16 @@ public class UpdateRowsEvent extends AbstractRowsEvent {
 		tableMapEvent = context.getTableMaps().get(tableId);
 		usedColumnsBefore = PacketUtils.readBitSet(buf, columnCount.intValue());
 		usedColumnsAfter = PacketUtils.readBitSet(buf, columnCount.intValue());
-		
+
 		rows = parseRows(buf, context);
 	}
 
 	protected List<UpdatedRowData<Row>> parseRows(ByteBuffer buf, PumaContext context) throws IOException {
 		final List<UpdatedRowData<Row>> r = new LinkedList<UpdatedRowData<Row>>();
-		boolean isRemaining = context.isCheckSum() ? buf.remaining() - 4 > 0 : buf.hasRemaining();
-		while (isRemaining) {
+		while (isRemaining(buf, context)) {
 			final Row before = parseRow(buf, usedColumnsBefore);
 			final Row after = parseRow(buf, usedColumnsAfter);
 			r.add(new UpdatedRowData<Row>(before, after));
-			isRemaining = context.isCheckSum() ? buf.remaining() - 4 > 0 : buf.hasRemaining();
 		}
 		return r;
 	}

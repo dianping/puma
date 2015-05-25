@@ -68,7 +68,7 @@ public class RotateEvent extends AbstractBinlogEvent {
 	@Override
 	public void doParse(ByteBuffer buf, PumaContext context) throws IOException {
 		firstEventPosition = PacketUtils.readLong(buf, 8);
-		int lenRemaining = context.isCheckSum() ? buf.remaining() - 4 : buf.remaining();
+		int lenRemaining = lenRemaining(buf, context);
 		nextBinlogFileName = PacketUtils.readFixedLengthString(buf, lenRemaining);
 	}
 

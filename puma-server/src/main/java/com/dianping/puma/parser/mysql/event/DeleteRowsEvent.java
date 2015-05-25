@@ -72,10 +72,8 @@ public class DeleteRowsEvent extends AbstractRowsEvent {
 
 	protected List<Row> parseRows(ByteBuffer buf, PumaContext context) throws IOException {
 		final List<Row> r = new LinkedList<Row>();
-		boolean isRemaining = context.isCheckSum() ? buf.remaining() - 4 > 0 : buf.hasRemaining();
-		while (isRemaining) {
+		while (isRemaining(buf, context)) {
 			r.add(parseRow(buf, usedColumns));
-			isRemaining = context.isCheckSum() ? buf.remaining() - 4 > 0 : buf.hasRemaining();
 		}
 		return r;
 	}

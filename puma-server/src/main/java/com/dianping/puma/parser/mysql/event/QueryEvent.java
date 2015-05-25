@@ -118,7 +118,7 @@ public class QueryEvent extends AbstractBinlogEvent {
 		statusVariablesLength = PacketUtils.readInt(buf, 2);
 		statusVariables = parseStatusVariables(PacketUtils.readBytes(buf, statusVariablesLength));
 		databaseName = PacketUtils.readNullTerminatedString(buf);
-		int lenRemaining = context.isCheckSum() ? buf.remaining() - 4 : buf.remaining();
+		int lenRemaining = lenRemaining(buf, context);
 		sql = PacketUtils.readFixedLengthString(buf, lenRemaining);
 
 	}

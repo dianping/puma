@@ -83,5 +83,12 @@ public abstract class AbstractBinlogEvent implements BinlogEvent {
 	public void setCrc(long crc) {
 		this.crc = crc;
 	}
-
+	
+	public boolean isRemaining(ByteBuffer buf, PumaContext context){
+		return context.isCheckSum() ? buf.remaining() - 4 > 0 : buf.hasRemaining();
+	}
+	
+	public int lenRemaining(ByteBuffer buf, PumaContext context){
+		return context.isCheckSum() ? buf.remaining() - 4 : buf.remaining();
+	}
 }

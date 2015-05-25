@@ -125,9 +125,11 @@ public class Handler implements PageHandler<Context> {
 
 					if (filterChain.doNext(event)) {
 						byte[] data = codec.encode(event);
-						res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
-						res.getOutputStream().write(data);
-						res.getOutputStream().flush();
+						synchronized (res){
+							res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
+							res.getOutputStream().write(data);
+							res.getOutputStream().flush();
+						}
 						// status report
 						SystemStatusContainer.instance.updateClientInfo(clientName, event.getSeq(),event.getBinlog(), event.getBinlogPos());
 					}

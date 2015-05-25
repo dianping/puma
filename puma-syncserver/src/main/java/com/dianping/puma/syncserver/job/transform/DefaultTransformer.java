@@ -17,22 +17,28 @@ public class DefaultTransformer implements Transformer {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DefaultTransformer.class);
 
-	/** Transformer stopped or not, default true. */
+	/**
+	 * Transformer stopped or not, default true.
+	 */
 	private boolean stopped = true;
 
-	/** Transformer title. */
+	/**
+	 * Transformer title.
+	 */
 	private String title = "Transform-";
 
-	/** Transformer name. */
+	/**
+	 * Transformer name.
+	 */
 	private String name;
 
-	/** Transformer strong consistency or not, default true. */
-	private boolean strongConsistency = true;
-
-	/** Transformer source and destination schema and table mapping. */
+	/**
+	 * Transformer source and destination schema and table mapping.
+	 */
 	private MysqlMapping mysqlMapping;
 
-	public DefaultTransformer() {}
+	public DefaultTransformer() {
+	}
 
 	@Override
 	public void start() {
@@ -58,8 +64,6 @@ public class DefaultTransformer implements Transformer {
 
 	@Override
 	public void transform(ChangedEvent event) throws TransformException {
-		// @TODO: split event that changes primary keys.
-
 		transformSQL(event);
 		transformColumn(event);
 		transformTable(event);
@@ -71,9 +75,10 @@ public class DefaultTransformer implements Transformer {
 		if (oriSchema != null) {
 			String schema = mysqlMapping.getSchema(oriSchema);
 			if (schema == null) {
-				LOG.error("Transformer({}) transform schema failure for event({}).", name, event.toString());
+				LOG.error("Transformer({}) transform schema failure for event({}).", title + name, event.toString());
 				throw new TransformException(-1,
-						String.format("Transformer(%s) transform schema failure for event(%s).", name, event.toString()));
+						String.format("Transformer(%s) transform schema failure for event(%s).", title + name,
+								event.toString()));
 			} else {
 				event.setDatabase(schema);
 			}
@@ -86,9 +91,10 @@ public class DefaultTransformer implements Transformer {
 		if (oriTable != null) {
 			String table = mysqlMapping.getTable(oriSchema, oriTable);
 			if (table == null) {
-				LOG.error("Transformer({}) transform table failure for event({}).", name, event.toString());
-				throw new TransformException(-1, String.format("Transformer(%s) transform table failure for event(%s).",
-						name, event.toString()));
+				LOG.error("Transformer({}) transform table failure for event({}).", title + name, event.toString());
+				throw new TransformException(-1,
+						String.format("Transformer(%s) transform table failure for event(%s).", title + name,
+								event.toString()));
 			} else {
 				event.setTable(table);
 			}
@@ -106,9 +112,10 @@ public class DefaultTransformer implements Transformer {
 			for (String oriColumn : dmlEvent.getColumns().keySet()) {
 				String column = mysqlMapping.getColumn(oriSchema, oriTable, oriColumn);
 				if (column == null) {
-					LOG.error("Transformer({}) transform column failure for event({}).", name, event.toString());
-					throw new TransformException(-1, String.format("Transformer(%s) transform column failure for event(%s).",
-							name, dmlEvent.toString()));
+					LOG.error("Transformer({}) transform column failure for event({}).", title + name, event.toString());
+					throw new TransformException(-1,
+							String.format("Transformer(%s) transform column failure for event(%s).", title + name,
+									dmlEvent.toString()));
 				} else {
 					columns.put(column, dmlEvent.getColumns().get(oriColumn));
 				}
@@ -123,9 +130,10 @@ public class DefaultTransformer implements Transformer {
 			String sql = DDLParser
 					.replaceDdl(ddlEvent.getSql(), ddlEvent.getDatabase(), ddlEvent.getTable(), ddlEvent.getDDLType());
 			if (sql == null) {
-				LOG.error("Transformer({}) transform sql failure for event({}).", name, event.toString());
-				throw new TransformException(-1, String.format("Transformer(%s) transform sql failure for event(%s).", name,
-						ddlEvent.toString()));
+				LOG.error("Transformer({}) transform sql failure for event({}).", title + name, event.toString());
+				throw new TransformException(-1,
+						String.format("Transformer(%s) transform sql failure for event(%s).", title + name,
+								ddlEvent.toString()));
 			}
 
 			ddlEvent.setSql(sql);
@@ -134,10 +142,6 @@ public class DefaultTransformer implements Transformer {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public void setStrongConsistency(boolean strongConsistency) {
-		this.strongConsistency = strongConsistency;
 	}
 
 	public void setMysqlMapping(MysqlMapping mysqlMapping) {

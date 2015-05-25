@@ -9,6 +9,8 @@ import com.dianping.puma.syncserver.job.load.row.BatchRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 public class PooledLoader implements Loader {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PooledLoader.class);
@@ -87,6 +89,21 @@ public class PooledLoader implements Loader {
 	 * Pooled loader JDBC connection password.
 	 */
 	private String password;
+
+	/** Binlog event delays statistics. */
+	private AtomicLong delay;
+
+	/** Update statistics. */
+	private AtomicLong updates;
+
+	/** Insert statistics. */
+	private AtomicLong inserts;
+
+	/** Delete statistics. */
+	private AtomicLong deletes;
+
+	/** DDL statistics. */
+	private AtomicLong ddls;
 
 	// Monitor.
 	private EventMonitor loadEventMonitor = new EventMonitor("EventCount.load", 1L);
@@ -173,6 +190,11 @@ public class PooledLoader implements Loader {
 			scBatchExecPool.setPoolSize(1);
 			scBatchExecPool.setRetires(retries);
 			scBatchExecPool.setBinlogManager(binlogManager);
+			scBatchExecPool.setDelay(delay);
+			scBatchExecPool.setUpdates(updates);
+			scBatchExecPool.setInserts(inserts);
+			scBatchExecPool.setDeletes(deletes);
+			scBatchExecPool.setDdls(ddls);
 		} else {
 			WCBatchExecPool wcBatchExecPool = new WCBatchExecPool();
 			wcBatchExecPool.setHost(host);
@@ -245,5 +267,25 @@ public class PooledLoader implements Loader {
 
 	public void setRetries(int retries) {
 		this.retries = retries;
+	}
+
+	public void setDelay(AtomicLong delay) {
+		this.delay = delay;
+	}
+
+	public void setUpdates(AtomicLong updates) {
+		this.updates = updates;
+	}
+
+	public void setInserts(AtomicLong inserts) {
+		this.inserts = inserts;
+	}
+
+	public void setDeletes(AtomicLong deletes) {
+		this.deletes = deletes;
+	}
+
+	public void setDdls(AtomicLong ddls) {
+		this.ddls = ddls;
 	}
 }

@@ -6,7 +6,6 @@ import com.dianping.puma.syncserver.job.load.row.BatchRow;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +13,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -68,6 +68,21 @@ public class SCBatchExecPool implements BatchExecPool {
 	// Used to block the put operation.
 	private Lock lock = new ReentrantLock();
 	private final Condition notConflict = lock.newCondition();
+
+	/** Binlog events delay statistics. */
+	private AtomicLong delay;
+
+	/** Update statistics. */
+	private AtomicLong updates;
+
+	/** Insert statistics. */
+	private AtomicLong inserts;
+
+	/** Delete statistics. */
+	private AtomicLong deletes;
+
+	/** DDL statistics. */
+	private AtomicLong ddls;
 
 	public SCBatchExecPool() {}
 
@@ -223,6 +238,7 @@ public class SCBatchExecPool implements BatchExecPool {
 							batchExecute(conn, batchRow);
 						}
 
+						statistic(batchRow);
 						afterPooledBatchExecute(batchRow);
 						remove(batchRow);
 						return;
@@ -262,6 +278,29 @@ public class SCBatchExecPool implements BatchExecPool {
 		}
 	}
 
+	private void statistic(BatchRow batchRow) {
+		// Binlog events delay.
+		delay.set(System.currentTimeMillis() - batchRow.getExecuteTime());
+
+		if (batchRow.isCommit()) {
+			// Do nothing.
+		} else if (batchRow.isDdl()) {
+			ddls.incrementAndGet();
+		} else {
+			switch (batchRow.getDmlType()) {
+			case UPDATE:
+				updates.addAndGet(batchRow.size());
+				break;
+			case INSERT:
+				inserts.addAndGet(batchRow.size());
+				break;
+			case DELETE:
+				deletes.addAndGet(batchRow.size());
+				break;
+			}
+		}
+	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -288,5 +327,25 @@ public class SCBatchExecPool implements BatchExecPool {
 
 	public void setBinlogManager(BinlogManager binlogManager) {
 		this.binlogManager = binlogManager;
+	}
+
+	public void setDelay(AtomicLong delay) {
+		this.delay = delay;
+	}
+
+	public void setUpdates(AtomicLong updates) {
+		this.updates = updates;
+	}
+
+	public void setInserts(AtomicLong inserts) {
+		this.inserts = inserts;
+	}
+
+	public void setDeletes(AtomicLong deletes) {
+		this.deletes = deletes;
+	}
+
+	public void setDdls(AtomicLong ddls) {
+		this.ddls = ddls;
 	}
 }

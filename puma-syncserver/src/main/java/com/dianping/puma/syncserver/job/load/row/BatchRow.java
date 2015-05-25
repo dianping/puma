@@ -30,6 +30,9 @@ public class BatchRow {
 	/** Minimum next binlog info of batch rows. */
 	private BinlogInfo nextBinlogInfo;
 
+	/** Execution time of a random row in batch rows. */
+	private long executeTime;
+
 	/** DDL or DML of batch rows. */
 	private boolean ddl = false;
 
@@ -69,6 +72,7 @@ public class BatchRow {
 					if (checkRow(row)) {
 						params.add(LoadParser.parseArgs(row));
 						rowKeys.put(RowKey.getRowKey(row), true);
+						executeTime = row.getExecuteTime();
 						binlogInfo = new BinlogInfo(row.getBinlog(), row.getBinlogPos());
 						++size;
 						return true;
@@ -81,6 +85,7 @@ public class BatchRow {
 	}
 
 	private void addFirstRow(ChangedEvent event) {
+		executeTime = event.getExecuteTime();
 		binlogInfo = new BinlogInfo(event.getBinlog(), event.getBinlogPos());
 		nextBinlogInfo = new BinlogInfo(event.getBinlog(), event.getBinlogNextPos());
 		++size;
@@ -131,6 +136,10 @@ public class BatchRow {
 		return size;
 	}
 
+	public long getExecuteTime() {
+		return executeTime;
+	}
+
 	public BinlogInfo getBinlogInfo() {
 		return binlogInfo;
 	}
@@ -141,6 +150,10 @@ public class BatchRow {
 
 	public boolean isDdl() {
 		return ddl;
+	}
+
+	public DMLType getDmlType() {
+		return dmlType;
 	}
 
 	public boolean isCommit() {

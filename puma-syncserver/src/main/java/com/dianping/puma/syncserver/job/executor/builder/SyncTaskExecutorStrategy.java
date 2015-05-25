@@ -94,6 +94,11 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
 		loader.setUsername(dstDBInstance.getUsername());
 		loader.setPassword(dstDBInstance.getPassword());
 		loader.setBinlogManager(binlogInfoManager);
+		loader.setDelay(executor.getDelay());
+		loader.setUpdates(executor.getUpdates());
+		loader.setInserts(executor.getInserts());
+		loader.setDeletes(executor.getDeletes());
+		loader.setDdls(executor.getDdls());
 		executor.setLoader(loader);
 
 		return executor;

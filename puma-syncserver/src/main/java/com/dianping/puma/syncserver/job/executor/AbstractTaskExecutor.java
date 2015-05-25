@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.*;
 import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
-import com.dianping.puma.syncserver.job.container.exception.TECException;
 import com.dianping.puma.syncserver.job.executor.exception.TEException;
-import com.dianping.puma.syncserver.job.executor.status.Status;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -279,5 +278,17 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 
 	public void setBinlogManager(BinlogManager binlogManager) {
 		this.binlogManager = binlogManager;
+	}
+
+	public Status getStatus() {
+		return status;
+	}
+
+	public BinlogManager getBinlogManager() {
+		return binlogManager;
+	}
+
+	public Exception getException() {
+		return new Exception(teException.getErrorDesc());
 	}
 }

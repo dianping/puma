@@ -34,7 +34,7 @@ public class SyncTaskOperationReceiver implements EventListener {
 	public void onEvent(Event event) {
 		try {
 			if (event instanceof SyncTaskOperationEvent) {
-				LOG.info("Receive sync task operation event({}).", event.toString());
+				LOG.info("Receiving sync task operation event({}).", event.toString());
 
 				String name = ((SyncTaskOperationEvent) event).getTaskName();
 				ActionOperation operation = ((SyncTaskOperationEvent) event).getOperation();
@@ -52,7 +52,7 @@ public class SyncTaskOperationReceiver implements EventListener {
 				}
 			}
 		} catch (TECException e) {
-			LOG.error("Receiving sync task operation event({}) failure.", event.toString());
+			LOG.error("Receiving sync task operation event({}) error.", event.toString(), e);
 			Cat.logError(e);
 		}
 	}

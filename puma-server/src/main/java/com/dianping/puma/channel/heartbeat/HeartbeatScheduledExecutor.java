@@ -36,7 +36,7 @@ public class HeartbeatScheduledExecutor implements InitializingBean {
 	}
 
 	public boolean isExecutorServiceValid() {
-		if (getExecutorService() != null && !getExecutorService().isShutdown() && !getExecutorService().isTerminated()) {
+		if (getExecutorService() != null && !getExecutorService().isShutdown()) {
 			return true;
 		}
 		return false;

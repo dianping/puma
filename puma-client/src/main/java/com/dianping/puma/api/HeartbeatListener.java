@@ -112,7 +112,7 @@ public class HeartbeatListener {
 	}
 
 	private boolean isScheduledValid() {
-		if (getExecutorService() != null && !getExecutorService().isShutdown() && !getExecutorService().isTerminated()) {
+		if (getExecutorService() != null && !getExecutorService().isShutdown()) {
 			return true;
 		}
 		return false;
@@ -123,7 +123,7 @@ public class HeartbeatListener {
 	}
 
 	public boolean isFutureValid() {
-		if (future != null && !future.isCancelled() && !future.isDone()) {
+		if (future != null && !future.isCancelled()) {
 			return true;
 		}
 		return false;

@@ -74,7 +74,7 @@ public class HeartbeatTask {
 	}
 
 	public boolean isFutureValid() {
-		if (getFuture() != null && !getFuture().isCancelled() && !getFuture().isDone()) {
+		if (getFuture() != null && !getFuture().isCancelled()) {
 			return true;
 		}
 		return false;

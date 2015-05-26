@@ -133,36 +133,6 @@ public class DstDBInstanceController {
 				operation = ActionOperation.CREATE;
 				dstDBInstance = new DstDBInstance();
 			} else {
-				throw new Exception("duplicate name.");
-			}
-			DBInstanceMapper.convertToDBInstance(dstDBInstanceDto);
-			dstDBInstanceService.create(dstDBInstance);
-			map.put("success", true);
-		} catch (MongoException e) {
-			map.put("error", "storage");
-			map.put("success", false);
-		} catch (Exception e) {
-			map.put("error", e.getMessage());
-			map.put("success", false);
-		}
-
-		return GsonUtil.toJson(map);
-	}
-
-	@RequestMapping(value = { "/dst-db-instance/update/{id}" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-	@ResponseBody
-	public String updatePost(@PathVariable long id, @RequestBody DstDBInstanceDto dstDBInstanceDto) {
-
-		Map<String, Object> map = new HashMap<String, Object>();
-
-		try {
-			ActionOperation operation;
-
-			DstDBInstance dstDBInstance = dstDBInstanceService.find(id);
-			if (dstDBInstance == null) {
-				operation = ActionOperation.CREATE;
-				dstDBInstance = new DstDBInstance();
-			} else {
 				operation = ActionOperation.UPDATE;
 			}
 			DBInstanceMapper.convertToDBInstance(dstDBInstance, dstDBInstanceDto);

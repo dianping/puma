@@ -1,8 +1,5 @@
 package com.dianping.puma.core.model.state;
 
-import com.dianping.puma.core.constant.Status;
-import com.dianping.puma.core.model.BinlogInfo;
-
 public class SyncTaskState extends BaseSyncTaskState {
 
 	private long delay;
@@ -16,10 +13,6 @@ public class SyncTaskState extends BaseSyncTaskState {
 	private long deletes;
 
 	private long ddls;
-
-	private Status status;
-
-	private BinlogInfo binlogInfo;
 
 	public long getDelay() {
 		return delay;
@@ -67,21 +60,5 @@ public class SyncTaskState extends BaseSyncTaskState {
 
 	public void setDdls(long ddls) {
 		this.ddls = ddls;
-	}
-
-	@Override public Status getStatus() {
-		return status;
-	}
-
-	@Override public void setStatus(Status status) {
-		this.status = status;
-	}
-
-	@Override public BinlogInfo getBinlogInfo() {
-		return binlogInfo;
-	}
-
-	@Override public void setBinlogInfo(BinlogInfo binlogInfo) {
-		this.binlogInfo = binlogInfo;
 	}
 }

@@ -70,8 +70,8 @@ public class BatchRow {
 				return false;
 			} else {
 				RowChangedEvent row = (RowChangedEvent) event;
-				RowChangedEvent u2iRow = (RowChangedEvent) event;
-				u2iRow.setDmlType(DMLType.INSERT);
+				RowChangedEvent u2iRow = row.clone();
+				u2iRow.setDmlType(DMLType.REPLACE);
 
 				if (row.isTransactionCommit()) {
 					return false;
@@ -102,7 +102,7 @@ public class BatchRow {
 
 		if (event instanceof RowChangedEvent) {
 			RowChangedEvent row = (RowChangedEvent) event;
-			RowChangedEvent u2iRow = (RowChangedEvent) event;
+			RowChangedEvent u2iRow = row.clone();
 			u2iRow.setDmlType(DMLType.INSERT);
 
 			if (row.isTransactionCommit()) {

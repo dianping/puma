@@ -136,11 +136,7 @@ public class PumaServerController {
 				operation = ActionOperation.CREATE;
 				pumaServer = new PumaServer();
 			} else {
-				throw new Exception("duplicate name.");
-			}
-			PumaServerMapper.convertToPumaServer(pumaServer, pumaServerDto);
-			if (operation == ActionOperation.CREATE) {
-				pumaServerService.create(pumaServer);
+				operation = ActionOperation.UPDATE;
 			}
 			PumaServerMapper.convertToPumaServer(pumaServer, pumaServerDto);
 			if (operation == ActionOperation.CREATE) {

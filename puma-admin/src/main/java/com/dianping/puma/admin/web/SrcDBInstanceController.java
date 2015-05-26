@@ -134,7 +134,6 @@ public class SrcDBInstanceController {
 				srcDBInstance = new SrcDBInstance();
 			} else {
 				create = false;
-				throw new Exception("duplicate name.");
 			}
 			DBInstanceMapper.convertToDBInstance(srcDBInstance, srcDBInstanceDto);
 

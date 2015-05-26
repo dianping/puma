@@ -129,16 +129,23 @@ public class SyncServerController {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
+			ActionOperation operation;
 			SyncServer syncServer = syncServerService.find(id);
 			if (syncServer == null) {
 				syncServer = new SyncServer();
+				operation = ActionOperation.CREATE;
 			} else {
-				throw new Exception("duplicate name.");
+				operation = ActionOperation.UPDATE;
 			}
 
 			SyncServerMapper.convertToSyncServer(syncServer, syncServerDto);
-
-			syncServerService.create(syncServer);
+			if (operation == ActionOperation.CREATE) {
+				syncServerService.create(syncServer);
+			}else{
+				syncServer.setId(id);
+				syncServerService.update(syncServer);
+			}
+			
 			map.put("success", true);
 		} catch (MongoException e) {
 			map.put("error", "storage");

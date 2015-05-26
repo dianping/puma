@@ -145,15 +145,15 @@ public class PumaTaskController {
 		try {
 			ActionOperation operation = null;
 			Map<String,AcceptedTables> acceptedDataInfos = getAcceptedDatas(acceptedDatabase,acceptedTable);
-			PumaTask pumaTask = pumaTaskService.find(name);
-			if (pumaTask == null) {
+			PumaTask oriPumaTask = pumaTaskService.find(name);
+			if (oriPumaTask == null) {
 				operation = ActionOperation.CREATE;
 			} else{
-				if (!binlogFile.equals(pumaTask.getBinlogInfo().getBinlogFile())
-						|| !binlogPosition.equals(pumaTask.getBinlogInfo().getBinlogPosition())) {
+				if (!binlogFile.equals(oriPumaTask.getBinlogInfo().getBinlogFile())
+						|| !binlogPosition.equals(oriPumaTask.getBinlogInfo().getBinlogPosition())) {
 					operation = ActionOperation.UPDATE;
-				}else if((acceptedDataInfos != null && !acceptedDataInfos.equals(pumaTask.getAcceptedDataInfos()))
-						||(acceptedDataInfos == null && pumaTask.getAcceptedDataInfos() != null)){
+				}else if((acceptedDataInfos != null && !acceptedDataInfos.equals(oriPumaTask.getAcceptedDataInfos()))
+						||(acceptedDataInfos == null && oriPumaTask.getAcceptedDataInfos() != null)){
 					operation = ActionOperation.FILTER;
 				}else{
 					operation = ActionOperation.CHANGE;
@@ -162,8 +162,8 @@ public class PumaTaskController {
 				}*/
 			}
 			PumaTaskOperationEvent event = new PumaTaskOperationEvent();
-			event.setOriPumaTask(pumaTask);
-			pumaTask = new PumaTask();
+			event.setOriPumaTask(oriPumaTask);
+			PumaTask pumaTask = new PumaTask();
 			
 
 			pumaTask.setName(name);
@@ -191,6 +191,7 @@ public class PumaTaskController {
 			if (operation == ActionOperation.CREATE) {
 				pumaTaskService.create(pumaTask);
 			} else {
+				pumaTask.setId(oriPumaTask.getId());
 				pumaTaskService.update(pumaTask);
 			}
 

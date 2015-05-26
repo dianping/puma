@@ -74,33 +74,6 @@ public class BinlogInfo implements Serializable, Comparable<BinlogInfo> {
 				+ skipToNextPos + " ]";
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-
-		BinlogInfo that = (BinlogInfo) o;
-
-		if (!binlogFile.equals(that.binlogFile))
-			return false;
-		if (!binlogPosition.equals(that.binlogPosition))
-			return false;
-		if (!skipToNextPos.equals(that.skipToNextPos))
-			return false;
-
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		int result = binlogFile.hashCode();
-		result = 31 * result + binlogPosition.hashCode();
-		result = 31 * result + skipToNextPos.hashCode();
-		return result;
-	}
-
 	public int compareTo(BinlogInfo binlogInfo) {
 		String leftBinlogFile = this.getBinlogFile();
 		int leftBinlogFileNum = Integer.parseInt(leftBinlogFile.substring(leftBinlogFile.indexOf(".") + 1));

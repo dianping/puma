@@ -78,7 +78,7 @@ public class BatchRow {
 				} else {
 					if (checkRow(row)) {
 						params.add(LoadParser.parseArgs(row));
-						params.add(LoadParser.parseArgs(u2iRow));
+						u2iParams.add(LoadParser.parseArgs(u2iRow));
 						rowKeys.put(RowKey.getRowKey(row), true);
 						executeTime = row.getExecuteTime();
 						binlogInfo = new BinlogInfo(row.getBinlog(), row.getBinlogPos());

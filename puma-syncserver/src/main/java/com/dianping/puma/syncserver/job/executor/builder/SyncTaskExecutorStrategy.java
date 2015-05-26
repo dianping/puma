@@ -40,7 +40,6 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
 		SyncTaskExecutor executor = new SyncTaskExecutor();
 		String name = task.getName();
 
-
 		// Binlog manager setting.
 		MapDBBinlogManager binlogInfoManager = new MapDBBinlogManager(SubscribeConstant.SEQ_FROM_BINLOGINFO, task.getBinlogInfo());
 		binlogInfoManager.setName(name);

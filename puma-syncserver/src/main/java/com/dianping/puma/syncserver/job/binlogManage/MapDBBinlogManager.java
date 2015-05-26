@@ -8,8 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentNavigableMap;
 
 public class MapDBBinlogManager implements BinlogManager {
@@ -50,6 +48,8 @@ public class MapDBBinlogManager implements BinlogManager {
 	 */
 	private String name;
 
+	private final long minSeq = Long.MIN_VALUE;
+
 	private long oriSeq;
 
 	private BinlogInfo oriBinlogInfo;
@@ -74,7 +74,11 @@ public class MapDBBinlogManager implements BinlogManager {
 
 		// Put the origin into the finished container if empty.
 		if (finished.isEmpty()) {
-			finished.put(oriSeq, oriBinlogInfo);
+			if (oriSeq == -3) {
+				finished.put(minSeq, oriBinlogInfo);
+			} else {
+				finished.put(oriSeq, oriBinlogInfo);
+			}
 			db.commit();
 		}
 
@@ -153,11 +157,11 @@ public class MapDBBinlogManager implements BinlogManager {
 
 	@Override
 	public BinlogInfo getBinlogInfo() {
-		if (unfinished.firstEntry() != null) {
-			return unfinished.firstEntry().getValue();
+		if (unfinished.lastEntry() != null) {
+			return unfinished.lastEntry().getValue();
 		} else {
-			if (finished.lastEntry() != null) {
-				return finished.lastEntry().getValue();
+			if (finished.firstEntry() != null) {
+				return finished.firstEntry().getValue();
 			} else {
 				return oriBinlogInfo;
 			}
@@ -166,15 +170,19 @@ public class MapDBBinlogManager implements BinlogManager {
 
 	@Override
 	public long getSeq() {
-		if (unfinished.firstEntry() != null) {
-			return unfinished.firstEntry().getKey();
+		long seq;
+
+		if (unfinished.lastEntry() != null) {
+			seq = unfinished.lastEntry().getKey();
 		} else {
-			if (finished.lastEntry() != null) {
-				return finished.lastEntry().getKey();
+			if (finished.firstEntry() != null) {
+				seq = finished.firstEntry().getKey();
 			} else {
-				return oriSeq;
+				seq = oriSeq;
 			}
 		}
+
+		return seq == minSeq ? -3 : seq;
 	}
 
 	public void setName(String name) {

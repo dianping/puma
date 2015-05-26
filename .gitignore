@@ -59,6 +59,7 @@ Thumbs.db
 .classpath
 .settings/
 .metadata/
+.externalToolBuilders/
 
 # IntelliJ generated files #
 ############################

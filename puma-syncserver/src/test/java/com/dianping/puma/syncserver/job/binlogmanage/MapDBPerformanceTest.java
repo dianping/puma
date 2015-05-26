@@ -5,10 +5,13 @@ import org.mapdb.*;
 
 import java.io.File;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentNavigableMap;
 
 public class MapDBPerformanceTest {
 
 	public static void main(String args[]) {
+		/*
 		DB db = DBMaker.newFileDB(new File("/data/appdatas/puma/MapDBPerformanceTest")).closeOnJvmShutdown()
 				.mmapFileEnableIfSupported().asyncWriteEnable().transactionDisable().make();
 		Map<Integer, BinlogInfo> binlogInfoMap = db.getHashMap("MapDBPerformanceTest");
@@ -26,6 +29,27 @@ public class MapDBPerformanceTest {
 		//db.delete("MapDBPerformanceTest");
 		//db.commit();
 		db.close();
-		System.out.println("end");
+		System.out.println("end");*/
+
+		DB db = DBMaker.newFileDB(new File("/data/appdatas/puma/MapDBPerformanceTest")).closeOnJvmShutdown()
+				.mmapFileEnableIfSupported().asyncWriteEnable().transactionDisable().make();
+
+		ConcurrentNavigableMap<String, String> map = db.getTreeMap("Test");
+
+		System.out.println(map.get("hello"));
+
+		map.put("hello", "world");
+		db.commit();
+
+		db.close();
+		db = DBMaker.newFileDB(new File("/data/appdatas/puma/MapDBPerformanceTest")).closeOnJvmShutdown()
+				.mmapFileEnableIfSupported().asyncWriteEnable().transactionDisable().make();
+
+		map = db.getTreeMap("Test");
+
+		System.out.println(map.get("hello"));
+
+		db.delete("Test");
+		db.commit();
 	}
 }

@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
@@ -62,6 +63,8 @@ public class SCBatchExecPool implements BatchExecPool {
 	private Lock lock = new ReentrantLock();
 	private final Condition notConflict = lock.newCondition();
 
+	private Thread warnDelayThread;
+
 	/** Binlog events delay statistics. */
 	private AtomicLong delay;
 
@@ -85,10 +88,14 @@ public class SCBatchExecPool implements BatchExecPool {
 
 		initDataSource();
 		initThreadPool();
+
+		warnDelayThread = new Thread(new WarnDelayTask());
 	}
 
 	@Override
 	public void destroy() {
+		warnDelayThread = null;
+
 		destroyThreadPool();
 		destroyDataSource();
 	}
@@ -96,6 +103,16 @@ public class SCBatchExecPool implements BatchExecPool {
 	@Override
 	public void cleanup() {
 
+	}
+
+	@Override
+	public void start() {
+		warnDelayThread.start();
+	}
+
+	@Override
+	public void stop() {
+		warnDelayThread.interrupt();
 	}
 
 	@Override
@@ -180,7 +197,7 @@ public class SCBatchExecPool implements BatchExecPool {
 	}
 
 	private void afterPooledBatchExecute(BatchRow batchRow) {
-		if (batchRow.isCommit()) {
+		if (batchRow.isCommit() || batchRow.isDdl()) {
 			binlogManager.after(batchRow.getSeq(), batchRow.getBinlogInfo());
 		}
 	}
@@ -204,6 +221,16 @@ public class SCBatchExecPool implements BatchExecPool {
 			case DELETE:
 				deletes.addAndGet(batchRow.size());
 				break;
+			}
+		}
+	}
+
+	private class WarnDelayTask implements Runnable {
+
+		@Override
+		public void run() {
+			if (delay.get() > 30 * 1000) {
+				Cat.logError("Binlog delay too much.", new LoadException(0));
 			}
 		}
 	}
@@ -237,6 +264,7 @@ public class SCBatchExecPool implements BatchExecPool {
 
 		private void batchExecute(Connection conn, BatchRow batchRow) {
 			try {
+				System.out.println(batchRow.getSql());
 				int[] affected = (new QueryRunner()).batch(conn, batchRow.getSql(), batchRow.getParams());
 
 				if (batchRow.getDmlType() == DMLType.UPDATE) {
@@ -272,6 +300,10 @@ public class SCBatchExecPool implements BatchExecPool {
 
 					if (batchRow.isCommit()) {
 						commit(conn);
+					} if (batchRow.isDdl()) {
+						conn.setAutoCommit(true);
+						batchExecute(conn, batchRow);
+						conn.setAutoCommit(false);
 					} else {
 						batchExecute(conn, batchRow);
 					}

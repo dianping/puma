@@ -137,6 +137,7 @@ public class PooledLoader implements Loader {
 		loadException = null;
 
 		loadEventMonitor.start();
+		batchExecPool.start();
 		mainThread.start();
 	}
 
@@ -149,6 +150,7 @@ public class PooledLoader implements Loader {
 		stopped = true;
 
 		mainThread.interrupt();
+		batchExecPool.stop();
 		loadEventMonitor.stop();
 	}
 

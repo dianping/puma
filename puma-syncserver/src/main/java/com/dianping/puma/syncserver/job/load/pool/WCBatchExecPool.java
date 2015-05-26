@@ -2,7 +2,6 @@ package com.dianping.puma.syncserver.job.load.pool;
 
 import com.dianping.puma.core.annotation.ThreadSafe;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
-import com.dianping.puma.syncserver.job.LifeCycle;
 import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
 import com.dianping.puma.syncserver.job.load.exception.LoadException;
 import com.dianping.puma.syncserver.job.load.row.BatchRow;
@@ -87,6 +86,16 @@ public class WCBatchExecPool implements BatchExecPool {
 
 	@Override
 	public void cleanup() {
+
+	}
+
+	@Override
+	public void start() {
+
+	}
+
+	@Override
+	public void stop() {
 
 	}
 

@@ -182,6 +182,7 @@ public class SyncTaskExecutor implements TaskExecutor<SyncTask> {
 
 			@Override
 			public void onEvent(ChangedEvent event) throws Exception {
+				status = Status.RUNNING;
 				execute(event);
 			}
 
@@ -236,7 +237,7 @@ public class SyncTaskExecutor implements TaskExecutor<SyncTask> {
 
 				// Sleep 60s.
 				try {
-					Thread.sleep(60000L);
+					Thread.sleep(60 * 5 * 1000);
 				} catch (InterruptedException e1) {
 				}
 			}

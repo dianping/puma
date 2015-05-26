@@ -6,7 +6,7 @@ import com.dianping.puma.core.entity.*;
 import com.dianping.puma.core.service.DstDBInstanceService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
-import com.dianping.puma.syncserver.job.binlog.MapDBBinlogManager;
+import com.dianping.puma.syncserver.job.binlogmanage.MapDBBinlogManager;
 import com.dianping.puma.syncserver.job.executor.exception.TEException;
 import com.dianping.puma.syncserver.job.load.PooledLoader;
 import com.dianping.puma.syncserver.job.transform.DefaultTransformer;

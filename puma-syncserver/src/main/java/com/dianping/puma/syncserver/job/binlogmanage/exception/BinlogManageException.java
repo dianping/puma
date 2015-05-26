@@ -1,4 +1,4 @@
-package com.dianping.puma.syncserver.job.binlog.exception;
+package com.dianping.puma.syncserver.job.binlogmanage.exception;
 
 import org.apache.commons.lang3.exception.ContextedRuntimeException;
 

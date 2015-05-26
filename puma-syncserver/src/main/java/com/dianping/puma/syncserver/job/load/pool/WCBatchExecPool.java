@@ -3,7 +3,7 @@ package com.dianping.puma.syncserver.job.load.pool;
 import com.dianping.puma.core.annotation.ThreadSafe;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.syncserver.job.LifeCycle;
-import com.dianping.puma.syncserver.job.binlog.BinlogManager;
+import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
 import com.dianping.puma.syncserver.job.load.exception.LoadException;
 import com.dianping.puma.syncserver.job.load.row.BatchRow;
 import com.dianping.puma.syncserver.job.load.row.RowKey;

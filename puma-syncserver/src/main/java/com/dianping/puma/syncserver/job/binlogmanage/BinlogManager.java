@@ -1,4 +1,4 @@
-package com.dianping.puma.syncserver.job.binlog;
+package com.dianping.puma.syncserver.job.binlogmanage;
 
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.syncserver.job.LifeCycle;

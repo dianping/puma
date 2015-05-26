@@ -105,7 +105,7 @@ public class SrcDBInstanceController {
 			if (srcDBInstance != null) {
 				throw new Exception("duplicate name.");
 			}
-			DBInstanceMapper.convertToDBInstance(srcDBInstanceDto);
+			srcDBInstance = (SrcDBInstance)DBInstanceMapper.convertToDBInstance(srcDBInstanceDto);
 			srcDBInstanceService.create(srcDBInstance);
 			map.put("success", true);
 		} catch (MongoException e) {

@@ -105,7 +105,7 @@ public class DstDBInstanceController {
 			if (dstDBInstance != null) {
 				throw new Exception("duplicate name.");
 			}
-			DBInstanceMapper.convertToDBInstance(dstDBInstanceDto);
+			dstDBInstance = (DstDBInstance)DBInstanceMapper.convertToDBInstance(dstDBInstanceDto);
 			dstDBInstanceService.create(dstDBInstance);
 			map.put("success", true);
 		} catch (MongoException e) {

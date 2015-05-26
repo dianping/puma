@@ -237,12 +237,12 @@
             <dependency>
                 <groupId>com.dianping.swallow</groupId>
                 <artifactId>swallow-producerclient</artifactId>
-                <version>0.7.0-SNAPSHOT</version>
+                <version>0.7.1</version>
             </dependency>
             <dependency>
                 <groupId>com.dianping.swallow</groupId>
                 <artifactId>swallow-consumerclient</artifactId>
-                <version>0.7.0-SNAPSHOT</version>
+                <version>0.7.1</version>
             </dependency>
             <!-- zebra -->
             <dependency>

@@ -1,5 +1,7 @@
 package com.dianping.puma.syncserver.job.load.pool;
 
+import com.dianping.cat.Cat;
+import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
 import com.dianping.puma.syncserver.job.load.exception.LoadException;
 import com.dianping.puma.syncserver.job.load.row.BatchRow;
@@ -22,10 +24,6 @@ public class SCBatchExecPool implements BatchExecPool {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SCBatchExecPool.class);
 
-	/** Pool stopped or not, default true. */
-	private boolean stopped = true;
-
-	/** Pool exception, default null. */
 	private LoadException loadException = null;
 
 	/** Pool prerequisite settings: data source host. */
@@ -36,12 +34,6 @@ public class SCBatchExecPool implements BatchExecPool {
 
 	/** Pool prerequisite settings: data source password. */
 	private String password;
-
-	/** Batch exec pool title. */
-	private String title = "SCBatchExecPool-";
-
-	/** Batch exec pool name. */
-	private String name;
 
 	/** Batch exec pool size, always 1. */
 	private int poolSize = 1;
@@ -87,40 +79,22 @@ public class SCBatchExecPool implements BatchExecPool {
 	public SCBatchExecPool() {}
 
 	@Override
-	public void start() {
-		LOG.info("Starting batch execution pool({})...", title + name);
+	public void init() {
+		loadException = null;
 
-		if (!stopped) {
-			LOG.warn("Batch execution pool({}) is already started.", title + name);
-		} else {
-			// Clear batch execution pool status.
-			stopped = false;
-			loadException = null;
-
-			// Initial JDBC data source.
-			initDataSource();
-
-			// Initial sql execution thread pool.
-			initThreadPool();
-		}
+		initDataSource();
+		initThreadPool();
 	}
 
 	@Override
-	public void stop() {
-		LOG.info("Stopping batch execution pool({})...", title + name);
+	public void destroy() {
+		destroyThreadPool();
+		destroyDataSource();
+	}
 
-		if (stopped) {
-			LOG.warn("batch execution pool({}) is already stopped.", title + name);
-		} else {
-			// Clear batch execution pool status.
-			stopped = true;
+	@Override
+	public void cleanup() {
 
-			// Destroy sql execution thread pool.
-			destroyThreadPool();
-
-			// Destroy JDBC data source.
-			destroyDataSource();
-		}
 	}
 
 	@Override
@@ -200,85 +174,17 @@ public class SCBatchExecPool implements BatchExecPool {
 
 	private void beforePooledBatchExecute(BatchRow batchRow) {
 		if (batchRow.isCommit()) {
-			binlogManager.before(batchRow.getBinlogInfo());
+			binlogManager.before(batchRow.getSeq(), batchRow.getBinlogInfo());
 		}
 	}
 
 	private void afterPooledBatchExecute(BatchRow batchRow) {
 		if (batchRow.isCommit()) {
-			binlogManager.after(batchRow.getBinlogInfo());
+			binlogManager.after(batchRow.getSeq(), batchRow.getBinlogInfo());
 		}
 	}
 
-	private void pooledBatchExecute(final BatchRow batchRow) {
-		try {
-			if (cachedConn == null || cachedConn.isClosed()) {
-				cachedConn = dataSource.getConnection();
-			}
-
-			pooledBatchExecute(cachedConn, batchRow);
-		} catch (SQLException e) {
-			if (!stopped) {
-				loadException = LoadException.translate(e);
-			}
-		}
-	}
-
-	private void pooledBatchExecute(final Connection conn, final BatchRow batchRow) {
-		threadPool.execute(new Runnable() {
-			@Override
-			public void run() {
-				LoadException te = null;
-
-				for (int count = 0; count <= retries; ++count) {
-					try {
-						if (batchRow.isCommit()) {
-							commit(conn);
-						} else {
-							batchExecute(conn, batchRow);
-						}
-
-						statistic(batchRow);
-						afterPooledBatchExecute(batchRow);
-						remove(batchRow);
-						return;
-					} catch (LoadException e) {
-						if (!stopped) {
-							te = e;
-							continue;
-						}
-						return;
-					}
-				}
-
-				// If the code runs to here, then the sql execution is failure.
-				loadException = te;
-				LOG.error("Sql error: {}.", loadException);
-				stop();
-			}
-		});
-	}
-
-	private void batchExecute(Connection conn, BatchRow batchRow) {
-		try {
-			(new QueryRunner()).batch(conn, batchRow.getSql(), batchRow.getParams());
-		} catch (SQLException e) {
-			DbUtils.rollbackAndCloseQuietly(conn);
-			throw LoadException.translate(e);
-		}
-	}
-
-	private void commit(Connection conn) {
-		try {
-			conn.commit();
-			//DbUtils.commitAndClose(conn);
-		} catch (SQLException e) {
-			DbUtils.rollbackAndCloseQuietly(conn);
-			throw LoadException.translate(e);
-		}
-	}
-
-	private void statistic(BatchRow batchRow) {
+	private void doStatistic(BatchRow batchRow) {
 		// Binlog events delay.
 		delay.set(System.currentTimeMillis() - batchRow.getExecuteTime());
 
@@ -301,8 +207,90 @@ public class SCBatchExecPool implements BatchExecPool {
 		}
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	private void pooledBatchExecute(BatchRow batchRow) {
+		BatchExecuteThread batchExecuteThread = new BatchExecuteThread();
+		batchExecuteThread.setBatchRow(batchRow);
+
+		threadPool.execute(batchExecuteThread);
+	}
+
+	private class BatchExecuteThread implements Runnable {
+
+		private BatchRow batchRow;
+
+		public void setBatchRow(BatchRow batchRow) {
+			this.batchRow = batchRow;
+		}
+
+		private Connection getConnection() {
+			try {
+				if (cachedConn == null || cachedConn.isClosed()) {
+					cachedConn = dataSource.getConnection();
+				}
+
+				return cachedConn;
+			} catch (SQLException e) {
+				throw LoadException.translate(e);
+			}
+		}
+
+		private void batchExecute(Connection conn, BatchRow batchRow) {
+			try {
+				int[] affected = (new QueryRunner()).batch(conn, batchRow.getSql(), batchRow.getParams());
+
+				if (batchRow.getDmlType() == DMLType.UPDATE) {
+					for (int i = 0; i != affected.length; ++i) {
+						if (affected[i] == 0) {
+							(new QueryRunner()).batch(conn, batchRow.getU2iSql(), batchRow.getU2iParams());
+							break;
+						}
+					}
+				}
+			} catch (SQLException e) {
+				DbUtils.rollbackAndCloseQuietly(conn);
+				throw LoadException.translate(e);
+			}
+		}
+
+		private void commit(Connection conn) {
+			try {
+				conn.commit();
+				//DbUtils.commitAndClose(conn);
+			} catch (SQLException e) {
+				DbUtils.rollbackAndCloseQuietly(conn);
+				throw LoadException.translate(e);
+			}
+		}
+
+		@Override
+		public void run() {
+			for (int count = 0; count <= retries; ++count) {
+				try {
+
+					Connection conn = getConnection();
+
+					if (batchRow.isCommit()) {
+						commit(conn);
+					} else {
+						batchExecute(conn, batchRow);
+					}
+
+					doStatistic(batchRow);
+					afterPooledBatchExecute(batchRow);
+					remove(batchRow);
+
+					return;
+				} catch (LoadException le) {
+					loadException = le;
+				} catch (Exception e) {
+					loadException = LoadException.translate(e);
+				}
+			}
+
+			String msg = String.format("Executing batch row(%s) error.", batchRow.toString());
+			LOG.error(msg, loadException);
+			Cat.logError(msg, loadException);
+		}
 	}
 
 	public void setPoolSize(int poolSize) {

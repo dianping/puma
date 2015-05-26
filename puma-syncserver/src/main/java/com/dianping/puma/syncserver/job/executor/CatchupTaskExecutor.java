@@ -24,6 +24,27 @@ public class CatchupTaskExecutor extends AbstractTaskExecutor<CatchupTask> {
     }
 
     @Override
+    public void init() {}
+
+    @Override
+    public void destroy() {}
+
+    @Override
+    public void start() {
+
+    }
+
+    @Override
+    public void stop() {
+
+    }
+
+    @Override
+    public void cleanup() {
+
+    }
+
+    @Override
     protected void doStart() {}
 
     @Override

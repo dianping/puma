@@ -76,9 +76,6 @@ public class SyncTaskOperationReceiver implements EventListener {
 		// Stop original task.
 		taskExecutorContainer.stop(name);
 
-		// Remove persistence.
-		taskExecutorContainer.removePersistence(name);
-
 		// Withdraw original task.
 		taskExecutorContainer.withdraw(name);
 
@@ -96,9 +93,6 @@ public class SyncTaskOperationReceiver implements EventListener {
 
 		// Stop original task.
 		taskExecutorContainer.stop(name);
-
-		// Remove persistence.
-		taskExecutorContainer.removePersistence(name);
 
 		// Withdraw the original task.
 		taskExecutorContainer.withdraw(name);

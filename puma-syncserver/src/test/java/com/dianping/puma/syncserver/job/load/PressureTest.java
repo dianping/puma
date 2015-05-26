@@ -37,7 +37,7 @@ public class PressureTest {
 		WCBatchExecPool.setPassword("123456");
 		WCBatchExecPool.setPoolSize(7);
 		WCBatchExecPool.setRetires(0);
-		WCBatchExecPool.start();
+		WCBatchExecPool.init();
 	}
 
 	@Test

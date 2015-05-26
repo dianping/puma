@@ -34,38 +34,20 @@ public class WCBatchRowPool implements BatchRowPool {
 	public WCBatchRowPool() {
 	}
 
-	public void start() {
-		LOG.info("Starting batch row pool({})...", name);
-
-		if (!stopped) {
-			LOG.warn("Batch row pool({}) is already started.", name);
-		} else {
-			// Clear batch row pool status.
-			stopped = false;
-			loadException = null;
-
-			// Initialize blocking queue.
-			batchRows = new LinkedBlockingDeque<BatchRow>(poolSize);
-		}
+	@Override
+	public void init() {
+		batchRows = new LinkedBlockingDeque<BatchRow>(poolSize);
 	}
 
-	public void stop() {
-		LOG.info("Stopping batch row pool({})...", name);
-
-		if (stopped) {
-			LOG.warn("Batch row pool({}) is already stopped.", name);
-		} else {
-			// Clear batch row pool status.
-			stopped = true;
-
-			// Destroy blocking queue.
-			batchRows.clear();
-			batchRows = null;
-		}
+	@Override
+	public void destroy() {
+		batchRows.clear();
+		batchRows = null;
 	}
 
-	public void die() {
-		// No persistent storage.
+	@Override
+	public void cleanup() {
+
 	}
 
 	public LoadException exception() {

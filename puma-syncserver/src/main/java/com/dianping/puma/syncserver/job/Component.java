@@ -1,14 +1,10 @@
 package com.dianping.puma.syncserver.job;
 
-public interface LifeCycle {
+public interface Component {
 
 	void init();
 
 	void destroy();
-
-	void start();
-
-	void stop();
 
 	void cleanup();
 }

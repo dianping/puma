@@ -1,5 +1,6 @@
 package com.dianping.puma.syncserver.job.container;
 
+import com.dianping.cat.Cat;
 import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.service.SyncTaskService;
 import com.dianping.puma.syncserver.config.SyncServerConfig;
@@ -42,7 +43,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer {
 		for (SyncTask syncTask: syncTasks) {
 			TaskExecutor taskExecutor = taskExecutorBuilder.build(syncTask);
 			submit(syncTask.getName(), taskExecutor);
-			taskExecutor.start();
+			start(syncTask.getName());
 		}
 	}
 
@@ -70,45 +71,45 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer {
 
 	@Override
 	public void start(String name) throws TECException {
-		LOG.info("Starting task executor({})...", name);
-
 		TaskExecutor taskExecutor = taskExecutorMap.get(name);
 		if (taskExecutor == null) {
-			// Not in container.
-			LOG.error("Starting task executor({}) failure: not in container.", name);
-			throw new TECException(-1, String.format("Starting task executor(%s) failure: not in container.", name));
+			String msg = String.format("Starting task executor(%s) failure: not in container.", name);
+			TECException tecException = new TECException(-1, msg);
+			LOG.error(msg, tecException);
+			Cat.logError(msg, tecException);
 		} else {
-			// In container.
+			taskExecutor.init();
 			taskExecutor.start();
 		}
 	}
 
 	@Override
-	public void stop(String name) throws TECException {
-		LOG.info("Stopping task executor({})...", name);
-
+	public void pause(String name) throws TECException {
 		TaskExecutor taskExecutor = taskExecutorMap.get(name);
+
 		if (taskExecutor == null) {
-			// Not in container.
-			LOG.error("Stopping task executor({}) failure: not in container.", name);
-			throw new TECException(-1, String.format("Stopping task executor(%s) failure: not in container.", name));
+			String msg = String.format("Pausing task executor(%s) failure: not in container.", name);
+			TECException tecException = new TECException(-1, msg);
+			LOG.error(msg, tecException);
+			Cat.logError(msg, tecException);
 		} else {
-			// In container.
 			taskExecutor.stop();
+			taskExecutor.destroy();
 		}
 	}
 
-	public void removePersistence(String name) throws TECException {
-		LOG.info("Removing task executor({}) persistence...", name);
-
+	@Override
+	public void stop(String name) throws TECException {
 		TaskExecutor taskExecutor = taskExecutorMap.get(name);
 		if (taskExecutor == null) {
-			// Not in container.
-			LOG.error("Removing task executor({}) persistence failure: not in container.", name);
-			throw new TECException(-1, String.format("Removing task executor(%s) persistence failure: not in container.", name));
+			String msg = String.format("Stopping task executor(%s) failure: not in container.", name);
+			TECException tecException = new TECException(-1, msg);
+			LOG.error(msg, tecException);
+			Cat.logError(msg, tecException);
 		} else {
-			// In container.
-			taskExecutor.removePersistence();
+			taskExecutor.stop();
+			taskExecutor.destroy();
+			taskExecutor.cleanup();
 		}
 	}
 

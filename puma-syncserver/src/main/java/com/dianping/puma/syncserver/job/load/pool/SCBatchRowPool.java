@@ -14,52 +14,43 @@ public class SCBatchRowPool implements BatchRowPool {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SCBatchRowPool.class);
 
-	/** Pool stopped or not, default true. */
-	private boolean stopped = true;
+	private boolean inited = false;
 
-	/** Current transaction state, -1 for begin, 0 for in, 1 for commit. */
 	int transaction = -1;
 
-	/** Batch row pool title. */
-	private String title = "SCBatchRowPool-";
-
-	/** Batch row pool name. */
-	private String name;
-
-	/** Batch row pool size, default 100. */
 	private int poolSize = 100;
 
-	/** Batch row pool bottom storage. */
 	protected BlockingDeque<BatchRow> batchRows;
 
 	public SCBatchRowPool() {}
 
 	@Override
-	public void start() {
-		LOG.info("Starting strong consistency batch row pool({})...", title + name);
-
-		if (!stopped) {
-			LOG.warn("Strong consistency batch row pool({}) is already started.", title + name);
-		} else {
-			stopped = false;
-
-			transaction = -1;
-			batchRows = new LinkedBlockingDeque<BatchRow>(poolSize);
+	public void init() {
+		if (inited) {
+			return;
 		}
+
+		transaction = -1;
+		batchRows = new LinkedBlockingDeque<BatchRow>(poolSize);
+
+		inited = true;
 	}
 
 	@Override
-	public void stop() {
-		LOG.info("Stopping strong consistency batch row pool({})...", title + name);
-
-		if (stopped) {
-			LOG.warn("Strong consistency batch row pool({}) is already stopped.", title + name);
-		} else {
-			stopped = true;
-
-			batchRows.clear();
-			batchRows = null;
+	public void destroy() {
+		if (!inited) {
+			return;
 		}
+
+		batchRows.clear();
+		batchRows = null;
+
+		inited = false;
+	}
+
+	@Override
+	public void cleanup() {
+
 	}
 
 	@Override
@@ -117,10 +108,6 @@ public class SCBatchRowPool implements BatchRowPool {
 		} catch (InterruptedException e) {
 			throw LoadException.translate(e);
 		}
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public void setPoolSize(int poolSize) {

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentNavigableMap;
 
@@ -15,9 +16,8 @@ public class MapDBBinlogManager implements BinlogManager {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MapDBBinlogManager.class);
 
-	/**
-	 * MapDB binlog manager is stopped or not, default true.
-	 */
+	private boolean inited = false;
+
 	private boolean stopped = true;
 
 	/**
@@ -33,12 +33,12 @@ public class MapDBBinlogManager implements BinlogManager {
 	/**
 	 * Unfinished binlog infos.
 	 */
-	private ConcurrentNavigableMap<BinlogInfo, Boolean> unfinished;
+	private ConcurrentNavigableMap<Long, BinlogInfo> unfinished;
 
 	/**
 	 * Finished binlog infos.
 	 */
-	private ConcurrentNavigableMap<BinlogInfo, Boolean> finished;
+	private ConcurrentNavigableMap<Long, BinlogInfo> finished;
 
 	/**
 	 * MapDB binlog manager title.
@@ -50,86 +50,88 @@ public class MapDBBinlogManager implements BinlogManager {
 	 */
 	private String name;
 
-	/**
-	 * The original binlog info, only for newly created task.
-	 */
-	private BinlogInfo origin;
+	private long oriSeq;
 
-	public MapDBBinlogManager(BinlogInfo origin) {
-		this.origin = origin;
+	private BinlogInfo oriBinlogInfo;
+
+	public MapDBBinlogManager(long oriSeq, BinlogInfo oriBinlogInfo) {
+		this.oriSeq = oriSeq;
+		this.oriBinlogInfo = oriBinlogInfo;
+	}
+
+	@Override
+	public void init() {
+		if (inited) {
+			return;
+		}
+
+		db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlogDB/", title + name)).closeOnJvmShutdown()
+				.transactionDisable().asyncWriteEnable().mmapFileEnableIfSupported().make();
+
+		// Read from the persistent storage.
+		unfinished = db.getTreeMap(title + name + "-unfinished");
+		finished = db.getTreeMap(title + name + "-finished");
+
+		// Put the origin into the finished container if empty.
+		if (finished.isEmpty()) {
+			finished.put(oriSeq, oriBinlogInfo);
+			db.commit();
+		}
+
+		inited = true;
+	}
+
+	@Override
+	public void destroy() {
+		if (!inited) {
+			return;
+		}
+
+		db.commit();
+		db.close();
+
+		inited = false;
 	}
 
 	@Override
 	public void start() {
-		LOG.info("Starting binlog manager({})...", title + name);
-
 		if (!stopped) {
-			LOG.warn("Binlog manager({}) is already started.", title + name);
-		} else {
-
-			try {
-				stopped = false;
-
-				db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlogDB/", title + name)).closeOnJvmShutdown()
-						.transactionDisable().asyncWriteEnable().mmapFileEnableIfSupported().make();
-
-				// Read from the persistent storage.
-				unfinished = db.getTreeMap(title + name + "-unfinished");
-				finished = db.getTreeMap(title + name + "-finished");
-
-				// Put the origin into the finished container if empty.
-				if (finished.isEmpty()) {
-					finished.put(origin, true);
-					db.commit();
-				}
-			} catch (Exception e) {
-				binlogManageException = BinlogManageException.translate(e);
-				throw binlogManageException;
-			} finally {
-				stopped = false;
-			}
+			return;
 		}
+
+		stopped = false;
 	}
 
 	@Override
 	public void stop() {
-		LOG.info("Stopping binlog manager({})...", title + name);
-
 		if (stopped) {
-			LOG.info("Binlog manager({}) is already stopped.", title + name);
-		} else {
-			try {
-				stopped = true;
-
-				// Commit before close.
-				db.commit();
-
-				// Close db.
-				db.close();
-			} catch (Exception e) {
-				binlogManageException = BinlogManageException.translate(e);
-				throw binlogManageException;
-			} finally {
-				stopped = true;
-			}
+			return;
 		}
+
+		stopped = true;
 	}
 
 	@Override
-	public void removeRecovery() {
+	public void cleanup() {
+		if (db.isClosed()) {
+			db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlogDB/", title + name)).closeOnJvmShutdown()
+					.transactionDisable().asyncWriteEnable().mmapFileEnableIfSupported().make();
+		}
+
+		// Delete persistent storage.
+		db.delete(title + name + "-unfinished");
+		db.delete(title + name + "-finished");
+		db.commit();
+
+		// Close db.
+		db.close();
+	}
+
+	@ThreadSafe
+	@Override
+	public void before(long seq, BinlogInfo binlogInfo) {
 		try {
-			if (stopped) {
-				db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlogDB/", title + name)).closeOnJvmShutdown()
-						.transactionDisable().asyncWriteEnable().mmapFileEnableIfSupported().make();
-			}
-
-			// Delete persistent storage.
-			db.delete(title + name + "-unfinished");
-			db.delete(title + name + "-finished");
-			db.commit();
-
-			// Close db.
-			db.close();
+			unfinished.put(seq, binlogInfo);
 		} catch (Exception e) {
 			binlogManageException = BinlogManageException.translate(e);
 			throw binlogManageException;
@@ -138,22 +140,11 @@ public class MapDBBinlogManager implements BinlogManager {
 
 	@ThreadSafe
 	@Override
-	public void before(BinlogInfo binlogInfo) {
+	public void after(long seq, BinlogInfo binlogInfo) {
 		try {
-			unfinished.put(binlogInfo, true);
-		} catch (Exception e) {
-			binlogManageException = BinlogManageException.translate(e);
-			throw binlogManageException;
-		}
-	}
-
-	@ThreadSafe
-	@Override
-	public void after(BinlogInfo binlogInfo) {
-		try {
-			finished.put(binlogInfo, true);
+			finished.put(seq, binlogInfo);
 			finished.pollFirstEntry();
-			unfinished.remove(binlogInfo);
+			unfinished.remove(seq);
 		} catch (Exception e) {
 			binlogManageException = BinlogManageException.translate(e);
 			throw binlogManageException;
@@ -161,14 +152,27 @@ public class MapDBBinlogManager implements BinlogManager {
 	}
 
 	@Override
-	public BinlogInfo getRecovery() {
-		try {
-			return unfinished.firstKey();
-		} catch (NoSuchElementException e) {
-			try {
-				return finished.lastKey();
-			} catch (NoSuchElementException e1) {
-				return origin;
+	public BinlogInfo getBinlogInfo() {
+		if (unfinished.firstEntry() != null) {
+			return unfinished.firstEntry().getValue();
+		} else {
+			if (finished.lastEntry() != null) {
+				return finished.lastEntry().getValue();
+			} else {
+				return oriBinlogInfo;
+			}
+		}
+	}
+
+	@Override
+	public long getSeq() {
+		if (unfinished.firstEntry() != null) {
+			return unfinished.firstEntry().getKey();
+		} else {
+			if (finished.lastEntry() != null) {
+				return finished.lastEntry().getKey();
+			} else {
+				return oriSeq;
 			}
 		}
 	}

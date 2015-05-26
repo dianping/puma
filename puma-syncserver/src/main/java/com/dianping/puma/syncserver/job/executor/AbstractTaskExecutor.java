@@ -28,17 +28,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractTaskExecutor.class);
 
 	private boolean stopped = true;
+
 	private TEException teException;
 
 	protected T task;
-
-	protected PumaTask pumaTask;
-
-	protected PumaServer pumaServer;
-
-	protected SrcDBInstance srcDBInstance;
-
-	protected DstDBInstance dstDBInstance;
 
 	protected BinlogManager binlogManager;
 
@@ -46,12 +39,27 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 
 	protected Status status;
 
+	protected String pumaTaskName;
+
+	protected String pumaServerHost;
+
+	protected int pumaServerPort;
+
+	protected String pumaClientServerName;
+
+	protected long pumaClientServerId;
+
 	public AbstractTaskExecutor() {}
 
 	protected abstract void execute(ChangedEvent event) throws TEException;
 
 	public void setTask(T task) {
 		this.task = task;
+	}
+
+	@Override
+	public void init() {
+
 	}
 
 	@Override
@@ -87,8 +95,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 	}
 
 	@Override
-	public void removePersistence() {
-		binlogManager.removeRecovery();
+	public void cleanup() {
+		binlogManager.cleanup();
 	}
 
 	protected abstract void doStart();
@@ -98,16 +106,16 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 	private PumaClient createPumaClient() {
 		LOG.info("Creating puma client...");
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
-		configBuilder.host(pumaServer.getHost());
-		configBuilder.port(pumaServer.getPort());
-		configBuilder.name(task.getPumaClientName());
-		configBuilder.serverId(srcDBInstance.getServerId());
-		configBuilder.target(pumaTask.getName());
+		configBuilder.host(pumaServerHost);
+		configBuilder.port(pumaServerPort);
+		configBuilder.name(pumaClientServerName);
+		configBuilder.serverId(pumaClientServerId);
+		configBuilder.target(pumaTaskName);
 		configBuilder.dml(true);
 		configBuilder.ddl(true);
 		configBuilder.transaction(true);
-		configBuilder.binlog(binlogManager.getRecovery().getBinlogFile());
-		configBuilder.binlogPos(binlogManager.getRecovery().getBinlogPosition());
+		configBuilder.binlog(binlogManager.getBinlogInfo().getBinlogFile());
+		configBuilder.binlogPos(binlogManager.getBinlogInfo().getBinlogPosition());
 		_parseSourceDatabaseTables(task.getMysqlMapping(), configBuilder);
 		Configuration configuration = configBuilder.build();
 		LOG.info("Puma client connecting settings: {}.", configuration.toString());
@@ -252,29 +260,10 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 				"stopped=" + stopped +
 				", gException=" + teException +
 				", task=" + task +
-				", pumaTask=" + pumaTask +
-				", pumaServer=" + pumaServer +
-				", dstDBInstance=" + dstDBInstance +
 				", binlogManager=" + binlogManager +
 				", pumaClient=" + pumaClient +
 				", status=" + status +
 				'}';
-	}
-
-	public void setPumaTask(PumaTask pumaTask) {
-		this.pumaTask = pumaTask;
-	}
-
-	public void setPumaServer(PumaServer pumaServer) {
-		this.pumaServer = pumaServer;
-	}
-
-	public void setSrcDBInstance(SrcDBInstance srcDBInstance) {
-		this.srcDBInstance = srcDBInstance;
-	}
-
-	public void setDstDBInstance(DstDBInstance dstDBInstance) {
-		this.dstDBInstance = dstDBInstance;
 	}
 
 	public void setBinlogManager(BinlogManager binlogManager) {
@@ -288,6 +277,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 	public BinlogManager getBinlogManager() {
 		return binlogManager;
 	}
+
+
 
 	public Exception getException() {
 		return new Exception(teException.getErrorDesc());

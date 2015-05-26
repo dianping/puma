@@ -5,14 +5,11 @@ import com.dianping.puma.syncserver.job.LifeCycle;
 
 public interface BinlogManager extends LifeCycle {
 
-	/** Record before the binlog event is synchronized. */
-	public void before(BinlogInfo binlogInfo);
+	public void before(long seq, BinlogInfo binlogInfo);
 
-	/** Record after the binlog event is synchronized. */
-	public void after(BinlogInfo binlogInfo);
+	public void after(long seq, BinlogInfo binlogInfo);
 
-	/** Get the recovery binlog info point. */
-	public BinlogInfo getRecovery();
+	public BinlogInfo getBinlogInfo();
 
-	public void removeRecovery();
+	public long getSeq();
 }

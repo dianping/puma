@@ -136,6 +136,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
         }
     }
 
+    @Override
+    public void destroy() {
+
+    }
+
     class Processor implements EventListener {
         protected volatile int tryTimes = 0;
 
@@ -526,6 +531,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
         } catch (Exception exp) {
             this.status.setStatus(Status.FAILED);
         }
+    }
+
+    @Override
+    public void cleanup() {
+
     }
 
     public void setConfigCache(ConfigCache configCache) {

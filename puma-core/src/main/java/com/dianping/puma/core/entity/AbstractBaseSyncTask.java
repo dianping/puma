@@ -14,7 +14,7 @@ public abstract class AbstractBaseSyncTask extends BaseSyncTask {
 
 	private boolean transaction;
 	
-	private boolean consistency;
+	private boolean consistent;
 
 	private MysqlMapping mysqlMapping;
 
@@ -66,11 +66,11 @@ public abstract class AbstractBaseSyncTask extends BaseSyncTask {
 		this.mysqlMapping = mysqlMapping;
 	}
 
-	public boolean isConsistency() {
-		return consistency;
+	public boolean isConsistent() {
+		return consistent;
 	}
 
-	public void setConsistency(boolean consistency) {
-		this.consistency = consistency;
+	public void setConsistent(boolean consistent) {
+		this.consistent = consistent;
 	}
 }

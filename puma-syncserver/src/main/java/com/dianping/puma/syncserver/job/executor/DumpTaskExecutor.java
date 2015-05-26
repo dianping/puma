@@ -102,6 +102,11 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         //status.setType(dumpTask.getType());
     }
 
+    @Override
+    public void init() {
+
+    }
+
     /**
      * 根据dumpConfig，进行dump，并返回binlog位置<br>
      */
@@ -193,7 +198,13 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         state.setStatus(Status.RUNNING);
     }
 
-    public void die() {
+    @Override
+    public void destroy() {
+
+    }
+
+    @Override
+    public void cleanup() {
 
     }
 

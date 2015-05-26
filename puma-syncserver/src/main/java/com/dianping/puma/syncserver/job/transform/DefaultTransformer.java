@@ -6,6 +6,7 @@ import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.util.sql.DDLParser;
+import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.puma.syncserver.job.transform.exception.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,53 +18,60 @@ public class DefaultTransformer implements Transformer {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DefaultTransformer.class);
 
-	/**
-	 * Transformer stopped or not, default true.
-	 */
 	private boolean stopped = true;
 
-	/**
-	 * Transformer title.
-	 */
 	private String title = "Transform-";
 
-	/**
-	 * Transformer name.
-	 */
 	private String name;
 
-	/**
-	 * Transformer source and destination schema and table mapping.
-	 */
 	private MysqlMapping mysqlMapping;
 
 	public DefaultTransformer() {
 	}
 
 	@Override
-	public void start() {
-		LOG.info("Starting transformer({})...", title + name);
+	public void init() {
 
+	}
+
+	@Override
+	public void destroy() {
+
+	}
+
+	@Override
+	public void start() {
 		if (!stopped) {
-			LOG.warn("Transformer({}) is already started.", title + name);
-		} else {
-			stopped = false;
+			return;
 		}
+
+		stopped = false;
 	}
 
 	@Override
 	public void stop() {
-		LOG.info("Stopping transformer({})...", title + name);
-
 		if (stopped) {
-			LOG.warn("Transformer({}) is already stopped.", title + name);
-		} else {
-			stopped = true;
+			return;
 		}
+
+		stopped = true;
+	}
+
+	@Override
+	public void cleanup() {
+
 	}
 
 	@Override
 	public void transform(ChangedEvent event) throws TransformException {
+		// Prepare.
+		if (event instanceof RowChangedEvent) {
+			RowChangedEvent row = (RowChangedEvent) event;
+			if (row.getDmlType() == DMLType.INSERT) {
+				row.setDmlType(DMLType.REPLACE);
+			}
+		}
+
 		transformSQL(event);
 		transformColumn(event);
 		transformTable(event);

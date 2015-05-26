@@ -1,5 +1,6 @@
 package com.dianping.puma.syncserver.job.load;
 
+import com.dianping.cat.Cat;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.monitor.EventMonitor;
 import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
@@ -15,9 +16,8 @@ public class PooledLoader implements Loader {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PooledLoader.class);
 
-	/**
-	 * Pooled loader stopped or not, default true.
-	 */
+	private boolean inited = false;
+
 	private boolean stopped = true;
 
 	/**
@@ -28,17 +28,7 @@ public class PooledLoader implements Loader {
 	/**
 	 * Pooled loader main loop thread. Read rows from batch row pool and put it into batch exec pool.
 	 */
-	private Thread loopThread;
-
-	/**
-	 * Pooled loader batch exec pool, for executing events.
-	 */
-	private BatchExecPool batchExecPool;
-
-	/**
-	 * Pooled loader batch exec pool size, default 1.
-	 */
-	private int batchExecPoolSize = 1;
+	private Thread mainThread;
 
 	/**
 	 * Pooled loader batch row pool, for smashing events.
@@ -49,6 +39,16 @@ public class PooledLoader implements Loader {
 	 * Pooled loader batch row pool size, default 100.
 	 */
 	private int batchRowPoolSize = 100;
+
+	/**
+	 * Pooled loader batch exec pool, for executing events.
+	 */
+	private BatchExecPool batchExecPool;
+
+	/**
+	 * Pooled loader batch exec pool size, default 1.
+	 */
+	private int batchExecPoolSize = 1;
 
 	/**
 	 * Pooled loader sql retries, default 1.
@@ -68,7 +68,7 @@ public class PooledLoader implements Loader {
 	/**
 	 * Pooled loader in strong consistency or not, default true.
 	 */
-	private boolean strongConsistency = true;
+	private boolean consistent = true;
 
 	/**
 	 * Pooled loader binlog manager.
@@ -111,46 +111,49 @@ public class PooledLoader implements Loader {
 	public PooledLoader() {}
 
 	@Override
+	public void init() {
+		if (inited) {
+			return;
+		}
+
+		initBatchRowPool();
+		initBatchExecPool();
+		mainThread = new Thread(new MainWorker());
+	}
+
+	@Override
+	public void destroy() {
+
+	}
+
+	@Override
 	public void start() {
-		LOG.info("Starting loader({})...", title + name);
+		if (!stopped) {
+			return;
+		}
+
 		stopped = false;
 		loadException = null;
 
-		// Start monitors.
 		loadEventMonitor.start();
-
-		// Start batchExecPool.
-		initBatchExecPool();
-		batchExecPool.start();
-
-		// Start batchRowPool.
-		initBatchRowPool();
-		batchRowPool.start();
-
-		// Start the main loop thread.
-		initLoopThread();
-		loopThread.start();
+		mainThread.start();
 	}
 
 	@Override
 	public void stop() {
-		LOG.info("PooledLoader({}) is stopping.", name);
+		if (stopped) {
+			return;
+		}
+
 		stopped = true;
 
-		// Stop the main loop thread.
-		loopThread.interrupt();
-		loopThread = null;
-
-		// Stop the batchRowPool.
-		batchRowPool.stop();
-		batchRowPool = null;
-
-		// Stop the batchExecPool.
-		batchExecPool.stop();
-		batchExecPool = null;
-
-		// Stop the monitor.
+		mainThread.interrupt();
 		loadEventMonitor.stop();
+	}
+
+	@Override
+	public void cleanup() {
+
 	}
 
 	@Override
@@ -168,21 +171,20 @@ public class PooledLoader implements Loader {
 	}
 
 	private void initBatchRowPool() {
-		if (strongConsistency) {
+		if (consistent) {
 			SCBatchRowPool scBatchRowPool = new SCBatchRowPool();
-			scBatchRowPool.setName(name);
 			scBatchRowPool.setPoolSize(batchRowPoolSize);
 			batchRowPool = scBatchRowPool;
 		} else {
 			WCBatchRowPool wcBatchRowPool = new WCBatchRowPool();
-			wcBatchRowPool.setName(name);
 			wcBatchRowPool.setPoolSize(batchRowPoolSize);
 			batchRowPool = wcBatchRowPool;
 		}
+		batchRowPool.init();
 	}
 
 	private void initBatchExecPool() {
-		if (strongConsistency) {
+		if (consistent) {
 			SCBatchExecPool scBatchExecPool = new SCBatchExecPool();
 			scBatchExecPool.setHost(host);
 			scBatchExecPool.setUsername(username);
@@ -195,6 +197,7 @@ public class PooledLoader implements Loader {
 			scBatchExecPool.setInserts(inserts);
 			scBatchExecPool.setDeletes(deletes);
 			scBatchExecPool.setDdls(ddls);
+			batchExecPool = scBatchExecPool;
 		} else {
 			WCBatchExecPool wcBatchExecPool = new WCBatchExecPool();
 			wcBatchExecPool.setHost(host);
@@ -202,34 +205,33 @@ public class PooledLoader implements Loader {
 			wcBatchExecPool.setPoolSize(batchExecPoolSize);
 			wcBatchExecPool.setRetires(retries);
 			wcBatchExecPool.setBinlogManager(binlogManager);
+			batchExecPool = wcBatchExecPool;
 		}
+		batchExecPool.init();
 	}
 
-	private void initLoopThread() {
-		loopThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					loop();
-				} catch (LoadException e) {
-					if (!stopped) {
-						LOG.error("Pooled loader loop thread failure.", e);
-						loadException = e;
-						stop();
-					}
+	private class MainWorker implements Runnable {
+
+		@Override
+		public void run() {
+			try {
+				while (!stopped) {
+					// Take batch row from the batch row pool.
+					BatchRow batchRow = batchRowPool.take();
+
+					// Put batch row into the batch exec pool.
+					batchExecPool.asyncThrow();
+					batchExecPool.put(batchRow);
+				}
+			} catch (LoadException e) {
+				if (!stopped) {
+					String msg = String.format("Loader main thread error.");
+					loadException = e;
+					LOG.error(msg, loadException);
+					Cat.logError(msg, loadException);
+					stop();
 				}
 			}
-		});
-	}
-
-	private void loop() {
-		while (true) {
-			// Take batch row from the batch row pool.
-			BatchRow batchRow = batchRowPool.take();
-
-			// Put batch row into the batch exec pool.
-			batchExecPool.asyncThrow();
-			batchExecPool.put(batchRow);
 		}
 	}
 
@@ -253,8 +255,8 @@ public class PooledLoader implements Loader {
 		this.password = password;
 	}
 
-	public void setStrongConsistency(boolean strongConsistency) {
-		this.strongConsistency = strongConsistency;
+	public void setConsistent(boolean consistent) {
+		this.consistent = consistent;
 	}
 
 	public void setBatchRowPoolSize(int batchRowPoolSize) {

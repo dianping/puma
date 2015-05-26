@@ -21,7 +21,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class WCBatchExecPool implements LifeCycle {
+public class WCBatchExecPool implements BatchExecPool {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WCBatchExecPool.class);
 
@@ -70,43 +70,30 @@ public class WCBatchExecPool implements LifeCycle {
 	public WCBatchExecPool() {
 	}
 
-	public void start() {
-		LOG.info("Starting batch execution pool({})...", name);
+	@Override
+	public void init() {
+		loadException = null;
 
-		if (!stopped) {
-			LOG.warn("Batch execution pool({}) is already started.", name);
-		} else {
-			// Clear batch execution pool status.
-			stopped = false;
-			loadException = null;
-
-			// Initial JDBC data source.
-			initDataSource();
-
-			// Initial sql execution thread pool.
-			initThreadPool();
-		}
+		initDataSource();
+		initThreadPool();
 	}
 
-	public void stop() {
-		LOG.info("Stopping batch execution pool({})...", name);
-
-		if (stopped) {
-			LOG.warn("batch execution pool({}) is already stopped.", name);
-		} else {
-			// Clear batch execution pool status.
-			stopped = true;
-
-			// Destroy sql execution thread pool.
-			destroyThreadPool();
-
-			// Destroy JDBC data source.
-			destroyDataSource();
-		}
+	@Override
+	public void destroy() {
+		destroyThreadPool();
+		destroyDataSource();
 	}
 
-	public void die() {
-		// No persistent storage.
+	@Override
+	public void cleanup() {
+
+	}
+
+	@Override
+	public void asyncThrow() throws LoadException {
+		if (loadException != null) {
+			throw loadException;
+		}
 	}
 
 	public LoadException exception() {
@@ -137,8 +124,8 @@ public class WCBatchExecPool implements LifeCycle {
 		dataSource = null;
 	}
 
-	@ThreadSafe
-	public void put(BatchRow batchRow) throws InterruptedException {
+	@Override
+	public void put(BatchRow batchRow) throws LoadException {
 		lock.lock();
 		try {
 			buffer = batchRow;
@@ -147,13 +134,14 @@ public class WCBatchExecPool implements LifeCycle {
 			}
 			buffer = null;
 			register(batchRow);
+		} catch (Exception e) {
+			throw LoadException.translate(e);
 		} finally {
 			lock.unlock();
 		}
 
 		beforePooledBatchExecute(batchRow);
 		pooledBatchExecute(batchRow);
-		afterPooledBatchExecute(batchRow);
 	}
 
 	@ThreadSafe
@@ -214,20 +202,20 @@ public class WCBatchExecPool implements LifeCycle {
 	private void beforePooledBatchExecute(BatchRow batchRow) {
 		if (isStrongConsistency) {
 			if (batchRow.isCommit()) {
-				binlogManager.before(batchRow.getBinlogInfo());
+				binlogManager.before(batchRow.getSeq(), batchRow.getBinlogInfo());
 			}
 		} else {
-			binlogManager.before(batchRow.getBinlogInfo());
+			binlogManager.before(batchRow.getSeq(), batchRow.getBinlogInfo());
 		}
 	}
 
 	private void afterPooledBatchExecute(BatchRow batchRow) {
 		if (isStrongConsistency) {
 			if (batchRow.isCommit()) {
-				binlogManager.after(batchRow.getBinlogInfo());
+				binlogManager.after(batchRow.getSeq(), batchRow.getBinlogInfo());
 			}
 		} else {
-			binlogManager.after(batchRow.getBinlogInfo());
+			binlogManager.after(batchRow.getSeq(), batchRow.getBinlogInfo());
 		}
 	}
 
@@ -286,7 +274,6 @@ public class WCBatchExecPool implements LifeCycle {
 				// If the code runs to here, then the sql execution is failure.
 				loadException = te;
 				LOG.error("Sql error: {}.", loadException);
-				stop();
 			}
 		});
 	}

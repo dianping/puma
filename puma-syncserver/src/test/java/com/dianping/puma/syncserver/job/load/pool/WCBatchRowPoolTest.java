@@ -19,12 +19,12 @@ public class WCBatchRowPoolTest {
 	@Before
 	public void before() {
 		WCBatchRowPool = new WCBatchRowPool();
-		WCBatchRowPool.start();
+		WCBatchRowPool.init();
 	}
 
 	@After
 	public void after() {
-		WCBatchRowPool.stop();
+		WCBatchRowPool.destroy();
 	}
 
 	@Test

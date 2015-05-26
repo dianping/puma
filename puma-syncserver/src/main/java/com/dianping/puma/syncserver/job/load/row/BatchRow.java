@@ -30,6 +30,8 @@ public class BatchRow {
 	/** Minimum next binlog info of batch rows. */
 	private BinlogInfo nextBinlogInfo;
 
+	private long seq;
+
 	/** Execution time of a random row in batch rows. */
 	private long executeTime;
 
@@ -42,11 +44,13 @@ public class BatchRow {
 	/** DML type of batch rows. */
 	private DMLType dmlType;
 
-	/** Sql statement of batch rows. */
 	private String sql;
 
-	/** Sql parameters of batch rows. */
 	private List<Object[]> params = new ArrayList<Object[]>();
+
+	private String u2iSql;
+
+	private List<Object[]> u2iParams = new ArrayList<Object[]>();
 
 	private Map<RowKey, Boolean> rowKeys = new HashMap<RowKey, Boolean>();
 
@@ -66,14 +70,19 @@ public class BatchRow {
 				return false;
 			} else {
 				RowChangedEvent row = (RowChangedEvent) event;
+				RowChangedEvent u2iRow = (RowChangedEvent) event;
+				u2iRow.setDmlType(DMLType.INSERT);
+
 				if (row.isTransactionCommit()) {
 					return false;
 				} else {
 					if (checkRow(row)) {
 						params.add(LoadParser.parseArgs(row));
+						params.add(LoadParser.parseArgs(u2iRow));
 						rowKeys.put(RowKey.getRowKey(row), true);
 						executeTime = row.getExecuteTime();
 						binlogInfo = new BinlogInfo(row.getBinlog(), row.getBinlogPos());
+						seq = row.getSeq();
 						++size;
 						return true;
 					} else {
@@ -88,10 +97,13 @@ public class BatchRow {
 		executeTime = event.getExecuteTime();
 		binlogInfo = new BinlogInfo(event.getBinlog(), event.getBinlogPos());
 		nextBinlogInfo = new BinlogInfo(event.getBinlog(), event.getBinlogNextPos());
+		seq = event.getSeq();
 		++size;
 
 		if (event instanceof RowChangedEvent) {
 			RowChangedEvent row = (RowChangedEvent) event;
+			RowChangedEvent u2iRow = (RowChangedEvent) event;
+			u2iRow.setDmlType(DMLType.INSERT);
 
 			if (row.isTransactionCommit()) {
 				ddl = false;
@@ -101,7 +113,9 @@ public class BatchRow {
 				table = new Table(row.getDatabase(), row.getTable());
 				dmlType = row.getDmlType();
 				sql = LoadParser.parseSql(row);
+				u2iSql = LoadParser.parseSql(u2iRow);
 				params.add(LoadParser.parseArgs(row));
+				u2iParams.add(LoadParser.parseArgs(u2iRow));
 				rowKeys.put(RowKey.getRowKey(row), true);
 			}
 		} else {
@@ -144,6 +158,10 @@ public class BatchRow {
 		return binlogInfo;
 	}
 
+	public long getSeq() {
+		return seq;
+	}
+
 	public Map<RowKey, Boolean> getRowKeys() {
 		return rowKeys;
 	}
@@ -166,5 +184,13 @@ public class BatchRow {
 
 	public Object[][] getParams() {
 		return params.toArray(new Object[params.size()][]);
+	}
+
+	public String getU2iSql() {
+		return u2iSql;
+	}
+
+	public Object[][] getU2iParams() {
+		return u2iParams.toArray(new Object[u2iParams.size()][]);
 	}
 }

@@ -23,15 +23,14 @@ public class SCWCBatchRowPoolTest extends MockTest {
 	@Before
 	public void before() {
 		scBatchRowPool = new SCBatchRowPool();
-		scBatchRowPool.setName("SCBatchRowPool-puma");
 		scBatchRowPool.setPoolSize(10);
 		scBatchRowPool.batchRows = batchRows;
-		scBatchRowPool.start();
+		scBatchRowPool.init();
 	}
 
 	@After
 	public void after() {
-		scBatchRowPool.stop();
+		scBatchRowPool.destroy();
 	}
 
 	@Test

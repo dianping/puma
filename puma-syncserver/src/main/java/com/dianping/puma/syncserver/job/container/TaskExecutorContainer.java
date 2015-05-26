@@ -28,9 +28,9 @@ public interface TaskExecutorContainer {
 
     public void start(String name) throws TECException;
 
-    public void stop(String name) throws TECException;
+    public void pause(String name) throws TECException;
 
-    public void removePersistence(String name) throws TECException;
+    public void stop(String name) throws TECException;
 
     public TaskExecutor get(String name);
 

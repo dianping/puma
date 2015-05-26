@@ -1,15 +1,14 @@
 package com.dianping.puma.syncserver.remote.reporter;
 
-import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.state.SyncTaskState;
 import com.dianping.puma.core.monitor.SwallowEventPublisher;
 import com.dianping.puma.core.monitor.event.SyncTaskStateEvent;
 import com.dianping.puma.core.service.SyncTaskStateService;
 import com.dianping.puma.syncserver.config.SyncServerConfig;
-import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
 import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;
 import com.dianping.puma.syncserver.job.executor.SyncTaskExecutor;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
+import com.dianping.puma.syncserver.job.executor.exception.TEException;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -51,10 +50,15 @@ public class SyncTaskStateReporter {
 				syncTaskState.setStatus(syncTaskExecutor.getStatus());
 
 				// BinlogInfo.
-				syncTaskState.setBinlogInfo(syncTaskExecutor.getBinlogManager().getRecovery());
+				syncTaskState.setBinlogInfo(syncTaskExecutor.getBinlogManager().getBinlogInfo());
 
 				// Exception.
-				syncTaskState.setException(syncTaskExecutor.getException());
+				try {
+					syncTaskExecutor.asyncThrow();
+					syncTaskState.setException(null);
+				} catch (TEException e) {
+					syncTaskState.setException(e);
+				}
 
 				// Update sql counts.
 				syncTaskState.setUpdates(syncTaskExecutor.getUpdates().get());

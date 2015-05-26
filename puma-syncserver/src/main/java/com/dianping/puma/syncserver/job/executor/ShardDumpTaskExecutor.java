@@ -100,6 +100,10 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
         createOutPutDir();
     }
 
+    public void destroy() {
+
+    }
+
     protected synchronized void saveTask() {
         shardDumpTaskService.update(this.task);
     }
@@ -420,7 +424,7 @@ public class ShardDumpTaskExecutor implements TaskExecutor<ShardDumpTask> {
         cleanup();
     }
 
-    protected void cleanup() {
+    public void cleanup() {
         try {
             FileUtils.deleteDirectory(new File(dumpOutputDir));
         } catch (IOException e) {

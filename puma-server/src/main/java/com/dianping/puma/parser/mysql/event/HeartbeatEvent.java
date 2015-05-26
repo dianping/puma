@@ -13,7 +13,8 @@ public class HeartbeatEvent extends AbstractBinlogEvent {
 	
 	@Override
 	public void doParse(ByteBuffer buf, PumaContext context) throws IOException {
-		logIdentify = PacketUtils.readNullTerminatedString(buf);
+		int lenRemaining = lenRemaining(buf, context);
+		logIdentify = PacketUtils.readFixedLengthString(buf, lenRemaining);
 	}
 	public void setLogIdentify(String logIdentify) {
 		this.logIdentify = logIdentify;

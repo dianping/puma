@@ -3,9 +3,7 @@ package com.dianping.puma.remote.receiver;
 import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.entity.PumaTask;
-import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.core.model.event.EventCenter;
-import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
 import com.dianping.puma.core.monitor.event.Event;
 import com.dianping.puma.core.monitor.EventListener;
 import com.dianping.puma.core.monitor.event.PumaTaskOperationEvent;
@@ -77,7 +75,8 @@ public class PumaTaskOperationChecker implements EventListener {
 				break;
 			case UPDATE:
 				LOG.info("Receive puma task operation event: UPDATE.");
-				taskExecutorContainer.updateEvent(pumaTaskOperationEvent);
+				updateEvent(pumaTaskOperationEvent);
+				// taskExecutorContainer.updateEvent(pumaTaskOperationEvent);
 				break;
 			case REMOVE:
 				LOG.info("Receive puma task operation event: REMOVE.");
@@ -100,4 +99,21 @@ public class PumaTaskOperationChecker implements EventListener {
 		}
 	}
 
+	private void updateEvent(PumaTaskOperationEvent pumaTaskOperationEvent) {
+		PumaTask oriPumaTask = pumaTaskOperationEvent.getOriPumaTask();
+		PumaTask pumaTask = pumaTaskOperationEvent.getPumaTask();
+		if (oriPumaTask != null && pumaTask != null && oriPumaTask != pumaTask) {
+			if (oriPumaTask.getTableSet().equals(pumaTask.getTableSet())) {
+				LOG.info("`{}` Task Accepted Table CHANGE.", pumaTaskOperationEvent.getTaskName());
+				taskExecutorContainer.filterEvent(pumaTaskOperationEvent);
+			} else if (oriPumaTask.getPreservedDay() != pumaTask.getPreservedDay()) {
+				LOG.info("`{}` Task PreservedDay CHANGE.", pumaTaskOperationEvent.getTaskName());
+				taskExecutorContainer.prolongEvent(pumaTaskOperationEvent);
+			} else if (oriPumaTask.getBinlogInfo().equals(pumaTask.getBinlogInfo())) {
+				LOG.info("`{}` Task Need Restart.", pumaTaskOperationEvent.getTaskName());
+				taskExecutorContainer.updateEvent(pumaTaskOperationEvent);
+			}
+		}
+		return;
+	}
 }

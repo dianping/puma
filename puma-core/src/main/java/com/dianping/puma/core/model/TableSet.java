@@ -6,7 +6,8 @@ public class TableSet {
 
 	List<Table> tables = new ArrayList<Table>();
 
-	public TableSet() {}
+	public TableSet() {
+	}
 
 	public List<Table> listSchemaTables() {
 		return tables;
@@ -76,9 +77,38 @@ public class TableSet {
 	}
 
 	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || !(o instanceof TableSet)) {
+			return false;
+		}
+		TableSet tableSet = (TableSet) o;
+		if (tableSet.tables.size() != this.tables.size()) {
+			return false;
+		} else {
+			for (Table table : tableSet.tables) {
+				if (!this.contains(table)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		for (Table table : this.tables) {
+			result = prime * result + table.hashCode();
+		}
+		return result;
+	}
+
+	@Override
 	public String toString() {
-		return "TableSet{" +
-				"tables=" + tables +
-				'}';
+		return "TableSet{" + "tables=" + tables + '}';
 	}
 }

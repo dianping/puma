@@ -32,10 +32,12 @@ public class Table {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o)
+		if (this == o){
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+		if (o == null || !(o instanceof Table)){
 			return false;
+		}
 
 		Table table = (Table) o;
 
@@ -50,7 +52,7 @@ public class Table {
 	@Override
 	public int hashCode() {
 		int result = schemaName.hashCode();
-		result = 31 * result + tableName.hashCode();
+		result = 37 * result + tableName.hashCode();
 		return result;
 	}
 

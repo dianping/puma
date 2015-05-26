@@ -20,17 +20,14 @@ import java.util.concurrent.TimeUnit;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
-import com.dianping.puma.ComponentContainer;
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.monitor.FetcherEventCountMonitor;
 import com.dianping.puma.monitor.FetcherEventDelayMonitor;
 import com.dianping.puma.monitor.ParserEventCountMonitor;
-import com.dianping.puma.sender.Sender;
 import com.dianping.puma.server.exception.ServerEventFetcherException;
 import com.dianping.puma.server.exception.ServerEventParserException;
-import com.dianping.puma.storage.DefaultEventStorage;
 
 import org.apache.commons.lang.StringUtils;
 

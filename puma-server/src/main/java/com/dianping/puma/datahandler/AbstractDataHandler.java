@@ -17,8 +17,6 @@ package com.dianping.puma.datahandler;
 
 import java.math.BigInteger;
 
-import com.dianping.puma.core.util.sql.DDLParser;
-import com.dianping.puma.core.util.sql.DDLResult;
 import com.dianping.puma.core.util.sql.DDLType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;

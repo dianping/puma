@@ -19,7 +19,7 @@ public class PumaTask extends BaseEntity {
 	private TableSet tableSet;
 
 	@Deprecated
-	private Map<String,AcceptedTables> acceptedDataInfos;
+	private Map<String, AcceptedTables> acceptedDataInfos;
 
 	public String getSrcDBInstanceName() {
 		return srcDBInstanceName;
@@ -62,12 +62,43 @@ public class PumaTask extends BaseEntity {
 	}
 
 	@Deprecated
-	public void setAcceptedDataInfos(Map<String,AcceptedTables> acceptedDataInfos) {
+	public void setAcceptedDataInfos(Map<String, AcceptedTables> acceptedDataInfos) {
 		this.acceptedDataInfos = acceptedDataInfos;
 	}
 
 	@Deprecated
-	public Map<String,AcceptedTables> getAcceptedDataInfos() {
+	public Map<String, AcceptedTables> getAcceptedDataInfos() {
 		return acceptedDataInfos;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == this) {
+			return true;
+		}
+		if (o == null || !(o instanceof PumaTask)) {
+			return false;
+		}
+		PumaTask pumaTask = (PumaTask) o;
+		if (this.getBinlogInfo().equals(pumaTask.getBinlogInfo())
+				&& (this.getPreservedDay() == pumaTask.getPreservedDay())
+				&& this.getTableSet().equals(pumaTask.getTableSet()) && this.getName().equals(pumaTask.getName())
+				&& this.getPumaServerName().equals(pumaTask.getPumaServerName())
+				&& this.getSrcDBInstanceName().equals(pumaTask.getSrcDBInstanceName())) {
+			return true;
+		}
+		return false;
+	}
+	
+	public int hashCode(){
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + this.getBinlogInfo().hashCode();
+		result = prime * result + this.getPreservedDay();
+		result = prime * result + this.getTableSet().hashCode();
+		result = prime * result + this.getName().hashCode();
+		result = prime * result + this.getPumaServerName().hashCode();
+		result = prime * result + this.getSrcDBInstanceName().hashCode();
+		return result;
 	}
 }

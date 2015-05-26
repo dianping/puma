@@ -147,7 +147,6 @@ public class PumaTaskController {
 			Map<String,AcceptedTables> acceptedDataInfos = getAcceptedDatas(acceptedDatabase,acceptedTable);
 			PumaTask pumaTask = pumaTaskService.find(name);
 			if (pumaTask == null) {
-				pumaTask = new PumaTask();
 				operation = ActionOperation.CREATE;
 			} else{
 				if (!binlogFile.equals(pumaTask.getBinlogInfo().getBinlogFile())
@@ -162,9 +161,10 @@ public class PumaTaskController {
 					operation = ActionOperation.DEFAULT;
 				}*/
 			}
-
 			PumaTaskOperationEvent event = new PumaTaskOperationEvent();
 			event.setOriPumaTask(pumaTask);
+			pumaTask = new PumaTask();
+			
 
 			pumaTask.setName(name);
 			pumaTask.setSrcDBInstanceName(srcDBInstanceName);
@@ -174,8 +174,6 @@ public class PumaTaskController {
 			binlogInfo.setBinlogPosition(binlogPosition);
 			pumaTask.setBinlogInfo(binlogInfo);
 			pumaTask.setPreservedDay(preservedDay);  
-			Type type = new TypeToken<HashMap<String,AcceptedTables>>() {}.getType(); 
-			//Map<String,AcceptedTables> acceptedDataInfos = (Map<java.lang.String, AcceptedTables>) GsonUtil.fromJson(acceptedDataInfoStr, type);
 			pumaTask.setAcceptedDataInfos(acceptedDataInfos);
 
 			// Accepted schema and tables.
@@ -203,7 +201,6 @@ public class PumaTaskController {
 			pumaTaskStateService.add(taskState);
 
 			// Publish puma task operation event to puma server.
-			//this.pumaTaskOperationReporter.report(pumaServerName, name, operation);
 			event.setServerName(pumaServerName);
 			event.setTaskName(name);
 			event.setPumaTask(pumaTask);

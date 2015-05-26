@@ -102,14 +102,14 @@ public class PumaTaskOperationChecker implements EventListener {
 	private void updateEvent(PumaTaskOperationEvent pumaTaskOperationEvent) {
 		PumaTask oriPumaTask = pumaTaskOperationEvent.getOriPumaTask();
 		PumaTask pumaTask = pumaTaskOperationEvent.getPumaTask();
-		if (oriPumaTask != null && pumaTask != null && oriPumaTask != pumaTask) {
-			if (oriPumaTask.getTableSet().equals(pumaTask.getTableSet())) {
+		if (oriPumaTask != null && pumaTask != null && !oriPumaTask.equals(pumaTask)) {
+			if (!oriPumaTask.getTableSet().equals(pumaTask.getTableSet())) {
 				LOG.info("`{}` Task Accepted Table CHANGE.", pumaTaskOperationEvent.getTaskName());
 				taskExecutorContainer.filterEvent(pumaTaskOperationEvent);
 			} else if (oriPumaTask.getPreservedDay() != pumaTask.getPreservedDay()) {
 				LOG.info("`{}` Task PreservedDay CHANGE.", pumaTaskOperationEvent.getTaskName());
 				taskExecutorContainer.prolongEvent(pumaTaskOperationEvent);
-			} else if (oriPumaTask.getBinlogInfo().equals(pumaTask.getBinlogInfo())) {
+			} else if (!oriPumaTask.getBinlogInfo().equals(pumaTask.getBinlogInfo())) {
 				LOG.info("`{}` Task Need Restart.", pumaTaskOperationEvent.getTaskName());
 				taskExecutorContainer.updateEvent(pumaTaskOperationEvent);
 			}

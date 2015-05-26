@@ -3,10 +3,11 @@ package com.dianping.puma.syncserver.job.load;
 import com.dianping.cat.Cat;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.monitor.EventMonitor;
-import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
+import com.dianping.puma.syncserver.job.binlog.BinlogManager;
 import com.dianping.puma.syncserver.job.load.exception.LoadException;
 import com.dianping.puma.syncserver.job.load.pool.*;
 import com.dianping.puma.syncserver.job.load.row.BatchRow;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,8 +1,9 @@
-package com.dianping.puma.syncserver.job.binlogmanage;
+package com.dianping.puma.syncserver.job.binlog;
 
 import com.dianping.puma.core.annotation.ThreadSafe;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.syncserver.job.binlogmanage.exception.BinlogManageException;
+import com.dianping.puma.syncserver.job.binlog.exception.BinlogManageException;
+
 import org.mapdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

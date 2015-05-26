@@ -1,6 +1,8 @@
 package com.dianping.puma.syncserver.job.binlogmanage;
 
 import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.syncserver.job.binlog.MapDBBinlogManager;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.junit.Test;
 

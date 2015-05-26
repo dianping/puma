@@ -6,8 +6,9 @@ import java.util.Map;
 
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.*;
-import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
+import com.dianping.puma.syncserver.job.binlog.BinlogManager;
 import com.dianping.puma.syncserver.job.executor.exception.TEException;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

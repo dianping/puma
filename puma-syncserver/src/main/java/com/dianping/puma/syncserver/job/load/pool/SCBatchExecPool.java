@@ -2,10 +2,11 @@ package com.dianping.puma.syncserver.job.load.pool;
 
 import com.dianping.cat.Cat;
 import com.dianping.puma.core.util.sql.DMLType;
-import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
+import com.dianping.puma.syncserver.job.binlog.BinlogManager;
 import com.dianping.puma.syncserver.job.load.exception.LoadException;
 import com.dianping.puma.syncserver.job.load.row.BatchRow;
 import com.zaxxer.hikari.HikariDataSource;
+
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.slf4j.Logger;

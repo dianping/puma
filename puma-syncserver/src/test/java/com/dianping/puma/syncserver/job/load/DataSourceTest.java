@@ -70,16 +70,31 @@ public class DataSourceTest {
 	@Test
 	public void testHikariCP() {
 		final HikariDataSource dataSource = new HikariDataSource();
-		dataSource.setJdbcUrl("jdbc:mysql://192.168.224.102:3306/?useServerPrepStmts=false&rewriteBatchedStatements=true");
+		//dataSource.setJdbcUrl("jdbc:mysql://192.168.224.102:3306/?useServerPrepStmts=false&rewriteBatchedStatements=true");
+		dataSource.setJdbcUrl("jdbc:mysql://10.128.53.21:3307/?useServerPrepStmts=false&rewriteBatchedStatements=true");
 		dataSource.setUsername("root");
-		dataSource.setPassword("123456");
+		dataSource.setPassword("admin");
 		dataSource.setDriverClassName("com.mysql.jdbc.Driver");
 		dataSource.setMaximumPoolSize(1);
 
 		QueryRunner runner = new QueryRunner(dataSource);
-		Object[][] params = {{10, "playi"}, {11, "playi"}, {12, "playy"}};
+		Object[][] params = {{23, "user23_new", 0}};
 		try {
-			runner.update("INSERT Pressure.business (name) VALUES (?)", "aaa");
+			runner.batch("INSERT INTO \n"
+					+ "`testdb`.`tbl_user`\n"
+					+ "(\n"
+					+ "  `id`\n"
+					+ "        ,\n"
+					+ "    `name`\n"
+					+ "        ,\n"
+					+ "    `uselock`\n"
+					+ "    ) \n"
+					+ "VALUES \n"
+					+ "(?,?,?)\n"
+					+ "ON DUPLICATE KEY UPDATE\n"
+					+ "                                     `name`=VALUES(name),`uselock`=VALUES(uselock)", params);
+			//runner.update("INSERT Pressure.business (name) VALUES (?)", "aaa");
+			/*
 			runner.batch("INSERT INTO \n"
 					+ "`Pressure`.`business`\n"
 					+ "(\n"
@@ -90,7 +105,7 @@ public class DataSourceTest {
 					+ "VALUES \n"
 					+ "(?,?)\n"
 					+ "ON DUPLICATE KEY UPDATE \n"
-					+ "`name`=VALUES(name)", params);
+					+ "                       `name`=VALUES(name)", params);*/
 			/*
 			runner.batch("INSERT INTO \n"
 					+ "`Pressure`.`business`\n"

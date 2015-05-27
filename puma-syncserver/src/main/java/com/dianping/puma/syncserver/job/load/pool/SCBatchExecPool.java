@@ -158,7 +158,7 @@ public class SCBatchExecPool implements BatchExecPool {
 		dataSource.setPassword(password);
 		dataSource.setDriverClassName("com.mysql.jdbc.Driver");
 		dataSource.setMaximumPoolSize(poolSize);
-		dataSource.setAutoCommit(true);
+		dataSource.setAutoCommit(false);
 	}
 
 	private void destroyDataSource() {
@@ -281,14 +281,13 @@ public class SCBatchExecPool implements BatchExecPool {
 		}
 
 		private void commit(Connection conn) {
-			/*
 			try {
 				conn.commit();
 				//DbUtils.commitAndClose(conn);
 			} catch (SQLException e) {
 				DbUtils.rollbackAndCloseQuietly(conn);
 				throw LoadException.translate(e);
-			}*/
+			}
 		}
 
 		@Override

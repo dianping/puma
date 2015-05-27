@@ -66,7 +66,7 @@ public class MapDBBinlogManager implements BinlogManager {
 			return;
 		}
 
-		db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlogDB/", title + name)).closeOnJvmShutdown()
+		db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlog/", title + name)).closeOnJvmShutdown()
 				.transactionDisable().asyncWriteEnable().mmapFileEnableIfSupported().make();
 
 		// Read from the persistent storage.
@@ -119,7 +119,7 @@ public class MapDBBinlogManager implements BinlogManager {
 	@Override
 	public void cleanup() {
 		if (db.isClosed()) {
-			db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlogDB/", title + name)).closeOnJvmShutdown()
+			db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlog/", title + name)).closeOnJvmShutdown()
 					.transactionDisable().asyncWriteEnable().mmapFileEnableIfSupported().make();
 		}
 

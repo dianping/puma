@@ -66,7 +66,7 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
 		loader.setName(name);
 		loader.setConsistent(true);
 		//loader.setConsistent(task.isConsistent());
-		loader.setHost(dstDBInstance.getHost());
+		loader.setHost(dstDBInstance.getHost() + ":" + dstDBInstance.getPort());
 		loader.setUsername(dstDBInstance.getUsername());
 		loader.setPassword(dstDBInstance.getPassword());
 		loader.setBinlogManager(binlogInfoManager);

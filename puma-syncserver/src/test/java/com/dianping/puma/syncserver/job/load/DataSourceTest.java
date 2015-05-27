@@ -7,6 +7,7 @@ import org.apache.tomcat.jdbc.pool.DataSource;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.CountDownLatch;
 
@@ -76,27 +77,35 @@ public class DataSourceTest {
 		dataSource.setPassword("admin");
 		dataSource.setDriverClassName("com.mysql.jdbc.Driver");
 		dataSource.setMaximumPoolSize(1);
+		dataSource.setAutoCommit(false);
 
-		QueryRunner runner = new QueryRunner(dataSource);
-		Object[][] params = {{23, "user23_new", 0}};
+
+		Object[][] params0 = {{14, "2015-04-28 11:36:02.030", "11:36:00.3303","2015-04-28 11:36:02.3300"}};
+		Object[][] params1 = {{23, "user"}};
 		try {
-			runner.batch("INSERT INTO \n"
-					+ "`testdb`.`tbl_user`\n"
+			Connection conn = dataSource.getConnection();
+			QueryRunner runner = new QueryRunner();
+			runner.batch(conn, "INSERT INTO \n"
+					+ "`testdb`.`tbl_test`\n"
 					+ "(\n"
 					+ "  `id`\n"
 					+ "        ,\n"
-					+ "    `name`\n"
+					+ "    `createTime`\n"
 					+ "        ,\n"
-					+ "    `uselock`\n"
+					+ "    `updateTime`\n"
+					+ "        ,\n"
+					+ "    `lastTime`\n"
 					+ "    ) \n"
 					+ "VALUES \n"
-					+ "(?,?,?)\n"
+					+ "(?,?,?,?)\n"
 					+ "ON DUPLICATE KEY UPDATE\n"
-					+ "                                     `name`=VALUES(name),`uselock`=VALUES(uselock)", params);
+					+ "                                                       createTime=VALUES(createTime),updateTime=VALUES(updateTime),lastTime=VALUES(lastTime) ", params0);
+
+			conn.commit();
 			//runner.update("INSERT Pressure.business (name) VALUES (?)", "aaa");
-			/*
-			runner.batch("INSERT INTO \n"
-					+ "`Pressure`.`business`\n"
+
+			runner.batch(conn, "INSERT INTO \n"
+					+ "`testdb`.`tbl_user`\n"
 					+ "(\n"
 					+ "  `id`\n"
 					+ "        ,\n"
@@ -105,7 +114,9 @@ public class DataSourceTest {
 					+ "VALUES \n"
 					+ "(?,?)\n"
 					+ "ON DUPLICATE KEY UPDATE \n"
-					+ "                       `name`=VALUES(name)", params);*/
+					+ "                       `name`=VALUES(name)", params1);
+
+			conn.commit();
 			/*
 			runner.batch("INSERT INTO \n"
 					+ "`Pressure`.`business`\n"

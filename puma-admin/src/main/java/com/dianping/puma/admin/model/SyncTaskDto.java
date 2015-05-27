@@ -22,7 +22,7 @@ public class SyncTaskDto {
 
 	private boolean transaction;
 	
-	private boolean consistency;
+	private boolean consistent;
 	
 	private ErrorListDto errorList;
 	
@@ -134,12 +134,12 @@ public class SyncTaskDto {
 		this.errorList = errorList;
 	}
 
-	public boolean isConsistency() {
-		return consistency;
+	public boolean isConsistent() {
+		return consistent;
 	}
 
-	public void setConsistency(boolean consistency) {
-		this.consistency = consistency;
+	public void setConsistent(boolean consistent) {
+		this.consistent = consistent;
 	}
 	
 	

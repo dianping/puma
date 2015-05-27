@@ -28,7 +28,7 @@ public class SyncTaskMapper {
 		syncTaskDto.setBinlogPosition(syncTask.getBinlogInfo().getBinlogPosition());
 		syncTaskDto.setDdl(syncTask.isDdl());
 		syncTaskDto.setDml(syncTask.isDml());
-		syncTaskDto.setConsistency(syncTask.isConsistent());
+		syncTaskDto.setConsistent(syncTask.isConsistent());
 		syncTaskDto.setTransaction(syncTask.isTransaction());
 		ErrorHandlerDto deaultHandler = new ErrorHandlerDto();
 		deaultHandler.setName(syncTask.getDefaultHandler());
@@ -53,7 +53,7 @@ public class SyncTaskMapper {
 		syncTask.setDml(syncTaskDto.isDml());
 		syncTask.setDdl(syncTaskDto.isDdl());
 		syncTask.setTransaction(syncTaskDto.isTransaction());
-		syncTask.setConsistent(syncTaskDto.isConsistency());
+		syncTask.setConsistent(syncTaskDto.isConsistent());
 		syncTask.setSyncType(SyncType.SYNC);
 		syncTask.setDefaultHandler(syncTaskDto.getDefaultHandler().getName());
 		syncTask.setMysqlMapping(MysqlMappingMapper.convertToMysqlMapping(syncTaskDto.getMysqlMapping()));

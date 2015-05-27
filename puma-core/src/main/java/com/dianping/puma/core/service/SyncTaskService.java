@@ -17,6 +17,8 @@ public interface SyncTaskService {
 
 	List<SyncTask> findByPumaServerName(String pumaServerName);
 
+	List<SyncTask> findByPumaTaskName(String pumaTaskName);
+	
 	List<SyncTask> findAll();
 	
 	long count();

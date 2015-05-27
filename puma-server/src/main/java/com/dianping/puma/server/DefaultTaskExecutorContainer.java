@@ -305,37 +305,6 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 		return binlogInfoHolder;
 	}
 
-/*	
- * @Override
-	public void updateEvent(ReplicationTaskEvent event) {
-		if (taskExecutorMap != null && taskExecutorMap.containsKey(event.getTaskName())) {
-			Server task = taskExecutorMap.get(event.getTaskName());
-			try {
-				task.setTaskStatus(ReplicationTaskStatus.Status.STOPPING);
-				task.stop();
-				task.setTaskStatus(ReplicationTaskStatus.Status.STOPPED);
-				taskExecutorMap.remove(event.getTaskName());
-			} catch (Exception e) {
-				LOG.error("delete Server" + task.getPumaServerId() + " failed.", e);
-				e.printStackTrace();
-			}
-			ReplicationTask serverTask = replicationTaskService.findByTaskId(event.getTaskId());
-			try {
-				task = construct(serverTask);
-				taskExecutorMap.put(task.getPumaServerId(), task);
-				task.setTaskStatus(ReplicationTaskStatus.Status.PREPARING);
-				initContext(task);
-				startExecutor(task);
-				task.setTaskStatus(ReplicationTaskStatus.Status.RUNNING);
-
-			} catch (Exception e) {
-				LOG.error("start Server" + task.getPumaServerId() + " failed.", e);
-				e.printStackTrace();
-			}
-
-		}
-	}
-*/
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		instance = this;

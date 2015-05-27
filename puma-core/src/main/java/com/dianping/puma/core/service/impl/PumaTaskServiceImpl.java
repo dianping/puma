@@ -34,7 +34,8 @@ public class PumaTaskServiceImpl implements PumaTaskService {
 	public List<PumaTask> findByPumaServerName(String pumaServerName) {
 		return pumaTaskDao.findByPumaServerName(pumaServerName);
 	}
-
+	
+	
 	@Override
 	public List<PumaTask> findAll() {
 		return pumaTaskDao.findAll();

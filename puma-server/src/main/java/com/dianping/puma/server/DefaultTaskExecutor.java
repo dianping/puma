@@ -84,10 +84,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 	private OutputStream os;
 
-	private BinlogInfo binlogInfo;
-
-	private BinlogStat binlogStat;
-
 	private FetcherEventCountMonitor fetcherEventCountMonitor;
 
 	private FetcherEventDelayMonitor fetcherEventDelayMonitor;
@@ -254,10 +250,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				&& !dataHandlerResult.isEmpty()
 				&& (dataHandlerResult.getData() instanceof DdlEvent || (dataHandlerResult.getData() instanceof RowChangedEvent && ((RowChangedEvent) dataHandlerResult
 						.getData()).isTransactionCommit()))) {
-			// LOG.info("Save occurs: {}, {}.",
-			// getContext().getBinlogFileName(),
-			// binlogEvent.getHeader().getNextPosition());
-			// save position
+
 			binlogInfoHolder.setBinlogInfo(getTaskName(), new BinlogInfo(getContext().getBinlogFileName(), binlogEvent
 					.getHeader().getNextPosition()));
 		}

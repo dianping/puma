@@ -35,6 +35,11 @@ public class SyncTaskServiceImpl implements SyncTaskService {
 	public List<SyncTask> findByPumaServerName(String pumaServerName) {
 		return syncTaskDao.findByPumaServerName(pumaServerName);
 	}
+	
+	@Override
+	public List<SyncTask> findByPumaTaskName(String pumaTaskName){
+		return syncTaskDao.findByPumaTaskName(pumaTaskName);
+	}
 
 	public List<SyncTask> findAll() {
 		return syncTaskDao.findAll();

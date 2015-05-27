@@ -14,11 +14,13 @@ import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.entity.PumaServer;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
+import com.dianping.puma.core.entity.SyncTask;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.service.PumaServerService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
 import com.mongodb.MongoException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,10 +127,10 @@ public class PumaTaskController {
 			map.put("srcDBInstanceEntities", srcDBInstanceEntities);
 			map.put("pumaServerEntities", pumaServerEntities);
 			PumaTask pumaTask = null;
-			if(id > 0){
+			if (id > 0) {
 				pumaTask = pumaTaskService.find(id);
 			}
-			map.put("entity", PumaTaskMapper.convertToPumaTaskDto(pumaTask));	
+			map.put("entity", PumaTaskMapper.convertToPumaTaskDto(pumaTask));
 		} catch (Exception e) {
 			// @TODO: error page.
 		}
@@ -143,12 +145,12 @@ public class PumaTaskController {
 		try {
 			ActionOperation operation = null;
 			PumaTask pumaTask = pumaTaskService.find(entity.getName());
-			if (pumaTask != null) {	
+			if (pumaTask != null) {
 				throw new Exception("duplicate name.");
 			}
 			pumaTask = PumaTaskMapper.convertToPumaTask(entity);
 			operation = ActionOperation.CREATE;
-			
+
 			pumaTaskService.create(pumaTask);
 			// Add puma task state to the state container.
 			PumaTaskState taskState = new PumaTaskState();
@@ -234,7 +236,14 @@ public class PumaTaskController {
 
 		try {
 			PumaTask pumaTask = pumaTaskService.find(name);
-
+			if(pumaTask == null){
+				throw new NullPointerException();
+			}
+			List<SyncTask> syncTasks = syncTaskService.findByPumaTaskName(pumaTask.getName());
+			if(syncTasks!=null&&syncTasks.size()>0){
+				throw new IllegalArgumentException();
+			}
+			
 			this.pumaTaskService.remove(name);
 
 			pumaTaskStateService.remove(name);

@@ -166,7 +166,6 @@ public class DstDBInstanceController {
 			if (syncTasks != null && syncTasks.size() != 0) {
 				throw new Exception("lock");
 			}
-
 			this.dstDBInstanceService.remove(name);
 			map.put("success", true);
 		} catch (MongoException e) {

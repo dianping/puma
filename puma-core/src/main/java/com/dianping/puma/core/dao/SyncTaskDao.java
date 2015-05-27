@@ -16,6 +16,8 @@ public interface SyncTaskDao {
 	List<SyncTask> findByDstDBInstanceName(String dstDBInstanceName);
 
 	List<SyncTask> findByPumaServerName(String pumaServerName);
+	
+	List<SyncTask> findByPumaTaskName(String pumaTaskName);
 
 	List<SyncTask> findAll();
 

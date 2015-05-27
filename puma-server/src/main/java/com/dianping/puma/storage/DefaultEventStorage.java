@@ -76,18 +76,12 @@ public class DefaultEventStorage implements EventStorage {
 	private AtomicReference<Long> processingServerId = new AtomicReference<Long>(
 			null);
 
-	private String acceptedTablesConfigKey;
-
 	private EventFilterChain storageEventFilterChain;
 
 	private StorageEventCountMonitor storageEventCountMonitor;
 
 	private StorageEventGroupMonitor storageEventGroupMonitor;
 	
-	public void setAcceptedTablesConfigKey(String acceptedTablesConfigKey) {
-		this.acceptedTablesConfigKey = acceptedTablesConfigKey;
-	}
-
 	/**
 	 * @param binlogIndexBaseDir the binlogIndexBaseDir to set
 	 */

@@ -75,6 +75,19 @@ public class SyncTaskMorphiaDao extends MongoBaseDao<SyncTaskMorphia> implements
 		}
 		return entities;
 	}
+	
+	public List<SyncTask> findByPumaTaskName(String pumaTaskName){
+		Query<SyncTaskMorphia> q = this.getDatastore().createQuery(SyncTaskMorphia.class).disableValidation();
+		q.field("entity.pumaTaskName").equal(pumaTaskName);
+		QueryResults<SyncTaskMorphia> result = this.find(q);
+		List<SyncTaskMorphia> syncTaskMorphias = result.asList();
+
+		List<SyncTask> entities = new ArrayList<SyncTask>();
+		for (SyncTaskMorphia syncTaskMorphia: syncTaskMorphias) {
+			entities.add(syncTaskMorphia.getEntity());
+		}
+		return entities;
+	}
 
 	public List<SyncTask> findAll() {
 		Query<SyncTaskMorphia> q = this.getDatastore().createQuery(SyncTaskMorphia.class);

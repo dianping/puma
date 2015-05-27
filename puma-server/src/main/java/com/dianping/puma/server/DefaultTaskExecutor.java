@@ -52,7 +52,6 @@ import com.dianping.puma.parser.mysql.packet.PacketType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 基于MySQL复制机制的Server
@@ -234,9 +233,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 		if (binlogEvent.getHeader().getEventType() != BinlogConstants.FORMAT_DESCRIPTION_EVENT) {
 			getContext().setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
+			setBinlogInfo(new BinlogInfo(getBinlogInfo().getBinlogFile(), binlogEvent.getHeader().getNextPosition()));
 		}
-
-		setBinlogInfo(new BinlogInfo(getBinlogInfo().getBinlogFile(), binlogEvent.getHeader().getNextPosition()));
 
 		// status report
 		SystemStatusContainer.instance.updateServerStatus(getTaskName(), dbHost, port, database, getContext()

@@ -158,7 +158,7 @@ public class SCBatchExecPool implements BatchExecPool {
 		dataSource.setPassword(password);
 		dataSource.setDriverClassName("com.mysql.jdbc.Driver");
 		dataSource.setMaximumPoolSize(poolSize);
-		dataSource.setAutoCommit(false);
+		dataSource.setAutoCommit(true);
 	}
 
 	private void destroyDataSource() {
@@ -264,7 +264,6 @@ public class SCBatchExecPool implements BatchExecPool {
 
 		private void batchExecute(Connection conn, BatchRow batchRow) {
 			try {
-				System.out.println(batchRow.getSql());
 				int[] affected = (new QueryRunner()).batch(conn, batchRow.getSql(), batchRow.getParams());
 
 				if (batchRow.getDmlType() == DMLType.UPDATE) {
@@ -282,13 +281,14 @@ public class SCBatchExecPool implements BatchExecPool {
 		}
 
 		private void commit(Connection conn) {
+			/*
 			try {
 				conn.commit();
 				//DbUtils.commitAndClose(conn);
 			} catch (SQLException e) {
 				DbUtils.rollbackAndCloseQuietly(conn);
 				throw LoadException.translate(e);
-			}
+			}*/
 		}
 
 		@Override
@@ -300,7 +300,7 @@ public class SCBatchExecPool implements BatchExecPool {
 
 					if (batchRow.isCommit()) {
 						commit(conn);
-					} if (batchRow.isDdl()) {
+					} else if (batchRow.isDdl()) {
 						conn.setAutoCommit(true);
 						batchExecute(conn, batchRow);
 						conn.setAutoCommit(false);

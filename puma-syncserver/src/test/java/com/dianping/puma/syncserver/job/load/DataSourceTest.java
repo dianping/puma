@@ -17,6 +17,7 @@ public class DataSourceTest {
 
 	}
 
+	/*
 	@Test
 	@Ignore
 	public void testTomcatJDBC() {
@@ -64,17 +65,50 @@ public class DataSourceTest {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-	}
+	}*/
 
 	@Test
 	public void testHikariCP() {
 		final HikariDataSource dataSource = new HikariDataSource();
-		dataSource.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/");
+		dataSource.setJdbcUrl("jdbc:mysql://192.168.224.102:3306/?useServerPrepStmts=false&rewriteBatchedStatements=true");
 		dataSource.setUsername("root");
 		dataSource.setPassword("123456");
 		dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-		dataSource.setMaximumPoolSize(10);
+		dataSource.setMaximumPoolSize(1);
 
+		QueryRunner runner = new QueryRunner(dataSource);
+		Object[][] params = {{10, "playi"}, {11, "playi"}, {12, "playy"}};
+		try {
+			runner.update("INSERT Pressure.business (name) VALUES (?)", "aaa");
+			runner.batch("INSERT INTO \n"
+					+ "`Pressure`.`business`\n"
+					+ "(\n"
+					+ "  `id`\n"
+					+ "        ,\n"
+					+ "    `name`\n"
+					+ "    ) \n"
+					+ "VALUES \n"
+					+ "(?,?)\n"
+					+ "ON DUPLICATE KEY UPDATE \n"
+					+ "`name`=VALUES(name)", params);
+			/*
+			runner.batch("INSERT INTO \n"
+					+ "`Pressure`.`business`\n"
+					+ "(\n"
+					+ "  `id`\n"
+					+ "        ,\n"
+					+ "    `name`\n"
+					+ "    ) \n"
+					+ "VALUES \n"
+					+ "(?,?)\n"
+					+ "ON DUPLICATE KEY UPDATE `name`=?", params);*/
+			//runner.batch("INSERT Pressure.business (`id`, `name`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `name` = ?", params);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+
+		/*
 		final CountDownLatch latch = new CountDownLatch(10);
 
 		for (int j = 0; j != 10; ++j) {
@@ -105,6 +139,6 @@ public class DataSourceTest {
 			latch.await();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}
+		}*/
 	}
 }

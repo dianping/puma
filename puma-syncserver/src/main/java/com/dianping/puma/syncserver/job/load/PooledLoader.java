@@ -169,6 +169,7 @@ public class PooledLoader implements Loader {
 	@Override
 	public void load(ChangedEvent event) throws LoadException {
 		// Record total event loaded.
+		System.out.println("HHHHHHHHHH" + event.toString());
 		loadEventMonitor.record(event.genFullName(), "0");
 		batchRowPool.put(event);
 	}

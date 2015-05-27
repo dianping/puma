@@ -21,7 +21,7 @@ ON DUPLICATE KEY UPDATE
 #set($updateSql = "")
 #foreach($name2ColumnInfo in $event.columns.entrySet())
   #if(!$name2ColumnInfo.value.isKey())
-     #set($updateSql = "$updateSql`${name2ColumnInfo.key}`=?")
+     #set($updateSql = "$updateSql`${name2ColumnInfo.key}`=VALUES(${name2ColumnInfo.key})")
      #if($velocityCount < ${event.columns.size()})
        #set($updateSql = "$updateSql,")
      #end

@@ -82,11 +82,12 @@ public class LoadParser {
 			for (Map.Entry<String, ColumnInfo> columnName2ColumnInfo : columnInfoMap.entrySet()) {
 				args.add(columnName2ColumnInfo.getValue().getNewValue());
 			}
+			/*
 			for (Map.Entry<String, ColumnInfo> columnName2ColumnInfo : columnInfoMap.entrySet()) {
 				if (!columnName2ColumnInfo.getValue().isKey()) {
 					args.add(columnName2ColumnInfo.getValue().getNewValue());
 				}
-			}
+			}*/
 			break;
 		}
 

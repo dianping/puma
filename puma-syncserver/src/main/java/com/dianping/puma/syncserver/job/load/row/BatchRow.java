@@ -146,6 +146,16 @@ public class BatchRow {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "BatchRow{" +
+				"table=" + table +
+				", size=" + size +
+				", binlogInfo=" + binlogInfo +
+				", sql='" + sql + '\'' +
+				'}';
+	}
+
 	public int size() {
 		return size;
 	}

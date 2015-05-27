@@ -3,7 +3,7 @@ var pageApp = angular.module("pageApp", [ 'ngDialog' ]);
 pageApp.factory('pageService', [ '$http', '$location',
 		function($http, $location) {
 			var list = function(page, pageSize) {
-				return $http({
+				return $http( {
 					params : {
 						page : page,
 						pageSize : pageSize
@@ -13,7 +13,7 @@ pageApp.factory('pageService', [ '$http', '$location',
 			};
 
 			var action = function(name, actionName) {
-				return $http({
+				return $http( {
 					method : 'POST',
 					params : {
 						name : name
@@ -101,7 +101,7 @@ pageApp.controller('pageCtrl', [
 			};
 
 			$scope.state = function(name) {
-				for (var i = 0, len = $scope.states.length; i < len; i++) {
+				for ( var i = 0, len = $scope.states.length; i < len; i++) {
 					if ($scope.states[i].taskName == name) {
 						return $scope.states[i];
 					}
@@ -109,7 +109,7 @@ pageApp.controller('pageCtrl', [
 			};
 
 			$scope.refresh = function(name) {
-				for (var i = 0, len = $scope.states.length; i < len; i++) {
+				for ( var i = 0, len = $scope.states.length; i < len; i++) {
 					if ($scope.states[i].taskName == name) {
 						var result = pageService.action(name, 'refresh')
 								.success(function(data) {
@@ -163,7 +163,6 @@ pageApp.controller('pageCtrl', [
 							className : 'ngdialog-theme-default'
 						});
 			};
-
 		} ]);
 
 var formApp = angular.module("formApp", []);
@@ -171,11 +170,11 @@ var formApp = angular.module("formApp", []);
 formApp.factory('formService', [ '$http', '$location',
 		function($http, $location) {
 			var submit = function(data) {
-				return $http.post($location.absUrl(),angular.toJson(data));
+				return $http.post($location.absUrl(),data);
 			};
 
 			var init = function(url, id) {
-				return $http({
+				return $http( {
 					method : 'GET',
 					params : {
 						id : id
@@ -185,7 +184,7 @@ formApp.factory('formService', [ '$http', '$location',
 			};
 
 			var addMark = function(data) {
-				data.push({});
+				data.push( {});
 			};
 
 			var removeMark = function(data, index) {
@@ -202,7 +201,7 @@ formApp.factory('formService', [ '$http', '$location',
 				addMark : function(data) {
 					return addMark(data);
 				},
-				removeMark : function(data, index){
+				removeMark : function(data, index) {
 					return removeMark(data, index);
 				}
 			};
@@ -219,13 +218,14 @@ formApp
 
 							$scope.submit = function() {
 								console.log($scope.entity);
-								
+
 								formService
 										.submit($scope.entity)
 										.success(
 												function(data) {
 													if (data.success) {
-														console.log($scope.backUrl);
+														console
+																.log($scope.backUrl);
 														$window.location.href = $scope.backUrl;
 													} else {
 														return false;
@@ -245,7 +245,6 @@ formApp
 								$scope.entity.name = $scope.entity.srcDBInstanceName
 										+ '@' + $scope.entity.pumaServerName;
 							};
-							
 
 							$scope.initPumaTask = function(url, id) {
 								formService
@@ -255,55 +254,68 @@ formApp
 													$scope.entity = data.entity;
 													$scope.pumaServerEntities = data.pumaServerEntities;
 													$scope.srcDBInstanceEntities = data.srcDBInstanceEntities;
-													if(!$scope.entity){
+													if (!$scope.entity) {
 														$scope.entity = {};
 														$scope.entity.databases = [];
-														$scope.addMark($scope.entity.databases);
+														$scope
+																.addMark($scope.entity.databases);
 													}
 												});
 							};
-							
-							$scope.addMark = function(data) {	
+
+							$scope.addMark = function(data) {
 								formService.addMark(data);
 							};
-							
-							$scope.removeMark = function(data,index) {
+
+							$scope.removeMark = function(data, index) {
 								formService.removeMark(data, index);
 							};
-							
-							$scope.addMapping = function(data) {	
-								data.push({tableMappings:[{}]});
+
+							$scope.addMapping = function(data) {
+								data.push( {
+									tableMappings : [ {} ]
+								});
 							};
-							
-							$scope.changeSyncTask = function(){
-								$scope.entity.pumaTaskName = $scope.entity.pumaTaskName ? $scope.entity.pumaTaskName: '';
-								$scope.entity.dstDBInstanceName = $scope.entity.dstDBInstanceName ? $scope.entity.dstDBInstanceName: '';
-								$scope.entity.name = $scope.entity.pumaTaskName+ '@' + $scope.entity.dstDBInstanceName;
+
+							$scope.changeSyncTask = function() {
+								$scope.entity.pumaTaskName = $scope.entity.pumaTaskName ? $scope.entity.pumaTaskName
+										: '';
+								$scope.entity.dstDBInstanceName = $scope.entity.dstDBInstanceName ? $scope.entity.dstDBInstanceName
+										: '';
+								$scope.entity.name = $scope.entity.pumaTaskName
+										+ '@' + $scope.entity.dstDBInstanceName;
 							};
-							
-							$scope.initSyncTask =  function(url, id) {
+
+							$scope.initSyncTask = function(url, id) {
 								formService
-								.init(url, id)
-								.success(
-										function(data) {
-											$scope.entity = data.entity;
-											$scope.pumaTasks = data.pumaTasks;
-											$scope.dstDBInstances = data.dstDBInstances;
-											$scope.syncServers = data.syncServers;
-											$scope.errorSet = data.errorSet;
-											if(!$scope.entity||!$scope.entity.errorList||!$scope.entity.errorList.errors){
-												$scope.entity = {};
-												$scope.entity.errorList = {};
-												$scope.entity.errorList.errors = [];
-												$scope.addMark($scope.entity.errorList.errors);
-											}
-											if(!$scope.entity||!$scope.entity.mysqlMapping||!$scope.entity.mysqlMapping.databaseMappings){
-												$scope.entity.mysqlMapping = {};
-												$scope.entity.mysqlMapping.databaseMappings = []; 
-												$scope.addMapping($scope.entity.mysqlMapping.databaseMappings);
-											}
-											
-										});
+										.init(url, id)
+										.success(
+												function(data) {
+													$scope.entity = data.entity;
+													$scope.pumaTasks = data.pumaTasks;
+													$scope.dstDBInstances = data.dstDBInstances;
+													$scope.syncServers = data.syncServers;
+													$scope.errorSet = data.errorSet;
+													if (!$scope.entity) {
+														$scope.entity = {};
+													}
+													if (!$scope.entity.errorList
+															|| !$scope.entity.errorList.errors) {
+														$scope.entity.errorList = {};
+														$scope.entity.errorList.errors = [];
+														$scope
+																.addMark($scope.entity.errorList.errors);
+													}
+													if (!$scope.entity
+															|| !$scope.entity.mysqlMapping
+															|| !$scope.entity.mysqlMapping.databaseMappings) {
+														$scope.entity.mysqlMapping = {};
+														$scope.entity.mysqlMapping.databaseMappings = [];
+														$scope
+																.addMapping($scope.entity.mysqlMapping.databaseMappings);
+													}
+
+												});
 							};
 
 						} ]);

@@ -85,7 +85,7 @@ public class SyncTaskCreateController {
     @Autowired
     DumpTaskStateService dumpTaskStateService;
     
-    @RequestMapping(value = "/sync-task/create/step1Save", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    //@RequestMapping(value = "/sync-task/create/step1Save", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object step1Save(HttpSession session, String pumaTaskName, String dstDBInstanceName, String syncServerName,
                             String databaseFrom, String databaseTo, String[] tableFrom, String[] tableTo) {
@@ -154,7 +154,7 @@ public class SyncTaskCreateController {
 
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = {"/sync-task/create/step2"})
+    //@RequestMapping(method = RequestMethod.GET, value = {"/sync-task/create/step2"})
     public ModelAndView step2(HttpSession session) throws SQLException {
         Map<String, Object> map = new HashMap<String, Object>();
         DumpTask dumpTask = (DumpTask) session.getAttribute("dumpTask");
@@ -190,7 +190,7 @@ public class SyncTaskCreateController {
     /**
      * 创建DumpTask
      */
-    @RequestMapping(value = "/sync-task/create/createDumpTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    //@RequestMapping(value = "/sync-task/create/createDumpTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object createDumpTask(HttpSession session, String dumpTaskName) {
         Map<String, Object> map = new HashMap<String, Object>();
@@ -235,7 +235,7 @@ public class SyncTaskCreateController {
     /**
      * 刷新DumpTask的状态
      */
-    @RequestMapping(value = "/sync-task/create/refreshDumpStatus", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    //@RequestMapping(value = "/sync-task/create/refreshDumpStatus", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object refreshDumpStatus(HttpSession session) {
         Map<String, Object> map = new HashMap<String, Object>();
@@ -267,7 +267,7 @@ public class SyncTaskCreateController {
 
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = {"/sync-task/create/step3"})
+    //@RequestMapping(method = RequestMethod.GET, value = {"/sync-task/create/step3"})
     public ModelAndView step3(HttpSession session) throws SQLException {
         Map<String, Object> map = new HashMap<String, Object>();
         // 查询所有syncServer
@@ -289,7 +289,7 @@ public class SyncTaskCreateController {
     /**
      * 创建SyncTask
      */
-    @RequestMapping(value = "/sync-task/create/createSyncTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+    //@RequestMapping(value = "/sync-task/create/createSyncTask", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object createSyncTask(HttpSession session, String binlogFile, String binlogPosition, Boolean ddl,
                                  Boolean dml, String pumaClientName, Boolean transaction, Integer[] errorCodes, String[] handlers,

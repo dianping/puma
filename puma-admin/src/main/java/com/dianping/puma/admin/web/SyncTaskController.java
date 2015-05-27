@@ -227,8 +227,7 @@ public class SyncTaskController {
 			SyncTaskState syncTaskState = syncTaskStateService.find(syncTask.getName());
 			syncTaskState.setStatus(Status.PREPARING);
 			this.syncTaskService.updateStatusAction(name, ActionController.START);
-			syncTaskControllerReporter
-					.report(syncTask.getSyncServerName(), syncTask.getName(), ActionController.START);
+			syncTaskControllerReporter.report(syncTask.getSyncServerName(), syncTask.getName(), ActionController.START);
 			map.put("success", true);
 		} catch (IllegalArgumentException e) {
 			map.put("success", false);
@@ -241,7 +240,7 @@ public class SyncTaskController {
 		return GsonUtil.toJson(map);
 	}
 
-	@RequestMapping(value = { "/sync-task/create" })
+	@RequestMapping(value = { "/sync-task/create" }, method = RequestMethod.GET)
 	public ModelAndView create(HttpSession session) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		// 查询MysqlConfig

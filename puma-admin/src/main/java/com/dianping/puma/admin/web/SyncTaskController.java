@@ -1,6 +1,5 @@
 package com.dianping.puma.admin.web;
 
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.dianping.puma.admin.config.Config;
-import com.dianping.puma.admin.model.PumaTaskDto;
 import com.dianping.puma.admin.model.SyncTaskDto;
 import com.dianping.puma.admin.model.mapper.ErrorListMapper;
 import com.dianping.puma.admin.model.mapper.SyncTaskMapper;

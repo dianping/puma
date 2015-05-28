@@ -16,8 +16,7 @@
 package com.dianping.puma.parser.mysql.column;
 
 import java.io.UnsupportedEncodingException;
-
-import com.dianping.puma.parser.mysql.DefaultCharset;
+import com.dianping.puma.utils.PacketUtils;
 
 /**
  * 
@@ -43,17 +42,17 @@ public final class StringColumn implements Column {
 	@Override
 	public String toString() {
 		try {
-			return new String(value, DefaultCharset.CHARSETNAME);
+			return new String(value, PacketUtils.UTF_8);
 		} catch (UnsupportedEncodingException e) {
-			throw new IllegalArgumentException("Unsupported encoding: " + DefaultCharset.CHARSETNAME, e);
+			throw new IllegalArgumentException("Unsupported encoding: " + PacketUtils.UTF_8, e);
 		}
 	}
 
 	public String getValue() {
 		try {
-			return new String(value, DefaultCharset.CHARSETNAME);
+			return new String(value, PacketUtils.UTF_8);
 		} catch (UnsupportedEncodingException e) {
-			throw new IllegalArgumentException("Unsupported encoding: " + DefaultCharset.CHARSETNAME, e);
+			throw new IllegalArgumentException("Unsupported encoding: " + PacketUtils.UTF_8, e);
 		}
 	}
 

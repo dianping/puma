@@ -26,6 +26,11 @@ import com.dianping.puma.core.datatype.UnsignedLong;
  * 
  */
 public final class PacketUtils {
+	
+	public static final String ISO_8859_1 = "ISO-8859-1";
+	
+	public static final String UTF_8 = "UTF-8";
+	
 	private PacketUtils() {
 
 	}
@@ -63,7 +68,7 @@ public final class PacketUtils {
 	}
 
 	public static String readNullTerminatedString(ByteBuffer buf) {
-		return readNullTerminatedString(buf, "ASCII");
+		return readNullTerminatedString(buf, ISO_8859_1);
 	}
 
 	public static String readNullTerminatedString(ByteBuffer buf, String encoding) {

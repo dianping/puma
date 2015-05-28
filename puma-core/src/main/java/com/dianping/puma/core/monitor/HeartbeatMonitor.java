@@ -34,6 +34,13 @@ public class HeartbeatMonitor extends AbstractPumaMonitor {
 			statuses.put(name, status);
 		}
 	}
+	
+	@Override
+	public void remove(String name) {
+		if (!isStopped()) {
+			statuses.remove(name);
+		}
+	}
 
 	@Override
 	protected void doStart() {
@@ -42,8 +49,6 @@ public class HeartbeatMonitor extends AbstractPumaMonitor {
 			public void run() {
 				for (Map.Entry entry: statuses.entrySet()) {
 					monitor.logEvent(type, (String) entry.getKey(), (String) entry.getValue(), "");
-				}
-				for (Map.Entry entry: statuses.entrySet()) {
 					statuses.put((String) entry.getKey(), "0");
 				}
 			}

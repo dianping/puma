@@ -16,11 +16,13 @@ import com.dianping.cat.message.Message;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
+import com.dianping.puma.ComponentContainer;
 import com.dianping.puma.channel.exception.HeartbeatSenderException;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.HeartbeatEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
+import com.dianping.puma.monitor.ServerEventDelayMonitor;
 
 public class HeartbeatTask {
 
@@ -42,6 +44,8 @@ public class HeartbeatTask {
 
 	private ScheduledExecutorService executorService = null;
 
+	ServerEventDelayMonitor serverEventDelayMonitor;
+
 	public HeartbeatTask(EventCodec codec, HttpServletResponse response, String clientName) {
 		this.clientName = clientName;
 		this.initialDelay = 0;
@@ -52,6 +56,7 @@ public class HeartbeatTask {
 		this.response = response;
 		executorService = HeartbeatScheduledExecutor.instance.getExecutorService();
 		execute();
+		serverEventDelayMonitor = ComponentContainer.SPRING.lookup("serverEventDelayMonitor");
 		Log.info("puma server HeartbeatTask constructed.");
 	}
 
@@ -116,28 +121,29 @@ public class HeartbeatTask {
 		@Override
 		public void run() {
 			if (response != null) {
-				synchronized (response) {
-					try {
-						byte[] data = codec.encode(event);
-						response.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
 
+				try {
+					byte[] data = codec.encode(event);
+					synchronized (response) {
+						response.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
 						response.getOutputStream().write(data);
 						response.getOutputStream().flush();
-						LOG.info(HeartbeatTask.this.clientName + " puma server heartbeat sended.");
-						Cat.logEvent("ClientConnect.heartbeated", HeartbeatTask.this.clientName, Message.SUCCESS, "");
-					} catch (IOException e) {
-						HeartbeatTask.this.cancelFuture();
-						try {
-							response.getOutputStream().close();
-						} catch (IOException e1) {
-							// ignore
-						}
-						SystemStatusContainer.instance.removeClient(HeartbeatTask.this.clientName);
-						Cat.logEvent("ClientConnect.heartbeated", HeartbeatTask.this.clientName, "1", "");
-						Cat.logError("ClientConnect.heartbeated.closed: ", new HeartbeatSenderException(
-								"ClientConnect.heartbeated.closed", e));
-						LOG.error("ClientConnect.heartbeated.closed: ", e);
 					}
+					LOG.info(HeartbeatTask.this.clientName + " puma server heartbeat sended.");
+					Cat.logEvent("ClientConnect.heartbeated", HeartbeatTask.this.clientName, Message.SUCCESS, "");
+				} catch (IOException e) {
+					HeartbeatTask.this.cancelFuture();
+					try {
+						response.getOutputStream().close();
+					} catch (IOException e1) {
+						// ignore
+					}
+					SystemStatusContainer.instance.removeClient(HeartbeatTask.this.clientName);
+					serverEventDelayMonitor.remove(clientName);
+					Cat.logEvent("ClientConnect.heartbeated", HeartbeatTask.this.clientName, "1", "");
+					Cat.logError("ClientConnect.heartbeated.closed: ", new HeartbeatSenderException(
+							"ClientConnect.heartbeated.closed", e));
+					LOG.error("ClientConnect.heartbeated.closed: ", e);
 				}
 			}
 		}

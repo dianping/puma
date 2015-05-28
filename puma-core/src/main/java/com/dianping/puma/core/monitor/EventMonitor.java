@@ -2,7 +2,9 @@ package com.dianping.puma.core.monitor;
 
 public class EventMonitor extends AbstractPumaMonitor {
 
-	public EventMonitor() { super(); }
+	public EventMonitor() {
+		super();
+	}
 
 	public EventMonitor(String type, Long countThreshold) {
 		super(type, countThreshold);
@@ -22,11 +24,19 @@ public class EventMonitor extends AbstractPumaMonitor {
 	}
 
 	@Override
-	protected void doStart() {}
+	protected void doStart() {
+	}
 
 	@Override
-	protected void doStop() {}
+	protected void doStop() {
+	}
 
 	@Override
-	protected void doPause() {}
+	protected void doPause() {
+	}
+
+	@Override
+	public void remove(String name) {
+
+	}
 }

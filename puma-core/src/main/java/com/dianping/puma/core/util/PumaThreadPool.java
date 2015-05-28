@@ -4,7 +4,7 @@ import java.util.concurrent.*;
 
 public class PumaThreadPool {
 
-	private static final int SCHEDULED_THREAD_POOL_SIZE = 20;
+	private static final int SCHEDULED_THREAD_POOL_SIZE = 10;
 
 	private static ExecutorService daemonThreadPool = Executors.newCachedThreadPool();
 

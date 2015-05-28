@@ -59,6 +59,10 @@ public class ServerEventDelayMonitor {
 	public void record(String taskName, long execTime) {
 		heartbeatMonitor.record(taskName, genStatus(taskName, execTime));
 	}
+	
+	public void remove(String taskName) {
+		heartbeatMonitor.remove(taskName);
+	}
 
 	private String genStatus(String taskName, long execSeconds) {
 		long diff = System.currentTimeMillis() / 1000 - execSeconds;

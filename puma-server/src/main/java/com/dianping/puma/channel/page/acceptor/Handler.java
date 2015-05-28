@@ -137,6 +137,7 @@ public class Handler implements PageHandler<Context> {
 			} catch (Exception e) {
 				Cat.logError("Puma.client.channelClosed:", new ChannelClosedException(e));
 				SystemStatusContainer.instance.removeClient(clientName);
+				serverEventDelayMonitor.remove(clientName);
 				heartbeatTask.cancelFuture();
 				LOG.info("Client(" +clientName + ") failed. ", e);
 				break;

@@ -61,4 +61,10 @@ public class TransactionMonitor extends AbstractPumaMonitor {
 
 	@Override
 	protected void doPause() {}
+
+	@Override
+	public void remove(String name) {
+		// TODO Auto-generated method stub
+		
+	}
 }

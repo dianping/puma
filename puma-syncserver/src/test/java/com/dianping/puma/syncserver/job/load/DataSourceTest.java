@@ -71,54 +71,21 @@ public class DataSourceTest {
 	@Test
 	public void testHikariCP() {
 		final HikariDataSource dataSource = new HikariDataSource();
-		//dataSource.setJdbcUrl("jdbc:mysql://192.168.224.102:3306/?useServerPrepStmts=false&rewriteBatchedStatements=true");
-		dataSource.setJdbcUrl("jdbc:mysql://10.128.53.21:3307/?useServerPrepStmts=false&rewriteBatchedStatements=true");
+		dataSource.setJdbcUrl("jdbc:mysql://192.168.224.102:3306/?useServerPrepStmts=false&rewriteBatchedStatements=true");
+		//dataSource.setJdbcUrl("jdbc:mysql://10.128.53.21:3307/?useServerPrepStmts=false&rewriteBatchedStatements=true");
 		dataSource.setUsername("root");
-		dataSource.setPassword("admin");
+		dataSource.setPassword("123456");
 		dataSource.setDriverClassName("com.mysql.jdbc.Driver");
 		dataSource.setMaximumPoolSize(1);
 		dataSource.setAutoCommit(false);
 
-
-		Object[][] params0 = {{14, "2015-04-28 11:36:02.030", "11:36:00.3303","2015-04-28 11:36:02.3300"}};
-		Object[][] params1 = {{23, "user"}};
 		try {
 			Connection conn = dataSource.getConnection();
 			QueryRunner runner = new QueryRunner();
+
+			//runner.update(conn, "ALTER TABLE Pressure.business ADD `sex3` INT(11) NULL DEFAULT NULL AFTER `sex2`");
+			Object[][] params = {{11, "hello"}, {12, "hello"}};
 			runner.batch(conn, "INSERT INTO \n"
-					+ "`testdb`.`tbl_test`\n"
-					+ "(\n"
-					+ "  `id`\n"
-					+ "        ,\n"
-					+ "    `createTime`\n"
-					+ "        ,\n"
-					+ "    `updateTime`\n"
-					+ "        ,\n"
-					+ "    `lastTime`\n"
-					+ "    ) \n"
-					+ "VALUES \n"
-					+ "(?,?,?,?)\n"
-					+ "ON DUPLICATE KEY UPDATE\n"
-					+ "                                                       createTime=VALUES(createTime),updateTime=VALUES(updateTime),lastTime=VALUES(lastTime) ", params0);
-
-			conn.commit();
-			//runner.update("INSERT Pressure.business (name) VALUES (?)", "aaa");
-
-			runner.batch(conn, "INSERT INTO \n"
-					+ "`testdb`.`tbl_user`\n"
-					+ "(\n"
-					+ "  `id`\n"
-					+ "        ,\n"
-					+ "    `name`\n"
-					+ "    ) \n"
-					+ "VALUES \n"
-					+ "(?,?)\n"
-					+ "ON DUPLICATE KEY UPDATE \n"
-					+ "                       `name`=VALUES(name)", params1);
-
-			conn.commit();
-			/*
-			runner.batch("INSERT INTO \n"
 					+ "`Pressure`.`business`\n"
 					+ "(\n"
 					+ "  `id`\n"
@@ -127,8 +94,9 @@ public class DataSourceTest {
 					+ "    ) \n"
 					+ "VALUES \n"
 					+ "(?,?)\n"
-					+ "ON DUPLICATE KEY UPDATE `name`=?", params);*/
-			//runner.batch("INSERT Pressure.business (`id`, `name`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `name` = ?", params);
+					+ "ON DUPLICATE KEY UPDATE\n"
+					+ "                   `name` = VALUES(name)", params);
+			conn.commit();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

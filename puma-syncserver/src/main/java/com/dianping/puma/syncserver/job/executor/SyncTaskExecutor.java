@@ -146,13 +146,8 @@ public class SyncTaskExecutor implements TaskExecutor<SyncTask> {
 
 	private void execute(ChangedEvent event) throws TEException {
 		try {
-			// Transformer.
 			transformer.transform(event);
-
-			// Loader.
-			loader.asyncThrow();
 			loader.load(event);
-
 		} catch (Exception e) {
 			throw TEException.translate(e);
 		}

@@ -26,7 +26,7 @@ public class SCBatchExecPool implements BatchExecPool {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SCBatchExecPool.class);
 
-	private LoadException loadException = null;
+	private volatile LoadException loadException = null;
 
 	/** Pool prerequisite settings: data source host. */
 	private String host;
@@ -130,6 +130,11 @@ public class SCBatchExecPool implements BatchExecPool {
 			while (!check(batchRow)) {
 				notConflict.await();
 			}
+
+			if (loadException != null) {
+				throw loadException;
+			}
+
 			buffer = null;
 			register(batchRow);
 		} catch (Exception e) {
@@ -137,6 +142,7 @@ public class SCBatchExecPool implements BatchExecPool {
 		} finally {
 			lock.unlock();
 		}
+
 
 		beforePooledBatchExecute(batchRow);
 		pooledBatchExecute(batchRow);
@@ -280,6 +286,15 @@ public class SCBatchExecPool implements BatchExecPool {
 			}
 		}
 
+		private void executeDdl(Connection conn, BatchRow batchRow) {
+			try {
+				(new QueryRunner()).update(conn, batchRow.getSql());
+			} catch (SQLException e) {
+				DbUtils.rollbackAndCloseQuietly(conn);
+				throw LoadException.translate(e);
+			}
+		}
+
 		private void commit(Connection conn) {
 			try {
 				conn.commit();
@@ -292,6 +307,8 @@ public class SCBatchExecPool implements BatchExecPool {
 
 		@Override
 		public void run() {
+			LoadException e = null;
+
 			for (int count = 0; count <= retries; ++count) {
 				try {
 
@@ -300,9 +317,8 @@ public class SCBatchExecPool implements BatchExecPool {
 					if (batchRow.isCommit()) {
 						commit(conn);
 					} else if (batchRow.isDdl()) {
-						conn.setAutoCommit(true);
-						batchExecute(conn, batchRow);
-						conn.setAutoCommit(false);
+						executeDdl(conn, batchRow);
+						commit(conn);
 					} else {
 						batchExecute(conn, batchRow);
 					}
@@ -313,15 +329,15 @@ public class SCBatchExecPool implements BatchExecPool {
 
 					return;
 				} catch (LoadException le) {
-					loadException = le;
-				} catch (Exception e) {
-					loadException = LoadException.translate(e);
+					String msg = String.format("Executing batch row(%s) error.", batchRow.toString());
+					e = le;
 				}
 			}
 
-			String msg = String.format("Executing batch row(%s) error.", batchRow.toString());
-			LOG.error(msg, loadException);
-			Cat.logError(msg, loadException);
+			if (e != null) {
+				loadException = e;
+				remove(batchRow);
+			}
 		}
 	}
 

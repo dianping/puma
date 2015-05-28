@@ -21,10 +21,7 @@ public class PooledLoader implements Loader {
 
 	private boolean stopped = true;
 
-	/**
-	 * Pooled loader exception, default null.
-	 */
-	private LoadException loadException = null;
+	private volatile LoadException loadException = null;
 
 	/**
 	 * Pooled loader main loop thread. Read rows from batch row pool and put it into batch exec pool.
@@ -159,7 +156,6 @@ public class PooledLoader implements Loader {
 
 	}
 
-	@Override
 	public void asyncThrow() throws LoadException {
 		if (loadException != null) {
 			throw loadException;
@@ -168,8 +164,9 @@ public class PooledLoader implements Loader {
 
 	@Override
 	public void load(ChangedEvent event) throws LoadException {
-		// Record total event loaded.
-		System.out.println("HHHHHHHHHH" + event.toString());
+		// Async throw loader exception.
+		asyncThrow();
+
 		loadEventMonitor.record(event.genFullName(), "0");
 		batchRowPool.put(event);
 	}
@@ -220,11 +217,7 @@ public class PooledLoader implements Loader {
 		public void run() {
 			try {
 				while (!stopped) {
-					// Take batch row from the batch row pool.
 					BatchRow batchRow = batchRowPool.take();
-
-					// Put batch row into the batch exec pool.
-					batchExecPool.asyncThrow();
 					batchExecPool.put(batchRow);
 				}
 			} catch (LoadException e) {

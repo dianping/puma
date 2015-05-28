@@ -2,6 +2,7 @@ package com.dianping.puma.syncserver.job.load;
 
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -39,18 +40,26 @@ public class LoadParser {
 	}
 
 	public static String parseSql(RowChangedEvent event) {
+		String sql;
+
 		switch (event.getDmlType()) {
 		case INSERT:
-			return parseSql(event, it);
+			sql = parseSql(event, it);
+			break;
 		case DELETE:
-			return parseSql(event, dt);
+			sql = parseSql(event, dt);
+			break;
 		case UPDATE:
-			return parseSql(event, ut);
+			sql = parseSql(event, ut);
+			break;
 		case REPLACE:
-			return parseSql(event, rt);
+			sql = parseSql(event, rt);
+			break;
 		default:
-			return null;
+			sql = null;
 		}
+
+		return StringUtils.normalizeSpace(sql);
 	}
 
 	public static Object[] parseArgs(RowChangedEvent event) {

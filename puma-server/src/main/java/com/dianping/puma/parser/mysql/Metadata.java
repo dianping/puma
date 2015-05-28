@@ -20,6 +20,9 @@ import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dianping.puma.utils.CodecUtils;
 import com.dianping.puma.utils.PacketUtils;
 
@@ -31,6 +34,8 @@ import com.dianping.puma.utils.PacketUtils;
  * 
  */
 public final class Metadata implements Serializable {
+
+	private static final Logger LOG = LoggerFactory.getLogger(Metadata.class);
 
 	private static final long serialVersionUID = -4925248968122255302L;
 	private final byte[] type;
@@ -81,6 +86,8 @@ public final class Metadata implements Serializable {
 				break;
 			case BinlogConstants.MYSQL_TYPE_SET:
 			case BinlogConstants.MYSQL_TYPE_ENUM:
+				LOG.error("This enumeration value is only used internally and cannot exist in a binlog: type=" + t);
+				break;
 			case BinlogConstants.MYSQL_TYPE_STRING:
 				metadata[i] = CodecUtils.toInt(PacketUtils.readBytes(buf, 2), 0, 2); // Big-endian
 				break;

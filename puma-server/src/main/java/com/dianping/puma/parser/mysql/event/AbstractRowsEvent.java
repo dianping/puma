@@ -17,6 +17,7 @@ package com.dianping.puma.parser.mysql.event;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
@@ -274,7 +275,7 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 			case BinlogConstants.MYSQL_TYPE_DATETIME2:
 				final long dateTimeValue = PacketUtils.readLong(buf, 5, false);
 				final int dateTimenanos = PacketUtils.readInt(buf, (meta + 1) / 2, false);
-				columns.add(Datetime2Column.valueOf(String.valueOf(MySQLUtils.toDatetime2(dateTimeValue, dateTimenanos,meta))));
+				columns.add(Datetime2Column.valueOf(MySQLUtils.toDatetime2(dateTimeValue, dateTimenanos,meta)));
 				break;
 			case BinlogConstants.MYSQL_TYPE_TIMESTAMP2:
 				final long timeStampValue = PacketUtils.readLong(buf, 4, false);

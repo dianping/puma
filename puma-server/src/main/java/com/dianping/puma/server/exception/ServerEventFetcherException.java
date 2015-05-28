@@ -3,6 +3,9 @@ package com.dianping.puma.server.exception;
 import com.dianping.puma.core.exception.PumaException;
 
 public class ServerEventFetcherException extends PumaException {
+
+	private static final long serialVersionUID = 3719251414447687703L;
+
 	public ServerEventFetcherException() {
 		super();
 	}

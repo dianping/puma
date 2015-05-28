@@ -28,6 +28,7 @@ import com.dianping.puma.monitor.FetcherEventDelayMonitor;
 import com.dianping.puma.monitor.ParserEventCountMonitor;
 import com.dianping.puma.server.exception.ServerEventFetcherException;
 import com.dianping.puma.server.exception.ServerEventParserException;
+import com.dianping.puma.server.exception.ServerEventRuntimeException;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -145,6 +146,9 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				if (isNeedStop) {
 					Cat.logError("Puma.server.failed", new ServerEventFetcherException(e));
 					stopTask();
+				}
+				if(e instanceof RuntimeException){
+					Cat.logError("Puma.server.runtimeException", new ServerEventRuntimeException(e));
 				}
 				if (isStop()) {
 					return;

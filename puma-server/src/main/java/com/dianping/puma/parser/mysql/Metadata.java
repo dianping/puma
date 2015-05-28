@@ -86,8 +86,6 @@ public final class Metadata implements Serializable {
 				break;
 			case BinlogConstants.MYSQL_TYPE_SET:
 			case BinlogConstants.MYSQL_TYPE_ENUM:
-				LOG.error("This enumeration value is only used internally and cannot exist in a binlog: type=" + t);
-				break;
 			case BinlogConstants.MYSQL_TYPE_STRING:
 				metadata[i] = CodecUtils.toInt(PacketUtils.readBytes(buf, 2), 0, 2); // Big-endian
 				break;

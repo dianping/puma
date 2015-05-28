@@ -48,6 +48,11 @@ public abstract class AbstractBinlogEvent implements BinlogEvent {
 	public BinlogHeader getHeader() {
 		return header;
 	};
+	
+	@Override
+	public void setHeader(BinlogHeader header) {
+		this.header = header;
+	};
 
 	public abstract void doParse(ByteBuffer buf, PumaContext context) throws IOException;
 
@@ -83,12 +88,12 @@ public abstract class AbstractBinlogEvent implements BinlogEvent {
 	public void setCrc(long crc) {
 		this.crc = crc;
 	}
-	
-	public boolean isRemaining(ByteBuffer buf, PumaContext context){
+
+	public boolean isRemaining(ByteBuffer buf, PumaContext context) {
 		return context.isCheckSum() ? buf.remaining() - 4 > 0 : buf.hasRemaining();
 	}
-	
-	public int lenRemaining(ByteBuffer buf, PumaContext context){
+
+	public int lenRemaining(ByteBuffer buf, PumaContext context) {
 		return context.isCheckSum() ? buf.remaining() - 4 : buf.remaining();
 	}
 }

@@ -15,6 +15,10 @@
  */
 package com.dianping.puma.parser.mysql.column;
 
+import java.io.UnsupportedEncodingException;
+
+import com.dianping.puma.parser.mysql.DefaultCharset;
+
 /**
  * 
  * TODO Comment of StringColumn
@@ -24,8 +28,8 @@ package com.dianping.puma.parser.mysql.column;
  * 
  */
 public final class StringColumn implements Column {
-	private static final long	serialVersionUID	= 2596823444368172645L;
-	private final byte[]		value;
+	private static final long serialVersionUID = 2596823444368172645L;
+	private final byte[] value;
 
 	private StringColumn(byte[] value) {
 		this.value = value;
@@ -38,11 +42,19 @@ public final class StringColumn implements Column {
 	 */
 	@Override
 	public String toString() {
-		return new String(value);
+		try {
+			return new String(value, DefaultCharset.CHARSETNAME);
+		} catch (UnsupportedEncodingException e) {
+			throw new IllegalArgumentException("Unsupported encoding: " + DefaultCharset.CHARSETNAME, e);
+		}
 	}
 
 	public String getValue() {
-		return new String(this.value);
+		try {
+			return new String(value, DefaultCharset.CHARSETNAME);
+		} catch (UnsupportedEncodingException e) {
+			throw new IllegalArgumentException("Unsupported encoding: " + DefaultCharset.CHARSETNAME, e);
+		}
 	}
 
 	public static final StringColumn valueOf(byte[] value) {

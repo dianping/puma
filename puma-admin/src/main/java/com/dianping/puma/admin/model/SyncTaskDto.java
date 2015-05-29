@@ -29,6 +29,8 @@ public class SyncTaskDto {
 	private ErrorHandlerDto defaultHandler;
 	
 	private boolean disabled;
+	
+	private boolean isShow;
 
 	public String getName() {
 		return name;
@@ -140,6 +142,14 @@ public class SyncTaskDto {
 
 	public void setConsistent(boolean consistent) {
 		this.consistent = consistent;
+	}
+
+	public void setShow(boolean isShow) {
+		this.isShow = isShow;
+	}
+
+	public boolean isShow() {
+		return isShow;
 	}
 	
 	

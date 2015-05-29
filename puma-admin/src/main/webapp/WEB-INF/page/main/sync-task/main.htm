@@ -61,8 +61,8 @@
 
 									<tbody>
 
-										<tr role="row" class="odd" ng-repeat="item in items">
-											<td><a href="#">{{item.pumaTaskName}}</a></td>
+										<tr role="row" class="odd" ng-repeat-start="item in items">
+											<td><a href="javascript:void(0)" ng-click ="item.isShow=!item.isShow;">{{item.pumaTaskName}}</a></td>
 											<td>{{item.dstDBInstanceName}}</td>
 											<td>{{item.syncServerName}}</td>
 											<td><span
@@ -94,7 +94,10 @@
 												</div>
 											</td>
 										</tr>
-
+										<tr></tr>
+										<tr ng-repeat-end ng-show = "item.isShow">
+											<td colspan="6">{{state(item.name).detail}}</td>
+										</tr>
 									</tbody>
 								</table>
 								<div class="row" ng-show="totalPage > 0">

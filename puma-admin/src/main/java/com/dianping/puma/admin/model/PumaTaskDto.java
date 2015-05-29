@@ -20,6 +20,8 @@ public class PumaTaskDto {
 	
 	private boolean disabled;
 	
+	private boolean isShow;
+	
 	public PumaTaskDto(){
 		
 	}
@@ -86,6 +88,14 @@ public class PumaTaskDto {
 
 	public void setDisabled(boolean disabled) {
 		this.disabled = disabled;
+	}
+
+	public void setShow(boolean isShow) {
+		this.isShow = isShow;
+	}
+
+	public boolean isShow() {
+		return isShow;
 	}
 
 }

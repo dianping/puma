@@ -49,6 +49,7 @@ public class PumaTaskMapper {
 
 		pumaTaskDto.setDatabases(databases);
 		pumaTaskDto.setDisabled(true);
+		pumaTaskDto.setShow(true);
 		return pumaTaskDto;
 	}
 

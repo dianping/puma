@@ -144,7 +144,7 @@
 											ng-options="o.errorCode as (o.errorCode +'('+o.desc+')') for o in errorSet.errorCodes">
 											<option value="">请选择ErrorCode</option>
 										</select>
-										<label class="col-xs-10 col-sm-1"> </label>
+										<label class="puma-form-split">&nbsp;</label>
 										 <select id="form-field-1" class="col-xs-10 col-sm-3 puma-form-select"
 											ng-model="itemError.selectedHandler.name"
 											placeholder="Handler"
@@ -173,7 +173,7 @@
 										<input id="form-field-1" placeholder="源数据库"
 											class="col-xs-10 col-sm-3" type="text"
 											ng-model="itemDatabase.databaseFrom" /> 
-											<label class="col-sm-1 control-label " for="form-field-1">  </label>
+											<label class="puma-form-split">&nbsp;</label>
 											<input
 											id="form-field-1" placeholder="目标数据库"
 											class="col-xs-10 col-sm-3" type="text"
@@ -190,7 +190,7 @@
 											<input id="form-field-1" placeholder="源表"
 												class="col-xs-10 col-sm-3" type="text"
 												ng-model="itemTable.tableFrom" />
-												<label class="col-sm-1 control-label " for="form-field-1">  </label>
+												<label class="puma-form-split">&nbsp;</label>
 												 <input id="form-field-1"
 												placeholder="目标表" class="col-xs-10 col-sm-3" type="text"
 												ng-model="itemTable.tableTo" /> 

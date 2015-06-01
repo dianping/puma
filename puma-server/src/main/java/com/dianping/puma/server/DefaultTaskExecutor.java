@@ -113,30 +113,25 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				if (!connect()) {
 					throw new IOException("connection failed.");
 				}
-				LOG.info("connection db success.");
+				
 				isNeedStop = true;
 				if (!auth()) {
 					throw new IOException("Login failed.");
 				}
-				LOG.info("Server logined... taskName: " + getTaskName() + " host: " + dbHost + " port: " + port
-						+ " username: " + dbUsername + " database: " + database + " dbServerId: " + getDbServerId());
+				
 				if (getContext().isCheckSum()) {
 					if (!updateSetting()) {
 						throw new IOException("update setting command failed.");
 					}
-					LOG.info("update setting command success.");
 				}
 				if (!queryConfig()) {
 					throw new IOException("query config binlogformat failed.");
 				}
-				LOG.info("query config binlogformat is legal.");
+				
 				if (dumpBinlog()) {
-					LOG.info("dump binlog command success.");
 					isNeedStop = false;
 					processBinlog();
-				} else {
-					throw new IOException("dump binlog command failed.");
-				}
+				} 
 			} catch (Throwable e) {
 				if (isNeedStop) {
 					Cat.logError("Puma.server.failed", new ServerEventFetcherException(e));
@@ -313,6 +308,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			is = new BufferedInputStream(pumaSocket.getInputStream());
 			os = new BufferedOutputStream(pumaSocket.getOutputStream());
 			PacketFactory.parsePacket(is, PacketType.CONNECT_PACKET, getContext());
+			LOG.info("connection db success.");
 			return true;
 		} catch (Exception e) {
 			LOG.error("connect failed. Reason: " + e.getMessage());
@@ -356,7 +352,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 							.getBinlogStartPos()));
 					getContext().setBinlogFileName(binlogFile);
 				}
-
+				LOG.info("dump binlog command success.");
 				return true;
 			} else {
 				LOG.error("Dump binlog failed. Reason: " + dumpCommandResultPacket.getMessage());
@@ -378,6 +374,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	private boolean auth() {
 		try {
 			// auth
+			LOG.info("server logining taskName: " + getTaskName() + " host: " + dbHost + " port: " + port + " username: "
+					+ dbUsername + " database: " + database + " dbServerId: " + getDbServerId());
 			AuthenticatePacket authPacket = (AuthenticatePacket) PacketFactory.createCommandPacket(
 					PacketType.AUTHENTICATE_PACKET, getContext());
 
@@ -392,6 +390,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			boolean isAuth;
 
 			if (okErrorPacket.isOk()) {
+				LOG.info("server login success.");
 				isAuth = true;
 			} else {
 				isAuth = false;
@@ -419,6 +418,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
 			if (okErrorPacket.isOk()) {
 				eventStatus = Message.SUCCESS;
+				LOG.info("update setting command success.");
 			} else {
 				eventStatus = "1";
 				LOG.error("updateSetting failed. Reason: " + okErrorPacket.getMessage());
@@ -457,6 +457,9 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			}
 
 			Cat.logEvent("Slave.dbBinlogFormat", eventName, isQuery ? Message.SUCCESS : "1", "");
+			if(isQuery){
+				LOG.info("query config binlogformat is legal.");
+			}
 			return isQuery;
 		} catch (Exception e) {
 			LOG.error("queryConfig failed Reason: " + e.getMessage());

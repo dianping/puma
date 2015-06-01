@@ -96,7 +96,45 @@
 										</tr>
 										<tr></tr>
 										<tr ng-repeat-end ng-show = "item.isShow">
-											<td colspan="6">{{state(item.name).detail}}</td>
+											<td colspan="6">
+											<div class="col-xs-12 puma-list-detail">
+												<div class="puma-list-line">
+													<div class ="col-sm-2">Sync任务名称：</div>
+													<div class ="col-sm-4">{{item.name}}</div>
+													<div class ="col-sm-2">binlog起始信息：</div>
+													<div class ="col-sm-4">{{item.binlogInfo.binlogFile}} - {{item.binlogInfo.binlogPosition}}</div>
+												</div>
+												<div class="puma-list-line">
+													<div class ="col-sm-2">创建时间：</div>
+													<div class ="col-sm-4">{{item.gmtCreate}}</div>
+													<div class ="col-sm-2">更新时间：</div>
+													<div class ="col-sm-4">{{item.gmtModify}}</div>
+												</div>
+												<div class="puma-list-line">
+													<div class ="col-sm-2">ddl：</div>
+													<div class ="col-sm-4">{{item.ddl}}</div>
+													<div class ="col-sm-2">dml：</div>
+													<div class ="col-sm-4">{{item.dml}}</div>
+												</div>
+												<div class="puma-list-line">
+													<div class ="col-sm-2">transaction：</div>
+													<div class ="col-sm-4">{{item.transaction}}</div>
+													<div class ="col-sm-2">consistent：</div>
+													<div class ="col-sm-4">{{item.consistent}}</div>
+												</div>
+												<div class="puma-list-line">
+													<div class ="col-sm-2"> 默认处理：</div>
+													<div class ="col-sm-4">{{item.defaultHandler}}</div>
+													<div class ="col-sm-2">consistent：</div>
+													<div class ="col-sm-4">{{item.consistent}}</div>
+												</div>
+												<div class="puma-list-line">
+													<div class ="col-sm-2">状态详情：</div>
+													<div class ="col-sm-10">{{state(item.name).detail?state(item.name).detail:state(item.name).status}}</div>
+												</div>
+											</div>
+											
+											</td>
 										</tr>
 									</tbody>
 								</table>

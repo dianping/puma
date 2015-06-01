@@ -19,7 +19,7 @@ public class PooledLoader implements Loader {
 
 	private boolean inited = false;
 
-	private boolean stopped = true;
+	private volatile boolean stopped = true;
 
 	private volatile LoadException loadException = null;
 
@@ -114,14 +114,24 @@ public class PooledLoader implements Loader {
 			return;
 		}
 
+		binlogManager.init();
 		initBatchRowPool();
 		initBatchExecPool();
 		mainThread = new Thread(new MainWorker());
+
+		inited = true;
 	}
 
 	@Override
 	public void destroy() {
+		if (!inited) {
+			return;
+		}
 
+		mainThread = null;
+		batchRowPool.destroy();
+		batchExecPool.destroy();
+		binlogManager.destroy();
 	}
 
 	@Override
@@ -133,8 +143,19 @@ public class PooledLoader implements Loader {
 		stopped = false;
 		loadException = null;
 
+		// Start others.
 		loadEventMonitor.start();
+
+		// Start binlog manager.
+		binlogManager.start();
+
+		// Start batch exec pool.
 		batchExecPool.start();
+
+		// Start batch row pool.
+		batchRowPool.start();
+
+		// Start main thread.
 		mainThread.start();
 	}
 
@@ -146,29 +167,32 @@ public class PooledLoader implements Loader {
 
 		stopped = true;
 
+		// Stop main thread.
 		mainThread.interrupt();
+
+		// Stop batch row pool.
+		batchRowPool.stop();
+
+		// Stop batch exec pool.
 		batchExecPool.stop();
+
+		// Stop others.
 		loadEventMonitor.stop();
 	}
 
 	@Override
-	public void cleanup() {
+	public void load(ChangedEvent event) throws LoadException {
+		// Async throw exception, spread the exception out.
+		asyncThrow();
 
+		loadEventMonitor.record(event.genFullName(), "0");
+		batchRowPool.put(event);
 	}
 
 	public void asyncThrow() throws LoadException {
 		if (loadException != null) {
 			throw loadException;
 		}
-	}
-
-	@Override
-	public void load(ChangedEvent event) throws LoadException {
-		// Async throw loader exception.
-		asyncThrow();
-
-		loadEventMonitor.record(event.genFullName(), "0");
-		batchRowPool.put(event);
 	}
 
 	private void initBatchRowPool() {
@@ -222,10 +246,9 @@ public class PooledLoader implements Loader {
 				}
 			} catch (LoadException e) {
 				if (!stopped) {
-					String msg = String.format("Loader main thread error.");
 					loadException = e;
-					LOG.error(msg, loadException);
-					Cat.logError(msg, loadException);
+
+					// Exception occurs, stop the pooled loader.
 					stop();
 				}
 			}

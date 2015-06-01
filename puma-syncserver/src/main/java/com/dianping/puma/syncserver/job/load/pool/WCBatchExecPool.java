@@ -85,11 +85,6 @@ public class WCBatchExecPool implements BatchExecPool {
 	}
 
 	@Override
-	public void cleanup() {
-
-	}
-
-	@Override
 	public void start() {
 
 	}

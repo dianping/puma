@@ -109,7 +109,6 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer {
 		} else {
 			taskExecutor.stop();
 			taskExecutor.destroy();
-			taskExecutor.cleanup();
 		}
 	}
 

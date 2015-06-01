@@ -95,11 +95,6 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 		return task;
 	}
 
-	@Override
-	public void cleanup() {
-		binlogManager.cleanup();
-	}
-
 	protected abstract void doStart();
 
 	protected abstract void doStop();

@@ -58,11 +58,6 @@ public class DefaultTransformer implements Transformer {
 	}
 
 	@Override
-	public void cleanup() {
-
-	}
-
-	@Override
 	public void transform(ChangedEvent event) throws TransformException {
 		// Prepare.
 		if (event instanceof RowChangedEvent) {
@@ -72,10 +67,10 @@ public class DefaultTransformer implements Transformer {
 			}
 		}
 
-		transformSQL(event);
 		transformColumn(event);
 		transformTable(event);
 		transformSchema(event);
+		transformSQL(event);
 	}
 
 	private void transformSchema(ChangedEvent event) {

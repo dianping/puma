@@ -101,11 +101,6 @@ public class SCBatchExecPool implements BatchExecPool {
 	}
 
 	@Override
-	public void cleanup() {
-
-	}
-
-	@Override
 	public void start() {
 		warnDelayThread.start();
 	}

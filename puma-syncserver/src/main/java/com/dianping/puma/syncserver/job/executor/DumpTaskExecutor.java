@@ -203,11 +203,6 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
 
     }
 
-    @Override
-    public void cleanup() {
-
-    }
-
     public TEException exception() {
         return new TEException(0);
     }

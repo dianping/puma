@@ -86,6 +86,7 @@ public class MapDBBinlogManager implements BinlogManager {
 		inited = true;
 	}
 
+	/*
 	@Override
 	public void destroy() {
 		if (!inited) {
@@ -96,7 +97,7 @@ public class MapDBBinlogManager implements BinlogManager {
 		db.close();
 
 		inited = false;
-	}
+	}*/
 
 	@Override
 	public void start() {
@@ -117,7 +118,7 @@ public class MapDBBinlogManager implements BinlogManager {
 	}
 
 	@Override
-	public void cleanup() {
+	public void destroy() {
 		if (db.isClosed()) {
 			db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlog/", title + name)).closeOnJvmShutdown()
 					.transactionDisable().asyncWriteEnable().mmapFileEnableIfSupported().make();

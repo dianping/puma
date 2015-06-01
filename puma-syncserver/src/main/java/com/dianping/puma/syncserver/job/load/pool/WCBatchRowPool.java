@@ -46,7 +46,12 @@ public class WCBatchRowPool implements BatchRowPool {
 	}
 
 	@Override
-	public void cleanup() {
+	public void start() {
+
+	}
+
+	@Override
+	public void stop() {
 
 	}
 

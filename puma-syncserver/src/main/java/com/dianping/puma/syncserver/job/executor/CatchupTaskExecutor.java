@@ -40,11 +40,6 @@ public class CatchupTaskExecutor extends AbstractTaskExecutor<CatchupTask> {
     }
 
     @Override
-    public void cleanup() {
-
-    }
-
-    @Override
     protected void doStart() {}
 
     @Override

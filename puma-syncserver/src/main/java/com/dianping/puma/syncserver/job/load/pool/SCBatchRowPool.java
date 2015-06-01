@@ -49,7 +49,12 @@ public class SCBatchRowPool implements BatchRowPool {
 	}
 
 	@Override
-	public void cleanup() {
+	public void start() {
+
+	}
+
+	@Override
+	public void stop() {
 
 	}
 

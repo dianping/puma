@@ -533,11 +533,6 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
         }
     }
 
-    @Override
-    public void cleanup() {
-
-    }
-
     public void setConfigCache(ConfigCache configCache) {
         this.configCache = configCache;
     }

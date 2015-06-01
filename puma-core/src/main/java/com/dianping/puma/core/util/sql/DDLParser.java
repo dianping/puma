@@ -139,7 +139,7 @@ public class DDLParser {
 		case ALTER_TABLE:
 			parseDDL(matcher, queryString, ALTER_TABLE_PATTERN);
 			String name = matcher.getMatch().group(5);
-			return queryString.replace(name, " " + schema + "." + table);
+			return queryString.replace(name, " " + "`" + schema + "`" + "." + "`" + table + "`");
 		default:
 			return null;
 		}

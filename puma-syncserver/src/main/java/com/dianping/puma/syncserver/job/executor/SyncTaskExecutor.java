@@ -127,13 +127,6 @@ public class SyncTaskExecutor implements TaskExecutor<SyncTask> {
 	}
 
 	@Override
-	public void cleanup() {
-		transformer.cleanup();
-		loader.cleanup();
-		binlogManager.cleanup();
-	}
-
-	@Override
 	public SyncTask getTask() {
 		return task;
 	}

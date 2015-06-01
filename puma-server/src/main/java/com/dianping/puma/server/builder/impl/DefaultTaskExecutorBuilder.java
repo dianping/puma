@@ -47,8 +47,6 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 	@Autowired
 	private FetcherEventCountMonitor fetcherEventCountMonitor;
 	@Autowired
-	private FetcherEventDelayMonitor fetcherEventDelayMonitor;
-	@Autowired
 	private ParserEventCountMonitor parserEventCountMonitor;
 
 	@Autowired
@@ -109,7 +107,6 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 		try {
 			DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
 			taskExecutor.setFetcherEventCountMonitor(fetcherEventCountMonitor);
-			taskExecutor.setFetcherEventDelayMonitor(fetcherEventDelayMonitor);
 			taskExecutor.setParserEventCountMonitor(parserEventCountMonitor);
 
 			PumaTaskState taskState = new PumaTaskState();

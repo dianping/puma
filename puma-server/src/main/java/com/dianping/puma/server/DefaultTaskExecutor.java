@@ -86,8 +86,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 	private FetcherEventCountMonitor fetcherEventCountMonitor;
 
-	private FetcherEventDelayMonitor fetcherEventDelayMonitor;
-
 	private ParserEventCountMonitor parserEventCountMonitor;
 
 	@Override
@@ -196,7 +194,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	protected void processBinlogPacket(BinlogPacket binlogPacket) throws IOException {
 		fetcherEventCountMonitor.record(getTaskName());
 		BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), getContext());
-		fetcherEventDelayMonitor.record(getTaskName(), binlogEvent.getHeader().getTimestamp());
 		if (binlogEvent.getHeader().getEventType() == BinlogConstants.INTVAR_EVENT
 				|| binlogEvent.getHeader().getEventType() == BinlogConstants.RAND_EVENT
 				|| binlogEvent.getHeader().getEventType() == BinlogConstants.USER_VAR_EVENT) {
@@ -207,7 +204,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 					"binlog_format is MIXED or STATEMENT ,System is not support."));
 			stopTask();
 		}
-		fetcherEventDelayMonitor.record(getTaskName(), binlogEvent.getHeader().getTimestamp());
 
 		if (binlogEvent.getHeader().getEventType() != BinlogConstants.FORMAT_DESCRIPTION_EVENT) {
 			getContext().setNextBinlogPos(binlogEvent.getHeader().getNextPosition());
@@ -628,10 +624,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 	public void setFetcherEventCountMonitor(FetcherEventCountMonitor fetcherEventCountMonitor) {
 		this.fetcherEventCountMonitor = fetcherEventCountMonitor;
-	}
-
-	public void setFetcherEventDelayMonitor(FetcherEventDelayMonitor fetcherEventDelayMonitor) {
-		this.fetcherEventDelayMonitor = fetcherEventDelayMonitor;
 	}
 
 	public void setParserEventCountMonitor(ParserEventCountMonitor parserEventCountMonitor) {

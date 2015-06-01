@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 
-@Service("fetcherEventDelayMonitor")
+//@Service("fetcherEventDelayMonitor")
 public class FetcherEventDelayMonitor {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FetcherEventDelayMonitor.class);

@@ -196,9 +196,9 @@ public class SyncTaskController {
 		try {
 			SyncTask syncTask = syncTaskService.find(name);
 			SyncTaskState syncTaskState = syncTaskStateService.find(syncTask.getName());
-			syncTaskState.setStatus(Status.PREPARING);
-			this.syncTaskService.updateStatusAction(name, ActionController.STOP);
-			syncTaskControllerReporter.report(syncTask.getSyncServerName(), syncTask.getName(), ActionController.STOP);
+			syncTaskState.setStatus(Status.STOPPING);
+			this.syncTaskService.updateStatusAction(name, ActionController.PAUSE);
+			syncTaskControllerReporter.report(syncTask.getSyncServerName(), syncTask.getName(), ActionController.PAUSE);
 			map.put("success", true);
 		} catch (IllegalArgumentException e) {
 			map.put("success", false);
@@ -224,8 +224,8 @@ public class SyncTaskController {
 			SyncTask syncTask = syncTaskService.find(name);
 			SyncTaskState syncTaskState = syncTaskStateService.find(syncTask.getName());
 			syncTaskState.setStatus(Status.PREPARING);
-			this.syncTaskService.updateStatusAction(name, ActionController.START);
-			syncTaskControllerReporter.report(syncTask.getSyncServerName(), syncTask.getName(), ActionController.START);
+			this.syncTaskService.updateStatusAction(name, ActionController.RESUME);
+			syncTaskControllerReporter.report(syncTask.getSyncServerName(), syncTask.getName(), ActionController.RESUME);
 			map.put("success", true);
 		} catch (IllegalArgumentException e) {
 			map.put("success", false);

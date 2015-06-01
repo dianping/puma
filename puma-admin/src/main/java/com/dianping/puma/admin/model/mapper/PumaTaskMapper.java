@@ -31,20 +31,38 @@ public class PumaTaskMapper {
 		pumaTaskDto.setBinlogPosition(pumaTask.getBinlogInfo().getBinlogPosition());
 		pumaTaskDto.setPreservedDay(pumaTask.getPreservedDay());
 		List<DatabaseDto> databases = new ArrayList<DatabaseDto>();
-		Map<String, List<String>> tableSet = pumaTask.getTableSet().mapSchemaTables();
-		for (Map.Entry<String, List<String>> entry : tableSet.entrySet()) {
-			DatabaseDto databaseDto = new DatabaseDto();
-			databaseDto.setDatabase(entry.getKey());
-			StringBuilder strTables = new StringBuilder();
-			for (String entryValue : entry.getValue()) {
-				strTables.append(entryValue);
-				strTables.append(TABLE_TABLE_SPLIT);
+		if(pumaTask.getTableSet() != null){
+			Map<String, List<String>> tableSet = pumaTask.getTableSet().mapSchemaTables();
+			for (Map.Entry<String, List<String>> entry : tableSet.entrySet()) {
+				DatabaseDto databaseDto = new DatabaseDto();
+				databaseDto.setDatabase(entry.getKey());
+				StringBuilder strTables = new StringBuilder();
+				for (String entryValue : entry.getValue()) {
+					strTables.append(entryValue);
+					strTables.append(TABLE_TABLE_SPLIT);
+				}
+				if (strTables.length() > 0) {
+					strTables.deleteCharAt(strTables.length() - 1);
+				}
+				databaseDto.setTables(strTables.toString());
+				databases.add(databaseDto);
 			}
-			if (strTables.length() > 0) {
-				strTables.deleteCharAt(strTables.length() - 1);
+		}else{
+			Map<String, AcceptedTables> acceptedTables = pumaTask.getAcceptedDataInfos();
+			for (Map.Entry<String, AcceptedTables> entry : acceptedTables.entrySet()) {
+				DatabaseDto databaseDto = new DatabaseDto();
+				databaseDto.setDatabase(entry.getKey());
+				StringBuilder strTables = new StringBuilder();
+				for (String entryValue : entry.getValue().getTables()) {
+					strTables.append(entryValue);
+					strTables.append(TABLE_TABLE_SPLIT);
+				}
+				if (strTables.length() > 0) {
+					strTables.deleteCharAt(strTables.length() - 1);
+				}
+				databaseDto.setTables(strTables.toString());
+				databases.add(databaseDto);
 			}
-			databaseDto.setTables(strTables.toString());
-			databases.add(databaseDto);
 		}
 
 		pumaTaskDto.setDatabases(databases);

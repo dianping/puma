@@ -15,18 +15,18 @@ public class PumaClientMainTest {
 		configBuilder.port(8080);
 		configBuilder.name("ClientTest");
 		configBuilder.serverId(1);
-		configBuilder.target("DianPing_beta@server_beta");
+		configBuilder.target("dpshop@server_beta");
 		configBuilder.dml(true);
 		configBuilder.ddl(true);
 		configBuilder.transaction(true);
 		configBuilder.binlog("mysql-bin.000001");
 		configBuilder.binlogPos(1);
-		configBuilder.tables("DianPing", "DP_RegionList","POI_FeedBack");
+		configBuilder.tables("DPShop", "DP_Shop","DP_ShopPOI");
 		//_parseSourceDatabaseTables(task.getMysqlMapping(), configBuilder);
 		Configuration configuration = configBuilder.build();
 
 		final PumaClient pumaClient = new PumaClient(configuration);
-		pumaClient.getSeqFileHolder().saveSeq(-2L);
+		pumaClient.getSeqFileHolder().saveSeq(-1L);
 
 		pumaClient.register(new EventListener() {
 

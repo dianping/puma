@@ -308,7 +308,7 @@ public class SyncTaskController {
 
 	@RequestMapping(value = { "/sync-task/update/{id}" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String updatePost(@PathVariable long id, @RequestBody SyncTaskDto syncTaskDto) {
+	public String updatePost(@PathVariable long id, @RequestBody SyncTaskDto entity) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		try {
 			SyncTask syncTask = syncTaskService.find(id);
@@ -318,7 +318,7 @@ public class SyncTaskController {
 			} else {
 				operation = ActionOperation.UPDATE;
 			}
-			syncTask = SyncTaskMapper.convertToSyncTask(syncTaskDto);
+			syncTask = SyncTaskMapper.convertToSyncTask(entity);
 			if (operation == ActionOperation.CREATE) {
 				syncTaskService.create(syncTask);
 			} else {

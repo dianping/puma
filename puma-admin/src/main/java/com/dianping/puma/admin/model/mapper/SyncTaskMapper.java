@@ -37,7 +37,7 @@ public class SyncTaskMapper {
 		syncTaskDto.setErrorList(ErrorListMapper.convertToErrorList(syncTask.getErrorCodeHandlerNameMap()));
 		syncTaskDto.setMysqlMapping(MysqlMappingMapper.convertToMysqlMapping(syncTask.getMysqlMapping()));
 		syncTaskDto.setDisabled(true);
-		syncTaskDto.setShow(false);
+		syncTaskDto.setIsShow(false);
 		return syncTaskDto;
 	}
 

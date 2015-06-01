@@ -144,11 +144,11 @@ public class SyncTaskDto {
 		this.consistent = consistent;
 	}
 
-	public void setShow(boolean isShow) {
+	public void setIsShow(boolean isShow) {
 		this.isShow = isShow;
 	}
 
-	public boolean isShow() {
+	public boolean getIsShow() {
 		return isShow;
 	}
 	

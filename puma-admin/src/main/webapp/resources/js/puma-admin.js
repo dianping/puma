@@ -170,7 +170,7 @@ var formApp = angular.module("formApp", []);
 formApp.factory('formService', [ '$http', '$location',
 		function($http, $location) {
 			var submit = function(data) {
-				return $http.post($location.absUrl(), angular.toJson(data));
+				return $http.post($location.absUrl(), data);
 			};
 
 			var init = function(url, id) {

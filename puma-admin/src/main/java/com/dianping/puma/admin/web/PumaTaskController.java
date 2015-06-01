@@ -181,7 +181,7 @@ public class PumaTaskController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = { "/puma-task/update/{id}" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String updatePost(@PathVariable long id, @RequestBody PumaTaskDto pumaTaskDto) {
+	public String updatePost(@PathVariable long id, @RequestBody PumaTaskDto entity) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
@@ -195,7 +195,7 @@ public class PumaTaskController {
 				operation = ActionOperation.UPDATE;
 				event.setOriPumaTask(pumaTask);
 			}
-			pumaTask = PumaTaskMapper.convertToPumaTask(pumaTaskDto);
+			pumaTask = PumaTaskMapper.convertToPumaTask(entity);
 			pumaTask.setId(id);
 			if (operation == ActionOperation.CREATE) {
 				pumaTaskService.create(pumaTask);

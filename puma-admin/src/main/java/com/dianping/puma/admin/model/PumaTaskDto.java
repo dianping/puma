@@ -82,7 +82,7 @@ public class PumaTaskDto {
 		this.databases = databases;
 	}
 
-	public boolean isDisabled() {
+	public boolean getDisabled() {
 		return disabled;
 	}
 
@@ -90,11 +90,11 @@ public class PumaTaskDto {
 		this.disabled = disabled;
 	}
 
-	public void setShow(boolean isShow) {
+	public void setIsShow(boolean isShow) {
 		this.isShow = isShow;
 	}
 
-	public boolean isShow() {
+	public boolean getIsShow() {
 		return isShow;
 	}
 

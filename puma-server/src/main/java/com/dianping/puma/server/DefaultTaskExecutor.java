@@ -24,7 +24,6 @@ import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.monitor.FetcherEventCountMonitor;
-import com.dianping.puma.monitor.FetcherEventDelayMonitor;
 import com.dianping.puma.monitor.ParserEventCountMonitor;
 import com.dianping.puma.server.exception.ServerEventFetcherException;
 import com.dianping.puma.server.exception.ServerEventParserException;
@@ -111,49 +110,45 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 				SystemStatusContainer.instance.updateServerStatus(getTaskName(), dbHost, port, database, getContext()
 						.getBinlogFileName(), getContext().getBinlogStartPos());
-
-				connect();
-
-				if (auth()) {
-					LOG.info("Server logined... taskName: " + getTaskName() + " host: " + dbHost + " port: " + port
-							+ " username: " + dbUsername + " database: " + database + " dbServerId: " + getDbServerId());
-					if (getContext().isCheckSum()) {
-						if (!updateSetting()) {
-							isNeedStop = true;
-							throw new IOException("update setting command failed.");
-						}
-						LOG.info("update setting command success.");
-					}
-					if (!queryConfig()) {
-						isNeedStop = true;
-						throw new IOException("query config binlogformat failed.");
-					}
-					LOG.info("query config binlogformat is legal.");
-					if (dumpBinlog()) {
-						LOG.info("dump binlog command success.");
-						processBinlog();
-
-					} else {
-						throw new IOException("dump binlog command failed.");
-					}
-				} else {
-					isNeedStop = true;
+				if (!connect()) {
+					throw new IOException("connection failed.");
+				}
+				LOG.info("connection db success.");
+				isNeedStop = true;
+				if (!auth()) {
 					throw new IOException("Login failed.");
+				}
+				LOG.info("Server logined... taskName: " + getTaskName() + " host: " + dbHost + " port: " + port
+						+ " username: " + dbUsername + " database: " + database + " dbServerId: " + getDbServerId());
+				if (getContext().isCheckSum()) {
+					if (!updateSetting()) {
+						throw new IOException("update setting command failed.");
+					}
+					LOG.info("update setting command success.");
+				}
+				if (!queryConfig()) {
+					throw new IOException("query config binlogformat failed.");
+				}
+				LOG.info("query config binlogformat is legal.");
+				if (dumpBinlog()) {
+					LOG.info("dump binlog command success.");
+					isNeedStop = false;
+					processBinlog();
+				} else {
+					throw new IOException("dump binlog command failed.");
 				}
 			} catch (Throwable e) {
 				if (isNeedStop) {
 					Cat.logError("Puma.server.failed", new ServerEventFetcherException(e));
 					stopTask();
 				}
-				if(e instanceof RuntimeException){
+				if (e instanceof RuntimeException) {
 					Cat.logError("Puma.server.runtimeException", new ServerEventRuntimeException(e));
 				}
 				if (isStop()) {
 					return;
 				}
 				if (++failCount % 3 == 0) {
-					this.notifyService.alarm("[" + getContext().getPumaServerName() + "]" + "Failed to dump mysql["
-							+ dbHost + ":" + port + "] for 3 times.", e, true);
 					failCount = 0;
 				}
 				LOG.error("Exception occurs. taskName: " + getTaskName() + " dbServerId: " + getDbServerId()
@@ -308,15 +303,21 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	 *
 	 * @throws IOException
 	 */
-	private void connect() throws IOException {
-		closeTransport();
-		this.pumaSocket = new Socket();
-		this.pumaSocket.setTcpNoDelay(false);
-		this.pumaSocket.setKeepAlive(true);
-		this.pumaSocket.connect(new InetSocketAddress(dbHost, port));
-		is = new BufferedInputStream(pumaSocket.getInputStream());
-		os = new BufferedOutputStream(pumaSocket.getOutputStream());
-		PacketFactory.parsePacket(is, PacketType.CONNECT_PACKET, getContext());
+	private boolean connect() {
+		try {
+			closeTransport();
+			this.pumaSocket = new Socket();
+			this.pumaSocket.setTcpNoDelay(false);
+			this.pumaSocket.setKeepAlive(true);
+			this.pumaSocket.connect(new InetSocketAddress(dbHost, port));
+			is = new BufferedInputStream(pumaSocket.getInputStream());
+			os = new BufferedOutputStream(pumaSocket.getOutputStream());
+			PacketFactory.parsePacket(is, PacketType.CONNECT_PACKET, getContext());
+			return true;
+		} catch (Exception e) {
+			LOG.error("connect failed. Reason: " + e.getMessage());
+			return false;
+		}
 	}
 
 	/**
@@ -325,7 +326,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	 * @return
 	 * @throws IOException
 	 */
-	private boolean dumpBinlog() throws IOException {
+	private boolean dumpBinlog() {
 		try {
 			ComBinlogDumpPacket dumpBinlogPacket = (ComBinlogDumpPacket) PacketFactory.createCommandPacket(
 					PacketType.COM_BINLOG_DUMP_PACKET, getContext());
@@ -361,7 +362,9 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				LOG.error("Dump binlog failed. Reason: " + dumpCommandResultPacket.getMessage());
 				return false;
 			}
-		} finally {
+		} catch (Exception e) {
+			LOG.error("Dump binlog failed. Reason: " + e.getMessage());
+			return false;
 		}
 
 	}
@@ -372,30 +375,33 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	 * @return
 	 * @throws IOException
 	 */
-	private boolean auth() throws IOException {
-		// auth
-		AuthenticatePacket authPacket = (AuthenticatePacket) PacketFactory.createCommandPacket(
-				PacketType.AUTHENTICATE_PACKET, getContext());
+	private boolean auth() {
+		try {
+			// auth
+			AuthenticatePacket authPacket = (AuthenticatePacket) PacketFactory.createCommandPacket(
+					PacketType.AUTHENTICATE_PACKET, getContext());
 
-		authPacket.setPassword(dbPassword);
-		authPacket.setUser(dbUsername);
-		authPacket.setDatabase(database);
-		authPacket.buildPacket(getContext());
-		authPacket.write(os, getContext());
+			authPacket.setPassword(dbPassword);
+			authPacket.setUser(dbUsername);
+			authPacket.setDatabase(database);
+			authPacket.buildPacket(getContext());
+			authPacket.write(os, getContext());
 
-		OKErrorPacket okErrorPacket = (OKErrorPacket) PacketFactory.parsePacket(is, PacketType.OKERROR_PACKET,
-				getContext());
+			OKErrorPacket okErrorPacket = (OKErrorPacket) PacketFactory.parsePacket(is, PacketType.OKERROR_PACKET,
+					getContext());
+			boolean isAuth;
 
-		boolean isAuth;
-
-		if (okErrorPacket.isOk()) {
-			isAuth = true;
-		} else {
-			isAuth = false;
-			LOG.error("Login failed. Reason: " + okErrorPacket.getMessage());
+			if (okErrorPacket.isOk()) {
+				isAuth = true;
+			} else {
+				isAuth = false;
+				LOG.error("Login failed. Reason: " + okErrorPacket.getMessage());
+			}
+			return isAuth;
+		} catch (Exception e) {
+			LOG.error("Login failed. Reason: " + e.getMessage());
+			return false;
 		}
-
-		return isAuth;
 	}
 
 	/**
@@ -405,20 +411,25 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	 * @throws IOException
 	 */
 	private boolean updateSetting() throws IOException {
-		UpdateExecutor executor = new UpdateExecutor(is, os);
-		String cmd = "set @master_binlog_checksum= '@@global.binlog_checksum'";
-		OKErrorPacket okErrorPacket = executor.update(cmd, getContext());
-		String eventStatus;
-		String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
-		if (okErrorPacket.isOk()) {
-			eventStatus = Message.SUCCESS;
-		} else {
-			eventStatus = "1";
-			LOG.error("updateSetting failed. Reason: " + okErrorPacket.getMessage());
-		}
+		try {
+			UpdateExecutor executor = new UpdateExecutor(is, os);
+			String cmd = "set @master_binlog_checksum= '@@global.binlog_checksum'";
+			OKErrorPacket okErrorPacket = executor.update(cmd, getContext());
+			String eventStatus;
+			String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
+			if (okErrorPacket.isOk()) {
+				eventStatus = Message.SUCCESS;
+			} else {
+				eventStatus = "1";
+				LOG.error("updateSetting failed. Reason: " + okErrorPacket.getMessage());
+			}
 
-		Cat.logEvent("Slave.dbSetCheckSum", eventName, eventStatus, "");
-		return okErrorPacket.isOk();
+			Cat.logEvent("Slave.dbSetCheckSum", eventName, eventStatus, "");
+			return okErrorPacket.isOk();
+		} catch (Exception e) {
+			LOG.error("updateSetting failed. Reason: " + e.getMessage());
+			return false;
+		}
 	}
 
 	/**
@@ -428,24 +439,29 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	 * @throws IOException
 	 */
 	private boolean queryConfig() throws IOException {
-		QueryExecutor executor = new QueryExecutor(is, os);
-		String cmd = "show global variables like 'binlog_format'";
-		ResultSet rs = executor.query(cmd, getContext());
-		List<String> columnValues = rs.getFiledValues();
-		boolean isQuery = true;
-		if (columnValues == null || columnValues.size() != 2 || columnValues.get(1) == null) {
-			LOG.error("queryConfig failed Reason:unexcepted binlog format query result.");
-			isQuery = false;
-		}
-		BinlogFormat binlogFormat = BinlogFormat.valuesOf(columnValues.get(1));
-		String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
-		if (binlogFormat == null || !binlogFormat.isRow()) {
-			isQuery = false;
-			LOG.error("unexcepted binlog format: " + binlogFormat.value);
-		}
+		try {
+			QueryExecutor executor = new QueryExecutor(is, os);
+			String cmd = "show global variables like 'binlog_format'";
+			ResultSet rs = executor.query(cmd, getContext());
+			List<String> columnValues = rs.getFiledValues();
+			boolean isQuery = true;
+			if (columnValues == null || columnValues.size() != 2 || columnValues.get(1) == null) {
+				LOG.error("queryConfig failed Reason:unexcepted binlog format query result.");
+				isQuery = false;
+			}
+			BinlogFormat binlogFormat = BinlogFormat.valuesOf(columnValues.get(1));
+			String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
+			if (binlogFormat == null || !binlogFormat.isRow()) {
+				isQuery = false;
+				LOG.error("unexcepted binlog format: " + binlogFormat.value);
+			}
 
-		Cat.logEvent("Slave.dbBinlogFormat", eventName, isQuery ? Message.SUCCESS : "1", "");
-		return isQuery;
+			Cat.logEvent("Slave.dbBinlogFormat", eventName, isQuery ? Message.SUCCESS : "1", "");
+			return isQuery;
+		} catch (Exception e) {
+			LOG.error("queryConfig failed Reason: " + e.getMessage());
+			return false;
+		}
 	}
 
 	protected void doStop() throws Exception {

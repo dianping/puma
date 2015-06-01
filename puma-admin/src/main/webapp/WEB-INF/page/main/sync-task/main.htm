@@ -125,12 +125,54 @@
 												<div class="puma-list-line">
 													<div class ="col-sm-2"> 默认处理：</div>
 													<div class ="col-sm-4">{{item.defaultHandler}}</div>
-													<div class ="col-sm-2">consistent：</div>
-													<div class ="col-sm-4">{{item.consistent}}</div>
+													<div ng-repeat="(key, value) in item.errorCodeHandlerNameMap">
+														<div class ="col-sm-2"> {{key}}错误处理：</div>
+														<div class ="col-sm-4">{{value}}</div>
+													</div>
 												</div>
 												<div class="puma-list-line">
+												 	<div class ="col-sm-2">INSERT数：</div>
+													<div class ="col-sm-4"><span class="red">{{state(item.name).inserts}}</span></div>
+													<div class ="col-sm-2">UPDATE数：</div>
+													<div class ="col-sm-4"><span class="red">{{state(item.name).updates}}</span></div>
+												</div>
+												<div class="puma-list-line">
+												 	<div class ="col-sm-2">DELETE数：</div>
+													<div class ="col-sm-4"><span class="red">{{state(item.name).deletes}}</span></div>
+													<div class ="col-sm-2">DDL数：</div>
+													<div class ="col-sm-4"><span class="red">{{state(item.name).ddls}}</span></div>
+												</div>
+												<div class="puma-list-line">
+													<div class ="col-sm-2">sync延时：</div>
+													<div class ="col-sm-4"><span class="red">{{state(item.name).delay}}</span></div>
 													<div class ="col-sm-2">状态详情：</div>
-													<div class ="col-sm-10">{{state(item.name).detail?state(item.name).detail:state(item.name).status}}</div>
+													<div class ="col-sm-4"><span class="red">{{state(item.name).detail?state(item.name).detail:state(item.name).status}}</span></div>
+												</div>
+												<div class="puma-list-line">
+													<div class ="col-sm-2">sync延时：</div>
+													<div class ="col-sm-4"><span class="red">{{state(item.name).delay}}</span></div>
+													<div class ="col-sm-2">状态详情：</div>
+													<div class ="col-sm-4"><span class="red">{{state(item.name).detail?state(item.name).detail:state(item.name).status}}</span></div>
+												</div>
+												
+												<div class="puma-list-line">
+													<div class ="col-sm-12 puma-list-line-center"><span class="blue bigger-120">映射关系</span></div>
+												</div>
+												<div ng-repeat="database in item.mysqlMapping.databases">
+												<div class="puma-list-line">
+													<div class ="col-sm-2"><span class="bigger-115">源库：</span></div>
+													<div class ="col-sm-4"><span class="bigger-115">{{database.from}}</span></div>
+													<div class ="col-sm-2"><span class="bigger-115">目标库：</span></div>
+													<div class ="col-sm-4"><span class="bigger-115">{{database.to}}</span></div>
+												</div>
+												<div ng-repeat="table in database.tables">
+													<div class="puma-list-line">
+														<div class ="col-sm-2">源表：</div>
+														<div class ="col-sm-4"><span>{{table.from}}</span></div>
+														<div class ="col-sm-2">目标表：</div>
+														<div class ="col-sm-4"><span>{{table.to}}</span></div>
+													</div>
+												</div>
 												</div>
 											</div>
 											

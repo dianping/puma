@@ -56,3 +56,13 @@
 .puma-list-detail{
 	line-height:25px;
 }
+
+.puma-list-line{
+	display:block;
+	clear:both;
+}
+
+.puma-list-line-center{
+	/*  text-align: center; */ 
+	line-height:35px;
+}

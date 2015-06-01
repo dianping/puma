@@ -8,10 +8,7 @@ import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.puma.syncserver.job.load.LoadParser;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class BatchRow {
 
@@ -149,10 +146,15 @@ public class BatchRow {
 	@Override
 	public String toString() {
 		return "BatchRow{" +
-				"table=" + table +
-				", size=" + size +
+				"size=" + size +
+				", table=" + table +
 				", binlogInfo=" + binlogInfo +
+				", seq=" + seq +
+				", ddl=" + ddl +
+				", commit=" + commit +
+				", dmlType=" + dmlType +
 				", sql='" + sql + '\'' +
+				", params=" + Arrays.deepToString(getParams()) +
 				'}';
 	}
 

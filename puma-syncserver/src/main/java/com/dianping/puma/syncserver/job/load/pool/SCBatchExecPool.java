@@ -26,6 +26,10 @@ public class SCBatchExecPool implements BatchExecPool {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SCBatchExecPool.class);
 
+	private boolean inited = false;
+
+	private volatile boolean stopped = true;
+
 	private volatile LoadException loadException = null;
 
 	/** Pool prerequisite settings: data source host. */
@@ -111,13 +115,6 @@ public class SCBatchExecPool implements BatchExecPool {
 	}
 
 	@Override
-	public void asyncThrow() throws LoadException {
-		if (loadException != null) {
-			throw loadException;
-		}
-	}
-
-	@Override
 	public void put(BatchRow batchRow) throws LoadException {
 		lock.lock();
 		try {
@@ -126,21 +123,29 @@ public class SCBatchExecPool implements BatchExecPool {
 				notConflict.await();
 			}
 
-			if (loadException != null) {
-				throw loadException;
-			}
+			// Async throw exception, spread the exception out.
+			asyncThrow();
 
 			buffer = null;
 			register(batchRow);
-		} catch (Exception e) {
-			throw LoadException.translate(e);
+		} catch (InterruptedException ie) {
+			if (!stopped) {
+				loadException = LoadException.translate(ie);
+				stop();
+				throw loadException;
+			}
 		} finally {
 			lock.unlock();
 		}
 
-
 		beforePooledBatchExecute(batchRow);
 		pooledBatchExecute(batchRow);
+	}
+
+	private void asyncThrow() throws LoadException {
+		if (loadException != null) {
+			throw loadException;
+		}
 	}
 
 	private void initThreadPool() {
@@ -264,8 +269,11 @@ public class SCBatchExecPool implements BatchExecPool {
 		}
 
 		private void batchExecute(Connection conn, BatchRow batchRow) {
+			LOG.info("Batch execute rows({}).", batchRow.toString());
+
 			try {
 				int[] affected = (new QueryRunner()).batch(conn, batchRow.getSql(), batchRow.getParams());
+				LOG.info("Batch execute affect rows = {}.", affected[0]);
 
 				if (batchRow.getDmlType() == DMLType.UPDATE) {
 					for (int i = 0; i != affected.length; ++i) {
@@ -291,6 +299,8 @@ public class SCBatchExecPool implements BatchExecPool {
 		}
 
 		private void commit(Connection conn) {
+			LOG.info("Commit.");
+
 			try {
 				conn.commit();
 				//DbUtils.commitAndClose(conn);
@@ -325,6 +335,7 @@ public class SCBatchExecPool implements BatchExecPool {
 					return;
 				} catch (LoadException le) {
 					String msg = String.format("Executing batch row(%s) error.", batchRow.toString());
+					LOG.error(msg, le);
 					e = le;
 				}
 			}

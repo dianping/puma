@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Service("defaultTaskExecutorContainer")
+@Service("taskExecutorContainer")
 public class DefaultTaskExecutorContainer implements TaskExecutorContainer {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DefaultTaskExecutorContainer.class);
@@ -94,7 +94,6 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer {
 			Cat.logError(msg, tecException);
 		} else {
 			taskExecutor.stop();
-			taskExecutor.destroy();
 		}
 	}
 

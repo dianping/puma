@@ -36,6 +36,7 @@ public class DumpTaskOperationReceiver implements EventListener {
 
 	@Override
 	public void onEvent(Event event) {
+		/*
 		if (event instanceof DumpTaskOperationEvent) {
 			LOG.info("Receive dump task operation event.");
 
@@ -57,7 +58,6 @@ public class DumpTaskOperationReceiver implements EventListener {
 			case REMOVE:
 				taskExecutorContainer.withdraw(taskName);
 			}
-		}
+		}*/
 	}
-
 }

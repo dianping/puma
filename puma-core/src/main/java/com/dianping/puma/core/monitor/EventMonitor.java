@@ -11,14 +11,14 @@ public class EventMonitor extends AbstractPumaMonitor {
 	}
 
 	@Override
-	public void record(String name, String status) {
+	public void record(Object name, Object status) {
 		if (!isStopped()) {
-			startCountingIfNeeded(name);
-			incrCountingIfExists(name);
+			startCountingIfNeeded((String) name);
+			incrCountingIfExists((String) name);
 
-			if (checkCountingIfExists(name)) {
-				resetCountingIfExists(name);
-				monitor.logEvent(type, name, status, "");
+			if (checkCountingIfExists((String) name)) {
+				resetCountingIfExists((String) name);
+				monitor.logEvent(type, (String) name, (String) status, "");
 			}
 		}
 	}
@@ -36,7 +36,7 @@ public class EventMonitor extends AbstractPumaMonitor {
 	}
 
 	@Override
-	public void remove(String name) {
+	public void remove(Object name) {
 
 	}
 }

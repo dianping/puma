@@ -83,37 +83,4 @@ public class AllTest {
 			e.printStackTrace();
 		}
 	}
-
-	@Test(expected = LoadException.class)
-	public void testSqlDdlOnException() {
-		DdlEvent ddlEvent = new DdlEvent();
-		ddlEvent.setSeq(1);
-		ddlEvent.setBinlog("mysql-bin.000001");
-		ddlEvent.setBinlogPos(1L);
-		ddlEvent.setDatabase("all-test-from-database");
-		ddlEvent.setTable("all-test-from-table");
-		ddlEvent.setDDLType(DDLType.ALTER_TABLE);
-		ddlEvent.setSql("ALTER TABLE `all-test-from-table` ADD `name` VARCHAR(20)");
-
-		transformer.transform(ddlEvent);
-		loader.load(ddlEvent);
-
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		DdlEvent ddlEvent1 = new DdlEvent();
-		ddlEvent1.setSeq(1);
-		ddlEvent1.setBinlog("mysql-bin.000001");
-		ddlEvent1.setBinlogPos(1L);
-		ddlEvent1.setDatabase("all-test-from-database");
-		ddlEvent1.setTable("all-test-from-table");
-		ddlEvent1.setDDLType(DDLType.ALTER_TABLE);
-		ddlEvent1.setSql("ALTER TABLE `all-test-from-table` ADD `name` VARCHAR(20)");
-
-		transformer.transform(ddlEvent1);
-		loader.load(ddlEvent1);
-	}
 }

@@ -16,6 +16,8 @@ public class SCBatchRowPool implements BatchRowPool {
 
 	private boolean inited = false;
 
+	private volatile boolean stopped = true;
+
 	int transaction = -1;
 
 	private int poolSize = 100;
@@ -50,12 +52,12 @@ public class SCBatchRowPool implements BatchRowPool {
 
 	@Override
 	public void start() {
-
+		stopped = false;
 	}
 
 	@Override
 	public void stop() {
-
+		stopped = true;
 	}
 
 	@Override

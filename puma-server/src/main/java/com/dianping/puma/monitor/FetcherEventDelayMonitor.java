@@ -41,7 +41,6 @@ public class FetcherEventDelayMonitor {
 	public void init() {
 		fetcherEventDelayThreshold = configCache.getLongProperty(FETCHER_EVENT_DELAY_THRESHOLD);
 		heartbeatMonitor.setType(MONITOR_TITLE);
-		heartbeatMonitor.setDelaySeconds(delay);
 		heartbeatMonitor.setPeriodSeconds(period);
 		heartbeatMonitor.start();
 

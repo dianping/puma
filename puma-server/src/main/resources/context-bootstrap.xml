@@ -90,6 +90,12 @@
         <property name="collName" value="seq" />
     </bean>
 
+	<bean id="serverEventDelayMonitor"
+		  class="com.dianping.puma.monitor.ServerEventDelayMonitor"
+		  init-method="init"
+		  destroy-method="destroy">
+	</bean>
+
 </beans>
 
 

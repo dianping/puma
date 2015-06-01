@@ -94,8 +94,7 @@ public class WCBatchExecPool implements BatchExecPool {
 
 	}
 
-	@Override
-	public void asyncThrow() throws LoadException {
+	private void asyncThrow() throws LoadException {
 		if (loadException != null) {
 			throw loadException;
 		}

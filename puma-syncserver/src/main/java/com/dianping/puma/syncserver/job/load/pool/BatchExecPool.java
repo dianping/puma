@@ -6,8 +6,5 @@ import com.dianping.puma.syncserver.job.load.row.BatchRow;
 
 public interface BatchExecPool extends LifeCycle {
 
-	void asyncThrow() throws LoadException;
-
 	void put(BatchRow batchRow) throws LoadException;
-
 }

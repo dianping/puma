@@ -8,8 +8,10 @@ import org.mapdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
+import java.io.*;
+import java.nio.channels.FileChannel;
 import java.util.concurrent.ConcurrentNavigableMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 public class MapDBBinlogManager implements BinlogManager {
 
@@ -73,16 +75,6 @@ public class MapDBBinlogManager implements BinlogManager {
 		unfinished = db.getTreeMap(title + name + "-unfinished");
 		finished = db.getTreeMap(title + name + "-finished");
 
-		// Put the origin into the finished container if empty.
-		if (finished.isEmpty()) {
-			if (oriSeq == -3) {
-				finished.put(minSeq, oriBinlogInfo);
-			} else {
-				finished.put(oriSeq, oriBinlogInfo);
-			}
-			db.commit();
-		}
-
 		inited = true;
 	}
 
@@ -125,12 +117,16 @@ public class MapDBBinlogManager implements BinlogManager {
 		}
 
 		// Delete persistent storage.
+		finished.clear();
+		unfinished.clear();
 		db.delete(title + name + "-unfinished");
 		db.delete(title + name + "-finished");
 		db.commit();
 
 		// Close db.
 		db.close();
+
+		inited = false;
 	}
 
 	@ThreadSafe
@@ -149,7 +145,11 @@ public class MapDBBinlogManager implements BinlogManager {
 	public void after(long seq, BinlogInfo binlogInfo) {
 		try {
 			finished.put(seq, binlogInfo);
-			finished.pollFirstEntry();
+
+			if (finished.size() > 10) {
+				finished.pollFirstEntry();
+			}
+
 			unfinished.remove(seq);
 		} catch (Exception e) {
 			binlogManageException = BinlogManageException.translate(e);
@@ -172,19 +172,15 @@ public class MapDBBinlogManager implements BinlogManager {
 
 	@Override
 	public long getSeq() {
-		long seq;
-
 		if (unfinished.lastEntry() != null) {
-			seq = unfinished.lastEntry().getKey();
+			return unfinished.lastEntry().getKey();
 		} else {
 			if (finished.firstEntry() != null) {
-				seq = finished.firstEntry().getKey();
+				return finished.firstEntry().getKey();
 			} else {
-				seq = oriSeq;
+				return oriSeq;
 			}
 		}
-
-		return seq == minSeq ? -3 : seq;
 	}
 
 	public void setName(String name) {

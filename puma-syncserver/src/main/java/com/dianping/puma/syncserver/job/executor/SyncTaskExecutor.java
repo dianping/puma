@@ -170,6 +170,8 @@ public class SyncTaskExecutor implements TaskExecutor<SyncTask> {
 
 			@Override
 			public void onEvent(ChangedEvent event) throws Exception {
+				LOG.info("Receive event({}).", event.toString());
+
 				status = Status.RUNNING;
 				execute(event);
 			}

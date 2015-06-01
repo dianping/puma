@@ -1,24 +1,32 @@
 package com.dianping.puma.monitor;
 
-import com.dianping.puma.core.exception.ConfigException;
-import com.dianping.puma.monitor.ServerEventDelayMonitor;
-import org.junit.Assert;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 public class ServerEventDelayMonitorTest {
 
 	ServerEventDelayMonitor serverEventDelayMonitor = new ServerEventDelayMonitor();
 
 	@Before
-	public void before() throws ConfigException {
+	public void before() {
 		serverEventDelayMonitor.init();
 	}
 
-	@Test
-	public void testGenStatus() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+	@After
+	public void after() {
+		serverEventDelayMonitor.destroy();
 	}
+
+	@Test
+	public void test() {
+		serverEventDelayMonitor.record("puma-test", 1L);
+
+		try {
+			Thread.sleep(50000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
 }

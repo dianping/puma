@@ -11,7 +11,7 @@ public interface PumaMonitor extends LifeCycle<MonitorException> {
 
 	void pause();
 
-	void record(String name, String status);
-	
-	void remove(String name);
+	void record(Object key, Object value);
+
+	void remove(Object key);
 }

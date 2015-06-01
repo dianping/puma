@@ -182,6 +182,8 @@ public class PooledLoader implements Loader {
 
 	@Override
 	public void load(ChangedEvent event) throws LoadException {
+		LOG.info("Load event({}).", event.toString());
+
 		// Async throw exception, spread the exception out.
 		asyncThrow();
 

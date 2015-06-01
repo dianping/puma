@@ -42,12 +42,12 @@ public class TransactionMonitor extends AbstractPumaMonitor {
 	}
 
 	@Override
-	public void record(String name, String status) {
+	public void record(Object name, Object status) {
 		if (isStopped()) {
-			if (checkCountingIfExists(name)) {
+			if (checkCountingIfExists((String) name)) {
 				Transaction transaction = transactions.get(name);
 				if (transaction != null) {
-					transaction.setStatus(status);
+					transaction.setStatus((String) status);
 				}
 			}
 		}
@@ -63,7 +63,7 @@ public class TransactionMonitor extends AbstractPumaMonitor {
 	protected void doPause() {}
 
 	@Override
-	public void remove(String name) {
+	public void remove(Object name) {
 		// TODO Auto-generated method stub
 		
 	}

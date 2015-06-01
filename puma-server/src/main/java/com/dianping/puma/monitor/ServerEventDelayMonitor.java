@@ -4,48 +4,31 @@ import com.dianping.cat.Cat;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.core.monitor.HeartbeatMonitor;
-import com.dianping.puma.monitor.exception.ServerEventDelayMonitorException;
+import com.dianping.puma.core.monitor.MonitorCore;
+import com.dianping.puma.monitor.exception.ServerEventDelayException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-import javax.annotation.PostConstruct;
-
-@Service("serverEventDelayMonitor")
 public class ServerEventDelayMonitor {
-
-	private static final Logger LOG = LoggerFactory.getLogger(ServerEventDelayMonitor.class);
-
-	private static final String MONITOR_TITLE = "EventDelay.server";
 
 	private static final String SERVER_EVENT_DELAY_THRESHOLD = "puma.server.eventdelay.server.threshold";
 
 	private long serverEventDelayThreshold;
 
+	private int periodSecond;
+
 	private HeartbeatMonitor heartbeatMonitor;
 
 	private ConfigCache configCache;
 
-	private int delay;
-
-	private int period;
-
 	public ServerEventDelayMonitor() {
-		heartbeatMonitor = new HeartbeatMonitor();
-		configCache = ConfigCache.getInstance();
-		delay = 60; // 60s.
-		period = 60; // 60s.
+		periodSecond = 60;
 	}
 
-	@PostConstruct
 	public void init() {
-		serverEventDelayThreshold = ConfigCache.getInstance().getLongProperty(SERVER_EVENT_DELAY_THRESHOLD);
-		heartbeatMonitor.setType(MONITOR_TITLE);
-		heartbeatMonitor.setDelaySeconds(delay);
-		heartbeatMonitor.setPeriodSeconds(period);
-		heartbeatMonitor.start();
-
+		configCache = ConfigCache.getInstance();
 		configCache.addChange(new ConfigChange() {
 			@Override
 			public void onChange(String key, String value) {
@@ -54,25 +37,58 @@ public class ServerEventDelayMonitor {
 				}
 			}
 		});
+
+		heartbeatMonitor = new HeartbeatMonitor();
+		serverEventDelayThreshold = configCache.getLongProperty(SERVER_EVENT_DELAY_THRESHOLD);
+		heartbeatMonitor.setPeriodSeconds(periodSecond);
+		heartbeatMonitor.setCore(new ServerEventDelayMonitorCore());
+		heartbeatMonitor.start();
+	}
+
+	public void destroy() {
+		heartbeatMonitor.stop();
+	}
+
+	private class ServerEventDelayMonitorCore implements MonitorCore {
+
+		private ConcurrentMap<String, Boolean> cores = new ConcurrentHashMap<String, Boolean>();
+
+		@Override
+		public void put(Object key, Object value) {
+			cores.put((String) key, isDelay((Long) value));
+		}
+
+		@Override
+		public void remove(Object key) {
+			cores.remove(key);
+		}
+
+		@Override
+		public void clear() {
+			cores.clear();
+		}
+
+		@Override
+		public void log() {
+			for (Map.Entry<String, Boolean> entry: cores.entrySet()) {
+				if (entry.getValue()) {
+					String msg = String.format("Puma task(%s) sends event delay.", entry.getKey());
+					Cat.logError(msg, new ServerEventDelayException(msg));
+				}
+			}
+		}
+
+		private boolean isDelay(long execSeconds) {
+			return (System.currentTimeMillis() / 1000 - execSeconds) > serverEventDelayThreshold;
+		}
 	}
 
 	public void record(String taskName, long execTime) {
-		heartbeatMonitor.record(taskName, genStatus(taskName, execTime));
+		heartbeatMonitor.record(taskName, execTime);
 	}
 	
 	public void remove(String taskName) {
 		heartbeatMonitor.remove(taskName);
-	}
-
-	private String genStatus(String taskName, long execSeconds) {
-		long diff = System.currentTimeMillis() / 1000 - execSeconds;
-		if (diff < serverEventDelayThreshold) {
-			return "0";
-		} else {
-			Cat.logError("Puma.server.eventDelay", new ServerEventDelayMonitorException("puma taskname is " + taskName
-					+ ".  Delay time is " + Long.toString(diff)));
-			return "1";
-		}
 	}
 
 	public void setHeartbeatMonitor(HeartbeatMonitor heartbeatMonitor) {

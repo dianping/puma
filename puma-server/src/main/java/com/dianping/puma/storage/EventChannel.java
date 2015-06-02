@@ -6,6 +6,8 @@ import com.dianping.puma.core.event.Event;
 import com.dianping.puma.storage.exception.StorageException;
 
 public interface EventChannel {
+	public void start();
+
 	/**
 	 * close the channel.
 	 */

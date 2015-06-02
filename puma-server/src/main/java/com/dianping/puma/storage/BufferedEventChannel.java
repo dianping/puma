@@ -48,6 +48,12 @@ public class BufferedEventChannel implements EventChannel {
         eventChannel.close();
     }
 
+    @Override
+    public void start() {
+        stopped = false;
+        eventChannel.start();
+    }
+
     private void extract() {
         while (!stopped) {
             try {

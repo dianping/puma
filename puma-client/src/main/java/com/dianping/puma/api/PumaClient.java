@@ -151,7 +151,7 @@ public class PumaClient {
 					is = connect();
 					// reconnect case
 					if (is == null) {
-						Thread.sleep(100);
+						Thread.sleep(5000);
 						log.info("Puma client[" + config.getName() + "] reconnecting...");
 						continue;
 					}

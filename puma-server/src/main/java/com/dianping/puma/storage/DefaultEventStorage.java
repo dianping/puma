@@ -135,6 +135,18 @@ public class DefaultEventStorage implements EventStorage {
 			writingBucket = null;
 
 			binlogIndex.start();
+
+			for (WeakReference<EventChannel> channelRef : openChannels) {
+				EventChannel channel = channelRef.get();
+				if (channel != null) {
+					try {
+						channel.start();
+					} catch (Exception e) {
+						// ignore
+					}
+				}
+			}
+
 		} catch (Exception e) {
 			throw new StorageLifeCycleException("Storage init failed", e);
 		}

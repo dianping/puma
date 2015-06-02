@@ -12,16 +12,18 @@ public class PumaClientMainTest {
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
 
 		// Set puma client target.
-		configBuilder.target("TargetWeWillGiveYou");
+		configBuilder.target("DPShop@puma01_nh");
 
 		// Set puma client name.
 		configBuilder.name("YourClientName");
 
 		// Set the database and tables you want to listen to on format:
 		// "database", "table_1", "table_2", ...
-		configBuilder.tables("database", "table_1","table_2");
+		configBuilder.tables("DPShop", "DP_Shop","DP_ShopPOI");
 
 		Configuration configuration = configBuilder.build();
+
+		System.out.println("Configuration: " + configuration.toString());
 
 		final PumaClient pumaClient = new PumaClient(configuration);
 
@@ -29,35 +31,44 @@ public class PumaClientMainTest {
 
 			@Override
 			public void onEvent(ChangedEvent event) throws Exception {
+				//System.out.println("Bingo!");
+
 				if (event instanceof RowChangedEvent) {
-					// RowChangedEvent(UPDATE, INSERT, DELETE)
+					// UPDATE, INSERT, DELETE
 
 					RowChangedEvent rowChangedEvent = (RowChangedEvent) event;
+
+					// UPDATE.
 					if (rowChangedEvent.getDmlType() == DMLType.UPDATE) {
-						// UPDATE.
+						System.out.println("UPDATE");
+
 						Map<String, RowChangedEvent.ColumnInfo> columnInfoMap = rowChangedEvent.getColumns();
 						for (Map.Entry<String, RowChangedEvent.ColumnInfo> entry: columnInfoMap.entrySet()) {
-							System.out.println("Column Name: " + entry.getKey());
-							System.out.println("Column value before update: " + entry.getValue().getOldValue());
-							System.out.println("Column value after update: " + entry.getValue().getNewValue());
+							//System.out.println("Column Name: " + entry.getKey());
+							//System.out.println("Column value before update: " + entry.getValue().getOldValue());
+							//System.out.println("Column value after update: " + entry.getValue().getNewValue());
 						}
 					}
 
+					// INSERT.
 					if (rowChangedEvent.getDmlType() == DMLType.INSERT) {
-						// INSERT.
+						System.out.println("INSERT");
+
 						Map<String, RowChangedEvent.ColumnInfo> columnInfoMap = rowChangedEvent.getColumns();
 						for (Map.Entry<String, RowChangedEvent.ColumnInfo> entry: columnInfoMap.entrySet()) {
-							System.out.println("Column Name: " + entry.getKey());
-							System.out.println("Column value inserted: " + entry.getValue().getNewValue());
+							//System.out.println("Column Name: " + entry.getKey());
+							//System.out.println("Column value inserted: " + entry.getValue().getNewValue());
 						}
 					}
 
+					// DELETE.
 					if (rowChangedEvent.getDmlType() == DMLType.DELETE) {
-						// DELETE.
+						System.out.println("DELETE");
+
 						Map<String, RowChangedEvent.ColumnInfo> columnInfoMap = rowChangedEvent.getColumns();
 						for (Map.Entry<String, RowChangedEvent.ColumnInfo> entry: columnInfoMap.entrySet()) {
-							System.out.println("Column Name: " + entry.getKey());
-							System.out.println("Column value deleted: " + entry.getValue().getOldValue());
+							//System.out.println("Column Name: " + entry.getKey());
+							//System.out.println("Column value deleted: " + entry.getValue().getOldValue());
 						}
 					}
 				}

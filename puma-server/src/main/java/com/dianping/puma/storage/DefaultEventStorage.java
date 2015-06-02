@@ -140,7 +140,8 @@ public class DefaultEventStorage implements EventStorage {
 				EventChannel channel = channelRef.get();
 				if (channel != null) {
 					try {
-						channel.start();
+						((DefaultEventChannel) channel).setBucketManager(bucketManager);
+						//channel.start();
 					} catch (Exception e) {
 						// ignore
 					}
@@ -362,6 +363,7 @@ public class DefaultEventStorage implements EventStorage {
 			// ignore
 		}
 
+		/*
 		for (WeakReference<EventChannel> channelRef : openChannels) {
 			EventChannel channel = channelRef.get();
 			if (channel != null) {
@@ -371,7 +373,7 @@ public class DefaultEventStorage implements EventStorage {
 					// ignore
 				}
 			}
-		}
+		}*/
 
 	}
 

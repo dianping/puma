@@ -105,4 +105,8 @@ public class DefaultEventChannel implements EventChannel {
 			// ignore
 		}
 	}
+
+	public void setBucketManager(BucketManager bucketManager) {
+		this.bucketManager = bucketManager;
+	}
 }

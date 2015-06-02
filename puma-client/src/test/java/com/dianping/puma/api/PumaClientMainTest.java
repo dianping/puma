@@ -1,9 +1,5 @@
 package com.dianping.puma.api;
 
-import java.util.Map;
-
-import com.dianping.cat.Cat;
-import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.event.ChangedEvent;
 
 
@@ -22,7 +18,6 @@ public class PumaClientMainTest {
 		configBuilder.binlog("mysql-bin.000001");
 		configBuilder.binlogPos(1);
 		configBuilder.tables("DPShop", "DP_Shop","DP_ShopPOI");
-		//_parseSourceDatabaseTables(task.getMysqlMapping(), configBuilder);
 		Configuration configuration = configBuilder.build();
 
 		final PumaClient pumaClient = new PumaClient(configuration);

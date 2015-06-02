@@ -1,8 +1,69 @@
 package com.dianping.puma.api;
 
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.dianping.lion.client.ConfigCache;
+import com.dianping.lion.client.ConfigChange;
+import com.dianping.lion.client.LionException;
+
 public class ConfigurationBuilder {
 
+	private static final Logger LOG = LoggerFactory.getLogger(ConfigurationBuilder.class);
+
 	private Configuration configuration;
+
+	private static final String SUFFIX_HOST = ".host";
+	private static final String SUFFIX_PORT = ".port";
+	private static final String SUFFIX_SERVERID = ".serverid";
+	private static final String PREFIX_NAME = "puma.server.";
+
+	private void initTargetConfig() {
+		final String hostKey = PREFIX_NAME + this.configuration.getTarget() + SUFFIX_HOST;
+		final String portKey = PREFIX_NAME + this.configuration.getTarget() + SUFFIX_PORT;
+		final String serverIdKey = PREFIX_NAME + this.configuration.getTarget() + SUFFIX_SERVERID;
+		try {
+			setLionConfigHost(hostKey);
+			setLionConfigPort(portKey);
+			setLionConfigServerId(serverIdKey);
+			ConfigCache.getInstance().addChange(new ConfigChange() {
+				@Override
+				public void onChange(String key, String value) {
+					if (key.equals(hostKey)) {
+						setLionConfigHost(hostKey);
+					} else if (key.equals(portKey)) {
+						setLionConfigPort(portKey);
+					} else if (key.equals(serverIdKey)) {
+						setLionConfigServerId(serverIdKey);
+					}
+				}
+			});
+		} catch (LionException e) {
+			LOG.info("Lion not exist target config. Reason: " + e.getMessage());
+		}
+	}
+
+	private void setLionConfigHost(String key) {
+		String host = ConfigCache.getInstance().getProperty(key);
+		if (StringUtils.isNotBlank(host)) {
+			this.configuration.setHost(host);
+		}
+	}
+
+	private void setLionConfigPort(String key) {
+		Integer port = ConfigCache.getInstance().getIntProperty(key);
+		if (port != null) {
+			this.configuration.setPort(port.intValue());
+		}
+	}
+
+	private void setLionConfigServerId(String key) {
+		Long serverId = ConfigCache.getInstance().getLongProperty(key);
+		if (serverId != null) {
+			this.configuration.setServerId(serverId.longValue());
+		}
+	}
 
 	public ConfigurationBuilder() {
 		this.configuration = new Configuration();
@@ -74,6 +135,7 @@ public class ConfigurationBuilder {
 	}
 
 	public Configuration build() {
+		initTargetConfig();
 		return this.configuration;
 	}
 
@@ -81,4 +143,5 @@ public class ConfigurationBuilder {
 		this.configuration.setTarget(target);
 		return this;
 	}
+
 }

@@ -1,7 +1,9 @@
 package com.dianping.puma.channel.page.acceptor;
 
 import java.io.IOException;
-import java.util.Date;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -50,7 +52,8 @@ public class Handler implements PageHandler<Context> {
 		Payload payload = ctx.getPayload();
 
 		HttpServletResponse res = ctx.getHttpServletResponse();
-		String clientName = payload.getClientName() + "-" + Long.toString(System.currentTimeMillis()) ;;
+		String clientName = payload.getClientName() + "-" + Long.toString(System.currentTimeMillis());
+		;
 		String serverName = payload.getTarget();
 		String clientIPAddr = NetUtils.getIpAddr(ctx.getHttpServletRequest());
 		BinlogInfo binlogInfo = new BinlogInfo(payload.getBinlog(), payload.getBinlogPos());
@@ -70,8 +73,8 @@ public class Handler implements PageHandler<Context> {
 		// Construct server filter chain.
 		EventFilterChain filterChain;
 		try {
-			filterChain = EventFilterChainFactory.createEventFilterChain(payload.isDdl(), payload.isDml(), payload
-					.isNeedsTransactionMeta(), payload.getDatabaseTables());
+			filterChain = EventFilterChainFactory.createEventFilterChain(payload.isDdl(), payload.isDml(),
+					payload.isNeedsTransactionMeta(), payload.getDatabaseTables());
 		} catch (IllegalArgumentException e) {
 			LOG.error("Client construct event filter chain error: {}.", e.getStackTrace());
 			throw e;
@@ -92,7 +95,7 @@ public class Handler implements PageHandler<Context> {
 		String binlogFile = payload.getBinlog();
 		long binlogPos = payload.getBinlogPos();
 		long timeStamp = payload.getTimestamp();
-		
+
 		EventChannel channel;
 		try {
 			channel = new BufferedEventChannel(storage.getChannel(seq, serverId, binlogFile, binlogPos, timeStamp),
@@ -102,22 +105,21 @@ public class Handler implements PageHandler<Context> {
 					e1);
 			throw new IOException(e1);
 		}
-		
-		// status report
-		SystemStatusContainer.instance.addClientStatus(clientName, NetUtils.getIpAddr(ctx
-				.getHttpServletRequest()), payload.getSeq(), payload.getTarget(), payload.isDml(), payload.isDdl(),
-				payload.isNeedsTransactionMeta(), payload.getDatabaseTables(), payload.getCodecType());
-		SystemStatusContainer.instance.updateClientBinlog(clientName, payload.getBinlog(), payload
-				.getBinlogPos());
-		
-		ServerEventDelayMonitor serverEventDelayMonitor = ComponentContainer.SPRING.lookup("serverEventDelayMonitor");
 
-		HeartbeatTask heartbeatTask = new HeartbeatTask(codec, res, clientName);
+		// status report
+		SystemStatusContainer.instance.addClientStatus(clientName, NetUtils.getIpAddr(ctx.getHttpServletRequest()),
+				payload.getSeq(), payload.getTarget(), payload.isDml(), payload.isDdl(),
+				payload.isNeedsTransactionMeta(), payload.getDatabaseTables(), payload.getCodecType());
+		SystemStatusContainer.instance.updateClientBinlog(clientName, payload.getBinlog(), payload.getBinlogPos());
+
+		ServerEventDelayMonitor serverEventDelayMonitor = ComponentContainer.SPRING.lookup("serverEventDelayMonitor");
+		Lock lock = new ReentrantLock();
+		HeartbeatTask heartbeatTask = new HeartbeatTask(codec, res, clientName, lock);
 
 		while (true) {
 			try {
 				filterChain.reset();
-				ChangedEvent event = (ChangedEvent)channel.next();
+				ChangedEvent event = (ChangedEvent) channel.next();
 
 				if (event != null) {
 
@@ -125,21 +127,31 @@ public class Handler implements PageHandler<Context> {
 
 					if (filterChain.doNext(event)) {
 						byte[] data = codec.encode(event);
-						synchronized (res){
-							res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
-							res.getOutputStream().write(data);
-							res.getOutputStream().flush();
+						if (lock.tryLock(60, TimeUnit.SECONDS)) {
+							try {
+								res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
+								res.getOutputStream().write(data);
+								res.getOutputStream().flush();
+							} finally {
+								lock.unlock();
+							}
+						} else {
+							throw new IOException("Client obtain write changedEvent lock failed.");
 						}
 						// status report
-						SystemStatusContainer.instance.updateClientInfo(clientName, event.getSeq(),event.getBinlog(), event.getBinlogPos());
+						SystemStatusContainer.instance.updateClientInfo(clientName, event.getSeq(), event.getBinlog(),
+								event.getBinlogPos());
 					}
 				}
+
+			} catch (InterruptedException e) {
+				LOG.warn(clientName + " puma server write changedEvent interrupted.");
 			} catch (Exception e) {
 				Cat.logError("Puma.client.channelClosed:", new ChannelClosedException(e));
 				SystemStatusContainer.instance.removeClient(clientName);
 				serverEventDelayMonitor.remove(clientName);
 				heartbeatTask.cancelFuture();
-				LOG.info("Client(" +clientName + ") failed. ", e);
+				LOG.info("Client(" + clientName + ") failed. ", e);
 				break;
 			}
 		}

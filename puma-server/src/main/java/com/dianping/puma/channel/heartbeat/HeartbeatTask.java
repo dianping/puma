@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -44,9 +45,11 @@ public class HeartbeatTask {
 
 	private ScheduledExecutorService executorService = null;
 
-	ServerEventDelayMonitor serverEventDelayMonitor;
+	private ServerEventDelayMonitor serverEventDelayMonitor;
 
-	public HeartbeatTask(EventCodec codec, HttpServletResponse response, String clientName) {
+	private Lock lock;
+
+	public HeartbeatTask(EventCodec codec, HttpServletResponse response, String clientName, Lock lock) {
 		this.clientName = clientName;
 		this.initialDelay = 0;
 		this.unit = TimeUnit.MILLISECONDS;
@@ -54,6 +57,7 @@ public class HeartbeatTask {
 		event = new HeartbeatEvent();
 		this.codec = codec;
 		this.response = response;
+		this.lock = lock;
 		executorService = HeartbeatScheduledExecutor.instance.getExecutorService();
 		execute();
 		serverEventDelayMonitor = ComponentContainer.SPRING.lookup("serverEventDelayMonitor");
@@ -124,13 +128,21 @@ public class HeartbeatTask {
 
 				try {
 					byte[] data = codec.encode(event);
-					synchronized (response) {
-						response.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
-						response.getOutputStream().write(data);
-						response.getOutputStream().flush();
+					if (lock.tryLock(60, TimeUnit.SECONDS)) {
+						try {
+							response.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
+							response.getOutputStream().write(data);
+							response.getOutputStream().flush();
+						} finally {
+							lock.unlock();
+						}
+					} else {
+						throw new IOException("Client obtain write changedEvent lock failed.");
 					}
 					LOG.info(HeartbeatTask.this.clientName + " puma server heartbeat sended.");
 					Cat.logEvent("ClientConnect.heartbeated", HeartbeatTask.this.clientName, Message.SUCCESS, "");
+				} catch (InterruptedException e) {
+					LOG.warn(HeartbeatTask.this.clientName + " puma server heartbeat interrupted.");
 				} catch (IOException e) {
 					HeartbeatTask.this.cancelFuture();
 					try {

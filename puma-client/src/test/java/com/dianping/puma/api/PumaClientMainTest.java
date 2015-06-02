@@ -1,37 +1,75 @@
 package com.dianping.puma.api;
 
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.RowChangedEvent;
+import com.dianping.puma.core.util.sql.DMLType;
 
+import java.util.Map;
 
 public class PumaClientMainTest {
 	
 	public PumaClient createPumaClient() {
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
-		configBuilder.host("192.168.224.101");
-		configBuilder.port(8080);
-		configBuilder.name("ClientTest");
-		configBuilder.serverId(1);
-		configBuilder.target("dpshop@server_beta");
-		configBuilder.dml(true);
-		configBuilder.ddl(true);
-		configBuilder.transaction(true);
-		configBuilder.binlog("mysql-bin.000001");
-		configBuilder.binlogPos(1);
-		configBuilder.tables("DPShop", "DP_Shop","DP_ShopPOI");
+
+		// Set puma client target.
+		configBuilder.target("TargetWeWillGiveYou");
+
+		// Set puma client name.
+		configBuilder.name("YourClientName");
+
+		// Set the database and tables you want to listen to on format:
+		// "database", "table_1", "table_2", ...
+		configBuilder.tables("database", "table_1","table_2");
+
 		Configuration configuration = configBuilder.build();
 
 		final PumaClient pumaClient = new PumaClient(configuration);
-		pumaClient.getSeqFileHolder().saveSeq(-1L);
 
 		pumaClient.register(new EventListener() {
 
 			@Override
 			public void onEvent(ChangedEvent event) throws Exception {
-				System.out.println(event.toString());
+				if (event instanceof RowChangedEvent) {
+					// RowChangedEvent(UPDATE, INSERT, DELETE)
+
+					RowChangedEvent rowChangedEvent = (RowChangedEvent) event;
+					if (rowChangedEvent.getDmlType() == DMLType.UPDATE) {
+						// UPDATE.
+						Map<String, RowChangedEvent.ColumnInfo> columnInfoMap = rowChangedEvent.getColumns();
+						for (Map.Entry<String, RowChangedEvent.ColumnInfo> entry: columnInfoMap.entrySet()) {
+							System.out.println("Column Name: " + entry.getKey());
+							System.out.println("Column value before update: " + entry.getValue().getOldValue());
+							System.out.println("Column value after update: " + entry.getValue().getNewValue());
+						}
+					}
+
+					if (rowChangedEvent.getDmlType() == DMLType.INSERT) {
+						// INSERT.
+						Map<String, RowChangedEvent.ColumnInfo> columnInfoMap = rowChangedEvent.getColumns();
+						for (Map.Entry<String, RowChangedEvent.ColumnInfo> entry: columnInfoMap.entrySet()) {
+							System.out.println("Column Name: " + entry.getKey());
+							System.out.println("Column value inserted: " + entry.getValue().getNewValue());
+						}
+					}
+
+					if (rowChangedEvent.getDmlType() == DMLType.DELETE) {
+						// DELETE.
+						Map<String, RowChangedEvent.ColumnInfo> columnInfoMap = rowChangedEvent.getColumns();
+						for (Map.Entry<String, RowChangedEvent.ColumnInfo> entry: columnInfoMap.entrySet()) {
+							System.out.println("Column Name: " + entry.getKey());
+							System.out.println("Column value deleted: " + entry.getValue().getOldValue());
+						}
+					}
+				}
 			}
 
 			@Override
 			public boolean onException(ChangedEvent event, Exception e) {
+
+				// Do your own exception handling.
+
+				// Return false if you want to stop the puma client when exception is thrown from `onEvent`.
+				// Return true if you want to ignore the exception and keep on listening.
 				return false;
 			}
 
@@ -57,6 +95,5 @@ public class PumaClientMainTest {
 		PumaClientMainTest main = new PumaClientMainTest();
 		PumaClient pumaClient = main.createPumaClient();
 		pumaClient.start();
-		
 	}
 }

@@ -20,6 +20,12 @@ public class BinlogInfo implements Serializable, Comparable<BinlogInfo> {
 		this.binlogPosition = binlogPosition;
 	}
 
+	public BinlogInfo(String binlogFile, Long binlogPosition, Boolean skipToNextPos) {
+		this.binlogFile = binlogFile;
+		this.binlogPosition = binlogPosition;
+		this.skipToNextPos = skipToNextPos;
+	}
+
 	public String getBinlogFile() {
 		return binlogFile;
 	}

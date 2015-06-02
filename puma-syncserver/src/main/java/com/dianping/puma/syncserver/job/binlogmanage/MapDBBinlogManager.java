@@ -4,12 +4,13 @@ import com.dianping.puma.core.annotation.ThreadSafe;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.syncserver.job.binlogmanage.exception.BinlogManageException;
 
-import org.mapdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -21,37 +22,15 @@ public class MapDBBinlogManager implements BinlogManager {
 
 	private boolean stopped = true;
 
-	/**
-	 * MapDB binlog manager exception, default null.
-	 */
-	private BinlogManageException binlogManageException = null;
-
-	/**
-	 * MapDB.
-	 */
-	private DB db;
-
-	/**
-	 * Unfinished binlog infos.
-	 */
-	private ConcurrentNavigableMap<Long, BinlogInfo> unfinished;
-
-	/**
-	 * Finished binlog infos.
-	 */
-	private ConcurrentNavigableMap<Long, BinlogInfo> finished;
-
-	/**
-	 * MapDB binlog manager title.
-	 */
-	private String title = "BinlogManager-";
-
-	/**
-	 * MapDB binlog manager name.
-	 */
 	private String name;
 
-	private final long minSeq = Long.MIN_VALUE;
+	private String folderName;
+
+	private MappedByteBuffer mbb;
+
+	private ConcurrentNavigableMap<Long, BinlogInfo> unfinished;
+
+	private ConcurrentNavigableMap<Long, BinlogInfo> finished;
 
 	private long oriSeq;
 
@@ -68,28 +47,27 @@ public class MapDBBinlogManager implements BinlogManager {
 			return;
 		}
 
-		db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlog/", title + name)).closeOnJvmShutdown()
-				.transactionDisable().asyncWriteEnable().mmapFileEnableIfSupported().make();
+		createFolderIfNeeded(folderName);
+		createFileIfNeededAndMapToBuffer(folderName, name);
 
-		// Read from the persistent storage.
-		unfinished = db.getTreeMap(title + name + "-unfinished");
-		finished = db.getTreeMap(title + name + "-finished");
+		finished = new ConcurrentSkipListMap<Long, BinlogInfo>();
+		unfinished = new ConcurrentSkipListMap<Long, BinlogInfo>();
 
 		inited = true;
 	}
 
-	/*
 	@Override
 	public void destroy() {
 		if (!inited) {
 			return;
 		}
 
-		db.commit();
-		db.close();
+		mbb = null;
+		finished = null;
+		unfinished = null;
 
-		inited = false;
-	}*/
+		deleteFile(folderName, name);
+	}
 
 	@Override
 	public void start() {
@@ -98,6 +76,8 @@ public class MapDBBinlogManager implements BinlogManager {
 		}
 
 		stopped = false;
+
+		loadBreakpoint();
 	}
 
 	@Override
@@ -107,54 +87,27 @@ public class MapDBBinlogManager implements BinlogManager {
 		}
 
 		stopped = true;
-	}
 
-	@Override
-	public void destroy() {
-		if (db.isClosed()) {
-			db = DBMaker.newFileDB(new File("/data/appdatas/puma/binlog/", title + name)).closeOnJvmShutdown()
-					.transactionDisable().asyncWriteEnable().mmapFileEnableIfSupported().make();
-		}
-
-		// Delete persistent storage.
 		finished.clear();
 		unfinished.clear();
-		db.delete(title + name + "-unfinished");
-		db.delete(title + name + "-finished");
-		db.commit();
-
-		// Close db.
-		db.close();
-
-		inited = false;
 	}
 
 	@ThreadSafe
 	@Override
 	public void before(long seq, BinlogInfo binlogInfo) {
-		try {
-			unfinished.put(seq, binlogInfo);
-		} catch (Exception e) {
-			binlogManageException = BinlogManageException.translate(e);
-			throw binlogManageException;
-		}
+		unfinished.put(seq, binlogInfo);
 	}
 
 	@ThreadSafe
 	@Override
 	public void after(long seq, BinlogInfo binlogInfo) {
-		try {
-			finished.put(seq, binlogInfo);
+		finished.put(seq, binlogInfo);
 
-			if (finished.size() > 10) {
-				finished.pollFirstEntry();
-			}
-
-			unfinished.remove(seq);
-		} catch (Exception e) {
-			binlogManageException = BinlogManageException.translate(e);
-			throw binlogManageException;
+		if (finished.size() > 100) {
+			finished.pollFirstEntry();
 		}
+
+		unfinished.remove(seq);
 	}
 
 	@Override
@@ -183,7 +136,72 @@ public class MapDBBinlogManager implements BinlogManager {
 		}
 	}
 
+	private void createFolderIfNeeded(String folderName) {
+		File folder = new File(folderName);
+		if (!folder.exists()) {
+			if (!folder.mkdirs()) {
+				throw new RuntimeException(String.format("Unable to create folder(%s).", folderName));
+			}
+		}
+	}
+
+	private void createFileIfNeededAndMapToBuffer(String folderName, String fileName) {
+		File file = new File(folderName, fileName);
+		if (!file.exists()) {
+			try {
+				if (!file.createNewFile()) {
+					throw new RuntimeException(String.format("Unable to create file(%s).", file.getAbsolutePath()));
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(String.format("Unable to create file(%s).", file.getAbsolutePath()));
+			}
+		}
+
+		try {
+			mbb = new RandomAccessFile(file, "rwd").getChannel().map(FileChannel.MapMode.READ_WRITE, 0, 200);
+		} catch (IOException e) {
+			throw new RuntimeException(String.format("Unable to map file(%s) to buffer.", file.getAbsolutePath()));
+		}
+	}
+
+	private void deleteFile(String folderName, String fileName) {
+		File file = new File(folderName, fileName);
+		if (!file.delete()) {
+			throw new RuntimeException(String.format("Unable to delete file(%s).", file.getAbsolutePath()));
+		}
+	}
+
+	protected void loadBreakpoint() {
+		try {
+			mbb.position(0);
+			String[] breakpointInfos = Charset.defaultCharset().decode(mbb).toString().split("\n");
+			oriSeq = Long.parseLong(breakpointInfos[0]);
+			oriBinlogInfo = new BinlogInfo(breakpointInfos[1], Long.parseLong(breakpointInfos[2]), Boolean.parseBoolean(breakpointInfos[3]));
+		} catch (RuntimeException e) {
+			String msg = String.format("Binlog manager(%s) load breakpoint error.", name);
+			LOG.error(msg);
+		}
+	}
+
+	protected void saveBreakpoint() {
+		mbb.position(0);
+		mbb.put(new byte[200]);
+		mbb.position(0);
+		mbb.put(String.valueOf(getSeq()).getBytes());
+		mbb.put("\n".getBytes());
+		mbb.put(String.valueOf(getBinlogInfo().getBinlogFile()).getBytes());
+		mbb.put("\n".getBytes());
+		mbb.put(String.valueOf(getBinlogInfo().getBinlogPosition()).getBytes());
+		mbb.put("\n".getBytes());
+		mbb.put(String.valueOf(getBinlogInfo().isSkipToNextPos()).getBytes());
+		mbb.put("\n".getBytes());
+	}
+
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public void setFolderName(String folderName) {
+		this.folderName = folderName;
 	}
 }

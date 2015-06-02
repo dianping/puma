@@ -59,6 +59,7 @@ public class BufferedEventChannel implements EventChannel {
             try {
                 eventBuffer.put(eventChannel.next());
             } catch (Throwable e) {
+                e.printStackTrace();
             }
         }
     }

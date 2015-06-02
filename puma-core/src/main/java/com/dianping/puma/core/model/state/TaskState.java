@@ -82,7 +82,6 @@ public abstract class TaskState {
 	}
 
 	public void setStatus(Status status) {
-		this.strStatus = status.getDesc();
 		this.status = status;
 	}
 

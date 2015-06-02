@@ -225,7 +225,8 @@ public class SyncTaskController {
 			SyncTaskState syncTaskState = syncTaskStateService.find(syncTask.getName());
 			syncTaskState.setStatus(Status.PREPARING);
 			this.syncTaskService.updateStatusAction(name, ActionController.RESUME);
-			syncTaskControllerReporter.report(syncTask.getSyncServerName(), syncTask.getName(), ActionController.RESUME);
+			syncTaskControllerReporter
+					.report(syncTask.getSyncServerName(), syncTask.getName(), ActionController.RESUME);
 			map.put("success", true);
 		} catch (IllegalArgumentException e) {
 			map.put("success", false);

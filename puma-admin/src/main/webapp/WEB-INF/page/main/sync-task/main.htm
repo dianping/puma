@@ -50,21 +50,21 @@
 									role="grid" aria-describedby="sample-table-2_info">
 									<thead>
 										<tr role="row">
-											<th>任务源</th>
-											<th>目标数据库实例</th>
-											<th>同步服务器</th>
-											<th>状态</th>
-											<th>日志进度</th>
-											<th>操作</th>
+											<th class="hidden-50">任务源</th>
+											<th class="hidden-50">目标数据库实例</th>
+											<th class="hidden-20">同步服务器</th>
+											<th class="hidden-50">状态</th>
+											<th class="hidden-50">日志进度</th>
+											<th class="hidden-50">操作</th>
 										</tr>
 									</thead>
 
 									<tbody>
 
 										<tr role="row" class="odd" ng-repeat-start="item in items  | orderBy: 'syncServerName'">
-											<td><a href="javascript:void(0)" ng-click ="item.isShow=!item.isShow;">{{item.pumaTaskName}}</a></td>
-											<td>{{item.dstDBInstanceName}}</td>
-											<td>{{item.syncServerName}}</td>
+											<td><a href="javascript:void(0)" ng-click ="item.isShow=!item.isShow;">{{item.pumaTaskName|cut:true:25:'...'}}</a></td>
+											<td>{{item.dstDBInstanceName|cut:true:25:'...'}}</td>
+											<td>{{item.syncServerName|cut:true:20:'...'}}</td>
 											<td><span
 												ng-class="{'label-success' :state(item.name).status == 'RUNNING','label-warning' : state(item.name).status== 'FAILED' }"
 												class="label label-sm">{{state(item.name).strStatus}}</span></td>

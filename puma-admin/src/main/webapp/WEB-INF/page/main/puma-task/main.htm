@@ -61,9 +61,9 @@
 									<tbody>
 
 										<tr role="row" class="odd" ng-repeat-start="item in items">
-											<td><a href="javascript:void(0)" ng-click ="item.isShow=!item.isShow;">{{item.name}}</a></td>
-											<td>{{item.srcDBInstanceName}}</td>
-											<td class="hidden-480">{{item.pumaServerName}}</td>
+											<td><a href="javascript:void(0)" ng-click ="item.isShow=!item.isShow;">{{item.name|cut:true:25:'...'}}</a></td>
+											<td>{{item.srcDBInstanceName|cut:true:25:'...'}}</td>
+											<td class="hidden-480">{{item.pumaServerName|cut:true:20:'...'}}</td>
 
 											<td><span
 												ng-class="{'label-success' : state(item.name).status== 'RUNNING','label-warning' : state(item.name).status== 'FAILED' }"

@@ -236,14 +236,14 @@ public class PumaTaskController {
 
 		try {
 			PumaTask pumaTask = pumaTaskService.find(name);
-			if(pumaTask == null){
+			if (pumaTask == null) {
 				throw new NullPointerException();
 			}
 			List<SyncTask> syncTasks = syncTaskService.findByPumaTaskName(pumaTask.getName());
-			if(syncTasks!=null&&syncTasks.size()>0){
+			if (syncTasks != null && syncTasks.size() > 0) {
 				throw new IllegalArgumentException();
 			}
-			
+
 			this.pumaTaskService.remove(name);
 
 			pumaTaskStateService.remove(name);

@@ -20,9 +20,9 @@ public class ConfigurationBuilder {
 	private static final String PREFIX_NAME = "puma.server.";
 
 	private void initTargetConfig() {
-		final String hostKey = PREFIX_NAME + this.configuration.getTarget() + SUFFIX_HOST;
-		final String portKey = PREFIX_NAME + this.configuration.getTarget() + SUFFIX_PORT;
-		final String serverIdKey = PREFIX_NAME + this.configuration.getTarget() + SUFFIX_SERVERID;
+		final String hostKey = PREFIX_NAME + StringUtils.lowerCase(this.configuration.getTarget()) + SUFFIX_HOST;
+		final String portKey = PREFIX_NAME + StringUtils.lowerCase(this.configuration.getTarget()) + SUFFIX_PORT;
+		final String serverIdKey = PREFIX_NAME + StringUtils.lowerCase(this.configuration.getTarget()) + SUFFIX_SERVERID;
 		try {
 			setLionConfigHost(hostKey);
 			setLionConfigPort(portKey);

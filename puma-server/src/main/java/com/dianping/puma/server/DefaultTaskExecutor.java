@@ -131,7 +131,9 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				if (dumpBinlog()) {
 					isNeedStop = false;
 					processBinlog();
-				} 
+				} else{
+					throw new IOException("binlog dump failed.");
+				}
 			} catch (Throwable e) {
 				if (isNeedStop) {
 					Cat.logError("Puma.server.failed", new ServerEventFetcherException(e));

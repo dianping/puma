@@ -85,7 +85,7 @@ public class DefaultEventChannel implements EventChannel {
 			if (bucket != null) {
 				try {
 					bucket.stop();
-					//bucket = null;
+					bucket = null;
 				} catch (IOException e) {
 					// ignore
 				}

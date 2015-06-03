@@ -24,6 +24,9 @@ import java.util.Map;
 
 import com.dianping.puma.core.constant.SubscribeConstant;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * TODO Comment of Configuration
  * 
@@ -288,18 +291,10 @@ public class Configuration implements Serializable {
 	}
 
 	public void validate() {
-		if (host == null || host.trim().length() == 0) {
-			throw new IllegalArgumentException("Puma client's host not set.");
-		}
-		if (name == null || name.trim().length() == 0) {
-			throw new IllegalArgumentException("Puma client's name not set.");
-		}
-		if (target == null || target.trim().length() == 0) {
-			throw new IllegalArgumentException("Puma client's target not set.");
-		}
-		if (databaseTablesMapping == null || databaseTablesMapping.size() == 0) {
-			throw new IllegalArgumentException("Puma client's db&tb not set.");
-		}
+		checkNotNull(target, "Puma client configuration target is null.");
+		checkNotNull(name, "Puma client configuration name is null.");
+		checkNotNull(host, "Puma client configuration host is null.");
+		checkNotNull(databaseTablesMapping, "Puma client configuration database tables mapping is null.");
 	}
 
 	public String getTarget() {

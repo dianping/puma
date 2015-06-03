@@ -4,6 +4,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.dianping.puma.api.exception.PumaClientConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +13,6 @@ import com.dianping.cat.message.Message;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
-import com.dianping.puma.core.exception.HeartbeatException;
 import com.dianping.puma.core.util.ScheduledExecutorUtils;
 
 public class HeartbeatListener {
@@ -141,7 +141,7 @@ public class HeartbeatListener {
 				LOG.info("PumaClient " + pumaClient.getConfig().getName()
 						+ " no receive heartbeat. restart pumaClient.");
 				Cat.logEvent("ClientConnect.heartbeated", pumaClient.getConfig().getName(), "1", "");
-				Cat.logError("ClientConnect.heartbeated.losed", new HeartbeatLosedException("PumaClient "
+				Cat.logError("ClientConnect.heartbeated.losed", new PumaClientConnectException("PumaClient "
 						+ pumaClient.getConfig().getName() + " no receive heartbeat. restart pumaClient."));
 				pumaClient.stop();
 				pumaClient.start();

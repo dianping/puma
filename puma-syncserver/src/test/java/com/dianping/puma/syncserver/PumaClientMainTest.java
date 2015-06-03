@@ -19,6 +19,48 @@ public class PumaClientMainTest {
 	static long delete;
 
 	public PumaClient createPumaClient() {
+		PumaClient pumaClient;
+
+		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
+		configBuilder.ddl(false);
+		configBuilder.dml(true);
+		configBuilder.host("1.1.1.1");
+		configBuilder.port(7823);
+		configBuilder.name("tuangou-receipt-job");
+		configBuilder.tables("TuanGou2010", "TG_DealReceiptInfo");
+		configBuilder.target("tuangou2010");
+		configBuilder.transaction(false);
+		pumaClient = new PumaClient(configBuilder.build());
+
+		System.out.println("######################seq:" + pumaClient.getSeqFileHolder().getSeq());
+
+		pumaClient.register(new EventListener() {
+			@Override public void onEvent(ChangedEvent event) throws Exception {
+				System.out.println(event.toString());
+			}
+
+			@Override public boolean onException(ChangedEvent event, Exception e) {
+				return true;
+			}
+
+			@Override public void onConnectException(Exception e) {
+
+			}
+
+			@Override public void onConnected() {
+
+			}
+
+			@Override public void onSkipEvent(ChangedEvent event) {
+
+			}
+		});
+
+		return pumaClient;
+	}
+
+	/*
+	public PumaClient createPumaClient() {
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
 
 		// Set puma client target.
@@ -111,7 +153,7 @@ public class PumaClientMainTest {
 		});
 
 		return pumaClient;
-	}
+	}*/
 	
 	public static void main(String []args){
 		PumaClientMainTest main = new PumaClientMainTest();

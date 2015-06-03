@@ -7,11 +7,10 @@ import com.dianping.puma.core.util.sql.DMLType;
 import java.util.Map;
 
 public class PumaClientMainTest {
-	
+
 	public PumaClient createPumaClient() {
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
 
-		/*
 		// Set puma client target.
 		configBuilder.target("DPShop@puma01_nh");
 
@@ -21,14 +20,6 @@ public class PumaClientMainTest {
 		// Set the database and tables you want to listen to on format:
 		// "database", "table_1", "table_2", ...
 		configBuilder.tables("DPShop", "DP_Shop","DP_ShopPOI");
-		*/
-
-		configBuilder.target("beta-from-5.6@lixt_0602");
-		configBuilder.host("10.128.121.111");
-		configBuilder.port(8080);
-		configBuilder.serverId(1);
-		configBuilder.name("TEST");
-		configBuilder.tables("Pressure", "business_5_6");
 
 		Configuration configuration = configBuilder.build();
 
@@ -53,9 +44,9 @@ public class PumaClientMainTest {
 
 						Map<String, RowChangedEvent.ColumnInfo> columnInfoMap = rowChangedEvent.getColumns();
 						for (Map.Entry<String, RowChangedEvent.ColumnInfo> entry: columnInfoMap.entrySet()) {
-							//System.out.println("Column Name: " + entry.getKey());
-							//System.out.println("Column value before update: " + entry.getValue().getOldValue());
-							//System.out.println("Column value after update: " + entry.getValue().getNewValue());
+							System.out.println("Column Name: " + entry.getKey());
+							System.out.println("Column value before update: " + entry.getValue().getOldValue());
+							System.out.println("Column value after update: " + entry.getValue().getNewValue());
 						}
 					}
 
@@ -65,8 +56,8 @@ public class PumaClientMainTest {
 
 						Map<String, RowChangedEvent.ColumnInfo> columnInfoMap = rowChangedEvent.getColumns();
 						for (Map.Entry<String, RowChangedEvent.ColumnInfo> entry: columnInfoMap.entrySet()) {
-							//System.out.println("Column Name: " + entry.getKey());
-							//System.out.println("Column value inserted: " + entry.getValue().getNewValue());
+							System.out.println("Column Name: " + entry.getKey());
+							System.out.println("Column value inserted: " + entry.getValue().getNewValue());
 						}
 					}
 
@@ -76,8 +67,8 @@ public class PumaClientMainTest {
 
 						Map<String, RowChangedEvent.ColumnInfo> columnInfoMap = rowChangedEvent.getColumns();
 						for (Map.Entry<String, RowChangedEvent.ColumnInfo> entry: columnInfoMap.entrySet()) {
-							//System.out.println("Column Name: " + entry.getKey());
-							//System.out.println("Column value deleted: " + entry.getValue().getOldValue());
+							System.out.println("Column Name: " + entry.getKey());
+							System.out.println("Column value deleted: " + entry.getValue().getOldValue());
 						}
 					}
 				}
@@ -95,12 +86,10 @@ public class PumaClientMainTest {
 
 			@Override
 			public void onConnectException(Exception e) {
-				
 			}
 
 			@Override
 			public void onConnected() {
-				
 			}
 
 			@Override

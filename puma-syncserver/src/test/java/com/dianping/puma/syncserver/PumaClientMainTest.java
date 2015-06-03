@@ -12,6 +12,12 @@ import java.util.Map;
 
 public class PumaClientMainTest {
 
+	static long update;
+
+	static long insert;
+
+	static long delete;
+
 	public PumaClient createPumaClient() {
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
 
@@ -44,7 +50,8 @@ public class PumaClientMainTest {
 
 					// UPDATE.
 					if (rowChangedEvent.getDmlType() == DMLType.UPDATE) {
-						System.out.println("UPDATE");
+						++update;
+						System.out.println("UPDATE:" + update);
 
 						Map<String, RowChangedEvent.ColumnInfo> columnInfoMap = rowChangedEvent.getColumns();
 						for (Map.Entry<String, RowChangedEvent.ColumnInfo> entry: columnInfoMap.entrySet()) {
@@ -56,7 +63,8 @@ public class PumaClientMainTest {
 
 					// INSERT.
 					if (rowChangedEvent.getDmlType() == DMLType.INSERT) {
-						System.out.println("INSERT");
+						++insert;
+						System.out.println("INSERT:" + insert);
 
 						Map<String, RowChangedEvent.ColumnInfo> columnInfoMap = rowChangedEvent.getColumns();
 						for (Map.Entry<String, RowChangedEvent.ColumnInfo> entry: columnInfoMap.entrySet()) {
@@ -67,7 +75,8 @@ public class PumaClientMainTest {
 
 					// DELETE.
 					if (rowChangedEvent.getDmlType() == DMLType.DELETE) {
-						System.out.println("DELETE");
+						++delete;
+						System.out.println("DELETE:" + delete);
 
 						Map<String, RowChangedEvent.ColumnInfo> columnInfoMap = rowChangedEvent.getColumns();
 						for (Map.Entry<String, RowChangedEvent.ColumnInfo> entry: columnInfoMap.entrySet()) {

@@ -67,6 +67,7 @@ public class PumaClient {
 		pumaClientTask.setActive(false);
 		if (subscribeThread != null) {
 			subscribeThread.interrupt();
+			subscribeThread = null;
 		}
 
 		heartbeatListener.stop();
@@ -180,6 +181,11 @@ public class PumaClient {
 						}
 
 						Event event = readEvent(is);
+
+						if (checkStop()) {
+							break;
+						}
+
 						if (event instanceof HeartbeatEvent) {
 							onHeartbeatEvent((HeartbeatEvent)event);
 						} else {

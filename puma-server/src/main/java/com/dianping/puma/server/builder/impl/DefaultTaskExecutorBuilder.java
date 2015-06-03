@@ -1,5 +1,6 @@
 package com.dianping.puma.server.builder.impl;
 
+import com.dianping.puma.ComponentContainer;
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.PumaTask;
@@ -18,6 +19,8 @@ import com.dianping.puma.filter.*;
 import com.dianping.puma.monitor.FetcherEventCountMonitor;
 import com.dianping.puma.monitor.FetcherEventDelayMonitor;
 import com.dianping.puma.monitor.ParserEventCountMonitor;
+import com.dianping.puma.monitor.StorageEventCountMonitor;
+import com.dianping.puma.monitor.StorageEventGroupMonitor;
 import com.dianping.puma.parser.DefaultBinlogParser;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.FileDumpSender;
@@ -48,7 +51,11 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 	private FetcherEventCountMonitor fetcherEventCountMonitor;
 	@Autowired
 	private ParserEventCountMonitor parserEventCountMonitor;
-
+	@Autowired
+	private StorageEventCountMonitor storageEventCountMonitor;
+	@Autowired
+	private StorageEventGroupMonitor storageEventGroupMonitor;
+	
 	@Autowired
 	SrcDBInstanceService srcDBInstanceService;
 
@@ -171,7 +178,9 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 
 			// storage.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
 			storage.setCodec(jsonCodec);
-
+			storage.setStorageEventCountMonitor(storageEventCountMonitor);
+			storage.setStorageEventGroupMonitor(storageEventGroupMonitor);
+			
 			EventFilterChain eventFilterChain = new DefaultEventFilterChain();
 			List<EventFilter> eventFilterList = new ArrayList<EventFilter>();
 

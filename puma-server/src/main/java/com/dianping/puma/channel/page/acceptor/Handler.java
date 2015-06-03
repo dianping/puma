@@ -114,7 +114,7 @@ public class Handler implements PageHandler<Context> {
 
 		ServerEventDelayMonitor serverEventDelayMonitor = ComponentContainer.SPRING.lookup("serverEventDelayMonitor");
 		Lock lock = new ReentrantLock();
-		HeartbeatTask heartbeatTask = new HeartbeatTask(codec, res, clientName, lock);
+		HeartbeatTask heartbeatTask = new HeartbeatTask(codec, res, clientName, lock, serverEventDelayMonitor);
 
 		while (true) {
 			try {

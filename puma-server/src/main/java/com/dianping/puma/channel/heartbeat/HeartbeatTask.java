@@ -49,7 +49,8 @@ public class HeartbeatTask {
 
 	private Lock lock;
 
-	public HeartbeatTask(EventCodec codec, HttpServletResponse response, String clientName, Lock lock) {
+	public HeartbeatTask(EventCodec codec, HttpServletResponse response, String clientName, Lock lock,
+			ServerEventDelayMonitor serverEventDelayMonitor) {
 		this.clientName = clientName;
 		this.initialDelay = 0;
 		this.unit = TimeUnit.MILLISECONDS;
@@ -60,7 +61,7 @@ public class HeartbeatTask {
 		this.lock = lock;
 		executorService = HeartbeatScheduledExecutor.instance.getExecutorService();
 		execute();
-		serverEventDelayMonitor = ComponentContainer.SPRING.lookup("serverEventDelayMonitor");
+		this.serverEventDelayMonitor = serverEventDelayMonitor;
 		Log.info("puma server HeartbeatTask constructed.");
 	}
 
@@ -151,7 +152,7 @@ public class HeartbeatTask {
 						// ignore
 					}
 					SystemStatusContainer.instance.removeClient(HeartbeatTask.this.clientName);
-					serverEventDelayMonitor.remove(clientName);
+					// serverEventDelayMonitor.remove(clientName);
 					Cat.logEvent("ClientConnect.heartbeated", HeartbeatTask.this.clientName, "1", "");
 					Cat.logError("ClientConnect.heartbeated.closed: ", new HeartbeatSenderException(
 							"ClientConnect.heartbeated.closed", e));
@@ -193,6 +194,14 @@ public class HeartbeatTask {
 
 	public void setFuture(@SuppressWarnings("rawtypes") Future future) {
 		this.future = future;
+	}
+
+	public ServerEventDelayMonitor getServerEventDelayMonitor() {
+		return serverEventDelayMonitor;
+	}
+
+	public void setServerEventDelayMonitor(ServerEventDelayMonitor serverEventDelayMonitor) {
+		this.serverEventDelayMonitor = serverEventDelayMonitor;
 	}
 
 }

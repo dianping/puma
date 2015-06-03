@@ -116,13 +116,10 @@ public class DefaultEventStorage implements EventStorage {
 				new BinlogIndexKeyConvertor());
 
 		cleanupStrategy.addDataIndex(binlogIndex);
-
-		storageEventCountMonitor = ComponentContainer.SPRING.lookup("storageEventCountMonitor");
+		
 		if (storageEventCountMonitor != null) {
 			LOG.info("Find `storageEventCountMonitor` spring bean success.");
 		}
-
-		storageEventGroupMonitor = ComponentContainer.SPRING.lookup("storageEventGroupMonitor");
 		if (storageEventGroupMonitor != null) {
 			LOG.info("Find `storageEventGroupMonitor` spring bean success.");
 		}
@@ -375,6 +372,22 @@ public class DefaultEventStorage implements EventStorage {
 			}
 		}*/
 
+	}
+
+	public StorageEventCountMonitor getStorageEventCountMonitor() {
+		return storageEventCountMonitor;
+	}
+
+	public void setStorageEventCountMonitor(StorageEventCountMonitor storageEventCountMonitor) {
+		this.storageEventCountMonitor = storageEventCountMonitor;
+	}
+
+	public StorageEventGroupMonitor getStorageEventGroupMonitor() {
+		return storageEventGroupMonitor;
+	}
+
+	public void setStorageEventGroupMonitor(StorageEventGroupMonitor storageEventGroupMonitor) {
+		this.storageEventGroupMonitor = storageEventGroupMonitor;
 	}
 
 }

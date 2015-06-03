@@ -152,7 +152,7 @@ public class HeartbeatTask {
 						// ignore
 					}
 					SystemStatusContainer.instance.removeClient(HeartbeatTask.this.clientName);
-					// serverEventDelayMonitor.remove(clientName);
+					serverEventDelayMonitor.remove(clientName);
 					Cat.logEvent("ClientConnect.heartbeated", HeartbeatTask.this.clientName, "1", "");
 					Cat.logError("ClientConnect.heartbeated.closed: ", new HeartbeatSenderException(
 							"ClientConnect.heartbeated.closed", e));

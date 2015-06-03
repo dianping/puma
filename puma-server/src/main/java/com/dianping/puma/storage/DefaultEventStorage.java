@@ -9,17 +9,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.dianping.puma.ComponentContainer;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.monitor.StorageEventCountMonitor;
 import com.dianping.puma.monitor.StorageEventGroupMonitor;
 
-import org.apache.commons.lang.StringUtils;
-
-import com.dianping.lion.client.ConfigCache;
-import com.dianping.lion.client.ConfigChange;
-import com.dianping.lion.client.LionException;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.constant.SubscribeConstant;

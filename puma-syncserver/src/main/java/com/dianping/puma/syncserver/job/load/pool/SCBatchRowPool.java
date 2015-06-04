@@ -1,6 +1,8 @@
 package com.dianping.puma.syncserver.job.load.pool;
 
+import com.dianping.cat.Cat;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.syncserver.job.load.exception.LoadException;
 import com.dianping.puma.syncserver.job.load.row.BatchRow;
@@ -18,13 +20,16 @@ public class SCBatchRowPool implements BatchRowPool {
 
 	private volatile boolean stopped = true;
 
-	int transaction = -1;
+	private boolean concurrent;
+
+	private Transaction transaction = Transaction.BEGIN;
 
 	private int poolSize = 100;
 
 	protected BlockingDeque<BatchRow> batchRows;
 
-	public SCBatchRowPool() {}
+	public SCBatchRowPool() {
+	}
 
 	@Override
 	public void init() {
@@ -32,7 +37,6 @@ public class SCBatchRowPool implements BatchRowPool {
 			return;
 		}
 
-		transaction = -1;
 		batchRows = new LinkedBlockingDeque<BatchRow>(poolSize);
 
 		inited = true;
@@ -62,35 +66,6 @@ public class SCBatchRowPool implements BatchRowPool {
 
 	@Override
 	public void put(ChangedEvent event) throws LoadException {
-		if (event instanceof RowChangedEvent) {
-			RowChangedEvent row = (RowChangedEvent) event;
-
-			switch (transaction) {
-			case -1:
-				if (!row.isTransactionBegin() && !row.isTransactionCommit()) {
-					batch(event);
-				}
-				break;
-			case 0:
-				if (!row.isTransactionBegin()) {
-					batch(event);
-				}
-				break;
-			case 1:
-				break;
-			}
-
-			if (row.isTransactionBegin()) {
-				transaction = -1;
-			} else if (row.isTransactionCommit()) {
-				transaction = 1;
-			} else {
-				transaction = 0;
-			}
-
-		} else {
-			batch(event);
-		}
 	}
 
 	@Override
@@ -100,6 +75,56 @@ public class SCBatchRowPool implements BatchRowPool {
 		} catch (InterruptedException e) {
 			throw LoadException.translate(e);
 		}
+	}
+
+	private boolean acceptConsistent(ChangedEvent event) {
+		if (event instanceof DdlEvent) {
+			return true;
+		} else {
+			RowChangedEvent row = (RowChangedEvent) event;
+
+			switch (transaction) {
+			case UNSET:
+				return (!row.isTransactionBegin() && !row.isTransactionCommit());
+			case BEGIN:
+				if (row.isTransactionBegin()) {
+					handleEventOrderException(event);
+					return false;
+				} else {
+					return true;
+				}
+			case DML:
+				if (row.isTransactionBegin()) {
+					handleEventOrderException(event);
+					return false;
+				} else {
+					return true;
+				}
+			case COMMIT:
+				if (row.isTransactionBegin()) {
+					return false;
+				} else {
+					handleEventOrderException(event);
+					return false;
+				}
+			default:
+				return false;
+			}
+		}
+	}
+
+	private boolean acceptNoConsistent() {
+		return false;
+	}
+
+	private void handleEventOrderException(ChangedEvent event) {
+		String msg = String.format("Batch row pool event order exception: event(%s).", event.toString());
+		LoadException e = new LoadException(-1, msg); // Can not recover, set -1.
+
+		LOG.error(msg, e);
+		Cat.logError(msg, e);
+
+		throw e;
 	}
 
 	private void batch(ChangedEvent event) {
@@ -119,5 +144,12 @@ public class SCBatchRowPool implements BatchRowPool {
 
 	public void setPoolSize(int poolSize) {
 		this.poolSize = poolSize;
+	}
+
+	private enum Transaction {
+		UNSET,
+		BEGIN,
+		DML,
+		COMMIT,
 	}
 }

@@ -1,6 +1,5 @@
 package com.dianping.puma.syncserver.job.load;
 
-import com.dianping.cat.Cat;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.monitor.EventMonitor;
 import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;

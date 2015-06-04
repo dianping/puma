@@ -169,10 +169,11 @@ public class PumaClient {
 					// Client connect to server failure, sleep and reconnect.
 					if (is == null) {
 						Thread.sleep(10000);
-
+						Cat.logEvent("Puma.state", "client:reconnect", "0", "");
 						continue;
 					}
 
+					Cat.logEvent("Puma.state", "client:connected", "0", "");
 					LOG.info("Puma client({}) reading events...", config.getName());
 
 					while (true) {
@@ -219,6 +220,7 @@ public class PumaClient {
 							LOG.info("Puma client({}) closing connection...", config.getName());
 
 							is.close();
+							Cat.logEvent("Puma.state", "client:close", "0", "");
 						} catch (IOException e) {
 							LOG.warn("Puma client({}) closing connection failure.", config.getName());
 						}

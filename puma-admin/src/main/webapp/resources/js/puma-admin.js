@@ -302,7 +302,7 @@ formApp
 										: '';
 								$scope.entity.dstDBInstanceName = $scope.entity.dstDBInstanceName ? $scope.entity.dstDBInstanceName
 										: '';
-								$scope.entity.name = $scope.entity.pumaTaskName
+								$scope.entity.name = 'Sync-' + $scope.entity.pumaTaskName
 										+ '@' + $scope.entity.dstDBInstanceName;
 							};
 

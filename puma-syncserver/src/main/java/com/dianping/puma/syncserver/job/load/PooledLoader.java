@@ -187,7 +187,12 @@ public class PooledLoader implements Loader {
 		asyncThrow();
 
 		loadEventMonitor.record(event.genFullName(), "0");
-		batchRowPool.put(event);
+
+		try {
+			batchRowPool.put(event);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
 	}
 
 	public void asyncThrow() throws LoadException {
@@ -198,9 +203,9 @@ public class PooledLoader implements Loader {
 
 	private void initBatchRowPool() {
 		if (consistent) {
-			SCBatchRowPool scBatchRowPool = new SCBatchRowPool();
-			scBatchRowPool.setPoolSize(batchRowPoolSize);
-			batchRowPool = scBatchRowPool;
+			BatchRowPoolConsistent batchRowPoolConsistent = new BatchRowPoolConsistent();
+			batchRowPoolConsistent.setPoolSize(batchRowPoolSize);
+			batchRowPool = batchRowPoolConsistent;
 		} else {
 			WCBatchRowPool wcBatchRowPool = new WCBatchRowPool();
 			wcBatchRowPool.setPoolSize(batchRowPoolSize);
@@ -211,19 +216,19 @@ public class PooledLoader implements Loader {
 
 	private void initBatchExecPool() {
 		if (consistent) {
-			SCBatchExecPool scBatchExecPool = new SCBatchExecPool();
-			scBatchExecPool.setHost(host);
-			scBatchExecPool.setUsername(username);
-			scBatchExecPool.setPassword(password);
-			scBatchExecPool.setPoolSize(1);
-			scBatchExecPool.setRetires(retries);
-			scBatchExecPool.setBinlogManager(binlogManager);
-			scBatchExecPool.setDelay(delay);
-			scBatchExecPool.setUpdates(updates);
-			scBatchExecPool.setInserts(inserts);
-			scBatchExecPool.setDeletes(deletes);
-			scBatchExecPool.setDdls(ddls);
-			batchExecPool = scBatchExecPool;
+			BatchExecPoolConsistent batchExecPoolConsistent = new BatchExecPoolConsistent();
+			batchExecPoolConsistent.setHost(host);
+			batchExecPoolConsistent.setUsername(username);
+			batchExecPoolConsistent.setPassword(password);
+			batchExecPoolConsistent.setPoolSize(1);
+			batchExecPoolConsistent.setRetires(retries);
+			batchExecPoolConsistent.setBinlogManager(binlogManager);
+			batchExecPoolConsistent.setLagSeconds(delay);
+			batchExecPoolConsistent.setUpdates(updates);
+			batchExecPoolConsistent.setInserts(inserts);
+			batchExecPoolConsistent.setDeletes(deletes);
+			batchExecPoolConsistent.setDdls(ddls);
+			batchExecPool = batchExecPoolConsistent;
 		} else {
 			WCBatchExecPool wcBatchExecPool = new WCBatchExecPool();
 			wcBatchExecPool.setHost(host);
@@ -245,6 +250,8 @@ public class PooledLoader implements Loader {
 					BatchRow batchRow = batchRowPool.take();
 					batchExecPool.put(batchRow);
 				}
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 			} catch (LoadException e) {
 				if (!stopped) {
 					loadException = e;

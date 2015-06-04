@@ -12,15 +12,13 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 
-public class SCBatchRowPool implements BatchRowPool {
+public class BatchRowPoolConsistent implements BatchRowPool {
 
-	private static final Logger LOG = LoggerFactory.getLogger(SCBatchRowPool.class);
+	private static final Logger LOG = LoggerFactory.getLogger(BatchRowPoolConsistent.class);
 
 	private boolean inited = false;
 
 	private volatile boolean stopped = true;
-
-	private boolean concurrent;
 
 	private Transaction transaction = Transaction.BEGIN;
 
@@ -28,7 +26,7 @@ public class SCBatchRowPool implements BatchRowPool {
 
 	protected BlockingDeque<BatchRow> batchRows;
 
-	public SCBatchRowPool() {
+	public BatchRowPoolConsistent() {
 	}
 
 	@Override
@@ -56,28 +54,47 @@ public class SCBatchRowPool implements BatchRowPool {
 
 	@Override
 	public void start() {
+		if (!stopped) {
+			return;
+		}
+
 		stopped = false;
+
+		transaction = Transaction.UNSET;
 	}
 
 	@Override
 	public void stop() {
+		if (stopped) {
+			return;
+		}
+
 		stopped = true;
+
+		batchRows.clear();
 	}
 
 	@Override
-	public void put(ChangedEvent event) throws LoadException {
-	}
+	public void put(ChangedEvent event) throws InterruptedException {
+		if (accept(event)) {
+			BatchRow last = batchRows.peekLast();
 
-	@Override
-	public BatchRow take() throws LoadException {
-		try {
-			return batchRows.take();
-		} catch (InterruptedException e) {
-			throw LoadException.translate(e);
+			if (last == null) {
+				batchRows.put(new BatchRow(event));
+			} else {
+				if (!last.addRow(event)) {
+					batchRows.put(new BatchRow(event));
+				}
+			}
 		}
 	}
 
-	private boolean acceptConsistent(ChangedEvent event) {
+	@Override
+	public BatchRow take() throws InterruptedException {
+		return batchRows.take();
+	}
+
+	private boolean accept(ChangedEvent event) {
 		if (event instanceof DdlEvent) {
 			return true;
 		} else {
@@ -113,10 +130,6 @@ public class SCBatchRowPool implements BatchRowPool {
 		}
 	}
 
-	private boolean acceptNoConsistent() {
-		return false;
-	}
-
 	private void handleEventOrderException(ChangedEvent event) {
 		String msg = String.format("Batch row pool event order exception: event(%s).", event.toString());
 		LoadException e = new LoadException(-1, msg); // Can not recover, set -1.
@@ -125,21 +138,6 @@ public class SCBatchRowPool implements BatchRowPool {
 		Cat.logError(msg, e);
 
 		throw e;
-	}
-
-	private void batch(ChangedEvent event) {
-		try {
-			BatchRow last = batchRows.peekLast();
-			if (last == null) {
-				batchRows.put(new BatchRow(event));
-			} else {
-				if (!last.addRow(event)) {
-					batchRows.put(new BatchRow(event));
-				}
-			}
-		} catch (InterruptedException e) {
-			throw LoadException.translate(e);
-		}
 	}
 
 	public void setPoolSize(int poolSize) {

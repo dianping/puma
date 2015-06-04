@@ -28,7 +28,7 @@ public class PumaClientMainTest {
 		configBuilder.port(7823);
 		configBuilder.name("tuangou-receipt-job");
 		configBuilder.tables("TuanGou2010", "TG_DealReceiptInfo");
-		configBuilder.target("tuangou2010o");
+		configBuilder.target("tuangou2010");
 		configBuilder.transaction(false);
 		pumaClient = new PumaClient(configBuilder.build());
 

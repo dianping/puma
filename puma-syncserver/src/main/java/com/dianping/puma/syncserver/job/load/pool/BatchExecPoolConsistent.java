@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
@@ -22,32 +21,29 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class SCBatchExecPool implements BatchExecPool {
+public class BatchExecPoolConsistent implements BatchExecPool {
 
-	private static final Logger LOG = LoggerFactory.getLogger(SCBatchExecPool.class);
+	private static final Logger logger = LoggerFactory.getLogger(BatchExecPoolConsistent.class);
 
 	private boolean inited = false;
-
 	private volatile boolean stopped = true;
-
 	private volatile LoadException loadException = null;
 
-	/** Pool prerequisite settings: data source host. */
+	private String name;
+
+	private BinlogManager binlogManager;
+	private HikariDataSource dataSource;
+	private ExecutorService threadPool;
+
 	private String host;
-
-	/** Pool prerequisite settings: data source username. */
 	private String username;
-
-	/** Pool prerequisite settings: data source password. */
 	private String password;
 
-	/** Batch exec pool size, always 1. */
 	private int poolSize = 1;
 
-	/** Batch exec pool sql retries, default 1. */
 	private int retries = 1;
 
-	private Connection cachedConn;
+	private Connection connCached;
 
 	/** Pool current size. */
 	private int size = 0;
@@ -55,106 +51,72 @@ public class SCBatchExecPool implements BatchExecPool {
 	// Batch row which is blocked.
 	private BatchRow buffer;
 
-	// Thread pool.
-	private ExecutorService threadPool;
-
-	// JDBC connection pool.
-	private HikariDataSource dataSource;
-
-	private BinlogManager binlogManager;
-
 	// Used to block the put operation.
 	private Lock lock = new ReentrantLock();
 	private final Condition notConflict = lock.newCondition();
 
-	private Thread warnDelayThread;
-
-	/** Binlog events delay statistics. */
-	private AtomicLong delay;
-
-	/** Update statistics. */
+	private AtomicLong lagSeconds;
 	private AtomicLong updates;
-
-	/** Insert statistics. */
 	private AtomicLong inserts;
-
-	/** Delete statistics. */
 	private AtomicLong deletes;
-
-	/** DDL statistics. */
 	private AtomicLong ddls;
 
-	public SCBatchExecPool() {}
+	public BatchExecPoolConsistent() {}
 
 	@Override
 	public void init() {
-		loadException = null;
+		if (inited) {
+			return;
+		}
 
+		binlogManager.init();
 		initDataSource();
+		initConnection();
 		initThreadPool();
 
-		warnDelayThread = new Thread(new WarnDelayTask());
+		inited = true;
 	}
 
 	@Override
 	public void destroy() {
-		warnDelayThread = null;
+		if (!inited) {
+			return;
+		}
 
 		destroyThreadPool();
+		destroyConnection();
 		destroyDataSource();
+		binlogManager.destroy();
+
+		inited = false;
 	}
 
 	@Override
 	public void start() {
-		warnDelayThread.start();
+		if (!stopped) {
+			return;
+		}
+
+		stopped = false;
+
+		binlogManager.start();
 	}
 
 	@Override
 	public void stop() {
-		warnDelayThread.interrupt();
-	}
-
-	@Override
-	public void put(BatchRow batchRow) throws LoadException {
-		lock.lock();
-		try {
-			buffer = batchRow;
-			while (!check(batchRow)) {
-				notConflict.await();
-			}
-
-			// Async throw exception, spread the exception out.
-			asyncThrow();
-
-			buffer = null;
-			register(batchRow);
-		} catch (InterruptedException ie) {
-			if (!stopped) {
-				loadException = LoadException.translate(ie);
-				stop();
-				throw loadException;
-			}
-		} finally {
-			lock.unlock();
+		if (stopped) {
+			return;
 		}
 
-		beforePooledBatchExecute(batchRow);
-		pooledBatchExecute(batchRow);
+		stopped = true;
+
+		binlogManager.stop();
 	}
 
 	private void asyncThrow() throws LoadException {
 		if (loadException != null) {
 			throw loadException;
 		}
-	}
-
-	private void initThreadPool() {
-		threadPool = Executors.newCachedThreadPool();
-	}
-
-	private void destroyThreadPool() {
-		threadPool.shutdown();
-		threadPool = null;
 	}
 
 	private void initDataSource() {
@@ -167,9 +129,64 @@ public class SCBatchExecPool implements BatchExecPool {
 		dataSource.setAutoCommit(false);
 	}
 
+	private void initConnection() {
+		try {
+			if (connCached == null || connCached.isClosed()) {
+				connCached = dataSource.getConnection();
+			}
+		} catch (SQLException e) {
+			String msg = String.format("Batch exec pool(%s) initializing connection failure.", name);
+			logger.error(msg, e);
+			throw new RuntimeException(msg, e);
+		}
+	}
+
+	private void initThreadPool() {
+		threadPool = Executors.newCachedThreadPool();
+	}
+
 	private void destroyDataSource() {
 		dataSource.close();
 		dataSource = null;
+	}
+
+	private void destroyConnection() {
+		try {
+			if (connCached != null && !connCached.isClosed()) {
+				connCached.close();
+			}
+		} catch (SQLException e) {
+			String msg = String.format("Batch exec pool(%s) destroying connection failure.", name);
+			logger.error(msg, e);
+			throw new RuntimeException(msg, e);
+		}
+	}
+
+	private void destroyThreadPool() {
+		threadPool.shutdown();
+		threadPool = null;
+	}
+
+	@Override
+	public void put(BatchRow batchRow) throws InterruptedException {
+		lock.lock();
+		try {
+			buffer = batchRow;
+			while (!check(batchRow)) {
+				notConflict.await();
+			}
+
+			// Async throw exception, spread the exception out.
+			asyncThrow();
+
+			buffer = null;
+			register(batchRow);
+		} finally {
+			lock.unlock();
+		}
+
+		beforePooledBatchExecute(batchRow);
+		pooledBatchExecute(batchRow);
 	}
 
 	private void remove(BatchRow batchRow) {
@@ -197,7 +214,7 @@ public class SCBatchExecPool implements BatchExecPool {
 	}
 
 	private void beforePooledBatchExecute(BatchRow batchRow) {
-		if (batchRow.isCommit()) {
+		if (batchRow.isCommit() || batchRow.isDdl()) {
 			binlogManager.before(batchRow.getSeq(), batchRow.getBinlogInfo());
 		}
 	}
@@ -209,8 +226,8 @@ public class SCBatchExecPool implements BatchExecPool {
 	}
 
 	private void doStatistic(BatchRow batchRow) {
-		// Binlog events delay.
-		delay.set(System.currentTimeMillis() - batchRow.getExecuteTime());
+		// Binlog events lagSeconds.
+		lagSeconds.set(System.currentTimeMillis() - batchRow.getExecuteTime());
 
 		if (batchRow.isCommit()) {
 			// Do nothing.
@@ -227,16 +244,6 @@ public class SCBatchExecPool implements BatchExecPool {
 			case DELETE:
 				deletes.addAndGet(batchRow.size());
 				break;
-			}
-		}
-	}
-
-	private class WarnDelayTask implements Runnable {
-
-		@Override
-		public void run() {
-			if (delay.get() > 30 * 1000) {
-				Cat.logError("Binlog delay too much.", new LoadException(0));
 			}
 		}
 	}
@@ -258,22 +265,32 @@ public class SCBatchExecPool implements BatchExecPool {
 
 		private Connection getConnection() {
 			try {
-				if (cachedConn == null || cachedConn.isClosed()) {
-					cachedConn = dataSource.getConnection();
+				if (connCached == null || connCached.isClosed()) {
+					connCached = dataSource.getConnection();
 				}
 
-				return cachedConn;
+				return connCached;
 			} catch (SQLException e) {
 				throw LoadException.translate(e);
 			}
 		}
 
+		private void executeDml(Connection conn, BatchRow batchRow) {
+			try {
+				int[] affected = (new QueryRunner()).batch(conn, batchRow.getSql(), batchRow.getParams());
+
+
+			} catch (SQLException e) {
+
+			}
+		}
+
 		private void batchExecute(Connection conn, BatchRow batchRow) {
-			LOG.info("Batch execute rows({}).", batchRow.toString());
+			logger.info("Batch execute rows({}).", batchRow.toString());
 
 			try {
 				int[] affected = (new QueryRunner()).batch(conn, batchRow.getSql(), batchRow.getParams());
-				LOG.info("Batch execute affect rows = {}.", affected[0]);
+				logger.info("Batch execute affect rows = {}.", affected[0]);
 
 				if (batchRow.getDmlType() == DMLType.UPDATE) {
 					for (int i = 0; i != affected.length; ++i) {
@@ -299,7 +316,7 @@ public class SCBatchExecPool implements BatchExecPool {
 		}
 
 		private void commit(Connection conn) {
-			LOG.info("Commit.");
+			logger.info("Commit.");
 
 			try {
 				conn.commit();
@@ -335,7 +352,7 @@ public class SCBatchExecPool implements BatchExecPool {
 					return;
 				} catch (LoadException le) {
 					String msg = String.format("Executing batch row(%s) error.", batchRow.toString());
-					LOG.error(msg, le);
+					logger.error(msg, le);
 					e = le;
 				}
 			}
@@ -371,8 +388,8 @@ public class SCBatchExecPool implements BatchExecPool {
 		this.binlogManager = binlogManager;
 	}
 
-	public void setDelay(AtomicLong delay) {
-		this.delay = delay;
+	public void setLagSeconds(AtomicLong lagSeconds) {
+		this.lagSeconds = lagSeconds;
 	}
 
 	public void setUpdates(AtomicLong updates) {

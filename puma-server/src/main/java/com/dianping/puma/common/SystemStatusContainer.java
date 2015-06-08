@@ -199,55 +199,70 @@ public enum SystemStatusContainer {
 	public Map<String, Long> listStorageStatus() {
 		return Collections.unmodifiableMap(storageStatus);
 	}
+    /*
+	public Map<String, TaskExecutorStatus> listExecutorStatus() {
+		setExecutorStatus();
+		return Collections.unmodifiableMap(taskExecutorStatus);
+	}
 
-	/*
-	 * public Map<String, TaskExecutorStatus> listExecutorStatus() {
-	 * setExecutorStatus(); return
-	 * Collections.unmodifiableMap(taskExecutorStatus); }
-	 * 
-	 * 
-	 * private void setExecutorStatus(){ Map<String, Server> serverTasks =
-	 * DefaultTaskManager.instance.getTaskExecutorMap(); TaskExecutorStatus
-	 * executorStatus = null; for(Entry<String, Server>
-	 * serverItem:serverTasks.entrySet()){ String taskName =
-	 * serverItem.getKey(); if(taskExecutorStatus.containsKey(taskName)){
-	 * executorStatus=taskExecutorStatus.get(taskName); }else{
-	 * executorStatus=new TaskExecutorStatus(); }
-	 * executorStatus.setServerName(DefaultTaskManager.instance.getName());
-	 * Server task = serverItem.getValue();
-	 * executorStatus.setTaskId(task.getServerId());
-	 * executorStatus.setTaskName(task.getName()); BinlogInfo binlogInfo = null;
-	 * if(executorStatus.getStartBinlogInfo() == null){ binlogInfo=new
-	 * BinlogInfo(); executorStatus.setStartBinlogInfo(binlogInfo); }
-	 * binlogInfo=executorStatus.getStartBinlogInfo();
-	 * binlogInfo.setBinlogFile(task.getDefaultBinlogFileName());
-	 * binlogInfo.setBinlogPosition(task.getDefaultBinlogPosition());
-	 * if(executorStatus.getCurrentBinlogInfo() == null){ binlogInfo=new
-	 * BinlogInfo(); executorStatus.setCurrentBinlogInfo(binlogInfo); }
-	 * binlogInfo=executorStatus.getCurrentBinlogInfo();
-	 * binlogInfo.setBinlogFile(task.getContext().getBinlogFileName());
-	 * binlogInfo.setBinlogPosition(task.getContext().getBinlogStartPos());
-	 * executorStatus.setDbServerId(task.getContext().getDBServerId()); if(task
-	 * instanceof ReplicationBasedServer){
-	 * executorStatus.setDBHost(((ReplicationBasedServer)task).getDBHost());
-	 * executorStatus.setPort(((ReplicationBasedServer)task).getPort()); }
-	 * executorStatus.setExecutorStatus(task.getTaskStatus());
-	 * executorStatus.setInsertCount(0); executorStatus.setUpdateCount(0);
-	 * executorStatus.setDeleteCount(0); executorStatus.setDdlCount(0);
-	 * Map<String, AtomicLong> insertCount = listServerRowInsertCounters();
-	 * if(insertCount.containsKey(taskName)){
-	 * executorStatus.setInsertCount(insertCount.get(taskName).longValue()); }
-	 * Map<String, AtomicLong> updateCount = listServerRowUpdateCounters();
-	 * if(updateCount.containsKey(taskName)){
-	 * executorStatus.setUpdateCount(updateCount.get(taskName).longValue()); }
-	 * Map<String, AtomicLong> deleteCount = listServerRowDeleteCounters();
-	 * if(deleteCount.containsKey(taskName)){
-	 * executorStatus.setDeleteCount(deleteCount.get(taskName).longValue()); }
-	 * Map<String, AtomicLong> ddlCount = listServerDdlCounters();
-	 * if(ddlCount.containsKey(taskName)){
-	 * executorStatus.setDdlCount(ddlCount.get(taskName).longValue()); }
-	 * taskExecutorStatus.put(taskName,executorStatus); } }
-	 */
+	private void setExecutorStatus() {
+		Map<String, Server> serverTasks = DefaultTaskManager.instance.getTaskExecutorMap();
+		TaskExecutorStatus executorStatus = null;
+		for (Entry<String, Server> serverItem : serverTasks.entrySet()) {
+			String taskName = serverItem.getKey();
+			if (taskExecutorStatus.containsKey(taskName)) {
+				executorStatus = taskExecutorStatus.get(taskName);
+			} else {
+				executorStatus = new TaskExecutorStatus();
+			}
+			executorStatus.setServerName(DefaultTaskManager.instance.getName());
+			Server task = serverItem.getValue();
+			executorStatus.setTaskId(task.getServerId());
+			executorStatus.setTaskName(task.getName());
+			BinlogInfo binlogInfo = null;
+			if (executorStatus.getStartBinlogInfo() == null) {
+				binlogInfo = new BinlogInfo();
+				executorStatus.setStartBinlogInfo(binlogInfo);
+			}
+			binlogInfo = executorStatus.getStartBinlogInfo();
+			binlogInfo.setBinlogFile(task.getDefaultBinlogFileName());
+			binlogInfo.setBinlogPosition(task.getDefaultBinlogPosition());
+			if (executorStatus.getCurrentBinlogInfo() == null) {
+				binlogInfo = new BinlogInfo();
+				executorStatus.setCurrentBinlogInfo(binlogInfo);
+			}
+			binlogInfo = executorStatus.getCurrentBinlogInfo();
+			binlogInfo.setBinlogFile(task.getContext().getBinlogFileName());
+			binlogInfo.setBinlogPosition(task.getContext().getBinlogStartPos());
+			executorStatus.setDbServerId(task.getContext().getDBServerId());
+			if (task instanceof ReplicationBasedServer) {
+				executorStatus.setDBHost(((ReplicationBasedServer) task).getDBHost());
+				executorStatus.setPort(((ReplicationBasedServer) task).getPort());
+			}
+			executorStatus.setExecutorStatus(task.getTaskStatus());
+			executorStatus.setInsertCount(0);
+			executorStatus.setUpdateCount(0);
+			executorStatus.setDeleteCount(0);
+			executorStatus.setDdlCount(0);
+			Map<String, AtomicLong> insertCount = listServerRowInsertCounters();
+			if (insertCount.containsKey(taskName)) {
+				executorStatus.setInsertCount(insertCount.get(taskName).longValue());
+			}
+			Map<String, AtomicLong> updateCount = listServerRowUpdateCounters();
+			if (updateCount.containsKey(taskName)) {
+				executorStatus.setUpdateCount(updateCount.get(taskName).longValue());
+			}
+			Map<String, AtomicLong> deleteCount = listServerRowDeleteCounters();
+			if (deleteCount.containsKey(taskName)) {
+				executorStatus.setDeleteCount(deleteCount.get(taskName).longValue());
+			}
+			Map<String, AtomicLong> ddlCount = listServerDdlCounters();
+			if (ddlCount.containsKey(taskName)) {
+				executorStatus.setDdlCount(ddlCount.get(taskName).longValue());
+			}
+			taskExecutorStatus.put(taskName, executorStatus);
+		}
+	}*/
 
 	public static class ClientStatus {
 		private String target;

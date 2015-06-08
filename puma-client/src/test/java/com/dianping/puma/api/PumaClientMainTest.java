@@ -12,7 +12,7 @@ public class PumaClientMainTest {
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
 
 		// Set puma client target.
-		configBuilder.target("DPShop@puma01_n");
+		configBuilder.target("DPShop@puma01_nh");
 
 		configBuilder.host("1.1.1.1");
 
@@ -24,7 +24,9 @@ public class PumaClientMainTest {
 		configBuilder.tables("DPShop", "DP_Shop","DP_ShopPOI");
 
 		Configuration configuration = configBuilder.build();
-
+		
+		configuration.setSeqFileBase("remote");
+		
 		System.out.println("Configuration: " + configuration.toString());
 
 		final PumaClient pumaClient = new PumaClient(configuration);

@@ -26,10 +26,11 @@ public class PumaClientMainTest {
 		configBuilder.dml(true);
 		configBuilder.host("1.1.1.1");
 		configBuilder.port(7823);
-		configBuilder.name("tuangou-receipt-job");
-		configBuilder.tables("TuanGou2010", "TG_DealReceiptInfo");
-		configBuilder.target("tuangou2010");
+		configBuilder.name("HELLO_WORLD");
+		configBuilder.tables("PCTOrder", "TG_Order");
+		configBuilder.target("pctorder");
 		configBuilder.transaction(false);
+		configBuilder.seqFileBase("memcached");
 		pumaClient = new PumaClient(configBuilder.build());
 
 		System.out.println("######################seq:" + pumaClient.getSeqFileHolder().getSeq());

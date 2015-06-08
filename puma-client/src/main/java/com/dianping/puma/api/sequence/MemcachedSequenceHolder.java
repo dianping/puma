@@ -47,11 +47,15 @@ public class MemcachedSequenceHolder implements SequenceHolder {
 		this.config = config;
 		SPRING_CONTAINER.start();
 		cacheService = (CacheService) SPRING_CONTAINER.getBean("cacheService");
-		StringBuilder path = new StringBuilder();
-		path.append(config.getName()).append("-");
-		path.append(config.getTarget());
-		cacheKey = new CacheKey("puma-seq", path.toString());
-		logger.info("puma cache key:" + path.toString());
+		String key = (new StringBuilder())
+				.append("seq")
+				.append("-")
+				.append(config.getName())
+				.append("-")
+				.append(config.getTarget())
+				.toString();
+		cacheKey = new CacheKey("puma-seq", key);
+		logger.info("puma cache key:" + key);
 
 		try {
 			fileSequenceHolder = new FileSequenceHolder(config);

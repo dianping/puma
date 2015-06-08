@@ -43,7 +43,7 @@ public class Configuration implements Serializable {
 	private boolean needTransactionInfo = false;
 	private int port = 7862;
 	private String name;
-	private String seqFileBase = "/data/applogs/puma/";
+	private String seqFileBase = "remote";
 	private String target;
 	private long serverId = -1L;
 	private String binlog;

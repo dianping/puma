@@ -50,11 +50,12 @@ public class PumaClient {
 
 		this.config = configuration;
 		String seqBase = configuration.getSeqFileBase();
-		if (seqBase != null && seqBase.equalsIgnoreCase("memcached")) {
-			this.sequenceHolder = new MemcachedSequenceHolder(configuration);
-		} else {
+		if (seqBase != null && seqBase.equalsIgnoreCase("local")) {
 			this.sequenceHolder = new FileSequenceHolder(configuration);
+		} else {
+			this.sequenceHolder = new MemcachedSequenceHolder(configuration);
 		}
+
 		codec = EventCodecFactory.createCodec(configuration.getCodecType());
 		heartbeatListener = new HeartbeatListener(this);
 	}

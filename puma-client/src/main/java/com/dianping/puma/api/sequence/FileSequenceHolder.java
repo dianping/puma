@@ -34,7 +34,7 @@ import com.dianping.puma.core.constant.SubscribeConstant;
  */
 public class FileSequenceHolder implements SequenceHolder {
 	private static final int MAX_FILE_LENGTH = 100;
-	private String seqFileBase;
+	private final String seqFileBase = "/data/appdatas/puma/";
 	private Configuration config;
 	private MappedByteBuffer buf;
 	private RandomAccessFile file;
@@ -42,14 +42,11 @@ public class FileSequenceHolder implements SequenceHolder {
 	private static final byte[] BUF_MASK = new byte[MAX_FILE_LENGTH];
 
 	public FileSequenceHolder(Configuration config) {
-		this.seqFileBase = config.getSeqFileBase();
 		this.config = config;
 
-		if (seqFileBase.startsWith("memcached")) {
-			this.seqFileBase = "/tmp";
-		}
 		String filePath = getSeqConfigFilePath();
-		File seqFile = new File(filePath);
+		File seqFile = new File(seqFileBase, filePath);
+		filePath = seqFile.getAbsolutePath();
 		initSeq(seqFile);
 		ensureFile(filePath);
 
@@ -97,18 +94,14 @@ public class FileSequenceHolder implements SequenceHolder {
 	}
 
 	private String getSeqConfigFilePath() {
-		String[] hostArr = config.getHost().split("\\.");
-		StringBuilder path = new StringBuilder(seqFileBase);
-		if (seqFileBase.charAt(seqFileBase.length() - 1) != File.separatorChar) {
-			path.append(File.separatorChar);
-		}
-		path.append("seq-");
-		path.append(config.getName()).append("-");
-		for (String hostPart : hostArr) {
-			path.append(hostPart).append("-");
-		}
-		path.append(config.getPort()).append("-").append(config.getTarget()).append(".conf");
-		return path.toString();
+		return (new StringBuilder())
+				.append("seq")
+				.append("-")
+				.append(config.getName())
+				.append("-")
+				.append(config.getTarget())
+				.append(".conf")
+				.toString();
 	}
 
 	public synchronized void saveSeq(long seq) {

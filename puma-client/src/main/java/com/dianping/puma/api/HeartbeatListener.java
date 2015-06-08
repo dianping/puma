@@ -137,12 +137,12 @@ public class HeartbeatListener {
 				pumaClient.setHasHeartbeat(false);
 				LOG.info("PumaClient " + pumaClient.getConfig().getName()
 						+ " receive heartbeat. reset heart beat mark.");
-				Cat.logEvent("ClientConnect.heartbeated", pumaClient.getConfig().getName(), Message.SUCCESS, "");
+				Cat.logEvent("Puma.state", "client:heartbeat-received", Message.SUCCESS, "");
 			} else {
 				LOG.info("PumaClient " + pumaClient.getConfig().getName()
 						+ " no receive heartbeat. restart pumaClient.");
-				Cat.logEvent("ClientConnect.heartbeated", pumaClient.getConfig().getName(), "1", "");
-				Cat.logError("ClientConnect.heartbeated.losed", new PumaClientConnectException("PumaClient "
+				Cat.logEvent("Puma.state", "client:heartbeat-lost", "1", "");
+				Cat.logError("client:heartbeat-lost", new PumaClientConnectException("PumaClient "
 						+ pumaClient.getConfig().getName() + " no receive heartbeat. restart pumaClient."));
 				pumaClient.stop();
 				try {

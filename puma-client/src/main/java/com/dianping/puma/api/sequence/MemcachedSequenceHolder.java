@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import com.dianping.avatar.cache.CacheKey;
 import com.dianping.avatar.cache.CacheService;
 import com.dianping.cache.exception.CacheException;
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
 import com.dianping.puma.api.Configuration;
 import com.dianping.puma.api.SpringContainer;
 
@@ -46,12 +48,8 @@ public class MemcachedSequenceHolder implements SequenceHolder {
 		SPRING_CONTAINER.start();
 		cacheService = (CacheService) SPRING_CONTAINER.getBean("cacheService");
 		StringBuilder path = new StringBuilder();
-		String[] hostArr = config.getHost().split("\\.");
 		path.append(config.getName()).append("-");
-		for (String hostPart : hostArr) {
-			path.append(hostPart).append("-");
-		}
-		path.append(config.getPort()).append("-").append(config.getTarget());
+		path.append(config.getTarget());
 		cacheKey = new CacheKey("puma-seq", path.toString());
 		logger.info("puma cache key:" + path.toString());
 
@@ -65,6 +63,7 @@ public class MemcachedSequenceHolder implements SequenceHolder {
 
 	private void initSeq() {
 		try {
+			Cat.logEvent("Puma.cache.seq", cacheKey.toString(), Message.SUCCESS, "");
 			Object seqFromCache = cacheService.get(cacheKey);
 			if (seqFromCache != null) {
 				long s = Long.valueOf(seqFromCache.toString());

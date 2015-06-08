@@ -89,7 +89,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 	@Value("1000")
 	int maxMasterBucketLengthMB;
 
-	@Value("50")
+	@Value("25")
 	int maxMasterFileCount;
 
 	@Value("/data/appdatas/puma/storage/slave/")
@@ -101,7 +101,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 	@Value("1000")
 	int maxSlaveBucketLengthMB;
 
-	@Value("50")
+	@Value("25")
 	int maxSlaveFileCount;
 
 	@Value("/data/appdatas/puma/binlogIndex/")

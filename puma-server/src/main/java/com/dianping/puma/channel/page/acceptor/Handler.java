@@ -55,11 +55,11 @@ public class Handler implements PageHandler<Context> {
 		String clientName = payload.getClientName() + "-" + Long.toString(System.currentTimeMillis());
 		;
 		String serverName = payload.getTarget();
-		String clientIPAddr = NetUtils.getIpAddr(ctx.getHttpServletRequest());
+		String clientIp= NetUtils.getIpAddr(ctx.getHttpServletRequest());
 		BinlogInfo binlogInfo = new BinlogInfo(payload.getBinlog(), payload.getBinlogPos());
 
-		LOG.info("Client connecting: {}({}).", new Object[] { clientName, clientIPAddr });
-		LOG.info("Client connecting info: server={}, binlogInfo={}.", new Object[] { serverName, binlogInfo });
+		LOG.info("Client connecting: {}({}).", new Object[] { clientName, clientIp });
+		LOG.info("Client connecting info: server={}, binlogInfo={}, seq={}.", new Object[] { serverName, binlogInfo, payload.getSeq()});
 
 		// Construct codec
 		EventCodec codec;
@@ -73,8 +73,8 @@ public class Handler implements PageHandler<Context> {
 		// Construct server filter chain.
 		EventFilterChain filterChain;
 		try {
-			filterChain = EventFilterChainFactory.createEventFilterChain(payload.isDdl(), payload.isDml(),
-					payload.isNeedsTransactionMeta(), payload.getDatabaseTables());
+			filterChain = EventFilterChainFactory.createEventFilterChain(payload.isDdl(), payload.isDml(), payload
+					.isNeedsTransactionMeta(), payload.getDatabaseTables());
 		} catch (IllegalArgumentException e) {
 			LOG.error("Client construct event filter chain error: {}.", e.getStackTrace());
 			throw e;
@@ -108,8 +108,8 @@ public class Handler implements PageHandler<Context> {
 
 		// status report
 		SystemStatusContainer.instance.addClientStatus(clientName, NetUtils.getIpAddr(ctx.getHttpServletRequest()),
-				payload.getSeq(), payload.getTarget(), payload.isDml(), payload.isDdl(),
-				payload.isNeedsTransactionMeta(), payload.getDatabaseTables(), payload.getCodecType());
+				payload.getSeq(), payload.getTarget(), payload.isDml(), payload.isDdl(), payload
+						.isNeedsTransactionMeta(), payload.getDatabaseTables(), payload.getCodecType());
 		SystemStatusContainer.instance.updateClientBinlog(clientName, payload.getBinlog(), payload.getBinlogPos());
 
 		ServerEventDelayMonitor serverEventDelayMonitor = ComponentContainer.SPRING.lookup("serverEventDelayMonitor");
@@ -145,9 +145,10 @@ public class Handler implements PageHandler<Context> {
 				}
 
 			} catch (InterruptedException e) {
-				LOG.warn(clientName + " puma server write changedEvent interrupted.");
+				LOG.warn("ClientName: "+clientName + ", Puma server write changedEvent interrupted.");
 			} catch (Exception e) {
-				Cat.logError("Puma.client.channelClosed:", new ChannelClosedException(e));
+				Cat.logError("Puma.client.channelClosed:", new ChannelClosedException("ClientName: " + clientName
+						+ ", ClientIp: " + clientIp, e));
 				SystemStatusContainer.instance.removeClient(clientName);
 				serverEventDelayMonitor.remove(clientName);
 				heartbeatTask.cancelFuture();

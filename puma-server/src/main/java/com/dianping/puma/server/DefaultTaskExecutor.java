@@ -111,7 +111,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				SystemStatusContainer.instance.updateServerStatus(getTaskName(), dbHost, port, database, getContext()
 						.getBinlogFileName(), getContext().getBinlogStartPos());
 				if (!connect()) {
-					throw new IOException("connection failed.");
+					throw new IOException("Connection failed.");
 				}
 				
 				isNeedStop = true;
@@ -121,26 +121,27 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				
 				if (getContext().isCheckSum()) {
 					if (!updateSetting()) {
-						throw new IOException("update setting command failed.");
+						throw new IOException("Update setting command failed.");
 					}
 				}
 				if (!queryConfig()) {
-					throw new IOException("query config binlogformat failed.");
+					throw new IOException("Query config binlogformat failed.");
 				}
 				
 				if (dumpBinlog()) {
 					isNeedStop = false;
 					processBinlog();
 				} else{
-					throw new IOException("binlog dump failed.");
+					throw new IOException("Binlog dump failed.");
 				}
 			} catch (Throwable e) {
 				if (isNeedStop) {
-					Cat.logError("Puma.server.failed", new ServerEventFetcherException(e));
+					Cat.logError("Puma.server.failed", new ServerEventFetcherException("TaskName: " + getTaskName(), e));
 					stopTask();
 				}
 				if (e instanceof RuntimeException) {
-					Cat.logError("Puma.server.runtimeException", new ServerEventRuntimeException(e));
+					Cat.logError("Puma.server.runtimeException", new ServerEventRuntimeException("TaskName: "
+							+ getTaskName(), e));
 				}
 				if (isStop()) {
 					return;
@@ -172,8 +173,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(is, PacketType.BINLOG_PACKET,
 					getContext());
 			if (!binlogPacket.isOk()) {
-				LOG.error("Binlog packet response error.");
-				throw new IOException("Binlog packet response error.");
+				LOG.error("TaskName: " + getTaskName() + ", Binlog packet response error.");
+				throw new IOException("TaskName: " + getTaskName() + ", Binlog packet response error.");
 			} else {
 				processBinlogPacket(binlogPacket);
 			}
@@ -189,11 +190,11 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		if (binlogEvent.getHeader().getEventType() == BinlogConstants.INTVAR_EVENT
 				|| binlogEvent.getHeader().getEventType() == BinlogConstants.RAND_EVENT
 				|| binlogEvent.getHeader().getEventType() == BinlogConstants.USER_VAR_EVENT) {
-			LOG.error("binlog_format is MIXED or STATEMENT ,System is not support.");
-			String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
+			LOG.error("TaskName: " + getTaskName() + ", Binlog_format is MIXED or STATEMENT ,System is not support.");
+			String eventName = String.format("slave(%s) -- db(%s:%d)", getTaskName(), dbHost, port);
 			Cat.logEvent("Slave.dbBinlogFormat", eventName, "1", "");
-			Cat.logError("Puma.server.mixedorstatement.format", new ServerEventParserException(
-					"binlog_format is MIXED or STATEMENT ,System is not support."));
+			Cat.logError("Puma.server.mixedorstatement.format", new ServerEventParserException("TaskName: "
+					+ getTaskName() + ", Binlog_format is MIXED or STATEMENT ,System is not support."));
 			stopTask();
 		}
 
@@ -252,7 +253,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		} catch (Exception e) {
 			this.notifyService.alarm("[" + getContext().getPumaServerName() + "]" + "Dispatch event failed. event("
 					+ changedEvent + ")", e, true);
-			LOG.error("Dispatcher dispatch failed.", e);
+			LOG.error("TaskName: " + getTaskName() + ", Dispatcher dispatch failed.", e);
 		}
 	}
 
@@ -310,10 +311,10 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			is = new BufferedInputStream(pumaSocket.getInputStream());
 			os = new BufferedOutputStream(pumaSocket.getOutputStream());
 			PacketFactory.parsePacket(is, PacketType.CONNECT_PACKET, getContext());
-			LOG.info("connection db success.");
+			LOG.info("TaskName: " + getTaskName() + ", Connection db success.");
 			return true;
 		} catch (Exception e) {
-			LOG.error("connect failed. Reason: " + e.getMessage());
+			LOG.error("TaskName: " + getTaskName() + ", Connect failed. Reason: " + e.getMessage());
 			return false;
 		}
 	}
@@ -354,14 +355,14 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 							.getBinlogStartPos()));
 					getContext().setBinlogFileName(binlogFile);
 				}
-				LOG.info("dump binlog command success.");
+				LOG.info("TaskName: " + getTaskName() + " ,Dump binlog command success.");
 				return true;
 			} else {
-				LOG.error("Dump binlog failed. Reason: " + dumpCommandResultPacket.getMessage());
+				LOG.error("TaskName: " + getTaskName() + " ,Dump binlog failed. Reason: " + dumpCommandResultPacket.getMessage());
 				return false;
 			}
 		} catch (Exception e) {
-			LOG.error("Dump binlog failed. Reason: " + e.getMessage());
+			LOG.error("TaskName: " + getTaskName() + " Dump binlog failed. Reason: " + e.getMessage());
 			return false;
 		}
 
@@ -392,15 +393,15 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			boolean isAuth;
 
 			if (okErrorPacket.isOk()) {
-				LOG.info("server login success.");
+				LOG.info("TaskName: " + getTaskName() + ", Server login success.");
 				isAuth = true;
 			} else {
 				isAuth = false;
-				LOG.error("Login failed. Reason: " + okErrorPacket.getMessage());
+				LOG.error("TaskName: " + getTaskName() + ", Login failed. Reason: " + okErrorPacket.getMessage());
 			}
 			return isAuth;
 		} catch (Exception e) {
-			LOG.error("Login failed. Reason: " + e.getMessage());
+			LOG.error("TaskName: " + getTaskName() + ", Login failed. Reason: " + e.getMessage());
 			return false;
 		}
 	}
@@ -417,19 +418,19 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			String cmd = "set @master_binlog_checksum= '@@global.binlog_checksum'";
 			OKErrorPacket okErrorPacket = executor.update(cmd, getContext());
 			String eventStatus;
-			String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
+			String eventName = String.format("slave(%s) -- db(%s:%d)", getTaskName(), dbHost, port);
 			if (okErrorPacket.isOk()) {
 				eventStatus = Message.SUCCESS;
-				LOG.info("update setting command success.");
+				LOG.info("TaskName: " + getTaskName() + ", Update setting command success.");
 			} else {
 				eventStatus = "1";
-				LOG.error("updateSetting failed. Reason: " + okErrorPacket.getMessage());
+				LOG.error("TaskName: " + getTaskName() + ", UpdateSetting failed. Reason: " + okErrorPacket.getMessage());
 			}
 
 			Cat.logEvent("Slave.dbSetCheckSum", eventName, eventStatus, "");
 			return okErrorPacket.isOk();
 		} catch (Exception e) {
-			LOG.error("updateSetting failed. Reason: " + e.getMessage());
+			LOG.error("TaskName: " + getTaskName() + ", UpdateSetting failed. Reason: " + e.getMessage());
 			return false;
 		}
 	}
@@ -448,23 +449,23 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			List<String> columnValues = rs.getFiledValues();
 			boolean isQuery = true;
 			if (columnValues == null || columnValues.size() != 2 || columnValues.get(1) == null) {
-				LOG.error("queryConfig failed Reason:unexcepted binlog format query result.");
+				LOG.error("TaskName: " + getTaskName() + ", QueryConfig failed Reason:unexcepted binlog format query result.");
 				isQuery = false;
 			}
 			BinlogFormat binlogFormat = BinlogFormat.valuesOf(columnValues.get(1));
-			String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
+			String eventName = String.format("slave(%s) -- db(%s:%d)", getTaskName(), dbHost, port);
 			if (binlogFormat == null || !binlogFormat.isRow()) {
 				isQuery = false;
-				LOG.error("unexcepted binlog format: " + binlogFormat.value);
+				LOG.error("TaskName: " + getTaskName() + ", Unexcepted binlog format: " + binlogFormat.value);
 			}
 
 			Cat.logEvent("Slave.dbBinlogFormat", eventName, isQuery ? Message.SUCCESS : "1", "");
-			if(isQuery){
-				LOG.info("query config binlogformat is legal.");
+			if (isQuery) {
+				LOG.info("TaskName: " + getTaskName() + ", Query config binlogformat is legal.");
 			}
 			return isQuery;
 		} catch (Exception e) {
-			LOG.error("queryConfig failed Reason: " + e.getMessage());
+			LOG.error("TaskName: " + getTaskName() + ", QueryConfig failed Reason: " + e.getMessage());
 			return false;
 		}
 	}
@@ -474,7 +475,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	}
 
 	private void stopTask() {
-		String eventName = String.format("slave(%s) ===> db(%s:%d)", getTaskName(), dbHost, port);
+		String eventName = String.format("slave(%s) -- db(%s:%d)", getTaskName(), dbHost, port);
 		try {
 			DefaultTaskExecutorContainer.instance.stopExecutor(this);
 			Cat.logEvent("Slave.doStop", eventName, Message.SUCCESS, "");
@@ -491,7 +492,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				this.is.close();
 			}
 		} catch (IOException ioEx) {
-			LOG.warn("Server " + this.getTaskName() + " failed to close the input stream.");
+			LOG.warn("Server " + this.getTaskName() + ", Failed to close the input stream.");
 		} finally {
 			this.is = null;
 		}
@@ -502,7 +503,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				this.os.close();
 			}
 		} catch (IOException ioEx) {
-			LOG.warn("Server " + this.getTaskName() + " failed to close the output stream");
+			LOG.warn("Server " + this.getTaskName() + ", Failed to close the output stream");
 		} finally {
 			this.os = null;
 		}
@@ -513,7 +514,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				this.pumaSocket.close();
 			}
 		} catch (IOException ioEx) {
-			LOG.warn("Server " + this.getTaskName() + " failed to close the socket", ioEx);
+			LOG.warn("Server " + this.getTaskName() + ", Failed to close the socket", ioEx);
 		} finally {
 			this.pumaSocket = null;
 		}

@@ -10,7 +10,7 @@ public class BinlogInfo implements Serializable, Comparable<BinlogInfo> {
 
 	private Long binlogPosition;
 
-	private Boolean skipToNextPos = false;
+	private int eventIndex;
 
 	public BinlogInfo() {
 	}
@@ -18,12 +18,13 @@ public class BinlogInfo implements Serializable, Comparable<BinlogInfo> {
 	public BinlogInfo(String binlogFile, Long binlogPosition) {
 		this.binlogFile = binlogFile;
 		this.binlogPosition = binlogPosition;
+		this.eventIndex = 0;
 	}
 
-	public BinlogInfo(String binlogFile, Long binlogPosition, Boolean skipToNextPos) {
+	public BinlogInfo(String binlogFile, Long binlogPosition, int eventIndex) {
 		this.binlogFile = binlogFile;
 		this.binlogPosition = binlogPosition;
-		this.skipToNextPos = skipToNextPos;
+		this.eventIndex = eventIndex;
 	}
 
 	public String getBinlogFile() {
@@ -42,12 +43,12 @@ public class BinlogInfo implements Serializable, Comparable<BinlogInfo> {
 		this.binlogPosition = binlogPosition;
 	}
 
-	public Boolean isSkipToNextPos() {
-		return skipToNextPos;
+	public int getEventIndex() {
+		return eventIndex;
 	}
 
-	public void setSkipToNextPos(Boolean skipToNextPos) {
-		this.skipToNextPos = skipToNextPos;
+	public void setEventIndex(int eventIndex) {
+		this.eventIndex = eventIndex;
 	}
 
 	@Override
@@ -60,7 +61,8 @@ public class BinlogInfo implements Serializable, Comparable<BinlogInfo> {
 		} else {
 			BinlogInfo binlogInfo = (BinlogInfo) o;
 			if (this.binlogFile.equals(binlogInfo.getBinlogFile())
-					&& this.getBinlogPosition().longValue() == binlogInfo.getBinlogPosition().longValue()) {
+					&& this.getBinlogPosition().longValue() == binlogInfo.getBinlogPosition().longValue()
+					&& this.getEventIndex() == binlogInfo.getEventIndex()) {
 				return true;
 			}
 			return false;
@@ -71,13 +73,14 @@ public class BinlogInfo implements Serializable, Comparable<BinlogInfo> {
 	public int hashCode() {
 		int result = this.getBinlogFile().hashCode();
 		result = 31 * result + (int) (this.getBinlogPosition() ^ (this.getBinlogPosition() >>> 32));
+		result = 31 * result + this.eventIndex;
 		return result;
 	}
 
 	@Override
 	public String toString() {
-		return "BinlogInfo [binlogFile=" + binlogFile + ", binlogPosition=" + binlogPosition + ",skipToNextPos="
-				+ skipToNextPos + " ]";
+		return "BinlogInfo [binlogFile=" + binlogFile + ", binlogPosition=" + binlogPosition + ", eventIndex="
+				+ eventIndex + " ]";
 	}
 
 	public int compareTo(BinlogInfo binlogInfo) {
@@ -99,7 +102,13 @@ public class BinlogInfo implements Serializable, Comparable<BinlogInfo> {
 			} else if (leftBinlogPosition > rightBinlogPosition) {
 				return 1;
 			} else {
-				return 0;
+				if (this.getEventIndex() == binlogInfo.getEventIndex()) {
+					return 0;
+				}else if(this.getEventIndex() > binlogInfo.getEventIndex()){
+					return 1;
+				}else{
+					return -1;
+				}
 			}
 		}
 	}

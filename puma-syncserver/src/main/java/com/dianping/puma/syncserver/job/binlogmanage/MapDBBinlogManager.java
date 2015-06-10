@@ -176,7 +176,7 @@ public class MapDBBinlogManager implements BinlogManager {
 			mbb.position(0);
 			String[] breakpointInfos = Charset.defaultCharset().decode(mbb).toString().split("\n");
 			oriSeq = Long.parseLong(breakpointInfos[0]);
-			oriBinlogInfo = new BinlogInfo(breakpointInfos[1], Long.parseLong(breakpointInfos[2]), Boolean.parseBoolean(breakpointInfos[3]));
+			oriBinlogInfo = new BinlogInfo(breakpointInfos[1], Long.parseLong(breakpointInfos[2]), Integer.parseInt(breakpointInfos[3]));
 		} catch (RuntimeException e) {
 			String msg = String.format("Binlog manager(%s) load breakpoint error.", name);
 			LOG.error(msg);
@@ -193,7 +193,7 @@ public class MapDBBinlogManager implements BinlogManager {
 		mbb.put("\n".getBytes());
 		mbb.put(String.valueOf(getBinlogInfo().getBinlogPosition()).getBytes());
 		mbb.put("\n".getBytes());
-		mbb.put(String.valueOf(getBinlogInfo().isSkipToNextPos()).getBytes());
+		mbb.put(String.valueOf(getBinlogInfo().getEventIndex()).getBytes());
 		mbb.put("\n".getBytes());
 	}
 

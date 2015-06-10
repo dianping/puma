@@ -2,12 +2,10 @@ package com.dianping.puma.api;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 import com.dianping.cat.Cat;
-import com.dianping.puma.api.exception.PumaClientConnectException;
+import com.dianping.puma.api.manager.HostManager;
+import com.dianping.puma.api.manager.PositionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +24,12 @@ import com.dianping.puma.core.util.StreamUtils;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class PumaClient {
-	private static final Logger LOG = LoggerFactory.getLogger(PumaClient.class);
+	private static final Logger logger = LoggerFactory.getLogger(PumaClient.class);
+
+	private String name;
+
+	private boolean stopped = true;
+
 	private Configuration config;
 	private EventListener eventListener;
 	// private volatile boolean active = false;
@@ -37,6 +40,12 @@ public class PumaClient {
 	private PumaClientTask pumaClientTask;
 	private HeartbeatListener heartbeatListener;
 
+	private InputStream is;
+
+	private HostManager hostManager = new HostManager();
+
+	private PositionManager positionManager = new PositionManager();
+
 	public SequenceHolder getSeqFileHolder() {
 		return sequenceHolder;
 	}
@@ -44,7 +53,7 @@ public class PumaClient {
 	public PumaClient(Configuration configuration) {
 		checkNotNull(configuration, "Puma client configuration is null");
 
-		LOG.info("Puma client configuration({}).", configuration.toString());
+		logger.info("Puma client configuration({}).", configuration.toString());
 
 		configuration.validate();
 
@@ -62,6 +71,14 @@ public class PumaClient {
 
 	public void register(EventListener listener) {
 		this.eventListener = listener;
+	}
+
+	private void init() {
+		hostManager.setName(name);
+		hostManager.init();
+
+		positionManager.setName(name);
+		positionManager.init();
 	}
 
 	public void stop() {
@@ -89,6 +106,7 @@ public class PumaClient {
 		return config;
 	}
 
+	/*
 	private InputStream connect() {
 		try {
 			final URL url = new URL(config.buildUrl());
@@ -116,7 +134,7 @@ public class PumaClient {
 		} catch (Exception e) {
 			String msg = String.format("Puma client(%s) connecting failure.", config.getName());
 			PumaClientConnectException pe = new PumaClientConnectException(msg, e);
-			LOG.error(msg, pe);
+			logger.error(msg, pe);
 			Cat.logError(msg, pe);
 
 			eventListener.onConnectException(pe);
@@ -124,7 +142,7 @@ public class PumaClient {
 
 		return null;
 
-	}
+	}*/
 
 	private Event readEvent(InputStream is) throws IOException {
 		byte[] lengthArray = new byte[4];
@@ -153,17 +171,46 @@ public class PumaClient {
 
 		@Override
 		public void run() {
+
+			while (!stopped) {
+
+				// Connect to server.
+				try {
+					connect();
+				} catch (IOException e) {
+					if (!stopped) {
+						String msg = String.format("");
+						logger.error(msg, e);
+						Cat.logError(msg, e);
+
+						// Thread sleep.
+					}
+				}
+
+				// Read events.
+
+			}
+
+		}
+
+		private void connect() throws IOException {
+
+		}
+
+		/*
+		@Override
+		public void run() {
 			// reconnect while there is some connection problem
 			while (true) {
 				InputStream is = null;
 
 				if (checkStop()) {
-					LOG.info("Puma client({}) stopped.", config.getName());
+					logger.info("Puma client({}) stopped.", config.getName());
 					break;
 				}
 
 				try {
-					LOG.info("Puma client({}) connecting...", config.getName());
+					logger.info("Puma client({}) connecting...", config.getName());
 
 					is = connect();
 
@@ -175,7 +222,7 @@ public class PumaClient {
 					}
 
 					Cat.logEvent("Puma.state", "client:connected", "0", "");
-					LOG.info("Puma client({}) reading events...", config.getName());
+					logger.info("Puma client({}) reading events...", config.getName());
 
 					while (true) {
 						if (checkStop()) {
@@ -198,13 +245,13 @@ public class PumaClient {
 					Thread.currentThread().interrupt();
 				} catch (Exception e) {
 					if (checkStop()) {
-						LOG.info("Puma client({}) stopped.", config.getName());
+						logger.info("Puma client({}) stopped.", config.getName());
 						break;
 					} else {
 						String msg = String.format("Puma client(%s) reading events failure.", config.getName());
 						PumaClientConnectException pe = new PumaClientConnectException(msg, e);
 
-						LOG.error(msg, pe);
+						logger.error(msg, pe);
 						Cat.logError(msg, pe);
 
 						eventListener.onConnectException(pe);
@@ -218,25 +265,25 @@ public class PumaClient {
 				} finally {
 					if (is != null) {
 						try {
-							LOG.info("Puma client({}) closing connection...", config.getName());
+							logger.info("Puma client({}) closing connection...", config.getName());
 
 							is.close();
 							Cat.logEvent("Puma.state", "client:close", "0", "");
 						} catch (IOException e) {
-							LOG.warn("Puma client({}) closing connection failure.", config.getName());
+							logger.warn("Puma client({}) closing connection failure.", config.getName());
 						}
 					}
 				}
 			}
-		}
+		}*/
 
 		private boolean checkStop() {
 			if (!active) {
-				LOG.info("Puma client({}) checked active is false.", config.getName());
+				logger.info("Puma client({}) checked active is false.", config.getName());
 				return true;
 			}
 			if (Thread.currentThread().isInterrupted()) {
-				LOG.info("Puma client({}) checked thread is interrupted.", config.getName());
+				logger.info("Puma client({}) checked thread is interrupted.", config.getName());
 				return true;
 			}
 
@@ -245,7 +292,7 @@ public class PumaClient {
 
 		private void onHeartbeatEvent(HeartbeatEvent event) {
 			setHasHeartbeat(true);
-			LOG.info("Puma client[" + config.getName() + "] heartbeat.");
+			logger.info("Puma client[" + config.getName() + "] heartbeat.");
 		}
 
 		private void onChangedEvent(ChangedEvent event) {
@@ -260,10 +307,10 @@ public class PumaClient {
 					listenerCallSuccess = true;
 					break;
 				} catch (Exception e) {
-					LOG.warn("Puma client[" + config.getName() + "] Exception occurs in eventListerner. Event: "
+					logger.warn("Puma client[" + config.getName() + "] Exception occurs in eventListerner. Event: "
 							+ event, e);
 					if (eventListener.onException(event, e)) {
-						LOG.warn("Puma client[" + config.getName() + "] Event(" + event + ") skipped. ");
+						logger.warn("Puma client[" + config.getName() + "] Event(" + event + ") skipped. ");
 						eventListener.onSkipEvent(event);
 						listenerCallSuccess = true;
 						break;

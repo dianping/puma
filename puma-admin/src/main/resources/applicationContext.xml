@@ -2,7 +2,6 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
     xmlns:context="http://www.springframework.org/schema/context"
-    xmlns:tx="http://www.springframework.org/schema/tx" 
     xmlns:pigeon="http://code.dianping.com/schema/pigeon"
     xsi:schemaLocation="
             http://www.springframework.org/schema/beans 

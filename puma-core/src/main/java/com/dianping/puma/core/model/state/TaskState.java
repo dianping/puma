@@ -5,6 +5,7 @@ import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
 
+import java.io.Serializable;
 import java.util.Date;
 
 public abstract class TaskState {
@@ -18,7 +19,7 @@ public abstract class TaskState {
 	private Status status;
 
 	private String strStatus;
-	
+
 	private ActionController controller;
 
 	private BinlogInfo binlogInfo;
@@ -89,5 +90,5 @@ public abstract class TaskState {
 	public String getStrStatus() {
 		return strStatus;
 	}
-	
+
 }

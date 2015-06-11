@@ -1,8 +1,11 @@
 package com.dianping.puma.core.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class ClientAck {
+public class ClientAck implements Serializable{
+
+	private static final long serialVersionUID = -2922003739900121110L;
 
 	private String clientName;
 	

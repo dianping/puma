@@ -1,49 +1,90 @@
 package com.dianping.puma.core.model;
 
+import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
-public class ServerAck {
+public class ServerAck implements Serializable{
+	
+	private static final long serialVersionUID = 5195049180415722540L;
+
+	private String clientName;
+	
+	private String clientIp;
+	
+	private String taskName;
 	
 	private String serverName;
 	
 	private String serverIp;
 	
-	private List<PumaTaskDetail> taskDetails;
+	private BinlogInfo parserBinlog;
 	
-	private BinlogInfo parserBinlogInfo;
+	private BinlogInfo senderBinlog;
 	
-	private Date createDate;
-	
-	public void setParserBinlogInfo(BinlogInfo parserBinlogInfo) {
-		this.parserBinlogInfo = parserBinlogInfo;
+	private Date updateTime;
+
+	public void setClientName(String clientName) {
+		this.clientName = clientName;
 	}
-	public BinlogInfo getParserBinlogInfo() {
-		return parserBinlogInfo;
+
+	public String getClientName() {
+		return clientName;
 	}
+
+	public void setClientIp(String clientIp) {
+		this.clientIp = clientIp;
+	}
+
+	public String getClientIp() {
+		return clientIp;
+	}
+
+	public void setTaskName(String taskName) {
+		this.taskName = taskName;
+	}
+
+	public String getTaskName() {
+		return taskName;
+	}
+
 	public void setServerName(String serverName) {
 		this.serverName = serverName;
 	}
+
 	public String getServerName() {
 		return serverName;
 	}
+
 	public void setServerIp(String serverIp) {
 		this.serverIp = serverIp;
 	}
+
 	public String getServerIp() {
 		return serverIp;
 	}
-	public void setTaskDetails(List<PumaTaskDetail> taskDetails) {
-		this.taskDetails = taskDetails;
-	}
-	public List<PumaTaskDetail> getTaskDetails() {
-		return taskDetails;
-	}
-	public void setCreateDate(Date createDate) {
-		this.createDate = createDate;
-	}
-	public Date getCreateDate() {
-		return createDate;
+
+	public void setParserBinlog(BinlogInfo parserBinlog) {
+		this.parserBinlog = parserBinlog;
 	}
 
+	public BinlogInfo getParserBinlog() {
+		return parserBinlog;
+	}
+
+	public void setSenderBinlog(BinlogInfo senderBinlog) {
+		this.senderBinlog = senderBinlog;
+	}
+
+	public BinlogInfo getSenderBinlog() {
+		return senderBinlog;
+	}
+
+	public Date getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(Date updateTime) {
+		this.updateTime = updateTime;
+	}
+	
 }

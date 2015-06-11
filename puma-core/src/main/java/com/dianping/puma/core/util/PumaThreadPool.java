@@ -17,4 +17,9 @@ public class PumaThreadPool {
 	public static ScheduledFuture schedule(Runnable runnable, int delay, int period, TimeUnit timeUnit) {
 		return scheduledThreadPool.scheduleAtFixedRate(runnable, delay, period, timeUnit);
 	}
+	
+	public static ScheduledFuture scheduleWithFixedDelay(Runnable runnable, int delay, int period, TimeUnit timeUnit){
+		return scheduledThreadPool.scheduleWithFixedDelay(runnable, delay, period, timeUnit);
+	}
+	
 }

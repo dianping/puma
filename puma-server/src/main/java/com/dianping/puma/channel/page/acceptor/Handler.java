@@ -53,7 +53,7 @@ public class Handler implements PageHandler<Context> {
 
 		HttpServletResponse res = ctx.getHttpServletResponse();
 		String clientName = payload.getClientName() + "-" + Long.toString(System.currentTimeMillis());
-		;
+		
 		String serverName = payload.getTarget();
 		String clientIp= NetUtils.getIpAddr(ctx.getHttpServletRequest());
 		BinlogInfo binlogInfo = new BinlogInfo(payload.getBinlog(), payload.getBinlogPos());

@@ -1,9 +1,8 @@
 package com.dianping.puma.core.model;
 
-import java.io.Serializable;
 import java.util.Date;
 
-public class ServerAck implements Serializable{
+public class ServerAck extends AbstractAck{
 	
 	private static final long serialVersionUID = 5195049180415722540L;
 
@@ -20,8 +19,6 @@ public class ServerAck implements Serializable{
 	private BinlogInfo parserBinlog;
 	
 	private BinlogInfo senderBinlog;
-	
-	private Date createDate;
 
 	public void setClientName(String clientName) {
 		this.clientName = clientName;
@@ -77,14 +74,6 @@ public class ServerAck implements Serializable{
 
 	public BinlogInfo getSenderBinlog() {
 		return senderBinlog;
-	}
-
-	public Date getCreateDate() {
-		return createDate;
-	}
-
-	public void setCreateDate(Date createDate) {
-		this.createDate = createDate;
 	}
 	
 }

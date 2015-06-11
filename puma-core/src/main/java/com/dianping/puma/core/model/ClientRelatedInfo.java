@@ -2,7 +2,7 @@ package com.dianping.puma.core.model;
 
 import java.io.Serializable;
 
-public class RelatedInfo implements Serializable{
+public class ClientRelatedInfo implements Serializable{
 
 	private static final long serialVersionUID = 2721382097815566812L;
 

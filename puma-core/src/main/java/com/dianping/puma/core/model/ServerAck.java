@@ -21,7 +21,7 @@ public class ServerAck implements Serializable{
 	
 	private BinlogInfo senderBinlog;
 	
-	private Date updateTime;
+	private Date createDate;
 
 	public void setClientName(String clientName) {
 		this.clientName = clientName;
@@ -79,12 +79,12 @@ public class ServerAck implements Serializable{
 		return senderBinlog;
 	}
 
-	public Date getUpdateTime() {
-		return updateTime;
+	public Date getCreateDate() {
+		return createDate;
 	}
 
-	public void setUpdateTime(Date updateTime) {
-		this.updateTime = updateTime;
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
 	}
 	
 }

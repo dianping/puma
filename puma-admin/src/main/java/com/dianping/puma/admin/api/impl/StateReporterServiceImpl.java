@@ -1,11 +1,15 @@
 package com.dianping.puma.admin.api.impl;
 
-import com.dianping.puma.core.api.StateListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.dianping.puma.core.api.StateReporterService;
 import com.dianping.puma.core.model.RelatedInfo;
 import com.dianping.puma.core.model.ClientAck;
 import com.dianping.puma.core.model.ServerAck;
 
-public class StateListenerImpl implements StateListener {
+public class StateReporterServiceImpl implements StateReporterService {
+	private static final Logger LOG = LoggerFactory.getLogger(StateReporterServiceImpl.class);
 
 	@Override
 	public RelatedInfo getRelatedInfo(String clientName) {
@@ -16,7 +20,7 @@ public class StateListenerImpl implements StateListener {
 	@Override
 	public void setClientAck(ClientAck clientAck) {
 		// TODO Auto-generated method stub
-
+		LOG.info("Client ack info.");
 	}
 
 	@Override

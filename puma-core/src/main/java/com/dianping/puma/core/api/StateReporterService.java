@@ -4,7 +4,7 @@ import com.dianping.puma.core.model.RelatedInfo;
 import com.dianping.puma.core.model.ClientAck;
 import com.dianping.puma.core.model.ServerAck;
 
-public interface StateListener {
+public interface StateReporterService {
 	
 	/*
 	 * puma Server 定时发送的Ack信息

@@ -33,8 +33,6 @@ public class PumaClientMainTest {
 		configBuilder.seqFileBase("memcached");
 		pumaClient = new PumaClient(configBuilder.build());
 
-		System.out.println("######################seq:" + pumaClient.getSeqFileHolder().getSeq());
-
 		pumaClient.register(new EventListener() {
 			@Override public void onEvent(ChangedEvent event) throws Exception {
 				System.out.println(event.toString());

@@ -164,7 +164,7 @@ public class SyncTaskExecutor implements TaskExecutor<SyncTask> {
 		LOG.info("Puma client connecting settings: {}.", configuration.toString());
 
 		final PumaClient pumaClient = new PumaClient(configuration);
-		pumaClient.getSeqFileHolder().saveSeq(-3);
+		//pumaClient.getSeqFileHolder().saveSeq(-3);
 
 		pumaClient.register(new EventListener() {
 
@@ -223,7 +223,7 @@ public class SyncTaskExecutor implements TaskExecutor<SyncTask> {
 				Cat.logError(msg, teException);
 
 				status = Status.RECONNECTING;
-				pumaClient.getSeqFileHolder().saveSeq(binlogManager.getSeq());
+				//pumaClient.getSeqFileHolder().saveSeq(binlogManager.getSeq());
 
 				// Sleep 60s.
 				try {

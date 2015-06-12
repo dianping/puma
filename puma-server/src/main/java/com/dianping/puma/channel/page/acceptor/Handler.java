@@ -98,7 +98,7 @@ public class Handler implements PageHandler<Context> {
 		HeartbeatTask heartbeatTask = new HeartbeatTask(codec, res, clientName, lock, serverEventDelayMonitor);
 
 		// Build event filter chain.
-		EventFilterChain filterChain;
+		EventFilterChain filterChain = null;
 		try {
 			filterChain = EventFilterChainFactory.createEventFilterChain(ddl, dml, transaction, databaseTables);
 		} catch (Exception e) {
@@ -107,7 +107,6 @@ public class Handler implements PageHandler<Context> {
 
 
 			logger.error("Client construct event filter chain error: {}.", e.getStackTrace());
-			throw e;
 		}
 
 		// Find storage.

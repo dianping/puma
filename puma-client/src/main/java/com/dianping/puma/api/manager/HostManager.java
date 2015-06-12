@@ -1,9 +1,9 @@
 package com.dianping.puma.api.manager;
 
+import com.dianping.cat.Cat;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.api.PumaClient;
-import com.dianping.puma.api.config.Config;
 import com.dianping.puma.api.exception.PumaClientConfigException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,18 +19,12 @@ public class HostManager {
 
 	private volatile boolean inited = false;
 
-	private PumaClient client;
-
-	private String[] hosts;
-
-	private String host;
-
+	private volatile List<String> hosts;
 	private int index = 0;
-
 	private int retries = 0;
+	private ConnectFeedback connectFeedback;
 
-	private Config config;
-
+	private PumaClient client;
 	private ConfigCache configCache;
 
 	private ConfigChange configChange = new ConfigChange() {
@@ -39,9 +33,11 @@ public class HostManager {
 			if (key.equalsIgnoreCase(PUMA_CLIENT_HOSTS_KEY)) {
 				try {
 					changeHosts(value);
-				} catch (PumaClientConfigException e) {
+				} catch (Exception e) {
 					String msg = String.format("Puma client(%s) changing hosts error: (%s).", client.getName(), value);
-					throw e;
+					PumaClientConfigException pe = new PumaClientConfigException(msg, e);
+					logger.error(msg, pe);
+					Cat.logError(msg, pe);
 				}
 			}
 		}
@@ -56,11 +52,17 @@ public class HostManager {
 			return;
 		}
 
+		// Allocates.
+		hosts = new ArrayList<String>();
+		index = 0;
+		retries = 0;
+		connectFeedback = ConnectFeedback.INITIAL;
+
 		// Initialize hosts.
-		changeHosts(ConfigCache.getInstance().getProperty(PUMA_CLIENT_HOSTS_KEY));
+		changeHosts(configCache.getProperty(PUMA_CLIENT_HOSTS_KEY));
 
 		// Register hosts listener.
-		ConfigCache.getInstance().addChange(configChange);
+		configCache.addChange(configChange);
 
 		inited = true;
 	}
@@ -71,38 +73,55 @@ public class HostManager {
 		}
 
 		// Unregister hosts listener.
-		ConfigCache.getInstance().removeChange(configChange);
+		configCache.removeChange(configChange);
+
+		// Frees.
+		hosts.clear();
+		hosts = null;
 
 		inited = false;
 	}
 
-	private void changeHosts(String hostStr) throws PumaClientConfigException {
-		if (hostStr == null) {
-			String msg = String.format("Puma client(%s) null hosts.", client.getName());
-			throw new PumaClientConfigException(msg);
-		} else {
-			hostStr = StringUtils.normalizeSpace(hostStr);
-			hosts = StringUtils.split(hostStr, ",");
-		}
-	}
-
 	public String next() {
-		if (retries > config.getReconnectTimes()) {
-			// Change a server to connect.
-			retries = 0;
-
-			index = (index + 1) % hosts.length;
-			String currentHost = hosts[index];
-			host = (currentHost == null) ? host : currentHost;
-			return host;
-		} else {
-			return host;
+		try {
+			switch (connectFeedback) {
+			case INITIAL:
+				return hosts.get(index);
+			case CONNECT_ERROR:
+				if (retries < 0) {
+					retries = 0;
+					index = (index + 1) % hosts.size();
+					return hosts.get(index);
+				} else {
+					++retries;
+					return hosts.get(index);
+				}
+			case SERVER_ERROR:
+				retries = 0;
+				index = (index + 1) % hosts.size();
+				return hosts.get(index);
+			}
+		} catch (Exception e) {
+			String msg = String.format("Puma client(%s) ask for host error.", client.getName());
+			PumaClientConfigException pe = new PumaClientConfigException(msg, e);
+			logger.error(msg, pe);
+			Cat.logError(msg, pe);
 		}
+
+		return null;
 	}
 
-	public void feedback(boolean success) {
-		if (!success) {
-			++retries;
+	public void feedback(ConnectFeedback connectFeedback) {
+		this.connectFeedback = connectFeedback;
+	}
+
+	private void changeHosts(String hostStr) {
+		hosts.clear();
+		String[] hostArray = StringUtils.split(StringUtils.normalizeSpace(hostStr), ",");
+		if (hostArray == null) {
+			throw new NullPointerException("Hosts is null.");
+		} else {
+			hosts.addAll(Arrays.asList(hostArray));
 		}
 	}
 
@@ -114,7 +133,10 @@ public class HostManager {
 		this.configCache = configCache;
 	}
 
-	public void setConfig(Config config) {
-		this.config = config;
+	public enum ConnectFeedback {
+		INITIAL,
+		CONNECT_ERROR,
+		SERVER_ERROR,
 	}
+
 }

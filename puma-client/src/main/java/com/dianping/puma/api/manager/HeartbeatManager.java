@@ -2,7 +2,6 @@ package com.dianping.puma.api.manager;
 
 import com.dianping.cat.Cat;
 import com.dianping.puma.api.PumaClient;
-import com.dianping.puma.api.config.Config;
 import com.dianping.puma.api.exception.PumaClientConnectException;
 import com.dianping.puma.api.util.Clock;
 import org.slf4j.Logger;
@@ -16,7 +15,6 @@ public class HeartbeatManager {
 	private static final Logger logger = LoggerFactory.getLogger(HeartbeatManager.class);
 
 	private PumaClient client;
-	private Config config;
 	private Clock clock;
 	private Timer timer = new Timer();
 
@@ -24,7 +22,7 @@ public class HeartbeatManager {
 
 	public void start() {
 		heartbeat();
-		timer.scheduleAtFixedRate(new HeartbeatCheckTask(), 0, config.getHeartbeatCheckTime());
+		timer.scheduleAtFixedRate(new HeartbeatCheckTask(), 0, 0);
 	}
 
 	public void stop() {
@@ -37,7 +35,7 @@ public class HeartbeatManager {
 	}
 
 	private boolean expired() {
-		return (clock.getCurrentTime() - last) >= config.getHeartbeatExpiredTime() * 1000;
+		return (clock.getCurrentTime() - last) >= 0 * 1000;
 	}
 
 	private class HeartbeatCheckTask extends TimerTask {
@@ -59,10 +57,6 @@ public class HeartbeatManager {
 
 	public void setClient(PumaClient client) {
 		this.client = client;
-	}
-
-	public void setConfig(Config config) {
-		this.config = config;
 	}
 
 	public void setClock(Clock clock) {

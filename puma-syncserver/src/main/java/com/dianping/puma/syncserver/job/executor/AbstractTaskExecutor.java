@@ -117,7 +117,7 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 		LOG.info("Puma client connecting settings: {}.", configuration.toString());
 
 		final PumaClient pumaClient = new PumaClient(configuration);
-		pumaClient.getSeqFileHolder().saveSeq(-3);
+		//pumaClient.getSeqFileHolder().saveSeq(-3);
 
 		pumaClient.register(new EventListener() {
 

@@ -419,6 +419,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
 
         PumaClient client = new PumaClient(configBuilder.build());
 
+        /*
         if (task.isMigrate()) {
             client.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_BINLOGINFO);
             client.register(new Processor(fullName, Lists.newArrayList(routerForMigrate)));
@@ -431,7 +432,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor<BaseSyncTask> {
                 }
             }
             client.register(new Processor(fullName, routerList));
-        }
+        }*/
 
         pumaClientList.put(jdbcRef, client);
         return client;

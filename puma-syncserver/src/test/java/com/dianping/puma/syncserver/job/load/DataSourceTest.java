@@ -95,7 +95,7 @@ public class DataSourceTest {
 					+ "VALUES \n"
 					+ "(?,?)\n"
 					+ "ON DUPLICATE KEY UPDATE\n"
-					+ "                   `name` = VALUES(name)", params);
+					+ "                `name` = VALUES(name)", params);
 			conn.commit();
 		} catch (SQLException e) {
 			e.printStackTrace();

@@ -7,7 +7,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import com.dianping.cat.Cat;
-import com.dianping.puma.api.config.Config;
 import com.dianping.puma.api.exception.PumaClientConnectException;
 import com.dianping.puma.api.exception.PumaClientOnEventException;
 import com.dianping.puma.api.manager.HeartbeatManager;
@@ -35,8 +34,6 @@ public class PumaClient {
 	private EventListener eventListener;
 	private EventCodec codec;
 
-	private Config config;
-
 	private HeartbeatManager heartbeatManager = new HeartbeatManager();
 
 	private HostManager hostManager = new HostManager();
@@ -46,7 +43,7 @@ public class PumaClient {
 	private Thread subscribeThread;
 
 	public PumaClient(Configuration configuration) {
-		config = new Config();
+
 	}
 
 	public void register(EventListener listener) {
@@ -59,7 +56,7 @@ public class PumaClient {
 		}
 
 		// Starting configurations.
-		config.start();
+		//config.start();
 
 
 		// Subscribe thread.
@@ -96,7 +93,7 @@ public class PumaClient {
 		}
 
 		// Stopping configuration.
-		config.stop();
+		//config.stop();
 	}
 
 	public void restartSubscribe() {
@@ -110,10 +107,6 @@ public class PumaClient {
 
 	public String getName() {
 		return name;
-	}
-
-	public Config getConfig() {
-		return config;
 	}
 
 	private class SubscribeTask implements Runnable {
@@ -135,11 +128,11 @@ public class PumaClient {
 
 				try {
 					connect();
-					hostManager.feedback(true);
+					hostManager.feedback(HostManager.ConnectFeedback.CONNECT_ERROR);
 
 					while (!checkStop()) {
 						Event event = readEvent(is);
-						hostManager.feedback(true);
+						hostManager.feedback(HostManager.ConnectFeedback.CONNECT_ERROR);
 
 						if (!checkStop() || event != null) {
 							if (handleEvent(event)) {
@@ -161,14 +154,14 @@ public class PumaClient {
 
 				} catch (IOException e) {
 					if (!checkStop()) {
-						hostManager.feedback(false);
+						hostManager.feedback(HostManager.ConnectFeedback.CONNECT_ERROR);
 
 						String msg = String.format("Puma client(%s) connect to server error.", name);
 						PumaClientConnectException pe = new PumaClientConnectException(msg, e);
 						logger.error(msg, pe);
 						Cat.logError(msg, pe);
 
-						sleep(config.getReconnectSleepTime());
+						//sleep(config.getReconnectSleepTime());
 					}
 				} finally {
 					if (is != null) {

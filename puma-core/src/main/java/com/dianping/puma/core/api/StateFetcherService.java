@@ -17,4 +17,6 @@ public interface StateFetcherService {
 	 * 
 	 */
 	Map<String,ClientRelatedInfo> getRelatedInfos(List<String> clientNames);
+	
+	
 }

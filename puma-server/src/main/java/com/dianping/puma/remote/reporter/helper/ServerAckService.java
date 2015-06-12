@@ -5,7 +5,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +21,9 @@ import com.dianping.puma.core.model.ServerAck;
 
 @Component("serverAckService")
 public class ServerAckService {
-	private static final Logger LOG = Logger.getLogger(ServerAckService.class);
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ServerAckService.class);
+
 	@Reference(timeout = 1000)
 	private StateAckService stateReporterService;
 	@Autowired

@@ -2,12 +2,12 @@ package com.dianping.puma.core.model;
 
 import java.util.Date;
 
-public class ClientAck extends AbstractAck{
+public class ClientAck extends AbstractAck {
 
 	private static final long serialVersionUID = -2922003739900121110L;
 
 	private String clientName;
-	
+
 	private BinlogInfo binlogInfo;
 
 	public void setClientName(String clientName) {
@@ -25,5 +25,5 @@ public class ClientAck extends AbstractAck{
 	public BinlogInfo getBinlogInfo() {
 		return binlogInfo;
 	}
-	
+
 }

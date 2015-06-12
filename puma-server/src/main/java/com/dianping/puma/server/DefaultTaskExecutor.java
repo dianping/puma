@@ -78,7 +78,11 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	private String encoding = "utf-8";
 
 	private Socket pumaSocket;
-
+	
+	private int receiveBufferSize = 16 * 1024;
+	
+	private int sendBufferSize = 16 * 1024;
+	
 	private InputStream is;
 
 	private OutputStream os;
@@ -312,6 +316,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			this.pumaSocket = new Socket();
 			this.pumaSocket.setTcpNoDelay(false);
 			this.pumaSocket.setKeepAlive(true);
+			this.pumaSocket.setReceiveBufferSize(receiveBufferSize);
+			this.pumaSocket.setSendBufferSize(sendBufferSize);
 			this.pumaSocket.connect(new InetSocketAddress(dbHost, port));
 			is = new BufferedInputStream(pumaSocket.getInputStream());
 			os = new BufferedOutputStream(pumaSocket.getOutputStream());

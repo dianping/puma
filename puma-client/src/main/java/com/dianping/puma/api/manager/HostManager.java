@@ -15,13 +15,14 @@ public class HostManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(HostManager.class);
 
-	private static final String PUMA_CLIENT_HOSTS_KEY = "";
+	private static final String HOSTS_KEY = "puma.client.hosts";
 
 	private volatile boolean inited = false;
 
 	private volatile List<String> hosts;
-	private int index = 0;
-	private int retries = 0;
+	private String host;
+	private int index;
+	private int retries;
 	private ConnectFeedback connectFeedback;
 
 	private PumaClient client;
@@ -30,9 +31,15 @@ public class HostManager {
 	private ConfigChange configChange = new ConfigChange() {
 		@Override
 		public void onChange(String key, String value) {
-			if (key.equalsIgnoreCase(PUMA_CLIENT_HOSTS_KEY)) {
+			if (key.equalsIgnoreCase(localKey(HOSTS_KEY))) {
 				try {
 					changeHosts(value);
+
+					// If current host not in the new host list, restart the subscribe thread.
+					if (needToRestart()) {
+						client.restartSubscribe();
+					}
+
 				} catch (Exception e) {
 					String msg = String.format("Puma client(%s) changing hosts error: (%s).", client.getName(), value);
 					PumaClientConfigException pe = new PumaClientConfigException(msg, e);
@@ -44,7 +51,6 @@ public class HostManager {
 	};
 
 	public HostManager() {
-
 	}
 
 	public void start() {
@@ -54,12 +60,13 @@ public class HostManager {
 
 		// Allocates.
 		hosts = new ArrayList<String>();
+		host = "0.0.0.0";
 		index = 0;
 		retries = 0;
 		connectFeedback = ConnectFeedback.INITIAL;
 
 		// Initialize hosts.
-		changeHosts(configCache.getProperty(PUMA_CLIENT_HOSTS_KEY));
+		changeHosts(configCache.getProperty(localKey(HOSTS_KEY)));
 
 		// Register hosts listener.
 		configCache.addChange(configChange);
@@ -83,23 +90,27 @@ public class HostManager {
 	}
 
 	public String next() {
+		host = null;
+
 		try {
 			switch (connectFeedback) {
 			case INITIAL:
-				return hosts.get(index);
+				host = hosts.get(index);
+				break;
 			case CONNECT_ERROR:
 				if (retries < 0) {
 					retries = 0;
 					index = (index + 1) % hosts.size();
-					return hosts.get(index);
+					host = hosts.get(index);
 				} else {
 					++retries;
-					return hosts.get(index);
 				}
+				break;
 			case SERVER_ERROR:
 				retries = 0;
 				index = (index + 1) % hosts.size();
-				return hosts.get(index);
+				host = hosts.get(index);
+				break;
 			}
 		} catch (Exception e) {
 			String msg = String.format("Puma client(%s) ask for host error.", client.getName());
@@ -108,7 +119,7 @@ public class HostManager {
 			Cat.logError(msg, pe);
 		}
 
-		return null;
+		return host;
 	}
 
 	public void feedback(ConnectFeedback connectFeedback) {
@@ -125,6 +136,18 @@ public class HostManager {
 		}
 	}
 
+	private boolean needToRestart() {
+		return host == null || !hosts.contains(host);
+	}
+
+	private String localKey(String key) {
+		return (new StringBuilder())
+				.append(key)
+				.append(".")
+				.append(client.getName())
+				.toString();
+	}
+
 	public void setClient(PumaClient client) {
 		this.client = client;
 	}
@@ -138,5 +161,4 @@ public class HostManager {
 		CONNECT_ERROR,
 		SERVER_ERROR,
 	}
-
 }

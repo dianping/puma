@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.dianping.cat.Cat;
+import com.dianping.puma.core.model.BinlogInfo;
 
 /**
  * @author Leo Liang
@@ -112,19 +113,24 @@ public enum SystemStatusContainer {
 		clientStatus.put(name, new ClientStatus(target, dml, ddl, ts, codec, dt, seq, ip));
 	}
 
-	public void updateClientInfo(String name, long seq, String binlogFile, long binlogPos) {
+	public void updateClientInfo(String name, long seq, BinlogInfo binlogInfo) {
 		if (clientStatus.get(name) != null) {
 			clientStatus.get(name).setSeq(seq);
 			clientSuccessSeq.put(name, seq);
-			clientStatus.get(name).setBinlogFile(binlogFile);
-			clientStatus.get(name).setBinlogPos(binlogPos);
+			updateClientBinlog(name,binlogInfo);
 			logMetricForCount("ClientConsumed-" + name);
 		}
 	}
 
-	public void updateClientBinlog(String name, String binlogFile, long binlogPos) {
-		clientStatus.get(name).setBinlogFile(binlogFile);
-		clientStatus.get(name).setBinlogPos(binlogPos);
+	public void updateClientBinlog(String name, BinlogInfo binlogInfo) {
+		if (clientStatus.get(name) != null) {
+			if (clientStatus.get(name).getBinlogInfo() == null) {
+				clientStatus.get(name).setBinlogInfo(new BinlogInfo());
+			}
+			clientStatus.get(name).getBinlogInfo().setBinlogFile(binlogInfo.getBinlogFile());
+			clientStatus.get(name).getBinlogInfo().setBinlogPosition(binlogInfo.getBinlogPosition());
+			clientStatus.get(name).getBinlogInfo().setEventIndex((binlogInfo.getEventIndex()));
+		}
 	}
 
 	public void removeClient(String name) {
@@ -199,70 +205,6 @@ public enum SystemStatusContainer {
 	public Map<String, Long> listStorageStatus() {
 		return Collections.unmodifiableMap(storageStatus);
 	}
-    /*
-	public Map<String, TaskExecutorStatus> listExecutorStatus() {
-		setExecutorStatus();
-		return Collections.unmodifiableMap(taskExecutorStatus);
-	}
-
-	private void setExecutorStatus() {
-		Map<String, Server> serverTasks = DefaultTaskManager.instance.getTaskExecutorMap();
-		TaskExecutorStatus executorStatus = null;
-		for (Entry<String, Server> serverItem : serverTasks.entrySet()) {
-			String taskName = serverItem.getKey();
-			if (taskExecutorStatus.containsKey(taskName)) {
-				executorStatus = taskExecutorStatus.get(taskName);
-			} else {
-				executorStatus = new TaskExecutorStatus();
-			}
-			executorStatus.setServerName(DefaultTaskManager.instance.getName());
-			Server task = serverItem.getValue();
-			executorStatus.setTaskId(task.getServerId());
-			executorStatus.setTaskName(task.getName());
-			BinlogInfo binlogInfo = null;
-			if (executorStatus.getStartBinlogInfo() == null) {
-				binlogInfo = new BinlogInfo();
-				executorStatus.setStartBinlogInfo(binlogInfo);
-			}
-			binlogInfo = executorStatus.getStartBinlogInfo();
-			binlogInfo.setBinlogFile(task.getDefaultBinlogFileName());
-			binlogInfo.setBinlogPosition(task.getDefaultBinlogPosition());
-			if (executorStatus.getCurrentBinlogInfo() == null) {
-				binlogInfo = new BinlogInfo();
-				executorStatus.setCurrentBinlogInfo(binlogInfo);
-			}
-			binlogInfo = executorStatus.getCurrentBinlogInfo();
-			binlogInfo.setBinlogFile(task.getContext().getBinlogFileName());
-			binlogInfo.setBinlogPosition(task.getContext().getBinlogStartPos());
-			executorStatus.setDbServerId(task.getContext().getDBServerId());
-			if (task instanceof ReplicationBasedServer) {
-				executorStatus.setDBHost(((ReplicationBasedServer) task).getDBHost());
-				executorStatus.setPort(((ReplicationBasedServer) task).getPort());
-			}
-			executorStatus.setExecutorStatus(task.getTaskStatus());
-			executorStatus.setInsertCount(0);
-			executorStatus.setUpdateCount(0);
-			executorStatus.setDeleteCount(0);
-			executorStatus.setDdlCount(0);
-			Map<String, AtomicLong> insertCount = listServerRowInsertCounters();
-			if (insertCount.containsKey(taskName)) {
-				executorStatus.setInsertCount(insertCount.get(taskName).longValue());
-			}
-			Map<String, AtomicLong> updateCount = listServerRowUpdateCounters();
-			if (updateCount.containsKey(taskName)) {
-				executorStatus.setUpdateCount(updateCount.get(taskName).longValue());
-			}
-			Map<String, AtomicLong> deleteCount = listServerRowDeleteCounters();
-			if (deleteCount.containsKey(taskName)) {
-				executorStatus.setDeleteCount(deleteCount.get(taskName).longValue());
-			}
-			Map<String, AtomicLong> ddlCount = listServerDdlCounters();
-			if (ddlCount.containsKey(taskName)) {
-				executorStatus.setDdlCount(ddlCount.get(taskName).longValue());
-			}
-			taskExecutorStatus.put(taskName, executorStatus);
-		}
-	}*/
 
 	public static class ClientStatus {
 		private String target;
@@ -281,9 +223,7 @@ public enum SystemStatusContainer {
 
 		private String ip;
 
-		private String binlogFile;
-
-		private long binlogPos;
+		private BinlogInfo binlogInfo;
 
 		public ClientStatus(String target, boolean dml, boolean ddl, boolean needTsInfo, String codec, String[] dt,
 				long seq, String ip) {
@@ -296,6 +236,7 @@ public enum SystemStatusContainer {
 			this.dt = dt;
 			this.seq = seq;
 			this.ip = ip;
+			binlogInfo = new BinlogInfo();
 		}
 
 		/**
@@ -363,20 +304,12 @@ public enum SystemStatusContainer {
 			return dt;
 		}
 
-		public void setBinlogFile(String binlogFile) {
-			this.binlogFile = binlogFile;
+		public BinlogInfo getBinlogInfo() {
+			return binlogInfo;
 		}
 
-		public String getBinlogFile() {
-			return binlogFile;
-		}
-
-		public void setBinlogPos(long binlogPos) {
-			this.binlogPos = binlogPos;
-		}
-
-		public long getBinlogPos() {
-			return binlogPos;
+		public void setBinlogInfo(BinlogInfo binlogInfo) {
+			this.binlogInfo = binlogInfo;
 		}
 
 	}

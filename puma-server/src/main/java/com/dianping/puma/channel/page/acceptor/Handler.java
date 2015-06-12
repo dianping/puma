@@ -52,8 +52,9 @@ public class Handler implements PageHandler<Context> {
 	@OutboundActionMeta(name = "acceptor")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
 		Payload payload = ctx.getPayload();
-
-		String clientName = payload.getClientName() + "-" + Long.toString(System.currentTimeMillis());
+		HttpServletResponse res = ctx.getHttpServletResponse();
+		
+		String clientName = payload.getClientName();
 		String serverName = payload.getTarget();
 		String clientIp = NetUtils.getIpAddr(ctx.getHttpServletRequest());
 		BinlogInfo binlogInfo = new BinlogInfo(payload.getBinlog(), payload.getBinlogPos());
@@ -61,9 +62,7 @@ public class Handler implements PageHandler<Context> {
 		boolean ddl = payload.isDdl();
 		boolean transaction = payload.isNeedsTransactionMeta();
 		String[] databaseTables = payload.getDatabaseTables();
-
-		HttpServletResponse res = ctx.getHttpServletResponse();
-
+		
 		logger.info("Client connecting: {}({}).", new Object[] { clientName, clientIp });
 		logger.info("Client connecting info: server={}, binlogInfo={}, seq={}.",
 				new Object[] { serverName, binlogInfo, payload.getSeq() });

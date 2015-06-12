@@ -1,4 +1,4 @@
-package com.dianping.puma.admin.api.common;
+package com.dianping.puma.admin.cache;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
+import com.dianping.lion.client.LionException;
 import com.dianping.puma.core.util.ScheduledExecutorUtils;
 
 @Component("cacheScheduledService")
@@ -20,9 +21,9 @@ public class CacheScheduledService {
 	private static final String FACTORY_NAME = "dcache";
 
 	@Autowired
-	private StateCacheService dCacheService;
+	private StateCacheService stateCacheService;
 
-	private long interval;
+	private volatile long interval = 5000L;
 
 	private ScheduledExecutorService executorService = null;
 
@@ -63,28 +64,32 @@ public class CacheScheduledService {
 	}
 
 	public void initConfig() {
-		this.setInterval(ConfigCache.getInstance().getLongProperty(STATE_CACHE_INTERVAL));
-		ConfigCache.getInstance().addChange(new ConfigChange() {
-			@Override
-			public void onChange(String key, String value) {
-				if (STATE_CACHE_INTERVAL.equals(key)) {
-					setInterval(Long.parseLong(value));
-					if (isScheduledFutureValid()) {
-						scheduledFuture.cancel(true);
-						if (isExecutorServiceValid()) {
-							execute();
+		try {
+			this.setInterval(ConfigCache.getInstance().getLongProperty(STATE_CACHE_INTERVAL));
+			ConfigCache.getInstance().addChange(new ConfigChange() {
+				@Override
+				public void onChange(String key, String value) {
+					if (STATE_CACHE_INTERVAL.equals(key)) {
+						setInterval(Long.parseLong(value));
+						if (isScheduledFutureValid()) {
+							scheduledFuture.cancel(true);
+							if (isExecutorServiceValid()) {
+								execute();
+							}
 						}
 					}
 				}
-			}
-		});
+			});
+		} catch (LionException e) {
+			LOG.error(STATE_CACHE_INTERVAL + " Lion config read exception, Reason: ", e.getMessage());
+		}
 	}
 
 	public void execute() {
 		scheduledFuture = executorService.scheduleWithFixedDelay(new Runnable() {
 			@Override
 			public void run() {
-				dCacheService.pushAck();
+				stateCacheService.pushAck();
 			}
 		}, 0, getInterval(), TimeUnit.MILLISECONDS);
 	}

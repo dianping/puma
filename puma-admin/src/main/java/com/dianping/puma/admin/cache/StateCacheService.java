@@ -1,4 +1,4 @@
-package com.dianping.puma.admin.api.common;
+package com.dianping.puma.admin.cache;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.dianping.avatar.cache.CacheKey;
 import com.dianping.avatar.cache.CacheService;
 import com.dianping.cache.exception.CacheException;
+import com.dianping.puma.admin.common.StateContainer;
 import com.dianping.puma.core.model.AbstractAck;
 import com.dianping.puma.core.model.ClientAck;
 import com.dianping.puma.core.model.ClientRelatedInfo;

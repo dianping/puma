@@ -1,4 +1,4 @@
-package com.dianping.puma.admin.api.common;
+package com.dianping.puma.admin.common;
 
 import java.util.ArrayList;
 import java.util.Collections;

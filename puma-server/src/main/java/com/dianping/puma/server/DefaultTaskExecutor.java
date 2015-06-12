@@ -128,6 +128,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 						throw new IOException("Update setting command failed.");
 					}
 				}
+
 				if (!queryBinlogFormat()) {
 					throw new IOException("Query config binlogformat failed.");
 				}

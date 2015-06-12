@@ -136,6 +136,10 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 					throw new IOException("Query config binlog row image failed.");
 				}
 
+				if (!queryBinlogImage()) {
+					throw new IOException("Query config binlog row image failed.");
+				}
+				
 				if (dumpBinlog()) {
 					isNeedStop = false;
 					processBinlog();

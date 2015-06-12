@@ -1,10 +1,16 @@
 package com.dianping.puma.api.config;
 
+import com.dianping.cat.Cat;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.api.PumaClient;
+import com.dianping.puma.api.exception.PumaClientConfigException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GlobalConfig {
+
+	private static final Logger logger = LoggerFactory.getLogger(GlobalConfig.class);
 
 	private static final String RECONNECT_SLEEP_TIME_KEY = "puma.client.reconnect.sleep.time";
 	private static final String RECONNECT_TIMES_KEY = "puma.client.reconnect.times";
@@ -14,19 +20,26 @@ public class GlobalConfig {
 	private long reconnectSleepTime;
 	private long reconnectTimes;
 
+	private PumaClient client;
+	private ConfigCache configCache;
+
 	private ConfigChange configChange = new ConfigChange() {
 		@Override
 		public void onChange(String key, String value) {
-			if (key.equalsIgnoreCase(RECONNECT_SLEEP_TIME_KEY)) {
-				reconnectSleepTime = Long.valueOf(value);
-			} else if (key.equalsIgnoreCase(RECONNECT_TIMES_KEY)) {
-				reconnectTimes = Long.valueOf(value);
+			try {
+				if (key.equalsIgnoreCase(RECONNECT_SLEEP_TIME_KEY)) {
+					reconnectSleepTime = Long.valueOf(value);
+				} else if (key.equalsIgnoreCase(RECONNECT_TIMES_KEY)) {
+					reconnectTimes = Long.valueOf(value);
+				}
+			} catch (Exception e) {
+				String msg = String.format("Puma client(%s) change local config error.", client.getName());
+				PumaClientConfigException pe = new PumaClientConfigException(msg, e);
+				logger.error(msg, pe);
+				Cat.logError(msg, pe);
 			}
 		}
 	};
-
-	private PumaClient client;
-	private ConfigCache configCache;
 
 	public void start() {
 		if (inited) {

@@ -7,6 +7,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import com.dianping.cat.Cat;
+import com.dianping.puma.api.config.GlobalConfig;
+import com.dianping.puma.api.config.LocalConfig;
 import com.dianping.puma.api.exception.PumaClientConnectException;
 import com.dianping.puma.api.exception.PumaClientOnEventException;
 import com.dianping.puma.api.manager.HeartbeatManager;
@@ -41,6 +43,9 @@ public class PumaClient {
 	private PositionManager positionManager = new PositionManager();
 
 	private Thread subscribeThread;
+
+	private GlobalConfig globalConfig;
+	private LocalConfig localConfig;
 
 	public PumaClient(Configuration configuration) {
 

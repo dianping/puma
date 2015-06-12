@@ -20,6 +20,9 @@ public class LocalConfig {
 	private volatile String target;
 	private volatile long serverId;
 
+	private PumaClient client;
+	private ConfigCache configCache;
+
 	private ConfigChange configChange = new ConfigChange() {
 		@Override
 		public void onChange(String key, String value) {
@@ -37,9 +40,6 @@ public class LocalConfig {
 			}
 		}
 	};
-
-	private PumaClient client;
-	private ConfigCache configCache;
 
 	public void start() {
 		if (inited) {

@@ -66,6 +66,9 @@ public class DeleteRowsEvent extends AbstractRowsEvent {
 	protected void innderParse(ByteBuffer buf, PumaContext context) throws IOException {
 		tableMapEvent = context.getTableMaps().get(tableId);
 		usedColumns = PacketUtils.readBitSet(buf, columnCount.intValue());
+
+		System.out.println("###########################################");
+		System.out.println(toString());
 		
 		rows = parseRows(buf, context);
 	}

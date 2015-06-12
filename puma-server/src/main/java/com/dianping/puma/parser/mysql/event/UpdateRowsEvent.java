@@ -25,6 +25,7 @@ import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.parser.mysql.Row;
 import com.dianping.puma.parser.mysql.UpdatedRowData;
 import com.dianping.puma.utils.PacketUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * TODO Comment of UpdateRowsEvent
@@ -39,15 +40,13 @@ public class UpdateRowsEvent extends AbstractRowsEvent {
 	private BitSet usedColumnsAfter;
 	private List<UpdatedRowData<Row>> rows;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "UpdateRowsEvent [usedColumnsBefore=" + usedColumnsBefore + ", usedColumnsAfter=" + usedColumnsAfter
-				+ ", rows=" + rows + ", super.toString()=" + super.toString() + "]";
+	@Override public String toString() {
+		return new ToStringBuilder(this)
+				.append("super", super.toString())
+				.append("usedColumnsBefore", usedColumnsBefore)
+				.append("usedColumnsAfter", usedColumnsAfter)
+				.append("rows", rows)
+				.toString();
 	}
 
 	/**
@@ -76,6 +75,9 @@ public class UpdateRowsEvent extends AbstractRowsEvent {
 		tableMapEvent = context.getTableMaps().get(tableId);
 		usedColumnsBefore = PacketUtils.readBitSet(buf, columnCount.intValue());
 		usedColumnsAfter = PacketUtils.readBitSet(buf, columnCount.intValue());
+
+		System.out.println("###########################################");
+		System.out.println(toString());
 
 		rows = parseRows(buf, context);
 	}

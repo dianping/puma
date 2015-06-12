@@ -55,6 +55,7 @@ import com.dianping.puma.parser.mysql.column.YearColumn;
 import com.dianping.puma.parser.mysql.utils.MySQLUtils;
 import com.dianping.puma.utils.CodecUtils;
 import com.dianping.puma.utils.PacketUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * TODO Comment of AbstractRowsEvent
@@ -71,16 +72,16 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 	private byte extraInfo[];
 	protected TableMapEvent tableMapEvent;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "AbstractRowsEvent [tableId=" + tableId + ", reserved=" + reserved + ", extraInfoLength="
-				+ extraInfoLength + ", extraInfo=" + extraInfo + ", columnCount=" + columnCount + ", super.toString()="
-				+ super.toString() + "]";
+	@Override public String toString() {
+		return new ToStringBuilder(this)
+				.append("super", super.toString())
+				.append("tableId", tableId)
+				.append("reserved", reserved)
+				.append("columnCount", columnCount)
+				.append("extraInfoLength", extraInfoLength)
+				.append("extraInfo", extraInfo)
+				.append("tableMapEvent", tableMapEvent)
+				.toString();
 	}
 
 	/**
@@ -141,6 +142,7 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 				extraInfo = PacketUtils.readBytes(buf, extraInfoLength - 2);
 		}
 		columnCount = PacketUtils.readLengthCodedUnsignedLong(buf);
+
 		innderParse(buf, context);
 	}
 

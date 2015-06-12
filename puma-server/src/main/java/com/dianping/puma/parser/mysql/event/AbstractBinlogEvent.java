@@ -21,6 +21,7 @@ import java.nio.ByteBuffer;
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.utils.PacketUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * TODO Comment of AbstractBinlogEvent
@@ -47,7 +48,7 @@ public abstract class AbstractBinlogEvent implements BinlogEvent {
 	@Override
 	public BinlogHeader getHeader() {
 		return header;
-	};
+	}
 	
 	@Override
 	public void setHeader(BinlogHeader header) {
@@ -63,14 +64,12 @@ public abstract class AbstractBinlogEvent implements BinlogEvent {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "AbstractBinlogEvent [header=" + header + ", checksumAlg=" + checksumAlg + ",crc =" + crc + "]";
+	@Override public String toString() {
+		return new ToStringBuilder(this)
+				.append("header", header)
+				.append("checksumAlg", checksumAlg)
+				.append("crc", crc)
+				.toString();
 	}
 
 	public void setChecksumAlg(int checksumAlg) {

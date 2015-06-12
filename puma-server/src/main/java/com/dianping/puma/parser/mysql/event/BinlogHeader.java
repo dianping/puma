@@ -21,6 +21,7 @@ import java.nio.ByteBuffer;
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.utils.PacketUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * TODO Comment of BinlogHeader
@@ -127,15 +128,15 @@ public class BinlogHeader implements Serializable {
 		this.flags = flags;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "BinlogHeader [timestamp=" + timestamp + ", eventType=" + eventType + ", serverId=" + serverId
-				+ ", eventLength=" + eventLength + ", nextPosition=" + nextPosition + ", flags=" + flags + "]";
+	@Override public String toString() {
+		return new ToStringBuilder(this)
+				.append("timestamp", timestamp)
+				.append("eventType", eventType)
+				.append("serverId", serverId)
+				.append("eventLength", eventLength)
+				.append("nextPosition", nextPosition)
+				.append("flags", flags)
+				.toString();
 	}
 
 	public void parse(ByteBuffer buf, PumaContext context) {

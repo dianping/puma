@@ -24,6 +24,7 @@ import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.datatype.UnsignedLong;
 import com.dianping.puma.parser.mysql.Metadata;
 import com.dianping.puma.utils.PacketUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * TODO Comment of TableMapEvent
@@ -123,19 +124,22 @@ public class TableMapEvent extends AbstractBinlogEvent {
 		return columnNullabilities;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
-		return "TableMapEvent [tableId=" + tableId + ", reserved=" + reserved + ", databaseNameLength="
-				+ databaseNameLength + ", databaseName=" + databaseName + ", tableNameLength=" + tableNameLength
-				+ ", tableName=" + tableName + ", columnCount=" + columnCount + ", columnTypes="
-				+ Arrays.toString(columnTypes) + ", columnMetadataCount=" + columnMetadataCount + ", columnMetadata="
-				+ columnMetadata + ", columnNullabilities=" + columnNullabilities + ", super.toString()="
-				+ super.toString() + "]";
+		return new ToStringBuilder(this)
+				.append("super", super.toString())
+				.append("tableId", tableId)
+				.append("reserved", reserved)
+				.append("databaseNameLength", databaseNameLength)
+				.append("databaseName", databaseName)
+				.append("tableNameLength", tableNameLength)
+				.append("tableName", tableName)
+				.append("columnCount", columnCount)
+				.append("columnTypes", columnTypes)
+				.append("columnMetadataCount", columnMetadataCount)
+				.append("columnMetadata", columnMetadata)
+				.append("columnNullabilities", columnNullabilities)
+				.toString();
 	}
 
 	/*
@@ -161,6 +165,9 @@ public class TableMapEvent extends AbstractBinlogEvent {
 		columnNullabilities = PacketUtils.readBitSet(buf, columnCount.intValue());
 
 		context.getTableMaps().put(tableId, this);
+
+		System.out.println("###########################################");
+		System.out.println(toString());
 	}
 
 }

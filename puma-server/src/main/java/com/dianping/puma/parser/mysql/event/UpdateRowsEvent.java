@@ -26,6 +26,8 @@ import com.dianping.puma.parser.mysql.Row;
 import com.dianping.puma.parser.mysql.UpdatedRowData;
 import com.dianping.puma.utils.PacketUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO Comment of UpdateRowsEvent
@@ -34,6 +36,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * 
  */
 public class UpdateRowsEvent extends AbstractRowsEvent {
+
+	private static final Logger logger = LoggerFactory.getLogger(UpdateRowsEvent.class);
 
 	private static final long serialVersionUID = -877826157536949565L;
 	private BitSet usedColumnsBefore;
@@ -76,8 +80,8 @@ public class UpdateRowsEvent extends AbstractRowsEvent {
 		usedColumnsBefore = PacketUtils.readBitSet(buf, columnCount.intValue());
 		usedColumnsAfter = PacketUtils.readBitSet(buf, columnCount.intValue());
 
-		System.out.println("###########################################");
-		System.out.println(toString());
+		logger.info("###########################################");
+		logger.info(toString());
 
 		rows = parseRows(buf, context);
 	}

@@ -57,7 +57,7 @@ import com.dianping.puma.parser.mysql.event.XIDEvent;
  */
 @ThreadSafe
 public class DefaultBinlogParser implements Parser {
-	private static final Logger log = Logger.getLogger(DefaultBinlogParser.class);
+	private static final Logger logger = Logger.getLogger(DefaultBinlogParser.class);
 	private static Map<Byte, Class<? extends BinlogEvent>> eventMaps = new ConcurrentHashMap<Byte, Class<? extends BinlogEvent>>();
 
 	@Override
@@ -71,13 +71,13 @@ public class DefaultBinlogParser implements Parser {
 			try {
 				event = eventClass.newInstance();
 			} catch (Exception e) {
-				log.error("Init event class failed. eventType: " + header.getEventType(), e);
+				logger.error("Init event class failed. eventType: " + header.getEventType(), e);
 				event = null;
 			}
 		}
 
-		System.out.println("###########################################");
-		System.out.println(event.toString());
+		logger.info("###########################################");
+		logger.info(event.toString());
 
 		if (event == null) {
 			event = new PumaIgnoreEvent();

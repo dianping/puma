@@ -25,6 +25,8 @@ import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.Row;
 import com.dianping.puma.utils.PacketUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO Comment of WriteRowsEvent
@@ -33,6 +35,8 @@ import com.dianping.puma.utils.PacketUtils;
  * 
  */
 public class WriteRowsEvent extends AbstractRowsEvent {
+	private static final Logger logger = LoggerFactory.getLogger(WriteRowsEvent.class);
+
 	private static final long serialVersionUID = 5158982187051056761L;
 	private BitSet usedColumns;
 	private List<Row> rows;
@@ -67,8 +71,8 @@ public class WriteRowsEvent extends AbstractRowsEvent {
 		usedColumns = PacketUtils.readBitSet(buf, columnCount.intValue());
 		tableMapEvent = context.getTableMaps().get(tableId);
 
-		System.out.println("###########################################");
-		System.out.println(toString());
+		logger.info("###########################################");
+		logger.info(toString());
 
 		rows = parseRows(buf, context);
 	}

@@ -24,6 +24,8 @@ import java.util.List;
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.parser.mysql.Row;
 import com.dianping.puma.utils.PacketUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO Comment of DeleteRowsEvent
@@ -32,6 +34,8 @@ import com.dianping.puma.utils.PacketUtils;
  * 
  */
 public class DeleteRowsEvent extends AbstractRowsEvent {
+
+	private static final Logger logger = LoggerFactory.getLogger(DeleteRowsEvent.class);
 
 	private static final long serialVersionUID = -4574646483606347256L;
 	private BitSet usedColumns;
@@ -67,8 +71,8 @@ public class DeleteRowsEvent extends AbstractRowsEvent {
 		tableMapEvent = context.getTableMaps().get(tableId);
 		usedColumns = PacketUtils.readBitSet(buf, columnCount.intValue());
 
-		System.out.println("###########################################");
-		System.out.println(toString());
+		logger.info("###########################################");
+		logger.info(toString());
 		
 		rows = parseRows(buf, context);
 	}

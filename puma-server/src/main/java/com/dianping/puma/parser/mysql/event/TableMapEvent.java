@@ -25,6 +25,8 @@ import com.dianping.puma.core.datatype.UnsignedLong;
 import com.dianping.puma.parser.mysql.Metadata;
 import com.dianping.puma.utils.PacketUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO Comment of TableMapEvent
@@ -33,6 +35,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * 
  */
 public class TableMapEvent extends AbstractBinlogEvent {
+
+	private static final Logger logger = LoggerFactory.getLogger(TableMapEvent.class);
 
 	private static final long	serialVersionUID	= -6294463562672565471L;
 	private long				tableId;
@@ -166,8 +170,8 @@ public class TableMapEvent extends AbstractBinlogEvent {
 
 		context.getTableMaps().put(tableId, this);
 
-		System.out.println("###########################################");
-		System.out.println(toString());
+		logger.info("###########################################");
+		logger.info(toString());
 	}
 
 }

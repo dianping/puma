@@ -19,9 +19,10 @@ import java.io.Serializable;
 import java.nio.ByteBuffer;
 
 import com.dianping.puma.bo.PumaContext;
-import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.utils.PacketUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO Comment of BinlogHeader
@@ -30,6 +31,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * 
  */
 public class BinlogHeader implements Serializable {
+
+	private static final Logger logger = LoggerFactory.getLogger(BinlogHeader.class);
+
 	private static final long serialVersionUID = 5056491879587690096L;
 	private long timestamp;
 	private byte eventType;
@@ -147,8 +151,8 @@ public class BinlogHeader implements Serializable {
 		nextPosition = PacketUtils.readLong(buf, 4);
 		flags = PacketUtils.readInt(buf, 2);
 
-		System.out.println("###########################################");
-		System.out.println(toString());
+		logger.info("###########################################");
+		logger.info(toString());
 	}
 
 }

@@ -67,8 +67,7 @@ public class AllTest {
 	public void testSqlDdl() {
 		DdlEvent ddlEvent = new DdlEvent();
 		ddlEvent.setSeq(1);
-		ddlEvent.setBinlog("mysql-bin.000001");
-		ddlEvent.setBinlogPos(1L);
+		ddlEvent.setBinlogInfo(new BinlogInfo("mysql-bin.000001", 1L, 0));
 		ddlEvent.setDatabase("all-test-from-database");
 		ddlEvent.setTable("all-test-from-table");
 		ddlEvent.setDDLType(DDLType.ALTER_TABLE);

@@ -289,8 +289,8 @@ public class DefaultEventStorage implements EventStorage {
 	
 	private void updateIndex(ChangedEvent event, boolean newL1Index, long newSeq)
 			throws IOException {
-		BinlogIndexKey binlogKey = new BinlogIndexKey(event.getBinlog(), event
-				.getBinlogPos(), event.getBinlogServerId());
+		BinlogIndexKey binlogKey = new BinlogIndexKey(event.getBinlogInfo().getBinlogFile(), event
+				.getBinlogInfo().getBinlogPosition(), event.getBinlogServerId());
 
 		if (newL1Index) {
 			binlogIndex.addL1Index(binlogKey, writingBucket.getBucketFileName()

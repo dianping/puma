@@ -18,6 +18,7 @@ package com.dianping.puma.datahandler;
 import java.math.BigInteger;
 
 import com.dianping.puma.core.util.sql.DDLType;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -26,9 +27,9 @@ import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.monitor.Notifiable;
 import com.dianping.puma.core.monitor.NotifyService;
-
 import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.core.util.SimpleDdlParser;
 import com.dianping.puma.core.util.SimpleDdlParser.DdlResult;
@@ -172,9 +173,9 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 		}
 
 		if (result != null && !result.isEmpty() && result.getData() != null) {
-			result.getData().setBinlog(context.getBinlogFileName());
-			result.getData().setBinlogPos(context.getBinlogStartPos());
-			result.getData().setBinlogNextPos(binlogEvent.getHeader().getNextPosition());
+			BinlogInfo binlogInfo = new BinlogInfo(context.getBinlogFileName(), context.getBinlogStartPos(),
+					context.getEventIndex());
+			result.getData().setBinlogInfo(binlogInfo);
 			result.getData().setServerId(binlogEvent.getHeader().getServerId());
 			result.getData().setBinlogServerId(context.getDBServerId());
 		}
@@ -197,7 +198,7 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 		} else {
 			result.setEmpty(true);
 			result.setFinished(true);
-			//log.info("QueryEvent  sql=" + queryEvent.getSql());
+			// log.info("QueryEvent  sql=" + queryEvent.getSql());
 		}
 	}
 
@@ -238,17 +239,18 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 				log.info("DDL event, sql=" + sql + "  ,database =" + ddlResult.getDatabase() + " table ="
 						+ ddlResult.getTable() + " queryEvent.getDatabaseName()" + queryEvent.getDatabaseName());
 			}
-		} 
+		}
 		if (StringUtils.isBlank(ddlEvent.getDatabase())) {
 			ddlEvent.setDatabase(queryEvent.getDatabaseName());
 		}
-		
-		if (ddlEvent.getEventType() == DdlEventType.DDL_ALTER && ddlEvent.getEventSubType() == DdlEventSubType.DDL_ALTER_TABLE) {
+
+		if (ddlEvent.getEventType() == DdlEventType.DDL_ALTER
+				&& ddlEvent.getEventSubType() == DdlEventSubType.DDL_ALTER_TABLE) {
 			ddlEvent.setDDLType(DDLType.ALTER_TABLE);
 		}
-		
+
 		tableMetasInfoFetcher.refreshTableMeta(ddlEvent, false);
-		
+
 		ddlEvent.setExecuteTime(queryEvent.getHeader().getTimestamp());
 		result.setData(dataChangedEvent);
 		result.setEmpty(false);

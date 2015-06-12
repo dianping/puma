@@ -90,7 +90,7 @@ public class Handler implements PageHandler<Context> {
 		SystemStatusContainer.instance.addClientStatus(clientName, NetUtils.getIpAddr(ctx.getHttpServletRequest()),
 				payload.getSeq(), payload.getTarget(), payload.isDml(), payload.isDdl(), payload
 						.isNeedsTransactionMeta(), payload.getDatabaseTables(), payload.getCodecType());
-		SystemStatusContainer.instance.updateClientBinlog(clientName, payload.getBinlog(), payload.getBinlogPos());
+		SystemStatusContainer.instance.updateClientBinlog(clientName, payload.getBinlog(), payload.getBinlogPos(),payload.getEventIndex());
 
 		ServerEventDelayMonitor serverEventDelayMonitor = ComponentContainer.SPRING.lookup("serverEventDelayMonitor");
 		Lock lock = new ReentrantLock();
@@ -161,8 +161,7 @@ public class Handler implements PageHandler<Context> {
 							throw new IOException("Client obtain write changedEvent lock failed.");
 						}
 						// status report
-						SystemStatusContainer.instance.updateClientInfo(clientName, event.getSeq(), event.getBinlog(),
-								event.getBinlogPos());
+						SystemStatusContainer.instance.updateClientInfo(clientName, event.getSeq(), event.getBinlogInfo());
 					}
 				}
 

@@ -78,7 +78,8 @@ public class BatchRow {
 						u2iParams.add(LoadParser.parseArgs(u2iRow));
 						rowKeys.put(RowKey.getRowKey(row), true);
 						executeTime = row.getExecuteTime();
-						binlogInfo = new BinlogInfo(row.getBinlog(), row.getBinlogPos());
+						binlogInfo = new BinlogInfo(row.getBinlogInfo().getBinlogFile(), row.getBinlogInfo()
+								.getBinlogPosition());
 						seq = row.getSeq();
 						++size;
 						return true;
@@ -92,8 +93,8 @@ public class BatchRow {
 
 	private void addFirstRow(ChangedEvent event) {
 		executeTime = event.getExecuteTime();
-		binlogInfo = new BinlogInfo(event.getBinlog(), event.getBinlogPos());
-		nextBinlogInfo = new BinlogInfo(event.getBinlog(), event.getBinlogNextPos());
+		binlogInfo = new BinlogInfo(event.getBinlogInfo().getBinlogFile(), event.getBinlogInfo()
+				.getBinlogPosition());
 		seq = event.getSeq();
 		++size;
 
@@ -145,17 +146,9 @@ public class BatchRow {
 
 	@Override
 	public String toString() {
-		return "BatchRow{" +
-				"size=" + size +
-				", table=" + table +
-				", binlogInfo=" + binlogInfo +
-				", seq=" + seq +
-				", ddl=" + ddl +
-				", commit=" + commit +
-				", dmlType=" + dmlType +
-				", sql='" + sql + '\'' +
-				", params=" + Arrays.deepToString(getParams()) +
-				'}';
+		return "BatchRow{" + "size=" + size + ", table=" + table + ", binlogInfo=" + binlogInfo + ", seq=" + seq
+				+ ", ddl=" + ddl + ", commit=" + commit + ", dmlType=" + dmlType + ", sql='" + sql + '\'' + ", params="
+				+ Arrays.deepToString(getParams()) + '}';
 	}
 
 	public int size() {

@@ -65,10 +65,7 @@ public abstract class ChangedEvent extends Event implements Serializable {
 	private String				database;
 	private String				table;
 	private long				serverId;
-	private BinlogInfo binlogInfo;
-	private String				binlog;
-	private long				binlogPos;
-	private long 				binlogNextPos;
+	private BinlogInfo 			binlogInfo;
 	private long                binlogServerId;
 	
 	/**
@@ -98,44 +95,6 @@ public abstract class ChangedEvent extends Event implements Serializable {
 	 */
 	public void setServerId(long serverId) {
 		this.serverId = serverId;
-	}
-
-	/**
-	 * @return the binlog
-	 */
-	public String getBinlog() {
-		return binlog;
-	}
-
-	/**
-	 * @param binlog
-	 *            the binlog to set
-	 */
-	public void setBinlog(String binlog) {
-		this.binlog = binlog;
-	}
-
-	/**
-	 * @return the binlogPos
-	 */
-	public long getBinlogPos() {
-		return binlogPos;
-	}
-
-	public void setBinlogNextPos(long binlogNextPos) {
-		this.binlogNextPos = binlogNextPos;
-	}
-
-	public long getBinlogNextPos() {
-		return binlogNextPos;
-	}
-
-	/**
-	 * @param binlogPos
-	 *            the binlogPos to set
-	 */
-	public void setBinlogPos(long binlogPos) {
-		this.binlogPos = binlogPos;
 	}
 
 	/**
@@ -199,7 +158,7 @@ public abstract class ChangedEvent extends Event implements Serializable {
 	@Override
 	public String toString() {
 		return "ChangedEvent [executeTime=" + executeTime + ", database=" + database + ", table=" + table + ", seq="
-				+ getSeq() + ", serverId=" + serverId + ", binlog=" + binlog + ", binlogPos=" + binlogPos + "]";
+				+ getSeq() + ", serverId=" + serverId + ", binlogInfo=" + binlogInfo + "]";
 	}
 
 	abstract public String genFullName();
@@ -213,8 +172,7 @@ public abstract class ChangedEvent extends Event implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((binlog == null) ? 0 : binlog.hashCode());
-		result = prime * result + (int) (binlogPos ^ (binlogPos >>> 32));
+		result = prime * result + binlogInfo.hashCode();
 		result = prime * result + ((database == null) ? 0 : database.hashCode());
 		result = prime * result + (int) (executeTime ^ (executeTime >>> 32));
 		result = prime * result + (int) (serverId ^ (serverId >>> 32));
@@ -240,14 +198,7 @@ public abstract class ChangedEvent extends Event implements Serializable {
 			return false;
 		}
 		ChangedEvent other = (ChangedEvent) obj;
-		if (binlog == null) {
-			if (other.binlog != null) {
-				return false;
-			}
-		} else if (!binlog.equals(other.binlog)) {
-			return false;
-		}
-		if (binlogPos != other.binlogPos) {
+		if(!binlogInfo.equals(other.getBinlogInfo())){
 			return false;
 		}
 		if (database == null) {

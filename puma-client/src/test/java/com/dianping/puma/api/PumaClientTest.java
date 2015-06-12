@@ -21,6 +21,7 @@ import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.core.util.PumaThreadUtils;
 
@@ -216,8 +217,7 @@ public class PumaClientTest {
         List<Event> eventsSent = new ArrayList<Event>();
 
         DdlEvent event1 = new DdlEvent();
-        event1.setBinlog("dddd");
-        event1.setBinlogPos(111);
+		event1.setBinlogInfo(new BinlogInfo("dddd", 111L, 0));
         event1.setDatabase("test1");
         event1.setExecuteTime(1111122233);
         event1.setServerId(11111);
@@ -226,8 +226,7 @@ public class PumaClientTest {
         eventsSent.add(event1);
 
         RowChangedEvent event2 = new RowChangedEvent();
-        event2.setBinlog("dddd");
-        event2.setBinlogPos(111);
+        event2.setBinlogInfo(new BinlogInfo("dddd", 111L, 0));
         event2.setDatabase("test1");
         event2.setExecuteTime(1111122233);
         event2.setServerId(11111);
@@ -242,8 +241,7 @@ public class PumaClientTest {
         eventsSent.add(event2);
 
         RowChangedEvent event3 = new RowChangedEvent();
-        event3.setBinlog("dddd");
-        event3.setBinlogPos(111);
+        event3.setBinlogInfo(new BinlogInfo("dddd", 111L, 0));
         event3.setDatabase("test1");
         event3.setExecuteTime(1111122233);
         event3.setServerId(11111);
@@ -258,8 +256,7 @@ public class PumaClientTest {
         eventsSent.add(event3);
 
         RowChangedEvent event4 = new RowChangedEvent();
-        event4.setBinlog("dddd");
-        event4.setBinlogPos(111);
+        event4.setBinlogInfo(new BinlogInfo("dddd", 111L, 0));
         event4.setDatabase("test1");
         event4.setExecuteTime(1111122233);
         event4.setServerId(11111);
@@ -274,8 +271,7 @@ public class PumaClientTest {
         eventsSent.add(event4);
 
         RowChangedEvent event5 = new RowChangedEvent();
-        event5.setBinlog("dddd");
-        event5.setBinlogPos(111);
+        event5.setBinlogInfo(new BinlogInfo("dddd", 111L, 0));
         event5.setDatabase("test1");
         event5.setExecuteTime(1111122233);
         event5.setServerId(11111);
@@ -284,8 +280,7 @@ public class PumaClientTest {
         eventsSent.add(event5);
 
         RowChangedEvent event6 = new RowChangedEvent();
-        event6.setBinlog("dddd");
-        event6.setBinlogPos(111);
+        event6.setBinlogInfo(new BinlogInfo("dddd", 111L, 0));
         event6.setDatabase("test1");
         event6.setExecuteTime(1111122233);
         event6.setServerId(11111);
@@ -353,8 +348,7 @@ public class PumaClientTest {
         List<Event> eventsSent = new ArrayList<Event>();
 
         DdlEvent event1 = new DdlEvent();
-        event1.setBinlog("dddd");
-        event1.setBinlogPos(111);
+        event1.setBinlogInfo(new BinlogInfo("dddd", 111L, 0));
         event1.setDatabase("test1");
         event1.setExecuteTime(1111122233);
         event1.setServerId(11111);
@@ -363,8 +357,7 @@ public class PumaClientTest {
         eventsSent.add(event1);
 
         RowChangedEvent event2 = new RowChangedEvent();
-        event2.setBinlog("dddd");
-        event2.setBinlogPos(111);
+        event2.setBinlogInfo(new BinlogInfo("dddd", 111L, 0));
         event2.setDatabase("test1");
         event2.setExecuteTime(1111122233);
         event2.setServerId(11111);
@@ -379,8 +372,7 @@ public class PumaClientTest {
         eventsSent.add(event2);
 
         RowChangedEvent event3 = new RowChangedEvent();
-        event3.setBinlog("dddd");
-        event3.setBinlogPos(111);
+        event3.setBinlogInfo(new BinlogInfo("dddd", 111L, 0));
         event3.setDatabase("test1");
         event3.setExecuteTime(1111122233);
         event3.setServerId(11111);
@@ -395,8 +387,7 @@ public class PumaClientTest {
         eventsSent.add(event3);
 
         RowChangedEvent event4 = new RowChangedEvent();
-        event4.setBinlog("dddd");
-        event4.setBinlogPos(111);
+        event4.setBinlogInfo(new BinlogInfo("dddd", 111L, 0));
         event4.setDatabase("test1");
         event4.setExecuteTime(1111122233);
         event4.setServerId(11111);
@@ -411,8 +402,7 @@ public class PumaClientTest {
         eventsSent.add(event4);
 
         RowChangedEvent event5 = new RowChangedEvent();
-        event5.setBinlog("dddd");
-        event5.setBinlogPos(111);
+        event5.setBinlogInfo(new BinlogInfo("dddd", 111L, 0));
         event5.setDatabase("test1");
         event5.setExecuteTime(1111122233);
         event5.setServerId(11111);
@@ -421,8 +411,7 @@ public class PumaClientTest {
         eventsSent.add(event5);
 
         RowChangedEvent event6 = new RowChangedEvent();
-        event6.setBinlog("dddd");
-        event6.setBinlogPos(111);
+        event6.setBinlogInfo(new BinlogInfo("dddd", 111L, 0));
         event6.setDatabase("test1");
         event6.setExecuteTime(1111122233);
         event6.setServerId(11111);
@@ -494,8 +483,7 @@ public class PumaClientTest {
         ArrayList<Event> eventsSent = new ArrayList<Event>();
 
         DdlEvent event1 = new DdlEvent();
-        event1.setBinlog("dddd");
-        event1.setBinlogPos(111);
+        event1.setBinlogInfo(new BinlogInfo("dddd", 111L, 0));
         event1.setDatabase("test1");
         event1.setExecuteTime(1111122233);
         event1.setServerId(11111);
@@ -504,8 +492,7 @@ public class PumaClientTest {
         eventsSent.add(event1);
 
         RowChangedEvent event2 = new RowChangedEvent();
-        event2.setBinlog("dddd");
-        event2.setBinlogPos(111);
+        event2.setBinlogInfo(new BinlogInfo("dddd", 111L, 0));
         event2.setDatabase("test1");
         event2.setExecuteTime(1111122233);
         event2.setServerId(11111);
@@ -520,8 +507,7 @@ public class PumaClientTest {
         eventsSent.add(event2);
 
         RowChangedEvent event3 = new RowChangedEvent();
-        event3.setBinlog("dddd");
-        event3.setBinlogPos(111);
+        event3.setBinlogInfo(new BinlogInfo("dddd", 111L, 0));
         event3.setDatabase("test1");
         event3.setExecuteTime(1111122233);
         event3.setServerId(11111);
@@ -536,8 +522,7 @@ public class PumaClientTest {
         eventsSent.add(event3);
 
         RowChangedEvent event4 = new RowChangedEvent();
-        event4.setBinlog("dddd");
-        event4.setBinlogPos(111);
+        event4.setBinlogInfo(new BinlogInfo("dddd", 111L, 0));
         event4.setDatabase("test1");
         event4.setExecuteTime(1111122233);
         event4.setServerId(11111);
@@ -552,8 +537,7 @@ public class PumaClientTest {
         eventsSent.add(event4);
 
         RowChangedEvent event5 = new RowChangedEvent();
-        event5.setBinlog("dddd");
-        event5.setBinlogPos(111);
+        event5.setBinlogInfo(new BinlogInfo("dddd", 111L, 0));
         event5.setDatabase("test1");
         event5.setExecuteTime(1111122233);
         event5.setServerId(11111);
@@ -562,8 +546,7 @@ public class PumaClientTest {
         eventsSent.add(event5);
 
         RowChangedEvent event6 = new RowChangedEvent();
-        event6.setBinlog("dddd");
-        event6.setBinlogPos(111);
+        event6.setBinlogInfo(new BinlogInfo("dddd", 111L, 0));
         event6.setDatabase("test1");
         event6.setExecuteTime(1111122233);
         event6.setServerId(11111);

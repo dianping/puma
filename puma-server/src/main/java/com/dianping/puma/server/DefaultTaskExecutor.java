@@ -117,12 +117,12 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				if (!connect()) {
 					throw new IOException("Connection failed.");
 				}
-				
+
 				isNeedStop = true;
 				if (!auth()) {
 					throw new IOException("Login failed.");
 				}
-				
+
 				if (getContext().isCheckSum()) {
 					if (!updateSetting()) {
 						throw new IOException("Update setting command failed.");
@@ -131,13 +131,15 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				if (!queryBinlogFormat()) {
 					throw new IOException("Query config binlogformat failed.");
 				}
+
 				if (!queryBinlogImage()) {
 					throw new IOException("Query config binlog row image failed.");
 				}
+
 				if (dumpBinlog()) {
 					isNeedStop = false;
 					processBinlog();
-				} else{
+				} else {
 					throw new IOException("Binlog dump failed.");
 				}
 			} catch (Throwable e) {
@@ -218,12 +220,15 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	protected void processDataEvent(BinlogEvent binlogEvent) {
 		DataHandlerResult dataHandlerResult = null;
 		// 一直处理一个binlogEvent的多行，处理完每行马上分发，以防止一个binlogEvent包含太多ChangedEvent而耗费太多内存
+		int eventIndex = 0;
 		do {
 			dataHandlerResult = dataHandler.process(binlogEvent, getContext());
 			if (dataHandlerResult != null && !dataHandlerResult.isEmpty()) {
 				parserEventCountMonitor.record(getTaskName());
 
 				ChangedEvent changedEvent = dataHandlerResult.getData();
+
+				changedEvent.getBinlogInfo().setEventIndex(eventIndex++);
 
 				updateOpsCounter(changedEvent);
 
@@ -365,7 +370,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				LOG.info("TaskName: " + getTaskName() + " ,Dump binlog command success.");
 				return true;
 			} else {
-				LOG.error("TaskName: " + getTaskName() + " ,Dump binlog failed. Reason: " + dumpCommandResultPacket.getMessage());
+				LOG.error("TaskName: " + getTaskName() + " ,Dump binlog failed. Reason: "
+						+ dumpCommandResultPacket.getMessage());
 				return false;
 			}
 		} catch (Exception e) {
@@ -384,8 +390,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	private boolean auth() {
 		try {
 			// auth
-			LOG.info("server logining taskName: " + getTaskName() + " host: " + dbHost + " port: " + port + " username: "
-					+ dbUsername + " database: " + database + " dbServerId: " + getDbServerId());
+			LOG.info("server logining taskName: " + getTaskName() + " host: " + dbHost + " port: " + port
+					+ " username: " + dbUsername + " database: " + database + " dbServerId: " + getDbServerId());
 			AuthenticatePacket authPacket = (AuthenticatePacket) PacketFactory.createCommandPacket(
 					PacketType.AUTHENTICATE_PACKET, getContext());
 
@@ -431,7 +437,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				LOG.info("TaskName: " + getTaskName() + ", Update setting command success.");
 			} else {
 				eventStatus = "1";
-				LOG.error("TaskName: " + getTaskName() + ", UpdateSetting failed. Reason: " + okErrorPacket.getMessage());
+				LOG.error("TaskName: " + getTaskName() + ", UpdateSetting failed. Reason: "
+						+ okErrorPacket.getMessage());
 			}
 
 			Cat.logEvent("Slave.dbSetCheckSum", eventName, eventStatus, "");
@@ -456,7 +463,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			List<String> columnValues = rs.getFiledValues();
 			boolean isQuery = true;
 			if (columnValues == null || columnValues.size() != 2 || columnValues.get(1) == null) {
-				LOG.error("TaskName: " + getTaskName() + ", QueryConfig failed Reason:unexcepted binlog format query result.");
+				LOG.error("TaskName: " + getTaskName()
+						+ ", QueryConfig failed Reason:unexcepted binlog format query result.");
 				isQuery = false;
 			}
 			BinlogFormat binlogFormat = BinlogFormat.valuesOf(columnValues.get(1));

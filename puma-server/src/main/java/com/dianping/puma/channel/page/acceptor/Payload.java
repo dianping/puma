@@ -37,6 +37,9 @@ public class Payload implements ActionPayload<ChannelPage, Action> {
     private String      m_binlog    = null;
     @FieldMeta("binlogPos")
     private long        m_binlogPos = -1L;
+    @FieldMeta("eventIndex")
+    private int        m_eventIndex = 0;
+    
     @FieldMeta("timestamp")
     private long        m_timestamp = -1L;
 
@@ -66,6 +69,10 @@ public class Payload implements ActionPayload<ChannelPage, Action> {
 
     public long getBinlogPos() {
         return m_binlogPos;
+    }
+    
+    public int getEventIndex(){
+    	return m_eventIndex;
     }
 
     public String getCodecType() {

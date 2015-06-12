@@ -1,4 +1,4 @@
-package com.dianping.puma.common;
+package com.dianping.puma.remote.reporter;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -13,6 +13,7 @@ import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
 import com.dianping.puma.core.util.ScheduledExecutorUtils;
+import com.dianping.puma.remote.reporter.helper.ServerAckService;
 
 @Component("serverAckScheduledService")
 public class ServerAckScheduledService {

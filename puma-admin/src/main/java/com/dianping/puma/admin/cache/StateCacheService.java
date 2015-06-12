@@ -33,7 +33,7 @@ public class StateCacheService {
 	private StateContainer stateContainer;
 
 	public void ayncSetKeyValue(String key, AbstractAck serverAck) {
-		CacheKey cacheKey = new CacheKey("pumaCache", key);
+		CacheKey cacheKey = new CacheKey("pumaStateCache", key);
 		try {
 			cacheService.asyncSet(cacheKey, serverAck);
 		} catch (CacheException e) {
@@ -42,7 +42,7 @@ public class StateCacheService {
 	}
 
 	public AbstractAck getKeyValue(String key) {
-		CacheKey cacheKey = new CacheKey("pumaCache", key);
+		CacheKey cacheKey = new CacheKey("pumaStateCache", key);
 		return cacheService.get(cacheKey);
 	}
 

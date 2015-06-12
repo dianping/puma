@@ -17,7 +17,7 @@ import com.dianping.puma.core.util.ScheduledExecutorUtils;
 @Component("cacheScheduledService")
 public class CacheScheduledService {
 	private static final Logger LOG = LoggerFactory.getLogger(CacheScheduledService.class);
-	private static final String STATE_CACHE_INTERVAL = "puma.admin.statecache.interval";
+	private static final String STATE_CACHE_INTERVAL = "puma.admin.cache.interval";
 	private static final String FACTORY_NAME = "dcache";
 
 	@Autowired
@@ -59,7 +59,7 @@ public class CacheScheduledService {
 
 		executorService = ScheduledExecutorUtils.createSingleScheduledExecutorService(FACTORY_NAME);
 
-		execute();
+		//execute();
 
 	}
 

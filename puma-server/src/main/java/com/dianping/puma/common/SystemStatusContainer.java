@@ -122,15 +122,19 @@ public enum SystemStatusContainer {
 		}
 	}
 
-	public void updateClientBinlog(String name, BinlogInfo binlogInfo) {
+	public void updateClientBinlog(String name, String binlogFile,long binlogPos,int eventIndex) {
 		if (clientStatus.get(name) != null) {
 			if (clientStatus.get(name).getBinlogInfo() == null) {
 				clientStatus.get(name).setBinlogInfo(new BinlogInfo());
 			}
-			clientStatus.get(name).getBinlogInfo().setBinlogFile(binlogInfo.getBinlogFile());
-			clientStatus.get(name).getBinlogInfo().setBinlogPosition(binlogInfo.getBinlogPosition());
-			clientStatus.get(name).getBinlogInfo().setEventIndex((binlogInfo.getEventIndex()));
+			clientStatus.get(name).getBinlogInfo().setBinlogFile(binlogFile);
+			clientStatus.get(name).getBinlogInfo().setBinlogPosition(binlogPos);
+			clientStatus.get(name).getBinlogInfo().setEventIndex((eventIndex));
 		}
+	}
+	
+	public void updateClientBinlog(String name, BinlogInfo binlogInfo) {
+		updateClientBinlog(name,binlogInfo.getBinlogFile(),binlogInfo.getBinlogPosition(),binlogInfo.getEventIndex());
 	}
 
 	public void removeClient(String name) {

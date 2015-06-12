@@ -21,7 +21,7 @@ import com.dianping.puma.core.model.ServerAck;
 
 @Component("serverAckService")
 public class ServerAckService {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(ServerAckService.class);
 
 	@Reference(timeout = 1000)

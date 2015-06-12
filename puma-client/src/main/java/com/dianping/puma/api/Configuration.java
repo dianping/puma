@@ -33,6 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Leo Liang
  * 
  */
+@Deprecated
 public class Configuration implements Serializable {
 	private static final long serialVersionUID = 5160892707659109303L;
 	private String codecType = "json";
@@ -49,6 +50,8 @@ public class Configuration implements Serializable {
 	private String binlog;
 	private long binlogPos = -1;
 	private long timeStamp = -1L;
+
+	private long connectExceptionSleepTime = 3000;
 
 	/**
 	 * @param timeStamp
@@ -143,31 +146,18 @@ public class Configuration implements Serializable {
 		return param.toString();
 	}
 
-	/**
-	 * @return the seqFileBase
-	 */
 	public String getSeqFileBase() {
 		return seqFileBase;
 	}
 
-	/**
-	 * @param seqFileBase
-	 *            the seqFileBase to set
-	 */
 	public void setSeqFileBase(String seqFileBase) {
 		this.seqFileBase = seqFileBase;
 	}
 
-	/**
-	 * @return
-	 */
 	public String buildUrl() {
 		return "http://" + host + ":" + port + "/puma/channel";
 	}
 
-	/**
-	 * @return the codecType
-	 */
 	public String getCodecType() {
 		return codecType;
 	}
@@ -305,4 +295,7 @@ public class Configuration implements Serializable {
 		this.target = target;
 	}
 
+	public long getConnectExceptionSleepTime() {
+		return connectExceptionSleepTime;
+	}
 }

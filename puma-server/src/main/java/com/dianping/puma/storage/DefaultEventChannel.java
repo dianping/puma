@@ -93,7 +93,7 @@ public class DefaultEventChannel implements EventChannel {
 		}
 	}
 
-	public void start() {
+	public void open() {
 		if (!stopped) {
 			return;
 		}

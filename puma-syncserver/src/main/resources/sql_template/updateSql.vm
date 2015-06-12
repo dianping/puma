@@ -12,6 +12,7 @@ SET
   #end
 #end
 WHERE
+
 #foreach($name2ColumnInfo in $event.columns.entrySet())
   #if(${name2ColumnInfo.value.key})
       #if($velocityCount > 1)

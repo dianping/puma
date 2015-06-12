@@ -15,6 +15,8 @@
  */
 package com.dianping.puma.core.event;
 
+import com.dianping.puma.core.model.BinlogInfo;
+
 import java.io.Serializable;
 
 /**
@@ -63,6 +65,7 @@ public abstract class ChangedEvent extends Event implements Serializable {
 	private String				database;
 	private String				table;
 	private long				serverId;
+	private BinlogInfo binlogInfo;
 	private String				binlog;
 	private long				binlogPos;
 	private long 				binlogNextPos;
@@ -180,11 +183,19 @@ public abstract class ChangedEvent extends Event implements Serializable {
 		this.table = table;
 	}
 
+	public BinlogInfo getBinlogInfo() {
+		return binlogInfo;
+	}
+
+	public void setBinlogInfo(BinlogInfo binlogInfo) {
+		this.binlogInfo = binlogInfo;
+	}
+
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
+		 * (non-Javadoc)
+		 *
+		 * @see java.lang.Object#toString()
+		 */
 	@Override
 	public String toString() {
 		return "ChangedEvent [executeTime=" + executeTime + ", database=" + database + ", table=" + table + ", seq="

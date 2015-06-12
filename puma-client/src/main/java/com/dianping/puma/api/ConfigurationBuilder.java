@@ -8,6 +8,7 @@ import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
 
+@Deprecated
 public class ConfigurationBuilder {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ConfigurationBuilder.class);

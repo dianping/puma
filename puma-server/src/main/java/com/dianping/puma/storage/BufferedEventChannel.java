@@ -1,75 +1,122 @@
 /**
  * Project: puma-server
- * 
+ *
  * File Created at Nov 29, 2013
- * 
+ *
  */
 package com.dianping.puma.storage;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicLong;
 
-import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.cat.Cat;
+import com.dianping.puma.channel.exception.PumaServerInternalException;
 import com.dianping.puma.core.event.Event;
+import com.dianping.puma.core.event.ServerErrorEvent;
 import com.dianping.puma.storage.exception.StorageException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * @author Leo Liang
- * 
- */
 public class BufferedEventChannel implements EventChannel {
-    private static final AtomicLong     seq     = new AtomicLong(0);
 
-    private EventChannel                eventChannel;
-    private BlockingQueue<Event> eventBuffer;
-    private volatile boolean            stopped = false;
+	private static final Logger logger = LoggerFactory.getLogger(BufferedEventChannel.class);
 
-    public BufferedEventChannel(EventChannel eventChannel, int bufSize) {
-        this.eventChannel = eventChannel;
-        this.eventBuffer = new ArrayBlockingQueue<Event>(bufSize);
+	private volatile boolean inited = false;
 
-        Thread fillThread = new Thread(new Runnable() {
+	private String clientName;
 
-            @Override
-            public void run() {
-                extract();
-            }
+	private EventChannel eventChannel;
 
-        });
-        fillThread.setDaemon(true);
-        fillThread.setName("BufferedChannelExtractThread-" + seq.incrementAndGet());
-        fillThread.start();
-    }
+	private BlockingQueue<Event> eventBuffer;
 
-    @Override
-    public void close() {
-        stopped = true;
-        eventChannel.close();
-    }
+	private Thread extractThread;
 
-    @Override
-    public void start() {
-        stopped = false;
-        eventChannel.start();
-    }
+	public BufferedEventChannel(String clientName, EventChannel eventChannel, int bufSize) {
+		this.clientName = clientName;
+		this.eventChannel = eventChannel;
+		this.eventBuffer = new ArrayBlockingQueue<Event>(bufSize);
+	}
 
-    private void extract() {
-        while (!stopped) {
-            try {
-                eventBuffer.put(eventChannel.next());
-            } catch (Throwable e) {
-            }
-        }
-    }
+	@Override
+	public void open() {
+		if (inited) {
+			return;
+		}
 
-    @Override
-    public Event next() throws StorageException {
-        try {
-            return eventBuffer.take();
-        } catch (InterruptedException e) {
-            return null;
-        }
-    }
+		// Opening storage channel.
+		eventChannel.open();
+
+		// Starting extract thread.
+		extractThread = new Thread(new ExtractTask());
+		extractThread.setName(String.format("extract-thread-%s", clientName));
+		extractThread.setDaemon(true);
+		extractThread.start();
+
+		inited = true;
+	}
+
+	@Override
+	public void close() {
+		if (!inited) {
+			return;
+		}
+
+		// Stopping extract thread.
+		extractThread.interrupt();
+		extractThread = null;
+
+		// Closing storage channel.
+		eventChannel.close();
+
+		inited = false;
+	}
+
+	@Override
+	public Event next() {
+		try {
+			return eventBuffer.take();
+		} catch (InterruptedException e) {
+			return null;
+		}
+	}
+
+	private class ExtractTask implements Runnable {
+
+		private volatile boolean stopped = false;
+
+		public void stop() {
+			stopped = true;
+			Thread.currentThread().interrupt();
+		}
+
+		@Override
+		public void run() {
+			while (checkStop()) {
+				try {
+					eventBuffer.put(eventChannel.next());
+				} catch (StorageException e) {
+					try {
+						eventBuffer.put(new ServerErrorEvent(e));
+
+						String msg = String.format("Puma server channel reading storage error.");
+						PumaServerInternalException pe = new PumaServerInternalException(msg, e);
+						logger.error(msg, pe);
+						Cat.logError(msg, pe);
+
+						// Stop the channel.
+						stop();
+					} catch (InterruptedException ie) {
+						Thread.currentThread().interrupt();
+					}
+				} catch (InterruptedException ie) {
+					Thread.currentThread().interrupt();
+				}
+			}
+		}
+
+		private boolean checkStop() {
+			return stopped || Thread.currentThread().isInterrupted();
+		}
+	}
 
 }

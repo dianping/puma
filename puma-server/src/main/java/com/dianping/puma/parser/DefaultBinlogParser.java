@@ -76,6 +76,9 @@ public class DefaultBinlogParser implements Parser {
 			}
 		}
 
+		System.out.println("###########################################");
+		System.out.println(event.toString());
+
 		if (event == null) {
 			event = new PumaIgnoreEvent();
 		}

@@ -128,10 +128,12 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 						throw new IOException("Update setting command failed.");
 					}
 				}
-				if (!queryConfig()) {
+				if (!queryBinlogFormat()) {
 					throw new IOException("Query config binlogformat failed.");
 				}
-				
+				if (!queryBinlogImage()) {
+					throw new IOException("Query config binlog row image failed.");
+				}
 				if (dumpBinlog()) {
 					isNeedStop = false;
 					processBinlog();
@@ -452,7 +454,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	 * @return
 	 * @throws IOException
 	 */
-	private boolean queryConfig() throws IOException {
+	private boolean queryBinlogFormat() throws IOException {
 		try {
 			QueryExecutor executor = new QueryExecutor(is, os);
 			String cmd = "show global variables like 'binlog_format'";
@@ -480,7 +482,43 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			return false;
 		}
 	}
-
+	/**
+	 * Send QueryCommand Packet to query binlog_format
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	private boolean queryBinlogImage() throws IOException {
+		try {
+			QueryExecutor executor = new QueryExecutor(is, os);
+			String cmd = "show variables like 'binlog_row_image'";
+			ResultSet rs = executor.query(cmd, getContext());
+			List<String> columnValues = rs.getFiledValues();
+			boolean isQuery = true;
+			if(columnValues == null||columnValues.size()== 0){//5.1
+				isQuery=true;
+			}else if (columnValues != null && columnValues.size() == 2 && columnValues.get(1) != null) {//5.6
+				BinlogRowImage binlogRowImage = BinlogRowImage.valuesOf(columnValues.get(1));
+				isQuery=true;
+				if (binlogRowImage == null || !binlogRowImage.isFull()) {
+					isQuery = false;
+					LOG.error("TaskName: " + getTaskName() + ", Unexcepted binlog row image: " + binlogRowImage.value);
+				}
+			}else{
+				LOG.error("TaskName: " + getTaskName() + ", QueryConfig failed Reason:unexcepted binlog row image query result.");
+				isQuery = false;
+			}
+			String eventName = String.format("slave(%s) -- db(%s:%d)", getTaskName(), dbHost, port);
+			Cat.logEvent("Slave.dbBinlogRowImage", eventName, isQuery ? Message.SUCCESS : "1", "");
+			if (isQuery) {
+				LOG.info("TaskName: " + getTaskName() + ", Query config binlog row image is legal.");
+			}
+			return isQuery;
+		} catch (Exception e) {
+			LOG.error("TaskName: " + getTaskName() + ", QueryConfig failed Reason: " + e.getMessage());
+			return false;
+		}
+	}
 	protected void doStop() throws Exception {
 		closeTransport();
 	}
@@ -689,6 +727,37 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			for (BinlogFormat format : formats) {
 				if (format.value.equalsIgnoreCase(value)) {
 					return format;
+				}
+			}
+			return null;
+		}
+	}
+	
+	public static enum BinlogRowImage{
+		
+		FULL("FULL"),MINIMAL("MINIMAL"),NOBLOB("NOBLOB");
+		
+		private String value;
+		
+		private BinlogRowImage(String value){
+			this.value = value;
+		}
+		
+		public boolean isFull(){
+			return this == FULL;
+		}
+		public boolean isMinimal(){
+			return this == MINIMAL;
+		}
+		public boolean isNOBLOB(){
+			return this == NOBLOB;
+		}
+
+		public static BinlogRowImage valuesOf(String value){
+			BinlogRowImage [] images = values();
+			for(BinlogRowImage image : images){
+				if(image.value.equalsIgnoreCase(value)){
+					return image;
 				}
 			}
 			return null;

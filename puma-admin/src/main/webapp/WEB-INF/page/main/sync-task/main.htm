@@ -55,7 +55,18 @@
 											<th class="hidden-20">同步服务器</th>
 											<th class="hidden-50">状态</th>
 											<th class="hidden-50">日志进度</th>
-											<th class="hidden-50">操作</th>
+											<th class="hidden-50">操作
+											<div class="puma-table-th-operation">
+												<a class="green puma-list-header-btn"
+													href="${rc.contextPath}/sync-task/create/"> <i
+													class="ace-icon fa fa-plus-circle purple bigger-130"></i>
+												</a>
+												<a class="blue puma-list-header-btn" href="javascript:void(0)"
+													ng-click="load()"> <i
+													class="ace-icon fa fa-refresh green bigger-130"></i>
+												</a>
+											</div>
+											</th>
 										</tr>
 									</thead>
 
@@ -177,7 +188,7 @@
 										</tr>
 									</tbody>
 								</table>
-								<div class="row" ng-show="totalPage > 0">
+								<div class="row" ng-show="totalPage >= 0">
 									<div class="col-xs-6">
 										<div class="dataTables_info" id="sample-table-2_info"
 											role="status" aria-live="polite">显示 {{startIndex}} 到

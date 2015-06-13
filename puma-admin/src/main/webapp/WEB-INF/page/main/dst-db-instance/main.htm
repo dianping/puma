@@ -52,7 +52,14 @@
 											<th>数据库实例IP</th>
 											<th>SERVER ID</th>
 											<th>用户名称</th>
-											<th>操作</th>
+											<th>操作
+											<div class="puma-table-th-operation">
+												<a class="green puma-list-header-btn"
+													href="${rc.contextPath}/dst-db-instance/create/"> <i
+													class="ace-icon fa fa-plus-circle purple bigger-130"></i>
+												</a>
+											</div>
+											</th>
 										</tr>
 									</thead>
 
@@ -67,9 +74,11 @@
 
 											<td>
 												<div class="hidden-sm hidden-xs action-buttons">
-													<a class="green" href="${rc.contextPath}/dst-db-instance/create/"> <i
+													<a class="green"
+														href="${rc.contextPath}/dst-db-instance/create/"> <i
 														class="ace-icon fa fa-plus-circle purple bigger-130"></i>
-													</a> <a class="green" href="${rc.contextPath}/dst-db-instance/update/{{item.id}}"> <i
+													</a>
+													<a class="green" href="${rc.contextPath}/dst-db-instance/update/{{item.id}}"> <i
 														class="ace-icon fa fa-pencil bigger-130"></i>
 													</a> <a class="red" href="javascript:void(0)"
 														ng-click="dialog(item.name)"> <i
@@ -81,7 +90,7 @@
 
 									</tbody>
 								</table>
-								<div class="row" ng-show="totalPage > 0">
+								<div class="row" ng-show="totalPage >= 0">
 									<div class="col-xs-6">
 										<div class="dataTables_info" id="sample-table-2_info"
 											role="status" aria-live="polite">显示 {{startIndex}} 到

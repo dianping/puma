@@ -51,7 +51,14 @@
 										<tr role="row">
 											<th>数据处理服务器名称</th>
 											<th>处理服务器IP</th>
-											<th>操作</th>
+											<th>操作
+											<div class="puma-table-th-operation">
+												<a class="green puma-list-header-btn"
+													href="${rc.contextPath}/puma-server/create/"> <i
+													class="ace-icon fa fa-plus-circle purple bigger-130"></i>
+												</a>
+											</div>
+											</th>
 										</tr>
 									</thead>
 
@@ -62,9 +69,11 @@
 											<td>{{item.host+':'+item.port}}</td>
 											<td>
 												<div class="hidden-sm hidden-xs action-buttons">
-													<a class="green" href="${rc.contextPath}/puma-server/create/"> <i
+													<a class="green"
+														href="${rc.contextPath}/puma-server/create/"> <i
 														class="ace-icon fa fa-plus-circle purple bigger-130"></i>
-													</a> <a class="green" href="${rc.contextPath}/puma-server/update/{{item.id}}"><i
+													</a>
+													<a class="green" href="${rc.contextPath}/puma-server/update/{{item.id}}"><i
 														class="ace-icon fa fa-pencil bigger-130"></i>
 													</a> <a class="red" href="javascript:void(0)"
 														ng-click="dialog(item.name)"> <i
@@ -77,7 +86,7 @@
 
 									</tbody>
 								</table>
-								<div class="row" ng-show="totalPage > 0">
+								<div class="row" ng-show="totalPage >= 0">
 									<div class="col-xs-6">
 										<div class="dataTables_info" id="sample-table-2_info"
 											role="status" aria-live="polite">显示 {{startIndex}} 

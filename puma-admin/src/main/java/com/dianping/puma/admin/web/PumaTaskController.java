@@ -86,7 +86,15 @@ public class PumaTaskController {
 		Map<String, Object> map = new HashMap<String, Object>();
 		long count = pumaTaskService.count();
 		List<PumaTask> pumaTaskEntities = pumaTaskService.findByPage(page, pageSize);
-		List<PumaTaskState> pumaTaskStates = pumaTaskStateService.findAll();
+		List<PumaTaskState> pumaTaskStates = new ArrayList<PumaTaskState>();
+		if(pumaTaskEntities != null){
+			for(PumaTask pumaTask:pumaTaskEntities){
+				PumaTaskState pumaTaskState = pumaTaskStateService.find(pumaTask.getName());
+				if(pumaTaskState != null){
+					pumaTaskStates.add(pumaTaskState);
+				}
+			}
+		}
 		map.put("count", count);
 		map.put("list", pumaTaskEntities);
 		map.put("state", pumaTaskStates);
@@ -102,6 +110,7 @@ public class PumaTaskController {
 		return new ModelAndView("common/main-container", map);
 	}
 
+	
 	@RequestMapping(value = { "/puma-task/update/{id}" }, method = RequestMethod.GET)
 	public ModelAndView update(@PathVariable long id) {
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -177,7 +186,7 @@ public class PumaTaskController {
 		}
 		return GsonUtil.toJson(map);
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = { "/puma-task/update/{id}" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody

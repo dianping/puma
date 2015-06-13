@@ -66,3 +66,11 @@
 	/*  text-align: center; */ 
 	line-height:35px;
 }
+
+.puma-list-header-btn{
+    padding-right: 10px;
+}
+
+.puma-table-th-operation{
+	float:right;
+}

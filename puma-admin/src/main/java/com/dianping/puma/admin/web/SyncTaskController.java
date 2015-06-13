@@ -1,5 +1,6 @@
 package com.dianping.puma.admin.web;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,7 @@ import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.state.BaseSyncTaskState;
+import com.dianping.puma.core.model.state.PumaTaskState;
 import com.dianping.puma.core.model.state.SyncTaskState;
 import com.dianping.puma.core.model.state.TaskStateContainer;
 import com.dianping.puma.core.service.DstDBInstanceService;
@@ -103,7 +105,15 @@ public class SyncTaskController {
 		Map<String, Object> map = new HashMap<String, Object>();
 		long count = syncTaskService.count();
 		List<SyncTask> syncTasks = syncTaskService.findByPage(page, pageSize);
-		List<SyncTaskState> syncTaskStates = syncTaskStateService.findAll();
+		List<SyncTaskState> syncTaskStates = new ArrayList<SyncTaskState>();
+		if(syncTasks != null){
+			for(SyncTask syncTask:syncTasks){
+				SyncTaskState syncTaskState = syncTaskStateService.find(syncTask.getName());
+				if(syncTaskState != null){
+					syncTaskStates.add(syncTaskState);
+				}
+			}
+		}
 		map.put("count", count);
 		map.put("list", syncTasks);
 		map.put("state", syncTaskStates);

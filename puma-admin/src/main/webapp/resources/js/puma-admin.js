@@ -41,7 +41,7 @@ pageApp.factory('pageService', [ '$http', '$location',
 					url : $location.absUrl() + '/' + actionName
 				});
 			};
-
+			
 			return {
 				list : function(page, pageSize) {
 					return list(page, pageSize);
@@ -139,7 +139,7 @@ pageApp.controller('pageCtrl', [
 					}
 				}
 			};
-
+			
 			$scope.pause = function(name) {
 				pageService.action(name, 'pause').success(function(data) {
 					$scope.refresh(name);

@@ -2,6 +2,7 @@ package com.dianping.puma.api.manager;
 
 import com.dianping.puma.api.MockTest;
 import com.dianping.puma.api.PumaClient;
+import com.dianping.puma.api.manager.impl.DefaultHeartbeatManager;
 import com.dianping.puma.api.util.Clock;
 import org.junit.After;
 import org.junit.Before;
@@ -10,9 +11,9 @@ import org.mockito.Mock;
 
 import static org.mockito.Mockito.when;
 
-public class HeartbeatManagerTest extends MockTest {
+public class DefaultHeartbeatManagerTest extends MockTest {
 
-	HeartbeatManager heartbeatManager = new HeartbeatManager();
+	DefaultHeartbeatManager defaultHeartbeatManager = new DefaultHeartbeatManager();
 
 	@Mock
 	PumaClient client;
@@ -23,17 +24,17 @@ public class HeartbeatManagerTest extends MockTest {
 
 	@Before
 	public void before() {
-		heartbeatManager.setClient(client);
+		defaultHeartbeatManager.setClient(client);
 
 		when(clock.getCurrentTime()).thenReturn(0L);
-		heartbeatManager.setClock(clock);
+		defaultHeartbeatManager.setClock(clock);
 
-		heartbeatManager.start();
+		defaultHeartbeatManager.start();
 	}
 
 	@After
 	public void after() {
-		heartbeatManager.stop();
+		defaultHeartbeatManager.stop();
 	}
 
 	@Test

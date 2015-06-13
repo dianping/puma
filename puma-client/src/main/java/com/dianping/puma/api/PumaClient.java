@@ -8,12 +8,12 @@ import java.net.URL;
 
 import com.dianping.cat.Cat;
 import com.dianping.puma.api.config.GlobalConfig;
-import com.dianping.puma.api.config.LocalConfig;
+import com.dianping.puma.api.config.Config;
 import com.dianping.puma.api.exception.PumaClientConnectException;
 import com.dianping.puma.api.exception.PumaClientOnEventException;
-import com.dianping.puma.api.manager.HeartbeatManager;
-import com.dianping.puma.api.manager.HostManager;
-import com.dianping.puma.api.manager.PositionManager;
+import com.dianping.puma.api.manager.impl.DefaultHeartbeatManager;
+import com.dianping.puma.api.manager.impl.DefaultHostManager;
+import com.dianping.puma.api.manager.impl.DefaultPositionManager;
 import com.dianping.puma.core.event.RowChangedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,16 +36,16 @@ public class PumaClient {
 	private EventListener eventListener;
 	private EventCodec codec;
 
-	private HeartbeatManager heartbeatManager = new HeartbeatManager();
+	private DefaultHeartbeatManager defaultHeartbeatManager = new DefaultHeartbeatManager();
 
-	private HostManager hostManager = new HostManager();
+	private DefaultHostManager defaultHostManager = new DefaultHostManager();
 
-	private PositionManager positionManager = new PositionManager();
+	private DefaultPositionManager defaultPositionManager = new DefaultPositionManager();
 
 	private Thread subscribeThread;
 
 	private GlobalConfig globalConfig;
-	private LocalConfig localConfig;
+	private Config config;
 
 	public PumaClient(Configuration configuration) {
 
@@ -57,12 +57,13 @@ public class PumaClient {
 
 	public void start() {
 		if (inited) {
+			logger.warn("Puma client(%s) is already started.", name);
 			return;
 		}
 
 		// Starting configurations.
-		//config.start();
-
+		globalConfig.start();
+		config.start();
 
 		// Subscribe thread.
 		if (subscribeThread != null) {
@@ -73,9 +74,9 @@ public class PumaClient {
 		subscribeThread.start();
 
 		// Managers.
-		heartbeatManager.start();
-		hostManager.start();
-		positionManager.start();
+		defaultHeartbeatManager.start();
+		defaultHostManager.start();
+		defaultPositionManager.start();
 
 		inited = true;
 	}
@@ -87,9 +88,9 @@ public class PumaClient {
 		inited = false;
 
 		// Stopping managers.
-		heartbeatManager.stop();
-		hostManager.stop();
-		positionManager.stop();
+		defaultHeartbeatManager.stop();
+		defaultHostManager.stop();
+		defaultPositionManager.stop();
 
 		// Stopping subscribe thread.
 		if (subscribeThread != null) {
@@ -114,6 +115,14 @@ public class PumaClient {
 		return name;
 	}
 
+	public DefaultHostManager getDefaultHostManager() {
+		return defaultHostManager;
+	}
+
+	public DefaultPositionManager getDefaultPositionManager() {
+		return defaultPositionManager;
+	}
+
 	private class SubscribeTask implements Runnable {
 
 		private volatile boolean stopped = false;
@@ -133,16 +142,16 @@ public class PumaClient {
 
 				try {
 					connect();
-					hostManager.feedback(HostManager.ConnectFeedback.CONNECT_ERROR);
+					defaultHostManager.feedback(DefaultHostManager.ConnectFeedback.CONNECT_ERROR);
 
 					while (!checkStop()) {
 						Event event = readEvent(is);
-						hostManager.feedback(HostManager.ConnectFeedback.CONNECT_ERROR);
+						defaultHostManager.feedback(DefaultHostManager.ConnectFeedback.CONNECT_ERROR);
 
 						if (!checkStop() || event != null) {
 							if (handleEvent(event)) {
 								if (event instanceof RowChangedEvent) {
-									positionManager.save(((RowChangedEvent) event).getBinlogInfo());
+									defaultPositionManager.save(((RowChangedEvent) event).getBinlogInfo());
 								}
 							} else {
 								String msg = String.format("Puma client(%s) on event error.", name);
@@ -159,7 +168,7 @@ public class PumaClient {
 
 				} catch (IOException e) {
 					if (!checkStop()) {
-						hostManager.feedback(HostManager.ConnectFeedback.CONNECT_ERROR);
+						defaultHostManager.feedback(DefaultHostManager.ConnectFeedback.CONNECT_ERROR);
 
 						String msg = String.format("Puma client(%s) connect to server error.", name);
 						PumaClientConnectException pe = new PumaClientConnectException(msg, e);
@@ -185,7 +194,7 @@ public class PumaClient {
 		}
 
 		private void connect() throws IOException {
-			URL url = new URL("http://" + hostManager.next() + "/puma/channel");
+			URL url = new URL("http://" + defaultHostManager.next() + "/puma/channel");
 
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("POST");
@@ -214,7 +223,7 @@ public class PumaClient {
 
 		private boolean handleEvent(Event event) {
 			if (event instanceof HeartbeatEvent) {
-				heartbeatManager.heartbeat();
+				defaultHeartbeatManager.heartbeat();
 				return true;
 			} else {
 				RowChangedEvent row = (RowChangedEvent) event;

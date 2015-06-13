@@ -86,7 +86,7 @@ public class Config {
 
 			} catch (Exception e) {
 				String msg = String.format("Puma changing configuration error.");
-				PumaException pe = new PumaException(client.getName(), client.getDefaultHostManager().next(), msg);
+				PumaException pe = new PumaException(client.getName(), msg);
 				logger.error(msg, pe);
 				Cat.logError(msg, pe);
 			}

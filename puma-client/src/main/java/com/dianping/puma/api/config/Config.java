@@ -5,8 +5,12 @@ import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.exception.PumaException;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class Config {
 
@@ -18,6 +22,8 @@ public class Config {
 	private static final String DDL_KEY = "puma.client.ddl";
 	private static final String TRANSACTION_KEY = "puma.client.transaction";
 	private static final String CODEC_TYPE_KEY = "puma.client.codectype";
+	private static final String SCHEMA_KEY = "puma.client.schema";
+	private static final String TABLES_KEY = "puma.client.tables";
 
 	private static final String RECONNECT_SLEEP_TIME_KEY = "puma.client.reconnect.sleep.time";
 	private static final String RECONNECT_COUNT_KEY = "puma.client.reconnect.count";
@@ -31,10 +37,13 @@ public class Config {
 
 	private volatile String target;                      // prerequisite.
 	private volatile Long serverId;                      // prerequisite.
+	private volatile String schema;                      // prerequisite.
+	private volatile List<String> tables;                // prerequisite.
 	private volatile Boolean dml = true;                 // optional.
 	private volatile Boolean ddl = false;                // optional.
 	private volatile Boolean transaction = false;        // optional.
 	private volatile String codecType = "json";          // optional.
+
 
 	private volatile Long reconnectSleepTime = 3000L;    // optional.
 	private volatile Integer reconnectCount = 3;         // optional.
@@ -57,6 +66,10 @@ public class Config {
 					target = (String) genConfig(target, value, true);
 				} else if (key.equalsIgnoreCase(localKey(SERVER_ID_KEY))) {
 					serverId = (Long) genConfig(serverId, Long.parseLong(value), true);
+				} else if (key.equalsIgnoreCase(localKey(SCHEMA_KEY))) {
+					schema = (String) genConfig(schema, value, true);
+				} else if (key.equalsIgnoreCase(localKey(TABLES_KEY))) {
+					tables = (List<String>) genConfig(tables, parseTables(value), true);
 				} else if (key.equalsIgnoreCase(localKey(DML_KEY))) {
 					dml = (Boolean) genConfig(dml, Boolean.parseBoolean(value), false);
 				} else if (key.equalsIgnoreCase(localKey(DDL_KEY))) {
@@ -102,6 +115,8 @@ public class Config {
 		// Set local configurations.
 		target = (String) genConfig(target, configCache.getProperty(localKey(TARGET_KEY)), true);
 		serverId = (Long) genConfig(serverId, configCache.getLongProperty(localKey(SERVER_ID_KEY)), true);
+		schema = (String) genConfig(schema, configCache.getProperty(SCHEMA_KEY), true);
+		tables = (List<String>) genConfig(tables, parseTables(configCache.getProperty(TABLES_KEY)), true);
 		dml = (Boolean) genConfig(dml, configCache.getBooleanProperty(localKey(DML_KEY)), false);
 		ddl = (Boolean) genConfig(ddl, configCache.getBooleanProperty(localKey(DDL_KEY)), false);
 		transaction = (Boolean) genConfig(transaction, configCache.getBooleanProperty(localKey(TRANSACTION_KEY)), false);
@@ -132,6 +147,10 @@ public class Config {
 		configCache.removeChange(configChange);
 
 		inited = false;
+	}
+
+	private List<String> parseTables(String tableString) {
+		return Arrays.asList(StringUtils.split(tableString, ","));
 	}
 
 	private Object genConfig(Object oldValue, Object newValue, boolean optional) {

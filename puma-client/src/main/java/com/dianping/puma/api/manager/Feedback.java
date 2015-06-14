@@ -1,8 +1,10 @@
 package com.dianping.puma.api.manager;
 
 public enum Feedback {
-	NO_ERROR,
-	NET_ERROR,
-	HEARTBEAT_ERROR,
-	SERVER_ERROR,
+	UNSET          , // UNSET state.
+	INITIAL        , // Sets before first connection.
+	SUCCESS        , // Sets after reading events success.
+	NET_ERROR      , // Sets after connection or reading events failure.
+	HEARTBEAT_ERROR, // Sets after heartbeat lost.
+	SERVER_ERROR   , // Sets after puma server error.
 }

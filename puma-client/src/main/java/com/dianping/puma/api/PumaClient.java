@@ -197,6 +197,8 @@ public class PumaClient {
 		@Override
 		public void run() {
 
+			hostManager.feedback(Feedback.INITIAL);
+
 			while (!checkStop()) {
 
 				try {
@@ -213,7 +215,7 @@ public class PumaClient {
 							if (event instanceof HeartbeatEvent) {
 								// Continue reading event.
 								heartbeatManager.heartbeat();
-								hostManager.feedback(Feedback.NO_ERROR);
+								hostManager.feedback(Feedback.SUCCESS);
 								continue;
 							} else if (event instanceof ServerErrorEvent) {
 								// Break reading event and reconnect.
@@ -227,7 +229,7 @@ public class PumaClient {
 								} catch (Exception e) {
 									if (eventListener.onException(row, e)) {
 										// Continue reading event.
-										hostManager.feedback(Feedback.NO_ERROR);
+										hostManager.feedback(Feedback.SUCCESS);
 										continue;
 									} else {
 										// Break reading event and stop puma.
@@ -299,7 +301,7 @@ public class PumaClient {
 		private boolean handleEvent(Event event) {
 			if (event instanceof HeartbeatEvent) {
 				heartbeatManager.heartbeat();
-				hostManager.feedback(Feedback.NO_ERROR);
+				hostManager.feedback(Feedback.SUCCESS);
 				return true;
 			} else if (event instanceof ServerErrorEvent) {
 				hostManager.feedback(Feedback.SERVER_ERROR);
@@ -309,7 +311,7 @@ public class PumaClient {
 
 				try {
 					eventListener.onEvent(row);
-					hostManager.feedback(Feedback.NO_ERROR);
+					hostManager.feedback(Feedback.SUCCESS);
 				} catch (Exception e) {
 					// @TODO: How to feedback if on event exception occurs?
 					return eventListener.onException(row, e);

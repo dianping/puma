@@ -23,10 +23,10 @@ public class DefaultHostManager implements HostManager {
 	private volatile boolean inited = false;
 
 	private volatile List<String> hosts = new ArrayList<String>();
-	private String host = "0.0.0.0";
-	private int index = 0;
-	private int retries = 0;
-	private Feedback feedbackState = Feedback.NO_ERROR;
+	private String host;
+	private int index;
+	private int retries;
+	private Feedback state = Feedback.UNSET;
 
 	private PumaClient client;
 	private Config config;
@@ -60,7 +60,7 @@ public class DefaultHostManager implements HostManager {
 	@Override
 	public void start() {
 		if (inited) {
-			logger.warn("Puma client(%s) already start host manager.", client.getName());
+			logger.warn("Puma({}) host manager has been started already.", client.getName());
 			return;
 		}
 
@@ -71,12 +71,13 @@ public class DefaultHostManager implements HostManager {
 		configCache.addChange(configChange);
 
 		inited = true;
+		logger.info("Puma({}) host manager has been started successfully.", client.getName());
 	}
 
 	@Override
 	public void stop() {
 		if (!inited) {
-			logger.warn("Puma client(%s) already stop host manager.", client.getName());
+			logger.warn("Puma({}) host manager has been stopped already", client.getName());
 			return;
 		}
 
@@ -88,18 +89,23 @@ public class DefaultHostManager implements HostManager {
 		hosts = null;
 
 		inited = false;
+		logger.info("Puma({}) host manager has been stopped successfully.", client.getName());
 	}
 
 	@Override
 	public String next() {
-		host = "0.0.0.0";
-
 		try {
-			switch (feedbackState) {
-			case NO_ERROR:
+			switch (state) {
+			case INITIAL:
+				retries = 0;
+				host = rawHost();
+				break;
+
+			case SUCCESS:
 				retries = 0;
 				host = oriHost();
 				break;
+
 			case NET_ERROR:
 				if (retries < config.getReconnectCount()) {
 					++retries;
@@ -109,10 +115,14 @@ public class DefaultHostManager implements HostManager {
 					host = newHost();
 				}
 				break;
+
 			case SERVER_ERROR:
 				retries = 0;
 				host = newHost();
 				break;
+
+			default:
+				throw new RuntimeException("Feeds back connection state before using host manager.");
 			}
 		} catch (Exception e) {
 			String msg = String.format("Puma request host error.");
@@ -130,8 +140,13 @@ public class DefaultHostManager implements HostManager {
 	}
 
 	@Override
-	public void feedback(Feedback feedbackState) {
-		this.feedbackState = feedbackState;
+	public void feedback(Feedback state) {
+		this.state = state;
+	}
+
+	private String rawHost() {
+		index = 0;
+		return hosts.get(index);
 	}
 
 	private String newHost() {
@@ -140,7 +155,7 @@ public class DefaultHostManager implements HostManager {
 	}
 
 	private String oriHost() {
-		return (host == null) ? hosts.get(index) : host;
+		return host;
 	}
 
 	private void changeHosts(String hostStr) {
@@ -154,7 +169,11 @@ public class DefaultHostManager implements HostManager {
 	}
 
 	private boolean needToRestart() {
-		return host == null || !hosts.contains(host);
+		if (state.equals(Feedback.INITIAL)) {
+			return false;
+		} else {
+			return host == null || !hosts.contains(host);
+		}
 	}
 
 	private String localKey(String key) {
@@ -167,6 +186,10 @@ public class DefaultHostManager implements HostManager {
 
 	public void setClient(PumaClient client) {
 		this.client = client;
+	}
+
+	public void setConfig(Config config) {
+		this.config = config;
 	}
 
 	public void setConfigCache(ConfigCache configCache) {

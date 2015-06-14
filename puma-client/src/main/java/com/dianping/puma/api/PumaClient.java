@@ -9,16 +9,17 @@ import java.net.URL;
 import com.dianping.cat.Cat;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.puma.api.config.Config;
+import com.dianping.puma.api.exception.AuthException;
 import com.dianping.puma.api.exception.PumaException;
-import com.dianping.puma.api.manager.Feedback;
-import com.dianping.puma.api.manager.HeartbeatManager;
-import com.dianping.puma.api.manager.HostManager;
-import com.dianping.puma.api.manager.PositionManager;
+import com.dianping.puma.api.manager.*;
 import com.dianping.puma.api.manager.impl.DefaultHeartbeatManager;
 import com.dianping.puma.api.manager.impl.DefaultHostManager;
+import com.dianping.puma.api.manager.impl.DefaultLockManager;
 import com.dianping.puma.api.manager.impl.DefaultPositionManager;
 import com.dianping.puma.api.util.Clock;
+import com.dianping.puma.core.codec.EventCodecFactory;
 import com.dianping.puma.core.event.*;
+import com.dianping.puma.core.model.BinlogInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,13 +49,17 @@ public class PumaClient {
 	private HostManager hostManager;
 	private PositionManager positionManager;
 	private HeartbeatManager heartbeatManager;
+	private LockManager lockManager;
 
 	public PumaClient(Configuration configuration) {
-
 	}
 
 	public void register(EventListener listener) {
 		this.eventListener = listener;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public void start() {
@@ -67,6 +72,7 @@ public class PumaClient {
 		startHostManager();
 		startPositionManager();
 		startHeartbeatManager();
+		startLockManager();
 		startSubscribe();
 
 		inited = true;
@@ -80,6 +86,7 @@ public class PumaClient {
 		}
 
 		stopSubscribe();
+		stopLockManager();
 		stopHeartbeatManager();
 		stopPositionManager();
 		stopHostManager();
@@ -94,6 +101,9 @@ public class PumaClient {
 		config.setClient(this);
 		config.setConfigCache(configCache);
 		config.start();
+
+		// Get event codec.
+		codec = EventCodecFactory.createCodec(config.getCodecType());
 	}
 
 	private void startHostManager() {
@@ -106,13 +116,12 @@ public class PumaClient {
 	}
 
 	private void startPositionManager() {
-		DefaultHeartbeatManager defaultHeartbeatManager = new DefaultHeartbeatManager();
-		defaultHeartbeatManager.setClient(this);
-		defaultHeartbeatManager.setHostManager(hostManager);
-		defaultHeartbeatManager.setConfig(config);
-		defaultHeartbeatManager.setClock(clock);
-		heartbeatManager = defaultHeartbeatManager;
-		heartbeatManager.start();
+		DefaultPositionManager defaultPositionManager = new DefaultPositionManager();
+		defaultPositionManager.setClient(this);
+		defaultPositionManager.setConfig(config);
+		defaultPositionManager.setClock(clock);
+		positionManager = defaultPositionManager;
+		positionManager.start();
 	}
 
 	private void startHeartbeatManager() {
@@ -125,8 +134,20 @@ public class PumaClient {
 		heartbeatManager.start();
 	}
 
+	private void startLockManager() {
+		DefaultLockManager defaultLockManager = new DefaultLockManager();
+		defaultLockManager.setClient(this);
+		lockManager = defaultLockManager;
+		lockManager.start();
+	}
+
 	private void startSubscribe() {
 		subscribeTask = new SubscribeTask();
+		subscribeTask.setConfig(config);
+		subscribeTask.setHostManager(hostManager);
+		subscribeTask.setPositionManager(positionManager);
+		subscribeTask.setHeartbeatManager(heartbeatManager);
+		subscribeTask.setLockManager(lockManager);
 		subscribeThread = new Thread(subscribeTask);
 		subscribeThread.setName(String.format("subscribe-thread-%s", name));
 		subscribeThread.setDaemon(true);
@@ -153,6 +174,11 @@ public class PumaClient {
 		heartbeatManager = null;
 	}
 
+	private void stopLockManager() {
+		lockManager.stop();
+		lockManager = null;
+	}
+
 	private void stopSubscribe() {
 		subscribeTask.shutdown();
 		subscribeThread.interrupt();
@@ -163,39 +189,19 @@ public class PumaClient {
 		return name;
 	}
 
-	public HostManager getHostManager() {
-		return hostManager;
-	}
-
-	public PositionManager getPositionManager() {
-		return positionManager;
-	}
-
-	public HeartbeatManager getHeartbeatManager() {
-		return heartbeatManager;
-	}
-
-	public Config getConfig() {
-		return config;
-	}
-
-	public Clock getClock() {
-		return clock;
-	}
-
-	public ConfigCache getConfigCache() {
-		return configCache;
-	}
-
 	private class SubscribeTask implements Runnable {
 
 		private volatile boolean stopped = false;
 
 		private boolean first = true;
-
 		private HttpURLConnection connection = null;
-
 		private InputStream is = null;
+
+		private Config config;
+		private HostManager hostManager;
+		private PositionManager positionManager;
+		private HeartbeatManager heartbeatManager;
+		private LockManager lockManager;
 
 		@Override
 		public void run() {
@@ -294,8 +300,17 @@ public class PumaClient {
 			return stopped || Thread.currentThread().isInterrupted();
 		}
 
-		private void connect() throws IOException {
-			URL url = new URL("http://" + hostManager.next() + "/puma/channel");
+		private void connect() throws IOException, AuthException {
+			if (!lockManager.tryLock()) {
+				throw new AuthException("Puma locks connection failure.");
+			}
+
+			logger.info("Puma({}) locks connection successfully.");
+
+			String host = hostManager.next();
+			URL url = new URL("http://" + host + "/puma/channel");
+
+			logger.info("Puma({}) connects to host: {}.", name, host);
 
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("POST");
@@ -306,11 +321,35 @@ public class PumaClient {
 			connection.setRequestProperty("Cache-Control", "no-cache");
 
 			PrintWriter out = new PrintWriter(connection.getOutputStream());
-			String requestParams = configuration.buildRequestParamString(-3);
+			String requestParams = buildRequestParamString();
 			out.print(requestParams);
 			out.close();
 
+			logger.info("Puma({}) connection configuration: {}.", name, requestParams);
+
 			is = connection.getInputStream();
+		}
+
+		private String buildRequestParamString() {
+			BinlogInfo binlogInfo = positionManager.next();
+
+			StringBuilder builder = (new StringBuilder())
+					.append("seq=").append(-3)
+					.append("&binlog=").append(binlogInfo.getBinlogFile())
+					.append("&binlogPos=").append(binlogInfo.getBinlogPosition())
+					.append("&serverId=").append(config.getServerId())
+					.append("&name=").append(name)
+					.append("&target=").append(config.getTarget())
+					.append("&dml=").append(config.getDml())
+					.append("&ddl=").append(config.getDdl())
+					.append("&ts=").append(config.getTransaction())
+					.append("&codec=").append(config.getCodecType());
+
+			for (String table: config.getTables()) {
+				builder.append("&dt=").append(config.getSchema()).append(".").append(table);
+			}
+
+			return builder.toString();
 		}
 
 		private Event readEvent(InputStream is) throws IOException {
@@ -328,6 +367,26 @@ public class PumaClient {
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
+		}
+
+		public void setHostManager(HostManager hostManager) {
+			this.hostManager = hostManager;
+		}
+
+		public void setPositionManager(PositionManager positionManager) {
+			this.positionManager = positionManager;
+		}
+
+		public void setHeartbeatManager(HeartbeatManager heartbeatManager) {
+			this.heartbeatManager = heartbeatManager;
+		}
+
+		public void setLockManager(LockManager lockManager) {
+			this.lockManager = lockManager;
+		}
+
+		public void setConfig(Config config) {
+			this.config = config;
 		}
 	}
 }

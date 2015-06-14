@@ -185,6 +185,14 @@ public class Config {
 		return target;
 	}
 
+	public String getSchema() {
+		return schema;
+	}
+
+	public List<String> getTables() {
+		return tables;
+	}
+
 	public Boolean getDml() {
 		return dml;
 	}

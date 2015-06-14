@@ -10,7 +10,6 @@ import org.junit.runners.Suite.SuiteClasses;
 // add test classes here
 ConfigurationBuilderTest.class,
 ConfigurationTest.class,
-MMapBasedSeqFileHolderTest.class,
 PumaClientTest.class
 
 })

@@ -32,20 +32,20 @@ public class DefaultPositionManager implements PositionManager {
 	@Override
 	public void start() {
 		if (inited) {
-			logger.warn("Puma(%s) already start position manager.", client.getName());
+			logger.warn("Puma({}) position manager has been started already.", client.getName());
 			return;
 		}
 
 		timer.scheduleAtFixedRate(new AckWorker(), 0, config.getBinlogAckTime());
 
 		inited = true;
-		logger.info("Puma(%s) start position manager success.", client.getName());
+		logger.info("Puma({}) position manager has been started successfully.", client.getName());
 	}
 
 	@Override
 	public void stop() {
 		if (!inited) {
-			logger.warn("Puma(%s) already stop position manager.", client.getName());
+			logger.warn("Puma({}) position manager has been stopped already.", client.getName());
 			return;
 		}
 
@@ -53,7 +53,7 @@ public class DefaultPositionManager implements PositionManager {
 		timer = null;
 
 		inited = false;
-		logger.info("Puma(%s) stop position manager success.", client.getName());
+		logger.info("Puma({}) position manager has been stopped successfully.", client.getName());
 	}
 
 	@Override

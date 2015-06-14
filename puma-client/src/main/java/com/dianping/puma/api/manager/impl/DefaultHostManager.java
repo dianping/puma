@@ -41,7 +41,8 @@ public class DefaultHostManager implements HostManager {
 
 					// If current host not in the new host list, restart the subscribe thread.
 					if (needToRestart()) {
-						client.restartSubscribe();
+						client.stop();
+						client.start();
 					}
 
 				} catch (Exception e) {

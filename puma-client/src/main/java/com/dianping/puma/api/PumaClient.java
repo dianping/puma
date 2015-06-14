@@ -18,14 +18,11 @@ import com.dianping.puma.api.manager.impl.DefaultHeartbeatManager;
 import com.dianping.puma.api.manager.impl.DefaultHostManager;
 import com.dianping.puma.api.manager.impl.DefaultPositionManager;
 import com.dianping.puma.api.util.Clock;
-import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.event.ServerErrorEvent;
+import com.dianping.puma.core.event.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.puma.core.codec.EventCodec;
-import com.dianping.puma.core.event.Event;
-import com.dianping.puma.core.event.HeartbeatEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.core.util.StreamUtils;
 
@@ -62,46 +59,15 @@ public class PumaClient {
 
 	public void start() {
 		if (inited) {
-			logger.warn("Puma(%s) has been started repeatedly.", name);
+			logger.warn("Puma(%s) has been started already.", name);
 			return;
 		}
 
-		// Start configuration.
-		config = new Config();
-		config.setClient(this);
-		config.setConfigCache(configCache);
-		config.start();
-
-		// Start host manager.
-		DefaultHostManager defaultHostManager = new DefaultHostManager();
-		defaultHostManager.setClient(this);
-		defaultHostManager.setConfigCache(configCache);
-		hostManager = defaultHostManager;
-		hostManager.start();
-
-		// Start position manager.
-		DefaultPositionManager defaultPositionManager = new DefaultPositionManager();
-		defaultPositionManager.setClient(this);
-		defaultPositionManager.setConfig(config);
-		defaultPositionManager.setClock(clock);
-		positionManager = defaultPositionManager;
-		positionManager.start();
-
-		// Start heartbeat manager.
-		DefaultHeartbeatManager defaultHeartbeatManager = new DefaultHeartbeatManager();
-		defaultHeartbeatManager.setClient(this);
-		defaultHeartbeatManager.setHostManager(hostManager);
-		defaultHeartbeatManager.setConfig(config);
-		defaultHeartbeatManager.setClock(clock);
-		heartbeatManager = defaultHeartbeatManager;
-		heartbeatManager.start();
-
-		// Start subscribe thread.
-		subscribeTask = new SubscribeTask();
-		subscribeThread = new Thread(subscribeTask);
-		subscribeThread.setName(String.format("subscribe-thread-%s", name));
-		subscribeThread.setDaemon(true);
-		subscribeThread.start();
+		startConfig();
+		startHostManager();
+		startPositionManager();
+		startHeartbeatManager();
+		startSubscribe();
 
 		inited = true;
 		logger.info("Puma(%s) has been started successfully.", name);
@@ -109,47 +75,88 @@ public class PumaClient {
 
 	public void stop() {
 		if (!inited) {
-			logger.warn("Puma(%s) has been stopped repeatedly.", name);
+			logger.warn("Puma(%s) has been stopped already.", name);
 			return;
 		}
 
-		// Stop subscribe thread.
-		subscribeTask.stop();
-		subscribeThread.interrupt();
-		subscribeThread = null;
-
-		// Stop heartbeat manager.
-		heartbeatManager.stop();
-
-		// Stop position manager.
-		positionManager.stop();
-
-		// Stop host manager.
-		hostManager.stop();
-
-		// Stop configuration.
-		config.stop();
+		stopSubscribe();
+		stopHeartbeatManager();
+		stopPositionManager();
+		stopHostManager();
+		stopConfig();
 
 		inited = false;
 		logger.info("Puma(%s) has been stopped successfully.", name);
 	}
 
-	public void restartSubscribe() {
-		if (inited) {
-			// Stop subscribe task.
-			subscribeTask.stop();
-			subscribeThread.interrupt();
-			subscribeThread = null;
-		}
+	private void startConfig() {
+		config = new Config();
+		config.setClient(this);
+		config.setConfigCache(configCache);
+		config.start();
+	}
 
-		// Start subscribe task.
+	private void startHostManager() {
+		DefaultHostManager defaultHostManager = new DefaultHostManager();
+		defaultHostManager.setClient(this);
+		defaultHostManager.setConfig(config);
+		defaultHostManager.setConfigCache(configCache);
+		hostManager = defaultHostManager;
+		hostManager.start();
+	}
+
+	private void startPositionManager() {
+		DefaultHeartbeatManager defaultHeartbeatManager = new DefaultHeartbeatManager();
+		defaultHeartbeatManager.setClient(this);
+		defaultHeartbeatManager.setHostManager(hostManager);
+		defaultHeartbeatManager.setConfig(config);
+		defaultHeartbeatManager.setClock(clock);
+		heartbeatManager = defaultHeartbeatManager;
+		heartbeatManager.start();
+	}
+
+	private void startHeartbeatManager() {
+		DefaultHeartbeatManager defaultHeartbeatManager = new DefaultHeartbeatManager();
+		defaultHeartbeatManager.setClient(this);
+		defaultHeartbeatManager.setHostManager(hostManager);
+		defaultHeartbeatManager.setConfig(config);
+		defaultHeartbeatManager.setClock(clock);
+		heartbeatManager = defaultHeartbeatManager;
+		heartbeatManager.start();
+	}
+
+	private void startSubscribe() {
 		subscribeTask = new SubscribeTask();
 		subscribeThread = new Thread(subscribeTask);
 		subscribeThread.setName(String.format("subscribe-thread-%s", name));
 		subscribeThread.setDaemon(true);
 		subscribeThread.start();
+	}
 
-		logger.info("Puma(%s) subscription has been restarted successfully.", name);
+	private void stopConfig() {
+		config.stop();
+		config = null;
+	}
+
+	private void stopHostManager() {
+		hostManager.stop();
+		hostManager = null;
+	}
+
+	private void stopPositionManager() {
+		positionManager.stop();
+		positionManager = null;
+	}
+
+	private void stopHeartbeatManager() {
+		heartbeatManager.stop();
+		heartbeatManager = null;
+	}
+
+	private void stopSubscribe() {
+		subscribeTask.shutdown();
+		subscribeThread.interrupt();
+		subscribeThread = null;
 	}
 
 	public String getName() {
@@ -184,76 +191,84 @@ public class PumaClient {
 
 		private volatile boolean stopped = false;
 
-		private PumaClient client;
+		private boolean first = true;
 
 		private HttpURLConnection connection = null;
 
 		private InputStream is = null;
 
-		public void stop() {
-			stopped = true;
-		}
-
 		@Override
 		public void run() {
 
-			hostManager.feedback(Feedback.INITIAL);
-
-			while (!checkStop()) {
+			while (!isShutdown()) {
 
 				try {
+					if (!first) {
+						// Sleep for a while if reconnection.
+						sleep(config.getReconnectSleepTime());
+					}
+					first = false;
 					connect();
 
-					// Open the heartbeat manager after connection.
+					// Open heartbeat manager after connection.
 					heartbeatManager.open();
 
-					while (!checkStop()) {
+					while (!isShutdown()) {
 						Event event = readEvent(is);
 
-						if (!checkStop() && event != null) {
+						if (!isShutdown() && event != null) {
 
-							if (event instanceof HeartbeatEvent) {
-								// Continue reading event.
-								heartbeatManager.heartbeat();
+							// Got event!
+							heartbeatManager.heartbeat();
+
+							// Changed event, handle it.
+							// If no exception occurs or exception can be handled, keep on reading events.
+							// If exception can't be handled, stop the entire client.
+							if (event instanceof ChangedEvent) {
 								hostManager.feedback(Feedback.SUCCESS);
-								continue;
-							} else if (event instanceof ServerErrorEvent) {
-								// Break reading event and reconnect.
-								hostManager.feedback(Feedback.SERVER_ERROR);
-								break;
-							} else {
-								RowChangedEvent row = (RowChangedEvent) event;
 
+								ChangedEvent changedEvent = (ChangedEvent) event;
 								try {
-									eventListener.onEvent(row);
+									eventListener.onEvent(changedEvent);
 								} catch (Exception e) {
-									if (eventListener.onException(row, e)) {
-										// Continue reading event.
-										hostManager.feedback(Feedback.SUCCESS);
+									if (eventListener.onException(changedEvent, e)) {
+										positionManager.feedback(changedEvent.getBinlogInfo());
 										continue;
 									} else {
-										// Break reading event and stop puma.
-										client.stop();
+										stop();
 										break;
 									}
 								}
+							}
+
+							// Heartbeat event, pass it and keep on reading events.
+							if (event instanceof HeartbeatEvent) {
+								hostManager.feedback(Feedback.SUCCESS);
+								continue;
+							}
+
+							// Server error event, reconnect.
+							if (event instanceof ServerErrorEvent) {
+								hostManager.feedback(Feedback.SERVER_ERROR);
+								break;
 							}
 						}
 					}
 
 				} catch (IOException e) {
-					if (!checkStop()) {
+					if (!isShutdown()) {
+						// Feeds back network error after connection failure.
 						hostManager.feedback(Feedback.NET_ERROR);
 
-						String msg = String.format("Puma(%s) connect to server error.", name);
+						String msg = "Connection to server failure.";
 						PumaException pe = new PumaException(name, hostManager.current(), msg, e);
 						logger.error(msg, pe);
 						Cat.logError(msg, pe);
-
-						// Reconnect sleep.
-						sleep(config.getReconnectSleepTime());
 					}
 				} finally {
+					// Close heartbeat manager here.
+					heartbeatManager.close();
+
 					if (is != null) {
 						try {
 							is.close();
@@ -268,6 +283,15 @@ public class PumaClient {
 					}
 				}
 			}
+		}
+
+		public void shutdown() {
+			heartbeatManager.close();
+			stopped = true;
+		}
+
+		private boolean isShutdown() {
+			return stopped || Thread.currentThread().isInterrupted();
 		}
 
 		private void connect() throws IOException {
@@ -298,39 +322,12 @@ public class PumaClient {
 			return codec.decode(data);
 		}
 
-		private boolean handleEvent(Event event) {
-			if (event instanceof HeartbeatEvent) {
-				heartbeatManager.heartbeat();
-				hostManager.feedback(Feedback.SUCCESS);
-				return true;
-			} else if (event instanceof ServerErrorEvent) {
-				hostManager.feedback(Feedback.SERVER_ERROR);
-				return false;
-			} else {
-				RowChangedEvent row = (RowChangedEvent) event;
-
-				try {
-					eventListener.onEvent(row);
-					hostManager.feedback(Feedback.SUCCESS);
-				} catch (Exception e) {
-					// @TODO: How to feedback if on event exception occurs?
-					return eventListener.onException(row, e);
-				}
-
-				return true;
-			}
-		}
-
 		private void sleep(long time) {
 			try {
 				Thread.sleep(time);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
-		}
-
-		private boolean checkStop() {
-			return stopped || Thread.currentThread().isInterrupted();
 		}
 	}
 }

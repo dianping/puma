@@ -30,18 +30,19 @@ public class DefaultHeartbeatManager implements HeartbeatManager {
 
 	public void start() {
 		if (inited) {
-			logger.warn("Puma(%s) already start heartbeat manager.", client.getName());
+			logger.warn("Puma({}) heartbeat manager has been started already.", client.getName());
 			return;
 		}
 
 		timer.scheduleAtFixedRate(new HeartbeatCheckTask(), 0, config.getHeartbeatCheckTime());
 
 		inited = true;
+		logger.info("Puma({}) heartbeat manager has been started successfully.", client.getName());
 	}
 
 	public void stop() {
 		if (!inited) {
-			logger.warn("Puma(%s) already stop heartbeat manager.", client.getName());
+			logger.warn("Puma({}) heartbeat manager has been stopped already.", client.getName());
 			return;
 		}
 
@@ -49,15 +50,20 @@ public class DefaultHeartbeatManager implements HeartbeatManager {
 		timer = null;
 
 		inited = false;
+		logger.info("Puma({}) heartbeat manager has been stopped successfully.", client.getName());
 	}
 
 	public void open() {
 		marked = true;
 		heartbeat();
+
+		logger.info("Puma({}) heartbeat manager has been opened successfully.", client.getName());
 	}
 
 	public void close() {
 		marked = false;
+
+		logger.info("Puma({}) heartbeat manager has been closed successfully.", client.getName());
 	}
 
 	public void heartbeat() {
@@ -94,9 +100,9 @@ public class DefaultHeartbeatManager implements HeartbeatManager {
 				logger.error(msg, pe);
 				Cat.logError(msg, pe);
 
-				// Restart subscribe thread if heartbeat is expired.
-				close();
-				client.restartSubscribe();
+				// Restart the client.
+				client.stop();
+				client.start();
 			}
 		}
 	}

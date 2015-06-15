@@ -265,6 +265,9 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 				break;
 			case BinlogConstants.MYSQL_TYPE_BLOB:
 				final int blobLength = PacketUtils.readInt(buf, meta);
+				if (blobLength < 0) {
+					blobLength = blobLength;
+				}
 				columns.add(BlobColumn.valueOf(PacketUtils.readBytes(buf, blobLength)));
 				break;
 			case BinlogConstants.MYSQL_TYPE_VARCHAR:

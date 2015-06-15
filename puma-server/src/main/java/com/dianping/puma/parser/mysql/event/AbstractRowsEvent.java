@@ -269,6 +269,7 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 					for (long j = 0; j != longBlobLength; ++j) {
 						buf.get();
 					}
+					columns.add(BlobColumn.valueOf(new byte[] {(byte) 0x00}));
 					break;
 				}
 				final int blobLength = (int) longBlobLength;

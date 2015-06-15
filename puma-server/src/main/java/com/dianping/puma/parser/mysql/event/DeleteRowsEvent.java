@@ -71,9 +71,6 @@ public class DeleteRowsEvent extends AbstractRowsEvent {
 		tableMapEvent = context.getTableMaps().get(tableId);
 		usedColumns = PacketUtils.readBitSet(buf, columnCount.intValue());
 
-		logger.info("###########################################");
-		logger.info(toString());
-		
 		rows = parseRows(buf, context);
 	}
 

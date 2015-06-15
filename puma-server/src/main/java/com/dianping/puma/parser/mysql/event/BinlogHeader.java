@@ -150,9 +150,6 @@ public class BinlogHeader implements Serializable {
 		eventLength = PacketUtils.readLong(buf, 4);
 		nextPosition = PacketUtils.readLong(buf, 4);
 		flags = PacketUtils.readInt(buf, 2);
-
-		logger.info("###########################################");
-		logger.info(toString());
 	}
 
 }

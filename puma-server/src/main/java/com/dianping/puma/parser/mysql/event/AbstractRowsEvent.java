@@ -250,7 +250,6 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 			case BinlogConstants.MYSQL_TYPE_STRING:
 				final int stringLength = length < 256 ? PacketUtils.readInt(buf, 1) : PacketUtils.readInt(buf, 2);
 				columns.add(StringColumn.valueOf(PacketUtils.readBytes(buf, stringLength)));
-				LOG.info("buf.limit: " + buf.limit() + " buf.position: " + buf.position() +" nextLength: " + stringLength);
 				break;
 			case BinlogConstants.MYSQL_TYPE_BIT:
 				final int bitLength = (meta >> 8) * 8 + (meta & 0xFF);
@@ -272,7 +271,6 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 			case BinlogConstants.MYSQL_TYPE_VAR_STRING:
 				final int varcharLength = meta < 256 ? PacketUtils.readInt(buf, 1) : PacketUtils.readInt(buf, 2);
 				columns.add(StringColumn.valueOf(PacketUtils.readBytes(buf, varcharLength)));
-				LOG.info("buf.limit: " + buf.limit() + " buf.position: " + buf.position() +" nextLength: " + varcharLength);
 				break;
 			case BinlogConstants.MYSQL_TYPE_TIME2:
 				final int timeValue = PacketUtils.readInt(buf, 3, false);

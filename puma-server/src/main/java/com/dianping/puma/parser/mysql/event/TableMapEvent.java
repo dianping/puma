@@ -169,9 +169,6 @@ public class TableMapEvent extends AbstractBinlogEvent {
 		columnNullabilities = PacketUtils.readBitSet(buf, columnCount.intValue());
 
 		context.getTableMaps().put(tableId, this);
-
-		logger.info("###########################################");
-		logger.info(toString());
 	}
 
 }

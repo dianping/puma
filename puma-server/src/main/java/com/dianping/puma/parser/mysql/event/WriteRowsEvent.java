@@ -71,9 +71,6 @@ public class WriteRowsEvent extends AbstractRowsEvent {
 		usedColumns = PacketUtils.readBitSet(buf, columnCount.intValue());
 		tableMapEvent = context.getTableMaps().get(tableId);
 
-		logger.info("###########################################");
-		logger.info(toString());
-
 		rows = parseRows(buf, context);
 	}
 

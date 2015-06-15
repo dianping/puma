@@ -80,9 +80,6 @@ public class UpdateRowsEvent extends AbstractRowsEvent {
 		usedColumnsBefore = PacketUtils.readBitSet(buf, columnCount.intValue());
 		usedColumnsAfter = PacketUtils.readBitSet(buf, columnCount.intValue());
 
-		logger.info("###########################################");
-		logger.info(toString());
-
 		rows = parseRows(buf, context);
 	}
 

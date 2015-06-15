@@ -44,7 +44,7 @@ public final class PacketUtils {
 		if ((buf.position() + length) <= buf.limit() && length <= 4) {
 			long r = 0;
 			for (int i = 0; i < length; i++) {
-				r |= ((buf.get() & 0xff) << (i << 3));
+				r |= ((long) (buf.get() & 0xff) << (i << 3));
 			}
 			return r;
 		}

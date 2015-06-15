@@ -14,5 +14,4 @@
 
 	<avatar:cache />
    	<pigeon:annotation />
-   	<bean id="stateAckService" class="com.dianping.puma.api.StateAckService" />
 </beans>

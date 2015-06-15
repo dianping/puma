@@ -25,5 +25,10 @@ public interface StateAckService {
 	 */
 	void setClientAck(ClientAck clientAck);
 	
+	/*
+	 * puma Client 拉取最新的Ack信息
+	 * 
+	 */
+	ClientAck getClientAck(String clientName);
 	
 }

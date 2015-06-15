@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.dianping.pigeon.remoting.provider.config.annotation.Service;
+import com.dianping.puma.admin.cache.StateCacheService;
 import com.dianping.puma.admin.common.StateContainer;
 import com.dianping.puma.core.api.StateAckService;
 import com.dianping.puma.core.model.ClientAck;
@@ -20,22 +21,32 @@ public class StateAckServiceImpl implements StateAckService {
 
 	@Autowired
 	private StateContainer stateContainer;
+	
+	@Autowired
+	private StateCacheService stateCacheService;
 
 	@Override
 	public void setClientAck(ClientAck clientAck) {
 		stateContainer.setClientAckInfo(clientAck);
-		LOG.info("Client ack info.");
+		LOG.info("set Client ack info.");
+	}
+	
+	@Override
+	public ClientAck getClientAck(String clientName) {
+		ClientAck clientAck = stateCacheService.popClientAck(clientName);
+		LOG.info("get Client ack info.");
+		return clientAck;
 	}
 
 	@Override
 	public void setServerAck(ServerAck serverAck) {
 		stateContainer.setServerAckInfo(serverAck);
-		LOG.info("Server ack info.");
+		LOG.info("set Server ack info.");
 	}
 
 	@Override
 	public void setServerAcks(List<ServerAck> serverAcks) {
-		LOG.info("Server ack infos.");
+		LOG.info("set Server ack infos.");
 		if (serverAcks == null || serverAcks.size() == 0) {
 			return;
 		}

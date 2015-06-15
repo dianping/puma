@@ -37,7 +37,7 @@ public class StateContainer {
 		}
 
 	}
-
+	
 	public void setServerAckInfo(ServerAck serverAck) {
 		if (serverAck != null && StringUtils.isNotBlank(serverAck.getClientName())) {
 			serverAcks.put(serverAck.getClientName(), serverAck);

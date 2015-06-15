@@ -25,13 +25,20 @@ public class PumaTaskMapper {
 		}
 		PumaTaskDto pumaTaskDto = new PumaTaskDto();
 		pumaTaskDto.setSrcDBInstanceName(pumaTask.getSrcDBInstanceName());
-		pumaTaskDto.setPumaServerName(pumaTask.getPumaServerName());
+		if (pumaTask.getPumaServerNames() == null || pumaTask.getPumaServerNames().size() == 0) {
+			List<String> pumaServerNames = new ArrayList<String>();
+			pumaServerNames.add(pumaTask.getPumaServerName());
+			pumaTaskDto.setPumaServerNames(pumaServerNames);
+		} else {
+			pumaTaskDto.setPumaServerNames(pumaTask.getPumaServerNames());
+		}
+
 		pumaTaskDto.setName(pumaTask.getName());
 		pumaTaskDto.setBinlogFile(pumaTask.getBinlogInfo().getBinlogFile());
 		pumaTaskDto.setBinlogPosition(pumaTask.getBinlogInfo().getBinlogPosition());
 		pumaTaskDto.setPreservedDay(pumaTask.getPreservedDay());
 		List<DatabaseDto> databases = new ArrayList<DatabaseDto>();
-		if(pumaTask.getTableSet() != null){
+		if (pumaTask.getTableSet() != null) {
 			Map<String, List<String>> tableSet = pumaTask.getTableSet().mapSchemaTables();
 			for (Map.Entry<String, List<String>> entry : tableSet.entrySet()) {
 				DatabaseDto databaseDto = new DatabaseDto();
@@ -47,7 +54,7 @@ public class PumaTaskMapper {
 				databaseDto.setTables(strTables.toString());
 				databases.add(databaseDto);
 			}
-		}else{
+		} else {
 			Map<String, AcceptedTables> acceptedTables = pumaTask.getAcceptedDataInfos();
 			for (Map.Entry<String, AcceptedTables> entry : acceptedTables.entrySet()) {
 				DatabaseDto databaseDto = new DatabaseDto();
@@ -79,7 +86,7 @@ public class PumaTaskMapper {
 	public static PumaTask convertToPumaTask(PumaTask pumaTask, PumaTaskDto pumaTaskDto) {
 		pumaTask.setName(pumaTaskDto.getName());
 		pumaTask.setSrcDBInstanceName(pumaTaskDto.getSrcDBInstanceName());
-		pumaTask.setPumaServerName(pumaTaskDto.getPumaServerName());
+		pumaTask.setPumaServerNames(pumaTaskDto.getPumaServerNames());
 		BinlogInfo binlogInfo = new BinlogInfo();
 		binlogInfo.setBinlogFile(pumaTaskDto.getBinlogFile());
 		binlogInfo.setBinlogPosition(pumaTaskDto.getBinlogPosition());

@@ -61,6 +61,19 @@ public class PumaTaskMorphiaDao extends MongoBaseDao<PumaTaskMorphia> implements
 		}
 		return pumaTasks;
 	}
+	
+	public List<PumaTask> findByPumaServerNames(String pumaServerName) {
+		Query<PumaTaskMorphia> q = this.getDatastore().createQuery(PumaTaskMorphia.class).disableValidation();
+		q.field("entity.pumaServerNames").contains(pumaServerName);
+		QueryResults<PumaTaskMorphia> result = this.find(q);
+		List<PumaTaskMorphia> pumaTaskMorphias = result.asList();
+
+		List<PumaTask> pumaTasks = new ArrayList<PumaTask>();
+		for (PumaTaskMorphia pumaTaskMorphia: pumaTaskMorphias) {
+			pumaTasks.add(pumaTaskMorphia.getEntity());
+		}
+		return pumaTasks;
+	}
 
 	public List<PumaTask> findAll() {
 		Query<PumaTaskMorphia> q = this.getDatastore().createQuery(PumaTaskMorphia.class);

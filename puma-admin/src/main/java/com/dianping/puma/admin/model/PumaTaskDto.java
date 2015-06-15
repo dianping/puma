@@ -6,7 +6,7 @@ public class PumaTaskDto {
 
 	private String srcDBInstanceName;
 
-	private String pumaServerName;
+	private List<String> pumaServerNames;
 
 	private String name;
 
@@ -34,12 +34,12 @@ public class PumaTaskDto {
 		this.srcDBInstanceName = srcDBInstanceName;
 	}
 
-	public String getPumaServerName() {
-		return pumaServerName;
+	public List<String> getPumaServerNames() {
+		return pumaServerNames;
 	}
 
-	public void setPumaServerName(String pumaServerName) {
-		this.pumaServerName = pumaServerName;
+	public void setPumaServerNames(List<String> pumaServerNames) {
+		this.pumaServerNames = pumaServerNames;
 	}
 
 	public String getName() {

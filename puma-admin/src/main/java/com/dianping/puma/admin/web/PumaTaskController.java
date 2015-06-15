@@ -167,7 +167,7 @@ public class PumaTaskController {
 			taskState.setStatus(Status.PREPARING);
 			pumaTaskStateService.add(taskState);
 			PumaTaskOperationEvent event = new PumaTaskOperationEvent();
-			event.setServerName(pumaTask.getPumaServerName());
+			event.setServerNames(pumaTask.getPumaServerNames());
 			event.setTaskName(pumaTask.getName());
 			event.setPumaTask(pumaTask);
 			event.setOperation(operation);
@@ -218,7 +218,7 @@ public class PumaTaskController {
 			taskState.setStatus(Status.PREPARING);
 			pumaTaskStateService.add(taskState);
 
-			event.setServerName(pumaTask.getPumaServerName());
+			event.setServerNames(pumaTask.getPumaServerNames());
 			event.setTaskName(pumaTask.getName());
 			event.setPumaTask(pumaTask);
 			event.setOperation(operation);

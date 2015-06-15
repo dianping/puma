@@ -13,6 +13,8 @@ public interface PumaTaskService {
 	List<PumaTask> findBySrcDBInstanceName(String srcDBInstanceName);
 
 	List<PumaTask> findByPumaServerName(String pumaServerName);
+	
+	List<PumaTask> findByPumaServerNames(String pumaServerName);
 
 	List<PumaTask> findAll();
 

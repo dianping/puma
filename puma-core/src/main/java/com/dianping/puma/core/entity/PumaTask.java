@@ -1,5 +1,6 @@
 package com.dianping.puma.core.entity;
 
+import java.util.List;
 import java.util.Map;
 
 import com.dianping.puma.core.model.AcceptedTables;
@@ -8,9 +9,13 @@ import com.dianping.puma.core.model.TableSet;
 
 public class PumaTask extends BaseEntity {
 
+	private static final long serialVersionUID = 1853488084226378816L;
+
 	private String srcDBInstanceName;
 
 	private String pumaServerName;
+	
+	private List<String> pumaServerNames;
 
 	private BinlogInfo binlogInfo;
 
@@ -69,6 +74,14 @@ public class PumaTask extends BaseEntity {
 	@Deprecated
 	public Map<String, AcceptedTables> getAcceptedDataInfos() {
 		return acceptedDataInfos;
+	}
+
+	public List<String> getPumaServerNames() {
+		return pumaServerNames;
+	}
+
+	public void setPumaServerNames(List<String> pumaServerNames) {
+		this.pumaServerNames = pumaServerNames;
 	}
 
 	@Override

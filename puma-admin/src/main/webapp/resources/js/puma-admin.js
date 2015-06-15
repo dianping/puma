@@ -204,7 +204,8 @@ formApp.factory('formService', [ '$http', '$location',
 			};
 
 			var addMark = function(data) {
-				data.push( {});
+				data.push({});
+				console.log(data);
 			};
 
 			var removeMark = function(data, index) {
@@ -276,9 +277,14 @@ formApp
 													$scope.srcDBInstanceEntities = data.srcDBInstanceEntities;
 													if (!$scope.entity) {
 														$scope.entity = {};
+													}
+													if(!$scope.entity.databases){
 														$scope.entity.databases = [];
-														$scope
-																.addMark($scope.entity.databases);
+														$scope.addMark($scope.entity.databases);
+													}
+													if(!$scope.entity.pumaServerNames){
+														$scope.entity.pumaServerNames = [];
+														$scope.addMark($scope.entity.pumaServerNames);
 													}
 												});
 							};

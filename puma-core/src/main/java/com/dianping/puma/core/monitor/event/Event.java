@@ -1,12 +1,13 @@
 package com.dianping.puma.core.monitor.event;
 
 import java.util.Date;
+import java.util.List;
 
 public abstract class Event {
 
     protected Date gmtCreate;
 
-    protected String serverName;
+    protected List<String> serverNames;
 
     public Event() {
         this.gmtCreate = new Date();
@@ -20,12 +21,12 @@ public abstract class Event {
         this.gmtCreate = gmtCreate;
     }
 
-    public String getServerName() {
-        return serverName;
+    public List<String> getServerNames() {
+        return serverNames;
     }
 
-    public void setServerName(String serverName) {
-        this.serverName = serverName;
+    public void setServerNames(List<String> serverNames) {
+        this.serverNames = serverNames;
     }
 
 }

@@ -14,6 +14,8 @@ public interface PumaTaskDao {
 
 	List<PumaTask> findByPumaServerName(String pumaServerName);
 
+	List<PumaTask> findByPumaServerNames(String pumaServerName);
+	
 	List<PumaTask> findAll();
 
 	long count();

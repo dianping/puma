@@ -10,10 +10,12 @@ import com.dianping.puma.syncserver.job.executor.SyncTaskExecutor;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 import com.dianping.puma.syncserver.job.executor.exception.TEException;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +38,9 @@ public class SyncTaskStateReporter {
 	@Scheduled(cron = "0/5 * * * * ?")
 	public void report() throws SendFailedException {
 		SyncTaskStateEvent event = new SyncTaskStateEvent();
-		event.setServerName(syncServerConfig.getSyncServerName());
+		List<String> serverNames = new ArrayList<String>();
+		serverNames.add(syncServerConfig.getSyncServerName());
+		event.setServerNames(serverNames);
 
 		Map<String, SyncTaskState> syncTaskStateMap = new HashMap<String, SyncTaskState>();
 

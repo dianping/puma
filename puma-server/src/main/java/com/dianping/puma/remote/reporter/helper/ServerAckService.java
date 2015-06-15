@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +20,7 @@ import com.dianping.puma.core.model.ServerAck;
 
 @Component("serverAckService")
 public class ServerAckService {
-
+	private static final Logger LOG = Logger.getLogger(ServerAckService.class);
 	@Reference(timeout = 1000)
 	private StateAckService stateReporterService;
 	@Autowired
@@ -28,6 +29,7 @@ public class ServerAckService {
 	public void pushServerAcks() {
 		List<ServerAck> serverAcks = collectServerAck();
 		stateReporterService.setServerAcks(serverAcks);
+		LOG.info("Server send acks.");
 	}
 
 	private List<ServerAck> collectServerAck() {

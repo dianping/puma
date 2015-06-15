@@ -35,12 +35,12 @@ public class StateAckServiceImpl implements StateAckService {
 
 	@Override
 	public void setServerAcks(List<ServerAck> serverAcks) {
+		LOG.info("Server ack infos.");
 		if (serverAcks == null || serverAcks.size() == 0) {
 			return;
 		}
 		for (ServerAck serverAck : serverAcks) {
 			stateContainer.setServerAckInfo(serverAck);
 		}
-		LOG.info("Server ack infos.");
 	}
 }

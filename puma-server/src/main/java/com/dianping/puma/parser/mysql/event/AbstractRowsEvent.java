@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 
+import com.dianping.cat.Cat;
 import org.apache.commons.lang.exception.NestableRuntimeException;
 
 import com.dianping.puma.bo.PumaContext;

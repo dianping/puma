@@ -27,13 +27,14 @@ public class StateCacheService {
 
 	private static final String CLIENT_CACHE_SUFFIX = "_client";
 	private static final String SERVER_CACHE_SUFFIX = "_server";
+	private static final String PUMA_CLIENTACK_STATE_CACHE = "PumaClientAckStateCache";
 	@Autowired
 	private CacheService cacheService;
 	@Autowired
 	private StateContainer stateContainer;
 
 	public void ayncSetKeyValue(String key, AbstractAck serverAck) {
-		CacheKey cacheKey = new CacheKey("pumaStateCache", key);
+		CacheKey cacheKey = new CacheKey(PUMA_CLIENTACK_STATE_CACHE, key);
 		try {
 			cacheService.asyncSet(cacheKey, serverAck);
 		} catch (CacheException e) {
@@ -42,7 +43,7 @@ public class StateCacheService {
 	}
 
 	public AbstractAck getKeyValue(String key) {
-		CacheKey cacheKey = new CacheKey("pumaStateCache", key);
+		CacheKey cacheKey = new CacheKey(PUMA_CLIENTACK_STATE_CACHE, key);
 		return cacheService.get(cacheKey);
 	}
 

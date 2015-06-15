@@ -40,6 +40,17 @@ public final class PacketUtils {
 		return isLittleEndian ? value : CodecUtils.toBigEndian(value);
 	}
 
+	public static long readUInt32(ByteBuffer buf, int length) {
+		if ((buf.position() + length) <= buf.limit() && length <= 4) {
+			long r = 0;
+			for (int i = 0; i < length; i++) {
+				r |= ((buf.get() & 0xff) << (i << 3));
+			}
+			return r;
+		}
+		return 0;
+	}
+
 	public static int readInt(ByteBuffer buf, int length) {
 		if ((buf.position() + length) <= buf.limit() && length <= 4) {
 			int r = 0;

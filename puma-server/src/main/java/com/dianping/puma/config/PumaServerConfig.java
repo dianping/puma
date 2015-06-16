@@ -30,6 +30,7 @@ public class PumaServerConfig implements InitializingBean {
 	@PostConstruct
 	public void init() {
 		for (String ip : IPUtils.getNoLoopbackIP4Addresses()) {
+			LOG.info("ip = {}.", ip);
 			PumaServer entity = pumaServerService.findByHost(ip);
 			if (entity != null) {
 				this.name = entity.getName();

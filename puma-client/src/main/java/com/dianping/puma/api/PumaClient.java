@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
 import com.dianping.cat.Cat;
 import com.dianping.lion.client.ConfigCache;
@@ -37,6 +38,9 @@ public class PumaClient {
 
 	private String name;
 	private String loggerName;
+
+	private String database;
+	private List<String> tables;
 
 	private Configuration configuration;
 	private EventListener eventListener;
@@ -72,6 +76,14 @@ public class PumaClient {
 		this.loggerName = String.format("[puma: %s] ", name);
 	}
 
+	public void setDatabase(String database) {
+		this.database = database;
+	}
+
+	public void setTables(List<String> tables) {
+		this.tables = tables;
+	}
+
 	public void start() {
 		if (inited) {
 			logger.warn("Puma({}) has been started already.", name);
@@ -80,7 +92,7 @@ public class PumaClient {
 
 		try {
 			startSpringContainer();
-			positionService.ack("lixt", Pair.of(new BinlogInfo("mysql-bin.000832", 12345L), System.currentTimeMillis()));
+			positionService.ack("lixt", Pair.of(new BinlogInfo("mysql-bin.000832", 54233L), System.currentTimeMillis()));
 			Thread.sleep(2000);
 			Pair<BinlogInfo, Long> pair = positionService.request("lixt");
 			startConfig();
@@ -392,8 +404,8 @@ public class PumaClient {
 					.append("&ts=").append(config.getTransaction())
 					.append("&codec=").append(config.getCodecType());
 
-			for (String table: config.getTables()) {
-				builder.append("&dt=").append(config.getSchema()).append(".").append(table);
+			for (String table: tables) {
+				builder.append("&dt=").append(database).append(".").append(table);
 			}
 
 			return builder.toString();

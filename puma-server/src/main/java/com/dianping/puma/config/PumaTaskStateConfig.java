@@ -5,6 +5,8 @@ import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.model.state.PumaTaskState;
 import com.dianping.puma.core.model.state.TaskStateContainer;
 import com.dianping.puma.core.service.PumaTaskService;
+import com.dianping.puma.core.service.PumaTaskStateService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,16 +22,36 @@ public class PumaTaskStateConfig {
 	@Autowired
 	PumaTaskService pumaTaskService;
 
+	@Autowired
+	PumaServerConfig pumaServerConfig;
+
+	@Autowired
+	PumaTaskStateService pumaTaskStateService;
+
 	@PostConstruct
 	public void init() {
-		List<PumaTask> pumaTasks = pumaTaskService.findAll();
+		List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerName(pumaServerConfig.getName());
 
-		for (PumaTask pumaTask: pumaTasks) {
-			PumaTaskState taskState = new PumaTaskState();
-			taskState.setTaskName(pumaTask.getName());
-			taskState.setStatus(Status.PREPARING);
-			taskStateContainer.add(pumaTask.getName(), taskState);
+		for (PumaTask pumaTask : pumaTasks) {
+			if (pumaTask.getPumaServerNames() != null) {
+				for (String serverName : pumaTask.getPumaServerNames()) {
+
+					PumaTaskState taskState = new PumaTaskState();
+					taskState.setName(pumaTaskStateService.getTaskStateName(pumaTask.getName(), serverName));
+					taskState.setServerName(pumaTask.getPumaServerName());
+					taskState.setTaskName(pumaTask.getName());
+					taskState.setStatus(Status.PREPARING);
+					taskStateContainer.add(taskState.getName(), taskState);
+				}
+			} else {
+				PumaTaskState taskState = new PumaTaskState();
+				taskState.setName(pumaTaskStateService.getTaskStateName(pumaTask.getName(), pumaTask
+						.getPumaServerName()));
+				taskState.setServerName(pumaTask.getPumaServerName());
+				taskState.setTaskName(pumaTask.getName());
+				taskState.setStatus(Status.PREPARING);
+				taskStateContainer.add(taskState.getName(), taskState);
+			}
 		}
 	}
 }
-

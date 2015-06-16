@@ -125,7 +125,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			taskExecutor.setParserEventCountMonitor(parserEventCountMonitor);
 
 			PumaTaskState taskState = new PumaTaskState();
-			taskState.setName(pumaTaskStateService.getTaskStateName(pumaTask.getName(), pumaServerConfig.getName()));
+			taskState.setName(pumaTaskStateService.getStateName(pumaTask.getName(), pumaServerConfig.getName()));
 			taskState.setServerName(pumaServerConfig.getName());
 			taskState.setTaskName(pumaTask.getName());
 			taskState.setStatus(Status.PREPARING);

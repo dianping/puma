@@ -5,6 +5,7 @@ import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.exception.PumaException;
+import com.dianping.puma.api.util.Monitor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +51,7 @@ public class Config {
 	private volatile Integer onEventRetryCount = 3;      // optional.
 
 	private PumaClient client;
+	private Monitor monitor;
 	private ConfigCache configCache;
 
 	private ConfigChange configChange = new ConfigChange() {
@@ -90,10 +92,7 @@ public class Config {
 				}
 
 			} catch (Exception e) {
-				String msg = String.format("Puma changing configuration error.");
-				PumaException pe = new PumaException(client.getName(), msg);
-				logger.error(msg, pe);
-				Cat.logError(msg, pe);
+				monitor.logError(logger, "lion error", e);
 			}
 		}
 	};
@@ -221,6 +220,10 @@ public class Config {
 
 	public void setClient(PumaClient client) {
 		this.client = client;
+	}
+
+	public void setMonitor(Monitor monitor) {
+		this.monitor = monitor;
 	}
 
 	public void setConfigCache(ConfigCache configCache) {

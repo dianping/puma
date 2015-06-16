@@ -1,12 +1,10 @@
 package com.dianping.puma.api.manager.impl;
 
-import com.dianping.cat.Cat;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.config.Config;
-import com.dianping.puma.api.exception.PumaException;
 import com.dianping.puma.api.manager.HeartbeatManager;
-import com.dianping.puma.api.manager.HostManager;
 import com.dianping.puma.api.util.Clock;
+import com.dianping.puma.api.util.Monitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +22,7 @@ public class DefaultHeartbeatManager implements HeartbeatManager {
 	private Timer timer = new Timer();
 
 	private PumaClient client;
-	private HostManager hostManager;
+	private Monitor monitor;
 	private Config config;
 	private Clock clock;
 
@@ -78,8 +76,8 @@ public class DefaultHeartbeatManager implements HeartbeatManager {
 		this.client = client;
 	}
 
-	public void setHostManager(HostManager hostManager) {
-		this.hostManager = hostManager;
+	public void setMonitor(Monitor monitor) {
+		this.monitor = monitor;
 	}
 
 	public void setConfig(Config config) {
@@ -95,10 +93,7 @@ public class DefaultHeartbeatManager implements HeartbeatManager {
 		@Override
 		public void run() {
 			if (marked && expired()) {
-				String msg = String.format("Puma heartbeat expired.");
-				PumaException pe = new PumaException(client.getName(), hostManager.current(), msg);
-				logger.error(msg, pe);
-				Cat.logError(msg, pe);
+				monitor.logError(logger, "heartbeat expired");
 
 				// Restart the client.
 				client.stop();

@@ -91,7 +91,7 @@ public class BufferedEventChannel implements EventChannel {
 
 		@Override
 		public void run() {
-			while (checkStop()) {
+			while (!checkStop()) {
 				try {
 					eventBuffer.put(eventChannel.next());
 				} catch (StorageException e) {

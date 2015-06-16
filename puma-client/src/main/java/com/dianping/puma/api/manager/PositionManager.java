@@ -8,5 +8,5 @@ public interface PositionManager extends LifeCycle<PumaException> {
 
 	BinlogInfo next();
 
-	void feedback(BinlogInfo binlogInfo);
+	void save(BinlogInfo binlogInfo);
 }

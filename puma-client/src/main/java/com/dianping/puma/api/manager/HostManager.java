@@ -7,7 +7,7 @@ public interface HostManager extends LifeCycle<PumaException> {
 
 	/**
 	 * Returns the next host to connect according to the hosts list, connection
-	 * feedback and the strategies.
+	 * save and the strategies.
 	 *
 	 * @return next host to connect.
 	 */

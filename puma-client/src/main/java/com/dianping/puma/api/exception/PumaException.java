@@ -5,7 +5,7 @@ public class PumaException extends RuntimeException {
 	private String clientName;
 	private String serverHost;
 
-	public PumaException(String clientName, String msg) {
+	public PumaException(String msg) {
 
 	}
 

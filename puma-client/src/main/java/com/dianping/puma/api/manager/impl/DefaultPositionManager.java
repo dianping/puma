@@ -11,6 +11,7 @@ import com.dianping.puma.api.manager.PositionManager;
 import com.dianping.puma.api.service.PositionService;
 import com.dianping.puma.api.service.impl.PigeonPositionService;
 import com.dianping.puma.api.util.Clock;
+import com.dianping.puma.api.util.Monitor;
 import com.dianping.puma.core.model.BinlogInfo;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -34,13 +35,10 @@ public class DefaultPositionManager implements PositionManager {
 	private Timer timer = new Timer();
 
 	private PumaClient client;
-
+	private Monitor monitor;
 	private Config config;
-
 	private HostManager hostManager;
-
 	private Clock clock;
-
 	private PositionService positionService;
 
 	public DefaultPositionManager() {
@@ -91,7 +89,7 @@ public class DefaultPositionManager implements PositionManager {
 	}
 
 	@Override
-	public void feedback(BinlogInfo binlogInfo) {
+	public void save(BinlogInfo binlogInfo) {
 		this.binlogInfo = binlogInfo;
 		this.updateTime = clock.getCurrentTime();
 
@@ -113,24 +111,23 @@ public class DefaultPositionManager implements PositionManager {
 
 	private void ack() {
 		try {
-			positionService.ack(client.getName(), Pair.of(binlogInfo, updateTime));
 
-			// Log client:ack.
-			String msg = client.getLoggerName() + String.format("client:ack(%s)", hostManager.current());
-			logger.info(msg);
-			Cat.logEvent("Puma", msg, Message.SUCCESS, "");
+			if (binlogInfo != null) {
+				positionService.ack(client.getName(), Pair.of(binlogInfo, updateTime));
+				monitor.logInfo(logger, "ack");
+			}
 
-		} catch (Exception e) {
-			// Log client:ack error.
-			String msg = client.getLoggerName() + String.format("client:ack(%s) error.", hostManager.current());
-			PumaException pe = new PumaException(msg, e);
-			logger.error(msg, pe);
-			Cat.logError(msg, pe);
+		} catch (Throwable e) {
+			monitor.logError(logger, "ack error", e);
 		}
 	}
 
 	public void setClient(PumaClient client) {
 		this.client = client;
+	}
+
+	public void setMonitor(Monitor monitor) {
+		this.monitor = monitor;
 	}
 
 	public void setConfig(Config config) {
@@ -152,9 +149,7 @@ public class DefaultPositionManager implements PositionManager {
 	private class AckWorker extends TimerTask {
 		@Override
 		public void run() {
-			if (binlogInfo != null) {
-				ack();
-			}
+			ack();
 		}
 	}
 }

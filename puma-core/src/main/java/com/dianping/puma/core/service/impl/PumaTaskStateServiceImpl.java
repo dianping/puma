@@ -64,7 +64,7 @@ public class PumaTaskStateServiceImpl implements PumaTaskStateService {
 		}
 	}
 
-	public String getTaskStateName(String taskName, String serverName) {
+	public String getStateName(String taskName, String serverName) {
 		return taskName + NAME_INFIX + serverName;
 	}
 

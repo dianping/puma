@@ -2,6 +2,7 @@ package com.dianping.puma.admin.common;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,13 +14,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.ClientAck;
 import com.dianping.puma.core.model.ClientRelatedInfo;
 import com.dianping.puma.core.model.ServerAck;
 
 @Service("stateContainer")
 public class StateContainer {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(StateContainer.class);
 
 	private ConcurrentMap<String, ServerAck> serverAcks = new ConcurrentHashMap<String, ServerAck>();
@@ -29,7 +31,19 @@ public class StateContainer {
 	private ConcurrentMap<String, AtomicBoolean> isClientAckLastests = new ConcurrentHashMap<String, AtomicBoolean>();
 
 	private ConcurrentMap<String, AtomicBoolean> isServerAckLastests = new ConcurrentHashMap<String, AtomicBoolean>();
-	
+
+	public StateContainer() {
+		ClientAck clientAck = new ClientAck();
+		clientAck.setClientName("lixt");
+		clientAck.setCreateDate(new Date());
+		BinlogInfo binlogInfo = new BinlogInfo();
+		binlogInfo.setBinlogFile("mysql-bin.000832");
+		binlogInfo.setBinlogPosition(123142170L);
+		binlogInfo.setEventIndex(0);
+		clientAck.setBinlogInfo(binlogInfo);
+		setClientAckInfo(clientAck);
+	}
+
 	public void setClientAckInfo(ClientAck clientAck) {
 		if (clientAck != null && StringUtils.isNotBlank(clientAck.getClientName())) {
 			clientAcks.put(clientAck.getClientName(), clientAck);
@@ -37,53 +51,52 @@ public class StateContainer {
 		}
 
 	}
-	
+
 	public void setServerAckInfo(ServerAck serverAck) {
 		if (serverAck != null && StringUtils.isNotBlank(serverAck.getClientName())) {
 			serverAcks.put(serverAck.getClientName(), serverAck);
 			isServerAckLastests.put(serverAck.getClientName(), new AtomicBoolean(true));
 		}
 	}
-	
-	public void setClientAckLastest(String clientName,boolean isValid) {
+
+	public void setClientAckLastest(String clientName, boolean isValid) {
 		isClientAckLastests.put(clientName, new AtomicBoolean(isValid));
 	}
-	
-	public void setServerAckLastest(String clientName,boolean isValid) {
+
+	public void setServerAckLastest(String clientName, boolean isValid) {
 		isServerAckLastests.put(clientName, new AtomicBoolean(isValid));
 	}
-	
-	public Map<String,ServerAck> getServerAcks(){
+
+	public Map<String, ServerAck> getServerAcks() {
 		return serverAcks;
 	}
-	
-	public Map<String,ClientAck> getClientAcks(){
+
+	public Map<String, ClientAck> getClientAcks() {
 		return clientAcks;
 	}
-	
-	public Map<String,AtomicBoolean> isServerAckLastests(){
+
+	public Map<String, AtomicBoolean> isServerAckLastests() {
 		return Collections.unmodifiableMap(isServerAckLastests);
 	}
-	
-	public Map<String,AtomicBoolean> isClientAckLastests(){
+
+	public Map<String, AtomicBoolean> isClientAckLastests() {
 		return Collections.unmodifiableMap(isClientAckLastests);
 	}
-	
-	public Map<String,AtomicBoolean> getIsClientAckLastests(){
+
+	public Map<String, AtomicBoolean> getIsClientAckLastests() {
 		return isClientAckLastests;
 	}
-	
-	public Map<String,AtomicBoolean> getIsServerAckLastests(){
+
+	public Map<String, AtomicBoolean> getIsServerAckLastests() {
 		return isServerAckLastests;
 	}
-	
-	public List<ClientRelatedInfo> getClientRelatedInfos(List<String> clientNames){
+
+	public List<ClientRelatedInfo> getClientRelatedInfos(List<String> clientNames) {
 		return new ArrayList<ClientRelatedInfo>();
 	}
-	
-	public ClientRelatedInfo getClientRelatedInfo(String clientName){
+
+	public ClientRelatedInfo getClientRelatedInfo(String clientName) {
 		return new ClientRelatedInfo();
 	}
-	
 
 }

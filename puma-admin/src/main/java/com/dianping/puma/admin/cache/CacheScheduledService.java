@@ -23,7 +23,7 @@ public class CacheScheduledService {
 	@Autowired
 	private StateCacheService stateCacheService;
 
-	private volatile long interval = 5000L;
+	private volatile long interval = 1000L;
 
 	private ScheduledExecutorService executorService = null;
 
@@ -60,7 +60,6 @@ public class CacheScheduledService {
 		executorService = ScheduledExecutorUtils.createSingleScheduledExecutorService(FACTORY_NAME);
 
 		execute();
-
 	}
 
 	public void initConfig() {
@@ -86,12 +85,16 @@ public class CacheScheduledService {
 	}
 
 	public void execute() {
-		scheduledFuture = executorService.scheduleWithFixedDelay(new Runnable() {
+		scheduledFuture = executorService.scheduleAtFixedRate(new Runnable() {
 			@Override
 			public void run() {
-				stateCacheService.pushAck();
+				try{
+					stateCacheService.pushAck();
+				}catch(Exception e){
+					LOG.error("stateCacheService scheduled error.");
+				}
 			}
-		}, 0, getInterval(), TimeUnit.MILLISECONDS);
+		}, 1000, getInterval(), TimeUnit.MILLISECONDS);
 	}
 
 	private boolean isScheduledFutureValid() {

@@ -42,12 +42,26 @@ pageApp.factory('pageService', [ '$http', '$location',
 				});
 			};
 			
+			var action1 = function(taskName, serverName, actionName) {
+				return $http( {
+					method : 'POST',
+					params : {
+						taskName : taskName,
+						serverName : serverName
+					},
+					url : $location.absUrl() + '/' + actionName
+				});
+			};
+			
 			return {
 				list : function(page, pageSize) {
 					return list(page, pageSize);
 				},
 				action : function(name, actionName) {
 					return action(name, actionName);
+				},
+				action1 : function(taskName, serverName, actionName) {
+					return action1(taskName, serverName, actionName);
 				}
 			};
 		} ]);
@@ -107,10 +121,6 @@ pageApp.controller('pageCtrl', [
 					$rootScope.load();
 				}
 			};
-
-			$scope.getStateName = function(taskName,serverName) {
-				return taskName + "_" + serverName;
-			};
 			
 			$scope.prev = function() {
 				if ($scope.currentPage > 1) {
@@ -126,15 +136,19 @@ pageApp.controller('pageCtrl', [
 
 			$scope.state = function(name) {
 				for ( var i = 0, len = $scope.states.length; i < len; i++) {
-					if ($scope.states[i].taskName == name) {
+					if ($scope.states[i].name == name) {
 						return $scope.states[i];
 					}
 				}
 			};
-
+			
+			$scope.getStateName = function(taskName,serverName) {
+				return taskName + "_" + serverName;
+			};
+			
 			$scope.refresh = function(name) {
 				for ( var i = 0, len = $scope.states.length; i < len; i++) {
-					if ($scope.states[i].taskName == name) {
+					if ($scope.states[i].name == name) {
 						var result = pageService.action(name, 'refresh')
 								.success(function(data) {
 									$scope.states[i] = data.state;
@@ -152,6 +166,18 @@ pageApp.controller('pageCtrl', [
 
 			$scope.resume = function(name) {
 				pageService.action(name, 'resume').success(function(data) {
+					$scope.refresh(name);
+				});
+			};
+			
+			$scope.pause = function(taskName, serverName) {
+				pageService.action1(taskName, serverName, 'pause').success(function(data) {
+					$scope.refresh(name);
+				});
+			};
+
+			$scope.resume = function(taskName, serverName) {
+				pageService.action1(taskName, serverName, 'resume').success(function(data) {
 					$scope.refresh(name);
 				});
 			};

@@ -97,7 +97,7 @@ public class PumaTaskController {
 		if (pumaTaskEntities != null) {
 			for (PumaTask pumaTask : pumaTaskEntities) {
 				for (String serverName : pumaTask.getPumaServerNames()) {
-					PumaTaskState pumaTaskState = pumaTaskStateService.find(pumaTaskStateService.getTaskStateName(
+					PumaTaskState pumaTaskState = pumaTaskStateService.find(pumaTaskStateService.getStateName(
 							pumaTask.getName(), serverName));
 					if (pumaTaskState != null) {
 						pumaTaskStates.add(pumaTaskState);
@@ -272,7 +272,7 @@ public class PumaTaskController {
 
 			if (pumaTask.getPumaServerNames() != null) {
 				for (String serverName : pumaTask.getPumaServerNames()) {
-					pumaTaskStateService.remove(pumaTaskStateService.getTaskStateName(pumaTask.getName(), serverName));
+					pumaTaskStateService.remove(pumaTaskStateService.getStateName(pumaTask.getName(), serverName));
 				}
 			} else {
 				pumaTaskStateService.remove(name);
@@ -326,13 +326,16 @@ public class PumaTaskController {
 
 	@RequestMapping(value = { "/puma-task/resume" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String resumePost(String name) {
+	public String resumePost(String taskName, String serverName) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			PumaTask pumaTask = pumaTaskService.find(name);
-
-			PumaTaskState taskState = pumaTaskStateService.find(name);
+			PumaTask pumaTask = pumaTaskService.find(taskName);
+			if (pumaTask == null) {
+				throw new Exception("Puma task not found.");
+			}
+			PumaTaskState taskState = pumaTaskStateService
+					.find(pumaTaskStateService.getStateName(taskName, serverName));
 			taskState.setStatus(Status.PREPARING);
 
 			// Publish puma task controller event to puma server.
@@ -353,16 +356,19 @@ public class PumaTaskController {
 
 	@RequestMapping(value = { "/puma-task/pause" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String pausePost(String name) {
+	public String pausePost(String taskName, String serverName) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			PumaTask pumaTask = pumaTaskService.find(name);
-
-			PumaTaskState taskState = pumaTaskStateService.find(name);
+			PumaTask pumaTask = pumaTaskService.find(taskName);
+			if (pumaTask == null) {
+				throw new Exception("Puma task not found.");
+			}
+			PumaTaskState taskState = pumaTaskStateService
+					.find(pumaTaskStateService.getStateName(taskName, serverName));
 			taskState.setStatus(Status.STOPPING);
 
-			pumaTaskControllerReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(), ActionController.PAUSE);
+			pumaTaskControllerReporter.report(serverName, taskName, ActionController.PAUSE);
 
 			map.put("success", true);
 		} catch (MongoException e) {

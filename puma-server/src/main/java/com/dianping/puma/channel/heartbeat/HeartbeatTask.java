@@ -156,6 +156,8 @@ public class HeartbeatTask {
 							"ClientConnect.heartbeated.closed: " + HeartbeatTask.this.clientName, e));
 					LOG.error("ClientConnect.heartbeated.closed: ClientName = " + HeartbeatTask.this.clientName, e);
 
+				}catch(Exception e){
+					
 				}
 			}
 		}

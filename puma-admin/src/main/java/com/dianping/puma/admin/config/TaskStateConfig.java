@@ -34,7 +34,7 @@ public class TaskStateConfig {
 				for (String serverName : pumaTask.getPumaServerNames()) {
 
 					PumaTaskState taskState = new PumaTaskState();
-					taskState.setName(pumaTaskStateService.getTaskStateName(pumaTask.getName(), serverName));
+					taskState.setName(pumaTaskStateService.getStateName(pumaTask.getName(), serverName));
 					taskState.setServerName(pumaTask.getPumaServerName());
 					taskState.setTaskName(pumaTask.getName());
 					taskState.setStatus(Status.PREPARING);
@@ -42,7 +42,7 @@ public class TaskStateConfig {
 				}
 			} else {
 				PumaTaskState taskState = new PumaTaskState();
-				taskState.setName(pumaTaskStateService.getTaskStateName(pumaTask.getName(), pumaTask
+				taskState.setName(pumaTaskStateService.getStateName(pumaTask.getName(), pumaTask
 						.getPumaServerName()));
 				taskState.setServerName(pumaTask.getPumaServerName());
 				taskState.setTaskName(pumaTask.getName());

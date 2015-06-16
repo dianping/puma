@@ -18,6 +18,6 @@ public interface PumaTaskStateService {
 
 	void removeAll();
 	
-	String getTaskStateName(String taskName, String serverName);
+	String getStateName(String taskName, String serverName);
 	
 }

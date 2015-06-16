@@ -1,6 +1,7 @@
 package com.dianping.puma.admin.cache;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import com.dianping.avatar.cache.CacheService;
 import com.dianping.cache.exception.CacheException;
 import com.dianping.puma.admin.common.StateContainer;
 import com.dianping.puma.core.model.AbstractAck;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.ClientAck;
 import com.dianping.puma.core.model.ClientRelatedInfo;
 import com.dianping.puma.core.model.ServerAck;
@@ -33,6 +35,7 @@ public class StateCacheService {
 	@Autowired
 	private StateContainer stateContainer;
 
+	
 	public void ayncSetKeyValue(String key, AbstractAck serverAck) {
 		CacheKey cacheKey = new CacheKey(PUMA_CLIENTACK_STATE_CACHE, key);
 		try {
@@ -49,7 +52,7 @@ public class StateCacheService {
 	}
 
 	public void pushAck() {
-		LOG.info("####write ack info to cache.####"); 
+		LOG.info("####write ack info to cache.####");
 		Map<String, AtomicBoolean> isClientAckLastests = stateContainer.getIsClientAckLastests();
 		Map<String, AtomicBoolean> isServerAckLastests = stateContainer.getIsServerAckLastests();
 		Map<String, ClientAck> clientAcks = stateContainer.getClientAcks();

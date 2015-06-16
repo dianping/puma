@@ -1,6 +1,7 @@
 package com.dianping.puma.server.builder.impl;
 
 import com.dianping.puma.ComponentContainer;
+import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.PumaTask;
@@ -11,6 +12,7 @@ import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.core.model.state.PumaTaskState;
 import com.dianping.puma.core.monitor.NotifyService;
+import com.dianping.puma.core.service.PumaTaskStateService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
 import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.datahandler.DefaultDataHandler;
@@ -55,7 +57,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 	private StorageEventCountMonitor storageEventCountMonitor;
 	@Autowired
 	private StorageEventGroupMonitor storageEventGroupMonitor;
-	
+
 	@Autowired
 	SrcDBInstanceService srcDBInstanceService;
 
@@ -67,6 +69,12 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 
 	@Autowired
 	EventCenter eventCenter;
+
+	@Autowired
+	PumaTaskStateService pumaTaskStateService;
+
+	@Autowired
+	PumaServerConfig pumaServerConfig;
 
 	@Autowired
 	private JsonEventCodec jsonCodec;
@@ -117,6 +125,8 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			taskExecutor.setParserEventCountMonitor(parserEventCountMonitor);
 
 			PumaTaskState taskState = new PumaTaskState();
+			taskState.setName(pumaTaskStateService.getTaskStateName(pumaTask.getName(), pumaServerConfig.getName()));
+			taskState.setServerName(pumaServerConfig.getName());
 			taskState.setTaskName(pumaTask.getName());
 			taskState.setStatus(Status.PREPARING);
 			taskExecutor.setTaskState(taskState);
@@ -180,7 +190,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			storage.setCodec(jsonCodec);
 			storage.setStorageEventCountMonitor(storageEventCountMonitor);
 			storage.setStorageEventGroupMonitor(storageEventGroupMonitor);
-			
+
 			EventFilterChain eventFilterChain = new DefaultEventFilterChain();
 			List<EventFilter> eventFilterList = new ArrayList<EventFilter>();
 
@@ -263,12 +273,12 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 
 			// Set puma task status.
 			taskExecutor.setStatus(Status.WAITING);
-			
+
 			return taskExecutor;
 		} catch (Exception e) {
 			LOG.error("Build puma task `{}` error: {}.", pumaTask.getName(), e.getMessage());
 			throw e;
 		}
 	}
-	
+
 }

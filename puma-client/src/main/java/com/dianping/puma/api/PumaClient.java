@@ -102,7 +102,7 @@ public class PumaClient {
 			startLockManager();
 			startSubscribe();
 		} catch (Exception e) {
-			String msg = String.format("Puma(%s) starts failure.", name);
+			String msg = loggerName + "client start error.";
 			PumaException pe = new PumaException(msg, e);
 			logger.error(msg, pe);
 			Cat.logError(msg, pe);
@@ -110,7 +110,7 @@ public class PumaClient {
 
 
 		inited = true;
-		logger.info("Puma({}) has been started successfully.", name);
+		logger.info(loggerName + "client start successfully.");
 	}
 
 	public void stop() {
@@ -242,7 +242,7 @@ public class PumaClient {
 
 				try {
 					if (!first) {
-						String msg = loggerName + String.format("reconnection sleep for %s ms.", config.getReconnectSleepTime());
+						String msg = loggerName + String.format("reconnection sleep for %s ms...", config.getReconnectSleepTime());
 						logger.info(msg);
 
 						// Sleep for a while if reconnection.
@@ -368,9 +368,6 @@ public class PumaClient {
 
 			String host = hostManager.next();
 			URL url = new URL("http://" + host + "/puma/channel");
-
-			logger.info("Puma({}) connection host is: {}.", name, host);
-
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("POST");
 			connection.setConnectTimeout(3000);
@@ -384,7 +381,8 @@ public class PumaClient {
 			out.print(requestParams);
 			out.close();
 
-			logger.info("Puma({}) connection configuration: {}.", name, requestParams);
+			logger.info(loggerName + "connection host: {}", host);
+			logger.info(loggerName + "connection params: {}", requestParams);
 
 			is = connection.getInputStream();
 		}

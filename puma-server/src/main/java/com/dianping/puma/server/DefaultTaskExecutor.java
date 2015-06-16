@@ -187,7 +187,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 				throw new IOException("TaskName: " + getTaskName() + ", Binlog packet response error.");
 			} else {
 				processBinlogPacket(binlogPacket);
-				LOG.info("TaskName: " + getTaskName() + ", Binlog packet response success.");
 			}
 
 		}
@@ -197,9 +196,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
 	protected void processBinlogPacket(BinlogPacket binlogPacket) throws IOException {
 		fetcherEventCountMonitor.record(getTaskName());
-		LOG.info("TaskName: " + getTaskName() + ", Binlog packet parse ing.");
 		BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), getContext());
-		LOG.info("TaskName: " + getTaskName() + ", Binlog packet parse over.");
 		if (binlogEvent.getHeader().getEventType() == BinlogConstants.INTVAR_EVENT
 				|| binlogEvent.getHeader().getEventType() == BinlogConstants.RAND_EVENT
 				|| binlogEvent.getHeader().getEventType() == BinlogConstants.USER_VAR_EVENT) {
@@ -222,7 +219,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	}
 
 	protected void processDataEvent(BinlogEvent binlogEvent) {
-		LOG.info("TaskName: " + getTaskName() + ", Data Event process.");
 		DataHandlerResult dataHandlerResult = null;
 		// 一直处理一个binlogEvent的多行，处理完每行马上分发，以防止一个binlogEvent包含太多ChangedEvent而耗费太多内存
 		int eventIndex = 0;

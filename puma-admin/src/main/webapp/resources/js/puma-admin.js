@@ -108,6 +108,10 @@ pageApp.controller('pageCtrl', [
 				}
 			};
 
+			$scope.getStateName = function(taskName,serverName) {
+				return taskName + "_" + serverName;
+			};
+			
 			$scope.prev = function() {
 				if ($scope.currentPage > 1) {
 					$scope.currentPage--;

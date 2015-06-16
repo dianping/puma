@@ -72,14 +72,14 @@
 									</thead>
 									<tbody style="border-top:0px;" ng-repeat="item in items">
 										<tr role="row" class="odd">
-											<td rowspan="{{item.pumaServerNames.length*2 - 1}}"><a href="javascript:void(0)" ng-click ="item.isShow=!item.isShow;">{{item.name|cut:true:25:'...'}}</a></td>
-											<td rowspan="{{item.pumaServerNames.length*2 - 1}}">{{item.srcDBInstanceName|cut:true:25:'...'}}</td>
+											<td rowspan="{{item.pumaServerNames.length * 2 - 1}}"><a href="javascript:void(0)" ng-click ="item.isShow=!item.isShow;">{{item.name|cut:true:25:'...'}}</a></td>
+											<td rowspan="{{item.pumaServerNames.length * 2 - 1}}">{{item.srcDBInstanceName|cut:true:25:'...'}}</td>
 											<td class="hidden-480" ng-repeat-start="item2 in item.pumaServerNames" ng-if="$index == 0">{{item2|cut:true:20:'...'}}</td>
 											<td ng-if="$index == 0"><span
 												ng-class="{'label-success' : state(item.name+'_'+item2).status== 'RUNNING','label-warning' : state(item.name+'_'+item2).status== 'FAILED' }"
-												class="label label-sm">{{state(item.name+'_'+item2).strStatus}}</span></td>
-											<td ng-if="$index == 0">{{state(item.name+'_'+item2).binlogInfo.binlogFile}}&nbsp;
-												{{state(item.name+'_'+item2).binlogInfo.binlogPosition}}</td>
+												class="label label-sm">{{state(getStateName(item.name,item2)).strStatus}}</span></td>
+											<td ng-if="$index == 0">{{state(item.name).binlogInfo.binlogFile}}&nbsp;
+												{{state((item.name+'_'+item2)).binlogInfo.binlogPosition}}</td>
 											<td ng-repeat-end ng-if="$index == 0">
 												<div class="hidden-sm hidden-xs action-buttons">
 													<a class="blue" href="javascript:void(0)"

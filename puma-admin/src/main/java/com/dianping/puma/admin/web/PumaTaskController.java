@@ -87,8 +87,8 @@ public class PumaTaskController {
 		long count = pumaTaskService.count();
 		List<PumaTask> pumaTaskEntities = pumaTaskService.findByPage(page, pageSize);
 		for (PumaTask pumaTask : pumaTaskEntities) {
-			if(pumaTask.getPumaServerNames() == null||pumaTask.getPumaServerNames().size() == 0){
-				List<String> serverNames= new ArrayList<String>();
+			if (pumaTask.getPumaServerNames() == null || pumaTask.getPumaServerNames().size() == 0) {
+				List<String> serverNames = new ArrayList<String>();
 				serverNames.add(pumaTask.getPumaServerName());
 				pumaTask.setPumaServerNames(serverNames);
 			}
@@ -96,7 +96,7 @@ public class PumaTaskController {
 		List<PumaTaskState> pumaTaskStates = new ArrayList<PumaTaskState>();
 		if (pumaTaskEntities != null) {
 			for (PumaTask pumaTask : pumaTaskEntities) {
-				for(String serverName:pumaTask.getPumaServerNames()){
+				for (String serverName : pumaTask.getPumaServerNames()) {
 					PumaTaskState pumaTaskState = pumaTaskStateService.find(pumaTaskStateService.getTaskStateName(
 							pumaTask.getName(), serverName));
 					if (pumaTaskState != null) {
@@ -272,7 +272,7 @@ public class PumaTaskController {
 
 			if (pumaTask.getPumaServerNames() != null) {
 				for (String serverName : pumaTask.getPumaServerNames()) {
-					pumaTaskStateService.remove(pumaTask.getName() + "_" + serverName);
+					pumaTaskStateService.remove(pumaTaskStateService.getTaskStateName(pumaTask.getName(), serverName));
 				}
 			} else {
 				pumaTaskStateService.remove(name);
@@ -281,7 +281,7 @@ public class PumaTaskController {
 			// Publish puma task operation event to puma server.
 			this.pumaTaskOperationReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(),
 					ActionOperation.REMOVE);
-
+			this.pumaTaskService.remove(name);
 			map.put("success", true);
 		} catch (MongoException e) {
 			map.put("error", "storage");

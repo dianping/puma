@@ -28,7 +28,7 @@
 	 
     <task:annotation-driven />
     <!-- pigeon -->
-	<pigeon:annotation />
+	<pigeon:annotation package="com.dianping.puma.admin.api.impl"/>
 	
 	<!-- dCache -->
 	<avatar:cache /> 

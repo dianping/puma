@@ -4,7 +4,7 @@ import com.dianping.puma.core.entity.ShardSyncTask;
 import com.dianping.puma.core.entity.SyncTask;
 import com.google.code.morphia.annotations.Entity;
 
-@Entity("ShardSyncTask")
+@Entity("ShardSyncTask_")
 public class ShardSyncTaskMorphia extends BaseMorphiaEntity<ShardSyncTask> {
 
 	public ShardSyncTaskMorphia() {}

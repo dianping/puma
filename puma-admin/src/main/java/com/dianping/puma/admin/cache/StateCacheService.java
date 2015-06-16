@@ -49,6 +49,7 @@ public class StateCacheService {
 	}
 
 	public void pushAck() {
+		LOG.info("####write ack info to cache.####"); 
 		Map<String, AtomicBoolean> isClientAckLastests = stateContainer.getIsClientAckLastests();
 		Map<String, AtomicBoolean> isServerAckLastests = stateContainer.getIsServerAckLastests();
 		Map<String, ClientAck> clientAcks = stateContainer.getClientAcks();

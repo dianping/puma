@@ -54,11 +54,11 @@ public class StateContainer {
 	}
 	
 	public Map<String,ServerAck> getServerAcks(){
-		return Collections.unmodifiableMap(serverAcks);
+		return serverAcks;
 	}
 	
 	public Map<String,ClientAck> getClientAcks(){
-		return Collections.unmodifiableMap(clientAcks);
+		return clientAcks;
 	}
 	
 	public Map<String,AtomicBoolean> isServerAckLastests(){

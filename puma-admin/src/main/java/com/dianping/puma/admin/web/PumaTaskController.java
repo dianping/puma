@@ -96,9 +96,12 @@ public class PumaTaskController {
 		List<PumaTaskState> pumaTaskStates = new ArrayList<PumaTaskState>();
 		if (pumaTaskEntities != null) {
 			for (PumaTask pumaTask : pumaTaskEntities) {
-				PumaTaskState pumaTaskState = pumaTaskStateService.find(pumaTask.getName());
-				if (pumaTaskState != null) {
-					pumaTaskStates.add(pumaTaskState);
+				for(String serverName:pumaTask.getPumaServerNames()){
+					PumaTaskState pumaTaskState = pumaTaskStateService.find(pumaTaskStateService.getTaskStateName(
+							pumaTask.getName(), serverName));
+					if (pumaTaskState != null) {
+						pumaTaskStates.add(pumaTaskState);
+					}
 				}
 			}
 		}

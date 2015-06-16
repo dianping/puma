@@ -1,6 +1,5 @@
 package com.dianping.puma.core.service.impl;
 
-import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.model.state.PumaTaskState;
 import com.dianping.puma.core.model.state.TaskState;
 import com.dianping.puma.core.model.state.TaskStateContainer;
@@ -16,6 +15,8 @@ import java.util.Map;
 
 @Service("pumaTaskStateService")
 public class PumaTaskStateServiceImpl implements PumaTaskStateService {
+
+	private static final String NAME_INFIX = "_";
 
 	@Autowired
 	TaskStateContainer taskStateContainer;
@@ -62,4 +63,9 @@ public class PumaTaskStateServiceImpl implements PumaTaskStateService {
 			taskStateContainer.remove(taskState.getTaskName());
 		}
 	}
+
+	public String getTaskStateName(String taskName, String serverName) {
+		return taskName + NAME_INFIX + serverName;
+	}
+
 }

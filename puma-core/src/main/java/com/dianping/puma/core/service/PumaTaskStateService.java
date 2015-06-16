@@ -1,6 +1,5 @@
 package com.dianping.puma.core.service;
 
-import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.model.state.PumaTaskState;
 
 import java.util.List;
@@ -18,4 +17,7 @@ public interface PumaTaskStateService {
 	void remove(String name);
 
 	void removeAll();
+	
+	String getTaskStateName(String taskName, String serverName);
+	
 }

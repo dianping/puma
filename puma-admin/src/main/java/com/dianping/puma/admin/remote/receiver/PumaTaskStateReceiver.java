@@ -34,14 +34,14 @@ public class PumaTaskStateReceiver implements EventListener {
 			if (pumaTask.getPumaServerNames() != null) {
 				for (String serverName : pumaTask.getPumaServerNames()) {
 					PumaTaskState pumaTaskState = new PumaTaskState();
-					pumaTaskState.setName(pumaTask.getName() + "_" + serverName);
+					pumaTaskState.setName(pumaTaskStateService.getTaskStateName(pumaTask.getName(),serverName));
 					pumaTaskState.setTaskName(pumaTask.getName());
 					pumaTaskState.setStatus(Status.PREPARING);
 					pumaTaskStateService.add(pumaTaskState);
 				}
 			} else {
 				PumaTaskState pumaTaskState = new PumaTaskState();
-				pumaTaskState.setName(pumaTask.getName() + "_" + pumaTask.getPumaServerName());
+				pumaTaskState.setName(pumaTaskStateService.getTaskStateName(pumaTask.getName(),pumaTask.getPumaServerName()));
 				pumaTaskState.setServerName(pumaTask.getPumaServerName());
 				pumaTaskState.setTaskName(pumaTask.getName());
 				pumaTaskState.setStatus(Status.PREPARING);

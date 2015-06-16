@@ -108,6 +108,8 @@ public class Handler implements PageHandler<Context> {
 			logger.error("Client construct event filter chain error: {}.", e.getStackTrace());
 		}
 
+		logger.info("Client({}) create filter chain success.", clientName);
+
 		// Find storage.
 		EventStorage storage = DefaultTaskExecutorContainer.instance.getTaskStorage(payload.getTarget());
 		if (storage == null) {
@@ -120,6 +122,8 @@ public class Handler implements PageHandler<Context> {
 
 			throw pe;
 		}
+
+		logger.info("Client({}) create event storage success.", clientName);
 
 		// Build channel from storage and open.
 		EventChannel channel;
@@ -137,6 +141,8 @@ public class Handler implements PageHandler<Context> {
 
 			throw pe;
 		}
+
+		logger.info("Client({}) create event channel success.", clientName);
 
 		while (true) {
 			try {

@@ -6,6 +6,7 @@ import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.SpringContainer;
 import com.dianping.puma.api.config.Config;
 import com.dianping.puma.api.exception.PumaException;
+import com.dianping.puma.api.manager.HostManager;
 import com.dianping.puma.api.manager.PositionManager;
 import com.dianping.puma.api.service.PositionService;
 import com.dianping.puma.api.service.impl.PigeonPositionService;
@@ -35,6 +36,8 @@ public class DefaultPositionManager implements PositionManager {
 	private PumaClient client;
 
 	private Config config;
+
+	private HostManager hostManager;
 
 	private Clock clock;
 
@@ -109,14 +112,20 @@ public class DefaultPositionManager implements PositionManager {
 	}
 
 	private void ack() {
-		String status = Message.SUCCESS;
 		try {
 			positionService.ack(client.getName(), Pair.of(binlogInfo, updateTime));
+
+			// Log client:ack.
+			String msg = client.getLoggerName() + String.format("client:ack(%s)", hostManager.current());
+			logger.info(msg);
+			Cat.logEvent("Puma", msg, Message.SUCCESS, "");
+
 		} catch (Exception e) {
-			status = "1";
-			logger.warn("Puma({}) ack binlog({}) back to pigeon service error.", client.getName(), binlogInfo);
-		} finally {
-			Cat.logEvent("Puma", "client:ack", status, "");
+			// Log client:ack error.
+			String msg = client.getLoggerName() + String.format("client:ack(%s) error.", hostManager.current());
+			PumaException pe = new PumaException(msg, e);
+			logger.error(msg, pe);
+			Cat.logError(msg, pe);
 		}
 	}
 
@@ -126,6 +135,10 @@ public class DefaultPositionManager implements PositionManager {
 
 	public void setConfig(Config config) {
 		this.config = config;
+	}
+
+	public void setHostManager(HostManager hostManager) {
+		this.hostManager = hostManager;
 	}
 
 	public void setClock(Clock clock) {

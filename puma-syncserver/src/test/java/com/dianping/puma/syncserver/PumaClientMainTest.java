@@ -12,14 +12,15 @@ public class PumaClientMainTest {
 	public PumaClient createPumaClient() {
 		PumaClient pumaClient = new PumaClient();
 		pumaClient.setName("lixt");
-		pumaClient.setDatabase("DPShop");
+		pumaClient.setDatabase("t00");
 		List<String> tables = new ArrayList<String>();
 		tables.add("DP_Shop");
 		tables.add("DP_ShopCategory");
 		pumaClient.setTables(tables);
 
 		pumaClient.register(new EventListener() {
-			@Override public void onEvent(ChangedEvent event) {
+			@Override
+			public void onEvent(ChangedEvent event) {
 				System.out.println(event.toString());
 			}
 		});

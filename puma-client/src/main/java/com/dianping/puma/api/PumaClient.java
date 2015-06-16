@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.List;
 
 import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.puma.api.config.Config;
 import com.dianping.puma.api.exception.AuthException;
@@ -86,15 +87,15 @@ public class PumaClient {
 
 	public void start() {
 		if (inited) {
-			logger.warn("Puma({}) has been started already.", name);
+			logger.warn(loggerName + "client start already.");
 			return;
 		}
 
 		try {
 			startSpringContainer();
-			positionService.ack("lixt", Pair.of(new BinlogInfo("mysql-bin.000832", 54233L), System.currentTimeMillis()));
-			Thread.sleep(2000);
-			Pair<BinlogInfo, Long> pair = positionService.request("lixt");
+			positionService.ack("lixt", Pair.of(new BinlogInfo("mysql-bin.000004", 923907898L), System.currentTimeMillis()));
+			//Thread.sleep(2000);
+			//Pair<BinlogInfo, Long> pair = positionService.request("lixt");
 			startConfig();
 			startHostManager();
 			startPositionManager();
@@ -106,6 +107,8 @@ public class PumaClient {
 			PumaException pe = new PumaException(msg, e);
 			logger.error(msg, pe);
 			Cat.logError(msg, pe);
+
+			throw pe;
 		}
 
 
@@ -115,22 +118,31 @@ public class PumaClient {
 
 	public void stop() {
 		if (!inited) {
-			logger.warn("Puma({}) has been stopped already.", name);
+			logger.warn(loggerName + "client stop already.");
 			return;
 		}
 
-		stopSubscribe();
-		//stopLockManager();
-		stopHeartbeatManager();
-		stopPositionManager();
-		stopHostManager();
-		stopConfig();
+		try {
+			stopSubscribe();
+			//stopLockManager();
+			stopHeartbeatManager();
+			stopPositionManager();
+			stopHostManager();
+			stopConfig();
 
-		// Stop spring container.
-		SpringContainer.getInstance().stop();
+			// Stop spring container.
+			SpringContainer.getInstance().stop();
+		} catch (Exception e) {
+			String msg = loggerName + "client stop error.";
+			PumaException pe = new PumaException(msg, e);
+			logger.error(msg, pe);
+			Cat.logError(msg, pe);
+
+			throw pe;
+		}
 
 		inited = false;
-		logger.info("Puma({}) has been stopped successfully.", name);
+		logger.info(loggerName + "client stop successfully.");
 	}
 
 	private void startSpringContainer() {
@@ -227,6 +239,10 @@ public class PumaClient {
 		return name;
 	}
 
+	public String getLoggerName() {
+		return loggerName;
+	}
+
 	private class SubscribeTask implements Runnable {
 
 		private volatile boolean stopped = false;
@@ -251,6 +267,10 @@ public class PumaClient {
 					first = false;
 
 					connect();
+
+					String msg0 = String.format("client:connected(%s).", hostManager.current());
+					logger.info(loggerName + msg0);
+					Cat.logEvent("Puma", msg0, Message.SUCCESS, "");
 
 					// Open the heartbeat checking if the connection is passed successfully.
 					heartbeatManager.open();
@@ -293,6 +313,9 @@ public class PumaClient {
 
 							// Heartbeat event, pass it and keep on reading events.
 							if (event instanceof HeartbeatEvent) {
+								String msg = loggerName + String.format("client:heartbeat(%s)", hostManager.current());
+								logger.info(msg);
+								Cat.logEvent("Puma", msg, Message.SUCCESS, "");
 								hostManager.feedback(Feedback.SUCCESS);
 								continue;
 							}
@@ -313,10 +336,10 @@ public class PumaClient {
 						// Feeds back network error after connection failure.
 						hostManager.feedback(Feedback.NET_ERROR);
 
-						String msg = loggerName + String.format("connection to server(%s) error.", hostManager.current());
-						PumaException pe = new PumaException(msg, e);
-						logger.error(msg, pe);
-						Cat.logError(msg, pe);
+						String msg = String.format("network with server(%s) error.", hostManager.current());
+						PumaException pe = new PumaException(loggerName + msg, e);
+						logger.error(loggerName + msg, pe);
+						Cat.logError(loggerName + msg, pe);
 					}
 
 				} finally {

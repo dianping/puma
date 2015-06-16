@@ -45,6 +45,7 @@ public class PumaTaskOperationChecker implements EventListener {
 
 		// Throws puma task service exceptions.
 		List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerNames(pumaServerName);
+		List<PumaTask> pumaTaskOlds = pumaTaskService.findByPumaServerName(pumaServerName);
 
 		// Swallows puma task executors exceptions.
 		for (PumaTask pumaTask : pumaTasks) {
@@ -56,8 +57,17 @@ public class PumaTaskOperationChecker implements EventListener {
 				LOG.error("Initialize puma task `{}` error: {}.", pumaTask.getName(), e.getStackTrace());
 			}
 		}
+		for (PumaTask pumaTask : pumaTaskOlds) {
+			try {
+				TaskExecutor taskExecutor = taskExecutorBuilder.build(pumaTask);
+				taskExecutorContainer.publishAcceptedTableChangedEvent(pumaTask.getName(), pumaTask.getTableSet());
+				taskExecutorContainer.submit(taskExecutor);
+			} catch (Exception e) {
+				LOG.error("Initialize puma task `{}` error: {}.", pumaTask.getName(), e.getStackTrace());
+			}
+		}
 	}
-
+	
 	@Override
 	public void onEvent(Event event) {
 		LOG.info("Receive puma task event!");

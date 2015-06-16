@@ -257,31 +257,41 @@ public class PumaTaskController {
 
 	@RequestMapping(value = { "/puma-task/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String removePost(String name) {
+	public String removePost(String taskName, String serverName) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			PumaTask pumaTask = pumaTaskService.find(name);
+			PumaTask pumaTask = pumaTaskService.find(taskName);
 			if (pumaTask == null) {
 				throw new NullPointerException();
 			}
-			List<SyncTask> syncTasks = syncTaskService.findByPumaTaskName(pumaTask.getName());
-			if (syncTasks != null && syncTasks.size() > 0) {
-				throw new IllegalArgumentException();
+			if (pumaTask.getPumaServerNames() == null || pumaTask.getPumaServerNames().size() == 0) {
+				List<SyncTask> syncTasks = syncTaskService.findByPumaTaskName(pumaTask.getName());
+				if (syncTasks != null && syncTasks.size() > 0) {
+					throw new IllegalArgumentException();
+				}
+				this.pumaTaskService.remove(taskName);
+			} else {
+				if (pumaTask.getPumaServerNames().contains(serverName)) {
+					if (pumaTask.getPumaServerNames().size() == 1) {
+						this.pumaTaskService.remove(taskName);
+					} else {
+						pumaTask.getPumaServerNames().remove(serverName);
+						pumaTaskService.update(pumaTask);
+					}
+				}
 			}
 
 			if (pumaTask.getPumaServerNames() != null) {
-				for (String serverName : pumaTask.getPumaServerNames()) {
-					pumaTaskStateService.remove(pumaTaskStateService.getStateName(pumaTask.getName(), serverName));
-				}
+
 			} else {
-				pumaTaskStateService.remove(name);
+
 			}
 
 			// Publish puma task operation event to puma server.
-			this.pumaTaskOperationReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(),
-					ActionOperation.REMOVE);
-			this.pumaTaskService.remove(name);
+			this.pumaTaskOperationReporter.report(serverName, taskName, ActionOperation.REMOVE);
+
+			pumaTaskStateService.remove(pumaTaskStateService.getStateName(pumaTask.getName(), serverName));
 			map.put("success", true);
 		} catch (MongoException e) {
 			map.put("error", "storage");

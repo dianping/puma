@@ -43,7 +43,7 @@
 									</select>
 								</div>
 							</div>
-							<div ng-repeat="item in entity.pumaServerNames">
+							<div ng-repeat="item in entity.pumaServerDtos">
 								<div class="form-group">
 									<label class="col-sm-2 control-label no-padding-right"
 										for="form-field-1"> 数据处理服务器 </label>
@@ -51,14 +51,14 @@
 									<div class="col-sm-10">
 										<select id="form-field-1" placeholder="数据处理服务器"
 											class="col-xs-10 col-sm-5 puma-form-select"
-											ng-model="item" ng-disabled="entity.disabled"
+											ng-model="item.name" ng-disabled="entity.disabled"
 											ng-options="o.name as o.name for o in pumaServerEntities">
 											<option value="">请选择数据处理服务器</option>
 										</select>
 										<div class="puma-form-operation">
-											<a class="blue" href="javascript:void(0)" ng-click="addMark(entity.pumaServerNames)">
+											<a class="blue" href="javascript:void(0)" ng-click="addMark(entity.pumaServerDtos)">
 												<i class="ace-icon fa fa-plus-circle bigger-150"></i>
-											</a> &nbsp;&nbsp;&nbsp; <a class="blue" href="javascript:void(0)" ng-click="removeMark(entity.pumaServerNames,$index)">
+											</a> &nbsp;&nbsp;&nbsp; <a class="blue" href="javascript:void(0)" ng-click="removeMark(entity.pumaServerDtos,$index)">
 												<i class="ace-icon fa fa-trash-o bigger-150"></i>
 											</a>
 										</div>

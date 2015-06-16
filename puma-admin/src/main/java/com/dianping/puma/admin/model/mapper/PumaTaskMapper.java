@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 import com.dianping.puma.admin.model.DatabaseDto;
+import com.dianping.puma.admin.model.PumaServerDto;
 import com.dianping.puma.admin.model.PumaTaskDto;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.model.AcceptedTables;
@@ -25,14 +26,19 @@ public class PumaTaskMapper {
 		}
 		PumaTaskDto pumaTaskDto = new PumaTaskDto();
 		pumaTaskDto.setSrcDBInstanceName(pumaTask.getSrcDBInstanceName());
+		List<PumaServerDto> pumaServerDtos = new ArrayList<PumaServerDto>();
 		if (pumaTask.getPumaServerNames() == null || pumaTask.getPumaServerNames().size() == 0) {
-			List<String> pumaServerNames = new ArrayList<String>();
-			pumaServerNames.add(pumaTask.getPumaServerName());
-			pumaTaskDto.setPumaServerNames(pumaServerNames);
+			PumaServerDto pumaServerDto = new PumaServerDto();
+			pumaServerDto.setName(pumaTask.getPumaServerName());
+			pumaServerDtos.add(pumaServerDto);
 		} else {
-			pumaTaskDto.setPumaServerNames(pumaTask.getPumaServerNames());
+			for (String serverName : pumaTask.getPumaServerNames()) {
+				PumaServerDto pumaServerDto = new PumaServerDto();
+				pumaServerDto.setName(serverName);
+				pumaServerDtos.add(pumaServerDto);
+			}
 		}
-
+		pumaTaskDto.setPumaServerDtos(pumaServerDtos);
 		pumaTaskDto.setName(pumaTask.getName());
 		pumaTaskDto.setBinlogFile(pumaTask.getBinlogInfo().getBinlogFile());
 		pumaTaskDto.setBinlogPosition(pumaTask.getBinlogInfo().getBinlogPosition());
@@ -86,7 +92,11 @@ public class PumaTaskMapper {
 	public static PumaTask convertToPumaTask(PumaTask pumaTask, PumaTaskDto pumaTaskDto) {
 		pumaTask.setName(pumaTaskDto.getName());
 		pumaTask.setSrcDBInstanceName(pumaTaskDto.getSrcDBInstanceName());
-		pumaTask.setPumaServerNames(pumaTaskDto.getPumaServerNames());
+		List<String> serverNames = new ArrayList<String>();
+		for (PumaServerDto pumaServerDto : pumaTaskDto.getPumaServerDtos()) {
+			serverNames.add(pumaServerDto.getName());
+		}
+		pumaTask.setPumaServerNames(serverNames);
 		BinlogInfo binlogInfo = new BinlogInfo();
 		binlogInfo.setBinlogFile(pumaTaskDto.getBinlogFile());
 		binlogInfo.setBinlogPosition(pumaTaskDto.getBinlogPosition());

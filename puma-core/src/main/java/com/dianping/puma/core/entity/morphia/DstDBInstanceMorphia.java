@@ -3,7 +3,7 @@ package com.dianping.puma.core.entity.morphia;
 import com.dianping.puma.core.entity.DstDBInstance;
 import com.google.code.morphia.annotations.Entity;
 
-@Entity("DstDBInstance_")
+@Entity("DstDBInstance")
 public class DstDBInstanceMorphia extends BaseMorphiaEntity<DstDBInstance> {
 
 	public DstDBInstanceMorphia() { }

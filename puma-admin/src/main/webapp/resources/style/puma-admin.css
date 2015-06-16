@@ -74,3 +74,7 @@
 .puma-table-th-operation{
 	float:right;
 }
+
+.puma-table-tbody{
+	border-top:0px;
+}

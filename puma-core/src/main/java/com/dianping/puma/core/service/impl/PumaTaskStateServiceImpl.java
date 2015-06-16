@@ -1,9 +1,11 @@
 package com.dianping.puma.core.service.impl;
 
+import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.model.state.PumaTaskState;
 import com.dianping.puma.core.model.state.TaskState;
 import com.dianping.puma.core.model.state.TaskStateContainer;
 import com.dianping.puma.core.service.PumaTaskStateService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,21 +19,22 @@ public class PumaTaskStateServiceImpl implements PumaTaskStateService {
 
 	@Autowired
 	TaskStateContainer taskStateContainer;
-
+	
 	public void add(PumaTaskState taskState) {
-		taskStateContainer.add(taskState.getTaskName(), taskState);
+		taskStateContainer.add(taskState.getName(), taskState);
 	}
 
 	public void addAll(List<PumaTaskState> taskStates) {
 		Map<String, TaskState> taskStateMap = new HashMap<String, TaskState>();
 		for (TaskState taskState: taskStates) {
-			taskStateMap.put(taskState.getTaskName(), taskState);
+			taskStateMap.put(taskState.getName(), taskState);
 		}
 		taskStateContainer.addAll(taskStateMap);
 	}
 
-	public PumaTaskState find(String taskName) {
-		TaskState taskState = taskStateContainer.get(taskName);
+	
+	public PumaTaskState find(String name) {
+		TaskState taskState = taskStateContainer.get(name);
 		return (taskState instanceof PumaTaskState) ? (PumaTaskState) taskState : null;
 	}
 
@@ -46,8 +49,8 @@ public class PumaTaskStateServiceImpl implements PumaTaskStateService {
 		return syncTaskStates;
 	}
 
-	public void remove(String taskName) {
-		PumaTaskState taskState = find(taskName);
+	public void remove(String name) {
+		PumaTaskState taskState = find(name);
 		if (taskState != null) {
 			taskStateContainer.remove(taskState.getTaskName());
 		}

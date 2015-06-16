@@ -29,7 +29,7 @@ public class StateContainer {
 	private ConcurrentMap<String, AtomicBoolean> isClientAckLastests = new ConcurrentHashMap<String, AtomicBoolean>();
 
 	private ConcurrentMap<String, AtomicBoolean> isServerAckLastests = new ConcurrentHashMap<String, AtomicBoolean>();
-
+	
 	public void setClientAckInfo(ClientAck clientAck) {
 		if (clientAck != null && StringUtils.isNotBlank(clientAck.getClientName())) {
 			clientAcks.put(clientAck.getClientName(), clientAck);
@@ -67,6 +67,14 @@ public class StateContainer {
 	
 	public Map<String,AtomicBoolean> isClientAckLastests(){
 		return Collections.unmodifiableMap(isClientAckLastests);
+	}
+	
+	public Map<String,AtomicBoolean> getIsClientAckLastests(){
+		return isClientAckLastests;
+	}
+	
+	public Map<String,AtomicBoolean> getIsServerAckLastests(){
+		return isServerAckLastests;
 	}
 	
 	public List<ClientRelatedInfo> getClientRelatedInfos(List<String> clientNames){

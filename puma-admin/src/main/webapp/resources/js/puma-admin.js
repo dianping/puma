@@ -207,11 +207,11 @@ formApp.factory('formService', [ '$http', '$location',
 				data.push({});
 				console.log(data);
 			};
-
+			
 			var removeMark = function(data, index) {
 				data.splice(index, 1);
 			};
-
+			
 			return {
 				submit : function(data) {
 					return submit(data);
@@ -258,15 +258,6 @@ formApp
 								$window.history.back();
 							};
 
-							$scope.change = function() {
-								$scope.entity.srcDBInstanceName = $scope.entity.srcDBInstanceName ? $scope.entity.srcDBInstanceName
-										: '';
-								$scope.entity.pumaServerName = $scope.entity.pumaServerName ? $scope.entity.pumaServerName
-										: '';
-								$scope.entity.name = $scope.entity.srcDBInstanceName
-										+ '@' + $scope.entity.pumaServerName;
-							};
-
 							$scope.initPumaTask = function(url, id) {
 								formService
 										.init(url, id)
@@ -282,9 +273,9 @@ formApp
 														$scope.entity.databases = [];
 														$scope.addMark($scope.entity.databases);
 													}
-													if(!$scope.entity.pumaServerNames){
-														$scope.entity.pumaServerNames = [];
-														$scope.addMark($scope.entity.pumaServerNames);
+													if(!$scope.entity.pumaServerDtos){
+														$scope.entity.pumaServerDtos = [];
+														$scope.addMark($scope.entity.pumaServerDtos);
 													}
 												});
 							};
@@ -292,7 +283,7 @@ formApp
 							$scope.addMark = function(data) {
 								formService.addMark(data);
 							};
-
+							
 							$scope.removeMark = function(data, index) {
 								formService.removeMark(data, index);
 							};

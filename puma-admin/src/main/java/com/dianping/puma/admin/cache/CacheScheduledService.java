@@ -59,7 +59,7 @@ public class CacheScheduledService {
 
 		executorService = ScheduledExecutorUtils.createSingleScheduledExecutorService(FACTORY_NAME);
 
-		//execute();
+		execute();
 
 	}
 

@@ -48,8 +48,8 @@ public class StateCacheService {
 	}
 
 	public void pushAck() {
-		Map<String, AtomicBoolean> isClientAckLastests = stateContainer.isClientAckLastests();
-		Map<String, AtomicBoolean> isServerAckLastests = stateContainer.isServerAckLastests();
+		Map<String, AtomicBoolean> isClientAckLastests = stateContainer.getIsClientAckLastests();
+		Map<String, AtomicBoolean> isServerAckLastests = stateContainer.getIsServerAckLastests();
 		Map<String, ClientAck> clientAcks = stateContainer.getClientAcks();
 		Map<String, ServerAck> serverAcks = stateContainer.getServerAcks();
 		for (Map.Entry<String, AtomicBoolean> isClientAckLastest : isClientAckLastests.entrySet()) {
@@ -57,6 +57,7 @@ public class StateCacheService {
 				ayncSetKeyValue(isClientAckLastest.getKey() + CLIENT_CACHE_SUFFIX,
 						clientAcks.get(isClientAckLastest.getKey()));
 				stateContainer.setClientAckLastest(isClientAckLastest.getKey(), false);
+				LOG.info("####write Client ack info to cache. clientName: " + isClientAckLastest.getKey());
 			}
 		}
 
@@ -65,6 +66,7 @@ public class StateCacheService {
 				ayncSetKeyValue(isServerAckLastest.getKey() + SERVER_CACHE_SUFFIX,
 						serverAcks.get(isServerAckLastest.getKey()));
 				stateContainer.setServerAckLastest(isServerAckLastest.getKey(), false);
+				LOG.info("####write Server ack info to cache. clientName: " + isServerAckLastest.getKey());
 			}
 		}
 	}

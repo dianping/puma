@@ -86,11 +86,18 @@ public class PumaTaskController {
 		Map<String, Object> map = new HashMap<String, Object>();
 		long count = pumaTaskService.count();
 		List<PumaTask> pumaTaskEntities = pumaTaskService.findByPage(page, pageSize);
+		for (PumaTask pumaTask : pumaTaskEntities) {
+			if(pumaTask.getPumaServerNames() == null||pumaTask.getPumaServerNames().size() == 0){
+				List<String> serverNames= new ArrayList<String>();
+				serverNames.add(pumaTask.getPumaServerName());
+				pumaTask.setPumaServerNames(serverNames);
+			}
+		}
 		List<PumaTaskState> pumaTaskStates = new ArrayList<PumaTaskState>();
-		if(pumaTaskEntities != null){
-			for(PumaTask pumaTask:pumaTaskEntities){
+		if (pumaTaskEntities != null) {
+			for (PumaTask pumaTask : pumaTaskEntities) {
 				PumaTaskState pumaTaskState = pumaTaskStateService.find(pumaTask.getName());
-				if(pumaTaskState != null){
+				if (pumaTaskState != null) {
 					pumaTaskStates.add(pumaTaskState);
 				}
 			}
@@ -110,7 +117,6 @@ public class PumaTaskController {
 		return new ModelAndView("common/main-container", map);
 	}
 
-	
 	@RequestMapping(value = { "/puma-task/update/{id}" }, method = RequestMethod.GET)
 	public ModelAndView update(@PathVariable long id) {
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -159,13 +165,17 @@ public class PumaTaskController {
 			}
 			pumaTask = PumaTaskMapper.convertToPumaTask(entity);
 			operation = ActionOperation.CREATE;
-
+			pumaTask.setPumaServerName("");
 			pumaTaskService.create(pumaTask);
 			// Add puma task state to the state container.
-			PumaTaskState taskState = new PumaTaskState();
-			taskState.setTaskName(pumaTask.getName());
-			taskState.setStatus(Status.PREPARING);
-			pumaTaskStateService.add(taskState);
+			for (String serverName : pumaTask.getPumaServerNames()) {
+				PumaTaskState taskState = new PumaTaskState();
+				taskState.setName(pumaTask.getName() + "_" + serverName);
+				taskState.setServerName(serverName);
+				taskState.setTaskName(pumaTask.getName());
+				taskState.setStatus(Status.PREPARING);
+				pumaTaskStateService.add(taskState);
+			}
 			PumaTaskOperationEvent event = new PumaTaskOperationEvent();
 			event.setServerNames(pumaTask.getPumaServerNames());
 			event.setTaskName(pumaTask.getName());
@@ -186,7 +196,7 @@ public class PumaTaskController {
 		}
 		return GsonUtil.toJson(map);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = { "/puma-task/update/{id}" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
@@ -213,10 +223,14 @@ public class PumaTaskController {
 				pumaTaskService.update(pumaTask);
 			}
 			// Add puma task state to the state container.
-			PumaTaskState taskState = new PumaTaskState();
-			taskState.setTaskName(pumaTask.getName());
-			taskState.setStatus(Status.PREPARING);
-			pumaTaskStateService.add(taskState);
+			for (String serverName : pumaTask.getPumaServerNames()) {
+				PumaTaskState taskState = new PumaTaskState();
+				taskState.setName(pumaTask.getName() + "_" + serverName);
+				taskState.setServerName(serverName);
+				taskState.setTaskName(pumaTask.getName());
+				taskState.setStatus(Status.PREPARING);
+				pumaTaskStateService.add(taskState);
+			}
 
 			event.setServerNames(pumaTask.getPumaServerNames());
 			event.setTaskName(pumaTask.getName());
@@ -253,9 +267,13 @@ public class PumaTaskController {
 				throw new IllegalArgumentException();
 			}
 
-			this.pumaTaskService.remove(name);
-
-			pumaTaskStateService.remove(name);
+			if (pumaTask.getPumaServerNames() != null) {
+				for (String serverName : pumaTask.getPumaServerNames()) {
+					pumaTaskStateService.remove(pumaTask.getName() + "_" + serverName);
+				}
+			} else {
+				pumaTaskStateService.remove(name);
+			}
 
 			// Publish puma task operation event to puma server.
 			this.pumaTaskOperationReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(),
@@ -341,8 +359,7 @@ public class PumaTaskController {
 			PumaTaskState taskState = pumaTaskStateService.find(name);
 			taskState.setStatus(Status.STOPPING);
 
-			pumaTaskControllerReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(),
-					com.dianping.puma.core.constant.ActionController.PAUSE);
+			pumaTaskControllerReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(), ActionController.PAUSE);
 
 			map.put("success", true);
 		} catch (MongoException e) {

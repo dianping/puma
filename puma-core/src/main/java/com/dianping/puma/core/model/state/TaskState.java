@@ -9,6 +9,9 @@ import java.io.Serializable;
 import java.util.Date;
 
 public abstract class TaskState {
+	private String name;
+	
+	private String serverName;
 
 	private Date gmtUpdate;
 
@@ -89,6 +92,22 @@ public abstract class TaskState {
 
 	public String getStrStatus() {
 		return strStatus;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getServerName() {
+		return serverName;
+	}
+
+	public void setServerName(String serverName) {
+		this.serverName = serverName;
 	}
 
 }

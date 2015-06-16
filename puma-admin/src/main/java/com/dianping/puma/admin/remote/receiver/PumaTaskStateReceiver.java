@@ -30,11 +30,23 @@ public class PumaTaskStateReceiver implements EventListener {
 	@PostConstruct
 	public void init() {
 		List<PumaTask> pumaTasks = pumaTaskService.findAll();
-		for (PumaTask pumaTask: pumaTasks) {
-			PumaTaskState pumaTaskState = new PumaTaskState();
-			pumaTaskState.setTaskName(pumaTask.getName());
-			pumaTaskState.setStatus(Status.PREPARING);
-			pumaTaskStateService.add(pumaTaskState);
+		for (PumaTask pumaTask : pumaTasks) {
+			if (pumaTask.getPumaServerNames() != null) {
+				for (String serverName : pumaTask.getPumaServerNames()) {
+					PumaTaskState pumaTaskState = new PumaTaskState();
+					pumaTaskState.setName(pumaTask.getName() + "_" + serverName);
+					pumaTaskState.setTaskName(pumaTask.getName());
+					pumaTaskState.setStatus(Status.PREPARING);
+					pumaTaskStateService.add(pumaTaskState);
+				}
+			} else {
+				PumaTaskState pumaTaskState = new PumaTaskState();
+				pumaTaskState.setName(pumaTask.getName() + "_" + pumaTask.getPumaServerName());
+				pumaTaskState.setServerName(pumaTask.getPumaServerName());
+				pumaTaskState.setTaskName(pumaTask.getName());
+				pumaTaskState.setStatus(Status.PREPARING);
+				pumaTaskStateService.add(pumaTaskState);
+			}
 		}
 	}
 
@@ -44,7 +56,7 @@ public class PumaTaskStateReceiver implements EventListener {
 			LOG.info("Receive puma task state event.");
 
 			List<PumaTaskState> pumaTaskStates = ((PumaTaskStateEvent) event).getTaskStates();
-			for (PumaTaskState pumaTaskState: pumaTaskStates) {
+			for (PumaTaskState pumaTaskState : pumaTaskStates) {
 				pumaTaskStateService.add(pumaTaskState);
 			}
 		}

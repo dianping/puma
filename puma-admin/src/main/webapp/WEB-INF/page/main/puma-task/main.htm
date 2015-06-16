@@ -70,20 +70,17 @@
 											</th>
 										</tr>
 									</thead>
-
-									<tbody>
-
-										<tr role="row" class="odd" ng-repeat-start="item in items">
-											<td><a href="javascript:void(0)" ng-click ="item.isShow=!item.isShow;">{{item.name|cut:true:25:'...'}}</a></td>
-											<td>{{item.srcDBInstanceName|cut:true:25:'...'}}</td>
-											<td class="hidden-480">{{item.pumaServerName|cut:true:20:'...'}}</td>
-
-											<td><span
-												ng-class="{'label-success' : state(item.name).status== 'RUNNING','label-warning' : state(item.name).status== 'FAILED' }"
-												class="label label-sm">{{state(item.name).strStatus}}</span></td>
-											<td>{{state(item.name).binlogInfo.binlogFile}}&nbsp;
-												{{state(item.name).binlogInfo.binlogPosition}}</td>
-											<td>
+									<tbody style="border-top:0px;" ng-repeat="item in items">
+										<tr role="row" class="odd">
+											<td rowspan="{{item.pumaServerNames.length*2 - 1}}"><a href="javascript:void(0)" ng-click ="item.isShow=!item.isShow;">{{item.name|cut:true:25:'...'}}</a></td>
+											<td rowspan="{{item.pumaServerNames.length*2 - 1}}">{{item.srcDBInstanceName|cut:true:25:'...'}}</td>
+											<td class="hidden-480" ng-repeat-start="item2 in item.pumaServerNames" ng-if="$index == 0">{{item2|cut:true:20:'...'}}</td>
+											<td ng-if="$index == 0"><span
+												ng-class="{'label-success' : state(item.name+'_'+item2).status== 'RUNNING','label-warning' : state(item.name+'_'+item2).status== 'FAILED' }"
+												class="label label-sm">{{state(item.name+'_'+item2).strStatus}}</span></td>
+											<td ng-if="$index == 0">{{state(item.name+'_'+item2).binlogInfo.binlogFile}}&nbsp;
+												{{state(item.name+'_'+item2).binlogInfo.binlogPosition}}</td>
+											<td ng-repeat-end ng-if="$index == 0">
 												<div class="hidden-sm hidden-xs action-buttons">
 													<a class="blue" href="javascript:void(0)"
 														ng-click="resume(item.name)"> <i
@@ -107,14 +104,44 @@
 												</div>
 											</td>
 										</tr>
-										<tr></tr>
+										<tr ng-repeat-start="item2 in item.pumaServerNames">
+										
+										<td class="hidden-480" ng-if="$index > 0">{{item2|cut:true:20:'...'}}</td>
+											<td ng-if="$index > 0"><span
+												ng-class="{'label-success' : state(item.name+'_'+item2).status== 'RUNNING','label-warning' : state(item.name+'_'+item2).status== 'FAILED' }"
+												class="label label-sm">{{state(item.name+'_'+item2).strStatus}}</span></td>
+											<td ng-if="$index > 0">{{state(item.name+'_'+item2).binlogInfo.binlogFile}}&nbsp;
+												{{state(item.name+'_'+item2).binlogInfo.binlogPosition}}</td>
+											<td ng-if="$index > 0">
+												<div class="hidden-sm hidden-xs action-buttons">
+													<a class="blue" href="javascript:void(0)"
+														ng-click="resume(item.name)"> <i
+														class="ace-icon fa fa-play bigger-110"></i>
+													</a> <a class="blue" href="javascript:void(0)"
+														ng-click="pause(item.name)"> <i
+														class="ace-icon fa fa-pause bigger-110"></i>
+													</a> <a class="blue" href="javascript:void(0)"
+														ng-click="refresh(item.name)"> <i
+														class="ace-icon fa fa-refresh bigger-130"></i>
+													</a><a class="green"
+														href="${rc.contextPath}/puma-task/create/"> <i
+														class="ace-icon fa fa-plus-circle purple bigger-130"></i>
+													</a> <a class="green"
+														href="${rc.contextPath}/puma-task/update/{{item.id}}">
+														<i class="ace-icon fa fa-pencil bigger-130"></i>
+													</a> <a class="red" href="javascript:void(0)"
+														ng-click="dialog(item.name)"> <i
+														class="ace-icon fa fa-trash-o bigger-130"></i>
+													</a>
+												</div>
+											</td>
+											</tr>
 										<tr ng-repeat-end ng-show = "item.isShow">
-											<td colspan="6">{{state(item.name).detail}}</td>
+											<td colspan="6">{{state(item.name+'_'+item2).detail}}</td>
 										</tr>
 									</tbody>
 								</table>
 								<div class="row" ng-show="totalPage >= 0">
-									
 									<div class="col-xs-6">
 										<div class="dataTables_info" id="sample-table-2_info"
 											role="status" aria-live="polite">显示 {{startIndex}} 到

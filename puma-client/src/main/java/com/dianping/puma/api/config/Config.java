@@ -31,7 +31,7 @@ public class Config {
 	private static final String HEARTBEAT_EXPIRED_TIME_KEY = "puma.client.heartbeat.expired.time";
 	private static final String BINLOG_ACK_TIME_KEY = "puma.client.binlog.ack.time";
 	private static final String BINLOG_ACK_COUNT_KEY = "puma.client.binlog.ack.count";
-	private static final String BINLOG_EXPIRED_TIME_KEY = "puma.client.binlog.expired.time";
+	private static final String ONEVENT_RETRY_COUNT_KEY = "puma.client.onevent.retry.count";
 
 	private boolean inited = false;
 
@@ -51,7 +51,7 @@ public class Config {
 	private volatile Long heartbeatExpiredTime = 18000L; // optional.
 	private volatile Long binlogAckTime = 1000L;         // optional.
 	private volatile Integer binlogAckCount = 100;       // optional.
-	private volatile Long binlogExpiredTime = 18000L;    // optional.
+	private volatile Integer onEventRetryCount = 3;      // optional.
 
 	private PumaClient client;
 	private ConfigCache configCache;
@@ -93,8 +93,8 @@ public class Config {
 					binlogAckTime = (Long) genConfig(binlogAckTime, Long.parseLong(value), false);
 				} else if (key.equalsIgnoreCase(globalKey(BINLOG_ACK_COUNT_KEY))) {
 					binlogAckCount = (Integer) genConfig(BINLOG_ACK_COUNT_KEY, Integer.parseInt(value), false);
-				} else if (key.equalsIgnoreCase(globalKey(BINLOG_EXPIRED_TIME_KEY))) {
-					binlogExpiredTime = (Long) genConfig(BINLOG_EXPIRED_TIME_KEY, Long.parseLong(value), false);
+				} else if (key.equalsIgnoreCase(globalKey(ONEVENT_RETRY_COUNT_KEY))) {
+					onEventRetryCount = (Integer) genConfig(ONEVENT_RETRY_COUNT_KEY, Integer.parseInt(value), false);
 				}
 
 			} catch (Exception e) {
@@ -113,23 +113,23 @@ public class Config {
 		}
 
 		// Set local configurations.
-		target = (String) genConfig(target, configCache.getProperty(localKey(TARGET_KEY)), true);
-		serverId = (Long) genConfig(serverId, configCache.getLongProperty(localKey(SERVER_ID_KEY)), true);
-		schema = (String) genConfig(schema, configCache.getProperty(SCHEMA_KEY), true);
-		tables = (List<String>) genConfig(tables, parseTables(configCache.getProperty(TABLES_KEY)), true);
-		dml = (Boolean) genConfig(dml, configCache.getBooleanProperty(localKey(DML_KEY)), false);
-		ddl = (Boolean) genConfig(ddl, configCache.getBooleanProperty(localKey(DDL_KEY)), false);
-		transaction = (Boolean) genConfig(transaction, configCache.getBooleanProperty(localKey(TRANSACTION_KEY)), false);
-		codecType = (String) genConfig(codecType, configCache.getProperty(CODEC_TYPE_KEY), false);
+		target = (String) genConfig(target, configCache.getProperty(localKey(TARGET_KEY)), false);
+		serverId = (Long) genConfig(serverId, configCache.getLongProperty(localKey(SERVER_ID_KEY)), false);
+		schema = (String) genConfig(schema, configCache.getProperty(localKey(SCHEMA_KEY)), false);
+		tables = (List<String>) genConfig(tables, parseTables(configCache.getProperty(localKey(TABLES_KEY))), false);
+		dml = (Boolean) genConfig(dml, configCache.getBooleanProperty(localKey(DML_KEY)), true);
+		ddl = (Boolean) genConfig(ddl, configCache.getBooleanProperty(localKey(DDL_KEY)), true);
+		transaction = (Boolean) genConfig(transaction, configCache.getBooleanProperty(localKey(TRANSACTION_KEY)), true);
+		codecType = (String) genConfig(codecType, configCache.getProperty(localKey(CODEC_TYPE_KEY)), true);
 
 		// Set global configurations.
-		reconnectSleepTime = (Long) genConfig(reconnectSleepTime, configCache.getLongProperty(RECONNECT_SLEEP_TIME_KEY), false);
-		reconnectCount = (Integer) genConfig(reconnectCount, configCache.getIntProperty(RECONNECT_COUNT_KEY), false);
-		heartbeatCheckTime = (Long) genConfig(heartbeatCheckTime, configCache.getLongProperty(HEARTBEAT_CHECK_TIME_KEY), false);
-		heartbeatExpiredTime = (Long) genConfig(heartbeatExpiredTime, configCache.getLongProperty(HEARTBEAT_EXPIRED_TIME_KEY), false);
-		binlogAckTime = (Long) genConfig(binlogAckTime, configCache.getLongProperty(BINLOG_ACK_TIME_KEY), false);
-		binlogAckCount = (Integer) genConfig(binlogAckCount, configCache.getIntProperty(BINLOG_ACK_COUNT_KEY), false);
-		binlogExpiredTime = (Long) genConfig(binlogExpiredTime, configCache.getLongProperty(BINLOG_EXPIRED_TIME_KEY), false);
+		reconnectSleepTime = (Long) genConfig(reconnectSleepTime, configCache.getLongProperty(globalKey(RECONNECT_SLEEP_TIME_KEY)), true);
+		reconnectCount = (Integer) genConfig(reconnectCount, configCache.getIntProperty(globalKey(RECONNECT_COUNT_KEY)), true);
+		heartbeatCheckTime = (Long) genConfig(heartbeatCheckTime, configCache.getLongProperty(globalKey(HEARTBEAT_CHECK_TIME_KEY)), true);
+		heartbeatExpiredTime = (Long) genConfig(heartbeatExpiredTime, configCache.getLongProperty(globalKey(HEARTBEAT_EXPIRED_TIME_KEY)), true);
+		binlogAckTime = (Long) genConfig(binlogAckTime, configCache.getLongProperty(globalKey(BINLOG_ACK_TIME_KEY)), true);
+		binlogAckCount = (Integer) genConfig(binlogAckCount, configCache.getIntProperty(globalKey(BINLOG_ACK_COUNT_KEY)), true);
+		onEventRetryCount = (Integer) genConfig(onEventRetryCount, configCache.getIntProperty(globalKey(ONEVENT_RETRY_COUNT_KEY)), true);
 
 		// Register listener.
 		configCache.addChange(configChange);
@@ -233,8 +233,8 @@ public class Config {
 		return binlogAckCount;
 	}
 
-	public Long getBinlogExpiredTime() {
-		return binlogExpiredTime;
+	public Integer getOnEventRetryCount() {
+		return onEventRetryCount;
 	}
 
 	public void setClient(PumaClient client) {

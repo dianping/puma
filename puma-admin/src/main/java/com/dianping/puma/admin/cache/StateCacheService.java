@@ -36,6 +36,7 @@ public class StateCacheService {
 	public void ayncSetKeyValue(String key, AbstractAck serverAck) {
 		CacheKey cacheKey = new CacheKey(PUMA_CLIENTACK_STATE_CACHE, key);
 		try {
+			LOG.info("pumaCache!");
 			cacheService.asyncSet(cacheKey, serverAck);
 		} catch (CacheException e) {
 			LOG.error("pumaCache failed, key : " + key, e);
@@ -53,7 +54,7 @@ public class StateCacheService {
 		Map<String, ClientAck> clientAcks = stateContainer.getClientAcks();
 		Map<String, ServerAck> serverAcks = stateContainer.getServerAcks();
 		for (Map.Entry<String, AtomicBoolean> isClientAckLastest : isClientAckLastests.entrySet()) {
-			if (isClientAckLastest.getValue().get() && clientAcks.containsKey(isClientAckLastest.getKey())) {
+			//if (isClientAckLastest.getValue().get() && clientAcks.containsKey(isClientAckLastest.getKey())) {
 				ayncSetKeyValue(isClientAckLastest.getKey() + CLIENT_CACHE_SUFFIX,
 						clientAcks.get(isClientAckLastest.getKey()));
 				stateContainer.setClientAckLastest(isClientAckLastest.getKey(), false);

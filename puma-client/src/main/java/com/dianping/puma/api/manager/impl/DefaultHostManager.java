@@ -24,9 +24,9 @@ public class DefaultHostManager implements HostManager {
 
 	private volatile List<String> hosts = new ArrayList<String>();
 	private String host;
-	private int index;
-	private int retries;
-	private Feedback state = Feedback.UNSET;
+	private int index = 0;
+	private int retries = 0;
+	private Feedback state = Feedback.INITIAL;
 
 	private PumaClient client;
 	private Config config;

@@ -9,6 +9,10 @@ public class PumaException extends RuntimeException {
 
 	}
 
+	public PumaException(String msg, Throwable e) {
+		super(msg, e);
+	}
+
 	public PumaException(String clientName, String serverHost, String msg) {
 		super(msg);
 

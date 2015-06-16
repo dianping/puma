@@ -1,7 +1,6 @@
 package com.dianping.puma.api.manager;
 
 public enum Feedback {
-	UNSET          , // UNSET state.
 	INITIAL        , // Sets before first connection.
 	SUCCESS        , // Sets after reading events success.
 	NET_ERROR      , // Sets after connection or reading events failure.

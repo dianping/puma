@@ -9,32 +9,14 @@ import java.util.Map;
 public class PumaClientMainTest {
 
 	public PumaClient createPumaClient() {
-		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
 
-		// Set puma client target.
-		configBuilder.target("DPShop@puma01_nh");
-
-		configBuilder.host("1.1.1.1");
-
-		// Set puma client name.
-		configBuilder.name("YourClientName");
-
-		// Set the database and tables you want to listen to on format:
-		// "database", "table_1", "table_2", ...
-		configBuilder.tables("DPShop", "DP_Shop","DP_ShopPOI");
-
-		Configuration configuration = configBuilder.build();
-		
-		configuration.setSeqFileBase("remote");
-		
-		System.out.println("Configuration: " + configuration.toString());
-
-		final PumaClient pumaClient = new PumaClient(configuration);
+		final PumaClient pumaClient = new PumaClient();
+		pumaClient.setName("lixt");
 
 		pumaClient.register(new EventListener() {
 
 			@Override
-			public void onEvent(ChangedEvent event) throws Exception {
+			public void onEvent(ChangedEvent event) {
 				//System.out.println("Bingo!");
 
 				if (event instanceof RowChangedEvent) {
@@ -78,27 +60,6 @@ public class PumaClientMainTest {
 				}
 			}
 
-			@Override
-			public boolean onException(ChangedEvent event, Exception e) {
-
-				// Do your own exception handling.
-
-				// Return false if you want to stop the puma client when exception is thrown from `onEvent`.
-				// Return true if you want to ignore the exception and keep on listening.
-				return false;
-			}
-
-			@Override
-			public void onConnectException(Exception e) {
-			}
-
-			@Override
-			public void onConnected() {
-			}
-
-			@Override
-			public void onSkipEvent(ChangedEvent event) {
-			}
 		});
 
 		return pumaClient;

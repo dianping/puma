@@ -16,10 +16,12 @@ import com.dianping.puma.api.manager.impl.DefaultHeartbeatManager;
 import com.dianping.puma.api.manager.impl.DefaultHostManager;
 import com.dianping.puma.api.manager.impl.DefaultLockManager;
 import com.dianping.puma.api.manager.impl.DefaultPositionManager;
+import com.dianping.puma.api.service.PositionService;
 import com.dianping.puma.api.util.Clock;
 import com.dianping.puma.core.codec.EventCodecFactory;
 import com.dianping.puma.core.event.*;
 import com.dianping.puma.core.model.BinlogInfo;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,9 +33,10 @@ public class PumaClient {
 
 	private static final Logger logger = LoggerFactory.getLogger(PumaClient.class);
 
-	private volatile boolean inited = true;
+	private volatile boolean inited = false;
 
 	private String name;
+	private String loggerName;
 
 	private Configuration configuration;
 	private EventListener eventListener;
@@ -51,6 +54,12 @@ public class PumaClient {
 	private HeartbeatManager heartbeatManager;
 	private LockManager lockManager;
 
+	private PositionService positionService;
+
+	public PumaClient() {
+
+	}
+
 	public PumaClient(Configuration configuration) {
 	}
 
@@ -60,40 +69,61 @@ public class PumaClient {
 
 	public void setName(String name) {
 		this.name = name;
+		this.loggerName = String.format("[puma: %s] ", name);
 	}
 
 	public void start() {
 		if (inited) {
-			logger.warn("Puma(%s) has been started already.", name);
+			logger.warn("Puma({}) has been started already.", name);
 			return;
 		}
 
-		startConfig();
-		startHostManager();
-		startPositionManager();
-		startHeartbeatManager();
-		startLockManager();
-		startSubscribe();
+		try {
+			startSpringContainer();
+			positionService.ack("lixt", Pair.of(new BinlogInfo("mysql-bin.000832", 12345L), System.currentTimeMillis()));
+			Thread.sleep(2000);
+			Pair<BinlogInfo, Long> pair = positionService.request("lixt");
+			startConfig();
+			startHostManager();
+			startPositionManager();
+			startHeartbeatManager();
+			startLockManager();
+			startSubscribe();
+		} catch (Exception e) {
+			String msg = String.format("Puma(%s) starts failure.", name);
+			PumaException pe = new PumaException(msg, e);
+			logger.error(msg, pe);
+			Cat.logError(msg, pe);
+		}
+
 
 		inited = true;
-		logger.info("Puma(%s) has been started successfully.", name);
+		logger.info("Puma({}) has been started successfully.", name);
 	}
 
 	public void stop() {
 		if (!inited) {
-			logger.warn("Puma(%s) has been stopped already.", name);
+			logger.warn("Puma({}) has been stopped already.", name);
 			return;
 		}
 
 		stopSubscribe();
-		stopLockManager();
+		//stopLockManager();
 		stopHeartbeatManager();
 		stopPositionManager();
 		stopHostManager();
 		stopConfig();
 
+		// Stop spring container.
+		SpringContainer.getInstance().stop();
+
 		inited = false;
-		logger.info("Puma(%s) has been stopped successfully.", name);
+		logger.info("Puma({}) has been stopped successfully.", name);
+	}
+
+	private void startSpringContainer() {
+		SpringContainer.getInstance().start();
+		positionService = (PositionService) SpringContainer.getInstance().getBean("positionService");
 	}
 
 	private void startConfig() {
@@ -120,6 +150,7 @@ public class PumaClient {
 		defaultPositionManager.setClient(this);
 		defaultPositionManager.setConfig(config);
 		defaultPositionManager.setClock(clock);
+		defaultPositionManager.setPositionService(positionService);
 		positionManager = defaultPositionManager;
 		positionManager.start();
 	}
@@ -143,11 +174,6 @@ public class PumaClient {
 
 	private void startSubscribe() {
 		subscribeTask = new SubscribeTask();
-		subscribeTask.setConfig(config);
-		subscribeTask.setHostManager(hostManager);
-		subscribeTask.setPositionManager(positionManager);
-		subscribeTask.setHeartbeatManager(heartbeatManager);
-		subscribeTask.setLockManager(lockManager);
 		subscribeThread = new Thread(subscribeTask);
 		subscribeThread.setName(String.format("subscribe-thread-%s", name));
 		subscribeThread.setDaemon(true);
@@ -180,7 +206,7 @@ public class PumaClient {
 	}
 
 	private void stopSubscribe() {
-		subscribeTask.shutdown();
+		subscribeTask.stop();
 		subscribeThread.interrupt();
 		subscribeThread = null;
 	}
@@ -197,34 +223,37 @@ public class PumaClient {
 		private HttpURLConnection connection = null;
 		private InputStream is = null;
 
-		private Config config;
-		private HostManager hostManager;
-		private PositionManager positionManager;
-		private HeartbeatManager heartbeatManager;
-		private LockManager lockManager;
-
 		@Override
 		public void run() {
 
-			while (!isShutdown()) {
+			while (!checkStop()) {
 
 				try {
 					if (!first) {
+						String msg = loggerName + String.format("reconnection sleep for %s ms.", config.getReconnectSleepTime());
+						logger.info(msg);
+
 						// Sleep for a while if reconnection.
 						sleep(config.getReconnectSleepTime());
 					}
 					first = false;
+
 					connect();
 
-					// Open heartbeat manager after connection.
+					// Open the heartbeat checking if the connection is passed successfully.
 					heartbeatManager.open();
 
-					while (!isShutdown()) {
+					while (!checkStop()) {
+
+						// The subscribe thread might be blocked here and can not be stopped and
+						// interrupted. Deal carefully.
 						Event event = readEvent(is);
 
-						if (!isShutdown() && event != null) {
+						// No.1 reborn place of the zombie thread.
+						// Send the revived zombie thread to the `finally` block.
+						if (!checkStop() && event != null) {
 
-							// Got event!
+							// Each event is treated as a heartbeat.
 							heartbeatManager.heartbeat();
 
 							// Changed event, handle it.
@@ -234,17 +263,20 @@ public class PumaClient {
 								hostManager.feedback(Feedback.SUCCESS);
 
 								ChangedEvent changedEvent = (ChangedEvent) event;
-								try {
-									eventListener.onEvent(changedEvent);
-								} catch (Exception e) {
-									if (eventListener.onException(changedEvent, e)) {
-										positionManager.feedback(changedEvent.getBinlogInfo());
-										continue;
-									} else {
-										stop();
+
+								for (int i = 0; i != config.getOnEventRetryCount(); ++i) {
+									try {
+										eventListener.onEvent(changedEvent);
 										break;
+									} catch (Exception e) {
+										String msg = String.format("Puma(%s) on event(%s) failure.", PumaClient.this.getName(), changedEvent);
+										PumaException pe = new PumaException(msg, e);
+										logger.error(msg, pe);
+										Cat.logError(msg, pe);
 									}
 								}
+
+								positionManager.feedback(changedEvent.getBinlogInfo());
 							}
 
 							// Heartbeat event, pass it and keep on reading events.
@@ -262,19 +294,27 @@ public class PumaClient {
 					}
 
 				} catch (IOException e) {
-					if (!isShutdown()) {
+
+					// No.2 reborn place of the zombie thread.
+					// Send the revived zombie thread to the `finally` block.
+					if (!checkStop()) {
 						// Feeds back network error after connection failure.
 						hostManager.feedback(Feedback.NET_ERROR);
 
-						String msg = "Connection to server failure.";
-						PumaException pe = new PumaException(name, hostManager.current(), msg, e);
+						String msg = loggerName + String.format("connection to server(%s) error.", hostManager.current());
+						PumaException pe = new PumaException(msg, e);
 						logger.error(msg, pe);
 						Cat.logError(msg, pe);
 					}
-				} finally {
-					// Close heartbeat manager here.
-					heartbeatManager.close();
 
+				} finally {
+
+					// Revived zombie thread need not close the heartbeat manager.
+					if (checkStop()) {
+						heartbeatManager.close();
+					}
+
+					// Close the input stream and connection, zombie or not.
 					if (is != null) {
 						try {
 							is.close();
@@ -287,30 +327,37 @@ public class PumaClient {
 						connection.disconnect();
 						logger.info("Puma({}) close connection successfully.", name);
 					}
+
 				}
 			}
 		}
 
-		public void shutdown() {
-			heartbeatManager.close();
+		public void stop() {
 			stopped = true;
+
+			// Maybe the current thread will be blocked at `readEvent`. Under that
+			// circumstance, we close the heartbeat manager in the stop function and
+			// check stop in the finally block.
+			heartbeatManager.close();
 		}
 
-		private boolean isShutdown() {
+		private boolean checkStop() {
 			return stopped || Thread.currentThread().isInterrupted();
 		}
 
 		private void connect() throws IOException, AuthException {
+			/*
 			if (!lockManager.tryLock()) {
 				throw new AuthException("Puma locks connection failure.");
 			}
 
-			logger.info("Puma({}) locks connection successfully.");
+			logger.info("Puma({}) locks connection successfully.", name);
+			*/
 
 			String host = hostManager.next();
 			URL url = new URL("http://" + host + "/puma/channel");
 
-			logger.info("Puma({}) connects to host: {}.", name, host);
+			logger.info("Puma({}) connection host is: {}.", name, host);
 
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("POST");
@@ -367,26 +414,6 @@ public class PumaClient {
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
-		}
-
-		public void setHostManager(HostManager hostManager) {
-			this.hostManager = hostManager;
-		}
-
-		public void setPositionManager(PositionManager positionManager) {
-			this.positionManager = positionManager;
-		}
-
-		public void setHeartbeatManager(HeartbeatManager heartbeatManager) {
-			this.heartbeatManager = heartbeatManager;
-		}
-
-		public void setLockManager(LockManager lockManager) {
-			this.lockManager = lockManager;
-		}
-
-		public void setConfig(Config config) {
-			this.config = config;
 		}
 	}
 }

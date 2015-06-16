@@ -19,12 +19,13 @@ public class PigeonPositionService implements PositionService {
 	@Override
 	public Pair<BinlogInfo, Long> request(String clientName) {
 		ClientAck clientAck = stateAckService.getClientAck(clientName);
-		return Pair.of(clientAck.getBinlogInfo(), clientAck.getCreateDate().getTime());
+		return clientAck == null ? null : Pair.of(clientAck.getBinlogInfo(), clientAck.getCreateDate().getTime());
 	}
 
 	@Override
 	public void ack(String clientName, Pair<BinlogInfo, Long> pair) {
 		ClientAck clientAck = new ClientAck();
+		clientAck.setClientName(clientName);
 		clientAck.setBinlogInfo(pair.getLeft());
 		clientAck.setCreateDate(new Date(pair.getRight()));
 		stateAckService.setClientAck(clientAck);

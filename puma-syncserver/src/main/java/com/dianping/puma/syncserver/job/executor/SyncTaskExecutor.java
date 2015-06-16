@@ -169,13 +169,14 @@ public class SyncTaskExecutor implements TaskExecutor<SyncTask> {
 		pumaClient.register(new EventListener() {
 
 			@Override
-			public void onEvent(ChangedEvent event) throws Exception {
+			public void onEvent(ChangedEvent event) {
 				LOG.info("Receive event({}).", event.toString());
 
 				status = Status.RUNNING;
 				execute(event);
 			}
 
+			/*
 			@Override
 			public boolean onException(ChangedEvent event, Exception e) {
 				if (!(e instanceof TEException)) {
@@ -239,7 +240,7 @@ public class SyncTaskExecutor implements TaskExecutor<SyncTask> {
 
 			@Override
 			public void onSkipEvent(ChangedEvent event) {
-			}
+			}*/
 		});
 
 		return pumaClient;

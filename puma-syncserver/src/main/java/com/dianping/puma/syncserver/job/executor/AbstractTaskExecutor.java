@@ -122,10 +122,11 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 		pumaClient.register(new EventListener() {
 
 			@Override
-			public void onEvent(ChangedEvent event) throws Exception {
+			public void onEvent(ChangedEvent event) {
 				execute(event);
 			}
 
+			/*
 			@Override
 			public boolean onException(ChangedEvent event, Exception e) {
 				if (!(e instanceof TEException)) {
@@ -163,32 +164,8 @@ public abstract class AbstractTaskExecutor<T extends AbstractBaseSyncTask> imple
 						}
 					}
 				}
-			}
+			}*/
 
-			@Override
-			public void onConnectException(Exception e) {
-				LOG.error("Puma client({}) connection exception occurs: {}.", task.getName(), e.getMessage());
-				status = Status.RECONNECTING;
-
-				// Sleep 60s.
-				try {
-					Thread.sleep(60000L);
-				} catch (InterruptedException e1) {
-					teException = new TEException(-1, e1.getMessage(), e1.getCause());
-					stop();
-				}
-			}
-
-			@Override
-			public void onConnected() {
-				LOG.info("Puma client({}) connected.", task.getName());
-				status = Status.CONNECTED;
-			}
-
-			@Override
-			public void onSkipEvent(ChangedEvent event) {
-				LOG.info("Puma client({}) skip event({}).", task.getName(), event.toString());
-			}
 		});
 
 		return pumaClient;

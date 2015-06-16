@@ -23,6 +23,15 @@ public final class SpringContainer {
 
 	}
 
+	private static SpringContainer springContainer = new SpringContainer();
+
+	public static SpringContainer getInstance() {
+		if (!isStartup) {
+			springContainer.start();
+		}
+		return springContainer;
+	}
+
 	public SpringContainer(String path) {
 		DEFAULT_SPRING_CONFIG = path;
 	}

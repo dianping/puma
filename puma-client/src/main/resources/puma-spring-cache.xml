@@ -13,5 +13,5 @@
 	http://code.dianping.com/schema/pigeon http://code.dianping.com/schema/pigeon/pigeon-service-2.0.xsd">
 
 	<avatar:cache />
-   	<pigeon:annotation />
+   	<pigeon:annotation package="com.dianping.puma.api"/>
 </beans>

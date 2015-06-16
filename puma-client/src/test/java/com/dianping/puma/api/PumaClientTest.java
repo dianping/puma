@@ -295,29 +295,9 @@ public class PumaClientTest {
         PumaClient client = new PumaClient(configBuilder.build());
 
         client.register(new EventListener() {
-
             @Override
-            public void onSkipEvent(ChangedEvent event) {
-
-            }
-
-            @Override
-            public boolean onException(ChangedEvent event, Exception e) {
-                return true;
-            }
-
-            @Override
-            public void onEvent(ChangedEvent event) throws Exception {
+            public void onEvent(ChangedEvent event) {
                 eventsReceived.add(event);
-            }
-
-            @Override
-            public void onConnectException(Exception e) {
-            }
-
-            @Override
-            public void onConnected() {
-
             }
         });
 
@@ -426,33 +406,9 @@ public class PumaClientTest {
         PumaClient client = new PumaClient(configBuilder.build());
 
         client.register(new EventListener() {
-            private int i = 0;
-
             @Override
-            public void onSkipEvent(ChangedEvent event) {
-
-            }
-
-            @Override
-            public boolean onException(ChangedEvent event, Exception e) {
-                return false;
-            }
-
-            @Override
-            public void onEvent(ChangedEvent event) throws Exception {
-                if (++i == 2) {
-                    throw new Exception();
-                }
+            public void onEvent(ChangedEvent event) {
                 eventsReceived.add(event);
-            }
-
-            @Override
-            public void onConnectException(Exception e) {
-            }
-
-            @Override
-            public void onConnected() {
-
             }
         });
 
@@ -565,30 +521,8 @@ public class PumaClientTest {
             private int i = 0;
 
             @Override
-            public void onSkipEvent(ChangedEvent event) {
-                eventsSkipped.add(event);
-            }
-
-            @Override
-            public boolean onException(ChangedEvent event, Exception e) {
-                return true;
-            }
-
-            @Override
-            public void onEvent(ChangedEvent event) throws Exception {
-                if (++i == 2) {
-                    throw new Exception();
-                }
+            public void onEvent(ChangedEvent event) {
                 eventsReceived.add(event);
-            }
-
-            @Override
-            public void onConnectException(Exception e) {
-            }
-
-            @Override
-            public void onConnected() {
-
             }
         });
 

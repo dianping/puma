@@ -22,8 +22,6 @@ public class Config {
 	private static final String DDL_KEY = "puma.client.ddl";
 	private static final String TRANSACTION_KEY = "puma.client.transaction";
 	private static final String CODEC_TYPE_KEY = "puma.client.codectype";
-	private static final String SCHEMA_KEY = "puma.client.schema";
-	private static final String TABLES_KEY = "puma.client.tables";
 
 	private static final String RECONNECT_SLEEP_TIME_KEY = "puma.client.reconnect.sleep.time";
 	private static final String RECONNECT_COUNT_KEY = "puma.client.reconnect.count";
@@ -37,8 +35,6 @@ public class Config {
 
 	private volatile String target;                      // prerequisite.
 	private volatile Long serverId;                      // prerequisite.
-	private volatile String schema;                      // prerequisite.
-	private volatile List<String> tables;                // prerequisite.
 	private volatile Boolean dml = true;                 // optional.
 	private volatile Boolean ddl = false;                // optional.
 	private volatile Boolean transaction = false;        // optional.
@@ -66,10 +62,6 @@ public class Config {
 					target = (String) genConfig(target, value, true);
 				} else if (key.equalsIgnoreCase(localKey(SERVER_ID_KEY))) {
 					serverId = (Long) genConfig(serverId, Long.parseLong(value), true);
-				} else if (key.equalsIgnoreCase(localKey(SCHEMA_KEY))) {
-					schema = (String) genConfig(schema, value, true);
-				} else if (key.equalsIgnoreCase(localKey(TABLES_KEY))) {
-					tables = (List<String>) genConfig(tables, parseTables(value), true);
 				} else if (key.equalsIgnoreCase(localKey(DML_KEY))) {
 					dml = (Boolean) genConfig(dml, Boolean.parseBoolean(value), false);
 				} else if (key.equalsIgnoreCase(localKey(DDL_KEY))) {
@@ -115,8 +107,6 @@ public class Config {
 		// Set local configurations.
 		target = (String) genConfig(target, configCache.getProperty(localKey(TARGET_KEY)), false);
 		serverId = (Long) genConfig(serverId, configCache.getLongProperty(localKey(SERVER_ID_KEY)), false);
-		schema = (String) genConfig(schema, configCache.getProperty(localKey(SCHEMA_KEY)), false);
-		tables = (List<String>) genConfig(tables, parseTables(configCache.getProperty(localKey(TABLES_KEY))), false);
 		dml = (Boolean) genConfig(dml, configCache.getBooleanProperty(localKey(DML_KEY)), true);
 		ddl = (Boolean) genConfig(ddl, configCache.getBooleanProperty(localKey(DDL_KEY)), true);
 		transaction = (Boolean) genConfig(transaction, configCache.getBooleanProperty(localKey(TRANSACTION_KEY)), true);
@@ -183,14 +173,6 @@ public class Config {
 
 	public String getTarget() {
 		return target;
-	}
-
-	public String getSchema() {
-		return schema;
-	}
-
-	public List<String> getTables() {
-		return tables;
 	}
 
 	public Boolean getDml() {

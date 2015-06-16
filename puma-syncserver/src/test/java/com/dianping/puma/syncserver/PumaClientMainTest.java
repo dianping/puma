@@ -4,6 +4,7 @@ import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.event.ChangedEvent;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PumaClientMainTest {
@@ -12,7 +13,10 @@ public class PumaClientMainTest {
 		PumaClient pumaClient = new PumaClient();
 		pumaClient.setName("lixt");
 		pumaClient.setDatabase("DPShop");
-		List<String> tables = new
+		List<String> tables = new ArrayList<String>();
+		tables.add("DP_Shop");
+		tables.add("DP_ShopCategory");
+		pumaClient.setTables(tables);
 
 		pumaClient.register(new EventListener() {
 			@Override public void onEvent(ChangedEvent event) {

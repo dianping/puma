@@ -54,7 +54,7 @@ public class StateCacheService {
 		Map<String, ClientAck> clientAcks = stateContainer.getClientAcks();
 		Map<String, ServerAck> serverAcks = stateContainer.getServerAcks();
 		for (Map.Entry<String, AtomicBoolean> isClientAckLastest : isClientAckLastests.entrySet()) {
-			//if (isClientAckLastest.getValue().get() && clientAcks.containsKey(isClientAckLastest.getKey())) {
+			if (isClientAckLastest.getValue().get() && clientAcks.containsKey(isClientAckLastest.getKey())) {
 				ayncSetKeyValue(isClientAckLastest.getKey() + CLIENT_CACHE_SUFFIX,
 						clientAcks.get(isClientAckLastest.getKey()));
 				stateContainer.setClientAckLastest(isClientAckLastest.getKey(), false);

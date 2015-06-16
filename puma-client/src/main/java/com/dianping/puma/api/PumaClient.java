@@ -272,8 +272,9 @@ public class PumaClient {
 
 				// Connect.
 				try {
-					if (!checkStop()) {
-						connect();
+					if (!first) {
+						String msg = loggerName + String.format("reconnection sleep for %s ms...", config.getReconnectSleepTime());
+						logger.info(msg);
 
 						monitor.logInfo(logger, "connected");
 					}

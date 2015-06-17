@@ -1,10 +1,8 @@
 package com.dianping.puma.api.config;
 
-import com.dianping.cat.Cat;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.api.PumaClient;
-import com.dianping.puma.api.exception.PumaException;
 import com.dianping.puma.api.util.Monitor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,9 +17,6 @@ public class Config {
 
 	private static final String TARGET_KEY = "puma.client.target";
 	private static final String SERVER_ID_KEY = "puma.client.serverid";
-	private static final String DML_KEY = "puma.client.dml";
-	private static final String DDL_KEY = "puma.client.ddl";
-	private static final String TRANSACTION_KEY = "puma.client.transaction";
 	private static final String CODEC_TYPE_KEY = "puma.client.codectype";
 
 	private static final String RECONNECT_SLEEP_TIME_KEY = "puma.client.reconnect.sleep.time";
@@ -36,11 +31,7 @@ public class Config {
 
 	private volatile String target;                      // prerequisite.
 	private volatile Long serverId;                      // prerequisite.
-	private volatile Boolean dml = true;                 // optional.
-	private volatile Boolean ddl = false;                // optional.
-	private volatile Boolean transaction = false;        // optional.
 	private volatile String codecType = "json";          // optional.
-
 
 	private volatile Long reconnectSleepTime = 3000L;    // optional.
 	private volatile Integer reconnectCount = 3;         // optional.
@@ -64,12 +55,6 @@ public class Config {
 					target = (String) genConfig(target, value, true);
 				} else if (key.equalsIgnoreCase(localKey(SERVER_ID_KEY))) {
 					serverId = (Long) genConfig(serverId, Long.parseLong(value), true);
-				} else if (key.equalsIgnoreCase(localKey(DML_KEY))) {
-					dml = (Boolean) genConfig(dml, Boolean.parseBoolean(value), false);
-				} else if (key.equalsIgnoreCase(localKey(DDL_KEY))) {
-					ddl = (Boolean) genConfig(ddl, Boolean.parseBoolean(value), false);
-				} else if (key.equalsIgnoreCase(localKey(TRANSACTION_KEY))) {
-					transaction = (Boolean) genConfig(transaction, Boolean.parseBoolean(value), false);
 				} else if (key.equalsIgnoreCase(localKey(CODEC_TYPE_KEY))) {
 					codecType = (String) genConfig(codecType, value, false);
 				}
@@ -106,9 +91,6 @@ public class Config {
 		// Set local configurations.
 		target = (String) genConfig(target, configCache.getProperty(localKey(TARGET_KEY)), false);
 		serverId = (Long) genConfig(serverId, configCache.getLongProperty(localKey(SERVER_ID_KEY)), false);
-		dml = (Boolean) genConfig(dml, configCache.getBooleanProperty(localKey(DML_KEY)), true);
-		ddl = (Boolean) genConfig(ddl, configCache.getBooleanProperty(localKey(DDL_KEY)), true);
-		transaction = (Boolean) genConfig(transaction, configCache.getBooleanProperty(localKey(TRANSACTION_KEY)), true);
 		codecType = (String) genConfig(codecType, configCache.getProperty(localKey(CODEC_TYPE_KEY)), true);
 
 		// Set global configurations.
@@ -172,18 +154,6 @@ public class Config {
 
 	public String getTarget() {
 		return target;
-	}
-
-	public Boolean getDml() {
-		return dml;
-	}
-
-	public Boolean getDdl() {
-		return ddl;
-	}
-
-	public Boolean getTransaction() {
-		return transaction;
 	}
 
 	public String getCodecType() {

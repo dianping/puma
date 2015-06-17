@@ -55,6 +55,7 @@ public class Handler implements PageHandler<Context> {
 		HttpServletResponse res = ctx.getHttpServletResponse();
 		
 		String clientName = payload.getClientName();
+		String target = payload.getTarget();
 		String serverName = payload.getTarget();
 		String clientIp = NetUtils.getIpAddr(ctx.getHttpServletRequest());
 		BinlogInfo binlogInfo = new BinlogInfo(payload.getBinlog(), payload.getBinlogPos());
@@ -84,7 +85,6 @@ public class Handler implements PageHandler<Context> {
 		String binlogFile = payload.getBinlog();
 		long binlogPos = payload.getBinlogPos();
 		long timeStamp = payload.getTimestamp();
-		String target = payload.getTarget();
 
 		// status report
 		SystemStatusContainer.instance.addClientStatus(clientName, NetUtils.getIpAddr(ctx.getHttpServletRequest()),

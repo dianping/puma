@@ -21,7 +21,6 @@ import com.dianping.puma.api.util.Monitor;
 import com.dianping.puma.core.codec.EventCodecFactory;
 import com.dianping.puma.core.event.*;
 import com.dianping.puma.core.model.BinlogInfo;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +39,9 @@ public class PumaClient {
 
 	private String database;
 	private List<String> tables;
+	private boolean dml = true;
+	private boolean ddl = false;
+	private boolean transaction = false;
 
 	private Configuration configuration;
 	private EventListener eventListener;
@@ -84,6 +86,18 @@ public class PumaClient {
 
 	public void setTables(List<String> tables) {
 		this.tables = tables;
+	}
+
+	public void setDml(boolean dml) {
+		this.dml = dml;
+	}
+
+	public void setDdl(boolean ddl) {
+		this.ddl = ddl;
+	}
+
+	public void setTransaction(boolean transaction) {
+		this.transaction = transaction;
 	}
 
 	public void setAsync(boolean async) {
@@ -417,18 +431,27 @@ public class PumaClient {
 		}
 
 		private String buildRequestParamString() {
+			String binlogFile;
+			long binlogPosition;
 			BinlogInfo binlogInfo = positionManager.next();
+			if (binlogInfo == null) {
+				binlogFile = null;
+				binlogPosition = 0;
+			} else {
+				binlogFile = binlogInfo.getBinlogFile();
+				binlogPosition = binlogInfo.getBinlogPosition();
+			}
 
 			StringBuilder builder = (new StringBuilder())
 					.append("seq=").append(-3)
-					.append("&binlog=").append(binlogInfo.getBinlogFile())
-					.append("&binlogPos=").append(binlogInfo.getBinlogPosition())
+					.append("&binlog=").append(binlogFile)
+					.append("&binlogPos=").append(binlogPosition)
 					.append("&serverId=").append(config.getServerId())
 					.append("&name=").append(name)
 					.append("&target=").append(config.getTarget())
-					.append("&dml=").append(config.getDml())
-					.append("&ddl=").append(config.getDdl())
-					.append("&ts=").append(config.getTransaction())
+					.append("&dml=").append(dml)
+					.append("&ddl=").append(ddl)
+					.append("&ts=").append(transaction)
 					.append("&codec=").append(config.getCodecType());
 
 			for (String table: tables) {

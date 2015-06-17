@@ -32,5 +32,6 @@ public class PumaClientMainTest {
 		PumaClientMainTest main = new PumaClientMainTest();
 		final PumaClient pumaClient = main.createPumaClient();
 		pumaClient.start();
+		pumaClient.stop();
 	}
 }

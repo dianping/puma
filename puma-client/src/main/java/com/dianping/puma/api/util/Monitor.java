@@ -4,7 +4,6 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.exception.PumaException;
-import com.dianping.puma.api.manager.HostManager;
 import org.slf4j.Logger;
 
 public class Monitor {
@@ -23,6 +22,16 @@ public class Monitor {
 		PumaException pe = new PumaException(msg, e);
 		logger.error(msg, pe);
 		Cat.logError(msg, pe);
+	}
+
+	public void logWarn(Logger logger, String warn) {
+		String msg = genMsgHead(client.getName()) + warn;
+		logger.warn(msg);
+	}
+
+	public void logWarn(Logger logger, String warn, Throwable e) {
+		String msg = genMsgHead(client.getName()) + warn;
+		logger.warn(msg, e);
 	}
 
 	public void logInfo(Logger logger, String serverHost, String info) {

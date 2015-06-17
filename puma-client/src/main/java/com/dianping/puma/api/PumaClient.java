@@ -35,15 +35,12 @@ public class PumaClient {
 	private volatile boolean inited = false;
 
 	private String name;
-	private String loggerName;
-
 	private String database;
 	private List<String> tables;
 	private boolean dml = true;
 	private boolean ddl = false;
 	private boolean transaction = false;
 
-	private Configuration configuration;
 	private EventListener eventListener;
 	private EventCodec codec;
 	private boolean async;
@@ -64,7 +61,6 @@ public class PumaClient {
 	private PositionService positionService;
 
 	public PumaClient() {
-
 	}
 
 	@Deprecated
@@ -77,7 +73,6 @@ public class PumaClient {
 
 	public void setName(String name) {
 		this.name = name;
-		this.loggerName = String.format("[puma: %s] ", name);
 	}
 
 	public void setDatabase(String database) {
@@ -110,7 +105,6 @@ public class PumaClient {
 
 	public void start() {
 		if (inited) {
-			logger.warn(loggerName + "client start already.");
 			return;
 		}
 
@@ -128,14 +122,12 @@ public class PumaClient {
 			throw new RuntimeException(e);
 		}
 
-
 		inited = true;
 		monitor.logInfo(logger, "started");
 	}
 
 	public void stop() {
 		if (!inited) {
-			logger.warn(loggerName + "client stop already.");
 			return;
 		}
 
@@ -223,43 +215,37 @@ public class PumaClient {
 		subscribeThread.start();
 	}
 
+	private void stopSpringContainer() {
+
+	}
+
 	private void stopConfig() {
 		config.stop();
-		config = null;
 	}
 
 	private void stopHostManager() {
 		hostManager.stop();
-		hostManager = null;
 	}
 
 	private void stopPositionManager() {
 		positionManager.stop();
-		positionManager = null;
 	}
 
 	private void stopHeartbeatManager() {
 		heartbeatManager.stop();
-		heartbeatManager = null;
 	}
 
 	private void stopLockManager() {
 		lockManager.stop();
-		lockManager = null;
 	}
 
 	private void stopSubscribe() {
 		subscribeTask.stop();
 		subscribeThread.interrupt();
-		subscribeThread = null;
 	}
 
 	public String getName() {
 		return name;
-	}
-
-	public String getLoggerName() {
-		return loggerName;
 	}
 
 	private class SubscribeTask implements Runnable {
@@ -412,8 +398,8 @@ public class PumaClient {
 			out.print(requestParams);
 			out.close();
 
-			logger.info(loggerName + "connection host: {}", host);
-			logger.info(loggerName + "connection params: {}", requestParams);
+			//logger.info(loggerName + "connection host: {}", host);
+			//logger.info(loggerName + "connection params: {}", requestParams);
 
 			is = connection.getInputStream();
 		}

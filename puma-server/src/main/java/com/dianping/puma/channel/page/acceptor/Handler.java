@@ -193,14 +193,18 @@ public class Handler implements PageHandler<Context> {
 	private void sendServerErrorEvent(HttpServletResponse response, Lock lock, EventCodec codec, ServerErrorEvent event)
 			throws IOException {
 		byte[] data = codec.encode(event);
-		if (lock.tryLock()) {
-			try {
-				response.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
-				response.getOutputStream().write(data);
-				response.getOutputStream().flush();
-			} finally {
-				lock.unlock();
+		try {
+			if (lock.tryLock(60, TimeUnit.SECONDS)) {
+				try {
+					response.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
+					response.getOutputStream().write(data);
+					response.getOutputStream().flush();
+				} finally {
+					lock.unlock();
+				}
 			}
+		} catch (InterruptedException e) {
+			logger.warn("Puma server write serverErrorEvent interrupted.");
 		}
 	}
 }

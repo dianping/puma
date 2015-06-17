@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.dianping.pigeon.remoting.provider.config.annotation.Service;
 import com.dianping.puma.admin.cache.StateCacheService;
-import com.dianping.puma.admin.common.StateContainer;
 import com.dianping.puma.core.api.StateFetcherService;
 import com.dianping.puma.core.model.ClientRelatedInfo;
 

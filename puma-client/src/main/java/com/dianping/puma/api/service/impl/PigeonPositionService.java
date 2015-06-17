@@ -1,20 +1,24 @@
 package com.dianping.puma.api.service.impl;
 
+import com.dianping.pigeon.remoting.ServiceFactory;
 import com.dianping.pigeon.remoting.invoker.config.annotation.Reference;
 import com.dianping.puma.api.service.PositionService;
 import com.dianping.puma.core.api.StateAckService;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.ClientAck;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
-@Service("positionService")
 public class PigeonPositionService implements PositionService {
 
-	@Reference(timeout = 1000)
 	private StateAckService stateAckService;
+
+	public PigeonPositionService() {
+		stateAckService = ServiceFactory.getService(StateAckService.class);
+	}
 
 	@Override
 	public Pair<BinlogInfo, Long> request(String clientName) {

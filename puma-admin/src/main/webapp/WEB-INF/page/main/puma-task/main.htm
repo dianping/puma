@@ -104,15 +104,15 @@
 												</div>
 											</td>
 										</tr>
-										<tr ng-repeat-start="item2 in item.pumaServerNames">
+										<tr ng-repeat-start="item2 in item.pumaServerNames" ng-hide="$first">
 										
-										<td class="hidden-480" ng-if="$index > 0">{{item2|cut:true:20:'...'}}</td>
-											<td ng-if="$index > 0"><span
+										<td class="hidden-480">{{item2|cut:true:20:'...'}}</td>
+											<td><span
 												ng-class="{'label-success' : state1(item.name, item2).status== 'RUNNING','label-warning' : state1(item.name, item2).status== 'FAILED' }"
 												class="label label-sm">{{state1(item.name, item2).strStatus}}</span></td>
-											<td ng-if="$index > 0">{{state1(item.name, item2).binlogInfo.binlogFile}}&nbsp;
+											<td>{{state1(item.name, item2).binlogInfo.binlogFile}}&nbsp;
 												{{state1(item.name, item2).binlogInfo.binlogPosition}}</td>
-											<td ng-if="$index > 0">
+											<td>
 												<div class="hidden-sm hidden-xs action-buttons">
 													<a class="blue" href="javascript:void(0)"
 														ng-click="resume1(item.name,item2)"> <i

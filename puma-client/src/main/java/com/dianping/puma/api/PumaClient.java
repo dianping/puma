@@ -16,11 +16,13 @@ import com.dianping.puma.api.manager.impl.DefaultHostManager;
 import com.dianping.puma.api.manager.impl.DefaultLockManager;
 import com.dianping.puma.api.manager.impl.DefaultPositionManager;
 import com.dianping.puma.api.service.PositionService;
+import com.dianping.puma.api.service.impl.PigeonPositionService;
 import com.dianping.puma.api.util.Clock;
 import com.dianping.puma.api.util.Monitor;
 import com.dianping.puma.core.codec.EventCodecFactory;
 import com.dianping.puma.core.event.*;
 import com.dianping.puma.core.model.BinlogInfo;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,8 +151,7 @@ public class PumaClient {
 	}
 
 	private void startSpringContainer() {
-		SpringContainer.getInstance().start();
-		positionService = (PositionService) SpringContainer.getInstance().getBean("positionService");
+		positionService = new PigeonPositionService();
 	}
 
 	private void startMonitor() {

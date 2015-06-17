@@ -1,8 +1,5 @@
 package com.dianping.puma.admin.remote.reporter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.monitor.SwallowEventPublisher;

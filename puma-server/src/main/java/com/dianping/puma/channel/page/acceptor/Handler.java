@@ -79,7 +79,7 @@ public class Handler implements PageHandler<Context> {
 		int binlogIndex = payload.getEventIndex();
 		long serverId = payload.getServerId();
 		long timeStamp = payload.getTimestamp();
-		if (binlogFile == null || binlogFile.equals("mysql-bin.000000")) {
+		if (binlogFile.equals("null") || binlogFile.equals("mysql-bin.000000")) {
 			seq = SubscribeConstant.SEQ_FROM_LATEST;
 		}
 

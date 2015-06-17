@@ -176,46 +176,6 @@ pageApp.controller('pageCtrl', [
 				});
 				return true;
 			};
-			
-			$scope.pause = function(taskName, serverName) {
-				pageService.action1(taskName, serverName, 'pause').success(function(data) {
-					$scope.refresh(name);
-				});
-			};
-
-			$scope.resume = function(taskName, serverName) {
-				pageService.action1(taskName, serverName, 'resume').success(function(data) {
-					$scope.refresh(name);
-				});
-			};
-
-			$rootScope.remove = function(taskName, serverName) {
-				pageService.action1(taskName, serverName, 'remove').success(function(data) {
-					$rootScope.load();
-				});
-				return true;
-			};
-			
-			$scope.refresh = function(taskName, serverName) {
-				for ( var i = 0, len = $scope.states.length; i < len; i++) {
-					if ($scope.states[i].taskName == taskName && $scope.states[i].serverName == serverName) {
-						var result = pageService.action1(taskName, serverName, 'refresh')
-								.success(function(data) {
-									$scope.states[i] = data.state;
-								});
-						break;
-					}
-				}
-			};
-			
-			$scope.state = function(taskName, serverName) {
-				for ( var i = 0, len = $scope.states.length; i < len; i++) {
-					if ($scope.states[i].taskName == taskName && $scope.states[i].serverName == serverName) {
-						return $scope.states[i];
-					}
-				}
-			};
-			
 			$scope.dialog = function(name) {
 				$rootScope.removeName = name;
 				ngDialog
@@ -234,6 +194,72 @@ pageApp.controller('pageCtrl', [
 									<div class="modal-footer">\
 										<button type="button" class="btn btn-default" ng-click="closeThisDialog()">取消</button>\
 										<button type="button" class="btn btn-primary" ng-click="true&&remove(removeName)&&closeThisDialog()">确定</button>\
+									</div>\
+								</div>\
+							</div>',
+							plain : true,
+							className : 'ngdialog-theme-default'
+						});
+			};
+			
+			$scope.pause1 = function(taskName, serverName) {
+				pageService.action1(taskName, serverName, 'pause').success(function(data) {
+					$scope.refresh(name);
+				});
+			};
+
+			$scope.resume1 = function(taskName, serverName) {
+				pageService.action1(taskName, serverName, 'resume').success(function(data) {
+					$scope.refresh(name);
+				});
+			};
+
+			$rootScope.remove1 = function(taskName, serverName) {
+				pageService.action1(taskName, serverName, 'remove').success(function(data) {
+					$rootScope.load();
+				});
+				return true;
+			};
+			
+			$scope.refresh1 = function(taskName, serverName) {
+				for ( var i = 0, len = $scope.states.length; i < len; i++) {
+					if ($scope.states[i].taskName == taskName && $scope.states[i].serverName == serverName) {
+						var result = pageService.action1(taskName, serverName, 'refresh')
+								.success(function(data) {
+									$scope.states[i] = data.state;
+								});
+						break;
+					}
+				}
+			};
+			
+			$scope.state1 = function(taskName, serverName) {
+				for ( var i = 0, len = $scope.states.length; i < len; i++) {
+					if ($scope.states[i].taskName == taskName && $scope.states[i].serverName == serverName) {
+						return $scope.states[i];
+					}
+				}
+			};
+			
+			$scope.dialog1 = function(taskName, serverName) {
+				$rootScope.removeTaskName = taskName;
+				$rootScope.removeServerName = serverName;
+				ngDialog
+						.open({
+							template : '\
+								<div class="widget-box">\
+								<div class="widget-header">\
+									<h4 class="widget-title">警告</h4>\
+								</div>\
+								<div class="widget-body">\
+									<div class="widget-main">\
+										<p class="alert alert-info">\
+											您确认要删除吗？\
+										</p>\
+									</div>\
+									<div class="modal-footer">\
+										<button type="button" class="btn btn-default" ng-click="closeThisDialog()">取消</button>\
+										<button type="button" class="btn btn-primary" ng-click="true&&remove1(removeTaskName,removeServerName)&&closeThisDialog()">确定</button>\
 									</div>\
 								</div>\
 							</div>',

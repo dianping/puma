@@ -24,7 +24,7 @@ public class DefaultPositionManager implements PositionManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPositionManager.class);
 
-	private boolean inited = true;
+	private boolean inited = false;
 
 	private volatile boolean async;
 	private volatile BinlogInfo binlogInfo;

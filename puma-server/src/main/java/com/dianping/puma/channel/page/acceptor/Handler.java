@@ -83,6 +83,9 @@ public class Handler implements PageHandler<Context> {
 			seq = SubscribeConstant.SEQ_FROM_LATEST;
 		}
 
+		String msg = (new StringBuilder())
+		logger.info("")
+
 		// Build event filter chain.
 		EventFilterChain filterChain = EventFilterChainFactory
 				.createEventFilterChain(ddl, dml, transaction, databaseTables);

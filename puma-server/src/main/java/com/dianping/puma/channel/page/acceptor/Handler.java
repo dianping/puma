@@ -79,19 +79,19 @@ public class Handler implements PageHandler<Context> {
 		int binlogIndex = payload.getEventIndex();
 		long serverId = payload.getServerId();
 		long timeStamp = payload.getTimestamp();
-		if (binlogFile == null && binlogPosition == 0L) {
+		if (binlogFile == null || binlogFile.equals("mysql-bin.000000")) {
 			seq = SubscribeConstant.SEQ_FROM_LATEST;
 		}
 
 		String msg = (new StringBuilder())
-				.append("client = ").append(clientName).append(",")
-				.append("client ip = ").append(clientIp).append(",")
-				.append("target = ").append(target).append(",")
-				.append("serverId = ").append(serverId).append(",")
-				.append("seq = ").append(seq).append(",")
-				.append("binlogFile = ").append(binlogFile).append(",")
-				.append("binlogPosition = ").append(binlogPosition).append(",")
-				.append("binlogIndex = ").append(binlogIndex).append(",")
+				.append("client = ").append(clientName).append(", ")
+				.append("client ip = ").append(clientIp).append(", ")
+				.append("target = ").append(target).append(", ")
+				.append("serverId = ").append(serverId).append(", ")
+				.append("seq = ").append(seq).append(", ")
+				.append("binlogFile = ").append(binlogFile).append(", ")
+				.append("binlogPosition = ").append(binlogPosition).append(", ")
+				.append("binlogIndex = ").append(binlogIndex)
 				.toString();
 		logger.info("Connection info: {}.", msg);
 

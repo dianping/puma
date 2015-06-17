@@ -44,6 +44,7 @@ public class PumaClient {
 	private Configuration configuration;
 	private EventListener eventListener;
 	private EventCodec codec;
+	private boolean async;
 
 	private SubscribeTask subscribeTask;
 	private Thread subscribeThread;
@@ -85,11 +86,11 @@ public class PumaClient {
 	}
 
 	public void setAsync(boolean async) {
-
+		this.async = async;
 	}
 
 	public void asyncSavePosition(BinlogInfo binlogInfo) {
-
+		positionManager.save(binlogInfo);
 	}
 
 	public void start() {
@@ -176,10 +177,10 @@ public class PumaClient {
 
 	private void startPositionManager() {
 		DefaultPositionManager defaultPositionManager = new DefaultPositionManager();
+		defaultPositionManager.setAsync(async);
 		defaultPositionManager.setClient(this);
 		defaultPositionManager.setMonitor(monitor);
 		defaultPositionManager.setConfig(config);
-		defaultPositionManager.setHostManager(hostManager);
 		defaultPositionManager.setClock(clock);
 		defaultPositionManager.setPositionService(positionService);
 		positionManager = defaultPositionManager;

@@ -26,18 +26,16 @@ public class DefaultPositionManager implements PositionManager {
 
 	private boolean inited = true;
 
+	private volatile boolean async;
 	private volatile BinlogInfo binlogInfo;
-
 	private volatile long updateTime = 0;
 
 	private int count = 0;
-
 	private Timer timer = new Timer();
 
 	private PumaClient client;
 	private Monitor monitor;
 	private Config config;
-	private HostManager hostManager;
 	private Clock clock;
 	private PositionService positionService;
 
@@ -90,13 +88,15 @@ public class DefaultPositionManager implements PositionManager {
 
 	@Override
 	public void save(BinlogInfo binlogInfo) {
-		this.binlogInfo = binlogInfo;
-		this.updateTime = clock.getCurrentTime();
+		if (!async) {
+			this.binlogInfo = binlogInfo;
+			this.updateTime = clock.getCurrentTime();
 
-		++count;
-		if (count >= config.getBinlogAckCount()) {
-			count = 0;
-			ack();
+			++count;
+			if (count >= config.getBinlogAckCount()) {
+				count = 0;
+				ack();
+			}
 		}
 	}
 
@@ -122,6 +122,10 @@ public class DefaultPositionManager implements PositionManager {
 		}
 	}
 
+	public void setAsync(boolean async) {
+		this.async = async;
+	}
+
 	public void setClient(PumaClient client) {
 		this.client = client;
 	}
@@ -132,10 +136,6 @@ public class DefaultPositionManager implements PositionManager {
 
 	public void setConfig(Config config) {
 		this.config = config;
-	}
-
-	public void setHostManager(HostManager hostManager) {
-		this.hostManager = hostManager;
 	}
 
 	public void setClock(Clock clock) {

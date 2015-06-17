@@ -23,7 +23,7 @@
     
     <task:annotation-driven />
     
-    <pigeon:annotation />
+    <pigeon:annotation package="com.dianping.puma.remote.reporter.helper"/>
       
 	<!--bean id="serverConfig" class="com.dianping.puma.config.Config">
 		<property name="port" value="8080" />

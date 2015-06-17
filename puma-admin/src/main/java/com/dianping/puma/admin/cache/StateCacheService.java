@@ -1,7 +1,6 @@
 package com.dianping.puma.admin.cache;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +16,6 @@ import com.dianping.avatar.cache.CacheService;
 import com.dianping.cache.exception.CacheException;
 import com.dianping.puma.admin.common.StateContainer;
 import com.dianping.puma.core.model.AbstractAck;
-import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.ClientAck;
 import com.dianping.puma.core.model.ClientRelatedInfo;
 import com.dianping.puma.core.model.ServerAck;
@@ -39,8 +37,9 @@ public class StateCacheService {
 	public void ayncSetKeyValue(String key, AbstractAck serverAck) {
 		CacheKey cacheKey = new CacheKey(PUMA_CLIENTACK_STATE_CACHE, key);
 		try {
-			LOG.info("pumaCache!");
+			
 			cacheService.asyncSet(cacheKey, serverAck);
+			LOG.info("Key: {} AsyncSet pumaCache success!",cacheKey);
 		} catch (CacheException e) {
 			LOG.error("pumaCache failed, key : " + key, e);
 		}

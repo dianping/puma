@@ -20,9 +20,7 @@ public class ShardSyncTaskControllerReporter {
 
     public void report(String syncServerName, String taskName, SyncType syncType, ActionController operation) throws SendFailedException {
         ShardSyncTaskControllerEvent event = new ShardSyncTaskControllerEvent();
-        List<String> serverNames = new ArrayList<String>();
-		serverNames.add(syncServerName);
-		event.setServerNames(serverNames);
+        event.setServerName(syncServerName);
         event.setTaskName(taskName);
         event.setController(operation);
         event.setSyncType(syncType);

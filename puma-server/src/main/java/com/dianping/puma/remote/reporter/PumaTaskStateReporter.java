@@ -28,9 +28,7 @@ public class PumaTaskStateReporter {
 	@Scheduled(cron = "0/5 * * * * ?")
 	public void report() throws SendFailedException {
 		PumaTaskStateEvent event = new PumaTaskStateEvent();
-		List<String> serverNames = new ArrayList<String>();
-		serverNames.add(pumaServerConfig.getName());
-		event.setServerNames(serverNames);
+		event.setServerName(pumaServerConfig.getName());
 		event.setTaskStates(pumaTaskStateService.findAll());
 		pumaTaskStatePublisher.publish(event);
 	}

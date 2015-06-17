@@ -7,7 +7,7 @@ public abstract class Event {
 
     protected Date gmtCreate;
 
-    protected List<String> serverNames;
+    protected String serverName;
 
     public Event() {
         this.gmtCreate = new Date();
@@ -21,12 +21,12 @@ public abstract class Event {
         this.gmtCreate = gmtCreate;
     }
 
-    public List<String> getServerNames() {
-        return serverNames;
+    public String getServerName() {
+        return serverName;
     }
 
-    public void setServerNames(List<String> serverNames) {
-        this.serverNames = serverNames;
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
     }
 
 }

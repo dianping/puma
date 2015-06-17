@@ -28,9 +28,7 @@ public class DumpTaskStateReporter {
 	@Scheduled(cron = "0/5 * * * * ?")
 	public void report() throws SendFailedException {
 		DumpTaskStateEvent event = new DumpTaskStateEvent();
-		List<String> serverNames = new ArrayList<String>();
-		serverNames.add(syncServerConfig.getSyncServerName());
-		event.setServerNames(serverNames);
+		event.setServerName(syncServerConfig.getSyncServerName());
 		event.setTaskStates(dumpTaskStateService.findAll());
 		dumpTaskStatePublisher.publish(event);
 	}

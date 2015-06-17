@@ -34,14 +34,15 @@ public class PumaTaskStateReceiver implements EventListener {
 			if (pumaTask.getPumaServerNames() != null) {
 				for (String serverName : pumaTask.getPumaServerNames()) {
 					PumaTaskState pumaTaskState = new PumaTaskState();
-					pumaTaskState.setName(pumaTaskStateService.getStateName(pumaTask.getName(),serverName));
+					pumaTaskState.setName(pumaTaskStateService.getStateName(pumaTask.getName(), serverName));
 					pumaTaskState.setTaskName(pumaTask.getName());
 					pumaTaskState.setStatus(Status.PREPARING);
 					pumaTaskStateService.add(pumaTaskState);
 				}
 			} else {
 				PumaTaskState pumaTaskState = new PumaTaskState();
-				pumaTaskState.setName(pumaTaskStateService.getStateName(pumaTask.getName(),pumaTask.getPumaServerName()));
+				pumaTaskState.setName(pumaTaskStateService.getStateName(pumaTask.getName(),
+						pumaTask.getPumaServerName()));
 				pumaTaskState.setServerName(pumaTask.getPumaServerName());
 				pumaTaskState.setTaskName(pumaTask.getName());
 				pumaTaskState.setStatus(Status.PREPARING);
@@ -57,6 +58,8 @@ public class PumaTaskStateReceiver implements EventListener {
 
 			List<PumaTaskState> pumaTaskStates = ((PumaTaskStateEvent) event).getTaskStates();
 			for (PumaTaskState pumaTaskState : pumaTaskStates) {
+				pumaTaskState.setName(pumaTaskStateService.getStateName(pumaTaskState.getTaskName(),event.getServerName()));
+				pumaTaskState.setServerName(event.getServerName());
 				pumaTaskStateService.add(pumaTaskState);
 			}
 		}

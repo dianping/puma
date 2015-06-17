@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,14 +37,12 @@ public class SyncTaskStateReporter {
 	@Scheduled(cron = "0/5 * * * * ?")
 	public void report() throws SendFailedException {
 		SyncTaskStateEvent event = new SyncTaskStateEvent();
-		List<String> serverNames = new ArrayList<String>();
-		serverNames.add(syncServerConfig.getSyncServerName());
-		event.setServerNames(serverNames);
+		event.setServerName(syncServerConfig.getSyncServerName());
 
 		Map<String, SyncTaskState> syncTaskStateMap = new HashMap<String, SyncTaskState>();
 
 		List<TaskExecutor> taskExecutors = defaultTaskExecutorContainer.getAll();
-		for (TaskExecutor taskExecutor: taskExecutors) {
+		for (TaskExecutor taskExecutor : taskExecutors) {
 			if (taskExecutor instanceof SyncTaskExecutor) {
 				SyncTaskExecutor syncTaskExecutor = (SyncTaskExecutor) taskExecutor;
 				SyncTaskState syncTaskState = new SyncTaskState();

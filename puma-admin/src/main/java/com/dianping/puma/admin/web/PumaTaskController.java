@@ -173,18 +173,20 @@ public class PumaTaskController {
 			// Add puma task state to the state container.
 			for (String serverName : pumaTask.getPumaServerNames()) {
 				PumaTaskState taskState = new PumaTaskState();
-				taskState.setName(pumaTask.getName() + "_" + serverName);
+				taskState.setName(pumaTaskStateService.getStateName(pumaTask.getName(), serverName));
 				taskState.setServerName(serverName);
 				taskState.setTaskName(pumaTask.getName());
 				taskState.setStatus(Status.PREPARING);
 				pumaTaskStateService.add(taskState);
 			}
-			PumaTaskOperationEvent event = new PumaTaskOperationEvent();
-			event.setServerNames(pumaTask.getPumaServerNames());
-			event.setTaskName(pumaTask.getName());
-			event.setPumaTask(pumaTask);
-			event.setOperation(operation);
-			pumaTaskOperationReporter.report(event);
+			for (String serverName : pumaTask.getPumaServerNames()) {
+				PumaTaskOperationEvent event = new PumaTaskOperationEvent();
+				event.setServerName(serverName);
+				event.setTaskName(pumaTask.getName());
+				event.setPumaTask(pumaTask);
+				event.setOperation(operation);
+				pumaTaskOperationReporter.report(event);
+			}
 
 			map.put("success", true);
 		} catch (MongoException e) {
@@ -228,19 +230,19 @@ public class PumaTaskController {
 			// Add puma task state to the state container.
 			for (String serverName : pumaTask.getPumaServerNames()) {
 				PumaTaskState taskState = new PumaTaskState();
-				taskState.setName(pumaTask.getName() + "_" + serverName);
+				taskState.setName(pumaTaskStateService.getStateName(pumaTask.getName(), serverName));
 				taskState.setServerName(serverName);
 				taskState.setTaskName(pumaTask.getName());
 				taskState.setStatus(Status.PREPARING);
 				pumaTaskStateService.add(taskState);
 			}
-
-			event.setServerNames(pumaTask.getPumaServerNames());
-			event.setTaskName(pumaTask.getName());
-			event.setPumaTask(pumaTask);
-			event.setOperation(operation);
-			pumaTaskOperationReporter.report(event);
-
+			for (String serverName : pumaTask.getPumaServerNames()) {
+				event.setServerName(serverName);
+				event.setTaskName(pumaTask.getName());
+				event.setPumaTask(pumaTask);
+				event.setOperation(operation);
+				pumaTaskOperationReporter.report(event);
+			}
 			map.put("success", true);
 		} catch (MongoException e) {
 			map.put("error", "storage");
@@ -305,11 +307,12 @@ public class PumaTaskController {
 
 	@RequestMapping(value = { "/puma-task/refresh" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String refreshPost(String taskName,String serverName) {
+	public String refreshPost(String taskName, String serverName) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			PumaTaskState taskState = pumaTaskStateService.find(pumaTaskStateService.getStateName(taskName, serverName));
+			PumaTaskState taskState = pumaTaskStateService
+					.find(pumaTaskStateService.getStateName(taskName, serverName));
 
 			if (taskState == null) {
 				throw new Exception("Puma task state not found.");

@@ -1,8 +1,5 @@
 package com.dianping.puma.admin.remote.reporter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.monitor.SwallowEventPublisher;
 import com.dianping.puma.core.monitor.event.SyncTaskOperationEvent;
@@ -19,9 +16,7 @@ public class SyncTaskOperationReporter {
 
 	public void report(String syncServerName, String taskName, ActionOperation operation) throws SendFailedException {
 		SyncTaskOperationEvent event = new SyncTaskOperationEvent();
-		List<String> serverNames = new ArrayList<String>();
-		serverNames.add(syncServerName);
-		event.setServerNames(serverNames);
+		event.setServerName(syncServerName);
 		event.setTaskName(taskName);
 		event.setOperation(operation);
 		syncTaskOperationEventPublisher.publish(event);

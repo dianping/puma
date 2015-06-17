@@ -38,11 +38,7 @@ public class SwallowEventPublisher implements EventPublisher {
 			}
 		} else {
 			// Task operation or controller event, sent by admin to servers.
-			if(event.getServerNames() != null){
-				for(String serverName :event.getServerNames()){
-					producer.sendMessage(event, serverName);
-				}
-			}
+			producer.sendMessage(event, event.getServerName());
 		}
 	}
 

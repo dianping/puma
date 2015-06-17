@@ -1,8 +1,5 @@
 package com.dianping.puma.admin.remote.reporter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.core.monitor.SwallowEventPublisher;
@@ -20,9 +17,7 @@ public class ShardSyncTaskOperationReporter {
 
     public void report(String syncServerName, String taskName, SyncType syncType, ActionOperation operation) throws SendFailedException {
         ShardSyncTaskOperationEvent event = new ShardSyncTaskOperationEvent();
-        List<String> serverNames = new ArrayList<String>();
-		serverNames.add(syncServerName);
-		event.setServerNames(serverNames);
+        event.setServerName(syncServerName);
         event.setTaskName(taskName);
         event.setOperation(operation);
         event.setSyncType(syncType);

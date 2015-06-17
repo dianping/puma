@@ -1,8 +1,5 @@
 package com.dianping.puma.syncserver.remote.reporter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.dianping.puma.core.monitor.SwallowEventPublisher;
 import com.dianping.puma.core.monitor.event.ShardSyncTaskStateEvent;
 import com.dianping.puma.core.service.ShardSyncTaskStateService;
@@ -28,9 +25,7 @@ public class ShardSyncTaskStateReporter {
     @Scheduled(cron = "0/5 * * * * ?")
     public void report() throws SendFailedException {
         ShardSyncTaskStateEvent event = new ShardSyncTaskStateEvent();
-        List<String> serverNames = new ArrayList<String>();
-		serverNames.add(syncServerConfig.getSyncServerName());
-		event.setServerNames(serverNames);
+        event.setServerName(syncServerConfig.getSyncServerName());
         event.setTaskStates(shardSyncTaskStateService.findAll());
         shardSyncTaskStatePublisher.publish(event);
     }

@@ -1,8 +1,5 @@
 package com.dianping.puma.admin.remote.reporter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.monitor.SwallowEventPublisher;
 import com.dianping.puma.core.monitor.event.Event;
@@ -24,9 +21,7 @@ public class PumaTaskOperationReporter {
 
 	public void report(String pumaServerName, String taskName, ActionOperation operation) throws SendFailedException {
 		PumaTaskOperationEvent event = new PumaTaskOperationEvent();
-		List<String> serverNames = new ArrayList<String>();
-		serverNames.add(pumaServerName);
-		event.setServerNames(serverNames);
+		event.setServerName(pumaServerName);
 		event.setTaskName(taskName);
 		event.setOperation(operation);
 		pumaTaskOperationEventPublisher.publish(event);

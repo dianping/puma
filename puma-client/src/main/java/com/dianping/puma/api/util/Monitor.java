@@ -11,26 +11,34 @@ public class Monitor {
 
 	private PumaClient client;
 
-	private HostManager hostManager;
-
 	public void logError(Logger logger, String cause) {
-		String msg = genMsgHead(client.getName(), hostManager.current())+ cause;
+		String msg = genMsgHead(client.getName())+ cause;
 		PumaException pe = new PumaException(msg);
 		logger.error(msg, pe);
 		Cat.logError(msg, pe);
 	}
 
 	public void logError(Logger logger, String cause, Throwable e) {
-		String msg = genMsgHead(client.getName(), hostManager.current())+ cause;
+		String msg = genMsgHead(client.getName())+ cause;
 		PumaException pe = new PumaException(msg, e);
 		logger.error(msg, pe);
 		Cat.logError(msg, pe);
 	}
 
-	public void logInfo(Logger logger, String info) {
-		String msg = genMsgHead(client.getName(), hostManager.current()) + info;
+	public void logInfo(Logger logger, String serverHost, String info) {
+		String msg = genMsgHead(client.getName(), serverHost) + info;
 		logger.info(msg);
 		Cat.logEvent("Puma", msg, Message.SUCCESS, "");
+	}
+
+	public void logInfo(Logger logger, String info) {
+		String msg = genMsgHead(client.getName()) + info;
+		logger.info(msg);
+		Cat.logEvent("Puma", msg, Message.SUCCESS, "");
+	}
+
+	private String genMsgHead(String clientName) {
+		return String.format("[client: %s] ", clientName);
 	}
 
 	private String genMsgHead(String clientName, String serverHost) {
@@ -39,9 +47,5 @@ public class Monitor {
 
 	public void setClient(PumaClient client) {
 		this.client = client;
-	}
-
-	public void setHostManager(HostManager hostManager) {
-		this.hostManager = hostManager;
 	}
 }

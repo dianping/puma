@@ -2,9 +2,24 @@ package com.dianping.puma.core.event;
 
 public class ServerErrorEvent extends Event {
 
-	private Exception e;
+	private String msg;
 
-	public ServerErrorEvent(Exception e) {
-		this.e = e;
+	private Throwable cause;
+
+	public ServerErrorEvent(String msg) {
+		this.msg = msg;
+	}
+
+	public ServerErrorEvent(String msg, Throwable cause) {
+		this.msg = msg;
+		this.cause = cause;
+	}
+
+	public String getMsg() {
+		return msg;
+	}
+
+	public Throwable getCause() {
+		return cause;
 	}
 }

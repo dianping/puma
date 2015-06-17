@@ -96,7 +96,7 @@ public class BufferedEventChannel implements EventChannel {
 					eventBuffer.put(eventChannel.next());
 				} catch (StorageException e) {
 					try {
-						eventBuffer.put(new ServerErrorEvent(e));
+						eventBuffer.put(new ServerErrorEvent("storage error event"));
 
 						String msg = String.format("Puma server channel reading storage error.");
 						PumaServerInternalException pe = new PumaServerInternalException(msg, e);

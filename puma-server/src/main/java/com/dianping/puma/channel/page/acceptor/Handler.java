@@ -13,6 +13,8 @@ import com.dianping.puma.channel.exception.ChannelClosedException;
 import com.dianping.puma.channel.exception.PumaServerChannelException;
 import com.dianping.puma.channel.heartbeat.HeartbeatTask;
 import com.dianping.puma.config.PumaServerConfig;
+import com.dianping.puma.core.constant.SubscribeConstant;
+import com.dianping.puma.core.event.ServerErrorEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.filter.EventFilter;
 import com.dianping.puma.monitor.ServerEventDelayMonitor;
@@ -53,96 +55,75 @@ public class Handler implements PageHandler<Context> {
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
 		Payload payload = ctx.getPayload();
 		HttpServletResponse res = ctx.getHttpServletResponse();
-		
+		res.setContentType("application/octet-stream");
+		res.addHeader("Connection", "Keep-Alive");
+
 		String clientName = payload.getClientName();
 		String target = payload.getTarget();
-		String serverName = payload.getTarget();
 		String clientIp = NetUtils.getIpAddr(ctx.getHttpServletRequest());
-		BinlogInfo binlogInfo = new BinlogInfo(payload.getBinlog(), payload.getBinlogPos());
+
 		boolean dml = payload.isDml();
 		boolean ddl = payload.isDdl();
 		boolean transaction = payload.isNeedsTransactionMeta();
 		String[] databaseTables = payload.getDatabaseTables();
-		
-		logger.info("Client connecting: {}({}).", new Object[] { clientName, clientIp });
-		logger.info("Client connecting info: server={}, binlogInfo={}, seq={}.",
-				new Object[] { serverName, binlogInfo, payload.getSeq() });
 
-		// Construct codec
-		EventCodec codec;
-		try {
-			codec = EventCodecFactory.createCodec(payload.getCodecType());
-		} catch (IllegalArgumentException e) {
-			logger.error("Client construct event codec error: {}.", e.getStackTrace());
-			throw e;
-		}
+		// Codec("json").
+		String codecType = payload.getCodecType();
+		EventCodec codec = EventCodecFactory.createCodec(codecType);
 
-		res.setContentType("application/octet-stream");
-		res.addHeader("Connection", "Keep-Alive");
-
+		// sequence, binlog info, serverid.
 		long seq = payload.getSeq();
-		long serverId = payload.getServerId();
 		String binlogFile = payload.getBinlog();
-		long binlogPos = payload.getBinlogPos();
+		long binlogPosition = payload.getBinlogPos();
+		int binlogIndex = payload.getEventIndex();
+		long serverId = payload.getServerId();
 		long timeStamp = payload.getTimestamp();
-
-		// status report
-		SystemStatusContainer.instance.addClientStatus(clientName, NetUtils.getIpAddr(ctx.getHttpServletRequest()),
-				payload.getSeq(), payload.getTarget(), payload.isDml(), payload.isDdl(), payload
-						.isNeedsTransactionMeta(), payload.getDatabaseTables(), payload.getCodecType());
-		SystemStatusContainer.instance.updateClientBinlog(clientName, payload.getBinlog(), payload.getBinlogPos(),payload.getEventIndex());
-
-		ServerEventDelayMonitor serverEventDelayMonitor = ComponentContainer.SPRING.lookup("serverEventDelayMonitor");
-		Lock lock = new ReentrantLock();
-		HeartbeatTask heartbeatTask = new HeartbeatTask(codec, res, clientName, lock, serverEventDelayMonitor);
+		if (binlogFile == null && binlogPosition == 0L) {
+			seq = SubscribeConstant.SEQ_FROM_LATEST;
+		}
 
 		// Build event filter chain.
-		EventFilterChain filterChain = null;
-		try {
-			filterChain = EventFilterChainFactory.createEventFilterChain(ddl, dml, transaction, databaseTables);
-		} catch (Exception e) {
-			String msg = String.format("Puma server(%s) building event filter chain for client(%s, %s) error.",
-					serverName, clientName, clientIp);
+		EventFilterChain filterChain = EventFilterChainFactory
+				.createEventFilterChain(ddl, dml, transaction, databaseTables);
+		if (filterChain == null) {
+			ServerErrorEvent event = new ServerErrorEvent("build event filter chain error.");
+			sendServerErrorEvent(res, codec, event);
 
-
-			logger.error("Client construct event filter chain error: {}.", e.getStackTrace());
+			return;
 		}
 
-		logger.info("Client({}) create filter chain success.", clientName);
-
-		// Find storage.
-		EventStorage storage = DefaultTaskExecutorContainer.instance.getTaskStorage(payload.getTarget());
+		// Find event storage.
+		EventStorage storage = DefaultTaskExecutorContainer.instance.getTaskStorage(target);
 		if (storage == null) {
-			String msg = String
-					.format("Puma server(%s) finding storage for client(%s, %s) error.", serverName, clientName, clientIp);
-			PumaServerChannelException pe = new PumaServerChannelException(msg);
+			ServerErrorEvent event = new ServerErrorEvent("find event storage error.");
+			sendServerErrorEvent(res, codec, event);
 
-			logger.error(msg, pe);
-			Cat.logError(msg, pe);
-
-			throw pe;
+			return;
 		}
 
-		logger.info("Client({}) create event storage success.", clientName);
-
-		// Build channel from storage and open.
+		// Build event storage channel.
 		EventChannel channel;
 		try {
 			channel = new BufferedEventChannel(clientName,
-					storage.getChannel(seq, serverId, binlogFile, binlogPos, timeStamp), 5000);
+					storage.getChannel(seq, serverId, binlogFile, binlogPosition, timeStamp), 5000);
 			channel.open();
 		} catch (Exception e) {
-			String msg = String
-					.format("Puma server(%s) building channel for client(%s, %s).", serverName, clientName, clientIp);
-			PumaServerChannelException pe = new PumaServerChannelException(msg, e);
+			ServerErrorEvent event = new ServerErrorEvent("build event storage channel error.");
+			sendServerErrorEvent(res, codec, event);
 
-			logger.error(msg, pe);
-			Cat.logError(msg, pe);
-
-			throw pe;
+			return;
 		}
 
-		logger.info("Client({}) create event channel success.", clientName);
+		// Client connect success.
+		SystemStatusContainer.instance.addClientStatus(clientName, NetUtils.getIpAddr(ctx.getHttpServletRequest()),
+				seq, target, dml, ddl, transaction, databaseTables, codecType);
+		SystemStatusContainer.instance.updateClientBinlog(clientName, binlogFile, binlogPosition, binlogIndex);
+
+		ServerEventDelayMonitor serverEventDelayMonitor = ComponentContainer.SPRING.lookup("serverEventDelayMonitor");
+
+		// Start heartbeat.
+		Lock lock = new ReentrantLock();
+		HeartbeatTask heartbeatTask = new HeartbeatTask(codec, res, clientName, lock, serverEventDelayMonitor);
 
 		while (true) {
 			try {
@@ -188,5 +169,13 @@ public class Handler implements PageHandler<Context> {
 		SystemStatusContainer.instance.removeClient(clientName);
 		heartbeatTask.cancelFuture();
 		heartbeatTask = null;
+	}
+
+	private void sendServerErrorEvent(HttpServletResponse response, EventCodec codec, ServerErrorEvent event)
+			throws IOException {
+		byte[] data = codec.encode(event);
+		response.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
+		response.getOutputStream().write(data);
+		response.getOutputStream().flush();
 	}
 }

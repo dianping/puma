@@ -164,7 +164,6 @@ public class PumaClient {
 	private void startMonitor() {
 		monitor = new Monitor();
 		monitor.setClient(this);
-		monitor.setHostManager(hostManager);
 	}
 
 	private void startConfig() {

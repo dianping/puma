@@ -13,16 +13,22 @@ public class CacheServiceMainTest {
 
 	public static void main(String[] args) {
 		ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext.xml");
-		StateContainer stateContainer = (StateContainer) applicationContext.getBean("stateContainer");
-		ClientAck clientAck = new ClientAck();
-		clientAck.setClientName("lixt");
-		clientAck.setCreateDate(new Date());
-		BinlogInfo binlogInfo = new BinlogInfo();
-		binlogInfo.setBinlogFile("mysql-bin.000832");
-		binlogInfo.setBinlogPosition(123142170L);
-		binlogInfo.setEventIndex(0);
-		clientAck.setBinlogInfo(binlogInfo);
-		stateContainer.setClientAckInfo(clientAck);
+//		StateContainer stateContainer = (StateContainer) applicationContext.getBean("stateContainer");
+//		ClientAck clientAck = new ClientAck();
+//		clientAck.setClientName("lixt");
+//		clientAck.setCreateDate(new Date());
+//		BinlogInfo binlogInfo = new BinlogInfo();
+//		binlogInfo.setBinlogFile("mysql-bin.000832");
+//		binlogInfo.setBinlogPosition(123142170L);
+//		binlogInfo.setEventIndex(0);
+//		clientAck.setBinlogInfo(binlogInfo);
+//		stateContainer.setClientAckInfo(clientAck);
+//		
+		StateCacheService stateCacheService = (StateCacheService) applicationContext.getBean("stateCacheService");
+		stateCacheService.ayncSetKeyValue("lixt_client", null);
+		
+		
+		
 	}
 
 }

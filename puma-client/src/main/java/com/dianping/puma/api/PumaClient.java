@@ -344,6 +344,8 @@ public class PumaClient {
 							// Server error event, reconnect.
 							if (event instanceof ServerErrorEvent) {
 								// @TODO
+								ServerErrorEvent serverErrorEvent = (ServerErrorEvent) event;
+								monitor.logError(logger, serverErrorEvent.getMsg(), serverErrorEvent.getCause());
 								hostManager.feedback(Feedback.SERVER_ERROR);
 								break;
 							}

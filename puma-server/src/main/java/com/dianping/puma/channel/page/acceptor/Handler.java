@@ -57,6 +57,7 @@ public class Handler implements PageHandler<Context> {
 		HttpServletResponse res = ctx.getHttpServletResponse();
 		res.setContentType("application/octet-stream");
 		res.addHeader("Connection", "Keep-Alive");
+		Lock lock = new ReentrantLock();
 
 		String clientName = payload.getClientName();
 		String target = payload.getTarget();
@@ -87,7 +88,7 @@ public class Handler implements PageHandler<Context> {
 				.createEventFilterChain(ddl, dml, transaction, databaseTables);
 		if (filterChain == null) {
 			ServerErrorEvent event = new ServerErrorEvent("build event filter chain error.");
-			sendServerErrorEvent(res, codec, event);
+			sendServerErrorEvent(res, lock, codec, event);
 
 			return;
 		}
@@ -96,7 +97,7 @@ public class Handler implements PageHandler<Context> {
 		EventStorage storage = DefaultTaskExecutorContainer.instance.getTaskStorage(target);
 		if (storage == null) {
 			ServerErrorEvent event = new ServerErrorEvent("find event storage error.");
-			sendServerErrorEvent(res, codec, event);
+			sendServerErrorEvent(res, lock, codec, event);
 
 			return;
 		}
@@ -109,7 +110,7 @@ public class Handler implements PageHandler<Context> {
 			channel.open();
 		} catch (Exception e) {
 			ServerErrorEvent event = new ServerErrorEvent("build event storage channel error.");
-			sendServerErrorEvent(res, codec, event);
+			sendServerErrorEvent(res, lock, codec, event);
 
 			return;
 		}
@@ -122,7 +123,6 @@ public class Handler implements PageHandler<Context> {
 		ServerEventDelayMonitor serverEventDelayMonitor = ComponentContainer.SPRING.lookup("serverEventDelayMonitor");
 
 		// Start heartbeat.
-		Lock lock = new ReentrantLock();
 		HeartbeatTask heartbeatTask = new HeartbeatTask(codec, res, clientName, lock, serverEventDelayMonitor);
 
 		while (true) {
@@ -171,11 +171,17 @@ public class Handler implements PageHandler<Context> {
 		heartbeatTask = null;
 	}
 
-	private void sendServerErrorEvent(HttpServletResponse response, EventCodec codec, ServerErrorEvent event)
+	private void sendServerErrorEvent(HttpServletResponse response, Lock lock, EventCodec codec, ServerErrorEvent event)
 			throws IOException {
 		byte[] data = codec.encode(event);
-		response.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
-		response.getOutputStream().write(data);
-		response.getOutputStream().flush();
+		if (lock.tryLock()) {
+			try {
+				response.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
+				response.getOutputStream().write(data);
+				response.getOutputStream().flush();
+			} finally {
+				lock.unlock();
+			}
+		}
 	}
 }

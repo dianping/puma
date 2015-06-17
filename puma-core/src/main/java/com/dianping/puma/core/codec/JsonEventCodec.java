@@ -3,17 +3,12 @@ package com.dianping.puma.core.codec;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import com.dianping.puma.core.event.*;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializerProvider;
-
-import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.event.DdlEvent;
-import com.dianping.puma.core.event.Event;
-import com.dianping.puma.core.event.HeartbeatEvent;
-import com.dianping.puma.core.event.RowChangedEvent;
 
 public class JsonEventCodec implements EventCodec {
 	private ObjectMapper	om;
@@ -40,10 +35,12 @@ public class JsonEventCodec implements EventCodec {
 
 		if (event instanceof DdlEvent) {
 			out.write(DDL_EVENT);
-		} else if(event instanceof RowChangedEvent){
+		} else if(event instanceof RowChangedEvent) {
 			out.write(DML_EVENT);
-		}else{
+		} else if(event instanceof HeartbeatEvent) {
 			out.write(HEARTBEAT_EVENT);
+		} else {
+			out.write(SERVER_ERROR_EVENT);
 		}
 
 		out.write(data);
@@ -56,10 +53,12 @@ public class JsonEventCodec implements EventCodec {
 		int type = data[0];
 		if (type == DDL_EVENT) {
 			return om.readValue(data, 1, data.length - 1, DdlEvent.class);
-		} else if(type == DML_EVENT){
+		} else if (type == DML_EVENT) {
 			return om.readValue(data, 1, data.length - 1, RowChangedEvent.class);
-		}else{
-			return om.readValue(data, 1, data.length-1, HeartbeatEvent.class);
+		} else if (type == HEARTBEAT_EVENT) {
+			return om.readValue(data, 1, data.length - 1, HeartbeatEvent.class);
+		} else {
+			return om.readValue(data, 1, data.length - 1, ServerErrorEvent.class);
 		}
 	}
 

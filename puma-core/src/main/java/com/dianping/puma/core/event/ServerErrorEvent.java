@@ -6,6 +6,10 @@ public class ServerErrorEvent extends Event {
 
 	private Throwable cause;
 
+	public ServerErrorEvent() {
+
+	}
+
 	public ServerErrorEvent(String msg) {
 		this.msg = msg;
 	}

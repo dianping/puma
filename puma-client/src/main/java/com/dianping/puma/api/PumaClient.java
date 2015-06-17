@@ -332,7 +332,9 @@ public class PumaClient {
 									}
 								}
 
-								positionManager.save(changedEvent.getBinlogInfo());
+								if (!async) {
+									positionManager.save(changedEvent.getBinlogInfo());
+								}
 							}
 
 							// Heartbeat event, pass it and keep on reading events.

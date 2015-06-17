@@ -27,16 +27,23 @@ public class DefaultPositionManager implements PositionManager {
 	private boolean inited = false;
 
 	private volatile boolean async;
+
 	private volatile BinlogInfo binlogInfo;
+
 	private volatile long updateTime = 0;
 
 	private int count = 0;
+
 	private Timer timer = new Timer();
 
 	private PumaClient client;
+
 	private Monitor monitor;
+
 	private Config config;
+
 	private Clock clock;
+
 	private PositionService positionService;
 
 	public DefaultPositionManager() {
@@ -78,7 +85,9 @@ public class DefaultPositionManager implements PositionManager {
 		try {
 			return request();
 		} catch (Exception e) {
-			String msg = String.format("Puma(%s) reading binlog from pigeon service error, use local instead: %s.", client.getName(), binlogInfo);
+			String msg = String
+					.format("Puma(%s) reading binlog from pigeon service error, use local instead: %s.", client.getName(),
+							binlogInfo);
 			logger.error(msg, e);
 			Cat.logError(msg, e);
 
@@ -88,15 +97,13 @@ public class DefaultPositionManager implements PositionManager {
 
 	@Override
 	public void save(BinlogInfo binlogInfo) {
-		if (!async) {
-			this.binlogInfo = binlogInfo;
-			this.updateTime = clock.getCurrentTime();
+		this.binlogInfo = binlogInfo;
+		this.updateTime = clock.getCurrentTime();
 
-			++count;
-			if (count >= config.getBinlogAckCount()) {
-				count = 0;
-				ack();
-			}
+		++count;
+		if (count >= config.getBinlogAckCount()) {
+			count = 0;
+			ack();
 		}
 	}
 

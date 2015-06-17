@@ -33,15 +33,14 @@ public class StateCacheService {
 	@Autowired
 	private StateContainer stateContainer;
 
-	
 	public void ayncSetKeyValue(String key, AbstractAck serverAck) {
 		CacheKey cacheKey = new CacheKey(PUMA_CLIENTACK_STATE_CACHE, key);
 		try {
-			
+
 			cacheService.asyncSet(cacheKey, serverAck);
-			LOG.info("Key: {} AsyncSet pumaCache success!",cacheKey);
+			LOG.info("Key: {}, AsyncSet pumaCache success!", cacheKey);
 		} catch (CacheException e) {
-			LOG.error("pumaCache failed, key : " + key, e);
+			LOG.error("Key: {}, AsyncSet pumaCache failed, key : ", cacheKey, e);
 		}
 	}
 

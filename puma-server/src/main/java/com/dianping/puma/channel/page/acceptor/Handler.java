@@ -83,8 +83,11 @@ public class Handler implements PageHandler<Context> {
 			seq = SubscribeConstant.SEQ_FROM_LATEST;
 		}
 
+		/*
 		String msg = (new StringBuilder())
-		logger.info("")
+				.append("client = ").append(clientName)
+				.append("target")
+		logger.info("")*/
 
 		// Build event filter chain.
 		EventFilterChain filterChain = EventFilterChainFactory

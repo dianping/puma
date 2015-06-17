@@ -65,6 +65,7 @@ public class PumaClient {
 
 	}
 
+	@Deprecated
 	public PumaClient(Configuration configuration) {
 	}
 
@@ -101,15 +102,12 @@ public class PumaClient {
 
 		try {
 			startSpringContainer();
-			positionService.ack("lixt", Pair.of(new BinlogInfo("mysql-bin.000004", 923907898L), System.currentTimeMillis()));
-			//Thread.sleep(2000);
-			//Pair<BinlogInfo, Long> pair = positionService.request("lixt");
 			startMonitor();
 			startConfig();
 			startHostManager();
 			startPositionManager();
 			startHeartbeatManager();
-			startLockManager();
+			//startLockManager();
 			startSubscribe();
 		} catch (Exception e) {
 			monitor.logError(logger, "start error", e);

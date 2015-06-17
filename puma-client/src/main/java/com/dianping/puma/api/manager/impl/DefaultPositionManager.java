@@ -102,11 +102,7 @@ public class DefaultPositionManager implements PositionManager {
 
 	private BinlogInfo request() {
 		Pair<BinlogInfo, Long> pair = positionService.request(client.getName());
-		BinlogInfo binlogInfo = pair.getLeft();
-		if (binlogInfo == null) {
-			throw new NullPointerException("Null binlog read from pigeon service.");
-		}
-		return binlogInfo;
+		return (pair == null) ? null : pair.getLeft();
 	}
 
 	private void ack() {

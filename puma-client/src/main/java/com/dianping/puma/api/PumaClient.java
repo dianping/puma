@@ -10,7 +10,6 @@ import java.util.List;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.puma.api.config.Config;
 import com.dianping.puma.api.exception.AuthException;
-import com.dianping.puma.api.exception.PumaException;
 import com.dianping.puma.api.manager.*;
 import com.dianping.puma.api.manager.impl.DefaultHeartbeatManager;
 import com.dianping.puma.api.manager.impl.DefaultHostManager;
@@ -272,9 +271,8 @@ public class PumaClient {
 
 				// Connect.
 				try {
-					if (!first) {
-						String msg = loggerName + String.format("reconnection sleep for %s ms...", config.getReconnectSleepTime());
-						logger.info(msg);
+					if (!checkStop()) {
+						connect();
 
 						monitor.logInfo(logger, "connected");
 					}

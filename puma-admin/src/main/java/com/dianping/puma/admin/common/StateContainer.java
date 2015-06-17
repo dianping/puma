@@ -33,15 +33,7 @@ public class StateContainer {
 	private ConcurrentMap<String, AtomicBoolean> isServerAckLastests = new ConcurrentHashMap<String, AtomicBoolean>();
 
 	public StateContainer() {
-//		ClientAck clientAck = new ClientAck();
-//		clientAck.setClientName("lixt");
-//		clientAck.setCreateDate(new Date());
-//		BinlogInfo binlogInfo = new BinlogInfo();
-//		binlogInfo.setBinlogFile("mysql-bin.000832");
-//		binlogInfo.setBinlogPosition(123142170L);
-//		binlogInfo.setEventIndex(0);
-//		clientAck.setBinlogInfo(binlogInfo);
-//		setClientAckInfo(clientAck);
+
 	}
 
 	public void setClientAckInfo(ClientAck clientAck) {

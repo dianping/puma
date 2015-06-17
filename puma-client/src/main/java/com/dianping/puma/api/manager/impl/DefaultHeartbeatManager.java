@@ -17,9 +17,9 @@ public class DefaultHeartbeatManager implements HeartbeatManager {
 
 	private boolean inited = false;
 
-	private volatile boolean marked = false;
+	private volatile boolean closed = true;
 	private volatile long last;
-	private Timer timer = new Timer();
+	private Timer timer;
 
 	private PumaClient client;
 	private Monitor monitor;
@@ -28,38 +28,34 @@ public class DefaultHeartbeatManager implements HeartbeatManager {
 
 	public void start() {
 		if (inited) {
-			logger.warn("Puma({}) heartbeat manager has been started already.", client.getName());
 			return;
 		}
 
+		timer = new Timer();
 		timer.scheduleAtFixedRate(new HeartbeatCheckTask(), 0, config.getHeartbeatCheckTime());
 
 		inited = true;
-		logger.info("Puma({}) heartbeat manager has been started successfully.", client.getName());
 	}
 
 	public void stop() {
 		if (!inited) {
-			logger.warn("Puma({}) heartbeat manager has been stopped already.", client.getName());
 			return;
 		}
 
 		timer.cancel();
-		timer = null;
 
 		inited = false;
-		logger.info("Puma({}) heartbeat manager has been stopped successfully.", client.getName());
 	}
 
 	public void open() {
-		marked = true;
+		closed = false;
 		heartbeat();
 
 		logger.info("Puma({}) heartbeat manager has been opened successfully.", client.getName());
 	}
 
 	public void close() {
-		marked = false;
+		closed = true;
 
 		logger.info("Puma({}) heartbeat manager has been closed successfully.", client.getName());
 	}
@@ -92,7 +88,7 @@ public class DefaultHeartbeatManager implements HeartbeatManager {
 
 		@Override
 		public void run() {
-			if (marked && expired()) {
+			if (!closed && expired()) {
 				monitor.logError(logger, "heartbeat expired");
 
 				// Restart the client.

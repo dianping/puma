@@ -95,6 +95,13 @@ public class Handler implements PageHandler<Context> {
 				.toString();
 		logger.info("Connection info: {}.", msg);
 
+		if (SystemStatusContainer.instance.getClientStatus(clientName) != null) {
+			ServerErrorEvent event = new ServerErrorEvent("duplicated client error.");
+			sendServerErrorEvent(res, lock, codec, event);
+
+			return;
+		}
+
 		// Build event filter chain.
 		EventFilterChain filterChain = EventFilterChainFactory
 				.createEventFilterChain(ddl, dml, transaction, databaseTables);

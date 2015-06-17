@@ -138,7 +138,7 @@ public class PumaClient {
 			stopPositionManager();
 			stopHostManager();
 			stopConfig();
-			SpringContainer.getInstance().stop();
+			stopSpringContainer();
 		} catch (Throwable e) {
 			monitor.logError(logger, "stop error", e);
 			throw new RuntimeException(e);
@@ -216,7 +216,7 @@ public class PumaClient {
 	}
 
 	private void stopSpringContainer() {
-
+		SpringContainer.getInstance().stop();
 	}
 
 	private void stopConfig() {
@@ -246,6 +246,34 @@ public class PumaClient {
 
 	public String getName() {
 		return name;
+	}
+
+	public HostManager getHostManager() {
+		return hostManager;
+	}
+
+	public Config getConfig() {
+		return config;
+	}
+
+	public Monitor getMonitor() {
+		return monitor;
+	}
+
+	public PositionManager getPositionManager() {
+		return positionManager;
+	}
+
+	public HeartbeatManager getHeartbeatManager() {
+		return heartbeatManager;
+	}
+
+	public LockManager getLockManager() {
+		return lockManager;
+	}
+
+	public PositionService getPositionService() {
+		return positionService;
 	}
 
 	private class SubscribeTask implements Runnable {

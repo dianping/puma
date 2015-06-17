@@ -16,7 +16,7 @@ import java.util.Map;
 @Service("pumaTaskStateService")
 public class PumaTaskStateServiceImpl implements PumaTaskStateService {
 
-	private static final String NAME_INFIX = "_";
+	private static final String NAME_INFIX = "&";
 
 	@Autowired
 	TaskStateContainer taskStateContainer;

@@ -76,20 +76,20 @@
 											<td rowspan="{{item.pumaServerNames.length * 2 - 1}}">{{item.srcDBInstanceName|cut:true:25:'...'}}</td>
 											<td class="hidden-480" ng-repeat-start="item2 in item.pumaServerNames" ng-if="$index == 0">{{item2|cut:true:20:'...'}}</td>
 											<td ng-if="$index == 0"><span
-												ng-class="{'label-success' : state(getStateName(item.name,item2)).status== 'RUNNING','label-warning' : state(getStateName(item.name,item2)).status== 'FAILED' }"
-												class="label label-sm">{{state(getStateName(item.name,item2)).strStatus}}</span></td>
-											<td ng-if="$index == 0">{{state(getStateName(item.name,item2)).binlogInfo.binlogFile}}&nbsp;
-												{{state(getStateName(item.name,item2)).binlogInfo.binlogPosition}}</td>
+												ng-class="{'label-success' : state(item.name, item2).status== 'RUNNING','label-warning' : state(item.name, item2).status== 'FAILED' }"
+												class="label label-sm">{{state(item.name, item2).strStatus}}</span></td>
+											<td ng-if="$index == 0">{{state(item.name, item2).binlogInfo.binlogFile}}&nbsp;
+												{{state(item.name, item2).binlogInfo.binlogPosition}}</td>
 											<td ng-repeat-end ng-if="$index == 0">
 												<div class="hidden-sm hidden-xs action-buttons">
 													<a class="blue" href="javascript:void(0)"
-														ng-click="resume(getStateName(item.name,item2))"> <i
+														ng-click="resume(item.name,item2)"> <i
 														class="ace-icon fa fa-play bigger-110"></i>
 													</a> <a class="blue" href="javascript:void(0)"
-														ng-click="pause(getStateName(item.name,item2))"> <i
+														ng-click="pause(item.name,item2)"> <i
 														class="ace-icon fa fa-pause bigger-110"></i>
 													</a> <a class="blue" href="javascript:void(0)"
-														ng-click="refresh(getStateName(item.name,item2))"> <i
+														ng-click="refresh(item.name,item2)"> <i
 														class="ace-icon fa fa-refresh bigger-130"></i>
 													</a><a class="green"
 														href="${rc.contextPath}/puma-task/create/"> <i
@@ -115,13 +115,13 @@
 											<td ng-if="$index > 0">
 												<div class="hidden-sm hidden-xs action-buttons">
 													<a class="blue" href="javascript:void(0)"
-														ng-click="resume(getStateName(item.name,item2))"> <i
+														ng-click="resume(item.name,item2)"> <i
 														class="ace-icon fa fa-play bigger-110"></i>
 													</a> <a class="blue" href="javascript:void(0)"
-														ng-click="pause(getStateName(item.name,item2))"> <i
+														ng-click="pause(item.name,item2)"> <i
 														class="ace-icon fa fa-pause bigger-110"></i>
 													</a> <a class="blue" href="javascript:void(0)"
-														ng-click="refresh(getStateName(item.name,item2))"> <i
+														ng-click="refresh(item.name,item2)"> <i
 														class="ace-icon fa fa-refresh bigger-130"></i>
 													</a><a class="green"
 														href="${rc.contextPath}/puma-task/create/"> <i

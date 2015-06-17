@@ -136,19 +136,19 @@ pageApp.controller('pageCtrl', [
 
 			$scope.state = function(name) {
 				for ( var i = 0, len = $scope.states.length; i < len; i++) {
-					if ($scope.states[i].name == name) {
+					if ($scope.states[i].taskName == name) {
 						return $scope.states[i];
 					}
 				}
 			};
 			
 			$scope.getStateName = function(taskName,serverName) {
-				return taskName + "_" + serverName;
+				return taskName + "&" + serverName;
 			};
 			
 			$scope.refresh = function(name) {
 				for ( var i = 0, len = $scope.states.length; i < len; i++) {
-					if ($scope.states[i].name == name) {
+					if ($scope.states[i].taskName == name) {
 						var result = pageService.action(name, 'refresh')
 								.success(function(data) {
 									$scope.states[i] = data.state;
@@ -170,6 +170,13 @@ pageApp.controller('pageCtrl', [
 				});
 			};
 			
+			$rootScope.remove = function(name) {
+				pageService.action(name, 'remove').success(function(data) {
+					$rootScope.load();
+				});
+				return true;
+			};
+			
 			$scope.pause = function(taskName, serverName) {
 				pageService.action1(taskName, serverName, 'pause').success(function(data) {
 					$scope.refresh(name);
@@ -182,12 +189,33 @@ pageApp.controller('pageCtrl', [
 				});
 			};
 
-			$rootScope.remove = function(name) {
-				pageService.action(name, 'remove').success(function(data) {
+			$rootScope.remove = function(taskName, serverName) {
+				pageService.action1(taskName, serverName, 'remove').success(function(data) {
 					$rootScope.load();
 				});
 				return true;
 			};
+			
+			$scope.refresh = function(taskName, serverName) {
+				for ( var i = 0, len = $scope.states.length; i < len; i++) {
+					if ($scope.states[i].taskName == taskName && $scope.states[i].serverName == serverName) {
+						var result = pageService.action1(taskName, serverName, 'refresh')
+								.success(function(data) {
+									$scope.states[i] = data.state;
+								});
+						break;
+					}
+				}
+			};
+			
+			$scope.state = function(taskName, serverName) {
+				for ( var i = 0, len = $scope.states.length; i < len; i++) {
+					if ($scope.states[i].taskName == taskName && $scope.states[i].serverName == serverName) {
+						return $scope.states[i];
+					}
+				}
+			};
+			
 			$scope.dialog = function(name) {
 				$rootScope.removeName = name;
 				ngDialog

@@ -282,16 +282,10 @@ public class PumaTaskController {
 				}
 			}
 
-			if (pumaTask.getPumaServerNames() != null) {
-
-			} else {
-
-			}
-
 			// Publish puma task operation event to puma server.
 			this.pumaTaskOperationReporter.report(serverName, taskName, ActionOperation.REMOVE);
 
-			pumaTaskStateService.remove(pumaTaskStateService.getStateName(pumaTask.getName(), serverName));
+			pumaTaskStateService.remove(pumaTaskStateService.getStateName(taskName, serverName));
 			map.put("success", true);
 		} catch (MongoException e) {
 			map.put("error", "storage");
@@ -311,11 +305,11 @@ public class PumaTaskController {
 
 	@RequestMapping(value = { "/puma-task/refresh" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String refreshPost(String name) {
+	public String refreshPost(String taskName,String serverName) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			PumaTaskState taskState = pumaTaskStateService.find(name);
+			PumaTaskState taskState = pumaTaskStateService.find(pumaTaskStateService.getStateName(taskName, serverName));
 
 			if (taskState == null) {
 				throw new Exception("Puma task state not found.");
@@ -349,8 +343,7 @@ public class PumaTaskController {
 			taskState.setStatus(Status.PREPARING);
 
 			// Publish puma task controller event to puma server.
-			this.pumaTaskControllerReporter.report(pumaTask.getPumaServerName(), pumaTask.getName(),
-					ActionController.RESUME);
+			this.pumaTaskControllerReporter.report(serverName, taskName, ActionController.RESUME);
 
 			map.put("success", true);
 		} catch (MongoException e) {

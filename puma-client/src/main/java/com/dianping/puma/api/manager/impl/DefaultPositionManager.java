@@ -1,15 +1,10 @@
 package com.dianping.puma.api.manager.impl;
 
-import com.dianping.cat.Cat;
-import com.dianping.cat.message.Message;
 import com.dianping.puma.api.PumaClient;
-import com.dianping.puma.api.SpringContainer;
 import com.dianping.puma.api.config.Config;
-import com.dianping.puma.api.exception.PumaException;
 import com.dianping.puma.api.manager.HostManager;
 import com.dianping.puma.api.manager.PositionManager;
 import com.dianping.puma.api.service.PositionService;
-import com.dianping.puma.api.service.impl.PigeonPositionService;
 import com.dianping.puma.api.util.Clock;
 import com.dianping.puma.api.util.Monitor;
 import com.dianping.puma.core.model.BinlogInfo;
@@ -26,24 +21,16 @@ public class DefaultPositionManager implements PositionManager {
 
 	private boolean inited = false;
 
-	private volatile boolean async;
-
 	private volatile BinlogInfo binlogInfo;
-
 	private volatile long updateTime = 0;
-
 	private int count = 0;
-
-	private Timer timer = new Timer();
+	private Timer timer;
 
 	private PumaClient client;
-
 	private Monitor monitor;
-
+	private HostManager hostManager;
 	private Config config;
-
 	private Clock clock;
-
 	private PositionService positionService;
 
 	public DefaultPositionManager() {
@@ -52,24 +39,20 @@ public class DefaultPositionManager implements PositionManager {
 	@Override
 	public void start() {
 		if (inited) {
-			logger.warn("Puma({}) position manager has been started already.", client.getName());
 			return;
 		}
 
-		// Request binlog from pigeon service when starting.
 		binlogInfo = request();
 
-		// Setup the ack task.
+		timer = new Timer(String.format("puma-position-thread-%s", client.getName()));
 		timer.scheduleAtFixedRate(new AckWorker(), 0, config.getBinlogAckTime());
 
 		inited = true;
-		logger.info("Puma({}) position manager has been started successfully.", client.getName());
 	}
 
 	@Override
 	public void stop() {
 		if (!inited) {
-			logger.warn("Puma({}) position manager has been stopped already.", client.getName());
 			return;
 		}
 
@@ -77,7 +60,6 @@ public class DefaultPositionManager implements PositionManager {
 		timer = null;
 
 		inited = false;
-		logger.info("Puma({}) position manager has been stopped successfully.", client.getName());
 	}
 
 	@Override
@@ -85,12 +67,8 @@ public class DefaultPositionManager implements PositionManager {
 		try {
 			return request();
 		} catch (Exception e) {
-			String msg = String
-					.format("Puma(%s) reading binlog from pigeon service error, use local instead: %s.", client.getName(),
-							binlogInfo);
-			logger.error(msg, e);
-			Cat.logError(msg, e);
-
+			String msg = String.format("reading remote binlog error, use local instead: %s.", binlogInfo);
+			monitor.logError(logger, hostManager.current(), msg);
 			return binlogInfo;
 		}
 	}
@@ -117,16 +95,12 @@ public class DefaultPositionManager implements PositionManager {
 
 			if (binlogInfo != null) {
 				positionService.ack(client.getName(), Pair.of(binlogInfo, updateTime));
-				monitor.logInfo(logger, "ack");
+				monitor.logInfo(logger, hostManager.current(), "ack");
 			}
 
 		} catch (Throwable e) {
-			monitor.logError(logger, "ack error", e);
+			monitor.logError(logger, hostManager.current(), "ack error", e);
 		}
-	}
-
-	public void setAsync(boolean async) {
-		this.async = async;
 	}
 
 	public void setClient(PumaClient client) {

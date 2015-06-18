@@ -7,7 +7,6 @@ import com.dianping.puma.api.util.Clock;
 import com.dianping.puma.api.util.Monitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -32,7 +31,7 @@ public class DefaultHeartbeatManager implements HeartbeatManager {
 			return;
 		}
 
-		timer = new Timer();
+		timer = new Timer(String.format("puma-heartbeat-thread-%s", client.getName()));
 		timer.scheduleAtFixedRate(new HeartbeatCheckTask(), 0, config.getHeartbeatCheckTime());
 
 		inited = true;
@@ -66,7 +65,7 @@ public class DefaultHeartbeatManager implements HeartbeatManager {
 	}
 
 	private boolean expired() {
-		return (clock.getCurrentTime() - last) >= config.getHeartbeatExpiredTime() * 1000;
+		return (clock.getCurrentTime() - last) >= config.getHeartbeatExpiredTime();
 	}
 
 	public void setClient(PumaClient client) {
@@ -92,9 +91,8 @@ public class DefaultHeartbeatManager implements HeartbeatManager {
 			if (!closed && expired()) {
 				monitor.logError(logger, "heartbeat expired");
 
-				// Restart the client.
-				client.stop();
-				client.start();
+				client.stopSubscribe();
+				client.startSubscribe();
 			}
 		}
 	}

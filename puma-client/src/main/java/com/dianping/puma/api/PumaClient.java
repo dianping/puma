@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.core.util.StreamUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class PumaClient {
 
@@ -59,7 +58,6 @@ public class PumaClient {
 	private HostManager hostManager;
 	private PositionManager positionManager;
 
-	@Autowired
 	private HeartbeatManager heartbeatManager;
 	private LockManager lockManager;
 
@@ -184,7 +182,6 @@ public class PumaClient {
 
 	private void startPositionManager() {
 		DefaultPositionManager defaultPositionManager = new DefaultPositionManager();
-		defaultPositionManager.setAsync(async);
 		defaultPositionManager.setClient(this);
 		defaultPositionManager.setMonitor(monitor);
 		defaultPositionManager.setConfig(config);
@@ -211,10 +208,10 @@ public class PumaClient {
 		lockManager.start();
 	}
 
-	private void startSubscribe() {
+	public void startSubscribe() {
 		subscribeTask = new SubscribeTask();
 		subscribeThread = new Thread(subscribeTask);
-		subscribeThread.setName(String.format("subscribe-thread-%s", name));
+		subscribeThread.setName(String.format("puma-subscribe-thread-%s", name));
 		subscribeThread.setDaemon(true);
 		subscribeThread.start();
 	}
@@ -243,41 +240,13 @@ public class PumaClient {
 		lockManager.stop();
 	}
 
-	private void stopSubscribe() {
+	public void stopSubscribe() {
 		subscribeTask.stop();
 		subscribeThread.interrupt();
 	}
 
 	public String getName() {
 		return name;
-	}
-
-	public HostManager getHostManager() {
-		return hostManager;
-	}
-
-	public Config getConfig() {
-		return config;
-	}
-
-	public Monitor getMonitor() {
-		return monitor;
-	}
-
-	public PositionManager getPositionManager() {
-		return positionManager;
-	}
-
-	public HeartbeatManager getHeartbeatManager() {
-		return heartbeatManager;
-	}
-
-	public LockManager getLockManager() {
-		return lockManager;
-	}
-
-	public PositionService getPositionService() {
-		return positionService;
 	}
 
 	private class SubscribeTask implements Runnable {
@@ -304,17 +273,17 @@ public class PumaClient {
 					if (!checkStop()) {
 						connect();
 
-						monitor.logInfo(logger, "connected");
+						monitor.logInfo(logger, hostManager.current(), "connected");
 					}
 				} catch (IOException e) {
 
 					if (!checkStop()) {
 						hostManager.feedback(Feedback.NET_ERROR);
-						monitor.logError(logger, "connect error", e);
+						monitor.logError(logger, hostManager.current(), "connect error", e);
 					}
 
 					disconnect();
-					monitor.logInfo(logger, "disconnected");
+					monitor.logInfo(logger, hostManager.current(), "disconnected");
 
 					continue;
 				}
@@ -346,7 +315,7 @@ public class PumaClient {
 										eventListener.onEvent(changedEvent);
 										break;
 									} catch (Throwable e) {
-										monitor.logError(logger, String.format("subscribe error(%s)", event), e);
+										monitor.logError(logger, hostManager.current(), String.format("subscribe error(%s)", event), e);
 									}
 								}
 
@@ -357,7 +326,7 @@ public class PumaClient {
 
 							// Heartbeat event, pass it and keep on reading events.
 							if (event instanceof HeartbeatEvent) {
-								monitor.logInfo(logger, "heartbeat");
+								monitor.logInfo(logger, hostManager.current(), "heartbeat");
 								continue;
 							}
 
@@ -378,7 +347,7 @@ public class PumaClient {
 					// Send the revived zombie thread to the `finally` block.
 					if (!checkStop()) {
 						hostManager.feedback(Feedback.NET_ERROR);
-						monitor.logError(logger, "subscribe error", e);
+						monitor.logError(logger, hostManager.current(), "subscribe error", e);
 					}
 
 				} finally {
@@ -388,7 +357,7 @@ public class PumaClient {
 					}
 
 					disconnect();
-					monitor.logInfo(logger, "disconnected");
+					monitor.logInfo(logger, hostManager.current(), "disconnected");
 				}
 			}
 		}
@@ -440,14 +409,12 @@ public class PumaClient {
 			if (is != null) {
 				try {
 					is.close();
-					logger.info("Puma({}) close input stream successfully.", name);
 				} catch (IOException e) {
-					logger.warn("Puma({}) close input stream failure.", name, e);
+					// Ignore.
 				}
 			}
 			if (connection != null) {
 				connection.disconnect();
-				logger.info("Puma({}) close connection successfully.", name);
 			}
 		}
 

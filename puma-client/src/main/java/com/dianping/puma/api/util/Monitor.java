@@ -24,24 +24,28 @@ public class Monitor {
 		Cat.logError(msg, pe);
 	}
 
-	public void logWarn(Logger logger, String warn) {
-		String msg = genMsgHead(client.getName()) + warn;
-		logger.warn(msg);
+	public void logError(Logger logger, String serverHost, String cause) {
+		String msg = genMsgHead(client.getName(), serverHost)+ cause;
+		PumaException pe = new PumaException(msg);
+		logger.error(msg, pe);
+		Cat.logError(msg, pe);
 	}
 
-	public void logWarn(Logger logger, String warn, Throwable e) {
-		String msg = genMsgHead(client.getName()) + warn;
-		logger.warn(msg, e);
-	}
-
-	public void logInfo(Logger logger, String serverHost, String info) {
-		String msg = genMsgHead(client.getName(), serverHost) + info;
-		logger.info(msg);
-		Cat.logEvent("Puma", msg, Message.SUCCESS, "");
+	public void logError(Logger logger, String serverHost, String cause, Throwable e) {
+		String msg = genMsgHead(client.getName(), serverHost)+ cause;
+		PumaException pe = new PumaException(msg, e);
+		logger.error(msg, pe);
+		Cat.logError(msg, pe);
 	}
 
 	public void logInfo(Logger logger, String info) {
 		String msg = genMsgHead(client.getName()) + info;
+		logger.info(msg);
+		Cat.logEvent("Puma", msg, Message.SUCCESS, "");
+	}
+
+	public void logInfo(Logger logger, String serverHost, String info) {
+		String msg = genMsgHead(client.getName(), serverHost) + info;
 		logger.info(msg);
 		Cat.logEvent("Puma", msg, Message.SUCCESS, "");
 	}

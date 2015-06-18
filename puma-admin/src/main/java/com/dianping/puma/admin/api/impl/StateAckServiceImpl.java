@@ -41,7 +41,7 @@ public class StateAckServiceImpl implements StateAckService {
 		ClientAck clientAck = null;
 		if (StringUtils.isNotBlank(clientName)) {
 			clientAck = stateCacheService.popClientAck(clientName);
-			LOG.info("ClientName: {} get Client ack info.", clientAck.getClientName());
+			LOG.info("ClientName: {} get Client ack info.", clientName);
 		} else {
 			LOG.info("Not valid get Client ack info.");
 		}

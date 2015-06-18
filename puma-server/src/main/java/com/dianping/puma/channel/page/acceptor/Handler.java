@@ -2,6 +2,7 @@ package com.dianping.puma.channel.page.acceptor;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -9,14 +10,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
 import com.dianping.puma.ComponentContainer;
-import com.dianping.puma.channel.exception.ChannelClosedException;
-import com.dianping.puma.channel.exception.PumaServerChannelException;
-import com.dianping.puma.channel.heartbeat.HeartbeatTask;
-import com.dianping.puma.config.PumaServerConfig;
+import com.dianping.puma.channel.heartbeat.HeartbeatManager;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ServerErrorEvent;
-import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.filter.EventFilter;
 import com.dianping.puma.monitor.ServerEventDelayMonitor;
 
 import org.slf4j.Logger;
@@ -26,7 +22,6 @@ import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
 
-import com.dianping.cat.Cat;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.codec.EventCodecFactory;
@@ -57,7 +52,7 @@ public class Handler implements PageHandler<Context> {
 		HttpServletResponse res = ctx.getHttpServletResponse();
 		res.setContentType("application/octet-stream");
 		res.addHeader("Connection", "Keep-Alive");
-		Lock lock = new ReentrantLock();
+		Lock sendLock = new ReentrantLock();
 
 		String clientName = payload.getClientName();
 		String target = payload.getTarget();
@@ -97,7 +92,7 @@ public class Handler implements PageHandler<Context> {
 
 		if (SystemStatusContainer.instance.getClientStatus(clientName) != null) {
 			ServerErrorEvent event = new ServerErrorEvent("duplicated client error.");
-			sendServerErrorEvent(res, lock, codec, event);
+			sendServerErrorEvent(res, sendLock, codec, event);
 
 			return;
 		}
@@ -107,7 +102,7 @@ public class Handler implements PageHandler<Context> {
 				.createEventFilterChain(ddl, dml, transaction, databaseTables);
 		if (filterChain == null) {
 			ServerErrorEvent event = new ServerErrorEvent("build event filter chain error.");
-			sendServerErrorEvent(res, lock, codec, event);
+			sendServerErrorEvent(res, sendLock, codec, event);
 
 			return;
 		}
@@ -116,7 +111,7 @@ public class Handler implements PageHandler<Context> {
 		EventStorage storage = DefaultTaskExecutorContainer.instance.getTaskStorage(target);
 		if (storage == null) {
 			ServerErrorEvent event = new ServerErrorEvent("find event storage error.");
-			sendServerErrorEvent(res, lock, codec, event);
+			sendServerErrorEvent(res, sendLock, codec, event);
 
 			return;
 		}
@@ -129,7 +124,7 @@ public class Handler implements PageHandler<Context> {
 			channel.open();
 		} catch (Exception e) {
 			ServerErrorEvent event = new ServerErrorEvent("build event storage channel error.");
-			sendServerErrorEvent(res, lock, codec, event);
+			sendServerErrorEvent(res, sendLock, codec, event);
 
 			return;
 		}
@@ -141,53 +136,53 @@ public class Handler implements PageHandler<Context> {
 
 		ServerEventDelayMonitor serverEventDelayMonitor = ComponentContainer.SPRING.lookup("serverEventDelayMonitor");
 
-		// Start heartbeat.
-		HeartbeatTask heartbeatTask = new HeartbeatTask(codec, res, clientName, lock, serverEventDelayMonitor);
 
-		while (true) {
+		Lock stopLock = new ReentrantLock();
+		HandlerContext context = new HandlerContext(res, stopLock, sendLock, codec);
+		HeartbeatManager heartbeatManager = new HeartbeatManager(codec, res, clientName, sendLock, serverEventDelayMonitor, context);
+
+		while (!context.isStopped()) {
+
 			try {
 				filterChain.reset();
 				ChangedEvent event = (ChangedEvent) channel.next();
 
-				if (event != null) {
-
-					serverEventDelayMonitor.record(clientName, event.getExecuteTime());
-
-					if (filterChain.doNext(event)) {
-						byte[] data = codec.encode(event);
-						if (lock.tryLock(60, TimeUnit.SECONDS)) {
-							try {
-								res.getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
-								res.getOutputStream().write(data);
-								res.getOutputStream().flush();
-							} finally {
-								lock.unlock();
-							}
-						} else {
-							throw new IOException("Client obtain write changedEvent lock failed.");
-						}
-						// status report
-						SystemStatusContainer.instance.updateClientInfo(clientName, event.getSeq(), event.getBinlogInfo());
-					}
+				if (event != null && filterChain.doNext(event)) {
+					sendChangedEvent(context, event);
+					SystemStatusContainer.instance.updateClientInfo(clientName, event.getSeq(), event.getBinlogInfo());
 				}
 
-			} catch (InterruptedException e) {
-				logger.warn("ClientName: " + clientName + ", Puma server write changedEvent interrupted.");
 			} catch (Exception e) {
-				Cat.logError("Puma.client.channelClosed:", new ChannelClosedException("ClientName: " + clientName
-						+ ", ClientIp: " + clientIp, e));
-				SystemStatusContainer.instance.removeClient(clientName);
-				serverEventDelayMonitor.remove(clientName);
-				heartbeatTask.cancelFuture();
-				logger.info("Client(" + clientName + ") failed. ", e);
+				if (context.isStopped()) {
+					channel.close();
+					heartbeatManager.cancelFuture();
+					return;
+				}
+
 				break;
 			}
 		}
 
 		channel.close();
+		heartbeatManager.cancelFuture();
 		SystemStatusContainer.instance.removeClient(clientName);
-		heartbeatTask.cancelFuture();
-		heartbeatTask = null;
+	}
+
+	private void sendChangedEvent(HandlerContext context, ChangedEvent event)
+			throws IOException, InterruptedException, TimeoutException {
+		byte[] data = context.getCodec().encode(event);
+
+		try {
+			if (context.getStopLock().tryLock(60, TimeUnit.SECONDS)) {
+				context.getResponse().getOutputStream().write(ByteArrayUtils.intToByteArray(data.length));
+				context.getResponse().getOutputStream().write(data);
+				context.getResponse().getOutputStream().flush();
+			} else {
+				throw new TimeoutException("get lock timeout");
+			}
+		} finally {
+			context.getStopLock().unlock();
+		}
 	}
 
 	private void sendServerErrorEvent(HttpServletResponse response, Lock lock, EventCodec codec, ServerErrorEvent event)
@@ -205,6 +200,46 @@ public class Handler implements PageHandler<Context> {
 			}
 		} catch (InterruptedException e) {
 			logger.warn("Puma server write serverErrorEvent interrupted.");
+		}
+	}
+
+	public class HandlerContext {
+
+		private boolean stopped = false;
+		private HttpServletResponse response;
+		private Lock stopLock;
+		private Lock sendLock;
+		private EventCodec codec;
+
+		public HandlerContext(HttpServletResponse response, Lock stopLock, Lock sendLock, EventCodec codec) {
+			this.response = response;
+			this.stopLock = stopLock;
+			this.sendLock = sendLock;
+			this.codec = codec;
+		}
+
+		public void stop() {
+			stopped = true;
+		}
+
+		public Lock getStopLock() {
+			return stopLock;
+		}
+
+		public Lock getSendLock() {
+			return sendLock;
+		}
+
+		public HttpServletResponse getResponse() {
+			return response;
+		}
+
+		public EventCodec getCodec() {
+			return codec;
+		}
+
+		public boolean isStopped() {
+			return stopped;
 		}
 	}
 }

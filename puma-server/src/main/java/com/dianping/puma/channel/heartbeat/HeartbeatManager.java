@@ -8,6 +8,8 @@ import java.util.concurrent.locks.Lock;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.dianping.puma.channel.page.acceptor.Handler;
+import com.dianping.puma.common.SystemStatusContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,15 +19,14 @@ import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
 import com.dianping.puma.channel.exception.HeartbeatSenderException;
-import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.HeartbeatEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.monitor.ServerEventDelayMonitor;
 
-public class HeartbeatTask {
+public class HeartbeatManager {
 
-	private static final Logger LOG = LoggerFactory.getLogger(HeartbeatTask.class);
+	private static final Logger LOG = LoggerFactory.getLogger(HeartbeatManager.class);
 
 	private static final String HEARTBEAT_SENDER_INTERVAL_NAME = "puma.server.heartbeatsender.interval";
 	private String clientName;
@@ -47,8 +48,11 @@ public class HeartbeatTask {
 
 	private Lock lock;
 
-	public HeartbeatTask(EventCodec codec, HttpServletResponse response, String clientName, Lock lock,
-			ServerEventDelayMonitor serverEventDelayMonitor) {
+	private Handler.HandlerContext context;
+
+	public HeartbeatManager(EventCodec codec, HttpServletResponse response, String clientName, Lock lock,
+			ServerEventDelayMonitor serverEventDelayMonitor, Handler.HandlerContext context) {
+		this.context = context;
 		this.clientName = clientName;
 		this.initialDelay = 0;
 		this.unit = TimeUnit.MILLISECONDS;
@@ -69,11 +73,11 @@ public class HeartbeatTask {
 			@Override
 			public void onChange(String key, String value) {
 				if (HEARTBEAT_SENDER_INTERVAL_NAME.equals(key)) {
-					HeartbeatTask.this.setInterval(Long.parseLong(value));
-					if (HeartbeatTask.this.isFutureValid()) {
+					HeartbeatManager.this.setInterval(Long.parseLong(value));
+					if (HeartbeatManager.this.isFutureValid()) {
 						future.cancel(true);
 						if (HeartbeatScheduledExecutor.instance.isExecutorServiceValid()) {
-							HeartbeatTask.this.execute();
+							HeartbeatManager.this.execute();
 						}
 					}
 				}
@@ -95,7 +99,7 @@ public class HeartbeatTask {
 	}
 
 	public void execute() {
-		future = executorService.scheduleWithFixedDelay(new HeartbeatSender(), getInitialDelay(), getInterval(),
+		future = executorService.scheduleWithFixedDelay(new HeartbeatTask(), getInitialDelay(), getInterval(),
 				getUnit());
 	}
 
@@ -120,7 +124,7 @@ public class HeartbeatTask {
 		return clientName;
 	}
 
-	private class HeartbeatSender implements Runnable {
+	private class HeartbeatTask implements Runnable {
 		@Override
 		public void run() {
 			if (response != null) {
@@ -136,28 +140,28 @@ public class HeartbeatTask {
 							lock.unlock();
 						}
 					} else {
+						context.stop();
+						SystemStatusContainer.instance.removeClient(clientName);
 						throw new IOException("Client obtain write changedEvent lock failed.");
 					}
-					LOG.info(HeartbeatTask.this.clientName + " puma server heartbeat sended.");
-					Cat.logEvent("ClientConnect.heartbeated", HeartbeatTask.this.clientName, Message.SUCCESS, "");
+					LOG.info(HeartbeatManager.this.clientName + " puma server heartbeat sended.");
+					Cat.logEvent("ClientConnect.heartbeated", HeartbeatManager.this.clientName, Message.SUCCESS, "");
 				} catch (InterruptedException e) {
-					LOG.warn(HeartbeatTask.this.clientName + " puma server heartbeat interrupted.");
+					LOG.warn(HeartbeatManager.this.clientName + " puma server heartbeat interrupted.");
 				} catch (IOException e) {
-					HeartbeatTask.this.cancelFuture();
+					HeartbeatManager.this.cancelFuture();
 					try {
 						response.getOutputStream().close();
 					} catch (IOException e1) {
 						// ignore
 					}
-					SystemStatusContainer.instance.removeClient(HeartbeatTask.this.clientName);
-					serverEventDelayMonitor.remove(clientName);
-					Cat.logEvent("ClientConnect.heartbeated", HeartbeatTask.this.clientName, "1", "");
+					Cat.logEvent("ClientConnect.heartbeated", HeartbeatManager.this.clientName, "1", "");
 					Cat.logError("ClientConnect.heartbeated.closed: ", new HeartbeatSenderException(
-							"ClientConnect.heartbeated.closed: " + HeartbeatTask.this.clientName, e));
-					LOG.error("ClientConnect.heartbeated.closed: ClientName = " + HeartbeatTask.this.clientName, e);
+							"ClientConnect.heartbeated.closed: " + HeartbeatManager.this.clientName, e));
+					LOG.error("ClientConnect.heartbeated.closed: ClientName = " + HeartbeatManager.this.clientName, e);
 
 				}catch(Exception e){
-					
+					context.stop();
 				}
 			}
 		}

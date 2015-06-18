@@ -7,6 +7,7 @@ import com.dianping.puma.api.util.Clock;
 import com.dianping.puma.api.util.Monitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -51,13 +52,13 @@ public class DefaultHeartbeatManager implements HeartbeatManager {
 		closed = false;
 		heartbeat();
 
-		logger.info("Puma({}) heartbeat manager has been opened successfully.", client.getName());
+		monitor.logInfo(logger, "heartbeat open");
 	}
 
 	public void close() {
 		closed = true;
 
-		logger.info("Puma({}) heartbeat manager has been closed successfully.", client.getName());
+		monitor.logInfo(logger, "heartbeat close");
 	}
 
 	public void heartbeat() {

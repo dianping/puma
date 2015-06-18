@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.core.util.StreamUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class PumaClient {
 
@@ -57,6 +58,8 @@ public class PumaClient {
 	private Config config;
 	private HostManager hostManager;
 	private PositionManager positionManager;
+
+	@Autowired
 	private HeartbeatManager heartbeatManager;
 	private LockManager lockManager;
 

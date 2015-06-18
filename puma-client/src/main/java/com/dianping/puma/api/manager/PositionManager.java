@@ -6,6 +6,10 @@ import com.dianping.puma.core.model.BinlogInfo;
 
 public interface PositionManager extends LifeCycle<PumaException> {
 
+	void open();
+
+	void close();
+
 	BinlogInfo next();
 
 	void save(BinlogInfo binlogInfo);

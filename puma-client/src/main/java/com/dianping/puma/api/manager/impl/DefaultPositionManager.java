@@ -20,6 +20,7 @@ public class DefaultPositionManager implements PositionManager {
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPositionManager.class);
 
 	private boolean inited = false;
+	private boolean closed = true;
 
 	private volatile BinlogInfo binlogInfo;
 	private volatile long updateTime = 0;
@@ -63,6 +64,20 @@ public class DefaultPositionManager implements PositionManager {
 	}
 
 	@Override
+	public void open() {
+		closed = false;
+
+		monitor.logInfo(logger, "ack open");
+	}
+
+	@Override
+	public void close() {
+		closed = true;
+
+		monitor.logInfo(logger, "ack close");
+	}
+
+	@Override
 	public BinlogInfo next() {
 		try {
 			return request();
@@ -91,15 +106,17 @@ public class DefaultPositionManager implements PositionManager {
 	}
 
 	private void ack() {
-		try {
+		if (!closed) {
+			try {
 
-			if (binlogInfo != null) {
-				positionService.ack(client.getName(), Pair.of(binlogInfo, updateTime));
-				monitor.logInfo(logger, hostManager.current(), "ack");
+				if (binlogInfo != null) {
+					positionService.ack(client.getName(), Pair.of(binlogInfo, updateTime));
+					monitor.logInfo(logger, hostManager.current(), "ack");
+				}
+
+			} catch (Throwable e) {
+				monitor.logError(logger, hostManager.current(), "ack error", e);
 			}
-
-		} catch (Throwable e) {
-			monitor.logError(logger, hostManager.current(), "ack error", e);
 		}
 	}
 

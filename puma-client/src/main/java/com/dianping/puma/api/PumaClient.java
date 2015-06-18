@@ -295,6 +295,7 @@ public class PumaClient {
 				try {
 
 					heartbeatManager.open();
+					positionManager.open();
 
 					while (!checkStop()) {
 
@@ -357,6 +358,7 @@ public class PumaClient {
 					// Revived zombie thread need not close the heartbeat manager.
 					if (checkStop()) {
 						heartbeatManager.close();
+						positionManager.close();
 					}
 
 					disconnect();
@@ -372,6 +374,7 @@ public class PumaClient {
 			// circumstance, we close the heartbeat manager in the stop function and
 			// check stop in the finally block.
 			heartbeatManager.close();
+			positionManager.close();
 		}
 
 		private boolean checkStop() {

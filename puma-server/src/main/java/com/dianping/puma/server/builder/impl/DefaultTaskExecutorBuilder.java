@@ -45,6 +45,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 @Service("taskExecutorBuilder")
 public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
@@ -135,7 +136,8 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			String taskName = pumaTask.getName();
 			taskExecutor.setTaskName(taskName);
 			taskExecutor.setNotifyService(notifyService);
-			taskExecutor.setServerId(taskName.hashCode());
+
+			taskExecutor.setServerId(taskName.hashCode() + pumaServerConfig.getName().hashCode());
 
 			// Bin log.
 			taskExecutor.setBinlogInfoHolder(binlogInfoHolder);

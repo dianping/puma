@@ -174,6 +174,7 @@ public class PumaClient {
 	private void startHostManager() {
 		DefaultHostManager defaultHostManager = new DefaultHostManager();
 		defaultHostManager.setClient(this);
+		defaultHostManager.setMonitor(monitor);
 		defaultHostManager.setConfig(config);
 		defaultHostManager.setConfigCache(configCache);
 		hostManager = defaultHostManager;

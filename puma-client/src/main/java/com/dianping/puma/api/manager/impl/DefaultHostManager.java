@@ -1,13 +1,12 @@
 package com.dianping.puma.api.manager.impl;
 
-import com.dianping.cat.Cat;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.config.Config;
-import com.dianping.puma.api.exception.PumaException;
 import com.dianping.puma.api.manager.Feedback;
 import com.dianping.puma.api.manager.HostManager;
+import com.dianping.puma.api.util.Monitor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +28,7 @@ public class DefaultHostManager implements HostManager {
 	private Feedback state = Feedback.INITIAL;
 
 	private PumaClient client;
+	private Monitor monitor;
 	private Config config;
 	private ConfigCache configCache;
 
@@ -41,15 +41,13 @@ public class DefaultHostManager implements HostManager {
 
 					// If current host not in the new host list, restart the subscribe thread.
 					if (needToRestart()) {
-						client.stop();
-						client.start();
+						monitor.logInfo(logger, current(), "host change restart");
+						client.stopSubscribe();
+						client.startSubscribe();
 					}
 
 				} catch (Exception e) {
-					String msg = String.format("Puma changing hosts error.");
-					PumaException pe = new PumaException(client.getName(), msg, e);
-					logger.error(msg, pe);
-					Cat.logError(msg, pe);
+					monitor.logError(logger, current(), "host change error");
 				}
 			}
 		}
@@ -61,7 +59,6 @@ public class DefaultHostManager implements HostManager {
 	@Override
 	public void start() {
 		if (inited) {
-			logger.warn("Puma({}) host manager has been started already.", client.getName());
 			return;
 		}
 
@@ -72,13 +69,11 @@ public class DefaultHostManager implements HostManager {
 		configCache.addChange(configChange);
 
 		inited = true;
-		logger.info("Puma({}) host manager has been started successfully.", client.getName());
 	}
 
 	@Override
 	public void stop() {
 		if (!inited) {
-			logger.warn("Puma({}) host manager has been stopped already", client.getName());
 			return;
 		}
 
@@ -90,7 +85,6 @@ public class DefaultHostManager implements HostManager {
 		hosts = null;
 
 		inited = false;
-		logger.info("Puma({}) host manager has been stopped successfully.", client.getName());
 	}
 
 	@Override
@@ -114,22 +108,18 @@ public class DefaultHostManager implements HostManager {
 				} else {
 					retries = 0;
 					host = newHost();
+					monitor.logInfo(logger, current(), String.format("host switch(%s)", host));
 				}
 				break;
 
 			case SERVER_ERROR:
 				retries = 0;
 				host = newHost();
+				monitor.logInfo(logger, current(), String.format("host switch(%s)", host));
 				break;
-
-			default:
-				throw new RuntimeException("Feeds back connection state before using host manager.");
 			}
 		} catch (Exception e) {
-			String msg = String.format("Puma request host error.");
-			PumaException pe = new PumaException(client.getName(), msg, e);
-			logger.error(msg, pe);
-			Cat.logError(msg, pe);
+			monitor.logError(logger, current(), "host next error");
 		}
 
 		return host;
@@ -163,7 +153,7 @@ public class DefaultHostManager implements HostManager {
 		hosts.clear();
 		String[] hostArray = StringUtils.split(StringUtils.normalizeSpace(hostStr), ",");
 		if (hostArray == null) {
-			throw new NullPointerException("Hosts is null.");
+			throw new NullPointerException("host null.");
 		} else {
 			hosts.addAll(Arrays.asList(hostArray));
 		}
@@ -187,6 +177,10 @@ public class DefaultHostManager implements HostManager {
 
 	public void setClient(PumaClient client) {
 		this.client = client;
+	}
+
+	public void setMonitor(Monitor monitor) {
+		this.monitor = monitor;
 	}
 
 	public void setConfig(Config config) {

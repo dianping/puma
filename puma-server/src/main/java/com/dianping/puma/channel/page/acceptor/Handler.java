@@ -140,6 +140,7 @@ public class Handler implements PageHandler<Context> {
 		Lock stopLock = new ReentrantLock();
 		HandlerContext context = new HandlerContext(clientName, res, stopLock, sendLock, codec, channel);
 		HeartbeatManager heartbeatManager = new HeartbeatManager(codec, res, clientName, sendLock, serverEventDelayMonitor, context);
+		context.setHeartbeatManager(heartbeatManager);
 
 		while (!context.isStopped()) {
 
@@ -204,6 +205,7 @@ public class Handler implements PageHandler<Context> {
 		private Lock sendLock;
 		private EventCodec codec;
 		private EventChannel channel;
+		private HeartbeatManager heartbeatManager;
 
 		public HandlerContext(String clientName, HttpServletResponse response, Lock stopLock, Lock sendLock, EventCodec codec, EventChannel channel) {
 			this.clientName = clientName;
@@ -227,7 +229,12 @@ public class Handler implements PageHandler<Context> {
 						// Ignore.
 					}
 
+					heartbeatManager.cancelFuture();
+					heartbeatManager = null;
+
 					SystemStatusContainer.instance.removeClient(clientName);
+
+					stopped = true;
 				}
 			} finally {
 				stopLock.unlock();
@@ -260,6 +267,10 @@ public class Handler implements PageHandler<Context> {
 
 		public boolean isStopped() {
 			return stopped;
+		}
+
+		public void setHeartbeatManager(HeartbeatManager heartbeatManager) {
+			this.heartbeatManager = heartbeatManager;
 		}
 	}
 }

@@ -140,28 +140,10 @@ public class HeartbeatManager {
 							lock.unlock();
 						}
 					} else {
-						context.stop();
-						SystemStatusContainer.instance.removeClient(clientName);
-						throw new IOException("Client obtain write changedEvent lock failed.");
+						context.quit();
 					}
-					LOG.info(HeartbeatManager.this.clientName + " puma server heartbeat sended.");
-					Cat.logEvent("ClientConnect.heartbeated", HeartbeatManager.this.clientName, Message.SUCCESS, "");
-				} catch (InterruptedException e) {
-					LOG.warn(HeartbeatManager.this.clientName + " puma server heartbeat interrupted.");
-				} catch (IOException e) {
-					HeartbeatManager.this.cancelFuture();
-					try {
-						response.getOutputStream().close();
-					} catch (IOException e1) {
-						// ignore
-					}
-					Cat.logEvent("ClientConnect.heartbeated", HeartbeatManager.this.clientName, "1", "");
-					Cat.logError("ClientConnect.heartbeated.closed: ", new HeartbeatSenderException(
-							"ClientConnect.heartbeated.closed: " + HeartbeatManager.this.clientName, e));
-					LOG.error("ClientConnect.heartbeated.closed: ClientName = " + HeartbeatManager.this.clientName, e);
-
-				}catch(Exception e){
-					context.stop();
+				} catch (Exception e) {
+					context.quit();
 				}
 			}
 		}

@@ -138,7 +138,7 @@ public class Handler implements PageHandler<Context> {
 
 
 		Lock stopLock = new ReentrantLock();
-		HandlerContext context = new HandlerContext(res, stopLock, sendLock, codec);
+		HandlerContext context = new HandlerContext(clientName, res, stopLock, sendLock, codec, channel);
 		HeartbeatManager heartbeatManager = new HeartbeatManager(codec, res, clientName, sendLock, serverEventDelayMonitor, context);
 
 		while (!context.isStopped()) {
@@ -153,19 +153,11 @@ public class Handler implements PageHandler<Context> {
 				}
 
 			} catch (Exception e) {
-				if (context.isStopped()) {
-					channel.close();
-					heartbeatManager.cancelFuture();
-					return;
-				}
-
 				break;
 			}
 		}
 
-		channel.close();
-		heartbeatManager.cancelFuture();
-		SystemStatusContainer.instance.removeClient(clientName);
+		context.quit();
 	}
 
 	private void sendChangedEvent(HandlerContext context, ChangedEvent event)
@@ -206,16 +198,40 @@ public class Handler implements PageHandler<Context> {
 	public class HandlerContext {
 
 		private boolean stopped = false;
+		private String clientName;
 		private HttpServletResponse response;
 		private Lock stopLock;
 		private Lock sendLock;
 		private EventCodec codec;
+		private EventChannel channel;
 
-		public HandlerContext(HttpServletResponse response, Lock stopLock, Lock sendLock, EventCodec codec) {
+		public HandlerContext(String clientName, HttpServletResponse response, Lock stopLock, Lock sendLock, EventCodec codec, EventChannel channel) {
+			this.clientName = clientName;
 			this.response = response;
 			this.stopLock = stopLock;
 			this.sendLock = sendLock;
 			this.codec = codec;
+			this.channel = channel;
+		}
+
+		public void quit() {
+			stopLock.lock();
+			try {
+				if (!stopped) {
+					channel.close();
+					channel = null;
+
+					try {
+						response.getOutputStream().close();
+					} catch (IOException e) {
+						// Ignore.
+					}
+
+					SystemStatusContainer.instance.removeClient(clientName);
+				}
+			} finally {
+				stopLock.unlock();
+			}
 		}
 
 		public void stop() {
@@ -236,6 +252,10 @@ public class Handler implements PageHandler<Context> {
 
 		public EventCodec getCodec() {
 			return codec;
+		}
+
+		public EventChannel getChannel() {
+			return channel;
 		}
 
 		public boolean isStopped() {

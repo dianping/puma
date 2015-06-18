@@ -3,6 +3,7 @@ package com.dianping.puma.api.manager.impl;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.config.Config;
 import com.dianping.puma.api.manager.HeartbeatManager;
+import com.dianping.puma.api.manager.HostManager;
 import com.dianping.puma.api.util.Clock;
 import com.dianping.puma.api.util.Monitor;
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ public class DefaultHeartbeatManager implements HeartbeatManager {
 	private PumaClient client;
 	private Monitor monitor;
 	private Config config;
+	private HostManager hostManager;
 	private Clock clock;
 
 	public void start() {
@@ -80,6 +82,10 @@ public class DefaultHeartbeatManager implements HeartbeatManager {
 		this.config = config;
 	}
 
+	public void setHostManager(HostManager hostManager) {
+		this.hostManager = hostManager;
+	}
+
 	public void setClock(Clock clock) {
 		this.clock = clock;
 	}
@@ -89,7 +95,7 @@ public class DefaultHeartbeatManager implements HeartbeatManager {
 		@Override
 		public void run() {
 			if (!closed && expired()) {
-				monitor.logError(logger, "heartbeat expired");
+				monitor.logError(logger, hostManager.current(), "heartbeat expired");
 
 				client.stopSubscribe();
 				client.startSubscribe();

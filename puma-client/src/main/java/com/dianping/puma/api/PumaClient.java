@@ -185,6 +185,7 @@ public class PumaClient {
 		defaultPositionManager.setClient(this);
 		defaultPositionManager.setMonitor(monitor);
 		defaultPositionManager.setConfig(config);
+		defaultPositionManager.setHostManager(hostManager);
 		defaultPositionManager.setClock(clock);
 		defaultPositionManager.setPositionService(positionService);
 		positionManager = defaultPositionManager;
@@ -196,6 +197,7 @@ public class PumaClient {
 		defaultHeartbeatManager.setClient(this);
 		defaultHeartbeatManager.setMonitor(monitor);
 		defaultHeartbeatManager.setConfig(config);
+		defaultHeartbeatManager.setHostManager(hostManager);
 		defaultHeartbeatManager.setClock(clock);
 		heartbeatManager = defaultHeartbeatManager;
 		heartbeatManager.start();

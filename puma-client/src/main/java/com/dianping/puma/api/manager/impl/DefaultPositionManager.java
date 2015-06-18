@@ -115,6 +115,10 @@ public class DefaultPositionManager implements PositionManager {
 		this.config = config;
 	}
 
+	public void setHostManager(HostManager hostManager) {
+		this.hostManager = hostManager;
+	}
+
 	public void setClock(Clock clock) {
 		this.clock = clock;
 	}

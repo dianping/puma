@@ -79,7 +79,7 @@ public final class PacketUtils {
 	}
 
 	public static String readNullTerminatedString(ByteBuffer buf) {
-		return readNullTerminatedString(buf, ISO_8859_1);
+		return readNullTerminatedString(buf, UTF_8);
 	}
 
 	public static String readNullTerminatedString(ByteBuffer buf, String encoding) {
@@ -160,6 +160,10 @@ public final class PacketUtils {
 
 	public static String readFixedLengthString(ByteBuffer buf, int length) throws IOException {
 		return new String(readBytes(buf, length));
+	}
+	
+	public static String readFixedLengthString(ByteBuffer buf, int length, String encoding) throws IOException {
+		return new String(readBytes(buf, length), encoding);
 	}
 
 	public static BitSet readBitSet(ByteBuffer buf, int len) {

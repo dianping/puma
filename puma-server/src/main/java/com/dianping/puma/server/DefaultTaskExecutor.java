@@ -353,20 +353,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 					PacketType.OKERROR_PACKET, getContext());
 
 			if (dumpCommandResultPacket.isOk()) {
-				if (StringUtils.isBlank(getContext().getBinlogFileName())
-						&& StringUtils.isNotBlank(dumpCommandResultPacket.getMessage())) {
-					String msg = dumpCommandResultPacket.getMessage();
-					int startPos = msg.lastIndexOf(' ');
-					if (startPos != -1) {
-						startPos += 1;
-					} else {
-						startPos = 0;
-					}
-					String binlogFile = dumpCommandResultPacket.getMessage().substring(startPos);
-					binlogInfoHolder.setBinlogInfo(getTaskName(), new BinlogInfo(binlogFile, getContext()
-							.getBinlogStartPos()));
-					getContext().setBinlogFileName(binlogFile);
-				}
 				LOG.info("TaskName: " + getTaskName() + " ,Dump binlog command success.");
 				return true;
 			} else {

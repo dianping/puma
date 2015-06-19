@@ -90,13 +90,6 @@ public class Handler implements PageHandler<Context> {
 				.toString();
 		logger.info("Connection info: {}.", msg);
 
-		if (SystemStatusContainer.instance.getClientStatus(clientName) != null) {
-			ServerErrorEvent event = new ServerErrorEvent("duplicated client error.");
-			sendServerErrorEvent(res, sendLock, codec, event);
-
-			return;
-		}
-
 		// Build event filter chain.
 		EventFilterChain filterChain = EventFilterChainFactory
 				.createEventFilterChain(ddl, dml, transaction, databaseTables);
@@ -129,6 +122,18 @@ public class Handler implements PageHandler<Context> {
 			return;
 		}
 
+		if (SystemStatusContainer.instance.getClientStatus(clientName) != null) {
+			HandlerContext context = SystemStatusContainer.instance.getClientContext(clientName);
+			if (context == null) {
+				ServerErrorEvent event = new ServerErrorEvent("duplicated client error.");
+				sendServerErrorEvent(res, sendLock, codec, event);
+				return;
+			} else {
+				context.quit();
+				SystemStatusContainer.instance.removeClientContext(clientName);
+			}
+		}
+
 		// Client connect success.
 		SystemStatusContainer.instance.addClientStatus(clientName, NetUtils.getIpAddr(ctx.getHttpServletRequest()),
 				seq, target, dml, ddl, transaction, databaseTables, codecType);
@@ -141,6 +146,7 @@ public class Handler implements PageHandler<Context> {
 		HandlerContext context = new HandlerContext(clientName, res, stopLock, sendLock, codec, channel);
 		HeartbeatManager heartbeatManager = new HeartbeatManager(codec, res, clientName, sendLock, serverEventDelayMonitor, context);
 		context.setHeartbeatManager(heartbeatManager);
+		SystemStatusContainer.instance.addClientContext(clientName, context);
 
 		while (!context.isStopped()) {
 

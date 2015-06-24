@@ -32,7 +32,7 @@ import com.dianping.puma.core.event.RowChangedEvent;
  * @author Leo Liang
  * 
  */
-public class IndexIntegegrationTest extends PumaServerIntegrationBaseTest {
+public class IndexIntegrationTest extends PumaServerIntegrationBaseTest {
     private String table = "indexTest";
 
     @Before

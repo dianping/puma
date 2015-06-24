@@ -31,8 +31,6 @@
 	
 	<!-- <import resource="serverConfig-${puma.server.env}.xml" /> -->
 	
-	<import resource="applicationContext-swallow.xml" />
-	
 	<bean id="notifyService" class="com.dianping.puma.core.monitor.DefaultNotifyService" />
 
 	<bean id="notifiableBean" abstract="true">

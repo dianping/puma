@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.constant.Status;
@@ -290,6 +291,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 	}
 
 	@Override
+	@PreDestroy
 	public void stopServers() {
 		LOG.info("Stopping...");
 		for (Map.Entry<String, TaskExecutor> item : taskExecutorMap.entrySet()) {

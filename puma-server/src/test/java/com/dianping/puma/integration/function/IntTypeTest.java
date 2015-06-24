@@ -1,4 +1,4 @@
-package com.dianping.puma.integration;
+package com.dianping.puma.integration.function;
 
 import java.util.List;
 
@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.model.BinlogInfo;
 
 public class IntTypeTest extends AbstractBaseTest {
 	

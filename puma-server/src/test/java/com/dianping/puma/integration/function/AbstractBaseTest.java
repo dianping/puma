@@ -1,4 +1,4 @@
-package com.dianping.puma.integration;
+package com.dianping.puma.integration.function;
 
 import java.beans.PropertyVetoException;
 import java.io.File;
@@ -468,7 +468,7 @@ public abstract class AbstractBaseTest {
 	}
 
 	protected List<ChangedEvent> getEvents(int n, boolean needTs) throws Exception {
-		waitForSync(1000);
+		waitForSync(2000);
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
 		EventChannel channel = storage.getChannel(-1, -1, null, -1, -1);
 		for (int i = 0; i < n;) {
@@ -492,7 +492,7 @@ public abstract class AbstractBaseTest {
 
 	protected List<ChangedEvent> getEvents(int n, long seq, long serverId, String binlog, long binlogPos,
 			long timeStamp, boolean needTs) throws Exception {
-		waitForSync(1000);
+		waitForSync(2000);
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
 		EventChannel channel = storage.getChannel(seq, serverId, binlog, binlogPos, timeStamp);
 		for (int i = 0; i < n;) {

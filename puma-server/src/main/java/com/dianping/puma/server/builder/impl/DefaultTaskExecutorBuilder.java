@@ -1,6 +1,5 @@
 package com.dianping.puma.server.builder.impl;
 
-import com.dianping.puma.ComponentContainer;
 import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.constant.Status;

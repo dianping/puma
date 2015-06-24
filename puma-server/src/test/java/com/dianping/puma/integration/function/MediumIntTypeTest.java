@@ -42,7 +42,7 @@ public class MediumIntTypeTest extends AbstractBaseTest {
 
 			@Override
 			public void doLogic() throws Exception {
-				long [][] testData = {{11, 11, 1, 1},{11, -11, 9, 9},{33, 77, 10, 10},{33, -77, 99, 99},{18866, 99987, 100, 100},{18866, -99987, 33333, 33333}};
+				int [][] testData = {{11, 11, 1, 1},{11, -11, 9, 9},{33, 77, 10, 10},{33, -77, 99, 99},{18866, 99987, 100, 100},{18866, -99987, 33333, 33333}};
 				for(int i = 0; i < testData.length; i++){
 					String insert_SQL = "INSERT INTO `" + SCHEMA_NAME +"`.`" + TABLE_NAME + "`(unsigned_mediumInt, signed_mediumInt, zerofill_mediumInt, unzerofill_mediumInt)VALUES(?, ?, ?, ?)";
 					queryRunner.update(insert_SQL, testData[i][0], testData[i][1], testData[i][2], testData[i][3]);
@@ -75,9 +75,9 @@ public class MediumIntTypeTest extends AbstractBaseTest {
 		test(new TestLogic() {
 			@Override
 			public void doLogic() throws Exception {
-				long [][] testDataOld = {{11, 11, 1, 1}, {11, -11, 9, 9}, {33, 77, 10, 10}, {33, -77, 99, 99}, {18866, 99987, 100, 100},{18866, -99987, 33333, 33333}};
-				long [][] testDataNew = {{11, -11, 1, 1}, {11, -11, 1, 1},{33, -77, 10, 10},{33, -77, 10, 10}, {18866, -99987, 100, 100},{18866, -99987, 100, 100}};
-				long [][] testData ={{11, -11, 1, 1, 11}, {33, -77, 10, 10, 33}, {18866, -99987, 100, 100, 18866}};
+				int [][] testDataOld = {{11, 11, 1, 1}, {11, -11, 9, 9}, {33, 77, 10, 10}, {33, -77, 99, 99}, {18866, 99987, 100, 100},{18866, -99987, 33333, 33333}};
+				int [][] testDataNew = {{11, -11, 1, 1}, {11, -11, 1, 1},{33, -77, 10, 10},{33, -77, 10, 10}, {18866, -99987, 100, 100},{18866, -99987, 100, 100}};
+				int [][] testData ={{11, -11, 1, 1, 11}, {33, -77, 10, 10, 33}, {18866, -99987, 100, 100, 18866}};
 				for(int i = 0; i < testData.length; i++){
 					String update_SQL = "UPDATE `" + SCHEMA_NAME +"`.`" + TABLE_NAME + "` SET unsigned_mediumInt = ?, signed_mediumInt = ?, zerofill_mediumInt = ?, unzerofill_mediumInt = ? WHERE unsigned_mediumInt = ?";
 					queryRunner.update(update_SQL, testData[i][0], testData[i][1], testData[i][2], testData[i][3], testData[i][4]);
@@ -111,8 +111,8 @@ public class MediumIntTypeTest extends AbstractBaseTest {
 
 			@Override
 			public void doLogic() throws Exception {
-				long [][] testDataOld = {{11, -11, 1, 1}, {11, -11, 1, 1},{33, -77, 10, 10},{33, -77, 10, 10}, {18866, -99987, 100, 100},{18866, -99987, 100, 100}};
-				long [][] testData = {{11},{33},{18866}};
+				int [][] testDataOld = {{11, -11, 1, 1}, {11, -11, 1, 1},{33, -77, 10, 10},{33, -77, 10, 10}, {18866, -99987, 100, 100},{18866, -99987, 100, 100}};
+				int [][] testData = {{11},{33},{18866}};
 				for(int i = 0; i < testData.length; i++){
 					String delete_SQL = "DELETE FROM `" + SCHEMA_NAME +"`.`" + TABLE_NAME + "` WHERE unsigned_mediumInt = ?";
 					queryRunner.update(delete_SQL, testData[i][0]);

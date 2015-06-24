@@ -56,13 +56,13 @@ public class BigIntTypeTest extends AbstractBaseTest {
 					Assert.assertEquals(TABLE_NAME, rowChangedEvent.getTable());
 					Assert.assertEquals(SCHEMA_NAME, rowChangedEvent.getDatabase());
 					Assert.assertEquals(5, rowChangedEvent.getColumns().size());
-					Assert.assertEquals(testData[i][0], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("unsigned_bigInt").getNewValue())).intValue());
+					Assert.assertEquals(testData[i][0], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("unsigned_bigInt").getNewValue())).longValue());
 					Assert.assertEquals(null, rowChangedEvent.getColumns().get("unsigned_bigInt").getOldValue());
-					Assert.assertEquals(testData[i][1], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("signed_bigInt").getNewValue())).intValue());
+					Assert.assertEquals(testData[i][1], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("signed_bigInt").getNewValue())).longValue());
 					Assert.assertEquals(null, rowChangedEvent.getColumns().get("signed_bigInt").getOldValue());
-					Assert.assertEquals(testData[i][2], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("zerofill_bigInt").getNewValue())).intValue());
+					Assert.assertEquals(testData[i][2], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("zerofill_bigInt").getNewValue())).longValue());
 					Assert.assertEquals(null, rowChangedEvent.getColumns().get("zerofill_bigInt").getOldValue());
-					Assert.assertEquals(testData[i][3], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("unzerofill_bigInt").getNewValue())).intValue());
+					Assert.assertEquals(testData[i][3], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("unzerofill_bigInt").getNewValue())).longValue());
 					Assert.assertEquals(null, rowChangedEvent.getColumns().get("unzerofill_bigInt").getOldValue());
 				}
 			}
@@ -91,14 +91,14 @@ public class BigIntTypeTest extends AbstractBaseTest {
 					Assert.assertEquals(TABLE_NAME, rowChangedEvent.getTable());
 					Assert.assertEquals(SCHEMA_NAME, rowChangedEvent.getDatabase());
 					Assert.assertEquals(5, rowChangedEvent.getColumns().size());
-					Assert.assertEquals(testDataNew[i][0], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("unsigned_bigInt").getNewValue())).intValue());
-					Assert.assertEquals(testDataOld[i][0], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("unsigned_bigInt").getOldValue())).intValue());
-					Assert.assertEquals(testDataNew[i][1], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("signed_bigInt").getNewValue())).intValue());
-					Assert.assertEquals(testDataOld[i][1], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("signed_bigInt").getOldValue())).intValue());
-					Assert.assertEquals(testDataNew[i][2], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("zerofill_bigInt").getNewValue())).intValue());
-					Assert.assertEquals(testDataOld[i][2], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("zerofill_bigInt").getOldValue())).intValue());
-					Assert.assertEquals(testDataNew[i][3], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("unzerofill_bigInt").getNewValue())).intValue());
-					Assert.assertEquals(testDataOld[i][3], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("unzerofill_bigInt").getOldValue())).intValue());
+					Assert.assertEquals(testDataNew[i][0], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("unsigned_bigInt").getNewValue())).longValue());
+					Assert.assertEquals(testDataOld[i][0], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("unsigned_bigInt").getOldValue())).longValue());
+					Assert.assertEquals(testDataNew[i][1], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("signed_bigInt").getNewValue())).longValue());
+					Assert.assertEquals(testDataOld[i][1], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("signed_bigInt").getOldValue())).longValue());
+					Assert.assertEquals(testDataNew[i][2], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("zerofill_bigInt").getNewValue())).longValue());
+					Assert.assertEquals(testDataOld[i][2], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("zerofill_bigInt").getOldValue())).longValue());
+					Assert.assertEquals(testDataNew[i][3], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("unzerofill_bigInt").getNewValue())).longValue());
+					Assert.assertEquals(testDataOld[i][3], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("unzerofill_bigInt").getOldValue())).longValue());
 				}
 			}
 
@@ -126,13 +126,13 @@ public class BigIntTypeTest extends AbstractBaseTest {
 					Assert.assertEquals(TABLE_NAME, rowChangedEvent.getTable());
 					Assert.assertEquals(SCHEMA_NAME, rowChangedEvent.getDatabase());
 					Assert.assertEquals(5, rowChangedEvent.getColumns().size());
-					Assert.assertEquals(testDataOld[i][0], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("unsigned_bigInt").getOldValue())).intValue());
+					Assert.assertEquals(testDataOld[i][0], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("unsigned_bigInt").getOldValue())).longValue());
 					Assert.assertEquals(null, rowChangedEvent.getColumns().get("unsigned_bigInt").getNewValue());
-					Assert.assertEquals(testDataOld[i][1], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("signed_bigInt").getOldValue())).intValue());
+					Assert.assertEquals(testDataOld[i][1], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("signed_bigInt").getOldValue())).longValue());
 					Assert.assertEquals(null, rowChangedEvent.getColumns().get("signed_bigInt").getNewValue());
-					Assert.assertEquals(testDataOld[i][2], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("zerofill_bigInt").getOldValue())).intValue());
+					Assert.assertEquals(testDataOld[i][2], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("zerofill_bigInt").getOldValue())).longValue());
 					Assert.assertEquals(null, rowChangedEvent.getColumns().get("zerofill_bigInt").getNewValue());
-					Assert.assertEquals(testDataOld[i][3], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("unzerofill_bigInt").getOldValue())).intValue());
+					Assert.assertEquals(testDataOld[i][3], Long.valueOf(String.valueOf(rowChangedEvent.getColumns().get("unzerofill_bigInt").getOldValue())).longValue());
 					Assert.assertEquals(null, rowChangedEvent.getColumns().get("unzerofill_bigInt").getNewValue());
 				}
 			}

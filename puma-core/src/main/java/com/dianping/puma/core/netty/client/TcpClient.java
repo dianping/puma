@@ -98,7 +98,7 @@ public class TcpClient {
         }
 
         ChannelFuture future;
-        if (config.getLocalPort() == 0) {
+        if (config.getLocalPort() != 0) {
             future = bootstrap.connect(new InetSocketAddress(config.getRemoteIp(), config.getRemotePort()),
                     new InetSocketAddress("0.0.0.0", config.getLocalPort()));
         } else {

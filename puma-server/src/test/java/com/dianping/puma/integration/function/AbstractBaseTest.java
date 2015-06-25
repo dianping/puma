@@ -197,7 +197,6 @@ public abstract class AbstractBaseTest {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	private static void distroyDataSource() {

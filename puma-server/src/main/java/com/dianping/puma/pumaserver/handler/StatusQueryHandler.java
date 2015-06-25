@@ -3,6 +3,9 @@ package com.dianping.puma.pumaserver.handler;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.netty.entity.StatusQuery;
 import com.dianping.puma.core.util.ConvertHelper;
+import com.dianping.puma.pumaserver.AttributeKeys;
+import com.dianping.puma.pumaserver.client.ClientInfo;
+import com.dianping.puma.pumaserver.client.ClientType;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -23,6 +26,8 @@ public class StatusQueryHandler extends SimpleChannelInboundHandler<StatusQuery>
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, StatusQuery msg) throws Exception {
+        ctx.channel().attr(AttributeKeys.CLIENT_INFO).set(new ClientInfo().setClientType(ClientType.PUMACLIENT));
+
         DefaultFullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
         response.headers().add("Connection", "close");
         response.headers().add("Content-type", "application/json");

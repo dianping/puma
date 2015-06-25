@@ -5,12 +5,12 @@ import com.dianping.puma.core.netty.server.ServerConfig;
 import com.dianping.puma.core.netty.server.TcpServer;
 import com.dianping.puma.pumaserver.handler.BinlogQueryHandler;
 import com.dianping.puma.pumaserver.handler.HttpRouterHandler;
+import com.dianping.puma.pumaserver.handler.PumaServerEncoder;
 import com.dianping.puma.pumaserver.handler.StatusQueryHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.http.HttpContentDecompressor;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpServerCodec;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -36,6 +36,7 @@ public class PumaServerManager {
             @Override
             public Map<String, ChannelHandler> getHandlers() {
                 Map<String, ChannelHandler> result = new LinkedHashMap<String, ChannelHandler>();
+                result.put("PumaServerEncoder", PumaServerEncoder.INSTANCE);
                 result.put("HttpServerCodec", new HttpRequestDecoder());
                 result.put("HttpContentDecompressor", new HttpContentDecompressor());
                 result.put("HttpObjectAggregator", new HttpObjectAggregator(1024 * 1024 * 32));

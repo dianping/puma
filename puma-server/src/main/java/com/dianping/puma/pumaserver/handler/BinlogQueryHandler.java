@@ -2,8 +2,10 @@ package com.dianping.puma.pumaserver.handler;
 
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.codec.EventCodecFactory;
+import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.Event;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.netty.entity.BinlogQuery;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.filter.EventFilterChain;
@@ -54,7 +56,7 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
             while (true) {
                 eventFilterChain.reset();
                 ChangedEvent event = (ChangedEvent) eventChannel.next();
-                if (eventFilterChain.doNext(event)) {
+                if (event != null && eventFilterChain.doNext(event)) {
                     ByteBuf byteBuf = PooledByteBufAllocator.DEFAULT.buffer().writeBytes(codec(event));
                     ctx.channel().writeAndFlush(byteBuf).addListener(binlogEventGenerator);
                     break;
@@ -62,7 +64,7 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
             }
 
         } catch (IOException e) {
-            ctx.fireExceptionCaught(e);
+            exceptionCaught(ctx, e);
         }
     }
 
@@ -72,7 +74,7 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
             if (future.isSuccess()) {
                 generateBinlogEvent();
             } else {
-                ctx.fireExceptionCaught(future.cause());
+                exceptionCaught(ctx, future.cause());
             }
         }
     };
@@ -86,6 +88,14 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
         return buf;
     }
 
+    private void adjust() {
+        BinlogInfo binlogInfo = binlogQuery.getBinlogInfo();
+        if (binlogInfo == null || binlogInfo.getBinlogFile().equals("null")
+                || binlogInfo.getBinlogFile().equals("mysql-bin.000000")) {
+            binlogQuery.setSeq(SubscribeConstant.SEQ_FROM_LATEST);
+        }
+    }
+
     private void start() {
         try {
             eventCodec = EventCodecFactory.createCodec("json");
@@ -95,6 +105,8 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
                     binlogQuery.isTransaction(),
                     binlogQuery.getDatabaseTables());
             EventStorage eventStorage = DefaultTaskExecutorContainer.instance.getTaskStorage(binlogQuery.getTarget());
+
+            adjust();
             eventChannel = new BufferedEventChannel(binlogQuery.getClientName(), eventStorage.getChannel(
                     binlogQuery.getSeq(),
                     binlogQuery.getServerId(),
@@ -102,13 +114,17 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
                     binlogQuery.getBinlogInfo().getBinlogPosition(),
                     binlogQuery.getTimestamp()
             ), 5000);
+            eventChannel.open();
         } catch (Exception e) {
-            ctx.fireExceptionCaught(e);
+            exceptionCaught(ctx, e);
         }
     }
 
     private void stop() {
-        eventChannel.close();
+        if (eventChannel != null) {
+            eventChannel.close();
+            eventChannel = null;
+        }
         ctx.channel().close();
     }
 }

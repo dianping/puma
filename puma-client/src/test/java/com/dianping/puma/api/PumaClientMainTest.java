@@ -14,10 +14,9 @@ public class PumaClientMainTest {
 
 		final PumaClient pumaClient = new PumaClient();
 		pumaClient.setName("test");
-		pumaClient.setDatabase("test-database");
+		pumaClient.setDatabase("t00");
 		List<String> tables = new ArrayList<String>();
-		tables.add("test-table0");
-		tables.add("test-table1");
+		tables.add("DP_Shop");
 		pumaClient.setTables(tables);
 
 		pumaClient.register(new EventListener() {

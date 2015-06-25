@@ -12,7 +12,6 @@ import java.util.Properties;
 
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
-import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -22,7 +21,6 @@ import org.junit.BeforeClass;
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;

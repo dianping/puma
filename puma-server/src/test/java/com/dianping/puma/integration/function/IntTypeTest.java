@@ -47,9 +47,9 @@ public class IntTypeTest extends AbstractBaseTest {
 					String insert_SQL = "INSERT INTO `" + SCHEMA_NAME +"`.`" + TABLE_NAME + "`(unsigned_int, signed_int, zerofill_int, unzerofill_int)VALUES(?, ?, ?, ?)";
 					queryRunner.update(insert_SQL, testData[i][0], testData[i][1], testData[i][2], testData[i][3]);
 				}
+				List<ChangedEvent> events = getEvents(testData.length, false, true, false);
+				Assert.assertEquals(testData.length, events.size());
 				for(int i = 0; i < testData.length; i++){
-					List<ChangedEvent> events = getEvents(testData.length, false);
-					Assert.assertEquals(testData.length, events.size());
 					Assert.assertTrue(events.get(i) instanceof RowChangedEvent);
 					RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(i);
 					Assert.assertEquals(RowChangedEvent.INSERT, rowChangedEvent.getActionType());
@@ -82,9 +82,9 @@ public class IntTypeTest extends AbstractBaseTest {
 					String update_SQL = "UPDATE `" + SCHEMA_NAME +"`.`" + TABLE_NAME + "` SET unsigned_int = ?, signed_int = ?, zerofill_int = ?, unzerofill_int = ? WHERE unsigned_int = ?";
 					queryRunner.update(update_SQL, testData[i][0], testData[i][1], testData[i][2], testData[i][3], testData[i][4]);
 				}
+				List<ChangedEvent> events = getEvents(testDataOld.length, false, true, false);
+				Assert.assertEquals(testDataOld.length, events.size());
 				for(int i = 0; i < testDataOld.length; i++){
-					List<ChangedEvent> events = getEvents(testDataOld.length, false);
-					Assert.assertEquals(testDataOld.length, events.size());
 					Assert.assertTrue(events.get(i) instanceof RowChangedEvent);
 					RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(i);
 					Assert.assertEquals(RowChangedEvent.UPDATE, rowChangedEvent.getActionType());
@@ -117,9 +117,9 @@ public class IntTypeTest extends AbstractBaseTest {
 					String delete_SQL = "DELETE FROM `" + SCHEMA_NAME +"`.`" + TABLE_NAME + "` WHERE unsigned_int = ?";
 					queryRunner.update(delete_SQL, testData[i][0]);
 				}
+				List<ChangedEvent> events = getEvents(testDataOld.length, false, true, false);
+				Assert.assertEquals(testDataOld.length, events.size());
 				for(int i = 0; i < testDataOld.length; i++){
-					List<ChangedEvent> events = getEvents(testDataOld.length, false);
-					Assert.assertEquals(testDataOld.length, events.size());
 					Assert.assertTrue(events.get(i) instanceof RowChangedEvent);
 					RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(i);
 					Assert.assertEquals(RowChangedEvent.DELETE, rowChangedEvent.getActionType());

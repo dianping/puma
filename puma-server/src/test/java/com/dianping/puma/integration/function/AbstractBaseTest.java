@@ -113,7 +113,6 @@ public abstract class AbstractBaseTest {
 		initProperties();
 		initDataSource();
 		initSchema();
-		initbinlogHolder();
 	}
 
 	@AfterClass
@@ -124,6 +123,12 @@ public abstract class AbstractBaseTest {
 
 	@Before
 	public void before() throws Exception {
+		initbinlogHolder();
+		initMonitor();
+		notifyService = new DefaultNotifyService();
+		eventCenter = new EventCenter();
+		eventCenter.init();
+		jsonCodec = new JsonEventCodec();
 		startTask();
 	}
 
@@ -261,11 +266,6 @@ public abstract class AbstractBaseTest {
 	}
 
 	private TaskExecutor buildTask() {
-		initMonitor();
-		notifyService = new DefaultNotifyService();
-		eventCenter = new EventCenter();
-		eventCenter.init();
-		jsonCodec = new JsonEventCodec();
 		DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
 
 		// monitor
@@ -467,7 +467,7 @@ public abstract class AbstractBaseTest {
 
 	}
 
-	protected List<ChangedEvent> getEvents(int n, boolean needTs) throws Exception {
+	protected List<ChangedEvent> getEvents(int n, boolean needTs,boolean isRowChangedEvent,boolean isDdlEvent) throws Exception {
 		waitForSync(2000);
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
 		EventChannel channel = storage.getChannel(-1, -1, null, -1, -1);
@@ -479,9 +479,11 @@ public abstract class AbstractBaseTest {
 							|| ((RowChangedEvent) event).isTransactionCommit()) {
 						continue;
 					}
-				}else if(event instanceof DdlEvent){
-					continue;
 				}
+			}else if(!isRowChangedEvent){
+				continue;
+			}else if(!isDdlEvent){
+				continue;
 			}
 			i++;
 			result.add(event);
@@ -503,8 +505,6 @@ public abstract class AbstractBaseTest {
 							|| ((RowChangedEvent) event).isTransactionCommit()) {
 						continue;
 					}
-				}else if(event instanceof DdlEvent){
-					continue;
 				}
 			}
 			i++;

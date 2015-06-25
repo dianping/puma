@@ -1,8 +1,11 @@
 package com.dianping.puma.pumaserver.handler;
 
+import com.dianping.puma.pumaserver.router.PumaRequestRouter;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
-import io.netty.handler.codec.http.FullHttpMessage;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpObject;
 
 import java.util.List;
 
@@ -11,11 +14,26 @@ import java.util.List;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class HttpRouterHandler extends MessageToMessageDecoder<FullHttpMessage> {
+
+@ChannelHandler.Sharable
+public class HttpRouterHandler extends MessageToMessageDecoder<HttpObject> {
+    public static HttpRouterHandler INSTANCE = new HttpRouterHandler();
+
+    private final PumaRequestRouter router;
+
+    public HttpRouterHandler() {
+        this.router = new PumaRequestRouter();
+    }
+
     @Override
-    protected void decode(ChannelHandlerContext ctx, FullHttpMessage msg, List<Object> out) throws Exception {
-        System.out.println("xxx");
-        //todo:
-        //转换成特定的对象
+    protected void decode(ChannelHandlerContext ctx, HttpObject msg, List<Object> out) throws Exception {
+        if (msg instanceof FullHttpRequest) {
+            FullHttpRequest request = (FullHttpRequest) msg;
+
+            Object result = router.route(request);
+            if (request != null) {
+                out.add(result);
+            }
+        }
     }
 }

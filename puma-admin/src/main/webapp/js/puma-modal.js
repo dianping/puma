@@ -27,8 +27,6 @@ $(function(w) {
       case 'sync-server':
         return '确认删除该配置？';
       case 'puma-task':
-      case 'shard-sync-task':
-      case 'shard-dump-task':
       case 'sync-task':
         return '确认删除该任务？';
       default :

@@ -234,10 +234,7 @@ public final class MySQLUtils {
 		final int s = (value >> 0) & 0x3F;
 
 		String format = "%02d:%02d:%02d";
-		if (meta > 0) {
-			format += (".%0" + String.valueOf(meta) + "d");
-		}
-		return String.format(format, h, m, s, nanos);
+		return String.format(format, h, m, s) + microSecondToStr(nanos, meta);
 	}
 
 	public static String toDatetime(long value) {
@@ -274,10 +271,8 @@ public final class MySQLUtils {
 		final int sec = ((int) (value >> 0)) & 0x3F;
 
 		String format = "%04d-%02d-%02d %02d:%02d:%02d";
-		if (meta > 0) {
-			format += (".%0" + String.valueOf(meta) + "d");
-		}
-		return String.format(format, year, mon, day, hour, min, sec, nanos);
+
+		return String.format(format, year, mon, day, hour, min, sec) + microSecondToStr(nanos, meta);
 	}
 
 	public static java.sql.Timestamp toTimestamp(long value) {
@@ -291,14 +286,9 @@ public final class MySQLUtils {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Timestamp time = new java.sql.Timestamp(value * 1000L);
 		String strValue = sdf.format(time);
-		String strNanos = "";
-		if (meta > 0) {
-			String format = (".%0" + String.valueOf(meta) + "d");
-			strNanos = String.format(format, nanos);
-		}
-		return strValue + strNanos;
-	} 
-	
+		return strValue + microSecondToStr(nanos, meta);
+	}
+
 	public static BigDecimal toDecimal(int precision, int scale, byte[] value) {
 		boolean positive = (value[0] & 0x80) == 0x80;
 		value[0] ^= 0x80;
@@ -342,4 +332,26 @@ public final class MySQLUtils {
 		return (ipDigits << 2) + DECIMAL_BINARY_SIZE[ipDigitsX] + (fpDigits << 2) + DECIMAL_BINARY_SIZE[fpDigitsX];
 	}
 
+	private static String microSecondToStr(int nanos, int meta) {
+		if (meta > 6) {
+			throw new IllegalArgumentException("unknow useconds meta : " + meta);
+		}
+		String microSecond = "";
+		if (meta > 0) {
+			microSecond = String.valueOf(nanos);
+			if (microSecond.length() < meta) {
+				int total = meta % 2 == 0 ? meta : meta + 1;
+				int len = total - microSecond.length();
+				StringBuilder result = new StringBuilder(len);
+				for (; len > 0; len--) {
+					result.append("0");
+				}
+				microSecond = result.toString() + microSecond;
+			}
+			microSecond = microSecond.substring(0, meta);
+			return "." + microSecond;
+		}
+		return microSecond;
+
+	}
 }

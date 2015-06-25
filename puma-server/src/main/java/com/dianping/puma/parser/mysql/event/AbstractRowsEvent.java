@@ -76,16 +76,12 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 	private byte extraInfo[];
 	protected TableMapEvent tableMapEvent;
 
-	@Override public String toString() {
-		return new ToStringBuilder(this)
-				.append("super", super.toString())
-				.append("tableId", tableId)
-				.append("reserved", reserved)
-				.append("columnCount", columnCount)
-				.append("extraInfoLength", extraInfoLength)
-				.append("extraInfo", extraInfo)
-				.append("tableMapEvent", tableMapEvent)
-				.toString();
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this).append("super", super.toString()).append("tableId", tableId)
+				.append("reserved", reserved).append("columnCount", columnCount)
+				.append("extraInfoLength", extraInfoLength).append("extraInfo", extraInfo)
+				.append("tableMapEvent", tableMapEvent).toString();
 	}
 
 	/**
@@ -276,17 +272,17 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 			case BinlogConstants.MYSQL_TYPE_TIME2:
 				final int timeValue = PacketUtils.readInt(buf, 3, false);
 				final int timeNanos = PacketUtils.readInt(buf, (meta + 1) / 2, false);
-				columns.add(Time2Column.valueOf(MySQLUtils.toTime2(timeValue, timeNanos,meta)));
+				columns.add(Time2Column.valueOf(MySQLUtils.toTime2(timeValue, timeNanos, meta)));
 				break;
 			case BinlogConstants.MYSQL_TYPE_DATETIME2:
 				final long dateTimeValue = PacketUtils.readLong(buf, 5, false);
 				final int dateTimenanos = PacketUtils.readInt(buf, (meta + 1) / 2, false);
-				columns.add(Datetime2Column.valueOf(MySQLUtils.toDatetime2(dateTimeValue, dateTimenanos,meta)));
+				columns.add(Datetime2Column.valueOf(MySQLUtils.toDatetime2(dateTimeValue, dateTimenanos, meta)));
 				break;
 			case BinlogConstants.MYSQL_TYPE_TIMESTAMP2:
 				final long timeStampValue = PacketUtils.readLong(buf, 4, false);
 				final int timeStampNanos = PacketUtils.readInt(buf, (meta + 1) / 2, false);
-				columns.add(Timestamp2Column.valueOf(MySQLUtils.toTimestamp2(timeStampValue, timeStampNanos,meta)));
+				columns.add(Timestamp2Column.valueOf(MySQLUtils.toTimestamp2(timeStampValue, timeStampNanos, meta)));
 				break;
 			default:
 				throw new NestableRuntimeException("assertion failed, unknown column type: " + type);

@@ -4,7 +4,6 @@ import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.codec.EventCodecFactory;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.Event;
-import com.dianping.puma.core.event.ServerErrorEvent;
 import com.dianping.puma.core.netty.entity.BinlogQuery;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.filter.EventFilterChain;
@@ -13,8 +12,8 @@ import com.dianping.puma.server.DefaultTaskExecutorContainer;
 import com.dianping.puma.storage.BufferedEventChannel;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.EventStorage;
-import com.dianping.puma.storage.exception.StorageException;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -24,11 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static com.google.common.base.Preconditions.*;
-
 public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery> {
-
-	private static final Logger logger = LoggerFactory.getLogger(BinlogQueryHandler.class);
 
 	private ChannelHandlerContext ctx;
 	private BinlogQuery binlogQuery;
@@ -42,96 +37,61 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
 		this.ctx = ctx;
 		this.binlogQuery = binlogQuery;
 
+		start();
+		generateBinlogEvent();
+	}
+
+	@Override
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+		stop();
+	}
+
+	private void generateBinlogEvent() {
 		try {
-			startEventCodec();
-			startEventFilterChain();
-			startEventChannel();
-		} catch (Exception e) {
-			//writeServerErrorEvent();
+			while (true) {
+				eventFilterChain.reset();
+				ChangedEvent event = (ChangedEvent) eventChannel.next();
+				if (eventFilterChain.doNext(event)) {
+					ByteBuf byteBuf = PooledByteBufAllocator.DEFAULT.buffer().writeBytes(codec(event));
+					ctx.channel().writeAndFlush(byteBuf).addListener(binlogEventGenerator);
+					break;
+				}
+			}
+
+		} catch (IOException e) {
+			ctx.fireExceptionCaught(e);
 		}
-
-		writeBinlogEvent();
 	}
 
-	private void generateBinlogEvent() throws StorageException {
-		ChangedEvent event = (ChangedEvent) eventChannel.next();
-
-	}
+	private final ChannelFutureListener binlogEventGenerator = new ChannelFutureListener() {
+		@Override
+		public void operationComplete(ChannelFuture future) throws Exception {
+			if (future.isSuccess()) {
+				generateBinlogEvent();
+			} else {
+				ctx.fireExceptionCaught(future.cause());
+			}
+		}
+	};
 
 	private byte[] codec(Event event) throws IOException {
 		byte[] data = eventCodec.encode(event);
-		
+		byte[] dataLength = ByteArrayUtils.intToByteArray(data.length);
+		byte[] buf = new byte[data.length + dataLength.length];
+		System.arraycopy(dataLength, 0, buf, 0, dataLength.length);
+		System.arraycopy(data, 0, buf, dataLength.length, data.length);
+		return buf;
 	}
 
-	private void writeBinlogEvent() {
-		eventFilterChain.reset();
+	private void start() {
 		try {
-			ChangedEvent event = (ChangedEvent) eventChannel.next();
-			byte[] data = eventCodec.encode(event);
-
-			ByteBuf byteBuf = ctx.alloc().directBuffer().writeBytes(ByteArrayUtils.intToByteArray(data.length)).writeBytes(data);
-			ctx.channel().writeAndFlush(byteBuf).addListener(new ChannelFutureListener() {
-				@Override
-				public void operationComplete(ChannelFuture future) throws Exception {
-					if (future.isSuccess()) {
-						writeBinlogEvent();
-					} else {
-						future.cause().printStackTrace();
-
-						stop();
-					}
-				}
-			});
-		} catch (Exception e) {
-			stop();
-		}
-	}
-
-	private void writeServerErrorEvent(ServerErrorEvent event) {
-		byte[] data;
-		try {
-			data = eventCodec.encode(event);
-		} catch (IOException e) {
-			// Codec error, quit.
-			stop();
-			return;
-		}
-
-		ByteBuf byteBuf = ctx.alloc().directBuffer().writeBytes(ByteArrayUtils.intToByteArray(data.length)).writeBytes(data);
-		ctx.channel().writeAndFlush(byteBuf).addListener(new ChannelFutureListener() {
-			@Override
-			public void operationComplete(ChannelFuture future) throws Exception {
-				if (!future.isSuccess()) {
-					// @TODO: logger error.
-				}
-
-				stop();
-			}
-		});
-	}
-
-	private void startEventCodec() {
-		eventCodec = EventCodecFactory.createCodec("json");
-
-		checkNotNull(eventCodec, "start binlog event codec error.");
-	}
-
-	private void startEventFilterChain() {
-		eventFilterChain = EventFilterChainFactory.createEventFilterChain(
-				binlogQuery.isDdl(),
-				binlogQuery.isDml(),
-				binlogQuery.isTransaction(),
-				binlogQuery.getDatabaseTables());
-
-		checkNotNull(eventFilterChain, "start binlog event filter chain error.");
-	}
-
-	private void startEventChannel() {
-		EventStorage eventStorage = DefaultTaskExecutorContainer.instance.getTaskStorage(binlogQuery.getTarget());
-
-		checkNotNull(eventStorage, "start binlog event channel error.");
-
-		try {
+			eventCodec = EventCodecFactory.createCodec("json");
+			eventFilterChain = EventFilterChainFactory.createEventFilterChain(
+					binlogQuery.isDdl(),
+					binlogQuery.isDml(),
+					binlogQuery.isTransaction(),
+					binlogQuery.getDatabaseTables());
+			EventStorage eventStorage = DefaultTaskExecutorContainer.instance.getTaskStorage(binlogQuery.getTarget());
 			eventChannel = new BufferedEventChannel(binlogQuery.getClientName(), eventStorage.getChannel(
 					binlogQuery.getSeq(),
 					binlogQuery.getServerId(),
@@ -140,26 +100,12 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
 					binlogQuery.getTimestamp()
 			), 5000);
 		} catch (Exception e) {
-			throw new IllegalArgumentException("start binlog event channel error.");
+			ctx.fireExceptionCaught(e);
 		}
 	}
 
-	private void stopEventCodec() {
-		eventCodec = null;
-	}
-
-	private void stopEventFilterChain() {
-		eventFilterChain = null;
-	}
-
-	private void stopEventChannel() {
-		eventChannel.close();
-		eventChannel = null;
-	}
-
 	private void stop() {
-		stopEventChannel();
-		stopEventFilterChain();
-		stopEventCodec();
+		eventChannel.close();
+		ctx.channel().close();
 	}
 }

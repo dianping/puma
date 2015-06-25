@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
  * http://www.dozer.cc
  */
 public class BinlogQueryDecoder implements RequestDecoder {
-    Pattern pattern = Pattern.compile("^/puma/channel.+$");
+    Pattern pattern = Pattern.compile("^/puma/channel$");
 
     @Override
     public boolean match(FullHttpRequest request) {
@@ -41,7 +41,7 @@ public class BinlogQueryDecoder implements RequestDecoder {
             request.content().readBytes(data);
         }
 
-        String queryString = ConvertHelper.bytesToStr(data, 0, request.content().readableBytes());
+        String queryString = ConvertHelper.bytesToStr(data, 0, data.length);
 
         Map<String, String> map = getQueryStringMap(queryString);
 

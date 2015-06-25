@@ -4,6 +4,7 @@ import com.dianping.puma.core.netty.handler.HandlerFactory;
 import com.dianping.puma.core.netty.server.ServerConfig;
 import com.dianping.puma.core.netty.server.TcpServer;
 import com.dianping.puma.pumaserver.handler.HttpRouterHandler;
+import com.dianping.puma.pumaserver.handler.StatusQueryHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.http.HttpContentDecompressor;
 import io.netty.handler.codec.http.HttpObjectAggregator;
@@ -37,6 +38,7 @@ public class PumaServerManager {
                 result.put("HttpContentDecompressor", new HttpContentDecompressor());
                 result.put("HttpObjectAggregator", new HttpObjectAggregator(1024 * 1024 * 32));
                 result.put("HttpRouterHandler", HttpRouterHandler.INSTANCE);
+                result.put("StatusQueryHandler", StatusQueryHandler.INSTANCE);
                 return result;
             }
         });

@@ -17,8 +17,8 @@ public class PumaRequestRouter {
     private Set<RequestDecoder> decoders = new LinkedHashSet<RequestDecoder>();
 
     public PumaRequestRouter() {
-        decoders.add(new BinlogQueryDecoder());
         decoders.add(new StatusQueryDecoder());
+        decoders.add(new BinlogQueryDecoder());
     }
 
     public Object route(FullHttpRequest request) {

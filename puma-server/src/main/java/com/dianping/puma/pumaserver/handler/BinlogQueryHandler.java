@@ -3,6 +3,7 @@ package com.dianping.puma.pumaserver.handler;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.codec.EventCodecFactory;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.ServerErrorEvent;
 import com.dianping.puma.core.netty.entity.BinlogQuery;
 import com.dianping.puma.core.util.ByteArrayUtils;
@@ -12,6 +13,7 @@ import com.dianping.puma.server.DefaultTaskExecutorContainer;
 import com.dianping.puma.storage.BufferedEventChannel;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.EventStorage;
+import com.dianping.puma.storage.exception.StorageException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -49,6 +51,16 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
 		}
 
 		writeBinlogEvent();
+	}
+
+	private void generateBinlogEvent() throws StorageException {
+		ChangedEvent event = (ChangedEvent) eventChannel.next();
+
+	}
+
+	private byte[] codec(Event event) throws IOException {
+		byte[] data = eventCodec.encode(event);
+		
 	}
 
 	private void writeBinlogEvent() {
@@ -148,6 +160,6 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
 	private void stop() {
 		stopEventChannel();
 		stopEventFilterChain();
-		startEventCodec();
+		stopEventCodec();
 	}
 }

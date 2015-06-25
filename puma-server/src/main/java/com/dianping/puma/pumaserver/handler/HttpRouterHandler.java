@@ -1,11 +1,12 @@
 package com.dianping.puma.pumaserver.handler;
 
 import com.dianping.puma.pumaserver.router.PumaRequestRouter;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpObject;
+import io.netty.handler.codec.http.*;
 
 import java.util.List;
 
@@ -31,8 +32,15 @@ public class HttpRouterHandler extends MessageToMessageDecoder<HttpObject> {
             FullHttpRequest request = (FullHttpRequest) msg;
 
             Object result = router.route(request);
-            if (request != null) {
+            if (result != null) {
                 out.add(result);
+            } else {
+                ctx.channel().writeAndFlush(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND)).addListener(new ChannelFutureListener() {
+                    @Override
+                    public void operationComplete(ChannelFuture future) throws Exception {
+                        future.channel().close();
+                    }
+                });
             }
         }
     }

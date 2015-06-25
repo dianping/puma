@@ -1,5 +1,6 @@
 package com.dianping.puma.pumaserver.handler;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufHolder;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -25,8 +26,8 @@ public class PumaServerEncoder extends MessageToMessageEncoder<Object> {
     protected void encode(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception {
         if (msg instanceof HttpResponse) {
             httpResponseEncoder.encodeRequest(ctx, msg, out);
-        } else if (msg instanceof ByteBufHolder) {
-            ((ByteBufHolder) msg).retain();
+        } else if (msg instanceof ByteBuf) {
+            ((ByteBuf) msg).retain();
             out.add(msg);
         }
     }

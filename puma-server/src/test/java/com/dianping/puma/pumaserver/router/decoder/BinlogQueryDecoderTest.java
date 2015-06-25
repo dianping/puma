@@ -1,12 +1,12 @@
 package com.dianping.puma.pumaserver.router.decoder;
 
-import com.dianping.puma.core.netty.entity.BinlogQuery;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
-import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
 import junit.framework.Assert;
 import org.junit.Test;
+
+import java.util.Map;
 
 /**
  * Dozer @ 6/25/15
@@ -23,15 +23,12 @@ public class BinlogQueryDecoderTest {
     }
 
     @Test
-    public void test_decode() throws Exception {
+    public void test_convert_query_string() throws Exception {
         BinlogQueryDecoder target = new BinlogQueryDecoder();
-        FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/puma/channel/acceptor?seq=-100&dt=a,b,c");
 
-        BinlogQuery result = (BinlogQuery) target.decode(request);
+        Map<String, String> result = target.getQueryStringMap("seq=-100&dt=a,b,&dt=c");
 
-        Assert.assertEquals(-100, result.getSeq());
-        Assert.assertEquals("a", result.getDatabaseTables()[0]);
-        Assert.assertEquals("b", result.getDatabaseTables()[1]);
-        Assert.assertEquals("c", result.getDatabaseTables()[2]);
+        Assert.assertEquals("-100", result.get("seq"));
+        Assert.assertEquals("a,b,c", result.get("dt"));
     }
 }

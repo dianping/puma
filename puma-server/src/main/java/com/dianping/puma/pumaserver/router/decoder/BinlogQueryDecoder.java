@@ -2,10 +2,17 @@ package com.dianping.puma.pumaserver.router.decoder;
 
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.netty.entity.BinlogQuery;
+import com.dianping.puma.core.util.ConvertHelper;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import io.netty.handler.codec.http.FullHttpRequest;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -26,8 +33,17 @@ public class BinlogQueryDecoder implements RequestDecoder {
     public Object decode(FullHttpRequest request) {
         BinlogQuery result = new BinlogQuery();
 
-        String queryString = request.getUri().substring(request.getUri().indexOf("?") + 1);
-        final Map<String, String> map = Splitter.on('&').trimResults().withKeyValueSeparator("=").split(queryString);
+        byte[] data;
+        if (request.content().hasArray()) {
+            data = request.content().array();
+        } else {
+            data = new byte[request.content().readableBytes()];
+            request.content().readBytes(data);
+        }
+
+        String queryString = ConvertHelper.bytesToStr(data, 0, request.content().readableBytes());
+
+        Map<String, String> map = getQueryStringMap(queryString);
 
         if (map.containsKey("seq")) {
             result.setSeq(Long.valueOf(map.get("seq")));
@@ -69,5 +85,19 @@ public class BinlogQueryDecoder implements RequestDecoder {
         }
 
         return result;
+    }
+
+    protected Map<String, String> getQueryStringMap(String queryString) {
+        List<NameValuePair> queryStringList = URLEncodedUtils.parse(queryString, Charset.forName("UTF-8"));
+        Map<String, String> map = new HashMap<String, String>();
+        for (NameValuePair pair : queryStringList) {
+            String oldValue = map.get(pair.getName());
+            if (Strings.isNullOrEmpty(oldValue)) {
+                map.put(pair.getName(), pair.getValue());
+            } else {
+                map.put(pair.getName(), oldValue.endsWith(",") ? oldValue + pair.getValue() : oldValue + "," + pair.getValue());
+            }
+        }
+        return map;
     }
 }

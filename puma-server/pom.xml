@@ -82,6 +82,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.dianping.lion</groupId>
             <artifactId>lion-client</artifactId>
         </dependency>

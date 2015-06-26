@@ -1,5 +1,7 @@
 package com.dianping.puma.integration.function;
 
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -15,23 +17,22 @@ import org.slf4j.LoggerFactory;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 
-
 /***
  * timestamp type test
+ * 
  * @author qi.yin
  *
  */
 public class TimestampTypeTest extends AbstractBaseTest {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TimestampTypeTest.class);
-	
+
 	private static final String TABLE_NAME = "tb_timestamp";
-	
+
 	@BeforeClass
 	public static void doBefore() throws Exception {
-		String create_SQL = "CREATE TABLE IF NOT EXISTS `" + SCHEMA_NAME +"`.`" + TABLE_NAME + "` (\n"
-				+ "`id` int NOT NULL AUTO_INCREMENT, \n" + "`default_timestamp` timestamp, \n"
-				+ "PRIMARY KEY (`id`)"
+		String create_SQL = "CREATE TABLE IF NOT EXISTS `" + SCHEMA_NAME + "`.`" + TABLE_NAME + "` (\n"
+				+ "`id` int NOT NULL AUTO_INCREMENT, \n" + "`default_timestamp` timestamp, \n" + "PRIMARY KEY (`id`)"
 				+ ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
 		queryRunner.update(create_SQL);
 		setFilterTable(TABLE_NAME);
@@ -39,7 +40,7 @@ public class TimestampTypeTest extends AbstractBaseTest {
 
 	@AfterClass
 	public static void doAfter() throws Exception {
-		String drop_SQL = "DROP TABLE IF EXISTS `" + SCHEMA_NAME +"`.`" + TABLE_NAME + "`";
+		String drop_SQL = "DROP TABLE IF EXISTS `" + SCHEMA_NAME + "`.`" + TABLE_NAME + "`";
 		queryRunner.update(drop_SQL);
 	}
 
@@ -49,26 +50,33 @@ public class TimestampTypeTest extends AbstractBaseTest {
 
 			@Override
 			public void doLogic() throws Exception {
-				String [][] testData = {{"2015-06-25 17:13:56"},{"2014-03-25 17:13:56"},{"1988-06-25 17:13:56"}};
-				for(int i = 0; i < testData.length; i++){
-					String insert_SQL = "INSERT INTO `" + SCHEMA_NAME +"`.`" + TABLE_NAME + "`(default_timestamp)VALUES(?)";
+				String[][] testData = { { "2015-06-25 17:13:56" }, { "2014-03-25 17:13:56" }, { "1988-06-25 17:13:56" } };
+				for (int i = 0; i < testData.length; i++) {
+					String insert_SQL = "INSERT INTO `" + SCHEMA_NAME + "`.`" + TABLE_NAME
+							+ "`(default_timestamp)VALUES(?)";
 					queryRunner.update(insert_SQL, testData[i][0]);
 				}
 				List<ChangedEvent> events = getEvents(testData.length, false, true, false);
 				Assert.assertEquals(testData.length, events.size());
 				DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-				for(int i = 0; i < testData.length; i++){
+				for (int i = 0; i < testData.length; i++) {
 					Assert.assertTrue(events.get(i) instanceof RowChangedEvent);
 					RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(i);
 					Assert.assertEquals(RowChangedEvent.INSERT, rowChangedEvent.getActionType());
 					Assert.assertEquals(TABLE_NAME, rowChangedEvent.getTable());
 					Assert.assertEquals(SCHEMA_NAME, rowChangedEvent.getDatabase());
 					Assert.assertEquals(2, rowChangedEvent.getColumns().size());
-					Assert.assertEquals(testData[i][0], sdf.format(rowChangedEvent.getColumns().get("default_timestamp").getNewValue()));
+					String tempDate = "";
+					try {
+						tempDate = sdf.format(rowChangedEvent.getColumns().get("default_timestamp").getNewValue());
+					} catch (IllegalArgumentException e) {
+						tempDate = String.valueOf(rowChangedEvent.getColumns().get("default_timestamp").getNewValue());
+					}
+					Assert.assertEquals(testData[i][0], tempDate);
 					Assert.assertEquals(null, rowChangedEvent.getColumns().get("default_timestamp").getOldValue());
 				}
 			}
 
-		});	
+		});
 	}
 }

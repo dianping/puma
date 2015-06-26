@@ -16,6 +16,7 @@ import com.dianping.puma.core.util.ByteArrayUtils;
 
 /***
  * bit type test
+ * 
  * @author qi.yin
  *
  */
@@ -46,26 +47,26 @@ public class BitTypeTest extends AbstractBaseTest {
 
 			@Override
 			public void doLogic() throws Exception {
-				byte [][] testData = {{6},{5},{4}};
-				for(int i = 0; i < testData.length; i++){
-					String insert_SQL = "INSERT INTO `" + SCHEMA_NAME +"`.`" + TABLE_NAME + "`(default_bit)VALUES(?)";
+				byte[][] testData = { { 6 }, { 5 }, { 4 } };
+				for (int i = 0; i < testData.length; i++) {
+					String insert_SQL = "INSERT INTO `" + SCHEMA_NAME + "`.`" + TABLE_NAME + "`(default_bit)VALUES(?)";
 					queryRunner.update(insert_SQL, testData[i][0]);
 				}
 				List<ChangedEvent> events = getEvents(testData.length, false, true, false);
 				Assert.assertEquals(testData.length, events.size());
-				for(int i = 0; i < testData.length; i++){
+				for (int i = 0; i < testData.length; i++) {
 					Assert.assertTrue(events.get(i) instanceof RowChangedEvent);
 					RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(i);
 					Assert.assertEquals(RowChangedEvent.INSERT, rowChangedEvent.getActionType());
 					Assert.assertEquals(TABLE_NAME, rowChangedEvent.getTable());
 					Assert.assertEquals(SCHEMA_NAME, rowChangedEvent.getDatabase());
 					Assert.assertEquals(2, rowChangedEvent.getColumns().size());
-					byte[] value = (byte[])rowChangedEvent.getColumns().get("default_bit").getNewValue();
-					Assert.assertEquals(testData[i][0], ByteArrayUtils.byteArrayToInt(value,0,value.length));
+					byte[] value = (byte[]) rowChangedEvent.getColumns().get("default_bit").getNewValue();
+					Assert.assertEquals(testData[i][0], ByteArrayUtils.byteArrayToInt(value, 0, value.length));
 					Assert.assertEquals(null, rowChangedEvent.getColumns().get("default_bit").getOldValue());
 				}
 			}
 
-		});	
+		});
 	}
 }

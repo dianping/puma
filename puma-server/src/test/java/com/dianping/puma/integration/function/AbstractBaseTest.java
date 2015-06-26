@@ -63,6 +63,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /***
  * Abstract function test
+ * 
  * @author qi.yin
  *
  */
@@ -98,7 +99,7 @@ public abstract class AbstractBaseTest {
 	private final String serverName = "testServer01";
 	private TaskExecutor taskExecutor;
 	private DefaultEventStorage storage;
-	
+
 	protected static String host;
 	protected static int port;
 	protected static long serverId;
@@ -220,7 +221,7 @@ public abstract class AbstractBaseTest {
 
 		taskExecutor = buildTask();
 		taskExecutor.initContext();
-		
+
 		AcceptedTableChangedEvent acceptedTableChangedEvent = new AcceptedTableChangedEvent();
 		acceptedTableChangedEvent.setName(taskName);
 		TableSet tableSet = new TableSet();
@@ -230,7 +231,7 @@ public abstract class AbstractBaseTest {
 		tableSet.add(table);
 		acceptedTableChangedEvent.setTableSet(tableSet);
 		eventCenter.post(acceptedTableChangedEvent);
-		
+
 		try {
 			PumaThreadUtils.createThread(new Runnable() {
 				@Override
@@ -435,7 +436,7 @@ public abstract class AbstractBaseTest {
 	}
 
 	protected static void setFilterTable(String tableName) {
-		TABLE_NAME=tableName;
+		TABLE_NAME = tableName;
 	}
 
 	private static void initbinlogHolder() {
@@ -469,7 +470,8 @@ public abstract class AbstractBaseTest {
 
 	}
 
-	protected List<ChangedEvent> getEvents(int n, boolean needTs,boolean isRowChangedEvent,boolean isDdlEvent) throws Exception {
+	protected List<ChangedEvent> getEvents(int n, boolean needTs, boolean isRowChangedEvent, boolean isDdlEvent)
+			throws Exception {
 		waitForSync(3000);
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
 		EventChannel channel = storage.getChannel(-1, -1, null, -1, -1);
@@ -482,9 +484,9 @@ public abstract class AbstractBaseTest {
 						continue;
 					}
 				}
-			}else if(!isRowChangedEvent){
+			} else if (!isRowChangedEvent) {
 				continue;
-			}else if(!isDdlEvent){
+			} else if (!isDdlEvent) {
 				continue;
 			}
 			i++;

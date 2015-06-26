@@ -47,9 +47,9 @@ import com.dianping.puma.integration.function.YearTypeTest;
 @SuiteClasses({
 	
 	//5.6
-//	DateTime2TypeTest.class,
-//	Time2TypeTest.class,
-//	Timestamp2TypeTest.class,
+	DateTime2TypeTest.class,
+	Time2TypeTest.class,
+	Timestamp2TypeTest.class,
 
 })
 public class ParserFunctionTest5_6 {

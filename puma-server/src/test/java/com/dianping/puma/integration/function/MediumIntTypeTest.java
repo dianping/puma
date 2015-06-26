@@ -83,9 +83,9 @@ public class MediumIntTypeTest extends AbstractBaseTest {
 			public void doLogic() throws Exception {
 				int [][] testDataOld = {{11, 11, 1, 1}, {11, -11, 9, 9}, {33, 77, 10, 10}, {33, -77, 99, 99}, {18866, 99987, 100, 100},{18866, -99987, 33333, 33333}};
 				int [][] testDataNew = {{11, -11, 1, 1}, {11, -11, 1, 1},{33, -77, 10, 10},{33, -77, 10, 10}, {18866, -99987, 100, 100},{18866, -99987, 100, 100}};
-				int [][] testData ={{11, -11, 1, 1, 11}, {33, -77, 10, 10, 33}, {18866, -99987, 100, 100, 18866}};
+				int [][] testData ={{11, -11, 1, 1, 1}, {11, -11, 1, 1, 2}, {33, -77, 10, 10, 3}, {33, -77, 10, 10, 4}, {18866, -99987, 100, 100, 5}, {18866, -99987, 100, 100, 6}};
 				for(int i = 0; i < testData.length; i++){
-					String update_SQL = "UPDATE `" + SCHEMA_NAME +"`.`" + TABLE_NAME + "` SET unsigned_mediumInt = ?, signed_mediumInt = ?, zerofill_mediumInt = ?, unzerofill_mediumInt = ? WHERE unsigned_mediumInt = ?";
+					String update_SQL = "UPDATE `" + SCHEMA_NAME +"`.`" + TABLE_NAME + "` SET unsigned_mediumInt = ?, signed_mediumInt = ?, zerofill_mediumInt = ?, unzerofill_mediumInt = ? WHERE id = ?";
 					queryRunner.update(update_SQL, testData[i][0], testData[i][1], testData[i][2], testData[i][3], testData[i][4]);
 				}
 				List<ChangedEvent> events = getEvents(testDataOld.length, false, true, false);
@@ -118,9 +118,9 @@ public class MediumIntTypeTest extends AbstractBaseTest {
 			@Override
 			public void doLogic() throws Exception {
 				int [][] testDataOld = {{11, -11, 1, 1}, {11, -11, 1, 1},{33, -77, 10, 10},{33, -77, 10, 10}, {18866, -99987, 100, 100},{18866, -99987, 100, 100}};
-				int [][] testData = {{11},{33},{18866}};
+				int [][] testData = {{ 1 }, { 2 }, { 3 }, { 4 }, { 5 }, { 6 }};
 				for(int i = 0; i < testData.length; i++){
-					String delete_SQL = "DELETE FROM `" + SCHEMA_NAME +"`.`" + TABLE_NAME + "` WHERE unsigned_mediumInt = ?";
+					String delete_SQL = "DELETE FROM `" + SCHEMA_NAME +"`.`" + TABLE_NAME + "` WHERE id = ?";
 					queryRunner.update(delete_SQL, testData[i][0]);
 				}
 				List<ChangedEvent> events = getEvents(testDataOld.length, false, true, false);

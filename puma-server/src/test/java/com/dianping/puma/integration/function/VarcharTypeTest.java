@@ -11,9 +11,14 @@ import org.junit.Test;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 
+/***
+ * varchar type test
+ * @author qi.yin
+ *
+ */
 public class VarcharTypeTest extends AbstractBaseTest {
 	
-private static final String TABLE_NAME = "tb_varchar";
+	private static final String TABLE_NAME = "tb_varchar";
 	
 	@BeforeClass
 	public static void doBefore() throws Exception {

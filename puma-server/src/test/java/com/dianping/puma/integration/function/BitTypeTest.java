@@ -14,6 +14,11 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
 
+/***
+ * bit type test
+ * @author qi.yin
+ *
+ */
 public class BitTypeTest extends AbstractBaseTest {
 
 	private static final Logger LOG = LoggerFactory.getLogger(BitTypeTest.class);

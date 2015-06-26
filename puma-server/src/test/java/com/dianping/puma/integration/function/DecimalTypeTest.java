@@ -13,9 +13,15 @@ import org.slf4j.LoggerFactory;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 
+
+/***
+ * decimal type test
+ * @author qi.yin
+ *
+ */
 public class DecimalTypeTest extends AbstractBaseTest {
 	
-private static final Logger LOG = LoggerFactory.getLogger(DecimalTypeTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DecimalTypeTest.class);
 	
 	private static final String TABLE_NAME = "tb_decimal";
 	

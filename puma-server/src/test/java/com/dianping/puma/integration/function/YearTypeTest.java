@@ -13,6 +13,12 @@ import org.slf4j.LoggerFactory;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 
+
+/***
+ * year type test
+ * @author qi.yin
+ *
+ */
 public class YearTypeTest extends AbstractBaseTest {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(YearTypeTest.class);

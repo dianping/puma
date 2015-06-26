@@ -61,6 +61,11 @@ import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.LocalFileBucketIndex;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
+/***
+ * Abstract function test
+ * @author qi.yin
+ *
+ */
 public abstract class AbstractBaseTest {
 
 	private static final String dbConfigFile = "pumaIntegrationTest.properties";

@@ -13,9 +13,14 @@ import org.slf4j.LoggerFactory;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 
+/***
+ * longtext type test
+ * @author qi.yin
+ *
+ */
 public class LongTextTypeTest extends AbstractBaseTest {
 
-private static final Logger LOG = LoggerFactory.getLogger(MediumTextTypeTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MediumTextTypeTest.class);
 	
 	private static final String TABLE_NAME = "tb_longText";
 	

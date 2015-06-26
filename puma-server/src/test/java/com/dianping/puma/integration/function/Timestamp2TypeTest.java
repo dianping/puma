@@ -13,6 +13,12 @@ import org.slf4j.LoggerFactory;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 
+
+/***
+ * timestamp2(mysql 5.6) type test
+ * @author qi.yin
+ *
+ */
 public class Timestamp2TypeTest extends AbstractBaseTest {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Timestamp2TypeTest.class);

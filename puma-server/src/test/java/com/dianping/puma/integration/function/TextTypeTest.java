@@ -1,6 +1,5 @@
 package com.dianping.puma.integration.function;
 
-import java.nio.charset.Charset;
 import java.util.List;
 
 import junit.framework.Assert;
@@ -14,6 +13,12 @@ import org.slf4j.LoggerFactory;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 
+
+/***
+ * text type test
+ * @author qi.yin
+ *
+ */
 public class TextTypeTest extends AbstractBaseTest {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TextTypeTest.class);

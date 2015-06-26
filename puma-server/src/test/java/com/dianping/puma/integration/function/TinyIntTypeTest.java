@@ -112,7 +112,7 @@ public class TinyIntTypeTest extends AbstractBaseTest {
 	}
 	
 	@Test
-	public void mediumIntTypeDeleteTest() throws Exception {
+	public void tinyIntTypeDeleteTest() throws Exception {
 		test(new TestLogic() {
 
 			@Override

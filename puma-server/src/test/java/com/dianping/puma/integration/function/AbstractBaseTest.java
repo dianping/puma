@@ -470,7 +470,7 @@ public abstract class AbstractBaseTest {
 	}
 
 	protected List<ChangedEvent> getEvents(int n, boolean needTs,boolean isRowChangedEvent,boolean isDdlEvent) throws Exception {
-		waitForSync(2000);
+		waitForSync(3000);
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
 		EventChannel channel = storage.getChannel(-1, -1, null, -1, -1);
 		for (int i = 0; i < n;) {

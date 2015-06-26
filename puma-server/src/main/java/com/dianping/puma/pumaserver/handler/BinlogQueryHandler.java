@@ -23,6 +23,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.HttpResponseEncoder;
 
 import java.io.IOException;
 
@@ -38,6 +39,7 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
     @Override
     public void channelRead0(ChannelHandlerContext ctx, BinlogQuery binlogQuery) {
         ctx.channel().attr(AttributeKeys.CLIENT_INFO).set(new ClientInfo().setClientType(ClientType.PUMACLIENT));
+        ctx.channel().pipeline().remove(HttpResponseEncoder.class);
 
         this.ctx = ctx;
         this.binlogQuery = binlogQuery;

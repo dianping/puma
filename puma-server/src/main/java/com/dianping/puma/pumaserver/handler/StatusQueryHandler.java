@@ -40,8 +40,10 @@ public class StatusQueryHandler extends SimpleChannelInboundHandler<StatusQuery>
         status.put("serverRowUpdateCounters", SystemStatusContainer.instance.listServerRowUpdateCounters());
         status.put("clientStatus", SystemStatusContainer.instance.listClientStatus());
         status.put("storageStatus", SystemStatusContainer.instance.listStorageStatus());
+        byte[] data = ConvertHelper.toBytes(status);
 
-        response.content().writeBytes(ConvertHelper.toBytes(status));
+        response.headers().add("Content-Length", data.length);
+        response.content().writeBytes(data);
 
         ctx.channel().writeAndFlush(response).addListener(new ChannelFutureListener() {
             @Override

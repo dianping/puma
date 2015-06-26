@@ -43,7 +43,7 @@ public class PumaServerManager {
                 Map<String, ChannelHandler> result = new LinkedHashMap<String, ChannelHandler>();
                 result.put("channelHolderHandler", channelHolderHandler);
                 result.put("HttpResponseEncoder", new HttpResponseEncoder());
-                result.put("HttpServerCodec", new HttpRequestDecoder());
+                result.put("HttpRequestDecoder", new HttpRequestDecoder());
                 result.put("HttpContentDecompressor", new HttpContentDecompressor());
                 result.put("HttpObjectAggregator", new HttpObjectAggregator(1024 * 1024 * 32));
                 result.put("HttpRouterHandler", HttpRouterHandler.INSTANCE);

@@ -1,8 +1,10 @@
 package com.dianping.puma.pumaserver;
 
+import com.dianping.puma.core.netty.handler.ChannelHolderHandler;
 import com.dianping.puma.core.netty.handler.HandlerFactory;
 import com.dianping.puma.core.netty.server.ServerConfig;
 import com.dianping.puma.core.netty.server.TcpServer;
+import com.dianping.puma.pumaserver.client.PumaClientsHolder;
 import com.dianping.puma.pumaserver.handler.BinlogQueryHandler;
 import com.dianping.puma.pumaserver.handler.HttpRouterHandler;
 import com.dianping.puma.pumaserver.handler.PumaServerEncoder;
@@ -27,6 +29,8 @@ import java.util.Map;
 public class PumaServerManager {
     public volatile static TcpServer server;
 
+    protected final ChannelHolderHandler channelHolderHandler = new ChannelHolderHandler(new PumaClientsHolder());
+
     @PostConstruct
     public synchronized void init() {
         ServerConfig consoleConfig = new ServerConfig();
@@ -36,6 +40,7 @@ public class PumaServerManager {
             @Override
             public Map<String, ChannelHandler> getHandlers() {
                 Map<String, ChannelHandler> result = new LinkedHashMap<String, ChannelHandler>();
+                result.put("channelHolderHandler", channelHolderHandler);
                 result.put("PumaServerEncoder", PumaServerEncoder.INSTANCE);
                 result.put("HttpServerCodec", new HttpRequestDecoder());
                 result.put("HttpContentDecompressor", new HttpContentDecompressor());

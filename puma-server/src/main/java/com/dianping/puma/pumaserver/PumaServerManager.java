@@ -7,7 +7,6 @@ import com.dianping.puma.core.netty.server.TcpServer;
 import com.dianping.puma.pumaserver.client.PumaClientsHolder;
 import com.dianping.puma.pumaserver.handler.BinlogQueryHandler;
 import com.dianping.puma.pumaserver.handler.HttpRouterHandler;
-import com.dianping.puma.pumaserver.handler.PumaServerEncoder;
 import com.dianping.puma.pumaserver.handler.StatusQueryHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.http.HttpContentDecompressor;

@@ -23,6 +23,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 
 import java.io.IOException;
@@ -40,6 +41,7 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
     public void channelRead0(ChannelHandlerContext ctx, BinlogQuery binlogQuery) {
         ctx.channel().attr(AttributeKeys.CLIENT_INFO).set(new ClientInfo().setClientType(ClientType.PUMACLIENT));
         ctx.channel().pipeline().remove(HttpResponseEncoder.class);
+        ctx.channel().pipeline().remove(HttpContentCompressor.class);
 
         this.ctx = ctx;
         this.binlogQuery = binlogQuery;
@@ -48,8 +50,7 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
         generateBinlogEvent();
     }
 
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+    public void onException(ChannelHandlerContext ctx, Throwable cause) {
         stop();
     }
 
@@ -66,7 +67,7 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
             }
 
         } catch (IOException e) {
-            exceptionCaught(ctx, e);
+            onException(ctx, e);
         }
     }
 
@@ -76,7 +77,7 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
             if (future.isSuccess()) {
                 generateBinlogEvent();
             } else {
-                exceptionCaught(ctx, future.cause());
+                onException(ctx, future.cause());
             }
         }
     };
@@ -118,7 +119,7 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
             ), 5000);
             eventChannel.open();
         } catch (Exception e) {
-            exceptionCaught(ctx, e);
+            onException(ctx, e);
         }
     }
 

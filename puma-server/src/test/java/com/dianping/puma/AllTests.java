@@ -33,7 +33,7 @@ import org.junit.runners.Suite.SuiteClasses;
         //DataTypeIntegrationTest.class,
         PacketUtilTest.class,
         //DefaultCleanupStrategyTest.class,
-        DefaultDataIndexTest.class,
+        DefaultDataIndexTest.class
         //IndexIntegrationTest.class
 })
 public class AllTests {

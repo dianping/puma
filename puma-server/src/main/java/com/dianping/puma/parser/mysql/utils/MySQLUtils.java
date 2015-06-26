@@ -342,11 +342,11 @@ public final class MySQLUtils {
 			if (microSecond.length() < meta) {
 				int total = meta % 2 == 0 ? meta : meta + 1;
 				int len = total - microSecond.length();
-				StringBuilder result = new StringBuilder(len);
+				StringBuilder prefixMicroSecond = new StringBuilder(len);
 				for (; len > 0; len--) {
-					result.append("0");
+					prefixMicroSecond.append("0");
 				}
-				microSecond = result.toString() + microSecond;
+				microSecond = prefixMicroSecond.toString() + microSecond;
 			}
 			microSecond = microSecond.substring(0, meta);
 			return "." + microSecond;

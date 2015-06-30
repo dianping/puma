@@ -6,7 +6,7 @@ import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.netty.entity.BinlogQuery;
+import com.dianping.puma.core.netty.entity.DeprecatedBinlogQuery;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.filter.EventFilterChainFactory;
@@ -28,23 +28,23 @@ import io.netty.handler.codec.http.HttpResponseEncoder;
 
 import java.io.IOException;
 
-public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery> {
+public class BinlogQueryHandler extends SimpleChannelInboundHandler<DeprecatedBinlogQuery> {
 
     private ChannelHandlerContext ctx;
-    private BinlogQuery binlogQuery;
+    private DeprecatedBinlogQuery deprecatedBinlogQuery;
 
     private EventCodec eventCodec;
     private EventFilterChain eventFilterChain;
     private EventChannel eventChannel;
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, BinlogQuery binlogQuery) {
+    public void channelRead0(ChannelHandlerContext ctx, DeprecatedBinlogQuery deprecatedBinlogQuery) {
         ctx.channel().attr(AttributeKeys.CLIENT_INFO).set(new ClientInfo().setClientType(ClientType.PUMACLIENT));
         ctx.channel().pipeline().remove(HttpResponseEncoder.class);
         ctx.channel().pipeline().remove(HttpContentCompressor.class);
 
         this.ctx = ctx;
-        this.binlogQuery = binlogQuery;
+        this.deprecatedBinlogQuery = deprecatedBinlogQuery;
 
         start();
         generateBinlogEvent();
@@ -92,10 +92,10 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
     }
 
     private void adjust() {
-        BinlogInfo binlogInfo = binlogQuery.getBinlogInfo();
+        BinlogInfo binlogInfo = deprecatedBinlogQuery.getBinlogInfo();
         if (binlogInfo == null || binlogInfo.getBinlogFile().equals("null")
                 || binlogInfo.getBinlogFile().equals("mysql-bin.000000")) {
-            binlogQuery.setSeq(SubscribeConstant.SEQ_FROM_LATEST);
+            deprecatedBinlogQuery.setSeq(SubscribeConstant.SEQ_FROM_LATEST);
         }
     }
 
@@ -103,19 +103,19 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
         try {
             eventCodec = EventCodecFactory.createCodec("json");
             eventFilterChain = EventFilterChainFactory.createEventFilterChain(
-                    binlogQuery.isDdl(),
-                    binlogQuery.isDml(),
-                    binlogQuery.isTransaction(),
-                    binlogQuery.getDatabaseTables());
-            EventStorage eventStorage = DefaultTaskExecutorContainer.instance.getTaskStorage(binlogQuery.getTarget());
+                    deprecatedBinlogQuery.isDdl(),
+                    deprecatedBinlogQuery.isDml(),
+                    deprecatedBinlogQuery.isTransaction(),
+                    deprecatedBinlogQuery.getDatabaseTables());
+            EventStorage eventStorage = DefaultTaskExecutorContainer.instance.getTaskStorage(deprecatedBinlogQuery.getTarget());
 
             adjust();
-            eventChannel = new BufferedEventChannel(binlogQuery.getClientName(), eventStorage.getChannel(
-                    binlogQuery.getSeq(),
-                    binlogQuery.getServerId(),
-                    binlogQuery.getBinlogInfo().getBinlogFile(),
-                    binlogQuery.getBinlogInfo().getBinlogPosition(),
-                    binlogQuery.getTimestamp()
+            eventChannel = new BufferedEventChannel(deprecatedBinlogQuery.getClientName(), eventStorage.getChannel(
+                    deprecatedBinlogQuery.getSeq(),
+                    deprecatedBinlogQuery.getServerId(),
+                    deprecatedBinlogQuery.getBinlogInfo().getBinlogFile(),
+                    deprecatedBinlogQuery.getBinlogInfo().getBinlogPosition(),
+                    deprecatedBinlogQuery.getTimestamp()
             ), 5000);
             eventChannel.open();
         } catch (Exception e) {

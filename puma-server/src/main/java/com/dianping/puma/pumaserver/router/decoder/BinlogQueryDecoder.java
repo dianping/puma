@@ -1,7 +1,7 @@
 package com.dianping.puma.pumaserver.router.decoder;
 
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.netty.entity.BinlogQuery;
+import com.dianping.puma.core.netty.entity.DeprecatedBinlogQuery;
 import com.dianping.puma.core.util.ConvertHelper;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -31,7 +31,7 @@ public class BinlogQueryDecoder implements RequestDecoder {
 
     @Override
     public Object decode(FullHttpRequest request) {
-        BinlogQuery result = new BinlogQuery();
+        DeprecatedBinlogQuery result = new DeprecatedBinlogQuery();
 
         byte[] data;
         if (request.content().hasArray()) {

@@ -13,7 +13,7 @@ import java.util.Map;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class BinlogQueryDecoderTest {
+public class DeprecatedBinlogQueryDecoderTest {
 
     @Test
     public void test_match() throws Exception {

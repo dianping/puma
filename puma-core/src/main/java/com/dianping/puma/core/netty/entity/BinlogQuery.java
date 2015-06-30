@@ -1,100 +1,46 @@
 package com.dianping.puma.core.netty.entity;
 
-import com.dianping.puma.core.model.BinlogInfo;
+import java.util.concurrent.TimeUnit;
 
 public class BinlogQuery {
 
-    private String clientName;
-    private String target;
-    private long serverId = -1l;
+	private boolean autoAck;
 
-    private boolean dml = true;
-    private boolean ddl;
-    private boolean transaction;
+	private int batchSize;
 
-    private long seq = -1;
-    private BinlogInfo binlogInfo;
-    private long timestamp = -1l;
+	private long timeout;
 
-    private String[] databaseTables;
+	private TimeUnit timeUnit;
 
-    public String getClientName() {
-        return clientName;
-    }
+	public boolean isAutoAck() {
+		return autoAck;
+	}
 
-    public void setClientName(String clientName) {
-        this.clientName = clientName;
-    }
+	public void setAutoAck(boolean autoAck) {
+		this.autoAck = autoAck;
+	}
 
-    public String getTarget() {
-        return target;
-    }
+	public int getBatchSize() {
+		return batchSize;
+	}
 
-    public void setTarget(String target) {
-        this.target = target;
-    }
+	public void setBatchSize(int batchSize) {
+		this.batchSize = batchSize;
+	}
 
-    public long getServerId() {
-        return serverId;
-    }
+	public long getTimeout() {
+		return timeout;
+	}
 
-    public void setServerId(long serverId) {
-        this.serverId = serverId;
-    }
+	public void setTimeout(long timeout) {
+		this.timeout = timeout;
+	}
 
-    public boolean isDml() {
-        return dml;
-    }
+	public TimeUnit getTimeUnit() {
+		return timeUnit;
+	}
 
-    public void setDml(boolean dml) {
-        this.dml = dml;
-    }
-
-    public boolean isDdl() {
-        return ddl;
-    }
-
-    public void setDdl(boolean ddl) {
-        this.ddl = ddl;
-    }
-
-    public boolean isTransaction() {
-        return transaction;
-    }
-
-    public void setTransaction(boolean transaction) {
-        this.transaction = transaction;
-    }
-
-    public long getSeq() {
-        return seq;
-    }
-
-    public void setSeq(long seq) {
-        this.seq = seq;
-    }
-
-    public BinlogInfo getBinlogInfo() {
-        return binlogInfo;
-    }
-
-    public void setBinlogInfo(BinlogInfo binlogInfo) {
-        this.binlogInfo = binlogInfo;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public String[] getDatabaseTables() {
-        return databaseTables;
-    }
-
-    public void setDatabaseTables(String[] databaseTables) {
-        this.databaseTables = databaseTables;
-    }
+	public void setTimeUnit(TimeUnit timeUnit) {
+		this.timeUnit = timeUnit;
+	}
 }

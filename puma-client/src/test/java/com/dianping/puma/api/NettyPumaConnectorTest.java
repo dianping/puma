@@ -6,7 +6,7 @@ public class NettyPumaConnectorTest {
 		String remoteIp = "127.0.0.1";
 		int remotePort = 4040;
 		int localPort  = 4050;
-		PumaConnector pumaConnector = new NettyPumaConnector(remoteIp, remotePort, localPort);
+		PumaConnector pumaConnector = new NettyPumaConnector("test", remoteIp, remotePort, localPort);
 
 		pumaConnector.connect();
 	}

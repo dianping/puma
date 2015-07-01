@@ -7,21 +7,23 @@ import java.util.concurrent.TimeUnit;
 
 public interface PumaConnector {
 
-	void connect() throws PumaClientException;
+    void connect() throws PumaClientException;
 
-	void disconnect() throws PumaClientException;
+    void disconnect() throws PumaClientException;
 
-	BinlogMessage get(int batchSize) throws PumaClientException;
+    BinlogMessage get(int batchSize) throws PumaClientException;
 
-	BinlogMessage get(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException;
+    BinlogMessage get(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException;
 
-	BinlogMessage getWithoutAck(int batchSize) throws PumaClientException;
+    BinlogMessage getWithoutAck(int batchSize) throws PumaClientException;
 
-	BinlogMessage getWithoutAck(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException;
+    BinlogMessage getWithoutAck(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException;
 
-	void ack(long batchId) throws PumaClientException;
+    void ack(long batchId) throws PumaClientException;
 
-	void rollback(long batchId) throws PumaClientException;
+    void rollback(long batchId) throws PumaClientException;
 
-	void rollback() throws PumaClientException;
+    void rollback() throws PumaClientException;
+
+    void subscribe() throws PumaClientException;
 }

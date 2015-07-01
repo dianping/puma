@@ -1,13 +1,17 @@
 package com.dianping.puma.pumaserver.router.decoder;
 
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.netty.entity.BinlogAck;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.QueryStringDecoder;
 
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class BinlogAckDecoder implements RequestDecoder {
 
-	Pattern pattern = Pattern.compile("^/puma/binlog/ack/*$");
+	Pattern pattern = Pattern.compile("^/puma/binlog/ack.*$");
 
 	@Override
 	public boolean match(FullHttpRequest request) {
@@ -17,6 +21,23 @@ public class BinlogAckDecoder implements RequestDecoder {
 	@Override
 	public Object decode(FullHttpRequest request) {
 		BinlogAck binlogAck = new BinlogAck();
+		Map<String, List<String>> params = (new QueryStringDecoder(request.getUri())).parameters();
+
+		if (params.containsKey("clientName")) {
+			binlogAck.setClientName(params.get("clientName").get(0));
+		} else {
+			throw new RuntimeException("no client name given in binlog ack.");
+		}
+
+		if (params.containsKey("binlogFile") && params.containsKey("binlogPosition")) {
+			binlogAck.setBinlogInfo(
+					new BinlogInfo(params.get("binlogFile").get(0),
+					Long.valueOf(params.get("binlogPosition").get(0)))
+			);
+		} else {
+			throw new RuntimeException("no binlog info given in binlog ack.");
+		}
+
 		return binlogAck;
 	}
 }

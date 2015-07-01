@@ -25,8 +25,8 @@ public class BinlogQueryDecoder implements RequestDecoder {
 
 	@Override
 	public Object decode(FullHttpRequest request) {
-		Map<String, List<String>> params = (new QueryStringDecoder(request.getUri())).parameters();
 		BinlogQuery binlogQuery = new BinlogQuery();
+		Map<String, List<String>> params = (new QueryStringDecoder(request.getUri())).parameters();
 
 		binlogQuery.setAutoAck(
 				params.containsKey("autoAck") ? Boolean.valueOf(params.get("autoAck").get(0)) : DEFAULT_AUTO_ACK

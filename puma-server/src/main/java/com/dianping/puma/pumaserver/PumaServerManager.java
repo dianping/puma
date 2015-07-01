@@ -5,6 +5,8 @@ import com.dianping.puma.core.netty.handler.HandlerFactory;
 import com.dianping.puma.core.netty.handler.HttpEntityEncoder;
 import com.dianping.puma.core.netty.server.ServerConfig;
 import com.dianping.puma.core.netty.server.TcpServer;
+import com.dianping.puma.pumaserver.ack.BinlogAckService;
+import com.dianping.puma.pumaserver.ack.impl.CachedBinlogAckService;
 import com.dianping.puma.pumaserver.client.PumaClientsHolder;
 import com.dianping.puma.pumaserver.handler.*;
 import io.netty.channel.ChannelHandler;
@@ -24,6 +26,8 @@ import java.util.Map;
 @Component
 public class PumaServerManager {
     public volatile static TcpServer server;
+
+    protected final BinlogAckService binlogAckService = new CachedBinlogAckService();
 
     protected final ChannelHolderHandler channelHolderHandler = new ChannelHolderHandler(new PumaClientsHolder());
 
@@ -46,7 +50,7 @@ public class PumaServerManager {
                 result.put("HttpRouterHandler", HttpRouterHandler.INSTANCE);
                 result.put("StatusQueryHandler", StatusQueryHandler.INSTANCE);
                 result.put("BinlogQueryHandler", new BinlogQueryHandler());
-                result.put("BinlogAckHandler", new BinlogAckHandler());
+                result.put("BinlogAckHandler", new BinlogAckHandler(binlogAckService));
                 result.put("DeprecatedBinlogQueryHandler", new DeprecatedBinlogQueryHandler());
                 return result;
             }

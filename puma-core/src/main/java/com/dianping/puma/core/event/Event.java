@@ -13,5 +13,4 @@ public abstract class Event implements Serializable {
 	public long getSeq() {
 		return seq;
 	}
-
 }

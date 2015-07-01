@@ -7,6 +7,7 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.netty.entity.DeprecatedBinlogQuery;
+import com.dianping.puma.core.netty.handler.HttpEntityEncoder;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.filter.EventFilterChainFactory;
@@ -42,6 +43,7 @@ public class DeprecatedBinlogQueryHandler extends SimpleChannelInboundHandler<De
         ctx.channel().attr(AttributeKeys.CLIENT_INFO).set(new ClientInfo().setClientType(ClientType.PUMACLIENT));
         ctx.channel().pipeline().remove(HttpResponseEncoder.class);
         ctx.channel().pipeline().remove(HttpContentCompressor.class);
+        ctx.channel().pipeline().remove(HttpEntityEncoder.class);
 
         this.ctx = ctx;
         this.deprecatedBinlogQuery = deprecatedBinlogQuery;

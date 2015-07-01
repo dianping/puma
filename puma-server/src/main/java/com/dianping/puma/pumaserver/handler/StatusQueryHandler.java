@@ -2,17 +2,12 @@ package com.dianping.puma.pumaserver.handler;
 
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.netty.entity.StatusQuery;
-import com.dianping.puma.core.util.ConvertHelper;
 import com.dianping.puma.pumaserver.AttributeKeys;
 import com.dianping.puma.pumaserver.client.ClientInfo;
 import com.dianping.puma.pumaserver.client.ClientType;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpVersion;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +25,7 @@ public class StatusQueryHandler extends SimpleChannelInboundHandler<StatusQuery>
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, StatusQuery msg) throws Exception {
         ctx.channel().attr(AttributeKeys.CLIENT_INFO).set(new ClientInfo().setClientType(ClientType.PUMACLIENT));
-        DefaultFullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+
         Map<String, Object> status = new HashMap<String, Object>();
         status.put("serverStatus", SystemStatusContainer.instance.listServerStatus());
         status.put("serverDdlCounters", SystemStatusContainer.instance.listServerDdlCounters());
@@ -39,10 +34,6 @@ public class StatusQueryHandler extends SimpleChannelInboundHandler<StatusQuery>
         status.put("serverRowUpdateCounters", SystemStatusContainer.instance.listServerRowUpdateCounters());
         status.put("clientStatus", SystemStatusContainer.instance.listClientStatus());
         status.put("storageStatus", SystemStatusContainer.instance.listStorageStatus());
-        byte[] data = ConvertHelper.toBytes(status);
-        response.content().writeBytes(data);
-        response.headers().add(HttpHeaders.Names.CONTENT_TYPE, "application/json");
-        response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, data.length);
-        ctx.channel().writeAndFlush(response);
+        ctx.channel().writeAndFlush(status);
     }
 }

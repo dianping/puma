@@ -49,7 +49,7 @@ public class PumaServerManager {
                 result.put("HttpObjectAggregator", new HttpObjectAggregator(1024 * 1024 * 32));
                 result.put("HttpRouterHandler", HttpRouterHandler.INSTANCE);
                 result.put("StatusQueryHandler", StatusQueryHandler.INSTANCE);
-                result.put("BinlogQueryHandler", new BinlogQueryHandler());
+                result.put("BinlogQueryHandler", new BinlogQueryHandler(binlogAckService));
                 result.put("BinlogAckHandler", new BinlogAckHandler(binlogAckService));
                 result.put("DeprecatedBinlogQueryHandler", new DeprecatedBinlogQueryHandler());
                 return result;

@@ -4,7 +4,6 @@ import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.netty.entity.BinlogMessage;
 import com.dianping.puma.core.netty.entity.BinlogQuery;
 import com.dianping.puma.pumaserver.ack.BinlogAckService;
-import com.dianping.puma.pumaserver.ack.impl.CachedBinlogAckService;
 import com.dianping.puma.pumaserver.channel.BinlogChannel;
 import com.dianping.puma.pumaserver.channel.impl.ConstantBinlogChannel;
 import io.netty.channel.ChannelFuture;
@@ -20,7 +19,11 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
 
 	private BinlogChannel binlogChannel = new ConstantBinlogChannel();
 
-	private BinlogAckService binlogAckService = new CachedBinlogAckService();
+	private BinlogAckService binlogAckService;
+
+	public BinlogQueryHandler(BinlogAckService binlogAckService) {
+		this.binlogAckService = binlogAckService;
+	}
 
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, final BinlogQuery binlogQuery) throws IOException {

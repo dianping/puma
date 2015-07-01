@@ -4,6 +4,8 @@ import java.util.concurrent.TimeUnit;
 
 public class BinlogQuery {
 
+	private String clientName;
+
 	private boolean autoAck;
 
 	private int batchSize;
@@ -11,6 +13,14 @@ public class BinlogQuery {
 	private long timeout;
 
 	private TimeUnit timeUnit;
+
+	public String getClientName() {
+		return clientName;
+	}
+
+	public void setClientName(String clientName) {
+		this.clientName = clientName;
+	}
 
 	public boolean isAutoAck() {
 		return autoAck;

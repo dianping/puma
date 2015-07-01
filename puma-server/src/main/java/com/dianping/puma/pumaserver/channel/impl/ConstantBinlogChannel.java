@@ -17,12 +17,23 @@ public class ConstantBinlogChannel implements BinlogChannel {
 	}
 
 	@Override
+	public void locate(BinlogInfo binlogInfo) throws BinlogChannelException {
+
+	}
+
+	@Override
 	public ChangedEvent next() throws BinlogChannelException {
-		return null;
+		ChangedEvent event = new RowChangedEvent();
+		event.setDatabase(constant.getDatabase());
+		event.setTable(constant.getTable());
+		return event;
 	}
 
 	@Override
 	public ChangedEvent read(BinlogInfo binlogInfo) throws BinlogChannelException {
-		return null;
+		ChangedEvent event = new RowChangedEvent();
+		event.setDatabase(constant.getDatabase());
+		event.setTable(constant.getTable());
+		return event;
 	}
 }

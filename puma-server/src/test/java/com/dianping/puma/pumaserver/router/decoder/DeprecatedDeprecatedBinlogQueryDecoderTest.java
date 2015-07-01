@@ -13,18 +13,18 @@ import java.util.Map;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class DeprecatedBinlogQueryDecoderTest {
+public class DeprecatedDeprecatedBinlogQueryDecoderTest {
 
     @Test
     public void test_match() throws Exception {
-        BinlogQueryDecoder target = new BinlogQueryDecoder();
+        DeprecatedBinlogQueryDecoder target = new DeprecatedBinlogQueryDecoder();
         Assert.assertTrue(target.match(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/puma/channel/acceptor?op=")));
         Assert.assertFalse(target.match(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/puma/channel2/acceptor?op=")));
     }
 
     @Test
     public void test_convert_query_string() throws Exception {
-        BinlogQueryDecoder target = new BinlogQueryDecoder();
+        DeprecatedBinlogQueryDecoder target = new DeprecatedBinlogQueryDecoder();
 
         Map<String, String> result = target.getQueryStringMap("seq=-100&dt=a,b,&dt=c");
 

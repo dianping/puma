@@ -11,6 +11,8 @@ public interface PumaConnector {
 
 	void disconnect() throws PumaClientException;
 
+	void subscribe
+
 	BinlogMessage get(int batchSize) throws PumaClientException;
 
 	BinlogMessage get(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException;

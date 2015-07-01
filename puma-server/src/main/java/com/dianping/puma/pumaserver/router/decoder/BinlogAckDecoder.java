@@ -1,13 +1,13 @@
 package com.dianping.puma.pumaserver.router.decoder;
 
-import com.dianping.puma.core.netty.entity.BinlogQuery;
+import com.dianping.puma.core.netty.entity.BinlogAck;
 import io.netty.handler.codec.http.FullHttpRequest;
 
 import java.util.regex.Pattern;
 
-public class BinlogQueryDecoder implements RequestDecoder {
+public class BinlogAckDecoder implements RequestDecoder {
 
-	Pattern pattern = Pattern.compile("^/puma/binlog/query/*$");
+	Pattern pattern = Pattern.compile("^/puma/binlog/ack/*$");
 
 	@Override
 	public boolean match(FullHttpRequest request) {
@@ -16,7 +16,7 @@ public class BinlogQueryDecoder implements RequestDecoder {
 
 	@Override
 	public Object decode(FullHttpRequest request) {
-		BinlogQuery binlogQuery = new BinlogQuery();
-		return binlogQuery;
+		BinlogAck binlogAck = new BinlogAck();
+		return binlogAck;
 	}
 }

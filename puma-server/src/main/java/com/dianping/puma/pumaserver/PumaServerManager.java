@@ -5,9 +5,7 @@ import com.dianping.puma.core.netty.handler.HandlerFactory;
 import com.dianping.puma.core.netty.server.ServerConfig;
 import com.dianping.puma.core.netty.server.TcpServer;
 import com.dianping.puma.pumaserver.client.PumaClientsHolder;
-import com.dianping.puma.pumaserver.handler.BinlogQueryHandler;
-import com.dianping.puma.pumaserver.handler.HttpRouterHandler;
-import com.dianping.puma.pumaserver.handler.StatusQueryHandler;
+import com.dianping.puma.pumaserver.handler.*;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.http.*;
 import org.springframework.stereotype.Component;
@@ -46,6 +44,8 @@ public class PumaServerManager {
                 result.put("HttpRouterHandler", HttpRouterHandler.INSTANCE);
                 result.put("StatusQueryHandler", StatusQueryHandler.INSTANCE);
                 result.put("BinlogQueryHandler", new BinlogQueryHandler());
+                result.put("BinlogAckHandler", new BinlogAckHandler());
+                result.put("BinlogQueryHandler", new DeprecatedBinlogQueryHandler());
                 return result;
             }
         });

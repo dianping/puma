@@ -27,11 +27,6 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
 
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, final BinlogQuery binlogQuery) throws IOException {
-		if (!inited) {
-			init(null);
-			inited = true;
-		}
-
 		final BinlogMessage binlogMessage = new BinlogMessage();
 		for (int i = 0; i != binlogQuery.getBatchSize(); ++i) {
 			binlogMessage.addBinlogEvents(binlogChannel.next());
@@ -47,10 +42,6 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
 				}
 			}
 		});
-	}
-
-	private void init(BinlogInfo binlogInfo) {
-		binlogChannel.locate(binlogInfo);
 	}
 
 	private void ackIfNeeded(BinlogQuery binlogQuery, BinlogMessage binlogMessage) {

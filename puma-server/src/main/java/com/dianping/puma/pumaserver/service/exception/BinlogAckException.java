@@ -1,4 +1,4 @@
-package com.dianping.puma.pumaserver.ack.exception;
+package com.dianping.puma.pumaserver.service.exception;
 
 public class BinlogAckException extends RuntimeException {
 }

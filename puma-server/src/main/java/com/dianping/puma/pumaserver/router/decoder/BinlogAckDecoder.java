@@ -23,12 +23,6 @@ public class BinlogAckDecoder implements RequestDecoder {
 		BinlogAck binlogAck = new BinlogAck();
 		Map<String, List<String>> params = (new QueryStringDecoder(request.getUri())).parameters();
 
-		if (params.containsKey("clientName")) {
-			binlogAck.setClientName(params.get("clientName").get(0));
-		} else {
-			throw new RuntimeException("no client name given in binlog ack.");
-		}
-
 		if (params.containsKey("binlogFile") && params.containsKey("binlogPosition")) {
 			binlogAck.setBinlogInfo(
 					new BinlogInfo(params.get("binlogFile").get(0),

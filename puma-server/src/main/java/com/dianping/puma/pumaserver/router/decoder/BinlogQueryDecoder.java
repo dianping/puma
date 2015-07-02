@@ -16,7 +16,7 @@ public class BinlogQueryDecoder implements RequestDecoder {
 	private static final long      DEFAULT_TIMEOUT     = 0;
 	private static final TimeUnit  DEFAULT_TIME_UNIT   = TimeUnit.MILLISECONDS;
 
-	Pattern pattern = Pattern.compile("^/puma/binlog/query.*$");
+	Pattern pattern = Pattern.compile("^/puma/binlog/get.*$");
 
 	@Override
 	public boolean match(FullHttpRequest request) {
@@ -27,12 +27,6 @@ public class BinlogQueryDecoder implements RequestDecoder {
 	public Object decode(FullHttpRequest request) {
 		BinlogQuery binlogQuery = new BinlogQuery();
 		Map<String, List<String>> params = (new QueryStringDecoder(request.getUri())).parameters();
-
-		if (params.containsKey("clientName")) {
-			binlogQuery.setClientName(params.get("clientName").get(0));
-		} else {
-			throw new RuntimeException("no client name given in binlog query.");
-		}
 
 		binlogQuery.setAutoAck(
 				params.containsKey("autoAck") ? Boolean.valueOf(params.get("autoAck").get(0)) : DEFAULT_AUTO_ACK

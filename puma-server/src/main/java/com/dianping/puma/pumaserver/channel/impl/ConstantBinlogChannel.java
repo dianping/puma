@@ -7,6 +7,8 @@ import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.pumaserver.channel.BinlogChannel;
 import com.dianping.puma.pumaserver.channel.exception.BinlogChannelException;
 
+import java.util.concurrent.TimeUnit;
+
 public class ConstantBinlogChannel implements BinlogChannel {
 
 	private final ChangedEvent constant;
@@ -32,10 +34,7 @@ public class ConstantBinlogChannel implements BinlogChannel {
 	}
 
 	@Override
-	public ChangedEvent read(BinlogInfo binlogInfo) throws BinlogChannelException {
-		ChangedEvent event = new RowChangedEvent();
-		event.setDatabase(constant.getDatabase());
-		event.setTable(constant.getTable());
-		return event;
+	public ChangedEvent next(long timeout, TimeUnit timeUnit) throws BinlogChannelException {
+		return null;
 	}
 }

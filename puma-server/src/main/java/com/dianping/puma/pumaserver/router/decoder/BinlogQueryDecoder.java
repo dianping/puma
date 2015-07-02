@@ -28,12 +28,6 @@ public class BinlogQueryDecoder implements RequestDecoder {
 		BinlogQuery binlogQuery = new BinlogQuery();
 		Map<String, List<String>> params = (new QueryStringDecoder(request.getUri())).parameters();
 
-		if (params.containsKey("clientName")) {
-			binlogQuery.setClientName(params.get("clientName").get(0));
-		} else {
-			throw new RuntimeException("no client name given in binlog query.");
-		}
-
 		binlogQuery.setAutoAck(
 				params.containsKey("autoAck") ? Boolean.valueOf(params.get("autoAck").get(0)) : DEFAULT_AUTO_ACK
 		);

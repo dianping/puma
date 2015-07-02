@@ -30,5 +30,8 @@ public class BinlogUnsubscriptionHandler extends SimpleChannelInboundHandler<Bin
 		ctx.channel().attr(AttributeKeys.CLIENT_NAME).remove();
 		ctx.channel().attr(AttributeKeys.CLIENT_CHANNEL).remove();
 		ctx.channel().attr(AttributeKeys.CLIENT_SUBSCRIBED).remove();
+
+		// For browser user.
+		ctx.channel().writeAndFlush("unsubscribe success.");
 	}
 }

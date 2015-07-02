@@ -33,13 +33,18 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 		BinlogAck binlogAck = binlogAckService.load(clientName);
 
 		BinlogChannel binlogChannel = buildBinlogChannel(
-				binlogTarget.getTargetName(),
-				binlogTarget.getDbServerId(),
+				binlogTarget == null ? null : binlogTarget.getTargetName(),
+				binlogTarget == null ? 0 : binlogTarget.getDbServerId(),
 				null,
-				binlogAck.getBinlogInfo(),
+				binlogAck == null ? null : binlogAck.getBinlogInfo(),
 				0
 		);
 		ctx.channel().attr(AttributeKeys.CLIENT_CHANNEL).set(binlogChannel);
+
+		ctx.channel().attr(AttributeKeys.CLIENT_SUBSCRIBED).set(true);
+
+		// For browser user.
+		ctx.channel().writeAndFlush("subscribe success.");
 	}
 
 	private BinlogChannel buildBinlogChannel(String targetName, long dbServerId, SubscribeConstant sc, BinlogInfo binlogInfo, long timestamp) {

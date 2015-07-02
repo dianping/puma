@@ -12,6 +12,8 @@ public interface BinlogChannel {
 	void locate(String targetName, long dbServerId, SubscribeConstant sc, BinlogInfo binlogInfo, long timestamp)
 			throws BinlogChannelException;
 
+	void destroy() throws BinlogChannelException;
+
 	ChangedEvent next() throws BinlogChannelException;
 
 	ChangedEvent next(long timeout, TimeUnit timeUnit) throws BinlogChannelException;

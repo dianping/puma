@@ -6,12 +6,16 @@ import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.pumaserver.channel.BinlogChannel;
 import com.dianping.puma.pumaserver.channel.exception.BinlogChannelException;
+import com.google.common.base.Stopwatch;
 
 import java.util.concurrent.TimeUnit;
 
 public class ConstantBinlogChannel implements BinlogChannel {
 
 	private final ChangedEvent constant;
+
+	private final long costTime = 1;
+	private final TimeUnit costTimeUnit = TimeUnit.MILLISECONDS;
 
 	public ConstantBinlogChannel() {
 		constant = new RowChangedEvent();
@@ -26,6 +30,11 @@ public class ConstantBinlogChannel implements BinlogChannel {
 	}
 
 	@Override
+	public void destroy() throws BinlogChannelException {
+
+	}
+
+	@Override
 	public ChangedEvent next() throws BinlogChannelException {
 		ChangedEvent event = new RowChangedEvent();
 		event.setDatabase(constant.getDatabase());
@@ -35,6 +44,19 @@ public class ConstantBinlogChannel implements BinlogChannel {
 
 	@Override
 	public ChangedEvent next(long timeout, TimeUnit timeUnit) throws BinlogChannelException {
-		return null;
+		long timeoutMillis = timeUnit.toMillis(timeout);
+		long costTimeMillis = costTimeUnit.toMillis(costTime);
+
+		try {
+			if (costTimeMillis > timeoutMillis) {
+				Thread.sleep(timeoutMillis);
+				return null;
+			} else {
+				Thread.sleep(costTimeMillis);
+				return next();
+			}
+		} catch (InterruptedException e) {
+			return null;
+		}
 	}
 }

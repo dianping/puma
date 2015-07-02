@@ -16,7 +16,7 @@ public class BinlogQueryDecoder implements RequestDecoder {
 	private static final long      DEFAULT_TIMEOUT     = 0;
 	private static final TimeUnit  DEFAULT_TIME_UNIT   = TimeUnit.MILLISECONDS;
 
-	Pattern pattern = Pattern.compile("^/puma/binlog/query.*$");
+	Pattern pattern = Pattern.compile("^/puma/binlog/get.*$");
 
 	@Override
 	public boolean match(FullHttpRequest request) {

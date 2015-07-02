@@ -26,15 +26,24 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
 
 	@Override
 	public void channelRead0(final ChannelHandlerContext ctx, final BinlogQuery binlogQuery) throws IOException {
+		Boolean subscribed = ctx.channel().attr(AttributeKeys.CLIENT_SUBSCRIBED).get();
+		if (subscribed == null) {
+			throw new RuntimeException("must subscribe before query binlog.");
+		}
+
+		final String clientName = ctx.channel().attr(AttributeKeys.CLIENT_NAME).get();
+		if (clientName == null) {
+			throw new NullPointerException("null client name.");
+		}
+
 		final BinlogChannel binlogChannel = ctx.channel().attr(AttributeKeys.CLIENT_CHANNEL).get();
 		if (binlogChannel == null) {
-			throw new RuntimeException("must subscribe before query binlog.");
+			throw new NullPointerException("null binlog channel.");
 		}
 
 		final BinlogMessage binlogMessage = (binlogQuery.getTimeout() <= 0) ?
 				fillBinlogMessage(binlogChannel, binlogQuery.getBatchSize()) :
 				fillBinlogMessageWithTimeout(binlogChannel, binlogQuery.getBatchSize(), binlogQuery.getTimeout(), binlogQuery.getTimeUnit());
-
 
 		ctx.writeAndFlush(binlogMessage).addListener(new ChannelFutureListener() {
 			@Override
@@ -44,7 +53,7 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
 					if (binlogQuery.isAutoAck() && binlogMessage.size() > 0) {
 						BinlogAck binlogAck = new BinlogAck();
 						binlogAck.setBinlogInfo(binlogMessage.getLastBinlogInfo());
-						binlogAckService.save(ctx.channel().attr(AttributeKeys.CLIENT_NAME).get(), binlogAck);
+						binlogAckService.save(clientName, binlogAck);
 					}
 
 				} else {

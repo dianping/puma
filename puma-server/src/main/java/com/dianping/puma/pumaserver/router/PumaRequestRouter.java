@@ -16,6 +16,8 @@ public class PumaRequestRouter {
 
     public PumaRequestRouter() {
         decoders.add(new StatusQueryDecoder());
+        decoders.add(new BinlogSubscriptionDecoder());
+        decoders.add(new BinlogUnsubscriptionDecoder());
         decoders.add(new BinlogQueryDecoder());
         decoders.add(new BinlogAckDecoder());
         decoders.add(new DeprecatedBinlogQueryDecoder());

@@ -19,32 +19,37 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class NettyPumaConnector implements PumaConnector {
+public class SinglePumaConnector implements PumaConnector {
 
-    private static final Logger logger = LoggerFactory.getLogger(NettyPumaConnector.class);
+    private static final Logger logger = LoggerFactory.getLogger(SinglePumaConnector.class);
 
-    private String clientName;
-
-    private String remoteIp;
-    private int remotePort;
-    private int localPort;
+    private final String clientName;
+    private final String remoteIp;
+    private final int remotePort;
+    private final int localPort;
 
     private TcpClient client;
 
     private final DefaultChannelHolder channelHolder = new DefaultChannelHolder();
     private final ChannelHolderHandler channelHolderHandler = new ChannelHolderHandler(channelHolder);
 
-    public NettyPumaConnector(String clientName) {
+
+    public SinglePumaConnector(String clientName, String remoteIp, int remotePort) {
         this.clientName = clientName;
+        this.remoteIp = remoteIp;
+        this.remotePort = remotePort;
+        this.localPort = 0;
+    }
+
+    public SinglePumaConnector(String clientName, String remoteIp, int remotePort, int localPort) {
+        this.clientName = clientName;
+        this.remoteIp = remoteIp;
+        this.remotePort = remotePort;
+        this.localPort = localPort;
     }
 
     @Override
     public synchronized void connect() throws PumaClientException {
-        //todo:read from ???
-        //this.remoteIp = remoteIp;
-        //this.remotePort = remotePort;
-        //this.localPort = localPort;
-
         doConnect();
     }
 
@@ -89,12 +94,12 @@ public class NettyPumaConnector implements PumaConnector {
     }
 
     @Override
-    public BinlogMessage getWithoutAck(int batchSize) throws PumaClientException {
+    public BinlogMessage getWithAck(int batchSize) throws PumaClientException {
         return null;
     }
 
     @Override
-    public BinlogMessage getWithoutAck(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException {
+    public BinlogMessage getWithAck(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException {
         return null;
     }
 

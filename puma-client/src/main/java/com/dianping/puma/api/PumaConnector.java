@@ -15,9 +15,9 @@ public interface PumaConnector {
 
     BinlogMessage get(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException;
 
-    BinlogMessage getWithoutAck(int batchSize) throws PumaClientException;
+    BinlogMessage getWithAck(int batchSize) throws PumaClientException;
 
-    BinlogMessage getWithoutAck(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException;
+    BinlogMessage getWithAck(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException;
 
     void ack(long batchId) throws PumaClientException;
 

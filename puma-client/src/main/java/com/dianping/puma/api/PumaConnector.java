@@ -20,7 +20,7 @@ public interface PumaConnector {
 
     BinlogMessage getWithAck(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException, InterruptedException;
 
-    void ack(BinlogInfo binlogInfo) throws PumaClientException;
+    void ack(BinlogInfo binlogInfo) throws PumaClientException, InterruptedException;
 
     void rollback(BinlogInfo binlogInfo) throws PumaClientException;
 

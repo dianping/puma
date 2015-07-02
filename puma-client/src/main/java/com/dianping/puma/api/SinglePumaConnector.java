@@ -108,15 +108,19 @@ public class SinglePumaConnector implements PumaConnector {
 
     @Override
     public BinlogMessage get(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException, InterruptedException {
+        queue.clear();
         QueryStringEncoder queryStringEncoder = new QueryStringEncoder("/binlog/get");
         queryStringEncoder.addParam("batchSize", String.valueOf(batchSize));
         queryStringEncoder.addParam("timeout", String.valueOf(timeout));
         queryStringEncoder.addParam("timeUnit", timeUnit.toString());
-
         DefaultFullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, queryStringEncoder.toString());
-        channelHolder.writeAndFlush(request);
+        channelHolder.writeAndFlush(request).sync();
 
-        return queue.take();
+        try {
+            return queue.poll(1, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            throw new PumaClientException(true, false, "Get message timeout!");
+        }
     }
 
     @Override
@@ -134,14 +138,14 @@ public class SinglePumaConnector implements PumaConnector {
     }
 
     @Override
-    public void ack(BinlogInfo binlogInfo) throws PumaClientException {
+    public void ack(BinlogInfo binlogInfo) throws PumaClientException, InterruptedException {
         QueryStringEncoder queryStringEncoder = new QueryStringEncoder("/binlog/ack");
 //        queryStringEncoder.addParam("batchSize", String.valueOf(batchSize));
 //        queryStringEncoder.addParam("timeout", String.valueOf(timeout));
 //        queryStringEncoder.addParam("timeUnit", timeUnit.toString());
 
         DefaultFullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, queryStringEncoder.toString());
-        channelHolder.writeAndFlush(request);
+        channelHolder.writeAndFlush(request).sync();
     }
 
     @Override

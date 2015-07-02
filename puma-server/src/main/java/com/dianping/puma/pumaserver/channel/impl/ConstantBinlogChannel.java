@@ -1,5 +1,6 @@
 package com.dianping.puma.pumaserver.channel.impl;
 
+import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
@@ -17,7 +18,8 @@ public class ConstantBinlogChannel implements BinlogChannel {
 	}
 
 	@Override
-	public void locate(BinlogInfo binlogInfo) throws BinlogChannelException {
+	public void locate(String targetName, long dbServerId, SubscribeConstant sc, BinlogInfo binlogInfo, long timestamp)
+			throws BinlogChannelException {
 
 	}
 

@@ -25,5 +25,5 @@ public interface PumaConnector {
 
     void rollback() throws PumaClientException;
 
-    void subscribe() throws PumaClientException;
+    void subscribe(boolean dml, boolean ddl, boolean transaction, String database, String... tables) throws PumaClientException;
 }

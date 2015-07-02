@@ -8,10 +8,8 @@ import com.dianping.puma.core.netty.handler.ChannelHolderHandler;
 import com.dianping.puma.core.netty.handler.HandlerFactory;
 import com.dianping.puma.core.netty.remove.DefaultChannelHolder;
 import io.netty.channel.ChannelHandler;
-import io.netty.handler.codec.http.HttpClientCodec;
-import io.netty.handler.codec.http.HttpContentCompressor;
-import io.netty.handler.codec.http.HttpContentDecompressor;
-import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +29,17 @@ public class SinglePumaConnector implements PumaConnector {
     private TcpClient client;
 
     private final DefaultChannelHolder channelHolder = new DefaultChannelHolder();
-    private final ChannelHolderHandler channelHolderHandler = new ChannelHolderHandler(channelHolder);
+    private final ChannelHolderHandler channelHolderHandler = new ChannelHolderHandler(channelHolder) {
+        @Override
+        public void channelActive(ChannelHandlerContext ctx) throws Exception {
+            super.channelActive(ctx);
+            if (subscriptionRequest != null) {
+                ctx.channel().writeAndFlush(subscriptionRequest.copy());
+            }
+        }
+    };
 
+    private volatile DefaultFullHttpRequest subscriptionRequest = null;
 
     public SinglePumaConnector(String clientName, String remoteIp, int remotePort) {
         this.clientName = clientName;
@@ -65,7 +72,6 @@ public class SinglePumaConnector implements PumaConnector {
                 handlers.put("channelHolderHandler", channelHolderHandler);
                 handlers.put("HttpClientCodec", new HttpClientCodec());
                 handlers.put("HttpContentDecompressor", new HttpContentDecompressor());
-                handlers.put("HttpContentCompressor", new HttpContentCompressor());
                 handlers.put("HttpObjectAggregator", new HttpObjectAggregator(1024 * 1024 * 32));
                 return handlers;
             }
@@ -119,7 +125,18 @@ public class SinglePumaConnector implements PumaConnector {
     }
 
     @Override
-    public void subscribe() throws PumaClientException {
+    public void subscribe(boolean dml, boolean ddl, boolean transaction, String database, String... tables) throws PumaClientException {
+        QueryStringEncoder queryStringEncoder = new QueryStringEncoder("/binlog/subscribe");
+        queryStringEncoder.addParam("clientName", clientName);
+        queryStringEncoder.addParam("database", database);
+        queryStringEncoder.addParam("dml", String.valueOf(dml));
+        queryStringEncoder.addParam("ddl", String.valueOf(ddl));
+        queryStringEncoder.addParam("transaction", String.valueOf(transaction));
+        for (String table : tables) {
+            queryStringEncoder.addParam("table", table);
+        }
 
+        subscriptionRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, queryStringEncoder.toString());
+        channelHolder.writeAndFlush(subscriptionRequest.copy());
     }
 }

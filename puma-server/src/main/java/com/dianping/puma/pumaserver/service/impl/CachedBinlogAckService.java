@@ -1,8 +1,8 @@
-package com.dianping.puma.pumaserver.ack.impl;
+package com.dianping.puma.pumaserver.service.impl;
 
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.netty.entity.BinlogAck;
-import com.dianping.puma.pumaserver.ack.BinlogAckService;
+import com.dianping.puma.pumaserver.service.BinlogAckService;
 
 public class CachedBinlogAckService implements BinlogAckService {
 

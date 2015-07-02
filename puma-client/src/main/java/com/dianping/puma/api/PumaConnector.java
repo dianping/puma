@@ -1,5 +1,6 @@
 package com.dianping.puma.api;
 
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.netty.entity.BinlogMessage;
 import com.dianping.puma.core.netty.exception.PumaClientException;
 
@@ -11,17 +12,17 @@ public interface PumaConnector {
 
     void disconnect() throws PumaClientException;
 
-    BinlogMessage get(int batchSize) throws PumaClientException;
+    BinlogMessage get(int batchSize) throws PumaClientException, InterruptedException;
 
-    BinlogMessage get(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException;
+    BinlogMessage get(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException, InterruptedException;
 
-    BinlogMessage getWithAck(int batchSize) throws PumaClientException;
+    BinlogMessage getWithAck(int batchSize) throws PumaClientException, InterruptedException;
 
-    BinlogMessage getWithAck(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException;
+    BinlogMessage getWithAck(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException, InterruptedException;
 
-    void ack(long batchId) throws PumaClientException;
+    void ack(BinlogInfo binlogInfo) throws PumaClientException;
 
-    void rollback(long batchId) throws PumaClientException;
+    void rollback(BinlogInfo binlogInfo) throws PumaClientException;
 
     void rollback() throws PumaClientException;
 

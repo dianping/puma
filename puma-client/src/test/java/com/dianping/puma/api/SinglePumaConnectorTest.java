@@ -14,7 +14,7 @@ public class SinglePumaConnectorTest {
     public void testConnect() throws Exception {
         SinglePumaConnector connector = new SinglePumaConnector("test", "www.dozer.cc", 80);
         connector.connect();
-        connector.subscribe(true, true, true, "test", "user");
+        connector.subscribe(true, true, true, "test", "user1", "user2");
         System.in.read();
     }
 }

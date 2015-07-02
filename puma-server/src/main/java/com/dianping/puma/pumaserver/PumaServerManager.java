@@ -2,7 +2,7 @@ package com.dianping.puma.pumaserver;
 
 import com.dianping.puma.core.netty.handler.ChannelHolderHandler;
 import com.dianping.puma.core.netty.handler.HandlerFactory;
-import com.dianping.puma.core.netty.handler.HttpEntityEncoder;
+import com.dianping.puma.core.netty.handler.HttpResponseEncoder;
 import com.dianping.puma.core.netty.server.ServerConfig;
 import com.dianping.puma.core.netty.server.TcpServer;
 import com.dianping.puma.pumaserver.ack.BinlogAckService;
@@ -43,9 +43,9 @@ public class PumaServerManager {
                 result.put("channelHolderHandler", channelHolderHandler);
                 result.put("HttpRequestDecoder", new HttpRequestDecoder());
                 result.put("HttpContentDecompressor", new HttpContentDecompressor());
-                result.put("HttpResponseEncoder", new HttpResponseEncoder());
+                result.put("HttpResponseEncoder", new io.netty.handler.codec.http.HttpResponseEncoder());
                 result.put("HttpContentCompressor", new HttpContentCompressor());
-                result.put("HttpEntityEncoder", HttpEntityEncoder.INSTANCE);
+                result.put("HttpEntityEncoder", HttpResponseEncoder.INSTANCE);
                 result.put("HttpObjectAggregator", new HttpObjectAggregator(1024 * 1024 * 32));
                 result.put("HttpRouterHandler", HttpRouterHandler.INSTANCE);
                 result.put("StatusQueryHandler", StatusQueryHandler.INSTANCE);

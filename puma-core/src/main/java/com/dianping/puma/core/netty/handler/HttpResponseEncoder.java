@@ -16,8 +16,8 @@ import java.util.List;
  */
 
 @ChannelHandler.Sharable
-public class HttpEntityEncoder extends MessageToMessageEncoder<Object> {
-    public static final HttpEntityEncoder INSTANCE = new HttpEntityEncoder();
+public class HttpResponseEncoder extends MessageToMessageEncoder<Object> {
+    public static final HttpResponseEncoder INSTANCE = new HttpResponseEncoder();
 
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception {

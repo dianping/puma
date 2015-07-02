@@ -7,7 +7,7 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.netty.entity.DeprecatedBinlogQuery;
-import com.dianping.puma.core.netty.handler.HttpEntityEncoder;
+import com.dianping.puma.core.netty.handler.HttpResponseEncoder;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.filter.EventFilterChainFactory;
@@ -25,7 +25,6 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.HttpContentCompressor;
-import io.netty.handler.codec.http.HttpResponseEncoder;
 
 import java.io.IOException;
 
@@ -41,9 +40,9 @@ public class DeprecatedBinlogQueryHandler extends SimpleChannelInboundHandler<De
     @Override
     public void channelRead0(ChannelHandlerContext ctx, DeprecatedBinlogQuery deprecatedBinlogQuery) {
         ctx.channel().attr(AttributeKeys.CLIENT_INFO).set(new ClientInfo().setClientType(ClientType.PUMACLIENT));
-        ctx.channel().pipeline().remove(HttpResponseEncoder.class);
+        ctx.channel().pipeline().remove(io.netty.handler.codec.http.HttpResponseEncoder.class);
         ctx.channel().pipeline().remove(HttpContentCompressor.class);
-        ctx.channel().pipeline().remove(HttpEntityEncoder.class);
+        ctx.channel().pipeline().remove(HttpResponseEncoder.class);
 
         this.ctx = ctx;
         this.deprecatedBinlogQuery = deprecatedBinlogQuery;

@@ -1,7 +1,7 @@
 package com.dianping.puma.pumaserver.service;
 
 import com.dianping.puma.core.netty.entity.BinlogTarget;
-import com.dianping.puma.pumaserver.exception.BinlogTargetException;
+import com.dianping.puma.pumaserver.exception.binlog.BinlogTargetException;
 
 public interface BinlogTargetService {
 

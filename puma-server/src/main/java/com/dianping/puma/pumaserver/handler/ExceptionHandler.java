@@ -2,10 +2,10 @@ package com.dianping.puma.pumaserver.handler;
 
 import com.dianping.puma.core.netty.entity.ExceptionResponse;
 import com.dianping.puma.core.util.ConvertHelper;
-import com.dianping.puma.pumaserver.channel.exception.BinlogChannelException;
-import com.dianping.puma.pumaserver.exception.BinlogAckException;
-import com.dianping.puma.pumaserver.exception.BinlogAuthException;
-import com.dianping.puma.pumaserver.exception.BinlogTargetException;
+import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
+import com.dianping.puma.pumaserver.exception.binlog.BinlogAckException;
+import com.dianping.puma.pumaserver.exception.binlog.BinlogAuthException;
+import com.dianping.puma.pumaserver.exception.binlog.BinlogTargetException;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;

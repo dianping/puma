@@ -3,7 +3,7 @@ package com.dianping.puma.pumaserver.channel;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.pumaserver.channel.exception.BinlogChannelException;
+import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
 
 import java.util.concurrent.TimeUnit;
 

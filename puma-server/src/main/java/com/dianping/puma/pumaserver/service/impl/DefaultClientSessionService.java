@@ -1,7 +1,7 @@
 package com.dianping.puma.pumaserver.service.impl;
 
 import com.dianping.puma.pumaserver.client.ClientSession;
-import com.dianping.puma.pumaserver.exception.BinlogAuthException;
+import com.dianping.puma.pumaserver.exception.binlog.BinlogAuthException;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
 import com.google.common.base.Strings;
 

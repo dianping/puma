@@ -6,7 +6,6 @@ import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.pumaserver.channel.BinlogChannel;
 import com.dianping.puma.pumaserver.channel.exception.BinlogChannelException;
-import com.google.common.base.Stopwatch;
 
 import java.util.concurrent.TimeUnit;
 

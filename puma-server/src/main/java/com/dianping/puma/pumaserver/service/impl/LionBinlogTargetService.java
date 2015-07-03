@@ -2,7 +2,7 @@ package com.dianping.puma.pumaserver.service.impl;
 
 import com.dianping.puma.core.netty.entity.BinlogTarget;
 import com.dianping.puma.pumaserver.service.BinlogTargetService;
-import com.dianping.puma.pumaserver.service.exception.BinlogTargetException;
+import com.dianping.puma.pumaserver.exception.BinlogTargetException;
 
 public class LionBinlogTargetService implements BinlogTargetService {
 

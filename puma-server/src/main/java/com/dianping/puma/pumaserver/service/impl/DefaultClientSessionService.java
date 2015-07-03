@@ -1,7 +1,7 @@
 package com.dianping.puma.pumaserver.service.impl;
 
 import com.dianping.puma.pumaserver.client.ClientSession;
-import com.dianping.puma.pumaserver.service.ClientInfoService;
+import com.dianping.puma.pumaserver.service.ClientSessionService;
 import com.google.common.base.Strings;
 
 import java.util.Map;
@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class DefaultClientInfoService implements ClientInfoService {
+public class DefaultClientSessionService implements ClientSessionService {
     private final Map<String, ClientSession> clients = new ConcurrentHashMap<String, ClientSession>();
 
     @Override

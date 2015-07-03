@@ -7,7 +7,7 @@ import com.dianping.puma.pumaserver.client.ClientSession;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public interface ClientInfoService {
+public interface ClientSessionService {
     /**
      * 订阅并返回一个token
      *

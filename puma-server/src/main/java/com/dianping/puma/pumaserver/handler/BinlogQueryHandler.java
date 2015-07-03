@@ -7,7 +7,7 @@ import com.dianping.puma.core.netty.entity.BinlogQuery;
 import com.dianping.puma.pumaserver.channel.BinlogChannel;
 import com.dianping.puma.pumaserver.client.ClientSession;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
-import com.dianping.puma.pumaserver.service.ClientInfoService;
+import com.dianping.puma.pumaserver.service.ClientSessionService;
 import com.google.common.base.Stopwatch;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -21,16 +21,16 @@ public class BinlogQueryHandler extends SimpleChannelInboundHandler<BinlogQuery>
 
     private final BinlogAckService binlogAckService;
 
-    private final ClientInfoService clientInfoService;
+    private final ClientSessionService clientSessionService;
 
-    public BinlogQueryHandler(BinlogAckService binlogAckService, ClientInfoService clientInfoService) {
+    public BinlogQueryHandler(BinlogAckService binlogAckService, ClientSessionService clientSessionService) {
         this.binlogAckService = binlogAckService;
-        this.clientInfoService = clientInfoService;
+        this.clientSessionService = clientSessionService;
     }
 
     @Override
     public void channelRead0(final ChannelHandlerContext ctx, final BinlogQuery binlogQuery) throws IOException {
-        ClientSession clientSession = clientInfoService.get(binlogQuery.getClientName(), binlogQuery.getToken());
+        ClientSession clientSession = clientSessionService.get(binlogQuery.getClientName(), binlogQuery.getToken());
         if (clientSession == null) {
             throw new RuntimeException("must subscribe before query binlog.");
         }

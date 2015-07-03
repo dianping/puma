@@ -12,7 +12,7 @@ import com.dianping.puma.pumaserver.client.ClientSession;
 import com.dianping.puma.pumaserver.client.ClientType;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.service.BinlogTargetService;
-import com.dianping.puma.pumaserver.service.ClientInfoService;
+import com.dianping.puma.pumaserver.service.ClientSessionService;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -22,12 +22,12 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
     private final BinlogAckService binlogAckService;
 
-    private final ClientInfoService clientInfoService;
+    private final ClientSessionService clientSessionService;
 
-    public BinlogSubscriptionHandler(BinlogTargetService binlogTargetService, BinlogAckService binlogAckService, ClientInfoService clientInfoService) {
+    public BinlogSubscriptionHandler(BinlogTargetService binlogTargetService, BinlogAckService binlogAckService, ClientSessionService clientSessionService) {
         this.binlogTargetService = binlogTargetService;
         this.binlogAckService = binlogAckService;
-        this.clientInfoService = clientInfoService;
+        this.clientSessionService = clientSessionService;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
         ClientSession clientSession = new ClientSession(clientName, binlogChannel, ClientType.UNKNOW);
 
-        String token = clientInfoService.subscribe(clientSession);
+        String token = clientSessionService.subscribe(clientSession);
 
         // For browser user.
         ctx.channel().writeAndFlush(new BinlogSubscriptionResponse().setToken(token));

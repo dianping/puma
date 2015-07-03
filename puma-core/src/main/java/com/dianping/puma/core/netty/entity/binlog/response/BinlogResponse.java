@@ -1,4 +1,4 @@
-package com.dianping.puma.core.netty.entity.response;
+package com.dianping.puma.core.netty.entity.binlog.response;
 
 public abstract class BinlogResponse {
 
@@ -6,11 +6,17 @@ public abstract class BinlogResponse {
 
 	private String token;
 
+	private String msg;
+
 	public void setClientName(String clientName) {
 		this.clientName = clientName;
 	}
 
 	public void setToken(String token) {
 		this.token = token;
+	}
+
+	public void setMsg(String msg) {
+		this.msg = msg;
 	}
 }

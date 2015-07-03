@@ -1,7 +1,7 @@
-package com.dianping.puma.pumaserver.handler;
+package com.dianping.puma.pumaserver.handler.binlog;
 
-import com.dianping.puma.core.netty.entity.BinlogAck;
-import com.dianping.puma.core.netty.entity.response.BinlogAckResponse;
+import com.dianping.puma.core.netty.entity.binlog.request.BinlogAckRequest;
+import com.dianping.puma.core.netty.entity.binlog.response.BinlogAckResponse;
 import com.dianping.puma.pumaserver.client.ClientSession;
 import com.dianping.puma.pumaserver.client.ClientType;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
@@ -11,16 +11,16 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 @ChannelHandler.Sharable
-public class BinlogAckHandler extends SimpleChannelInboundHandler<BinlogAck> {
+public class BinlogAckHandler extends SimpleChannelInboundHandler<BinlogAckRequest> {
 
     private BinlogAckService binlogAckService;
     private ClientSessionService clientSessionService;
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, BinlogAck binlogAck) {
-        ClientSession session = clientSessionService.get(binlogAck.getClientName(), binlogAck.getToken());
+    public void channelRead0(ChannelHandlerContext ctx, BinlogAckRequest binlogAckRequest) {
+        ClientSession session = clientSessionService.get(binlogAckRequest.getClientName(), binlogAckRequest.getToken());
 
-        binlogAckService.save(session.getClientName(), binlogAck);
+        binlogAckService.save(session.getClientName(), binlogAckRequest);
 
         // For browser user only.
         if (session.getClientType().equals(ClientType.BROSWER)) {

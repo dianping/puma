@@ -1,7 +1,7 @@
-package com.dianping.puma.pumaserver.handler;
+package com.dianping.puma.pumaserver.handler.binlog;
 
-import com.dianping.puma.core.netty.entity.BinlogUnsubscription;
-import com.dianping.puma.core.netty.entity.response.BinlogUnsubscriptionResponse;
+import com.dianping.puma.core.netty.entity.binlog.request.BinlogUnsubscriptionRequest;
+import com.dianping.puma.core.netty.entity.binlog.response.BinlogUnsubscriptionResponse;
 import com.dianping.puma.pumaserver.client.ClientSession;
 import com.dianping.puma.pumaserver.client.ClientType;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
@@ -10,14 +10,14 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 @ChannelHandler.Sharable
-public class BinlogUnsubscriptionHandler extends SimpleChannelInboundHandler<BinlogUnsubscription> {
+public class BinlogUnsubscriptionHandler extends SimpleChannelInboundHandler<BinlogUnsubscriptionRequest> {
 
 	private ClientSessionService clientSessionService;
 
 	@Override
-	public void channelRead0(ChannelHandlerContext ctx, BinlogUnsubscription binlogUnsubscription) {
+	public void channelRead0(ChannelHandlerContext ctx, BinlogUnsubscriptionRequest binlogUnsubscriptionRequest) {
 		ClientSession session = clientSessionService
-				.get(binlogUnsubscription.getClientName(), binlogUnsubscription.getToken());
+				.get(binlogUnsubscriptionRequest.getClientName(), binlogUnsubscriptionRequest.getToken());
 
 		// Destroy binlog channel.
 		session.getBinlogChannel().destroy();

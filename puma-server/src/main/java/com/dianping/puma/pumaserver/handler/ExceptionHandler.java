@@ -1,6 +1,6 @@
 package com.dianping.puma.pumaserver.handler;
 
-import com.dianping.puma.core.netty.entity.response.ExceptionResponse;
+import com.dianping.puma.core.netty.entity.ExceptionResponse;
 import com.dianping.puma.core.util.ConvertHelper;
 import com.dianping.puma.pumaserver.channel.exception.BinlogChannelException;
 import com.dianping.puma.pumaserver.exception.BinlogAckException;

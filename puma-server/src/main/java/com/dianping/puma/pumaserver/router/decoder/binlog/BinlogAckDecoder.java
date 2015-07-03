@@ -1,0 +1,48 @@
+package com.dianping.puma.pumaserver.router.decoder.binlog;
+
+import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.netty.entity.binlog.request.BinlogAckRequest;
+import com.dianping.puma.pumaserver.router.decoder.RequestDecoder;
+import com.dianping.puma.pumaserver.router.decoder.exception.DecoderException;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.QueryStringDecoder;
+
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+
+public class BinlogAckDecoder implements RequestDecoder {
+
+	Pattern pattern = Pattern.compile("^/puma/binlog/ack.*$");
+
+	@Override
+	public boolean match(FullHttpRequest request) {
+		return pattern.matcher(request.getUri()).matches();
+	}
+
+	@Override
+	public Object decode(FullHttpRequest request) {
+		BinlogAckRequest binlogAckRequest = new BinlogAckRequest();
+		Map<String, List<String>> params = (new QueryStringDecoder(request.getUri())).parameters();
+
+		if (!params.containsKey("clientName")) {
+			throw new DecoderException("must contain `clientName` in `BinlogAckRequest`");
+		}
+		binlogAckRequest.setClientName(params.get("clientName").get(0));
+
+		if (!params.containsKey("token")) {
+			throw new DecoderException("must contain `token` in `BinlogAckRequest`");
+		}
+		binlogAckRequest.setToken(params.get("token").get(0));
+
+		if (!params.containsKey("binlogFile") || !params.containsKey("binlogPosition")) {
+			throw new DecoderException("must contain `binlogInfo` in `BinlogAckRequest`");
+		}
+		binlogAckRequest.setBinlogInfo(new BinlogInfo(
+				params.get("binlogFile").get(0),
+				Long.valueOf(params.get("binlogPosition").get(0))
+		));
+
+		return binlogAckRequest;
+	}
+}

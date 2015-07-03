@@ -1,10 +1,9 @@
-package com.dianping.puma.pumaserver.handler;
+package com.dianping.puma.pumaserver.handler.binlog;
 
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.netty.entity.BinlogAck;
 import com.dianping.puma.core.netty.entity.BinlogMessage;
-import com.dianping.puma.core.netty.entity.BinlogQuery;
-import com.dianping.puma.core.netty.entity.response.BinlogGetResponse;
+import com.dianping.puma.core.netty.entity.binlog.request.BinlogGetRequest;
+import com.dianping.puma.core.netty.entity.binlog.response.BinlogGetResponse;
 import com.dianping.puma.pumaserver.channel.BinlogChannel;
 import com.dianping.puma.pumaserver.client.ClientSession;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
@@ -16,26 +15,26 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 @ChannelHandler.Sharable
-public class BinlogGetHandler extends SimpleChannelInboundHandler<BinlogQuery> {
+public class BinlogGetHandler extends SimpleChannelInboundHandler<BinlogGetRequest> {
 
 	private BinlogAckService binlogAckService;
 	private ClientSessionService clientSessionService;
 
 	@Override
-	public void channelRead0(final ChannelHandlerContext ctx, final BinlogQuery binlogQuery) throws IOException {
-		final ClientSession session = clientSessionService.get(binlogQuery.getClientName(), binlogQuery.getToken());
+	public void channelRead0(final ChannelHandlerContext ctx, final BinlogGetRequest binlogGetRequest) throws IOException {
+		final ClientSession session = clientSessionService.get(binlogGetRequest.getClientName(), binlogGetRequest.getToken());
 
-		final BinlogMessage binlogMessage = (binlogQuery.getTimeout() <= 0)
+		final BinlogMessage binlogMessage = (binlogGetRequest.getTimeout() <= 0)
 				?
 				fillBinlogMessage(
 						session.getBinlogChannel(),
-						binlogQuery.getBatchSize())
+						binlogGetRequest.getBatchSize())
 				:
 				fillBinlogMessageWithTimeout(
 						session.getBinlogChannel(),
-						binlogQuery.getBatchSize(),
-						binlogQuery.getTimeout(),
-						binlogQuery.getTimeUnit()
+						binlogGetRequest.getBatchSize(),
+						binlogGetRequest.getTimeout(),
+						binlogGetRequest.getTimeUnit()
 				);
 
 		BinlogGetResponse binlogGetResponse = new BinlogGetResponse();

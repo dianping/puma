@@ -1,10 +1,10 @@
-package com.dianping.puma.core.netty.entity;
+package com.dianping.puma.core.netty.entity.binlog.request;
 
-public class BinlogUnsubscription {
+public abstract class BinlogRequest {
 
-	String clientName;
+	private String clientName;
 
-	String token;
+	private String token;
 
 	public String getClientName() {
 		return clientName;

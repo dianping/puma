@@ -1,4 +1,4 @@
-package com.dianping.puma.core.netty.entity.response;
+package com.dianping.puma.core.netty.entity;
 
 public class ExceptionResponse {
 

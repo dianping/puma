@@ -1,11 +1,11 @@
-package com.dianping.puma.pumaserver.handler;
+package com.dianping.puma.pumaserver.handler.binlog;
 
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.netty.entity.BinlogAck;
-import com.dianping.puma.core.netty.entity.BinlogSubscription;
+import com.dianping.puma.core.netty.entity.binlog.request.BinlogAckRequest;
+import com.dianping.puma.core.netty.entity.binlog.request.BinlogSubscriptionRequest;
 import com.dianping.puma.core.netty.entity.BinlogTarget;
-import com.dianping.puma.core.netty.entity.response.BinlogSubscriptionResponse;
+import com.dianping.puma.core.netty.entity.binlog.response.BinlogSubscriptionResponse;
 import com.dianping.puma.pumaserver.channel.BinlogChannel;
 import com.dianping.puma.pumaserver.channel.impl.ConstantBinlogChannel;
 import com.dianping.puma.pumaserver.client.ClientSession;
@@ -18,24 +18,24 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 @ChannelHandler.Sharable
-public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<BinlogSubscription> {
+public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<BinlogSubscriptionRequest> {
 
 	private BinlogTargetService   binlogTargetService;
 	private BinlogAckService      binlogAckService;
 	private ClientSessionService  clientSessionService;
 
 	@Override
-	public void channelRead0(ChannelHandlerContext ctx, BinlogSubscription binlogSubscription) {
-		String clientName = binlogSubscription.getClientName();
+	public void channelRead0(ChannelHandlerContext ctx, BinlogSubscriptionRequest binlogSubscriptionRequest) {
+		String clientName = binlogSubscriptionRequest.getClientName();
 
 		BinlogTarget binlogTarget = binlogTargetService.find(clientName);
-		BinlogAck binlogAck = binlogAckService.load(clientName);
+		BinlogAckRequest binlogAckRequest = binlogAckService.load(clientName);
 
 		BinlogChannel binlogChannel = buildBinlogChannel(
 				binlogTarget == null ? null : binlogTarget.getTargetName(),
 				binlogTarget == null ? 0 : binlogTarget.getDbServerId(),
 				null,
-				binlogAck == null ? null : binlogAck.getBinlogInfo(),
+				binlogAckRequest == null ? null : binlogAckRequest.getBinlogInfo(),
 				0
 		);
 

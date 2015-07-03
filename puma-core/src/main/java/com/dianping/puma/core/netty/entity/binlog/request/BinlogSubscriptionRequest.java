@@ -1,10 +1,8 @@
-package com.dianping.puma.core.netty.entity;
+package com.dianping.puma.core.netty.entity.binlog.request;
 
 import java.util.List;
 
-public class BinlogSubscription {
-
-	private String clientName;
+public class BinlogSubscriptionRequest extends BinlogRequest {
 
 	private boolean ddl;
 
@@ -15,14 +13,6 @@ public class BinlogSubscription {
 	private String database;
 
 	private List<String> tables;
-
-	public String getClientName() {
-		return clientName;
-	}
-
-	public void setClientName(String clientName) {
-		this.clientName = clientName;
-	}
 
 	public boolean isDdl() {
 		return ddl;

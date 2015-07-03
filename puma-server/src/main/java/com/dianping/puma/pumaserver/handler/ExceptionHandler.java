@@ -7,9 +7,7 @@ import com.dianping.puma.pumaserver.service.exception.BinlogAckException;
 import com.dianping.puma.pumaserver.service.exception.BinlogAuthException;
 import com.dianping.puma.pumaserver.service.exception.BinlogTargetException;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.*;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -25,84 +23,89 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 @ChannelHandler.Sharable
 public class ExceptionHandler extends ChannelDuplexHandler {
 
-	public static final ExceptionHandler INSTANCE = new ExceptionHandler();
+    public static final ExceptionHandler INSTANCE = new ExceptionHandler();
 
-	private static final Map<Class, HowToHandle> howToHandles = new HashMap<Class, HowToHandle>();
+    private static final Map<Class, HowToHandle> howToHandles = new HashMap<Class, HowToHandle>();
 
-	static {
-		howToHandles.put(
-				BinlogAuthException.class,
-				new HowToHandle(UNAUTHORIZED, "puma binlog auth error.", true)
-		);
-		howToHandles.put(
-				BinlogTargetException.class,
-				new HowToHandle(INTERNAL_SERVER_ERROR, "puma binlog target error.", true)
-		);
-		howToHandles.put(
-				BinlogChannelException.class,
-				new HowToHandle(INTERNAL_SERVER_ERROR, "puma binlog channel error.", true)
-		);
-		howToHandles.put(
-				BinlogAckException.class,
-				new HowToHandle(INTERNAL_SERVER_ERROR, "puma binlog ack error.", true)
-		);
-		howToHandles.put(
-				RuntimeException.class,
-				new HowToHandle(INTERNAL_SERVER_ERROR, "puma binlog server internal error.", true)
-		);
-	}
+    static {
+        howToHandles.put(
+                BinlogAuthException.class,
+                new HowToHandle(UNAUTHORIZED, "puma binlog auth error.", true)
+        );
+        howToHandles.put(
+                BinlogTargetException.class,
+                new HowToHandle(INTERNAL_SERVER_ERROR, "puma binlog target error.", true)
+        );
+        howToHandles.put(
+                BinlogChannelException.class,
+                new HowToHandle(INTERNAL_SERVER_ERROR, "puma binlog channel error.", true)
+        );
+        howToHandles.put(
+                BinlogAckException.class,
+                new HowToHandle(INTERNAL_SERVER_ERROR, "puma binlog ack error.", true)
+        );
+        howToHandles.put(
+                RuntimeException.class,
+                new HowToHandle(INTERNAL_SERVER_ERROR, "puma binlog server internal error.", true)
+        );
+    }
 
-	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-		if (cause instanceof IOException) {
-			// Handle network exceptions.
-			// @todo
-		} else {
-			// Handler server internal exceptions.
-			HowToHandle howToHandle = howToHandles.get(cause.getClass());
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        if (cause instanceof IOException) {
+            // Handle network exceptions.
+            // @todo
+        } else {
+            // Handler server internal exceptions.
+            HowToHandle howToHandle = howToHandles.get(cause.getClass());
 
-			// All unclassified exceptions are treated as runtime exception.
-			if (howToHandle == null) {
-				howToHandle = howToHandles.get(RuntimeException.class);
-			}
+            // All unclassified exceptions are treated as runtime exception.
+            if (howToHandle == null) {
+                howToHandle = howToHandles.get(RuntimeException.class);
+            }
 
-			FullHttpResponse response = new DefaultFullHttpResponse(
-					HTTP_1_1,
-					howToHandle.getStatus(),
-					Unpooled.wrappedBuffer(ConvertHelper.toBytes(new ExceptionResponse(howToHandle.getMsg()))));
+            FullHttpResponse response = new DefaultFullHttpResponse(
+                    HTTP_1_1,
+                    howToHandle.getStatus(),
+                    Unpooled.wrappedBuffer(ConvertHelper.toBytes(new ExceptionResponse(howToHandle.getMsg()))));
 
-			ctx.channel().writeAndFlush(response);
+            ChannelFuture future = ctx.channel().writeAndFlush(response);
 
-			if (howToHandle.isCloseChannel()) {
-				ctx.channel().close();
-			}
-		}
-	}
+            if (howToHandle.isCloseChannel()) {
+                future.addListener(new ChannelFutureListener() {
+                    @Override
+                    public void operationComplete(ChannelFuture f) throws Exception {
+                        f.channel().close();
+                    }
+                });
+            }
+        }
+    }
 
-	static final class HowToHandle {
+    static final class HowToHandle {
 
-		private HttpResponseStatus status;
+        private HttpResponseStatus status;
 
-		private String msg;
+        private String msg;
 
-		private boolean closeChannel;
+        private boolean closeChannel;
 
-		public HowToHandle(HttpResponseStatus status, String msg, boolean closeChannel) {
-			this.status = status;
-			this.msg = msg;
-			this.closeChannel = closeChannel;
-		}
+        public HowToHandle(HttpResponseStatus status, String msg, boolean closeChannel) {
+            this.status = status;
+            this.msg = msg;
+            this.closeChannel = closeChannel;
+        }
 
-		public HttpResponseStatus getStatus() {
-			return status;
-		}
+        public HttpResponseStatus getStatus() {
+            return status;
+        }
 
-		public String getMsg() {
-			return msg;
-		}
+        public String getMsg() {
+            return msg;
+        }
 
-		public boolean isCloseChannel() {
-			return closeChannel;
-		}
-	}
+        public boolean isCloseChannel() {
+            return closeChannel;
+        }
+    }
 }

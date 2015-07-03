@@ -17,10 +17,19 @@ public interface ClientSessionService {
     String subscribe(ClientSession subscription);
 
     /**
+     * 取消订阅
+     *
+     * @param clientName
+     * @param token
+     */
+    void unsubscribe(String clientName, String token);
+
+    /**
      * 根据 clientname 和 token 得到 client 信息
+     *
      * @param clientName
      * @param token
      * @return
      */
-    ClientSession get(String clientName, String token) ;
+    ClientSession get(String clientName, String token);
 }

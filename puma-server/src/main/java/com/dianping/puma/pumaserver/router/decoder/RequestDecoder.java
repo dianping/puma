@@ -8,6 +8,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
  * http://www.dozer.cc
  */
 public interface RequestDecoder {
+
     boolean match(FullHttpRequest request);
 
     Object decode(FullHttpRequest request);

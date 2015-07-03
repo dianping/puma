@@ -24,27 +24,12 @@ public class BinlogAckDecoder implements RequestDecoder {
         Map<String, List<String>> params = (new QueryStringDecoder(request.getUri())).parameters();
 
 
-        List<String> clientName = params.get("clientName");
-        if (clientName == null || clientName.size() == 0) {
-            throw new RuntimeException("must contain client name in binlog ack.");
-        }
-        binlogAck.setClientName(clientName.get(0));
-
-        List<String> token = params.get("token");
-        if (token == null || token.size() == 0) {
-            throw new RuntimeException("must contain token in binlog ack.");
-        }
-        binlogAck.setToken(token.get(0));
-
-
-        if (params.containsKey("binlogFile") && params.containsKey("binlogPosition")) {
-            binlogAck.setBinlogInfo(
-                    new BinlogInfo(params.get("binlogFile").get(0),
-                            Long.valueOf(params.get("binlogPosition").get(0)))
-            );
-        } else {
-            throw new RuntimeException("no binlog info given in binlog ack.");
-        }
+        binlogAck.setClientName(params.get("clientName").get(0));
+        binlogAck.setToken(params.get("token").get(0));
+        binlogAck.setBinlogInfo(
+                new BinlogInfo(params.get("binlogFile").get(0),
+                        Long.valueOf(params.get("binlogPosition").get(0)))
+        );
 
         return binlogAck;
     }

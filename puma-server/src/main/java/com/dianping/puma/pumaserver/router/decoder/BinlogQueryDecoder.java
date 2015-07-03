@@ -29,17 +29,8 @@ public class BinlogQueryDecoder implements RequestDecoder {
         Map<String, List<String>> params = (new QueryStringDecoder(request.getUri())).parameters();
 
 
-        List<String> clientName = params.get("clientName");
-        if (clientName == null || clientName.size() == 0) {
-            throw new RuntimeException("must contain client name in binlog subscription.");
-        }
-        binlogQuery.setClientName(clientName.get(0));
-
-        List<String> token = params.get("token");
-        if (token == null || token.size() == 0) {
-            throw new RuntimeException("must contain token in binlog subscription.");
-        }
-        binlogQuery.setToken(token.get(0));
+        binlogQuery.setClientName(params.get("clientName").get(0));
+        binlogQuery.setToken(params.get("token").get(0));
 
         binlogQuery.setAutoAck(
                 params.containsKey("autoAck") ? Boolean.valueOf(params.get("autoAck").get(0)) : DEFAULT_AUTO_ACK

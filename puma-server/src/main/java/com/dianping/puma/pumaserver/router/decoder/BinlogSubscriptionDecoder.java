@@ -26,23 +26,9 @@ public class BinlogSubscriptionDecoder implements RequestDecoder {
 		BinlogSubscription binlogSubscription = new BinlogSubscription();
 		Map<String, List<String>> params = (new QueryStringDecoder(request.getUri())).parameters();
 
-		List<String> clientName = params.get("clientName");
-		if (clientName == null || clientName.size() == 0) {
-			throw new RuntimeException("must contain client name in binlog subscription.");
-		}
-		binlogSubscription.setClientName(clientName.get(0));
-
-		List<String> database = params.get("database");
-		if (database == null || database.size() == 0) {
-			throw new RuntimeException("must contain database in binlog subscription.");
-		}
-		binlogSubscription.setDatabase(database.get(0));
-
-		List<String> tables = params.get("table");
-		if (tables == null || tables.size() == 0) {
-			throw new RuntimeException("must contain at least one table in binlog subscription");
-		}
-		binlogSubscription.setTables(tables);
+		binlogSubscription.setClientName(params.get("clientName").get(0));
+		binlogSubscription.setDatabase(params.get("database").get(0));
+		binlogSubscription.setTables(params.get("table"));
 
 		List<String> ddlStr = params.get("ddl");
 		binlogSubscription.setDdl(

@@ -59,7 +59,7 @@ public class PumaServerManager {
                 result.put("HttpRouterHandler", HttpRouterHandler.INSTANCE);
                 result.put("StatusQueryHandler", StatusQueryHandler.INSTANCE);
                 result.put("BinlogSubscriptionHandler", new BinlogSubscriptionHandler(binlogTargetService, binlogAckService, clientSessionService));
-                result.put("BinlogUnsubscriptionHandler", new BinlogUnsubscriptionHandler());
+                result.put("BinlogUnsubscriptionHandler", new BinlogUnsubscriptionHandler(clientSessionService));
                 result.put("BinlogQueryHandler", new BinlogQueryHandler(binlogAckService, clientSessionService));
                 result.put("BinlogAckHandler", new BinlogAckHandler(binlogAckService, clientSessionService));
                 result.put("DeprecatedBinlogQueryHandler", new DeprecatedBinlogQueryHandler());

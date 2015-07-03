@@ -25,6 +25,23 @@ public class DefaultClientSessionService implements ClientSessionService {
     }
 
     @Override
+    public void unsubscribe(String clientName, String token) {
+        if (Strings.isNullOrEmpty(clientName) || Strings.isNullOrEmpty(token)) {
+            return;
+        }
+
+        ClientSession client = clients.get(clientName);
+        if (client != null && token.equals(client.getToken())) {
+            unsubscribe(client);
+        }
+    }
+
+    protected void unsubscribe(ClientSession session) {
+        clients.remove(session.getClientName());
+        session.getBinlogChannel().destroy();
+    }
+
+    @Override
     public ClientSession get(String clientName, String token) {
         if (Strings.isNullOrEmpty(clientName) || Strings.isNullOrEmpty(token)) {
             return null;

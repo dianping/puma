@@ -63,6 +63,7 @@ public class PumaServerManager {
                 result.put("BinlogQueryHandler", new BinlogQueryHandler(binlogAckService, clientSessionService));
                 result.put("BinlogAckHandler", new BinlogAckHandler(binlogAckService, clientSessionService));
                 result.put("DeprecatedBinlogQueryHandler", new DeprecatedBinlogQueryHandler());
+                result.put("ExceptionHandler", ExceptionHandler.INSTANCE);
                 return result;
             }
         });

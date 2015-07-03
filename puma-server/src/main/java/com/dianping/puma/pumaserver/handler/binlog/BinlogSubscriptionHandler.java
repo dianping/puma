@@ -2,6 +2,7 @@ package com.dianping.puma.pumaserver.handler.binlog;
 
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.netty.entity.BinlogAck;
 import com.dianping.puma.core.netty.entity.binlog.request.BinlogAckRequest;
 import com.dianping.puma.core.netty.entity.binlog.request.BinlogSubscriptionRequest;
 import com.dianping.puma.core.netty.entity.BinlogTarget;
@@ -29,13 +30,13 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 		String clientName = binlogSubscriptionRequest.getClientName();
 
 		BinlogTarget binlogTarget = binlogTargetService.find(clientName);
-		BinlogAckRequest binlogAckRequest = binlogAckService.load(clientName);
+		BinlogAck binlogAck = binlogAckService.load(clientName);
 
 		BinlogChannel binlogChannel = buildBinlogChannel(
 				binlogTarget == null ? null : binlogTarget.getTargetName(),
 				binlogTarget == null ? 0 : binlogTarget.getDbServerId(),
 				null,
-				binlogAckRequest == null ? null : binlogAckRequest.getBinlogInfo(),
+				binlogAck == null ? null : binlogAck.getBinlogInfo(),
 				0
 		);
 

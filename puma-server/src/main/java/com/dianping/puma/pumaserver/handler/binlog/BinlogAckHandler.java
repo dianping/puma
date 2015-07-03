@@ -20,7 +20,7 @@ public class BinlogAckHandler extends SimpleChannelInboundHandler<BinlogAckReque
     public void channelRead0(ChannelHandlerContext ctx, BinlogAckRequest binlogAckRequest) {
         ClientSession session = clientSessionService.get(binlogAckRequest.getClientName(), binlogAckRequest.getToken());
 
-        binlogAckService.save(session.getClientName(), binlogAckRequest);
+        binlogAckService.save(session.getClientName(), binlogAckRequest.getBinlogAck());
 
         // For browser user only.
         if (session.getClientType().equals(ClientType.BROSWER)) {

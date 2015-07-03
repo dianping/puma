@@ -1,11 +1,11 @@
 package com.dianping.puma.pumaserver.service;
 
-import com.dianping.puma.core.netty.entity.binlog.request.BinlogAckRequest;
+import com.dianping.puma.core.netty.entity.BinlogAck;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogAckException;
 
 public interface BinlogAckService {
 
-	void save(String clientName, BinlogAckRequest binlogAckRequest) throws BinlogAckException;
+	void save(String clientName, BinlogAck binlogAck) throws BinlogAckException;
 
-	BinlogAckRequest load(String clientName) throws BinlogAckException;
+	BinlogAck load(String clientName) throws BinlogAckException;
 }

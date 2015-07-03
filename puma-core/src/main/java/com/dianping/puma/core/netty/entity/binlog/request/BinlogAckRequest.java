@@ -1,16 +1,16 @@
 package com.dianping.puma.core.netty.entity.binlog.request;
 
-import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.netty.entity.BinlogAck;
 
 public class BinlogAckRequest extends BinlogRequest {
 
-    private BinlogInfo binlogInfo;
+    private BinlogAck binlogAck;
 
-    public BinlogInfo getBinlogInfo() {
-        return binlogInfo;
+    public BinlogAck getBinlogAck() {
+        return binlogAck;
     }
 
-    public void setBinlogInfo(BinlogInfo binlogInfo) {
-        this.binlogInfo = binlogInfo;
+    public void setBinlogAck(BinlogAck binlogAck) {
+        this.binlogAck = binlogAck;
     }
 }

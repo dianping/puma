@@ -1,6 +1,7 @@
 package com.dianping.puma.pumaserver.handler.binlog;
 
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.netty.entity.BinlogAck;
 import com.dianping.puma.core.netty.entity.BinlogMessage;
 import com.dianping.puma.core.netty.entity.binlog.request.BinlogGetRequest;
 import com.dianping.puma.core.netty.entity.binlog.response.BinlogGetResponse;
@@ -42,7 +43,22 @@ public class BinlogGetHandler extends SimpleChannelInboundHandler<BinlogGetReque
 		binlogGetResponse.setToken(session.getToken());
 		binlogGetResponse.setMsg("get success");
 		binlogGetResponse.setBinlogMessage(binlogMessage);
-		ctx.writeAndFlush(binlogGetResponse);
+		ctx.writeAndFlush(binlogGetResponse).addListener(new ChannelFutureListener() {
+			@Override
+			public void operationComplete(ChannelFuture future) throws Exception {
+				if (future.isSuccess()) {
+
+					if (binlogGetRequest.isAutoAck() && binlogMessage.size() > 0) {
+						BinlogAck binlogAck = new BinlogAck();
+						binlogAck.setBinlogInfo(binlogMessage.getLastBinlogInfo());
+						binlogAckService.save(session.getClientName(), binlogAck);
+					}
+
+				} else {
+					// @todo
+				}
+			}
+		});
 
 		/*
 		ctx.writeAndFlush(binlogMessage).addListener(new ChannelFutureListener() {

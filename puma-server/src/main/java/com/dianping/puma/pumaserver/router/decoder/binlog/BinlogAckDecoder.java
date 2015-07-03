@@ -1,6 +1,7 @@
 package com.dianping.puma.pumaserver.router.decoder.binlog;
 
 import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.netty.entity.BinlogAck;
 import com.dianping.puma.core.netty.entity.binlog.request.BinlogAckRequest;
 import com.dianping.puma.pumaserver.router.decoder.RequestDecoder;
 import com.dianping.puma.pumaserver.router.decoder.exception.DecoderException;
@@ -40,10 +41,12 @@ public class BinlogAckDecoder implements RequestDecoder {
 		if (!params.containsKey("binlogFile") || !params.containsKey("binlogPosition")) {
 			throw new DecoderException("must contain `binlogInfo` in `BinlogAckRequest`");
 		} else {
-			binlogAckRequest.setBinlogInfo(new BinlogInfo(
+			BinlogAck binlogAck = new BinlogAck();
+			binlogAck.setBinlogInfo(new BinlogInfo(
 					params.get("binlogFile").get(0),
 					Long.valueOf(params.get("binlogPosition").get(0))
 			));
+			binlogAckRequest.setBinlogAck(binlogAck);
 		}
 
 		return binlogAckRequest;

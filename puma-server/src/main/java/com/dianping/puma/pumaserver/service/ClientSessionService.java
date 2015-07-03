@@ -32,4 +32,6 @@ public interface ClientSessionService {
      * @return
      */
     ClientSession get(String clientName, String token);
+
+    void init();
 }

@@ -42,6 +42,8 @@ public class PumaServerManager {
 
     @PostConstruct
     public synchronized void init() {
+        clientSessionService.init();
+
         ServerConfig consoleConfig = new ServerConfig();
         consoleConfig.setPort(4040);
 

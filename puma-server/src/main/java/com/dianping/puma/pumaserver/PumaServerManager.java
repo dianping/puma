@@ -47,6 +47,23 @@ public class PumaServerManager {
         ServerConfig consoleConfig = new ServerConfig();
         consoleConfig.setPort(4040);
 
+        // Initialize sharable handlers.
+        final BinlogAckHandler binlogAckHandler = new BinlogAckHandler();
+        binlogAckHandler.setBinlogAckService(binlogAckService);
+        binlogAckHandler.setClientSessionService(clientSessionService);
+
+        final BinlogGetHandler binlogGetHandler = new BinlogGetHandler();
+        binlogGetHandler.setBinlogAckService(binlogAckService);
+        binlogGetHandler.setClientSessionService(clientSessionService);
+
+        final BinlogSubscriptionHandler binlogSubscriptionHandler = new BinlogSubscriptionHandler();
+        binlogSubscriptionHandler.setBinlogAckService(binlogAckService);
+        binlogSubscriptionHandler.setBinlogTargetService(binlogTargetService);
+        binlogSubscriptionHandler.setClientSessionService(clientSessionService);
+
+        final BinlogUnsubscriptionHandler binlogUnsubscriptionHandler = new BinlogUnsubscriptionHandler();
+        binlogUnsubscriptionHandler.setClientSessionService(clientSessionService);
+
         consoleConfig.setHandlerFactory(new HandlerFactory() {
             @Override
             public Map<String, ChannelHandler> getHandlers() {
@@ -60,10 +77,10 @@ public class PumaServerManager {
                 result.put("HttpObjectAggregator", new HttpObjectAggregator(1024 * 1024 * 32));
                 result.put("HttpRouterHandler", HttpRouterHandler.INSTANCE);
                 result.put("StatusQueryHandler", StatusQueryHandler.INSTANCE);
-                result.put("BinlogSubscriptionHandler", new BinlogSubscriptionHandler(binlogTargetService, binlogAckService, clientSessionService));
-                result.put("BinlogUnsubscriptionHandler", new BinlogUnsubscriptionHandler(clientSessionService));
-                result.put("BinlogQueryHandler", new BinlogQueryHandler(binlogAckService, clientSessionService));
-                result.put("BinlogAckHandler", new BinlogAckHandler(binlogAckService, clientSessionService));
+                result.put("BinlogSubscriptionHandler", binlogSubscriptionHandler);
+                result.put("BinlogUnsubscriptionHandler", binlogUnsubscriptionHandler);
+                result.put("BinlogQueryHandler", binlogGetHandler);
+                result.put("BinlogAckHandler", binlogAckHandler);
                 result.put("DeprecatedBinlogQueryHandler", new DeprecatedBinlogQueryHandler());
                 result.put("ExceptionHandler", ExceptionHandler.INSTANCE);
                 return result;

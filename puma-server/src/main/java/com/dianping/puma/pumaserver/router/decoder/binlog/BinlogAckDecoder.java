@@ -21,27 +21,30 @@ public class BinlogAckDecoder implements RequestDecoder {
 	}
 
 	@Override
-	public Object decode(FullHttpRequest request) {
+	public Object decode(FullHttpRequest request) throws DecoderException {
 		BinlogAckRequest binlogAckRequest = new BinlogAckRequest();
 		Map<String, List<String>> params = (new QueryStringDecoder(request.getUri())).parameters();
 
 		if (!params.containsKey("clientName")) {
 			throw new DecoderException("must contain `clientName` in `BinlogAckRequest`");
+		} else {
+			binlogAckRequest.setClientName(params.get("clientName").get(0));
 		}
-		binlogAckRequest.setClientName(params.get("clientName").get(0));
 
 		if (!params.containsKey("token")) {
 			throw new DecoderException("must contain `token` in `BinlogAckRequest`");
+		} else {
+			binlogAckRequest.setToken(params.get("token").get(0));
 		}
-		binlogAckRequest.setToken(params.get("token").get(0));
 
 		if (!params.containsKey("binlogFile") || !params.containsKey("binlogPosition")) {
 			throw new DecoderException("must contain `binlogInfo` in `BinlogAckRequest`");
+		} else {
+			binlogAckRequest.setBinlogInfo(new BinlogInfo(
+					params.get("binlogFile").get(0),
+					Long.valueOf(params.get("binlogPosition").get(0))
+			));
 		}
-		binlogAckRequest.setBinlogInfo(new BinlogInfo(
-				params.get("binlogFile").get(0),
-				Long.valueOf(params.get("binlogPosition").get(0))
-		));
 
 		return binlogAckRequest;
 	}

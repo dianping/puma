@@ -24,29 +24,45 @@ public class BinlogSubscriptionDecoder implements RequestDecoder {
 	}
 
 	@Override
-	public Object decode(FullHttpRequest request) {
+	public Object decode(FullHttpRequest request) throws DecoderException {
 		BinlogSubscriptionRequest binlogSubscriptionRequest = new BinlogSubscriptionRequest();
 		Map<String, List<String>> params = (new QueryStringDecoder(request.getUri())).parameters();
 
 		if (!params.containsKey("clientName")) {
 			throw new DecoderException("must contain `clientName` in `BinlogSubscriptionRequest`");
+		} else {
+			binlogSubscriptionRequest.setClientName(params.get("clientName").get(0));
 		}
-		binlogSubscriptionRequest.setClientName(params.get("clientName").get(0));
+
+		if (!params.containsKey("database")) {
+			throw new DecoderException("must contain `database` in `BinlogSubscriptionRequest`");
+		} else {
+			binlogSubscriptionRequest.setDatabase(params.get("database").get(0));
+		}
+
+		if (!params.containsKey("table")) {
+			throw new DecoderException("must contain `table` in `BinlogSubscriptionRequest`");
+		} else {
+			binlogSubscriptionRequest.setTables(params.get("table"));
+		}
 
 		if (!params.containsKey("ddl")) {
 			binlogSubscriptionRequest.setDdl(DEFAULT_DDL);
+		} else {
+			binlogSubscriptionRequest.setDdl(Boolean.valueOf(params.get("ddl").get(0)));
 		}
-		binlogSubscriptionRequest.setDdl(Boolean.valueOf(params.get("ddl").get(0)));
 
 		if (!params.containsKey("dml")) {
 			binlogSubscriptionRequest.setDml(DEFAULT_DML);
+		} else {
+			binlogSubscriptionRequest.setDml(Boolean.valueOf(params.get("dml").get(0)));
 		}
-		binlogSubscriptionRequest.setDml(Boolean.valueOf(params.get("dml").get(0)));
 
 		if (!params.containsKey("transaction")) {
 			binlogSubscriptionRequest.setTransaction(DEFAULT_TRANSACTION);
+		} else {
+			binlogSubscriptionRequest.setTransaction(Boolean.valueOf(params.get("transaction").get(0)));
 		}
-		binlogSubscriptionRequest.setTransaction(Boolean.valueOf(params.get("transaction").get(0)));
 
 		return binlogSubscriptionRequest;
 	}

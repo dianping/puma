@@ -32,33 +32,39 @@ public class BinlogGetDecoder implements RequestDecoder {
 
 		if (!params.containsKey("clientName")) {
 			throw new DecoderException("must contain `clientName` in `BinlogGetRequest`");
+		} else {
+			binlogGetRequest.setClientName(params.get("clientName").get(0));
 		}
-		binlogGetRequest.setClientName(params.get("clientName").get(0));
 
 		if (!params.containsKey("token")) {
 			throw new DecoderException("must contain `token` in `BinlogGetRequest`");
+		} else {
+			binlogGetRequest.setToken(params.get("token").get(0));
 		}
-		binlogGetRequest.setToken(params.get("token").get(0));
 
 		if (!params.containsKey("autoAck")) {
 			binlogGetRequest.setAutoAck(DEFAULT_AUTO_ACK);
+		} else {
+			binlogGetRequest.setAutoAck(Boolean.valueOf(params.get("autoAck").get(0)));
 		}
-		binlogGetRequest.setAutoAck(Boolean.valueOf(params.get("autoAck").get(0)));
 
 		if (!params.containsKey("batchSize")) {
 			binlogGetRequest.setBatchSize(DEFAULT_BATCH_SIZE);
+		} else {
+			binlogGetRequest.setBatchSize(Integer.valueOf(params.get("batchSize").get(0)));
 		}
-		binlogGetRequest.setBatchSize(Integer.valueOf(params.get("batchSize").get(0)));
 
 		if (!params.containsKey("timeout"))	{
 			binlogGetRequest.setTimeout(DEFAULT_TIMEOUT);
+		} else {
+			binlogGetRequest.setTimeout(Long.valueOf(params.get("timeout").get(0)));
 		}
-		binlogGetRequest.setTimeout(Long.valueOf(params.get("timeout").get(0)));
 
 		if (!params.containsKey("timeUnit")) {
 			binlogGetRequest.setTimeUnit(DEFAULT_TIME_UNIT);
+		} else {
+			binlogGetRequest.setTimeUnit(TimeUnit.valueOf(params.get("TimeUnit").get(0)));
 		}
-		binlogGetRequest.setTimeUnit(TimeUnit.valueOf(params.get("TimeUnit").get(0)));
 
 		return binlogGetRequest;
 	}

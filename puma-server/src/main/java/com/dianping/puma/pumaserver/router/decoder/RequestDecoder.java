@@ -1,5 +1,6 @@
 package com.dianping.puma.pumaserver.router.decoder;
 
+import com.dianping.puma.pumaserver.router.decoder.exception.DecoderException;
 import io.netty.handler.codec.http.FullHttpRequest;
 
 /**
@@ -11,5 +12,5 @@ public interface RequestDecoder {
 
     boolean match(FullHttpRequest request);
 
-    Object decode(FullHttpRequest request);
+    Object decode(FullHttpRequest request) throws DecoderException;
 }

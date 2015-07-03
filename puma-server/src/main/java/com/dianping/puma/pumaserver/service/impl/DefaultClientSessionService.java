@@ -1,6 +1,7 @@
 package com.dianping.puma.pumaserver.service.impl;
 
 import com.dianping.puma.pumaserver.client.ClientSession;
+import com.dianping.puma.pumaserver.exception.BinlogAuthException;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
 import com.google.common.base.Strings;
 
@@ -81,7 +82,7 @@ public class DefaultClientSessionService implements ClientSessionService {
     @Override
     public ClientSession get(String clientName, String token) {
         if (Strings.isNullOrEmpty(clientName) || Strings.isNullOrEmpty(token)) {
-            return null;
+            throw new BinlogAuthException(clientName);
         }
 
         ClientSession client = clients.get(clientName);
@@ -89,6 +90,7 @@ public class DefaultClientSessionService implements ClientSessionService {
             client.setLastAccessTime(System.currentTimeMillis());
             return client;
         }
-        return null;
+
+        throw new BinlogAuthException(clientName);
     }
 }

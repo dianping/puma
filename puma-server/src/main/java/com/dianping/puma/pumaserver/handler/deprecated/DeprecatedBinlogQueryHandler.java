@@ -1,4 +1,4 @@
-package com.dianping.puma.pumaserver.handler;
+package com.dianping.puma.pumaserver.handler.deprecated;
 
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.codec.EventCodecFactory;
@@ -6,7 +6,7 @@ import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.netty.entity.DeprecatedBinlogQuery;
+import com.dianping.puma.core.netty.entity.deprecated.DeprecatedBinlogQuery;
 import com.dianping.puma.core.netty.handler.HttpResponseEncoder;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.filter.EventFilterChain;

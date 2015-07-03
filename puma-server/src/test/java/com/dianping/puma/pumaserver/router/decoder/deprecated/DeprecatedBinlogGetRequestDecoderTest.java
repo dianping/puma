@@ -1,4 +1,4 @@
-package com.dianping.puma.pumaserver.router.decoder;
+package com.dianping.puma.pumaserver.router.decoder.deprecated;
 
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
@@ -13,7 +13,7 @@ import java.util.Map;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class DeprecatedDeprecatedBinlogGetRequestDecoderTest {
+public class DeprecatedBinlogGetRequestDecoderTest {
 
     @Test
     public void test_match() throws Exception {

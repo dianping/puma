@@ -1,6 +1,7 @@
-package com.dianping.puma.pumaserver.router.decoder;
+package com.dianping.puma.pumaserver.router.decoder.status;
 
-import com.dianping.puma.core.netty.entity.StatusQuery;
+import com.dianping.puma.core.netty.entity.status.StatusQuery;
+import com.dianping.puma.pumaserver.router.decoder.RequestDecoder;
 import io.netty.handler.codec.http.FullHttpRequest;
 
 import java.util.regex.Pattern;

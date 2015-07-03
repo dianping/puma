@@ -1,4 +1,4 @@
-package com.dianping.puma.core.netty.entity;
+package com.dianping.puma.core.netty.entity.deprecated;
 
 import com.dianping.puma.core.model.BinlogInfo;
 

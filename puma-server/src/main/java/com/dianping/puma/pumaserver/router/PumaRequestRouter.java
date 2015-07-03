@@ -5,6 +5,8 @@ import com.dianping.puma.pumaserver.router.decoder.binlog.BinlogAckDecoder;
 import com.dianping.puma.pumaserver.router.decoder.binlog.BinlogGetDecoder;
 import com.dianping.puma.pumaserver.router.decoder.binlog.BinlogSubscriptionDecoder;
 import com.dianping.puma.pumaserver.router.decoder.binlog.BinlogUnsubscriptionDecoder;
+import com.dianping.puma.pumaserver.router.decoder.deprecated.DeprecatedBinlogQueryDecoder;
+import com.dianping.puma.pumaserver.router.decoder.status.StatusQueryDecoder;
 import io.netty.handler.codec.http.FullHttpRequest;
 
 import java.util.LinkedHashSet;

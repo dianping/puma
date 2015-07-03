@@ -1,4 +1,4 @@
-package com.dianping.puma.core.netty.entity;
+package com.dianping.puma.core.netty.entity.status;
 
 /**
  * Dozer @ 6/25/15

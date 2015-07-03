@@ -1,8 +1,9 @@
-package com.dianping.puma.pumaserver.router.decoder;
+package com.dianping.puma.pumaserver.router.decoder.deprecated;
 
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.netty.entity.DeprecatedBinlogQuery;
+import com.dianping.puma.core.netty.entity.deprecated.DeprecatedBinlogQuery;
 import com.dianping.puma.core.util.ConvertHelper;
+import com.dianping.puma.pumaserver.router.decoder.RequestDecoder;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;

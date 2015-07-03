@@ -11,6 +11,8 @@ import com.dianping.puma.pumaserver.handler.binlog.BinlogAckHandler;
 import com.dianping.puma.pumaserver.handler.binlog.BinlogGetHandler;
 import com.dianping.puma.pumaserver.handler.binlog.BinlogSubscriptionHandler;
 import com.dianping.puma.pumaserver.handler.binlog.BinlogUnsubscriptionHandler;
+import com.dianping.puma.pumaserver.handler.deprecated.DeprecatedBinlogQueryHandler;
+import com.dianping.puma.pumaserver.handler.status.StatusQueryHandler;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.service.BinlogTargetService;
 import com.dianping.puma.pumaserver.service.ClientSessionService;

@@ -11,9 +11,6 @@ import com.dianping.puma.core.netty.handler.HttpResponseEncoder;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.filter.EventFilterChainFactory;
-import com.dianping.puma.pumaserver.AttributeKeys;
-import com.dianping.puma.pumaserver.client.ClientInfo;
-import com.dianping.puma.pumaserver.client.ClientType;
 import com.dianping.puma.server.DefaultTaskExecutorContainer;
 import com.dianping.puma.storage.BufferedEventChannel;
 import com.dianping.puma.storage.EventChannel;
@@ -39,7 +36,6 @@ public class DeprecatedBinlogQueryHandler extends SimpleChannelInboundHandler<De
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, DeprecatedBinlogQuery deprecatedBinlogQuery) {
-        ctx.channel().attr(AttributeKeys.CLIENT_INFO).set(new ClientInfo().setClientType(ClientType.PUMACLIENT));
         ctx.channel().pipeline().remove(io.netty.handler.codec.http.HttpResponseEncoder.class);
         ctx.channel().pipeline().remove(HttpContentCompressor.class);
         ctx.channel().pipeline().remove(HttpResponseEncoder.class);

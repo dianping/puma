@@ -5,14 +5,19 @@ import com.dianping.puma.core.netty.handler.HandlerFactory;
 import com.dianping.puma.core.netty.handler.HttpResponseEncoder;
 import com.dianping.puma.core.netty.server.ServerConfig;
 import com.dianping.puma.core.netty.server.TcpServer;
-import com.dianping.puma.pumaserver.service.BinlogAckService;
-import com.dianping.puma.pumaserver.service.BinlogTargetService;
-import com.dianping.puma.pumaserver.service.impl.CachedBinlogAckService;
 import com.dianping.puma.pumaserver.client.PumaClientsHolder;
 import com.dianping.puma.pumaserver.handler.*;
+import com.dianping.puma.pumaserver.service.BinlogAckService;
+import com.dianping.puma.pumaserver.service.BinlogTargetService;
+import com.dianping.puma.pumaserver.service.ClientInfoService;
+import com.dianping.puma.pumaserver.service.impl.CachedBinlogAckService;
+import com.dianping.puma.pumaserver.service.impl.DefaultClientInfoService;
 import com.dianping.puma.pumaserver.service.impl.LionBinlogTargetService;
 import io.netty.channel.ChannelHandler;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.HttpContentCompressor;
+import io.netty.handler.codec.http.HttpContentDecompressor;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpRequestDecoder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -31,6 +36,7 @@ public class PumaServerManager {
 
     protected final BinlogTargetService binlogTargetService = new LionBinlogTargetService();
     protected final BinlogAckService binlogAckService = new CachedBinlogAckService();
+    protected final ClientInfoService clientInfoService = new DefaultClientInfoService();
 
     protected final ChannelHolderHandler channelHolderHandler = new ChannelHolderHandler(new PumaClientsHolder());
 
@@ -52,10 +58,10 @@ public class PumaServerManager {
                 result.put("HttpObjectAggregator", new HttpObjectAggregator(1024 * 1024 * 32));
                 result.put("HttpRouterHandler", HttpRouterHandler.INSTANCE);
                 result.put("StatusQueryHandler", StatusQueryHandler.INSTANCE);
-                result.put("BinlogSubscriptionHandler", new BinlogSubscriptionHandler(binlogTargetService, binlogAckService));
+                result.put("BinlogSubscriptionHandler", new BinlogSubscriptionHandler(binlogTargetService, binlogAckService, clientInfoService));
                 result.put("BinlogUnsubscriptionHandler", new BinlogUnsubscriptionHandler());
-                result.put("BinlogQueryHandler", new BinlogQueryHandler(binlogAckService));
-                result.put("BinlogAckHandler", new BinlogAckHandler(binlogAckService));
+                result.put("BinlogQueryHandler", new BinlogQueryHandler(binlogAckService, clientInfoService));
+                result.put("BinlogAckHandler", new BinlogAckHandler(binlogAckService, clientInfoService));
                 result.put("DeprecatedBinlogQueryHandler", new DeprecatedBinlogQueryHandler());
                 return result;
             }

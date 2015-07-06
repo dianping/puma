@@ -245,7 +245,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 		SystemStatusContainer.instance.updateServerStatus(getTaskName(), dbHost, port, database, getContext()
 				.getBinlogFileName(), getContext().getBinlogStartPos());
 
-		// 只有整个binlogEvent分发完了才save
+		// 只有整个binlogEvent分发完了才save ? TODO:如果分发到了一半挂了,重新启动后会回滚数据文件吗？
 		if (binlogEvent.getHeader() != null
 				&& binlogEvent.getHeader().getNextPosition() != 0
 				&& StringUtils.isNotBlank(getContext().getBinlogFileName())

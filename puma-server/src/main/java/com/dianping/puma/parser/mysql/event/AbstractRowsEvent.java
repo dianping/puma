@@ -143,10 +143,10 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 		}
 		columnCount = PacketUtils.readLengthCodedUnsignedLong(buf);
 
-		innderParse(buf, context);
+		innerParse(buf, context);
 	}
 
-	protected abstract void innderParse(ByteBuffer buf, PumaContext context) throws IOException;
+	protected abstract void innerParse(ByteBuffer buf, PumaContext context) throws IOException;
 
 	/**
 	 * 

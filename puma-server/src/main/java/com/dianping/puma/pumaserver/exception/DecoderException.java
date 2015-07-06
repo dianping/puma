@@ -1,4 +1,4 @@
-package com.dianping.puma.pumaserver.router.decoder.exception;
+package com.dianping.puma.pumaserver.exception;
 
 public class DecoderException extends RuntimeException {
 

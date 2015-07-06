@@ -1,6 +1,6 @@
 package com.dianping.puma.pumaserver.router.decoder;
 
-import com.dianping.puma.pumaserver.router.decoder.exception.DecoderException;
+import com.dianping.puma.pumaserver.exception.DecoderException;
 import io.netty.handler.codec.http.FullHttpRequest;
 
 /**

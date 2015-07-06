@@ -63,7 +63,7 @@ public class BinlogGetDecoder implements RequestDecoder {
 		if (!params.containsKey("timeUnit")) {
 			binlogGetRequest.setTimeUnit(DEFAULT_TIME_UNIT);
 		} else {
-			binlogGetRequest.setTimeUnit(TimeUnit.valueOf(params.get("TimeUnit").get(0)));
+			binlogGetRequest.setTimeUnit(TimeUnit.valueOf(params.get("timeUnit").get(0)));
 		}
 
 		return binlogGetRequest;

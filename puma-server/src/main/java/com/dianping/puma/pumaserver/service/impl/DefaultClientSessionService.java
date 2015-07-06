@@ -58,7 +58,10 @@ public class DefaultClientSessionService implements ClientSessionService {
     public String subscribe(ClientSession client) {
         client.setToken(UUID.randomUUID().toString());
         client.setLastAccessTime(System.currentTimeMillis());
-        clients.put(client.getClientName(), client);
+        ClientSession old = clients.put(client.getClientName(), client);
+        if (old != null) {
+            old.getBinlogChannel().destroy();
+        }
         return client.getToken();
     }
 

@@ -4,9 +4,13 @@ import com.dianping.puma.core.netty.entity.BinlogMessage;
 
 public class BinlogGetResponse extends BinlogResponse {
 
-	private BinlogMessage binlogMessage;
+    private BinlogMessage binlogMessage;
 
-	public void setBinlogMessage(BinlogMessage binlogMessage) {
-		this.binlogMessage = binlogMessage;
-	}
+    public void setBinlogMessage(BinlogMessage binlogMessage) {
+        this.binlogMessage = binlogMessage;
+    }
+
+    public BinlogMessage getBinlogMessage() {
+        return binlogMessage;
+    }
 }

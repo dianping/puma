@@ -1,8 +1,8 @@
 package com.dianping.puma.syncserver.job.container;
 
 import com.dianping.cat.Cat;
-import com.dianping.puma.core.entity.SyncTask;
-import com.dianping.puma.core.service.SyncTaskService;
+import com.dianping.puma.biz.entity.SyncTask;
+import com.dianping.puma.biz.service.SyncTaskService;
 import com.dianping.puma.syncserver.config.SyncServerConfig;
 import com.dianping.puma.syncserver.job.container.exception.TECException;
 import com.dianping.puma.syncserver.job.executor.*;

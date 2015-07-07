@@ -39,16 +39,16 @@
 
     <import resource="applicationContext-swallow.xml" />
 
-    <bean id="notifyService" class="com.dianping.puma.core.monitor.DefaultNotifyService"/>
+    <bean id="notifyService" class="com.dianping.puma.biz.monitor.DefaultNotifyService"/>
 
-    <bean id="mongoClient" class="com.dianping.puma.core.dao.morphia.helper.MongoClient">
+    <bean id="mongoClient" class="com.dianping.puma.biz.dao.morphia.helper.MongoClient">
     </bean>
 
     <!--<bean id="mongoClient" class="com.dianping.puma.core.sync.dao.MongoClient">
     </bean>  -->
 
     <bean id="seqGeneratorService"
-        class="com.dianping.puma.core.dao.morphia.helper.MongoSeqGeneratorServiceImpl">
+        class="com.dianping.puma.biz.dao.morphia.helper.MongoSeqGeneratorServiceImpl">
         <property name="mongoClient">
             <ref bean="mongoClient" />
         </property>

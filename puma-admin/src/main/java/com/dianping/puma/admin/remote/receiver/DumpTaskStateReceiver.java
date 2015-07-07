@@ -1,11 +1,11 @@
 package com.dianping.puma.admin.remote.receiver;
 
 import com.dianping.puma.core.model.state.DumpTaskState;
-import com.dianping.puma.core.monitor.EventListener;
-import com.dianping.puma.core.monitor.event.DumpTaskStateEvent;
-import com.dianping.puma.core.monitor.event.Event;
-import com.dianping.puma.core.service.DumpTaskService;
-import com.dianping.puma.core.service.DumpTaskStateService;
+import com.dianping.puma.biz.monitor.EventListener;
+import com.dianping.puma.biz.monitor.event.DumpTaskStateEvent;
+import com.dianping.puma.biz.monitor.event.Event;
+import com.dianping.puma.biz.service.DumpTaskService;
+import com.dianping.puma.biz.service.DumpTaskStateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

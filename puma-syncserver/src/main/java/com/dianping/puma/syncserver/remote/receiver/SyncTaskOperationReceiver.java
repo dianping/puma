@@ -2,11 +2,11 @@ package com.dianping.puma.syncserver.remote.receiver;
 
 import com.dianping.cat.Cat;
 import com.dianping.puma.core.constant.ActionOperation;
-import com.dianping.puma.core.entity.SyncTask;
-import com.dianping.puma.core.monitor.event.Event;
-import com.dianping.puma.core.monitor.EventListener;
-import com.dianping.puma.core.monitor.event.SyncTaskOperationEvent;
-import com.dianping.puma.core.service.SyncTaskService;
+import com.dianping.puma.biz.entity.SyncTask;
+import com.dianping.puma.biz.monitor.event.Event;
+import com.dianping.puma.biz.monitor.EventListener;
+import com.dianping.puma.biz.monitor.event.SyncTaskOperationEvent;
+import com.dianping.puma.biz.service.SyncTaskService;
 import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;
 import com.dianping.puma.syncserver.job.container.exception.TECException;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;

@@ -1,0 +1,17 @@
+package com.dianping.puma.biz.monitor;
+
+import com.dianping.puma.core.LifeCycle;
+import com.dianping.puma.core.exception.MonitorException;
+
+public interface PumaMonitor extends LifeCycle<MonitorException> {
+
+	void start();
+
+	void stop();
+
+	void pause();
+
+	void record(Object key, Object value);
+
+	void remove(Object key);
+}

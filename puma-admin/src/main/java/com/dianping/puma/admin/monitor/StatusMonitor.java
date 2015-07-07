@@ -12,12 +12,10 @@ import org.springframework.stereotype.Service;
 
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
-import com.dianping.puma.core.service.SyncTaskService;
-import com.dianping.puma.core.monitor.NotifyService;
-import com.dianping.puma.core.entity.SyncTask;
-import com.dianping.puma.core.sync.model.task.SyncTaskStatusAction;
-import com.dianping.puma.core.sync.model.task.Type;
-import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
+import com.dianping.puma.biz.service.SyncTaskService;
+import com.dianping.puma.biz.monitor.NotifyService;
+import com.dianping.puma.biz.entity.SyncTask;
+import com.dianping.puma.biz.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.SyncType;
 

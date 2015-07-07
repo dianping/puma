@@ -1,41 +1,33 @@
 package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.config.Config;
-import com.dianping.puma.admin.model.SyncTaskDto;
-import com.dianping.puma.admin.model.mapper.ErrorListMapper;
-import com.dianping.puma.admin.model.mapper.SyncTaskMapper;
 import com.dianping.puma.admin.remote.reporter.SyncTaskControllerReporter;
 import com.dianping.puma.admin.remote.reporter.SyncTaskOperationReporter;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.admin.util.MysqlMetaInfoFetcher;
+import com.dianping.puma.biz.entity.DumpTask;
+import com.dianping.puma.biz.entity.PumaTask;
+import com.dianping.puma.biz.entity.SrcDBInstance;
+import com.dianping.puma.biz.entity.SyncTask;
+import com.dianping.puma.biz.service.*;
+import com.dianping.puma.biz.sync.model.config.MysqlHost;
+import com.dianping.puma.biz.sync.model.mapping.*;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
-import com.dianping.puma.core.entity.*;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.state.BaseSyncTaskState;
 import com.dianping.puma.core.model.state.DumpTaskState;
-import com.dianping.puma.core.model.state.SyncTaskState;
 import com.dianping.puma.core.model.state.TaskStateContainer;
-import com.dianping.puma.core.service.*;
-import com.dianping.puma.core.sync.model.config.MysqlHost;
-import com.dianping.puma.core.sync.model.mapping.*;
-import com.mongodb.MongoException;
-
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
-
 import java.sql.SQLException;
 import java.util.*;
 
@@ -84,7 +76,7 @@ public class SyncTaskCreateController {
 
     @Autowired
     DumpTaskStateService dumpTaskStateService;
-    
+
     //@RequestMapping(value = "/sync-task/create/step1Save", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Object step1Save(HttpSession session, String pumaTaskName, String dstDBInstanceName, String syncServerName,
@@ -113,7 +105,7 @@ public class SyncTaskCreateController {
             }
             // 判断该srcMysql和destMysql是否重复
             /*
-			 * if (this.syncTaskService.existsBySrcAndDest(srcMysql, destMysql))
+             * if (this.syncTaskService.existsBySrcAndDest(srcMysql, destMysql))
 			 * { throw new
 			 * IllegalArgumentException("创建失败，已有相同的配置存在。(srcMysqlName=" +
 			 * srcMysql + ", destMysqlName=" + destMysql + ")"); }
@@ -351,7 +343,7 @@ public class SyncTaskCreateController {
             // 保存dumpTask到数据库
             syncTaskService.create(syncTask);
             // 更新dumpTask的syncTaskId
-			/*Long syncTaskId = syncTask.getId();
+            /*Long syncTaskId = syncTask.getId();
 			if (dumpTask != null) {
 				long dumpTaskId = dumpTask.getId();
 				this.dumpTaskService.updateSyncTaskId(dumpTaskId, syncTaskId);
@@ -464,5 +456,5 @@ public class SyncTaskCreateController {
         return true;
     }
 
-   
+
 }

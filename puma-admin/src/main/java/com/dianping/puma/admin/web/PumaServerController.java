@@ -4,12 +4,12 @@ import com.dianping.puma.admin.model.PumaServerDto;
 import com.dianping.puma.admin.model.mapper.PumaServerMapper;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.constant.ActionOperation;
-import com.dianping.puma.core.entity.PumaServer;
-import com.dianping.puma.core.entity.PumaTask;
-import com.dianping.puma.core.entity.SyncTask;
-import com.dianping.puma.core.service.PumaServerService;
-import com.dianping.puma.core.service.PumaTaskService;
-import com.dianping.puma.core.service.SyncTaskService;
+import com.dianping.puma.biz.entity.PumaServer;
+import com.dianping.puma.biz.entity.PumaTask;
+import com.dianping.puma.biz.entity.SyncTask;
+import com.dianping.puma.biz.service.PumaServerService;
+import com.dianping.puma.biz.service.PumaTaskService;
+import com.dianping.puma.biz.service.SyncTaskService;
 import com.mongodb.MongoException;
 
 import org.slf4j.Logger;

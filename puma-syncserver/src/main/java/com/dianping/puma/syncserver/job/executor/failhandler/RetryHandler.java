@@ -1,14 +1,11 @@
 package com.dianping.puma.syncserver.job.executor.failhandler;
 
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import com.dianping.puma.core.entity.BaseSyncTask;
-import com.dianping.puma.core.model.state.BaseSyncTaskState;
-import org.apache.commons.lang.time.DateFormatUtils;
+import com.dianping.puma.biz.entity.BaseSyncTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

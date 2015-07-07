@@ -4,17 +4,16 @@ import java.io.IOException;
 
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
-import com.dianping.puma.core.entity.DumpTask;
-import com.dianping.puma.core.entity.PumaTask;
-import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
+import com.dianping.puma.biz.entity.DumpTask;
+import com.dianping.puma.biz.entity.PumaTask;
 import com.dianping.puma.core.model.state.DumpTaskState;
-import com.dianping.puma.core.service.DstDBInstanceService;
-import com.dianping.puma.core.service.PumaTaskService;
-import com.dianping.puma.core.service.SrcDBInstanceService;
+import com.dianping.puma.biz.service.DstDBInstanceService;
+import com.dianping.puma.biz.service.PumaTaskService;
+import com.dianping.puma.biz.service.SrcDBInstanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.dianping.puma.core.sync.model.task.Type;
+import com.dianping.puma.biz.sync.model.task.Type;
 import com.dianping.puma.syncserver.job.executor.DumpTaskExecutor;
 
 @Service("dumpTaskExecutorStrategy")

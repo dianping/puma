@@ -3,9 +3,9 @@ package com.dianping.puma.admin.model.mapper;
 import com.dianping.puma.admin.model.DBInstanceDto;
 import com.dianping.puma.admin.model.DstDBInstanceDto;
 import com.dianping.puma.admin.model.SrcDBInstanceDto;
-import com.dianping.puma.core.entity.DBInstance;
-import com.dianping.puma.core.entity.DstDBInstance;
-import com.dianping.puma.core.entity.SrcDBInstance;
+import com.dianping.puma.biz.entity.DBInstance;
+import com.dianping.puma.biz.entity.DstDBInstance;
+import com.dianping.puma.biz.entity.SrcDBInstance;
 
 public class DBInstanceMapper {
 

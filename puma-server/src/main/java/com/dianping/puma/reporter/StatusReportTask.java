@@ -27,8 +27,8 @@ import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.common.SystemStatusContainer.ServerStatus;
-import com.dianping.puma.core.monitor.Notifiable;
-import com.dianping.puma.core.monitor.NotifyService;
+import com.dianping.puma.biz.monitor.Notifiable;
+import com.dianping.puma.biz.monitor.NotifyService;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.storage.Sequence;
 

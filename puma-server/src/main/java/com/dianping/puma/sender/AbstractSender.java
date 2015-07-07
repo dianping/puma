@@ -3,8 +3,8 @@ package com.dianping.puma.sender;
 
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.monitor.Notifiable;
-import com.dianping.puma.core.monitor.NotifyService;
+import com.dianping.puma.biz.monitor.Notifiable;
+import com.dianping.puma.biz.monitor.NotifyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

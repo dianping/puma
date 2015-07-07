@@ -1,6 +1,6 @@
 package com.dianping.puma.syncserver.job.executor.failhandler;
 
-import com.dianping.puma.core.entity.BaseSyncTask;
+import com.dianping.puma.biz.entity.BaseSyncTask;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 
 import com.dianping.puma.core.event.ChangedEvent;

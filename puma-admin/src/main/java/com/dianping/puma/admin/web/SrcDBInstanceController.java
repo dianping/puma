@@ -3,10 +3,10 @@ package com.dianping.puma.admin.web;
 import com.dianping.puma.admin.model.SrcDBInstanceDto;
 import com.dianping.puma.admin.model.mapper.DBInstanceMapper;
 import com.dianping.puma.admin.util.GsonUtil;
-import com.dianping.puma.core.entity.PumaTask;
-import com.dianping.puma.core.entity.SrcDBInstance;
-import com.dianping.puma.core.service.PumaTaskService;
-import com.dianping.puma.core.service.SrcDBInstanceService;
+import com.dianping.puma.biz.entity.PumaTask;
+import com.dianping.puma.biz.entity.SrcDBInstance;
+import com.dianping.puma.biz.service.PumaTaskService;
+import com.dianping.puma.biz.service.SrcDBInstanceService;
 import com.mongodb.MongoException;
 
 import org.slf4j.Logger;

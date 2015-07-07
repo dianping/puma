@@ -1,10 +1,9 @@
 package com.dianping.puma.syncserver.job.executor.failhandler;
 
-import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
 
-import com.dianping.puma.core.entity.BaseSyncTask;
+import com.dianping.puma.biz.entity.BaseSyncTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
-import com.dianping.puma.core.monitor.NotifyService;
+import com.dianping.puma.biz.monitor.NotifyService;
 
 public class DeleteDuplicateRecordHandler implements Handler {
     private static final Logger LOG = LoggerFactory.getLogger(DeleteDuplicateRecordHandler.class);

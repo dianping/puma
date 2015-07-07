@@ -1,7 +1,7 @@
 package com.dianping.puma.admin.model.mapper;
 
 import com.dianping.puma.admin.model.PumaServerDto;
-import com.dianping.puma.core.entity.PumaServer;
+import com.dianping.puma.biz.entity.PumaServer;
 
 public class PumaServerMapper {
 

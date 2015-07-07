@@ -1,13 +1,13 @@
 package com.dianping.puma.admin.remote.receiver;
 
 import com.dianping.puma.core.constant.Status;
-import com.dianping.puma.core.entity.SyncTask;
+import com.dianping.puma.biz.entity.SyncTask;
 import com.dianping.puma.core.model.state.SyncTaskState;
-import com.dianping.puma.core.monitor.EventListener;
-import com.dianping.puma.core.monitor.event.Event;
-import com.dianping.puma.core.monitor.event.SyncTaskStateEvent;
-import com.dianping.puma.core.service.SyncTaskService;
-import com.dianping.puma.core.service.SyncTaskStateService;
+import com.dianping.puma.biz.monitor.EventListener;
+import com.dianping.puma.biz.monitor.event.Event;
+import com.dianping.puma.biz.monitor.event.SyncTaskStateEvent;
+import com.dianping.puma.biz.service.SyncTaskService;
+import com.dianping.puma.biz.service.SyncTaskStateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

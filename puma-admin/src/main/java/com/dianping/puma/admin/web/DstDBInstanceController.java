@@ -4,10 +4,10 @@ import com.dianping.puma.admin.model.DstDBInstanceDto;
 import com.dianping.puma.admin.model.mapper.DBInstanceMapper;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.constant.ActionOperation;
-import com.dianping.puma.core.entity.DstDBInstance;
-import com.dianping.puma.core.entity.SyncTask;
-import com.dianping.puma.core.service.DstDBInstanceService;
-import com.dianping.puma.core.service.SyncTaskService;
+import com.dianping.puma.biz.entity.DstDBInstance;
+import com.dianping.puma.biz.entity.SyncTask;
+import com.dianping.puma.biz.service.DstDBInstanceService;
+import com.dianping.puma.biz.service.SyncTaskService;
 import com.mongodb.MongoException;
 
 import org.slf4j.Logger;

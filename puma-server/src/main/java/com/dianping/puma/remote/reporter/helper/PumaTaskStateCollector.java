@@ -2,7 +2,7 @@ package com.dianping.puma.remote.reporter.helper;
 
 import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.core.model.state.PumaTaskState;
-import com.dianping.puma.core.service.PumaTaskStateService;
+import com.dianping.puma.biz.service.PumaTaskStateService;
 import com.dianping.puma.server.TaskExecutor;
 import com.dianping.puma.server.TaskExecutorContainer;
 

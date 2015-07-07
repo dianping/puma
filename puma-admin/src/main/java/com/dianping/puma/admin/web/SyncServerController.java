@@ -1,14 +1,13 @@
 package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.model.SyncServerDto;
-import com.dianping.puma.admin.model.mapper.PumaServerMapper;
 import com.dianping.puma.admin.model.mapper.SyncServerMapper;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.core.constant.ActionOperation;
-import com.dianping.puma.core.entity.SyncServer;
-import com.dianping.puma.core.entity.SyncTask;
-import com.dianping.puma.core.service.SyncServerService;
-import com.dianping.puma.core.service.SyncTaskService;
+import com.dianping.puma.biz.entity.SyncServer;
+import com.dianping.puma.biz.entity.SyncTask;
+import com.dianping.puma.biz.service.SyncServerService;
+import com.dianping.puma.biz.service.SyncTaskService;
 import com.mongodb.MongoException;
 
 import org.slf4j.Logger;

@@ -2,12 +2,12 @@ package com.dianping.puma.remote.receiver;
 
 import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.core.constant.ActionOperation;
-import com.dianping.puma.core.entity.PumaTask;
+import com.dianping.puma.biz.entity.PumaTask;
 import com.dianping.puma.core.model.event.EventCenter;
-import com.dianping.puma.core.monitor.event.Event;
-import com.dianping.puma.core.monitor.EventListener;
-import com.dianping.puma.core.monitor.event.PumaTaskOperationEvent;
-import com.dianping.puma.core.service.PumaTaskService;
+import com.dianping.puma.biz.monitor.event.Event;
+import com.dianping.puma.biz.monitor.EventListener;
+import com.dianping.puma.biz.monitor.event.PumaTaskOperationEvent;
+import com.dianping.puma.biz.service.PumaTaskService;
 import com.dianping.puma.server.TaskExecutor;
 import com.dianping.puma.server.TaskExecutorContainer;
 import com.dianping.puma.server.builder.TaskExecutorBuilder;

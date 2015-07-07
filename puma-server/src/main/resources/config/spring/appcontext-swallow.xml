@@ -11,24 +11,24 @@
     http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 
     <bean id="pumaTaskStatePublisher"
-          class="com.dianping.puma.core.monitor.SwallowEventPublisher"
+          class="com.dianping.puma.biz.monitor.SwallowEventPublisher"
           init-method="init">
         <property name="topic" value="puma_task_state" />
     </bean>
 
-    <bean id="statusEventPublisher" class="com.dianping.puma.core.monitor.SwallowEventPublisher"
+    <bean id="statusEventPublisher" class="com.dianping.puma.biz.monitor.SwallowEventPublisher"
         init-method="init">
         <property name="topic" value="puma_task" />
     </bean>
 
     <bean id="pumaTaskOperationEventSubscriber"
-        class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
+        class="com.dianping.puma.biz.monitor.SwallowEventSubscriber"
         init-method="init">
         <property name="topic" value="puma_task_operation" />
         <property name="type" value="#{pumaServerConfig.name}" />
         <property name="notifyService" ref="notifyService"/>
         <property name="clazz"
-            value="com.dianping.puma.core.monitor.event.PumaTaskOperationEvent" />
+            value="com.dianping.puma.biz.monitor.event.PumaTaskOperationEvent" />
         <property name="listeners">
             <list>
                 <ref bean="pumaTaskOperationChecker" />
@@ -37,13 +37,13 @@
     </bean>
 
     <bean id="pumaTaskControllerEventSubscriber"
-          class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
+          class="com.dianping.puma.biz.monitor.SwallowEventSubscriber"
           init-method="init">
         <property name="topic" value="puma_task_controller" />
         <property name="type" value="#{pumaServerConfig.name}" />
         <property name="notifyService" ref="notifyService"/>
         <property name="clazz"
-                  value="com.dianping.puma.core.monitor.event.PumaTaskControllerEvent" />
+                  value="com.dianping.puma.biz.monitor.event.PumaTaskControllerEvent" />
         <property name="listeners">
             <list>
                 <ref bean="pumaTaskControllerChecker" />

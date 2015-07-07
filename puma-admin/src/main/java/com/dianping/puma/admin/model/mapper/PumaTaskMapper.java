@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.dianping.puma.admin.model.DatabaseDto;
 import com.dianping.puma.admin.model.PumaServerDto;
 import com.dianping.puma.admin.model.PumaTaskDto;
-import com.dianping.puma.core.entity.PumaTask;
+import com.dianping.puma.biz.entity.PumaTask;
 import com.dianping.puma.core.model.AcceptedTables;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.Table;

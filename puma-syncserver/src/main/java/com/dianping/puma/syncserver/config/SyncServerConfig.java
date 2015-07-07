@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.dianping.puma.core.entity.SyncServer;
-import com.dianping.puma.core.service.SyncServerService;
+import com.dianping.puma.biz.entity.SyncServer;
+import com.dianping.puma.biz.service.SyncServerService;
 import com.dianping.puma.core.util.IPUtils;
 import com.dianping.puma.syncserver.job.executor.DumpTaskExecutor;
 

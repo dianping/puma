@@ -6,23 +6,26 @@ import java.util.List;
 
 public interface PumaServerService {
 
-	PumaServer find(long id);
+    PumaServer find(long id);
 
-	PumaServer find(String name);
+    PumaServer find(String name);
 
-	PumaServer findByHost(String host);
+    PumaServer findByHost(String host);
 
-	List<PumaServer> findAll();
+    List<PumaServer> findAll();
 
-	long count();
+    long count();
 
-	List<PumaServer> findByPage(int page, int pageSize);
+    List<PumaServer> findByPage(int page, int pageSize);
 
-	void create(PumaServer pumaServer);
+    void heartBeat();
 
-	void update(PumaServer pumaServer);
+    @Deprecated
+    void create(PumaServer pumaServer);
 
-	void remove(String name);
+    void update(PumaServer pumaServer);
 
-	void remove(long id);
+    void remove(String name);
+
+    void remove(long id);
 }

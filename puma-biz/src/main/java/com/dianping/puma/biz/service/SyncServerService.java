@@ -5,24 +5,26 @@ import com.dianping.puma.biz.entity.SyncServer;
 import java.util.List;
 
 public interface SyncServerService {
-	
-	SyncServer find(long id);
 
-	SyncServer find(String name);
+    SyncServer find(long id);
 
-	List<SyncServer> findAll();
+    SyncServer find(String name);
 
-	long count();
+    List<SyncServer> findAll();
 
-	List<SyncServer> findByPage(int page, int pageSize);
-	
-	void create(SyncServer syncServer);
+    long count();
 
-	void update(SyncServer syncServer);
+    List<SyncServer> findByPage(int page, int pageSize);
 
-	void remove(String name);
-	
-	void remove(long id);
+    void create(SyncServer syncServer);
 
-	SyncServer findByHost(String host);
+    void update(SyncServer syncServer);
+
+    void remove(String name);
+
+    void remove(long id);
+
+    SyncServer findByHost(String host);
+
+    void heartBeat();
 }

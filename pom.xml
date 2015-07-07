@@ -13,6 +13,7 @@
         <module>puma-core</module>
         <module>puma-admin</module>
         <module>puma-syncserver</module>
+        <module>puma-biz</module>
     </modules>
     <description>puma</description>
     <dependencyManagement>
@@ -40,6 +41,11 @@
             <dependency>
                 <groupId>com.dianping.puma</groupId>
                 <artifactId>puma-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dianping.puma</groupId>
+                <artifactId>puma-biz</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

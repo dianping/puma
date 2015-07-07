@@ -1,8 +1,8 @@
 package com.dianping.puma.pumaserver.router.decoder.binlog;
 
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.netty.entity.BinlogAck;
-import com.dianping.puma.core.netty.entity.binlog.request.BinlogAckRequest;
+import com.dianping.puma.core.dto.BinlogAck;
+import com.dianping.puma.core.dto.binlog.request.BinlogAckRequest;
 import com.dianping.puma.pumaserver.router.decoder.RequestDecoder;
 import com.dianping.puma.pumaserver.exception.DecoderException;
 import io.netty.handler.codec.http.FullHttpRequest;

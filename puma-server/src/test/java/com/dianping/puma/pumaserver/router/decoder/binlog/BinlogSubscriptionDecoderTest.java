@@ -1,6 +1,6 @@
 package com.dianping.puma.pumaserver.router.decoder.binlog;
 
-import com.dianping.puma.core.netty.entity.binlog.request.BinlogSubscriptionRequest;
+import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;

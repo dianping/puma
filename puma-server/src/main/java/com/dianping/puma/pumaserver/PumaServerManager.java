@@ -1,10 +1,10 @@
 package com.dianping.puma.pumaserver;
 
-import com.dianping.puma.core.netty.handler.ChannelHolderHandler;
-import com.dianping.puma.core.netty.handler.HandlerFactory;
-import com.dianping.puma.core.netty.handler.HttpResponseEncoder;
-import com.dianping.puma.core.netty.server.ServerConfig;
-import com.dianping.puma.core.netty.server.TcpServer;
+import com.dianping.puma.pumaserver.handler.ChannelHolderHandler;
+import com.dianping.puma.pumaserver.handler.HandlerFactory;
+import com.dianping.puma.pumaserver.handler.HttpResponseEncoder;
+import com.dianping.puma.pumaserver.server.ServerConfig;
+import com.dianping.puma.pumaserver.server.TcpServer;
 import com.dianping.puma.pumaserver.client.PumaClientsHolder;
 import com.dianping.puma.pumaserver.handler.*;
 import com.dianping.puma.pumaserver.handler.binlog.BinlogAckHandler;

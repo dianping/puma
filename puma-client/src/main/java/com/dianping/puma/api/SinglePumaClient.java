@@ -1,7 +1,7 @@
 package com.dianping.puma.api;
 
-import com.dianping.puma.api.connector.exception.PumaClientAuthException;
-import com.dianping.puma.api.connector.exception.PumaClientException;
+import com.dianping.puma.api.exception.PumaClientAuthException;
+import com.dianping.puma.api.exception.PumaClientException;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.netty.entity.BinlogMessage;
 import com.dianping.puma.core.netty.entity.binlog.response.BinlogAckResponse;
@@ -28,9 +28,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @NotThreadSafe
-public class SinglePumaConnector implements PumaConnector {
+public class SinglePumaClient implements PumaClient {
 
-    private static final Logger logger = LoggerFactory.getLogger(SinglePumaConnector.class);
+    private static final Logger logger = LoggerFactory.getLogger(SinglePumaClient.class);
 
     private static final Charset DEFAULT_CHARSET = Charset.forName("utf-8");
 
@@ -48,7 +48,7 @@ public class SinglePumaConnector implements PumaConnector {
 
     private volatile String token;
 
-    public SinglePumaConnector(String clientName, String remoteIp, int remotePort) {
+    public SinglePumaClient(String clientName, String remoteIp, int remotePort) {
         this.clientName = clientName;
         this.remoteIp = remoteIp;
         this.remotePort = remotePort;

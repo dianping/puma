@@ -1,13 +1,13 @@
 package com.dianping.puma.api;
 
-import com.dianping.puma.api.connector.exception.PumaClientAuthException;
-import com.dianping.puma.api.connector.exception.PumaClientException;
+import com.dianping.puma.api.exception.PumaClientAuthException;
+import com.dianping.puma.api.exception.PumaClientException;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.netty.entity.BinlogMessage;
 
 import java.util.concurrent.TimeUnit;
 
-public interface PumaConnector {
+public interface PumaClient {
 
     void connect() throws PumaClientException;
 

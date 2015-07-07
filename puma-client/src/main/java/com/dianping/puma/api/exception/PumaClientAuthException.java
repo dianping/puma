@@ -1,4 +1,4 @@
-package com.dianping.puma.api.connector.exception;
+package com.dianping.puma.api.exception;
 
 /**
  * Dozer @ 7/6/15

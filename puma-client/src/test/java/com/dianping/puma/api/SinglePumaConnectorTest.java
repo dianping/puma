@@ -1,7 +1,7 @@
 package com.dianping.puma.api;
 
-import com.dianping.puma.api.connector.exception.PumaClientAuthException;
-import com.dianping.puma.api.connector.exception.PumaClientException;
+import com.dianping.puma.api.exception.PumaClientAuthException;
+import com.dianping.puma.api.exception.PumaClientException;
 import com.google.gson.Gson;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -16,7 +16,7 @@ public class SinglePumaConnectorTest {
     @Test
     @Ignore
     public void testConnect() {
-        SinglePumaConnector connector = new SinglePumaConnector("my-client", "127.0.0.1", 4040);
+        SinglePumaClient connector = new SinglePumaClient("my-client", "127.0.0.1", 4040);
 
         while (true) {
             try {

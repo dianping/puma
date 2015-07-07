@@ -1,6 +1,8 @@
 package com.dianping.puma.controller;
 
+import com.dianping.puma.biz.service.PumaTaskStateService;
 import com.dianping.puma.common.SystemStatusContainer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -19,6 +21,9 @@ import java.util.Map;
 @RequestMapping(value = "/status")
 public class StatusController {
 
+    @Autowired
+    PumaTaskStateService pumaTaskStateService;
+
     @RequestMapping(value = "", method = RequestMethod.GET)
     @ResponseBody
     public Object index() {
@@ -32,5 +37,11 @@ public class StatusController {
         status.put("storageStatus", SystemStatusContainer.instance.listStorageStatus());
 
         return status;
+    }
+
+    @RequestMapping(value = "puma-task", method = RequestMethod.GET)
+    @ResponseBody
+    public Object pumaTask() {
+        return pumaTaskStateService.findAll();
     }
 }

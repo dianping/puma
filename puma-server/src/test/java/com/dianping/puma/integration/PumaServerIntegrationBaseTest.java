@@ -35,12 +35,14 @@ import org.junit.BeforeClass;
 
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.codec.JsonEventCodec;
+import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.datahandler.DefaultDataHandler;
-import com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher;
+import com.dianping.puma.meta.DefaultTableMetaInfoFectcher;
+import com.dianping.puma.meta.TableMetaInfoStore;
 import com.dianping.puma.parser.DefaultBinlogParser;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.FileDumpSender;
@@ -123,11 +125,17 @@ public abstract class PumaServerIntegrationBaseTest {
         parser.start();
 
         // init tablemetasinfofetcher
-        DefaultTableMetaInfoFetcher tableMetaInfoFetcher = new DefaultTableMetaInfoFetcher();
-        tableMetaInfoFetcher.setMetaDBHost(host);
-        tableMetaInfoFetcher.setMetaDBPassword(pwd);
-        tableMetaInfoFetcher.setMetaDBPort(port);
-        tableMetaInfoFetcher.setMetaDBUsername(user);
+        DefaultTableMetaInfoFectcher tableMetaInfoFetcher = new DefaultTableMetaInfoFectcher();
+        SrcDBInstance srcDbInstance = new SrcDBInstance();
+        srcDbInstance.setHost(host);
+        srcDbInstance.setPassword(pwd);
+        srcDbInstance.setPort(port);
+        srcDbInstance.setUsername(user);
+        
+        tableMetaInfoFetcher.setSrcDbInstance(srcDbInstance);
+        TableMetaInfoStore tableMetaInfoStore = new TableMetaInfoStore();
+        tableMetaInfoStore.start();
+        tableMetaInfoFetcher.setTableMetaInfoStore(tableMetaInfoStore);
 
         // init dataHandler
         DefaultDataHandler dataHandler = new DefaultDataHandler();

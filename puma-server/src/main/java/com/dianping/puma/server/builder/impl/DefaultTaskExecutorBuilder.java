@@ -1,24 +1,39 @@
 package com.dianping.puma.server.builder.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.entity.PumaTask;
 import com.dianping.puma.core.entity.SrcDBInstance;
-import com.dianping.puma.core.model.event.EventCenter;
-import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
+import com.dianping.puma.core.model.event.EventCenter;
 import com.dianping.puma.core.model.state.PumaTaskState;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.service.PumaTaskStateService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
+import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.datahandler.DefaultDataHandler;
-import com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher;
-import com.dianping.puma.filter.*;
+import com.dianping.puma.filter.DDLEventFilter;
+import com.dianping.puma.filter.DMLEventFilter;
+import com.dianping.puma.filter.DefaultEventFilterChain;
+import com.dianping.puma.filter.EventFilter;
+import com.dianping.puma.filter.EventFilterChain;
+import com.dianping.puma.filter.TableMetaRefreshFilter;
+import com.dianping.puma.filter.TransactionEventFilter;
+import com.dianping.puma.meta.DefaultTableMetaInfoFectcher;
+import com.dianping.puma.meta.TableMetaInfoStore;
 import com.dianping.puma.monitor.FetcherEventCountMonitor;
-import com.dianping.puma.monitor.FetcherEventDelayMonitor;
 import com.dianping.puma.monitor.ParserEventCountMonitor;
 import com.dianping.puma.monitor.StorageEventCountMonitor;
 import com.dianping.puma.monitor.StorageEventGroupMonitor;
@@ -34,17 +49,6 @@ import com.dianping.puma.storage.DefaultArchiveStrategy;
 import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.LocalFileBucketIndex;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
 
 @Service("taskExecutorBuilder")
 public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
@@ -160,12 +164,15 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			// Handler.
 			DefaultDataHandler dataHandler = new DefaultDataHandler();
 			dataHandler.setNotifyService(notifyService);
-			DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
-			// tableMetaInfo.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
-			tableMetaInfo.setMetaDBHost(srcDBInstance.getMetaHost());
-			tableMetaInfo.setMetaDBPort(srcDBInstance.getMetaPort());
-			tableMetaInfo.setMetaDBUsername(srcDBInstance.getUsername());
-			tableMetaInfo.setMetaDBPassword(srcDBInstance.getPassword());
+			DefaultTableMetaInfoFectcher tableMetaInfo = new DefaultTableMetaInfoFectcher();
+			tableMetaInfo.setSrcDbInstance(srcDBInstance);
+			tableMetaInfo.setBinlogInfo(pumaTask.getBinlogInfo());
+			
+			// MetaStore
+			TableMetaInfoStore tableMetaInfoStore  = new TableMetaInfoStore();
+			tableMetaInfoStore.start();
+			tableMetaInfo.setTableMetaInfoStore(tableMetaInfoStore);
+			
 			// tableMeta refresh filter
 			TableMetaRefreshFilter tableMetaRefreshFilter = new TableMetaRefreshFilter();
 			tableMetaRefreshFilter.setName(taskName);
@@ -173,7 +180,8 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			tableMetaInfo.setTableMetaRefreshFilter(tableMetaRefreshFilter);
 
 			dataHandler.setTableMetasInfoFetcher(tableMetaInfo);
-			// dataHandler.start();
+			dataHandler.start();
+			
 			taskExecutor.setDataHandler(dataHandler);
 
 			// File sender.

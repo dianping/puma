@@ -13,9 +13,10 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.datahandler;
+package com.dianping.puma.meta;
 
 import com.dianping.puma.core.event.DdlEvent;
+import com.dianping.puma.datahandler.TableMetaInfo;
 
 /**
  * TODO Comment of TableMetasInfoFetcher
@@ -23,10 +24,10 @@ import com.dianping.puma.core.event.DdlEvent;
  * @author Leo Liang
  * 
  */
-public interface TableMetaInfoFetcher {
+public interface TableMetaInfoFectcher {
 
 	void refreshTableMeta(DdlEvent ddlEvent, boolean isRefresh);
-
-	TableMetaInfo getTableMetaInfo(String database, String table);
 	
+	TableMetaInfo getTableMetaInfo(String database, String table);
+
 }

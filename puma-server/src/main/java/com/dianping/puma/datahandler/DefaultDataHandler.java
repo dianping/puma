@@ -46,7 +46,9 @@ import com.dianping.puma.parser.mysql.event.WriteRowsEvent;
 @ThreadUnSafe
 public class DefaultDataHandler extends AbstractDataHandler {
 	private Logger log = Logger.getLogger(DefaultDataHandler.class);
+
 	private Map<Long, TableMetaInfo> tableMetaInfos;
+
 	private int rowPos = 0;
 
 	@Override
@@ -63,7 +65,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 			}
 
 			TableMetaInfo tableMetaInfo = getTableMetasInfoFetcher().getTableMetaInfo(tableMapEvent.getDatabaseName(),
-					tableMapEvent.getTableName());
+			      tableMapEvent.getTableName());
 
 			if (tableMetaInfo != null) {
 				tableMetaInfos.put(tableMapEvent.getTableId(), tableMetaInfo);
@@ -73,7 +75,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 			} else {
 				if (log.isDebugEnabled()) {
 					log.debug("meta info not found for:" + tableMapEvent.getDatabaseName() + "-"
-							+ tableMapEvent.getTableName());
+					      + tableMapEvent.getTableName());
 				}
 				skipEvent(BinlogConstants.TABLE_MAP_EVENT, result, context);
 				return;
@@ -161,7 +163,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 
 			RowChangedEvent rowChangedEvent = new RowChangedEvent();
 			Map<String, ColumnInfo> columns = initColumns(deleteRowsEvent, rowChangedEvent, RowChangedEvent.DELETE,
-					tableMetaInfo);
+			      tableMetaInfo);
 
 			for (int columnPos = 0, columnIndex = 0; columnPos < deleteRowsEvent.getColumnCount().intValue(); columnPos++) {
 				if (deleteRowsEvent.getUsedColumns().get(columnPos)) {
@@ -171,7 +173,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 						return;
 					}
 					ColumnInfo columnInfo = new ColumnInfo(tableMetaInfo.getKeys().contains(columnName),
-							convertUnsignedValueIfNeeded(columnPos + 1, binlogColumn.getValue(), tableMetaInfo), null);
+					      convertUnsignedValueIfNeeded(columnPos + 1, binlogColumn.getValue(), tableMetaInfo), null);
 					columns.put(columnName, columnInfo);
 					columnIndex++;
 				}
@@ -206,13 +208,13 @@ public class DefaultDataHandler extends AbstractDataHandler {
 
 			RowChangedEvent rowChangedEvent = new RowChangedEvent();
 			Map<String, ColumnInfo> columns = initColumns(updateRowsEvent, rowChangedEvent, RowChangedEvent.UPDATE,
-					tableMetaInfo);
+			      tableMetaInfo);
 			if (log.isDebugEnabled()) {
 				log.debug("update from " + tableMetaInfo.getDatabase() + "." + tableMetaInfo.getTable());
 			}
 
 			for (int columnPos = 0, columnAfterIndex = 0, columnBeforeIndex = 0; columnPos < updateRowsEvent
-					.getColumnCount().intValue(); columnPos++) {
+			      .getColumnCount().intValue(); columnPos++) {
 				String columnName = tableMetaInfo.getColumns().get(columnPos + 1);
 				if (!checkUnknownColumnName(result, context, columnName, columnPos + 1)) {
 					return;
@@ -224,14 +226,13 @@ public class DefaultDataHandler extends AbstractDataHandler {
 					columnAfterIndex++;
 				}
 				if (updateRowsEvent.getUsedColumnsBefore().get(columnPos)) {
-					beforeColumn = updateRowsEvent.getRows().get(rowPos).getBefore().getColumns()
-							.get(columnBeforeIndex);
+					beforeColumn = updateRowsEvent.getRows().get(rowPos).getBefore().getColumns().get(columnBeforeIndex);
 					columnBeforeIndex++;
 				}
 				ColumnInfo columnInfo = new ColumnInfo(tableMetaInfo.getKeys().contains(columnName),
-						beforeColumn == null ? null : convertUnsignedValueIfNeeded(columnPos + 1, beforeColumn
-								.getValue(), tableMetaInfo), afterColumn == null ? null : convertUnsignedValueIfNeeded(
-								columnPos + 1, afterColumn.getValue(), tableMetaInfo));
+				      beforeColumn == null ? null : convertUnsignedValueIfNeeded(columnPos + 1, beforeColumn.getValue(),
+				            tableMetaInfo), afterColumn == null ? null : convertUnsignedValueIfNeeded(columnPos + 1,
+				            afterColumn.getValue(), tableMetaInfo));
 				columns.put(columnName, columnInfo);
 			}
 
@@ -264,7 +265,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 
 			RowChangedEvent rowChangedEvent = new RowChangedEvent();
 			Map<String, ColumnInfo> columns = initColumns(writeRowsEvent, rowChangedEvent, RowChangedEvent.INSERT,
-					tableMetaInfo);
+			      tableMetaInfo);
 
 			for (int columnPos = 0, columnIndex = 0; columnPos < writeRowsEvent.getColumnCount().intValue(); columnPos++) {
 				if (writeRowsEvent.getUsedColumns().get(columnPos)) {
@@ -274,7 +275,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 						return;
 					}
 					ColumnInfo columnInfo = new ColumnInfo(tableMetaInfo.getKeys().contains(columnName), null,
-							convertUnsignedValueIfNeeded(columnPos + 1, binlogColumn.getValue(), tableMetaInfo));
+					      convertUnsignedValueIfNeeded(columnPos + 1, binlogColumn.getValue(), tableMetaInfo));
 					columns.put(columnName, columnInfo);
 					columnIndex++;
 				}
@@ -291,7 +292,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 		if (columnName == null) {
 			StringBuilder msg = new StringBuilder();
 			msg.append("Unknown column for Binlog:  ").append(context.getBinlogFileName()).append(" BinlogPos: ")
-					.append(context.getBinlogStartPos()).append(" Skip to ").append(context.getNextBinlogPos());
+			      .append(context.getBinlogStartPos()).append(" Skip to ").append(context.getNextBinlogPos());
 			msg.append(" columnPos: ").append(pos);
 			log.warn(msg.toString());
 			skipEvent((byte) 0, result, context);
@@ -307,9 +308,9 @@ public class DefaultDataHandler extends AbstractDataHandler {
 		result.setEmpty(true);
 		result.setFinished(true);
 		StringBuilder msg = new StringBuilder();
-		msg.append("Skip one event#").append(eventType).append(", since there is no table meta info. Binlog: ").append(
-				context.getBinlogFileName()).append(" Pos: ").append(context.getBinlogStartPos()).append(" Skip to ")
-				.append(context.getNextBinlogPos());
+		msg.append("Skip one event#").append(eventType).append(", since there is no table meta info. Binlog: ")
+		      .append(context.getBinlogFileName()).append(" Pos: ").append(context.getBinlogStartPos())
+		      .append(" Skip to ").append(context.getNextBinlogPos());
 		if (log.isDebugEnabled()) {
 			log.debug(msg.toString());
 		}
@@ -323,11 +324,12 @@ public class DefaultDataHandler extends AbstractDataHandler {
 		if (tableMeta.getRawNullAbilities() == null && tableMapEvent.getColumnNullabilities() != null) {
 			List<Integer> rawNullAbilities = new ArrayList<Integer>();
 			for (int i = 0; i < tableMapEvent.getColumnNullabilities().size()
-					&& i < tableMapEvent.getColumnCount().intValue(); i++) {
+			      && i < tableMapEvent.getColumnCount().intValue(); i++) {
 				if (tableMapEvent.getColumnNullabilities().get(i)) {
 					rawNullAbilities.add(i + 1);
 				}
 			}
+			
 			tableMeta.setRawNullAbilities(rawNullAbilities);
 		}
 	}
@@ -342,12 +344,13 @@ public class DefaultDataHandler extends AbstractDataHandler {
 			for (int i = 0; i < tableMapEvent.getColumnTypes().length; i++) {
 				rawTypes.put(i + 1, tableMapEvent.getColumnTypes()[i]);
 			}
+			
 			tableMeta.setRawTypeCodes(rawTypes);
 		}
 	}
 
 	private Map<String, ColumnInfo> initColumns(AbstractRowsEvent rowsEvent, RowChangedEvent rowChangedData,
-			int actionType, TableMetaInfo tableMetaInfo) {
+	      int actionType, TableMetaInfo tableMetaInfo) {
 		Map<String, ColumnInfo> columns = new HashMap<String, ColumnInfo>();
 		if (actionType == 0) {
 			rowChangedData.setDmlType(DMLType.INSERT);

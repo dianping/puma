@@ -20,6 +20,7 @@ import org.junit.BeforeClass;
 
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.constant.Status;
+import com.dianping.puma.core.entity.SrcDBInstance;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
@@ -35,7 +36,6 @@ import com.dianping.puma.core.storage.holder.impl.DefaultBinlogInfoHolder;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.datahandler.DefaultDataHandler;
-import com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.filter.DDLEventFilter;
 import com.dianping.puma.filter.DMLEventFilter;
 import com.dianping.puma.filter.DefaultEventFilterChain;
@@ -43,6 +43,8 @@ import com.dianping.puma.filter.EventFilter;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.filter.TableMetaRefreshFilter;
 import com.dianping.puma.filter.TransactionEventFilter;
+import com.dianping.puma.meta.DefaultTableMetaInfoFectcher;
+import com.dianping.puma.meta.TableMetaInfoStore;
 import com.dianping.puma.monitor.FetcherEventCountMonitor;
 import com.dianping.puma.monitor.ParserEventCountMonitor;
 import com.dianping.puma.monitor.StorageEventCountMonitor;
@@ -268,7 +270,7 @@ public abstract class AbstractBaseTest {
 
 	}
 
-	private TaskExecutor buildTask() {
+	private TaskExecutor buildTask() throws Exception {
 		DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
 
 		// monitor
@@ -306,12 +308,21 @@ public abstract class AbstractBaseTest {
 		// Handler.
 		DefaultDataHandler dataHandler = new DefaultDataHandler();
 		dataHandler.setNotifyService(notifyService);
-		DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
-		// tableMetaInfo.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
-		tableMetaInfo.setMetaDBHost(host);
-		tableMetaInfo.setMetaDBPort(port);
-		tableMetaInfo.setMetaDBUsername(username);
-		tableMetaInfo.setMetaDBPassword(password);
+		DefaultTableMetaInfoFectcher tableMetaInfo = new DefaultTableMetaInfoFectcher();
+		SrcDBInstance srcDbInstance = new SrcDBInstance();
+		srcDbInstance.setHost(host);
+      srcDbInstance.setPassword(password);
+      srcDbInstance.setPort(port);
+      srcDbInstance.setUsername(username);
+      srcDbInstance.setServerId(serverId);
+		tableMetaInfo.setSrcDbInstance(srcDbInstance);
+		BinlogInfo binlogInfo1 = new BinlogInfo("mysql-bin.000000", 4L);
+		tableMetaInfo.setBinlogInfo(binlogInfo1);
+		TableMetaInfoStore metaStore = new TableMetaInfoStore();
+	   metaStore.start();
+		
+	   tableMetaInfo.setTableMetaInfoStore(metaStore);
+		
 		// tableMeta refresh filter
 		TableMetaRefreshFilter tableMetaRefreshFilter = new TableMetaRefreshFilter();
 		tableMetaRefreshFilter.setName(taskName);
@@ -319,7 +330,7 @@ public abstract class AbstractBaseTest {
 		tableMetaInfo.setTableMetaRefreshFilter(tableMetaRefreshFilter);
 
 		dataHandler.setTableMetasInfoFetcher(tableMetaInfo);
-		// dataHandler.start();
+		dataHandler.start();
 		taskExecutor.setDataHandler(dataHandler);
 
 		// File sender.

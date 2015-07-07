@@ -20,6 +20,7 @@ import com.dianping.puma.core.monitor.event.PumaTaskControllerEvent;
 import com.dianping.puma.core.monitor.event.PumaTaskOperationEvent;
 import com.dianping.puma.core.service.PumaTaskService;
 import com.dianping.puma.core.service.SrcDBInstanceService;
+import com.dianping.puma.meta.TableMetaInfoFectcher;
 import com.dianping.puma.server.builder.TaskExecutorBuilder;
 import com.dianping.puma.storage.CleanupStrategy;
 import com.dianping.puma.storage.DefaultCleanupStrategy;
@@ -36,7 +37,6 @@ import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.monitor.NotifyService;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.datahandler.AbstractDataHandler;
-import com.dianping.puma.datahandler.TableMetaInfoFetcher;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.storage.EventStorage;
 
@@ -278,7 +278,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 		TaskExecutor taskExecutor = taskExecutorMap.get(taskName);
 		if (taskExecutor != null) {
 			AbstractDataHandler handler = (AbstractDataHandler) taskExecutor.getDataHandler();
-			TableMetaInfoFetcher tableMetasInfoFetcher = handler.getTableMetasInfoFetcher();
+			TableMetaInfoFectcher tableMetasInfoFetcher = handler.getTableMetasInfoFetcher();
 			try {
 				publishAcceptedTableChangedEvent(event.getTaskName(), event.getPumaTask().getTableSet());
 				tableMetasInfoFetcher.refreshTableMeta(null, true);

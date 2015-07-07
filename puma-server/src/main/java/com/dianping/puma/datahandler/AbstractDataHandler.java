@@ -30,6 +30,7 @@ import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.monitor.Notifiable;
 import com.dianping.puma.core.monitor.NotifyService;
+import com.dianping.puma.meta.TableMetaInfoFectcher;
 import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.core.util.SimpleDdlParser;
 import com.dianping.puma.core.util.SimpleDdlParser.DdlResult;
@@ -48,7 +49,7 @@ import com.dianping.puma.parser.mysql.event.QueryEvent;
 @ThreadUnSafe
 public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 	private static final Logger log = Logger.getLogger(AbstractDataHandler.class);
-	private TableMetaInfoFetcher tableMetasInfoFetcher;
+	private TableMetaInfoFectcher tableMetasInfoFetcher;
 	private NotifyService notifyService;
 
 	/**
@@ -69,7 +70,7 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 	/**
 	 * @return the tableMetasInfoFetcher
 	 */
-	public TableMetaInfoFetcher getTableMetasInfoFetcher() {
+	public TableMetaInfoFectcher getTableMetasInfoFetcher() {
 		return tableMetasInfoFetcher;
 	}
 
@@ -77,7 +78,7 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 	 * @param tableMetasInfoFetcher
 	 *            the tableMetasInfoFetcher to set
 	 */
-	public void setTableMetasInfoFetcher(TableMetaInfoFetcher tableMetasInfoFetcher) {
+	public void setTableMetasInfoFetcher(TableMetaInfoFectcher tableMetasInfoFetcher) {
 		this.tableMetasInfoFetcher = tableMetasInfoFetcher;
 	}
 

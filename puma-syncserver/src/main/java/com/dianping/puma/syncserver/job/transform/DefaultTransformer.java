@@ -76,7 +76,7 @@ public class DefaultTransformer implements Transformer {
 	private void transformSchema(ChangedEvent event) {
 		String oriSchema = event.getDatabase();
 		if (oriSchema != null) {
-			String schema = mysqlMapping.getSchema(oriSchema);
+			String schema = mysqlMapping.getDatabase(oriSchema);
 			if (schema == null) {
 				LOG.error("Transformer({}) transform schema failure for event({}).", title + name, event.toString());
 				throw new TransformException(-1,

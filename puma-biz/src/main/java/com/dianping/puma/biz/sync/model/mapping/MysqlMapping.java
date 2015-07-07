@@ -81,7 +81,7 @@ public class MysqlMapping implements Cloneable {
 		return m;
 	}
 
-	public String getSchema(String oriSchema) {
+	public String getDatabase(String oriSchema) {
 		for (DatabaseMapping databaseMapping: databases) {
 			if (databaseMapping.getFrom().equals(oriSchema)) {
 				return databaseMapping.getTo();

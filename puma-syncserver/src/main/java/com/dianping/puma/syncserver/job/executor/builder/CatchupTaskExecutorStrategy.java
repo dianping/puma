@@ -1,19 +1,20 @@
 package com.dianping.puma.syncserver.job.executor.builder;
 
+import com.dianping.puma.biz.entity.*;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
-import com.dianping.puma.core.entity.*;
+import com.dianping.puma.biz.entity.*;
 import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
-import com.dianping.puma.core.monitor.NotifyService;
+import com.dianping.puma.biz.monitor.NotifyService;
 import com.dianping.puma.core.model.state.CatchupTaskState;
-import com.dianping.puma.core.service.DstDBInstanceService;
-import com.dianping.puma.core.service.SrcDBInstanceService;
+import com.dianping.puma.biz.service.DstDBInstanceService;
+import com.dianping.puma.biz.service.SrcDBInstanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.dianping.puma.core.service.PumaServerService;
-import com.dianping.puma.core.service.PumaTaskService;
-import com.dianping.puma.core.sync.model.task.Type;
+import com.dianping.puma.biz.service.PumaServerService;
+import com.dianping.puma.biz.service.PumaTaskService;
+import com.dianping.puma.biz.sync.model.task.Type;
 import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;
 import com.dianping.puma.syncserver.job.executor.CatchupTaskExecutor;
 import com.dianping.puma.syncserver.job.executor.SyncTaskExecutor;

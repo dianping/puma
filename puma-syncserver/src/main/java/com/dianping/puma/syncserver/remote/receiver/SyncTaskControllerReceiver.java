@@ -2,9 +2,9 @@ package com.dianping.puma.syncserver.remote.receiver;
 
 import com.dianping.cat.Cat;
 import com.dianping.puma.core.constant.ActionController;
-import com.dianping.puma.core.monitor.event.Event;
-import com.dianping.puma.core.monitor.EventListener;
-import com.dianping.puma.core.monitor.event.SyncTaskControllerEvent;
+import com.dianping.puma.biz.monitor.event.Event;
+import com.dianping.puma.biz.monitor.EventListener;
+import com.dianping.puma.biz.monitor.event.SyncTaskControllerEvent;
 import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;
 import com.dianping.puma.syncserver.job.container.exception.TECException;
 import org.slf4j.Logger;

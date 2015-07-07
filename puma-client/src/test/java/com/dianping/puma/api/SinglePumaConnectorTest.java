@@ -1,13 +1,10 @@
 package com.dianping.puma.api;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import com.dianping.puma.api.exception.PumaClientAuthException;
+import com.dianping.puma.api.exception.PumaClientException;
+import com.google.gson.Gson;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.net.URI;
 
 /**
  * Dozer @ 7/2/15
@@ -15,39 +12,34 @@ import java.net.URI;
  * http://www.dozer.cc
  */
 public class SinglePumaConnectorTest {
+
     @Test
     @Ignore
-    public void testConnect() throws Exception {
-//        SinglePumaConnector connector = new SinglePumaConnector("test", "www.dozer.cc", 80);
-//        connector.connect();
-//        connector.subscribe(true, true, true, "test", "user1", "user2");
-//        System.in.read();
-        HttpClient client = new DefaultHttpClient();
-        client.getParams().setParameter("http.socket.timeout", 60 * 1000);
+    public void testConnect() {
+        SinglePumaClient connector = new SinglePumaClient("my-client", "127.0.0.1", 4040);
 
         while (true) {
             try {
-                HttpResponse response1 = client.execute(new HttpGet(URI.create("http://localhost:4040/puma/binlog/get?clientName=a&database=user&table=user")));
-                HttpResponse response2 = client.execute(new HttpGet(URI.create("http://localhost:4040/puma/binlog/ack?xx")));
-                //todo: process
-            } catch (Exception e) {
-                HttpResponse response2 = client.execute(new HttpGet(URI.create("http://localhost:4040/puma/binlog/rollback?xx")));
-                //todo: ha
+                connector.connect();
+                while (true) {
+                    try {
+                        try {
+                            System.out.println(new Gson().toJson(connector.getWithAck(1)));
+                        } catch (PumaClientException exp) {
+                            connector.rollback();
+                        }
+                    } catch (PumaClientAuthException exp) {
+                        try {
+                            connector.subscribe(true, false, false, "test", "a", "b");
+                        } catch (PumaClientException e) {
+                            //todo: log
+                        }
+                    }
+                }
+            } catch (PumaClientException exp) {
+                //todo:log
             }
         }
-
-
     }
 
-//    class BasicClientConnectionManagerExt extends BasicClientConnectionManager {
-//        @Override
-//        protected ClientConnectionOperator createConnectionOperator(SchemeRegistry schreg) {
-//            return super.createConnectionOperator(schreg);
-//        }
-//
-//        @Override
-//        public void releaseConnection(ManagedClientConnection conn, long keepalive, TimeUnit tunit) {
-//            super.releaseConnection(conn, keepalive, tunit);
-//        }
-//    }
 }

@@ -6,32 +6,32 @@
             http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
     <bean id="syncTaskStatePublisher"
-          class="com.dianping.puma.core.monitor.SwallowEventPublisher"
+          class="com.dianping.puma.biz.monitor.SwallowEventPublisher"
           init-method="init">
         <property name="topic" value="sync_task_state" />
     </bean>
 
 
     <bean id="shardSyncTaskStatePublisher"
-          class="com.dianping.puma.core.monitor.SwallowEventPublisher"
+          class="com.dianping.puma.biz.monitor.SwallowEventPublisher"
           init-method="init">
         <property name="topic" value="sync_task_state" />
     </bean>
 
     <bean id="dumpTaskStatePublisher"
-          class="com.dianping.puma.core.monitor.SwallowEventPublisher"
+          class="com.dianping.puma.biz.monitor.SwallowEventPublisher"
           init-method="init">
         <property name="topic" value="sync_task_state" />
     </bean>
 
     <bean id="syncTaskOperationEventSubscriber"
-          class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
+          class="com.dianping.puma.biz.monitor.SwallowEventSubscriber"
           init-method="init">
         <property name="topic" value="sync_task_operation" />
         <property name="type" value="#{syncServerConfig.syncServerName}" />
         <property name="notifyService" ref="notifyService"/>
         <property name="clazz"
-                  value="com.dianping.puma.core.monitor.event.SyncTaskOperationEvent" />
+                  value="com.dianping.puma.biz.monitor.event.SyncTaskOperationEvent" />
         <property name="listeners">
             <list>
                 <ref bean="syncTaskOperationReceiver"/>
@@ -40,13 +40,13 @@
     </bean>
 
     <bean id="syncTaskControllerEventSubscriber"
-          class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
+          class="com.dianping.puma.biz.monitor.SwallowEventSubscriber"
           init-method="init">
         <property name="topic" value="sync_task_controller" />
         <property name="type" value="#{syncServerConfig.syncServerName}" />
         <property name="notifyService" ref="notifyService"/>
         <property name="clazz"
-                  value="com.dianping.puma.core.monitor.event.SyncTaskControllerEvent" />
+                  value="com.dianping.puma.biz.monitor.event.SyncTaskControllerEvent" />
         <property name="listeners">
             <list>
                 <ref bean="syncTaskControllerReceiver"/>
@@ -55,7 +55,7 @@
     </bean>
 
     <bean id="shardSyncTaskOperationEventSubscriber"
-          class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
+          class="com.dianping.puma.biz.monitor.SwallowEventSubscriber"
           init-method="init">
         <property name="topic" value="shard_sync_task_operation" />
         <property name="type" value="#{syncServerConfig.syncServerName}" />
@@ -70,7 +70,7 @@
     </bean>
 
     <bean id="shardSyncTaskControllerEventSubscriber"
-          class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
+          class="com.dianping.puma.biz.monitor.SwallowEventSubscriber"
           init-method="init">
         <property name="topic" value="shard_sync_task_controller" />
         <property name="type" value="#{syncServerConfig.syncServerName}" />
@@ -85,13 +85,13 @@
     </bean>
 
     <bean id="dumpTaskOperationEventSubscriber"
-          class="com.dianping.puma.core.monitor.SwallowEventSubscriber"
+          class="com.dianping.puma.biz.monitor.SwallowEventSubscriber"
           init-method="init">
         <property name="topic" value="sync_task_operation" />
         <property name="type" value="#{syncServerConfig.syncServerName}" />
         <property name="notifyService" ref="notifyService"/>
         <property name="clazz"
-                  value="com.dianping.puma.core.monitor.event.DumpTaskOperationEvent" />
+                  value="com.dianping.puma.biz.monitor.event.DumpTaskOperationEvent" />
         <property name="listeners">
             <list>
                 <ref bean="dumpTaskOperationReceiver"/>

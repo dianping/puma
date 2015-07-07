@@ -1,7 +1,7 @@
 package com.dianping.puma.pumaserver.handler.binlog;
 
-import com.dianping.puma.core.netty.entity.binlog.request.BinlogAckRequest;
-import com.dianping.puma.core.netty.entity.binlog.response.BinlogAckResponse;
+import com.dianping.puma.core.dto.binlog.request.BinlogAckRequest;
+import com.dianping.puma.core.dto.binlog.response.BinlogAckResponse;
 import com.dianping.puma.pumaserver.client.ClientSession;
 import com.dianping.puma.pumaserver.client.ClientType;
 import com.dianping.puma.pumaserver.service.BinlogAckService;

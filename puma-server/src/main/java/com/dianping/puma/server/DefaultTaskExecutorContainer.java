@@ -9,35 +9,34 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import com.dianping.puma.common.SystemStatusContainer;
-import com.dianping.puma.core.constant.Status;
-import com.dianping.puma.core.entity.PumaTask;
-import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
-import com.dianping.puma.core.model.TableSet;
-import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
-import com.dianping.puma.core.model.event.EventCenter;
-import com.dianping.puma.core.monitor.event.PumaTaskControllerEvent;
-import com.dianping.puma.core.monitor.event.PumaTaskOperationEvent;
-import com.dianping.puma.core.service.PumaTaskService;
-import com.dianping.puma.core.service.SrcDBInstanceService;
-import com.dianping.puma.meta.TableMetaInfoFectcher;
-import com.dianping.puma.server.builder.TaskExecutorBuilder;
-import com.dianping.puma.storage.CleanupStrategy;
-import com.dianping.puma.storage.DefaultCleanupStrategy;
-import com.dianping.puma.storage.DefaultEventStorage;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.dianping.puma.biz.entity.PumaTask;
+import com.dianping.puma.biz.monitor.NotifyService;
+import com.dianping.puma.biz.monitor.event.PumaTaskControllerEvent;
+import com.dianping.puma.biz.monitor.event.PumaTaskOperationEvent;
+import com.dianping.puma.biz.service.PumaTaskService;
+import com.dianping.puma.biz.service.SrcDBInstanceService;
+import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.core.codec.JsonEventCodec;
-import com.dianping.puma.core.monitor.NotifyService;
+import com.dianping.puma.core.constant.Status;
+import com.dianping.puma.core.model.TableSet;
+import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
+import com.dianping.puma.core.model.event.EventCenter;
+import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.datahandler.AbstractDataHandler;
+import com.dianping.puma.meta.TableMetaInfoFectcher;
 import com.dianping.puma.sender.Sender;
+import com.dianping.puma.server.builder.TaskExecutorBuilder;
+import com.dianping.puma.storage.CleanupStrategy;
+import com.dianping.puma.storage.DefaultCleanupStrategy;
+import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.EventStorage;
 
 @Service("taskManager")

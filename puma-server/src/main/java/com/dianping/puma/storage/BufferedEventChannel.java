@@ -10,7 +10,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import com.dianping.cat.Cat;
-import com.dianping.puma.channel.exception.PumaServerInternalException;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.ServerErrorEvent;
 import com.dianping.puma.storage.exception.StorageException;
@@ -99,7 +98,7 @@ public class BufferedEventChannel implements EventChannel {
 						eventBuffer.put(new ServerErrorEvent("storage error event"));
 
 						String msg = String.format("Puma server channel reading storage error.");
-						PumaServerInternalException pe = new PumaServerInternalException(msg, e);
+						Exception pe = new Exception(msg, e);
 						logger.error(msg, pe);
 						Cat.logError(msg, pe);
 

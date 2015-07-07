@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.dianping.cat.Cat;
-import com.dianping.puma.channel.page.acceptor.Handler;
 import com.dianping.puma.core.model.BinlogInfo;
 
 /**
@@ -53,11 +52,6 @@ public enum SystemStatusContainer {
 	private ConcurrentMap<String, AtomicBoolean> stopTheWorlds = new ConcurrentHashMap<String, AtomicBoolean>();
 
 	private ConcurrentMap<String, AtomicInteger> metrics = new ConcurrentHashMap<String, AtomicInteger>();
-
-	private ConcurrentMap<String, Handler.HandlerContext> contexts = new ConcurrentHashMap<String, Handler.HandlerContext>();
-
-	// private ConcurrentMap<String, TaskExecutorStatus> taskExecutorStatus =
-	// new ConcurrentHashMap<String, TaskExecutorStatus>();
 
 	private static final String CAT_KEY_EVENT_PARSED = "EventParsed-";
 
@@ -147,18 +141,6 @@ public enum SystemStatusContainer {
 	public void updateStorageStatus(String name, long seq) {
 		storageStatus.put(name, seq);
 		logMetricForCount("StorageStored-" + name);
-	}
-
-	public Handler.HandlerContext getClientContext(String clientName) {
-		return contexts.get(clientName);
-	}
-
-	public void addClientContext(String clientName, Handler.HandlerContext context) {
-		contexts.put(clientName, context);
-	}
-
-	public void removeClientContext(String clientName) {
-		contexts.remove(clientName);
 	}
 
 	public ServerStatus getServerStatus(String name) {

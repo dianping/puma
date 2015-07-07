@@ -1,12 +1,11 @@
 package com.dianping.puma.syncserver.job.executor.failhandler;
 
-import com.dianping.puma.core.entity.BaseSyncTask;
+import com.dianping.puma.biz.entity.BaseSyncTask;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.sync.model.task.Task;
 import com.dianping.puma.syncserver.job.executor.AbstractTaskExecutor;
 
 public class StopOnFailedHandler implements Handler {

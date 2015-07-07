@@ -2,11 +2,10 @@ package com.dianping.puma.pumaserver.handler.binlog;
 
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.netty.entity.BinlogAck;
-import com.dianping.puma.core.netty.entity.binlog.request.BinlogAckRequest;
-import com.dianping.puma.core.netty.entity.binlog.request.BinlogSubscriptionRequest;
-import com.dianping.puma.core.netty.entity.BinlogTarget;
-import com.dianping.puma.core.netty.entity.binlog.response.BinlogSubscriptionResponse;
+import com.dianping.puma.core.dto.BinlogAck;
+import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
+import com.dianping.puma.core.dto.BinlogTarget;
+import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
 import com.dianping.puma.pumaserver.channel.BinlogChannel;
 import com.dianping.puma.pumaserver.channel.impl.ConstantBinlogChannel;
 import com.dianping.puma.pumaserver.client.ClientSession;

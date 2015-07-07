@@ -1,9 +1,9 @@
 package com.dianping.puma.syncserver.remote.reporter;
 
 import com.dianping.puma.core.model.state.SyncTaskState;
-import com.dianping.puma.core.monitor.SwallowEventPublisher;
-import com.dianping.puma.core.monitor.event.SyncTaskStateEvent;
-import com.dianping.puma.core.service.SyncTaskStateService;
+import com.dianping.puma.biz.monitor.SwallowEventPublisher;
+import com.dianping.puma.biz.monitor.event.SyncTaskStateEvent;
+import com.dianping.puma.biz.service.SyncTaskStateService;
 import com.dianping.puma.syncserver.config.SyncServerConfig;
 import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;
 import com.dianping.puma.syncserver.job.executor.SyncTaskExecutor;

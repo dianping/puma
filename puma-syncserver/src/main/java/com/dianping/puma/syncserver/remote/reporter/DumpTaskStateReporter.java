@@ -1,11 +1,8 @@
 package com.dianping.puma.syncserver.remote.reporter;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.dianping.puma.core.monitor.SwallowEventPublisher;
-import com.dianping.puma.core.monitor.event.DumpTaskStateEvent;
-import com.dianping.puma.core.service.DumpTaskStateService;
+import com.dianping.puma.biz.monitor.SwallowEventPublisher;
+import com.dianping.puma.biz.monitor.event.DumpTaskStateEvent;
+import com.dianping.puma.biz.service.DumpTaskStateService;
 import com.dianping.puma.syncserver.config.SyncServerConfig;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
 

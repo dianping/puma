@@ -2,7 +2,7 @@ package com.dianping.puma.monitor;
 
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
-import com.dianping.puma.core.monitor.EventMonitor;
+import com.dianping.puma.biz.monitor.EventMonitor;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;

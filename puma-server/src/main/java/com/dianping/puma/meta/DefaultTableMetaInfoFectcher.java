@@ -32,7 +32,7 @@ import org.apache.log4j.Logger;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
-import com.dianping.puma.core.entity.SrcDBInstance;
+import com.dianping.puma.biz.entity.SrcDBInstance;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.datahandler.TableMetaInfo;

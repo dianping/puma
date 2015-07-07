@@ -1,13 +1,11 @@
 package com.dianping.puma.monitor;
 
-import com.dianping.cat.Cat;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
-import com.dianping.puma.core.monitor.HeartbeatMonitor;
+import com.dianping.puma.biz.monitor.HeartbeatMonitor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 

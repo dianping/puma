@@ -1,20 +1,17 @@
 package com.dianping.puma.syncserver.job.executor;
 
-import com.dianping.cat.Cat;
 import com.dianping.puma.api.Configuration;
 import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.constant.Status;
-import com.dianping.puma.core.entity.SyncTask;
+import com.dianping.puma.biz.entity.SyncTask;
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
-import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
-import com.dianping.puma.core.sync.model.mapping.TableMapping;
+import com.dianping.puma.biz.sync.model.mapping.DatabaseMapping;
+import com.dianping.puma.biz.sync.model.mapping.MysqlMapping;
+import com.dianping.puma.biz.sync.model.mapping.TableMapping;
 import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
 import com.dianping.puma.syncserver.job.executor.exception.TEException;
-import com.dianping.puma.syncserver.job.executor.failhandler.Handler;
-import com.dianping.puma.syncserver.job.executor.failhandler.HandlerContainer;
 import com.dianping.puma.syncserver.job.load.Loader;
 import com.dianping.puma.syncserver.job.transform.Transformer;
 
@@ -24,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class SyncTaskExecutor implements TaskExecutor<SyncTask> {

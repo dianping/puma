@@ -2,8 +2,8 @@ package com.dianping.puma.config;
 
 import javax.annotation.PostConstruct;
 
-import com.dianping.puma.core.entity.PumaServer;
-import com.dianping.puma.core.service.PumaServerService;
+import com.dianping.puma.biz.entity.PumaServer;
+import com.dianping.puma.biz.service.PumaServerService;
 import com.dianping.puma.core.util.IPUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -2,7 +2,7 @@ package com.dianping.puma.monitor;
 
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.puma.MockTest;
-import com.dianping.puma.core.monitor.EventMonitor;
+import com.dianping.puma.biz.monitor.EventMonitor;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

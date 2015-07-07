@@ -17,25 +17,24 @@ package com.dianping.puma.datahandler;
 
 import java.math.BigInteger;
 
-import com.dianping.puma.core.util.sql.DDLType;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.dianping.puma.biz.monitor.Notifiable;
+import com.dianping.puma.biz.monitor.NotifyService;
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.monitor.Notifiable;
-import com.dianping.puma.core.monitor.NotifyService;
-import com.dianping.puma.meta.TableMetaInfoFectcher;
-import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.core.util.SimpleDdlParser;
 import com.dianping.puma.core.util.SimpleDdlParser.DdlResult;
 import com.dianping.puma.core.util.constant.DdlEventSubType;
 import com.dianping.puma.core.util.constant.DdlEventType;
+import com.dianping.puma.core.util.sql.DDLType;
+import com.dianping.puma.meta.TableMetaInfoFectcher;
+import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
 import com.dianping.puma.parser.mysql.event.PumaIgnoreEvent;
 import com.dianping.puma.parser.mysql.event.QueryEvent;

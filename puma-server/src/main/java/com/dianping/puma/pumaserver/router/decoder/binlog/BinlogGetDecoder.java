@@ -1,8 +1,8 @@
 package com.dianping.puma.pumaserver.router.decoder.binlog;
 
-import com.dianping.puma.core.netty.entity.binlog.request.BinlogGetRequest;
+import com.dianping.puma.core.dto.binlog.request.BinlogGetRequest;
 import com.dianping.puma.pumaserver.router.decoder.RequestDecoder;
-import com.dianping.puma.pumaserver.router.decoder.exception.DecoderException;
+import com.dianping.puma.pumaserver.exception.DecoderException;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
 
@@ -63,7 +63,7 @@ public class BinlogGetDecoder implements RequestDecoder {
 		if (!params.containsKey("timeUnit")) {
 			binlogGetRequest.setTimeUnit(DEFAULT_TIME_UNIT);
 		} else {
-			binlogGetRequest.setTimeUnit(TimeUnit.valueOf(params.get("TimeUnit").get(0)));
+			binlogGetRequest.setTimeUnit(TimeUnit.valueOf(params.get("timeUnit").get(0)));
 		}
 
 		return binlogGetRequest;

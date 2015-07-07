@@ -26,6 +26,10 @@
 			<artifactId>puma-core</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.dianping.puma</groupId>
+			<artifactId>puma-biz</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.dianping.dpsf</groupId>
 			<artifactId>dpsf-net</artifactId>
 		</dependency>

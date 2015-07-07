@@ -1,6 +1,6 @@
 package com.dianping.puma.pumaserver.service.impl;
 
-import com.dianping.puma.core.netty.entity.BinlogAck;
+import com.dianping.puma.core.dto.BinlogAck;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogAckException;
 

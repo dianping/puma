@@ -3,7 +3,7 @@ package com.dianping.puma.syncserver.job.transform;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
-import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
+import com.dianping.puma.biz.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.syncserver.MockTest;
 import com.dianping.puma.syncserver.job.transform.exception.TransformException;

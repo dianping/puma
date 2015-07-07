@@ -1,8 +1,8 @@
 package com.dianping.puma.admin.remote.reporter;
 
 import com.dianping.puma.core.constant.ActionController;
-import com.dianping.puma.core.monitor.SwallowEventPublisher;
-import com.dianping.puma.core.monitor.event.PumaTaskControllerEvent;
+import com.dianping.puma.biz.monitor.SwallowEventPublisher;
+import com.dianping.puma.biz.monitor.event.PumaTaskControllerEvent;
 import com.dianping.swallow.common.producer.exceptions.SendFailedException;
 
 import org.springframework.beans.factory.annotation.Autowired;

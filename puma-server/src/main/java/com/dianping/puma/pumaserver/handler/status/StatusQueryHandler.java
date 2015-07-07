@@ -1,7 +1,7 @@
 package com.dianping.puma.pumaserver.handler.status;
 
 import com.dianping.puma.common.SystemStatusContainer;
-import com.dianping.puma.core.netty.entity.status.StatusQuery;
+import com.dianping.puma.core.dto.status.StatusQuery;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

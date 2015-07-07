@@ -3,8 +3,8 @@ package com.dianping.puma.monitor;
 import com.dianping.cat.Cat;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
-import com.dianping.puma.core.monitor.HeartbeatMonitor;
-import com.dianping.puma.core.monitor.MonitorCore;
+import com.dianping.puma.biz.monitor.HeartbeatMonitor;
+import com.dianping.puma.biz.monitor.MonitorCore;
 import com.dianping.puma.monitor.exception.ServerEventDelayException;
 
 import java.util.Map;

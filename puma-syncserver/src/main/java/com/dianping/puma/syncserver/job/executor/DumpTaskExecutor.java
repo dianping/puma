@@ -14,9 +14,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.dianping.puma.core.constant.Status;
-import com.dianping.puma.core.entity.DstDBInstance;
-import com.dianping.puma.core.entity.DumpTask;
-import com.dianping.puma.core.entity.SrcDBInstance;
+import com.dianping.puma.biz.entity.DstDBInstance;
+import com.dianping.puma.biz.entity.DumpTask;
+import com.dianping.puma.biz.entity.SrcDBInstance;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.state.DumpTaskState;
 import com.dianping.puma.syncserver.job.executor.exception.TEException;
@@ -36,9 +36,9 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dianping.puma.core.sync.model.mapping.DatabaseMapping;
-import com.dianping.puma.core.sync.model.mapping.TableMapping;
-import com.dianping.puma.core.sync.model.taskexecutor.TaskExecutorStatus;
+import com.dianping.puma.biz.sync.model.mapping.DatabaseMapping;
+import com.dianping.puma.biz.sync.model.mapping.TableMapping;
+import com.dianping.puma.biz.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.syncserver.config.SyncServerConfig;
 import com.dianping.puma.syncserver.util.ProcessBuilderWrapper;
 

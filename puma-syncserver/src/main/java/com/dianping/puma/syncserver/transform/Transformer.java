@@ -6,5 +6,5 @@ import com.dianping.puma.syncserver.transform.exception.TransformException;
 
 public interface Transformer extends LifeCycle<TransformException> {
 
-	ChangedEvent transform(ChangedEvent event) throws TransformException;
+	ChangedEvent transform(ChangedEvent binlogEvent) throws TransformException;
 }

@@ -20,17 +20,17 @@
 
 	<!-- annotation scan -->
 	<context:component-scan base-package="com.dianping.puma" />
-    
+
     <task:annotation-driven />
-    
+
     <pigeon:annotation package="com.dianping.puma.remote.reporter.helper"/>
-      
+
 	<!--bean id="serverConfig" class="com.dianping.puma.config.Config">
 		<property name="port" value="8080" />
 	</bean-->
-	
+
 	<!-- <import resource="serverConfig-${puma.server.env}.xml" /> -->
-	
+
 	<bean id="notifyService" class="com.dianping.puma.biz.monitor.DefaultNotifyService" />
 
 	<bean id="notifiableBean" abstract="true">
@@ -42,7 +42,7 @@
 
 	<bean id="dailyReportTask" class="com.dianping.puma.reporter.DailyReportTask"
 		parent="notifiableBean" init-method="start" />
-		
+
 	<bean id="binlogInfoHolder"
 		  class="com.dianping.puma.core.storage.holder.impl.DefaultBinlogInfoHolder"
 		  init-method="init">

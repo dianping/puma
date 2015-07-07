@@ -1,26 +1,27 @@
-package com.dianping.puma.pumaserver.handler.status;
+package com.dianping.puma.controller;
 
 import com.dianping.puma.common.SystemStatusContainer;
-import com.dianping.puma.core.dto.status.StatusQuery;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Dozer @ 6/25/15
+ * Dozer @ 7/7/15
  * mail@dozer.cc
  * http://www.dozer.cc
  */
 
-@ChannelHandler.Sharable
-public class StatusQueryHandler extends SimpleChannelInboundHandler<StatusQuery> {
-    public static StatusQueryHandler INSTANCE = new StatusQueryHandler();
+@Controller
+@RequestMapping(value = "/status")
+public class StatusController {
 
-    @Override
-    protected void channelRead0(ChannelHandlerContext ctx, StatusQuery msg) throws Exception {
+    @RequestMapping(value = "", method = RequestMethod.GET)
+    @ResponseBody
+    public Object index() {
         Map<String, Object> status = new HashMap<String, Object>();
         status.put("serverStatus", SystemStatusContainer.instance.listServerStatus());
         status.put("serverDdlCounters", SystemStatusContainer.instance.listServerDdlCounters());
@@ -29,6 +30,7 @@ public class StatusQueryHandler extends SimpleChannelInboundHandler<StatusQuery>
         status.put("serverRowUpdateCounters", SystemStatusContainer.instance.listServerRowUpdateCounters());
         status.put("clientStatus", SystemStatusContainer.instance.listClientStatus());
         status.put("storageStatus", SystemStatusContainer.instance.listStorageStatus());
-        ctx.channel().writeAndFlush(status);
+
+        return status;
     }
 }

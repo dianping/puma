@@ -12,7 +12,6 @@ import com.dianping.puma.pumaserver.handler.binlog.BinlogGetHandler;
 import com.dianping.puma.pumaserver.handler.binlog.BinlogSubscriptionHandler;
 import com.dianping.puma.pumaserver.handler.binlog.BinlogUnsubscriptionHandler;
 import com.dianping.puma.pumaserver.handler.deprecated.DeprecatedBinlogQueryHandler;
-import com.dianping.puma.pumaserver.handler.status.StatusQueryHandler;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.service.BinlogTargetService;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
@@ -82,7 +81,6 @@ public class PumaServerManager {
                 result.put("HttpEntityEncoder", HttpResponseEncoder.INSTANCE);
                 result.put("HttpObjectAggregator", new HttpObjectAggregator(1024 * 1024 * 32));
                 result.put("HttpRouterHandler", HttpRouterHandler.INSTANCE);
-                result.put("StatusQueryHandler", StatusQueryHandler.INSTANCE);
                 result.put("BinlogSubscriptionHandler", binlogSubscriptionHandler);
                 result.put("BinlogUnsubscriptionHandler", binlogUnsubscriptionHandler);
                 result.put("BinlogQueryHandler", binlogGetHandler);

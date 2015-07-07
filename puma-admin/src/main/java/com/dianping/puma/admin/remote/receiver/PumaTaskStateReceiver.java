@@ -3,9 +3,8 @@ package com.dianping.puma.admin.remote.receiver;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.biz.entity.PumaTask;
 import com.dianping.puma.core.model.state.PumaTaskState;
-import com.dianping.puma.biz.monitor.event.Event;
-import com.dianping.puma.biz.monitor.EventListener;
-import com.dianping.puma.biz.monitor.event.PumaTaskStateEvent;
+import com.dianping.puma.biz.event.entity.Event;
+import com.dianping.puma.biz.event.EventListener;
 import com.dianping.puma.biz.service.PumaTaskService;
 import com.dianping.puma.biz.service.PumaTaskStateService;
 import org.slf4j.Logger;
@@ -53,15 +52,15 @@ public class PumaTaskStateReceiver implements EventListener {
 
 	@Override
 	public void onEvent(Event event) {
-		if (event instanceof PumaTaskStateEvent) {
-			LOG.info("Receive puma task state event.");
-
-			List<PumaTaskState> pumaTaskStates = ((PumaTaskStateEvent) event).getTaskStates();
-			for (PumaTaskState pumaTaskState : pumaTaskStates) {
-				pumaTaskState.setName(pumaTaskStateService.getStateName(pumaTaskState.getTaskName(),event.getServerName()));
-				pumaTaskState.setServerName(event.getServerName());
-				pumaTaskStateService.add(pumaTaskState);
-			}
-		}
+//		if (event instanceof PumaTaskStateEvent) {
+//			LOG.info("Receive puma task state event.");
+//
+//			List<PumaTaskState> pumaTaskStates = ((PumaTaskStateEvent) event).getTaskStates();
+//			for (PumaTaskState pumaTaskState : pumaTaskStates) {
+//				pumaTaskState.setName(pumaTaskStateService.getStateName(pumaTaskState.getTaskName(),event.getServerName()));
+//				pumaTaskState.setServerName(event.getServerName());
+//				pumaTaskStateService.add(pumaTaskState);
+//			}
+//		}
 	}
 }

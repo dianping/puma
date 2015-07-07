@@ -1,7 +1,6 @@
-package com.dianping.puma.biz.monitor.event;
+package com.dianping.puma.biz.event.entity;
 
 import java.util.Date;
-import java.util.List;
 
 public abstract class Event {
 

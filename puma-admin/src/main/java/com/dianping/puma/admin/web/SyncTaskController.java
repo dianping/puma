@@ -18,7 +18,6 @@ import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.state.BaseSyncTaskState;
 import com.dianping.puma.core.model.state.SyncTaskState;
 import com.dianping.puma.core.model.state.TaskStateContainer;
-import com.dianping.swallow.common.producer.exceptions.SendFailedException;
 import com.mongodb.MongoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,9 +120,6 @@ public class SyncTaskController {
             map.put("success", true);
         } catch (MongoException e) {
             map.put("error", "storage");
-            map.put("success", false);
-        } catch (SendFailedException e) {
-            map.put("error", "notify");
             map.put("success", false);
         } catch (Exception e) {
             map.put("error", e.getMessage());

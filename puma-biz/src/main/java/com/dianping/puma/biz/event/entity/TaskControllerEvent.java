@@ -1,4 +1,4 @@
-package com.dianping.puma.biz.monitor.event;
+package com.dianping.puma.biz.event.entity;
 
 import com.dianping.puma.core.constant.ActionController;
 

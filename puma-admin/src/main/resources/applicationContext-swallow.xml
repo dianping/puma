@@ -22,7 +22,7 @@
         <property name="topic" value="puma_task_state"/>
         <property name="type" value="puma"/>
         <property name="notifyService" ref="notifyService"/>
-        <property name="clazz" value="com.dianping.puma.biz.monitor.event.PumaTaskStateEvent"/>
+        <property name="clazz" value="com.dianping.puma.biz.event.entity.PumaTaskStateEvent"/>
         <property name="listeners">
             <list>
                 <ref bean="taskStateReceiver"/>
@@ -74,7 +74,7 @@
         <property name="topic" value="sync_task_state"/>
         <property name="type" value="sync"/>
         <property name="notifyService" ref="notifyService"/>
-        <property name="clazz" value="com.dianping.puma.biz.monitor.event.SyncTaskStateEvent"/>
+        <property name="clazz" value="com.dianping.puma.biz.event.entity.SyncTaskStateEvent"/>
         <property name="listeners">
             <list>
                 <ref bean="syncTaskStateReceiver"/>
@@ -88,7 +88,7 @@
         <property name="topic" value="sync_task_state"/>
         <property name="type" value="dump"/>
         <property name="notifyService" ref="notifyService"/>
-        <property name="clazz" value="com.dianping.puma.biz.monitor.event.DumpTaskStateEvent"/>
+        <property name="clazz" value="com.dianping.puma.biz.event.entity.DumpTaskStateEvent"/>
         <property name="listeners">
             <list>
                 <ref bean="dumpTaskStateReceiver"/>

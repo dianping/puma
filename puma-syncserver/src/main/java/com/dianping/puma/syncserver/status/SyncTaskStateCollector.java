@@ -1,4 +1,4 @@
-package com.dianping.puma.syncserver.remote.reporter.helper;
+package com.dianping.puma.syncserver.status;
 
 import com.dianping.puma.biz.service.SyncTaskService;
 import com.dianping.puma.biz.service.SyncTaskStateService;

@@ -1,4 +1,4 @@
-package com.dianping.puma.biz.monitor;
+package com.dianping.puma.biz.event;
 
 import java.util.List;
 

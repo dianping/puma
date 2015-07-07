@@ -176,16 +176,6 @@
 			<groupId>com.google.code.morphia</groupId>
 			<artifactId>morphia</artifactId>
 		</dependency>
-		<!-- swallow -->
-		<dependency>
-			<groupId>com.dianping.swallow</groupId>
-			<artifactId>swallow-consumerclient</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.dianping.swallow</groupId>
-			<artifactId>swallow-producerclient</artifactId>
-		</dependency>
-
 		<dependency>
 			<groupId>org.unidal.framework</groupId>
 			<artifactId>web-framework</artifactId>

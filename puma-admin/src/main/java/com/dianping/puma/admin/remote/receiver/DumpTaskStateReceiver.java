@@ -1,9 +1,8 @@
 package com.dianping.puma.admin.remote.receiver;
 
 import com.dianping.puma.core.model.state.DumpTaskState;
-import com.dianping.puma.biz.monitor.EventListener;
-import com.dianping.puma.biz.monitor.event.DumpTaskStateEvent;
-import com.dianping.puma.biz.monitor.event.Event;
+import com.dianping.puma.biz.event.EventListener;
+import com.dianping.puma.biz.event.entity.Event;
 import com.dianping.puma.biz.service.DumpTaskService;
 import com.dianping.puma.biz.service.DumpTaskStateService;
 import org.slf4j.Logger;
@@ -31,13 +30,13 @@ public class DumpTaskStateReceiver implements EventListener {
 
 	@Override
 	public void onEvent(Event event) {
-		if (event instanceof DumpTaskStateEvent) {
-			LOG.info("Receive dump task state event.");
-
-			List<DumpTaskState> dumpTaskStates = ((DumpTaskStateEvent) event).getTaskStates();
-			for (DumpTaskState dumpTaskState: dumpTaskStates) {
-				dumpTaskStateService.add(dumpTaskState);
-			}
-		}
+//		if (event instanceof DumpTaskStateEvent) {
+//			LOG.info("Receive dump task state event.");
+//
+//			List<DumpTaskState> dumpTaskStates = ((DumpTaskStateEvent) event).getTaskStates();
+//			for (DumpTaskState dumpTaskState: dumpTaskStates) {
+//				dumpTaskStateService.add(dumpTaskState);
+//			}
+//		}
 	}
 }

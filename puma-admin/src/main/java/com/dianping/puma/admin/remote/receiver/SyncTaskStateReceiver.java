@@ -1,13 +1,12 @@
 package com.dianping.puma.admin.remote.receiver;
 
-import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.biz.entity.SyncTask;
-import com.dianping.puma.core.model.state.SyncTaskState;
-import com.dianping.puma.biz.monitor.EventListener;
-import com.dianping.puma.biz.monitor.event.Event;
-import com.dianping.puma.biz.monitor.event.SyncTaskStateEvent;
+import com.dianping.puma.biz.event.EventListener;
+import com.dianping.puma.biz.event.entity.Event;
 import com.dianping.puma.biz.service.SyncTaskService;
 import com.dianping.puma.biz.service.SyncTaskStateService;
+import com.dianping.puma.core.constant.Status;
+import com.dianping.puma.core.model.state.SyncTaskState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,13 +38,13 @@ public class SyncTaskStateReceiver implements EventListener {
 
 	@Override
 	public void onEvent(Event event) {
-		if (event instanceof SyncTaskStateEvent) {
-			LOG.info("Receive sync task state event.");
-
-			List<SyncTaskState> syncTaskStates = ((SyncTaskStateEvent) event).getTaskStates();
-			for (SyncTaskState syncTaskState: syncTaskStates) {
-				syncTaskStateService.add(syncTaskState);
-			}
-		}
+//		if (event instanceof SyncTaskStateEvent) {
+//			LOG.info("Receive sync task state event.");
+//
+//			List<SyncTaskState> syncTaskStates = ((SyncTaskStateEvent) event).getTaskStates();
+//			for (SyncTaskState syncTaskState: syncTaskStates) {
+//				syncTaskStateService.add(syncTaskState);
+//			}
+//		}
 	}
 }

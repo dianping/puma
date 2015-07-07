@@ -9,14 +9,13 @@ import com.dianping.puma.biz.entity.PumaServer;
 import com.dianping.puma.biz.entity.PumaTask;
 import com.dianping.puma.biz.entity.SrcDBInstance;
 import com.dianping.puma.biz.entity.SyncTask;
-import com.dianping.puma.biz.monitor.event.PumaTaskOperationEvent;
+import com.dianping.puma.biz.event.entity.PumaTaskOperationEvent;
 import com.dianping.puma.biz.service.*;
 import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.ActionOperation;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.state.PumaTaskState;
 import com.dianping.puma.core.model.state.TaskStateContainer;
-import com.dianping.swallow.common.producer.exceptions.SendFailedException;
 import com.mongodb.MongoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -184,9 +183,6 @@ public class PumaTaskController {
         } catch (MongoException e) {
             map.put("error", "storage");
             map.put("success", false);
-        } catch (SendFailedException e) {
-            map.put("error", "notify");
-            map.put("success", false);
         } catch (Exception e) {
             map.put("error", e.getMessage());
             map.put("success", false);
@@ -239,9 +235,6 @@ public class PumaTaskController {
         } catch (MongoException e) {
             map.put("error", "storage");
             map.put("success", false);
-        } catch (SendFailedException e) {
-            map.put("error", "notify");
-            map.put("success", false);
         } catch (Exception e) {
             map.put("error", e.getMessage());
             map.put("success", false);
@@ -283,9 +276,6 @@ public class PumaTaskController {
             map.put("success", true);
         } catch (MongoException e) {
             map.put("error", "storage");
-            map.put("success", false);
-        } catch (SendFailedException e) {
-            map.put("error", "notify");
             map.put("success", false);
         } catch (Exception e) {
             map.put("error", e.getMessage());

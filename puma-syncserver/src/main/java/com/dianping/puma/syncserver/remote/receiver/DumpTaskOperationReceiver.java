@@ -1,8 +1,8 @@
 package com.dianping.puma.syncserver.remote.receiver;
 
-import com.dianping.puma.biz.monitor.EventListener;
+import com.dianping.puma.biz.event.EventListener;
 import com.dianping.puma.biz.monitor.NotifyService;
-import com.dianping.puma.biz.monitor.event.Event;
+import com.dianping.puma.biz.event.entity.Event;
 import com.dianping.puma.biz.service.DumpTaskService;
 import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;
 import com.dianping.puma.syncserver.job.executor.builder.TaskExecutorBuilder;

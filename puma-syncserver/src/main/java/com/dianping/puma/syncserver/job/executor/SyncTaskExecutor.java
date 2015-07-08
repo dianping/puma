@@ -4,17 +4,15 @@ import com.dianping.puma.api.Configuration;
 import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
-import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.biz.entity.SyncTask;
-import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.biz.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.biz.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.biz.sync.model.mapping.TableMapping;
+import com.dianping.puma.core.constant.Status;
+import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
 import com.dianping.puma.syncserver.job.executor.exception.TEException;
-import com.dianping.puma.syncserver.job.load.Loader;
 import com.dianping.puma.syncserver.job.transform.Transformer;
-
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,155 +23,149 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class SyncTaskExecutor implements TaskExecutor<SyncTask> {
 
-	protected static final Logger LOG = LoggerFactory.getLogger(SyncTaskExecutor.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(SyncTaskExecutor.class);
 
-	private boolean inited = false;
+    private boolean inited = false;
 
-	private boolean stopped = true;
+    private boolean stopped = true;
 
-	private TEException teException = null;
+    private TEException teException = null;
 
-	private Transformer transformer;
+    private Transformer transformer;
 
-	private Loader loader;
+    protected SyncTask task;
 
-	protected SyncTask task;
+    protected BinlogManager binlogManager;
 
-	protected BinlogManager binlogManager;
+    protected PumaClient pumaClient;
 
-	protected PumaClient pumaClient;
+    protected Status status;
 
-	protected Status status;
+    protected String pumaTaskName;
 
-	protected String pumaTaskName;
+    protected String pumaServerHost;
 
-	protected String pumaServerHost;
+    protected int pumaServerPort;
 
-	protected int pumaServerPort;
+    protected String pumaClientServerName;
 
-	protected String pumaClientServerName;
+    protected long pumaClientServerId;
 
-	protected long pumaClientServerId;
+    private AtomicLong delay = new AtomicLong(0L);
 
-	private AtomicLong delay = new AtomicLong(0L);
+    private AtomicLong updates = new AtomicLong(0L);
 
-	private AtomicLong updates = new AtomicLong(0L);
+    private AtomicLong inserts = new AtomicLong(0L);
 
-	private AtomicLong inserts = new AtomicLong(0L);
+    private AtomicLong deletes = new AtomicLong(0L);
 
-	private AtomicLong deletes = new AtomicLong(0L);
+    private AtomicLong ddls = new AtomicLong(0L);
 
-	private AtomicLong ddls = new AtomicLong(0L);
+    public SyncTaskExecutor() {
+    }
 
-	public SyncTaskExecutor() {}
+    @Override
+    public void init() {
+        if (inited) {
+            return;
+        }
 
-	@Override
-	public void init() {
-		if (inited) {
-			return;
-		}
+        binlogManager.init();
+        transformer.init();
+        pumaClient = createPumaClient();
 
-		binlogManager.init();
-		loader.init();
-		transformer.init();
-		pumaClient = createPumaClient();
+        inited = true;
+    }
 
-		inited = true;
-	}
+    @Override
+    public void destroy() {
+        if (!inited) {
+            return;
+        }
 
-	@Override
-	public void destroy() {
-		if (!inited) {
-			return;
-		}
+        transformer.destroy();
+        binlogManager.destroy();
 
-		transformer.destroy();
-		loader.destroy();
-		binlogManager.destroy();
+        inited = false;
+    }
 
-		inited = false;
-	}
+    @Override
+    public void start() {
+        if (!stopped) {
+            return;
+        }
 
-	@Override
-	public void start() {
-		if (!stopped) {
-			return;
-		}
+        stopped = false;
 
-		stopped = false;
+        binlogManager.start();
+        transformer.start();
+        pumaClient.start();
+    }
 
-		binlogManager.start();
-		loader.start();
-		transformer.start();
-		pumaClient.start();
-	}
+    @Override
+    public void stop() {
+        if (stopped) {
+            return;
+        }
 
-	@Override
-	public void stop() {
-		if (stopped) {
-			return;
-		}
+        stopped = true;
 
-		stopped = true;
+        pumaClient.stop();
+        transformer.stop();
+        binlogManager.stop();
+    }
 
-		pumaClient.stop();
-		transformer.stop();
-		loader.stop();
-		binlogManager.stop();
-	}
+    @Override
+    public SyncTask getTask() {
+        return task;
+    }
 
-	@Override
-	public SyncTask getTask() {
-		return task;
-	}
+    public void asyncThrow() throws TEException {
+        if (teException != null) {
+            throw teException;
+        }
+    }
 
-	public void asyncThrow() throws TEException {
-		if (teException != null) {
-			throw teException;
-		}
-	}
+    private void execute(ChangedEvent event) throws TEException {
+        try {
+            transformer.transform(event);
+        } catch (Exception e) {
+            throw TEException.translate(e);
+        }
+    }
 
-	private void execute(ChangedEvent event) throws TEException {
-		try {
-			transformer.transform(event);
-			loader.load(event);
-		} catch (Exception e) {
-			throw TEException.translate(e);
-		}
-	}
+    private PumaClient createPumaClient() {
+        LOG.info("Creating puma client...");
+        ConfigurationBuilder configBuilder = new ConfigurationBuilder();
+        configBuilder.host(pumaServerHost);
+        configBuilder.port(pumaServerPort);
+        configBuilder.name(pumaClientServerName);
+        configBuilder.serverId(pumaClientServerId);
+        configBuilder.target(pumaTaskName);
+        configBuilder.dml(true);
+        configBuilder.ddl(true);
+        configBuilder.transaction(true);
+        configBuilder.binlog(binlogManager.getBinlogInfo().getBinlogFile());
+        configBuilder.binlogPos(binlogManager.getBinlogInfo().getBinlogPosition());
+        _parseSourceDatabaseTables(task.getMysqlMapping(), configBuilder);
+        Configuration configuration = configBuilder.build();
+        LOG.info("Puma client connecting settings: {}.", configuration.toString());
 
-	private PumaClient createPumaClient() {
-		LOG.info("Creating puma client...");
-		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
-		configBuilder.host(pumaServerHost);
-		configBuilder.port(pumaServerPort);
-		configBuilder.name(pumaClientServerName);
-		configBuilder.serverId(pumaClientServerId);
-		configBuilder.target(pumaTaskName);
-		configBuilder.dml(true);
-		configBuilder.ddl(true);
-		configBuilder.transaction(true);
-		configBuilder.binlog(binlogManager.getBinlogInfo().getBinlogFile());
-		configBuilder.binlogPos(binlogManager.getBinlogInfo().getBinlogPosition());
-		_parseSourceDatabaseTables(task.getMysqlMapping(), configBuilder);
-		Configuration configuration = configBuilder.build();
-		LOG.info("Puma client connecting settings: {}.", configuration.toString());
+        final PumaClient pumaClient = new PumaClient(configuration);
+        //pumaClient.getSeqFileHolder().saveSeq(-3);
 
-		final PumaClient pumaClient = new PumaClient(configuration);
-		//pumaClient.getSeqFileHolder().saveSeq(-3);
+        pumaClient.register(new EventListener() {
 
-		pumaClient.register(new EventListener() {
+            @Override
+            public void onEvent(ChangedEvent event) {
+                LOG.info("Receive event({}).", event.toString());
 
-			@Override
-			public void onEvent(ChangedEvent event) {
-				LOG.info("Receive event({}).", event.toString());
-
-				status = Status.RUNNING;
-				execute(event);
-			}
+                status = Status.RUNNING;
+                execute(event);
+            }
 
 			/*
-			@Override
+            @Override
 			public boolean onException(ChangedEvent event, Exception e) {
 				if (!(e instanceof TEException)) {
 					// Don't know how to deal, stop executor.
@@ -237,10 +229,10 @@ public class SyncTaskExecutor implements TaskExecutor<SyncTask> {
 			@Override
 			public void onSkipEvent(ChangedEvent event) {
 			}*/
-		});
+        });
 
-		return pumaClient;
-	}
+        return pumaClient;
+    }
 
 		/*
 		private boolean handleError(ChangedEvent event, Handler handler, Exception e) {
@@ -263,102 +255,98 @@ public class SyncTaskExecutor implements TaskExecutor<SyncTask> {
 			return ignoreFailEvent;
 		}*/
 
-	/**
-	 * 设置同步源的数据库和表
-	 */
-	private void _parseSourceDatabaseTables(MysqlMapping mysqlMapping, ConfigurationBuilder configBuilder) {
-		List<DatabaseMapping> databases = mysqlMapping.getDatabases();
-		if (databases != null) {
-			for (DatabaseMapping database : databases) {
-				// 解析database
-				String databaseFrom = database.getFrom();
-				// 解析table
-				List<TableMapping> tables = database.getTables();
-				if (tables != null) {
-					// 如果table中有一个是*，则只需要设置一个*；否则，添加所有table配置
-					List<String> tableFroms = new ArrayList<String>();
-					boolean star = false;
-					for (TableMapping table : tables) {
-						if (StringUtils.equals(table.getFrom(), "*")) {
-							star = true;
-							break;
-						} else {
-							tableFroms.add(table.getFrom());
-						}
-					}
-					if (star) {
-						configBuilder.tables(databaseFrom, "*");
-					} else {
-						for (String tableFrom : tableFroms) {
-							configBuilder.tables(databaseFrom, tableFrom);
-						}
-					}
-				}
-			}
-		}
-	}
+    /**
+     * 设置同步源的数据库和表
+     */
+    private void _parseSourceDatabaseTables(MysqlMapping mysqlMapping, ConfigurationBuilder configBuilder) {
+        List<DatabaseMapping> databases = mysqlMapping.getDatabases();
+        if (databases != null) {
+            for (DatabaseMapping database : databases) {
+                // 解析database
+                String databaseFrom = database.getFrom();
+                // 解析table
+                List<TableMapping> tables = database.getTables();
+                if (tables != null) {
+                    // 如果table中有一个是*，则只需要设置一个*；否则，添加所有table配置
+                    List<String> tableFroms = new ArrayList<String>();
+                    boolean star = false;
+                    for (TableMapping table : tables) {
+                        if (StringUtils.equals(table.getFrom(), "*")) {
+                            star = true;
+                            break;
+                        } else {
+                            tableFroms.add(table.getFrom());
+                        }
+                    }
+                    if (star) {
+                        configBuilder.tables(databaseFrom, "*");
+                    } else {
+                        for (String tableFrom : tableFroms) {
+                            configBuilder.tables(databaseFrom, tableFrom);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-	public void setTask(SyncTask task) {
-		this.task = task;
-	}
+    public void setTask(SyncTask task) {
+        this.task = task;
+    }
 
-	public void setBinlogManager(BinlogManager binlogManager) {
-		this.binlogManager = binlogManager;
-	}
+    public void setBinlogManager(BinlogManager binlogManager) {
+        this.binlogManager = binlogManager;
+    }
 
-	public void setTransformer(Transformer transformer) {
-		this.transformer = transformer;
-	}
+    public void setTransformer(Transformer transformer) {
+        this.transformer = transformer;
+    }
 
-	public void setLoader(Loader loader) {
-		this.loader = loader;
-	}
+    public void setPumaTaskName(String pumaTaskName) {
+        this.pumaTaskName = pumaTaskName;
+    }
 
-	public void setPumaTaskName(String pumaTaskName) {
-		this.pumaTaskName = pumaTaskName;
-	}
+    public void setPumaServerPort(int pumaServerPort) {
+        this.pumaServerPort = pumaServerPort;
+    }
 
-	public void setPumaServerPort(int pumaServerPort) {
-		this.pumaServerPort = pumaServerPort;
-	}
+    public void setPumaServerHost(String pumaServerHost) {
+        this.pumaServerHost = pumaServerHost;
+    }
 
-	public void setPumaServerHost(String pumaServerHost) {
-		this.pumaServerHost = pumaServerHost;
-	}
+    public void setPumaClientServerName(String pumaClientServerName) {
+        this.pumaClientServerName = pumaClientServerName;
+    }
 
-	public void setPumaClientServerName(String pumaClientServerName) {
-		this.pumaClientServerName = pumaClientServerName;
-	}
+    public void setPumaClientServerId(long pumaClientServerId) {
+        this.pumaClientServerId = pumaClientServerId;
+    }
 
-	public void setPumaClientServerId(long pumaClientServerId) {
-		this.pumaClientServerId = pumaClientServerId;
-	}
+    public Status getStatus() {
+        return status;
+    }
 
-	public Status getStatus() {
-		return status;
-	}
+    public BinlogManager getBinlogManager() {
+        return binlogManager;
+    }
 
-	public BinlogManager getBinlogManager() {
-		return binlogManager;
-	}
+    public AtomicLong getDelay() {
+        return delay;
+    }
 
-	public AtomicLong getDelay() {
-		return delay;
-	}
+    public AtomicLong getDdls() {
+        return ddls;
+    }
 
-	public AtomicLong getDdls() {
-		return ddls;
-	}
+    public AtomicLong getUpdates() {
+        return updates;
+    }
 
-	public AtomicLong getUpdates() {
-		return updates;
-	}
+    public AtomicLong getInserts() {
+        return inserts;
+    }
 
-	public AtomicLong getInserts() {
-		return inserts;
-	}
-
-	public AtomicLong getDeletes() {
-		return deletes;
-	}
+    public AtomicLong getDeletes() {
+        return deletes;
+    }
 }

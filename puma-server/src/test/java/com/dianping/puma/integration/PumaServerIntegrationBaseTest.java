@@ -1,12 +1,12 @@
 /**
  * Project: puma-server
- * 
+ * <p/>
  * File Created at 2012-7-26
  * $Id$
- * 
+ * <p/>
  * Copyright 2010 dianping.com.
  * All rights reserved.
- *
+ * <p/>
  * This software is the confidential and proprietary information of
  * Dianping Company. ("Confidential Information").  You shall not
  * disclose such Confidential Information and shall use it only in
@@ -14,6 +14,27 @@
  * with dianping.com.
  */
 package com.dianping.puma.integration;
+
+import com.dianping.puma.bo.PumaContext;
+import com.dianping.puma.core.codec.JsonEventCodec;
+import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.RowChangedEvent;
+import com.dianping.puma.core.storage.holder.impl.DefaultBinlogInfoHolder;
+import com.dianping.puma.core.util.PumaThreadUtils;
+import com.dianping.puma.datahandler.DefaultDataHandler;
+import com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher;
+import com.dianping.puma.parser.DefaultBinlogParser;
+import com.dianping.puma.parser.Parser;
+import com.dianping.puma.sender.FileDumpSender;
+import com.dianping.puma.sender.Sender;
+import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
+import com.dianping.puma.server.DefaultTaskExecutor;
+import com.dianping.puma.storage.*;
+import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -25,41 +46,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-
-import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-
-import com.dianping.puma.bo.PumaContext;
-import com.dianping.puma.core.codec.JsonEventCodec;
-import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.biz.monitor.NotifyService;
-import com.dianping.puma.core.util.PumaThreadUtils;
-import com.dianping.puma.datahandler.DefaultDataHandler;
-import com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher;
-import com.dianping.puma.parser.DefaultBinlogParser;
-import com.dianping.puma.parser.Parser;
-import com.dianping.puma.sender.FileDumpSender;
-import com.dianping.puma.sender.Sender;
-import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
-import com.dianping.puma.core.storage.holder.impl.DefaultBinlogInfoHolder;
-import com.dianping.puma.server.DefaultTaskExecutor;
-import com.dianping.puma.storage.ArchiveStrategy;
-import com.dianping.puma.storage.BucketIndex;
-import com.dianping.puma.storage.CleanupStrategy;
-import com.dianping.puma.storage.DataIndex;
-import com.dianping.puma.storage.DefaultEventStorage;
-import com.dianping.puma.storage.EventChannel;
-import com.dianping.puma.storage.LocalFileBucketIndex;
-import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 /**
  * TODO Comment of PumaServerIntegrationTest
- * 
+ *
  * @author Leo Liang
  */
 public abstract class PumaServerIntegrationBaseTest {
@@ -96,24 +87,6 @@ public abstract class PumaServerIntegrationBaseTest {
     }
 
     protected void startServer() throws Exception {
-        NotifyService mockNotifyService = new NotifyService() {
-
-            @Override
-            public void report(String title, Map<String, Map<String, String>> msg) {
-                System.out.println("report-----" + title + ": " + msg);
-            }
-
-            @Override
-            public void alarm(String msg, Throwable t, boolean sendSms) {
-                System.out.println("alarm-----" + msg + ": " + t);
-            }
-
-            @Override
-            public void recover(String msg, boolean sendSms) {
-                System.out.println("recover-----" + msg);
-            }
-        };
-
         DefaultBinlogInfoHolder binlogPositionHolder = new DefaultBinlogInfoHolder();
         binlogPositionHolder.setBaseDir(confBaseDir.getAbsolutePath());
         binlogPositionHolder.init();
@@ -132,7 +105,6 @@ public abstract class PumaServerIntegrationBaseTest {
         // init dataHandler
         DefaultDataHandler dataHandler = new DefaultDataHandler();
         dataHandler.setTableMetasInfoFetcher(tableMetaInfoFetcher);
-        dataHandler.setNotifyService(mockNotifyService);
         dataHandler.start();
 
         // init index
@@ -178,13 +150,12 @@ public abstract class PumaServerIntegrationBaseTest {
         sender = new FileDumpSender();
         sender.setName("test-sender");
         sender.setStorage(storage);
-        sender.setNotifyService(mockNotifyService);
         sender.start();
 
         // init dispatcher
         SimpleDispatcherImpl dispatcher = new SimpleDispatcherImpl();
         dispatcher.setName("test-dispatcher");
-        dispatcher.setSenders(Arrays.asList(new Sender[] { sender }));
+        dispatcher.setSenders(Arrays.asList(new Sender[]{sender}));
 
         // init server
         server = new DefaultTaskExecutor();
@@ -201,7 +172,6 @@ public abstract class PumaServerIntegrationBaseTest {
         server.setParser(parser);
         server.setDataHandler(dataHandler);
         server.setDispatcher(dispatcher);
-        server.setNotifyService(mockNotifyService);
         server.setBinlogInfoHolder(binlogPositionHolder);
 
         PumaContext context = new PumaContext();
@@ -229,8 +199,8 @@ public abstract class PumaServerIntegrationBaseTest {
         waitForSync(50);
         List<ChangedEvent> result = new ArrayList<ChangedEvent>();
         EventChannel channel = storage.getChannel(-1, -1, null, -1, -1);
-        for (int i = 0; i < n;) {
-            ChangedEvent event = (ChangedEvent)channel.next();
+        for (int i = 0; i < n; ) {
+            ChangedEvent event = (ChangedEvent) channel.next();
             if (!needTs) {
                 if (event instanceof RowChangedEvent) {
                     if (((RowChangedEvent) event).isTransactionBegin() || ((RowChangedEvent) event).isTransactionCommit()) {
@@ -250,8 +220,8 @@ public abstract class PumaServerIntegrationBaseTest {
         waitForSync(50);
         List<ChangedEvent> result = new ArrayList<ChangedEvent>();
         EventChannel channel = storage.getChannel(seq, serverId, binlog, binlogPos, timeStamp);
-        for (int i = 0; i < n;) {
-            ChangedEvent event = (ChangedEvent)channel.next();
+        for (int i = 0; i < n; ) {
+            ChangedEvent event = (ChangedEvent) channel.next();
             if (!needTs) {
                 if (event instanceof RowChangedEvent) {
                     if (((RowChangedEvent) event).isTransactionBegin() || ((RowChangedEvent) event).isTransactionCommit()) {

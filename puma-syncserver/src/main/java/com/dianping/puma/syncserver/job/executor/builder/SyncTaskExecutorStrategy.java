@@ -12,7 +12,6 @@ import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.syncserver.job.binlogmanage.MapDBBinlogManager;
 import com.dianping.puma.syncserver.job.executor.SyncTaskExecutor;
 import com.dianping.puma.syncserver.job.executor.exception.TEException;
-import com.dianping.puma.syncserver.job.load.PooledLoader;
 import com.dianping.puma.syncserver.job.transform.DefaultTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,26 +57,11 @@ public class SyncTaskExecutorStrategy implements TaskExecutorStrategy<SyncTask, 
             throw new TEException(-1, String.format("Destination db instance is null in sync task(%s).", name));
         }
 
-        PooledLoader loader = new PooledLoader();
-        loader.setName(name);
-        loader.setConsistent(true);
-        //loader.setConsistent(task.isConsistent());
-        loader.setHost(dstDBInstance.getHost() + ":" + dstDBInstance.getPort());
-        loader.setUsername(dstDBInstance.getUsername());
-        loader.setPassword(dstDBInstance.getPassword());
-        loader.setBinlogManager(binlogInfoManager);
-        loader.setDelay(executor.getDelay());
-        loader.setUpdates(executor.getUpdates());
-        loader.setInserts(executor.getInserts());
-        loader.setDeletes(executor.getDeletes());
-        loader.setDdls(executor.getDdls());
-        executor.setLoader(loader);
 
         // Executor setting.
         executor.setTask(task);
         executor.setBinlogManager(binlogInfoManager);
         executor.setTransformer(transformer);
-        executor.setLoader(loader);
 
         String pumaTaskName = task.getPumaTaskName();
         PumaTask pumaTask = pumaTaskService.find(pumaTaskName);

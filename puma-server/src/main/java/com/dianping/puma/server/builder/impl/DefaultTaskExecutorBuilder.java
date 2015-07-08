@@ -2,7 +2,6 @@ package com.dianping.puma.server.builder.impl;
 
 import com.dianping.puma.biz.entity.PumaTask;
 import com.dianping.puma.biz.entity.SrcDBInstance;
-import com.dianping.puma.biz.monitor.NotifyService;
 import com.dianping.puma.biz.service.SrcDBInstanceService;
 import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.core.codec.JsonEventCodec;
@@ -16,10 +15,6 @@ import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.datahandler.DefaultDataHandler;
 import com.dianping.puma.datahandler.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.filter.*;
-import com.dianping.puma.monitor.FetcherEventCountMonitor;
-import com.dianping.puma.monitor.ParserEventCountMonitor;
-import com.dianping.puma.monitor.StorageEventCountMonitor;
-import com.dianping.puma.monitor.StorageEventGroupMonitor;
 import com.dianping.puma.parser.DefaultBinlogParser;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.FileDumpSender;
@@ -45,22 +40,10 @@ import java.util.List;
 public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 
     @Autowired
-    private FetcherEventCountMonitor fetcherEventCountMonitor;
-    @Autowired
-    private ParserEventCountMonitor parserEventCountMonitor;
-    @Autowired
-    private StorageEventCountMonitor storageEventCountMonitor;
-    @Autowired
-    private StorageEventGroupMonitor storageEventGroupMonitor;
-
-    @Autowired
     SrcDBInstanceService srcDBInstanceService;
 
     @Autowired
     BinlogInfoHolder binlogInfoHolder;
-
-    @Autowired
-    NotifyService notifyService;
 
     @Autowired
     EventCenter eventCenter;
@@ -113,8 +96,6 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 
         try {
             DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
-            taskExecutor.setFetcherEventCountMonitor(fetcherEventCountMonitor);
-            taskExecutor.setParserEventCountMonitor(parserEventCountMonitor);
 
             PumaTaskState taskState = new PumaTaskState();
             taskState.setName(pumaTask.getName());
@@ -126,7 +107,6 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
             // Base.
             String taskName = pumaTask.getName();
             taskExecutor.setTaskName(taskName);
-            taskExecutor.setNotifyService(notifyService);
 
             taskExecutor.setServerId(taskName.hashCode() + pumaServerConfig.getName().hashCode());
 
@@ -151,7 +131,6 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 
             // Handler.
             DefaultDataHandler dataHandler = new DefaultDataHandler();
-            dataHandler.setNotifyService(notifyService);
             DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
             // tableMetaInfo.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
             tableMetaInfo.setMetaDBHost(srcDBInstance.getMetaHost());
@@ -172,7 +151,6 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
             List<Sender> senders = new ArrayList<Sender>();
             FileDumpSender sender = new FileDumpSender();
             sender.setName(fileSenderName + taskName);
-            sender.setNotifyService(notifyService);
 
             // File sender storage.
             DefaultEventStorage storage = new DefaultEventStorage();
@@ -181,8 +159,6 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 
             // storage.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
             storage.setCodec(jsonCodec);
-            storage.setStorageEventCountMonitor(storageEventCountMonitor);
-            storage.setStorageEventGroupMonitor(storageEventGroupMonitor);
 
             EventFilterChain eventFilterChain = new DefaultEventFilterChain();
             List<EventFilter> eventFilterList = new ArrayList<EventFilter>();

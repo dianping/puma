@@ -185,6 +185,11 @@
                 <version>3.3.2</version>
             </dependency>
             <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.4</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-exec</artifactId>
                 <version>1.1</version>
@@ -253,17 +258,6 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>18.0</version>
-            </dependency>
-            <!-- swallow -->
-            <dependency>
-                <groupId>com.dianping.swallow</groupId>
-                <artifactId>swallow-producerclient</artifactId>
-                <version>0.7.1</version>
-            </dependency>
-            <dependency>
-                <groupId>com.dianping.swallow</groupId>
-                <artifactId>swallow-consumerclient</artifactId>
-                <version>0.7.1</version>
             </dependency>
             <!-- zebra -->
             <dependency>

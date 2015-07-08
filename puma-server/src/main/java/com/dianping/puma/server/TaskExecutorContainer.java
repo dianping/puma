@@ -1,8 +1,8 @@
 package com.dianping.puma.server;
 
 import com.dianping.puma.core.model.TableSet;
-import com.dianping.puma.biz.monitor.event.PumaTaskControllerEvent;
-import com.dianping.puma.biz.monitor.event.PumaTaskOperationEvent;
+import com.dianping.puma.biz.event.entity.PumaTaskControllerEvent;
+import com.dianping.puma.biz.event.entity.PumaTaskOperationEvent;
 
 import java.util.List;
 

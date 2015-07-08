@@ -5,7 +5,7 @@
     <display-name>Archetype Created Web Application</display-name>
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>classpath*:applicationContext.xml</param-value>
+        <param-value>classpath*:config/spring/appcontext-*</param-value>
     </context-param>
     
      <session-config>
@@ -48,7 +48,7 @@
         <init-param>
             <param-name>contextConfigLocation</param-name>
             <param-value>
-        classpath*:/servlet-context.xml
+        classpath*:config/spring/appcontext-mvc.xml
             </param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>

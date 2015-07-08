@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
 import com.dianping.puma.biz.service.SyncTaskService;
-import com.dianping.puma.biz.monitor.NotifyService;
 import com.dianping.puma.biz.entity.SyncTask;
 import com.dianping.puma.biz.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.core.constant.ActionController;
@@ -32,8 +31,6 @@ public class StatusMonitor {
 
     @Autowired
     private SyncTaskService syncTaskService;
-    @Autowired
-    private NotifyService notifyService;
     /** 存放正在报警的task的status，同一个Task在getAlarmInterval()分钟内只报警一次 */
     private HashMap<Integer, Long> alarmingStatusMap = new HashMap<Integer, Long>();
 
@@ -50,14 +47,11 @@ public class StatusMonitor {
             for (TaskExecutorStatus status : taskStatusMap.values()) {
                 if ((status.getStatus() == TaskExecutorStatus.Status.FAILED || status.getStatus() == TaskExecutorStatus.Status.RECONNECTING)
                         && shouldAlarm(status)) {
-                    notifyService.alarm("Task status error: " + status, null, true);
                     alarmingStatusMap.put(status.hashCode(), System.currentTimeMillis());
                 } else if (status.getStatus() == null && shouldAlarm(status)) {
-                    notifyService.alarm("Task's status is not Update recently: " + status, null, true);
                     alarmingStatusMap.put(status.hashCode(), System.currentTimeMillis());
                 } else if (status.getStatus() == TaskExecutorStatus.Status.RUNNING) {
                     if (alarmingStatusMap.get(status.hashCode()) != null) {//本次状态是RUNNING且已经报过警，说明是恢复
-                        notifyService.recover("Task is RUNNING again: " + status, true);
                         alarmingStatusMap.remove(status.hashCode());
                     }
                 }

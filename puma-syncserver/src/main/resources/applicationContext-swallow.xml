@@ -31,7 +31,7 @@
         <property name="type" value="#{syncServerConfig.syncServerName}" />
         <property name="notifyService" ref="notifyService"/>
         <property name="clazz"
-                  value="com.dianping.puma.biz.monitor.event.SyncTaskOperationEvent" />
+                  value="com.dianping.puma.biz.event.entity.SyncTaskOperationEvent" />
         <property name="listeners">
             <list>
                 <ref bean="syncTaskOperationReceiver"/>
@@ -46,7 +46,7 @@
         <property name="type" value="#{syncServerConfig.syncServerName}" />
         <property name="notifyService" ref="notifyService"/>
         <property name="clazz"
-                  value="com.dianping.puma.biz.monitor.event.SyncTaskControllerEvent" />
+                  value="com.dianping.puma.biz.event.entity.SyncTaskControllerEvent" />
         <property name="listeners">
             <list>
                 <ref bean="syncTaskControllerReceiver"/>
@@ -91,7 +91,7 @@
         <property name="type" value="#{syncServerConfig.syncServerName}" />
         <property name="notifyService" ref="notifyService"/>
         <property name="clazz"
-                  value="com.dianping.puma.biz.monitor.event.DumpTaskOperationEvent" />
+                  value="com.dianping.puma.biz.event.entity.DumpTaskOperationEvent" />
         <property name="listeners">
             <list>
                 <ref bean="dumpTaskOperationReceiver"/>

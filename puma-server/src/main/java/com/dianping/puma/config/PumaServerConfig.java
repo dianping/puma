@@ -1,7 +1,5 @@
 package com.dianping.puma.config;
 
-import javax.annotation.PostConstruct;
-
 import com.dianping.puma.biz.entity.PumaServer;
 import com.dianping.puma.biz.service.PumaServerService;
 import com.dianping.puma.core.util.IPUtils;
@@ -11,74 +9,79 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+
 @Service("pumaServerConfig")
 public class PumaServerConfig implements InitializingBean {
 
-	private static final Logger LOG = LoggerFactory.getLogger(PumaServerConfig.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PumaServerConfig.class);
 
-	@Autowired
-	PumaServerService pumaServerService;
+    @Autowired
+    PumaServerService pumaServerService;
 
-	private String id;
+    private String id;
 
-	private String name;
+    private String name;
 
-	private String host;
+    private String host;
 
-	private int port;
+    private int port;
 
-	@PostConstruct
-	public void init() {
-		for (String ip : IPUtils.getNoLoopbackIP4Addresses()) {
-			LOG.info("ip = {}.", ip);
-			PumaServer entity = pumaServerService.findByHost(ip);
-			if (entity != null) {
-				this.name = entity.getName();
-				this.host = entity.getHost();
-				this.port = entity.getPort();
-				LOG.info("Initialize puma server: name `{}`, host `{}`, port `{}`.", new Object[] { name, host, port });
-				break;
-			}
-		}
+    @PostConstruct
+    public void init() {
+        pumaServerService.heartBeat();
 
-		if (this.name == null) {
-			LOG.error("Initialize puma server error: No matched server found in DB.");
-			throw new RuntimeException("Initialize puma server error: No matched server found in DB.");
-		}
-	}
+        for (String ip : IPUtils.getNoLoopbackIP4Addresses()) {
+            LOG.info("ip = {}.", ip);
+            PumaServer entity = pumaServerService.findByHost(ip);
+            if (entity != null) {
+                this.name = entity.getName();
+                this.host = entity.getHost();
+                this.port = entity.getPort();
+                LOG.info("Initialize puma server: name `{}`, host `{}`, port `{}`.", new Object[]{name, host, port});
+                break;
+            }
+        }
 
-	@Override
-	public void afterPropertiesSet() throws Exception {}
+        if (this.name == null) {
+            LOG.error("Initialize puma server error: No matched server found in DB.");
+            throw new RuntimeException("Initialize puma server error: No matched server found in DB.");
+        }
+    }
 
-	public String getId() {
-		return id;
-	}
+    @Override
+    public void afterPropertiesSet() throws Exception {
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public String getName() {
-		return this.name;
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getName() {
+        return this.name;
+    }
 
-	public String getHost() {
-		return this.host;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setHost(String host) {
-		this.host = host;
-	}
+    public String getHost() {
+        return this.host;
+    }
 
-	public Integer getPort() {
-		return this.port;
-	}
+    public void setHost(String host) {
+        this.host = host;
+    }
 
-	public void setPort(Integer port) {
-		this.port = port;
-	}
+    public Integer getPort() {
+        return this.port;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
+    }
 }

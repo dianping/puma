@@ -3,18 +3,15 @@ package com.dianping.puma.sender;
 
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.biz.monitor.Notifiable;
-import com.dianping.puma.biz.monitor.NotifyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractSender implements Sender, Notifiable {
+public abstract class AbstractSender implements Sender {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractSender.class);
 	private String				name;
 	private int					maxTryTimes		= 3;
 	private boolean				canMissEvent	= false;
 	private volatile boolean	stopped			= true;
-	private NotifyService		notifyService;
 	private final String		MSG_SKIP		= "[Miss]Send event failed for %d times. [servername=%s; current binlogfile=%s; current binlogpos=%d; next binlogpos=%d] ";
 	private final String		MSG_LOOP_FAILED	= "[Can't Miss]Send event failed for %d times. [servername=%s; current binlogfile=%s; current binlogpos=%d; next binlogpos=%d] ";
 
@@ -23,21 +20,6 @@ public abstract class AbstractSender implements Sender, Notifiable {
 	 */
 	public boolean isStop() {
 		return stopped;
-	}
-
-	/**
-	 * @return the notifyService
-	 */
-	public NotifyService getNotifyService() {
-		return notifyService;
-	}
-
-	/**
-	 * @param notifyService
-	 *            the notifyService to set
-	 */
-	public void setNotifyService(NotifyService notifyService) {
-		this.notifyService = notifyService;
 	}
 
 	/**

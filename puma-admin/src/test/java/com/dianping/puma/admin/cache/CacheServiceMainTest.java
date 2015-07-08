@@ -5,14 +5,13 @@ import java.util.Date;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.dianping.puma.admin.common.StateContainer;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.ClientAck;
 
 public class CacheServiceMainTest {
 
 	public static void main(String[] args) {
-		ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext.xml");
+		ApplicationContext applicationContext = new ClassPathXmlApplicationContext("config/spring/applicationContext.xml");
 		//StateContainer stateContainer = (StateContainer) applicationContext.getBean("stateContainer");
 		ClientAck clientAck = new ClientAck();
 		clientAck.setClientName("lixt");

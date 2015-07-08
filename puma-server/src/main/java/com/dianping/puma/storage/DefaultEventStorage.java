@@ -11,9 +11,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.filter.EventFilterChain;
+<<<<<<< HEAD
 import com.dianping.puma.monitor.StorageEventCountMonitor;
 import com.dianping.puma.monitor.StorageEventGroupMonitor;
 import com.dianping.puma.codec.EventCodec;
+=======
+
+>>>>>>> 6e8525a46376849862d1c4d807ab0636fbcabbf4
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
@@ -71,10 +75,6 @@ public class DefaultEventStorage implements EventStorage {
 
 	private EventFilterChain storageEventFilterChain;
 
-	private StorageEventCountMonitor storageEventCountMonitor;
-
-	private StorageEventGroupMonitor storageEventGroupMonitor;
-	
 	/**
 	 * @param binlogIndexBaseDir the binlogIndexBaseDir to set
 	 */
@@ -110,13 +110,6 @@ public class DefaultEventStorage implements EventStorage {
 
 		cleanupStrategy.addDataIndex(binlogIndex);
 		
-		if (storageEventCountMonitor != null) {
-			LOG.info("Find `storageEventCountMonitor` spring bean success.");
-		}
-		if (storageEventGroupMonitor != null) {
-			LOG.info("Find `storageEventGroupMonitor` spring bean success.");
-		}
-
 		try {
 			masterBucketIndex.start();
 			slaveBucketIndex.start();
@@ -276,9 +269,6 @@ public class DefaultEventStorage implements EventStorage {
 			writingBucket.append(bos.toByteArray());
 			bucketManager.updateLatestSequence(new Sequence(event.getSeq()));
 
-			storageEventCountMonitor.record(getTaskName());
-			storageEventGroupMonitor.record(event.genFullName());
-
 			SystemStatusContainer.instance.updateStorageStatus(name, event.getSeq());
 		} catch (IOException e) {
 			throw new StorageWriteException("Failed to write event.", e);
@@ -365,22 +355,6 @@ public class DefaultEventStorage implements EventStorage {
 			}
 		}*/
 
-	}
-
-	public StorageEventCountMonitor getStorageEventCountMonitor() {
-		return storageEventCountMonitor;
-	}
-
-	public void setStorageEventCountMonitor(StorageEventCountMonitor storageEventCountMonitor) {
-		this.storageEventCountMonitor = storageEventCountMonitor;
-	}
-
-	public StorageEventGroupMonitor getStorageEventGroupMonitor() {
-		return storageEventGroupMonitor;
-	}
-
-	public void setStorageEventGroupMonitor(StorageEventGroupMonitor storageEventGroupMonitor) {
-		this.storageEventGroupMonitor = storageEventGroupMonitor;
 	}
 
 }

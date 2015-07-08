@@ -1,23 +1,17 @@
 package com.dianping.puma.syncserver.job.executor.failhandler;
 
-import java.util.Iterator;
-import java.util.Map;
-
 import com.dianping.puma.biz.entity.BaseSyncTask;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
-import com.dianping.puma.biz.monitor.NotifyService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Iterator;
+import java.util.Map;
 
 public class DeleteDuplicateRecordHandler implements Handler {
     private static final Logger LOG = LoggerFactory.getLogger(DeleteDuplicateRecordHandler.class);
-
-    @Autowired
-    private NotifyService notifyService;
 
     @Override
     public String getName() {
@@ -63,10 +57,8 @@ public class DeleteDuplicateRecordHandler implements Handler {
 
                     String msg = taskInfo + " Handle(" + getName() + "): <br/><br/>" + msgSB.toString();
                     LOG.info(msg);
-                    notifyService.alarm(msg, null, false);
                 } catch (Exception e) {
                     String msg = taskInfo + " Unexpected SQLException on handler(" + getName() + "), ignoreFailEvent still false.";
-                    notifyService.alarm(msg, e, true);
                     LOG.error(msg, e);
                 }
             }

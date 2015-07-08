@@ -132,11 +132,11 @@ public abstract class AbstractBaseTest {
 		initSchema();
 	}
 
-//	@AfterClass
-//	public static void afterClass() throws IOException {
-//		distroySchema();
-//		distroyDataSource();
-//	}
+	@AfterClass
+	public static void afterClass() throws IOException {
+		distroySchema();
+		distroyDataSource();
+	}
 
 	@Before
 	public void before() throws Exception {

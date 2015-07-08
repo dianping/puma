@@ -34,11 +34,11 @@ public class TimeTypeTest extends AbstractBaseTest {
 		setFilterTable(TABLE_NAME);
 	}
 
-	@AfterClass
-	public static void doAfter() throws Exception {
-		String drop_SQL = "DROP TABLE IF EXISTS `" + SCHEMA_NAME + "`.`" + TABLE_NAME + "`";
-		queryRunner.update(drop_SQL);
-	}
+//	@AfterClass
+//	public static void doAfter() throws Exception {
+//		String drop_SQL = "DROP TABLE IF EXISTS `" + SCHEMA_NAME + "`.`" + TABLE_NAME + "`";
+//		queryRunner.update(drop_SQL);
+//	}
 
 	@Test
 	public void timeTypeInsertTest() throws Exception {

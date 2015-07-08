@@ -1,6 +1,18 @@
 package com.dianping.puma.syncserver.task.fail;
 
-public interface FailHandler {
+public class FailHandler {
 
-	FailPattern handle(Exception e);
+	public static final FailHandler INSTANCE = new FailHandler();
+
+	public FailPattern handle(String name, Exception e) {
+		return null;
+	}
+
+	public void register(String name, Exception e, FailPattern failPattern) {
+
+	}
+
+	public void unregister(String name) {
+
+	}
 }

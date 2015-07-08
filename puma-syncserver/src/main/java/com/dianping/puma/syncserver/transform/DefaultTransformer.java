@@ -2,7 +2,7 @@ package com.dianping.puma.syncserver.transform;
 
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
-import com.dianping.puma.syncserver.transform.exception.TransformException;
+import com.dianping.puma.syncserver.exception.PumaBinlogException;
 
 import java.util.List;
 
@@ -32,19 +32,17 @@ public class DefaultTransformer implements Transformer {
 
 	@Override
 	public ChangedEvent transform(ChangedEvent binlogEvent) {
-		if (stopped) {
-			throw new TransformException("transform failure, already stopped.");
+		if (!stopped) {
+			validate(binlogEvent);
+
+			preprocess(binlogEvent);
+
+			String database = mapDatabase(binlogEvent);
+			String table = mapTable(binlogEvent);
+
+			binlogEvent.setDatabase(database);
+			binlogEvent.setTable(table);
 		}
-
-		validate(binlogEvent);
-
-		preprocess(binlogEvent);
-
-		String database = mapDatabase(binlogEvent);
-		String table = mapTable(binlogEvent);
-
-		binlogEvent.setDatabase(database);
-		binlogEvent.setTable(table);
 
 		return null;
 	}
@@ -65,7 +63,7 @@ public class DefaultTransformer implements Transformer {
 
 		String database = mysqlMapping.getDatabase(oriDatabase);
 		if (database == null) {
-			throw new TransformException("transform failure, no mapping database found.");
+			throw new PumaBinlogException("no mapping database found.");
 		}
 		return database;
 	}
@@ -80,7 +78,7 @@ public class DefaultTransformer implements Transformer {
 
 		String table = mysqlMapping.getTable(oriDatabase, oriTable);
 		if (table == null) {
-			throw new TransformException("transform failure, no mapping table found.");
+			throw new PumaBinlogException("no mapping table found.");
 		}
 		return table;
 	}

@@ -2,7 +2,8 @@ package com.dianping.puma.syncserver.task;
 
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.syncserver.accept.DuplexBuffer;
+import com.dianping.puma.syncserver.buffer.DuplexBuffer;
+import com.dianping.puma.syncserver.exception.PumaTimeoutException;
 import com.dianping.puma.syncserver.load.LoadFuture;
 import com.dianping.puma.syncserver.load.Loader;
 import com.dianping.puma.syncserver.transform.Transformer;
@@ -17,10 +18,8 @@ public class SyncTaskExecutor extends AbstractTaskExecutor {
 
 	private String taskName;
 
-	private ScheduledExecutorService BossThreadPool;
-	private ScheduledExecutorService WorkerThreadPool;
-	private ScheduledExecutorService SQLThreadPool;
-	private BlockingQueue<LoadFuture> loadFutureBlockingQueue;
+	private ExecutorService bossThreadPool;
+	private ExecutorService workerThreadPool;
 
 	private PumaClient client;
 	private DuplexBuffer duplexBuffer;
@@ -29,12 +28,52 @@ public class SyncTaskExecutor extends AbstractTaskExecutor {
 
 	@Override
 	public void doStart() {
-
+		startWorker();
+		startBoss();
 	}
 
 	@Override
 	public void doStop() {
+		stopWorker();
+		stopBoss();
+	}
 
+	private void startBoss() {
+		bossThreadPool = Executors.newFixedThreadPool(3, new ThreadFactory() {
+			@Override
+			public Thread newThread(Runnable runnable) {
+				Thread thread = new Thread(runnable);
+				thread.setDaemon(true);
+				thread.setName("puma-boss");
+				return thread;
+			}
+		});
+
+		bossThreadPool.execute(listenTask);
+		bossThreadPool.execute(handleTask);
+		bossThreadPool.execute(commitTask);
+	}
+
+	private void stopBoss() {
+		bossThreadPool.shutdown();
+		bossThreadPool = null;
+	}
+
+	private void startWorker() {
+		workerThreadPool = Executors.newFixedThreadPool(10, new ThreadFactory() {
+			@Override
+			public Thread newThread(Runnable runnable) {
+				Thread thread = new Thread(runnable);
+				thread.setDaemon(true);
+				thread.setName("puma-boss");
+				return thread;
+			}
+		});
+	}
+
+	private void stopWorker() {
+		workerThreadPool.shutdown();
+		workerThreadPool = null;
 	}
 
 	private Runnable listenTask = new Runnable() {
@@ -81,9 +120,9 @@ public class SyncTaskExecutor extends AbstractTaskExecutor {
 				} catch (InterruptedException e) {
 					// do nothing.
 				} catch (TimeoutException e) {
-					// @todo.
+					fail("binlog execution timeout.", new PumaTimeoutException(e));
 				} catch (ExecutionException e) {
-					// @todo.
+					fail("binlog execution error.", e.getCause());
 				}
 			}
 		}

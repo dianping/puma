@@ -1,4 +1,4 @@
-package com.dianping.puma.syncserver.accept;
+package com.dianping.puma.syncserver.buffer;
 
 import com.dianping.puma.core.LifeCycle;
 import com.dianping.puma.core.event.ChangedEvent;

@@ -1,8 +1,12 @@
 package com.dianping.puma.syncserver.task;
 
+import com.dianping.puma.syncserver.task.fail.FailPattern;
+
 public abstract class AbstractTaskExecutor implements TaskExecutor {
 
 	protected volatile boolean stopped = true;
+
+	protected volatile FailPattern failPattern;
 
 	@Override
 	public void start() {
@@ -32,5 +36,9 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
 
 	protected boolean checkStop() {
 		return stopped || Thread.currentThread().isInterrupted();
+	}
+
+	protected void fail(String msg, Throwable cause) {
+
 	}
 }

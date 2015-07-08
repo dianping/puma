@@ -15,7 +15,6 @@
  */
 package com.dianping.puma.integration;
 
-<<<<<<< HEAD
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -26,7 +25,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
@@ -35,9 +33,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 import com.dianping.puma.biz.entity.SrcDBInstance;
-import com.dianping.puma.biz.monitor.NotifyService;
-=======
->>>>>>> 6e8525a46376849862d1c4d807ab0636fbcabbf4
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.codec.JsonEventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
@@ -53,24 +48,14 @@ import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
 import com.dianping.puma.server.DefaultTaskExecutor;
-import com.dianping.puma.storage.*;
+import com.dianping.puma.storage.ArchiveStrategy;
+import com.dianping.puma.storage.BucketIndex;
+import com.dianping.puma.storage.CleanupStrategy;
+import com.dianping.puma.storage.DataIndex;
+import com.dianping.puma.storage.DefaultEventStorage;
+import com.dianping.puma.storage.EventChannel;
+import com.dianping.puma.storage.LocalFileBucketIndex;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
-import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
 
 /**
  * TODO Comment of PumaServerIntegrationTest

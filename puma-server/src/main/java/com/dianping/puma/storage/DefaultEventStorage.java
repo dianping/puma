@@ -9,27 +9,21 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.filter.EventFilterChain;
-<<<<<<< HEAD
-import com.dianping.puma.monitor.StorageEventCountMonitor;
-import com.dianping.puma.monitor.StorageEventGroupMonitor;
-import com.dianping.puma.codec.EventCodec;
-=======
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
->>>>>>> 6e8525a46376849862d1c4d807ab0636fbcabbf4
+import com.dianping.puma.codec.EventCodec;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.ByteArrayUtils;
+import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.storage.exception.InvalidSequenceException;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageException;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;
 import com.dianping.puma.storage.exception.StorageWriteException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DefaultEventStorage implements EventStorage {
 

@@ -29,7 +29,7 @@ import com.dianping.puma.filter.EventFilter;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.filter.TableMetaRefreshFilter;
 import com.dianping.puma.filter.TransactionEventFilter;
-import com.dianping.puma.meta.DefaultTableMetaInfoFectcher;
+import com.dianping.puma.meta.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.meta.TableMetaInfoStore;
 import com.dianping.puma.parser.DefaultBinlogParser;
 import com.dianping.puma.parser.Parser;
@@ -139,7 +139,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 
             // Handler.
             DefaultDataHandler dataHandler = new DefaultDataHandler();
-            DefaultTableMetaInfoFectcher tableMetaInfo = new DefaultTableMetaInfoFectcher();
+            DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
             tableMetaInfo.setSrcDbInstance(srcDBInstance);
             BinlogInfo binlogInfo1 = new BinlogInfo("mysql-bin.000000", 4L);
       		tableMetaInfo.setBinlogInfo(binlogInfo1);

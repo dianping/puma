@@ -41,7 +41,7 @@ import com.dianping.puma.filter.EventFilter;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.filter.TableMetaRefreshFilter;
 import com.dianping.puma.filter.TransactionEventFilter;
-import com.dianping.puma.meta.DefaultTableMetaInfoFectcher;
+import com.dianping.puma.meta.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.meta.TableMetaInfoStore;
 import com.dianping.puma.parser.DefaultBinlogParser;
 import com.dianping.puma.parser.Parser;
@@ -311,7 +311,7 @@ public abstract class AbstractBaseTest {
 
 		// Handler.
 		DefaultDataHandler dataHandler = new DefaultDataHandler();
-		DefaultTableMetaInfoFectcher tableMetaInfo = new DefaultTableMetaInfoFectcher();
+		DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
 		// tableMetaInfo.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
 		SrcDBInstance srcDbInstance = new SrcDBInstance();
 		srcDbInstance.setHost(host);

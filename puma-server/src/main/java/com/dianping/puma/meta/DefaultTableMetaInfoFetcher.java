@@ -43,9 +43,9 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
  * @author Leo Liang
  * @author hao.zhu
  */
-public class DefaultTableMetaInfoFectcher implements TableMetaInfoFectcher {
+public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 
-	private static final Logger log = Logger.getLogger(DefaultTableMetaInfoFectcher.class);
+	private static final Logger log = Logger.getLogger(DefaultTableMetaInfoFetcher.class);
 
 	private SrcDBInstance srcDbInstance;
 

@@ -40,7 +40,7 @@ import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.storage.holder.impl.DefaultBinlogInfoHolder;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.datahandler.DefaultDataHandler;
-import com.dianping.puma.meta.DefaultTableMetaInfoFectcher;
+import com.dianping.puma.meta.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.meta.TableMetaInfoStore;
 import com.dianping.puma.parser.DefaultBinlogParser;
 import com.dianping.puma.parser.Parser;
@@ -105,7 +105,7 @@ public abstract class PumaServerIntegrationBaseTest {
         parser.start();
 
         // init tablemetasinfofetcher
-        DefaultTableMetaInfoFectcher tableMetaInfoFetcher = new DefaultTableMetaInfoFectcher();
+        DefaultTableMetaInfoFetcher tableMetaInfoFetcher = new DefaultTableMetaInfoFetcher();
         SrcDBInstance srcDbInstance = new SrcDBInstance();
         srcDbInstance.setHost(host);
         srcDbInstance.setPassword(pwd);

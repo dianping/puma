@@ -24,7 +24,7 @@ import com.dianping.puma.core.meta.TableMetaInfo;
  * @author Leo Liang
  * 
  */
-public interface TableMetaInfoFectcher {
+public interface TableMetaInfoFetcher {
 
 	void refreshTableMeta(DdlEvent ddlEvent, boolean isRefresh);
 	

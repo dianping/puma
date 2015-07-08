@@ -32,7 +32,7 @@ import com.dianping.puma.core.util.SimpleDdlParser.DdlResult;
 import com.dianping.puma.core.util.constant.DdlEventSubType;
 import com.dianping.puma.core.util.constant.DdlEventType;
 import com.dianping.puma.core.util.sql.DDLType;
-import com.dianping.puma.meta.TableMetaInfoFectcher;
+import com.dianping.puma.meta.TableMetaInfoFetcher;
 import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
 import com.dianping.puma.parser.mysql.event.PumaIgnoreEvent;
@@ -47,12 +47,12 @@ import com.dianping.puma.parser.mysql.event.QueryEvent;
 public abstract class AbstractDataHandler implements DataHandler {
 	private static final Logger log = Logger.getLogger(AbstractDataHandler.class);
 
-	private TableMetaInfoFectcher tableMetasInfoFetcher;
+	private TableMetaInfoFetcher tableMetasInfoFetcher;
 
 	/**
 	 * @return the tableMetasInfoFetcher
 	 */
-	public TableMetaInfoFectcher getTableMetasInfoFetcher() {
+	public TableMetaInfoFetcher getTableMetasInfoFetcher() {
 		return tableMetasInfoFetcher;
 	}
 
@@ -60,7 +60,7 @@ public abstract class AbstractDataHandler implements DataHandler {
 	 * @param tableMetasInfoFetcher
 	 *           the tableMetasInfoFetcher to set
 	 */
-	public void setTableMetasInfoFetcher(TableMetaInfoFectcher tableMetasInfoFetcher) {
+	public void setTableMetasInfoFetcher(TableMetaInfoFetcher tableMetasInfoFetcher) {
 		this.tableMetasInfoFetcher = tableMetasInfoFetcher;
 	}
 

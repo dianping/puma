@@ -20,7 +20,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.dianping.puma.core.meta.TableMetaInfo;
 import com.dianping.puma.core.util.sql.DMLType;
+
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.bo.PumaContext;

@@ -78,7 +78,7 @@
 		<property name="backupDay" value="1" />
 	</bean>
 
-	<bean id="jsonCodec" class="com.dianping.puma.core.codec.JsonEventCodec" />
+	<bean id="rawCodec" class="com.dianping.puma.codec.RawEventCodec" />
 
 	<bean id="mongoClient" class="com.dianping.puma.biz.dao.morphia.helper.MongoClient">
 	</bean>

@@ -2,9 +2,25 @@ package com.dianping.puma.core.util.sql;
 
 public enum DMLType {
 
-	INSERT,
-	DELETE,
-	UPDATE,
-	REPLACE,
+	NULL(0), INSERT(1), DELETE(2), UPDATE(3), REPLACE(4);
 
+	private int type;
+
+	private DMLType(int type) {
+		this.type = type;
+	}
+
+	public int getDMLType() {
+		return this.type;
+	}
+
+	public static DMLType getDMLType(int type) {
+		for (DMLType dmlType : DMLType.values()) {
+			if (dmlType.getDMLType() == type) {
+				return dmlType;
+			}
+		}
+
+		return null;
+	}
 }

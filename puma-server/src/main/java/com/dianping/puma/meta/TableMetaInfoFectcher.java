@@ -16,7 +16,7 @@
 package com.dianping.puma.meta;
 
 import com.dianping.puma.core.event.DdlEvent;
-import com.dianping.puma.datahandler.TableMetaInfo;
+import com.dianping.puma.core.meta.TableMetaInfo;
 
 /**
  * TODO Comment of TableMetasInfoFetcher

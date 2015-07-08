@@ -36,7 +36,7 @@ import org.junit.BeforeClass;
 import com.dianping.puma.biz.entity.SrcDBInstance;
 import com.dianping.puma.biz.monitor.NotifyService;
 import com.dianping.puma.bo.PumaContext;
-import com.dianping.puma.core.codec.JsonEventCodec;
+import com.dianping.puma.codec.JsonEventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.storage.holder.impl.DefaultBinlogInfoHolder;

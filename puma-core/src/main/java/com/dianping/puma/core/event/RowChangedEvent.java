@@ -97,8 +97,6 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
 
 	public static final int UPDATE = 2;
 
-	private Map<String, ColumnInfo> columns = new HashMap<String, ColumnInfo>();
-
 	private int actionType;
 
 	private DMLType dmlType;
@@ -106,6 +104,8 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
 	private boolean isTransactionBegin = false;
 
 	private boolean isTransactionCommit = false;
+
+	private Map<String, ColumnInfo> columns = new HashMap<String, ColumnInfo>();
 
 	public DMLType getDmlType() {
 		return dmlType;

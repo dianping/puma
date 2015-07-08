@@ -14,8 +14,8 @@ import com.dianping.puma.biz.entity.SrcDBInstance;
 import com.dianping.puma.biz.monitor.NotifyService;
 import com.dianping.puma.biz.service.PumaTaskStateService;
 import com.dianping.puma.biz.service.SrcDBInstanceService;
+import com.dianping.puma.codec.RawEventCodec;
 import com.dianping.puma.config.PumaServerConfig;
-import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
@@ -81,7 +81,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 	PumaServerConfig pumaServerConfig;
 
 	@Autowired
-	private JsonEventCodec jsonCodec;
+	private RawEventCodec rawCodec;
 
 	@Value("fileSender-")
 	String fileSenderName;
@@ -196,7 +196,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			storage.setTaskName(taskName);
 
 			// storage.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
-			storage.setCodec(jsonCodec);
+			storage.setCodec(rawCodec);
 			storage.setStorageEventCountMonitor(storageEventCountMonitor);
 			storage.setStorageEventGroupMonitor(storageEventGroupMonitor);
 

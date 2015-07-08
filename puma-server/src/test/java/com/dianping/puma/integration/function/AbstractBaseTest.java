@@ -21,7 +21,7 @@ import org.junit.BeforeClass;
 import com.dianping.puma.biz.entity.SrcDBInstance;
 import com.dianping.puma.biz.monitor.DefaultNotifyService;
 import com.dianping.puma.biz.monitor.NotifyService;
-import com.dianping.puma.core.codec.JsonEventCodec;
+import com.dianping.puma.codec.RawEventCodec;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
@@ -96,7 +96,7 @@ public abstract class AbstractBaseTest {
 	private static DefaultBinlogInfoHolder binlogInfoHolder;
 	private NotifyService notifyService;
 	private EventCenter eventCenter;
-	private JsonEventCodec jsonCodec;
+	private RawEventCodec rawCodec;
 	private final String taskName = "test";
 	private final String serverName = "testServer01";
 	private TaskExecutor taskExecutor;
@@ -134,7 +134,7 @@ public abstract class AbstractBaseTest {
 		notifyService = new DefaultNotifyService();
 		eventCenter = new EventCenter();
 		eventCenter.init();
-		jsonCodec = new JsonEventCodec();
+		rawCodec = new RawEventCodec();
 		startTask();
 	}
 
@@ -345,7 +345,7 @@ public abstract class AbstractBaseTest {
 		storage.setTaskName(taskName);
 
 		// storage.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
-		storage.setCodec(jsonCodec);
+		storage.setCodec(rawCodec);
 		storage.setStorageEventCountMonitor(storageEventCountMonitor);
 		storage.setStorageEventGroupMonitor(storageEventGroupMonitor);
 

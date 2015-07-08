@@ -15,7 +15,6 @@
  */
 package com.dianping.puma.parser.mysql.column;
 
-import java.util.Date;
 
 
 /**
@@ -51,5 +50,4 @@ public final class DatetimeColumn implements Column {
 	public static final DatetimeColumn valueOf(String value) {
 		return new DatetimeColumn(value);
 	}
-	
 }

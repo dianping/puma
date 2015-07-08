@@ -4,8 +4,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import com.dianping.puma.core.codec.EventCodecFactoryTest;
-import com.dianping.puma.core.codec.JsonEventCodecTest;
 import com.dianping.puma.core.util.ByteArrayUtilsTest;
 import com.dianping.puma.core.util.StreamUtilsTest;
 
@@ -13,8 +11,6 @@ import com.dianping.puma.core.util.StreamUtilsTest;
 @SuiteClasses({
 
 // add test classes here
-JsonEventCodecTest.class,
-EventCodecFactoryTest.class,
 ByteArrayUtilsTest.class,
 StreamUtilsTest.class
 

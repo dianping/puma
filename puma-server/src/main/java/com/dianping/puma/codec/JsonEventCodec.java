@@ -1,4 +1,4 @@
-package com.dianping.puma.core.codec;
+package com.dianping.puma.codec;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

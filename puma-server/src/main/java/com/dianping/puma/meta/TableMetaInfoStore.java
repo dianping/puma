@@ -22,7 +22,7 @@ import org.jboss.netty.util.internal.ConcurrentHashMap;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.datahandler.TableMetaInfo;
+import com.dianping.puma.core.meta.TableMetaInfo;
 import com.dianping.puma.storage.BinlogIndexKey;
 import com.dianping.puma.storage.BinlogIndexKeyConvertor;
 

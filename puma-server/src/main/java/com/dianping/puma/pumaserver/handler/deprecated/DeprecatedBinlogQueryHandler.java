@@ -1,7 +1,7 @@
 package com.dianping.puma.pumaserver.handler.deprecated;
 
-import com.dianping.puma.core.codec.EventCodec;
-import com.dianping.puma.core.codec.EventCodecFactory;
+import com.dianping.puma.codec.EventCodec;
+import com.dianping.puma.codec.EventCodecFactory;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.Event;
@@ -15,6 +15,7 @@ import com.dianping.puma.server.DefaultTaskExecutorContainer;
 import com.dianping.puma.storage.BufferedEventChannel;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.EventStorage;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;

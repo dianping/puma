@@ -34,8 +34,8 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.puma.biz.entity.SrcDBInstance;
 import com.dianping.puma.core.event.DdlEvent;
+import com.dianping.puma.core.meta.TableMetaInfo;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.datahandler.TableMetaInfo;
 import com.dianping.puma.filter.TableMetaRefreshFilter;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 

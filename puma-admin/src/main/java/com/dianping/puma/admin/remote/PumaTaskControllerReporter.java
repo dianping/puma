@@ -1,4 +1,4 @@
-package com.dianping.puma.admin.remote.reporter;
+package com.dianping.puma.admin.remote;
 
 import com.dianping.puma.core.constant.ActionController;
 import org.springframework.stereotype.Service;

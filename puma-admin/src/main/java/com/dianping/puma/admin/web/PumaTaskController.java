@@ -2,8 +2,9 @@ package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.model.PumaTaskDto;
 import com.dianping.puma.admin.model.mapper.PumaTaskMapper;
-import com.dianping.puma.admin.remote.reporter.PumaTaskControllerReporter;
-import com.dianping.puma.admin.remote.reporter.PumaTaskOperationReporter;
+import com.dianping.puma.admin.remote.PumaTaskControllerReporter;
+import com.dianping.puma.admin.remote.PumaTaskOperationReporter;
+import com.dianping.puma.admin.remote.PumaTaskStatusManager;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.biz.entity.PumaServer;
 import com.dianping.puma.biz.entity.PumaTask;
@@ -16,6 +17,7 @@ import com.dianping.puma.biz.service.SrcDBInstanceService;
 import com.dianping.puma.biz.service.SyncTaskService;
 import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.ActionOperation;
+import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.state.PumaTaskState;
 import com.mongodb.MongoException;
 import org.slf4j.Logger;
@@ -55,6 +57,9 @@ public class PumaTaskController {
     @Autowired
     SyncTaskService syncTaskService;
 
+    @Autowired
+    PumaTaskStatusManager taskStatusManager;
+
     @RequestMapping(value = {"/puma-task"})
     public ModelAndView view() {
         Map<String, Object> map = new HashMap<String, Object>();
@@ -80,18 +85,15 @@ public class PumaTaskController {
             }
         }
         List<PumaTaskState> pumaTaskStates = new ArrayList<PumaTaskState>();
-        //todo:read puma task status
-//        if (pumaTaskEntities != null) {
-//            for (PumaTask pumaTask : pumaTaskEntities) {
-//                for (String serverName : pumaTask.getPumaServerNames()) {
-//                    PumaTaskState pumaTaskState = pumaTaskStateService.find(pumaTaskStateService.getStateName(
-//                            pumaTask.getName(), serverName));
-//                    if (pumaTaskState != null) {
-//                        pumaTaskStates.add(pumaTaskState);
-//                    }
-//                }
-//            }
-//        }
+
+        if (pumaTaskEntities != null) {
+            for (PumaTask pumaTask : pumaTaskEntities) {
+                PumaTaskState pumaTaskState = taskStatusManager.find(pumaTask);
+                if (pumaTaskState != null) {
+                    pumaTaskStates.add(pumaTaskState);
+                }
+            }
+        }
         map.put("count", count);
         map.put("list", pumaTaskEntities);
         map.put("state", pumaTaskStates);
@@ -158,15 +160,14 @@ public class PumaTaskController {
             pumaTask.setPumaServerName("");
             pumaTaskService.create(pumaTask);
             // Add puma task state to the state container.
-            //todo: read puma task status
-//            for (String serverName : pumaTask.getPumaServerNames()) {
-//                PumaTaskState taskState = new PumaTaskState();
-//                taskState.setName(pumaTaskStateService.getStateName(pumaTask.getName(), serverName));
-//                taskState.setServerName(serverName);
-//                taskState.setTaskName(pumaTask.getName());
-//                taskState.setStatus(Status.PREPARING);
-//                pumaTaskStateService.add(taskState);
-//            }
+            for (String serverName : pumaTask.getPumaServerNames()) {
+                PumaTaskState taskState = new PumaTaskState();
+                taskState.setName(pumaTask.getName());
+                taskState.setServerName(serverName);
+                taskState.setTaskName(pumaTask.getName());
+                taskState.setStatus(Status.PREPARING);
+                taskStatusManager.add(taskState);
+            }
             for (String serverName : pumaTask.getPumaServerNames()) {
                 PumaTaskOperationEvent event = new PumaTaskOperationEvent();
                 event.setServerName(serverName);
@@ -271,8 +272,7 @@ public class PumaTaskController {
             // Publish puma task operation event to puma server.
             this.pumaTaskOperationReporter.report(serverName, taskName, ActionOperation.REMOVE);
 
-            //todo: read puma task status
-//            pumaTaskStateService.remove(pumaTaskStateService.getStateName(taskName, serverName));
+            taskStatusManager.remove(pumaTask);
             map.put("success", true);
         } catch (MongoException e) {
             map.put("error", "storage");
@@ -293,16 +293,14 @@ public class PumaTaskController {
         Map<String, Object> map = new HashMap<String, Object>();
 
         try {
-            //todo: read puma task status
+            PumaTaskState taskState = taskStatusManager
+                    .find(taskStatusManager.getKey(taskName, serverName));
 
-//            PumaTaskState taskState = pumaTaskStateService
-//                    .find(pumaTaskStateService.getStateName(taskName, serverName));
+            if (taskState == null) {
+                throw new Exception("Puma task state not found.");
+            }
 
-//            if (taskState == null) {
-//                throw new Exception("Puma task state not found.");
-//            }
-//
-//            map.put("state", taskState);
+            map.put("state", taskState);
             map.put("success", true);
         } catch (MongoException e) {
             map.put("error", "storage");
@@ -325,11 +323,6 @@ public class PumaTaskController {
             if (pumaTask == null) {
                 throw new Exception("Puma task not found.");
             }
-            //todo: read puma task status
-
-//            PumaTaskState taskState = pumaTaskStateService
-//                    .find(pumaTaskStateService.getStateName(taskName, serverName));
-//            taskState.setStatus(Status.PREPARING);
 
             // Publish puma task controller event to puma server.
             this.pumaTaskControllerReporter.report(serverName, taskName, ActionController.RESUME);
@@ -356,11 +349,6 @@ public class PumaTaskController {
             if (pumaTask == null) {
                 throw new Exception("Puma task not found.");
             }
-            //todo: read puma task status
-
-//            PumaTaskState taskState = pumaTaskStateService
-//                    .find(pumaTaskStateService.getStateName(taskName, serverName));
-//            taskState.setStatus(Status.STOPPING);
 
             pumaTaskControllerReporter.report(serverName, taskName, ActionController.PAUSE);
 

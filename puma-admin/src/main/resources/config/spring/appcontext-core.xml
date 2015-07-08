@@ -35,10 +35,6 @@
 	
 	<context:annotation-config />
 	
-    <import resource="applicationContext-properties.xml" />
-
-    <import resource="applicationContext-swallow.xml" />
-
     <bean id="notifyService" class="com.dianping.puma.biz.monitor.DefaultNotifyService"/>
 
     <bean id="mongoClient" class="com.dianping.puma.biz.dao.morphia.helper.MongoClient">

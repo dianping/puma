@@ -1,4 +1,4 @@
-package com.dianping.puma.admin.remote.reporter;
+package com.dianping.puma.admin.remote;
 
 import com.dianping.puma.biz.event.entity.Event;
 import com.dianping.puma.core.constant.ActionOperation;
@@ -7,8 +7,6 @@ import org.springframework.stereotype.Service;
 
 @Service("pumaTaskOperationReporter")
 public class PumaTaskOperationReporter {
-
-    @Autowired
 
     public void report(Event event) {
     }

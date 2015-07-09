@@ -1,6 +1,8 @@
 package com.dianping.puma.syncserver.task;
 
 import com.dianping.puma.api.PumaClient;
+import com.dianping.puma.biz.entity.sync.SyncTaskEntity;
+import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.syncserver.buffer.DuplexBuffer;
 import com.dianping.puma.syncserver.exception.PumaTimeoutException;
@@ -12,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.*;
 
-public class SyncTaskExecutor extends AbstractTaskExecutor {
+public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTaskEntity> {
 
 	private static final Logger logger = LoggerFactory.getLogger(SyncTaskExecutor.class);
 
@@ -81,10 +83,7 @@ public class SyncTaskExecutor extends AbstractTaskExecutor {
 		public void run() {
 			while (!checkStop()) {
 				try {
-					ChangedEvent binlogEvent = client.get();
-					if (binlogEvent != null) {
-						duplexBuffer.putQuery(binlogEvent);
-					}
+					BinlogMessage binlogMessage = client.get(1);
 				} catch (Exception e) {
 					// @todo
 				}

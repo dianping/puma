@@ -1,10 +1,13 @@
 package com.dianping.puma.syncserver.task;
 
+import com.dianping.puma.biz.entity.sync.BaseTaskEntity;
 import com.dianping.puma.syncserver.task.fail.FailPattern;
 
-public abstract class AbstractTaskExecutor implements TaskExecutor {
+public abstract class AbstractTaskExecutor<T extends BaseTaskEntity> implements TaskExecutor<T> {
 
 	protected volatile boolean stopped = true;
+
+	protected T task;
 
 	protected volatile FailPattern failPattern;
 

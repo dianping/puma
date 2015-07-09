@@ -1,7 +1,7 @@
 package com.dianping.puma.syncserver.transform;
 
+import com.dianping.puma.biz.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.syncserver.exception.PumaBinlogException;
 
 import java.util.List;

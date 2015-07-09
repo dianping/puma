@@ -1,7 +1,8 @@
 package com.dianping.puma.biz.service;
 
 
-import com.dianping.puma.biz.entity.TaskState;
+
+import com.dianping.puma.biz.entity.old.TaskState;
 
 import java.util.List;
 

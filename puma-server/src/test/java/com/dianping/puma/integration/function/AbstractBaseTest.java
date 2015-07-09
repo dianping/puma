@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Properties;
 
 import com.dianping.puma.biz.entity.old.SrcDBInstance;
+import com.dianping.puma.core.codec.RawEventCodec;
+import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
+import com.dianping.puma.parser.meta.TableMetaInfoStore;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.io.FileUtils;
@@ -19,7 +22,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
-import com.dianping.puma.codec.RawEventCodec;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
@@ -41,8 +43,6 @@ import com.dianping.puma.filter.EventFilter;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.filter.TableMetaRefreshFilter;
 import com.dianping.puma.filter.TransactionEventFilter;
-import com.dianping.puma.meta.DefaultTableMetaInfoFetcher;
-import com.dianping.puma.meta.TableMetaInfoStore;
 import com.dianping.puma.parser.DefaultBinlogParser;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.FileDumpSender;

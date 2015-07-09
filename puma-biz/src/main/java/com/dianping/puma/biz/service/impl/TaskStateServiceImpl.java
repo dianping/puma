@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.service.impl;
 
-import com.dianping.puma.biz.entity.TaskState;
+import com.dianping.puma.biz.entity.old.TaskState;
 import com.dianping.puma.biz.service.TaskStateService;
 
 import java.util.Date;

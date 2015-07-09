@@ -1,11 +1,7 @@
 package com.dianping.puma.controller;
 
-import com.dianping.puma.biz.entity.TaskState;
+import com.dianping.puma.biz.entity.old.TaskState;
 import com.dianping.puma.config.PumaServerConfig;
-<<<<<<< HEAD
-=======
-import com.dianping.puma.biz.entity.old.PumaTaskState;
->>>>>>> add puma biz pumaServerDao
 import com.dianping.puma.server.TaskExecutor;
 import com.dianping.puma.server.TaskExecutorContainer;
 import com.dianping.puma.status.SystemStatusContainer;

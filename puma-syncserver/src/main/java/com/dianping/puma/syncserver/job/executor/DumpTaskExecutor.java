@@ -13,6 +13,10 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.dianping.puma.biz.entity.old.TaskState;
+import com.dianping.puma.biz.sync.model.mapping.DatabaseMapping;
+import com.dianping.puma.biz.sync.model.mapping.TableMapping;
+import com.dianping.puma.biz.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.biz.entity.old.DstDBInstance;
 import com.dianping.puma.biz.entity.old.DumpTask;

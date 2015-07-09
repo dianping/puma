@@ -15,7 +15,7 @@
  */
 package com.dianping.puma.server;
 
-import com.dianping.puma.biz.entity.TaskState;
+import com.dianping.puma.biz.entity.old.TaskState;
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.constant.Status;

@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.service.impl;
 
-import com.dianping.puma.biz.entity.PumaTask;
+import com.dianping.puma.biz.entity.old.PumaTask;
 import org.springframework.stereotype.Service;
 
 /**

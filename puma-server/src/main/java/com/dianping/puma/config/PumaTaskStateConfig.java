@@ -1,11 +1,9 @@
 package com.dianping.puma.config;
 
+import com.dianping.puma.biz.entity.PumaTaskState;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.biz.entity.old.PumaTask;
-import com.dianping.puma.core.model.state.PumaTaskState;
-import com.dianping.puma.core.model.state.TaskStateContainer;
 import com.dianping.puma.biz.service.PumaTaskService;
-import com.dianping.puma.biz.service.PumaTaskStateService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

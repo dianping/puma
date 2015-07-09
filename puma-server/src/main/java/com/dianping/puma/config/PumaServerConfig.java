@@ -1,6 +1,6 @@
 package com.dianping.puma.config;
 
-import com.dianping.puma.biz.entity.PumaServer;
+import com.dianping.puma.biz.entity.old.PumaServer;
 import com.dianping.puma.biz.service.PumaServerService;
 import com.dianping.puma.core.util.IPUtils;
 import org.slf4j.Logger;

@@ -15,4 +15,8 @@ public interface TaskStateDao {
     List<TaskStateEntity> findByTaskNameAndTaskType(@Param("taskName") String taskName, @Param("taskType") String taskType);
 
     List<TaskStateEntity> findByTaskNameAndServerNameAndTaskType(@Param("taskName") String taskName, @Param("serverName") String serverName, @Param("taskType") String taskType);
+
+    int insert(TaskStateEntity entity);
+
+    int update(TaskStateEntity entity);
 }

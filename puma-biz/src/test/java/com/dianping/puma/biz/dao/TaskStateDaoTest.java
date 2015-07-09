@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.List;
-
 /**
  * Dozer @ 7/9/15
  * mail@dozer.cc
@@ -25,8 +23,12 @@ public class TaskStateDaoTest {
     @Test
     @Ignore
     public void testDao() throws Exception {
-        List<TaskStateEntity> result1 = taskStateDao.findByTaskNameAndTaskType("task1", "type1");
-        List<TaskStateEntity> result2 = taskStateDao.findByTaskNameAndServerNameAndTaskType("task1", "server1", "type1");
+        TaskStateEntity result2 = taskStateDao.findByTaskNameAndServerNameAndTaskType("task1", "server1", "type1").get(0);
+        result2.getBinlogStat().setDdls(100l);
+        taskStateDao.update(result2);
+
+        result2.setTaskName("xxxxx2");
+        taskStateDao.insert(result2);
 
         System.out.println("ok");
     }

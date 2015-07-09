@@ -4,7 +4,6 @@
 
 <mapper namespace="com.dianping.puma.biz.dao.TaskStateDao">
 
-
     <resultMap id="binlogInfo" type="com.dianping.puma.core.model.BinlogInfo" autoMapping="true"/>
     <resultMap id="binlogStat" type="com.dianping.puma.core.model.BinlogStat" autoMapping="true"/>
     <resultMap id="entity" type="TaskStateEntity" autoMapping="true">
@@ -22,4 +21,64 @@
         and taskType = #{taskType}
         and serverName = #{serverName}
     </select>
+
+    <update id="update" parameterType="TaskStateEntity">
+        update TaskState
+        set
+        TaskName=#{taskName},
+        ServerName=#{serverName},
+        TaskType=#{taskType},
+        GmtUpdate=#{gmtUpdate},
+        Detail=#{detail},
+        Status=#{status},
+        Controller=#{controller},
+        BinlogInfo_ServerId=#{binlogInfo.serverId},
+        BinlogInfo_BinlogFile=#{binlogInfo.binlogFile},
+        BinlogInfo_BinlogPosition=#{binlogInfo.binlogPosition},
+        BinlogStat_RowsInsert=#{binlogStat.rowsInsert},
+        BinlogStat_RowsUpdate=#{binlogStat.rowsUpdate},
+        BinlogStat_RowsDelete=#{binlogStat.rowsDelete},
+        BinlogStat_Ddls=#{binlogStat.ddls}
+        where
+        TaskName=#{taskName} and
+        ServerName=#{serverName} and
+        TaskType=#{taskType}
+    </update>
+
+    <insert id="insert" parameterType="TaskStateEntity" useGeneratedKeys="true" keyProperty="id">
+        insert into TaskState
+        (
+        TaskName,
+        ServerName,
+        TaskType,
+        GmtUpdate,
+        Detail,
+        Status,
+        Controller,
+        BinlogInfo_ServerId,
+        BinlogInfo_BinlogFile,
+        BinlogInfo_BinlogPosition,
+        BinlogStat_RowsInsert,
+        BinlogStat_RowsUpdate,
+        BinlogStat_RowsDelete,
+        BinlogStat_Ddls
+        )
+        values
+        (
+        #{taskName},
+        #{serverName},
+        #{taskType},
+        #{gmtUpdate},
+        #{detail},
+        #{status},
+        #{controller},
+        #{binlogInfo.serverId},
+        #{binlogInfo.binlogFile},
+        #{binlogInfo.binlogPosition},
+        #{binlogStat.rowsInsert},
+        #{binlogStat.rowsUpdate},
+        #{binlogStat.rowsDelete},
+        #{binlogStat.ddls}
+        )
+    </insert>
 </mapper>

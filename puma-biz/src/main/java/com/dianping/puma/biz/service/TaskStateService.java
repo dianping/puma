@@ -16,4 +16,5 @@ public interface TaskStateService {
 
     TaskState find(String name, String serverName);
 
+    void createOrUpdate(TaskState state);
 }

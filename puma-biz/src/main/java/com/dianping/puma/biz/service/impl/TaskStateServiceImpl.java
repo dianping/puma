@@ -24,6 +24,7 @@ public abstract class TaskStateServiceImpl implements TaskStateService {
         return null;
     }
 
+    @Override
     public void createOrUpdate(TaskState state) {
         state.setTaskType(getTypeName());
         state.setGmtUpdate(new Date());

@@ -52,7 +52,7 @@ public class StatusController {
         for (TaskExecutor taskExecutor : taskExecutorContainer.getAll()) {
             TaskStateEntity taskState = taskExecutor.getTaskState();
             taskState.setServerName(pumaServerConfig.getName());
-            taskState.setName(taskState.getTaskName());
+            taskState.setTaskName(taskState.getTaskName());
             taskState.setGmtUpdate(new Date());
             pumaTaskStates.add(taskState);
         }

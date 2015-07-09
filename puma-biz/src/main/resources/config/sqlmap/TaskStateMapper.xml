@@ -4,13 +4,22 @@
 
 <mapper namespace="com.dianping.puma.biz.dao.TaskStateDao">
 
-    <resultMap id="binlogInfo" type="com.dianping.puma.core.model.BinlogInfo" autoMapping="true"/>
 
+    <resultMap id="binlogInfo" type="com.dianping.puma.core.model.BinlogInfo" autoMapping="true"/>
+    <resultMap id="binlogStat" type="com.dianping.puma.core.model.BinlogStat" autoMapping="true"/>
     <resultMap id="entity" type="TaskStateEntity" autoMapping="true">
         <association resultMap="binlogInfo" property="binlogInfo" columnPrefix="BinlogInfo_"/>
+        <association resultMap="binlogStat" property="binlogStat" columnPrefix="BinlogStat_"/>
     </resultMap>
 
-    <select id="find" resultMap="entity">
-        SELECT * FROM TaskState
+    <select id="findByTaskNameAndTaskType" parameterType="map" resultMap="entity">
+        SELECT * FROM TaskState where taskName = #{taskName}
+        and taskType = #{taskType}
+    </select>
+
+    <select id="findByTaskNameAndServerNameAndTaskType" parameterType="map" resultMap="entity">
+        SELECT * FROM TaskState where taskName = #{taskName}
+        and taskType = #{taskType}
+        and serverName = #{serverName}
     </select>
 </mapper>

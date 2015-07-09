@@ -11,15 +11,13 @@ import java.util.Date;
 public class TaskStateEntity {
     private int id;
 
-    private String name;
+    private String taskName;
 
     private String serverName;
 
     private String taskType;
 
     private Date gmtUpdate;
-
-    private String taskName;
 
     private String detail;
 
@@ -91,14 +89,6 @@ public class TaskStateEntity {
         this.status = status;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getServerName() {
         return serverName;
     }
@@ -130,12 +120,12 @@ public class TaskStateEntity {
         if (o == null || getClass() != o.getClass())
             return false;
         TaskStateEntity taskState = (TaskStateEntity) o;
-        return Objects.equal(name, taskState.name) && Objects.equal(serverName, taskState.serverName)
+        return Objects.equal(taskName, taskState.taskName) && Objects.equal(serverName, taskState.serverName)
                 && Objects.equal(taskType, taskState.taskType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(name, serverName, taskType);
+        return Objects.hashCode(taskName, serverName, taskType);
     }
 }

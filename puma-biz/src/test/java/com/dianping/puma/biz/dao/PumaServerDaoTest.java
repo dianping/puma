@@ -1,14 +1,12 @@
 package com.dianping.puma.biz.dao;
 
 import com.dianping.puma.biz.entity.PumaServerEntity;
-import com.dianping.puma.biz.entity.TaskStateEntity;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath*:config/spring/*.xml")
@@ -18,6 +16,7 @@ public class PumaServerDaoTest {
     PumaServerDao pumaServerDao;
 
     @Test
+    @Ignore
     public void testInsert() throws Exception {
         PumaServerEntity entity = new PumaServerEntity();
         entity.setName("test-name");

@@ -282,7 +282,6 @@ public abstract class AbstractBaseTest {
 
         // state
         TaskStateEntity taskState = new TaskStateEntity();
-        taskState.setName(taskName);
         taskState.setServerName(serverName);
         taskState.setTaskName(taskName);
         taskState.setStatus(Status.PREPARING);

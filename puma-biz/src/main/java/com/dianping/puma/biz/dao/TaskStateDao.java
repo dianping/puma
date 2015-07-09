@@ -1,6 +1,7 @@
 package com.dianping.puma.biz.dao;
 
 import com.dianping.puma.biz.entity.TaskStateEntity;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -10,5 +11,8 @@ import java.util.List;
  * http://www.dozer.cc
  */
 public interface TaskStateDao {
-    public List<TaskStateEntity> find();
+
+    List<TaskStateEntity> findByTaskNameAndTaskType(@Param("taskName") String taskName, @Param("taskType") String taskType);
+
+    List<TaskStateEntity> findByTaskNameAndServerNameAndTaskType(@Param("taskName") String taskName, @Param("serverName") String serverName, @Param("taskType") String taskType);
 }

@@ -1,9 +1,9 @@
 package com.dianping.puma.syncserver.job.executor;
 
+import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.biz.entity.old.DstDBInstance;
 import com.dianping.puma.biz.entity.old.DumpTask;
 import com.dianping.puma.biz.entity.old.SrcDBInstance;
-import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.biz.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.biz.sync.model.mapping.TableMapping;
 import com.dianping.puma.biz.sync.model.taskexecutor.TaskExecutorStatus;
@@ -81,7 +81,7 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         FileUtils.forceMkdir(new File(dumpOutputDir));
         this.dumpTask = dumpTask;
         state = dumpTaskState;
-        state.setName(dumpTask.getName());
+        state.setTaskName(dumpTask.getName());
         state.setServerName(SyncServerConfig.getInstance().getSyncServerName());
 
         //this.status = new TaskExecutorStatus();

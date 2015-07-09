@@ -13,6 +13,7 @@
         <property name="dataSource" ref="pumaDataSource"/>
         <property name="mapperLocations" value="classpath*:config/sqlmap/*.xml"/>
         <property name="typeAliasesPackage" value="com.dianping.puma.biz.entity"/>
+        <property name="configLocation" value="config/mybatis/config.xml"/>
     </bean>
 
 </beans>

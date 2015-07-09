@@ -105,9 +105,8 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
 
 			TaskStateEntity taskState = new TaskStateEntity();
-			taskState.setName(pumaTask.getName());
-			taskState.setServerName(pumaServerConfig.getName());
 			taskState.setTaskName(pumaTask.getName());
+			taskState.setServerName(pumaServerConfig.getName());
 			taskState.setStatus(Status.PREPARING);
 			taskExecutor.setTaskState(taskState);
 

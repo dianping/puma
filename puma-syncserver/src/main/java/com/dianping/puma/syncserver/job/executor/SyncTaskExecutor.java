@@ -331,7 +331,7 @@ public class SyncTaskExecutor implements TaskExecutor<SyncTask> {
     public TaskStateEntity getTaskState() {
         TaskStateEntity state = new TaskStateEntity();
         state.setStatus(this.status);
-        state.setName(this.task.getName());
+        state.setTaskName(this.task.getName());
         state.setServerName(SyncServerConfig.getInstance().getSyncServerName());
         return state;
     }

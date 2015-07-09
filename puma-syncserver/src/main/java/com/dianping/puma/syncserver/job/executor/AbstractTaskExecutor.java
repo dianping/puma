@@ -4,7 +4,7 @@ import com.dianping.puma.api.Configuration;
 import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
-import com.dianping.puma.biz.entity.AbstractBaseSyncTask;
+import com.dianping.puma.biz.entity.old.AbstractBaseSyncTask;
 import com.dianping.puma.biz.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.biz.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.biz.sync.model.mapping.TableMapping;

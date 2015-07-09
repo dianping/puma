@@ -1,7 +1,7 @@
 package com.dianping.puma.admin.model.mapper;
 
 import com.dianping.puma.admin.model.SyncServerDto;
-import com.dianping.puma.biz.entity.SyncServer;
+import com.dianping.puma.biz.entity.old.SyncServer;
 
 public class SyncServerMapper {
 	

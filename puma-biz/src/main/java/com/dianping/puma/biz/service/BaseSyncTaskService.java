@@ -1,7 +1,7 @@
 package com.dianping.puma.biz.service;
 
 import com.dianping.puma.core.constant.SyncType;
-import com.dianping.puma.biz.entity.BaseSyncTask;
+import com.dianping.puma.biz.entity.old.BaseSyncTask;
 
 public interface BaseSyncTaskService {
 

@@ -9,13 +9,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import com.dianping.puma.biz.entity.old.PumaTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.dianping.puma.biz.entity.PumaTask;
 import com.dianping.puma.biz.event.entity.PumaTaskControllerEvent;
 import com.dianping.puma.biz.event.entity.PumaTaskOperationEvent;
 import com.dianping.puma.biz.service.PumaTaskService;

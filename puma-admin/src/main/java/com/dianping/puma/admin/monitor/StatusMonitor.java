@@ -3,6 +3,7 @@ package com.dianping.puma.admin.monitor;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.dianping.puma.biz.entity.old.SyncTask;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
 import com.dianping.puma.biz.service.SyncTaskService;
-import com.dianping.puma.biz.entity.SyncTask;
 import com.dianping.puma.biz.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.SyncType;

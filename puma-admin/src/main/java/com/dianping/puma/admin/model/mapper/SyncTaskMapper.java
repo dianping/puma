@@ -4,7 +4,7 @@ import com.dianping.puma.admin.model.ErrorHandlerDto;
 
 import com.dianping.puma.admin.model.SyncTaskDto;
 import com.dianping.puma.core.constant.SyncType;
-import com.dianping.puma.biz.entity.SyncTask;
+import com.dianping.puma.biz.entity.old.SyncTask;
 import com.dianping.puma.core.model.BinlogInfo;
 
 public class SyncTaskMapper {

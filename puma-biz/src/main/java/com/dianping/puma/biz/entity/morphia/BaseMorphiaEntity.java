@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.entity.morphia;
 
-import com.dianping.puma.biz.entity.BaseEntity;
+import com.dianping.puma.biz.entity.old.BaseEntity;
 import com.google.code.morphia.annotations.Embedded;
 import com.google.code.morphia.annotations.Id;
 import com.google.code.morphia.annotations.Indexed;

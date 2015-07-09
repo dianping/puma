@@ -9,17 +9,20 @@ import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 public class DefaultBucketManager implements BucketManager {
-	private static final Logger	log		= Logger.getLogger(DefaultBucketManager.class);
-	private BucketIndex			masterIndex;
-	private BucketIndex			slaveIndex;
+	private static final Logger log = Logger.getLogger(DefaultBucketManager.class);
 
-	private ArchiveStrategy		archiveStrategy;
-	private CleanupStrategy		cleanupStrategy;
+	private BucketIndex masterIndex;
 
-	private volatile boolean	stopped	= true;
+	private BucketIndex slaveIndex;
+
+	private ArchiveStrategy archiveStrategy;
+
+	private CleanupStrategy cleanupStrategy;
+
+	private volatile boolean stopped = true;
 
 	public DefaultBucketManager(BucketIndex masterIndex, BucketIndex slaveIndex, ArchiveStrategy archiveStrategy,
-			CleanupStrategy cleanupStrategy) {
+	      CleanupStrategy cleanupStrategy) {
 		this.archiveStrategy = archiveStrategy;
 		this.cleanupStrategy = cleanupStrategy;
 		this.masterIndex = masterIndex;
@@ -134,7 +137,7 @@ public class DefaultBucketManager implements BucketManager {
 		Thread archiveThread = PumaThreadUtils.createThread(new Runnable() {
 			@Override
 			public void run() {
-			    int failedCount = 0;
+				int failedCount = 0;
 				while (true) {
 					try {
 						checkClosed();
@@ -147,12 +150,12 @@ public class DefaultBucketManager implements BucketManager {
 						failedCount = 0;
 					} catch (Exception e) {
 						log.error("Archive Job failed.", e);
-					    failedCount = (++failedCount) % 10;
+						failedCount = (++failedCount) % 10;
 					}
 					try {
-                        Thread.sleep((failedCount + 1) * 5000);
-                    } catch (InterruptedException e) {
-                    }
+						Thread.sleep((failedCount + 1) * 5000);
+					} catch (InterruptedException e) {
+					}
 
 				}
 			}
@@ -168,7 +171,7 @@ public class DefaultBucketManager implements BucketManager {
 		Thread archiveThread = PumaThreadUtils.createThread(new Runnable() {
 			@Override
 			public void run() {
-			    int failedCount = 0;
+				int failedCount = 0;
 				while (true) {
 					try {
 						checkClosed();
@@ -178,15 +181,15 @@ public class DefaultBucketManager implements BucketManager {
 
 					try {
 						cleanupStrategy.cleanup(slaveIndex);
-					    failedCount = 0;
+						failedCount = 0;
 					} catch (Exception e) {
 						log.error("Cleanup Job failed.", e);
-					    failedCount = (++failedCount) % 10;
+						failedCount = (++failedCount) % 10;
 					}
 					try {
-                        Thread.sleep((failedCount + 1) * 5000);
-                    } catch (InterruptedException e) {
-                    }
+						Thread.sleep((failedCount + 1) * 5000);
+					} catch (InterruptedException e) {
+					}
 
 				}
 			}

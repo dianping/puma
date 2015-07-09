@@ -3,15 +3,15 @@ package com.dianping.puma.server.builder.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.dianping.puma.biz.entity.old.PumaTask;
+import com.dianping.puma.biz.entity.old.SrcDBInstance;
+import com.dianping.puma.biz.entity.old.TaskState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.dianping.puma.biz.entity.PumaTask;
-import com.dianping.puma.biz.entity.SrcDBInstance;
-import com.dianping.puma.biz.entity.TaskState;
 import com.dianping.puma.biz.service.SrcDBInstanceService;
 import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.core.codec.RawEventCodec;

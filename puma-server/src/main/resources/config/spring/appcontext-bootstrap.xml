@@ -80,11 +80,11 @@
 
 	<bean id="rawCodec" class="com.dianping.puma.codec.RawEventCodec" />
 
-	<bean id="mongoClient" class="com.dianping.puma.biz.dao.morphia.helper.MongoClient">
+	<bean id="mongoClient" class="com.dianping.puma.biz.olddao.morphia.helper.MongoClient">
 	</bean>
 
    <bean id="seqGeneratorService"
-        class="com.dianping.puma.biz.dao.morphia.helper.MongoSeqGeneratorServiceImpl">
+        class="com.dianping.puma.biz.olddao.morphia.helper.MongoSeqGeneratorServiceImpl">
         <property name="mongoClient">
             <ref bean="mongoClient" />
         </property>

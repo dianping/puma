@@ -1,13 +1,26 @@
 package com.dianping.puma.syncserver.job.executor;
 
-import com.dianping.puma.biz.entity.DstDBInstance;
-import com.dianping.puma.biz.entity.DumpTask;
-import com.dianping.puma.biz.entity.SrcDBInstance;
-import com.dianping.puma.biz.entity.TaskState;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.dianping.puma.biz.entity.old.TaskState;
 import com.dianping.puma.biz.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.biz.sync.model.mapping.TableMapping;
 import com.dianping.puma.biz.sync.model.taskexecutor.TaskExecutorStatus;
 import com.dianping.puma.core.constant.Status;
+import com.dianping.puma.biz.entity.old.DstDBInstance;
+import com.dianping.puma.biz.entity.old.DumpTask;
+import com.dianping.puma.biz.entity.old.SrcDBInstance;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.syncserver.config.SyncServerConfig;
 import com.dianping.puma.syncserver.job.executor.exception.TEException;

@@ -4,7 +4,7 @@ import com.dianping.puma.biz.service.BaseSyncTaskService;
 import com.dianping.puma.biz.service.DumpTaskService;
 import com.dianping.puma.biz.service.SyncTaskService;
 import com.dianping.puma.core.constant.SyncType;
-import com.dianping.puma.biz.entity.BaseSyncTask;
+import com.dianping.puma.biz.entity.old.BaseSyncTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,7 +1,7 @@
 package com.dianping.puma.syncserver.job.executor;
 
-import com.dianping.puma.biz.entity.CatchupTask;
-import com.dianping.puma.biz.entity.DstDBInstance;
+import com.dianping.puma.biz.entity.old.CatchupTask;
+import com.dianping.puma.biz.entity.old.DstDBInstance;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.syncserver.job.executor.exception.TEException;
 import org.slf4j.Logger;

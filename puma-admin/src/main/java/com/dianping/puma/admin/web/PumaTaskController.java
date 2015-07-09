@@ -4,6 +4,7 @@ import com.dianping.puma.admin.model.PumaTaskDto;
 import com.dianping.puma.admin.model.mapper.PumaTaskMapper;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.biz.entity.*;
+import com.dianping.puma.biz.entity.old.*;
 import com.dianping.puma.biz.event.entity.PumaTaskOperationEvent;
 import com.dianping.puma.biz.service.PumaServerService;
 import com.dianping.puma.biz.service.PumaTaskService;

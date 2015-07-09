@@ -100,9 +100,7 @@ public class DefaultEventStorage implements EventStorage {
 			masterBucketIndex.start();
 			slaveBucketIndex.start();
 			bucketManager.start();
-
 			writingBucket = null;
-
 			binlogIndex.start();
 
 			for (WeakReference<EventChannel> channelRef : openChannels) {
@@ -116,7 +114,6 @@ public class DefaultEventStorage implements EventStorage {
 					}
 				}
 			}
-
 		} catch (Exception e) {
 			throw new StorageLifeCycleException("Storage init failed", e);
 		}
@@ -320,12 +317,5 @@ public class DefaultEventStorage implements EventStorage {
 		} catch (IOException e1) {
 			// ignore
 		}
-
-		/*
-		 * for (WeakReference<EventChannel> channelRef : openChannels) { EventChannel channel = channelRef.get(); if (channel != null)
-		 * { try { channel.close(); } catch (Exception e) { // ignore } } }
-		 */
-
 	}
-
 }

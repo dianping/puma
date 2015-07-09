@@ -1,6 +1,6 @@
 package com.dianping.puma.controller;
 
-import com.dianping.puma.biz.entity.TaskState;
+import com.dianping.puma.biz.entity.old.TaskState;
 import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.server.TaskExecutor;
 import com.dianping.puma.server.TaskExecutorContainer;

@@ -3,6 +3,7 @@ package com.dianping.puma.server.builder.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.dianping.puma.biz.entity.TaskState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,6 @@ import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.core.model.event.EventCenter;
-import com.dianping.puma.biz.entity.PumaTaskState;
 import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.datahandler.DefaultDataHandler;
@@ -105,7 +105,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
         try {
             DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
 
-            PumaTaskState taskState = new PumaTaskState();
+            TaskState taskState = new TaskState();
             taskState.setName(pumaTask.getName());
             taskState.setServerName(pumaServerConfig.getName());
             taskState.setTaskName(pumaTask.getName());

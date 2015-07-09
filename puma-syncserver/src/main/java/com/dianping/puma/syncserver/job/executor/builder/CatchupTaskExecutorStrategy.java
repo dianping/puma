@@ -8,7 +8,6 @@ import com.dianping.puma.biz.service.SrcDBInstanceService;
 import com.dianping.puma.biz.sync.model.task.Type;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
-import com.dianping.puma.biz.entity.CatchupTaskState;
 import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;
 import com.dianping.puma.syncserver.job.executor.CatchupTaskExecutor;
@@ -100,7 +99,7 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
 
         CatchupTaskExecutor executor = new CatchupTaskExecutor(task, pumaServerHost, pumaServerPort, target, syncTaskExecutor, dstDBInstance);
 
-        CatchupTaskState catchupTaskState = new CatchupTaskState();
+        TaskState catchupTaskState = new TaskState();
         catchupTaskState.setTaskName(task.getName());
         catchupTaskState.setStatus(Status.PREPARING);
 

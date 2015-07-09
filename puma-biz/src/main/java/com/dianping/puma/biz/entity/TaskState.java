@@ -7,7 +7,7 @@ import com.dianping.puma.core.model.BinlogStat;
 
 import java.util.Date;
 
-public abstract class TaskState {
+public class TaskState {
     private String name;
 
     private String serverName;
@@ -19,8 +19,6 @@ public abstract class TaskState {
     private String detail;
 
     private Status status;
-
-    private String strStatus;
 
     private ActionController controller;
 
@@ -85,12 +83,7 @@ public abstract class TaskState {
     }
 
     public void setStatus(Status status) {
-        this.strStatus = status.getDesc();
         this.status = status;
-    }
-
-    public String getStrStatus() {
-        return strStatus;
     }
 
     public String getName() {

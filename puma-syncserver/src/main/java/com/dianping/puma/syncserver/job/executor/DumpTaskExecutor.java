@@ -1,33 +1,19 @@
 package com.dianping.puma.syncserver.job.executor;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.biz.entity.DstDBInstance;
 import com.dianping.puma.biz.entity.DumpTask;
 import com.dianping.puma.biz.entity.SrcDBInstance;
+import com.dianping.puma.biz.entity.TaskState;
+import com.dianping.puma.biz.sync.model.mapping.DatabaseMapping;
+import com.dianping.puma.biz.sync.model.mapping.TableMapping;
+import com.dianping.puma.biz.sync.model.taskexecutor.TaskExecutorStatus;
+import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.biz.entity.DumpTaskState;
+import com.dianping.puma.syncserver.config.SyncServerConfig;
 import com.dianping.puma.syncserver.job.executor.exception.TEException;
+import com.dianping.puma.syncserver.util.ProcessBuilderWrapper;
 import com.google.common.base.Strings;
-import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecuteResultHandler;
-import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteException;
-import org.apache.commons.exec.ExecuteWatchdog;
-import org.apache.commons.exec.Executor;
-import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.exec.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
@@ -36,11 +22,10 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dianping.puma.biz.sync.model.mapping.DatabaseMapping;
-import com.dianping.puma.biz.sync.model.mapping.TableMapping;
-import com.dianping.puma.biz.sync.model.taskexecutor.TaskExecutorStatus;
-import com.dianping.puma.syncserver.config.SyncServerConfig;
-import com.dianping.puma.syncserver.util.ProcessBuilderWrapper;
+import java.io.*;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author wukezhu
@@ -76,19 +61,21 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
     }
 
     private Executor executor = new DefaultExecutor();
+
     {
         executor.setExitValue(1);
         ExecuteWatchdog watchdog = new ExecuteWatchdog(60 * 1000);
         executor.setWatchdog(watchdog);
     }
+
     private DumpTask dumpTask;
 
-    protected DumpTaskState state;
+    protected TaskState state;
 
     private Process proc;
     protected TaskExecutorStatus status;
 
-    public DumpTaskExecutor(DumpTask dumpTask, DumpTaskState dumpTaskState) throws IOException {
+    public DumpTaskExecutor(DumpTask dumpTask, TaskState dumpTaskState) throws IOException {
         this.uuid = UUID.randomUUID().toString();
         this.dumpOutputDir = SyncServerConfig.getInstance().getTempDir() + "/dump/" + uuid + "/";
         FileUtils.forceMkdir(new File(dumpOutputDir));
@@ -233,16 +220,16 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
         return destTableNames;
     }
 
-    private boolean hasException(String output){
-        if(Strings.isNullOrEmpty(output)){
+    private boolean hasException(String output) {
+        if (Strings.isNullOrEmpty(output)) {
             return false;
         }
         String[] lines = output.split("\r\n|\r|\n");
-        for(String line : lines){
-            if(Strings.isNullOrEmpty(line)){
+        for (String line : lines) {
+            if (Strings.isNullOrEmpty(line)) {
                 continue;
             }
-            if(line.startsWith("Warning:")){
+            if (line.startsWith("Warning:")) {
                 continue;
             }
             return true;
@@ -404,15 +391,15 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
 
     }
 
-    public DumpTaskState getTaskState() {
+    public TaskState getTaskState() {
         return state;
     }
 
-    public void setTaskState(DumpTaskState taskState) {
+    public void setTaskState(TaskState taskState) {
         this.state = taskState;
     }
 
-    public void setState(DumpTaskState state) {
+    public void setState(TaskState state) {
         this.state = state;
     }
 

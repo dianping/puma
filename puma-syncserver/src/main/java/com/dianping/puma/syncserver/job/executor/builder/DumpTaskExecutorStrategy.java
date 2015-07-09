@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import com.dianping.puma.biz.entity.old.DumpTask;
 import com.dianping.puma.biz.entity.old.PumaTask;
-import com.dianping.puma.biz.entity.old.TaskState;
+import com.dianping.puma.biz.entity.TaskState;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.biz.service.DstDBInstanceService;

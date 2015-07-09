@@ -3,7 +3,7 @@ package com.dianping.puma.syncserver.job.executor;
 import com.dianping.puma.biz.entity.old.DstDBInstance;
 import com.dianping.puma.biz.entity.old.DumpTask;
 import com.dianping.puma.biz.entity.old.SrcDBInstance;
-import com.dianping.puma.biz.entity.old.TaskState;
+import com.dianping.puma.biz.entity.TaskState;
 import com.dianping.puma.biz.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.biz.sync.model.mapping.TableMapping;
 import com.dianping.puma.biz.sync.model.taskexecutor.TaskExecutorStatus;

@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import com.dianping.puma.biz.entity.old.TaskState;
+import com.dianping.puma.biz.entity.TaskState;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.io.FileUtils;

@@ -1,6 +1,6 @@
 package com.dianping.puma.syncserver.status;
 
-import com.dianping.puma.biz.entity.old.TaskState;
+import com.dianping.puma.biz.entity.TaskState;
 import com.dianping.puma.biz.service.SyncTaskService;
 import com.dianping.puma.biz.service.impl.SyncTaskStateServiceImpl;
 import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;

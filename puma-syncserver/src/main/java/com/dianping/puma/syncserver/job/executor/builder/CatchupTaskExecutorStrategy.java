@@ -1,5 +1,6 @@
 package com.dianping.puma.syncserver.job.executor.builder;
 
+import com.dianping.puma.biz.entity.TaskState;
 import com.dianping.puma.biz.entity.old.*;
 import com.dianping.puma.biz.service.DstDBInstanceService;
 import com.dianping.puma.biz.service.PumaServerService;

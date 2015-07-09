@@ -1,7 +1,7 @@
 package com.dianping.puma.server;
 
 import com.dianping.puma.biz.entity.old.PumaTask;
-import com.dianping.puma.biz.entity.old.TaskState;
+import com.dianping.puma.biz.entity.TaskState;
 import com.dianping.puma.biz.event.entity.PumaTaskControllerEvent;
 import com.dianping.puma.biz.event.entity.PumaTaskOperationEvent;
 import com.dianping.puma.biz.service.PumaTaskService;

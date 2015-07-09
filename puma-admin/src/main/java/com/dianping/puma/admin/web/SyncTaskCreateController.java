@@ -1,13 +1,9 @@
 //package com.dianping.puma.admin.web;
 //
 //import com.dianping.puma.admin.config.Config;
-//import com.dianping.puma.admin.remote.SyncTaskControllerReporter;
-//import com.dianping.puma.admin.remote.SyncTaskOperationReporter;
 //import com.dianping.puma.admin.util.GsonUtil;
 //import com.dianping.puma.admin.util.MysqlMetaInfoFetcher;
 //import com.dianping.puma.biz.entity.DumpTask;
-//import com.dianping.puma.biz.entity.PumaTask;
-//import com.dianping.puma.biz.entity.SrcDBInstance;
 //import com.dianping.puma.biz.entity.SyncTask;
 //import com.dianping.puma.biz.service.*;
 //import com.dianping.puma.biz.sync.model.config.MysqlHost;
@@ -18,7 +14,6 @@
 //import com.dianping.puma.core.model.BinlogInfo;
 //import com.dianping.puma.core.model.state.BaseSyncTaskState;
 //import com.dianping.puma.core.model.state.DumpTaskState;
-//import com.dianping.puma.core.model.state.TaskStateContainer;
 //import org.apache.commons.lang.StringUtils;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
@@ -63,121 +58,7 @@
 //    private PumaTaskService pumaTaskService;
 //
 //    @Autowired
-//    private SyncTaskOperationReporter syncTaskOperationReporter;
-//
-//    @Autowired
-//    private SyncTaskControllerReporter syncTaskControllerReporter;
-//
-//    @Autowired
-//    TaskStateContainer syncTaskStateContainer;
-//
-//    @Autowired
-//    SyncTaskStateService syncTaskStateService;
-//
-//    @Autowired
 //    DumpTaskStateService dumpTaskStateService;
-//
-//    //@RequestMapping(value = "/sync-task/create/step1Save", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
-//    @ResponseBody
-//    public Object step1Save(HttpSession session, String pumaTaskName, String dstDBInstanceName, String syncServerName,
-//                            String databaseFrom, String databaseTo, String[] tableFrom, String[] tableTo) {
-//
-//        // 清除之前的状态
-//        LOG.info("create sync task step 1 save");
-//        session.removeAttribute("dumpMapping");
-//        session.removeAttribute("dumpTask");
-//        session.removeAttribute("pumaTaskName");
-//        session.removeAttribute("dstDBInstanceName");
-//        session.removeAttribute("mysqlMapping");
-//        session.removeAttribute("syncServerName");
-//        Map<String, Object> map = new HashMap<String, Object>();
-//        try {
-//            if (StringUtils.isBlank(pumaTaskName) || StringUtils.isBlank(dstDBInstanceName)) {
-//                throw new IllegalArgumentException("srcMysql和destMysql都不能为空。(srcMysql=" + pumaTaskName + ", destMysql="
-//                        + dstDBInstanceName + ")");
-//            }
-//            if (tableFrom == null && tableTo == null) {
-//                tableFrom = new String[]{"*"};
-//                tableTo = new String[]{"*"};
-//            } else if (!(tableFrom != null && tableTo != null && tableFrom.length == tableTo.length)) {
-//                throw new IllegalArgumentException("源表个数和目标表的个数不一致。(tableFrom=" + tableFrom + ", tableTo=" + tableTo
-//                        + ")");
-//            }
-//            // 判断该srcMysql和destMysql是否重复
-//            /*
-//             * if (this.syncTaskService.existsBySrcAndDest(srcMysql, destMysql))
-//			 * { throw new
-//			 * IllegalArgumentException("创建失败，已有相同的配置存在。(srcMysqlName=" +
-//			 * srcMysql + ", destMysqlName=" + destMysql + ")"); }
-//			 */
-//            // 解析mapping
-//            // 有xml改为表格提交
-//            // MysqlMapping mysqlMapping = SyncXmlParser.parse2(syncXml);
-//            MysqlMapping mysqlMapping = new MysqlMapping();
-//            DatabaseMapping database = new DatabaseMapping();
-//            database.setFrom(databaseFrom);
-//            database.setTo(databaseTo);
-//            for (int i = 0; i < tableFrom.length; i++) {
-//                String from = tableFrom[i];
-//                String to = tableTo[i];
-//                TableMapping table = new TableMapping();
-//                table.setFrom(from);
-//                table.setTo(to);
-//                database.addTable(table);
-//            }
-//            mysqlMapping.addDatabase(database);
-//
-//            // 保存到session
-//            session.setAttribute("pumaTaskName", pumaTaskName);
-//            session.setAttribute("dstDBInstanceName", dstDBInstanceName);
-//            session.setAttribute("syncServerName", syncServerName);
-//            session.setAttribute("mysqlMapping", mysqlMapping);
-//
-//            map.put("success", true);
-//        } catch (IllegalArgumentException e) {
-//            map.put("success", false);
-//            map.put("errorMsg", e.getMessage());
-//        } catch (Exception e) {
-//            map.put("success", false);
-//            map.put("errorMsg", e.getMessage());
-//            LOG.error(e.getMessage(), e);
-//        }
-//        return GsonUtil.toJson(map);
-//
-//    }
-//
-//    //@RequestMapping(method = RequestMethod.GET, value = {"/sync-task/create/step2"})
-//    public ModelAndView step2(HttpSession session) throws SQLException {
-//        Map<String, Object> map = new HashMap<String, Object>();
-//        DumpTask dumpTask = (DumpTask) session.getAttribute("dumpTask");
-//        if (dumpTask == null) {
-//            // 从会话中取出保存的mysqlMapping，计算出dumpMapping
-//            MysqlMapping mysqlMapping = (MysqlMapping) session.getAttribute("mysqlMapping");
-//            // MysqlHost mysqlHost = getSrcMysqlHost(srcDBInstance);
-//            String pumaTaskName = (String) session.getAttribute("pumaTaskName");
-//            String dstDBInstanceName = (String) session.getAttribute("dstDBInstanceName");
-//            PumaTask pumaTask = pumaTaskService.find(pumaTaskName);
-//
-//            SrcDBInstance srcDBInstance = srcDBInstanceService.find(pumaTask.getSrcDBInstanceName());
-//            MysqlHost mysqlHost = new MysqlHost();
-//            mysqlHost.setHost(srcDBInstance.getHost() + ":" + srcDBInstance.getPort());
-//            mysqlHost.setServerId(srcDBInstance.getServerId());
-//            mysqlHost.setUsername(srcDBInstance.getUsername());
-//            mysqlHost.setPassword(srcDBInstance.getPassword());
-//
-//            DumpMapping dumpMapping = this.convertMysqlMappingToDumpMapping(mysqlHost, mysqlMapping);
-//            session.setAttribute("dumpMapping", dumpMapping);
-//            map.put("dumpTaskName", "DumpTask-" + pumaTaskName + "@" + dstDBInstanceName);
-//            map.put("dumpMapping", dumpMapping);
-//        } else {
-//            map.put("dumpTaskName", dumpTask.getName());
-//            map.put("dumpMapping", dumpTask.getDumpMapping());
-//        }
-//        map.put("createActive", "active");
-//        map.put("path", "sync-task");
-//        map.put("subPath", "step2");
-//        return new ModelAndView("main/container", map);
-//    }
 //
 //    /**
 //     * 创建DumpTask
@@ -344,7 +225,7 @@
 //            syncTaskService.create(syncTask);
 //            // 更新dumpTask的syncTaskId
 //            /*Long syncTaskId = syncTask.getId();
-//			if (dumpTask != null) {
+//            if (dumpTask != null) {
 //				long dumpTaskId = dumpTask.getId();
 //				this.dumpTaskService.updateSyncTaskId(dumpTaskId, syncTaskId);
 //			}*/

@@ -4,13 +4,18 @@ import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
+import com.google.common.base.Objects;
 
 import java.util.Date;
 
 public class TaskState {
+	private int id;
+
 	private String name;
 
 	private String serverName;
+
+	private String taskType;
 
 	private Date gmtUpdate;
 
@@ -100,5 +105,37 @@ public class TaskState {
 
 	public void setServerName(String serverName) {
 		this.serverName = serverName;
+	}
+
+	public String getTaskType() {
+		return taskType;
+	}
+
+	public void setTaskType(String taskType) {
+		this.taskType = taskType;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		TaskState taskState = (TaskState) o;
+		return Objects.equal(name, taskState.name) && Objects.equal(serverName, taskState.serverName)
+		      && Objects.equal(taskType, taskState.taskType);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(name, serverName, taskType);
 	}
 }

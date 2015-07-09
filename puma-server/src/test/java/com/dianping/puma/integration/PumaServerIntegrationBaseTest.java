@@ -107,16 +107,11 @@ public abstract class PumaServerIntegrationBaseTest {
         // init tablemetasinfofetcher
         DefaultTableMetaInfoFetcher tableMetaInfoFetcher = new DefaultTableMetaInfoFetcher();
         SrcDBInstance srcDbInstance = new SrcDBInstance();
-        srcDbInstance.setHost(host);
-        srcDbInstance.setPassword(pwd);
-        srcDbInstance.setPort(port);
-        srcDbInstance.setUsername(user);
+        tableMetaInfoFetcher.setMetaDBHost(host);
+        tableMetaInfoFetcher.setMetaDBPort(port);
+        tableMetaInfoFetcher.setMetaDBUsername(user);
+        tableMetaInfoFetcher.setMetaDBPassword(pwd);
         
-        tableMetaInfoFetcher.setSrcDbInstance(srcDbInstance);
-        TableMetaInfoStore tableMetaInfoStore = new TableMetaInfoStore();
-        tableMetaInfoStore.start();
-        tableMetaInfoFetcher.setTableMetaInfoStore(tableMetaInfoStore);
-
         // init dataHandler
         DefaultDataHandler dataHandler = new DefaultDataHandler();
         dataHandler.setTableMetasInfoFetcher(tableMetaInfoFetcher);

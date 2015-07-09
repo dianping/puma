@@ -18,7 +18,7 @@ import com.dianping.puma.biz.entity.DstDBInstance;
 import com.dianping.puma.biz.entity.DumpTask;
 import com.dianping.puma.biz.entity.SrcDBInstance;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.state.DumpTaskState;
+import com.dianping.puma.biz.entity.DumpTaskState;
 import com.dianping.puma.syncserver.job.executor.exception.TEException;
 import com.google.common.base.Strings;
 import org.apache.commons.exec.CommandLine;

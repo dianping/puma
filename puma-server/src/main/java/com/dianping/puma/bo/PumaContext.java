@@ -25,30 +25,55 @@ import com.dianping.puma.parser.mysql.event.TableMapEvent;
  */
 public class PumaContext implements Serializable {
 	private static final long serialVersionUID = -2280369356150286536L;
+
 	private String serverVersion = null;
+
 	private int serverMajorVersion = 0;
+
 	private int serverMinorVersion = 0;
+
 	private int serverSubMinorVersion = 0;
+
 	private int maxThreeBytes = 255 * 255 * 255;
+
 	private byte protocolVersion = 0;
+
 	private long threadId;
+
 	private String seed;
+
 	private int serverCapabilities;
+
 	private int serverCharsetIndex;
+
 	private int serverStatus = 0;
+
 	private int clientParam = 0;
+
 	private boolean has41NewNewProt = false;
+
 	private boolean use41Extensions = false;
+
 	private String encoding = "utf-8";
+
 	private String binlogFileName;
+
 	private long binlogStartPos;
+
 	private int eventIndex;
+
 	private String pumaServerId;
+
 	private String pumaServerName;
+
 	private Map<Long, TableMapEvent> tableMaps = new LRUCache<Long, TableMapEvent>(300);
+
 	private String masterUrl;
+
 	private long nextBinlogPos;
+
 	private long dbServerId;
+
 	private int checksumAlg;
 
 	/**
@@ -60,7 +85,7 @@ public class PumaContext implements Serializable {
 
 	/**
 	 * @param nextBinlogPos
-	 *            the nextBinlogPos to set
+	 *           the nextBinlogPos to set
 	 */
 	public void setNextBinlogPos(long nextBinlogPos) {
 		this.nextBinlogPos = nextBinlogPos;
@@ -75,7 +100,7 @@ public class PumaContext implements Serializable {
 
 	/**
 	 * @param masterUrl
-	 *            the masterUrl to set
+	 *           the masterUrl to set
 	 */
 	public void setMasterUrl(String host, int port) {
 		this.masterUrl = host + ":" + port;
@@ -90,7 +115,7 @@ public class PumaContext implements Serializable {
 
 	/**
 	 * @param pumaServerName
-	 *            the pumaServerName to set
+	 *           the pumaServerName to set
 	 */
 	public void setPumaServerName(String pumaServerName) {
 		this.pumaServerName = pumaServerName;
@@ -105,7 +130,7 @@ public class PumaContext implements Serializable {
 
 	/**
 	 * @param pumaServerId
-	 *            the pumaServerId to set
+	 *           the pumaServerId to set
 	 */
 	public void setPumaServerId(String pumaServerId) {
 		this.pumaServerId = pumaServerId;
@@ -120,7 +145,7 @@ public class PumaContext implements Serializable {
 
 	/**
 	 * @param tableMaps
-	 *            the tableMaps to set
+	 *           the tableMaps to set
 	 */
 	public void setTableMaps(Map<Long, TableMapEvent> tableMaps) {
 		this.tableMaps = tableMaps;

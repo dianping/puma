@@ -25,15 +25,14 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.sender.Sender;
 
 /**
- * TODO Comment of SimpleDispatherImpl
- * 
  * @author Leo Liang
  * 
  */
 public class SimpleDispatcherImpl extends AbstractDispatcher {
 
-	private static final Logger	log	= Logger.getLogger(SimpleDispatcherImpl.class);
-	private List<Sender>		senders;
+	private static final Logger log = Logger.getLogger(SimpleDispatcherImpl.class);
+
+	private List<Sender> senders;
 
 	/**
 	 * @return the senders
@@ -44,7 +43,7 @@ public class SimpleDispatcherImpl extends AbstractDispatcher {
 
 	/**
 	 * @param senders
-	 *            the senders to set
+	 *           the senders to set
 	 */
 	public void setSenders(List<Sender> senders) {
 		this.senders = senders;
@@ -52,7 +51,7 @@ public class SimpleDispatcherImpl extends AbstractDispatcher {
 
 	@Override
 	public void start() throws Exception {
-		for (Sender sender: senders) {
+		for (Sender sender : senders) {
 			sender.start();
 		}
 		super.start();

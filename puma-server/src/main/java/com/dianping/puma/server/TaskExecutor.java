@@ -28,49 +28,43 @@ import java.util.List;
  */
 public interface TaskExecutor extends LifeCycle<Exception> {
 
-    public void setContext(PumaContext context);
+	public void setContext(PumaContext context);
 
-    public void initContext();
+	public void initContext();
 
-    public PumaContext getContext();
+	public PumaContext getContext();
 
-    public String getTaskId();
+	public String getTaskId();
 
-    public void setTaskId(String taskId);
+	public void setTaskId(String taskId);
 
-    public String getTaskName();
+	public String getTaskName();
 
-    public void setTaskName(String taskName);
+	public void setTaskName(String taskName);
 
-    public String getDefaultBinlogFileName();
+	public String getDefaultBinlogFileName();
 
-    public void setDefaultBinlogFileName(String binlogFileName);
+	public void setDefaultBinlogFileName(String binlogFileName);
 
-    public Long getDefaultBinlogPosition();
+	public Long getDefaultBinlogPosition();
 
-    public void setDefaultBinlogPosition(Long binlogFileName);
+	public void setDefaultBinlogPosition(Long binlogFileName);
 
-    //public void setServerId(long serverId);
+	public void setBinlogInfoHolder(BinlogInfoHolder holder);
 
-    //public long getServerId();
+	public Status getStatus();
 
-    //public String getServerName();
+	public void setStatus(Status status);
 
-    public void setBinlogInfoHolder(BinlogInfoHolder holder);
+	public List<Sender> getFileSender();
 
-    public Status getStatus();
+	public DataHandler getDataHandler();
 
-    public void setStatus(Status status);
+	public void resume() throws Exception;
 
-    public List<Sender> getFileSender();
+	public void pause() throws Exception;
 
-    public DataHandler getDataHandler();
+	public TaskState getTaskState();
 
-    public void resume() throws Exception;
-
-    public void pause() throws Exception;
-
-    public TaskState getTaskState();
-
-    public void setTaskState(TaskState taskState);
+	public void setTaskState(TaskState taskState);
 }

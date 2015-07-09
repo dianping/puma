@@ -12,8 +12,6 @@ import java.sql.Timestamp;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.net.ntp.TimeStamp;
-
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.Event;
@@ -348,7 +346,7 @@ public class RawEventCodec implements EventCodec {
 				break;
 			}
 			case Timestamp: {
-				value = new TimeStamp(buf.readLong());
+				value = new Timestamp(buf.readLong());
 				break;
 			}
 			case Double: {

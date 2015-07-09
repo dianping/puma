@@ -10,7 +10,6 @@ import java.util.Map;
 
 import junit.framework.Assert;
 
-import org.apache.commons.net.ntp.TimeStamp;
 import org.junit.Test;
 
 import com.dianping.puma.core.event.ChangedEvent;
@@ -284,8 +283,8 @@ public class RawEventCodecTest {
 			String tms2c = (String) result.getColumns().get("timestamp2").getOldValue();
 			Assert.assertEquals("2015-7-1 12:23:4", tms2c);
 
-			TimeStamp tmsc = (TimeStamp) result.getColumns().get("timestamp").getOldValue();
-			Assert.assertEquals(new TimeStamp(now), tmsc);
+			Timestamp tmsc = (Timestamp) result.getColumns().get("timestamp").getOldValue();
+			Assert.assertEquals(new Timestamp(now), tmsc);
 
 			Integer tyc = (Integer) result.getColumns().get("tiny").getOldValue();
 			Assert.assertEquals(new Integer(10), tyc);
@@ -355,8 +354,8 @@ public class RawEventCodecTest {
 			String tms2c = (String) result.getColumns().get("timestamp2").getNewValue();
 			Assert.assertEquals("2015-7-1 12:23:4", tms2c);
 
-			TimeStamp tmsc = (TimeStamp) result.getColumns().get("timestamp").getNewValue();
-			Assert.assertEquals(new TimeStamp(now), tmsc);
+			Timestamp tmsc = (Timestamp) result.getColumns().get("timestamp").getNewValue();
+			Assert.assertEquals(new Timestamp(now), tmsc);
 
 			Integer tyc = (Integer) result.getColumns().get("tiny").getNewValue();
 			Assert.assertEquals(new Integer(10), tyc);

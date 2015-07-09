@@ -5,11 +5,13 @@ import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.biz.entity.old.SyncTask;
+import com.dianping.puma.biz.entity.old.TaskState;
 import com.dianping.puma.biz.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.biz.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.biz.sync.model.mapping.TableMapping;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.syncserver.config.SyncServerConfig;
 import com.dianping.puma.syncserver.job.binlogmanage.BinlogManager;
 import com.dianping.puma.syncserver.job.executor.exception.TEException;
 import com.dianping.puma.syncserver.job.transform.Transformer;
@@ -235,7 +237,7 @@ public class SyncTaskExecutor implements TaskExecutor<SyncTask> {
     }
 
 		/*
-		private boolean handleError(ChangedEvent event, Handler handler, Exception e) {
+        private boolean handleError(ChangedEvent event, Handler handler, Exception e) {
 			boolean ignoreFailEvent = false;
 			try {
 				LOG.info("Invoke handler(" + handler.getName() + "), event : " + event);
@@ -324,6 +326,14 @@ public class SyncTaskExecutor implements TaskExecutor<SyncTask> {
 
     public Status getStatus() {
         return status;
+    }
+
+    public TaskState getTaskState() {
+        TaskState state = new TaskState();
+        state.setStatus(this.status);
+        state.setName(this.task.getName());
+        state.setServerName(SyncServerConfig.getInstance().getSyncServerName());
+        return state;
     }
 
     public BinlogManager getBinlogManager() {

@@ -8,7 +8,7 @@ import com.google.common.base.Objects;
 
 import java.util.Date;
 
-public class TaskState {
+public class TaskStateEntity {
 	private int id;
 
 	private String name;
@@ -31,7 +31,7 @@ public class TaskState {
 
 	private BinlogStat binlogStat;
 
-	public TaskState() {
+	public TaskStateEntity() {
 		gmtUpdate = new Date();
 	}
 
@@ -129,7 +129,7 @@ public class TaskState {
 			return true;
 		if (o == null || getClass() != o.getClass())
 			return false;
-		TaskState taskState = (TaskState) o;
+		TaskStateEntity taskState = (TaskStateEntity) o;
 		return Objects.equal(name, taskState.name) && Objects.equal(serverName, taskState.serverName)
 		      && Objects.equal(taskType, taskState.taskType);
 	}

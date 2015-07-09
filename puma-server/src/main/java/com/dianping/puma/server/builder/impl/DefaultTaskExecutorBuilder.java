@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.dianping.puma.biz.entity.old.PumaTask;
 import com.dianping.puma.biz.entity.old.SrcDBInstance;
-import com.dianping.puma.biz.entity.TaskState;
+import com.dianping.puma.biz.entity.TaskStateEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,7 +104,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 		try {
 			DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
 
-			TaskState taskState = new TaskState();
+			TaskStateEntity taskState = new TaskStateEntity();
 			taskState.setName(pumaTask.getName());
 			taskState.setServerName(pumaServerConfig.getName());
 			taskState.setTaskName(pumaTask.getName());

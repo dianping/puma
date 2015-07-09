@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import com.dianping.puma.biz.entity.TaskState;
+import com.dianping.puma.biz.entity.TaskStateEntity;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.io.FileUtils;
@@ -281,7 +281,7 @@ public abstract class AbstractBaseTest {
         DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
 
         // state
-        TaskState taskState = new TaskState();
+        TaskStateEntity taskState = new TaskStateEntity();
         taskState.setName(taskName);
         taskState.setServerName(serverName);
         taskState.setTaskName(taskName);

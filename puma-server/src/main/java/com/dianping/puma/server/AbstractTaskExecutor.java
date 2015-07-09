@@ -15,7 +15,7 @@
  */
 package com.dianping.puma.server;
 
-import com.dianping.puma.biz.entity.TaskState;
+import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.constant.Status;
@@ -56,7 +56,7 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
 
 	protected BinlogInfoHolder binlogInfoHolder;
 
-	protected TaskState state;
+	protected TaskStateEntity state;
 
 	protected Status status;
 
@@ -208,11 +208,11 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
 		return this.dataHandler;
 	}
 
-	public TaskState getTaskState() {
+	public TaskStateEntity getTaskState() {
 		return state;
 	}
 
-	public void setTaskState(TaskState state) {
+	public void setTaskState(TaskStateEntity state) {
 		this.state = state;
 	}
 

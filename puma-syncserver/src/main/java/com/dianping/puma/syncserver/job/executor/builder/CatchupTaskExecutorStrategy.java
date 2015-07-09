@@ -1,6 +1,6 @@
 package com.dianping.puma.syncserver.job.executor.builder;
 
-import com.dianping.puma.biz.entity.TaskState;
+import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.biz.entity.old.*;
 import com.dianping.puma.biz.service.DstDBInstanceService;
 import com.dianping.puma.biz.service.PumaServerService;
@@ -100,7 +100,7 @@ public class CatchupTaskExecutorStrategy implements TaskExecutorStrategy<Catchup
 
         CatchupTaskExecutor executor = new CatchupTaskExecutor(task, pumaServerHost, pumaServerPort, target, syncTaskExecutor, dstDBInstance);
 
-        TaskState catchupTaskState = new TaskState();
+        TaskStateEntity catchupTaskState = new TaskStateEntity();
         catchupTaskState.setTaskName(task.getName());
         catchupTaskState.setStatus(Status.PREPARING);
 

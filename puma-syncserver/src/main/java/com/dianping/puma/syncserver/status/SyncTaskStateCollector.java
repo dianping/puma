@@ -1,6 +1,6 @@
 package com.dianping.puma.syncserver.status;
 
-import com.dianping.puma.biz.entity.TaskState;
+import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.biz.service.SyncTaskService;
 import com.dianping.puma.biz.service.impl.SyncTaskStateServiceImpl;
 import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;
@@ -26,7 +26,7 @@ public class SyncTaskStateCollector {
     public void collect() {
         for (TaskExecutor taskExecutor : taskExecutorContainer.getAll()) {
             if (taskExecutor instanceof SyncTaskExecutor) {
-                TaskState syncTaskState = ((SyncTaskExecutor) taskExecutor).getTaskState();
+                TaskStateEntity syncTaskState = ((SyncTaskExecutor) taskExecutor).getTaskState();
                 syncTaskStateService.createOrUpdate(syncTaskState);
             }
         }

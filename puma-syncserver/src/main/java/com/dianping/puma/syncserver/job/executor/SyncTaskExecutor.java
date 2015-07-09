@@ -5,7 +5,7 @@ import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.biz.entity.old.SyncTask;
-import com.dianping.puma.biz.entity.TaskState;
+import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.biz.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.biz.sync.model.mapping.MysqlMapping;
 import com.dianping.puma.biz.sync.model.mapping.TableMapping;
@@ -328,8 +328,8 @@ public class SyncTaskExecutor implements TaskExecutor<SyncTask> {
         return status;
     }
 
-    public TaskState getTaskState() {
-        TaskState state = new TaskState();
+    public TaskStateEntity getTaskState() {
+        TaskStateEntity state = new TaskStateEntity();
         state.setStatus(this.status);
         state.setName(this.task.getName());
         state.setServerName(SyncServerConfig.getInstance().getSyncServerName());

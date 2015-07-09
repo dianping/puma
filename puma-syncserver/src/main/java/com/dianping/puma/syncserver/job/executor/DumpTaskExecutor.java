@@ -3,7 +3,7 @@ package com.dianping.puma.syncserver.job.executor;
 import com.dianping.puma.biz.entity.old.DstDBInstance;
 import com.dianping.puma.biz.entity.old.DumpTask;
 import com.dianping.puma.biz.entity.old.SrcDBInstance;
-import com.dianping.puma.biz.entity.TaskState;
+import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.biz.sync.model.mapping.DatabaseMapping;
 import com.dianping.puma.biz.sync.model.mapping.TableMapping;
 import com.dianping.puma.biz.sync.model.taskexecutor.TaskExecutorStatus;
@@ -70,12 +70,12 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
 
     private DumpTask dumpTask;
 
-    protected TaskState state;
+    protected TaskStateEntity state;
 
     private Process proc;
     protected TaskExecutorStatus status;
 
-    public DumpTaskExecutor(DumpTask dumpTask, TaskState dumpTaskState) throws IOException {
+    public DumpTaskExecutor(DumpTask dumpTask, TaskStateEntity dumpTaskState) throws IOException {
         this.uuid = UUID.randomUUID().toString();
         this.dumpOutputDir = SyncServerConfig.getInstance().getTempDir() + "/dump/" + uuid + "/";
         FileUtils.forceMkdir(new File(dumpOutputDir));
@@ -393,15 +393,15 @@ public class DumpTaskExecutor implements TaskExecutor<DumpTask> {
 
     }
 
-    public TaskState getTaskState() {
+    public TaskStateEntity getTaskState() {
         return state;
     }
 
-    public void setTaskState(TaskState taskState) {
+    public void setTaskState(TaskStateEntity taskState) {
         this.state = taskState;
     }
 
-    public void setState(TaskState state) {
+    public void setState(TaskStateEntity state) {
         this.state = state;
     }
 

@@ -78,7 +78,7 @@ public class SyncTaskController {
         Map<String, Object> map = new HashMap<String, Object>();
         long count = syncTaskService.count();
         List<SyncTask> syncTasks = syncTaskService.findByPage(page, pageSize);
-        List<TaskState> TaskStates = new ArrayList<TaskState>();
+        List<TaskStateEntity> TaskStates = new ArrayList<TaskStateEntity>();
         if (syncTasks != null) {
             for (SyncTask syncTask : syncTasks) {
                 TaskStates.addAll(syncTaskStateService.find(syncTask.getName()));
@@ -124,7 +124,7 @@ public class SyncTaskController {
     public Object status(HttpSession session, String taskName) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            TaskState TaskState = syncTaskStateService.find(taskName).get(0);
+            TaskStateEntity TaskState = syncTaskStateService.find(taskName).get(0);
             // binlog信息，从数据库查询binlog位置即可，不需要从SyncServer实时发过来的status中的binlog获取
             // binlogInfoOfIOThread则是从status中获取
             SyncTask syncTask = this.syncTaskService.find(taskName);
@@ -151,7 +151,7 @@ public class SyncTaskController {
         Map<String, Object> map = new HashMap<String, Object>();
         SyncTask syncTask = this.syncTaskService.find(id);
         if (syncTask != null) {
-            List<TaskState> TaskState = syncTaskStateService.find(syncTask.getName());
+            List<TaskStateEntity> TaskState = syncTaskStateService.find(syncTask.getName());
             map.put("syncTask", syncTask);
             map.put("TaskState", TaskState.get(0));
             map.put("createdActive", "active");
@@ -307,7 +307,7 @@ public class SyncTaskController {
     public String refreshPost(String name) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
-            List<TaskState> TaskState = syncTaskStateService.find(name);
+            List<TaskStateEntity> TaskState = syncTaskStateService.find(name);
             map.put("state", TaskState.get(0));
             map.put("success", true);
         } catch (MongoException e) {

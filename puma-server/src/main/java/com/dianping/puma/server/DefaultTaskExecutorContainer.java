@@ -1,7 +1,7 @@
 package com.dianping.puma.server;
 
 import com.dianping.puma.biz.entity.old.PumaTask;
-import com.dianping.puma.biz.entity.TaskState;
+import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.biz.event.entity.PumaTaskControllerEvent;
 import com.dianping.puma.biz.event.entity.PumaTaskOperationEvent;
 import com.dianping.puma.biz.service.PumaTaskService;
@@ -78,7 +78,7 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
     public void updateState() {
         for (TaskExecutor executor : taskExecutorMap.values()) {
             try {
-                TaskState state = executor.getTaskState();
+                TaskStateEntity state = executor.getTaskState();
                 if (state != null) {
                     pumaTaskStateService.createOrUpdate(state);
                 }

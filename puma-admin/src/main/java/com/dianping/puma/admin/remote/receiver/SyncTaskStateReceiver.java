@@ -1,5 +1,6 @@
 package com.dianping.puma.admin.remote.receiver;
 
+import com.dianping.puma.biz.entity.SyncTaskState;
 import com.dianping.puma.biz.entity.old.SyncTask;
 import com.dianping.puma.biz.event.EventListener;
 import com.dianping.puma.biz.event.entity.Event;

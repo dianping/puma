@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.TaskStateDao">
+
+    <resultMap id="binlogInfo" type="com.dianping.puma.core.model.BinlogInfo" autoMapping="true"/>
+
+    <resultMap id="entity" type="TaskStateEntity" autoMapping="true">
+        <association resultMap="binlogInfo" property="binlogInfo" columnPrefix="BinlogInfo_"/>
+    </resultMap>
+
+    <select id="find" resultMap="entity">
+        SELECT * FROM TaskState
+    </select>
+</mapper>

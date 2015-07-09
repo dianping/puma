@@ -9,133 +9,133 @@ import com.google.common.base.Objects;
 import java.util.Date;
 
 public class TaskStateEntity {
-	private int id;
+    private int id;
 
-	private String name;
+    private String name;
 
-	private String serverName;
+    private String serverName;
 
-	private String taskType;
+    private String taskType;
 
-	private Date gmtUpdate;
+    private Date gmtUpdate;
 
-	private String taskName;
+    private String taskName;
 
-	private String detail;
+    private String detail;
 
-	private Status status;
+    private Status status;
 
-	private ActionController controller;
+    private ActionController controller;
 
-	private BinlogInfo binlogInfo;
+    private BinlogInfo binlogInfo = new BinlogInfo();
 
-	private BinlogStat binlogStat;
+    private BinlogStat binlogStat = new BinlogStat();
 
-	public TaskStateEntity() {
-		gmtUpdate = new Date();
-	}
+    public TaskStateEntity() {
+        gmtUpdate = new Date();
+    }
 
-	public Date getGmtUpdate() {
-		return gmtUpdate;
-	}
+    public Date getGmtUpdate() {
+        return gmtUpdate;
+    }
 
-	public void setGmtUpdate(Date gmtUpdate) {
-		this.gmtUpdate = gmtUpdate;
-	}
+    public void setGmtUpdate(Date gmtUpdate) {
+        this.gmtUpdate = gmtUpdate;
+    }
 
-	public String getTaskName() {
-		return taskName;
-	}
+    public String getTaskName() {
+        return taskName;
+    }
 
-	public void setTaskName(String taskName) {
-		this.taskName = taskName;
-	}
+    public void setTaskName(String taskName) {
+        this.taskName = taskName;
+    }
 
-	public String getDetail() {
-		return detail;
-	}
+    public String getDetail() {
+        return detail;
+    }
 
-	public void setDetail(String detail) {
-		this.detail = detail;
-	}
+    public void setDetail(String detail) {
+        this.detail = detail;
+    }
 
-	public ActionController getController() {
-		return controller;
-	}
+    public ActionController getController() {
+        return controller;
+    }
 
-	public void setController(ActionController controller) {
-		this.controller = controller;
-	}
+    public void setController(ActionController controller) {
+        this.controller = controller;
+    }
 
-	public BinlogInfo getBinlogInfo() {
-		return binlogInfo;
-	}
+    public BinlogInfo getBinlogInfo() {
+        return binlogInfo;
+    }
 
-	public void setBinlogInfo(BinlogInfo binlogInfo) {
-		this.binlogInfo = binlogInfo;
-	}
+    public void setBinlogInfo(BinlogInfo binlogInfo) {
+        this.binlogInfo = binlogInfo;
+    }
 
-	public BinlogStat getBinlogStat() {
-		return binlogStat;
-	}
+    public BinlogStat getBinlogStat() {
+        return binlogStat;
+    }
 
-	public void setBinlogStat(BinlogStat binlogStat) {
-		this.binlogStat = binlogStat;
-	}
+    public void setBinlogStat(BinlogStat binlogStat) {
+        this.binlogStat = binlogStat;
+    }
 
-	public Status getStatus() {
-		return status;
-	}
+    public Status getStatus() {
+        return status;
+    }
 
-	public void setStatus(Status status) {
-		this.status = status;
-	}
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getServerName() {
-		return serverName;
-	}
+    public String getServerName() {
+        return serverName;
+    }
 
-	public void setServerName(String serverName) {
-		this.serverName = serverName;
-	}
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
 
-	public String getTaskType() {
-		return taskType;
-	}
+    public String getTaskType() {
+        return taskType;
+    }
 
-	public void setTaskType(String taskType) {
-		this.taskType = taskType;
-	}
+    public void setTaskType(String taskType) {
+        this.taskType = taskType;
+    }
 
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-		TaskStateEntity taskState = (TaskStateEntity) o;
-		return Objects.equal(name, taskState.name) && Objects.equal(serverName, taskState.serverName)
-		      && Objects.equal(taskType, taskState.taskType);
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        TaskStateEntity taskState = (TaskStateEntity) o;
+        return Objects.equal(name, taskState.name) && Objects.equal(serverName, taskState.serverName)
+                && Objects.equal(taskType, taskState.taskType);
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hashCode(name, serverName, taskType);
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(name, serverName, taskType);
+    }
 }

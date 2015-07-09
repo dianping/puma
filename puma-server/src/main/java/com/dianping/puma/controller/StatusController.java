@@ -2,7 +2,7 @@ package com.dianping.puma.controller;
 
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.config.PumaServerConfig;
-import com.dianping.puma.core.model.state.PumaTaskState;
+import com.dianping.puma.biz.entity.PumaTaskState;
 import com.dianping.puma.server.TaskExecutor;
 import com.dianping.puma.server.TaskExecutorContainer;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -18,7 +18,7 @@ import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.core.model.event.EventCenter;
-import com.dianping.puma.core.model.state.PumaTaskState;
+import com.dianping.puma.biz.entity.PumaTaskState;
 import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.datahandler.DefaultDataHandler;

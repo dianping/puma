@@ -1,4 +1,4 @@
-package com.dianping.puma.core.model.state;
+package com.dianping.puma.biz.entity;
 
 public class PumaTaskState extends TaskState {
 	

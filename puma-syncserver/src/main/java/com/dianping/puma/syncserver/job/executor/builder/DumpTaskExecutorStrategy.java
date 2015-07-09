@@ -6,7 +6,7 @@ import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.biz.entity.DumpTask;
 import com.dianping.puma.biz.entity.PumaTask;
-import com.dianping.puma.core.model.state.DumpTaskState;
+import com.dianping.puma.biz.entity.DumpTaskState;
 import com.dianping.puma.biz.service.DstDBInstanceService;
 import com.dianping.puma.biz.service.PumaTaskService;
 import com.dianping.puma.biz.service.SrcDBInstanceService;

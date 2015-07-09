@@ -15,10 +15,10 @@
  */
 package com.dianping.puma.server;
 
+import com.dianping.puma.biz.entity.TaskState;
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.constant.Status;
-import com.dianping.puma.biz.entity.PumaTaskState;
 import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.parser.Parser;
@@ -62,7 +62,7 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
 
     //protected String name;
 
-    protected PumaTaskState state;
+    protected TaskState state;
 
     protected Status status;
 
@@ -237,11 +237,11 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
         return this.dataHandler;
     }
 
-    public PumaTaskState getTaskState() {
+    public TaskState getTaskState() {
         return state;
     }
 
-    public void setTaskState(PumaTaskState state) {
+    public void setTaskState(TaskState state) {
         this.state = state;
     }
 

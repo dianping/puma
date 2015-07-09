@@ -2,11 +2,11 @@ package com.dianping.puma.syncserver.job.executor.builder;
 
 import java.io.IOException;
 
+import com.dianping.puma.biz.entity.TaskState;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
 import com.dianping.puma.biz.entity.DumpTask;
 import com.dianping.puma.biz.entity.PumaTask;
-import com.dianping.puma.biz.entity.DumpTaskState;
 import com.dianping.puma.biz.service.DstDBInstanceService;
 import com.dianping.puma.biz.service.PumaTaskService;
 import com.dianping.puma.biz.service.SrcDBInstanceService;
@@ -38,11 +38,11 @@ public class DumpTaskExecutorStrategy implements TaskExecutorStrategy<DumpTask, 
             String srcDBInstanceName = pumaTask.getSrcDBInstanceName();
             String dstDBInstanceName = task.getDstDBInstanceName();
 
-            excutor = new DumpTaskExecutor(task, new DumpTaskState());
+            excutor = new DumpTaskExecutor(task, new TaskState());
             excutor.setSrcDBInstance(srcDBInstanceService.find(srcDBInstanceName));
             excutor.setDstDBInstance(dstDBInstanceService.find(dstDBInstanceName));
 
-            DumpTaskState dumpTaskState = new DumpTaskState();
+            TaskState dumpTaskState = new TaskState();
             dumpTaskState.setTaskName(task.getName());
             dumpTaskState.setStatus(Status.PREPARING);
             dumpTaskState.setBinlogInfo(task.getBinlogInfo());

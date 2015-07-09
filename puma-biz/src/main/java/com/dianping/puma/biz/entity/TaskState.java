@@ -9,6 +9,8 @@ import com.google.common.base.Objects;
 import java.util.Date;
 
 public class TaskState {
+    private int id;
+
     private String name;
 
     private String serverName;
@@ -111,6 +113,14 @@ public class TaskState {
 
     public void setTaskType(String taskType) {
         this.taskType = taskType;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     @Override

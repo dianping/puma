@@ -23,7 +23,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.dianping.puma.common.SystemStatusContainer;
+import com.dianping.puma.status.SystemStatusContainer;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**

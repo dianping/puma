@@ -1,6 +1,11 @@
 package com.dianping.puma.core.exception;
 
 public class ChannelException extends PumaException {
+	/**
+	 * 
+	 */
+   private static final long serialVersionUID = 3213949848013139538L;
+
 	public ChannelException() {
 		super();
 	}

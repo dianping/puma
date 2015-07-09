@@ -15,7 +15,6 @@ package com.dianping.puma.server;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.puma.bo.PumaContext;
-import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
@@ -33,6 +32,8 @@ import com.dianping.puma.parser.mysql.packet.*;
 import com.dianping.puma.server.exception.ServerEventFetcherException;
 import com.dianping.puma.server.exception.ServerEventParserException;
 import com.dianping.puma.server.exception.ServerEventRuntimeException;
+import com.dianping.puma.status.SystemStatusContainer;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

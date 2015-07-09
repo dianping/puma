@@ -1,4 +1,4 @@
-package com.dianping.puma.codec;
+package com.dianping.puma.core.codec;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -12,6 +12,8 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.dianping.puma.core.codec.JsonEventCodec;
+import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;

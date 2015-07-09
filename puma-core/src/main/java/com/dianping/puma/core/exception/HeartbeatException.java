@@ -1,6 +1,11 @@
 package com.dianping.puma.core.exception;
 
 public class HeartbeatException extends PumaException {
+	/**
+	 * 
+	 */
+   private static final long serialVersionUID = 6849086140041823181L;
+
 	public HeartbeatException() {
 		super();
 	}

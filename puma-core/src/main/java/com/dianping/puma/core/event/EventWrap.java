@@ -35,7 +35,7 @@ public class EventWrap {
     public void setDdlEvent(DdlEvent ddlEvent) {
         this.ddlEvent = ddlEvent;
         this.rowChangedEvent = null;
-        this.type = DDL;
+        this.setType(DDL);
     }
 
     public RowChangedEvent getRowChangedEvent() {
@@ -45,6 +45,14 @@ public class EventWrap {
     public void setRowChangedEvent(RowChangedEvent rowChangedEvent) {
         this.rowChangedEvent = rowChangedEvent;
         this.ddlEvent = null;
-        this.type = DML;
+        this.setType(DML);
     }
+
+	public int getType() {
+	   return type;
+   }
+
+	public void setType(int type) {
+	   this.type = type;
+   }
 }

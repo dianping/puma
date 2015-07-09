@@ -2,6 +2,11 @@ package com.dianping.puma.core.exception;
 
 public class PumaException extends Exception {
 
+	/**
+	 * 
+	 */
+   private static final long serialVersionUID = 7423790635936212910L;
+
 	public PumaException() {
 		super();
 	}

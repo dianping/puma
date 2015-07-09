@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.meta;
+package com.dianping.puma.parser.meta;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

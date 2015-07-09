@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.core.model.BinlogInfo;
+
 import org.apache.log4j.Logger;
 
 import javax.annotation.PostConstruct;
@@ -32,8 +33,6 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 	private final Map<String, MappedByteBuffer> mappedByteBufferMapping = new ConcurrentHashMap<String, MappedByteBuffer>();
 
 	private static final String SUFFIX = ".binlog";
-
-	private static final String PREFIX = "server-";
 
 	private static final long DEFAULT_BINLOGPOS = 4L;
 
@@ -113,6 +112,7 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 		}
 	}
 
+	@SuppressWarnings({ "resource", "unused" })
 	private void loadFromFile(String taskName) {
 		String path = (new File(baseDir, task2file(taskName))).getAbsolutePath();
 		File f = new File(path);
@@ -127,12 +127,12 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 			String binlogPositionStr = br.readLine();
 			String eventIndexStr = br.readLine();
 			long binlogPosition = binlogPositionStr == null ? DEFAULT_BINLOGPOS : Long.parseLong(binlogPositionStr);
-			//int eventIndex = Integer.valueOf(eventIndexStr).intValue();
+			// int eventIndex = Integer.valueOf(eventIndexStr).intValue();
 			BinlogInfo binlogInfo = new BinlogInfo(binlogFile, binlogPosition);
-			//binlogInfo.setEventIndex(eventIndex);
-			
+			// binlogInfo.setEventIndex(eventIndex);
+
 			mappedByteBufferMapping.put(taskName,
-					new RandomAccessFile(f, "rwd").getChannel().map(MapMode.READ_WRITE, 0, MAX_FILE_SIZE));
+			      new RandomAccessFile(f, "rwd").getChannel().map(MapMode.READ_WRITE, 0, MAX_FILE_SIZE));
 			binlogInfoMap.put(taskName, binlogInfo);
 
 		} catch (Exception e) {
@@ -168,7 +168,7 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 						throw new RuntimeException("Can not create file(" + f.getAbsolutePath() + ")");
 					}
 					mappedByteBufferMapping.put(taskName,
-							new RandomAccessFile(f, "rwd").getChannel().map(MapMode.READ_WRITE, 0, MAX_FILE_SIZE));
+					      new RandomAccessFile(f, "rwd").getChannel().map(MapMode.READ_WRITE, 0, MAX_FILE_SIZE));
 				} catch (IOException e) {
 					throw new RuntimeException("Create file(" + path + " failed.", e);
 				}

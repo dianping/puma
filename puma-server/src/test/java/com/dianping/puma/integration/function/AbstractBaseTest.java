@@ -313,19 +313,10 @@ public abstract class AbstractBaseTest {
 		DefaultDataHandler dataHandler = new DefaultDataHandler();
 		DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
 		// tableMetaInfo.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
-		SrcDBInstance srcDbInstance = new SrcDBInstance();
-		srcDbInstance.setHost(host);
-		srcDbInstance.setPassword(password);
-		srcDbInstance.setPort(port);
-		srcDbInstance.setUsername(username);
-		srcDbInstance.setServerId(serverId);
-		tableMetaInfo.setSrcDbInstance(srcDbInstance);
-		BinlogInfo binlogInfo1 = new BinlogInfo("mysql-bin.000000", 4L);
-		tableMetaInfo.setBinlogInfo(binlogInfo1);
-		TableMetaInfoStore metaStore = new TableMetaInfoStore();
-		metaStore.start();
-		
-		tableMetaInfo.setTableMetaInfoStore(metaStore);
+		tableMetaInfo.setMetaDBHost(host);
+		tableMetaInfo.setMetaDBPort(port);
+		tableMetaInfo.setMetaDBUsername(username);
+		tableMetaInfo.setMetaDBPassword(password);
 		// tableMeta refresh filter
 		TableMetaRefreshFilter tableMetaRefreshFilter = new TableMetaRefreshFilter();
 		tableMetaRefreshFilter.setName(taskName);

@@ -140,14 +140,11 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
             // Handler.
             DefaultDataHandler dataHandler = new DefaultDataHandler();
             DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
-            tableMetaInfo.setSrcDbInstance(srcDBInstance);
-            BinlogInfo binlogInfo1 = new BinlogInfo("mysql-bin.000000", 4L);
-      		tableMetaInfo.setBinlogInfo(binlogInfo1);
+            tableMetaInfo.setMetaDBHost(srcDBInstance.getHost());
+      		tableMetaInfo.setMetaDBPort(srcDBInstance.getPort());
+      		tableMetaInfo.setMetaDBUsername(srcDBInstance.getMetaUsername());
+      		tableMetaInfo.setMetaDBPassword(srcDBInstance.getMetaPassword());
             
-      		TableMetaInfoStore metaStore = new TableMetaInfoStore();
-      		metaStore.start();
-      		
-      		tableMetaInfo.setTableMetaInfoStore(metaStore);
             // tableMeta refresh filter
             TableMetaRefreshFilter tableMetaRefreshFilter = new TableMetaRefreshFilter();
             tableMetaRefreshFilter.setName(taskName);

@@ -17,13 +17,12 @@ package com.dianping.puma.parser.mysql.event;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 
-import com.dianping.cat.Cat;
 import org.apache.commons.lang.exception.NestableRuntimeException;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.datatype.UnsignedLong;
@@ -56,9 +55,6 @@ import com.dianping.puma.parser.mysql.column.YearColumn;
 import com.dianping.puma.parser.mysql.utils.MySQLUtils;
 import com.dianping.puma.utils.CodecUtils;
 import com.dianping.puma.utils.PacketUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * TODO Comment of AbstractRowsEvent
@@ -67,21 +63,25 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
-	private static final Logger LOG = LoggerFactory.getLogger(AbstractRowsEvent.class);
 	private static final long serialVersionUID = 2658456786993670332L;
+
 	protected long tableId;
+
 	protected int reserved;
+
 	protected UnsignedLong columnCount;
+
 	private int extraInfoLength;
+
 	private byte extraInfo[];
+
 	protected TableMapEvent tableMapEvent;
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this).append("super", super.toString()).append("tableId", tableId)
-				.append("reserved", reserved).append("columnCount", columnCount)
-				.append("extraInfoLength", extraInfoLength).append("extraInfo", extraInfo)
-				.append("tableMapEvent", tableMapEvent).toString();
+		      .append("reserved", reserved).append("columnCount", columnCount).append("extraInfoLength", extraInfoLength)
+		      .append("extraInfo", extraInfo).append("tableMapEvent", tableMapEvent).toString();
 	}
 
 	/**
@@ -126,17 +126,16 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * com.dianping.puma.common.mysql.event.AbstractBinlogEvent#doParse(java
-	 * .nio.ByteBuffer, com.dianping.puma.common.bo.PumaContext)
+	 * @see com.dianping.puma.common.mysql.event.AbstractBinlogEvent#doParse(java .nio.ByteBuffer,
+	 * com.dianping.puma.common.bo.PumaContext)
 	 */
 	@Override
 	public void doParse(ByteBuffer buf, PumaContext context) throws IOException {
 		tableId = PacketUtils.readLong(buf, 6);
 		reserved = PacketUtils.readInt(buf, 2);
 		if (getHeader().getEventType() == BinlogConstants.WRITE_ROWS_EVENT
-				|| getHeader().getEventType() == BinlogConstants.DELETE_ROWS_EVENT
-				|| getHeader().getEventType() == BinlogConstants.UPDATE_ROWS_EVENT) {
+		      || getHeader().getEventType() == BinlogConstants.DELETE_ROWS_EVENT
+		      || getHeader().getEventType() == BinlogConstants.UPDATE_ROWS_EVENT) {
 			extraInfoLength = PacketUtils.readInt(buf, 2);
 			if (extraInfoLength > 2)
 				extraInfo = PacketUtils.readBytes(buf, extraInfoLength - 2);
@@ -257,8 +256,7 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 				final int scale = meta >> 8;
 				final int decimalLength = MySQLUtils.getDecimalBinarySize(precision, scale);
 				columns.add(DecimalColumn.valueOf(
-						MySQLUtils.toDecimal(precision, scale, PacketUtils.readBytes(buf, decimalLength)), precision,
-						scale));
+				      MySQLUtils.toDecimal(precision, scale, PacketUtils.readBytes(buf, decimalLength)), precision, scale));
 				break;
 			case BinlogConstants.MYSQL_TYPE_BLOB:
 				final int blobLength = PacketUtils.readInt(buf, meta);

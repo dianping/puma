@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.meta;
+package com.dianping.puma.parser.meta;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -55,8 +55,6 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 	private String metaDBPassword;
 
 	private MysqlDataSource metaDs;
-
-	// private Map<String, AcceptedTables> acceptedDataTables;
 
 	private TableMetaRefreshFilter tableMetaRefreshFilter;
 
@@ -197,7 +195,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 				sqlStr.append(PREFIX_BRACKET + TABLE_SCHEMA + EQUAL_SQL + INFIX_REPLACE);
 				if (database.getValue() != null && database.getValue().size() > 0) {
 					sqlStr.append(AND_SQL + TABLE_NAME + IN_SQL + PREFIX_BRACKET);
-					for (String table : database.getValue()) {
+					for (@SuppressWarnings("unused") String table : database.getValue()) {
 						sqlStr.append(INFIX_REPLACE + INFIX_DOT);
 					}
 					sqlStr = sqlStr.delete(sqlStr.length() - INFIX_DOT.length(), sqlStr.length());

@@ -1,4 +1,4 @@
-package com.dianping.puma.meta;
+package com.dianping.puma.parser.meta;
 
 import java.io.BufferedWriter;
 import java.io.File;

@@ -3,7 +3,7 @@ package com.dianping.puma.storage;
 import java.io.EOFException;
 import java.io.IOException;
 
-import com.dianping.puma.codec.EventCodec;
+import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.storage.exception.InvalidSequenceException;
 import com.dianping.puma.storage.exception.StorageClosedException;

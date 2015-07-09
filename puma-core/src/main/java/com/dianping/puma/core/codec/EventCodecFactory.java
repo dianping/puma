@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.codec;
+package com.dianping.puma.core.codec;
 
 /**
  * @author Leo Liang

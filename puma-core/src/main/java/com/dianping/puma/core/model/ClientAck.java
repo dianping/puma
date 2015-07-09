@@ -1,6 +1,5 @@
 package com.dianping.puma.core.model;
 
-import java.util.Date;
 
 public class ClientAck extends AbstractAck {
 

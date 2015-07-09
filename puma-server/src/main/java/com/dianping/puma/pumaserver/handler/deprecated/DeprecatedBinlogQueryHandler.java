@@ -1,7 +1,7 @@
 package com.dianping.puma.pumaserver.handler.deprecated;
 
-import com.dianping.puma.codec.EventCodec;
-import com.dianping.puma.codec.EventCodecFactory;
+import com.dianping.puma.core.codec.EventCodec;
+import com.dianping.puma.core.codec.EventCodecFactory;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.Event;

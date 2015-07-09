@@ -1,4 +1,4 @@
-package com.dianping.puma.codec;
+package com.dianping.puma.core.codec;
 
 import java.io.IOException;
 

@@ -8,6 +8,7 @@ import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.meta.TableMetaInfo;
 import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.parser.meta.TableMetaInfoStore;
 
 public class TableMetaInfoStoreTest {
 	

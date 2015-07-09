@@ -2,6 +2,11 @@ package com.dianping.puma.core.event;
 
 public class ServerErrorEvent extends Event {
 
+	/**
+	 * 
+	 */
+   private static final long serialVersionUID = 133827935042159681L;
+
 	private String msg;
 
 	private Throwable cause;

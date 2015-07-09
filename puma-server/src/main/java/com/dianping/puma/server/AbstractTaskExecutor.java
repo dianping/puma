@@ -52,15 +52,9 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
 
     protected Dispatcher dispatcher;
 
-    //private long serverId;
-
     private volatile boolean stop = true;
 
-    private volatile boolean pause = false;
-
     protected BinlogInfoHolder binlogInfoHolder;
-
-    //protected String name;
 
     protected TaskState state;
 

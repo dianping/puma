@@ -1,16 +1,18 @@
 package com.dianping.puma;
 
-import com.dianping.puma.common.util.PacketUtilTest;
-import com.dianping.puma.filter.*;
-import com.dianping.puma.integration.DataTypeIntegrationTest;
-import com.dianping.puma.integration.IndexIntegrationTest;
-import com.dianping.puma.integration.SQLIntegegrationTest;
-import com.dianping.puma.integration.SystemIntegegrationTest;
-import com.dianping.puma.storage.*;
-
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+
+import com.dianping.puma.common.util.PacketUtilTest;
+import com.dianping.puma.filter.DbTbEventFilterTest;
+import com.dianping.puma.filter.DefaultEventFilterChainTest;
+import com.dianping.puma.filter.DmlDdlEventFilterTest;
+import com.dianping.puma.filter.EventFilterChainFactoryTest;
+import com.dianping.puma.filter.TransactionInfoEventFilterTest;
+import com.dianping.puma.storage.DefaultDataIndexTest;
+import com.dianping.puma.storage.LocalBucketTest;
+import com.dianping.puma.storage.SequenceTest;
 
 
 @RunWith(Suite.class)

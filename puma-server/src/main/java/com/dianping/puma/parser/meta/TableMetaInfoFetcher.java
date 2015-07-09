@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.meta;
+package com.dianping.puma.parser.meta;
 
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.meta.TableMetaInfo;

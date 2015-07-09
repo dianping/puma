@@ -1,4 +1,4 @@
-package com.dianping.puma.parser.mysql.column;
+package com.dianping.puma.core.codec;
 
 public enum ColumnType {
 	ByteArray(1),

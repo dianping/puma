@@ -1,23 +1,26 @@
 package com.dianping.puma.core.util;
 
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.dianping.puma.core.util.constant.DdlEventSubType;
 import com.dianping.puma.core.util.constant.DdlEventType;
 
 public class SimpleDdlParser {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(SimpleDdlParser.class);
-	
+
 	private static final String PREFIX_TB = " TABLE ";
+
 	private static final String INFIX_DB_TB_SPOT = ".";
+
 	private static final String INFIX_DB_TB_QUOTE = "`";
+
 	private static final String INFIX_SINGLE_BLANK = " ";
+
 	private static final String PREFIX_DB = " DATABASE ";
-	private static final String PREFIX_DB_SCHEMA=" SCHEMA ";
+
+	private static final String PREFIX_DB_SCHEMA = " SCHEMA ";
+
 	private static final String PREFIX_EXISTS = "IF EXISTS ";
+
 	private static final String PREFIX_NOT_EXISTS = "IF NOT EXISTS ";
 
 	public static DdlEventType getEventType(String strSql) {
@@ -180,9 +183,9 @@ public class SimpleDdlParser {
 				ddlResult = new DdlResult();
 				if (midPosition > -1) {
 					ddlResult.setDatabase(StringUtils.remove(StringUtils.substringBefore(strTbl, INFIX_DB_TB_SPOT),
-							INFIX_DB_TB_QUOTE));
+					      INFIX_DB_TB_QUOTE));
 					ddlResult.setTable(StringUtils.remove(StringUtils.substringAfter(strTbl, INFIX_DB_TB_SPOT),
-							INFIX_DB_TB_QUOTE));
+					      INFIX_DB_TB_QUOTE));
 				} else {
 					ddlResult.setTable(StringUtils.remove(strTbl, INFIX_DB_TB_QUOTE));
 				}
@@ -211,6 +214,7 @@ public class SimpleDdlParser {
 
 	public static class DdlResult {
 		private String database;
+
 		private String table;
 
 		public DdlResult() {

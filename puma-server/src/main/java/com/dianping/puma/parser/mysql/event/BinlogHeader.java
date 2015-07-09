@@ -18,11 +18,10 @@ package com.dianping.puma.parser.mysql.event;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.utils.PacketUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * TODO Comment of BinlogHeader
@@ -32,14 +31,18 @@ import org.slf4j.LoggerFactory;
  */
 public class BinlogHeader implements Serializable {
 
-	private static final Logger logger = LoggerFactory.getLogger(BinlogHeader.class);
-
 	private static final long serialVersionUID = 5056491879587690096L;
+
 	private long timestamp;
+
 	private byte eventType;
+
 	private long serverId;
+
 	private long eventLength;
+
 	private long nextPosition;
+
 	private int flags;
 
 	/**
@@ -51,7 +54,7 @@ public class BinlogHeader implements Serializable {
 
 	/**
 	 * @param timestamp
-	 *            the timestamp to set
+	 *           the timestamp to set
 	 */
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
@@ -66,7 +69,7 @@ public class BinlogHeader implements Serializable {
 
 	/**
 	 * @param eventType
-	 *            the eventType to set
+	 *           the eventType to set
 	 */
 	public void setEventType(byte eventType) {
 		this.eventType = eventType;
@@ -81,7 +84,7 @@ public class BinlogHeader implements Serializable {
 
 	/**
 	 * @param serverId
-	 *            the serverId to set
+	 *           the serverId to set
 	 */
 	public void setServerId(long serverId) {
 		this.serverId = serverId;
@@ -96,7 +99,7 @@ public class BinlogHeader implements Serializable {
 
 	/**
 	 * @param eventLength
-	 *            the eventLength to set
+	 *           the eventLength to set
 	 */
 	public void setEventLength(long eventLength) {
 		this.eventLength = eventLength;
@@ -111,7 +114,7 @@ public class BinlogHeader implements Serializable {
 
 	/**
 	 * @param nextPosition
-	 *            the nextPosition to set
+	 *           the nextPosition to set
 	 */
 	public void setNextPosition(long nextPosition) {
 		this.nextPosition = nextPosition;
@@ -126,21 +129,17 @@ public class BinlogHeader implements Serializable {
 
 	/**
 	 * @param flags
-	 *            the flags to set
+	 *           the flags to set
 	 */
 	public void setFlags(int flags) {
 		this.flags = flags;
 	}
 
-	@Override public String toString() {
-		return new ToStringBuilder(this)
-				.append("timestamp", timestamp)
-				.append("eventType", eventType)
-				.append("serverId", serverId)
-				.append("eventLength", eventLength)
-				.append("nextPosition", nextPosition)
-				.append("flags", flags)
-				.toString();
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this).append("timestamp", timestamp).append("eventType", eventType)
+		      .append("serverId", serverId).append("eventLength", eventLength).append("nextPosition", nextPosition)
+		      .append("flags", flags).toString();
 	}
 
 	public void parse(ByteBuffer buf, PumaContext context) {

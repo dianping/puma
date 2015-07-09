@@ -1,4 +1,4 @@
-package com.dianping.puma.codec;
+package com.dianping.puma.core.codec;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -22,7 +22,6 @@ import com.dianping.puma.core.util.constant.DdlEventSubType;
 import com.dianping.puma.core.util.constant.DdlEventType;
 import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.core.util.sql.DMLType;
-import com.dianping.puma.parser.mysql.column.ColumnType;
 
 public class RawEventCodec implements EventCodec {
 

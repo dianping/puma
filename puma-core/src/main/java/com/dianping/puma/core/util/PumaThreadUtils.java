@@ -30,7 +30,7 @@ public final class PumaThreadUtils {
 	private static final String PREFIX = "Puma-thread-";
 
 	private static List<WeakReference<Thread>> threadList = Collections
-			.synchronizedList(new ArrayList<WeakReference<Thread>>());
+	      .synchronizedList(new ArrayList<WeakReference<Thread>>());
 
 	private static ConcurrentHashMap<String, AtomicInteger> taskToSeq = new ConcurrentHashMap<String, AtomicInteger>();
 

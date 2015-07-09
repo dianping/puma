@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.dianping.puma.biz.entity.old.SrcDBInstance;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 

@@ -1,6 +1,6 @@
 package com.dianping.puma.syncserver.job.executor.failhandler;
 
-import com.dianping.puma.biz.entity.BaseSyncTask;
+import com.dianping.puma.biz.entity.old.BaseSyncTask;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;

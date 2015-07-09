@@ -1,4 +1,4 @@
-package com.dianping.puma.biz.entity;
+package com.dianping.puma.biz.entity.old;
 
 import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.Status;

@@ -4,8 +4,16 @@
 
 <mapper namespace="com.dianping.puma.biz.dao.PumaServerDao">
 
-	<select id="findByName" resultType="PumaServerEntity">
-
+	<select id="find" resultType="PumaServerEntity">
+		SELECT * FROM PumaServer WHERE id = #{id}
 	</select>
+
+	<insert id="insert" parameterType="PumaServerEntity">
+		INSERT INTO PumaServer (name, host, port) VALUES (#{name}, #{host}, #{port})
+	</insert>
+
+	<delete id="delete">
+		DELETE FROM PumaServer WHERE id = #{id}
+	</delete>
 
 </mapper>

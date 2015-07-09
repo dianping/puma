@@ -2,11 +2,11 @@ package com.dianping.puma.syncserver.job.executor.builder;
 
 import java.io.IOException;
 
-import com.dianping.puma.biz.entity.TaskState;
+import com.dianping.puma.biz.entity.old.DumpTask;
+import com.dianping.puma.biz.entity.old.PumaTask;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SyncType;
-import com.dianping.puma.biz.entity.DumpTask;
-import com.dianping.puma.biz.entity.PumaTask;
+import com.dianping.puma.biz.entity.old.DumpTaskState;
 import com.dianping.puma.biz.service.DstDBInstanceService;
 import com.dianping.puma.biz.service.PumaTaskService;
 import com.dianping.puma.biz.service.SrcDBInstanceService;

@@ -263,7 +263,7 @@
             <dependency>
                 <groupId>com.dianping.zebra</groupId>
                 <artifactId>zebra-api</artifactId>
-                <version>2.7.5</version>
+                <version>2.7.6</version>
             </dependency>
             <dependency>
                 <groupId>com.dianping.zebra</groupId>
@@ -287,11 +287,6 @@
                 <version>1.5</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.tomcat</groupId>
-                <artifactId>tomcat-jdbc</artifactId>
-                <version>7.0.57</version>
-            </dependency>
-            <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
                 <version>4.0.28.Final</version>
@@ -307,6 +302,8 @@
                 <artifactId>mapdb</artifactId>
                 <version>1.0.6</version>
             </dependency>
+
+            <!-- mybatis -->
             <dependency>
                 <groupId>org.mybatis</groupId>
                 <artifactId>mybatis</artifactId>
@@ -316,6 +313,13 @@
                 <groupId>org.mybatis</groupId>
                 <artifactId>mybatis-spring</artifactId>
                 <version>1.2.2</version>
+            </dependency>
+
+            <!-- tomcat jdbc -->
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-jdbc</artifactId>
+                <version>7.0.57</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

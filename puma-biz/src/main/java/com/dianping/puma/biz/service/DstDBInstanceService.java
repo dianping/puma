@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.service;
 
-import com.dianping.puma.biz.entity.DstDBInstance;
+import com.dianping.puma.biz.entity.old.DstDBInstance;
 
 import java.util.List;
 

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
+
+	<bean id="pumaDataSource" class="com.zaxxer.hikari.HikariDataSource">
+		<property name="jdbcUrl" value="${puma.db.url}" />
+		<property name="driverClassName" value="${puma.db.driverClassName}" />
+		<property name="username" value="${puma.db.username}" />
+		<property name="password" value="${puma.db.password}" />
+	</bean>
+
+	<bean id="pumaSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="pumaDataSource" />
+		<property name="mapperLocations" value="classpath*:config/sqlmap/**/*.xml" />
+		<property name="typeAliasesPackage" value="com.dianping.zebra.biz.entity" />
+	</bean>
+
+</beans>

@@ -5,7 +5,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import com.dianping.puma.biz.entity.BaseSyncTask;
+import com.dianping.puma.biz.entity.old.BaseSyncTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

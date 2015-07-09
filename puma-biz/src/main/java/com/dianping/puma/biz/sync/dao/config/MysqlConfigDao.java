@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.sync.dao.config;
 
-import com.dianping.puma.biz.dao.morphia.helper.MongoClient;
+import com.dianping.puma.biz.olddao.morphia.helper.MongoClient;
 import com.dianping.puma.biz.sync.model.config.MysqlConfig;
 import com.google.code.morphia.dao.BasicDAO;
 import org.springframework.beans.factory.annotation.Autowired;

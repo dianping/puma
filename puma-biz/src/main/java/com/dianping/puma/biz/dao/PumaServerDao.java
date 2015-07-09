@@ -1,28 +1,9 @@
 package com.dianping.puma.biz.dao;
 
-import com.dianping.puma.biz.entity.PumaServer;
-
-import java.util.List;
+import com.dianping.puma.biz.entity.old.PumaServer;
+import org.apache.ibatis.annotations.Param;
 
 public interface PumaServerDao {
 
-	PumaServer find(long id);
-
-	PumaServer find(String name);
-
-	PumaServer findByHost(String host);
-
-	List<PumaServer> findAll();
-
-	long count();
-
-	List<PumaServer> findByPage(int page, int pageSize);
-
-	void create(PumaServer pumaServer);
-
-	void update(PumaServer pumaServer);
-
-	void remove(String name);
-
-	void remove(long id);
+	PumaServer findByName(@Param("name") String name);
 }

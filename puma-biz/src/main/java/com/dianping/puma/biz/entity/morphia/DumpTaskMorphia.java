@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.entity.morphia;
 
-import com.dianping.puma.biz.entity.DumpTask;
+import com.dianping.puma.biz.entity.old.DumpTask;
 import com.google.code.morphia.annotations.Entity;
 
 @Entity("DumpTask_")

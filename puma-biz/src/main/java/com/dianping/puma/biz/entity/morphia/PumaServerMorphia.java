@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.entity.morphia;
 
-import com.dianping.puma.biz.entity.PumaServer;
+import com.dianping.puma.biz.entity.old.PumaServer;
 import com.google.code.morphia.annotations.Entity;
 
 @Entity("PumaServer_")

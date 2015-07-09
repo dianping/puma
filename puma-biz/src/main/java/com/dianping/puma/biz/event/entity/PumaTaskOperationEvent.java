@@ -1,7 +1,7 @@
 package com.dianping.puma.biz.event.entity;
 
 
-import com.dianping.puma.biz.entity.PumaTask;
+import com.dianping.puma.biz.entity.old.PumaTask;
 
 public class PumaTaskOperationEvent extends TaskOperationEvent {
 

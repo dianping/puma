@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.service;
 
-import com.dianping.puma.biz.entity.SyncServer;
+import com.dianping.puma.biz.entity.old.SyncServer;
 
 import java.util.List;
 

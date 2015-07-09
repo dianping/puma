@@ -1,7 +1,7 @@
 package com.dianping.puma.biz.service.impl;
 
-import com.dianping.puma.biz.dao.SrcDBInstanceDao;
-import com.dianping.puma.biz.entity.SrcDBInstance;
+import com.dianping.puma.biz.olddao.SrcDBInstanceDao;
+import com.dianping.puma.biz.entity.old.SrcDBInstance;
 import com.dianping.puma.biz.service.SrcDBInstanceService;
 
 import org.springframework.beans.factory.annotation.Autowired;

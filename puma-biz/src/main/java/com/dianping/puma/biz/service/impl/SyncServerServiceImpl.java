@@ -1,8 +1,8 @@
 package com.dianping.puma.biz.service.impl;
 
 import com.dianping.cat.Cat;
-import com.dianping.puma.biz.dao.SyncServerDao;
-import com.dianping.puma.biz.entity.SyncServer;
+import com.dianping.puma.biz.olddao.SyncServerDao;
+import com.dianping.puma.biz.entity.old.SyncServer;
 import com.dianping.puma.biz.service.SyncServerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

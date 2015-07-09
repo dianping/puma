@@ -1,8 +1,8 @@
 package com.dianping.puma.biz.service.impl;
 
 import com.dianping.puma.biz.service.PumaTaskService;
-import com.dianping.puma.biz.dao.PumaTaskDao;
-import com.dianping.puma.biz.entity.PumaTask;
+import com.dianping.puma.biz.olddao.PumaTaskDao;
+import com.dianping.puma.biz.entity.old.PumaTask;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -3,7 +3,7 @@ package com.dianping.puma.syncserver.job.executor.builder;
 import java.util.List;
 
 import com.dianping.puma.core.constant.SyncType;
-import com.dianping.puma.biz.entity.BaseSyncTask;
+import com.dianping.puma.biz.entity.old.BaseSyncTask;
 import com.dianping.puma.syncserver.job.executor.TaskExecutor;
 
 @SuppressWarnings("rawtypes")

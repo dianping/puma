@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.entity.morphia;
 
-import com.dianping.puma.biz.entity.SyncTask;
+import com.dianping.puma.biz.entity.old.SyncTask;
 import com.google.code.morphia.annotations.Entity;
 
 @Entity("SyncTask_")

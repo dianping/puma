@@ -69,10 +69,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
     private Socket pumaSocket;
 
-    private int receiveBufferSize = 16 * 1024;
-
-    private int sendBufferSize = 16 * 1024;
-
     private InputStream is;
 
     private OutputStream os;

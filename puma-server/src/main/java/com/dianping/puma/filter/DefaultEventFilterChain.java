@@ -3,13 +3,12 @@ package com.dianping.puma.filter;
 import java.util.List;
 
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.event.Event;
 
 public class DefaultEventFilterChain implements EventFilterChain {
 
-	private int					pos	= 0;
+	private int pos = 0;
 
-	private List<EventFilter>	eventFilters;
+	private List<EventFilter> eventFilters;
 
 	public boolean doNext(ChangedEvent event) {
 

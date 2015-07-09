@@ -1,5 +1,8 @@
 package com.dianping.puma.filter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.Table;
@@ -7,10 +10,6 @@ import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
 import com.dianping.puma.core.model.event.EventListener;
 import com.google.common.eventbus.Subscribe;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Collections;
 
 public class DMLEventFilter extends AbstractEventFilter implements EventListener<AcceptedTableChangedEvent> {
 
@@ -30,8 +29,8 @@ public class DMLEventFilter extends AbstractEventFilter implements EventListener
 		if (changedEvent instanceof RowChangedEvent) {
 
 			// Transaction or not.
-			if (((RowChangedEvent) changedEvent).isTransactionBegin() || ((RowChangedEvent) changedEvent)
-					.isTransactionCommit()) {
+			if (((RowChangedEvent) changedEvent).isTransactionBegin()
+			      || ((RowChangedEvent) changedEvent).isTransactionCommit()) {
 				return true;
 			}
 

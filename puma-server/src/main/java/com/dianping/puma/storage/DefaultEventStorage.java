@@ -9,9 +9,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.dianping.puma.codec.EventCodec;
 import com.dianping.puma.common.SystemStatusContainer;
 import com.dianping.puma.core.constant.SubscribeConstant;
@@ -26,8 +23,6 @@ import com.dianping.puma.storage.exception.StorageLifeCycleException;
 import com.dianping.puma.storage.exception.StorageWriteException;
 
 public class DefaultEventStorage implements EventStorage {
-
-	private static final Logger LOG = LoggerFactory.getLogger(DefaultEventStorage.class);
 
 	private BucketManager bucketManager;
 
@@ -61,16 +56,15 @@ public class DefaultEventStorage implements EventStorage {
 
 	private DataIndex<BinlogIndexKey, Long> binlogIndex;
 
-	private AtomicReference<BinlogIndexKey> lastBinlogIndexKey = new AtomicReference<BinlogIndexKey>(
-			null);
+	private AtomicReference<BinlogIndexKey> lastBinlogIndexKey = new AtomicReference<BinlogIndexKey>(null);
 
-	private AtomicReference<Long> processingServerId = new AtomicReference<Long>(
-			null);
+	private AtomicReference<Long> processingServerId = new AtomicReference<Long>(null);
 
 	private EventFilterChain storageEventFilterChain;
 
 	/**
-	 * @param binlogIndexBaseDir the binlogIndexBaseDir to set
+	 * @param binlogIndexBaseDir
+	 *           the binlogIndexBaseDir to set
 	 */
 	public void setBinlogIndexBaseDir(String binlogIndexBaseDir) {
 		this.binlogIndexBaseDir = binlogIndexBaseDir;
@@ -96,14 +90,12 @@ public class DefaultEventStorage implements EventStorage {
 		stopped = false;
 		masterBucketIndex.setMaster(true);
 		slaveBucketIndex.setMaster(false);
-		bucketManager = new DefaultBucketManager(masterBucketIndex,
-				slaveBucketIndex, archiveStrategy, cleanupStrategy);
-		binlogIndex = new DefaultDataIndexImpl<BinlogIndexKey, Long>(
-				binlogIndexBaseDir, new LongIndexItemConvertor(),
-				new BinlogIndexKeyConvertor());
+		bucketManager = new DefaultBucketManager(masterBucketIndex, slaveBucketIndex, archiveStrategy, cleanupStrategy);
+		binlogIndex = new DefaultDataIndexImpl<BinlogIndexKey, Long>(binlogIndexBaseDir, new LongIndexItemConvertor(),
+		      new BinlogIndexKeyConvertor());
 
 		cleanupStrategy.addDataIndex(binlogIndex);
-		
+
 		try {
 			masterBucketIndex.start();
 			slaveBucketIndex.start();
@@ -118,7 +110,7 @@ public class DefaultEventStorage implements EventStorage {
 				if (channel != null) {
 					try {
 						((DefaultEventChannel) channel).setBucketManager(bucketManager);
-						//channel.start();
+						// channel.start();
 					} catch (Exception e) {
 						// ignore
 					}
@@ -135,14 +127,16 @@ public class DefaultEventStorage implements EventStorage {
 	}
 
 	/**
-	 * @param cleanupStrategy the cleanupStrategy to set
+	 * @param cleanupStrategy
+	 *           the cleanupStrategy to set
 	 */
 	public void setCleanupStrategy(CleanupStrategy cleanupStrategy) {
 		this.cleanupStrategy = cleanupStrategy;
 	}
 
 	/**
-	 * @param name the name to set
+	 * @param name
+	 *           the name to set
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -177,25 +171,25 @@ public class DefaultEventStorage implements EventStorage {
 	}
 
 	/**
-	 * @param archiveStrategy the archiveStrategy to set
+	 * @param archiveStrategy
+	 *           the archiveStrategy to set
 	 */
 	public void setArchiveStrategy(ArchiveStrategy archiveStrategy) {
 		this.archiveStrategy = archiveStrategy;
 	}
 
 	@Override
-	public EventChannel getChannel(long seq, long serverId, String binlog,
-			long binlogPos, long timestamp) throws StorageException {
-		long newSeq = translateSeqIfNeeded(seq, serverId, binlog, binlogPos,
-				timestamp);
-		EventChannel channel = new DefaultEventChannel(bucketManager, newSeq,
-				codec, newSeq == seq);
+	public EventChannel getChannel(long seq, long serverId, String binlog, long binlogPos, long timestamp)
+	      throws StorageException {
+		long newSeq = translateSeqIfNeeded(seq, serverId, binlog, binlogPos, timestamp);
+		EventChannel channel = new DefaultEventChannel(bucketManager, newSeq, codec, newSeq == seq);
 		openChannels.add(new WeakReference<EventChannel>(channel));
 		return channel;
 	}
 
 	/**
-	 * @param codec the codec to set
+	 * @param codec
+	 *           the codec to set
 	 */
 	public void setCodec(EventCodec codec) {
 		this.codec = codec;
@@ -237,8 +231,7 @@ public class DefaultEventStorage implements EventStorage {
 				writingBucket.stop();
 				writingBucket = bucketManager.getNextWriteBucket();
 				newL1Index = true;
-			} else if (!processingServerId.get().equals(
-					event.getBinlogServerId())) {
+			} else if (!processingServerId.get().equals(event.getBinlogServerId())) {
 				writingBucket.stop();
 				writingBucket = bucketManager.getNextWriteBucket();
 				processingServerId.set(event.getBinlogServerId());
@@ -269,42 +262,33 @@ public class DefaultEventStorage implements EventStorage {
 		}
 	}
 
-	
-	private void updateIndex(ChangedEvent event, boolean newL1Index, long newSeq)
-			throws IOException {
-		BinlogIndexKey binlogKey = new BinlogIndexKey(event.getBinlogInfo().getBinlogFile(), event
-				.getBinlogInfo().getBinlogPosition(), event.getBinlogServerId());
+	private void updateIndex(ChangedEvent event, boolean newL1Index, long newSeq) throws IOException {
+		BinlogIndexKey binlogKey = new BinlogIndexKey(event.getBinlogInfo().getBinlogFile(), event.getBinlogInfo()
+		      .getBinlogPosition(), event.getBinlogServerId());
 
 		if (newL1Index) {
-			binlogIndex.addL1Index(binlogKey, writingBucket.getBucketFileName()
-					.replace('/', '-'));
+			binlogIndex.addL1Index(binlogKey, writingBucket.getBucketFileName().replace('/', '-'));
 		}
 
-		if (lastBinlogIndexKey.get() == null
-				|| !lastBinlogIndexKey.get().equals(binlogKey)) {
+		if (lastBinlogIndexKey.get() == null || !lastBinlogIndexKey.get().equals(binlogKey)) {
 			binlogIndex.addL2Index(binlogKey, newSeq);
 			lastBinlogIndexKey.set(binlogKey);
 		}
 	}
 
-	private long translateSeqIfNeeded(long seq, long serverId, String binlog,
-			long binlogPos, long timestamp) throws InvalidSequenceException {
+	private long translateSeqIfNeeded(long seq, long serverId, String binlog, long binlogPos, long timestamp)
+	      throws InvalidSequenceException {
 		if (seq == SubscribeConstant.SEQ_FROM_BINLOGINFO) {
 			if (serverId != -1L && binlog != null && binlogPos != -1L) {
-				Long indexedSeq = binlogIndex.find(new BinlogIndexKey(binlog,
-						binlogPos, serverId));
+				Long indexedSeq = binlogIndex.find(new BinlogIndexKey(binlog, binlogPos, serverId));
 				if (indexedSeq != null) {
 					seq = indexedSeq.longValue();
 				} else {
-					throw new InvalidSequenceException(
-							String
-									.format(
-											"Invalid binlogInfo(serverId=%d, binlog=%s, binlogPos=%d)",
-											serverId, binlog, binlogPos));
+					throw new InvalidSequenceException(String.format(
+					      "Invalid binlogInfo(serverId=%d, binlog=%s, binlogPos=%d)", serverId, binlog, binlogPos));
 				}
 			} else {
-				throw new InvalidSequenceException(String.format(
-						"Invalid sequence(seq=%d but no binlogInfo set)", seq));
+				throw new InvalidSequenceException(String.format("Invalid sequence(seq=%d but no binlogInfo set)", seq));
 			}
 		} else if (seq == SubscribeConstant.SEQ_FROM_TIMESTAMP) {
 			throw new UnsupportedOperationException();
@@ -338,16 +322,9 @@ public class DefaultEventStorage implements EventStorage {
 		}
 
 		/*
-		for (WeakReference<EventChannel> channelRef : openChannels) {
-			EventChannel channel = channelRef.get();
-			if (channel != null) {
-				try {
-					channel.close();
-				} catch (Exception e) {
-					// ignore
-				}
-			}
-		}*/
+		 * for (WeakReference<EventChannel> channelRef : openChannels) { EventChannel channel = channelRef.get(); if (channel != null)
+		 * { try { channel.close(); } catch (Exception e) { // ignore } } }
+		 */
 
 	}
 

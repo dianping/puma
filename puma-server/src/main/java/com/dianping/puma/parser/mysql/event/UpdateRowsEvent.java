@@ -21,13 +21,12 @@ import java.util.BitSet;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.parser.mysql.Row;
 import com.dianping.puma.parser.mysql.UpdatedRowData;
 import com.dianping.puma.utils.PacketUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * TODO Comment of UpdateRowsEvent
@@ -37,20 +36,18 @@ import org.slf4j.LoggerFactory;
  */
 public class UpdateRowsEvent extends AbstractRowsEvent {
 
-	private static final Logger logger = LoggerFactory.getLogger(UpdateRowsEvent.class);
-
 	private static final long serialVersionUID = -877826157536949565L;
+
 	private BitSet usedColumnsBefore;
+
 	private BitSet usedColumnsAfter;
+
 	private List<UpdatedRowData<Row>> rows;
 
-	@Override public String toString() {
-		return new ToStringBuilder(this)
-				.append("super", super.toString())
-				.append("usedColumnsBefore", usedColumnsBefore)
-				.append("usedColumnsAfter", usedColumnsAfter)
-				.append("rows", rows)
-				.toString();
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this).append("super", super.toString()).append("usedColumnsBefore", usedColumnsBefore)
+		      .append("usedColumnsAfter", usedColumnsAfter).append("rows", rows).toString();
 	}
 
 	/**

@@ -13,4 +13,8 @@ public enum ClientType {
     ClientType(int type) {
         this.type = type;
     }
+    
+    public int getType(){
+   	 return type;
+    }
 }

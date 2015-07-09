@@ -19,7 +19,6 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 import com.dianping.puma.utils.CodecUtils;
 
@@ -33,23 +32,20 @@ public final class MySQLUtils {
 
 	}
 
-	public static boolean versionMeetsMinimum(int serverMajorVersion, int serverMinorVersion,
-			int serverSubMinorVersion, int major, int minor, int subminor) {
+	public static boolean versionMeetsMinimum(int serverMajorVersion, int serverMinorVersion, int serverSubMinorVersion,
+	      int major, int minor, int subminor) {
 		if (serverMajorVersion >= major) {
 			if (serverMajorVersion == major) {
 				if (serverMinorVersion >= minor) {
 					if (serverMinorVersion == minor) {
 						return (serverSubMinorVersion >= subminor);
 					}
-
 					// newer than major.minor
 					return true;
 				}
-
 				// older than major.minor
 				return false;
 			}
-
 			// newer than major
 			return true;
 		}
@@ -169,12 +165,12 @@ public final class MySQLUtils {
 	}
 
 	public static byte[] scramble411(String password, String seed, String encoding) throws NoSuchAlgorithmException,
-			UnsupportedEncodingException {
+	      UnsupportedEncodingException {
 		MessageDigest md = MessageDigest.getInstance("SHA");
 		String passwordEncoding = encoding;
 
 		byte[] passwordHashStage1 = md.digest((passwordEncoding == null || passwordEncoding.length() == 0) ? password
-				.getBytes() : password.getBytes(encoding));
+		      .getBytes() : password.getBytes(encoding));
 		md.reset();
 
 		byte[] passwordHashStage2 = md.digest(passwordHashStage1);
@@ -196,8 +192,11 @@ public final class MySQLUtils {
 	}
 
 	private static final int DIGITS_PER_4BYTES = 9;
+
 	private static final BigDecimal POSITIVE_ONE = BigDecimal.ONE;
+
 	private static final BigDecimal NEGATIVE_ONE = new BigDecimal("-1");
+
 	private static final int DECIMAL_BINARY_SIZE[] = { 0, 1, 1, 2, 2, 3, 3, 4, 4, 4 };
 
 	public static short toYear(short value) {

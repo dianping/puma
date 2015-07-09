@@ -28,8 +28,8 @@ public class TransactionEventFilter extends AbstractEventFilter implements Event
 		if (changedEvent instanceof RowChangedEvent) {
 
 			// Transaction or not.
-			if (!((RowChangedEvent) changedEvent).isTransactionBegin() && !((RowChangedEvent) changedEvent)
-					.isTransactionCommit()) {
+			if (!((RowChangedEvent) changedEvent).isTransactionBegin()
+			      && !((RowChangedEvent) changedEvent).isTransactionCommit()) {
 				return true;
 			}
 

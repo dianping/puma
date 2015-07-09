@@ -25,7 +25,7 @@ public class ExceptionHandler extends ChannelDuplexHandler {
 
     public static final ExceptionHandler INSTANCE = new ExceptionHandler();
 
-    private static final Map<Class, HowToHandle> howToHandles = new HashMap<Class, HowToHandle>();
+    private static final Map<Class<?>, HowToHandle> howToHandles = new HashMap<Class<?>, HowToHandle>();
 
     static {
         howToHandles.put(

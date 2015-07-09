@@ -1,25 +1,12 @@
 package com.dianping.puma.server;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import com.dianping.puma.biz.entity.old.PumaTask;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import com.dianping.puma.biz.entity.old.TaskState;
 import com.dianping.puma.biz.event.entity.PumaTaskControllerEvent;
 import com.dianping.puma.biz.event.entity.PumaTaskOperationEvent;
 import com.dianping.puma.biz.service.PumaTaskService;
 import com.dianping.puma.biz.service.SrcDBInstanceService;
+import com.dianping.puma.biz.service.impl.PumaTaskStateServiceImpl;
 import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.constant.Status;
@@ -37,6 +24,20 @@ import com.dianping.puma.storage.CleanupStrategy;
 import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.EventStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service("taskManager")
 public class DefaultTaskExecutorContainer implements TaskExecutorContainer, InitializingBean {
@@ -46,6 +47,9 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
     private ConcurrentHashMap<String, TaskExecutor> taskExecutorMap = new ConcurrentHashMap<String, TaskExecutor>();
 
     public static DefaultTaskExecutorContainer instance;
+
+    @Autowired
+    private PumaTaskStateServiceImpl pumaTaskStateService;
 
     @Autowired
     private TaskExecutorBuilder taskExecutorBuilder;
@@ -69,6 +73,21 @@ public class DefaultTaskExecutorContainer implements TaskExecutorContainer, Init
 
     @Autowired
     EventCenter eventCenter;
+
+    @Scheduled(fixedDelay = 30 * 1000)
+    public void updateState() {
+        for (TaskExecutor executor : taskExecutorMap.values()) {
+            try {
+                TaskState state = executor.getTaskState();
+                if (state != null) {
+                    pumaTaskStateService.createOrUpdate(state);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                //todo: log
+            }
+        }
+    }
 
     @PostConstruct
     public void init() {

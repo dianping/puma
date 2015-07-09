@@ -16,8 +16,6 @@
 package com.dianping.puma.codec;
 
 /**
- * TODO Comment of EventCodecFactory
- * 
  * @author Leo Liang
  * 
  */
@@ -29,6 +27,8 @@ public final class EventCodecFactory {
 	public static EventCodec createCodec(String type) {
 		if ("json".equals(type)) {
 			return new JsonEventCodec();
+		} else if ("raw".equals(type)) {
+			return new RawEventCodec();
 		}
 		return null;
 	}

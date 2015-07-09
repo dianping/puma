@@ -1,6 +1,8 @@
 package com.dianping.puma.biz.service;
 
 
+import com.dianping.puma.biz.entity.TaskState;
+
 import java.util.List;
 
 /**
@@ -9,5 +11,9 @@ import java.util.List;
  * http://www.dozer.cc
  */
 public interface TaskStateService {
-//        public List<PumaTaskState> findState
+
+    List<TaskState> find(String name);
+
+    TaskState find(String name, String serverName);
+
 }

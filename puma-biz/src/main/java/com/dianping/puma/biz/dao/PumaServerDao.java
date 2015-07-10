@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Param;
 
 public interface PumaServerDao {
 
-	PumaServerEntity find(@Param("id") int id);
+	PumaServerEntity findById(@Param("id") int id);
 
 	void insert(PumaServerEntity entity);
 

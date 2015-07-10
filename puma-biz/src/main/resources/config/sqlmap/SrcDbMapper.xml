@@ -5,7 +5,7 @@
 <mapper namespace="com.dianping.puma.biz.dao.TaskStateDao">
 
     <select id="findById" parameterType="map" resultMap="SrcDbEntity">
-        SELECT * FROM SrcDb where id = #{id} limit 1
+        SELECT * FROM SrcDb where id = #{id}
     </select>
 
     <update id="update" parameterType="SrcDbEntity">

@@ -4,7 +4,7 @@
 
 <mapper namespace="com.dianping.puma.biz.dao.PumaServerDao">
 
-	<select id="find" resultType="PumaServerEntity">
+	<select id="findById" resultType="PumaServerEntity">
 		SELECT * FROM PumaServer WHERE id = #{id}
 	</select>
 

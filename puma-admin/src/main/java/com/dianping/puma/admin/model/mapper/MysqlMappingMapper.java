@@ -6,9 +6,9 @@ import java.util.List;
 import com.dianping.puma.admin.model.DatabaseMappingDto;
 import com.dianping.puma.admin.model.MysqlMappingDto;
 import com.dianping.puma.admin.model.TableMappingDto;
-import com.dianping.puma.biz.sync.model.mapping.DatabaseMapping;
-import com.dianping.puma.biz.sync.model.mapping.MysqlMapping;
-import com.dianping.puma.biz.sync.model.mapping.TableMapping;
+import com.dianping.puma.biz.entity.sync.mapping.DatabaseMapping;
+import com.dianping.puma.biz.entity.sync.mapping.MysqlMapping;
+import com.dianping.puma.biz.entity.sync.mapping.TableMapping;
 
 public class MysqlMappingMapper {
 	

@@ -20,6 +20,8 @@ public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTaskEntity> {
 
 	private String taskName;
 
+	private SyncTaskEntity task;
+
 	private ExecutorService bossThreadPool;
 	private ExecutorService workerThreadPool;
 
@@ -126,4 +128,20 @@ public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTaskEntity> {
 			}
 		}
 	};
+
+	public void setClient(PumaClient client) {
+		this.client = client;
+	}
+
+	public void setDuplexBuffer(DuplexBuffer duplexBuffer) {
+		this.duplexBuffer = duplexBuffer;
+	}
+
+	public void setTransformer(Transformer transformer) {
+		this.transformer = transformer;
+	}
+
+	public void setLoader(Loader loader) {
+		this.loader = loader;
+	}
 }

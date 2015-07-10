@@ -1,4 +1,4 @@
-package com.dianping.puma.biz.sync.model.mapping;
+package com.dianping.puma.biz.entity.sync.mapping;
 
 public class ColumnMapping implements Cloneable {
     private String from;

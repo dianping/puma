@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.entity.old;
 
-import com.dianping.puma.biz.sync.model.mapping.MysqlMapping;
+import com.dianping.puma.biz.entity.sync.mapping.MysqlMapping;
 
 public abstract class AbstractBaseSyncTask extends BaseSyncTask {
 

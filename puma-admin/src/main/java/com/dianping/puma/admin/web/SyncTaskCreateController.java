@@ -7,7 +7,7 @@
 //import com.dianping.puma.biz.entity.SyncTask;
 //import com.dianping.puma.biz.service.*;
 //import com.dianping.puma.biz.sync.model.config.MysqlHost;
-//import com.dianping.puma.biz.sync.model.mapping.*;
+//import com.dianping.puma.biz.entity.sync.mapping.*;
 //import com.dianping.puma.core.constant.ActionOperation;
 //import com.dianping.puma.core.constant.Status;
 //import com.dianping.puma.core.constant.SyncType;

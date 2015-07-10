@@ -10,7 +10,7 @@ public interface TaskContainer<T extends BaseTaskEntity> {
 
 	void delete(T task);
 
-	void pause(T task);
+	void start(T task);
 
-	void resume(T task);
+	void stop(T task);
 }

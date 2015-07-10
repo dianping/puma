@@ -3,7 +3,7 @@ package com.dianping.puma.biz.sync.model.task;
 import java.util.Arrays;
 import java.util.List;
 
-import com.dianping.puma.biz.sync.model.mapping.DumpMapping;
+import com.dianping.puma.biz.entity.sync.mapping.DumpMapping;
 
 
 public class DumpTask extends Task {

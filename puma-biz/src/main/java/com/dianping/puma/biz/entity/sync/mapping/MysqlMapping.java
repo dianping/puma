@@ -1,4 +1,4 @@
-package com.dianping.puma.biz.sync.model.mapping;
+package com.dianping.puma.biz.entity.sync.mapping;
 
 import java.util.ArrayList;
 import java.util.List;

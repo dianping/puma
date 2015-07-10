@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.PumaTaskServerDao">
+
+    <select id="findByTaskId" parameterType="map" resultMap="PumaTaskServerEntity">
+        SELECT * FROM PumaTaskServer where taskId = #{taskId}
+    </select>
+
+    <delete id="delete" parameterType="map">
+        delete from PumaTaskServer
+        where
+        id = #{id}
+    </delete>
+
+    <insert id="insert" parameterType="PumaTaskServerEntity" useGeneratedKeys="true" keyProperty="id">
+        insert into PumaTaskServer
+        (
+        TaskId,
+        ServerId
+        )
+        values
+        (
+        #{taskId},
+        #{serverId}
+        )
+    </insert>
+</mapper>

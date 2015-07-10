@@ -1,6 +1,6 @@
 package com.dianping.puma.syncserver.task;
 
-import com.dianping.puma.biz.entity.sync.BaseTaskEntity;
+import com.dianping.puma.biz.entity.BaseTaskEntity;
 import com.dianping.puma.syncserver.task.fail.FailPattern;
 
 public abstract class AbstractTaskExecutor<T extends BaseTaskEntity> implements TaskExecutor<T> {

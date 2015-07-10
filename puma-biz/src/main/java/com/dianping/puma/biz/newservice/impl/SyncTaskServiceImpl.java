@@ -3,7 +3,7 @@ package com.dianping.puma.biz.newservice.impl;
 import com.dianping.puma.biz.dao.SyncTaskDao;
 import com.dianping.puma.biz.dao.SyncTaskDstDbDao;
 import com.dianping.puma.biz.dao.SyncTaskServerDao;
-import com.dianping.puma.biz.entity.sync.SyncTaskEntity;
+import com.dianping.puma.biz.entity.SyncTaskEntity;
 import com.dianping.puma.biz.entity.SyncTaskDstDbEntity;
 import com.dianping.puma.biz.entity.sync.relation.SyncTaskServerEntity;
 import com.dianping.puma.biz.newservice.SyncTaskService;

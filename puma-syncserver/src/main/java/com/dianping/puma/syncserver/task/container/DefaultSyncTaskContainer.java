@@ -1,6 +1,6 @@
 package com.dianping.puma.syncserver.task.container;
 
-import com.dianping.puma.biz.entity.sync.SyncTaskEntity;
+import com.dianping.puma.biz.entity.SyncTaskEntity;
 import com.dianping.puma.syncserver.exception.PumaBaseTaskException;
 import com.dianping.puma.syncserver.task.TaskExecutor;
 import com.dianping.puma.syncserver.task.builder.TaskBuilder;

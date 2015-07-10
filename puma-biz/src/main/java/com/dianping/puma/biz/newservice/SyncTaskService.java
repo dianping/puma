@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.newservice;
 
-import com.dianping.puma.biz.entity.sync.SyncTaskEntity;
+import com.dianping.puma.biz.entity.SyncTaskEntity;
 
 import java.util.List;
 

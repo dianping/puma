@@ -1,6 +1,6 @@
 package com.dianping.puma.syncserver.task.container;
 
-import com.dianping.puma.biz.entity.sync.BaseTaskEntity;
+import com.dianping.puma.biz.entity.BaseTaskEntity;
 
 public interface TaskContainer<T extends BaseTaskEntity> {
 

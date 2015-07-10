@@ -1,7 +1,7 @@
 package com.dianping.puma.syncserver.task;
 
 import com.dianping.puma.api.PumaClient;
-import com.dianping.puma.biz.entity.sync.SyncTaskEntity;
+import com.dianping.puma.biz.entity.SyncTaskEntity;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.syncserver.buffer.DuplexBuffer;

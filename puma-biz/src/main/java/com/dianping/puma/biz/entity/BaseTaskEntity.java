@@ -1,6 +1,6 @@
-package com.dianping.puma.biz.entity.sync;
+package com.dianping.puma.biz.entity;
 
-public class BaseTaskEntity {
+public abstract class BaseTaskEntity {
 
 	private int id;
 

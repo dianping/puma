@@ -1,6 +1,6 @@
 package com.dianping.puma.syncserver.task.builder;
 
-import com.dianping.puma.biz.entity.sync.SyncTaskEntity;
+import com.dianping.puma.biz.entity.SyncTaskEntity;
 import com.dianping.puma.syncserver.buffer.DefaultDuplexBuffer;
 import com.dianping.puma.syncserver.buffer.DuplexBuffer;
 import com.dianping.puma.syncserver.load.ConcurrentLoader;

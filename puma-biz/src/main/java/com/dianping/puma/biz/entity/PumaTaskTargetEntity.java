@@ -5,11 +5,11 @@ package com.dianping.puma.biz.entity;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class PumaTaskTarget {
+public class PumaTaskTargetEntity {
 
     private int id;
 
-    private int pumaTaskId;
+    private int taskId;
 
     private String database;
 
@@ -23,12 +23,12 @@ public class PumaTaskTarget {
         this.id = id;
     }
 
-    public int getPumaTaskId() {
-        return pumaTaskId;
+    public int getTaskId() {
+        return taskId;
     }
 
-    public void setPumaTaskId(int pumaTaskId) {
-        this.pumaTaskId = pumaTaskId;
+    public void setTaskId(int taskId) {
+        this.taskId = taskId;
     }
 
     public String getDatabase() {

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.PumaTaskTargetDao">
+
+    <select id="findByTaskId" parameterType="map" resultMap="PumaTaskTargetEntity">
+        SELECT * FROM PumaTaskTarget where taskId = #{taskId}
+    </select>
+
+    <update id="update" parameterType="PumaTaskTargetEntity">
+        update PumaTaskTarget
+        set
+        TaskId = #{taskId},
+        Database = #{database},
+        Tables = #{tables}
+        where
+        Id = #{id}
+    </update>
+
+    <insert id="insert" parameterType="PumaTaskTargetEntity" useGeneratedKeys="true" keyProperty="id">
+        insert into PumaTaskTarget
+        (
+        TaskId,
+        Database,
+        Tables
+        )
+        values
+        (
+        #{taskId},
+        #{database},
+        #{tables}
+        )
+    </insert>
+</mapper>

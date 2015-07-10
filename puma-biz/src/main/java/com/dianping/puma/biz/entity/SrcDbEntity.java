@@ -12,7 +12,7 @@ public class SrcDbEntity {
 
 	private String password;
 
-	private long dbServerId;
+	private long serverId;
 
 	public int getId() {
 		return id;
@@ -54,11 +54,11 @@ public class SrcDbEntity {
 		this.password = password;
 	}
 
-	public long getDbServerId() {
-		return dbServerId;
+	public long getServerId() {
+		return serverId;
 	}
 
-	public void setDbServerId(long dbServerId) {
-		this.dbServerId = dbServerId;
+	public void setServerId(long serverId) {
+		this.serverId = serverId;
 	}
 }

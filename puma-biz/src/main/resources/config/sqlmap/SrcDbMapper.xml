@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.TaskStateDao">
+
+    <select id="findById" parameterType="map" resultMap="SrcDbEntity">
+        SELECT * FROM SrcDb where id = #{id} limit 1
+    </select>
+
+    <update id="update" parameterType="SrcDbEntity">
+        update SrcDb
+        set
+        Host = #{host},
+        Port = #{port},
+        Username = #{username},
+        Password = #{password},
+        ServerId = #{serverId}
+        where
+        id = #{id}
+    </update>
+
+    <insert id="insert" parameterType="SrcDbEntity" useGeneratedKeys="true" keyProperty="id">
+        insert into SrcDb
+        (
+        Host,
+        Port,
+        Username,
+        Password,
+        ServerId
+        )
+        values
+        (
+        #{host},
+        #{port},
+        #{username},
+        #{password},
+        #{serverId}
+        )
+    </insert>
+</mapper>

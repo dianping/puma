@@ -4,9 +4,6 @@ import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.TableSet;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class PumaTaskEntity {
 
     private int id;
@@ -19,7 +16,7 @@ public class PumaTaskEntity {
 
     private Status status;
 
-    private List<PumaTaskDbEntity> pumaTaskDbEntities = new ArrayList<PumaTaskDbEntity>();
+    private PumaTaskDbEntity pumaTaskDb;
 
     private TableSet tableSet = new TableSet();
 
@@ -63,11 +60,15 @@ public class PumaTaskEntity {
         this.name = name;
     }
 
-    public List<PumaTaskDbEntity> getPumaTaskDbEntities() {
-        return pumaTaskDbEntities;
-    }
-
     public TableSet getTableSet() {
         return tableSet;
+    }
+
+    public PumaTaskDbEntity getPumaTaskDb() {
+        return pumaTaskDb;
+    }
+
+    public void setPumaTaskDb(PumaTaskDbEntity pumaTaskDb) {
+        this.pumaTaskDb = pumaTaskDb;
     }
 }

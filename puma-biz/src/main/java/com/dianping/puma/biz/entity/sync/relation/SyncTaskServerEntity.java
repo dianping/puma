@@ -4,9 +4,9 @@ public class SyncTaskServerEntity {
 
 	private int id;
 
-	private String name;
+	private int taskId;
 
-	private String host;
+	private int serverId;
 
 	public int getId() {
 		return id;
@@ -16,19 +16,19 @@ public class SyncTaskServerEntity {
 		this.id = id;
 	}
 
-	public String getHost() {
-		return host;
+	public int getTaskId() {
+		return taskId;
 	}
 
-	public void setHost(String host) {
-		this.host = host;
+	public void setTaskId(int taskId) {
+		this.taskId = taskId;
 	}
 
-	public String getName() {
-		return name;
+	public int getServerId() {
+		return serverId;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setServerId(int serverId) {
+		this.serverId = serverId;
 	}
 }

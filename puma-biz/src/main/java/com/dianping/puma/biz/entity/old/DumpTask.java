@@ -1,7 +1,7 @@
 package com.dianping.puma.biz.entity.old;
 
 
-import com.dianping.puma.biz.entity.sync.mapping.DumpMapping;
+import com.dianping.puma.core.dto.mapping.DumpMapping;
 
 import java.util.Arrays;
 import java.util.List;

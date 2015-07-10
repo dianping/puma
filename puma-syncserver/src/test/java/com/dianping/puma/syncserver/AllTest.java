@@ -2,9 +2,9 @@ package com.dianping.puma.syncserver;
 
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.biz.entity.sync.mapping.DatabaseMapping;
-import com.dianping.puma.biz.entity.sync.mapping.MysqlMapping;
-import com.dianping.puma.biz.entity.sync.mapping.TableMapping;
+import com.dianping.puma.core.dto.mapping.DatabaseMapping;
+import com.dianping.puma.core.dto.mapping.MysqlMapping;
+import com.dianping.puma.core.dto.mapping.TableMapping;
 import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.syncserver.job.transform.DefaultTransformer;
 import com.dianping.puma.syncserver.job.transform.Transformer;

@@ -1,6 +1,8 @@
 package com.dianping.puma.biz.dao;
 
-import java.util.List;
+import com.dianping.puma.biz.entity.sync.SyncTaskEntity;
 
 public interface SyncTaskDao {
+
+	int insert(SyncTaskEntity entity);
 }

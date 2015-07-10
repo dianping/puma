@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.entity.sync.relation;
 
-public class TaskServerEntity {
+public class SyncTaskServerEntity {
 
 	private int id;
 

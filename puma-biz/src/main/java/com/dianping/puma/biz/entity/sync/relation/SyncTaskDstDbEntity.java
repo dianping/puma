@@ -1,4 +1,4 @@
 package com.dianping.puma.biz.entity.sync.relation;
 
-public class TaskDstDbEntity {
+public class SyncTaskDstDbEntity {
 }

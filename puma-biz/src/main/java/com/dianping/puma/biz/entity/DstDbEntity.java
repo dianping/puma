@@ -1,8 +1,10 @@
-package com.dianping.puma.biz.entity.sync;
+package com.dianping.puma.biz.entity;
 
 public class DstDbEntity {
 
 	private int id;
+
+	private String jdbcRef;
 
 	private String host;
 
@@ -18,6 +20,14 @@ public class DstDbEntity {
 
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	public String getJdbcRef() {
+		return jdbcRef;
+	}
+
+	public void setJdbcRef(String jdbcRef) {
+		this.jdbcRef = jdbcRef;
 	}
 
 	public String getHost() {

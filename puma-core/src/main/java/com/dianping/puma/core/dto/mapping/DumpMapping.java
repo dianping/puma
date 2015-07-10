@@ -1,4 +1,4 @@
-package com.dianping.puma.biz.entity.sync.mapping;
+package com.dianping.puma.core.dto.mapping;
 
 import java.util.List;
 

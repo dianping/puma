@@ -1,5 +1,6 @@
 package com.dianping.puma.biz.entity;
 
+import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
 
 public class PumaTaskEntity {
@@ -12,7 +13,17 @@ public class PumaTaskEntity {
 
 	private int preservedDay;
 
-	public int getId() {
+    private Status status;
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public int getId() {
 		return id;
 	}
 

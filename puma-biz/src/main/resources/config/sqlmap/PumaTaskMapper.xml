@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.PumaTaskDao">
+
+    <resultMap id="binlogInfo" type="com.dianping.puma.core.model.BinlogInfo" autoMapping="true"/>
+
+    <resultMap id="entity" type="PumaTaskEntity" autoMapping="true">
+        <association resultMap="binlogInfo" property="binlogInfo" columnPrefix="BinlogInfo_"/>
+    </resultMap>
+
+    <select id="findByIds" parameterType="map" resultMap="entity">
+        SELECT * FROM PumaTask where id in
+        <foreach item="item" index="index" collection="ids"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <update id="update" parameterType="PumaTaskEntity">
+        update PumaTask
+        set
+        Name=#{name},
+        PreservedDay=#{preservedDay},
+        Status=#{status},
+        BinlogInfo_ServerId=#{binlogInfo.serverId},
+        BinlogInfo_BinlogFile=#{binlogInfo.binlogFile},
+        BinlogInfo_BinlogPosition=#{binlogInfo.binlogPosition},
+        where
+        Id = #{id}
+    </update>
+
+    <insert id="insert" parameterType="PumaTaskEntity" useGeneratedKeys="true" keyProperty="id">
+        insert into PumaTask
+        (
+        Name,
+        PreservedDay,
+        Status,
+        BinlogInfo_ServerId,
+        BinlogInfo_BinlogFile,
+        BinlogInfo_BinlogPosition
+        )
+        values
+        (
+        #{name},
+        #{preservedDay},
+        #{status}
+        #{binlogInfo.serverId},
+        #{binlogInfo.binlogFile},
+        #{binlogInfo.binlogPosition},
+        )
+    </insert>
+</mapper>

@@ -4,8 +4,24 @@
 
 <mapper namespace="com.dianping.puma.biz.dao.SrcDbDao">
 
-    <select id="findById" parameterType="map" resultType="SrcDbEntity">
+    <select id="findById" resultType="SrcDbEntity">
         SELECT * FROM SrcDb where id = #{id}
+    </select>
+
+    <select id="findByName" resultType="SrcDbEntity">
+        SELECT * FROM SrcDb where name = #{name}
+    </select>
+
+    <select id="findAll" resultType="SrcDbEntity">
+        SELECT * FROM SrcDb
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT count(*) FROM SrcDb
+    </select>
+
+    <select id="findByPage" resultType="SrcDbEntity">
+        SELECT * FROM SrcDb limit #{offset},#{limit}
     </select>
 
     <update id="update" parameterType="SrcDbEntity">
@@ -38,4 +54,12 @@
         #{serverId}
         )
     </insert>
+
+    <delete id="delete">
+        delete from SrcDb where id = #{id}
+    </delete>
+
+    <delete id="deleteByName">
+        delete from SrcDb where name = #{name}
+    </delete>
 </mapper>

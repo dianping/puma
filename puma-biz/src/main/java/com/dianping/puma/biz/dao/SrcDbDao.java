@@ -1,7 +1,8 @@
 package com.dianping.puma.biz.dao;
 
 import com.dianping.puma.biz.entity.SrcDbEntity;
-import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * Dozer @ 7/9/15
@@ -10,10 +11,21 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface SrcDbDao {
 
-    SrcDbEntity findById(@Param(value = "id") int id);
+    SrcDbEntity findById(int id);
+
+    SrcDbEntity findByName(String name);
+
+    List<SrcDbEntity> findAll();
+
+    List<SrcDbEntity> findByPage(int offset, int limit);
+
+    long count();
 
     int insert(SrcDbEntity entity);
 
     int update(SrcDbEntity entity);
 
+    int delete(int id);
+
+    int deleteByName(String name);
 }

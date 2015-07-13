@@ -7,11 +7,9 @@ import java.util.List;
 
 public interface SrcDBInstanceService {
 	
-	SrcDbEntity find(long id);
+	SrcDbEntity find(int id);
 
 	SrcDbEntity find(String name);
-
-    List<SrcDbEntity> findByIp(String ip);
 
     List<SrcDbEntity> findAll();
 

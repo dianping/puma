@@ -1,7 +1,7 @@
 package com.dianping.puma.biz.service.impl;
 
+import com.dianping.puma.biz.dao.SrcDbDao;
 import com.dianping.puma.biz.entity.SrcDbEntity;
-import com.dianping.puma.biz.olddao.SrcDBInstanceDao;
 import com.dianping.puma.biz.service.SrcDBInstanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,64 +11,50 @@ import java.util.List;
 @Service("srcDBInstanceService")
 public class SrcDBInstanceServiceImpl implements SrcDBInstanceService {
     @Autowired
-    SrcDBInstanceDao srcDbInstanceDao;
+    SrcDbDao srcDbDao;
 
     @Override
     public SrcDbEntity find(String name) {
-        return null;
-//		return srcDbInstanceDao.find(name);
+        return srcDbDao.findByName(name);
     }
 
     @Override
-    public SrcDbEntity find(long id) {
-        return null;
-//        return srcDbInstanceDao.find(id);
+    public SrcDbEntity find(int id) {
+        return srcDbDao.findById(id);
     }
 
     @Override
     public List<SrcDbEntity> findAll() {
-        return null;
-
-//        return srcDbInstanceDao.findAll();
+        return srcDbDao.findAll();
     }
 
     @Override
     public long count() {
-        return srcDbInstanceDao.count();
+        return srcDbDao.count();
     }
 
     @Override
     public List<SrcDbEntity> findByPage(int page, int pageSize) {
-        return null;
-
-//        return srcDbInstanceDao.findByPage(page, pageSize);
+        return srcDbDao.findByPage((page - 1) * pageSize, pageSize);
     }
 
     @Override
     public void create(SrcDbEntity srcDBInstance) {
-
-        //srcDbInstanceDao.create(srcDBInstance);
+        srcDbDao.insert(srcDBInstance);
     }
 
     @Override
     public void update(SrcDbEntity srcDBInstance) {
-
-        //srcDbInstanceDao.update(srcDBInstance);
+        srcDbDao.update(srcDBInstance);
     }
 
     @Override
     public void remove(String name) {
-        srcDbInstanceDao.remove(name);
+        srcDbDao.deleteByName(name);
     }
 
     @Override
     public void remove(int id) {
-        srcDbInstanceDao.remove(id);
-    }
-
-    @Override
-    public List<SrcDbEntity> findByIp(String ip) {
-        return null;
-        //return srcDbInstanceDao.findByIp(ip);
+        srcDbDao.delete(id);
     }
 }

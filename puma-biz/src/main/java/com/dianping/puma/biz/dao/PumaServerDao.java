@@ -1,6 +1,7 @@
 package com.dianping.puma.biz.dao;
 
 import com.dianping.puma.biz.entity.PumaServerEntity;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ public interface PumaServerDao {
 
     List<PumaServerEntity> findAll();
 
-    List<PumaServerEntity> findByPage(int offset, int limit);
+    List<PumaServerEntity> findByPage(@Param(value = "offset") int offset, @Param(value = "limit") int limit);
 
     long count();
 

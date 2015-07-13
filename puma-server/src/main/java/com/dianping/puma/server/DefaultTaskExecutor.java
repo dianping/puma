@@ -29,6 +29,7 @@ import com.dianping.puma.parser.mysql.UpdateExecutor;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
 import com.dianping.puma.parser.mysql.event.RotateEvent;
 import com.dianping.puma.parser.mysql.packet.*;
+import com.dianping.puma.server.container.DefaultTaskContainer;
 import com.dianping.puma.server.exception.ServerEventFetcherException;
 import com.dianping.puma.server.exception.ServerEventParserException;
 import com.dianping.puma.server.exception.ServerEventRuntimeException;
@@ -502,7 +503,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	private void stopTask() {
 		String eventName = String.format("slave(%s) -- db(%s:%d)", getTaskName(), dbHost, port);
 		try {
-			DefaultTaskExecutorContainer.instance.stopExecutor(this);
+			//DefaultTaskContainer.instance.stopExecutor(this);
 			Cat.logEvent("Slave.doStop", eventName, Message.SUCCESS, "");
 		} catch (Exception e) {
 			LOG.error("task " + getTaskName() + "stop error.");

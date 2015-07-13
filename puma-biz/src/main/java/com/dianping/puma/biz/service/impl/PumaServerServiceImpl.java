@@ -69,13 +69,11 @@ public class PumaServerServiceImpl implements PumaServerService {
     @Override
     public void create(PumaServerEntity pumaServer) {
         pumaServerDao.insert(pumaServer);
-        //todo: insert other
     }
 
     @Override
     public void update(PumaServerEntity pumaServer) {
         pumaServerDao.update(pumaServer);
-        //todo: update other
     }
 
     @Override

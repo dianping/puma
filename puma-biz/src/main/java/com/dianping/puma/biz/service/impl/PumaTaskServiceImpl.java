@@ -1,10 +1,7 @@
 package com.dianping.puma.biz.service.impl;
 
 import com.dianping.puma.biz.dao.*;
-import com.dianping.puma.biz.entity.PumaTaskDbEntity;
-import com.dianping.puma.biz.entity.PumaTaskEntity;
-import com.dianping.puma.biz.entity.PumaTaskServerEntity;
-import com.dianping.puma.biz.entity.PumaTaskTargetEntity;
+import com.dianping.puma.biz.entity.*;
 import com.dianping.puma.biz.service.PumaTaskService;
 import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
@@ -41,31 +38,46 @@ public class PumaTaskServiceImpl implements PumaTaskService {
     PumaTaskTargetDao pumaTaskTargetDao;
 
     protected PumaTaskEntity loadFullPumaTask(PumaTaskEntity entity) {
-        List<PumaTaskServerEntity> pumaTaskServers = pumaTaskServerDao.findByTaskId(entity.getId());
-        List<Integer> serverIds = Lists.newArrayList(Iterables.transform(pumaTaskServers, new Function<PumaTaskServerEntity, Integer>() {
-            @Override
-            public Integer apply(PumaTaskServerEntity input) {
-                return input.getServerId();
-            }
-        }));
-        entity.setPumaServers(pumaServerDao.findByIds(serverIds));
+        List<PumaServerEntity> pumaServers = loadPumaServer(entity.getId());
+        entity.setPumaServers(pumaServers);
 
-        List<PumaTaskDbEntity> pumaTaskDbs = pumaTaskDbDao.findByTaskId(entity.getId());
+        List<SrcDbEntity> srcDbs = loadSrcDb(entity.getId());
+        entity.setSrcDbs(srcDbs);
+
+        TableSet tableSet = loadTableSet(entity.getId());
+        entity.setTableSet(tableSet);
+        return entity;
+    }
+
+    protected TableSet loadTableSet(int id) {
+        List<PumaTaskTargetEntity> targets = pumaTaskTargetDao.findByTaskId(id);
+        TableSet tableSet = new TableSet();
+        for (PumaTaskTargetEntity target : targets) {
+            tableSet.add(new Table(target.getDatabase(), target.getTables()));
+        }
+        return tableSet;
+    }
+
+    protected List<SrcDbEntity> loadSrcDb(int id) {
+        List<PumaTaskDbEntity> pumaTaskDbs = pumaTaskDbDao.findByTaskId(id);
         List<Integer> srcDbIds = Lists.newArrayList(Iterables.transform(pumaTaskDbs, new Function<PumaTaskDbEntity, Integer>() {
             @Override
             public Integer apply(PumaTaskDbEntity input) {
                 return input.getDbId();
             }
         }));
-        entity.setSrcDbs(srcDbDao.findByIds(srcDbIds));
+        return srcDbDao.findByIds(srcDbIds);
+    }
 
-        List<PumaTaskTargetEntity> targets = pumaTaskTargetDao.findByTaskId(entity.getId());
-        TableSet tableSet = new TableSet();
-        for (PumaTaskTargetEntity target : targets) {
-            tableSet.add(new Table(target.getDatabase(), target.getTables()));
-        }
-        entity.setTableSet(tableSet);
-        return entity;
+    protected List<PumaServerEntity> loadPumaServer(int id) {
+        List<PumaTaskServerEntity> pumaTaskServers = pumaTaskServerDao.findByTaskId(id);
+        List<Integer> serverIds = Lists.newArrayList(Iterables.transform(pumaTaskServers, new Function<PumaTaskServerEntity, Integer>() {
+            @Override
+            public Integer apply(PumaTaskServerEntity input) {
+                return input.getServerId();
+            }
+        }));
+        return pumaServerDao.findByIds(serverIds);
     }
 
     protected List<PumaTaskEntity> loadFullPumaTask(List<PumaTaskEntity> entities) {
@@ -75,8 +87,47 @@ public class PumaTaskServiceImpl implements PumaTaskService {
         return entities;
     }
 
-    protected PumaTaskEntity updateFullPumaTask(PumaTaskEntity entity) {
-        return entity;
+    protected void savePumaServer(PumaTaskEntity entity) {
+        for (PumaServerEntity serverEntity : entity.getPumaServers()) {
+            PumaServerEntity server = pumaServerDao.findByName(serverEntity.getName());
+            if (server != null) {
+                PumaTaskServerEntity taskServerEntity = new PumaTaskServerEntity();
+                taskServerEntity.setTaskId(entity.getId());
+                taskServerEntity.setServerId(serverEntity.getId());
+                pumaTaskServerDao.insert(taskServerEntity);
+            }
+        }
+    }
+
+    protected void saveSrcDb(PumaTaskEntity entity) {
+        for (SrcDbEntity dbEntity : entity.getSrcdbs()) {
+            SrcDbEntity srcDb = srcDbDao.findByName(dbEntity.getName());
+            if (srcDb != null) {
+                PumaTaskDbEntity pumaTaskDbEntity = new PumaTaskDbEntity();
+                pumaTaskDbEntity.setTaskId(entity.getId());
+                pumaTaskDbEntity.setDbId(srcDb.getId());
+                pumaTaskDbDao.insert(pumaTaskDbEntity);
+            }
+        }
+    }
+
+    protected void saveTableSet(PumaTaskEntity entity) {
+        for (Table table : entity.getTableSet().listSchemaTables()) {
+            PumaTaskTargetEntity target = new PumaTaskTargetEntity();
+            target.setTaskId(entity.getId());
+            target.setDatabase(table.getSchemaName());
+            target.setTables(table.getTableName());
+            pumaTaskTargetDao.insert(target);
+        }
+    }
+
+    protected void updateFullPumaTask(PumaTaskEntity entity) {
+        pumaTaskServerDao.deleteByTaskId(entity.getId());
+        savePumaServer(entity);
+        pumaTaskDbDao.deleteByTaskId(entity.getId());
+        saveSrcDb(entity);
+        pumaTaskTargetDao.deleteByTaskId(entity.getId());
+        saveTableSet(entity);
     }
 
     @Override
@@ -117,13 +168,13 @@ public class PumaTaskServiceImpl implements PumaTaskService {
     @Override
     public void create(PumaTaskEntity pumaTask) {
         pumaTaskDao.insert(pumaTask);
-        //todo:
+        updateFullPumaTask(pumaTask);
     }
 
     @Override
     public void update(PumaTaskEntity pumaTask) {
         pumaTaskDao.update(pumaTask);
-        //todo:
+        updateFullPumaTask(pumaTask);
     }
 
     @Override

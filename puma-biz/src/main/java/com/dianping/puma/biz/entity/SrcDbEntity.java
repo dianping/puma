@@ -4,6 +4,8 @@ public class SrcDbEntity {
 
 	private int id;
 
+	private String name;
+
 	private String host;
 
 	private int port;
@@ -60,5 +62,13 @@ public class SrcDbEntity {
 
 	public void setServerId(long serverId) {
 		this.serverId = serverId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 }

@@ -51,18 +51,18 @@ public class PolledTaskChecker implements TaskChecker {
 		handleDeletedTask(deletedTasks);
 	}
 
-	private Map<String, PumaTaskEntity> findCreatedTask(
+	protected Map<String, PumaTaskEntity> findCreatedTask(
 			Map<String, PumaTaskEntity> oriTasks, Map<String, PumaTaskEntity> tasks) {
 		MapDifference<String, PumaTaskEntity> taskDifference = Maps.difference(oriTasks, tasks);
 		return taskDifference.entriesOnlyOnRight();
 	}
 
-	private Map<String, PumaTaskEntity> findUpdatedTask(
+	protected Map<String, PumaTaskEntity> findUpdatedTask(
 			Map<String, PumaTaskEntity> oriTasks, Map<String, PumaTaskEntity> tasks) {
 		return null;
 	}
 
-	private Map<String, PumaTaskEntity> findDeletedTask(
+	protected Map<String, PumaTaskEntity> findDeletedTask(
 			Map<String, PumaTaskEntity> oriTasks, Map<String, PumaTaskEntity> tasks) {
 		MapDifference<String, PumaTaskEntity> taskDifference = Maps.difference(oriTasks, tasks);
 		return taskDifference.entriesOnlyOnLeft();

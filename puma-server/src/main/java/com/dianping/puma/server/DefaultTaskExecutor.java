@@ -194,26 +194,33 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 	}
 
 	protected void processBinlogPacket(BinlogPacket binlogPacket) throws IOException {
-		fetcherEventCountMonitor.record(getTaskName());
-		BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), getContext());
-		if (binlogEvent.getHeader().getEventType() == BinlogConstants.INTVAR_EVENT
-				|| binlogEvent.getHeader().getEventType() == BinlogConstants.RAND_EVENT
-				|| binlogEvent.getHeader().getEventType() == BinlogConstants.USER_VAR_EVENT) {
-			LOG.error("TaskName: " + getTaskName() + ", Binlog_format is MIXED or STATEMENT ,System is not support.");
-			String eventName = String.format("slave(%s) -- db(%s:%d)", getTaskName(), dbHost, port);
-			Cat.logEvent("Slave.dbBinlogFormat", eventName, "1", "");
-			Cat.logError("Puma.server.mixedorstatement.format", new ServerEventParserException("TaskName: "
-					+ getTaskName() + ", Binlog_format is MIXED or STATEMENT ,System is not support."));
-			stopTask();
-		}
+		try {
+			fetcherEventCountMonitor.record(getTaskName());
+			BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), getContext());
 
-		if (binlogEvent.getHeader().getEventType() != BinlogConstants.FORMAT_DESCRIPTION_EVENT) {
-			getContext().setNextBinlogPos(binlogEvent.getHeader().getNextPosition());
-		}
-		if (binlogEvent.getHeader().getEventType() == BinlogConstants.ROTATE_EVENT) {
-			processRotateEvent(binlogEvent);
-		} else {
-			processDataEvent(binlogEvent);
+			LOG.info("################ binlog event: %s", binlogEvent.toString());
+
+			if (binlogEvent.getHeader().getEventType() == BinlogConstants.INTVAR_EVENT
+					|| binlogEvent.getHeader().getEventType() == BinlogConstants.RAND_EVENT
+					|| binlogEvent.getHeader().getEventType() == BinlogConstants.USER_VAR_EVENT) {
+				LOG.error("TaskName: " + getTaskName() + ", Binlog_format is MIXED or STATEMENT ,System is not support.");
+				String eventName = String.format("slave(%s) -- db(%s:%d)", getTaskName(), dbHost, port);
+				Cat.logEvent("Slave.dbBinlogFormat", eventName, "1", "");
+				Cat.logError("Puma.server.mixedorstatement.format", new ServerEventParserException("TaskName: "
+						+ getTaskName() + ", Binlog_format is MIXED or STATEMENT ,System is not support."));
+				stopTask();
+			}
+
+			if (binlogEvent.getHeader().getEventType() != BinlogConstants.FORMAT_DESCRIPTION_EVENT) {
+				getContext().setNextBinlogPos(binlogEvent.getHeader().getNextPosition());
+			}
+			if (binlogEvent.getHeader().getEventType() == BinlogConstants.ROTATE_EVENT) {
+				processRotateEvent(binlogEvent);
+			} else {
+				processDataEvent(binlogEvent);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 

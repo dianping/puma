@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.dianping.puma.biz.entity.PumaTaskEntity;
 import org.apache.commons.lang3.StringUtils;
 
 import com.dianping.puma.admin.model.DatabaseDto;
@@ -84,12 +85,12 @@ public class PumaTaskMapper {
 		return pumaTaskDto;
 	}
 
-	public static PumaTask convertToPumaTask(PumaTaskDto pumaTaskDto) {
-		PumaTask pumaTask = new PumaTask();
+	public static PumaTaskEntity convertToPumaTask(PumaTaskDto pumaTaskDto) {
+		PumaTaskEntity pumaTask = new PumaTaskEntity();
 		return convertToPumaTask(pumaTask, pumaTaskDto);
 	}
 
-	public static PumaTask convertToPumaTask(PumaTask pumaTask, PumaTaskDto pumaTaskDto) {
+	public static PumaTaskEntity convertToPumaTask(PumaTaskEntity pumaTask, PumaTaskDto pumaTaskDto) {
 		pumaTask.setName(pumaTaskDto.getName());
 		pumaTask.setSrcDBInstanceName(pumaTaskDto.getSrcDBInstanceName());
 		List<String> serverNames = new ArrayList<String>();

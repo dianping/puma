@@ -139,13 +139,11 @@ public class PumaTaskController {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             ActionOperation operation = null;
-            PumaTask pumaTask = pumaTaskService.find(entity.getName());
+            PumaTaskEntity pumaTask = pumaTaskService.find(entity.getName());
             if (pumaTask != null) {
                 throw new Exception("duplicate name.");
             }
             pumaTask = PumaTaskMapper.convertToPumaTask(entity);
-            operation = ActionOperation.CREATE;
-            pumaTask.setPumaServerName("");
             pumaTaskService.create(pumaTask);
             map.put("success", true);
         } catch (MongoException e) {

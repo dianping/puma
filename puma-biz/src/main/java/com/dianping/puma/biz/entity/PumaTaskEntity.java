@@ -3,6 +3,7 @@ package com.dianping.puma.biz.entity;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.TableSet;
+import com.google.common.collect.ImmutableList;
 
 public class PumaTaskEntity {
 
@@ -19,6 +20,10 @@ public class PumaTaskEntity {
     private PumaTaskDbEntity pumaTaskDb;
 
     private TableSet tableSet = new TableSet();
+
+    private PumaServerEntity currentServer;
+
+    private ImmutableList<PumaServerEntity> pumaServers;
 
     public Status getStatus() {
         return status;
@@ -70,5 +75,13 @@ public class PumaTaskEntity {
 
     public void setPumaTaskDb(PumaTaskDbEntity pumaTaskDb) {
         this.pumaTaskDb = pumaTaskDb;
+    }
+
+    public ImmutableList<PumaServerEntity> getPumaServers() {
+        return pumaServers;
+    }
+
+    public PumaServerEntity getCurrentServer() {
+        return currentServer;
     }
 }

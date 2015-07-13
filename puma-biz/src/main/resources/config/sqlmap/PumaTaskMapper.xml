@@ -18,6 +18,14 @@
         </foreach>
     </select>
 
+    <select id="findById" parameterType="map" resultMap="entity">
+        SELECT * FROM PumaTask where id = #{id}
+    </select>
+
+    <select id="findByName" parameterType="map" resultMap="entity">
+        SELECT * FROM PumaTask where name = #{name}
+    </select>
+
     <update id="update" parameterType="PumaTaskEntity">
         update PumaTask
         set

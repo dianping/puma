@@ -22,7 +22,7 @@ public class DefaultSyncTaskContainer implements TaskContainer<SyncTaskEntity> {
 	public void create(SyncTaskEntity task) {
 		TaskExecutor taskExecutor = syncTaskBuilder.build(task);
 		if (syncTaskExecutors.putIfAbsent(task.getName(), taskExecutor) == null) {
-			throw new PumaBaseTaskException("create sync task failure, duplicate exist.");
+			throw new PumaBaseTaskException("create sync task failure, duplicate exist in container.");
 		}
 
 		start(task);
@@ -40,13 +40,17 @@ public class DefaultSyncTaskContainer implements TaskContainer<SyncTaskEntity> {
 		stop(task);
 
 		if (syncTaskExecutors.remove(task.getName()) == null) {
-			throw new PumaBaseTaskException("delete sync task failure, not exist.");
+			throw new PumaBaseTaskException("delete sync task failure, not exist in container.");
 		}
 	}
 
 	@Override
 	public void start(SyncTaskEntity task) {
-		TaskExecutor taskExecutor =
+		TaskExecutor taskExecutor = syncTaskExecutors.get(task.getName());
+		if (taskExecutor == null) {
+			throw new PumaBaseTaskException("start sync task failure, not exist in container.");
+		}
+
 	}
 
 	@Override

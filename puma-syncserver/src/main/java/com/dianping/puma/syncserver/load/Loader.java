@@ -1,9 +1,8 @@
 package com.dianping.puma.syncserver.load;
 
-import com.dianping.puma.core.LifeCycle;
 import com.dianping.puma.core.event.ChangedEvent;
 
-public interface Loader extends LifeCycle<Exception> {
+public interface Loader {
 
 	LoadFuture load(ChangedEvent event);
 }

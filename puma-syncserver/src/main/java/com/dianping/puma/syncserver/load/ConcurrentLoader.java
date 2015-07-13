@@ -2,15 +2,15 @@ package com.dianping.puma.syncserver.load;
 
 import com.dianping.puma.core.event.ChangedEvent;
 
-public class ConcurrentLoader implements Loader {
+public class ConcurrentLoader extends AbstractLoader {
 
 	@Override
-	public void start() {
+	protected void doStart() {
 
 	}
 
 	@Override
-	public void stop() {
+	protected void doStop() {
 
 	}
 

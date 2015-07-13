@@ -1,15 +1,12 @@
 //package com.dianping.puma.admin.web;
 //
-//import com.dianping.puma.admin.model.PumaServerDto;
-//import com.dianping.puma.admin.model.mapper.PumaServerMapper;
+//import com.dianping.puma.admin.model.SrcDbDto;
+//import com.dianping.puma.admin.model.mapper.DBInstanceMapper;
 //import com.dianping.puma.admin.util.GsonUtil;
-//import com.dianping.puma.core.constant.ActionOperation;
-//import com.dianping.puma.biz.entity.old.PumaServer;
 //import com.dianping.puma.biz.entity.old.PumaTask;
-//import com.dianping.puma.biz.entity.old.SyncTask;
-//import com.dianping.puma.biz.service.PumaServerService;
+//import com.dianping.puma.biz.entity.old.SrcDBInstance;
 //import com.dianping.puma.biz.service.PumaTaskService;
-//import com.dianping.puma.biz.service.SyncTaskService;
+//import com.dianping.puma.biz.service.SrcDBInstanceService;
 //import com.mongodb.MongoException;
 //
 //import org.slf4j.Logger;
@@ -32,67 +29,63 @@
 //import java.util.Map;
 //
 //@Controller
-//public class PumaServerController {
+//public class SrcDbController {
 //
-//	private static final Logger LOG = LoggerFactory.getLogger(PumaServerController.class);
+//	private static final Logger LOG = LoggerFactory.getLogger(SrcDbController.class);
 //
 //	@Autowired
-//	PumaServerService pumaServerService;
+//	SrcDBInstanceService srcDBInstanceService;
 //
 //	@Autowired
 //	PumaTaskService pumaTaskService;
 //
-//	@Autowired
-//	SyncTaskService syncTaskService;
+//	@Value("3306")
+//	Integer dbPort;
 //
-//	@Value("8080")
-//	Integer serverPort;
-//
-//	@RequestMapping(value = { "/puma-server" })
+//	@RequestMapping(value = { "/src-db-instance" })
 //	public ModelAndView view(HttpServletRequest request, HttpServletResponse response) {
 //		Map<String, Object> map = new HashMap<String, Object>();
-//		map.put("path", "puma-server");
+//		map.put("path", "src-db-instance");
 //		return new ModelAndView("common/main-container", map);
 //	}
 //
-//	@RequestMapping(value = { "/puma-server/list" }, method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+//	@RequestMapping(value = { "/src-db-instance/list" }, method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 //	@ResponseBody
 //	public String list(int page, int pageSize) {
 //		Map<String, Object> map = new HashMap<String, Object>();
-//		long count = pumaServerService.count();
-//		List<PumaServer> pumaServerEntities = null;
-//		pumaServerEntities = pumaServerService.findByPage(page, pageSize);
+//		long count = srcDBInstanceService.count();
+//		List<SrcDBInstance> srcDBInstanceEntities = srcDBInstanceService.findByPage(page, pageSize);
 //		map.put("count", count);
-//		map.put("list", pumaServerEntities);
+//		map.put("list", srcDBInstanceEntities);
 //		return GsonUtil.toJson(map);
 //	}
 //
-//	@RequestMapping(value = { "/puma-server/create" })
+//	@RequestMapping(value = { "/src-db-instance/create" })
 //	public ModelAndView create(HttpServletRequest request, HttpServletResponse response) {
 //		Map<String, Object> map = new HashMap<String, Object>();
-//		map.put("path", "puma-server");
+//		map.put("path", "src-db-instance");
 //		map.put("subPath", "create");
 //		return new ModelAndView("common/main-container", map);
 //	}
 //
-//	@RequestMapping(value = { "/puma-server/update/{id}" })
+//	@RequestMapping(value = { "/src-db-instance/update/{id}" }, method = RequestMethod.GET)
 //	public ModelAndView update(@PathVariable long id) {
 //		Map<String, Object> map = new HashMap<String, Object>();
-//
 //		try {
-//			PumaServer entity = pumaServerService.find(id);
+//			SrcDBInstance entity = srcDBInstanceService.find(id);
 //			if (entity != null) {
-//				List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerName(entity.getName());
-//				List<SyncTask> syncTasks = syncTaskService.findByPumaServerName(entity.getName());
-//				if ((pumaTasks != null && pumaTasks.size() != 0) || (syncTasks != null && syncTasks.size() != 0)) {
+//				List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceName(entity.getName());
+//				if (pumaTasks != null && pumaTasks.size() != 0) {
 //					map.put("lock", true);
 //				} else {
 //					map.put("lock", false);
 //				}
 //			}
+//			// SrcDBInstance entity = srcDBInstanceService.find(name);
 //			map.put("entity", entity);
-//			map.put("path", "puma-server");
+//			map.put("path", "src-db-instance");
 //			map.put("subPath", "create");
+//
 //		} catch (Exception e) {
 //			// @TODO: error page.
 //		}
@@ -100,18 +93,20 @@
 //		return new ModelAndView("common/main-container", map);
 //	}
 //
-//	@RequestMapping(value = { "/puma-server/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+//	@RequestMapping(value = { "/src-db-instance/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 //	@ResponseBody
-//	public String createPost(@RequestBody PumaServerDto pumaServerDto) {
+//	public String createPost(@RequestBody SrcDbDto srcDbDto) {
+//
 //		Map<String, Object> map = new HashMap<String, Object>();
 //
 //		try {
-//			PumaServer pumaServer = pumaServerService.find(pumaServerDto.getName());
-//			if (pumaServer != null) {
+//			SrcDBInstance srcDBInstance = srcDBInstanceService.find(srcDbDto.getName());
+//
+//			if (srcDBInstance != null) {
 //				throw new Exception("duplicate name.");
 //			}
-//			pumaServer = PumaServerMapper.convertToPumaServer(pumaServerDto);
-//			pumaServerService.create(pumaServer);
+//			//srcDBInstance = (SrcDBInstance)DBInstanceMapper.convertToDBInstance(srcDbModel);
+//			srcDBInstanceService.create(srcDBInstance);
 //			map.put("success", true);
 //		} catch (MongoException e) {
 //			map.put("error", "storage");
@@ -124,27 +119,30 @@
 //		return GsonUtil.toJson(map);
 //	}
 //
-//	@RequestMapping(value = { "/puma-server/update/{id}" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+//	@RequestMapping(value = { "/src-db-instance/update/{id}" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 //	@ResponseBody
-//	public String updatePost(@PathVariable long id, @RequestBody PumaServerDto pumaServerDto) {
+//	public String updatePost(@PathVariable long id, @RequestBody SrcDbDto srcDbDto) {
 //		Map<String, Object> map = new HashMap<String, Object>();
 //
 //		try {
-//			ActionOperation operation;
-//			PumaServer pumaServer = pumaServerService.find(id);
-//			if (pumaServer == null) {
-//				operation = ActionOperation.CREATE;
-//				pumaServer = new PumaServer();
+//			boolean create;
+//
+//			SrcDBInstance srcDBInstance = srcDBInstanceService.find(id);
+//
+//			if (srcDBInstance == null) {
+//				create = true;
+//				srcDBInstance = new SrcDBInstance();
 //			} else {
-//				operation = ActionOperation.UPDATE;
+//				create = false;
 //			}
-//			PumaServerMapper.convertToPumaServer(pumaServer, pumaServerDto);
-//			if (operation == ActionOperation.CREATE) {
-//				pumaServerService.create(pumaServer);
+//			//DBInstanceMapper.convertToDBInstance(srcDBInstance, srcDbDto);
+//
+//			if (create) {
+//				srcDBInstanceService.create(srcDBInstance);
 //			} else {
-//				pumaServer.setId(id);
-//				pumaServerService.update(pumaServer);
+//				srcDBInstanceService.update(srcDBInstance);
 //			}
+//
 //			map.put("success", true);
 //		} catch (MongoException e) {
 //			map.put("error", "storage");
@@ -157,19 +155,19 @@
 //		return GsonUtil.toJson(map);
 //	}
 //
-//	@RequestMapping(value = { "/puma-server/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+//	@RequestMapping(value = { "/src-db-instance/remove" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 //	@ResponseBody
 //	public String removePost(String name) {
 //		Map<String, Object> map = new HashMap<String, Object>();
 //
 //		try {
-//			List<PumaTask> pumaTasks = pumaTaskService.findByPumaServerName(name);
-//			List<SyncTask> syncTasks = syncTaskService.findByPumaServerName(name);
-//			if (pumaTasks != null && pumaTasks.size() != 0 && syncTasks != null && syncTasks.size() != 0) {
+//			List<PumaTask> pumaTasks = pumaTaskService.findBySrcDBInstanceName(name);
+//
+//			if (pumaTasks != null && pumaTasks.size() != 0) {
 //				throw new Exception("lock");
 //			}
 //
-//			pumaServerService.remove(name);
+//			this.srcDBInstanceService.remove(name);
 //			map.put("success", true);
 //		} catch (MongoException e) {
 //			map.put("error", "storage");

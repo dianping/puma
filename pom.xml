@@ -320,6 +320,13 @@
                 <artifactId>tomcat-jdbc</artifactId>
                 <version>7.0.57</version>
             </dependency>
+
+            <!-- model mapper -->
+            <dependency>
+                <groupId>org.modelmapper</groupId>
+                <artifactId>modelmapper</artifactId>
+                <version>0.7.4</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>

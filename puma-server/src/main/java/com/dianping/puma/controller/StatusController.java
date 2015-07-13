@@ -3,7 +3,7 @@ package com.dianping.puma.controller;
 import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.server.TaskExecutor;
-import com.dianping.puma.server.TaskExecutorContainer;
+import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.status.SystemStatusContainer;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ import java.util.*;
 public class StatusController {
 
     @Autowired
-    TaskExecutorContainer taskExecutorContainer;
+    TaskContainer taskContainer;
 
     @Autowired
     PumaServerConfig pumaServerConfig;
@@ -49,7 +49,7 @@ public class StatusController {
     @ResponseBody
     public List<TaskStateEntity> pumaTask() {
         List<TaskStateEntity> pumaTaskStates = new ArrayList<TaskStateEntity>();
-        for (TaskExecutor taskExecutor : taskExecutorContainer.getAll()) {
+        for (TaskExecutor taskExecutor : taskContainer.getAll()) {
             TaskStateEntity taskState = taskExecutor.getTaskState();
             taskState.setServerName(pumaServerConfig.getName());
             taskState.setTaskName(taskState.getTaskName());

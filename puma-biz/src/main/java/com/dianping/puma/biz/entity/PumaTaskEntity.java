@@ -3,7 +3,8 @@ package com.dianping.puma.biz.entity;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.TableSet;
-import com.google.common.collect.ImmutableList;
+
+import java.util.List;
 
 public class PumaTaskEntity {
 
@@ -17,13 +18,11 @@ public class PumaTaskEntity {
 
     private Status status;
 
-    private PumaTaskDbEntity pumaTaskDb;
+    private TableSet tableSet;
 
-    private TableSet tableSet = new TableSet();
+    private List<SrcDbEntity> srcDbs;
 
-    private PumaServerEntity currentServer;
-
-    private ImmutableList<PumaServerEntity> pumaServers;
+    private List<PumaServerEntity> pumaServers;
 
     public Status getStatus() {
         return status;
@@ -69,19 +68,23 @@ public class PumaTaskEntity {
         return tableSet;
     }
 
-    public PumaTaskDbEntity getPumaTaskDb() {
-        return pumaTaskDb;
+    public void setSrcDbs(List<SrcDbEntity> srcDbs) {
+        this.srcDbs = srcDbs;
     }
 
-    public void setPumaTaskDb(PumaTaskDbEntity pumaTaskDb) {
-        this.pumaTaskDb = pumaTaskDb;
+    public void setPumaServers(List<PumaServerEntity> pumaServers) {
+        this.pumaServers = pumaServers;
     }
 
-    public ImmutableList<PumaServerEntity> getPumaServers() {
+    public void setTableSet(TableSet tableSet) {
+        this.tableSet = tableSet;
+    }
+
+    public List<SrcDbEntity> getSrcdbs() {
+        return srcDbs;
+    }
+
+    public List<PumaServerEntity> getPumaServers() {
         return pumaServers;
-    }
-
-    public PumaServerEntity getCurrentServer() {
-        return currentServer;
     }
 }

@@ -1,6 +1,6 @@
 package com.dianping.puma.core.exception;
 
-public class PumaException extends Exception {
+public class PumaException extends RuntimeException {
 
 	/**
 	 * 

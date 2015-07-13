@@ -4,7 +4,7 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
-import com.dianping.puma.biz.sync.model.mapping.MysqlMapping;
+import com.dianping.puma.core.dto.mapping.MysqlMapping;
 import com.dianping.puma.core.util.sql.DDLParser;
 import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.puma.syncserver.job.transform.exception.TransformException;
@@ -76,7 +76,7 @@ public class DefaultTransformer implements Transformer {
 	private void transformSchema(ChangedEvent event) {
 		String oriSchema = event.getDatabase();
 		if (oriSchema != null) {
-			String schema = mysqlMapping.getSchema(oriSchema);
+			String schema = mysqlMapping.getDatabase(oriSchema);
 			if (schema == null) {
 				LOG.error("Transformer({}) transform schema failure for event({}).", title + name, event.toString());
 				throw new TransformException(-1,

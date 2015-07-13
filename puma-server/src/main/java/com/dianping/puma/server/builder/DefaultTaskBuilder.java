@@ -1,5 +1,14 @@
 package com.dianping.puma.server.builder;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.dianping.puma.biz.entity.PumaTaskDbEntity;
+import com.dianping.puma.biz.entity.PumaTaskEntity;
+import com.dianping.puma.biz.entity.SrcDbEntity;
+import com.dianping.puma.biz.entity.old.PumaTask;
+import com.dianping.puma.biz.entity.old.SrcDBInstance;
+import com.dianping.puma.biz.entity.TaskStateEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,61 +26,61 @@ import com.dianping.puma.server.TaskExecutor;
 @Service("taskExecutorBuilder")
 public class DefaultTaskBuilder implements TaskBuilder {
 
-	@Autowired
-	SrcDBInstanceService srcDBInstanceService;
-
-	@Autowired
-	BinlogInfoHolder binlogInfoHolder;
-
-	@Autowired
-	EventCenter eventCenter;
-
-	@Autowired
-	PumaServerConfig pumaServerConfig;
-
-	@Autowired
-	private RawEventCodec rawCodec;
-
-	@Value("fileSender-")
-	String fileSenderName;
-
-	@Value("storage-")
-	String storageName;
-
-	@Value("dispatch-")
-	String dispatchName;
-
-	@Value("/data/appdatas/puma/storage/master/")
-	String masterStorageBaseDir;
-
-	@Value("Bucket-")
-	String masterBucketFilePrefix;
-
-	@Value("1000")
-	int maxMasterBucketLengthMB;
-
-	@Value("25")
-	int maxMasterFileCount;
-
-	@Value("/data/appdatas/puma/storage/slave/")
-	String slaveStorageBaseDir;
-
-	@Value("Bucket-")
-	String slaveBucketFilePrefix;
-
-	@Value("1000")
-	int maxSlaveBucketLengthMB;
-
-	@Value("25")
-	int maxSlaveFileCount;
-
-	@Value("/data/appdatas/puma/binlogIndex/")
-	String binlogIndexBaseDir;
-
-	private static final Logger LOG = LoggerFactory.getLogger(DefaultTaskBuilder.class);
-
-//	public TaskExecutor build(PumaTask pumaTask) throws Exception {
+//	@Autowired
+//	SrcDBInstanceService srcDBInstanceService;
 //
+//	@Autowired
+//	BinlogInfoHolder binlogInfoHolder;
+//
+//	@Autowired
+//	EventCenter eventCenter;
+//
+//	@Autowired
+//	PumaServerConfig pumaServerConfig;
+//
+//	@Autowired
+//	private RawEventCodec rawCodec;
+//
+//	@Value("fileSender-")
+//	String fileSenderName;
+//
+//	@Value("storage-")
+//	String storageName;
+//
+//	@Value("dispatch-")
+//	String dispatchName;
+//
+//	@Value("/data/appdatas/puma/storage/master/")
+//	String masterStorageBaseDir;
+//
+//	@Value("Bucket-")
+//	String masterBucketFilePrefix;
+//
+//	@Value("1000")
+//	int maxMasterBucketLengthMB;
+//
+//	@Value("25")
+//	int maxMasterFileCount;
+//
+//	@Value("/data/appdatas/puma/storage/slave/")
+//	String slaveStorageBaseDir;
+//
+//	@Value("Bucket-")
+//	String slaveBucketFilePrefix;
+//
+//	@Value("1000")
+//	int maxSlaveBucketLengthMB;
+//
+//	@Value("25")
+//	int maxSlaveFileCount;
+//
+//	@Value("/data/appdatas/puma/binlogIndex/")
+//	String binlogIndexBaseDir;
+//
+//	private static final Logger LOG = LoggerFactory.getLogger(DefaultTaskBuilder.class);
+
+	public TaskExecutor build(PumaTaskEntity pumaTask) {
+
 //		try {
 //			DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
 //
@@ -93,13 +102,13 @@ public class DefaultTaskBuilder implements TaskBuilder {
 //			taskExecutor.setBinlogStat(new BinlogStat());
 //
 //			// Source database.
-//			String srcDBInstanceName = pumaTask.getSrcDBInstanceName();
-//			SrcDBInstance srcDBInstance = srcDBInstanceService.find(srcDBInstanceName);
-//			taskExecutor.setDbServerId(srcDBInstance.getServerId());
-//			taskExecutor.setDBHost(srcDBInstance.getHost());
-//			taskExecutor.setPort(srcDBInstance.getPort());
-//			taskExecutor.setDBUsername(srcDBInstance.getUsername());
-//			taskExecutor.setDBPassword(srcDBInstance.getPassword());
+//			//			:w
+//			// PumaTaskDbEntity pumaTaskDb = pumaTask.getPumaTaskDb();
+//			//			taskExecutor.setDbServerId(pumaTaskDb.getServerId());
+//			//			taskExecutor.setDBHost(srcDBInstance.getHost());
+//			//			taskExecutor.setPort(srcDBInstance.getPort());
+//			//			taskExecutor.setDBUsername(srcDBInstance.getUsername());
+//			//			taskExecutor.setDBPassword(srcDBInstance.getPassword());
 //
 //			// Parser.
 //			Parser parser = new DefaultBinlogParser();
@@ -109,10 +118,10 @@ public class DefaultTaskBuilder implements TaskBuilder {
 //			// Handler.
 //			DefaultDataHandler dataHandler = new DefaultDataHandler();
 //			DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
-//			tableMetaInfo.setMetaDBHost(srcDBInstance.getHost());
-//			tableMetaInfo.setMetaDBPort(srcDBInstance.getPort());
-//			tableMetaInfo.setMetaDBUsername(srcDBInstance.getMetaUsername());
-//			tableMetaInfo.setMetaDBPassword(srcDBInstance.getMetaPassword());
+////			tableMetaInfo.setMetaDBHost(srcDBInstance.getHost());
+////			tableMetaInfo.setMetaDBPort(srcDBInstance.getPort());
+////			tableMetaInfo.setMetaDBUsername(srcDBInstance.getMetaUsername());
+////			tableMetaInfo.setMetaDBPassword(srcDBInstance.getMetaPassword());
 //
 //			// tableMeta refresh filter
 //			TableMetaRefreshFilter tableMetaRefreshFilter = new TableMetaRefreshFilter();
@@ -223,12 +232,9 @@ public class DefaultTaskBuilder implements TaskBuilder {
 //			return taskExecutor;
 //		} catch (Exception e) {
 //			LOG.error("Build puma task `{}` error: {}.", pumaTask.getName(), e.getMessage());
-//			throw e;
+//			throw new RuntimeException(e);
 //		}
-//	}
 
-	@Override
-	public TaskExecutor build(PumaTaskEntity task) {
 		return null;
 	}
 

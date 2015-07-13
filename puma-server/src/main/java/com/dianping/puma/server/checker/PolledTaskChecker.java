@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 @Service
-public class PolledTaskChecker extends AbstractTaskChecker {
+public class PolledTaskChecker implements TaskChecker {
 
 	@Autowired
 	PumaTaskService pumaTaskService;

@@ -12,13 +12,19 @@
         SELECT * FROM PumaServer
     </select>
 
-
     <select id="findByPage" resultType="PumaServerEntity">
         SELECT * FROM PumaServer limit #{offset},#{limit}
     </select>
 
     <select id="findById" resultType="PumaServerEntity">
         SELECT * FROM PumaServer WHERE id = #{id}
+    </select>
+
+    <select id="findByIds" resultType="PumaServerEntity">
+        SELECT * FROM PumaServer WHERE id in
+        <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+            #{item}
+        </foreach>
     </select>
 
     <select id="findByHost" resultType="PumaServerEntity">

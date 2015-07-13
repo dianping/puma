@@ -8,6 +8,13 @@
         SELECT * FROM SrcDb where id = #{id}
     </select>
 
+    <select id="findByIds" resultType="SrcDbEntity">
+        SELECT * FROM SrcDb where id in
+        <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
     <select id="findByName" resultType="SrcDbEntity">
         SELECT * FROM SrcDb where name = #{name}
     </select>

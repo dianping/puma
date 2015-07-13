@@ -13,6 +13,8 @@ public interface SrcDbDao {
 
     SrcDbEntity findById(int id);
 
+    List<SrcDbEntity> findByIds(List<Integer> id);
+
     SrcDbEntity findByName(String name);
 
     List<SrcDbEntity> findAll();

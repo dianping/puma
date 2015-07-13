@@ -12,7 +12,6 @@
         <module>puma-client</module>
         <module>puma-core</module>
         <module>puma-admin</module>
-        <module>puma-syncserver</module>
         <module>puma-biz</module>
     </modules>
     <description>puma</description>

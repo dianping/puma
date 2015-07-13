@@ -1,8 +1,6 @@
 package com.dianping.puma.biz.dao;
 
-import com.dianping.puma.biz.entity.PumaTaskDbEntity;
 import com.dianping.puma.biz.entity.PumaTaskServerEntity;
-import com.dianping.puma.biz.entity.SrcDbEntity;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

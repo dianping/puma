@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface PumaServerService {
 
-    PumaServerEntity find(long id);
+    PumaServerEntity find(int id);
 
     PumaServerEntity find(String name);
 

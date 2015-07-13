@@ -1,44 +1,56 @@
 package com.dianping.puma.biz.entity;
 
+import java.util.Date;
+
 public class PumaServerEntity {
 
-	private int id;
+    private int id;
 
-	private String name;
+    private String name;
 
-	private String host;
+    private String host;
 
-	private int port;
+    private int port;
 
-	public int getId() {
-		return id;
-	}
+    private Date updateTime;
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getHost() {
-		return host;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setHost(String host) {
-		this.host = host;
-	}
+    public String getHost() {
+        return host;
+    }
 
-	public int getPort() {
-		return port;
-	}
+    public void setHost(String host) {
+        this.host = host;
+    }
 
-	public void setPort(int port) {
-		this.port = port;
-	}
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+    }
 }

@@ -1,11 +1,15 @@
 package com.dianping.puma.biz.service.impl;
 
+import com.dianping.cat.Cat;
+import com.dianping.puma.biz.dao.PumaServerDao;
 import com.dianping.puma.biz.entity.PumaServerEntity;
-import com.dianping.puma.biz.olddao.PumaServerDao;
 import com.dianping.puma.biz.service.PumaServerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.List;
 
 @Service("pumaServerService")
@@ -16,25 +20,21 @@ public class PumaServerServiceImpl implements PumaServerService {
 
     @Override
     public PumaServerEntity find(String name) {
-        return null;
-//        return pumaServerDao.find(name);
+        return pumaServerDao.findByName(name);
     }
 
     @Override
-    public PumaServerEntity find(long id) {
-        return null;
-//        return pumaServerDao.find(id);
+    public PumaServerEntity find(int id) {
+        return pumaServerDao.findById(id);
     }
 
     public PumaServerEntity findByHost(String host) {
-        return null;
-//        return pumaServerDao.findByHost(host);
+        return pumaServerDao.findByHost(host);
     }
 
     @Override
     public List<PumaServerEntity> findAll() {
-        return null;
-//        return pumaServerDao.findAll();
+        return pumaServerDao.findAll();
     }
 
     @Override
@@ -44,46 +44,47 @@ public class PumaServerServiceImpl implements PumaServerService {
 
     @Override
     public List<PumaServerEntity> findByPage(int page, int pageSize) {
-        return null;
-//        return pumaServerDao.findByPage(page, pageSize);
+        return pumaServerDao.findByPage((page - 1) * pageSize, pageSize);
     }
 
     @Override
     public void heartBeat() {
-//        try {
-//            PumaServer server = findByHost(InetAddress.getLocalHost().getHostAddress());
-//            if (server == null) {
-//                server = new PumaServer();
-//                server.setName(InetAddress.getLocalHost().getHostName());
-//                server.setHost(InetAddress.getLocalHost().getHostAddress());
-//                server.setPort(4040);
-//                create(server);
-//            } else {
-//                server.upgrade();
-//                update(server);
-//            }
-//        } catch (UnknownHostException e) {
-//            Cat.logError(e);
-//        }
+        try {
+            PumaServerEntity server = findByHost(InetAddress.getLocalHost().getHostAddress());
+            if (server == null) {
+                server = new PumaServerEntity();
+                server.setName(InetAddress.getLocalHost().getHostName());
+                server.setHost(InetAddress.getLocalHost().getHostAddress());
+                server.setPort(4040);
+                create(server);
+            } else {
+                server.setUpdateTime(new Date());
+                update(server);
+            }
+        } catch (UnknownHostException e) {
+            Cat.logError(e);
+        }
     }
 
     @Override
     public void create(PumaServerEntity pumaServer) {
-//        pumaServerDao.create(pumaServer);
+        pumaServerDao.insert(pumaServer);
+        //todo: insert other
     }
 
     @Override
     public void update(PumaServerEntity pumaServer) {
-//        pumaServerDao.update(pumaServer);
+        pumaServerDao.update(pumaServer);
+        //todo: update other
     }
 
     @Override
     public void remove(String name) {
-//        pumaServerDao.remove(name);
+        pumaServerDao.deleteByName(name);
     }
 
     @Override
     public void remove(int id) {
-//        pumaServerDao.remove(id);
+        pumaServerDao.delete(id);
     }
 }

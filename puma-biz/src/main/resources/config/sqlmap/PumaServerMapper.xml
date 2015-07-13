@@ -1,19 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.dianping.puma.biz.dao.PumaServerDao">
 
-	<select id="findById" resultType="PumaServerEntity">
-		SELECT * FROM PumaServer WHERE id = #{id}
-	</select>
+    <select id="count" resultType="long">
+        SELECT count(*) FROM PumaServer
+    </select>
 
-	<insert id="insert" parameterType="PumaServerEntity">
-		INSERT INTO PumaServer (name, host, port) VALUES (#{name}, #{host}, #{port})
-	</insert>
+    <select id="findAll" resultType="PumaServerEntity">
+        SELECT * FROM PumaServer
+    </select>
 
-	<delete id="delete">
-		DELETE FROM PumaServer WHERE id = #{id}
-	</delete>
+
+    <select id="findByPage" resultType="PumaServerEntity">
+        SELECT * FROM PumaServer limit #{offset},#{limit}
+    </select>
+
+    <select id="findById" resultType="PumaServerEntity">
+        SELECT * FROM PumaServer WHERE id = #{id}
+    </select>
+
+    <select id="findByHost" resultType="PumaServerEntity">
+        SELECT * FROM PumaServer WHERE host = #{host}
+    </select>
+
+    <select id="findByName" resultType="PumaServerEntity">
+        SELECT * FROM PumaServer WHERE name = #{name}
+    </select>
+
+    <insert id="insert" parameterType="PumaServerEntity">
+        INSERT INTO PumaServer (Name, Host, Port, UpdateTime) VALUES (#{name}, #{host}, #{port}, #{updateTime})
+    </insert>
+
+    <update id="update" parameterType="PumaServerEntity">
+        update PumaServer
+        set
+        Name = #{name},
+        Host = #{host},
+        port = #{port},
+        updateTime = #{updateTime}
+        where id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM PumaServer WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByName">
+        DELETE FROM PumaServer WHERE name = #{name}
+    </delete>
 
 </mapper>

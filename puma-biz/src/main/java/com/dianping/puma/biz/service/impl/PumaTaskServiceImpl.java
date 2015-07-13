@@ -17,9 +17,6 @@ import java.util.List;
 public class PumaTaskServiceImpl implements PumaTaskService {
 
     @Autowired
-    com.dianping.puma.biz.olddao.PumaTaskDao oldPumaTaskDao;
-
-    @Autowired
     PumaTaskDao pumaTaskDao;
 
     @Autowired

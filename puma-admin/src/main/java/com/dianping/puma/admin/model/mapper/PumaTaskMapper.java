@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.dianping.puma.admin.model.DatabaseDto;
 import com.dianping.puma.admin.model.PumaServerDto;
-import com.dianping.puma.admin.model.PumaTaskDto;
+import com.dianping.puma.admin.model.PumaTaskModel;
 import com.dianping.puma.biz.entity.old.PumaTask;
 import com.dianping.puma.core.model.AcceptedTables;
 import com.dianping.puma.core.model.BinlogInfo;
@@ -21,12 +21,12 @@ public class PumaTaskMapper {
 
 	private static final String TABLE_TABLE_SPLIT = "&";
 
-	public static PumaTaskDto convertToPumaTaskDto(PumaTask pumaTask) {
+	public static PumaTaskModel convertToPumaTaskDto(PumaTask pumaTask) {
 		if (pumaTask == null) {
 			return null;
 		}
-		PumaTaskDto pumaTaskDto = new PumaTaskDto();
-		pumaTaskDto.setSrcDBInstanceName(pumaTask.getSrcDBInstanceName());
+		PumaTaskModel pumaTaskModel = new PumaTaskModel();
+		pumaTaskModel.setSrcDBInstanceName(pumaTask.getSrcDBInstanceName());
 		List<PumaServerDto> pumaServerDtos = new ArrayList<PumaServerDto>();
 		if (pumaTask.getPumaServerNames() == null || pumaTask.getPumaServerNames().size() == 0) {
 			PumaServerDto pumaServerDto = new PumaServerDto();
@@ -39,11 +39,11 @@ public class PumaTaskMapper {
 				pumaServerDtos.add(pumaServerDto);
 			}
 		}
-		pumaTaskDto.setPumaServerDtos(pumaServerDtos);
-		pumaTaskDto.setName(pumaTask.getName());
-		pumaTaskDto.setBinlogFile(pumaTask.getBinlogInfo().getBinlogFile());
-		pumaTaskDto.setBinlogPosition(pumaTask.getBinlogInfo().getBinlogPosition());
-		pumaTaskDto.setPreservedDay(pumaTask.getPreservedDay());
+		pumaTaskModel.setPumaServerDtos(pumaServerDtos);
+		pumaTaskModel.setName(pumaTask.getName());
+		pumaTaskModel.setBinlogFile(pumaTask.getBinlogInfo().getBinlogFile());
+		pumaTaskModel.setBinlogPosition(pumaTask.getBinlogInfo().getBinlogPosition());
+		pumaTaskModel.setPreservedDay(pumaTask.getPreservedDay());
 		List<DatabaseDto> databases = new ArrayList<DatabaseDto>();
 		if (pumaTask.getTableSet() != null) {
 			Map<String, List<String>> tableSet = pumaTask.getTableSet().mapSchemaTables();
@@ -79,10 +79,10 @@ public class PumaTaskMapper {
 			}
 		}
 
-		pumaTaskDto.setDatabases(databases);
-		pumaTaskDto.setDisabled(true);
-		pumaTaskDto.setIsShow(true);
-		return pumaTaskDto;
+		pumaTaskModel.setDatabases(databases);
+		pumaTaskModel.setDisabled(true);
+		pumaTaskModel.setIsShow(true);
+		return pumaTaskModel;
 	}
 
 	public static PumaTaskEntity convertToPumaTask(PumaTaskDto pumaTaskDto) {
@@ -94,16 +94,16 @@ public class PumaTaskMapper {
 		pumaTask.setName(pumaTaskDto.getName());
 		pumaTask.setSrcDBInstanceName(pumaTaskDto.getSrcDBInstanceName());
 		List<String> serverNames = new ArrayList<String>();
-		for (PumaServerDto pumaServerDto : pumaTaskDto.getPumaServerDtos()) {
+		for (PumaServerDto pumaServerDto : pumaTaskModel.getPumaServerDtos()) {
 			serverNames.add(pumaServerDto.getName());
 		}
 		pumaTask.setPumaServerNames(serverNames);
 		BinlogInfo binlogInfo = new BinlogInfo();
-		binlogInfo.setBinlogFile(pumaTaskDto.getBinlogFile());
-		binlogInfo.setBinlogPosition(pumaTaskDto.getBinlogPosition());
+		binlogInfo.setBinlogFile(pumaTaskModel.getBinlogFile());
+		binlogInfo.setBinlogPosition(pumaTaskModel.getBinlogPosition());
 		pumaTask.setBinlogInfo(binlogInfo);
-		pumaTask.setPreservedDay(pumaTaskDto.getPreservedDay());
-		List<DatabaseDto> databases = pumaTaskDto.getDatabases();
+		pumaTask.setPreservedDay(pumaTaskModel.getPreservedDay());
+		List<DatabaseDto> databases = pumaTaskModel.getDatabases();
 		if (databases != null && databases.size() > 0) {
 			TableSet tableSet = new TableSet();
 			for (DatabaseDto database : databases) {

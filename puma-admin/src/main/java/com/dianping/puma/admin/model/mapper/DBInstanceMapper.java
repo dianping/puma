@@ -2,7 +2,7 @@ package com.dianping.puma.admin.model.mapper;
 
 import com.dianping.puma.admin.model.DBInstanceDto;
 import com.dianping.puma.admin.model.DstDBInstanceDto;
-import com.dianping.puma.admin.model.SrcDBInstanceDto;
+import com.dianping.puma.admin.model.SrcDbDto;
 import com.dianping.puma.biz.entity.old.DBInstance;
 import com.dianping.puma.biz.entity.old.DstDBInstance;
 import com.dianping.puma.biz.entity.old.SrcDBInstance;
@@ -11,10 +11,11 @@ public class DBInstanceMapper {
 
 	public static DBInstanceDto convertToDBInstanceDto(DBInstance dbInstance){
 		DBInstanceDto dbInstanceDto = null;
+		/*
 		if(dbInstance instanceof DstDBInstance){
 			dbInstanceDto  = new DstDBInstanceDto();
 		}else if(dbInstance instanceof SrcDBInstance){
-			dbInstanceDto  = new SrcDBInstanceDto();
+			dbInstanceDto  = new SrcDbDto();
 		}else{
 			return dbInstanceDto;
 		}
@@ -24,6 +25,7 @@ public class DBInstanceMapper {
 		dbInstanceDto.setPort(dbInstance.getPort());
 		dbInstanceDto.setUsername(dbInstance.getUsername());
 		dbInstanceDto.setPassword(dbInstance.getPassword());
+		*/
 		return dbInstanceDto;
 	}
 	
@@ -43,9 +45,10 @@ public class DBInstanceMapper {
 
 	public static DBInstance convertToDBInstance(DBInstanceDto dbInstanceDto){
 		DBInstance dbInstance = null;
+		/*
 		if(dbInstanceDto instanceof DstDBInstanceDto){
 			dbInstance  = new DstDBInstance();
-		}else if(dbInstanceDto instanceof SrcDBInstanceDto){
+		}else if(dbInstanceDto instanceof SrcDbDto){
 			dbInstance  = new SrcDBInstance();
 		}else{
 			return dbInstance;
@@ -60,6 +63,7 @@ public class DBInstanceMapper {
 		dbInstance.setMetaPort(dbInstanceDto.getPort());
 		dbInstance.setMetaUsername(dbInstanceDto.getUsername());
 		dbInstance.setMetaPassword(dbInstanceDto.getPassword());
+		*/
 		return dbInstance;
 	}
 }

@@ -1,6 +1,6 @@
 package com.dianping.puma.admin.web;
 
-import com.dianping.puma.admin.model.SrcDBInstanceDto;
+import com.dianping.puma.admin.model.SrcDbDto;
 import com.dianping.puma.admin.model.mapper.DBInstanceMapper;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.biz.entity.old.PumaTask;
@@ -29,9 +29,9 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-public class SrcDBInstanceController {
+public class SrcDbController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(SrcDBInstanceController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SrcDbController.class);
 
 	@Autowired
 	SrcDBInstanceService srcDBInstanceService;
@@ -95,17 +95,17 @@ public class SrcDBInstanceController {
 
 	@RequestMapping(value = { "/src-db-instance/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String createPost(@RequestBody SrcDBInstanceDto srcDBInstanceDto) {
+	public String createPost(@RequestBody SrcDbDto srcDbDto) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			SrcDBInstance srcDBInstance = srcDBInstanceService.find(srcDBInstanceDto.getName());
+			SrcDBInstance srcDBInstance = srcDBInstanceService.find(srcDbDto.getName());
 
 			if (srcDBInstance != null) {
 				throw new Exception("duplicate name.");
 			}
-			srcDBInstance = (SrcDBInstance)DBInstanceMapper.convertToDBInstance(srcDBInstanceDto);
+			//srcDBInstance = (SrcDBInstance)DBInstanceMapper.convertToDBInstance(srcDbModel);
 			srcDBInstanceService.create(srcDBInstance);
 			map.put("success", true);
 		} catch (MongoException e) {
@@ -121,7 +121,7 @@ public class SrcDBInstanceController {
 
 	@RequestMapping(value = { "/src-db-instance/update/{id}" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String updatePost(@PathVariable long id, @RequestBody SrcDBInstanceDto srcDBInstanceDto) {
+	public String updatePost(@PathVariable long id, @RequestBody SrcDbDto srcDbDto) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
@@ -135,7 +135,7 @@ public class SrcDBInstanceController {
 			} else {
 				create = false;
 			}
-			DBInstanceMapper.convertToDBInstance(srcDBInstance, srcDBInstanceDto);
+			//DBInstanceMapper.convertToDBInstance(srcDBInstance, srcDbDto);
 
 			if (create) {
 				srcDBInstanceService.create(srcDBInstance);

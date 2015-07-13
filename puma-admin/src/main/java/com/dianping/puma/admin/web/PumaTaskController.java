@@ -1,6 +1,6 @@
 package com.dianping.puma.admin.web;
 
-import com.dianping.puma.admin.model.PumaTaskDto;
+import com.dianping.puma.admin.model.PumaTaskModel;
 import com.dianping.puma.admin.model.mapper.PumaTaskMapper;
 import com.dianping.puma.admin.util.GsonUtil;
 import com.dianping.puma.biz.entity.*;
@@ -135,7 +135,7 @@ public class PumaTaskController {
 
     @RequestMapping(value = {"/puma-task/create"}, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public String createPost(@RequestBody PumaTaskDto entity) {
+    public String createPost(@RequestBody PumaTaskModel entity) {
         Map<String, Object> map = new HashMap<String, Object>();
         try {
             ActionOperation operation = null;
@@ -159,7 +159,7 @@ public class PumaTaskController {
     @SuppressWarnings("unchecked")
     @RequestMapping(value = {"/puma-task/update/{id}"}, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public String updatePost(@PathVariable long id, @RequestBody PumaTaskDto entity) {
+    public String updatePost(@PathVariable long id, @RequestBody PumaTaskModel entity) {
 
         Map<String, Object> map = new HashMap<String, Object>();
 

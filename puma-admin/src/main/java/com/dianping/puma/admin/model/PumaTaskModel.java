@@ -2,7 +2,7 @@ package com.dianping.puma.admin.model;
 
 import java.util.List;
 
-public class PumaTaskDto {
+public class PumaTaskModel {
 
 	private String srcDBInstanceName;
 
@@ -22,7 +22,7 @@ public class PumaTaskDto {
 	
 	private boolean isShow;
 	
-	public PumaTaskDto(){
+	public PumaTaskModel(){
 		
 	}
 	

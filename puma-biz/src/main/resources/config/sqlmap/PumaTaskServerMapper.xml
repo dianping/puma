@@ -8,10 +8,10 @@
         SELECT * FROM PumaTaskServer where taskId = #{taskId}
     </select>
 
-    <delete id="delete" parameterType="map">
+    <delete id="deleteByTaskId">
         delete from PumaTaskServer
         where
-        id = #{id}
+        taskId = #{taskId}
     </delete>
 
     <insert id="insert" parameterType="PumaTaskServerEntity" useGeneratedKeys="true" keyProperty="id">

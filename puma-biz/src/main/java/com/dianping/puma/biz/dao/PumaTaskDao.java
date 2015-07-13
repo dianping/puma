@@ -12,13 +12,25 @@ import java.util.List;
  */
 public interface PumaTaskDao {
 
-    List<PumaTaskEntity> findByIds(@Param(value = "ids") List<Integer> ids);
+    PumaTaskEntity findByName(String name);
 
-    PumaTaskEntity findByName(@Param(value = "name") String name);
+    PumaTaskEntity findById(int id);
 
-    PumaTaskEntity findById(@Param(value = "id") int id);
+    List<PumaTaskEntity> findBySrcDbName(String name);
+
+    List<PumaTaskEntity> findByPumaServerName(String name);
+
+    List<PumaTaskEntity> findAll();
+
+    List<PumaTaskEntity> findByPage(@Param(value = "offset") int offset, @Param(value = "limit") int limit);
+
+    int count();
 
     int insert(PumaTaskEntity entity);
 
     int update(PumaTaskEntity entity);
+
+    int delete(int id);
+
+    int deleteByName(String name);
 }

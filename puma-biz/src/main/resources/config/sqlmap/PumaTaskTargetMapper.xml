@@ -32,4 +32,10 @@
         #{tables}
         )
     </insert>
+
+    <delete id="deleteByTaskId">
+        delete from PumaTaskTarget
+        where
+        taskId = #{taskId}
+    </delete>
 </mapper>

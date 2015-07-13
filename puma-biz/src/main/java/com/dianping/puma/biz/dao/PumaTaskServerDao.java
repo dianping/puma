@@ -1,7 +1,6 @@
 package com.dianping.puma.biz.dao;
 
 import com.dianping.puma.biz.entity.PumaTaskServerEntity;
-import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -12,9 +11,9 @@ import java.util.List;
  */
 public interface PumaTaskServerDao {
 
-    List<PumaTaskServerEntity> findByTaskId(@Param(value = "taskId") int taskId);
+    List<PumaTaskServerEntity> findByTaskId(int taskId);
 
-    int delete(@Param(value = "id") int id);
+    int deleteByTaskId(int taskId);
 
     int insert(PumaTaskServerEntity entity);
 

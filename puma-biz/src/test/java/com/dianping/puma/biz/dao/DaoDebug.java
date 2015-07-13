@@ -13,12 +13,12 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class DaoDebug {
 
     @Autowired
-    PumaServerDao pumaServerDao;
+    PumaTaskDao dao;
 
     @Test
     @Ignore
-    public void testInsert() throws Exception {
-        Object entity = pumaServerDao.count();
+    public void debug() throws Exception {
+        Object entity = dao.findByPumaServerName("test-name");
         System.out.println(new Gson().toJson(entity));
     }
 }

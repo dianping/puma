@@ -11,9 +11,11 @@ import java.util.List;
  * http://www.dozer.cc
  */
 public interface PumaTaskTargetDao {
-    List<PumaTaskTargetEntity> findByTaskId(@Param(value = "taskId") int taskId);
+    List<PumaTaskTargetEntity> findByTaskId(int taskId);
 
     int insert(PumaTaskTargetEntity entity);
 
     int update(PumaTaskTargetEntity entity);
+
+    int deleteByTaskId(int taskId);
 }

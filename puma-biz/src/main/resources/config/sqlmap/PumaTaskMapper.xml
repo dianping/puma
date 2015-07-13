@@ -10,20 +10,38 @@
         <association resultMap="binlogInfo" property="binlogInfo" columnPrefix="BinlogInfo_"/>
     </resultMap>
 
-    <select id="findByIds" parameterType="map" resultMap="entity">
-        SELECT * FROM PumaTask where id in
-        <foreach item="item" index="index" collection="ids"
-                 open="(" separator="," close=")">
-            #{item}
-        </foreach>
-    </select>
-
-    <select id="findById" parameterType="map" resultMap="entity">
+    <select id="findById" resultMap="entity">
         SELECT * FROM PumaTask where id = #{id}
     </select>
 
-    <select id="findByName" parameterType="map" resultMap="entity">
+    <select id="findAll" resultMap="entity">
+        SELECT * FROM PumaTask
+    </select>
+
+    <select id="findByName" resultMap="entity">
         SELECT * FROM PumaTask where name = #{name}
+    </select>
+
+    <select id="findByPage" resultMap="entity">
+        SELECT * FROM PumaTask limit #{offset},#{limit}
+    </select>
+
+    <select id="findBySrcDbName" resultMap="entity">
+        SELECT p.* FROM PumaTask p
+        left join PumaTaskDb td on tb.taskId = p.id
+        left join SrcDb d on tb.dbId = d.id
+        where d.Name = #{name}
+    </select>
+
+    <select id="findByPumaServerName" resultMap="entity">
+        SELECT p.* FROM PumaTask p
+        left join PumaTaskServer ts on ts.taskId = p.id
+        left join PumaServer s on ts.serverId = s.id
+        where s.Name = #{name}
+    </select>
+
+    <select id="count" resultType="long">
+        select count(*) from PumaTask
     </select>
 
     <update id="update" parameterType="PumaTaskEntity">
@@ -59,4 +77,12 @@
         #{binlogInfo.binlogPosition},
         )
     </insert>
+
+    <delete id="delete">
+        delete from PumaTask where id = #{id}
+    </delete>
+
+    <delete id="deleteByName">
+        delete from PumaTask where name = #{name}
+    </delete>
 </mapper>

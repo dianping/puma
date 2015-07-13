@@ -198,8 +198,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 			fetcherEventCountMonitor.record(getTaskName());
 			BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), getContext());
 
-			LOG.info("################ binlog event: %s", binlogEvent.toString());
-
 			if (binlogEvent.getHeader().getEventType() == BinlogConstants.INTVAR_EVENT
 					|| binlogEvent.getHeader().getEventType() == BinlogConstants.RAND_EVENT
 					|| binlogEvent.getHeader().getEventType() == BinlogConstants.USER_VAR_EVENT) {

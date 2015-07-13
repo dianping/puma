@@ -15,8 +15,6 @@ public interface PumaTaskService {
 
     List<PumaTaskEntity> findByPumaServerName(String pumaServerName);
 
-    List<PumaTaskEntity> findByPumaServerNames(String pumaServerName);
-
     List<PumaTaskEntity> findAll();
 
     long count();

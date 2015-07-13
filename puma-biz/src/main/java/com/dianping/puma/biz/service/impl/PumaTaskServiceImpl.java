@@ -44,13 +44,6 @@ public class PumaTaskServiceImpl implements PumaTaskService {
     }
 
     @Override
-    public List<PumaTaskEntity> findByPumaServerNames(String pumaServerName) {
-        return null;
-//        return oldPumaTaskDao.findByPumaServerNames(pumaServerName);
-    }
-
-
-    @Override
     public List<PumaTaskEntity> findAll() {
         return null;
 //        return oldPumaTaskDao.findAll();

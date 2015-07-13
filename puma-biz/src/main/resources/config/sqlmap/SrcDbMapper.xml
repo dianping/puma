@@ -4,7 +4,7 @@
 
 <mapper namespace="com.dianping.puma.biz.dao.SrcDbDao">
 
-    <select id="findById" parameterType="map" resultMap="SrcDbEntity">
+    <select id="findById" parameterType="map" resultType="SrcDbEntity">
         SELECT * FROM SrcDb where id = #{id}
     </select>
 

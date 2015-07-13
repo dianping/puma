@@ -4,7 +4,7 @@
 
 <mapper namespace="com.dianping.puma.biz.dao.PumaTaskDbDao">
 
-    <select id="findByTaskId" parameterType="map" resultMap="PumaTaskDbEntity">
+    <select id="findByTaskId" parameterType="map" resultType="PumaTaskDbEntity">
         SELECT * FROM PumaTaskDb where taskId = #{taskId}
     </select>
 

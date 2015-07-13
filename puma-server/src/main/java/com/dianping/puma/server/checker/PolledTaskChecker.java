@@ -30,7 +30,7 @@ public class PolledTaskChecker implements TaskChecker {
 		tasks.clear();
 
 		try {
-			for (PumaTaskEntity task: pumaTaskService.findAll()) {
+			for (PumaTaskEntity task: pumaTaskService.findByPumaServerName()) {
 				tasks.put(task.getName(), task);
 			}
 		} catch (Exception e) {

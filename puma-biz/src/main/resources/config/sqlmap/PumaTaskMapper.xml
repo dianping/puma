@@ -49,7 +49,6 @@
         set
         Name=#{name},
         PreservedDay=#{preservedDay},
-        Status=#{status},
         BinlogInfo_ServerId=#{binlogInfo.serverId},
         BinlogInfo_BinlogFile=#{binlogInfo.binlogFile},
         BinlogInfo_BinlogPosition=#{binlogInfo.binlogPosition},
@@ -64,7 +63,6 @@
         (
         Name,
         PreservedDay,
-        Status,
         BinlogInfo_ServerId,
         BinlogInfo_BinlogFile,
         BinlogInfo_BinlogPosition,
@@ -75,7 +73,6 @@
         (
         #{name},
         #{preservedDay},
-        #{status}
         #{binlogInfo.serverId},
         #{binlogInfo.binlogFile},
         #{binlogInfo.binlogPosition},

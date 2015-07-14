@@ -18,8 +18,6 @@ public class PumaTaskEntity {
 
     private int preservedDay;
 
-    private Status status;
-
     private TableSet tableSet;
 
     private List<SrcDbEntity> srcDbs;
@@ -29,14 +27,6 @@ public class PumaTaskEntity {
     private Date UpdateTime;
 
     private ActionController actionController;
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
 
     public int getId() {
         return id;

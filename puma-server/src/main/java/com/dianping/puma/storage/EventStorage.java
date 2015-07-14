@@ -10,8 +10,8 @@ public interface EventStorage extends LifeCycle<StorageLifeCycleException> {
 
 	public void store(ChangedEvent event) throws StorageException;
 	
-	public BucketIndex getMasterBucketIndex();
+	public DataBucketManager getMasterBucketIndex();
 	
-	public BucketIndex getSlaveBucketIndex();
+	public DataBucketManager getSlaveBucketIndex();
 
 }

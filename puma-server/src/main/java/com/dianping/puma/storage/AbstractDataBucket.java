@@ -29,7 +29,7 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  * @author Leo Liang
  * 
  */
-public abstract class AbstractBucket implements Bucket {
+public abstract class AbstractDataBucket implements DataBucket {
     private Sequence                  startingSequence;
     private int                       maxSizeMB;
     private AtomicReference<Sequence> currentWritingSeq = new AtomicReference<Sequence>();
@@ -95,7 +95,7 @@ public abstract class AbstractBucket implements Bucket {
         return maxSizeByte;
     }
 
-    public AbstractBucket(Sequence startingSequence, int maxSizeMB, String fileName, boolean compress)
+    public AbstractDataBucket(Sequence startingSequence, int maxSizeMB, String fileName, boolean compress)
             throws FileNotFoundException {
         this.startingSequence = startingSequence;
         this.maxSizeMB = maxSizeMB;

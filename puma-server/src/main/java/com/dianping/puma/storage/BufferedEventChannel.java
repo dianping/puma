@@ -13,6 +13,7 @@ import com.dianping.cat.Cat;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.ServerErrorEvent;
 import com.dianping.puma.storage.exception.StorageException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,5 +118,4 @@ public class BufferedEventChannel implements EventChannel {
 			return stopped || Thread.currentThread().isInterrupted();
 		}
 	}
-
 }

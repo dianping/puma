@@ -41,7 +41,7 @@ import com.dianping.puma.server.builder.TaskExecutorBuilder;
 import com.dianping.puma.storage.DefaultArchiveStrategy;
 import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
-import com.dianping.puma.storage.LocalFileBucketIndex;
+import com.dianping.puma.storage.LocalFileDataBucketManager;
 
 @Service("taskExecutorBuilder")
 public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
@@ -208,7 +208,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			}
 
 			// File sender master storage.
-			LocalFileBucketIndex masterBucketIndex = new LocalFileBucketIndex();
+			LocalFileDataBucketManager masterBucketIndex = new LocalFileDataBucketManager();
 			masterBucketIndex.setBaseDir(masterStorageBaseDir + taskName);
 			masterBucketIndex.setBucketFilePrefix(masterBucketFilePrefix);
 			masterBucketIndex.setMaxBucketLengthMB(maxMasterBucketLengthMB);
@@ -216,7 +216,7 @@ public class DefaultTaskExecutorBuilder implements TaskExecutorBuilder {
 			storage.setMasterBucketIndex(masterBucketIndex);
 
 			// File sender slave storage.
-			LocalFileBucketIndex slaveBucketIndex = new LocalFileBucketIndex();
+			LocalFileDataBucketManager slaveBucketIndex = new LocalFileDataBucketManager();
 			slaveBucketIndex.setBaseDir(slaveStorageBaseDir + taskName);
 			slaveBucketIndex.setBucketFilePrefix(slaveBucketFilePrefix);
 			slaveBucketIndex.setMaxBucketLengthMB(maxSlaveBucketLengthMB);

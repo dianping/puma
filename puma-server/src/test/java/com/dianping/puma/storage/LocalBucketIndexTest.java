@@ -25,7 +25,7 @@ import com.dianping.puma.storage.exception.StorageClosedException;
 public class LocalBucketIndexTest {
 
 	protected File					work				= null;
-	protected LocalFileBucketIndex	localBucketIndex	= new LocalFileBucketIndex();
+	protected LocalFileDataBucketManager	localBucketIndex	= new LocalFileDataBucketManager();
 
 	@Before
 	public void before() {
@@ -97,9 +97,9 @@ public class LocalBucketIndexTest {
 
 		Sequence sequence = new Sequence(120711, 0);
 
-		Bucket bucket = null;
+		DataBucket bucket = null;
 		try {
-			bucket = new LocalFileBucket(work, sequence, 10, "20120711/bucket-0", false);
+			bucket = new LocalFileDataBucket(work, sequence, 10, "20120711/bucket-0", false);
 			localBucketIndex.add(bucket);
 
 		} catch (FileNotFoundException e) {
@@ -288,7 +288,7 @@ public class LocalBucketIndexTest {
 
 		Sequence seq = new Sequence(120710, 0);
 		try {
-			Bucket bucket = this.localBucketIndex.getNextReadBucket(seq);
+			DataBucket bucket = this.localBucketIndex.getNextReadBucket(seq);
 			Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
 			Assert.assertEquals(1, bucket.getStartingSequece().getNumber());
 			bucket.stop();
@@ -338,7 +338,7 @@ public class LocalBucketIndexTest {
 		this.localBucketIndex.start();
 
 		try {
-			Bucket bucket = this.localBucketIndex.getNextWriteBucket();
+			DataBucket bucket = this.localBucketIndex.getNextWriteBucket();
 
 			SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
 
@@ -348,7 +348,7 @@ public class LocalBucketIndexTest {
 					.getStartingSequece().getNumber());
 			this.localBucketIndex.add(bucket);
 
-			Bucket bucket2 = this.localBucketIndex.getNextWriteBucket();
+			DataBucket bucket2 = this.localBucketIndex.getNextWriteBucket();
 
 			Assert.assertEquals(new Sequence(Integer.valueOf(sdf.format(new Date())), 0).getCreationDate(), bucket2
 					.getStartingSequece().getCreationDate());
@@ -419,7 +419,7 @@ public class LocalBucketIndexTest {
 		this.localBucketIndex.start();
 
 		try {
-			Bucket bucket = this.localBucketIndex.getReadBucket(-1, true);
+			DataBucket bucket = this.localBucketIndex.getReadBucket(-1, true);
 
 			Assert.assertEquals(null, bucket);
 			bucket = this.localBucketIndex.getReadBucket(-2, true);
@@ -458,7 +458,7 @@ public class LocalBucketIndexTest {
 		}
 		this.localBucketIndex.start();
 		try {
-			Bucket bucket = this.localBucketIndex.getReadBucket(-1, true);
+			DataBucket bucket = this.localBucketIndex.getReadBucket(-1, true);
 			Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
 			Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
 			bucket.stop();

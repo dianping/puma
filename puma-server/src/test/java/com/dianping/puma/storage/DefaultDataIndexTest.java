@@ -95,7 +95,7 @@ public class DefaultDataIndexTest {
         Properties prop = new Properties();
         prop.load(new FileInputStream(l1IndexFile));
         Assert.assertEquals(1, prop.size());
-        Assert.assertEquals("1", prop.getProperty(new BinlogIndexKeyConvertor().convertToString(key)));
+        Assert.assertEquals("1", prop.getProperty(new BinlogIndexKeyConvertor().convertToObj(key)));
 
         File l2IndexFile = new File(new File(baseDir, DefaultDataIndexImpl.L2INDEX_FOLDER), "1"
                 + DefaultDataIndexImpl.L2INDEX_FILESUFFIX);
@@ -111,13 +111,17 @@ public class DefaultDataIndexTest {
         BinlogIndexKey key = new BinlogIndexKey("bin-0001.bin", 5, 0);
         index.addL1Index(key, "1");
         index.addL2Index(key, 123L);
+        
+        BinlogIndexKey key1 = new BinlogIndexKey("bin-0002.bin", 5, 0);
+        index.addL1Index(key1, "1");
+        index.addL2Index(key1, 123555L);
 
         File l1IndexFile = new File(baseDir, DefaultDataIndexImpl.L1INDEX_FILENAME);
         Assert.assertTrue(l1IndexFile.exists());
         Properties prop = new Properties();
         prop.load(new FileInputStream(l1IndexFile));
         Assert.assertEquals(1, prop.size());
-        Assert.assertEquals("1", prop.getProperty(new BinlogIndexKeyConvertor().convertToString(key)));
+        Assert.assertEquals("1", prop.getProperty(new BinlogIndexKeyConvertor().convertToObj(key)));
 
         File l2IndexFile = new File(new File(baseDir, DefaultDataIndexImpl.L2INDEX_FOLDER), "1"
                 + DefaultDataIndexImpl.L2INDEX_FILESUFFIX);
@@ -125,7 +129,7 @@ public class DefaultDataIndexTest {
         prop = new Properties();
         prop.load(new FileInputStream(l2IndexFile));
         Assert.assertEquals(1, prop.size());
-        Assert.assertEquals("123", prop.getProperty(new BinlogIndexKeyConvertor().convertToString(key)));
+        Assert.assertEquals("123", prop.getProperty(new BinlogIndexKeyConvertor().convertToObj(key)));
     }
 
     @Test
@@ -143,7 +147,7 @@ public class DefaultDataIndexTest {
         Properties prop = new Properties();
         prop.load(new FileInputStream(l1IndexFile));
         Assert.assertEquals(1, prop.size());
-        Assert.assertEquals("1", prop.getProperty(new BinlogIndexKeyConvertor().convertToString(key)));
+        Assert.assertEquals("1", prop.getProperty(new BinlogIndexKeyConvertor().convertToObj(key)));
 
         File l2IndexFile = new File(new File(baseDir, DefaultDataIndexImpl.L2INDEX_FOLDER), "1"
                 + DefaultDataIndexImpl.L2INDEX_FILESUFFIX);
@@ -151,7 +155,7 @@ public class DefaultDataIndexTest {
         prop = new Properties();
         prop.load(new FileInputStream(l2IndexFile));
         Assert.assertEquals(1, prop.size());
-        Assert.assertEquals("123", prop.getProperty(new BinlogIndexKeyConvertor().convertToString(key)));
+        Assert.assertEquals("123", prop.getProperty(new BinlogIndexKeyConvertor().convertToObj(key)));
 
         Assert.assertEquals(123L, index.find(key).longValue());
     }

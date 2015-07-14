@@ -21,5 +21,5 @@ package com.dianping.puma.storage;
  * 
  */
 public interface ArchiveStrategy {
-	public void archive(BucketIndex masterIndex, BucketIndex slaveIndex);
+	public void archive(DataBucketManager masterIndex, DataBucketManager slaveIndex);
 }

@@ -52,7 +52,7 @@ import com.dianping.puma.storage.DefaultArchiveStrategy;
 import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.EventChannel;
-import com.dianping.puma.storage.LocalFileBucketIndex;
+import com.dianping.puma.storage.LocalFileDataBucketManager;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /***
@@ -379,7 +379,7 @@ public abstract class AbstractBaseTest {
         }
 
         // File sender master storage.
-        LocalFileBucketIndex masterBucketIndex = new LocalFileBucketIndex();
+        LocalFileDataBucketManager masterBucketIndex = new LocalFileDataBucketManager();
         masterBucketIndex.setBaseDir(masterStorageBaseDir.getAbsolutePath());
         masterBucketIndex.setBucketFilePrefix("Bucket-");
         masterBucketIndex.setMaxBucketLengthMB(1000);
@@ -387,7 +387,7 @@ public abstract class AbstractBaseTest {
         storage.setMasterBucketIndex(masterBucketIndex);
 
         // File sender slave storage.
-        LocalFileBucketIndex slaveBucketIndex = new LocalFileBucketIndex();
+        LocalFileDataBucketManager slaveBucketIndex = new LocalFileDataBucketManager();
         slaveBucketIndex.setBaseDir(slaveStorageBaseDir.getAbsolutePath());
         slaveBucketIndex.setBucketFilePrefix("Bucket-");
         slaveBucketIndex.setMaxBucketLengthMB(1000);

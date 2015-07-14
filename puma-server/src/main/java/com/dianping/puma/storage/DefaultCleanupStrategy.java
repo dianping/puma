@@ -47,7 +47,7 @@ public class DefaultCleanupStrategy implements CleanupStrategy {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void cleanup(BucketIndex index) {
+    public void cleanup(DataBucketManager index) {
         try {
             toBeDeleteBuckets.addAll(index.bulkGetRemainNDay(preservedDay));
 

@@ -11,9 +11,9 @@ import com.dianping.puma.storage.exception.StorageClosedException;
 public class DefaultBucketManager implements BucketManager {
 	private static final Logger log = Logger.getLogger(DefaultBucketManager.class);
 
-	private BucketIndex masterIndex;
+	private DataBucketManager masterIndex;
 
-	private BucketIndex slaveIndex;
+	private DataBucketManager slaveIndex;
 
 	private ArchiveStrategy archiveStrategy;
 
@@ -21,7 +21,7 @@ public class DefaultBucketManager implements BucketManager {
 
 	private volatile boolean stopped = true;
 
-	public DefaultBucketManager(BucketIndex masterIndex, BucketIndex slaveIndex, ArchiveStrategy archiveStrategy,
+	public DefaultBucketManager(DataBucketManager masterIndex, DataBucketManager slaveIndex, ArchiveStrategy archiveStrategy,
 	      CleanupStrategy cleanupStrategy) {
 		this.archiveStrategy = archiveStrategy;
 		this.cleanupStrategy = cleanupStrategy;
@@ -59,12 +59,12 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	@Override
-	public Bucket getNextReadBucket(long seq) throws StorageClosedException, IOException {
+	public DataBucket getNextReadBucket(long seq) throws StorageClosedException, IOException {
 		checkClosed();
 		Sequence sequence = new Sequence(seq);
 		sequence = sequence.clearOffset();
 
-		Bucket bucket = slaveIndex.getNextReadBucket(sequence);
+		DataBucket bucket = slaveIndex.getNextReadBucket(sequence);
 
 		if (bucket != null) {
 			return bucket;
@@ -79,9 +79,9 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	@Override
-	public Bucket getNextWriteBucket() throws IOException, StorageClosedException {
+	public DataBucket getNextWriteBucket() throws IOException, StorageClosedException {
 		checkClosed();
-		Bucket bucket = masterIndex.getNextWriteBucket();
+		DataBucket bucket = masterIndex.getNextWriteBucket();
 
 		if (bucket != null) {
 			masterIndex.add(bucket);
@@ -92,10 +92,10 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	@Override
-	public Bucket getReadBucket(long seq, boolean fromNext) throws IOException, StorageClosedException {
+	public DataBucket getReadBucket(long seq, boolean fromNext) throws IOException, StorageClosedException {
 		checkClosed();
 
-		Bucket bucket = slaveIndex.getReadBucket(seq, fromNext);
+		DataBucket bucket = slaveIndex.getReadBucket(seq, fromNext);
 
 		if (bucket != null) {
 			return bucket;
@@ -202,5 +202,4 @@ public class DefaultBucketManager implements BucketManager {
 	public void updateLatestSequence(Sequence sequence) {
 		this.masterIndex.updateLatestSequence(sequence);
 	}
-
 }

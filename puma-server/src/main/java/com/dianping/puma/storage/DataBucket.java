@@ -26,7 +26,7 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  * @author Leo Liang
  * 
  */
-public interface Bucket extends LifeCycle<IOException> {
+public interface DataBucket extends LifeCycle<IOException> {
     /**
      * 获得当前存储对应的起始sequence(Offset一定为0)
      * 

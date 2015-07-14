@@ -16,7 +16,6 @@
 package com.dianping.puma.storage;
 
 /**
- * TODO Comment of BinlogIndexKey
  * 
  * @author Leo Liang
  * 

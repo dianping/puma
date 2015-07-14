@@ -17,31 +17,24 @@ package com.dianping.puma.storage;
 
 import org.apache.commons.lang.math.NumberUtils;
 
-
 /**
- * TODO Comment of LongIndexItemConvertor
  * @author Leo Liang
  *
  */
 public class LongIndexItemConvertor implements IndexItemConvertor<Long> {
 
-    /* (non-Javadoc)
-     * @see com.dianping.puma.storage.IndexItemConvertor#convertFromString(java.lang.String)
-     */
-    @Override
-    public Long convertFromString(String stringValue) {
-        if(NumberUtils.isNumber(stringValue)){
-            return Long.valueOf(stringValue);
-        }
-        return null;
-    }
+	@Override
+	public Long convertFromObj(Object value) {
+		String stringValue = (String) value;
+		if (NumberUtils.isNumber(stringValue)) {
+			return Long.valueOf(stringValue);
+		}
+		return null;
+	}
 
-    /* (non-Javadoc)
-     * @see com.dianping.puma.storage.IndexItemConvertor#convertToString(java.lang.Object)
-     */
-    @Override
-    public String convertToString(Long value) {
-        return Long.toString(value);
-    }
+	@Override
+	public String convertToObj(Long value) {
+		return Long.toString(value);
+	}
 
 }

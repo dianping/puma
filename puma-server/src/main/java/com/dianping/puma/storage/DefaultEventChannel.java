@@ -15,7 +15,7 @@ public class DefaultEventChannel implements EventChannel {
 
 	private EventCodec codec;
 
-	private Bucket bucket;
+	private DataBucket bucket;
 
 	private long seq;
 
@@ -32,7 +32,6 @@ public class DefaultEventChannel implements EventChannel {
 		this.codec = codec;
 		this.seq = bucket.getStartingSequece().longValue();
 		stopped = false;
-
 	}
 
 	@Override

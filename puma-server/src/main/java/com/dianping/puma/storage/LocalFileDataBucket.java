@@ -14,12 +14,12 @@ import java.util.zip.GZIPInputStream;
  * @author Leo Liang
  * 
  */
-public class LocalFileBucket extends AbstractBucket {
+public class LocalFileDataBucket extends AbstractDataBucket {
 
     private static final int BUF_SIZE = 1024 * 4;
     private RandomAccessFile file;
 
-    public LocalFileBucket(File file, Sequence startingSequence, int maxSizeMB, String fileName, boolean compress)
+    public LocalFileDataBucket(File file, Sequence startingSequence, int maxSizeMB, String fileName, boolean compress)
             throws IOException {
         super(startingSequence, maxSizeMB, fileName, compress);
         this.file = new RandomAccessFile(file, "rw");

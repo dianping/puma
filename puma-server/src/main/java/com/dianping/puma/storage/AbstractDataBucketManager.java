@@ -37,7 +37,7 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  * @author Leo Liang
  * 
  */
-public abstract class AbstractBucketIndex implements BucketIndex {
+public abstract class AbstractDataBucketManager implements DataBucketManager {
     protected static final String                      PATH_SEPARATOR    = "/";
     private AtomicReference<TreeMap<Sequence, String>> index             = new AtomicReference<TreeMap<Sequence, String>>();
     private String                                     baseDir;
@@ -115,7 +115,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
     }
 
     @Override
-    public void add(Bucket bucket) throws StorageClosedException {
+    public void add(DataBucket bucket) throws StorageClosedException {
         checkClosed();
         TreeMap<Sequence, String> newIndex = new TreeMap<Sequence, String>(index.get());
         newIndex.put(new Sequence(bucket.getStartingSequece()), convertToPath(bucket.getStartingSequece()));
@@ -123,7 +123,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
     }
 
     @Override
-    public Bucket getNextReadBucket(Sequence sequence) throws IOException, StorageClosedException {
+    public DataBucket getNextReadBucket(Sequence sequence) throws IOException, StorageClosedException {
         checkClosed();
         NavigableMap<Sequence, String> tailMap = index.get().tailMap(sequence, false);
         if (!tailMap.isEmpty()) {
@@ -133,11 +133,11 @@ public abstract class AbstractBucketIndex implements BucketIndex {
         return null;
     }
 
-    protected abstract Bucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB)
+    protected abstract DataBucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB)
             throws IOException;
 
     @Override
-    public Bucket getNextWriteBucket() throws IOException, StorageClosedException {
+    public DataBucket getNextWriteBucket() throws IOException, StorageClosedException {
         checkClosed();
         Entry<Sequence, String> lastEntry = index.get().lastEntry();
         Sequence nextSeq = null;
@@ -151,7 +151,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
 
     }
 
-    protected abstract Bucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence)
+    protected abstract DataBucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence)
             throws IOException;
 
     protected int getNowCreationDate() {
@@ -168,7 +168,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
     }
 
     @Override
-    public Bucket getReadBucket(long seq, boolean fromNext) throws StorageClosedException, IOException {
+    public DataBucket getReadBucket(long seq, boolean fromNext) throws StorageClosedException, IOException {
         checkClosed();
         Sequence sequence = null;
         String path = null;
@@ -202,7 +202,7 @@ public abstract class AbstractBucketIndex implements BucketIndex {
         }
 
         int offset = sequence.getOffset();
-        Bucket bucket = doGetReadBucket(baseDir, path, sequence.clearOffset(), maxBucketLengthMB);
+        DataBucket bucket = doGetReadBucket(baseDir, path, sequence.clearOffset(), maxBucketLengthMB);
 
         if (bucket != null) {
             bucket.skip(offset);

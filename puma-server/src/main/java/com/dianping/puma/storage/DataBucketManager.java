@@ -27,9 +27,9 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  * @author Leo Liang
  * 
  */
-public interface BucketIndex extends LifeCycle<IOException> {
+public interface DataBucketManager extends LifeCycle<IOException> {
 
-    public void add(Bucket bucket) throws StorageClosedException;
+    public void add(DataBucket bucket) throws StorageClosedException;
 
     public void add(List<String> paths) throws StorageClosedException;
 
@@ -37,13 +37,13 @@ public interface BucketIndex extends LifeCycle<IOException> {
 
     public List<String> bulkGetRemainNDay(int remainDay) throws StorageClosedException;
 
-    public Bucket getNextReadBucket(Sequence sequence) throws StorageClosedException, IOException;
+    public DataBucket getNextReadBucket(Sequence sequence) throws StorageClosedException, IOException;
 
-    public Bucket getNextWriteBucket() throws StorageClosedException, IOException;
+    public DataBucket getNextWriteBucket() throws StorageClosedException, IOException;
 
     public boolean hasNexReadBucket(Sequence sequence) throws StorageClosedException;
 
-    public Bucket getReadBucket(long seq, boolean fromNext) throws StorageClosedException, IOException;
+    public DataBucket getReadBucket(long seq, boolean fromNext) throws StorageClosedException, IOException;
 
     public int size();
 

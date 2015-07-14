@@ -32,7 +32,7 @@ import com.dianping.puma.storage.exception.StorageClosedException;
 /**
  * @author Leo Liang
  */
-public class HDFSBucketIndex extends AbstractBucketIndex {
+public class HDFSDataBucketManager extends AbstractDataBucketManager {
 
     private FileSystem fileSystem;
     private HDFSConfig hdfsConfig;
@@ -91,9 +91,9 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
     }
 
     @Override
-    protected Bucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB)
+    protected DataBucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB)
             throws IOException {
-        return new HDFSBucket(fileSystem, baseDir, path, startingSeq, !isMaster());
+        return new HDFSDataBucket(fileSystem, baseDir, path, startingSeq, !isMaster());
     }
 
     /*
@@ -120,7 +120,7 @@ public class HDFSBucketIndex extends AbstractBucketIndex {
      * .lang.String, java.lang.String, com.dianping.puma.storage.Sequence)
      */
     @Override
-    protected Bucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence)
+    protected DataBucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence)
             throws IOException {
         return null;
     }

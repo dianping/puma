@@ -13,11 +13,11 @@ import org.apache.hadoop.fs.Path;
  * @author Leo Liang
  * 
  */
-public class HDFSBucket extends AbstractBucket {
+public class HDFSDataBucket extends AbstractDataBucket {
 
     private Path file;
 
-    public HDFSBucket(FileSystem fileSystem, String baseDir, String path, Sequence startingSequence, boolean compress)
+    public HDFSDataBucket(FileSystem fileSystem, String baseDir, String path, Sequence startingSequence, boolean compress)
             throws IOException {
         super(startingSequence, -1, path, compress);
         this.file = new Path(baseDir, path);

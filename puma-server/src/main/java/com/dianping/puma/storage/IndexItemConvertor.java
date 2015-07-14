@@ -20,7 +20,7 @@ package com.dianping.puma.storage;
  * 
  */
 public interface IndexItemConvertor<V> {
-    public V convertFromString(String stringValue);
+	public V convertFromObj(Object value);
 
-    public String convertToString(V value);
+	public Object convertToObj(V value);
 }

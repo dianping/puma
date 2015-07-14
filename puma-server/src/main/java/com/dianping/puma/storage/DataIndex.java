@@ -24,11 +24,13 @@ import com.dianping.puma.core.LifeCycle;
  * 
  */
 public interface DataIndex<K extends DataIndexKey<K>, V> extends LifeCycle<IOException> {
-    public V find(K key);
+	public V find(K key);
 
-    public void addL1Index(K key, String l2IndexName) throws IOException;
+	public void addL1Index(K key, String l2IndexName) throws IOException;
 
-    public void addL2Index(K key, V value) throws IOException;
+	public void addL2Index(K key, V value) throws IOException;
 
-    public void removeByL2IndexName(String l2IndexName) throws IOException;
+	public void removeByL2IndexName(String l2IndexName) throws IOException;
+
+	public IndexBucket<K,V> getIndexBucket(K key) throws IOException;
 }

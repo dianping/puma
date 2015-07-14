@@ -24,29 +24,28 @@ import org.apache.commons.lang.StringUtils;
  */
 
 public class BinlogIndexKeyConvertor implements IndexItemConvertor<BinlogIndexKey> {
-    private static final String SEPARATOR = "!";
+	private static final String SEPARATOR = "!";
 
-    @Override
-    public BinlogIndexKey convertFromString(String stringValue) {
-        if (stringValue != null) {
-            String[] splits = stringValue.split(SEPARATOR);
-            if (splits != null && splits.length == 3 && StringUtils.isNumeric(splits[0])
-                    && StringUtils.isNotBlank(splits[1]) && StringUtils.isNumeric(splits[2])) {
-                return new BinlogIndexKey(splits[1], Long.valueOf(splits[2]), Long.valueOf(splits[0]));
-            }
-        }
-        return null;
-    }
+	@Override
+	public BinlogIndexKey convertFromObj(Object value) {
+		String stringValue = (String) value;
+		if (stringValue != null) {
+			String[] splits = stringValue.split(SEPARATOR);
+			if (splits != null && splits.length == 3 && StringUtils.isNumeric(splits[0])
+			      && StringUtils.isNotBlank(splits[1]) && StringUtils.isNumeric(splits[2])) {
+				return new BinlogIndexKey(splits[1], Long.valueOf(splits[2]), Long.valueOf(splits[0]));
+			}
+		}
+		return null;
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.dianping.puma.storage.IndexItemConvertor#convertToString(java
-     * .lang.Object)
-     */
-    @Override
-    public String convertToString(BinlogIndexKey value) {
-        return value.getServerId() + SEPARATOR + value.getBinlogFile() + SEPARATOR + value.getBinlogPos();
-    }
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dianping.puma.storage.IndexItemConvertor#convertToString(java .lang.Object)
+	 */
+	@Override
+	public String convertToObj(BinlogIndexKey value) {
+		return value.getServerId() + SEPARATOR + value.getBinlogFile() + SEPARATOR + value.getBinlogPos();
+	}
 }

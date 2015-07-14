@@ -25,7 +25,7 @@ import com.dianping.puma.storage.exception.StorageClosedException;
 
 public class LocalBucketTest {
 
-    protected LocalFileBucket localFileBucket;
+    protected LocalFileDataBucket localFileBucket;
     protected File            work    = null;
     protected File            zipWork = null;
     protected File            zipDir  = null;
@@ -54,7 +54,7 @@ public class LocalBucketTest {
         Sequence sequence = new Sequence(120710, 0, 0);
 
         try {
-            localFileBucket = new LocalFileBucket(work, sequence, 10, "20120710/bucket-0", false);
+            localFileBucket = new LocalFileDataBucket(work, sequence, 10, "20120710/bucket-0", false);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -162,7 +162,7 @@ public class LocalBucketTest {
         event.setSeq(seq.longValue());
         event.setTable(null);
 
-        LocalFileBucketIndex bucketIndex = new LocalFileBucketIndex();
+        LocalFileDataBucketManager bucketIndex = new LocalFileDataBucketManager();
         bucketIndex.setMaster(false);
         bucketIndex.setBaseDir(new File(System.getProperty("java.io.tmpdir", "."), "Puma/zip/").getAbsolutePath());
         bucketIndex.setBucketFilePrefix("bucket-");
@@ -203,7 +203,7 @@ public class LocalBucketTest {
 
             bucketIndex.copyFromLocal(new File(System.getProperty("java.io.tmpdir", "."), "Puma/").getAbsolutePath(), "20120710/bucket-0");
             assertequalByteArray(datas,
-                    new LocalFileBucket(zipWork, new Sequence(120710, 0, 0), 10000, "ffff", true).getNext());
+                    new LocalFileDataBucket(zipWork, new Sequence(120710, 0, 0), 10000, "ffff", true).getNext());
 
         } catch (StorageClosedException e) {
             e.printStackTrace();
@@ -306,7 +306,7 @@ public class LocalBucketTest {
         event.setTable(null);
         Sequence newSeq = null;
         
-        LocalFileBucketIndex bucketIndex = new LocalFileBucketIndex();
+        LocalFileDataBucketManager bucketIndex = new LocalFileDataBucketManager();
         bucketIndex.setMaster(false);
         bucketIndex.setBaseDir(new File(System.getProperty("java.io.tmpdir", "."), "Puma/zip/").getAbsolutePath());
         bucketIndex.setBucketFilePrefix("bucket-");
@@ -342,7 +342,7 @@ public class LocalBucketTest {
 
             try {
                 bucketIndex.copyFromLocal(new File(System.getProperty("java.io.tmpdir", "."), "Puma/").getAbsolutePath(), "20120710/bucket-0");
-                LocalFileBucket zipBucket = new LocalFileBucket(zipWork, new Sequence(120710, 0, 0), 10000, "ffff", true);
+                LocalFileDataBucket zipBucket = new LocalFileDataBucket(zipWork, new Sequence(120710, 0, 0), 10000, "ffff", true);
                 zipBucket.skip(newSeq.getOffset());
 
                 try {
@@ -377,9 +377,9 @@ public class LocalBucketTest {
     @Test
     public void testClose() {
         Sequence sequence = new Sequence(120710, 0, 0);
-        LocalFileBucket bucket = null;
+        LocalFileDataBucket bucket = null;
         try {
-            bucket = new LocalFileBucket(work, sequence, 10, "20120710/bucket-0", false);
+            bucket = new LocalFileDataBucket(work, sequence, 10, "20120710/bucket-0", false);
             bucket.stop();
 
         } catch (FileNotFoundException e) {

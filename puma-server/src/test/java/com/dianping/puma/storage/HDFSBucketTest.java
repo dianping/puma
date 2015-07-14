@@ -26,7 +26,7 @@ import com.dianping.puma.storage.exception.StorageClosedException;
 
 public class HDFSBucketTest {
 
-	protected HDFSBucket			hdfsBucket;
+	protected HDFSDataBucket			hdfsBucket;
 	protected FileSystem			fileSystem;
 	protected FSDataOutputStream	fsoutput;
 
@@ -56,7 +56,7 @@ public class HDFSBucketTest {
 		Sequence sequence = new Sequence(120710, 0, 0);
 
 		try {
-			hdfsBucket = new HDFSBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", sequence, false);
+			hdfsBucket = new HDFSDataBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", sequence, false);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -74,7 +74,7 @@ public class HDFSBucketTest {
 		try {
 			Sequence sequence = new Sequence(120710, 0, 0);
 
-			hdfsBucket = new HDFSBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", sequence, false);
+			hdfsBucket = new HDFSDataBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", sequence, false);
 			this.hdfsBucket.append(null);
 		} catch (StorageClosedException e) {
 			e.printStackTrace();
@@ -93,7 +93,7 @@ public class HDFSBucketTest {
 			Sequence sequence = new Sequence(120710, 0, 0);
 
 			try {
-				hdfsBucket = new HDFSBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", sequence, false);
+				hdfsBucket = new HDFSDataBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", sequence, false);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -144,7 +144,7 @@ public class HDFSBucketTest {
 
 			try {
 
-				hdfsBucket = new HDFSBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", sequence, false);
+				hdfsBucket = new HDFSDataBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", sequence, false);
 				assertequalByteArray(datas, this.hdfsBucket.getNext());
 			} catch (StorageClosedException e) {
 				e.printStackTrace();
@@ -195,7 +195,7 @@ public class HDFSBucketTest {
 			fsoutput.close();
 
 			try {
-				hdfsBucket = new HDFSBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", seq, false);
+				hdfsBucket = new HDFSDataBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", seq, false);
 				this.hdfsBucket.skip(newSeq.getOffset());
 
 				try {
@@ -230,9 +230,9 @@ public class HDFSBucketTest {
 	@Test
 	public void testClose() {
 		Sequence sequence = new Sequence(120710, 0, 0);
-		HDFSBucket bucket = null;
+		HDFSDataBucket bucket = null;
 		try {
-			bucket = new HDFSBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", sequence, false);
+			bucket = new HDFSDataBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", sequence, false);
 			bucket.stop();
 
 		} catch (FileNotFoundException e) {
@@ -257,7 +257,7 @@ public class HDFSBucketTest {
 		Sequence sequence = new Sequence(120710, 0, 0);
 
 		try {
-			hdfsBucket = new HDFSBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", sequence, false);
+			hdfsBucket = new HDFSDataBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", sequence, false);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

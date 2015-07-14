@@ -33,12 +33,12 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  * @author Leo Liang
  * 
  */
-public class LocalFileBucketIndex extends AbstractBucketIndex {
+public class LocalFileDataBucketManager extends AbstractDataBucketManager {
 
     @Override
-    protected Bucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB)
+    protected DataBucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB)
             throws IOException {
-        return new LocalFileBucket(new File(baseDir, path), startingSeq, maxSizeMB, path, !isMaster());
+        return new LocalFileDataBucket(new File(baseDir, path), startingSeq, maxSizeMB, path, !isMaster());
     }
 
     /*
@@ -93,7 +93,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
     }
 
     @Override
-    protected Bucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence)
+    protected DataBucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence)
             throws IOException {
         File bucketFile = new File(baseDir, bucketPath);
 
@@ -106,7 +106,7 @@ public class LocalFileBucketIndex extends AbstractBucketIndex {
         if (!bucketFile.createNewFile()) {
             throw new IOException(String.format("Can't create writeBucket(%s)!", bucketFile.getAbsolutePath()));
         } else {
-            return new LocalFileBucket(bucketFile, startingSequence, getMaxBucketLengthMB(), bucketPath, !isMaster());
+            return new LocalFileDataBucket(bucketFile, startingSequence, getMaxBucketLengthMB(), bucketPath, !isMaster());
         }
 
     }

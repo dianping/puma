@@ -50,7 +50,7 @@ public class DefaultCleanupStrategyTest {
         int preservedDay = 5;
         DefaultCleanupStrategy defaultCleanupStrategy = new DefaultCleanupStrategy();
         defaultCleanupStrategy.setPreservedDay(preservedDay);
-        LocalFileBucketIndex index = new LocalFileBucketIndex();
+        LocalFileDataBucketManager index = new LocalFileDataBucketManager();
         index.setBaseDir(baseDir.getAbsolutePath());
         index.setBucketFilePrefix("bucket-");
 

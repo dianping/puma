@@ -15,6 +15,7 @@
  */
 package com.dianping.puma.parser.meta;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -36,12 +37,10 @@ import com.mysql.jdbc.PreparedStatement;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 /**
- * TODO Comment of DefaultTableMetaInfoFetcher
- *
  * @author Leo Liang
  */
 public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
-	
+
 	private static final Logger log = Logger.getLogger(DefaultTableMetaInfoFetcher.class);
 
 	private AtomicReference<Map<String, TableMetaInfo>> tableMetaInfoCache = new AtomicReference<Map<String, TableMetaInfo>>();
@@ -125,8 +124,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * com.dianping.puma.datahandler.TableMetasInfoFetcher#refreshTableMeta()
+	 * @see com.dianping.puma.datahandler.TableMetasInfoFetcher#refreshTableMeta()
 	 */
 	@Override
 	public void refreshTableMeta(DdlEvent ddlEvent, boolean isRefresh) {
@@ -157,6 +155,8 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 
 			t.setStatus("0");
 		} catch (Exception e) {
+
+			// TODO if fail, then what? then stop and alarm
 			t.setStatus(e);
 			log.error("Refresh TableMeta failed.", e);
 		} finally {
@@ -195,7 +195,8 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 				sqlStr.append(PREFIX_BRACKET + TABLE_SCHEMA + EQUAL_SQL + INFIX_REPLACE);
 				if (database.getValue() != null && database.getValue().size() > 0) {
 					sqlStr.append(AND_SQL + TABLE_NAME + IN_SQL + PREFIX_BRACKET);
-					for (@SuppressWarnings("unused") String table : database.getValue()) {
+					for (@SuppressWarnings("unused")
+					String table : database.getValue()) {
 						sqlStr.append(INFIX_REPLACE + INFIX_DOT);
 					}
 					sqlStr = sqlStr.delete(sqlStr.length() - INFIX_DOT.length(), sqlStr.length());
@@ -209,7 +210,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 	}
 
 	private void setStatementParams(PreparedStatement ps, Map<String, List<String>> acceptedDataTables)
-			throws SQLException {
+	      throws SQLException {
 		if (acceptedDataTables == null || acceptedDataTables.isEmpty()) {
 			return;
 		}
@@ -230,8 +231,9 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 	 * @param newTableMeta
 	 * @param rs
 	 * @throws SQLException
+	 * @throws IOException
 	 */
-	protected void fillTableMetaCache(ResultSet rs) throws SQLException {
+	protected void fillTableMetaCache(ResultSet rs) throws SQLException, IOException {
 		Map<String, TableMetaInfo> newTableMeta = new HashMap<String, TableMetaInfo>();
 		while (rs.next()) {
 			String db = rs.getString("TABLE_SCHEMA");
@@ -299,5 +301,4 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 	public void setTableMetaRefreshFilter(TableMetaRefreshFilter tableMetaRefreshFilter) {
 		this.tableMetaRefreshFilter = tableMetaRefreshFilter;
 	}
-
 }

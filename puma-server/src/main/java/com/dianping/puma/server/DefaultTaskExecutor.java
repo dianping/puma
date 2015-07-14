@@ -29,7 +29,6 @@ import com.dianping.puma.parser.mysql.UpdateExecutor;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
 import com.dianping.puma.parser.mysql.event.RotateEvent;
 import com.dianping.puma.parser.mysql.packet.*;
-import com.dianping.puma.server.container.DefaultTaskContainer;
 import com.dianping.puma.server.exception.ServerEventFetcherException;
 import com.dianping.puma.server.exception.ServerEventParserException;
 import com.dianping.puma.server.exception.ServerEventRuntimeException;

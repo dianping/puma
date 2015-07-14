@@ -28,6 +28,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
+import com.dianping.puma.storage.index.BinlogIndexKey;
+import com.dianping.puma.storage.index.BinlogIndexKeyConvertor;
+import com.dianping.puma.storage.index.DefaultDataIndexImpl;
+import com.dianping.puma.storage.index.LongIndexItemConvertor;
+
 /**
  * TODO Comment of DefaultCleanupStrategyTest
  * 
@@ -50,7 +56,7 @@ public class DefaultCleanupStrategyTest {
         int preservedDay = 5;
         DefaultCleanupStrategy defaultCleanupStrategy = new DefaultCleanupStrategy();
         defaultCleanupStrategy.setPreservedDay(preservedDay);
-        LocalFileBucketIndex index = new LocalFileBucketIndex();
+        LocalFileDataBucketManager index = new LocalFileDataBucketManager();
         index.setBaseDir(baseDir.getAbsolutePath());
         index.setBucketFilePrefix("bucket-");
 

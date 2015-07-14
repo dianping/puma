@@ -1,5 +1,16 @@
 package com.dianping.puma.server.container;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.biz.service.PumaTaskService;
@@ -13,22 +24,9 @@ import com.dianping.puma.sender.Sender;
 import com.dianping.puma.server.TaskExecutor;
 import com.dianping.puma.server.builder.TaskBuilder;
 import com.dianping.puma.storage.EventStorage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class DefaultTaskContainer implements TaskContainer, InitializingBean {
-
-    private static Logger LOG = LoggerFactory.getLogger(DefaultTaskContainer.class);
 
     private ConcurrentHashMap<String, TaskExecutor> taskExecutors = new ConcurrentHashMap<String, TaskExecutor>();
 

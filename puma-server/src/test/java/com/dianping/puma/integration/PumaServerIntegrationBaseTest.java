@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Properties;
 
 import com.dianping.puma.biz.entity.old.SrcDBInstance;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -43,18 +44,17 @@ import com.dianping.puma.datahandler.DefaultDataHandler;
 import com.dianping.puma.parser.DefaultBinlogParser;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
-import com.dianping.puma.parser.meta.TableMetaInfoStore;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
 import com.dianping.puma.server.DefaultTaskExecutor;
 import com.dianping.puma.storage.ArchiveStrategy;
-import com.dianping.puma.storage.BucketIndex;
 import com.dianping.puma.storage.CleanupStrategy;
-import com.dianping.puma.storage.DataIndex;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.EventChannel;
-import com.dianping.puma.storage.LocalFileBucketIndex;
+import com.dianping.puma.storage.bucket.DataBucketManager;
+import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
+import com.dianping.puma.storage.index.DataIndex;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 /**
@@ -73,8 +73,8 @@ public abstract class PumaServerIntegrationBaseTest {
     protected static long serverId;
     protected DefaultTaskExecutor server;
     protected DefaultEventStorage storage;
-    protected LocalFileBucketIndex masterIndex;
-    protected LocalFileBucketIndex slaveIndex;
+    protected LocalFileDataBucketManager masterIndex;
+    protected LocalFileDataBucketManager slaveIndex;
     protected FileDumpSender sender;
     private static File storageMasterBaseDir = new File(System.getProperty("java.io.tmpdir", "."), "Puma");
     private static File storageSlaveBaseDir = new File(System.getProperty("java.io.tmpdir", "."), "Puma/bak/");
@@ -106,11 +106,6 @@ public abstract class PumaServerIntegrationBaseTest {
 
         // init tablemetasinfofetcher
         DefaultTableMetaInfoFetcher tableMetaInfoFetcher = new DefaultTableMetaInfoFetcher();
-        SrcDBInstance srcDbInstance = new SrcDBInstance();
-        tableMetaInfoFetcher.setMetaDBHost(host);
-        tableMetaInfoFetcher.setMetaDBPort(port);
-        tableMetaInfoFetcher.setMetaDBUsername(user);
-        tableMetaInfoFetcher.setMetaDBPassword(pwd);
         
         // init dataHandler
         DefaultDataHandler dataHandler = new DefaultDataHandler();
@@ -118,11 +113,11 @@ public abstract class PumaServerIntegrationBaseTest {
         dataHandler.start();
 
         // init index
-        masterIndex = new LocalFileBucketIndex();
+        masterIndex = new LocalFileDataBucketManager();
         masterIndex.setBaseDir(storageMasterBaseDir.getAbsolutePath());
         masterIndex.setMaxBucketLengthMB(1);
         masterIndex.start();
-        slaveIndex = new LocalFileBucketIndex();
+        slaveIndex = new LocalFileDataBucketManager();
         slaveIndex.setBaseDir(storageSlaveBaseDir.getAbsolutePath());
         slaveIndex.start();
 
@@ -132,13 +127,13 @@ public abstract class PumaServerIntegrationBaseTest {
         storage.setArchiveStrategy(new ArchiveStrategy() {
 
             @Override
-            public void archive(BucketIndex masterIndex, BucketIndex slaveIndex) {
+            public void archive(DataBucketManager masterIndex, DataBucketManager slaveIndex) {
             }
         });
         storage.setCleanupStrategy(new CleanupStrategy() {
 
             @Override
-            public void cleanup(BucketIndex index) {
+            public void cleanup(DataBucketManager index) {
 
             }
 

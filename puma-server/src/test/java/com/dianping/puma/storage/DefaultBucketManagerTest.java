@@ -14,16 +14,21 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.dianping.puma.storage.bucket.AbstractDataBucketManager;
+import com.dianping.puma.storage.bucket.DataBucket;
+import com.dianping.puma.storage.bucket.DataBucketManager;
+import com.dianping.puma.storage.bucket.DefaultBucketManager;
+import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 public class DefaultBucketManagerTest {
 
 	public DefaultBucketManager	bucketManager;
 	protected File				work	= null;
-	public BucketIndex			masterIndex;
-	public BucketIndex			masterNullIndex;
-	public BucketIndex			slaveIndex;
-	public BucketIndex			slaveNullIndex;
+	public DataBucketManager			masterIndex;
+	public DataBucketManager			masterNullIndex;
+	public DataBucketManager			slaveIndex;
+	public DataBucketManager			slaveNullIndex;
 	public ArchiveStrategy		archiveStrategy;
 	public CleanupStrategy		cleanupStrategy;
 
@@ -53,10 +58,10 @@ public class DefaultBucketManagerTest {
 		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/null");
 		if (work.mkdirs())
 			System.out.println("create a file: " + work.getAbsolutePath());
-		masterIndex = new LocalFileBucketIndex();
-		((AbstractBucketIndex) masterIndex).setBaseDir(System.getProperty("java.io.tmpdir", ".") + "/Puma/master");
-		((AbstractBucketIndex) masterIndex).setBucketFilePrefix("bucket-");
-		((AbstractBucketIndex) masterIndex).setMaxBucketLengthMB(500);
+		masterIndex = new LocalFileDataBucketManager();
+		((AbstractDataBucketManager) masterIndex).setBaseDir(System.getProperty("java.io.tmpdir", ".") + "/Puma/master");
+		((AbstractDataBucketManager) masterIndex).setBucketFilePrefix("bucket-");
+		((AbstractDataBucketManager) masterIndex).setMaxBucketLengthMB(500);
 
 		masterIndex.start();
 		List<String> paths = new ArrayList<String>();
@@ -64,16 +69,16 @@ public class DefaultBucketManagerTest {
 		paths.add("20120711/bucket-1");
 		masterIndex.add(paths);
 
-		masterNullIndex = new LocalFileBucketIndex();
-		((AbstractBucketIndex) masterNullIndex).setBaseDir(System.getProperty("java.io.tmpdir", ".") + "/Puma/null");
-		((AbstractBucketIndex) masterNullIndex).setBucketFilePrefix("bucket-");
-		((AbstractBucketIndex) masterNullIndex).setMaxBucketLengthMB(500);
+		masterNullIndex = new LocalFileDataBucketManager();
+		((AbstractDataBucketManager) masterNullIndex).setBaseDir(System.getProperty("java.io.tmpdir", ".") + "/Puma/null");
+		((AbstractDataBucketManager) masterNullIndex).setBucketFilePrefix("bucket-");
+		((AbstractDataBucketManager) masterNullIndex).setMaxBucketLengthMB(500);
 		masterNullIndex.start();
 
-		slaveIndex = new LocalFileBucketIndex();
-		((AbstractBucketIndex) slaveIndex).setBaseDir(System.getProperty("java.io.tmpdir", ".") + "/Puma/slave");
-		((AbstractBucketIndex) slaveIndex).setBucketFilePrefix("bucket-");
-		((AbstractBucketIndex) slaveIndex).setMaxBucketLengthMB(500);
+		slaveIndex = new LocalFileDataBucketManager();
+		((AbstractDataBucketManager) slaveIndex).setBaseDir(System.getProperty("java.io.tmpdir", ".") + "/Puma/slave");
+		((AbstractDataBucketManager) slaveIndex).setBucketFilePrefix("bucket-");
+		((AbstractDataBucketManager) slaveIndex).setMaxBucketLengthMB(500);
 
 		slaveIndex.start();
 		List<String> slavepaths = new ArrayList<String>();
@@ -81,10 +86,10 @@ public class DefaultBucketManagerTest {
 		slavepaths.add("20120710/bucket-1");
 		slaveIndex.add(slavepaths);
 
-		slaveNullIndex = new LocalFileBucketIndex();
-		((AbstractBucketIndex) slaveNullIndex).setBaseDir(System.getProperty("java.io.tmpdir", ".") + "/Puma/null");
-		((AbstractBucketIndex) slaveNullIndex).setBucketFilePrefix("bucket-");
-		((AbstractBucketIndex) slaveNullIndex).setMaxBucketLengthMB(500);
+		slaveNullIndex = new LocalFileDataBucketManager();
+		((AbstractDataBucketManager) slaveNullIndex).setBaseDir(System.getProperty("java.io.tmpdir", ".") + "/Puma/null");
+		((AbstractDataBucketManager) slaveNullIndex).setBucketFilePrefix("bucket-");
+		((AbstractDataBucketManager) slaveNullIndex).setMaxBucketLengthMB(500);
 		slaveNullIndex.start();
 
 	}
@@ -94,7 +99,7 @@ public class DefaultBucketManagerTest {
 		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, archiveStrategy, cleanupStrategy);
 		bucketManager.start();
 
-		Bucket bucket = bucketManager.getReadBucket(-1, true);
+		DataBucket bucket = bucketManager.getReadBucket(-1, true);
 		Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
 		Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
 		bucket.stop();
@@ -197,7 +202,7 @@ public class DefaultBucketManagerTest {
 		bucketManager.start();
 
 		Sequence sequence = new Sequence(120710, 0, 0);
-		Bucket bucket = bucketManager.getNextReadBucket(sequence.longValue());
+		DataBucket bucket = bucketManager.getNextReadBucket(sequence.longValue());
 		Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
 		Assert.assertEquals(1, bucket.getStartingSequece().getNumber());
 		bucket.stop();
@@ -287,7 +292,7 @@ public class DefaultBucketManagerTest {
 		bucketManager.start();
 
 		// TDODO
-		Bucket bucket = bucketManager.getNextWriteBucket();
+		DataBucket bucket = bucketManager.getNextWriteBucket();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
 		Assert.assertEquals(new Sequence(Integer.valueOf(sdf.format(new Date())), 0).getCreationDate(), bucket
 				.getStartingSequece().getCreationDate());

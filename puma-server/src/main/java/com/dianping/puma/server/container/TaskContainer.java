@@ -1,9 +1,9 @@
 package com.dianping.puma.server.container;
 
+import java.util.List;
+
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.server.TaskExecutor;
-
-import java.util.List;
 
 public interface TaskContainer {
 

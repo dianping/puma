@@ -24,6 +24,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.status.SystemStatusContainer;
+import com.dianping.puma.storage.bucket.DataBucketManager;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
@@ -62,7 +63,7 @@ public class DefaultArchiveStrategy implements ArchiveStrategy {
    }
 
 	@Override
-	public void archive(BucketIndex masterIndex, BucketIndex slaveIndex) {
+	public void archive(DataBucketManager masterIndex, DataBucketManager slaveIndex) {
 		try {
 			if (toBeDeleteBuckets.size() >= stopTheWorldCount) {
 				SystemStatusContainer.instance.stopTheWorld(serverName);
@@ -119,7 +120,7 @@ public class DefaultArchiveStrategy implements ArchiveStrategy {
 		}
 	}
 
-	private boolean doArchive(String baseDir, String path, BucketIndex dest, List<String> copiedFiles) {
+	private boolean doArchive(String baseDir, String path, DataBucketManager dest, List<String> copiedFiles) {
 		try {
 			dest.copyFromLocal(baseDir, path);
 			copiedFiles.add(path);

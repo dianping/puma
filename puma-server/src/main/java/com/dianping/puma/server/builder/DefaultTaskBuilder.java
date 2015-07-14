@@ -1,47 +1,18 @@
 package com.dianping.puma.server.builder;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.dianping.puma.biz.entity.PumaTaskEntity;
-import com.dianping.puma.biz.entity.old.PumaTask;
-import com.dianping.puma.biz.entity.old.SrcDBInstance;
-import com.dianping.puma.biz.entity.TaskStateEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.biz.service.SrcDBInstanceService;
 import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.core.codec.RawEventCodec;
-import com.dianping.puma.core.constant.Status;
-import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.core.model.event.EventCenter;
 import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
-import com.dianping.puma.core.util.sql.DDLType;
-import com.dianping.puma.datahandler.DefaultDataHandler;
-import com.dianping.puma.filter.DDLEventFilter;
-import com.dianping.puma.filter.DMLEventFilter;
-import com.dianping.puma.filter.DefaultEventFilterChain;
-import com.dianping.puma.filter.EventFilter;
-import com.dianping.puma.filter.EventFilterChain;
-import com.dianping.puma.filter.TableMetaRefreshFilter;
-import com.dianping.puma.filter.TransactionEventFilter;
-import com.dianping.puma.parser.DefaultBinlogParser;
-import com.dianping.puma.parser.Parser;
-import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
-import com.dianping.puma.sender.FileDumpSender;
-import com.dianping.puma.sender.Sender;
-import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
-import com.dianping.puma.server.DefaultTaskExecutor;
 import com.dianping.puma.server.TaskExecutor;
-import com.dianping.puma.storage.DefaultArchiveStrategy;
-import com.dianping.puma.storage.DefaultCleanupStrategy;
-import com.dianping.puma.storage.DefaultEventStorage;
-import com.dianping.puma.storage.LocalFileBucketIndex;
 
 @Service("taskExecutorBuilder")
 public class DefaultTaskBuilder implements TaskBuilder {

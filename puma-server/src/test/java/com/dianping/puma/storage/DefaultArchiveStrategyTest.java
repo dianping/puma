@@ -16,10 +16,13 @@
 package com.dianping.puma.storage;
 
 import junit.framework.Assert;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
 
 import java.io.File;
 
@@ -41,10 +44,10 @@ public class DefaultArchiveStrategyTest {
         DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
         archiveStrategy.setServerName("test");
         archiveStrategy.setMaxMasterFileCount(5);
-        LocalFileBucketIndex masterIndex = new LocalFileBucketIndex();
+        LocalFileDataBucketManager masterIndex = new LocalFileDataBucketManager();
         masterIndex.setBaseDir(masterBaseDir.getAbsolutePath());
         masterIndex.setBucketFilePrefix("bucket-");
-        LocalFileBucketIndex slaveIndex = new LocalFileBucketIndex();
+        LocalFileDataBucketManager slaveIndex = new LocalFileDataBucketManager();
         slaveIndex.setBaseDir(slaveBaseDir.getAbsolutePath());
         slaveIndex.setBucketFilePrefix("bucket-");
 
@@ -85,10 +88,10 @@ public class DefaultArchiveStrategyTest {
         DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
         archiveStrategy.setServerName("test");
         archiveStrategy.setMaxMasterFileCount(12);
-        LocalFileBucketIndex masterIndex = new LocalFileBucketIndex();
+        LocalFileDataBucketManager masterIndex = new LocalFileDataBucketManager();
         masterIndex.setBaseDir(masterBaseDir.getAbsolutePath());
         masterIndex.setBucketFilePrefix("bucket-");
-        LocalFileBucketIndex slaveIndex = new LocalFileBucketIndex();
+        LocalFileDataBucketManager slaveIndex = new LocalFileDataBucketManager();
         slaveIndex.setBaseDir(slaveBaseDir.getAbsolutePath());
         slaveIndex.setBucketFilePrefix("bucket-");
 
@@ -125,10 +128,10 @@ public class DefaultArchiveStrategyTest {
         DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
         archiveStrategy.setServerName("test");
         archiveStrategy.setMaxMasterFileCount(13);
-        LocalFileBucketIndex masterIndex = new LocalFileBucketIndex();
+        LocalFileDataBucketManager masterIndex = new LocalFileDataBucketManager();
         masterIndex.setBaseDir(masterBaseDir.getAbsolutePath());
         masterIndex.setBucketFilePrefix("bucket-");
-        LocalFileBucketIndex slaveIndex = new LocalFileBucketIndex();
+        LocalFileDataBucketManager slaveIndex = new LocalFileDataBucketManager();
         slaveIndex.setBaseDir(slaveBaseDir.getAbsolutePath());
         slaveIndex.setBucketFilePrefix("bucket-");
 
@@ -165,10 +168,10 @@ public class DefaultArchiveStrategyTest {
         DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
         archiveStrategy.setServerName("test");
         archiveStrategy.setMaxMasterFileCount(5);
-        LocalFileBucketIndex masterIndex = new LocalFileBucketIndex();
+        LocalFileDataBucketManager masterIndex = new LocalFileDataBucketManager();
         masterIndex.setBaseDir(masterBaseDir.getAbsolutePath());
         masterIndex.setBucketFilePrefix("bucket-");
-        LocalFileBucketIndex slaveIndex = new LocalFileBucketIndex();
+        LocalFileDataBucketManager slaveIndex = new LocalFileDataBucketManager();
         slaveIndex.setBaseDir(slaveBaseDir.getAbsolutePath());
         slaveIndex.setBucketFilePrefix("bucket-");
 

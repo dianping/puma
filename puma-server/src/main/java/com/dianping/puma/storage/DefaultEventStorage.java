@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.dianping.puma.core.codec.EventCodec;
-import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
@@ -18,11 +17,21 @@ import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.status.SystemStatusContainer;
-import com.dianping.puma.storage.exception.InvalidSequenceException;
+import com.dianping.puma.storage.bucket.BucketManager;
+import com.dianping.puma.storage.bucket.DataBucket;
+import com.dianping.puma.storage.bucket.DataBucketManager;
+import com.dianping.puma.storage.bucket.DefaultBucketManager;
+import com.dianping.puma.storage.channel.DefaultEventChannel;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageException;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;
 import com.dianping.puma.storage.exception.StorageWriteException;
+import com.dianping.puma.storage.index.BinlogIndexKey;
+import com.dianping.puma.storage.index.BinlogIndexKeyConvertor;
+import com.dianping.puma.storage.index.DataIndex;
+import com.dianping.puma.storage.index.DefaultDataIndexImpl;
+import com.dianping.puma.storage.index.L2Index;
+import com.dianping.puma.storage.index.L2IndexItemConvertor;
 
 public class DefaultEventStorage implements EventStorage {
 
@@ -75,7 +84,6 @@ public class DefaultEventStorage implements EventStorage {
 	/**
 	 * @return the masterBucketIndex
 	 */
-	@Override
 	public DataBucketManager getMasterBucketIndex() {
 		return masterBucketIndex;
 	}
@@ -83,7 +91,6 @@ public class DefaultEventStorage implements EventStorage {
 	/**
 	 * @return the slaveBucketIndex
 	 */
-	@Override
 	public DataBucketManager getSlaveBucketIndex() {
 		return slaveBucketIndex;
 	}
@@ -109,7 +116,7 @@ public class DefaultEventStorage implements EventStorage {
 				EventChannel channel = channelRef.get();
 				if (channel != null) {
 					try {
-						((IndexEventChannel) channel).setBucketManager(bucketManager);
+						((DefaultEventChannel) channel).setBucketManager(bucketManager);
 						// channel.start();
 					} catch (Exception e) {
 						// ignore
@@ -180,9 +187,8 @@ public class DefaultEventStorage implements EventStorage {
 	@Override
 	public EventChannel getChannel(long seq, long serverId, String binlog, long binlogPos, long timestamp)
 	      throws StorageException {
-		long newSeq = translateSeqIfNeeded(seq, serverId, binlog, binlogPos, timestamp);
-		EventChannel channel = new IndexEventChannel(bucketManager, binlogIndex, codec, new BinlogIndexKey(binlog,
-		      binlogPos, serverId), newSeq, newSeq == seq, "db", "tb1");
+		EventChannel channel = new DefaultEventChannel(bucketManager, binlogIndex, codec, seq, serverId, binlog,
+		      binlogPos, timestamp);
 		openChannels.add(new WeakReference<EventChannel>(channel));
 
 		return channel;
@@ -277,31 +283,10 @@ public class DefaultEventStorage implements EventStorage {
 			l2Index.setDdl(event instanceof DdlEvent);
 			l2Index.setDml(event instanceof RowChangedEvent);
 			l2Index.setSequence(new Sequence(newSeq));
-			
+
 			binlogIndex.addL2Index(binlogKey, l2Index);
 			lastBinlogIndexKey.set(binlogKey);
 		}
-	}
-
-	private long translateSeqIfNeeded(long seq, long serverId, String binlog, long binlogPos, long timestamp)
-	      throws InvalidSequenceException {
-		if (seq == SubscribeConstant.SEQ_FROM_BINLOGINFO) {
-			if (serverId != -1L && binlog != null && binlogPos != -1L) {
-				L2Index indexedSeq = binlogIndex.find(new BinlogIndexKey(binlog, binlogPos, serverId));
-				if (indexedSeq != null) {
-					return indexedSeq.getSequence().longValue();
-				} else {
-					throw new InvalidSequenceException(String.format(
-					      "Invalid binlogInfo(serverId=%d, binlog=%s, binlogPos=%d)", serverId, binlog, binlogPos));
-				}
-			} else {
-				throw new InvalidSequenceException(String.format("Invalid sequence(seq=%d but no binlogInfo set)", seq));
-			}
-		} else if (seq == SubscribeConstant.SEQ_FROM_TIMESTAMP) {
-			throw new UnsupportedOperationException();
-		}
-
-		return seq;
 	}
 
 	@Override

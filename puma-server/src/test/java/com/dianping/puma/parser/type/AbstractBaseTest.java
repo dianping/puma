@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Properties;
 
 import com.dianping.puma.biz.entity.TaskStateEntity;
+
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.io.FileUtils;
@@ -52,7 +53,7 @@ import com.dianping.puma.storage.DefaultArchiveStrategy;
 import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.EventChannel;
-import com.dianping.puma.storage.LocalFileDataBucketManager;
+import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /***

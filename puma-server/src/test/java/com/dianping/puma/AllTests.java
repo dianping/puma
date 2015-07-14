@@ -10,9 +10,9 @@ import com.dianping.puma.filter.DefaultEventFilterChainTest;
 import com.dianping.puma.filter.DmlDdlEventFilterTest;
 import com.dianping.puma.filter.EventFilterChainFactoryTest;
 import com.dianping.puma.filter.TransactionInfoEventFilterTest;
-import com.dianping.puma.storage.DefaultDataIndexTest;
-import com.dianping.puma.storage.LocalBucketTest;
 import com.dianping.puma.storage.SequenceTest;
+import com.dianping.puma.storage.bucket.LocalBucketTest;
+import com.dianping.puma.storage.index.DefaultDataIndexTest;
 
 
 @RunWith(Suite.class)

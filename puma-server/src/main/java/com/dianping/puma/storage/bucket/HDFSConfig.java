@@ -1,7 +1,7 @@
 /**
  * Project: puma-server
  * 
- * File Created at 2012-8-6
+ * File Created at 2013-6-25
  * $Id$
  * 
  * Copyright 2010 dianping.com.
@@ -13,20 +13,20 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.storage;
+package com.dianping.puma.storage.bucket;
 
-import com.dianping.puma.storage.bucket.DataBucketManager;
-import com.dianping.puma.storage.index.DataIndex;
+import java.io.IOException;
+
+import org.apache.hadoop.fs.FileSystem;
 
 /**
- * TODO Comment of CleanupStrategy
- * 
  * @author Leo Liang
  * 
  */
-public interface CleanupStrategy {
-    public void cleanup(DataBucketManager index);
+public interface HDFSConfig {
+    public FileSystem getFileSystem() throws IOException;
 
-    @SuppressWarnings("rawtypes")
-    public void addDataIndex(DataIndex index);
+    public void close() throws IOException;
+
+    public void init() throws IOException;
 }

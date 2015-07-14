@@ -1,13 +1,9 @@
 package com.dianping.puma.server.container;
 
-import com.dianping.puma.biz.entity.PumaTaskEntity;
-import com.dianping.puma.core.annotation.ThreadUnSafe;
-import com.dianping.puma.core.model.TableSet;
-import com.dianping.puma.biz.event.entity.PumaTaskControllerEvent;
-import com.dianping.puma.biz.event.entity.PumaTaskOperationEvent;
-import com.dianping.puma.server.TaskExecutor;
-
 import java.util.List;
+
+import com.dianping.puma.biz.entity.PumaTaskEntity;
+import com.dianping.puma.server.TaskExecutor;
 
 public interface TaskContainer {
 

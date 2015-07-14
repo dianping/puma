@@ -28,6 +28,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
+import com.dianping.puma.storage.index.BinlogIndexKey;
+import com.dianping.puma.storage.index.BinlogIndexKeyConvertor;
+import com.dianping.puma.storage.index.DefaultDataIndexImpl;
+import com.dianping.puma.storage.index.LongIndexItemConvertor;
+
 /**
  * TODO Comment of DefaultCleanupStrategyTest
  * 

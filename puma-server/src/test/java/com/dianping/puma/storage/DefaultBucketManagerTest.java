@@ -14,6 +14,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.dianping.puma.storage.bucket.AbstractDataBucketManager;
+import com.dianping.puma.storage.bucket.DataBucket;
+import com.dianping.puma.storage.bucket.DataBucketManager;
+import com.dianping.puma.storage.bucket.DefaultBucketManager;
+import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 public class DefaultBucketManagerTest {

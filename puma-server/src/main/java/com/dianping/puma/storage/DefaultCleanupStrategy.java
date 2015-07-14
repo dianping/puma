@@ -22,7 +22,9 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.dianping.puma.storage.bucket.DataBucketManager;
 import com.dianping.puma.storage.exception.StorageClosedException;
+import com.dianping.puma.storage.index.DataIndex;
 
 /**
  * TODO Comment of DefaultCleanupStrategy

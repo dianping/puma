@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Properties;
 
 import com.dianping.puma.biz.entity.old.SrcDBInstance;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -48,12 +49,12 @@ import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
 import com.dianping.puma.server.DefaultTaskExecutor;
 import com.dianping.puma.storage.ArchiveStrategy;
-import com.dianping.puma.storage.DataBucketManager;
 import com.dianping.puma.storage.CleanupStrategy;
-import com.dianping.puma.storage.DataIndex;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.EventChannel;
-import com.dianping.puma.storage.LocalFileDataBucketManager;
+import com.dianping.puma.storage.bucket.DataBucketManager;
+import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
+import com.dianping.puma.storage.index.DataIndex;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 /**

@@ -1,30 +1,17 @@
 package com.dianping.puma.server.container;
 
 import com.dianping.puma.biz.entity.PumaTaskEntity;
-import com.dianping.puma.biz.entity.old.PumaTask;
 import com.dianping.puma.biz.entity.TaskStateEntity;
-import com.dianping.puma.biz.event.entity.PumaTaskControllerEvent;
-import com.dianping.puma.biz.event.entity.PumaTaskOperationEvent;
 import com.dianping.puma.biz.service.PumaTaskService;
 import com.dianping.puma.biz.service.SrcDBInstanceService;
 import com.dianping.puma.biz.service.impl.PumaTaskStateServiceImpl;
 import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.core.codec.RawEventCodec;
-import com.dianping.puma.core.constant.Status;
-import com.dianping.puma.core.model.TableSet;
-import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
 import com.dianping.puma.core.model.event.EventCenter;
 import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
-import com.dianping.puma.core.util.PumaThreadUtils;
-import com.dianping.puma.datahandler.AbstractDataHandler;
-import com.dianping.puma.parser.meta.TableMetaInfoFetcher;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.server.TaskExecutor;
 import com.dianping.puma.server.builder.TaskBuilder;
-import com.dianping.puma.status.SystemStatusContainer;
-import com.dianping.puma.storage.CleanupStrategy;
-import com.dianping.puma.storage.DefaultCleanupStrategy;
-import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.EventStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,11 +21,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -246,7 +230,7 @@ public class DefaultTaskContainer implements TaskContainer, InitializingBean {
 //        }
 //    }
 
-//    @Override
+    //    @Override
 //    @PreDestroy
 //    public void stopServers() {
 //        LOG.info("Stopping...");
@@ -267,7 +251,8 @@ public class DefaultTaskContainer implements TaskContainer, InitializingBean {
     public void afterPropertiesSet() throws Exception {
         instance = this;
     }
-//
+
+    //
     public EventStorage getTaskStorage(String taskName) {
         if (taskExecutors.containsKey(taskName)) {
             List<Sender> senders = taskExecutors.get(taskName).getFileSender();

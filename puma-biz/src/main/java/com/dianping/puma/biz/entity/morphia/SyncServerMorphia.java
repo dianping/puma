@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.entity.morphia;
 
-import com.dianping.puma.biz.entity.SyncServer;
+import com.dianping.puma.biz.entity.old.SyncServer;
 import com.google.code.morphia.annotations.Entity;
 
 @Entity("SyncServer_")

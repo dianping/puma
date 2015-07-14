@@ -12,7 +12,7 @@
  */
 package com.dianping.puma.server;
 
-import com.dianping.puma.biz.entity.TaskState;
+import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.LifeCycle;
 import com.dianping.puma.core.constant.Status;
@@ -64,7 +64,7 @@ public interface TaskExecutor extends LifeCycle<Exception> {
 
 	public void pause() throws Exception;
 
-	public TaskState getTaskState();
+	public TaskStateEntity getTaskState();
 
-	public void setTaskState(TaskState taskState);
+	public void setTaskState(TaskStateEntity taskState);
 }

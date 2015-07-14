@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.entity.morphia;
 
-import com.dianping.puma.biz.entity.CatchupTask;
+import com.dianping.puma.biz.entity.old.CatchupTask;
 import com.google.code.morphia.annotations.Entity;
 
 @Entity("CatchupTask_")

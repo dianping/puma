@@ -1,32 +1,31 @@
 package com.dianping.puma.biz.service;
 
-import com.dianping.puma.biz.entity.PumaTask;
+import com.dianping.puma.biz.entity.PumaTaskEntity;
+import com.dianping.puma.biz.entity.old.PumaTask;
 
 import java.util.List;
 
 public interface PumaTaskService {
-	
-	PumaTask find(long id);
 
-	PumaTask find(String name);
+    PumaTaskEntity find(int id);
 
-	List<PumaTask> findBySrcDBInstanceName(String srcDBInstanceName);
+    PumaTaskEntity find(String name);
 
-	List<PumaTask> findByPumaServerName(String pumaServerName);
-	
-	List<PumaTask> findByPumaServerNames(String pumaServerName);
+    List<PumaTaskEntity> findBySrcDBInstanceName(String srcDBInstanceName);
 
-	List<PumaTask> findAll();
+    List<PumaTaskEntity> findByPumaServerName(String pumaServerName);
 
-	long count();
+    List<PumaTaskEntity> findAll();
 
-	List<PumaTask> findByPage(int page, int pageSize);
-	
-	void create(PumaTask pumaTask);
+    long count();
 
-	void update(PumaTask pumaTask);
+    List<PumaTaskEntity> findByPage(int page, int pageSize);
 
-	void remove(String name);
-	
-	void remove(long id);
+    void create(PumaTaskEntity pumaTask);
+
+    void update(PumaTaskEntity pumaTask);
+
+    void remove(String name);
+
+    void remove(int id);
 }

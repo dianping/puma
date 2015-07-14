@@ -2,11 +2,11 @@ package com.dianping.puma.api;
 
 import com.dianping.puma.api.exception.PumaClientAuthException;
 import com.dianping.puma.api.exception.PumaClientException;
-import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.dto.binlog.response.BinlogAckResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.google.gson.Gson;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -104,6 +104,7 @@ public class SinglePumaClient implements PumaClient {
         parma.add(new BasicNameValuePair("token", this.token));
         parma.add(new BasicNameValuePair("binlogFile", binlogInfo.getBinlogFile()));
         parma.add(new BasicNameValuePair("binlogPosition", String.valueOf(binlogInfo.getBinlogPosition())));
+        parma.add(new BasicNameValuePair("serverId", String.valueOf(binlogInfo.getServerId())));
         execute("/puma/binlog/get", parma, BinlogAckResponse.class);
     }
 

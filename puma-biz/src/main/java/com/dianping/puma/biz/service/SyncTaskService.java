@@ -1,7 +1,7 @@
 package com.dianping.puma.biz.service;
 
 import com.dianping.puma.core.constant.ActionController;
-import com.dianping.puma.biz.entity.SyncTask;
+import com.dianping.puma.biz.entity.old.SyncTask;
 
 import java.util.List;
 

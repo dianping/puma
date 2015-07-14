@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.service.impl;
 
-import com.dianping.puma.biz.entity.TaskState;
+import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.biz.service.TaskStateService;
 
 import java.util.Date;
@@ -15,16 +15,17 @@ public abstract class TaskStateServiceImpl implements TaskStateService {
     protected abstract String getTypeName();
 
     @Override
-    public List<TaskState> find(String name) {
+    public List<TaskStateEntity> find(String name) {
         return null;
     }
 
     @Override
-    public TaskState find(String name, String serverName) {
+    public TaskStateEntity find(String name, String serverName) {
         return null;
     }
 
-    public void createOrUpdate(TaskState state) {
+    @Override
+    public void createOrUpdate(TaskStateEntity state) {
         state.setTaskType(getTypeName());
         state.setGmtUpdate(new Date());
 

@@ -1,28 +1,14 @@
 package com.dianping.puma.biz.dao;
 
-import com.dianping.puma.biz.entity.SyncServer;
-
-import java.util.List;
+import com.dianping.puma.biz.entity.SyncServerEntity;
 
 public interface SyncServerDao {
-	
-	SyncServer find(long id);
 
-	SyncServer find(String name);
+	SyncServerEntity find(int id);
 
-	SyncServer findByHost(String host);
-	
-	List<SyncServer> findAll();
+	int insert(SyncServerEntity entity);
 
-	long count();
+	int update(SyncServerEntity entity);
 
-	List<SyncServer> findByPage(int page, int pageSize);
-	
-	void create(SyncServer syncServer);
-
-	void update(SyncServer syncServer);
-
-	void remove(String name);
-	
-	void remove(long id);
+	int delete(SyncServerEntity entity);
 }

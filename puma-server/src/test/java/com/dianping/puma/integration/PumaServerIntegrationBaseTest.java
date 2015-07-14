@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import com.dianping.puma.biz.entity.old.SrcDBInstance;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;

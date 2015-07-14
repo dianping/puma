@@ -1,31 +1,32 @@
 package com.dianping.puma.biz.service;
 
-import com.dianping.puma.biz.entity.PumaServer;
+import com.dianping.puma.biz.entity.PumaServerEntity;
+import com.dianping.puma.biz.entity.old.PumaServer;
 
 import java.util.List;
 
 public interface PumaServerService {
 
-    PumaServer find(long id);
+    PumaServerEntity find(int id);
 
-    PumaServer find(String name);
+    PumaServerEntity find(String name);
 
-    PumaServer findByHost(String host);
+    PumaServerEntity findByHost(String host);
 
-    List<PumaServer> findAll();
+    List<PumaServerEntity> findAll();
 
     long count();
 
-    List<PumaServer> findByPage(int page, int pageSize);
+    List<PumaServerEntity> findByPage(int page, int pageSize);
 
     void heartBeat();
 
     @Deprecated
-    void create(PumaServer pumaServer);
+    void create(PumaServerEntity pumaServer);
 
-    void update(PumaServer pumaServer);
+    void update(PumaServerEntity pumaServer);
 
     void remove(String name);
 
-    void remove(long id);
+    void remove(int id);
 }

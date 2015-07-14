@@ -1,7 +1,8 @@
 package com.dianping.puma.biz.service;
 
 
-import com.dianping.puma.biz.entity.TaskState;
+
+import com.dianping.puma.biz.entity.TaskStateEntity;
 
 import java.util.List;
 
@@ -12,8 +13,9 @@ import java.util.List;
  */
 public interface TaskStateService {
 
-    List<TaskState> find(String name);
+    List<TaskStateEntity> find(String name);
 
-    TaskState find(String name, String serverName);
+    TaskStateEntity find(String name, String serverName);
 
+    void createOrUpdate(TaskStateEntity state);
 }

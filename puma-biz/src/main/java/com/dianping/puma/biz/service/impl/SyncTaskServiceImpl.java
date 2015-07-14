@@ -1,8 +1,8 @@
 package com.dianping.puma.biz.service.impl;
 
 import com.dianping.puma.core.constant.ActionController;
-import com.dianping.puma.biz.dao.SyncTaskDao;
-import com.dianping.puma.biz.entity.SyncTask;
+import com.dianping.puma.biz.olddao.SyncTaskDao;
+import com.dianping.puma.biz.entity.old.SyncTask;
 import com.dianping.puma.biz.service.SyncTaskService;
 
 import org.springframework.beans.factory.annotation.Autowired;

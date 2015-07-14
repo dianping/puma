@@ -1,9 +1,9 @@
 package com.dianping.puma.controller;
 
-import com.dianping.puma.biz.entity.TaskState;
+import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.server.TaskExecutor;
-import com.dianping.puma.server.TaskExecutorContainer;
+import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.status.SystemStatusContainer;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ import java.util.*;
 public class StatusController {
 
     @Autowired
-    TaskExecutorContainer taskExecutorContainer;
+    TaskContainer taskContainer;
 
     @Autowired
     PumaServerConfig pumaServerConfig;
@@ -47,12 +47,12 @@ public class StatusController {
 
     @RequestMapping(value = "puma-task", method = RequestMethod.GET)
     @ResponseBody
-    public List<TaskState> pumaTask() {
-        List<TaskState> pumaTaskStates = new ArrayList<TaskState>();
-        for (TaskExecutor taskExecutor : taskExecutorContainer.getAll()) {
-            TaskState taskState = taskExecutor.getTaskState();
+    public List<TaskStateEntity> pumaTask() {
+        List<TaskStateEntity> pumaTaskStates = new ArrayList<TaskStateEntity>();
+        for (TaskExecutor taskExecutor : taskContainer.getAll()) {
+            TaskStateEntity taskState = taskExecutor.getTaskState();
             taskState.setServerName(pumaServerConfig.getName());
-            taskState.setName(taskState.getTaskName());
+            taskState.setTaskName(taskState.getTaskName());
             taskState.setGmtUpdate(new Date());
             pumaTaskStates.add(taskState);
         }

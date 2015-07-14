@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.sync.model.task;
 
-import com.dianping.puma.biz.sync.model.mapping.MysqlMapping;
+import com.dianping.puma.core.dto.mapping.MysqlMapping;
 import com.google.code.morphia.annotations.Entity;
 
 @Entity

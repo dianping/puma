@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.entity.morphia;
 
-import com.dianping.puma.biz.entity.SrcDBInstance;
+import com.dianping.puma.biz.entity.old.SrcDBInstance;
 import com.google.code.morphia.annotations.Entity;
 
 @Entity("SrcDBInstance_")

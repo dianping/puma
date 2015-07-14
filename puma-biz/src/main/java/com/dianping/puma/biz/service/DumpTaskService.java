@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.service;
 
-import com.dianping.puma.biz.entity.DumpTask;
+import com.dianping.puma.biz.entity.old.DumpTask;
 
 import java.util.List;
 

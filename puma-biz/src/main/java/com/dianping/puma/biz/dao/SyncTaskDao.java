@@ -1,39 +1,14 @@
 package com.dianping.puma.biz.dao;
 
-import com.dianping.puma.core.constant.ActionController;
-import com.dianping.puma.biz.entity.SyncTask;
-
-import java.util.List;
+import com.dianping.puma.biz.entity.SyncTaskEntity;
 
 public interface SyncTaskDao {
-	
-	SyncTask find(long id);
 
-	SyncTask find(String name);
+	SyncTaskEntity find(int id);
 
-	List<SyncTask> findBySyncServerName(String syncServerName);
+	int insert(SyncTaskEntity entity);
 
-	List<SyncTask> findByDstDBInstanceName(String dstDBInstanceName);
+	int update(SyncTaskEntity entity);
 
-	List<SyncTask> findByPumaServerName(String pumaServerName);
-	
-	List<SyncTask> findByPumaTaskName(String pumaTaskName);
-
-	List<SyncTask> findAll();
-
-	long count();
-
-	List<SyncTask> findByPage(int page, int pageSize);
-	
-	void create(SyncTask syncTask);
-
-	void remove(String name);
-	
-	void remove(long id);
-	
-	void update(SyncTask syncTask);
-	
-	List<SyncTask> find(int offset, int limit);
-	
-	void updateStatusAction(String name,ActionController controller);
+	int delete(SyncTaskEntity entity);
 }

@@ -1,32 +1,36 @@
 package com.dianping.puma.biz.dao;
 
-import com.dianping.puma.biz.entity.PumaTask;
+import com.dianping.puma.biz.entity.PumaTaskEntity;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+/**
+ * Dozer @ 7/10/15
+ * mail@dozer.cc
+ * http://www.dozer.cc
+ */
 public interface PumaTaskDao {
-	
-	PumaTask find(long id);
 
-	PumaTask find(String name);
+    PumaTaskEntity findByName(String name);
 
-	List<PumaTask> findBySrcDBInstanceName(String srcDBInstanceName);
+    PumaTaskEntity findById(int id);
 
-	List<PumaTask> findByPumaServerName(String pumaServerName);
+    List<PumaTaskEntity> findBySrcDbName(String name);
 
-	List<PumaTask> findByPumaServerNames(String pumaServerName);
-	
-	List<PumaTask> findAll();
+    List<PumaTaskEntity> findByPumaServerName(String name);
 
-	long count();
+    List<PumaTaskEntity> findAll();
 
-	List<PumaTask> findByPage(int page, int pageSize);
-	
-	void create(PumaTask pumaTask);
+    List<PumaTaskEntity> findByPage(@Param(value = "offset") int offset, @Param(value = "limit") int limit);
 
-	void update(PumaTask pumaTask);
+    int count();
 
-	void remove(String name);
-	
-	void remove(long id);
+    int insert(PumaTaskEntity entity);
+
+    int update(PumaTaskEntity entity);
+
+    int delete(int id);
+
+    int deleteByName(String name);
 }

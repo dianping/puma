@@ -1,7 +1,8 @@
 //package com.dianping.puma.syncserver.status;
 //
+//import com.dianping.puma.biz.entity.TaskStateEntity;
 //import com.dianping.puma.biz.service.SyncTaskService;
-//import com.dianping.puma.biz.service.SyncTaskStateService;
+//import com.dianping.puma.biz.service.impl.SyncTaskStateServiceImpl;
 //import com.dianping.puma.syncserver.job.container.TaskExecutorContainer;
 //import com.dianping.puma.syncserver.job.executor.SyncTaskExecutor;
 //import com.dianping.puma.syncserver.job.executor.TaskExecutor;
@@ -12,26 +13,22 @@
 //@Service("syncTaskStateCollector")
 //public class SyncTaskStateCollector {
 //
-//	@Autowired
-//	SyncTaskStateService syncTaskStateService;
+//    @Autowired
+//    SyncTaskStateServiceImpl syncTaskStateService;
 //
-//	@Autowired
-//	SyncTaskService syncTaskService;
+//    @Autowired
+//    SyncTaskService syncTaskService;
 //
-//	@Autowired
-//	TaskExecutorContainer taskExecutorContainer;
+//    @Autowired
+//    TaskExecutorContainer taskExecutorContainer;
 //
-//	@Scheduled(cron = "0/5 * * * * ?")
-//	public void collect() {
-//		syncTaskStateService.removeAll();
-//
-//		for (TaskExecutor taskExecutor: taskExecutorContainer.getAll()) {
-//			if (taskExecutor instanceof SyncTaskExecutor) {
-//				/*
-//				SyncTaskState syncTaskState = ((SyncTaskExecutor) taskExecutor).getTaskState();
-//				syncTaskState.setGmtUpdate(new Date());
-//				syncTaskStateService.add(syncTaskState);*/
-//			}
-//		}
-//	}
+//    @Scheduled(fixedDelay = 10 * 1000)
+//    public void collect() {
+//        for (TaskExecutor taskExecutor : taskExecutorContainer.getAll()) {
+//            if (taskExecutor instanceof SyncTaskExecutor) {
+//                TaskStateEntity syncTaskState = ((SyncTaskExecutor) taskExecutor).getTaskState();
+//                syncTaskStateService.createOrUpdate(syncTaskState);
+//            }
+//        }
+//    }
 //}

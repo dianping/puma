@@ -1,5 +1,6 @@
 package com.dianping.puma.biz.entity;
 
+import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.TableSet;
@@ -26,6 +27,8 @@ public class PumaTaskEntity {
     private List<PumaServerEntity> pumaServers;
 
     private Date UpdateTime;
+
+    private ActionController actionController;
 
     public Status getStatus() {
         return status;
@@ -97,5 +100,13 @@ public class PumaTaskEntity {
 
     public void setUpdateTime(Date updateTime) {
         UpdateTime = updateTime;
+    }
+
+    public ActionController getActionController() {
+        return actionController;
+    }
+
+    public void setActionController(ActionController actionController) {
+        this.actionController = actionController;
     }
 }

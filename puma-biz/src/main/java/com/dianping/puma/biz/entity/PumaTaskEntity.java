@@ -1,9 +1,11 @@
 package com.dianping.puma.biz.entity;
 
+import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.TableSet;
 
+import java.util.Date;
 import java.util.List;
 
 public class PumaTaskEntity {
@@ -16,21 +18,15 @@ public class PumaTaskEntity {
 
     private int preservedDay;
 
-    private Status status;
-
     private TableSet tableSet;
 
     private List<SrcDbEntity> srcDbs;
 
     private List<PumaServerEntity> pumaServers;
 
-    public Status getStatus() {
-        return status;
-    }
+    private Date UpdateTime;
 
-    public void setStatus(Status status) {
-        this.status = status;
-    }
+    private ActionController actionController;
 
     public int getId() {
         return id;
@@ -86,5 +82,21 @@ public class PumaTaskEntity {
 
     public List<PumaServerEntity> getPumaServers() {
         return pumaServers;
+    }
+
+    public Date getUpdateTime() {
+        return UpdateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        UpdateTime = updateTime;
+    }
+
+    public ActionController getActionController() {
+        return actionController;
+    }
+
+    public void setActionController(ActionController actionController) {
+        this.actionController = actionController;
     }
 }

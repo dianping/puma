@@ -228,7 +228,7 @@ public class DefaultTaskContainer implements TaskContainer, InitializingBean {
 //        }
 //    }
 
-//    @Override
+    //    @Override
 //    @PreDestroy
 //    public void stopServers() {
 //        LOG.info("Stopping...");
@@ -249,7 +249,8 @@ public class DefaultTaskContainer implements TaskContainer, InitializingBean {
     public void afterPropertiesSet() throws Exception {
         instance = this;
     }
-//
+
+    //
     public EventStorage getTaskStorage(String taskName) {
         if (taskExecutors.containsKey(taskName)) {
             List<Sender> senders = taskExecutors.get(taskName).getFileSender();

@@ -58,8 +58,6 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
 
 	protected TaskStateEntity state;
 
-	protected Status status;
-
 	@Override
 	public String getTaskId() {
 		return taskId;
@@ -186,16 +184,6 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
 
 	public void pause() throws Exception {
 		stop = true;
-	}
-
-	@Override
-	public Status getStatus() {
-		return this.state.getStatus();
-	}
-
-	@Override
-	public void setStatus(Status status) {
-		this.state.setStatus(status);
 	}
 
 	@Override

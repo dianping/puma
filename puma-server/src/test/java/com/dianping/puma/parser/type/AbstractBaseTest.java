@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import com.dianping.puma.biz.entity.TaskStateEntity;
-
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.io.FileUtils;
@@ -20,6 +18,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.event.ChangedEvent;
@@ -249,30 +248,30 @@ public abstract class AbstractBaseTest {
                     try {
                         taskExecutor.start();
                     } catch (Exception e) {
-                        taskExecutor.setStatus(Status.FAILED);
+                        taskExecutor.getTaskState().setStatus(Status.FAILED);
                     }
                 }
             }, taskExecutor.getTaskName(), false).start();
         } catch (Exception e) {
-            taskExecutor.setStatus(Status.FAILED);
+            taskExecutor.getTaskState().setStatus(Status.FAILED);
             throw e;
         }
 
-        taskExecutor.setStatus(Status.RUNNING);
+        taskExecutor.getTaskState().setStatus(Status.RUNNING);
     }
 
     private void stopTask() throws Exception {
         if (taskExecutor != null) {
-            taskExecutor.setStatus(Status.STOPPING);
+            taskExecutor.getTaskState().setStatus(Status.STOPPING);
 
             try {
                 taskExecutor.stop();
             } catch (Exception e) {
-                taskExecutor.setStatus(Status.FAILED);
+                taskExecutor.getTaskState().setStatus(Status.FAILED);
                 throw e;
             }
 
-            taskExecutor.setStatus(Status.STOPPED);
+            taskExecutor.getTaskState().setStatus(Status.STOPPED);
 
         }
 
@@ -419,7 +418,7 @@ public abstract class AbstractBaseTest {
         taskExecutor.setDispatcher(dispatcher);
 
         // Set puma task status.
-        taskExecutor.setStatus(Status.WAITING);
+        taskExecutor.getTaskState().setStatus(Status.WAITING);
 
         return taskExecutor;
     }

@@ -11,6 +11,7 @@ import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service("pumaTaskService")
@@ -164,12 +165,14 @@ public class PumaTaskServiceImpl implements PumaTaskService {
 
     @Override
     public void create(PumaTaskEntity pumaTask) {
+        pumaTask.setUpdateTime(new Date());
         pumaTaskDao.insert(pumaTask);
         updateFullPumaTask(pumaTask);
     }
 
     @Override
     public void update(PumaTaskEntity pumaTask) {
+        pumaTask.setUpdateTime(new Date());
         pumaTaskDao.update(pumaTask);
         updateFullPumaTask(pumaTask);
     }

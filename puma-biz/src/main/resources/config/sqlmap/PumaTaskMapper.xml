@@ -49,10 +49,11 @@
         set
         Name=#{name},
         PreservedDay=#{preservedDay},
-        Status=#{status},
         BinlogInfo_ServerId=#{binlogInfo.serverId},
         BinlogInfo_BinlogFile=#{binlogInfo.binlogFile},
         BinlogInfo_BinlogPosition=#{binlogInfo.binlogPosition},
+        ActionController=#{actionController},
+        UpdateTime = #{updateTime}
         where
         Id = #{id}
     </update>
@@ -62,19 +63,21 @@
         (
         Name,
         PreservedDay,
-        Status,
         BinlogInfo_ServerId,
         BinlogInfo_BinlogFile,
-        BinlogInfo_BinlogPosition
+        BinlogInfo_BinlogPosition,
+        ActionController,
+        UpdateTime
         )
         values
         (
         #{name},
         #{preservedDay},
-        #{status}
         #{binlogInfo.serverId},
         #{binlogInfo.binlogFile},
         #{binlogInfo.binlogPosition},
+        #{actionController},
+        #{updateTime}
         )
     </insert>
 

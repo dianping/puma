@@ -52,10 +52,6 @@ public interface TaskExecutor extends LifeCycle<Exception> {
 
 	public void setBinlogInfoHolder(BinlogInfoHolder holder);
 
-	public Status getStatus();
-
-	public void setStatus(Status status);
-
 	public List<Sender> getFileSender();
 
 	public DataHandler getDataHandler();

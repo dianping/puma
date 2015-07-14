@@ -1,8 +1,7 @@
 package com.dianping.puma.api;
 
-import com.dianping.puma.api.exception.PumaClientAuthException;
 import com.dianping.puma.api.exception.PumaClientException;
-import com.google.gson.Gson;
+import com.dianping.puma.core.dto.BinlogMessage;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -17,27 +16,37 @@ public class SinglePumaConnectorTest {
     @Ignore
     public void testConnect() {
         SinglePumaClient connector = new SinglePumaClient("my-client", "127.0.0.1", 4040);
+        connector.subscribe(true, false, false, "test", "a", "b");
 
         while (true) {
             try {
-                connector.connect();
-                while (true) {
-                    try {
-                        try {
-                            System.out.println(new Gson().toJson(connector.getWithAck(1)));
-                        } catch (PumaClientException exp) {
-                            connector.rollback();
-                        }
-                    } catch (PumaClientAuthException exp) {
-                        try {
-                            connector.subscribe(true, false, false, "test", "a", "b");
-                        } catch (PumaClientException e) {
-                            //todo: log
-                        }
-                    }
-                }
+                BinlogMessage message = connector.getWithAck(1);
+
+                //todo: 业务逻辑
+                System.out.println(message);
             } catch (PumaClientException exp) {
-                //todo:log
+                //todo: add log
+            }
+        }
+    }
+
+
+    @Test
+    @Ignore
+    public void testConnectSync() {
+        SinglePumaClient connector = new SinglePumaClient("my-client", "127.0.0.1", 4040);
+        connector.subscribe(true, false, false, "test", "a", "b");
+
+        while (true) {
+            try {
+                BinlogMessage message = connector.get(1);
+
+                //todo:业务逻辑
+                System.out.println(message);
+
+                connector.ack(message.getLastBinlogInfo());
+            } catch (PumaClientException exp) {
+                //todo: add log
             }
         }
     }

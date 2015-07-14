@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -66,12 +67,12 @@ public class SinglePumaClient implements PumaClient {
     public BinlogMessage get(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException {
         List<NameValuePair> parma = new ArrayList<NameValuePair>();
         parma.add(new BasicNameValuePair("clientName", clientName));
-        parma.add(new BasicNameValuePair("token", this.token));
         parma.add(new BasicNameValuePair("batchSize", String.valueOf(batchSize)));
         parma.add(new BasicNameValuePair("timeout", String.valueOf(timeout)));
         if (timeUnit != null) {
             parma.add(new BasicNameValuePair("timeUnit", timeUnit.toString()));
         }
+        addToken(parma);
         return execute("/puma/binlog/get", parma, BinlogGetResponse.class).getBinlogMessage();
     }
 
@@ -91,13 +92,28 @@ public class SinglePumaClient implements PumaClient {
 
     @Override
     public void ack(BinlogInfo binlogInfo) throws PumaClientException {
+        if (binlogInfo == null) {
+            return;
+        }
+
         List<NameValuePair> parma = new ArrayList<NameValuePair>();
         parma.add(new BasicNameValuePair("clientName", clientName));
-        parma.add(new BasicNameValuePair("token", this.token));
         parma.add(new BasicNameValuePair("binlogFile", binlogInfo.getBinlogFile()));
         parma.add(new BasicNameValuePair("binlogPosition", String.valueOf(binlogInfo.getBinlogPosition())));
         parma.add(new BasicNameValuePair("serverId", String.valueOf(binlogInfo.getServerId())));
+        addToken(parma);
         execute("/puma/binlog/get", parma, BinlogAckResponse.class);
+    }
+
+    protected void addToken(List<NameValuePair> parma) {
+        Iterator<NameValuePair> iterator = parma.iterator();
+        while (iterator.hasNext()) {
+            NameValuePair nameValuePair = iterator.next();
+            if (nameValuePair.getName().equals("token")) {
+                iterator.remove();
+            }
+        }
+        parma.add(new BasicNameValuePair("token", this.token));
     }
 
     @Override
@@ -157,6 +173,8 @@ public class SinglePumaClient implements PumaClient {
 
         if (result.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
             doSubscribe();
+            addToken(params);
+            return execute(path, params, clazz);
         }
 
         return gson.fromJson(json, clazz);

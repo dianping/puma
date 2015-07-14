@@ -1,5 +1,7 @@
 package com.dianping.puma.core.event;
 
+import com.dianping.puma.core.model.BinlogInfo;
+
 /**
  * Dozer @ 7/6/15
  * mail@dozer.cc
@@ -28,6 +30,15 @@ public class EventWrap {
         }
     }
 
+    public BinlogInfo getBinlogInfo() {
+        if (DDL == type) {
+            return ddlEvent.getBinlogInfo();
+        } else if (DML == type) {
+            return rowChangedEvent.getBinlogInfo();
+        }
+        return null;
+    }
+
     public DdlEvent getDdlEvent() {
         return ddlEvent;
     }
@@ -48,11 +59,11 @@ public class EventWrap {
         this.setType(DML);
     }
 
-	public int getType() {
-	   return type;
-   }
+    public int getType() {
+        return type;
+    }
 
-	public void setType(int type) {
-	   this.type = type;
-   }
+    public void setType(int type) {
+        this.type = type;
+    }
 }

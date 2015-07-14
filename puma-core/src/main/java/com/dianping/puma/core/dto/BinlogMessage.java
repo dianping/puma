@@ -23,7 +23,10 @@ public class BinlogMessage {
     }
 
     public BinlogInfo getLastBinlogInfo() {
-        return null;
+        if (binlogEvents.size() == 0) {
+            return null;
+        }
+        return binlogEvents.get(binlogEvents.size() - 1).getBinlogInfo();
     }
 
     public int size() {

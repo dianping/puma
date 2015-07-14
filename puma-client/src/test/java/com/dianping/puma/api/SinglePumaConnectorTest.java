@@ -2,7 +2,7 @@ package com.dianping.puma.api;
 
 import com.dianping.puma.api.exception.PumaClientException;
 import com.dianping.puma.core.dto.BinlogMessage;
-import org.junit.Ignore;
+import com.google.gson.Gson;
 import org.junit.Test;
 
 /**
@@ -13,7 +13,7 @@ import org.junit.Test;
 public class SinglePumaConnectorTest {
 
     @Test
-    @Ignore
+//    @Ignore
     public void testConnect() {
         SinglePumaClient connector = new SinglePumaClient("my-client", "127.0.0.1", 4040);
         connector.subscribe(true, false, false, "test", "a", "b");
@@ -22,17 +22,22 @@ public class SinglePumaConnectorTest {
             try {
                 BinlogMessage message = connector.getWithAck(1);
 
+
+                Thread.sleep(1000);
+
                 //todo: 业务逻辑
                 System.out.println(message);
             } catch (PumaClientException exp) {
                 //todo: add log
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
 
 
     @Test
-    @Ignore
+//    @Ignore
     public void testConnectSync() {
         SinglePumaClient connector = new SinglePumaClient("my-client", "127.0.0.1", 4040);
         connector.subscribe(true, false, false, "test", "a", "b");
@@ -42,11 +47,15 @@ public class SinglePumaConnectorTest {
                 BinlogMessage message = connector.get(1);
 
                 //todo:业务逻辑
-                System.out.println(message);
+                System.out.println(new Gson().toJson(message));
+
+                Thread.sleep(1000);
 
                 connector.ack(message.getLastBinlogInfo());
             } catch (PumaClientException exp) {
                 //todo: add log
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }

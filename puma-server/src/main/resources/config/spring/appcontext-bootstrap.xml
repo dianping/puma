@@ -31,18 +31,6 @@
 
 	<!-- <import resource="serverConfig-${puma.server.env}.xml" /> -->
 
-	<bean id="notifyService" class="com.dianping.puma.biz.monitor.DefaultNotifyService" />
-
-	<bean id="notifiableBean" abstract="true">
-		<property name="notifyService" ref="notifyService" />
-	</bean>
-
-	<bean id="statusReportTask" class="com.dianping.puma.reporter.StatusReportTask"
-		parent="notifiableBean" init-method="start" />
-
-	<bean id="dailyReportTask" class="com.dianping.puma.reporter.DailyReportTask"
-		parent="notifiableBean" init-method="start" />
-
 	<bean id="binlogInfoHolder"
 		  class="com.dianping.puma.core.storage.holder.impl.DefaultBinlogInfoHolder"
 		  init-method="init">
@@ -78,7 +66,7 @@
 		<property name="backupDay" value="1" />
 	</bean>
 
-	<bean id="rawCodec" class="com.dianping.puma.codec.RawEventCodec" />
+	<bean id="rawCodec" class="com.dianping.puma.core.codec.RawEventCodec" />
 
 	<bean id="mongoClient" class="com.dianping.puma.biz.olddao.morphia.helper.MongoClient">
 	</bean>
@@ -91,12 +79,6 @@
         <property name="dbName" value="puma_admin" />
         <property name="collName" value="seq" />
     </bean>
-
-	<bean id="serverEventDelayMonitor"
-		  class="com.dianping.puma.monitor.ServerEventDelayMonitor"
-		  init-method="init"
-		  destroy-method="destroy">
-	</bean>
 
 </beans>
 

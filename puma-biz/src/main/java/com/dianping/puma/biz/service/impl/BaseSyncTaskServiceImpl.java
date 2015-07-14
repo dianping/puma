@@ -8,7 +8,6 @@ import com.dianping.puma.biz.entity.old.BaseSyncTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service("baseSyncTaskService")
 public class BaseSyncTaskServiceImpl implements BaseSyncTaskService {
 
 	@Autowired

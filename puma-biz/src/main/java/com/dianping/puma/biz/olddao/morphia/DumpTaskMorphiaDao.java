@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service("dumpTaskDao")
 public class DumpTaskMorphiaDao extends MongoBaseDao<DumpTaskMorphia> implements DumpTaskDao {
 
 	@Autowired

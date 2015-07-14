@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service("syncServerDao")
 public class SyncServerMorphiaDao extends MongoBaseDao<SyncServerMorphia> implements SyncServerDao{
 
 	@Autowired

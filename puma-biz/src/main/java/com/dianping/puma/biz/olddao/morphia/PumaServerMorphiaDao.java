@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service("pumaServerDao")
 public class PumaServerMorphiaDao extends MongoBaseDao<PumaServerMorphia> implements PumaServerDao {
 
 	@Autowired

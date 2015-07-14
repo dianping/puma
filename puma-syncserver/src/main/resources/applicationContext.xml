@@ -21,8 +21,6 @@
 
     <import resource="applicationContext-swallow.xml" />
 
-    <bean id="notifyService" class="com.dianping.puma.biz.monitor.DefaultNotifyService"/>
-
     <!-- executor -->
     <bean
         class="com.dianping.puma.syncserver.job.executor.builder.DefaultTaskExecutorBuilder">

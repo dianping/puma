@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service("dstDBInstanceService")
 public class DstDBInstanceServiceImpl implements DstDBInstanceService {
 
 	@Autowired

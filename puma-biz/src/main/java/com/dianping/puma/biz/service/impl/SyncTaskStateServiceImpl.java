@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-@Service
 public class SyncTaskStateServiceImpl extends TaskStateServiceImpl {
     @Override
     protected String getTypeName() {

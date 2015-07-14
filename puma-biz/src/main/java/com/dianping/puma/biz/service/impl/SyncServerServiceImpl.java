@@ -11,7 +11,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 
-@Service("syncServerService")
 public class SyncServerServiceImpl implements SyncServerService {
 
     @Autowired

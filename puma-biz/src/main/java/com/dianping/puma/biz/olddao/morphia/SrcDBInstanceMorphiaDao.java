@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service("srcDBInstanceDao")
 public class SrcDBInstanceMorphiaDao extends MongoBaseDao<SrcDBInstanceMorphia>
 		implements SrcDBInstanceDao {
 

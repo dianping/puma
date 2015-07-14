@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service("dumpTaskService")
 public class DumpTaskServiceImpl implements DumpTaskService {
 
 	@Autowired

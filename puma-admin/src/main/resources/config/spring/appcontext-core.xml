@@ -35,8 +35,6 @@
 	
 	<context:annotation-config />
 	
-    <bean id="notifyService" class="com.dianping.puma.biz.monitor.DefaultNotifyService"/>
-
     <bean id="mongoClient" class="com.dianping.puma.biz.olddao.morphia.helper.MongoClient">
     </bean>
 

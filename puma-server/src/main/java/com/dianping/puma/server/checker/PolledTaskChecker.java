@@ -3,6 +3,7 @@ package com.dianping.puma.server.checker;
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.biz.service.PumaTaskService;
 import com.dianping.puma.server.container.TaskContainer;
+import com.dianping.puma.server.server.TaskServerManager;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,9 @@ import java.util.concurrent.ConcurrentMap;
 public class PolledTaskChecker implements TaskChecker {
 
 	@Autowired
+	TaskServerManager taskServerManager;
+
+	@Autowired
 	PumaTaskService pumaTaskService;
 
 	@Autowired
@@ -24,14 +28,16 @@ public class PolledTaskChecker implements TaskChecker {
 
 	private ConcurrentMap<String, PumaTaskEntity> tasks = new ConcurrentHashMap<String, PumaTaskEntity>();
 
-	@Scheduled(fixedDelay = 5 * 1000)
-	public void poll() {
+	@Override
+	public void check() {
 		ConcurrentMap<String, PumaTaskEntity> oriTasks = tasks;
 		tasks.clear();
 
 		try {
-			for (PumaTaskEntity task: pumaTaskService.findByPumaServerName()) {
-				tasks.put(task.getName(), task);
+			for (String host: taskServerManager.findAuthorizedHosts()) {
+				for (PumaTaskEntity task: pumaTaskService.findByPumaServerName(host)) {
+					tasks.put(task.getName(), task);
+				}
 			}
 		} catch (Exception e) {
 			// @todo.
@@ -49,6 +55,11 @@ public class PolledTaskChecker implements TaskChecker {
 		// Deleted.
 		Map<String, PumaTaskEntity> deletedTasks = findDeletedTask(oriTasks, tasks);
 		handleDeletedTask(deletedTasks);
+	}
+
+	@Scheduled(fixedDelay = 5 * 1000)
+	public void poll() {
+		check();
 	}
 
 	protected Map<String, PumaTaskEntity> findCreatedTask(

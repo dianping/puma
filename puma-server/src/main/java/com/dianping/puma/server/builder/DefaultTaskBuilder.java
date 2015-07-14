@@ -3,11 +3,7 @@ package com.dianping.puma.server.builder;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.dianping.puma.biz.entity.PumaTaskDbEntity;
 import com.dianping.puma.biz.entity.PumaTaskEntity;
-import com.dianping.puma.biz.entity.SrcDbEntity;
-import com.dianping.puma.biz.entity.old.PumaTask;
-import com.dianping.puma.biz.entity.old.SrcDBInstance;
 import com.dianping.puma.biz.entity.TaskStateEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.biz.service.SrcDBInstanceService;
-import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.model.event.EventCenter;
 import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
@@ -26,6 +21,7 @@ import com.dianping.puma.server.TaskExecutor;
 @Service("taskExecutorBuilder")
 public class DefaultTaskBuilder implements TaskBuilder {
 
+<<<<<<< HEAD
 //	@Autowired
 //	SrcDBInstanceService srcDBInstanceService;
 //
@@ -81,12 +77,71 @@ public class DefaultTaskBuilder implements TaskBuilder {
 
 	public TaskExecutor build(PumaTaskEntity pumaTask) {
 
+=======
+	@Autowired
+	SrcDBInstanceService srcDBInstanceService;
+
+	@Autowired
+	BinlogInfoHolder binlogInfoHolder;
+
+	@Autowired
+	EventCenter eventCenter;
+
+	@Autowired
+	private RawEventCodec rawCodec;
+
+	@Value("fileSender-")
+	String fileSenderName;
+
+	@Value("storage-")
+	String storageName;
+
+	@Value("dispatch-")
+	String dispatchName;
+
+	@Value("/data/appdatas/puma/storage/master/")
+	String masterStorageBaseDir;
+
+	@Value("Bucket-")
+	String masterBucketFilePrefix;
+
+	@Value("1000")
+	int maxMasterBucketLengthMB;
+
+	@Value("25")
+	int maxMasterFileCount;
+
+	@Value("/data/appdatas/puma/storage/slave/")
+	String slaveStorageBaseDir;
+
+	@Value("Bucket-")
+	String slaveBucketFilePrefix;
+
+	@Value("1000")
+	int maxSlaveBucketLengthMB;
+
+	@Value("25")
+	int maxSlaveFileCount;
+
+	@Value("/data/appdatas/puma/binlogIndex/")
+	String binlogIndexBaseDir;
+
+	private static final Logger LOG = LoggerFactory.getLogger(DefaultTaskBuilder.class);
+
+	public TaskExecutor build(PumaTaskEntity pumaTask) {
+
+		return null;
+>>>>>>> remove unused bean
 //		try {
 //			DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
 //
 //			TaskStateEntity taskState = new TaskStateEntity();
 //			taskState.setTaskName(pumaTask.getName());
+<<<<<<< HEAD
 //			taskState.setServerName(pumaServerConfig.getName());
+=======
+//			//taskState.setServerName(pumaServerConfig.getName());
+>>>>>>> remove unused bean
 //			taskState.setStatus(Status.PREPARING);
 //			taskExecutor.setTaskState(taskState);
 //
@@ -94,13 +149,18 @@ public class DefaultTaskBuilder implements TaskBuilder {
 //			String taskName = pumaTask.getName();
 //			taskExecutor.setTaskName(taskName);
 //
+<<<<<<< HEAD
 //			taskExecutor.setServerId(taskName.hashCode() + pumaServerConfig.getName().hashCode());
+=======
+//			//taskExecutor.setServerId(taskName.hashCode() + pumaServerConfig.getName().hashCode());
+>>>>>>> remove unused bean
 //
 //			// Bin log.
 //			taskExecutor.setBinlogInfoHolder(binlogInfoHolder);
 //			taskExecutor.setBinlogInfo(pumaTask.getBinlogInfo());
 //			taskExecutor.setBinlogStat(new BinlogStat());
 //
+<<<<<<< HEAD
 //			// Source database.
 //			//			:w
 //			// PumaTaskDbEntity pumaTaskDb = pumaTask.getPumaTaskDb();
@@ -109,6 +169,14 @@ public class DefaultTaskBuilder implements TaskBuilder {
 //			//			taskExecutor.setPort(srcDBInstance.getPort());
 //			//			taskExecutor.setDBUsername(srcDBInstance.getUsername());
 //			//			taskExecutor.setDBPassword(srcDBInstance.getPassword());
+=======
+////			PumaTaskDbEntity pumaTaskDb = pumaTask.getPumaTaskDb();
+////						taskExecutor.setDbServerId(pumaTaskDb.getServerId());
+////						taskExecutor.setDBHost(srcDBInstance.getHost());
+////						taskExecutor.setPort(srcDBInstance.getPort());
+////						taskExecutor.setDBUsername(srcDBInstance.getUsername());
+////						taskExecutor.setDBPassword(srcDBInstance.getPassword());
+>>>>>>> remove unused bean
 //
 //			// Parser.
 //			Parser parser = new DefaultBinlogParser();

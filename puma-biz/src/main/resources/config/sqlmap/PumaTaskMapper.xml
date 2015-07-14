@@ -53,6 +53,7 @@
         BinlogInfo_ServerId=#{binlogInfo.serverId},
         BinlogInfo_BinlogFile=#{binlogInfo.binlogFile},
         BinlogInfo_BinlogPosition=#{binlogInfo.binlogPosition},
+        UpdateTime = #{updateTime}
         where
         Id = #{id}
     </update>
@@ -65,7 +66,8 @@
         Status,
         BinlogInfo_ServerId,
         BinlogInfo_BinlogFile,
-        BinlogInfo_BinlogPosition
+        BinlogInfo_BinlogPosition,
+        UpdateTime
         )
         values
         (
@@ -75,6 +77,7 @@
         #{binlogInfo.serverId},
         #{binlogInfo.binlogFile},
         #{binlogInfo.binlogPosition},
+        #{updateTime}
         )
     </insert>
 

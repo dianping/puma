@@ -4,6 +4,7 @@ import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.TableSet;
 
+import java.util.Date;
 import java.util.List;
 
 public class PumaTaskEntity {
@@ -23,6 +24,8 @@ public class PumaTaskEntity {
     private List<SrcDbEntity> srcDbs;
 
     private List<PumaServerEntity> pumaServers;
+
+    private Date UpdateTime;
 
     public Status getStatus() {
         return status;
@@ -86,5 +89,13 @@ public class PumaTaskEntity {
 
     public List<PumaServerEntity> getPumaServers() {
         return pumaServers;
+    }
+
+    public Date getUpdateTime() {
+        return UpdateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        UpdateTime = updateTime;
     }
 }

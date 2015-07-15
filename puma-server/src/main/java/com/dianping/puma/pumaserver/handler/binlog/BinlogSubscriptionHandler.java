@@ -1,18 +1,18 @@
 package com.dianping.puma.pumaserver.handler.binlog;
 
-import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.dto.BinlogAck;
 import com.dianping.puma.core.dto.BinlogTarget;
 import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.pumaserver.channel.BinlogChannel;
-import com.dianping.puma.pumaserver.channel.impl.ConstantBinlogChannel;
+import com.dianping.puma.pumaserver.channel.impl.BufferedBinlogChannel;
 import com.dianping.puma.pumaserver.client.ClientSession;
 import com.dianping.puma.pumaserver.client.ClientType;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.service.BinlogTargetService;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
+import com.dianping.puma.server.container.TaskContainer;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -23,6 +23,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
     private BinlogTargetService binlogTargetService;
     private BinlogAckService binlogAckService;
     private ClientSessionService clientSessionService;
+    private TaskContainer taskContainer;
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, BinlogSubscriptionRequest binlogSubscriptionRequest) {
@@ -34,12 +35,12 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
         BinlogChannel binlogChannel = buildBinlogChannel(
                 binlogTarget == null ? null : binlogTarget.getTargetName(),
                 binlogTarget == null ? 0 : binlogTarget.getDbServerId(),
-                null,
+                0L,
                 binlogAck == null ? null : binlogAck.getBinlogInfo(),
                 0
         );
 
-        ClientSession session = new ClientSession(clientName, binlogChannel, ClientType.BROSWER);
+        ClientSession session = new ClientSession(clientName, binlogChannel, ClientType.UNKNOW);
         clientSessionService.subscribe(session);
 
         BinlogSubscriptionResponse binlogSubscriptionResponse = new BinlogSubscriptionResponse();
@@ -47,12 +48,13 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
         ctx.channel().writeAndFlush(binlogSubscriptionResponse);
     }
 
-    private BinlogChannel buildBinlogChannel(String targetName, long dbServerId, SubscribeConstant sc,
+    private BinlogChannel buildBinlogChannel(String targetName, long dbServerId, long sc,
                                              BinlogInfo binlogInfo, long timestamp) {
-        BinlogChannel binlogChannel = new ConstantBinlogChannel();
-        binlogChannel.locate(targetName, dbServerId, sc, binlogInfo, timestamp);
+        BufferedBinlogChannel bufferedBinlogChannel = new BufferedBinlogChannel();
+        bufferedBinlogChannel.setTaskContainer(taskContainer);
+        bufferedBinlogChannel.init(targetName, dbServerId, sc, binlogInfo, timestamp);
 
-        return binlogChannel;
+        return bufferedBinlogChannel;
     }
 
     public void setBinlogTargetService(BinlogTargetService binlogTargetService) {
@@ -65,5 +67,9 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
     public void setClientSessionService(ClientSessionService clientSessionService) {
         this.clientSessionService = clientSessionService;
+    }
+
+    public void setTaskContainer(TaskContainer taskContainer) {
+        this.taskContainer = taskContainer;
     }
 }

@@ -13,6 +13,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 public class BinlogAckHandler extends SimpleChannelInboundHandler<BinlogAckRequest> {
 
     private BinlogAckService binlogAckService;
+
     private ClientSessionService clientSessionService;
 
     @Override

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.ClientPositionDao">
+
+    <select id="findByClientName" resultType="ClientPositionEntity">
+        SELECT * FROM ClientPosition where ClientName = #{clientName}
+    </select>
+
+    <update id="update" parameterType="ClientPositionEntity">
+        update ClientPosition
+        set
+        ClientName = #{clientName},
+        BinlogFile = #{binlogFile},
+        BinlogPosition = #{binlogPosition},
+        ServerId = #{serverId},
+        EventIndex = #{eventIndex},
+        UpdateTime = #{updateTime},
+        where
+        id = #{id}
+    </update>
+
+    <insert id="insert" parameterType="ClientPositionEntity" useGeneratedKeys="true" keyProperty="id">
+        insert into ClientPosition
+        (
+        ClientName,
+        BinlogFile,
+        BinlogPosition,
+        ServerId,
+        EventIndex,
+        UpdateTime
+        )
+        values
+        (
+        #{clientName},
+        #{binlogFile},
+        #{binlogPosition},
+        #{serverId},
+        #{eventIndex},
+        #{updateTime}
+        )
+    </insert>
+</mapper>

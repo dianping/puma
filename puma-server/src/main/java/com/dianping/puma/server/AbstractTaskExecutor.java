@@ -157,24 +157,32 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
 	protected abstract void doStart() throws Exception;
 
 	@Override
-	public void start() throws Exception {
-		stop = false;
+	public void start() {
+		try {
+			stop = false;
 
-		parser.start();
-		dataHandler.start();
-		dispatcher.start();
-		doStart();
+			parser.start();
+			dataHandler.start();
+			dispatcher.start();
+			doStart();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
-	public void stop() throws Exception {
-		stop = true;
+	public void stop() {
+		try {
+			stop = true;
 
-		parser.stop();
-		dataHandler.stop();
-		dispatcher.stop();
+			parser.stop();
+			dataHandler.stop();
+			dispatcher.stop();
 
-		doStop();
+			doStop();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public void resume() throws Exception {

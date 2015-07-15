@@ -10,7 +10,7 @@
 
     <select id="findByIds" resultType="SrcDbEntity">
         SELECT * FROM SrcDb where id in
-        <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
             #{item}
         </foreach>
     </select>

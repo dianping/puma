@@ -36,13 +36,28 @@ public class PumaServerServiceImpl implements PumaServerService {
     }
 
     @Override
+    public List<PumaServerEntity> findByPage(int page, int pageSize) {
+        return pumaServerDao.findByPage((page - 1) * pageSize, pageSize);
+    }
+
+    @Override
     public long count() {
         return pumaServerDao.count();
     }
 
     @Override
-    public List<PumaServerEntity> findByPage(int page, int pageSize) {
-        return pumaServerDao.findByPage((page - 1) * pageSize, pageSize);
+    public void registerByHost(String host) {
+        PumaServerEntity server = findByHost(host);
+        if (server == null) {
+            server = new PumaServerEntity();
+            server.setName(host);
+            server.setHost(host);
+            server.setPort(4040);
+            create(server);
+        } else {
+            server.setUpdateTime(new Date());
+            update(server);
+        }
     }
 
     @Override

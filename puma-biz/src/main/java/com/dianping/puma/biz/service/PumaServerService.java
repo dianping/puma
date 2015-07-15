@@ -18,6 +18,8 @@ public interface PumaServerService {
 
 	List<PumaServerEntity> findByPage(int page, int pageSize);
 
+	void registerByHost(String host);
+
 	void heartBeat();
 
 	void create(PumaServerEntity pumaServer);

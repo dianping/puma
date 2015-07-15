@@ -1,10 +1,10 @@
 package com.dianping.puma.biz.service;
 
-import com.dianping.puma.biz.entity.SrcDbEntity;
-
 import java.util.List;
 
-public interface SrcDBInstanceService {
+import com.dianping.puma.biz.entity.SrcDbEntity;
+
+public interface SrcDbService {
 
 	SrcDbEntity find(int id);
 

@@ -39,7 +39,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
                 0
         );
 
-        ClientSession session = new ClientSession(clientName, binlogChannel, ClientType.BROSWER);
+        ClientSession session = new ClientSession(clientName, binlogChannel, ClientType.UNKNOW);
         clientSessionService.subscribe(session);
 
         BinlogSubscriptionResponse binlogSubscriptionResponse = new BinlogSubscriptionResponse();

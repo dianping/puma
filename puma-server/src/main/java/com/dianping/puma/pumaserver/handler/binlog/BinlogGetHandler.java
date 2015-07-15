@@ -40,8 +40,6 @@ public class BinlogGetHandler extends SimpleChannelInboundHandler<BinlogGetReque
                 );
 
         BinlogGetResponse binlogGetResponse = new BinlogGetResponse();
-        binlogGetResponse.setClientName(session.getClientName());
-        binlogGetResponse.setToken(session.getToken());
         binlogGetResponse.setMsg("get success");
         binlogGetResponse.setBinlogMessage(binlogMessage);
         ctx.writeAndFlush(binlogGetResponse).addListener(new ChannelFutureListener() {

@@ -3,7 +3,6 @@ package com.dianping.puma.pumaserver.handler.binlog;
 import com.dianping.puma.core.dto.binlog.request.BinlogAckRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogAckResponse;
 import com.dianping.puma.pumaserver.client.ClientSession;
-import com.dianping.puma.pumaserver.client.ClientType;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
 import io.netty.channel.ChannelHandler;
@@ -22,14 +21,9 @@ public class BinlogAckHandler extends SimpleChannelInboundHandler<BinlogAckReque
 
         binlogAckService.save(session.getClientName(), binlogAckRequest.getBinlogAck());
 
-        // For browser user only.
-        if (session.getClientType().equals(ClientType.BROSWER)) {
-            BinlogAckResponse response = new BinlogAckResponse();
-            response.setClientName(session.getClientName());
-            response.setToken(session.getToken());
-            response.setMsg("ack success");
-            ctx.channel().writeAndFlush(response);
-        }
+        BinlogAckResponse response = new BinlogAckResponse();
+        response.setMsg("ack success");
+        ctx.channel().writeAndFlush(response);
     }
 
     public void setBinlogAckService(BinlogAckService binlogAckService) {

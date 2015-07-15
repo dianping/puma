@@ -2,14 +2,14 @@ package com.dianping.puma.biz.service.impl;
 
 import com.dianping.puma.biz.dao.SrcDbDao;
 import com.dianping.puma.biz.entity.SrcDbEntity;
-import com.dianping.puma.biz.service.SrcDBInstanceService;
+import com.dianping.puma.biz.service.SrcDbService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service("srcDBInstanceService")
-public class SrcDBInstanceServiceImpl implements SrcDBInstanceService {
+public class SrcDbServiceImpl implements SrcDbService {
     @Autowired
     SrcDbDao srcDbDao;
 

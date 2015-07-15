@@ -10,12 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 @Service
-public class PolledTaskChecker implements TaskChecker {
+public class ScheduledTaskChecker implements TaskChecker {
 
 	@Autowired
 	TaskServerManager taskServerManager;
@@ -42,6 +43,7 @@ public class PolledTaskChecker implements TaskChecker {
 		} catch (Exception e) {
 			// @todo.
 			tasks = oriTasks;
+			return;
 		}
 
 		// Created.
@@ -58,7 +60,7 @@ public class PolledTaskChecker implements TaskChecker {
 	}
 
 	@Scheduled(fixedDelay = 5 * 1000)
-	public void poll() {
+	public void scheduledCheck() {
 		check();
 	}
 

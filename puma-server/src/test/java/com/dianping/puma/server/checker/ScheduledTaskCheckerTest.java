@@ -10,7 +10,7 @@ import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath*:config/spring/*.xml")
-public class PolledTaskCheckerTest {
+public class ScheduledTaskCheckerTest {
 
 	@Autowired
 	TaskChecker taskChecker;

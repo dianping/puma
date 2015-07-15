@@ -281,12 +281,11 @@ public class DefaultTaskContainer implements TaskContainer {
     @Override
     public void create(String taskName, PumaTaskEntity task) {
         TaskExecutor taskExecutor = taskBuilder.build(task);
-
         if (taskExecutors.putIfAbsent(taskName, taskExecutor) != null) {
             throw new RuntimeException("create puma task failure, duplicate exists.");
         }
 
-        start(taskName, task);
+        start(taskName);
     }
 
     @Override
@@ -300,11 +299,11 @@ public class DefaultTaskContainer implements TaskContainer {
             throw new RuntimeException("delete puma task failure, not exists.");
         }
 
-        stop(taskName, task);
+        stop(taskName);
     }
 
     @Override
-    public void start(String taskName, PumaTaskEntity task) {
+    public void start(String taskName) {
         TaskExecutor taskExecutor = taskExecutors.get(taskName);
         if (taskExecutor == null) {
             throw new RuntimeException("start puma task failure, not exists.");
@@ -314,7 +313,7 @@ public class DefaultTaskContainer implements TaskContainer {
     }
 
     @Override
-    public void stop(String taskName, PumaTaskEntity task) {
+    public void stop(String taskName) {
         TaskExecutor taskExecutor = taskExecutors.get(taskName);
         if (taskExecutor == null) {
             throw new RuntimeException("stop puma task failure, not exists.");

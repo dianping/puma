@@ -15,9 +15,11 @@ public interface PumaServerService {
 
     List<PumaServerEntity> findAll();
 
+    List<PumaServerEntity> findByPage(int page, int pageSize);
+
     long count();
 
-    List<PumaServerEntity> findByPage(int page, int pageSize);
+    void registerByHost(String host);
 
     void heartBeat();
 

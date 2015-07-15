@@ -22,7 +22,7 @@
 
     <select id="findByIds" resultType="PumaServerEntity">
         SELECT * FROM PumaServer WHERE id in
-        <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
             #{item}
         </foreach>
     </select>

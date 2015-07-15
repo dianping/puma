@@ -9,7 +9,7 @@ public interface PumaServerDao {
 
     PumaServerEntity findById(int id);
 
-    List<PumaServerEntity> findByIds(List<Integer> ids);
+    List<PumaServerEntity> findByIds(@Param("list") List<Integer> ids);
 
     PumaServerEntity findByName(String name);
 

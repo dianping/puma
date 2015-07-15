@@ -9,6 +9,7 @@ import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.EventStorage;
 
+import java.util.List;
 import java.util.concurrent.*;
 
 public class BufferedBinlogChannel implements BinlogChannel {
@@ -24,8 +25,19 @@ public class BufferedBinlogChannel implements BinlogChannel {
 	private BlockingQueue<Event> binlogBuffer;
 
 	@Override
-	public void init(String targetName, long dbServerId, long sc, BinlogInfo binlogInfo, long timestamp) throws
-			BinlogChannelException {
+	public void init(
+			String targetName,
+			long dbServerId,
+			long sc,
+			BinlogInfo binlogInfo,
+			long timestamp,
+			String database,
+			List<String> tables,
+			boolean dml,
+			boolean ddl,
+			boolean transaction
+	) throws BinlogChannelException {
+
 		EventStorage eventStorage = taskContainer.getTaskStorage(targetName);
 
 		if (eventStorage == null) {
@@ -40,6 +52,12 @@ public class BufferedBinlogChannel implements BinlogChannel {
 					binlogInfo.getBinlogPosition(),
 					timestamp
 			);
+			eventChannel.withDatabase(database);
+			eventChannel.withTables(tables.toArray(new String[tables.size()]));
+			eventChannel.withDml(dml);
+			eventChannel.withDdl(ddl);
+			eventChannel.withTransaction(transaction);
+			eventChannel.open();
 
 			binlogBuffer = new ArrayBlockingQueue<Event>(1000);
 
@@ -76,7 +94,11 @@ public class BufferedBinlogChannel implements BinlogChannel {
 	@Override
 	public void destroy() {
 		stopped = false;
+
 		executorService.shutdown();
+
+		eventChannel.close();
+
 		binlogBuffer.clear();
 		binlogBuffer = null;
 	}

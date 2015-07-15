@@ -4,7 +4,6 @@ import java.io.EOFException;
 import java.io.IOException;
 
 import com.dianping.puma.core.codec.EventCodec;
-import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.Sequence;
@@ -32,11 +31,7 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 
 	private volatile boolean stopped = true;
 
-	private boolean fromNext;
-
 	private DataBucket readDataBucket;
-
-	private Sequence lastReadSequence;
 
 	public DefaultEventChannel(BucketManager bucketManager, DataIndex<BinlogIndexKey, L2Index> indexManager,
 	      EventCodec codec, long seq, long serverId, String binlogFile, long binlogPos, long timestamp)
@@ -44,40 +39,16 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 		this.bucketManager = bucketManager;
 		this.indexManager = indexManager;
 		this.codec = codec;
-
-		if (seq == SubscribeConstant.SEQ_FROM_BINLOGINFO) {
-			if (serverId != -1L && binlogFile != null && binlogPos != -1L) {
-				this.binlogIndexKey = new BinlogIndexKey(binlogFile, binlogPos, serverId);
-
-				try {
-					this.indexBucket = indexManager.getIndexBucket(seq, this.binlogIndexKey);
-				} catch (IOException e) {
-					throw new InvalidSequenceException("Invalid sequence(" + seq + ")", e);
-				}
-
-			} else {
-				throw new InvalidSequenceException(String.format("Invalid sequence(seq=%d but no binlogInfo set)", seq));
-			}
-		} else {
-			try {
-	         this.indexBucket = indexManager.getIndexBucket(seq, null);
-	         
-         } catch (IOException e) {
-         	
-         }
-		}
+		this.binlogIndexKey = new BinlogIndexKey(binlogFile, binlogPos, serverId);
 
 		try {
-			this.readDataBucket = bucketManager.getReadBucket(seq, fromNext);
+			this.indexBucket = indexManager.getIndexBucket(seq, this.binlogIndexKey);
 		} catch (IOException e) {
 			throw new InvalidSequenceException("Invalid sequence(" + seq + ")", e);
 		}
 
-		this.lastReadSequence = this.readDataBucket.getStartingSequece();
-
 		stopped = false;
 	}
-
 
 	@Override
 	public Event next() throws StorageException {
@@ -85,6 +56,8 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 
 		Event event = null;
 		BinlogIndexKey lastBinLogIndexKey = null;
+		Sequence lastReadSequence = null;
+
 		while (event == null) {
 			try {
 				checkClosed();
@@ -101,25 +74,32 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 				}
 
 				Sequence sequence = nextL2Index.getSequence();
-				lastBinLogIndexKey = nextL2Index.getBinlogIndexKey();
 
-				readDataBucket.skip(sequence.getOffset() - this.lastReadSequence.getOffset());
+				if (readDataBucket == null) {
+					lastReadSequence = sequence;
+					readDataBucket = this.bucketManager.getReadBucket(sequence.longValue(), false);
+				}
+
+				readDataBucket.skip(sequence.getOffset() - lastReadSequence.getOffset());
 				byte[] data = readDataBucket.getNext();
 				event = codec.decode(data);
 
-				this.lastReadSequence = sequence;
+				lastBinLogIndexKey = nextL2Index.getBinlogIndexKey();
+				lastReadSequence = sequence;
 			} catch (EOFException e) {
 				try {
-					if (this.bucketManager.hasNexReadBucket(this.lastReadSequence.longValue())) {
-						this.readDataBucket.stop();
-						this.indexBucket.stop();
+					if (this.bucketManager.hasNexReadBucket(lastReadSequence.longValue())) {
+						if (readDataBucket != null) {
+							this.readDataBucket.stop();
+							this.readDataBucket = null;
+						}
+
+						if (indexBucket != null) {
+							this.indexBucket.stop();
+						}
 
 						this.indexBucket = this.indexManager.getNextIndexBucket(lastBinLogIndexKey);
 						this.indexBucket.start();
-						this.readDataBucket = this.bucketManager.getNextReadBucket(this.lastReadSequence.longValue());
-						this.readDataBucket.start();
-
-						this.lastReadSequence = this.readDataBucket.getStartingSequece();
 					} else {
 						try {
 							Thread.sleep(5);
@@ -174,8 +154,6 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 		stopped = false;
 		try {
 			this.indexBucket.start();
-			this.indexBucket.locate(binlogIndexKey);
-
 			this.readDataBucket.start();
 		} catch (IOException ignore) {
 		}

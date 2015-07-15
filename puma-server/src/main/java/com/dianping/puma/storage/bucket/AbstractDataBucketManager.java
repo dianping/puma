@@ -199,7 +199,6 @@ public abstract class AbstractDataBucketManager implements DataBucketManager {
             if (path == null) {
                 return null;
             }
-
         }
 
         int offset = sequence.getOffset();

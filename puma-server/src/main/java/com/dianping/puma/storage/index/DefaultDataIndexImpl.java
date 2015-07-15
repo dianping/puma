@@ -313,7 +313,6 @@ public class DefaultDataIndexImpl<K extends DataIndexKey<K>, V> implements DataI
 		}
 	}
 
-	// TODO
 	@Override
 	public IndexBucket<K, V> getIndexBucket(long startPos, K key) throws IOException {
 		if (startPos == SubscribeConstant.SEQ_FROM_BINLOGINFO) {
@@ -356,6 +355,7 @@ public class DefaultDataIndexImpl<K extends DataIndexKey<K>, V> implements DataI
 			File l2IndexFile = getL2IndexFile(l2Index.getValue());
 			LocalFileIndexBucket<K, V> localFileIndexBucket = new LocalFileIndexBucket<K, V>(l2IndexFile,
 			      this.l2IndexItemConvertor);
+			localFileIndexBucket.locate(latestL2Index.get());
 
 			return localFileIndexBucket;
 		} else if (startPos == SubscribeConstant.SEQ_FROM_OLDEST) {
@@ -376,35 +376,32 @@ public class DefaultDataIndexImpl<K extends DataIndexKey<K>, V> implements DataI
 			File l2IndexFile = getL2IndexFile(l2Index.getValue());
 			LocalFileIndexBucket<K, V> localFileIndexBucket = new LocalFileIndexBucket<K, V>(l2IndexFile,
 			      this.l2IndexItemConvertor);
-			localFileIndexBucket.locate(latestL2Index.get());
 
 			return localFileIndexBucket;
 		} else {
 			return null;
-
 		}
-
 	}
 
-	@Override
 	public IndexBucket<K, V> getNextIndexBucket(K key) throws IOException {
-		if (key != null && l1Index != null) {
-			Entry<K, String> l2Index = null;
+		Entry<K, String> l2Index = null;
+		if (l1Index != null) {
 			l1ReadLock.lock();
 			try {
 				if (l1Index.isEmpty()) {
 					return null;
 				}
-				l2Index = l1Index.floorEntry(key);
+
+				l2Index = l1Index.ceilingEntry(key);
 			} finally {
 				l1ReadLock.unlock();
 			}
-
-			File l2IndexFile = getL2IndexFile(l2Index.getValue());
-
-			return new LocalFileIndexBucket<K, V>(l2IndexFile, this.l2IndexItemConvertor);
-		} else {
-			return null;
 		}
+
+		File l2IndexFile = getL2IndexFile(l2Index.getValue());
+		LocalFileIndexBucket<K, V> localFileIndexBucket = new LocalFileIndexBucket<K, V>(l2IndexFile,
+		      this.l2IndexItemConvertor);
+		
+		return localFileIndexBucket;
 	}
 }

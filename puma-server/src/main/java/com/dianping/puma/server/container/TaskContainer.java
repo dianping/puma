@@ -4,12 +4,15 @@ import java.util.List;
 
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.server.TaskExecutor;
+import com.dianping.puma.storage.EventStorage;
 
 public interface TaskContainer {
 
 	public TaskExecutor get(String taskId);
 
 	public List<TaskExecutor> getAll();
+
+	public EventStorage getTaskStorage(String taskName);
 
 	public void create(String name, PumaTaskEntity task);
 

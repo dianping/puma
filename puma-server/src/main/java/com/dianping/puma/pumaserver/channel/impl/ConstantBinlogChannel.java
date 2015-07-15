@@ -1,7 +1,7 @@
 package com.dianping.puma.pumaserver.channel.impl;
 
-import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.pumaserver.channel.BinlogChannel;
@@ -23,7 +23,7 @@ public class ConstantBinlogChannel implements BinlogChannel {
 	}
 
 	@Override
-	public void locate(String targetName, long dbServerId, SubscribeConstant sc, BinlogInfo binlogInfo, long timestamp)
+	public void init(String targetName, long dbServerId, long sc, BinlogInfo binlogInfo, long timestamp)
 			throws BinlogChannelException {
 
 	}
@@ -34,7 +34,7 @@ public class ConstantBinlogChannel implements BinlogChannel {
 	}
 
 	@Override
-	public ChangedEvent next() throws BinlogChannelException {
+	public Event next() throws BinlogChannelException {
 		ChangedEvent event = new RowChangedEvent();
 		event.setDatabase(constant.getDatabase());
 		event.setTable(constant.getTable());
@@ -42,7 +42,7 @@ public class ConstantBinlogChannel implements BinlogChannel {
 	}
 
 	@Override
-	public ChangedEvent next(long timeout, TimeUnit timeUnit) throws BinlogChannelException {
+	public Event next(long timeout, TimeUnit timeUnit) throws BinlogChannelException {
 		long timeoutMillis = timeUnit.toMillis(timeout);
 		long costTimeMillis = costTimeUnit.toMillis(costTime);
 

@@ -1,14 +1,12 @@
 package com.dianping.puma.biz.service.impl;
 
-import com.dianping.cat.Cat;
 import com.dianping.puma.biz.dao.PumaServerDao;
 import com.dianping.puma.biz.entity.PumaServerEntity;
 import com.dianping.puma.biz.service.PumaServerService;
+import com.dianping.puma.core.util.IPUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.List;
 
@@ -49,20 +47,18 @@ public class PumaServerServiceImpl implements PumaServerService {
 
     @Override
     public void heartBeat() {
-        try {
-            PumaServerEntity server = findByHost(InetAddress.getLocalHost().getHostAddress());
+        for (String ip : IPUtils.getNoLoopbackIP4Addresses()) {
+            PumaServerEntity server = findByHost(ip);
             if (server == null) {
                 server = new PumaServerEntity();
-                server.setName(InetAddress.getLocalHost().getHostName());
-                server.setHost(InetAddress.getLocalHost().getHostAddress());
+                server.setName(ip);
+                server.setHost(ip);
                 server.setPort(4040);
                 create(server);
             } else {
                 server.setUpdateTime(new Date());
                 update(server);
             }
-        } catch (UnknownHostException e) {
-            Cat.logError(e);
         }
     }
 

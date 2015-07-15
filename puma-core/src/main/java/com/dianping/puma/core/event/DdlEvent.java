@@ -1,12 +1,12 @@
 /**
  * Project: ${puma-client.aid}
- * 
+ * <p/>
  * File Created at 2012-7-3
  * $Id$
- * 
+ * <p/>
  * Copyright 2010 dianping.com.
  * All rights reserved.
- *
+ * <p/>
  * This software is the confidential and proprietary information of
  * Dianping Company. ("Confidential Information").  You shall not
  * disclose such Confidential Information and shall use it only in
@@ -15,17 +15,17 @@
  */
 package com.dianping.puma.core.event;
 
-import java.io.Serializable;
-
 import com.dianping.puma.core.util.constant.DdlEventSubType;
 import com.dianping.puma.core.util.constant.DdlEventType;
 import com.dianping.puma.core.util.sql.DDLType;
+
+import java.io.Serializable;
 
 /**
  * <p>
  * 变更时间的基类
  * </p>
- * 
+ * <p/>
  * <p>
  * 域信息和含义如下：
  * </p>
@@ -39,111 +39,118 @@ import com.dianping.puma.core.util.sql.DDLType;
  * <td><code>sql语句</code>
  * </table>
  * </blockquote>
- * 
+ *
  * @author Leo Liang
- * 
  */
 
 public class DdlEvent extends ChangedEvent implements Serializable {
-	private static final long	serialVersionUID	= -5676914333310337620L;
-	private String				sql;
+    private static final long serialVersionUID = -5676914333310337620L;
 
-	private DDLType ddlType;
-	
-	private DdlEventType  eventType;
-	
-	private DdlEventSubType eventSubType;
-	/**
-	 * @return the sql
-	 */
-	public String getSql() {
-		return sql;
-	}
+    private final EventType eventType = EventType.DDL;
 
-	/**
-	 * @param sql
-	 *            the sql to set
-	 */
-	public void setSql(String sql) {
-		this.sql = sql;
-	}
+    private String sql;
 
-	@Override
-	public String genFullName() {
-		return getDatabase() + "." + getTable();
-	}
+    private DDLType ddlType;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "DdlEvent [sql=" + sql + ", super.toString()=" + super.toString() + "]";
-	}
+    private DdlEventType ddlEventType;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((sql == null) ? 0 : sql.hashCode());
-		return result;
-	}
+    private DdlEventSubType ddlEventSubType;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!super.equals(obj)) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		DdlEvent other = (DdlEvent) obj;
-		if (sql == null) {
-			if (other.sql != null) {
-				return false;
-			}
-		} else if (!sql.equals(other.sql)) {
-			return false;
-		}
-		return true;
-	}
+    /**
+     * @return the sql
+     */
+    public String getSql() {
+        return sql;
+    }
 
-	public void setEventType(DdlEventType eventType) {
-		this.eventType = eventType;
-	}
+    /**
+     * @param sql the sql to set
+     */
+    public void setSql(String sql) {
+        this.sql = sql;
+    }
 
-	public DdlEventType getEventType() {
-		return eventType;
-	}
+    @Override
+    public String genFullName() {
+        return getDatabase() + "." + getTable();
+    }
 
-	public void setEventSubType(DdlEventSubType eventSubType) {
-		this.eventSubType = eventSubType;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "DdlEvent [sql=" + sql + ", super.toString()=" + super.toString() + "]";
+    }
 
-	public DdlEventSubType getEventSubType() {
-		return eventSubType;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((sql == null) ? 0 : sql.hashCode());
+        return result;
+    }
 
-	public DDLType getDDLType() {
-		return ddlType;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        DdlEvent other = (DdlEvent) obj;
+        if (sql == null) {
+            if (other.sql != null) {
+                return false;
+            }
+        } else if (!sql.equals(other.sql)) {
+            return false;
+        }
+        return true;
+    }
 
-	public void setDDLType(DDLType ddlType) {
-		this.ddlType = ddlType;
-	}
+    public void setDdlEventType(DdlEventType ddlEventType) {
+        this.ddlEventType = ddlEventType;
+    }
+
+    public DdlEventType getDdlEventType() {
+        return ddlEventType;
+    }
+
+    public void setDdlEventSubType(DdlEventSubType ddlEventSubType) {
+        this.ddlEventSubType = ddlEventSubType;
+    }
+
+    public DdlEventSubType getDdlEventSubType() {
+        return ddlEventSubType;
+    }
+
+    public DDLType getDDLType() {
+        return ddlType;
+    }
+
+    public void setDDLType(DDLType ddlType) {
+        this.ddlType = ddlType;
+    }
+
+    @Override
+    public EventType getEventType() {
+        return eventType;
+    }
 }

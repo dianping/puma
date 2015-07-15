@@ -1,11 +1,10 @@
 package com.dianping.puma.pumaserver.handler.binlog;
 
-import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.event.EventWrap;
 import com.dianping.puma.core.dto.BinlogAck;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.dto.binlog.request.BinlogGetRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
+import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.pumaserver.channel.BinlogChannel;
 import com.dianping.puma.pumaserver.client.ClientSession;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
@@ -40,9 +39,6 @@ public class BinlogGetHandler extends SimpleChannelInboundHandler<BinlogGetReque
                 );
 
         BinlogGetResponse binlogGetResponse = new BinlogGetResponse();
-        binlogGetResponse.setClientName(session.getClientName());
-        binlogGetResponse.setToken(session.getToken());
-        binlogGetResponse.setMsg("get success");
         binlogGetResponse.setBinlogMessage(binlogMessage);
         ctx.writeAndFlush(binlogGetResponse).addListener(new ChannelFutureListener() {
             @Override
@@ -83,7 +79,7 @@ public class BinlogGetHandler extends SimpleChannelInboundHandler<BinlogGetReque
     private BinlogMessage fillBinlogMessage(final BinlogChannel binlogChannel, int batchSize) {
         BinlogMessage binlogMessage = new BinlogMessage();
         for (int i = 0; i != batchSize; ++i) {
-            binlogMessage.addBinlogEvents(new EventWrap(binlogChannel.next()));
+            binlogMessage.addBinlogEvents(binlogChannel.next());
         }
         return binlogMessage;
     }
@@ -108,7 +104,7 @@ public class BinlogGetHandler extends SimpleChannelInboundHandler<BinlogGetReque
             if (binlogEvent == null) {
                 break;
             } else {
-                binlogMessage.addBinlogEvents(new EventWrap(binlogEvent));
+                binlogMessage.addBinlogEvents(binlogEvent);
                 nextTimeout = nextTimeout - stopwatch.elapsed(timeUnit);
             }
         }

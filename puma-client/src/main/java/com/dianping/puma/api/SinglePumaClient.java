@@ -5,8 +5,10 @@ import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.dto.binlog.response.BinlogAckResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
+import com.dianping.puma.core.dto.binlog.response.BinlogUnsubscriptionResponse;
+import com.dianping.puma.core.event.*;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.google.gson.Gson;
+import com.google.gson.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -21,6 +23,7 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -34,7 +37,7 @@ public class SinglePumaClient implements PumaClient {
 
     private static final Charset DEFAULT_CHARSET = Charset.forName("utf-8");
 
-    private final Gson gson = new Gson();
+    private final Gson gson;
 
     private volatile List<NameValuePair> subscribeRequest;
 
@@ -50,6 +53,7 @@ public class SinglePumaClient implements PumaClient {
 
 
     public SinglePumaClient(String clientName, String remoteIp, int remotePort) {
+        this.gson = new GsonBuilder().registerTypeAdapter(Event.class, new EventJsonDeserializer()).create();
         this.clientName = clientName;
         this.baseUrl = String.format("http://%s:%d", remoteIp, remotePort);
         logger.info("Current puma client base url is: {}", baseUrl);
@@ -65,15 +69,15 @@ public class SinglePumaClient implements PumaClient {
 
     @Override
     public BinlogMessage get(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException {
-        List<NameValuePair> parma = new ArrayList<NameValuePair>();
-        parma.add(new BasicNameValuePair("clientName", clientName));
-        parma.add(new BasicNameValuePair("batchSize", String.valueOf(batchSize)));
-        parma.add(new BasicNameValuePair("timeout", String.valueOf(timeout)));
+        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("clientName", clientName));
+        params.add(new BasicNameValuePair("batchSize", String.valueOf(batchSize)));
+        params.add(new BasicNameValuePair("timeout", String.valueOf(timeout)));
         if (timeUnit != null) {
-            parma.add(new BasicNameValuePair("timeUnit", timeUnit.toString()));
+            params.add(new BasicNameValuePair("timeUnit", timeUnit.toString()));
         }
-        addToken(parma);
-        return execute("/puma/binlog/get", parma, BinlogGetResponse.class).getBinlogMessage();
+        addToken(params);
+        return execute("/puma/binlog/get", params, BinlogGetResponse.class).getBinlogMessage();
     }
 
     @Override
@@ -96,13 +100,13 @@ public class SinglePumaClient implements PumaClient {
             return;
         }
 
-        List<NameValuePair> parma = new ArrayList<NameValuePair>();
-        parma.add(new BasicNameValuePair("clientName", clientName));
-        parma.add(new BasicNameValuePair("binlogFile", binlogInfo.getBinlogFile()));
-        parma.add(new BasicNameValuePair("binlogPosition", String.valueOf(binlogInfo.getBinlogPosition())));
-        parma.add(new BasicNameValuePair("serverId", String.valueOf(binlogInfo.getServerId())));
-        addToken(parma);
-        execute("/puma/binlog/get", parma, BinlogAckResponse.class);
+        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("clientName", clientName));
+        params.add(new BasicNameValuePair("binlogFile", binlogInfo.getBinlogFile()));
+        params.add(new BasicNameValuePair("binlogPosition", String.valueOf(binlogInfo.getBinlogPosition())));
+        params.add(new BasicNameValuePair("serverId", String.valueOf(binlogInfo.getServerId())));
+        addToken(params);
+        execute("/puma/binlog/get", params, BinlogAckResponse.class);
     }
 
     protected void addToken(List<NameValuePair> parma) {
@@ -124,6 +128,16 @@ public class SinglePumaClient implements PumaClient {
     @Override
     public void rollback() throws PumaClientException {
         //todo:
+    }
+
+    @Override
+    public void unSubscribe() throws PumaClientException {
+        this.token = null;
+
+        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("clientName", clientName));
+        addToken(params);
+        execute("/puma/binlog/unsubscribe", params, BinlogUnsubscriptionResponse.class);
     }
 
     @Override
@@ -178,5 +192,25 @@ public class SinglePumaClient implements PumaClient {
         }
 
         return gson.fromJson(json, clazz);
+    }
+
+
+    public class EventJsonDeserializer implements JsonDeserializer<Event> {
+        @Override
+        public Event deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            JsonObject jsonObject = json.getAsJsonObject();
+
+            String eventType = jsonObject.get("eventType").getAsString();
+
+            if (EventType.DDL.toString().equals(eventType)) {
+                return context.deserialize(json, DdlEvent.class);
+            } else if (EventType.DML.toString().equals(eventType)) {
+                return context.deserialize(json, RowChangedEvent.class);
+            } else if (EventType.ERROR.toString().equals(eventType)) {
+                return context.deserialize(json, ServerErrorEvent.class);
+            } else {
+                throw new JsonParseException("Unknown EventType :" + eventType);
+            }
+        }
     }
 }

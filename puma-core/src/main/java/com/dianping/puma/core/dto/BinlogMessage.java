@@ -1,6 +1,6 @@
 package com.dianping.puma.core.dto;
 
-import com.dianping.puma.core.event.EventWrap;
+import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.model.BinlogInfo;
 
 import java.util.LinkedList;
@@ -8,17 +8,17 @@ import java.util.List;
 
 public class BinlogMessage {
 
-    private List<EventWrap> binlogEvents = new LinkedList<EventWrap>();
+    private List<Event> binlogEvents = new LinkedList<Event>();
 
-    public List<EventWrap> getBinlogEvents() {
+    public List<Event> getBinlogEvents() {
         return binlogEvents;
     }
 
-    public void setBinlogEvents(List<EventWrap> binlogEvents) {
+    public void setBinlogEvents(List<Event> binlogEvents) {
         this.binlogEvents = binlogEvents;
     }
 
-    public void addBinlogEvents(EventWrap binlogEvent) {
+    public void addBinlogEvents(Event binlogEvent) {
         binlogEvents.add(binlogEvent);
     }
 

@@ -37,8 +37,6 @@ public class JsonEventCodec implements EventCodec {
 			out.write(DDL_EVENT);
 		} else if(event instanceof RowChangedEvent) {
 			out.write(DML_EVENT);
-		} else if(event instanceof HeartbeatEvent) {
-			out.write(HEARTBEAT_EVENT);
 		} else {
 			out.write(SERVER_ERROR_EVENT);
 		}
@@ -55,8 +53,6 @@ public class JsonEventCodec implements EventCodec {
 			return om.readValue(data, 1, data.length - 1, DdlEvent.class);
 		} else if (type == DML_EVENT) {
 			return om.readValue(data, 1, data.length - 1, RowChangedEvent.class);
-		} else if (type == HEARTBEAT_EVENT) {
-			return om.readValue(data, 1, data.length - 1, HeartbeatEvent.class);
 		} else {
 			return om.readValue(data, 1, data.length - 1, ServerErrorEvent.class);
 		}

@@ -21,7 +21,6 @@ public interface PumaServerService {
 
     void heartBeat();
 
-    @Deprecated
     void create(PumaServerEntity pumaServer);
 
     void update(PumaServerEntity pumaServer);

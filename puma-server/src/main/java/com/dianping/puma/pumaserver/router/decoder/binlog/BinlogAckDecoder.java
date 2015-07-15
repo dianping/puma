@@ -26,17 +26,9 @@ public class BinlogAckDecoder implements RequestDecoder {
         BinlogAckRequest binlogAckRequest = new BinlogAckRequest();
         Map<String, List<String>> params = (new QueryStringDecoder(request.getUri())).parameters();
 
-        if (!params.containsKey("clientName")) {
-            throw new DecoderException("must contain `clientName` in `BinlogAckRequest`");
-        } else {
-            binlogAckRequest.setClientName(params.get("clientName").get(0));
-        }
+        binlogAckRequest.setClientName(params.get("clientName").get(0));
 
-        if (!params.containsKey("token")) {
-            throw new DecoderException("must contain `token` in `BinlogAckRequest`");
-        } else {
-            binlogAckRequest.setToken(params.get("token").get(0));
-        }
+        binlogAckRequest.setToken(params.get("token").get(0));
 
         BinlogAck binlogAck = new BinlogAck();
         binlogAck.setBinlogInfo(new BinlogInfo(

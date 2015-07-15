@@ -35,32 +35,36 @@ public class BinlogInfo implements Serializable {
         return binlogFile;
     }
 
-    public void setBinlogFile(String binlogFile) {
+    public BinlogInfo setBinlogFile(String binlogFile) {
         this.binlogFile = binlogFile;
+        return this;
     }
 
     public Long getBinlogPosition() {
         return binlogPosition;
     }
 
-    public void setBinlogPosition(Long binlogPosition) {
+    public BinlogInfo setBinlogPosition(Long binlogPosition) {
         this.binlogPosition = binlogPosition;
+        return this;
     }
 
     public int getEventIndex() {
         return eventIndex;
     }
 
-    public void setEventIndex(int eventIndex) {
+    public BinlogInfo setEventIndex(int eventIndex) {
         this.eventIndex = eventIndex;
+        return this;
     }
 
     public int getServerId() {
         return serverId;
     }
 
-    public void setServerId(int serverId) {
+    public BinlogInfo setServerId(int serverId) {
         this.serverId = serverId;
+        return this;
     }
 
     @Override

@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -47,16 +46,13 @@ public class ScheduledTaskChecker implements TaskChecker {
 		}
 
 		// Created.
-		Map<String, PumaTaskEntity> createdTasks = findCreatedTask(oriTasks, tasks);
-		handleCreatedTask(createdTasks);
+		findAndHandleCreatedTasks(oriTasks, tasks);
 
 		// Updated.
-		Map<String, PumaTaskEntity> updatedTasks = findUpdatedTask(oriTasks, tasks);
-		handleUpdatedTask(updatedTasks);
+		findAndHandleUpdatedTasks(oriTasks, tasks);
 
 		// Deleted.
-		Map<String, PumaTaskEntity> deletedTasks = findDeletedTask(oriTasks, tasks);
-		handleDeletedTask(deletedTasks);
+		findAndHandleDeletedTasks(oriTasks, tasks);
 	}
 
 	@Scheduled(fixedDelay = 5 * 1000)
@@ -64,25 +60,11 @@ public class ScheduledTaskChecker implements TaskChecker {
 		check();
 	}
 
-	protected Map<String, PumaTaskEntity> findCreatedTask(
+	protected void findAndHandleCreatedTasks(
 			Map<String, PumaTaskEntity> oriTasks, Map<String, PumaTaskEntity> tasks) {
+
 		MapDifference<String, PumaTaskEntity> taskDifference = Maps.difference(oriTasks, tasks);
-		return taskDifference.entriesOnlyOnRight();
-	}
-
-	protected Map<String, PumaTaskEntity> findUpdatedTask(
-			Map<String, PumaTaskEntity> oriTasks, Map<String, PumaTaskEntity> tasks) {
-		return null;
-	}
-
-	protected Map<String, PumaTaskEntity> findDeletedTask(
-			Map<String, PumaTaskEntity> oriTasks, Map<String, PumaTaskEntity> tasks) {
-		MapDifference<String, PumaTaskEntity> taskDifference = Maps.difference(oriTasks, tasks);
-		return taskDifference.entriesOnlyOnLeft();
-	}
-
-	private void handleCreatedTask(Map<String, PumaTaskEntity> createdTasks) {
-		for (Map.Entry<String, PumaTaskEntity> entry: createdTasks.entrySet()) {
+		for (Map.Entry<String, PumaTaskEntity> entry: taskDifference.entriesOnlyOnRight().entrySet()) {
 			try {
 				taskContainer.create(entry.getKey(), entry.getValue());
 			} catch (Exception e) {
@@ -91,18 +73,25 @@ public class ScheduledTaskChecker implements TaskChecker {
 		}
 	}
 
-	private void handleUpdatedTask(Map<String, PumaTaskEntity> updatedTasks) {
-		for (Map.Entry<String, PumaTaskEntity> entry: updatedTasks.entrySet()) {
+	protected void findAndHandleUpdatedTasks(
+			Map<String, PumaTaskEntity> oriTasks, Map<String, PumaTaskEntity> tasks) {
+
+		MapDifference<String, PumaTaskEntity> taskDifference = Maps.difference(oriTasks, tasks);
+		Map<String, MapDifference.ValueDifference<PumaTaskEntity>> diffs = taskDifference.entriesDiffering();
+		for (Map.Entry<String, MapDifference.ValueDifference<PumaTaskEntity>> entry: diffs.entrySet()) {
 			try {
-				taskContainer.update(entry.getKey(), entry.getValue());
+				taskContainer.update(entry.getKey(), entry.getValue().leftValue(), entry.getValue().rightValue());
 			} catch (Exception e) {
 				// @todo.
 			}
 		}
 	}
 
-	private void handleDeletedTask(Map<String, PumaTaskEntity> deletedTasks) {
-		for (Map.Entry<String, PumaTaskEntity> entry: deletedTasks.entrySet()) {
+	protected void findAndHandleDeletedTasks(
+			Map<String, PumaTaskEntity> oriTasks, Map<String, PumaTaskEntity> tasks) {
+
+		MapDifference<String, PumaTaskEntity> taskDifference = Maps.difference(oriTasks, tasks);
+		for (Map.Entry<String, PumaTaskEntity> entry: taskDifference.entriesOnlyOnLeft().entrySet()) {
 			try {
 				taskContainer.delete(entry.getKey(), entry.getValue());
 			} catch (Exception e) {

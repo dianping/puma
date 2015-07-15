@@ -2,7 +2,6 @@ package com.dianping.puma.server.state;
 
 import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.biz.service.TaskStateService;
-import com.dianping.puma.server.TaskExecutor;
 import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.server.server.TaskServerManager;
 import com.google.common.collect.MapDifference;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -33,67 +31,68 @@ public class ScheduledTaskStateChecker implements TaskStateChecker {
 
 	@Override
 	public void check() {
-		for (String host: taskServerManager.findAuthorizedHosts()) {
-			for (TaskExecutor taskExecutor: taskContainer.getAll()) {
-				String taskName = taskExecutor.getTaskName();
-				TaskStateEntity taskState = taskStateService.find(taskName, host);
-				if (taskState != null) {
-					taskStates.put(taskName, taskState);
+		ConcurrentMap<String, TaskStateEntity> oriTaskStates = taskStates;
+		taskStates.clear();
+
+		try {
+			for (String host: taskServerManager.findAuthorizedHosts()) {
+				for (TaskStateEntity taskState: taskStateService.findByServerName(host)) {
+					taskStates.put(taskState.getTaskName(), taskState);
 				}
+			}
+		} catch (Exception e) {
+			taskStates = oriTaskStates;
+			return;
+		}
+
+		// Created.
+		findAndHandleCreatedTaskStates(oriTaskStates, taskStates);
+
+		// Updated.
+		findAndHandleUpdatedTaskStates(oriTaskStates, taskStates);
+	}
+
+	protected void findAndHandleCreatedTaskStates(
+			Map<String, TaskStateEntity> oriTaskStates, Map<String, TaskStateEntity> taskStates) {
+
+		MapDifference<String, TaskStateEntity> taskStateDifference = Maps.difference(oriTaskStates, taskStates);
+		for (Map.Entry<String, TaskStateEntity> entry: taskStateDifference.entriesOnlyOnRight().entrySet()) {
+			try {
+				changeTaskState(entry.getKey(), entry.getValue());
+			} catch (Exception e) {
+				// @todo.
 			}
 		}
 	}
 
-	protected Map<String, TaskStateEntity> findChangedTaskStates(
+	protected void findAndHandleUpdatedTaskStates(
 			Map<String, TaskStateEntity> oriTaskStates, Map<String, TaskStateEntity> taskStates) {
-		return null;
-	}
 
-	protected Map<String, TaskStateEntity> findCreatedTaskStates(
-			Map<String, TaskStateEntity> oriTaskStates, Map<String, TaskStateEntity> taskStates) {
 		MapDifference<String, TaskStateEntity> taskStateDifference = Maps.difference(oriTaskStates, taskStates);
-		return taskStateDifference.entriesOnlyOnRight();
-	}
+		Map<String, ValueDifference<TaskStateEntity>> diffs = taskStateDifference.entriesDiffering();
 
-	protected Map<String, TaskStateEntity> findUpdatedTaskStates(
-			Map<String, TaskStateEntity> oriTaskStates, Map<String, TaskStateEntity> taskStates) {
-		Map<String, TaskStateEntity> updatedTaskStates = new HashMap<String, TaskStateEntity>();
-		MapDifference<String, TaskStateEntity> taskStateDifference = Maps.difference(oriTaskStates, taskStates);
-		Map<String, ValueDifference<TaskStateEntity>> valueDifferences = taskStateDifference.entriesDiffering();
-
-		for (Map.Entry<String, ValueDifference<TaskStateEntity>> entry: valueDifferences.entrySet()) {
-			String taskName = entry.getKey();
+		for (Map.Entry<String, ValueDifference<TaskStateEntity>> entry: diffs.entrySet()) {
 			TaskStateEntity oriTaskState = entry.getValue().leftValue();
 			TaskStateEntity taskState = entry.getValue().rightValue();
 
 			if (!oriTaskState.getController().equals(taskState.getController())) {
-				updatedTaskStates.put(taskName, taskState);
+				try {
+					changeTaskState(entry.getKey(), taskState);
+				} catch (Exception e) {
+					// @todo.
+				}
 			}
 		}
-
-		return updatedTaskStates;
 	}
 
-	protected Map<String, TaskStateEntity> findDeletedTaskStates(
-			Map<String, TaskStateEntity> oriTaskStates, Map<String, TaskStateEntity> taskStates) {
-		MapDifference<String, TaskStateEntity> taskStateDifference = Maps.difference(oriTaskStates, taskStates);
-		return taskStateDifference.entriesOnlyOnLeft();
-	}
-
-	protected void handleChangedTaskStates(Map<String, TaskStateEntity> changedTaskStates) {
-		for (Map.Entry<String, TaskStateEntity> entry: changedTaskStates.entrySet()) {
-			try {
-				switch (entry.getValue().getController()) {
-				case START:
-					taskContainer.start(entry.getKey());
-					break;
-				case STOP:
-					taskContainer.stop(entry.getKey());
-					break;
-				}
-			} catch (Exception e) {
-				// @todo.
-			}
+	private void changeTaskState(String taskName, TaskStateEntity taskState) {
+		switch (taskState.getController()) {
+		case START:
+			taskContainer.start(taskName);
+			break;
+		case STOP:
+			taskContainer.stop(taskName);
+			break;
 		}
 	}
 

@@ -25,10 +25,13 @@ public abstract class TaskStateServiceImpl implements TaskStateService {
     }
 
     @Override
+    public List<TaskStateEntity> findByServerName(String serverName) {
+        return null;
+    }
+
+    @Override
     public void createOrUpdate(TaskStateEntity state) {
         state.setTaskType(getTypeName());
         state.setGmtUpdate(new Date());
-
-
     }
 }

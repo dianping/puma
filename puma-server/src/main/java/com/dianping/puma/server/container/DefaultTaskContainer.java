@@ -4,11 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.dianping.puma.biz.entity.PumaTaskEntity;
@@ -289,7 +285,7 @@ public class DefaultTaskContainer implements TaskContainer {
     }
 
     @Override
-    public void update(String taskName, PumaTaskEntity task) {
+    public void update(String taskName, PumaTaskEntity oriTask, PumaTaskEntity task) {
 
     }
 

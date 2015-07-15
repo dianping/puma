@@ -17,5 +17,7 @@ public interface TaskStateService {
 
     TaskStateEntity find(String name, String serverName);
 
+    List<TaskStateEntity> findByServerName(String serverName);
+
     void createOrUpdate(TaskStateEntity state);
 }

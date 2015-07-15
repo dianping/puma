@@ -13,7 +13,7 @@ public interface TaskContainer {
 
 	public void create(String name, PumaTaskEntity task);
 
-	public void update(String name, PumaTaskEntity task);
+	public void update(String name, PumaTaskEntity oriTask, PumaTaskEntity task);
 
 	public void delete(String name, PumaTaskEntity task);
 

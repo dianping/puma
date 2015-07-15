@@ -65,15 +65,15 @@ public class SinglePumaClient implements PumaClient {
 
     @Override
     public BinlogMessage get(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException {
-        List<NameValuePair> parma = new ArrayList<NameValuePair>();
-        parma.add(new BasicNameValuePair("clientName", clientName));
-        parma.add(new BasicNameValuePair("batchSize", String.valueOf(batchSize)));
-        parma.add(new BasicNameValuePair("timeout", String.valueOf(timeout)));
+        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("clientName", clientName));
+        params.add(new BasicNameValuePair("batchSize", String.valueOf(batchSize)));
+        params.add(new BasicNameValuePair("timeout", String.valueOf(timeout)));
         if (timeUnit != null) {
-            parma.add(new BasicNameValuePair("timeUnit", timeUnit.toString()));
+            params.add(new BasicNameValuePair("timeUnit", timeUnit.toString()));
         }
-        addToken(parma);
-        return execute("/puma/binlog/get", parma, BinlogGetResponse.class).getBinlogMessage();
+        addToken(params);
+        return execute("/puma/binlog/get", params, BinlogGetResponse.class).getBinlogMessage();
     }
 
     @Override
@@ -96,13 +96,13 @@ public class SinglePumaClient implements PumaClient {
             return;
         }
 
-        List<NameValuePair> parma = new ArrayList<NameValuePair>();
-        parma.add(new BasicNameValuePair("clientName", clientName));
-        parma.add(new BasicNameValuePair("binlogFile", binlogInfo.getBinlogFile()));
-        parma.add(new BasicNameValuePair("binlogPosition", String.valueOf(binlogInfo.getBinlogPosition())));
-        parma.add(new BasicNameValuePair("serverId", String.valueOf(binlogInfo.getServerId())));
-        addToken(parma);
-        execute("/puma/binlog/get", parma, BinlogAckResponse.class);
+        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("clientName", clientName));
+        params.add(new BasicNameValuePair("binlogFile", binlogInfo.getBinlogFile()));
+        params.add(new BasicNameValuePair("binlogPosition", String.valueOf(binlogInfo.getBinlogPosition())));
+        params.add(new BasicNameValuePair("serverId", String.valueOf(binlogInfo.getServerId())));
+        addToken(params);
+        execute("/puma/binlog/get", params, BinlogAckResponse.class);
     }
 
     protected void addToken(List<NameValuePair> parma) {

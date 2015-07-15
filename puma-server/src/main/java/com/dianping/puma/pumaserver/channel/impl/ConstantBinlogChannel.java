@@ -7,6 +7,7 @@ import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.pumaserver.channel.BinlogChannel;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class ConstantBinlogChannel implements BinlogChannel {
@@ -14,6 +15,7 @@ public class ConstantBinlogChannel implements BinlogChannel {
 	private final ChangedEvent constant;
 
 	private final long costTime = 1;
+
 	private final TimeUnit costTimeUnit = TimeUnit.MILLISECONDS;
 
 	public ConstantBinlogChannel() {
@@ -23,9 +25,17 @@ public class ConstantBinlogChannel implements BinlogChannel {
 	}
 
 	@Override
-	public void init(String targetName, long dbServerId, long sc, BinlogInfo binlogInfo, long timestamp)
-			throws BinlogChannelException {
-
+	public void init(
+			String targetName,
+			long dbServerId,
+			long sc,
+			BinlogInfo binlogInfo,
+			long timestamp,
+			String database,
+			List<String> tables,
+			boolean dml,
+			boolean ddl,
+			boolean transaction) throws BinlogChannelException {
 	}
 
 	@Override

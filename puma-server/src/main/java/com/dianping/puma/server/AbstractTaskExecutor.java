@@ -15,17 +15,16 @@
  */
 package com.dianping.puma.server;
 
+import java.util.List;
+
 import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
-import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.Dispatcher;
-
-import java.util.List;
 
 /**
  * TODO Comment of AbstractServer

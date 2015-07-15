@@ -74,8 +74,6 @@ public class DefaultDataIndexImpl<K extends DataIndexKey<K>, V> implements DataI
 
 	private ReentrantReadWriteLock l2Lock = new ReentrantReadWriteLock();
 
-	private ReadLock l2ReadLock = l2Lock.readLock();
-
 	private WriteLock l2WriteLock = l2Lock.writeLock();
 
 	private AtomicReference<K> latestL2Index = new AtomicReference<K>();

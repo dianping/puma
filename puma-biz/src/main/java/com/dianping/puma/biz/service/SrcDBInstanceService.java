@@ -1,27 +1,26 @@
 package com.dianping.puma.biz.service;
 
 import com.dianping.puma.biz.entity.SrcDbEntity;
-import com.dianping.puma.biz.entity.old.SrcDBInstance;
 
 import java.util.List;
 
 public interface SrcDBInstanceService {
-	
+
 	SrcDbEntity find(int id);
 
 	SrcDbEntity find(String name);
 
-    List<SrcDbEntity> findAll();
+	List<SrcDbEntity> findAll();
 
-    long count();
+	long count();
 
 	List<SrcDbEntity> findByPage(int page, int pageSize);
-	
+
 	void create(SrcDbEntity srcDBInstance);
 
 	void update(SrcDbEntity srcDBInstance);
 
 	void remove(String name);
-	
+
 	void remove(int id);
 }

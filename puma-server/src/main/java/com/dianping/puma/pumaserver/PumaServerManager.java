@@ -15,7 +15,7 @@ import com.dianping.puma.pumaserver.handler.deprecated.DeprecatedBinlogQueryHand
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.service.BinlogTargetService;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
-import com.dianping.puma.pumaserver.service.impl.CachedBinlogAckService;
+import com.dianping.puma.pumaserver.service.impl.DbBinlogAckService;
 import com.dianping.puma.pumaserver.service.impl.DefaultClientSessionService;
 import com.dianping.puma.pumaserver.service.impl.LionBinlogTargetService;
 import io.netty.channel.ChannelHandler;
@@ -23,6 +23,7 @@ import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpContentDecompressor;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -39,8 +40,11 @@ import java.util.Map;
 public class PumaServerManager {
     public volatile static TcpServer server;
 
+    @Autowired
+    protected DbBinlogAckService binlogAckService;
+
     protected final BinlogTargetService binlogTargetService = new LionBinlogTargetService();
-    protected final BinlogAckService binlogAckService = new CachedBinlogAckService();
+
     protected final ClientSessionService clientSessionService = new DefaultClientSessionService();
 
     protected final ChannelHolderHandler channelHolderHandler = new ChannelHolderHandler(new PumaClientsHolder());

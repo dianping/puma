@@ -8,7 +8,7 @@ public class BinlogInfo implements Serializable {
 
     private static final long serialVersionUID = 5056491879587690001L;
 
-    private int serverId;
+    private long serverId;
 
     private String binlogFile;
 
@@ -58,11 +58,11 @@ public class BinlogInfo implements Serializable {
         return this;
     }
 
-    public int getServerId() {
+    public long getServerId() {
         return serverId;
     }
 
-    public BinlogInfo setServerId(int serverId) {
+    public BinlogInfo setServerId(long serverId) {
         this.serverId = serverId;
         return this;
     }

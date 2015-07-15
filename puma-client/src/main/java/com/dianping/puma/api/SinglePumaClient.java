@@ -5,6 +5,7 @@ import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.dto.binlog.response.BinlogAckResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
+import com.dianping.puma.core.dto.binlog.response.BinlogUnsubscriptionResponse;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.google.gson.Gson;
 import org.apache.http.HttpResponse;
@@ -124,6 +125,16 @@ public class SinglePumaClient implements PumaClient {
     @Override
     public void rollback() throws PumaClientException {
         //todo:
+    }
+
+    @Override
+    public void unSubscribe() throws PumaClientException {
+        this.token = null;
+
+        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("clientName", clientName));
+        addToken(params);
+        execute("/puma/binlog/unsubscribe", params, BinlogUnsubscriptionResponse.class);
     }
 
     @Override

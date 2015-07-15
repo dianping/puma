@@ -12,8 +12,6 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.dianping.puma.core.codec.JsonEventCodec;
-import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
@@ -43,8 +41,8 @@ public class RawEventCodecTest {
 		// ddl event info
 		event.setSql("SELECT * FROM testtb");
 		event.setDDLType(DDLType.ALTER_DATABASE);
-		event.setEventSubType(DdlEventSubType.DDL_ALTER_DATABASE);
-		event.setEventType(DdlEventType.DDL_ALTER);
+		event.setDdlEventSubType(DdlEventSubType.DDL_ALTER_DATABASE);
+		event.setDdlEventType(DdlEventType.DDL_ALTER);
 
 		byte[] encode = codec.encode(event);
 		byte[] encode2 = jsonCodec.encode(event);
@@ -58,8 +56,8 @@ public class RawEventCodecTest {
 
 		Assert.assertEquals("SELECT * FROM testtb", result.getSql());
 		Assert.assertEquals(DDLType.ALTER_DATABASE, result.getDDLType());
-		Assert.assertEquals(DdlEventSubType.DDL_ALTER_DATABASE, result.getEventSubType());
-		Assert.assertEquals(DdlEventType.DDL_ALTER, result.getEventType());
+		Assert.assertEquals(DdlEventSubType.DDL_ALTER_DATABASE, result.getDdlEventSubType());
+		Assert.assertEquals(DdlEventType.DDL_ALTER, result.getDdlEventType());
 	}
 
 	private void assertChangedEventProperty(ChangedEvent result) {

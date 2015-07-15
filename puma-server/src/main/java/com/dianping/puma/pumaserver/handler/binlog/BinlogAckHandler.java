@@ -22,7 +22,6 @@ public class BinlogAckHandler extends SimpleChannelInboundHandler<BinlogAckReque
         binlogAckService.save(session.getClientName(), binlogAckRequest.getBinlogAck());
 
         BinlogAckResponse response = new BinlogAckResponse();
-        response.setMsg("ack success");
         ctx.channel().writeAndFlush(response);
     }
 

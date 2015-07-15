@@ -6,8 +6,9 @@ import com.dianping.puma.core.dto.binlog.response.BinlogAckResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogUnsubscriptionResponse;
+import com.dianping.puma.core.event.*;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.google.gson.Gson;
+import com.google.gson.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -22,6 +23,7 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -35,7 +37,7 @@ public class SinglePumaClient implements PumaClient {
 
     private static final Charset DEFAULT_CHARSET = Charset.forName("utf-8");
 
-    private final Gson gson = new Gson();
+    private final Gson gson;
 
     private volatile List<NameValuePair> subscribeRequest;
 
@@ -51,6 +53,7 @@ public class SinglePumaClient implements PumaClient {
 
 
     public SinglePumaClient(String clientName, String remoteIp, int remotePort) {
+        this.gson = new GsonBuilder().registerTypeAdapter(Event.class, new EventJsonDeserializer()).create();
         this.clientName = clientName;
         this.baseUrl = String.format("http://%s:%d", remoteIp, remotePort);
         logger.info("Current puma client base url is: {}", baseUrl);
@@ -189,5 +192,25 @@ public class SinglePumaClient implements PumaClient {
         }
 
         return gson.fromJson(json, clazz);
+    }
+
+
+    public class EventJsonDeserializer implements JsonDeserializer<Event> {
+        @Override
+        public Event deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            JsonObject jsonObject = json.getAsJsonObject();
+
+            String eventType = jsonObject.get("eventType").getAsString();
+
+            if (EventType.DDL.toString().equals(eventType)) {
+                return context.deserialize(json, DdlEvent.class);
+            } else if (EventType.DML.toString().equals(eventType)) {
+                return context.deserialize(json, RowChangedEvent.class);
+            } else if (EventType.ERROR.toString().equals(eventType)) {
+                return context.deserialize(json, ServerErrorEvent.class);
+            } else {
+                throw new JsonParseException("Unknown EventType :" + eventType);
+            }
+        }
     }
 }

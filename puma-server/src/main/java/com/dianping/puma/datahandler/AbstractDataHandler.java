@@ -206,19 +206,19 @@ public abstract class AbstractDataHandler implements DataHandler {
 		ChangedEvent dataChangedEvent = new DdlEvent();
 		DdlEvent ddlEvent = (DdlEvent) dataChangedEvent;
 		ddlEvent.setSql(sql);
-		ddlEvent.setEventType(SimpleDdlParser.getEventType(sql));
+		ddlEvent.setDdlEventType(SimpleDdlParser.getEventType(sql));
 
-		ddlEvent.setEventSubType(SimpleDdlParser.getEventSubType(ddlEvent.getEventType(), sql));
-		if (ddlEvent.getEventType() == DdlEventType.DDL_DEFAULT
-		      || ddlEvent.getEventSubType() == DdlEventSubType.DDL_SUB_DEFAULT) {
+		ddlEvent.setDdlEventSubType(SimpleDdlParser.getEventSubType(ddlEvent.getDdlEventType(), sql));
+		if (ddlEvent.getDdlEventType() == DdlEventType.DDL_DEFAULT
+		      || ddlEvent.getDdlEventSubType() == DdlEventSubType.DDL_SUB_DEFAULT) {
 			log.info("DdlEvent Type do not found. ddl sql=" + sql);
 		}
-		DdlResult ddlResult = SimpleDdlParser.getDdlResult(ddlEvent.getEventType(), ddlEvent.getEventSubType(), sql);
+		DdlResult ddlResult = SimpleDdlParser.getDdlResult(ddlEvent.getDdlEventType(), ddlEvent.getDdlEventSubType(), sql);
 		if (ddlResult != null) {
 			ddlEvent.setDatabase(StringUtils.isNotBlank(ddlResult.getDatabase()) ? ddlResult.getDatabase()
 			      : StringUtils.EMPTY);
 			ddlEvent.setTable(StringUtils.isNotBlank(ddlResult.getTable()) ? ddlResult.getTable() : StringUtils.EMPTY);
-			if (ddlEvent.getEventType() != DdlEventType.DDL_CREATE) {
+			if (ddlEvent.getDdlEventType() != DdlEventType.DDL_CREATE) {
 				log.info("DDL event, sql=" + sql + "  ,database =" + ddlResult.getDatabase() + " table ="
 				      + ddlResult.getTable() + " queryEvent.getDatabaseName()" + queryEvent.getDatabaseName());
 			}
@@ -227,8 +227,8 @@ public abstract class AbstractDataHandler implements DataHandler {
 			ddlEvent.setDatabase(queryEvent.getDatabaseName());
 		}
 
-		if (ddlEvent.getEventType() == DdlEventType.DDL_ALTER
-		      && ddlEvent.getEventSubType() == DdlEventSubType.DDL_ALTER_TABLE) {
+		if (ddlEvent.getDdlEventType() == DdlEventType.DDL_ALTER
+		      && ddlEvent.getDdlEventSubType() == DdlEventSubType.DDL_ALTER_TABLE) {
 			ddlEvent.setDDLType(DDLType.ALTER_TABLE);
 		}
 

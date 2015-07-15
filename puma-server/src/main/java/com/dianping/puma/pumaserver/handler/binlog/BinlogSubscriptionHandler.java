@@ -44,7 +44,6 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
         BinlogSubscriptionResponse binlogSubscriptionResponse = new BinlogSubscriptionResponse();
         binlogSubscriptionResponse.setToken(session.getToken());
-        binlogSubscriptionResponse.setMsg("subscribe success");
         ctx.channel().writeAndFlush(binlogSubscriptionResponse);
     }
 

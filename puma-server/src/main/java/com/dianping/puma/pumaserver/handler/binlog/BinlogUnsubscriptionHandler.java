@@ -22,7 +22,6 @@ public class BinlogUnsubscriptionHandler extends SimpleChannelInboundHandler<Bin
         session.getBinlogChannel().destroy();
 
         BinlogUnsubscriptionResponse response = new BinlogUnsubscriptionResponse();
-        response.setMsg("unsubscribe success");
         ctx.channel().writeAndFlush(response);
     }
 

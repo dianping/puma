@@ -27,7 +27,6 @@ import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.Dispatcher;
 
 /**
- * TODO Comment of AbstractServer
  *
  * @author Leo Liang
  */

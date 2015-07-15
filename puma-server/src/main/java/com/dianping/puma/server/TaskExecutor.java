@@ -25,7 +25,7 @@ import com.dianping.puma.sender.Sender;
  * @author Leo Liang
  *
  */
-public interface TaskExecutor extends LifeCycle {
+public interface TaskExecutor extends LifeCycle<Exception> {
 
 	public void setContext(PumaContext context);
 

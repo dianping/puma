@@ -32,7 +32,8 @@ import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
 import com.dianping.puma.storage.index.BinlogIndexKey;
 import com.dianping.puma.storage.index.BinlogIndexKeyConvertor;
 import com.dianping.puma.storage.index.DefaultDataIndexImpl;
-import com.dianping.puma.storage.index.LongIndexItemConvertor;
+import com.dianping.puma.storage.index.L2Index;
+import com.dianping.puma.storage.index.L2IndexItemConvertor;
 
 /**
  * TODO Comment of DefaultCleanupStrategyTest
@@ -60,8 +61,8 @@ public class DefaultCleanupStrategyTest {
         index.setBaseDir(baseDir.getAbsolutePath());
         index.setBucketFilePrefix("bucket-");
 
-        DefaultDataIndexImpl<BinlogIndexKey, Long> binlogIndex = new DefaultDataIndexImpl<BinlogIndexKey, Long>(
-                binlogIndexBaseDir.getAbsolutePath(), new LongIndexItemConvertor(), new BinlogIndexKeyConvertor());
+        DefaultDataIndexImpl<BinlogIndexKey, L2Index> binlogIndex = new DefaultDataIndexImpl<BinlogIndexKey, L2Index>(
+                binlogIndexBaseDir.getAbsolutePath(), new L2IndexItemConvertor(), new BinlogIndexKeyConvertor());
 
         Calendar cal = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
@@ -74,7 +75,7 @@ public class DefaultCleanupStrategyTest {
             file.getParentFile().mkdirs();
             file.createNewFile();
             binlogIndex.addL1Index(new BinlogIndexKey("dd", i, i), sdf.format(cal.getTime()) + "-bucket-0");
-            binlogIndex.addL2Index(new BinlogIndexKey("dd", i, i), (long) i);
+            binlogIndex.addL2Index(new BinlogIndexKey("dd", i, i), new L2Index());
         }
 
         index.start();

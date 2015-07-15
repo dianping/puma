@@ -15,194 +15,196 @@
  */
 package com.dianping.puma.storage.index;
 
-import java.io.BufferedWriter;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.dianping.puma.storage.index.BinlogIndexKey;
-import com.dianping.puma.storage.index.BinlogIndexKeyConvertor;
-import com.dianping.puma.storage.index.DefaultDataIndexImpl;
-import com.dianping.puma.storage.index.LongIndexItemConvertor;
+import com.dianping.puma.core.constant.SubscribeConstant;
+import com.dianping.puma.storage.Sequence;
 
 /**
- * @author Leo Liang
  * 
+ * @author damonzhu
+ *
  */
 public class DefaultDataIndexTest {
-    protected File baseDir = null;
+	protected File baseDir = null;
 
-    @BeforeClass
-    public static void init() {
+	private DefaultDataIndexImpl<BinlogIndexKey, L2Index> index;
 
-    }
+	private BinlogIndexKey key1;
 
-    @Before
-    public void before() {
-        baseDir = new File(System.getProperty("java.io.tmpdir", "."), "IndexTest");
-        baseDir.mkdirs();
+	private BinlogIndexKey key2;
 
-    }
+	private BinlogIndexKey key3;
 
-    @After
-    public void after() {
-        FileUtils.deleteQuietly(baseDir);
-    }
+	@Before
+	public void before() throws IOException {
+		baseDir = new File(System.getProperty("java.io.tmpdir", "."), "IndexTest");
+		baseDir.mkdirs();
 
-    @AfterClass
-    public static void destroy() {
-    }
+		index = new DefaultDataIndexImpl<BinlogIndexKey, L2Index>(baseDir.getAbsolutePath(), new L2IndexItemConvertor(),
+		      new BinlogIndexKeyConvertor());
+		index.start();
 
-    @Test
-    public void testFind() throws IOException {
-        createL1IndexFile(new String[] { "0!binlog01!0=1000", "0!binlog02!0=2000" });
-        Map<String, String[]> l2IndexFiles = new HashMap<String, String[]>();
-        l2IndexFiles.put("1000", new String[] { "0!binlog01!0=10000", "0!binlog01!1=10001", "0!binlog01!2=10002",
-                "0!binlog01!3=10003", "0!binlog01!4=10004", "0!binlog01!5=10005" });
-        l2IndexFiles.put("2000", new String[] { "0!binlog02!6=10006", "0!binlog02!7=10007", "0!binlog02!8=10008",
-                "0!binlog02!9=10009", "0!binlog02!10=10010", "0!binlog02!11=10011" });
-        createL2IndexFile(l2IndexFiles);
-        DefaultDataIndexImpl<BinlogIndexKey, Long> index = new DefaultDataIndexImpl<BinlogIndexKey, Long>(
-                baseDir.getAbsolutePath(), new LongIndexItemConvertor(), new BinlogIndexKeyConvertor());
-        index.start();
-    }
+		key1 = new BinlogIndexKey("bin-0001.bin", 5, 0);
+		L2Index l2Index1 = new L2Index();
+		l2Index1.setBinlogIndexKey(key1);
+		l2Index1.setDatabase("dianping");
+		l2Index1.setTable("receipt");
+		l2Index1.setDdl(false);
+		l2Index1.setDml(true);
+		l2Index1.setSequence(new Sequence(123L));
 
-    @Test
-    public void testAddL1Index() throws IOException {
+		index.addL1Index(key1, "1");
+		index.addL2Index(key1, l2Index1);
 
-        DefaultDataIndexImpl<BinlogIndexKey, Long> index = new DefaultDataIndexImpl<BinlogIndexKey, Long>(
-                baseDir.getAbsolutePath(), new LongIndexItemConvertor(), new BinlogIndexKeyConvertor());
-        index.start();
-        BinlogIndexKey key = new BinlogIndexKey("bin-0001.bin", 5, 0);
-        index.addL1Index(key, "1");
+		key2 = new BinlogIndexKey("bin-0002.bin", 10, 0);
+		L2Index l2Index2 = new L2Index();
+		l2Index2.setBinlogIndexKey(key2);
+		l2Index2.setDatabase("dianping");
+		l2Index2.setTable("receipt");
+		l2Index2.setDdl(false);
+		l2Index2.setDml(true);
+		l2Index2.setSequence(new Sequence(123555L));
 
-        File l1IndexFile = new File(baseDir, DefaultDataIndexImpl.L1INDEX_FILENAME);
-        Assert.assertTrue(l1IndexFile.exists());
-        Properties prop = new Properties();
-        prop.load(new FileInputStream(l1IndexFile));
-        Assert.assertEquals(1, prop.size());
-        Assert.assertEquals("1", prop.getProperty(new BinlogIndexKeyConvertor().convertToObj(key)));
+		index.addL2Index(key2, l2Index2);
 
-        File l2IndexFile = new File(new File(baseDir, DefaultDataIndexImpl.L2INDEX_FOLDER), "1"
-                + DefaultDataIndexImpl.L2INDEX_FILESUFFIX);
-        Assert.assertTrue(l2IndexFile.exists());
-    }
+		key3 = new BinlogIndexKey("bin-0003.bin", 200, 0);
+		L2Index l2Index3 = new L2Index();
+		l2Index3.setBinlogIndexKey(key3);
+		l2Index3.setDatabase("dianping");
+		l2Index3.setTable("receipt");
+		l2Index3.setDdl(false);
+		l2Index3.setDml(true);
+		l2Index3.setSequence(new Sequence(123555L));
 
-    @Test
-    public void testAddL2Index() throws IOException {
+		index.addL1Index(key3, "2");
+		index.addL2Index(key3, l2Index3);
+	}
 
-        DefaultDataIndexImpl<BinlogIndexKey, Long> index = new DefaultDataIndexImpl<BinlogIndexKey, Long>(
-                baseDir.getAbsolutePath(), new LongIndexItemConvertor(), new BinlogIndexKeyConvertor());
-        index.start();
-        BinlogIndexKey key = new BinlogIndexKey("bin-0001.bin", 5, 0);
-        index.addL1Index(key, "1");
-        index.addL2Index(key, 123L);
-        
-        BinlogIndexKey key1 = new BinlogIndexKey("bin-0002.bin", 5, 0);
-        index.addL1Index(key1, "1");
-        index.addL2Index(key1, 123555L);
+	@After
+	public void after() {
+		FileUtils.deleteQuietly(baseDir);
+	}
 
-        File l1IndexFile = new File(baseDir, DefaultDataIndexImpl.L1INDEX_FILENAME);
-        Assert.assertTrue(l1IndexFile.exists());
-        Properties prop = new Properties();
-        prop.load(new FileInputStream(l1IndexFile));
-        Assert.assertEquals(1, prop.size());
-        Assert.assertEquals("1", prop.getProperty(new BinlogIndexKeyConvertor().convertToObj(key)));
+	@Test
+	public void testAddL1Index() throws IOException {
+		File l1IndexFile = new File(baseDir, DefaultDataIndexImpl.L1INDEX_FILENAME);
+		Assert.assertTrue(l1IndexFile.exists());
+		Properties prop = new Properties();
+		prop.load(new FileInputStream(l1IndexFile));
+		Assert.assertEquals(2, prop.size());
+		Assert.assertEquals("1", prop.getProperty(new BinlogIndexKeyConvertor().convertToObj(key1)));
+		Assert.assertEquals("2", prop.getProperty(new BinlogIndexKeyConvertor().convertToObj(key3)));
 
-        File l2IndexFile = new File(new File(baseDir, DefaultDataIndexImpl.L2INDEX_FOLDER), "1"
-                + DefaultDataIndexImpl.L2INDEX_FILESUFFIX);
-        Assert.assertTrue(l2IndexFile.exists());
-        prop = new Properties();
-        prop.load(new FileInputStream(l2IndexFile));
-        Assert.assertEquals(1, prop.size());
-        Assert.assertEquals("123", prop.getProperty(new BinlogIndexKeyConvertor().convertToObj(key)));
-    }
+		File l2IndexFile1 = new File(new File(baseDir, DefaultDataIndexImpl.L2INDEX_FOLDER), "1"
+		      + DefaultDataIndexImpl.L2INDEX_FILESUFFIX);
+		Assert.assertTrue(l2IndexFile1.exists());
+		File l2IndexFile2 = new File(new File(baseDir, DefaultDataIndexImpl.L2INDEX_FOLDER), "2"
+		      + DefaultDataIndexImpl.L2INDEX_FILESUFFIX);
+		Assert.assertTrue(l2IndexFile2.exists());
+	}
 
-    @Test
-    public void testWholeProcess() throws IOException {
+	@Test
+	public void testGetIndexBucketFromBinLogInfo() throws IOException {
+		IndexBucket<BinlogIndexKey, L2Index> indexBucket = index.getIndexBucket(SubscribeConstant.SEQ_FROM_BINLOGINFO,
+		      new BinlogIndexKey("bin-0001.bin", 5, 0));
+		L2Index convertFromObj = indexBucket.next();
 
-        DefaultDataIndexImpl<BinlogIndexKey, Long> index = new DefaultDataIndexImpl<BinlogIndexKey, Long>(
-                baseDir.getAbsolutePath(), new LongIndexItemConvertor(), new BinlogIndexKeyConvertor());
-        index.start();
-        BinlogIndexKey key = new BinlogIndexKey("bin-0001.bin", 5, 0);
-        index.addL1Index(key, "1");
-        index.addL2Index(key, 123L);
+		Assert.assertEquals("bin-0002.bin", convertFromObj.getBinlogIndexKey().getBinlogFile());
+		Assert.assertEquals(10L, convertFromObj.getBinlogIndexKey().getBinlogPos());
+		Assert.assertEquals(0L, convertFromObj.getBinlogIndexKey().getServerId());
+		Assert.assertEquals("dianping", convertFromObj.getDatabase());
+		Assert.assertEquals("receipt", convertFromObj.getTable());
+		Assert.assertEquals(false, convertFromObj.isDdl());
+		Assert.assertEquals(true, convertFromObj.isDml());
+		Assert.assertEquals(123555L, convertFromObj.getSequence().longValue());
+	}
 
-        File l1IndexFile = new File(baseDir, DefaultDataIndexImpl.L1INDEX_FILENAME);
-        Assert.assertTrue(l1IndexFile.exists());
-        Properties prop = new Properties();
-        prop.load(new FileInputStream(l1IndexFile));
-        Assert.assertEquals(1, prop.size());
-        Assert.assertEquals("1", prop.getProperty(new BinlogIndexKeyConvertor().convertToObj(key)));
+	@Test
+	public void testGetIndexBucketFromOldest() throws IOException {
+		IndexBucket<BinlogIndexKey, L2Index> indexBucket = index.getIndexBucket(SubscribeConstant.SEQ_FROM_OLDEST, null);
+		L2Index convertFromObj = indexBucket.next();
 
-        File l2IndexFile = new File(new File(baseDir, DefaultDataIndexImpl.L2INDEX_FOLDER), "1"
-                + DefaultDataIndexImpl.L2INDEX_FILESUFFIX);
-        Assert.assertTrue(l2IndexFile.exists());
-        prop = new Properties();
-        prop.load(new FileInputStream(l2IndexFile));
-        Assert.assertEquals(1, prop.size());
-        Assert.assertEquals("123", prop.getProperty(new BinlogIndexKeyConvertor().convertToObj(key)));
-    }
+		Assert.assertEquals("bin-0001.bin", convertFromObj.getBinlogIndexKey().getBinlogFile());
+		Assert.assertEquals(5L, convertFromObj.getBinlogIndexKey().getBinlogPos());
+		Assert.assertEquals(0L, convertFromObj.getBinlogIndexKey().getServerId());
+		Assert.assertEquals("dianping", convertFromObj.getDatabase());
+		Assert.assertEquals("receipt", convertFromObj.getTable());
+		Assert.assertEquals(false, convertFromObj.isDdl());
+		Assert.assertEquals(true, convertFromObj.isDml());
+		Assert.assertEquals(123L, convertFromObj.getSequence().longValue());
+	}
 
-    @Test
-    public void testRemove() throws IOException {
+	@Test(expected = EOFException.class)
+	public void testGetIndexBucketFromLaest1() throws IOException {
+		IndexBucket<BinlogIndexKey, L2Index> indexBucket = index.getIndexBucket(SubscribeConstant.SEQ_FROM_LATEST, null);
+		indexBucket.next();
+	}
 
-        DefaultDataIndexImpl<BinlogIndexKey, Long> index = new DefaultDataIndexImpl<BinlogIndexKey, Long>(
-                baseDir.getAbsolutePath(), new LongIndexItemConvertor(), new BinlogIndexKeyConvertor());
-        index.start();
-        BinlogIndexKey key = new BinlogIndexKey("bin-0001.bin", 5, 0);
-        index.addL1Index(key, "1");
-        index.addL2Index(key, 123L);
+	@Test
+	public void testGetIndexBucketFromLaest2() throws IOException {
+		IndexBucket<BinlogIndexKey, L2Index> indexBucket = index.getIndexBucket(SubscribeConstant.SEQ_FROM_LATEST, null);
 
-        index.removeByL2IndexName("1");
+		BinlogIndexKey key1 = new BinlogIndexKey("bin-0002.bin", 15, 0);
+		L2Index l2Index2 = new L2Index();
+		l2Index2.setBinlogIndexKey(key1);
+		l2Index2.setDatabase("dianping");
+		l2Index2.setTable("receipt");
+		l2Index2.setDdl(false);
+		l2Index2.setDml(true);
+		l2Index2.setSequence(new Sequence(123567L));
+		index.addL2Index(key1, l2Index2);
 
-        File l1IndexFile = new File(baseDir, DefaultDataIndexImpl.L1INDEX_FILENAME);
-        Assert.assertTrue(l1IndexFile.exists());
-        Properties prop = new Properties();
-        prop.load(new FileInputStream(l1IndexFile));
-        Assert.assertEquals(0, prop.size());
+		L2Index convertFromObj = indexBucket.next();
 
-        File l2IndexFile = new File(new File(baseDir, DefaultDataIndexImpl.L2INDEX_FOLDER), "1"
-                + DefaultDataIndexImpl.L2INDEX_FILESUFFIX);
-        Assert.assertFalse(l2IndexFile.exists());
+		Assert.assertEquals("bin-0002.bin", convertFromObj.getBinlogIndexKey().getBinlogFile());
+		Assert.assertEquals(15L, convertFromObj.getBinlogIndexKey().getBinlogPos());
+		Assert.assertEquals(0L, convertFromObj.getBinlogIndexKey().getServerId());
+		Assert.assertEquals("dianping", convertFromObj.getDatabase());
+		Assert.assertEquals("receipt", convertFromObj.getTable());
+		Assert.assertEquals(false, convertFromObj.isDdl());
+		Assert.assertEquals(true, convertFromObj.isDml());
+		Assert.assertEquals(123567L, convertFromObj.getSequence().longValue());
+	}
 
-    }
+	@Test
+	public void testGetNextIndexBucket() throws IOException {
+		IndexBucket<BinlogIndexKey, L2Index> indexBucket = index.getNextIndexBucket(key3);
 
-    private void createL1IndexFile(String[] lines) throws IOException {
-        File file = new File(baseDir, DefaultDataIndexImpl.L1INDEX_FILENAME);
-        file.createNewFile();
-        BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-        for (String line : lines) {
-            bw.write(line);
-            bw.newLine();
-        }
-        bw.close();
-    }
+		L2Index convertFromObj = indexBucket.next();
 
-    private void createL2IndexFile(Map<String, String[]> data) throws IOException {
-        for (Map.Entry<String, String[]> entry : data.entrySet()) {
-            File file = new File(new File(baseDir, DefaultDataIndexImpl.L2INDEX_FOLDER), entry.getKey()
-                    + DefaultDataIndexImpl.L2INDEX_FILESUFFIX);
-            file.getParentFile().mkdirs();
-            file.createNewFile();
-            BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-            for (String line : entry.getValue()) {
-                bw.write(line);
-                bw.newLine();
-            }
-            bw.close();
-        }
-    }
+		Assert.assertEquals("bin-0003.bin", convertFromObj.getBinlogIndexKey().getBinlogFile());
+		Assert.assertEquals(200L, convertFromObj.getBinlogIndexKey().getBinlogPos());
+		Assert.assertEquals(0L, convertFromObj.getBinlogIndexKey().getServerId());
+		Assert.assertEquals("dianping", convertFromObj.getDatabase());
+		Assert.assertEquals("receipt", convertFromObj.getTable());
+		Assert.assertEquals(false, convertFromObj.isDdl());
+		Assert.assertEquals(true, convertFromObj.isDml());
+		Assert.assertEquals(123555L, convertFromObj.getSequence().longValue());
+	}
+
+	@Test
+	public void testRemoveByL2IndexName() throws IOException {
+		index.removeByL2IndexName("1");
+
+		File l1IndexFile = new File(baseDir, DefaultDataIndexImpl.L1INDEX_FILENAME);
+		Assert.assertTrue(l1IndexFile.exists());
+		Properties prop = new Properties();
+		prop.load(new FileInputStream(l1IndexFile));
+		Assert.assertEquals(1, prop.size());
+
+		File l2IndexFile = new File(new File(baseDir, DefaultDataIndexImpl.L2INDEX_FOLDER), "1"
+		      + DefaultDataIndexImpl.L2INDEX_FILESUFFIX);
+		Assert.assertFalse(l2IndexFile.exists());
+	}
 }

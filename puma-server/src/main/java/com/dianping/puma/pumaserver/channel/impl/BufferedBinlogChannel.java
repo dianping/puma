@@ -53,7 +53,7 @@ public class BufferedBinlogChannel implements BinlogChannel {
 					timestamp
 			);
 			eventChannel.withDatabase(database);
-			eventChannel.withTables();
+			eventChannel.withTables(tables.toArray(new String[tables.size()]));
 			eventChannel.withDml(dml);
 			eventChannel.withDdl(ddl);
 			eventChannel.withTransaction(transaction);

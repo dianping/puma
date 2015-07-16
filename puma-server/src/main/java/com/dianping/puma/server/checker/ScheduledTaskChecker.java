@@ -2,6 +2,7 @@ package com.dianping.puma.server.checker;
 
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.biz.service.PumaTaskService;
+import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.server.server.TaskServerManager;
 import com.google.common.collect.MapDifference;
@@ -66,6 +67,14 @@ public class ScheduledTaskChecker implements TaskChecker {
 		MapDifference<String, PumaTaskEntity> taskDifference = Maps.difference(oriTasks, tasks);
 		for (Map.Entry<String, PumaTaskEntity> entry: taskDifference.entriesOnlyOnRight().entrySet()) {
 			try {
+				String taskName = entry.getKey();
+				PumaTaskEntity task = entry.getValue();
+
+				taskContainer.create(taskName, task);
+
+				if (task.getActionController().equals(ActionController.START)) {
+				}
+
 				taskContainer.create(entry.getKey(), entry.getValue());
 			} catch (Exception e) {
 				// @todo.

@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.dao;
 
-import com.dianping.puma.biz.entity.TaskStateEntity;
+import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +23,7 @@ public class TaskStateDaoTest {
     @Test
     @Ignore
     public void testDao() throws Exception {
-        TaskStateEntity result2 = taskStateDao.findByTaskNameAndServerNameAndTaskType("task1", "server1", "type1").get(0);
+        PumaTaskStateEntity result2 = taskStateDao.findByTaskNameAndServerNameAndTaskType("task1", "server1", "type1").get(0);
         result2.getBinlogStat().setDdls(100l);
         taskStateDao.update(result2);
 

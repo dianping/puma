@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.dao;
 
-import com.dianping.puma.biz.entity.TaskStateEntity;
+import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -12,11 +12,11 @@ import java.util.List;
  */
 public interface TaskStateDao {
 
-    List<TaskStateEntity> findByTaskNameAndTaskType(@Param("taskName") String taskName, @Param("taskType") String taskType);
+    List<PumaTaskStateEntity> findByTaskNameAndTaskType(@Param("taskName") String taskName, @Param("taskType") String taskType);
 
-    List<TaskStateEntity> findByTaskNameAndServerNameAndTaskType(@Param("taskName") String taskName, @Param("serverName") String serverName, @Param("taskType") String taskType);
+    List<PumaTaskStateEntity> findByTaskNameAndServerNameAndTaskType(@Param("taskName") String taskName, @Param("serverName") String serverName, @Param("taskType") String taskType);
 
-    int insert(TaskStateEntity entity);
+    int insert(PumaTaskStateEntity entity);
 
-    int update(TaskStateEntity entity);
+    int update(PumaTaskStateEntity entity);
 }

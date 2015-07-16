@@ -1,7 +1,7 @@
-package com.dianping.puma.server.state;
+package com.dianping.puma.server.reporter;
 
-import com.dianping.puma.biz.entity.TaskStateEntity;
-import com.dianping.puma.biz.service.TaskStateService;
+import com.dianping.puma.biz.entity.PumaTaskStateEntity;
+import com.dianping.puma.biz.service.PumaTaskStateService;
 import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.server.server.TaskServerManager;
 import com.google.common.collect.MapDifference;
@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentMap;
 public class ScheduledTaskStateChecker implements TaskStateChecker {
 
 	@Autowired
-	TaskStateService taskStateService;
+	PumaTaskStateService taskStateService;
 
 	@Autowired
 	TaskServerManager taskServerManager;
@@ -27,16 +27,16 @@ public class ScheduledTaskStateChecker implements TaskStateChecker {
 	@Autowired
 	TaskContainer taskContainer;
 
-	private ConcurrentMap<String, TaskStateEntity> taskStates = new ConcurrentHashMap<String, TaskStateEntity>();
+	private ConcurrentMap<String, PumaTaskStateEntity> taskStates = new ConcurrentHashMap<String, PumaTaskStateEntity>();
 
 	@Override
 	public void check() {
-		ConcurrentMap<String, TaskStateEntity> oriTaskStates = taskStates;
+		ConcurrentMap<String, PumaTaskStateEntity> oriTaskStates = taskStates;
 		taskStates.clear();
 
 		try {
 			for (String host: taskServerManager.findAuthorizedHosts()) {
-				for (TaskStateEntity taskState: taskStateService.findByServerName(host)) {
+				for (PumaTaskStateEntity taskState: taskStateService.findByServerName(host)) {
 					taskStates.put(taskState.getTaskName(), taskState);
 				}
 			}
@@ -53,10 +53,10 @@ public class ScheduledTaskStateChecker implements TaskStateChecker {
 	}
 
 	protected void findAndHandleCreatedTaskStates(
-			Map<String, TaskStateEntity> oriTaskStates, Map<String, TaskStateEntity> taskStates) {
+			Map<String, PumaTaskStateEntity> oriTaskStates, Map<String, PumaTaskStateEntity> taskStates) {
 
-		MapDifference<String, TaskStateEntity> taskStateDifference = Maps.difference(oriTaskStates, taskStates);
-		for (Map.Entry<String, TaskStateEntity> entry: taskStateDifference.entriesOnlyOnRight().entrySet()) {
+		MapDifference<String, PumaTaskStateEntity> taskStateDifference = Maps.difference(oriTaskStates, taskStates);
+		for (Map.Entry<String, PumaTaskStateEntity> entry: taskStateDifference.entriesOnlyOnRight().entrySet()) {
 			try {
 				changeTaskState(entry.getKey(), entry.getValue());
 			} catch (Exception e) {
@@ -66,14 +66,14 @@ public class ScheduledTaskStateChecker implements TaskStateChecker {
 	}
 
 	protected void findAndHandleUpdatedTaskStates(
-			Map<String, TaskStateEntity> oriTaskStates, Map<String, TaskStateEntity> taskStates) {
+			Map<String, PumaTaskStateEntity> oriTaskStates, Map<String, PumaTaskStateEntity> taskStates) {
 
-		MapDifference<String, TaskStateEntity> taskStateDifference = Maps.difference(oriTaskStates, taskStates);
-		Map<String, ValueDifference<TaskStateEntity>> diffs = taskStateDifference.entriesDiffering();
+		MapDifference<String, PumaTaskStateEntity> taskStateDifference = Maps.difference(oriTaskStates, taskStates);
+		Map<String, ValueDifference<PumaTaskStateEntity>> diffs = taskStateDifference.entriesDiffering();
 
-		for (Map.Entry<String, ValueDifference<TaskStateEntity>> entry: diffs.entrySet()) {
-			TaskStateEntity oriTaskState = entry.getValue().leftValue();
-			TaskStateEntity taskState = entry.getValue().rightValue();
+		for (Map.Entry<String, ValueDifference<PumaTaskStateEntity>> entry: diffs.entrySet()) {
+			PumaTaskStateEntity oriTaskState = entry.getValue().leftValue();
+			PumaTaskStateEntity taskState = entry.getValue().rightValue();
 
 			if (!oriTaskState.getController().equals(taskState.getController())) {
 				try {
@@ -85,7 +85,7 @@ public class ScheduledTaskStateChecker implements TaskStateChecker {
 		}
 	}
 
-	private void changeTaskState(String taskName, TaskStateEntity taskState) {
+	private void changeTaskState(String taskName, PumaTaskStateEntity taskState) {
 		switch (taskState.getController()) {
 		case START:
 			taskContainer.start(taskName);

@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.dianping.puma.bo.PumaContext;
+import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.utils.PacketUtils;
 
 public class RowDataPacket extends AbstractResponsePacket {

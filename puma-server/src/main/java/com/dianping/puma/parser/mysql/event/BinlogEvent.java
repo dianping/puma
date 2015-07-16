@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 
-import com.dianping.puma.bo.PumaContext;
+import com.dianping.puma.common.PumaContext;
 
 /**
  * TODO Comment of BinlogEvent

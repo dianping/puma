@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
 
-import com.dianping.puma.bo.PumaContext;
+import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.core.annotation.ThreadSafe;
 import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.event.AnonymousGtidEvent;

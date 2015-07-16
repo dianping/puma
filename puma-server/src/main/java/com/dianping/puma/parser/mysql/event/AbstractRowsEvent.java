@@ -22,10 +22,11 @@ import java.util.BitSet;
 import java.util.List;
 
 import com.google.common.primitives.UnsignedLong;
+
 import org.apache.commons.lang.exception.NestableRuntimeException;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import com.dianping.puma.bo.PumaContext;
+import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.Metadata;
 import com.dianping.puma.parser.mysql.Row;

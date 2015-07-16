@@ -1,7 +1,8 @@
 package com.dianping.puma.sender;
 
-import com.dianping.puma.bo.PumaContext;
+import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.core.event.ChangedEvent;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

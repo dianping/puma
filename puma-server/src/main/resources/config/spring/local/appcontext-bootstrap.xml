@@ -13,28 +13,12 @@
     http://www.springframework.org/schema/context/spring-context-3.0.xsd
     http://code.dianping.com/schema/pigeon http://code.dianping.com/schema/pigeon/pigeon-service-2.0.xsd">
 
-	<bean name="placeholder" lazy-init="false"
-		class="com.dianping.puma.config.InitializeConfig">
-		<property name="propertiesPath" value="applicationContext.properties" />
-	</bean>
-
 	<!-- annotation scan -->
 	<context:component-scan base-package="com.dianping.puma" />
 
 	<task:annotation-driven />
 
 	<bean id="binlogInfoHolder"
-		class="com.dianping.puma.biz.storage.holder.impl.DefaultBinlogInfoHolder"
-		init-method="init">
-		<property name="baseDir" value="/data/appdatas/puma/binlog/" />
-		<property name="bakDir" value="/data/appdatas/puma/binlog/bak/" />
-		<property name="storageBakDir" value="/data/appdatas/puma/bak/" />
-		<property name="masterStorageBaseDir" value="/data/appdatas/puma/storage/master/" />
-		<property name="slaveStorageBaseDir" value="/data/appdatas/puma/storage/slave/" />
-		<property name="binlogIndexBaseDir" value="/data/appdatas/puma/binlogIndex/" />
-	</bean>
-
-	<bean id="storageMasterBackup"
 		class="com.dianping.puma.biz.storage.holder.impl.DefaultBinlogInfoHolder"
 		init-method="init">
 		<property name="baseDir" value="/data/appdatas/puma/binlog/" />

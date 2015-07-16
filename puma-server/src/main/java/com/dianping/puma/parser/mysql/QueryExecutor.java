@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.dianping.puma.bo.PumaContext;
+import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.parser.mysql.packet.EofPacket;
 import com.dianping.puma.parser.mysql.packet.FieldPacket;
 import com.dianping.puma.parser.mysql.packet.PacketFactory;

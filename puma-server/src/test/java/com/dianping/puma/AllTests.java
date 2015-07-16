@@ -4,7 +4,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import com.dianping.puma.biz.storage.backup.LocalFileBasedBackupTest;
 import com.dianping.puma.filter.DDLEventFilterTest;
 import com.dianping.puma.filter.DMLEventFilterTest;
 import com.dianping.puma.filter.DbTbEventFilterTest;
@@ -22,6 +21,7 @@ import com.dianping.puma.storage.bucket.LocalBucketIndexTest;
 import com.dianping.puma.storage.bucket.LocalBucketTest;
 import com.dianping.puma.storage.index.DefaultDataIndexTest;
 import com.dianping.puma.storage.index.L2IndexItemConvertorTest;
+import com.dianping.puma.storage.index.LocalFileIndexBucketTest;
 import com.dianping.puma.utils.PacketUtilTest;
 
 @RunWith(Suite.class)
@@ -45,7 +45,7 @@ import com.dianping.puma.utils.PacketUtilTest;
       // storage.index
       DefaultDataIndexTest.class,//
       L2IndexItemConvertorTest.class,//
-      LocalFileBasedBackupTest.class,//
+      LocalFileIndexBucketTest.class,//
 
       // storage
       DefaultArchiveStrategyTest.class,//

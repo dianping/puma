@@ -15,7 +15,7 @@
  */
 package com.dianping.puma.sender;
 
-import com.dianping.puma.bo.PumaContext;
+import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.storage.EventStorage;
 import com.dianping.puma.storage.exception.StorageException;

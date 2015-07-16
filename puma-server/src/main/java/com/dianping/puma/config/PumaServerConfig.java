@@ -20,66 +20,46 @@ public class PumaServerConfig implements InitializingBean {
 	@Autowired
 	PumaServerService pumaServerService;
 
-	private String id;
-
-	private String name;
-
-	private String host;
-
-	private int port;
+	private PumaServerEntity entity;
 
 	@PostConstruct
 	public void init() {
 		for (String ip : IPUtils.getNoLoopbackIP4Addresses()) {
 			LOG.info("ip = {}.", ip);
-			PumaServerEntity entity = pumaServerService.findByHost(ip);
+			entity = pumaServerService.findByHost(ip);
+
 			if (entity != null) {
-				this.name = entity.getName();
-				this.host = entity.getHost();
-				this.port = entity.getPort();
-				LOG.info("Initialize puma server: name `{}`, host `{}`, port `{}`.", new Object[] { name, host, port });
+				LOG.info("Initialize puma server: name `{}`, host `{}`, port `{}`.", new Object[] { entity.getName(),
+				      entity.getHost(), entity.getPort() });
 				break;
 			}
 		}
 
-		if (this.name == null) {
-			LOG.error("Initialize puma server error: No matched server found in DB.");
-			throw new RuntimeException("Initialize puma server error: No matched server found in DB.");
+		if (this.entity == null) {
+			this.entity = new PumaServerEntity();
+
+			String ip = IPUtils.getFirstNoLoopbackIP4Address();
+			this.entity.setHost(ip);
+			this.entity.setPort(8080);
+			this.entity.setName(ip);
+
+			pumaServerService.create(this.entity);
 		}
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception {}
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
+	public void afterPropertiesSet() throws Exception {
 	}
 
 	public String getName() {
-		return this.name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
+		return this.entity.getName();
 	}
 
 	public String getHost() {
-		return this.host;
-	}
-
-	public void setHost(String host) {
-		this.host = host;
+		return this.entity.getHost();
 	}
 
 	public Integer getPort() {
-		return this.port;
-	}
-
-	public void setPort(Integer port) {
-		this.port = port;
+		return this.entity.getPort();
 	}
 }

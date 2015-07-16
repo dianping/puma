@@ -31,6 +31,8 @@ public class ScheduledTaskControllerChecker implements TaskControllerChecker {
 				case STOP:
 					taskContainer.stop(task.getName());
 					break;
+				default:
+					break;
 				}
 			}
 		}

@@ -1,7 +1,9 @@
 package com.dianping.puma.biz.service.impl;
 
+import com.dianping.puma.biz.dao.PumaTaskStateDao;
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import com.dianping.puma.biz.service.PumaTaskStateService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -15,23 +17,27 @@ import java.util.List;
 @Service
 public class PumaTaskStateServiceImpl implements PumaTaskStateService {
 
+    @Autowired
+    PumaTaskStateDao pumaTaskStateDao;
+
     @Override
-    public List<PumaTaskStateEntity> find(String name) {
-        return null;
+    public List<PumaTaskStateEntity> find(String taskName) {
+        return pumaTaskStateDao.findByTaskName(taskName);
     }
 
     @Override
-    public PumaTaskStateEntity find(String name, String serverName) {
-        return null;
+    public PumaTaskStateEntity findByTaskNameAndServerName(String taskName, String serverName) {
+        return pumaTaskStateDao.findByTaskNameAndServerName(taskName, serverName);
     }
 
     @Override
-    public List<PumaTaskStateEntity> findByServerName(String serverName) {
-        return null;
-    }
+    public void createOrUpdate(PumaTaskStateEntity taskState) {
+        taskState.setGmtUpdate(new Date());
 
-    @Override
-    public void createOrUpdate(PumaTaskStateEntity state) {
-        state.setGmtUpdate(new Date());
+        if (pumaTaskStateDao.find(taskState.getId()) == null) {
+            pumaTaskStateDao.insert(taskState);
+        } else {
+            pumaTaskStateDao.update(taskState);
+        }
     }
 }

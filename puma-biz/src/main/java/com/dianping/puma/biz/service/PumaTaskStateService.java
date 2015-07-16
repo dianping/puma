@@ -1,7 +1,5 @@
 package com.dianping.puma.biz.service;
 
-
-
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 
 import java.util.List;
@@ -13,11 +11,9 @@ import java.util.List;
  */
 public interface PumaTaskStateService {
 
-    List<PumaTaskStateEntity> find(String name);
+    List<PumaTaskStateEntity> find(String taskName);
 
-    PumaTaskStateEntity find(String name, String serverName);
-
-    List<PumaTaskStateEntity> findByServerName(String serverName);
+    PumaTaskStateEntity findByTaskNameAndServerName(String taskName, String serverName);
 
     void createOrUpdate(PumaTaskStateEntity state);
 }

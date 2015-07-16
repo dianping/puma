@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,6 @@ import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.biz.service.SrcDbService;
 import com.dianping.puma.biz.storage.holder.BinlogInfoHolder;
-import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
@@ -35,6 +35,7 @@ import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
 import com.dianping.puma.server.DefaultTaskExecutor;
 import com.dianping.puma.server.TaskExecutor;
+import com.dianping.puma.spring.service.PumaServerConfig;
 import com.dianping.puma.storage.DefaultArchiveStrategy;
 import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;

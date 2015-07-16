@@ -1,4 +1,4 @@
-package com.dianping.puma.status;
+package com.dianping.puma.spring.service;
 
 import com.dianping.puma.biz.service.PumaServerService;
 import org.springframework.beans.factory.annotation.Autowired;

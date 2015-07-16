@@ -1,4 +1,4 @@
-package com.dianping.puma.controller;
+package com.dianping.puma.spring.controller;
 
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import com.dianping.puma.server.TaskExecutor;

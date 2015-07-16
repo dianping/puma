@@ -127,10 +127,9 @@ public class BufferedBinlogChannel implements BinlogChannel {
                         }
 
                         req.getChannel().writeAndFlush(response.setBinlogMessage(message));
+                        request.set(null);
                         //todo: auto ack
                     }
-
-                    request.set(null);
                 }
             }
         }

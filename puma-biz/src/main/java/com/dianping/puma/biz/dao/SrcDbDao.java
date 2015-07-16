@@ -1,6 +1,7 @@
 package com.dianping.puma.biz.dao;
 
 import com.dianping.puma.biz.entity.SrcDbEntity;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public interface SrcDbDao {
 
     SrcDbEntity findById(int id);
 
-    List<SrcDbEntity> findByIds(List<Integer> id);
+    List<SrcDbEntity> findByIds(@Param("list") List<Integer> id);
 
     SrcDbEntity findByName(String name);
 

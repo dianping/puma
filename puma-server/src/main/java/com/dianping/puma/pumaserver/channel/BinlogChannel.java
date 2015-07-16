@@ -1,20 +1,29 @@
 package com.dianping.puma.pumaserver.channel;
 
-import com.dianping.puma.core.constant.SubscribeConstant;
-import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public interface BinlogChannel {
 
-	void locate(String targetName, long dbServerId, SubscribeConstant sc, BinlogInfo binlogInfo, long timestamp)
-			throws BinlogChannelException;
+	void init(
+			String targetName,
+			long dbServerId,
+			long sc,
+			BinlogInfo binlogInfo,
+			long timestamp,
+			String database,
+			List<String> tables,
+			boolean dml,
+			boolean ddl,
+			boolean transaction) throws BinlogChannelException;
 
 	void destroy() throws BinlogChannelException;
 
-	ChangedEvent next() throws BinlogChannelException;
+	Event next() throws BinlogChannelException;
 
-	ChangedEvent next(long timeout, TimeUnit timeUnit) throws BinlogChannelException;
+	Event next(long timeout, TimeUnit timeUnit) throws BinlogChannelException;
 }

@@ -4,22 +4,23 @@ import java.util.List;
 
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.server.TaskExecutor;
+import com.dianping.puma.storage.EventStorage;
 
 public interface TaskContainer {
 
-    public void init();
+	public TaskExecutor get(String taskId);
 
-    public TaskExecutor get(String taskId);
+	public List<TaskExecutor> getAll();
 
-    public List<TaskExecutor> getAll();
+	public EventStorage getTaskStorage(String taskName);
 
-    public void create(String name, PumaTaskEntity task);
+	public void create(String name, PumaTaskEntity task);
 
-    public void update(String name, PumaTaskEntity task);
+	public void update(String name, PumaTaskEntity oriTask, PumaTaskEntity task);
 
-    public void delete(String name, PumaTaskEntity task);
+	public void delete(String name, PumaTaskEntity task);
 
-    public void start(String name, PumaTaskEntity task);
+	public void start(String name);
 
-    public void stop(String name, PumaTaskEntity task);
+	public void stop(String name);
 }

@@ -18,6 +18,7 @@ import com.dianping.puma.pumaserver.service.ClientSessionService;
 import com.dianping.puma.pumaserver.service.impl.DbBinlogAckService;
 import com.dianping.puma.pumaserver.service.impl.DefaultClientSessionService;
 import com.dianping.puma.pumaserver.service.impl.LionBinlogTargetService;
+import com.dianping.puma.server.container.TaskContainer;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpContentDecompressor;
@@ -38,6 +39,10 @@ import java.util.Map;
  */
 @Component
 public class PumaServerManager {
+
+    @Autowired
+    TaskContainer taskContainer;
+
     public volatile static TcpServer server;
 
     @Autowired
@@ -69,6 +74,7 @@ public class PumaServerManager {
         binlogSubscriptionHandler.setBinlogAckService(binlogAckService);
         binlogSubscriptionHandler.setBinlogTargetService(binlogTargetService);
         binlogSubscriptionHandler.setClientSessionService(clientSessionService);
+        binlogSubscriptionHandler.setTaskContainer(taskContainer);
 
         final BinlogUnsubscriptionHandler binlogUnsubscriptionHandler = new BinlogUnsubscriptionHandler();
         binlogUnsubscriptionHandler.setClientSessionService(clientSessionService);

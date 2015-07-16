@@ -15,20 +15,18 @@
  */
 package com.dianping.puma.server;
 
+import java.util.List;
+
 import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
-import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.Dispatcher;
 
-import java.util.List;
-
 /**
- * TODO Comment of AbstractServer
  *
  * @author Leo Liang
  */
@@ -158,24 +156,32 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
 	protected abstract void doStart() throws Exception;
 
 	@Override
-	public void start() throws Exception {
-		stop = false;
+	public void start() {
+		try {
+			stop = false;
 
-		parser.start();
-		dataHandler.start();
-		dispatcher.start();
-		doStart();
+			parser.start();
+			dataHandler.start();
+			dispatcher.start();
+			doStart();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
-	public void stop() throws Exception {
-		stop = true;
+	public void stop() {
+		try {
+			stop = true;
 
-		parser.stop();
-		dataHandler.stop();
-		dispatcher.stop();
+			parser.stop();
+			dataHandler.stop();
+			dispatcher.stop();
 
-		doStop();
+			doStop();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public void resume() throws Exception {

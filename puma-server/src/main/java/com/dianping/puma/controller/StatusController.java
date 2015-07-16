@@ -1,7 +1,6 @@
 package com.dianping.puma.controller;
 
 import com.dianping.puma.biz.entity.TaskStateEntity;
-import com.dianping.puma.config.PumaServerConfig;
 import com.dianping.puma.server.TaskExecutor;
 import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.status.SystemStatusContainer;
@@ -27,9 +26,6 @@ public class StatusController {
     @Autowired
     TaskContainer taskContainer;
 
-    @Autowired
-    PumaServerConfig pumaServerConfig;
-
     @RequestMapping(value = "", method = RequestMethod.GET)
     @ResponseBody
     public Map<String, Object> index() {
@@ -51,7 +47,7 @@ public class StatusController {
         List<TaskStateEntity> pumaTaskStates = new ArrayList<TaskStateEntity>();
         for (TaskExecutor taskExecutor : taskContainer.getAll()) {
             TaskStateEntity taskState = taskExecutor.getTaskState();
-            taskState.setServerName(pumaServerConfig.getName());
+            //taskState.setServerName(pumaServerConfig.getName());
             taskState.setTaskName(taskState.getTaskName());
             taskState.setGmtUpdate(new Date());
             pumaTaskStates.add(taskState);

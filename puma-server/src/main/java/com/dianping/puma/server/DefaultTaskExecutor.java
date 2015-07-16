@@ -67,7 +67,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
     private String encoding = "utf-8";
 
-    private Socket pumaSocket;
+	private Socket mysqlSocket;
 
     private InputStream is;
 
@@ -286,21 +286,21 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 .getBinlogFileName(), getContext().getBinlogStartPos());
     }
 
-    /**
-     * Connect to mysql master and parse the greeting packet
-     *
-     * @throws IOException
-     */
-    private boolean connect() {
-        try {
-            closeTransport();
-            this.pumaSocket = new Socket();
-            this.pumaSocket.setTcpNoDelay(false);
-            this.pumaSocket.setKeepAlive(true);
-            this.pumaSocket.connect(new InetSocketAddress(dbHost, port));
-            this.is = new BufferedInputStream(pumaSocket.getInputStream());
-            this.os = new BufferedOutputStream(pumaSocket.getOutputStream());
-            PacketFactory.parsePacket(is, PacketType.CONNECT_PACKET, getContext());
+	/**
+	 * Connect to mysql master and parse the greeting packet
+	 *
+	 * @throws IOException
+	 */
+	private boolean connect() {
+		try {
+			closeTransport();
+			this.mysqlSocket = new Socket();
+			this.mysqlSocket.setTcpNoDelay(false);
+			this.mysqlSocket.setKeepAlive(true);
+			this.mysqlSocket.connect(new InetSocketAddress(dbHost, port));
+			this.is = new BufferedInputStream(mysqlSocket.getInputStream());
+			this.os = new BufferedOutputStream(mysqlSocket.getOutputStream());
+			PacketFactory.parsePacket(is, PacketType.CONNECT_PACKET, getContext());
 
             LOG.info("TaskName: " + getTaskName() + ", Connection db success.");
 
@@ -500,16 +500,16 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         closeTransport();
     }
 
-    private void stopTask() {
-        String eventName = String.format("slave(%s) -- db(%s:%d)", getTaskName(), dbHost, port);
-        try {
-            //DefaultTaskContainer.instance.stopExecutor(this);
-            Cat.logEvent("Slave.doStop", eventName, Message.SUCCESS, "");
-        } catch (Exception e) {
-            LOG.error("task " + getTaskName() + "stop error.");
-            Cat.logEvent("Slave.doStop", eventName, "1", "");
-        }
-    }
+	private void stopTask() {
+		String eventName = String.format("slave(%s) -- db(%s:%d)", getTaskName(), dbHost, port);
+		try {
+			// DefaultTaskContainer.instance.stopExecutor(this);
+			Cat.logEvent("Slave.doStop", eventName, Message.SUCCESS, "");
+		} catch (Exception e) {
+			LOG.error("task " + getTaskName() + "stop error.");
+			Cat.logEvent("Slave.doStop", eventName, "1", "");
+		}
+	}
 
     private void closeTransport() {
         // Close in.
@@ -534,17 +534,17 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             this.os = null;
         }
 
-        // Close socket.
-        try {
-            if (this.pumaSocket != null) {
-                this.pumaSocket.close();
-            }
-        } catch (IOException ioEx) {
-            LOG.warn("Server " + this.getTaskName() + ", Failed to close the socket", ioEx);
-        } finally {
-            this.pumaSocket = null;
-        }
-    }
+		// Close socket.
+		try {
+			if (this.mysqlSocket != null) {
+				this.mysqlSocket.close();
+			}
+		} catch (IOException ioEx) {
+			LOG.warn("Server " + this.getTaskName() + ", Failed to close the socket", ioEx);
+		} finally {
+			this.mysqlSocket = null;
+		}
+	}
 
     public void initContext() {
         PumaContext context = new PumaContext();

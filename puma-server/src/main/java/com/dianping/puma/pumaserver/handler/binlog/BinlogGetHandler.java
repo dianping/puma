@@ -5,6 +5,7 @@ import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.dto.binlog.request.BinlogGetRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.Event;
 import com.dianping.puma.pumaserver.channel.BinlogChannel;
 import com.dianping.puma.pumaserver.client.ClientSession;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
@@ -98,7 +99,7 @@ public class BinlogGetHandler extends SimpleChannelInboundHandler<BinlogGetReque
             stopwatch.reset();
             stopwatch.start();
 
-            ChangedEvent binlogEvent = binlogChannel.next(nextTimeout, timeUnit);
+            Event binlogEvent = binlogChannel.next(nextTimeout, timeUnit);
             stopwatch.stop();
 
             if (binlogEvent == null) {

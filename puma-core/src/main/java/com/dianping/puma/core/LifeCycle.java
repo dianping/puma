@@ -16,8 +16,6 @@
 package com.dianping.puma.core;
 
 /**
- * TODO Comment of LifeCycle
- * 
  * @author Leo Liang
  * 
  */

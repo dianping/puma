@@ -4,80 +4,68 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.dianping.puma.biz.entity.PumaTaskEntity;
-import com.dianping.puma.biz.entity.TaskStateEntity;
-import com.dianping.puma.biz.service.PumaTaskService;
-import com.dianping.puma.biz.service.SrcDBInstanceService;
-import com.dianping.puma.biz.service.impl.PumaTaskStateServiceImpl;
-import com.dianping.puma.config.PumaServerConfig;
-import com.dianping.puma.core.codec.RawEventCodec;
-import com.dianping.puma.core.model.event.EventCenter;
-import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.server.TaskExecutor;
 import com.dianping.puma.server.builder.TaskBuilder;
 import com.dianping.puma.storage.EventStorage;
 
 @Service
-public class DefaultTaskContainer implements TaskContainer, InitializingBean {
+public class DefaultTaskContainer implements TaskContainer {
 
     private ConcurrentHashMap<String, TaskExecutor> taskExecutors = new ConcurrentHashMap<String, TaskExecutor>();
 
     public static DefaultTaskContainer instance;
-
-    @Autowired
-    private PumaTaskStateServiceImpl pumaTaskStateService;
-
-    @Autowired
-    private TaskBuilder taskBuilder;
-
-    @Autowired
-    private PumaTaskService pumaTaskService;
-
-    @Autowired
-    private SrcDBInstanceService srcDBInstanceService;
-
-    private String pumaServerName;
-
-    @Autowired
-    private BinlogInfoHolder binlogInfoHolder;
-
-    @Autowired
-    private RawEventCodec rawCodec;
-
-    @Autowired
-    private PumaServerConfig pumaServerConfig;
-
-    @Autowired
-    EventCenter eventCenter;
-
-    @Scheduled(fixedDelay = 30 * 1000)
-    public void updateState() {
-        for (TaskExecutor executor : taskExecutors.values()) {
-            try {
-                TaskStateEntity state = executor.getTaskState();
-                if (state != null) {
-                    pumaTaskStateService.createOrUpdate(state);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                //todo: log
-            }
-        }
-    }
-
-    @PostConstruct
-    public void init() {
-        pumaServerName = pumaServerConfig.getName();
-    }
-
+//
+//    @Autowired
+//    private PumaTaskStateServiceImpl pumaTaskStateService;
+//
+      @Autowired
+      private TaskBuilder taskBuilder;
+//
+//    @Autowired
+//    private PumaTaskService pumaTaskService;
+//
+//    @Autowired
+//    private SrcDBInstanceService srcDBInstanceService;
+//
+//    private String pumaServerName;
+//
+//    @Autowired
+//    private BinlogInfoHolder binlogInfoHolder;
+//
+//    @Autowired
+//    private RawEventCodec rawCodec;
+//
+//    @Autowired
+//    private PumaServerConfig pumaServerConfig;
+//
+//    @Autowired
+//    EventCenter eventCenter;
+//
+//    @Scheduled(fixedDelay = 30 * 1000)
+//    public void updateState() {
+//        for (TaskExecutor executor : taskExecutors.values()) {
+//            try {
+//                TaskStateEntity state = executor.getTaskState();
+//                if (state != null) {
+//                    pumaTaskStateService.createOrUpdate(state);
+//                }
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                //todo: log
+//            }
+//        }
+//    }
+//
+//    @PostConstruct
+//    public void init() {
+//        pumaServerName = pumaServerConfig.getName();
+//    }
+//
     @Override
     public TaskExecutor get(String taskName) {
         return taskExecutors.get(taskName);
@@ -245,12 +233,13 @@ public class DefaultTaskContainer implements TaskContainer, InitializingBean {
 //        return binlogInfoHolder;
 //    }
 //
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        instance = this;
-    }
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//        instance = this;
+//    }
+//
 
-    //
+    @Override
     public EventStorage getTaskStorage(String taskName) {
         if (taskExecutors.containsKey(taskName)) {
             List<Sender> senders = taskExecutors.get(taskName).getFileSender();
@@ -289,16 +278,15 @@ public class DefaultTaskContainer implements TaskContainer, InitializingBean {
     @Override
     public void create(String taskName, PumaTaskEntity task) {
         TaskExecutor taskExecutor = taskBuilder.build(task);
-
         if (taskExecutors.putIfAbsent(taskName, taskExecutor) != null) {
             throw new RuntimeException("create puma task failure, duplicate exists.");
         }
 
-        start(taskName, task);
+        start(taskName);
     }
 
     @Override
-    public void update(String taskName, PumaTaskEntity task) {
+    public void update(String taskName, PumaTaskEntity oriTask, PumaTaskEntity task) {
 
     }
 
@@ -308,26 +296,36 @@ public class DefaultTaskContainer implements TaskContainer, InitializingBean {
             throw new RuntimeException("delete puma task failure, not exists.");
         }
 
-        stop(taskName, task);
+        stop(taskName);
     }
 
     @Override
-    public void start(String taskName, PumaTaskEntity task) {
+    public void start(String taskName) {
         TaskExecutor taskExecutor = taskExecutors.get(taskName);
         if (taskExecutor == null) {
             throw new RuntimeException("start puma task failure, not exists.");
         }
 
-        //taskExecutor.start();
+        try {
+	      taskExecutor.start();
+      } catch (Exception e) {
+	      // TODO Auto-generated catch block
+	      e.printStackTrace();
+      }
     }
 
     @Override
-    public void stop(String taskName, PumaTaskEntity task) {
+    public void stop(String taskName) {
         TaskExecutor taskExecutor = taskExecutors.get(taskName);
         if (taskExecutor == null) {
             throw new RuntimeException("stop puma task failure, not exists.");
         }
 
-        //taskExecutor.stop();
+        try {
+	      taskExecutor.stop();
+      } catch (Exception e) {
+	      // TODO Auto-generated catch block
+	      e.printStackTrace();
+      }
     }
 }

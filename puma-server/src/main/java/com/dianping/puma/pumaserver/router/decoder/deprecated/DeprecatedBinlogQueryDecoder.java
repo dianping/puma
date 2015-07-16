@@ -1,7 +1,7 @@
 package com.dianping.puma.pumaserver.router.decoder.deprecated;
 
-import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.dto.deprecated.DeprecatedBinlogQuery;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.ConvertHelper;
 import com.dianping.puma.pumaserver.router.decoder.RequestDecoder;
 import com.google.common.base.Splitter;
@@ -68,12 +68,9 @@ public class DeprecatedBinlogQueryDecoder implements RequestDecoder {
 
         result.setTarget(map.get("target"));
 
-        if (map.containsKey("serverId")) {
-            result.setServerId(Long.valueOf(map.get("serverId")));
-        }
 
-        if (map.containsKey("binlog") && map.containsKey("binlogPos")) {
-            BinlogInfo binlogInfo = new BinlogInfo(map.get("binlog"), Long.valueOf(map.get("binlogPos")));
+        if (map.containsKey("serverId") && map.containsKey("binlog") && map.containsKey("binlogPos")) {
+            BinlogInfo binlogInfo = new BinlogInfo(Long.valueOf(map.get("serverId")), map.get("binlog"), Long.valueOf(map.get("binlogPos")));
             result.setBinlogInfo(binlogInfo);
         }
 

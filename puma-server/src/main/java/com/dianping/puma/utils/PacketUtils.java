@@ -12,14 +12,14 @@
  */
 package com.dianping.puma.utils;
 
+import com.google.common.primitives.UnsignedLong;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.BitSet;
-
-import com.dianping.puma.core.datatype.UnsignedLong;
 
 /**
  * @author Leo Liang
@@ -139,15 +139,15 @@ public final class PacketUtils {
 	public static UnsignedLong readLengthCodedUnsignedLong(ByteBuffer buf) {
 		byte v = buf.get();
 		if (v < 251) {
-			return UnsignedLong.asUnsigned(v);
+			return UnsignedLong.fromLongBits(v);
 		} else if (v == 251) {
 			return null;
 		} else if (v == 252) {
-			return UnsignedLong.asUnsigned(readInt(buf, 2));
+			return UnsignedLong.fromLongBits(readInt(buf, 2));
 		} else if (v == 253) {
-			return UnsignedLong.asUnsigned(readInt(buf, 3));
+			return UnsignedLong.fromLongBits(readInt(buf, 3));
 		} else if (v == 254) {
-			return UnsignedLong.asUnsigned(readInt(buf, 8));
+			return UnsignedLong.fromLongBits(readInt(buf, 8));
 		} else {
 			return null;
 		}

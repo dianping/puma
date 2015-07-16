@@ -19,10 +19,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.BitSet;
 
+import com.google.common.primitives.UnsignedLong;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.dianping.puma.bo.PumaContext;
-import com.dianping.puma.core.datatype.UnsignedLong;
 import com.dianping.puma.parser.mysql.Metadata;
 import com.dianping.puma.utils.PacketUtils;
 

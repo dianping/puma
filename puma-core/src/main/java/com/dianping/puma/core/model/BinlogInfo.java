@@ -19,13 +19,12 @@ public class BinlogInfo implements Serializable {
     public BinlogInfo() {
     }
 
-    public BinlogInfo(String binlogFile, Long binlogPosition) {
-        this.binlogFile = binlogFile;
-        this.binlogPosition = binlogPosition;
-        this.eventIndex = 0;
+    public BinlogInfo(long serverId, String binlogFile, Long binlogPosition) {
+        this(serverId, binlogFile, binlogPosition, 0);
     }
 
-    public BinlogInfo(String binlogFile, Long binlogPosition, int eventIndex) {
+    public BinlogInfo(long serverId, String binlogFile, Long binlogPosition, int eventIndex) {
+        this.serverId = serverId;
         this.binlogFile = binlogFile;
         this.binlogPosition = binlogPosition;
         this.eventIndex = eventIndex;

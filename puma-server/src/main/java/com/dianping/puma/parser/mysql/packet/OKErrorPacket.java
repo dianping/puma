@@ -16,8 +16,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import com.dianping.puma.bo.PumaContext;
-import com.dianping.puma.core.datatype.UnsignedLong;
 import com.dianping.puma.utils.PacketUtils;
+import com.google.common.primitives.UnsignedLong;
 
 /**
  * TODO Comment of OKErrorPacket
@@ -37,7 +37,7 @@ public class OKErrorPacket extends AbstractResponsePacket {
 	private String				message;
 
 	// OK Packet
-	private UnsignedLong		affectedRows;
+	private UnsignedLong affectedRows;
 	private UnsignedLong		insertId;
 	private int					serverStatus;
 	private int					warningCount;

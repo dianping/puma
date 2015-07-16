@@ -66,21 +66,6 @@ public abstract class ChangedEvent extends Event implements Serializable {
 	private String				table;
 	private long				serverId;
 	private BinlogInfo 			binlogInfo;
-	private long                binlogServerId;
-	
-	/**
-     * @return the binlogServerId
-     */
-    public long getBinlogServerId() {
-        return binlogServerId;
-    }
-
-    /**
-     * @param binlogServerId the binlogServerId to set
-     */
-    public void setBinlogServerId(long binlogServerId) {
-        this.binlogServerId = binlogServerId;
-    }
 
     /**
 	 * @return the serverId

@@ -27,8 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import com.dianping.puma.biz.entity.old.SrcDBInstance;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -38,7 +36,7 @@ import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.storage.holder.impl.DefaultBinlogInfoHolder;
+import com.dianping.puma.biz.storage.holder.impl.DefaultBinlogInfoHolder;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.datahandler.DefaultDataHandler;
 import com.dianping.puma.parser.DefaultBinlogParser;

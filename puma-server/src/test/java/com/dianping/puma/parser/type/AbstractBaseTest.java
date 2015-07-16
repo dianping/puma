@@ -18,6 +18,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.constant.Status;
@@ -29,7 +30,7 @@ import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
 import com.dianping.puma.core.model.event.EventCenter;
-import com.dianping.puma.core.storage.holder.impl.DefaultBinlogInfoHolder;
+import com.dianping.puma.biz.storage.holder.impl.DefaultBinlogInfoHolder;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.datahandler.DefaultDataHandler;
@@ -310,10 +311,14 @@ public abstract class AbstractBaseTest {
         DefaultDataHandler dataHandler = new DefaultDataHandler();
         DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
         // tableMetaInfo.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
-        tableMetaInfo.setMetaDBHost(host);
-        tableMetaInfo.setMetaDBPassword(password);
-        tableMetaInfo.setMetaDBPort(port);
-        tableMetaInfo.setMetaDBUsername(username);
+        SrcDbEntity entity = new SrcDbEntity();
+        entity.setHost(host);
+        entity.setPort(port);
+        entity.setUsername(username);
+        entity.setPassword(password);
+        
+        tableMetaInfo.setSrcDbEntity(entity);
+
         // tableMeta refresh filter
         TableMetaRefreshFilter tableMetaRefreshFilter = new TableMetaRefreshFilter();
         tableMetaRefreshFilter.setName(taskName);

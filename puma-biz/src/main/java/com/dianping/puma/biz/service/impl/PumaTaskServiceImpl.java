@@ -40,7 +40,7 @@ public class PumaTaskServiceImpl implements PumaTaskService {
         entity.setPumaServers(pumaServers);
 
         List<SrcDbEntity> srcDbs = loadSrcDb(entity.getId());
-        entity.setSrcDbs(srcDbs);
+        entity.setBackUpSrcDbs(srcDbs);
 
         TableSet tableSet = loadTableSet(entity.getId());
         entity.setTableSet(tableSet);
@@ -98,7 +98,7 @@ public class PumaTaskServiceImpl implements PumaTaskService {
     }
 
     protected void saveSrcDb(PumaTaskEntity entity) {
-        for (SrcDbEntity dbEntity : entity.getSrcdbs()) {
+        for (SrcDbEntity dbEntity : entity.getBackUpSrcDbs()) {
             SrcDbEntity srcDb = srcDbDao.findByName(dbEntity.getName());
             if (srcDb != null) {
                 PumaTaskDbEntity pumaTaskDbEntity = new PumaTaskDbEntity();

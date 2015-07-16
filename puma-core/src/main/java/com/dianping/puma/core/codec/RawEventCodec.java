@@ -1,5 +1,15 @@
 package com.dianping.puma.core.codec;
 
+import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.DdlEvent;
+import com.dianping.puma.core.event.Event;
+import com.dianping.puma.core.event.RowChangedEvent;
+import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
+import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.util.constant.DdlEventSubType;
+import com.dianping.puma.core.util.constant.DdlEventType;
+import com.dianping.puma.core.util.sql.DDLType;
+import com.dianping.puma.core.util.sql.DMLType;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
@@ -12,386 +22,375 @@ import java.sql.Timestamp;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.event.DdlEvent;
-import com.dianping.puma.core.event.Event;
-import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
-import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.util.constant.DdlEventSubType;
-import com.dianping.puma.core.util.constant.DdlEventType;
-import com.dianping.puma.core.util.sql.DDLType;
-import com.dianping.puma.core.util.sql.DMLType;
-
 public class RawEventCodec implements EventCodec {
 
-	public static final byte VERSION1 = 1;
+    public static final byte VERSION1 = 1;
 
-	@Override
-	public byte[] encode(Event event) throws IOException {
-		ByteBuf buf = Unpooled.buffer();
+    @Override
+    public byte[] encode(Event event) throws IOException {
+        ByteBuf buf = Unpooled.buffer();
 
-		buf.writeByte(VERSION1);
+        buf.writeByte(VERSION1);
 
-		if (event instanceof DdlEvent) {
-			buf.writeByte(DDL_EVENT);
-		} else if (event instanceof RowChangedEvent) {
-			buf.writeByte(DML_EVENT);
-		} else {
-			return null;
-		}
+        if (event instanceof DdlEvent) {
+            buf.writeByte(DDL_EVENT);
+        } else if (event instanceof RowChangedEvent) {
+            buf.writeByte(DML_EVENT);
+        } else {
+            return null;
+        }
 
-		ChangedEvent chEvent = (ChangedEvent) event;
-		buf.writeLong(chEvent.getSeq());
-		buf.writeLong(chEvent.getExecuteTime());
-		buf.writeLong(chEvent.getServerId());
-		buf.writeLong(chEvent.getBinlogServerId());
-		writeIntoBuf(chEvent.getBinlogInfo().getBinlogFile(), buf);
-		buf.writeLong(chEvent.getBinlogInfo().getBinlogPosition());
-		buf.writeInt(chEvent.getBinlogInfo().getEventIndex());
-		writeIntoBuf(chEvent.getDatabase(), buf);
-		writeIntoBuf(chEvent.getTable(), buf);
+        ChangedEvent chEvent = (ChangedEvent) event;
+        buf.writeLong(chEvent.getSeq());
+        buf.writeLong(chEvent.getExecuteTime());
+        buf.writeLong(chEvent.getServerId());
+        buf.writeLong(chEvent.getBinlogInfo().getServerId());
+        writeIntoBuf(chEvent.getBinlogInfo().getBinlogFile(), buf);
+        buf.writeLong(chEvent.getBinlogInfo().getBinlogPosition());
+        buf.writeInt(chEvent.getBinlogInfo().getEventIndex());
+        writeIntoBuf(chEvent.getDatabase(), buf);
+        writeIntoBuf(chEvent.getTable(), buf);
 
-		if (event instanceof DdlEvent) {
-			DdlEvent ddlEvent = (DdlEvent) event;
+        if (event instanceof DdlEvent) {
+            DdlEvent ddlEvent = (DdlEvent) event;
 
-			writeIntoBuf(ddlEvent.getSql(), buf);
-			buf.writeInt(ddlEvent.getDDLType().getDDLType());
-			buf.writeInt(ddlEvent.getDdlEventType().getEventType());
-			buf.writeInt(ddlEvent.getDdlEventSubType().getEventSubType());
-		} else if (event instanceof RowChangedEvent) {
-			RowChangedEvent rcEvent = (RowChangedEvent) event;
-			Map<String, ColumnInfo> columns = rcEvent.getColumns();
-			int columnNum = columns.size();
+            writeIntoBuf(ddlEvent.getSql(), buf);
+            buf.writeInt(ddlEvent.getDDLType().getDDLType());
+            buf.writeInt(ddlEvent.getDdlEventType().getEventType());
+            buf.writeInt(ddlEvent.getDdlEventSubType().getEventSubType());
+        } else if (event instanceof RowChangedEvent) {
+            RowChangedEvent rcEvent = (RowChangedEvent) event;
+            Map<String, ColumnInfo> columns = rcEvent.getColumns();
+            int columnNum = columns.size();
 
-			buf.writeInt(rcEvent.getActionType());
-			if (rcEvent.getDmlType() != null) {
-				buf.writeInt(rcEvent.getDmlType().getDMLType());
-			} else {
-				buf.writeInt(DMLType.NULL.getDMLType());
-			}
-			buf.writeBoolean(rcEvent.isTransactionBegin());
-			buf.writeBoolean(rcEvent.isTransactionCommit());
+            buf.writeInt(rcEvent.getActionType());
+            if (rcEvent.getDmlType() != null) {
+                buf.writeInt(rcEvent.getDmlType().getDMLType());
+            } else {
+                buf.writeInt(DMLType.NULL.getDMLType());
+            }
+            buf.writeBoolean(rcEvent.isTransactionBegin());
+            buf.writeBoolean(rcEvent.isTransactionCommit());
 
-			if (rcEvent.getDmlType() != null) {
-				switch (rcEvent.getDmlType()) {
-				case INSERT: {
-					buf.writeInt(columnNum);
-					byte[] bitSetForType = new byte[columnNum];
-					ByteBuf columnValues = encodeColumnValues(columns, bitSetForType, true);
+            if (rcEvent.getDmlType() != null) {
+                switch (rcEvent.getDmlType()) {
+                    case INSERT: {
+                        buf.writeInt(columnNum);
+                        byte[] bitSetForType = new byte[columnNum];
+                        ByteBuf columnValues = encodeColumnValues(columns, bitSetForType, true);
 
-					buf.writeBytes(bitSetForType);
-					buf.writeBytes(columnValues);
-					break;
-				}
-				case UPDATE: {
-					buf.writeInt(columnNum);
-					byte[] columnOldTypeSet = new byte[columnNum];
-					ByteBuf columnOldValues = encodeColumnValues(columns, columnOldTypeSet, false);
-					buf.writeBytes(columnOldTypeSet);
-					buf.writeBytes(columnOldValues);
+                        buf.writeBytes(bitSetForType);
+                        buf.writeBytes(columnValues);
+                        break;
+                    }
+                    case UPDATE: {
+                        buf.writeInt(columnNum);
+                        byte[] columnOldTypeSet = new byte[columnNum];
+                        ByteBuf columnOldValues = encodeColumnValues(columns, columnOldTypeSet, false);
+                        buf.writeBytes(columnOldTypeSet);
+                        buf.writeBytes(columnOldValues);
 
-					buf.writeInt(columnNum);
-					byte[] columnNewTypeSet = new byte[columnNum];
-					ByteBuf columnNewValues = encodeColumnValues(columns, columnNewTypeSet, true);
-					buf.writeBytes(columnNewTypeSet);
-					buf.writeBytes(columnNewValues);
+                        buf.writeInt(columnNum);
+                        byte[] columnNewTypeSet = new byte[columnNum];
+                        ByteBuf columnNewValues = encodeColumnValues(columns, columnNewTypeSet, true);
+                        buf.writeBytes(columnNewTypeSet);
+                        buf.writeBytes(columnNewValues);
 
-					break;
-				}
-				case DELETE: {
-					buf.writeInt(columnNum);
-					byte[] columnOldTypeSet = new byte[columnNum];
-					ByteBuf columnOldValues = encodeColumnValues(columns, columnOldTypeSet, false);
-					buf.writeBytes(columnOldTypeSet);
-					buf.writeBytes(columnOldValues);
+                        break;
+                    }
+                    case DELETE: {
+                        buf.writeInt(columnNum);
+                        byte[] columnOldTypeSet = new byte[columnNum];
+                        ByteBuf columnOldValues = encodeColumnValues(columns, columnOldTypeSet, false);
+                        buf.writeBytes(columnOldTypeSet);
+                        buf.writeBytes(columnOldValues);
 
-					break;
-				}
-				case REPLACE:
-				case NULL:
-				}
-			}
-		}
+                        break;
+                    }
+                    case REPLACE:
+                    case NULL:
+                }
+            }
+        }
 
-		byte[] data = new byte[buf.readableBytes()];
-		buf.readBytes(data);
+        byte[] data = new byte[buf.readableBytes()];
+        buf.readBytes(data);
 
-		return data;
-	}
+        return data;
+    }
 
-	private ByteBuf encodeColumnValues(Map<String, ColumnInfo> columns, byte[] bitSetForType, boolean useNew) {
-		ByteBuf columnValues = Unpooled.buffer();
+    private ByteBuf encodeColumnValues(Map<String, ColumnInfo> columns, byte[] bitSetForType, boolean useNew) {
+        ByteBuf columnValues = Unpooled.buffer();
 
-		int index = 0;
-		for (Entry<String, ColumnInfo> entry : columns.entrySet()) {
-			String columnName = entry.getKey();
-			ColumnInfo columnInfo = entry.getValue();
-			Object columnObject = useNew ? columnInfo.getNewValue() : columnInfo.getOldValue();
+        int index = 0;
+        for (Entry<String, ColumnInfo> entry : columns.entrySet()) {
+            String columnName = entry.getKey();
+            ColumnInfo columnInfo = entry.getValue();
+            Object columnObject = useNew ? columnInfo.getNewValue() : columnInfo.getOldValue();
 
-			writeIntoBuf(columnName, columnValues);
-			columnValues.writeBoolean(columnInfo.isKey());
+            writeIntoBuf(columnName, columnValues);
+            columnValues.writeBoolean(columnInfo.isKey());
 
-			if (columnObject instanceof byte[]) {
-				bitSetForType[index++] = (byte) ColumnType.ByteArray.getType();
+            if (columnObject instanceof byte[]) {
+                bitSetForType[index++] = (byte) ColumnType.ByteArray.getType();
 
-				byte[] value = (byte[]) columnObject;
-				columnValues.writeByte(value.length);
-				columnValues.writeBytes(value);
-			} else if (columnObject instanceof BigDecimal) {
-				bitSetForType[index++] = (byte) ColumnType.Decimal.getType();
+                byte[] value = (byte[]) columnObject;
+                columnValues.writeByte(value.length);
+                columnValues.writeBytes(value);
+            } else if (columnObject instanceof BigDecimal) {
+                bitSetForType[index++] = (byte) ColumnType.Decimal.getType();
 
-				BigDecimal column = (BigDecimal) columnObject;
-				byte[] value = column.toPlainString().getBytes();
-				columnValues.writeByte(value.length);
-				columnValues.writeBytes(value);
-			} else if (columnObject instanceof Double) {
-				bitSetForType[index++] = (byte) ColumnType.Double.getType();
+                BigDecimal column = (BigDecimal) columnObject;
+                byte[] value = column.toPlainString().getBytes();
+                columnValues.writeByte(value.length);
+                columnValues.writeBytes(value);
+            } else if (columnObject instanceof Double) {
+                bitSetForType[index++] = (byte) ColumnType.Double.getType();
 
-				Double column = (Double) columnObject;
-				columnValues.writeDouble(column.doubleValue());
-			} else if (columnObject instanceof Float) {
-				bitSetForType[index++] = (byte) ColumnType.Float.getType();
+                Double column = (Double) columnObject;
+                columnValues.writeDouble(column.doubleValue());
+            } else if (columnObject instanceof Float) {
+                bitSetForType[index++] = (byte) ColumnType.Float.getType();
 
-				Float column = (Float) columnObject;
-				columnValues.writeFloat(column.floatValue());
-			} else if (columnObject instanceof Integer) {
-				bitSetForType[index++] = (byte) ColumnType.Int.getType();
+                Float column = (Float) columnObject;
+                columnValues.writeFloat(column.floatValue());
+            } else if (columnObject instanceof Integer) {
+                bitSetForType[index++] = (byte) ColumnType.Int.getType();
 
-				Integer column = (Integer) columnObject;
-				columnValues.writeInt(column.intValue());
-			} else if (columnObject instanceof Long) {
-				bitSetForType[index++] = (byte) ColumnType.Long.getType();
+                Integer column = (Integer) columnObject;
+                columnValues.writeInt(column.intValue());
+            } else if (columnObject instanceof Long) {
+                bitSetForType[index++] = (byte) ColumnType.Long.getType();
 
-				Long column = (Long) columnObject;
-				columnValues.writeLong(column.longValue());
-			} else if (columnObject == null) {
-				bitSetForType[index++] = (byte) ColumnType.Null.getType();
-			} else if (columnObject instanceof Short) {
-				bitSetForType[index++] = (byte) ColumnType.Short.getType();
+                Long column = (Long) columnObject;
+                columnValues.writeLong(column.longValue());
+            } else if (columnObject == null) {
+                bitSetForType[index++] = (byte) ColumnType.Null.getType();
+            } else if (columnObject instanceof Short) {
+                bitSetForType[index++] = (byte) ColumnType.Short.getType();
 
-				Short column = (Short) columnObject;
-				columnValues.writeShort(column.shortValue());
-			} else if (columnObject instanceof String) {
-				bitSetForType[index++] = (byte) ColumnType.String.getType();
+                Short column = (Short) columnObject;
+                columnValues.writeShort(column.shortValue());
+            } else if (columnObject instanceof String) {
+                bitSetForType[index++] = (byte) ColumnType.String.getType();
 
-				String column = (String) columnObject;
-				byte[] value = column.getBytes();
-				columnValues.writeInt(value.length);
-				columnValues.writeBytes(value);
-			} else if (columnObject instanceof Time) {
-				bitSetForType[index++] = (byte) ColumnType.Time.getType();
+                String column = (String) columnObject;
+                byte[] value = column.getBytes();
+                columnValues.writeInt(value.length);
+                columnValues.writeBytes(value);
+            } else if (columnObject instanceof Time) {
+                bitSetForType[index++] = (byte) ColumnType.Time.getType();
 
-				Time column = (Time) columnObject;
-				columnValues.writeLong(column.getTime());
-			} else if (columnObject instanceof Timestamp) {
-				bitSetForType[index++] = (byte) ColumnType.Timestamp.getType();
+                Time column = (Time) columnObject;
+                columnValues.writeLong(column.getTime());
+            } else if (columnObject instanceof Timestamp) {
+                bitSetForType[index++] = (byte) ColumnType.Timestamp.getType();
 
-				Timestamp column = (Timestamp) columnObject;
-				columnValues.writeLong(column.getTime());
-			} else if (columnObject instanceof Date) {
-				bitSetForType[index++] = (byte) ColumnType.Date.getType();
+                Timestamp column = (Timestamp) columnObject;
+                columnValues.writeLong(column.getTime());
+            } else if (columnObject instanceof Date) {
+                bitSetForType[index++] = (byte) ColumnType.Date.getType();
 
-				Date column = (Date) columnObject;
-				columnValues.writeLong(column.getTime());
-			} else if (columnObject instanceof BigInteger) {
-				bitSetForType[index++] = (byte) ColumnType.BigInteger.getType();
+                Date column = (Date) columnObject;
+                columnValues.writeLong(column.getTime());
+            } else if (columnObject instanceof BigInteger) {
+                bitSetForType[index++] = (byte) ColumnType.BigInteger.getType();
 
-				BigInteger column = (BigInteger) columnObject;
-				columnValues.writeLong(column.longValue());
-			} else {
-				System.out.println("Unsupported type!");
-			}
-		}
+                BigInteger column = (BigInteger) columnObject;
+                columnValues.writeLong(column.longValue());
+            } else {
+                System.out.println("Unsupported type!");
+            }
+        }
 
-		return columnValues;
-	}
+        return columnValues;
+    }
 
-	@Override
-	public Event decode(byte[] data) throws IOException {
-		ByteBuf buf = Unpooled.wrappedBuffer(data);
+    @Override
+    public Event decode(byte[] data) throws IOException {
+        ByteBuf buf = Unpooled.wrappedBuffer(data);
 
-		byte version = buf.readByte();
-		if (version != VERSION1) {
-			return null;
-		}
+        byte version = buf.readByte();
+        if (version != VERSION1) {
+            return null;
+        }
 
-		ChangedEvent event = null;
-		int type = buf.readByte();
-		if (type == DDL_EVENT) {
-			event = new DdlEvent();
-		} else if (type == DML_EVENT) {
-			event = new RowChangedEvent();
-		} else {
-			return null;
-		}
+        ChangedEvent event = null;
+        int type = buf.readByte();
+        if (type == DDL_EVENT) {
+            event = new DdlEvent();
+        } else if (type == DML_EVENT) {
+            event = new RowChangedEvent();
+        } else {
+            return null;
+        }
 
-		event.setSeq(buf.readLong());
-		event.setExecuteTime(buf.readLong());
-		event.setServerId(buf.readLong());
-		event.setBinlogServerId(buf.readLong());
-		event.setBinlogInfo(new BinlogInfo((String) readFromBuf(buf, String.class), buf.readLong(), buf.readInt()));
-		event.setDatabase((String) readFromBuf(buf, String.class));
-		event.setTable((String) readFromBuf(buf, String.class));
+        event.setSeq(buf.readLong());
+        event.setExecuteTime(buf.readLong());
+        event.setServerId(buf.readLong());
+        BinlogInfo binlogInfo = new BinlogInfo(buf.readLong(),(String) readFromBuf(buf, String.class), buf.readLong(), buf.readInt());
+        event.setBinlogInfo(binlogInfo);
+        event.setDatabase((String) readFromBuf(buf, String.class));
+        event.setTable((String) readFromBuf(buf, String.class));
 
-		if (type == DDL_EVENT) {
-			DdlEvent ddlEvent = (DdlEvent) event;
+        if (type == DDL_EVENT) {
+            DdlEvent ddlEvent = (DdlEvent) event;
 
-			ddlEvent.setSql((String) readFromBuf(buf, String.class));
-			ddlEvent.setDDLType(DDLType.getDDLType(buf.readInt()));
-			ddlEvent.setDdlEventType(DdlEventType.getEventType(buf.readInt()));
-			ddlEvent.setDdlEventSubType(DdlEventSubType.getDdlEventSubType(buf.readInt()));
-		} else {
-			RowChangedEvent rcEvent = (RowChangedEvent) event;
+            ddlEvent.setSql((String) readFromBuf(buf, String.class));
+            ddlEvent.setDDLType(DDLType.getDDLType(buf.readInt()));
+            ddlEvent.setDdlEventType(DdlEventType.getEventType(buf.readInt()));
+            ddlEvent.setDdlEventSubType(DdlEventSubType.getDdlEventSubType(buf.readInt()));
+        } else {
+            RowChangedEvent rcEvent = (RowChangedEvent) event;
 
-			rcEvent.setActionType(buf.readInt());
-			DMLType dmlType = DMLType.getDMLType(buf.readInt());
-			if (dmlType != DMLType.NULL) {
-				rcEvent.setDmlType(dmlType);
-			}
-			rcEvent.setTransactionBegin(buf.readBoolean());
-			rcEvent.setTransactionCommit(buf.readBoolean());
-			Map<String, ColumnInfo> columns = rcEvent.getColumns();
+            rcEvent.setActionType(buf.readInt());
+            DMLType dmlType = DMLType.getDMLType(buf.readInt());
+            if (dmlType != DMLType.NULL) {
+                rcEvent.setDmlType(dmlType);
+            }
+            rcEvent.setTransactionBegin(buf.readBoolean());
+            rcEvent.setTransactionCommit(buf.readBoolean());
+            Map<String, ColumnInfo> columns = rcEvent.getColumns();
 
-			switch (dmlType) {
-			case INSERT:
-				decodeColumnValues(buf, columns, true);
-				break;
-			case UPDATE:
-				decodeColumnValues(buf, columns, false);
-				decodeColumnValues(buf, columns, true);
-				break;
-			case DELETE:
-				decodeColumnValues(buf, columns, false);
-				break;
-			case REPLACE:
-				break;
-			case NULL:
-				break;
-			}
+            switch (dmlType) {
+                case INSERT:
+                    decodeColumnValues(buf, columns, true);
+                    break;
+                case UPDATE:
+                    decodeColumnValues(buf, columns, false);
+                    decodeColumnValues(buf, columns, true);
+                    break;
+                case DELETE:
+                    decodeColumnValues(buf, columns, false);
+                    break;
+                case REPLACE:
+                    break;
+                case NULL:
+                    break;
+            }
 
-		}
+        }
 
-		return event;
-	}
+        return event;
+    }
 
-	private void decodeColumnValues(ByteBuf buf, Map<String, ColumnInfo> columns, boolean useNew) {
-		int columnNum = buf.readInt();
-		byte[] columnValueTypes = new byte[columnNum];
-		buf.readBytes(columnValueTypes);
+    private void decodeColumnValues(ByteBuf buf, Map<String, ColumnInfo> columns, boolean useNew) {
+        int columnNum = buf.readInt();
+        byte[] columnValueTypes = new byte[columnNum];
+        buf.readBytes(columnValueTypes);
 
-		for (int i = 0; i < columnNum; i++) {
-			ColumnType columnType = ColumnType.getType(columnValueTypes[i]);
-			String columnName = (String) readFromBuf(buf, String.class);
-			boolean isKey = buf.readBoolean();
-			ColumnInfo columnInfo = columns.get(columnName);
+        for (int i = 0; i < columnNum; i++) {
+            ColumnType columnType = ColumnType.getType(columnValueTypes[i]);
+            String columnName = (String) readFromBuf(buf, String.class);
+            boolean isKey = buf.readBoolean();
+            ColumnInfo columnInfo = columns.get(columnName);
 
-			if (columnInfo == null) {
-				columnInfo = new ColumnInfo();
-			}
+            if (columnInfo == null) {
+                columnInfo = new ColumnInfo();
+            }
 
-			columnInfo.setKey(isKey);
-			columns.put(columnName, columnInfo);
+            columnInfo.setKey(isKey);
+            columns.put(columnName, columnInfo);
 
-			Object value = null;
+            Object value = null;
 
-			switch (columnType) {
-			case ByteArray: {
-				int len = buf.readByte();
-				byte[] byteArray = new byte[len];
-				buf.readBytes(byteArray);
-				value = byteArray;
-				break;
-			}
-			case Date: {
-				long time = buf.readLong();
-				value = new Date(time);
-				break;
-			}
-			case Decimal: {
-				String planText = (String) readFromBuf(buf, String.class);
-				value = new BigDecimal(planText);
-				break;
-			}
-			case Float: {
-				value = new Float(buf.readFloat());
-				break;
-			}
-			case Int: {
-				value = new Integer(buf.readInt());
-				break;
-			}
-			case Long: {
-				value = new Long(buf.readLong());
-				break;
-			}
-			case Null: {
-				value = null;
-				break;
-			}
-			case Short: {
-				value = new Short(buf.readShort());
-				break;
-			}
-			case String: {
-				int len = buf.readInt();
-				byte[] byteArray = new byte[len];
-				buf.readBytes(byteArray);
-				value = new String(byteArray);
-				break;
-			}
-			case Time: {
-				value = new Time(buf.readLong());
-				break;
-			}
-			case Timestamp: {
-				value = new Timestamp(buf.readLong());
-				break;
-			}
-			case Double: {
-				value = new Double(buf.readDouble());
-				break;
-			}
-			case BigInteger: {
-				value = BigInteger.valueOf(buf.readLong());
-				break;
-			}
-			}
+            switch (columnType) {
+                case ByteArray: {
+                    int len = buf.readByte();
+                    byte[] byteArray = new byte[len];
+                    buf.readBytes(byteArray);
+                    value = byteArray;
+                    break;
+                }
+                case Date: {
+                    long time = buf.readLong();
+                    value = new Date(time);
+                    break;
+                }
+                case Decimal: {
+                    String planText = (String) readFromBuf(buf, String.class);
+                    value = new BigDecimal(planText);
+                    break;
+                }
+                case Float: {
+                    value = new Float(buf.readFloat());
+                    break;
+                }
+                case Int: {
+                    value = new Integer(buf.readInt());
+                    break;
+                }
+                case Long: {
+                    value = new Long(buf.readLong());
+                    break;
+                }
+                case Null: {
+                    value = null;
+                    break;
+                }
+                case Short: {
+                    value = new Short(buf.readShort());
+                    break;
+                }
+                case String: {
+                    int len = buf.readInt();
+                    byte[] byteArray = new byte[len];
+                    buf.readBytes(byteArray);
+                    value = new String(byteArray);
+                    break;
+                }
+                case Time: {
+                    value = new Time(buf.readLong());
+                    break;
+                }
+                case Timestamp: {
+                    value = new Timestamp(buf.readLong());
+                    break;
+                }
+                case Double: {
+                    value = new Double(buf.readDouble());
+                    break;
+                }
+                case BigInteger: {
+                    value = BigInteger.valueOf(buf.readLong());
+                    break;
+                }
+            }
 
-			if (useNew) {
-				columnInfo.setNewValue(value);
-			} else {
-				columnInfo.setOldValue(value);
-			}
-		}
-	}
+            if (useNew) {
+                columnInfo.setNewValue(value);
+            } else {
+                columnInfo.setOldValue(value);
+            }
+        }
+    }
 
-	private void writeIntoBuf(Object object, ByteBuf buf) {
-		if (object != null) {
-			if (object instanceof String) {
-				byte[] bytes = ((String) object).getBytes();
+    private void writeIntoBuf(Object object, ByteBuf buf) {
+        if (object != null) {
+            if (object instanceof String) {
+                byte[] bytes = ((String) object).getBytes();
 
-				buf.writeByte(bytes.length);
-				buf.writeBytes(bytes);
-			}
-		}else{
-			buf.writeByte(0);
-		}
-	}
+                buf.writeByte(bytes.length);
+                buf.writeBytes(bytes);
+            }
+        } else {
+            buf.writeByte(0);
+        }
+    }
 
-	private Object readFromBuf(ByteBuf buf, Class<?> clazz) {
-		int len = buf.readByte();
+    private Object readFromBuf(ByteBuf buf, Class<?> clazz) {
+        int len = buf.readByte();
 
-		if (len != 0) {
-			if (clazz.getName().equals("java.lang.String")) {
-				byte[] bytes = new byte[len];
-				buf.readBytes(bytes);
-				return new String(bytes);
-			} else {
-				return null;
-			}
-		} else {
-			return null;
-		}
-	}
+        if (len != 0) {
+            if (clazz.getName().equals("java.lang.String")) {
+                byte[] bytes = new byte[len];
+                buf.readBytes(bytes);
+                return new String(bytes);
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
 }

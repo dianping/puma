@@ -1,14 +1,5 @@
 package com.dianping.puma.storage;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
@@ -26,292 +17,291 @@ import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageException;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;
 import com.dianping.puma.storage.exception.StorageWriteException;
-import com.dianping.puma.storage.index.BinlogIndexKey;
-import com.dianping.puma.storage.index.BinlogIndexKeyConvertor;
-import com.dianping.puma.storage.index.DataIndex;
-import com.dianping.puma.storage.index.DefaultDataIndexImpl;
-import com.dianping.puma.storage.index.L2Index;
-import com.dianping.puma.storage.index.L2IndexItemConvertor;
+import com.dianping.puma.storage.index.*;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DefaultEventStorage implements EventStorage {
 
-	private BucketManager bucketManager;
+    private BucketManager bucketManager;
 
-	private DataBucket writingBucket;
+    private DataBucket writingBucket;
 
-	private EventCodec codec;
+    private EventCodec codec;
 
-	private List<WeakReference<EventChannel>> openChannels = new ArrayList<WeakReference<EventChannel>>();
+    private List<WeakReference<EventChannel>> openChannels = new ArrayList<WeakReference<EventChannel>>();
 
-	private volatile boolean stopped = true;
+    private volatile boolean stopped = true;
 
-	private DataBucketManager masterBucketIndex;
+    private DataBucketManager masterBucketIndex;
 
-	private DataBucketManager slaveBucketIndex;
+    private DataBucketManager slaveBucketIndex;
 
-	private ArchiveStrategy archiveStrategy;
+    private ArchiveStrategy archiveStrategy;
 
-	private CleanupStrategy cleanupStrategy;
+    private CleanupStrategy cleanupStrategy;
 
-	private String name;
+    private String name;
 
-	private String taskName;
+    private String taskName;
 
-	private BinlogInfo binlogInfo;
+    private BinlogInfo binlogInfo;
 
-	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-	private AtomicReference<String> lastDate = new AtomicReference<String>();
+    private AtomicReference<String> lastDate = new AtomicReference<String>();
 
-	private String binlogIndexBaseDir;
+    private String binlogIndexBaseDir;
 
-	private DataIndex<BinlogIndexKey, L2Index> binlogIndex;
+    private DataIndex<BinlogIndexKey, L2Index> binlogIndex;
 
-	private AtomicReference<BinlogIndexKey> lastBinlogIndexKey = new AtomicReference<BinlogIndexKey>(null);
+    private AtomicReference<BinlogIndexKey> lastBinlogIndexKey = new AtomicReference<BinlogIndexKey>(null);
 
-	private AtomicReference<Long> processingServerId = new AtomicReference<Long>(null);
+    private AtomicReference<Long> processingServerId = new AtomicReference<Long>(null);
 
-	private EventFilterChain storageEventFilterChain;
+    private EventFilterChain storageEventFilterChain;
 
-	/**
-	 * @param binlogIndexBaseDir
-	 *           the binlogIndexBaseDir to set
-	 */
-	public void setBinlogIndexBaseDir(String binlogIndexBaseDir) {
-		this.binlogIndexBaseDir = binlogIndexBaseDir;
-	}
+    /**
+     * @param binlogIndexBaseDir the binlogIndexBaseDir to set
+     */
+    public void setBinlogIndexBaseDir(String binlogIndexBaseDir) {
+        this.binlogIndexBaseDir = binlogIndexBaseDir;
+    }
 
-	/**
-	 * @return the masterBucketIndex
-	 */
-	public DataBucketManager getMasterBucketIndex() {
-		return masterBucketIndex;
-	}
+    /**
+     * @return the masterBucketIndex
+     */
+    public DataBucketManager getMasterBucketIndex() {
+        return masterBucketIndex;
+    }
 
-	/**
-	 * @return the slaveBucketIndex
-	 */
-	public DataBucketManager getSlaveBucketIndex() {
-		return slaveBucketIndex;
-	}
+    /**
+     * @return the slaveBucketIndex
+     */
+    public DataBucketManager getSlaveBucketIndex() {
+        return slaveBucketIndex;
+    }
 
-	public void start() throws StorageLifeCycleException {
-		stopped = false;
-		masterBucketIndex.setMaster(true);
-		slaveBucketIndex.setMaster(false);
-		bucketManager = new DefaultBucketManager(masterBucketIndex, slaveBucketIndex, archiveStrategy, cleanupStrategy);
-		binlogIndex = new DefaultDataIndexImpl<BinlogIndexKey, L2Index>(binlogIndexBaseDir, new L2IndexItemConvertor(),
-		      new BinlogIndexKeyConvertor());
+    public void start() throws StorageLifeCycleException {
+        stopped = false;
+        masterBucketIndex.setMaster(true);
+        slaveBucketIndex.setMaster(false);
+        bucketManager = new DefaultBucketManager(masterBucketIndex, slaveBucketIndex, archiveStrategy, cleanupStrategy);
+        binlogIndex = new DefaultDataIndexImpl<BinlogIndexKey, L2Index>(binlogIndexBaseDir, new L2IndexItemConvertor(),
+                new BinlogIndexKeyConvertor());
 
-		cleanupStrategy.addDataIndex(binlogIndex);
+        cleanupStrategy.addDataIndex(binlogIndex);
 
-		try {
-			masterBucketIndex.start();
-			slaveBucketIndex.start();
-			bucketManager.start();
-			writingBucket = null;
-			binlogIndex.start();
+        try {
+            masterBucketIndex.start();
+            slaveBucketIndex.start();
+            bucketManager.start();
+            writingBucket = null;
+            binlogIndex.start();
 
-			for (WeakReference<EventChannel> channelRef : openChannels) {
-				EventChannel channel = channelRef.get();
-				if (channel != null) {
-					try {
-						((DefaultEventChannel) channel).setBucketManager(bucketManager);
-						// channel.start();
-					} catch (Exception e) {
-						// ignore
-					}
-				}
-			}
-		} catch (Exception e) {
-			throw new StorageLifeCycleException("Storage init failed", e);
-		}
-	}
+            for (WeakReference<EventChannel> channelRef : openChannels) {
+                EventChannel channel = channelRef.get();
+                if (channel != null) {
+                    try {
+                        ((DefaultEventChannel) channel).setBucketManager(bucketManager);
+                        // channel.start();
+                    } catch (Exception e) {
+                        // ignore
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new StorageLifeCycleException("Storage init failed", e);
+        }
+    }
 
-	public CleanupStrategy getCleanupStrategy() {
-		return cleanupStrategy;
-	}
+    public CleanupStrategy getCleanupStrategy() {
+        return cleanupStrategy;
+    }
 
-	/**
-	 * @param cleanupStrategy
-	 *           the cleanupStrategy to set
-	 */
-	public void setCleanupStrategy(CleanupStrategy cleanupStrategy) {
-		this.cleanupStrategy = cleanupStrategy;
-	}
+    /**
+     * @param cleanupStrategy the cleanupStrategy to set
+     */
+    public void setCleanupStrategy(CleanupStrategy cleanupStrategy) {
+        this.cleanupStrategy = cleanupStrategy;
+    }
 
-	/**
-	 * @param name
-	 *           the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getTaskName() {
-		return taskName;
-	}
+    public String getTaskName() {
+        return taskName;
+    }
 
-	public void setTaskName(String taskName) {
-		this.taskName = taskName;
-	}
+    public void setTaskName(String taskName) {
+        this.taskName = taskName;
+    }
 
-	public BinlogInfo getBinlogInfo() {
-		return binlogInfo;
-	}
+    public BinlogInfo getBinlogInfo() {
+        return binlogInfo;
+    }
 
-	public void setBinlogInfo(BinlogInfo binlogInfo) {
-		this.binlogInfo = binlogInfo;
-	}
+    public void setBinlogInfo(BinlogInfo binlogInfo) {
+        this.binlogInfo = binlogInfo;
+    }
 
-	public void setMasterBucketIndex(DataBucketManager masterBucketIndex) {
-		this.masterBucketIndex = masterBucketIndex;
-	}
+    public void setMasterBucketIndex(DataBucketManager masterBucketIndex) {
+        this.masterBucketIndex = masterBucketIndex;
+    }
 
-	public void setSlaveBucketIndex(DataBucketManager slaveBucketIndex) {
-		this.slaveBucketIndex = slaveBucketIndex;
-	}
+    public void setSlaveBucketIndex(DataBucketManager slaveBucketIndex) {
+        this.slaveBucketIndex = slaveBucketIndex;
+    }
 
-	/**
-	 * @param archiveStrategy
-	 *           the archiveStrategy to set
-	 */
-	public void setArchiveStrategy(ArchiveStrategy archiveStrategy) {
-		this.archiveStrategy = archiveStrategy;
-	}
+    /**
+     * @param archiveStrategy the archiveStrategy to set
+     */
+    public void setArchiveStrategy(ArchiveStrategy archiveStrategy) {
+        this.archiveStrategy = archiveStrategy;
+    }
 
-	@Override
-	public EventChannel getChannel(long seq, long serverId, String binlog, long binlogPos, long timestamp)
-	      throws StorageException {
-		EventChannel channel = new DefaultEventChannel(bucketManager, binlogIndex, codec, seq, serverId, binlog,
-		      binlogPos, timestamp);
-		openChannels.add(new WeakReference<EventChannel>(channel));
+    @Override
+    public EventChannel getChannel(long seq, long serverId, String binlog, long binlogPos, long timestamp)
+            throws StorageException {
+        EventChannel channel = new DefaultEventChannel(bucketManager, binlogIndex, codec, seq, serverId, binlog,
+                binlogPos, timestamp);
+        openChannels.add(new WeakReference<EventChannel>(channel));
 
-		return channel;
-	}
+        return channel;
+    }
 
-	/**
-	 * @param codec
-	 *           the codec to set
-	 */
-	public void setCodec(EventCodec codec) {
-		this.codec = codec;
-	}
+    /**
+     * @param codec the codec to set
+     */
+    public void setCodec(EventCodec codec) {
+        this.codec = codec;
+    }
 
-	public void setStorageEventFilterChain(EventFilterChain storageEventFilterChain) {
-		this.storageEventFilterChain = storageEventFilterChain;
-	}
+    public void setStorageEventFilterChain(EventFilterChain storageEventFilterChain) {
+        this.storageEventFilterChain = storageEventFilterChain;
+    }
 
-	@Override
-	public synchronized void store(ChangedEvent event) throws StorageException {
-		if (stopped) {
-			throw new StorageClosedException("Storage has been closed.");
-		}
+    @Override
+    public synchronized void store(ChangedEvent event) throws StorageException {
+        if (stopped) {
+            throw new StorageClosedException("Storage has been closed.");
+        }
 
-		// Storage filter.
-		storageEventFilterChain.reset();
-		if (!storageEventFilterChain.doNext(event)) {
-			return;
-		}
+        // Storage filter.
+        storageEventFilterChain.reset();
+        if (!storageEventFilterChain.doNext(event)) {
+            return;
+        }
 
-		String nowDate = sdf.format(new Date());
+        String nowDate = sdf.format(new Date());
 
-		if (processingServerId.get() == null) {
-			processingServerId.set(event.getBinlogServerId());
-		}
+        if (processingServerId.get() == null) {
+            processingServerId.set(event.getBinlogInfo().getServerId());
+        }
 
-		if (lastDate.get() == null) {
-			lastDate.set(nowDate);
-		}
+        if (lastDate.get() == null) {
+            lastDate.set(nowDate);
+        }
 
-		try {
-			boolean newL1Index = false;
-			if (writingBucket == null) {
-				writingBucket = bucketManager.getNextWriteBucket();
-				newL1Index = true;
-			} else if (!writingBucket.hasRemainingForWrite()) {
-				writingBucket.stop();
-				writingBucket = bucketManager.getNextWriteBucket();
-				newL1Index = true;
-			} else if (!processingServerId.get().equals(event.getBinlogServerId())) {
-				writingBucket.stop();
-				writingBucket = bucketManager.getNextWriteBucket();
-				processingServerId.set(event.getBinlogServerId());
-				newL1Index = true;
-			} else {
-				if (!lastDate.get().equals(nowDate)) {
-					writingBucket.stop();
-					writingBucket = bucketManager.getNextWriteBucket();
-					lastDate.set(nowDate);
-					newL1Index = true;
-				}
-			}
+        try {
+            boolean newL1Index = false;
+            if (writingBucket == null) {
+                writingBucket = bucketManager.getNextWriteBucket();
+                newL1Index = true;
+            } else if (!writingBucket.hasRemainingForWrite()) {
+                writingBucket.stop();
+                writingBucket = bucketManager.getNextWriteBucket();
+                newL1Index = true;
+            } else if (!processingServerId.get().equals(event.getBinlogInfo().getServerId())) {
+                writingBucket.stop();
+                writingBucket = bucketManager.getNextWriteBucket();
+                processingServerId.set(event.getBinlogInfo().getServerId());
+                newL1Index = true;
+            } else {
+                if (!lastDate.get().equals(nowDate)) {
+                    writingBucket.stop();
+                    writingBucket = bucketManager.getNextWriteBucket();
+                    lastDate.set(nowDate);
+                    newL1Index = true;
+                }
+            }
 
-			long newSeq = writingBucket.getCurrentWritingSeq();
-			updateIndex(event, newL1Index, newSeq);
+            long newSeq = writingBucket.getCurrentWritingSeq();
+            updateIndex(event, newL1Index, newSeq);
 
-			event.setSeq(newSeq);
-			byte[] data = codec.encode(event);
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			bos.write(ByteArrayUtils.intToByteArray(data.length));
-			bos.write(data);
-			writingBucket.append(bos.toByteArray());
-			bucketManager.updateLatestSequence(new Sequence(event.getSeq()));
+            event.setSeq(newSeq);
+            byte[] data = codec.encode(event);
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            bos.write(ByteArrayUtils.intToByteArray(data.length));
+            bos.write(data);
+            writingBucket.append(bos.toByteArray());
+            bucketManager.updateLatestSequence(new Sequence(event.getSeq()));
 
-			SystemStatusContainer.instance.updateStorageStatus(name, event.getSeq());
-		} catch (IOException e) {
-			throw new StorageWriteException("Failed to write event.", e);
-		}
-	}
+            SystemStatusContainer.instance.updateStorageStatus(name, event.getSeq());
+        } catch (IOException e) {
+            throw new StorageWriteException("Failed to write event.", e);
+        }
+    }
 
-	private void updateIndex(ChangedEvent event, boolean newL1Index, long newSeq) throws IOException {
-		BinlogIndexKey binlogKey = new BinlogIndexKey(event.getBinlogInfo().getBinlogFile(), event.getBinlogInfo()
-		      .getBinlogPosition(), event.getBinlogServerId());
+    private void updateIndex(ChangedEvent event, boolean newL1Index, long newSeq) throws IOException {
+        BinlogIndexKey binlogKey = new BinlogIndexKey(event.getBinlogInfo().getBinlogFile(), event.getBinlogInfo()
+                .getBinlogPosition(), event.getBinlogInfo().getServerId());
 
-		if (newL1Index) {
-			binlogIndex.addL1Index(binlogKey, writingBucket.getBucketFileName().replace('/', '-'));
-		}
+        if (newL1Index) {
+            binlogIndex.addL1Index(binlogKey, writingBucket.getBucketFileName().replace('/', '-'));
+        }
 
-		if (lastBinlogIndexKey.get() == null || !lastBinlogIndexKey.get().equals(binlogKey)) {
-			L2Index l2Index = new L2Index();
-			l2Index.setDatabase(event.getDatabase());
-			l2Index.setTable(event.getTable());
-			l2Index.setDdl(event instanceof DdlEvent);
-			l2Index.setDml(event instanceof RowChangedEvent);
-			l2Index.setSequence(new Sequence(newSeq));
+        if (lastBinlogIndexKey.get() == null || !lastBinlogIndexKey.get().equals(binlogKey)) {
+            L2Index l2Index = new L2Index();
+            l2Index.setDatabase(event.getDatabase());
+            l2Index.setTable(event.getTable());
+            l2Index.setDdl(event instanceof DdlEvent);
+            l2Index.setDml(event instanceof RowChangedEvent);
+            l2Index.setSequence(new Sequence(newSeq));
 
-			binlogIndex.addL2Index(binlogKey, l2Index);
-			lastBinlogIndexKey.set(binlogKey);
-		}
-	}
+            binlogIndex.addL2Index(binlogKey, l2Index);
+            lastBinlogIndexKey.set(binlogKey);
+        }
+    }
 
-	@Override
-	public synchronized void stop() {
-		if (stopped) {
-			return;
-		}
-		stopped = true;
-		try {
-			bucketManager.stop();
-		} catch (StorageLifeCycleException e1) {
-			// ignore
-		}
-		if (writingBucket != null) {
-			try {
-				writingBucket.stop();
-			} catch (IOException e) {
-				// ignore
-			}
-		}
+    @Override
+    public synchronized void stop() {
+        if (stopped) {
+            return;
+        }
+        stopped = true;
+        try {
+            bucketManager.stop();
+        } catch (StorageLifeCycleException e1) {
+            // ignore
+        }
+        if (writingBucket != null) {
+            try {
+                writingBucket.stop();
+            } catch (IOException e) {
+                // ignore
+            }
+        }
 
-		try {
-			binlogIndex.stop();
-		} catch (IOException e1) {
-			// ignore
-		}
-	}
+        try {
+            binlogIndex.stop();
+        } catch (IOException e1) {
+            // ignore
+        }
+    }
 }

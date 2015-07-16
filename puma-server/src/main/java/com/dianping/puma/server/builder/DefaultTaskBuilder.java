@@ -3,13 +3,13 @@ package com.dianping.puma.server.builder;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.biz.entity.SrcDbEntity;
-import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.biz.service.SrcDbService;
 import com.dianping.puma.biz.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.config.PumaServerConfig;
@@ -97,7 +97,7 @@ public class DefaultTaskBuilder implements TaskBuilder {
 	public TaskExecutor build(PumaTaskEntity pumaTask) throws Exception {
 		DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
 
-		TaskStateEntity taskState = new TaskStateEntity();
+		PumaTaskStateEntity taskState = new PumaTaskStateEntity();
 		taskState.setTaskName(pumaTask.getName());
 		taskState.setServerName(pumaServerConfig.getName());
 		taskState.setStatus(Status.PREPARING);
@@ -115,7 +115,7 @@ public class DefaultTaskBuilder implements TaskBuilder {
 		taskExecutor.setBinlogStat(new BinlogStat());
 
 		// Source database.
-		SrcDbEntity srcDBEntity = pumaTask.getPerferSrcDb();
+		SrcDbEntity srcDBEntity = pumaTask.getPreferSrcDb();
 		taskExecutor.setDbServerId(srcDBEntity.getServerId());
 		taskExecutor.setDBHost(srcDBEntity.getHost());
 		taskExecutor.setPort(srcDBEntity.getPort());

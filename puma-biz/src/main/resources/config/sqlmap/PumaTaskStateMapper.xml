@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.PumaTaskStateDao">
+
+    <select id="find" resultType="PumaTaskStateEntity">
+        SELECT * FROM PumaTaskState WHERE id = #{id}
+    </select>
+
+    <select id="findByTaskName" resultType="PumaTaskStateEntity">
+        SELECT * FROM PumaTaskState WHERE taskName = #{taskName}
+    </select>
+
+    <select id="findByTaskNameAndServerName" resultType="PumaTaskStateEntity">
+        SELECT * FROM PumaTaskState WHERE taskName = #{taskName} and serverName = #{serverName}
+    </select>
+
+    <update id="update" parameterType="PumaTaskStateEntity">
+        update PumaTaskState
+        set
+        taskName=#{taskName},
+        serverName=#{serverName},
+        gmtUpdate=#{gmtUpdate},
+        detail=#{detail},
+        status=#{status},
+        srcDb=#{srcDb.id},
+        binlogInfo_ServerId=#{binlogInfo.serverId},
+        binlogInfo_BinlogFile=#{binlogInfo.binlogFile},
+        binlogInfo_BinlogPosition=#{binlogInfo.binlogPosition},
+        binlogStat_RowsInsert=#{binlogStat.rowsInsert},
+        binlogStat_RowsUpdate=#{binlogStat.rowsUpdate},
+        binlogStat_RowsDelete=#{binlogStat.rowsDelete},
+        binlogStat_Ddls=#{binlogStat.ddls}
+        where
+        taskName=#{taskName} and serverName=#{serverName}
+    </update>
+
+    <insert id="insert" parameterType="PumaTaskStateEntity" useGeneratedKeys="true" keyProperty="id">
+        insert into PumaTaskState
+        (
+        taskName,
+        serverName,
+        gmtUpdate,
+        detail,
+        status,
+        srcDb,
+        binlogInfo_ServerId,
+        binlogInfo_BinlogFile,
+        binlogInfo_BinlogPosition,
+        binlogStat_RowsInsert,
+        binlogStat_RowsUpdate,
+        binlogStat_RowsDelete,
+        binlogStat_Ddls
+        )
+        values
+        (
+        #{taskName},
+        #{serverName},
+        #{gmtUpdate},
+        #{detail},
+        #{status},
+        #{srcDb.id},
+        #{binlogInfo.serverId},
+        #{binlogInfo.binlogFile},
+        #{binlogInfo.binlogPosition},
+        #{binlogStat.rowsInsert},
+        #{binlogStat.rowsUpdate},
+        #{binlogStat.rowsDelete},
+        #{binlogStat.ddls}
+        )
+    </insert>
+</mapper>

@@ -1,4 +1,4 @@
-package com.dianping.puma.server.state;
+package com.dianping.puma.server.reporter;
 
 public interface TaskStateReporter {
 

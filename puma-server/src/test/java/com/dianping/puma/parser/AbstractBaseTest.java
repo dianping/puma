@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.io.FileUtils;
@@ -19,7 +20,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 
 import com.dianping.puma.biz.entity.SrcDbEntity;
-import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.constant.SubscribeConstant;
@@ -283,7 +283,7 @@ public abstract class AbstractBaseTest {
 		DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
 
 		// state
-		TaskStateEntity taskState = new TaskStateEntity();
+		PumaTaskStateEntity taskState = new PumaTaskStateEntity();
 		taskState.setServerName(serverName);
 		taskState.setTaskName(taskName);
 		taskState.setStatus(Status.PREPARING);

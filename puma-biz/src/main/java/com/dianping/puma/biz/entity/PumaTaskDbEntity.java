@@ -8,6 +8,8 @@ public class PumaTaskDbEntity {
 
 	private int dbId;
 
+	private boolean active;
+
 	public int getId() {
 		return id;
 	}
@@ -30,5 +32,13 @@ public class PumaTaskDbEntity {
 
 	public void setDbId(int dbId) {
 		this.dbId = dbId;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 }

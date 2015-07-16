@@ -2,6 +2,7 @@ package com.dianping.puma.server.checker;
 
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.biz.service.PumaTaskService;
+import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.server.server.TaskServerManager;
 import com.google.common.collect.MapDifference;
@@ -34,8 +35,8 @@ public class ScheduledTaskChecker implements TaskChecker {
 		tasks.clear();
 
 		try {
-			for (String host: taskServerManager.findAuthorizedHosts()) {
-				for (PumaTaskEntity task: pumaTaskService.findByPumaServerName(host)) {
+			for (String host : taskServerManager.findAuthorizedHosts()) {
+				for (PumaTaskEntity task : pumaTaskService.findByPumaServerName(host)) {
 					tasks.put(task.getName(), task);
 				}
 			}
@@ -46,13 +47,13 @@ public class ScheduledTaskChecker implements TaskChecker {
 		}
 
 		// Created.
-		findAndHandleCreatedTasks(oriTasks, tasks);
+		handleCreatedTasks(findCreatedTasks(oriTasks, tasks));
 
 		// Updated.
-		findAndHandleUpdatedTasks(oriTasks, tasks);
+		handleUpdatedTasks(findUpdatedTasks(oriTasks, tasks));
 
 		// Deleted.
-		findAndHandleDeletedTasks(oriTasks, tasks);
+		handleDeletedTasks(findDeletedTasks(oriTasks, tasks));
 	}
 
 	@Scheduled(fixedDelay = 5 * 1000)
@@ -60,11 +61,26 @@ public class ScheduledTaskChecker implements TaskChecker {
 		check();
 	}
 
-	protected void findAndHandleCreatedTasks(
-			Map<String, PumaTaskEntity> oriTasks, Map<String, PumaTaskEntity> tasks) {
-
+	protected Map<String, PumaTaskEntity> findCreatedTasks(Map<String, PumaTaskEntity> oriTasks,
+			Map<String, PumaTaskEntity> tasks) {
 		MapDifference<String, PumaTaskEntity> taskDifference = Maps.difference(oriTasks, tasks);
-		for (Map.Entry<String, PumaTaskEntity> entry: taskDifference.entriesOnlyOnRight().entrySet()) {
+		return taskDifference.entriesOnlyOnRight();
+	}
+
+	protected Map<String, MapDifference.ValueDifference<PumaTaskEntity>> findUpdatedTasks(
+			Map<String, PumaTaskEntity> oriTasks, Map<String, PumaTaskEntity> tasks) {
+		MapDifference<String, PumaTaskEntity> taskDifference = Maps.difference(oriTasks, tasks);
+		return taskDifference.entriesDiffering();
+	}
+
+	protected Map<String, PumaTaskEntity> findDeletedTasks(Map<String, PumaTaskEntity> oriTasks,
+			Map<String, PumaTaskEntity> tasks) {
+		MapDifference<String, PumaTaskEntity> taskDifference = Maps.difference(oriTasks, tasks);
+		return taskDifference.entriesOnlyOnLeft();
+	}
+
+	private void handleCreatedTasks(Map<String, PumaTaskEntity> createdTasks) {
+		for (Map.Entry<String, PumaTaskEntity> entry: createdTasks.entrySet()) {
 			try {
 				taskContainer.create(entry.getKey(), entry.getValue());
 			} catch (Exception e) {
@@ -73,12 +89,8 @@ public class ScheduledTaskChecker implements TaskChecker {
 		}
 	}
 
-	protected void findAndHandleUpdatedTasks(
-			Map<String, PumaTaskEntity> oriTasks, Map<String, PumaTaskEntity> tasks) {
-
-		MapDifference<String, PumaTaskEntity> taskDifference = Maps.difference(oriTasks, tasks);
-		Map<String, MapDifference.ValueDifference<PumaTaskEntity>> diffs = taskDifference.entriesDiffering();
-		for (Map.Entry<String, MapDifference.ValueDifference<PumaTaskEntity>> entry: diffs.entrySet()) {
+	private void handleUpdatedTasks(Map<String, MapDifference.ValueDifference<PumaTaskEntity>> updatedTasks) {
+		for (Map.Entry<String, MapDifference.ValueDifference<PumaTaskEntity>> entry: updatedTasks.entrySet()) {
 			try {
 				taskContainer.update(entry.getKey(), entry.getValue().leftValue(), entry.getValue().rightValue());
 			} catch (Exception e) {
@@ -87,11 +99,8 @@ public class ScheduledTaskChecker implements TaskChecker {
 		}
 	}
 
-	protected void findAndHandleDeletedTasks(
-			Map<String, PumaTaskEntity> oriTasks, Map<String, PumaTaskEntity> tasks) {
-
-		MapDifference<String, PumaTaskEntity> taskDifference = Maps.difference(oriTasks, tasks);
-		for (Map.Entry<String, PumaTaskEntity> entry: taskDifference.entriesOnlyOnLeft().entrySet()) {
+	private void handleDeletedTasks(Map<String, PumaTaskEntity> deletedTasks) {
+		for (Map.Entry<String, PumaTaskEntity> entry: deletedTasks.entrySet()) {
 			try {
 				taskContainer.delete(entry.getKey(), entry.getValue());
 			} catch (Exception e) {

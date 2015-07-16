@@ -14,10 +14,10 @@ package com.dianping.puma.server;
 
 import java.util.List;
 
-import com.dianping.puma.biz.entity.TaskStateEntity;
-import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.LifeCycle;
 import com.dianping.puma.biz.storage.holder.BinlogInfoHolder;
+import com.dianping.puma.biz.entity.PumaTaskStateEntity;
+import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.sender.Sender;
 
@@ -59,7 +59,7 @@ public interface TaskExecutor extends LifeCycle<Exception> {
 
 	public void pause() throws Exception;
 
-	public TaskStateEntity getTaskState();
+	public PumaTaskStateEntity getTaskState();
 
-	public void setTaskState(TaskStateEntity taskState);
+	public void setTaskState(PumaTaskStateEntity taskState);
 }

@@ -1,6 +1,5 @@
 package com.dianping.puma.biz.entity;
 
-import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
@@ -8,14 +7,13 @@ import com.google.common.base.Objects;
 
 import java.util.Date;
 
-public class TaskStateEntity {
+public class PumaTaskStateEntity {
+
     private int id;
 
     private String taskName;
 
     private String serverName;
-
-    private String taskType;
 
     private Date gmtUpdate;
 
@@ -23,13 +21,13 @@ public class TaskStateEntity {
 
     private Status status;
 
-    private ActionController controller;
+    private SrcDbEntity srcDb;
 
     private BinlogInfo binlogInfo = new BinlogInfo();
 
     private BinlogStat binlogStat = new BinlogStat();
 
-    public TaskStateEntity() {
+    public PumaTaskStateEntity() {
         gmtUpdate = new Date();
     }
 
@@ -57,12 +55,12 @@ public class TaskStateEntity {
         this.detail = detail;
     }
 
-    public ActionController getController() {
-        return controller;
+    public SrcDbEntity getSrcDb() {
+        return srcDb;
     }
 
-    public void setController(ActionController controller) {
-        this.controller = controller;
+    public void setSrcDb(SrcDbEntity srcDb) {
+        this.srcDb = srcDb;
     }
 
     public BinlogInfo getBinlogInfo() {
@@ -97,14 +95,6 @@ public class TaskStateEntity {
         this.serverName = serverName;
     }
 
-    public String getTaskType() {
-        return taskType;
-    }
-
-    public void setTaskType(String taskType) {
-        this.taskType = taskType;
-    }
-
     public int getId() {
         return id;
     }
@@ -119,13 +109,12 @@ public class TaskStateEntity {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
-        TaskStateEntity taskState = (TaskStateEntity) o;
-        return Objects.equal(taskName, taskState.taskName) && Objects.equal(serverName, taskState.serverName)
-                && Objects.equal(taskType, taskState.taskType);
+        PumaTaskStateEntity taskState = (PumaTaskStateEntity) o;
+        return Objects.equal(taskName, taskState.taskName) && Objects.equal(serverName, taskState.serverName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(taskName, serverName, taskType);
+        return Objects.hashCode(taskName, serverName);
     }
 }

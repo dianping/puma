@@ -17,10 +17,10 @@ package com.dianping.puma.server;
 
 import java.util.List;
 
-import com.dianping.puma.biz.entity.TaskStateEntity;
-import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.biz.storage.holder.BinlogInfoHolder;
+import com.dianping.puma.biz.entity.PumaTaskStateEntity;
+import com.dianping.puma.bo.PumaContext;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.Sender;
@@ -54,7 +54,7 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
 
 	protected BinlogInfoHolder binlogInfoHolder;
 
-	protected TaskStateEntity state;
+	protected PumaTaskStateEntity state;
 
 	@Override
 	public String getTaskId() {
@@ -202,11 +202,11 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
 		return this.dataHandler;
 	}
 
-	public TaskStateEntity getTaskState() {
+	public PumaTaskStateEntity getTaskState() {
 		return state;
 	}
 
-	public void setTaskState(TaskStateEntity state) {
+	public void setTaskState(PumaTaskStateEntity state) {
 		this.state = state;
 	}
 

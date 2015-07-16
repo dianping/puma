@@ -11,6 +11,7 @@ import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -39,8 +40,11 @@ public class PumaTaskServiceImpl implements PumaTaskService {
         List<PumaServerEntity> pumaServers = loadPumaServer(entity.getId());
         entity.setPumaServers(pumaServers);
 
-        List<SrcDbEntity> srcDbs = loadSrcDb(entity.getId());
-        entity.setBackUpSrcDbs(srcDbs);
+        SrcDbEntity preferSrcDb = loadPreferSrcDb(entity.getId());
+        entity.setPreferSrcDb(preferSrcDb);
+
+        List<SrcDbEntity> backupSrcDbs = loadBackupSrcDb(entity.getId());
+        entity.setBackUpSrcDbs(backupSrcDbs);
 
         TableSet tableSet = loadTableSet(entity.getId());
         entity.setTableSet(tableSet);
@@ -56,7 +60,17 @@ public class PumaTaskServiceImpl implements PumaTaskService {
         return tableSet;
     }
 
-    protected List<SrcDbEntity> loadSrcDb(int id) {
+    protected SrcDbEntity loadPreferSrcDb(int id) {
+        List<PumaTaskDbEntity> pumaTaskDbs = pumaTaskDbDao.findByTaskId(id);
+        for (PumaTaskDbEntity pumaTaskDb: pumaTaskDbs) {
+            if (pumaTaskDb.isActive()) {
+                return srcDbDao.findById(pumaTaskDb.getId());
+            }
+        }
+        return null;
+    }
+
+    protected List<SrcDbEntity> loadBackupSrcDb(int id) {
         List<PumaTaskDbEntity> pumaTaskDbs = pumaTaskDbDao.findByTaskId(id);
         List<Integer> srcDbIds = Lists.newArrayList(Iterables.transform(pumaTaskDbs, new Function<PumaTaskDbEntity, Integer>() {
             @Override

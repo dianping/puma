@@ -2,7 +2,9 @@ package com.dianping.puma.biz.service.impl;
 
 import com.dianping.puma.biz.dao.PumaTaskStateDao;
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
+import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.biz.service.PumaTaskStateService;
+import com.dianping.puma.biz.service.SrcDbService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,14 +22,19 @@ public class PumaTaskStateServiceImpl implements PumaTaskStateService {
     @Autowired
     PumaTaskStateDao pumaTaskStateDao;
 
+    @Autowired
+    SrcDbService srcDbService;
+
     @Override
     public List<PumaTaskStateEntity> find(String taskName) {
-        return pumaTaskStateDao.findByTaskName(taskName);
+        List<PumaTaskStateEntity> taskStates = pumaTaskStateDao.findByTaskName(taskName);
+        return loadFullPumaTaskStates(taskStates);
     }
 
     @Override
     public PumaTaskStateEntity findByTaskNameAndServerName(String taskName, String serverName) {
-        return pumaTaskStateDao.findByTaskNameAndServerName(taskName, serverName);
+        PumaTaskStateEntity taskState = pumaTaskStateDao.findByTaskNameAndServerName(taskName, serverName);
+        return loadFullPumaTaskState(taskState);
     }
 
     @Override
@@ -39,5 +46,18 @@ public class PumaTaskStateServiceImpl implements PumaTaskStateService {
         } else {
             pumaTaskStateDao.update(taskState);
         }
+    }
+
+    protected PumaTaskStateEntity loadFullPumaTaskState(PumaTaskStateEntity taskState) {
+        SrcDbEntity srcDb = srcDbService.find(taskState.getSrcDb().getId());
+        taskState.setSrcDb(srcDb);
+        return taskState;
+    }
+
+    protected List<PumaTaskStateEntity> loadFullPumaTaskStates(List<PumaTaskStateEntity> taskStates) {
+        for (PumaTaskStateEntity taskState: taskStates) {
+            loadFullPumaTaskState(taskState);
+        }
+        return taskStates;
     }
 }

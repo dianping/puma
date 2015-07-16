@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.biz.entity.SrcDbEntity;
-import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.biz.service.SrcDbService;
 import com.dianping.puma.biz.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.config.PumaServerConfig;
@@ -116,7 +115,7 @@ public class DefaultTaskBuilder implements TaskBuilder {
 		taskExecutor.setBinlogStat(new BinlogStat());
 
 		// Source database.
-		SrcDbEntity srcDBEntity = pumaTask.getPerferSrcDb();
+		SrcDbEntity srcDBEntity = pumaTask.getPreferSrcDb();
 		taskExecutor.setDbServerId(srcDBEntity.getServerId());
 		taskExecutor.setDBHost(srcDBEntity.getHost());
 		taskExecutor.setPort(srcDBEntity.getPort());

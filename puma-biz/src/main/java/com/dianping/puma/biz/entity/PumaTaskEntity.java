@@ -19,7 +19,7 @@ public class PumaTaskEntity {
 
 	private TableSet tableSet;
 
-	private SrcDbEntity perferSrcDb;
+	private SrcDbEntity preferSrcDb;
 
 	private List<SrcDbEntity> backUpSrcDbs;
 
@@ -65,12 +65,12 @@ public class PumaTaskEntity {
 		return tableSet;
 	}
 
-	public SrcDbEntity getPerferSrcDb() {
-		return perferSrcDb;
+	public SrcDbEntity getPreferSrcDb() {
+		return preferSrcDb;
 	}
 
-	public void setPerferSrcDb(SrcDbEntity perferSrcDb) {
-		this.perferSrcDb = perferSrcDb;
+	public void setPreferSrcDb(SrcDbEntity preferSrcDb) {
+		this.preferSrcDb = preferSrcDb;
 	}
 
 	public List<SrcDbEntity> getBackUpSrcDbs() {

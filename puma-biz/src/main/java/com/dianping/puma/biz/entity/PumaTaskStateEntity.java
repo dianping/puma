@@ -8,6 +8,7 @@ import com.google.common.base.Objects;
 import java.util.Date;
 
 public class PumaTaskStateEntity {
+
     private int id;
 
     private String taskName;
@@ -19,6 +20,8 @@ public class PumaTaskStateEntity {
     private String detail;
 
     private Status status;
+
+    private SrcDbEntity srcDb;
 
     private BinlogInfo binlogInfo = new BinlogInfo();
 
@@ -50,6 +53,14 @@ public class PumaTaskStateEntity {
 
     public void setDetail(String detail) {
         this.detail = detail;
+    }
+
+    public SrcDbEntity getSrcDb() {
+        return srcDb;
+    }
+
+    public void setSrcDb(SrcDbEntity srcDb) {
+        this.srcDb = srcDb;
     }
 
     public BinlogInfo getBinlogInfo() {

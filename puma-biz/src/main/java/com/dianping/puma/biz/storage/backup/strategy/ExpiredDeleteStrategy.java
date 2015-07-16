@@ -1,4 +1,4 @@
-package com.dianping.puma.core.storage.backup.strategy;
+package com.dianping.puma.biz.storage.backup.strategy;
 
 import org.apache.commons.lang.time.DateUtils;
 

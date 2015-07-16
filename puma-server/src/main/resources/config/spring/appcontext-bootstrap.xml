@@ -21,7 +21,7 @@
     <pigeon:annotation package="com.dianping.puma.remote.reporter.helper"/>
 
 	<bean id="binlogInfoHolder"
-		  class="com.dianping.puma.core.storage.holder.impl.DefaultBinlogInfoHolder"
+		  class="com.dianping.puma.biz.storage.holder.impl.DefaultBinlogInfoHolder"
 		  init-method="init">
 		<property name="baseDir" value="/data/appdatas/puma/binlog/"/>
 		<property name="bakDir" value="/data/appdatas/puma/binlog/bak/"/>
@@ -32,7 +32,7 @@
 	</bean>
 
 	<bean id="storageMasterBackup"
-		  class="com.dianping.puma.core.storage.backup.LocalFileBasedBackup"
+		  class="com.dianping.puma.biz.storage.backup.LocalFileBasedBackup"
 		  init-method="init">
 		<property name="workingBaseFolder" value="/data/appdatas/puma/storage/master" />
 		<property name="backupBaseFolder" value="/data/appdatas/puma/bak/storage/master" />
@@ -40,7 +40,7 @@
 	</bean>
 
 	<bean id="storageSlaveBackup"
-		  class="com.dianping.puma.core.storage.backup.LocalFileBasedBackup"
+		  class="com.dianping.puma.biz.storage.backup.LocalFileBasedBackup"
 		  init-method="init">
 		<property name="workingBaseFolder" value="/data/appdatas/puma/storage/slave" />
 		<property name="backupBaseFolder" value="/data/appdatas/puma/bak/storage/slave" />
@@ -48,7 +48,7 @@
 	</bean>
 
 	<bean id="storageBinlogIndexBackup"
-		  class="com.dianping.puma.core.storage.backup.LocalFileBasedBackup"
+		  class="com.dianping.puma.biz.storage.backup.LocalFileBasedBackup"
 		  init-method="init">
 		<property name="workingBaseFolder" value="/data/appdatas/puma/binlogIndex" />
 		<property name="backupBaseFolder" value="/data/appdatas/puma/bak/binlogIndex" />

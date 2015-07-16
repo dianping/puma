@@ -12,7 +12,7 @@ import com.dianping.puma.biz.service.SrcDbService;
 import com.dianping.puma.biz.sync.model.config.PumaServerConfig;
 import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.model.event.EventCenter;
-import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
+import com.dianping.puma.biz.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.server.TaskExecutor;
 
 @Service("taskBuilder")

@@ -29,7 +29,7 @@ import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
 import com.dianping.puma.core.model.event.EventCenter;
-import com.dianping.puma.core.storage.holder.impl.DefaultBinlogInfoHolder;
+import com.dianping.puma.biz.storage.holder.impl.DefaultBinlogInfoHolder;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.datahandler.DefaultDataHandler;

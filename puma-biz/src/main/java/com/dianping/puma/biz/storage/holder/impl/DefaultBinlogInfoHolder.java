@@ -1,7 +1,7 @@
-package com.dianping.puma.core.storage.holder.impl;
+package com.dianping.puma.biz.storage.holder.impl;
 
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.storage.holder.BinlogInfoHolder;
+import com.dianping.puma.biz.storage.holder.BinlogInfoHolder;
 import org.apache.log4j.Logger;
 
 import javax.annotation.PostConstruct;

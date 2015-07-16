@@ -1,4 +1,4 @@
-package com.dianping.puma.core.storage.holder;
+package com.dianping.puma.biz.storage.holder;
 
 import com.dianping.puma.core.model.BinlogInfo;
 

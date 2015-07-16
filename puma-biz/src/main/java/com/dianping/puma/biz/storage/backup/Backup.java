@@ -1,4 +1,4 @@
-package com.dianping.puma.core.storage.backup;
+package com.dianping.puma.biz.storage.backup;
 
 import com.dianping.puma.core.exception.BackupException;
 

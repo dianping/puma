@@ -3,6 +3,7 @@ package com.dianping.puma.server.builder;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -97,7 +98,7 @@ public class DefaultTaskBuilder implements TaskBuilder {
 	public TaskExecutor build(PumaTaskEntity pumaTask) throws Exception {
 		DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
 
-		TaskStateEntity taskState = new TaskStateEntity();
+		PumaTaskStateEntity taskState = new PumaTaskStateEntity();
 		taskState.setTaskName(pumaTask.getName());
 		taskState.setServerName(pumaServerConfig.getName());
 		taskState.setStatus(Status.PREPARING);

@@ -93,7 +93,7 @@ public class BufferedBinlogChannel implements BinlogChannel {
 
 	@Override
 	public void destroy() {
-		stopped = false;
+		stopped = true;
 
 		executorService.shutdown();
 

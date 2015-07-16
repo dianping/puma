@@ -20,8 +20,6 @@ public class BaseSyncTaskServiceImpl implements BaseSyncTaskService {
 		switch (syncType) {
 		case SYNC:
 			return syncTaskService.find(name);
-		case DUMP:
-			return dumpTaskService.find(name);
 		default:
 			return syncTaskService.find(name);
 		}

@@ -66,7 +66,6 @@ public class PumaServerManager {
         binlogAckHandler.setClientSessionService(clientSessionService);
 
         final BinlogGetHandler binlogGetHandler = new BinlogGetHandler();
-        binlogGetHandler.setBinlogAckService(binlogAckService);
         binlogGetHandler.setClientSessionService(clientSessionService);
 
         final BinlogSubscriptionHandler binlogSubscriptionHandler = new BinlogSubscriptionHandler();

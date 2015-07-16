@@ -1,5 +1,7 @@
 package com.dianping.puma.core.dto.binlog.request;
 
+import io.netty.channel.Channel;
+
 import java.util.concurrent.TimeUnit;
 
 public class BinlogGetRequest extends BinlogRequest {
@@ -10,7 +12,11 @@ public class BinlogGetRequest extends BinlogRequest {
 
     private long timeout;
 
+    private long startTime;
+
     private TimeUnit timeUnit;
+
+    private Channel channel;
 
     public boolean isAutoAck() {
         return autoAck;
@@ -42,5 +48,21 @@ public class BinlogGetRequest extends BinlogRequest {
 
     public void setTimeUnit(TimeUnit timeUnit) {
         this.timeUnit = timeUnit;
+    }
+
+    public Channel getChannel() {
+        return channel;
+    }
+
+    public void setChannel(Channel channel) {
+        this.channel = channel;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
     }
 }

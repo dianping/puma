@@ -4,7 +4,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import com.dianping.puma.biz.storage.backup.LocalFileBasedBackupTest;
 import com.dianping.puma.filter.DDLEventFilterTest;
 import com.dianping.puma.filter.DMLEventFilterTest;
 import com.dianping.puma.filter.DbTbEventFilterTest;
@@ -45,7 +44,6 @@ import com.dianping.puma.utils.PacketUtilTest;
       // storage.index
       DefaultDataIndexTest.class,//
       L2IndexItemConvertorTest.class,//
-      LocalFileBasedBackupTest.class,//
 
       // storage
       DefaultArchiveStrategyTest.class,//

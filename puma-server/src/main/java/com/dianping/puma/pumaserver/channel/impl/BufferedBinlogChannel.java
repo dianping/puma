@@ -1,5 +1,8 @@
 package com.dianping.puma.pumaserver.channel.impl;
 
+import com.dianping.puma.core.dto.BinlogMessage;
+import com.dianping.puma.core.dto.binlog.request.BinlogGetRequest;
+import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.ServerErrorEvent;
 import com.dianping.puma.core.model.BinlogInfo;
@@ -9,129 +12,143 @@ import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.EventStorage;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class BufferedBinlogChannel implements BinlogChannel {
 
-	private volatile boolean stopped = true;
+    private volatile boolean stopped = true;
 
-	private ExecutorService executorService;
+    private ExecutorService executorService;
 
-	private EventChannel eventChannel;
+    private EventChannel eventChannel;
 
-	private TaskContainer taskContainer;
+    private TaskContainer taskContainer;
 
-	private BlockingQueue<Event> binlogBuffer;
+    private final AtomicReference<BinlogGetRequest> request = new AtomicReference<BinlogGetRequest>();
 
-	@Override
-	public void init(
-			String targetName,
-			long dbServerId,
-			long sc,
-			BinlogInfo binlogInfo,
-			long timestamp,
-			String database,
-			List<String> tables,
-			boolean dml,
-			boolean ddl,
-			boolean transaction
-	) throws BinlogChannelException {
+    @Override
+    public void init(
+            String targetName,
+            long dbServerId,
+            long sc,
+            BinlogInfo binlogInfo,
+            long timestamp,
+            String database,
+            List<String> tables,
+            boolean dml,
+            boolean ddl,
+            boolean transaction
+    ) throws BinlogChannelException {
 
-		EventStorage eventStorage = taskContainer.getTaskStorage(targetName);
+        EventStorage eventStorage = taskContainer.getTaskStorage(targetName);
 
-		if (eventStorage == null) {
-			throw new BinlogChannelException("find event storage failure, not exist.");
-		}
+        if (eventStorage == null) {
+            throw new BinlogChannelException("find event storage failure, not exist.");
+        }
 
-		try {
-			eventChannel = eventStorage.getChannel(
-					sc,
-					dbServerId,
-					binlogInfo.getBinlogFile(),
-					binlogInfo.getBinlogPosition(),
-					timestamp
-			);
-			eventChannel.withDatabase(database);
-			eventChannel.withTables(tables.toArray(new String[tables.size()]));
-			eventChannel.withDml(dml);
-			eventChannel.withDdl(ddl);
-			eventChannel.withTransaction(transaction);
-			eventChannel.open();
+        try {
+            eventChannel = eventStorage.getChannel(
+                    sc,
+                    dbServerId,
+                    binlogInfo.getBinlogFile(),
+                    binlogInfo.getBinlogPosition(),
+                    timestamp
+            );
+            eventChannel.withDatabase(database);
+            eventChannel.withTables(tables.toArray(new String[tables.size()]));
+            eventChannel.withDml(dml);
+            eventChannel.withDdl(ddl);
+            eventChannel.withTransaction(transaction);
+            eventChannel.open();
 
-			binlogBuffer = new ArrayBlockingQueue<Event>(1000);
+            executorService = Executors.newFixedThreadPool(1);
+            executorService.execute(extractTask);
 
-			executorService = Executors.newFixedThreadPool(1);
-			executorService.execute(extractTask);
+        } catch (Exception e) {
+            throw new BinlogChannelException("find event storage failure", e.getCause());
+        }
+    }
 
-		} catch (Exception e) {
-			throw new BinlogChannelException("find event storage failure", e.getCause());
-		}
-	}
+    private Runnable extractTask = new Runnable() {
+        @Override
+        public void run() {
+            List<Event> results = new ArrayList<Event>();
 
-	private Runnable extractTask = new Runnable() {
-		@Override
-		public void run() {
-			while (!stopped) {
-				Event binlogEvent;
+            while (!stopped && !Thread.interrupted()) {
+                BinlogGetRequest req = request.get();
 
-				try {
-					binlogEvent = eventChannel.next();
-				} catch (Exception e) {
-					binlogEvent = new ServerErrorEvent("get binlog event from storage failure.", e.getCause());
-				}
+                if (req == null && results.size() > 1000) {
+                    try {
+                        Thread.sleep(5);
+                    } catch (InterruptedException e) {
+                        stopped = true;
+                    }
+                    continue;
+                }
 
-				try {
-					binlogBuffer.put(binlogEvent);
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-					stopped = true;
-				}
-			}
-		}
-	};
 
-	@Override
-	public void destroy() {
-		stopped = true;
+                Event binlogEvent;
+                try {
+                    binlogEvent = eventChannel.next();
+                } catch (Exception e) {
+                    binlogEvent = new ServerErrorEvent("get binlog event from storage failure.", e.getCause());
+                }
 
-		executorService.shutdown();
 
-		eventChannel.close();
+                if (binlogEvent != null) {
+                    results.add(binlogEvent);
+                }
 
-		binlogBuffer.clear();
-		binlogBuffer = null;
-	}
+                boolean needSend = false;
+                if (req != null && results.size() > req.getBatchSize()) {
+                    needSend = true;
+                }
 
-	@Override
-	public Event next() {
-		Event binlogEvent = null;
+                if (!needSend && req != null &&
+                        req.getTimeout() > 0 &&
+                        req.getStartTime() + req.getTimeUnit().toMillis(req.getTimeout()) < System.currentTimeMillis()) {
+                    needSend = true;
+                }
 
-		try {
-			binlogEvent = binlogBuffer.take();
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			stopped = true;
-		}
+                if (needSend) {
+                    if (req.getChannel().isActive()) {
+                        BinlogGetResponse response = new BinlogGetResponse();
+                        BinlogMessage message = new BinlogMessage();
 
-		return binlogEvent;
-	}
+                        Iterator<Event> iterator = results.iterator();
+                        while (iterator.hasNext() && message.getBinlogEvents().size() < req.getBatchSize()) {
+                            message.addBinlogEvents(iterator.next());
+                            iterator.remove();
+                        }
 
-	@Override
-	public Event next(long timeout, TimeUnit timeUnit) {
-		Event binlogEvent = null;
+                        req.getChannel().writeAndFlush(response.setBinlogMessage(message));
+                        //todo: auto ack
+                    }
 
-		try {
-			binlogEvent = binlogBuffer.poll(timeout, timeUnit);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			stopped = true;
-		}
+                    request.set(null);
+                }
+            }
+        }
+    };
 
-		return binlogEvent;
-	}
+    @Override
+    public void destroy() {
+        stopped = true;
+        executorService.shutdown();
+        eventChannel.close();
+    }
 
-	public void setTaskContainer(TaskContainer taskContainer) {
-		this.taskContainer = taskContainer;
-	}
+    @Override
+    public boolean addRequest(BinlogGetRequest request) {
+        return this.request.compareAndSet(null, request);
+    }
+
+    public void setTaskContainer(TaskContainer taskContainer) {
+        this.taskContainer = taskContainer;
+    }
 }

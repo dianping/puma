@@ -5,44 +5,51 @@ import com.dianping.puma.storage.exception.StorageException;
 
 public interface EventChannel {
 
-	/**
-	 * default value is all;
-	 * @param transaction
-	 * @return
-	 */
-	public EventChannel withDatabase(String database);
+    /**
+     * default value is all;
+     *
+     * @param transaction
+     * @return
+     */
+    public EventChannel withDatabase(String database);
 
-	/**
-	 * default value is all;
-	 * @param transaction
-	 * @return
-	 */
-	public EventChannel withTables(String... tables);
-	
-	/**
-	 * default value is true;
-	 * @param transaction
-	 * @return
-	 */
-	public EventChannel withTransaction(boolean transaction);
-	
-	/**
-	 * default value is false;
-	 * @param transaction
-	 * @return
-	 */
-	public EventChannel withDdl(boolean ddl);
-	
-	/**
-	 * default value is true;
-	 * @param transaction
-	 * @return
-	 */
-	public EventChannel withDml(boolean dml);
+    /**
+     * default value is all;
+     *
+     * @param transaction
+     * @return
+     */
+    public EventChannel withTables(String... tables);
 
-	public void open();
+    /**
+     * default value is true;
+     *
+     * @param transaction
+     * @return
+     */
+    public EventChannel withTransaction(boolean transaction);
 
-	public void close();
+    /**
+     * default value is false;
+     *
+     * @param transaction
+     * @return
+     */
+    public EventChannel withDdl(boolean ddl);
 
-	public Event next() throws StorageException;
+    /**
+     * default value is true;
+     *
+     * @param transaction
+     * @return
+     */
+    public EventChannel withDml(boolean dml);
+
+    public void open();
+
+    public void close();
+
+    public Event next() throws StorageException;
+
+    public Event next(boolean emptyReturnNull) throws StorageException;
 }

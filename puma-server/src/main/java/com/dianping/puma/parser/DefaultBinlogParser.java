@@ -62,7 +62,6 @@ public class DefaultBinlogParser implements Parser {
 
 	@Override
 	public BinlogEvent parse(ByteBuffer buf, PumaContext context) throws IOException {
-
 		BinlogHeader header = new BinlogHeader();
 		header.parse(buf, context);
 		BinlogEvent event = null;

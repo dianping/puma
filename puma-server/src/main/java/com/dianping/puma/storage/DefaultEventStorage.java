@@ -241,24 +241,28 @@ public class DefaultEventStorage implements EventStorage {
                 }
             }
 
-            long newSeq = writingBucket.getCurrentWritingSeq();
-            updateIndex(event, newL1Index, newSeq);
+            Sequence newSeq = writingBucket.getCurrentWritingSeq();
 
-            event.setSeq(newSeq);
+            event.setSeq(newSeq.longValue());
             byte[] data = codec.encode(event);
+            
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             bos.write(ByteArrayUtils.intToByteArray(data.length));
             bos.write(data);
-            writingBucket.append(bos.toByteArray());
-            bucketManager.updateLatestSequence(new Sequence(event.getSeq()));
+            byte[] byteArray = bos.toByteArray();
+            writingBucket.append(byteArray);
+            
+            Sequence sequence = new Sequence(event.getSeq(),byteArray.length);
+            updateIndex(event, newL1Index,sequence);
 
+            bucketManager.updateLatestSequence(sequence);
             SystemStatusContainer.instance.updateStorageStatus(name, event.getSeq());
         } catch (IOException e) {
             throw new StorageWriteException("Failed to write event.", e);
         }
     }
 
-    private void updateIndex(ChangedEvent event, boolean newL1Index, long newSeq) throws IOException {
+    private void updateIndex(ChangedEvent event, boolean newL1Index, Sequence sequence) throws IOException {
         BinlogIndexKey binlogKey = new BinlogIndexKey(event.getBinlogInfo().getBinlogFile(), event.getBinlogInfo()
                 .getBinlogPosition(), event.getBinlogInfo().getServerId());
 
@@ -272,7 +276,9 @@ public class DefaultEventStorage implements EventStorage {
             l2Index.setTable(event.getTable());
             l2Index.setDdl(event instanceof DdlEvent);
             l2Index.setDml(event instanceof RowChangedEvent);
-            l2Index.setSequence(new Sequence(newSeq));
+            l2Index.setSequence(new Sequence(sequence));
+            
+            l2Index.setBinlogIndexKey(binlogKey);
 
             binlogIndex.addL2Index(binlogKey, l2Index);
             lastBinlogIndexKey.set(binlogKey);

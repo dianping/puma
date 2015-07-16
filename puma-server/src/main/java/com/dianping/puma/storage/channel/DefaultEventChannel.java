@@ -33,6 +33,10 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 
 	private DataBucket readDataBucket;
 
+	private BinlogIndexKey lastBinLogIndexKey = null;
+
+	private Sequence lastReadSequence = null;
+
 	public DefaultEventChannel(BucketManager bucketManager, DataIndex<BinlogIndexKey, L2Index> indexManager,
 	      EventCodec codec, long seq, long serverId, String binlogFile, long binlogPos, long timestamp)
 	      throws StorageException {
@@ -55,8 +59,6 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 		checkClosed();
 
 		Event event = null;
-		BinlogIndexKey lastBinLogIndexKey = null;
-		Sequence lastReadSequence = null;
 
 		while (event == null) {
 			try {
@@ -80,7 +82,9 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 					readDataBucket = this.bucketManager.getReadBucket(sequence.longValue(), false);
 				}
 
-				readDataBucket.skip(sequence.getOffset() - lastReadSequence.getOffset());
+				if(sequence.getOffset() != lastReadSequence.getOffset()){
+					readDataBucket.skip(sequence.getOffset() - lastReadSequence.getOffset() - lastReadSequence.getLen());
+				}
 				byte[] data = readDataBucket.getNext();
 				event = codec.decode(data);
 

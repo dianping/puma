@@ -24,8 +24,8 @@ public class DefaultBucketManager implements BucketManager {
 
 	private volatile boolean stopped = true;
 
-	public DefaultBucketManager(DataBucketManager masterIndex, DataBucketManager slaveIndex, ArchiveStrategy archiveStrategy,
-	      CleanupStrategy cleanupStrategy) {
+	public DefaultBucketManager(DataBucketManager masterIndex, DataBucketManager slaveIndex,
+	      ArchiveStrategy archiveStrategy, CleanupStrategy cleanupStrategy) {
 		this.masterIndex = masterIndex;
 		this.slaveIndex = slaveIndex;
 		this.archiveStrategy = archiveStrategy;
@@ -64,7 +64,7 @@ public class DefaultBucketManager implements BucketManager {
 	@Override
 	public DataBucket getNextReadBucket(long seq) throws StorageClosedException, IOException {
 		checkClosed();
-		Sequence sequence = new Sequence(seq);
+		Sequence sequence = new Sequence(seq, 0);
 		sequence = sequence.clearOffset();
 
 		DataBucket bucket = slaveIndex.getNextReadBucket(sequence);
@@ -121,7 +121,7 @@ public class DefaultBucketManager implements BucketManager {
 	@Override
 	public boolean hasNexReadBucket(long seq) throws IOException, StorageClosedException {
 		checkClosed();
-		Sequence sequence = new Sequence(seq);
+		Sequence sequence = new Sequence(seq, 0);
 		sequence.clearOffset();
 		return slaveIndex.hasNexReadBucket(sequence) || masterIndex.hasNexReadBucket(sequence);
 

@@ -44,7 +44,7 @@ public class LocalFileIndexBucketTest {
 			l2Index.setTable("receipt");
 			l2Index.setDdl(false);
 			l2Index.setDml(true);
-			l2Index.setSequence(new Sequence(123123L + i));
+			l2Index.setSequence(new Sequence(123123L + i,1));
 			byte[] convertToObj = (byte[]) valueConvertor.convertToObj(l2Index);
 
 			output.write(convertToObj.length);
@@ -80,6 +80,7 @@ public class LocalFileIndexBucketTest {
 				Assert.assertEquals(false, next.isDdl());
 				Assert.assertEquals(true, next.isDml());
 				Assert.assertEquals(123123L + i, next.getSequence().longValue());
+				Assert.assertEquals(1, next.getSequence().getLen());
 			}
 		} catch (EOFException eof) {
 			Assert.assertEquals(i, 1000);

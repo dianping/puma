@@ -45,7 +45,7 @@ public class L2IndexItemConvertor implements IndexItemConvertor<L2Index> {
 		}
 
 		buf.readChar(); // skip '+'
-		
+
 		byte[] filter = new byte[8]; // 预留8位给其他filter，目前只用2位
 		buf.readBytes(filter);
 
@@ -53,7 +53,7 @@ public class L2IndexItemConvertor implements IndexItemConvertor<L2Index> {
 		l2Index.setDml(filter[1] == 1);
 
 		buf.readChar(); // skip '+'
-		Sequence sequence = new Sequence(buf.readLong());
+		Sequence sequence = new Sequence(buf.readLong(), buf.readInt());
 		l2Index.setSequence(sequence);
 
 		return l2Index;
@@ -93,7 +93,6 @@ public class L2IndexItemConvertor implements IndexItemConvertor<L2Index> {
 
 		buf.writeChar('+');
 
-		
 		byte[] filter = new byte[8];
 
 		filter[0] = (byte) (value.isDdl() ? 1 : 0);
@@ -106,6 +105,7 @@ public class L2IndexItemConvertor implements IndexItemConvertor<L2Index> {
 		buf.writeChar('+');
 
 		buf.writeLong(value.getSequence().longValue());
+		buf.writeInt(value.getSequence().getLen());
 
 		int readableBytes = buf.readableBytes();
 

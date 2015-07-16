@@ -71,7 +71,7 @@ public interface DataBucket extends LifeCycle<IOException> {
      * 
      * @return
      */
-    public long getCurrentWritingSeq();
+    public Sequence getCurrentWritingSeq();
 
     /**
      * 获得BucketFileName

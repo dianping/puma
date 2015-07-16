@@ -38,7 +38,7 @@ public class HDFSDataBucket extends AbstractDataBucket {
     }
 
     @Override
-    public long getCurrentWritingSeq() {
+    public Sequence getCurrentWritingSeq() {
         throw new UnsupportedOperationException();
     }
 

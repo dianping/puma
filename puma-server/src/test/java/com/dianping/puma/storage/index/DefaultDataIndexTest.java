@@ -62,7 +62,7 @@ public class DefaultDataIndexTest {
 		l2Index1.setTable("receipt");
 		l2Index1.setDdl(false);
 		l2Index1.setDml(true);
-		l2Index1.setSequence(new Sequence(123L));
+		l2Index1.setSequence(new Sequence(123L,0));
 
 		index.addL1Index(key1, "1");
 		index.addL2Index(key1, l2Index1);
@@ -74,7 +74,7 @@ public class DefaultDataIndexTest {
 		l2Index2.setTable("receipt");
 		l2Index2.setDdl(false);
 		l2Index2.setDml(true);
-		l2Index2.setSequence(new Sequence(123555L));
+		l2Index2.setSequence(new Sequence(123555L,0));
 
 		index.addL2Index(key2, l2Index2);
 
@@ -85,7 +85,7 @@ public class DefaultDataIndexTest {
 		l2Index3.setTable("receipt");
 		l2Index3.setDdl(false);
 		l2Index3.setDml(true);
-		l2Index3.setSequence(new Sequence(123555L));
+		l2Index3.setSequence(new Sequence(123555L,0));
 
 		index.addL1Index(key3, "2");
 		index.addL2Index(key3, l2Index3);
@@ -162,7 +162,7 @@ public class DefaultDataIndexTest {
 		l2Index2.setTable("receipt");
 		l2Index2.setDdl(false);
 		l2Index2.setDml(true);
-		l2Index2.setSequence(new Sequence(123567L));
+		l2Index2.setSequence(new Sequence(123567L,0));
 		index.addL2Index(key1, l2Index2);
 
 		L2Index convertFromObj = indexBucket.next();

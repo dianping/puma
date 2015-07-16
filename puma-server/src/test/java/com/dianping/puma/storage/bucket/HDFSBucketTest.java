@@ -55,7 +55,7 @@ public class HDFSBucketTest {
 
 	@Test
 	public void testGetStartingSequece() {
-		Sequence sequence = new Sequence(120710, 0, 0);
+		Sequence sequence = new Sequence(120710, 0, 0, 0);
 
 		try {
 			hdfsBucket = new HDFSDataBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", sequence, false);
@@ -74,7 +74,7 @@ public class HDFSBucketTest {
 	public void testAppend() {
 		boolean flag = false;
 		try {
-			Sequence sequence = new Sequence(120710, 0, 0);
+			Sequence sequence = new Sequence(120710, 0, 0,0);
 
 			hdfsBucket = new HDFSDataBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", sequence, false);
 			this.hdfsBucket.append(null);
@@ -92,7 +92,7 @@ public class HDFSBucketTest {
 	public void testGettingCurrentWritingSequence() {
 		boolean flag = false;
 		try {
-			Sequence sequence = new Sequence(120710, 0, 0);
+			Sequence sequence = new Sequence(120710, 0, 0,0);
 
 			try {
 				hdfsBucket = new HDFSDataBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", sequence, false);
@@ -108,7 +108,7 @@ public class HDFSBucketTest {
 
 	@Test
 	public void testGetNext() {
-		Sequence sequence = new Sequence(120710, 0, 0);
+		Sequence sequence = new Sequence(120710, 0, 0,0);
 		DdlEvent event = new DdlEvent();
 		event.setSql("CREATE TABLE products (proeduct VARCHAR(10))");
 		event.setDatabase("cat");
@@ -166,7 +166,7 @@ public class HDFSBucketTest {
 	public void testSeek() {
 		Sequence newSeq = null;
 
-		Sequence seq = new Sequence(120710, 0, 0);
+		Sequence seq = new Sequence(120710, 0, 0, 0);
 		DdlEvent event = new DdlEvent();
 		event.setSql("CREATE TABLE products (proeduct VARCHAR(10))");
 		event.setDatabase("cat");
@@ -230,7 +230,7 @@ public class HDFSBucketTest {
 
 	@Test
 	public void testClose() {
-		Sequence sequence = new Sequence(120710, 0, 0);
+		Sequence sequence = new Sequence(120710, 0, 0,0);
 		HDFSDataBucket bucket = null;
 		try {
 			bucket = new HDFSDataBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", sequence, false);
@@ -255,7 +255,7 @@ public class HDFSBucketTest {
 	@Test
 	public void testDoHasRemainingForWrite() {
 
-		Sequence sequence = new Sequence(120710, 0, 0);
+		Sequence sequence = new Sequence(120710, 0, 0,0);
 
 		try {
 			hdfsBucket = new HDFSDataBucket(fileSystem, "/tmp", "Puma/7-43/20120710/bucket-0", sequence, false);

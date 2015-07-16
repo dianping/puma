@@ -54,7 +54,7 @@ public class LocalBucketTest {
         zipDir = zipWork.getParentFile();
         zipDir.mkdirs();
 
-        Sequence sequence = new Sequence(120710, 0, 0);
+        Sequence sequence = new Sequence(120710, 0, 0,0);
 
         try {
             localFileBucket = new LocalFileDataBucket(work, sequence, 10, "20120710/bucket-0", false);
@@ -94,7 +94,7 @@ public class LocalBucketTest {
             Assert.assertEquals(event, s);
             Assert.assertEquals(data.length, new Sequence(localFileBucket.getCurrentWritingSeq()).getOffset());
             Assert.assertEquals(data.length + this.localFileBucket.getStartingSequece().longValue(),
-                    localFileBucket.getCurrentWritingSeq());
+                    localFileBucket.getCurrentWritingSeq().longValue());
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -206,7 +206,7 @@ public class LocalBucketTest {
 
             bucketIndex.copyFromLocal(new File(System.getProperty("java.io.tmpdir", "."), "Puma/").getAbsolutePath(), "20120710/bucket-0");
             assertequalByteArray(datas,
-                    new LocalFileDataBucket(zipWork, new Sequence(120710, 0, 0), 10000, "ffff", true).getNext());
+                    new LocalFileDataBucket(zipWork, new Sequence(120710, 0, 0,0), 10000, "ffff", true).getNext());
 
         } catch (StorageClosedException e) {
             e.printStackTrace();
@@ -345,7 +345,7 @@ public class LocalBucketTest {
 
             try {
                 bucketIndex.copyFromLocal(new File(System.getProperty("java.io.tmpdir", "."), "Puma/").getAbsolutePath(), "20120710/bucket-0");
-                LocalFileDataBucket zipBucket = new LocalFileDataBucket(zipWork, new Sequence(120710, 0, 0), 10000, "ffff", true);
+                LocalFileDataBucket zipBucket = new LocalFileDataBucket(zipWork, new Sequence(120710, 0, 0,0), 10000, "ffff", true);
                 zipBucket.skip(newSeq.getOffset());
 
                 try {
@@ -379,7 +379,7 @@ public class LocalBucketTest {
 
     @Test
     public void testClose() {
-        Sequence sequence = new Sequence(120710, 0, 0);
+        Sequence sequence = new Sequence(120710, 0, 0,0);
         LocalFileDataBucket bucket = null;
         try {
             bucket = new LocalFileDataBucket(work, sequence, 10, "20120710/bucket-0", false);

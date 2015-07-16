@@ -194,7 +194,7 @@ public abstract class AbstractDataBucketManager implements DataBucketManager {
                 return null;
             }
         } else {
-            sequence = new Sequence(seq);
+            sequence = new Sequence(seq,0);
             path = index.get().get(sequence);
             if (path == null) {
                 return null;

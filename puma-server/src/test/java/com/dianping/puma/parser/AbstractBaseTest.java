@@ -22,6 +22,7 @@ import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.biz.entity.TaskStateEntity;
 import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.constant.Status;
+import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
@@ -139,6 +140,8 @@ public abstract class AbstractBaseTest {
 
 	@Before
 	public void before() throws Exception {
+		System.out.println("java.io.tmpdir is at " + System.getProperty("java.io.tmpdir"));
+
 		initbinlogHolder();
 		eventCenter = new EventCenter();
 		eventCenter.init();
@@ -457,7 +460,7 @@ public abstract class AbstractBaseTest {
 	      throws Exception {
 		waitForSync(3000);
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
-		EventChannel channel = storage.getChannel(-1, -1, null, -1, -1);
+		EventChannel channel = storage.getChannel(SubscribeConstant.SEQ_FROM_OLDEST, -1, null, -1, -1);
 		for (int i = 0; i < n;) {
 			ChangedEvent event = (ChangedEvent) channel.next();
 			if (!needTs) {

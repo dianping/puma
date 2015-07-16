@@ -149,8 +149,8 @@ public abstract class AbstractDataBucket implements DataBucket {
     }
 
     @Override
-    public long getCurrentWritingSeq() {
-        return currentWritingSeq.get().longValue();
+    public Sequence getCurrentWritingSeq() {
+        return currentWritingSeq.get();
     }
 
     @Override

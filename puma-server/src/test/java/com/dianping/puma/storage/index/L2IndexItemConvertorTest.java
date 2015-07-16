@@ -23,7 +23,7 @@ public class L2IndexItemConvertorTest {
 		l2Index.setTable("receipt");
 		l2Index.setDdl(false);
 		l2Index.setDml(true);
-		l2Index.setSequence(new Sequence(123123L));
+		l2Index.setSequence(new Sequence(123123L,1));
 
 		byte[] bytes = convertor.convertToObj(l2Index);
 
@@ -40,5 +40,6 @@ public class L2IndexItemConvertorTest {
 		Assert.assertEquals(false, convertFromObj.isDdl());
 		Assert.assertEquals(true, convertFromObj.isDml());
 		Assert.assertEquals(123123L, convertFromObj.getSequence().longValue());
+		Assert.assertEquals(1, convertFromObj.getSequence().getLen());
 	}
 }

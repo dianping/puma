@@ -23,21 +23,27 @@ import com.dianping.puma.storage.exception.StorageClosedException;
 
 public class DefaultBucketManagerTest {
 
-	public DefaultBucketManager	bucketManager;
-	protected File				work	= null;
-	public DataBucketManager			masterIndex;
-	public DataBucketManager			masterNullIndex;
-	public DataBucketManager			slaveIndex;
-	public DataBucketManager			slaveNullIndex;
-	public ArchiveStrategy		archiveStrategy;
-	public CleanupStrategy		cleanupStrategy;
+	public DefaultBucketManager bucketManager;
+
+	protected File work = null;
+
+	public DataBucketManager masterIndex;
+
+	public DataBucketManager masterNullIndex;
+
+	public DataBucketManager slaveIndex;
+
+	public DataBucketManager slaveNullIndex;
+
+	public ArchiveStrategy archiveStrategy;
+
+	public CleanupStrategy cleanupStrategy;
 
 	@Before
 	public void before() throws Exception {
 
 		for (int i = 0; i < 2; i++) {
-			work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/slave/20120710/bucket-"
-					+ Integer.toString(i));
+			work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/slave/20120710/bucket-" + Integer.toString(i));
 			work.getParentFile().mkdirs();
 			if (work.createNewFile()) {
 				System.out.println("create a file: " + work.getAbsolutePath());
@@ -47,7 +53,7 @@ public class DefaultBucketManagerTest {
 
 		for (int i = 0; i < 2; i++) {
 			work = new File(System.getProperty("java.io.tmpdir", "."), "Puma/master/20120711/bucket-"
-					+ Integer.toString(i));
+			      + Integer.toString(i));
 			work.getParentFile().mkdirs();
 			if (work.createNewFile()) {
 				System.out.println("create a file: " + work.getAbsolutePath());
@@ -70,7 +76,8 @@ public class DefaultBucketManagerTest {
 		masterIndex.add(paths);
 
 		masterNullIndex = new LocalFileDataBucketManager();
-		((AbstractDataBucketManager) masterNullIndex).setBaseDir(System.getProperty("java.io.tmpdir", ".") + "/Puma/null");
+		((AbstractDataBucketManager) masterNullIndex)
+		      .setBaseDir(System.getProperty("java.io.tmpdir", ".") + "/Puma/null");
 		((AbstractDataBucketManager) masterNullIndex).setBucketFilePrefix("bucket-");
 		((AbstractDataBucketManager) masterNullIndex).setMaxBucketLengthMB(500);
 		masterNullIndex.start();
@@ -104,13 +111,13 @@ public class DefaultBucketManagerTest {
 		Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
 		bucket.stop();
 
-		Sequence sequence = new Sequence(120710, 0, 0);
+		Sequence sequence = new Sequence(120710, 0, 0, 0);
 		bucket = bucketManager.getReadBucket(sequence.longValue(), true);
 		Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
 		Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
 		bucket.stop();
 
-		sequence = new Sequence(120711, 1, 0);
+		sequence = new Sequence(120711, 1, 0, 0);
 		bucket = bucketManager.getReadBucket(sequence.longValue(), true);
 		Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
 		Assert.assertEquals(1, bucket.getStartingSequece().getNumber());
@@ -133,13 +140,13 @@ public class DefaultBucketManagerTest {
 		Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
 		bucket.stop();
 
-		sequence = new Sequence(120710, 0, 0);
+		sequence = new Sequence(120710, 0, 0, 0);
 		bucket = bucketManager.getReadBucket(sequence.longValue(), true);
 		Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
 		Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
 		bucket.stop();
 
-		sequence = new Sequence(120711, 1, 0);
+		sequence = new Sequence(120711, 1, 0, 0);
 
 		try {
 			bucket = bucketManager.getReadBucket(sequence.longValue(), true);
@@ -164,7 +171,7 @@ public class DefaultBucketManagerTest {
 		Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
 		bucket.stop();
 
-		sequence = new Sequence(120710, 0, 0);
+		sequence = new Sequence(120710, 0, 0, 0);
 		try {
 			bucket = bucketManager.getReadBucket(sequence.longValue(), true);
 			Assert.fail();
@@ -172,7 +179,7 @@ public class DefaultBucketManagerTest {
 
 		}
 
-		sequence = new Sequence(120711, 1, 0);
+		sequence = new Sequence(120711, 1, 0, 0);
 		bucket = bucketManager.getReadBucket(sequence.longValue(), true);
 		Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
 		Assert.assertEquals(1, bucket.getStartingSequece().getNumber());
@@ -201,13 +208,13 @@ public class DefaultBucketManagerTest {
 		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, archiveStrategy, cleanupStrategy);
 		bucketManager.start();
 
-		Sequence sequence = new Sequence(120710, 0, 0);
+		Sequence sequence = new Sequence(120710, 0, 0, 0);
 		DataBucket bucket = bucketManager.getNextReadBucket(sequence.longValue());
 		Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
 		Assert.assertEquals(1, bucket.getStartingSequece().getNumber());
 		bucket.stop();
 
-		sequence = new Sequence(120711, 0, 0);
+		sequence = new Sequence(120711, 0, 0, 0);
 		bucket = bucketManager.getNextReadBucket(sequence.longValue());
 		Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
 		Assert.assertEquals(1, bucket.getStartingSequece().getNumber());
@@ -226,13 +233,13 @@ public class DefaultBucketManagerTest {
 		bucket = null;
 
 		bucketManager.start();
-		sequence = new Sequence(120710, 0, 0);
+		sequence = new Sequence(120710, 0, 0, 0);
 		bucket = bucketManager.getNextReadBucket(sequence.longValue());
 		Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
 		Assert.assertEquals(1, bucket.getStartingSequece().getNumber());
 		bucket.stop();
 
-		sequence = new Sequence(120711, 1, 0);
+		sequence = new Sequence(120711, 1, 0, 0);
 
 		try {
 			bucket = bucketManager.getNextReadBucket(sequence.longValue());
@@ -251,14 +258,14 @@ public class DefaultBucketManagerTest {
 		}
 
 		bucketManager = new DefaultBucketManager(masterIndex, slaveNullIndex, archiveStrategy, cleanupStrategy);
-		sequence = new Sequence(120710, 0, 0);
+		sequence = new Sequence(120710, 0, 0, 0);
 		bucketManager.start();
 		bucket = bucketManager.getNextReadBucket(sequence.longValue());
 		Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
 		Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
 		bucket.stop();
 
-		sequence = new Sequence(120711, 0, 0);
+		sequence = new Sequence(120711, 0, 0, 0);
 		bucket = bucketManager.getNextReadBucket(sequence.longValue());
 		Assert.assertEquals(120711, bucket.getStartingSequece().getCreationDate());
 		Assert.assertEquals(1, bucket.getStartingSequece().getNumber());
@@ -295,9 +302,9 @@ public class DefaultBucketManagerTest {
 		DataBucket bucket = bucketManager.getNextWriteBucket();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
 		Assert.assertEquals(new Sequence(Integer.valueOf(sdf.format(new Date())), 0).getCreationDate(), bucket
-				.getStartingSequece().getCreationDate());
+		      .getStartingSequece().getCreationDate());
 		Assert.assertEquals(new Sequence(Integer.valueOf(sdf.format(new Date())), 0).getNumber(), bucket
-				.getStartingSequece().getNumber());
+		      .getStartingSequece().getNumber());
 		Assert.assertEquals(3, masterIndex.size());
 		Assert.assertEquals(2, slaveIndex.size());
 		bucket.stop();
@@ -314,10 +321,10 @@ public class DefaultBucketManagerTest {
 		bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, archiveStrategy, cleanupStrategy);
 		bucketManager.start();
 
-		Sequence sequence = new Sequence(120710, 0, 0);
+		Sequence sequence = new Sequence(120710, 0, 0, 0);
 		Assert.assertTrue(bucketManager.hasNexReadBucket(sequence.longValue()));
 
-		sequence = new Sequence(120711, 0, 0);
+		sequence = new Sequence(120711, 0, 0, 0);
 		Assert.assertTrue(bucketManager.hasNexReadBucket(sequence.longValue()));
 
 		sequence = new Sequence(120711, 1);
@@ -326,10 +333,10 @@ public class DefaultBucketManagerTest {
 
 		bucketManager = new DefaultBucketManager(masterNullIndex, slaveIndex, archiveStrategy, cleanupStrategy);
 		bucketManager.start();
-		sequence = new Sequence(120710, 0, 0);
+		sequence = new Sequence(120710, 0, 0, 0);
 		Assert.assertTrue(bucketManager.hasNexReadBucket(sequence.longValue()));
 
-		sequence = new Sequence(120711, 1, 0);
+		sequence = new Sequence(120711, 1, 0, 0);
 
 		Assert.assertTrue(!bucketManager.hasNexReadBucket(sequence.longValue()));
 
@@ -339,7 +346,7 @@ public class DefaultBucketManagerTest {
 
 		bucketManager = new DefaultBucketManager(masterIndex, slaveNullIndex, archiveStrategy, cleanupStrategy);
 		bucketManager.start();
-		sequence = new Sequence(120711, 0, 0);
+		sequence = new Sequence(120711, 0, 0, 0);
 		Assert.assertTrue(bucketManager.hasNexReadBucket(sequence.longValue()));
 
 		sequence = new Sequence(120711, 1);

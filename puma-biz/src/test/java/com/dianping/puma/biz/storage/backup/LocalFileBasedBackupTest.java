@@ -1,18 +1,17 @@
 package com.dianping.puma.biz.storage.backup;
 
-import com.dianping.puma.biz.storage.backup.strategy.AlwaysDeleteStrategy;
-import com.dianping.puma.biz.storage.backup.strategy.DeleteStrategy;
-import com.dianping.puma.core.exception.BackupException;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static org.junit.Assert.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.dianping.puma.biz.storage.backup.strategy.AlwaysDeleteStrategy;
+import com.dianping.puma.biz.storage.backup.strategy.DeleteStrategy;
+import com.dianping.puma.core.exception.BackupException;
 
 /**
  * Dozer @ 7/16/15

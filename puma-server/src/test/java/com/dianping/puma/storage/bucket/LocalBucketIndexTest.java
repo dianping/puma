@@ -53,7 +53,7 @@ public class LocalBucketIndexTest {
 			e1.printStackTrace();
 		}
 
-		localBucketIndex.setBaseDir(System.getProperty("java.io.tmpdir", ".") + "/Puma");
+		localBucketIndex.setBaseDir(System.getProperty("java.io.tmpdir", ".") + "Puma");
 		localBucketIndex.setBucketFilePrefix("bucket-");
 		localBucketIndex.setMaxBucketLengthMB(500);
 
@@ -582,7 +582,7 @@ public class LocalBucketIndexTest {
 		System.out.println("***********************testGetBaseDir*************************");
 		System.out.println("**************************************************************");
 		this.localBucketIndex.start();
-		Assert.assertEquals((System.getProperty("java.io.tmpdir", ".").toString() + "/Puma"),
+		Assert.assertEquals((System.getProperty("java.io.tmpdir", ".").toString() + "Puma"),
 				this.localBucketIndex.getBaseDir());
 		System.out.println("*************************************************************");
 		System.out.println("****************************End******************************");

@@ -1,4 +1,4 @@
-package com.dianping.puma.parser;
+package com.dianping.puma;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;

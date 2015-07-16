@@ -23,7 +23,6 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 /**
- * TODO Comment of SequenceTest
  * 
  * @author Leo Liang
  * 

@@ -2,7 +2,6 @@ package com.dianping.puma.server.checker;
 
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.biz.service.PumaTaskService;
-import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.server.server.TaskServerManager;
 import com.google.common.collect.MapDifference;

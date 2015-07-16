@@ -36,7 +36,6 @@ import com.dianping.puma.storage.index.L2Index;
 import com.dianping.puma.storage.index.L2IndexItemConvertor;
 
 /**
- * TODO Comment of DefaultCleanupStrategyTest
  * 
  * @author Leo Liang
  * 
@@ -75,7 +74,12 @@ public class DefaultCleanupStrategyTest {
             file.getParentFile().mkdirs();
             file.createNewFile();
             binlogIndex.addL1Index(new BinlogIndexKey("dd", i, i), sdf.format(cal.getTime()) + "-bucket-0");
-            binlogIndex.addL2Index(new BinlogIndexKey("dd", i, i), new L2Index());
+            BinlogIndexKey binlogIndexKey = new BinlogIndexKey("dd", i, i);
+            L2Index l2Index = new L2Index();
+            l2Index.setBinlogIndexKey(binlogIndexKey);
+            l2Index.setSequence(new Sequence(123L, 123));
+            
+            binlogIndex.addL2Index(binlogIndexKey,l2Index);
         }
 
         index.start();

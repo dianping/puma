@@ -10,12 +10,11 @@ public class DbTbEventFilterTest {
 	public DbTbEventFilter eventFilter = new DbTbEventFilter();
 
 	@Test
-	public void testCheckEvent()
-	{
-		String[] dts={"cat.table1", "cat.table2", "dog.*", "puma.ab* "};
+	public void testCheckEvent() {
+		String[] dts = { "cat.table1", "cat.table2", "dog.*", "puma.ab* " };
 		this.eventFilter.init(dts);
 
-		RowChangedEvent event=new RowChangedEvent();
+		RowChangedEvent event = new RowChangedEvent();
 		event.setDatabase("cat");
 		event.setTable("table1");
 		Assert.assertTrue(this.eventFilter.checkEvent(event));

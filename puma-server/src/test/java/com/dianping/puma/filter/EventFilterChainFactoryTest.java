@@ -48,15 +48,11 @@ public class EventFilterChainFactoryTest {
 		Assert.assertEquals(2, tbPrefixList.size());
 		Assert.assertEquals("dog.", tbPrefixList.get(0));
 		Assert.assertEquals("puma.ab", tbPrefixList.get(1));
-		
+
 		Assert.assertTrue(filters.get(2) instanceof DmlDdlEventFilter);
-		DmlDdlEventFilter ddeventfilter = (DmlDdlEventFilter)filters.get(2);
-		int operation = (Integer)getFieldValue(ddeventfilter, "operationType");
+		DmlDdlEventFilter ddeventfilter = (DmlDdlEventFilter) filters.get(2);
+		int operation = (Integer) getFieldValue(ddeventfilter, "operationType");
 		Assert.assertEquals(3, operation);
-		
-		
-		
-		
 
 	}
 

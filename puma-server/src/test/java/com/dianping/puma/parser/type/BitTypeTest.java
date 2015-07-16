@@ -11,6 +11,7 @@ import org.junit.Test;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
+import com.dianping.puma.parser.AbstractBaseTest;
 
 /***
  * bit type test

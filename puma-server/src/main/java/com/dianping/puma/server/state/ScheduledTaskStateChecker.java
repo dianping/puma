@@ -93,6 +93,10 @@ public class ScheduledTaskStateChecker implements TaskStateChecker {
 		case STOP:
 			taskContainer.stop(taskName);
 			break;
+		case PAUSE:
+			break;
+		default:
+			break;
 		}
 	}
 

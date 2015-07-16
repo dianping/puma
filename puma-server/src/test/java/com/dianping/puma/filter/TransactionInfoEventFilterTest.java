@@ -6,7 +6,6 @@ import com.dianping.puma.core.event.ChangedEvent;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 

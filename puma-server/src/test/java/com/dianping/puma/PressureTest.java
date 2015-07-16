@@ -44,52 +44,52 @@ public class PressureTest {
 		}
 	}
 
-	private void initSQL() throws SQLException {
-		try {
-			conn = dataSource.getConnection();
+//	private void initSQL() throws SQLException {
+//		try {
+//			conn = dataSource.getConnection();
+//
+//			// Drop database.
+//			//String dropSQL = "DROP SCHEMA IF EXISTS Pressure;";
+//			//queryRunner.update(dropSQL);
+//
+//			// Create database.
+//			String createSQL = "CREATE SCHEMA IF NOT EXISTS Pressure;";
+//			queryRunner.update(createSQL);
+//
+//			// Create tables.
+//			String createTableSQL0 = "CREATE TABLE IF NOT EXISTS `Pressure`.`user` (\n"
+//					+ "  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,\n"
+//					+ "  `name` varchar(20) DEFAULT NULL,\n"
+//					+ "  PRIMARY KEY (`id`)\n"
+//					+ ") ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;";
+//
+//			queryRunner.update(createTableSQL0);
+//
+//			String createTableSQL1 = "CREATE TABLE IF NOT EXISTS `Pressure`.`business` (\n"
+//					+ "  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,\n"
+//					+ "  `name` varchar(20) DEFAULT NULL,\n"
+//					+ "  PRIMARY KEY (`id`)\n"
+//					+ ") ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;";
+//			queryRunner.update(createTableSQL1);
+//
+//		} finally {
+//			DbUtils.close(conn);
+//		}
+//	}
 
-			// Drop database.
-			//String dropSQL = "DROP SCHEMA IF EXISTS Pressure;";
-			//queryRunner.update(dropSQL);
-
-			// Create database.
-			String createSQL = "CREATE SCHEMA IF NOT EXISTS Pressure;";
-			queryRunner.update(createSQL);
-
-			// Create tables.
-			String createTableSQL0 = "CREATE TABLE IF NOT EXISTS `Pressure`.`user` (\n"
-					+ "  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,\n"
-					+ "  `name` varchar(20) DEFAULT NULL,\n"
-					+ "  PRIMARY KEY (`id`)\n"
-					+ ") ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;";
-
-			queryRunner.update(createTableSQL0);
-
-			String createTableSQL1 = "CREATE TABLE IF NOT EXISTS `Pressure`.`business` (\n"
-					+ "  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,\n"
-					+ "  `name` varchar(20) DEFAULT NULL,\n"
-					+ "  PRIMARY KEY (`id`)\n"
-					+ ") ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;";
-			queryRunner.update(createTableSQL1);
-
-		} finally {
-			DbUtils.close(conn);
-		}
-	}
-
-	private void insertSQL() throws SQLException {
-		try {
-			conn = dataSource.getConnection();
-			String insertSQL0 = "INSERT INTO Pressure.user (name) VALUES (?)";
-
-			for (int i = 0; i != 1000000; ++i) {
-				queryRunner.update(insertSQL0, "aaa");
-			}
-
-		} finally {
-			DbUtils.close(conn);
-		}
-	}
+//	private void insertSQL() throws SQLException {
+//		try {
+//			conn = dataSource.getConnection();
+//			String insertSQL0 = "INSERT INTO Pressure.user (name) VALUES (?)";
+//
+//			for (int i = 0; i != 1000000; ++i) {
+//				queryRunner.update(insertSQL0, "aaa");
+//			}
+//
+//		} finally {
+//			DbUtils.close(conn);
+//		}
+//	}
 
 	private void updateSQL() throws SQLException {
 		try {

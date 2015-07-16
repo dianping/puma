@@ -164,7 +164,6 @@ public class HDFSBucketTest {
 
 	@Test
 	public void testSeek() {
-		boolean thrown = false;
 		Sequence newSeq = null;
 
 		Sequence seq = new Sequence(120710, 0, 0);

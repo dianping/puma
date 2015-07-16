@@ -30,6 +30,7 @@ import org.apache.log4j.Logger;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
+import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.meta.TableMetaInfo;
 import com.dianping.puma.filter.TableMetaRefreshFilter;
@@ -45,13 +46,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 
 	private AtomicReference<Map<String, TableMetaInfo>> tableMetaInfoCache = new AtomicReference<Map<String, TableMetaInfo>>();
 
-	private int metaDBPort = 3306;
-
-	private String metaDBHost;
-
-	private String metaDBUsername;
-
-	private String metaDBPassword;
+	private SrcDbEntity srcDbEntity;
 
 	private MysqlDataSource metaDs;
 
@@ -81,44 +76,105 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 
 	private static final String INFIX_DOT = ",";
 
-	public int getMetaDBPort() {
-		return metaDBPort;
+	protected String convertTypes(String str) {
+		return str;
 	}
-
-	public void setMetaDBPort(int metaDBPort) {
-		this.metaDBPort = metaDBPort;
-	}
-
-	public String getMetaDBHost() {
-		return metaDBHost;
-	}
-
-	public void setMetaDBHost(String metaDBHost) {
-		this.metaDBHost = metaDBHost;
-	}
-
-	public String getMetaDBUsername() {
-		return metaDBUsername;
-	}
-
-	public void setMetaDBUsername(String metaDBUsername) {
-		this.metaDBUsername = metaDBUsername;
-	}
-
-	public String getMetaDBPassword() {
-		return metaDBPassword;
-	}
-
-	public void setMetaDBPassword(String metaDBPassword) {
-		this.metaDBPassword = metaDBPassword;
+	
+	/**
+	 * @param newTableMeta
+	 * @param rs
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	protected void fillTableMetaCache(ResultSet rs) throws SQLException, IOException {
+		Map<String, TableMetaInfo> newTableMeta = new HashMap<String, TableMetaInfo>();
+		while (rs.next()) {
+			String db = rs.getString("TABLE_SCHEMA");
+			String tb = rs.getString("TABLE_NAME");
+			String columnName = rs.getString("COLUMN_NAME");
+			int colPosition = rs.getInt("ORDINAL_POSITION");
+			String type = rs.getString("DATA_TYPE");
+			String key = rs.getString("COLUMN_KEY");
+			String typeStr = rs.getString("COLUMN_TYPE");
+			boolean signed = true;
+			if (typeStr != null && typeStr.indexOf(" unsigned") != -1) {
+				signed = false;
+			}
+			TableMetaInfo tmi = newTableMeta.get(db + "." + tb);
+			if (tmi == null) {
+				TableMetaInfo newTmi = new TableMetaInfo();
+				newTmi.setDatabase(db);
+				newTmi.setTable(tb);
+				newTmi.setColumns(new HashMap<Integer, String>());
+				newTmi.setKeys(new ArrayList<String>());
+				newTmi.setTypes(new HashMap<String, String>());
+				newTmi.setSignedInfos(new HashMap<Integer, Boolean>());
+				newTableMeta.put(db + "." + tb, newTmi);
+				log.info("table meta info :" + db + "." + tb);
+				tmi = newTmi;
+			}
+			tmi.getColumns().put(colPosition, columnName);
+			tmi.getSignedInfos().put(colPosition, signed);
+			tmi.getTypes().put(columnName, convertTypes(type));
+			if ("PRI".equals(key)) {
+				tmi.getKeys().add(columnName);
+			}
+		}
+		tableMetaInfoCache.set(newTableMeta);
+		if (log.isDebugEnabled()) {
+			log.debug("tables meta info:" + newTableMeta);
+		}
 	}
 
 	public MysqlDataSource getMetaDs() {
 		return metaDs;
 	}
 
-	public void setMetaDs(MysqlDataSource metaDs) {
-		this.metaDs = metaDs;
+	private String getSqlQuery(Map<String, List<String>> acceptedDataTables) {
+		StringBuilder sqlStr = new StringBuilder();
+		sqlStr.append(QUERY_SQL);
+		if (acceptedDataTables == null || acceptedDataTables.isEmpty()) {
+			return QUERY_SQL;
+		}
+		sqlStr.append(WHERE_SQL);
+		for (Map.Entry<String, List<String>> database : acceptedDataTables.entrySet()) {
+			if (StringUtils.isNotBlank(database.getKey().trim())) {
+				sqlStr.append(PREFIX_BRACKET + TABLE_SCHEMA + EQUAL_SQL + INFIX_REPLACE);
+				if (database.getValue() != null && database.getValue().size() > 0) {
+					sqlStr.append(AND_SQL + TABLE_NAME + IN_SQL + PREFIX_BRACKET);
+					for (@SuppressWarnings("unused")
+					String table : database.getValue()) {
+						sqlStr.append(INFIX_REPLACE + INFIX_DOT);
+					}
+					sqlStr = sqlStr.delete(sqlStr.length() - INFIX_DOT.length(), sqlStr.length());
+					sqlStr.append(SUFIX_BRACKET);
+				}
+				sqlStr.append(SUFIX_BRACKET + OR_SQL);
+			}
+		}
+		sqlStr = sqlStr.delete(sqlStr.length() - OR_SQL.length(), sqlStr.length());
+		return sqlStr.toString();
+	}
+
+	@Override
+	public TableMetaInfo getTableMetaInfo(String database, String table) {
+		return tableMetaInfoCache.get().get(database + "." + table);
+	}
+
+	public TableMetaRefreshFilter getTableMetaRefreshFilter() {
+		return tableMetaRefreshFilter;
+	}
+
+	/**
+	 *
+	 */
+	protected void initDsIfNeeded() {
+		if (metaDs == null) {
+			metaDs = new MysqlDataSource();
+			metaDs.setUrl("jdbc:mysql://" + srcDbEntity.getHost() + ":" + srcDbEntity.getPort());
+			metaDs.setUser(srcDbEntity.getUsername());
+			metaDs.setPassword(srcDbEntity.getPassword());
+		}
 	}
 
 	/*
@@ -183,30 +239,12 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 		}
 	}
 
-	private String getSqlQuery(Map<String, List<String>> acceptedDataTables) {
-		StringBuilder sqlStr = new StringBuilder();
-		sqlStr.append(QUERY_SQL);
-		if (acceptedDataTables == null || acceptedDataTables.isEmpty()) {
-			return QUERY_SQL;
-		}
-		sqlStr.append(WHERE_SQL);
-		for (Map.Entry<String, List<String>> database : acceptedDataTables.entrySet()) {
-			if (StringUtils.isNotBlank(database.getKey().trim())) {
-				sqlStr.append(PREFIX_BRACKET + TABLE_SCHEMA + EQUAL_SQL + INFIX_REPLACE);
-				if (database.getValue() != null && database.getValue().size() > 0) {
-					sqlStr.append(AND_SQL + TABLE_NAME + IN_SQL + PREFIX_BRACKET);
-					for (@SuppressWarnings("unused")
-					String table : database.getValue()) {
-						sqlStr.append(INFIX_REPLACE + INFIX_DOT);
-					}
-					sqlStr = sqlStr.delete(sqlStr.length() - INFIX_DOT.length(), sqlStr.length());
-					sqlStr.append(SUFIX_BRACKET);
-				}
-				sqlStr.append(SUFIX_BRACKET + OR_SQL);
-			}
-		}
-		sqlStr = sqlStr.delete(sqlStr.length() - OR_SQL.length(), sqlStr.length());
-		return sqlStr.toString();
+	public void setMetaDs(MysqlDataSource metaDs) {
+		this.metaDs = metaDs;
+	}
+
+	public void setSrcDbEntity(SrcDbEntity srcDbEntity){
+		this.srcDbEntity = srcDbEntity;
 	}
 
 	private void setStatementParams(PreparedStatement ps, Map<String, List<String>> acceptedDataTables)
@@ -225,77 +263,6 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 				}
 			}
 		}
-	}
-
-	/**
-	 * @param newTableMeta
-	 * @param rs
-	 * @throws SQLException
-	 * @throws IOException
-	 */
-	protected void fillTableMetaCache(ResultSet rs) throws SQLException, IOException {
-		Map<String, TableMetaInfo> newTableMeta = new HashMap<String, TableMetaInfo>();
-		while (rs.next()) {
-			String db = rs.getString("TABLE_SCHEMA");
-			String tb = rs.getString("TABLE_NAME");
-			String columnName = rs.getString("COLUMN_NAME");
-			int colPosition = rs.getInt("ORDINAL_POSITION");
-			String type = rs.getString("DATA_TYPE");
-			String key = rs.getString("COLUMN_KEY");
-			String typeStr = rs.getString("COLUMN_TYPE");
-			boolean signed = true;
-			if (typeStr != null && typeStr.indexOf(" unsigned") != -1) {
-				signed = false;
-			}
-			TableMetaInfo tmi = newTableMeta.get(db + "." + tb);
-			if (tmi == null) {
-				TableMetaInfo newTmi = new TableMetaInfo();
-				newTmi.setDatabase(db);
-				newTmi.setTable(tb);
-				newTmi.setColumns(new HashMap<Integer, String>());
-				newTmi.setKeys(new ArrayList<String>());
-				newTmi.setTypes(new HashMap<String, String>());
-				newTmi.setSignedInfos(new HashMap<Integer, Boolean>());
-				newTableMeta.put(db + "." + tb, newTmi);
-				log.info("table meta info :" + db + "." + tb);
-				tmi = newTmi;
-			}
-			tmi.getColumns().put(colPosition, columnName);
-			tmi.getSignedInfos().put(colPosition, signed);
-			tmi.getTypes().put(columnName, convertTypes(type));
-			if ("PRI".equals(key)) {
-				tmi.getKeys().add(columnName);
-			}
-		}
-		tableMetaInfoCache.set(newTableMeta);
-		if (log.isDebugEnabled()) {
-			log.debug("tables meta info:" + newTableMeta);
-		}
-	}
-
-	/**
-	 *
-	 */
-	protected void initDsIfNeeded() {
-		if (metaDs == null) {
-			metaDs = new MysqlDataSource();
-			metaDs.setUrl("jdbc:mysql://" + metaDBHost + ":" + metaDBPort);
-			metaDs.setUser(metaDBUsername);
-			metaDs.setPassword(metaDBPassword);
-		}
-	}
-
-	protected String convertTypes(String str) {
-		return str;
-	}
-
-	@Override
-	public TableMetaInfo getTableMetaInfo(String database, String table) {
-		return tableMetaInfoCache.get().get(database + "." + table);
-	}
-
-	public TableMetaRefreshFilter getTableMetaRefreshFilter() {
-		return tableMetaRefreshFilter;
 	}
 
 	public void setTableMetaRefreshFilter(TableMetaRefreshFilter tableMetaRefreshFilter) {

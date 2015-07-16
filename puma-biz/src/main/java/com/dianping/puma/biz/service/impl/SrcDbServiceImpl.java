@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service("srcDBInstanceService")
+@Service("srcDBService")
 public class SrcDbServiceImpl implements SrcDbService {
     @Autowired
     SrcDbDao srcDbDao;

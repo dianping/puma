@@ -5,5 +5,5 @@ import com.dianping.puma.server.TaskExecutor;
 
 public interface TaskBuilder {
 
-	TaskExecutor build(PumaTaskEntity task);
+	TaskExecutor build(PumaTaskEntity task) throws Exception;
 }

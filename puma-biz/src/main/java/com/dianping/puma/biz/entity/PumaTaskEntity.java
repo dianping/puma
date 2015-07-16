@@ -1,7 +1,6 @@
 package com.dianping.puma.biz.entity;
 
 import com.dianping.puma.core.constant.ActionController;
-import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.TableSet;
 
@@ -10,93 +9,103 @@ import java.util.List;
 
 public class PumaTaskEntity {
 
-    private int id;
+	private int id;
 
-    private String name;
+	private String name;
 
-    private BinlogInfo binlogInfo;
+	private BinlogInfo binlogInfo;
 
-    private int preservedDay;
+	private int preservedDay;
 
-    private TableSet tableSet;
+	private TableSet tableSet;
 
-    private List<SrcDbEntity> srcDbs;
+	private SrcDbEntity perferSrcDb;
 
-    private List<PumaServerEntity> pumaServers;
+	private List<SrcDbEntity> backUpSrcDbs;
 
-    private Date UpdateTime;
+	private List<PumaServerEntity> pumaServers;
 
-    private ActionController actionController;
+	private Date UpdateTime;
 
-    public int getId() {
-        return id;
-    }
+	private ActionController actionController;
 
-    public void setId(int id) {
-        this.id = id;
-    }
+	public int getId() {
+		return id;
+	}
 
-    public int getPreservedDay() {
-        return preservedDay;
-    }
+	public void setId(int id) {
+		this.id = id;
+	}
 
-    public void setPreservedDay(int preservedDay) {
-        this.preservedDay = preservedDay;
-    }
+	public int getPreservedDay() {
+		return preservedDay;
+	}
 
-    public BinlogInfo getBinlogInfo() {
-        return binlogInfo;
-    }
+	public void setPreservedDay(int preservedDay) {
+		this.preservedDay = preservedDay;
+	}
 
-    public void setBinlogInfo(BinlogInfo binlogInfo) {
-        this.binlogInfo = binlogInfo;
-    }
+	public BinlogInfo getBinlogInfo() {
+		return binlogInfo;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public void setBinlogInfo(BinlogInfo binlogInfo) {
+		this.binlogInfo = binlogInfo;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public TableSet getTableSet() {
-        return tableSet;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public void setSrcDbs(List<SrcDbEntity> srcDbs) {
-        this.srcDbs = srcDbs;
-    }
+	public TableSet getTableSet() {
+		return tableSet;
+	}
 
-    public void setPumaServers(List<PumaServerEntity> pumaServers) {
-        this.pumaServers = pumaServers;
-    }
+	public SrcDbEntity getPerferSrcDb() {
+		return perferSrcDb;
+	}
 
-    public void setTableSet(TableSet tableSet) {
-        this.tableSet = tableSet;
-    }
+	public void setPerferSrcDb(SrcDbEntity perferSrcDb) {
+		this.perferSrcDb = perferSrcDb;
+	}
 
-    public List<SrcDbEntity> getSrcdbs() {
-        return srcDbs;
-    }
+	public List<SrcDbEntity> getBackUpSrcDbs() {
+		return backUpSrcDbs;
+	}
 
-    public List<PumaServerEntity> getPumaServers() {
-        return pumaServers;
-    }
+	public void setBackUpSrcDbs(List<SrcDbEntity> backUpSrcDbs) {
+		this.backUpSrcDbs = backUpSrcDbs;
+	}
 
-    public Date getUpdateTime() {
-        return UpdateTime;
-    }
+	public void setPumaServers(List<PumaServerEntity> pumaServers) {
+		this.pumaServers = pumaServers;
+	}
 
-    public void setUpdateTime(Date updateTime) {
-        UpdateTime = updateTime;
-    }
+	public void setTableSet(TableSet tableSet) {
+		this.tableSet = tableSet;
+	}
 
-    public ActionController getActionController() {
-        return actionController;
-    }
+	public List<PumaServerEntity> getPumaServers() {
+		return pumaServers;
+	}
 
-    public void setActionController(ActionController actionController) {
-        this.actionController = actionController;
-    }
+	public Date getUpdateTime() {
+		return UpdateTime;
+	}
+
+	public void setUpdateTime(Date updateTime) {
+		UpdateTime = updateTime;
+	}
+
+	public ActionController getActionController() {
+		return actionController;
+	}
+
+	public void setActionController(ActionController actionController) {
+		this.actionController = actionController;
+	}
 }

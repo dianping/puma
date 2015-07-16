@@ -63,7 +63,7 @@ public class PumaTaskServiceImpl implements PumaTaskService {
     protected SrcDbEntity loadPreferSrcDb(int id) {
         List<PumaTaskDbEntity> pumaTaskDbs = pumaTaskDbDao.findByTaskId(id);
         for (PumaTaskDbEntity pumaTaskDb: pumaTaskDbs) {
-            if (pumaTaskDb.isActive()) {
+            if (pumaTaskDb.isPreferred()) {
                 return srcDbDao.findById(pumaTaskDb.getId());
             }
         }

@@ -4,26 +4,26 @@
 
 <mapper namespace="com.dianping.puma.biz.dao.PumaTaskDbDao">
 
-    <select id="findByTaskId" parameterType="map" resultType="PumaTaskDbEntity">
-        SELECT * FROM PumaTaskDb where taskId = #{taskId}
+    <select id="findByTaskId" resultType="PumaTaskDbEntity">
+        SELECT * FROM PumaTaskDb WHERE taskId = #{taskId}
     </select>
 
     <delete id="deleteByTaskId">
-        delete from PumaTaskDb
-        where
-        taskId = #{taskId}
+        DELETE FROM PumaTaskDb WHERE taskId = #{taskId}
     </delete>
 
     <insert id="insert" parameterType="PumaTaskDbEntity" useGeneratedKeys="true" keyProperty="id">
-        insert into PumaTaskDb
+        INSERT INTO PumaTaskDb
         (
-        TaskId,
-        DbId
+        taskId,
+        dbId,
+        preferred
         )
-        values
+        VALUES
         (
         #{taskId},
-        #{dbId}
+        #{dbId},
+        #{preferred}
         )
     </insert>
 </mapper>

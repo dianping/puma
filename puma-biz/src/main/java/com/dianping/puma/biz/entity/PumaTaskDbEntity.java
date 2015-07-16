@@ -8,7 +8,7 @@ public class PumaTaskDbEntity {
 
 	private int dbId;
 
-	private boolean active;
+	private boolean preferred;
 
 	public int getId() {
 		return id;
@@ -34,11 +34,11 @@ public class PumaTaskDbEntity {
 		this.dbId = dbId;
 	}
 
-	public boolean isActive() {
-		return active;
+	public boolean isPreferred() {
+		return preferred;
 	}
 
-	public void setActive(boolean active) {
-		this.active = active;
+	public void setPreferred(boolean preferred) {
+		this.preferred = preferred;
 	}
 }

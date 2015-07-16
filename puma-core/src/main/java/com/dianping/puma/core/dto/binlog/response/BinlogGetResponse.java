@@ -6,8 +6,9 @@ public class BinlogGetResponse {
 
     private BinlogMessage binlogMessage;
 
-    public void setBinlogMessage(BinlogMessage binlogMessage) {
+    public BinlogGetResponse setBinlogMessage(BinlogMessage binlogMessage) {
         this.binlogMessage = binlogMessage;
+        return this;
     }
 
     public BinlogMessage getBinlogMessage() {

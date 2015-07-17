@@ -48,14 +48,14 @@ import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
-import com.dianping.puma.server.DefaultTaskExecutor;
-import com.dianping.puma.server.TaskExecutor;
 import com.dianping.puma.storage.DefaultArchiveStrategy;
 import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
 import com.dianping.puma.storage.holder.impl.DefaultBinlogInfoHolder;
+import com.dianping.puma.taskexecutor.DefaultTaskExecutor;
+import com.dianping.puma.taskexecutor.TaskExecutor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /***

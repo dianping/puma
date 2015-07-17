@@ -32,14 +32,14 @@ import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
-import com.dianping.puma.server.DefaultTaskExecutor;
-import com.dianping.puma.server.TaskExecutor;
-import com.dianping.puma.spring.service.PumaServerConfig;
+import com.dianping.puma.server.service.PumaServerConfig;
 import com.dianping.puma.storage.DefaultArchiveStrategy;
 import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
 import com.dianping.puma.storage.holder.BinlogInfoHolder;
+import com.dianping.puma.taskexecutor.DefaultTaskExecutor;
+import com.dianping.puma.taskexecutor.TaskExecutor;
 
 @Service("taskBuilder")
 public class DefaultTaskBuilder implements TaskBuilder {

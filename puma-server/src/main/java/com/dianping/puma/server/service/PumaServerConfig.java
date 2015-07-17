@@ -1,4 +1,4 @@
-package com.dianping.puma.spring.service;
+package com.dianping.puma.server.service;
 
 import javax.annotation.PostConstruct;
 

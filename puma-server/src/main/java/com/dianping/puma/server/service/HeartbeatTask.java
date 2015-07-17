@@ -1,4 +1,4 @@
-package com.dianping.puma.spring.service;
+package com.dianping.puma.server.service;
 
 import com.dianping.puma.biz.service.PumaServerService;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.sender.Sender;
-import com.dianping.puma.server.TaskExecutor;
 import com.dianping.puma.server.builder.TaskBuilder;
 import com.dianping.puma.storage.EventStorage;
+import com.dianping.puma.taskexecutor.TaskExecutor;
 
 @Service
 public class DefaultTaskContainer implements TaskContainer {

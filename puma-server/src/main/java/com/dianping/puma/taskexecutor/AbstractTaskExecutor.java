@@ -13,18 +13,18 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.server;
+package com.dianping.puma.taskexecutor;
 
 import java.util.List;
 
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
-import com.dianping.puma.biz.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.Dispatcher;
+import com.dianping.puma.storage.holder.BinlogInfoHolder;
 
 /**
  *

@@ -1,9 +1,9 @@
-package com.dianping.puma.spring.controller;
+package com.dianping.puma.server.controller;
 
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
-import com.dianping.puma.server.TaskExecutor;
 import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.status.SystemStatusContainer;
+import com.dianping.puma.taskexecutor.TaskExecutor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

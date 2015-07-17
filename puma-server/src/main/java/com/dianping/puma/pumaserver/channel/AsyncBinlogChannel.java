@@ -6,7 +6,7 @@ import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
 
 import java.util.List;
 
-public interface BinlogChannel {
+public interface AsyncBinlogChannel {
 
     void init(
             String targetName,

@@ -6,7 +6,7 @@ import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.ServerErrorEvent;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.pumaserver.channel.BinlogChannel;
+import com.dianping.puma.pumaserver.channel.AsyncBinlogChannel;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
 import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.storage.EventChannel;
@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class BufferedBinlogChannel implements BinlogChannel {
+public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
     private volatile boolean stopped = true;
 
@@ -81,6 +81,10 @@ public class BufferedBinlogChannel implements BinlogChannel {
 
             while (!stopped && !Thread.interrupted()) {
                 BinlogGetRequest req = request.get();
+                if (!req.getChannel().isActive()) {
+                    request.set(null);
+                    req = null;
+                }
 
                 if (req == null && results.size() > 1000) {
                     try {
@@ -91,44 +95,43 @@ public class BufferedBinlogChannel implements BinlogChannel {
                     continue;
                 }
 
-
                 Event binlogEvent;
                 try {
-                    binlogEvent = eventChannel.next();
+                    binlogEvent = eventChannel.next(true);
                 } catch (Exception e) {
                     binlogEvent = new ServerErrorEvent("get binlog event from storage failure.", e.getCause());
                 }
-
 
                 if (binlogEvent != null) {
                     results.add(binlogEvent);
                 }
 
                 boolean needSend = false;
-                if (req != null && results.size() > req.getBatchSize()) {
-                    needSend = true;
-                }
-
-                if (!needSend && req != null &&
-                        req.getTimeout() > 0 &&
-                        req.getStartTime() + req.getTimeUnit().toMillis(req.getTimeout()) < System.currentTimeMillis()) {
+                if (req != null && (results.size() > req.getBatchSize() || req.isTimeout())) {
                     needSend = true;
                 }
 
                 if (needSend) {
-                    if (req.getChannel().isActive()) {
-                        BinlogGetResponse response = new BinlogGetResponse();
-                        BinlogMessage message = new BinlogMessage();
+                    request.set(null);
 
-                        Iterator<Event> iterator = results.iterator();
-                        while (iterator.hasNext() && message.getBinlogEvents().size() < req.getBatchSize()) {
-                            message.addBinlogEvents(iterator.next());
-                            iterator.remove();
-                        }
+                    BinlogGetResponse response = new BinlogGetResponse();
+                    BinlogMessage message = new BinlogMessage();
 
-                        req.getChannel().writeAndFlush(response.setBinlogMessage(message));
-                        request.set(null);
-                        //todo: auto ack
+                    Iterator<Event> iterator = results.iterator();
+                    while (iterator.hasNext() && message.getBinlogEvents().size() < req.getBatchSize()) {
+                        message.addBinlogEvents(iterator.next());
+                        iterator.remove();
+                    }
+
+                    req.getChannel().writeAndFlush(response.setBinlogMessage(message));
+                    //todo: auto ack
+                }
+
+                if (binlogEvent == null) {
+                    try {
+                        Thread.sleep(5);
+                    } catch (InterruptedException e) {
+                        stopped = true;
                     }
                 }
             }

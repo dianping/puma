@@ -93,6 +93,8 @@ public abstract class AbstractBaseTest {
 	      "puma/binlogIndex/");
 
 	private static DefaultBinlogInfoHolder binlogInfoHolder;
+	
+	private final int WAIT_FOR_SYNC_TIME = 1500;
 
 	private EventCenter eventCenter;
 
@@ -459,7 +461,7 @@ public abstract class AbstractBaseTest {
 
 	protected List<ChangedEvent> getEvents(int n, boolean needTs, boolean isRowChangedEvent, boolean isDdlEvent)
 	      throws Exception {
-		waitForSync(900);
+		waitForSync(WAIT_FOR_SYNC_TIME);
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
 		EventChannel channel = storage.getChannel(SubscribeConstant.SEQ_FROM_OLDEST, -1, null, -1, -1);
 		for (int i = 0; i < n;) {
@@ -484,7 +486,7 @@ public abstract class AbstractBaseTest {
 
 	protected List<ChangedEvent> getEvents(int n, long seq, long serverId, String binlog, long binlogPos,
 	      long timeStamp, boolean needTs) throws Exception {
-		waitForSync(900);
+		waitForSync(WAIT_FOR_SYNC_TIME);
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
 		EventChannel channel = storage.getChannel(seq, serverId, binlog, binlogPos, timeStamp);
 		for (int i = 0; i < n;) {

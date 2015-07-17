@@ -44,7 +44,7 @@ public class DefaultClientSessionService implements ClientSessionService {
                         if (session == null) {
                             continue;
                         }
-                        session.getBinlogChannel().destroy();
+                        session.getAsyncBinlogChannel().destroy();
                     }
                 }
             }
@@ -60,7 +60,7 @@ public class DefaultClientSessionService implements ClientSessionService {
         client.setLastAccessTime(System.currentTimeMillis());
         ClientSession old = clients.put(client.getClientName(), client);
         if (old != null) {
-            old.getBinlogChannel().destroy();
+            old.getAsyncBinlogChannel().destroy();
         }
         return client.getToken();
     }
@@ -79,7 +79,7 @@ public class DefaultClientSessionService implements ClientSessionService {
 
     protected void unsubscribe(ClientSession session) {
         clients.remove(session.getClientName());
-        session.getBinlogChannel().destroy();
+        session.getAsyncBinlogChannel().destroy();
     }
 
     @Override

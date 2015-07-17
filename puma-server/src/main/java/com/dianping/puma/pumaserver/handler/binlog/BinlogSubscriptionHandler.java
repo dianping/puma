@@ -5,8 +5,8 @@ import com.dianping.puma.core.dto.BinlogTarget;
 import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.pumaserver.channel.BinlogChannel;
-import com.dianping.puma.pumaserver.channel.impl.BufferedBinlogChannel;
+import com.dianping.puma.pumaserver.channel.AsyncBinlogChannel;
+import com.dianping.puma.pumaserver.channel.impl.DefaultAsyncBinlogChannel;
 import com.dianping.puma.pumaserver.client.ClientSession;
 import com.dianping.puma.pumaserver.client.ClientType;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
@@ -37,7 +37,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 		BinlogTarget binlogTarget = binlogTargetService.find(clientName);
 		BinlogAck binlogAck = binlogAckService.load(clientName);
 
-		BinlogChannel binlogChannel = buildBinlogChannel(
+		AsyncBinlogChannel asyncBinlogChannel = buildBinlogChannel(
 				binlogTarget == null ? null : binlogTarget.getTargetName(),
 				binlogTarget == null ? 0 : binlogTarget.getDbServerId(),
 				0L,
@@ -50,7 +50,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 				true
 		);
 
-		ClientSession session = new ClientSession(clientName, binlogChannel, ClientType.UNKNOW);
+		ClientSession session = new ClientSession(clientName, asyncBinlogChannel, ClientType.UNKNOW);
 		clientSessionService.subscribe(session);
 
 		BinlogSubscriptionResponse binlogSubscriptionResponse = new BinlogSubscriptionResponse();
@@ -58,7 +58,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 		ctx.channel().writeAndFlush(binlogSubscriptionResponse);
 	}
 
-	private BinlogChannel buildBinlogChannel(
+	private AsyncBinlogChannel buildBinlogChannel(
 			String targetName,
 			long dbServerId,
 			long sc,
@@ -69,11 +69,11 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 			boolean dml,
 			boolean ddl,
 			boolean transaction) {
-		BufferedBinlogChannel bufferedBinlogChannel = new BufferedBinlogChannel();
-		bufferedBinlogChannel.setTaskContainer(taskContainer);
-		bufferedBinlogChannel.init(targetName, dbServerId, sc, binlogInfo, timestamp, database, tables, dml, ddl ,transaction);
+		DefaultAsyncBinlogChannel defaultAsyncBinlogChannel = new DefaultAsyncBinlogChannel();
+		defaultAsyncBinlogChannel.setTaskContainer(taskContainer);
+		defaultAsyncBinlogChannel.init(targetName, dbServerId, sc, binlogInfo, timestamp, database, tables, dml, ddl ,transaction);
 
-		return bufferedBinlogChannel;
+		return defaultAsyncBinlogChannel;
 	}
 
 	public void setBinlogTargetService(BinlogTargetService binlogTargetService) {

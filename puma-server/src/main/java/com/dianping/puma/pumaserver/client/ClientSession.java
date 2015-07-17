@@ -1,6 +1,6 @@
 package com.dianping.puma.pumaserver.client;
 
-import com.dianping.puma.pumaserver.channel.BinlogChannel;
+import com.dianping.puma.pumaserver.channel.AsyncBinlogChannel;
 
 /**
  * Dozer @ 6/25/15
@@ -14,14 +14,14 @@ public class ClientSession {
 
     private final String clientName;
 
-    private final BinlogChannel binlogChannel;
+    private final AsyncBinlogChannel asyncBinlogChannel;
 
     private volatile long lastAccessTime;
 
-    public ClientSession(String clientName, BinlogChannel binlogChannel, ClientType clientType) {
+    public ClientSession(String clientName, AsyncBinlogChannel asyncBinlogChannel, ClientType clientType) {
         this.clientType = clientType;
         this.clientName = clientName;
-        this.binlogChannel = binlogChannel;
+        this.asyncBinlogChannel = asyncBinlogChannel;
     }
 
     public ClientType getClientType() {
@@ -44,8 +44,8 @@ public class ClientSession {
         this.lastAccessTime = lastAccessTime;
     }
 
-    public BinlogChannel getBinlogChannel() {
-        return binlogChannel;
+    public AsyncBinlogChannel getAsyncBinlogChannel() {
+        return asyncBinlogChannel;
     }
 
     public void setToken(String token) {

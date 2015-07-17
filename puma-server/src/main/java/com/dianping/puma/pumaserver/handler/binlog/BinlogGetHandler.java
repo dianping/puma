@@ -25,7 +25,7 @@ public class BinlogGetHandler extends SimpleChannelInboundHandler<BinlogGetReque
 
         final ClientSession session = clientSessionService.get(binlogGetRequest.getClientName(), binlogGetRequest.getToken());
 
-        boolean addSuccess = session.getBinlogChannel().addRequest(binlogGetRequest);
+        boolean addSuccess = session.getAsyncBinlogChannel().addRequest(binlogGetRequest);
 
         if (!addSuccess) {
             ctx.channel().writeAndFlush(EMPTY_RESPONSE);

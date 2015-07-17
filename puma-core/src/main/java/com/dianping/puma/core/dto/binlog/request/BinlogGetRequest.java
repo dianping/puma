@@ -65,4 +65,8 @@ public class BinlogGetRequest extends BinlogRequest {
     public void setStartTime(long startTime) {
         this.startTime = startTime;
     }
+
+    public boolean isTimeout() {
+        return timeout > 0 && (startTime + timeUnit.toMillis(timeout) < System.currentTimeMillis());
+    }
 }

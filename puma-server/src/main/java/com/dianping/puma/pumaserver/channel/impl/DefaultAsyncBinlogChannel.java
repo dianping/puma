@@ -21,11 +21,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
-    private volatile boolean stopped = true;
+    private volatile boolean stopped = false;
 
     private ExecutorService executorService;
 
-    private EventChannel eventChannel;
+    private volatile EventChannel eventChannel;
 
     private TaskContainer taskContainer;
 
@@ -81,7 +81,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
             while (!stopped && !Thread.interrupted()) {
                 BinlogGetRequest req = request.get();
-                if (!req.getChannel().isActive()) {
+                if (req != null && !req.getChannel().isActive()) {
                     request.set(null);
                     req = null;
                 }
@@ -107,7 +107,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
                 }
 
                 boolean needSend = false;
-                if (req != null && (results.size() > req.getBatchSize() || req.isTimeout())) {
+                if (req != null && (results.size() >= req.getBatchSize() || req.isTimeout())) {
                     needSend = true;
                 }
 

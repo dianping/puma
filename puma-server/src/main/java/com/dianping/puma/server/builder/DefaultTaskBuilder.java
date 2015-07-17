@@ -3,15 +3,13 @@ package com.dianping.puma.server.builder;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.dianping.puma.biz.entity.PumaTaskStateEntity;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.dianping.puma.biz.entity.PumaTaskEntity;
+import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import com.dianping.puma.biz.entity.SrcDbEntity;
-import com.dianping.puma.biz.service.SrcDbService;
 import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
@@ -43,9 +41,6 @@ import com.dianping.puma.taskexecutor.TaskExecutor;
 
 @Service("taskBuilder")
 public class DefaultTaskBuilder implements TaskBuilder {
-
-	@Autowired
-	SrcDbService srcDBInstanceService;
 
 	@Autowired
 	BinlogInfoHolder binlogInfoHolder;

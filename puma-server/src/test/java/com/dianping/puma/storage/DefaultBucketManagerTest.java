@@ -390,5 +390,4 @@ public class DefaultBucketManagerTest {
 		work = new File(System.getProperty("java.io.tmpdir", "."), "Puma");
 		FileUtils.deleteDirectory(work);
 	}
-
 }

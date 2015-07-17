@@ -14,5 +14,5 @@
 
     <aop:aspectj-autoproxy/>
     <mvc:annotation-driven/>
-    <context:component-scan base-package="com.dianping.puma.spring.controller"/>
+    <context:component-scan base-package="com.dianping.puma.server"/>
 </beans>

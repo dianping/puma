@@ -127,7 +127,6 @@
         <dependency>
             <groupId>com.google.code.morphia</groupId>
             <artifactId>morphia</artifactId>
-            <optional>true</optional>
         </dependency>
     </dependencies>
 </project>

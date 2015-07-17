@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.biz.service.SrcDbService;
-import com.dianping.puma.biz.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
@@ -40,6 +39,7 @@ import com.dianping.puma.storage.DefaultArchiveStrategy;
 import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
+import com.dianping.puma.storage.holder.BinlogInfoHolder;
 
 @Service("taskBuilder")
 public class DefaultTaskBuilder implements TaskBuilder {

@@ -1,10 +1,12 @@
-package com.dianping.puma.biz.storage.holder.impl;
+package com.dianping.puma.storage.holder.impl;
 
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.biz.storage.holder.BinlogInfoHolder;
+import com.dianping.puma.storage.holder.BinlogInfoHolder;
+
 import org.apache.log4j.Logger;
 
 import javax.annotation.PostConstruct;
+
 import java.io.*;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
@@ -13,8 +15,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * TODO Comment of MMapBasedBinlogPositionHolder
- *
  * @author Leo Liang
  */
 public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
@@ -105,7 +105,7 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
         }
     }
 
-    @SuppressWarnings({"resource", "unused"})
+    @SuppressWarnings({"resource"})
     private void loadFromFile(String taskName) {
         String path = (new File(baseDir, task2file(taskName))).getAbsolutePath();
         File f = new File(path);

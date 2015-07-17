@@ -1,16 +1,15 @@
-package com.dianping.puma.biz.storage.backup;
+package com.dianping.puma.storage.backup;
 
 import com.dianping.puma.core.exception.BackupException;
 import com.dianping.puma.core.exception.StorageCleanException;
-import com.dianping.puma.biz.storage.backup.strategy.AlwaysDeleteStrategy;
-import com.dianping.puma.biz.storage.backup.strategy.DeleteStrategy;
-import com.dianping.puma.biz.storage.backup.strategy.ExpiredDeleteStrategy;
+
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.annotation.PostConstruct;
+
 import java.io.File;
 import java.io.IOException;
 

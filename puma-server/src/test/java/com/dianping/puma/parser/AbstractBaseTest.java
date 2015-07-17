@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Properties;
 
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
+
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.io.FileUtils;
@@ -31,7 +32,6 @@ import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
 import com.dianping.puma.core.model.event.EventCenter;
-import com.dianping.puma.biz.storage.holder.impl.DefaultBinlogInfoHolder;
 import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.datahandler.DefaultDataHandler;
@@ -55,6 +55,7 @@ import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
+import com.dianping.puma.storage.holder.impl.DefaultBinlogInfoHolder;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /***

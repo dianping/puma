@@ -38,7 +38,7 @@
 //        //获取本地ip
 //        for (String ip : IPUtils.getNoLoopbackIP4Addresses()) {
 //            String host = ip + ':' + localPort;
-//            LOG.info("Try this localhost to find syncServerName from db : " + host);
+//            LOG.info("Try this localhost to findById syncServerName from db : " + host);
 //            SyncServer config = syncServerService.findByHost(ip);
 //            if (config != null) {
 //                syncServerName = config.getName();
@@ -49,7 +49,7 @@
 //            }
 //        }
 //        if (syncServerName == null) {
-//            throw new RuntimeException("Cannot try to find the syncServerName, please check the SyncServerConfig in DB.");
+//            throw new RuntimeException("Cannot try to findById the syncServerName, please check the SyncServerConfig in DB.");
 //        }
 //        LOG.info("Properties: " + this.toString());
 //        //复制mysqlload.sh到shell目录

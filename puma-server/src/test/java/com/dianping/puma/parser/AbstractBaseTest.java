@@ -42,8 +42,6 @@ import com.dianping.puma.filter.EventFilter;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.filter.TableMetaRefreshFilter;
 import com.dianping.puma.filter.TransactionEventFilter;
-import com.dianping.puma.parser.DefaultBinlogParser;
-import com.dianping.puma.parser.Parser;
 import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;

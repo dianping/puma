@@ -1,5 +1,7 @@
 package com.dianping.puma.biz.entity;
 
+import com.dianping.puma.core.constant.ActionController;
+
 public class PumaTaskServerEntity {
 
 	private int id;
@@ -7,6 +9,8 @@ public class PumaTaskServerEntity {
 	private int taskId;
 
 	private int serverId;
+
+	private ActionController actionController;
 
 	public int getId() {
 		return id;
@@ -30,5 +34,13 @@ public class PumaTaskServerEntity {
 
 	public void setServerId(int serverId) {
 		this.serverId = serverId;
+	}
+
+	public ActionController getActionController() {
+		return actionController;
+	}
+
+	public void setActionController(ActionController actionController) {
+		this.actionController = actionController;
 	}
 }

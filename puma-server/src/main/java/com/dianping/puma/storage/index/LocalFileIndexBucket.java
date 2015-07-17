@@ -55,7 +55,7 @@ public class LocalFileIndexBucket<K, V> implements IndexBucket<K, V> {
 	}
 
 //	@Override
-//	public V find(K key) throws StorageClosedException, IOException {
+//	public V findById(K key) throws StorageClosedException, IOException {
 //		while (true) {
 //			V next = next();
 //

@@ -3,6 +3,7 @@ package com.dianping.puma.biz.entity;
 import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.TableSet;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Date;
 import java.util.List;
@@ -13,21 +14,22 @@ public class PumaTaskEntity {
 
 	private String name;
 
-	private BinlogInfo binlogInfo;
-
 	private int preservedDay;
+
+	private String jdbcRef;
+
+	private BinlogInfo startBinlogInfo;
+
+	private Date GmtUpdate;
 
 	private TableSet tableSet;
 
-	private SrcDbEntity preferSrcDb;
+	private SrcDbEntity preferredSrcDb;
 
 	private List<SrcDbEntity> backUpSrcDbs;
 
-	private List<PumaServerEntity> pumaServers;
-
-	private Date UpdateTime;
-
-	private ActionController actionController;
+	/** Puma task instance may contain redundant information here. */
+	private List<Pair<PumaServerEntity, ActionController>> pumaServers;
 
 	public int getId() {
 		return id;
@@ -35,22 +37,6 @@ public class PumaTaskEntity {
 
 	public void setId(int id) {
 		this.id = id;
-	}
-
-	public int getPreservedDay() {
-		return preservedDay;
-	}
-
-	public void setPreservedDay(int preservedDay) {
-		this.preservedDay = preservedDay;
-	}
-
-	public BinlogInfo getBinlogInfo() {
-		return binlogInfo;
-	}
-
-	public void setBinlogInfo(BinlogInfo binlogInfo) {
-		this.binlogInfo = binlogInfo;
 	}
 
 	public String getName() {
@@ -61,16 +47,44 @@ public class PumaTaskEntity {
 		this.name = name;
 	}
 
+	public int getPreservedDay() {
+		return preservedDay;
+	}
+
+	public void setPreservedDay(int preservedDay) {
+		this.preservedDay = preservedDay;
+	}
+
+	public BinlogInfo getStartBinlogInfo() {
+		return startBinlogInfo;
+	}
+
+	public void setStartBinlogInfo(BinlogInfo startBinlogInfo) {
+		this.startBinlogInfo = startBinlogInfo;
+	}
+
 	public TableSet getTableSet() {
 		return tableSet;
 	}
 
-	public SrcDbEntity getPreferSrcDb() {
-		return preferSrcDb;
+	public void setTableSet(TableSet tableSet) {
+		this.tableSet = tableSet;
 	}
 
-	public void setPreferSrcDb(SrcDbEntity preferSrcDb) {
-		this.preferSrcDb = preferSrcDb;
+	public String getJdbcRef() {
+		return jdbcRef;
+	}
+
+	public void setJdbcRef(String jdbcRef) {
+		this.jdbcRef = jdbcRef;
+	}
+
+	public SrcDbEntity getPreferredSrcDb() {
+		return preferredSrcDb;
+	}
+
+	public void setPreferredSrcDb(SrcDbEntity preferredSrcDb) {
+		this.preferredSrcDb = preferredSrcDb;
 	}
 
 	public List<SrcDbEntity> getBackUpSrcDbs() {
@@ -81,31 +95,48 @@ public class PumaTaskEntity {
 		this.backUpSrcDbs = backUpSrcDbs;
 	}
 
-	public void setPumaServers(List<PumaServerEntity> pumaServers) {
-		this.pumaServers = pumaServers;
+	public Date getGmtUpdate() {
+		return GmtUpdate;
 	}
 
-	public void setTableSet(TableSet tableSet) {
-		this.tableSet = tableSet;
+	public void setGmtUpdate(Date gmtUpdate) {
+		GmtUpdate = gmtUpdate;
 	}
 
-	public List<PumaServerEntity> getPumaServers() {
+	public List<Pair<PumaServerEntity, ActionController>> getPumaServers() {
 		return pumaServers;
 	}
 
-	public Date getUpdateTime() {
-		return UpdateTime;
+	public void setPumaServers(List<Pair<PumaServerEntity, ActionController>> pumaServers) {
+		this.pumaServers = pumaServers;
 	}
 
-	public void setUpdateTime(Date updateTime) {
-		UpdateTime = updateTime;
+	/**
+	 *
+	 * @return
+	 */
+	public ActionController hostGetActionController(String host) {
+		for (Pair<PumaServerEntity, ActionController> pumaServer: pumaServers) {
+			if (pumaServer.getLeft().getHost().equals(host)) {
+				return pumaServer.getRight();
+			}
+		}
+
+		throw new RuntimeException("self get action controller failure.");
 	}
 
-	public ActionController getActionController() {
-		return actionController;
-	}
+	/**
+	 *
+	 * @param actionController
+	 */
+	public void hostSetActionController(String host, ActionController actionController) {
+		for (Pair<PumaServerEntity, ActionController> pumaServer: pumaServers) {
+			if (pumaServer.getLeft().getHost().equals(host)) {
+				pumaServer.setValue(actionController);
+				return;
+			}
+		}
 
-	public void setActionController(ActionController actionController) {
-		this.actionController = actionController;
+		throw new RuntimeException("self set action controller failure.");
 	}
 }

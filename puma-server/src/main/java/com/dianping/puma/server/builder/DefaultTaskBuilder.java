@@ -30,7 +30,7 @@ import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
-import com.dianping.puma.server.service.PumaServerConfig;
+import com.dianping.puma.server.server.TaskServerManager;
 import com.dianping.puma.storage.DefaultArchiveStrategy;
 import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
@@ -49,7 +49,7 @@ public class DefaultTaskBuilder implements TaskBuilder {
 	EventCenter eventCenter;
 
 	@Autowired
-	PumaServerConfig pumaServerConfig;
+	TaskServerManager taskServerManager;
 
 	@Autowired
 	RawEventCodec rawCodec;
@@ -95,7 +95,7 @@ public class DefaultTaskBuilder implements TaskBuilder {
 
 		PumaTaskStateEntity taskState = new PumaTaskStateEntity();
 		taskState.setTaskName(pumaTask.getName());
-		taskState.setServerName(pumaServerConfig.getName());
+		taskState.setServerName("self");
 		taskState.setStatus(Status.PREPARING);
 
 		taskExecutor.setTaskState(taskState);
@@ -103,15 +103,15 @@ public class DefaultTaskBuilder implements TaskBuilder {
 		// Base.
 		String taskName = pumaTask.getName();
 		taskExecutor.setTaskName(taskName);
-		taskExecutor.setServerId(taskName.hashCode() + pumaServerConfig.getName().hashCode());
+		taskExecutor.setServerId(taskName.hashCode() + "self".hashCode());
 
 		// Bin log.
 		taskExecutor.setBinlogInfoHolder(binlogInfoHolder);
-		taskExecutor.setBinlogInfo(pumaTask.getBinlogInfo());
+		taskExecutor.setBinlogInfo(pumaTask.getStartBinlogInfo());
 		taskExecutor.setBinlogStat(new BinlogStat());
 
 		// Source database.
-		SrcDbEntity srcDBEntity = pumaTask.getPreferSrcDb();
+		SrcDbEntity srcDBEntity = pumaTask.getPreferredSrcDb();
 		taskExecutor.setDbServerId(srcDBEntity.getServerId());
 		taskExecutor.setDBHost(srcDBEntity.getHost());
 		taskExecutor.setPort(srcDBEntity.getPort());
@@ -188,7 +188,7 @@ public class DefaultTaskBuilder implements TaskBuilder {
 		if (binlogInfo != null) {
 			storage.setBinlogInfo(binlogInfo);
 		} else {
-			storage.setBinlogInfo(pumaTask.getBinlogInfo());
+			storage.setBinlogInfo(pumaTask.getStartBinlogInfo());
 		}
 
 		// File sender master storage.

@@ -4,38 +4,36 @@
 
 <mapper namespace="com.dianping.puma.biz.dao.PumaTaskTargetDao">
 
-    <select id="findByTaskId" parameterType="map" resultType="PumaTaskTargetEntity">
-        SELECT * FROM PumaTaskTarget where taskId = #{taskId}
+    <select id="findByTaskId" resultType="PumaTaskTargetEntity">
+        SELECT * FROM PumaTaskTarget WHERE `taskId` = #{taskId}
     </select>
 
     <update id="update" parameterType="PumaTaskTargetEntity">
-        update PumaTaskTarget
-        set
-        TaskId = #{taskId},
-        Database = #{database},
-        Tables = #{tables}
-        where
+        UPDATE PumaTaskTarget
+        SET
+        `taskId` = #{taskId},
+        `database` = #{database},
+        `table` = #{table}
+        WHERE
         Id = #{id}
     </update>
 
     <insert id="insert" parameterType="PumaTaskTargetEntity" useGeneratedKeys="true" keyProperty="id">
-        insert into PumaTaskTarget
+        INSERT INTO PumaTaskTarget
         (
-        TaskId,
-        Database,
-        Tables
+        `taskId`,
+        `database`,
+        `table`
         )
-        values
+        VALUES
         (
         #{taskId},
         #{database},
-        #{tables}
+        #{table}
         )
     </insert>
 
     <delete id="deleteByTaskId">
-        delete from PumaTaskTarget
-        where
-        taskId = #{taskId}
+        DELETE FROM PumaTaskTarget WHERE `taskId` = #{taskId}
     </delete>
 </mapper>

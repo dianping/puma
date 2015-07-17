@@ -1,5 +1,6 @@
 package com.dianping.puma;
 
+import com.dianping.puma.pumaserver.channel.impl.DefaultAsyncBinlogChannelTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -55,7 +56,8 @@ import com.dianping.puma.utils.PacketUtilTest;
 
       // utils
       PacketUtilTest.class, //
-      DefaultDataIndexTest.class //
+      DefaultDataIndexTest.class, //
+        DefaultAsyncBinlogChannelTest.class
 })
 public class AllTests {
 

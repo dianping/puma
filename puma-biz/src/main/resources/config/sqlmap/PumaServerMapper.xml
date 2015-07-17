@@ -36,7 +36,7 @@
     </select>
 
     <insert id="insert" parameterType="PumaServerEntity">
-        INSERT INTO PumaServer (Name, Host, Port, UpdateTime) VALUES (#{name}, #{host}, #{port}, #{updateTime})
+        INSERT INTO PumaServer (Name, Host, Port, UpdateTime) VALUES (#{name}, #{host}, #{port}, #{gmtUpdate})
     </insert>
 
     <update id="update" parameterType="PumaServerEntity">
@@ -45,7 +45,7 @@
         Name = #{name},
         Host = #{host},
         port = #{port},
-        updateTime = #{updateTime}
+        gmtUpdate = #{gmtUpdate}
         where id = #{id}
     </update>
 

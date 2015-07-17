@@ -145,10 +145,10 @@
 					$("span[binlogioOfId='" + id + "']").text("--");
 				}
 				//数据库获取的binlog信息
-				if (status && status.binlogInfo) {
+				if (status && status.startBinlogInfo) {
 					$("span[binlogOfId='" + id + "']").text(
-							status.binlogInfo.binlogFile + " "
-									+ status.binlogInfo.binlogPosition);
+							status.startBinlogInfo.binlogFile + " "
+									+ status.startBinlogInfo.binlogPosition);
 				} else {
 					$("span[binlogOfId='" + id + "']").text("--");
 				}

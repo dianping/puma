@@ -28,6 +28,9 @@ public class BinlogGetRequest extends BinlogRequest {
     }
 
     public int getBatchSize() {
+        if (batchSize <= 0) {
+            batchSize = 1;
+        }
         return batchSize;
     }
 

@@ -4,10 +4,10 @@
 
 <mapper namespace="com.dianping.puma.biz.dao.PumaTaskDao">
 
-    <resultMap id="binlogInfo" type="com.dianping.puma.core.model.BinlogInfo" autoMapping="true"/>
+    <resultMap id="startBinlogInfo" type="com.dianping.puma.core.model.BinlogInfo" autoMapping="true"/>
 
     <resultMap id="entity" type="PumaTaskEntity" autoMapping="true">
-        <association resultMap="binlogInfo" property="binlogInfo" columnPrefix="BinlogInfo_"/>
+        <association resultMap="startBinlogInfo" property="startBinlogInfo" columnPrefix="StartBinlogInfo_"/>
     </resultMap>
 
     <select id="findById" resultMap="entity">
@@ -49,11 +49,11 @@
         set
         Name=#{name},
         PreservedDay=#{preservedDay},
-        BinlogInfo_ServerId=#{binlogInfo.serverId},
-        BinlogInfo_BinlogFile=#{binlogInfo.binlogFile},
-        BinlogInfo_BinlogPosition=#{binlogInfo.binlogPosition},
+        BinlogInfo_ServerId=#{startBinlogInfo.serverId},
+        BinlogInfo_BinlogFile=#{startBinlogInfo.binlogFile},
+        BinlogInfo_BinlogPosition=#{startBinlogInfo.binlogPosition},
         ActionController=#{actionController},
-        UpdateTime = #{updateTime}
+        UpdateTime = #{gmtUpdate}
         where
         Id = #{id}
     </update>
@@ -73,11 +73,11 @@
         (
         #{name},
         #{preservedDay},
-        #{binlogInfo.serverId},
-        #{binlogInfo.binlogFile},
-        #{binlogInfo.binlogPosition},
+        #{startBinlogInfo.serverId},
+        #{startBinlogInfo.binlogFile},
+        #{startBinlogInfo.binlogPosition},
         #{actionController},
-        #{updateTime}
+        #{gmtUpdate}
         )
     </insert>
 

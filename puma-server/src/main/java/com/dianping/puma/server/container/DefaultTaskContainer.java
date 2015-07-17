@@ -188,7 +188,7 @@ public class DefaultTaskContainer implements TaskContainer {
 	// EventStorage storage = senders.get(0).getStorage();
 	// DefaultEventStorage defaultEventStorage = (DefaultEventStorage) storage;
 	// try {
-	// PumaTask pumaTask = pumaTaskService.find(taskName);
+	// PumaTask pumaTask = pumaTaskService.findById(taskName);
 	// CleanupStrategy cleanupStrategy = defaultEventStorage.getCleanupStrategy();
 	// ((DefaultCleanupStrategy) cleanupStrategy).setPreservedDay(pumaTask.getPreservedDay());
 	//

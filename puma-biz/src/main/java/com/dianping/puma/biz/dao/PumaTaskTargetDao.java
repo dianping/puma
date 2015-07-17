@@ -11,6 +11,7 @@ import java.util.List;
  * http://www.dozer.cc
  */
 public interface PumaTaskTargetDao {
+
     List<PumaTaskTargetEntity> findByTaskId(int taskId);
 
     int insert(PumaTaskTargetEntity entity);

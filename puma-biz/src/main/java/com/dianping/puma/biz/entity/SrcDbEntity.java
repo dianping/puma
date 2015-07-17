@@ -4,6 +4,8 @@ public class SrcDbEntity {
 
 	private int id;
 
+	private String jdbcRef;
+
 	private String name;
 
 	private String host;
@@ -15,6 +17,8 @@ public class SrcDbEntity {
 	private String password;
 
 	private long serverId;
+
+	private boolean preferred;
 
 	public int getId() {
 		return id;
@@ -70,5 +74,21 @@ public class SrcDbEntity {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getJdbcRef() {
+		return jdbcRef;
+	}
+
+	public void setJdbcRef(String jdbcRef) {
+		this.jdbcRef = jdbcRef;
+	}
+
+	public boolean isPreferred() {
+		return preferred;
+	}
+
+	public void setPreferred(boolean preferred) {
+		this.preferred = preferred;
 	}
 }

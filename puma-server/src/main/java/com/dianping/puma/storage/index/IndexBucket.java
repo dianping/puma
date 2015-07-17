@@ -11,5 +11,5 @@ public interface IndexBucket<K, V> extends LifeCycle<IOException> {
 
 	void locate(K key) throws StorageClosedException, IOException;
 
-//	V find(K key) throws StorageClosedException, IOException;
+//	V findById(K key) throws StorageClosedException, IOException;
 }

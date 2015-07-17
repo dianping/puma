@@ -24,7 +24,7 @@ public class ScheduledTaskControllerChecker implements TaskControllerChecker {
 	public void check() {
 		for (String host: taskServerManager.findAuthorizedHosts()) {
 			for (PumaTaskEntity task: pumaTaskService.findByPumaServerName(host)) {
-				switch (task.getActionController()) {
+				switch (task.hostGetActionController(host)) {
 				case START:
 					taskContainer.start(task.getName());
 					break;

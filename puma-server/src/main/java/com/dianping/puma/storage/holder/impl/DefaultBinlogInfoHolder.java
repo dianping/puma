@@ -103,7 +103,7 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
         }
     }
 
-    @SuppressWarnings({"resource", "unused"})
+    @SuppressWarnings({"resource"})
     private void loadFromFile(String taskName) {
         String path = (new File(baseDir, task2file(taskName))).getAbsolutePath();
         File f = new File(path);

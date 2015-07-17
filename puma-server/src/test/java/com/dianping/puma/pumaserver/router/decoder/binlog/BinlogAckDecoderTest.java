@@ -30,6 +30,6 @@ public class BinlogAckDecoderTest {
         Assert.assertEquals("1", result.getToken());
         Assert.assertEquals("xx", result.getClientName());
         Assert.assertEquals("f1", result.getBinlogAck().getBinlogInfo().getBinlogFile());
-        Assert.assertEquals(new Long(1), result.getBinlogAck().getBinlogInfo().getBinlogPosition());
+        Assert.assertEquals(1, result.getBinlogAck().getBinlogInfo().getBinlogPosition());
     }
 }

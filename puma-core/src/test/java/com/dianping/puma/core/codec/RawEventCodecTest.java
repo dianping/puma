@@ -64,7 +64,7 @@ public class RawEventCodecTest {
         Assert.assertEquals("testtb", result.getTable());
         Assert.assertEquals(1233, result.getSeq());
         Assert.assertEquals("mysql-bin.000000", result.getBinlogInfo().getBinlogFile());
-        Assert.assertEquals(new Long(4L), result.getBinlogInfo().getBinlogPosition());
+        Assert.assertEquals(4, result.getBinlogInfo().getBinlogPosition());
         Assert.assertEquals(2, result.getBinlogInfo().getEventIndex());
         Assert.assertEquals(123123L, result.getServerId());
         Assert.assertEquals(123124L, result.getBinlogInfo().getServerId());

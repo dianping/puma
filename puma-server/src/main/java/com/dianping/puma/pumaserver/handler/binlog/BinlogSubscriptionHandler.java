@@ -1,5 +1,6 @@
 package com.dianping.puma.pumaserver.handler.binlog;
 
+import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.dto.BinlogAck;
 import com.dianping.puma.core.dto.BinlogTarget;
 import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
@@ -39,7 +40,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
         AsyncBinlogChannel asyncBinlogChannel = buildBinlogChannel(
                 binlogTarget == null ? null : binlogTarget.getTargetName(),
-                0L,
+                SubscribeConstant.SEQ_FROM_LATEST,
                 binlogAck == null ? null : binlogAck.getBinlogInfo(),
                 0,
                 binlogSubscriptionRequest.getDatabase(),

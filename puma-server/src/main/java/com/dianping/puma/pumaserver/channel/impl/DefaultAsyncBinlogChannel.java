@@ -53,9 +53,9 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
         try {
             eventChannel = eventStorage.getChannel(
                     sc,
-                    binlogInfo.getServerId(),
-                    binlogInfo.getBinlogFile(),
-                    binlogInfo.getBinlogPosition(),
+                    binlogInfo == null ? 0 : binlogInfo.getServerId(),
+                    binlogInfo == null ? null : binlogInfo.getBinlogFile(),
+                    binlogInfo == null ? 0 : binlogInfo.getBinlogPosition(),
                     timestamp
             );
             eventChannel.withDatabase(database);

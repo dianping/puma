@@ -12,7 +12,7 @@ public class BinlogInfo implements Serializable {
 
     private String binlogFile;
 
-    private Long binlogPosition;
+    private long binlogPosition;
 
     private int eventIndex;
 
@@ -39,11 +39,11 @@ public class BinlogInfo implements Serializable {
         return this;
     }
 
-    public Long getBinlogPosition() {
+    public long getBinlogPosition() {
         return binlogPosition;
     }
 
-    public BinlogInfo setBinlogPosition(Long binlogPosition) {
+    public BinlogInfo setBinlogPosition(long binlogPosition) {
         this.binlogPosition = binlogPosition;
         return this;
     }

@@ -20,8 +20,6 @@ public interface PumaServerService {
 
 	void registerByHost(String host);
 
-	void heartBeat();
-
 	void create(PumaServerEntity pumaServer);
 
 	void update(PumaServerEntity pumaServer);

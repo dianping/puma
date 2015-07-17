@@ -26,6 +26,7 @@ public class PumaServerServiceImpl implements PumaServerService {
         return pumaServerDao.findById(id);
     }
 
+    @Override
     public PumaServerEntity findByHost(String host) {
         return pumaServerDao.findByHost(host);
     }
@@ -57,23 +58,6 @@ public class PumaServerServiceImpl implements PumaServerService {
         } else {
             server.setUpdateTime(new Date());
             update(server);
-        }
-    }
-
-    @Override
-    public void heartBeat() {
-        for (String ip : IPUtils.getNoLoopbackIP4Addresses()) {
-            PumaServerEntity server = findByHost(ip);
-            if (server == null) {
-                server = new PumaServerEntity();
-                server.setName(ip);
-                server.setHost(ip);
-                server.setPort(4040);
-                create(server);
-            } else {
-                server.setUpdateTime(new Date());
-                update(server);
-            }
         }
     }
 

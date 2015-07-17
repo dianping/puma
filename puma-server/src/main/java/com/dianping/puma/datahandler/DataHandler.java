@@ -20,7 +20,6 @@ import com.dianping.puma.core.LifeCycle;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
 
 /**
- * TODO Comment of DataHandler
  * 
  * @author Leo Liang
  * 

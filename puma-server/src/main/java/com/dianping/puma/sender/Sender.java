@@ -21,7 +21,6 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.storage.EventStorage;
 
 /**
- * TODO Comment of Sender
  * 
  * @author Leo Liang
  * 

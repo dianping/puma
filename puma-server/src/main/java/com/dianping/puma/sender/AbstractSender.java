@@ -95,18 +95,18 @@ public abstract class AbstractSender implements Sender {
 	@Override
 	public void send(ChangedEvent event, PumaContext context) throws SenderException {
 		long retryCount = 0;
-		
+
 		while (true) {
 			if (isStop()) {
 				break;
 			}
-			
+
 			try {
 				doSend(event, context);
 				break;
 			} catch (Exception e) {
 				LOG.error("Send error!", e);
-				
+
 				if (retryCount++ > maxTryTimes) {
 					if (canMissEvent) {
 						LOG.error(String.format(MSG_SKIP, maxTryTimes, context.getPumaServerName(),
@@ -119,7 +119,7 @@ public abstract class AbstractSender implements Sender {
 						}
 					}
 				}
-				
+
 				try {
 					Thread.sleep(((retryCount % 15) + 1) * 300);
 				} catch (InterruptedException e1) {

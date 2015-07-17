@@ -40,7 +40,6 @@ import com.dianping.puma.parser.mysql.event.UpdateRowsEvent;
 import com.dianping.puma.parser.mysql.event.WriteRowsEvent;
 
 /**
- * TODO Comment of TransactionSupportDataHandler
  * 
  * @author Leo Liang
  * 
@@ -331,7 +330,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 					rawNullAbilities.add(i + 1);
 				}
 			}
-			
+
 			tableMeta.setRawNullAbilities(rawNullAbilities);
 		}
 	}
@@ -346,7 +345,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
 			for (int i = 0; i < tableMapEvent.getColumnTypes().length; i++) {
 				rawTypes.put(i + 1, tableMapEvent.getColumnTypes()[i]);
 			}
-			
+
 			tableMeta.setRawTypeCodes(rawTypes);
 		}
 	}

@@ -21,7 +21,6 @@ import com.dianping.puma.storage.EventStorage;
 import com.dianping.puma.storage.exception.StorageException;
 
 /**
- * TODO Comment of FileDumpSender
  * 
  * @author Leo Liang
  * 

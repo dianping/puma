@@ -254,9 +254,9 @@
 				text = "无状态 (可能不在运行)";
 			}
 			$("#dumpStatus").text(text);
-			if (state.binlogInfo && state.binlogInfo.binlogFile) {
-				$('#dumpBinlogFile').val(state.binlogInfo.binlogFile);
-				$('#dumpBinlogPos').val(state.binlogInfo.binlogPosition);
+			if (state.startBinlogInfo && state.startBinlogInfo.binlogFile) {
+				$('#dumpBinlogFile').val(state.startBinlogInfo.binlogFile);
+				$('#dumpBinlogPos').val(state.startBinlogInfo.binlogPosition);
 			}
 			if (state.status == 'SUCCESS') {
 				//把文案显示成“下一步”

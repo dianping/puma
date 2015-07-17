@@ -14,9 +14,9 @@ public interface SrcDbDao {
 
     SrcDbEntity findById(int id);
 
-    List<SrcDbEntity> findByIds(@Param("list") List<Integer> id);
-
     SrcDbEntity findByName(String name);
+
+    List<SrcDbEntity> findByJdbcRef(String jdbcRef);
 
     List<SrcDbEntity> findAll();
 

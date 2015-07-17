@@ -11,6 +11,7 @@ import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -39,10 +40,10 @@ public class PumaTaskServiceImpl implements PumaTaskService {
         List<PumaServerEntity> pumaServers = loadPumaServer(entity.getId());
         entity.setPumaServers(pumaServers);
 
-        SrcDbEntity preferSrcDb = loadPreferSrcDb(entity.getId());
-        entity.setPreferSrcDb(preferSrcDb);
+        SrcDbEntity preferredSrcDb = loadPreferredSrcDb(entity.getJdbcRef());
+        entity.setPreferredSrcDb(preferredSrcDb);
 
-        List<SrcDbEntity> backupSrcDbs = loadBackupSrcDb(entity.getId());
+        List<SrcDbEntity> backupSrcDbs = loadBackupSrcDbs(entity.getJdbcRef());
         entity.setBackUpSrcDbs(backupSrcDbs);
 
         TableSet tableSet = loadTableSet(entity.getId());
@@ -59,25 +60,28 @@ public class PumaTaskServiceImpl implements PumaTaskService {
         return tableSet;
     }
 
-    protected SrcDbEntity loadPreferSrcDb(int id) {
-        List<PumaTaskDbEntity> pumaTaskDbs = pumaTaskDbDao.findByTaskId(id);
-        for (PumaTaskDbEntity pumaTaskDb: pumaTaskDbs) {
-            if (pumaTaskDb.isPreferred()) {
-                return srcDbDao.findById(pumaTaskDb.getId());
+    protected SrcDbEntity loadPreferredSrcDb(String jdbcRef) {
+        List<SrcDbEntity> srcDbs = srcDbDao.findByJdbcRef(jdbcRef);
+        for (SrcDbEntity srcDb: srcDbs) {
+            if (srcDb.isPreferred()) {
+                return srcDb;
             }
         }
-        return null;
+
+        throw new RuntimeException("find preferred source db failure, not exists.");
     }
 
-    protected List<SrcDbEntity> loadBackupSrcDb(int id) {
-        List<PumaTaskDbEntity> pumaTaskDbs = pumaTaskDbDao.findByTaskId(id);
-        List<Integer> srcDbIds = Lists.newArrayList(Iterables.transform(pumaTaskDbs, new Function<PumaTaskDbEntity, Integer>() {
-            @Override
-            public Integer apply(PumaTaskDbEntity input) {
-                return input.getDbId();
+    protected List<SrcDbEntity> loadBackupSrcDbs(String jdbcRef) {
+        List<SrcDbEntity> backupDbs = new ArrayList<SrcDbEntity>();
+
+        List<SrcDbEntity> srcDbs = srcDbDao.findByJdbcRef(jdbcRef);
+        for (SrcDbEntity srcDb: srcDbs) {
+            if (!srcDb.isPreferred()) {
+                backupDbs.add(srcDb);
             }
-        }));
-        return srcDbDao.findByIds(srcDbIds);
+        }
+
+        return backupDbs;
     }
 
     protected List<PumaServerEntity> loadPumaServer(int id) {

@@ -112,11 +112,11 @@ public class DefaultTaskBuilder implements TaskBuilder {
 
 		// Bin log.
 		taskExecutor.setBinlogInfoHolder(binlogInfoHolder);
-		taskExecutor.setBinlogInfo(pumaTask.getBinlogInfo());
+		taskExecutor.setBinlogInfo(pumaTask.getStartBinlogInfo());
 		taskExecutor.setBinlogStat(new BinlogStat());
 
 		// Source database.
-		SrcDbEntity srcDBEntity = pumaTask.getPreferSrcDb();
+		SrcDbEntity srcDBEntity = pumaTask.getPreferredSrcDb();
 		taskExecutor.setDbServerId(srcDBEntity.getServerId());
 		taskExecutor.setDBHost(srcDBEntity.getHost());
 		taskExecutor.setPort(srcDBEntity.getPort());
@@ -193,7 +193,7 @@ public class DefaultTaskBuilder implements TaskBuilder {
 		if (binlogInfo != null) {
 			storage.setBinlogInfo(binlogInfo);
 		} else {
-			storage.setBinlogInfo(pumaTask.getBinlogInfo());
+			storage.setBinlogInfo(pumaTask.getStartBinlogInfo());
 		}
 
 		// File sender master storage.

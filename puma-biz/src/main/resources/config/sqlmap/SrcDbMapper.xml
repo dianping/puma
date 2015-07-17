@@ -8,27 +8,24 @@
         SELECT * FROM SrcDb where id = #{id}
     </select>
 
-    <select id="findByIds" resultType="SrcDbEntity">
-        SELECT * FROM SrcDb where id in
-        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
-            #{item}
-        </foreach>
-    </select>
+   <select id="findByJdbcRef" resultType="SrcDbEntity">
+       SELECT * FROM SrcDb WHERE jdbcRef = #{jdbcRef}
+   </select>
 
     <select id="findByName" resultType="SrcDbEntity">
-        SELECT * FROM SrcDb where name = #{name}
+        SELECT * FROM SrcDb WHERE name = #{name}
     </select>
 
     <select id="findAll" resultType="SrcDbEntity">
         SELECT * FROM SrcDb
     </select>
 
-    <select id="count" resultType="long">
-        SELECT count(*) FROM SrcDb
-    </select>
-
     <select id="findByPage" resultType="SrcDbEntity">
         SELECT * FROM SrcDb limit #{offset},#{limit}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT count(*) FROM SrcDb
     </select>
 
     <update id="update" parameterType="SrcDbEntity">
@@ -49,6 +46,7 @@
         INSERT INTO SrcDb
         (
         jdbcRef,
+        name,
         host,
         port,
         username,
@@ -59,6 +57,7 @@
         VALUES
         (
         #{jdbcRef},
+        #{name},
         #{host},
         #{port},
         #{username},

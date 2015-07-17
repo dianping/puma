@@ -12,20 +12,31 @@ public class PumaTaskEntity {
 	private int id;
 
 	private String name;
+
+	/** parsed binlog preserved days. */
 	private int preservedDay;
-	private TableSet tableSet;
-	private List<PumaServerEntity> pumaServers;
+
+	/** source db jdbcRef. */
 	private String jdbcRef;
 
-
-	private BinlogInfo binlogInfo;
-
-	private SrcDbEntity preferSrcDb;
-
-	private List<SrcDbEntity> backUpSrcDbs;
+	/** start binlog info, should be valid to the source db cluster. */
+	private BinlogInfo startBinlogInfo;
 
 	private Date UpdateTime;
 
+	/** relations with `PumaTaskTarget`. */
+	private TableSet tableSet;
+
+	/** relations with `PumaServer` by `PumaTaskServer`. */
+	private List<PumaServerEntity> pumaServers;
+
+	/** relations with `SrcDb`. */
+	private SrcDbEntity preferredSrcDb;
+
+	/** relations with `SrcDb`. */
+	private List<SrcDbEntity> backUpSrcDbs;
+
+	/** puma task instance, stopped or started on a specific server. */
 	private ActionController actionController;
 
 	public int getId() {
@@ -44,12 +55,12 @@ public class PumaTaskEntity {
 		this.preservedDay = preservedDay;
 	}
 
-	public BinlogInfo getBinlogInfo() {
-		return binlogInfo;
+	public BinlogInfo getStartBinlogInfo() {
+		return startBinlogInfo;
 	}
 
-	public void setBinlogInfo(BinlogInfo binlogInfo) {
-		this.binlogInfo = binlogInfo;
+	public void setStartBinlogInfo(BinlogInfo startBinlogInfo) {
+		this.startBinlogInfo = startBinlogInfo;
 	}
 
 	public String getName() {
@@ -64,12 +75,12 @@ public class PumaTaskEntity {
 		return tableSet;
 	}
 
-	public SrcDbEntity getPreferSrcDb() {
-		return preferSrcDb;
+	public SrcDbEntity getPreferredSrcDb() {
+		return preferredSrcDb;
 	}
 
-	public void setPreferSrcDb(SrcDbEntity preferSrcDb) {
-		this.preferSrcDb = preferSrcDb;
+	public void setPreferredSrcDb(SrcDbEntity preferredSrcDb) {
+		this.preferredSrcDb = preferredSrcDb;
 	}
 
 	public List<SrcDbEntity> getBackUpSrcDbs() {
@@ -106,5 +117,13 @@ public class PumaTaskEntity {
 
 	public void setActionController(ActionController actionController) {
 		this.actionController = actionController;
+	}
+
+	public String getJdbcRef() {
+		return jdbcRef;
+	}
+
+	public void setJdbcRef(String jdbcRef) {
+		this.jdbcRef = jdbcRef;
 	}
 }

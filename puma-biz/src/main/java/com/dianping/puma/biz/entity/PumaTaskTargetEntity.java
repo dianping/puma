@@ -13,7 +13,7 @@ public class PumaTaskTargetEntity {
 
     private String database;
 
-    private String tables;
+    private String table;
 
     public int getId() {
         return id;
@@ -39,11 +39,11 @@ public class PumaTaskTargetEntity {
         this.database = database;
     }
 
-    public String getTables() {
-        return tables;
+    public String getTable() {
+        return table;
     }
 
-    public void setTables(String tables) {
-        this.tables = tables;
+    public void setTable(String tables) {
+        this.table = tables;
     }
 }

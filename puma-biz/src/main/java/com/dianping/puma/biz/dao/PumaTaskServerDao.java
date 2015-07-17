@@ -16,5 +16,4 @@ public interface PumaTaskServerDao {
     int deleteByTaskId(int taskId);
 
     int insert(PumaTaskServerEntity entity);
-
 }

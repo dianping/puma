@@ -1,5 +1,7 @@
 package com.dianping.puma.biz.entity;
 
+import com.dianping.puma.core.constant.ActionController;
+
 import java.util.Date;
 
 public class PumaServerEntity {

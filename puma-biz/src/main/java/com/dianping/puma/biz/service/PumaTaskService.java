@@ -6,19 +6,17 @@ import com.dianping.puma.biz.entity.PumaTaskEntity;
 
 public interface PumaTaskService {
 
-	PumaTaskEntity find(int id);
+	PumaTaskEntity findById(int id);
 
-	PumaTaskEntity find(String name);
-
-	List<PumaTaskEntity> findBySrcDBInstanceName(String srcDBInstanceName);
+	PumaTaskEntity findByName(String name);
 
 	List<PumaTaskEntity> findByPumaServerName(String pumaServerName);
 
 	List<PumaTaskEntity> findAll();
 
-	long count();
-
 	List<PumaTaskEntity> findByPage(int page, int pageSize);
+
+	long count();
 
 	void create(PumaTaskEntity pumaTask);
 

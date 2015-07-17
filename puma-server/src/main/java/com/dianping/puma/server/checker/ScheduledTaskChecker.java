@@ -31,7 +31,7 @@ public class ScheduledTaskChecker implements TaskChecker {
 	@Override
 	public void check() {
 		ConcurrentMap<String, PumaTaskEntity> oriTasks = tasks;
-		tasks.clear();
+		tasks = new ConcurrentHashMap<String, PumaTaskEntity>();
 
 		try {
 			for (String host : taskServerManager.findAuthorizedHosts()) {

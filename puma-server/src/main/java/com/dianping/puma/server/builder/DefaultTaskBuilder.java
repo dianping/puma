@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 
+import com.dianping.puma.server.server.TaskServerManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,6 @@ import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
-import com.dianping.puma.server.service.PumaServerConfig;
 import com.dianping.puma.storage.DefaultArchiveStrategy;
 import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
@@ -54,7 +54,7 @@ public class DefaultTaskBuilder implements TaskBuilder {
 	EventCenter eventCenter;
 
 	@Autowired
-	PumaServerConfig pumaServerConfig;
+	TaskServerManager taskServerManager;
 
 	@Autowired
 	RawEventCodec rawCodec;
@@ -100,7 +100,7 @@ public class DefaultTaskBuilder implements TaskBuilder {
 
 		PumaTaskStateEntity taskState = new PumaTaskStateEntity();
 		taskState.setTaskName(pumaTask.getName());
-		taskState.setServerName(pumaServerConfig.getName());
+		taskState.setServerName("self");
 		taskState.setStatus(Status.PREPARING);
 
 		taskExecutor.setTaskState(taskState);
@@ -108,7 +108,7 @@ public class DefaultTaskBuilder implements TaskBuilder {
 		// Base.
 		String taskName = pumaTask.getName();
 		taskExecutor.setTaskName(taskName);
-		taskExecutor.setServerId(taskName.hashCode() + pumaServerConfig.getName().hashCode());
+		taskExecutor.setServerId(taskName.hashCode() + "self".hashCode());
 
 		// Bin log.
 		taskExecutor.setBinlogInfoHolder(binlogInfoHolder);

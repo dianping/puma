@@ -121,10 +121,13 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
             String binlogPositionStr = br.readLine();
             String eventIndexStr = br.readLine();
 
+            /*
             long serverId = Long.valueOf(serverIdStr);
             long binlogPosition = binlogPositionStr == null ? DEFAULT_BINLOGPOS : Long.parseLong(binlogPositionStr);
             int eventIndex = Integer.valueOf(eventIndexStr).intValue();
             BinlogInfo binlogInfo = new BinlogInfo(serverId, binlogFile, binlogPosition, eventIndex);
+            */
+            BinlogInfo binlogInfo = new BinlogInfo(0, "mysql-bin.000000", 0L, 0);
 
             mappedByteBufferMapping.put(taskName,
                     new RandomAccessFile(f, "rwd").getChannel().map(MapMode.READ_WRITE, 0, MAX_FILE_SIZE));

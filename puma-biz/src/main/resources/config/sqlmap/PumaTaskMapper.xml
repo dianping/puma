@@ -7,7 +7,7 @@
     <resultMap id="startBinlogInfo" type="com.dianping.puma.core.model.BinlogInfo" autoMapping="true"/>
 
     <resultMap id="entity" type="PumaTaskEntity" autoMapping="true">
-        <association resultMap="startBinlogInfo" property="startBinlogInfo" columnPrefix="BinlogInfo_"/>
+        <association resultMap="startBinlogInfo" property="startBinlogInfo" columnPrefix="StartBinlogInfo_"/>
     </resultMap>
 
     <select id="findById" resultMap="entity">
@@ -53,7 +53,7 @@
         BinlogInfo_BinlogFile=#{startBinlogInfo.binlogFile},
         BinlogInfo_BinlogPosition=#{startBinlogInfo.binlogPosition},
         ActionController=#{actionController},
-        UpdateTime = #{updateTime}
+        UpdateTime = #{gmtUpdate}
         where
         Id = #{id}
     </update>
@@ -77,7 +77,7 @@
         #{startBinlogInfo.binlogFile},
         #{startBinlogInfo.binlogPosition},
         #{actionController},
-        #{updateTime}
+        #{gmtUpdate}
         )
     </insert>
 

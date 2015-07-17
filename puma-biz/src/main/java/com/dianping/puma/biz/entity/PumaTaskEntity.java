@@ -3,6 +3,7 @@ package com.dianping.puma.biz.entity;
 import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.TableSet;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Date;
 import java.util.List;
@@ -13,31 +14,22 @@ public class PumaTaskEntity {
 
 	private String name;
 
-	/** parsed binlog preserved days. */
 	private int preservedDay;
 
-	/** source db jdbcRef. */
 	private String jdbcRef;
 
-	/** start binlog info, should be valid to the source db cluster. */
 	private BinlogInfo startBinlogInfo;
 
-	private Date UpdateTime;
+	private Date GmtUpdate;
 
-	/** relations with `PumaTaskTarget`. */
 	private TableSet tableSet;
 
-	/** relations with `PumaServer` by `PumaTaskServer`. */
-	private List<PumaServerEntity> pumaServers;
-
-	/** relations with `SrcDb`. */
 	private SrcDbEntity preferredSrcDb;
 
-	/** relations with `SrcDb`. */
 	private List<SrcDbEntity> backUpSrcDbs;
 
-	/** puma task instance, stopped or started on a specific server. */
-	private ActionController actionController;
+	/** Puma task instance may contain redundant information here. */
+	private List<Pair<PumaServerEntity, ActionController>> pumaServers;
 
 	public int getId() {
 		return id;
@@ -45,6 +37,14 @@ public class PumaTaskEntity {
 
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public int getPreservedDay() {
@@ -63,16 +63,20 @@ public class PumaTaskEntity {
 		this.startBinlogInfo = startBinlogInfo;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public TableSet getTableSet() {
 		return tableSet;
+	}
+
+	public void setTableSet(TableSet tableSet) {
+		this.tableSet = tableSet;
+	}
+
+	public String getJdbcRef() {
+		return jdbcRef;
+	}
+
+	public void setJdbcRef(String jdbcRef) {
+		this.jdbcRef = jdbcRef;
 	}
 
 	public SrcDbEntity getPreferredSrcDb() {
@@ -91,39 +95,48 @@ public class PumaTaskEntity {
 		this.backUpSrcDbs = backUpSrcDbs;
 	}
 
-	public void setPumaServers(List<PumaServerEntity> pumaServers) {
-		this.pumaServers = pumaServers;
+	public Date getGmtUpdate() {
+		return GmtUpdate;
 	}
 
-	public void setTableSet(TableSet tableSet) {
-		this.tableSet = tableSet;
+	public void setGmtUpdate(Date gmtUpdate) {
+		GmtUpdate = gmtUpdate;
 	}
 
-	public List<PumaServerEntity> getPumaServers() {
+	public List<Pair<PumaServerEntity, ActionController>> getPumaServers() {
 		return pumaServers;
 	}
 
-	public Date getUpdateTime() {
-		return UpdateTime;
+	public void setPumaServers(List<Pair<PumaServerEntity, ActionController>> pumaServers) {
+		this.pumaServers = pumaServers;
 	}
 
-	public void setUpdateTime(Date updateTime) {
-		UpdateTime = updateTime;
+	/**
+	 *
+	 * @return
+	 */
+	public ActionController hostGetActionController(String host) {
+		for (Pair<PumaServerEntity, ActionController> pumaServer: pumaServers) {
+			if (pumaServer.getLeft().getHost().equals(host)) {
+				return pumaServer.getRight();
+			}
+		}
+
+		throw new RuntimeException("self get action controller failure.");
 	}
 
-	public ActionController getActionController() {
-		return actionController;
-	}
+	/**
+	 *
+	 * @param actionController
+	 */
+	public void hostSetActionController(String host, ActionController actionController) {
+		for (Pair<PumaServerEntity, ActionController> pumaServer: pumaServers) {
+			if (pumaServer.getLeft().getHost().equals(host)) {
+				pumaServer.setValue(actionController);
+				return;
+			}
+		}
 
-	public void setActionController(ActionController actionController) {
-		this.actionController = actionController;
-	}
-
-	public String getJdbcRef() {
-		return jdbcRef;
-	}
-
-	public void setJdbcRef(String jdbcRef) {
-		this.jdbcRef = jdbcRef;
+		throw new RuntimeException("self set action controller failure.");
 	}
 }

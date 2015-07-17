@@ -16,7 +16,7 @@
         BinlogPosition = #{binlogPosition},
         ServerId = #{serverId},
         EventIndex = #{eventIndex},
-        UpdateTime = #{updateTime},
+        UpdateTime = #{gmtUpdate},
         where
         id = #{id}
     </update>
@@ -38,7 +38,7 @@
         #{binlogPosition},
         #{serverId},
         #{eventIndex},
-        #{updateTime}
+        #{gmtUpdate}
         )
     </insert>
 </mapper>

@@ -12,18 +12,17 @@ public class PumaTaskEntity {
 	private int id;
 
 	private String name;
+	private int preservedDay;
+	private TableSet tableSet;
+	private List<PumaServerEntity> pumaServers;
+	private String jdbcRef;
+
 
 	private BinlogInfo binlogInfo;
-
-	private int preservedDay;
-
-	private TableSet tableSet;
 
 	private SrcDbEntity preferSrcDb;
 
 	private List<SrcDbEntity> backUpSrcDbs;
-
-	private List<PumaServerEntity> pumaServers;
 
 	private Date UpdateTime;
 

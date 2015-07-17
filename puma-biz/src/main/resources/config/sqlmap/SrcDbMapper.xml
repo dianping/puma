@@ -32,33 +32,39 @@
     </select>
 
     <update id="update" parameterType="SrcDbEntity">
-        update SrcDb
-        set
-        Host = #{host},
-        Port = #{port},
-        Username = #{username},
-        Password = #{password},
-        ServerId = #{serverId}
-        where
+        UPDATE SrcDb
+        SET
+        jdbcRef = #{jdbcRef}
+        host = #{host},
+        port = #{port},
+        username = #{username},
+        password = #{password},
+        serverId = #{serverId},
+        preferred = #{preferred}
+        WHERE
         id = #{id}
     </update>
 
     <insert id="insert" parameterType="SrcDbEntity" useGeneratedKeys="true" keyProperty="id">
-        insert into SrcDb
+        INSERT INTO SrcDb
         (
-        Host,
-        Port,
-        Username,
-        Password,
-        ServerId
+        jdbcRef,
+        host,
+        port,
+        username,
+        password,
+        serverId,
+        preferred
         )
-        values
+        VALUES
         (
+        #{jdbcRef},
         #{host},
         #{port},
         #{username},
         #{password},
-        #{serverId}
+        #{serverId},
+        #{preferred}
         )
     </insert>
 

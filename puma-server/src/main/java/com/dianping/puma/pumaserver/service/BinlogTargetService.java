@@ -5,5 +5,5 @@ import com.dianping.puma.pumaserver.exception.binlog.BinlogTargetException;
 
 public interface BinlogTargetService {
 
-	BinlogTarget find(String clientName) throws BinlogTargetException;
+	BinlogTarget find(String targetKey) throws BinlogTargetException;
 }

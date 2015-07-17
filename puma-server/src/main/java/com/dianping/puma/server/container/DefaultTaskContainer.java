@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.dianping.puma.core.model.Table;
+import com.dianping.puma.core.model.TableSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -242,14 +244,29 @@ public class DefaultTaskContainer implements TaskContainer {
 	// }
 	//
 
-	@Override
-	public EventStorage getTaskStorage(String taskName) {
+	public EventStorage getTaskStorageByTaskName(String taskName) {
 		if (taskExecutors.containsKey(taskName)) {
 			List<Sender> senders = taskExecutors.get(taskName).getFileSender();
 			if (senders != null && senders.size() > 0) {
 				return senders.get(0).getStorage();
 			}
 		}
+		return null;
+	}
+
+	@Override
+	public EventStorage getTaskStorage(String database) {
+		for (TaskExecutor taskExecutor: taskExecutors.values()) {
+			TableSet tableSet = taskExecutor.getTask().getTableSet();
+			List<Table> tables = tableSet.listSchemaTables();
+
+			for (Table table: tables) {
+				if (table.getSchemaName().equals(database)) {
+					return getTaskStorageByTaskName(taskExecutor.getTask().getName());
+				}
+			}
+		}
+
 		return null;
 	}
 

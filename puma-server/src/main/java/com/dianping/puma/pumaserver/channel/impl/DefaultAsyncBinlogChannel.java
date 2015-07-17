@@ -44,7 +44,8 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
             boolean transaction
     ) throws BinlogChannelException {
 
-        EventStorage eventStorage = taskContainer.getTaskStorage(targetName);
+        //EventStorage eventStorage = taskContainer.getTaskStorage(targetName);
+        EventStorage eventStorage = taskContainer.getTaskStorage(database);
 
         if (eventStorage == null) {
             throw new BinlogChannelException("find event storage failure, not exist.");

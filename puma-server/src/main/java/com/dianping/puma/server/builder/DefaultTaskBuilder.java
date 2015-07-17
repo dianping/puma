@@ -93,6 +93,8 @@ public class DefaultTaskBuilder implements TaskBuilder {
 	public TaskExecutor build(PumaTaskEntity pumaTask) throws Exception {
 		DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
 
+		taskExecutor.setTask(pumaTask);
+
 		PumaTaskStateEntity taskState = new PumaTaskStateEntity();
 		taskState.setTaskName(pumaTask.getName());
 		taskState.setServerName("self");

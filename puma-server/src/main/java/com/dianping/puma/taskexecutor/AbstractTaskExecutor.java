@@ -17,6 +17,7 @@ package com.dianping.puma.taskexecutor;
 
 import java.util.List;
 
+import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
@@ -33,6 +34,8 @@ import com.dianping.puma.storage.holder.BinlogInfoHolder;
 @ThreadUnSafe
 public abstract class AbstractTaskExecutor implements TaskExecutor {
 	private PumaContext context;
+
+	private PumaTaskEntity pumaTask;
 
 	private String taskId;
 
@@ -210,4 +213,11 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
 		this.state = state;
 	}
 
+	public PumaTaskEntity getTask() {
+		return pumaTask;
+	}
+
+	public void setTask(PumaTaskEntity pumaTask) {
+		this.pumaTask = pumaTask;
+	}
 }

@@ -14,6 +14,7 @@ package com.dianping.puma.taskexecutor;
 
 import java.util.List;
 
+import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.core.LifeCycle;
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
@@ -26,6 +27,10 @@ import com.dianping.puma.storage.holder.BinlogInfoHolder;
  *
  */
 public interface TaskExecutor extends LifeCycle<Exception> {
+
+	public PumaTaskEntity getTask();
+
+	public void setTask(PumaTaskEntity pumaTask);
 
 	public void setContext(PumaContext context);
 

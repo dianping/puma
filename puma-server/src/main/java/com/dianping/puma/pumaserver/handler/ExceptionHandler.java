@@ -2,15 +2,17 @@ package com.dianping.puma.pumaserver.handler;
 
 import com.dianping.puma.core.dto.ExceptionResponse;
 import com.dianping.puma.core.util.ConvertHelper;
-import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogAckException;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogAuthException;
+import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogTargetException;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -22,6 +24,8 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 @ChannelHandler.Sharable
 public class ExceptionHandler extends ChannelDuplexHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(ExceptionHandler.class);
 
     public static final ExceptionHandler INSTANCE = new ExceptionHandler();
 
@@ -52,6 +56,8 @@ public class ExceptionHandler extends ChannelDuplexHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        logger.error(cause.getMessage(), cause);
+
         if (cause instanceof IOException) {
             // Handle network exceptions.
             // @todo

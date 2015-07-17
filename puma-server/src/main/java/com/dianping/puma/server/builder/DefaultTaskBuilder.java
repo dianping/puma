@@ -219,9 +219,9 @@ public class DefaultTaskBuilder implements TaskBuilder {
 		storage.setCleanupStrategy(cleanupStrategy);
 
 		storage.setBinlogIndexBaseDir(binlogIndexBaseDir + taskName);
-		
+
 		sender.setStorage(storage);
-		
+
 		senders.add(sender);
 
 		// Dispatch.
@@ -229,6 +229,8 @@ public class DefaultTaskBuilder implements TaskBuilder {
 		dispatcher.setName(dispatchName + taskName);
 		dispatcher.setSenders(senders);
 		taskExecutor.setDispatcher(dispatcher);
+
+		taskExecutor.initContext();
 
 		// Set puma task status.
 		taskExecutor.getTaskState().setStatus(Status.WAITING);

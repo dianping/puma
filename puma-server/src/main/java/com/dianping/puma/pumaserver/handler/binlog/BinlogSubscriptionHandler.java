@@ -22,73 +22,71 @@ import java.util.List;
 @ChannelHandler.Sharable
 public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<BinlogSubscriptionRequest> {
 
-	private BinlogTargetService binlogTargetService;
+    private BinlogTargetService binlogTargetService;
 
-	private BinlogAckService binlogAckService;
+    private BinlogAckService binlogAckService;
 
-	private ClientSessionService clientSessionService;
+    private ClientSessionService clientSessionService;
 
-	private TaskContainer taskContainer;
+    private TaskContainer taskContainer;
 
-	@Override
-	public void channelRead0(ChannelHandlerContext ctx, BinlogSubscriptionRequest binlogSubscriptionRequest) {
-		String clientName = binlogSubscriptionRequest.getClientName();
+    @Override
+    public void channelRead0(ChannelHandlerContext ctx, BinlogSubscriptionRequest binlogSubscriptionRequest) {
+        String clientName = binlogSubscriptionRequest.getClientName();
 
-		BinlogTarget binlogTarget = binlogTargetService.find(clientName);
-		BinlogAck binlogAck = binlogAckService.load(clientName);
+        BinlogTarget binlogTarget = binlogTargetService.find(clientName);
+        BinlogAck binlogAck = binlogAckService.load(clientName);
 
-		AsyncBinlogChannel asyncBinlogChannel = buildBinlogChannel(
-				binlogTarget == null ? null : binlogTarget.getTargetName(),
-				binlogTarget == null ? 0 : binlogTarget.getDbServerId(),
-				0L,
-				binlogAck == null ? null : binlogAck.getBinlogInfo(),
-				0,
-				binlogSubscriptionRequest.getDatabase(),
-				binlogSubscriptionRequest.getTables(),
-				true,
-				true,
-				true
-		);
+        AsyncBinlogChannel asyncBinlogChannel = buildBinlogChannel(
+                binlogTarget == null ? null : binlogTarget.getTargetName(),
+                0L,
+                binlogAck == null ? null : binlogAck.getBinlogInfo(),
+                0,
+                binlogSubscriptionRequest.getDatabase(),
+                binlogSubscriptionRequest.getTables(),
+                true,
+                true,
+                true
+        );
 
-		ClientSession session = new ClientSession(clientName, asyncBinlogChannel, ClientType.UNKNOW);
-		clientSessionService.subscribe(session);
+        ClientSession session = new ClientSession(clientName, asyncBinlogChannel, ClientType.UNKNOW);
+        clientSessionService.subscribe(session);
 
-		BinlogSubscriptionResponse binlogSubscriptionResponse = new BinlogSubscriptionResponse();
-		binlogSubscriptionResponse.setToken(session.getToken());
-		ctx.channel().writeAndFlush(binlogSubscriptionResponse);
-	}
+        BinlogSubscriptionResponse binlogSubscriptionResponse = new BinlogSubscriptionResponse();
+        binlogSubscriptionResponse.setToken(session.getToken());
+        ctx.channel().writeAndFlush(binlogSubscriptionResponse);
+    }
 
-	private AsyncBinlogChannel buildBinlogChannel(
-			String targetName,
-			long dbServerId,
-			long sc,
-			BinlogInfo binlogInfo,
-			long timestamp,
-			String database,
-			List<String> tables,
-			boolean dml,
-			boolean ddl,
-			boolean transaction) {
-		DefaultAsyncBinlogChannel defaultAsyncBinlogChannel = new DefaultAsyncBinlogChannel();
-		defaultAsyncBinlogChannel.setTaskContainer(taskContainer);
-		defaultAsyncBinlogChannel.init(targetName, dbServerId, sc, binlogInfo, timestamp, database, tables, dml, ddl ,transaction);
+    private AsyncBinlogChannel buildBinlogChannel(
+            String targetName,
+            long sc,
+            BinlogInfo binlogInfo,
+            long timestamp,
+            String database,
+            List<String> tables,
+            boolean dml,
+            boolean ddl,
+            boolean transaction) {
+        DefaultAsyncBinlogChannel defaultAsyncBinlogChannel = new DefaultAsyncBinlogChannel();
+        defaultAsyncBinlogChannel.setTaskContainer(taskContainer);
+        defaultAsyncBinlogChannel.init(targetName, sc, binlogInfo, timestamp, database, tables, dml, ddl, transaction);
 
-		return defaultAsyncBinlogChannel;
-	}
+        return defaultAsyncBinlogChannel;
+    }
 
-	public void setBinlogTargetService(BinlogTargetService binlogTargetService) {
-		this.binlogTargetService = binlogTargetService;
-	}
+    public void setBinlogTargetService(BinlogTargetService binlogTargetService) {
+        this.binlogTargetService = binlogTargetService;
+    }
 
-	public void setBinlogAckService(BinlogAckService binlogAckService) {
-		this.binlogAckService = binlogAckService;
-	}
+    public void setBinlogAckService(BinlogAckService binlogAckService) {
+        this.binlogAckService = binlogAckService;
+    }
 
-	public void setClientSessionService(ClientSessionService clientSessionService) {
-		this.clientSessionService = clientSessionService;
-	}
+    public void setClientSessionService(ClientSessionService clientSessionService) {
+        this.clientSessionService = clientSessionService;
+    }
 
-	public void setTaskContainer(TaskContainer taskContainer) {
-		this.taskContainer = taskContainer;
-	}
+    public void setTaskContainer(TaskContainer taskContainer) {
+        this.taskContainer = taskContainer;
+    }
 }

@@ -10,7 +10,6 @@ public interface AsyncBinlogChannel {
 
     void init(
             String targetName,
-            long dbServerId,
             long sc,
             BinlogInfo binlogInfo,
             long timestamp,

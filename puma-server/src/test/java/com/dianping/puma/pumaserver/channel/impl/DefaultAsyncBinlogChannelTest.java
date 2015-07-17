@@ -9,10 +9,8 @@ import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.EventStorage;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -65,7 +63,7 @@ public class DefaultAsyncBinlogChannelTest {
 
         target = new DefaultAsyncBinlogChannel();
         target.setTaskContainer(taskContainer);
-        target.init("", -1, -1, new BinlogInfo(1, "", 1l, 1), -1, "", new ArrayList<String>(), false, false, false);
+        target.init("", -1, new BinlogInfo(-1, "", 1l, 1), -1, "", new ArrayList<String>(), false, false, false);
     }
 
     @Test
@@ -151,7 +149,7 @@ public class DefaultAsyncBinlogChannelTest {
     }
 
     @SuppressWarnings("serial")
-   static class NullEvent extends Event {
+    static class NullEvent extends Event {
         @Override
         public BinlogInfo getBinlogInfo() {
             return null;

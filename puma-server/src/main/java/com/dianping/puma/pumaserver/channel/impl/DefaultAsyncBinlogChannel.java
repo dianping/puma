@@ -34,7 +34,6 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
     @Override
     public void init(
             String targetName,
-            long dbServerId,
             long sc,
             BinlogInfo binlogInfo,
             long timestamp,
@@ -54,7 +53,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
         try {
             eventChannel = eventStorage.getChannel(
                     sc,
-                    dbServerId,
+                    binlogInfo.getServerId(),
                     binlogInfo.getBinlogFile(),
                     binlogInfo.getBinlogPosition(),
                     timestamp

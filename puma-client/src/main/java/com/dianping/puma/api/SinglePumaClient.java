@@ -9,6 +9,7 @@ import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogUnsubscriptionResponse;
 import com.dianping.puma.core.event.*;
 import com.dianping.puma.core.model.BinlogInfo;
+import com.google.common.base.Strings;
 import com.google.gson.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -179,6 +180,11 @@ public class SinglePumaClient implements PumaClient {
 
     protected <T> T execute(String path, List<NameValuePair> params, Class<T> clazz) throws PumaClientException {
         checkConnection();
+
+        if (Strings.isNullOrEmpty(this.token) && !clazz.equals(BinlogSubscriptionResponse.class)) {
+            doSubscribe();
+            addToken(params);
+        }
 
         HttpResponse result;
         try {

@@ -45,17 +45,11 @@ public class SinglePumaConnectorTest {
         while (true) {
             try {
                 BinlogMessage message = connector.get(1);
-
                 //todo:业务逻辑
                 System.out.println(new Gson().toJson(message));
-
-                Thread.sleep(1000);
-
                 connector.ack(message.getLastBinlogInfo());
             } catch (PumaClientException exp) {
                 exp.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
         }
     }

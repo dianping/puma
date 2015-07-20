@@ -12,11 +12,9 @@ import com.dianping.puma.pumaserver.handler.binlog.BinlogGetHandler;
 import com.dianping.puma.pumaserver.handler.binlog.BinlogSubscriptionHandler;
 import com.dianping.puma.pumaserver.handler.binlog.BinlogUnsubscriptionHandler;
 import com.dianping.puma.pumaserver.handler.deprecated.DeprecatedBinlogQueryHandler;
-import com.dianping.puma.pumaserver.service.BinlogTargetService;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
 import com.dianping.puma.pumaserver.service.impl.DbBinlogAckService;
 import com.dianping.puma.pumaserver.service.impl.DefaultClientSessionService;
-import com.dianping.puma.pumaserver.service.impl.LionBinlogTargetService;
 import com.dianping.puma.server.container.TaskContainer;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.http.HttpContentCompressor;
@@ -47,8 +45,6 @@ public class PumaServerManager {
     @Autowired
     protected DbBinlogAckService binlogAckService;
 
-    protected final BinlogTargetService binlogTargetService = new LionBinlogTargetService();
-
     protected final ClientSessionService clientSessionService = new DefaultClientSessionService();
 
     protected final ChannelHolderHandler channelHolderHandler = new ChannelHolderHandler(new PumaClientsHolder());
@@ -70,7 +66,6 @@ public class PumaServerManager {
 
         final BinlogSubscriptionHandler binlogSubscriptionHandler = new BinlogSubscriptionHandler();
         binlogSubscriptionHandler.setBinlogAckService(binlogAckService);
-        binlogSubscriptionHandler.setBinlogTargetService(binlogTargetService);
         binlogSubscriptionHandler.setClientSessionService(clientSessionService);
         binlogSubscriptionHandler.setTaskContainer(taskContainer);
 

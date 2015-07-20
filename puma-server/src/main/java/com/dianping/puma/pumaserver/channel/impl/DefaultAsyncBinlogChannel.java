@@ -37,7 +37,6 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
     @Override
     public void init(
-            String targetName,
             long sc,
             BinlogInfo binlogInfo,
             long timestamp,
@@ -47,8 +46,6 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
             boolean ddl,
             boolean transaction
     ) throws BinlogChannelException {
-
-        //EventStorage eventStorage = taskContainer.getTaskStorage(targetName);
         EventStorage eventStorage = taskContainer.getTaskStorage(database);
 
         if (eventStorage == null) {

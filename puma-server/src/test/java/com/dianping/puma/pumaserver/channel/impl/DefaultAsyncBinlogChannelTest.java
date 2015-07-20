@@ -63,7 +63,7 @@ public class DefaultAsyncBinlogChannelTest {
 
         target = new DefaultAsyncBinlogChannel();
         target.setTaskContainer(taskContainer);
-        target.init("", -1, new BinlogInfo(-1, "", 1l, 1), -1, "", new ArrayList<String>(), false, false, false);
+        target.init(-1, new BinlogInfo(-1, "", 1l, 1), -1, "", new ArrayList<String>(), false, false, false);
     }
 
     @Test

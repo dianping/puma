@@ -9,7 +9,6 @@ import java.util.List;
 public interface AsyncBinlogChannel {
 
     void init(
-            String targetName,
             long sc,
             BinlogInfo binlogInfo,
             long timestamp,

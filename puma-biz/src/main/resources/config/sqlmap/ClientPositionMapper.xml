@@ -11,14 +11,13 @@
     <update id="update" parameterType="ClientPositionEntity">
         update ClientPosition
         set
-        ClientName = #{clientName},
         BinlogFile = #{binlogFile},
         BinlogPosition = #{binlogPosition},
         ServerId = #{serverId},
         EventIndex = #{eventIndex},
-        UpdateTime = #{gmtUpdate},
+        UpdateTime = #{updateTime}
         where
-        id = #{id}
+        ClientName = #{clientName}
     </update>
 
     <insert id="insert" parameterType="ClientPositionEntity" useGeneratedKeys="true" keyProperty="id">
@@ -38,7 +37,7 @@
         #{binlogPosition},
         #{serverId},
         #{eventIndex},
-        #{gmtUpdate}
+        #{updateTime}
         )
     </insert>
 </mapper>

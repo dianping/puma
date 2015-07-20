@@ -1,5 +1,7 @@
 package com.dianping.puma.biz.entity;
 
+import java.util.Date;
+
 /**
  * Dozer @ 7/15/15
  * mail@dozer.cc
@@ -18,6 +20,8 @@ public class ClientPositionEntity {
     private long serverId;
 
     private int eventIndex;
+
+    private Date updateTime;
 
     public int getId() {
         return id;
@@ -65,5 +69,13 @@ public class ClientPositionEntity {
 
     public void setEventIndex(int eventIndex) {
         this.eventIndex = eventIndex;
+    }
+
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
     }
 }

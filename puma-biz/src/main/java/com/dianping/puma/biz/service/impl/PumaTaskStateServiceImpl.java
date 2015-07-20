@@ -49,8 +49,6 @@ public class PumaTaskStateServiceImpl implements PumaTaskStateService {
     }
 
     protected PumaTaskStateEntity loadFullPumaTaskState(PumaTaskStateEntity taskState) {
-        SrcDbEntity srcDb = srcDbService.find(taskState.getSrcDb().getId());
-        taskState.setSrcDb(srcDb);
         return taskState;
     }
 

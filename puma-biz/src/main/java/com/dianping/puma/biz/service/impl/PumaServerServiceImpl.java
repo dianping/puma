@@ -3,10 +3,10 @@ package com.dianping.puma.biz.service.impl;
 import com.dianping.puma.biz.dao.PumaServerDao;
 import com.dianping.puma.biz.entity.PumaServerEntity;
 import com.dianping.puma.biz.service.PumaServerService;
-import com.dianping.puma.core.util.IPUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -29,6 +29,11 @@ public class PumaServerServiceImpl implements PumaServerService {
     @Override
     public PumaServerEntity findByHost(String host) {
         return pumaServerDao.findByHost(host);
+    }
+
+    @Override
+    public List<PumaServerEntity> findByDatabaseAndTables(String database, List<String> tables) {
+        return Collections.emptyList();
     }
 
     @Override
@@ -56,7 +61,7 @@ public class PumaServerServiceImpl implements PumaServerService {
             server.setPort(4040);
             create(server);
         } else {
-            server.setUpdateTime(new Date());
+            server.setGmtUpdate(new Date());
             update(server);
         }
     }

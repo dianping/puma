@@ -8,6 +8,7 @@
     <packaging>pom</packaging>
     <name>parent</name>
     <modules>
+        <module>puma-admin</module>
         <module>puma-server</module>
         <module>puma-client</module>
         <module>puma-core</module>

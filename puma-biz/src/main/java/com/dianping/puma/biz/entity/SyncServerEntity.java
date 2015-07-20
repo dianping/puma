@@ -1,5 +1,7 @@
 package com.dianping.puma.biz.entity;
 
+import java.util.Date;
+
 public class SyncServerEntity {
 
 	private int id;
@@ -8,7 +10,11 @@ public class SyncServerEntity {
 
 	private String host;
 
-	private int port;
+	private int port; // temporarily redundant.
+
+	private float loadBalance;
+
+	private Date gmtUpdate;
 
 	public int getId() {
 		return id;
@@ -40,5 +46,21 @@ public class SyncServerEntity {
 
 	public void setPort(int port) {
 		this.port = port;
+	}
+
+	public float getLoadBalance() {
+		return loadBalance;
+	}
+
+	public void setLoadBalance(float loadBalance) {
+		this.loadBalance = loadBalance;
+	}
+
+	public Date getGmtUpdate() {
+		return gmtUpdate;
+	}
+
+	public void setGmtUpdate(Date gmtUpdate) {
+		this.gmtUpdate = gmtUpdate;
 	}
 }

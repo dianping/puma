@@ -4,8 +4,19 @@
 
 <mapper namespace="com.dianping.puma.biz.dao.PumaServerDao">
 
+    <select id="findById" resultType="PumaServerEntity">
+        SELECT * FROM PumaServer WHERE id = #{id}
+    </select>
+
+    <select id="findByIds" resultType="PumaServerEntity">
+        SELECT * FROM PumaServer WHERE id IN
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
     <select id="count" resultType="long">
-        SELECT count(*) FROM PumaServer
+        SELECT COUNT (*) FROM PumaServer
     </select>
 
     <select id="findAll" resultType="PumaServerEntity">
@@ -14,17 +25,6 @@
 
     <select id="findByPage" resultType="PumaServerEntity">
         SELECT * FROM PumaServer limit #{offset},#{limit}
-    </select>
-
-    <select id="findById" resultType="PumaServerEntity">
-        SELECT * FROM PumaServer WHERE id = #{id}
-    </select>
-
-    <select id="findByIds" resultType="PumaServerEntity">
-        SELECT * FROM PumaServer WHERE id in
-        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
-            #{item}
-        </foreach>
     </select>
 
     <select id="findByHost" resultType="PumaServerEntity">
@@ -36,7 +36,7 @@
     </select>
 
     <insert id="insert" parameterType="PumaServerEntity">
-        INSERT INTO PumaServer (Name, Host, Port, UpdateTime) VALUES (#{name}, #{host}, #{port}, #{updateTime})
+        INSERT INTO PumaServer (Name, Host, Port, GmtUpdate) VALUES (#{name}, #{host}, #{port}, #{gmtUpdate})
     </insert>
 
     <update id="update" parameterType="PumaServerEntity">
@@ -45,7 +45,7 @@
         Name = #{name},
         Host = #{host},
         port = #{port},
-        updateTime = #{updateTime}
+        gmtUpdate = #{gmtUpdate}
         where id = #{id}
     </update>
 

@@ -16,9 +16,4 @@
         <property name="errorCodeHandler" value="${puma.admin.errorCodeHandler}" />
     </bean>
 
-    <!--bean id="pumaTaskStateContainer" class="com.dianping.puma.core.model.state.DefaultTaskStateContainer"/-->
-    <bean id="syncTaskStateContainer" class="com.dianping.puma.core.model.state.DefaultTaskStateContainer"/>
-    <bean id="catchupTaskStateContainer" class="com.dianping.puma.core.model.state.DefaultTaskStateContainer"/>
-    <bean id="dumpTaskStateContainer" class="com.dianping.puma.core.model.state.DefaultTaskStateContainer"/>
-
 </beans>

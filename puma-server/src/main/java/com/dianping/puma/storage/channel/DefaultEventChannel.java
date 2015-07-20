@@ -19,156 +19,179 @@ import java.io.EOFException;
 import java.io.IOException;
 
 public class DefaultEventChannel extends AbstractEventChannel implements EventChannel {
-    private BucketManager bucketManager;
+	private BucketManager bucketManager;
 
-    private DataIndex<BinlogIndexKey, L2Index> indexManager;
+	private DataIndex<BinlogIndexKey, L2Index> indexManager;
 
-    private IndexBucket<BinlogIndexKey, L2Index> indexBucket;
+	private IndexBucket<BinlogIndexKey, L2Index> indexBucket;
 
-    private EventCodec codec;
+	private EventCodec codec;
 
-    private BinlogIndexKey binlogIndexKey;
+	private BinlogIndexKey binlogIndexKey;
 
-    private volatile boolean stopped = true;
+	private volatile boolean stopped = true;
 
-    private DataBucket readDataBucket;
+	private DataBucket readDataBucket;
 
-    private BinlogIndexKey lastBinLogIndexKey = null;
+	private BinlogIndexKey lastBinLogIndexKey = null;
 
-    private Sequence lastReadSequence = null;
+	private Sequence lastReadSequence = null;
 
-    public DefaultEventChannel(BucketManager bucketManager, DataIndex<BinlogIndexKey, L2Index> indexManager,
-                               EventCodec codec, long seq, long serverId, String binlogFile, long binlogPos, long timestamp)
-            throws StorageException {
-        this.bucketManager = bucketManager;
-        this.indexManager = indexManager;
-        this.codec = codec;
-        this.binlogIndexKey = new BinlogIndexKey(binlogFile, binlogPos, serverId);
+	public DefaultEventChannel(BucketManager bucketManager, DataIndex<BinlogIndexKey, L2Index> indexManager,
+	      EventCodec codec, long seq, long serverId, String binlogFile, long binlogPos, long timestamp)
+	      throws StorageException {
+		this.bucketManager = bucketManager;
+		this.indexManager = indexManager;
+		this.codec = codec;
+		this.binlogIndexKey = new BinlogIndexKey(binlogFile, binlogPos, serverId);
 
-        try {
-            this.indexBucket = indexManager.getIndexBucket(seq, this.binlogIndexKey);
-        } catch (IOException e) {
-            throw new InvalidSequenceException("Invalid sequence(" + seq + ")", e);
-        }
-    }
+		try {
+			this.indexBucket = indexManager.getIndexBucket(seq, this.binlogIndexKey);
+		} catch (IOException e) {
+			throw new InvalidSequenceException("Invalid sequence(" + seq + ")", e);
+		}
 
-    @Override
-    public Event next(boolean emptyReturnNull) throws StorageException {
-        checkClosed();
+		if (this.indexBucket == null) {
+			throw new InvalidSequenceException("Invalid BinlogFile(" + binlogFile + "),binlogPos(" + binlogPos + ")");
+		}
+	}
 
-        Event event = null;
+	@Override
+	public Event next(boolean shouldSleep) throws StorageException {
+		checkClosed();
 
-        while (event == null) {
-            try {
-                checkClosed();
-                L2Index nextL2Index = this.indexBucket.next();
+		Event event = null;
 
-                if (this.database != null && !nextL2Index.getDatabase().equals(this.database)) {
-                    continue;
-                }
-                if (this.tables != null && !this.tables.contains(nextL2Index.getTable())) {
-                    continue;
-                }
-                if (this.withDdl != nextL2Index.isDdl() && this.withDml != nextL2Index.isDml()) {
-                    continue;
-                }
+		while (event == null) {
+			try {
+				checkClosed();
+				if (this.indexBucket == null) {
+					this.indexBucket = this.indexManager.getNextIndexBucket(lastBinLogIndexKey);
 
-                Sequence sequence = nextL2Index.getSequence();
+					if (this.indexBucket == null) {
+						if (!shouldSleep) {
+							return null;
+						} else {
+							try {
+								Thread.sleep(5);
+							} catch (InterruptedException e1) {
+								Thread.currentThread().interrupt();
+							}
+						}
+					}
+				}
 
-                if (readDataBucket == null) {
-                    lastReadSequence = sequence;
-                    readDataBucket = this.bucketManager.getReadBucket(sequence.longValue(), false);
-                }
+				L2Index nextL2Index = this.indexBucket.next();
 
-                if (sequence.getOffset() != lastReadSequence.getOffset()) {
-                    readDataBucket.skip(sequence.getOffset() - lastReadSequence.getOffset() - lastReadSequence.getLen());
-                }
-                byte[] data = readDataBucket.getNext();
-                event = codec.decode(data);
+				if (this.database != null && !nextL2Index.getDatabase().equals(this.database)) {
+					continue;
+				}
+				if (this.tables != null && !this.tables.contains(nextL2Index.getTable())) {
+					continue;
+				}
+				if (this.withDdl != nextL2Index.isDdl() && this.withDml != nextL2Index.isDml()) {
+					continue;
+				}
 
-                lastBinLogIndexKey = nextL2Index.getBinlogIndexKey();
-                lastReadSequence = sequence;
-            } catch (EOFException e) {
-                try {
-                    if (lastReadSequence != null && this.bucketManager.hasNexReadBucket(lastReadSequence.longValue())) {
-                        if (readDataBucket != null) {
-                            this.readDataBucket.stop();
-                            this.readDataBucket = null;
-                        }
+				Sequence sequence = nextL2Index.getSequence();
 
-                        if (indexBucket != null) {
-                            this.indexBucket.stop();
-                        }
+				if (readDataBucket == null) {
+					lastReadSequence = sequence;
+					readDataBucket = this.bucketManager.getReadBucket(sequence.longValue(), false);
+				}
 
-                        this.indexBucket = this.indexManager.getNextIndexBucket(lastBinLogIndexKey);
-                        this.indexBucket.start();
-                    } else {
-                        if (emptyReturnNull) {
-                            return null;
-                        }
-                        try {
-                            Thread.sleep(5);
-                        } catch (InterruptedException e1) {
-                            Thread.currentThread().interrupt();
-                        }
-                    }
-                } catch (IOException ex) {
-                    throw new StorageReadException("Failed to read", ex);
-                }
-            } catch (IOException e) {
-                throw new StorageReadException("Failed to read", e);
-            }
-        }
+				if (sequence.getOffset() != lastReadSequence.getOffset()) {
+					readDataBucket.skip(sequence.getOffset() - lastReadSequence.getOffset() - lastReadSequence.getLen());
+				}
+				byte[] data = readDataBucket.getNext();
+				event = codec.decode(data);
 
-        return event;
-    }
+				lastBinLogIndexKey = nextL2Index.getBinlogIndexKey();
+				lastReadSequence = sequence;
+			} catch (EOFException e) {
+				try {
+					if (lastReadSequence != null && this.bucketManager.hasNexReadBucket(lastReadSequence.longValue())) {
+						if (readDataBucket != null) {
+							this.readDataBucket.stop();
+							this.readDataBucket = null;
+						}
 
-    @Override
-    public Event next() throws StorageException {
-        return next(false);
-    }
+						if (indexBucket != null) {
+							this.indexBucket.stop();
+						}
 
-    private void checkClosed() throws StorageClosedException {
-        if (stopped) {
-            throw new StorageClosedException("Channel has been closed.");
-        }
-    }
+						this.indexBucket = this.indexManager.getNextIndexBucket(lastBinLogIndexKey);
+						if (this.indexBucket != null) {
+							this.indexBucket.start();
+						}
+					} else {
+						if (shouldSleep) {
+							return null;
+						} else {
+							try {
+								Thread.sleep(5);
+							} catch (InterruptedException e1) {
+								Thread.currentThread().interrupt();
+							}
+						}
+					}
+				} catch (IOException ex) {
+					throw new StorageReadException("Failed to read", ex);
+				}
+			} catch (IOException e) {
+				throw new StorageReadException("Failed to read", e);
+			}
+		}
 
-    @Override
-    public void close() {
-        if (!stopped) {
-            stopped = true;
-            if (this.readDataBucket != null) {
-                try {
-                    this.readDataBucket.stop();
-                    this.readDataBucket = null;
-                } catch (IOException ignore) {
-                }
-            }
+		return event;
+	}
 
-            if (this.indexBucket != null) {
-                try {
-                    this.indexBucket.stop();
-                    this.indexBucket = null;
-                } catch (IOException ignore) {
-                }
-            }
-        }
-    }
+	@Override
+	public Event next() throws StorageException {
+		return next(false);
+	}
 
-    public void open() {
-        if (!stopped) {
-            return;
-        }
+	private void checkClosed() throws StorageClosedException {
+		if (stopped) {
+			throw new StorageClosedException("Channel has been closed.");
+		}
+	}
 
-        stopped = false;
-        try {
-            this.indexBucket.start();
-        } catch (IOException ignore) {
-        }
-    }
+	@Override
+	public void close() {
+		if (!stopped) {
+			stopped = true;
+			if (this.readDataBucket != null) {
+				try {
+					this.readDataBucket.stop();
+					this.readDataBucket = null;
+				} catch (IOException ignore) {
+				}
+			}
 
-    public void setBucketManager(BucketManager bucketManager) {
-        this.bucketManager = bucketManager;
-    }
+			if (this.indexBucket != null) {
+				try {
+					this.indexBucket.stop();
+					this.indexBucket = null;
+				} catch (IOException ignore) {
+				}
+			}
+		}
+	}
+
+	public void open() {
+		if (!stopped) {
+			return;
+		}
+
+		stopped = false;
+		try {
+			this.indexBucket.start();
+		} catch (IOException ignore) {
+		}
+	}
+
+	public void setBucketManager(BucketManager bucketManager) {
+		this.bucketManager = bucketManager;
+	}
 }

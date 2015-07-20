@@ -53,19 +53,4 @@ public class LocalFileIndexBucket<K, V> implements IndexBucket<K, V> {
 			}
 		}
 	}
-
-//	@Override
-//	public V findById(K key) throws StorageClosedException, IOException {
-//		while (true) {
-//			V next = next();
-//
-//			if (next instanceof L2Index) {
-//				L2Index l2Index = (L2Index) next;
-//
-//				if (l2Index.getBinlogIndexKey().equals(key)) {
-//					return next;
-//				}
-//			}
-//		}
-//	}
 }

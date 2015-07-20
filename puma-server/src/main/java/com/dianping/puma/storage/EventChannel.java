@@ -51,5 +51,5 @@ public interface EventChannel {
 
     public Event next() throws StorageException;
 
-    public Event next(boolean emptyReturnNull) throws StorageException;
+    public Event next(boolean shouldSleep) throws StorageException;
 }

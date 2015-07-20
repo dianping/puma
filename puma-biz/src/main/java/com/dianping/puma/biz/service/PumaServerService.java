@@ -12,6 +12,8 @@ public interface PumaServerService {
 
 	PumaServerEntity findByHost(String host);
 
+	List<PumaServerEntity> findByDatabaseAndTables(String database, List<String> tables);
+
 	List<PumaServerEntity> findAll();
 
 	long count();

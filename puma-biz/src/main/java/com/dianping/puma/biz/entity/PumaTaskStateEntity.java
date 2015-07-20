@@ -21,8 +21,6 @@ public class PumaTaskStateEntity {
 
     private Status status;
 
-    private SrcDbEntity srcDb;
-
     private BinlogInfo binlogInfo = new BinlogInfo();
 
     private BinlogStat binlogStat = new BinlogStat();
@@ -53,14 +51,6 @@ public class PumaTaskStateEntity {
 
     public void setDetail(String detail) {
         this.detail = detail;
-    }
-
-    public SrcDbEntity getSrcDb() {
-        return srcDb;
-    }
-
-    public void setSrcDb(SrcDbEntity srcDb) {
-        this.srcDb = srcDb;
     }
 
     public BinlogInfo getBinlogInfo() {

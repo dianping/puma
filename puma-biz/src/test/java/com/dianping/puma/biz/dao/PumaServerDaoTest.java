@@ -24,7 +24,7 @@ public class PumaServerDaoTest {
 		entity.setName("test-name");
 		entity.setHost("127.0.0.1");
 		entity.setPort(4040);
-		entity.setUpdateTime(new Date());
+		entity.setGmtUpdate(new Date());
 
 		pumaServerDao.insert(entity);
 	}

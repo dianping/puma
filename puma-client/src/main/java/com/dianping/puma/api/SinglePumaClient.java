@@ -106,7 +106,7 @@ public class SinglePumaClient implements PumaClient {
         params.add(new BasicNameValuePair("binlogPosition", String.valueOf(binlogInfo.getBinlogPosition())));
         params.add(new BasicNameValuePair("serverId", String.valueOf(binlogInfo.getServerId())));
         addToken(params);
-        execute("/puma/binlog/get", params, BinlogAckResponse.class);
+        execute("/puma/binlog/ack", params, BinlogAckResponse.class);
     }
 
     protected void addToken(List<NameValuePair> parma) {

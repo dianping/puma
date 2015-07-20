@@ -39,8 +39,8 @@ public class SinglePumaConnectorTest {
     @Test
 //    @Ignore
     public void testConnectSync() {
-        SinglePumaClient connector = new SinglePumaClient("my-client", "127.0.0.1", 4040);
-        connector.subscribe(true, false, false, "test", "a", "b");
+        SinglePumaClient connector = new SinglePumaClient("dozer", "127.0.0.1", 4040);
+        connector.subscribe(true, false, false, "test", "debug");
 
         while (true) {
             try {
@@ -53,7 +53,7 @@ public class SinglePumaConnectorTest {
 
                 connector.ack(message.getLastBinlogInfo());
             } catch (PumaClientException exp) {
-                //todo: add log
+                exp.printStackTrace();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

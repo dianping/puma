@@ -399,7 +399,7 @@ public class DefaultDataIndexImpl<K extends DataIndexKey<K>, V> implements DataI
 		File l2IndexFile = getL2IndexFile(l2Index.getValue());
 		LocalFileIndexBucket<K, V> localFileIndexBucket = new LocalFileIndexBucket<K, V>(l2IndexFile,
 		      this.l2IndexItemConvertor);
-		
+
 		return localFileIndexBucket;
 	}
 }

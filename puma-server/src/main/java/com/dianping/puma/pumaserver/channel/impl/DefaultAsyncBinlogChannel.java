@@ -11,6 +11,8 @@ import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
 import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.EventStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,6 +22,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
+
+    private final static Logger logger = LoggerFactory.getLogger(DefaultAsyncBinlogChannel.class);
 
     private volatile boolean stopped = false;
 
@@ -99,6 +103,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
                 try {
                     binlogEvent = eventChannel.next(true);
                 } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
                     binlogEvent = new ServerErrorEvent("get binlog event from storage failure.", e.getCause());
                 }
 

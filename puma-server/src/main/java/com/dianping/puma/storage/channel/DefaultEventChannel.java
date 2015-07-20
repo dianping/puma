@@ -50,8 +50,6 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
         } catch (IOException e) {
             throw new InvalidSequenceException("Invalid sequence(" + seq + ")", e);
         }
-
-        stopped = false;
     }
 
     @Override
@@ -71,7 +69,7 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
                 if (this.tables != null && !this.tables.contains(nextL2Index.getTable())) {
                     continue;
                 }
-                if (this.withDdl != nextL2Index.isDdl() || this.withDml != nextL2Index.isDml()) {
+                if (this.withDdl != nextL2Index.isDdl() && this.withDml != nextL2Index.isDml()) {
                     continue;
                 }
 
@@ -92,7 +90,7 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
                 lastReadSequence = sequence;
             } catch (EOFException e) {
                 try {
-                    if (this.bucketManager.hasNexReadBucket(lastReadSequence.longValue())) {
+                    if (lastReadSequence != null && this.bucketManager.hasNexReadBucket(lastReadSequence.longValue())) {
                         if (readDataBucket != null) {
                             this.readDataBucket.stop();
                             this.readDataBucket = null;
@@ -166,7 +164,6 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
         stopped = false;
         try {
             this.indexBucket.start();
-            this.readDataBucket.start();
         } catch (IOException ignore) {
         }
     }

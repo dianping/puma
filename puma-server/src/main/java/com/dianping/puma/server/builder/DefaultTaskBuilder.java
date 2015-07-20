@@ -160,6 +160,7 @@ public class DefaultTaskBuilder implements TaskBuilder {
 		DMLEventFilter dmlEventFilter = new DMLEventFilter();
 		dmlEventFilter.setName(taskName);
 		dmlEventFilter.setDml(true);
+		dmlEventFilter.setAcceptedTables(pumaTask.getTableSet());
 		eventCenter.register(dmlEventFilter);
 		eventFilterList.add(dmlEventFilter);
 

@@ -2,6 +2,7 @@ package com.dianping.puma.api;
 
 import com.dianping.puma.api.exception.PumaClientException;
 import com.dianping.puma.core.dto.BinlogMessage;
+import com.dianping.puma.core.dto.BinlogRollback;
 import com.dianping.puma.core.dto.binlog.response.BinlogAckResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
@@ -122,12 +123,22 @@ public class SinglePumaClient implements PumaClient {
 
     @Override
     public void rollback(BinlogInfo binlogInfo) throws PumaClientException {
-        //todo:
+        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("clientName", clientName));
+
+        if (binlogInfo != null) {
+            params.add(new BasicNameValuePair("binlogFile", binlogInfo.getBinlogFile()));
+            params.add(new BasicNameValuePair("binlogPosition", String.valueOf(binlogInfo.getBinlogPosition())));
+            params.add(new BasicNameValuePair("serverId", String.valueOf(binlogInfo.getServerId())));
+        }
+
+        addToken(params);
+        execute("/puma/binlog/rollback", params, BinlogRollback.class);
     }
 
     @Override
     public void rollback() throws PumaClientException {
-        //todo:
+        rollback(null);
     }
 
     @Override

@@ -174,6 +174,7 @@ public class SinglePumaClient implements PumaClient {
             HttpGet get = new HttpGet(baseUrl + path + "?" + URLEncodedUtils.format(params, DEFAULT_CHARSET));
             result = httpClient.execute(get);
         } catch (Exception e) {
+            this.token = null;
             throw new PumaClientException(e.getMessage(), e);
         }
 

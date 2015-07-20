@@ -1,7 +1,5 @@
 package com.dianping.puma.biz.entity;
 
-import com.dianping.puma.core.constant.ActionController;
-
 import java.util.Date;
 
 public class PumaServerEntity {
@@ -14,7 +12,9 @@ public class PumaServerEntity {
 
     private int port;
 
-    private Date updateTime;
+    private float loadBalance;
+
+    private Date gmtUpdate;
 
     public int getId() {
         return id;
@@ -48,11 +48,19 @@ public class PumaServerEntity {
         this.port = port;
     }
 
-    public Date getUpdateTime() {
-        return updateTime;
+    public float getLoadBalance() {
+        return loadBalance;
     }
 
-    public void setUpdateTime(Date updateTime) {
-        this.updateTime = updateTime;
+    public void setLoadBalance(float loadBalance) {
+        this.loadBalance = loadBalance;
+    }
+
+    public Date getGmtUpdate() {
+        return gmtUpdate;
+    }
+
+    public void setGmtUpdate(Date gmtUpdate) {
+        this.gmtUpdate = gmtUpdate;
     }
 }

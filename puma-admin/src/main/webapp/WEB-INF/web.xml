@@ -8,7 +8,6 @@
         <param-value>
             classpath*:config/spring/appcontext-*.xml,
             classpath*:config/spring/common/appcontext-*.xml,
-            classpath*:config/spring/db/appcontext-*.xml
         </param-value>
     </context-param>
     

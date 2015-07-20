@@ -26,11 +26,11 @@
 
     <!-- Handles HTTP GET requests for /resources/** by efficiently serving 
         up static resources in the ${webappRoot}/resources/ directory -->
-    <mvc:resources mapping="/javascripts/**" location="/javascripts/" />
+    <mvc:resources mapping="/javascripts/**" location="/js/" />
     <mvc:resources mapping="/images/**" location="/images/" />
-    <mvc:resources mapping="/stylesheets/**" location="/stylesheets/" />
+    <mvc:resources mapping="/stylesheets/**" location="/style/" />
     <mvc:resources mapping="/style/**" location="/style/" />
-    <mvc:resources mapping="/image/**" location="/image/" />
+    <mvc:resources mapping="/image/**" location="/images/" />
     <mvc:resources mapping="*.html" location="*.html" />
     <mvc:resources mapping="/js/**" location="/js/"/>
     <mvc:resources mapping="/resources/**" location="/resources/"/>

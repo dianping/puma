@@ -101,7 +101,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
                 Event binlogEvent;
                 try {
-                    binlogEvent = eventChannel.next(true);
+                    binlogEvent = eventChannel.next(false);
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);
                     binlogEvent = new ServerErrorEvent("get binlog event from storage failure.", e.getCause());

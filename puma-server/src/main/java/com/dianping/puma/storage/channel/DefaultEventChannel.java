@@ -125,7 +125,7 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 							this.indexBucket.start();
 						}
 					} else {
-						if (shouldSleep) {
+						if (!shouldSleep) {
 							return null;
 						} else {
 							try {

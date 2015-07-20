@@ -13,11 +13,15 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 public class DefaultTaskContainer implements TaskContainer {
 
     private ConcurrentHashMap<String, TaskExecutor> taskExecutors = new ConcurrentHashMap<String, TaskExecutor>();
+
+    private ExecutorService executorService = Executors.newCachedThreadPool();
 
     public static DefaultTaskContainer instance;
 
@@ -60,32 +64,6 @@ public class DefaultTaskContainer implements TaskContainer {
         return null;
     }
 
-    //
-    // public Map<String, TaskExecutor> getTaskExecutors() {
-    // return Collections.unmodifiableMap(taskExecutors);
-    // }
-    //
-    // public String getPumaServerName() {
-    // return pumaServerName;
-    // }
-    //
-    // public boolean canStop(TaskExecutor taskExecutor) {
-    // return taskExecutor.getStatus() != Status.STOPPED && taskExecutor.getStatus() != Status.STOPPING
-    // && taskExecutor.getStatus() != Status.FAILED;
-    // }
-    //
-    // public boolean canStart(TaskExecutor taskExecutor) {
-    // return taskExecutor.getStatus() != Status.RUNNING && taskExecutor.getStatus() != Status.PREPARING;
-    // }
-    //
-    // public void publishAcceptedTableChangedEvent(String name, TableSet tableSet) {
-    // AcceptedTableChangedEvent acceptedTableChangedEvent = new AcceptedTableChangedEvent();
-    // acceptedTableChangedEvent.setName(name);
-    // acceptedTableChangedEvent.setTableSet(tableSet);
-    //
-    // eventCenter.post(acceptedTableChangedEvent);
-    // }
-
     @Override
     public void create(String taskName, PumaTaskEntity task) {
         try {
@@ -117,11 +95,19 @@ public class DefaultTaskContainer implements TaskContainer {
 
     @Override
     public void start(String taskName) {
-
         try {
-            TaskExecutor taskExecutor = taskExecutors.get(taskName);
-            if (taskExecutor != null) {
-                taskExecutor.start();
+            final TaskExecutor taskExecutor = taskExecutors.get(taskName);
+            if (taskExecutor != null && taskExecutor.isStop()) {
+                executorService.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            taskExecutor.start();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
             }
         } catch (Exception e) {
             // TODO Auto-generated catch block
@@ -131,13 +117,11 @@ public class DefaultTaskContainer implements TaskContainer {
 
     @Override
     public void stop(String taskName) {
-        TaskExecutor taskExecutor = taskExecutors.get(taskName);
-        if (taskExecutor == null) {
-            throw new RuntimeException("stop puma task failure, not exists.");
-        }
-
         try {
-            taskExecutor.stop();
+            TaskExecutor taskExecutor = taskExecutors.get(taskName);
+            if (taskExecutor != null) {
+                taskExecutor.stop();
+            }
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

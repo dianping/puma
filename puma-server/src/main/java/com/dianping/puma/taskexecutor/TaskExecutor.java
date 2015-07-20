@@ -28,6 +28,8 @@ import com.dianping.puma.storage.holder.BinlogInfoHolder;
  */
 public interface TaskExecutor extends LifeCycle<Exception> {
 
+	boolean isStop();
+
 	public PumaTaskEntity getTask();
 
 	public void setTask(PumaTaskEntity pumaTask);

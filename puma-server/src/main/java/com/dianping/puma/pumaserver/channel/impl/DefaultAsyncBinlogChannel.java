@@ -27,7 +27,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
     private volatile boolean stopped = false;
 
-    private ExecutorService executorService;
+    private static final ExecutorService executorService = Executors.newCachedThreadPool();
 
     private volatile EventChannel eventChannel;
 
@@ -67,7 +67,6 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
             eventChannel.withTransaction(transaction);
             eventChannel.open();
 
-            executorService = Executors.newFixedThreadPool(1);
             executorService.execute(extractTask);
 
         } catch (Exception e) {

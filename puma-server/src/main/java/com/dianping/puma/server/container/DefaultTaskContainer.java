@@ -327,13 +327,12 @@ public class DefaultTaskContainer implements TaskContainer {
 
 	@Override
 	public void start(String taskName) {
-		TaskExecutor taskExecutor = taskExecutors.get(taskName);
-		if (taskExecutor == null) {
-			throw new RuntimeException("start puma task failure, not exists.");
-		}
 
 		try {
-			taskExecutor.start();
+			TaskExecutor taskExecutor = taskExecutors.get(taskName);
+            if(taskExecutor!= null) {
+                taskExecutor.start();
+            }
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

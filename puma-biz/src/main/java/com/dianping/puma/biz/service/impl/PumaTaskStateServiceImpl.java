@@ -2,7 +2,6 @@ package com.dianping.puma.biz.service.impl;
 
 import com.dianping.puma.biz.dao.PumaTaskStateDao;
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
-import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.biz.service.PumaTaskStateService;
 import com.dianping.puma.biz.service.SrcDbService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +40,7 @@ public class PumaTaskStateServiceImpl implements PumaTaskStateService {
     public void createOrUpdate(PumaTaskStateEntity taskState) {
         taskState.setGmtUpdate(new Date());
 
-        if (pumaTaskStateDao.find(taskState.getId()) == null) {
+        if (pumaTaskStateDao.findByTaskNameAndServerName(taskState.getTaskName(), taskState.getServerName()) == null) {
             pumaTaskStateDao.insert(taskState);
         } else {
             pumaTaskStateDao.update(taskState);
@@ -53,7 +52,7 @@ public class PumaTaskStateServiceImpl implements PumaTaskStateService {
     }
 
     protected List<PumaTaskStateEntity> loadFullPumaTaskStates(List<PumaTaskStateEntity> taskStates) {
-        for (PumaTaskStateEntity taskState: taskStates) {
+        for (PumaTaskStateEntity taskState : taskStates) {
             loadFullPumaTaskState(taskState);
         }
         return taskStates;

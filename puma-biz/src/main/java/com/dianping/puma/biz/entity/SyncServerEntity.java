@@ -12,7 +12,7 @@ public class SyncServerEntity {
 
 	private int port; // temporarily redundant.
 
-	private float loadBalance;
+	private double loadBalance;
 
 	private Date updateTime;
 
@@ -48,7 +48,7 @@ public class SyncServerEntity {
 		this.port = port;
 	}
 
-	public float getLoadBalance() {
+	public double getLoadBalance() {
 		return loadBalance;
 	}
 

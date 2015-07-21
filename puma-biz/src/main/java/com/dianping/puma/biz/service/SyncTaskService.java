@@ -1,39 +1,24 @@
 package com.dianping.puma.biz.service;
 
-import com.dianping.puma.core.constant.ActionController;
-import com.dianping.puma.biz.entity.old.SyncTask;
+import com.dianping.puma.biz.entity.SyncTaskEntity;
 
 import java.util.List;
 
 public interface SyncTaskService {
 	
-	SyncTask find(long id);
+	SyncTaskEntity findById(int id);
 
-	SyncTask find(String name);
+	SyncTaskEntity findByName(String name);
 
-	List<SyncTask> findBySyncServerName(String syncServerName);
+	List<SyncTaskEntity> findByServerName(String serverName);
+	
+	List<SyncTaskEntity> findAll();
 
-	List<SyncTask> findByDstDBInstanceName(String dstDBInstanceName);
+	int create(SyncTaskEntity entity);
+	
+	int update(SyncTaskEntity entity);
 
-	List<SyncTask> findByPumaServerName(String pumaServerName);
+	int remove(int id);
 
-	List<SyncTask> findByPumaTaskName(String pumaTaskName);
-	
-	List<SyncTask> findAll();
-	
-	long count();
-
-	List<SyncTask> findByPage(int page, int pageSize);
-	
-	void create(SyncTask syncTask);
-	
-	void update(SyncTask syncTask);
-
-	void remove(String name);
-	
-	void remove(long id);
-	
-	List<SyncTask> find(int offset, int limit);
-	
-	void updateStatusAction(String name,ActionController controller);
+	int remove(String name);
 }

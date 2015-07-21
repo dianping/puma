@@ -1,49 +1,26 @@
 package com.dianping.puma.admin.model;
 
+import com.dianping.puma.biz.entity.SrcDbEntity;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class SrcDbDto {
 
-	private String name;
+	private String mhaRef;
 
-	private String jdbcRef;
-
-	private String host;
-
-	private int port;
+	private List<SrcDbEntity> srcDbEntities = new ArrayList<SrcDbEntity>();
 
 	private String username;
 
 	private String password;
 
-	public String getName() {
-		return name;
+	public String getMhaRef() {
+		return mhaRef;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getJdbcRef() {
-		return jdbcRef;
-	}
-
-	public void setJdbcRef(String jdbcRef) {
-		this.jdbcRef = jdbcRef;
-	}
-
-	public String getHost() {
-		return host;
-	}
-
-	public void setHost(String host) {
-		this.host = host;
-	}
-
-	public int getPort() {
-		return port;
-	}
-
-	public void setPort(int port) {
-		this.port = port;
+	public void setMhaRef(String mhaRef) {
+		this.mhaRef = mhaRef;
 	}
 
 	public String getUsername() {
@@ -52,6 +29,14 @@ public class SrcDbDto {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public List<SrcDbEntity> getSrcDbEntities() {
+		return srcDbEntities;
+	}
+
+	public void setSrcDbEntities(List<SrcDbEntity> srcDbEntities) {
+		this.srcDbEntities = srcDbEntities;
 	}
 
 	public String getPassword() {

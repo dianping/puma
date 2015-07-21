@@ -1,4 +1,4 @@
-package com.dianping.puma.admin.util;
+package com.dianping.puma.core.util;
 
 import java.lang.reflect.Type;
 

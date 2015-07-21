@@ -2,7 +2,7 @@
 //
 //import com.dianping.puma.admin.model.SrcDbDto;
 //import com.dianping.puma.admin.model.mapper.DBInstanceMapper;
-//import com.dianping.puma.admin.util.GsonUtil;
+//import com.dianping.puma.core.util.GsonUtil;
 //import com.dianping.puma.biz.entity.old.PumaTask;
 //import com.dianping.puma.biz.entity.old.SrcDBInstance;
 //import com.dianping.puma.biz.service.PumaTaskService;

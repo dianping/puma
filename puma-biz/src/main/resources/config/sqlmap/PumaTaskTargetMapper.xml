@@ -8,6 +8,10 @@
         SELECT * FROM PumaTaskTarget WHERE `taskId` = #{taskId}
     </select>
 
+    <select id="findByDatabaseAndTable" resultType="PumaTaskTargetEntity">
+        SELECT * FROM PumaTaskTarget WHERE `database` = #{database} AND `table` = #{table}
+    </select>
+
     <update id="update" parameterType="PumaTaskTargetEntity">
         UPDATE PumaTaskTarget
         SET

@@ -4,7 +4,7 @@
 //import com.dianping.puma.admin.model.SyncTaskDto;
 //import com.dianping.puma.admin.model.mapper.ErrorListMapper;
 //import com.dianping.puma.admin.model.mapper.SyncTaskMapper;
-//import com.dianping.puma.admin.util.GsonUtil;
+//import com.dianping.puma.core.util.GsonUtil;
 //import com.dianping.puma.biz.entity.*;
 //import com.dianping.puma.biz.entity.old.*;
 //import com.dianping.puma.biz.service.DstDBInstanceService;

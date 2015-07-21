@@ -14,6 +14,10 @@ public interface PumaTaskTargetDao {
 
     List<PumaTaskTargetEntity> findByTaskId(int taskId);
 
+    List<PumaTaskTargetEntity> findByDatabaseAndTable(
+            @Param("database") String database,
+            @Param("table") String table);
+
     int insert(PumaTaskTargetEntity entity);
 
     int update(PumaTaskTargetEntity entity);

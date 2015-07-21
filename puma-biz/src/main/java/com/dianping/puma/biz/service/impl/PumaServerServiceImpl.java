@@ -1,9 +1,10 @@
 package com.dianping.puma.biz.service.impl;
 
 import com.dianping.puma.biz.dao.PumaServerDao;
-import com.dianping.puma.biz.dao.PumaTaskDao;
+import com.dianping.puma.biz.dao.PumaTaskServerDao;
 import com.dianping.puma.biz.dao.PumaTaskTargetDao;
 import com.dianping.puma.biz.entity.PumaServerEntity;
+import com.dianping.puma.biz.entity.PumaTaskServerEntity;
 import com.dianping.puma.biz.entity.PumaTaskTargetEntity;
 import com.dianping.puma.biz.service.PumaServerService;
 import com.google.common.base.Function;
@@ -20,6 +21,9 @@ public class PumaServerServiceImpl implements PumaServerService {
     PumaServerDao pumaServerDao;
 
     @Autowired
+    PumaTaskServerDao pumaTaskServerDao;
+
+    @Autowired
     PumaTaskTargetDao pumaTaskTargetDao;
 
     @Override
@@ -28,13 +32,25 @@ public class PumaServerServiceImpl implements PumaServerService {
     }
 
     @Override
-    public PumaServerEntity find(int id) {
+    public PumaServerEntity findById(int id) {
         return pumaServerDao.findById(id);
     }
 
     @Override
     public PumaServerEntity findByHost(String host) {
         return pumaServerDao.findByHost(host);
+    }
+
+    @Override
+    public List<PumaServerEntity> findByTaskId(int taskId) {
+        List<PumaTaskServerEntity> pumaTaskServers = pumaTaskServerDao.findByTaskId(taskId);
+
+        List<PumaServerEntity> pumaServers = new ArrayList<PumaServerEntity>();
+        for (PumaTaskServerEntity pumaTaskServer: pumaTaskServers) {
+            pumaServers.add(findById(pumaTaskServer.getServerId()));
+        }
+
+        return pumaServers;
     }
 
     @Override
@@ -60,8 +76,7 @@ public class PumaServerServiceImpl implements PumaServerService {
         List<PumaServerEntity> pumaServers = new ArrayList<PumaServerEntity>();
         if (taskIds != null) {
             for (int taskId: taskIds) {
-                PumaServerEntity pumaServer = this.find(taskId);
-                pumaServers.add(pumaServer);
+                pumaServers.addAll(this.findByTaskId(taskId));
             }
         }
 

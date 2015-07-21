@@ -6,11 +6,13 @@ import com.dianping.puma.biz.entity.PumaServerEntity;
 
 public interface PumaServerService {
 
-	PumaServerEntity find(int id);
+	PumaServerEntity findById(int id);
 
 	PumaServerEntity find(String name);
 
 	PumaServerEntity findByHost(String host);
+
+	List<PumaServerEntity> findByTaskId(int taskId);
 
 	List<PumaServerEntity> findByDatabaseAndTables(String database, List<String> tables);
 

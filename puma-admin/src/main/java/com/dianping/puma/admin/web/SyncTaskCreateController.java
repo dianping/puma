@@ -1,7 +1,7 @@
 //package com.dianping.puma.admin.web;
 //
 //import com.dianping.puma.admin.config.Config;
-//import com.dianping.puma.admin.util.GsonUtil;
+//import com.dianping.puma.core.util.GsonUtil;
 //import com.dianping.puma.admin.util.MysqlMetaInfoFetcher;
 //import com.dianping.puma.biz.entity.DumpTask;
 //import com.dianping.puma.biz.entity.SyncTask;

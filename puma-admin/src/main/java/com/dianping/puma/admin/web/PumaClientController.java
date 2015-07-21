@@ -1,6 +1,6 @@
 package com.dianping.puma.admin.web;
 
-import com.dianping.puma.admin.util.GsonUtil;
+import com.dianping.puma.core.util.GsonUtil;
 import com.dianping.puma.biz.entity.PumaServerEntity;
 import com.dianping.puma.biz.service.PumaServerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,16 +19,14 @@ public class PumaClientController {
 	@Autowired
 	PumaServerService pumaServerService;
 
-	@RequestMapping(value = "/client/loadBalances")
+	@RequestMapping(value = "/puma-client/puma-server-router")
 	@ResponseBody
-	public String loadBalances(String database, String[] tables) {
+	public String getPumaServers(String database, String[] tables) {
 		List<PumaServerEntity> pumaServers = pumaServerService.findByDatabaseAndTables(database, Arrays.asList(tables));
 		Map<String, Float> loadBalances = new HashMap<String, Float>();
-		/*
 		for (PumaServerEntity pumaServer: pumaServers) {
 			loadBalances.put(pumaServer.getHost() + ":" + pumaServer.getPort(), pumaServer.getLoadBalance());
-		}*/
-		loadBalances.put("hello", 1.0f);
+		}
 
 		return GsonUtil.toJson(loadBalances);
 	}

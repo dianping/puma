@@ -2,7 +2,7 @@
 //
 //import com.dianping.puma.admin.model.SyncServerDto;
 //import com.dianping.puma.admin.model.mapper.SyncServerMapper;
-//import com.dianping.puma.admin.util.GsonUtil;
+//import com.dianping.puma.core.util.GsonUtil;
 //import com.dianping.puma.core.constant.ActionOperation;
 //import com.dianping.puma.biz.entity.old.SyncServer;
 //import com.dianping.puma.biz.entity.old.SyncTask;

@@ -22,6 +22,7 @@ public class L2IndexItemConvertorTest {
 		l2Index.setDatabase("dianping");
 		l2Index.setTable("receipt");
 		l2Index.setDdl(false);
+		l2Index.setTransaction(true);
 		l2Index.setDml(true);
 		l2Index.setSequence(new Sequence(123123L,1));
 
@@ -39,6 +40,7 @@ public class L2IndexItemConvertorTest {
 		Assert.assertEquals("receipt", convertFromObj.getTable());
 		Assert.assertEquals(false, convertFromObj.isDdl());
 		Assert.assertEquals(true, convertFromObj.isDml());
+		Assert.assertEquals(true, convertFromObj.isTransaction());
 		Assert.assertEquals(123123L, convertFromObj.getSequence().longValue());
 		Assert.assertEquals(1, convertFromObj.getSequence().getLen());
 	}

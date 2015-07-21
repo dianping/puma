@@ -51,6 +51,7 @@ public class L2IndexItemConvertor implements IndexItemConvertor<L2Index> {
 
 		l2Index.setDdl(filter[0] == 1);
 		l2Index.setDml(filter[1] == 1);
+		l2Index.setTransaction(filter[2] == 1);
 
 		buf.readChar(); // skip '+'
 		Sequence sequence = new Sequence(buf.readLong(), buf.readInt());
@@ -97,7 +98,8 @@ public class L2IndexItemConvertor implements IndexItemConvertor<L2Index> {
 
 		filter[0] = (byte) (value.isDdl() ? 1 : 0);
 		filter[1] = (byte) (value.isDml() ? 1 : 0);
-		for (int i = 2; i < 8; i++) {
+		filter[2] = (byte) (value.isTransaction() ? 1 : 0);
+		for (int i = 3; i < 8; i++) {
 			filter[i] = 0;
 		}
 

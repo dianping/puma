@@ -39,9 +39,9 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
                 0,
                 binlogSubscriptionRequest.getDatabase(),
                 binlogSubscriptionRequest.getTables(),
-                true,
-                true,
-                true
+                binlogSubscriptionRequest.isDml(),
+                binlogSubscriptionRequest.isDdl(),
+                binlogSubscriptionRequest.isTransaction()
         );
 
         ClientSession session = new ClientSession(clientName, asyncBinlogChannel, ClientType.UNKNOW);

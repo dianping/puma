@@ -335,11 +335,11 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                     PacketType.OKERROR_PACKET, getContext());
 
             if (dumpCommandResultPacket.isOk()) {
-                LOG.info("TaskName: " + getTaskName() + " ,Dump binlog command success.");
+                LOG.info("TaskName: " + getTaskName() + ", Dump binlog command success.");
 
                 return true;
             } else {
-                LOG.error("TaskName: " + getTaskName() + " ,Dump binlog failed. Reason: "
+                LOG.error("TaskName: " + getTaskName() + ", Dump binlog failed. Reason: "
                         + dumpCommandResultPacket.getMessage());
 
                 return false;

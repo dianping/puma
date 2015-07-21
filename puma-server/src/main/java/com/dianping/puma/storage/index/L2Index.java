@@ -12,6 +12,8 @@ public class L2Index {
 	
 	private boolean isDml;
 	
+	private boolean isTransaction;
+	
 	private Sequence sequence;
 	
 	private BinlogIndexKey binlogIndexKey;
@@ -54,6 +56,14 @@ public class L2Index {
 
 	public void setDml(boolean isDml) {
 		this.isDml = isDml;
+	}
+	
+	public boolean isTransaction() {
+		return isTransaction;
+	}
+
+	public void setTransaction(boolean isTransaction) {
+		this.isTransaction = isTransaction;
 	}
 
 	public Sequence getSequence() {

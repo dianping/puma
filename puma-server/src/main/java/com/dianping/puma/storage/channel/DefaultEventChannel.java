@@ -92,6 +92,9 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 				if (this.withDdl != nextL2Index.isDdl() && this.withDml != nextL2Index.isDml()) {
 					continue;
 				}
+				if (!this.withTransaction && nextL2Index.isTransaction()) {
+					continue;
+				}
 
 				Sequence sequence = nextL2Index.getSequence();
 

@@ -1,9 +1,10 @@
 package com.dianping.puma.server.controller;
 
-import com.dianping.puma.biz.entity.PumaTaskStateEntity;
-import com.dianping.puma.server.container.TaskContainer;
-import com.dianping.puma.status.SystemStatusContainer;
-import com.dianping.puma.taskexecutor.TaskExecutor;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -11,47 +12,41 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.*;
-
-/**
- * Dozer @ 7/7/15
- * mail@dozer.cc
- * http://www.dozer.cc
- */
+import com.dianping.puma.biz.entity.PumaTaskStateEntity;
+import com.dianping.puma.server.container.TaskContainer;
+import com.dianping.puma.status.SystemStatusManager;
+import com.dianping.puma.taskexecutor.TaskExecutor;
 
 @Controller
 @RequestMapping(value = "/status")
 public class StatusController {
 
-    @Autowired
-    TaskContainer taskContainer;
+	@Autowired
+	TaskContainer taskContainer;
 
-    @RequestMapping(value = "", method = RequestMethod.GET)
-    @ResponseBody
-    public Map<String, Object> index() {
-        Map<String, Object> status = new HashMap<String, Object>();
-        status.put("serverStatus", SystemStatusContainer.instance.listServerStatus());
-        status.put("serverDdlCounters", SystemStatusContainer.instance.listServerDdlCounters());
-        status.put("serverRowDeleteCounters", SystemStatusContainer.instance.listServerRowDeleteCounters());
-        status.put("serverRowInsertCounters", SystemStatusContainer.instance.listServerRowInsertCounters());
-        status.put("serverRowUpdateCounters", SystemStatusContainer.instance.listServerRowUpdateCounters());
-        status.put("clientStatus", SystemStatusContainer.instance.listClientStatus());
-        status.put("storageStatus", SystemStatusContainer.instance.listStorageStatus());
+	@RequestMapping(method = RequestMethod.GET)
+	@ResponseBody
+	public Map<String, Object> index() {
+		Map<String, Object> status = new HashMap<String, Object>();
 
-        return status;
-    }
+		status.put("status", SystemStatusManager.status);
 
-    @RequestMapping(value = "puma-task", method = RequestMethod.GET)
-    @ResponseBody
-    public List<PumaTaskStateEntity> pumaTask() {
-        List<PumaTaskStateEntity> pumaTaskStates = new ArrayList<PumaTaskStateEntity>();
-        for (TaskExecutor taskExecutor : taskContainer.getAll()) {
-            PumaTaskStateEntity taskState = taskExecutor.getTaskState();
-            //taskState.setServerName(pumaServerConfig.getName());
-            taskState.setTaskName(taskState.getTaskName());
-            taskState.setGmtUpdate(new Date());
-            pumaTaskStates.add(taskState);
-        }
-        return pumaTaskStates;
-    }
+		return status;
+	}
+
+	@RequestMapping(value = "puma-task", method = RequestMethod.GET)
+	@ResponseBody
+	public List<PumaTaskStateEntity> pumaTask() {
+		List<PumaTaskStateEntity> pumaTaskStates = new ArrayList<PumaTaskStateEntity>();
+
+		for (TaskExecutor taskExecutor : taskContainer.getAll()) {
+			PumaTaskStateEntity taskState = taskExecutor.getTaskState();
+			// taskState.setServerName(pumaServerConfig.getName());
+			taskState.setTaskName(taskState.getTaskName());
+			taskState.setGmtUpdate(new Date());
+			pumaTaskStates.add(taskState);
+		}
+		
+		return pumaTaskStates;
+	}
 }

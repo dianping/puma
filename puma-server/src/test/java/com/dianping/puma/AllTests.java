@@ -1,6 +1,7 @@
 package com.dianping.puma;
 
 import com.dianping.puma.pumaserver.channel.impl.DefaultAsyncBinlogChannelTest;
+
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -14,6 +15,7 @@ import com.dianping.puma.filter.EventFilterChainFactoryTest;
 import com.dianping.puma.filter.StorageEventFilterChainTest;
 import com.dianping.puma.filter.TransactionEventFilterTest;
 import com.dianping.puma.filter.TransactionInfoEventFilterTest;
+import com.dianping.puma.status.SecondBucketCounterTest;
 import com.dianping.puma.storage.DefaultArchiveStrategyTest;
 import com.dianping.puma.storage.DefaultBucketManagerTest;
 import com.dianping.puma.storage.DefaultCleanupStrategyTest;
@@ -39,6 +41,9 @@ import com.dianping.puma.utils.PacketUtilTest;
       TransactionEventFilterTest.class, //
       TransactionInfoEventFilterTest.class,//
 
+      //status
+      SecondBucketCounterTest.class,//
+      
       // storage.bucket
       LocalBucketIndexTest.class, //
       LocalBucketTest.class, //

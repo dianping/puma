@@ -1,5 +1,14 @@
 package com.dianping.puma.storage;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
@@ -7,7 +16,7 @@ import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.filter.EventFilterChain;
-import com.dianping.puma.status.SystemStatusContainer;
+import com.dianping.puma.status.SystemStatusManager;
 import com.dianping.puma.storage.bucket.BucketManager;
 import com.dianping.puma.storage.bucket.DataBucket;
 import com.dianping.puma.storage.bucket.DataBucketManager;
@@ -17,16 +26,12 @@ import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageException;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;
 import com.dianping.puma.storage.exception.StorageWriteException;
-import com.dianping.puma.storage.index.*;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import com.dianping.puma.storage.index.BinlogIndexKey;
+import com.dianping.puma.storage.index.BinlogIndexKeyConvertor;
+import com.dianping.puma.storage.index.DataIndex;
+import com.dianping.puma.storage.index.DefaultDataIndexImpl;
+import com.dianping.puma.storage.index.L2Index;
+import com.dianping.puma.storage.index.L2IndexItemConvertor;
 
 public class DefaultEventStorage implements EventStorage {
 
@@ -261,7 +266,9 @@ public class DefaultEventStorage implements EventStorage {
 			updateIndex(event, newL1Index, sequence);
 
 			bucketManager.updateLatestSequence(sequence);
-			SystemStatusContainer.instance.updateStorageStatus(name, event.getSeq());
+
+			SystemStatusManager.incServerStoredBytes(getTaskName(), data.length);
+			SystemStatusManager.updateServerBucket(getTaskName(), newSeq.getCreationDate(), newSeq.getNumber());
 		} catch (IOException e) {
 			throw new StorageWriteException("Failed to write event.", e);
 		}

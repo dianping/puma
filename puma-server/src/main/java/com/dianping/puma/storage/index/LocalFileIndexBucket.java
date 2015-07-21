@@ -41,6 +41,10 @@ public class LocalFileIndexBucket<K, V> implements IndexBucket<K, V> {
 
 	@Override
 	public void locate(K key) throws StorageClosedException, IOException {
+		if (key == null) {
+			return;
+		}
+
 		while (true) {
 			V next = next();
 

@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import com.dianping.puma.biz.entity.PumaTaskStateEntity;
-
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.io.FileUtils;
@@ -20,6 +18,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.constant.Status;
@@ -462,6 +461,7 @@ public abstract class AbstractBaseTest {
 		waitForSync(WAIT_FOR_SYNC_TIME);
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
 		EventChannel channel = storage.getChannel(SubscribeConstant.SEQ_FROM_OLDEST, -1, null, -1, -1);
+		channel.open();
 		for (int i = 0; i < n;) {
 			ChangedEvent event = (ChangedEvent) channel.next();
 			if (!needTs) {
@@ -487,6 +487,7 @@ public abstract class AbstractBaseTest {
 		waitForSync(WAIT_FOR_SYNC_TIME);
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
 		EventChannel channel = storage.getChannel(seq, serverId, binlog, binlogPos, timeStamp);
+		channel.open();
 		for (int i = 0; i < n;) {
 			ChangedEvent event = (ChangedEvent) channel.next();
 			if (!needTs) {

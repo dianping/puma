@@ -5,7 +5,7 @@ import java.util.Map;
 
 public interface PumaServerRouter {
 
-	public Map<String, Float> route(String database, List<String> tables);
+	public void init(String database, List<String> tables);
 
-	public void addListener(PumaServerListener listener);
+	public Map<String, Double> route();
 }

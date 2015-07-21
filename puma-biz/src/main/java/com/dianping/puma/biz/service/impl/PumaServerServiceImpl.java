@@ -1,20 +1,26 @@
 package com.dianping.puma.biz.service.impl;
 
 import com.dianping.puma.biz.dao.PumaServerDao;
+import com.dianping.puma.biz.dao.PumaTaskDao;
+import com.dianping.puma.biz.dao.PumaTaskTargetDao;
 import com.dianping.puma.biz.entity.PumaServerEntity;
+import com.dianping.puma.biz.entity.PumaTaskTargetEntity;
 import com.dianping.puma.biz.service.PumaServerService;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service("pumaServerService")
 public class PumaServerServiceImpl implements PumaServerService {
 
     @Autowired
     PumaServerDao pumaServerDao;
+
+    @Autowired
+    PumaTaskTargetDao pumaTaskTargetDao;
 
     @Override
     public PumaServerEntity find(String name) {
@@ -33,7 +39,33 @@ public class PumaServerServiceImpl implements PumaServerService {
 
     @Override
     public List<PumaServerEntity> findByDatabaseAndTables(String database, List<String> tables) {
-        return Collections.emptyList();
+        List<Integer> taskIds = null;
+
+        for (String table: tables) {
+            List<PumaTaskTargetEntity> pumaTaskTargets = pumaTaskTargetDao.findByDatabaseAndTable(database, table);
+            List<Integer> tempTaskIds = Lists.transform(pumaTaskTargets, new Function<PumaTaskTargetEntity, Integer>() {
+                @Override
+                public Integer apply(PumaTaskTargetEntity pumaTaskTargetEntity) {
+                    return pumaTaskTargetEntity.getTaskId();
+                }
+            });
+
+            if (taskIds == null) {
+                taskIds = tempTaskIds;
+            } else {
+                taskIds.retainAll(tempTaskIds);
+            }
+        }
+
+        List<PumaServerEntity> pumaServers = new ArrayList<PumaServerEntity>();
+        if (taskIds != null) {
+            for (int taskId: taskIds) {
+                PumaServerEntity pumaServer = this.find(taskId);
+                pumaServers.add(pumaServer);
+            }
+        }
+
+        return pumaServers;
     }
 
     @Override

@@ -61,9 +61,6 @@ public class SinglePumaClient implements PumaClient {
         logger.info("Current puma client base url is: {}", baseUrl);
     }
 
-    protected void checkConnection() throws PumaClientException {
-    }
-
     @Override
     public BinlogMessage get(int batchSize) throws PumaClientException {
         return get(batchSize, 0, null);
@@ -179,8 +176,6 @@ public class SinglePumaClient implements PumaClient {
 
 
     protected <T> T execute(String path, List<NameValuePair> params, Class<T> clazz) throws PumaClientException {
-        checkConnection();
-
         if (Strings.isNullOrEmpty(this.token) && !clazz.equals(BinlogSubscriptionResponse.class)) {
             doSubscribe();
             addToken(params);

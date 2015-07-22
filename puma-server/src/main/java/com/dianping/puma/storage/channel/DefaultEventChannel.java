@@ -125,10 +125,11 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 				Sequence sequence = nextL2Index.getSequence();
 
 				if (readDataBucket == null) {
+					lastReadSequence = sequence;
 					readDataBucket = this.bucketManager.getReadBucket(sequence.longValue(), false);
 				}
 
-				if (lastReadSequence != null) {
+				if (sequence.getOffset() != lastReadSequence.getOffset()) {
 					readDataBucket.skip(sequence.getOffset() - lastReadSequence.getOffset() - lastReadSequence.getLen());
 				}
 

@@ -114,7 +114,7 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 				if (this.database != null && !nextL2Index.getDatabase().equals(this.database)) {
 					continue;
 				}
-				if (this.tables != null && !this.tables.contains(nextL2Index.getTable())) {
+				if (this.tables != null && !this.tables.contains(nextL2Index.getTable()) && !nextL2Index.isTransaction()) {
 					continue;
 				}
 				if (this.withDdl != nextL2Index.isDdl() && this.withDml != nextL2Index.isDml()) {

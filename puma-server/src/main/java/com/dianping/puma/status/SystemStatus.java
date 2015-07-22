@@ -9,371 +9,373 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class SystemStatus {
 
-	private Map<String, Client> clients = new ConcurrentHashMap<String, Client>();
+    private Map<String, Client> clients = new ConcurrentHashMap<String, Client>();
 
-	private Map<String, Server> servers = new ConcurrentHashMap<String, Server>();
+    private Map<String, Server> servers = new ConcurrentHashMap<String, Server>();
 
-	private int storeQps;
+    private int storeQps;
 
-	private long totalParsedEvent;
+    private long totalParsedEvent;
 
-	private long totalStoreBytes;
+    private long totalStoreBytes;
 
-	private long totalStoreCount;
+    private long totalStoreCount;
 
-	private long totalInsertEvent;
+    private long totalInsertEvent;
 
-	private long totalUpdateEvent;
+    private long totalUpdateEvent;
 
-	private long totalDeleteEvent;
+    private long totalDeleteEvent;
 
-	private long totalDdlEvent;
+    private long totalDdlEvent;
 
-	public Map<String, Client> getClients() {
-		return clients;
-	}
+    public Map<String, Client> getClients() {
+        return clients;
+    }
 
-	public Map<String, Server> getServers() {
-		return servers;
-	}
+    public Map<String, Server> getServers() {
+        return servers;
+    }
 
-	public int getStoreQps() {
-		this.storeQps = 0;
+    public int getStoreQps() {
+        this.storeQps = 0;
 
-		for (Server server : this.servers.values()) {
-			this.storeQps += server.getStoreQps();
-		}
+        for (Server server : this.servers.values()) {
+            this.storeQps += server.getStoreQps();
+        }
 
-		return storeQps;
-	}
+        return storeQps;
+    }
 
-	public long getTotalDdlEvent() {
-		this.totalDdlEvent = 0L;
+    public long getTotalDdlEvent() {
+        this.totalDdlEvent = 0L;
 
-		for (Server server : this.servers.values()) {
-			this.totalDdlEvent += server.getTotalDdlEvent().get();
-		}
+        for (Server server : this.servers.values()) {
+            this.totalDdlEvent += server.getTotalDdlEvent().get();
+        }
 
-		return totalDdlEvent;
-	}
+        return totalDdlEvent;
+    }
 
-	public long getTotalDeleteEvent() {
-		this.totalDeleteEvent = 0L;
+    public long getTotalDeleteEvent() {
+        this.totalDeleteEvent = 0L;
 
-		for (Server server : this.servers.values()) {
-			this.totalDeleteEvent += server.getTotalDeleteEvent().get();
-		}
+        for (Server server : this.servers.values()) {
+            this.totalDeleteEvent += server.getTotalDeleteEvent().get();
+        }
 
-		return totalDeleteEvent;
-	}
+        return totalDeleteEvent;
+    }
 
-	public long getTotalInsertEvent() {
-		this.totalInsertEvent = 0L;
+    public long getTotalInsertEvent() {
+        this.totalInsertEvent = 0L;
 
-		for (Server server : this.servers.values()) {
-			this.totalInsertEvent += server.getTotalInsertEvent().get();
-		}
+        for (Server server : this.servers.values()) {
+            this.totalInsertEvent += server.getTotalInsertEvent().get();
+        }
 
-		return totalInsertEvent;
-	}
+        return totalInsertEvent;
+    }
 
-	public long getTotalParsedEvent() {
-		this.totalParsedEvent = 0L;
+    public long getTotalParsedEvent() {
+        this.totalParsedEvent = 0L;
 
-		for (Server server : this.servers.values()) {
-			this.totalParsedEvent += server.getTotalParsedEvent().get();
-		}
+        for (Server server : this.servers.values()) {
+            this.totalParsedEvent += server.getTotalParsedEvent().get();
+        }
 
-		return totalParsedEvent;
-	}
+        return totalParsedEvent;
+    }
 
-	public long getTotalStoreBytes() {
-		this.totalStoreBytes = 0L;
+    public long getTotalStoreBytes() {
+        this.totalStoreBytes = 0L;
 
-		for (Server server : this.servers.values()) {
-			this.totalStoreBytes += server.getTotalStoreBytes().get();
-		}
+        for (Server server : this.servers.values()) {
+            this.totalStoreBytes += server.getTotalStoreBytes().get();
+        }
 
-		return totalStoreBytes;
-	}
+        return totalStoreBytes;
+    }
 
-	public long getTotalStoreCount() {
-		this.totalStoreCount = 0L;
+    public long getTotalStoreCount() {
+        this.totalStoreCount = 0L;
 
-		for (Server server : this.servers.values()) {
-			this.totalStoreCount += server.getTotalStoreCount().get();
-		}
+        for (Server server : this.servers.values()) {
+            this.totalStoreCount += server.getTotalStoreCount().get();
+        }
 
-		return totalStoreCount;
-	}
+        return totalStoreCount;
+    }
 
-	public long getTotalUpdateEvent() {
-		this.totalUpdateEvent = 0L;
+    public long getTotalUpdateEvent() {
+        this.totalUpdateEvent = 0L;
 
-		for (Server server : this.servers.values()) {
-			this.totalUpdateEvent += server.getTotalUpdateEvent().get();
-		}
+        for (Server server : this.servers.values()) {
+            this.totalUpdateEvent += server.getTotalUpdateEvent().get();
+        }
 
-		return totalUpdateEvent;
-	}
+        return totalUpdateEvent;
+    }
 
-	public void setClients(Map<String, Client> clients) {
-		this.clients = clients;
-	}
+    public void setClients(Map<String, Client> clients) {
+        this.clients = clients;
+    }
 
-	public void setServers(Map<String, Server> servers) {
-		this.servers = servers;
-	}
+    public void setServers(Map<String, Server> servers) {
+        this.servers = servers;
+    }
 
-	public void setStoreQps(int storeQps) {
-		this.storeQps = storeQps;
-	}
+    public void setStoreQps(int storeQps) {
+        this.storeQps = storeQps;
+    }
 
-	public static class Client {
-		private String ip;
+    public static class Client {
+        private String ip;
 
-		private String database;
+        private String database;
 
-		private List<String> tables;
+        private List<String> tables;
 
-		private boolean withDml;
+        private boolean withDml;
 
-		private boolean withDdl;
+        private boolean withDdl;
 
-		private boolean withTransaction;
+        private boolean withTransaction;
 
-		private String codec;
+        private String codec;
 
-		private BinlogInfo sendBinlogInfo;
+        private BinlogInfo sendBinlogInfo;
 
-		private BinlogInfo ackBinlogInfo;
+        private BinlogInfo ackBinlogInfo;
 
-		private QpsCounter fetchQpsCounter;
+        private QpsCounter fetchQpsCounter;
 
-		public Client(String ip, String database, List<String> tables, boolean withDml, boolean withDdl,
-		      boolean withTransaction, String codec) {
-			super();
-			this.ip = ip;
-			this.database = database;
-			this.tables = tables;
-			this.withDml = withDml;
-			this.withDdl = withDdl;
-			this.withTransaction = withTransaction;
-			this.codec = codec;
-			this.fetchQpsCounter = new QpsCounter(60);
-		}
+        public Client(String ip, String database, List<String> tables, boolean withDml, boolean withDdl,
+                      boolean withTransaction, String codec) {
+            super();
+            this.ip = ip;
+            this.database = database;
+            this.tables = tables;
+            this.withDml = withDml;
+            this.withDdl = withDdl;
+            this.withTransaction = withTransaction;
+            this.codec = codec;
+            this.fetchQpsCounter = new QpsCounter(60);
+        }
 
-		public String getCodec() {
-			return codec;
-		}
+        public String getCodec() {
+            return codec;
+        }
 
-		public String getDatabase() {
-			return database;
-		}
+        public String getDatabase() {
+            return database;
+        }
 
-		public long getFetchQps() {
-			return this.fetchQpsCounter.get(60);
-		}
+        public long getFetchQps() {
+            return this.fetchQpsCounter.get(60);
+        }
 
-		public String getIp() {
-			return ip;
-		}
+        public String getIp() {
+            return ip;
+        }
 
-		public List<String> getTables() {
-			return tables;
-		}
+        public List<String> getTables() {
+            return tables;
+        }
 
-		public boolean isWithDdl() {
-			return withDdl;
-		}
+        public boolean isWithDdl() {
+            return withDdl;
+        }
 
-		public boolean isWithDml() {
-			return withDml;
-		}
+        public boolean isWithDml() {
+            return withDml;
+        }
 
-		public boolean isWithTransaction() {
-			return withTransaction;
-		}
+        public boolean isWithTransaction() {
+            return withTransaction;
+        }
 
-		public BinlogInfo getAckBinlogInfo() {
-			return ackBinlogInfo;
-		}
+        public BinlogInfo getAckBinlogInfo() {
+            return ackBinlogInfo;
+        }
 
-		public void setAckBinlogInfo(BinlogInfo ackBinlogInfo) {
-			this.ackBinlogInfo = ackBinlogInfo;
-		}
+        public void setAckBinlogInfo(BinlogInfo ackBinlogInfo) {
+            this.ackBinlogInfo = ackBinlogInfo;
+        }
 
-		public BinlogInfo getSendBinlogInfo() {
-			return sendBinlogInfo;
-		}
+        public BinlogInfo getSendBinlogInfo() {
+            return sendBinlogInfo;
+        }
 
-		public void setSendBinlogInfo(BinlogInfo sendBinlogInfo) {
-			this.sendBinlogInfo = sendBinlogInfo;
-		}
-	}
+        public void setSendBinlogInfo(BinlogInfo sendBinlogInfo) {
+            this.sendBinlogInfo = sendBinlogInfo;
+        }
 
-	public static class Server {
-		private String name;
+        public void increaseFetchQps() {
+            fetchQpsCounter.increase();
+        }
+    }
 
-		private String host;
+    public static class Server {
+        private String name;
 
-		private int port;
+        private String host;
 
-		private String database;
+        private int port;
 
-		private String binlogFile;
+        private String database;
 
-		private long binlogPosition = 0L;
+        private String binlogFile;
 
-		private int bucketDate;
+        private long binlogPosition = 0L;
 
-		private int bucketNumber;
+        private int bucketDate;
 
-		private int storeQps;
+        private int bucketNumber;
 
-		private AtomicLong totalParsedEvent = new AtomicLong(0);
+        private AtomicLong totalParsedEvent = new AtomicLong(0);
 
-		private AtomicLong totalStoreCount = new AtomicLong(0);
+        private AtomicLong totalStoreCount = new AtomicLong(0);
 
-		private AtomicLong totalStoreBytes = new AtomicLong(0);
+        private AtomicLong totalStoreBytes = new AtomicLong(0);
 
-		private AtomicLong totalInsertEvent = new AtomicLong(0);
+        private AtomicLong totalInsertEvent = new AtomicLong(0);
 
-		private AtomicLong totalUpdateEvent = new AtomicLong(0);
+        private AtomicLong totalUpdateEvent = new AtomicLong(0);
 
-		private AtomicLong totalDeleteEvent = new AtomicLong(0);
+        private AtomicLong totalDeleteEvent = new AtomicLong(0);
 
-		private AtomicLong totalDdlEvent = new AtomicLong(0);
+        private AtomicLong totalDdlEvent = new AtomicLong(0);
 
-		private QpsCounter storeQpsCounter;
+        private QpsCounter storeQpsCounter;
 
-		public Server(String name, String host, int port) {
-			this(name, host, port, null);
-		}
+        public Server(String name, String host, int port) {
+            this(name, host, port, null);
+        }
 
-		public Server(String name, String host, int port, String database) {
-			super();
-			this.name = name;
-			this.host = host;
-			this.port = port;
-			this.database = database;
-			this.storeQpsCounter = new QpsCounter(60);
-		}
+        public Server(String name, String host, int port, String database) {
+            super();
+            this.name = name;
+            this.host = host;
+            this.port = port;
+            this.database = database;
+            this.storeQpsCounter = new QpsCounter(60);
+        }
 
-		public String getBinlogFile() {
-			return binlogFile;
-		}
+        public String getBinlogFile() {
+            return binlogFile;
+        }
 
-		public long getBinlogPosition() {
-			return binlogPosition;
-		}
+        public long getBinlogPosition() {
+            return binlogPosition;
+        }
 
-		public int getBucketDate() {
-			return bucketDate;
-		}
+        public int getBucketDate() {
+            return bucketDate;
+        }
 
-		public int getBucketNumber() {
-			return bucketNumber;
-		}
+        public int getBucketNumber() {
+            return bucketNumber;
+        }
 
-		public String getDatabase() {
-			return database;
-		}
+        public String getDatabase() {
+            return database;
+        }
 
-		public String getHost() {
-			return host;
-		}
+        public String getHost() {
+            return host;
+        }
 
-		public String getName() {
-			return name;
-		}
+        public String getName() {
+            return name;
+        }
 
-		public int getPort() {
-			return port;
-		}
+        public int getPort() {
+            return port;
+        }
 
-		public long getStoreQps() {
-			return this.storeQpsCounter.get(60);
-		}
+        public long getStoreQps() {
+            return this.storeQpsCounter.get(60);
+        }
 
-		public AtomicLong getTotalDdlEvent() {
-			return totalDdlEvent;
-		}
+        public void increaseStoreQps() {
+            storeQpsCounter.increase();
+        }
 
-		public AtomicLong getTotalDeleteEvent() {
-			return totalDeleteEvent;
-		}
+        public AtomicLong getTotalDdlEvent() {
+            return totalDdlEvent;
+        }
 
-		public AtomicLong getTotalInsertEvent() {
-			return totalInsertEvent;
-		}
+        public AtomicLong getTotalDeleteEvent() {
+            return totalDeleteEvent;
+        }
 
-		public AtomicLong getTotalParsedEvent() {
-			return totalParsedEvent;
-		}
+        public AtomicLong getTotalInsertEvent() {
+            return totalInsertEvent;
+        }
 
-		public AtomicLong getTotalStoreBytes() {
-			return totalStoreBytes;
-		}
+        public AtomicLong getTotalParsedEvent() {
+            return totalParsedEvent;
+        }
 
-		public AtomicLong getTotalStoreCount() {
-			return totalStoreCount;
-		}
+        public AtomicLong getTotalStoreBytes() {
+            return totalStoreBytes;
+        }
 
-		public AtomicLong getTotalUpdateEvent() {
-			return totalUpdateEvent;
-		}
+        public AtomicLong getTotalStoreCount() {
+            return totalStoreCount;
+        }
 
-		public void incStoreCountAndByte(long size) {
-			this.totalStoreCount.incrementAndGet();
-			this.totalStoreBytes.addAndGet(size);
-			this.storeQpsCounter.increase();
-		}
+        public AtomicLong getTotalUpdateEvent() {
+            return totalUpdateEvent;
+        }
 
-		public void setBinlogFile(String binlogFile) {
-			this.binlogFile = binlogFile;
-		}
+        public void incStoreCountAndByte(long size) {
+            this.totalStoreCount.incrementAndGet();
+            this.totalStoreBytes.addAndGet(size);
+            this.storeQpsCounter.increase();
+        }
 
-		public void setBinlogPosition(long binlogPosition) {
-			this.binlogPosition = binlogPosition;
-		}
+        public void setBinlogFile(String binlogFile) {
+            this.binlogFile = binlogFile;
+        }
 
-		public void setBucketDate(int bucketDate) {
-			this.bucketDate = bucketDate;
-		}
+        public void setBinlogPosition(long binlogPosition) {
+            this.binlogPosition = binlogPosition;
+        }
 
-		public void setBucketNumber(int bucketOffset) {
-			this.bucketNumber = bucketOffset;
-		}
+        public void setBucketDate(int bucketDate) {
+            this.bucketDate = bucketDate;
+        }
 
-		public void setDatabase(String database) {
-			this.database = database;
-		}
+        public void setBucketNumber(int bucketOffset) {
+            this.bucketNumber = bucketOffset;
+        }
 
-		public void setHost(String host) {
-			this.host = host;
-		}
+        public void setDatabase(String database) {
+            this.database = database;
+        }
 
-		public void setName(String name) {
-			this.name = name;
-		}
+        public void setHost(String host) {
+            this.host = host;
+        }
 
-		public void setPort(int port) {
-			this.port = port;
-		}
+        public void setName(String name) {
+            this.name = name;
+        }
 
-		public void setStoreQps(int storeQps) {
-			this.storeQps = storeQps;
-		}
+        public void setPort(int port) {
+            this.port = port;
+        }
 
-		public void updateBinlog(String binlogFile, long binlogPosition) {
-			this.binlogFile = binlogFile;
-			this.binlogPosition = binlogPosition;
-		}
+        public void updateBinlog(String binlogFile, long binlogPosition) {
+            this.binlogFile = binlogFile;
+            this.binlogPosition = binlogPosition;
+        }
 
-		public void updateBucket(int bucketDate, int bucketNumber) {
-			this.bucketDate = bucketDate;
-			this.bucketNumber = bucketNumber;
-		}
-	}
+        public void updateBucket(int bucketDate, int bucketNumber) {
+            this.bucketDate = bucketDate;
+            this.bucketNumber = bucketNumber;
+        }
+    }
 }

@@ -13,7 +13,6 @@ import org.junit.Test;
 public class SinglePumaConnectorTest {
 
     @Test
-//    @Ignore
     public void testConnect() {
         SinglePumaClient connector = new SinglePumaClient("my-client", "127.0.0.1", 4040);
         connector.subscribe(true, false, false, "test", "a", "b");
@@ -37,10 +36,9 @@ public class SinglePumaConnectorTest {
 
 
     @Test
-//    @Ignore
     public void testConnectSync() {
         SinglePumaClient connector = new SinglePumaClient("dozer", "127.0.0.1", 4040);
-        connector.subscribe(true, false, false, "test", "debug");
+        connector.subscribe(true, true, true, "test", "debug");
 
         while (true) {
             try {

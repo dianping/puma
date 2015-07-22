@@ -27,8 +27,6 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 
 	private EventCodec codec;
 
-	private BinlogIndexKey binlogIndexKey;
-
 	private volatile boolean stopped = true;
 
 	private DataBucket readDataBucket;
@@ -43,10 +41,10 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 		this.bucketManager = bucketManager;
 		this.indexManager = indexManager;
 		this.codec = codec;
-		this.binlogIndexKey = new BinlogIndexKey(binlogFile, binlogPos, serverId);
+		this.lastBinLogIndexKey = new BinlogIndexKey(binlogFile, binlogPos, serverId);
 
 		try {
-			this.indexBucket = indexManager.getIndexBucket(seq, this.binlogIndexKey);
+			this.indexBucket = indexManager.getIndexBucket(seq, this.lastBinLogIndexKey);
 		} catch (IOException e) {
 			throw new InvalidSequenceException("Invalid sequence(" + seq + ")", e);
 		}
@@ -65,15 +63,19 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 		while (event == null) {
 			try {
 				checkClosed();
+				L2Index nextL2Index = null;
+
 				if (this.indexBucket == null) {
 					this.indexBucket = this.indexManager.getNextIndexBucket(lastBinLogIndexKey);
 
-					if (this.indexBucket == null) {
+					if (indexBucket == null) {
 						if (!shouldSleep) {
 							return null;
 						} else {
 							try {
 								Thread.sleep(5);
+
+								continue;
 							} catch (InterruptedException e1) {
 								Thread.currentThread().interrupt();
 							}
@@ -81,7 +83,31 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 					}
 				}
 
-				L2Index nextL2Index = this.indexBucket.next();
+				try {
+					nextL2Index = this.indexBucket.next();
+				} catch (EOFException e) {
+					if (readDataBucket != null) {
+						this.readDataBucket.stop();
+						this.readDataBucket = null;
+					}
+
+					if (indexBucket != null) {
+						this.indexBucket.stop();
+						this.indexBucket = null;
+					}
+
+					if (!shouldSleep) {
+						return null;
+					} else {
+						try {
+							Thread.sleep(5);
+
+							continue;
+						} catch (InterruptedException e1) {
+							Thread.currentThread().interrupt();
+						}
+					}
+				}
 
 				if (this.database != null && !nextL2Index.getDatabase().equals(this.database)) {
 					continue;
@@ -99,48 +125,18 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 				Sequence sequence = nextL2Index.getSequence();
 
 				if (readDataBucket == null) {
-					lastReadSequence = sequence;
 					readDataBucket = this.bucketManager.getReadBucket(sequence.longValue(), false);
 				}
 
-				if (sequence.getOffset() != lastReadSequence.getOffset()) {
+				if (lastReadSequence != null) {
 					readDataBucket.skip(sequence.getOffset() - lastReadSequence.getOffset() - lastReadSequence.getLen());
 				}
+
 				byte[] data = readDataBucket.getNext();
 				event = codec.decode(data);
 
 				lastBinLogIndexKey = nextL2Index.getBinlogIndexKey();
 				lastReadSequence = sequence;
-			} catch (EOFException e) {
-				try {
-					if (lastReadSequence != null && this.bucketManager.hasNexReadBucket(lastReadSequence.longValue())) {
-						if (readDataBucket != null) {
-							this.readDataBucket.stop();
-							this.readDataBucket = null;
-						}
-
-						if (indexBucket != null) {
-							this.indexBucket.stop();
-						}
-
-						this.indexBucket = this.indexManager.getNextIndexBucket(lastBinLogIndexKey);
-						if (this.indexBucket != null) {
-							this.indexBucket.start();
-						}
-					} else {
-						if (!shouldSleep) {
-							return null;
-						} else {
-							try {
-								Thread.sleep(5);
-							} catch (InterruptedException e1) {
-								Thread.currentThread().interrupt();
-							}
-						}
-					}
-				} catch (IOException ex) {
-					throw new StorageReadException("Failed to read", ex);
-				}
 			} catch (IOException e) {
 				throw new StorageReadException("Failed to read", e);
 			}

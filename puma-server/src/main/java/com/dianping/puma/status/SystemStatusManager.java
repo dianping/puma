@@ -103,6 +103,7 @@ public class SystemStatusManager {
 			Client client = status.getClients().get(clientName);
 			if(client != null) {
 				client.setAckBinlogInfo(binlogInfo);
+				client.increaseFetchQps();
 			}
 		}
 	}

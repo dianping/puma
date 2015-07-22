@@ -80,7 +80,6 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
     @Override
     public void destroy() {
         stopped = true;
-        executorService.shutdown();
         eventChannel.close();
     }
 

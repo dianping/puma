@@ -91,14 +91,19 @@ public class SystemStatusManager {
 	public static void updateClientSendBinlogInfo(String clientName, BinlogInfo binlogInfo) {
 		if(binlogInfo!= null) {
 			Client client = status.getClients().get(clientName);
-			client.setSendBinlogInfo(binlogInfo);
+
+			if(client != null){
+				client.setSendBinlogInfo(binlogInfo);
+			}
 		}
 	}
 
 	public static void updateClientAckBinlogInfo(String clientName, BinlogInfo binlogInfo) {
 		if(binlogInfo!= null) {
 			Client client = status.getClients().get(clientName);
-			client.setAckBinlogInfo(binlogInfo);
+			if(client != null) {
+				client.setAckBinlogInfo(binlogInfo);
+			}
 		}
 	}
 

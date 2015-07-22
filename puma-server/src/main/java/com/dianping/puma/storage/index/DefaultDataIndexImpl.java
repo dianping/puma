@@ -326,12 +326,16 @@ public class DefaultDataIndexImpl<K extends DataIndexKey<K>, V> implements DataI
 					l1ReadLock.unlock();
 				}
 
-				File l2IndexFile = getL2IndexFile(l2Index.getValue());
-				LocalFileIndexBucket<K, V> localFileIndexBucket = new LocalFileIndexBucket<K, V>(l2IndexFile,
-				      this.l2IndexItemConvertor);
+				if (l2Index != null) {
+					File l2IndexFile = getL2IndexFile(l2Index.getValue());
+					LocalFileIndexBucket<K, V> localFileIndexBucket = new LocalFileIndexBucket<K, V>(l2IndexFile,
+					      this.l2IndexItemConvertor);
 
-				localFileIndexBucket.locate(key);
-				return localFileIndexBucket;
+					localFileIndexBucket.locate(key);
+					return localFileIndexBucket;
+				} else {
+					return null;
+				}
 			} else {
 				return null;
 			}
@@ -396,10 +400,15 @@ public class DefaultDataIndexImpl<K extends DataIndexKey<K>, V> implements DataI
 			}
 		}
 
-		File l2IndexFile = getL2IndexFile(l2Index.getValue());
-		LocalFileIndexBucket<K, V> localFileIndexBucket = new LocalFileIndexBucket<K, V>(l2IndexFile,
-		      this.l2IndexItemConvertor);
+		if (l2Index != null) {
 
-		return localFileIndexBucket;
+			File l2IndexFile = getL2IndexFile(l2Index.getValue());
+			LocalFileIndexBucket<K, V> localFileIndexBucket = new LocalFileIndexBucket<K, V>(l2IndexFile,
+			      this.l2IndexItemConvertor);
+
+			return localFileIndexBucket;
+		} else {
+			return null;
+		}
 	}
 }

@@ -148,9 +148,7 @@ public class SystemStatus {
 
 		private BinlogInfo ackBinlogInfo;
 
-		private int fetchQps;
-
-		private SecondBucketCounter fetchQpsCounter;
+		private QpsCounter fetchQpsCounter;
 
 		public Client(String ip, String database, List<String> tables, boolean withDml, boolean withDdl,
 		      boolean withTransaction, String codec) {
@@ -162,7 +160,7 @@ public class SystemStatus {
 			this.withDdl = withDdl;
 			this.withTransaction = withTransaction;
 			this.codec = codec;
-			this.fetchQpsCounter = new SecondBucketCounter();
+			this.fetchQpsCounter = new QpsCounter(60);
 		}
 
 		public String getCodec() {
@@ -173,10 +171,8 @@ public class SystemStatus {
 			return database;
 		}
 
-		public int getFetchQps() {
-			this.fetchQps = this.fetchQpsCounter.get();
-
-			return fetchQps;
+		public long getFetchQps() {
+			return this.fetchQpsCounter.get(60);
 		}
 
 		public String getIp() {
@@ -214,10 +210,6 @@ public class SystemStatus {
 		public void setSendBinlogInfo(BinlogInfo sendBinlogInfo) {
 			this.sendBinlogInfo = sendBinlogInfo;
 		}
-
-		public void setFetchQps(int fetchQps) {
-			this.fetchQps = fetchQps;
-		}
 	}
 
 	public static class Server {
@@ -253,7 +245,7 @@ public class SystemStatus {
 
 		private AtomicLong totalDdlEvent = new AtomicLong(0);
 
-		private SecondBucketCounter storeQpsCounter;
+		private QpsCounter storeQpsCounter;
 
 		public Server(String name, String host, int port) {
 			this(name, host, port, null);
@@ -265,7 +257,7 @@ public class SystemStatus {
 			this.host = host;
 			this.port = port;
 			this.database = database;
-			this.storeQpsCounter = new SecondBucketCounter();
+			this.storeQpsCounter = new QpsCounter(60);
 		}
 
 		public String getBinlogFile() {
@@ -300,10 +292,8 @@ public class SystemStatus {
 			return port;
 		}
 
-		public int getStoreQps() {
-			this.storeQps = this.storeQpsCounter.get();
-
-			return storeQps;
+		public long getStoreQps() {
+			return this.storeQpsCounter.get(60);
 		}
 
 		public AtomicLong getTotalDdlEvent() {

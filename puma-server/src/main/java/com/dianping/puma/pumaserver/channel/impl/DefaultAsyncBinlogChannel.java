@@ -70,6 +70,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
             executorService.execute(extractTask);
 
         } catch (Exception e) {
+            logger.error(e.getMessage(), e);
             throw new BinlogChannelException("find event storage failure", e.getCause());
         }
     }

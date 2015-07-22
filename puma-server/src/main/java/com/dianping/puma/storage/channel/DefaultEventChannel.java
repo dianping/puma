@@ -86,14 +86,16 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 				try {
 					nextL2Index = this.indexBucket.next();
 				} catch (EOFException e) {
-					if (readDataBucket != null) {
-						this.readDataBucket.stop();
-						this.readDataBucket = null;
-					}
-
-					if (indexBucket != null) {
-						this.indexBucket.stop();
-						this.indexBucket = null;
+					if(this.indexManager.hasNextIndexBucket(lastBinLogIndexKey)){
+						if (readDataBucket != null) {
+							this.readDataBucket.stop();
+							this.readDataBucket = null;
+						}
+						
+						if (indexBucket != null) {
+							this.indexBucket.stop();
+							this.indexBucket = null;
+						}
 					}
 
 					if (!shouldSleep) {

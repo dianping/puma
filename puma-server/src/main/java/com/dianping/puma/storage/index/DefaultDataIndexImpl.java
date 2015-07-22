@@ -385,6 +385,24 @@ public class DefaultDataIndexImpl<K extends DataIndexKey<K>, V> implements DataI
 		}
 	}
 
+	public boolean hasNextIndexBucket(K key) throws IOException {
+		Entry<K, String> l2Index = null;
+		if (l1Index != null) {
+			l1ReadLock.lock();
+			try {
+				if (l1Index.isEmpty()) {
+					return false;
+				}
+
+				l2Index = l1Index.tailMap(key, false).firstEntry();
+			} finally {
+				l1ReadLock.unlock();
+			}
+		}
+
+		return l2Index != null ? true : false;
+	}
+
 	public IndexBucket<K, V> getNextIndexBucket(K key) throws IOException {
 		Entry<K, String> l2Index = null;
 		if (l1Index != null) {
@@ -394,14 +412,13 @@ public class DefaultDataIndexImpl<K extends DataIndexKey<K>, V> implements DataI
 					return null;
 				}
 
-				l2Index = l1Index.ceilingEntry(key);
+				l2Index = l1Index.tailMap(key, false).firstEntry();
 			} finally {
 				l1ReadLock.unlock();
 			}
 		}
 
 		if (l2Index != null) {
-
 			File l2IndexFile = getL2IndexFile(l2Index.getValue());
 			LocalFileIndexBucket<K, V> localFileIndexBucket = new LocalFileIndexBucket<K, V>(l2IndexFile,
 			      this.l2IndexItemConvertor);

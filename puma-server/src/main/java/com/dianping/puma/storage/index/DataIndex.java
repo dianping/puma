@@ -41,6 +41,8 @@ public interface DataIndex<K extends DataIndexKey<K>, V> extends LifeCycle<IOExc
 	 */
 	public IndexBucket<K, V> getIndexBucket(long startPos, K key) throws IOException;
 
+	public boolean hasNextIndexBucket(K key) throws IOException;
+
 	public IndexBucket<K, V> getNextIndexBucket(K key) throws IOException;
 
 }

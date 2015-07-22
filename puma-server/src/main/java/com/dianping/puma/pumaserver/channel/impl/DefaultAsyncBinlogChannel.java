@@ -15,6 +15,7 @@ import com.dianping.puma.storage.EventStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -28,7 +29,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
     private volatile boolean stopped = false;
 
-    private static final ExecutorService executorService = Executors.newCachedThreadPool();
+    protected static final ExecutorService executorService = Executors.newCachedThreadPool();
 
     private volatile EventChannel eventChannel;
 
@@ -68,85 +69,13 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
             eventChannel.withTransaction(transaction);
             eventChannel.open();
 
-            executorService.execute(extractTask);
+            executorService.execute(new AsyncTask(new WeakReference<DefaultAsyncBinlogChannel>(this)));
 
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw new BinlogChannelException("find event storage failure", e.getCause());
         }
     }
-
-    private Runnable extractTask = new Runnable() {
-        @Override
-        public void run() {
-            List<Event> results = new ArrayList<Event>();
-
-            while (!stopped && !Thread.interrupted()) {
-                BinlogGetRequest req = request.get();
-                if (req != null && !req.getChannel().isActive()) {
-                    request.set(null);
-                    req = null;
-                }
-
-                if (req == null && results.size() > 1000) {
-                    try {
-                        Thread.sleep(5);
-                    } catch (InterruptedException e) {
-                        stopped = true;
-                    }
-                    continue;
-                }
-
-                Event binlogEvent;
-                try {
-                    binlogEvent = eventChannel.next(false);
-                } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
-                    binlogEvent = new ServerErrorEvent("get binlog event from storage failure.", e.getCause());
-                }
-
-                if (binlogEvent != null) {
-                    results.add(binlogEvent);
-                }
-
-                boolean needSend = false;
-                if (req != null && (results.size() >= req.getBatchSize() || req.isTimeout())) {
-                    needSend = true;
-                }
-
-                if (needSend) {
-                    request.set(null);
-
-                    BinlogGetResponse response = new BinlogGetResponse();
-                    BinlogMessage message = new BinlogMessage();
-                    BinlogInfo lastBinlogInfo = null;
-
-                    Iterator<Event> iterator = results.iterator();
-                    while (iterator.hasNext() && message.getBinlogEvents().size() < req.getBatchSize()) {
-                        Event event = iterator.next();
-                        message.addBinlogEvents(event);
-                        if (event.getBinlogInfo() != null) {
-                            lastBinlogInfo = event.getBinlogInfo();
-                        }
-                        iterator.remove();
-                    }
-
-                    req.getChannel().writeAndFlush(response.setBinlogMessage(message));
-                    //todo: auto ack
-
-                    SystemStatusManager.updateClientSendBinlogInfo(req.getClientName(), lastBinlogInfo);
-                }
-
-                if (binlogEvent == null) {
-                    try {
-                        Thread.sleep(5);
-                    } catch (InterruptedException e) {
-                        stopped = true;
-                    }
-                }
-            }
-        }
-    };
 
     @Override
     public void destroy() {
@@ -162,5 +91,91 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
     public void setTaskContainer(TaskContainer taskContainer) {
         this.taskContainer = taskContainer;
+    }
+
+    static class AsyncTask implements Runnable {
+        private final static Logger logger = LoggerFactory.getLogger(AsyncTask.class);
+
+        private final WeakReference<DefaultAsyncBinlogChannel> parent;
+
+        public AsyncTask(WeakReference<DefaultAsyncBinlogChannel> parent) {
+            this.parent = parent;
+        }
+
+        private DefaultAsyncBinlogChannel getParent() throws InterruptedException {
+            DefaultAsyncBinlogChannel channel = parent.get();
+            if (channel == null) {
+                logger.warn("Parent has be GCed. Please check your code to call destroy.");
+                Thread.currentThread().interrupt();
+                throw new InterruptedException();
+            }
+            return channel;
+        }
+
+        @Override
+        public void run() {
+            List<Event> results = new ArrayList<Event>();
+
+            try {
+                while (!getParent().stopped && !Thread.currentThread().isInterrupted()) {
+                    BinlogGetRequest req = getParent().request.get();
+                    if (req != null && !req.getChannel().isActive()) {
+                        getParent().request.set(null);
+                        req = null;
+                    }
+
+                    if (req == null && results.size() > 1000) {
+                        Thread.sleep(5);
+                        continue;
+                    }
+
+                    Event binlogEvent;
+                    try {
+                        binlogEvent = getParent().eventChannel.next(false);
+                    } catch (Exception e) {
+                        logger.error(e.getMessage(), e);
+                        binlogEvent = new ServerErrorEvent("get binlog event from storage failure.", e.getCause());
+                    }
+
+                    if (binlogEvent != null) {
+                        results.add(binlogEvent);
+                    }
+
+                    boolean needSend = false;
+                    if (req != null && (results.size() >= req.getBatchSize() || req.isTimeout())) {
+                        needSend = true;
+                    }
+
+                    if (needSend) {
+                        getParent().request.set(null);
+
+                        BinlogGetResponse response = new BinlogGetResponse();
+                        BinlogMessage message = new BinlogMessage();
+                        BinlogInfo lastBinlogInfo = null;
+
+                        Iterator<Event> iterator = results.iterator();
+                        while (iterator.hasNext() && message.getBinlogEvents().size() < req.getBatchSize()) {
+                            Event event = iterator.next();
+                            message.addBinlogEvents(event);
+                            if (event.getBinlogInfo() != null) {
+                                lastBinlogInfo = event.getBinlogInfo();
+                            }
+                            iterator.remove();
+                        }
+
+                        req.getChannel().writeAndFlush(response.setBinlogMessage(message));
+                        //todo: auto ack
+
+                        SystemStatusManager.updateClientSendBinlogInfo(req.getClientName(), lastBinlogInfo);
+                    }
+
+                    if (binlogEvent == null) {
+                        Thread.sleep(5);
+                    }
+                }
+            } catch (InterruptedException e) {
+                logger.info("AsyncTask has be Interrupted");
+            }
+        }
     }
 }

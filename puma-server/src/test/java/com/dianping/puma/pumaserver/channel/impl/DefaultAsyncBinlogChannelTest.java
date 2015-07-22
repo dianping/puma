@@ -11,6 +11,7 @@ import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.EventStorage;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -19,6 +20,7 @@ import org.mockito.stubbing.Answer;
 import java.util.ArrayList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -133,6 +135,15 @@ public class DefaultAsyncBinlogChannelTest {
         Thread.sleep(150);
 
         assertNotNull(result.get());
+    }
+
+    @Test
+    public void test_weakreference() throws Exception {
+        Assert.assertEquals(1, ((ThreadPoolExecutor) DefaultAsyncBinlogChannel.executorService).getActiveCount());
+        target = null;
+        System.gc();
+        Thread.sleep(50);
+        Assert.assertEquals(0, ((ThreadPoolExecutor) DefaultAsyncBinlogChannel.executorService).getActiveCount());
     }
 
     protected Channel getChannel(final AtomicReference<BinlogGetResponse> result) {

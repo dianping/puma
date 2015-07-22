@@ -5,6 +5,7 @@ import com.dianping.puma.core.dto.binlog.response.BinlogAckResponse;
 import com.dianping.puma.pumaserver.client.ClientSession;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
+import com.dianping.puma.status.SystemStatusManager;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -24,6 +25,8 @@ public class BinlogAckHandler extends SimpleChannelInboundHandler<BinlogAckReque
 
         BinlogAckResponse response = new BinlogAckResponse();
         ctx.channel().writeAndFlush(response);
+
+        SystemStatusManager.updateClientAckBinlogInfo(binlogAckRequest.getClientName(),binlogAckRequest.getBinlogAck().getBinlogInfo());
     }
 
     public void setBinlogAckService(BinlogAckService binlogAckService) {

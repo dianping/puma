@@ -9,6 +9,7 @@ import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.pumaserver.channel.AsyncBinlogChannel;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
 import com.dianping.puma.server.container.TaskContainer;
+import com.dianping.puma.status.SystemStatusManager;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.EventStorage;
 import org.slf4j.Logger;
@@ -118,15 +119,22 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
                     BinlogGetResponse response = new BinlogGetResponse();
                     BinlogMessage message = new BinlogMessage();
+                    BinlogInfo lastBinlogInfo = null;
 
                     Iterator<Event> iterator = results.iterator();
                     while (iterator.hasNext() && message.getBinlogEvents().size() < req.getBatchSize()) {
-                        message.addBinlogEvents(iterator.next());
+                        Event event = iterator.next();
+                        message.addBinlogEvents(event);
+                        if (event.getBinlogInfo() != null) {
+                            lastBinlogInfo = event.getBinlogInfo();
+                        }
                         iterator.remove();
                     }
 
                     req.getChannel().writeAndFlush(response.setBinlogMessage(message));
                     //todo: auto ack
+
+                    SystemStatusManager.updateClientSendBinlogInfo(req.getClientName(), lastBinlogInfo);
                 }
 
                 if (binlogEvent == null) {

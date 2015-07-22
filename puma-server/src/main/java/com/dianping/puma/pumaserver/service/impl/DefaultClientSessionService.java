@@ -3,6 +3,7 @@ package com.dianping.puma.pumaserver.service.impl;
 import com.dianping.puma.pumaserver.client.ClientSession;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogAuthException;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
+import com.dianping.puma.status.SystemStatusManager;
 import com.google.common.base.Strings;
 
 import java.util.ArrayList;
@@ -34,17 +35,14 @@ public class DefaultClientSessionService implements ClientSessionService {
 
                     List<String> needToDestroy = new ArrayList<String>();
                     for (ClientSession session : clients.values()) {
-                        if (System.currentTimeMillis() - session.getLastAccessTime() > 60 * 60 * 1000) {
+                        if (System.currentTimeMillis() - session.getLastAccessTime() > 15 * 60 * 1000) {
                             needToDestroy.add(session.getClientName());
                         }
                     }
 
                     for (String name : needToDestroy) {
                         ClientSession session = clients.remove(name);
-                        if (session == null) {
-                            continue;
-                        }
-                        session.getAsyncBinlogChannel().destroy();
+                        destory(session);
                     }
                 }
             }
@@ -55,14 +53,11 @@ public class DefaultClientSessionService implements ClientSessionService {
     }
 
     @Override
-    public String subscribe(ClientSession client) {
-        client.setToken(UUID.randomUUID().toString());
-        client.setLastAccessTime(System.currentTimeMillis());
-        ClientSession old = clients.put(client.getClientName(), client);
-        if (old != null) {
-            old.getAsyncBinlogChannel().destroy();
-        }
-        return client.getToken();
+    public String subscribe(ClientSession session) {
+        init(session);
+        ClientSession old = clients.put(session.getClientName(), session);
+        destory(old);
+        return session.getToken();
     }
 
     @Override
@@ -73,13 +68,25 @@ public class DefaultClientSessionService implements ClientSessionService {
 
         ClientSession client = clients.get(clientName);
         if (client != null && token.equals(client.getToken())) {
-            unsubscribe(client);
+            destory(client);
         }
     }
 
-    protected void unsubscribe(ClientSession session) {
-        clients.remove(session.getClientName());
-        session.getAsyncBinlogChannel().destroy();
+    protected ClientSession init(ClientSession session) {
+        session.setToken(UUID.randomUUID().toString());
+        session.setLastAccessTime(System.currentTimeMillis());
+        return session;
+    }
+
+    protected void destory(ClientSession session) {
+        if (session != null) {
+            clients.remove(session.getClientName());
+            session.getAsyncBinlogChannel().destroy();
+
+            if (!clients.containsKey(session.getClientName())) {
+                SystemStatusManager.deleteClient(session.getClientName());
+            }
+        }
     }
 
     @Override

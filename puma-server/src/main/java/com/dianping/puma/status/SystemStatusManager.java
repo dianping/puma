@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.status.SystemStatus.Client;
 import com.dianping.puma.status.SystemStatus.Server;
 
@@ -87,10 +88,18 @@ public class SystemStatusManager {
 		stopTheWorlds.put(serverName, new AtomicBoolean(true));
 	}
 
-	public static void updateClientBinlogInfo(String clientName, String binlogFile, long binlogPosition) {
-		Client client = status.getClients().get(clientName);
+	public static void updateClientSendBinlogInfo(String clientName, BinlogInfo binlogInfo) {
+		if(binlogInfo!= null) {
+			Client client = status.getClients().get(clientName);
+			client.setSendBinlogInfo(binlogInfo);
+		}
+	}
 
-		client.setBinlogInfo(binlogFile, binlogPosition);
+	public static void updateClientAckBinlogInfo(String clientName, BinlogInfo binlogInfo) {
+		if(binlogInfo!= null) {
+			Client client = status.getClients().get(clientName);
+			client.setAckBinlogInfo(binlogInfo);
+		}
 	}
 
 	public static void updateServerBinlog(String name, String binlogFile, long binlogPosition) {

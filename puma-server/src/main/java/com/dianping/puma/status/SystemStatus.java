@@ -1,5 +1,7 @@
 package com.dianping.puma.status;
 
+import com.dianping.puma.core.model.BinlogInfo;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -142,9 +144,9 @@ public class SystemStatus {
 
 		private String codec;
 
-		private String currentBinlogFile;
+		private BinlogInfo sendBinlogInfo;
 
-		private long currentBinLogPosition;
+		private BinlogInfo ackBinlogInfo;
 
 		private int fetchQps;
 
@@ -165,14 +167,6 @@ public class SystemStatus {
 
 		public String getCodec() {
 			return codec;
-		}
-
-		public String getCurrentBinlogFile() {
-			return currentBinlogFile;
-		}
-
-		public long getCurrentBinLogPosition() {
-			return currentBinLogPosition;
 		}
 
 		public String getDatabase() {
@@ -205,9 +199,20 @@ public class SystemStatus {
 			return withTransaction;
 		}
 
-		public void setBinlogInfo(String binlogFile, long binlogPosition) {
-			this.currentBinlogFile = binlogFile;
-			this.currentBinLogPosition = binlogPosition;
+		public BinlogInfo getAckBinlogInfo() {
+			return ackBinlogInfo;
+		}
+
+		public void setAckBinlogInfo(BinlogInfo ackBinlogInfo) {
+			this.ackBinlogInfo = ackBinlogInfo;
+		}
+
+		public BinlogInfo getSendBinlogInfo() {
+			return sendBinlogInfo;
+		}
+
+		public void setSendBinlogInfo(BinlogInfo sendBinlogInfo) {
+			this.sendBinlogInfo = sendBinlogInfo;
 		}
 
 		public void setFetchQps(int fetchQps) {

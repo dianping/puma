@@ -12,6 +12,7 @@ import com.dianping.puma.pumaserver.client.ClientType;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
 import com.dianping.puma.server.container.TaskContainer;
+import com.dianping.puma.status.SystemStatusManager;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -50,6 +51,16 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
         BinlogSubscriptionResponse binlogSubscriptionResponse = new BinlogSubscriptionResponse();
         binlogSubscriptionResponse.setToken(session.getToken());
         ctx.channel().writeAndFlush(binlogSubscriptionResponse);
+
+        SystemStatusManager.addClient(
+                clientName,
+                binlogSubscriptionRequest.getDatabase(),
+                binlogSubscriptionRequest.getTables(),
+                binlogSubscriptionRequest.isDml(),
+                binlogSubscriptionRequest.isDdl(),
+                binlogSubscriptionRequest.isTransaction(),
+                "json"
+        );
     }
 
     private AsyncBinlogChannel buildBinlogChannel(

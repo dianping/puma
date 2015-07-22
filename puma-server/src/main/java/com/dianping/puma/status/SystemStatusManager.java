@@ -14,11 +14,11 @@ public class SystemStatusManager {
 
 	private static ConcurrentMap<String, AtomicBoolean> stopTheWorlds = new ConcurrentHashMap<String, AtomicBoolean>();
 
-	public static void addClient(String ip, String database, List<String> tables, boolean withDml, boolean withDdl,
+	public static void addClient(String clientName, String database, List<String> tables, boolean withDml, boolean withDdl,
 	      boolean withTransaction, String codec) {
-		Client client = new Client(ip, database, tables, withDml, withDdl, withTransaction, codec);
+		Client client = new Client(clientName, database, tables, withDml, withDdl, withTransaction, codec);
 
-		status.getClients().put(ip, client);
+		status.getClients().put(clientName, client);
 	}
 
 	public static void addServer(String name, String host, int port, String database) {
@@ -27,8 +27,8 @@ public class SystemStatusManager {
 		status.getServers().put(name, server);
 	}
 
-	public static void deleteClient(String ip) {
-		status.getClients().remove(ip);
+	public static void deleteClient(String clientName) {
+		status.getClients().remove(clientName);
 	}
 
 	public static void deleteServer(String name) {
@@ -87,8 +87,8 @@ public class SystemStatusManager {
 		stopTheWorlds.put(serverName, new AtomicBoolean(true));
 	}
 
-	public static void updateClientBinlogInfo(String ip, String binlogFile, long binlogPosition) {
-		Client client = status.getClients().get(ip);
+	public static void updateClientBinlogInfo(String clientName, String binlogFile, long binlogPosition) {
+		Client client = status.getClients().get(clientName);
 
 		client.setBinlogInfo(binlogFile, binlogPosition);
 	}

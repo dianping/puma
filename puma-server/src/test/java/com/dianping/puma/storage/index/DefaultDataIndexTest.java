@@ -182,7 +182,7 @@ public class DefaultDataIndexTest {
 
 	@Test
 	public void testGetNextIndexBucket() throws IOException {
-		IndexBucket<BinlogIndexKey, L2Index> indexBucket = index.getNextIndexBucket(key3);
+		IndexBucket<BinlogIndexKey, L2Index> indexBucket = index.getNextIndexBucket(key2);
 
 		L2Index convertFromObj = indexBucket.next();
 

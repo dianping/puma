@@ -5,6 +5,8 @@ import com.dianping.puma.pumaserver.exception.binlog.BinlogAuthException;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
 import com.dianping.puma.status.SystemStatusManager;
 import com.google.common.base.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * http://www.dozer.cc
  */
 public class DefaultClientSessionService implements ClientSessionService {
+    private final static Logger logger = LoggerFactory.getLogger(DefaultClientSessionService.class);
+
     private final Map<String, ClientSession> clients = new ConcurrentHashMap<String, ClientSession>();
 
     private Thread autoCleanSessionThread;
@@ -43,6 +47,8 @@ public class DefaultClientSessionService implements ClientSessionService {
                     for (String name : needToDestroy) {
                         ClientSession session = clients.remove(name);
                         destory(session);
+
+                        logger.info("{}({}) was timeout", session.getClientName(), session.getToken());
                     }
                 }
             }

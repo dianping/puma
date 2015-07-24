@@ -19,9 +19,10 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
@@ -35,7 +36,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
     private TaskContainer taskContainer;
 
-    private final AtomicReference<BinlogGetRequest> request = new AtomicReference<BinlogGetRequest>();
+    private final BlockingQueue<BinlogGetRequest> requests = new LinkedBlockingQueue<BinlogGetRequest>(5);
 
     @Override
     public void init(
@@ -85,7 +86,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
     @Override
     public boolean addRequest(BinlogGetRequest request) {
-        return this.request.compareAndSet(null, request);
+        return requests.offer(request);
     }
 
     public void setTaskContainer(TaskContainer taskContainer) {
@@ -116,16 +117,16 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
             List<Event> results = new ArrayList<Event>();
 
             try {
+                BinlogGetRequest req = null;
+
                 while (!getParent().stopped && !Thread.currentThread().isInterrupted()) {
-                    BinlogGetRequest req = getParent().request.get();
-                    if (req != null && !req.getChannel().isActive()) {
-                        getParent().request.set(null);
-                        req = null;
+
+                    while (!(req != null && req.getChannel().isActive())) {
+                        req = getParent().requests.poll();
                     }
 
                     if (req == null && results.size() > 1000) {
-                        Thread.sleep(5);
-                        continue;
+                        req = getParent().requests.take();
                     }
 
                     Event binlogEvent;
@@ -146,8 +147,6 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
                     }
 
                     if (needSend) {
-                        getParent().request.set(null);
-
                         BinlogGetResponse response = new BinlogGetResponse();
                         BinlogMessage message = new BinlogMessage();
                         BinlogInfo lastBinlogInfo = null;
@@ -163,10 +162,11 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
                         }
 
                         req.getChannel().writeAndFlush(response.setBinlogMessage(message));
-                        //todo: auto ack
 
                         SystemStatusManager.updateClientSendBinlogInfo(req.getClientName(), lastBinlogInfo);
                         SystemStatusManager.addClientFetchQps(req.getClientName(), message.getBinlogEvents().size());
+
+                        req = null;
                     }
 
                     if (binlogEvent == null) {

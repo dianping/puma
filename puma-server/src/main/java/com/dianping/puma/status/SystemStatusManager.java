@@ -3,6 +3,7 @@ package com.dianping.puma.status;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.status.SystemStatus.Client;
 import com.dianping.puma.status.SystemStatus.Server;
+import com.google.common.base.Strings;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -89,6 +90,9 @@ public class SystemStatusManager {
     }
 
     public static void addClientFetchQps(String clientName, long size) {
+        if (Strings.isNullOrEmpty(clientName)) {
+            return;
+        }
         Client client = status.getClients().get(clientName);
         if (client != null) {
             client.addFetchQps(size);
@@ -96,12 +100,14 @@ public class SystemStatusManager {
     }
 
     public static void updateClientSendBinlogInfo(String clientName, BinlogInfo binlogInfo) {
-        if (binlogInfo != null) {
-            Client client = status.getClients().get(clientName);
+        if (Strings.isNullOrEmpty(clientName) || binlogInfo == null) {
+            return;
+        }
 
-            if (client != null) {
-                client.setSendBinlogInfo(binlogInfo);
-            }
+        Client client = status.getClients().get(clientName);
+
+        if (client != null) {
+            client.setSendBinlogInfo(binlogInfo);
         }
     }
 

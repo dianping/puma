@@ -166,6 +166,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
                         //todo: auto ack
 
                         SystemStatusManager.updateClientSendBinlogInfo(req.getClientName(), lastBinlogInfo);
+                        SystemStatusManager.addClientFetchQps(req.getClientName(), message.getBinlogEvents().size());
                     }
 
                     if (binlogEvent == null) {

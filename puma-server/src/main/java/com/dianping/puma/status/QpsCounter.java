@@ -55,6 +55,16 @@ public class QpsCounter {
         return count / averageQpsSecond;
     }
 
+    public void add(long size) {
+        AtomicLong counter = new AtomicLong();
+        AtomicLong oldCounter = qps.putIfAbsent(System.currentTimeMillis() / SPLIT, counter);
+        if (oldCounter != null) {
+            oldCounter.addAndGet(size);
+        } else {
+            counter.addAndGet(size);
+        }
+    }
+
     public void increase() {
         AtomicLong counter = new AtomicLong();
         AtomicLong oldCounter = qps.putIfAbsent(System.currentTimeMillis() / SPLIT, counter);

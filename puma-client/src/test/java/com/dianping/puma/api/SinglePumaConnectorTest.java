@@ -44,7 +44,9 @@ public class SinglePumaConnectorTest {
             try {
                 BinlogMessage message = connector.get(1);
                 //todo:业务逻辑
-                System.out.println(new Gson().toJson(message));
+                if ((System.currentTimeMillis() / 1000) % 1000 == 0) {
+                    System.out.println(new Gson().toJson(message));
+                }
                 connector.ack(message.getLastBinlogInfo());
             } catch (PumaClientException exp) {
                 exp.printStackTrace();

@@ -26,8 +26,7 @@ public class QpsCounter {
     /**
      * 设置最大统计时间
      *
-     * @param maxSecond
-     * 最大统计时间，如果设置成10秒，那么后续只能得到平均10秒的QPS
+     * @param maxSecond 最大统计时间，如果设置成10秒，那么后续只能得到平均10秒的QPS
      */
     public QpsCounter(int maxSecond) {
         Preconditions.checkArgument(maxSecond > 0, "should > 0");
@@ -53,7 +52,7 @@ public class QpsCounter {
                 count += next.getValue().get();
             }
         }
-        return count;
+        return count / averageQpsSecond;
     }
 
     public void increase() {

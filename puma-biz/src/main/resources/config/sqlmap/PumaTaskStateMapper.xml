@@ -21,7 +21,7 @@
         set
         taskName=#{taskName},
         serverName=#{serverName},
-        gmtUpdate=#{gmtUpdate},
+        updateTime=#{updateTime},
         detail=#{detail},
         status=#{status},
         binlogInfo_ServerId=#{binlogInfo.serverId},
@@ -40,7 +40,7 @@
         (
         taskName,
         serverName,
-        gmtUpdate,
+        updateTime,
         detail,
         status,
         binlogInfo_ServerId,
@@ -55,7 +55,7 @@
         (
         #{taskName},
         #{serverName},
-        #{gmtUpdate},
+        #{updateTime},
         #{detail},
         #{status},
         #{binlogInfo.serverId},

@@ -43,7 +43,7 @@ public class StatusController {
 			PumaTaskStateEntity taskState = taskExecutor.getTaskState();
 			// taskState.setServerName(pumaServerConfig.getName());
 			taskState.setTaskName(taskState.getTaskName());
-			taskState.setGmtUpdate(new Date());
+			taskState.setUpdateTime(new Date());
 			pumaTaskStates.add(taskState);
 		}
 		

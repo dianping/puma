@@ -14,7 +14,7 @@ public class SyncServerEntity {
 
 	private float loadBalance;
 
-	private Date gmtUpdate;
+	private Date updateTime;
 
 	public int getId() {
 		return id;
@@ -56,11 +56,11 @@ public class SyncServerEntity {
 		this.loadBalance = loadBalance;
 	}
 
-	public Date getGmtUpdate() {
-		return gmtUpdate;
+	public Date getUpdateTime() {
+		return updateTime;
 	}
 
-	public void setGmtUpdate(Date gmtUpdate) {
-		this.gmtUpdate = gmtUpdate;
+	public void setUpdateTime(Date updateTime) {
+		this.updateTime = updateTime;
 	}
 }

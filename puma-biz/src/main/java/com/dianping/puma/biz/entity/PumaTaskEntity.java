@@ -20,7 +20,7 @@ public class PumaTaskEntity {
 
 	private BinlogInfo startBinlogInfo;
 
-	private Date GmtUpdate;
+	private Date updateTime;
 
 	private TableSet tableSet;
 
@@ -95,12 +95,12 @@ public class PumaTaskEntity {
 		this.backUpSrcDbs = backUpSrcDbs;
 	}
 
-	public Date getGmtUpdate() {
-		return GmtUpdate;
+	public Date getUpdateTime() {
+		return updateTime;
 	}
 
-	public void setGmtUpdate(Date gmtUpdate) {
-		GmtUpdate = gmtUpdate;
+	public void setUpdateTime(Date updateTime) {
+		this.updateTime = updateTime;
 	}
 
 	public List<Pair<PumaServerEntity, ActionController>> getPumaServers() {

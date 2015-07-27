@@ -38,7 +38,7 @@ public class PumaTaskStateServiceImpl implements PumaTaskStateService {
 
     @Override
     public void createOrUpdate(PumaTaskStateEntity taskState) {
-        taskState.setGmtUpdate(new Date());
+        taskState.setUpdateTime(new Date());
 
         if (pumaTaskStateDao.findByTaskNameAndServerName(taskState.getTaskName(), taskState.getServerName()) == null) {
             pumaTaskStateDao.insert(taskState);

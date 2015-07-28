@@ -302,10 +302,6 @@ public class SystemStatus {
             return this.storeQpsCounter.get(15);
         }
 
-        public void increaseStoreQps() {
-            storeQpsCounter.increase();
-        }
-
         public AtomicLong getTotalDdlEvent() {
             return totalDdlEvent;
         }

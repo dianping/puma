@@ -15,25 +15,16 @@
     <!-- Configures the @Controller programming model -->
     <mvc:annotation-driven />
 
+    <mvc:resources mapping="/app/**" location="/app/" />
 
-    <!-- Configures Handler Interceptors -->
-    <!--<mvc:interceptors> -->
-    <!-- Changes the locale when a 'locale' request parameter is sent; e.g. 
-        /?locale=de -->
-    <!-- <bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" 
-        /> -->
-    <!--</mvc:interceptors> -->
-
-    <!-- Handles HTTP GET requests for /resources/** by efficiently serving 
-        up static resources in the ${webappRoot}/resources/ directory -->
-    <mvc:resources mapping="/javascripts/**" location="/js/" />
+    <!--mvc:resources mapping="/javascripts/**" location="/js/" />
     <mvc:resources mapping="/images/**" location="/images/" />
     <mvc:resources mapping="/stylesheets/**" location="/style/" />
     <mvc:resources mapping="/style/**" location="/style/" />
     <mvc:resources mapping="/image/**" location="/images/" />
-    <mvc:resources mapping="*.html" location="*.html" />
+    <mvc:resources mapping="/*.html" location="/app/" />
     <mvc:resources mapping="/js/**" location="/js/"/>
-    <mvc:resources mapping="/resources/**" location="/resources/"/>
+    <mvc:resources mapping="/resources/**" location="/resources/"/-->
 
     <!-- Saves a locale change using a cookie -->
     <!-- <bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver" 

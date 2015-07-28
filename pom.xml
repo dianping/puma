@@ -13,6 +13,7 @@
         <module>puma-client</module>
         <module>puma-core</module>
         <module>puma-biz</module>
+        <module>puma-syncserver</module>
     </modules>
     <description>puma</description>
     <dependencyManagement>

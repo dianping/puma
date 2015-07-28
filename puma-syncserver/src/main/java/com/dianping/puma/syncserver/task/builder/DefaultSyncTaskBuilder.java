@@ -3,7 +3,7 @@ package com.dianping.puma.syncserver.task.builder;
 import com.dianping.puma.biz.entity.SyncTaskEntity;
 import com.dianping.puma.syncserver.buffer.DefaultDuplexBuffer;
 import com.dianping.puma.syncserver.buffer.DuplexBuffer;
-import com.dianping.puma.syncserver.load.ConcurrentLoader;
+import com.dianping.puma.syncserver.load.AsyncConcurrentLoader;
 import com.dianping.puma.syncserver.load.Loader;
 import com.dianping.puma.syncserver.task.SyncTaskExecutor;
 import com.dianping.puma.syncserver.task.TaskExecutor;
@@ -33,7 +33,7 @@ public class DefaultSyncTaskBuilder implements TaskBuilder<SyncTaskEntity> {
 
 		// @todo.
 		// loader.
-		Loader loader = new ConcurrentLoader();
+		Loader loader = new AsyncConcurrentLoader();
 		executor.setLoader(loader);
 
 		return executor;

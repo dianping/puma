@@ -80,4 +80,8 @@ public class RemotePumaServerRouter implements PumaServerRouter {
 				.append(queryString)
 				.toString();
 	}
+
+	@Override public void addListener(PumaServerRouterListener listener) {
+
+	}
 }

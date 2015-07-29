@@ -4,5 +4,5 @@ import com.dianping.puma.core.event.ChangedEvent;
 
 public interface Loader {
 
-	void load(ChangedEvent binlogEvent, LoadCallback callback);
+	public LoadFuture load(ChangedEvent binlogEvent);
 }

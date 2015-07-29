@@ -1,4 +1,4 @@
-package com.dianping.puma.syncserver.transform;
+package com.dianping.puma.syncserver.executor.transform;
 
 import com.dianping.puma.syncserver.MockTest;
 

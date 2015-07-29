@@ -4,8 +4,6 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.syncserver.exception.PumaException;
 import com.dianping.puma.syncserver.executor.load.condition.ConditionChain;
 import com.dianping.puma.syncserver.util.SqlParser;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFutureTask;
 import org.apache.commons.dbutils.QueryRunner;
 
 import javax.sql.DataSource;
@@ -32,14 +30,13 @@ public class AsyncConcurrentLoader extends AbstractLoader {
 	}
 
 	@Override
-	public void load(ChangedEvent binlogEvent, LoadCallback loadCallback) {
+	public LoadFuture load(ChangedEvent binlogEvent) {
 		if (checkStop()) {
 			throw new PumaException("load binlog event failure, load module stopped.");
 		}
 
 		Callable<Integer> loadCallable = genLoadTask(binlogEvent);
-		ListenableFutureTask<Integer> loadFutureTask = ListenableFutureTask.create(loadCallable);
-		Futures.addCallback(loadFutureTask, loadCallback);
+		LoadFuture loadFuture = new LoadFuture(loadCallable);
 
 		while (conditionChain.isLocked(binlogEvent)) {
 			try {
@@ -50,7 +47,9 @@ public class AsyncConcurrentLoader extends AbstractLoader {
 			}
 		}
 
-		executorService.submit(loadFutureTask);
+		executorService.submit(loadFuture);
+
+		return loadFuture;
 	}
 
 	protected Callable<Integer> genLoadTask(final ChangedEvent binlogEvent) {

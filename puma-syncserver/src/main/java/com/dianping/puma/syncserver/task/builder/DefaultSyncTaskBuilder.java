@@ -5,8 +5,8 @@ import com.dianping.puma.syncserver.executor.load.AsyncConcurrentLoader;
 import com.dianping.puma.syncserver.executor.load.Loader;
 import com.dianping.puma.syncserver.executor.SyncTaskExecutor;
 import com.dianping.puma.syncserver.executor.TaskExecutor;
-import com.dianping.puma.syncserver.transform.DefaultTransformer;
-import com.dianping.puma.syncserver.transform.Transformer;
+import com.dianping.puma.syncserver.executor.transform.DefaultTransformer;
+import com.dianping.puma.syncserver.executor.transform.Transformer;
 import org.springframework.stereotype.Component;
 
 @Component("syncTaskBuilder")

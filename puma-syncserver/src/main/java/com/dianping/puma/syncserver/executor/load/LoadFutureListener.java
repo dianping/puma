@@ -2,7 +2,7 @@ package com.dianping.puma.syncserver.executor.load;
 
 import com.google.common.util.concurrent.FutureCallback;
 
-public interface LoadCallback extends FutureCallback<Integer> {
+public interface LoadFutureListener extends FutureCallback<Integer> {
 
 	@Override
 	public void onSuccess(Integer result);

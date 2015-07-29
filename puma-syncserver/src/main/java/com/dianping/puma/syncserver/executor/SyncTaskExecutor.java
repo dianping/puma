@@ -3,10 +3,8 @@ package com.dianping.puma.syncserver.executor;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.biz.entity.SyncTaskEntity;
 import com.dianping.puma.core.dto.BinlogMessage;
-import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.syncserver.exception.PumaTimeoutException;
 import com.dianping.puma.syncserver.executor.load.Loader;
-import com.dianping.puma.syncserver.transform.Transformer;
+import com.dianping.puma.syncserver.executor.transform.Transformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -50,6 +50,7 @@ import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
+import com.dianping.puma.storage.channel.DefaultEventChannel;
 import com.dianping.puma.storage.holder.impl.DefaultBinlogInfoHolder;
 import com.dianping.puma.taskexecutor.DefaultTaskExecutor;
 import com.dianping.puma.taskexecutor.TaskExecutor;
@@ -90,7 +91,7 @@ public abstract class AbstractBaseTest {
 	      "puma/binlogIndex/");
 
 	private static DefaultBinlogInfoHolder binlogInfoHolder;
-	
+
 	private final int WAIT_FOR_SYNC_TIME = 1500;
 
 	private EventCenter eventCenter;
@@ -460,8 +461,10 @@ public abstract class AbstractBaseTest {
 	      throws Exception {
 		waitForSync(WAIT_FOR_SYNC_TIME);
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
-		EventChannel channel = storage.getChannel(SubscribeConstant.SEQ_FROM_OLDEST, -1, null, -1, -1);
-		channel.open();
+
+		EventChannel channel = new DefaultEventChannel(storage);
+		channel.open(SubscribeConstant.SEQ_FROM_OLDEST);
+
 		for (int i = 0; i < n;) {
 			ChangedEvent event = (ChangedEvent) channel.next();
 			if (!needTs) {
@@ -486,8 +489,9 @@ public abstract class AbstractBaseTest {
 	      long timeStamp, boolean needTs) throws Exception {
 		waitForSync(WAIT_FOR_SYNC_TIME);
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
-		EventChannel channel = storage.getChannel(seq, serverId, binlog, binlogPos, timeStamp);
-		channel.open();
+		EventChannel channel = new DefaultEventChannel(storage);
+		channel.open(serverId, binlog, binlogPos);
+
 		for (int i = 0; i < n;) {
 			ChangedEvent event = (ChangedEvent) channel.next();
 			if (!needTs) {

@@ -18,6 +18,7 @@ package com.dianping.puma.storage.index;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -26,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -38,19 +40,17 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import org.apache.commons.io.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
 
-import com.dianping.puma.core.constant.SubscribeConstant;
-
 /**
  * 
  * @author Leo Liang
  * 
  */
-public class DefaultDataIndexImpl<K extends DataIndexKey<K>, V> implements DataIndex<K, V> {
+public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>> implements IndexManager<K, V> {
+	public static final String L1INDEX_FILENAME = "l1Index.l1idx";
+
 	public static final String L2INDEX_FOLDER = "l2Index";
 
 	public static final String L2INDEX_FILESUFFIX = ".l2idx";
-
-	public static final String L1INDEX_FILENAME = "l1Index.l1idx";
 
 	private String baseDir;
 
@@ -62,9 +62,9 @@ public class DefaultDataIndexImpl<K extends DataIndexKey<K>, V> implements DataI
 
 	private DataOutputStream writingl2IndexStream;
 
-	private IndexItemConvertor<V> l2IndexItemConvertor;
+	private IndexItemConvertor<K> indexKeyConvertor;
 
-	private IndexItemConvertor<K> keyConvertor;
+	private IndexItemConvertor<V> indexValueConvertor;
 
 	private ReentrantReadWriteLock l1Lock = new ReentrantReadWriteLock();
 
@@ -78,10 +78,11 @@ public class DefaultDataIndexImpl<K extends DataIndexKey<K>, V> implements DataI
 
 	private AtomicReference<K> latestL2Index = new AtomicReference<K>();
 
-	public DefaultDataIndexImpl(String baseDir, IndexItemConvertor<V> valueConvertor, IndexItemConvertor<K> keyConvertor) {
+	public DefaultIndexManager(String baseDir, IndexItemConvertor<K> indexKeyConvertor,
+	      IndexItemConvertor<V> indexValueConvertor) {
 		this.baseDir = baseDir;
-		this.keyConvertor = keyConvertor;
-		this.l2IndexItemConvertor = valueConvertor;
+		this.indexKeyConvertor = indexKeyConvertor;
+		this.indexValueConvertor = indexValueConvertor;
 	}
 
 	private File getL2IndexFile(String l2IndexName) {
@@ -90,6 +91,13 @@ public class DefaultDataIndexImpl<K extends DataIndexKey<K>, V> implements DataI
 
 	private File getL1IndexFile() {
 		return new File(baseDir, L1INDEX_FILENAME);
+	}
+
+	/*
+	 * for test purpose only
+	 */
+	protected void setLatestL2IndexNull() {
+		latestL2Index.getAndSet(null);
 	}
 
 	@Override
@@ -122,7 +130,7 @@ public class DefaultDataIndexImpl<K extends DataIndexKey<K>, V> implements DataI
 				prop.load(is);
 				TreeMap<K, String> newL1Index = new TreeMap<K, String>();
 				for (String propName : prop.stringPropertyNames()) {
-					K key = keyConvertor.convertFromObj(propName);
+					K key = indexKeyConvertor.convertFromObj(propName);
 					String value = prop.getProperty(propName);
 					if (key != null && value != null) {
 						newL1Index.put(key, value);
@@ -232,22 +240,17 @@ public class DefaultDataIndexImpl<K extends DataIndexKey<K>, V> implements DataI
 	}
 
 	private void appendL1IndexToFile(K key, String l2IndexName) throws IOException {
-		l1IndexWriter.write(keyConvertor.convertToObj(key) + "=" + l2IndexName);
+		l1IndexWriter.write(indexKeyConvertor.convertToObj(key) + "=" + l2IndexName);
 		l1IndexWriter.newLine();
 		l1IndexWriter.flush();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.storage.DataIndex#addL2Index(com.dianping.puma.storage .DataIndexKey, java.lang.Object)
-	 */
 	@Override
 	public void addL2Index(K key, V value) throws IOException {
 		l2WriteLock.lock();
 		try {
 			if (writingl2IndexStream != null) {
-				Object object = l2IndexItemConvertor.convertToObj(value);
+				Object object = indexValueConvertor.convertToObj(value);
 
 				if (object instanceof byte[]) {
 					byte[] bytes = (byte[]) object;
@@ -312,74 +315,31 @@ public class DefaultDataIndexImpl<K extends DataIndexKey<K>, V> implements DataI
 	}
 
 	@Override
-	public IndexBucket<K, V> getIndexBucket(long startPos, K key) throws IOException {
-		if (startPos == SubscribeConstant.SEQ_FROM_BINLOGINFO) {
-			if (key != null && l1Index != null) {
-				Entry<K, String> l2Index = null;
-				l1ReadLock.lock();
-				try {
-					if (l1Index.isEmpty()) {
-						return null;
-					}
-					l2Index = l1Index.floorEntry(key);
-				} finally {
-					l1ReadLock.unlock();
-				}
-
-				if (l2Index != null) {
-					File l2IndexFile = getL2IndexFile(l2Index.getValue());
-					LocalFileIndexBucket<K, V> localFileIndexBucket = new LocalFileIndexBucket<K, V>(l2IndexFile,
-					      this.l2IndexItemConvertor);
-
-					localFileIndexBucket.locate(key);
-					return localFileIndexBucket;
-				} else {
+	public IndexBucket<K, V> getIndexBucket(K key, boolean inclusive) throws IOException {
+		if (key != null && l1Index != null) {
+			Entry<K, String> l2Index = null;
+			l1ReadLock.lock();
+			try {
+				if (l1Index.isEmpty()) {
 					return null;
 				}
+
+				l2Index = l1Index.floorEntry(key);
+			} finally {
+				l1ReadLock.unlock();
+			}
+
+			if (l2Index != null) {
+				File l2IndexFile = getL2IndexFile(l2Index.getValue());
+				LocalFileIndexBucket<K, V> localFileIndexBucket = new LocalFileIndexBucket<K, V>(l2IndexFile,
+				      this.indexValueConvertor);
+
+				localFileIndexBucket.locate(key, inclusive);
+
+				return localFileIndexBucket;
 			} else {
 				return null;
 			}
-		} else if (startPos == SubscribeConstant.SEQ_FROM_LATEST) {
-			Entry<K, String> l2Index = null;
-			if (l1Index != null) {
-				l1ReadLock.lock();
-				try {
-					if (l1Index.isEmpty()) {
-						return null;
-					}
-
-					l2Index = l1Index.lastEntry();
-				} finally {
-					l1ReadLock.unlock();
-				}
-			}
-
-			File l2IndexFile = getL2IndexFile(l2Index.getValue());
-			LocalFileIndexBucket<K, V> localFileIndexBucket = new LocalFileIndexBucket<K, V>(l2IndexFile,
-			      this.l2IndexItemConvertor);
-			localFileIndexBucket.locate(latestL2Index.get());
-
-			return localFileIndexBucket;
-		} else if (startPos == SubscribeConstant.SEQ_FROM_OLDEST) {
-			Entry<K, String> l2Index = null;
-			if (l1Index != null) {
-				l1ReadLock.lock();
-				try {
-					if (l1Index.isEmpty()) {
-						return null;
-					}
-
-					l2Index = l1Index.firstEntry();
-				} finally {
-					l1ReadLock.unlock();
-				}
-			}
-
-			File l2IndexFile = getL2IndexFile(l2Index.getValue());
-			LocalFileIndexBucket<K, V> localFileIndexBucket = new LocalFileIndexBucket<K, V>(l2IndexFile,
-			      this.l2IndexItemConvertor);
-
-			return localFileIndexBucket;
 		} else {
 			return null;
 		}
@@ -421,11 +381,242 @@ public class DefaultDataIndexImpl<K extends DataIndexKey<K>, V> implements DataI
 		if (l2Index != null) {
 			File l2IndexFile = getL2IndexFile(l2Index.getValue());
 			LocalFileIndexBucket<K, V> localFileIndexBucket = new LocalFileIndexBucket<K, V>(l2IndexFile,
-			      this.l2IndexItemConvertor);
+			      this.indexValueConvertor);
 
 			return localFileIndexBucket;
 		} else {
 			return null;
+		}
+	}
+
+	@Override
+	public K findFirst() throws IOException {
+		if (l1Index != null) {
+			l1ReadLock.lock();
+
+			try {
+				if (l1Index.isEmpty()) {
+					return null;
+				} else {
+					return l1Index.firstKey();
+				}
+			} finally {
+				l1ReadLock.unlock();
+			}
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public K findLatest() throws IOException {
+		K latestKey = latestL2Index.get();
+
+		if (latestKey != null) {
+			return latestKey;
+		} else {
+			if (l1Index != null) {
+				l1ReadLock.lock();
+
+				try {
+					if (l1Index.isEmpty()) {
+						return null;
+					} else {
+						Entry<K, String> lastEntry = l1Index.lastEntry();
+
+						LocalFileIndexBucket<K, V> bucket = new LocalFileIndexBucket<K, V>(
+						      getL2IndexFile(lastEntry.getValue()), this.indexValueConvertor);
+						bucket.start();
+
+						V next = null;
+						try {
+							while (true) {
+								next = bucket.next();
+							}
+						} catch (EOFException ignore) {
+						} finally {
+							bucket.stop();
+						}
+
+						if (next != null) {
+							return next.getIndexKey();
+						} else {
+							return null;
+						}
+					}
+				} finally {
+					l1ReadLock.unlock();
+				}
+			} else {
+				return null;
+			}
+		}
+	}
+
+	@Override
+	public K findByTime(K searchKey, boolean startWithCompleteTransaction) throws IOException {
+		if (l1Index != null) {
+			l1ReadLock.lock();
+
+			try {
+				if (l1Index.isEmpty()) {
+					return null;
+				} else {
+					Entry<K, String> target = l1Index.floorEntry(searchKey);
+
+					if (target == null) {
+						target = l1Index.ceilingEntry(searchKey);
+
+						if (target != null) {
+							return target.getKey();
+						} else {
+							return null;
+						}
+					}
+
+					LocalFileIndexBucket<K, V> bucket = new LocalFileIndexBucket<K, V>(getL2IndexFile(target.getValue()),
+					      this.indexValueConvertor);
+					bucket.start();
+
+					V next = null;
+					LinkedList<V> entries = new LinkedList<V>();
+
+					try {
+						while (true) {
+							next = bucket.next();
+
+							if (next.getIndexKey().getTimestamp() > searchKey.getTimestamp()) {
+								break;
+							} else {
+								entries.add(next);
+							}
+						}
+					} catch (EOFException ignore) {
+					} finally {
+						bucket.stop();
+					}
+
+					if (startWithCompleteTransaction) {
+						// 从队列中查找上一个transaction commit位置，从这个点之后的一定是完整的
+						V last = entries.pollLast();
+
+						while (last != null) {
+							if (last.isTransactionCommit()) {
+								return last.getIndexKey();
+							} else {
+								last = entries.pollLast();
+							}
+						}
+						// 如果仍然没有找到
+						return null;
+					} else {
+						V last = entries.pollLast();
+
+						return (last == null) ? null : last.getIndexKey();
+					}
+				}
+			} finally {
+				l1ReadLock.unlock();
+			}
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public K findByBinlog(K searchKey, boolean startWithCompleteTransaction) throws IOException {
+		if (l1Index != null) {
+			l1ReadLock.lock();
+
+			try {
+				if (l1Index.isEmpty()) {
+					return null;
+				} else {
+					Entry<K, String> target = null;
+
+					for (Entry<K, String> entry : l1Index.entrySet()) {
+						K key = entry.getKey();
+
+						if (key.getServerId() == searchKey.getServerId()) {
+							if (compareTo(searchKey, key) >= 0) {
+
+								if (target == null) {
+									target = entry;
+								} else {
+									if (compareTo(key, target.getKey()) >= 0) {
+										target = entry;
+									}
+								}
+							}
+						}
+					}
+
+					if (target == null) {
+						return null;
+					}
+
+					LocalFileIndexBucket<K, V> bucket = new LocalFileIndexBucket<K, V>(getL2IndexFile(target.getValue()),
+					      this.indexValueConvertor);
+					bucket.start();
+
+					V next = null;
+					LinkedList<V> entries = new LinkedList<V>();
+
+					try {
+						while (true) {
+							next = bucket.next();
+
+							if (compareTo(next.getIndexKey(), searchKey) > 0) {
+								break;
+							} else {
+								entries.add(next);
+							}
+						}
+					} catch (EOFException ignore) {
+					} finally {
+						bucket.stop();
+					}
+
+					if (startWithCompleteTransaction) {
+						// 从队列中查找上一个transaction commit位置，从这个点之后的一定是完整的
+						V last = entries.pollLast();
+
+						while (last != null) {
+							if (last.isTransactionCommit()) {
+								return last.getIndexKey();
+							} else {
+								last = entries.pollLast();
+							}
+						}
+						// 如果仍然没有找到
+						return null;
+					} else {
+						V last = entries.pollLast();
+
+						return (last == null) ? null : last.getIndexKey();
+					}
+				}
+			} finally {
+				l1ReadLock.unlock();
+			}
+		} else {
+			return null;
+		}
+	}
+
+	private int compareTo(K key1, K key2) {
+		if (key1.getServerId() == key2.getServerId()) {
+			if (key1.getBinlogFile().equals(key2.getBinlogFile())) {
+				if (key1.getBinlogPosition() == key2.getBinlogPosition()) {
+					return 0;
+				} else {
+					return key1.getBinlogPosition() > key2.getBinlogPosition() ? 1 : -1;
+				}
+			} else {
+				return key1.getBinlogFile().compareTo(key2.getBinlogFile());
+			}
+		} else {
+			return key1.getServerId() > key2.getServerId() ? 1 : -1;
 		}
 	}
 }

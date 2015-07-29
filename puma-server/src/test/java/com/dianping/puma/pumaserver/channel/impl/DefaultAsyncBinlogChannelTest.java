@@ -49,7 +49,7 @@ public class DefaultAsyncBinlogChannelTest {
         taskContainer = mock(TaskContainer.class);
 
         when(taskContainer.getTaskStorage(anyString())).thenReturn(eventStorage);
-        when(eventStorage.getChannel(anyLong(), anyLong(), anyString(), anyLong(), anyLong())).thenReturn(eventChannel);
+//        when(eventStorage.getChannel(anyLong(), anyLong(), anyString(), anyLong(), anyLong())).thenReturn(eventChannel);
         when(eventChannel.next(anyBoolean())).thenAnswer(new Answer<Event>() {
             @Override
             public Event answer(InvocationOnMock invocationOnMock) throws Throwable {

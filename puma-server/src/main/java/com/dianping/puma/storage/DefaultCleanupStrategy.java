@@ -24,7 +24,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.dianping.puma.storage.bucket.DataBucketManager;
 import com.dianping.puma.storage.exception.StorageClosedException;
-import com.dianping.puma.storage.index.DataIndex;
+import com.dianping.puma.storage.index.IndexManager;
 
 /**
  * TODO Comment of DefaultCleanupStrategy
@@ -36,14 +36,14 @@ public class DefaultCleanupStrategy implements CleanupStrategy {
     private int             preservedDay      = 14;
     private List<String>    toBeDeleteBuckets = new ArrayList<String>();
     @SuppressWarnings("rawtypes")
-    private List<DataIndex> dataIndexes       = new ArrayList<DataIndex>();
+    private List<IndexManager> dataIndexes       = new ArrayList<IndexManager>();
 
     public void setPreservedDay(int preservedDay) {
         this.preservedDay = preservedDay;
     }
 
     @SuppressWarnings("rawtypes")
-    public void addDataIndex(DataIndex index) {
+    public void addDataIndex(IndexManager index) {
         this.dataIndexes.add(index);
     }
 
@@ -57,7 +57,7 @@ public class DefaultCleanupStrategy implements CleanupStrategy {
                 index.remove(toBeDeleteBuckets);
                 for (String path : toBeDeleteBuckets) {
                     if (dataIndexes != null && !dataIndexes.isEmpty()) {
-                        for (DataIndex dataIndex : dataIndexes) {
+                        for (IndexManager dataIndex : dataIndexes) {
                             try {
                                 dataIndex.removeByL2IndexName(path.replace('/', '-'));
                             } catch (IOException e) {

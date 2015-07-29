@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import com.dianping.puma.storage.exception.StorageClosedException;
 
-public class LocalFileIndexBucket<K, V> implements IndexBucket<K, V> {
+public class LocalFileIndexBucket<K, V extends IndexValue<K>> implements IndexBucket<K, V> {
 
 	private DataInputStream input;
 
@@ -40,20 +40,22 @@ public class LocalFileIndexBucket<K, V> implements IndexBucket<K, V> {
 	}
 
 	@Override
-	public void locate(K key) throws StorageClosedException, IOException {
+	public void locate(K key, boolean inclusive) throws StorageClosedException, IOException {
 		if (key == null) {
 			return;
 		}
 
 		while (true) {
+			this.input.mark(Integer.MAX_VALUE);
+
 			V next = next();
 
-			if (next instanceof L2Index) {
-				L2Index l2Index = (L2Index) next;
-
-				if (l2Index.getBinlogIndexKey().equals(key)) {
-					return;
+			if (next.getIndexKey().equals(key)) {
+				if (inclusive) {
+					this.input.reset();
 				}
+
+				return;
 			}
 		}
 	}

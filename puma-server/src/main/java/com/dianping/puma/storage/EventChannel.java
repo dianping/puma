@@ -1,55 +1,63 @@
 package com.dianping.puma.storage;
 
 import com.dianping.puma.core.event.Event;
+import com.dianping.puma.storage.exception.InvalidSequenceException;
 import com.dianping.puma.storage.exception.StorageException;
 
 public interface EventChannel {
 
-    /**
-     * default value is all;
-     *
-     * @param transaction
-     * @return
-     */
-    public EventChannel withDatabase(String database);
+	/**
+	 * default value is all;
+	 *
+	 * @param transaction
+	 * @return
+	 */
+	public EventChannel withDatabase(String database);
 
-    /**
-     * default value is all;
-     *
-     * @param transaction
-     * @return
-     */
-    public EventChannel withTables(String... tables);
+	/**
+	 * default value is all;
+	 *
+	 * @param transaction
+	 * @return
+	 */
+	public EventChannel withTables(String... tables);
 
-    /**
-     * default value is true;
-     *
-     * @param transaction
-     * @return
-     */
-    public EventChannel withTransaction(boolean transaction);
+	/**
+	 * default value is true;
+	 *
+	 * @param transaction
+	 * @return
+	 */
+	public EventChannel withTransaction(boolean transaction);
 
-    /**
-     * default value is false;
-     *
-     * @param transaction
-     * @return
-     */
-    public EventChannel withDdl(boolean ddl);
+	/**
+	 * default value is false;
+	 *
+	 * @param transaction
+	 * @return
+	 */
+	public EventChannel withDdl(boolean ddl);
 
-    /**
-     * default value is true;
-     *
-     * @param transaction
-     * @return
-     */
-    public EventChannel withDml(boolean dml);
+	/**
+	 * default value is true;
+	 *
+	 * @param transaction
+	 * @return
+	 */
+	public EventChannel withDml(boolean dml);
 
-    public void open();
+	public void open(long serverId, String binlogFile, long binlogPosition) throws InvalidSequenceException;
 
-    public void close();
+	/**
+	 * -1 for oldest ; 0 for newest; other for timestamp;
+	 * 
+	 * @param startTimeStamp
+	 */
+	public void open(long startTimeStamp) throws InvalidSequenceException;
 
-    public Event next() throws StorageException;
+	public void close();
 
-    public Event next(boolean shouldSleep) throws StorageException;
+	public Event next() throws StorageException;
+
+	public Event next(boolean shouldSleep) throws StorageException;
 }

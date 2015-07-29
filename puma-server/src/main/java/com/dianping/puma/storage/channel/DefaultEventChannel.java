@@ -1,8 +1,13 @@
 package com.dianping.puma.storage.channel;
 
+import java.io.EOFException;
+import java.io.IOException;
+
 import com.dianping.puma.core.codec.EventCodec;
+import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.storage.EventChannel;
+import com.dianping.puma.storage.EventStorage;
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.bucket.BucketManager;
 import com.dianping.puma.storage.bucket.DataBucket;
@@ -10,20 +15,17 @@ import com.dianping.puma.storage.exception.InvalidSequenceException;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageException;
 import com.dianping.puma.storage.exception.StorageReadException;
-import com.dianping.puma.storage.index.BinlogIndexKey;
-import com.dianping.puma.storage.index.DataIndex;
 import com.dianping.puma.storage.index.IndexBucket;
-import com.dianping.puma.storage.index.L2Index;
-
-import java.io.EOFException;
-import java.io.IOException;
+import com.dianping.puma.storage.index.IndexKeyImpl;
+import com.dianping.puma.storage.index.IndexManager;
+import com.dianping.puma.storage.index.IndexValueImpl;
 
 public class DefaultEventChannel extends AbstractEventChannel implements EventChannel {
 	private BucketManager bucketManager;
 
-	private DataIndex<BinlogIndexKey, L2Index> indexManager;
+	private IndexManager<IndexKeyImpl, IndexValueImpl> indexManager;
 
-	private IndexBucket<BinlogIndexKey, L2Index> indexBucket;
+	private IndexBucket<IndexKeyImpl, IndexValueImpl> indexBucket;
 
 	private EventCodec codec;
 
@@ -31,27 +33,14 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 
 	private DataBucket readDataBucket;
 
-	private BinlogIndexKey lastBinLogIndexKey = null;
+	private IndexKeyImpl lastIndexKey = null;
 
 	private Sequence lastReadSequence = null;
 
-	public DefaultEventChannel(BucketManager bucketManager, DataIndex<BinlogIndexKey, L2Index> indexManager,
-	      EventCodec codec, long seq, long serverId, String binlogFile, long binlogPos, long timestamp)
-	      throws StorageException {
-		this.bucketManager = bucketManager;
-		this.indexManager = indexManager;
-		this.codec = codec;
-		this.lastBinLogIndexKey = new BinlogIndexKey(binlogFile, binlogPos, serverId);
-
-		try {
-			this.indexBucket = indexManager.getIndexBucket(seq, this.lastBinLogIndexKey);
-		} catch (IOException e) {
-			throw new InvalidSequenceException("Invalid sequence(" + seq + ")", e);
-		}
-
-		if (this.indexBucket == null) {
-			throw new InvalidSequenceException("Invalid BinlogFile(" + binlogFile + "),binlogPos(" + binlogPos + ")");
-		}
+	public DefaultEventChannel(EventStorage eventStorage) throws StorageException {
+		this.bucketManager = eventStorage.getBucketManager();
+		this.indexManager = eventStorage.getDataIndex();
+		this.codec = eventStorage.getEventCodec();
 	}
 
 	@Override
@@ -63,10 +52,10 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 		while (event == null) {
 			try {
 				checkClosed();
-				L2Index nextL2Index = null;
+				IndexValueImpl nextL2Index = null;
 
 				if (this.indexBucket == null) {
-					this.indexBucket = this.indexManager.getNextIndexBucket(lastBinLogIndexKey);
+					this.indexBucket = this.indexManager.getNextIndexBucket(lastIndexKey);
 
 					if (indexBucket == null) {
 						if (!shouldSleep) {
@@ -86,7 +75,7 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 				try {
 					nextL2Index = this.indexBucket.next();
 				} catch (EOFException e) {
-					if (this.indexManager.hasNextIndexBucket(lastBinLogIndexKey)) {
+					if (this.indexManager.hasNextIndexBucket(lastIndexKey)) {
 						if (readDataBucket != null) {
 							this.readDataBucket.stop();
 							this.readDataBucket = null;
@@ -138,7 +127,7 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 				byte[] data = readDataBucket.getNext();
 				event = codec.decode(data);
 
-				lastBinLogIndexKey = nextL2Index.getBinlogIndexKey();
+				lastIndexKey = nextL2Index.getIndexKey();
 				lastReadSequence = sequence;
 			} catch (IOException e) {
 				throw new StorageReadException("Failed to read", e);
@@ -181,19 +170,82 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 		}
 	}
 
-	public void open() {
+	public void setBucketManager(BucketManager bucketManager) {
+		this.bucketManager = bucketManager;
+	}
+
+	@Override
+	public void open(long serverId, String binlogFile, long binlogPosition) throws InvalidSequenceException {
 		if (!stopped) {
 			return;
 		}
 
 		stopped = false;
+
+		if (serverId != 0 && binlogFile != null && binlogPosition > 0) {
+			try {
+				this.lastIndexKey = this.indexManager.findByBinlog(new IndexKeyImpl(serverId, binlogFile, binlogPosition),
+				      true);
+			} catch (IOException e) {
+				throw new InvalidSequenceException("find binlog error", e);
+			}
+
+			if (this.lastIndexKey == null) {
+				throw new InvalidSequenceException("cannot find binlog position");
+			}
+
+			initIndexBucket(false);
+		} else {
+			throw new InvalidSequenceException("Invalid binlog info");
+		}
+
 		try {
 			this.indexBucket.start();
 		} catch (IOException ignore) {
 		}
 	}
 
-	public void setBucketManager(BucketManager bucketManager) {
-		this.bucketManager = bucketManager;
+	@Override
+	public void open(long startTimeStamp) throws InvalidSequenceException {
+		if (!stopped) {
+			return;
+		}
+
+		stopped = false;
+
+		try {
+			if (startTimeStamp == SubscribeConstant.SEQ_FROM_LATEST) {
+				this.lastIndexKey = this.indexManager.findLatest();
+			} else if (startTimeStamp == SubscribeConstant.SEQ_FROM_OLDEST) {
+				this.lastIndexKey = this.indexManager.findFirst();
+			} else {
+				this.lastIndexKey = this.indexManager.findByTime(new IndexKeyImpl(startTimeStamp), true);
+			}
+		} catch (IOException e) {
+			throw new InvalidSequenceException("find binlog error", e);
+		}
+
+		if (this.lastIndexKey == null) {
+			throw new InvalidSequenceException("cannot find any latest binlog");
+		}
+
+		initIndexBucket(startTimeStamp == SubscribeConstant.SEQ_FROM_OLDEST);
+
+		try {
+			this.indexBucket.start();
+		} catch (IOException ignore) {
+		}
+	}
+
+	private void initIndexBucket(boolean inclusive) throws InvalidSequenceException {
+		try {
+			this.indexBucket = indexManager.getIndexBucket(this.lastIndexKey, inclusive);
+		} catch (IOException e) {
+			throw new InvalidSequenceException("Invalid binlogInfo(", e);
+		}
+
+		if (this.indexBucket == null) {
+			throw new InvalidSequenceException("Invalid binlogInfo(");
+		}
 	}
 }

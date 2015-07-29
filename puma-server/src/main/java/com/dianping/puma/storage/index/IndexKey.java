@@ -1,7 +1,7 @@
 /**
  * Project: puma-server
  * 
- * File Created at 2012-8-6
+ * File Created at 2013-1-8
  * $Id$
  * 
  * Copyright 2010 dianping.com.
@@ -13,20 +13,20 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.storage;
-
-import com.dianping.puma.storage.bucket.DataBucketManager;
-import com.dianping.puma.storage.index.IndexManager;
+package com.dianping.puma.storage.index;
 
 /**
- * TODO Comment of CleanupStrategy
  * 
  * @author Leo Liang
  * 
  */
-public interface CleanupStrategy {
-    public void cleanup(DataBucketManager index);
+public interface IndexKey<T> extends Comparable<T> {
 
-    @SuppressWarnings("rawtypes")
-    public void addDataIndex(IndexManager index);
+	public long getTimestamp();
+
+	public long getServerId();
+
+	public String getBinlogFile();
+
+	public long getBinlogPosition();
 }

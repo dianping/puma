@@ -59,5 +59,4 @@ public interface DataBucketManager extends LifeCycle<IOException> {
     public void remove(List<String> paths) throws StorageClosedException;
 
     public void updateLatestSequence(Sequence sequence);
-
 }

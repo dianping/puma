@@ -9,7 +9,6 @@ public interface IndexBucket<K, V> extends LifeCycle<IOException> {
 
 	V next() throws StorageClosedException, IOException;
 
-	void locate(K key) throws StorageClosedException, IOException;
-
-//	V findById(K key) throws StorageClosedException, IOException;
+	void locate(K key, boolean inclusive) throws StorageClosedException, IOException;
+	
 }

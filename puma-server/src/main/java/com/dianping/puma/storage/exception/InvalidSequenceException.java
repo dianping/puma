@@ -16,7 +16,6 @@
 package com.dianping.puma.storage.exception;
 
 /**
- * TODO Comment of InvalidSequenceException
  * 
  * @author Leo Liang
  * 

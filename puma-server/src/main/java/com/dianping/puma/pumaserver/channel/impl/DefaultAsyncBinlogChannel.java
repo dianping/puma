@@ -1,5 +1,17 @@
 package com.dianping.puma.pumaserver.channel.impl;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.dto.binlog.request.BinlogGetRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
@@ -12,16 +24,7 @@ import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.status.SystemStatusManager;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.EventStorage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicReference;
+import com.dianping.puma.storage.channel.DefaultEventChannel;
 
 public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
@@ -55,20 +58,21 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
         }
 
         try {
-            eventChannel = eventStorage.getChannel(
-                    sc,
-                    binlogInfo == null ? 0 : binlogInfo.getServerId(),
-                    binlogInfo == null ? null : binlogInfo.getBinlogFile(),
-                    binlogInfo == null ? 0 : binlogInfo.getBinlogPosition(),
-                    timestamp
-            );
+            eventChannel = new DefaultEventChannel(eventStorage);
             eventChannel.withDatabase(database);
             eventChannel.withTables(tables.toArray(new String[tables.size()]));
             eventChannel.withDml(dml);
             eventChannel.withDdl(ddl);
             eventChannel.withTransaction(transaction);
-            eventChannel.open();
-
+            
+            if(sc == SubscribeConstant.SEQ_FROM_BINLOGINFO){
+            	eventChannel.open(binlogInfo.getServerId(),binlogInfo.getBinlogFile(), binlogInfo.getBinlogPosition());
+            }else if(sc == SubscribeConstant.SEQ_FROM_TIMESTAMP){
+            	eventChannel.open(timestamp);
+            }else{
+            	eventChannel.open(sc);
+            }
+            
             executorService.execute(new AsyncTask(new WeakReference<DefaultAsyncBinlogChannel>(this)));
 
         } catch (Exception e) {

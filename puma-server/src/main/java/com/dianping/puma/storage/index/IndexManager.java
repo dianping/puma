@@ -23,7 +23,7 @@ import com.dianping.puma.core.LifeCycle;
  * @author Leo Liang
  * 
  */
-public interface DataIndex<K extends DataIndexKey<K>, V> extends LifeCycle<IOException> {
+public interface IndexManager<K extends IndexKey<K>, V> extends LifeCycle<IOException> {
 
 	public void addL1Index(K key, String l2IndexName) throws IOException;
 
@@ -39,10 +39,18 @@ public interface DataIndex<K extends DataIndexKey<K>, V> extends LifeCycle<IOExc
 	 * @return
 	 * @throws IOException
 	 */
-	public IndexBucket<K, V> getIndexBucket(long startPos, K key) throws IOException;
+	public IndexBucket<K, V> getIndexBucket(K key, boolean inclusive) throws IOException;
 
 	public boolean hasNextIndexBucket(K key) throws IOException;
 
 	public IndexBucket<K, V> getNextIndexBucket(K key) throws IOException;
+
+	public K findFirst() throws IOException;
+
+	public K findLatest() throws IOException;
+
+	public K findByTime(K searchKey, boolean startWithCompleteTransaction) throws IOException;
+
+	public K findByBinlog(K searchKey, boolean startWithCompleteTransaction) throws IOException;
 
 }

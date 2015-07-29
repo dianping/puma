@@ -2,11 +2,8 @@ package com.dianping.puma.storage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.dianping.puma.core.codec.EventCodec;
@@ -21,17 +18,16 @@ import com.dianping.puma.storage.bucket.BucketManager;
 import com.dianping.puma.storage.bucket.DataBucket;
 import com.dianping.puma.storage.bucket.DataBucketManager;
 import com.dianping.puma.storage.bucket.DefaultBucketManager;
-import com.dianping.puma.storage.channel.DefaultEventChannel;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageException;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;
 import com.dianping.puma.storage.exception.StorageWriteException;
-import com.dianping.puma.storage.index.BinlogIndexKey;
-import com.dianping.puma.storage.index.BinlogIndexKeyConvertor;
-import com.dianping.puma.storage.index.DataIndex;
-import com.dianping.puma.storage.index.DefaultDataIndexImpl;
-import com.dianping.puma.storage.index.L2Index;
-import com.dianping.puma.storage.index.L2IndexItemConvertor;
+import com.dianping.puma.storage.index.DefaultIndexManager;
+import com.dianping.puma.storage.index.IndexKeyConvertor;
+import com.dianping.puma.storage.index.IndexKeyImpl;
+import com.dianping.puma.storage.index.IndexManager;
+import com.dianping.puma.storage.index.IndexValueConvertor;
+import com.dianping.puma.storage.index.IndexValueImpl;
 
 public class DefaultEventStorage implements EventStorage {
 
@@ -40,8 +36,6 @@ public class DefaultEventStorage implements EventStorage {
 	private DataBucket writingBucket;
 
 	private EventCodec codec;
-
-	private List<WeakReference<EventChannel>> openChannels = new ArrayList<WeakReference<EventChannel>>();
 
 	private volatile boolean stopped = true;
 
@@ -65,9 +59,9 @@ public class DefaultEventStorage implements EventStorage {
 
 	private String binlogIndexBaseDir;
 
-	private DataIndex<BinlogIndexKey, L2Index> binlogIndex;
+	private IndexManager<IndexKeyImpl, IndexValueImpl> indexKeyManager;
 
-	private AtomicReference<BinlogIndexKey> lastBinlogIndexKey = new AtomicReference<BinlogIndexKey>(null);
+	private AtomicReference<IndexKeyImpl> lastIndexKey = new AtomicReference<IndexKeyImpl>(null);
 
 	private AtomicReference<Long> processingServerId = new AtomicReference<Long>(null);
 
@@ -100,29 +94,17 @@ public class DefaultEventStorage implements EventStorage {
 		masterBucketIndex.setMaster(true);
 		slaveBucketIndex.setMaster(false);
 		bucketManager = new DefaultBucketManager(masterBucketIndex, slaveBucketIndex, archiveStrategy, cleanupStrategy);
-		binlogIndex = new DefaultDataIndexImpl<BinlogIndexKey, L2Index>(binlogIndexBaseDir, new L2IndexItemConvertor(),
-		      new BinlogIndexKeyConvertor());
+		indexKeyManager = new DefaultIndexManager<IndexKeyImpl, IndexValueImpl>(binlogIndexBaseDir,
+		      new IndexKeyConvertor(), new IndexValueConvertor());
 
-		cleanupStrategy.addDataIndex(binlogIndex);
+		cleanupStrategy.addDataIndex(indexKeyManager);
 
 		try {
 			masterBucketIndex.start();
 			slaveBucketIndex.start();
 			bucketManager.start();
 			writingBucket = null;
-			binlogIndex.start();
-
-			for (WeakReference<EventChannel> channelRef : openChannels) {
-				EventChannel channel = channelRef.get();
-				if (channel != null) {
-					try {
-						((DefaultEventChannel) channel).setBucketManager(bucketManager);
-						// channel.start();
-					} catch (Exception e) {
-						// ignore
-					}
-				}
-			}
+			indexKeyManager.start();
 		} catch (Exception e) {
 			throw new StorageLifeCycleException("Storage init failed", e);
 		}
@@ -182,16 +164,6 @@ public class DefaultEventStorage implements EventStorage {
 	 */
 	public void setArchiveStrategy(ArchiveStrategy archiveStrategy) {
 		this.archiveStrategy = archiveStrategy;
-	}
-
-	@Override
-	public EventChannel getChannel(long seq, long serverId, String binlog, long binlogPos, long timestamp)
-	      throws StorageException {
-		EventChannel channel = new DefaultEventChannel(bucketManager, binlogIndex, codec, seq, serverId, binlog,
-		      binlogPos, timestamp);
-		openChannels.add(new WeakReference<EventChannel>(channel));
-
-		return channel;
 	}
 
 	/**
@@ -275,29 +247,30 @@ public class DefaultEventStorage implements EventStorage {
 	}
 
 	private void updateIndex(ChangedEvent event, boolean newL1Index, Sequence sequence) throws IOException {
-		BinlogIndexKey binlogKey = new BinlogIndexKey(event.getBinlogInfo().getBinlogFile(), event.getBinlogInfo()
-		      .getBinlogPosition(), event.getBinlogInfo().getServerId());
+		IndexKeyImpl indexKey = new IndexKeyImpl(event.getExecuteTime(), event.getBinlogInfo().getServerId(), event
+		      .getBinlogInfo().getBinlogFile(), event.getBinlogInfo().getBinlogPosition());
 
 		if (newL1Index) {
-			binlogIndex.addL1Index(binlogKey, writingBucket.getBucketFileName().replace('/', '-'));
+			indexKeyManager.addL1Index(indexKey, writingBucket.getBucketFileName().replace('/', '-'));
 		}
 
-		if (lastBinlogIndexKey.get() == null || !lastBinlogIndexKey.get().equals(binlogKey)) {
-			L2Index l2Index = new L2Index();
+		if (lastIndexKey.get() == null || !lastIndexKey.get().equals(indexKey)) {
+			IndexValueImpl l2Index = new IndexValueImpl();
 			l2Index.setDatabase(event.getDatabase());
 			l2Index.setTable(event.getTable());
 			l2Index.setDdl(event instanceof DdlEvent);
 			l2Index.setDml(event instanceof RowChangedEvent);
 			l2Index.setSequence(new Sequence(sequence));
-			l2Index.setBinlogIndexKey(binlogKey);
+			l2Index.setIndexKey(indexKey);
 			if (event instanceof RowChangedEvent) {
 				RowChangedEvent rowEvent = (RowChangedEvent) event;
 
-				l2Index.setTransaction(rowEvent.isTransactionBegin() || rowEvent.isTransactionCommit());
+				l2Index.setTransactionBegin(rowEvent.isTransactionBegin());
+				l2Index.setTransactionCommit(rowEvent.isTransactionCommit());
 			}
 
-			binlogIndex.addL2Index(binlogKey, l2Index);
-			lastBinlogIndexKey.set(binlogKey);
+			indexKeyManager.addL2Index(indexKey, l2Index);
+			lastIndexKey.set(indexKey);
 		}
 	}
 
@@ -321,9 +294,24 @@ public class DefaultEventStorage implements EventStorage {
 		}
 
 		try {
-			binlogIndex.stop();
+			indexKeyManager.stop();
 		} catch (IOException e1) {
 			// ignore
 		}
+	}
+
+	@Override
+	public BucketManager getBucketManager() {
+		return this.bucketManager;
+	}
+
+	@Override
+	public IndexManager<IndexKeyImpl, IndexValueImpl> getDataIndex() {
+		return this.indexKeyManager;
+	}
+
+	@Override
+	public EventCodec getEventCodec() {
+		return this.codec;
 	}
 }

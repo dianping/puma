@@ -12,9 +12,9 @@ public class SyncServerEntity {
 
 	private int port; // temporarily redundant.
 
-	private float loadBalance;
+	private double loadBalance;
 
-	private Date gmtUpdate;
+	private Date updateTime;
 
 	public int getId() {
 		return id;
@@ -48,7 +48,7 @@ public class SyncServerEntity {
 		this.port = port;
 	}
 
-	public float getLoadBalance() {
+	public double getLoadBalance() {
 		return loadBalance;
 	}
 
@@ -56,11 +56,11 @@ public class SyncServerEntity {
 		this.loadBalance = loadBalance;
 	}
 
-	public Date getGmtUpdate() {
-		return gmtUpdate;
+	public Date getUpdateTime() {
+		return updateTime;
 	}
 
-	public void setGmtUpdate(Date gmtUpdate) {
-		this.gmtUpdate = gmtUpdate;
+	public void setUpdateTime(Date updateTime) {
+		this.updateTime = updateTime;
 	}
 }

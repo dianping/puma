@@ -30,18 +30,6 @@
 			<artifactId>puma-biz</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.dianping.dpsf</groupId>
-			<artifactId>dpsf-net</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.dianping</groupId>
-			<artifactId>avatar-cache</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>qq-central</groupId>
-			<artifactId>dcache_client_api</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>com.dianping.lion</groupId>
 			<artifactId>lion-client</artifactId>
 		</dependency>

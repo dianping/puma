@@ -58,7 +58,11 @@
 //        return new ModelAndView("common/main-container", map);
 //    }
 //
-//    @RequestMapping(value = {"/puma-task/list"}, method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+//    @RequestMapping(
+//            value = {"/puma-task/list"},
+//            method = RequestMethod.GET,
+//            produces = "application/json; charset=utf-8"
+//    )
 //    @ResponseBody
 //    public String list(int page, int pageSize) {
 //        Map<String, Object> map = new HashMap<String, Object>();

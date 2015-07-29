@@ -1,30 +1,23 @@
 package com.dianping.puma.biz.service;
 
+import com.dianping.puma.biz.entity.SyncServerEntity;
 import com.dianping.puma.biz.entity.old.SyncServer;
 
 import java.util.List;
 
 public interface SyncServerService {
 
-    SyncServer find(long id);
+    SyncServerEntity findById(int id);
 
-    SyncServer find(String name);
+    SyncServerEntity findByName(String name);
 
     List<SyncServer> findAll();
 
-    long count();
+    int create(SyncServer syncServer);
 
-    List<SyncServer> findByPage(int page, int pageSize);
+    int update(SyncServer syncServer);
 
-    void create(SyncServer syncServer);
+    int remove(int id);
 
-    void update(SyncServer syncServer);
-
-    void remove(String name);
-
-    void remove(long id);
-
-    SyncServer findByHost(String host);
-
-    void heartBeat();
+    int remove(String name);
 }

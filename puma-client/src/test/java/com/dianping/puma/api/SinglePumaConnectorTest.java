@@ -2,7 +2,6 @@ package com.dianping.puma.api;
 
 import com.dianping.puma.api.exception.PumaClientException;
 import com.dianping.puma.core.dto.BinlogMessage;
-import com.google.gson.Gson;
 import org.junit.Test;
 
 /**
@@ -40,11 +39,11 @@ public class SinglePumaConnectorTest {
         SinglePumaClient connector = new SinglePumaClient("dozer", "127.0.0.1", 4040);
         connector.subscribe(true, true, true, "test", "debug");
 
+        final int size = 1000;
+
         while (true) {
             try {
-                BinlogMessage message = connector.get(1);
-                //todo:业务逻辑
-                System.out.println(new Gson().toJson(message));
+                BinlogMessage message = connector.get(size);
                 connector.ack(message.getLastBinlogInfo());
             } catch (PumaClientException exp) {
                 exp.printStackTrace();

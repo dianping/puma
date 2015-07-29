@@ -108,7 +108,7 @@ public class PumaServerServiceImpl implements PumaServerService {
             server.setPort(4040);
             create(server);
         } else {
-            server.setGmtUpdate(new Date());
+            server.setUpdateTime(new Date());
             update(server);
         }
     }

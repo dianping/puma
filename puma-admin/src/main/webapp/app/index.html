@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html ng-app="puma">
+<head lang="en">
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta charset="utf-8" />
+    <title>Puma管理平台</title>
+
+    <!-- ace -->
+    <link ng-include="'/app/partials/ace-css.html'">
+</head>
+<body>
+    <div ng-view></div>
+
+    <div class="navbar" ng-include="'/app/partials/common/navbar.html'"></div>
+
+    <!-- ace -->
+    <script ng-include="'/app/partials/ace-js.html'"></script>
+
+    <!-- ngDialog -->
+    <!--script src="/app/lib/ng-dialog/ngDialog.min.js"></script-->
+
+    <!-- angularJS -->
+    <script src="/app/lib/angular/angular.min.js"></script>
+
+    <!-- puma -->
+    <script src="/app/js/app.js"></script>
+</body>
+</html>

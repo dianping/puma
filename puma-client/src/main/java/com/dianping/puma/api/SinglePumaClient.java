@@ -47,7 +47,8 @@ public class SinglePumaClient implements PumaClient {
 
     private final String clientName;
     private final String baseUrl;
-    private final HttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(
+    private final HttpClient httpClient = HttpClients.custom()
+            .setDefaultRequestConfig(
             RequestConfig.custom()
                     .setConnectTimeout(60 * 1000)
                     .setSocketTimeout(10 * 60 * 1000)//long pull 模式必须设置一个比较长的超时时间

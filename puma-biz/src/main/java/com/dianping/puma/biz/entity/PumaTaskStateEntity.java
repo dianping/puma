@@ -15,7 +15,7 @@ public class PumaTaskStateEntity {
 
     private String serverName;
 
-    private Date gmtUpdate;
+    private Date updateTime;
 
     private String detail;
 
@@ -26,15 +26,15 @@ public class PumaTaskStateEntity {
     private BinlogStat binlogStat = new BinlogStat();
 
     public PumaTaskStateEntity() {
-        gmtUpdate = new Date();
+        updateTime = new Date();
     }
 
-    public Date getGmtUpdate() {
-        return gmtUpdate;
+    public Date getUpdateTime() {
+        return updateTime;
     }
 
-    public void setGmtUpdate(Date gmtUpdate) {
-        this.gmtUpdate = gmtUpdate;
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
     }
 
     public String getTaskName() {

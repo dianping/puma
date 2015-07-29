@@ -4,9 +4,10 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
     private TaskContainer taskContainer;
 
-    private final AtomicReference<BinlogGetRequest> request = new AtomicReference<BinlogGetRequest>();
+    private final BlockingQueue<BinlogGetRequest> requests = new LinkedBlockingQueue<BinlogGetRequest>(5);
 
     @Override
     public void init(
@@ -89,7 +90,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
     @Override
     public boolean addRequest(BinlogGetRequest request) {
-        return this.request.compareAndSet(null, request);
+        return requests.offer(request);
     }
 
     public void setTaskContainer(TaskContainer taskContainer) {
@@ -105,73 +106,23 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
             this.parent = parent;
         }
 
-        private DefaultAsyncBinlogChannel getParent() throws InterruptedException {
-            DefaultAsyncBinlogChannel channel = parent.get();
-            if (channel == null) {
-                logger.warn("Parent has be GCed. Please check your code to call destroy.");
-                Thread.currentThread().interrupt();
-                throw new InterruptedException();
-            }
-            return channel;
-        }
-
         @Override
         public void run() {
             List<Event> results = new ArrayList<Event>();
 
             try {
+                BinlogGetRequest req = null;
+
                 while (!getParent().stopped && !Thread.currentThread().isInterrupted()) {
-                    BinlogGetRequest req = getParent().request.get();
-                    if (req != null && !req.getChannel().isActive()) {
-                        getParent().request.set(null);
+                    req = getBinlogGetRequest(results, req);
+                    boolean needSend = isNeedSend(results, req);
+                    if (needSend) {
+                        req.getChannel().writeAndFlush(buildBinlogGetResponse(results, req));
                         req = null;
                     }
 
-                    if (req == null && results.size() > 1000) {
-                        Thread.sleep(5);
-                        continue;
-                    }
-
-                    Event binlogEvent;
-                    try {
-                        binlogEvent = getParent().eventChannel.next(false);
-                    } catch (Exception e) {
-                        logger.error(e.getMessage(), e);
-                        binlogEvent = new ServerErrorEvent("get binlog event from storage failure.", e.getCause());
-                    }
-
-                    if (binlogEvent != null) {
-                        results.add(binlogEvent);
-                    }
-
-                    boolean needSend = false;
-                    if (req != null && (results.size() >= req.getBatchSize() || req.isTimeout())) {
-                        needSend = true;
-                    }
-
-                    if (needSend) {
-                        getParent().request.set(null);
-
-                        BinlogGetResponse response = new BinlogGetResponse();
-                        BinlogMessage message = new BinlogMessage();
-                        BinlogInfo lastBinlogInfo = null;
-
-                        Iterator<Event> iterator = results.iterator();
-                        while (iterator.hasNext() && message.getBinlogEvents().size() < req.getBatchSize()) {
-                            Event event = iterator.next();
-                            message.addBinlogEvents(event);
-                            if (event.getBinlogInfo() != null) {
-                                lastBinlogInfo = event.getBinlogInfo();
-                            }
-                            iterator.remove();
-                        }
-
-                        req.getChannel().writeAndFlush(response.setBinlogMessage(message));
-                        //todo: auto ack
-
-                        SystemStatusManager.updateClientSendBinlogInfo(req.getClientName(), lastBinlogInfo);
-                    }
-
+                    Event binlogEvent = getEvent();
+                    saveBinlogEvent(results, binlogEvent);
                     if (binlogEvent == null) {
                         Thread.sleep(5);
                     }
@@ -179,6 +130,73 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
             } catch (InterruptedException e) {
                 logger.info("AsyncTask has be Interrupted");
             }
+        }
+
+        protected BinlogGetResponse buildBinlogGetResponse(List<Event> results,BinlogGetRequest req){
+            BinlogGetResponse response = new BinlogGetResponse();
+            BinlogMessage message = new BinlogMessage();
+            BinlogInfo lastBinlogInfo = null;
+
+            Iterator<Event> iterator = results.iterator();
+            while (iterator.hasNext() && message.getBinlogEvents().size() < req.getBatchSize()) {
+                Event event = iterator.next();
+                message.addBinlogEvents(event);
+                if (event.getBinlogInfo() != null) {
+                    lastBinlogInfo = event.getBinlogInfo();
+                }
+                iterator.remove();
+            }
+            response.setBinlogMessage(message);
+
+            SystemStatusManager.updateClientSendBinlogInfo(req.getClientName(), lastBinlogInfo);
+            SystemStatusManager.addClientFetchQps(req.getClientName(), message.getBinlogEvents().size());
+            return response;
+        }
+
+        protected boolean isNeedSend(List<Event> results, BinlogGetRequest req) {
+            boolean needSend = false;
+            if (req != null && (results.size() >= req.getBatchSize() || req.isTimeout())) {
+                needSend = true;
+            }
+            return needSend;
+        }
+
+        protected void saveBinlogEvent(List<Event> results, Event binlogEvent) {
+            if (binlogEvent != null) {
+                results.add(binlogEvent);
+            }
+        }
+
+        protected Event getEvent() {
+            Event binlogEvent;
+            try {
+                binlogEvent = getParent().eventChannel.next(false);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                binlogEvent = new ServerErrorEvent("get binlog event from storage failure.", e.getCause());
+            }
+            return binlogEvent;
+        }
+
+        protected BinlogGetRequest getBinlogGetRequest(List<Event> results, BinlogGetRequest req) throws InterruptedException {
+            while (!(req != null && req.getChannel().isActive())) {
+                req = getParent().requests.poll();
+            }
+
+            if (req == null && results.size() >= 1000) {
+                req = getParent().requests.take();
+            }
+            return req;
+        }
+
+        protected DefaultAsyncBinlogChannel getParent() throws InterruptedException {
+            DefaultAsyncBinlogChannel channel = parent.get();
+            if (channel == null) {
+                logger.warn("Parent has be GCed. Please check your code to call destroy.");
+                Thread.currentThread().interrupt();
+                throw new InterruptedException();
+            }
+            return channel;
         }
     }
 }

@@ -110,14 +110,14 @@ public class PumaTaskServiceImpl implements PumaTaskService {
 
     @Override
     public void create(PumaTaskEntity pumaTask) {
-        pumaTask.setGmtUpdate(new Date());
+        pumaTask.setUpdateTime(new Date());
         pumaTaskDao.insert(pumaTask);
         updateFullPumaTask(pumaTask);
     }
 
     @Override
     public void update(PumaTaskEntity pumaTask) {
-        pumaTask.setGmtUpdate(new Date());
+        pumaTask.setUpdateTime(new Date());
         pumaTaskDao.update(pumaTask);
         updateFullPumaTask(pumaTask);
     }

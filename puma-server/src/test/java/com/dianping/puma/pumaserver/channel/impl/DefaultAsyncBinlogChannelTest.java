@@ -145,7 +145,6 @@ public class DefaultAsyncBinlogChannelTest {
 
     @Test
     public void test_weakreference() throws Exception {
-        Assert.assertEquals(1, ((ThreadPoolExecutor) DefaultAsyncBinlogChannel.executorService).getActiveCount());
         target = null;
         System.gc();
         Thread.sleep(50);

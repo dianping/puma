@@ -5,7 +5,7 @@ INSERT INTO
 `${event.database}`.`${event.table}`
 #end
 (
-#set($ask = "" )
+#set($ask = "")
 #foreach($name2ColumnInfo in $event.columns.entrySet())
   `${name2ColumnInfo.key}`
   #set($ask = "${ask},?")

@@ -12,23 +12,13 @@ SET
   #end
 #end
 WHERE
-
+#set ($keyCount = 0)
 #foreach($name2ColumnInfo in $event.columns.entrySet())
-  #if(${name2ColumnInfo.value.key})
-      #if($velocityCount > 1)
-          AND
-      #end
-      `${name2ColumnInfo.key}` = ?
-  #end
-
-  #*
-  #if(!${name2ColumnInfo.value.oldValue})
-    `${name2ColumnInfo.key}` is ?
-  #else
+    #if(${name2ColumnInfo.value.key})
+        #set ($keyCount = $keyCount + 1)
+        #if($keyCount > 1)
+        AND
+        #end
     `${name2ColumnInfo.key}` = ?
-  #end
-  #if($velocityCount < ${event.columns.size()})
-     AND
-  #end
-  *#
+    #end
 #end

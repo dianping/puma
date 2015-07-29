@@ -35,6 +35,6 @@ public class QpsCounterTest {
         Thread.sleep(500);
         target.increase();
         Assert.assertEquals(1, target.get());
-        Assert.assertEquals(6, target.get(2));
+        Assert.assertEquals(3, target.get(2));
     }
 }

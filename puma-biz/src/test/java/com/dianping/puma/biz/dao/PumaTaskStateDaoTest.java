@@ -5,7 +5,6 @@ import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,7 @@ public class PumaTaskStateDaoTest {
         PumaTaskStateEntity entity = new PumaTaskStateEntity();
         entity.setTaskName("test-task-name");
         entity.setServerName("test-server-name");
-        entity.setGmtUpdate(new Date());
+        entity.setUpdateTime(new Date());
         entity.setStatus(Status.RUNNING);
         entity.setDetail("test-detail");
         entity.setBinlogInfo(new BinlogInfo());

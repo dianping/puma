@@ -160,7 +160,7 @@ public class SystemStatus {
             this.withDdl = withDdl;
             this.withTransaction = withTransaction;
             this.codec = codec;
-            this.fetchQpsCounter = new QpsCounter(60);
+            this.fetchQpsCounter = new QpsCounter(15);
         }
 
         public String getCodec() {
@@ -172,7 +172,7 @@ public class SystemStatus {
         }
 
         public long getFetchQps() {
-            return this.fetchQpsCounter.get(60);
+            return this.fetchQpsCounter.get(15);
         }
 
         public String getIp() {
@@ -211,7 +211,11 @@ public class SystemStatus {
             this.sendBinlogInfo = sendBinlogInfo;
         }
 
-        public void increaseFetchQps() {
+        public void addFetchQps(long size) {
+            fetchQpsCounter.add(size);
+        }
+
+        public void increaseFetQps() {
             fetchQpsCounter.increase();
         }
     }
@@ -259,7 +263,7 @@ public class SystemStatus {
             this.host = host;
             this.port = port;
             this.database = database;
-            this.storeQpsCounter = new QpsCounter(60);
+            this.storeQpsCounter = new QpsCounter(15);
         }
 
         public String getBinlogFile() {
@@ -295,11 +299,7 @@ public class SystemStatus {
         }
 
         public long getStoreQps() {
-            return this.storeQpsCounter.get(60);
-        }
-
-        public void increaseStoreQps() {
-            storeQpsCounter.increase();
+            return this.storeQpsCounter.get(15);
         }
 
         public AtomicLong getTotalDdlEvent() {

@@ -72,7 +72,7 @@ public class DefaultClientSessionService implements ClientSessionService {
             return;
         }
 
-        ClientSession client = clients.get(clientName);
+        ClientSession client = clients.remove(clientName);
         if (client != null && token.equals(client.getToken())) {
             destory(client);
         }
@@ -86,7 +86,6 @@ public class DefaultClientSessionService implements ClientSessionService {
 
     protected void destory(ClientSession session) {
         if (session != null) {
-            clients.remove(session.getClientName());
             session.getAsyncBinlogChannel().destroy();
 
             if (!clients.containsKey(session.getClientName())) {

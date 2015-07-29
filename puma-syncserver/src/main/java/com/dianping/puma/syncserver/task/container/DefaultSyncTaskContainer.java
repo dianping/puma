@@ -2,7 +2,7 @@ package com.dianping.puma.syncserver.task.container;
 
 import com.dianping.puma.biz.entity.SyncTaskEntity;
 import com.dianping.puma.syncserver.exception.PumaBaseTaskException;
-import com.dianping.puma.syncserver.task.TaskExecutor;
+import com.dianping.puma.syncserver.executor.TaskExecutor;
 import com.dianping.puma.syncserver.task.builder.TaskBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

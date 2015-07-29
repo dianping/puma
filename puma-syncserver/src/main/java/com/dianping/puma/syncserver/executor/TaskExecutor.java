@@ -1,4 +1,4 @@
-package com.dianping.puma.syncserver.task;
+package com.dianping.puma.syncserver.executor;
 
 import com.dianping.puma.biz.entity.BaseTaskEntity;
 import com.dianping.puma.core.LifeCycle;

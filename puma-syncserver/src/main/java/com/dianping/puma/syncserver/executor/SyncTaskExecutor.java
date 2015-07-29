@@ -1,13 +1,11 @@
-package com.dianping.puma.syncserver.task;
+package com.dianping.puma.syncserver.executor;
 
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.biz.entity.SyncTaskEntity;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.syncserver.buffer.DuplexBuffer;
 import com.dianping.puma.syncserver.exception.PumaTimeoutException;
-import com.dianping.puma.syncserver.load.LoadFuture;
-import com.dianping.puma.syncserver.load.Loader;
+import com.dianping.puma.syncserver.executor.load.Loader;
 import com.dianping.puma.syncserver.transform.Transformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +24,6 @@ public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTaskEntity> {
 	private ExecutorService workerThreadPool;
 
 	private PumaClient client;
-	private DuplexBuffer duplexBuffer;
 	private Transformer transformer;
 	private Loader loader;
 
@@ -98,10 +95,6 @@ public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTaskEntity> {
 		public void run() {
 			while (!checkStop()) {
 				try {
-					ChangedEvent binlogEvent = duplexBuffer.pollQuery();
-					binlogEvent = transformer.transform(binlogEvent);
-					LoadFuture loadFuture = loader.load(binlogEvent);
-					duplexBuffer.putResult(loadFuture);
 				} catch (Exception e) {
 					// @todo
 				}
@@ -113,28 +106,13 @@ public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTaskEntity> {
 		@Override
 		public void run() {
 			while (!checkStop()) {
-				try {
-					LoadFuture loadFuture = duplexBuffer.pollResult();
-					loadFuture.get(1000, TimeUnit.MILLISECONDS);
-				} catch (CancellationException e) {
-					// do nothing.
-				} catch (InterruptedException e) {
-					// do nothing.
-				} catch (TimeoutException e) {
-					fail("binlog execution timeout.", new PumaTimeoutException(e));
-				} catch (ExecutionException e) {
-					fail("binlog execution error.", e.getCause());
-				}
+
 			}
 		}
 	};
 
 	public void setClient(PumaClient client) {
 		this.client = client;
-	}
-
-	public void setDuplexBuffer(DuplexBuffer duplexBuffer) {
-		this.duplexBuffer = duplexBuffer;
 	}
 
 	public void setTransformer(Transformer transformer) {

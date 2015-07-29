@@ -1,4 +1,4 @@
-package com.dianping.puma.syncserver.load;
+package com.dianping.puma.syncserver.executor.load;
 
 import com.dianping.puma.syncserver.common.AbstractLifeCycle;
 

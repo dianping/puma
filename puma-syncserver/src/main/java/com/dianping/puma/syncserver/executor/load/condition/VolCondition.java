@@ -1,4 +1,4 @@
-package com.dianping.puma.syncserver.load.condition;
+package com.dianping.puma.syncserver.executor.load.condition;
 
 import com.dianping.puma.core.event.ChangedEvent;
 

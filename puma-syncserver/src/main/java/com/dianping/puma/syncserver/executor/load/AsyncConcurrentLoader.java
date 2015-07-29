@@ -1,9 +1,11 @@
-package com.dianping.puma.syncserver.load;
+package com.dianping.puma.syncserver.executor.load;
 
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.syncserver.exception.PumaException;
-import com.dianping.puma.syncserver.load.condition.ConditionChain;
+import com.dianping.puma.syncserver.executor.load.condition.ConditionChain;
 import com.dianping.puma.syncserver.util.SqlParser;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFutureTask;
 import org.apache.commons.dbutils.QueryRunner;
 
 import javax.sql.DataSource;
@@ -30,13 +32,14 @@ public class AsyncConcurrentLoader extends AbstractLoader {
 	}
 
 	@Override
-	public LoadFuture load(ChangedEvent binlogEvent) {
+	public void load(ChangedEvent binlogEvent, LoadCallback loadCallback) {
 		if (checkStop()) {
-			throw new PumaException("load binlog event failure, stopped.");
+			throw new PumaException("load binlog event failure, load module stopped.");
 		}
 
-		Callable<Integer> loadTask = genLoadTask(binlogEvent);
-		LoadFuture loadFuture = new LoadFuture(loadTask);
+		Callable<Integer> loadCallable = genLoadTask(binlogEvent);
+		ListenableFutureTask<Integer> loadFutureTask = ListenableFutureTask.create(loadCallable);
+		Futures.addCallback(loadFutureTask, loadCallback);
 
 		while (conditionChain.isLocked(binlogEvent)) {
 			try {
@@ -47,9 +50,7 @@ public class AsyncConcurrentLoader extends AbstractLoader {
 			}
 		}
 
-		executorService.submit(loadFuture);
-
-		return loadFuture;
+		executorService.submit(loadFutureTask);
 	}
 
 	protected Callable<Integer> genLoadTask(final ChangedEvent binlogEvent) {
@@ -72,5 +73,17 @@ public class AsyncConcurrentLoader extends AbstractLoader {
 				}
 			}
 		};
+	}
+
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+
+	public void setExecutorService(ExecutorService executorService) {
+		this.executorService = executorService;
+	}
+
+	public void setConditionChain(ConditionChain conditionChain) {
+		this.conditionChain = conditionChain;
 	}
 }

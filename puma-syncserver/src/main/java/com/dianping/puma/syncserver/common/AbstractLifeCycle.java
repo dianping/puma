@@ -11,6 +11,7 @@ public abstract class AbstractLifeCycle implements LifeCycle {
 		}
 
 		doStart();
+		stopped = false;
 	}
 
 	@Override
@@ -19,6 +20,7 @@ public abstract class AbstractLifeCycle implements LifeCycle {
 			return;
 		}
 
+		stopped = true;
 		doStop();
 	}
 

@@ -1,7 +1,7 @@
 package com.dianping.puma.syncserver.task.builder;
 
 import com.dianping.puma.biz.entity.BaseTaskEntity;
-import com.dianping.puma.syncserver.task.TaskExecutor;
+import com.dianping.puma.syncserver.executor.TaskExecutor;
 
 public interface TaskBuilder<T extends BaseTaskEntity> {
 

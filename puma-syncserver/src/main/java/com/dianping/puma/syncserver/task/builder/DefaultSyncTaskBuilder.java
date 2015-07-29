@@ -1,12 +1,10 @@
 package com.dianping.puma.syncserver.task.builder;
 
 import com.dianping.puma.biz.entity.SyncTaskEntity;
-import com.dianping.puma.syncserver.buffer.DefaultDuplexBuffer;
-import com.dianping.puma.syncserver.buffer.DuplexBuffer;
-import com.dianping.puma.syncserver.load.AsyncConcurrentLoader;
-import com.dianping.puma.syncserver.load.Loader;
-import com.dianping.puma.syncserver.task.SyncTaskExecutor;
-import com.dianping.puma.syncserver.task.TaskExecutor;
+import com.dianping.puma.syncserver.executor.load.AsyncConcurrentLoader;
+import com.dianping.puma.syncserver.executor.load.Loader;
+import com.dianping.puma.syncserver.executor.SyncTaskExecutor;
+import com.dianping.puma.syncserver.executor.TaskExecutor;
 import com.dianping.puma.syncserver.transform.DefaultTransformer;
 import com.dianping.puma.syncserver.transform.Transformer;
 import org.springframework.stereotype.Component;
@@ -23,8 +21,6 @@ public class DefaultSyncTaskBuilder implements TaskBuilder<SyncTaskEntity> {
 
 		// @todo.
 		// duplex buffer.
-		DuplexBuffer duplexBuffer = new DefaultDuplexBuffer();
-		executor.setDuplexBuffer(duplexBuffer);
 
 		// @todo.
 		// transformer.

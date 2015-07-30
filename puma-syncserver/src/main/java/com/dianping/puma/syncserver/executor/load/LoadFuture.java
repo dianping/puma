@@ -7,8 +7,6 @@ import java.util.concurrent.*;
 
 public class LoadFuture extends FutureTask<Integer> {
 
-	private Executor executor;
-
 	private Runnable runnable;
 
 	public LoadFuture(Callable<Integer> callable) {
@@ -39,7 +37,6 @@ public class LoadFuture extends FutureTask<Integer> {
 			}
 		};
 
-		executor = Executors.newSingleThreadExecutor();
-		executor.execute(runnable);
+		LoadFutureThreadPool.execute(runnable);
 	}
 }

@@ -85,19 +85,16 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                             getContext().getDBServerId(),
                             getContext().getBinlogFileName(),
                             getContext().getBinlogStartPos(), 0, 0);
-                    this.currentSrcDbEntity = loadSrcDbByServerId(getContext().getDBServerId());
+                    this.currentSrcDbEntity = initSrcDbByServerId(getContext().getDBServerId(), false);
                 } else {
-                    this.currentSrcDbEntity = loadSrcDbByServerId(binlogInfo.getServerId());
-                    this.currentSrcDbEntity = randomChooseSrcDbWhenServerIsNull();
+                    this.currentSrcDbEntity = initSrcDbByServerId(binlogInfo.getServerId(), true);
 
-                    //如果 server Id 不一致，那需要做切换
                     if (binlogInfo.getServerId() != currentSrcDbEntity.getServerId()) {
                         binlogInfo = switchBinlog();
                     }
                 }
 
-                tableMetaInfoFetcher.setSrcDbEntity(this.currentSrcDbEntity);
-                tableMetaInfoFetcher.refreshTableMeta(null, true);
+                updateTableMetaInfoFetcher();
 
                 getContext().setDBServerId(currentSrcDbEntity.getServerId());
                 getContext().setBinlogFileName(binlogInfo.getBinlogFile());
@@ -154,6 +151,9 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                     return;
                 }
                 if (++failCount % 3 == 0) {
+                    this.currentSrcDbEntity = chooseNextSrcDb();
+                    updateTableMetaInfoFetcher();
+
                     failCount = 0;
                 }
                 LOG.error("Exception occurs. taskName: " + getTaskName() + " dbServerId: " + currentSrcDbEntity.getServerId()
@@ -165,15 +165,20 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
     }
 
-    protected SrcDbEntity randomChooseSrcDbWhenServerIsNull() {
-        if (this.currentSrcDbEntity == null) {
-            return getTask().getSrcDbEntityList().get(0);
-        } else {
-            return this.currentSrcDbEntity;
-        }
+    protected void updateTableMetaInfoFetcher() {
+        tableMetaInfoFetcher.setSrcDbEntity(this.currentSrcDbEntity);
+        tableMetaInfoFetcher.refreshTableMeta(null, true);
     }
 
-    protected SrcDbEntity loadSrcDbByServerId(final long binlogServerId) {
+    protected SrcDbEntity chooseNextSrcDb() {
+        int index = getTask().getSrcDbEntityList().indexOf(this.currentSrcDbEntity) + 1;
+        if (index >= getTask().getSrcDbEntityList().size()) {
+            index = 0;
+        }
+        return getTask().getSrcDbEntityList().get(index);
+    }
+
+    protected SrcDbEntity initSrcDbByServerId(final long binlogServerId, boolean randomIfNotExist) {
         if (this.currentSrcDbEntity == null) {
             return Iterables.find(getTask().getSrcDbEntityList(), new Predicate<SrcDbEntity>() {
                 @Override
@@ -181,6 +186,10 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                     return input.getServerId() == binlogServerId;
                 }
             });
+        }
+
+        if (this.currentSrcDbEntity == null) {
+            return getTask().getSrcDbEntityList().get(0);
         } else {
             return this.currentSrcDbEntity;
         }

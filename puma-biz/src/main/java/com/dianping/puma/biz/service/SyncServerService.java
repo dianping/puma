@@ -1,23 +1,20 @@
 package com.dianping.puma.biz.service;
 
 import com.dianping.puma.biz.entity.SyncServerEntity;
-import com.dianping.puma.biz.entity.old.SyncServer;
 
 import java.util.List;
 
 public interface SyncServerService {
 
-    SyncServerEntity findById(int id);
+    public SyncServerEntity find(int id);
 
-    SyncServerEntity findByName(String name);
+    public List<SyncServerEntity> findAll();
 
-    List<SyncServer> findAll();
+    public int create(SyncServerEntity entity);
 
-    int create(SyncServer syncServer);
+    public int update(SyncServerEntity entity);
 
-    int update(SyncServer syncServer);
+    public int createOrUpdate(SyncServerEntity entity);
 
-    int remove(int id);
-
-    int remove(String name);
+    public int remove(int id);
 }

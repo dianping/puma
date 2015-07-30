@@ -15,6 +15,7 @@
         BinlogPosition = #{binlogPosition},
         ServerId = #{serverId},
         EventIndex = #{eventIndex},
+        Timestamp = #{timestamp},
         UpdateTime = #{updateTime}
         where
         ClientName = #{clientName}
@@ -28,6 +29,7 @@
         BinlogPosition,
         ServerId,
         EventIndex,
+        Timestamp,
         UpdateTime
         )
         values
@@ -37,6 +39,7 @@
         #{binlogPosition},
         #{serverId},
         #{eventIndex},
+        #{timestamp},
         #{updateTime}
         )
     </insert>

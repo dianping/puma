@@ -49,10 +49,10 @@ public class SinglePumaClient implements PumaClient {
     private final String baseUrl;
     private final HttpClient httpClient = HttpClients.custom()
             .setDefaultRequestConfig(
-            RequestConfig.custom()
-                    .setConnectTimeout(60 * 1000)
-                    .setSocketTimeout(10 * 60 * 1000)//long pull 模式必须设置一个比较长的超时时间
-                    .build()).build();
+                    RequestConfig.custom()
+                            .setConnectTimeout(60 * 1000)
+                            .setSocketTimeout(10 * 60 * 1000)//long pull 模式必须设置一个比较长的超时时间
+                            .build()).build();
 
 
     public SinglePumaClient(String clientName, String remoteIp, int remotePort) {
@@ -105,6 +105,8 @@ public class SinglePumaClient implements PumaClient {
         params.add(new BasicNameValuePair("binlogFile", binlogInfo.getBinlogFile()));
         params.add(new BasicNameValuePair("binlogPosition", String.valueOf(binlogInfo.getBinlogPosition())));
         params.add(new BasicNameValuePair("serverId", String.valueOf(binlogInfo.getServerId())));
+        params.add(new BasicNameValuePair("eventIndex", String.valueOf(binlogInfo.getEventIndex())));
+        params.add(new BasicNameValuePair("timestamp", String.valueOf(binlogInfo.getTimestamp())));
         addToken(params);
         execute("/puma/binlog/ack", params, BinlogAckResponse.class);
     }
@@ -129,6 +131,8 @@ public class SinglePumaClient implements PumaClient {
             params.add(new BasicNameValuePair("binlogFile", binlogInfo.getBinlogFile()));
             params.add(new BasicNameValuePair("binlogPosition", String.valueOf(binlogInfo.getBinlogPosition())));
             params.add(new BasicNameValuePair("serverId", String.valueOf(binlogInfo.getServerId())));
+            params.add(new BasicNameValuePair("eventIndex", String.valueOf(binlogInfo.getEventIndex())));
+            params.add(new BasicNameValuePair("timestamp", String.valueOf(binlogInfo.getTimestamp())));
         }
 
         addToken(params);

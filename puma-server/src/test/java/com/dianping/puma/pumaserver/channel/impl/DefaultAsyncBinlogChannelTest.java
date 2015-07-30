@@ -11,7 +11,6 @@ import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.EventStorage;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +20,6 @@ import org.mockito.stubbing.Answer;
 import java.util.ArrayList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -64,8 +62,8 @@ public class DefaultAsyncBinlogChannelTest {
 
         target = spy(new DefaultAsyncBinlogChannel());
         target.setTaskContainer(taskContainer);
-        doReturn(eventChannel).when(target).initChannel(anyLong(), any(BinlogInfo.class), anyLong(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(EventStorage.class));
-        target.init(-1, new BinlogInfo(-1, "", 1l, 1), -1, "", new ArrayList<String>(), false, false, false);
+        doReturn(eventChannel).when(target).initChannel(anyLong(), any(BinlogInfo.class), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(EventStorage.class));
+        target.init(-1, new BinlogInfo(-1, "", 1l, 1, 0), "", new ArrayList<String>(), false, false, false);
     }
 
     @After

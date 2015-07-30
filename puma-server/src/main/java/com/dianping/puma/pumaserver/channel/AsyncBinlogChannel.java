@@ -11,7 +11,6 @@ public interface AsyncBinlogChannel {
     void init(
             long sc,
             BinlogInfo binlogInfo,
-            long timestamp,
             String database,
             List<String> tables,
             boolean dml,

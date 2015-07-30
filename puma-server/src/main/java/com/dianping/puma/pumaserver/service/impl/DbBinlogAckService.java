@@ -25,6 +25,7 @@ public class DbBinlogAckService implements BinlogAckService {
         positionEntity.setBinlogPosition(binlogAck.getBinlogInfo().getBinlogPosition());
         positionEntity.setServerId(binlogAck.getBinlogInfo().getServerId());
         positionEntity.setEventIndex(binlogAck.getBinlogInfo().getEventIndex());
+        positionEntity.setTimestamp(binlogAck.getBinlogInfo().getTimestamp());
 
         clientPositionService.update(positionEntity);
     }
@@ -37,12 +38,13 @@ public class DbBinlogAckService implements BinlogAckService {
         }
 
         BinlogAck ack = new BinlogAck();
-        ack.setBinlogInfo(new BinlogInfo()
-                        .setBinlogFile(position.getBinlogFile())
-                        .setBinlogPosition(position.getBinlogPosition())
-                        .setServerId(position.getServerId())
-                        .setEventIndex(position.getEventIndex())
-        );
+        ack.setBinlogInfo(new BinlogInfo(
+                position.getServerId(),
+                position.getBinlogFile(),
+                position.getBinlogPosition(),
+                position.getEventIndex(),
+                position.getTimestamp()
+        ));
         return ack;
     }
 }

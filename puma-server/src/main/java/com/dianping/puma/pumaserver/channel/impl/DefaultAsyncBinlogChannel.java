@@ -45,7 +45,6 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
     public void init(
             long sc,
             BinlogInfo binlogInfo,
-            long timestamp,
             String database,
             List<String> tables,
             boolean dml,
@@ -59,7 +58,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
         }
 
         try {
-            this.eventChannel = initChannel(sc, binlogInfo, timestamp, database, tables, dml, ddl, transaction, eventStorage);
+            this.eventChannel = initChannel(sc, binlogInfo, database, tables, dml, ddl, transaction, eventStorage);
             executorService.execute(new AsyncTask(new WeakReference<DefaultAsyncBinlogChannel>(this)));
 
         } catch (Exception e) {
@@ -68,7 +67,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
         }
     }
 
-    protected EventChannel initChannel(long sc, BinlogInfo binlogInfo, long timestamp, String database, List<String> tables, boolean dml, boolean ddl, boolean transaction, EventStorage eventStorage) throws StorageException {
+    protected EventChannel initChannel(long sc, BinlogInfo binlogInfo, String database, List<String> tables, boolean dml, boolean ddl, boolean transaction, EventStorage eventStorage) throws StorageException {
         DefaultEventChannel eventChannel = new DefaultEventChannel(eventStorage);
         eventChannel.withDatabase(database);
         eventChannel.withTables(tables.toArray(new String[tables.size()]));
@@ -79,7 +78,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
         if (sc == SubscribeConstant.SEQ_FROM_BINLOGINFO) {
             eventChannel.open(binlogInfo.getServerId(), binlogInfo.getBinlogFile(), binlogInfo.getBinlogPosition());
         } else if (sc == SubscribeConstant.SEQ_FROM_TIMESTAMP) {
-            eventChannel.open(timestamp);
+            eventChannel.open(binlogInfo.getTimestamp());
         } else {
             eventChannel.open(sc);
         }

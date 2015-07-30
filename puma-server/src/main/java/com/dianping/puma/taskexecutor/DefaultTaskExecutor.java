@@ -78,10 +78,10 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 // 读position/file文件
                 BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(getContext().getPumaServerName());
                 if (binlogInfo == null) {
-                    binlogInfo = new BinlogInfo();
-                    binlogInfo.setServerId(getContext().getDBServerId());
-                    binlogInfo.setBinlogFile(getContext().getBinlogFileName());
-                    binlogInfo.setBinlogPosition(getContext().getBinlogStartPos());
+                    binlogInfo = new BinlogInfo(
+                            getContext().getDBServerId(),
+                            getContext().getBinlogFileName(),
+                            getContext().getBinlogStartPos(), 0, 0);
                 }
 
                 // todo: 将来要做处理，如果 binlog serverid 和 db serverid 不一样怎么办？
@@ -218,7 +218,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         if (binlogEvent.getHeader().getEventType() != BinlogConstants.FORMAT_DESCRIPTION_EVENT) {
             getContext().setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
             setBinlogInfo(new BinlogInfo(getBinlogInfo().getServerId(), getBinlogInfo().getBinlogFile(), binlogEvent
-                    .getHeader().getNextPosition()));
+                    .getHeader().getNextPosition(), 0, 0));
         }
 
         // status report
@@ -235,7 +235,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 .getData()).isTransactionCommit()))) {
 
             binlogInfoHolder.setBinlogInfo(getTaskName(), new BinlogInfo(getContext().getDBServerId(), getContext()
-                    .getBinlogFileName(), binlogEvent.getHeader().getNextPosition()));
+                    .getBinlogFileName(), binlogEvent.getHeader().getNextPosition(), 0, binlogEvent.getHeader().getTimestamp()));
         }
     }
 
@@ -278,14 +278,13 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         RotateEvent rotateEvent = (RotateEvent) binlogEvent;
         binlogInfoHolder.setBinlogInfo(
                 getTaskName(),
-                new BinlogInfo(getContext().getDBServerId(), rotateEvent.getNextBinlogFileName(), rotateEvent
-                        .getFirstEventPosition()));
+                new BinlogInfo(getContext().getDBServerId(), rotateEvent.getNextBinlogFileName(),
+                        rotateEvent.getFirstEventPosition(), 0, rotateEvent.getHeader().getTimestamp()));
         getContext().setBinlogFileName(rotateEvent.getNextBinlogFileName());
         getContext().setBinlogStartPos(rotateEvent.getFirstEventPosition());
 
         setBinlogInfo(new BinlogInfo(getContext().getDBServerId(), rotateEvent.getNextBinlogFileName(),
-                rotateEvent.getFirstEventPosition()));
-        // status report
+                rotateEvent.getFirstEventPosition(), 0, rotateEvent.getHeader().getTimestamp()));
         SystemStatusManager.updateServerBinlog(getTaskName(), getContext().getBinlogFileName(), getContext()
                 .getBinlogStartPos());
     }

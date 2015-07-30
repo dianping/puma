@@ -2,6 +2,7 @@ package com.dianping.puma.storage.holder.impl;
 
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.holder.BinlogInfoHolder;
+import com.google.common.base.Strings;
 import org.apache.log4j.Logger;
 
 import javax.annotation.PostConstruct;
@@ -118,12 +119,20 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
             String binlogFile = br.readLine();
             String binlogPositionStr = br.readLine();
             String eventIndexStr = br.readLine();
+            long timestamp = 0;
+            try {
+                String timestampStr = br.readLine();
+                if (!Strings.isNullOrEmpty(timestampStr)) {
+                    timestamp = Long.valueOf(timestampStr);
+                }
+            } catch (Exception ignore) {
+            }
 
             long serverId = Long.valueOf(serverIdStr);
             long binlogPosition = binlogPositionStr == null ? DEFAULT_BINLOGPOS : Long.parseLong(binlogPositionStr);
             int eventIndex = Integer.valueOf(eventIndexStr).intValue();
-            BinlogInfo binlogInfo =
-                    new BinlogInfo(serverId, binlogFile, binlogPosition, eventIndex);
+            BinlogInfo binlogInfo = new BinlogInfo(serverId, binlogFile, binlogPosition, eventIndex, timestamp);
+
 
             mappedByteBufferMapping.put(taskName,
                     new RandomAccessFile(f, "rwd").getChannel().map(MapMode.READ_WRITE, 0, MAX_FILE_SIZE));
@@ -180,6 +189,8 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
         mbb.put(String.valueOf(binlogInfo.getBinlogPosition()).getBytes());
         mbb.put("\n".getBytes());
         mbb.put(String.valueOf(binlogInfo.getEventIndex()).getBytes());
+        mbb.put("\n".getBytes());
+        mbb.put(String.valueOf(binlogInfo.getTimestamp()).getBytes());
         mbb.put("\n".getBytes());
     }
 

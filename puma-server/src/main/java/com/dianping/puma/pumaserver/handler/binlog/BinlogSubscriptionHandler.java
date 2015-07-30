@@ -37,7 +37,6 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
         AsyncBinlogChannel asyncBinlogChannel = buildBinlogChannel(
                 binlogAck == null ? SubscribeConstant.SEQ_FROM_LATEST : SubscribeConstant.SEQ_FROM_BINLOGINFO,
                 binlogAck == null ? null : binlogAck.getBinlogInfo(),
-                0,
                 binlogSubscriptionRequest.getDatabase(),
                 binlogSubscriptionRequest.getTables(),
                 binlogSubscriptionRequest.isDml(),
@@ -66,7 +65,6 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
     private AsyncBinlogChannel buildBinlogChannel(
             long sc,
             BinlogInfo binlogInfo,
-            long timestamp,
             String database,
             List<String> tables,
             boolean dml,
@@ -74,7 +72,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
             boolean transaction) {
         DefaultAsyncBinlogChannel defaultAsyncBinlogChannel = new DefaultAsyncBinlogChannel();
         defaultAsyncBinlogChannel.setTaskContainer(taskContainer);
-        defaultAsyncBinlogChannel.init(sc, binlogInfo, timestamp, database, tables, dml, ddl, transaction);
+        defaultAsyncBinlogChannel.init(sc, binlogInfo, database, tables, dml, ddl, transaction);
 
         return defaultAsyncBinlogChannel;
     }

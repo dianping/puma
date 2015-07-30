@@ -48,6 +48,7 @@ public class RawEventCodec implements EventCodec {
         writeIntoBuf(chEvent.getBinlogInfo().getBinlogFile(), buf);
         buf.writeLong(chEvent.getBinlogInfo().getBinlogPosition());
         buf.writeInt(chEvent.getBinlogInfo().getEventIndex());
+        buf.writeLong(chEvent.getBinlogInfo().getTimestamp());
         writeIntoBuf(chEvent.getDatabase(), buf);
         writeIntoBuf(chEvent.getTable(), buf);
 
@@ -228,7 +229,7 @@ public class RawEventCodec implements EventCodec {
         event.setSeq(buf.readLong());
         event.setExecuteTime(buf.readLong());
         event.setServerId(buf.readLong());
-        BinlogInfo binlogInfo = new BinlogInfo(buf.readLong(),(String) readFromBuf(buf, String.class), buf.readLong(), buf.readInt());
+        BinlogInfo binlogInfo = new BinlogInfo(buf.readLong(), (String) readFromBuf(buf, String.class), buf.readLong(), buf.readInt(), buf.readLong());
         event.setBinlogInfo(binlogInfo);
         event.setDatabase((String) readFromBuf(buf, String.class));
         event.setTable((String) readFromBuf(buf, String.class));

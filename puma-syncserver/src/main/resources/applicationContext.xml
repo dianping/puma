@@ -15,8 +15,6 @@
     <!-- annotation scan -->
     <context:component-scan base-package="com.dianping.puma" />
 
-    <task:annotation-driven />
-
     <import resource="applicationContext-properties.xml" />
 
     <import resource="applicationContext-swallow.xml" />

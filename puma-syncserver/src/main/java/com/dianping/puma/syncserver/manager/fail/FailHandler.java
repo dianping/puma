@@ -1,4 +1,4 @@
-package com.dianping.puma.syncserver.task.fail;
+package com.dianping.puma.syncserver.manager.fail;
 
 public class FailHandler {
 

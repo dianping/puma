@@ -1,7 +1,8 @@
 package com.dianping.puma.syncserver.executor;
 
 import com.dianping.puma.biz.entity.BaseTaskEntity;
-import com.dianping.puma.core.LifeCycle;
 
-public interface TaskExecutor<T extends BaseTaskEntity> extends LifeCycle<RuntimeException> {
+public interface TaskExecutor<T extends BaseTaskEntity> {
+
+	public T getTask();
 }

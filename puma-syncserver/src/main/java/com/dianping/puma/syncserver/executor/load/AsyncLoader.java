@@ -10,16 +10,19 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.concurrent.*;
 
-public class AsyncConcurrentLoader extends AbstractLoader {
+public class AsyncLoader extends AbstractLoader {
 
 	// Injected.
 	protected DataSource dataSource;
 
 	// Injected.
-	protected ExecutorService executorService;
+	protected ExecutorService sqlExecutorThreadPool;
 
-	// Injected.
 	protected ConditionChain conditionChain;
+
+	public AsyncLoader(int maxConcurrent, DataSource dataSource, ExecutorService sqlExecutorThreadPool) {
+
+	}
 
 	@Override
 	protected void doStart() {
@@ -47,7 +50,7 @@ public class AsyncConcurrentLoader extends AbstractLoader {
 			}
 		}
 
-		executorService.submit(loadFuture);
+		sqlExecutorThreadPool.submit(loadFuture);
 
 		return loadFuture;
 	}
@@ -62,13 +65,12 @@ public class AsyncConcurrentLoader extends AbstractLoader {
 				try {
 					conditionChain.lock(binlogEvent);
 					QueryRunner queryRunner = new QueryRunner(dataSource);
-					int result = queryRunner.update(sql, params);
-					conditionChain.unlock(binlogEvent);
-
-					return result;
+					return queryRunner.update(sql, params);
 				} catch (SQLException e) {
 					stop();
 					throw new PumaException("execute sql failure.", e);
+				} finally {
+					conditionChain.unlock(binlogEvent);
 				}
 			}
 		};
@@ -78,8 +80,8 @@ public class AsyncConcurrentLoader extends AbstractLoader {
 		this.dataSource = dataSource;
 	}
 
-	public void setExecutorService(ExecutorService executorService) {
-		this.executorService = executorService;
+	public void setSqlExecutorThreadPool(ExecutorService sqlExecutorThreadPool) {
+		this.sqlExecutorThreadPool = sqlExecutorThreadPool;
 	}
 
 	public void setConditionChain(ConditionChain conditionChain) {

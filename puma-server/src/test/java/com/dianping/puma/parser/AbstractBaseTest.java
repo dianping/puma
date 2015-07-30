@@ -299,11 +299,14 @@ public abstract class AbstractBaseTest {
 		taskExecutor.setBinlogInfo(getLastestBinlog());
 		taskExecutor.setBinlogStat(new BinlogStat());
 		// data source
-		taskExecutor.setDbServerId(serverId);
-		taskExecutor.setDBHost(host);
-		taskExecutor.setPort(port);
-		taskExecutor.setDBUsername(username);
-		taskExecutor.setDBPassword(password);
+		SrcDbEntity srcdb = new SrcDbEntity();
+		srcdb.setServerId(serverId);
+		srcdb.setHost(host);
+		srcdb.setPort(port);
+		srcdb.setUsername(username);
+		srcdb.setPassword(password);
+
+		taskExecutor.setCurrentSrcDbEntity(srcdb);
 		// Parser.
 		Parser parser = new DefaultBinlogParser();
 		// parser.start();
@@ -313,13 +316,7 @@ public abstract class AbstractBaseTest {
 		DefaultDataHandler dataHandler = new DefaultDataHandler();
 		DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
 		// tableMetaInfo.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
-		SrcDbEntity entity = new SrcDbEntity();
-		entity.setHost(host);
-		entity.setPort(port);
-		entity.setUsername(username);
-		entity.setPassword(password);
-
-		tableMetaInfo.setSrcDbEntity(entity);
+		tableMetaInfo.setSrcDbEntity(srcdb);
 
 		// tableMeta refresh filter
 		TableMetaRefreshFilter tableMetaRefreshFilter = new TableMetaRefreshFilter();

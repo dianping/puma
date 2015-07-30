@@ -7,7 +7,6 @@ import com.dianping.puma.core.event.EventType;
 import com.dianping.puma.core.event.ServerErrorEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.server.container.TaskContainer;
-import com.dianping.puma.status.SystemStatus;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.EventStorage;
 import io.netty.channel.Channel;
@@ -49,7 +48,7 @@ public class DefaultAsyncBinlogChannelTest {
         taskContainer = mock(TaskContainer.class);
 
         when(taskContainer.getTaskStorage(anyString())).thenReturn(eventStorage);
-//        when(eventStorage.getChannel(anyLong(), anyLong(), anyString(), anyLong(), anyLong())).thenReturn(eventChannel);
+
         when(eventChannel.next(anyBoolean())).thenAnswer(new Answer<Event>() {
             @Override
             public Event answer(InvocationOnMock invocationOnMock) throws Throwable {
@@ -63,8 +62,9 @@ public class DefaultAsyncBinlogChannelTest {
         });
 
 
-        target = new DefaultAsyncBinlogChannel();
+        target = spy(new DefaultAsyncBinlogChannel());
         target.setTaskContainer(taskContainer);
+        doReturn(eventChannel).when(target).initChannel(anyLong(), any(BinlogInfo.class), anyLong(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(EventStorage.class));
         target.init(-1, new BinlogInfo(-1, "", 1l, 1), -1, "", new ArrayList<String>(), false, false, false);
     }
 
@@ -141,14 +141,6 @@ public class DefaultAsyncBinlogChannelTest {
         Thread.sleep(150);
 
         assertNotNull(result.get());
-    }
-
-    @Test
-    public void test_weakreference() throws Exception {
-        target = null;
-        System.gc();
-        Thread.sleep(50);
-        Assert.assertEquals(0, ((ThreadPoolExecutor) DefaultAsyncBinlogChannel.executorService).getActiveCount());
     }
 
     protected Channel getChannel(final AtomicReference<BinlogGetResponse> result) {

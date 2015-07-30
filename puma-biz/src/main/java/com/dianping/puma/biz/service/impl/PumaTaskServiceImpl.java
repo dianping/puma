@@ -48,7 +48,7 @@ public class PumaTaskServiceImpl implements PumaTaskService {
 //    }
 
     protected void saveSrcDb(PumaTaskEntity entity) {
-        for (SrcDbEntity dbEntity : entity.getBackUpSrcDbs()) {
+        for (SrcDbEntity dbEntity : entity.getSrcDbEntityList()) {
             SrcDbEntity srcDb = srcDbDao.findByName(dbEntity.getName());
             if (srcDb != null) {
                 PumaTaskDbEntity pumaTaskDbEntity = new PumaTaskDbEntity();
@@ -146,8 +146,7 @@ public class PumaTaskServiceImpl implements PumaTaskService {
      */
     protected PumaTaskEntity loadFullPumaTask(PumaTaskEntity pumaTask) {
         pumaTask.setPumaServers(loadPumaServers(pumaTask.getId()));
-        pumaTask.setPreferredSrcDb(loadPreferredSrcDb(pumaTask.getJdbcRef()));
-        pumaTask.setBackUpSrcDbs(loadBackupSrcDbs(pumaTask.getJdbcRef()));
+        pumaTask.setSrcDbEntityList(loadSrcDbs(pumaTask.getJdbcRef()));
         pumaTask.setTableSet(loadTableSet(pumaTask.getId()));
 
         return pumaTask;
@@ -160,7 +159,7 @@ public class PumaTaskServiceImpl implements PumaTaskService {
      * @return full puma tasks.
      */
     protected List<PumaTaskEntity> loadFullPumaTasks(List<PumaTaskEntity> pumaTasks) {
-        for (PumaTaskEntity pumaTask: pumaTasks) {
+        for (PumaTaskEntity pumaTask : pumaTasks) {
             loadFullPumaTask(pumaTask);
         }
         return pumaTasks;
@@ -176,7 +175,7 @@ public class PumaTaskServiceImpl implements PumaTaskService {
         List<Pair<PumaServerEntity, ActionController>> results = new ArrayList<Pair<PumaServerEntity, ActionController>>();
 
         List<PumaTaskServerEntity> entities = pumaTaskServerDao.findByTaskId(taskId);
-        for (PumaTaskServerEntity entity: entities) {
+        for (PumaTaskServerEntity entity : entities) {
             PumaServerEntity pumaServer = pumaServerDao.findById(entity.getServerId());
             results.add(Pair.of(pumaServer, entity.getActionController()));
         }
@@ -185,39 +184,13 @@ public class PumaTaskServiceImpl implements PumaTaskService {
     }
 
     /**
-     * Load preferred source db machine of a puma task.
-     *
-     * @param jdbcRef jdbcRef of the source db cluster.
-     * @return preferred source db machine.
-     */
-    protected SrcDbEntity loadPreferredSrcDb(String jdbcRef) {
-        List<SrcDbEntity> srcDbs = srcDbDao.findByJdbcRef(jdbcRef);
-        for (SrcDbEntity srcDb: srcDbs) {
-            if (srcDb.isPreferred()) {
-                return srcDb;
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Load backup source db machines of a puma task.
      *
      * @param jdbcRef jdbcRef of the source db cluster.
      * @return backup source db machines.
      */
-    protected List<SrcDbEntity> loadBackupSrcDbs(String jdbcRef) {
-        List<SrcDbEntity> backupDbs = new ArrayList<SrcDbEntity>();
-
-        List<SrcDbEntity> srcDbs = srcDbDao.findByJdbcRef(jdbcRef);
-        for (SrcDbEntity srcDb: srcDbs) {
-            if (!srcDb.isPreferred()) {
-                backupDbs.add(srcDb);
-            }
-        }
-
-        return backupDbs;
+    protected List<SrcDbEntity> loadSrcDbs(String jdbcRef) {
+        return srcDbDao.findByJdbcRef(jdbcRef);
     }
 
     /**

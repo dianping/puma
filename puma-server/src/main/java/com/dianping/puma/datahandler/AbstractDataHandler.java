@@ -67,7 +67,6 @@ public abstract class AbstractDataHandler implements DataHandler {
      */
     @Override
     public void start() throws Exception {
-        tableMetasInfoFetcher.refreshTableMeta(null, true);
     }
 
     /*

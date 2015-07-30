@@ -1,9 +1,9 @@
 /**
  * Project: puma-server
- * 
+ *
  * File Created at 2012-8-3
  * $Id$
- * 
+ *
  * Copyright 2010 dianping.com.
  * All rights reserved.
  *
@@ -20,14 +20,14 @@ import com.dianping.puma.core.meta.TableMetaInfo;
 
 /**
  * TODO Comment of TableMetasInfoFetcher
- * 
+ *
  * @author Leo Liang
- * 
+ *
  */
 public interface TableMetaInfoFetcher {
 
 	void refreshTableMeta(DdlEvent ddlEvent, boolean isRefresh);
-	
+
 	TableMetaInfo getTableMetaInfo(String database, String table);
 
 }

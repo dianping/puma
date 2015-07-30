@@ -35,6 +35,8 @@ import com.dianping.puma.server.exception.ServerEventFetcherException;
 import com.dianping.puma.server.exception.ServerEventParserException;
 import com.dianping.puma.server.exception.ServerEventRuntimeException;
 import com.dianping.puma.status.SystemStatusManager;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,14 +79,26 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             try {
                 // 读position/file文件
                 BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(getContext().getPumaServerName());
+
                 if (binlogInfo == null) {
                     binlogInfo = new BinlogInfo(
                             getContext().getDBServerId(),
                             getContext().getBinlogFileName(),
                             getContext().getBinlogStartPos(), 0, 0);
+                    this.currentSrcDbEntity = loadSrcDbByServerId(getContext().getDBServerId());
+                } else {
+                    this.currentSrcDbEntity = loadSrcDbByServerId(binlogInfo.getServerId());
+                    this.currentSrcDbEntity = randomChooseSrcDbWhenServerIsNull();
+
+                    //如果 server Id 不一致，那需要做切换
+                    if (binlogInfo.getServerId() != currentSrcDbEntity.getServerId()) {
+                        binlogInfo = switchBinlog();
+                    }
                 }
 
-                // todo: 将来要做处理，如果 binlog serverid 和 db serverid 不一样怎么办？
+                tableMetaInfoFetcher.setSrcDbEntity(this.currentSrcDbEntity);
+                tableMetaInfoFetcher.refreshTableMeta(null, true);
+
                 getContext().setDBServerId(currentSrcDbEntity.getServerId());
                 getContext().setBinlogFileName(binlogInfo.getBinlogFile());
                 getContext().setBinlogStartPos(binlogInfo.getBinlogPosition());
@@ -126,6 +140,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                     throw new IOException("Binlog dump failed.");
                 }
             } catch (Throwable e) {
+                //todo:switch src db
+
                 if (canStop) {
                     Cat.logError("Puma.server.failed", new ServerEventFetcherException("TaskName: " + getTaskName(), e));
                     stopTask();
@@ -147,6 +163,31 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             }
         } while (!isStop());
 
+    }
+
+    protected SrcDbEntity randomChooseSrcDbWhenServerIsNull() {
+        if (this.currentSrcDbEntity == null) {
+            return getTask().getSrcDbEntityList().get(0);
+        } else {
+            return this.currentSrcDbEntity;
+        }
+    }
+
+    protected SrcDbEntity loadSrcDbByServerId(final long binlogServerId) {
+        if (this.currentSrcDbEntity == null) {
+            return Iterables.find(getTask().getSrcDbEntityList(), new Predicate<SrcDbEntity>() {
+                @Override
+                public boolean apply(SrcDbEntity input) {
+                    return input.getServerId() == binlogServerId;
+                }
+            });
+        } else {
+            return this.currentSrcDbEntity;
+        }
+    }
+
+    protected BinlogInfo switchBinlog() {
+        return null;
     }
 
     private void processBinlog() throws IOException {
@@ -569,10 +610,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
     public void setTableMetaInfoFetcher(DefaultTableMetaInfoFetcher tableMetaInfoFetcher) {
         this.tableMetaInfoFetcher = tableMetaInfoFetcher;
-    }
-
-    public void setCurrentSrcDbEntity(SrcDbEntity currentSrcDbEntity) {
-        this.currentSrcDbEntity = currentSrcDbEntity;
     }
 
     public String getEncoding() {

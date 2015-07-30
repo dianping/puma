@@ -306,7 +306,6 @@ public abstract class AbstractBaseTest {
 		srcdb.setUsername(username);
 		srcdb.setPassword(password);
 
-		taskExecutor.setCurrentSrcDbEntity(srcdb);
 		// Parser.
 		Parser parser = new DefaultBinlogParser();
 		// parser.start();

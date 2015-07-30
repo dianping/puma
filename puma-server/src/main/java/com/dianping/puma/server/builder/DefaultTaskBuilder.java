@@ -108,9 +108,6 @@ public class DefaultTaskBuilder implements TaskBuilder {
 
         taskExecutor.setParser(parser);
 
-        //srcDb
-        taskExecutor.setCurrentSrcDbEntity(pumaTask.getPreferredSrcDb());
-
         // Handler.
         DefaultDataHandler dataHandler = new DefaultDataHandler();
         DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
@@ -122,7 +119,6 @@ public class DefaultTaskBuilder implements TaskBuilder {
         tableMetaRefreshFilter.setAcceptedTables(pumaTask.getTableSet());
         eventCenter.register(tableMetaRefreshFilter);
         tableMetaInfo.setTableMetaRefreshFilter(tableMetaRefreshFilter);
-        tableMetaInfo.setSrcDbEntity(pumaTask.getPreferredSrcDb());
 
         dataHandler.setTableMetasInfoFetcher(tableMetaInfo);
 

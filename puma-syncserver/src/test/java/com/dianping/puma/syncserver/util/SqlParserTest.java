@@ -2,6 +2,7 @@ package com.dianping.puma.syncserver.util;
 
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.sql.DMLType;
+import com.dianping.puma.syncserver.util.sql.SqlParser;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 

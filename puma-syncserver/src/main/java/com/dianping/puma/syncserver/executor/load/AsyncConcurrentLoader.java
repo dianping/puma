@@ -3,7 +3,7 @@ package com.dianping.puma.syncserver.executor.load;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.syncserver.exception.PumaException;
 import com.dianping.puma.syncserver.executor.load.condition.ConditionChain;
-import com.dianping.puma.syncserver.util.SqlParser;
+import com.dianping.puma.syncserver.util.sql.SqlParser;
 import org.apache.commons.dbutils.QueryRunner;
 
 import javax.sql.DataSource;

@@ -1,4 +1,4 @@
-package com.dianping.puma.syncserver.util;
+package com.dianping.puma.syncserver.util.sql;
 
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;

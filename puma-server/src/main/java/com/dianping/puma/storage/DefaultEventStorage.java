@@ -254,7 +254,7 @@ public class DefaultEventStorage implements EventStorage {
 	}
 
 	/**
-	 * flush L2Index every second
+	 * flush L2Index and Data every second
 	 * 
 	 * @author damonzhu
 	 *

@@ -179,14 +179,14 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
     }
 
     protected SrcDbEntity initSrcDbByServerId(final long binlogServerId, boolean randomIfNotExist) {
-        if (this.currentSrcDbEntity == null) {
-            return Iterables.find(getTask().getSrcDbEntityList(), new Predicate<SrcDbEntity>() {
-                @Override
-                public boolean apply(SrcDbEntity input) {
-                    return input.getServerId() == binlogServerId;
-                }
-            });
-        }
+//        if (this.currentSrcDbEntity == null) {
+//            return Iterables.find(getTask().getSrcDbEntityList(), new Predicate<SrcDbEntity>() {
+//                @Override
+//                public boolean apply(SrcDbEntity input) {
+//                    return input.getServerId() == binlogServerId;
+//                }
+//            });
+//        }
 
         if (this.currentSrcDbEntity == null) {
             return getTask().getSrcDbEntityList().get(0);

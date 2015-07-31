@@ -18,6 +18,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.core.codec.RawEventCodec;
@@ -306,6 +307,12 @@ public abstract class AbstractBaseTest {
 		srcdb.setUsername(username);
 		srcdb.setPassword(password);
 
+		//task
+		PumaTaskEntity task = new PumaTaskEntity();
+		task.getSrcDbEntityList().add(srcdb);
+		
+		taskExecutor.setTask(task);
+		
 		// Parser.
 		Parser parser = new DefaultBinlogParser();
 		// parser.start();
@@ -325,6 +332,7 @@ public abstract class AbstractBaseTest {
 
 		dataHandler.setTableMetasInfoFetcher(tableMetaInfo);
 		taskExecutor.setDataHandler(dataHandler);
+		taskExecutor.setTableMetaInfoFetcher(tableMetaInfo);
 
 		// File sender.
 		List<Sender> senders = new ArrayList<Sender>();

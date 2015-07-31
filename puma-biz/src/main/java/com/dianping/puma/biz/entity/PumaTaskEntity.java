@@ -3,8 +3,10 @@ package com.dianping.puma.biz.entity;
 import com.dianping.puma.core.constant.ActionController;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.TableSet;
+
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -24,7 +26,7 @@ public class PumaTaskEntity {
 
     private TableSet tableSet;
 
-    private List<SrcDbEntity> srcDbEntityList;
+    private List<SrcDbEntity> srcDbEntityList = new ArrayList<SrcDbEntity>();
 
     /**
      * Puma task instance may contain redundant information here.

@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
@@ -79,8 +78,6 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 
 	private AtomicReference<K> latestL2Index = new AtomicReference<K>();
 
-	private Thread syncTask;
-
 	public DefaultIndexManager(String baseDir, IndexItemConvertor<K> indexKeyConvertor,
 	      IndexItemConvertor<V> indexValueConvertor) {
 		this.baseDir = baseDir;
@@ -117,12 +114,6 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 		} finally {
 			l2WriteLock.unlock();
 		}
-
-		this.syncTask = new Thread(new Sync());
-		syncTask.setName("Puma-Index-Sync");
-		syncTask.setDaemon(true);
-
-		syncTask.start();
 	}
 
 	private void loadL1Index() throws IOException {
@@ -170,31 +161,11 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 			}
 		}
 	}
-
-	/**
-	 * flush L2Index every second
-	 * 
-	 * @author damonzhu
-	 *
-	 */
-	private class Sync implements Runnable {
-
-		@Override
-		public void run() {
-			while (!Thread.currentThread().isInterrupted()) {
-				if (l2IndexWriter != null) {
-					try {
-						l2IndexWriter.flush();
-					} catch (IOException e) {
-					}
-				}
-
-				try {
-					TimeUnit.SECONDS.sleep(1);
-				} catch (InterruptedException e) {
-					break;
-				}
-			}
+	
+	@Override
+	public void flush() throws IOException{
+		if(this.l2IndexWriter != null){
+			this.l2IndexWriter.flush();
 		}
 	}
 
@@ -205,10 +176,6 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 		closeQuietly(l2IndexWriter);
 		writingl2IndexName = null;
 		l2IndexWriter = null;
-
-		if (this.syncTask != null) {
-			this.syncTask.interrupt();
-		}
 	}
 
 	private void closeQuietly(Writer out) {
@@ -419,7 +386,10 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 
 	@Override
 	public K findFirst() throws IOException {
-		this.l2IndexWriter.flush();
+		if (this.l2IndexWriter != null) {
+			this.l2IndexWriter.flush();
+		}
+
 		if (l1Index != null) {
 			l1ReadLock.lock();
 
@@ -440,7 +410,9 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 	@Override
 	public K findLatest() throws IOException {
 		K latestKey = latestL2Index.get();
-		this.l2IndexWriter.flush();
+		if (this.l2IndexWriter != null) {
+			this.l2IndexWriter.flush();
+		}
 
 		if (latestKey != null) {
 			return latestKey;
@@ -485,7 +457,10 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 
 	@Override
 	public K findByTime(K searchKey, boolean startWithCompleteTransaction) throws IOException {
-		this.l2IndexWriter.flush();
+		if (this.l2IndexWriter != null) {
+			this.l2IndexWriter.flush();
+		}
+
 		if (l1Index != null) {
 			l1ReadLock.lock();
 
@@ -556,7 +531,10 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 
 	@Override
 	public K findByBinlog(K searchKey, boolean startWithCompleteTransaction) throws IOException {
-		this.l2IndexWriter.flush();
+		if (this.l2IndexWriter != null) {
+			this.l2IndexWriter.flush();
+		}
+
 		if (l1Index != null) {
 			l1ReadLock.lock();
 

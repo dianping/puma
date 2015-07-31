@@ -26,7 +26,7 @@ public class LocalFileDataBucket extends AbstractDataBucket {
 	      throws IOException {
 		super(startingSequence, maxSizeMB, fileName, compress);
 		this.length = file.length();
-		this.output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+		this.output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file, true)));
 		if (!compress) {
 			input = new DataInputStream(new BufferedInputStream(new FileInputStream(file), BUF_SIZE));
 		} else {

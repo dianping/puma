@@ -30,6 +30,8 @@ public interface IndexManager<K extends IndexKey<K>, V> extends LifeCycle<IOExce
 	public void addL2Index(K key, V value) throws IOException;
 
 	public void removeByL2IndexName(String l2IndexName) throws IOException;
+	
+	public void flush() throws IOException;
 
 	/**
 	 * 

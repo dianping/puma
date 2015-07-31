@@ -70,7 +70,7 @@ public class DeprecatedBinlogQueryDecoder implements RequestDecoder {
 
 
         if (map.containsKey("serverId") && map.containsKey("binlog") && map.containsKey("binlogPos")) {
-            BinlogInfo binlogInfo = new BinlogInfo(Long.valueOf(map.get("serverId")), map.get("binlog"), Long.valueOf(map.get("binlogPos")));
+            BinlogInfo binlogInfo = new BinlogInfo(Long.valueOf(map.get("serverId")), map.get("binlog"), Long.valueOf(map.get("binlogPos")), 0, 0);
             result.setBinlogInfo(binlogInfo);
         }
 

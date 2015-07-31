@@ -75,7 +75,7 @@ public class RawEventCodecTest {
         event.setExecuteTime(11111111);
         event.setTable("testtb");
         event.setSeq(1233);
-        event.setBinlogInfo(new BinlogInfo(123124L, "mysql-bin.000000", 4L, 2));
+        event.setBinlogInfo(new BinlogInfo(123124L, "mysql-bin.000000", 4L, 2, 0));
         event.setServerId(123123L);
     }
 

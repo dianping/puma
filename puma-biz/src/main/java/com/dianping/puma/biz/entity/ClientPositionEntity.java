@@ -21,6 +21,8 @@ public class ClientPositionEntity {
 
     private int eventIndex;
 
+    private long timestamp;
+
     private Date updateTime;
 
     public int getId() {
@@ -77,5 +79,13 @@ public class ClientPositionEntity {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }

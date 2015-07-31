@@ -31,11 +31,19 @@ public class BinlogAckDecoder implements RequestDecoder {
         binlogAckRequest.setToken(params.get("token").get(0));
 
         BinlogAck binlogAck = new BinlogAck();
-        binlogAck.setBinlogInfo(new BinlogInfo(
+        BinlogInfo binlogInfo = new BinlogInfo(
                 Long.valueOf(params.get("serverId").get(0)),
                 params.get("binlogFile").get(0),
-                Long.valueOf(params.get("binlogPosition").get(0))
-        ));
+                Long.valueOf(params.get("binlogPosition").get(0)),
+                0,
+                Long.valueOf(params.get("timestamp").get(0))
+        );
+        if(params.containsKey("eventIndex")){
+            binlogInfo.setEventIndex(Integer.valueOf(params.get("eventIndex").get(0)));
+        }
+
+
+        binlogAck.setBinlogInfo(binlogInfo);
         binlogAckRequest.setBinlogAck(binlogAck);
 
         return binlogAckRequest;

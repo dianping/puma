@@ -16,18 +16,17 @@ public class BinlogInfo implements Serializable {
 
     private int eventIndex;
 
+    private long timestamp;
+
     public BinlogInfo() {
     }
 
-    public BinlogInfo(long serverId, String binlogFile, Long binlogPosition) {
-        this(serverId, binlogFile, binlogPosition, 0);
-    }
-
-    public BinlogInfo(long serverId, String binlogFile, Long binlogPosition, int eventIndex) {
+    public BinlogInfo(long serverId, String binlogFile, Long binlogPosition, int eventIndex, long timestamp) {
         this.serverId = serverId;
         this.binlogFile = binlogFile;
         this.binlogPosition = binlogPosition;
         this.eventIndex = eventIndex;
+        this.timestamp = timestamp;
     }
 
     public String getBinlogFile() {
@@ -66,20 +65,30 @@ public class BinlogInfo implements Serializable {
         return this;
     }
 
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public BinlogInfo setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BinlogInfo that = (BinlogInfo) o;
         return Objects.equal(serverId, that.serverId) &&
+                Objects.equal(binlogPosition, that.binlogPosition) &&
                 Objects.equal(eventIndex, that.eventIndex) &&
-                Objects.equal(binlogFile, that.binlogFile) &&
-                Objects.equal(binlogPosition, that.binlogPosition);
+                Objects.equal(timestamp, that.timestamp) &&
+                Objects.equal(binlogFile, that.binlogFile);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(serverId, binlogFile, binlogPosition, eventIndex);
+        return Objects.hashCode(serverId, binlogFile, binlogPosition, eventIndex, timestamp);
     }
 
     @Override
@@ -89,6 +98,7 @@ public class BinlogInfo implements Serializable {
                 ", binlogFile='" + binlogFile + '\'' +
                 ", binlogPosition=" + binlogPosition +
                 ", eventIndex=" + eventIndex +
+                ", timestamp=" + timestamp +
                 '}';
     }
 }

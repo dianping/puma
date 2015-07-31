@@ -2,7 +2,6 @@ package com.dianping.puma.server.builder;
 
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
-import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.*;
@@ -104,14 +103,6 @@ public class DefaultTaskBuilder implements TaskBuilder {
         taskExecutor.setBinlogInfo(pumaTask.getStartBinlogInfo());
         taskExecutor.setBinlogStat(new BinlogStat());
 
-        // Source database.
-        SrcDbEntity srcDBEntity = pumaTask.getPreferredSrcDb();
-        taskExecutor.setDbServerId(srcDBEntity.getServerId());
-        taskExecutor.setDBHost(srcDBEntity.getHost());
-        taskExecutor.setPort(srcDBEntity.getPort());
-        taskExecutor.setDBUsername(srcDBEntity.getUsername());
-        taskExecutor.setDBPassword(srcDBEntity.getPassword());
-
         // Parser.
         Parser parser = new DefaultBinlogParser();
 
@@ -120,7 +111,7 @@ public class DefaultTaskBuilder implements TaskBuilder {
         // Handler.
         DefaultDataHandler dataHandler = new DefaultDataHandler();
         DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
-        tableMetaInfo.setSrcDbEntity(srcDBEntity);
+        taskExecutor.setTableMetaInfoFetcher(tableMetaInfo);
 
         // tableMeta refresh filter
         TableMetaRefreshFilter tableMetaRefreshFilter = new TableMetaRefreshFilter();

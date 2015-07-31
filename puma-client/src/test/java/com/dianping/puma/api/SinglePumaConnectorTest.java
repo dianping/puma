@@ -39,11 +39,12 @@ public class SinglePumaConnectorTest {
         SinglePumaClient connector = new SinglePumaClient("dozer", "127.0.0.1", 4040);
         connector.subscribe(true, true, true, "test", "debug");
 
-        final int size = 1000;
+        final int size = 1;
 
         while (true) {
             try {
                 BinlogMessage message = connector.get(size);
+                System.out.println(message.getLastBinlogInfo().toString());
                 connector.ack(message.getLastBinlogInfo());
             } catch (PumaClientException exp) {
                 exp.printStackTrace();

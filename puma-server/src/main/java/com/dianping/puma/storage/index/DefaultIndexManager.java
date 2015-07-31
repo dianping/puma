@@ -61,7 +61,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 
 	private String writingl2IndexName = null;
 
-	private DataOutputStream writingl2IndexStream;
+	private DataOutputStream l2IndexWriter;
 
 	private IndexItemConvertor<K> indexKeyConvertor;
 
@@ -112,8 +112,8 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 		l2WriteLock.lock();
 		try {
 			writingl2IndexName = null;
-			closeQuietly(writingl2IndexStream);
-			writingl2IndexStream = null;
+			closeQuietly(l2IndexWriter);
+			l2IndexWriter = null;
 		} finally {
 			l2WriteLock.unlock();
 		}
@@ -182,9 +182,9 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 		@Override
 		public void run() {
 			while (!Thread.currentThread().isInterrupted()) {
-				if (writingl2IndexStream != null) {
+				if (l2IndexWriter != null) {
 					try {
-						writingl2IndexStream.flush();
+						l2IndexWriter.flush();
 					} catch (IOException e) {
 					}
 				}
@@ -202,9 +202,9 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 	public void stop() throws IOException {
 		closeQuietly(l1IndexWriter);
 		l1IndexWriter = null;
-		closeQuietly(writingl2IndexStream);
+		closeQuietly(l2IndexWriter);
 		writingl2IndexName = null;
-		writingl2IndexStream = null;
+		l2IndexWriter = null;
 
 		if (this.syncTask != null) {
 			this.syncTask.interrupt();
@@ -259,10 +259,10 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 		try {
 			if (added && !StringUtils.equals(l2IndexName, writingl2IndexName)) {
 				writingl2IndexName = l2IndexName;
-				closeQuietly(writingl2IndexStream);
+				closeQuietly(l2IndexWriter);
 				File l2IndexFile = getL2IndexFile(writingl2IndexName);
 				l2IndexFile.createNewFile();
-				writingl2IndexStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(l2IndexFile)));
+				l2IndexWriter = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(l2IndexFile)));
 			}
 		} finally {
 			l2WriteLock.unlock();
@@ -279,14 +279,14 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 	public void addL2Index(K key, V value) throws IOException {
 		l2WriteLock.lock();
 		try {
-			if (writingl2IndexStream != null) {
+			if (l2IndexWriter != null) {
 				Object object = indexValueConvertor.convertToObj(value);
 
 				if (object instanceof byte[]) {
 					byte[] bytes = (byte[]) object;
 
-					writingl2IndexStream.writeInt(bytes.length);
-					writingl2IndexStream.write(bytes);
+					l2IndexWriter.writeInt(bytes.length);
+					l2IndexWriter.write(bytes);
 				}
 
 				latestL2Index.set(key);
@@ -331,8 +331,8 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 			try {
 				if (StringUtils.equals(l2IndexName, writingl2IndexName)) {
 					writingl2IndexName = null;
-					closeQuietly(writingl2IndexStream);
-					writingl2IndexStream = null;
+					closeQuietly(l2IndexWriter);
+					l2IndexWriter = null;
 				}
 				File l2IndexFile = getL2IndexFile(l2IndexName);
 				FileUtils.deleteQuietly(l2IndexFile);
@@ -419,7 +419,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 
 	@Override
 	public K findFirst() throws IOException {
-		this.writingl2IndexStream.flush();
+		this.l2IndexWriter.flush();
 		if (l1Index != null) {
 			l1ReadLock.lock();
 
@@ -440,7 +440,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 	@Override
 	public K findLatest() throws IOException {
 		K latestKey = latestL2Index.get();
-		this.writingl2IndexStream.flush();
+		this.l2IndexWriter.flush();
 
 		if (latestKey != null) {
 			return latestKey;
@@ -485,7 +485,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 
 	@Override
 	public K findByTime(K searchKey, boolean startWithCompleteTransaction) throws IOException {
-		this.writingl2IndexStream.flush();
+		this.l2IndexWriter.flush();
 		if (l1Index != null) {
 			l1ReadLock.lock();
 
@@ -556,7 +556,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 
 	@Override
 	public K findByBinlog(K searchKey, boolean startWithCompleteTransaction) throws IOException {
-		this.writingl2IndexStream.flush();
+		this.l2IndexWriter.flush();
 		if (l1Index != null) {
 			l1ReadLock.lock();
 

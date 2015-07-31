@@ -88,6 +88,7 @@ public class LocalBucketTest {
         }
 
         try {
+      	  localFileBucket.flush();
             BufferedReader input = new BufferedReader(new FileReader(work));
             String s = input.readLine();
             input.close();

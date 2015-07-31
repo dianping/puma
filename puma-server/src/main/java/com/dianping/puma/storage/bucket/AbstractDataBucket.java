@@ -16,6 +16,7 @@
 package com.dianping.puma.storage.bucket;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -36,9 +37,11 @@ public abstract class AbstractDataBucket implements DataBucket {
     private AtomicReference<Sequence> currentWritingSeq = new AtomicReference<Sequence>();
     private volatile boolean          stopped           = false;
     private long                      maxSizeByte;
+    protected long						  length;
     private String                    fileName;
     private boolean                   compress;
     protected DataInputStream         input;
+    protected DataOutputStream		  output;
     protected ByteBuffer              dataLengthBuf     = ByteBuffer.allocate(4);
 
     public String getBucketFileName() {
@@ -112,6 +115,15 @@ public abstract class AbstractDataBucket implements DataBucket {
         checkClosed();
         doAppend(data);
         currentWritingSeq.set(currentWritingSeq.get().addOffset(data.length));
+    }
+    
+    @Override
+    public void flush() throws StorageClosedException, IOException {
+   	 checkClosed();
+   	 
+   	 if(this.output != null){
+   		 this.output.flush();
+   	 }
     }
 
     protected abstract void doAppend(byte[] data) throws IOException;

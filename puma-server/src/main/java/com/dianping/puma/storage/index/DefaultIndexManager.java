@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
@@ -78,6 +79,8 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 
 	private AtomicReference<K> latestL2Index = new AtomicReference<K>();
 
+	private Thread syncTask;
+
 	public DefaultIndexManager(String baseDir, IndexItemConvertor<K> indexKeyConvertor,
 	      IndexItemConvertor<V> indexValueConvertor) {
 		this.baseDir = baseDir;
@@ -114,6 +117,12 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 		} finally {
 			l2WriteLock.unlock();
 		}
+
+		this.syncTask = new Thread(new Sync());
+		syncTask.setName("Puma-Index-Sync");
+		syncTask.setDaemon(true);
+
+		syncTask.start();
 	}
 
 	private void loadL1Index() throws IOException {
@@ -162,11 +171,33 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * flush L2Index every second
 	 * 
-	 * @see com.dianping.puma.common.LifeCycle#stop()
+	 * @author damonzhu
+	 *
 	 */
+	private class Sync implements Runnable {
+
+		@Override
+		public void run() {
+			while (!Thread.currentThread().isInterrupted()) {
+				if (writingl2IndexStream != null) {
+					try {
+						writingl2IndexStream.flush();
+					} catch (IOException e) {
+					}
+				}
+
+				try {
+					TimeUnit.SECONDS.sleep(1);
+				} catch (InterruptedException e) {
+					break;
+				}
+			}
+		}
+	}
+
 	@Override
 	public void stop() throws IOException {
 		closeQuietly(l1IndexWriter);
@@ -174,6 +205,10 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 		closeQuietly(writingl2IndexStream);
 		writingl2IndexName = null;
 		writingl2IndexStream = null;
+
+		if (this.syncTask != null) {
+			this.syncTask.interrupt();
+		}
 	}
 
 	private void closeQuietly(Writer out) {
@@ -206,11 +241,6 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.storage.DataIndex#addL1Index(com.dianping.puma.storage .DataIndexKey, java.lang.String)
-	 */
 	@Override
 	public void addL1Index(K key, String l2IndexName) throws IOException {
 		boolean added = false;
@@ -258,8 +288,6 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 					writingl2IndexStream.writeInt(bytes.length);
 					writingl2IndexStream.write(bytes);
 				}
-
-				writingl2IndexStream.flush();
 
 				latestL2Index.set(key);
 			}
@@ -391,6 +419,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 
 	@Override
 	public K findFirst() throws IOException {
+		this.writingl2IndexStream.flush();
 		if (l1Index != null) {
 			l1ReadLock.lock();
 
@@ -411,6 +440,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 	@Override
 	public K findLatest() throws IOException {
 		K latestKey = latestL2Index.get();
+		this.writingl2IndexStream.flush();
 
 		if (latestKey != null) {
 			return latestKey;
@@ -455,6 +485,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 
 	@Override
 	public K findByTime(K searchKey, boolean startWithCompleteTransaction) throws IOException {
+		this.writingl2IndexStream.flush();
 		if (l1Index != null) {
 			l1ReadLock.lock();
 
@@ -525,6 +556,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 
 	@Override
 	public K findByBinlog(K searchKey, boolean startWithCompleteTransaction) throws IOException {
+		this.writingl2IndexStream.flush();
 		if (l1Index != null) {
 			l1ReadLock.lock();
 

@@ -264,20 +264,8 @@ public class DefaultEventStorage implements EventStorage {
 		@Override
 		public void run() {
 			while (!Thread.currentThread().isInterrupted()) {
-				if (writingBucket != null) {
-					try {
-						writingBucket.flush();
-					} catch (IOException e) {
-					}
-				}
-
-				if (indexKeyManager != null) {
-					try {
-						indexKeyManager.flush();
-					} catch (IOException e) {
-					}
-				}
-
+				flush();
+				
 				try {
 					TimeUnit.SECONDS.sleep(1);
 				} catch (InterruptedException e) {
@@ -286,6 +274,23 @@ public class DefaultEventStorage implements EventStorage {
 			}
 		}
 	}
+	
+	@Override
+   public void flush(){
+		if (writingBucket != null) {
+			try {
+				writingBucket.flush();
+			} catch (IOException e) {
+			}
+		}
+
+		if (indexKeyManager != null) {
+			try {
+				indexKeyManager.flush();
+			} catch (IOException e) {
+			}
+		}	   
+   }
 
 	private void updateIndex(ChangedEvent event, boolean newL1Index, Sequence sequence) throws IOException {
 		IndexKeyImpl indexKey = new IndexKeyImpl(event.getExecuteTime(), event.getBinlogInfo().getServerId(), event

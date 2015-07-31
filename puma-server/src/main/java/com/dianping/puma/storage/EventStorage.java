@@ -13,11 +13,13 @@ import com.dianping.puma.storage.index.IndexValueImpl;
 public interface EventStorage extends LifeCycle<StorageLifeCycleException> {
 
 	public void store(ChangedEvent event) throws StorageException;
-	
+
+	public void flush();
+
 	public BucketManager getBucketManager();
-	
+
 	public IndexManager<IndexKeyImpl, IndexValueImpl> getDataIndex();
-	
+
 	public EventCodec getEventCodec();
 
 }

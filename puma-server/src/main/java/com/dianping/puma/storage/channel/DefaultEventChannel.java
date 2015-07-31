@@ -21,6 +21,8 @@ import com.dianping.puma.storage.index.IndexManager;
 import com.dianping.puma.storage.index.IndexValueImpl;
 
 public class DefaultEventChannel extends AbstractEventChannel implements EventChannel {
+	private EventStorage eventStorage;
+
 	private BucketManager bucketManager;
 
 	private IndexManager<IndexKeyImpl, IndexValueImpl> indexManager;
@@ -38,6 +40,7 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 	private Sequence lastReadSequence = null;
 
 	public DefaultEventChannel(EventStorage eventStorage) throws StorageException {
+		this.eventStorage = eventStorage;
 		this.bucketManager = eventStorage.getBucketManager();
 		this.indexManager = eventStorage.getDataIndex();
 		this.codec = eventStorage.getEventCodec();
@@ -120,12 +123,14 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 					readDataBucket = this.bucketManager.getReadBucket(sequence.longValue(), false);
 				}
 
-				if (sequence.getOffset() != lastReadSequence.getOffset()) {
-					readDataBucket.skip(sequence.getOffset() - lastReadSequence.getOffset() - lastReadSequence.getLen());
-				}
+				try {
+					event = codec.decode(readData(sequence));
+				} catch (EOFException eof) {
+					// 处理索引已经刷新到文件，但是数据还没有刷新到文件的情况，这里强制刷新一下存储，然后再读数据，如果还读不到，说明真有问题了。
+					this.eventStorage.flush();
 
-				byte[] data = readDataBucket.getNext();
-				event = codec.decode(data);
+					event = codec.decode(readData(sequence));
+				}
 
 				lastIndexKey = nextL2Index.getIndexKey();
 				lastReadSequence = sequence;
@@ -135,6 +140,14 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 		}
 
 		return event;
+	}
+
+	private byte[] readData(Sequence sequence) throws StorageClosedException, IOException {
+		if (sequence.getOffset() != lastReadSequence.getOffset()) {
+			readDataBucket.skip(sequence.getOffset() - lastReadSequence.getOffset() - lastReadSequence.getLen());
+		}
+
+		return readDataBucket.getNext();
 	}
 
 	@Override

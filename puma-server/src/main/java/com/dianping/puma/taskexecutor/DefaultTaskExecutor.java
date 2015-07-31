@@ -85,9 +85,9 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                             getContext().getDBServerId(),
                             getContext().getBinlogFileName(),
                             getContext().getBinlogStartPos(), 0, 0);
-                    this.currentSrcDbEntity = initSrcDbByServerId(getContext().getDBServerId(), false);
+                    this.currentSrcDbEntity = initSrcDbByServerId(-1);
                 } else {
-                    this.currentSrcDbEntity = initSrcDbByServerId(binlogInfo.getServerId(), true);
+                    this.currentSrcDbEntity = initSrcDbByServerId(binlogInfo.getServerId());
 
                     if (binlogInfo.getServerId() != currentSrcDbEntity.getServerId()) {
                         binlogInfo = switchBinlog();
@@ -137,8 +137,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                     throw new IOException("Binlog dump failed.");
                 }
             } catch (Throwable e) {
-                //todo:switch src db
-
                 if (canStop) {
                     Cat.logError("Puma.server.failed", new ServerEventFetcherException("TaskName: " + getTaskName(), e));
                     stopTask();
@@ -156,7 +154,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
                     failCount = 0;
                 }
-                LOG.error("Exception occurs. taskName: " + getTaskName() + " dbServerId: " + currentSrcDbEntity.getServerId()
+                LOG.error("Exception occurs. taskName: " + getTaskName() + " dbServerId: " + (currentSrcDbEntity == null ? 0 : currentSrcDbEntity.getServerId())
                         + ". Reconnect...", e);
 
                 Thread.sleep(((failCount % 10) + 1) * 2000);
@@ -178,21 +176,30 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         return getTask().getSrcDbEntityList().get(index);
     }
 
-    protected SrcDbEntity initSrcDbByServerId(final long binlogServerId, boolean randomIfNotExist) {
-//        if (this.currentSrcDbEntity == null) {
-//            return Iterables.find(getTask().getSrcDbEntityList(), new Predicate<SrcDbEntity>() {
-//                @Override
-//                public boolean apply(SrcDbEntity input) {
-//                    return input.getServerId() == binlogServerId;
-//                }
-//            });
-//        }
-
-        if (this.currentSrcDbEntity == null) {
-            return getTask().getSrcDbEntityList().get(0);
-        } else {
+    protected SrcDbEntity initSrcDbByServerId(final long binlogServerId) {
+        if (this.currentSrcDbEntity != null) {
             return this.currentSrcDbEntity;
         }
+
+        SrcDbEntity srcDbEntity = Iterables.find(getTask().getSrcDbEntityList(), new Predicate<SrcDbEntity>() {
+            @Override
+            public boolean apply(SrcDbEntity input) {
+                return input.getServerId() == binlogServerId;
+            }
+        }, null);
+
+        if (srcDbEntity != null) {
+            return srcDbEntity;
+        }
+
+        srcDbEntity = Iterables.find(getTask().getSrcDbEntityList(), new Predicate<SrcDbEntity>() {
+            @Override
+            public boolean apply(SrcDbEntity input) {
+                return input.isPreferred();
+            }
+        }, null);
+
+        return srcDbEntity != null ? srcDbEntity : getTask().getSrcDbEntityList().get(0);
     }
 
     protected BinlogInfo switchBinlog() {

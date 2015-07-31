@@ -255,7 +255,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 				if (object instanceof byte[]) {
 					byte[] bytes = (byte[]) object;
 
-					writingl2IndexStream.writeByte(bytes.length);
+					writingl2IndexStream.writeInt(bytes.length);
 					writingl2IndexStream.write(bytes);
 				}
 

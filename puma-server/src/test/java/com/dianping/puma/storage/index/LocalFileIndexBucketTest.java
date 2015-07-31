@@ -47,7 +47,7 @@ public class LocalFileIndexBucketTest {
 			l2Index.setSequence(new Sequence(123123L + i, 1));
 			byte[] convertToObj = (byte[]) valueConvertor.convertToObj(l2Index);
 
-			output.write(convertToObj.length);
+			output.writeInt(convertToObj.length);
 			output.write(convertToObj);
 		}
 

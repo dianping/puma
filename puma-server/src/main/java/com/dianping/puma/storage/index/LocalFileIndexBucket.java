@@ -32,7 +32,7 @@ public class LocalFileIndexBucket<K, V extends IndexValue<K>> implements IndexBu
 
 	@Override
 	public V next() throws StorageClosedException, IOException {
-		int len = this.input.readByte();
+		int len = this.input.readInt();
 		byte[] bytes = new byte[len];
 		this.input.read(bytes);
 

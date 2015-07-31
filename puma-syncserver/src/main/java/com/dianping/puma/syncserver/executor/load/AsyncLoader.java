@@ -1,8 +1,9 @@
 package com.dianping.puma.syncserver.executor.load;
 
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.syncserver.common.binlog.BinlogEvent;
 import com.dianping.puma.syncserver.exception.PumaException;
-import com.dianping.puma.syncserver.executor.load.condition.ConditionChain;
+import com.dianping.puma.syncserver.executor.load.condition.*;
 import com.dianping.puma.syncserver.util.sql.SqlParser;
 import org.apache.commons.dbutils.QueryRunner;
 
@@ -12,28 +13,39 @@ import java.util.concurrent.*;
 
 public class AsyncLoader extends AbstractLoader {
 
-	// Injected.
-	protected DataSource dataSource;
+	protected final int maxConcurrent;
 
-	// Injected.
-	protected ExecutorService sqlExecutorThreadPool;
+	protected DataSource ds;
+
+	protected ExecutorService es;
 
 	protected ConditionChain conditionChain;
 
-	public AsyncLoader(int maxConcurrent, DataSource dataSource, ExecutorService sqlExecutorThreadPool) {
-
+	public AsyncLoader(int maxConcurrent, DataSource ds, ExecutorService es) {
+		this.maxConcurrent = maxConcurrent;
+		this.ds = ds;
+		this.es = es;
 	}
 
 	@Override
 	protected void doStart() {
+		conditionChain = new SeriesConditionChain();
+		VolCondition volCondition = new VolCondition(maxConcurrent);
+		RowCondition rowCondition = new RowCondition();
+		DdlCondition ddlCondition = new DdlCondition();
+		conditionChain.addCondition(volCondition);
+		conditionChain.addCondition(rowCondition);
+		conditionChain.addCondition(ddlCondition);
+		conditionChain.reset();
 	}
 
 	@Override
 	protected void doStop() {
+		conditionChain = null;
 	}
 
 	@Override
-	public LoadFuture load(ChangedEvent binlogEvent) {
+	public LoadFuture load(BinlogEvent binlogEvent) {
 		if (checkStop()) {
 			throw new PumaException("load binlog event failure, load module stopped.");
 		}
@@ -50,41 +62,29 @@ public class AsyncLoader extends AbstractLoader {
 			}
 		}
 
-		sqlExecutorThreadPool.submit(loadFuture);
+		es.submit(loadFuture);
 
 		return loadFuture;
 	}
 
-	protected Callable<Integer> genLoadTask(final ChangedEvent binlogEvent) {
-		final String sql = SqlParser.parseSql(binlogEvent);
-		final Object[] params = SqlParser.parseArgs(binlogEvent);
-
+	protected Callable<Integer> genLoadTask(final BinlogEvent binlogEvent) {
 		return new Callable<Integer>() {
 			@Override
 			public Integer call() throws Exception {
 				try {
-					conditionChain.lock(binlogEvent);
-					QueryRunner queryRunner = new QueryRunner(dataSource);
+					String sql = binlogEvent.getSql();
+					Object[] params = binlogEvent.getParams();
+
+					//conditionChain.lock(binlogEvent);
+					QueryRunner queryRunner = new QueryRunner(ds);
 					return queryRunner.update(sql, params);
 				} catch (SQLException e) {
 					stop();
 					throw new PumaException("execute sql failure.", e);
 				} finally {
-					conditionChain.unlock(binlogEvent);
+					//conditionChain.unlock(binlogEvent);
 				}
 			}
 		};
-	}
-
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
-
-	public void setSqlExecutorThreadPool(ExecutorService sqlExecutorThreadPool) {
-		this.sqlExecutorThreadPool = sqlExecutorThreadPool;
-	}
-
-	public void setConditionChain(ConditionChain conditionChain) {
-		this.conditionChain = conditionChain;
 	}
 }

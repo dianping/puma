@@ -1,7 +1,8 @@
 package com.dianping.puma.syncserver.executor.load.condition;
 
-import com.dianping.puma.core.event.DdlEvent;
-import com.dianping.puma.core.event.RowChangedEvent;
+import com.dianping.puma.syncserver.common.binlog.BinlogEvent;
+import com.dianping.puma.syncserver.common.binlog.DdlEvent;
+import com.dianping.puma.syncserver.common.binlog.DmlEvent;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -18,7 +19,7 @@ public class DdlConditionTest {
 
 	@Test
 	public void testLock() {
-		DdlEvent ddlEvent = new DdlEvent();
+		BinlogEvent ddlEvent = new DdlEvent();
 		ddlEvent.setDatabase("test-database-0");
 		ddlEvent.setTable("test-table-0");
 
@@ -28,7 +29,7 @@ public class DdlConditionTest {
 
 	@Test
 	public void testUnlock() {
-		DdlEvent ddlEvent = new DdlEvent();
+		BinlogEvent ddlEvent = new DdlEvent();
 		ddlEvent.setDatabase("test-database-0");
 		ddlEvent.setTable("test-table-0");
 
@@ -41,20 +42,20 @@ public class DdlConditionTest {
 
 	@Test
 	public void testIsLocked() {
-		DdlEvent ddlEvent = new DdlEvent();
+		BinlogEvent ddlEvent = new DdlEvent();
 		ddlEvent.setDatabase("test-database-0");
 		ddlEvent.setTable("test-table-0");
 
 		ddlCondition.lock(ddlEvent);
 		assertTrue(ddlCondition.ddlEvent.equals(ddlEvent));
 
-		RowChangedEvent rowChangedEvent = new RowChangedEvent();
-		assertTrue(ddlCondition.isLocked(rowChangedEvent));
+		DmlEvent dmlEvent = new DmlEvent();
+		assertTrue(ddlCondition.isLocked(dmlEvent));
 
 		ddlCondition.unlock(ddlEvent);
 		assertNull(ddlCondition.ddlEvent);
 
-		assertFalse(ddlCondition.isLocked(rowChangedEvent));
+		assertFalse(ddlCondition.isLocked(dmlEvent));
 	}
 
 }

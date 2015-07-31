@@ -9,7 +9,7 @@ public class LoaderFactory {
 		return new AsyncLoader(1, dataSource, sqlExecutorThreadPool);
 	}
 
-	public static Loader createAsyncConcurrentLoader(int maxConcurrent, DataSource dataSource,
+	public static Loader createConcurrentAsyncLoader(int maxConcurrent, DataSource dataSource,
 			ExecutorService sqlExecutorThreadPool) {
 		return new AsyncLoader(maxConcurrent, dataSource, sqlExecutorThreadPool);
 	}

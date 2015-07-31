@@ -5,6 +5,7 @@ import com.dianping.puma.biz.entity.SyncTaskEntity;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.Event;
+import com.dianping.puma.syncserver.common.binlog.BinlogEvent;
 import com.dianping.puma.syncserver.executor.load.LoadFutureListener;
 import com.dianping.puma.syncserver.executor.load.Loader;
 import com.dianping.puma.syncserver.executor.load.LoaderFactory;
@@ -64,7 +65,7 @@ public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTaskEntity> {
 	}
 
 	private void initLoader() {
-		loader = LoaderFactory.createAsyncConcurrentLoader(5, dataSource, sqlExecutorThreadPool);
+		loader = LoaderFactory.createConcurrentAsyncLoader(5, dataSource, sqlExecutorThreadPool);
 	}
 
 	private Runnable mainTask = new Runnable() {
@@ -74,13 +75,12 @@ public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTaskEntity> {
 
 			for (Event binlogEvent: binlogMessage.getBinlogEvents()) {
 				if (binlogEvent instanceof ChangedEvent) {
-					consume((ChangedEvent) binlogEvent);
 				}
 			}
 		}
 	};
 
-	private void consume(ChangedEvent binlogEvent) {
+	private void consume(BinlogEvent binlogEvent) {
 		loader.load(binlogEvent).addListener(new LoadFutureListener() {
 			@Override
 			public void onSuccess(Integer result) {

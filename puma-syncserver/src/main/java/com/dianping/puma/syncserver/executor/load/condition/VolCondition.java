@@ -1,6 +1,6 @@
 package com.dianping.puma.syncserver.executor.load.condition;
 
-import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.syncserver.common.binlog.BinlogEvent;
 
 public class VolCondition implements Condition {
 
@@ -18,12 +18,12 @@ public class VolCondition implements Condition {
 	}
 
 	@Override
-	public synchronized boolean isLocked(ChangedEvent binlogEvent) {
+	public synchronized boolean isLocked(BinlogEvent binlogEvent) {
 		return count >= volume;
 	}
 
 	@Override
-	public synchronized void lock(ChangedEvent binlogEvent) {
+	public synchronized void lock(BinlogEvent binlogEvent) {
 		if (count >= volume) {
 			throw new RuntimeException("volume condition lock failure.");
 		}
@@ -31,7 +31,7 @@ public class VolCondition implements Condition {
 	}
 
 	@Override
-	public synchronized void unlock(ChangedEvent binlogEvent) {
+	public synchronized void unlock(BinlogEvent binlogEvent) {
 		if (count == 0) {
 			throw new RuntimeException("volume condition unlock failure.");
 		}

@@ -1,6 +1,8 @@
 package com.dianping.puma.syncserver.executor.load.condition;
 
 import com.dianping.puma.core.event.RowChangedEvent;
+import com.dianping.puma.syncserver.common.binlog.BinlogEvent;
+import com.dianping.puma.syncserver.common.binlog.DmlEvent;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,40 +19,40 @@ public class VolConditionTest {
 
 	@Test
 	public void testLock() {
-		RowChangedEvent rowChangedEvent = new RowChangedEvent();
+		DmlEvent dmlEvent = new DmlEvent();
 
 		assertEquals(0, volCondition.count);
 
-		volCondition.lock(rowChangedEvent);
+		volCondition.lock(dmlEvent);
 
 		assertEquals(1, volCondition.count);
 	}
 
 	@Test
 	public void testUnlock() {
-		RowChangedEvent rowChangedEvent = new RowChangedEvent();
+		DmlEvent dmlEvent = new DmlEvent();
 
 		assertEquals(0, volCondition.count);
 
-		volCondition.lock(rowChangedEvent);
+		volCondition.lock(dmlEvent);
 
 		assertEquals(1, volCondition.count);
 
-		volCondition.unlock(rowChangedEvent);
+		volCondition.unlock(dmlEvent);
 
 		assertEquals(0, volCondition.count);
 	}
 
 	@Test
 	public void testIsLocked() {
-		RowChangedEvent rowChangedEvent = new RowChangedEvent();
+		DmlEvent dmlEvent = new DmlEvent();
 
 		assertEquals(0, volCondition.count);
 
-		volCondition.lock(rowChangedEvent);
+		volCondition.lock(dmlEvent);
 
 		assertEquals(1, volCondition.count);
 
-		assertTrue(volCondition.isLocked(rowChangedEvent));
+		assertTrue(volCondition.isLocked(dmlEvent));
 	}
 }

@@ -1,6 +1,6 @@
 package com.dianping.puma.syncserver.executor.load.condition;
 
-import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.syncserver.common.binlog.BinlogEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ public class SeriesConditionChain implements ConditionChain {
 	}
 
 	@Override
-	public boolean isLocked(ChangedEvent binlogEvent) {
+	public boolean isLocked(BinlogEvent binlogEvent) {
 		for (Condition condition: conditions) {
 			if (condition.isLocked(binlogEvent)) {
 				return true;
@@ -33,14 +33,14 @@ public class SeriesConditionChain implements ConditionChain {
 	}
 
 	@Override
-	public void lock(ChangedEvent binlogEvent) {
+	public void lock(BinlogEvent binlogEvent) {
 		for (Condition condition: conditions) {
 			condition.lock(binlogEvent);
 		}
 	}
 
 	@Override
-	public void unlock(ChangedEvent binlogEvent) {
+	public void unlock(BinlogEvent binlogEvent) {
 		for (Condition condition: conditions) {
 			condition.unlock(binlogEvent);
 		}

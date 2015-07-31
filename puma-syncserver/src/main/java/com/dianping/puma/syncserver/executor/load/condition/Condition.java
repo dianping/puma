@@ -1,7 +1,7 @@
 package com.dianping.puma.syncserver.executor.load.condition;
 
 import com.dianping.puma.core.annotation.ThreadSafe;
-import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.syncserver.common.binlog.BinlogEvent;
 
 public interface Condition {
 
@@ -9,11 +9,11 @@ public interface Condition {
 	public void reset();
 
 	@ThreadSafe
-	public boolean isLocked(ChangedEvent binlogEvent);
+	public boolean isLocked(BinlogEvent binlogEvent);
 
 	@ThreadSafe
-	public void lock(ChangedEvent binlogEvent);
+	public void lock(BinlogEvent binlogEvent);
 
 	@ThreadSafe
-	public void unlock(ChangedEvent binlogEvent);
+	public void unlock(BinlogEvent binlogEvent);
 }

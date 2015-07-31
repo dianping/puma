@@ -6,7 +6,7 @@ import java.util.Set;
 import com.dianping.puma.storage.EventChannel;
 
 public abstract class AbstractEventChannel implements EventChannel {
-	
+
 	protected String database;
 
 	protected Set<String> tables;

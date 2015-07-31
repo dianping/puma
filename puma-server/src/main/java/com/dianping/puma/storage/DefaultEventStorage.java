@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.dianping.puma.core.codec.EventCodec;
@@ -46,6 +47,8 @@ public class DefaultEventStorage implements EventStorage {
 	private ArchiveStrategy archiveStrategy;
 
 	private CleanupStrategy cleanupStrategy;
+
+	private Thread flushTask;
 
 	private String name;
 
@@ -96,6 +99,10 @@ public class DefaultEventStorage implements EventStorage {
 		bucketManager = new DefaultBucketManager(masterBucketIndex, slaveBucketIndex, archiveStrategy, cleanupStrategy);
 		indexKeyManager = new DefaultIndexManager<IndexKeyImpl, IndexValueImpl>(binlogIndexBaseDir,
 		      new IndexKeyConvertor(), new IndexValueConvertor());
+		flushTask = new Thread(new Flush());
+		flushTask.setName("Puma-Storage-Flush");
+		flushTask.setDaemon(true);
+		flushTask.start();
 
 		cleanupStrategy.addDataIndex(indexKeyManager);
 
@@ -246,10 +253,48 @@ public class DefaultEventStorage implements EventStorage {
 		}
 	}
 
+	/**
+	 * flush L2Index and Data every second
+	 * 
+	 * @author damonzhu
+	 *
+	 */
+	private class Flush implements Runnable {
+
+		@Override
+		public void run() {
+			while (!Thread.currentThread().isInterrupted()) {
+				flush();
+				
+				try {
+					TimeUnit.SECONDS.sleep(1);
+				} catch (InterruptedException e) {
+					break;
+				}
+			}
+		}
+	}
+	
+	@Override
+   public void flush(){
+		if (writingBucket != null) {
+			try {
+				writingBucket.flush();
+			} catch (IOException e) {
+			}
+		}
+
+		if (indexKeyManager != null) {
+			try {
+				indexKeyManager.flush();
+			} catch (IOException e) {
+			}
+		}	   
+   }
+
 	private void updateIndex(ChangedEvent event, boolean newL1Index, Sequence sequence) throws IOException {
 		IndexKeyImpl indexKey = new IndexKeyImpl(event.getExecuteTime(), event.getBinlogInfo().getServerId(), event
 		      .getBinlogInfo().getBinlogFile(), event.getBinlogInfo().getBinlogPosition());
-
 		if (newL1Index) {
 			indexKeyManager.addL1Index(indexKey, writingBucket.getBucketFileName().replace('/', '-'));
 		}
@@ -297,6 +342,10 @@ public class DefaultEventStorage implements EventStorage {
 			indexKeyManager.stop();
 		} catch (IOException e1) {
 			// ignore
+		}
+
+		if (this.flushTask != null) {
+			this.flushTask.interrupt();
 		}
 	}
 

@@ -16,10 +16,10 @@
 package com.dianping.puma.storage.bucket;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.dianping.puma.storage.Sequence;
@@ -31,185 +31,187 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  * 
  */
 public abstract class AbstractDataBucket implements DataBucket {
-    private Sequence                  startingSequence;
-    private int                       maxSizeMB;
-    private AtomicReference<Sequence> currentWritingSeq = new AtomicReference<Sequence>();
-    private volatile boolean          stopped           = false;
-    private long                      maxSizeByte;
-    private String                    fileName;
-    private boolean                   compress;
-    protected DataInputStream         input;
-    protected ByteBuffer              dataLengthBuf     = ByteBuffer.allocate(4);
+	private Sequence startingSequence;
 
-    public String getBucketFileName() {
-        return this.fileName;
-    }
+	private int maxSizeMB;
 
-    /**
-     * @return the fileName
-     */
-    public String getFileName() {
-        return fileName;
-    }
+	private AtomicReference<Sequence> currentWritingSeq = new AtomicReference<Sequence>();
 
-    /**
-     * @return the compress
-     */
-    public boolean isCompress() {
-        return compress;
-    }
+	private volatile boolean stopped = false;
 
-    /**
-     * @param maxSizeMB
-     *            the maxSizeMB to set
-     */
-    public void setMaxSizeMB(int maxSizeMB) {
-        this.maxSizeMB = maxSizeMB;
-    }
+	private long maxSizeByte;
 
-    /**
-     * @param maxSizeByte
-     *            the maxSizeByte to set
-     */
-    public void setMaxSizeByte(long maxSizeByte) {
-        this.maxSizeByte = maxSizeByte;
-    }
+	protected long length;
 
-    /**
-     * @return the maxSizeMB
-     */
-    public int getMaxSizeMB() {
-        return maxSizeMB;
-    }
+	private String fileName;
 
-    /**
-     * @return the stopped
-     */
-    public boolean isStopped() {
-        return stopped;
-    }
+	private boolean compress;
 
-    /**
-     * @return the maxSizeByte
-     */
-    public long getMaxSizeByte() {
-        return maxSizeByte;
-    }
+	protected DataInputStream input;
 
-    public AbstractDataBucket(Sequence startingSequence, int maxSizeMB, String fileName, boolean compress)
-            throws FileNotFoundException {
-        this.startingSequence = startingSequence;
-        this.maxSizeMB = maxSizeMB;
-        this.maxSizeByte = this.maxSizeMB * 1024 * 1024L;
-        this.fileName = fileName;
-        this.compress = compress;
-        // we need to copy the whole instance
-        this.currentWritingSeq.set(new Sequence(startingSequence.getCreationDate(), startingSequence.getNumber()));
-    }
+	protected DataOutputStream output;
 
-    @Override
-    public void append(byte[] data) throws StorageClosedException, IOException {
-        checkClosed();
-        doAppend(data);
-        currentWritingSeq.set(currentWritingSeq.get().addOffset(data.length));
-    }
+	public String getBucketFileName() {
+		return this.fileName;
+	}
 
-    protected abstract void doAppend(byte[] data) throws IOException;
+	/**
+	 * @return the fileName
+	 */
+	public String getFileName() {
+		return fileName;
+	}
 
-    @Override
-    public byte[] getNext() throws StorageClosedException, IOException {
-        checkClosed();
-        // we should guarantee the whole packet read in one transaction,
-        // otherwise we will skip some bytes and read a wrong value in the next
-        // call
-        if (readable()) {
-            return doReadData();
-        } else {
-            throw new EOFException();
-        }
-    }
+	/**
+	 * @return the compress
+	 */
+	public boolean isCompress() {
+		return compress;
+	}
 
-    @Override
-    public void skip(int pos) throws StorageClosedException, IOException {
-        checkClosed();
-        doSkip(pos);
-    }
+	/**
+	 * @param maxSizeMB
+	 *           the maxSizeMB to set
+	 */
+	public void setMaxSizeMB(int maxSizeMB) {
+		this.maxSizeMB = maxSizeMB;
+	}
 
-    @Override
-    public void stop() throws IOException {
-        stopped = true;
-        input.close();
-        input = null;
-        doClose();
-    }
+	/**
+	 * @param maxSizeByte
+	 *           the maxSizeByte to set
+	 */
+	public void setMaxSizeByte(long maxSizeByte) {
+		this.maxSizeByte = maxSizeByte;
+	}
 
-    @Override
-    public Sequence getStartingSequece() {
-        return startingSequence;
-    }
+	/**
+	 * @return the maxSizeMB
+	 */
+	public int getMaxSizeMB() {
+		return maxSizeMB;
+	}
 
-    @Override
-    public Sequence getCurrentWritingSeq() {
-        return currentWritingSeq.get();
-    }
+	/**
+	 * @return the stopped
+	 */
+	public boolean isStopped() {
+		return stopped;
+	}
 
-    @Override
-    public void start() throws IOException {
-    	stopped = false;
-    }
+	/**
+	 * @return the maxSizeByte
+	 */
+	public long getMaxSizeByte() {
+		return maxSizeByte;
+	}
 
-    @Override
-    public boolean hasRemainingForWrite() throws StorageClosedException, IOException {
-        checkClosed();
-        return doHasRemainingForWrite();
-    }
+	public AbstractDataBucket(Sequence startingSequence, int maxSizeMB, String fileName, boolean compress)
+	      throws FileNotFoundException {
+		this.startingSequence = startingSequence;
+		this.maxSizeMB = maxSizeMB;
+		this.maxSizeByte = this.maxSizeMB * 1024 * 1024L;
+		this.fileName = fileName;
+		this.compress = compress;
+		// we need to copy the whole instance
+		this.currentWritingSeq.set(new Sequence(startingSequence.getCreationDate(), startingSequence.getNumber()));
+	}
 
-    protected boolean readable() throws IOException {
-        while (dataLengthBuf.hasRemaining()) {
-            int b = input.read();
-            if (b != -1) {
-                dataLengthBuf.put((byte) b);
-            } else {
-                break;
-            }
-        }
-        return !dataLengthBuf.hasRemaining();
-    }
+	@Override
+	public void append(byte[] data) throws StorageClosedException, IOException {
+		checkClosed();
+		doAppend(data);
+		currentWritingSeq.set(currentWritingSeq.get().addOffset(data.length));
+	}
 
-    protected byte[] doReadData() throws StorageClosedException, IOException {
-        dataLengthBuf.flip();
-        int length = dataLengthBuf.getInt();
-        dataLengthBuf.clear();
-        ByteBuffer data = ByteBuffer.allocate(length);
-        while (data.hasRemaining()) {
-            checkClosed();
-            int b = input.read();
-            if (b != -1) {
-                data.put((byte) b);
-            }
-        }
-        return data.array();
-    }
+	@Override
+	public void flush() throws StorageClosedException, IOException {
+		checkClosed();
 
-    protected void doSkip(int pos) throws IOException {
-        if (pos < 0) {
-            throw new IOException(String.format("Seek %d pos failed(%s).", pos, getFileName()));
-        }
+		if (this.output != null) {
+			this.output.flush();
+		}
+	}
 
-        int count = pos;
-        while (count > 0) {
-            count -= input.skipBytes(count);
-        }
+	protected abstract void doAppend(byte[] data) throws IOException;
 
-    }
+	@Override
+	public byte[] getNext() throws StorageClosedException, IOException {
+		checkClosed();
+		input.mark(Integer.MAX_VALUE);
 
-    protected abstract boolean doHasRemainingForWrite() throws IOException;
+		try {
+			int len = input.readInt();
+			byte[] data = new byte[len];
+			input.read(data);
 
-    protected abstract void doClose() throws IOException;
+			return data;
+		} catch (EOFException eof) {
+			input.reset();
+			throw eof;
+		}
+	}
 
-    protected void checkClosed() throws StorageClosedException {
-        if (stopped) {
-            throw new StorageClosedException("Bucket has been closed");
-        }
-    }
+	@Override
+	public void skip(int pos) throws StorageClosedException, IOException {
+		checkClosed();
+		doSkip(pos);
+	}
+
+	@Override
+	public void stop() throws IOException {
+		stopped = true;
+		input.close();
+		input = null;
+		doClose();
+	}
+
+	@Override
+	public Sequence getStartingSequece() {
+		return startingSequence;
+	}
+
+	@Override
+	public Sequence getCurrentWritingSeq() {
+		return currentWritingSeq.get();
+	}
+
+	@Override
+	public void start() throws IOException {
+		stopped = false;
+	}
+
+	@Override
+	public boolean hasRemainingForWrite() throws StorageClosedException, IOException {
+		checkClosed();
+		return doHasRemainingForWrite();
+	}
+
+	protected void doSkip(int pos) throws IOException {
+		if (pos < 0) {
+			throw new IOException(String.format("Seek %d pos failed(%s).", pos, getFileName()));
+		}
+
+		this.input.mark(Integer.MAX_VALUE);
+		try {
+			int count = pos;
+			while (count > 0) {
+				count -= input.skipBytes(count);
+			}
+		} catch (EOFException eof) {
+			this.input.reset();
+
+			throw eof;
+		}
+	}
+
+	protected abstract boolean doHasRemainingForWrite() throws IOException;
+
+	protected abstract void doClose() throws IOException;
+
+	protected void checkClosed() throws StorageClosedException {
+		if (stopped) {
+			throw new StorageClosedException("Bucket has been closed");
+		}
+	}
 }

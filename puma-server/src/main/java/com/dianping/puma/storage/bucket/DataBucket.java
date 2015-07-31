@@ -33,6 +33,13 @@ public interface DataBucket extends LifeCycle<IOException> {
      * 
      */
     public Sequence getStartingSequece();
+    
+    /**
+     * flush bucket
+     * @throws StorageClosedException
+     * @throws IOException
+     */
+    public void flush() throws StorageClosedException, IOException;
 
     /**
      * 往存储中增加一个事件

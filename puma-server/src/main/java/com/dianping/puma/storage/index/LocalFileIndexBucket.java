@@ -2,6 +2,7 @@ package com.dianping.puma.storage.index;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -32,11 +33,18 @@ public class LocalFileIndexBucket<K, V extends IndexValue<K>> implements IndexBu
 
 	@Override
 	public V next() throws StorageClosedException, IOException {
-		int len = this.input.readInt();
-		byte[] bytes = new byte[len];
-		this.input.read(bytes);
+		this.input.mark(Integer.MAX_VALUE);
+		try {
+			int len = this.input.readInt();
+			byte[] bytes = new byte[len];
+			this.input.read(bytes);
 
-		return this.valueConvertor.convertFromObj(bytes);
+			return this.valueConvertor.convertFromObj(bytes);
+		} catch (EOFException eof) {
+			this.input.reset();
+
+			throw eof;
+		}
 	}
 
 	@Override

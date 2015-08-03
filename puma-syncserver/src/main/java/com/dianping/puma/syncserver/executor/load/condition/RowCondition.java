@@ -85,7 +85,7 @@ public class RowCondition implements Condition {
 			Row row = new Row();
 			row.database = dmlEvent.getDatabase();
 			row.table = dmlEvent.getTable();
-			row.pkValues = dmlEvent.getPkValues();
+			row.pkValues = dmlEvent.buildPkValues();
 			return row;
 		}
 	}

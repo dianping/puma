@@ -1,15 +1,8 @@
 package com.dianping.puma.syncserver.executor.load.condition;
 
-import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.util.sql.DMLType;
-import com.dianping.puma.syncserver.common.binlog.Column;
-import com.dianping.puma.syncserver.common.binlog.DmlEvent;
-import com.dianping.puma.syncserver.common.binlog.EventType;
+import com.dianping.puma.syncserver.common.binlog.*;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -24,72 +17,67 @@ public class RowConditionTest {
 
 	@Test
 	public void testLock() {
-		DmlEvent dmlEvent0 = new DmlEvent();
-		dmlEvent0.setEventType(EventType.INSERT);
-		dmlEvent0.setDatabase("test-database-0");
-		dmlEvent0.setTable("test-table-0");
-		dmlEvent0.addColumn("test-column-0", new Column(true, null, 1));
-		dmlEvent0.addColumn("test-column-1", new Column(true, null, "aaa"));
-		rowCondition.lock(dmlEvent0);
+		InsertEvent insertEvent = new InsertEvent();
+		insertEvent.setDatabase("test-database-0");
+		insertEvent.setTable("test-table-0");
+		insertEvent.addColumn("test-column-0", new Column(true, null, 1));
+		insertEvent.addColumn("test-column-1", new Column(true, null, "aaa"));
+		rowCondition.lock(insertEvent);
 
-		RowCondition.Row row0 = RowCondition.Row.valueOf(dmlEvent0);
+		RowCondition.Row row0 = RowCondition.Row.valueOf(insertEvent);
 
 		assertTrue(rowCondition.rowMap.containsKey(row0));
 
-		DmlEvent dmlEvent1 = new DmlEvent();
-		dmlEvent1.setEventType(EventType.UPDATE);
-		dmlEvent1.setDatabase("test-database-0");
-		dmlEvent1.setTable("test-table-0");
-		dmlEvent1.addColumn("test-column-0", new Column(true, 2, 2));
-		dmlEvent1.addColumn("test-column-1", new Column(true, "aaa", "aaa"));
-		rowCondition.lock(dmlEvent1);
+		UpdateEvent updateEvent = new UpdateEvent();
+		updateEvent.setDatabase("test-database-0");
+		updateEvent.setTable("test-table-0");
+		updateEvent.addColumn("test-column-0", new Column(true, 2, 2));
+		updateEvent.addColumn("test-column-1", new Column(true, "aaa", "aaa"));
+		rowCondition.lock(updateEvent);
 
-		RowCondition.Row row1 = RowCondition.Row.valueOf(dmlEvent1);
+		RowCondition.Row row1 = RowCondition.Row.valueOf(updateEvent);
 
 		assertTrue(rowCondition.rowMap.containsKey(row1));
 	}
 
 	@Test
 	public void testUnlock() {
-		DmlEvent dmlEvent0 = new DmlEvent();
-		dmlEvent0.setEventType(EventType.DELETE);
-		dmlEvent0.setDatabase("test-database-0");
-		dmlEvent0.setTable("test-table-0");
-		dmlEvent0.addColumn("test-column-0", new Column(true, 1, null));
-		dmlEvent0.addColumn("test-column-1", new Column(true, "aaa", null));
-		rowCondition.lock(dmlEvent0);
+		DeleteEvent deleteEvent = new DeleteEvent();
+		deleteEvent.setDatabase("test-database-0");
+		deleteEvent.setTable("test-table-0");
+		deleteEvent.addColumn("test-column-0", new Column(true, 1, null));
+		deleteEvent.addColumn("test-column-1", new Column(true, "aaa", null));
+		rowCondition.lock(deleteEvent);
 
-		RowCondition.Row row0 = RowCondition.Row.valueOf(dmlEvent0);
+		RowCondition.Row row0 = RowCondition.Row.valueOf(deleteEvent);
 
 		assertTrue(rowCondition.rowMap.containsKey(row0));
 
-		rowCondition.unlock(dmlEvent0);
+		rowCondition.unlock(deleteEvent);
 
 		assertFalse(rowCondition.rowMap.containsKey(row0));
 	}
 
 	@Test
 	public void testIsLocked() {
-		DmlEvent dmlEvent0 = new DmlEvent();
-		dmlEvent0.setEventType(EventType.INSERT);
-		dmlEvent0.setDatabase("test-database-0");
-		dmlEvent0.setTable("test-table-0");
-		dmlEvent0.addColumn("test-column-0", new Column(true, null, 1));
-		dmlEvent0.addColumn("test-column-1", new Column(true, null, "aaa"));
+		InsertEvent insertEvent = new InsertEvent();
+		insertEvent.setDatabase("test-database-0");
+		insertEvent.setTable("test-table-0");
+		insertEvent.addColumn("test-column-0", new Column(true, null, 1));
+		insertEvent.addColumn("test-column-1", new Column(true, null, "aaa"));
 
-		boolean result0 = rowCondition.isLocked(dmlEvent0);
+		boolean result0 = rowCondition.isLocked(insertEvent);
 		assertEquals(false, result0);
 
-		rowCondition.lock(dmlEvent0);
+		rowCondition.lock(insertEvent);
 
-		DmlEvent dmlEvent1 = new DmlEvent();
-		dmlEvent1.setEventType(EventType.UPDATE);
-		dmlEvent1.setDatabase("test-database-0");
-		dmlEvent1.setTable("test-table-0");
-		dmlEvent1.addColumn("test-column-0", new Column(true, 1, 1));
-		dmlEvent1.addColumn("test-column-1", new Column(true, "aaa", "aaa"));
+		UpdateEvent updateEvent = new UpdateEvent();
+		updateEvent.setDatabase("test-database-0");
+		updateEvent.setTable("test-table-0");
+		updateEvent.addColumn("test-column-0", new Column(true, 1, 1));
+		updateEvent.addColumn("test-column-1", new Column(true, "aaa", "aaa"));
 
-		boolean result1 = rowCondition.isLocked(dmlEvent1);
+		boolean result1 = rowCondition.isLocked(updateEvent);
 		assertEquals(true, result1);
 	}
 }

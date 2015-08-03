@@ -1,16 +1,32 @@
 package com.dianping.puma.syncserver.common.binlog;
 
+import com.dianping.puma.syncserver.executor.transform.rule.DataSourceMappingRule;
+import com.dianping.puma.syncserver.executor.transform.rule.DbTbMappingRule;
+import org.apache.commons.lang3.tuple.Pair;
+
+import javax.sql.DataSource;
+
 public abstract class BinlogEvent {
 
-	private String database;
+	protected String database;
 
-	private String table;
+	protected String table;
 
-	private String sql;
+	protected String sql;
 
-	private Object[] params;
+	protected Object[] params;
 
-	private EventType eventType;
+	protected EventType eventType;
+
+	protected DataSource dataSource;
+
+	public abstract DataSource mapDataSource(DataSourceMappingRule rule);
+
+	public abstract Pair<String, String> mapDbTb(DbTbMappingRule rule);
+
+	public abstract void buildSql();
+
+	public abstract void buildParams();
 
 	public String getDatabase() {
 		return database;
@@ -50,5 +66,13 @@ public abstract class BinlogEvent {
 
 	public void setEventType(EventType eventType) {
 		this.eventType = eventType;
+	}
+
+	public DataSource getDataSource() {
+		return dataSource;
+	}
+
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
 	}
 }

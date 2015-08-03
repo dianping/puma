@@ -1,34 +1,33 @@
 package com.dianping.puma.syncserver.common.binlog;
 
+import com.dianping.puma.syncserver.executor.transform.rule.DataSourceMappingRule;
+import com.dianping.puma.syncserver.executor.transform.rule.DbTbMappingRule;
+import org.apache.commons.lang3.tuple.Pair;
+
+import javax.sql.DataSource;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class DmlEvent extends BinlogEvent {
+public abstract class DmlEvent extends BinlogEvent {
 
-	private Map<String, Column> columns;
+	protected Map<String, Column> columns;
 
-	public Map<String, Object> getPkValues() {
-		Map<String, Object> pkValues = new HashMap<String, Object>();
-
-		for (Map.Entry<String, Column> entry: columns.entrySet()) {
-			String columnName = entry.getKey();
-			Column column = entry.getValue();
-
-			if (column.isPk()) {
-				if (getEventType().equals(EventType.DELETE)) {
-					pkValues.put(columnName, column.getOldValue());
-				} else {
-					pkValues.put(columnName, column.getNewValue());
-				}
-			}
-		}
-
-		return pkValues;
+	@Override
+	public DataSource mapDataSource(DataSourceMappingRule rule) {
+		return rule.map(database, table, columns);
 	}
+
+	@Override
+	public Pair<String, String> mapDbTb(DbTbMappingRule rule) {
+		return rule.map(database, table, columns);
+	}
+
+	public abstract Map<String, Object> buildPkValues();
 
 	public void addColumn(String columnName, Column column) {
 		if (columns == null) {
-			columns = new HashMap<String, Column>();
+			columns = new LinkedHashMap<String, Column>();
 		}
 
 		columns.put(columnName, column);

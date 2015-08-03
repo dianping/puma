@@ -65,7 +65,7 @@ public class SyncTaskExecutor extends AbstractTaskExecutor<SyncTaskEntity> {
 	}
 
 	private void initLoader() {
-		loader = LoaderFactory.createConcurrentAsyncLoader(5, dataSource, sqlExecutorThreadPool);
+		loader = LoaderFactory.createConcurrentAsyncLoader(5, sqlExecutorThreadPool);
 	}
 
 	private Runnable mainTask = new Runnable() {

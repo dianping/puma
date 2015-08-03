@@ -2,7 +2,7 @@ package com.dianping.puma.syncserver.executor.load.condition;
 
 import com.dianping.puma.syncserver.common.binlog.BinlogEvent;
 import com.dianping.puma.syncserver.common.binlog.DdlEvent;
-import com.dianping.puma.syncserver.common.binlog.DmlEvent;
+import com.dianping.puma.syncserver.common.binlog.InsertEvent;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -49,13 +49,13 @@ public class DdlConditionTest {
 		ddlCondition.lock(ddlEvent);
 		assertTrue(ddlCondition.ddlEvent.equals(ddlEvent));
 
-		DmlEvent dmlEvent = new DmlEvent();
-		assertTrue(ddlCondition.isLocked(dmlEvent));
+		InsertEvent insertEvent = new InsertEvent();
+		assertTrue(ddlCondition.isLocked(insertEvent));
 
 		ddlCondition.unlock(ddlEvent);
 		assertNull(ddlCondition.ddlEvent);
 
-		assertFalse(ddlCondition.isLocked(dmlEvent));
+		assertFalse(ddlCondition.isLocked(insertEvent));
 	}
 
 }

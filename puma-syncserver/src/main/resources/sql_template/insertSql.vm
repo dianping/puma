@@ -1,15 +1,11 @@
 INSERT INTO
-#if (${event.database} == "")
-`${event.table}`
-#else
-`${event.database}`.`${event.table}`
-#end
+`${database}`.`${table}`
 (
 #set($ask = "")
-#foreach($name2ColumnInfo in $event.columns.entrySet())
-  `${name2ColumnInfo.key}`
+#foreach($entry in $columns.entrySet())
+  `${entry.key}`
   #set($ask = "${ask},?")
-  #if($velocityCount < ${event.columns.size()})
+  #if($velocityCount < ${columns.size()})
     ,
   #end
 #end

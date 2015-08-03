@@ -92,6 +92,9 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
                     if (binlogInfo.getServerId() != currentSrcDbEntity.getServerId()) {
                         binlogInfo = switchBinlog(binlogInfo);
+                        if (binlogInfo == null) {
+                            throw new IOException("Switch Binlog Failed!");
+                        }
                     }
                 }
 
@@ -114,22 +117,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
                 canStop = true;
 
-                if (!auth()) {
-                    throw new IOException("Login failed.");
-                }
-
-                if (getContext().isCheckSum()) {
-                    if (!updateSetting()) {
-                        throw new IOException("Update setting command failed.");
-                    }
-                }
-
-                if (!queryBinlogFormat()) {
-                    throw new IOException("Query config binlogformat failed.");
-                }
-                if (!queryBinlogImage()) {
-                    throw new IOException("Query config binlog row image failed.");
-                }
+                initConnect();
 
                 if (dumpBinlog()) {
                     canStop = false;
@@ -161,6 +149,25 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             }
         } while (!isStop());
 
+    }
+
+    protected void initConnect() throws IOException {
+        if (!auth()) {
+            throw new IOException("Login failed.");
+        }
+
+        if (getContext().isCheckSum()) {
+            if (!updateSetting()) {
+                throw new IOException("Update setting command failed.");
+            }
+        }
+
+        if (!queryBinlogFormat()) {
+            throw new IOException("Query config binlogformat failed.");
+        }
+        if (!queryBinlogImage()) {
+            throw new IOException("Query config binlog row image failed.");
+        }
     }
 
     protected void updateTableMetaInfoFetcher() {
@@ -208,27 +215,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         if (!connect()) {
             throw new IOException("Connection failed.");
         }
-
-        if (!auth()) {
-            throw new IOException("Login failed.");
-        }
-
-        if (getContext().isCheckSum()) {
-            if (!updateSetting()) {
-                throw new IOException("Update setting command failed.");
-            }
-        }
-
-        if (!queryBinlogFormat()) {
-            throw new IOException("Query config binlogformat failed.");
-        }
-        if (!queryBinlogImage()) {
-            throw new IOException("Query config binlog row image failed.");
-        }
-
-        //get all binlog files
+        initConnect();
         List<BinlogInfo> binaryLogs = getBinaryLogs();
-
         BinlogInfo closestBinlogInfo = null;
 
         for (int k = binaryLogs.size() - 1; k >= 0; k--) {
@@ -242,23 +230,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             if (!connect()) {
                 throw new IOException("Connection failed.");
             }
-
-            if (!auth()) {
-                throw new IOException("Login failed.");
-            }
-
-            if (getContext().isCheckSum()) {
-                if (!updateSetting()) {
-                    throw new IOException("Update setting command failed.");
-                }
-            }
-
-            if (!queryBinlogFormat()) {
-                throw new IOException("Query config binlogformat failed.");
-            }
-            if (!queryBinlogImage()) {
-                throw new IOException("Query config binlog row image failed.");
-            }
+            initConnect();
 
             if (dumpBinlog()) {
                 while (!isStop()) {
@@ -304,16 +276,20 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                                 continue;
                             }
                         } finally {
-                            getContext().setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
+                            if (binlogEvent.getHeader().getEventType() == BinlogConstants.ROTATE_EVENT) {
+                                RotateEvent rotateEvent = (RotateEvent) binlogEvent;
+                                getContext().setBinlogFileName(rotateEvent.getNextBinlogFileName());
+                                getContext().setBinlogStartPos(rotateEvent.getFirstEventPosition());
+                            } else {
+                                getContext().setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
+                            }
                         }
                     }
                 }
             } else {
                 throw new IOException("Binlog dump failed.");
             }
-
         }
-
         return null;
     }
 

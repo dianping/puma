@@ -224,11 +224,7 @@ public abstract class AbstractBaseTest {
 	}
 
 	private static void distroyDirectory() throws IOException {
-		FileUtils.deleteDirectory(baseDir);
-		FileUtils.deleteDirectory(masterStorageBaseDir);
-		FileUtils.deleteDirectory(slaveStorageBaseDir);
-		FileUtils.deleteDirectory(storageBakBaseDir);
-		FileUtils.deleteDirectory(binlogIndexBaseDir);
+		FileUtils.deleteDirectory(new File(System.getProperty("java.io.tmpdir", "."), "puma"));
 	}
 
 	private void startTask() throws Exception {

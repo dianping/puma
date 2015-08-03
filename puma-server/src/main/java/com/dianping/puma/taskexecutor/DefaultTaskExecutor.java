@@ -275,19 +275,27 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                             getContext().setNextBinlogPos(binlogEvent.getHeader().getNextPosition());
 
                             if (binlogEvent.getHeader().getEventType() == BinlogConstants.ROTATE_EVENT) {
-                                break;
+                                if (closestBinlogInfo == null) {
+                                    break;
+                                } else {
+                                    continue;
+                                }
                             }
 
                             if (binlogEvent.getHeader().getEventType() != BinlogConstants.XID_EVENT &&
                                     binlogEvent.getHeader().getEventType() != BinlogConstants.FORMAT_DESCRIPTION_EVENT) {
                                 continue;
-                            } else if (binlogEvent.getHeader().getTimestamp() > time) {
+                            }
+
+                            if (binlogEvent.getHeader().getTimestamp() > time) {
                                 if (closestBinlogInfo == null) {
                                     break;
                                 } else {
                                     return closestBinlogInfo;
                                 }
-                            } else if (binlogEvent.getHeader().getTimestamp() < time) {
+                            }
+
+                            if (binlogEvent.getHeader().getTimestamp() <= time) {
                                 closestBinlogInfo = new BinlogInfo(
                                         currentSrcDbEntity.getServerId(),
                                         getContext().getBinlogFileName(),

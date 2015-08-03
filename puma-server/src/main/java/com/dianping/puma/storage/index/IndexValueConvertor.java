@@ -24,8 +24,6 @@ public class IndexValueConvertor implements IndexItemConvertor<IndexValueImpl> {
 
 		l2Index.setIndexKey(indexKey);
 
-		buf.readChar(); // skip '='
-
 		int databaseLen = buf.readByte();
 		if (databaseLen > 0) {
 			byte[] database = new byte[databaseLen];
@@ -33,8 +31,6 @@ public class IndexValueConvertor implements IndexItemConvertor<IndexValueImpl> {
 
 			l2Index.setDatabase(new String(database));
 		}
-
-		buf.readChar(); // skip '.'
 
 		int tableLen = buf.readByte();
 		if (tableLen > 0) {
@@ -44,9 +40,7 @@ public class IndexValueConvertor implements IndexItemConvertor<IndexValueImpl> {
 			l2Index.setTable(new String(table));
 		}
 
-		buf.readChar(); // skip '+'
-
-		byte[] filter = new byte[8]; // 预留8位给其他filter，目前只用2位
+		byte[] filter = new byte[4];
 		buf.readBytes(filter);
 
 		l2Index.setDdl(filter[0] == 1);
@@ -54,7 +48,6 @@ public class IndexValueConvertor implements IndexItemConvertor<IndexValueImpl> {
 		l2Index.setTransactionBegin(filter[2] == 1);
 		l2Index.setTransactionCommit(filter[3] == 1);
 
-		buf.readChar(); // skip '+'
 		Sequence sequence = new Sequence(buf.readLong(), buf.readInt());
 		l2Index.setSequence(sequence);
 
@@ -69,7 +62,6 @@ public class IndexValueConvertor implements IndexItemConvertor<IndexValueImpl> {
 		byte[] binlogIndexKeyBytes = binlogIndexKey.getBytes();
 		buf.writeByte(binlogIndexKey.length());
 		buf.writeBytes(binlogIndexKeyBytes);
-		buf.writeChar('=');
 
 		String database = value.getDatabase();
 		if (database != null && database.length() > 0) {
@@ -81,8 +73,6 @@ public class IndexValueConvertor implements IndexItemConvertor<IndexValueImpl> {
 			buf.writeByte(0);
 		}
 
-		buf.writeChar('.');
-
 		String table = value.getTable();
 		if (table != null && table.length() > 0) {
 			byte[] tableBytes = table.getBytes();
@@ -93,20 +83,14 @@ public class IndexValueConvertor implements IndexItemConvertor<IndexValueImpl> {
 			buf.writeByte(0);
 		}
 
-		buf.writeChar('+');
-
-		byte[] filter = new byte[8];
+		byte[] filter = new byte[4];
 
 		filter[0] = (byte) (value.isDdl() ? 1 : 0);
 		filter[1] = (byte) (value.isDml() ? 1 : 0);
 		filter[2] = (byte) (value.isTransactionBegin() ? 1 : 0);
 		filter[3] = (byte) (value.isTransactionCommit() ? 1 : 0);
-		for (int i = 4; i < 8; i++) {
-			filter[i] = 0;
-		}
 
 		buf.writeBytes(filter);
-		buf.writeChar('+');
 
 		buf.writeLong(value.getSequence().longValue());
 		buf.writeInt(value.getSequence().getLen());

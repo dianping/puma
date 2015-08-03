@@ -28,7 +28,7 @@ public class IndexValueConvertorTest {
 		l2Index.setSequence(new Sequence(123123L, 1));
 
 		byte[] bytes = convertor.convertToObj(l2Index);
-
+		
 		System.out.println(bytes.length);
 		System.out.println(new String(bytes));
 

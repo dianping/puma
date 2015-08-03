@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -90,7 +91,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                     this.currentSrcDbEntity = initSrcDbByServerId(binlogInfo.getServerId());
 
                     if (binlogInfo.getServerId() != currentSrcDbEntity.getServerId()) {
-                        binlogInfo = switchBinlog();
+                        binlogInfo = switchBinlog(binlogInfo);
                     }
                 }
 
@@ -151,7 +152,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 if (++failCount % 3 == 0) {
                     this.currentSrcDbEntity = chooseNextSrcDb();
                     updateTableMetaInfoFetcher();
-
                     failCount = 0;
                 }
                 LOG.error("Exception occurs. taskName: " + getTaskName() + " dbServerId: " + (currentSrcDbEntity == null ? 0 : currentSrcDbEntity.getServerId())
@@ -202,7 +202,110 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         return srcDbEntity != null ? srcDbEntity : getTask().getSrcDbEntityList().get(0);
     }
 
-    protected BinlogInfo switchBinlog() {
+    protected BinlogInfo switchBinlog(BinlogInfo oldBinlogInfo) throws IOException {
+        long time = oldBinlogInfo.getTimestamp() - 60;
+
+        if (!connect()) {
+            throw new IOException("Connection failed.");
+        }
+
+        if (!auth()) {
+            throw new IOException("Login failed.");
+        }
+
+        if (getContext().isCheckSum()) {
+            if (!updateSetting()) {
+                throw new IOException("Update setting command failed.");
+            }
+        }
+
+        if (!queryBinlogFormat()) {
+            throw new IOException("Query config binlogformat failed.");
+        }
+        if (!queryBinlogImage()) {
+            throw new IOException("Query config binlog row image failed.");
+        }
+
+        //get all binlog files
+        List<BinlogInfo> binaryLogs = getBinaryLogs();
+
+        BinlogInfo closestBinlogInfo = null;
+
+        for (int k = binaryLogs.size() - 1; k >= 0; k--) {
+            BinlogInfo newBinlogInfo = binaryLogs.get(k);
+
+            getContext().setDBServerId(currentSrcDbEntity.getServerId());
+            getContext().setBinlogFileName(newBinlogInfo.getBinlogFile());
+            getContext().setBinlogStartPos(4);
+            getContext().setMasterUrl(currentSrcDbEntity.getHost(), currentSrcDbEntity.getPort());
+
+            if (!connect()) {
+                throw new IOException("Connection failed.");
+            }
+
+            if (!auth()) {
+                throw new IOException("Login failed.");
+            }
+
+            if (getContext().isCheckSum()) {
+                if (!updateSetting()) {
+                    throw new IOException("Update setting command failed.");
+                }
+            }
+
+            if (!queryBinlogFormat()) {
+                throw new IOException("Query config binlogformat failed.");
+            }
+            if (!queryBinlogImage()) {
+                throw new IOException("Query config binlog row image failed.");
+            }
+
+            if (dumpBinlog()) {
+                while (!isStop()) {
+                    BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(is, PacketType.BINLOG_PACKET,
+                            getContext());
+
+                    if (!binlogPacket.isOk()) {
+                        LOG.error("TaskName: " + getTaskName() + ", Binlog packet response error.");
+                        throw new IOException("TaskName: " + getTaskName() + ", Binlog packet response error.");
+                    } else {
+                        BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), getContext());
+
+                        try {
+                            getContext().setNextBinlogPos(binlogEvent.getHeader().getNextPosition());
+
+                            if (binlogEvent.getHeader().getEventType() == BinlogConstants.ROTATE_EVENT) {
+                                break;
+                            }
+
+                            if (binlogEvent.getHeader().getEventType() != BinlogConstants.XID_EVENT &&
+                                    binlogEvent.getHeader().getEventType() != BinlogConstants.FORMAT_DESCRIPTION_EVENT) {
+                                continue;
+                            } else if (binlogEvent.getHeader().getTimestamp() > time) {
+                                if (closestBinlogInfo == null) {
+                                    break;
+                                } else {
+                                    return closestBinlogInfo;
+                                }
+                            } else if (binlogEvent.getHeader().getTimestamp() < time) {
+                                closestBinlogInfo = new BinlogInfo(
+                                        currentSrcDbEntity.getServerId(),
+                                        getContext().getBinlogFileName(),
+                                        getContext().getBinlogStartPos(),
+                                        0, binlogEvent.getHeader().getTimestamp());
+                                continue;
+                            }
+                        } finally {
+                            getContext().setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
+                        }
+                    }
+                }
+            } else {
+                throw new IOException("Binlog dump failed.");
+            }
+
+        }
+
         return null;
     }
 
@@ -409,6 +512,23 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             return false;
         }
 
+    }
+
+    private List<BinlogInfo> getBinaryLogs() throws IOException {
+        try {
+            QueryExecutor executor = new QueryExecutor(is, os);
+            String cmd = "SHOW BINARY LOGS";
+            ResultSet rs = executor.query(cmd, getContext());
+            List<String> values = rs.getFiledValues();
+            List<BinlogInfo> result = new ArrayList<BinlogInfo>();
+            for (int k = 0; k < values.size(); k += 2) {
+                result.add(new BinlogInfo(currentSrcDbEntity.getServerId(), values.get(k), Long.valueOf(values.get(k + 1)), 0, 0));
+            }
+            return result;
+        } catch (Exception e) {
+            LOG.error("TaskName: " + getTaskName() + ", QueryConfig failed Reason: " + e.getMessage());
+            throw new IOException(e);
+        }
     }
 
     /**

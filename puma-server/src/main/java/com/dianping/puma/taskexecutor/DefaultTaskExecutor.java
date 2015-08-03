@@ -436,10 +436,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
     protected void processRotateEvent(BinlogEvent binlogEvent) {
         RotateEvent rotateEvent = (RotateEvent) binlogEvent;
-        binlogInfoHolder.setBinlogInfo(
-                getTaskName(),
-                new BinlogInfo(getContext().getDBServerId(), rotateEvent.getNextBinlogFileName(),
-                        rotateEvent.getFirstEventPosition(), 0, rotateEvent.getHeader().getTimestamp()));
         getContext().setBinlogFileName(rotateEvent.getNextBinlogFileName());
         getContext().setBinlogStartPos(rotateEvent.getFirstEventPosition());
 

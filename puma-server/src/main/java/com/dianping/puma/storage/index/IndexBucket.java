@@ -7,8 +7,11 @@ import com.dianping.puma.storage.exception.StorageClosedException;
 
 public interface IndexBucket<K, V> extends LifeCycle<IOException> {
 
+	void append(byte[] bytes) throws IOException;
+	
 	V next() throws StorageClosedException, IOException;
 
 	void locate(K key, boolean inclusive) throws StorageClosedException, IOException;
-	
+
+	void truncate() throws IOException;
 }

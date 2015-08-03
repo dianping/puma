@@ -2,10 +2,12 @@ package com.dianping.puma.storage.index;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
-import java.io.EOFException;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 
 import com.dianping.puma.storage.exception.StorageClosedException;
 
@@ -15,7 +17,14 @@ public class LocalFileIndexBucket<K, V extends IndexValue<K>> implements IndexBu
 
 	private IndexItemConvertor<V> valueConvertor;
 
+	private File file;
+
+	private long prePosition = 0L;
+	
+	private long currentPosition = 0L;
+
 	public LocalFileIndexBucket(File file, IndexItemConvertor<V> valueConvertor) throws IOException {
+		this.file = file;
 		this.input = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
 		this.valueConvertor = valueConvertor;
 	}
@@ -37,13 +46,19 @@ public class LocalFileIndexBucket<K, V extends IndexValue<K>> implements IndexBu
 		try {
 			int len = this.input.readInt();
 			byte[] bytes = new byte[len];
-			this.input.read(bytes);
+			int readable = this.input.read(bytes);
 
+			if (readable != len) {
+				throw new IOException("found broken index!");
+			}
+
+			prePosition = currentPosition;
+			currentPosition += 4 + len;
 			return this.valueConvertor.convertFromObj(bytes);
-		} catch (EOFException eof) {
+		} catch (IOException e) {
 			this.input.reset();
 
-			throw eof;
+			throw e;
 		}
 	}
 
@@ -54,8 +69,6 @@ public class LocalFileIndexBucket<K, V extends IndexValue<K>> implements IndexBu
 		}
 
 		while (true) {
-			this.input.mark(Integer.MAX_VALUE);
-
 			V next = next();
 
 			if (next.getIndexKey().equals(key)) {
@@ -66,5 +79,27 @@ public class LocalFileIndexBucket<K, V extends IndexValue<K>> implements IndexBu
 				return;
 			}
 		}
+	}
+
+	@Override
+	public void truncate() throws IOException {
+		RandomAccessFile randomAccessFile = null;
+		try {
+			randomAccessFile = new RandomAccessFile(file, "rwd");
+			randomAccessFile.setLength(prePosition);
+		} finally {
+			if (randomAccessFile != null) {
+				randomAccessFile.close();
+			}
+		}
+	}
+
+	// hack for test purpose
+	@Override
+	public void append(byte[] bytes) throws IOException {
+		DataOutputStream output = new DataOutputStream(new FileOutputStream(file, true));
+
+		output.write(bytes);
+		output.close();
 	}
 }

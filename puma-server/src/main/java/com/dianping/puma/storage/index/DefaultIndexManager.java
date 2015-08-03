@@ -161,10 +161,10 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 			}
 		}
 	}
-	
+
 	@Override
-	public void flush() throws IOException{
-		if(this.l2IndexWriter != null){
+	public void flush() throws IOException {
+		if (this.l2IndexWriter != null) {
 			this.l2IndexWriter.flush();
 		}
 	}
@@ -628,5 +628,19 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 		} else {
 			return key1.getServerId() > key2.getServerId() ? 1 : -1;
 		}
+	}
+
+	@Override
+	public TreeMap<K, String> getL1Index() {
+		return this.l1Index;
+	}
+
+	@Override
+	public IndexBucket<K, V> getIndexBucket(String fileName) throws IOException {
+		File l2IndexFile = getL2IndexFile(fileName);
+		LocalFileIndexBucket<K, V> localFileIndexBucket = new LocalFileIndexBucket<K, V>(l2IndexFile,
+		      this.indexValueConvertor);
+
+		return localFileIndexBucket;
 	}
 }

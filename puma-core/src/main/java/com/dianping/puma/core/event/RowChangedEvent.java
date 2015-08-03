@@ -15,6 +15,7 @@
  */
 package com.dianping.puma.core.event;
 
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.sql.DMLType;
 
 import java.io.Serializable;
@@ -109,6 +110,15 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
 
     private Map<String, ColumnInfo> columns = new HashMap<String, ColumnInfo>();
 
+    public RowChangedEvent(){
+    }
+    
+    public RowChangedEvent(long executionTime,long serverId, String binlogFile, long binlogPosition){
+   	 this.executeTime = executionTime;
+   	 this.serverId = serverId;
+   	 this.binlogInfo = new BinlogInfo(serverId, binlogFile, binlogPosition, 0, executionTime);
+    }
+    
     public DMLType getDmlType() {
         return dmlType;
     }

@@ -18,7 +18,7 @@ public interface EventStorage extends LifeCycle<StorageLifeCycleException> {
 
 	public BucketManager getBucketManager();
 
-	public IndexManager<IndexKeyImpl, IndexValueImpl> getDataIndex();
+	public IndexManager<IndexKeyImpl, IndexValueImpl> getIndexManager();
 
 	public EventCodec getEventCodec();
 

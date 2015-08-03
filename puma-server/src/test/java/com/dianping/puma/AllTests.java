@@ -19,6 +19,7 @@ import com.dianping.puma.storage.DefaultArchiveStrategyTest;
 import com.dianping.puma.storage.DefaultBucketManagerTest;
 import com.dianping.puma.storage.DefaultCleanupStrategyTest;
 import com.dianping.puma.storage.SequenceTest;
+import com.dianping.puma.storage.StorageIntegrityCheckerTest;
 import com.dianping.puma.storage.bucket.LocalBucketIndexTest;
 import com.dianping.puma.storage.bucket.LocalBucketTest;
 import com.dianping.puma.storage.index.DefaultIndexManagerTest;
@@ -57,6 +58,7 @@ import com.dianping.puma.utils.PacketUtilTest;
       DefaultBucketManagerTest.class,//
       DefaultCleanupStrategyTest.class,//
       SequenceTest.class,//
+      StorageIntegrityCheckerTest.class,//
 
       // utils
       PacketUtilTest.class, //

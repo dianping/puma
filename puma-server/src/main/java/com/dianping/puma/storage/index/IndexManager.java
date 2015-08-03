@@ -16,6 +16,7 @@
 package com.dianping.puma.storage.index;
 
 import java.io.IOException;
+import java.util.TreeMap;
 
 import com.dianping.puma.core.LifeCycle;
 
@@ -26,12 +27,16 @@ import com.dianping.puma.core.LifeCycle;
 public interface IndexManager<K extends IndexKey<K>, V> extends LifeCycle<IOException> {
 
 	public void addL1Index(K key, String l2IndexName) throws IOException;
+	
+	public TreeMap<K,String> getL1Index();
 
 	public void addL2Index(K key, V value) throws IOException;
 
 	public void removeByL2IndexName(String l2IndexName) throws IOException;
 	
 	public void flush() throws IOException;
+	
+	public IndexBucket<K, V> getIndexBucket(String fileName) throws IOException;
 
 	/**
 	 * 

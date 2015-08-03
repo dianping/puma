@@ -143,10 +143,14 @@ public abstract class AbstractDataBucket implements DataBucket {
 		try {
 			int len = input.readInt();
 			byte[] data = new byte[len];
-			input.read(data);
+			int readable = input.read(data);
+
+			if (len != readable) {
+				throw new IOException("found broken data!");
+			}
 
 			return data;
-		} catch (EOFException eof) {
+		} catch (IOException eof) {
 			input.reset();
 			throw eof;
 		}

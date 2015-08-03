@@ -42,7 +42,7 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 	public DefaultEventChannel(EventStorage eventStorage) throws StorageException {
 		this.eventStorage = eventStorage;
 		this.bucketManager = eventStorage.getBucketManager();
-		this.indexManager = eventStorage.getDataIndex();
+		this.indexManager = eventStorage.getIndexManager();
 		this.codec = eventStorage.getEventCodec();
 	}
 

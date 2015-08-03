@@ -62,7 +62,7 @@ public class DefaultEventStorage implements EventStorage {
 
 	private String binlogIndexBaseDir;
 
-	private IndexManager<IndexKeyImpl, IndexValueImpl> indexKeyManager;
+	private IndexManager<IndexKeyImpl, IndexValueImpl> indexManager;
 
 	private AtomicReference<IndexKeyImpl> lastIndexKey = new AtomicReference<IndexKeyImpl>(null);
 
@@ -97,21 +97,21 @@ public class DefaultEventStorage implements EventStorage {
 		masterBucketIndex.setMaster(true);
 		slaveBucketIndex.setMaster(false);
 		bucketManager = new DefaultBucketManager(masterBucketIndex, slaveBucketIndex, archiveStrategy, cleanupStrategy);
-		indexKeyManager = new DefaultIndexManager<IndexKeyImpl, IndexValueImpl>(binlogIndexBaseDir,
+		indexManager = new DefaultIndexManager<IndexKeyImpl, IndexValueImpl>(binlogIndexBaseDir,
 		      new IndexKeyConvertor(), new IndexValueConvertor());
 		flushTask = new Thread(new Flush());
 		flushTask.setName("Puma-Storage-Flush");
 		flushTask.setDaemon(true);
 		flushTask.start();
 
-		cleanupStrategy.addDataIndex(indexKeyManager);
+		cleanupStrategy.addDataIndex(indexManager);
 
 		try {
 			masterBucketIndex.start();
 			slaveBucketIndex.start();
 			bucketManager.start();
 			writingBucket = null;
-			indexKeyManager.start();
+			indexManager.start();
 		} catch (Exception e) {
 			throw new StorageLifeCycleException("Storage init failed", e);
 		}
@@ -284,9 +284,9 @@ public class DefaultEventStorage implements EventStorage {
 			}
 		}
 
-		if (indexKeyManager != null) {
+		if (indexManager != null) {
 			try {
-				indexKeyManager.flush();
+				indexManager.flush();
 			} catch (IOException e) {
 			}
 		}	   
@@ -296,7 +296,7 @@ public class DefaultEventStorage implements EventStorage {
 		IndexKeyImpl indexKey = new IndexKeyImpl(event.getExecuteTime(), event.getBinlogInfo().getServerId(), event
 		      .getBinlogInfo().getBinlogFile(), event.getBinlogInfo().getBinlogPosition());
 		if (newL1Index) {
-			indexKeyManager.addL1Index(indexKey, writingBucket.getBucketFileName().replace('/', '-'));
+			indexManager.addL1Index(indexKey, writingBucket.getBucketFileName().replace('/', '-'));
 		}
 
 		if (lastIndexKey.get() == null || !lastIndexKey.get().equals(indexKey)) {
@@ -314,7 +314,7 @@ public class DefaultEventStorage implements EventStorage {
 				l2Index.setTransactionCommit(rowEvent.isTransactionCommit());
 			}
 
-			indexKeyManager.addL2Index(indexKey, l2Index);
+			indexManager.addL2Index(indexKey, l2Index);
 			lastIndexKey.set(indexKey);
 		}
 	}
@@ -339,7 +339,7 @@ public class DefaultEventStorage implements EventStorage {
 		}
 
 		try {
-			indexKeyManager.stop();
+			indexManager.stop();
 		} catch (IOException e1) {
 			// ignore
 		}
@@ -355,8 +355,8 @@ public class DefaultEventStorage implements EventStorage {
 	}
 
 	@Override
-	public IndexManager<IndexKeyImpl, IndexValueImpl> getDataIndex() {
-		return this.indexKeyManager;
+	public IndexManager<IndexKeyImpl, IndexValueImpl> getIndexManager() {
+		return this.indexManager;
 	}
 
 	@Override

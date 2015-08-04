@@ -1,31 +1,50 @@
-package com.dianping.puma.api.router;
+package com.dianping.puma.api.impl;
 
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
+import com.dianping.puma.api.PumaServerRouter;
+import com.dianping.puma.api.router.PumaServerRouterListener;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class ZookeeperPumaServerRouter implements PumaServerRouter {
+public class AutoawarePumaServerRouter implements PumaServerRouter {
+
+	@Override
+	public String next() throws RuntimeException {
+
+	}
+
+	/*
 
 	private String zkPath;
 
 	protected ConfigCache configCache = ConfigCache.getInstance();
 
+	protected List<Node> nodes = new ArrayList<Node>();
+
+	protected String current;
+
 	@Override
 	public void init(String database, List<String> tables) {
 		zkPath = parseZkPath(database, tables);
+
+
 	}
 
 	@Override
+	public String next() {
+	}
+
 	public Map<String, Double> route() {
 		String str = configCache.getProperty(zkPath);
 		return parsePumaServers(str);
 	}
 
-	@Override
 	public void addListener(final PumaServerRouterListener listener) {
 		configCache.addChange(new ConfigChange() {
 			@Override
@@ -60,4 +79,10 @@ public class ZookeeperPumaServerRouter implements PumaServerRouter {
 
 		return result;
 	}
+
+	private class Node {
+		private String host;
+		private Double loadBalance;
+		private long failureTime;
+	}*/
 }

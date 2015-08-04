@@ -1,8 +1,10 @@
 package com.dianping.puma.api;
 
-import com.dianping.puma.api.exception.PumaClientException;
+import java.util.List;
 
 public interface PumaServerRouter {
 
-	public String next() throws PumaClientException;
+	public void init(String database, List<String> tables);
+
+	public String next();
 }

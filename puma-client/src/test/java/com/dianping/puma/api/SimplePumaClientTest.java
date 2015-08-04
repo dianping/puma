@@ -1,6 +1,7 @@
 package com.dianping.puma.api;
 
 import com.dianping.puma.api.exception.PumaClientException;
+import com.dianping.puma.api.impl.SimplePumaClient;
 import com.dianping.puma.core.dto.BinlogMessage;
 import org.junit.Test;
 
@@ -9,11 +10,11 @@ import org.junit.Test;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class SinglePumaConnectorTest {
+public class SimplePumaClientTest {
 
     @Test
     public void testConnect() {
-        SinglePumaClient connector = new SinglePumaClient("my-client", "127.0.0.1", 4040);
+        SimplePumaClient connector = new SimplePumaClient("my-client", "127.0.0.1", 4040);
         connector.subscribe(true, false, false, "test", "a", "b");
 
         while (true) {
@@ -36,7 +37,7 @@ public class SinglePumaConnectorTest {
 
     @Test
     public void testConnectSync() {
-        SinglePumaClient connector = new SinglePumaClient("dozer", "127.0.0.1", 4040);
+        SimplePumaClient connector = new SimplePumaClient("dozer", "127.0.0.1", 4040);
         connector.subscribe(true, true, true, "test", "debug");
 
         final int size = 1;

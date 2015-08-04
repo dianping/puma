@@ -1,5 +1,6 @@
-package com.dianping.puma.api;
+package com.dianping.puma.api.impl;
 
+import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.exception.PumaClientException;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.dto.BinlogRollback;
@@ -33,9 +34,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @NotThreadSafe
-public class SinglePumaClient implements PumaClient {
+public class SimplePumaClient implements PumaClient {
 
-    private static final Logger logger = LoggerFactory.getLogger(SinglePumaClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(SimplePumaClient.class);
 
     private static final Charset DEFAULT_CHARSET = Charset.forName("utf-8");
 
@@ -44,6 +45,12 @@ public class SinglePumaClient implements PumaClient {
     private volatile List<NameValuePair> subscribeRequest;
 
     private volatile String token;
+
+    private String database;
+
+    private List<String> tables;
+
+    private String pumaServerHost;
 
     private final String clientName;
     private final String baseUrl;
@@ -55,10 +62,10 @@ public class SinglePumaClient implements PumaClient {
                             .build()).build();
 
 
-    public SinglePumaClient(String clientName, String remoteIp, int remotePort) {
+    public SimplePumaClient(String clientName, String remoteHost) {
         this.gson = new GsonBuilder().registerTypeAdapter(Event.class, new EventJsonDeserializer()).create();
         this.clientName = clientName;
-        this.baseUrl = String.format("http://%s:%d", remoteIp, remotePort);
+        this.baseUrl = String.format("http://%s", remoteHost);
         logger.info("Current puma client base url is: {}", baseUrl);
     }
 
@@ -155,7 +162,7 @@ public class SinglePumaClient implements PumaClient {
     }
 
     @Override
-    public synchronized void subscribe(boolean dml, boolean ddl, boolean transaction, String database, String... tables) {
+    public synchronized void subscribe(String database, List<String> tables, boolean dml, boolean ddl, boolean transaction) {
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair("clientName", clientName));
         params.add(new BasicNameValuePair("database", database));
@@ -230,5 +237,9 @@ public class SinglePumaClient implements PumaClient {
                 throw new JsonParseException("Unknown EventType :" + eventType);
             }
         }
+    }
+
+    public String getPumaServerHost() {
+        return pumaServerHost;
     }
 }

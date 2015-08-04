@@ -5,7 +5,7 @@ package com.dianping.puma.api.exception;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class PumaClientException extends Exception{
+public class PumaClientException extends RuntimeException {
     public PumaClientException() {
     }
 

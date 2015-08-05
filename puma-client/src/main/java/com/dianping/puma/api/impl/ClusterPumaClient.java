@@ -1,9 +1,6 @@
 package com.dianping.puma.api.impl;
 
-import com.dianping.puma.api.PumaClient;
-import com.dianping.puma.api.PumaClientFactory;
-import com.dianping.puma.api.PumaServerRouter;
-import com.dianping.puma.api.exception.PumaClientException;
+import com.dianping.puma.api.*;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -20,46 +17,38 @@ public class ClusterPumaClient implements PumaClient {
 
 	private final String name;
 
-	/**
-	 * Puma client subscription options.
-	 */
 	private String database;
 	private List<String> tables;
 	private boolean dml = true; // default only need dml.
 	private boolean ddl = false;
 	private boolean transaction = false;
 
-	/**
-	 * Puma client ha options.
-	 */
 	private final int retryTimes = 3; // puma client ha retry times.
 	private final int retryInterval = 3000;
-	private PumaServerRouter pumaServerRouter;
+	private PumaServerRouter router;
 
-	/**
-	 * Current puma client state.
-	 */
-	private volatile String currentHost;
 	private volatile boolean subscribed = false;
 	private volatile PumaClient currentPumaClient;
 
-	public ClusterPumaClient(String name) {
+	public ClusterPumaClient(String name, PumaServerRouter router) {
 		this.name = name;
-		start();
+		this.router = router;
 	}
 
-	protected void start() {
+	protected void start(String database, List<String> tables) {
+		String currentHost = null;
 		try {
-			currentHost = pumaServerRouter.next();
+			currentHost = router.next(database, tables);
 			currentPumaClient = PumaClientFactory.createSimplePumaClient(name, currentHost);
 		} catch (Throwable t) {
 			throw new PumaClientException("fail to start puma client from server " + currentHost + ".", t);
 		}
 	}
 
-	protected void restart() {
+	protected void restart(String database, List<String> tables) {
+		String currentHost = null;
 		try {
-			currentHost = pumaServerRouter.next();
+			currentHost = router.next(database, tables);
 		} catch (Throwable t) {
 			logger.warn("fail to route puma servers.\n{}", ExceptionUtils.getStackTrace(t));
 		}
@@ -89,6 +78,10 @@ public class ClusterPumaClient implements PumaClient {
 			throw new PumaClientException("subscribe before you get binlog message.");
 		}
 
+		if (currentPumaClient == null) {
+			start(database, tables);
+		}
+
 		for (int i = 0; i != retryTimes; ++i) {
 			try {
 				currentPumaClient.get(batchSize);
@@ -97,7 +90,7 @@ public class ClusterPumaClient implements PumaClient {
 						currentPumaClient.getPumaServerHost(),
 						ExceptionUtils.getStackTrace(t));
 
-				restart();
+				restart(database, tables);
 			}
 		}
 
@@ -110,6 +103,10 @@ public class ClusterPumaClient implements PumaClient {
 			throw new PumaClientException("failed to get binlog message, subscribe first.");
 		}
 
+		if (currentPumaClient == null) {
+			start(database, tables);
+		}
+
 		for (int i = 0; i != retryTimes; ++i) {
 			try {
 				currentPumaClient.get(batchSize, timeout, timeUnit);
@@ -118,7 +115,7 @@ public class ClusterPumaClient implements PumaClient {
 						currentPumaClient.getPumaServerHost(),
 						ExceptionUtils.getStackTrace(t));
 
-				restart();
+				restart(database, tables);
 			}
 		}
 
@@ -131,6 +128,10 @@ public class ClusterPumaClient implements PumaClient {
 			throw new PumaClientException("failed to get binlog message with ack, subscribe first.");
 		}
 
+		if (currentPumaClient == null) {
+			start(database, tables);
+		}
+
 		for (int i = 0; i != retryTimes; ++i) {
 			try {
 				currentPumaClient.getWithAck(batchSize, timeout, timeUnit);
@@ -139,7 +140,7 @@ public class ClusterPumaClient implements PumaClient {
 						currentPumaClient.getPumaServerHost(),
 						ExceptionUtils.getStackTrace(t));
 
-				restart();
+				restart(database, tables);
 			}
 		}
 
@@ -152,6 +153,10 @@ public class ClusterPumaClient implements PumaClient {
 			throw new PumaClientException("failed to get binlog message with ack, subscribe first.");
 		}
 
+		if (currentPumaClient == null) {
+			start(database, tables);
+		}
+
 		for (int i = 0; i != retryTimes; ++i) {
 			try {
 				currentPumaClient.getWithAck(batchSize);
@@ -160,7 +165,7 @@ public class ClusterPumaClient implements PumaClient {
 						currentPumaClient.getPumaServerHost(),
 						ExceptionUtils.getStackTrace(t));
 
-				restart();
+				restart(database, tables);
 			}
 		}
 
@@ -173,6 +178,10 @@ public class ClusterPumaClient implements PumaClient {
 			throw new PumaClientException("failed to ack binlog position, subscribe first.");
 		}
 
+		if (currentPumaClient == null) {
+			start(database, tables);
+		}
+
 		for (int i = 0; i != retryTimes; ++i) {
 			try {
 				currentPumaClient.ack(binlogInfo);
@@ -181,7 +190,7 @@ public class ClusterPumaClient implements PumaClient {
 						currentPumaClient.getPumaServerHost(),
 						ExceptionUtils.getStackTrace(t));
 
-				restart();
+				restart(database, tables);
 			}
 		}
 	}
@@ -192,6 +201,10 @@ public class ClusterPumaClient implements PumaClient {
 			throw new PumaClientException("failed to rollback binlog message, subscribe first.");
 		}
 
+		if (currentPumaClient == null) {
+			start(database, tables);
+		}
+
 		for (int i = 0; i != retryTimes; ++i) {
 			try {
 				currentPumaClient.rollback();
@@ -200,7 +213,7 @@ public class ClusterPumaClient implements PumaClient {
 						currentPumaClient.getPumaServerHost(),
 						ExceptionUtils.getStackTrace(t));
 
-				restart();
+				restart(database, tables);
 			}
 		}
 	}
@@ -211,6 +224,10 @@ public class ClusterPumaClient implements PumaClient {
 			throw new PumaClientException("failed to rollback binlog message, subscribe first.");
 		}
 
+		if (currentPumaClient == null) {
+			start(database, tables);
+		}
+
 		for (int i = 0; i != retryTimes; ++i) {
 			try {
 				currentPumaClient.rollback(binlogInfo);
@@ -219,7 +236,7 @@ public class ClusterPumaClient implements PumaClient {
 						currentPumaClient.getPumaServerHost(),
 						ExceptionUtils.getStackTrace(t));
 
-				restart();
+				restart(database, tables);
 			}
 		}
 	}
@@ -233,7 +250,6 @@ public class ClusterPumaClient implements PumaClient {
 		this.transaction = transaction;
 
 		currentPumaClient.subscribe(database, tables, dml, ddl, transaction);
-
 		subscribed = true;
 	}
 
@@ -245,9 +261,5 @@ public class ClusterPumaClient implements PumaClient {
 
 		currentPumaClient.unSubscribe();
 		subscribed = false;
-	}
-
-	public void setPumaServerRouter(PumaServerRouter pumaServerRouter) {
-		this.pumaServerRouter = pumaServerRouter;
 	}
 }

@@ -4,7 +4,5 @@ import java.util.List;
 
 public interface PumaServerRouter {
 
-	public void init(String database, List<String> tables);
-
-	public String next();
+	public String next(String database, List<String> tables);
 }

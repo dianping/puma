@@ -1,6 +1,5 @@
 package com.dianping.puma.api;
 
-import com.dianping.puma.api.exception.PumaClientException;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.model.BinlogInfo;
 

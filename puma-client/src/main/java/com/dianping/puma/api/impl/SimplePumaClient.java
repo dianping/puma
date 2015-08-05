@@ -1,7 +1,7 @@
 package com.dianping.puma.api.impl;
 
 import com.dianping.puma.api.PumaClient;
-import com.dianping.puma.api.exception.PumaClientException;
+import com.dianping.puma.api.PumaClientException;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.dto.BinlogRollback;
 import com.dianping.puma.core.dto.binlog.response.BinlogAckResponse;

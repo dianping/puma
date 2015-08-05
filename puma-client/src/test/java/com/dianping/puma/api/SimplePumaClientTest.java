@@ -1,9 +1,11 @@
 package com.dianping.puma.api;
 
-import com.dianping.puma.api.exception.PumaClientException;
 import com.dianping.puma.api.impl.SimplePumaClient;
 import com.dianping.puma.core.dto.BinlogMessage;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Dozer @ 7/2/15
@@ -14,8 +16,11 @@ public class SimplePumaClientTest {
 
     @Test
     public void testConnect() {
-        SimplePumaClient connector = new SimplePumaClient("my-client", "127.0.0.1", 4040);
-        connector.subscribe(true, false, false, "test", "a", "b");
+        SimplePumaClient connector = new SimplePumaClient("my-client", "127.0.0.1:4040");
+        List<String> tables = new ArrayList<String>();
+        tables.add("a");
+        tables.add("b");
+        connector.subscribe("test", tables, true, false, false);
 
         while (true) {
             try {
@@ -37,8 +42,10 @@ public class SimplePumaClientTest {
 
     @Test
     public void testConnectSync() {
-        SimplePumaClient connector = new SimplePumaClient("dozer", "127.0.0.1", 4040);
-        connector.subscribe(true, true, true, "test", "debug");
+        SimplePumaClient connector = new SimplePumaClient("dozer", "127.0.0.1:4040");
+        List<String> tables = new ArrayList<String>();
+        tables.add("debug");
+        connector.subscribe("test", tables, true, true, true);
 
         final int size = 1;
 

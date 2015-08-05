@@ -26,8 +26,6 @@ public class PumaTaskEntity {
 
     private TableSet tableSet;
 
-    private List<SrcDbEntity> srcDbEntityList = new ArrayList<SrcDbEntity>();
-
     /**
      * Puma task instance may contain redundant information here.
      */
@@ -79,14 +77,6 @@ public class PumaTaskEntity {
 
     public void setJdbcRef(String jdbcRef) {
         this.jdbcRef = jdbcRef;
-    }
-
-    public List<SrcDbEntity> getSrcDbEntityList() {
-        return srcDbEntityList;
-    }
-
-    public void setSrcDbEntityList(List<SrcDbEntity> srcDbEntityList) {
-        this.srcDbEntityList = srcDbEntityList;
     }
 
     public Date getUpdateTime() {

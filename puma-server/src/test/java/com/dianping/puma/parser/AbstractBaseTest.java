@@ -305,10 +305,10 @@ public abstract class AbstractBaseTest {
 
 		//task
 		PumaTaskEntity task = new PumaTaskEntity();
-		task.getSrcDbEntityList().add(srcdb);
-		
+//		task.getSrcDbEntityList().add(srcdb);
+
 		taskExecutor.setTask(task);
-		
+
 		// Parser.
 		Parser parser = new DefaultBinlogParser();
 		// parser.start();

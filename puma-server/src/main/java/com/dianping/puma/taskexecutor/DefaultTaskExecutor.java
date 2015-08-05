@@ -35,18 +35,34 @@ import com.dianping.puma.server.exception.ServerEventFetcherException;
 import com.dianping.puma.server.exception.ServerEventParserException;
 import com.dianping.puma.server.exception.ServerEventRuntimeException;
 import com.dianping.puma.status.SystemStatusManager;
+import com.dianping.zebra.Constants;
+import com.dianping.zebra.group.config.DataSourceConfigManager;
+import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
+import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
+import com.dianping.zebra.group.exception.IllegalConfigException;
+import com.dianping.zebra.util.JdbcDriverClassHelper;
 import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 基于MySQL复制机制的Server
@@ -56,9 +72,19 @@ import java.util.concurrent.TimeUnit;
 @ThreadUnSafe
 public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
+    protected String configManagerType = Constants.CONFIG_MANAGER_TYPE_REMOTE;
+
+    protected volatile DataSourceConfigManager configManager;
+
+    protected volatile GroupDataSourceConfig groupConfig;
+
+    protected volatile boolean srcDbChanged = false;
+
     private static final Logger LOG = LoggerFactory.getLogger(DefaultTaskExecutor.class);
 
     private SrcDbEntity currentSrcDbEntity;
+
+    private volatile List<SrcDbEntity> srcDbEntityList;
 
     private DefaultTableMetaInfoFetcher tableMetaInfoFetcher;
 
@@ -72,8 +98,21 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
     private OutputStream os;
 
+    public DefaultTaskExecutor() {
+
+    }
+
+    private List<SrcDbEntity> checkAndGetSrcDbEntityList() {
+        if (this.srcDbChanged) {
+            throw new IllegalStateException("SrcDb List Changed!");
+        }
+        return this.srcDbEntityList;
+    }
+
     @Override
     public void doStart() throws Exception {
+        loadSrcDbEntity(getTask().getJdbcRef());
+
         long failCount = 0;
         boolean canStop = false;
         do {
@@ -176,11 +215,110 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
     }
 
     protected SrcDbEntity chooseNextSrcDb() {
-        int index = getTask().getSrcDbEntityList().indexOf(this.currentSrcDbEntity) + 1;
-        if (index >= getTask().getSrcDbEntityList().size()) {
+        int index = checkAndGetSrcDbEntityList().indexOf(this.currentSrcDbEntity) + 1;
+        if (index >= checkAndGetSrcDbEntityList().size()) {
             index = 0;
         }
-        return getTask().getSrcDbEntityList().get(index);
+        return checkAndGetSrcDbEntityList().get(index);
+    }
+
+    protected void loadSrcDbEntity(String jdbcRef) {
+        if (configManager == null) {
+            synchronized (this) {
+                if (configManager == null) {
+                    this.configManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef);
+                    this.configManager.addListerner(new PropertyChangeListener() {
+                        @Override
+                        public void propertyChange(PropertyChangeEvent evt) {
+                            if (evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_GROUP_PRFIX + ".") ||
+                                    evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX + ".")) {
+                                loadSrcDbEntity(getTask().getJdbcRef());
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        GroupDataSourceConfig newGroupConfig = configManager.getGroupDataSourceConfig();
+
+        if (!newGroupConfig.equals(groupConfig)) {
+            synchronized (this) {
+                if (!newGroupConfig.equals(groupConfig)) {
+
+                    List<SrcDbEntity> result = new ArrayList<SrcDbEntity>();
+
+                    for (DataSourceConfig config : newGroupConfig.getDataSourceConfigs().values()) {
+                        if (!config.isCanRead() || !config.isActive()) {
+                            continue;
+                        }
+
+                        //todo: config.getTag() 根据 tag 做后续的一些处理，优先级等等
+                        //todo: 暂时默认所有的读库都是可以的
+                        result.add(convertSrcDbEntity(config));
+                    }
+
+                    this.srcDbChanged = true;
+                    this.srcDbEntityList = result;
+                    this.groupConfig = newGroupConfig;
+                }
+            }
+        }
+    }
+
+    protected SrcDbEntity convertSrcDbEntity(DataSourceConfig config) {
+        SrcDbEntity srcDbEntity = new SrcDbEntity();
+        srcDbEntity.setUsername(config.getUsername());
+        srcDbEntity.setPassword(config.getPassword());
+
+        Pattern pattern = Pattern.compile("(jdbc:mysql://)([^:/]+)((:\\d+)?).*");
+        Matcher matcher = pattern.matcher(config.getJdbcUrl());
+        if (!matcher.matches()) {
+            throw new IllegalConfigException(config.getJdbcUrl());
+        }
+        srcDbEntity.setHost(matcher.group(2));
+        String port = matcher.group(3);
+        if (Strings.isNullOrEmpty(port)) {
+            srcDbEntity.setPort(3306);
+        } else {
+            srcDbEntity.setPort(Integer.valueOf(port.replace(":", "")));
+        }
+
+        JdbcDriverClassHelper.loadDriverClass(config.getDriverClass(), config.getJdbcUrl());
+
+        Connection conn = null;
+        Statement stmt = null;
+        java.sql.ResultSet resultSet = null;
+        try {
+            conn = DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword());
+            stmt = conn.createStatement();
+            resultSet = stmt.executeQuery("SHOW VARIABLES LIKE 'server_id'");
+            resultSet.next();
+            srcDbEntity.setServerId(resultSet.getLong(2));
+        } catch (SQLException e) {
+            throw new RuntimeException("Convert SrcDbEntity failed", e);
+        } finally {
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException ignore) {
+                }
+            }
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException ignore) {
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException ignore) {
+                }
+            }
+        }
+
+        return srcDbEntity;
     }
 
     protected SrcDbEntity initSrcDbByServerId(final long binlogServerId) {
@@ -188,7 +326,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             return this.currentSrcDbEntity;
         }
 
-        SrcDbEntity srcDbEntity = Iterables.find(getTask().getSrcDbEntityList(), new Predicate<SrcDbEntity>() {
+        SrcDbEntity srcDbEntity = Iterables.find(checkAndGetSrcDbEntityList(), new Predicate<SrcDbEntity>() {
             @Override
             public boolean apply(SrcDbEntity input) {
                 return input.getServerId() == binlogServerId;
@@ -199,14 +337,14 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             return srcDbEntity;
         }
 
-        srcDbEntity = Iterables.find(getTask().getSrcDbEntityList(), new Predicate<SrcDbEntity>() {
+        srcDbEntity = Iterables.find(checkAndGetSrcDbEntityList(), new Predicate<SrcDbEntity>() {
             @Override
             public boolean apply(SrcDbEntity input) {
                 return input.isPreferred();
             }
         }, null);
 
-        return srcDbEntity != null ? srcDbEntity : getTask().getSrcDbEntityList().get(0);
+        return srcDbEntity != null ? srcDbEntity : checkAndGetSrcDbEntityList().get(0);
     }
 
     protected BinlogInfo switchBinlog(BinlogInfo oldBinlogInfo) throws IOException {
@@ -302,6 +440,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 } catch (InterruptedException ignore) {
                 }
             }
+
+            checkAndGetSrcDbEntityList();
 
             BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(is, PacketType.BINLOG_PACKET,
                     getContext());

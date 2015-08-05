@@ -53,6 +53,7 @@ public class DefaultStorageIntegrityChecker implements StorageIntegrityChecker {
 					} catch (IOException e) {
 						// handle broken index
 						indexBucket.truncate();
+						break;
 					}
 
 					try {
@@ -91,7 +92,6 @@ public class DefaultStorageIntegrityChecker implements StorageIntegrityChecker {
 					} catch (IOException e) {
 					}
 				}
-
 			}
 		}
 	}

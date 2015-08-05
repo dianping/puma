@@ -15,7 +15,7 @@ public class ClusterPumaClient implements PumaClient {
 
 	private final Logger logger = LoggerFactory.getLogger(ClusterPumaClient.class);
 
-	private final String name;
+	private String name;
 
 	private String database;
 	private List<String> tables;
@@ -23,12 +23,14 @@ public class ClusterPumaClient implements PumaClient {
 	private boolean ddl = false;
 	private boolean transaction = false;
 
-	private final int retryTimes = 3; // puma client ha retry times.
-	private final int retryInterval = 3000;
+	protected int retryTimes = 3; // puma client ha retry times.
+	protected int retryInterval = 5000;
 	private PumaServerRouter router;
 
-	private volatile boolean subscribed = false;
-	private volatile PumaClient currentPumaClient;
+	protected volatile boolean subscribed = false;
+	protected volatile PumaClient currentPumaClient;
+
+	public ClusterPumaClient() {}
 
 	public ClusterPumaClient(String name, PumaServerRouter router) {
 		this.name = name;
@@ -84,7 +86,7 @@ public class ClusterPumaClient implements PumaClient {
 
 		for (int i = 0; i != retryTimes; ++i) {
 			try {
-				currentPumaClient.get(batchSize);
+				return currentPumaClient.get(batchSize);
 			} catch (Throwable t) {
 				logger.warn("failed to get binlog message from server({}).\n{}",
 						currentPumaClient.getPumaServerHost(),
@@ -109,7 +111,7 @@ public class ClusterPumaClient implements PumaClient {
 
 		for (int i = 0; i != retryTimes; ++i) {
 			try {
-				currentPumaClient.get(batchSize, timeout, timeUnit);
+				return currentPumaClient.get(batchSize, timeout, timeUnit);
 			} catch (Throwable t) {
 				logger.warn("failed to get binlog message from server {}.\n{}",
 						currentPumaClient.getPumaServerHost(),
@@ -134,7 +136,7 @@ public class ClusterPumaClient implements PumaClient {
 
 		for (int i = 0; i != retryTimes; ++i) {
 			try {
-				currentPumaClient.getWithAck(batchSize, timeout, timeUnit);
+				return currentPumaClient.getWithAck(batchSize, timeout, timeUnit);
 			} catch (Throwable t) {
 				logger.warn("failed to get binlog message with ack from server {}.\n{}",
 						currentPumaClient.getPumaServerHost(),
@@ -159,7 +161,7 @@ public class ClusterPumaClient implements PumaClient {
 
 		for (int i = 0; i != retryTimes; ++i) {
 			try {
-				currentPumaClient.getWithAck(batchSize);
+				return currentPumaClient.getWithAck(batchSize);
 			} catch (Throwable t) {
 				logger.warn("failed to get binlog message with ack from server {}.\n{}",
 						currentPumaClient.getPumaServerHost(),
@@ -185,6 +187,7 @@ public class ClusterPumaClient implements PumaClient {
 		for (int i = 0; i != retryTimes; ++i) {
 			try {
 				currentPumaClient.ack(binlogInfo);
+				return;
 			} catch (Throwable t) {
 				logger.warn("failed to ack binlog position to server {}.\n{}",
 						currentPumaClient.getPumaServerHost(),
@@ -208,6 +211,7 @@ public class ClusterPumaClient implements PumaClient {
 		for (int i = 0; i != retryTimes; ++i) {
 			try {
 				currentPumaClient.rollback();
+				return;
 			} catch (Throwable t) {
 				logger.warn("failed to rollback binlog message from server {}.\n{}",
 						currentPumaClient.getPumaServerHost(),
@@ -231,6 +235,7 @@ public class ClusterPumaClient implements PumaClient {
 		for (int i = 0; i != retryTimes; ++i) {
 			try {
 				currentPumaClient.rollback(binlogInfo);
+				return;
 			} catch (Throwable t) {
 				logger.warn("failed to rollback binlog message from server {}.\n{}",
 						currentPumaClient.getPumaServerHost(),
@@ -249,6 +254,10 @@ public class ClusterPumaClient implements PumaClient {
 		this.ddl = ddl;
 		this.transaction = transaction;
 
+		if (currentPumaClient == null) {
+			start(database, tables);
+		}
+
 		currentPumaClient.subscribe(database, tables, dml, ddl, transaction);
 		subscribed = true;
 	}
@@ -257,6 +266,10 @@ public class ClusterPumaClient implements PumaClient {
 	public void unSubscribe() throws PumaClientException {
 		if (!subscribed) {
 			throw new PumaClientException("failed to unsubscribe binlog, subscribe first.");
+		}
+
+		if (currentPumaClient == null) {
+			start(database, tables);
 		}
 
 		currentPumaClient.unSubscribe();

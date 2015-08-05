@@ -15,6 +15,8 @@ public class MonitorBasedPumaServerRouter implements PumaServerRouter {
 
 	protected PumaServerMonitor monitor;
 
+	public MonitorBasedPumaServerRouter() {}
+
 	public MonitorBasedPumaServerRouter(PumaServerMonitor monitor) {
 		this.monitor = monitor;
 	}
@@ -33,6 +35,7 @@ public class MonitorBasedPumaServerRouter implements PumaServerRouter {
 
 			if (frozenTime == null || isFrozenExpired(now, frozenTime)) {
 				frozenTimes.put(server, now);
+				return server;
 			}
 		}
 

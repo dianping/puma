@@ -63,6 +63,7 @@ public class SimplePumaClient implements PumaClient {
 
 
     public SimplePumaClient(String clientName, String remoteHost) {
+        this.pumaServerHost = remoteHost;
         this.gson = new GsonBuilder().registerTypeAdapter(Event.class, new EventJsonDeserializer()).create();
         this.clientName = clientName;
         this.baseUrl = String.format("http://%s", remoteHost);

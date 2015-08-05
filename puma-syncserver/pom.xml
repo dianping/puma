@@ -33,6 +33,12 @@
             <artifactId>lion-client</artifactId>
         </dependency>
 
+        <!-- spring -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-util</artifactId>
+        </dependency>
+
         <!-- log -->
         <dependency>
             <groupId>org.slf4j</groupId>

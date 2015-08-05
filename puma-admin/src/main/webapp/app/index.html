@@ -10,9 +10,16 @@
     <link ng-include="'/app/partials/ace-css.html'">
 </head>
 <body>
-    <div ng-view></div>
 
-    <div class="navbar" ng-include="'/app/partials/common/navbar.html'"></div>
+    <div ng-include="'/app/partials/common/navbar.html'"></div>
+
+    <script type="text/javascript">
+        try{ace.settings.check('main-container' , 'fixed')}catch(e){}
+    </script>
+    <div>
+        <div class="sidebar responsive" ng-include="'/app/partials/common/sidebar.html'"></div>
+        <div class="main-content"></div>
+    </div>
 
     <!-- ace -->
     <script ng-include="'/app/partials/ace-js.html'"></script>

@@ -11,25 +11,23 @@
 	<insert id="insert" parameterType="SyncServerEntity" useGeneratedKeys="true" keyProperty="id">
 		INSERT INTO SyncServer
 		(
-		Name,
-		Host,
-		Port
+		host,
+		loadBalance
 		)
 		VALUES
 		(
-		#{name},
 		#{host},
-		#{port}
+		#{loadBalance}
 		)
 	</insert>
 
 	<update id="update" parameterType="SyncServerEntity">
 		UPDATE SyncServer
 		SET
-		Name = #{name},
-		Host = #{host},
-		Port = #{port}
-		WHERE id = #{id}
+		host = #{host},
+		loadBalance = #{loadBalance}
+		WHERE
+		id = #{id}
 	</update>
 
 	<delete id="delete" parameterType="SyncServerEntity">

@@ -1,24 +1,20 @@
 UPDATE
-#if (${event.database} == "")
-`${event.table}`
-#else
-`${event.database}`.`${event.table}`
-#end
+`${database}`.`${table}`
 SET
-#foreach($name2ColumnInfo in $event.columns.entrySet())
-    `${name2ColumnInfo.key}` = ?
-  #if($velocityCount < ${event.columns.size()})
+#foreach($entry in $columns.entrySet())
+    `${entry.key}` = ?
+  #if($velocityCount < ${columns.size()})
      ,
   #end
 #end
 WHERE
 #set ($keyCount = 0)
-#foreach($name2ColumnInfo in $event.columns.entrySet())
-    #if(${name2ColumnInfo.value.key})
+#foreach($entry in $columns.entrySet())
+    #if(${entry.value.pk})
         #set ($keyCount = $keyCount + 1)
         #if($keyCount > 1)
         AND
         #end
-    `${name2ColumnInfo.key}` = ?
+        `${entry.key}` = ?
     #end
 #end

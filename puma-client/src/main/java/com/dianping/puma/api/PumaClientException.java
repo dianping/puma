@@ -1,19 +1,19 @@
 package com.dianping.puma.api;
 
-/**
- * Dozer @ 7/6/15
- * mail@dozer.cc
- * http://www.dozer.cc
- */
 public class PumaClientException extends RuntimeException {
-    public PumaClientException() {
-    }
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5575514632552935756L;
 
-    public PumaClientException(String message) {
-        super(message);
-    }
+	public PumaClientException() {
+	}
 
-    public PumaClientException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	public PumaClientException(String message) {
+		super(message);
+	}
+
+	public PumaClientException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

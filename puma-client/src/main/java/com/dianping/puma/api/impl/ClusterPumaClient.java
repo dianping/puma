@@ -13,24 +13,29 @@ import java.util.concurrent.TimeUnit;
 
 public class ClusterPumaClient implements PumaClient {
 
-	private final Logger logger = LoggerFactory.getLogger(ClusterPumaClient.class);
+	private static final Logger logger = LoggerFactory.getLogger(ClusterPumaClient.class);
 
 	private String name;
 
 	private String database;
+
 	private List<String> tables;
+
 	private boolean dml = true; // default only need dml.
+
 	private boolean ddl = false;
+
 	private boolean transaction = false;
 
 	protected int retryTimes = 3; // puma client ha retry times.
+
 	protected int retryInterval = 5000;
+
 	private PumaServerRouter router;
 
 	protected volatile boolean subscribed = false;
-	protected volatile PumaClient currentPumaClient;
 
-	public ClusterPumaClient() {}
+	protected volatile PumaClient currentPumaClient;
 
 	public ClusterPumaClient(String name, PumaServerRouter router) {
 		this.name = name;
@@ -88,9 +93,8 @@ public class ClusterPumaClient implements PumaClient {
 			try {
 				return currentPumaClient.get(batchSize);
 			} catch (Throwable t) {
-				logger.warn("failed to get binlog message from server({}).\n{}",
-						currentPumaClient.getPumaServerHost(),
-						ExceptionUtils.getStackTrace(t));
+				logger.warn("failed to get binlog message from server({}).\n{}", currentPumaClient.getPumaServerHost(),
+				      ExceptionUtils.getStackTrace(t));
 
 				restart(database, tables);
 			}
@@ -113,9 +117,8 @@ public class ClusterPumaClient implements PumaClient {
 			try {
 				return currentPumaClient.get(batchSize, timeout, timeUnit);
 			} catch (Throwable t) {
-				logger.warn("failed to get binlog message from server {}.\n{}",
-						currentPumaClient.getPumaServerHost(),
-						ExceptionUtils.getStackTrace(t));
+				logger.warn("failed to get binlog message from server {}.\n{}", currentPumaClient.getPumaServerHost(),
+				      ExceptionUtils.getStackTrace(t));
 
 				restart(database, tables);
 			}
@@ -139,8 +142,7 @@ public class ClusterPumaClient implements PumaClient {
 				return currentPumaClient.getWithAck(batchSize, timeout, timeUnit);
 			} catch (Throwable t) {
 				logger.warn("failed to get binlog message with ack from server {}.\n{}",
-						currentPumaClient.getPumaServerHost(),
-						ExceptionUtils.getStackTrace(t));
+				      currentPumaClient.getPumaServerHost(), ExceptionUtils.getStackTrace(t));
 
 				restart(database, tables);
 			}
@@ -164,8 +166,7 @@ public class ClusterPumaClient implements PumaClient {
 				return currentPumaClient.getWithAck(batchSize);
 			} catch (Throwable t) {
 				logger.warn("failed to get binlog message with ack from server {}.\n{}",
-						currentPumaClient.getPumaServerHost(),
-						ExceptionUtils.getStackTrace(t));
+				      currentPumaClient.getPumaServerHost(), ExceptionUtils.getStackTrace(t));
 
 				restart(database, tables);
 			}
@@ -189,9 +190,8 @@ public class ClusterPumaClient implements PumaClient {
 				currentPumaClient.ack(binlogInfo);
 				return;
 			} catch (Throwable t) {
-				logger.warn("failed to ack binlog position to server {}.\n{}",
-						currentPumaClient.getPumaServerHost(),
-						ExceptionUtils.getStackTrace(t));
+				logger.warn("failed to ack binlog position to server {}.\n{}", currentPumaClient.getPumaServerHost(),
+				      ExceptionUtils.getStackTrace(t));
 
 				restart(database, tables);
 			}
@@ -213,9 +213,8 @@ public class ClusterPumaClient implements PumaClient {
 				currentPumaClient.rollback();
 				return;
 			} catch (Throwable t) {
-				logger.warn("failed to rollback binlog message from server {}.\n{}",
-						currentPumaClient.getPumaServerHost(),
-						ExceptionUtils.getStackTrace(t));
+				logger.warn("failed to rollback binlog message from server {}.\n{}", currentPumaClient.getPumaServerHost(),
+				      ExceptionUtils.getStackTrace(t));
 
 				restart(database, tables);
 			}
@@ -237,9 +236,8 @@ public class ClusterPumaClient implements PumaClient {
 				currentPumaClient.rollback(binlogInfo);
 				return;
 			} catch (Throwable t) {
-				logger.warn("failed to rollback binlog message from server {}.\n{}",
-						currentPumaClient.getPumaServerHost(),
-						ExceptionUtils.getStackTrace(t));
+				logger.warn("failed to rollback binlog message from server {}.\n{}", currentPumaClient.getPumaServerHost(),
+				      ExceptionUtils.getStackTrace(t));
 
 				restart(database, tables);
 			}

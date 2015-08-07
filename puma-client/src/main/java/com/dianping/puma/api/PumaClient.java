@@ -8,23 +8,24 @@ import java.util.concurrent.TimeUnit;
 
 public interface PumaClient {
 
-    String getPumaServerHost();
+	String getPumaServerHost();
 
-    BinlogMessage get(int batchSize) throws PumaClientException;
+	BinlogMessage get(int batchSize) throws PumaClientException;
 
-    BinlogMessage get(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException;
+	BinlogMessage get(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException;
 
-    BinlogMessage getWithAck(int batchSize) throws PumaClientException;
+	BinlogMessage getWithAck(int batchSize) throws PumaClientException;
 
-    BinlogMessage getWithAck(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException;
+	BinlogMessage getWithAck(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException;
 
-    void ack(BinlogInfo binlogInfo) throws PumaClientException;
+	void ack(BinlogInfo binlogInfo) throws PumaClientException;
 
-    void rollback(BinlogInfo binlogInfo) throws PumaClientException;
+	void rollback(BinlogInfo binlogInfo) throws PumaClientException;
 
-    void rollback() throws PumaClientException;
+	void rollback() throws PumaClientException;
 
-    void subscribe(String database, List<String> tables, boolean dml, boolean ddl, boolean transaction) throws PumaClientException;
+	void subscribe(String database, List<String> tables, boolean dml, boolean ddl, boolean transaction)
+	      throws PumaClientException;
 
-    void unSubscribe() throws PumaClientException;
+	void unSubscribe() throws PumaClientException;
 }

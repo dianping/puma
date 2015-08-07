@@ -46,6 +46,9 @@ import org.codehaus.plexus.util.StringUtils;
  * 
  */
 public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>> implements IndexManager<K, V> {
+
+	private static final int BUF_SIZE = 1024 * 10;
+
 	public static final String L1INDEX_FILENAME = "l1Index.l1idx";
 
 	public static final String L2INDEX_FOLDER = "l2Index";
@@ -229,7 +232,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 				closeQuietly(l2IndexWriter);
 				File l2IndexFile = getL2IndexFile(writingl2IndexName);
 				l2IndexFile.createNewFile();
-				l2IndexWriter = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(l2IndexFile)));
+				l2IndexWriter = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(l2IndexFile), BUF_SIZE));
 			}
 		} finally {
 			l2WriteLock.unlock();

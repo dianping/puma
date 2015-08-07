@@ -9,8 +9,10 @@ import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.EventStorage;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +41,8 @@ public class DefaultAsyncBinlogChannelTest {
 
     DefaultAsyncBinlogChannel target;
 
-    @Before
+    @SuppressWarnings("unchecked")
+   @Before
     public void setUp() throws Exception {
         eventChannel = mock(EventChannel.class);
         eventStorage = mock(EventStorage.class);

@@ -182,13 +182,14 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
         }
 
         protected BinlogGetRequest getBinlogGetRequest(List<Event> results, BinlogGetRequest req) throws InterruptedException {
-            while (!(req != null && req.getChannel().isActive())) {
+            if (!(req != null && req.getChannel().isActive())) {
                 req = getParent().requests.poll();
             }
 
             if (req == null && results.size() >= 1000) {
                 req = getParent().requests.take();
             }
+            
             return req;
         }
 

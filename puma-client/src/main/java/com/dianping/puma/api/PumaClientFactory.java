@@ -24,7 +24,7 @@ public class PumaClientFactory {
 	}
 
 	/**
-	 * 获取支持多个连接Puma Server的Puma Client,具有HA的功能。
+	 * 获取支持多个连接Puma Server的Puma Client,具有HA的功能。 所连接的Puma Server服务器地址会根据订阅的数据库自动获得。
 	 * 
 	 * @param clientName
 	 *           自定义一个puma-client的名字

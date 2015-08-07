@@ -1,16 +1,23 @@
 package com.dianping.puma.api.impl;
 
-import com.dianping.puma.api.MockTest;
-import com.dianping.puma.core.dto.BinlogMessage;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.slf4j.Logger;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import com.dianping.puma.api.MockTest;
+import com.dianping.puma.core.dto.BinlogMessage;
 
 public class ClusterPumaClientTest extends MockTest {
 
@@ -29,7 +36,8 @@ public class ClusterPumaClientTest extends MockTest {
 		reset(simpleClient);
 	}
 
-	@Test
+	@SuppressWarnings("unchecked")
+   @Test
 	public void testGetSuccess() {
 		doNothing().when(client).restart(anyString(), anyList());
 		doReturn(new BinlogMessage()).when(simpleClient).get(anyInt());
@@ -42,6 +50,7 @@ public class ClusterPumaClientTest extends MockTest {
 		verify(client, times(1)).get(10);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test(expected = RuntimeException.class)
 	public void testGetFailure() {
 		doNothing().when(client).restart(anyString(), anyList());

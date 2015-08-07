@@ -33,12 +33,6 @@
             <artifactId>lion-client</artifactId>
         </dependency>
 
-        <!-- spring -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-util</artifactId>
-        </dependency>
-
         <!-- log -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -182,24 +176,20 @@
             <artifactId>mockito-all</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- mongo -->
-        <dependency>
-            <groupId>com.google.code.morphia</groupId>
-            <artifactId>morphia</artifactId>
-        </dependency>
         <dependency>
             <groupId>c3p0</groupId>
             <artifactId>c3p0</artifactId>
         </dependency>
     </dependencies>
     <build>
-        <finalName>${artifactId}-${env}-${version}</finalName>
+        <finalName>${project.artifactId}-${env}-${project.version}</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
-                    <warName>${artifactId}-${env}-${version}</warName>
+                    <warName>${project.artifactId}-${env}-${project.version}</warName>
                 </configuration>
+                <version>2.6</version>
             </plugin>
             <plugin>
                 <groupId>org.mortbay.jetty</groupId>

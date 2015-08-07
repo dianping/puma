@@ -1,7 +1,5 @@
 package com.dianping.puma.api;
 
-import com.dianping.puma.api.impl.ClusterPumaClient;
-
 import java.util.ArrayList;
 import java.util.List;
 

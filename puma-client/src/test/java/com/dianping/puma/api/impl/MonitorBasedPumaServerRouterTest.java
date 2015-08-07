@@ -2,6 +2,7 @@ package com.dianping.puma.api.impl;
 
 import com.dianping.puma.api.MockTest;
 import com.dianping.puma.api.PumaServerMonitor;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -21,6 +22,7 @@ public class MonitorBasedPumaServerRouterTest extends MockTest {
 	@Mock
 	PumaServerMonitor monitor;
 
+	@SuppressWarnings("unchecked")
 	@Before
 	public void before() {
 		List<String> serverHosts = new ArrayList<String>();

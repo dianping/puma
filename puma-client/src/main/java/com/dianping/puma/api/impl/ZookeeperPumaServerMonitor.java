@@ -14,9 +14,9 @@ public class ZookeeperPumaServerMonitor implements PumaServerMonitor {
 
 	private static final String ZK_BASE_PATH = "puma.client.route.";
 
-	protected final ConfigCache cc = ConfigCache.getInstance();
+	private final ConfigCache cc = ConfigCache.getInstance();
 
-	protected ConcurrentMap<String, ConfigChange> configChanges = new ConcurrentHashMap<String, ConfigChange>();
+	private ConcurrentMap<String, ConfigChange> configChanges = new ConcurrentHashMap<String, ConfigChange>();
 
 	@Override
 	public List<String> fetch(String database, List<String> tables) {

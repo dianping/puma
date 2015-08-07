@@ -20,7 +20,7 @@ import com.dianping.puma.storage.Sequence;
  */
 public class LocalFileDataBucket extends AbstractDataBucket {
 
-	private static final int BUF_SIZE = 1024 * 8;
+	private static final int BUF_SIZE = 1024 * 100;
 
 	public LocalFileDataBucket(File file, Sequence startingSequence, int maxSizeMB, String fileName, boolean compress)
 	      throws IOException {

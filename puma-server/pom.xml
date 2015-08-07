@@ -74,10 +74,6 @@
             <artifactId>lion-client</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.dianping.zebra</groupId>
-            <artifactId>zebra-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jzlib</artifactId>
         </dependency>

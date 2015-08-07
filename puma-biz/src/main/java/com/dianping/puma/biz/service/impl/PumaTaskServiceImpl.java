@@ -47,6 +47,18 @@ public class PumaTaskServiceImpl implements PumaTaskService {
 //        }
 //    }
 
+    protected void saveSrcDb(PumaTaskEntity entity) {
+        for (SrcDbEntity dbEntity : entity.getSrcDbEntityList()) {
+            SrcDbEntity srcDb = srcDbDao.findByName(dbEntity.getName());
+            if (srcDb != null) {
+                PumaTaskDbEntity pumaTaskDbEntity = new PumaTaskDbEntity();
+                pumaTaskDbEntity.setTaskId(entity.getId());
+                pumaTaskDbEntity.setDbId(srcDb.getId());
+                pumaTaskDbDao.insert(pumaTaskDbEntity);
+            }
+        }
+    }
+
     protected void saveTableSet(PumaTaskEntity entity) {
         for (Table table : entity.getTableSet().listSchemaTables()) {
             PumaTaskTargetEntity target = new PumaTaskTargetEntity();
@@ -61,6 +73,7 @@ public class PumaTaskServiceImpl implements PumaTaskService {
         pumaTaskServerDao.deleteByTaskId(entity.getId());
         //savePumaServer(entity);
         pumaTaskDbDao.deleteByTaskId(entity.getId());
+        saveSrcDb(entity);
         pumaTaskTargetDao.deleteByTaskId(entity.getId());
         saveTableSet(entity);
     }
@@ -133,7 +146,9 @@ public class PumaTaskServiceImpl implements PumaTaskService {
      */
     protected PumaTaskEntity loadFullPumaTask(PumaTaskEntity pumaTask) {
         pumaTask.setPumaServers(loadPumaServers(pumaTask.getId()));
+        pumaTask.setSrcDbEntityList(loadSrcDbs(pumaTask.getJdbcRef()));
         pumaTask.setTableSet(loadTableSet(pumaTask.getId()));
+
         return pumaTask;
     }
 

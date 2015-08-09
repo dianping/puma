@@ -15,262 +15,253 @@ public class ClusterPumaClient implements PumaClient {
 
 	private static final Logger logger = LoggerFactory.getLogger(ClusterPumaClient.class);
 
-	private String name;
+	private String clientName;
 
 	private String database;
 
 	private List<String> tables;
 
-	private boolean dml = true; // default only need dml.
+	private boolean dml;
 
-	private boolean ddl = false;
+	private boolean ddl;
 
-	private boolean transaction = false;
-
-	protected int retryTimes = 3; // puma client ha retry times.
-
-	protected int retryInterval = 5000;
+	private boolean transaction;
 
 	private PumaServerRouter router;
 
-	protected volatile boolean subscribed = false;
+	protected int retryTimes = 3; // 3 times.
 
-	protected volatile PumaClient currentPumaClient;
+	protected int retryInterval = 5000; // 5s.
 
-	public ClusterPumaClient(String name, PumaServerRouter router) {
-		this.name = name;
-		this.router = router;
+	protected volatile SimplePumaClient client;
+
+	public ClusterPumaClient() {}
+
+	public ClusterPumaClient(PumaClientConfig config) {
+		clientName = config.getClientName();
+		database = config.getDatabase();
+		tables = config.getTables();
+		dml = config.isDml();
+		ddl = config.isDdl();
+		transaction = config.isTransaction();
+		router = config.getRouter();
 	}
 
-	protected void start(String database, List<String> tables) {
-		String currentHost = null;
-		try {
-			currentHost = router.next(database, tables);
-			currentPumaClient = PumaClientFactory.createSimplePumaClient(name, currentHost);
-		} catch (Throwable t) {
-			throw new PumaClientException("fail to start puma client from server " + currentHost + ".", t);
-		}
-	}
-
-	protected void restart(String database, List<String> tables) {
-		String currentHost = null;
-		try {
-			currentHost = router.next(database, tables);
-		} catch (Throwable t) {
-			logger.warn("fail to route puma servers.\n{}", ExceptionUtils.getStackTrace(t));
+	protected SimplePumaClient newClient() {
+		String serverHost = router.next();
+		if (serverHost == null) {
+			String msg = String.format("[%s] failed to create new client.", clientName);
+			RuntimeException e = new RuntimeException("no puma server available.");
+			logger.error(msg, e);
+			throw new PumaClientException(msg, e);
 		}
 
-		try {
-			Uninterruptibles.sleepUninterruptibly(retryInterval, TimeUnit.MILLISECONDS);
-
-			currentPumaClient = PumaClientFactory.createSimplePumaClient(name, currentHost);
-			currentPumaClient.subscribe(database, tables, dml, ddl, transaction);
-		} catch (Throwable t) {
-			throw new PumaClientException("fail to restart puma client from server " + currentHost + ".", t);
-		}
-	}
-
-	@Override
-	public String getPumaServerHost() {
-		if (currentPumaClient == null) {
-			return null;
-		}
-
-		return currentPumaClient.getPumaServerHost();
+		return new PumaClientConfig()
+				.setClientName(clientName)
+				.setDatabase(database)
+				.setTables(tables)
+				.setDml(dml)
+				.setDdl(ddl)
+				.setTransaction(transaction)
+				.setServerHost(serverHost)
+				.buildSimplePumaClient();
 	}
 
 	@Override
 	public BinlogMessage get(int batchSize) throws PumaClientException {
-		if (!subscribed) {
-			throw new PumaClientException("subscribe before you get binlog message.");
+		if (client == null) {
+			client = newClient();
 		}
 
-		if (currentPumaClient == null) {
-			start(database, tables);
-		}
-
-		for (int i = 0; i != retryTimes; ++i) {
+		for (int i = 0; i <= retryTimes; ++i) {
 			try {
-				return currentPumaClient.get(batchSize);
+				return client.get(batchSize);
 			} catch (Throwable t) {
-				logger.warn("failed to get binlog message from server({}).\n{}", currentPumaClient.getPumaServerHost(),
-				      ExceptionUtils.getStackTrace(t));
+				if (i == retryTimes) {
+					break;
+				}
 
-				restart(database, tables);
+				logger.warn("[{}] failed to get binlog message from server({}).\n{}",
+						new Object[] { clientName, client.getServerHost(), ExceptionUtils.getStackTrace(t) });
+
+				Uninterruptibles.sleepUninterruptibly(retryInterval, TimeUnit.MILLISECONDS);
+				client = newClient();
 			}
 		}
 
-		throw new PumaClientException("failed to get binlog message after " + retryTimes + " times retries.");
+		String msg = String.format("[%s] failed to get after %s times retries.", clientName, retryTimes);
+		logger.error(msg);
+		throw new PumaClientException(msg);
 	}
 
 	@Override
 	public BinlogMessage get(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException {
-		if (!subscribed) {
-			throw new PumaClientException("failed to get binlog message, subscribe first.");
+		if (client == null) {
+			client = newClient();
 		}
 
-		if (currentPumaClient == null) {
-			start(database, tables);
-		}
-
-		for (int i = 0; i != retryTimes; ++i) {
+		for (int i = 0; i <= retryTimes; ++i) {
 			try {
-				return currentPumaClient.get(batchSize, timeout, timeUnit);
+				return client.get(batchSize, timeout, timeUnit);
 			} catch (Throwable t) {
-				logger.warn("failed to get binlog message from server {}.\n{}", currentPumaClient.getPumaServerHost(),
-				      ExceptionUtils.getStackTrace(t));
+				if (i == retryTimes) {
+					break;
+				}
 
-				restart(database, tables);
+				logger.warn("failed to get binlog message from server {}.\n{}",
+						client.getServerHost(),
+						ExceptionUtils.getStackTrace(t));
+
+				Uninterruptibles.sleepUninterruptibly(retryInterval, TimeUnit.MILLISECONDS);
+				client = newClient();
 			}
 		}
 
-		throw new PumaClientException("failed to get binlog message after " + retryTimes + " time retries.");
+		String msg = String.format("[%s] failed to get after %s times retries.", clientName, retryTimes);
+		logger.error(msg);
+		throw new PumaClientException(msg);
 	}
 
 	@Override
 	public BinlogMessage getWithAck(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException {
-		if (!subscribed) {
-			throw new PumaClientException("failed to get binlog message with ack, subscribe first.");
+		if (client == null) {
+			client = newClient();
 		}
 
-		if (currentPumaClient == null) {
-			start(database, tables);
-		}
-
-		for (int i = 0; i != retryTimes; ++i) {
+		for (int i = 0; i <= retryTimes; ++i) {
 			try {
-				return currentPumaClient.getWithAck(batchSize, timeout, timeUnit);
+				return client.getWithAck(batchSize, timeout, timeUnit);
 			} catch (Throwable t) {
-				logger.warn("failed to get binlog message with ack from server {}.\n{}",
-				      currentPumaClient.getPumaServerHost(), ExceptionUtils.getStackTrace(t));
+				if (i == retryTimes) {
+					break;
+				}
 
-				restart(database, tables);
+				logger.warn("failed to get binlog message with ack from server {}.\n{}",
+						client.getServerHost(),
+						ExceptionUtils.getStackTrace(t));
+
+				Uninterruptibles.sleepUninterruptibly(retryInterval, TimeUnit.MILLISECONDS);
+				client = newClient();
 			}
 		}
 
-		throw new PumaClientException("failed to get binlog message with ack after " + retryTimes + " time retries.");
+		String msg = String.format("[%s] failed to get with ack after %s times retries.", clientName, retryTimes);
+		logger.error(msg);
+		throw new PumaClientException(msg);
 	}
 
 	@Override
 	public BinlogMessage getWithAck(int batchSize) throws PumaClientException {
-		if (!subscribed) {
-			throw new PumaClientException("failed to get binlog message with ack, subscribe first.");
+		if (client == null) {
+			client = newClient();
 		}
 
-		if (currentPumaClient == null) {
-			start(database, tables);
-		}
-
-		for (int i = 0; i != retryTimes; ++i) {
+		for (int i = 0; i <= retryTimes; ++i) {
 			try {
-				return currentPumaClient.getWithAck(batchSize);
+				return client.getWithAck(batchSize);
 			} catch (Throwable t) {
-				logger.warn("failed to get binlog message with ack from server {}.\n{}",
-				      currentPumaClient.getPumaServerHost(), ExceptionUtils.getStackTrace(t));
+				if (i == retryTimes) {
+					break;
+				}
 
-				restart(database, tables);
+				logger.warn("failed to get binlog message with ack from server {}.\n{}",
+						client.getServerHost(),
+						ExceptionUtils.getStackTrace(t));
+
+				Uninterruptibles.sleepUninterruptibly(retryInterval, TimeUnit.MILLISECONDS);
+				client = newClient();
 			}
 		}
 
-		throw new PumaClientException("failed to get binlog message with ack after " + retryTimes + " time retries.");
+		String msg = String.format("[%s] failed to get with ack after %s times retries.", clientName, retryTimes);
+		logger.error(msg);
+		throw new PumaClientException(msg);
 	}
 
 	@Override
 	public void ack(BinlogInfo binlogInfo) throws PumaClientException {
-		if (!subscribed) {
-			throw new PumaClientException("failed to ack binlog position, subscribe first.");
+		if (client == null) {
+			client = newClient();
 		}
 
-		if (currentPumaClient == null) {
-			start(database, tables);
-		}
-
-		for (int i = 0; i != retryTimes; ++i) {
+		for (int i = 0; i <= retryTimes; ++i) {
 			try {
-				currentPumaClient.ack(binlogInfo);
+				client.ack(binlogInfo);
 				return;
 			} catch (Throwable t) {
-				logger.warn("failed to ack binlog position to server {}.\n{}", currentPumaClient.getPumaServerHost(),
-				      ExceptionUtils.getStackTrace(t));
+				if (i == retryTimes) {
+					break;
+				}
 
-				restart(database, tables);
+				logger.warn("failed to ack binlog position to server {}.\n{}",
+						client.getServerHost(),
+						ExceptionUtils.getStackTrace(t));
+
+				Uninterruptibles.sleepUninterruptibly(retryInterval, TimeUnit.MILLISECONDS);
+				client = newClient();
 			}
 		}
+
+		String msg = String.format("[%s] failed to ack after %s times retries.", clientName, retryTimes);
+		logger.error(msg);
+		throw new PumaClientException(msg);
 	}
 
 	@Override
 	public void rollback() throws PumaClientException {
-		if (!subscribed) {
-			throw new PumaClientException("failed to rollback binlog message, subscribe first.");
+		if (client == null) {
+			client = newClient();
 		}
 
-		if (currentPumaClient == null) {
-			start(database, tables);
-		}
-
-		for (int i = 0; i != retryTimes; ++i) {
+		for (int i = 0; i <= retryTimes; ++i) {
 			try {
-				currentPumaClient.rollback();
+				client.rollback();
 				return;
 			} catch (Throwable t) {
-				logger.warn("failed to rollback binlog message from server {}.\n{}", currentPumaClient.getPumaServerHost(),
-				      ExceptionUtils.getStackTrace(t));
+				if (i == retryTimes) {
+					break;
+				}
 
-				restart(database, tables);
+				logger.warn("failed to rollback binlog message from server {}.\n{}",
+						client.getServerHost(),
+						ExceptionUtils.getStackTrace(t));
+
+				Uninterruptibles.sleepUninterruptibly(retryInterval, TimeUnit.MILLISECONDS);
+				client = newClient();
 			}
 		}
+
+		String msg = String.format("[%s] failed to rollback after %s times retries.", clientName, retryTimes);
+		logger.error(msg);
+		throw new PumaClientException(msg);
 	}
 
 	@Override
 	public void rollback(BinlogInfo binlogInfo) throws PumaClientException {
-		if (!subscribed) {
-			throw new PumaClientException("failed to rollback binlog message, subscribe first.");
+		if (client == null) {
+			client = newClient();
 		}
 
-		if (currentPumaClient == null) {
-			start(database, tables);
-		}
-
-		for (int i = 0; i != retryTimes; ++i) {
+		for (int i = 0; i <= retryTimes; ++i) {
 			try {
-				currentPumaClient.rollback(binlogInfo);
+				client.rollback(binlogInfo);
 				return;
 			} catch (Throwable t) {
-				logger.warn("failed to rollback binlog message from server {}.\n{}", currentPumaClient.getPumaServerHost(),
-				      ExceptionUtils.getStackTrace(t));
+				if (i == retryTimes) {
+					break;
+				}
 
-				restart(database, tables);
+				logger.warn("failed to rollback binlog message from server {}.\n{}",
+						client.getServerHost(),
+						ExceptionUtils.getStackTrace(t));
+
+				Uninterruptibles.sleepUninterruptibly(retryInterval, TimeUnit.MILLISECONDS);
+				client = newClient();
 			}
 		}
-	}
 
-	@Override
-	public void subscribe(String database, List<String> tables, boolean dml, boolean ddl, boolean transaction) {
-		this.database = database;
-		this.tables = tables;
-		this.dml = dml;
-		this.ddl = ddl;
-		this.transaction = transaction;
-
-		if (currentPumaClient == null) {
-			start(database, tables);
-		}
-
-		currentPumaClient.subscribe(database, tables, dml, ddl, transaction);
-		subscribed = true;
-	}
-
-	@Override
-	public void unSubscribe() throws PumaClientException {
-		if (!subscribed) {
-			throw new PumaClientException("failed to unsubscribe binlog, subscribe first.");
-		}
-
-		if (currentPumaClient == null) {
-			start(database, tables);
-		}
-
-		currentPumaClient.unSubscribe();
-		subscribed = false;
+		String msg = String.format("[%s] failed to rollback after %s times retries.", clientName, retryTimes);
+		logger.error(msg);
+		throw new PumaClientException(msg);
 	}
 }

@@ -1,69 +1,81 @@
 package com.dianping.puma.api.impl;
 
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.dianping.puma.api.MockTest;
+import com.dianping.puma.api.PumaClientException;
+import com.dianping.puma.core.dto.BinlogMessage;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.slf4j.Logger;
 
-import com.dianping.puma.api.MockTest;
-import com.dianping.puma.core.dto.BinlogMessage;
+import static org.junit.Assert.assertEquals;
 
 public class ClusterPumaClientTest extends MockTest {
 
 	@Spy
-	ClusterPumaClient client;
+	ClusterPumaClient clusterPumaClient;
 
 	@Mock
-	SimplePumaClient simpleClient;
-
-	@Mock
-	Logger logger;
+	SimplePumaClient simplePumaClient;
 
 	@Before
 	public void before() {
-		reset(client);
-		reset(simpleClient);
+		reset(clusterPumaClient, simplePumaClient);
+	}
+
+	@Test
+	public void testGetFirst() {
+		clusterPumaClient.client = null;
+		doReturn(simplePumaClient).when(clusterPumaClient).newClient();
+		BinlogMessage binlogMessage = new BinlogMessage();
+		doReturn(binlogMessage).when(simplePumaClient).get(anyInt());
+
+		assertEquals(binlogMessage, clusterPumaClient.get(100));
+		verify(clusterPumaClient, times(1)).newClient();
+		verify(simplePumaClient, times(1)).get(100);
+
+		assertEquals(binlogMessage, clusterPumaClient.get(1000));
+		verify(clusterPumaClient, times(1)).newClient();
+		verify(simplePumaClient, times(1)).get(1000);
 	}
 
 	@SuppressWarnings("unchecked")
    @Test
 	public void testGetSuccess() {
-		doNothing().when(client).restart(anyString(), anyList());
-		doReturn(new BinlogMessage()).when(simpleClient).get(anyInt());
-		client.currentPumaClient = simpleClient;
-		client.subscribed = true;
-		client.retryTimes = 3;
+		clusterPumaClient.client = simplePumaClient;
+		BinlogMessage binlogMessage = new BinlogMessage();
+		doReturn(binlogMessage).when(simplePumaClient).get(anyInt());
 
-		client.get(10);
-		verify(client, times(0)).restart(anyString(), anyList());
-		verify(client, times(1)).get(10);
+		assertEquals(binlogMessage, clusterPumaClient.get(1));
+		verify(clusterPumaClient, times(0)).newClient();
+		verify(simplePumaClient, times(1)).get(1);
+
+		assertEquals(binlogMessage, clusterPumaClient.get(10));
+		verify(clusterPumaClient, times(0)).newClient();
+		verify(simplePumaClient, times(1)).get(10);
 	}
 
-	@SuppressWarnings("unchecked")
-	@Test(expected = RuntimeException.class)
+	@Test(expected = PumaClientException.class)
 	public void testGetFailure() {
-		doNothing().when(client).restart(anyString(), anyList());
-		doThrow(new RuntimeException("mock exception")).when(simpleClient).get(anyInt());
-		client.currentPumaClient = simpleClient;
-		client.subscribed = true;
-		client.retryTimes = 3;
+		clusterPumaClient.client = simplePumaClient;
+		clusterPumaClient.retryTimes = 5;
+		doReturn(simplePumaClient).when(clusterPumaClient).newClient();
+		doThrow(new PumaClientException()).when(simplePumaClient).get(anyInt());
 
 		try {
-			client.get(10);
-		} catch (Exception e) {
-			verify(client, times(3)).restart(anyString(), anyList());
-			throw new RuntimeException();
+			clusterPumaClient.get(20);
+		} catch (PumaClientException e) {
+			throw e;
+		} finally {
+			verify(clusterPumaClient, times(5)).newClient();
+			verify(simplePumaClient, times(6)).get(20);
 		}
 	}
 }

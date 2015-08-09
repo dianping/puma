@@ -8,9 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 public interface PumaClient {
 
-	String getPumaServerHost();
-
-	BinlogMessage get(int batchSize) throws PumaClientException;
+    BinlogMessage get(int batchSize) throws PumaClientException;
 
 	BinlogMessage get(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException;
 
@@ -22,10 +20,5 @@ public interface PumaClient {
 
 	void rollback(BinlogInfo binlogInfo) throws PumaClientException;
 
-	void rollback() throws PumaClientException;
-
-	void subscribe(String database, List<String> tables, boolean dml, boolean ddl, boolean transaction)
-	      throws PumaClientException;
-
-	void unSubscribe() throws PumaClientException;
+    void rollback() throws PumaClientException;
 }

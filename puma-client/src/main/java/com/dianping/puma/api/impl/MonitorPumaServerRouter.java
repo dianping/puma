@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MonitorBasedPumaServerRouter implements PumaServerRouter {
+public class MonitorPumaServerRouter implements PumaServerRouter {
 
 	private final long frozenDuration = 60 * 1000; // 60s.
 
@@ -15,14 +15,18 @@ public class MonitorBasedPumaServerRouter implements PumaServerRouter {
 
 	protected PumaServerMonitor monitor;
 
-	public MonitorBasedPumaServerRouter() {}
+	private String database;
 
-	public MonitorBasedPumaServerRouter(PumaServerMonitor monitor) {
+	private List<String> tables;
+
+	public MonitorPumaServerRouter() {}
+
+	public MonitorPumaServerRouter(PumaServerMonitor monitor) {
 		this.monitor = monitor;
 	}
 
 	@Override
-	public String next(String database, List<String> tables) {
+	public String next() {
 		List<String> servers = monitor.fetch(database, tables);
 
 		if (servers == null || servers.size() == 0) {

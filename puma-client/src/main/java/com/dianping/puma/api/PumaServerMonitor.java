@@ -4,13 +4,13 @@ import java.util.List;
 
 public interface PumaServerMonitor {
 
-	public List<String> fetch(String database, List<String> tables);
+	public List<String> get();
 
-	public void addListener(String database, List<String> tables, PumaServerMonitorListener listener);
+	public void addListener(PumaServerMonitorListener listener);
 
-	public void removeListener(String database, List<String> tables);
+	public void removeListener();
 
 	public interface PumaServerMonitorListener {
-		public void onChange(List<String> servers);
+		public void onChange(List<String> oriServers, List<String> servers);
 	}
 }

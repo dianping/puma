@@ -9,13 +9,13 @@ import java.util.List;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-public class ZookeeperPumaServerMonitorTest {
+public class ConfigPumaServerMonitorTest {
 
-	ZookeeperPumaServerMonitor monitor;
+	ConfigPumaServerMonitor monitor;
 
 	@Before
 	public void before() {
-		monitor = mock(ZookeeperPumaServerMonitor.class);
+		monitor = mock(ConfigPumaServerMonitor.class);
 		doCallRealMethod().when(monitor).parseServers(anyString());
 	}
 

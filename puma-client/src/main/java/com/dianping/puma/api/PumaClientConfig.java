@@ -22,6 +22,8 @@ public class PumaClientConfig {
 
 	private String serverHost;
 
+	private List<String> serverHosts;
+
 	public PumaClientConfig setClientName(String clientName) {
 		this.clientName = clientName;
 		return this;
@@ -61,6 +63,12 @@ public class PumaClientConfig {
 		this.serverHost = serverHost;
 		return this;
 	}
+
+	public PumaClientConfig setServerHosts(List<String> serverHosts) {
+		this.serverHosts = serverHosts;
+		return this;
+	}
+
 	public String getClientName() {
 		return clientName;
 	}
@@ -93,8 +101,28 @@ public class PumaClientConfig {
 		return serverHost;
 	}
 
+	public List<String> getServerHosts() {
+		return serverHosts;
+	}
+
 	public SimplePumaClient buildSimplePumaClient() {
 		return null;
+	}
+
+	public ClusterPumaClient buildClusterPumaClient() {
+		return null;
+	}
+
+	public ClusterPumaClient buildLionClusterPumaClient() {
+		ConfigPumaServerMonitor monitor = new ConfigPumaServerMonitor(database, tables);
+		router = new RoundRobinPumaServerRouter(monitor);
+		return new ClusterPumaClient(this);
+	}
+
+	public ClusterPumaClient buildFixedClusterPumaClient() {
+		FixedPumaServerMonitor monitor = new FixedPumaServerMonitor(serverHosts);
+		router = new RoundRobinPumaServerRouter(monitor);
+		return new ClusterPumaClient(this);
 	}
 
 	protected boolean checkSimplePumaClientConfig() {

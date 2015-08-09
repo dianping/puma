@@ -18,7 +18,9 @@
     </script>
     <div>
         <div class="sidebar responsive" ng-include="'/app/partials/common/sidebar.html'"></div>
-        <div class="main-content"></div>
+        <div class="main-content">
+            <div ng-view></div>
+        </div>
     </div>
 
     <!-- ace -->
@@ -28,7 +30,8 @@
     <!--script src="/app/lib/ng-dialog/ngDialog.min.js"></script-->
 
     <!-- angularJS -->
-    <script src="/app/lib/angular/angular.min.js"></script>
+    <script src="/app/lib/angular/angular.js"></script>
+    <script src="/app/lib/angular/angular-route.js"></script>
 
     <!-- puma -->
     <script src="/app/js/app.js"></script>

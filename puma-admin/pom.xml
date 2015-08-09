@@ -12,15 +12,7 @@
 	<name>puma-admin</name>
 	<packaging>war</packaging>
 	<dependencies>
-		<dependency>
-			<groupId>org.mongodb</groupId>
-			<artifactId>mongo-java-driver</artifactId>
-		</dependency>
-		<!-- 內部jar -->
-		<dependency>
-			<groupId>com.dianping.cat</groupId>
-			<artifactId>cat-core</artifactId>
-		</dependency>
+
 		<dependency>
 			<groupId>com.dianping.puma</groupId>
 			<artifactId>puma-core</artifactId>
@@ -29,10 +21,26 @@
 			<groupId>com.dianping.puma</groupId>
 			<artifactId>puma-biz</artifactId>
 		</dependency>
+
+		<!-- zebra -->
+		<dependency>
+			<groupId>com.dianping.zebra</groupId>
+			<artifactId>zebra-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongo-java-driver</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.dianping.cat</groupId>
+			<artifactId>cat-core</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.dianping.lion</groupId>
 			<artifactId>lion-client</artifactId>
 		</dependency>
+
 		<!-- 日志系统 -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -169,6 +177,29 @@
 			<artifactId>web-framework</artifactId>
 			<version>2.0.10</version>
 		</dependency>
+
+		<!-- unirest -->
+		<dependency>
+			<groupId>com.mashape.unirest</groupId>
+			<artifactId>unirest-java</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpasyncclient</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpmime</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<finalName>${project.artifactId}-${env}-${project.version}</finalName>

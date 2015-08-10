@@ -7,12 +7,15 @@ import com.dianping.puma.biz.entity.PumaServerEntity;
 import com.dianping.puma.biz.entity.PumaTaskServerEntity;
 import com.dianping.puma.biz.entity.PumaTaskTargetEntity;
 import com.dianping.puma.biz.service.PumaServerService;
+import com.dianping.puma.core.util.IPUtils;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Service("pumaServerService")
 public class PumaServerServiceImpl implements PumaServerService {
@@ -42,11 +45,23 @@ public class PumaServerServiceImpl implements PumaServerService {
     }
 
     @Override
+    public List<PumaServerEntity> findOnCurrentServer() {
+        List<PumaServerEntity> result = new ArrayList<PumaServerEntity>();
+        for (String host : IPUtils.getNoLoopbackIP4Addresses()) {
+            PumaServerEntity entity = findByHost(host);
+            if (entity != null) {
+                result.add(entity);
+            }
+        }
+        return result;
+    }
+
+    @Override
     public List<PumaServerEntity> findByTaskId(int taskId) {
         List<PumaTaskServerEntity> pumaTaskServers = pumaTaskServerDao.findByTaskId(taskId);
 
         List<PumaServerEntity> pumaServers = new ArrayList<PumaServerEntity>();
-        for (PumaTaskServerEntity pumaTaskServer: pumaTaskServers) {
+        for (PumaTaskServerEntity pumaTaskServer : pumaTaskServers) {
             pumaServers.add(findById(pumaTaskServer.getServerId()));
         }
 
@@ -57,7 +72,7 @@ public class PumaServerServiceImpl implements PumaServerService {
     public List<PumaServerEntity> findByDatabaseAndTables(String database, List<String> tables) {
         List<Integer> taskIds = null;
 
-        for (String table: tables) {
+        for (String table : tables) {
             List<PumaTaskTargetEntity> pumaTaskTargets = pumaTaskTargetDao.findByDatabaseAndTable(database, table);
             List<Integer> tempTaskIds = Lists.transform(pumaTaskTargets, new Function<PumaTaskTargetEntity, Integer>() {
                 @Override
@@ -75,7 +90,7 @@ public class PumaServerServiceImpl implements PumaServerService {
 
         List<PumaServerEntity> pumaServers = new ArrayList<PumaServerEntity>();
         if (taskIds != null) {
-            for (int taskId: taskIds) {
+            for (int taskId : taskIds) {
                 pumaServers.addAll(this.findByTaskId(taskId));
             }
         }

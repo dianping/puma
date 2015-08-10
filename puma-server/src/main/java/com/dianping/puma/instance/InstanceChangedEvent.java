@@ -1,6 +1,7 @@
 package com.dianping.puma.instance;
 
 import com.dianping.puma.biz.entity.SrcDbEntity;
+import com.dianping.puma.core.model.TableSet;
 
 import java.util.List;
 
@@ -14,6 +15,8 @@ public class InstanceChangedEvent {
     private String clusterName;
 
     private List<SrcDbEntity> dbList;
+
+    private TableSet tableSet;
 
     public String getClusterName() {
         return clusterName;
@@ -30,4 +33,14 @@ public class InstanceChangedEvent {
     public void setDbList(List<SrcDbEntity> dbList) {
         this.dbList = dbList;
     }
+
+    public TableSet getTableSet() {
+        return tableSet;
+    }
+
+    public void setTableSet(TableSet tableSet) {
+        this.tableSet = tableSet;
+    }
+
+
 }

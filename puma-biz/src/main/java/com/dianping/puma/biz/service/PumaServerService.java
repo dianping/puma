@@ -12,6 +12,8 @@ public interface PumaServerService {
 
 	PumaServerEntity findByHost(String host);
 
+	List<PumaServerEntity> findOnCurrentServer();
+
 	List<PumaServerEntity> findByTaskId(int taskId);
 
 	List<PumaServerEntity> findByDatabaseAndTables(String database, List<String> tables);

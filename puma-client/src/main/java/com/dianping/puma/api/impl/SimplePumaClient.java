@@ -86,6 +86,8 @@ public class SimplePumaClient implements PumaClient {
                             .build()).build();
 
     public SimplePumaClient(PumaClientConfig config) {
+        this.database = config.getDatabase();
+        this.tables = config.getTables();
         this.pumaServerHost = config.getServerHost();
         this.clientName = config.getClientName();
         this.gson = new GsonBuilder().registerTypeAdapter(Event.class, new EventJsonDeserializer()).create();

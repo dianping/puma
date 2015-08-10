@@ -13,7 +13,7 @@ public class ConfigPumaServerMonitor implements PumaServerMonitor {
 
 	private static final String ZK_BASE_PATH = "puma.client.route.";
 
-	protected ConfigManager configManager;
+	protected ConfigManager configManager = new LionConfigManager();
 
 	private final String zkPath;
 

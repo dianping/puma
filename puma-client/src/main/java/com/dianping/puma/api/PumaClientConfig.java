@@ -106,7 +106,7 @@ public class PumaClientConfig {
 	}
 
 	public SimplePumaClient buildSimplePumaClient() {
-		return null;
+		return new SimplePumaClient(this);
 	}
 
 	public ClusterPumaClient buildClusterPumaClient() {

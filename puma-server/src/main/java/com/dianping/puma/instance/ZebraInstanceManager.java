@@ -6,7 +6,7 @@ import com.dianping.puma.biz.entity.PumaServerEntity;
 import com.dianping.puma.biz.entity.PumaTaskTargetEntity;
 import com.dianping.puma.biz.service.PumaServerService;
 import com.dianping.zebra.Constants;
-import com.dianping.zebra.biz.service.LionService;
+import com.dianping.zebra.config.LionConfigService;
 import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,7 +22,7 @@ import java.util.*;
 public class ZebraInstanceManager extends AbstractInstanceManager {
 
     @Autowired
-    private LionService lionService;
+    private LionConfigService lionService;
 
     @Autowired
     private PumaTaskTargetDao pumaTaskTargetDao;
@@ -41,13 +41,14 @@ public class ZebraInstanceManager extends AbstractInstanceManager {
 
         Map<String, InstanceChangedEvent> cachedEvent = new HashMap<String, InstanceChangedEvent>();
 
+        /*
         Map<String, String> allProperties = lionService.getConfigByProject(env, Constants.DEFAULT_DATASOURCE_GROUP_PRFIX);
         for (String groupds : allProperties.values()) {
             Map<String, DefaultDataSourceConfigManager.ReadOrWriteRole> groupdsResult = DefaultDataSourceConfigManager.ReadOrWriteRole.parseConfig(groupds);
             for (Map.Entry<String, DefaultDataSourceConfigManager.ReadOrWriteRole> entry : groupdsResult.entrySet()) {
 
             }
-        }
+        }*/
     }
 
     protected Map<String, Set<String>> getTargets() {

@@ -1,8 +1,10 @@
 package com.dianping.puma.pumaserver;
 
 import com.dianping.puma.core.dto.BinlogMessage;
+import com.dianping.puma.core.dto.binlog.request.BinlogAckRequest;
 import com.dianping.puma.core.dto.binlog.request.BinlogGetRequest;
 import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
+import com.dianping.puma.core.dto.binlog.response.BinlogAckResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
 import com.dianping.puma.core.event.RowChangedEvent;
@@ -52,6 +54,7 @@ public class MockedPumaServer {
                 result.put("HttpRouterHandler", HttpRouterHandler.INSTANCE);
                 result.put("BinlogSubscriptionHandler", new BinlogSubscriptionHandler());
                 result.put("BinlogQueryHandler", new BinlogGetHandler());
+                result.put("BinlogAckHandler", new BinlogAckHandler());
                 result.put("DeprecatedBinlogQueryHandler", new DeprecatedBinlogQueryHandler());
                 result.put("ExceptionHandler", ExceptionHandler.INSTANCE);
                 return result;
@@ -67,6 +70,13 @@ public class MockedPumaServer {
             BinlogSubscriptionResponse binlogSubscriptionResponse = new BinlogSubscriptionResponse();
             binlogSubscriptionResponse.setToken("token");
             ctx.channel().writeAndFlush(binlogSubscriptionResponse);
+        }
+    }
+
+    static class BinlogAckHandler extends SimpleChannelInboundHandler<BinlogAckRequest> {
+        @Override
+        protected void channelRead0(ChannelHandlerContext ctx, BinlogAckRequest msg) throws Exception {
+            ctx.channel().writeAndFlush(new BinlogAckResponse());
         }
     }
 

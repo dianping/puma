@@ -110,7 +110,7 @@ public class PumaClientConfig {
 	}
 
 	public ClusterPumaClient buildClusterPumaClient() {
-		return null;
+		return buildLionClusterPumaClient();
 	}
 
 	public ClusterPumaClient buildLionClusterPumaClient() {
@@ -124,25 +124,4 @@ public class PumaClientConfig {
 		router = new RoundRobinPumaServerRouter(monitor);
 		return new ClusterPumaClient(this);
 	}
-
-	protected boolean checkSimplePumaClientConfig() {
-		return false;
-	}
-
-	/*
-	public static PumaClient createClusterPumaClient(String name) {
-		return createZookeeperClusterPumaClient(name);
-	}
-
-	public static PumaClient createClusterPumaClient(String name, List<String> serverHosts) {
-		ConstantPumaServerMonitor monitor = new ConstantPumaServerMonitor(serverHosts);
-		MonitorBasedPumaServerRouter router = new MonitorBasedPumaServerRouter(monitor);
-		return new ClusterPumaClient(name, router);
-	}
-
-	public static PumaClient createZookeeperClusterPumaClient(String name) {
-		ZookeeperPumaServerMonitor monitor = new ZookeeperPumaServerMonitor();
-		MonitorBasedPumaServerRouter router = new MonitorBasedPumaServerRouter(monitor);
-		return new ClusterPumaClient(name, router);
-	}*/
 }

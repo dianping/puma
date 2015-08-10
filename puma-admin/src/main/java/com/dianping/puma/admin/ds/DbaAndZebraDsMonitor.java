@@ -52,7 +52,8 @@ public class DbaAndZebraDsMonitor implements DsMonitor {
 			HttpResponse<JsonNode> response = Unirest.get(queryDatabasesUrl).asJson();
 			Map<String, String> raw = new Gson().fromJson(
 					response.getBody().getObject().getString("result"),
-					new TypeToken<Map<String, String>>(){}.getType());
+					new TypeToken<Map<String, String>>() {
+					}.getType());
 			return new ArrayList<String>(raw.keySet());
 		} catch (Throwable t) {
 			throw new RuntimeException("failed to query databases.", t);
@@ -62,7 +63,7 @@ public class DbaAndZebraDsMonitor implements DsMonitor {
 	protected Map<String, List<String>> queryDatabaseHosts(List<String> databases) {
 		Map<String, List<String>> databaseHosts = new HashMap<String, List<String>>();
 
-		for (String database: databases) {
+		for (String database : databases) {
 			DataSourceConfigManager manager = DataSourceConfigManagerFactory.getConfigManager("remote", database);
 			manager.init();
 
@@ -70,7 +71,7 @@ public class DbaAndZebraDsMonitor implements DsMonitor {
 			Map<String, DataSourceConfig> dataSourceConfigs = config.getDataSourceConfigs();
 
 			List<String> hosts = new ArrayList<String>();
-			for (DataSourceConfig dataSourceConfig: dataSourceConfigs.values()) {
+			for (DataSourceConfig dataSourceConfig : dataSourceConfigs.values()) {
 				String jdbcUrl = dataSourceConfig.getJdbcUrl();
 				String host = parseHostFromJdbcUrl(jdbcUrl);
 				hosts.add(host);
@@ -94,8 +95,11 @@ public class DbaAndZebraDsMonitor implements DsMonitor {
 		return null;
 	}
 
-	protected Map<String, Cluster> combine(Map<String, Cluster> rawClusters,
-			Map<String, List<String>> masterDbRelation, Map<String, List<String>> slaveDbRelation) {
-		return null;
+	protected void merge(Map<String, Cluster> rawClusters, Map<String, List<String>> masterDbs) {
+		for (Cluster cluster: rawClusters.values()) {
+			for (Single single: cluster.getSingles()) {
+
+			}
+		}
 	}
 }

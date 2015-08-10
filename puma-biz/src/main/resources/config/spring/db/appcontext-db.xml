@@ -11,7 +11,7 @@
 
     <bean id="pumaSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="pumaDataSource"/>
-        <property name="mapperLocations" value="classpath*:config/sqlmap/*.xml"/>
+        <property name="mapperLocations" value="classpath:config/sqlmap/puma/*.xml"/>
         <property name="typeAliasesPackage" value="com.dianping.puma.biz.entity"/>
     </bean>
 

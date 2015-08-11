@@ -35,6 +35,7 @@ import com.dianping.puma.server.exception.ServerEventFetcherException;
 import com.dianping.puma.server.exception.ServerEventParserException;
 import com.dianping.puma.server.exception.ServerEventRuntimeException;
 import com.dianping.puma.status.SystemStatusManager;
+import com.dianping.zebra.util.JDBCUtils;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
@@ -44,7 +45,10 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -78,6 +82,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         boolean canStop = false;
         do {
             try {
+                loadServerId(getTask().getSrcDbEntityList());
+
                 // 读position/file文件
                 BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(getContext().getPumaServerName());
 
@@ -151,6 +157,30 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
     }
 
+    protected void loadServerId(List<SrcDbEntity> srcDbEntityList) throws Exception {
+        Class.forName("com.mysql.jdbc.Driver");
+
+        Iterator<SrcDbEntity> iterator = srcDbEntityList.iterator();
+        while (iterator.hasNext()) {
+            SrcDbEntity entity = iterator.next();
+
+            Connection conn = null;
+            Statement stmt = null;
+            java.sql.ResultSet results = null;
+            try {
+                stmt = conn.createStatement();
+                results = stmt.executeQuery("show global variables like 'server_id'");
+                results.next();
+                entity.setServerId(results.getLong(2));
+            } catch (Exception e) {
+                Cat.logError("get server id failed!", e);
+                iterator.remove();
+            } finally {
+                JDBCUtils.closeAll(results, stmt, conn);
+            }
+        }
+    }
+
     protected void initConnect() throws IOException {
         if (!auth()) {
             throw new IOException("Login failed.");
@@ -167,6 +197,10 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         }
         if (!queryBinlogImage()) {
             throw new IOException("Query config binlog row image failed.");
+        }
+
+        if (queryServerId() != currentSrcDbEntity.getServerId()) {
+            throw new IOException("Server Id Changed.");
         }
     }
 
@@ -578,6 +612,22 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             LOG.error("TaskName: " + getTaskName() + ", UpdateSetting failed. Reason: " + e.getMessage());
 
             return false;
+        }
+    }
+
+
+    private long queryServerId() throws IOException {
+        try {
+            QueryExecutor executor = new QueryExecutor(is, os);
+            String cmd = "show global variables like 'server_id'";
+            ResultSet rs = executor.query(cmd, getContext());
+            List<String> columnValues = rs.getFiledValues();
+            if (columnValues == null || columnValues.size() != 2 || columnValues.get(1) == null) {
+                return Long.valueOf(columnValues.get(1));
+            }
+            return -1;
+        } catch (Exception e) {
+            return -1;
         }
     }
 

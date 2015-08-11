@@ -9,7 +9,7 @@
     </select>
 
    <select id="findByJdbcRef" resultType="SrcDbEntity">
-       SELECT * FROM SrcDb WHERE jdbcRef = #{jdbcRef}
+       SELECT * FROM SrcDb WHERE clusterName = #{clusterName}
    </select>
 
     <select id="findByName" resultType="SrcDbEntity">
@@ -31,7 +31,7 @@
     <update id="update" parameterType="SrcDbEntity">
         UPDATE SrcDb
         SET
-        jdbcRef = #{jdbcRef}
+        clusterName = #{clusterName}
         host = #{host},
         port = #{port},
         username = #{username},
@@ -45,7 +45,7 @@
     <insert id="insert" parameterType="SrcDbEntity" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO SrcDb
         (
-        jdbcRef,
+        clusterName,
         name,
         host,
         port,
@@ -56,7 +56,7 @@
         )
         VALUES
         (
-        #{jdbcRef},
+        #{clusterName},
         #{name},
         #{host},
         #{port},

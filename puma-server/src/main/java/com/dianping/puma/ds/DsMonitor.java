@@ -1,4 +1,4 @@
-package com.dianping.puma.admin.ds;
+package com.dianping.puma.ds;
 
 public interface DsMonitor {
 

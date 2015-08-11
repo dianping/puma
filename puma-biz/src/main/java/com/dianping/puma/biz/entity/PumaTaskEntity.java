@@ -18,7 +18,7 @@ public class PumaTaskEntity {
 
     private int preservedDay;
 
-    private String jdbcRef;
+    private String clusterName;
 
     private BinlogInfo startBinlogInfo;
 
@@ -73,12 +73,12 @@ public class PumaTaskEntity {
         this.tableSet = tableSet;
     }
 
-    public String getJdbcRef() {
-        return jdbcRef;
+    public String getClusterName() {
+        return clusterName;
     }
 
-    public void setJdbcRef(String jdbcRef) {
-        this.jdbcRef = jdbcRef;
+    public void setClusterName(String clusterName) {
+        this.clusterName = clusterName;
     }
 
     public List<SrcDbEntity> getSrcDbEntityList() {

@@ -19,7 +19,7 @@
 		)
 		VALUES
 		(
-		#{jdbcRef},
+		#{clusterName},
 		#{host},
 		#{port},
 		#{username},
@@ -30,7 +30,7 @@
 	<update id="update" parameterType="DstDbEntity">
 		UPDATE DstDb
 		SET
-		JdbcRef = #{jdbcRef},
+		JdbcRef = #{clusterName},
 		Host = #{host},
 		Port = #{port},
 		Username = #{username},

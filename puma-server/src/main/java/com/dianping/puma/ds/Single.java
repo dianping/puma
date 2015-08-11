@@ -1,4 +1,4 @@
-package com.dianping.puma.admin.ds;
+package com.dianping.puma.ds;
 
 public class Single {
 
@@ -6,9 +6,13 @@ public class Single {
 
 	private boolean active;
 
+	private String host;
+
 	private String rip;
 
 	private String vip;
+
+	private int port;
 
 	private String version;
 
@@ -30,6 +34,14 @@ public class Single {
 		this.active = active;
 	}
 
+	public String getHost() {
+		return host;
+	}
+
+	public void setHost(String host) {
+		this.host = host;
+	}
+
 	public String getRip() {
 		return rip;
 	}
@@ -44,6 +56,14 @@ public class Single {
 
 	public void setVip(String vip) {
 		this.vip = vip;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
 	}
 
 	public String getVersion() {

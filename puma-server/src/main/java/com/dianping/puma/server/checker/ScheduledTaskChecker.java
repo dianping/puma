@@ -1,11 +1,18 @@
 package com.dianping.puma.server.checker;
 
 import com.dianping.puma.biz.entity.PumaTaskEntity;
+import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.biz.service.PumaTaskService;
+import com.dianping.puma.core.config.ConfigManager;
+import com.dianping.puma.core.config.LionConfigManager;
+import com.dianping.puma.ds.Cluster;
+import com.dianping.puma.ds.DsMonitor;
+import com.dianping.puma.ds.Single;
 import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.server.server.TaskServerManager;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
+import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -25,6 +32,11 @@ public class ScheduledTaskChecker implements TaskChecker {
 
 	@Autowired
 	TaskContainer taskContainer;
+
+	@Autowired
+	DsMonitor dsMonitor;
+
+	ConfigManager configManager = new LionConfigManager();
 
 	private ConcurrentMap<String, PumaTaskEntity> tasks = new ConcurrentHashMap<String, PumaTaskEntity>();
 
@@ -79,8 +91,17 @@ public class ScheduledTaskChecker implements TaskChecker {
 	}
 
 	private void handleCreatedTasks(Map<String, PumaTaskEntity> createdTasks) {
-		for (Map.Entry<String, PumaTaskEntity> entry: createdTasks.entrySet()) {
+		for (Map.Entry<String, PumaTaskEntity> entry : createdTasks.entrySet()) {
 			try {
+				PumaTaskEntity pumaTask = entry.getValue();
+				Cluster cluster = dsMonitor.getCluster(pumaTask.getClusterName());
+				for (Single single : cluster.getSingles()) {
+					SrcDbEntity srcDbEntity = new SrcDbEntity();
+					srcDbEntity.setHost(single.getHost());
+					srcDbEntity.setUsername(configManager.getConfig("puma.server.binlog.username"));
+					srcDbEntity.setPassword(configManager.getConfig("puma.server.binlog.password"));
+				}
+
 				taskContainer.create(entry.getKey(), entry.getValue());
 			} catch (Exception e) {
 				// @todo.
@@ -89,7 +110,7 @@ public class ScheduledTaskChecker implements TaskChecker {
 	}
 
 	private void handleUpdatedTasks(Map<String, MapDifference.ValueDifference<PumaTaskEntity>> updatedTasks) {
-		for (Map.Entry<String, MapDifference.ValueDifference<PumaTaskEntity>> entry: updatedTasks.entrySet()) {
+		for (Map.Entry<String, MapDifference.ValueDifference<PumaTaskEntity>> entry : updatedTasks.entrySet()) {
 			try {
 				taskContainer.update(entry.getKey(), entry.getValue().leftValue(), entry.getValue().rightValue());
 			} catch (Exception e) {
@@ -99,12 +120,20 @@ public class ScheduledTaskChecker implements TaskChecker {
 	}
 
 	private void handleDeletedTasks(Map<String, PumaTaskEntity> deletedTasks) {
-		for (Map.Entry<String, PumaTaskEntity> entry: deletedTasks.entrySet()) {
+		for (Map.Entry<String, PumaTaskEntity> entry : deletedTasks.entrySet()) {
 			try {
 				taskContainer.delete(entry.getKey(), entry.getValue());
 			} catch (Exception e) {
 				// @todo.
 			}
+		}
+	}
+
+	protected void handleUpdatedTask(PumaTaskEntity oriPumaTask, PumaTaskEntity pumaTask) {
+		try {
+			taskContainer.update(pumaTask.getName(), oriPumaTask, pumaTask);
+		} catch (Throwable t) {
+			// @todo.
 		}
 	}
 }

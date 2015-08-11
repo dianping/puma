@@ -37,6 +37,7 @@ import com.dianping.puma.server.exception.ServerEventRuntimeException;
 import com.dianping.puma.status.SystemStatusManager;
 import com.dianping.zebra.util.JDBCUtils;
 import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -46,6 +47,7 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -168,6 +170,11 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             Statement stmt = null;
             java.sql.ResultSet results = null;
             try {
+                conn = DriverManager.getConnection(
+                        String.format("jdbc:mysql://%s:%d", entity.getHost(), entity.getPort() == 0 ? 3306 : entity.getPort()),
+                        entity.getUsername(),
+                        entity.getPassword());
+
                 stmt = conn.createStatement();
                 results = stmt.executeQuery("show global variables like 'server_id'");
                 results.next();
@@ -622,7 +629,9 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             String cmd = "show global variables like 'server_id'";
             ResultSet rs = executor.query(cmd, getContext());
             List<String> columnValues = rs.getFiledValues();
-            if (columnValues == null || columnValues.size() != 2 || columnValues.get(1) == null) {
+            if (columnValues != null &&
+                    columnValues.size() == 2 &&
+                    !Strings.isNullOrEmpty(columnValues.get(1))) {
                 return Long.valueOf(columnValues.get(1));
             }
             return -1;

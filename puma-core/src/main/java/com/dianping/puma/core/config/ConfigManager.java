@@ -6,5 +6,5 @@ public interface ConfigManager {
 
 	public void addConfigChangeListener(String key, ConfigChangeListener listener);
 
-	public void removeConfigChangeListener(String key);
+	public void removeConfigChangeListener(String key, ConfigChangeListener listener);
 }

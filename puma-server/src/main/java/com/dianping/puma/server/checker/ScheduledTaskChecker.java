@@ -97,6 +97,7 @@ public class ScheduledTaskChecker implements TaskChecker {
 				for (Single single : cluster.getSingles()) {
 					SrcDbEntity srcDbEntity = new SrcDbEntity();
 					srcDbEntity.setHost(single.getHost());
+					srcDbEntity.setPort(single.getPort());
 					srcDbEntity.setUsername(configManager.getConfig("puma.server.binlog.username"));
 					srcDbEntity.setPassword(configManager.getConfig("puma.server.binlog.password"));
 					pumaTask.getSrcDbEntityList().add(srcDbEntity);

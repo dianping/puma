@@ -5,11 +5,13 @@ import com.dianping.puma.core.config.ConfigManager;
 import com.dianping.puma.core.config.LionConfigManager;
 import com.dianping.zebra.biz.service.LionService;
 import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class DbaDsMonitor implements DsMonitor {
+public class DbaDsMonitor implements DsMonitor, InitializingBean {
 
 	private final String DBA_QUERY_URL = "puma.server.dbaquery.url";
 
@@ -43,6 +45,11 @@ public class DbaDsMonitor implements DsMonitor {
 				dbaQueryUrl = newValue;
 			}
 		});
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		clusters = dbaQuery();
 	}
 
 	@Override
@@ -95,8 +102,11 @@ public class DbaDsMonitor implements DsMonitor {
 			for (DbaResult.Data.Mha mhaInstance: mhaInstances) {
 				Single single = new Single();
 				single.setVersion(mhaInstance.version);
-				single.setRip(mhaInstance.RIP);
-				single.setVip(mhaInstance.VIP);
+				if (mhaInstance.VIP != null && !StringUtils.isWhitespace(mhaInstance.VIP)) {
+					single.setHost(mhaInstance.VIP + ":" + mhaInstance.port);
+				} else if (mhaInstance.RIP != null && !StringUtils.isWhitespace(mhaInstance.RIP)) {
+					single.setHost(mhaInstance.RIP + ":" + mhaInstance.port);
+				}
 				single.setMaster(mhaInstance.Role.equalsIgnoreCase("master"));
 				cluster.addSingle(single);
 			}

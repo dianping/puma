@@ -12,7 +12,6 @@ import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.server.server.TaskServerManager;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
-import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -100,6 +99,7 @@ public class ScheduledTaskChecker implements TaskChecker {
 					srcDbEntity.setHost(single.getHost());
 					srcDbEntity.setUsername(configManager.getConfig("puma.server.binlog.username"));
 					srcDbEntity.setPassword(configManager.getConfig("puma.server.binlog.password"));
+					pumaTask.getSrcDbEntityList().add(srcDbEntity);
 				}
 
 				taskContainer.create(entry.getKey(), entry.getValue());

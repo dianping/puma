@@ -146,7 +146,7 @@ public class PumaTaskServiceImpl implements PumaTaskService {
      */
     protected PumaTaskEntity loadFullPumaTask(PumaTaskEntity pumaTask) {
         pumaTask.setPumaServers(loadPumaServers(pumaTask.getId()));
-        pumaTask.setSrcDbEntityList(loadSrcDbs(pumaTask.getClusterName()));
+        //pumaTask.setSrcDbEntityList(loadSrcDbs(pumaTask.getClusterName()));
         pumaTask.setTableSet(loadTableSet(pumaTask.getId()));
 
         return pumaTask;

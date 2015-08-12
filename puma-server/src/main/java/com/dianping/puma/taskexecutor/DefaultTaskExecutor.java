@@ -171,7 +171,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             java.sql.ResultSet results = null;
             try {
                 conn = DriverManager.getConnection(
-                        String.format("jdbc:mysql://%s:%d", entity.getHost(), entity.getPort() == 0 ? 3306 : entity.getPort()),
+                        String.format("jdbc:mysql://%s:%d/", entity.getHost(), entity.getPort() == 0 ? 3306 : entity.getPort()),
                         entity.getUsername(),
                         entity.getPassword());
 

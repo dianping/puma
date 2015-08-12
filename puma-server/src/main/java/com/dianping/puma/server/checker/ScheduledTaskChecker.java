@@ -97,6 +97,7 @@ public class ScheduledTaskChecker implements TaskChecker {
 				for (Single single : cluster.getSingles()) {
 					SrcDbEntity srcDbEntity = new SrcDbEntity();
 					srcDbEntity.setHost(single.getHost());
+					srcDbEntity.setPort(single.getPort());
 					srcDbEntity.setUsername(configManager.getConfig("puma.server.binlog.username"));
 					srcDbEntity.setPassword(configManager.getConfig("puma.server.binlog.password"));
 					pumaTask.getSrcDbEntityList().add(srcDbEntity);
@@ -126,14 +127,6 @@ public class ScheduledTaskChecker implements TaskChecker {
 			} catch (Exception e) {
 				// @todo.
 			}
-		}
-	}
-
-	protected void handleUpdatedTask(PumaTaskEntity oriPumaTask, PumaTaskEntity pumaTask) {
-		try {
-			taskContainer.update(pumaTask.getName(), oriPumaTask, pumaTask);
-		} catch (Throwable t) {
-			// @todo.
 		}
 	}
 }

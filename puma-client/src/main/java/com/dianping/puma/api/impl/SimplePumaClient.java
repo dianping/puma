@@ -1,22 +1,18 @@
 package com.dianping.puma.api.impl;
 
-import java.lang.reflect.Type;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.PumaClientConfig;
 import com.dianping.puma.api.PumaClientException;
+import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.dto.BinlogRollback;
 import com.dianping.puma.core.dto.binlog.response.BinlogAckResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
+import com.dianping.puma.core.event.*;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.google.common.base.Strings;
+import com.google.gson.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -30,19 +26,12 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dianping.puma.core.annotation.ThreadUnSafe;
-import com.dianping.puma.core.event.DdlEvent;
-import com.dianping.puma.core.event.Event;
-import com.dianping.puma.core.event.EventType;
-import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.event.ServerErrorEvent;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
+import java.lang.reflect.Type;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @ThreadUnSafe
 public class SimplePumaClient implements PumaClient {
@@ -209,14 +198,16 @@ public class SimplePumaClient implements PumaClient {
             this.token = null;
             throw new PumaClientException(e.getMessage(), e);
         }
-
-        if (result.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
+        if (result.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            return gson.fromJson(json, clazz);
+        } else if (result.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
             doSubscribe();
             addToken(params);
             return execute(path, params, clazz);
+        } else {
+            this.token = null;
+            throw new PumaClientException(json);
         }
-
-        return gson.fromJson(json, clazz);
     }
 
 

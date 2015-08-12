@@ -9,6 +9,7 @@ import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
 import com.dianping.puma.core.model.event.EventListener;
 import com.google.common.eventbus.Subscribe;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,12 +35,8 @@ public class TransactionEventFilter extends AbstractEventFilter implements Event
 			}
 
 			// Need begin or not.
-			if (((RowChangedEvent) changedEvent).isTransactionBegin()) {
-				if(!begin){
-					return false;
-				}else{
-					return true;
-				}
+			if (((RowChangedEvent) changedEvent).isTransactionBegin() && !begin) {
+				return false;
 			}
 
 			// Need commit or not.
@@ -48,7 +45,12 @@ public class TransactionEventFilter extends AbstractEventFilter implements Event
 			}
 
 			// In accepted table list.
-			Schema schema = new Schema(changedEvent.getDatabase());
+			String database = changedEvent.getDatabase();
+			if(database == null || database.length() == 0){
+				return true;
+			}
+			
+			Schema schema = new Schema(database);
 			if (!acceptedSchemas.contains(schema)) {
 				return false;
 			}

@@ -38,6 +38,7 @@ import com.dianping.puma.status.SystemStatusManager;
 import com.dianping.zebra.util.JDBCUtils;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -50,7 +51,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -166,9 +166,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
     protected void loadServerId(List<SrcDbEntity> srcDbEntityList) throws Exception {
         Class.forName("com.mysql.jdbc.Driver");
 
-        Iterator<SrcDbEntity> iterator = srcDbEntityList.iterator();
-        while (iterator.hasNext()) {
-            SrcDbEntity entity = iterator.next();
+        for (SrcDbEntity entity : srcDbEntityList) {
 
             Connection conn = null;
             Statement stmt = null;
@@ -183,9 +181,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 results = stmt.executeQuery("show global variables like 'server_id'");
                 results.next();
                 entity.setServerId(results.getLong(2));
-            } catch (Exception e) {
-                Cat.logError("get server id failed!", e);
-                iterator.remove();
+            } catch (Exception ignore) {
+                entity.setServerId(0);
             } finally {
                 JDBCUtils.closeAll(results, stmt, conn);
             }
@@ -235,12 +232,25 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         return newSrcEntity;
     }
 
-    protected SrcDbEntity initSrcDbByServerId(final long binlogServerId) {
+    protected SrcDbEntity initSrcDbByServerId(final long binlogServerId) throws IOException {
+        List<SrcDbEntity> avaliableSrcDb = FluentIterable
+                .from(getTask().getSrcDbEntityList())
+                .filter(new Predicate<SrcDbEntity>() {
+                    @Override
+                    public boolean apply(SrcDbEntity input) {
+                        return input.getServerId() > 0;
+                    }
+                }).toList();
+
+        if (avaliableSrcDb.size() == 0) {
+            throw new IOException("No Avaliable SrcDB");
+        }
+
         if (this.currentSrcDbEntity != null) {
             return this.currentSrcDbEntity;
         }
 
-        SrcDbEntity srcDbEntity = Iterables.find(getTask().getSrcDbEntityList(), new Predicate<SrcDbEntity>() {
+        SrcDbEntity srcDbEntity = Iterables.find(avaliableSrcDb, new Predicate<SrcDbEntity>() {
             @Override
             public boolean apply(SrcDbEntity input) {
                 return input.getServerId() == binlogServerId;
@@ -251,14 +261,14 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             return srcDbEntity;
         }
 
-        srcDbEntity = Iterables.find(getTask().getSrcDbEntityList(), new Predicate<SrcDbEntity>() {
+        srcDbEntity = Iterables.find(avaliableSrcDb, new Predicate<SrcDbEntity>() {
             @Override
             public boolean apply(SrcDbEntity input) {
                 return input.isPreferred();
             }
         }, null);
 
-        return srcDbEntity != null ? srcDbEntity : getTask().getSrcDbEntityList().get(0);
+        return srcDbEntity != null ? srcDbEntity : avaliableSrcDb.get(0);
     }
 
     protected BinlogInfo switchBinlog(BinlogInfo oldBinlogInfo) throws IOException {

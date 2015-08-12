@@ -42,7 +42,7 @@ import org.codehaus.plexus.util.StringUtils;
 
 /**
  * 
- * @author Leo Liang
+ * @author damon.zhu
  * 
  */
 public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>> implements IndexManager<K, V> {

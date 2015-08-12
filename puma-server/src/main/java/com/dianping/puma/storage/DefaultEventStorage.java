@@ -11,9 +11,7 @@ import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.ByteArrayUtils;
-import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.status.SystemStatusManager;
 import com.dianping.puma.storage.bucket.BucketManager;
 import com.dianping.puma.storage.bucket.DataBucket;
@@ -54,8 +52,6 @@ public class DefaultEventStorage implements EventStorage {
 
 	private String taskName;
 
-	private BinlogInfo binlogInfo;
-
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 	private AtomicReference<String> lastDate = new AtomicReference<String>();
@@ -67,8 +63,6 @@ public class DefaultEventStorage implements EventStorage {
 	private AtomicReference<IndexKeyImpl> lastIndexKey = new AtomicReference<IndexKeyImpl>(null);
 
 	private AtomicReference<Long> processingServerId = new AtomicReference<Long>(null);
-
-	private EventFilterChain storageEventFilterChain;
 
 	/**
 	 * @param binlogIndexBaseDir
@@ -149,14 +143,6 @@ public class DefaultEventStorage implements EventStorage {
 		this.taskName = taskName;
 	}
 
-	public BinlogInfo getBinlogInfo() {
-		return binlogInfo;
-	}
-
-	public void setBinlogInfo(BinlogInfo binlogInfo) {
-		this.binlogInfo = binlogInfo;
-	}
-
 	public void setMasterBucketIndex(DataBucketManager masterBucketIndex) {
 		this.masterBucketIndex = masterBucketIndex;
 	}
@@ -181,20 +167,11 @@ public class DefaultEventStorage implements EventStorage {
 		this.codec = codec;
 	}
 
-	public void setStorageEventFilterChain(EventFilterChain storageEventFilterChain) {
-		this.storageEventFilterChain = storageEventFilterChain;
-	}
 
 	@Override
 	public synchronized void store(ChangedEvent event) throws StorageException {
 		if (stopped) {
 			throw new StorageClosedException("Storage has been closed.");
-		}
-
-		// Storage filter.
-		storageEventFilterChain.reset();
-		if (!storageEventFilterChain.doNext(event)) {
-			return;
 		}
 
 		String nowDate = sdf.format(new Date());

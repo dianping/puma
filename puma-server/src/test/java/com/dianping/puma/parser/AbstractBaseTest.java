@@ -372,14 +372,7 @@ public abstract class AbstractBaseTest {
 		eventFilterList.add(transactionEventFilter);
 
 		eventFilterChain.setEventFilters(eventFilterList);
-		storage.setStorageEventFilterChain(eventFilterChain);
-
-		BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(taskName);
-		if (binlogInfo != null) {
-			storage.setBinlogInfo(binlogInfo);
-		} else {
-			storage.setBinlogInfo(taskExecutor.getBinlogInfo());
-		}
+		sender.setStorageEventFilterChain(eventFilterChain);
 
 		// File sender master storage.
 		LocalFileDataBucketManager masterBucketIndex = new LocalFileDataBucketManager();

@@ -104,7 +104,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                         if (binlogInfo == null) {
                             throw new IOException("Switch Binlog Failed!");
                         } else {
-                            Cat.logEvent("Binlog", "Switch", Message.SUCCESS,
+                            Cat.logEvent("BinlogSwitch", String.format("[%d]%s", getTask().getId(), getTask().getName()), Message.SUCCESS,
                                     oldBinlogInfo.toString() + " -> " + binlogInfo.toString());
                         }
                     }

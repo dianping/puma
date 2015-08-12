@@ -46,11 +46,8 @@ import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
-import com.dianping.puma.storage.DefaultArchiveStrategy;
-import com.dianping.puma.storage.DefaultCleanupStrategy;
-import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.EventChannel;
-import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
+import com.dianping.puma.storage.EventStorage;
 import com.dianping.puma.storage.channel.DefaultEventChannel;
 import com.dianping.puma.storage.holder.impl.DefaultBinlogInfoHolder;
 import com.dianping.puma.taskexecutor.DefaultTaskExecutor;
@@ -104,8 +101,6 @@ public abstract class AbstractBaseTest {
 	private final String serverName = "testServer01";
 
 	private TaskExecutor taskExecutor;
-
-	private DefaultEventStorage storage;
 
 	protected static String host;
 
@@ -303,12 +298,12 @@ public abstract class AbstractBaseTest {
 		srcdb.setUsername(username);
 		srcdb.setPassword(password);
 
-		//task
+		// task
 		PumaTaskEntity task = new PumaTaskEntity();
 		task.getSrcDbEntityList().add(srcdb);
-		
+
 		taskExecutor.setTask(task);
-		
+
 		// Parser.
 		Parser parser = new DefaultBinlogParser();
 		// parser.start();
@@ -329,17 +324,6 @@ public abstract class AbstractBaseTest {
 		dataHandler.setTableMetasInfoFetcher(tableMetaInfo);
 		taskExecutor.setDataHandler(dataHandler);
 		taskExecutor.setTableMetaInfoFetcher(tableMetaInfo);
-
-		// File sender.
-		List<Sender> senders = new ArrayList<Sender>();
-		FileDumpSender sender = new FileDumpSender();
-		sender.setName("fileSender-" + taskName);
-
-		// File sender storage.
-		storage = new DefaultEventStorage();
-		storage.setName("storage-" + taskName);
-		storage.setTaskName(taskName);
-		storage.setCodec(codec);
 
 		EventFilterChain eventFilterChain = new DefaultEventFilterChain();
 		List<EventFilter> eventFilterList = new ArrayList<EventFilter>();
@@ -372,35 +356,24 @@ public abstract class AbstractBaseTest {
 		eventFilterList.add(transactionEventFilter);
 
 		eventFilterChain.setEventFilters(eventFilterList);
+
+		// File sender.
+		List<Sender> senders = new ArrayList<Sender>();
+		FileDumpSender sender = new FileDumpSender();
+		sender.setName("fileSender-" + taskName);
+		sender.setTaskName(taskName);
+		sender.setCodec(codec);
 		sender.setStorageEventFilterChain(eventFilterChain);
 
-		// File sender master storage.
-		LocalFileDataBucketManager masterBucketIndex = new LocalFileDataBucketManager();
-		masterBucketIndex.setBaseDir(masterStorageBaseDir.getAbsolutePath());
-		masterBucketIndex.setBucketFilePrefix("Bucket-");
-		masterBucketIndex.setMaxBucketLengthMB(1000);
-		storage.setMasterBucketIndex(masterBucketIndex);
+		sender.setMasterStorageBaseDir(masterStorageBaseDir.getAbsolutePath());
+		sender.setMasterBucketFilePrefix("Bucket-");
+		sender.setMaxMasterBucketLengthMB(1000);
+		sender.setSlaveStorageBaseDir(slaveStorageBaseDir.getAbsolutePath());
+		sender.setSlaveBucketFilePrefix("Bucket-");
+		sender.setMaxMasterFileCount(1000);
+		sender.setPreservedDay(2);
+		sender.setBinlogIndexBaseDir(binlogIndexBaseDir.getAbsolutePath());
 
-		// File sender slave storage.
-		LocalFileDataBucketManager slaveBucketIndex = new LocalFileDataBucketManager();
-		slaveBucketIndex.setBaseDir(slaveStorageBaseDir.getAbsolutePath());
-		slaveBucketIndex.setBucketFilePrefix("Bucket-");
-		slaveBucketIndex.setMaxBucketLengthMB(1000);
-		storage.setSlaveBucketIndex(slaveBucketIndex);
-
-		// Archive strategy.
-		DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
-		archiveStrategy.setServerName(taskName);
-		archiveStrategy.setMaxMasterFileCount(25);
-		storage.setArchiveStrategy(archiveStrategy);
-
-		// Clean up strategy.
-		DefaultCleanupStrategy cleanupStrategy = new DefaultCleanupStrategy();
-		cleanupStrategy.setPreservedDay(2);
-		storage.setCleanupStrategy(cleanupStrategy);
-
-		storage.setBinlogIndexBaseDir(binlogIndexBaseDir.getAbsolutePath());
-		sender.setStorage(storage);
 		senders.add(sender);
 
 		// Dispatch.
@@ -455,6 +428,7 @@ public abstract class AbstractBaseTest {
 		waitForSync(WAIT_FOR_SYNC_TIME);
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
 
+		EventStorage storage = this.taskExecutor.getFileSender().get(0).getStorage(SCHEMA_NAME);
 		EventChannel channel = new DefaultEventChannel(storage);
 		channel.open(SubscribeConstant.SEQ_FROM_OLDEST);
 
@@ -482,6 +456,8 @@ public abstract class AbstractBaseTest {
 	      long timeStamp, boolean needTs) throws Exception {
 		waitForSync(WAIT_FOR_SYNC_TIME);
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
+		
+		EventStorage storage = this.taskExecutor.getFileSender().get(0).getStorage(SCHEMA_NAME);
 		EventChannel channel = new DefaultEventChannel(storage);
 		channel.open(serverId, binlog, binlogPos);
 

@@ -30,5 +30,6 @@ public interface Sender extends LifeCycle<Exception> {
 
 	public void send(ChangedEvent event, PumaContext context) throws SenderException;
 	
-	public EventStorage getStorage();
+	public EventStorage getStorage(String database);
+	
 }

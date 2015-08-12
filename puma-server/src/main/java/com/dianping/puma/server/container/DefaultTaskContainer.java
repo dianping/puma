@@ -1,20 +1,20 @@
 package com.dianping.puma.server.container;
 
-import com.dianping.puma.biz.entity.PumaTaskEntity;
-import com.dianping.puma.core.model.Table;
-import com.dianping.puma.core.model.TableSet;
-import com.dianping.puma.sender.Sender;
-import com.dianping.puma.server.builder.TaskBuilder;
-import com.dianping.puma.storage.EventStorage;
-import com.dianping.puma.taskexecutor.TaskExecutor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.dianping.puma.biz.entity.PumaTaskEntity;
+import com.dianping.puma.core.model.Table;
+import com.dianping.puma.core.model.TableSet;
+import com.dianping.puma.server.builder.TaskBuilder;
+import com.dianping.puma.storage.EventStorage;
+import com.dianping.puma.taskexecutor.TaskExecutor;
 
 @Service
 public class DefaultTaskContainer implements TaskContainer {
@@ -38,15 +38,15 @@ public class DefaultTaskContainer implements TaskContainer {
         return new ArrayList<TaskExecutor>(taskExecutors.values());
     }
 
-    public EventStorage getTaskStorageByTaskName(String taskName) {
-        if (taskExecutors.containsKey(taskName)) {
-            List<Sender> senders = taskExecutors.get(taskName).getFileSender();
-            if (senders != null && senders.size() > 0) {
-                return senders.get(0).getStorage();
-            }
-        }
-        return null;
-    }
+//    public EventStorage getTaskStorageByTaskName(String taskName) {
+//        if (taskExecutors.containsKey(taskName)) {
+//            List<Sender> senders = taskExecutors.get(taskName).getFileSender();
+//            if (senders != null && senders.size() > 0) {
+//                return senders.get(0).getStorage();
+//            }
+//        }
+//        return null;
+//    }
 
     @Override
     public EventStorage getTaskStorage(String database) {
@@ -56,7 +56,8 @@ public class DefaultTaskContainer implements TaskContainer {
 
             for (Table table : tables) {
                 if (table.getSchemaName().equals(database)) {
-                    return getTaskStorageByTaskName(taskExecutor.getTask().getName());
+               	  return taskExecutor.getFileSender().get(0).getStorage(database);
+                    //return getTaskStorageByTaskName(taskExecutor.getTask().getName());
                 }
             }
         }

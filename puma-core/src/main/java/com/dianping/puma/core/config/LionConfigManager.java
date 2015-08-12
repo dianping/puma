@@ -2,15 +2,17 @@ package com.dianping.puma.core.config;
 
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+@Service
 public class LionConfigManager implements ConfigManager {
 
-	protected ConfigCache cc = ConfigCache.getInstance();
+	protected final ConfigCache cc = ConfigCache.getInstance();
 
 	protected volatile List<String> keys = new ArrayList<String>();
 

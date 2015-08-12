@@ -40,7 +40,6 @@ public class LocalFileIndexBucketTest {
 		for (int i = 0; i < 1000; i++) {
 			IndexValueImpl l2Index = new IndexValueImpl();
 			l2Index.setIndexKey(new IndexKeyImpl(1 + i, 1L, "mysql-binlog.0000001", 4L + i));
-			l2Index.setDatabase("dianping");
 			l2Index.setTable("receipt");
 			l2Index.setDdl(false);
 			l2Index.setDml(true);
@@ -76,7 +75,6 @@ public class LocalFileIndexBucketTest {
 				Assert.assertEquals(4L + i, next.getIndexKey().getBinlogPosition());
 				Assert.assertEquals(1L, next.getIndexKey().getServerId());
 				Assert.assertEquals(i + 1, next.getIndexKey().getTimestamp());
-				Assert.assertEquals("dianping", next.getDatabase());
 				Assert.assertEquals("receipt", next.getTable());
 				Assert.assertEquals(false, next.isDdl());
 				Assert.assertEquals(true, next.isDml());
@@ -104,7 +102,6 @@ public class LocalFileIndexBucketTest {
 			Assert.assertEquals("mysql-binlog.0000001", next.getIndexKey().getBinlogFile());
 			Assert.assertEquals(4L + i, next.getIndexKey().getBinlogPosition());
 			Assert.assertEquals(1L, next.getIndexKey().getServerId());
-			Assert.assertEquals("dianping", next.getDatabase());
 			Assert.assertEquals("receipt", next.getTable());
 			Assert.assertEquals(false, next.isDdl());
 			Assert.assertEquals(true, next.isDml());
@@ -128,7 +125,6 @@ public class LocalFileIndexBucketTest {
 			Assert.assertEquals("mysql-binlog.0000001", next.getIndexKey().getBinlogFile());
 			Assert.assertEquals(4L + i, next.getIndexKey().getBinlogPosition());
 			Assert.assertEquals(1L, next.getIndexKey().getServerId());
-			Assert.assertEquals("dianping", next.getDatabase());
 			Assert.assertEquals("receipt", next.getTable());
 			Assert.assertEquals(false, next.isDdl());
 			Assert.assertEquals(true, next.isDml());

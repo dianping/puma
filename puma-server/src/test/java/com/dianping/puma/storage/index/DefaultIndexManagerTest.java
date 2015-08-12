@@ -49,7 +49,6 @@ public class DefaultIndexManagerTest {
 			IndexValueImpl l2IndexValue = new IndexValueImpl();
 
 			l2IndexValue.setIndexKey(indexKey);
-			l2IndexValue.setDatabase(database);
 			l2IndexValue.setTable(table);
 			l2IndexValue.setDdl(isDdl);
 			l2IndexValue.setDml(isDml);
@@ -288,7 +287,6 @@ public class DefaultIndexManagerTest {
 		Assert.assertEquals("bin-0003.bin", convertFromObj.getIndexKey().getBinlogFile());
 		Assert.assertEquals(200L, convertFromObj.getIndexKey().getBinlogPosition());
 		Assert.assertEquals(0L, convertFromObj.getIndexKey().getServerId());
-		Assert.assertEquals("dianping", convertFromObj.getDatabase());
 		Assert.assertEquals("receipt", convertFromObj.getTable());
 		Assert.assertEquals(false, convertFromObj.isDdl());
 		Assert.assertEquals(true, convertFromObj.isDml());
@@ -302,7 +300,6 @@ public class DefaultIndexManagerTest {
 		Assert.assertEquals("bin-0003.bin", convertFromObj.getIndexKey().getBinlogFile());
 		Assert.assertEquals(200L, convertFromObj.getIndexKey().getBinlogPosition());
 		Assert.assertEquals(0L, convertFromObj.getIndexKey().getServerId());
-		Assert.assertEquals("dianping", convertFromObj.getDatabase());
 		Assert.assertEquals("receipt", convertFromObj.getTable());
 		Assert.assertEquals(false, convertFromObj.isDdl());
 		Assert.assertEquals(true, convertFromObj.isDml());

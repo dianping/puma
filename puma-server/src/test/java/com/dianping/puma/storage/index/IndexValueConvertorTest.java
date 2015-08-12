@@ -19,7 +19,6 @@ public class IndexValueConvertorTest {
 
 		IndexValueImpl l2Index = new IndexValueImpl();
 		l2Index.setIndexKey(new IndexKeyImpl(1L, "mysql-binlog.0000001", 4L));
-		l2Index.setDatabase("dianping");
 		l2Index.setTable("receipt");
 		l2Index.setDdl(false);
 		l2Index.setTransactionBegin(true);
@@ -37,7 +36,6 @@ public class IndexValueConvertorTest {
 		Assert.assertEquals("mysql-binlog.0000001", convertFromObj.getIndexKey().getBinlogFile());
 		Assert.assertEquals(4L, convertFromObj.getIndexKey().getBinlogPosition());
 		Assert.assertEquals(1L, convertFromObj.getIndexKey().getServerId());
-		Assert.assertEquals("dianping", convertFromObj.getDatabase());
 		Assert.assertEquals("receipt", convertFromObj.getTable());
 		Assert.assertEquals(false, convertFromObj.isDdl());
 		Assert.assertEquals(true, convertFromObj.isDml());

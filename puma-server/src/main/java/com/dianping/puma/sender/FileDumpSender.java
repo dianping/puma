@@ -89,6 +89,10 @@ public class FileDumpSender extends AbstractSender {
 
 			if (database != null && database.length() > 0) {
 				DefaultEventStorage eventStorage = storages.get(database);
+				
+				if (((RowChangedEvent) event).isTransactionBegin()) {
+					System.out.println("transaction begin");
+				}
 
 				if (eventStorage == null) {
 					eventStorage = buildEventStorage(database);

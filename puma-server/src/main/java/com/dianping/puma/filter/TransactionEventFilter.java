@@ -34,8 +34,12 @@ public class TransactionEventFilter extends AbstractEventFilter implements Event
 			}
 
 			// Need begin or not.
-			if (((RowChangedEvent) changedEvent).isTransactionBegin() && !begin) {
-				return false;
+			if (((RowChangedEvent) changedEvent).isTransactionBegin()) {
+				if(!begin){
+					return false;
+				}else{
+					return true;
+				}
 			}
 
 			// Need commit or not.

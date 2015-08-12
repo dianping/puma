@@ -38,16 +38,6 @@ public class DefaultTaskContainer implements TaskContainer {
         return new ArrayList<TaskExecutor>(taskExecutors.values());
     }
 
-//    public EventStorage getTaskStorageByTaskName(String taskName) {
-//        if (taskExecutors.containsKey(taskName)) {
-//            List<Sender> senders = taskExecutors.get(taskName).getFileSender();
-//            if (senders != null && senders.size() > 0) {
-//                return senders.get(0).getStorage();
-//            }
-//        }
-//        return null;
-//    }
-
     @Override
     public EventStorage getTaskStorage(String database) {
         for (TaskExecutor taskExecutor : taskExecutors.values()) {
@@ -57,7 +47,6 @@ public class DefaultTaskContainer implements TaskContainer {
             for (Table table : tables) {
                 if (table.getSchemaName().equals(database)) {
                	  return taskExecutor.getFileSender().get(0).getStorage(database);
-                    //return getTaskStorageByTaskName(taskExecutor.getTask().getName());
                 }
             }
         }

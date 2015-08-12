@@ -4,8 +4,6 @@ import com.dianping.puma.storage.Sequence;
 
 public class IndexValueImpl implements IndexValue<IndexKeyImpl> {
 
-	private String database;
-	
 	private String table;
 	
 	private boolean isDdl;
@@ -22,14 +20,6 @@ public class IndexValueImpl implements IndexValue<IndexKeyImpl> {
 	
 	public void setIndexKey(IndexKeyImpl indexKey) {
 		this.indexKey = indexKey;
-	}
-
-	public String getDatabase() {
-		return database;
-	}
-
-	public void setDatabase(String database) {
-		this.database = database;
 	}
 
 	public String getTable() {

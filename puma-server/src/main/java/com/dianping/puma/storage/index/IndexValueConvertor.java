@@ -24,14 +24,6 @@ public class IndexValueConvertor implements IndexItemConvertor<IndexValueImpl> {
 
 		l2Index.setIndexKey(indexKey);
 
-		int databaseLen = buf.readByte();
-		if (databaseLen > 0) {
-			byte[] database = new byte[databaseLen];
-			buf.readBytes(database);
-
-			l2Index.setDatabase(new String(database));
-		}
-
 		int tableLen = buf.readByte();
 		if (tableLen > 0) {
 			byte[] table = new byte[tableLen];
@@ -62,16 +54,6 @@ public class IndexValueConvertor implements IndexItemConvertor<IndexValueImpl> {
 		byte[] binlogIndexKeyBytes = binlogIndexKey.getBytes();
 		buf.writeByte(binlogIndexKey.length());
 		buf.writeBytes(binlogIndexKeyBytes);
-
-		String database = value.getDatabase();
-		if (database != null && database.length() > 0) {
-			byte[] databaseBytes = database.getBytes();
-
-			buf.writeByte(databaseBytes.length);
-			buf.writeBytes(databaseBytes);
-		} else {
-			buf.writeByte(0);
-		}
 
 		String table = value.getTable();
 		if (table != null && table.length() > 0) {

@@ -99,9 +99,13 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                     this.currentSrcDbEntity = initSrcDbByServerId(binlogInfo.getServerId());
 
                     if (binlogInfo.getServerId() != currentSrcDbEntity.getServerId()) {
+                        BinlogInfo oldBinlogInfo = binlogInfo;
                         binlogInfo = switchBinlog(binlogInfo);
                         if (binlogInfo == null) {
                             throw new IOException("Switch Binlog Failed!");
+                        } else {
+                            Cat.logEvent("Binlog", "Switch", Message.SUCCESS,
+                                    oldBinlogInfo.toString() + " -> " + binlogInfo.toString());
                         }
                     }
                 }

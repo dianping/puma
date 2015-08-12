@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.jboss.netty.util.internal.ConcurrentHashMap;
 
+import com.dianping.cat.Cat;
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
@@ -89,10 +90,6 @@ public class FileDumpSender extends AbstractSender {
 
 			if (database != null && database.length() > 0) {
 				DefaultEventStorage eventStorage = storages.get(database);
-				
-				if (((RowChangedEvent) event).isTransactionBegin()) {
-					System.out.println("transaction begin");
-				}
 
 				if (eventStorage == null) {
 					eventStorage = buildEventStorage(database);
@@ -102,10 +99,6 @@ public class FileDumpSender extends AbstractSender {
 
 				if (transactionBegin != null) {
 					eventStorage.store(transactionBegin);
-					
-					System.out.println("store transaction begin");
-
-					
 					transactionBegin = null;
 				}
 
@@ -115,14 +108,14 @@ public class FileDumpSender extends AbstractSender {
 					if (((RowChangedEvent) event).isTransactionBegin()) {
 						transactionBegin = event;
 					} else {
-						System.out.println("unknown rowchanged event");
+						Cat.logEvent("Puma", "RowChangeEvent-Has-No-Database");
+						LOG.error(String.format("RowChangeEvent[%s] has no database", event.toString()));
 					}
 				} else {
-					System.out.println("unknown rowchanged event");
+					Cat.logEvent("Puma", "ChangeEvent-Has-No-Database");
+					LOG.error(String.format("ChangeEvent[%s] has no database", event.toString()));
 				}
 			}
-
-			// storage.store(event);
 		} catch (StorageException e) {
 			throw new SenderException("FileDumpSender.doSend failed.", e);
 		}

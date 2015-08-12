@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractSender implements Sender {
-	private static final Logger LOG = LoggerFactory.getLogger(AbstractSender.class);
+	protected static final Logger LOG = LoggerFactory.getLogger(AbstractSender.class);
 
 	private String name;
 

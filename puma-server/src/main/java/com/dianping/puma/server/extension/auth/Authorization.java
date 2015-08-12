@@ -6,6 +6,13 @@ public class Authorization {
 
 	private String password;
 
+	public Authorization() {}
+
+	public Authorization(String username, String password) {
+		this.username = username;
+		this.password = password;
+	}
+
 	public String getUsername() {
 		return username;
 	}

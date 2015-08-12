@@ -15,8 +15,16 @@
  */
 package com.dianping.puma.sender;
 
+import java.util.Map;
+
+import org.jboss.netty.util.internal.ConcurrentHashMap;
+
 import com.dianping.puma.common.PumaContext;
+import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.RowChangedEvent;
+import com.dianping.puma.filter.EventFilterChain;
+import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.EventStorage;
 import com.dianping.puma.storage.exception.StorageException;
 
@@ -26,18 +34,42 @@ import com.dianping.puma.storage.exception.StorageException;
  * 
  */
 public class FileDumpSender extends AbstractSender {
-	private EventStorage	storage;
+	private EventStorage storage;
+
+	private Map<String, DefaultEventStorage> storages = new ConcurrentHashMap<String, DefaultEventStorage>();
+
+	private ChangedEvent transactionBegin;
+
+	private EventFilterChain storageEventFilterChain;
+	
+	private String taskName;
+
+	private String binlogIndexBaseDir;
+	
+	private String masterStorageBaseDir;
+	
+	private String slaveStorageBaseDir;
+	
+	private int maxMasterBucketLengthMB;
+	
+	private int maxSlaveBucketLengthMB;
+	
+	private String slaveBucketFilePrefix;
+	
+	
+	
+	private EventCodec codec;
 
 	/**
 	 * @param storage
-	 *            the storage to set
+	 *           the storage to set
 	 */
 	public void setStorage(EventStorage storage) {
 		this.storage = storage;
 	}
-	
+
 	@Override
-	public EventStorage getStorage(){
+	public EventStorage getStorage() {
 		return storage;
 	}
 
@@ -55,11 +87,51 @@ public class FileDumpSender extends AbstractSender {
 
 	@Override
 	protected void doSend(ChangedEvent event, PumaContext context) throws SenderException {
+		// Storage filter.
+		storageEventFilterChain.reset();
+		if (!storageEventFilterChain.doNext(event)) {
+			return;
+		}
+		
 		try {
-			storage.store(event);
+//			String database = event.getDatabase();
+//
+//			if (database != null && database.length() > 0) {
+//				DefaultEventStorage eventStorage = storages.get(database);
+//
+//				if (eventStorage == null) {
+//					eventStorage = new DefaultEventStorage();
+//
+//					eventStorage.setName(database);
+//					eventStorage.setTaskName(taskName);
+//
+//				}
+//
+//				if (transactionBegin != null) {
+//					eventStorage.store(transactionBegin);
+//					transactionBegin = null;
+//				}
+//
+//				eventStorage.store(event);
+//			} else {
+//				if (event instanceof RowChangedEvent) {
+//					if (((RowChangedEvent) event).isTransactionBegin()) {
+//						transactionBegin = event;
+//					} else {
+//
+//					}
+//				} else {
+//
+//				}
+//			}
+
+			 storage.store(event);
 		} catch (StorageException e) {
 			throw new SenderException("FileDumpSender.doSend failed.", e);
 		}
 	}
 
+	public void setStorageEventFilterChain(EventFilterChain storageEventFilterChain) {
+		this.storageEventFilterChain = storageEventFilterChain;
+	}
 }

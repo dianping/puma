@@ -175,14 +175,7 @@ public class DefaultTaskBuilder implements TaskBuilder {
         eventFilterList.add(transactionEventFilter);
 
         eventFilterChain.setEventFilters(eventFilterList);
-        storage.setStorageEventFilterChain(eventFilterChain);
-
-        BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(taskName);
-        if (binlogInfo != null) {
-            storage.setBinlogInfo(binlogInfo);
-        } else {
-            storage.setBinlogInfo(pumaTask.getStartBinlogInfo());
-        }
+        sender.setStorageEventFilterChain(eventFilterChain);
 
         // File sender master storage.
         LocalFileDataBucketManager masterBucketIndex = new LocalFileDataBucketManager();

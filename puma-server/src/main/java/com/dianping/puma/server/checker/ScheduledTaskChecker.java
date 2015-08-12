@@ -129,12 +129,4 @@ public class ScheduledTaskChecker implements TaskChecker {
 			}
 		}
 	}
-
-	protected void handleUpdatedTask(PumaTaskEntity oriPumaTask, PumaTaskEntity pumaTask) {
-		try {
-			taskContainer.update(pumaTask.getName(), oriPumaTask, pumaTask);
-		} catch (Throwable t) {
-			// @todo.
-		}
-	}
 }

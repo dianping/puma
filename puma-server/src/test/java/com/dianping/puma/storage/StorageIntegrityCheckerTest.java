@@ -12,8 +12,6 @@ import org.unidal.helper.Files.Dir;
 
 import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.filter.DefaultEventFilterChain;
-import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.storage.bucket.DataBucket;
 import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;
@@ -41,9 +39,6 @@ public class StorageIntegrityCheckerTest {
 		eventStorage.setName("storage-test");
 		eventStorage.setTaskName("test");
 		eventStorage.setCodec(new RawEventCodec());
-
-		EventFilterChain eventFilterChain = new DefaultEventFilterChain();
-		eventStorage.setStorageEventFilterChain(eventFilterChain);
 
 		LocalFileDataBucketManager masterBucketIndex = new LocalFileDataBucketManager();
 		masterBucketIndex.setBaseDir(masterStorageBaseDir.getAbsolutePath());

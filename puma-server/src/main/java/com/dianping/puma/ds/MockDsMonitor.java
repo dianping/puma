@@ -44,12 +44,12 @@ public class MockDsMonitor implements DsMonitor {
             Cluster cluster = new Cluster();
             cluster.addDatabase("test");
 
-            Single s1 = new Single();
-            s1.setHost("192.168.225.83");
-            s1.setPort(3306);
-            s1.setActive(true);
-            s1.setBalance(1);
-            s1.setMaster(true);
+//            Single s1 = new Single();
+//            s1.setHost("192.168.225.83");
+//            s1.setPort(3306);
+//            s1.setActive(true);
+//            s1.setBalance(1);
+//            s1.setMaster(true);
 
             Single s2 = new Single();
             s2.setHost("192.168.225.84");
@@ -63,7 +63,7 @@ public class MockDsMonitor implements DsMonitor {
             s3.setActive(true);
             s3.setBalance(1);
 
-            cluster.addSingle(s1);
+//            cluster.addSingle(s1);
             cluster.addSingle(s2);
             cluster.addSingle(s3);
             return cluster;

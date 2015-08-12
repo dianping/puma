@@ -221,11 +221,18 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
     }
 
     protected SrcDbEntity chooseNextSrcDb() {
+        SrcDbEntity oldSrcEntity = this.currentSrcDbEntity;
+
         int index = getTask().getSrcDbEntityList().indexOf(this.currentSrcDbEntity) + 1;
         if (index >= getTask().getSrcDbEntityList().size()) {
             index = 0;
         }
-        return getTask().getSrcDbEntityList().get(index);
+        SrcDbEntity newSrcEntity = getTask().getSrcDbEntityList().get(index);
+
+        Cat.logEvent("SrcDbSwitch", String.format("[%d]%s", getTask().getId(), getTask().getName()), Message.SUCCESS,
+                oldSrcEntity.toString() + " -> " + newSrcEntity.toString());
+
+        return newSrcEntity;
     }
 
     protected SrcDbEntity initSrcDbByServerId(final long binlogServerId) {

@@ -71,19 +71,19 @@ public class LionRegistryServiceTest extends MockTest {
 		lionRegistryService.register("0.0.0.0", "puma-test-db", null);
 		verify(configManager, times(1)).createConfig(anyString(), anyString(), anyString());
 		verify(configManager, times(1)).setConfig(anyString(), anyString());
-		verify(configManager, times(1)).setConfig("puma-test-db", "0.0.0.0");
+		verify(configManager, times(1)).setConfig(lionRegistryService.buildKey("puma-test-db"), "0.0.0.0");
 
 		doReturn("0.0.0.0").when(configManager).getConfig(anyString());
 		lionRegistryService.register("1.1.1.1", "puma-test-db", null);
 		verify(configManager, times(1)).createConfig(anyString(), anyString(), anyString());
 		verify(configManager, times(2)).setConfig(anyString(), anyString());
-		verify(configManager, times(1)).setConfig("puma-test-db", "0.0.0.0\t1.1.1.1");
+		verify(configManager, times(1)).setConfig(lionRegistryService.buildKey("puma-test-db"), "0.0.0.0\t1.1.1.1");
 
 		doReturn("0.0.0.0\t1.1.1.1").when(configManager).getConfig(anyString());
 		lionRegistryService.register("2.2.2.2", "puma-test-db", null);
 		verify(configManager, times(1)).createConfig(anyString(), anyString(), anyString());
 		verify(configManager, times(3)).setConfig(anyString(), anyString());
-		verify(configManager, times(1)).setConfig("puma-test-db", "0.0.0.0\t1.1.1.1\t2.2.2.2");
+		verify(configManager, times(1)).setConfig(lionRegistryService.buildKey("puma-test-db"), "0.0.0.0\t1.1.1.1\t2.2.2.2");
 
 		doReturn("0.0.0.0\t1.1.1.1\t2.2.2.2").when(configManager).getConfig(anyString());
 		lionRegistryService.register("1.1.1.1", "puma-test-db", null);
@@ -100,24 +100,24 @@ public class LionRegistryServiceTest extends MockTest {
 		lionRegistryService.register("0.0.0.0", "puma-test-db", null);
 		verify(configManager, times(1)).createConfig(anyString(), anyString(), anyString());
 		verify(configManager, times(1)).setConfig(anyString(), anyString());
-		verify(configManager, times(1)).setConfig("puma-test-db", "0.0.0.0");
+		verify(configManager, times(1)).setConfig(lionRegistryService.buildKey("puma-test-db"), "0.0.0.0");
 
 		doReturn("0.0.0.0").when(configManager).getConfig(anyString());
 		lionRegistryService.register("1.1.1.1", "puma-test-db", null);
 		verify(configManager, times(1)).createConfig(anyString(), anyString(), anyString());
 		verify(configManager, times(2)).setConfig(anyString(), anyString());
-		verify(configManager, times(1)).setConfig("puma-test-db", "0.0.0.0\t1.1.1.1");
+		verify(configManager, times(1)).setConfig(lionRegistryService.buildKey("puma-test-db"), "0.0.0.0\t1.1.1.1");
 
 		doReturn("0.0.0.0\t1.1.1.1").when(configManager).getConfig(anyString());
 		lionRegistryService.unregister("0.0.0.0", "puma-test-db", null);
 		verify(configManager, times(1)).createConfig(anyString(), anyString(), anyString());
 		verify(configManager, times(3)).setConfig(anyString(), anyString());
-		verify(configManager, times(1)).setConfig("puma-test-db", "1.1.1.1");
+		verify(configManager, times(1)).setConfig(lionRegistryService.buildKey("puma-test-db"), "1.1.1.1");
 
 		doReturn("1.1.1.1").when(configManager).getConfig(anyString());
 		lionRegistryService.unregister("1.1.1.1", "puma-test-db", null);
 		verify(configManager, times(1)).createConfig(anyString(), anyString(), anyString());
 		verify(configManager, times(4)).setConfig(anyString(), anyString());
-		verify(configManager, times(1)).setConfig("puma-test-db", "");
+		verify(configManager, times(1)).setConfig(lionRegistryService.buildKey("puma-test-db"), "");
 	}
 }

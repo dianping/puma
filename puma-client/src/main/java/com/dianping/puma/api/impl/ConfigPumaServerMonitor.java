@@ -58,7 +58,7 @@ public class ConfigPumaServerMonitor implements PumaServerMonitor {
 			return servers;
 		}
 
-		String[] serverStrings = StringUtils.split(zkNode);
+		String[] serverStrings = StringUtils.split(zkNode, "#");
 		if (serverStrings == null) {
 			return servers;
 		}

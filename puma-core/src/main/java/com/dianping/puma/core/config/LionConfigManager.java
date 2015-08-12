@@ -11,6 +11,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Service;
 
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,7 +41,7 @@ public class LionConfigManager implements ConfigManager {
 	@Override
 	public void createConfig(String project, String key, String desc) {
 		try {
-			HttpGet httpGet = new HttpGet(String.format(lionCreateUrl, project, key, desc));
+			HttpGet httpGet = new HttpGet(String.format(lionCreateUrl, encode(project), encode(key), encode(desc)));
 			HttpResponse httpResponse = httpClient.execute(httpGet);
 			String json = EntityUtils.toString(httpResponse.getEntity());
 			LionApiResult lionApiResult = new Gson().fromJson(json, LionApiResult.class);
@@ -54,7 +56,7 @@ public class LionConfigManager implements ConfigManager {
 	@Override
 	public void setConfig(String key, String value) {
 		try {
-			HttpGet httpGet = new HttpGet(String.format(lionSetUrl, EnvZooKeeperConfig.getEnv(), key, value));
+			HttpGet httpGet = new HttpGet(String.format(lionSetUrl, EnvZooKeeperConfig.getEnv(), encode(key), encode(value)));
 			HttpResponse httpResponse = httpClient.execute(httpGet);
 			String json = EntityUtils.toString(httpResponse.getEntity());
 			LionApiResult lionApiResult = new Gson().fromJson(json, LionApiResult.class);
@@ -100,6 +102,22 @@ public class LionConfigManager implements ConfigManager {
 	public void removeConfigChangeListener(String key, ConfigChangeListener listener) {
 		keys.remove(key);
 		listeners.remove(key, listener);
+	}
+
+	protected String encode(String url) {
+		try {
+			return URLEncoder.encode(url, "utf-8");
+		} catch (Throwable t) {
+			throw new RuntimeException("failed to encode url.");
+		}
+	}
+
+	protected String decode(String url) {
+		try {
+			return URLDecoder.decode(url, "utf-8");
+		} catch (Throwable t) {
+			throw new RuntimeException("failed to decode url.");
+		}
 	}
 
 	private class LionApiResult {

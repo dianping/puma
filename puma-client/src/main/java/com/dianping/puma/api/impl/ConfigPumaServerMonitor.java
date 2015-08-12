@@ -17,6 +17,8 @@ public class ConfigPumaServerMonitor implements PumaServerMonitor {
 
 	private final String zkPath;
 
+	private ConfigChangeListener configChangeListener;
+
 	public ConfigPumaServerMonitor(String database, List<String> tables) {
 		configManager = new LionConfigManager();
 		zkPath = buildZkPath(database, tables);
@@ -30,7 +32,7 @@ public class ConfigPumaServerMonitor implements PumaServerMonitor {
 
 	@Override
 	public void addListener(final PumaServerMonitorListener listener) {
-		ConfigChangeListener configChangeListener = new ConfigChangeListener() {
+		configChangeListener = new ConfigChangeListener() {
 			@Override
 			public void onConfigChange(String oldValue, String newValue) {
 				listener.onChange(parseServers(oldValue), parseServers(newValue));
@@ -42,7 +44,7 @@ public class ConfigPumaServerMonitor implements PumaServerMonitor {
 
 	@Override
 	public void removeListener() {
-		configManager.removeConfigChangeListener(zkPath);
+		configManager.removeConfigChangeListener(zkPath, configChangeListener);
 	}
 
 	protected String buildZkPath(String database, List<String> tables) {

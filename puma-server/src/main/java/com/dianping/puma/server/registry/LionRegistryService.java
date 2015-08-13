@@ -1,4 +1,4 @@
-package com.dianping.puma.server.extension.registry;
+package com.dianping.puma.server.registry;
 
 import com.dianping.puma.core.config.ConfigManager;
 import com.google.common.collect.Lists;

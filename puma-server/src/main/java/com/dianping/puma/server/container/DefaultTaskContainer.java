@@ -14,7 +14,7 @@ import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.core.util.IPUtils;
 import com.dianping.puma.server.builder.TaskBuilder;
-import com.dianping.puma.server.extension.registry.RegistryService;
+import com.dianping.puma.server.registry.RegistryService;
 import com.dianping.puma.storage.EventStorage;
 import com.dianping.puma.taskexecutor.TaskExecutor;
 

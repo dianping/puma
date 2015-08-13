@@ -1,14 +1,18 @@
 package com.dianping.puma.core.config;
 
+import java.util.Map;
+
 public interface ConfigManager {
 
-	public void createConfig(String project, String key, String desc);
+    void createConfig(String project, String key, String desc);
 
-	public void setConfig(String key, String value);
+    void setConfig(String key, String value);
 
-	public String getConfig(String key);
+    String getConfig(String key);
 
-	public void addConfigChangeListener(String key, ConfigChangeListener listener);
+    Map<String, String> getConfigByProject(String env, String project);
 
-	public void removeConfigChangeListener(String key, ConfigChangeListener listener);
+    void addConfigChangeListener(String key, ConfigChangeListener listener);
+
+    void removeConfigChangeListener(String key, ConfigChangeListener listener);
 }

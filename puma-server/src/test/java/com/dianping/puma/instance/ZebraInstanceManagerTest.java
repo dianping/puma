@@ -1,7 +1,6 @@
 package com.dianping.puma.instance;
 
-import com.dianping.zebra.biz.service.LionService;
-import com.dianping.zebra.biz.service.impl.LionServiceImpl;
+import com.dianping.puma.core.config.ConfigManager;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,11 +18,11 @@ public class ZebraInstanceManagerTest {
 
     @Test
     public void testBuildConfigFromZebra() throws Exception {
-        LionService lionService = mock(LionService.class);
+        ConfigManager lionService = mock(ConfigManager.class);
         when(lionService.getConfigByProject(anyString(), anyString())).thenReturn(groupds);
 
         ZebraInstanceManager target = new ZebraInstanceManager();
-        target.setLionService(lionService);
+        target.setConfigManager(lionService);
         target.buildConfigFromZebra();
     }
 

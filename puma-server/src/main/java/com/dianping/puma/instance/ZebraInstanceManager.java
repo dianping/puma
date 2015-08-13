@@ -4,8 +4,8 @@ import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.puma.biz.dao.PumaTaskTargetDao;
 import com.dianping.puma.biz.service.PumaServerService;
+import com.dianping.puma.core.config.ConfigManager;
 import com.dianping.zebra.Constants;
-import com.dianping.zebra.biz.service.LionService;
 import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -33,13 +33,13 @@ import java.util.regex.Pattern;
 public class ZebraInstanceManager extends AbstractInstanceManager {
 
     @Autowired
-    private LionService lionService;
-
-    @Autowired
     private PumaTaskTargetDao pumaTaskTargetDao;
 
     @Autowired
     private PumaServerService pumaServerService;
+
+    @Autowired
+    private ConfigManager configManager;
 
     private final String env = EnvZooKeeperConfig.getEnv();
 
@@ -73,7 +73,7 @@ public class ZebraInstanceManager extends AbstractInstanceManager {
         Map<String, Set<String>> clusterIpMap = new HashMap<String, Set<String>>();
         Map<String, Set<String>> clusterDbMap = new HashMap<String, Set<String>>();
 
-        Map<String, String> allProperties = lionService.getConfigByProject(env, Constants.DEFAULT_DATASOURCE_GROUP_PRFIX);
+        Map<String, String> allProperties = configManager.getConfigByProject(env, Constants.DEFAULT_DATASOURCE_GROUP_PRFIX);
         for (String groupds : allProperties.values()) {
             Map<String, DefaultDataSourceConfigManager.ReadOrWriteRole> groupdsResult = DefaultDataSourceConfigManager.ReadOrWriteRole.parseConfig(groupds);
 
@@ -139,8 +139,8 @@ public class ZebraInstanceManager extends AbstractInstanceManager {
         return String.format("%s.%s.jdbc.%s", Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX, dsId, key);
     }
 
-    public void setLionService(LionService lionService) {
-        this.lionService = lionService;
+    public void setConfigManager(ConfigManager configManager) {
+        this.configManager = configManager;
     }
 
     //    protected Map<String, Set<String>> getTargets() {

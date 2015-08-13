@@ -20,7 +20,6 @@ import com.dianping.puma.core.meta.TableMetaInfo;
 import java.sql.SQLException;
 
 /**
- * TODO Comment of TableMetasInfoFetcher
  *
  * @author Leo Liang
  *

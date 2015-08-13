@@ -22,17 +22,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Dozer @ 8/7/15
- * mail@dozer.cc
- * http://www.dozer.cc
- */
-
 @Component
 public class ZebraInstanceManager implements InstanceManager {
-
-    @Autowired
-    private PumaServerService pumaServerService;
 
     @Autowired
     private ConfigManager configManager;
@@ -44,8 +35,6 @@ public class ZebraInstanceManager implements InstanceManager {
     private ConfigCache configCache = ConfigCache.getInstance();
 
     private volatile Map<String, Set<String>> clusterIpMap = new HashMap<String, Set<String>>();
-
-    private volatile Map<String, Set<String>> clusterDbMap = new HashMap<String, Set<String>>();
 
     private volatile Map<String, String> dbClusterMap = new HashMap<String, String>();
 
@@ -71,7 +60,6 @@ public class ZebraInstanceManager implements InstanceManager {
 
     protected void buildConfigFromZebra() throws IOException {
         Map<String, Set<String>> clusterIpMap = new HashMap<String, Set<String>>();
-        Map<String, Set<String>> clusterDbMap = new HashMap<String, Set<String>>();
         Map<String, String> dbClusterMap = new HashMap<String, String>();
 
         Map<String, String> allProperties = configManager.getConfigByProject(env, Constants.DEFAULT_DATASOURCE_GROUP_PRFIX);
@@ -101,13 +89,6 @@ public class ZebraInstanceManager implements InstanceManager {
 
             dbClusterMap.put(db, writeUrl);
 
-            Set<String> clusterDbs = clusterDbMap.get(writeUrl);
-            if (clusterDbs == null) {
-                clusterDbs = new HashSet<String>();
-                clusterDbMap.put(writeUrl, clusterDbs);
-            }
-            clusterDbs.add(db);
-
             Set<String> clusterIps = clusterIpMap.get(writeUrl);
             if (clusterIps == null) {
                 clusterIps = new HashSet<String>();
@@ -133,7 +114,6 @@ public class ZebraInstanceManager implements InstanceManager {
                 clusterIps.add(url);
             }
 
-            this.clusterDbMap = clusterDbMap;
             this.clusterIpMap = clusterIpMap;
             this.dbClusterMap = dbClusterMap;
         }

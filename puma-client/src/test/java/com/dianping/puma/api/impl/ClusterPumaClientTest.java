@@ -46,7 +46,6 @@ public class ClusterPumaClientTest extends MockTest {
 		verify(simplePumaClient, times(1)).get(1000);
 	}
 
-	@SuppressWarnings("unchecked")
    @Test
 	public void testGetSuccess() {
 		clusterPumaClient.client = simplePumaClient;

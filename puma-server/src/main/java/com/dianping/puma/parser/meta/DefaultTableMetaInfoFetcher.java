@@ -22,139 +22,131 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
-
 import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.core.meta.TableMetaInfo;
 import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
-import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.log4j.Logger;
-
 import com.dianping.puma.filter.TableMetaRefreshFilter;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 /**
- * TODO Comment of DefaultTableMetaInfoFetcher
- *
  * @author Leo Liang
  */
 public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 
-    private final Logger logger = Logger.getLogger(DefaultTableMetaInfoFetcher.class);
+	private AtomicReference<Map<String, TableMetaInfo>> tableMetaInfoCache = new AtomicReference<Map<String, TableMetaInfo>>();
 
-    private AtomicReference<Map<String, TableMetaInfo>> tableMetaInfoCache = new AtomicReference<Map<String, TableMetaInfo>>();
+	private SrcDbEntity srcDbEntity;
 
-    private SrcDbEntity srcDbEntity;
+	private MysqlDataSource metaDs;
 
-    private MysqlDataSource metaDs;
+	private TableMetaRefreshFilter tableMetaRefreshFilter;
 
-    private TableMetaRefreshFilter tableMetaRefreshFilter;
+	@Override
+	public TableMetaInfo getTableMetaInfo(String database, String table) {
+		return tableMetaInfoCache.get().get(database + "." + table);
+	}
 
-    @Override
-    public TableMetaInfo getTableMetaInfo(String database, String table) {
-        return tableMetaInfoCache.get().get(database + "." + table);
-    }
+	@Override
+	public void refreshTableMeta(final String databaseName, final String tableName) throws SQLException {
+		Table table = new Table(databaseName, tableName);
+		if (tableMetaRefreshFilter.getAcceptedTables().contains(table)) {
+			TableMetaInfo tableMetaInfo = _refreshTableMeta(databaseName, tableName);
+			tableMetaInfoCache.get().put(databaseName + "." + tableName, tableMetaInfo);
+		}
+	}
 
-    @Override
-    public void refreshTableMeta(final String databaseName, final String tableName) throws SQLException {
-        Table table = new Table(databaseName, tableName);
-        if (tableMetaRefreshFilter.getAcceptedTables().contains(table)) {
-            TableMetaInfo tableMetaInfo = _refreshTableMeta(databaseName, tableName);
-            tableMetaInfoCache.get().put(databaseName + "." + tableName, tableMetaInfo);
-        }
-    }
+	@Override
+	public void refreshTableMetas() throws SQLException {
+		Map<String, TableMetaInfo> tableMetaInfoMap = new HashMap<String, TableMetaInfo>();
 
-    @Override
-    public void refreshTableMetas() throws SQLException {
-        Map<String, TableMetaInfo> tableMetaInfoMap = new HashMap<String, TableMetaInfo>();
+		TableSet tableSet = tableMetaRefreshFilter.getAcceptedTables();
+		for (Table table : tableSet.listSchemaTables()) {
+			String databaseName = table.getSchemaName();
+			String tableName = table.getTableName();
 
-        TableSet tableSet = tableMetaRefreshFilter.getAcceptedTables();
-        for (Table table: tableSet.listSchemaTables()) {
-            String databaseName = table.getSchemaName();
-            String tableName = table.getTableName();
+			TableMetaInfo tableMetaInfo = _refreshTableMeta(databaseName, tableName);
+			tableMetaInfoMap.put(databaseName + "." + tableName, tableMetaInfo);
+		}
 
-            TableMetaInfo tableMetaInfo = _refreshTableMeta(databaseName, tableName);
-            tableMetaInfoMap.put(databaseName + "." + tableName, tableMetaInfo);
-        }
+		tableMetaInfoCache.set(tableMetaInfoMap);
+	}
 
-        tableMetaInfoCache.set(tableMetaInfoMap);
-    }
+	protected TableMetaInfo _refreshTableMeta(final String database, final String table) throws SQLException {
+		initDsIfNeeded();
 
-    protected TableMetaInfo _refreshTableMeta(final String database, final String table) throws SQLException {
-        initDsIfNeeded();
+		QueryRunner runner = new QueryRunner(metaDs);
 
-        QueryRunner runner = new QueryRunner(metaDs);
+		Transaction t = Cat.newTransaction("SQL.meta", "database" + "." + "table");
+		try {
+			TableMetaInfo tableMetaInfo = runner.query(genTableMetaSql(database, table),
+			      new ResultSetHandler<TableMetaInfo>() {
+				      @Override
+				      public TableMetaInfo handle(ResultSet rs) throws SQLException {
+					      TableMetaInfo result = new TableMetaInfo();
+					      result.setDatabase(database);
+					      result.setTable(table);
+					      result.setColumns(new HashMap<Integer, String>());
+					      result.setKeys(new ArrayList<String>());
+					      result.setTypes(new HashMap<String, String>());
+					      result.setSignedInfos(new HashMap<Integer, Boolean>());
 
-        Transaction t = Cat.newTransaction("SQL.meta", "database" + "." + "table");
-        try {
-            TableMetaInfo tableMetaInfo = runner.query(
-                    genTableMetaSql(database, table),
-                    new ResultSetHandler<TableMetaInfo>() {
-                        @Override
-                        public TableMetaInfo handle(ResultSet rs) throws SQLException {
-                            TableMetaInfo result = new TableMetaInfo();
-                            result.setDatabase(database);
-                            result.setTable(table);
-                            result.setColumns(new HashMap<Integer, String>());
-                            result.setKeys(new ArrayList<String>());
-                            result.setTypes(new HashMap<String, String>());
-                            result.setSignedInfos(new HashMap<Integer, Boolean>());
+					      while (rs.next()) {
+						      int i = rs.getRow();
+						      String column = rs.getString("Field");
 
-                            while (rs.next()) {
-                                int i = rs.getRow();
-                                String column = rs.getString("Field");
+						      result.getColumns().put(i, column);
 
-                                result.getColumns().put(i, column);
+						      if (rs.getString("Type").contains("unsigned")) {
+							      result.getSignedInfos().put(i, false);
+						      } else {
+							      result.getSignedInfos().put(i, true);
+						      }
 
-                                if (rs.getString("Type").contains("unsigned")) {
-                                    result.getSignedInfos().put(i, false);
-                                } else {
-                                    result.getSignedInfos().put(i, true);
-                                }
+						      if (rs.getString("Key").equalsIgnoreCase("pri")) {
+							      result.getKeys().add(column);
+						      }
+					      }
 
-                                if (rs.getString("Key").equalsIgnoreCase("pri")) {
-                                    result.getKeys().add(column);
-                                }
-                            }
+					      return result;
+				      }
+			      });
 
-                            return result;
-                        }
-                    }
-            );
+			t.setStatus("0");
+			return tableMetaInfo;
+		} catch (SQLException e) {
+			t.setStatus("1");
+			throw e;
+		} finally {
+			t.complete();
+		}
+	}
 
-            t.setStatus("0");
-            return tableMetaInfo;
-        } catch (SQLException e) {
-            t.setStatus("1");
-            throw e;
-        } finally {
-            t.complete();
-        }
-    }
+	private String genTableMetaSql(String database, String table) {
+		return "desc " + database + "." + table;
+	}
 
-    private String genTableMetaSql(String database, String table) {
-        return "desc " + database + "." + table;
-    }
+	protected void initDsIfNeeded() {
+		if (metaDs == null) {
+			metaDs = new MysqlDataSource();
+			metaDs.setUrl("jdbc:mysql://" + srcDbEntity.getHost() + ":" + srcDbEntity.getPort()
+			      + "?connectTimeout=5000&socketTimeout=10000");
+			metaDs.setUser(srcDbEntity.getUsername());
+			metaDs.setPassword(srcDbEntity.getPassword());
+		}
+	}
 
-    protected void initDsIfNeeded() {
-        if (metaDs == null) {
-            metaDs = new MysqlDataSource();
-            metaDs.setUrl("jdbc:mysql://" + srcDbEntity.getHost()
-                    + ":" + srcDbEntity.getPort() + "?connectTimeout=60000&socketTimeout=60000");
-            metaDs.setUser(srcDbEntity.getUsername());
-            metaDs.setPassword(srcDbEntity.getPassword());
-        }
-    }
+	public void setTableMetaRefreshFilter(TableMetaRefreshFilter tableMetaRefreshFilter) {
+		this.tableMetaRefreshFilter = tableMetaRefreshFilter;
+	}
 
-    public void setTableMetaRefreshFilter(TableMetaRefreshFilter tableMetaRefreshFilter) {
-        this.tableMetaRefreshFilter = tableMetaRefreshFilter;
-    }
-
-    public void setSrcDbEntity(SrcDbEntity srcDbEntity){
-        this.srcDbEntity = srcDbEntity;
-    }
+	public void setSrcDbEntity(SrcDbEntity srcDbEntity) {
+		this.srcDbEntity = srcDbEntity;
+	}
 
 }

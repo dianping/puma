@@ -1,12 +1,13 @@
 package com.dianping.puma.instance;
 
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import com.dianping.puma.core.config.ConfigManager;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
-
-import static org.mockito.Mockito.*;
 
 /**
  * Dozer @ 8/12/15

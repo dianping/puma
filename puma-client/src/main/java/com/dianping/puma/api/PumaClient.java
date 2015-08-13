@@ -1,14 +1,13 @@
 package com.dianping.puma.api;
 
+import java.util.concurrent.TimeUnit;
+
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.model.BinlogInfo;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 public interface PumaClient {
 
-    BinlogMessage get(int batchSize) throws PumaClientException;
+	BinlogMessage get(int batchSize) throws PumaClientException;
 
 	BinlogMessage get(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException;
 
@@ -20,5 +19,5 @@ public interface PumaClient {
 
 	void rollback(BinlogInfo binlogInfo) throws PumaClientException;
 
-    void rollback() throws PumaClientException;
+	void rollback() throws PumaClientException;
 }

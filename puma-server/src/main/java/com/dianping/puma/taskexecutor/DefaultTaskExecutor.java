@@ -49,6 +49,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -181,7 +182,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 results = stmt.executeQuery("show global variables like 'server_id'");
                 results.next();
                 entity.setServerId(results.getLong(2));
-            } catch (Exception ignore) {
+            } catch (Exception e) {
+                Cat.logError(String.format("server id load failed: %s:%d", entity.getHost(), entity.getPort()), e);
                 entity.setServerId(0);
             } finally {
                 JDBCUtils.closeAll(results, stmt, conn);
@@ -212,9 +214,9 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         }
     }
 
-    protected void updateTableMetaInfoFetcher() {
+    protected void updateTableMetaInfoFetcher() throws SQLException {
         tableMetaInfoFetcher.setSrcDbEntity(this.currentSrcDbEntity);
-        tableMetaInfoFetcher.refreshTableMeta(null, true);
+        tableMetaInfoFetcher.refreshTableMetas();
     }
 
     protected SrcDbEntity chooseNextSrcDb() {

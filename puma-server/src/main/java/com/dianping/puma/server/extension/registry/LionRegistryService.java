@@ -8,8 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.List;
 
 @Service
@@ -27,7 +25,7 @@ public class LionRegistryService implements RegistryService {
 		if (hostListString == null) {
 			// maybe not created or created but not set.
 			try {
-				configManager.createConfig("puma", buildKey(database), encode(database));
+				configManager.createConfig("puma", buildKey(database), database);
 			} catch (Throwable t) {
 				logger.warn("failed to create config");
 			} finally {
@@ -66,21 +64,5 @@ public class LionRegistryService implements RegistryService {
 
 	protected String buildKey(String database) {
 		return "puma.client.route." + database;
-	}
-
-	protected String encode(String url) {
-		try {
-			return URLEncoder.encode(url, "utf-8");
-		} catch (Throwable t) {
-			throw new RuntimeException("failed to encode url.");
-		}
-	}
-
-	protected String decode(String url) {
-		try {
-			return URLDecoder.decode(url, "utf-8");
-		} catch (Throwable t) {
-			throw new RuntimeException("failed to decode url.");
-		}
 	}
 }

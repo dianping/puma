@@ -16,7 +16,7 @@
     </select>
 
     <select id="count" resultType="long">
-        SELECT COUNT (*) FROM PumaServer
+        SELECT COUNT(*) FROM PumaServer
     </select>
 
     <select id="findAll" resultType="PumaServerEntity">

@@ -34,7 +34,8 @@ public class ScheduledTaskChecker implements TaskChecker {
     @Autowired
     InstanceManager instanceManager;
 
-    ConfigManager configManager = new LionConfigManager();
+    @Autowired
+    ConfigManager configManager;
 
     private ConcurrentMap<String, PumaTaskEntity> tasks = new ConcurrentHashMap<String, PumaTaskEntity>();
 

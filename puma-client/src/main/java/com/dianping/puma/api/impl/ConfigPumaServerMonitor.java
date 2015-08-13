@@ -3,6 +3,7 @@ package com.dianping.puma.api.impl;
 import com.dianping.puma.api.PumaServerMonitor;
 import com.dianping.puma.core.config.ConfigChangeListener;
 import com.dianping.puma.core.config.ConfigManager;
+import com.dianping.puma.core.config.ConfigManagerLoader;
 import com.dianping.puma.core.config.LionConfigManager;
 import org.apache.commons.lang3.StringUtils;
 
@@ -13,14 +14,13 @@ public class ConfigPumaServerMonitor implements PumaServerMonitor {
 
 	private static final String ZK_BASE_PATH = "puma.client.route.";
 
-	protected ConfigManager configManager = new LionConfigManager();
+	protected ConfigManager configManager = ConfigManagerLoader.getConfigManager();
 
 	private final String zkPath;
 
 	private ConfigChangeListener configChangeListener;
 
 	public ConfigPumaServerMonitor(String database, List<String> tables) {
-		configManager = new LionConfigManager();
 		zkPath = buildZkPath(database, tables);
 	}
 

@@ -2,7 +2,6 @@ package com.dianping.puma.instance;
 
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
-import com.dianping.puma.biz.dao.PumaTaskTargetDao;
 import com.dianping.puma.biz.service.PumaServerService;
 import com.dianping.puma.core.config.ConfigManager;
 import com.dianping.zebra.Constants;
@@ -30,10 +29,7 @@ import java.util.regex.Pattern;
  */
 
 @Component
-public class ZebraInstanceManager extends AbstractInstanceManager {
-
-    @Autowired
-    private PumaTaskTargetDao pumaTaskTargetDao;
+public class ZebraInstanceManager implements InstanceManager {
 
     @Autowired
     private PumaServerService pumaServerService;
@@ -51,6 +47,8 @@ public class ZebraInstanceManager extends AbstractInstanceManager {
 
     private volatile Map<String, Set<String>> clusterDbMap = new HashMap<String, Set<String>>();
 
+    private volatile Map<String, String> dbClusterMap = new HashMap<String, String>();
+
     @Override
     @PostConstruct
     public void init() {
@@ -63,15 +61,18 @@ public class ZebraInstanceManager extends AbstractInstanceManager {
 
     @Override
     public Set<String> getUrlByCluster(String clusterName) {
-        return clusterIpMap.get(clusterName);
+        return clusterIpMap.get(clusterName.toLowerCase());
+    }
+
+    @Override
+    public String getClusterByDb(String db) {
+        return dbClusterMap.get(db.toLowerCase());
     }
 
     protected void buildConfigFromZebra() throws IOException {
-//        Map<String, Set<String>> targets = getTargets();
-//        Map<String, InstanceChangedEvent> cachedEvent = new HashMap<String, InstanceChangedEvent>();
-
         Map<String, Set<String>> clusterIpMap = new HashMap<String, Set<String>>();
         Map<String, Set<String>> clusterDbMap = new HashMap<String, Set<String>>();
+        Map<String, String> dbClusterMap = new HashMap<String, String>();
 
         Map<String, String> allProperties = configManager.getConfigByProject(env, Constants.DEFAULT_DATASOURCE_GROUP_PRFIX);
         for (String groupds : allProperties.values()) {
@@ -97,6 +98,8 @@ public class ZebraInstanceManager extends AbstractInstanceManager {
 
             String writeUrl = writeMatcher.group(1);
             String db = writeMatcher.group(2).toLowerCase();
+
+            dbClusterMap.put(db, writeUrl);
 
             Set<String> clusterDbs = clusterDbMap.get(writeUrl);
             if (clusterDbs == null) {
@@ -132,6 +135,7 @@ public class ZebraInstanceManager extends AbstractInstanceManager {
 
             this.clusterDbMap = clusterDbMap;
             this.clusterIpMap = clusterIpMap;
+            this.dbClusterMap = dbClusterMap;
         }
     }
 
@@ -142,21 +146,4 @@ public class ZebraInstanceManager extends AbstractInstanceManager {
     public void setConfigManager(ConfigManager configManager) {
         this.configManager = configManager;
     }
-
-    //    protected Map<String, Set<String>> getTargets() {
-//        List<PumaServerEntity> servers = pumaServerService.findOnCurrentServer();
-//        Map<String, Set<String>> targetResult = new HashMap<String, Set<String>>();
-//        for (PumaServerEntity server : servers) {
-//            List<PumaTaskTargetEntity> targets = pumaTaskTargetDao.findByTaskId(server.getId());
-//            for (PumaTaskTargetEntity target : targets) {
-//                Set<String> tables = targetResult.get(target.getDatabase());
-//                if (tables == null) {
-//                    tables = new HashSet<String>();
-//                    targetResult.put(target.getDatabase(), tables);
-//                }
-//                tables.add(target.getTable());
-//            }
-//        }
-//        return targetResult;
-//    }
 }

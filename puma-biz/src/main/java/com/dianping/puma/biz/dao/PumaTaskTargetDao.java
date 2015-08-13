@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface PumaTaskTargetDao {
 
-    List<PumaTaskTargetEntity> findByTaskId(int taskId);
+    List<PumaTaskTargetEntity> findByServerId(int ServerId);
 
     List<PumaTaskTargetEntity> findByDatabaseAndTable(
             @Param("database") String database,
@@ -22,5 +22,5 @@ public interface PumaTaskTargetDao {
 
     int update(PumaTaskTargetEntity entity);
 
-    int deleteByTaskId(int taskId);
+    int delete(int id);
 }

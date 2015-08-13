@@ -13,7 +13,5 @@ public interface InstanceManager {
 
     Set<String> getUrlByCluster(String clusterName);
 
-    void register(String clusterName,InstanceChangedObserver event);
-
-    boolean unregister(String clusterName,InstanceChangedObserver event);
+    String getClusterByDb(String db);
 }

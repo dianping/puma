@@ -4,8 +4,8 @@
 
 <mapper namespace="com.dianping.puma.biz.dao.PumaTaskTargetDao">
 
-    <select id="findByTaskId" resultType="PumaTaskTargetEntity">
-        SELECT * FROM PumaTaskTarget WHERE `taskId` = #{taskId}
+    <select id="findByServerId" resultType="PumaTaskTargetEntity">
+        SELECT * FROM PumaTaskTarget WHERE `serverId` = #{serverId}
     </select>
 
     <select id="findByDatabaseAndTable" resultType="PumaTaskTargetEntity">
@@ -37,7 +37,7 @@
         )
     </insert>
 
-    <delete id="deleteByTaskId">
-        DELETE FROM PumaTaskTarget WHERE `taskId` = #{taskId}
+    <delete id="delete">
+        DELETE FROM PumaTaskTarget WHERE `id` = #{id}
     </delete>
 </mapper>

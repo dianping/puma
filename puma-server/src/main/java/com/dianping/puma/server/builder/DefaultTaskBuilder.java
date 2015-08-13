@@ -3,6 +3,7 @@ package com.dianping.puma.server.builder;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,6 @@ import com.dianping.puma.filter.TableMetaRefreshFilter;
 import com.dianping.puma.filter.TransactionEventFilter;
 import com.dianping.puma.parser.DefaultBinlogParser;
 import com.dianping.puma.parser.Parser;
-import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;

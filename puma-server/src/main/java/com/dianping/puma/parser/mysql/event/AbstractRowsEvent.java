@@ -233,7 +233,7 @@ public abstract class AbstractRowsEvent extends AbstractBinlogEvent {
 				columns.add(TimeColumn.valueOf(MySQLUtils.toTime(PacketUtils.readInt(buf, 3))));
 				break;
 			case BinlogConstants.MYSQL_TYPE_TIMESTAMP:
-				columns.add(TimestampColumn.valueOf(MySQLUtils.toTimestamp(PacketUtils.readLong(buf, 4))));
+				columns.add(TimestampColumn.valueOf(PacketUtils.readLong(buf, 4)));
 				break;
 			case BinlogConstants.MYSQL_TYPE_DATETIME:
 				columns.add(DatetimeColumn.valueOf(MySQLUtils.toDatetime(PacketUtils.readLong(buf, 8))));

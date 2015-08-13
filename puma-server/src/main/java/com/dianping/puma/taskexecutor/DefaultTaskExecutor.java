@@ -49,6 +49,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -213,9 +214,9 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         }
     }
 
-    protected void updateTableMetaInfoFetcher() {
+    protected void updateTableMetaInfoFetcher() throws SQLException {
         tableMetaInfoFetcher.setSrcDbEntity(this.currentSrcDbEntity);
-        tableMetaInfoFetcher.refreshTableMeta(null, true);
+        tableMetaInfoFetcher.refreshTableMetas();
     }
 
     protected SrcDbEntity chooseNextSrcDb() {

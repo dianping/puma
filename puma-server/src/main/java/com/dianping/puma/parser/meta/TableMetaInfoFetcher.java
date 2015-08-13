@@ -15,8 +15,9 @@
  */
 package com.dianping.puma.parser.meta;
 
-import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.meta.TableMetaInfo;
+
+import java.sql.SQLException;
 
 /**
  * TODO Comment of TableMetasInfoFetcher
@@ -26,8 +27,9 @@ import com.dianping.puma.core.meta.TableMetaInfo;
  */
 public interface TableMetaInfoFetcher {
 
-	void refreshTableMeta(DdlEvent ddlEvent, boolean isRefresh);
+	public void refreshTableMeta(String database, String table) throws SQLException;
+
+	public void refreshTableMetas() throws SQLException;
 
 	TableMetaInfo getTableMetaInfo(String database, String table);
-
 }

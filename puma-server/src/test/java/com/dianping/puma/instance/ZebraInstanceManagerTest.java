@@ -1,13 +1,15 @@
 package com.dianping.puma.instance;
 
-import com.dianping.zebra.biz.service.LionService;
-import com.dianping.zebra.biz.service.impl.LionServiceImpl;
-import org.junit.Before;
-import org.junit.Test;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 
-import static org.mockito.Mockito.*;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.dianping.zebra.biz.service.LionService;
 
 /**
  * Dozer @ 8/12/15

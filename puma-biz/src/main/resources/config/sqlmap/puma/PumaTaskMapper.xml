@@ -7,6 +7,7 @@
     <resultMap id="startBinlogInfo" type="com.dianping.puma.core.model.BinlogInfo" autoMapping="true"/>
 
     <resultMap id="entity" type="PumaTaskEntity" autoMapping="true">
+        <id column="Id" property="id"/>
         <association resultMap="startBinlogInfo" property="startBinlogInfo" columnPrefix="StartBinlogInfo_"/>
     </resultMap>
 

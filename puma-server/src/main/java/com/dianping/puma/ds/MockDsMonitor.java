@@ -52,20 +52,20 @@ public class MockDsMonitor implements DsMonitor {
 //            s1.setMaster(true);
 
             Single s2 = new Single();
-            s2.setHost("192.168.225.84");
+            s2.setHost("localhost");
             s2.setPort(3306);
             s2.setActive(true);
             s2.setBalance(1);
 
-            Single s3 = new Single();
-            s3.setHost("192.168.225.85");
-            s3.setPort(3306);
-            s3.setActive(true);
-            s3.setBalance(1);
+//            Single s3 = new Single();
+//            s3.setHost("192.168.225.85");
+//            s3.setPort(3306);
+//            s3.setActive(true);
+//            s3.setBalance(1);
 
 //            cluster.addSingle(s1);
             cluster.addSingle(s2);
-            cluster.addSingle(s3);
+//            cluster.addSingle(s3);
             return cluster;
         }
     }

@@ -1,11 +1,5 @@
 package com.dianping.puma.api;
 
-import com.dianping.puma.api.impl.SimplePumaClient;
-import com.dianping.puma.core.dto.BinlogMessage;
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Dozer @ 7/2/15

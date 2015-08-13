@@ -1,17 +1,5 @@
 package com.dianping.puma.instance;
 
-import com.dianping.lion.EnvZooKeeperConfig;
-import com.dianping.puma.biz.dao.PumaTaskTargetDao;
-import com.dianping.puma.biz.entity.PumaServerEntity;
-import com.dianping.puma.biz.entity.PumaTaskTargetEntity;
-import com.dianping.puma.biz.service.PumaServerService;
-import com.dianping.zebra.Constants;
-import com.dianping.zebra.config.LionConfigService;
-import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.io.IOException;
-import java.util.*;
 
 /**
  * Dozer @ 8/7/15

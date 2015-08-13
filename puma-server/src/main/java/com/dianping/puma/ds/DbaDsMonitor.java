@@ -1,10 +1,9 @@
 package com.dianping.puma.ds;
 
-import com.dianping.puma.core.config.ConfigChangeListener;
-import com.dianping.puma.core.config.ConfigManager;
-import com.dianping.puma.core.config.LionConfigManager;
-import com.dianping.zebra.biz.service.LionService;
-import com.google.gson.Gson;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -13,11 +12,12 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.dianping.puma.core.config.ConfigChangeListener;
+import com.dianping.puma.core.config.ConfigManager;
+import com.dianping.puma.core.config.LionConfigManager;
+import com.dianping.zebra.biz.service.LionService;
+import com.google.gson.Gson;
 
 //@Service
 public class DbaDsMonitor implements DsMonitor, InitializingBean {
@@ -26,7 +26,7 @@ public class DbaDsMonitor implements DsMonitor, InitializingBean {
 
 	private String dbaQueryUrl;
 
-	private String queryDatabasesUrl;
+	// private String queryDatabasesUrl;
 
 	protected ConfigManager configManager;
 
@@ -92,22 +92,22 @@ public class DbaDsMonitor implements DsMonitor, InitializingBean {
 	protected Map<String, Cluster> mapDbaResult(DbaResult result) {
 		Map<String, Cluster> clusters = new HashMap<String, Cluster>();
 
-		for (Map.Entry<String, List<DbaResult.Data.Mha>> entry: result.data.mha.entrySet()) {
+		for (Map.Entry<String, List<DbaResult.Data.Mha>> entry : result.data.mha.entrySet()) {
 			Cluster cluster = new Cluster();
 
 			String mhaName = entry.getKey();
 			cluster.setName(mhaName);
 
 			List<DbaResult.Data.Mha> mhaInstances = entry.getValue();
-			for (DbaResult.Data.Mha mhaInstance: mhaInstances) {
+			for (DbaResult.Data.Mha mhaInstance : mhaInstances) {
 				Single single = new Single();
 				single.setVersion(mhaInstance.version);
-				if (mhaInstance.VIP != null && !StringUtils.isWhitespace(mhaInstance.VIP)) {
-					single.setHost(mhaInstance.VIP + ":" + mhaInstance.port);
-				} else if (mhaInstance.RIP != null && !StringUtils.isWhitespace(mhaInstance.RIP)) {
-					single.setHost(mhaInstance.RIP + ":" + mhaInstance.port);
+				if (mhaInstance.vip != null && !StringUtils.isWhitespace(mhaInstance.vip)) {
+					single.setHost(mhaInstance.vip + ":" + mhaInstance.port);
+				} else if (mhaInstance.rip != null && !StringUtils.isWhitespace(mhaInstance.rip)) {
+					single.setHost(mhaInstance.rip + ":" + mhaInstance.port);
 				}
-				single.setMaster(mhaInstance.Role.equalsIgnoreCase("master"));
+				single.setMaster(mhaInstance.role.equalsIgnoreCase("master"));
 				cluster.addSingle(single);
 			}
 
@@ -119,17 +119,26 @@ public class DbaDsMonitor implements DsMonitor, InitializingBean {
 
 	static class DbaResult {
 		public String status;
+
 		public Data data;
+
 		static class Data {
 			public Map<String, List<Mha>> mha;
+
 			static class Mha {
-				public String Status;
+				public String status;
+
 				public String buss;
-				private String RIP;
-				private String VIP;
+
+				private String rip;
+
+				private String vip;
+
 				private String version;
-				private String MonIP;
-				private String Role;
+
+				// private String MonIP;
+				private String role;
+
 				private String port;
 			}
 		}

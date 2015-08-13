@@ -21,10 +21,9 @@ import java.util.concurrent.ConcurrentMap;
 @Service
 public class LionConfigManager implements ConfigManager {
 
-	private final String lionCreateUrl
-			= "http://lionapi.dp:8080/config2/create?id=2&project=%s&key=%s&desc=%s";
-	private final String lionSetUrl
-			= "http://lionapi.dp:8080/config2/set?id=2&env=%s&key=%s&value=%s";
+	private final String lionCreateUrl = "http://lionapi.dp:8080/config2/create?id=2&project=%s&key=%s&desc=%s";
+
+	private final String lionSetUrl = "http://lionapi.dp:8080/config2/set?id=2&env=%s&key=%s&value=%s";
 
 	protected final HttpClient httpClient = HttpClients.createDefault();
 
@@ -56,7 +55,8 @@ public class LionConfigManager implements ConfigManager {
 	@Override
 	public void setConfig(String key, String value) {
 		try {
-			HttpGet httpGet = new HttpGet(String.format(lionSetUrl, EnvZooKeeperConfig.getEnv(), encode(key), encode(value)));
+			HttpGet httpGet = new HttpGet(String.format(lionSetUrl, EnvZooKeeperConfig.getEnv(), encode(key),
+			      encode(value)));
 			HttpResponse httpResponse = httpClient.execute(httpGet);
 			String json = EntityUtils.toString(httpResponse.getEntity());
 			LionApiResult lionApiResult = new Gson().fromJson(json, LionApiResult.class);
@@ -122,8 +122,10 @@ public class LionConfigManager implements ConfigManager {
 
 	private class LionApiResult {
 		String status;
+
 		String message;
-		String result;
+
+		// String result;
 
 		public String getStatus() {
 			return status;
@@ -133,8 +135,8 @@ public class LionConfigManager implements ConfigManager {
 			return message;
 		}
 
-		public String getResult() {
-			return result;
-		}
+		// public String getResult() {
+		// return result;
+		// }
 	}
 }

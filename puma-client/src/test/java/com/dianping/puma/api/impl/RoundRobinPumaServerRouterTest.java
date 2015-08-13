@@ -1,18 +1,18 @@
 package com.dianping.puma.api.impl;
 
-import com.dianping.puma.api.MockTest;
-import com.dianping.puma.api.PumaServerMonitor;
-import com.dianping.puma.api.PumaServerRouter;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.doReturn;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+
+import com.dianping.puma.api.MockTest;
+import com.dianping.puma.api.PumaServerMonitor;
 
 public class RoundRobinPumaServerRouterTest extends MockTest {
 

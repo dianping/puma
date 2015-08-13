@@ -46,10 +46,10 @@ public class TransactionEventFilter extends AbstractEventFilter implements Event
 
 			// In accepted table list.
 			String database = changedEvent.getDatabase();
-			if(database == null || database.length() == 0){
+			if (database == null || database.length() == 0) {
 				return true;
 			}
-			
+
 			Schema schema = new Schema(database);
 			if (!acceptedSchemas.contains(schema)) {
 				return false;

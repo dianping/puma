@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.lang.ref.WeakReference;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -24,20 +25,19 @@ public class LionConfigManager implements ConfigManager {
 
 	private final String lionSetUrl = "http://lionapi.dp:8080/config2/set?id=2&env=%s&key=%s&value=%s";
 
+	private final String getProjectConfigUrl = "http://lionapi.dp:8080/config2/get?env=%s&project=%s&id=2";
+
 	protected HttpClient httpClient = HttpClients.createDefault();
 
 	protected ConfigCache cc = ConfigCache.getInstance();
 
 	protected ConfigChange configChange;
 
-	protected ConcurrentMap<String, Boolean> keys
-			= new ConcurrentHashMap<String, Boolean>();
+	protected ConcurrentMap<String, Boolean> keys = new ConcurrentHashMap<String, Boolean>();
 
-	protected ConcurrentMap<String, String> caches
-			= new ConcurrentHashMap<String, String>();
+	protected ConcurrentMap<String, String> caches = new ConcurrentHashMap<String, String>();
 
-	protected ConcurrentMap<String, WeakReference<ConfigChangeListener>> listeners
-			= new ConcurrentHashMap<String, WeakReference<ConfigChangeListener>>();
+	protected ConcurrentMap<String, WeakReference<ConfigChangeListener>> listeners = new ConcurrentHashMap<String, WeakReference<ConfigChangeListener>>();
 
 	@Override
 	public void createConfig(String project, String key, String desc) {
@@ -51,6 +51,26 @@ public class LionConfigManager implements ConfigManager {
 			}
 		} catch (Throwable t) {
 			throw new RuntimeException("failed to create config.", t);
+		}
+	}
+
+	@Override
+	public Map<String, String> getConfigByProject(String env, String project) {
+		try {
+			HttpGet httpGet = new HttpGet(String.format(getProjectConfigUrl, encode(env), encode(project)));
+			HttpResponse httpResponse = httpClient.execute(httpGet);
+
+			String json = EntityUtils.toString(httpResponse.getEntity());
+
+			LionGetByProject result = new Gson().fromJson(json, LionGetByProject.class);
+
+			if (!result.getStatus().equalsIgnoreCase("success")) {
+				throw new RuntimeException(result.getMessage());
+			} else {
+				return result.getResult();
+			}
+		} catch (Throwable t) {
+			throw new RuntimeException("failed to get config by project.", t);
 		}
 	}
 
@@ -131,12 +151,44 @@ public class LionConfigManager implements ConfigManager {
 		}
 	}
 
-	private class LionApiResult {
+	public class LionGetByProject {
 		String status;
 
 		String message;
 
-		// String result;
+		Map<String, String> result;
+
+		public String getStatus() {
+			return status;
+		}
+
+		public void setStatus(String status) {
+			this.status = status;
+		}
+
+		public String getMessage() {
+			return message;
+		}
+
+		public void setMessage(String message) {
+			this.message = message;
+		}
+
+		public Map<String, String> getResult() {
+			return result;
+		}
+
+		public void setResult(Map<String, String> result) {
+			this.result = result;
+		}
+	}
+
+	public class LionApiResult {
+		String status;
+
+		String message;
+
+		String result;
 
 		public String getStatus() {
 			return status;
@@ -146,8 +198,8 @@ public class LionConfigManager implements ConfigManager {
 			return message;
 		}
 
-		// public String getResult() {
-		// return result;
-		// }
+		public String getResult() {
+			return result;
+		}
 	}
 }

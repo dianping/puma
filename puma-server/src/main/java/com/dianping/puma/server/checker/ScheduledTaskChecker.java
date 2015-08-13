@@ -4,7 +4,6 @@ import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.biz.service.PumaTaskService;
 import com.dianping.puma.core.config.ConfigManager;
-import com.dianping.puma.core.config.LionConfigManager;
 import com.dianping.puma.instance.InstanceManager;
 import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.server.server.TaskServerManager;
@@ -34,7 +33,8 @@ public class ScheduledTaskChecker implements TaskChecker {
     @Autowired
     InstanceManager instanceManager;
 
-    ConfigManager configManager = new LionConfigManager();
+    @Autowired
+    ConfigManager configManager;
 
     private ConcurrentMap<String, PumaTaskEntity> tasks = new ConcurrentHashMap<String, PumaTaskEntity>();
 

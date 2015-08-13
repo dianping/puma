@@ -1,4 +1,4 @@
-package com.dianping.puma.server.extension.registry;
+package com.dianping.puma.server.registry;
 
 import com.dianping.puma.MockTest;
 import com.dianping.puma.core.config.ConfigManager;
@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.hamcrest.CoreMatchers.*;
 
 public class LionRegistryServiceTest extends MockTest {
 

@@ -3,7 +3,6 @@ package com.dianping.puma.biz.service.impl;
 import com.dianping.puma.biz.dao.PumaTaskStateDao;
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import com.dianping.puma.biz.service.PumaTaskStateService;
-import com.dianping.puma.biz.service.SrcDbService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +19,6 @@ public class PumaTaskStateServiceImpl implements PumaTaskStateService {
 
     @Autowired
     PumaTaskStateDao pumaTaskStateDao;
-
-    @Autowired
-    SrcDbService srcDbService;
 
     @Override
     public List<PumaTaskStateEntity> find(String taskName) {

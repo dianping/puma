@@ -4,7 +4,7 @@ public class ConfigManagerLoader {
 
 	private static final ConfigManager configManager = new LionConfigManager();
 
-	public ConfigManager getConfigManager() {
+	public static ConfigManager getConfigManager() {
 		return configManager;
 	}
 }

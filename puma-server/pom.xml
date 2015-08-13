@@ -21,10 +21,6 @@
             <artifactId>zebra-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.dianping.zebra</groupId>
-            <artifactId>zebra-biz</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.dianping.puma</groupId>
             <artifactId>puma-core</artifactId>
         </dependency>

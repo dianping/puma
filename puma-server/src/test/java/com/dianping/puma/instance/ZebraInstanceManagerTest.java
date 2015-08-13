@@ -3,13 +3,11 @@ package com.dianping.puma.instance;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import java.util.HashMap;
-
+import com.dianping.puma.core.config.ConfigManager;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.dianping.zebra.biz.service.LionService;
+import java.util.HashMap;
 
 /**
  * Dozer @ 8/12/15
@@ -21,11 +19,11 @@ public class ZebraInstanceManagerTest {
 
     @Test
     public void testBuildConfigFromZebra() throws Exception {
-        LionService lionService = mock(LionService.class);
+        ConfigManager lionService = mock(ConfigManager.class);
         when(lionService.getConfigByProject(anyString(), anyString())).thenReturn(groupds);
 
         ZebraInstanceManager target = new ZebraInstanceManager();
-        target.setLionService(lionService);
+        target.setConfigManager(lionService);
         target.buildConfigFromZebra();
     }
 

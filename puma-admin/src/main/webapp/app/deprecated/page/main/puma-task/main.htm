@@ -72,9 +72,9 @@
 									</thead>
 									<tbody style="border-top:0px;" ng-repeat="item in items">
 										<tr role="row" class="odd">
-											<td rowspan="{{item.pumaServerNames.length * 2 - 1}}"><a href="javascript:void(0)" ng-click ="item.isShow=!item.isShow;">{{item.name|cut:true:25:'...'}}</a></td>
-											<td rowspan="{{item.pumaServerNames.length * 2 - 1}}">{{item.srcDBInstanceName|cut:true:25:'...'}}</td>
-											<td class="hidden-480" ng-repeat-start="item2 in item.pumaServerNames" ng-if="$index == 0">{{item2|cut:true:20:'...'}}</td>
+											<td rowspan="{{item.pumaServers.length * 2 - 1}}"><a href="javascript:void(0)" ng-click ="item.isShow=!item.isShow;">{{item.name|cut:true:25:'...'}}</a></td>
+											<td rowspan="{{item.pumaServers.length * 2 - 1}}">{{item.clusterName|cut:true:25:'...'}}</td>
+											<td class="hidden-480" ng-repeat-start="item2 in item.pumaServers" ng-if="$index == 0">{{item2|cut:true:20:'...'}}</td>
 											<td ng-if="$index == 0"><span
 												ng-class="{'label-success' : state1(item.name, item2).status== 'RUNNING','label-warning' : state1(item.name, item2).status== 'FAILED' }"
 												class="label label-sm">{{state1(item.name, item2).strStatus}}</span></td>

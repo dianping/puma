@@ -12,9 +12,14 @@ import org.springframework.stereotype.Service;
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
+import com.dianping.puma.core.util.IPUtils;
 import com.dianping.puma.server.builder.TaskBuilder;
+import com.dianping.puma.server.extension.registry.RegistryService;
 import com.dianping.puma.storage.EventStorage;
 import com.dianping.puma.taskexecutor.TaskExecutor;
+
+import java.util.Map;
+
 
 @Service
 public class DefaultTaskContainer implements TaskContainer {
@@ -27,6 +32,9 @@ public class DefaultTaskContainer implements TaskContainer {
 
     @Autowired
     private TaskBuilder taskBuilder;
+
+    @Autowired
+    RegistryService registryService;
 
     @Override
     public TaskExecutor get(String taskName) {
@@ -98,6 +106,8 @@ public class DefaultTaskContainer implements TaskContainer {
                         }
                     }
                 });
+
+                register(taskExecutor);
             }
         } catch (Exception e) {
             // TODO Auto-generated catch block
@@ -111,10 +121,28 @@ public class DefaultTaskContainer implements TaskContainer {
             TaskExecutor taskExecutor = taskExecutors.get(taskName);
             if (taskExecutor != null) {
                 taskExecutor.stop();
+
+                unregister(taskExecutor);
             }
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        }
+    }
+
+    protected void register(TaskExecutor taskExecutor) {
+        PumaTaskEntity pumaTask = taskExecutor.getTask();
+        Map<String, List<String>> databaseTableMap = pumaTask.getTableSet().mapSchemaTables();
+        for (String database: databaseTableMap.keySet()) {
+            registryService.register(IPUtils.getFirstNoLoopbackIP4Address() + ":4040", database, null);
+        }
+    }
+
+    protected void unregister(TaskExecutor taskExecutor) {
+        PumaTaskEntity pumaTask = taskExecutor.getTask();
+        Map<String, List<String>> databaseTableMap = pumaTask.getTableSet().mapSchemaTables();
+        for (String database: databaseTableMap.keySet()) {
+            registryService.unregister(IPUtils.getFirstNoLoopbackIP4Address() + ":4040", database, null);
         }
     }
 }

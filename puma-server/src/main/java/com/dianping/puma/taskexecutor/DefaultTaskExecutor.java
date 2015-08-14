@@ -91,11 +91,9 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(getContext().getPumaServerName());
 
                 if (binlogInfo == null) {
-                    binlogInfo = new BinlogInfo(
-                            getContext().getDBServerId(),
-                            getContext().getBinlogFileName(),
-                            getContext().getBinlogStartPos(), 0, 0);
                     this.currentSrcDbEntity = initSrcDbByServerId(-1);
+
+                    binlogInfo = new BinlogInfo(this.currentSrcDbEntity.getServerId(), null, 4l, 0, 0);
                 } else {
                     this.currentSrcDbEntity = initSrcDbByServerId(binlogInfo.getServerId());
 
@@ -112,17 +110,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 }
 
                 updateTableMetaInfoFetcher();
-
-                getContext().setDBServerId(currentSrcDbEntity.getServerId());
-                getContext().setBinlogFileName(binlogInfo.getBinlogFile());
-                getContext().setBinlogStartPos(binlogInfo.getBinlogPosition());
                 getContext().setMasterUrl(currentSrcDbEntity.getHost(), currentSrcDbEntity.getPort());
-
-                setBinlogInfo(binlogInfo);
-
-                SystemStatusManager.addServer(getTaskName(), currentSrcDbEntity.getHost(), currentSrcDbEntity.getPort(), database);
-                SystemStatusManager.updateServerBinlog(getTaskName(), getContext().getBinlogFileName(), getContext()
-                        .getBinlogStartPos());
 
                 if (!connect()) {
                     throw new IOException("Connection failed.");
@@ -131,6 +119,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 canStop = true;
 
                 initConnect();
+
+                initBinlogPosition(binlogInfo);
 
                 if (dumpBinlog()) {
                     canStop = false;
@@ -162,6 +152,22 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             }
         } while (!isStop());
 
+    }
+
+    protected void initBinlogPosition(BinlogInfo binlogInfo) throws IOException {
+        if (Strings.isNullOrEmpty(binlogInfo.getBinlogFile())) {
+            List<BinlogInfo> binaryLogs = getBinaryLogs();
+            BinlogInfo lastBinaryLog = binaryLogs.get(binaryLogs.size() - 1);
+            binlogInfo.setBinlogFile(lastBinaryLog.getBinlogFile());
+        }
+
+        getContext().setDBServerId(currentSrcDbEntity.getServerId());
+        getContext().setBinlogFileName(binlogInfo.getBinlogFile());
+        getContext().setBinlogStartPos(binlogInfo.getBinlogPosition());
+        setBinlogInfo(binlogInfo);
+        SystemStatusManager.addServer(getTaskName(), currentSrcDbEntity.getHost(), currentSrcDbEntity.getPort(), database);
+        SystemStatusManager.updateServerBinlog(getTaskName(), getContext().getBinlogFileName(), getContext()
+                .getBinlogStartPos());
     }
 
     protected void loadServerId(List<SrcDbEntity> srcDbEntityList) throws Exception {
@@ -262,13 +268,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         if (srcDbEntity != null) {
             return srcDbEntity;
         }
-
-        srcDbEntity = Iterables.find(avaliableSrcDb, new Predicate<SrcDbEntity>() {
-            @Override
-            public boolean apply(SrcDbEntity input) {
-                return input.isPreferred();
-            }
-        }, null);
 
         return srcDbEntity != null ? srcDbEntity : avaliableSrcDb.get(0);
     }

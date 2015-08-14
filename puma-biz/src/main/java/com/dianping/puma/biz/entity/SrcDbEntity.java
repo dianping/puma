@@ -18,8 +18,6 @@ public class SrcDbEntity {
 
 	private long serverId;
 
-	private boolean preferred;
-
 	public int getId() {
 		return id;
 	}
@@ -82,14 +80,6 @@ public class SrcDbEntity {
 
 	public void setJdbcRef(String jdbcRef) {
 		this.jdbcRef = jdbcRef;
-	}
-
-	public boolean isPreferred() {
-		return preferred;
-	}
-
-	public void setPreferred(boolean preferred) {
-		this.preferred = preferred;
 	}
 
 	@Override

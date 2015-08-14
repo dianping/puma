@@ -2,7 +2,6 @@ package com.dianping.puma.instance;
 
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
-import com.dianping.puma.biz.dao.PumaTaskTargetDao;
 import com.dianping.puma.biz.service.PumaServerService;
 import com.dianping.puma.core.config.ConfigManager;
 import com.dianping.zebra.Constants;
@@ -11,12 +10,10 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,138 +23,107 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
-public class ZebraInstanceManager extends AbstractInstanceManager {
+public class ZebraInstanceManager implements InstanceManager {
 
-	@Autowired
-	private PumaTaskTargetDao pumaTaskTargetDao;
+    @Autowired
+    private ConfigManager configManager;
 
-	@Autowired
-	private PumaServerService pumaServerService;
+    private final String env = EnvZooKeeperConfig.getEnv();
 
-	@Autowired
-	private ConfigManager configManager;
+    private static final Pattern JDBC_URL_PATTERN = Pattern.compile("jdbc:mysql://([^:]+:\\d+)/([^\\?]+).*");
 
-	private final String env = EnvZooKeeperConfig.getEnv();
+    private ConfigCache configCache = ConfigCache.getInstance();
 
-	private static final Pattern JDBC_URL_PATTERN = Pattern.compile("jdbc:mysql://([^:]+:\\d+)/([^\\?]+).*");
+    private volatile Map<String, Set<String>> clusterIpMap = new HashMap<String, Set<String>>();
 
-	private ConfigCache configCache = ConfigCache.getInstance();
+    private volatile Map<String, String> dbClusterMap = new HashMap<String, String>();
 
-	private volatile Map<String, Set<String>> clusterIpMap = new HashMap<String, Set<String>>();
+    @Override
+    @PostConstruct
+    public void init() {
+        try {
+            buildConfigFromZebra();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@SuppressWarnings("unused")
-   private volatile Map<String, Set<String>> clusterDbMap = new HashMap<String, Set<String>>();
+    @Override
+    public Set<String> getUrlByCluster(String clusterName) {
+        return clusterIpMap.get(clusterName.toLowerCase());
+    }
 
-	@Override
-	@PostConstruct
-	public void init() {
-		try {
-			buildConfigFromZebra();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    @Override
+    public String getClusterByDb(String db) {
+        return dbClusterMap.get(db.toLowerCase());
+    }
 
-	@Override
-	public Set<String> getUrlByCluster(String clusterName) {
-		return clusterIpMap.get(clusterName);
-	}
+    protected void buildConfigFromZebra() throws IOException {
+        Map<String, Set<String>> clusterIpMap = new HashMap<String, Set<String>>();
+        Map<String, String> dbClusterMap = new HashMap<String, String>();
 
-	protected void buildConfigFromZebra() throws IOException {
-		// Map<String, Set<String>> targets = getTargets();
-		// Map<String, InstanceChangedEvent> cachedEvent = new HashMap<String, InstanceChangedEvent>();
+        Map<String, String> allProperties = configManager.getConfigByProject(env, Constants.DEFAULT_DATASOURCE_GROUP_PRFIX);
+        for (String groupds : allProperties.values()) {
+            Map<String, DefaultDataSourceConfigManager.ReadOrWriteRole> groupdsResult = DefaultDataSourceConfigManager.ReadOrWriteRole.parseConfig(groupds);
 
-		Map<String, Set<String>> clusterIpMap = new HashMap<String, Set<String>>();
-		Map<String, Set<String>> clusterDbMap = new HashMap<String, Set<String>>();
+            Optional<Map.Entry<String, DefaultDataSourceConfigManager.ReadOrWriteRole>> write = FluentIterable.from(groupdsResult.entrySet()).filter(new Predicate<Map.Entry<String, DefaultDataSourceConfigManager.ReadOrWriteRole>>() {
+                @Override
+                public boolean apply(Map.Entry<String, DefaultDataSourceConfigManager.ReadOrWriteRole> input) {
+                    return input.getValue().isWrite();
+                }
+            }).first();
+            if (!write.isPresent()) {
+                continue;
+            }
+            String writeJdbcUrl = configCache.getProperty(getSingleDataSourceKey("url", write.get().getKey()));
+            if (Strings.isNullOrEmpty(writeJdbcUrl)) {
+                continue;
+            }
+            Matcher writeMatcher = JDBC_URL_PATTERN.matcher(writeJdbcUrl);
+            if (!writeMatcher.matches()) {
+                continue;
+            }
 
-		Map<String, String> allProperties = configManager.getConfigByProject(env,
-		      Constants.DEFAULT_DATASOURCE_GROUP_PRFIX);
-		for (String groupds : allProperties.values()) {
-			Map<String, DefaultDataSourceConfigManager.ReadOrWriteRole> groupdsResult = DefaultDataSourceConfigManager.ReadOrWriteRole
-			      .parseConfig(groupds);
+            String writeUrl = writeMatcher.group(1);
+            String db = writeMatcher.group(2).toLowerCase();
 
-			Optional<Map.Entry<String, DefaultDataSourceConfigManager.ReadOrWriteRole>> write = FluentIterable
-			      .from(groupdsResult.entrySet())
-			      .filter(new Predicate<Map.Entry<String, DefaultDataSourceConfigManager.ReadOrWriteRole>>() {
-				      @Override
-				      public boolean apply(Map.Entry<String, DefaultDataSourceConfigManager.ReadOrWriteRole> input) {
-					      return input.getValue().isWrite();
-				      }
-			      }).first();
-			if (!write.isPresent()) {
-				continue;
-			}
-			String writeJdbcUrl = configCache.getProperty(getSingleDataSourceKey("url", write.get().getKey()));
-			if (Strings.isNullOrEmpty(writeJdbcUrl)) {
-				continue;
-			}
-			Matcher writeMatcher = JDBC_URL_PATTERN.matcher(writeJdbcUrl);
-			if (!writeMatcher.matches()) {
-				continue;
-			}
+            dbClusterMap.put(db, writeUrl);
 
-			String writeUrl = writeMatcher.group(1);
-			String db = writeMatcher.group(2).toLowerCase();
+            Set<String> clusterIps = clusterIpMap.get(writeUrl);
+            if (clusterIps == null) {
+                clusterIps = new HashSet<String>();
+                clusterIpMap.put(writeUrl, clusterIps);
+            }
 
-			Set<String> clusterDbs = clusterDbMap.get(writeUrl);
-			if (clusterDbs == null) {
-				clusterDbs = new HashSet<String>();
-				clusterDbMap.put(writeUrl, clusterDbs);
-			}
-			clusterDbs.add(db);
+            for (Map.Entry<String, DefaultDataSourceConfigManager.ReadOrWriteRole> entry : groupdsResult.entrySet()) {
+                if (!entry.getValue().isRead()) {
+                    continue;
+                }
 
-			Set<String> clusterIps = clusterIpMap.get(writeUrl);
-			if (clusterIps == null) {
-				clusterIps = new HashSet<String>();
-				clusterIpMap.put(writeUrl, clusterIps);
-			}
+                String jdbcUrl = configCache.getProperty(getSingleDataSourceKey("url", entry.getKey()));
+                if (Strings.isNullOrEmpty(jdbcUrl)) {
+                    continue;
+                }
+                Matcher matcher = JDBC_URL_PATTERN.matcher(jdbcUrl);
+                if (!matcher.matches()) {
+                    continue;
+                }
 
-			for (Map.Entry<String, DefaultDataSourceConfigManager.ReadOrWriteRole> entry : groupdsResult.entrySet()) {
-				if (!entry.getValue().isRead()) {
-					continue;
-				}
+                String url = matcher.group(1);
 
-				String jdbcUrl = configCache.getProperty(getSingleDataSourceKey("url", entry.getKey()));
-				if (Strings.isNullOrEmpty(jdbcUrl)) {
-					continue;
-				}
-				Matcher matcher = JDBC_URL_PATTERN.matcher(jdbcUrl);
-				if (!matcher.matches()) {
-					continue;
-				}
+                clusterIps.add(url);
+            }
 
-				String url = matcher.group(1);
+            this.clusterIpMap = clusterIpMap;
+            this.dbClusterMap = dbClusterMap;
+        }
+    }
 
-				clusterIps.add(url);
-			}
+    private String getSingleDataSourceKey(String key, String dsId) {
+        return String.format("%s.%s.jdbc.%s", Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX, dsId, key);
+    }
 
-			this.clusterDbMap = clusterDbMap;
-			this.clusterIpMap = clusterIpMap;
-		}
-	}
-
-	private String getSingleDataSourceKey(String key, String dsId) {
-		return String.format("%s.%s.jdbc.%s", Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX, dsId, key);
-	}
-
-	public void setConfigManager(ConfigManager configManager) {
-		this.configManager = configManager;
-	}
-
-	// protected Map<String, Set<String>> getTargets() {
-	// List<PumaServerEntity> servers = pumaServerService.findOnCurrentServer();
-	// Map<String, Set<String>> targetResult = new HashMap<String, Set<String>>();
-	// for (PumaServerEntity server : servers) {
-	// List<PumaTaskTargetEntity> targets = pumaTaskTargetDao.findByTaskId(server.getId());
-	// for (PumaTaskTargetEntity target : targets) {
-	// Set<String> tables = targetResult.get(target.getDatabase());
-	// if (tables == null) {
-	// tables = new HashSet<String>();
-	// targetResult.put(target.getDatabase(), tables);
-	// }
-	// tables.add(target.getTable());
-	// }
-	// }
-	// return targetResult;
-	// }
+    public void setConfigManager(ConfigManager configManager) {
+        this.configManager = configManager;
+    }
 }

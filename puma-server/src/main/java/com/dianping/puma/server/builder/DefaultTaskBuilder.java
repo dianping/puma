@@ -106,7 +106,6 @@ public class DefaultTaskBuilder implements TaskBuilder {
 
 		// Bin log.
 		taskExecutor.setBinlogInfoHolder(binlogInfoHolder);
-		taskExecutor.setBinlogInfo(pumaTask.getStartBinlogInfo());
 		taskExecutor.setBinlogStat(new BinlogStat());
 
 		// Parser.

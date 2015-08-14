@@ -1,14 +1,6 @@
 package com.dianping.puma.server.container;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import com.dianping.cat.Cat;
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
@@ -17,8 +9,15 @@ import com.dianping.puma.server.builder.TaskBuilder;
 import com.dianping.puma.server.registry.RegistryService;
 import com.dianping.puma.storage.EventStorage;
 import com.dianping.puma.taskexecutor.TaskExecutor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 @Service
@@ -54,7 +53,7 @@ public class DefaultTaskContainer implements TaskContainer {
 
             for (Table table : tables) {
                 if (table.getSchemaName().equals(database)) {
-               	  return taskExecutor.getFileSender().get(0).getStorage(database);
+                    return taskExecutor.getFileSender().get(0).getStorage(database);
                 }
             }
         }
@@ -73,22 +72,23 @@ public class DefaultTaskContainer implements TaskContainer {
 
             start(taskName);
         } catch (Exception e) {
-            e.printStackTrace();
+            Cat.logError(e.getMessage(), e);
         }
     }
 
     @Override
     public void update(String taskName, PumaTaskEntity oriTask, PumaTaskEntity task) {
-
+        delete(taskName, oriTask);
+        create(taskName, task);
     }
 
     @Override
     public void delete(String taskName, PumaTaskEntity task) {
+        stop(taskName);
+
         if (taskExecutors.remove(taskName) == null) {
             throw new RuntimeException("delete puma task failure, not exists.");
         }
-
-        stop(taskName);
     }
 
     @Override
@@ -110,8 +110,7 @@ public class DefaultTaskContainer implements TaskContainer {
                 register(taskExecutor);
             }
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Cat.logError(e.getMessage(), e);
         }
     }
 
@@ -125,15 +124,14 @@ public class DefaultTaskContainer implements TaskContainer {
                 unregister(taskExecutor);
             }
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Cat.logError(e.getMessage(), e);
         }
     }
 
     protected void register(TaskExecutor taskExecutor) {
         PumaTaskEntity pumaTask = taskExecutor.getTask();
         Map<String, List<String>> databaseTableMap = pumaTask.getTableSet().mapSchemaTables();
-        for (String database: databaseTableMap.keySet()) {
+        for (String database : databaseTableMap.keySet()) {
             registryService.register(IPUtils.getFirstNoLoopbackIP4Address() + ":4040", database, null);
         }
     }
@@ -141,7 +139,7 @@ public class DefaultTaskContainer implements TaskContainer {
     protected void unregister(TaskExecutor taskExecutor) {
         PumaTaskEntity pumaTask = taskExecutor.getTask();
         Map<String, List<String>> databaseTableMap = pumaTask.getTableSet().mapSchemaTables();
-        for (String database: databaseTableMap.keySet()) {
+        for (String database : databaseTableMap.keySet()) {
             registryService.unregister(IPUtils.getFirstNoLoopbackIP4Address() + ":4040", database, null);
         }
     }

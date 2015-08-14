@@ -1,13 +1,19 @@
 package com.dianping.puma.instance;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import com.dianping.puma.core.config.ConfigManager;
+import com.google.common.collect.Sets;
+import junit.framework.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Dozer @ 8/12/15
@@ -15,18 +21,21 @@ import java.util.HashMap;
  * http://www.dozer.cc
  */
 public class ZebraInstanceManagerTest {
+
     HashMap<String, String> groupds = new HashMap<String, String>();
 
+
     @Test
+    @Ignore
     public void testBuildConfigFromZebra() throws Exception {
+        ZebraInstanceManager target = new ZebraInstanceManager();
+
         ConfigManager lionService = mock(ConfigManager.class);
         when(lionService.getConfigByProject(anyString(), anyString())).thenReturn(groupds);
 
-        ZebraInstanceManager target = new ZebraInstanceManager();
         target.setConfigManager(lionService);
         target.buildConfigFromZebra();
     }
-
 
     @Before
     public void setUp() throws Exception {

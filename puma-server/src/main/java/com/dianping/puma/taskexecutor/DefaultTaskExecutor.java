@@ -40,6 +40,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
+import jodd.util.collection.SortedArrayList;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -170,7 +173,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 .getBinlogStartPos());
     }
 
-    protected void loadServerId(List<SrcDbEntity> srcDbEntityList) throws Exception {
+    protected void loadServerId(Collection<SrcDbEntity> srcDbEntityList) throws Exception {
         Class.forName("com.mysql.jdbc.Driver");
 
         for (SrcDbEntity entity : srcDbEntityList) {
@@ -228,11 +231,24 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
     protected SrcDbEntity chooseNextSrcDb() {
         SrcDbEntity oldSrcEntity = this.currentSrcDbEntity;
 
-        int index = getTask().getSrcDbEntityList().indexOf(this.currentSrcDbEntity) + 1;
-        if (index >= getTask().getSrcDbEntityList().size()) {
+        List<SrcDbEntity> sortedSet = new SortedArrayList<SrcDbEntity>(new Comparator<SrcDbEntity>() {
+            @Override
+            public int compare(SrcDbEntity o1, SrcDbEntity o2) {
+                if (o1.getServerId() > o1.getServerId()) {
+                    return 1;
+                } else if (o1.getServerId() < o1.getServerId()) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }
+        });
+
+        int index = sortedSet.indexOf(this.currentSrcDbEntity) + 1;
+        if (index >= sortedSet.size()) {
             index = 0;
         }
-        SrcDbEntity newSrcEntity = getTask().getSrcDbEntityList().get(index);
+        SrcDbEntity newSrcEntity = sortedSet.get(index);
 
         Cat.logEvent("SrcDbSwitch", String.format("[%d]%s", getTask().getId(), getTask().getName()), Message.SUCCESS,
                 oldSrcEntity.toString() + " -> " + newSrcEntity.toString());
@@ -738,6 +754,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
     }
 
     protected void doStop() throws Exception {
+        LOG.info("TaskName: " + getTaskName() + ", Stopped.");
         closeTransport();
     }
 

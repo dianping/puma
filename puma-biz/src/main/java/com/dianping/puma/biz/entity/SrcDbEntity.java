@@ -1,93 +1,79 @@
 package com.dianping.puma.biz.entity;
 
+import com.google.common.base.Objects;
+
 public class SrcDbEntity {
+    private String host;
 
-	private int id;
+    private int port;
 
-	private String jdbcRef;
+    private String username;
 
-	private String name;
+    private String password;
 
-	private String host;
+    private long serverId;
 
-	private int port;
+    public String getHost() {
+        return host;
+    }
 
-	private String username;
+    public void setHost(String host) {
+        this.host = host;
+    }
 
-	private String password;
+    public int getPort() {
+        return port;
+    }
 
-	private long serverId;
+    public void setPort(int port) {
+        this.port = port;
+    }
 
-	public int getId() {
-		return id;
-	}
+    public String getUsername() {
+        return username;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-	public String getHost() {
-		return host;
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	public void setHost(String host) {
-		this.host = host;
-	}
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-	public int getPort() {
-		return port;
-	}
+    public long getServerId() {
+        return serverId;
+    }
 
-	public void setPort(int port) {
-		this.port = port;
-	}
+    public void setServerId(long serverId) {
+        this.serverId = serverId;
+    }
 
-	public String getUsername() {
-		return username;
-	}
+    @Override
+    public String toString() {
+        return "SrcDbEntity{" +
+                "host='" + host + '\'' +
+                ", port=" + port +
+                '}';
+    }
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SrcDbEntity that = (SrcDbEntity) o;
+        return Objects.equal(port, that.port) &&
+                Objects.equal(host, that.host) &&
+                Objects.equal(username, that.username) &&
+                Objects.equal(password, that.password);
+    }
 
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public long getServerId() {
-		return serverId;
-	}
-
-	public void setServerId(long serverId) {
-		this.serverId = serverId;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getJdbcRef() {
-		return jdbcRef;
-	}
-
-	public void setJdbcRef(String jdbcRef) {
-		this.jdbcRef = jdbcRef;
-	}
-
-	@Override
-	public String toString() {
-		return "SrcDbEntity{" +
-				"host='" + host + '\'' +
-				", port=" + port +
-				", serverId=" + serverId +
-				'}';
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(host, port, username, password);
+    }
 }

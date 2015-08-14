@@ -1,10 +1,10 @@
 package com.dianping.puma.biz.entity;
 
 import com.dianping.puma.core.model.TableSet;
+import com.google.common.collect.ImmutableSet;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 public class PumaTaskEntity {
 
@@ -20,7 +20,7 @@ public class PumaTaskEntity {
 
     private TableSet tableSet;
 
-    private List<SrcDbEntity> srcDbEntityList = new ArrayList<SrcDbEntity>();
+    private Set<SrcDbEntity> srcDbEntityList = ImmutableSet.of();
 
     public int getId() {
         return id;
@@ -62,11 +62,11 @@ public class PumaTaskEntity {
         this.clusterName = clusterName;
     }
 
-    public List<SrcDbEntity> getSrcDbEntityList() {
+    public Set<SrcDbEntity> getSrcDbEntityList() {
         return srcDbEntityList;
     }
 
-    public void setSrcDbEntityList(List<SrcDbEntity> srcDbEntityList) {
+    public void setSrcDbEntityList(Set<SrcDbEntity> srcDbEntityList) {
         this.srcDbEntityList = srcDbEntityList;
     }
 

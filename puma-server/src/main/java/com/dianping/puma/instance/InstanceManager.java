@@ -14,4 +14,5 @@ public interface InstanceManager {
     Set<String> getUrlByCluster(String clusterName);
 
     String getClusterByDb(String db);
+
 }

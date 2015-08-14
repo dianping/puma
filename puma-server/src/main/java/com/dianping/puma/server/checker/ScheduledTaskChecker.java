@@ -11,10 +11,12 @@ import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.instance.InstanceManager;
 import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.server.server.TaskServerManager;
+import com.google.common.base.Equivalence;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -79,7 +81,7 @@ public class ScheduledTaskChecker implements TaskChecker {
             }
             entity.setTableSet(tableSet);
 
-            ImmutableList.Builder<SrcDbEntity> srcDbBuilder = ImmutableList.builder();
+            ImmutableSet.Builder<SrcDbEntity> srcDbBuilder = ImmutableSet.builder();
             for (String url : instanceManager.getUrlByCluster(entry.getKey())) {
                 SrcDbEntity srcDbEntity = new SrcDbEntity();
                 String[] urlAndPort = url.split(":");
@@ -109,37 +111,21 @@ public class ScheduledTaskChecker implements TaskChecker {
             return;
         }
 
+        MapDifference<String, PumaTaskEntity> taskDifference = Maps.difference(oriTasks, tasks, new PumaTaskEquivalence());
+
         // Created.
-        handleCreatedTasks(findCreatedTasks(oriTasks, tasks));
+        handleCreatedTasks(taskDifference.entriesOnlyOnRight());
 
         // Updated.
-        handleUpdatedTasks(findUpdatedTasks(oriTasks, tasks));
+        handleUpdatedTasks(taskDifference.entriesDiffering());
 
         // Deleted.
-        handleDeletedTasks(findDeletedTasks(oriTasks, tasks));
+        handleDeletedTasks(taskDifference.entriesOnlyOnLeft());
     }
 
     @Scheduled(fixedDelay = 5 * 1000)
     public void scheduledCheck() {
         check();
-    }
-
-    protected Map<String, PumaTaskEntity> findCreatedTasks(Map<String, PumaTaskEntity> oriTasks,
-                                                           Map<String, PumaTaskEntity> tasks) {
-        MapDifference<String, PumaTaskEntity> taskDifference = Maps.difference(oriTasks, tasks);
-        return taskDifference.entriesOnlyOnRight();
-    }
-
-    protected Map<String, MapDifference.ValueDifference<PumaTaskEntity>> findUpdatedTasks(
-            Map<String, PumaTaskEntity> oriTasks, Map<String, PumaTaskEntity> tasks) {
-        MapDifference<String, PumaTaskEntity> taskDifference = Maps.difference(oriTasks, tasks);
-        return taskDifference.entriesDiffering();
-    }
-
-    protected Map<String, PumaTaskEntity> findDeletedTasks(Map<String, PumaTaskEntity> oriTasks,
-                                                           Map<String, PumaTaskEntity> tasks) {
-        MapDifference<String, PumaTaskEntity> taskDifference = Maps.difference(oriTasks, tasks);
-        return taskDifference.entriesOnlyOnLeft();
     }
 
     private void handleCreatedTasks(Map<String, PumaTaskEntity> createdTasks) {
@@ -169,6 +155,28 @@ public class ScheduledTaskChecker implements TaskChecker {
             } catch (Exception e) {
                 // @todo.
             }
+        }
+    }
+
+    class PumaTaskEquivalence extends Equivalence<PumaTaskEntity> {
+        @Override
+        protected boolean doEquivalent(PumaTaskEntity a, PumaTaskEntity b) {
+            if (!a.getName().equals(b.getName())) {
+                return false;
+            }
+
+            if (!a.getTableSet().equals(b.getTableSet())) {
+                return false;
+            }
+
+
+            Sets.SetView<SrcDbEntity> diff = Sets.difference(a.getSrcDbEntityList(), b.getSrcDbEntityList());
+            return diff.size() == 0;
+        }
+
+        @Override
+        protected int doHash(PumaTaskEntity entity) {
+            return entity.hashCode();
         }
     }
 }

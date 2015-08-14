@@ -1,16 +1,22 @@
 package com.dianping.puma.instance;
 
+import com.dianping.cat.Cat;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
-import com.dianping.puma.biz.service.PumaServerService;
+import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.core.config.ConfigManager;
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
+import com.google.common.base.Equivalence;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.MapDifference;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -44,7 +50,31 @@ public class ZebraInstanceManager implements InstanceManager {
         try {
             buildConfigFromZebra();
         } catch (IOException e) {
-            e.printStackTrace();
+            Cat.logError(e.getMessage(), e);
+        }
+
+        configCache.addChange(new ConfigChange() {
+            @Override
+            public void onChange(String key, String value) {
+                if (!key.startsWith(Constants.DEFAULT_DATASOURCE_GROUP_PRFIX)
+                        && !key.startsWith(Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX)) {
+                    return;
+                }
+                try {
+                    buildConfigFromZebra();
+                } catch (IOException e) {
+                    Cat.logError(e.getMessage(), e);
+                }
+            }
+        });
+    }
+
+    @Scheduled(fixedDelay = 5 * 60 * 1000)
+    public void scheduledReload() {
+        try {
+            buildConfigFromZebra();
+        } catch (IOException e) {
+            Cat.logError(e.getMessage(), e);
         }
     }
 
@@ -58,7 +88,7 @@ public class ZebraInstanceManager implements InstanceManager {
         return dbClusterMap.get(db.toLowerCase());
     }
 
-    protected void buildConfigFromZebra() throws IOException {
+    protected synchronized void buildConfigFromZebra() throws IOException {
         Map<String, Set<String>> clusterIpMap = new HashMap<String, Set<String>>();
         Map<String, String> dbClusterMap = new HashMap<String, String>();
 

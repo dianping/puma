@@ -2,7 +2,6 @@ package com.dianping.puma.admin.web;
 
 import com.dianping.puma.core.util.GsonUtil;
 import com.dianping.puma.biz.entity.*;
-import com.dianping.puma.biz.service.PumaTaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +20,6 @@ public class PumaTaskController {
 
     private final Logger logger = LoggerFactory.getLogger(PumaTaskController.class);
 
-    @Autowired
-    PumaTaskService pumaTaskService;
-
     @RequestMapping(value = {"/puma-task"})
     public ModelAndView view() {
         Map<String, Object> map = new HashMap<String, Object>();
@@ -35,10 +31,10 @@ public class PumaTaskController {
     @ResponseBody
     public String list(int page, int pageSize) {
         Map<String, Object> map = new HashMap<String, Object>();
-        int count = pumaTaskService.count();
-        List<PumaTaskEntity> pumaTaskEntities = pumaTaskService.findByPage(page, pageSize);
-        map.put("count", count);
-        map.put("list", pumaTaskEntities);
+        //int count = pumaTaskService.count();
+        //List<PumaTaskEntity> pumaTaskEntities = pumaTaskService.findByPage(page, pageSize);
+        //map.put("count", count);
+        //map.put("list", pumaTaskEntities);
         return GsonUtil.toJson(map);
     }
 

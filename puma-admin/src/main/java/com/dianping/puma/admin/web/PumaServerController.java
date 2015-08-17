@@ -3,7 +3,6 @@ package com.dianping.puma.admin.web;
 import com.dianping.puma.biz.entity.PumaServerEntity;
 import com.dianping.puma.core.util.GsonUtil;
 import com.dianping.puma.biz.service.PumaServerService;
-import com.dianping.puma.biz.service.PumaTaskService;
 import com.dianping.puma.biz.service.SyncTaskService;
 
 import org.slf4j.Logger;
@@ -30,9 +29,6 @@ public class PumaServerController {
 
 	@Autowired
 	PumaServerService pumaServerService;
-
-	@Autowired
-	PumaTaskService pumaTaskService;
 
 	@Autowired
 	SyncTaskService syncTaskService;

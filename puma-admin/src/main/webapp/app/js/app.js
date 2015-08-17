@@ -1,9 +1,16 @@
-//var puma = angular.module('puma', ['ngRoute']);
-//
-//puma.config(['$routeProvider', function($routeProvider) {
-//  $routeProvider.when('/puma-server/list', {
-//    templateUrl: 'app/partials/puma-server/list.html',
-//    controller: 'controller.js'
-//  }).otherwise('index.html');
-//}]);
+var puma = angular.module('puma', ['ngRoute']);
+
+puma.controller("Controller", function($scope) {
+
+});
+
+puma.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
+  $routeProvider.when('/puma-server', {
+    templateUrl: '/partials/puma-server/list.html'
+  }).otherwise({
+    redirectTo: '/error'
+  });
+
+  $locationProvider.html5Mode(false);
+}]);
 

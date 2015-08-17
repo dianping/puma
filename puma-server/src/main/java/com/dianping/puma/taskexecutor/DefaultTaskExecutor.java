@@ -243,6 +243,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 }
             }
         });
+        sortedSet.addAll(getTask().getSrcDbEntityList());
 
         int index = sortedSet.indexOf(this.currentSrcDbEntity) + 1;
         if (index >= sortedSet.size()) {

@@ -88,9 +88,21 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 							this.indexBucket.stop();
 							this.indexBucket = null;
 						}
+
+                        continue;
 					}
 
-					continue;
+					if (!shouldSleep) {
+						return null;
+					} else {
+						try {
+							Thread.sleep(5);
+
+							continue;
+						} catch (InterruptedException e1) {
+							Thread.currentThread().interrupt();
+						}
+					}
 				}
 
 				Sequence sequence = nextL2Index.getSequence();

@@ -106,7 +106,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                         if (binlogInfo == null) {
                             throw new IOException("Switch Binlog Failed!");
                         } else {
-                            Cat.logEvent("BinlogSwitch", String.format("[%d]%s", getTask().getId(), getTask().getName()), Message.SUCCESS,
+                            Cat.logEvent("BinlogSwitch", getTask().getName(), Message.SUCCESS,
                                     oldBinlogInfo.toString() + " -> " + binlogInfo.toString());
                         }
                     }
@@ -251,7 +251,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         }
         SrcDbEntity newSrcEntity = sortedSet.get(index);
 
-        Cat.logEvent("SrcDbSwitch", String.format("[%d]%s", getTask().getId(), getTask().getName()), Message.SUCCESS,
+        Cat.logEvent("SrcDbSwitch", getTask().getName(), Message.SUCCESS,
                 oldSrcEntity.toString() + " -> " + newSrcEntity.toString());
 
         return newSrcEntity;

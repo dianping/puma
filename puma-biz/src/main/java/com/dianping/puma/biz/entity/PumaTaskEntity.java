@@ -8,8 +8,6 @@ import java.util.Set;
 
 public class PumaTaskEntity {
 
-    private int id;
-
     private String name;
 
     private int preservedDay;
@@ -21,14 +19,6 @@ public class PumaTaskEntity {
     private TableSet tableSet;
 
     private Set<SrcDbEntity> srcDbEntityList = ImmutableSet.of();
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;

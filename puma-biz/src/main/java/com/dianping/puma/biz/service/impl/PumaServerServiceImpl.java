@@ -1,15 +1,10 @@
 package com.dianping.puma.biz.service.impl;
 
 import com.dianping.puma.biz.dao.PumaServerDao;
-import com.dianping.puma.biz.dao.PumaTaskServerDao;
 import com.dianping.puma.biz.dao.PumaTaskTargetDao;
 import com.dianping.puma.biz.entity.PumaServerEntity;
-import com.dianping.puma.biz.entity.PumaTaskServerEntity;
-import com.dianping.puma.biz.entity.PumaTaskTargetEntity;
 import com.dianping.puma.biz.service.PumaServerService;
 import com.dianping.puma.core.util.IPUtils;
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +17,6 @@ public class PumaServerServiceImpl implements PumaServerService {
 
     @Autowired
     PumaServerDao pumaServerDao;
-
-    @Autowired
-    PumaTaskServerDao pumaTaskServerDao;
 
     @Autowired
     PumaTaskTargetDao pumaTaskTargetDao;
@@ -57,45 +49,35 @@ public class PumaServerServiceImpl implements PumaServerService {
     }
 
     @Override
-    public List<PumaServerEntity> findByTaskId(int taskId) {
-        List<PumaTaskServerEntity> pumaTaskServers = pumaTaskServerDao.findByTaskId(taskId);
-
-        List<PumaServerEntity> pumaServers = new ArrayList<PumaServerEntity>();
-        for (PumaTaskServerEntity pumaTaskServer : pumaTaskServers) {
-            pumaServers.add(findById(pumaTaskServer.getServerId()));
-        }
-
-        return pumaServers;
-    }
-
-    @Override
     public List<PumaServerEntity> findByDatabaseAndTables(String database, List<String> tables) {
-        List<Integer> taskIds = null;
-
-        for (String table : tables) {
-            List<PumaTaskTargetEntity> pumaTaskTargets = pumaTaskTargetDao.findByDatabaseAndTable(database, table);
-            List<Integer> tempTaskIds = Lists.transform(pumaTaskTargets, new Function<PumaTaskTargetEntity, Integer>() {
-                @Override
-                public Integer apply(PumaTaskTargetEntity pumaTaskTargetEntity) {
-                    return pumaTaskTargetEntity.getTaskId();
-                }
-            });
-
-            if (taskIds == null) {
-                taskIds = tempTaskIds;
-            } else {
-                taskIds.retainAll(tempTaskIds);
-            }
-        }
-
-        List<PumaServerEntity> pumaServers = new ArrayList<PumaServerEntity>();
-        if (taskIds != null) {
-            for (int taskId : taskIds) {
-                pumaServers.addAll(this.findByTaskId(taskId));
-            }
-        }
-
-        return pumaServers;
+        //todo: puma task 在数据库已经不存在了，需要重写这块逻辑
+        return null;
+//        List<Integer> taskIds = null;
+//
+//        for (String table : tables) {
+//            List<PumaTaskTargetEntity> pumaTaskTargets = pumaTaskTargetDao.findByDatabaseAndTable(database, table);
+//            List<Integer> tempTaskIds = Lists.transform(pumaTaskTargets, new Function<PumaTaskTargetEntity, Integer>() {
+//                @Override
+//                public Integer apply(PumaTaskTargetEntity pumaTaskTargetEntity) {
+//                    return pumaTaskTargetEntity.getTaskId();
+//                }
+//            });
+//
+//            if (taskIds == null) {
+//                taskIds = tempTaskIds;
+//            } else {
+//                taskIds.retainAll(tempTaskIds);
+//            }
+//        }
+//
+//        List<PumaServerEntity> pumaServers = new ArrayList<PumaServerEntity>();
+//        if (taskIds != null) {
+//            for (int taskId : taskIds) {
+//                pumaServers.addAll(this.findByTaskId(taskId));
+//            }
+//        }
+//
+//        return pumaServers;
     }
 
     @Override

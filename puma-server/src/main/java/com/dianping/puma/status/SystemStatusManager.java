@@ -23,8 +23,8 @@ public class SystemStatusManager {
 		status.getClients().put(clientName, client);
 	}
 
-	public static void addServer(String name, String host, int port, String database) {
-		Server server = new Server(name, host, port, database);
+	public static void addServer(String name, String host, int port, String target) {
+		Server server = new Server(name, host, port, target);
 
 		status.getServers().put(name, server);
 	}

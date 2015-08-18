@@ -72,8 +72,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
     private DefaultTableMetaInfoFetcher tableMetaInfoFetcher;
 
-    private String database;
-
     private String encoding = "utf-8";
 
     private Socket mysqlSocket;
@@ -169,7 +167,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         getContext().setBinlogFileName(binlogInfo.getBinlogFile());
         getContext().setBinlogStartPos(binlogInfo.getBinlogPosition());
         setBinlogInfo(binlogInfo);
-        SystemStatusManager.addServer(getTaskName(), currentSrcDbEntity.getHost(), currentSrcDbEntity.getPort(), database);
+        SystemStatusManager.addServer(getTaskName(), currentSrcDbEntity.getHost(), currentSrcDbEntity.getPort(), getTask().getTableSet().toString());
         SystemStatusManager.updateServerBinlog(getTaskName(), getContext().getBinlogFileName(), getContext()
                 .getBinlogStartPos());
     }
@@ -599,13 +597,12 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
     private boolean auth() {
         try {
             LOG.info("server logining taskName: " + getTaskName() + " host: " + currentSrcDbEntity.getHost() + " port: " + currentSrcDbEntity.getPort() + " username: "
-                    + currentSrcDbEntity.getUsername() + " database: " + database + " dbServerId: " + currentSrcDbEntity.getServerId());
+                    + currentSrcDbEntity.getUsername() + " dbServerId: " + currentSrcDbEntity.getServerId());
             AuthenticatePacket authPacket = (AuthenticatePacket) PacketFactory.createCommandPacket(
                     PacketType.AUTHENTICATE_PACKET, getContext());
 
             authPacket.setPassword(currentSrcDbEntity.getPassword());
             authPacket.setUser(currentSrcDbEntity.getUsername());
-            authPacket.setDatabase(database);
             authPacket.buildPacket(getContext());
             authPacket.write(os, getContext());
 
@@ -832,20 +829,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
     public void setEncoding(String encoding) {
         this.encoding = encoding;
-    }
-
-    /**
-     * @return the database
-     */
-    public String getDatabase() {
-        return database;
-    }
-
-    /**
-     * @param database the database to set
-     */
-    public void setDatabase(String database) {
-        this.database = database;
     }
 
     public BinlogInfo getBinlogInfo() {

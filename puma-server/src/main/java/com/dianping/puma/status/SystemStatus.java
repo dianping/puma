@@ -227,7 +227,7 @@ public class SystemStatus {
 
         private int port;
 
-        private String database;
+        private String target;
 
         private String binlogFile;
 
@@ -257,12 +257,12 @@ public class SystemStatus {
             this(name, host, port, null);
         }
 
-        public Server(String name, String host, int port, String database) {
+        public Server(String name, String host, int port, String target) {
             super();
             this.name = name;
             this.host = host;
             this.port = port;
-            this.database = database;
+            this.target = target;
             this.storeQpsCounter = new QpsCounter(15);
         }
 
@@ -282,8 +282,12 @@ public class SystemStatus {
             return bucketNumber;
         }
 
-        public String getDatabase() {
-            return database;
+        public String getTarget() {
+            return target;
+        }
+
+        public void setTarget(String target) {
+            this.target = target;
         }
 
         public String getHost() {
@@ -350,10 +354,6 @@ public class SystemStatus {
 
         public void setBucketNumber(int bucketOffset) {
             this.bucketNumber = bucketOffset;
-        }
-
-        public void setDatabase(String database) {
-            this.database = database;
         }
 
         public void setHost(String host) {

@@ -21,7 +21,7 @@
 
 	<servers>
 		<server name="database1" host="192.168.1.1" port="3306"
-			database="test">
+			target="test">
 			<binlogFile>mysql-00001</binlogFile>
 			<binlogPosition>123213</binlogPosition>
 			<bucketDate>20120304</bucketDate>

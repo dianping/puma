@@ -15,7 +15,7 @@
     <!-- Configures the @Controller programming model -->
     <mvc:annotation-driven />
 
-    <mvc:resources mapping="/app/**" location="/app/" />
+    <!--mvc:resources mapping="/**" location="/"/-->
 
     <!--mvc:resources mapping="/javascripts/**" location="/js/" />
     <mvc:resources mapping="/images/**" location="/images/" />
@@ -45,7 +45,7 @@
         class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
         <!-- (1)resourceLoaderPath可以以classpath:或file:开头，velocity会自动知道ClassReourceLoader或FileReourceLoader去加载资源的。 
             (2)这里指定了模板完整路径，viewResolver的prefix就不要设置了，让它为默认的空字符串即可,因为完整filename是path+prefix+name+suffix。 -->
-        <property name="resourceLoaderPath" value="/WEB-INF/page/" />
+        <property name="resourceLoaderPath" value="/app/deprecated/page/" />
         <property name="configLocation" value="classpath:velocity.properties" />
     </bean>
 
@@ -60,7 +60,7 @@
         <property name="requestContextAttribute" value="rc" />
         <property name="suffix" value=".htm" />
         <property name="toolboxConfigLocation">
-            <value>/WEB-INF/velocity/toolbox.xml</value>
+            <value>/app/deprecated/velocity/toolbox.xml</value>
         </property>
       	<property name="layoutUrl">
             <value>layout.htm</value>

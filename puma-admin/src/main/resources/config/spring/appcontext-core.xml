@@ -1,33 +1,12 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xmlns:task="http://www.springframework.org/schema/task"
-    xmlns:context="http://www.springframework.org/schema/context"
-    xmlns:pigeon="http://code.dianping.com/schema/pigeon"
-    xmlns:avatar="http://www.dianping.com/schema/avatar"
-    xsi:schemaLocation="
-            http://www.springframework.org/schema/beans 
-            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-            http://www.springframework.org/schema/context
-            http://www.springframework.org/schema/context/spring-context-3.0.xsd
-            http://www.springframework.org/schema/task   
-    http://www.springframework.org/schema/task/spring-task-3.0.xsd
-    http://code.dianping.com/schema/pigeon http://code.dianping.com/schema/pigeon/pigeon-service-2.0.xsd
-    http://www.dianping.com/schema/avatar http://www.dianping.com/schema/avatar/avatar-1.0.xsd">
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <!-- annotation scan -->
-    <context:component-scan base-package="com.dianping.puma">
-        <context:exclude-filter type="annotation"
-            expression="org.springframework.stereotype.Controller" />
-    </context:component-scan>
-	 
-    <task:annotation-driven />
-    <!-- pigeon -->
-	<pigeon:annotation package="com.dianping.puma.admin.api.impl"/>
-	
-	<!-- dCache -->
-	<avatar:cache /> 
-	
-	<context:annotation-config />
+    <context:component-scan base-package="com.dianping.puma"/>
 
 </beans>

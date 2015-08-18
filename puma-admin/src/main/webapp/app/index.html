@@ -2,38 +2,59 @@
 <html ng-app="puma">
 <head lang="en">
 
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta charset="utf-8"/>
     <title>Puma管理平台</title>
+    <meta name="description" content="frequently asked questions using tabs and accordions"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 
-    <!-- ace -->
-    <link ng-include="'/app/partials/ace-css.html'">
+    <link rel="stylesheet" href="/app/lib/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/app/lib/assets/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/app/lib/assets/css/ace-fonts.css">
+    <link rel="stylesheet" href="/app/lib/assets/css/ace.min.css" id="main-ace-style">
 </head>
+
 <body>
 
-    <div ng-include="'/app/partials/common/navbar.html'"></div>
+<div class="sidebar">
+    <ul class="nav nav-list">
+        <li>
+            <a href="#/puma-monitor/">Puma Monitor</a>
+        </li>
 
-    <script type="text/javascript">
-        try{ace.settings.check('main-container' , 'fixed')}catch(e){}
-    </script>
-    <div>
-        <div class="sidebar responsive" ng-include="'/app/partials/common/sidebar.html'"></div>
-        <div class="main-content">
-            <div ng-view></div>
-        </div>
+        <li>
+            <a href="#/puma-server/">Puma Server</a>
+        </li>
+
+        <li>
+            <a href="#/puma-client/">Puma Client</a>
+        </li>
+    </ul>
+
+    <div class="main-content">
+        <div ng-view></div>
     </div>
+</div>
 
-    <!-- ace -->
-    <script ng-include="'/app/partials/ace-js.html'"></script>
+<script src="/app/lib/assets/js/ace-elements.min.js"></script>
+<script src="/app/lib/assets/js/ace.min.js"></script>
+<script type="text/javascript"> ace.vars['base'] = '..'; </script>
+<script src="/app/lib/assets/js/ace/elements.onpage-help.js"></script>
+<script src="/app/lib/assets/js/ace/ace.onpage-help.js"></script>
+<script src="/app/lib/docs/assets/js/rainbow.js"></script>
+<script src="/app/lib/docs/assets/js/language/generic.js"></script>
+<script src="/app/lib/docs/assets/js/language/html.js"></script>
+<script src="/app/lib/docs/assets/js/language/css.js"></script>
+<script src="/app/lib/docs/assets/js/language/javascript.js"></script>
 
-    <!-- ngDialog -->
-    <!--script src="/app/lib/ng-dialog/ngDialog.min.js"></script-->
+<!-- ngDialog -->
+<!--script src="/app/lib/ng-dialog/ngDialog.min.js"></script-->
 
-    <!-- angularJS -->
-    <script src="/app/lib/angular/angular.js"></script>
-    <script src="/app/lib/angular/angular-route.js"></script>
+<!-- angularJS -->
+<script src="/app/lib/angular/angular.js"></script>
+<script src="/app/lib/angular/angular-route.js"></script>
 
-    <!-- puma -->
-    <script src="/app/js/app.js"></script>
+<!-- puma -->
+<script src="/app/js/app.js"></script>
 </body>
 </html>

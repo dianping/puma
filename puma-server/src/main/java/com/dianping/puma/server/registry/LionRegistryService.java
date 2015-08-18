@@ -15,6 +15,8 @@ public class LionRegistryService implements RegistryService {
 
     private static final String ZK_BASE_PATH = "puma-route.server.";
 
+    private static final String ZK_PROJECT = "puma-route";
+
     private final Logger logger = LoggerFactory.getLogger(LionRegistryService.class);
 
     @Autowired
@@ -27,7 +29,7 @@ public class LionRegistryService implements RegistryService {
         if (hostListString == null) {
             // maybe not created or created but not set.
             try {
-                configManager.createConfig("puma", buildKey(database), database);
+                configManager.createConfig(ZK_PROJECT, buildKey(database), database);
             } catch (Throwable t) {
                 logger.warn("failed to create config");
             } finally {

@@ -12,7 +12,7 @@ import java.util.List;
 
 public class ConfigPumaServerMonitor implements PumaServerMonitor {
 
-	private static final String ZK_BASE_PATH = "puma.client.route.";
+	private static final String ZK_BASE_PATH = "puma-route.server.";
 
 	protected ConfigManager configManager = ConfigManagerLoader.getConfigManager();
 

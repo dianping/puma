@@ -13,56 +13,58 @@ import java.util.List;
 @Service
 public class LionRegistryService implements RegistryService {
 
-	private final Logger logger = LoggerFactory.getLogger(LionRegistryService.class);
+    private static final String ZK_BASE_PATH = "puma-route.server.";
 
-	@Autowired
-	ConfigManager configManager;
+    private final Logger logger = LoggerFactory.getLogger(LionRegistryService.class);
 
-	@Override
-	public void register(String host, String database, List<String> tables) {
-		String hostListString = configManager.getConfig(buildKey(database));
+    @Autowired
+    ConfigManager configManager;
 
-		if (hostListString == null) {
-			// maybe not created or created but not set.
-			try {
-				configManager.createConfig("puma", buildKey(database), database);
-			} catch (Throwable t) {
-				logger.warn("failed to create config");
-			} finally {
-				hostListString = "";
-			}
-		}
+    @Override
+    public void register(String host, String database, List<String> tables) {
+        String hostListString = configManager.getConfig(buildKey(database));
 
-		List<String> hostList = parseHostList(hostListString);
+        if (hostListString == null) {
+            // maybe not created or created but not set.
+            try {
+                configManager.createConfig("puma", buildKey(database), database);
+            } catch (Throwable t) {
+                logger.warn("failed to create config");
+            } finally {
+                hostListString = "";
+            }
+        }
 
-		if (!hostList.contains(host)) {
-			hostList.add(host);
-			hostListString = buildHostListString(hostList);
-			configManager.setConfig(buildKey(database), hostListString);
-		}
-	}
+        List<String> hostList = parseHostList(hostListString);
 
-	@Override
-	public void unregister(String host, String database, List<String> tables) {
-		String hostListString = configManager.getConfig(buildKey(database));
+        if (!hostList.contains(host)) {
+            hostList.add(host);
+            hostListString = buildHostListString(hostList);
+            configManager.setConfig(buildKey(database), hostListString);
+        }
+    }
 
-		if (hostListString != null) {
-			List<String> hostList = parseHostList(hostListString);
-			hostList.remove(host);
-			hostListString = buildHostListString(hostList);
-			configManager.setConfig(buildKey(database), hostListString);
-		}
-	}
+    @Override
+    public void unregister(String host, String database, List<String> tables) {
+        String hostListString = configManager.getConfig(buildKey(database));
 
-	protected List<String> parseHostList(String hostListString) {
-		return Lists.newArrayList(StringUtils.split(hostListString, "#"));
-	}
+        if (hostListString != null) {
+            List<String> hostList = parseHostList(hostListString);
+            hostList.remove(host);
+            hostListString = buildHostListString(hostList);
+            configManager.setConfig(buildKey(database), hostListString);
+        }
+    }
 
-	protected String buildHostListString(List<String> hostList) {
-		return StringUtils.join(hostList, "#");
-	}
+    protected List<String> parseHostList(String hostListString) {
+        return Lists.newArrayList(StringUtils.split(hostListString, "#"));
+    }
 
-	protected String buildKey(String database) {
-		return "puma.client.route." + database;
-	}
+    protected String buildHostListString(List<String> hostList) {
+        return StringUtils.join(hostList, "#");
+    }
+
+    protected String buildKey(String database) {
+        return ZK_BASE_PATH + database;
+    }
 }

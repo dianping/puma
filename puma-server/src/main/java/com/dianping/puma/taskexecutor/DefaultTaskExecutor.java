@@ -95,14 +95,15 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
                 if (binlogInfo == null) {
                     this.currentSrcDbEntity = initSrcDbByServerId(-1);
-
-                    binlogInfo = new BinlogInfo(this.currentSrcDbEntity.getServerId(), null, 4l, 0, 0);
+                    if (getTask().getBeginTime() != null) {
+                        binlogInfo = getBinlogByTimestamp(getTask().getBeginTime().getTime() / 1000);
+                    }
                 } else {
                     this.currentSrcDbEntity = initSrcDbByServerId(binlogInfo.getServerId());
 
                     if (binlogInfo.getServerId() != currentSrcDbEntity.getServerId()) {
                         BinlogInfo oldBinlogInfo = binlogInfo;
-                        binlogInfo = switchBinlog(binlogInfo);
+                        binlogInfo = getBinlogByTimestamp(oldBinlogInfo.getTimestamp() - 60);
                         if (binlogInfo == null) {
                             throw new IOException("Switch Binlog Failed!");
                         } else {
@@ -158,10 +159,10 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
     }
 
     protected void initBinlogPosition(BinlogInfo binlogInfo) throws IOException {
-        if (Strings.isNullOrEmpty(binlogInfo.getBinlogFile())) {
+        if (binlogInfo == null) {
             List<BinlogInfo> binaryLogs = getBinaryLogs();
-            BinlogInfo lastBinaryLog = binaryLogs.get(binaryLogs.size() - 1);
-            binlogInfo.setBinlogFile(lastBinaryLog.getBinlogFile());
+            BinlogInfo begin = getTask().getBeginTime() == null ? binaryLogs.get(binaryLogs.size() - 1) : binaryLogs.get(0);
+            binlogInfo = new BinlogInfo(currentSrcDbEntity.getServerId(), begin.getBinlogFile(), 4l, 0, begin.getTimestamp());
         }
 
         getContext().setDBServerId(currentSrcDbEntity.getServerId());
@@ -289,9 +290,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         return srcDbEntity != null ? srcDbEntity : avaliableSrcDb.get(0);
     }
 
-    protected BinlogInfo switchBinlog(BinlogInfo oldBinlogInfo) throws IOException {
-        long time = oldBinlogInfo.getTimestamp() - 60;
-
+    protected BinlogInfo getBinlogByTimestamp(long time) throws IOException {
         if (!connect()) {
             throw new IOException("Connection failed.");
         }

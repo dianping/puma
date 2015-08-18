@@ -76,10 +76,16 @@ public class ScheduledTaskChecker implements TaskChecker {
             entity.setPreservedDay(3);
 
             TableSet tableSet = new TableSet();
+            Date beginTime = null;
             for (PumaTaskTargetEntity target : entry.getValue()) {
                 tableSet.add(new Table(target.getDatabase(), target.getTable()));
+                if (target.getBeginTime() != null &&
+                        (beginTime == null || target.getBeginTime().compareTo(beginTime) < 0)) {
+                    beginTime = target.getBeginTime();
+                }
             }
             entity.setTableSet(tableSet);
+            entity.setBeginTime(beginTime);
 
             ImmutableSet.Builder<SrcDbEntity> srcDbBuilder = ImmutableSet.builder();
             for (String url : instanceManager.getUrlByCluster(entry.getKey())) {

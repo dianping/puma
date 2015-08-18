@@ -1,5 +1,7 @@
 package com.dianping.puma.biz.entity;
 
+import java.util.Date;
+
 /**
  * Dozer @ 7/10/15
  * mail@dozer.cc
@@ -14,6 +16,8 @@ public class PumaTaskTargetEntity {
     private String database;
 
     private String table;
+
+    private Date beginTime;
 
     public int getId() {
         return id;
@@ -45,5 +49,13 @@ public class PumaTaskTargetEntity {
 
     public void setTable(String tables) {
         this.table = tables;
+    }
+
+    public Date getBeginTime() {
+        return beginTime;
+    }
+
+    public void setBeginTime(Date beginTime) {
+        this.beginTime = beginTime;
     }
 }

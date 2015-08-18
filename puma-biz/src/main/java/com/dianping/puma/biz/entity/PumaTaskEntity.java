@@ -16,6 +16,8 @@ public class PumaTaskEntity {
 
     private Date updateTime;
 
+    private Date beginTime;
+
     private TableSet tableSet;
 
     private Set<SrcDbEntity> srcDbEntityList = ImmutableSet.of();
@@ -66,5 +68,13 @@ public class PumaTaskEntity {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public Date getBeginTime() {
+        return beginTime;
+    }
+
+    public void setBeginTime(Date beginTime) {
+        this.beginTime = beginTime;
     }
 }

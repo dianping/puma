@@ -103,17 +103,24 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 					}
 				}
 
+				Sequence sequence = nextL2Index.getSequence();
+
 				if (this.tables != null && !this.tables.contains(nextL2Index.getTable()) && !nextL2Index.isTransaction()) {
+					lastIndexKey = nextL2Index.getIndexKey();
+					lastReadSequence = sequence;
 					continue;
 				}
 				if (this.withDdl != nextL2Index.isDdl() && this.withDml != nextL2Index.isDml()) {
+					lastIndexKey = nextL2Index.getIndexKey();
+					lastReadSequence = sequence;
 					continue;
 				}
 				if (!this.withTransaction && nextL2Index.isTransaction()) {
+					lastIndexKey = nextL2Index.getIndexKey();
+					lastReadSequence = sequence;
 					continue;
 				}
 
-				Sequence sequence = nextL2Index.getSequence();
 
 				if (readDataBucket == null) {
 					lastReadSequence = sequence;

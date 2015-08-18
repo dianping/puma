@@ -517,7 +517,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 							}
 						}
 						// 如果仍然没有找到
-						return null;
+						return findFromPreviosIndexBucketByTime(target.getKey());
 					} else {
 						V last = entries.pollLast();
 
@@ -529,6 +529,39 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 			}
 		} else {
 			return null;
+		}
+	}
+
+	private K findFromPreviosIndexBucketByTime(K searchKey) throws IOException {
+		Entry<K, String> target = l1Index.headMap(searchKey, false).lastEntry();
+
+		if (target == null) {
+			return null;
+		}
+
+		LocalFileIndexBucket<K, V> bucket = new LocalFileIndexBucket<K, V>(getL2IndexFile(target.getValue()),
+		      this.indexValueConvertor);
+		bucket.start();
+
+		K commitKey = null;
+
+		try {
+			while (true) {
+				V next = bucket.next();
+
+				if (next.isTransactionCommit()) {
+					commitKey = next.getIndexKey();
+				}
+			}
+		} catch (EOFException ignore) {
+		} finally {
+			bucket.stop();
+		}
+
+		if (commitKey != null) {
+			return commitKey;
+		} else {
+			return findFromPreviosIndexBucketByTime(target.getKey());
 		}
 	}
 
@@ -601,8 +634,9 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 								last = entries.pollLast();
 							}
 						}
+
 						// 如果仍然没有找到
-						return null;
+						return findFromPreviosIndexBucketByBinlog(target.getKey());
 					} else {
 						V last = entries.pollLast();
 
@@ -614,6 +648,56 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 			}
 		} else {
 			return null;
+		}
+	}
+
+	private K findFromPreviosIndexBucketByBinlog(K searchKey) throws IOException {
+		Entry<K, String> target = null;
+
+		for (Entry<K, String> entry : l1Index.entrySet()) {
+			K key = entry.getKey();
+
+			if (key.getServerId() == searchKey.getServerId()) {
+				if (compareTo(searchKey, key) > 0) {
+
+					if (target == null) {
+						target = entry;
+					} else {
+						if (compareTo(key, target.getKey()) > 0) {
+							target = entry;
+						}
+					}
+				}
+			}
+		}
+
+		if (target == null) {
+			return null;
+		}
+
+		LocalFileIndexBucket<K, V> bucket = new LocalFileIndexBucket<K, V>(getL2IndexFile(target.getValue()),
+		      this.indexValueConvertor);
+		bucket.start();
+
+		K commitKey = null;
+
+		try {
+			while (true) {
+				V next = bucket.next();
+
+				if (next.isTransactionCommit()) {
+					commitKey = next.getIndexKey();
+				}
+			}
+		} catch (EOFException ignore) {
+		} finally {
+			bucket.stop();
+		}
+
+		if (commitKey != null) {
+			return commitKey;
+		} else {
+			return findFromPreviosIndexBucketByBinlog(target.getKey());
 		}
 	}
 

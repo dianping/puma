@@ -90,6 +90,18 @@ public class DefaultIndexManagerTest {
 		      new Sequence(123559L, 0), true, true);
 		addIndex(new IndexKeyImpl(100, -12, "bin-0001.bin", 200), "3", "dianping", "receipt", false, true, false, false,
 		      new Sequence(123560L, 0), true, true);
+		addIndex(new IndexKeyImpl(101, -12, "bin-0001.bin", 300), "3", "dianping", "receipt", false, true, false, true,
+				new Sequence(123560L, 0), false, true);
+		addIndex(new IndexKeyImpl(102, -12, "bin-0001.bin", 400), "3", "dianping", "receipt", false, true, true, false,
+				new Sequence(123560L, 0), false, true);
+		addIndex(new IndexKeyImpl(103, -12, "bin-0001.bin", 500), "3", "dianping", "receipt", false, true, false, false,
+				new Sequence(123560L, 0), false, true);
+		addIndex(new IndexKeyImpl(104, -12, "bin-0002.bin", 0), "4", "dianping", "receipt", false, true, false, false,
+				new Sequence(123560L, 0), true, true);
+		addIndex(new IndexKeyImpl(105, -12, "bin-0002.bin", 100), "4", "dianping", "receipt", false, true, false, false,
+				new Sequence(123560L, 0), false, true);
+		addIndex(new IndexKeyImpl(106, -12, "bin-0002.bin", 200), "4", "dianping", "receipt", false, true, false, false,
+				new Sequence(123560L, 0), false, true);
 	}
 
 	@Test
@@ -101,7 +113,7 @@ public class DefaultIndexManagerTest {
 		Properties prop = new Properties();
 		prop.load(new FileInputStream(l1IndexFile));
 
-		Assert.assertEquals(3, prop.size());
+		Assert.assertEquals(4, prop.size());
 		Assert.assertEquals("1", prop.getProperty("1!0!bin-0001.bin!5"));
 		Assert.assertEquals("2", prop.getProperty("34!0!bin-0003.bin!200"));
 		Assert.assertEquals("3", prop.getProperty("100!-12!bin-0001.bin!200"));
@@ -179,6 +191,15 @@ public class DefaultIndexManagerTest {
 		indexKey = index.findByBinlog(new IndexKeyImpl(16, 0, "bin-0002.bin", 80), true);
 		Assert.assertEquals(new IndexKeyImpl(16, 0, "bin-0002.bin", 50), indexKey);
 	}
+	/*
+	 * 根据binlog查找：查找条件的binlog位置不可以在l1Index中直接查到，同样也不存在l2Index,另外需要递归的查找到transactionCommit事件
+	 */
+	@Test
+	public void testfindByBinlog5() throws IOException {
+		IndexKeyImpl indexKey = index.findByBinlog(new IndexKeyImpl(105, -12, "bin-0002.bin", 100), true);
+		
+		Assert.assertEquals(new IndexKeyImpl(101, -12, "bin-0001.bin", 300), indexKey);
+	}
 
 	/*
 	 * 根据time查找：查找条件的time直接可以在l1Index中查到，并且这个位置不属于transactionCommit
@@ -237,6 +258,20 @@ public class DefaultIndexManagerTest {
 		key = index.findByTime(searchKey, true);
 		Assert.assertEquals(new IndexKeyImpl(16, 0, "bin-0002.bin", 50), key);
 	}
+	
+	/*
+	 * 根据time查找：查找条件的binlog位置不可以在l1Index中直接查到，同样也不存在l2Index,另外需要递归的查找到transactionCommit事件
+	 */
+	@Test
+	public void testfindByTime5() throws IOException {
+		IndexKeyImpl searchKey = new IndexKeyImpl(105);
+		
+		IndexKeyImpl key = index.findByTime(searchKey, false);
+		Assert.assertEquals(new IndexKeyImpl(105, -12, "bin-0002.bin", 100), key);
+		
+		key = index.findByTime(searchKey, true);
+		Assert.assertEquals(new IndexKeyImpl(101, -12, "bin-0001.bin", 300), key);
+	}
 
 	@Test
 	public void testfindFirst() throws IOException {
@@ -249,12 +284,12 @@ public class DefaultIndexManagerTest {
 	public void testfindLatest() throws IOException {
 		IndexKeyImpl latestKey = index.findLatest();
 
-		Assert.assertEquals(new IndexKeyImpl(100, -12, "bin-0001.bin", 200), latestKey);
+		Assert.assertEquals(new IndexKeyImpl(106, -12, "bin-0002.bin", 200), latestKey);
 
 		index.setLatestL2IndexNull();
 		latestKey = index.findLatest();
 
-		Assert.assertEquals(new IndexKeyImpl(100, -12, "bin-0001.bin", 200), latestKey);
+		Assert.assertEquals(new IndexKeyImpl(106, -12, "bin-0002.bin", 200), latestKey);
 	}
 
 	@Test
@@ -314,7 +349,7 @@ public class DefaultIndexManagerTest {
 		Assert.assertTrue(l1IndexFile.exists());
 		Properties prop = new Properties();
 		prop.load(new FileInputStream(l1IndexFile));
-		Assert.assertEquals(2, prop.size());
+		Assert.assertEquals(3, prop.size());
 
 		File l2IndexFile = new File(new File(baseDir, DefaultIndexManager.L2INDEX_FOLDER), "1"
 		      + DefaultIndexManager.L2INDEX_FILESUFFIX);

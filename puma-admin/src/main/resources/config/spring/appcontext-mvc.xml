@@ -15,7 +15,7 @@
     <!-- Configures the @Controller programming model -->
     <mvc:annotation-driven />
 
-    <mvc:resources mapping="/app/**" location="/app/" />
+    <!--mvc:resources mapping="/**" location="/"/-->
 
     <!--mvc:resources mapping="/javascripts/**" location="/js/" />
     <mvc:resources mapping="/images/**" location="/images/" />

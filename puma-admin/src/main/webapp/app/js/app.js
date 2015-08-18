@@ -1,16 +1,18 @@
 var puma = angular.module('puma', ['ngRoute']);
 
-puma.controller("Controller", function($scope) {
-
+puma.config(function($routeProvider) {
+  $routeProvider
+    .when('/puma-monitor', {
+      templateUrl: '/app/partials/puma-monitor.html'
+    })
+    .when('/puma-client', {
+      templateUrl: '/app/partials/puma-client.html'
+    })
+    .when('/puma-server', {
+      templateUrl: '/app/partials/puma-server.html'
+    })
+    .otherwise({
+      'redirectTo': '/'
+    });
 });
-
-puma.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
-  $routeProvider.when('/puma-server', {
-    templateUrl: '/partials/puma-server/list.html'
-  }).otherwise({
-    redirectTo: '/error'
-  });
-
-  $locationProvider.html5Mode(false);
-}]);
 

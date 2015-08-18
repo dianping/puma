@@ -62,7 +62,7 @@
 
     <servlet-mapping>
         <servlet-name>appServlet</servlet-name>
-        <url-pattern>/</url-pattern>
+        <url-pattern>/a/*</url-pattern>
     </servlet-mapping>
 
 </web-app>

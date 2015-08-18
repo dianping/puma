@@ -168,8 +168,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         getContext().setBinlogStartPos(binlogInfo.getBinlogPosition());
         setBinlogInfo(binlogInfo);
         SystemStatusManager.addServer(getTaskName(), currentSrcDbEntity.getHost(), currentSrcDbEntity.getPort(), getTask().getTableSet().toString());
-        SystemStatusManager.updateServerBinlog(getTaskName(), getContext().getBinlogFileName(), getContext()
-                .getBinlogStartPos());
+        SystemStatusManager.updateServerBinlog(getTaskName(), binlogInfo);
     }
 
     protected void loadServerId(Collection<SrcDbEntity> srcDbEntityList) throws Exception {
@@ -443,8 +442,10 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         }
 
         // status report
-        SystemStatusManager.updateServerBinlog(getTaskName(), getContext().getBinlogFileName(), getContext()
-                .getBinlogStartPos());
+        SystemStatusManager.updateServerBinlog(getTaskName(),
+                new BinlogInfo(getContext().getDBServerId(),
+                        getContext().getBinlogFileName(), getContext()
+                        .getBinlogStartPos(), 0, binlogEvent.getHeader().getTimestamp()));
 
         // 只有整个binlogEvent分发完了才save ? TODO:如果分发到了一半挂了,重新启动后会回滚数据文件吗？
         if (binlogEvent.getHeader() != null
@@ -500,10 +501,10 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         getContext().setBinlogFileName(rotateEvent.getNextBinlogFileName());
         getContext().setBinlogStartPos(rotateEvent.getFirstEventPosition());
 
-        setBinlogInfo(new BinlogInfo(getContext().getDBServerId(), rotateEvent.getNextBinlogFileName(),
-                rotateEvent.getFirstEventPosition(), 0, rotateEvent.getHeader().getTimestamp()));
-        SystemStatusManager.updateServerBinlog(getTaskName(), getContext().getBinlogFileName(), getContext()
-                .getBinlogStartPos());
+        BinlogInfo binlogInfo = new BinlogInfo(getContext().getDBServerId(), rotateEvent.getNextBinlogFileName(),
+                rotateEvent.getFirstEventPosition(), 0, rotateEvent.getHeader().getTimestamp());
+        setBinlogInfo(binlogInfo);
+        SystemStatusManager.updateServerBinlog(getTaskName(), binlogInfo);
     }
 
     /**

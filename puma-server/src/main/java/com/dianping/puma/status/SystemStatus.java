@@ -229,9 +229,7 @@ public class SystemStatus {
 
         private String target;
 
-        private String binlogFile;
-
-        private long binlogPosition = 0L;
+        private BinlogInfo binlogInfo;
 
         private int bucketDate;
 
@@ -264,14 +262,6 @@ public class SystemStatus {
             this.port = port;
             this.target = target;
             this.storeQpsCounter = new QpsCounter(15);
-        }
-
-        public String getBinlogFile() {
-            return binlogFile;
-        }
-
-        public long getBinlogPosition() {
-            return binlogPosition;
         }
 
         public int getBucketDate() {
@@ -340,14 +330,6 @@ public class SystemStatus {
             this.storeQpsCounter.increase();
         }
 
-        public void setBinlogFile(String binlogFile) {
-            this.binlogFile = binlogFile;
-        }
-
-        public void setBinlogPosition(long binlogPosition) {
-            this.binlogPosition = binlogPosition;
-        }
-
         public void setBucketDate(int bucketDate) {
             this.bucketDate = bucketDate;
         }
@@ -368,9 +350,12 @@ public class SystemStatus {
             this.port = port;
         }
 
-        public void updateBinlog(String binlogFile, long binlogPosition) {
-            this.binlogFile = binlogFile;
-            this.binlogPosition = binlogPosition;
+        public BinlogInfo getBinlogInfo() {
+            return binlogInfo;
+        }
+
+        public void setBinlogInfo(BinlogInfo binlogInfo) {
+            this.binlogInfo = binlogInfo;
         }
 
         public void updateBucket(int bucketDate, int bucketNumber) {

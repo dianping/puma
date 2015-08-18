@@ -17,7 +17,8 @@
         SET
         `taskId` = #{taskId},
         `database` = #{database},
-        `table` = #{table}
+        `table` = #{table},
+        `beginTime` = #{beginTime}
         WHERE
         Id = #{id}
     </update>
@@ -27,13 +28,15 @@
         (
         `taskId`,
         `database`,
-        `table`
+        `table`,
+        `beginTime`
         )
         VALUES
         (
         #{taskId},
         #{database},
-        #{table}
+        #{table},
+        #{beginTime}
         )
     </insert>
 

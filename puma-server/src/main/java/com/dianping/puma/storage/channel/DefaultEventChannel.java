@@ -147,7 +147,7 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 
     private byte[] readData(Sequence sequence) throws StorageClosedException, IOException {
         if (sequence.getOffset() != lastReadSequence.getOffset()) {
-            readDataBucket.skip(sequence.getOffset() - lastReadSequence.getOffset());
+            readDataBucket.skip(sequence.getOffset() - lastReadSequence.getOffset() - lastReadSequence.getLen());
         }
 
         return readDataBucket.getNext();

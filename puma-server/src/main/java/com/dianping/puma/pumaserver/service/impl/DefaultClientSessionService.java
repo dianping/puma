@@ -39,7 +39,8 @@ public class DefaultClientSessionService implements ClientSessionService {
 
                     List<String> needToDestroy = new ArrayList<String>();
                     for (ClientSession session : clients.values()) {
-                        if (System.currentTimeMillis() - session.getLastAccessTime() > 15 * 60 * 1000) {
+                        if (System.currentTimeMillis() - session.getLastAccessTime() > 5 * 60 * 1000
+                                && (session.getLastChannel() == null || !session.getLastChannel().isActive())) {
                             needToDestroy.add(session.getClientName());
                         }
                     }

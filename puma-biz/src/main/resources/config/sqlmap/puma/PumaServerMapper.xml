@@ -5,11 +5,11 @@
 <mapper namespace="com.dianping.puma.biz.dao.PumaServerDao">
 
     <select id="findById" resultType="PumaServerEntity">
-        SELECT * FROM PumaServer WHERE id = #{id}
+        SELECT * FROM PumaServer WHERE `id` = #{id}
     </select>
 
     <select id="findByIds" resultType="PumaServerEntity">
-        SELECT * FROM PumaServer WHERE id IN
+        SELECT * FROM PumaServer WHERE `id` IN
         <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
             #{item}
         </foreach>
@@ -28,25 +28,38 @@
     </select>
 
     <select id="findByHost" resultType="PumaServerEntity">
-        SELECT * FROM PumaServer WHERE host = #{host}
+        SELECT * FROM PumaServer WHERE `host` = #{host}
     </select>
 
     <select id="findByName" resultType="PumaServerEntity">
-        SELECT * FROM PumaServer WHERE name = #{name}
+        SELECT * FROM PumaServer WHERE `name` = #{name}
     </select>
 
     <insert id="insert" parameterType="PumaServerEntity">
-        INSERT INTO PumaServer (Name, Host, Port, UpdateTime) VALUES (#{name}, #{host}, #{port}, #{updateTime})
+        INSERT INTO PumaServer
+        (
+        `name`,
+        `host`,
+        `port`,
+        `updateTime`
+        )
+        VALUES
+        (
+        #{name},
+        #{host},
+        #{port},
+        #{updateTime}
+        )
     </insert>
 
     <update id="update" parameterType="PumaServerEntity">
         update PumaServer
         set
-        Name = #{name},
-        Host = #{host},
-        port = #{port},
-        updateTime = #{updateTime}
-        where id = #{id}
+        `name` = #{name},
+        `host` = #{host},
+        `port` = #{port},
+        `updateTime` = #{updateTime}
+        where `id` = #{id}
     </update>
 
     <delete id="delete">

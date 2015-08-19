@@ -1,10 +1,8 @@
 package com.dianping.puma.admin.web;
 
 import com.dianping.puma.core.util.GsonUtil;
-import com.dianping.puma.biz.entity.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -12,13 +10,12 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Controller
-public class PumaTaskController {
+public class PumaController {
 
-    private final Logger logger = LoggerFactory.getLogger(PumaTaskController.class);
+    private final Logger logger = LoggerFactory.getLogger(PumaController.class);
 
     @RequestMapping(value = {"/puma-task"})
     public ModelAndView view() {

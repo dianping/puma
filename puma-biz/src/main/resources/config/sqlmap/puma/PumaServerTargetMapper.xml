@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.PumaServerTargetDao">
+
+    <select id="findById" resultType="PumaServerTargetEntity">
+        SELECT * FROM PumaServerTarget WHERE `id` = #{id}
+    </select>
+
+    <select id="findByServerId" resultType="PumaServerTargetEntity">
+        SELECT * FROM PumaServerTarget WHERE `serverId` = #{serverId}
+    </select>
+
+    <insert id="insert" parameterType="PumaServerTargetEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO PumaServerTarget
+        (
+        `serverId`,
+        `targetId`,
+        `beginTime`
+        )
+        VALUES
+        (
+        #{serverId},
+        #{targetId},
+        #{beginTime}
+        )
+    </insert>
+
+    <update id="update" parameterType="PumaServerTargetEntity">
+        UPDATE PumaServerTarget
+        SET
+        `serverId` = #{serverId},
+        `targetId` = #{targetId},
+        `beginTime` = #{beginTime}
+        WHERE
+        `id` = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM PumaServerTarget WHERE `id` = #{id}
+    </delete>
+</mapper>

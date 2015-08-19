@@ -1,6 +1,7 @@
 package com.dianping.puma.biz.entity;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Dozer @ 7/10/15
@@ -11,11 +12,11 @@ public class PumaTargetEntity {
 
     private int id;
 
-    private int taskId;
-
     private String database;
 
-    private String table;
+    private String formatTables;
+
+    private List<String> tables;
 
     private Date beginTime;
 
@@ -27,14 +28,6 @@ public class PumaTargetEntity {
         this.id = id;
     }
 
-    public int getTaskId() {
-        return taskId;
-    }
-
-    public void setTaskId(int taskId) {
-        this.taskId = taskId;
-    }
-
     public String getDatabase() {
         return database;
     }
@@ -43,12 +36,20 @@ public class PumaTargetEntity {
         this.database = database;
     }
 
-    public String getTable() {
-        return table;
+    public String getFormatTables() {
+        return formatTables;
     }
 
-    public void setTable(String tables) {
-        this.table = tables;
+    public void setFormatTables(String formatTables) {
+        this.formatTables = formatTables;
+    }
+
+    public List<String> getTables() {
+        return tables;
+    }
+
+    public void setTables(List<String> tables) {
+        this.tables = tables;
     }
 
     public Date getBeginTime() {

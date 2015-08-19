@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.dao;
 
-import com.dianping.puma.biz.entity.PumaServerEntity;
+import com.dianping.puma.biz.entity.PumaServerTargetEntity;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,22 +10,22 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Date;
 
+import static org.junit.Assert.*;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath*:config/**/*.xml")
-public class PumaServerDaoTest {
+public class PumaServerTargetDaoTest {
 
 	@Autowired
-	PumaServerDao pumaServerDao;
+	PumaServerTargetDao pumaServerTargetDao;
 
 	@Test
 	@Ignore
 	public void test() {
-		PumaServerEntity entity = new PumaServerEntity();
-		entity.setName("test-name");
-		entity.setHost("127.0.0.1");
-		entity.setPort(4040);
-		entity.setUpdateTime(new Date());
-
-		pumaServerDao.insert(entity);
+		PumaServerTargetEntity entity = new PumaServerTargetEntity();
+		entity.setServerId(123);
+		entity.setTargetId(321);
+		entity.setBeginTime(new Date());
+		pumaServerTargetDao.insert(entity);
 	}
 }

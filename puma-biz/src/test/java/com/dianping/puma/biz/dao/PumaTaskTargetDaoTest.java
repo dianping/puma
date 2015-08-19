@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.dao;
 
-import com.dianping.puma.biz.entity.PumaTaskTargetEntity;
+import com.dianping.puma.biz.entity.PumaTargetEntity;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ public class PumaTaskTargetDaoTest {
 
 	@Test
 	public void test() {
-		PumaTaskTargetEntity entity = new PumaTaskTargetEntity();
+		PumaTargetEntity entity = new PumaTargetEntity();
 		entity.setTaskId(1);
 		entity.setDatabase("test-database");
 		entity.setTable("test-table");

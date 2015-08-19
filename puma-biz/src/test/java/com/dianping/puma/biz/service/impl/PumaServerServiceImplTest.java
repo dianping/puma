@@ -2,10 +2,9 @@ package com.dianping.puma.biz.service.impl;
 
 import com.dianping.puma.biz.MockTest;
 import com.dianping.puma.biz.dao.PumaTaskTargetDao;
-import com.dianping.puma.biz.entity.PumaTaskTargetEntity;
+import com.dianping.puma.biz.entity.PumaTargetEntity;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
@@ -26,20 +25,20 @@ public class PumaServerServiceImplTest extends MockTest {
 
 	@Test
 	public void testFindByDatabaseAndTable() {
-		List<PumaTaskTargetEntity> entities0 = new ArrayList<PumaTaskTargetEntity>();
-		PumaTaskTargetEntity entity00 = new PumaTaskTargetEntity();
+		List<PumaTargetEntity> entities0 = new ArrayList<PumaTargetEntity>();
+		PumaTargetEntity entity00 = new PumaTargetEntity();
 		entity00.setTaskId(0);
 		entities0.add(entity00);
-		PumaTaskTargetEntity entity01 = new PumaTaskTargetEntity();
+		PumaTargetEntity entity01 = new PumaTargetEntity();
 		entity01.setTaskId(1);
 		entities0.add(entity01);
 		Mockito.when(pumaTaskTargetDao.findByDatabaseAndTable("test-db", "test-tb0")).thenReturn(entities0);
 
-		List<PumaTaskTargetEntity> entities1 = new ArrayList<PumaTaskTargetEntity>();
-		PumaTaskTargetEntity entity10 = new PumaTaskTargetEntity();
+		List<PumaTargetEntity> entities1 = new ArrayList<PumaTargetEntity>();
+		PumaTargetEntity entity10 = new PumaTargetEntity();
 		entity10.setTaskId(1);
 		entities1.add(entity10);
-		PumaTaskTargetEntity entity11 = new PumaTaskTargetEntity();
+		PumaTargetEntity entity11 = new PumaTargetEntity();
 		entity10.setTaskId(2);
 		entities1.add(entity11);
 		Mockito.when(pumaTaskTargetDao.findByDatabaseAndTable("test-db", "test-tb1")).thenReturn(entities1);

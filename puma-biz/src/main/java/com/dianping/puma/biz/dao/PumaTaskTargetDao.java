@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.dao;
 
-import com.dianping.puma.biz.entity.PumaTaskTargetEntity;
+import com.dianping.puma.biz.entity.PumaTargetEntity;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -12,15 +12,15 @@ import java.util.List;
  */
 public interface PumaTaskTargetDao {
 
-    List<PumaTaskTargetEntity> findByServerId(int ServerId);
+    List<PumaTargetEntity> findByServerId(int ServerId);
 
-    List<PumaTaskTargetEntity> findByDatabaseAndTable(
+    List<PumaTargetEntity> findByDatabaseAndTable(
             @Param("database") String database,
             @Param("table") String table);
 
-    int insert(PumaTaskTargetEntity entity);
+    int insert(PumaTargetEntity entity);
 
-    int update(PumaTaskTargetEntity entity);
+    int update(PumaTargetEntity entity);
 
     int delete(int id);
 }

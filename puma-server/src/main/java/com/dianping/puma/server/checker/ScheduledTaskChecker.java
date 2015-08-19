@@ -2,7 +2,7 @@ package com.dianping.puma.server.checker;
 
 import com.dianping.cat.Cat;
 import com.dianping.puma.biz.entity.PumaTaskEntity;
-import com.dianping.puma.biz.entity.PumaTaskTargetEntity;
+import com.dianping.puma.biz.entity.PumaTargetEntity;
 import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.biz.service.PumaTaskTargetService;
 import com.dianping.puma.core.config.ConfigManager;
@@ -45,13 +45,13 @@ public class ScheduledTaskChecker implements TaskChecker {
     private Map<String, PumaTaskEntity> tasks = new ConcurrentHashMap<String, PumaTaskEntity>();
 
     protected Map<String, PumaTaskEntity> loadPumaTask() {
-        final List<PumaTaskTargetEntity> targets = new ArrayList<PumaTaskTargetEntity>();
+        final List<PumaTargetEntity> targets = new ArrayList<PumaTargetEntity>();
         for (String host : taskServerManager.findAuthorizedHosts()) {
             targets.addAll(pumaTaskTargetService.findTargetByServerName(host));
         }
 
-        Map<String, Set<PumaTaskTargetEntity>> clusterTargetMap = new HashMap<String, Set<PumaTaskTargetEntity>>();
-        for (PumaTaskTargetEntity target : targets) {
+        Map<String, Set<PumaTargetEntity>> clusterTargetMap = new HashMap<String, Set<PumaTargetEntity>>();
+        for (PumaTargetEntity target : targets) {
             String cluster = instanceManager.getClusterByDb(target.getDatabase());
 
             if (Strings.isNullOrEmpty(cluster)) {
@@ -59,9 +59,9 @@ public class ScheduledTaskChecker implements TaskChecker {
                 continue;
             }
 
-            Set<PumaTaskTargetEntity> clusterTarget = clusterTargetMap.get(cluster);
+            Set<PumaTargetEntity> clusterTarget = clusterTargetMap.get(cluster);
             if (clusterTarget == null) {
-                clusterTarget = new HashSet<PumaTaskTargetEntity>();
+                clusterTarget = new HashSet<PumaTargetEntity>();
                 clusterTargetMap.put(cluster, clusterTarget);
             }
 
@@ -69,7 +69,7 @@ public class ScheduledTaskChecker implements TaskChecker {
         }
 
         Map<String, PumaTaskEntity> tasks = new ConcurrentHashMap<String, PumaTaskEntity>();
-        for (Map.Entry<String, Set<PumaTaskTargetEntity>> entry : clusterTargetMap.entrySet()) {
+        for (Map.Entry<String, Set<PumaTargetEntity>> entry : clusterTargetMap.entrySet()) {
             PumaTaskEntity entity = new PumaTaskEntity();
             entity.setName(entry.getKey());
             entity.setClusterName(entry.getKey());
@@ -77,7 +77,7 @@ public class ScheduledTaskChecker implements TaskChecker {
 
             TableSet tableSet = new TableSet();
             Date beginTime = null;
-            for (PumaTaskTargetEntity target : entry.getValue()) {
+            for (PumaTargetEntity target : entry.getValue()) {
                 tableSet.add(new Table(target.getDatabase(), target.getTable()));
                 if (target.getBeginTime() != null &&
                         (beginTime == null || target.getBeginTime().compareTo(beginTime) < 0)) {

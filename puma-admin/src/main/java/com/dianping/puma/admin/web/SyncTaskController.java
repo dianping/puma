@@ -2,8 +2,8 @@
 //
 //import com.dianping.puma.admin.config.Config;
 //import com.dianping.puma.admin.model.SyncTaskDto;
-//import com.dianping.puma.admin.model.mapper.ErrorListMapper;
-//import com.dianping.puma.admin.model.mapper.SyncTaskMapper;
+//import com.dianping.puma.admin.model.deprecated.mapper.ErrorListMapper;
+//import com.dianping.puma.admin.model.deprecated.mapper.SyncTaskMapper;
 //import com.dianping.puma.core.util.GsonUtil;
 //import com.dianping.puma.biz.entity.*;
 //import com.dianping.puma.biz.entity.old.*;

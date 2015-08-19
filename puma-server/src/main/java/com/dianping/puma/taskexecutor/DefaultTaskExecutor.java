@@ -330,12 +330,11 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                                 }
                             }
 
-                            if (binlogEvent.getHeader().getEventType() != BinlogConstants.XID_EVENT &&
-                                    binlogEvent.getHeader().getEventType() != BinlogConstants.FORMAT_DESCRIPTION_EVENT) {
+                            if (binlogEvent.getHeader().getEventType() != BinlogConstants.XID_EVENT) {
                                 continue;
                             }
 
-                            if (binlogEvent.getHeader().getTimestamp() > time) {
+                            if (binlogEvent.getHeader().getTimestamp() >= time) {
                                 if (closestBinlogInfo == null) {
                                     break;
                                 } else {
@@ -347,7 +346,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                                 closestBinlogInfo = new BinlogInfo(
                                         currentSrcDbEntity.getServerId(),
                                         getContext().getBinlogFileName(),
-                                        getContext().getBinlogStartPos(),
+                                        binlogEvent.getHeader().getNextPosition(),
                                         0, binlogEvent.getHeader().getTimestamp());
                                 continue;
                             }

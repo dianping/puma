@@ -440,23 +440,17 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                     .getHeader().getNextPosition(), 0, 0));
         }
 
-        // status report
-        SystemStatusManager.updateServerBinlog(getTaskName(),
-                new BinlogInfo(getContext().getDBServerId(),
-                        getContext().getBinlogFileName(), getContext()
-                        .getBinlogStartPos(), 0, binlogEvent.getHeader().getTimestamp()));
-
-        // 只有整个binlogEvent分发完了才save ? TODO:如果分发到了一半挂了,重新启动后会回滚数据文件吗？
-        if (binlogEvent.getHeader() != null
-                && binlogEvent.getHeader().getNextPosition() != 0
+        if (binlogEvent.getHeader().getNextPosition() != 0
                 && StringUtils.isNotBlank(getContext().getBinlogFileName())
                 && dataHandlerResult != null
                 && !dataHandlerResult.isEmpty()
                 && (dataHandlerResult.getData() instanceof DdlEvent || (dataHandlerResult.getData() instanceof RowChangedEvent && ((RowChangedEvent) dataHandlerResult
                 .getData()).isTransactionCommit()))) {
 
-            binlogInfoHolder.setBinlogInfo(getTaskName(), new BinlogInfo(getContext().getDBServerId(), getContext()
-                    .getBinlogFileName(), binlogEvent.getHeader().getNextPosition(), 0, binlogEvent.getHeader().getTimestamp()));
+            BinlogInfo binlogInfo = new BinlogInfo(getContext().getDBServerId(), getContext()
+                    .getBinlogFileName(), binlogEvent.getHeader().getNextPosition(), 0, binlogEvent.getHeader().getTimestamp());
+            binlogInfoHolder.setBinlogInfo(getTaskName(), binlogInfo);
+            SystemStatusManager.updateServerBinlog(getTaskName(), binlogInfo);
         }
     }
 

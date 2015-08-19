@@ -352,7 +352,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 					return false;
 				}
 
-				l2Index = l1Index.tailMap(key, false).firstEntry();
+				l2Index = l1Index.tailMap(key, true).firstEntry();
 			} finally {
 				l1ReadLock.unlock();
 			}
@@ -370,7 +370,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 					return null;
 				}
 
-				l2Index = l1Index.tailMap(key, false).firstEntry();
+				l2Index = l1Index.tailMap(key, true).firstEntry();
 			} finally {
 				l1ReadLock.unlock();
 			}

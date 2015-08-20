@@ -7,6 +7,7 @@ import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.core.util.IPUtils;
 import com.dianping.puma.server.builder.TaskBuilder;
 import com.dianping.puma.server.registry.RegistryService;
+import com.dianping.puma.status.SystemStatusManager;
 import com.dianping.puma.storage.EventStorage;
 import com.dianping.puma.taskexecutor.TaskExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,6 +90,8 @@ public class DefaultTaskContainer implements TaskContainer {
         if (taskExecutors.remove(taskName) == null) {
             throw new RuntimeException("delete puma task failure, not exists.");
         }
+
+        SystemStatusManager.deleteServer(taskName);
     }
 
     @Override

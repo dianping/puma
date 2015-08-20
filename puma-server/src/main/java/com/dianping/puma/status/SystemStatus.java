@@ -1,6 +1,7 @@
 package com.dianping.puma.status;
 
 import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.model.TableSet;
 
 import java.util.List;
 import java.util.Map;
@@ -227,7 +228,7 @@ public class SystemStatus {
 
         private int port;
 
-        private String target;
+        private TableSet target;
 
         private BinlogInfo binlogInfo;
 
@@ -255,7 +256,7 @@ public class SystemStatus {
             this(name, host, port, null);
         }
 
-        public Server(String name, String host, int port, String target) {
+        public Server(String name, String host, int port, TableSet target) {
             super();
             this.name = name;
             this.host = host;
@@ -272,11 +273,11 @@ public class SystemStatus {
             return bucketNumber;
         }
 
-        public String getTarget() {
+        public TableSet getTarget() {
             return target;
         }
 
-        public void setTarget(String target) {
+        public void setTarget(TableSet target) {
             this.target = target;
         }
 

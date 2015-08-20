@@ -167,7 +167,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         getContext().setBinlogFileName(binlogInfo.getBinlogFile());
         getContext().setBinlogStartPos(binlogInfo.getBinlogPosition());
         setBinlogInfo(binlogInfo);
-        SystemStatusManager.addServer(getTaskName(), currentSrcDbEntity.getHost(), currentSrcDbEntity.getPort(), getTask().getTableSet().toString());
+        SystemStatusManager.addServer(getTaskName(), currentSrcDbEntity.getHost(), currentSrcDbEntity.getPort(), getTask().getTableSet());
         SystemStatusManager.updateServerBinlog(getTaskName(), binlogInfo);
     }
 

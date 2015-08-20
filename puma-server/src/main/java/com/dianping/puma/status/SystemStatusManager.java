@@ -1,6 +1,7 @@
 package com.dianping.puma.status;
 
 import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.status.SystemStatus.Client;
 import com.dianping.puma.status.SystemStatus.Server;
 import com.google.common.base.Strings;
@@ -23,7 +24,7 @@ public class SystemStatusManager {
         status.getClients().put(clientName, client);
     }
 
-    public static void addServer(String name, String host, int port, String target) {
+    public static void addServer(String name, String host, int port, TableSet target) {
         Server server = new Server(name, host, port, target);
 
         status.getServers().put(name, server);
@@ -91,7 +92,7 @@ public class SystemStatusManager {
         }
         AtomicBoolean stopTheWorld = stopTheWorlds.get(serverName);
 
-        return (stopTheWorld != null) ? stopTheWorld.get() : false;
+        return (stopTheWorld != null) && stopTheWorld.get();
     }
 
     public static void startTheWorld(String serverName) {

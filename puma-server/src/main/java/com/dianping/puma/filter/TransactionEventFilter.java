@@ -4,14 +4,10 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.Schema;
 import com.dianping.puma.core.model.SchemaSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TransactionEventFilter extends AbstractEventFilter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TransactionEventFilter.class);
-
-    private String name;
+    protected String name;
 
     private boolean begin = true;
 

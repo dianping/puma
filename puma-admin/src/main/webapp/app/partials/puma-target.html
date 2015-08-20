@@ -1,0 +1,41 @@
+<div ng-controller="pumaTargetController">
+
+    <div>
+
+        <form class="form-horizontal" role="form">
+            <label class="col-sm-2 control-label" for="database-search">Database</label>
+            <input id="database-search" class="col-sm-6" ng-model="database">
+            <button ng-click="search()">Search</button>
+        </form>
+
+        <div ng-repeat="server in servers">
+            <table class="table table-hover">
+                <tr>
+                    <th>KEY</th>
+                    <th>VALUE</th>
+                </tr>
+                <tr>
+                    <td>host</td>
+                    <td>
+                        <input ng-model="server">
+                    </td>
+                </tr>
+                <tr>
+                    <td>active</td>
+                    <td>
+                        <input value="true">
+                    </td>
+                </tr>
+                <tr>
+                    <td>weight</td>
+                    <td>
+                        <input value="1">
+                    </td>
+                </tr>
+            </table>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,5 +1,5 @@
 INSERT INTO
-`${database}`.`${table}`
+`${database}`.`${formatTables}`
 (
 #set($ask = "")
 #foreach($entry in $columns.entrySet())

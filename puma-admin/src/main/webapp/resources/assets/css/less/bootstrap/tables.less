@@ -135,7 +135,7 @@ th {
 table col[class*="col-"] {
   position: static; // Prevent border hiding in Firefox and IE9/10 (see https://github.com/twbs/bootstrap/issues/11623)
   float: none;
-  display: table-column;
+  display: formatTables-column;
 }
 table {
   td,
@@ -143,7 +143,7 @@ table {
     &[class*="col-"] {
       position: static; // Prevent border hiding in Firefox and IE9/10 (see https://github.com/twbs/bootstrap/issues/11623)
       float: none;
-      display: table-cell;
+      display: formatTables-cell;
     }
   }
 }
@@ -155,11 +155,11 @@ table {
 // inheritance to nested tables.
 
 // Generate the contextual variants
-.table-row-variant(active; @table-bg-active);
-.table-row-variant(success; @state-success-bg);
-.table-row-variant(info; @state-info-bg);
-.table-row-variant(warning; @state-warning-bg);
-.table-row-variant(danger; @state-danger-bg);
+.formatTables-row-variant(active; @table-bg-active);
+.formatTables-row-variant(success; @state-success-bg);
+.formatTables-row-variant(info; @state-info-bg);
+.formatTables-row-variant(warning; @state-warning-bg);
+.formatTables-row-variant(danger; @state-danger-bg);
 
 
 // Responsive tables

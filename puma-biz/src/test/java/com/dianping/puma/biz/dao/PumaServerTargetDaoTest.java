@@ -1,6 +1,7 @@
 package com.dianping.puma.biz.dao;
 
 import com.dianping.puma.biz.entity.PumaServerTargetEntity;
+import com.dianping.puma.biz.entity.old.PumaServer;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,6 +10,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -27,5 +29,10 @@ public class PumaServerTargetDaoTest {
 		entity.setTargetId(321);
 		entity.setBeginTime(new Date());
 		pumaServerTargetDao.insert(entity);
+	}
+
+	@Test
+	public void testFindByDatabase() {
+		List<PumaServerTargetEntity> entities = pumaServerTargetDao.findByDatabase("test");
 	}
 }

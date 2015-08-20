@@ -15,12 +15,8 @@ public class PumaServerServiceImplTest extends MockTest {
 
 	PumaServerServiceImpl pumaServerService = new PumaServerServiceImpl();
 
-	@Mock
-	PumaTaskTargetDao pumaTaskTargetDao;
-
 	@Before
 	public void before() {
-		pumaServerService.pumaTaskTargetDao = pumaTaskTargetDao;
 	}
 
 	@Test

@@ -12,6 +12,10 @@
         SELECT * FROM PumaTarget WHERE `database` = #{database}
     </select>
 
+    <select id="findAll" resultType="PumaTargetEntity">
+        SELECT * FROM PumaTarget
+    </select>
+
     <update id="update" parameterType="PumaTargetEntity">
         UPDATE PumaTarget
         SET

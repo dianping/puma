@@ -58,6 +58,29 @@ public class PumaTargetServiceImpl implements PumaTargetService {
 	}
 
 	@Override
+	public List<PumaTargetEntity> findAll() {
+		return pumaTargetDao.findAll();
+	}
+
+	@Override
+	public int createOrUpdate(PumaTargetEntity entity) {
+		String database = entity.getDatabase();
+		PumaTargetEntity pumaTarget = findByDatabase(database);
+		if (pumaTarget == null) {
+			return create(entity);
+		} else {
+			List<String> oriTables = pumaTarget.getTables();
+			List<String> tables = entity.getTables();
+			for (String table: tables) {
+				if (!oriTables.contains(table)) {
+					oriTables.add(table);
+				}
+			}
+			return update(pumaTarget);
+		}
+	}
+
+	@Override
 	public int create(PumaTargetEntity entity) {
 		mergeTables(entity);
 		return pumaTargetDao.insert(entity);
@@ -76,7 +99,7 @@ public class PumaTargetServiceImpl implements PumaTargetService {
 	protected void mergeTables(PumaTargetEntity entity) {
 		if (entity != null) {
 			List<String> tableList = entity.getTables();
-			String tables = StringUtils.join(tableList, ",");
+			String tables = StringUtils.join(tableList, "+");
 			entity.setFormatTables(tables);
 		}
 	}
@@ -84,7 +107,7 @@ public class PumaTargetServiceImpl implements PumaTargetService {
 	protected void splitTables(PumaTargetEntity entity) {
 		if (entity != null) {
 			String tables = entity.getFormatTables();
-			String[] tableArray = StringUtils.split(tables, ",");
+			String[] tableArray = StringUtils.split(tables, "+");
 			List<String> tableList = Arrays.asList(tableArray);
 			entity.setTables(tableList);
 		}

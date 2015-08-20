@@ -1,4 +1,33 @@
+/*
+var underscore = angular.module('underscore', []);
+underscore.factory('_', ['$window', function() {
+  return $window._; // assumes underscore has already been loaded on the page
+}]);*/
+
 var puma = angular.module('puma', ['ngRoute']);
+
+puma.controller('pumaTargetController', function($scope, $http) {
+
+  $scope.puma = {};
+  $scope.servers = {};
+
+  $scope.search = function() {
+    var postJson = {
+      'database': $scope.database
+    };
+    $http.post('/a/puma-task/list', postJson).then(
+      function(response) {
+        if (response.data.status == "success") {
+          $scope.puma = response.data.result;
+          $scope.servers = $scope.puma.servers;
+        }
+      },
+      function(response) {
+
+      }
+    )
+  }
+});
 
 puma.controller('pumaTaskCreateController', function($scope, $http) {
 
@@ -45,6 +74,10 @@ puma.config(function($routeProvider) {
     })
     .when('/puma-task', {
       templateUrl: '/app/partials/puma-task.html'
+    })
+    .when('/puma-target', {
+      templateUrl: '/app/partials/puma-target.html',
+      controller: 'pumaTargetController'
     })
     .otherwise({
       'redirectTo': '/'

@@ -1,5 +1,5 @@
 DELETE FROM
-`${database}`.`${table}`
+`${database}`.`${formatTables}`
 WHERE
 #set ($keyCount = 0)
 #foreach($entry in $columns.entrySet())

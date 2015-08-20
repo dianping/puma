@@ -4,7 +4,8 @@ import com.dianping.cat.Cat;
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.biz.entity.PumaTargetEntity;
 import com.dianping.puma.biz.entity.SrcDbEntity;
-import com.dianping.puma.biz.service.PumaTaskTargetService;
+import com.dianping.puma.biz.service.PumaServerTargetService;
+import com.dianping.puma.biz.service.PumaTargetService;
 import com.dianping.puma.core.config.ConfigManager;
 import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
@@ -31,7 +32,7 @@ public class ScheduledTaskChecker implements TaskChecker {
     TaskServerManager taskServerManager;
 
     @Autowired
-    PumaTaskTargetService pumaTaskTargetService;
+    PumaTargetService pumaTargetService;
 
     @Autowired
     TaskContainer taskContainer;
@@ -47,7 +48,7 @@ public class ScheduledTaskChecker implements TaskChecker {
     protected Map<String, PumaTaskEntity> loadPumaTask() {
         final List<PumaTargetEntity> targets = new ArrayList<PumaTargetEntity>();
         for (String host : taskServerManager.findAuthorizedHosts()) {
-            targets.addAll(pumaTaskTargetService.findTargetByServerName(host));
+            targets.addAll(pumaTargetService.findByHost(host));
         }
 
         Map<String, Set<PumaTargetEntity>> clusterTargetMap = new HashMap<String, Set<PumaTargetEntity>>();
@@ -78,7 +79,11 @@ public class ScheduledTaskChecker implements TaskChecker {
             TableSet tableSet = new TableSet();
             Date beginTime = null;
             for (PumaTargetEntity target : entry.getValue()) {
-                tableSet.add(new Table(target.getDatabase(), target.getTable()));
+                List<String> tables = target.getTables();
+                for (String table: tables) {
+                    tableSet.add(new Table(target.getDatabase(), table));
+                }
+
                 if (target.getBeginTime() != null &&
                         (beginTime == null || target.getBeginTime().compareTo(beginTime) < 0)) {
                     beginTime = target.getBeginTime();

@@ -1,8 +1,8 @@
 SELECT * FROM
 #if (${event.database} == "")
-`${event.table}`
+`${event.formatTables}`
 #else
-`${event.database}`.`${event.table}`
+`${event.database}`.`${event.formatTables}`
 #end
 WHERE 
 #foreach($name2ColumnInfo in $event.columns.entrySet())

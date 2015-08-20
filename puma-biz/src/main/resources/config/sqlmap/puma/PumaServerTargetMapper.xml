@@ -12,6 +12,44 @@
         SELECT * FROM PumaServerTarget WHERE `serverId` = #{serverId}
     </select>
 
+    <select id="findByTargetId" resultType="PumaServerTargetEntity">
+        SELECT * FROM PumaServerTarget WHERE `targetId` = #{targetId}
+    </select>
+
+    <select id="findByHost" resultType="PumaServerTargetEntity">
+        SELECT
+        P.id,
+        P.serverId,
+        P.targetId,
+        P.beginTime,
+        PS.host,
+        PT.database,
+        PT.formatTables
+        FROM
+        PumaServerTarget P
+        LEFT JOIN PumaTarget PT ON P.targetId = PT.id
+        LEFT JOIN PumaServer PS ON P.serverId = PS.id
+        WHERE
+        PS.host = #{host}
+    </select>
+
+    <select id="findByDatabase" resultType="PumaServerTargetEntity">
+        SELECT
+        P.id,
+        P.serverId,
+        P.targetId,
+        P.beginTime,
+        PS.host,
+        PT.database,
+        PT.formatTables
+        FROM
+        PumaServerTarget P
+        LEFT JOIN PumaTarget PT ON P.targetId = PT.id
+        LEFT JOIN PumaServer PS ON P.serverId = PS.id
+        WHERE
+        PT.database = #{database}
+    </select>
+
     <insert id="insert" parameterType="PumaServerTargetEntity" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO PumaServerTarget
         (

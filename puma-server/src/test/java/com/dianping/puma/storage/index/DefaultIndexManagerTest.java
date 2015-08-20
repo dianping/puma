@@ -354,15 +354,6 @@ public class DefaultIndexManagerTest {
         Assert.assertFalse(l2IndexFile.exists());
     }
 
-    /**
-     * 上一个 bucket 的最后一个 key 如果是下一个 bucket 的第一个 key 相同，那也需要可以找到对应的 index
-     */
-    @Test
-    public void testCanNotFindNextIndexBug() throws IOException {
-        IndexKeyImpl key = new IndexKeyImpl(104, -12, "bin-0002.bin", 0);
-        Assert.assertTrue(index.hasNextIndexBucket(key));
-    }
-
     @Test
     public void testCanNotAddSameL2Index() throws IOException {
         int size = index.getL1Index().size();

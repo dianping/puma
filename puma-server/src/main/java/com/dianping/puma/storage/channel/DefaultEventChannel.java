@@ -29,6 +29,8 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 
     private IndexBucket<IndexKeyImpl, IndexValueImpl> indexBucket;
 
+    private IndexBucket<IndexKeyImpl, IndexValueImpl> lastIndexBucket;
+
     private EventCodec codec;
 
     private volatile boolean stopped = true;
@@ -58,7 +60,7 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
                 IndexValueImpl nextL2Index = null;
 
                 if (this.indexBucket == null) {
-                    this.indexBucket = this.indexManager.getNextIndexBucket(lastIndexKey);
+                    this.indexBucket = this.indexManager.getNextIndexBucket(lastIndexBucket.getStartKeyIndex());
 
                     if (indexBucket == null) {
                         if (!shouldSleep) {
@@ -78,13 +80,14 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
                 try {
                     nextL2Index = this.indexBucket.next();
                 } catch (EOFException e) {
-                    if (this.indexManager.hasNextIndexBucket(lastIndexKey)) {
+                    if (this.indexManager.hasNextIndexBucket(this.indexBucket.getStartKeyIndex())) {
                         if (readDataBucket != null) {
                             this.readDataBucket.stop();
                             this.readDataBucket = null;
                         }
 
                         if (indexBucket != null) {
+                            this.lastIndexBucket = this.indexBucket;
                             this.indexBucket.stop();
                             this.indexBucket = null;
                         }

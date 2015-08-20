@@ -1,9 +1,9 @@
 /**
  * Project: puma-server
- * 
+ *
  * File Created at 2013-1-8
  * $Id$
- * 
+ *
  * Copyright 2010 dianping.com.
  * All rights reserved.
  *
@@ -41,9 +41,9 @@ import org.apache.commons.io.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
 
 /**
- * 
+ *
  * @author damon.zhu
- * 
+ *
  */
 public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>> implements IndexManager<K, V> {
 
@@ -352,7 +352,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 					return false;
 				}
 
-				l2Index = l1Index.tailMap(key, true).firstEntry();
+				l2Index = l1Index.tailMap(key, false).firstEntry();
 			} finally {
 				l1ReadLock.unlock();
 			}
@@ -370,7 +370,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 					return null;
 				}
 
-				l2Index = l1Index.tailMap(key, true).firstEntry();
+				l2Index = l1Index.tailMap(key, false).firstEntry();
 			} finally {
 				l1ReadLock.unlock();
 			}

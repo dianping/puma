@@ -1,52 +1,224 @@
 <!DOCTYPE html>
 <html ng-app="puma">
 <head lang="en">
-
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
     <meta charset="utf-8"/>
-    <title>Puma管理平台</title>
-    <meta name="description" content="frequently asked questions using tabs and accordions"/>
+    <title>Puma Admin</title>
+
+    <meta name="description" content=""/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 
-    <link rel="stylesheet" href="/app/lib/assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/app/lib/assets/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/app/lib/assets/css/ace-fonts.css">
-    <link rel="stylesheet" href="/app/lib/assets/css/ace.min.css" id="main-ace-style">
+    <!-- bootstrap & fontawesome -->
+    <link rel="stylesheet" href="/app/lib/assets/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/app/lib/assets/css/font-awesome.min.css"/>
+
+    <!-- page specific plugin styles -->
+
+    <!-- text fonts -->
+    <link rel="stylesheet" href="/app/lib/assets/css/ace-fonts.css"/>
+
+    <!-- ace styles -->
+    <link rel="stylesheet" href="/app/lib/assets/css/ace.min.css" id="main-ace-style"/>
+
+    <!--[if lte IE 9]>
+    <link rel="stylesheet" href="/app/lib/assets/css/ace-part2.min.css"/>
+    <![endif]-->
+    <link rel="stylesheet" href="/app/lib/assets/css/ace-skins.min.css"/>
+    <link rel="stylesheet" href="/app/lib/assets/css/ace-rtl.min.css"/>
+
+    <!--[if lte IE 9]>
+    <link rel="stylesheet" href="/app/lib/assets/css/ace-ie.min.css"/>
+    <![endif]-->
+
+    <!-- inline styles related to this page -->
+
+    <!-- ace settings handler -->
+    <script src="/app/lib/assets/js/ace-extra.min.js"></script>
+
+    <!-- HTML5shiv and Respond.js for IE8 to support HTML5 elements and media queries -->
+
+    <!--[if lte IE 8]>
+    <script src="/app/lib/assets/js/html5shiv.min.js"></script>
+    <script src="/app/lib/assets/js/respond.min.js"></script>
+    <![endif]-->
 </head>
 
-<body>
+<body class="no-skin">
 
-<div class="sidebar">
-    <ul class="nav nav-list">
-        <li>
-            <a href="#/puma-monitor/">Puma Monitor</a>
-        </li>
+<div id="navbar" class="navbar navbar-default">
+    <script type="text/javascript">
+        try {
+            ace.settings.check('navbar', 'fixed')
+        } catch (e) {
+        }
+    </script>
 
-        <li>
-            <a href="#/puma-server/">Puma Server</a>
-        </li>
+    <div class="navbar-container" id="navbar-container">
+        <!-- #section:basics/sidebar.mobile.toggle -->
+        <button type="button" class="navbar-toggle menu-toggler pull-left" id="menu-toggler">
+            <span class="sr-only">Toggle sidebar</span>
 
-        <li>
-            <a href="#/puma-client/">Puma Client</a>
-        </li>
+            <span class="icon-bar"></span>
 
-        <li>
-            <a href="#/puma-task/">Puma Task</a>
-        </li>
+            <span class="icon-bar"></span>
 
-        <li>
-            <a href="#/puma-target/">Puma Target</a>
-        </li>
-    </ul>
+            <span class="icon-bar"></span>
+        </button>
+
+        <!-- /section:basics/sidebar.mobile.toggle -->
+        <div class="navbar-header pull-left">
+            <!-- #section:basics/navbar.layout.brand -->
+            <a href="#" class="navbar-brand">
+                <small>
+                    <i class="fa fa-leaf"></i>
+                    Puma Admin
+                </small>
+            </a>
+
+            <!-- /section:basics/navbar.layout.brand -->
+
+            <!-- #section:basics/navbar.toggle -->
+
+            <!-- /section:basics/navbar.toggle -->
+        </div>
+
+        <!-- /section:basics/navbar.dropdown -->
+    </div>
+    <!-- /.navbar-container -->
 </div>
 
-<div class="main-content">
+<div class="main-container" id="main-container">
+    <script type="text/javascript">
+        try {
+            ace.settings.check('main-container', 'fixed')
+        } catch (e) {
+        }
+    </script>
+
+    <!-- #section:basics/sidebar -->
+    <div id="sidebar" class="sidebar responsive">
+        <script type="text/javascript">
+            try {
+                ace.settings.check('sidebar', 'fixed')
+            } catch (e) {
+            }
+        </script>
+
+        <ul class="nav nav-list">
+            <li class="">
+                <a href="index.html">
+                    <i class="menu-icon fa fa-tachometer"></i>
+                    <span class="menu-text"> Dashboard </span>
+                </a>
+
+                <b class="arrow"></b>
+            </li>
+
+            <li class="">
+                <a href="#" class="dropdown-toggle">
+                    <i class="menu-icon fa fa-list"></i>
+                    <span class="menu-text"> Puma </span>
+
+                    <b class="arrow fa fa-angle-down"></b>
+                </a>
+
+                <b class="arrow"></b>
+
+                <ul class="submenu">
+                    <li class="">
+                        <a href="#/puma-target">
+                            <i class="menu-icon fa fa-caret-right"></i>
+                            Target
+                        </a>
+
+                        <b class="arrow"></b>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="">
+                <a href="#" class="dropdown-toggle">
+                    <i class="menu-icon fa fa-list"></i>
+                    <span class="menu-text"> Sync </span>
+
+                    <b class="arrow fa fa-angle-down"></b>
+                </a>
+
+                <b class="arrow"></b>
+            </li>
+
+        </ul>
+        <!-- /.nav-list -->
+
+        <!-- #section:basics/sidebar.layout.minimize -->
+        <div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse">
+            <i class="ace-icon fa fa-angle-double-left" data-icon1="ace-icon fa fa-angle-double-left"
+               data-icon2="ace-icon fa fa-angle-double-right"></i>
+        </div>
+
+        <!-- /section:basics/sidebar.layout.minimize -->
+        <script type="text/javascript">
+            try {
+                ace.settings.check('sidebar', 'collapsed')
+            } catch (e) {
+            }
+        </script>
+    </div>
+
+    <div class="main-content">
+        <div ng-view></div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-inner">
+            <!-- #section:basics/footer -->
+            <div class="footer-content">
+                <span class="bigger-120">
+                    DianPing &copy; 2015-2016
+                </span>
+            </div>
+
+            <!-- /section:basics/footer -->
+        </div>
+    </div>
+</div>
+<!-- /.main-container -->
+
+<!--div class="main-content">
     <div ng-view></div>
-</div>
+</div-->
 
-<script src="/app/lib/assets/js/jquery.min.js"></script>
-<script src="/app/lib/assets/js/ace.min.js"></script>
+<!-- basic scripts -->
+
+<!--[if !IE]> -->
+<script type="text/javascript">
+    window.jQuery || document.write("<script src='/app/lib/assets/js/jquery.min.js'>" + "<" + "/script>");
+</script>
+
+<!-- <![endif]-->
+
+<!--[if IE]>
+<script type="text/javascript">
+    window.jQuery || document.write("<script src='/app/lib/assets/js/jquery1x.min.js'>" + "<" + "/script>");
+</script>
+<![endif]-->
+<script type="text/javascript">
+    if ('ontouchstart' in document.documentElement) document.write("<script src='/app/lib/assets/js/jquery.mobile.custom.min.js'>" + "<" + "/script>");
+</script>
+<script src="/app/lib/assets/js/bootstrap.min.js"></script>
+
+<!-- page specific plugin scripts -->
+
+<!-- ace scripts -->
 <script src="/app/lib/assets/js/ace-elements.min.js"></script>
+<script src="/app/lib/assets/js/ace.min.js"></script>
+
+<!-- inline scripts related to this page -->
+
+<!-- the following scripts are used in demo only for onpage help and you don't need them -->
+<link rel="stylesheet" href="/app/lib/assets/css/ace.onpage-help.css"/>
+<link rel="stylesheet" href="/app/lib/docs/assets/js/themes/sunburst.css"/>
+
 <script type="text/javascript"> ace.vars['base'] = '..'; </script>
 <script src="/app/lib/assets/js/ace/elements.onpage-help.js"></script>
 <script src="/app/lib/assets/js/ace/ace.onpage-help.js"></script>

@@ -1,7 +1,6 @@
 package com.dianping.puma.biz.service.impl;
 
 import com.dianping.puma.biz.MockTest;
-import com.dianping.puma.biz.dao.PumaTaskTargetDao;
 import com.dianping.puma.biz.entity.PumaTargetEntity;
 import org.junit.Before;
 import org.junit.Test;

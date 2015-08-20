@@ -6,8 +6,6 @@ import com.dianping.puma.core.model.Schema;
 import com.dianping.puma.core.model.SchemaSet;
 import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
-import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
-import com.dianping.puma.core.model.event.EventCenter;
 import com.dianping.puma.core.util.sql.DDLType;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,127 +14,100 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.Mockito.*;
-
 public class StorageEventFilterChainTest {
 
-	DefaultEventFilterChain storageEventFilterChain = new DefaultEventFilterChain();
+    DefaultEventFilterChain storageEventFilterChain = new DefaultEventFilterChain();
 
-	EventCenter eventCenter = new EventCenter();
+    @Before
+    public void before() {
+        List<EventFilter> eventFilters = new ArrayList<EventFilter>();
 
-	@Before
-	public void before() {
-		List<EventFilter> eventFilters = new ArrayList<EventFilter>();
+        TableSet tableSet = new TableSet();
+        tableSet.add(new Table("schema", "table"));
+        tableSet.add(new Table("puma", "test"));
 
-		TableSet tableSet = new TableSet();
-		tableSet.add(new Table("schema", "table"));
-		tableSet.add(new Table("puma", "test"));
+        SchemaSet schemaSet = new SchemaSet();
+        schemaSet.add(new Schema("schema"));
+        schemaSet.add(new Schema("puma"));
 
-		SchemaSet schemaSet = new SchemaSet();
-		schemaSet.add(new Schema("schema"));
-		schemaSet.add(new Schema("puma"));
+        DMLEventFilter dmlEventFilter = new DMLEventFilter();
+        dmlEventFilter.setName("puma");
+        dmlEventFilter.setDml(true);
+        dmlEventFilter.setAcceptedTables(tableSet);
+        eventFilters.add(dmlEventFilter);
 
-		DMLEventFilter dmlEventFilter = new DMLEventFilter();
-		dmlEventFilter.setName("puma");
-		dmlEventFilter.setDml(true);
-		dmlEventFilter.setAcceptedTables(tableSet);
-		eventFilters.add(dmlEventFilter);
+        DDLEventFilter ddlEventFilter = new DDLEventFilter();
+        ddlEventFilter.setName("puma");
+        ddlEventFilter.setDdl(true);
+        ddlEventFilter.setAcceptedTables(tableSet);
+        List<DDLType> ddlTypes = new ArrayList<DDLType>();
+        ddlTypes.add(DDLType.ALTER_TABLE);
+        ddlTypes.add(DDLType.CREATE_INDEX);
+        ddlTypes.add(DDLType.DROP_INDEX);
+        ddlEventFilter.setDdlTypes(ddlTypes);
+        eventFilters.add(ddlEventFilter);
 
-		DDLEventFilter ddlEventFilter = new DDLEventFilter();
-		ddlEventFilter.setName("puma");
-		ddlEventFilter.setDdl(true);
-		ddlEventFilter.setAcceptedTables(tableSet);
-		List<DDLType> ddlTypes = new ArrayList<DDLType>();
-		ddlTypes.add(DDLType.ALTER_TABLE);
-		ddlTypes.add(DDLType.CREATE_INDEX);
-		ddlTypes.add(DDLType.DROP_INDEX);
-		ddlEventFilter.setDdlTypes(ddlTypes);
-		eventFilters.add(ddlEventFilter);
+        TransactionEventFilter transactionEventFilter = new TransactionEventFilter();
+        transactionEventFilter.setName("puma");
+        transactionEventFilter.setBegin(false);
+        transactionEventFilter.setCommit(true);
+        transactionEventFilter.setAcceptedSchemas(schemaSet);
+        eventFilters.add(transactionEventFilter);
 
-		TransactionEventFilter transactionEventFilter = new TransactionEventFilter();
-		transactionEventFilter.setName("puma");
-		transactionEventFilter.setBegin(false);
-		transactionEventFilter.setCommit(true);
-		transactionEventFilter.setAcceptedSchemas(schemaSet);
-		eventFilters.add(transactionEventFilter);
+        storageEventFilterChain.setEventFilters(eventFilters);
+    }
 
-		storageEventFilterChain.setEventFilters(eventFilters);
-	}
+    @Test
+    public void testDoNext() {
+        // Case 1.
+        storageEventFilterChain.reset();
+        RowChangedEvent rowChangedEvent0 = new RowChangedEvent();
+        rowChangedEvent0.setDatabase("schema");
+        rowChangedEvent0.setTable("table");
+        rowChangedEvent0.setTransactionBegin(false);
+        rowChangedEvent0.setTransactionCommit(false);
+        Assert.assertTrue(storageEventFilterChain.doNext(rowChangedEvent0));
 
-	@Test
-	public void testDoNext() {
-		// Case 1.
-		storageEventFilterChain.reset();
-		RowChangedEvent rowChangedEvent0 = new RowChangedEvent();
-		rowChangedEvent0.setDatabase("schema");
-		rowChangedEvent0.setTable("table");
-		rowChangedEvent0.setTransactionBegin(false);
-		rowChangedEvent0.setTransactionCommit(false);
-		Assert.assertTrue(storageEventFilterChain.doNext(rowChangedEvent0));
+        // Case 2.
+        storageEventFilterChain.reset();
+        RowChangedEvent rowChangedEvent1 = new RowChangedEvent();
+        rowChangedEvent1.setDatabase("schema");
+        rowChangedEvent1.setTable("hello");
+        rowChangedEvent1.setTransactionBegin(false);
+        rowChangedEvent1.setTransactionCommit(false);
+        Assert.assertFalse(storageEventFilterChain.doNext(rowChangedEvent1));
 
-		// Case 2.
-		storageEventFilterChain.reset();
-		RowChangedEvent rowChangedEvent1 = new RowChangedEvent();
-		rowChangedEvent1.setDatabase("schema");
-		rowChangedEvent1.setTable("hello");
-		rowChangedEvent1.setTransactionBegin(false);
-		rowChangedEvent1.setTransactionCommit(false);
-		Assert.assertFalse(storageEventFilterChain.doNext(rowChangedEvent1));
+        // Case 3.
+        storageEventFilterChain.reset();
+        RowChangedEvent rowChangedEvent2 = new RowChangedEvent();
+        rowChangedEvent2.setDatabase("puma");
+        rowChangedEvent2.setTransactionBegin(true);
+        rowChangedEvent2.setTransactionCommit(false);
+        Assert.assertFalse(storageEventFilterChain.doNext(rowChangedEvent2));
 
-		// Case 3.
-		storageEventFilterChain.reset();
-		RowChangedEvent rowChangedEvent2 = new RowChangedEvent();
-		rowChangedEvent2.setDatabase("puma");
-		rowChangedEvent2.setTransactionBegin(true);
-		rowChangedEvent2.setTransactionCommit(false);
-		Assert.assertFalse(storageEventFilterChain.doNext(rowChangedEvent2));
+        // Case 4.
+        storageEventFilterChain.reset();
+        RowChangedEvent rowChangedEvent3 = new RowChangedEvent();
+        rowChangedEvent3.setDatabase("puma");
+        rowChangedEvent3.setTransactionBegin(false);
+        rowChangedEvent3.setTransactionCommit(true);
+        Assert.assertTrue(storageEventFilterChain.doNext(rowChangedEvent3));
 
-		// Case 4.
-		storageEventFilterChain.reset();
-		RowChangedEvent rowChangedEvent3 = new RowChangedEvent();
-		rowChangedEvent3.setDatabase("puma");
-		rowChangedEvent3.setTransactionBegin(false);
-		rowChangedEvent3.setTransactionCommit(true);
-		Assert.assertTrue(storageEventFilterChain.doNext(rowChangedEvent3));
+        // Case 5.
+        storageEventFilterChain.reset();
+        DdlEvent ddlEvent0 = new DdlEvent();
+        ddlEvent0.setDDLType(DDLType.ALTER_TABLE);
+        ddlEvent0.setDatabase("puma");
+        ddlEvent0.setTable("test");
+        Assert.assertTrue(storageEventFilterChain.doNext(ddlEvent0));
 
-		// Case 5.
-		storageEventFilterChain.reset();
-		DdlEvent ddlEvent0 = new DdlEvent();
-		ddlEvent0.setDDLType(DDLType.ALTER_TABLE);
-		ddlEvent0.setDatabase("puma");
-		ddlEvent0.setTable("test");
-		Assert.assertTrue(storageEventFilterChain.doNext(ddlEvent0));
+        // Case 6.
+        storageEventFilterChain.reset();
+        DdlEvent ddlEvent1 = new DdlEvent();
+        ddlEvent1.setDDLType(DDLType.ALTER_TABLE);
+        ddlEvent1.setDatabase("puma");
+        ddlEvent1.setTable(null);
+        Assert.assertFalse(storageEventFilterChain.doNext(ddlEvent1));
+    }
 
-		// Case 6.
-		storageEventFilterChain.reset();
-		DdlEvent ddlEvent1 = new DdlEvent();
-		ddlEvent1.setDDLType(DDLType.ALTER_TABLE);
-		ddlEvent1.setDatabase("puma");
-		ddlEvent1.setTable(null);
-		Assert.assertFalse(storageEventFilterChain.doNext(ddlEvent1));
-	}
-
-	@Test
-	public void testOnEvent() {
-		AcceptedTableChangedEvent acceptedTableChangedEvent = new AcceptedTableChangedEvent();
-		acceptedTableChangedEvent.setName("puma");
-
-		TableSet tableSet = new TableSet();
-		tableSet.add(new Table("puma", "hello"));
-		tableSet.add(new Table("puma", "ok"));
-		acceptedTableChangedEvent.setTableSet(tableSet);
-
-		DMLEventFilter dmlEventFilter = mock(DMLEventFilter.class);
-		DDLEventFilter ddlEventFilter = mock(DDLEventFilter.class);
-		TransactionEventFilter transactionEventFilter = mock(TransactionEventFilter.class);
-
-		eventCenter.register(dmlEventFilter);
-		eventCenter.register(ddlEventFilter);
-		eventCenter.register(transactionEventFilter);
-		eventCenter.post(acceptedTableChangedEvent);
-
-		verify(ddlEventFilter, times(1)).onEvent(acceptedTableChangedEvent);
-		verify(dmlEventFilter, times(1)).onEvent(acceptedTableChangedEvent);
-		verify(transactionEventFilter, times(1)).onEvent(acceptedTableChangedEvent);
-	}
 }

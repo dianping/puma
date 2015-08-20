@@ -13,12 +13,14 @@ public class ClusterPumaClientMainTest {
 
     public static void main(String[] args) {
         List<String> tables = new ArrayList<String>();
-        tables.add("UOD_Order2");
-        tables.add("UOD_Order3");
+        tables.add("UOD_Order0");
+        tables.add("UOD_Order1");
+        tables.add("UOD_OrderAdditionalFee0");
+        tables.add("UOD_OrderAdditionalFee1");
 
         PumaClient client = new PumaClientConfig()
-                .setClientName("UnifiedOrder1@UOD_Order@ShopID")
-                .setDatabase("UnifiedOrder1")
+                .setClientName("dozer-debug")
+                .setDatabase("UnifiedOrder0")
                 .setTables(tables)
                 .buildClusterPumaClient();
 

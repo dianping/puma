@@ -1,13 +1,5 @@
 package com.dianping.puma.server.builder;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import com.dianping.puma.core.codec.RawEventCodec;
@@ -16,188 +8,168 @@ import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.core.model.Schema;
 import com.dianping.puma.core.model.SchemaSet;
 import com.dianping.puma.core.model.Table;
-import com.dianping.puma.core.model.event.EventCenter;
 import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.datahandler.DefaultDataHandler;
-import com.dianping.puma.filter.DDLEventFilter;
-import com.dianping.puma.filter.DMLEventFilter;
-import com.dianping.puma.filter.DefaultEventFilterChain;
-import com.dianping.puma.filter.EventFilter;
-import com.dianping.puma.filter.EventFilterChain;
-import com.dianping.puma.filter.TableMetaRefreshFilter;
-import com.dianping.puma.filter.TransactionEventFilter;
+import com.dianping.puma.filter.*;
 import com.dianping.puma.parser.DefaultBinlogParser;
 import com.dianping.puma.parser.Parser;
+import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
-import com.dianping.puma.server.server.TaskServerManager;
 import com.dianping.puma.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.taskexecutor.DefaultTaskExecutor;
 import com.dianping.puma.taskexecutor.TaskExecutor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service("taskBuilder")
 public class DefaultTaskBuilder implements TaskBuilder {
 
-	@Autowired
-	BinlogInfoHolder binlogInfoHolder;
+    @Autowired
+    BinlogInfoHolder binlogInfoHolder;
 
-	@Autowired
-	EventCenter eventCenter;
+    @Autowired
+    RawEventCodec rawCodec;
 
-	@Autowired
-	TaskServerManager taskServerManager;
+    @Value("fileSender-")
+    String fileSenderName;
 
-	@Autowired
-	RawEventCodec rawCodec;
+    @Value("dispatch-")
+    String dispatchName;
 
-	@Value("fileSender-")
-	String fileSenderName;
+    @Value("/data/appdatas/puma/storage/master/")
+    String masterStorageBaseDir;
 
-	@Value("storage-")
-	String storageName;
+    @Value("Bucket-")
+    String masterBucketFilePrefix;
 
-	@Value("dispatch-")
-	String dispatchName;
+    @Value("1000")
+    int maxMasterBucketLengthMB;
 
-	@Value("/data/appdatas/puma/storage/master/")
-	String masterStorageBaseDir;
+    @Value("25")
+    int maxMasterFileCount;
 
-	@Value("Bucket-")
-	String masterBucketFilePrefix;
+    @Value("/data/appdatas/puma/storage/slave/")
+    String slaveStorageBaseDir;
 
-	@Value("1000")
-	int maxMasterBucketLengthMB;
+    @Value("Bucket-")
+    String slaveBucketFilePrefix;
 
-	@Value("25")
-	int maxMasterFileCount;
+    @Value("/data/appdatas/puma/binlogIndex/")
+    String binlogIndexBaseDir;
 
-	@Value("/data/appdatas/puma/storage/slave/")
-	String slaveStorageBaseDir;
+    public TaskExecutor build(PumaTaskEntity pumaTask) throws Exception {
+        DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
 
-	@Value("Bucket-")
-	String slaveBucketFilePrefix;
+        taskExecutor.setTask(pumaTask);
 
-	@Value("1000")
-	int maxSlaveBucketLengthMB;
+        PumaTaskStateEntity taskState = new PumaTaskStateEntity();
+        taskState.setTaskName(pumaTask.getName());
+        taskState.setStatus(Status.PREPARING);
 
-	@Value("25")
-	int maxSlaveFileCount;
+        taskExecutor.setTaskState(taskState);
 
-	@Value("/data/appdatas/puma/binlogIndex/")
-	String binlogIndexBaseDir;
+        // Base.
+        String taskName = pumaTask.getName();
+        taskExecutor.setTaskName(taskName);
+        taskExecutor.setServerId(taskName.hashCode() + "self".hashCode());
 
-	public TaskExecutor build(PumaTaskEntity pumaTask) throws Exception {
-		DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
+        // Bin log.
+        taskExecutor.setBinlogInfoHolder(binlogInfoHolder);
+        taskExecutor.setBinlogStat(new BinlogStat());
 
-		taskExecutor.setTask(pumaTask);
+        // Parser.
+        Parser parser = new DefaultBinlogParser();
 
-		PumaTaskStateEntity taskState = new PumaTaskStateEntity();
-		taskState.setTaskName(pumaTask.getName());
-		taskState.setStatus(Status.PREPARING);
+        taskExecutor.setParser(parser);
 
-		taskExecutor.setTaskState(taskState);
+        // Handler.
+        DefaultDataHandler dataHandler = new DefaultDataHandler();
+        DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
+        taskExecutor.setTableMetaInfoFetcher(tableMetaInfo);
 
-		// Base.
-		String taskName = pumaTask.getName();
-		taskExecutor.setTaskName(taskName);
-		taskExecutor.setServerId(taskName.hashCode() + "self".hashCode());
+        // tableMeta refresh filter
+        TableMetaRefreshFilter tableMetaRefreshFilter = new TableMetaRefreshFilter();
+        tableMetaRefreshFilter.setName(taskName);
+        tableMetaRefreshFilter.setAcceptedTables(pumaTask.getTableSet());
+        tableMetaInfo.setTableMetaRefreshFilter(tableMetaRefreshFilter);
 
-		// Bin log.
-		taskExecutor.setBinlogInfoHolder(binlogInfoHolder);
-		taskExecutor.setBinlogStat(new BinlogStat());
+        dataHandler.setTableMetasInfoFetcher(tableMetaInfo);
 
-		// Parser.
-		Parser parser = new DefaultBinlogParser();
+        taskExecutor.setDataHandler(dataHandler);
 
-		taskExecutor.setParser(parser);
+        EventFilterChain eventFilterChain = new DefaultEventFilterChain();
+        List<EventFilter> eventFilterList = new ArrayList<EventFilter>();
 
-		// Handler.
-		DefaultDataHandler dataHandler = new DefaultDataHandler();
-		DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
-		taskExecutor.setTableMetaInfoFetcher(tableMetaInfo);
+        // DML event filter.
+        DMLEventFilter dmlEventFilter = new DMLEventFilter();
+        dmlEventFilter.setName(taskName);
+        dmlEventFilter.setDml(true);
+        dmlEventFilter.setAcceptedTables(pumaTask.getTableSet());
+        eventFilterList.add(dmlEventFilter);
 
-		// tableMeta refresh filter
-		TableMetaRefreshFilter tableMetaRefreshFilter = new TableMetaRefreshFilter();
-		tableMetaRefreshFilter.setName(taskName);
-		tableMetaRefreshFilter.setAcceptedTables(pumaTask.getTableSet());
-		eventCenter.register(tableMetaRefreshFilter);
-		tableMetaInfo.setTableMetaRefreshFilter(tableMetaRefreshFilter);
+        // DDL event filter.
+        DDLEventFilter ddlEventFilter = new DDLEventFilter();
+        ddlEventFilter.setName(taskName);
+        ddlEventFilter.setDdl(true);
+        List<DDLType> ddlTypes = new ArrayList<DDLType>();
+        ddlTypes.add(DDLType.ALTER_TABLE);
+        ddlTypes.add(DDLType.CREATE_INDEX);
+        ddlTypes.add(DDLType.DROP_INDEX);
+        ddlEventFilter.setDdlTypes(ddlTypes);
+        eventFilterList.add(ddlEventFilter);
 
-		dataHandler.setTableMetasInfoFetcher(tableMetaInfo);
+        // Transaction event filter.
+        TransactionEventFilter transactionEventFilter = new TransactionEventFilter();
+        transactionEventFilter.setName(taskName);
+        transactionEventFilter.setBegin(true);
+        transactionEventFilter.setCommit(true);
+        if (pumaTask.getTableSet() != null) {
+            SchemaSet schemaSet = new SchemaSet();
+            for (Table table : pumaTask.getTableSet().listSchemaTables()) {
+                schemaSet.add(new Schema(table.getSchemaName()));
+            }
+            transactionEventFilter.setAcceptedSchemas(schemaSet);
+        }
+        eventFilterList.add(transactionEventFilter);
 
-		taskExecutor.setDataHandler(dataHandler);
+        eventFilterChain.setEventFilters(eventFilterList);
 
-		EventFilterChain eventFilterChain = new DefaultEventFilterChain();
-		List<EventFilter> eventFilterList = new ArrayList<EventFilter>();
+        // File sender.
+        List<Sender> senders = new ArrayList<Sender>();
+        FileDumpSender sender = new FileDumpSender();
+        sender.setName(fileSenderName + taskName);
+        sender.setTaskName(taskName);
+        sender.setCodec(rawCodec);
+        sender.setStorageEventFilterChain(eventFilterChain);
 
-		// DML event filter.
-		DMLEventFilter dmlEventFilter = new DMLEventFilter();
-		dmlEventFilter.setName(taskName);
-		dmlEventFilter.setDml(true);
-		dmlEventFilter.setAcceptedTables(pumaTask.getTableSet());
-		eventCenter.register(dmlEventFilter);
-		eventFilterList.add(dmlEventFilter);
+        sender.setBinlogIndexBaseDir(binlogIndexBaseDir);
+        sender.setMasterStorageBaseDir(masterStorageBaseDir);
+        sender.setMasterBucketFilePrefix(masterBucketFilePrefix);
+        sender.setMaxMasterBucketLengthMB(maxMasterBucketLengthMB);
+        sender.setSlaveStorageBaseDir(slaveStorageBaseDir);
+        sender.setSlaveBucketFilePrefix(slaveBucketFilePrefix);
+        sender.setMaxMasterFileCount(maxMasterFileCount);
+        sender.setPreservedDay(pumaTask.getPreservedDay());
 
-		// DDL event filter.
-		DDLEventFilter ddlEventFilter = new DDLEventFilter();
-		ddlEventFilter.setName(taskName);
-		ddlEventFilter.setDdl(true);
-		List<DDLType> ddlTypes = new ArrayList<DDLType>();
-		ddlTypes.add(DDLType.ALTER_TABLE);
-		ddlTypes.add(DDLType.CREATE_INDEX);
-		ddlTypes.add(DDLType.DROP_INDEX);
-		ddlEventFilter.setDdlTypes(ddlTypes);
-		eventCenter.register(ddlEventFilter);
-		eventFilterList.add(ddlEventFilter);
+        senders.add(sender);
 
-		// Transaction event filter.
-		TransactionEventFilter transactionEventFilter = new TransactionEventFilter();
-		transactionEventFilter.setName(taskName);
-		transactionEventFilter.setBegin(true);
-		transactionEventFilter.setCommit(true);
-		if (pumaTask.getTableSet() != null) {
-			SchemaSet schemaSet = new SchemaSet();
-			for (Table table : pumaTask.getTableSet().listSchemaTables()) {
-				schemaSet.add(new Schema(table.getSchemaName()));
-			}
-			transactionEventFilter.setAcceptedSchemas(schemaSet);
-		}
-		eventCenter.register(transactionEventFilter);
-		eventFilterList.add(transactionEventFilter);
+        // Dispatch.
+        SimpleDispatcherImpl dispatcher = new SimpleDispatcherImpl();
+        dispatcher.setName(dispatchName + taskName);
+        dispatcher.setSenders(senders);
+        taskExecutor.setDispatcher(dispatcher);
 
-		eventFilterChain.setEventFilters(eventFilterList);
+        taskExecutor.initContext();
 
-		// File sender.
-		List<Sender> senders = new ArrayList<Sender>();
-		FileDumpSender sender = new FileDumpSender();
-		sender.setName(fileSenderName + taskName);
-		sender.setTaskName(taskName);
-		sender.setCodec(rawCodec);
-		sender.setStorageEventFilterChain(eventFilterChain);
+        // Set puma task status.
+        taskExecutor.getTaskState().setStatus(Status.WAITING);
 
-		sender.setBinlogIndexBaseDir(binlogIndexBaseDir);
-		sender.setMasterStorageBaseDir(masterStorageBaseDir);
-		sender.setMasterBucketFilePrefix(masterBucketFilePrefix);
-		sender.setMaxMasterBucketLengthMB(maxMasterBucketLengthMB);
-		sender.setSlaveStorageBaseDir(slaveStorageBaseDir);
-		sender.setSlaveBucketFilePrefix(slaveBucketFilePrefix);
-		sender.setMaxMasterFileCount(maxMasterFileCount);
-		sender.setPreservedDay(pumaTask.getPreservedDay());
-
-		senders.add(sender);
-
-		// Dispatch.
-		SimpleDispatcherImpl dispatcher = new SimpleDispatcherImpl();
-		dispatcher.setName(dispatchName + taskName);
-		dispatcher.setSenders(senders);
-		taskExecutor.setDispatcher(dispatcher);
-
-		taskExecutor.initContext();
-
-		// Set puma task status.
-		taskExecutor.getTaskState().setStatus(Status.WAITING);
-
-		return taskExecutor;
-	}
+        return taskExecutor;
+    }
 }

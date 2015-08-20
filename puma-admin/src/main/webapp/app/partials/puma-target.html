@@ -31,11 +31,120 @@
 
     <div class="page-content">
 
-        <form class="form-horizontal" role="form">
-            <label class="col-sm-2 control-label" for="database-search">Database</label>
-            <input id="database-search" class="col-sm-6" ng-model="database">
-            <button ng-click="search()">Search</button>
-        </form>
+        <div class="col-sm-6">
+            <div class="widget-box">
+                <div class="widget-header widget-header-small">
+                    <h5 class="widget-title lighter">Search Target</h5>
+                </div>
+
+                <div class="widget-body">
+                    <div class="widget-main">
+                        <form class="form-search">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control search-query"/>
+                                        <span class="input-group-btn">
+                                            <button type="button" class="btn btn-purple btn-sm">
+                                                Search
+                                                <i class="ace-icon fa fa-search icon-on-right bigger-110"></i>
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-10">
+            <div class="widget-box">
+                <div class="widget-header widget-header-small">
+                    <h5 class="widget-title lighter">Target Tables</h5>
+                </div>
+
+                <div class="widget-body">
+                    <div class="widget-main">
+                        <form class="form-search">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control search-query"/>
+                                        <span class="input-group-btn">
+                                            <button type="button" class="btn btn-purple btn-sm">
+                                                Submit
+                                                <i class="ace-icon fa fa-search icon-on-right bigger-110"></i>
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!--div ng-repeat=""-->
+
+            <div class="col-sm-4">
+                <div class="widget-box">
+                    <div class="widget-header">
+
+                        <h4 class="widget-title">Server</h4>
+
+                        <span class="widget-toolbar">
+
+                            <a href="#" data-action="reload">
+                                <i class="ace-icon fa fa-refresh"></i>
+                            </a>
+
+                            <a href="#" data-action="collapse">
+                                <i class="ace-icon fa fa-chevron-up"></i>
+                            </a>
+
+                            <a href="#" data-action="close">
+                                <i class="ace-icon fa fa-times"></i>
+                            </a>
+                        </span>
+                    </div>
+
+                    <div class="widget-body">
+                        <div class="widget-main">
+
+                            <table class="table">
+                                <tr>
+                                    <td class="col-sm-3">Server</td>
+                                    <td class="col-sm-9">
+                                        <input class="form-control " type="text" id="form-field-mask-2" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="col-sm-3">Begin</td>
+                                    <td class="col-sm-9">
+                                        <input class="form-control" type="text" id="form-field-mask-3" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="col-sm-3">Weight</td>
+                                    <td class="col-sm-9">
+                                        <input class="form-control" type="text" id="form-field-mask-4" />
+                                    </td>
+                                </tr>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        <!--/div-->
 
         <div ng-repeat="server in servers">
             <table class="table table-hover">

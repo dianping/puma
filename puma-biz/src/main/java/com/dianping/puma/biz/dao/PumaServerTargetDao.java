@@ -6,19 +6,13 @@ import java.util.List;
 
 public interface PumaServerTargetDao {
 
-	public PumaServerTargetEntity findById(int id);
+    List<PumaServerTargetEntity> findByDatabase(String targetDb);
 
-	public List<PumaServerTargetEntity> findByTargetId(int targetId);
+    List<PumaServerTargetEntity> findByServerName(String serverName);
 
-	public List<PumaServerTargetEntity> findByDatabase(String database);
+    int insert(PumaServerTargetEntity entity);
 
-	public List<PumaServerTargetEntity> findByServerId(int serverId);
+    int update(PumaServerTargetEntity entity);
 
-	public List<PumaServerTargetEntity> findByHost(String host);
-
-	public int insert(PumaServerTargetEntity entity);
-
-	public int update(PumaServerTargetEntity entity);
-
-	public int delete(int id);
+    int delete(int id);
 }

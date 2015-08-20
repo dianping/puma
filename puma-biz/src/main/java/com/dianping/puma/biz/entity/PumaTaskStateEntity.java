@@ -13,8 +13,6 @@ public class PumaTaskStateEntity {
 
     private String taskName;
 
-    private String serverName;
-
     private Date updateTime;
 
     private String detail;
@@ -77,34 +75,11 @@ public class PumaTaskStateEntity {
         this.status = status;
     }
 
-    public String getServerName() {
-        return serverName;
-    }
-
-    public void setServerName(String serverName) {
-        this.serverName = serverName;
-    }
-
     public int getId() {
         return id;
     }
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
-        PumaTaskStateEntity taskState = (PumaTaskStateEntity) o;
-        return Objects.equal(taskName, taskState.taskName) && Objects.equal(serverName, taskState.serverName);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(taskName, serverName);
     }
 }

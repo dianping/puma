@@ -14,11 +14,17 @@ public class PumaTargetEntity {
 
     private String database;
 
-    private String formatTables;
-
-    private List<String> tables;
+    private String table;
 
     private Date beginTime;
+
+    public Date getBeginTime() {
+        return beginTime;
+    }
+
+    public void setBeginTime(Date beginTime) {
+        this.beginTime = beginTime;
+    }
 
     public int getId() {
         return id;
@@ -36,27 +42,11 @@ public class PumaTargetEntity {
         this.database = database;
     }
 
-    public String getFormatTables() {
-        return formatTables;
+    public String getTable() {
+        return table;
     }
 
-    public void setFormatTables(String formatTables) {
-        this.formatTables = formatTables;
-    }
-
-    public List<String> getTables() {
-        return tables;
-    }
-
-    public void setTables(List<String> tables) {
-        this.tables = tables;
-    }
-
-    public Date getBeginTime() {
-        return beginTime;
-    }
-
-    public void setBeginTime(Date beginTime) {
-        this.beginTime = beginTime;
+    public void setTable(String table) {
+        this.table = table;
     }
 }

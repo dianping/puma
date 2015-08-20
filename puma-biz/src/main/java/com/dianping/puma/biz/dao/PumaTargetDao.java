@@ -6,15 +6,13 @@ import java.util.List;
 
 public interface PumaTargetDao {
 
-	public PumaTargetEntity findById(int id);
+    PumaTargetEntity findById(int id);
 
-	public PumaTargetEntity findByDatabase(String database);
+    List<PumaTargetEntity> findByDatabase(String database);
 
-	public List<PumaTargetEntity> findAll();
+    List<PumaTargetEntity> findAll();
 
-	public int insert(PumaTargetEntity entity);
+    int insert(PumaTargetEntity entity);
 
-	public int update(PumaTargetEntity entity);
-
-	public int delete(int id);
+    int delete(int id);
 }

@@ -277,7 +277,6 @@ public abstract class AbstractBaseTest {
 
 		// state
 		PumaTaskStateEntity taskState = new PumaTaskStateEntity();
-		taskState.setServerName(serverName);
 		taskState.setTaskName(taskName);
 		taskState.setStatus(Status.PREPARING);
 		taskExecutor.setTaskState(taskState);

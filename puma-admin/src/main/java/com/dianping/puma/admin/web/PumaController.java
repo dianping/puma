@@ -37,10 +37,10 @@ public class PumaController {
 		try {
 			String database = pumaDto.getDatabase();
 			List<PumaServerTargetEntity> pumaServerTargets = pumaServerTargetService.findByDatabase(database);
-			for (PumaServerTargetEntity pumaServerTarget: pumaServerTargets) {
-				pumaDto.setTables(pumaServerTarget.getTables());
-				pumaDto.addServer(pumaServerTarget.getHost());
-			}
+//			for (PumaServerTargetEntity pumaServerTarget: pumaServerTargets) {
+//				pumaDto.setTables(pumaServerTarget.getTables());
+//				pumaDto.addServer(pumaServerTarget.getHost());
+//			}
 
 			result.put("status", "success");
 			result.put("result", pumaDto);
@@ -65,16 +65,16 @@ public class PumaController {
 
 			PumaTargetEntity pumaTarget = new PumaTargetEntity();
 			pumaTarget.setDatabase(database);
-			pumaTarget.setTables(tables);
-			pumaTargetService.createOrUpdate(pumaTarget);
-
-			for (Integer serverId : serverIds) {
-				PumaServerTargetEntity pumaServerTarget = new PumaServerTargetEntity();
-				pumaServerTarget.setServerId(serverId);
-				pumaServerTarget.setTargetId(pumaTarget.getId());
-				pumaServerTarget.setBeginTime(beginTime);
-				pumaServerTargetService.createOrUpdate(pumaServerTarget);
-			}
+//			pumaTarget.setTables(tables);
+//			pumaTargetService.createOrUpdate(pumaTarget);
+//
+//			for (Integer serverId : serverIds) {
+//				PumaServerTargetEntity pumaServerTarget = new PumaServerTargetEntity();
+//				pumaServerTarget.setServerId(serverId);
+//				pumaServerTarget.setTargetId(pumaTarget.getId());
+//				pumaServerTarget.setBeginTime(beginTime);
+//				pumaServerTargetService.createOrUpdate(pumaServerTarget);
+//			}
 		} catch (Throwable t) {
 			return null;
 		}

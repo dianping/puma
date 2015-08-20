@@ -22,7 +22,7 @@ public class PumaTargetDaoTest {
 	public void test() {
 		PumaTargetEntity entity = new PumaTargetEntity();
 		entity.setDatabase("test");
-		entity.setFormatTables("test1+test2+test3");
+		entity.setTable("test1+test2+test3");
 		pumaTargetDao.insert(entity);
 	}
 }

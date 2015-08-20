@@ -25,8 +25,8 @@ public class PumaServerTargetDaoTest {
 	@Ignore
 	public void test() {
 		PumaServerTargetEntity entity = new PumaServerTargetEntity();
-		entity.setServerId(123);
-		entity.setTargetId(321);
+		entity.setServerName("123");
+		entity.setTargetDb("123");
 		entity.setBeginTime(new Date());
 		pumaServerTargetDao.insert(entity);
 	}

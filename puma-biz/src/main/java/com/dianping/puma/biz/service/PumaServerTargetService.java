@@ -5,22 +5,13 @@ import com.dianping.puma.biz.entity.PumaServerTargetEntity;
 import java.util.List;
 
 public interface PumaServerTargetService {
+    List<PumaServerTargetEntity> findByDatabase(String database);
 
-	public PumaServerTargetEntity findById(int id);
+    List<PumaServerTargetEntity> findByServerName(String host);
 
-	public List<PumaServerTargetEntity> findByTargetId(int targetId);
+    int create(PumaServerTargetEntity entity);
 
-	public List<PumaServerTargetEntity> findByDatabase(String database);
+    int update(PumaServerTargetEntity entity);
 
-	public List<PumaServerTargetEntity> findByServerId(int serverId);
-
-	public List<PumaServerTargetEntity> findByHost(String host);
-
-	public int createOrUpdate(PumaServerTargetEntity entity);
-
-	public int create(PumaServerTargetEntity entity);
-
-	public int update(PumaServerTargetEntity entity);
-
-	public int remove(int id);
+    int remove(int id);
 }

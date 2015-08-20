@@ -94,7 +94,6 @@ public class DefaultTaskBuilder implements TaskBuilder {
 
 		PumaTaskStateEntity taskState = new PumaTaskStateEntity();
 		taskState.setTaskName(pumaTask.getName());
-		taskState.setServerName("self");
 		taskState.setStatus(Status.PREPARING);
 
 		taskExecutor.setTaskState(taskState);

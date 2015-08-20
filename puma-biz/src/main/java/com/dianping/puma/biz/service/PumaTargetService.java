@@ -6,19 +6,13 @@ import java.util.List;
 
 public interface PumaTargetService {
 
-	public PumaTargetEntity findById(int id);
+    List<PumaTargetEntity> findByDatabase(String database);
 
-	public PumaTargetEntity findByDatabase(String database);
+    List<PumaTargetEntity> findByHost(String host);
 
-	public List<PumaTargetEntity> findByHost(String host);
+    List<PumaTargetEntity> findAll();
 
-	public List<PumaTargetEntity> findAll();
+    int create(PumaTargetEntity entity);
 
-	public int createOrUpdate(PumaTargetEntity entity);
-
-	public int create(PumaTargetEntity entity);
-
-	public int update(PumaTargetEntity entity);
-
-	public int remove(int id);
+    int remove(int id);
 }

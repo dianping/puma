@@ -16,25 +16,16 @@
         SELECT * FROM PumaTarget
     </select>
 
-    <update id="update" parameterType="PumaTargetEntity">
-        UPDATE PumaTarget
-        SET
-        `database` = #{database},
-        `formatTables` = #{formatTables}
-        WHERE
-        id = #{id}
-    </update>
-
     <insert id="insert" parameterType="PumaTargetEntity" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO PumaTarget
+        INSERT IGNORE INTO PumaTarget
         (
         `database`,
-        `formatTables`
+        `table`
         )
         VALUES
         (
         #{database},
-        #{formatTables}
+        #{table}
         )
     </insert>
 

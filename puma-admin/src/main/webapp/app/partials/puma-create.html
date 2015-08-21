@@ -31,82 +31,94 @@
 
     <div class="page-content">
 
-        <div class="row">
+        <div class="page-content-area">
 
-            <div class="space-4"></div>
+            <div class="row">
 
-            <div class="col-sm-12">
-                <div class="well">
-                    <h4 class="green smaller lighter">Create Puma Database</h4>
-                    Choose the database and tables first, then pick servers for the database to run on and set the begin time finally.
-                </div>
-            </div>
+                <div class="col-sm-12">
 
-        </div>
+                    <div class="row">
 
-        <div class="row">
+                        <div class="space-4"></div>
 
-            <div class="col-sm-12">
-                <div class="widget-box">
-                    <div class="widget-header widget-header-large">
-                        <h5 class="widget-title lighter">Puma Database Configurations</h5>
+                        <div class="col-sm-12">
+                            <div class="well">
+                                <h4 class="green smaller lighter">Create Puma Database</h4>
+                                Choose the database and tables first, then pick servers for the database to run on and set the begin time finally.
+                            </div>
+                        </div>
+
                     </div>
 
-                    <div class="widget-body">
-                        <div class="widget-main">
+                    <div class="row">
 
-                            <form class="form-horizontal" role="form">
-
-                                <div class="space-4"></div>
-
-                                <!-- #section:elements.form -->
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label no-padding-right" for="form-database"> Database </label>
-
-                                    <div class="col-sm-9">
-                                        <input type="text" id="form-database" class="col-sm-5" placeholder="database" ng-model="database"/>
-                                    </div>
+                        <div class="col-sm-12">
+                            <div class="widget-box">
+                                <div class="widget-header widget-header-large">
+                                    <h5 class="widget-title lighter">Puma Database Configurations</h5>
                                 </div>
 
-                                <!-- /section:elements.form -->
-                                <div class="space-4"></div>
+                                <div class="widget-body">
+                                    <div class="widget-main">
 
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label no-padding-right" for="form-tables"> Tables </label>
+                                        <form class="form-horizontal" role="form">
 
-                                    <div class="col-sm-9">
-                                        <input type="text" id="form-tables" class="col-sm-9" placeholder="table0, table1, table2, ..." ng-model="tables"/>
+                                            <div class="space-4"></div>
+
+                                            <!-- #section:elements.form -->
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label no-padding-right" for="form-database"> Database </label>
+
+                                                <div class="col-sm-9">
+                                                    <input type="text" id="form-database" class="col-sm-5" placeholder="database" ng-model="database"/>
+                                                </div>
+                                            </div>
+
+                                            <!-- /section:elements.form -->
+                                            <div class="space-4"></div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label no-padding-right" for="form-tables"> Tables </label>
+
+                                                <div class="col-sm-9">
+                                                    <input type="text" id="form-tables" class="col-sm-9" placeholder="table0, table1, table2, ..." ng-model="tables"/>
+                                                </div>
+                                            </div>
+
+                                            <div class="space-4"></div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label no-padding-right" for="form-servers"> Servers </label>
+
+                                                <div class="col-sm-9">
+                                                    <input type="text" id="form-servers" class="col-sm-9" placeholder="server0, server1, server2, ..." ng-model="servers"/>
+                                                </div>
+                                            </div>
+
+                                            <div class="space-4"></div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label no-padding-right" for="form-begin-time"> Begin Time </label>
+
+                                                <div class="col-sm-9">
+                                                    <input class="col-sm-5" type="datetime" id="form-begin-time" placeholder="yyyy-MM-dd hh:mm:ss" ng-model="beginTime"/>
+                                                </div>
+                                            </div>
+
+                                        </form>
+
+                                        <hr />
+
+                                        <p align="right">
+                                            <span class="btn btn-info btn-sm" ng-click="reset()">Reset</span>
+                                            <span class="btn btn-success btn-sm" ng-click="submit()">Submit</span>
+                                        </p>
+
                                     </div>
+
                                 </div>
 
-                                <div class="space-4"></div>
-
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label no-padding-right" for="form-servers"> Servers </label>
-
-                                    <div class="col-sm-9">
-                                        <input type="text" id="form-servers" class="col-sm-9" placeholder="server0, server1, server2, ..." ng-model="servers"/>
-                                    </div>
-                                </div>
-
-                                <div class="space-4"></div>
-
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label no-padding-right" for="form-begin-time"> Begin Time </label>
-
-                                    <div class="col-sm-9">
-                                        <input class="col-sm-5" type="datetime" id="form-begin-time" placeholder="yyyy-MM-dd hh:mm:ss" ng-model="beginTime"/>
-                                    </div>
-                                </div>
-
-                            </form>
-
-                            <hr />
-
-                            <p align="right">
-                                <span class="btn btn-info btn-sm" ng-click="reset()">Reset</span>
-                                <span class="btn btn-success btn-sm" ng-click="submit()">Submit</span>
-                            </p>
+                            </div>
 
                         </div>
 

@@ -31,95 +31,101 @@
 
     <div class="page-content">
 
-        <div class="row">
+        <div class="page-content-area">
 
-            <div class="space-4"></div>
+            <div class="row">
 
-            <div class="col-sm-12">
-                <div class="well">
-                    <h4 class="green smaller lighter">Find Puma Database</h4>
-                    Find puma database and corresponding details here. If the database is not setup yet, <a
-                        href="#/puma-create">CLICK HERE</a> to create a new puma database.
-                </div>
-            </div>
+                <div class="col-sm-12">
 
-        </div>
+                    <div class="row">
 
-        <div class="row">
+                        <div class="space-4"></div>
 
-            <div class="col-sm-4">
-                <div class="widget-box">
-                    <div class="widget-header widget-header-small">
-                        <h5 class="widget-title lighter">Database</h5>
+                        <div class="col-sm-12">
+                            <div class="well">
+                                <h4 class="green smaller lighter">Find Puma Database</h4>
+                                Find puma database and corresponding details here. If the database is not setup yet, <a
+                                    href="#/puma-create">CLICK HERE</a> to create a new puma database.
+                            </div>
+                        </div>
+
                     </div>
 
-                    <div class="widget-body">
-                        <div class="widget-main">
-                            <form class="form-search">
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <div class="input-group">
-                                            <input type="text" class="form-control search-query"
-                                                   ng-model="pumaDto.database"/>
+                    <div class="row">
+
+                        <div class="col-sm-4">
+                            <div class="widget-box">
+                                <div class="widget-header widget-header-small">
+                                    <h5 class="widget-title lighter">Database</h5>
+                                </div>
+
+                                <div class="widget-body">
+                                    <div class="widget-main">
+                                        <form class="form-search">
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control search-query"
+                                                               ng-model="pumaDto.database"/>
                                         <span class="input-group-btn">
                                             <button type="button" class="btn btn-purple btn-sm" ng-click="search()">
                                                 Search
                                                 <i class="ace-icon fa fa-search icon-on-right bigger-110"></i>
                                             </button>
                                         </span>
-                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
-                            </form>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </div>
 
-            <div class="col-sm-8">
-                <div class="widget-box">
-                    <div class="widget-header widget-header-small">
-                        <h5 class="widget-title lighter">Target Tables</h5>
-                    </div>
+                        <div class="col-sm-8">
+                            <div class="widget-box">
+                                <div class="widget-header widget-header-small">
+                                    <h5 class="widget-title lighter">Target Tables</h5>
+                                </div>
 
-                    <div class="widget-body">
-                        <div class="widget-main">
-                            <form class="form-search">
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <div class="input-group">
-                                            <input type="text" class="form-control search-query"
-                                                   ng-model="pumaDto.tables"/>
+                                <div class="widget-body">
+                                    <div class="widget-main">
+                                        <form class="form-search">
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control search-query"
+                                                               ng-model="pumaDto.tables"/>
                                         <span class="input-group-btn">
                                             <button type="button" class="btn btn-purple btn-sm">
                                                 Submit
                                                 <i class="ace-icon fa fa-search icon-on-right bigger-110"></i>
                                             </button>
                                         </span>
-                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+
                                     </div>
                                 </div>
-                            </form>
 
+                            </div>
                         </div>
+
                     </div>
 
-                </div>
-            </div>
+                    <div class="space-4"></div>
 
-        </div>
+                    <div class="row">
 
-        <div class="space-4"></div>
+                        <div ng-repeat="serverName in pumaDto.serverNames">
 
-        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="widget-box">
+                                    <div class="widget-header">
 
-            <div ng-repeat="serverName in pumaDto.serverNames">
-
-                <div class="col-sm-4">
-                    <div class="widget-box">
-                        <div class="widget-header">
-
-                            <h4 class="widget-title">{{serverName}}</h4>
+                                        <h4 class="widget-title">{{serverName}}</h4>
 
                         <span class="widget-toolbar">
 
@@ -135,38 +141,44 @@
                                 <i class="ace-icon fa fa-times"></i>
                             </a>
                         </span>
-                        </div>
+                                    </div>
 
-                        <div class="widget-body">
-                            <div class="widget-main">
+                                    <div class="widget-body">
+                                        <div class="widget-main">
 
-                                <table class="table table-bordered">
+                                            <table class="table table-bordered">
 
-                                    <tr>
-                                        <td class="col-sm-3">Weight</td>
-                                        <td class="col-sm-9">
-                                            <input class="form-control" type="text" ng-model="pumaDto.hosts[serverName]"/>
-                                        </td>
-                                    </tr>
+                                                <tr>
+                                                    <td class="col-sm-3">Weight</td>
+                                                    <td class="col-sm-9">
+                                                        <input class="form-control" type="text" ng-model="pumaDto.hosts[serverName]"/>
+                                                    </td>
+                                                </tr>
 
-                                    <tr>
-                                        <td class="col-sm-3">Begin</td>
-                                        <td class="col-sm-9">
-                                            <input class="form-control" type="text"
-                                                   ng-model="pumaDto.beginTimes[serverName]"/>
-                                        </td>
-                                    </tr>
+                                                <tr>
+                                                    <td class="col-sm-3">Begin</td>
+                                                    <td class="col-sm-9">
+                                                        <input class="form-control" type="text"
+                                                               ng-model="pumaDto.beginTimes[serverName]"/>
+                                                    </td>
+                                                </tr>
 
-                                    <tr>
-                                        <td class="col-sm-3">Current</td>
-                                        <td class="col-sm-9">
-                                            <input class="form-control" type="text" ng-model="pumaDto.weights[serverName]"/>
-                                        </td>
-                                    </tr>
+                                                <tr>
+                                                    <td class="col-sm-3">Current</td>
+                                                    <td class="col-sm-9">
+                                                        <input class="form-control" type="text" ng-model="pumaDto.weights[serverName]"/>
+                                                    </td>
+                                                </tr>
 
-                                </table>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
+
                         </div>
+
                     </div>
 
                 </div>

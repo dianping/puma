@@ -22,7 +22,8 @@ public class ClusterPumaClientMainTest {
                 .setClientName("dozer-debug")
                 .setDatabase("UnifiedOrder0")
                 .setTables(tables)
-                .buildClusterPumaClient();
+                .setServerHost("127.0.0.1:4040")
+                .buildSimplePumaClient();
 
         final int size = 100;
 

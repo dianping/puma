@@ -12,6 +12,8 @@ public class BinlogSubscriptionRequest extends BinlogRequest {
 
 	private String database;
 
+	private String codec;
+
 	private List<String> tables;
 
 	public boolean isDdl() {
@@ -52,5 +54,13 @@ public class BinlogSubscriptionRequest extends BinlogRequest {
 
 	public void setTables(List<String> tables) {
 		this.tables = tables;
+	}
+
+	public String getCodec() {
+		return codec;
+	}
+
+	public void setCodec(String codec) {
+		this.codec = codec;
 	}
 }

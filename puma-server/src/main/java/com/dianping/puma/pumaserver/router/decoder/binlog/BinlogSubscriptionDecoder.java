@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 public class BinlogSubscriptionDecoder implements RequestDecoder {
 
+    private static final String DEFAULT_CODEC = "json";
     private static final boolean DEFAULT_DDL = false;
     private static final boolean DEFAULT_DML = true;
     private static final boolean DEFAULT_TRANSACTION = false;
@@ -36,6 +37,12 @@ public class BinlogSubscriptionDecoder implements RequestDecoder {
             throw new DecoderException("must contain `table` in `BinlogSubscriptionRequest`");
         } else {
             binlogSubscriptionRequest.setTables(params.get("table"));
+        }
+
+        if (!params.containsKey("codec")) {
+            binlogSubscriptionRequest.setCodec(DEFAULT_CODEC);
+        } else {
+            binlogSubscriptionRequest.setCodec(params.get("codec").get(0));
         }
 
         if (!params.containsKey("ddl")) {

@@ -45,7 +45,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
                 binlogSubscriptionRequest.isTransaction()
         );
 
-        ClientSession session = new ClientSession(clientName, asyncBinlogChannel, ClientType.UNKNOW);
+        ClientSession session = new ClientSession(clientName, asyncBinlogChannel, binlogSubscriptionRequest.getCodec().equals("json") ? ClientType.BROSWER : ClientType.PUMACLIENT);
         clientSessionService.subscribe(session);
 
         BinlogSubscriptionResponse binlogSubscriptionResponse = new BinlogSubscriptionResponse();
@@ -61,7 +61,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
                 binlogSubscriptionRequest.isDml(),
                 binlogSubscriptionRequest.isDdl(),
                 binlogSubscriptionRequest.isTransaction(),
-                "json"
+                binlogSubscriptionRequest.getCodec()
         );
     }
 

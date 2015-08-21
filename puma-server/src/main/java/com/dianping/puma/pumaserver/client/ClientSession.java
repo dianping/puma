@@ -9,6 +9,7 @@ import io.netty.channel.Channel;
  * http://www.dozer.cc
  */
 public class ClientSession {
+
     private final ClientType clientType;
 
     private volatile String token;

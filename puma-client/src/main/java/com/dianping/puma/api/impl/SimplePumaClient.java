@@ -4,15 +4,18 @@ import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.PumaClientConfig;
 import com.dianping.puma.api.PumaClientException;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
+import com.dianping.puma.core.codec.EventCodec;
+import com.dianping.puma.core.codec.EventCodecFactory;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.dto.BinlogRollback;
 import com.dianping.puma.core.dto.binlog.response.BinlogAckResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
-import com.dianping.puma.core.event.*;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.google.common.base.Strings;
-import com.google.gson.*;
+import com.google.common.net.MediaType;
+import com.google.gson.Gson;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -26,7 +29,6 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -40,7 +42,9 @@ public class SimplePumaClient implements PumaClient {
 
     private static final Charset DEFAULT_CHARSET = Charset.forName("utf-8");
 
-    private final Gson gson;
+    private static final EventCodec codec = EventCodecFactory.createCodec("raw");
+
+    private static final Gson gson = new Gson();
 
     private volatile List<NameValuePair> subscribeRequest;
 
@@ -66,11 +70,11 @@ public class SimplePumaClient implements PumaClient {
         this.tables = config.getTables();
         this.pumaServerHost = config.getServerHost();
         this.clientName = config.getClientName();
-        this.gson = new GsonBuilder().registerTypeAdapter(Event.class, new EventJsonDeserializer()).create();
         this.baseUrl = String.format("http://%s", config.getServerHost());
         logger.info("Current puma client base url is: {}", baseUrl);
 
         List<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("codec", "raw"));
         params.add(new BasicNameValuePair("clientName", clientName));
         params.add(new BasicNameValuePair("database", database));
         params.add(new BasicNameValuePair("dml", String.valueOf(config.isDml())));
@@ -191,42 +195,31 @@ public class SimplePumaClient implements PumaClient {
             throw new PumaClientException(e.getMessage(), e);
         }
 
-        String json;
-        try {
-            json = EntityUtils.toString(result.getEntity());
-        } catch (Exception e) {
-            this.token = null;
-            throw new PumaClientException(e.getMessage(), e);
-        }
-        if (result.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-            return gson.fromJson(json, clazz);
-        } else if (result.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
+        if (result.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
             doSubscribe();
             addToken(params);
             return execute(path, params, clazz);
+        }
+
+        if (result.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            try {
+                if (clazz.equals(BinlogGetResponse.class) &&
+                        result.getHeaders(HttpHeaders.CONTENT_TYPE)[0].getValue().equals(MediaType.OCTET_STREAM.toString())) {
+                    BinlogGetResponse response = new BinlogGetResponse();
+                    BinlogMessage message = new BinlogMessage();
+                    message.setBinlogEvents(codec.decodeList(EntityUtils.toByteArray(result.getEntity())));
+                    response.setBinlogMessage(message);
+                    return (T) response;
+                } else {
+                    return gson.fromJson(EntityUtils.toString(result.getEntity()), clazz);
+                }
+            } catch (Exception e) {
+                this.token = null;
+                throw new PumaClientException(e.getMessage(), e);
+            }
         } else {
             this.token = null;
-            throw new PumaClientException(json);
-        }
-    }
-
-
-    public class EventJsonDeserializer implements JsonDeserializer<Event> {
-        @Override
-        public Event deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            JsonObject jsonObject = json.getAsJsonObject();
-
-            String eventType = jsonObject.get("eventType").getAsString();
-
-            if (EventType.DDL.toString().equals(eventType)) {
-                return context.deserialize(json, DdlEvent.class);
-            } else if (EventType.DML.toString().equals(eventType)) {
-                return context.deserialize(json, RowChangedEvent.class);
-            } else if (EventType.ERROR.toString().equals(eventType)) {
-                return context.deserialize(json, ServerErrorEvent.class);
-            } else {
-                throw new JsonParseException("Unknown EventType :" + eventType);
-            }
+            throw new PumaClientException("decode error!");
         }
     }
 

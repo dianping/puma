@@ -19,6 +19,8 @@ import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -118,6 +120,34 @@ public class RawEventCodec implements EventCodec {
         buf.readBytes(data);
 
         return data;
+    }
+
+    @Override
+    public byte[] encodeList(List<Event> events) throws IOException {
+        byte[][] byteArray = new byte[events.size()][];
+        int length = 0;
+
+        int index = 0;
+        for (Event event : events) {
+            byte[] data = encode(event);
+            byteArray[index++] = data;
+
+            length += data.length;
+            length += 4;
+        }
+
+        byte[] result = new byte[length];
+        int offset = 0;
+        for (byte[] data : byteArray) {
+            result[offset++] = (byte) (data.length >> 24);
+            result[offset++] = (byte) (data.length >> 16);
+            result[offset++] = (byte) (data.length >> 8);
+            result[offset++] = (byte) (data.length);
+            System.arraycopy(data, 0, result, offset, data.length);
+            offset += data.length;
+        }
+
+        return result;
     }
 
     private ByteBuf encodeColumnValues(Map<String, ColumnInfo> columns, byte[] bitSetForType, boolean useNew) {
@@ -273,6 +303,23 @@ public class RawEventCodec implements EventCodec {
         }
 
         return event;
+    }
+
+    @Override
+    public List<Event> decodeList(byte[] data) throws IOException {
+        List<Event> result = new ArrayList<Event>();
+        int offset = 0;
+
+        while (offset < data.length) {
+            int length = data[offset] << 24 | (data[offset + 1] & 0xFF) << 16 | (data[offset + 2] & 0xFF) << 8 | (data[offset + 3] & 0xFF);
+            offset += 4;
+            byte[] eventData = new byte[length];
+            System.arraycopy(data, offset, eventData, 0, length);
+            offset += length;
+            result.add(decode(eventData));
+        }
+
+        return result;
     }
 
     private void decodeColumnValues(ByteBuf buf, Map<String, ColumnInfo> columns, boolean useNew) {

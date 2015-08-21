@@ -137,6 +137,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
         protected BinlogGetResponse buildBinlogGetResponse(List<Event> results, BinlogGetRequest req) {
             BinlogGetResponse response = new BinlogGetResponse();
+            response.setBinlogGetRequest(req);
             BinlogMessage message = new BinlogMessage();
             BinlogInfo lastBinlogInfo = null;
 

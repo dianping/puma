@@ -72,6 +72,8 @@ public class PumaServerManager {
         final BinlogUnsubscriptionHandler binlogUnsubscriptionHandler = new BinlogUnsubscriptionHandler();
         binlogUnsubscriptionHandler.setClientSessionService(clientSessionService);
 
+        HttpResponseEncoder.INSTANCE.setClientSessionService(clientSessionService);
+
         consoleConfig.setHandlerFactory(new HandlerFactory() {
             @Override
             public Map<String, ChannelHandler> getHandlers() {

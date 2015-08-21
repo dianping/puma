@@ -2,6 +2,7 @@ package com.dianping.puma.core.codec;
 
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
+import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
 import com.dianping.puma.core.model.BinlogInfo;
@@ -17,7 +18,9 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class RawEventCodecTest {
@@ -29,6 +32,31 @@ public class RawEventCodecTest {
     private long now = System.currentTimeMillis();
 
     private byte[] values = new byte[]{0, 1, 2, 3, 4};
+
+    @Test
+    public void testEncodeDecodeList() throws IOException {
+        List<Event> eventList = new ArrayList<Event>();
+
+        for (int k = 0; k < 3; k++) {
+            DdlEvent event = new DdlEvent();
+            // base info
+            setChangedEventProperty(event);
+
+            // ddl event info
+            event.setSql("SELECT * FROM testtb");
+            event.setDDLType(DDLType.ALTER_DATABASE);
+            event.setDdlEventSubType(DdlEventSubType.DDL_ALTER_DATABASE);
+            event.setDdlEventType(DdlEventType.DDL_ALTER);
+
+            eventList.add(event);
+        }
+
+        byte[] data = codec.encodeList(eventList);
+
+        List<Event> result = codec.decodeList(data);
+
+        Assert.assertEquals(result.size(),eventList.size());
+    }
 
     @Test
     public void testEncodeDdlEvent() throws IOException {

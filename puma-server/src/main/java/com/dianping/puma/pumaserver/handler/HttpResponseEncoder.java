@@ -1,6 +1,14 @@
 package com.dianping.puma.pumaserver.handler;
 
+import com.dianping.puma.core.codec.EventCodec;
+import com.dianping.puma.core.codec.EventCodecFactory;
+import com.dianping.puma.core.dto.binlog.request.BinlogGetRequest;
+import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.util.ConvertHelper;
+import com.dianping.puma.pumaserver.client.ClientSession;
+import com.dianping.puma.pumaserver.client.ClientType;
+import com.dianping.puma.pumaserver.service.ClientSessionService;
+import com.google.common.net.MediaType;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
@@ -19,6 +27,10 @@ import java.util.List;
 public class HttpResponseEncoder extends MessageToMessageEncoder<Object> {
     public static final HttpResponseEncoder INSTANCE = new HttpResponseEncoder();
 
+    private ClientSessionService clientSessionService;
+
+    private EventCodec codec = EventCodecFactory.createCodec("raw");
+
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception {
         if (msg instanceof HttpResponse) {
@@ -29,11 +41,31 @@ public class HttpResponseEncoder extends MessageToMessageEncoder<Object> {
             }
         } else {
             DefaultFullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-            response.headers().add(HttpHeaders.Names.CONTENT_TYPE, "application/json");
+
+            if (msg instanceof BinlogGetResponse) {
+                BinlogGetResponse resp = (BinlogGetResponse) msg;
+                BinlogGetRequest req = resp.getBinlogGetRequest();
+                ClientSession session = clientSessionService.get(req.getClientName(), req.getToken());
+
+                if (session != null && session.getClientType().equals(ClientType.PUMACLIENT)) {
+                    response.headers().add(HttpHeaders.Names.CONTENT_TYPE, MediaType.OCTET_STREAM);
+                    byte[] data = codec.encodeList(resp.getBinlogMessage().getBinlogEvents());
+                    response.content().writeBytes(data);
+                    response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, data.length);
+                    out.add(response);
+                    return;
+                }
+            }
+
+            response.headers().add(HttpHeaders.Names.CONTENT_TYPE, MediaType.JSON_UTF_8);
             byte[] data = ConvertHelper.toBytes(msg);
             response.content().writeBytes(data);
             response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, data.length);
             out.add(response);
         }
+    }
+
+    public void setClientSessionService(ClientSessionService clientSessionService) {
+        this.clientSessionService = clientSessionService;
     }
 }

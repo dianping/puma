@@ -1,15 +1,11 @@
 package com.dianping.puma.instance;
 
 import com.dianping.puma.core.config.ConfigManager;
-import com.google.common.collect.Sets;
-import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;

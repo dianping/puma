@@ -4,7 +4,6 @@ import com.dianping.puma.api.PumaServerMonitor;
 import com.dianping.puma.core.config.ConfigChangeListener;
 import com.dianping.puma.core.config.ConfigManager;
 import com.dianping.puma.core.config.ConfigManagerLoader;
-import com.dianping.puma.core.config.LionConfigManager;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;

@@ -1,21 +1,17 @@
 package com.dianping.puma.filter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.core.util.sql.DDLType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class DDLEventFilter extends AbstractEventFilter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DDLEventFilter.class);
-
-    private String name;
+    protected String name;
 
     private boolean ddl = true;
 

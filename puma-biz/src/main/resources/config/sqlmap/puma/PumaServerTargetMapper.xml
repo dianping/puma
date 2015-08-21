@@ -14,19 +14,11 @@
 
     <select id="findByDatabase" resultType="PumaServerTargetEntity">
         SELECT
-        P.id,
-        P.serverName,
-        P.targetDb,
-        P.beginTime,
-        PS.host,
-        PT.database,
-        PT.table
+        *
         FROM
-        PumaServerTarget P
-        RIGHT JOIN PumaTarget PT ON P.targetDb = PT.database
-        RIGHT JOIN PumaServer PS ON P.serverName = PS.name
+        PumaServerTarget
         WHERE
-        PT.database = #{database}
+        `targetDb` = #{targetDb}
     </select>
 
     <insert id="insert" parameterType="PumaServerTargetEntity" useGeneratedKeys="true" keyProperty="id">

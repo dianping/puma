@@ -35,14 +35,13 @@ public class PumaController {
 		Map<String, Object> result = new HashMap<String, Object>();
 
 		try {
-			/*
 			String database = pumaDto.getDatabase();
 			List<PumaServerTargetEntity> pumaServerTargets = pumaServerTargetService.findByDatabase(database);
 			for (PumaServerTargetEntity pumaServerTarget: pumaServerTargets) {
 				pumaDto.setTables(pumaServerTarget.getTables());
 				pumaDto.addServerName(pumaServerTarget.getServerName());
 				pumaDto.addBeginTime(pumaServerTarget.getServerName(), pumaServerTarget.getBeginTime());
-			}*/
+			}
 
 			result.put("status", "success");
 			result.put("result", pumaDto);

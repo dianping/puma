@@ -37,18 +37,6 @@
         <property name="basename" value="/WEB-INF/messages/messages" /> <property 
         name="cacheSeconds" value="-1" /> </bean> -->
 
-    <!-- This bean sets up the Velocity environment for us based on a root 
-        path for templates. Optionally, a properties file can be specified for more 
-        control over the Velocity environment, but the defaults are pretty sane for 
-        file based template loading. -->
-    <bean id="velocityConfig"
-        class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
-        <!-- (1)resourceLoaderPath可以以classpath:或file:开头，velocity会自动知道ClassReourceLoader或FileReourceLoader去加载资源的。 
-            (2)这里指定了模板完整路径，viewResolver的prefix就不要设置了，让它为默认的空字符串即可,因为完整filename是path+prefix+name+suffix。 -->
-        <property name="resourceLoaderPath" value="/app/deprecated/page/" />
-        <property name="configLocation" value="classpath:velocity.properties" />
-    </bean>
-
     <!-- View resolvers can also be configured with ResourceBundles or XML 
         files. If you need different view resolving based on Locale, you have to 
         use the resource bundle resolver. -->

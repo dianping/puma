@@ -91,13 +91,8 @@ public class DefaultTaskBuilder implements TaskBuilder {
         // Handler.
         DefaultDataHandler dataHandler = new DefaultDataHandler();
         DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
+        tableMetaInfo.setAcceptedTables(pumaTask.getTableSet());
         taskExecutor.setTableMetaInfoFetcher(tableMetaInfo);
-
-        // tableMeta refresh filter
-        TableMetaRefreshFilter tableMetaRefreshFilter = new TableMetaRefreshFilter();
-        tableMetaRefreshFilter.setName(taskName);
-        tableMetaRefreshFilter.setAcceptedTables(pumaTask.getTableSet());
-        tableMetaInfo.setTableMetaRefreshFilter(tableMetaRefreshFilter);
 
         dataHandler.setTableMetasInfoFetcher(tableMetaInfo);
 

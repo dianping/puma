@@ -294,13 +294,8 @@ public abstract class AbstractBaseTest {
         // Handler.
         DefaultDataHandler dataHandler = new DefaultDataHandler();
         DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
-        // tableMetaInfo.setAcceptedDataTables(pumaTask.getAcceptedDataInfos());
         tableMetaInfo.setSrcDbEntity(srcdb);
-
-        // tableMeta refresh filter
-        TableMetaRefreshFilter tableMetaRefreshFilter = new TableMetaRefreshFilter();
-        tableMetaRefreshFilter.setName(taskName);
-        tableMetaInfo.setTableMetaRefreshFilter(tableMetaRefreshFilter);
+        tableMetaInfo.setAcceptedTables(task.getTableSet());
 
         dataHandler.setTableMetasInfoFetcher(tableMetaInfo);
         taskExecutor.setDataHandler(dataHandler);

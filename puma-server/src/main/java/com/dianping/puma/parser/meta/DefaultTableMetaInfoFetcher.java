@@ -21,7 +21,6 @@ import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.core.meta.TableMetaInfo;
 import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
-import com.dianping.puma.filter.TableMetaRefreshFilter;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -44,7 +43,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 
     private MysqlDataSource metaDs;
 
-    private TableMetaRefreshFilter tableMetaRefreshFilter;
+    private TableSet acceptedTables;
 
     @Override
     public TableMetaInfo getTableMetaInfo(String database, String table) {
@@ -54,7 +53,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
     @Override
     public void refreshTableMeta(final String databaseName, final String tableName) throws SQLException {
         Table table = new Table(databaseName, tableName);
-        if (tableMetaRefreshFilter.getAcceptedTables().contains(table)) {
+        if (acceptedTables.contains(table)) {
             TableMetaInfo tableMetaInfo = _refreshTableMeta(databaseName, tableName);
             tableMetaInfoCache.get().put(databaseName + "." + tableName, tableMetaInfo);
         }
@@ -64,8 +63,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
     public void refreshTableMetas() throws SQLException {
         Map<String, TableMetaInfo> tableMetaInfoMap = new HashMap<String, TableMetaInfo>();
 
-        TableSet tableSet = tableMetaRefreshFilter.getAcceptedTables();
-        for (Table table : tableSet.listSchemaTables()) {
+        for (Table table : acceptedTables.listSchemaTables()) {
             String databaseName = table.getSchemaName();
             String tableName = table.getTableName();
 
@@ -140,13 +138,12 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
         }
     }
 
-    public void setTableMetaRefreshFilter(TableMetaRefreshFilter tableMetaRefreshFilter) {
-        this.tableMetaRefreshFilter = tableMetaRefreshFilter;
-    }
-
     public void setSrcDbEntity(SrcDbEntity srcDbEntity) {
         this.srcDbEntity = srcDbEntity;
         this.metaDs = null;
     }
 
+    public void setAcceptedTables(TableSet acceptedTables) {
+        this.acceptedTables = acceptedTables;
+    }
 }

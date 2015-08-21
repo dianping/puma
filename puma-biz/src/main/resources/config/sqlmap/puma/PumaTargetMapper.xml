@@ -29,6 +29,22 @@
         )
     </insert>
 
+    <insert id="replace" parameterType="PumaTargetEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT IGNORE INTO PumaTarget
+        (
+        `database`,
+        `table`
+        )
+        VALUES
+        (
+        #{database},
+        #{table}
+        )
+        ON DUPLICATE KEY UPDATE
+        `database` = VALUES(`database`),
+        `table` = VALUES(`table`)
+    </insert>
+
     <delete id="delete">
         DELETE FROM PumaTarget WHERE `id` = #{id}
     </delete>

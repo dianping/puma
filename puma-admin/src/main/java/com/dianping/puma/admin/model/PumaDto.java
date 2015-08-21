@@ -1,8 +1,6 @@
 package com.dianping.puma.admin.model;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class PumaDto {
 
@@ -10,11 +8,15 @@ public class PumaDto {
 
 	private List<String> tables;
 
-	private List<Integer> serverIds;
+	private List<String> serverNames;
 
-	private List<String> servers;
+	private Map<String, String> hosts;
 
-	private Date beginTime;
+	private Map<String, Date> beginTimes;
+
+	private Map<String, Boolean> actives;
+
+	private Map<String, Double> weights;
 
 	public String getDatabase() {
 		return database;
@@ -32,35 +34,83 @@ public class PumaDto {
 		this.tables = tables;
 	}
 
-	public List<Integer> getServerIds() {
-		return serverIds;
+	public List<String> getServerNames() {
+		return serverNames;
 	}
 
-	public void setServerIds(List<Integer> serverIds) {
-		this.serverIds = serverIds;
+	public void setServerNames(List<String> serverNames) {
+		this.serverNames = serverNames;
 	}
 
-	public List<String> getServers() {
-		return servers;
-	}
-
-	public void setServers(List<String> servers) {
-		this.servers = servers;
-	}
-
-	public void addServer(String server) {
-		if (servers == null) {
-			servers = new ArrayList<String>();
+	public void addServerName(String server) {
+		if (serverNames == null) {
+			serverNames = new ArrayList<String>();
 		}
 
-		servers.add(server);
+		serverNames.add(server);
 	}
 
-	public Date getBeginTime() {
-		return beginTime;
+	public Map<String, String> getHosts() {
+		return hosts;
 	}
 
-	public void setBeginTime(Date beginTime) {
-		this.beginTime = beginTime;
+	public void setHosts(Map<String, String> hosts) {
+		this.hosts = hosts;
+	}
+
+	public void addHost(String serverName, String host) {
+		if (hosts == null) {
+			hosts = new HashMap<String, String>();
+		}
+
+		hosts.put(serverName, host);
+	}
+
+	public Map<String, Boolean> getActives() {
+		return actives;
+	}
+
+	public void setActives(Map<String, Boolean> actives) {
+		this.actives = actives;
+	}
+
+	public void addActive(String serverName, Boolean active) {
+		if (actives == null) {
+			actives = new HashMap<String, Boolean>();
+		}
+
+		actives.put(serverName, active);
+	}
+
+	public Map<String, Date> getBeginTimes() {
+		return beginTimes;
+	}
+
+	public void setBeginTimes(Map<String, Date> beginTimes) {
+		this.beginTimes = beginTimes;
+	}
+
+	public void addBeginTime(String serverName, Date beginTime) {
+		if (beginTimes == null) {
+			beginTimes = new HashMap<String, Date>();
+		}
+
+		beginTimes.put(serverName, beginTime);
+	}
+
+	public Map<String, Double> getWeights() {
+		return weights;
+	}
+
+	public void setWeights(Map<String, Double> weights) {
+		this.weights = weights;
+	}
+
+	public void addWeight(String serverName, Double weight) {
+		if (weights == null) {
+			weights = new HashMap<String, Double>();
+		}
+
+		weights.put(serverName, weight);
 	}
 }

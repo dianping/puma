@@ -13,6 +13,8 @@ public class PumaServerTargetEntity {
 
 	private String TargetDb;
 
+	private List<String> tables;
+
 	public int getId() {
 		return id;
 	}
@@ -43,5 +45,13 @@ public class PumaServerTargetEntity {
 
 	public void setTargetDb(String targetDb) {
 		TargetDb = targetDb;
+	}
+
+	public List<String> getTables() {
+		return tables;
+	}
+
+	public void setTables(List<String> tables) {
+		this.tables = tables;
 	}
 }

@@ -29,18 +29,20 @@ public class PumaController {
 	@Autowired
 	PumaServerTargetService pumaServerTargetService;
 
-	@RequestMapping(value = { "/puma-task/list" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = { "/puma-target" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String ajaxList(@RequestBody PumaDto pumaDto) {
 		Map<String, Object> result = new HashMap<String, Object>();
 
 		try {
+			/*
 			String database = pumaDto.getDatabase();
 			List<PumaServerTargetEntity> pumaServerTargets = pumaServerTargetService.findByDatabase(database);
-//			for (PumaServerTargetEntity pumaServerTarget: pumaServerTargets) {
-//				pumaDto.setTables(pumaServerTarget.getTables());
-//				pumaDto.addServer(pumaServerTarget.getHost());
-//			}
+			for (PumaServerTargetEntity pumaServerTarget: pumaServerTargets) {
+				pumaDto.setTables(pumaServerTarget.getTables());
+				pumaDto.addServerName(pumaServerTarget.getServerName());
+				pumaDto.addBeginTime(pumaServerTarget.getServerName(), pumaServerTarget.getBeginTime());
+			}*/
 
 			result.put("status", "success");
 			result.put("result", pumaDto);
@@ -54,31 +56,30 @@ public class PumaController {
 		}
 	}
 
-	@RequestMapping(value = { "/puma-task/create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
+	@RequestMapping(value = { "/puma-create" }, method = RequestMethod.POST, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String ajaxCreate(@RequestBody PumaDto pumaDto) {
+		Map<String, Object> result = new HashMap<String, Object>();
+
 		try {
 			String database = pumaDto.getDatabase();
 			List<String> tables = pumaDto.getTables();
-			List<Integer> serverIds = pumaDto.getServerIds();
-			Date beginTime = pumaDto.getBeginTime();
 
-			PumaTargetEntity pumaTarget = new PumaTargetEntity();
-			pumaTarget.setDatabase(database);
-//			pumaTarget.setTables(tables);
-//			pumaTargetService.createOrUpdate(pumaTarget);
-//
-//			for (Integer serverId : serverIds) {
-//				PumaServerTargetEntity pumaServerTarget = new PumaServerTargetEntity();
-//				pumaServerTarget.setServerId(serverId);
-//				pumaServerTarget.setTargetId(pumaTarget.getId());
-//				pumaServerTarget.setBeginTime(beginTime);
-//				pumaServerTargetService.createOrUpdate(pumaServerTarget);
-//			}
+			for (String serverName: pumaDto.getServerNames()) {
+				PumaServerTargetEntity pumaServerTarget = new PumaServerTargetEntity();
+				pumaServerTarget.setServerName(serverName);
+				pumaServerTarget.setTargetDb(database);
+				pumaServerTarget.setTables(tables);
+				pumaServerTarget.setBeginTime(pumaDto.getBeginTimes().get(serverName));
+				pumaServerTargetService.replace(pumaServerTarget);
+			}
 		} catch (Throwable t) {
-			return null;
+			result.put("status", "failure");
+			result.put("msg", t.getMessage());
+			return GsonUtil.toJson(result);
 		}
 
-		return null;
+		result.put("status", "success");
+		return GsonUtil.toJson(result);
 	}
 }

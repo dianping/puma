@@ -5,11 +5,14 @@ import com.dianping.puma.biz.entity.PumaServerTargetEntity;
 import java.util.List;
 
 public interface PumaServerTargetService {
+
     List<PumaServerTargetEntity> findByDatabase(String database);
 
     List<PumaServerTargetEntity> findByServerName(String host);
 
     int create(PumaServerTargetEntity entity);
+
+    int replace(PumaServerTargetEntity entity);
 
     int update(PumaServerTargetEntity entity);
 

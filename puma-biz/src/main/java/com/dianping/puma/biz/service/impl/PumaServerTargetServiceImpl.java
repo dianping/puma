@@ -1,8 +1,13 @@
 package com.dianping.puma.biz.service.impl;
 
 import com.dianping.puma.biz.dao.PumaServerTargetDao;
+import com.dianping.puma.biz.dao.PumaTargetDao;
 import com.dianping.puma.biz.entity.PumaServerTargetEntity;
+import com.dianping.puma.biz.entity.PumaTargetEntity;
+import com.dianping.puma.biz.entity.old.PumaServer;
 import com.dianping.puma.biz.service.PumaServerTargetService;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +18,9 @@ public class PumaServerTargetServiceImpl implements PumaServerTargetService {
 
     @Autowired
     PumaServerTargetDao pumaServerTargetDao;
+
+    @Autowired
+    PumaTargetDao pumaTargetDao;
 
     @Override
     public List<PumaServerTargetEntity> findByDatabase(String database) {
@@ -26,7 +34,30 @@ public class PumaServerTargetServiceImpl implements PumaServerTargetService {
 
     @Override
     public int create(PumaServerTargetEntity entity) {
+        String database = entity.getTargetDb();
+        List<String> tables = entity.getTables();
+        for (String table: tables) {
+            PumaTargetEntity pumaTarget = new PumaTargetEntity();
+            pumaTarget.setDatabase(database);
+            pumaTarget.setTable(table);
+            pumaTargetDao.insert(pumaTarget);
+        }
+
         return pumaServerTargetDao.insert(entity);
+    }
+
+    @Override
+    public int replace(PumaServerTargetEntity entity) {
+        String database = entity.getTargetDb();
+        List<String> tables = entity.getTables();
+        for (String table: tables) {
+            PumaTargetEntity pumaTarget = new PumaTargetEntity();
+            pumaTarget.setDatabase(database);
+            pumaTarget.setTable(table);
+            pumaTargetDao.replace(pumaTarget);
+        }
+
+        return pumaServerTargetDao.replace(entity);
     }
 
     @Override

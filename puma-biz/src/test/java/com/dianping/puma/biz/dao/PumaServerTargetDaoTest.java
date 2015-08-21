@@ -22,17 +22,13 @@ public class PumaServerTargetDaoTest {
 	PumaServerTargetDao pumaServerTargetDao;
 
 	@Test
-	@Ignore
 	public void test() {
+		List<PumaServerTargetEntity> entities = pumaServerTargetDao.findByDatabase("abb");
+		/*
 		PumaServerTargetEntity entity = new PumaServerTargetEntity();
 		entity.setServerName("123");
 		entity.setTargetDb("123");
 		entity.setBeginTime(new Date());
-		pumaServerTargetDao.insert(entity);
-	}
-
-	@Test
-	public void testFindByDatabase() {
-		List<PumaServerTargetEntity> entities = pumaServerTargetDao.findByDatabase("test");
+		pumaServerTargetDao.insert(entity);*/
 	}
 }

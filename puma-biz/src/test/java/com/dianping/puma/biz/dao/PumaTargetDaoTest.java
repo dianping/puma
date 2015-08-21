@@ -18,11 +18,10 @@ public class PumaTargetDaoTest {
 	PumaTargetDao pumaTargetDao;
 
 	@Test
-	@Ignore
 	public void test() {
 		PumaTargetEntity entity = new PumaTargetEntity();
 		entity.setDatabase("test");
-		entity.setTable("test1+test2+test3");
-		pumaTargetDao.insert(entity);
+		entity.setTable("test1");
+		pumaTargetDao.replace(entity);
 	}
 }

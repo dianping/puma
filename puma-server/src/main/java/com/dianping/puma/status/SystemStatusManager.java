@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SystemStatusManager {
 
-    public static SystemStatus status = new SystemStatus();
+    private static SystemStatus status = new SystemStatus();
 
     private static ConcurrentMap<String, AtomicBoolean> stopTheWorlds = new ConcurrentHashMap<String, AtomicBoolean>();
 
@@ -42,7 +42,7 @@ public class SystemStatusManager {
         Server server = status.getServers().get(name);
 
         if (server != null) {
-            server.getTotalDdlEvent().incrementAndGet();
+            server.increaseTotalDdlEvent();
         }
     }
 
@@ -50,7 +50,7 @@ public class SystemStatusManager {
         Server server = status.getServers().get(name);
 
         if (server != null) {
-            server.getTotalParsedEvent().incrementAndGet();
+            server.increaseTotalParsedEvent();
         }
     }
 
@@ -58,7 +58,7 @@ public class SystemStatusManager {
         Server server = status.getServers().get(name);
 
         if (server != null) {
-            server.getTotalDeleteEvent().incrementAndGet();
+            server.increaseTotalDeleteEvent();
         }
     }
 
@@ -66,7 +66,7 @@ public class SystemStatusManager {
         Server server = status.getServers().get(name);
 
         if (server != null) {
-            server.getTotalInsertEvent().incrementAndGet();
+            server.increaseTotalInsertEvent();
         }
     }
 
@@ -74,7 +74,7 @@ public class SystemStatusManager {
         Server server = status.getServers().get(name);
 
         if (server != null) {
-            server.getTotalUpdateEvent().incrementAndGet();
+            server.increaseTotalUpdateEvent();
         }
     }
 
@@ -109,7 +109,7 @@ public class SystemStatusManager {
         }
         Client client = status.getClients().get(clientName);
         if (client != null) {
-            client.addFetchQps(size);
+            client.increaseFetchQps(size);
         }
     }
 
@@ -148,5 +148,10 @@ public class SystemStatusManager {
         if (server != null) {
             server.updateBucket(bucketDate, bucketNumber);
         }
+    }
+
+    public static SystemStatus getStatus() {
+        status.count();
+        return status;
     }
 }

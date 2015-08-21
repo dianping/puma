@@ -38,84 +38,95 @@ public class SystemStatus {
         return servers;
     }
 
-    public int getStoreQps() {
-        this.storeQps = 0;
-
-        for (Server server : this.servers.values()) {
-            this.storeQps += server.getStoreQps();
-        }
-
-        return storeQps;
+    public void count() {
+        countStoreQps();
+        countTotalDdlEvent();
+        countTotalDeleteEvent();
+        countTotalInsertEvent();
+        countTotalUpdateEvent();
+        countTotalStoreBytes();
+        countTotalParsedEvent();
+        countTotalStoreCount();
     }
 
-    public long getTotalDdlEvent() {
-        this.totalDdlEvent = 0L;
+    private void countStoreQps() {
+        int storeQps = 0;
 
         for (Server server : this.servers.values()) {
-            this.totalDdlEvent += server.getTotalDdlEvent().get();
+            storeQps += server.getStoreQps();
         }
 
-        return totalDdlEvent;
+        this.storeQps = storeQps;
     }
 
-    public long getTotalDeleteEvent() {
-        this.totalDeleteEvent = 0L;
+    private void countTotalDdlEvent() {
+        long totalDdlEvent = 0L;
 
         for (Server server : this.servers.values()) {
-            this.totalDeleteEvent += server.getTotalDeleteEvent().get();
+            totalDdlEvent += server.getTotalDdlEvent();
         }
 
-        return totalDeleteEvent;
+        this.totalDdlEvent = totalDdlEvent;
     }
 
-    public long getTotalInsertEvent() {
-        this.totalInsertEvent = 0L;
+    private void countTotalDeleteEvent() {
+        long totalDeleteEvent = 0L;
 
         for (Server server : this.servers.values()) {
-            this.totalInsertEvent += server.getTotalInsertEvent().get();
+            totalDeleteEvent += server.getTotalDeleteEvent();
         }
 
-        return totalInsertEvent;
+        this.totalDeleteEvent = totalDeleteEvent;
     }
 
-    public long getTotalParsedEvent() {
-        this.totalParsedEvent = 0L;
+    private void countTotalInsertEvent() {
+        long totalInsertEvent = 0L;
 
         for (Server server : this.servers.values()) {
-            this.totalParsedEvent += server.getTotalParsedEvent().get();
+            totalInsertEvent += server.getTotalInsertEvent();
         }
 
-        return totalParsedEvent;
+        this.totalInsertEvent = totalInsertEvent;
     }
 
-    public long getTotalStoreBytes() {
-        this.totalStoreBytes = 0L;
+    private void countTotalParsedEvent() {
+        long totalParsedEvent = 0L;
 
         for (Server server : this.servers.values()) {
-            this.totalStoreBytes += server.getTotalStoreBytes().get();
+            totalParsedEvent += server.getTotalParsedEvent();
         }
 
-        return totalStoreBytes;
+        this.totalParsedEvent = totalParsedEvent;
     }
 
-    public long getTotalStoreCount() {
-        this.totalStoreCount = 0L;
+    private void countTotalStoreBytes() {
+        long totalStoreBytes = 0L;
 
         for (Server server : this.servers.values()) {
-            this.totalStoreCount += server.getTotalStoreCount().get();
+            totalStoreBytes += server.getTotalStoreBytes();
         }
 
-        return totalStoreCount;
+        this.totalStoreBytes = totalStoreBytes;
     }
 
-    public long getTotalUpdateEvent() {
-        this.totalUpdateEvent = 0L;
+    private void countTotalStoreCount() {
+        long totalStoreCount = 0L;
 
         for (Server server : this.servers.values()) {
-            this.totalUpdateEvent += server.getTotalUpdateEvent().get();
+            totalStoreCount += server.getTotalStoreCount();
         }
 
-        return totalUpdateEvent;
+        this.totalStoreCount = totalStoreCount;
+    }
+
+    private void countTotalUpdateEvent() {
+        long totalUpdateEvent = 0L;
+
+        for (Server server : this.servers.values()) {
+            totalUpdateEvent += server.getTotalUpdateEvent();
+        }
+
+        this.totalUpdateEvent = totalUpdateEvent;
     }
 
     public void setClients(Map<String, Client> clients) {
@@ -124,10 +135,6 @@ public class SystemStatus {
 
     public void setServers(Map<String, Server> servers) {
         this.servers = servers;
-    }
-
-    public void setStoreQps(int storeQps) {
-        this.storeQps = storeQps;
     }
 
     public static class Client {
@@ -149,7 +156,9 @@ public class SystemStatus {
 
         private BinlogInfo ackBinlogInfo;
 
-        private QpsCounter fetchQpsCounter;
+        private long fetchQps;
+
+        private transient QpsCounter fetchQpsCounter;
 
         public Client(String ip, String database, List<String> tables, boolean withDml, boolean withDdl,
                       boolean withTransaction, String codec) {
@@ -173,7 +182,7 @@ public class SystemStatus {
         }
 
         public long getFetchQps() {
-            return this.fetchQpsCounter.get(15);
+            return this.fetchQps;
         }
 
         public String getIp() {
@@ -212,16 +221,14 @@ public class SystemStatus {
             this.sendBinlogInfo = sendBinlogInfo;
         }
 
-        public void addFetchQps(long size) {
+        public void increaseFetchQps(long size) {
             fetchQpsCounter.add(size);
-        }
-
-        public void increaseFetQps() {
-            fetchQpsCounter.increase();
+            fetchQps = fetchQpsCounter.get(15);
         }
     }
 
     public static class Server {
+
         private String name;
 
         private String host;
@@ -236,21 +243,37 @@ public class SystemStatus {
 
         private int bucketNumber;
 
-        private AtomicLong totalParsedEvent = new AtomicLong(0);
+        private long storeQps;
 
-        private AtomicLong totalStoreCount = new AtomicLong(0);
+        private long totalParsedEvent;
 
-        private AtomicLong totalStoreBytes = new AtomicLong(0);
+        private long totalStoreCount;
 
-        private AtomicLong totalInsertEvent = new AtomicLong(0);
+        private long totalStoreBytes;
 
-        private AtomicLong totalUpdateEvent = new AtomicLong(0);
+        private long totalInsertEvent;
 
-        private AtomicLong totalDeleteEvent = new AtomicLong(0);
+        private long totalUpdateEvent;
 
-        private AtomicLong totalDdlEvent = new AtomicLong(0);
+        private long totalDeleteEvent;
 
-        private QpsCounter storeQpsCounter;
+        private long totalDdlEvent;
+
+        private transient AtomicLong atomicTotalParsedEvent = new AtomicLong(0);
+
+        private transient AtomicLong atomicTotalStoreCount = new AtomicLong(0);
+
+        private transient AtomicLong atomicTotalStoreBytes = new AtomicLong(0);
+
+        private transient AtomicLong atomicTotalInsertEvent = new AtomicLong(0);
+
+        private transient AtomicLong atomicTotalUpdateEvent = new AtomicLong(0);
+
+        private transient AtomicLong atomicTotalDeleteEvent = new AtomicLong(0);
+
+        private transient AtomicLong atomicTotalDdlEvent = new AtomicLong(0);
+
+        private transient QpsCounter storeQpsCounter;
 
         public Server(String name, String host, int port) {
             this(name, host, port, null);
@@ -294,41 +317,14 @@ public class SystemStatus {
         }
 
         public long getStoreQps() {
-            return this.storeQpsCounter.get(15);
-        }
-
-        public AtomicLong getTotalDdlEvent() {
-            return totalDdlEvent;
-        }
-
-        public AtomicLong getTotalDeleteEvent() {
-            return totalDeleteEvent;
-        }
-
-        public AtomicLong getTotalInsertEvent() {
-            return totalInsertEvent;
-        }
-
-        public AtomicLong getTotalParsedEvent() {
-            return totalParsedEvent;
-        }
-
-        public AtomicLong getTotalStoreBytes() {
-            return totalStoreBytes;
-        }
-
-        public AtomicLong getTotalStoreCount() {
-            return totalStoreCount;
-        }
-
-        public AtomicLong getTotalUpdateEvent() {
-            return totalUpdateEvent;
+            return this.storeQps;
         }
 
         public void incStoreCountAndByte(long size) {
-            this.totalStoreCount.incrementAndGet();
-            this.totalStoreBytes.addAndGet(size);
+            this.totalStoreCount = this.atomicTotalStoreCount.incrementAndGet();
+            this.totalStoreBytes = this.atomicTotalStoreBytes.addAndGet(size);
             this.storeQpsCounter.increase();
+            this.storeQps = this.storeQpsCounter.get(15);
         }
 
         public void setBucketDate(int bucketDate) {
@@ -362,6 +358,56 @@ public class SystemStatus {
         public void updateBucket(int bucketDate, int bucketNumber) {
             this.bucketDate = bucketDate;
             this.bucketNumber = bucketNumber;
+        }
+
+        public long getTotalParsedEvent() {
+            return totalParsedEvent;
+        }
+
+        public long getTotalStoreCount() {
+            return totalStoreCount;
+        }
+
+        public long getTotalStoreBytes() {
+            return totalStoreBytes;
+        }
+
+        public long getTotalInsertEvent() {
+            return totalInsertEvent;
+        }
+
+        public long getTotalUpdateEvent() {
+            return totalUpdateEvent;
+        }
+
+        public long getTotalDeleteEvent() {
+            return totalDeleteEvent;
+        }
+
+        public long getTotalDdlEvent() {
+            return totalDdlEvent;
+        }
+
+        public void increaseTotalDdlEvent() {
+            this.totalDdlEvent = this.atomicTotalDdlEvent.incrementAndGet();
+        }
+
+        public void increaseTotalParsedEvent() {
+            this.totalParsedEvent = this.atomicTotalParsedEvent.incrementAndGet();
+
+        }
+
+        public void increaseTotalDeleteEvent() {
+            this.totalDeleteEvent = this.atomicTotalDeleteEvent.incrementAndGet();
+
+        }
+
+        public void increaseTotalInsertEvent() {
+            this.totalInsertEvent = this.atomicTotalInsertEvent.incrementAndGet();
+        }
+
+        public void increaseTotalUpdateEvent() {
+            this.totalUpdateEvent = this.atomicTotalUpdateEvent.incrementAndGet();
         }
     }
 }

@@ -17,7 +17,7 @@ public class QpsCounter {
 
     private final static int SPLIT = 100;
 
-    private final ConcurrentHashMap<Long, AtomicLong> qps = new ConcurrentHashMap<Long, AtomicLong>();
+    private transient final ConcurrentHashMap<Long, AtomicLong> qps = new ConcurrentHashMap<Long, AtomicLong>();
 
     public QpsCounter() {
         this(1);

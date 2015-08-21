@@ -146,7 +146,8 @@ public abstract class AbstractDataBucket implements DataBucket {
 			int readable = input.read(data);
 
 			if (len != readable) {
-				throw new IOException("found broken data!");
+				throw new IOException("found broken data! Need to read " + len + " bytes but only " + readable
+				      + " bytes available!");
 			}
 
 			return data;

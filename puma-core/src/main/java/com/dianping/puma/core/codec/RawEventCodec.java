@@ -136,7 +136,7 @@ public class RawEventCodec implements EventCodec {
                 bitSetForType[index++] = (byte) ColumnType.ByteArray.getType();
 
                 byte[] value = (byte[]) columnObject;
-                columnValues.writeByte(value.length);
+                columnValues.writeInt(value.length);
                 columnValues.writeBytes(value);
             } else if (columnObject instanceof BigDecimal) {
                 bitSetForType[index++] = (byte) ColumnType.Decimal.getType();
@@ -297,7 +297,7 @@ public class RawEventCodec implements EventCodec {
 
             switch (columnType) {
                 case ByteArray: {
-                    int len = buf.readByte();
+                    int len = buf.readInt();
                     byte[] byteArray = new byte[len];
                     buf.readBytes(byteArray);
                     value = byteArray;

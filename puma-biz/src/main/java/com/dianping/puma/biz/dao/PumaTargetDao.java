@@ -14,5 +14,7 @@ public interface PumaTargetDao {
 
     int insert(PumaTargetEntity entity);
 
+    int replace(PumaTargetEntity entity);
+
     int delete(int id);
 }

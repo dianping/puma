@@ -13,22 +13,54 @@
     </select>
 
     <select id="findByDatabase" resultType="PumaServerTargetEntity">
-        SELECT * FROM PumaServerTarget WHERE `targetDb` = #{targetDb}
+        SELECT
+        P.id,
+        P.serverName,
+        P.targetDb,
+        P.beginTime,
+        PS.host,
+        PT.database,
+        PT.table
+        FROM
+        PumaServerTarget P
+        RIGHT JOIN PumaTarget PT ON P.targetDb = PT.database
+        RIGHT JOIN PumaServer PS ON P.serverName = PS.name
+        WHERE
+        PT.database = #{database}
     </select>
 
     <insert id="insert" parameterType="PumaServerTargetEntity" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO PumaServerTarget
         (
-        `serverId`,
-        `targetId`,
+        `serverName`,
+        `targetDb`,
         `beginTime`
         )
         VALUES
         (
-        #{serverId},
-        #{targetId},
+        #{serverName},
+        #{targetDb},
         #{beginTime}
         )
+    </insert>
+
+    <insert id="replace" parameterType="PumaServerTargetEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO PumaServerTarget
+        (
+        `serverName`,
+        `targetDb`,
+        `beginTime`
+        )
+        VALUES
+        (
+        #{serverName},
+        #{targetDb},
+        #{beginTime}
+        )
+        ON DUPLICATE KEY UPDATE
+        `serverName` = VALUES(`serverName`),
+        `targetDb` = VALUES(`targetDb`),
+        `beginTime` = VALUES(`beginTime`)
     </insert>
 
     <update id="update" parameterType="PumaServerTargetEntity">

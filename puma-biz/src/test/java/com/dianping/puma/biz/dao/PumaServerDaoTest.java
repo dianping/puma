@@ -18,7 +18,6 @@ public class PumaServerDaoTest {
 	PumaServerDao pumaServerDao;
 
 	@Test
-	@Ignore
 	public void test() {
 		PumaServerEntity entity = new PumaServerEntity();
 		entity.setName("test-name");

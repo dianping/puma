@@ -126,6 +126,15 @@
 
                 <ul class="submenu">
                     <li class="">
+                        <a href="#/puma-create">
+                            <i class="menu-icon fa fa-caret-right"></i>
+                            New
+                        </a>
+
+                        <b class="arrow"></b>
+                    </li>
+
+                    <li class="">
                         <a href="#/puma-target">
                             <i class="menu-icon fa fa-caret-right"></i>
                             Target
@@ -169,24 +178,52 @@
         <div ng-view></div>
     </div>
 
+    <!--
     <div class="footer">
         <div class="footer-inner">
-            <!-- #section:basics/footer -->
             <div class="footer-content">
                 <span class="bigger-120">
                     DianPing &copy; 2015-2016
                 </span>
             </div>
+        </div>
+    </div>
+    -->
+    <div class="footer">
+        <div class="footer-inner">
+            <!-- #section:basics/footer -->
+            <div class="footer-content">
+						<span class="bigger-120">
+							<span class="blue bolder">Ace</span>
+							Application &copy; 2013-2014
+						</span>
+
+                &nbsp; &nbsp;
+						<span class="action-buttons">
+							<a href="#">
+                                <i class="ace-icon fa fa-twitter-square light-blue bigger-150"></i>
+                            </a>
+
+							<a href="#">
+                                <i class="ace-icon fa fa-facebook-square text-primary bigger-150"></i>
+                            </a>
+
+							<a href="#">
+                                <i class="ace-icon fa fa-rss-square orange bigger-150"></i>
+                            </a>
+						</span>
+            </div>
 
             <!-- /section:basics/footer -->
         </div>
     </div>
+
+    <a href="#" id="btn-scroll-up" class="btn-scroll-up btn btn-sm btn-inverse">
+        <i class="ace-icon fa fa-angle-double-up icon-only bigger-110"></i>
+    </a>
+
 </div>
 <!-- /.main-container -->
-
-<!--div class="main-content">
-    <div ng-view></div>
-</div-->
 
 <!-- basic scripts -->
 
@@ -230,6 +267,8 @@
 
 <!-- ngDialog -->
 <!--script src="/app/lib/ng-dialog/ngDialog.min.js"></script-->
+
+<script src="/app/lib/underscore/underscore.js"></script>
 
 <!-- angularJS -->
 <script src="/app/lib/angular/angular.js"></script>

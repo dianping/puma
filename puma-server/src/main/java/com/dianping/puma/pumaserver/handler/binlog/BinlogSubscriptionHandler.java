@@ -1,5 +1,6 @@
 package com.dianping.puma.pumaserver.handler.binlog;
 
+import com.dianping.cat.Cat;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.dto.BinlogAck;
 import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
@@ -50,6 +51,8 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
         BinlogSubscriptionResponse binlogSubscriptionResponse = new BinlogSubscriptionResponse();
         binlogSubscriptionResponse.setToken(session.getToken());
         ctx.channel().writeAndFlush(binlogSubscriptionResponse);
+
+        Cat.logEvent("Client.Subscription", String.format("%s %s", clientName, ctx.channel().remoteAddress().toString()));
 
         SystemStatusManager.addClient(
                 clientName,

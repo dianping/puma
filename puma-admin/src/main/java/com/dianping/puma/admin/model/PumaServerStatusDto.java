@@ -114,6 +114,8 @@ public class PumaServerStatusDto {
 
     public static class Server {
 
+        private  String server;
+
         private String name;
 
         private String host;
@@ -143,6 +145,14 @@ public class PumaServerStatusDto {
         private long totalDeleteEvent;
 
         private long totalDdlEvent;
+
+        public String getServer() {
+            return server;
+        }
+
+        public void setServer(String server) {
+            this.server = server;
+        }
 
         public String getName() {
             return name;
@@ -266,6 +276,8 @@ public class PumaServerStatusDto {
     }
 
     public static class Client {
+        private String server;
+
         private String ip;
 
         private String database;
@@ -285,6 +297,14 @@ public class PumaServerStatusDto {
         private BinlogInfo ackBinlogInfo;
 
         private long fetchQps;
+
+        public String getServer() {
+            return server;
+        }
+
+        public void setServer(String server) {
+            this.server = server;
+        }
 
         public String getIp() {
             return ip;

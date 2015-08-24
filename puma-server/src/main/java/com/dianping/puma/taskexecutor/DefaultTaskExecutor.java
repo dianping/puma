@@ -82,6 +82,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
     @Override
     public void doStart() throws Exception {
+        Thread.currentThread().setName("DefaultTaskExecutor-" + getTask().getName());
+
         long failCount = 0;
         boolean canStop = false;
         do {

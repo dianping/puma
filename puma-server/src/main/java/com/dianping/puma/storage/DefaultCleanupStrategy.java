@@ -66,7 +66,10 @@ public class DefaultCleanupStrategy implements CleanupStrategy {
 					if (dataIndexes != null && !dataIndexes.isEmpty()) {
 						for (IndexManager dataIndex : dataIndexes) {
 							try {
-								dataIndex.removeByL2IndexName(path.replace('/', '-'));
+								String indexName = path.replace('/', '-');
+								dataIndex.removeByL2IndexName(indexName);
+								
+								logger.info("cleanUp l1Index " + indexName);
 							} catch (IOException e) {
 								Cat.logError(e);
 								logger.error(e.getMessage());

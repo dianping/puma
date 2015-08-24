@@ -17,6 +17,8 @@ public interface PumaServerDao {
 
     List<PumaServerEntity> findAll();
 
+    List<PumaServerEntity> findAllAlive();
+
     List<PumaServerEntity> findByPage(@Param(value = "offset") int offset, @Param(value = "limit") int limit);
 
     long count();

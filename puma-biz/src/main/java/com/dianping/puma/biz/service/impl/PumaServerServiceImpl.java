@@ -50,6 +50,11 @@ public class PumaServerServiceImpl implements PumaServerService {
     }
 
     @Override
+    public List<PumaServerEntity> findAllAlive() {
+        return pumaServerDao.findAllAlive();
+    }
+
+    @Override
     public List<PumaServerEntity> findByPage(int page, int pageSize) {
         return pumaServerDao.findByPage((page - 1) * pageSize, pageSize);
     }

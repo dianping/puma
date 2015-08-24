@@ -1,6 +1,7 @@
 package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.model.PumaDto;
+import com.dianping.puma.admin.service.PumaTaskStatusService;
 import com.dianping.puma.biz.entity.PumaServerTargetEntity;
 import com.dianping.puma.biz.service.PumaServerService;
 import com.dianping.puma.biz.service.PumaServerTargetService;
@@ -31,6 +32,9 @@ public class PumaController extends BasicController {
 
     @Autowired
     PumaServerTargetService pumaServerTargetService;
+
+    @Autowired
+    PumaTaskStatusService pumaTaskStatusService;
 
     @RequestMapping(value = {"/puma-target"}, method = RequestMethod.POST)
     @ResponseBody
@@ -69,5 +73,11 @@ public class PumaController extends BasicController {
 
         result.put("status", "success");
         return result;
+    }
+
+    @RequestMapping(value = {"/puma-status"}, method = RequestMethod.GET)
+    @ResponseBody
+    public Object status() {
+        return pumaTaskStatusService.getAllStatus();
     }
 }

@@ -16,6 +16,8 @@ public interface PumaServerService {
 
 	List<PumaServerEntity> findAll();
 
+	List<PumaServerEntity> findAllAlive();
+
 	long count();
 
 	List<PumaServerEntity> findByPage(int page, int pageSize);

@@ -23,6 +23,10 @@
         SELECT * FROM PumaServer
     </select>
 
+    <select id="findAllAlive" resultType="PumaServerEntity">
+        SELECT * FROM PumaServer where UpdateTime >= DATE_SUB(NOW(),INTERVAL 15 MINUTE)
+    </select>
+
     <select id="findByPage" resultType="PumaServerEntity">
         SELECT * FROM PumaServer limit #{offset},#{limit}
     </select>

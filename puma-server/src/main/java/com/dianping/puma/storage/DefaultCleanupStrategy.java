@@ -91,7 +91,5 @@ public class DefaultCleanupStrategy implements CleanupStrategy {
 		} catch (StorageClosedException e) {
 			// ignore
 		}
-
 	}
-
 }

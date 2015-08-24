@@ -22,6 +22,10 @@ public class DefaultBucketManager implements BucketManager {
 
 	private CleanupStrategy cleanupStrategy;
 
+	private Thread archiveThread;
+
+	private Thread cleanupThread;
+
 	private volatile boolean stopped = true;
 
 	public DefaultBucketManager(DataBucketManager masterIndex, DataBucketManager slaveIndex,
@@ -58,6 +62,14 @@ public class DefaultBucketManager implements BucketManager {
 			slaveIndex.stop();
 		} catch (IOException e) {
 			// ignore
+		}
+
+		if (this.cleanupThread != null) {
+			this.cleanupThread.interrupt();
+		}
+
+		if (this.archiveThread != null) {
+			this.archiveThread.interrupt();
 		}
 	}
 
@@ -137,11 +149,12 @@ public class DefaultBucketManager implements BucketManager {
 		if (archiveStrategy == null) {
 			return;
 		}
-		Thread archiveThread = PumaThreadUtils.createThread(new Runnable() {
+
+		archiveThread = PumaThreadUtils.createThread(new Runnable() {
 			@Override
 			public void run() {
 				int failedCount = 0;
-				while (true) {
+				while (!Thread.currentThread().isInterrupted()) {
 					try {
 						checkClosed();
 					} catch (StorageClosedException e1) {
@@ -171,11 +184,12 @@ public class DefaultBucketManager implements BucketManager {
 		if (cleanupStrategy == null) {
 			return;
 		}
-		Thread archiveThread = PumaThreadUtils.createThread(new Runnable() {
+
+		cleanupThread = PumaThreadUtils.createThread(new Runnable() {
 			@Override
 			public void run() {
 				int failedCount = 0;
-				while (true) {
+				while (!Thread.currentThread().isInterrupted()) {
 					try {
 						checkClosed();
 					} catch (StorageClosedException e1) {
@@ -198,7 +212,7 @@ public class DefaultBucketManager implements BucketManager {
 			}
 		}, "CleanupTask", false);
 
-		archiveThread.start();
+		cleanupThread.start();
 	}
 
 	@Override

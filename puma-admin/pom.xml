@@ -210,19 +210,6 @@
 			<plugin>
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<configuration>
-					<!-- <scanIntervalSeconds>2</scanIntervalSeconds> -->
-					<webAppSourceDirectory>src/main/webapp</webAppSourceDirectory>
-					<webApp>
-						<contextPath>/puma-admin</contextPath>
-					</webApp>
-					<systemProperties>
-						<systemProperty>
-							<name>org.mortbay.util.URI.charset</name>
-							<value>UTF-8</value>
-						</systemProperty>
-					</systemProperties>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

@@ -109,6 +109,8 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
             this.parent = parent;
         }
 
+        private boolean threadNameHasSet = false;
+
         @Override
         public void run() {
             List<Event> results = new ArrayList<Event>();
@@ -190,7 +192,12 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
             if (req == null && results.size() >= 1000) {
                 req = getParent().requests.take();
             }
-            
+
+            if (req != null && !threadNameHasSet) {
+                threadNameHasSet = true;
+                Thread.currentThread().setName("DefaultAsyncBinlogChannel-" + req.getClientName());
+            }
+
             return req;
         }
 

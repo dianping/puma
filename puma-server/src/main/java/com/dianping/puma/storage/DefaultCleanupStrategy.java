@@ -21,66 +21,74 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.dianping.cat.Cat;
 import com.dianping.puma.storage.bucket.DataBucketManager;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.index.IndexManager;
 
 /**
- * TODO Comment of DefaultCleanupStrategy
  * 
  * @author Leo Liang
  * 
  */
 public class DefaultCleanupStrategy implements CleanupStrategy {
-    private int             preservedDay      = 14;
-    private List<String>    toBeDeleteBuckets = new ArrayList<String>();
-    @SuppressWarnings("rawtypes")
-    private List<IndexManager> dataIndexes       = new ArrayList<IndexManager>();
 
-    public void setPreservedDay(int preservedDay) {
-        this.preservedDay = preservedDay;
-    }
+	private static final Logger logger = LoggerFactory.getLogger(DefaultCleanupStrategy.class);
 
-    @SuppressWarnings("rawtypes")
-    public void addDataIndex(IndexManager index) {
-        this.dataIndexes.add(index);
-    }
+	private int preservedDay = 14;
 
-    @SuppressWarnings("rawtypes")
-    @Override
-    public void cleanup(DataBucketManager index) {
-        try {
-            toBeDeleteBuckets.addAll(index.bulkGetRemainNDay(preservedDay));
+	private List<String> toBeDeleteBuckets = new ArrayList<String>();
 
-            if (!toBeDeleteBuckets.isEmpty()) {
-                index.remove(toBeDeleteBuckets);
-                for (String path : toBeDeleteBuckets) {
-                    if (dataIndexes != null && !dataIndexes.isEmpty()) {
-                        for (IndexManager dataIndex : dataIndexes) {
-                            try {
-                                dataIndex.removeByL2IndexName(path.replace('/', '-'));
-                            } catch (IOException e) {
-                                // ignore
-                            }
-                        }
-                    }
-                }
+	@SuppressWarnings("rawtypes")
+	private List<IndexManager> dataIndexes = new ArrayList<IndexManager>();
 
-                Iterator<String> iterator = toBeDeleteBuckets.iterator();
-                while (iterator.hasNext()) {
-                    String path = iterator.next();
-                    if (StringUtils.isNotBlank(path)) {
-                        if (index.removeBucket(path)) {
-                            iterator.remove();
-                        }
-                    }
-                }
-            }
-        } catch (StorageClosedException e) {
-            // ignore
-        }
+	public void setPreservedDay(int preservedDay) {
+		this.preservedDay = preservedDay;
+	}
 
-    }
+	@SuppressWarnings("rawtypes")
+	public void addDataIndex(IndexManager index) {
+		this.dataIndexes.add(index);
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public void cleanup(DataBucketManager index) {
+		try {
+			toBeDeleteBuckets.addAll(index.bulkGetRemainNDay(preservedDay));
+
+			if (!toBeDeleteBuckets.isEmpty()) {
+				index.remove(toBeDeleteBuckets);
+				for (String path : toBeDeleteBuckets) {
+					if (dataIndexes != null && !dataIndexes.isEmpty()) {
+						for (IndexManager dataIndex : dataIndexes) {
+							try {
+								dataIndex.removeByL2IndexName(path.replace('/', '-'));
+							} catch (IOException e) {
+								Cat.logError(e);
+								logger.error(e.getMessage());
+							}
+						}
+					}
+				}
+
+				Iterator<String> iterator = toBeDeleteBuckets.iterator();
+				while (iterator.hasNext()) {
+					String path = iterator.next();
+					if (StringUtils.isNotBlank(path)) {
+						if (index.removeBucket(path)) {
+							iterator.remove();
+						}
+					}
+				}
+			}
+		} catch (StorageClosedException e) {
+			// ignore
+		}
+
+	}
 
 }

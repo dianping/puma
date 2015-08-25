@@ -6,7 +6,7 @@ underscore.factory('_', ['$window', function() {
 
 var puma = angular.module('puma', ['ngRoute', 'ui.bootstrap']);
 
-puma.controller('pumaMonitorTargetController', function ($scope, item) {
+puma.controller('simpleModalController', function ($scope, item) {
     $scope.item = item;
 });
 
@@ -16,6 +16,14 @@ puma.controller('pumaMonitorController', function ($scope, $http, $modal) {
             $scope.clients = response.data.clients;
             $scope.servers = response.data.servers;
 
+            _.each($scope.clients, function (item) {
+                item.tablesStr = _.first(item.tables, 10).join('<br/>');
+
+                if (item.tables.length > 10) {
+                    item.tablesStr += '<br/>Click to show more...'
+                }
+            });
+            
             _.each($scope.servers, function (item) {
                 item.targetStr = _.map(_.first(item.target.tables, 10), function (table) {
                     return table.schemaName + '.' + table.tableName;
@@ -27,11 +35,23 @@ puma.controller('pumaMonitorController', function ($scope, $http, $modal) {
             });
         }
     );
+    
+     $scope.openTables = function (item) {
+        $modal.open({
+            templateUrl: 'tables.html',
+            controller: 'simpleModalController',
+            resolve: {
+                item: function () {
+                    return item;
+                }
+            }
+        });
+    };
 
     $scope.openTarget = function (item) {
         $modal.open({
             templateUrl: 'target.html',
-            controller: 'pumaMonitorTargetController',
+            controller: 'simpleModalController',
             resolve: {
                 item: function () {
                     return item;

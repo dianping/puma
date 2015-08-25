@@ -39,6 +39,7 @@ public class SystemStatus {
     }
 
     public void count() {
+        countFetchQps();
         countStoreQps();
         countTotalDdlEvent();
         countTotalDeleteEvent();
@@ -49,10 +50,17 @@ public class SystemStatus {
         countTotalStoreCount();
     }
 
+    private void countFetchQps() {
+        for (Client server : this.clients.values()) {
+            server.count();
+        }
+    }
+
     private void countStoreQps() {
         int storeQps = 0;
 
         for (Server server : this.servers.values()) {
+            server.count();
             storeQps += server.getStoreQps();
         }
 
@@ -223,7 +231,10 @@ public class SystemStatus {
 
         public void increaseFetchQps(long size) {
             fetchQpsCounter.add(size);
-            fetchQps = fetchQpsCounter.get(15);
+        }
+
+        public void count() {
+            this.fetchQps = fetchQpsCounter.get(15);
         }
     }
 
@@ -288,6 +299,10 @@ public class SystemStatus {
             this.storeQpsCounter = new QpsCounter(15);
         }
 
+        public void count() {
+            this.storeQps = storeQpsCounter.get(15);
+        }
+
         public int getBucketDate() {
             return bucketDate;
         }
@@ -324,7 +339,6 @@ public class SystemStatus {
             this.totalStoreCount = this.atomicTotalStoreCount.incrementAndGet();
             this.totalStoreBytes = this.atomicTotalStoreBytes.addAndGet(size);
             this.storeQpsCounter.increase();
-            this.storeQps = this.storeQpsCounter.get(15);
         }
 
         public void setBucketDate(int bucketDate) {

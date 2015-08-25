@@ -44,7 +44,8 @@
                         <div class="col-sm-12">
                             <div class="well">
                                 <h4 class="green smaller lighter">Create Puma Database</h4>
-                                Choose the database and tables first, then pick servers for the database to run on and set the begin time finally.
+                                Choose the database and tables first, then pick servers for the database to run on and
+                                set the begin time finally.
                             </div>
                         </div>
 
@@ -65,49 +66,98 @@
 
                                             <div class="space-4"></div>
 
-                                            <!-- #section:elements.form -->
-                                            <div class="form-group">
-                                                <label class="col-sm-3 control-label no-padding-right" for="form-database"> Database </label>
+                                            <!--div class="form-group">
+                                                <label class="col-sm-3 control-label no-padding-right"
+                                                       for="form-database"> Database </label>
 
-                                                <div class="col-sm-9">
-                                                    <input type="text" id="form-database" class="col-sm-5" placeholder="database" ng-model="database"/>
+                                                <div class="col-sm-6">
+                                                    <autocomplete id="form-database"
+                                                                  ng-model="outputDatabase"
+                                                                  data="inputDatabases"
+                                                                  attr-inputClass="input-xxlarge"
+                                                                  attr-placeholder="input database...">
+                                                </div>
+                                            </div-->
+
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label no-padding-right"
+                                                       for="form-database"> Database </label>
+
+                                                <div class="col-sm-6">
+                                                    <div class="input-group">
+                                                        <input id="form-database" type="text" class="form-control" ng-model="outputDatabase"/>
+                                                        <span class="input-group-addon">
+                                                            <i class="fa fa-bullseye bigger-110"></i>
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
 
                                             <!-- /section:elements.form -->
                                             <div class="space-4"></div>
 
+                                            <div class="space-4"></div>
                                             <div class="form-group">
-                                                <label class="col-sm-3 control-label no-padding-right" for="form-tables"> Tables </label>
+                                                <label class="col-sm-3 control-label no-padding-right"
+                                                       for="form-servers"> Tables </label>
 
-                                                <div class="col-sm-9">
-                                                    <input type="text" id="form-tables" class="col-sm-9" placeholder="table0, table1, table2, ..." ng-model="tables"/>
+                                                <div class="col-sm-6">
+                                                    <isteven-multi-select
+                                                            id="form-tables"
+                                                            input-model="inputTables"
+                                                            output-model="outputTables"
+                                                            button-label="name"
+                                                            item-label="name"
+                                                            on-open="findTables()"
+                                                            tick-property="ticked"
+                                                            max-height="200px"
+                                                            output-properties="name"
+                                                            >
+                                                    </isteven-multi-select>
                                                 </div>
                                             </div>
 
                                             <div class="space-4"></div>
 
                                             <div class="form-group">
-                                                <label class="col-sm-3 control-label no-padding-right" for="form-servers"> Servers </label>
+                                                <label class="col-sm-3 control-label no-padding-right"
+                                                       for="form-servers"> Servers </label>
 
-                                                <div class="col-sm-9">
-                                                    <input type="text" id="form-servers" class="col-sm-9" placeholder="server0, server1, server2, ..." ng-model="servers"/>
+                                                <div class="col-sm-6">
+                                                    <isteven-multi-select
+                                                            id="form-servers"
+                                                            input-model="inputServers"
+                                                            output-model="outputServers"
+                                                            button-label="name"
+                                                            item-label="name"
+                                                            tick-property="ticked"
+                                                            max-height="200px"
+                                                            output-properties="name"
+                                                            >
+                                                    </isteven-multi-select>
                                                 </div>
                                             </div>
 
                                             <div class="space-4"></div>
 
                                             <div class="form-group">
-                                                <label class="col-sm-3 control-label no-padding-right" for="form-begin-time"> Begin Time </label>
+                                                <label class="col-sm-3 control-label no-padding-right"
+                                                       for="form-begin-time"> Begin Time </label>
 
-                                                <div class="col-sm-9">
-                                                    <input class="col-sm-5" type="datetime" id="form-begin-time" placeholder="yyyy-MM-dd hh:mm:ss" ng-model="beginTime"/>
+                                                <div class="col-sm-6">
+                                                    <div class="input-group" style="z-index: 0">
+                                                        <input id="form-begin-time" type="text" class="form-control"
+                                                               ng-model="beginTime"/>
+                                                        <span class="input-group-addon">
+                                                            <i class="fa fa-clock-o bigger-110"></i>
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
 
                                         </form>
 
-                                        <hr />
+                                        <hr/>
 
                                         <p align="right">
                                             <span class="btn btn-info btn-sm" ng-click="reset()">Reset</span>
@@ -133,3 +183,4 @@
     </div>
 
 </div>
+

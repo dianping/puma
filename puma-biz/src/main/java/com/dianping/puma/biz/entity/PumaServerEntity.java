@@ -4,6 +4,8 @@ import java.util.Date;
 
 public class PumaServerEntity {
 
+    private static final long timeout = 60 * 1000; // 60s.
+
     private int id;
 
     private String name;
@@ -62,5 +64,9 @@ public class PumaServerEntity {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public boolean checkAlive() {
+        return new Date().getTime() - updateTime.getTime() < timeout;
     }
 }

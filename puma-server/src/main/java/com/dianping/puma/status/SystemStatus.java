@@ -148,6 +148,8 @@ public class SystemStatus {
     public static class Client {
         private String ip;
 
+        private String name;
+
         private String database;
 
         private List<String> tables;
@@ -168,9 +170,10 @@ public class SystemStatus {
 
         private transient QpsCounter fetchQpsCounter;
 
-        public Client(String ip, String database, List<String> tables, boolean withDml, boolean withDdl,
+        public Client(String name, String ip, String database, List<String> tables, boolean withDml, boolean withDdl,
                       boolean withTransaction, String codec) {
             super();
+            this.name = name;
             this.ip = ip;
             this.database = database;
             this.tables = tables;
@@ -215,6 +218,14 @@ public class SystemStatus {
 
         public BinlogInfo getAckBinlogInfo() {
             return ackBinlogInfo;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
 
         public void setAckBinlogInfo(BinlogInfo ackBinlogInfo) {

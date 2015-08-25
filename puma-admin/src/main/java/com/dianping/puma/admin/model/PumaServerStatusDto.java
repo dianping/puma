@@ -278,6 +278,8 @@ public class PumaServerStatusDto {
     public static class Client {
         private String server;
 
+        private String name;
+
         private String ip;
 
         private String database;
@@ -384,6 +386,14 @@ public class PumaServerStatusDto {
 
         public void setFetchQps(long fetchQps) {
             this.fetchQps = fetchQps;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
     }
 }

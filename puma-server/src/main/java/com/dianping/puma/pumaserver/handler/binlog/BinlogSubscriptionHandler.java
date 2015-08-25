@@ -56,6 +56,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
         SystemStatusManager.addClient(
                 clientName,
+                ctx.channel().remoteAddress().toString(),
                 binlogSubscriptionRequest.getDatabase(),
                 binlogSubscriptionRequest.getTables(),
                 binlogSubscriptionRequest.isDml(),

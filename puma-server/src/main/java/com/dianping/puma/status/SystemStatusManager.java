@@ -17,9 +17,9 @@ public class SystemStatusManager {
 
     private static ConcurrentMap<String, AtomicBoolean> stopTheWorlds = new ConcurrentHashMap<String, AtomicBoolean>();
 
-    public static void addClient(String clientName, String database, List<String> tables, boolean withDml,
+    public static void addClient(String clientName, String ip, String database, List<String> tables, boolean withDml,
                                  boolean withDdl, boolean withTransaction, String codec) {
-        Client client = new Client(clientName, database, tables, withDml, withDdl, withTransaction, codec);
+        Client client = new Client(clientName, ip, database, tables, withDml, withDdl, withTransaction, codec);
 
         status.getClients().put(clientName, client);
     }

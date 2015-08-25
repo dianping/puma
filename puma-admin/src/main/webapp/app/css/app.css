@@ -1,3 +1,3 @@
-span[data-toggle="popover"]{
+*[data-toggle="popover"]{
     cursor: pointer;
 }

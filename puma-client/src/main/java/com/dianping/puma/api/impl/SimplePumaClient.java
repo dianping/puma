@@ -187,12 +187,14 @@ public class SimplePumaClient implements PumaClient {
         }
 
         HttpResponse result;
+        HttpGet get = null;
         try {
-            HttpGet get = new HttpGet(baseUrl + path + "?" + URLEncodedUtils.format(params, DEFAULT_CHARSET));
+            get = new HttpGet(baseUrl + path + "?" + URLEncodedUtils.format(params, DEFAULT_CHARSET));
             result = httpClient.execute(get);
         } catch (Exception e) {
             this.token = null;
-            throw new PumaClientException(e.getMessage(), e);
+            String msg = get == null ? e.getMessage() : String.format("%s %s", get.getURI(), e.getMessage());
+            throw new PumaClientException(msg, e);
         }
 
         if (result.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {

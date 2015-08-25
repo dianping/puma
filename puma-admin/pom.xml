@@ -131,8 +131,6 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aop</artifactId>
 		</dependency>
-<<<<<<< HEAD
-=======
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
@@ -145,7 +143,6 @@
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-asl</artifactId>
 		</dependency>
->>>>>>> puam target page
 		<!-- 数据库 -->
 		<dependency>
 			<groupId>org.springframework</groupId>

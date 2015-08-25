@@ -64,6 +64,7 @@ public class PumaServerTargetServiceImpl implements PumaServerTargetService {
     public int replace(PumaServerTargetEntity entity) {
         String database = entity.getTargetDb();
         List<String> tables = entity.getTables();
+
         for (String table: tables) {
             PumaTargetEntity pumaTarget = new PumaTargetEntity();
             pumaTarget.setDatabase(database);

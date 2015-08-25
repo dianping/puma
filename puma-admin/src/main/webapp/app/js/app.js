@@ -6,6 +6,16 @@ underscore.factory('_', ['$window', function() {
 
 var puma = angular.module('puma', ['ngRoute']);
 
+puma.controller('pumaMonitorController', function ($scope, $http) {
+    $http.get('/a/puma-status').then(
+        function (response) {
+            $scope.clients = response.data.clients;
+            $scope.servers = response.data.servers;
+        }
+    );
+});
+
+
 puma.controller('pumaCreateController', function($scope, $http) {
 
   $scope.submit = function() {
@@ -124,3 +134,12 @@ puma.config(function($routeProvider) {
     });
 });
 
+
+$(function(){
+    $(document).on('mouseenter','[data-toggle="popover"]',function(){
+        $(this).popover('show');
+    });
+    $(document).on('mouseleave','[data-toggle="popover"]',function(){
+        $(this).popover('hide');
+    });
+});

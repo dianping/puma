@@ -1,1 +1,107 @@
-<p>Hello, Puma Monitor!</p>
+<div ng-controller="pumaMonitorController">
+    <div class="breadcrumbs" id="breadcrumbs">
+        <script type="text/javascript">
+            try {
+                ace.settings.check('breadcrumbs', 'fixed')
+            } catch (e) {}
+        </script>
+        <ul class="breadcrumb">
+            <li>
+                <i class="ace-icon fa fa-home home-icon"></i>
+                <a href="#">Home</a>
+            </li>
+            <li class="active">Puma Monitor</li>
+        </ul>
+        <div class="nav-search" id="nav-search">
+            <form class="form-search">
+                <span class="input-icon">
+                    <input type="text" placeholder="Search ..." class="nav-search-input"
+                           id="nav-search-input" autocomplete="off"/>
+                    <i class="ace-icon fa fa-search nav-search-icon"></i>
+                </span>
+            </form>
+        </div>
+    </div>
+    <div class="page-content">
+        <div class="page-content-area">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="widget-box">
+                                <div class="widget-header widget-header-large">
+                                    <h5 class="widget-title lighter">Puma Task Monitor</h5>
+                                </div>
+                                <div class="widget-body">
+                                    <div class="widget-main">
+                                        <table id="simple-table" class="table table-striped table-bordered table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Server</th>
+                                                    <th>Name</th>
+                                                    <th>Store Qps</th>
+                                                    <th>I / U / D / DDL</th>
+                                                    <th>BinlogInfo</th>
+                                                    <th>Target</th>
+                                                    <th>Other</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="server in servers">
+                                                    <td>{{server.server}}</td>
+                                                    <td><span data-html="true" data-toggle="popover" data-placement="top" data-content="Host : {{server.host}} <br />Port  : {{server.port}}">{{server.name}}</span></td>
+                                                    <td>{{server.storeQps}}</td>
+                                                    <td>{{server.totalInsertEvent}} / {{server.totalUpdateEvent}} / {{server.totalDeleteEvent}} / {{server.totalDdlEvent}}</td>
+                                                    <td><span data-html="true" data-toggle="popover" data-placement="top" data-content="ServerId : {{server.binlogInfo.serverId}} <br />BinlogFile  : {{server.binlogInfo.binlogFile}} <br />BinlogPosition   : {{server.binlogInfo.binlogPosition }} <br />EventIndex   : {{server.binlogInfo.eventIndex }} <br />Timestamp   : {{server.binlogInfo.timestamp*1000 }}">{{server.binlogInfo.timestamp * 1000}}</span>
+                                                    </td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="widget-box">
+                                <div class="widget-header widget-header-large">
+                                    <h5 class="widget-title lighter">Puma Client Monitor</h5>
+                                </div>
+                                <div class="widget-body">
+                                    <div class="widget-main">
+                                        <table id="simple-table" class="table table-striped table-bordered table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th class="center">
+                                                        <label class="pos-rel">
+                                                            <input type="checkbox" class="ace">
+                                                            <span class="lbl"></span>
+                                                        </label>
+                                                    </th>
+                                                    <th>Domain</th>
+                                                    <th>Price</th>
+                                                    <th class="hidden-480">Clicks</th>
+                                                    <th>
+                                                        <i class="ace-icon fa fa-clock-o bigger-110 hidden-480"></i> Update
+                                                    </th>
+                                                    <th class="hidden-480">Status</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

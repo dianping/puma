@@ -4,7 +4,7 @@ underscore.factory('_', ['$window', function() {
   return $window._; // assumes underscore has already been loaded on the page
 }]);*/
 
-var puma = angular.module('puma', ['ngRoute', 'ui.bootstrap']);
+var puma = angular.module('puma', ['ngRoute', 'isteven-multi-select', 'ui.bootstrap']);
 
 puma.controller('simpleModalController', function ($scope, item) {
     $scope.item = item;

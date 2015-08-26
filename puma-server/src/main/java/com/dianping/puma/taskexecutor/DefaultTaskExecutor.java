@@ -260,6 +260,10 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
     }
 
     protected SrcDbEntity initSrcDbByServerId(final long binlogServerId) throws IOException {
+        if (this.currentSrcDbEntity != null) {
+            return this.currentSrcDbEntity;
+        }
+
         List<SrcDbEntity> avaliableSrcDb = FluentIterable
                 .from(getTask().getSrcDbEntityList())
                 .filter(new Predicate<SrcDbEntity>() {
@@ -273,10 +277,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             throw new IOException("No Avaliable SrcDB");
         }
 
-        if (this.currentSrcDbEntity != null) {
-            return this.currentSrcDbEntity;
-        }
-
         SrcDbEntity srcDbEntity = Iterables.find(avaliableSrcDb, new Predicate<SrcDbEntity>() {
             @Override
             public boolean apply(SrcDbEntity input) {
@@ -288,7 +288,18 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             return srcDbEntity;
         }
 
-        return srcDbEntity != null ? srcDbEntity : avaliableSrcDb.get(0);
+        srcDbEntity = Iterables.find(avaliableSrcDb, new Predicate<SrcDbEntity>() {
+            @Override
+            public boolean apply(SrcDbEntity input) {
+                return input.getTags().contains(SrcDbEntity.TAG_WRITE);
+            }
+        }, null);
+
+        if (srcDbEntity != null) {
+            return srcDbEntity;
+        }
+
+        return avaliableSrcDb.get(0);
     }
 
     protected BinlogInfo getBinlogByTimestamp(long time) throws IOException {

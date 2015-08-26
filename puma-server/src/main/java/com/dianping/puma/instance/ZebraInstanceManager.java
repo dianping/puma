@@ -4,6 +4,7 @@ import com.dianping.cat.Cat;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
+import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.core.config.ConfigManager;
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
@@ -11,6 +12,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -36,7 +39,7 @@ public class ZebraInstanceManager implements InstanceManager {
 
     private ConfigCache configCache = ConfigCache.getInstance();
 
-    private volatile Map<String, Set<String>> clusterIpMap = new HashMap<String, Set<String>>();
+    private volatile Map<String, Set<SrcDbEntity>> clusterIpMap = new HashMap<String, Set<SrcDbEntity>>();
 
     private volatile Map<String, String> dbClusterMap = new HashMap<String, String>();
 
@@ -75,7 +78,7 @@ public class ZebraInstanceManager implements InstanceManager {
     }
 
     @Override
-    public Set<String> getUrlByCluster(String clusterName) {
+    public Set<SrcDbEntity> getUrlByCluster(String clusterName) {
         return clusterIpMap.get(clusterName.toLowerCase());
     }
 
@@ -85,7 +88,7 @@ public class ZebraInstanceManager implements InstanceManager {
     }
 
     protected synchronized void buildConfigFromZebra() throws IOException {
-        Map<String, Set<String>> clusterIpMap = new HashMap<String, Set<String>>();
+        Map<String, Set<SrcDbEntity>> clusterIpMap = new HashMap<String, Set<SrcDbEntity>>();
         Map<String, String> dbClusterMap = new HashMap<String, String>();
 
         Map<String, String> allProperties = configManager.getConfigByProject(env, Constants.DEFAULT_DATASOURCE_GROUP_PRFIX);
@@ -115,18 +118,18 @@ public class ZebraInstanceManager implements InstanceManager {
 
             dbClusterMap.put(db, writeUrl);
 
-            Set<String> clusterIps = clusterIpMap.get(writeUrl);
+            Set<SrcDbEntity> clusterIps = clusterIpMap.get(writeUrl);
             if (clusterIps == null) {
-                clusterIps = new HashSet<String>();
+                clusterIps = new HashSet<SrcDbEntity>();
                 clusterIpMap.put(writeUrl, clusterIps);
             }
 
             for (Map.Entry<String, DefaultDataSourceConfigManager.ReadOrWriteRole> entry : groupdsResult.entrySet()) {
-                if (!entry.getValue().isRead()) {
+                if (!entry.getValue().isRead() && !entry.getValue().isWrite()) {
                     continue;
                 }
 
-                String jdbcUrl = configCache.getProperty(getSingleDataSourceKey("url", entry.getKey()));
+                String jdbcUrl = configCache.getProperty(getSingleDataSourceKey(Constants.ELEMENT_JDBC_URL, entry.getKey()));
                 if (Strings.isNullOrEmpty(jdbcUrl)) {
                     continue;
                 }
@@ -136,8 +139,28 @@ public class ZebraInstanceManager implements InstanceManager {
                 }
 
                 String url = matcher.group(1);
+                SrcDbEntity srcDbEntity = new SrcDbEntity();
+                String[] urlAndPort = url.split(":");
+                srcDbEntity.setHost(urlAndPort[0]);
+                srcDbEntity.setPort(Integer.parseInt(urlAndPort[1]));
+                srcDbEntity.setUsername(configCache.getProperty("puma.server.binlog.username"));
+                srcDbEntity.setPassword(configCache.getProperty("puma.server.binlog.password"));
 
-                clusterIps.add(url);
+                ImmutableSet.Builder<String> tagBuilder = ImmutableSet.builder();
+                if (entry.getValue().isRead()) {
+                    tagBuilder.add(SrcDbEntity.TAG_READ);
+                }
+                if (entry.getValue().isWrite()) {
+                    tagBuilder.add(SrcDbEntity.TAG_WRITE);
+                }
+
+                String tags = configCache.getProperty(getSingleDataSourceKey(Constants.ELEMENT_TAG, entry.getKey()));
+                if (!Strings.isNullOrEmpty(tags)) {
+                    tagBuilder.addAll(Sets.newHashSet(tags.split(",")));
+                }
+                srcDbEntity.setTags(tagBuilder.build());
+
+                clusterIps.add(srcDbEntity);
             }
 
             this.clusterIpMap = clusterIpMap;

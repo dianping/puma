@@ -1,5 +1,7 @@
 package com.dianping.puma.instance;
 
+import com.dianping.puma.biz.entity.SrcDbEntity;
+
 import java.util.Set;
 
 /**
@@ -11,7 +13,7 @@ public interface InstanceManager {
 
     void init();
 
-    Set<String> getUrlByCluster(String clusterName);
+    Set<SrcDbEntity> getUrlByCluster(String clusterName);
 
     String getClusterByDb(String db);
 

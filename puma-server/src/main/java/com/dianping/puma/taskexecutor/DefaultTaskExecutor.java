@@ -380,8 +380,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 }
             }
 
-            Cat.logEvent("Binlog.FindByTimeSuccess", getTask().getName(), Message.SUCCESS,
-                    time + " -> " + binlogResult == null ? "null" : binlogResult.toString());
+            Cat.logEvent("BinlogFindByTime.Success", getTask().getName(), Message.SUCCESS,
+                    time + " -> " + (binlogResult == null ? "null" : binlogResult.toString()));
             t.setStatus(Message.SUCCESS);
             t.complete();
             return binlogResult;

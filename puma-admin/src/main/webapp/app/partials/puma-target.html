@@ -105,7 +105,7 @@
                                                         <isteven-multi-select
                                                                 id="form-tables"
                                                                 input-model="allTables"
-                                                                output-model="pumaDto.tables"
+                                                                output-model="tables"
                                                                 button-label="name"
                                                                 item-label="name"
                                                                 tick-property="selected"
@@ -139,7 +139,8 @@
                                     <span class="widget-toolbar">
                                         <a href="" data-action="reload"><i class="ace-icon fa fa-refresh"></i></a>
                                         <a href="" data-action="" ng-click="add()"><i class="ace-icon fa fa-check"></i></a>
-                                        <a href="" data-action="close" ng-click="delete(server)"><i class="ace-icon fa fa-times"></i></a>
+                                        <a href="" data-action="close" ng-click="delete(server)"><i
+                                                class="ace-icon fa fa-times"></i></a>
                                     </span>
                                     </div>
 
@@ -148,7 +149,9 @@
 
                                             <form class="form-horizontal">
                                                 <div class="form-group">
-                                                    <label class="col-sm-1 control-label no-padding-right" for="server-name"> Server </label>
+                                                    <label class="col-sm-2 control-label no-padding-right"
+                                                           for="server-name"> Server </label>
+
                                                     <div class="col-sm-6">
                                                         <!--input class="form-control" type="text" id="server-name" ng-model="serverName" disabled="true" ng-hide="(serverName === '')"/-->
                                                         <isteven-multi-select
@@ -167,11 +170,50 @@
                                                 </div>
 
                                                 <div class="form-group">
-                                                    <label class="col-sm-1 control-label no-padding-right" for="server-weight"> Weight </label>
-                                                    <div class="col-sm-4">
+                                                    <label class="col-sm-2 control-label no-padding-right"
+                                                           for="server-weight"> Weight </label>
+
+                                                    <div class="col-sm-6">
                                                         <input class="form-control" type="text" id="server-weight"/>
                                                     </div>
                                                 </div>
+
+                                                <div class="form-group">
+                                                    <label class="col-sm-2 control-label no-padding-right" for="form-begin-time-{{$index}}"> Begin Time </label>
+
+                                                    <div class="col-sm-6">
+                                                        <div class="dropdown">
+                                                            <a id="form-begin-time-{{$index}}" class="dropdown-toggle" role="button" data-toggle="dropdown" data-target="#" href="">
+                                                                <div class="input-group">
+                                                                    <input type="text" class="form-control" data-ng-model="server.beginTime">
+                                                                    <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                                                                </div>
+                                                            </a>
+                                                            <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                                                                <datetimepicker data-ng-model="server.beginTime"
+                                                                                data-datetimepicker-config="{
+                                                                                dropdownSelector: '#form-begin-time-{{$index}}'}"/>
+                                                            </ul>
+                                                        </div>
+
+
+                                                        <!--div class="dropdown">
+                                                            <a class="dropdown-toggle my-toggle-select" role="button" data-toggle="dropdown" data-target="#" href="">
+                                                                <div class="input-append">
+                                                                    <input type="text" class="input-xxlarge" data-ng-model="server.beginTime | date: 'yyyy-MM-dd HH:mm'">
+                                                                    <span class="add-on"><i
+                                                                        class="icon-calendar"></i>
+                                                                    </span>
+                                                                </div>
+                                                            </a>
+                                                            <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                                                                <datetimepicker data-ng-model="server.beginTime"
+                                                                                data-datetimepicker-config="{ dropdownSelector: '.my-toggle-select' }"></datetimepicker>
+                                                            </ul>
+                                                        </div-->
+                                                    </div>
+                                                </div>
+
                                             </form>
                                         </div>
                                     </div>
@@ -185,21 +227,21 @@
 
                     </div>
 
-                    </div>
-
-                    <hr/>
-
-                    <p align="right">
-                        <span class="btn btn-info btn-sm" ng-click="reset()">Reset</span>
-                        <span class="btn btn-success btn-sm" ng-click="submit()">Submit</span>
-                    </p>
-
                 </div>
+
+                <hr/>
+
+                <p align="right">
+                    <span class="btn btn-info btn-sm" ng-click="reset()">Reset</span>
+                    <span class="btn btn-success btn-sm" ng-click="submit()">Submit</span>
+                </p>
 
             </div>
 
         </div>
 
     </div>
+
+</div>
 
 </div>

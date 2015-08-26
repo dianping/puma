@@ -8,9 +8,12 @@ import com.dianping.puma.biz.entity.old.PumaServer;
 import com.dianping.puma.biz.service.PumaServerTargetService;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -48,6 +51,7 @@ public class PumaServerTargetServiceImpl implements PumaServerTargetService {
 
     @Override
     public int create(PumaServerTargetEntity entity) {
+        /*
         String database = entity.getTargetDb();
         List<String> tables = entity.getTables();
         for (String table: tables) {
@@ -55,7 +59,7 @@ public class PumaServerTargetServiceImpl implements PumaServerTargetService {
             pumaTarget.setDatabase(database);
             pumaTarget.setTable(table);
             pumaTargetDao.insert(pumaTarget);
-        }
+        }*/
 
         return pumaServerTargetDao.insert(entity);
     }
@@ -65,6 +69,17 @@ public class PumaServerTargetServiceImpl implements PumaServerTargetService {
         String database = entity.getTargetDb();
         List<String> tables = entity.getTables();
 
+        List<PumaTargetEntity> pumaTargets = pumaTargetDao.findByDatabase(database);
+
+        // Removes unused puma targets.
+        for (PumaTargetEntity pumaTarget: pumaTargets) {
+            String oriTable = pumaTarget.getTable();
+            if (!tables.contains(oriTable)) {
+                pumaTargetDao.delete(pumaTarget.getId());
+            }
+        }
+
+        // Replaces new puma targets.
         for (String table: tables) {
             PumaTargetEntity pumaTarget = new PumaTargetEntity();
             pumaTarget.setDatabase(database);

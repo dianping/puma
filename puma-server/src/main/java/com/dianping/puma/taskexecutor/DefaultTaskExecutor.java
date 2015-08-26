@@ -97,8 +97,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                     this.currentSrcDbEntity = initSrcDbByServerId(-1);
                     if (getTask().getBeginTime() != null) {
                         binlogInfo = getBinlogByTimestamp(getTask().getBeginTime().getTime() / 1000);
-                        Cat.logEvent("BinlogSwitch", getTask().getName(), Message.SUCCESS,
-                                "empty -> " + binlogInfo.toString());
                     }
                 } else {
                     this.currentSrcDbEntity = initSrcDbByServerId(binlogInfo.getServerId());
@@ -342,6 +340,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                                 if (closestBinlogInfo == null) {
                                     break;
                                 } else {
+                                    Cat.logEvent("BinlogFind", getTask().getName(), Message.SUCCESS,
+                                            time + " -> " + closestBinlogInfo.toString());
                                     return closestBinlogInfo;
                                 }
                             }
@@ -369,6 +369,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 throw new IOException("Binlog dump failed.");
             }
         }
+        Cat.logEvent("BinlogFind", getTask().getName(), Message.SUCCESS,
+                time + " -> null");
         return null;
     }
 

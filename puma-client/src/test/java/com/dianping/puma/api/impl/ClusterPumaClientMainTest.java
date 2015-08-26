@@ -4,6 +4,7 @@ import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.PumaClientConfig;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.event.Event;
+import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +31,8 @@ public class ClusterPumaClientMainTest {
                 .setClientName("dozer-debug")
                 .setDatabase("UnifiedOrder0")
                 .setTables(tables)
-                .setServerHost("127.0.0.1:4040")
-                .buildSimplePumaClient();
+                .setServerHosts(Lists.newArrayList("127.0.0.1:4040"))
+                .buildFixedClusterPumaClient();
 
         final int size = 100;
 

@@ -1,11 +1,14 @@
 package com.dianping.puma.pumaserver.router.decoder.binlog;
 
 import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
+import com.dianping.puma.core.util.GsonUtil;
 import com.dianping.puma.pumaserver.exception.DecoderException;
 import com.dianping.puma.pumaserver.router.decoder.RequestDecoder;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.QueryStringDecoder;
 
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -26,6 +29,11 @@ public class BinlogSubscriptionDecoder implements RequestDecoder {
 
     @Override
     public Object decode(FullHttpRequest request) throws DecoderException {
+        if (request.getMethod().equals(HttpMethod.POST)) {
+            String json = request.content().toString(Charset.forName("utf-8"));
+            return GsonUtil.fromJson(json, BinlogSubscriptionRequest.class);
+        }
+
         BinlogSubscriptionRequest binlogSubscriptionRequest = new BinlogSubscriptionRequest();
         Map<String, List<String>> params = (new QueryStringDecoder(request.getUri())).parameters();
 

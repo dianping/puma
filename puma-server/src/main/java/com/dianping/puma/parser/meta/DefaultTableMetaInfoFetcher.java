@@ -79,7 +79,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 
         QueryRunner runner = new QueryRunner(metaDs);
 
-        Transaction t = Cat.newTransaction("SQL.meta", "database" + "." + "table");
+        Transaction t = Cat.newTransaction("SQL.meta", database + "." + table);
         try {
             TableMetaInfo tableMetaInfo = runner.query(genTableMetaSql(database, table),
                     new ResultSetHandler<TableMetaInfo>() {

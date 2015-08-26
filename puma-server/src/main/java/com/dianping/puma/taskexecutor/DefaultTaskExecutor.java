@@ -97,6 +97,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                     this.currentSrcDbEntity = initSrcDbByServerId(-1);
                     if (getTask().getBeginTime() != null) {
                         binlogInfo = getBinlogByTimestamp(getTask().getBeginTime().getTime() / 1000);
+                        Cat.logEvent("BinlogSwitch", getTask().getName(), Message.SUCCESS,
+                                "empty -> " + binlogInfo.toString());
                     }
                 } else {
                     this.currentSrcDbEntity = initSrcDbByServerId(binlogInfo.getServerId());
@@ -458,7 +460,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
     protected void dispatch(ChangedEvent changedEvent) {
         try {
-            Cat.logEvent("Puma.Dispath", changedEvent.getDatabase());
             dispatcher.dispatch(changedEvent, getContext());
         } catch (Exception e) {
             LOG.error("TaskName: " + getTaskName() + ", Dispatcher dispatch failed.", e);

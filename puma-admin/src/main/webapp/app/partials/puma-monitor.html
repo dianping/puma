@@ -38,14 +38,9 @@
             </li>
             <li class="active">Puma Monitor</li>
         </ul>
-        <div class="nav-search" id="nav-search">
-            <form class="form-search">
-                <span class="input-icon">
-                    <input type="text" placeholder="Search ..." class="nav-search-input"
-                           id="nav-search-input" autocomplete="off"/>
-                    <i class="ace-icon fa fa-search nav-search-icon"></i>
-                </span>
-            </form>
+        <div class="nav-search" id="nav-search" style="padding-top:2px;">
+            <input ng-model="autoRefresh" name="form-field-checkbox" class="ace ace-checkbox-2" type="checkbox">
+            <span class="lbl">Auto Refresh</span>
         </div>
     </div>
     <div class="page-content">

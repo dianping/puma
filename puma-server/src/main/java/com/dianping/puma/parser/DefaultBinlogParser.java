@@ -20,8 +20,6 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.log4j.Logger;
-
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.core.annotation.ThreadSafe;
 import com.dianping.puma.parser.mysql.BinlogConstants;
@@ -48,6 +46,8 @@ import com.dianping.puma.parser.mysql.event.UpdateRowsEvent;
 import com.dianping.puma.parser.mysql.event.UserVarEvent;
 import com.dianping.puma.parser.mysql.event.WriteRowsEvent;
 import com.dianping.puma.parser.mysql.event.XIDEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO Comment of DefaultBinlogParser
@@ -57,13 +57,21 @@ import com.dianping.puma.parser.mysql.event.XIDEvent;
  */
 @ThreadSafe
 public class DefaultBinlogParser implements Parser {
-	private static final Logger logger = Logger.getLogger(DefaultBinlogParser.class);
+	private final Logger logger = LoggerFactory.getLogger(DefaultBinlogParser.class);
 	private static Map<Byte, Class<? extends BinlogEvent>> eventMaps = new ConcurrentHashMap<Byte, Class<? extends BinlogEvent>>();
 
 	@Override
 	public BinlogEvent parse(ByteBuffer buf, PumaContext context) throws IOException {
+
+		logger.debug("\n\n\n");
+		logger.debug("****************************** binlog parse begin ******************************");
+
 		BinlogHeader header = new BinlogHeader();
 		header.parse(buf, context);
+
+		logger.debug("binlog event header:\n");
+		logger.debug("{}", header);
+
 		BinlogEvent event = null;
 		Class<? extends BinlogEvent> eventClass = eventMaps.get(header.getEventType());
 		if (eventClass != null) {
@@ -78,7 +86,16 @@ public class DefaultBinlogParser implements Parser {
 		if (event == null) {
 			event = new PumaIgnoreEvent();
 		}
+
+		logger.debug("binlog event type:\n");
+		logger.debug("{}", event.getClass());
+
 		event.parse(buf, context, header);
+
+		logger.debug("binlog event:\n");
+		logger.debug("{}", event);
+		logger.debug("****************************** binlog parse end ******************************");
+		logger.debug("\n\n\n");
 
 		return event;
 	}

@@ -18,7 +18,6 @@ import com.dianping.puma.storage.exception.InvalidSequenceException;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageException;
 import com.dianping.puma.storage.exception.StorageReadException;
-import com.dianping.puma.storage.exception.StorageSyncException;
 import com.dianping.puma.storage.index.DefaultIndexManager;
 import com.dianping.puma.storage.index.IndexBucket;
 import com.dianping.puma.storage.index.IndexKeyConvertor;
@@ -138,9 +137,18 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 				} catch (EOFException eof) {
 					// 处理索引已经刷新到文件，但是数据还没有刷新到文件的情况，这里强制刷新一下存储，然后再读数据，如果还读不到，说明真有问题了。
 					this.indexBucket.resetNext();
+					
+					if (!shouldSleep) {
+						return null;
+					} else {
+						try {
+							Thread.sleep(1);
 
-					throw new StorageSyncException("storage is not sync,need to wait storage flush", eof);
-
+							continue;
+						} catch (InterruptedException e1) {
+							Thread.currentThread().interrupt();
+						}
+					}
 				}
 
 				lastIndexKey = nextL2Index.getIndexKey();

@@ -113,18 +113,11 @@ public class FileDumpSender extends AbstractSender {
 	}
 
 	private DefaultEventStorage buildEventStorage(String database) throws StorageLifeCycleException {
-		DefaultEventStorage storage = new DefaultEventStorage();
-		storage.setName("storage-" + database);
-		storage.setTaskName(taskName);
-		storage.setCodec(codec);
-
 		// File sender master storage.
 		LocalFileDataBucketManager masterBucketIndex = new LocalFileDataBucketManager();
 		masterBucketIndex.setBaseDir(GlobalStorageConfig.masterStorageBaseDir + "/" + database);
 		masterBucketIndex.setBucketFilePrefix(GlobalStorageConfig.masterBucketFilePrefix);
 		masterBucketIndex.setMaxBucketLengthMB(GlobalStorageConfig.maxMasterBucketLengthMB);
-
-		storage.setMasterBucketIndex(masterBucketIndex);
 
 		// File sender slave storage.
 		LocalFileDataBucketManager slaveBucketIndex = new LocalFileDataBucketManager();
@@ -132,17 +125,22 @@ public class FileDumpSender extends AbstractSender {
 		slaveBucketIndex.setBucketFilePrefix(GlobalStorageConfig.slaveBucketFilePrefix);
 		slaveBucketIndex.setMaxBucketLengthMB(GlobalStorageConfig.maxMasterBucketLengthMB);
 
-		storage.setSlaveBucketIndex(slaveBucketIndex);
-
 		// Archive strategy.
 		DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
 		archiveStrategy.setServerName(taskName);
 		archiveStrategy.setMaxMasterFileCount(GlobalStorageConfig.maxMasterFileCount);
-		storage.setArchiveStrategy(archiveStrategy);
 
 		// Clean up strategy.
 		DefaultCleanupStrategy cleanupStrategy = new DefaultCleanupStrategy();
 		cleanupStrategy.setPreservedDay(preservedDay);
+
+		DefaultEventStorage storage = new DefaultEventStorage();
+		storage.setName("storage-" + database);
+		storage.setTaskName(taskName);
+		storage.setCodec(codec);
+		storage.setMasterBucketIndex(masterBucketIndex);
+		storage.setSlaveBucketIndex(slaveBucketIndex);
+		storage.setArchiveStrategy(archiveStrategy);
 		storage.setCleanupStrategy(cleanupStrategy);
 		storage.setBinlogIndexBaseDir(GlobalStorageConfig.binlogIndexBaseDir + "/" + database);
 

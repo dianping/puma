@@ -91,10 +91,8 @@ public class LocalFileIndexBucketTest {
 		IndexKeyImpl searchKey = new IndexKeyImpl(1 + 10, 1L, "mysql-binlog.0000001", 4L + 10);
 
 		LocalFileIndexBucket<IndexKeyImpl, IndexValueImpl> indexBucket = new LocalFileIndexBucket<IndexKeyImpl, IndexValueImpl>(
-		      this.file, valueConvertor);
+		      this.file, valueConvertor,searchKey, false);
 		indexBucket.start();
-
-		indexBucket.locate(searchKey, false);
 
 		for (int i = 11; i < 1000; i++) {
 			IndexValueImpl next = indexBucket.next();
@@ -114,10 +112,8 @@ public class LocalFileIndexBucketTest {
 		IndexKeyImpl searchKey = new IndexKeyImpl(1 + 10, 1L, "mysql-binlog.0000001", 4L + 10);
 
 		LocalFileIndexBucket<IndexKeyImpl, IndexValueImpl> indexBucket = new LocalFileIndexBucket<IndexKeyImpl, IndexValueImpl>(
-		      this.file, valueConvertor);
+		      this.file, valueConvertor,searchKey, true);
 		indexBucket.start();
-
-		indexBucket.locate(searchKey, true);
 
 		for (int i = 10; i < 1000; i++) {
 			IndexValueImpl next = indexBucket.next();

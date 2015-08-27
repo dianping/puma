@@ -7,107 +7,116 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class LocalFileIndexBucket<K, V extends IndexValue<K>> implements IndexBucket<K, V> {
 
-    private DataInputStream input;
+	private DataInputStream input;
 
-    private IndexItemConvertor<V> valueConvertor;
+	private IndexItemConvertor<V> valueConvertor;
 
-    private File file;
+	private File file;
 
-    private long prePosition = 0L;
+	private long prePosition = 0L;
 
-    private long currentPosition = 0L;
+	private long currentPosition = 0L;
 
-    private final AtomicReference<K> startIndexKey = new AtomicReference<K>();
+	private final AtomicReference<K> startIndexKey = new AtomicReference<K>();
 
-    public LocalFileIndexBucket(File file, IndexItemConvertor<V> valueConvertor) throws IOException {
-        this.file = file;
-        this.input = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
-        this.valueConvertor = valueConvertor;
-    }
+	public LocalFileIndexBucket(File file, IndexItemConvertor<V> valueConvertor) throws IOException {
+		this.file = file;
+		this.input = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
+		this.valueConvertor = valueConvertor;
+	}
 
-    @Override
-    public void start() throws IOException {
-    }
+	public LocalFileIndexBucket(File file, IndexItemConvertor<V> valueConvertor, K startKey, boolean inclusive) throws IOException {
+		this.file = file;
+		this.input = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
+		this.valueConvertor = valueConvertor;
 
-    @Override
-    public void stop() throws IOException {
-        if (this.input != null) {
-            this.input.close();
-        }
-    }
+		if(startKey != null){
+			locate(startKey,inclusive);
+		}
+	}
 
-    @Override
-    public V next() throws StorageClosedException, IOException {
-        this.input.mark(Integer.MAX_VALUE);
-        try {
-            int len = this.input.readInt();
-            byte[] bytes = new byte[len];
-            int readable = this.input.read(bytes);
+	@Override
+	public void start() throws IOException {
+	}
 
-            if (readable != len) {
-                throw new IOException("found broken index!");
-            }
+	@Override
+	public void stop() throws IOException {
+		if (this.input != null) {
+			this.input.close();
+		}
+	}
 
-            prePosition = currentPosition;
-            currentPosition += 4 + len;
-            V result = this.valueConvertor.convertFromObj(bytes);
-            startIndexKey.compareAndSet(null, result.getIndexKey());
-            return result;
-        } catch (IOException e) {
-            this.input.reset();
+	@Override
+	public V next() throws StorageClosedException, IOException {
+		this.input.mark(Integer.MAX_VALUE);
+		try {
+			int len = this.input.readInt();
+			byte[] bytes = new byte[len];
+			int readable = this.input.read(bytes);
 
-            throw e;
-        }
-    }
-    
-    @Override
-    public void resetNext() throws IOException{
-   	 this.input.reset();
-    }
+			if (readable != len) {
+				throw new IOException("found broken index!");
+			}
 
-    @Override
-    public void locate(K key, boolean inclusive) throws StorageClosedException, IOException {
-        if (key == null) {
-            return;
-        }
+			prePosition = currentPosition;
+			currentPosition += 4 + len;
+			V result = this.valueConvertor.convertFromObj(bytes);
+			startIndexKey.compareAndSet(null, result.getIndexKey());
+			return result;
+		} catch (IOException e) {
+			this.input.reset();
 
-        while (true) {
-            V next = next();
+			throw e;
+		}
+	}
 
-            if (next.getIndexKey().equals(key)) {
-                if (inclusive) {
-                    this.input.reset();
-                }
+	@Override
+	public void resetNext() throws IOException {
+		this.input.reset();
+	}
 
-                return;
-            }
-        }
-    }
+	private void locate(K key, boolean inclusive) throws StorageClosedException, IOException {
+		if (key == null) {
+			return;
+		}
 
-    @Override
-    public void truncate() throws IOException {
-        RandomAccessFile randomAccessFile = null;
-        try {
-            randomAccessFile = new RandomAccessFile(file, "rwd");
-            randomAccessFile.setLength(prePosition);
-        } finally {
-            if (randomAccessFile != null) {
-                randomAccessFile.close();
-            }
-        }
-    }
+		while (true) {
+			V next = next();
 
-    @Override
-    public K getStartKeyIndex() {
-        return startIndexKey.get();
-    }
+			if (next.getIndexKey().equals(key)) {
+				if (inclusive) {
+					this.input.reset();
+				}
 
-    // hack for test purpose
-    @Override
-    public void append(byte[] bytes) throws IOException {
-        DataOutputStream output = new DataOutputStream(new FileOutputStream(file, true));
+				return;
+			}
+		}
+	}
 
-        output.write(bytes);
-        output.close();
-    }
+	@Override
+	public void truncate() throws IOException {
+		RandomAccessFile randomAccessFile = null;
+		try {
+			randomAccessFile = new RandomAccessFile(file, "rwd");
+			randomAccessFile.setLength(prePosition);
+		} finally {
+			if (randomAccessFile != null) {
+				randomAccessFile.close();
+			}
+		}
+	}
+
+	@Override
+	public K getStartKeyIndex() {
+		return startIndexKey.get();
+	}
+
+	// hack for test purpose
+	@Override
+	public void append(byte[] bytes) throws IOException {
+		DataOutputStream output = new DataOutputStream(new FileOutputStream(file, true));
+
+		output.write(bytes);
+		output.close();
+	}
 }

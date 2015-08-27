@@ -308,10 +308,10 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 	}
 
 	@Override
-	public IndexBucket<K, V> getIndexBucket(K key, boolean inclusive) throws IOException {
+	public IndexBucket<K, V> getIndexBucket(K startKey, boolean inclusive) throws IOException {
 		TreeMap<K, String> l1Index = loadL1Index();
 
-		if (key != null && l1Index != null) {
+		if (startKey != null && l1Index != null) {
 			Entry<K, String> l2Index = null;
 			l1ReadLock.lock();
 			try {
@@ -319,7 +319,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 					return null;
 				}
 
-				l2Index = l1Index.floorEntry(key);
+				l2Index = l1Index.floorEntry(startKey);
 			} finally {
 				l1ReadLock.unlock();
 			}
@@ -327,9 +327,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 			if (l2Index != null) {
 				File l2IndexFile = getL2IndexFile(l2Index.getValue());
 				LocalFileIndexBucket<K, V> localFileIndexBucket = new LocalFileIndexBucket<K, V>(l2IndexFile,
-				      this.indexValueConvertor);
-
-				localFileIndexBucket.locate(key, inclusive);
+				      this.indexValueConvertor, startKey, inclusive);
 
 				return localFileIndexBucket;
 			} else {
@@ -419,7 +417,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 		if (this.l2IndexWriter != null) {
 			this.l2IndexWriter.flush();
 		}
-		
+
 		TreeMap<K, String> l1Index = loadL1Index();
 
 		if (latestKey != null) {
@@ -464,11 +462,11 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 	}
 
 	@Override
-	public K findByTime(K searchKey, boolean startWithCompleteTransaction) throws IOException {
+	public K findByTime(K startKey, boolean startWithCompleteTransaction) throws IOException {
 		if (this.l2IndexWriter != null) {
 			this.l2IndexWriter.flush();
 		}
-		
+
 		TreeMap<K, String> l1Index = loadL1Index();
 
 		if (l1Index != null) {
@@ -478,10 +476,10 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 				if (l1Index.isEmpty()) {
 					return null;
 				} else {
-					Entry<K, String> target = l1Index.floorEntry(searchKey);
+					Entry<K, String> target = l1Index.floorEntry(startKey);
 
 					if (target == null) {
-						target = l1Index.ceilingEntry(searchKey);
+						target = l1Index.ceilingEntry(startKey);
 
 						if (target != null) {
 							return target.getKey();
@@ -501,7 +499,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 						while (true) {
 							next = bucket.next();
 
-							if (next.getIndexKey().getTimestamp() > searchKey.getTimestamp()) {
+							if (next.getIndexKey().getTimestamp() > startKey.getTimestamp()) {
 								break;
 							} else {
 								entries.add(next);
@@ -539,9 +537,9 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 		}
 	}
 
-	private K findFromPreviosIndexBucketByTime(K searchKey) throws IOException {
+	private K findFromPreviosIndexBucketByTime(K startKey) throws IOException {
 		TreeMap<K, String> l1Index = loadL1Index();
-		Entry<K, String> target = l1Index.headMap(searchKey, false).lastEntry();
+		Entry<K, String> target = l1Index.headMap(startKey, false).lastEntry();
 
 		if (target == null) {
 			return null;
@@ -574,11 +572,11 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 	}
 
 	@Override
-	public K findByBinlog(K searchKey, boolean startWithCompleteTransaction) throws IOException {
+	public K findByBinlog(K startKey, boolean startWithCompleteTransaction) throws IOException {
 		if (this.l2IndexWriter != null) {
 			this.l2IndexWriter.flush();
 		}
-		
+
 		TreeMap<K, String> l1Index = loadL1Index();
 
 		if (l1Index != null) {
@@ -593,8 +591,8 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 					for (Entry<K, String> entry : l1Index.entrySet()) {
 						K key = entry.getKey();
 
-						if (key.getServerId() == searchKey.getServerId()) {
-							if (compareTo(searchKey, key) >= 0) {
+						if (key.getServerId() == startKey.getServerId()) {
+							if (compareTo(startKey, key) >= 0) {
 
 								if (target == null) {
 									target = entry;
@@ -622,7 +620,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 						while (true) {
 							next = bucket.next();
 
-							if (compareTo(next.getIndexKey(), searchKey) > 0) {
+							if (compareTo(next.getIndexKey(), startKey) > 0) {
 								break;
 							} else {
 								entries.add(next);
@@ -661,7 +659,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 		}
 	}
 
-	private K findFromPreviosIndexBucketByBinlog(K searchKey) throws IOException {
+	private K findFromPreviosIndexBucketByBinlog(K startKey) throws IOException {
 		Entry<K, String> target = null;
 
 		TreeMap<K, String> l1Index = loadL1Index();
@@ -669,8 +667,8 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 		for (Entry<K, String> entry : l1Index.entrySet()) {
 			K key = entry.getKey();
 
-			if (key.getServerId() == searchKey.getServerId()) {
-				if (compareTo(searchKey, key) > 0) {
+			if (key.getServerId() == startKey.getServerId()) {
+				if (compareTo(startKey, key) > 0) {
 
 					if (target == null) {
 						target = entry;
@@ -734,6 +732,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 		return loadL1Index();
 
 	}
+
 	@Override
 	public IndexBucket<K, V> getIndexBucket(String fileName) throws IOException {
 		File l2IndexFile = getL2IndexFile(fileName);

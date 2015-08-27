@@ -14,9 +14,7 @@ public interface IndexBucket<K, V> extends LifeCycle<IOException> {
 	
 	void resetNext() throws IOException;
 
-	void locate(K key, boolean inclusive) throws StorageClosedException, IOException;
-
 	void truncate() throws IOException;
-
+	
 	K getStartKeyIndex();
 }

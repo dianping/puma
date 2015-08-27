@@ -1,5 +1,7 @@
 package com.dianping.puma.admin.model;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.util.*;
 
 public class PumaDto {
@@ -13,6 +15,8 @@ public class PumaDto {
 	private Map<String, String> hosts;
 
 	private Map<String, Date> beginTimes;
+
+	private Map<String, Long> beginTimestamps;
 
 	private Map<String, Boolean> actives;
 
@@ -80,6 +84,14 @@ public class PumaDto {
 		}
 
 		actives.put(serverName, active);
+	}
+
+	public Map<String, Long> getBeginTimestamps() {
+		return beginTimestamps;
+	}
+
+	public void setBeginTimestamps(Map<String, Long> beginTimestamps) {
+		this.beginTimestamps = beginTimestamps;
 	}
 
 	public Map<String, Date> getBeginTimes() {

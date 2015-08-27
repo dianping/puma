@@ -1,5 +1,18 @@
 package com.dianping.puma.pumaserver.channel.impl;
 
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.dto.binlog.request.BinlogGetRequest;
@@ -9,23 +22,9 @@ import com.dianping.puma.core.event.ServerErrorEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.pumaserver.channel.AsyncBinlogChannel;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
-import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.status.SystemStatusManager;
 import com.dianping.puma.storage.EventChannel;
-import com.dianping.puma.storage.EventStorage;
 import com.dianping.puma.storage.channel.DefaultEventChannel;
-import com.dianping.puma.storage.exception.StorageException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
@@ -36,8 +35,6 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
     protected static final ExecutorService executorService = Executors.newCachedThreadPool();
 
     private volatile EventChannel eventChannel;
-
-    private TaskContainer taskContainer;
 
     private final BlockingQueue<BinlogGetRequest> requests = new LinkedBlockingQueue<BinlogGetRequest>(5);
 
@@ -51,14 +48,8 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
             boolean ddl,
             boolean transaction
     ) throws BinlogChannelException {
-        EventStorage eventStorage = taskContainer.getTaskStorage(database);
-
-        if (eventStorage == null) {
-            throw new BinlogChannelException("find event storage failure, not exist.");
-        }
-
         try {
-            this.eventChannel = initChannel(sc, binlogInfo, database, tables, dml, ddl, transaction, eventStorage);
+            this.eventChannel = initChannel(sc, binlogInfo, database, tables, dml, ddl, transaction);
             executorService.execute(new AsyncTask(new WeakReference<DefaultAsyncBinlogChannel>(this)));
 
         } catch (Exception e) {
@@ -67,9 +58,8 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
         }
     }
 
-    protected EventChannel initChannel(long sc, BinlogInfo binlogInfo, String database, List<String> tables, boolean dml, boolean ddl, boolean transaction, EventStorage eventStorage) throws StorageException {
-        DefaultEventChannel eventChannel = new DefaultEventChannel(eventStorage);
-        eventChannel.withDatabase(database);
+    protected EventChannel initChannel(long sc, BinlogInfo binlogInfo, String database, List<String> tables, boolean dml, boolean ddl, boolean transaction) throws IOException {
+        DefaultEventChannel eventChannel = new DefaultEventChannel(database);
         eventChannel.withTables(tables.toArray(new String[tables.size()]));
         eventChannel.withDml(dml);
         eventChannel.withDdl(ddl);
@@ -94,10 +84,6 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
     @Override
     public boolean addRequest(BinlogGetRequest request) {
         return requests.offer(request);
-    }
-
-    public void setTaskContainer(TaskContainer taskContainer) {
-        this.taskContainer = taskContainer;
     }
 
     static class AsyncTask implements Runnable {

@@ -1,33 +1,36 @@
 package com.dianping.puma.pumaserver;
 
-import com.dianping.puma.pumaserver.handler.ChannelHolderHandler;
-import com.dianping.puma.pumaserver.handler.HandlerFactory;
-import com.dianping.puma.pumaserver.handler.HttpResponseEncoder;
-import com.dianping.puma.pumaserver.server.ServerConfig;
-import com.dianping.puma.pumaserver.server.TcpServer;
-import com.dianping.puma.pumaserver.client.PumaClientsHolder;
-import com.dianping.puma.pumaserver.handler.*;
-import com.dianping.puma.pumaserver.handler.binlog.BinlogAckHandler;
-import com.dianping.puma.pumaserver.handler.binlog.BinlogGetHandler;
-import com.dianping.puma.pumaserver.handler.binlog.BinlogSubscriptionHandler;
-import com.dianping.puma.pumaserver.handler.binlog.BinlogUnsubscriptionHandler;
-import com.dianping.puma.pumaserver.handler.deprecated.DeprecatedBinlogQueryHandler;
-import com.dianping.puma.pumaserver.service.ClientSessionService;
-import com.dianping.puma.pumaserver.service.impl.DbBinlogAckService;
-import com.dianping.puma.pumaserver.service.impl.DefaultClientSessionService;
-import com.dianping.puma.server.container.TaskContainer;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpContentDecompressor;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.util.LinkedHashMap;
-import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.dianping.puma.pumaserver.client.PumaClientsHolder;
+import com.dianping.puma.pumaserver.handler.ChannelHolderHandler;
+import com.dianping.puma.pumaserver.handler.ExceptionHandler;
+import com.dianping.puma.pumaserver.handler.HandlerFactory;
+import com.dianping.puma.pumaserver.handler.HttpResponseEncoder;
+import com.dianping.puma.pumaserver.handler.HttpRouterHandler;
+import com.dianping.puma.pumaserver.handler.binlog.BinlogAckHandler;
+import com.dianping.puma.pumaserver.handler.binlog.BinlogGetHandler;
+import com.dianping.puma.pumaserver.handler.binlog.BinlogSubscriptionHandler;
+import com.dianping.puma.pumaserver.handler.binlog.BinlogUnsubscriptionHandler;
+import com.dianping.puma.pumaserver.handler.deprecated.DeprecatedBinlogQueryHandler;
+import com.dianping.puma.pumaserver.server.ServerConfig;
+import com.dianping.puma.pumaserver.server.TcpServer;
+import com.dianping.puma.pumaserver.service.ClientSessionService;
+import com.dianping.puma.pumaserver.service.impl.DbBinlogAckService;
+import com.dianping.puma.pumaserver.service.impl.DefaultClientSessionService;
 
 /**
  * Dozer @ 6/24/15
@@ -36,9 +39,6 @@ import java.util.Map;
  */
 @Component
 public class PumaServerManager {
-
-    @Autowired
-    TaskContainer taskContainer;
 
     public volatile static TcpServer server;
 
@@ -67,7 +67,6 @@ public class PumaServerManager {
         final BinlogSubscriptionHandler binlogSubscriptionHandler = new BinlogSubscriptionHandler();
         binlogSubscriptionHandler.setBinlogAckService(binlogAckService);
         binlogSubscriptionHandler.setClientSessionService(clientSessionService);
-        binlogSubscriptionHandler.setTaskContainer(taskContainer);
 
         final BinlogUnsubscriptionHandler binlogUnsubscriptionHandler = new BinlogUnsubscriptionHandler();
         binlogUnsubscriptionHandler.setClientSessionService(clientSessionService);

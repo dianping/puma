@@ -64,8 +64,7 @@ public class DefaultAsyncBinlogChannelTest {
 
 
         target = spy(new DefaultAsyncBinlogChannel());
-        target.setTaskContainer(taskContainer);
-        doReturn(eventChannel).when(target).initChannel(anyLong(), any(BinlogInfo.class), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(EventStorage.class));
+        doReturn(eventChannel).when(target).initChannel(anyLong(), any(BinlogInfo.class), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean());
         target.init(-1, new BinlogInfo(-1, "", 1l, 1, 0), "", new ArrayList<String>(), false, false, false);
     }
 

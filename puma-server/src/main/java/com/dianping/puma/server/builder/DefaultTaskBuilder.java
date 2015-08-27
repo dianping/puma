@@ -1,5 +1,11 @@
 package com.dianping.puma.server.builder;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import com.dianping.puma.core.codec.RawEventCodec;
@@ -10,7 +16,12 @@ import com.dianping.puma.core.model.SchemaSet;
 import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.datahandler.DefaultDataHandler;
-import com.dianping.puma.filter.*;
+import com.dianping.puma.filter.DDLEventFilter;
+import com.dianping.puma.filter.DMLEventFilter;
+import com.dianping.puma.filter.DefaultEventFilterChain;
+import com.dianping.puma.filter.EventFilter;
+import com.dianping.puma.filter.EventFilterChain;
+import com.dianping.puma.filter.TransactionEventFilter;
 import com.dianping.puma.parser.DefaultBinlogParser;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
@@ -20,12 +31,6 @@ import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
 import com.dianping.puma.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.taskexecutor.DefaultTaskExecutor;
 import com.dianping.puma.taskexecutor.TaskExecutor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service("taskBuilder")
 public class DefaultTaskBuilder implements TaskBuilder {
@@ -35,33 +40,6 @@ public class DefaultTaskBuilder implements TaskBuilder {
 
     @Autowired
     RawEventCodec rawCodec;
-
-    @Value("fileSender-")
-    String fileSenderName;
-
-    @Value("dispatch-")
-    String dispatchName;
-
-    @Value("/data/appdatas/puma/storage/master/")
-    String masterStorageBaseDir;
-
-    @Value("Bucket-")
-    String masterBucketFilePrefix;
-
-    @Value("1000")
-    int maxMasterBucketLengthMB;
-
-    @Value("25")
-    int maxMasterFileCount;
-
-    @Value("/data/appdatas/puma/storage/slave/")
-    String slaveStorageBaseDir;
-
-    @Value("Bucket-")
-    String slaveBucketFilePrefix;
-
-    @Value("/data/appdatas/puma/binlogIndex/")
-    String binlogIndexBaseDir;
 
     public TaskExecutor build(PumaTaskEntity pumaTask) throws Exception {
         DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
@@ -138,25 +116,17 @@ public class DefaultTaskBuilder implements TaskBuilder {
         // File sender.
         List<Sender> senders = new ArrayList<Sender>();
         FileDumpSender sender = new FileDumpSender();
-        sender.setName(fileSenderName + taskName);
+        sender.setName("fileSender-" + taskName);
         sender.setTaskName(taskName);
         sender.setCodec(rawCodec);
         sender.setStorageEventFilterChain(eventFilterChain);
-
-        sender.setBinlogIndexBaseDir(binlogIndexBaseDir);
-        sender.setMasterStorageBaseDir(masterStorageBaseDir);
-        sender.setMasterBucketFilePrefix(masterBucketFilePrefix);
-        sender.setMaxMasterBucketLengthMB(maxMasterBucketLengthMB);
-        sender.setSlaveStorageBaseDir(slaveStorageBaseDir);
-        sender.setSlaveBucketFilePrefix(slaveBucketFilePrefix);
-        sender.setMaxMasterFileCount(maxMasterFileCount);
         sender.setPreservedDay(pumaTask.getPreservedDay());
 
         senders.add(sender);
 
         // Dispatch.
         SimpleDispatcherImpl dispatcher = new SimpleDispatcherImpl();
-        dispatcher.setName(dispatchName + taskName);
+        dispatcher.setName("dispatch-" + taskName);
         dispatcher.setSenders(senders);
         taskExecutor.setDispatcher(dispatcher);
 

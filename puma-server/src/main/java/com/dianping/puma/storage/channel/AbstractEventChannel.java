@@ -18,12 +18,6 @@ public abstract class AbstractEventChannel implements EventChannel {
 	protected boolean withDml = true;
 
 	@Override
-	public EventChannel withDatabase(String database) {
-		this.database = database;
-		return this;
-	}
-
-	@Override
 	public EventChannel withTables(String... tables) {
 		this.tables = new HashSet<String>();
 

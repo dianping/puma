@@ -25,30 +25,30 @@ import java.util.TreeMap;
  */
 public interface IndexManager<K extends IndexKey<K>, V> extends LifeCycle<IOException> {
 
-    void addL1Index(K key, String l2IndexName) throws IOException;
+	void addL1Index(K key, String l2IndexName) throws IOException;
 
-    TreeMap<K, String> getL1Index();
+	TreeMap<K, String> getL1Index() throws IOException;
 
-    void addL2Index(K key, V value) throws IOException;
+	void addL2Index(K key, V value) throws IOException;
 
-    void removeByL2IndexName(String l2IndexName) throws IOException;
+	void removeByL2IndexName(String l2IndexName) throws IOException;
 
-    void flush() throws IOException;
+	void flush() throws IOException;
 
-    IndexBucket<K, V> getIndexBucket(String fileName) throws IOException;
+	IndexBucket<K, V> getIndexBucket(String fileName) throws IOException;
 
-    IndexBucket<K, V> getIndexBucket(K key, boolean inclusive) throws IOException;
+	IndexBucket<K, V> getIndexBucket(K key, boolean inclusive) throws IOException;
 
-    boolean hasNextIndexBucket(K key) throws IOException;
+	boolean hasNextIndexBucket(K key) throws IOException;
 
-    IndexBucket<K, V> getNextIndexBucket(K key) throws IOException;
+	IndexBucket<K, V> getNextIndexBucket(K key) throws IOException;
 
-    K findFirst() throws IOException;
+	K findFirst() throws IOException;
 
-    K findLatest() throws IOException;
+	K findLatest() throws IOException;
 
-    K findByTime(K searchKey, boolean startWithCompleteTransaction) throws IOException;
+	K findByTime(K searchKey, boolean startWithCompleteTransaction) throws IOException;
 
-    K findByBinlog(K searchKey, boolean startWithCompleteTransaction) throws IOException;
+	K findByBinlog(K searchKey, boolean startWithCompleteTransaction) throws IOException;
 
 }

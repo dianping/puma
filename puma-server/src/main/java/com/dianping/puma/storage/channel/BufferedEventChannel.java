@@ -5,17 +5,18 @@
  */
 package com.dianping.puma.storage.channel;
 
+import java.io.IOException;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dianping.cat.Cat;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.ServerErrorEvent;
 import com.dianping.puma.storage.EventChannel;
-import com.dianping.puma.storage.exception.InvalidSequenceException;
 import com.dianping.puma.storage.exception.StorageException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 public class BufferedEventChannel extends AbstractEventChannel implements EventChannel {
 
@@ -111,7 +112,7 @@ public class BufferedEventChannel extends AbstractEventChannel implements EventC
     }
 
     @Override
-    public void open(long serverId, String binlogFile, long binlogPosition) throws InvalidSequenceException {
+    public void open(long serverId, String binlogFile, long binlogPosition) throws IOException {
         if (inited) {
             return;
         }
@@ -129,7 +130,7 @@ public class BufferedEventChannel extends AbstractEventChannel implements EventC
     }
 
     @Override
-    public void open(long startTimeStamp) throws InvalidSequenceException {
+    public void open(long startTimeStamp) throws IOException {
         if (inited) {
             return;
         }

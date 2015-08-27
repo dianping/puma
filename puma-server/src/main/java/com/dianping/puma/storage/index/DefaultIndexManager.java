@@ -57,8 +57,6 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 
 	private String baseDir;
 
-	private TreeMap<K, String> l1Index;
-
 	private BufferedWriter l1IndexWriter;
 
 	private String writingl2IndexName = null;
@@ -107,7 +105,9 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 	public void start() throws IOException {
 		createDirIfNeeded();
 
-		loadL1Index();
+		File l1IndexFile = getL1IndexFile();
+		l1IndexFile.createNewFile();
+		l1IndexWriter = new BufferedWriter(new FileWriter(l1IndexFile, true));
 
 		l2WriteLock.lock();
 		try {
@@ -119,34 +119,27 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 		}
 	}
 
-	private void loadL1Index() throws IOException {
-		l1WriteLock.lock();
+	private TreeMap<K, String> loadL1Index() throws IOException {
+		TreeMap<K, String> l1Index = new TreeMap<K, String>();
+		File l1IndexFile = getL1IndexFile();
+		l1IndexFile.createNewFile();
+		InputStream is = null;
 		try {
-			l1Index = new TreeMap<K, String>();
-			File l1IndexFile = getL1IndexFile();
-			l1IndexFile.createNewFile();
-
-			InputStream is = null;
-			try {
-				Properties prop = new Properties();
-				is = new FileInputStream(l1IndexFile);
-				prop.load(is);
-				TreeMap<K, String> newL1Index = new TreeMap<K, String>();
-				for (String propName : prop.stringPropertyNames()) {
-					K key = indexKeyConvertor.convertFromObj(propName);
-					String value = prop.getProperty(propName);
-					if (key != null && value != null) {
-						newL1Index.put(key, value);
-					}
+			Properties prop = new Properties();
+			is = new FileInputStream(l1IndexFile);
+			prop.load(is);
+			for (String propName : prop.stringPropertyNames()) {
+				K key = indexKeyConvertor.convertFromObj(propName);
+				String value = prop.getProperty(propName);
+				if (key != null && value != null) {
+					l1Index.put(key, value);
 				}
-				l1Index = newL1Index;
-				l1IndexWriter = new BufferedWriter(new FileWriter(l1IndexFile, true));
-			} finally {
-				closeQuietly(is);
 			}
 		} finally {
-			l1WriteLock.unlock();
+			closeQuietly(is);
 		}
+
+		return l1Index;
 	}
 
 	private void createDirIfNeeded() throws IOException {
@@ -214,10 +207,10 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 	@Override
 	public void addL1Index(K key, String l2IndexName) throws IOException {
 		boolean added = false;
+		TreeMap<K, String> l1Index = loadL1Index();
 		l1WriteLock.lock();
 		try {
 			if (!l1Index.containsKey(key)) {
-				l1Index.put(key, l2IndexName);
 				appendL1IndexToFile(key, l2IndexName);
 				added = true;
 			}
@@ -269,6 +262,8 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 	@Override
 	public void removeByL2IndexName(String l2IndexName) throws IOException {
 		boolean removed = false;
+		TreeMap<K, String> l1Index = loadL1Index();
+
 		l1WriteLock.lock();
 		try {
 			if (l1Index.containsValue(l2IndexName)) {
@@ -314,6 +309,8 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 
 	@Override
 	public IndexBucket<K, V> getIndexBucket(K key, boolean inclusive) throws IOException {
+		TreeMap<K, String> l1Index = loadL1Index();
+
 		if (key != null && l1Index != null) {
 			Entry<K, String> l2Index = null;
 			l1ReadLock.lock();
@@ -344,6 +341,8 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 	}
 
 	public boolean hasNextIndexBucket(K key) throws IOException {
+		TreeMap<K, String> l1Index = loadL1Index();
+
 		Entry<K, String> l2Index = null;
 		if (l1Index != null) {
 			l1ReadLock.lock();
@@ -362,6 +361,8 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 	}
 
 	public IndexBucket<K, V> getNextIndexBucket(K key) throws IOException {
+		TreeMap<K, String> l1Index = loadL1Index();
+
 		Entry<K, String> l2Index = null;
 		if (l1Index != null) {
 			l1ReadLock.lock();
@@ -393,6 +394,8 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 			this.l2IndexWriter.flush();
 		}
 
+		TreeMap<K, String> l1Index = loadL1Index();
+
 		if (l1Index != null) {
 			l1ReadLock.lock();
 
@@ -416,6 +419,8 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 		if (this.l2IndexWriter != null) {
 			this.l2IndexWriter.flush();
 		}
+		
+		TreeMap<K, String> l1Index = loadL1Index();
 
 		if (latestKey != null) {
 			return latestKey;
@@ -463,6 +468,8 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 		if (this.l2IndexWriter != null) {
 			this.l2IndexWriter.flush();
 		}
+		
+		TreeMap<K, String> l1Index = loadL1Index();
 
 		if (l1Index != null) {
 			l1ReadLock.lock();
@@ -533,6 +540,7 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 	}
 
 	private K findFromPreviosIndexBucketByTime(K searchKey) throws IOException {
+		TreeMap<K, String> l1Index = loadL1Index();
 		Entry<K, String> target = l1Index.headMap(searchKey, false).lastEntry();
 
 		if (target == null) {
@@ -570,6 +578,8 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 		if (this.l2IndexWriter != null) {
 			this.l2IndexWriter.flush();
 		}
+		
+		TreeMap<K, String> l1Index = loadL1Index();
 
 		if (l1Index != null) {
 			l1ReadLock.lock();
@@ -654,6 +664,8 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 	private K findFromPreviosIndexBucketByBinlog(K searchKey) throws IOException {
 		Entry<K, String> target = null;
 
+		TreeMap<K, String> l1Index = loadL1Index();
+
 		for (Entry<K, String> entry : l1Index.entrySet()) {
 			K key = entry.getKey();
 
@@ -718,10 +730,10 @@ public class DefaultIndexManager<K extends IndexKey<K>, V extends IndexValue<K>>
 	}
 
 	@Override
-	public TreeMap<K, String> getL1Index() {
-		return this.l1Index;
-	}
+	public TreeMap<K, String> getL1Index() throws IOException {
+		return loadL1Index();
 
+	}
 	@Override
 	public IndexBucket<K, V> getIndexBucket(String fileName) throws IOException {
 		File l2IndexFile = getL2IndexFile(fileName);

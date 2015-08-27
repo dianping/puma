@@ -29,7 +29,12 @@ public class DefaultStorageIntegrityChecker implements StorageIntegrityChecker {
 
 	@Override
 	public void checkAndRepair() {
-		TreeMap<IndexKeyImpl, String> l1Index = eventStorage.getIndexManager().getL1Index();
+		TreeMap<IndexKeyImpl, String> l1Index = null;
+      try {
+	      l1Index = eventStorage.getIndexManager().getL1Index();
+      } catch (IOException e1) {
+      }
+      
 		EventCodec eventCodec = eventStorage.getEventCodec();
 
 		if (l1Index != null) {

@@ -1,5 +1,11 @@
 package com.dianping.puma.pumaserver.handler.binlog;
 
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
+
+import java.util.List;
+
 import com.dianping.cat.Cat;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.dto.BinlogAck;
@@ -12,13 +18,7 @@ import com.dianping.puma.pumaserver.client.ClientSession;
 import com.dianping.puma.pumaserver.client.ClientType;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
-import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.status.SystemStatusManager;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
-
-import java.util.List;
 
 @ChannelHandler.Sharable
 public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<BinlogSubscriptionRequest> {
@@ -26,8 +26,6 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
     private BinlogAckService binlogAckService;
 
     private ClientSessionService clientSessionService;
-
-    private TaskContainer taskContainer;
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, BinlogSubscriptionRequest binlogSubscriptionRequest) {
@@ -75,7 +73,6 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
             boolean ddl,
             boolean transaction) {
         DefaultAsyncBinlogChannel defaultAsyncBinlogChannel = new DefaultAsyncBinlogChannel();
-        defaultAsyncBinlogChannel.setTaskContainer(taskContainer);
         defaultAsyncBinlogChannel.init(sc, binlogInfo, database, tables, dml, ddl, transaction);
 
         return defaultAsyncBinlogChannel;
@@ -87,9 +84,5 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
     public void setClientSessionService(ClientSessionService clientSessionService) {
         this.clientSessionService = clientSessionService;
-    }
-
-    public void setTaskContainer(TaskContainer taskContainer) {
-        this.taskContainer = taskContainer;
     }
 }

@@ -1,18 +1,11 @@
 package com.dianping.puma.storage;
 
+import java.io.IOException;
+
 import com.dianping.puma.core.event.Event;
-import com.dianping.puma.storage.exception.InvalidSequenceException;
 import com.dianping.puma.storage.exception.StorageException;
 
 public interface EventChannel {
-
-	/**
-	 * default value is all;
-	 *
-	 * @param transaction
-	 * @return
-	 */
-	public EventChannel withDatabase(String database);
 
 	/**
 	 * default value is all;
@@ -46,14 +39,14 @@ public interface EventChannel {
 	 */
 	public EventChannel withDml(boolean dml);
 
-	public void open(long serverId, String binlogFile, long binlogPosition) throws InvalidSequenceException;
+	public void open(long serverId, String binlogFile, long binlogPosition) throws IOException;
 
 	/**
 	 * -1 for oldest ; 0 for newest; other for timestamp;
 	 * 
 	 * @param startTimeStamp
 	 */
-	public void open(long startTimeStamp) throws InvalidSequenceException;
+	public void open(long startTimeStamp) throws IOException;
 
 	public void close();
 

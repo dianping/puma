@@ -111,7 +111,8 @@ public class DeprecatedBinlogQueryHandler extends SimpleChannelInboundHandler<De
 
 			adjust();
 
-			DefaultEventChannel defaultChannel = new DefaultEventChannel(eventStorage);
+			DefaultEventChannel defaultChannel = new DefaultEventChannel(""); //TODO
+//			defaultChannel.withDatabase(database);//TODO
 			eventChannel = new BufferedEventChannel(deprecatedBinlogQuery.getClientName(), defaultChannel, 5000);
 
 			if (deprecatedBinlogQuery.getSeq() == SubscribeConstant.SEQ_FROM_BINLOGINFO) {

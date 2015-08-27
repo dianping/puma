@@ -59,6 +59,11 @@ public class LocalFileIndexBucket<K, V extends IndexValue<K>> implements IndexBu
             throw e;
         }
     }
+    
+    @Override
+    public void resetNext() throws IOException{
+   	 this.input.reset();
+    }
 
     @Override
     public void locate(K key, boolean inclusive) throws StorageClosedException, IOException {

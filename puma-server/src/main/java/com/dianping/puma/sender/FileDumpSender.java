@@ -15,9 +15,14 @@
  */
 package com.dianping.puma.sender;
 
+import java.util.Map;
+
+import org.jboss.netty.util.internal.ConcurrentHashMap;
+
 import com.dianping.cat.Cat;
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.core.codec.EventCodec;
+import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.filter.EventFilterChain;
@@ -26,11 +31,9 @@ import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.EventStorage;
 import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
+import com.dianping.puma.storage.conf.GlobalStorageConfig;
 import com.dianping.puma.storage.exception.StorageException;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;
-import org.jboss.netty.util.internal.ConcurrentHashMap;
-
-import java.util.Map;
 
 /**
  *
@@ -38,195 +41,146 @@ import java.util.Map;
  *
  */
 public class FileDumpSender extends AbstractSender {
-    private Map<String, DefaultEventStorage> storages = new ConcurrentHashMap<String, DefaultEventStorage>();
+	private Map<String, DefaultEventStorage> storages = new ConcurrentHashMap<String, DefaultEventStorage>();
 
-    private ChangedEvent transactionBegin;
+	private ChangedEvent transactionBegin;
 
-    private EventFilterChain storageEventFilterChain;
+	private EventFilterChain storageEventFilterChain;
 
-    private String taskName;
+	private String taskName;
 
-    private String binlogIndexBaseDir;
+	private int preservedDay;
 
-    private String masterStorageBaseDir;
+	private EventCodec codec;
 
-    private String masterBucketFilePrefix;
+	@Override
+	public void start() throws Exception {
+		super.start();
+	}
 
-    private String slaveStorageBaseDir;
+	@Override
+	public void stop() throws Exception {
+		super.stop();
+	}
 
-    private String slaveBucketFilePrefix;
+	@Override
+	protected void doSend(ChangedEvent event, PumaContext context) throws SenderException {
+		// Storage filter.
+		storageEventFilterChain.reset();
+		if (!storageEventFilterChain.doNext(event)) {
+			return;
+		}
 
-    private int maxMasterFileCount;
+		try {
+			String database = event.getDatabase();
 
-    private int maxMasterBucketLengthMB;
+			if (database != null && database.length() > 0) {
+				DefaultEventStorage eventStorage = storages.get(database);
 
-    private int maxSlaveBucketLengthMB;
+				if (eventStorage == null) {
+					eventStorage = buildEventStorage(database);
+					storages.put(database, eventStorage);
+				}
 
-    private int preservedDay;
+				boolean isTransactionBegin = false;
 
-    private EventCodec codec;
+				if (event instanceof RowChangedEvent) {
+					isTransactionBegin = ((RowChangedEvent) event).isTransactionBegin();
+				}
 
-    @Override
-    public void start() throws Exception {
-        super.start();
-    }
+				if (transactionBegin != null && !isTransactionBegin) {
+					eventStorage.store(transactionBegin);
+					transactionBegin = null;
+				}
 
-    @Override
-    public void stop() throws Exception {
-        super.stop();
-    }
+				eventStorage.store(event);
+			} else {
+				if (event instanceof RowChangedEvent) {
+					if (((RowChangedEvent) event).isTransactionBegin()) {
+						transactionBegin = event;
+					} else {
+						Cat.logEvent("Puma", "RowChangeEvent-Has-No-Database");
+						LOG.error(String.format("RowChangeEvent[%s] has no database", event.toString()));
+					}
+				} else {
+					Cat.logEvent("Puma", "ChangeEvent-Has-No-Database");
+					LOG.error(String.format("ChangeEvent[%s] has no database", event.toString()));
+				}
+			}
+		} catch (StorageException e) {
+			throw new SenderException("FileDumpSender.doSend failed.", e);
+		}
+	}
 
-    @Override
-    protected void doSend(ChangedEvent event, PumaContext context) throws SenderException {
-        // Storage filter.
-        storageEventFilterChain.reset();
-        if (!storageEventFilterChain.doNext(event)) {
-            return;
-        }
+	private DefaultEventStorage buildEventStorage(String database) throws StorageLifeCycleException {
+		DefaultEventStorage storage = new DefaultEventStorage();
+		storage.setName("storage-" + database);
+		storage.setTaskName(taskName);
+		storage.setCodec(codec);
 
-        try {
-            String database = event.getDatabase();
+		// File sender master storage.
+		LocalFileDataBucketManager masterBucketIndex = new LocalFileDataBucketManager();
+		masterBucketIndex.setBaseDir(GlobalStorageConfig.masterStorageBaseDir + "/" + database);
+		masterBucketIndex.setBucketFilePrefix(GlobalStorageConfig.masterBucketFilePrefix);
+		masterBucketIndex.setMaxBucketLengthMB(GlobalStorageConfig.maxMasterBucketLengthMB);
 
-            if (database != null && database.length() > 0) {
-                DefaultEventStorage eventStorage = storages.get(database);
+		storage.setMasterBucketIndex(masterBucketIndex);
 
-                if (eventStorage == null) {
-                    eventStorage = buildEventStorage(database);
-                    storages.put(database, eventStorage);
-                }
+		// File sender slave storage.
+		LocalFileDataBucketManager slaveBucketIndex = new LocalFileDataBucketManager();
+		slaveBucketIndex.setBaseDir(GlobalStorageConfig.slaveStorageBaseDir + "/" + database);
+		slaveBucketIndex.setBucketFilePrefix(GlobalStorageConfig.slaveBucketFilePrefix);
+		slaveBucketIndex.setMaxBucketLengthMB(GlobalStorageConfig.maxMasterBucketLengthMB);
 
-                boolean isTransactionBegin = false;
+		storage.setSlaveBucketIndex(slaveBucketIndex);
 
-                if (event instanceof RowChangedEvent) {
-                    isTransactionBegin = ((RowChangedEvent) event).isTransactionBegin();
-                }
+		// Archive strategy.
+		DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
+		archiveStrategy.setServerName(taskName);
+		archiveStrategy.setMaxMasterFileCount(GlobalStorageConfig.maxMasterFileCount);
+		storage.setArchiveStrategy(archiveStrategy);
 
-                if (transactionBegin != null && !isTransactionBegin) {
-                    eventStorage.store(transactionBegin);
-                    transactionBegin = null;
-                }
+		// Clean up strategy.
+		DefaultCleanupStrategy cleanupStrategy = new DefaultCleanupStrategy();
+		cleanupStrategy.setPreservedDay(preservedDay);
+		storage.setCleanupStrategy(cleanupStrategy);
+		storage.setBinlogIndexBaseDir(GlobalStorageConfig.binlogIndexBaseDir + "/" + database);
 
-                eventStorage.store(event);
-            } else {
-                if (event instanceof RowChangedEvent) {
-                    if (((RowChangedEvent) event).isTransactionBegin()) {
-                        transactionBegin = event;
-                    } else {
-                        Cat.logEvent("Puma", "RowChangeEvent-Has-No-Database");
-                        LOG.error(String.format("RowChangeEvent[%s] has no database", event.toString()));
-                    }
-                } else {
-                    Cat.logEvent("Puma", "ChangeEvent-Has-No-Database");
-                    LOG.error(String.format("ChangeEvent[%s] has no database", event.toString()));
-                }
-            }
-        } catch (StorageException e) {
-            throw new SenderException("FileDumpSender.doSend failed.", e);
-        }
-    }
+		storage.start();
+		return storage;
+	}
 
-    private DefaultEventStorage buildEventStorage(String database) throws StorageLifeCycleException {
-        DefaultEventStorage storage = new DefaultEventStorage();
-        storage.setName("storage-" + database);
-        storage.setTaskName(taskName);
-        storage.setCodec(codec);
+	public void setStorageEventFilterChain(EventFilterChain storageEventFilterChain) {
+		this.storageEventFilterChain = storageEventFilterChain;
+	}
 
-        // File sender master storage.
-        LocalFileDataBucketManager masterBucketIndex = new LocalFileDataBucketManager();
-        masterBucketIndex.setBaseDir(masterStorageBaseDir + "/" + database);
-        masterBucketIndex.setBucketFilePrefix(masterBucketFilePrefix);
-        masterBucketIndex.setMaxBucketLengthMB(maxMasterBucketLengthMB);
+	public void setStorages(Map<String, DefaultEventStorage> storages) {
+		this.storages = storages;
+	}
 
-        storage.setMasterBucketIndex(masterBucketIndex);
+	public void setTaskName(String taskName) {
+		this.taskName = taskName;
+	}
 
-        // File sender slave storage.
-        LocalFileDataBucketManager slaveBucketIndex = new LocalFileDataBucketManager();
-        slaveBucketIndex.setBaseDir(slaveStorageBaseDir + "/" + database);
-        slaveBucketIndex.setBucketFilePrefix(slaveBucketFilePrefix);
-        slaveBucketIndex.setMaxBucketLengthMB(maxSlaveBucketLengthMB);
+	public void setPreservedDay(int preservedDay) {
+		this.preservedDay = preservedDay;
+	}
 
-        storage.setSlaveBucketIndex(slaveBucketIndex);
+	@Override
+	public EventStorage getStorage(String database) {
+		try {
+			DefaultEventStorage eventStorage = storages.get(database);
+			if (eventStorage == null) {
+				eventStorage = buildEventStorage(database);
+				storages.put(database, eventStorage);
+			}
+			return eventStorage;
+		} catch (Exception e) {
+			return null;
+		}
+	}
 
-        // Archive strategy.
-        DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
-        archiveStrategy.setServerName(taskName);
-        archiveStrategy.setMaxMasterFileCount(maxMasterFileCount);
-        storage.setArchiveStrategy(archiveStrategy);
-
-        // Clean up strategy.
-        DefaultCleanupStrategy cleanupStrategy = new DefaultCleanupStrategy();
-        cleanupStrategy.setPreservedDay(preservedDay);
-        storage.setCleanupStrategy(cleanupStrategy);
-
-        storage.setBinlogIndexBaseDir(binlogIndexBaseDir + database);
-
-        storage.start();
-        return storage;
-    }
-
-    public void setStorageEventFilterChain(EventFilterChain storageEventFilterChain) {
-        this.storageEventFilterChain = storageEventFilterChain;
-    }
-
-    public void setStorages(Map<String, DefaultEventStorage> storages) {
-        this.storages = storages;
-    }
-
-    public void setTaskName(String taskName) {
-        this.taskName = taskName;
-    }
-
-    public void setBinlogIndexBaseDir(String binlogIndexBaseDir) {
-        this.binlogIndexBaseDir = binlogIndexBaseDir;
-    }
-
-    public void setMasterStorageBaseDir(String masterStorageBaseDir) {
-        this.masterStorageBaseDir = masterStorageBaseDir;
-    }
-
-    public void setSlaveStorageBaseDir(String slaveStorageBaseDir) {
-        this.slaveStorageBaseDir = slaveStorageBaseDir;
-    }
-
-    public void setMaxMasterBucketLengthMB(int maxMasterBucketLengthMB) {
-        this.maxMasterBucketLengthMB = maxMasterBucketLengthMB;
-    }
-
-    public void setMaxSlaveBucketLengthMB(int maxSlaveBucketLengthMB) {
-        this.maxSlaveBucketLengthMB = maxSlaveBucketLengthMB;
-    }
-
-    public void setSlaveBucketFilePrefix(String slaveBucketFilePrefix) {
-        this.slaveBucketFilePrefix = slaveBucketFilePrefix;
-    }
-
-    public void setCodec(EventCodec codec) {
-        this.codec = codec;
-    }
-
-    public void setMasterBucketFilePrefix(String masterBucketFilePrefix) {
-        this.masterBucketFilePrefix = masterBucketFilePrefix;
-    }
-
-    public void setMaxMasterFileCount(int maxMasterFileCount) {
-        this.maxMasterFileCount = maxMasterFileCount;
-    }
-
-    public void setPreservedDay(int preservedDay) {
-        this.preservedDay = preservedDay;
-    }
-
-    @Override
-    public EventStorage getStorage(String database) {
-        try {
-            DefaultEventStorage eventStorage = storages.get(database);
-            if (eventStorage == null) {
-                eventStorage = buildEventStorage(database);
-                storages.put(database, eventStorage);
-            }
-            return eventStorage;
-        } catch (Exception e) {
-            return null;
-        }
-    }
+	public void setCodec(RawEventCodec rawCodec) {
+		this.codec = rawCodec;
+	}
 }

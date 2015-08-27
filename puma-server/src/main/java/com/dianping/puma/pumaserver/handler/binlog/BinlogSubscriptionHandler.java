@@ -1,24 +1,20 @@
 package com.dianping.puma.pumaserver.handler.binlog;
 
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
-
-import java.util.List;
-
 import com.dianping.cat.Cat;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.dto.BinlogAck;
 import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
-import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.pumaserver.channel.AsyncBinlogChannel;
 import com.dianping.puma.pumaserver.channel.impl.DefaultAsyncBinlogChannel;
 import com.dianping.puma.pumaserver.client.ClientSession;
 import com.dianping.puma.pumaserver.client.ClientType;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
 import com.dianping.puma.status.SystemStatusManager;
+import com.google.common.base.Strings;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 
 @ChannelHandler.Sharable
 public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<BinlogSubscriptionRequest> {
@@ -33,8 +29,15 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
         BinlogAck binlogAck = binlogAckService.load(clientName);
 
-        AsyncBinlogChannel asyncBinlogChannel = buildBinlogChannel(
-                binlogAck == null ? SubscribeConstant.SEQ_FROM_OLDEST : SubscribeConstant.SEQ_FROM_BINLOGINFO,
+        DefaultAsyncBinlogChannel defaultAsyncBinlogChannel = new DefaultAsyncBinlogChannel(clientName);
+
+        long seq = binlogAck == null ? SubscribeConstant.SEQ_FROM_OLDEST :
+                (Strings.isNullOrEmpty(binlogAck.getBinlogInfo().getBinlogFile()) ?
+                        SubscribeConstant.SEQ_FROM_TIMESTAMP :
+                        SubscribeConstant.SEQ_FROM_BINLOGINFO);
+
+        defaultAsyncBinlogChannel.init(
+                seq,
                 binlogAck == null ? null : binlogAck.getBinlogInfo(),
                 binlogSubscriptionRequest.getDatabase(),
                 binlogSubscriptionRequest.getTables(),
@@ -43,7 +46,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
                 binlogSubscriptionRequest.isTransaction()
         );
 
-        ClientSession session = new ClientSession(clientName, asyncBinlogChannel, binlogSubscriptionRequest.getCodec().equals("json") ? ClientType.BROSWER : ClientType.PUMACLIENT);
+        ClientSession session = new ClientSession(clientName, defaultAsyncBinlogChannel, binlogSubscriptionRequest.getCodec().equals("json") ? ClientType.BROSWER : ClientType.PUMACLIENT);
         clientSessionService.subscribe(session);
 
         BinlogSubscriptionResponse binlogSubscriptionResponse = new BinlogSubscriptionResponse();
@@ -62,20 +65,6 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
                 binlogSubscriptionRequest.isTransaction(),
                 binlogSubscriptionRequest.getCodec()
         );
-    }
-
-    private AsyncBinlogChannel buildBinlogChannel(
-            long sc,
-            BinlogInfo binlogInfo,
-            String database,
-            List<String> tables,
-            boolean dml,
-            boolean ddl,
-            boolean transaction) {
-        DefaultAsyncBinlogChannel defaultAsyncBinlogChannel = new DefaultAsyncBinlogChannel();
-        defaultAsyncBinlogChannel.init(sc, binlogInfo, database, tables, dml, ddl, transaction);
-
-        return defaultAsyncBinlogChannel;
     }
 
     public void setBinlogAckService(BinlogAckService binlogAckService) {

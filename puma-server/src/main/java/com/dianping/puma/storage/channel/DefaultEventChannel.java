@@ -235,7 +235,7 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 
 		if (serverId != 0 && binlogFile != null && binlogPosition > 0) {
 			try {
-				this.lastIndexKey = this.indexManager.findByBinlog(new IndexKeyImpl(serverId, binlogFile, binlogPosition),
+ 				this.lastIndexKey = this.indexManager.findByBinlog(new IndexKeyImpl(serverId, binlogFile, binlogPosition),
 				      true);
 			} catch (IOException e) {
 				throw new InvalidSequenceException("find binlog error", e);

@@ -1,5 +1,26 @@
 package com.dianping.puma.pumaserver.channel.impl;
 
+import com.dianping.cat.Cat;
+import com.dianping.puma.core.constant.SubscribeConstant;
+import com.dianping.puma.core.dto.BinlogMessage;
+import com.dianping.puma.core.dto.binlog.request.BinlogGetRequest;
+import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
+import com.dianping.puma.core.event.Event;
+import com.dianping.puma.core.event.ServerErrorEvent;
+import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.eventbus.DefaultEventBus;
+import com.dianping.puma.eventbus.event.ClientPositionChangedEvent;
+import com.dianping.puma.pumaserver.channel.AsyncBinlogChannel;
+import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
+import com.dianping.puma.status.SystemStatusManager;
+import com.dianping.puma.storage.EventChannel;
+import com.dianping.puma.storage.channel.DefaultEventChannel;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.google.common.eventbus.Subscribe;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -10,23 +31,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.dianping.puma.core.constant.SubscribeConstant;
-import com.dianping.puma.core.dto.BinlogMessage;
-import com.dianping.puma.core.dto.binlog.request.BinlogGetRequest;
-import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
-import com.dianping.puma.core.event.Event;
-import com.dianping.puma.core.event.ServerErrorEvent;
-import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.pumaserver.channel.AsyncBinlogChannel;
-import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
-import com.dianping.puma.status.SystemStatusManager;
-import com.dianping.puma.storage.EventChannel;
-import com.dianping.puma.storage.channel.DefaultEventChannel;
-
 public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
+
+    private final String clientName;
+
+    private volatile String database;
 
     private final static Logger logger = LoggerFactory.getLogger(DefaultAsyncBinlogChannel.class);
 
@@ -37,6 +46,10 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
     private volatile EventChannel eventChannel;
 
     private final BlockingQueue<BinlogGetRequest> requests = new LinkedBlockingQueue<BinlogGetRequest>(5);
+
+    public DefaultAsyncBinlogChannel(String clientName) {
+        this.clientName = clientName;
+    }
 
     @Override
     public void init(
@@ -49,12 +62,37 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
             boolean transaction
     ) throws BinlogChannelException {
         try {
+            this.database = database;
             this.eventChannel = initChannel(sc, binlogInfo, database, tables, dml, ddl, transaction);
             executorService.execute(new AsyncTask(new WeakReference<DefaultAsyncBinlogChannel>(this)));
-
+            DefaultEventBus.INSTANCE.register(this);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw new BinlogChannelException("find event storage failure", e.getCause());
+        }
+    }
+
+    @Subscribe
+    public void listenClientPositionChanged(ClientPositionChangedEvent event) {
+        if (event.getClientName() == null || !event.getClientName().equals(clientName)) {
+            return;
+        }
+
+        if (this.eventChannel == null) {
+            return;
+        }
+
+        try {
+            EventChannel eventChannel = initChannel(
+                    Strings.isNullOrEmpty(event.getBinlogInfo().getBinlogFile()) ? SubscribeConstant.SEQ_FROM_TIMESTAMP : SubscribeConstant.SEQ_FROM_BINLOGINFO,
+                    event.getBinlogInfo(), database, Lists.newArrayList(this.eventChannel.getTables()),
+                    this.eventChannel.getDml(), this.eventChannel.getDdl(), this.eventChannel.getTransaction());
+            EventChannel oldEventChannel = this.eventChannel;
+            this.eventChannel = eventChannel;
+            oldEventChannel.close();
+            Cat.logEvent("Switch.ClientPosition", String.format("%s %s", clientName, event.getBinlogInfo().toString()));
+        } catch (IOException e) {
+            Cat.logError(String.format("Switch ClientPosition Failed! %s %s", clientName, event.getBinlogInfo().toString()), e);
         }
     }
 
@@ -77,6 +115,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
     @Override
     public void destroy() {
+        DefaultEventBus.INSTANCE.unregister(this);
         stopped = true;
         eventChannel.close();
     }

@@ -39,9 +39,6 @@ public class ScheduledTaskChecker implements TaskChecker {
     @Autowired
     InstanceManager instanceManager;
 
-    @Autowired
-    ConfigManager configManager;
-
     private Map<String, PumaTaskEntity> tasks = new ConcurrentHashMap<String, PumaTaskEntity>();
 
     protected Map<String, PumaTaskEntity> loadPumaTask() {
@@ -88,14 +85,8 @@ public class ScheduledTaskChecker implements TaskChecker {
             entity.setBeginTime(beginTime);
 
             ImmutableSet.Builder<SrcDbEntity> srcDbBuilder = ImmutableSet.builder();
-            for (String url : instanceManager.getUrlByCluster(entry.getKey())) {
-                SrcDbEntity srcDbEntity = new SrcDbEntity();
-                String[] urlAndPort = url.split(":");
-                srcDbEntity.setHost(urlAndPort[0]);
-                srcDbEntity.setPort(Integer.parseInt(urlAndPort[1]));
-                srcDbEntity.setUsername(configManager.getConfig("puma.server.binlog.username"));
-                srcDbEntity.setPassword(configManager.getConfig("puma.server.binlog.password"));
-                srcDbBuilder.add(srcDbEntity);
+            for (SrcDbEntity db : instanceManager.getUrlByCluster(entry.getKey())) {
+                srcDbBuilder.add(db);
             }
             entity.setSrcDbEntityList(srcDbBuilder.build());
 

@@ -2,7 +2,13 @@ package com.dianping.puma.biz.entity;
 
 import com.google.common.base.Objects;
 
+import java.util.Set;
+
 public class SrcDbEntity {
+    public static String TAG_WRITE = "write";
+
+    public static String TAG_READ = "read";
+
     private String host;
 
     private int port;
@@ -12,6 +18,8 @@ public class SrcDbEntity {
     private String password;
 
     private long serverId;
+
+    private Set<String> tags;
 
     public String getHost() {
         return host;
@@ -51,6 +59,14 @@ public class SrcDbEntity {
 
     public void setServerId(long serverId) {
         this.serverId = serverId;
+    }
+
+    public Set<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<String> tags) {
+        this.tags = tags;
     }
 
     @Override

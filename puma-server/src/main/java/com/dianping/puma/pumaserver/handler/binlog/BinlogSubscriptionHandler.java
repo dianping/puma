@@ -34,7 +34,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
         BinlogAck binlogAck = binlogAckService.load(clientName);
 
         AsyncBinlogChannel asyncBinlogChannel = buildBinlogChannel(
-                binlogAck == null ? SubscribeConstant.SEQ_FROM_LATEST : SubscribeConstant.SEQ_FROM_BINLOGINFO,
+                binlogAck == null ? SubscribeConstant.SEQ_FROM_OLDEST : SubscribeConstant.SEQ_FROM_BINLOGINFO,
                 binlogAck == null ? null : binlogAck.getBinlogInfo(),
                 binlogSubscriptionRequest.getDatabase(),
                 binlogSubscriptionRequest.getTables(),

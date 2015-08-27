@@ -14,6 +14,7 @@ package com.dianping.puma.taskexecutor;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
+import com.dianping.cat.message.Transaction;
 import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
@@ -36,6 +37,7 @@ import com.dianping.puma.server.exception.ServerEventParserException;
 import com.dianping.puma.server.exception.ServerEventRuntimeException;
 import com.dianping.puma.status.SystemStatusManager;
 import com.dianping.zebra.util.JDBCUtils;
+import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
@@ -258,6 +260,10 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
     }
 
     protected SrcDbEntity initSrcDbByServerId(final long binlogServerId) throws IOException {
+        if (this.currentSrcDbEntity != null) {
+            return this.currentSrcDbEntity;
+        }
+
         List<SrcDbEntity> avaliableSrcDb = FluentIterable
                 .from(getTask().getSrcDbEntityList())
                 .filter(new Predicate<SrcDbEntity>() {
@@ -271,10 +277,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             throw new IOException("No Avaliable SrcDB");
         }
 
-        if (this.currentSrcDbEntity != null) {
-            return this.currentSrcDbEntity;
-        }
-
         SrcDbEntity srcDbEntity = Iterables.find(avaliableSrcDb, new Predicate<SrcDbEntity>() {
             @Override
             public boolean apply(SrcDbEntity input) {
@@ -286,88 +288,119 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             return srcDbEntity;
         }
 
-        return srcDbEntity != null ? srcDbEntity : avaliableSrcDb.get(0);
+        srcDbEntity = Iterables.find(avaliableSrcDb, new Predicate<SrcDbEntity>() {
+            @Override
+            public boolean apply(SrcDbEntity input) {
+                return input.getTags().contains(SrcDbEntity.TAG_WRITE);
+            }
+        }, null);
+
+        if (srcDbEntity != null) {
+            return srcDbEntity;
+        }
+
+        return avaliableSrcDb.get(0);
     }
 
     protected BinlogInfo getBinlogByTimestamp(long time) throws IOException {
-        if (!connect()) {
-            throw new IOException("Connection failed.");
-        }
-        initConnect();
-        List<BinlogInfo> binaryLogs = getBinaryLogs();
-        BinlogInfo closestBinlogInfo = null;
+        BinlogInfo binlogResult = null;
+        Transaction t = Cat.newTransaction("BinlogFindByTime", getTask().getName());
 
-        for (int k = binaryLogs.size() - 1; k >= 0; k--) {
-            BinlogInfo newBinlogInfo = binaryLogs.get(k);
+        Cat.logEvent("BinlogFindByTime.Time", String.valueOf(time));
 
-            getContext().setDBServerId(currentSrcDbEntity.getServerId());
-            getContext().setBinlogFileName(newBinlogInfo.getBinlogFile());
-            getContext().setBinlogStartPos(4);
-            getContext().setMasterUrl(currentSrcDbEntity.getHost(), currentSrcDbEntity.getPort());
-
+        try {
             if (!connect()) {
                 throw new IOException("Connection failed.");
             }
             initConnect();
+            List<BinlogInfo> binaryLogs = getBinaryLogs();
 
-            if (dumpBinlog()) {
-                while (!isStop()) {
-                    BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(is, PacketType.BINLOG_PACKET,
-                            getContext());
+            Cat.logEvent("BinlogFindByTime.BinaryLogs", currentSrcDbEntity.toString(), Message.SUCCESS, Joiner.on(",").join(binaryLogs));
 
-                    if (!binlogPacket.isOk()) {
-                        LOG.error("TaskName: " + getTaskName() + ", Binlog packet response error.");
-                        throw new IOException("TaskName: " + getTaskName() + ", Binlog packet response error.");
-                    } else {
-                        BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), getContext());
+            BinlogInfo closestBinlogInfo = null;
 
-                        try {
-                            getContext().setNextBinlogPos(binlogEvent.getHeader().getNextPosition());
+            for (int k = binaryLogs.size() - 1; k >= 0; k--) {
+                if (binlogResult != null) {
+                    break;
+                }
 
-                            if (binlogEvent.getHeader().getEventType() == BinlogConstants.ROTATE_EVENT) {
-                                if (closestBinlogInfo == null) {
-                                    break;
-                                } else {
-                                    continue;
+                BinlogInfo newBinlogInfo = binaryLogs.get(k);
+
+                Cat.logEvent("BinlogFindByTime.Start", newBinlogInfo.toString());
+
+                getContext().setDBServerId(currentSrcDbEntity.getServerId());
+                getContext().setBinlogFileName(newBinlogInfo.getBinlogFile());
+                getContext().setBinlogStartPos(4);
+                getContext().setMasterUrl(currentSrcDbEntity.getHost(), currentSrcDbEntity.getPort());
+
+                if (!connect()) {
+                    throw new IOException("Connection failed.");
+                }
+                initConnect();
+
+                if (dumpBinlog()) {
+                    while (!isStop()) {
+                        BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(is, PacketType.BINLOG_PACKET,
+                                getContext());
+
+                        if (!binlogPacket.isOk()) {
+                            LOG.error("TaskName: " + getTaskName() + ", Binlog packet response error.");
+                            throw new IOException("TaskName: " + getTaskName() + ", Binlog packet response error.");
+                        } else {
+                            BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), getContext());
+
+                            try {
+                                getContext().setNextBinlogPos(binlogEvent.getHeader().getNextPosition());
+
+                                if (binlogEvent.getHeader().getEventType() == BinlogConstants.ROTATE_EVENT) {
+                                    if (closestBinlogInfo == null) {
+                                        break;
+                                    } else {
+                                        continue;
+                                    }
                                 }
-                            }
 
-                            if (binlogEvent.getHeader().getEventType() != BinlogConstants.XID_EVENT) {
-                                continue;
-                            }
-
-                            if (binlogEvent.getHeader().getTimestamp() >= time) {
-                                if (closestBinlogInfo == null) {
+                                if (binlogEvent.getHeader().getTimestamp() >= time) {
+                                    if (closestBinlogInfo != null) {
+                                        binlogResult = closestBinlogInfo;
+                                    }
                                     break;
-                                } else {
-                                    return closestBinlogInfo;
                                 }
-                            }
 
-                            if (binlogEvent.getHeader().getTimestamp() <= time) {
-                                closestBinlogInfo = new BinlogInfo(
-                                        currentSrcDbEntity.getServerId(),
-                                        getContext().getBinlogFileName(),
-                                        binlogEvent.getHeader().getNextPosition(),
-                                        0, binlogEvent.getHeader().getTimestamp());
-                                continue;
-                            }
-                        } finally {
-                            if (binlogEvent.getHeader().getEventType() == BinlogConstants.ROTATE_EVENT) {
-                                RotateEvent rotateEvent = (RotateEvent) binlogEvent;
-                                getContext().setBinlogFileName(rotateEvent.getNextBinlogFileName());
-                                getContext().setBinlogStartPos(rotateEvent.getFirstEventPosition());
-                            } else {
-                                getContext().setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
+                                if (binlogEvent.getHeader().getEventType() == BinlogConstants.XID_EVENT
+                                        && binlogEvent.getHeader().getTimestamp() < time) {
+                                    closestBinlogInfo = new BinlogInfo(
+                                            currentSrcDbEntity.getServerId(),
+                                            getContext().getBinlogFileName(),
+                                            binlogEvent.getHeader().getNextPosition(),
+                                            0, binlogEvent.getHeader().getTimestamp());
+                                }
+                            } finally {
+                                if (binlogEvent.getHeader().getEventType() == BinlogConstants.ROTATE_EVENT) {
+                                    RotateEvent rotateEvent = (RotateEvent) binlogEvent;
+                                    getContext().setBinlogFileName(rotateEvent.getNextBinlogFileName());
+                                    getContext().setBinlogStartPos(rotateEvent.getFirstEventPosition());
+                                } else {
+                                    getContext().setBinlogStartPos(binlogEvent.getHeader().getNextPosition());
+                                }
                             }
                         }
                     }
+                } else {
+                    throw new IOException("Binlog dump failed.");
                 }
-            } else {
-                throw new IOException("Binlog dump failed.");
             }
+
+            Cat.logEvent("BinlogFindByTime.Success", getTask().getName(), Message.SUCCESS,
+                    time + " -> " + (binlogResult == null ? "null" : binlogResult.toString()));
+            t.setStatus(Message.SUCCESS);
+            t.complete();
+            return binlogResult;
+        } catch (IOException e) {
+            t.setStatus(e);
+            t.complete();
+            throw e;
         }
-        return null;
     }
 
     private void processBinlog() throws IOException {
@@ -458,7 +491,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
     protected void dispatch(ChangedEvent changedEvent) {
         try {
-            Cat.logEvent("Puma.Dispath", changedEvent.getDatabase());
             dispatcher.dispatch(changedEvent, getContext());
         } catch (Exception e) {
             LOG.error("TaskName: " + getTaskName() + ", Dispatcher dispatch failed.", e);

@@ -126,7 +126,7 @@ puma.controller('pumaTargetController', function ($scope, $http) {
                         name: serverName,
                         input: buildInput(serverName, $scope.pumaDto.serverNames),
                         output: [],
-                        beginTime: $scope.pumaDto.beginTimes[serverName]
+                        beginTime: (new Date($scope.pumaDto.beginTimes[serverName])).toString()
                     };
                     $scope.servers.push(server);
                 });
@@ -186,7 +186,9 @@ puma.controller('pumaTargetController', function ($scope, $http) {
     function parseBeginTime(servers) {
         var list = {};
         angular.forEach(servers, function(server) {
-            list[server.output[0].name] = moment(server.beginTime).format('YYYY-MM-DD HH:mm:SS');
+            try {
+                list[server.output[0].name] = new Date(server.beginTime).getTime();
+            } catch (err) {}
         });
         return list;
     };
@@ -200,7 +202,7 @@ puma.controller('pumaTargetController', function ($scope, $http) {
             serverNames: $scope.pumaDto.serverNames,
             tables: $scope.pumaDto.tables,
             database: $scope.pumaDto.database,
-            beginTimes: $scope.pumaDto.beginTimes
+            beginTimestamps: $scope.pumaDto.beginTimes
         };
 
         $http.post('/a/puma-create', json).success(function(response) {

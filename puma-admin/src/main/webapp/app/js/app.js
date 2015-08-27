@@ -10,33 +10,47 @@ puma.controller('simpleModalController', function ($scope, item) {
     $scope.item = item;
 });
 
-puma.controller('pumaMonitorController', function ($scope, $http, $modal) {
-    $http.get('/a/puma-status').then(
-        function (response) {
-            $scope.clients = response.data.clients;
-            $scope.servers = response.data.servers;
+puma.controller('pumaMonitorController', function ($scope, $http, $modal, $interval) {
+    $scope.query = function () {
+        $http.get('/a/puma-status').then(
+            function (response) {
+                $scope.clients = response.data.clients;
+                $scope.servers = response.data.servers;
 
-            _.each($scope.clients, function (item) {
-                item.tablesStr = _.first(item.tables, 10).join('<br/>');
+                _.each($scope.clients, function (item) {
+                    item.tablesStr = _.first(item.tables, 10).join('<br/>');
 
-                if (item.tables.length > 10) {
-                    item.tablesStr += '<br/>Click to show more...'
-                }
-            });
-            
-            _.each($scope.servers, function (item) {
-                item.targetStr = _.map(_.first(item.target.tables, 10), function (table) {
-                    return table.schemaName + '.' + table.tableName;
-                }).join('<br/>');
+                    if (item.tables.length > 10) {
+                        item.tablesStr += '<br/>Click to show more...'
+                    }
+                });
 
-                if (item.target.tables.length > 10) {
-                    item.targetStr += '<br/>Click to show more...'
-                }
-            });
+                _.each($scope.servers, function (item) {
+                    item.targetStr = _.map(_.first(item.target.tables, 10), function (table) {
+                        return table.schemaName + '.' + table.tableName;
+                    }).join('<br/>');
+
+                    if (item.target.tables.length > 10) {
+                        item.targetStr += '<br/>Click to show more...'
+                    }
+                });
+            }
+        );
+    };
+
+    $scope.query();
+
+    var interval = $interval(function () {
+        if ($scope.autoRefresh) {
+            $scope.query();
         }
-    );
-    
-     $scope.openTables = function (item) {
+    }, 5000);
+
+    $scope.$on('$destroy', function () {
+        $interval.cancel(interval);
+    });
+
+    $scope.openTables = function (item) {
         $modal.open({
             templateUrl: 'tables.html',
             controller: 'simpleModalController',

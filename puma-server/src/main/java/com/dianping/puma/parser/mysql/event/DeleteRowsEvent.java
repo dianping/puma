@@ -24,6 +24,8 @@ import java.util.List;
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.parser.mysql.Row;
 import com.dianping.puma.utils.PacketUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO Comment of DeleteRowsEvent
@@ -32,6 +34,8 @@ import com.dianping.puma.utils.PacketUtils;
  * 
  */
 public class DeleteRowsEvent extends AbstractRowsEvent {
+
+	private final Logger logger = LoggerFactory.getLogger(DeleteRowsEvent.class);
 
 	private static final long serialVersionUID = -4574646483606347256L;
 
@@ -68,6 +72,13 @@ public class DeleteRowsEvent extends AbstractRowsEvent {
 	protected void innerParse(ByteBuffer buf, PumaContext context) throws IOException {
 		tableMapEvent = context.getTableMaps().get(tableId);
 		usedColumns = PacketUtils.readBitSet(buf, columnCount.intValue());
+
+		logger.debug("binlog event before parse rows:\n");
+		logger.debug("{}", this);
+
+		if (usedColumns.length() != columnCount.intValue()) {
+			throw new RuntimeException("Illegal column image.");
+		}
 
 		rows = parseRows(buf, context);
 	}

@@ -27,6 +27,8 @@ import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.parser.mysql.Row;
 import com.dianping.puma.parser.mysql.UpdatedRowData;
 import com.dianping.puma.utils.PacketUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO Comment of UpdateRowsEvent
@@ -35,6 +37,8 @@ import com.dianping.puma.utils.PacketUtils;
  * 
  */
 public class UpdateRowsEvent extends AbstractRowsEvent {
+
+	private final Logger logger = LoggerFactory.getLogger(UpdateRowsEvent.class);
 
 	private static final long serialVersionUID = -877826157536949565L;
 
@@ -46,7 +50,8 @@ public class UpdateRowsEvent extends AbstractRowsEvent {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append("super", super.toString()).append("usedColumnsBefore", usedColumnsBefore)
+		return new ToStringBuilder(this).append("super", super.toString()).append("usedColumnsBefore",
+				usedColumnsBefore)
 		      .append("usedColumnsAfter", usedColumnsAfter).append("rows", rows).toString();
 	}
 
@@ -76,6 +81,17 @@ public class UpdateRowsEvent extends AbstractRowsEvent {
 		tableMapEvent = context.getTableMaps().get(tableId);
 		usedColumnsBefore = PacketUtils.readBitSet(buf, columnCount.intValue());
 		usedColumnsAfter = PacketUtils.readBitSet(buf, columnCount.intValue());
+
+		logger.debug("binlog event before parse rows:\n");
+		logger.debug("{}", this);
+
+		if (usedColumnsBefore.length() != columnCount.intValue()) {
+			throw new RuntimeException("Illegal before column image.");
+		}
+
+		if (usedColumnsAfter.length() != columnCount.intValue()) {
+			throw new RuntimeException("Illegal after column image.");
+		}
 
 		rows = parseRows(buf, context);
 	}

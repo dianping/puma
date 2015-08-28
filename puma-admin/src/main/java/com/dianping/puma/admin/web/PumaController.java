@@ -132,6 +132,21 @@ public class PumaController extends BasicController {
 			}
 		}
 
+		// Register and unregister.
+		List<String> hosts = new ArrayList<String>();
+		for (Map.Entry<String, Boolean> entry: pumaDto.getRegistries().entrySet()) {
+			String serverName = entry.getKey();
+			Boolean registry = entry.getValue();
+			if (registry) {
+				PumaServerEntity pumaServer = pumaServerService.find(serverName);
+				String host = pumaServer.getHost();
+				if (host != null) {
+					hosts.add(host);
+				}
+			}
+		}
+		registryService.registerResetAll(hosts, database);
+
 		return null;
 	}
 

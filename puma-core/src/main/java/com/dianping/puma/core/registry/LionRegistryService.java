@@ -94,6 +94,11 @@ public class LionRegistryService implements RegistryService {
         }
     }
 
+    @Override
+    public void registerResetAll(List<String> hosts, String database) {
+        register0(hosts, database);
+    }
+
     protected void register0(List<String> hostList, String database) {
         String hostListString = buildHostListString(hostList);
         configManager.setConfig(buildKey(database), hostListString);

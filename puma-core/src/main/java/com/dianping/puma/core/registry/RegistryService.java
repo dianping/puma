@@ -13,4 +13,6 @@ public interface RegistryService {
 	public void registerAll(List<String> hosts, String database);
 
 	public void unregisterAll(List<String> hosts, String database);
+
+	public void registerResetAll(List<String> hosts, String database);
 }

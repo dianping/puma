@@ -1,0 +1,12 @@
+{
+  "name": "puma-admin",
+  "description": "A web admin console for Puma",
+  "version": "0.0.0",
+  "homepage": "http://puma.dp",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "switchery": "",
+    "ng-switchery": ""
+  }
+}

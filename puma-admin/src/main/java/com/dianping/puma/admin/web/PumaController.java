@@ -14,6 +14,7 @@ import com.dianping.puma.biz.service.PumaTargetService;
 import com.dianping.puma.core.config.ConfigManager;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,42 +70,33 @@ public class PumaController extends BasicController {
 	@RequestMapping(value = { "/puma-create" }, method = RequestMethod.POST)
 	@ResponseBody
 	public Object create(@RequestBody PumaDto pumaDto) {
-		String database = pumaDto.getDatabase();
-		List<String> serverNames = pumaDto.getServerNames();
-
-		for (Map.Entry<String, Long> entry: pumaDto.getBeginTimestamps().entrySet()) {
+		for (Map.Entry<String, Long> entry : pumaDto.getBeginTimestamps().entrySet()) {
 			if (entry.getValue() != null) {
 				pumaDto.addBeginTime(entry.getKey(), new Date(entry.getValue()));
 			}
 		}
 
+		String database = pumaDto.getDatabase();
 		List<PumaServerTargetEntity> pumaServerTargets = pumaServerTargetService.findByDatabase(database);
 
 		// Removes unused puma server target.
-		for (PumaServerTargetEntity pumaServerTarget: pumaServerTargets) {
+		List<String> serverNames = pumaDto.getServerNames();
+		for (PumaServerTargetEntity pumaServerTarget : pumaServerTargets) {
 			if (!serverNames.contains(pumaServerTarget.getServerName())) {
 				pumaServerTargetService.remove(pumaServerTarget.getId());
 			}
 		}
 
-		// Creates new puma server target.
-		List<String> oriServers = Lists.transform(pumaServerTargets, new Function<PumaServerTargetEntity, String>() {
-			@Override
-			public String apply(PumaServerTargetEntity pumaServerTarget) {
-				return pumaServerTarget.getServerName();
-			}
-		});
-		for (String serverName: serverNames) {
-			if (!oriServers.contains(serverName)) {
-				PumaServerTargetEntity pumaServerTarget = new PumaServerTargetEntity();
-				pumaServerTarget.setServerName(serverName);
-				pumaServerTarget.setTargetDb(database);
+		// Updates new puma server target.
+		for (String serverName : serverNames) {
+			PumaServerTargetEntity pumaServerTarget = new PumaServerTargetEntity();
+			pumaServerTarget.setServerName(serverName);
+			pumaServerTarget.setTargetDb(database);
 
-				if (pumaDto.getBeginTimes() != null) {
-					pumaServerTarget.setBeginTime(pumaDto.getBeginTimes().get(serverName));
-				}
-				pumaServerTargetService.create(pumaServerTarget);
+			if (pumaDto.getBeginTimes() != null) {
+				pumaServerTarget.setBeginTime(pumaDto.getBeginTimes().get(serverName));
 			}
+			pumaServerTargetService.replace(pumaServerTarget);
 		}
 
 		// Removes unused puma tables.
@@ -116,14 +108,14 @@ public class PumaController extends BasicController {
 				return pumaTarget.getTable();
 			}
 		});
-		for (PumaTargetEntity pumaTarget: pumaTargets) {
+		for (PumaTargetEntity pumaTarget : pumaTargets) {
 			if (!tables.contains(pumaTarget.getTable())) {
 				pumaTargetService.remove(pumaTarget.getId());
 			}
 		}
 
 		// Creates new puma tables.
-		for (String table: tables) {
+		for (String table : tables) {
 			if (!oriTables.contains(table)) {
 				PumaTargetEntity pumaTarget = new PumaTargetEntity();
 				pumaTarget.setDatabase(database);
@@ -157,7 +149,7 @@ public class PumaController extends BasicController {
 		return tableService.getTables(database);
 	}
 
-	@RequestMapping(value = {"/puma-status"}, method = RequestMethod.GET)
+	@RequestMapping(value = { "/puma-status" }, method = RequestMethod.GET)
 	@ResponseBody
 	public Object status() {
 		Map<String, Object> status = new HashMap<String, Object>();

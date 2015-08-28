@@ -51,42 +51,11 @@ public class PumaServerTargetServiceImpl implements PumaServerTargetService {
 
     @Override
     public int create(PumaServerTargetEntity entity) {
-        /*
-        String database = entity.getTargetDb();
-        List<String> tables = entity.getTables();
-        for (String table: tables) {
-            PumaTargetEntity pumaTarget = new PumaTargetEntity();
-            pumaTarget.setDatabase(database);
-            pumaTarget.setTable(table);
-            pumaTargetDao.insert(pumaTarget);
-        }*/
-
         return pumaServerTargetDao.insert(entity);
     }
 
     @Override
     public int replace(PumaServerTargetEntity entity) {
-        String database = entity.getTargetDb();
-        List<String> tables = entity.getTables();
-
-        List<PumaTargetEntity> pumaTargets = pumaTargetDao.findByDatabase(database);
-
-        // Removes unused puma targets.
-        for (PumaTargetEntity pumaTarget: pumaTargets) {
-            String oriTable = pumaTarget.getTable();
-            if (!tables.contains(oriTable)) {
-                pumaTargetDao.delete(pumaTarget.getId());
-            }
-        }
-
-        // Replaces new puma targets.
-        for (String table: tables) {
-            PumaTargetEntity pumaTarget = new PumaTargetEntity();
-            pumaTarget.setDatabase(database);
-            pumaTarget.setTable(table);
-            pumaTargetDao.replace(pumaTarget);
-        }
-
         return pumaServerTargetDao.replace(entity);
     }
 

@@ -5,11 +5,21 @@
 <mapper namespace="com.dianping.puma.biz.dao.PumaServerTargetDao">
 
     <select id="findById" resultType="PumaServerTargetEntity">
-        SELECT * FROM PumaServerTarget WHERE `id` = #{id}
+        SELECT
+        *
+        FROM
+        PumaServerTarget
+        WHERE
+        `id` = #{id}
     </select>
 
     <select id="findByServerName" resultType="PumaServerTargetEntity">
-        SELECT * FROM PumaServerTarget WHERE `serverName` = #{serverName}
+        SELECT
+        *
+        FROM
+        PumaServerTarget
+        WHERE
+        `serverName` = #{serverName}
     </select>
 
     <select id="findByDatabase" resultType="PumaServerTargetEntity">
@@ -66,6 +76,9 @@
     </update>
 
     <delete id="delete">
-        DELETE FROM PumaServerTarget WHERE `id` = #{id}
+        DELETE FROM
+        PumaServerTarget
+        WHERE
+        `id` = #{id}
     </delete>
 </mapper>

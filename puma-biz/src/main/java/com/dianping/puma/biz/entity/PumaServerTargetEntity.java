@@ -11,6 +11,8 @@ public class PumaServerTargetEntity {
 
 	private String ServerName;
 
+	private String serverHost;
+
 	private String TargetDb;
 
 	private List<String> tables;
@@ -37,6 +39,14 @@ public class PumaServerTargetEntity {
 
 	public void setServerName(String serverName) {
 		ServerName = serverName;
+	}
+
+	public String getServerHost() {
+		return serverHost;
+	}
+
+	public void setServerHost(String serverHost) {
+		this.serverHost = serverHost;
 	}
 
 	public String getTargetDb() {

@@ -1,7 +1,9 @@
 package com.dianping.puma.biz.service.impl;
 
+import com.dianping.puma.biz.dao.PumaServerDao;
 import com.dianping.puma.biz.dao.PumaServerTargetDao;
 import com.dianping.puma.biz.dao.PumaTargetDao;
+import com.dianping.puma.biz.entity.PumaServerEntity;
 import com.dianping.puma.biz.entity.PumaServerTargetEntity;
 import com.dianping.puma.biz.entity.PumaTargetEntity;
 import com.dianping.puma.biz.entity.old.PumaServer;
@@ -25,6 +27,9 @@ public class PumaServerTargetServiceImpl implements PumaServerTargetService {
     @Autowired
     PumaTargetDao pumaTargetDao;
 
+    @Autowired
+    PumaServerDao pumaServerDao;
+
     @Override
     public List<PumaServerTargetEntity> findByDatabase(String database) {
         List<PumaTargetEntity> pumaTargets = pumaTargetDao.findByDatabase(database);
@@ -39,6 +44,10 @@ public class PumaServerTargetServiceImpl implements PumaServerTargetService {
         List<PumaServerTargetEntity> pumaServerTargets = pumaServerTargetDao.findByDatabase(database);
         for (PumaServerTargetEntity pumaServerTarget: pumaServerTargets) {
             pumaServerTarget.setTables(tables);
+
+            String serverName = pumaServerTarget.getServerName();
+            PumaServerEntity pumaServer = pumaServerDao.findByName(serverName);
+            pumaServerTarget.setServerHost(pumaServer.getHost());
         }
 
         return pumaServerTargets;

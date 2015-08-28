@@ -1,7 +1,5 @@
 package com.dianping.puma.admin.model;
 
-import org.springframework.format.annotation.DateTimeFormat;
-
 import java.util.*;
 
 public class PumaDto {
@@ -21,6 +19,8 @@ public class PumaDto {
 	private Map<String, Boolean> actives;
 
 	private Map<String, Double> weights;
+
+	private Map<String, Boolean> registries;
 
 	public String getDatabase() {
 		return database;
@@ -124,5 +124,21 @@ public class PumaDto {
 		}
 
 		weights.put(serverName, weight);
+	}
+
+	public Map<String, Boolean> getRegistries() {
+		return registries;
+	}
+
+	public void setRegistries(Map<String, Boolean> registries) {
+		this.registries = registries;
+	}
+
+	public void addRegistry(String serverName, Boolean registry) {
+		if (registries == null) {
+			registries = new HashMap<String, Boolean>();
+		}
+
+		registries.put(serverName, registry);
 	}
 }

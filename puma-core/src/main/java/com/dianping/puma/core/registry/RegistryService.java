@@ -1,4 +1,4 @@
-package com.dianping.puma.server.registry;
+package com.dianping.puma.core.registry;
 
 import java.util.List;
 

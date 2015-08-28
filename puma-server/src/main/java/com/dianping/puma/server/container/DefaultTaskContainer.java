@@ -4,9 +4,7 @@ import com.dianping.cat.Cat;
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
-import com.dianping.puma.core.util.IPUtils;
 import com.dianping.puma.server.builder.TaskBuilder;
-import com.dianping.puma.server.registry.RegistryService;
 import com.dianping.puma.status.SystemStatusManager;
 import com.dianping.puma.storage.EventStorage;
 import com.dianping.puma.taskexecutor.TaskExecutor;
@@ -15,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,9 +29,6 @@ public class DefaultTaskContainer implements TaskContainer {
 
     @Autowired
     private TaskBuilder taskBuilder;
-
-    @Autowired
-    RegistryService registryService;
 
     @Override
     public TaskExecutor get(String taskName) {
@@ -109,8 +103,6 @@ public class DefaultTaskContainer implements TaskContainer {
                         }
                     }
                 });
-
-                register(taskExecutor);
             }
         } catch (Exception e) {
             Cat.logError(e.getMessage(), e);
@@ -123,27 +115,9 @@ public class DefaultTaskContainer implements TaskContainer {
             TaskExecutor taskExecutor = taskExecutors.get(taskName);
             if (taskExecutor != null) {
                 taskExecutor.stop();
-
-                unregister(taskExecutor);
             }
         } catch (Exception e) {
             Cat.logError(e.getMessage(), e);
-        }
-    }
-
-    protected void register(TaskExecutor taskExecutor) {
-        PumaTaskEntity pumaTask = taskExecutor.getTask();
-        Map<String, List<String>> databaseTableMap = pumaTask.getTableSet().mapSchemaTables();
-        for (String database : databaseTableMap.keySet()) {
-            registryService.register(IPUtils.getFirstNoLoopbackIP4Address() + ":4040", database, null);
-        }
-    }
-
-    protected void unregister(TaskExecutor taskExecutor) {
-        PumaTaskEntity pumaTask = taskExecutor.getTask();
-        Map<String, List<String>> databaseTableMap = pumaTask.getTableSet().mapSchemaTables();
-        for (String database : databaseTableMap.keySet()) {
-            registryService.unregister(IPUtils.getFirstNoLoopbackIP4Address() + ":4040", database, null);
         }
     }
 }

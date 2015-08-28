@@ -126,7 +126,7 @@ puma.controller('pumaTargetController', function ($scope, $http) {
                         name: serverName,
                         input: buildInput(serverName, $scope.pumaDto.serverNames),
                         output: [],
-                        beginTime: (new Date($scope.pumaDto.beginTimes[serverName])).toString()
+                        beginTime: setDate($scope.pumaDto.beginTimes[serverName])
                     };
                     $scope.servers.push(server);
                 });
@@ -138,6 +138,14 @@ puma.controller('pumaTargetController', function ($scope, $http) {
             }
         );
     };
+
+    function setDate(date) {
+        if (_.isUndefined(date) || _.isNull(date)) {
+            return undefined;
+        } else {
+            return new Date(date).toString();
+        }
+    }
 
     $scope.findTables = function () {
         $scope.allTables = [];

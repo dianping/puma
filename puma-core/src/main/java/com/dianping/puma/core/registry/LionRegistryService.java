@@ -23,7 +23,7 @@ public class LionRegistryService implements RegistryService {
     ConfigManager configManager;
 
     @Override
-    public void register(String host, String database, List<String> tables) {
+    public List<String> find(String database) {
         String hostListString = configManager.getConfig(buildKey(database));
 
         if (hostListString == null) {
@@ -37,25 +37,66 @@ public class LionRegistryService implements RegistryService {
             }
         }
 
-        List<String> hostList = parseHostList(hostListString);
+        return parseHostList(hostListString);
+    }
+
+    @Override
+    public void register(String host, String database) {
+        List<String> hostList = find(database);
 
         if (!hostList.contains(host)) {
             hostList.add(host);
-            hostListString = buildHostListString(hostList);
-            configManager.setConfig(buildKey(database), hostListString);
+            register0(hostList, database);
         }
     }
 
     @Override
-    public void unregister(String host, String database, List<String> tables) {
-        String hostListString = configManager.getConfig(buildKey(database));
+    public void unregister(String host, String database) {
+        List<String> hostList = find(database);
 
-        if (hostListString != null) {
-            List<String> hostList = parseHostList(hostListString);
+        if (hostList.contains(host)) {
             hostList.remove(host);
-            hostListString = buildHostListString(hostList);
-            configManager.setConfig(buildKey(database), hostListString);
+            register0(hostList, database);
         }
+    }
+
+    @Override
+    public void registerAll(List<String> hosts, String database) {
+        List<String> hostList = find(database);
+
+        boolean needToRegister = false;
+        for (String host: hosts) {
+            if (!hostList.contains(host)) {
+                hostList.add(host);
+                needToRegister = true;
+            }
+
+            if (needToRegister) {
+                register0(hostList, database);
+            }
+        }
+    }
+
+    @Override
+    public void unregisterAll(List<String> hosts, String database) {
+        List<String> hostList = find(database);
+
+        boolean needToRegister = false;
+        for (String host: hosts) {
+            if (hostList.contains(host)) {
+                hostList.remove(host);
+                needToRegister = true;
+            }
+
+            if (needToRegister) {
+                register0(hostList, database);
+            }
+        }
+    }
+
+    protected void register0(List<String> hostList, String database) {
+        String hostListString = buildHostListString(hostList);
+        configManager.setConfig(buildKey(database), hostListString);
     }
 
     protected List<String> parseHostList(String hostListString) {

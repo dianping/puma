@@ -127,7 +127,7 @@ puma.controller('pumaTargetController', function ($scope, $http) {
                         input: buildInput(serverName, $scope.pumaDto.serverNames),
                         output: [],
                         beginTime: setDate($scope.pumaDto.beginTimes[serverName]),
-                        valid: true
+                        active: false
                     };
                     $scope.servers.push(server);
                 });

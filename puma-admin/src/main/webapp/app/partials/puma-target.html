@@ -133,11 +133,11 @@
                         <div class="row">
 
                             <div class="col-sm-8">
-                                <div class="widget-box widget-color-purple">
+                                <div class="widget-box widget-color-{{ server.active ? 'purple' : 'dark' }}">
                                     <div class="widget-header widget-header-small">
                                         <h5 class="widget-title lighter">Server-{{$index}}</h5>
                                         <span class="widget-toolbar">
-                                            <input type="checkbox" class="js-switch" checked ng-model="server.valid"
+                                            <input type="checkbox" class="js-switch" checked ng-model="server.active"
                                                    ui-switch="{ size: 'small',  }" />
                                             <a href="" data-action="" ng-click="add()">
                                                 <i class="ace-icon fa fa-plus"></i></a>

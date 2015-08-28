@@ -9,6 +9,10 @@ public class RoundRobinPumaServerRouter implements PumaServerRouter {
 
 	protected PumaServerMonitor monitor;
 
+	private boolean inited = false;
+
+	private volatile List<String> servers;
+
 	private int index;
 
 	public RoundRobinPumaServerRouter(PumaServerMonitor monitor) {
@@ -17,7 +21,10 @@ public class RoundRobinPumaServerRouter implements PumaServerRouter {
 
 	@Override
 	public String next() {
-		List<String> servers = monitor.get();
+		if (!inited) {
+			init();
+			inited = true;
+		}
 
 		if (servers == null || servers.size() == 0) {
 			return null;
@@ -28,5 +35,30 @@ public class RoundRobinPumaServerRouter implements PumaServerRouter {
 		}
 
 		return servers.get(index++);
+	}
+
+	@Override
+	public boolean exist(String server) {
+		if (!inited) {
+			init();
+			inited = true;
+		}
+
+		if (servers == null) {
+			return false;
+		}
+
+		return servers.contains(server);
+	}
+
+	protected void init() {
+		servers = monitor.get();
+		PumaServerMonitor.PumaServerMonitorListener listener = new PumaServerMonitor.PumaServerMonitorListener() {
+			@Override
+			public void onChange(List<String> oriServers, List<String> servers) {
+				RoundRobinPumaServerRouter.this.servers = servers;
+			}
+		};
+		monitor.addListener(listener);
 	}
 }

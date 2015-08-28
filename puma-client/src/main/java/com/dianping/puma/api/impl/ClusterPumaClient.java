@@ -73,7 +73,7 @@ public class ClusterPumaClient implements PumaClient {
 
     @Override
     public BinlogMessage get(int batchSize) throws PumaClientException {
-        if (client == null) {
+        if (needNewClient()) {
             client = newClient();
         }
 
@@ -102,7 +102,7 @@ public class ClusterPumaClient implements PumaClient {
 
     @Override
     public BinlogMessage get(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException {
-        if (client == null) {
+        if (needNewClient()) {
             client = newClient();
         }
 
@@ -132,7 +132,7 @@ public class ClusterPumaClient implements PumaClient {
 
     @Override
     public BinlogMessage getWithAck(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException {
-        if (client == null) {
+        if (needNewClient()) {
             client = newClient();
         }
 
@@ -162,7 +162,7 @@ public class ClusterPumaClient implements PumaClient {
 
     @Override
     public BinlogMessage getWithAck(int batchSize) throws PumaClientException {
-        if (client == null) {
+        if (needNewClient()) {
             client = newClient();
         }
 
@@ -192,7 +192,7 @@ public class ClusterPumaClient implements PumaClient {
 
     @Override
     public void ack(BinlogInfo binlogInfo) throws PumaClientException {
-        if (client == null) {
+        if (needNewClient()) {
             client = newClient();
         }
         Exception lastException = null;
@@ -223,7 +223,7 @@ public class ClusterPumaClient implements PumaClient {
 
     @Override
     public void rollback() throws PumaClientException {
-        if (client == null) {
+        if (needNewClient()) {
             client = newClient();
         }
 
@@ -254,7 +254,7 @@ public class ClusterPumaClient implements PumaClient {
 
     @Override
     public void rollback(BinlogInfo binlogInfo) throws PumaClientException {
-        if (client == null) {
+        if (needNewClient()) {
             client = newClient();
         }
 
@@ -282,5 +282,13 @@ public class ClusterPumaClient implements PumaClient {
         String msg = String.format("[%s] failed to rollback after %s times retries.", clientName, retryTimes);
         logger.error(msg);
         throw new PumaClientException(msg, lastException);
+    }
+
+    protected boolean needNewClient() {
+        if (client == null) {
+            return true;
+        }
+
+        return !router.exist(client.getServerHost());
     }
 }

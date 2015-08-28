@@ -28,11 +28,12 @@ public class ClusterPumaClientMainTest {
         tables.add("UOD_OrderSKUExtraFields1");
 
         PumaClient client = new PumaClientConfig()
-                .setClientName("dozer-debug")
-                .setDatabase("UnifiedOrder0")
+                .setClientName("lixt")
+                .setDatabase("Taurus")
                 .setTables(tables)
-                .setServerHosts(Lists.newArrayList("127.0.0.1:4040"))
-                .buildFixedClusterPumaClient();
+                .buildClusterPumaClient();
+                //.setServerHosts(Lists.newArrayList("127.0.0.1:4040"))
+                //.buildFixedClusterPumaClient();
 
         final int size = 100;
 

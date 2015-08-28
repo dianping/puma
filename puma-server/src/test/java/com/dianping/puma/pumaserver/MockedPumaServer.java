@@ -99,12 +99,14 @@ public class MockedPumaServer {
 
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, BinlogGetRequest msg) throws Exception {
+            msg.setCodec("raw");
             BinlogGetResponse response = new BinlogGetResponse();
             BinlogMessage message = new BinlogMessage();
             for (int k = 0; k < msg.getBatchSize(); k++) {
                 message.addBinlogEvents(getRowChangedEvent());
             }
             response.setBinlogMessage(message);
+            response.setBinlogGetRequest(msg);
             ctx.channel().writeAndFlush(response);
         }
     }

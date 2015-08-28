@@ -5,9 +5,6 @@ import com.dianping.puma.core.codec.EventCodecFactory;
 import com.dianping.puma.core.dto.binlog.request.BinlogGetRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.util.ConvertHelper;
-import com.dianping.puma.pumaserver.client.ClientSession;
-import com.dianping.puma.pumaserver.client.ClientType;
-import com.dianping.puma.pumaserver.service.ClientSessionService;
 import com.google.common.net.MediaType;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -27,8 +24,6 @@ import java.util.List;
 public class HttpResponseEncoder extends MessageToMessageEncoder<Object> {
     public static final HttpResponseEncoder INSTANCE = new HttpResponseEncoder();
 
-    private ClientSessionService clientSessionService;
-
     private EventCodec codec = EventCodecFactory.createCodec("raw");
 
     @Override
@@ -45,9 +40,8 @@ public class HttpResponseEncoder extends MessageToMessageEncoder<Object> {
             if (msg instanceof BinlogGetResponse) {
                 BinlogGetResponse resp = (BinlogGetResponse) msg;
                 BinlogGetRequest req = resp.getBinlogGetRequest();
-                ClientSession session = clientSessionService.get(req.getClientName(), req.getToken());
 
-                if (session != null && session.getClientType().equals(ClientType.PUMACLIENT)) {
+                if ("raw".equals(req.getCodec())) {
                     response.headers().add(HttpHeaders.Names.CONTENT_TYPE, MediaType.OCTET_STREAM);
                     byte[] data = codec.encodeList(resp.getBinlogMessage().getBinlogEvents());
                     response.content().writeBytes(data);
@@ -63,9 +57,5 @@ public class HttpResponseEncoder extends MessageToMessageEncoder<Object> {
             response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, data.length);
             out.add(response);
         }
-    }
-
-    public void setClientSessionService(ClientSessionService clientSessionService) {
-        this.clientSessionService = clientSessionService;
     }
 }

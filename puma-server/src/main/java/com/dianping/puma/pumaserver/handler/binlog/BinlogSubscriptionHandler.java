@@ -7,7 +7,6 @@ import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
 import com.dianping.puma.pumaserver.channel.impl.DefaultAsyncBinlogChannel;
 import com.dianping.puma.pumaserver.client.ClientSession;
-import com.dianping.puma.pumaserver.client.ClientType;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
 import com.dianping.puma.status.SystemStatusManager;
@@ -46,7 +45,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
                 binlogSubscriptionRequest.isTransaction()
         );
 
-        ClientSession session = new ClientSession(clientName, defaultAsyncBinlogChannel, binlogSubscriptionRequest.getCodec().equals("json") ? ClientType.BROSWER : ClientType.PUMACLIENT);
+        ClientSession session = new ClientSession(clientName, defaultAsyncBinlogChannel, binlogSubscriptionRequest.getCodec());
         clientSessionService.subscribe(session);
 
         BinlogSubscriptionResponse binlogSubscriptionResponse = new BinlogSubscriptionResponse();

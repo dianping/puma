@@ -18,6 +18,8 @@ public class BinlogGetRequest extends BinlogRequest {
 
     private Channel channel;
 
+    private transient String codec;
+
     public boolean isAutoAck() {
         return autoAck;
     }
@@ -77,5 +79,13 @@ public class BinlogGetRequest extends BinlogRequest {
 
     public boolean isTimeout() {
         return timeUnit != null && timeout > 0 && (startTime + timeUnit.toMillis(timeout) < System.currentTimeMillis());
+    }
+
+    public String getCodec() {
+        return codec;
+    }
+
+    public void setCodec(String codec) {
+        this.codec = codec;
     }
 }

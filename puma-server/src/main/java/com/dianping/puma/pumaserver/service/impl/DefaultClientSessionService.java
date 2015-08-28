@@ -87,7 +87,9 @@ public class DefaultClientSessionService implements ClientSessionService {
 
     protected void destory(ClientSession session) {
         if (session != null) {
-            session.getAsyncBinlogChannel().destroy();
+            if (session.getAsyncBinlogChannel() != null) {
+                session.getAsyncBinlogChannel().destroy();
+            }
 
             if (!clients.containsKey(session.getClientName())) {
                 SystemStatusManager.deleteClient(session.getClientName());

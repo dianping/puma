@@ -10,7 +10,7 @@ import io.netty.channel.Channel;
  */
 public class ClientSession {
 
-    private final ClientType clientType;
+    private final String codec;
 
     private volatile String token;
 
@@ -22,14 +22,14 @@ public class ClientSession {
 
     private volatile Channel lastChannel;
 
-    public ClientSession(String clientName, AsyncBinlogChannel asyncBinlogChannel, ClientType clientType) {
-        this.clientType = clientType;
+    public ClientSession(String clientName, AsyncBinlogChannel asyncBinlogChannel, String codec) {
+        this.codec = codec;
         this.clientName = clientName;
         this.asyncBinlogChannel = asyncBinlogChannel;
     }
 
-    public ClientType getClientType() {
-        return clientType;
+    public String getCodec() {
+        return codec;
     }
 
     public String getToken() {

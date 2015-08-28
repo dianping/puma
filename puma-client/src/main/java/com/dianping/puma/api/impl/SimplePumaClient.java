@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public class SimplePumaClient implements PumaClient {
             .setDefaultRequestConfig(
                     RequestConfig.custom()
                             .setConnectTimeout(60 * 1000)
-                            .setSocketTimeout(10 * 60 * 1000)//long pull 模式必须设置一个比较长的超时时间
+                            .setSocketTimeout(10 * 60 * 1000)
                             .build()).build();
 
     public SimplePumaClient(PumaClientConfig config) {
@@ -200,7 +201,14 @@ public class SimplePumaClient implements PumaClient {
                 request = new HttpGet(uri);
             }
 
-            result = httpClient.execute(request);
+            while (true) {
+                try {
+                    result = httpClient.execute(request);
+                    break;
+                } catch (SocketTimeoutException ignore) {
+                    ignore.printStackTrace();
+                }
+            }
         } catch (Exception e) {
             this.token = null;
             String msg = request == null ? e.getMessage() : String.format("%s %s", request.getURI(), e.getMessage());

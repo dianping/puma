@@ -1,26 +1,7 @@
 package com.dianping.puma.pumaserver;
 
-import io.netty.channel.ChannelHandler;
-import io.netty.handler.codec.http.HttpContentCompressor;
-import io.netty.handler.codec.http.HttpContentDecompressor;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.dianping.puma.pumaserver.client.PumaClientsHolder;
-import com.dianping.puma.pumaserver.handler.ChannelHolderHandler;
-import com.dianping.puma.pumaserver.handler.ExceptionHandler;
-import com.dianping.puma.pumaserver.handler.HandlerFactory;
-import com.dianping.puma.pumaserver.handler.HttpResponseEncoder;
-import com.dianping.puma.pumaserver.handler.HttpRouterHandler;
+import com.dianping.puma.pumaserver.handler.*;
 import com.dianping.puma.pumaserver.handler.binlog.BinlogAckHandler;
 import com.dianping.puma.pumaserver.handler.binlog.BinlogGetHandler;
 import com.dianping.puma.pumaserver.handler.binlog.BinlogSubscriptionHandler;
@@ -31,6 +12,18 @@ import com.dianping.puma.pumaserver.server.TcpServer;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
 import com.dianping.puma.pumaserver.service.impl.DbBinlogAckService;
 import com.dianping.puma.pumaserver.service.impl.DefaultClientSessionService;
+import io.netty.channel.ChannelHandler;
+import io.netty.handler.codec.http.HttpContentCompressor;
+import io.netty.handler.codec.http.HttpContentDecompressor;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Dozer @ 6/24/15
@@ -70,8 +63,6 @@ public class PumaServerManager {
 
         final BinlogUnsubscriptionHandler binlogUnsubscriptionHandler = new BinlogUnsubscriptionHandler();
         binlogUnsubscriptionHandler.setClientSessionService(clientSessionService);
-
-        HttpResponseEncoder.INSTANCE.setClientSessionService(clientSessionService);
 
         consoleConfig.setHandlerFactory(new HandlerFactory() {
             @Override

@@ -4,7 +4,12 @@ underscore.factory('_', ['$window', function() {
   return $window._; // assumes underscore has already been loaded on the page
 }]);*/
 
-var puma = angular.module('puma', ['ngRoute', 'isteven-multi-select', 'ui.bootstrap', 'ui.bootstrap.datetimepicker']);
+var puma = angular.module('puma', [
+    'ngRoute',
+    'isteven-multi-select',
+    'ui.bootstrap',
+    'ui.bootstrap.datetimepicker',
+    'NgSwitchery']);
 
 puma.controller('simpleModalController', function ($scope, item) {
     $scope.item = item;

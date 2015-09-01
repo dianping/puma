@@ -32,11 +32,8 @@ public class ScheduledTaskChecker implements TaskChecker {
     DatabaseTaskContainer databaseTaskContainer;
 
     protected Map<String, DatabaseTask> loadDatabaseTasks() {
-        List<PumaServerTargetEntity> pumaServerTargets = new ArrayList<PumaServerTargetEntity>();
-
-        for (String host: taskServerManager.findAuthorizedHosts()) {
-            pumaServerTargets.addAll(pumaServerTargetService.findByServerHost(host));
-        }
+        List<PumaServerTargetEntity> pumaServerTargets
+                = pumaServerTargetService.findByServerHost(taskServerManager.findSelfHost());
 
         Map<String, DatabaseTask> databaseTasks = new HashMap<String, DatabaseTask>();
         for (PumaServerTargetEntity pumaServerTarget: pumaServerTargets) {

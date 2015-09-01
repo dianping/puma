@@ -1,5 +1,6 @@
 package com.dianping.puma.server.container;
 
+import com.dianping.puma.core.registry.RegistryService;
 import com.dianping.puma.instance.InstanceManager;
 import com.dianping.puma.server.container.InstanceTaskContainer.InstanceTask;
 import com.dianping.puma.storage.manage.DatabaseStorageManager;
@@ -25,6 +26,9 @@ public class DefaultDatabaseTaskContainer implements DatabaseTaskContainer {
 
 	@Autowired
 	DatabaseStorageManager databaseStorageManager;
+
+	@Autowired
+	RegistryService registryService;
 
 	private Map<String, DatabaseTask> databaseTasks = new HashMap<String, DatabaseTask>();
 

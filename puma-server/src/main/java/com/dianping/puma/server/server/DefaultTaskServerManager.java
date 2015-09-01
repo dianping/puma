@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-
 @Service
 public class DefaultTaskServerManager implements TaskServerManager {
 
@@ -15,15 +13,14 @@ public class DefaultTaskServerManager implements TaskServerManager {
 	PumaServerService pumaServerService;
 
 	@Override
-	public Collection<String> findAuthorizedHosts() {
-		return IPUtils.getNoLoopbackIP4Addresses();
+	public String findSelfHost() {
+		return IPUtils.getFirstNoLoopbackIP4Address();
 	}
 
 	@Override
 	public void register() {
-		for (String host: findAuthorizedHosts()) {
-			pumaServerService.registerByHost(host);
-		}
+		String host = findSelfHost();
+		pumaServerService.registerByHost(host);
 	}
 
 	@Scheduled(fixedDelay = 5 * 1000)

@@ -10,6 +10,7 @@ import com.dianping.puma.core.util.GsonUtil;
 import com.google.common.collect.ImmutableMap;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -35,7 +36,14 @@ public class PumaTaskStatusServiceImpl implements PumaTaskStatusService {
 
     protected ConfigCache configCache = ConfigCache.getInstance();
 
-    protected HttpClient httpClient = HttpClients.createDefault();
+    protected HttpClient httpClient = HttpClients
+            .custom()
+            .setDefaultRequestConfig(RequestConfig
+                    .custom()
+                    .setConnectTimeout(60 * 1000)
+                    .setSocketTimeout(60 * 1000)
+                    .build())
+            .build();
 
     private volatile long lastAccessTime;
 

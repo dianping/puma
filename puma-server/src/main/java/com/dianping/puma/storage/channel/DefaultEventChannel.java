@@ -189,6 +189,10 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
             }
 
             this.readDataBucket = initReadBucket(value.getSequence(), false);
+
+            if (this.readDataBucket == null) {
+                throw new InvalidSequenceException("cannot find binlog position");
+            }
         } else {
             throw new InvalidSequenceException("Invalid binlog info");
         }
@@ -216,6 +220,10 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
         }
 
         this.readDataBucket = initReadBucket(value.getSequence(), startTimeStamp == SubscribeConstant.SEQ_FROM_LATEST);
+
+        if (this.readDataBucket == null) {
+            throw new InvalidSequenceException("cannot find any latest binlog");
+        }
     }
 
     private void openInternal() throws IOException {

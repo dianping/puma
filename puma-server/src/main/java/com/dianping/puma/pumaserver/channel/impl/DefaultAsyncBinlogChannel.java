@@ -168,6 +168,9 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
                 }
             } catch (InterruptedException e) {
                 logger.info("AsyncTask has be Interrupted");
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                Cat.logError(e.getMessage(), e);
             }
         }
 

@@ -54,8 +54,27 @@ public class PumaServerTargetServiceImpl implements PumaServerTargetService {
     }
 
     @Override
-    public List<PumaServerTargetEntity> findByServerName(String host) {
-        return pumaServerTargetDao.findByServerName(host);
+    public List<PumaServerTargetEntity> findByServerHost(String host) {
+        PumaServerEntity pumaServer = pumaServerDao.findByHost(host);
+        String serverName = pumaServer.getName();
+
+        List<PumaServerTargetEntity> pumaServerTargets = pumaServerTargetDao.findByServerName(serverName);
+        for (PumaServerTargetEntity pumaServerTarget: pumaServerTargets) {
+            pumaServerTarget.setServerHost(host);
+
+            String database = pumaServerTarget.getTargetDb();
+            List<PumaTargetEntity> pumaTargets = pumaTargetDao.findByDatabase(database);
+            List<String> tables = Lists.transform(pumaTargets, new Function<PumaTargetEntity, String>() {
+                @Override
+                public String apply(PumaTargetEntity pumaTarget) {
+                    return pumaTarget.getTable();
+                }
+            });
+
+            pumaServerTarget.setTables(tables);
+        }
+
+        return pumaServerTargets;
     }
 
     @Override

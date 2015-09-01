@@ -17,6 +17,8 @@ public class PumaServerTargetEntity {
 
 	private List<String> tables;
 
+	private boolean stopped;
+
 	public int getId() {
 		return id;
 	}
@@ -63,5 +65,13 @@ public class PumaServerTargetEntity {
 
 	public void setTables(List<String> tables) {
 		this.tables = tables;
+	}
+
+	public boolean isStopped() {
+		return stopped;
+	}
+
+	public void setStopped(boolean stopped) {
+		this.stopped = stopped;
 	}
 }

@@ -84,21 +84,21 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
     @Override
     public void doStart() throws Exception {
-        Thread.currentThread().setName("DefaultTaskExecutor-" + getTask().getName());
+        Thread.currentThread().setName("DefaultTaskExecutor-" + taskName);
 
         long failCount = 0;
         boolean canStop = false;
         do {
             try {
-                loadServerId(getTask().getSrcDbEntityList());
+                loadServerId(srcDbEntities);
 
                 // 读position/file文件
                 BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(getContext().getPumaServerName());
 
                 if (binlogInfo == null) {
                     this.currentSrcDbEntity = initSrcDbByServerId(-1);
-                    if (getTask().getBeginTime() != null) {
-                        binlogInfo = getBinlogByTimestamp(getTask().getBeginTime().getTime() / 1000);
+                    if (beginTime != null) {
+                        binlogInfo = getBinlogByTimestamp(beginTime.getTime() / 1000);
                     }
                 } else {
                     this.currentSrcDbEntity = initSrcDbByServerId(binlogInfo.getServerId());
@@ -109,7 +109,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                         if (binlogInfo == null) {
                             throw new IOException("Switch Binlog Failed!");
                         } else {
-                            Cat.logEvent("BinlogSwitch", getTask().getName(), Message.SUCCESS,
+                            Cat.logEvent("BinlogSwitch", taskName, Message.SUCCESS,
                                     oldBinlogInfo.toString() + " -> " + binlogInfo.toString());
                         }
                     }
@@ -163,7 +163,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
     protected void initBinlogPosition(BinlogInfo binlogInfo) throws IOException {
         if (binlogInfo == null) {
             List<BinlogInfo> binaryLogs = getBinaryLogs();
-            BinlogInfo begin = getTask().getBeginTime() == null ? binaryLogs.get(binaryLogs.size() - 1) : binaryLogs.get(0);
+            BinlogInfo begin = beginTime == null ? binaryLogs.get(binaryLogs.size() - 1) : binaryLogs.get(0);
             binlogInfo = new BinlogInfo(currentSrcDbEntity.getServerId(), begin.getBinlogFile(), 4l, 0, begin.getTimestamp());
         }
 
@@ -171,7 +171,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         getContext().setBinlogFileName(binlogInfo.getBinlogFile());
         getContext().setBinlogStartPos(binlogInfo.getBinlogPosition());
         setBinlogInfo(binlogInfo);
-        SystemStatusManager.addServer(getTaskName(), currentSrcDbEntity.getHost(), currentSrcDbEntity.getPort(), getTask().getTableSet());
+        SystemStatusManager.addServer(getTaskName(), currentSrcDbEntity.getHost(), currentSrcDbEntity.getPort(), tableSet);
         SystemStatusManager.updateServerBinlog(getTaskName(), binlogInfo);
     }
 
@@ -245,7 +245,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 }
             }
         });
-        sortedSet.addAll(getTask().getSrcDbEntityList());
+        sortedSet.addAll(srcDbEntities);
 
         int index = sortedSet.indexOf(this.currentSrcDbEntity) + 1;
         if (index >= sortedSet.size()) {
@@ -253,7 +253,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         }
         SrcDbEntity newSrcEntity = sortedSet.get(index);
 
-        Cat.logEvent("SrcDbSwitch", getTask().getName(), Message.SUCCESS,
+        Cat.logEvent("SrcDbSwitch", taskName, Message.SUCCESS,
                 oldSrcEntity.toString() + " -> " + newSrcEntity.toString());
 
         return newSrcEntity;
@@ -265,7 +265,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         }
 
         List<SrcDbEntity> avaliableSrcDb = FluentIterable
-                .from(getTask().getSrcDbEntityList())
+                .from(srcDbEntities)
                 .filter(new Predicate<SrcDbEntity>() {
                     @Override
                     public boolean apply(SrcDbEntity input) {
@@ -304,7 +304,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
     protected BinlogInfo getBinlogByTimestamp(long time) throws IOException {
         BinlogInfo binlogResult = null;
-        Transaction t = Cat.newTransaction("BinlogFindByTime", getTask().getName());
+        Transaction t = Cat.newTransaction("BinlogFindByTime", taskName);
 
         Cat.logEvent("BinlogFindByTime.Time", String.valueOf(time));
 
@@ -391,7 +391,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 }
             }
 
-            Cat.logEvent("BinlogFindByTime.Success", getTask().getName(), Message.SUCCESS,
+            Cat.logEvent("BinlogFindByTime.Success", taskName, Message.SUCCESS,
                     time + " -> " + (binlogResult == null ? "null" : binlogResult.toString()));
             t.setStatus(Message.SUCCESS);
             t.complete();
@@ -954,5 +954,9 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             }
             return null;
         }
+    }
+
+    public void onChange() {
+
     }
 }

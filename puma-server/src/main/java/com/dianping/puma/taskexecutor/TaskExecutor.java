@@ -69,4 +69,6 @@ public interface TaskExecutor extends LifeCycle<Exception> {
 	public PumaTaskStateEntity getTaskState();
 
 	public void setTaskState(PumaTaskStateEntity taskState);
+
+	public void onChange();
 }

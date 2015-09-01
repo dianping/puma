@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface TaskContainer {
 
-    TaskExecutor get(String taskId);
+    TaskExecutor get(String instanceName);
 
     List<TaskExecutor> getAll();
 

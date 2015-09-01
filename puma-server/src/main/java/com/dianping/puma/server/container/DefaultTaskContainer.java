@@ -31,8 +31,8 @@ public class DefaultTaskContainer implements TaskContainer {
     private TaskBuilder taskBuilder;
 
     @Override
-    public TaskExecutor get(String taskName) {
-        return taskExecutors.get(taskName);
+    public TaskExecutor get(String instanceName) {
+        return taskExecutors.get(instanceName);
     }
 
     @Override

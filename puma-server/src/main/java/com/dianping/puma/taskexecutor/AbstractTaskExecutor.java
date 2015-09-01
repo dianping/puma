@@ -15,12 +15,15 @@
  */
 package com.dianping.puma.taskexecutor;
 
+import java.util.Date;
 import java.util.List;
 
 import com.dianping.puma.biz.entity.PumaTaskEntity;
+import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
+import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.Sender;
@@ -41,7 +44,13 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
 
 	private long serverId;
 
-	private String taskName;
+	protected String taskName;
+
+	protected Date beginTime;
+
+	protected TableSet tableSet;
+
+	protected List<SrcDbEntity> srcDbEntities;
 
 	private String defaultBinlogFileName;
 
@@ -219,5 +228,29 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
 
 	public void setTask(PumaTaskEntity pumaTask) {
 		this.pumaTask = pumaTask;
+	}
+
+	public Date getBeginTime() {
+		return beginTime;
+	}
+
+	public void setBeginTime(Date beginTime) {
+		this.beginTime = beginTime;
+	}
+
+	public TableSet getTableSet() {
+		return tableSet;
+	}
+
+	public void setTableSet(TableSet tableSet) {
+		this.tableSet = tableSet;
+	}
+
+	public List<SrcDbEntity> getSrcDbEntities() {
+		return srcDbEntities;
+	}
+
+	public void setSrcDbEntities(List<SrcDbEntity> srcDbEntities) {
+		this.srcDbEntities = srcDbEntities;
 	}
 }

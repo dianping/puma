@@ -11,6 +11,12 @@ var puma = angular.module('puma', [
     'ui.bootstrap.datetimepicker',
     'NgSwitchery']);
 
+puma.filter('toLocaleString', function () {
+    return function (value) {
+        return new Date(value).toLocaleString();
+    };
+});
+
 puma.controller('simpleModalController', function ($scope, item) {
     $scope.item = item;
 });

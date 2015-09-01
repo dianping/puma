@@ -15,7 +15,6 @@ import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
 import com.dianping.puma.status.SystemStatusManager;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.channel.DefaultEventChannel;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
 import org.slf4j.Logger;
@@ -83,12 +82,22 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
         }
 
         try {
-            EventChannel eventChannel = initChannel(
-                    Strings.isNullOrEmpty(event.getBinlogInfo().getBinlogFile()) ? SubscribeConstant.SEQ_FROM_TIMESTAMP : SubscribeConstant.SEQ_FROM_BINLOGINFO,
-                    event.getBinlogInfo(), database, Lists.newArrayList(this.eventChannel.getTables()),
-                    this.eventChannel.getDml(), this.eventChannel.getDdl(), this.eventChannel.getTransaction());
+            EventChannel eventChannel;
+            try {
+                eventChannel = initChannel(
+                        SubscribeConstant.SEQ_FROM_BINLOGINFO,
+                        event.getBinlogInfo(), database, Lists.newArrayList(this.eventChannel.getTables()),
+                        this.eventChannel.getDml(), this.eventChannel.getDdl(), this.eventChannel.getTransaction());
+            } catch (IOException e) {
+                eventChannel = initChannel(
+                        SubscribeConstant.SEQ_FROM_TIMESTAMP,
+                        event.getBinlogInfo(), database, Lists.newArrayList(this.eventChannel.getTables()),
+                        this.eventChannel.getDml(), this.eventChannel.getDdl(), this.eventChannel.getTransaction());
+            }
+
             EventChannel oldEventChannel = this.eventChannel;
             this.eventChannel = eventChannel;
+
             oldEventChannel.close();
             Cat.logEvent("Switch.ClientPosition", String.format("%s %s", clientName, event.getBinlogInfo().toString()));
         } catch (IOException e) {

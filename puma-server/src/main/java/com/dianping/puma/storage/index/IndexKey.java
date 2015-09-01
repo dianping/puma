@@ -20,7 +20,7 @@ package com.dianping.puma.storage.index;
  * @author Leo Liang
  * 
  */
-public interface IndexKey<T> extends Comparable<T> {
+public interface IndexKey{
 
 	public long getTimestamp();
 

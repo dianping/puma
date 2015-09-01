@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 /**
- * @author damonzhu
+ * @author damonzhu,Dozer
  */
 public class DefaultIndexManagerTest {
     protected File baseDir = null;
@@ -99,6 +99,8 @@ public class DefaultIndexManagerTest {
                 new Sequence(123560L, 0), false, true);
         addIndex(new IndexKeyImpl(106, -12, "bin-0002.bin", 200), "4", "dianping", "receipt", false, true, false, false,
                 new Sequence(123560L, 0), false, true);
+
+        index.flush();
     }
 
     @Test
@@ -131,7 +133,7 @@ public class DefaultIndexManagerTest {
         Assert.assertTrue(l2IndexFile3.exists());
 
         LocalFileIndexBucket<IndexKeyImpl, IndexValueImpl> bucket = new LocalFileIndexBucket<IndexKeyImpl, IndexValueImpl>(
-                l2IndexFile1, new IndexValueConvertor());
+                "1" + DefaultIndexManager.L2INDEX_FILESUFFIX, l2IndexFile1, new IndexValueConvertor());
 
         Assert.assertEquals(new IndexKeyImpl(1, 0, "bin-0001.bin", 5), bucket.next().getIndexKey());
         Assert.assertEquals(new IndexKeyImpl(5, 0, "bin-0002.bin", 10), bucket.next().getIndexKey());
@@ -142,12 +144,11 @@ public class DefaultIndexManagerTest {
      */
     @Test
     public void testfindByBinlog1() throws IOException {
-        IndexKeyImpl indexKey = index.findByBinlog(new IndexKeyImpl(1, 0, "bin-0001.bin", 5), false);
+        IndexKeyImpl indexKey = index.findByBinlog(new IndexKeyImpl(1, 0, "bin-0001.bin", 5), false).getIndexKey();
 
         Assert.assertEquals(new IndexKeyImpl(1, 0, "bin-0001.bin", 5), indexKey);
 
-        indexKey = index.findByBinlog(new IndexKeyImpl(1, 0, "bin-0001.bin", 5), true);
-        Assert.assertEquals(null, indexKey);
+        Assert.assertEquals(null, index.findByBinlog(new IndexKeyImpl(1, 0, "bin-0001.bin", 5), true));
     }
 
     /*
@@ -155,11 +156,11 @@ public class DefaultIndexManagerTest {
      */
     @Test
     public void testfindByBinlog2() throws IOException {
-        IndexKeyImpl indexKey = index.findByBinlog(new IndexKeyImpl(20, 0, "bin-0002.bin", 70), false);
+        IndexKeyImpl indexKey = index.findByBinlog(new IndexKeyImpl(20, 0, "bin-0002.bin", 70), false).getIndexKey();
 
         Assert.assertEquals(new IndexKeyImpl(20, 0, "bin-0002.bin", 70), indexKey);
 
-        indexKey = index.findByBinlog(new IndexKeyImpl(20, 0, "bin-0002.bin", 70), true);
+        indexKey = index.findByBinlog(new IndexKeyImpl(20, 0, "bin-0002.bin", 70), true).getIndexKey();
         Assert.assertEquals(new IndexKeyImpl(16, 0, "bin-0002.bin", 50), indexKey);
     }
 
@@ -168,11 +169,11 @@ public class DefaultIndexManagerTest {
      */
     @Test
     public void testfindByBinlog3() throws IOException {
-        IndexKeyImpl indexKey = index.findByBinlog(new IndexKeyImpl(16, 0, "bin-0002.bin", 50), false);
+        IndexKeyImpl indexKey = index.findByBinlog(new IndexKeyImpl(16, 0, "bin-0002.bin", 50), false).getIndexKey();
 
         Assert.assertEquals(new IndexKeyImpl(16, 0, "bin-0002.bin", 50), indexKey);
 
-        indexKey = index.findByBinlog(new IndexKeyImpl(16, 0, "bin-0002.bin", 50), true);
+        indexKey = index.findByBinlog(new IndexKeyImpl(16, 0, "bin-0002.bin", 50), true).getIndexKey();
         Assert.assertEquals(new IndexKeyImpl(16, 0, "bin-0002.bin", 50), indexKey);
     }
 
@@ -181,11 +182,11 @@ public class DefaultIndexManagerTest {
      */
     @Test
     public void testfindByBinlog4() throws IOException {
-        IndexKeyImpl indexKey = index.findByBinlog(new IndexKeyImpl(16, 0, "bin-0002.bin", 80), false);
+        IndexKeyImpl indexKey = index.findByBinlog(new IndexKeyImpl(16, 0, "bin-0002.bin", 80), false).getIndexKey();
 
         Assert.assertEquals(new IndexKeyImpl(20, 0, "bin-0002.bin", 70), indexKey);
 
-        indexKey = index.findByBinlog(new IndexKeyImpl(16, 0, "bin-0002.bin", 80), true);
+        indexKey = index.findByBinlog(new IndexKeyImpl(16, 0, "bin-0002.bin", 80), true).getIndexKey();
         Assert.assertEquals(new IndexKeyImpl(16, 0, "bin-0002.bin", 50), indexKey);
     }
 
@@ -194,7 +195,7 @@ public class DefaultIndexManagerTest {
      */
     @Test
     public void testfindByBinlog5() throws IOException {
-        IndexKeyImpl indexKey = index.findByBinlog(new IndexKeyImpl(105, -12, "bin-0002.bin", 100), true);
+        IndexKeyImpl indexKey = index.findByBinlog(new IndexKeyImpl(105, -12, "bin-0002.bin", 100), true).getIndexKey();
 
         Assert.assertEquals(new IndexKeyImpl(101, -12, "bin-0001.bin", 300), indexKey);
     }
@@ -204,15 +205,13 @@ public class DefaultIndexManagerTest {
      */
     @Test
     public void testfindByTime1() throws IOException {
-        IndexKeyImpl searchKey = new IndexKeyImpl(1);
+        IndexKeyImpl searchKey = new IndexKeyImpl(2);
 
-        IndexKeyImpl key = index.findByTime(searchKey, false);
+        IndexKeyImpl key = index.findByTime(searchKey, false).getIndexKey();
 
         Assert.assertEquals(new IndexKeyImpl(1, 0, "bin-0001.bin", 5), key);
 
-        key = index.findByTime(searchKey, true);
-
-        Assert.assertEquals(null, key);
+        Assert.assertEquals(null, index.findByTime(searchKey, true));
     }
 
     /*
@@ -220,12 +219,12 @@ public class DefaultIndexManagerTest {
      */
     @Test
     public void testfindByTime2() throws IOException {
-        IndexKeyImpl searchKey = new IndexKeyImpl(20);
+        IndexKeyImpl searchKey = new IndexKeyImpl(21);
 
-        IndexKeyImpl key = index.findByTime(searchKey, false);
+        IndexKeyImpl key = index.findByTime(searchKey, false).getIndexKey();
         Assert.assertEquals(new IndexKeyImpl(20, 0, "bin-0002.bin", 70), key);
 
-        key = index.findByTime(searchKey, true);
+        key = index.findByTime(searchKey, true).getIndexKey();
         Assert.assertEquals(new IndexKeyImpl(16, 0, "bin-0002.bin", 50), key);
     }
 
@@ -234,12 +233,12 @@ public class DefaultIndexManagerTest {
      */
     @Test
     public void testfindByTime3() throws IOException {
-        IndexKeyImpl searchKey = new IndexKeyImpl(16);
+        IndexKeyImpl searchKey = new IndexKeyImpl(17);
 
-        IndexKeyImpl key = index.findByTime(searchKey, false);
+        IndexKeyImpl key = index.findByTime(searchKey, false).getIndexKey();
         Assert.assertEquals(new IndexKeyImpl(16, 0, "bin-0002.bin", 50), key);
 
-        key = index.findByTime(searchKey, true);
+        key = index.findByTime(searchKey, true).getIndexKey();
         Assert.assertEquals(new IndexKeyImpl(16, 0, "bin-0002.bin", 50), key);
     }
 
@@ -250,10 +249,10 @@ public class DefaultIndexManagerTest {
     public void testfindByTime4() throws IOException {
         IndexKeyImpl searchKey = new IndexKeyImpl(21);
 
-        IndexKeyImpl key = index.findByTime(searchKey, false);
+        IndexKeyImpl key = index.findByTime(searchKey, false).getIndexKey();
         Assert.assertEquals(new IndexKeyImpl(20, 0, "bin-0002.bin", 70), key);
 
-        key = index.findByTime(searchKey, true);
+        key = index.findByTime(searchKey, true).getIndexKey();
         Assert.assertEquals(new IndexKeyImpl(16, 0, "bin-0002.bin", 50), key);
     }
 
@@ -262,58 +261,40 @@ public class DefaultIndexManagerTest {
      */
     @Test
     public void testfindByTime5() throws IOException {
-        IndexKeyImpl searchKey = new IndexKeyImpl(105);
+        IndexKeyImpl searchKey = new IndexKeyImpl(106);
 
-        IndexKeyImpl key = index.findByTime(searchKey, false);
+        IndexKeyImpl key = index.findByTime(searchKey, false).getIndexKey();
         Assert.assertEquals(new IndexKeyImpl(105, -12, "bin-0002.bin", 100), key);
 
-        key = index.findByTime(searchKey, true);
+        key = index.findByTime(searchKey, true).getIndexKey();
         Assert.assertEquals(new IndexKeyImpl(101, -12, "bin-0001.bin", 300), key);
     }
 
     @Test
     public void testfindFirst() throws IOException {
-        IndexKeyImpl firstKey = index.findFirst();
+        IndexKeyImpl firstKey = index.findFirst().getIndexKey();
 
         Assert.assertEquals(new IndexKeyImpl(1, 0, "bin-0001.bin", 5), firstKey);
     }
 
     @Test
     public void testfindLatest() throws IOException {
-        IndexKeyImpl latestKey = index.findLatest();
-
-        Assert.assertEquals(new IndexKeyImpl(106, -12, "bin-0002.bin", 200), latestKey);
-
-        index.setLatestL2IndexNull();
-        latestKey = index.findLatest();
-
+        IndexKeyImpl latestKey = index.findLatest().getIndexKey();
         Assert.assertEquals(new IndexKeyImpl(106, -12, "bin-0002.bin", 200), latestKey);
     }
 
     @Test
-    public void testGetIndexBucket1() throws IOException {
-        IndexBucket<IndexKeyImpl, IndexValueImpl> bucket = index.getIndexBucket(new IndexKeyImpl(16, 0, "bin-0002.bin",
-                50), false);
-        bucket.start();
-
-        IndexValueImpl next = bucket.next();
-        Assert.assertEquals(new IndexKeyImpl(20, 0, "bin-0002.bin", 70), next.getIndexKey());
-    }
-
-    @Test
-    public void testGetIndexBucket2() throws IOException {
-        IndexBucket<IndexKeyImpl, IndexValueImpl> bucket = index.getIndexBucket(new IndexKeyImpl(16, 0, "bin-0002.bin",
-                50), true);
-        bucket.start();
-
-        IndexValueImpl next = bucket.next();
-        Assert.assertEquals(new IndexKeyImpl(16, 0, "bin-0002.bin", 50), next.getIndexKey());
+    public void testHasNextIndexBucket() throws IOException {
+        Assert.assertFalse(index.hasNextIndexBucket("xxx"));
+        Assert.assertTrue(index.hasNextIndexBucket("1"));
+        Assert.assertTrue(index.hasNextIndexBucket("2"));
+        Assert.assertTrue(index.hasNextIndexBucket("3"));
+        Assert.assertFalse(index.hasNextIndexBucket("4"));
     }
 
     @Test
     public void testGetNextIndexBucket() throws IOException {
-        IndexBucket<IndexKeyImpl, IndexValueImpl> indexBucket = index.getNextIndexBucket(new IndexKeyImpl(22, 0,
-                "bin-0002.bin", 90));
+        IndexBucket<IndexKeyImpl, IndexValueImpl> indexBucket = index.getNextIndexBucket("1");
 
         IndexValueImpl convertFromObj = indexBucket.next();
 
@@ -326,17 +307,6 @@ public class DefaultIndexManagerTest {
         Assert.assertEquals(123559L, convertFromObj.getSequence().longValue());
 
         indexBucket.stop();
-        indexBucket = index.getNextIndexBucket(new IndexKeyImpl(22, 0, "bin-0002.bin", 80));
-
-        convertFromObj = indexBucket.next();
-
-        Assert.assertEquals("bin-0003.bin", convertFromObj.getIndexKey().getBinlogFile());
-        Assert.assertEquals(200L, convertFromObj.getIndexKey().getBinlogPosition());
-        Assert.assertEquals(0L, convertFromObj.getIndexKey().getServerId());
-        Assert.assertEquals("receipt", convertFromObj.getTable());
-        Assert.assertEquals(false, convertFromObj.isDdl());
-        Assert.assertEquals(true, convertFromObj.isDml());
-        Assert.assertEquals(123559L, convertFromObj.getSequence().longValue());
     }
 
     @Test
@@ -355,13 +325,13 @@ public class DefaultIndexManagerTest {
     }
 
     @Test
-    public void testCanNotAddSameL2Index() throws IOException {
-        int size = index.getL1Index().size();
+    public void testCanNotAddSameL1Index() throws IOException {
+        int size = index.loadLinkedL1Index().size();
         addIndex(new IndexKeyImpl(200, -12, "bin-0003.bin", 0), "4", "dianping", "receipt", false, true, false, false,
                 new Sequence(123561L, 0), true, true);
-        Assert.assertEquals(size + 1, index.getL1Index().size());
+        Assert.assertEquals(size + 1, index.loadLinkedL1Index().size());
         addIndex(new IndexKeyImpl(200, -12, "bin-0003.bin", 0), "4", "dianping", "receipt", false, true, false, false,
                 new Sequence(123561L, 0), true, true);
-        Assert.assertEquals(size + 1, index.getL1Index().size());
+        Assert.assertEquals(size + 1, index.loadLinkedL1Index().size());
     }
 }

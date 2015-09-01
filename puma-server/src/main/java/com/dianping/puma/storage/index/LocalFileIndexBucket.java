@@ -7,11 +7,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class LocalFileIndexBucket<K, V extends IndexValue<K>> implements IndexBucket<K, V> {
 
-	private DataInputStream input;
+	private final DataInputStream input;
 
-	private IndexItemConvertor<V> valueConvertor;
+	private final IndexItemConvertor<V> valueConvertor;
 
-	private File file;
+	private final File file;
+
+	private final String name;
 
 	private long prePosition = 0L;
 
@@ -19,13 +21,15 @@ public class LocalFileIndexBucket<K, V extends IndexValue<K>> implements IndexBu
 
 	private final AtomicReference<K> startIndexKey = new AtomicReference<K>();
 
-	public LocalFileIndexBucket(File file, IndexItemConvertor<V> valueConvertor) throws IOException {
+	public LocalFileIndexBucket(String name,File file, IndexItemConvertor<V> valueConvertor) throws IOException {
+		this.name = name;
 		this.file = file;
 		this.input = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
 		this.valueConvertor = valueConvertor;
 	}
 
-	public LocalFileIndexBucket(File file, IndexItemConvertor<V> valueConvertor, K startKey, boolean inclusive) throws IOException {
+	public LocalFileIndexBucket(String name,File file, IndexItemConvertor<V> valueConvertor, K startKey, boolean inclusive) throws IOException {
+		this.name = name;
 		this.file = file;
 		this.input = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
 		this.valueConvertor = valueConvertor;
@@ -118,5 +122,10 @@ public class LocalFileIndexBucket<K, V extends IndexValue<K>> implements IndexBu
 
 		output.write(bytes);
 		output.close();
+	}
+
+	@Override
+	public String getName() {
+		return name;
 	}
 }

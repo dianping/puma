@@ -1,5 +1,6 @@
 package com.dianping.puma.storage.index;
 
+import java.io.File;
 import java.io.IOException;
 
 import com.dianping.puma.core.LifeCycle;
@@ -17,4 +18,6 @@ public interface IndexBucket<K, V> extends LifeCycle<IOException> {
 	void truncate() throws IOException;
 	
 	K getStartKeyIndex();
+
+	String getName();
 }

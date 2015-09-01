@@ -1,13 +1,11 @@
 package com.dianping.puma.storage.channel;
 
-import java.io.EOFException;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.constant.SubscribeConstant;
+import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.Event;
+import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.bucket.DataBucket;
@@ -18,298 +16,222 @@ import com.dianping.puma.storage.exception.InvalidSequenceException;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageException;
 import com.dianping.puma.storage.exception.StorageReadException;
-import com.dianping.puma.storage.index.DefaultIndexManager;
-import com.dianping.puma.storage.index.IndexBucket;
-import com.dianping.puma.storage.index.IndexKeyConvertor;
-import com.dianping.puma.storage.index.IndexKeyImpl;
-import com.dianping.puma.storage.index.IndexManager;
-import com.dianping.puma.storage.index.IndexValueConvertor;
-import com.dianping.puma.storage.index.IndexValueImpl;
+import com.dianping.puma.storage.index.*;
+import com.google.common.base.Strings;
+
+import java.io.EOFException;
+import java.io.IOException;
 
 public class DefaultEventChannel extends AbstractEventChannel implements EventChannel {
 
-	private IndexManager<IndexKeyImpl, IndexValueImpl> indexManager;
+    private IndexManager<IndexKeyImpl, IndexValueImpl> indexManager;
 
-	private DataBucketManager slaveIndex;
+    private DataBucketManager slaveIndex;
 
-	private DataBucketManager masterIndex;
+    private DataBucketManager masterIndex;
 
-	private IndexBucket<IndexKeyImpl, IndexValueImpl> indexBucket;
+    private EventCodec codec = new RawEventCodec();
 
-	private IndexBucket<IndexKeyImpl, IndexValueImpl> lastIndexBucket;
+    private volatile boolean stopped = true;
 
-	private EventCodec codec = new RawEventCodec();
+    private DataBucket readDataBucket;
 
-	private volatile boolean stopped = true;
+    private Sequence lastSequence = null;
 
-	private DataBucket readDataBucket;
+    public DefaultEventChannel(String database) {
+        this.database = database;
+    }
 
-	private IndexKeyImpl lastIndexKey = null;
+    @Override
+    public Event next(boolean shouldSleep) throws StorageException {
+        checkClosed();
 
-	private Sequence lastReadSequence = null;
-	
-	public DefaultEventChannel(String database){
-		this.database = database;
-	}
+        while (true) {
+            try {
+                checkClosed();
+                byte[] data = readDataBucket.getNext();
+                Event event = codec.decode(data);
+                lastSequence = new Sequence(event.getSeq(), data.length);
 
-	@Override
-	public Event next(boolean shouldSleep) throws StorageException {
-		checkClosed();
+                if (event instanceof DdlEvent && !this.withDdl) {
+                    continue;
+                }
+                if (event instanceof RowChangedEvent) {
+                    RowChangedEvent rowChangedEvent = (RowChangedEvent) event;
+                    if ((rowChangedEvent.isTransactionBegin() || rowChangedEvent.isTransactionCommit())
+                            ) {
+                        if (!this.withTransaction) {
+                            continue;
+                        }
+                    } else {
+                        if (!this.withDml) {
+                            continue;
+                        }
 
-		Event event = null;
+                        if (!this.tables.contains(rowChangedEvent.getTable())) {
+                            continue;
+                        }
+                    }
+                }
+                return event;
+            } catch (EOFException e) {
+                try {
+                    DataBucket newReadDataBucket = getNextReadBucket(lastSequence);
+                    if (newReadDataBucket == null) {
+                        return null;
+                    }
+                    this.readDataBucket = newReadDataBucket;
+                } catch (IOException exception) {
+                    throw new StorageReadException("Failed to read", e);
+                }
+            } catch (IOException e) {
+                throw new StorageReadException("Failed to read", e);
+            }
+        }
+    }
 
-		while (event == null) {
-			try {
-				checkClosed();
-				IndexValueImpl nextL2Index = null;
+    protected DataBucket initReadBucket(Sequence seq, boolean fromNext) throws IOException {
+        checkClosed();
+        DataBucket bucket = slaveIndex.getReadBucket(seq.longValue(), fromNext);
+        if (bucket != null) {
+            return bucket;
+        } else {
+            return masterIndex.getReadBucket(seq.longValue(), fromNext);
+        }
 
-				if (this.indexBucket == null) {
-					this.indexBucket = this.indexManager.getNextIndexBucket(lastIndexBucket.getStartKeyIndex());
+    }
 
-					if (indexBucket == null) {
-						if (!shouldSleep) {
-							return null;
-						} else {
-							try {
-								Thread.sleep(5);
+    protected DataBucket getNextReadBucket(Sequence seq) throws IOException {
+        checkClosed();
+        DataBucket bucket = slaveIndex.getNextReadBucket(seq);
+        if (bucket != null) {
+            return bucket;
+        } else {
+            return masterIndex.getNextReadBucket(seq);
+        }
+    }
 
-								continue;
-							} catch (InterruptedException e1) {
-								Thread.currentThread().interrupt();
-							}
-						}
-					}
-				}
+    private DataBucketManager createDataBucketManager(String baseDir, String prefix, String database, int lengthMB) {
+        LocalFileDataBucketManager bucketManager = new LocalFileDataBucketManager();
 
-				try {
-					nextL2Index = this.indexBucket.next();
-				} catch (EOFException e) {
-					if (this.indexManager.hasNextIndexBucket(this.indexBucket.getStartKeyIndex())) {
-						if (readDataBucket != null) {
-							this.readDataBucket.stop();
-							this.readDataBucket = null;
-						}
+        bucketManager.setBaseDir(baseDir + "/" + database);
+        bucketManager.setBucketFilePrefix(prefix);
+        bucketManager.setMaxBucketLengthMB(lengthMB);
 
-						if (indexBucket != null) {
-							this.lastIndexBucket = this.indexBucket;
-							this.indexBucket.stop();
-							this.indexBucket = null;
-						}
+        return bucketManager;
+    }
 
-						continue;
-					}
+    @Override
+    public Event next() throws StorageException {
+        return next(false);
+    }
 
-					if (!shouldSleep) {
-						return null;
-					} else {
-						try {
-							Thread.sleep(5);
+    private void checkClosed() throws StorageClosedException {
+        if (stopped) {
+            throw new StorageClosedException("Channel has been closed.");
+        }
+    }
 
-							continue;
-						} catch (InterruptedException e1) {
-							Thread.currentThread().interrupt();
-						}
-					}
-				}
+    @Override
+    public void close() {
+        if (!stopped) {
+            stopped = true;
+            if (this.readDataBucket != null) {
+                try {
+                    this.readDataBucket.stop();
+                    this.readDataBucket = null;
+                } catch (IOException ignore) {
+                }
+            }
+            if (this.indexManager != null) {
+                try {
+                    this.indexManager.stop();
+                    this.indexManager = null;
+                } catch (IOException ignore) {
+                }
+            }
+            if (this.slaveIndex != null) {
+                try {
+                    this.slaveIndex.stop();
+                    this.slaveIndex = null;
+                } catch (IOException ignore) {
+                }
+            }
+            if (this.masterIndex != null) {
+                try {
+                    this.masterIndex.stop();
+                    this.masterIndex = null;
+                } catch (IOException ignore) {
+                }
+            }
+        }
+    }
 
-				Sequence sequence = nextL2Index.getSequence();
+    @Override
+    public void open(long serverId, String binlogFile, long binlogPosition) throws IOException {
+        if (Strings.isNullOrEmpty(binlogFile) || binlogPosition < 0) {
+            throw new InvalidSequenceException("Invalid binlog info");
+        }
 
-				if (this.tables != null && !this.tables.contains(nextL2Index.getTable()) && !nextL2Index.isTransaction()) {
-					lastIndexKey = nextL2Index.getIndexKey();
-					continue;
-				}
-				if (this.withDdl != nextL2Index.isDdl() && this.withDml != nextL2Index.isDml()) {
-					lastIndexKey = nextL2Index.getIndexKey();
-					continue;
-				}
-				if (!this.withTransaction && nextL2Index.isTransaction()) {
-					lastIndexKey = nextL2Index.getIndexKey();
-					continue;
-				}
+        openInternal();
 
-				if (readDataBucket == null) {
-					lastReadSequence = sequence;
-					readDataBucket = this.getReadBucket(sequence.longValue(), false);
-				}
+        IndexValueImpl value;
 
-				try {
-					event = codec.decode(readData(sequence));
-				} catch (EOFException eof) {
-					// 处理索引已经刷新到文件，但是数据还没有刷新到文件的情况，这里强制刷新一下存储，然后再读数据，如果还读不到，说明真有问题了。
-					this.indexBucket.resetNext();
-					
-					if (!shouldSleep) {
-						return null;
-					} else {
-						try {
-							Thread.sleep(1);
+        if (serverId != 0 && binlogFile != null && binlogPosition > 0) {
+            try {
+                value = this.indexManager.findByBinlog(new IndexKeyImpl(serverId, binlogFile, binlogPosition), true);
+            } catch (IOException e) {
+                throw new InvalidSequenceException("find binlog error", e);
+            }
 
-							continue;
-						} catch (InterruptedException e1) {
-							Thread.currentThread().interrupt();
-						}
-					}
-				}
+            if (value == null) {
+                throw new InvalidSequenceException("cannot find binlog position");
+            }
 
-				lastIndexKey = nextL2Index.getIndexKey();
-				lastReadSequence = sequence;
-			} catch (IOException e) {
-				throw new StorageReadException("Failed to read", e);
-			}
-		}
+            this.readDataBucket = initReadBucket(value.getSequence(), false);
+        } else {
+            throw new InvalidSequenceException("Invalid binlog info");
+        }
+    }
 
-		return event;
-	}
+    @Override
+    public void open(long startTimeStamp) throws IOException {
+        openInternal();
 
-	public DataBucket getReadBucket(long seq, boolean fromNext) throws IOException, StorageClosedException {
-		checkClosed();
+        IndexValueImpl value;
+        try {
+            if (startTimeStamp == SubscribeConstant.SEQ_FROM_LATEST) {
+                value = this.indexManager.findLatest();
+            } else if (startTimeStamp == SubscribeConstant.SEQ_FROM_OLDEST) {
+                value = this.indexManager.findFirst();
+            } else {
+                value = this.indexManager.findByTime(new IndexKeyImpl(startTimeStamp), true);
+            }
+        } catch (IOException e) {
+            throw new InvalidSequenceException("find binlog error", e);
+        }
 
-		DataBucket bucket = slaveIndex.getReadBucket(seq, fromNext);
+        if (value == null) {
+            throw new InvalidSequenceException("cannot find any latest binlog");
+        }
 
-		if (bucket != null) {
-			return bucket;
-		} else {
-			bucket = masterIndex.getReadBucket(seq, fromNext);
-			if (bucket != null) {
-				return bucket;
-			} else {
-				throw new FileNotFoundException(String.format("No matching bucket for seq(%d)!", seq));
-			}
-		}
-	}
+        this.readDataBucket = initReadBucket(value.getSequence(), startTimeStamp == SubscribeConstant.SEQ_FROM_LATEST);
+    }
 
-	private DataBucketManager createDataBucketManager(String baseDir, String prefix, String database, int lengthMB) {
-		LocalFileDataBucketManager bucketManager = new LocalFileDataBucketManager();
+    private void openInternal() throws IOException {
+        if (!stopped) {
+            return;
+        }
 
-		bucketManager.setBaseDir(baseDir + "/" + database);
-		bucketManager.setBucketFilePrefix(prefix);
-		bucketManager.setMaxBucketLengthMB(lengthMB);
+        this.indexManager = new DefaultIndexManager<IndexKeyImpl, IndexValueImpl>(GlobalStorageConfig.binlogIndexBaseDir
+                + "/" + database, new IndexKeyConvertor(), new IndexValueConvertor());
+        this.slaveIndex = createDataBucketManager(GlobalStorageConfig.slaveStorageBaseDir,
+                GlobalStorageConfig.slaveBucketFilePrefix, database, GlobalStorageConfig.maxMasterBucketLengthMB);
+        this.slaveIndex.start();
+        this.masterIndex = createDataBucketManager(GlobalStorageConfig.masterStorageBaseDir,
+                GlobalStorageConfig.masterBucketFilePrefix, database, GlobalStorageConfig.maxMasterBucketLengthMB);
+        this.masterIndex.start();
 
-		return bucketManager;
-	}
-
-	private byte[] readData(Sequence sequence) throws StorageClosedException, IOException {
-		if (sequence.getOffset() != lastReadSequence.getOffset()) {
-			readDataBucket.skip(sequence.getOffset() - lastReadSequence.getOffset() - lastReadSequence.getLen());
-		}
-
-		return readDataBucket.getNext();
-	}
-
-	@Override
-	public Event next() throws StorageException {
-		return next(false);
-	}
-
-	private void checkClosed() throws StorageClosedException {
-		if (stopped) {
-			throw new StorageClosedException("Channel has been closed.");
-		}
-	}
-
-	@Override
-	public void close() {
-		if (!stopped) {
-			stopped = true;
-			if (this.readDataBucket != null) {
-				try {
-					this.readDataBucket.stop();
-					this.readDataBucket = null;
-				} catch (IOException ignore) {
-				}
-			}
-
-			if (this.indexBucket != null) {
-				try {
-					this.indexBucket.stop();
-					this.indexBucket = null;
-				} catch (IOException ignore) {
-				}
-			}
-		}
-	}
-
-	@Override
-	public void open(long serverId, String binlogFile, long binlogPosition) throws IOException {
-		openInternal();
-
-		if (serverId != 0 && binlogFile != null && binlogPosition > 0) {
-			try {
- 				this.lastIndexKey = this.indexManager.findByBinlog(new IndexKeyImpl(serverId, binlogFile, binlogPosition),
-				      true);
-			} catch (IOException e) {
-				throw new InvalidSequenceException("find binlog error", e);
-			}
-
-			if (this.lastIndexKey == null) {
-				throw new InvalidSequenceException("cannot find binlog position");
-			}
-
-			initIndexBucket(false);
-		} else {
-			throw new InvalidSequenceException("Invalid binlog info");
-		}
-
-		try {
-			this.indexBucket.start();
-		} catch (IOException ignore) {
-		}
-	}
-
-	@Override
-	public void open(long startTimeStamp) throws IOException {
-		openInternal();
-
-		try {
-			if (startTimeStamp == SubscribeConstant.SEQ_FROM_LATEST) {
-				this.lastIndexKey = this.indexManager.findLatest();
-			} else if (startTimeStamp == SubscribeConstant.SEQ_FROM_OLDEST) {
-				this.lastIndexKey = this.indexManager.findFirst();
-			} else {
-				this.lastIndexKey = this.indexManager.findByTime(new IndexKeyImpl(startTimeStamp), true);
-			}
-		} catch (IOException e) {
-			throw new InvalidSequenceException("find binlog error", e);
-		}
-
-		if (this.lastIndexKey == null) {
-			throw new InvalidSequenceException("cannot find any latest binlog");
-		}
-
-		initIndexBucket(startTimeStamp == SubscribeConstant.SEQ_FROM_OLDEST);
-
-		try {
-			this.indexBucket.start();
-		} catch (IOException ignore) {
-		}
-	}
-
-	private void openInternal() throws IOException {
-		if (!stopped) {
-			return;
-		}
-
-		this.indexManager = new DefaultIndexManager<IndexKeyImpl, IndexValueImpl>(GlobalStorageConfig.binlogIndexBaseDir
-		      + "/" + database, new IndexKeyConvertor(), new IndexValueConvertor());
-		this.slaveIndex = createDataBucketManager(GlobalStorageConfig.slaveStorageBaseDir,
-		      GlobalStorageConfig.slaveBucketFilePrefix, database, GlobalStorageConfig.maxMasterBucketLengthMB);
-		this.slaveIndex.start();
-		this.masterIndex = createDataBucketManager(GlobalStorageConfig.masterStorageBaseDir,
-		      GlobalStorageConfig.masterBucketFilePrefix, database, GlobalStorageConfig.maxMasterBucketLengthMB);
-		this.masterIndex.start();
-
-		stopped = false;
-	}
-
-	private void initIndexBucket(boolean inclusive) throws InvalidSequenceException {
-		try {
-			this.indexBucket = indexManager.getIndexBucket(this.lastIndexKey, inclusive);
-		} catch (IOException e) {
-			throw new InvalidSequenceException("Invalid binlogInfo(", e);
-		}
-
-		if (this.indexBucket == null) {
-			throw new InvalidSequenceException("Invalid binlogInfo(");
-		}
-	}
+        stopped = false;
+    }
 }

@@ -1,9 +1,9 @@
 /**
  * Project: puma-server
- * 
+ *
  * File Created at 2012-7-18
  * $Id$
- * 
+ *
  * Copyright 2010 dianping.com.
  * All rights reserved.
  *
@@ -34,9 +34,9 @@ import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
- * 
+ *
  * @author Leo Liang
- * 
+ *
  */
 public abstract class AbstractDataBucketManager implements DataBucketManager {
     protected static final String                      PATH_SEPARATOR    = "/";

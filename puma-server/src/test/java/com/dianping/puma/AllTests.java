@@ -46,7 +46,7 @@ import org.junit.runners.Suite.SuiteClasses;
         DefaultBucketManagerTest.class,//
         DefaultCleanupStrategyTest.class,//
         SequenceTest.class,//
-        StorageIntegrityCheckerTest.class,//
+//        StorageIntegrityCheckerTest.class,//
 
         // utils
         PacketUtilTest.class, //

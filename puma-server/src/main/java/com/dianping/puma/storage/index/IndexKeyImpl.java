@@ -1,6 +1,6 @@
 package com.dianping.puma.storage.index;
 
-public class IndexKeyImpl implements IndexKey<IndexKeyImpl> {
+public class IndexKeyImpl implements IndexKey {
 
 	private long timestamp;
 
@@ -53,17 +53,6 @@ public class IndexKeyImpl implements IndexKey<IndexKeyImpl> {
 	@Override
 	public long getServerId() {
 		return serverId;
-	}
-
-	@Override
-	public int compareTo(IndexKeyImpl o) {
-		if (this.timestamp > o.timestamp) {
-			return 1;
-		} else if (this.timestamp == o.timestamp) {
-			return 0;
-		} else {
-			return -1;
-		}
 	}
 
 	@Override

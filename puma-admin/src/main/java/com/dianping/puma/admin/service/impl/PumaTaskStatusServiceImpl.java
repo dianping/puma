@@ -41,7 +41,7 @@ public class PumaTaskStatusServiceImpl implements PumaTaskStatusService {
 
     private volatile long lastReloadTime;
 
-    private Map<String, PumaServerStatusDto> status = ImmutableMap.of();
+    private volatile Map<String, PumaServerStatusDto> status = ImmutableMap.of();
 
     public Map<String, PumaServerStatusDto> getAllStatus() {
         lastAccessTime = System.currentTimeMillis();

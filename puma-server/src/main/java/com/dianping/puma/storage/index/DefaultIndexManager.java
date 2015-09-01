@@ -483,87 +483,73 @@ public class DefaultIndexManager<K extends IndexKey, V extends IndexValue<K>> im
 
     @Override
     public V findByBinlog(K startKey, boolean startWithCompleteTransaction) throws IOException {
-        if (this.l2IndexWriter != null) {
-            this.l2IndexWriter.flush();
-        }
-
         LinkedHashMap<K, String> l1Index = loadLinkedL1Index();
 
-        if (l1Index != null) {
-            l1ReadLock.lock();
+        if (l1Index.isEmpty()) {
+            return null;
+        }
 
-            try {
-                if (l1Index.isEmpty()) {
-                    return null;
-                } else {
-                    Entry<K, String> target = null;
+        Entry<K, String> target = null;
 
-                    for (Entry<K, String> entry : l1Index.entrySet()) {
-                        K key = entry.getKey();
+        for (Entry<K, String> entry : l1Index.entrySet()) {
+            K key = entry.getKey();
 
-                        if (key.getServerId() == startKey.getServerId()) {
-                            if (compareTo(startKey, key) >= 0) {
-
-                                if (target == null) {
-                                    target = entry;
-                                } else {
-                                    if (compareTo(key, target.getKey()) >= 0) {
-                                        target = entry;
-                                    }
-                                }
-                            }
-                        }
-                    }
+            if (key.getServerId() == startKey.getServerId()) {
+                if (compareTo(startKey, key) >= 0) {
 
                     if (target == null) {
-                        return null;
-                    }
-
-                    LocalFileIndexBucket<K, V> bucket = new LocalFileIndexBucket<K, V>(target.getValue(), getL2IndexFile(target.getValue()),
-                            this.indexValueConvertor);
-                    bucket.start();
-
-                    V next = null;
-                    LinkedList<V> entries = new LinkedList<V>();
-
-                    try {
-                        while (true) {
-                            next = bucket.next();
-
-                            if (compareTo(next.getIndexKey(), startKey) > 0) {
-                                break;
-                            } else {
-                                entries.add(next);
-                            }
-                        }
-                    } catch (EOFException ignore) {
-                    } finally {
-                        bucket.stop();
-                    }
-
-                    if (startWithCompleteTransaction) {
-                        // 从队列中查找上一个transaction commit位置，从这个点之后的一定是完整的
-                        V last = entries.pollLast();
-
-                        while (last != null) {
-                            if (last.isTransactionCommit()) {
-                                return last;
-                            } else {
-                                last = entries.pollLast();
-                            }
-                        }
-
-                        // 如果仍然没有找到
-                        return findFromPreviosIndexBucketByBinlog(target.getKey());
+                        target = entry;
                     } else {
-                        return entries.pollLast();
+                        if (compareTo(key, target.getKey()) >= 0) {
+                            target = entry;
+                        }
                     }
                 }
-            } finally {
-                l1ReadLock.unlock();
             }
-        } else {
+        }
+
+        if (target == null) {
             return null;
+        }
+
+        LocalFileIndexBucket<K, V> bucket = new LocalFileIndexBucket<K, V>(target.getValue(), getL2IndexFile(target.getValue()),
+                this.indexValueConvertor);
+        bucket.start();
+
+        V next = null;
+        LinkedList<V> entries = new LinkedList<V>();
+
+        try {
+            while (true) {
+                next = bucket.next();
+
+                if (compareTo(next.getIndexKey(), startKey) > 0) {
+                    break;
+                } else {
+                    entries.add(next);
+                }
+            }
+        } catch (EOFException ignore) {
+        } finally {
+            bucket.stop();
+        }
+
+        if (startWithCompleteTransaction) {
+            // 从队列中查找上一个transaction commit位置，从这个点之后的一定是完整的
+            V last = entries.pollLast();
+
+            while (last != null) {
+                if (last.isTransactionCommit()) {
+                    return last;
+                } else {
+                    last = entries.pollLast();
+                }
+            }
+
+            // 如果仍然没有找到
+            return findFromPreviosIndexBucketByBinlog(target.getKey());
+        } else {
+            return entries.pollLast();
         }
     }
 

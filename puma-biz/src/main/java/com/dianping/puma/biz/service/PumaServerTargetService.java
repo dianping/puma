@@ -8,7 +8,7 @@ public interface PumaServerTargetService {
 
     List<PumaServerTargetEntity> findByDatabase(String database);
 
-    List<PumaServerTargetEntity> findByServerName(String host);
+    List<PumaServerTargetEntity> findByServerHost(String host);
 
     int create(PumaServerTargetEntity entity);
 

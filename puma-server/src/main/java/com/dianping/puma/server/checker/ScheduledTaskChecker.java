@@ -1,179 +1,110 @@
 package com.dianping.puma.server.checker;
 
-import com.dianping.cat.Cat;
-import com.dianping.puma.biz.entity.PumaTargetEntity;
-import com.dianping.puma.biz.entity.PumaTaskEntity;
-import com.dianping.puma.biz.entity.SrcDbEntity;
-import com.dianping.puma.biz.service.PumaTargetService;
-import com.dianping.puma.core.config.ConfigManager;
-import com.dianping.puma.core.model.Table;
-import com.dianping.puma.core.model.TableSet;
-import com.dianping.puma.instance.InstanceManager;
-import com.dianping.puma.server.container.TaskContainer;
+import com.dianping.puma.biz.entity.PumaServerTargetEntity;
+import com.dianping.puma.biz.service.PumaServerTargetService;
+import com.dianping.puma.server.container.DatabaseTaskContainer;
 import com.dianping.puma.server.server.TaskServerManager;
-import com.google.common.base.Equivalence;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapDifference;
+import com.google.common.collect.MapDifference.ValueDifference;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+
+import static com.dianping.puma.server.container.DatabaseTaskContainer.*;
 
 @Service
 public class ScheduledTaskChecker implements TaskChecker {
+
+    private final Logger logger = LoggerFactory.getLogger(ScheduledTaskChecker.class);
 
     @Autowired
     TaskServerManager taskServerManager;
 
     @Autowired
-    PumaTargetService pumaTargetService;
+    PumaServerTargetService pumaServerTargetService;
 
     @Autowired
-    TaskContainer taskContainer;
+    DatabaseTaskContainer databaseTaskContainer;
 
-    @Autowired
-    InstanceManager instanceManager;
+    protected Map<String, DatabaseTask> loadDatabaseTasks() {
+        List<PumaServerTargetEntity> pumaServerTargets
+                = pumaServerTargetService.findByServerHost(taskServerManager.findSelfHost());
 
-    private Map<String, PumaTaskEntity> tasks = new ConcurrentHashMap<String, PumaTaskEntity>();
-
-    protected Map<String, PumaTaskEntity> loadPumaTask() {
-        final List<PumaTargetEntity> targets = new ArrayList<PumaTargetEntity>();
-        for (String host : taskServerManager.findAuthorizedHosts()) {
-            targets.addAll(pumaTargetService.findByHost(host));
+        Map<String, DatabaseTask> databaseTasks = new HashMap<String, DatabaseTask>();
+        for (PumaServerTargetEntity pumaServerTarget: pumaServerTargets) {
+            String database = pumaServerTarget.getTargetDb();
+            List<String> tables = pumaServerTarget.getTables();
+            Date beginTime = pumaServerTarget.getBeginTime();
+            DatabaseTask databaseTask = new DatabaseTask(database, tables, beginTime);
+            databaseTasks.put(database, databaseTask);
         }
 
-        Map<String, Set<PumaTargetEntity>> clusterTargetMap = new HashMap<String, Set<PumaTargetEntity>>();
-        for (PumaTargetEntity target : targets) {
-            String cluster = instanceManager.getClusterByDb(target.getDatabase());
+        return databaseTasks;
+    }
 
-            if (Strings.isNullOrEmpty(cluster)) {
-                Cat.logError(String.format("%s not exists", target.getDatabase()), new IllegalArgumentException(target.getDatabase()));
-                continue;
+    protected void handleCreatedDatabaseTask(Map<String, DatabaseTask> createdDatabaseTasks) {
+        for (Map.Entry<String, DatabaseTask> entry: createdDatabaseTasks.entrySet()) {
+            DatabaseTask databaseTask = entry.getValue();
+            try {
+                databaseTaskContainer.create(databaseTask);
+            } catch (Throwable t) {
+                logger.error("failed to create task.", t);
             }
-
-            Set<PumaTargetEntity> clusterTarget = clusterTargetMap.get(cluster);
-            if (clusterTarget == null) {
-                clusterTarget = new HashSet<PumaTargetEntity>();
-                clusterTargetMap.put(cluster, clusterTarget);
-            }
-
-            clusterTarget.add(target);
         }
+    }
 
-        Map<String, PumaTaskEntity> tasks = new ConcurrentHashMap<String, PumaTaskEntity>();
-        for (Map.Entry<String, Set<PumaTargetEntity>> entry : clusterTargetMap.entrySet()) {
-            PumaTaskEntity entity = new PumaTaskEntity();
-            entity.setName(entry.getKey());
-            entity.setClusterName(entry.getKey());
-            entity.setPreservedDay(3);
-
-            TableSet tableSet = new TableSet();
-            Date beginTime = null;
-            for (PumaTargetEntity target : entry.getValue()) {
-                tableSet.add(new Table(target.getDatabase(), target.getTable()));
-                if (target.getBeginTime() != null &&
-                        (beginTime == null || target.getBeginTime().compareTo(beginTime) < 0)) {
-                    beginTime = target.getBeginTime();
-                }
+    protected void handleRemovedDatabaseTask(Map<String, DatabaseTask> removedDatabaseTasks) {
+        for (Map.Entry<String, DatabaseTask> entry: removedDatabaseTasks.entrySet()) {
+            String database = entry.getKey();
+            try {
+                databaseTaskContainer.remove(database);
+            } catch (Throwable t) {
+                logger.error("failed to remove task.", t);
             }
-            entity.setTableSet(tableSet);
-            entity.setBeginTime(beginTime);
-
-            ImmutableSet.Builder<SrcDbEntity> srcDbBuilder = ImmutableSet.builder();
-            for (SrcDbEntity db : instanceManager.getUrlByCluster(entry.getKey())) {
-                srcDbBuilder.add(db);
-            }
-            entity.setSrcDbEntityList(srcDbBuilder.build());
-
-            tasks.put(entity.getName(), entity);
         }
+    }
 
-        return tasks;
+    protected void handleUpdatedDatabaseTask(Map<String, DatabaseTask> updatedDatabaseTasks) {
+        for (Map.Entry<String, DatabaseTask> entry: updatedDatabaseTasks.entrySet()) {
+            DatabaseTask databaseTask = entry.getValue();
+            try {
+                databaseTaskContainer.update(databaseTask);
+            } catch (Throwable t) {
+                logger.error("failed to update task.", t);
+            }
+        }
     }
 
     @Override
     public void check() {
-        Map<String, PumaTaskEntity> oriTasks = tasks;
+        Map<String, DatabaseTask> databaseTasks = loadDatabaseTasks();
+        Map<String, DatabaseTask> oriDatabaseTasks = databaseTaskContainer.getAll();
 
-        try {
-            tasks = loadPumaTask();
-        } catch (Exception e) {
-            // @todo.
-            tasks = oriTasks;
-            return;
-        }
+        MapDifference<String, DatabaseTask> difference = Maps.difference(oriDatabaseTasks, databaseTasks);
 
-        MapDifference<String, PumaTaskEntity> taskDifference = Maps.difference(oriTasks, tasks, new PumaTaskEquivalence());
+        Map<String, DatabaseTask> createdDatabaseTasks = difference.entriesOnlyOnRight();
+        Map<String, DatabaseTask> removedDatabaseTasks = difference.entriesOnlyOnLeft();
+        Map<String, DatabaseTask> updatedDatabaseTasks = Maps.transformEntries(difference.entriesDiffering(),
+                new Maps.EntryTransformer<String, ValueDifference<DatabaseTask>, DatabaseTask>() {
+                    @Override
+                    public DatabaseTask transformEntry(String key, ValueDifference<DatabaseTask> value) {
+                        return value.rightValue();
+                    }
+                }
+        );
 
-        // Created.
-        handleCreatedTasks(taskDifference.entriesOnlyOnRight());
-
-        // Updated.
-        handleUpdatedTasks(taskDifference.entriesDiffering());
-
-        // Deleted.
-        handleDeletedTasks(taskDifference.entriesOnlyOnLeft());
+        handleCreatedDatabaseTask(createdDatabaseTasks);
+        handleRemovedDatabaseTask(removedDatabaseTasks);
+        handleUpdatedDatabaseTask(updatedDatabaseTasks);
     }
 
     @Scheduled(fixedDelay = 5 * 1000)
     public void scheduledCheck() {
         check();
-    }
-
-    private void handleCreatedTasks(Map<String, PumaTaskEntity> createdTasks) {
-        for (Map.Entry<String, PumaTaskEntity> entry : createdTasks.entrySet()) {
-            try {
-                taskContainer.create(entry.getKey(), entry.getValue());
-            } catch (Exception e) {
-                // @todo.
-            }
-        }
-    }
-
-    private void handleUpdatedTasks(Map<String, MapDifference.ValueDifference<PumaTaskEntity>> updatedTasks) {
-        for (Map.Entry<String, MapDifference.ValueDifference<PumaTaskEntity>> entry : updatedTasks.entrySet()) {
-            try {
-                taskContainer.update(entry.getKey(), entry.getValue().leftValue(), entry.getValue().rightValue());
-            } catch (Exception e) {
-                // @todo.
-            }
-        }
-    }
-
-    private void handleDeletedTasks(Map<String, PumaTaskEntity> deletedTasks) {
-        for (Map.Entry<String, PumaTaskEntity> entry : deletedTasks.entrySet()) {
-            try {
-                taskContainer.delete(entry.getKey(), entry.getValue());
-            } catch (Exception e) {
-                // @todo.
-            }
-        }
-    }
-
-    class PumaTaskEquivalence extends Equivalence<PumaTaskEntity> {
-        @Override
-        protected boolean doEquivalent(PumaTaskEntity a, PumaTaskEntity b) {
-            if (!a.getName().equals(b.getName())) {
-                return false;
-            }
-
-            if (!a.getTableSet().equals(b.getTableSet())) {
-                return false;
-            }
-
-
-            Sets.SetView<SrcDbEntity> diff = Sets.difference(a.getSrcDbEntityList(), b.getSrcDbEntityList());
-            return diff.size() == 0;
-        }
-
-        @Override
-        protected int doHash(PumaTaskEntity entity) {
-            return entity.hashCode();
-        }
     }
 }

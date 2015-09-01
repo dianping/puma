@@ -6,6 +6,10 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "angular": "^1.0.0",
+    "bootstrap": "^3.0.0",
+    "jquery": "^2.0.0",
+    "jquery-ui": "^1.0.0",
     "switchery": "",
     "ng-switchery": ""
   }

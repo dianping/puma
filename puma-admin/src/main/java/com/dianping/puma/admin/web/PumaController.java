@@ -12,7 +12,6 @@ import com.dianping.puma.biz.service.PumaServerService;
 import com.dianping.puma.biz.service.PumaServerTargetService;
 import com.dianping.puma.biz.service.PumaTargetService;
 import com.dianping.puma.core.config.ConfigManager;
-import com.dianping.puma.core.registry.RegistryService;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
@@ -52,9 +51,6 @@ public class PumaController extends BasicController {
 	@Autowired
 	PumaServerTargetService pumaServerTargetService;
 
-	@Autowired
-	RegistryService registryService;
-
 	@RequestMapping(value = { "/puma/search" }, method = RequestMethod.GET)
 	@ResponseBody
 	public Object search(String database) {
@@ -62,13 +58,11 @@ public class PumaController extends BasicController {
 		pumaDto.setDatabase(database);
 
 		List<PumaServerTargetEntity> pumaServerTargets = pumaServerTargetService.findByDatabase(database);
-		List<String> serverHosts = registryService.find(database);
 		for (PumaServerTargetEntity pumaServerTarget : pumaServerTargets) {
 			pumaDto.setTables(pumaServerTarget.getTables());
 			pumaDto.addServerName(pumaServerTarget.getServerName());
 			pumaDto.addHost(pumaServerTarget.getServerName(), pumaServerTarget.getServerHost());
 			pumaDto.addBeginTime(pumaServerTarget.getServerName(), pumaServerTarget.getBeginTime());
-			pumaDto.addRegistry(pumaServerTarget.getServerName(), serverHosts.contains(pumaServerTarget.getServerHost() + ":4040"));
 		}
 
 		return pumaDto;
@@ -130,21 +124,6 @@ public class PumaController extends BasicController {
 				pumaTargetService.create(pumaTarget);
 			}
 		}
-
-		// Register and unregister.
-		List<String> hosts = new ArrayList<String>();
-		for (Map.Entry<String, Boolean> entry: pumaDto.getRegistries().entrySet()) {
-			String serverName = entry.getKey();
-			Boolean registry = entry.getValue();
-			if (registry) {
-				PumaServerEntity pumaServer = pumaServerService.find(serverName);
-				String host = pumaServer.getHost();
-				if (host != null) {
-					hosts.add(host + ":4040");
-				}
-			}
-		}
-		registryService.registerResetAll(hosts, database);
 
 		return null;
 	}

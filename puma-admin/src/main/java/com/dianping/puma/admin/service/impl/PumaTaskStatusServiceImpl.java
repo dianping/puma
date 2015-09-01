@@ -59,25 +59,28 @@ public class PumaTaskStatusServiceImpl implements PumaTaskStatusService {
                 System.currentTimeMillis() - lastReloadTime < 5 * 60 * 1000) {
             return;
         }
+        try {
+            List<PumaServerEntity> servers = pumaServerService.findAllAlive();
 
-        List<PumaServerEntity> servers = pumaServerService.findAllAlive();
+            ImmutableMap.Builder<String, PumaServerStatusDto> builder = ImmutableMap.builder();
 
-        ImmutableMap.Builder<String, PumaServerStatusDto> builder = ImmutableMap.builder();
-
-        for (PumaServerEntity server : servers) {
-            try {
-                HttpGet get = new HttpGet(buildUrl(server.getHost()));
-                HttpResponse response = httpClient.execute(get);
-                String json = EntityUtils.toString(response.getEntity());
-                PumaServerStatusDto dto = GsonUtil.fromJson(json, PumaServerStatusDto.class);
-                builder.put(server.getName(), dto);
-            } catch (Exception e) {
-                Cat.logError("Reload Puma Task Status Failed! " + server.getHost(), e);
+            for (PumaServerEntity server : servers) {
+                try {
+                    HttpGet get = new HttpGet(buildUrl(server.getHost()));
+                    HttpResponse response = httpClient.execute(get);
+                    String json = EntityUtils.toString(response.getEntity());
+                    PumaServerStatusDto dto = GsonUtil.fromJson(json, PumaServerStatusDto.class);
+                    builder.put(server.getName(), dto);
+                } catch (Exception e) {
+                    Cat.logError("Reload Puma Task Status Failed! " + server.getHost(), e);
+                }
             }
-        }
 
-        status = builder.build();
-        lastReloadTime = System.currentTimeMillis();
+            status = builder.build();
+            lastReloadTime = System.currentTimeMillis();
+        } catch (Exception e) {
+            Cat.logError("Reload Puma Task Status Failed! ", e);
+        }
     }
 
     protected String buildUrl(String url) {

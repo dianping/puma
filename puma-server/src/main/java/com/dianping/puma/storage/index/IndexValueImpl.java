@@ -4,8 +4,6 @@ import com.dianping.puma.storage.Sequence;
 
 public class IndexValueImpl implements IndexValue<IndexKeyImpl> {
 
-	private String table;
-	
 	private boolean isDdl;
 	
 	private boolean isDml;
@@ -20,14 +18,6 @@ public class IndexValueImpl implements IndexValue<IndexKeyImpl> {
 	
 	public void setIndexKey(IndexKeyImpl indexKey) {
 		this.indexKey = indexKey;
-	}
-
-	public String getTable() {
-		return table;
-	}
-
-	public void setTable(String table) {
-		this.table = table;
 	}
 
 	public boolean isDdl() {

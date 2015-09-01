@@ -278,7 +278,6 @@ public class DefaultEventStorage implements EventStorage {
 
 		if (lastIndexKey.get() == null || !lastIndexKey.get().equals(indexKey)) {
 			IndexValueImpl l2Index = new IndexValueImpl();
-			l2Index.setTable(event.getTable());
 			l2Index.setDdl(event instanceof DdlEvent);
 			l2Index.setDml(event instanceof RowChangedEvent);
 			l2Index.setSequence(new Sequence(sequence));

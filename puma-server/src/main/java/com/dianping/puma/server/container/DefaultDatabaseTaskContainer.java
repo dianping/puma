@@ -3,6 +3,7 @@ package com.dianping.puma.server.container;
 import com.dianping.puma.core.registry.RegistryService;
 import com.dianping.puma.instance.InstanceManager;
 import com.dianping.puma.server.container.InstanceTaskContainer.InstanceTask;
+import com.dianping.puma.server.server.TaskServerManager;
 import com.dianping.puma.storage.manage.DatabaseStorageManager;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
@@ -30,6 +31,9 @@ public class DefaultDatabaseTaskContainer implements DatabaseTaskContainer {
 	@Autowired
 	RegistryService registryService;
 
+	@Autowired
+	TaskServerManager taskServerManager;
+
 	private Map<String, DatabaseTask> databaseTasks = new HashMap<String, DatabaseTask>();
 
 	@Override
@@ -55,6 +59,8 @@ public class DefaultDatabaseTaskContainer implements DatabaseTaskContainer {
 			instanceTask.create(databaseTask);
 			instanceTaskContainer.update(instanceTask);
 		}
+
+		registryService.register(taskServerManager.findSelfHost(), database);
 
 		databaseTasks.put(database, databaseTask);
 	}
@@ -103,6 +109,8 @@ public class DefaultDatabaseTaskContainer implements DatabaseTaskContainer {
 		}
 
 		databaseStorageManager.delete(database);
+
+		registryService.unregister(taskServerManager.findSelfHost(), database);
 
 		databaseTasks.remove(database);
 	}

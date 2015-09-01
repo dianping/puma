@@ -17,7 +17,9 @@ public class LocalFileInstanceStorageManager implements InstanceStorageManager {
 	public void delete(String instance) {
 		try {
 			File file = new File(binlogRootPath, instance + binlogSuffix);
-			FileUtils.forceDelete(file);
+			if (file.exists()) {
+				FileUtils.forceDelete(file);
+			}
 		} catch (IOException e) {
 			throw new RuntimeException("failed to delete instance files.", e);
 		}

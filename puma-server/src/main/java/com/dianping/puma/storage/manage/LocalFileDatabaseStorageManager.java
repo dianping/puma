@@ -19,13 +19,19 @@ public class LocalFileDatabaseStorageManager implements DatabaseStorageManager {
 	public void delete(String database) {
 		try {
 			File binlogIndexFile = new File(binlogIndexRootPath, database);
-			FileUtils.forceDelete(binlogIndexFile);
+			if (binlogIndexFile.exists()) {
+				FileUtils.forceDelete(binlogIndexFile);
+			}
 
 			File binlogMasterStorageFile = new File(binlogMasterStorageRootPath, database);
-			FileUtils.forceDelete(binlogMasterStorageFile);
+			if (binlogMasterStorageFile.exists()) {
+				FileUtils.forceDelete(binlogMasterStorageFile);
+			}
 
 			File binlogSlaveStorageFile = new File(binlogSlaveStorageRootPath, database);
-			FileUtils.forceDelete(binlogSlaveStorageFile);
+			if (binlogSlaveStorageFile.exists()) {
+				FileUtils.forceDelete(binlogSlaveStorageFile);
+			}
 
 		} catch (IOException e) {
 			throw new RuntimeException("failed to delete database files.", e);

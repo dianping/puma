@@ -127,7 +127,6 @@ puma.controller('pumaTargetController', function ($scope, $http) {
                         input: buildInput(serverName, $scope.pumaDto.serverNames),
                         output: [],
                         beginTime: setDate($scope.pumaDto.beginTimes[serverName]),
-                        registry: $scope.pumaDto.registries[serverName]
                     };
                     $scope.servers.push(server);
                 });
@@ -202,26 +201,16 @@ puma.controller('pumaTargetController', function ($scope, $http) {
         return list;
     };
 
-    function parseRegistry(servers) {
-        var list = {};
-        angular.forEach(servers, function(server) {
-           list[server.output[0].name] = server.registry;
-        });
-        return list;
-    }
-
     $scope.submit = function() {
         $scope.pumaDto.serverNames = parseOutput($scope.servers);
         $scope.pumaDto.tables = parseTables($scope.tables);
         $scope.pumaDto.beginTimes = parseBeginTime($scope.servers);
-        $scope.pumaDto.registries = parseRegistry($scope.servers);
 
         var json = {
             serverNames: $scope.pumaDto.serverNames,
             tables: $scope.pumaDto.tables,
             database: $scope.pumaDto.database,
             beginTimestamps: $scope.pumaDto.beginTimes,
-            registries: $scope.pumaDto.registries
         };
 
         $http.post('/a/puma-create', json).success(function(response) {
@@ -233,8 +222,7 @@ puma.controller('pumaTargetController', function ($scope, $http) {
         $scope.servers.push({
             name: '',
             input: buildInput('', $scope.allServers),
-            output: [],
-            registry: true
+            output: []
         });
     };
 

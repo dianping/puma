@@ -88,50 +88,64 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 
     protected DataBucket initReadBucket(Sequence seq, boolean fromNext) throws IOException {
         checkClosed();
-        DataBucket bucket = createSlaveDataBucketManager().getReadBucket(seq.longValue(), fromNext);
-        if (bucket != null) {
-            return bucket;
-        } else {
-            return createMasterDataBucketManager().getReadBucket(seq.longValue(), fromNext);
+        DataBucketManager slaveDataBucketManager = null;
+        DataBucketManager masterDataBucketManager = null;
+
+        try {
+            slaveDataBucketManager = createSlaveDataBucketManager();
+            DataBucket bucket = slaveDataBucketManager.getReadBucket(seq.longValue(), fromNext);
+            if (bucket != null) {
+                return bucket;
+            } else {
+                masterDataBucketManager = createMasterDataBucketManager();
+                return masterDataBucketManager.getReadBucket(seq.longValue(), fromNext);
+            }
+        } finally {
+            if (slaveDataBucketManager != null) {
+                slaveDataBucketManager.stop();
+            }
+            if (masterDataBucketManager != null) {
+                masterDataBucketManager.stop();
+            }
         }
     }
 
     protected DataBucket getNextReadBucket(Sequence seq) throws IOException {
         checkClosed();
-        DataBucket bucket = createSlaveDataBucketManager().getNextReadBucket(seq);
-        if (bucket != null) {
-            return bucket;
-        } else {
-            return createMasterDataBucketManager().getNextReadBucket(seq);
+        DataBucketManager slaveDataBucketManager = null;
+        DataBucketManager masterDataBucketManager = null;
+
+        try {
+            slaveDataBucketManager = createSlaveDataBucketManager();
+            DataBucket bucket = slaveDataBucketManager.getNextReadBucket(seq);
+            if (bucket != null) {
+                return bucket;
+            } else {
+                masterDataBucketManager = createMasterDataBucketManager();
+                return masterDataBucketManager.getNextReadBucket(seq);
+            }
+        } finally {
+            if (slaveDataBucketManager != null) {
+                slaveDataBucketManager.stop();
+            }
+            if (masterDataBucketManager != null) {
+                masterDataBucketManager.stop();
+            }
         }
     }
 
     private DataBucketManager createSlaveDataBucketManager() throws IOException {
-        DataBucketManager slaveIndex = null;
-        try {
-            slaveIndex = createDataBucketManager(GlobalStorageConfig.slaveStorageBaseDir,
-                    GlobalStorageConfig.slaveBucketFilePrefix, database, GlobalStorageConfig.maxMasterBucketLengthMB);
-            slaveIndex.start();
-            return slaveIndex;
-        } finally {
-            if (slaveIndex != null) {
-                slaveIndex.stop();
-            }
-        }
+        DataBucketManager slaveIndex = createDataBucketManager(GlobalStorageConfig.slaveStorageBaseDir,
+                GlobalStorageConfig.slaveBucketFilePrefix, database, GlobalStorageConfig.maxMasterBucketLengthMB);
+        slaveIndex.start();
+        return slaveIndex;
     }
 
     private DataBucketManager createMasterDataBucketManager() throws IOException {
-        DataBucketManager masterIndex = null;
-        try {
-            masterIndex = createDataBucketManager(GlobalStorageConfig.masterStorageBaseDir,
-                    GlobalStorageConfig.masterBucketFilePrefix, database, GlobalStorageConfig.maxMasterBucketLengthMB);
-            masterIndex.start();
-            return masterIndex;
-        } finally {
-            if (masterIndex != null) {
-                masterIndex.stop();
-            }
-        }
+        DataBucketManager masterIndex = createDataBucketManager(GlobalStorageConfig.masterStorageBaseDir,
+                GlobalStorageConfig.masterBucketFilePrefix, database, GlobalStorageConfig.maxMasterBucketLengthMB);
+        masterIndex.start();
+        return masterIndex;
     }
 
     private DataBucketManager createDataBucketManager(String baseDir, String prefix, String database, int lengthMB) {

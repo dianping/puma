@@ -40,8 +40,8 @@ public class PumaTaskStatusServiceImpl implements PumaTaskStatusService {
             .custom()
             .setDefaultRequestConfig(RequestConfig
                     .custom()
-                    .setConnectTimeout(60 * 1000)
-                    .setSocketTimeout(60 * 1000)
+                    .setConnectTimeout(5 * 1000)
+                    .setSocketTimeout(10 * 1000)
                     .build())
             .build();
 

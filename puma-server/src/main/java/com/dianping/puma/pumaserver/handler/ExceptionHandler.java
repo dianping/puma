@@ -1,5 +1,6 @@
 package com.dianping.puma.pumaserver.handler;
 
+import com.dianping.cat.Cat;
 import com.dianping.puma.core.dto.ExceptionResponse;
 import com.dianping.puma.core.util.ConvertHelper;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogAckException;
@@ -56,12 +57,13 @@ public class ExceptionHandler extends ChannelDuplexHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        logger.error(cause.getMessage(), cause);
-
         if (cause instanceof IOException) {
             // Handle network exceptions.
             // @todo
         } else {
+            logger.error(cause.getMessage(), cause);
+            Cat.logError(cause.getMessage(), cause);
+
             // Handler server internal exceptions.
             HowToHandle howToHandle = howToHandles.get(cause.getClass());
 

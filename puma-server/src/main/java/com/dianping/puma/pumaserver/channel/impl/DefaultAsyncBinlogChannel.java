@@ -124,7 +124,11 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
     @Override
     public void destroy() {
-        DefaultEventBus.INSTANCE.unregister(this);
+        try {
+            DefaultEventBus.INSTANCE.unregister(this);
+        } catch (Exception ignore) {
+
+        }
         stopped = true;
         eventChannel.close();
     }

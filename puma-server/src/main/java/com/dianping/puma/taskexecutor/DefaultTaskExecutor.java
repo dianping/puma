@@ -22,10 +22,8 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.*;
-import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.datahandler.DataHandlerResult;
 import com.dianping.puma.eventbus.DefaultEventBus;
-import com.dianping.puma.filter.*;
 import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.QueryExecutor;
@@ -39,6 +37,7 @@ import com.dianping.puma.server.exception.ServerEventParserException;
 import com.dianping.puma.server.exception.ServerEventRuntimeException;
 import com.dianping.puma.status.SystemStatusManager;
 import com.dianping.puma.taskexecutor.change.TargetChangedEvent;
+import com.dianping.puma.taskexecutor.task.InstanceTask;
 import com.dianping.zebra.util.JDBCUtils;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
@@ -85,6 +84,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
     private InputStream is;
 
     private OutputStream os;
+
+    private InstanceTask instanceTask;
 
     public DefaultTaskExecutor() {
         DefaultEventBus.INSTANCE.register(this);
@@ -970,5 +971,9 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             }
             return null;
         }
+    }
+
+    public InstanceTask getInstanceTask() {
+        return instanceTask;
     }
 }

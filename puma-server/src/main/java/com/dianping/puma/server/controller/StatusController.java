@@ -1,6 +1,6 @@
 package com.dianping.puma.server.controller;
 
-import com.dianping.puma.server.container.TaskContainer;
+import com.dianping.puma.server.container.DeprecatedTaskContainer;
 import com.dianping.puma.status.SystemStatusManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class StatusController {
 
     @Autowired
-    TaskContainer taskContainer;
+    DeprecatedTaskContainer deprecatedTaskContainer;
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody

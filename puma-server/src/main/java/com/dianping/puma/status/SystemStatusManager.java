@@ -24,6 +24,10 @@ public class SystemStatusManager {
         status.getClients().put(clientName, client);
     }
 
+    public static Server getServer(String name) {
+        return status.getServers().get(name);
+    }
+
     public static void addServer(String name, String host, int port, TableSet target) {
         Server server = new Server(name, host, port, target);
 

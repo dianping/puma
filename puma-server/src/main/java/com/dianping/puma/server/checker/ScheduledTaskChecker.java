@@ -2,8 +2,9 @@ package com.dianping.puma.server.checker;
 
 import com.dianping.puma.biz.entity.PumaServerTargetEntity;
 import com.dianping.puma.biz.service.PumaServerTargetService;
-import com.dianping.puma.server.container.DatabaseTaskContainer;
+import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.server.server.TaskServerManager;
+import com.dianping.puma.taskexecutor.task.DatabaseTask;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.MapDifference.ValueDifference;
 import com.google.common.collect.Maps;
@@ -14,8 +15,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-
-import static com.dianping.puma.server.container.DatabaseTaskContainer.*;
 
 @Service
 public class ScheduledTaskChecker implements TaskChecker {
@@ -29,7 +28,7 @@ public class ScheduledTaskChecker implements TaskChecker {
     PumaServerTargetService pumaServerTargetService;
 
     @Autowired
-    DatabaseTaskContainer databaseTaskContainer;
+    TaskContainer taskContainer;
 
     protected Map<String, DatabaseTask> loadDatabaseTasks() {
         List<PumaServerTargetEntity> pumaServerTargets
@@ -51,7 +50,7 @@ public class ScheduledTaskChecker implements TaskChecker {
         for (Map.Entry<String, DatabaseTask> entry: createdDatabaseTasks.entrySet()) {
             DatabaseTask databaseTask = entry.getValue();
             try {
-                databaseTaskContainer.create(databaseTask);
+                taskContainer.create(databaseTask);
             } catch (Throwable t) {
                 logger.error("failed to create task.", t);
             }
@@ -62,7 +61,7 @@ public class ScheduledTaskChecker implements TaskChecker {
         for (Map.Entry<String, DatabaseTask> entry: removedDatabaseTasks.entrySet()) {
             String database = entry.getKey();
             try {
-                databaseTaskContainer.remove(database);
+                taskContainer.remove(database);
             } catch (Throwable t) {
                 logger.error("failed to remove task.", t);
             }
@@ -73,7 +72,7 @@ public class ScheduledTaskChecker implements TaskChecker {
         for (Map.Entry<String, DatabaseTask> entry: updatedDatabaseTasks.entrySet()) {
             DatabaseTask databaseTask = entry.getValue();
             try {
-                databaseTaskContainer.update(databaseTask);
+                taskContainer.update(databaseTask);
             } catch (Throwable t) {
                 logger.error("failed to update task.", t);
             }
@@ -83,7 +82,7 @@ public class ScheduledTaskChecker implements TaskChecker {
     @Override
     public void check() {
         Map<String, DatabaseTask> databaseTasks = loadDatabaseTasks();
-        Map<String, DatabaseTask> oriDatabaseTasks = databaseTaskContainer.getAll();
+        Map<String, DatabaseTask> oriDatabaseTasks = taskContainer.getAll();
 
         MapDifference<String, DatabaseTask> difference = Maps.difference(oriDatabaseTasks, databaseTasks);
 

@@ -3,14 +3,11 @@ package com.dianping.puma.server.builder;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.core.config.ConfigManager;
 import com.dianping.puma.core.model.*;
 import com.dianping.puma.instance.InstanceManager;
-import com.dianping.puma.server.container.DatabaseTaskContainer;
-import com.dianping.puma.server.container.InstanceTaskContainer;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
+import com.dianping.puma.taskexecutor.task.DatabaseTask;
+import com.dianping.puma.taskexecutor.task.InstanceTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,9 +32,6 @@ import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
 import com.dianping.puma.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.taskexecutor.DefaultTaskExecutor;
 import com.dianping.puma.taskexecutor.TaskExecutor;
-
-import static com.dianping.puma.server.container.DatabaseTaskContainer.*;
-import static com.dianping.puma.server.container.InstanceTaskContainer.*;
 
 @Service("taskBuilder")
 public class DefaultTaskBuilder implements TaskBuilder {

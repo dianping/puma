@@ -21,7 +21,7 @@ import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.filter.EventFilterChainFactory;
 import com.dianping.puma.pumaserver.handler.HttpResponseEncoder;
-import com.dianping.puma.server.container.DefaultTaskContainer;
+import com.dianping.puma.server.container.DefaultDeprecatedTaskContainer;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.EventStorage;
 import com.dianping.puma.storage.channel.BufferedEventChannel;
@@ -107,7 +107,7 @@ public class DeprecatedBinlogQueryHandler extends SimpleChannelInboundHandler<De
 			eventFilterChain = EventFilterChainFactory.createEventFilterChain(deprecatedBinlogQuery.isDdl(),
 			      deprecatedBinlogQuery.isDml(), deprecatedBinlogQuery.isTransaction(),
 			      deprecatedBinlogQuery.getDatabaseTables());
-			EventStorage eventStorage = DefaultTaskContainer.instance.getTaskStorage(deprecatedBinlogQuery.getTarget());
+			EventStorage eventStorage = DefaultDeprecatedTaskContainer.instance.getTaskStorage(deprecatedBinlogQuery.getTarget());
 
 			adjust();
 

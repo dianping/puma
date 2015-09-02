@@ -6,7 +6,7 @@ import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.EventType;
 import com.dianping.puma.core.event.ServerErrorEvent;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.server.container.TaskContainer;
+import com.dianping.puma.server.container.DeprecatedTaskContainer;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.EventStorage;
 import io.netty.channel.Channel;

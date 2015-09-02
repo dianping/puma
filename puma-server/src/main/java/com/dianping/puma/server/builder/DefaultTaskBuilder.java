@@ -72,8 +72,7 @@ public class DefaultTaskBuilder implements TaskBuilder {
         }
         taskExecutor.setTableSet(tableSet);
 
-        List<SrcDbEntity> srcDbEntities = Lists.newArrayList(instanceManager.getUrlByCluster(instanceTask.getInstance()));
-        taskExecutor.setSrcDbEntities(srcDbEntities);
+        taskExecutor.setInstanceManager(instanceManager);
 
         PumaTaskStateEntity taskState = new PumaTaskStateEntity();
         taskState.setTaskName(taskName);
@@ -90,6 +89,7 @@ public class DefaultTaskBuilder implements TaskBuilder {
         // Handler.
         DefaultDataHandler dataHandler = new DefaultDataHandler();
         DefaultTableMetaInfoFetcher tableMetaInfo = new DefaultTableMetaInfoFetcher();
+        tableMetaInfo.setName(taskName);
         tableMetaInfo.setAcceptedTables(tableSet);
         taskExecutor.setTableMetaInfoFetcher(tableMetaInfo);
         dataHandler.setTableMetasInfoFetcher(tableMetaInfo);

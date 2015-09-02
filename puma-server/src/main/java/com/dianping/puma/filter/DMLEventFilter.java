@@ -4,6 +4,9 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
+import com.dianping.puma.eventbus.DefaultEventBus;
+import com.dianping.puma.taskexecutor.change.TargetChangedEvent;
+import com.google.common.eventbus.Subscribe;
 
 public class DMLEventFilter extends AbstractEventFilter {
 
@@ -12,6 +15,17 @@ public class DMLEventFilter extends AbstractEventFilter {
     private boolean dml = true;
 
     private TableSet acceptedTables = new TableSet();
+
+    public DMLEventFilter() {
+        DefaultEventBus.INSTANCE.register(this);
+    }
+
+    @Subscribe
+    public void listenTargetChangedEvent(TargetChangedEvent event) {
+        if (event.getTaskName().equals(name)) {
+            setAcceptedTables(event.getTableSet());
+        }
+    }
 
     protected boolean checkEvent(ChangedEvent changedEvent) {
         if (changedEvent == null) {

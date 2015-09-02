@@ -17,18 +17,26 @@ package com.dianping.puma.taskexecutor;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
+import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.datahandler.DataHandler;
+import com.dianping.puma.eventbus.DefaultEventBus;
+import com.dianping.puma.instance.InstanceManager;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.Dispatcher;
+import com.dianping.puma.server.container.DatabaseTaskContainer;
+import com.dianping.puma.server.container.InstanceTaskContainer;
 import com.dianping.puma.storage.holder.BinlogInfoHolder;
+
+import static com.dianping.puma.server.container.InstanceTaskContainer.*;
 
 /**
  *
@@ -50,8 +58,6 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
 
 	protected TableSet tableSet;
 
-	protected List<SrcDbEntity> srcDbEntities;
-
 	private String defaultBinlogFileName;
 
 	private Long defaultBinlogPosition;
@@ -67,6 +73,8 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
 	protected BinlogInfoHolder binlogInfoHolder;
 
 	protected PumaTaskStateEntity state;
+
+	protected InstanceManager instanceManager;
 
 	@Override
 	public String getTaskId() {
@@ -246,11 +254,11 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
 		this.tableSet = tableSet;
 	}
 
-	public List<SrcDbEntity> getSrcDbEntities() {
-		return srcDbEntities;
+	public InstanceManager getInstanceManager() {
+		return instanceManager;
 	}
 
-	public void setSrcDbEntities(List<SrcDbEntity> srcDbEntities) {
-		this.srcDbEntities = srcDbEntities;
+	public void setInstanceManager(InstanceManager instanceManager) {
+		this.instanceManager = instanceManager;
 	}
 }

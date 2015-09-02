@@ -1,14 +1,19 @@
 package com.dianping.puma.server.container;
 
+import com.dianping.puma.core.model.Table;
+import com.dianping.puma.core.model.TableSet;
+import com.dianping.puma.eventbus.DefaultEventBus;
 import com.dianping.puma.server.builder.TaskBuilder;
 import com.dianping.puma.status.SystemStatusManager;
 import com.dianping.puma.storage.manage.InstanceStorageManager;
 import com.dianping.puma.taskexecutor.TaskExecutor;
+import com.dianping.puma.taskexecutor.change.TargetChangedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -121,9 +126,22 @@ public class DefaultInstanceTaskContainer implements InstanceTaskContainer {
 		}
 
 		try {
-			taskExecutor.onChange();
+			TargetChangedEvent event = new TargetChangedEvent();
+			event.setTaskName(taskExecutor.getTaskName());
+
+			TableSet tableSet = new TableSet();
+			for (DatabaseTaskContainer.DatabaseTask databaseTask: instanceTask.getDatabaseTasks()) {
+				String database = databaseTask.getDatabase();
+				List<String> tables = databaseTask.getTables();
+				for (String table: tables) {
+					tableSet.add(new Table(database, table));
+				}
+			}
+			event.setTableSet(tableSet);
+			DefaultEventBus.INSTANCE.post(event);
+
 		} catch (Throwable t) {
-			throw new RuntimeException("");
+			throw new RuntimeException("failed to change task executor.", t);
 		}
 	}
 }

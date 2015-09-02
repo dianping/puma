@@ -21,9 +21,11 @@ import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.BinlogStat;
+import com.dianping.puma.core.model.*;
+import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.datahandler.DataHandlerResult;
+import com.dianping.puma.eventbus.DefaultEventBus;
+import com.dianping.puma.filter.*;
 import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.QueryExecutor;
@@ -36,12 +38,14 @@ import com.dianping.puma.server.exception.ServerEventFetcherException;
 import com.dianping.puma.server.exception.ServerEventParserException;
 import com.dianping.puma.server.exception.ServerEventRuntimeException;
 import com.dianping.puma.status.SystemStatusManager;
+import com.dianping.puma.taskexecutor.change.TargetChangedEvent;
 import com.dianping.zebra.util.JDBCUtils;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
+import com.google.common.eventbus.Subscribe;
 import jodd.util.collection.SortedArrayList;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -82,6 +86,18 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
     private OutputStream os;
 
+    public DefaultTaskExecutor() {
+        DefaultEventBus.INSTANCE.register(this);
+    }
+
+    @Subscribe
+    public void listenTargetChangedEvent(TargetChangedEvent event) {
+        if (event.getTaskName().equals(taskName)) {
+            tableSet = event.getTableSet();
+            SystemStatusManager.updateServer(getTaskName(), currentSrcDbEntity.getHost(), currentSrcDbEntity.getPort(), tableSet);
+        }
+    }
+
     @Override
     public void doStart() throws Exception {
         Thread.currentThread().setName("DefaultTaskExecutor-" + taskName);
@@ -90,7 +106,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         boolean canStop = false;
         do {
             try {
-                loadServerId(srcDbEntities);
+                loadServerId(instanceManager.getUrlByCluster(taskName));
 
                 // 读position/file文件
                 BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(getContext().getPumaServerName());
@@ -245,7 +261,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 }
             }
         });
-        sortedSet.addAll(srcDbEntities);
+        sortedSet.addAll(instanceManager.getUrlByCluster(taskName));
 
         int index = sortedSet.indexOf(this.currentSrcDbEntity) + 1;
         if (index >= sortedSet.size()) {
@@ -265,7 +281,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         }
 
         List<SrcDbEntity> avaliableSrcDb = FluentIterable
-                .from(srcDbEntities)
+                .from(instanceManager.getUrlByCluster(taskName))
                 .filter(new Predicate<SrcDbEntity>() {
                     @Override
                     public boolean apply(SrcDbEntity input) {
@@ -954,9 +970,5 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             }
             return null;
         }
-    }
-
-    public void onChange() {
-
     }
 }

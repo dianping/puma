@@ -8,6 +8,9 @@ import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.core.util.sql.DDLType;
+import com.dianping.puma.eventbus.DefaultEventBus;
+import com.dianping.puma.taskexecutor.change.TargetChangedEvent;
+import com.google.common.eventbus.Subscribe;
 
 public class DDLEventFilter extends AbstractEventFilter {
 
@@ -18,6 +21,17 @@ public class DDLEventFilter extends AbstractEventFilter {
     private TableSet acceptedTables = new TableSet();
 
     private List<DDLType> ddlTypes = new ArrayList<DDLType>();
+
+    public DDLEventFilter() {
+        DefaultEventBus.INSTANCE.register(this);
+    }
+
+    @Subscribe
+    public void listenTargetChangedEvent(TargetChangedEvent event) {
+        if (event.getTaskName().equals(name)) {
+            setAcceptedTables(event.getTableSet());
+        }
+    }
 
     public void init(boolean ddl, List<DDLType> ddlTypes) {
         this.ddl = ddl;

@@ -30,6 +30,15 @@ public class SystemStatusManager {
         status.getServers().put(name, server);
     }
 
+    public static void updateServer(String name, String host, int port, TableSet target) {
+        Server server = status.getServers().get(name);
+
+        server.setName(name);
+        server.setHost(host);
+        server.setPort(port);
+        server.setTarget(target);
+    }
+
     public static void deleteClient(String clientName) {
         status.getClients().remove(clientName);
     }

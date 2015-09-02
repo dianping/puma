@@ -21,9 +21,14 @@ import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.core.meta.TableMetaInfo;
 import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
+import com.dianping.puma.eventbus.DefaultEventBus;
+import com.dianping.puma.taskexecutor.change.TargetChangedEvent;
+import com.google.common.eventbus.Subscribe;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -37,6 +42,10 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 
+    private final Logger logger = LoggerFactory.getLogger(DefaultTableMetaInfoFetcher.class);
+
+    private String name;
+
     private AtomicReference<Map<String, TableMetaInfo>> tableMetaInfoCache = new AtomicReference<Map<String, TableMetaInfo>>();
 
     private SrcDbEntity srcDbEntity;
@@ -44,6 +53,24 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
     private MysqlDataSource metaDs;
 
     private TableSet acceptedTables;
+
+    public DefaultTableMetaInfoFetcher() {
+        DefaultEventBus.INSTANCE.register(this);
+    }
+
+    @Subscribe
+    public void listenTargetChangedEvent(TargetChangedEvent event) {
+        if (event.getTaskName().equals(name)) {
+            acceptedTables = event.getTableSet();
+            try {
+                refreshTableMetas();
+                logger.info("refresh table metas.");
+                logger.info("table set = {}", acceptedTables.toString());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     @Override
     public TableMetaInfo getTableMetaInfo(String database, String table) {
@@ -145,5 +172,9 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 
     public void setAcceptedTables(TableSet acceptedTables) {
         this.acceptedTables = acceptedTables;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

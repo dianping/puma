@@ -20,6 +20,8 @@ import com.dianping.puma.core.LifeCycle;
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.sender.Sender;
+import com.dianping.puma.server.container.InstanceTaskContainer;
+import com.dianping.puma.server.container.InstanceTaskContainer.InstanceTask;
 import com.dianping.puma.storage.holder.BinlogInfoHolder;
 
 /**
@@ -69,6 +71,4 @@ public interface TaskExecutor extends LifeCycle<Exception> {
 	public PumaTaskStateEntity getTaskState();
 
 	public void setTaskState(PumaTaskStateEntity taskState);
-
-	public void onChange();
 }

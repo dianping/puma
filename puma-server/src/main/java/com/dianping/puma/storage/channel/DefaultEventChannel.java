@@ -26,10 +26,6 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 
     private IndexManager<IndexKeyImpl, IndexValueImpl> indexManager;
 
-    private DataBucketManager slaveIndex;
-
-    private DataBucketManager masterIndex;
-
     private EventCodec codec = new RawEventCodec();
 
     private volatile boolean stopped = true;
@@ -92,22 +88,49 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 
     protected DataBucket initReadBucket(Sequence seq, boolean fromNext) throws IOException {
         checkClosed();
-        DataBucket bucket = slaveIndex.getReadBucket(seq.longValue(), fromNext);
+        DataBucket bucket = createSlaveDataBucketManager().getReadBucket(seq.longValue(), fromNext);
         if (bucket != null) {
             return bucket;
         } else {
-            return masterIndex.getReadBucket(seq.longValue(), fromNext);
+            return createMasterDataBucketManager().getReadBucket(seq.longValue(), fromNext);
         }
-
     }
 
     protected DataBucket getNextReadBucket(Sequence seq) throws IOException {
         checkClosed();
-        DataBucket bucket = slaveIndex.getNextReadBucket(seq);
+        DataBucket bucket = createSlaveDataBucketManager().getNextReadBucket(seq);
         if (bucket != null) {
             return bucket;
         } else {
-            return masterIndex.getNextReadBucket(seq);
+            return createMasterDataBucketManager().getNextReadBucket(seq);
+        }
+    }
+
+    private DataBucketManager createSlaveDataBucketManager() throws IOException {
+        DataBucketManager slaveIndex = null;
+        try {
+            slaveIndex = createDataBucketManager(GlobalStorageConfig.slaveStorageBaseDir,
+                    GlobalStorageConfig.slaveBucketFilePrefix, database, GlobalStorageConfig.maxMasterBucketLengthMB);
+            slaveIndex.start();
+            return slaveIndex;
+        } finally {
+            if (slaveIndex != null) {
+                slaveIndex.stop();
+            }
+        }
+    }
+
+    private DataBucketManager createMasterDataBucketManager() throws IOException {
+        DataBucketManager masterIndex = null;
+        try {
+            masterIndex = createDataBucketManager(GlobalStorageConfig.masterStorageBaseDir,
+                    GlobalStorageConfig.masterBucketFilePrefix, database, GlobalStorageConfig.maxMasterBucketLengthMB);
+            masterIndex.start();
+            return masterIndex;
+        } finally {
+            if (masterIndex != null) {
+                masterIndex.stop();
+            }
         }
     }
 
@@ -147,20 +170,6 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
                 try {
                     this.indexManager.stop();
                     this.indexManager = null;
-                } catch (IOException ignore) {
-                }
-            }
-            if (this.slaveIndex != null) {
-                try {
-                    this.slaveIndex.stop();
-                    this.slaveIndex = null;
-                } catch (IOException ignore) {
-                }
-            }
-            if (this.masterIndex != null) {
-                try {
-                    this.masterIndex.stop();
-                    this.masterIndex = null;
                 } catch (IOException ignore) {
                 }
             }
@@ -233,12 +242,6 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 
         this.indexManager = new DefaultIndexManager<IndexKeyImpl, IndexValueImpl>(GlobalStorageConfig.binlogIndexBaseDir
                 + "/" + database, new IndexKeyConvertor(), new IndexValueConvertor());
-        this.slaveIndex = createDataBucketManager(GlobalStorageConfig.slaveStorageBaseDir,
-                GlobalStorageConfig.slaveBucketFilePrefix, database, GlobalStorageConfig.maxMasterBucketLengthMB);
-        this.slaveIndex.start();
-        this.masterIndex = createDataBucketManager(GlobalStorageConfig.masterStorageBaseDir,
-                GlobalStorageConfig.masterBucketFilePrefix, database, GlobalStorageConfig.maxMasterBucketLengthMB);
-        this.masterIndex.start();
 
         stopped = false;
     }

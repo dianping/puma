@@ -19,8 +19,6 @@ public class LocalFileIndexBucket<K, V extends IndexValue<K>> implements IndexBu
 
 	private long currentPosition = 0L;
 
-	private final AtomicReference<K> startIndexKey = new AtomicReference<K>();
-
 	public LocalFileIndexBucket(String name,File file, IndexItemConvertor<V> valueConvertor) throws IOException {
 		this.name = name;
 		this.file = file;
@@ -65,7 +63,6 @@ public class LocalFileIndexBucket<K, V extends IndexValue<K>> implements IndexBu
 			prePosition = currentPosition;
 			currentPosition += 4 + len;
 			V result = this.valueConvertor.convertFromObj(bytes);
-			startIndexKey.compareAndSet(null, result.getIndexKey());
 			return result;
 		} catch (IOException e) {
 			this.input.reset();
@@ -108,11 +105,6 @@ public class LocalFileIndexBucket<K, V extends IndexValue<K>> implements IndexBu
 				randomAccessFile.close();
 			}
 		}
-	}
-
-	@Override
-	public K getStartKeyIndex() {
-		return startIndexKey.get();
 	}
 
 	// hack for test purpose

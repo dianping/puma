@@ -32,8 +32,6 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 
     private DataBucket readDataBucket;
 
-    private Sequence lastSequence = null;
-
     public DefaultEventChannel(String database) {
         this.database = database;
     }
@@ -41,6 +39,7 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
     @Override
     public Event next(boolean shouldSleep) throws StorageException {
         checkClosed();
+        Sequence lastSequence = null;
 
         while (true) {
             try {
@@ -200,7 +199,7 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 
         IndexValueImpl value;
 
-        if (serverId != 0 && binlogFile != null && binlogPosition > 0) {
+        if (serverId != 0 && binlogPosition > 0) {
             try {
                 value = this.indexManager.findByBinlog(new IndexKeyImpl(serverId, binlogFile, binlogPosition), true);
             } catch (IOException e) {

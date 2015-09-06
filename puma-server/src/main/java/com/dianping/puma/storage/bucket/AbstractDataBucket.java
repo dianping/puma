@@ -197,15 +197,12 @@ public abstract class AbstractDataBucket implements DataBucket {
 			throw new IOException(String.format("Seek %d pos failed(%s).", pos, getFileName()));
 		}
 
-		this.input.mark(Integer.MAX_VALUE);
 		try {
 			int count = pos;
 			while (count > 0) {
 				count -= input.skipBytes(count);
 			}
 		} catch (EOFException eof) {
-			this.input.reset();
-
 			throw eof;
 		}
 	}

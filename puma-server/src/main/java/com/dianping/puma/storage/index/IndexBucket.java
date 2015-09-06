@@ -17,7 +17,5 @@ public interface IndexBucket<K, V> extends LifeCycle<IOException> {
 
 	void truncate() throws IOException;
 	
-	K getStartKeyIndex();
-
 	String getName();
 }

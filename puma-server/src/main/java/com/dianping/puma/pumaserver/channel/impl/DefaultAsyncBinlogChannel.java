@@ -32,224 +32,233 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
-    private final String clientName;
+	private static final Logger LOG = LoggerFactory.getLogger(DefaultAsyncBinlogChannel.class);
 
-    private volatile String database;
+	protected static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
 
-    private final static Logger logger = LoggerFactory.getLogger(DefaultAsyncBinlogChannel.class);
+	private final String clientName;
 
-    private volatile boolean stopped = false;
+	private volatile String database;
 
-    protected static final ExecutorService executorService = Executors.newCachedThreadPool();
+	private volatile boolean stopped = false;
 
-    private volatile EventChannel eventChannel;
+	private volatile EventChannel eventChannel;
 
-    private final BlockingQueue<BinlogGetRequest> requests = new LinkedBlockingQueue<BinlogGetRequest>(5);
+	private final BlockingQueue<BinlogGetRequest> requests = new LinkedBlockingQueue<BinlogGetRequest>(5);
 
-    public DefaultAsyncBinlogChannel(String clientName) {
-        this.clientName = clientName;
-    }
+	public DefaultAsyncBinlogChannel(String clientName) {
+		this.clientName = clientName;
+	}
 
-    @Override
-    public void init(
-            long sc,
-            BinlogInfo binlogInfo,
-            String database,
-            List<String> tables,
-            boolean dml,
-            boolean ddl,
-            boolean transaction
-    ) throws BinlogChannelException {
-        try {
-            this.database = database;
-            this.eventChannel = initChannel(sc, binlogInfo, database, tables, dml, ddl, transaction);
-            executorService.execute(new AsyncTask(new WeakReference<DefaultAsyncBinlogChannel>(this)));
-            DefaultEventBus.INSTANCE.register(this);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            throw new BinlogChannelException("find event storage failure", e.getCause());
-        }
-    }
+	@Override
+	public void init(
+		long sc,
+		BinlogInfo binlogInfo,
+		String database,
+		List<String> tables,
+		boolean dml,
+		boolean ddl,
+		boolean transaction
+	) throws BinlogChannelException {
+		try {
+			this.database = database;
+			this.eventChannel = initChannel(sc, binlogInfo, tables, dml, ddl, transaction);
+			THREAD_POOL.execute(new AsyncTask(new WeakReference<DefaultAsyncBinlogChannel>(this)));
+			DefaultEventBus.INSTANCE.register(this);
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+			throw new BinlogChannelException("find event storage failure", e);
+		}
+	}
 
-    @Subscribe
-    public void listenClientPositionChanged(ClientPositionChangedEvent event) {
-        if (event.getClientName() == null || !event.getClientName().equals(clientName)) {
-            return;
-        }
+	@Subscribe
+	public void listenClientPositionChanged(ClientPositionChangedEvent event) {
+		if (event.getClientName() == null || !event.getClientName().equals(clientName)) {
+			return;
+		}
 
-        if (this.eventChannel == null) {
-            return;
-        }
+		if (this.eventChannel == null) {
+			return;
+		}
 
-        try {
-            EventChannel eventChannel;
-            try {
-                eventChannel = initChannel(
-                        SubscribeConstant.SEQ_FROM_BINLOGINFO,
-                        event.getBinlogInfo(), database, Lists.newArrayList(this.eventChannel.getTables()),
-                        this.eventChannel.getDml(), this.eventChannel.getDdl(), this.eventChannel.getTransaction());
-            } catch (IOException e) {
-                eventChannel = initChannel(
-                        SubscribeConstant.SEQ_FROM_TIMESTAMP,
-                        event.getBinlogInfo(), database, Lists.newArrayList(this.eventChannel.getTables()),
-                        this.eventChannel.getDml(), this.eventChannel.getDdl(), this.eventChannel.getTransaction());
-            }
+		try {
+			EventChannel newEventChannel;
+			try {
+				newEventChannel = initChannel(
+					SubscribeConstant.SEQ_FROM_BINLOGINFO,
+					event.getBinlogInfo(), Lists.newArrayList(this.eventChannel.getTables()),
+					this.eventChannel.getDml(), this.eventChannel.getDdl(), this.eventChannel.getTransaction());
+			} catch (IOException e) {
+				newEventChannel = initChannel(
+					SubscribeConstant.SEQ_FROM_TIMESTAMP,
+					event.getBinlogInfo(), Lists.newArrayList(this.eventChannel.getTables()),
+					this.eventChannel.getDml(), this.eventChannel.getDdl(), this.eventChannel.getTransaction());
+			}
 
-            EventChannel oldEventChannel = this.eventChannel;
-            this.eventChannel = eventChannel;
+			EventChannel oldEventChannel = this.eventChannel;
+			this.eventChannel = newEventChannel;
 
-            oldEventChannel.close();
-            Cat.logEvent("Switch.ClientPosition", String.format("%s %s", clientName, event.getBinlogInfo().toString()));
-        } catch (IOException e) {
-            Cat.logError(String.format("Switch ClientPosition Failed! %s %s", clientName, event.getBinlogInfo().toString()), e);
-        }
-    }
+			oldEventChannel.close();
+			Cat.logEvent("Switch.ClientPosition", String.format("%s %s", clientName, event.getBinlogInfo().toString()));
+		} catch (IOException e) {
+			Cat.logError(
+				String.format("Switch ClientPosition Failed! %s %s", clientName, event.getBinlogInfo().toString()), e);
+		}
+	}
 
-    protected EventChannel initChannel(long sc, BinlogInfo binlogInfo, String database, List<String> tables, boolean dml, boolean ddl, boolean transaction) throws IOException {
-        DefaultEventChannel eventChannel = new DefaultEventChannel(database);
-        eventChannel.withTables(tables.toArray(new String[tables.size()]));
-        eventChannel.withDml(dml);
-        eventChannel.withDdl(ddl);
-        eventChannel.withTransaction(transaction);
+	protected EventChannel initChannel(long sc, BinlogInfo binlogInfo, List<String> tables,
+		boolean dml, boolean ddl, boolean transaction) throws IOException {
+		DefaultEventChannel newEventChannel = new DefaultEventChannel(database);
+		newEventChannel.withTables(tables.toArray(new String[tables.size()]));
+		newEventChannel.withDml(dml);
+		newEventChannel.withDdl(ddl);
+		newEventChannel.withTransaction(transaction);
 
-        if (sc == SubscribeConstant.SEQ_FROM_BINLOGINFO) {
-            eventChannel.open(binlogInfo.getServerId(), binlogInfo.getBinlogFile(), binlogInfo.getBinlogPosition());
-        } else if (sc == SubscribeConstant.SEQ_FROM_TIMESTAMP) {
-            eventChannel.open(binlogInfo.getTimestamp());
-        } else {
-            eventChannel.open(sc);
-        }
-        return eventChannel;
-    }
+		if (sc == SubscribeConstant.SEQ_FROM_BINLOGINFO) {
+			newEventChannel.open(binlogInfo.getServerId(), binlogInfo.getBinlogFile(), binlogInfo.getBinlogPosition());
+		} else if (sc == SubscribeConstant.SEQ_FROM_TIMESTAMP) {
+			newEventChannel.open(binlogInfo.getTimestamp());
+		} else {
+			newEventChannel.open(sc);
+		}
+		return newEventChannel;
+	}
 
-    @Override
-    public void destroy() {
-        try {
-            DefaultEventBus.INSTANCE.unregister(this);
-        } catch (Exception ignore) {
+	@Override
+	public void destroy() {
+		try {
+			DefaultEventBus.INSTANCE.unregister(this);
+		} catch (Exception ignore) {
 
-        }
-        stopped = true;
-        eventChannel.close();
-    }
+		}
+		stopped = true;
+		eventChannel.close();
+	}
 
-    @Override
-    public boolean addRequest(BinlogGetRequest request) {
-        return requests.offer(request);
-    }
+	@Override
+	public boolean addRequest(BinlogGetRequest request) {
+		return requests.offer(request);
+	}
 
-    static class AsyncTask implements Runnable {
-        private final static Logger logger = LoggerFactory.getLogger(AsyncTask.class);
+	static class AsyncTask implements Runnable {
+		private static final Logger LOG = LoggerFactory.getLogger(AsyncTask.class);
 
-        private final WeakReference<DefaultAsyncBinlogChannel> parent;
+		private static final int CACHE_SIZE = 1000;
 
-        public AsyncTask(WeakReference<DefaultAsyncBinlogChannel> parent) {
-            this.parent = parent;
-        }
+		private static final int EMPTY_SLEEP_TIME = 5;
 
-        private boolean threadNameHasSet = false;
+		private final WeakReference<DefaultAsyncBinlogChannel> parent;
 
-        @Override
-        public void run() {
-            List<Event> results = new ArrayList<Event>();
+		public AsyncTask(WeakReference<DefaultAsyncBinlogChannel> parent) {
+			this.parent = parent;
+		}
 
-            try {
-                BinlogGetRequest req = null;
+		private boolean threadNameHasSet = false;
 
-                while (!getParent().stopped && !Thread.currentThread().isInterrupted()) {
-                    req = getBinlogGetRequest(results, req);
-                    boolean needSend = isNeedSend(results, req);
-                    if (needSend) {
-                        req.getChannel().writeAndFlush(buildBinlogGetResponse(results, req));
-                        req = null;
-                    }
+		@Override
+		public void run() {
+			List<Event> results = new ArrayList<Event>();
 
-                    Event binlogEvent = getEvent();
-                    saveBinlogEvent(results, binlogEvent);
-                    if (binlogEvent == null) {
-                        Thread.sleep(5);
-                    }
-                }
-            } catch (InterruptedException e) {
-                logger.info("AsyncTask has be Interrupted");
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-                Cat.logError(e.getMessage(), e);
-            }
-        }
+			try {
+				BinlogGetRequest req = null;
 
-        protected BinlogGetResponse buildBinlogGetResponse(List<Event> results, BinlogGetRequest req) {
-            BinlogGetResponse response = new BinlogGetResponse();
-            response.setBinlogGetRequest(req);
-            BinlogMessage message = new BinlogMessage();
-            BinlogInfo lastBinlogInfo = null;
+				while (!getParent().stopped && !Thread.currentThread().isInterrupted()) {
+					req = getBinlogGetRequest(results, req);
+					boolean needSend = isNeedSend(results, req);
+					if (needSend) {
+						req.getChannel().writeAndFlush(buildBinlogGetResponse(results, req));
+						req = null;
+					}
 
-            Iterator<Event> iterator = results.iterator();
-            while (iterator.hasNext() && message.getBinlogEvents().size() < req.getBatchSize()) {
-                Event event = iterator.next();
-                message.addBinlogEvents(event);
-                if (event.getBinlogInfo() != null) {
-                    lastBinlogInfo = event.getBinlogInfo();
-                }
-                iterator.remove();
-            }
-            response.setBinlogMessage(message);
+					Event binlogEvent = getEvent();
+					saveBinlogEvent(results, binlogEvent);
+					if (binlogEvent == null) {
+						Thread.sleep(EMPTY_SLEEP_TIME);
+					}
+				}
+			} catch (InterruptedException e) {
+				LOG.info("AsyncTask has be Interrupted");
+			} catch (Exception e) {
+				LOG.error(e.getMessage(), e);
+				Cat.logError(e.getMessage(), e);
+			}
+		}
 
-            SystemStatusManager.updateClientSendBinlogInfo(req.getClientName(), lastBinlogInfo);
-            SystemStatusManager.addClientFetchQps(req.getClientName(), message.getBinlogEvents().size());
-            return response;
-        }
+		protected BinlogGetResponse buildBinlogGetResponse(List<Event> results, BinlogGetRequest req) {
+			BinlogGetResponse response = new BinlogGetResponse();
+			response.setBinlogGetRequest(req);
+			BinlogMessage message = new BinlogMessage();
+			BinlogInfo lastBinlogInfo = null;
 
-        protected boolean isNeedSend(List<Event> results, BinlogGetRequest req) {
-            boolean needSend = false;
-            if (req != null && (results.size() >= req.getBatchSize() || req.isTimeout())) {
-                needSend = true;
-            }
-            return needSend;
-        }
+			Iterator<Event> iterator = results.iterator();
+			while (iterator.hasNext() && message.getBinlogEvents().size() < req.getBatchSize()) {
+				Event event = iterator.next();
+				message.addBinlogEvents(event);
+				if (event.getBinlogInfo() != null) {
+					lastBinlogInfo = event.getBinlogInfo();
+				}
+				iterator.remove();
+			}
+			response.setBinlogMessage(message);
 
-        protected void saveBinlogEvent(List<Event> results, Event binlogEvent) {
-            if (binlogEvent != null) {
-                results.add(binlogEvent);
-            }
-        }
+			SystemStatusManager.updateClientSendBinlogInfo(req.getClientName(), lastBinlogInfo);
+			SystemStatusManager.addClientFetchQps(req.getClientName(), message.getBinlogEvents().size());
+			return response;
+		}
 
-        protected Event getEvent() {
-            Event binlogEvent;
-            try {
-                binlogEvent = getParent().eventChannel.next(false);
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-                binlogEvent = new ServerErrorEvent("get binlog event from storage failure.", e.getCause());
-            }
-            return binlogEvent;
-        }
+		protected boolean isNeedSend(List<Event> results, BinlogGetRequest req) {
+			boolean needSend = false;
+			if (req != null && (results.size() >= req.getBatchSize() || req.isTimeout())) {
+				needSend = true;
+			}
+			return needSend;
+		}
 
-        protected BinlogGetRequest getBinlogGetRequest(List<Event> results, BinlogGetRequest req) throws InterruptedException {
-            if (!(req != null && req.getChannel().isActive())) {
-                req = getParent().requests.poll();
-            }
+		protected void saveBinlogEvent(List<Event> results, Event binlogEvent) {
+			if (binlogEvent != null) {
+				results.add(binlogEvent);
+			}
+		}
 
-            if (req == null && results.size() >= 1000) {
-                req = getParent().requests.take();
-            }
+		protected Event getEvent() {
+			Event binlogEvent;
+			try {
+				binlogEvent = getParent().eventChannel.next(false);
+			} catch (Exception e) {
+				LOG.error(e.getMessage(), e);
+				binlogEvent = new ServerErrorEvent("get binlog event from storage failure.", e.getCause());
+			}
+			return binlogEvent;
+		}
 
-            if (req != null && !threadNameHasSet) {
-                threadNameHasSet = true;
-                Thread.currentThread().setName("DefaultAsyncBinlogChannel-" + req.getClientName());
-            }
+		protected BinlogGetRequest getBinlogGetRequest(List<Event> results, BinlogGetRequest req)
+			throws InterruptedException {
+			BinlogGetRequest request = req;
 
-            return req;
-        }
+			if (!(request != null && request.getChannel().isActive())) {
+				request = getParent().requests.poll();
+			}
 
-        protected DefaultAsyncBinlogChannel getParent() throws InterruptedException {
-            DefaultAsyncBinlogChannel channel = parent.get();
-            if (channel == null) {
-                logger.warn("Parent has be GCed. Please check your code to call destroy.");
-                Thread.currentThread().interrupt();
-                throw new InterruptedException();
-            }
-            return channel;
-        }
-    }
+			if (request == null && results.size() >= CACHE_SIZE) {
+				request = getParent().requests.take();
+			}
+
+			if (request != null && !threadNameHasSet) {
+				threadNameHasSet = true;
+				Thread.currentThread().setName("DefaultAsyncBinlogChannel-" + request.getClientName());
+			}
+
+			return request;
+		}
+
+		protected DefaultAsyncBinlogChannel getParent() throws InterruptedException {
+			DefaultAsyncBinlogChannel channel = parent.get();
+			if (channel == null) {
+				LOG.warn("Parent has be GCed. Please check your code to call destroy.");
+				Thread.currentThread().interrupt();
+				throw new InterruptedException();
+			}
+			return channel;
+		}
+	}
 }

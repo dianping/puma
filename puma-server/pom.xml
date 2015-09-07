@@ -78,11 +78,6 @@
             <artifactId>jzlib</artifactId>
         </dependency>
 
-        <!-- unirest -->
-        <dependency>
-            <groupId>com.mashape.unirest</groupId>
-            <artifactId>unirest-java</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>

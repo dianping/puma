@@ -9,10 +9,8 @@ import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.EventStorage;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,138 +32,141 @@ import static org.mockito.Mockito.*;
  * http://www.dozer.cc
  */
 public class DefaultAsyncBinlogChannelTest {
-    TaskContainer taskContainer;
-    EventStorage eventStorage;
-    EventChannel eventChannel;
-    Queue<Event> eventQueue = new ConcurrentLinkedQueue<Event>();
+	TaskContainer taskContainer;
 
-    DefaultAsyncBinlogChannel target;
+	EventStorage eventStorage;
 
-    @SuppressWarnings("unchecked")
-   @Before
-    public void setUp() throws Exception {
-        eventChannel = mock(EventChannel.class);
-        eventStorage = mock(EventStorage.class);
-        taskContainer = mock(TaskContainer.class);
+	EventChannel eventChannel;
 
-        when(taskContainer.getTaskStorage(anyString())).thenReturn(eventStorage);
+	Queue<Event> eventQueue = new ConcurrentLinkedQueue<Event>();
 
-        when(eventChannel.next(anyBoolean())).thenAnswer(new Answer<Event>() {
-            @Override
-            public Event answer(InvocationOnMock invocationOnMock) throws Throwable {
-                Event event = eventQueue.poll();
-                if (event instanceof NullEvent) {
-                    return null;
-                } else {
-                    return event;
-                }
-            }
-        });
+	DefaultAsyncBinlogChannel target;
 
+	@SuppressWarnings("unchecked")
+	@Before
+	public void setUp() throws Exception {
+		eventChannel = mock(EventChannel.class);
+		eventStorage = mock(EventStorage.class);
+		taskContainer = mock(TaskContainer.class);
 
-        target = spy(new DefaultAsyncBinlogChannel(null));
-        doReturn(eventChannel).when(target).initChannel(anyLong(), any(BinlogInfo.class), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean());
-        target.init(-1, new BinlogInfo(-1, "", 1l, 1, 0), "", new ArrayList<String>(), false, false, false);
-    }
+		when(taskContainer.getTaskStorage(anyString())).thenReturn(eventStorage);
 
-    @After
-    public void tearDown() throws Exception {
-        target = null;
-        System.gc();
-    }
+		when(eventChannel.next(anyBoolean())).thenAnswer(new Answer<Event>() {
+			@Override
+			public Event answer(InvocationOnMock invocationOnMock) throws Throwable {
+				Event event = eventQueue.poll();
+				if (event instanceof NullEvent) {
+					return null;
+				} else {
+					return event;
+				}
+			}
+		});
 
-    @Test
-    public void testWait() throws Exception {
-        Event event1 = new ServerErrorEvent("1");
-        final AtomicReference<BinlogGetResponse> result = new AtomicReference<BinlogGetResponse>();
-        Channel channel = getChannel(result);
+		target = spy(new DefaultAsyncBinlogChannel(null));
+		doReturn(eventChannel).when(target)
+			.initChannel(anyLong(), any(BinlogInfo.class), anyList(), anyBoolean(), anyBoolean(), anyBoolean());
+		target.init(-1, new BinlogInfo(-1, "", 1l, 1, 0), "", new ArrayList<String>(), false, false, false);
+	}
 
-        BinlogGetRequest request = new BinlogGetRequest().setChannel(channel);
-        target.addRequest(request);
+	@After
+	public void tearDown() throws Exception {
+		target = null;
+		System.gc();
+	}
 
-        assertNull(result.get());
+	@Test
+	public void testWait() throws Exception {
+		Event event1 = new ServerErrorEvent("1");
+		final AtomicReference<BinlogGetResponse> result = new AtomicReference<BinlogGetResponse>();
+		Channel channel = getChannel(result);
 
-        eventQueue.offer(event1);
+		BinlogGetRequest request = new BinlogGetRequest().setChannel(channel);
+		target.addRequest(request);
 
-        Thread.sleep(20);
+		assertNull(result.get());
 
-        BinlogGetResponse response = result.get();
-        assertNotNull(response);
-        assertEquals(1, response.getBinlogMessage().getBinlogEvents().size());
-        assertSame(event1, response.getBinlogMessage().getBinlogEvents().get(0));
-    }
+		eventQueue.offer(event1);
 
-    @Test
-    public void testBatch() throws Exception {
-        Event event1 = new ServerErrorEvent("1");
-        Event event2 = new ServerErrorEvent("2");
-        Event event3 = new ServerErrorEvent("3");
-        Event event4 = new ServerErrorEvent("4");
+		Thread.sleep(20);
 
-        eventQueue.add(event1);
-        eventQueue.add(event2);
-        eventQueue.add(event3);
-        eventQueue.add(event4);
+		BinlogGetResponse response = result.get();
+		assertNotNull(response);
+		assertEquals(1, response.getBinlogMessage().getBinlogEvents().size());
+		assertSame(event1, response.getBinlogMessage().getBinlogEvents().get(0));
+	}
 
-        final AtomicReference<BinlogGetResponse> result = new AtomicReference<BinlogGetResponse>();
-        Channel channel = getChannel(result);
+	@Test
+	public void testBatch() throws Exception {
+		Event event1 = new ServerErrorEvent("1");
+		Event event2 = new ServerErrorEvent("2");
+		Event event3 = new ServerErrorEvent("3");
+		Event event4 = new ServerErrorEvent("4");
 
-        BinlogGetRequest request = new BinlogGetRequest()
-                .setBatchSize(2)
-                .setChannel(channel);
+		eventQueue.add(event1);
+		eventQueue.add(event2);
+		eventQueue.add(event3);
+		eventQueue.add(event4);
 
-        target.addRequest(request);
+		final AtomicReference<BinlogGetResponse> result = new AtomicReference<BinlogGetResponse>();
+		Channel channel = getChannel(result);
 
-        Thread.sleep(100);
+		BinlogGetRequest request = new BinlogGetRequest()
+			.setBatchSize(2)
+			.setChannel(channel);
 
-        BinlogGetResponse response = result.get();
-        assertNotNull(response);
-        assertEquals(2, response.getBinlogMessage().getBinlogEvents().size());
-        assertSame(event1, response.getBinlogMessage().getBinlogEvents().get(0));
-        assertSame(event2, response.getBinlogMessage().getBinlogEvents().get(1));
-    }
+		target.addRequest(request);
 
-    @Test
-    public void testTimeout() throws Exception {
-        final AtomicReference<BinlogGetResponse> result = new AtomicReference<BinlogGetResponse>();
-        Channel channel = getChannel(result);
+		Thread.sleep(100);
 
-        BinlogGetRequest request = new BinlogGetRequest()
-                .setStartTime(System.currentTimeMillis())
-                .setTimeout(100)
-                .setTimeUnit(TimeUnit.MILLISECONDS)
-                .setChannel(channel);
+		BinlogGetResponse response = result.get();
+		assertNotNull(response);
+		assertEquals(2, response.getBinlogMessage().getBinlogEvents().size());
+		assertSame(event1, response.getBinlogMessage().getBinlogEvents().get(0));
+		assertSame(event2, response.getBinlogMessage().getBinlogEvents().get(1));
+	}
 
-        target.addRequest(request);
+	@Test
+	public void testTimeout() throws Exception {
+		final AtomicReference<BinlogGetResponse> result = new AtomicReference<BinlogGetResponse>();
+		Channel channel = getChannel(result);
 
-        Thread.sleep(150);
+		BinlogGetRequest request = new BinlogGetRequest()
+			.setStartTime(System.currentTimeMillis())
+			.setTimeout(100)
+			.setTimeUnit(TimeUnit.MILLISECONDS)
+			.setChannel(channel);
 
-        assertNotNull(result.get());
-    }
+		target.addRequest(request);
 
-    protected Channel getChannel(final AtomicReference<BinlogGetResponse> result) {
-        Channel channel = mock(Channel.class);
-        when(channel.isActive()).thenReturn(true);
-        when(channel.writeAndFlush(anyObject())).thenAnswer(new Answer<ChannelFuture>() {
-            @Override
-            public ChannelFuture answer(InvocationOnMock invocationOnMock) throws Throwable {
-                result.set((BinlogGetResponse) invocationOnMock.getArguments()[0]);
-                return null;
-            }
-        });
-        return channel;
-    }
+		Thread.sleep(150);
 
-    @SuppressWarnings("serial")
-    static class NullEvent extends Event {
-        @Override
-        public BinlogInfo getBinlogInfo() {
-            return null;
-        }
+		assertNotNull(result.get());
+	}
 
-        @Override
-        public EventType getEventType() {
-            return null;
-        }
-    }
+	protected Channel getChannel(final AtomicReference<BinlogGetResponse> result) {
+		Channel channel = mock(Channel.class);
+		when(channel.isActive()).thenReturn(true);
+		when(channel.writeAndFlush(anyObject())).thenAnswer(new Answer<ChannelFuture>() {
+			@Override
+			public ChannelFuture answer(InvocationOnMock invocationOnMock) throws Throwable {
+				result.set((BinlogGetResponse) invocationOnMock.getArguments()[0]);
+				return null;
+			}
+		});
+		return channel;
+	}
+
+	@SuppressWarnings("serial")
+	static class NullEvent extends Event {
+		@Override
+		public BinlogInfo getBinlogInfo() {
+			return null;
+		}
+
+		@Override
+		public EventType getEventType() {
+			return null;
+		}
+	}
 }

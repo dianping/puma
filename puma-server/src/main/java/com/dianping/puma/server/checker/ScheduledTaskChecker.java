@@ -2,9 +2,12 @@ package com.dianping.puma.server.checker;
 
 import com.dianping.puma.biz.entity.PumaServerTargetEntity;
 import com.dianping.puma.biz.service.PumaServerTargetService;
+import com.dianping.puma.instance.InstanceManager;
 import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.server.server.TaskServerManager;
+import com.dianping.puma.storage.manage.InstanceStorageManager;
 import com.dianping.puma.taskexecutor.task.DatabaseTask;
+import com.dianping.puma.taskexecutor.task.InstanceTask;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.MapDifference.ValueDifference;
 import com.google.common.collect.Maps;
@@ -21,6 +24,8 @@ public class ScheduledTaskChecker implements TaskChecker {
 
     private final Logger logger = LoggerFactory.getLogger(ScheduledTaskChecker.class);
 
+    private boolean inited = false;
+
     @Autowired
     TaskServerManager taskServerManager;
 
@@ -29,6 +34,12 @@ public class ScheduledTaskChecker implements TaskChecker {
 
     @Autowired
     TaskContainer taskContainer;
+
+    @Autowired
+    InstanceStorageManager instanceStorageManager;
+
+    @Autowired
+    InstanceManager instanceManager;
 
     protected Map<String, DatabaseTask> loadDatabaseTasks() {
         List<PumaServerTargetEntity> pumaServerTargets
@@ -44,6 +55,49 @@ public class ScheduledTaskChecker implements TaskChecker {
         }
 
         return databaseTasks;
+    }
+
+    protected Map<String, InstanceTask> loadInstanceTasks() {
+        Map<String, InstanceTask> instanceTasks = new HashMap<String, InstanceTask>();
+
+        Map<String, DatabaseTask> databaseTasks = loadDatabaseTasks();
+        for (Map.Entry<String, DatabaseTask> entry: databaseTasks.entrySet()) {
+            String database = entry.getKey();
+            DatabaseTask databaseTask = entry.getValue();
+
+            String instance = findInstance(database);
+            if (instance == null) {
+                logger.error("failed to find instance");
+                continue;
+            }
+
+            String slaveTaskName = genSlaveTaskName(instance, database);
+            if (instanceStorageManager.exist(slaveTaskName)) {
+                InstanceTask instanceTask = new InstanceTask(false, instance, databaseTask);
+                instanceTasks.put(slaveTaskName, instanceTask);
+                continue;
+            }
+
+            String masterTaskName = genMasterTaskName(instance, database);
+            if (instanceStorageManager.exist(masterTaskName)) {
+                InstanceTask instanceTask = instanceTasks.get(masterTaskName);
+                if (instanceTask == null) {
+                    instanceTask = new InstanceTask(true, instance, databaseTask);
+                } else {
+                    instanceTask.create(databaseTask);
+                }
+                instanceTasks.put(masterTaskName, instanceTask);
+            }
+        }
+
+        return instanceTasks;
+
+    }
+
+    protected void handleInstanceTask(Map<String, InstanceTask> instanceTasks) {
+        for (InstanceTask instanceTask: instanceTasks.values()) {
+            taskContainer.create(instanceTask);
+        }
     }
 
     protected void handleCreatedDatabaseTask(Map<String, DatabaseTask> createdDatabaseTasks) {
@@ -79,8 +133,12 @@ public class ScheduledTaskChecker implements TaskChecker {
         }
     }
 
-    @Override
-    public void check() {
+    protected void checkInit() {
+        Map<String, InstanceTask> instanceTasks = loadInstanceTasks();
+        handleInstanceTask(instanceTasks);
+    }
+
+    protected void check0() {
         Map<String, DatabaseTask> databaseTasks = loadDatabaseTasks();
         Map<String, DatabaseTask> oriDatabaseTasks = taskContainer.getAll();
 
@@ -102,8 +160,30 @@ public class ScheduledTaskChecker implements TaskChecker {
         handleUpdatedDatabaseTask(updatedDatabaseTasks);
     }
 
+    @Override
+    public void check() {
+        if (!inited) {
+            checkInit();
+            inited = true;
+        } else {
+            check0();
+        }
+    }
+
     @Scheduled(fixedDelay = 5 * 1000)
     public void scheduledCheck() {
         check();
+    }
+
+    protected String genMasterTaskName(String instance, String database) {
+        return instance;
+    }
+
+    protected String genSlaveTaskName(String instance, String database) {
+        return instance + "-" + database;
+    }
+
+    protected String findInstance(String database) {
+        return instanceManager.getClusterByDb(database);
     }
 }

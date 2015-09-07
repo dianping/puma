@@ -107,7 +107,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         boolean canStop = false;
         do {
             try {
-                loadServerId(instanceManager.getUrlByCluster(taskName));
+                loadServerId(instanceManager.getUrlByCluster(instanceTask.getInstance()));
 
                 // 读position/file文件
                 BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(getContext().getPumaServerName());
@@ -262,7 +262,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 }
             }
         });
-        sortedSet.addAll(instanceManager.getUrlByCluster(taskName));
+        sortedSet.addAll(instanceManager.getUrlByCluster(instanceTask.getInstance()));
 
         int index = sortedSet.indexOf(this.currentSrcDbEntity) + 1;
         if (index >= sortedSet.size()) {
@@ -282,7 +282,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         }
 
         List<SrcDbEntity> avaliableSrcDb = FluentIterable
-                .from(instanceManager.getUrlByCluster(taskName))
+                .from(instanceManager.getUrlByCluster(instanceTask.getInstance()))
                 .filter(new Predicate<SrcDbEntity>() {
                     @Override
                     public boolean apply(SrcDbEntity input) {
@@ -971,6 +971,10 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             }
             return null;
         }
+    }
+
+    public void setInstanceTask(InstanceTask instanceTask) {
+        this.instanceTask = instanceTask;
     }
 
     public InstanceTask getInstanceTask() {

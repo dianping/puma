@@ -14,6 +14,12 @@ public class LocalFileInstanceStorageManager implements InstanceStorageManager {
 	private final String binlogSuffix = ".binlog";
 
 	@Override
+	public boolean exist(String filename) {
+		File file = new File(binlogRootPath, filename + binlogSuffix);
+		return file.exists();
+	}
+
+	@Override
 	public void delete(String instance) {
 		try {
 			File file = new File(binlogRootPath, instance + binlogSuffix);

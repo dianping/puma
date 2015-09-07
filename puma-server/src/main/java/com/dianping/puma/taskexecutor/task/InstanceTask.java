@@ -1,11 +1,16 @@
 package com.dianping.puma.taskexecutor.task;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
 public class InstanceTask {
+
+	private boolean main;
+
+	private String taskName;
 
 	private String instance;
 
@@ -13,21 +18,39 @@ public class InstanceTask {
 
 	public InstanceTask() {}
 
-	public InstanceTask(String instance, List<DatabaseTask> databaseTasks) {
+	public InstanceTask(boolean main, String instance, DatabaseTask databaseTask) {
+		this.main = main;
+		this.instance = instance;
+		this.databaseTasks.add(databaseTask);
+		this.taskName = (main ? instance : instance + "-" + databaseTask.getDatabase());
+	}
+
+	public InstanceTask(boolean main, String instance, List<DatabaseTask> databaseTasks) {
+		this.main = main;
 		this.instance = instance;
 		this.databaseTasks = databaseTasks;
 	}
 
-	public void add(DatabaseTask databaseTask, Date date) {
-
-	}
-
-	public void merge(InstanceTask instanceTask) {
-
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+				.append("main", main)
+				.append("taskName", taskName)
+				.append("instance", instance)
+				.append("databaseTasks", databaseTasks)
+				.toString();
 	}
 
 	public int size() {
 		return databaseTasks.size();
+	}
+
+	public boolean isMain() {
+		return main;
+	}
+
+	public String getTaskName() {
+		return taskName;
 	}
 
 	public String getInstance() {
@@ -38,7 +61,19 @@ public class InstanceTask {
 		return databaseTasks;
 	}
 
+	public boolean contains(String database) {
+		for (DatabaseTask databaseTask: databaseTasks) {
+			if (databaseTask.getDatabase().equals(database)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public void create(DatabaseTask task) {
+		if (databaseTasks == null) {
+			databaseTasks = new ArrayList<DatabaseTask>();
+		}
 		databaseTasks.add(task);
 	}
 

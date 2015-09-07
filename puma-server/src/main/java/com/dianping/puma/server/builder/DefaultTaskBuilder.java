@@ -51,7 +51,9 @@ public class DefaultTaskBuilder implements TaskBuilder {
     public TaskExecutor build(InstanceTask instanceTask) {
         DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
 
-        String taskName = instanceTask.getInstance();
+        taskExecutor.setInstanceTask(instanceTask);
+
+        String taskName = instanceTask.getTaskName();
         taskExecutor.setTaskName(taskName);
         taskExecutor.setServerId(taskName.hashCode());
         taskExecutor.setBeginTime(instanceTask.getDatabaseTasks().get(0).getBeginTime());

@@ -1,5 +1,7 @@
 package com.dianping.puma.taskexecutor.task;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import java.util.Date;
 import java.util.List;
 
@@ -17,6 +19,15 @@ public class DatabaseTask {
 		this.database = database;
 		this.tables = tables;
 		this.beginTime = beginTime;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+				.append("database", database)
+				.append("tables", tables)
+				.append("beginTime", beginTime)
+				.toString();
 	}
 
 	@Override

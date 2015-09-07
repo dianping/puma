@@ -71,5 +71,7 @@ public interface TaskExecutor extends LifeCycle<Exception> {
 
 	public void setTaskState(PumaTaskStateEntity taskState);
 
+	public void setInstanceTask(InstanceTask instanceTask);
+
 	public InstanceTask getInstanceTask();
 }

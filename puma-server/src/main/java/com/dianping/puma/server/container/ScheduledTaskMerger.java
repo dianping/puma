@@ -37,6 +37,11 @@ public class ScheduledTaskMerger implements TaskMerger {
 
 		for (String instance: instances) {
 			if (!isMerging(instance)) {
+				if (isLeaderMissing(instance)) {
+					selectNewLeader(instance);
+					continue;
+				}
+
 				resetMerging(instance);
 				tryMerging(instance);
 			} else {
@@ -79,35 +84,17 @@ public class ScheduledTaskMerger implements TaskMerger {
 		TaskExecutor mainTaskExecutor = taskContainer.getMainExecutors().get(instance);
 		List<TaskExecutor> tempTaskExecutors = taskContainer.getTempExecutors().get(instance);
 
-		if (mainTaskExecutor == null) {
-			return false;
-		} else {
-			return tempTaskExecutors != null && tempTaskExecutors.size() > 0;
-		}
+		return mainTaskExecutor == null && tempTaskExecutors != null && tempTaskExecutors.size() > 0;
 	}
 
-	/*
 	protected void selectNewLeader(String instance) {
 		List<TaskExecutor> tempTaskExecutors = taskContainer.getTempExecutors().get(instance);
 
 		if (tempTaskExecutors != null && tempTaskExecutors.size() > 0) {
 			TaskExecutor tempTaskExecutor = tempTaskExecutors.get(0);
-			try {
-				tempTaskExecutor.stop();
-			} catch (Exception e) {
-				logger.error("failed to stop task.");
-			}
-
-			InstanceTask instanceTask = tempTaskExecutor.getInstanceTask();
-			String oriTaskName = instanceTask.getTaskName();
-			instanceTask.temp2Main();
-			binlogInfoHolder.rename(oriTaskName, instanceTask.getTaskName());
-
-			tempTaskExecutors.remove(tempTaskExecutor);
-			TaskExecutor mainTaskExecutor = taskOperator.create(instanceTask);
-			taskContainer.getMainExecutors().put(instance, mainTaskExecutor);
+			taskContainer.upgrade(tempTaskExecutor);
 		}
-	}*/
+	}
 
 	protected void resetMerging(String instance) {
 		TaskExecutor mainTaskExecutor = taskContainer.getMainExecutors().get(instance);

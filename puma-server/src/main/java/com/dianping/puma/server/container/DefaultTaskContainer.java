@@ -1,10 +1,13 @@
 package com.dianping.puma.server.container;
 
+import com.dianping.puma.core.model.Table;
+import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.core.registry.RegistryService;
 import com.dianping.puma.instance.InstanceManager;
 import com.dianping.puma.server.builder.TaskBuilder;
 import com.dianping.puma.server.server.TaskServerManager;
 import com.dianping.puma.status.SystemStatusManager;
+import com.dianping.puma.storage.EventStorage;
 import com.dianping.puma.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.storage.manage.DatabaseStorageManager;
 import com.dianping.puma.taskexecutor.TaskExecutor;
@@ -42,9 +45,27 @@ public class DefaultTaskContainer implements TaskContainer {
 	@Autowired
 	TaskBuilder taskBuilder;
 
+	public static DefaultTaskContainer instance;
+
 	private ExecutorService pool = Executors.newCachedThreadPool();
 
 	private Map<String, TaskExecutor> taskExecutors = new HashMap<String, TaskExecutor>();
+
+	@Override
+	public EventStorage getTaskStorage(String database) {
+		for (TaskExecutor taskExecutor : taskExecutors.values()) {
+			TableSet tableSet = taskExecutor.getTask().getTableSet();
+			List<Table> tables = tableSet.listSchemaTables();
+
+			for (Table table : tables) {
+				if (table.getSchemaName().equals(database)) {
+					return taskExecutor.getFileSender().get(0).getStorage(database);
+				}
+			}
+		}
+
+		return null;
+	}
 
 	@Override
 	public Map<String, DatabaseTask> getDatabaseTasks() {
@@ -210,6 +231,30 @@ public class DefaultTaskContainer implements TaskContainer {
 		registerTask(newTaskExecutor);
 	}
 
+	public void upgrade(TaskExecutor taskExecutor) {
+		logger.info("start upgrading task executor...");
+
+		InstanceTask instanceTask = taskExecutor.getInstanceTask();
+		if (instanceTask.isMain()) {
+			return;
+		}
+
+		stop(taskExecutor);
+		String oriTaskName = instanceTask.getTaskName();
+		unregisterTask(oriTaskName);
+
+		instanceTask.temp2Main();
+		String taskName = instanceTask.getTaskName();
+		binlogInfoHolder.rename(oriTaskName, taskName);
+		binlogInfoHolder.remove(oriTaskName);
+
+		TaskExecutor newTaskExecutor = taskBuilder.build(instanceTask);
+		start(newTaskExecutor);
+		registerTask(newTaskExecutor);
+
+		logger.info("success to upgrade task executor.");
+	}
+
 	protected void add(TaskExecutor taskExecutor) {
 		InstanceTask instanceTask = taskExecutor.getInstanceTask();
 		if (instanceTask != null) {
@@ -263,6 +308,8 @@ public class DefaultTaskContainer implements TaskContainer {
 		for (String database: databases) {
 			taskExecutors.remove(database);
 		}
+
+		SystemStatusManager.deleteServer(taskName);
 	}
 
 	protected void clearDatabase(String database) {
@@ -270,7 +317,6 @@ public class DefaultTaskContainer implements TaskContainer {
 	}
 
 	protected void clearTask(String taskName) {
-		SystemStatusManager.deleteServer(taskName);
 		binlogInfoHolder.remove(taskName);
 	}
 
@@ -293,7 +339,7 @@ public class DefaultTaskContainer implements TaskContainer {
 		return instanceManager.getClusterByDb(database);
 	}
 
-	protected void start(final TaskExecutor taskExecutor) {
+	public void start(final TaskExecutor taskExecutor) {
 		if (taskExecutor == null) {
 			throw new NullPointerException("task executor");
 		}
@@ -314,7 +360,7 @@ public class DefaultTaskContainer implements TaskContainer {
 		}
 	}
 
-	protected void stop(final TaskExecutor taskExecutor) {
+	public void stop(final TaskExecutor taskExecutor) {
 		if (taskExecutor == null) {
 			throw new NullPointerException("task executor");
 		}

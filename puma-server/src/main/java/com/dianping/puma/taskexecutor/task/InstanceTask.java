@@ -61,6 +61,11 @@ public class InstanceTask {
 		return databaseTasks;
 	}
 
+	public void temp2Main() {
+		main = true;
+		taskName = instance;
+	}
+
 	public boolean contains(String database) {
 		for (DatabaseTask databaseTask: databaseTasks) {
 			if (databaseTask.getDatabase().equals(database)) {
@@ -68,6 +73,14 @@ public class InstanceTask {
 			}
 		}
 		return false;
+	}
+
+	public void merge(InstanceTask instanceTask) {
+		if (instanceTask != null) {
+			for (DatabaseTask databaseTask: instanceTask.getDatabaseTasks()) {
+				create(databaseTask);
+			}
+		}
 	}
 
 	public void create(DatabaseTask task) {

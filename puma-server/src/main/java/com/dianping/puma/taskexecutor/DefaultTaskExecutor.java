@@ -36,7 +36,6 @@ import com.dianping.puma.server.exception.ServerEventFetcherException;
 import com.dianping.puma.server.exception.ServerEventParserException;
 import com.dianping.puma.server.exception.ServerEventRuntimeException;
 import com.dianping.puma.status.SystemStatusManager;
-import com.dianping.puma.taskexecutor.change.TargetChangedEvent;
 import com.dianping.puma.taskexecutor.task.InstanceTask;
 import com.dianping.zebra.util.JDBCUtils;
 import com.google.common.base.Joiner;
@@ -44,7 +43,6 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
-import com.google.common.eventbus.Subscribe;
 import jodd.util.collection.SortedArrayList;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -87,15 +85,32 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
     private InstanceTask instanceTask;
 
+    private boolean merging = false;
+
+    private long runUntilTimestamp;
+
     public DefaultTaskExecutor() {
         DefaultEventBus.INSTANCE.register(this);
     }
 
-    @Subscribe
-    public void listenTargetChangedEvent(TargetChangedEvent event) {
-        if (event.getTaskName().equals(taskName)) {
-            tableSet = event.getTableSet();
-            SystemStatusManager.updateServer(getTaskName(), currentSrcDbEntity.getHost(), currentSrcDbEntity.getPort(), tableSet);
+    @Override
+    public boolean isMerging() {
+        return merging;
+    }
+
+    @Override
+    public void stopUntil(long runUntilTimestamp) {
+        merging = true;
+        this.runUntilTimestamp = runUntilTimestamp;
+    }
+
+    @Override
+    public void cancelStopUntil() {
+        if (isMerging()) {
+            merging = false;
+            if (isStop()) {
+                start();
+            }
         }
     }
 
@@ -105,6 +120,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
         long failCount = 0;
         boolean canStop = false;
+        merging = false;
         do {
             try {
                 loadServerId(instanceManager.getUrlByCluster(instanceTask.getInstance()));
@@ -445,6 +461,12 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
     protected void processBinlogPacket(BinlogPacket binlogPacket) throws IOException {
         BinlogEvent binlogEvent = parser.parse(binlogPacket.getBinlogBuf(), getContext());
 
+        if (merging) {
+            if (binlogEvent.getHeader().getTimestamp() >= runUntilTimestamp) {
+                stop();
+            }
+        }
+
         SystemStatusManager.incServerParsedCounter(getTaskName());
 
         if (binlogEvent.getHeader().getEventType() == BinlogConstants.INTVAR_EVENT
@@ -492,6 +514,10 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                     .getHeader().getNextPosition(), 0, 0));
         }
 
+        BinlogInfo binlogInfo = new BinlogInfo(getContext().getDBServerId(), getContext()
+                .getBinlogFileName(), binlogEvent.getHeader().getNextPosition(), 0, binlogEvent.getHeader().getTimestamp());
+        SystemStatusManager.updateServerBinlog(getTaskName(), binlogInfo);
+
         if (binlogEvent.getHeader().getNextPosition() != 0
                 && StringUtils.isNotBlank(getContext().getBinlogFileName())
                 && dataHandlerResult != null
@@ -499,10 +525,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 && (dataHandlerResult.getData() instanceof DdlEvent || (dataHandlerResult.getData() instanceof RowChangedEvent && ((RowChangedEvent) dataHandlerResult
                 .getData()).isTransactionCommit()))) {
 
-            BinlogInfo binlogInfo = new BinlogInfo(getContext().getDBServerId(), getContext()
-                    .getBinlogFileName(), binlogEvent.getHeader().getNextPosition(), 0, binlogEvent.getHeader().getTimestamp());
+
             binlogInfoHolder.setBinlogInfo(getTaskName(), binlogInfo);
-            SystemStatusManager.updateServerBinlog(getTaskName(), binlogInfo);
         }
     }
 

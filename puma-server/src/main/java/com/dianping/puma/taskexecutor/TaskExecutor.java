@@ -31,6 +31,12 @@ public interface TaskExecutor extends LifeCycle<Exception> {
 
 	boolean isStop();
 
+	public boolean isMerging();
+
+	public void stopUntil(long timestamp);
+
+	public void cancelStopUntil();
+
 	public PumaTaskEntity getTask();
 
 	public void setTask(PumaTaskEntity pumaTask);

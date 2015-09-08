@@ -140,7 +140,7 @@ public class ScheduledTaskChecker implements TaskChecker {
 
     protected void check0() {
         Map<String, DatabaseTask> databaseTasks = loadDatabaseTasks();
-        Map<String, DatabaseTask> oriDatabaseTasks = taskContainer.getAll();
+        Map<String, DatabaseTask> oriDatabaseTasks = taskContainer.getDatabaseTasks();
 
         MapDifference<String, DatabaseTask> difference = Maps.difference(oriDatabaseTasks, databaseTasks);
 

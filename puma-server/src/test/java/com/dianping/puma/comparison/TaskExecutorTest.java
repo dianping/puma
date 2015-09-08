@@ -48,7 +48,7 @@ public class TaskExecutorTest {
 		target.setTargetDs(targetDs);
 
 		target.setColumns(Sets.newHashSet("*"));
-		target.setLastTime(new Date(1441036800000l));
+		target.setLastTime(new Date(1430956800000l));
 		target.setKeys(Sets.newHashSet("AddTime", "OrderID"));
 
 		target.start();

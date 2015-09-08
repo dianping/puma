@@ -1,9 +1,12 @@
 package com.dianping.puma.comparison;
 
+import com.google.common.base.Equivalence;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.MapDifference;
+import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -34,9 +37,15 @@ public class TaskExecutor {
 
 	private volatile Set<String> columns;
 
+	private volatile String primaryKeyName = "ID";
+
+	private volatile String updateTimeKeyName = "UpdateTime";
+
 	private volatile Set<String> keys;
 
 	private volatile Date lastTime;
+
+	private volatile long lastId;
 
 	private volatile boolean stoped = true;
 
@@ -46,7 +55,7 @@ public class TaskExecutor {
 
 	protected final BlockingQueue<RowContext> targetDsQueue = new LinkedBlockingQueue<RowContext>(1000);
 
-	private final ExecutorService threadPool = Executors.newFixedThreadPool(4);
+	private final ExecutorService threadPool = Executors.newFixedThreadPool(6);
 
 	public void start() {
 		if (!stoped) {
@@ -56,6 +65,8 @@ public class TaskExecutor {
 
 		threadPool.submit(new RetryWorker());
 		threadPool.submit(new SourceFetcher());
+		threadPool.submit(new TargetFetcher());
+		threadPool.submit(new TargetFetcher());
 		threadPool.submit(new TargetFetcher());
 		threadPool.submit(new ComparisonWorker());
 
@@ -82,114 +93,128 @@ public class TaskExecutor {
 	public class SourceFetcher implements Runnable {
 
 		@Override public void run() {
-			Thread.currentThread().setName("SourceFetcher-" + sourceTable);
+			try {
+				Thread.currentThread().setName("SourceFetcher-" + sourceTable);
 
-			JdbcTemplate template = new JdbcTemplate(sourceDs);
-			template.setIgnoreWarnings(true);
-			int fetchMinute = 5;
-			String sql = String.format("select %s from %s where updatetime >= ? and updatetime < ?",
-				Joiner.on(",").join(columns), sourceTable);
+				JdbcTemplate template = new JdbcTemplate(sourceDs);
+				template.setIgnoreWarnings(true);
+				String sql = String
+					.format("select %s from %s where %s >= ? and %s < now() - INTERVAL 10 MINUTE and %s > ? limit 1000",
+						Joiner.on(",").join(columns), sourceTable, updateTimeKeyName, updateTimeKeyName,
+						primaryKeyName);
 
-			while (true) {
-				if (new Date().getTime() - lastTime.getTime() < fetchMinute * 60 * 1000 * 2) {
+				while (true) {
+					List<Map<String, Object>> rows;
 					try {
-						Thread.sleep(60 * 1000);
-					} catch (InterruptedException ignore) {
-						return;
+						rows = template.queryForList(sql, lastTime, lastId);
+					} catch (Exception e) {
+						LOG.error("Fetch source failed!", e);
+						continue;
 					}
-					continue;
-				}
 
-				Date newTime = new Date(lastTime.getTime() + fetchMinute * 60 * 1000);
-				List<Map<String, Object>> rows;
-				try {
-					rows = template.queryForList(sql, lastTime, newTime);
-					lastTime = newTime;
-				} catch (Exception e) {
-					LOG.error("Fetch source failed!", e);
-					continue;
-				}
-
-				fetchMinute = Math.min(15, Math.max(1, fetchMinute * 1000 / (rows.size() + 1)));
-				for (Map<String, Object> row : rows) {
-					RowContext context = new RowContext();
-					context.setSource(row);
-
-					try {
+					for (Map<String, Object> row : rows) {
+						RowContext context = new RowContext();
+						context.setSource(row);
 						sourceDsQueue.put(context);
-					} catch (InterruptedException ignore) {
-						return;
+					}
+
+					if (rows.size() > 0) {
+						lastId = ((Number) rows.get(rows.size() - 1).get(primaryKeyName)).longValue();
+						lastTime = (Date) rows.get(rows.size() - 1).get(updateTimeKeyName);
+					} else {
+						Thread.sleep(60 * 1000);
 					}
 				}
+			} catch (InterruptedException ignore) {
+			} catch (Exception e) {
+				LOG.error(e.getMessage(), e);
 			}
 		}
 	}
 
 	public class TargetFetcher implements Runnable {
 		@Override public void run() {
-			Thread.currentThread().setName("TargetFetcher-" + targetTable);
+			try {
+				Thread.currentThread().setName("TargetFetcher-" + targetTable);
 
-			JdbcTemplate template = new JdbcTemplate(targetDs);
-			template.setIgnoreWarnings(true);
-			LinkedList<String> orderedKeys = Lists.newLinkedList(keys);
+				JdbcTemplate template = new JdbcTemplate(targetDs);
+				template.setIgnoreWarnings(true);
+				LinkedList<String> orderedKeys = Lists.newLinkedList(keys);
 
-			String sql = String.format("select %s from %s where %s limit 1",
-				Joiner.on(",").join(columns), targetTable,
-				Joiner.on(" and ").join(FluentIterable.from(orderedKeys).transform(new Function<String, String>() {
-					@Override public String apply(String input) {
-						return input + " = ?";
-					}
-				})));
+				String sql = String.format("select %s from %s where %s limit 1",
+					Joiner.on(",").join(columns), targetTable,
+					Joiner.on(" and ").join(FluentIterable.from(orderedKeys).transform(new Function<String, String>() {
+						@Override public String apply(String input) {
+							return input + " = ?";
+						}
+					})));
 
-			while (true) {
-				final RowContext context;
-				try {
+				while (true) {
+					final RowContext context;
 					context = sourceDsQueue.take();
-				} catch (InterruptedException ignore) {
-					break;
-				}
 
-				Object[] args = FluentIterable.from(orderedKeys).transform(new Function<String, Object>() {
-					@Override public Object apply(String input) {
-						return context.getSource().get(input);
-					}
-				}).toArray(Object.class);
+					Object[] args = FluentIterable.from(orderedKeys).transform(new Function<String, Object>() {
+						@Override public Object apply(String input) {
+							return context.getSource().get(input);
+						}
+					}).toArray(Object.class);
 
-				try {
-					List<Map<String, Object>> rows = template.queryForList(sql, args);
-					context.setTarget(rows.size() == 0 ? null : rows.get(0));
-				} catch (Exception e) {
-					LOG.error("Fetch target failed!", e);
-					context.setLastRetryTime(new Date().getTime());
-					context.increaseTryTimes();
 					try {
+						List<Map<String, Object>> rows = template.queryForList(sql, args);
+						context.setTarget(rows.size() == 0 ? new HashMap<String, Object>() : rows.get(0));
+					} catch (Exception e) {
+						LOG.error("Fetch target failed!", e);
+						context.setLastRetryTime(new Date().getTime());
+						context.increaseTryTimes();
 						retryQueue.put(context);
-					} catch (InterruptedException ignore) {
-						return;
 					}
-				}
 
-				try {
 					targetDsQueue.put(context);
-				} catch (InterruptedException ignore) {
-					return;
 				}
+			} catch (InterruptedException ignore) {
+			} catch (Exception e) {
+				LOG.error(e.getMessage(), e);
 			}
 		}
 	}
 
 	public class ComparisonWorker implements Runnable {
-
 		@Override public void run() {
-			long fetchSize = 0;
-
-			while (true) {
-				try {
+			try {
+				while (true) {
 					RowContext item = targetDsQueue.take();
-					System.out.println(++fetchSize);
-				} catch (InterruptedException ignore) {
-					break;
+
+					Map<String, Object> source = item.getSource();
+					source.remove(primaryKeyName);
+					Map<String, Object> target = item.getTarget();
+					target.remove(primaryKeyName);
+
+					MapDifference<String, Object> result = Maps
+						.difference(source, target, new Equivalence<Object>() {
+							@Override protected boolean doEquivalent(Object a, Object b) {
+								if (a == null || b == null) {
+									return a == null && b == null ? true : false;
+								}
+
+								if (a instanceof byte[]) {
+									return Arrays.equals((byte[]) a, (byte[]) b);
+								}
+
+								return a.equals(b);
+							}
+
+							@Override protected int doHash(Object o) {
+								return o.hashCode();
+							}
+						});
+
+					if (!result.areEqual()) {
+						System.out.println("'" + item.getSource().get("OrderID") + "',");
+					}
 				}
+			} catch (InterruptedException ignore) {
+			} catch (Exception e) {
+				LOG.error(e.getMessage(), e);
 			}
 		}
 	}
@@ -224,5 +249,13 @@ public class TaskExecutor {
 
 	public void setLastTime(Date lastTime) {
 		this.lastTime = lastTime;
+	}
+
+	public void setUpdateTimeKeyName(String updateTimeKeyName) {
+		this.updateTimeKeyName = updateTimeKeyName;
+	}
+
+	public void setPrimaryKeyName(String primaryKeyName) {
+		this.primaryKeyName = primaryKeyName;
 	}
 }

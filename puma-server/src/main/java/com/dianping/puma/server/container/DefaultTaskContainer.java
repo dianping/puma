@@ -68,6 +68,11 @@ public class DefaultTaskContainer implements TaskContainer {
 	}
 
 	@Override
+	public TaskExecutor getExecutor(String database) {
+		return taskExecutors.get(database);
+	}
+
+	@Override
 	public Map<String, DatabaseTask> getDatabaseTasks() {
 		Map<String, DatabaseTask> databaseTaskMap = new HashMap<String, DatabaseTask>();
 		for (TaskExecutor taskExecutor: taskExecutors.values()) {

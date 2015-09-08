@@ -1,11 +1,13 @@
 package com.dianping.puma.server.checker;
 
 import com.dianping.puma.biz.entity.PumaServerTargetEntity;
+import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.biz.service.PumaServerTargetService;
 import com.dianping.puma.instance.InstanceManager;
 import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.server.server.TaskServerManager;
 import com.dianping.puma.storage.manage.InstanceStorageManager;
+import com.dianping.puma.taskexecutor.TaskExecutor;
 import com.dianping.puma.taskexecutor.task.DatabaseTask;
 import com.dianping.puma.taskexecutor.task.InstanceTask;
 import com.google.common.collect.MapDifference;
@@ -40,6 +42,8 @@ public class ScheduledTaskChecker implements TaskChecker {
 
     @Autowired
     InstanceManager instanceManager;
+
+    private Map<String, Set<SrcDbEntity>> sources = new HashMap<String, Set<SrcDbEntity>>();
 
     protected Map<String, DatabaseTask> loadDatabaseTasks() {
         List<PumaServerTargetEntity> pumaServerTargets
@@ -103,6 +107,7 @@ public class ScheduledTaskChecker implements TaskChecker {
     protected void handleCreatedDatabaseTask(Map<String, DatabaseTask> createdDatabaseTasks) {
         for (Map.Entry<String, DatabaseTask> entry: createdDatabaseTasks.entrySet()) {
             DatabaseTask databaseTask = entry.getValue();
+            addSource(databaseTask.getDatabase());
             try {
                 taskContainer.create(databaseTask);
             } catch (Throwable t) {
@@ -114,6 +119,7 @@ public class ScheduledTaskChecker implements TaskChecker {
     protected void handleRemovedDatabaseTask(Map<String, DatabaseTask> removedDatabaseTasks) {
         for (Map.Entry<String, DatabaseTask> entry: removedDatabaseTasks.entrySet()) {
             String database = entry.getKey();
+            removeSource(database);
             try {
                 taskContainer.remove(database);
             } catch (Throwable t) {
@@ -131,6 +137,51 @@ public class ScheduledTaskChecker implements TaskChecker {
                 logger.error("failed to update task.", t);
             }
         }
+    }
+
+    protected void handleCommonDatabaseTask(Map<String, DatabaseTask> commonDatabaseTasks) {
+        for (Map.Entry<String, DatabaseTask> entry: commonDatabaseTasks.entrySet()) {
+            String database = entry.getKey();
+            if (checkSource(database)) {
+                TaskExecutor taskExecutor = taskContainer.getExecutor(database);
+                if (taskExecutor != null) {
+                    taskContainer.stop(taskExecutor);
+                    taskContainer.start(taskExecutor);
+                }
+            }
+        }
+    }
+
+    protected void addSource(String database) {
+        String instance = instanceManager.getClusterByDb(database);
+        if (instance != null) {
+            Set<SrcDbEntity> srcDbEntities = instanceManager.getUrlByCluster(instance);
+            if (srcDbEntities != null) {
+                sources.put(database, srcDbEntities);
+            }
+        }
+    }
+
+    protected void removeSource(String database) {
+        sources.remove(database);
+    }
+
+    protected boolean checkSource(String database) {
+        String instance = instanceManager.getClusterByDb(database);
+        if (instance != null) {
+            Set<SrcDbEntity> oriSrcDbEntities = sources.get(instance);
+            Set<SrcDbEntity> srcDbEntities = instanceManager.getUrlByCluster(instance);
+            if (oriSrcDbEntities != null) {
+                if (!oriSrcDbEntities.equals(srcDbEntities)) {
+                    return true;
+                }
+            } else {
+                if (srcDbEntities != null) {
+                    sources.put(database, srcDbEntities);
+                }
+            }
+        }
+        return false;
     }
 
     protected void checkInit() {
@@ -154,10 +205,12 @@ public class ScheduledTaskChecker implements TaskChecker {
                     }
                 }
         );
+        Map<String, DatabaseTask> commonDatabaseTasks = difference.entriesInCommon();
 
         handleCreatedDatabaseTask(createdDatabaseTasks);
         handleRemovedDatabaseTask(removedDatabaseTasks);
         handleUpdatedDatabaseTask(updatedDatabaseTasks);
+        handleCommonDatabaseTask(commonDatabaseTasks);
     }
 
     @Override

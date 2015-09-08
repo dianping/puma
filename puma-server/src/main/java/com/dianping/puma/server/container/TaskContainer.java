@@ -33,4 +33,6 @@ public interface TaskContainer {
 	public void start(TaskExecutor taskExecutor);
 
 	public void stop(TaskExecutor taskExecutor);
+
+	public TaskExecutor getExecutor(String database);
 }

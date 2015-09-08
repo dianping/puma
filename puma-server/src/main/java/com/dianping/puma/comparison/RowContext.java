@@ -11,9 +11,11 @@ public class RowContext {
 
 	private volatile long lastRetryTime;
 
-	private volatile Map<String,Object> source;
+	private volatile Map<String, Object> source;
 
-	private volatile Map<String,Object> target;
+	private volatile Map<String, Object> target;
+
+	private volatile int tryTimes;
 
 	public Map<String, Object> getSource() {
 		return source;
@@ -37,5 +39,13 @@ public class RowContext {
 
 	public void setLastRetryTime(long lastRetryTime) {
 		this.lastRetryTime = lastRetryTime;
+	}
+
+	public int getTryTimes() {
+		return tryTimes;
+	}
+
+	public void increaseTryTimes() {
+		this.tryTimes++;
 	}
 }

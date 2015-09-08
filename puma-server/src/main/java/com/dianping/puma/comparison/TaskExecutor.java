@@ -1,13 +1,15 @@
 package com.dianping.puma.comparison;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,6 +21,8 @@ import java.util.concurrent.LinkedBlockingQueue;
  * http://www.dozer.cc
  */
 public class TaskExecutor {
+
+	private static final Logger LOG = LoggerFactory.getLogger(TaskExecutor.class);
 
 	private volatile DataSource sourceDs;
 
@@ -78,8 +82,13 @@ public class TaskExecutor {
 	public class SourceFetcher implements Runnable {
 
 		@Override public void run() {
+			Thread.currentThread().setName("SourceFetcher-" + sourceTable);
+
 			JdbcTemplate template = new JdbcTemplate(sourceDs);
+			template.setIgnoreWarnings(true);
 			int fetchMinute = 5;
+			String sql = String.format("select %s from %s where updatetime >= ? and updatetime < ?",
+				Joiner.on(",").join(columns), sourceTable);
 
 			while (true) {
 				if (new Date().getTime() - lastTime.getTime() < fetchMinute * 60 * 1000 * 2) {
@@ -92,15 +101,16 @@ public class TaskExecutor {
 				}
 
 				Date newTime = new Date(lastTime.getTime() + fetchMinute * 60 * 1000);
-				List<Map<String, Object>> rows = template.queryForList(
-					String.format("select %s from %s where updatetime >= ? and updatetime < ?",
-						Joiner.on(",").join(columns), sourceTable),
-					lastTime, newTime);
-
-				lastTime = newTime;
+				List<Map<String, Object>> rows;
+				try {
+					rows = template.queryForList(sql, lastTime, newTime);
+					lastTime = newTime;
+				} catch (Exception e) {
+					LOG.error("Fetch source failed!", e);
+					continue;
+				}
 
 				fetchMinute = Math.min(15, Math.max(1, fetchMinute * 1000 / (rows.size() + 1)));
-
 				for (Map<String, Object> row : rows) {
 					RowContext context = new RowContext();
 					context.setSource(row);
@@ -116,10 +126,54 @@ public class TaskExecutor {
 	}
 
 	public class TargetFetcher implements Runnable {
-
 		@Override public void run() {
-			while (true) {
+			Thread.currentThread().setName("TargetFetcher-" + targetTable);
 
+			JdbcTemplate template = new JdbcTemplate(targetDs);
+			template.setIgnoreWarnings(true);
+			LinkedList<String> orderedKeys = Lists.newLinkedList(keys);
+
+			String sql = String.format("select %s from %s where %s limit 1",
+				Joiner.on(",").join(columns), targetTable,
+				Joiner.on(" and ").join(FluentIterable.from(orderedKeys).transform(new Function<String, String>() {
+					@Override public String apply(String input) {
+						return input + " = ?";
+					}
+				})));
+
+			while (true) {
+				final RowContext context;
+				try {
+					context = sourceDsQueue.take();
+				} catch (InterruptedException ignore) {
+					break;
+				}
+
+				Object[] args = FluentIterable.from(orderedKeys).transform(new Function<String, Object>() {
+					@Override public Object apply(String input) {
+						return context.getSource().get(input);
+					}
+				}).toArray(Object.class);
+
+				try {
+					List<Map<String, Object>> rows = template.queryForList(sql, args);
+					context.setTarget(rows.size() == 0 ? null : rows.get(0));
+				} catch (Exception e) {
+					LOG.error("Fetch target failed!", e);
+					context.setLastRetryTime(new Date().getTime());
+					context.increaseTryTimes();
+					try {
+						retryQueue.put(context);
+					} catch (InterruptedException ignore) {
+						return;
+					}
+				}
+
+				try {
+					targetDsQueue.put(context);
+				} catch (InterruptedException ignore) {
+					return;
+				}
 			}
 		}
 	}
@@ -127,8 +181,15 @@ public class TaskExecutor {
 	public class ComparisonWorker implements Runnable {
 
 		@Override public void run() {
-			while (true) {
+			long fetchSize = 0;
 
+			while (true) {
+				try {
+					RowContext item = targetDsQueue.take();
+					System.out.println(++fetchSize);
+				} catch (InterruptedException ignore) {
+					break;
+				}
 			}
 		}
 	}

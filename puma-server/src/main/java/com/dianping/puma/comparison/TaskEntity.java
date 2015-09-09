@@ -7,43 +7,143 @@ package com.dianping.puma.comparison;
  */
 public class TaskEntity {
 
-    private String targetDataSourceBuilder;
+    private String comparison;
 
-    private String targetDataSourceBuilderProp;
+    private String comparisonProp;
 
-    private String sourceDataSourceBuilder;
+    private String sourceFetcher;
 
-    private String sourceDataSourceBuilderProp;
+    private String sourceFetcherProp;
 
-    public String getSourceDataSourceBuilder() {
-        return sourceDataSourceBuilder;
+    private String targetFetcher;
+
+    private String targetFetcherProp;
+
+    private String mapper;
+
+    private String mapperProp;
+
+    private String reporter;
+
+    private String reporterProp;
+
+    private String targetDsBuilder;
+
+    private String targetDsBuilderProp;
+
+    private String sourceDsBuilder;
+
+    private String sourceDsBuilderProp;
+
+    public String getSourceDsBuilder() {
+        return sourceDsBuilder;
     }
 
-    public void setSourceDataSourceBuilder(String sourceDataSourceBuilder) {
-        this.sourceDataSourceBuilder = sourceDataSourceBuilder;
+    public void setSourceDsBuilder(String sourceDsBuilder) {
+        this.sourceDsBuilder = sourceDsBuilder;
     }
 
-    public String getSourceDataSourceBuilderProp() {
-        return sourceDataSourceBuilderProp;
+    public String getSourceDsBuilderProp() {
+        return sourceDsBuilderProp;
     }
 
-    public void setSourceDataSourceBuilderProp(String sourceDataSourceBuilderProp) {
-        this.sourceDataSourceBuilderProp = sourceDataSourceBuilderProp;
+    public void setSourceDsBuilderProp(String sourceDsBuilderProp) {
+        this.sourceDsBuilderProp = sourceDsBuilderProp;
     }
 
-    public String getTargetDataSourceBuilder() {
-        return targetDataSourceBuilder;
+    public String getTargetDsBuilder() {
+        return targetDsBuilder;
     }
 
-    public void setTargetDataSourceBuilder(String targetDataSourceBuilder) {
-        this.targetDataSourceBuilder = targetDataSourceBuilder;
+    public void setTargetDsBuilder(String targetDsBuilder) {
+        this.targetDsBuilder = targetDsBuilder;
     }
 
-    public String getTargetDataSourceBuilderProp() {
-        return targetDataSourceBuilderProp;
+    public String getTargetDsBuilderProp() {
+        return targetDsBuilderProp;
     }
 
-    public void setTargetDataSourceBuilderProp(String targetDataSourceBuilderProp) {
-        this.targetDataSourceBuilderProp = targetDataSourceBuilderProp;
+    public void setTargetDsBuilderProp(String targetDsBuilderProp) {
+        this.targetDsBuilderProp = targetDsBuilderProp;
+    }
+
+    public String getComparison() {
+        return comparison;
+    }
+
+    public void setComparison(String comparison) {
+        this.comparison = comparison;
+    }
+
+    public String getComparisonProp() {
+        return comparisonProp;
+    }
+
+    public void setComparisonProp(String comparisonProp) {
+        this.comparisonProp = comparisonProp;
+    }
+
+    public String getSourceFetcher() {
+        return sourceFetcher;
+    }
+
+    public void setSourceFetcher(String sourceFetcher) {
+        this.sourceFetcher = sourceFetcher;
+    }
+
+    public String getSourceFetcherProp() {
+        return sourceFetcherProp;
+    }
+
+    public void setSourceFetcherProp(String sourceFetcherProp) {
+        this.sourceFetcherProp = sourceFetcherProp;
+    }
+
+    public String getTargetFetcher() {
+        return targetFetcher;
+    }
+
+    public void setTargetFetcher(String targetFetcher) {
+        this.targetFetcher = targetFetcher;
+    }
+
+    public String getTargetFetcherProp() {
+        return targetFetcherProp;
+    }
+
+    public void setTargetFetcherProp(String targetFetcherProp) {
+        this.targetFetcherProp = targetFetcherProp;
+    }
+
+    public String getMapper() {
+        return mapper;
+    }
+
+    public void setMapper(String mapper) {
+        this.mapper = mapper;
+    }
+
+    public String getMapperProp() {
+        return mapperProp;
+    }
+
+    public void setMapperProp(String mapperProp) {
+        this.mapperProp = mapperProp;
+    }
+
+    public String getReporter() {
+        return reporter;
+    }
+
+    public void setReporter(String reporter) {
+        this.reporter = reporter;
+    }
+
+    public String getReporterProp() {
+        return reporterProp;
+    }
+
+    public void setReporterProp(String reporterProp) {
+        this.reporterProp = reporterProp;
     }
 }

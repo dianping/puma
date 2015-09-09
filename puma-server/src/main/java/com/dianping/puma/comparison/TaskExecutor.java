@@ -52,32 +52,32 @@ public class TaskExecutor implements Runnable {
     }
 
     protected Reporter initReporter(TaskEntity task) {
-        return null;
+        return (Reporter) fromClassNameAndJson(task.getReporter(), task.getReporterProp());
     }
 
     protected Comparison initComparison(TaskEntity task) {
-        return null;
+        return (Comparison) fromClassNameAndJson(task.getComparison(), task.getComparisonProp());
     }
 
     protected TargetFetcher initTargetFetcher(TaskEntity task) {
-        return null;
+        return (TargetFetcher) fromClassNameAndJson(task.getTargetFetcher(), task.getTargetFetcherProp());
     }
 
     protected SourceFetcher initSourceFetcher(TaskEntity task) {
-        return null;
+        return (SourceFetcher) fromClassNameAndJson(task.getSourceFetcher(), task.getSourceFetcherProp());
     }
 
     protected RowMapper initRowMapper(TaskEntity task) {
-        return null;
+        return (RowMapper) fromClassNameAndJson(task.getMapper(), task.getMapperProp());
     }
 
     protected DataSource initTargetDataSource(TaskEntity task) {
-        DataSourceBuilder builder = (DataSourceBuilder) fromClassNameAndJson(task.getTargetDataSourceBuilder(), task.getTargetDataSourceBuilderProp());
+        DataSourceBuilder builder = (DataSourceBuilder) fromClassNameAndJson(task.getTargetDsBuilder(), task.getTargetDsBuilderProp());
         return builder.build();
     }
 
     protected DataSource initSourceDataSource(TaskEntity task) {
-        DataSourceBuilder builder = (DataSourceBuilder) fromClassNameAndJson(task.getSourceDataSourceBuilder(), task.getSourceDataSourceBuilderProp());
+        DataSourceBuilder builder = (DataSourceBuilder) fromClassNameAndJson(task.getSourceDsBuilder(), task.getSourceDsBuilderProp());
         return builder.build();
     }
 

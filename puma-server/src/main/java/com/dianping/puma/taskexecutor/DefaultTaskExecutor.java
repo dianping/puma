@@ -21,7 +21,8 @@ import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.model.*;
+import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.datahandler.DataHandlerResult;
 import com.dianping.puma.eventbus.DefaultEventBus;
 import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
@@ -32,9 +33,7 @@ import com.dianping.puma.parser.mysql.UpdateExecutor;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
 import com.dianping.puma.parser.mysql.event.RotateEvent;
 import com.dianping.puma.parser.mysql.packet.*;
-import com.dianping.puma.server.exception.ServerEventFetcherException;
 import com.dianping.puma.server.exception.ServerEventParserException;
-import com.dianping.puma.server.exception.ServerEventRuntimeException;
 import com.dianping.puma.status.SystemStatusManager;
 import com.dianping.puma.taskexecutor.task.InstanceTask;
 import com.dianping.zebra.util.JDBCUtils;
@@ -117,10 +116,12 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
     @Override
     public void doStart() throws Exception {
         Thread.currentThread().setName("DefaultTaskExecutor-" + taskName);
+        SystemStatusManager.addServer(getTaskName(), currentSrcDbEntity.getHost(), currentSrcDbEntity.getPort(),
+                tableSet);
 
         long failCount = 0;
-        boolean canStop = false;
         merging = false;
+
         do {
             try {
                 loadServerId(instanceManager.getUrlByCluster(instanceTask.getInstance()));
@@ -155,41 +156,29 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                     throw new IOException("Connection failed.");
                 }
 
-                canStop = true;
-
                 initConnect();
 
                 initBinlogPosition(binlogInfo);
 
                 if (dumpBinlog()) {
-                    canStop = false;
                     processBinlog();
                 } else {
                     throw new IOException("Binlog dump failed.");
                 }
-            } catch (Throwable e) {
-                if (canStop) {
-                    Cat.logError("Puma.server.failed", new ServerEventFetcherException("TaskName: " + getTaskName(), e));
-                    stopTask();
-                }
-                if (e instanceof RuntimeException) {
-                    Cat.logError("Puma.server.runtimeException", new ServerEventRuntimeException("TaskName: "
-                            + getTaskName(), e));
-                }
-                if (isStop()) {
-                    return;
-                }
+            } catch (Exception e) {
                 if (++failCount % 3 == 0) {
                     this.currentSrcDbEntity = chooseNextSrcDb();
                     updateTableMetaInfoFetcher();
                     failCount = 0;
                 }
-                LOG.error("Exception occurs. taskName: " + getTaskName() + " dbServerId: " + (currentSrcDbEntity == null ? 0 : currentSrcDbEntity.getServerId())
-                        + ". Reconnect...", e);
+                String msg = "Exception occurs. taskName: " + getTaskName() + " dbServerId: " + (currentSrcDbEntity == null ? 0 : currentSrcDbEntity.getServerId())
+                        + ". Reconnect...";
+                LOG.error(msg, e);
+                Cat.logError(msg, e);
 
                 Thread.sleep(((failCount % 10) + 1) * 2000);
             }
-        } while (!isStop());
+        } while (!isStop() && !Thread.interrupted());
 
     }
 
@@ -204,7 +193,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         getContext().setBinlogFileName(binlogInfo.getBinlogFile());
         getContext().setBinlogStartPos(binlogInfo.getBinlogPosition());
         setBinlogInfo(binlogInfo);
-        SystemStatusManager.addServer(getTaskName(), currentSrcDbEntity.getHost(), currentSrcDbEntity.getPort(), tableSet);
         SystemStatusManager.updateServerBinlog(getTaskName(), binlogInfo);
     }
 
@@ -373,7 +361,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
                 if (dumpBinlog()) {
                     while (!isStop()) {
-                        BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(is, PacketType.BINLOG_PACKET,
+                        BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(is,
+                                PacketType.BINLOG_PACKET,
                                 getContext());
 
                         if (!binlogPacket.isOk()) {

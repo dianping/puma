@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.CheckTaskDao">
+
+	<select id="findById" resultType="CheckTaskEntity">
+		SELECT * FROM CheckTask WHERE Id = #{id}
+	</select>
+
+	<select id="findAll" resultType="CheckTaskEntity">
+		SELECT * FROM CheckTask
+	</select>
+
+</mapper>

@@ -2,9 +2,12 @@ package com.dianping.puma.comparison.manager.lock;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
 
-public class DatabaseTaskLock implements Lock {
+public class DatabaseTaskLock implements TaskLock {
+
+	public DatabaseTaskLock(int taskId) {
+
+	}
 
 	@Override public void lock() {
 

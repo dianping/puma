@@ -4,6 +4,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,12 +27,18 @@ public class DefaultRowMapper implements RowMapper {
     }
 
     @Override
-    public Map<String, Object> map(Map<String, Object> row) {
-        return Maps.filterEntries(row, new Predicate<Map.Entry<String, Object>>() {
-            @Override
-            public boolean apply(Map.Entry<String, Object> input) {
-                return mapKey.contains(input.getKey());
-            }
-        });
+    public List<Map<String, Object>> map(List<Map<String, Object>> source) {
+        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+
+        for (Map<String, Object> row : source) {
+            result.add(Maps.filterEntries(row, new Predicate<Map.Entry<String, Object>>() {
+                @Override
+                public boolean apply(Map.Entry<String, Object> input) {
+                    return mapKey.contains(input.getKey());
+                }
+            }));
+        }
+
+        return result;
     }
 }

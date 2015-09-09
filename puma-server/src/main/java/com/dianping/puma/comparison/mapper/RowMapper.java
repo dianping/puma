@@ -1,5 +1,6 @@
 package com.dianping.puma.comparison.mapper;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -10,5 +11,5 @@ import java.util.Map;
  * 用语映射原数据和目标数据
  */
 public interface RowMapper {
-    Map<String, Object> map(Map<String, Object> row);
+    List<Map<String, Object>> map(List<Map<String, Object>> source);
 }

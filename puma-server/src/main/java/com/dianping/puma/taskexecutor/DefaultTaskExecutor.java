@@ -116,11 +116,9 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
     @Override
     public void doStart() throws Exception {
         Thread.currentThread().setName("DefaultTaskExecutor-" + taskName);
-        SystemStatusManager.addServer(getTaskName(), currentSrcDbEntity.getHost(), currentSrcDbEntity.getPort(),
-                tableSet);
-
         long failCount = 0;
         merging = false;
+        SystemStatusManager.addServer(getTaskName(), "", 0, tableSet);
 
         do {
             try {
@@ -193,6 +191,8 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         getContext().setBinlogFileName(binlogInfo.getBinlogFile());
         getContext().setBinlogStartPos(binlogInfo.getBinlogPosition());
         setBinlogInfo(binlogInfo);
+
+        SystemStatusManager.addServer(getTaskName(), currentSrcDbEntity.getHost(), currentSrcDbEntity.getPort(), tableSet);
         SystemStatusManager.updateServerBinlog(getTaskName(), binlogInfo);
     }
 

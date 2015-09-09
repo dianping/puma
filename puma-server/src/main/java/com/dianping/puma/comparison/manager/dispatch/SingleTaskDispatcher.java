@@ -1,7 +1,6 @@
 package com.dianping.puma.comparison.manager.dispatch;
 
 import com.dianping.puma.biz.entity.CheckTaskEntity;
-import com.dianping.puma.comparison.manager.container.TaskContainer;
 import com.dianping.puma.comparison.manager.lock.TaskLock;
 import com.dianping.puma.comparison.manager.lock.TaskLockFactory;
 import com.dianping.puma.comparison.manager.run.TaskRunFutureListener;
@@ -15,40 +14,49 @@ import java.util.List;
 public class SingleTaskDispatcher implements TaskDispatcher {
 
 	@Autowired
-	TaskContainer taskContainer;
-
-	@Autowired
 	TaskRunner taskRunner;
 
 	@Override
 	public void dispatch(List<CheckTaskEntity> checkTasks) {
 		for (CheckTaskEntity checkTask: checkTasks) {
-			int taskId = checkTask.getId();
+			final int taskId = checkTask.getId();
 
-			// Local lock.
-			if (taskContainer.contains(taskId)) {
-				continue;
-			}
+			// Query the local and remote lock.
+			final TaskLock localTaskLock = TaskLockFactory.getNoReentranceTaskLock(taskId);
+			final TaskLock remoteTaskLock = TaskLockFactory.getDatabaseTaskLock(taskId);
 
-			// Remote lock.
-			TaskLock taskLock = TaskLockFactory.getDatabaseTaskLock(taskId);
-			if (!taskLock.tryLock()) {
-				continue;
-			}
-
-			taskContainer.create(checkTask);
-			taskRunner.run(checkTask).addListener(new TaskRunFutureListener() {
-				@Override
-				public void onSuccess(Void result) {
-
+			try {
+				if (!localTaskLock.tryLock()) {
+					continue;
 				}
 
-				@Override
-				public void onFailure(Throwable cause) {
-
+				if (!remoteTaskLock.tryLock()) {
+					localTaskLock.unlock();
+					continue;
 				}
-			});
 
+				taskRunner.run(checkTask).addListener(new TaskRunFutureListener() {
+
+					protected void unlock() {
+						localTaskLock.unlock();
+						remoteTaskLock.unlock();
+					}
+
+					@Override
+					public void onSuccess(Void result) {
+						unlock();
+					}
+
+					@Override
+					public void onFailure(Throwable cause) {
+						unlock();
+					}
+				});
+
+			} catch (Throwable t) {
+				localTaskLock.unlock();
+				remoteTaskLock.unlock();
+			}
 		}
 	}
 }

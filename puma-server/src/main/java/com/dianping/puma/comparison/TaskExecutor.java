@@ -6,19 +6,19 @@ import com.dianping.puma.comparison.datasource.DataSourceBuilder;
 import com.dianping.puma.comparison.fetcher.SourceFetcher;
 import com.dianping.puma.comparison.fetcher.TargetFetcher;
 import com.dianping.puma.comparison.mapper.RowMapper;
-import com.dianping.puma.comparison.reporter.Reporter;
 import com.dianping.puma.core.util.GsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.util.concurrent.Callable;
 
 /**
  * Dozer @ 2015-09
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class TaskExecutor implements Runnable {
+public class TaskExecutor implements Callable<TaskResult> {
 
     private static final Logger LOG = LoggerFactory.getLogger(TaskExecutor.class);
 
@@ -34,8 +34,6 @@ public class TaskExecutor implements Runnable {
 
     private final TargetFetcher targetFetcher;
 
-    private final Reporter reporter;
-
     private final Comparison comparison;
 
     public TaskExecutor(TaskEntity task) {
@@ -48,11 +46,6 @@ public class TaskExecutor implements Runnable {
         this.targetFetcher.init(this.targetDataSource);
         this.rowMapper = initRowMapper(task);
         this.comparison = initComparison(task);
-        this.reporter = initReporter(task);
-    }
-
-    protected Reporter initReporter(TaskEntity task) {
-        return (Reporter) fromClassNameAndJson(task.getReporter(), task.getReporterProp());
     }
 
     protected Comparison initComparison(TaskEntity task) {
@@ -92,6 +85,7 @@ public class TaskExecutor implements Runnable {
     }
 
     @Override
-    public void run() {
+    public TaskResult call() throws Exception {
+        return null;
     }
 }

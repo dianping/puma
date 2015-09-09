@@ -23,10 +23,6 @@ public class TaskEntity {
 
     private String mapperProp;
 
-    private String reporter;
-
-    private String reporterProp;
-
     private String targetDsBuilder;
 
     private String targetDsBuilderProp;
@@ -129,21 +125,5 @@ public class TaskEntity {
 
     public void setMapperProp(String mapperProp) {
         this.mapperProp = mapperProp;
-    }
-
-    public String getReporter() {
-        return reporter;
-    }
-
-    public void setReporter(String reporter) {
-        this.reporter = reporter;
-    }
-
-    public String getReporterProp() {
-        return reporterProp;
-    }
-
-    public void setReporterProp(String reporterProp) {
-        this.reporterProp = reporterProp;
     }
 }

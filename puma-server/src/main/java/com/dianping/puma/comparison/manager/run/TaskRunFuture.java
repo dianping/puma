@@ -31,8 +31,10 @@ public class TaskRunFuture extends FutureTask<Void> {
 					return;
 				}
 
-				//listener.onSuccess();
+				listener.onSuccess(null);
 			}
 		};
+
+		TaskRunFutureThreadPool.execute(runnable);
 	}
 }

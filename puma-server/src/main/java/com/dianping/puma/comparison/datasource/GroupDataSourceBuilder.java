@@ -13,22 +13,12 @@ public class GroupDataSourceBuilder implements DataSourceBuilder {
 
     private String jdbcRef;
 
-    private String tableName;
-
     public String getJdbcRef() {
         return jdbcRef;
     }
 
     public void setJdbcRef(String jdbcRef) {
         this.jdbcRef = jdbcRef;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
     }
 
     @Override

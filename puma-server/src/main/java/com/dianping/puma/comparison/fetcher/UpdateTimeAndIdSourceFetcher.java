@@ -1,5 +1,6 @@
 package com.dianping.puma.comparison.fetcher;
 
+import javax.sql.DataSource;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +10,7 @@ import java.util.Map;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class UpdateTimeAndIdSourceFetcher implements SourceFetcher {
+public class UpdateTimeAndIdSourceFetcher extends AbstractDataFetcher implements SourceFetcher {
 
     @Override
     public void setStartTime(Date time) {
@@ -18,6 +19,11 @@ public class UpdateTimeAndIdSourceFetcher implements SourceFetcher {
 
     @Override
     public void setEndTime(Date time) {
+
+    }
+
+    @Override
+    public void init(DataSource dataSource) {
 
     }
 

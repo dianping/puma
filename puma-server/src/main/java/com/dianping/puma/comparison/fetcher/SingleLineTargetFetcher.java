@@ -10,7 +10,7 @@ import java.util.Map;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class SingleLineTargetFetcher implements TargetFetcher {
+public class SingleLineTargetFetcher extends AbstractDataFetcher implements TargetFetcher {
     @Override
     public List<Map<String, Object>> fetch(List<Map<String, Object>> source) {
         return null;

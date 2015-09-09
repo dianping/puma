@@ -8,7 +8,7 @@ import java.util.Map;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public interface TargetFetcher {
+public interface TargetFetcher extends DataFetcher {
 
     List<Map<String, Object>> fetch(List<Map<String, Object>> columns);
 

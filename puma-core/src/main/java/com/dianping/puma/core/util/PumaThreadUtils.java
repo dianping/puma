@@ -1,12 +1,12 @@
 /**
  * Project: ${puma-common.aid}
- *
+ * <p/>
  * File Created at 2012-6-23
  * $Id$
- *
+ * <p/>
  * Copyright 2010 dianping.com.
  * All rights reserved.
- *
+ * <p/>
  * This software is the confidential and proprietary information of
  * Dianping Company. ("Confidential Information").  You shall not
  * disclose such Confidential Information and shall use it only in
@@ -23,24 +23,29 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public final class PumaThreadUtils {
 
-	private static final String PREFIX = "Puma-thread-";
+    private static final String PREFIX = "Puma-thread-";
 
-	private static ConcurrentHashMap<String, AtomicInteger> taskToSeq = new ConcurrentHashMap<String, AtomicInteger>();
+    private static ConcurrentHashMap<String, AtomicInteger> taskToSeq = new ConcurrentHashMap<String, AtomicInteger>();
 
-	private static ThreadGroup threadGroup = new ThreadGroup("pumaThreadGroup");
+    private static ThreadGroup threadGroup;
 
-	private PumaThreadUtils() {
-	}
+    static {
+        threadGroup = new ThreadGroup("pumaThreadGroup");
+        threadGroup.setDaemon(true);
+    }
 
-	public static ThreadGroup getThreadGroup() {
-		return threadGroup;
-	}
+    private PumaThreadUtils() {
+    }
 
-	public static Thread createThread(Runnable r, String taskName, boolean isDaemon) {
-		taskToSeq.putIfAbsent(taskName, new AtomicInteger(1));
-		Thread t = new Thread(threadGroup, r, PREFIX + taskName + "-" + taskToSeq.get(taskName).getAndIncrement());
-		t.setDaemon(isDaemon);
-		
-		return t;
-	}
+    public static ThreadGroup getThreadGroup() {
+        return threadGroup;
+    }
+
+    public static Thread createThread(Runnable r, String taskName, boolean isDaemon) {
+        taskToSeq.putIfAbsent(taskName, new AtomicInteger(1));
+        Thread t = new Thread(threadGroup, r, PREFIX + taskName + "-" + taskToSeq.get(taskName).getAndIncrement());
+        t.setDaemon(isDaemon);
+
+        return t;
+    }
 }

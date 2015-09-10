@@ -7,23 +7,19 @@ public class CheckTaskEntity {
 
 	private int id;
 
-	private String srcDatabase;
-
-	private String dstDatabase;
-
-	private String srcTable;
-
-	private String dstTable;
-
-	private Map<String, String> columnMapping;
-
 	private Date initTime;
+
+	private Date currTime;
 
 	private Date nextTime;
 
 	private boolean running;
 
 	private String ownerHost;
+
+	private boolean success;
+
+	private String message;
 
 	private Date updateTime;
 
@@ -35,52 +31,20 @@ public class CheckTaskEntity {
 		this.id = id;
 	}
 
-	public String getSrcDatabase() {
-		return srcDatabase;
-	}
-
-	public void setSrcDatabase(String srcDatabase) {
-		this.srcDatabase = srcDatabase;
-	}
-
-	public String getDstDatabase() {
-		return dstDatabase;
-	}
-
-	public void setDstDatabase(String dstDatabase) {
-		this.dstDatabase = dstDatabase;
-	}
-
-	public String getSrcTable() {
-		return srcTable;
-	}
-
-	public void setSrcTable(String srcTable) {
-		this.srcTable = srcTable;
-	}
-
-	public String getDstTable() {
-		return dstTable;
-	}
-
-	public void setDstTable(String dstTable) {
-		this.dstTable = dstTable;
-	}
-
-	public Map<String, String> getColumnMapping() {
-		return columnMapping;
-	}
-
-	public void setColumnMapping(Map<String, String> columnMapping) {
-		this.columnMapping = columnMapping;
-	}
-
 	public Date getInitTime() {
 		return initTime;
 	}
 
 	public void setInitTime(Date initTime) {
 		this.initTime = initTime;
+	}
+
+	public Date getCurrTime() {
+		return currTime;
+	}
+
+	public void setCurrTime(Date currTime) {
+		this.currTime = currTime;
 	}
 
 	public Date getNextTime() {
@@ -105,6 +69,22 @@ public class CheckTaskEntity {
 
 	public void setOwnerHost(String ownerHost) {
 		this.ownerHost = ownerHost;
+	}
+
+	public boolean isSuccess() {
+		return success;
+	}
+
+	public void setSuccess(boolean success) {
+		this.success = success;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
 	public Date getUpdateTime() {

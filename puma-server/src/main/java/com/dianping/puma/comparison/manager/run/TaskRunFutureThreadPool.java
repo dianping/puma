@@ -13,7 +13,7 @@ public class TaskRunFutureThreadPool {
 			@Override
 			public Thread newThread(Runnable runnable) {
 				Thread thread = new Thread(runnable);
-				thread.setName("check-task-run-future");
+				thread.setName("check-task-related-thread");
 				thread.setDaemon(true);
 				return thread;
 			}

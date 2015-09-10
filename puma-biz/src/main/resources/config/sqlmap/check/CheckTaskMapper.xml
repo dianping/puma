@@ -16,14 +16,12 @@
 		UPDATE
 		CheckTask
 		SET
-		CheckTask.SrcDatabase = #{srcDatabase},
-		CheckTask.DstDatabase = #{dstDatabase},
-		CheckTask.SrcTable = #{srcTable},
-		CheckTask.DstTable = #{dstTable},
 		CheckTask.InitTime = #{initTime},
-		CheckTask.NextTime = #{nextTime},
+		CheckTask.CurrTime = #{currTime},
 		CheckTask.Running = #{running},
-		CheckTask.OwnerHost = #{ownerHost}
+		CheckTask.OwnerHost = #{ownerHost},
+		CheckTask.Success = #{success},
+		CheckTask.Message = #{message}
 		WHERE
 		CheckTask.Id = #{id}
 	</update>

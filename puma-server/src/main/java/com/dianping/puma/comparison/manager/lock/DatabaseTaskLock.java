@@ -3,6 +3,7 @@ package com.dianping.puma.comparison.manager.lock;
 import com.dianping.puma.biz.entity.CheckTaskEntity;
 import com.dianping.puma.biz.service.CheckTaskService;
 import com.dianping.puma.comparison.manager.server.TaskServerManager;
+import com.dianping.puma.comparison.manager.utils.ThreadPool;
 import com.google.common.util.concurrent.Uninterruptibles;
 
 import java.util.Date;
@@ -45,7 +46,7 @@ public class DatabaseTaskLock implements TaskLock {
 		checkTaskService.update(checkTask);
 
 		stopped = false;
-		DatabaseTaskLockThreadPool.execute(heartbeatWorker);
+		ThreadPool.execute(heartbeatWorker);
 
 		return true;
 	}

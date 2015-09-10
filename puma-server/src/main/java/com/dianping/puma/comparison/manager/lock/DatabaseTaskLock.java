@@ -20,7 +20,7 @@ public class DatabaseTaskLock implements TaskLock {
 
 	private volatile boolean stopped = false;
 
-	private long lockTimeout = 30; // 30s.
+	protected long lockTimeout = 30; // 30s.
 
 	@Override
 	public void lock() {
@@ -29,26 +29,28 @@ public class DatabaseTaskLock implements TaskLock {
 
 	@Override
 	public boolean tryLock() {
-		CheckTaskEntity tempCheckTask = checkTaskService.findById(checkTask.getId());
-		String host = taskServerManager.findFirstAuthorizedHost();
+		try {
+			checkTask = checkTaskService.findById(checkTask.getId());
+			String host = taskServerManager.findFirstAuthorizedHost();
 
-		if (tempCheckTask.isRunning()
-				&& isTimeout(tempCheckTask.getUpdateTime())
-				&& !host.equals(tempCheckTask.getOwnerHost())) {
+			if (checkTask.isRunning()
+					&& !isTimeout(checkTask.getUpdateTime())
+					&& !host.equals(checkTask.getOwnerHost())) {
+				return false;
+			}
+
+			if (checkTask.isRunning()) {
+				if (isTimeout(checkTask.getUpdateTime())) {
+					return tryLock0();
+				} else {
+					return host.equals(checkTask.getOwnerHost()) && tryLock0();
+				}
+			} else {
+				return tryLock0();
+			}
+		} catch (Throwable t) {
 			return false;
 		}
-
-		tempCheckTask.setRunning(true);
-		tempCheckTask.setOwnerHost(host);
-		tempCheckTask.setUpdateTime(new Date());
-		checkTask = tempCheckTask;
-
-		checkTaskService.update(checkTask);
-
-		stopped = false;
-		ThreadPool.execute(heartbeatWorker);
-
-		return true;
 	}
 
 	@Override public void lockInterruptibly() throws InterruptedException {
@@ -61,23 +63,22 @@ public class DatabaseTaskLock implements TaskLock {
 
 	@Override
 	public void unlock() {
-		CheckTaskEntity tempCheckTask = checkTaskService.findById(checkTask.getId());
+		checkTask = checkTaskService.findById(checkTask.getId());
 		String host = taskServerManager.findFirstAuthorizedHost();
 
-		if (!tempCheckTask.isRunning()
-				|| isTimeout(tempCheckTask.getUpdateTime())
-				|| !host.equals(tempCheckTask.getOwnerHost())) {
+		if (!checkTask.isRunning()
+				|| isTimeout(checkTask.getUpdateTime())
+				|| !host.equals(checkTask.getOwnerHost())) {
 			return;
 		}
 
 		stopped = true;
 
-		tempCheckTask.setRunning(false);
-		tempCheckTask.setOwnerHost(null);
-		tempCheckTask.setUpdateTime(new Date());
-		checkTask = tempCheckTask;
+		checkTask.setRunning(false);
+		checkTask.setOwnerHost(null);
+		checkTask.setUpdateTime(new Date());
 
-		checkTaskService.update(tempCheckTask);
+		checkTaskService.update(checkTask);
 	}
 
 	@Override
@@ -94,6 +95,23 @@ public class DatabaseTaskLock implements TaskLock {
 			}
 		}
 	};
+
+	protected boolean tryLock0() {
+		String host = taskServerManager.findFirstAuthorizedHost();
+
+		checkTask.setRunning(true);
+		checkTask.setOwnerHost(host);
+		checkTask.setUpdateTime(new Date());
+
+		int result = checkTaskService.update(checkTask);
+		if (result == 0) {
+			return false;
+		}
+
+		stopped = false;
+		ThreadPool.execute(heartbeatWorker);
+		return true;
+	}
 
 	protected boolean isTimeout(Date updateTime) {
 		return new Date().getTime() - updateTime.getTime() >= lockTimeout;

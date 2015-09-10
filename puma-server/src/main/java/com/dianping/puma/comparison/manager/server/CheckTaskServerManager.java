@@ -2,7 +2,7 @@ package com.dianping.puma.comparison.manager.server;
 
 import java.util.Collection;
 
-public interface TaskServerManager {
+public interface CheckTaskServerManager {
 
 	public String findFirstAuthorizedHost();
 

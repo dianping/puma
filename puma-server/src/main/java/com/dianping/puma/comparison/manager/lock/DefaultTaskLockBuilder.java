@@ -2,8 +2,8 @@ package com.dianping.puma.comparison.manager.lock;
 
 import com.dianping.puma.biz.entity.CheckTaskEntity;
 import com.dianping.puma.biz.service.CheckTaskService;
-import com.dianping.puma.comparison.manager.container.TaskContainer;
-import com.dianping.puma.comparison.manager.server.TaskServerManager;
+import com.dianping.puma.comparison.manager.container.CheckTaskContainer;
+import com.dianping.puma.comparison.manager.server.CheckTaskServerManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,18 +11,18 @@ import org.springframework.stereotype.Service;
 public class DefaultTaskLockBuilder implements TaskLockBuilder {
 
 	@Autowired
-	TaskContainer taskContainer;
+	CheckTaskContainer checkTaskContainer;
 
 	@Autowired
 	CheckTaskService checkTaskService;
 
 	@Autowired
-	TaskServerManager taskServerManager;
+	CheckTaskServerManager checkTaskServerManager;
 
 	@Override
 	public TaskLock buildLocalLock(CheckTaskEntity checkTask) {
 		NoReentrantTaskLock taskLock = new NoReentrantTaskLock();
-		taskLock.setTaskContainer(taskContainer);
+		taskLock.setCheckTaskContainer(checkTaskContainer);
 		taskLock.setCheckTask(checkTask);
 		return taskLock;
 	}
@@ -31,7 +31,7 @@ public class DefaultTaskLockBuilder implements TaskLockBuilder {
 	public TaskLock buildRemoteLock(CheckTaskEntity checkTask) {
 		DatabaseTaskLock taskLock = new DatabaseTaskLock();
 		taskLock.setCheckTaskService(checkTaskService);
-		taskLock.setTaskServerManager(taskServerManager);
+		taskLock.setCheckTaskServerManager(checkTaskServerManager);
 		taskLock.setCheckTask(checkTask);
 		return taskLock;
 	}

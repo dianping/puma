@@ -3,7 +3,7 @@ package com.dianping.puma.comparison.manager.lock;
 import com.dianping.puma.MockTest;
 import com.dianping.puma.biz.entity.CheckTaskEntity;
 import com.dianping.puma.biz.service.CheckTaskService;
-import com.dianping.puma.comparison.manager.server.TaskServerManager;
+import com.dianping.puma.comparison.manager.server.CheckTaskServerManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -26,18 +26,18 @@ public class DatabaseTaskLockTest extends MockTest {
 	CheckTaskService checkTaskService;
 
 	@Mock
-	TaskServerManager taskServerManager;
+	CheckTaskServerManager checkTaskServerManager;
 
 	@Before
 	public void before() {
 		taskLock.setCheckTask(checkTask);
 		taskLock.setCheckTaskService(checkTaskService);
-		taskLock.setTaskServerManager(taskServerManager);
+		taskLock.setCheckTaskServerManager(checkTaskServerManager);
 	}
 
 	@Test
 	public void testTryLock() throws Exception {
-		doReturn("127.0.0.1").when(taskServerManager).findFirstAuthorizedHost();
+		doReturn("127.0.0.1").when(checkTaskServerManager).findFirstAuthorizedHost();
 		doReturn(1).when(checkTask).getId();
 		doReturn(1).when(checkTaskService).update(any(CheckTaskEntity.class));
 		doReturn(true).when(taskLock).tryLock0();

@@ -2,7 +2,7 @@ package com.dianping.puma.comparison.manager.lock;
 
 import com.dianping.puma.biz.entity.CheckTaskEntity;
 import com.dianping.puma.biz.service.CheckTaskService;
-import com.dianping.puma.comparison.manager.server.TaskServerManager;
+import com.dianping.puma.comparison.manager.server.CheckTaskServerManager;
 import com.dianping.puma.comparison.manager.utils.ThreadPool;
 import com.google.common.util.concurrent.Uninterruptibles;
 
@@ -14,13 +14,13 @@ public class DatabaseTaskLock implements TaskLock {
 
 	private CheckTaskService checkTaskService;
 
-	private TaskServerManager taskServerManager;
+	private CheckTaskServerManager checkTaskServerManager;
 
 	private CheckTaskEntity checkTask;
 
 	private volatile boolean stopped = false;
 
-	protected long lockTimeout = 30; // 30s.
+	protected long lockTimeout = 60 * 1000; // 1 min.
 
 	@Override
 	public void lock() {
@@ -31,7 +31,7 @@ public class DatabaseTaskLock implements TaskLock {
 	public boolean tryLock() {
 		try {
 			checkTask = checkTaskService.findById(checkTask.getId());
-			String host = taskServerManager.findFirstAuthorizedHost();
+			String host = checkTaskServerManager.findFirstAuthorizedHost();
 
 			if (checkTask.isRunning()
 					&& !isTimeout(checkTask.getUpdateTime())
@@ -64,7 +64,7 @@ public class DatabaseTaskLock implements TaskLock {
 	@Override
 	public void unlock() {
 		checkTask = checkTaskService.findById(checkTask.getId());
-		String host = taskServerManager.findFirstAuthorizedHost();
+		String host = checkTaskServerManager.findFirstAuthorizedHost();
 
 		if (!checkTask.isRunning()
 				|| isTimeout(checkTask.getUpdateTime())
@@ -97,7 +97,7 @@ public class DatabaseTaskLock implements TaskLock {
 	};
 
 	protected boolean tryLock0() {
-		String host = taskServerManager.findFirstAuthorizedHost();
+		String host = checkTaskServerManager.findFirstAuthorizedHost();
 
 		checkTask.setRunning(true);
 		checkTask.setOwnerHost(host);
@@ -121,8 +121,8 @@ public class DatabaseTaskLock implements TaskLock {
 		this.checkTaskService = checkTaskService;
 	}
 
-	public void setTaskServerManager(TaskServerManager taskServerManager) {
-		this.taskServerManager = taskServerManager;
+	public void setCheckTaskServerManager(CheckTaskServerManager checkTaskServerManager) {
+		this.checkTaskServerManager = checkTaskServerManager;
 	}
 
 	public void setCheckTask(CheckTaskEntity checkTask) {

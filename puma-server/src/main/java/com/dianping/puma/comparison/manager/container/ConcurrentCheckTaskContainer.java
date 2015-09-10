@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 @Service
-public class DefaultTaskContainer implements TaskContainer {
+public class ConcurrentCheckTaskContainer implements CheckTaskContainer {
 
 	private ConcurrentMap<Integer, CheckTaskEntity> checkTasks = new ConcurrentHashMap<Integer, CheckTaskEntity>();
 

@@ -2,7 +2,7 @@ package com.dianping.puma.comparison.manager.container;
 
 import com.dianping.puma.biz.entity.CheckTaskEntity;
 
-public interface TaskContainer {
+public interface CheckTaskContainer {
 
 	public void create(CheckTaskEntity checkTask);
 

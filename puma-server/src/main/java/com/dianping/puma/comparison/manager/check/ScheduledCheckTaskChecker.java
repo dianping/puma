@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class ScheduledTaskChecker implements TaskChecker {
+public class ScheduledCheckTaskChecker implements CheckTaskChecker {
 
 	@Autowired
 	CheckTaskService checkTaskService;

@@ -1,14 +1,14 @@
 package com.dianping.puma.comparison.manager.lock;
 
 import com.dianping.puma.biz.entity.CheckTaskEntity;
-import com.dianping.puma.comparison.manager.container.TaskContainer;
+import com.dianping.puma.comparison.manager.container.CheckTaskContainer;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 
 public class NoReentrantTaskLock implements TaskLock {
 
-	protected TaskContainer taskContainer;
+	protected CheckTaskContainer checkTaskContainer;
 
 	protected CheckTaskEntity checkTask;
 
@@ -22,10 +22,10 @@ public class NoReentrantTaskLock implements TaskLock {
 
 	@Override
 	public boolean tryLock() {
-		if (taskContainer.contains(checkTask.getId())) {
+		if (checkTaskContainer.contains(checkTask.getId())) {
 			return false;
 		} else {
-			taskContainer.create(checkTask);
+			checkTaskContainer.create(checkTask);
 			return true;
 		}
 	}
@@ -36,15 +36,15 @@ public class NoReentrantTaskLock implements TaskLock {
 
 	@Override
 	public void unlock() {
-		taskContainer.remove(checkTask.getId());
+		checkTaskContainer.remove(checkTask.getId());
 	}
 
 	@Override public Condition newCondition() {
 		return null;
 	}
 
-	public void setTaskContainer(TaskContainer taskContainer) {
-		this.taskContainer = taskContainer;
+	public void setCheckTaskContainer(CheckTaskContainer checkTaskContainer) {
+		this.checkTaskContainer = checkTaskContainer;
 	}
 
 	public void setCheckTask(CheckTaskEntity checkTask) {

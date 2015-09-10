@@ -25,11 +25,15 @@ public class SingleTaskDispatcher implements TaskDispatcher {
 	@Autowired
 	TaskReporter taskReporter;
 
-	private final long checkTimePeriod = 30 * 60; // 30 min.
+	private final long checkTimePeriod = 30 * 60 * 1000; // 30 min.
 
 	@Override
 	public void dispatch(List<CheckTaskEntity> checkTasks) {
 		for (final CheckTaskEntity checkTask: checkTasks) {
+
+			if (!setNextTimeIfEnough(checkTask)) {
+				continue;
+			}
 
 			final TaskLock localTaskLock = taskLockBuilder.buildLocalLock(checkTask);
 			final TaskLock remoteTaskLock = taskLockBuilder.buildRemoteLock(checkTask);
@@ -44,13 +48,10 @@ public class SingleTaskDispatcher implements TaskDispatcher {
 					continue;
 				}
 
-				if (!setNextTimeIfEnough(checkTask)) {
-					continue;
-				}
-
 				taskRunner.run(checkTask).addListener(new TaskRunFutureListener() {
 					@Override
 					public void onSuccess(TaskResult result) {
+						System.out.println("success");
 						taskReporter.report(checkTask, result);
 						localTaskLock.unlock();
 						remoteTaskLock.unlock();
@@ -58,6 +59,7 @@ public class SingleTaskDispatcher implements TaskDispatcher {
 
 					@Override
 					public void onFailure(Throwable cause) {
+						System.out.println("failure");
 						taskReporter.report(checkTask, cause);
 						localTaskLock.unlock();
 						remoteTaskLock.unlock();

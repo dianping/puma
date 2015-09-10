@@ -2,7 +2,7 @@ package com.dianping.puma.comparison.manager.lock;
 
 import com.dianping.puma.MockTest;
 import com.dianping.puma.biz.entity.CheckTaskEntity;
-import com.dianping.puma.comparison.manager.container.TaskContainer;
+import com.dianping.puma.comparison.manager.container.CheckTaskContainer;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -15,7 +15,7 @@ public class NoReentrantTaskLockTest extends MockTest {
 	NoReentrantTaskLock taskLock;
 
 	@Mock
-	TaskContainer taskContainer;
+	CheckTaskContainer checkTaskContainer;
 
 	@Mock
 	CheckTaskEntity checkTask;
@@ -24,19 +24,19 @@ public class NoReentrantTaskLockTest extends MockTest {
 	public void before() {
 		taskLock = new NoReentrantTaskLock();
 		taskLock.setCheckTask(checkTask);
-		taskLock.setTaskContainer(taskContainer);
+		taskLock.setCheckTaskContainer(checkTaskContainer);
 	}
 
 	@Test
 	public void testTryLock() throws Exception {
 		doReturn(1).when(checkTask).getId();
-		doReturn(false).when(taskContainer).contains(1);
+		doReturn(false).when(checkTaskContainer).contains(1);
 		assertTrue(taskLock.tryLock());
-		verify(taskContainer, times(1)).create(checkTask);
+		verify(checkTaskContainer, times(1)).create(checkTask);
 
-		doReturn(true).when(taskContainer).contains(1);
+		doReturn(true).when(checkTaskContainer).contains(1);
 		assertFalse(taskLock.tryLock());
-		verify(taskContainer, times(1)).create(checkTask);
+		verify(checkTaskContainer, times(1)).create(checkTask);
 	}
 
 	@Test
@@ -44,6 +44,6 @@ public class NoReentrantTaskLockTest extends MockTest {
 		doReturn(1).when(checkTask).getId();
 
 		taskLock.unlock();
-		verify(taskContainer, times(1)).remove(1);
+		verify(checkTaskContainer, times(1)).remove(1);
 	}
 }

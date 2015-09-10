@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 
 @Service
-public class DefaultTaskServerManager implements TaskServerManager {
+public class DefaultCheckTaskServerManager implements CheckTaskServerManager {
 
 	@Override
 	public String findFirstAuthorizedHost() {

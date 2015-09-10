@@ -71,6 +71,9 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
                 return event;
             } catch (EOFException e) {
                 try {
+                    if (lastSequence == null) {
+                        return null;
+                    }
                     DataBucket newReadDataBucket = getNextReadBucket(lastSequence);
                     if (newReadDataBucket == null) {
                         return null;

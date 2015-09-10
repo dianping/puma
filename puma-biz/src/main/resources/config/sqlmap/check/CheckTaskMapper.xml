@@ -12,4 +12,20 @@
 		SELECT * FROM CheckTask
 	</select>
 
+	<update id="update" parameterType="CheckTaskEntity">
+		UPDATE
+		CheckTask
+		SET
+		CheckTask.SrcDatabase = #{srcDatabase},
+		CheckTask.DstDatabase = #{dstDatabase},
+		CheckTask.SrcTable = #{srcTable},
+		CheckTask.DstTable = #{dstTable},
+		CheckTask.InitTime = #{initTime},
+		CheckTask.NextTime = #{nextTime},
+		CheckTask.Running = #{running},
+		CheckTask.OwnerHost = #{ownerHost}
+		WHERE
+		CheckTask.Id = #{id}
+	</update>
+
 </mapper>

@@ -23,6 +23,8 @@ public class CheckTaskEntity {
 
 	private boolean running;
 
+	private String ownerHost;
+
 	private Date updateTime;
 
 	public int getId() {
@@ -95,6 +97,14 @@ public class CheckTaskEntity {
 
 	public void setRunning(boolean running) {
 		this.running = running;
+	}
+
+	public String getOwnerHost() {
+		return ownerHost;
+	}
+
+	public void setOwnerHost(String ownerHost) {
+		this.ownerHost = ownerHost;
 	}
 
 	public Date getUpdateTime() {

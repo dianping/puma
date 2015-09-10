@@ -1,8 +1,9 @@
 package com.dianping.puma.comparison.manager.dispatch;
 
 import com.dianping.puma.biz.entity.CheckTaskEntity;
+import com.dianping.puma.comparison.TaskResult;
 import com.dianping.puma.comparison.manager.lock.TaskLock;
-import com.dianping.puma.comparison.manager.lock.TaskLockFactory;
+import com.dianping.puma.comparison.manager.lock.TaskLockBuilder;
 import com.dianping.puma.comparison.manager.run.TaskRunFutureListener;
 import com.dianping.puma.comparison.manager.run.TaskRunner;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +17,15 @@ public class SingleTaskDispatcher implements TaskDispatcher {
 	@Autowired
 	TaskRunner taskRunner;
 
+	@Autowired
+	TaskLockBuilder taskLockBuilder;
+
 	@Override
 	public void dispatch(List<CheckTaskEntity> checkTasks) {
 		for (CheckTaskEntity checkTask: checkTasks) {
-			final int taskId = checkTask.getId();
 
-			// Query the local and remote lock.
-			final TaskLock localTaskLock = TaskLockFactory.getNoReentranceTaskLock(taskId);
-			final TaskLock remoteTaskLock = TaskLockFactory.getDatabaseTaskLock(taskId);
+			final TaskLock localTaskLock = taskLockBuilder.buildLocalLock(checkTask);
+			final TaskLock remoteTaskLock = taskLockBuilder.buildRemoteLock(checkTask);
 
 			try {
 				if (!localTaskLock.tryLock()) {
@@ -43,7 +45,7 @@ public class SingleTaskDispatcher implements TaskDispatcher {
 					}
 
 					@Override
-					public void onSuccess(Void result) {
+					public void onSuccess(TaskResult result) {
 						unlock();
 					}
 

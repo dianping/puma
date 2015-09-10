@@ -104,6 +104,7 @@ public final class TaskExecutor implements Callable<TaskResult> {
             for (SourceTargetPair pair : pairs) {
                 if (!comparison.compare(pair.getSource(), pair.getTarget())) {
                     difference.add(pair);
+                    LOG.info("find difference:" + GsonUtil.toJson(pair));
                 }
             }
         } while (sourceData != null && sourceData.size() > 0);

@@ -12,10 +12,10 @@ import java.util.Map;
  */
 public interface TargetFetcher extends DataFetcher {
 
-    Map<String, Object> fetch(Map<String, Object> columns);
+    boolean isBatch();
 
-    List<Map<String, Object>> fetch(List<Map<String, Object>> columns);
+    SourceTargetPair fetch(Map<String, Object> source, Map<String, Object> condition);
 
-    List<SourceTargetPair> map(List<Map<String, Object>> source, List<Map<String, Object>> target);
+    List<SourceTargetPair> fetch(List<Map<String, Object>> source, List<Map<String, Object>> condition);
 
 }

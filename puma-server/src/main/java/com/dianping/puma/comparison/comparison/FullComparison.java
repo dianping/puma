@@ -15,6 +15,10 @@ import java.util.Map;
 public class FullComparison implements Comparison {
     @Override
     public boolean compare(Map<String, Object> source, Map<String, Object> target) {
+        if (source == null || target == null) {
+            return source == target ? true : false;
+        }
+
         MapDifference<String, Object> result = Maps
                 .difference(source, target, new Equivalence<Object>() {
                     @Override

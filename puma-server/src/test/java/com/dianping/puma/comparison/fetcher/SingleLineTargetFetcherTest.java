@@ -1,7 +1,5 @@
 package com.dianping.puma.comparison.fetcher;
 
-import com.dianping.puma.comparison.model.SourceTargetPair;
-import com.google.common.collect.Lists;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import junit.framework.Assert;
 import org.junit.Before;
@@ -53,7 +51,7 @@ public class SingleLineTargetFetcherTest {
         for (int k = 1; k <= 8888; k++) {
             Map<String, Object> source = new HashMap<String, Object>();
             source.put("ID", k);
-            result.addAll(target.fetch(Lists.newArrayList(source)));
+            result.add(target.fetch(source, source).getTarget());
         }
 
         Assert.assertEquals(8888, result.size());
@@ -63,19 +61,5 @@ public class SingleLineTargetFetcherTest {
             long lastId = ((Number) row.get("ID")).longValue();
             Assert.assertEquals(index++, lastId);
         }
-    }
-
-    @Test
-    public void testMap() throws Exception {
-        List<Map<String, Object>> targetRows = Lists.newArrayList();
-        Map<String, Object> targetRow = new HashMap<String, Object>();
-        targetRow.put("ID", 1);
-        targetRows.add(targetRow);
-
-        List<SourceTargetPair> result = target.map(null, targetRows);
-
-        Assert.assertEquals(1, result.size());
-        Assert.assertEquals(null, result.get(0).getSource());
-        Assert.assertEquals(1, result.get(0).getTarget().get("ID"));
     }
 }

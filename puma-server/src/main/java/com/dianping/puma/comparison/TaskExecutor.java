@@ -59,22 +59,21 @@ public class TaskExecutor implements Callable<TaskResult> {
 
     protected void retry(List<SourceTargetPair> difference) {
         Iterator<SourceTargetPair> iterable = difference.iterator();
+
         while (iterable.hasNext()) {
             SourceTargetPair pair = iterable.next();
 
             Map<String, Object> mappedColumn = rowMapper.mapToSource(pair.getSource());
             Map<String, Object> sourceData = sourceFetcher.retry(mappedColumn);
 
-            Map<String, Object> mappedColumnTarget;
+            SourceTargetPair newPair;
             if (sourceData == null) {
-                mappedColumnTarget = rowMapper.mapToTarget(pair.getSource());
+                newPair = targetFetcher.fetch(pair.getSource(), rowMapper.mapToTarget(pair.getSource()));
             } else {
-                mappedColumnTarget = rowMapper.mapToTarget(sourceData);
+                newPair = targetFetcher.fetch(sourceData, rowMapper.mapToTarget(sourceData));
             }
 
-            Map<String, Object> targetData = targetFetcher.fetch(mappedColumnTarget);
-
-            if (comparison.compare(sourceData, targetData)) {
+            if (comparison.compare(newPair.getSource(), newPair.getTarget())) {
                 iterable.remove();
             }
         }
@@ -84,9 +83,17 @@ public class TaskExecutor implements Callable<TaskResult> {
         List<Map<String, Object>> sourceData;
         do {
             sourceData = sourceFetcher.fetch();
-            List<Map<String, Object>> mappedColumn = rowMapper.mapToTarget(sourceData);
-            List<Map<String, Object>> targetData = targetFetcher.fetch(mappedColumn);
-            List<SourceTargetPair> pairs = targetFetcher.map(sourceData, targetData);
+
+            List<SourceTargetPair> pairs;
+            if (targetFetcher.isBatch()) {
+                List<Map<String, Object>> mappedColumn = rowMapper.mapToTarget(sourceData);
+                pairs = targetFetcher.fetch(sourceData, mappedColumn);
+            } else {
+                pairs = new ArrayList<SourceTargetPair>();
+                for (Map<String, Object> data : sourceData) {
+                    pairs.add(targetFetcher.fetch(data, rowMapper.mapToTarget(data)));
+                }
+            }
 
             for (SourceTargetPair pair : pairs) {
                 if (!comparison.compare(pair.getSource(), pair.getTarget())) {
@@ -119,6 +126,8 @@ public class TaskExecutor implements Callable<TaskResult> {
             DataSource targetDataSource = initTargetDataSource(task);
             builder.sourceFetcher = initSourceFetcher(task);
             builder.sourceFetcher.init(sourceDataSource);
+            builder.sourceFetcher.setStartTime(task.getBeginTime());
+            builder.sourceFetcher.setEndTime(task.getEndTime());
             builder.targetFetcher = initTargetFetcher(task);
             builder.targetFetcher.init(targetDataSource);
             builder.rowMapper = initRowMapper(task);

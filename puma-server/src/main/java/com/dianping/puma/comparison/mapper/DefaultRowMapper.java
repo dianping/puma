@@ -4,10 +4,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Dozer @ 2015-09
@@ -22,8 +19,9 @@ public class DefaultRowMapper implements RowMapper {
         return mapKey;
     }
 
-    public void setMapKey(Set<String> mapKey) {
+    public DefaultRowMapper setMapKey(Iterable<String> mapKey) {
         this.mapKey = ImmutableSet.<String>builder().addAll(mapKey).build();
+        return this;
     }
 
     @Override

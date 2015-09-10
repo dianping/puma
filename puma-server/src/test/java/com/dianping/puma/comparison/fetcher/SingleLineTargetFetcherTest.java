@@ -1,5 +1,6 @@
 package com.dianping.puma.comparison.fetcher;
 
+import com.dianping.puma.comparison.model.SourceTargetPair;
 import com.google.common.collect.Lists;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import junit.framework.Assert;
@@ -71,7 +72,7 @@ public class SingleLineTargetFetcherTest {
         targetRow.put("ID", 1);
         targetRows.add(targetRow);
 
-        List<TargetFetcher.SourceTargetPair> result = target.map(null, targetRows);
+        List<SourceTargetPair> result = target.map(null, targetRows);
 
         Assert.assertEquals(1, result.size());
         Assert.assertEquals(null, result.get(0).getSource());

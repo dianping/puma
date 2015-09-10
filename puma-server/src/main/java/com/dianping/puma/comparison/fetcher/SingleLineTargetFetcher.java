@@ -1,5 +1,6 @@
 package com.dianping.puma.comparison.fetcher;
 
+import com.dianping.puma.comparison.model.SourceTargetPair;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.FluentIterable;

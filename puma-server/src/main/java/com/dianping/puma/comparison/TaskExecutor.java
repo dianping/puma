@@ -27,12 +27,6 @@ public class TaskExecutor implements Callable<TaskResult> {
 
     private static final Logger LOG = LoggerFactory.getLogger(TaskExecutor.class);
 
-    private final TaskEntity task;
-
-    private final DataSource sourceDataSource;
-
-    private final DataSource targetDataSource;
-
     private final RowMapper rowMapper;
 
     private final SourceFetcher sourceFetcher;
@@ -41,52 +35,11 @@ public class TaskExecutor implements Callable<TaskResult> {
 
     private final Comparison comparison;
 
-    public TaskExecutor(TaskEntity task) {
-        this.task = task;
-        this.sourceDataSource = initSourceDataSource(task);
-        this.targetDataSource = initTargetDataSource(task);
-        this.sourceFetcher = initSourceFetcher(task);
-        this.sourceFetcher.init(this.sourceDataSource);
-        this.targetFetcher = initTargetFetcher(task);
-        this.targetFetcher.init(this.targetDataSource);
-        this.rowMapper = initRowMapper(task);
-        this.comparison = initComparison(task);
-    }
-
-    protected Comparison initComparison(TaskEntity task) {
-        return (Comparison) fromClassNameAndJson(task.getComparison(), task.getComparisonProp());
-    }
-
-    protected TargetFetcher initTargetFetcher(TaskEntity task) {
-        return (TargetFetcher) fromClassNameAndJson(task.getTargetFetcher(), task.getTargetFetcherProp());
-    }
-
-    protected SourceFetcher initSourceFetcher(TaskEntity task) {
-        return (SourceFetcher) fromClassNameAndJson(task.getSourceFetcher(), task.getSourceFetcherProp());
-    }
-
-    protected RowMapper initRowMapper(TaskEntity task) {
-        return (RowMapper) fromClassNameAndJson(task.getMapper(), task.getMapperProp());
-    }
-
-    protected DataSource initTargetDataSource(TaskEntity task) {
-        DataSourceBuilder builder = (DataSourceBuilder) fromClassNameAndJson(task.getTargetDsBuilder(), task.getTargetDsBuilderProp());
-        return builder.build();
-    }
-
-    protected DataSource initSourceDataSource(TaskEntity task) {
-        DataSourceBuilder builder = (DataSourceBuilder) fromClassNameAndJson(task.getSourceDsBuilder(), task.getSourceDsBuilderProp());
-        return builder.build();
-    }
-
-    protected Object fromClassNameAndJson(String className, String json) {
-        try {
-            return GsonUtil.fromJson(json, Class.forName(className));
-        } catch (ClassNotFoundException e) {
-            Cat.logError(className, e);
-            LOG.error(className, e);
-            throw new RuntimeException(className, e);
-        }
+    private TaskExecutor(SourceFetcher sourceFetcher, TargetFetcher targetFetcher, RowMapper rowMapper, Comparison comparison) {
+        this.sourceFetcher = sourceFetcher;
+        this.targetFetcher = targetFetcher;
+        this.rowMapper = rowMapper;
+        this.comparison = comparison;
     }
 
     @Override
@@ -141,5 +94,96 @@ public class TaskExecutor implements Callable<TaskResult> {
                 }
             }
         } while (sourceData != null && sourceData.size() > 0);
+    }
+
+    public static class Builder {
+
+        private RowMapper rowMapper;
+
+        private SourceFetcher sourceFetcher;
+
+        private TargetFetcher targetFetcher;
+
+        private Comparison comparison;
+
+        private Builder() {
+        }
+
+        public static Builder create() {
+            return new Builder();
+        }
+
+        public static Builder create(TaskEntity task) {
+            Builder builder = new Builder();
+            DataSource sourceDataSource = initSourceDataSource(task);
+            DataSource targetDataSource = initTargetDataSource(task);
+            builder.sourceFetcher = initSourceFetcher(task);
+            builder.sourceFetcher.init(sourceDataSource);
+            builder.targetFetcher = initTargetFetcher(task);
+            builder.targetFetcher.init(targetDataSource);
+            builder.rowMapper = initRowMapper(task);
+            builder.comparison = initComparison(task);
+            return builder;
+        }
+
+        public TaskExecutor build() {
+            return new TaskExecutor(this.sourceFetcher, this.targetFetcher, this.rowMapper, this.comparison);
+        }
+
+        protected static Comparison initComparison(TaskEntity task) {
+            return (Comparison) fromClassNameAndJson(task.getComparison(), task.getComparisonProp());
+        }
+
+        protected static TargetFetcher initTargetFetcher(TaskEntity task) {
+            return (TargetFetcher) fromClassNameAndJson(task.getTargetFetcher(), task.getTargetFetcherProp());
+        }
+
+        protected static SourceFetcher initSourceFetcher(TaskEntity task) {
+            return (SourceFetcher) fromClassNameAndJson(task.getSourceFetcher(), task.getSourceFetcherProp());
+        }
+
+        protected static RowMapper initRowMapper(TaskEntity task) {
+            return (RowMapper) fromClassNameAndJson(task.getMapper(), task.getMapperProp());
+        }
+
+        protected static DataSource initTargetDataSource(TaskEntity task) {
+            DataSourceBuilder builder = (DataSourceBuilder) fromClassNameAndJson(task.getTargetDsBuilder(), task.getTargetDsBuilderProp());
+            return builder.build();
+        }
+
+        protected static DataSource initSourceDataSource(TaskEntity task) {
+            DataSourceBuilder builder = (DataSourceBuilder) fromClassNameAndJson(task.getSourceDsBuilder(), task.getSourceDsBuilderProp());
+            return builder.build();
+        }
+
+        protected static Object fromClassNameAndJson(String className, String json) {
+            try {
+                return GsonUtil.fromJson(json, Class.forName(className));
+            } catch (ClassNotFoundException e) {
+                Cat.logError(className, e);
+                LOG.error(className, e);
+                throw new RuntimeException(className, e);
+            }
+        }
+
+        public Builder setRowMapper(RowMapper rowMapper) {
+            this.rowMapper = rowMapper;
+            return this;
+        }
+
+        public Builder setSourceFetcher(SourceFetcher sourceFetcher) {
+            this.sourceFetcher = sourceFetcher;
+            return this;
+        }
+
+        public Builder setTargetFetcher(TargetFetcher targetFetcher) {
+            this.targetFetcher = targetFetcher;
+            return this;
+        }
+
+        public Builder setComparison(Comparison comparison) {
+            this.comparison = comparison;
+            return this;
+        }
     }
 }

@@ -44,6 +44,11 @@ public class CheckTaskServiceImpl implements CheckTaskService {
 		return checkTaskEntities;
 	}
 
+	@Override
+	public int update(CheckTaskEntity checkTaskEntity) {
+		return checkTaskDao.update(checkTaskEntity);
+	}
+
 	protected void loadColumnMapping(CheckTaskEntity checkTaskEntity) {
 		Map<String, String> columnMapping = new HashMap<String, String>();
 

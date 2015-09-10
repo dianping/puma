@@ -4,20 +4,27 @@ import com.dianping.puma.biz.entity.CheckTaskEntity;
 import com.dianping.puma.comparison.model.TaskEntity;
 import com.dianping.puma.comparison.TaskExecutor;
 import com.dianping.puma.comparison.manager.utils.ThreadPool;
+import com.dianping.puma.comparison.model.TaskResult;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.Callable;
 
 @Service
 public class AsyncTaskRunner implements TaskRunner {
 
 	@Override
 	public TaskRunFuture run(CheckTaskEntity checkTask) {
-		TaskEntity taskEntity = transform(checkTask);
-		TaskExecutor.Builder builder = TaskExecutor.Builder.create(taskEntity);
-		TaskExecutor taskExecutor = builder.build();
+		Callable<TaskResult> taskExecutor = build(checkTask);
 
 		TaskRunFuture taskRunFuture = new TaskRunFuture(taskExecutor);
-		ThreadPool.submit(taskExecutor);
+		ThreadPool.execute(taskRunFuture);
 		return taskRunFuture;
+	}
+
+	protected Callable<TaskResult> build(CheckTaskEntity checkTask) {
+		TaskEntity taskEntity = transform(checkTask);
+		TaskExecutor.Builder builder = TaskExecutor.Builder.create(taskEntity);
+		return builder.build();
 	}
 
 	protected TaskEntity transform(CheckTaskEntity checkTask) {

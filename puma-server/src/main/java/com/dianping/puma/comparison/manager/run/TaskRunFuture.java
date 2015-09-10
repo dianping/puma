@@ -1,6 +1,7 @@
 package com.dianping.puma.comparison.manager.run;
 
 import com.dianping.puma.comparison.model.TaskResult;
+import com.dianping.puma.comparison.manager.utils.ThreadPool;
 import com.google.common.util.concurrent.Uninterruptibles;
 
 import java.util.concurrent.Callable;
@@ -34,6 +35,6 @@ public class TaskRunFuture extends FutureTask<TaskResult> {
 			}
 		};
 
-		TaskRunFutureThreadPool.execute(runnable);
+		ThreadPool.execute(runnable);
 	}
 }

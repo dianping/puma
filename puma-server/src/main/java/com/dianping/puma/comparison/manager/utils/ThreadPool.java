@@ -1,10 +1,11 @@
-package com.dianping.puma.comparison.manager.lock;
+package com.dianping.puma.comparison.manager.utils;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-public class DatabaseTaskLockThreadPool {
+public class ThreadPool {
 
 	private static ExecutorService threadPool;
 
@@ -22,5 +23,9 @@ public class DatabaseTaskLockThreadPool {
 
 	public static void execute(Runnable runnable) {
 		threadPool.execute(runnable);
+	}
+
+	public static void submit(Callable<?> callable) {
+		threadPool.submit(callable);
 	}
 }

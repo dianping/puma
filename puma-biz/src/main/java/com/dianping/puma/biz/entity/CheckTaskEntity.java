@@ -1,23 +1,14 @@
 package com.dianping.puma.biz.entity;
 
 import java.util.Date;
-import java.util.Map;
 
 public class CheckTaskEntity {
 
 	private int id;
 
-	private String srcDatabase;
-
-	private String dstDatabase;
-
-	private String srcTable;
-
-	private String dstTable;
-
-	private Map<String, String> columnMapping;
-
 	private Date initTime;
+
+	private Date currTime;
 
 	private Date nextTime;
 
@@ -25,7 +16,35 @@ public class CheckTaskEntity {
 
 	private String ownerHost;
 
+	private boolean success;
+
+	private String message;
+
 	private Date updateTime;
+
+	private String comparison;
+
+	private String comparisonProp;
+
+	private String sourceFetcher;
+
+	private String sourceFetcherProp;
+
+	private String targetFetcher;
+
+	private String targetFetcherProp;
+
+	private String mapper;
+
+	private String mapperProp;
+
+	private String targetDsBuilder;
+
+	private String targetDsBuilderProp;
+
+	private String sourceDsBuilder;
+
+	private String sourceDsBuilderProp;
 
 	public int getId() {
 		return id;
@@ -35,52 +54,20 @@ public class CheckTaskEntity {
 		this.id = id;
 	}
 
-	public String getSrcDatabase() {
-		return srcDatabase;
-	}
-
-	public void setSrcDatabase(String srcDatabase) {
-		this.srcDatabase = srcDatabase;
-	}
-
-	public String getDstDatabase() {
-		return dstDatabase;
-	}
-
-	public void setDstDatabase(String dstDatabase) {
-		this.dstDatabase = dstDatabase;
-	}
-
-	public String getSrcTable() {
-		return srcTable;
-	}
-
-	public void setSrcTable(String srcTable) {
-		this.srcTable = srcTable;
-	}
-
-	public String getDstTable() {
-		return dstTable;
-	}
-
-	public void setDstTable(String dstTable) {
-		this.dstTable = dstTable;
-	}
-
-	public Map<String, String> getColumnMapping() {
-		return columnMapping;
-	}
-
-	public void setColumnMapping(Map<String, String> columnMapping) {
-		this.columnMapping = columnMapping;
-	}
-
 	public Date getInitTime() {
 		return initTime;
 	}
 
 	public void setInitTime(Date initTime) {
 		this.initTime = initTime;
+	}
+
+	public Date getCurrTime() {
+		return currTime;
+	}
+
+	public void setCurrTime(Date currTime) {
+		this.currTime = currTime;
 	}
 
 	public Date getNextTime() {
@@ -107,11 +94,123 @@ public class CheckTaskEntity {
 		this.ownerHost = ownerHost;
 	}
 
+	public boolean isSuccess() {
+		return success;
+	}
+
+	public void setSuccess(boolean success) {
+		this.success = success;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
 	public Date getUpdateTime() {
 		return updateTime;
 	}
 
 	public void setUpdateTime(Date updateTime) {
 		this.updateTime = updateTime;
+	}
+
+	public String getComparison() {
+		return comparison;
+	}
+
+	public void setComparison(String comparison) {
+		this.comparison = comparison;
+	}
+
+	public String getComparisonProp() {
+		return comparisonProp;
+	}
+
+	public void setComparisonProp(String comparisonProp) {
+		this.comparisonProp = comparisonProp;
+	}
+
+	public String getSourceFetcher() {
+		return sourceFetcher;
+	}
+
+	public void setSourceFetcher(String sourceFetcher) {
+		this.sourceFetcher = sourceFetcher;
+	}
+
+	public String getSourceFetcherProp() {
+		return sourceFetcherProp;
+	}
+
+	public void setSourceFetcherProp(String sourceFetcherProp) {
+		this.sourceFetcherProp = sourceFetcherProp;
+	}
+
+	public String getTargetFetcher() {
+		return targetFetcher;
+	}
+
+	public void setTargetFetcher(String targetFetcher) {
+		this.targetFetcher = targetFetcher;
+	}
+
+	public String getMapper() {
+		return mapper;
+	}
+
+	public void setMapper(String mapper) {
+		this.mapper = mapper;
+	}
+
+	public String getTargetFetcherProp() {
+		return targetFetcherProp;
+	}
+
+	public void setTargetFetcherProp(String targetFetcherProp) {
+		this.targetFetcherProp = targetFetcherProp;
+	}
+
+	public String getMapperProp() {
+		return mapperProp;
+	}
+
+	public void setMapperProp(String mapperProp) {
+		this.mapperProp = mapperProp;
+	}
+
+	public String getTargetDsBuilder() {
+		return targetDsBuilder;
+	}
+
+	public void setTargetDsBuilder(String targetDsBuilder) {
+		this.targetDsBuilder = targetDsBuilder;
+	}
+
+	public String getTargetDsBuilderProp() {
+		return targetDsBuilderProp;
+	}
+
+	public void setTargetDsBuilderProp(String targetDsBuilderProp) {
+		this.targetDsBuilderProp = targetDsBuilderProp;
+	}
+
+	public String getSourceDsBuilderProp() {
+		return sourceDsBuilderProp;
+	}
+
+	public void setSourceDsBuilderProp(String sourceDsBuilderProp) {
+		this.sourceDsBuilderProp = sourceDsBuilderProp;
+	}
+
+	public String getSourceDsBuilder() {
+		return sourceDsBuilder;
+	}
+
+	public void setSourceDsBuilder(String sourceDsBuilder) {
+		this.sourceDsBuilder = sourceDsBuilder;
 	}
 }

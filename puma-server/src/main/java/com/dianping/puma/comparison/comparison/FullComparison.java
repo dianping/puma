@@ -1,6 +1,7 @@
 package com.dianping.puma.comparison.comparison;
 
 import com.google.common.base.Equivalence;
+import com.google.common.base.Objects;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 
@@ -16,7 +17,7 @@ public class FullComparison implements Comparison {
     @Override
     public boolean compare(Map<String, Object> source, Map<String, Object> target) {
         if (source == null || target == null) {
-            return source == target ? true : false;
+            return Objects.equal(source, target);
         }
 
         MapDifference<String, Object> result = Maps

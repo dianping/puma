@@ -1,6 +1,6 @@
 package com.dianping.puma.comparison.manager.run;
 
-import com.dianping.puma.comparison.TaskResult;
+import com.dianping.puma.comparison.model.TaskResult;
 import com.google.common.util.concurrent.Uninterruptibles;
 
 import java.util.concurrent.Callable;

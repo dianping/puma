@@ -7,6 +7,8 @@ import com.dianping.puma.comparison.fetcher.SourceFetcher;
 import com.dianping.puma.comparison.fetcher.TargetFetcher;
 import com.dianping.puma.comparison.mapper.RowMapper;
 import com.dianping.puma.comparison.model.SourceTargetPair;
+import com.dianping.puma.comparison.model.TaskEntity;
+import com.dianping.puma.comparison.model.TaskResult;
 import com.dianping.puma.core.util.GsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +25,7 @@ import java.util.concurrent.Callable;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class TaskExecutor implements Callable<TaskResult> {
+public final class TaskExecutor implements Callable<TaskResult> {
 
     private static final Logger LOG = LoggerFactory.getLogger(TaskExecutor.class);
 
@@ -34,6 +36,10 @@ public class TaskExecutor implements Callable<TaskResult> {
     private final TargetFetcher targetFetcher;
 
     private final Comparison comparison;
+
+    private static final int RETRY_TIMES = 3;
+
+    private static final long RETRY_SLEEP_TIME = 10 * 1000;
 
     private TaskExecutor(SourceFetcher sourceFetcher, TargetFetcher targetFetcher, RowMapper rowMapper, Comparison comparison) {
         this.sourceFetcher = sourceFetcher;
@@ -49,9 +55,9 @@ public class TaskExecutor implements Callable<TaskResult> {
         fullCompare(difference);
 
         int tryTimes = 0;
-        while (tryTimes++ < 3 && difference.size() > 0) {
+        while (tryTimes++ < RETRY_TIMES && difference.size() > 0) {
+            Thread.sleep(RETRY_SLEEP_TIME);
             retry(difference);
-            Thread.sleep(10 * 1000);
         }
 
         return new TaskResult().setDifference(difference);
@@ -103,7 +109,7 @@ public class TaskExecutor implements Callable<TaskResult> {
         } while (sourceData != null && sourceData.size() > 0);
     }
 
-    public static class Builder {
+    public static final class Builder {
 
         private RowMapper rowMapper;
 
@@ -171,7 +177,7 @@ public class TaskExecutor implements Callable<TaskResult> {
             } catch (ClassNotFoundException e) {
                 Cat.logError(className, e);
                 LOG.error(className, e);
-                throw new RuntimeException(className, e);
+                throw new IllegalArgumentException(className, e);
             }
         }
 

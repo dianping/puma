@@ -1,7 +1,7 @@
 package com.dianping.puma.comparison.manager.dispatch;
 
 import com.dianping.puma.biz.entity.CheckTaskEntity;
-import com.dianping.puma.comparison.TaskResult;
+import com.dianping.puma.comparison.model.TaskResult;
 import com.dianping.puma.comparison.manager.lock.TaskLock;
 import com.dianping.puma.comparison.manager.lock.TaskLockBuilder;
 import com.dianping.puma.comparison.manager.run.TaskRunFutureListener;

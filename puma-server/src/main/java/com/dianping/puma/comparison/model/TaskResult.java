@@ -1,6 +1,4 @@
-package com.dianping.puma.comparison;
-
-import com.dianping.puma.comparison.model.SourceTargetPair;
+package com.dianping.puma.comparison.model;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.dianping.puma.comparison;
+package com.dianping.puma.comparison.model;
 
 import java.util.Date;
 

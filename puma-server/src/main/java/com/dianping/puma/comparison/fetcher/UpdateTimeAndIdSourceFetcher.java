@@ -30,7 +30,7 @@ public class UpdateTimeAndIdSourceFetcher extends AbstractDataFetcher implements
 
     private long lastId;
 
-    private int pageSize = 1000;
+    private static final int PAGE_SIZE = 1000;
 
     @Override
     public void setStartTime(Date time) {
@@ -77,7 +77,7 @@ public class UpdateTimeAndIdSourceFetcher extends AbstractDataFetcher implements
         if (Strings.isNullOrEmpty(this.sql)) {
             this.sql = String.format(
                     "SELECT %s FROM %s WHERE %s >= ? and %s < ? and %s > ? ORDER BY %s,%s limit %d",
-                    columns, tableName, updateTimeName, updateTimeName, idName, updateTimeName, idName, pageSize);
+                    columns, tableName, updateTimeName, updateTimeName, idName, updateTimeName, idName, PAGE_SIZE);
         }
     }
 

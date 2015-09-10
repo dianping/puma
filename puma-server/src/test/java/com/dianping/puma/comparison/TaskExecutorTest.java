@@ -7,6 +7,7 @@ import com.dianping.puma.comparison.fetcher.UpdateTimeAndIdSourceFetcher;
 import com.dianping.puma.comparison.mapper.DefaultRowMapper;
 import com.dianping.puma.comparison.mapper.RowMapper;
 import com.dianping.puma.comparison.model.SourceTargetPair;
+import com.dianping.puma.comparison.model.TaskResult;
 import com.google.common.collect.Sets;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import junit.framework.Assert;

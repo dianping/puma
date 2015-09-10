@@ -1,16 +1,17 @@
 package com.dianping.puma.comparison.manager.run;
 
+import com.dianping.puma.comparison.TaskResult;
 import com.google.common.util.concurrent.Uninterruptibles;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
-public class TaskRunFuture extends FutureTask<Void> {
+public class TaskRunFuture extends FutureTask<TaskResult> {
 
 	private Runnable runnable;
 
-	public TaskRunFuture(Callable<Void> callable) {
+	public TaskRunFuture(Callable<TaskResult> callable) {
 		super(callable);
 	}
 
@@ -20,18 +21,16 @@ public class TaskRunFuture extends FutureTask<Void> {
 		}
 
 		runnable = new Runnable() {
-			@Override public void run() {
+			@Override
+			public void run() {
 				try {
-					Uninterruptibles.getUninterruptibly(TaskRunFuture.this);
+					TaskResult result = Uninterruptibles.getUninterruptibly(TaskRunFuture.this);
+					listener.onSuccess(result);
 				} catch (ExecutionException e) {
 					listener.onFailure(e.getCause());
-					return;
 				} catch (Throwable t) {
 					listener.onFailure(t);
-					return;
 				}
-
-				listener.onSuccess(null);
 			}
 		};
 

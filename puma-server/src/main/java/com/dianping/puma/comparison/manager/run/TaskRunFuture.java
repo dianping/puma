@@ -24,14 +24,19 @@ public class TaskRunFuture extends FutureTask<TaskResult> {
 		runnable = new Runnable() {
 			@Override
 			public void run() {
+				TaskResult result;
+
 				try {
-					TaskResult result = Uninterruptibles.getUninterruptibly(TaskRunFuture.this);
-					listener.onSuccess(result);
+					result = Uninterruptibles.getUninterruptibly(TaskRunFuture.this);
 				} catch (ExecutionException e) {
 					listener.onFailure(e.getCause());
+					return;
 				} catch (Throwable t) {
 					listener.onFailure(t);
+					return;
 				}
+
+				listener.onSuccess(result);
 			}
 		};
 

@@ -6,10 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Dozer @ 2015-09
@@ -74,5 +71,21 @@ public class UpdateTimeAndIdSourceFetcherTest {
             long lastId = ((Number) row.get("ID")).longValue();
             Assert.assertEquals(index++, lastId);
         }
+    }
+
+    @Test
+    public void testRetry() throws Exception {
+        target.setTableName("Debug");
+        target.setStartTime(startTime);
+        target.setEndTime(endTime);
+        target.setColumns("Id,UpdateTime");
+        target.init(ds);
+
+        Map<String, Object> row = new HashMap<String, Object>();
+        row.put("ID", 1);
+
+        Map<String, Object> result = target.retry(row);
+
+        Assert.assertEquals(1, result.get("ID"));
     }
 }

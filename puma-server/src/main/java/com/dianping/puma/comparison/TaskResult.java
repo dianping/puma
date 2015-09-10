@@ -17,8 +17,9 @@ public class TaskResult {
         return difference;
     }
 
-    public void setDifference(List<SourceTargetPair> difference) {
+    public TaskResult setDifference(List<SourceTargetPair> difference) {
         this.difference = difference;
+        return this;
     }
 
 }

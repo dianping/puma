@@ -12,6 +12,8 @@ import java.util.Map;
  */
 public interface TargetFetcher extends DataFetcher {
 
+    Map<String, Object> fetch(Map<String, Object> columns);
+
     List<Map<String, Object>> fetch(List<Map<String, Object>> columns);
 
     List<SourceTargetPair> map(List<Map<String, Object>> source, List<Map<String, Object>> target);

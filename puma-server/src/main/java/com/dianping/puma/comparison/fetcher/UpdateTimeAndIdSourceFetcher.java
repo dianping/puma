@@ -1,8 +1,13 @@
 package com.dianping.puma.comparison.fetcher;
 
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Maps;
 
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,6 +53,24 @@ public class UpdateTimeAndIdSourceFetcher extends AbstractDataFetcher implements
             startTime = (Date) rows.get(rows.size() - 1).get(updateTimeName);
         }
         return rows;
+    }
+
+    @Override
+    public Map<String, Object> retry(Map<String, Object> source) {
+        LinkedHashMap<String, Object> condition = Maps.newLinkedHashMap(source);
+
+        String sql = String.format("select %s from %s where %s limit 1",
+                columns, tableName,
+                Joiner.on(" and ").join(FluentIterable.from(condition.keySet()).transform(new Function<String, String>() {
+                    @Override
+                    public String apply(String input) {
+                        return input + " = ?";
+                    }
+                })));
+        Object[] args = condition.values().toArray(new Object[condition.size()]);
+        List<Map<String, Object>> result = template.queryForList(sql, args);
+
+        return result.size() > 0 ? result.get(0) : null;
     }
 
     protected void initSql() {

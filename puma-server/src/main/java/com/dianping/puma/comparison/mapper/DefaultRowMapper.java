@@ -27,18 +27,32 @@ public class DefaultRowMapper implements RowMapper {
     }
 
     @Override
-    public List<Map<String, Object>> map(List<Map<String, Object>> source) {
+    public List<Map<String, Object>> mapToTarget(List<Map<String, Object>> source) {
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
 
         for (Map<String, Object> row : source) {
-            result.add(Maps.filterEntries(row, new Predicate<Map.Entry<String, Object>>() {
-                @Override
-                public boolean apply(Map.Entry<String, Object> input) {
-                    return mapKey.contains(input.getKey());
-                }
-            }));
+            result.add(map(row));
         }
 
         return result;
+    }
+
+    @Override
+    public Map<String, Object> mapToTarget(Map<String, Object> source) {
+        return map(source);
+    }
+
+    @Override
+    public Map<String, Object> mapToSource(Map<String, Object> source) {
+        return map(source);
+    }
+
+    protected Map<String, Object> map(Map<String, Object> row) {
+        return Maps.filterEntries(row, new Predicate<Map.Entry<String, Object>>() {
+            @Override
+            public boolean apply(Map.Entry<String, Object> input) {
+                return mapKey.contains(input.getKey());
+            }
+        });
     }
 }

@@ -6,11 +6,16 @@ import com.dianping.puma.comparison.datasource.DataSourceBuilder;
 import com.dianping.puma.comparison.fetcher.SourceFetcher;
 import com.dianping.puma.comparison.fetcher.TargetFetcher;
 import com.dianping.puma.comparison.mapper.RowMapper;
+import com.dianping.puma.comparison.model.SourceTargetPair;
 import com.dianping.puma.core.util.GsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 /**
@@ -86,6 +91,55 @@ public class TaskExecutor implements Callable<TaskResult> {
 
     @Override
     public TaskResult call() throws Exception {
-        return null;
+        List<SourceTargetPair> difference = new ArrayList<SourceTargetPair>();
+
+        fullCompare(difference);
+
+        int tryTimes = 0;
+        while (tryTimes++ < 3 && difference.size() > 0) {
+            retry(difference);
+            Thread.sleep(10 * 1000);
+        }
+
+        return new TaskResult().setDifference(difference);
+    }
+
+    protected void retry(List<SourceTargetPair> difference) {
+        Iterator<SourceTargetPair> iterable = difference.iterator();
+        while (iterable.hasNext()) {
+            SourceTargetPair pair = iterable.next();
+
+            Map<String, Object> mappedColumn = rowMapper.mapToSource(pair.getSource());
+            Map<String, Object> sourceData = sourceFetcher.retry(mappedColumn);
+
+            Map<String, Object> mappedColumnTarget;
+            if (sourceData == null) {
+                mappedColumnTarget = rowMapper.mapToTarget(pair.getSource());
+            } else {
+                mappedColumnTarget = rowMapper.mapToTarget(sourceData);
+            }
+
+            Map<String, Object> targetData = targetFetcher.fetch(mappedColumnTarget);
+
+            if (comparison.compare(sourceData, targetData)) {
+                iterable.remove();
+            }
+        }
+    }
+
+    protected void fullCompare(List<SourceTargetPair> difference) {
+        List<Map<String, Object>> sourceData;
+        do {
+            sourceData = sourceFetcher.fetch();
+            List<Map<String, Object>> mappedColumn = rowMapper.mapToTarget(sourceData);
+            List<Map<String, Object>> targetData = targetFetcher.fetch(mappedColumn);
+            List<SourceTargetPair> pairs = targetFetcher.map(sourceData, targetData);
+
+            for (SourceTargetPair pair : pairs) {
+                if (!comparison.compare(pair.getSource(), pair.getTarget())) {
+                    difference.add(pair);
+                }
+            }
+        } while (sourceData != null && sourceData.size() > 0);
     }
 }

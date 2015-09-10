@@ -11,5 +11,11 @@ import java.util.Map;
  * 用语映射原数据和目标数据
  */
 public interface RowMapper {
-    List<Map<String, Object>> map(List<Map<String, Object>> source);
+
+    List<Map<String, Object>> mapToTarget(List<Map<String, Object>> source);
+
+    Map<String, Object> mapToTarget(Map<String, Object> source);
+
+    Map<String, Object> mapToSource(Map<String, Object> source);
+
 }

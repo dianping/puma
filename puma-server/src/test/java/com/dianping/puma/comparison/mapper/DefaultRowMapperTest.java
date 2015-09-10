@@ -33,7 +33,7 @@ public class DefaultRowMapperTest {
         source.add(row1);
         source.add(row2);
 
-        List<Map<String, Object>> result = target.map(source);
+        List<Map<String, Object>> result = target.mapToTarget(source);
 
         Assert.assertEquals(2, result.size());
         Assert.assertEquals(1, result.get(0).size());

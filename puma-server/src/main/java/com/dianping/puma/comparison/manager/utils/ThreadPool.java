@@ -25,7 +25,7 @@ public class ThreadPool {
 		threadPool.execute(runnable);
 	}
 
-	public static void submit(Callable callable) {
+	public static void submit(Callable<?> callable) {
 		threadPool.submit(callable);
 	}
 }

@@ -8,9 +8,9 @@ import java.util.concurrent.locks.Condition;
 
 public class NoReentrantTaskLock implements TaskLock {
 
-	private TaskContainer taskContainer;
+	protected TaskContainer taskContainer;
 
-	private CheckTaskEntity checkTask;
+	protected CheckTaskEntity checkTask;
 
 	@Override public void lock() {
 

@@ -59,11 +59,6 @@ public class SingleTaskDispatcher implements TaskDispatcher {
 
                 logger.info("start run check task...");
 
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                logger.info("check period: {} - {}.",
-                        dateFormat.format(checkTask.getCurrTime()),
-                        dateFormat.format(checkTask.getNextTime()));
-
                 taskRunner.run(checkTask, new TaskRunFutureListener() {
                     @Override
                     public void onSuccess(TaskResult result) {
@@ -85,8 +80,6 @@ public class SingleTaskDispatcher implements TaskDispatcher {
                 });
 
             } catch (Throwable t) {
-                logger.error("failed to execute check task.", t);
-
                 localTaskLock.unlock();
                 remoteTaskLock.unlock();
             }

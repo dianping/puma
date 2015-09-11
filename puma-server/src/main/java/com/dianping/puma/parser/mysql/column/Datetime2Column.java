@@ -11,7 +11,7 @@ public class Datetime2Column implements Column{
 	}
 	
 	@Override
-	public Object getValue() {
+	public String getValue() {
 		return value;
 	}
 	
@@ -23,5 +23,4 @@ public class Datetime2Column implements Column{
 	public static final Datetime2Column valueOf(String value ){
 		return new Datetime2Column(value);
 	}
-
 }

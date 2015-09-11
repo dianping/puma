@@ -4,75 +4,68 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
-import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
-import com.dianping.puma.core.model.event.EventListener;
+import com.dianping.puma.eventbus.DefaultEventBus;
+import com.dianping.puma.taskexecutor.change.TargetChangedEvent;
 import com.google.common.eventbus.Subscribe;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
+public class DMLEventFilter extends AbstractEventFilter {
 
-public class DMLEventFilter extends AbstractEventFilter implements EventListener<AcceptedTableChangedEvent> {
+    protected String name;
 
-	private static final Logger LOG = LoggerFactory.getLogger(DMLEventFilter.class);
+    private boolean dml = true;
 
-	private String name;
+    private TableSet acceptedTables = new TableSet();
 
-	private boolean dml = true;
+    public DMLEventFilter() {
+        DefaultEventBus.INSTANCE.register(this);
+    }
 
-	private TableSet acceptedTables = new TableSet();
+    @Subscribe
+    public void listenTargetChangedEvent(TargetChangedEvent event) {
+        if (event.getTaskName().equals(name)) {
+            setAcceptedTables(event.getTableSet());
+        }
+    }
 
-	protected boolean checkEvent(ChangedEvent changedEvent) {
-		if (changedEvent == null) {
-			return false;
-		}
+    protected boolean checkEvent(ChangedEvent changedEvent) {
+        if (changedEvent == null) {
+            return false;
+        }
 
-		if (changedEvent instanceof RowChangedEvent) {
+        if (changedEvent instanceof RowChangedEvent) {
 
-			// Transaction or not.
-			if (((RowChangedEvent) changedEvent).isTransactionBegin() || ((RowChangedEvent) changedEvent)
-					.isTransactionCommit()) {
-				return true;
-			}
+            // Transaction or not.
+            if (((RowChangedEvent) changedEvent).isTransactionBegin()
+                    || ((RowChangedEvent) changedEvent).isTransactionCommit()) {
+                return true;
+            }
 
-			// Need dml or not.
-			if (!dml) {
-				return false;
-			}
+            // Need dml or not.
+            if (!dml) {
+                return false;
+            }
 
-			// In accepted table list.
-			Table table = new Table(changedEvent.getDatabase(), changedEvent.getTable());
-			if (!acceptedTables.contains(table)) {
-				return false;
-			}
+            // In accepted table list.
+            Table table = new Table(changedEvent.getDatabase(), changedEvent.getTable());
+            if (!acceptedTables.contains(table)) {
+                return false;
+            }
 
-			return true;
-		}
+            return true;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	@Subscribe
-	public void onEvent(AcceptedTableChangedEvent event) {
-		if (event.getName().equals(name)) {
-			LOG.info("`DMLEventFilter` receives event: {}.", event.toString());
+    public void setName(String name) {
+        this.name = name;
+    }
 
-			TableSet tableSet = event.getTableSet();
-			if (tableSet != null) {
-				setAcceptedTables(tableSet);
-			}
-		}
-	}
+    public void setDml(boolean dml) {
+        this.dml = dml;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public void setDml(boolean dml) {
-		this.dml = dml;
-	}
-
-	public void setAcceptedTables(TableSet acceptedTables) {
-		this.acceptedTables = acceptedTables;
-	}
+    public void setAcceptedTables(TableSet acceptedTables) {
+        this.acceptedTables = acceptedTables;
+    }
 }

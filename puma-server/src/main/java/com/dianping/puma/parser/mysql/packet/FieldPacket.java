@@ -1,141 +1,146 @@
 package com.dianping.puma.parser.mysql.packet;
 
+import com.dianping.puma.common.PumaContext;
+import com.dianping.puma.utils.PacketUtils;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import com.dianping.puma.bo.PumaContext;
-import com.dianping.puma.utils.PacketUtils;
-
 public class FieldPacket extends AbstractResponsePacket {
 
-	private static final long serialVersionUID = -870179242685869534L;
-	private String catalog;
-	private String db;
-	private String table;
-	private String originalTable;
-	private String name;
-	private String originalName;
-	private int character;
-	private long length;
-	private byte type;
-	private int flags;
-	private byte decimals;
-	private String definition;
+    private static final long serialVersionUID = -870179242685869534L;
+    private String catalog;
+    private String db;
+    private String table;
+    private String originalTable;
+    private String name;
+    private String originalName;
+    private int character;
+    private long length;
+    private byte type;
+    private int flags;
+    private byte decimals;
+    private String definition;
 
-	@Override
-	protected void doReadPacket(ByteBuffer buf, PumaContext context) throws IOException {
-		// TODO Auto-generated method stub
-		catalog = PacketUtils.readLengthCodedString(buf);
-		db = PacketUtils.readLengthCodedString(buf);
-		table = PacketUtils.readLengthCodedString(buf);
-		originalTable = PacketUtils.readLengthCodedString(buf);
-		name = PacketUtils.readLengthCodedString(buf);
-		originalName = PacketUtils.readLengthCodedString(buf);
-		character = PacketUtils.readInt(buf, 2);
-		length = PacketUtils.readLong(buf, 4);
-		type = buf.get();
-		flags = PacketUtils.readInt(buf, 2);
-		decimals = buf.get();
-		if (buf.hasRemaining()) {
-			definition = PacketUtils.readLengthCodedString(buf);
-		}
+    @Override
+    protected void doReadPacket(ByteBuffer buf, PumaContext context) throws IOException {
+        // TODO Auto-generated method stub
+        catalog = PacketUtils.readLengthCodedString(buf);
+        db = PacketUtils.readLengthCodedString(buf);
+        table = PacketUtils.readLengthCodedString(buf);
+        originalTable = PacketUtils.readLengthCodedString(buf);
+        name = PacketUtils.readLengthCodedString(buf);
+        originalName = PacketUtils.readLengthCodedString(buf);
+        character = PacketUtils.readInt(buf, 2);
+        length = PacketUtils.readLong(buf, 4);
+        type = buf.get();
+        flags = PacketUtils.readInt(buf, 2);
+        decimals = buf.get();
 
-	}
+        //skip the filter
+        buf.get();
+        buf.get();
 
-	public String getCatalog() {
-		return catalog;
-	}
+        if (buf.hasRemaining()) {
+            definition = PacketUtils.readLengthCodedString(buf);
+        }
 
-	public void setCatalog(String catalog) {
-		this.catalog = catalog;
-	}
+    }
 
-	public String getDb() {
-		return db;
-	}
+    public String getCatalog() {
+        return catalog;
+    }
 
-	public void setDb(String db) {
-		this.db = db;
-	}
+    public void setCatalog(String catalog) {
+        this.catalog = catalog;
+    }
 
-	public String getTable() {
-		return table;
-	}
+    public String getDb() {
+        return db;
+    }
 
-	public void setTable(String table) {
-		this.table = table;
-	}
+    public void setDb(String db) {
+        this.db = db;
+    }
 
-	public String getOriginalTable() {
-		return originalTable;
-	}
+    public String getTable() {
+        return table;
+    }
 
-	public void setOriginalTable(String originalTable) {
-		this.originalTable = originalTable;
-	}
+    public void setTable(String table) {
+        this.table = table;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getOriginalTable() {
+        return originalTable;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setOriginalTable(String originalTable) {
+        this.originalTable = originalTable;
+    }
 
-	public String getOriginalName() {
-		return originalName;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setOriginalName(String originalName) {
-		this.originalName = originalName;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public int getCharacter() {
-		return character;
-	}
+    public String getOriginalName() {
+        return originalName;
+    }
 
-	public void setCharacter(int character) {
-		this.character = character;
-	}
+    public void setOriginalName(String originalName) {
+        this.originalName = originalName;
+    }
 
-	public long getLength() {
-		return length;
-	}
+    public int getCharacter() {
+        return character;
+    }
 
-	public void setLength(long length) {
-		this.length = length;
-	}
+    public void setCharacter(int character) {
+        this.character = character;
+    }
 
-	public byte getType() {
-		return type;
-	}
+    public long getLength() {
+        return length;
+    }
 
-	public void setType(byte type) {
-		this.type = type;
-	}
+    public void setLength(long length) {
+        this.length = length;
+    }
 
-	public int getFlags() {
-		return flags;
-	}
+    public byte getType() {
+        return type;
+    }
 
-	public void setFlags(int flags) {
-		this.flags = flags;
-	}
+    public void setType(byte type) {
+        this.type = type;
+    }
 
-	public byte getDecimals() {
-		return decimals;
-	}
+    public int getFlags() {
+        return flags;
+    }
 
-	public void setDecimals(byte decimals) {
-		this.decimals = decimals;
-	}
+    public void setFlags(int flags) {
+        this.flags = flags;
+    }
 
-	public String getDefinition() {
-		return definition;
-	}
+    public byte getDecimals() {
+        return decimals;
+    }
 
-	public void setDefinition(String definition) {
-		this.definition = definition;
-	}
+    public void setDecimals(byte decimals) {
+        this.decimals = decimals;
+    }
+
+    public String getDefinition() {
+        return definition;
+    }
+
+    public void setDefinition(String definition) {
+        this.definition = definition;
+    }
 
 }

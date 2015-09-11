@@ -3,7 +3,7 @@ package com.dianping.puma.parser.mysql.event;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import com.dianping.puma.bo.PumaContext;
+import com.dianping.puma.common.PumaContext;
 
 public class IgnorableEvent extends AbstractBinlogEvent {
 	

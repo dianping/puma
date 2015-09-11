@@ -1,86 +1,81 @@
 package com.dianping.puma.filter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
-import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
-import com.dianping.puma.core.model.event.EventListener;
 import com.dianping.puma.core.util.sql.DDLType;
+import com.dianping.puma.eventbus.DefaultEventBus;
+import com.dianping.puma.taskexecutor.change.TargetChangedEvent;
 import com.google.common.eventbus.Subscribe;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+public class DDLEventFilter extends AbstractEventFilter {
 
-public class DDLEventFilter extends AbstractEventFilter implements EventListener<AcceptedTableChangedEvent> {
+    protected String name;
 
-	private static final Logger LOG = LoggerFactory.getLogger(DDLEventFilter.class);
+    private boolean ddl = true;
 
-	private String name;
+    private TableSet acceptedTables = new TableSet();
 
-	private boolean ddl = true;
+    private List<DDLType> ddlTypes = new ArrayList<DDLType>();
 
-	private TableSet acceptedTables = new TableSet();
+    public DDLEventFilter() {
+        DefaultEventBus.INSTANCE.register(this);
+    }
 
-	private List<DDLType> ddlTypes = new ArrayList<DDLType>();
+    @Subscribe
+    public void listenTargetChangedEvent(TargetChangedEvent event) {
+        if (event.getTaskName().equals(name)) {
+            setAcceptedTables(event.getTableSet());
+        }
+    }
 
-	public void init(boolean ddl, List<DDLType> ddlTypes) {
-		this.ddl = ddl;
-		this.ddlTypes = ddlTypes;
-	}
+    public void init(boolean ddl, List<DDLType> ddlTypes) {
+        this.ddl = ddl;
+        this.ddlTypes = ddlTypes;
+    }
 
-	protected boolean checkEvent(ChangedEvent changedEvent) {
-		if (changedEvent instanceof DdlEvent) {
+    protected boolean checkEvent(ChangedEvent changedEvent) {
+        if (changedEvent instanceof DdlEvent) {
 
-			// Need ddl or not.
-			if (!ddl) {
-				return false;
-			}
+            // Need ddl or not.
+            if (!ddl) {
+                return false;
+            }
 
-			// In supported ddl type list or not.
-			if (!ddlTypes.contains(((DdlEvent) changedEvent).getDDLType())) {
-				return false;
-			}
+            // In supported ddl type list or not.
+            if (!ddlTypes.contains(((DdlEvent) changedEvent).getDDLType())) {
+                return false;
+            }
 
-			// In accepted table list.
-			Table table = new Table(changedEvent.getDatabase(), changedEvent.getTable());
-			if (!acceptedTables.contains(table)) {
-				return false;
-			}
+            // In accepted table list.
+            Table table = new Table(changedEvent.getDatabase(), changedEvent.getTable());
+            if (!acceptedTables.contains(table)) {
+                return false;
+            }
 
-			return true;
-		}
+            return true;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	@Subscribe
-	public void onEvent(AcceptedTableChangedEvent event) {
-		if (event.getName().equals(name)) {
-			LOG.info("`DDLEventFilter` receives event: {}.", event.toString());
+    public void setName(String name) {
+        this.name = name;
+    }
 
-			TableSet tableSet = event.getTableSet();
-			if (tableSet != null) {
-				setAcceptedTables(tableSet);
-			}
-		}
-	}
+    public void setDdl(boolean ddl) {
+        this.ddl = ddl;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setAcceptedTables(TableSet acceptedTables) {
+        this.acceptedTables = acceptedTables;
+    }
 
-	public void setDdl(boolean ddl) {
-		this.ddl = ddl;
-	}
-
-	public void setAcceptedTables(TableSet acceptedTables) {
-		this.acceptedTables = acceptedTables;
-	}
-
-	public void setDdlTypes(List<DDLType> ddlTypes) {
-		this.ddlTypes = ddlTypes;
-	}
+    public void setDdlTypes(List<DDLType> ddlTypes) {
+        this.ddlTypes = ddlTypes;
+    }
 }

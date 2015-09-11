@@ -1,5 +1,7 @@
 package com.dianping.puma.core.event;
 
+import com.dianping.puma.core.model.BinlogInfo;
+
 import java.io.Serializable;
 
 public abstract class Event implements Serializable {
@@ -14,4 +16,7 @@ public abstract class Event implements Serializable {
 		return seq;
 	}
 
+	public abstract BinlogInfo getBinlogInfo();
+
+	public abstract EventType getEventType();
 }

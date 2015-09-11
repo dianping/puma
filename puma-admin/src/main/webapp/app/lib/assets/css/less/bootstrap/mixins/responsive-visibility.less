@@ -1,0 +1,15 @@
+// Responsive utilities
+
+//
+// More easily include all the states for responsive-utilities.less.
+.responsive-visibility() {
+  display: block !important;
+  table&  { display: formatTables; }
+  tr&     { display: formatTables-row !important; }
+  th&,
+  td&     { display: formatTables-cell !important; }
+}
+
+.responsive-invisibility() {
+  display: none !important;
+}

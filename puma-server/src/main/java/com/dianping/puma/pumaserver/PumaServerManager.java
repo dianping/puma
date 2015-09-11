@@ -1,15 +1,23 @@
 package com.dianping.puma.pumaserver;
 
-import com.dianping.puma.core.netty.handler.ChannelHolderHandler;
-import com.dianping.puma.core.netty.handler.HandlerFactory;
-import com.dianping.puma.core.netty.server.ServerConfig;
-import com.dianping.puma.core.netty.server.TcpServer;
 import com.dianping.puma.pumaserver.client.PumaClientsHolder;
-import com.dianping.puma.pumaserver.handler.BinlogQueryHandler;
-import com.dianping.puma.pumaserver.handler.HttpRouterHandler;
-import com.dianping.puma.pumaserver.handler.StatusQueryHandler;
+import com.dianping.puma.pumaserver.handler.*;
+import com.dianping.puma.pumaserver.handler.binlog.BinlogAckHandler;
+import com.dianping.puma.pumaserver.handler.binlog.BinlogGetHandler;
+import com.dianping.puma.pumaserver.handler.binlog.BinlogSubscriptionHandler;
+import com.dianping.puma.pumaserver.handler.binlog.BinlogUnsubscriptionHandler;
+import com.dianping.puma.pumaserver.handler.deprecated.DeprecatedBinlogQueryHandler;
+import com.dianping.puma.pumaserver.server.ServerConfig;
+import com.dianping.puma.pumaserver.server.TcpServer;
+import com.dianping.puma.pumaserver.service.ClientSessionService;
+import com.dianping.puma.pumaserver.service.impl.DbBinlogAckService;
+import com.dianping.puma.pumaserver.service.impl.DefaultClientSessionService;
 import io.netty.channel.ChannelHandler;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.HttpContentCompressor;
+import io.netty.handler.codec.http.HttpContentDecompressor;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -24,14 +32,37 @@ import java.util.Map;
  */
 @Component
 public class PumaServerManager {
+
     public volatile static TcpServer server;
+
+    @Autowired
+    protected DbBinlogAckService binlogAckService;
+
+    protected final ClientSessionService clientSessionService = new DefaultClientSessionService();
 
     protected final ChannelHolderHandler channelHolderHandler = new ChannelHolderHandler(new PumaClientsHolder());
 
     @PostConstruct
     public synchronized void init() {
+        clientSessionService.init();
+
         ServerConfig consoleConfig = new ServerConfig();
         consoleConfig.setPort(4040);
+
+        // Initialize sharable handlers.
+        final BinlogAckHandler binlogAckHandler = new BinlogAckHandler();
+        binlogAckHandler.setBinlogAckService(binlogAckService);
+        binlogAckHandler.setClientSessionService(clientSessionService);
+
+        final BinlogGetHandler binlogGetHandler = new BinlogGetHandler();
+        binlogGetHandler.setClientSessionService(clientSessionService);
+
+        final BinlogSubscriptionHandler binlogSubscriptionHandler = new BinlogSubscriptionHandler();
+        binlogSubscriptionHandler.setBinlogAckService(binlogAckService);
+        binlogSubscriptionHandler.setClientSessionService(clientSessionService);
+
+        final BinlogUnsubscriptionHandler binlogUnsubscriptionHandler = new BinlogUnsubscriptionHandler();
+        binlogUnsubscriptionHandler.setClientSessionService(clientSessionService);
 
         consoleConfig.setHandlerFactory(new HandlerFactory() {
             @Override
@@ -40,12 +71,17 @@ public class PumaServerManager {
                 result.put("channelHolderHandler", channelHolderHandler);
                 result.put("HttpRequestDecoder", new HttpRequestDecoder());
                 result.put("HttpContentDecompressor", new HttpContentDecompressor());
-                result.put("HttpResponseEncoder", new HttpResponseEncoder());
+                result.put("HttpResponseEncoder", new io.netty.handler.codec.http.HttpResponseEncoder());
                 result.put("HttpContentCompressor", new HttpContentCompressor());
+                result.put("HttpEntityEncoder", HttpResponseEncoder.INSTANCE);
                 result.put("HttpObjectAggregator", new HttpObjectAggregator(1024 * 1024 * 32));
                 result.put("HttpRouterHandler", HttpRouterHandler.INSTANCE);
-                result.put("StatusQueryHandler", StatusQueryHandler.INSTANCE);
-                result.put("BinlogQueryHandler", new BinlogQueryHandler());
+                result.put("BinlogSubscriptionHandler", binlogSubscriptionHandler);
+                result.put("BinlogUnsubscriptionHandler", binlogUnsubscriptionHandler);
+                result.put("BinlogQueryHandler", binlogGetHandler);
+                result.put("BinlogAckHandler", binlogAckHandler);
+                result.put("DeprecatedBinlogQueryHandler", new DeprecatedBinlogQueryHandler());
+                result.put("ExceptionHandler", ExceptionHandler.INSTANCE);
                 return result;
             }
         });

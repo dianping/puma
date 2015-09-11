@@ -1,6 +1,6 @@
 package com.dianping.puma.pumaserver.client;
 
-import com.dianping.puma.core.netty.remove.DefaultChannelHolder;
+import com.dianping.puma.pumaserver.remote.DefaultChannelHolder;
 
 /**
  * Dozer @ 6/26/15

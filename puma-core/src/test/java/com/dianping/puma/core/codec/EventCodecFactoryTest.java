@@ -19,6 +19,10 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.dianping.puma.core.codec.EventCodec;
+import com.dianping.puma.core.codec.EventCodecFactory;
+import com.dianping.puma.core.codec.JsonEventCodec;
+
 /**
  * TODO Comment of EventCodecFactoryTest
  * 

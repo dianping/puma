@@ -61,26 +61,11 @@ import java.io.Serializable;
  */
 public abstract class ChangedEvent extends Event implements Serializable {
 	private static final long	serialVersionUID	= -2358086827502066009L;
-	private long				executeTime;
-	private String				database;
-	private String				table;
-	private long				serverId;
-	private BinlogInfo 			binlogInfo;
-	private long                binlogServerId;
-	
-	/**
-     * @return the binlogServerId
-     */
-    public long getBinlogServerId() {
-        return binlogServerId;
-    }
-
-    /**
-     * @param binlogServerId the binlogServerId to set
-     */
-    public void setBinlogServerId(long binlogServerId) {
-        this.binlogServerId = binlogServerId;
-    }
+	protected long					executeTime;
+	protected String				database;
+	protected String				table;
+	protected long					serverId;
+	protected BinlogInfo 		binlogInfo;
 
     /**
 	 * @return the serverId

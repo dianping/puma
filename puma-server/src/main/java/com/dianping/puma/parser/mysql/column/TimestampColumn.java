@@ -1,9 +1,9 @@
 /**
  * Project: ${puma-parser.aid}
- * 
+ *
  * File Created at 2012-6-24
  * $Id$
- * 
+ *
  * Copyright 2010 dianping.com.
  * All rights reserved.
  *
@@ -18,45 +18,35 @@ package com.dianping.puma.parser.mysql.column;
 import java.sql.Timestamp;
 
 /**
- * 
  * TODO Comment of TimestampColumn
- * 
- * @see http://code.google.com/p/open-replicator/
+ *
  * @author Leo Liang
- * 
+ * @see http://code.google.com/p/open-replicator/
  */
 public final class TimestampColumn implements Column {
 	private static final long serialVersionUID = 3097163231761587681L;
-	private final Timestamp value;
 
-	private TimestampColumn(Timestamp value) {
-		if (value.getTime() <= 1000) {
-			value = new java.sql.Timestamp(1000);
+	private final String timestamp;
+
+	private TimestampColumn(long value) {
+		if (value == 0) {
+			timestamp = "0000-00-00 00:00:00";
+		} else {
+			String temp = (new Timestamp(value * 1000)).toString();
+			timestamp = temp.substring(0, temp.length() - 2);
 		}
-		this.value = value;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
-		return String.valueOf(value);
+		return timestamp;
 	}
 
-	public Timestamp getValue() {
-		if (this.value.getTime() <= 1000) {
-			return new java.sql.Timestamp(1000);
-		}
-		return this.value;
+	public String getValue() {
+		return timestamp;
 	}
 
-	public static final TimestampColumn valueOf(Timestamp value) {
-		if (value.getTime() <= 1) {
-			value = new java.sql.Timestamp(1000);
-		}
+	public static TimestampColumn valueOf(long value) {
 		return new TimestampColumn(value);
 	}
 }

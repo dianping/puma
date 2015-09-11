@@ -6,18 +6,17 @@ import com.dianping.puma.core.event.ChangedEvent;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 
-
 public class TransactionInfoEventFilterTest {
 	public TransactionInfoEventFilter eventFilter = new TransactionInfoEventFilter();
-	public RowChangedEvent changedEvent =new RowChangedEvent();
+
+	public RowChangedEvent changedEvent = new RowChangedEvent();
+
 	public EventFilterChainTest filterChain = new EventFilterChainTest();
-	
-	class EventFilterChainTest implements EventFilterChain
-	{
+
+	class EventFilterChainTest implements EventFilterChain {
 
 		@Override
 		public boolean doNext(ChangedEvent event) {
@@ -26,19 +25,18 @@ public class TransactionInfoEventFilterTest {
 
 		@Override
 		public void reset() {
-			
+
 		}
 
 		@Override
 		public void setEventFilters(List<EventFilter> eventFilters) {
-			
+
 		}
-		
+
 	}
-	
+
 	@Test
-	public void testAccept()
-	{
+	public void testAccept() {
 		changedEvent.setTransactionBegin(true);
 		eventFilter.init(true);
 		Assert.assertTrue(eventFilter.accept(changedEvent, null));
@@ -52,6 +50,5 @@ public class TransactionInfoEventFilterTest {
 		changedEvent.setTransactionBegin(false);
 		Assert.assertTrue(eventFilter.accept(changedEvent, this.filterChain));
 	}
-	
 
 }

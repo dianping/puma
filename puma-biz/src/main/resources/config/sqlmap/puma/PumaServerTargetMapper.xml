@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.PumaServerTargetDao">
+
+    <select id="findById" resultType="PumaServerTargetEntity">
+        SELECT
+        *
+        FROM
+        PumaServerTarget
+        WHERE
+        `id` = #{id}
+    </select>
+
+    <select id="findByServerName" resultType="PumaServerTargetEntity">
+        SELECT
+        *
+        FROM
+        PumaServerTarget
+        WHERE
+        `serverName` = #{serverName}
+    </select>
+
+    <select id="findByDatabase" resultType="PumaServerTargetEntity">
+        SELECT
+        *
+        FROM
+        PumaServerTarget
+        WHERE
+        `targetDb` = #{targetDb}
+    </select>
+
+    <insert id="insert" parameterType="PumaServerTargetEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO PumaServerTarget
+        (
+        `serverName`,
+        `targetDb`,
+        `beginTime`
+        )
+        VALUES
+        (
+        #{serverName},
+        #{targetDb},
+        #{beginTime}
+        )
+    </insert>
+
+    <insert id="replace" parameterType="PumaServerTargetEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO PumaServerTarget
+        (
+        `serverName`,
+        `targetDb`,
+        `beginTime`
+        )
+        VALUES
+        (
+        #{serverName},
+        #{targetDb},
+        #{beginTime}
+        )
+        ON DUPLICATE KEY UPDATE
+        `serverName` = VALUES(`serverName`),
+        `targetDb` = VALUES(`targetDb`),
+        `beginTime` = VALUES(`beginTime`)
+    </insert>
+
+    <update id="update" parameterType="PumaServerTargetEntity">
+        UPDATE PumaServerTarget
+        SET
+        `serverId` = #{serverId},
+        `targetId` = #{targetId},
+        `beginTime` = #{beginTime}
+        WHERE
+        `id` = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM
+        PumaServerTarget
+        WHERE
+        `id` = #{id}
+    </delete>
+</mapper>

@@ -1,12 +1,12 @@
 /**
  * Project: ${puma-datahandler.aid}
- * 
+ * <p/>
  * File Created at 2012-6-25
  * $Id$
- * 
+ * <p/>
  * Copyright 2010 dianping.com.
  * All rights reserved.
- *
+ * <p/>
  * This software is the confidential and proprietary information of
  * Dianping Company. ("Confidential Information").  You shall not
  * disclose such Confidential Information and shall use it only in
@@ -15,56 +15,37 @@
  */
 package com.dianping.puma.datahandler;
 
-import java.math.BigInteger;
-
-import com.dianping.puma.core.util.sql.DDLType;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-
-import com.dianping.puma.bo.PumaContext;
+import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
+import com.dianping.puma.core.meta.TableMetaInfo;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.monitor.Notifiable;
-import com.dianping.puma.core.monitor.NotifyService;
-import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.core.util.SimpleDdlParser;
 import com.dianping.puma.core.util.SimpleDdlParser.DdlResult;
 import com.dianping.puma.core.util.constant.DdlEventSubType;
 import com.dianping.puma.core.util.constant.DdlEventType;
+import com.dianping.puma.core.util.sql.DDLType;
+import com.dianping.puma.parser.meta.TableMetaInfoFetcher;
+import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
 import com.dianping.puma.parser.mysql.event.PumaIgnoreEvent;
 import com.dianping.puma.parser.mysql.event.QueryEvent;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+
+import java.math.BigInteger;
+import java.sql.SQLException;
 
 /**
- * TODO Comment of AbstractDataHandler
- * 
  * @author Leo Liang
- * 
  */
 @ThreadUnSafe
-public abstract class AbstractDataHandler implements DataHandler, Notifiable {
+public abstract class AbstractDataHandler implements DataHandler {
 	private static final Logger log = Logger.getLogger(AbstractDataHandler.class);
+
 	private TableMetaInfoFetcher tableMetasInfoFetcher;
-	private NotifyService notifyService;
-
-	/**
-	 * @return the notifyService
-	 */
-	public NotifyService getNotifyService() {
-		return notifyService;
-	}
-
-	/**
-	 * @param notifyService
-	 *            the notifyService to set
-	 */
-	public void setNotifyService(NotifyService notifyService) {
-		this.notifyService = notifyService;
-	}
 
 	/**
 	 * @return the tableMetasInfoFetcher
@@ -74,8 +55,7 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 	}
 
 	/**
-	 * @param tableMetasInfoFetcher
-	 *            the tableMetasInfoFetcher to set
+	 * @param tableMetasInfoFetcher the tableMetasInfoFetcher to set
 	 */
 	public void setTableMetasInfoFetcher(TableMetaInfoFetcher tableMetasInfoFetcher) {
 		this.tableMetasInfoFetcher = tableMetasInfoFetcher;
@@ -83,17 +63,16 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.dianping.puma.common.LifeCycle#start()
 	 */
 	@Override
 	public void start() throws Exception {
-		tableMetasInfoFetcher.refreshTableMeta(null, true);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.dianping.puma.common.LifeCycle#stop()
 	 */
 	@Override
@@ -173,11 +152,10 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 		}
 
 		if (result != null && !result.isEmpty() && result.getData() != null) {
-			BinlogInfo binlogInfo = new BinlogInfo(context.getBinlogFileName(), context.getBinlogStartPos(),
-					context.getEventIndex());
+			BinlogInfo binlogInfo = new BinlogInfo(context.getDBServerId(), context.getBinlogFileName(),
+					context.getBinlogStartPos(), context.getEventIndex(), binlogEvent.getHeader().getTimestamp());
 			result.getData().setBinlogInfo(binlogInfo);
 			result.getData().setServerId(binlogEvent.getHeader().getServerId());
-			result.getData().setBinlogServerId(context.getDBServerId());
 		}
 
 		return result;
@@ -202,7 +180,8 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 		}
 	}
 
-	protected void handleTransactionBeginEvent(BinlogEvent binlogEvent, DataHandlerResult result, QueryEvent queryEvent) {
+	protected void handleTransactionBeginEvent(BinlogEvent binlogEvent, DataHandlerResult result,
+			QueryEvent queryEvent) {
 		// BEGIN事件，发送一个begin transaction的事件
 		ChangedEvent dataChangedEvent = new RowChangedEvent();
 		((RowChangedEvent) dataChangedEvent).setTransactionBegin(true);
@@ -223,19 +202,20 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 		ChangedEvent dataChangedEvent = new DdlEvent();
 		DdlEvent ddlEvent = (DdlEvent) dataChangedEvent;
 		ddlEvent.setSql(sql);
-		ddlEvent.setEventType(SimpleDdlParser.getEventType(sql));
+		ddlEvent.setDdlEventType(SimpleDdlParser.getEventType(sql));
 
-		ddlEvent.setEventSubType(SimpleDdlParser.getEventSubType(ddlEvent.getEventType(), sql));
-		if (ddlEvent.getEventType() == DdlEventType.DDL_DEFAULT
-				|| ddlEvent.getEventSubType() == DdlEventSubType.DDL_SUB_DEFAULT) {
+		ddlEvent.setDdlEventSubType(SimpleDdlParser.getEventSubType(ddlEvent.getDdlEventType(), sql));
+		if (ddlEvent.getDdlEventType() == DdlEventType.DDL_DEFAULT
+				|| ddlEvent.getDdlEventSubType() == DdlEventSubType.DDL_SUB_DEFAULT) {
 			log.info("DdlEvent Type do not found. ddl sql=" + sql);
 		}
-		DdlResult ddlResult = SimpleDdlParser.getDdlResult(ddlEvent.getEventType(), ddlEvent.getEventSubType(), sql);
+		DdlResult ddlResult = SimpleDdlParser
+				.getDdlResult(ddlEvent.getDdlEventType(), ddlEvent.getDdlEventSubType(), sql);
 		if (ddlResult != null) {
 			ddlEvent.setDatabase(StringUtils.isNotBlank(ddlResult.getDatabase()) ? ddlResult.getDatabase()
 					: StringUtils.EMPTY);
 			ddlEvent.setTable(StringUtils.isNotBlank(ddlResult.getTable()) ? ddlResult.getTable() : StringUtils.EMPTY);
-			if (ddlEvent.getEventType() != DdlEventType.DDL_CREATE) {
+			if (ddlEvent.getDdlEventType() != DdlEventType.DDL_CREATE) {
 				log.info("DDL event, sql=" + sql + "  ,database =" + ddlResult.getDatabase() + " table ="
 						+ ddlResult.getTable() + " queryEvent.getDatabaseName()" + queryEvent.getDatabaseName());
 			}
@@ -244,12 +224,16 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
 			ddlEvent.setDatabase(queryEvent.getDatabaseName());
 		}
 
-		if (ddlEvent.getEventType() == DdlEventType.DDL_ALTER
-				&& ddlEvent.getEventSubType() == DdlEventSubType.DDL_ALTER_TABLE) {
+		if (ddlEvent.getDdlEventType() == DdlEventType.DDL_ALTER
+				&& ddlEvent.getDdlEventSubType() == DdlEventSubType.DDL_ALTER_TABLE) {
 			ddlEvent.setDDLType(DDLType.ALTER_TABLE);
 		}
 
-		tableMetasInfoFetcher.refreshTableMeta(ddlEvent, false);
+		try {
+			tableMetasInfoFetcher.refreshTableMeta(ddlEvent.getDatabase(), ddlEvent.getTable());
+		} catch (SQLException e) {
+			throw new RuntimeException("fetch table meta error", e);
+		}
 
 		ddlEvent.setExecuteTime(queryEvent.getHeader().getTimestamp());
 		result.setData(dataChangedEvent);

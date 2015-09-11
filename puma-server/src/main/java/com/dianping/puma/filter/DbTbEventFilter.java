@@ -5,14 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.dianping.puma.core.event.ChangedEvent;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.dianping.puma.core.event.ChangedEvent;
 
 public class DbTbEventFilter extends AbstractEventFilter {
-
-	private static final Logger LOG = LoggerFactory.getLogger(DbTbEventFilter.class);
 
 	private Map<String, Boolean> dbtbMap = new ConcurrentHashMap<String, Boolean>();
 
@@ -33,8 +30,8 @@ public class DbTbEventFilter extends AbstractEventFilter {
 					dbtbMap.put(dbName + DB_TB_SPLIT_STR + tbName, true);
 				} else {
 					if (SUFIX_ANY.length() < tbName.length()) {
-						tbPrefixList.add(dbName + DB_TB_SPLIT_STR
-								+ tbName.substring(0, tbName.length() - SUFIX_ANY.length()));
+						tbPrefixList
+						      .add(dbName + DB_TB_SPLIT_STR + tbName.substring(0, tbName.length() - SUFIX_ANY.length()));
 					} else if (SUFIX_ANY.length() == tbName.length()) {
 						tbPrefixList.add(dbName + DB_TB_SPLIT_STR);
 					}

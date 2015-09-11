@@ -11,7 +11,7 @@ public class Time2Column implements Column {
 	}
 	
 	@Override
-	public Object getValue() {
+	public String getValue() {
 		return value;
 	}
 	

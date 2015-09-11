@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-    version="2.5">
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5">
+
     <display-name>Archetype Created Web Application</display-name>
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>classpath*:applicationContext.xml</param-value>
+        <param-value>
+            classpath*:config/spring/appcontext-core.xml,
+            classpath*:config/spring/db/appcontext-dao.xml,
+            classpath*:config/spring/db/appcontext-db.xml,
+        </param-value>
     </context-param>
     
      <session-config>
@@ -48,7 +54,7 @@
         <init-param>
             <param-name>contextConfigLocation</param-name>
             <param-value>
-        classpath*:/servlet-context.xml
+                classpath*:config/spring/appcontext-mvc.xml
             </param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
@@ -56,7 +62,7 @@
 
     <servlet-mapping>
         <servlet-name>appServlet</servlet-name>
-        <url-pattern>/</url-pattern>
+        <url-pattern>/a/*</url-pattern>
     </servlet-mapping>
 
 </web-app>

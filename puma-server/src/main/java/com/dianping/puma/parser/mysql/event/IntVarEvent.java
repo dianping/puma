@@ -18,9 +18,9 @@ package com.dianping.puma.parser.mysql.event;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import com.dianping.puma.bo.PumaContext;
-import com.dianping.puma.core.datatype.UnsignedLong;
+import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.utils.PacketUtils;
+import com.google.common.primitives.UnsignedLong;
 
 /**
  * TODO Comment of IntvarEvent
@@ -31,7 +31,7 @@ import com.dianping.puma.utils.PacketUtils;
 public class IntVarEvent extends AbstractBinlogEvent {
 	private static final long	serialVersionUID	= 5285705565213997195L;
 	private byte				type;
-	private UnsignedLong		value;
+	private UnsignedLong value;
 
 	/**
 	 * @return the type
@@ -67,7 +67,7 @@ public class IntVarEvent extends AbstractBinlogEvent {
 	@Override
 	public void doParse(ByteBuffer buf, PumaContext context) throws IOException {
 		type = buf.get();
-		value = UnsignedLong.asUnsigned(PacketUtils.readLong(buf, 8));
+		value = UnsignedLong.fromLongBits(PacketUtils.readLong(buf, 8));
 	}
 
 }

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.PumaTargetDao">
+
+    <select id="findById" resultType="PumaTargetEntity">
+        SELECT * FROM PumaTarget WHERE `id` = #{id}
+    </select>
+
+    <select id="findByDatabase" resultType="PumaTargetEntity">
+        SELECT * FROM PumaTarget WHERE `database` = #{database}
+    </select>
+
+    <select id="findAll" resultType="PumaTargetEntity">
+        SELECT * FROM PumaTarget
+    </select>
+
+    <insert id="insert" parameterType="PumaTargetEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT IGNORE INTO PumaTarget
+        (
+        `database`,
+        `table`
+        )
+        VALUES
+        (
+        #{database},
+        #{table}
+        )
+    </insert>
+
+    <insert id="replace" parameterType="PumaTargetEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT IGNORE INTO PumaTarget
+        (
+        `database`,
+        `table`
+        )
+        VALUES
+        (
+        #{database},
+        #{table}
+        )
+        ON DUPLICATE KEY UPDATE
+        `database` = VALUES(`database`),
+        `table` = VALUES(`table`)
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM PumaTarget WHERE `id` = #{id}
+    </delete>
+</mapper>

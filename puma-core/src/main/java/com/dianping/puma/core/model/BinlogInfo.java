@@ -1,116 +1,104 @@
 package com.dianping.puma.core.model;
 
+import com.google.common.base.Objects;
+
 import java.io.Serializable;
 
-public class BinlogInfo implements Serializable, Comparable<BinlogInfo> {
+public class BinlogInfo implements Serializable {
 
-	private static final long serialVersionUID = 5056491879587690001L;
+    private static final long serialVersionUID = 5056491879587690001L;
 
-	private String binlogFile;
+    private long serverId;
 
-	private Long binlogPosition;
+    private String binlogFile;
 
-	private int eventIndex;
+    private long binlogPosition;
 
-	public BinlogInfo() {
-	}
+    private int eventIndex;
 
-	public BinlogInfo(String binlogFile, Long binlogPosition) {
-		this.binlogFile = binlogFile;
-		this.binlogPosition = binlogPosition;
-		this.eventIndex = 0;
-	}
+    private long timestamp;
 
-	public BinlogInfo(String binlogFile, Long binlogPosition, int eventIndex) {
-		this.binlogFile = binlogFile;
-		this.binlogPosition = binlogPosition;
-		this.eventIndex = eventIndex;
-	}
+    public BinlogInfo() {
+    }
 
-	public String getBinlogFile() {
-		return binlogFile;
-	}
+    public BinlogInfo(long serverId, String binlogFile, Long binlogPosition, int eventIndex, long timestamp) {
+        this.serverId = serverId;
+        this.binlogFile = binlogFile;
+        this.binlogPosition = binlogPosition;
+        this.eventIndex = eventIndex;
+        this.timestamp = timestamp;
+    }
 
-	public void setBinlogFile(String binlogFile) {
-		this.binlogFile = binlogFile;
-	}
+    public String getBinlogFile() {
+        return binlogFile;
+    }
 
-	public Long getBinlogPosition() {
-		return binlogPosition;
-	}
+    public BinlogInfo setBinlogFile(String binlogFile) {
+        this.binlogFile = binlogFile;
+        return this;
+    }
 
-	public void setBinlogPosition(Long binlogPosition) {
-		this.binlogPosition = binlogPosition;
-	}
+    public long getBinlogPosition() {
+        return binlogPosition;
+    }
 
-	public int getEventIndex() {
-		return eventIndex;
-	}
+    public BinlogInfo setBinlogPosition(long binlogPosition) {
+        this.binlogPosition = binlogPosition;
+        return this;
+    }
 
-	public void setEventIndex(int eventIndex) {
-		this.eventIndex = eventIndex;
-	}
+    public int getEventIndex() {
+        return eventIndex;
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || !(o instanceof BinlogInfo)) {
-			return false;
-		} else {
-			BinlogInfo binlogInfo = (BinlogInfo) o;
-			if (this.binlogFile.equals(binlogInfo.getBinlogFile())
-					&& this.getBinlogPosition().longValue() == binlogInfo.getBinlogPosition().longValue()
-					&& this.getEventIndex() == binlogInfo.getEventIndex()) {
-				return true;
-			}
-			return false;
-		}
-	}
+    public BinlogInfo setEventIndex(int eventIndex) {
+        this.eventIndex = eventIndex;
+        return this;
+    }
 
-	@Override
-	public int hashCode() {
-		int result = this.getBinlogFile().hashCode();
-		result = 31 * result + (int) (this.getBinlogPosition() ^ (this.getBinlogPosition() >>> 32));
-		result = 31 * result + this.eventIndex;
-		return result;
-	}
+    public long getServerId() {
+        return serverId;
+    }
 
-	@Override
-	public String toString() {
-		return "BinlogInfo [binlogFile=" + binlogFile + ", binlogPosition=" + binlogPosition + ", eventIndex="
-				+ eventIndex + " ]";
-	}
+    public BinlogInfo setServerId(long serverId) {
+        this.serverId = serverId;
+        return this;
+    }
 
-	public int compareTo(BinlogInfo binlogInfo) {
-		String leftBinlogFile = this.getBinlogFile();
-		int leftBinlogFileNum = Integer.parseInt(leftBinlogFile.substring(leftBinlogFile.indexOf(".") + 1));
-		String rightBinlogFile = binlogInfo.getBinlogFile();
-		int rightBinlogFileNum = Integer.parseInt(rightBinlogFile.substring(rightBinlogFile.indexOf(".") + 1));
+    public long getTimestamp() {
+        return timestamp;
+    }
 
-		if (leftBinlogFileNum < rightBinlogFileNum) {
-			return -1;
-		} else if (leftBinlogFileNum > rightBinlogFileNum) {
-			return 1;
-		} else {
-			long leftBinlogPosition = this.getBinlogPosition();
-			long rightBinlogPosition = binlogInfo.getBinlogPosition();
+    public BinlogInfo setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+        return this;
+    }
 
-			if (leftBinlogPosition < rightBinlogPosition) {
-				return -1;
-			} else if (leftBinlogPosition > rightBinlogPosition) {
-				return 1;
-			} else {
-				if (this.getEventIndex() == binlogInfo.getEventIndex()) {
-					return 0;
-				}else if(this.getEventIndex() > binlogInfo.getEventIndex()){
-					return 1;
-				}else{
-					return -1;
-				}
-			}
-		}
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BinlogInfo that = (BinlogInfo) o;
+        return Objects.equal(serverId, that.serverId) &&
+                Objects.equal(binlogPosition, that.binlogPosition) &&
+                Objects.equal(eventIndex, that.eventIndex) &&
+                Objects.equal(timestamp, that.timestamp) &&
+                Objects.equal(binlogFile, that.binlogFile);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(serverId, binlogFile, binlogPosition, eventIndex, timestamp);
+    }
+
+    @Override
+    public String toString() {
+        return "BinlogInfo{" +
+                "serverId=" + serverId +
+                ", binlogFile='" + binlogFile + '\'' +
+                ", binlogPosition=" + binlogPosition +
+                ", eventIndex=" + eventIndex +
+                ", timestamp=" + timestamp +
+                '}';
+    }
 }

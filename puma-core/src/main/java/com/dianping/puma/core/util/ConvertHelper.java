@@ -1,14 +1,13 @@
 package com.dianping.puma.core.util;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 /**
  * Created by Dozer on 11/21/14.
@@ -18,8 +17,6 @@ public final class ConvertHelper {
     private final static Gson gson = new Gson();
 
     private final static Charset charset = Charset.forName("UTF-8");
-
-    private static Logger logger = LoggerFactory.getLogger(ConvertHelper.class);
 
     public static String toJson(Object item) {
         return gson.toJson(item);

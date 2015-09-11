@@ -23,7 +23,8 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.dianping.puma.common.SystemStatusContainer;
+import com.dianping.puma.status.SystemStatusManager;
+import com.dianping.puma.storage.bucket.DataBucketManager;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
@@ -33,43 +34,50 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  */
 public class DefaultArchiveStrategy implements ArchiveStrategy {
 	private static final int PERCENT_100 = 100;
-	private static final Logger	log					= Logger.getLogger(DefaultArchiveStrategy.class);
-	private List<String>		toBeArchiveBuckets	= new ArrayList<String>();
-	private List<String>		toBeDeleteBuckets	= new ArrayList<String>();
-	private int					maxMasterFileCount	= 20;
-	private int					stopTheWorldCount 	= 10;
-	private int					startTheWorldCountPercentage = 50;
-	private String				serverName;
+
+	private static final Logger log = Logger.getLogger(DefaultArchiveStrategy.class);
+
+	private List<String> toBeArchiveBuckets = new ArrayList<String>();
+
+	private List<String> toBeDeleteBuckets = new ArrayList<String>();
+
+	private int maxMasterFileCount = 20;
+
+	private int stopTheWorldCount = 10;
+
+	private int startTheWorldCountPercentage = 50;
+
+	private String serverName;
 
 	/**
 	 * @param maxMasterFileCount
-	 *            the maxMasterFileCount to set
+	 *           the maxMasterFileCount to set
 	 */
 	public void setMaxMasterFileCount(int maxMasterFileCount) {
 		this.maxMasterFileCount = maxMasterFileCount;
 	}
 
 	public void setStopTheWorldCount(int stopTheWorldCount) {
-   	this.stopTheWorldCount = stopTheWorldCount;
-   }
+		this.stopTheWorldCount = stopTheWorldCount;
+	}
 
 	public void setStartTheWorldCountPercentage(int startTheWorldCountPercentage) {
-   	this.startTheWorldCountPercentage = startTheWorldCountPercentage;
-   }
+		this.startTheWorldCountPercentage = startTheWorldCountPercentage;
+	}
 
 	public void setServerName(String serverName) {
-   	this.serverName = serverName;
-   }
+		this.serverName = serverName;
+	}
 
 	@Override
-	public void archive(BucketIndex masterIndex, BucketIndex slaveIndex) {
+	public void archive(DataBucketManager masterIndex, DataBucketManager slaveIndex) {
 		try {
 			if (toBeDeleteBuckets.size() >= stopTheWorldCount) {
-				SystemStatusContainer.instance.stopTheWorld(serverName);
+				SystemStatusManager.stopTheWorld(serverName);
 			} else if (toBeDeleteBuckets.size() <= stopTheWorldCount * startTheWorldCountPercentage / PERCENT_100) {
-				SystemStatusContainer.instance.startTheWorld(serverName);
+				SystemStatusManager.startTheWorld(serverName);
 			}
-			
+
 			if (masterIndex.size() > maxMasterFileCount) {
 				toBeArchiveBuckets.addAll(masterIndex.bulkGetRemainN(maxMasterFileCount));
 			}
@@ -88,7 +96,7 @@ public class DefaultArchiveStrategy implements ArchiveStrategy {
 					}
 					slaveIndex.add(copiedFiles);
 					masterIndex.remove(copiedFiles);
-					
+
 					toBeDeleteBuckets.addAll(copiedFiles);
 					cleanUpLocalFiles(masterIndex.getBaseDir(), toBeDeleteBuckets);
 				}
@@ -119,7 +127,7 @@ public class DefaultArchiveStrategy implements ArchiveStrategy {
 		}
 	}
 
-	private boolean doArchive(String baseDir, String path, BucketIndex dest, List<String> copiedFiles) {
+	private boolean doArchive(String baseDir, String path, DataBucketManager dest, List<String> copiedFiles) {
 		try {
 			dest.copyFromLocal(baseDir, path);
 			copiedFiles.add(path);

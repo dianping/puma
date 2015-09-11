@@ -1,35 +1,28 @@
-INSERT INTO 
-#if (${event.database} == "")
-`${event.table}`
-#else
-`${event.database}`.`${event.table}`
-#end
+INSERT INTO
+`${database}`.`${formatTables}`
 (
 #set($ask = "" )
-#foreach($name2ColumnInfo in $event.columns.entrySet())
-  `${name2ColumnInfo.key}`
+#foreach($entry in $columns.entrySet())
+  `${entry.key}`
   #set($ask = "${ask},?")
-  #if($velocityCount < ${event.columns.size()})
+  #if($velocityCount < ${columns.size()})
     ,
   #end
 #end
 ) 
 VALUES 
 (${ask.substring(1)})
-##尾部的update语句（重复时使用update）
 ON DUPLICATE KEY UPDATE
 #set($updateSql = "")
-#foreach($name2ColumnInfo in $event.columns.entrySet())
-  #if(!$name2ColumnInfo.value.isKey())
-     #set($updateSql = "$updateSql`${name2ColumnInfo.key}`=VALUES(${name2ColumnInfo.key})")
-     #if($velocityCount < ${event.columns.size()})
+#foreach($entry in $columns.entrySet())
+  #if(!$entry.value.isPk())
+     #set($updateSql = "$updateSql`${entry.key}`=VALUES(${entry.key})")
+     #if($velocityCount < ${columns.size()})
        #set($updateSql = "$updateSql,")
      #end
   #end
-  ##如果key在最后，则最后的逗号需要去掉
-  #if($name2ColumnInfo.value.isKey() && $velocityCount >= ${event.columns.size()} && $updateSql.length()>0)
+  #if($entry.value.isPk() && $velocityCount >= ${columns.size()} && $updateSql.length()>0)
     #set($length = ${updateSql.length()})
     #set($updateSql = "${updateSql.substring(0,$length-1)}")
   #end
 #end
-$updateSql

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.PumaServerDao">
+
+    <select id="findById" resultType="PumaServerEntity">
+        SELECT * FROM PumaServer WHERE `id` = #{id}
+    </select>
+
+    <select id="findByIds" resultType="PumaServerEntity">
+        SELECT * FROM PumaServer WHERE `id` IN
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM PumaServer
+    </select>
+
+    <select id="findAll" resultType="PumaServerEntity">
+        SELECT * FROM PumaServer
+    </select>
+
+    <select id="findAllAlive" resultType="PumaServerEntity">
+        SELECT * FROM PumaServer where UpdateTime >= DATE_SUB(NOW(),INTERVAL 15 MINUTE)
+    </select>
+
+    <select id="findByPage" resultType="PumaServerEntity">
+        SELECT * FROM PumaServer limit #{offset},#{limit}
+    </select>
+
+    <select id="findByHost" resultType="PumaServerEntity">
+        SELECT * FROM PumaServer WHERE `host` = #{host}
+    </select>
+
+    <select id="findByName" resultType="PumaServerEntity">
+        SELECT * FROM PumaServer WHERE `name` = #{name}
+    </select>
+
+    <insert id="insert" parameterType="PumaServerEntity">
+        INSERT INTO PumaServer
+        (
+        `name`,
+        `host`,
+        `port`,
+        `updateTime`
+        )
+        VALUES
+        (
+        #{name},
+        #{host},
+        #{port},
+        #{updateTime}
+        )
+    </insert>
+
+    <update id="update" parameterType="PumaServerEntity">
+        update PumaServer
+        set
+        `name` = #{name},
+        `host` = #{host},
+        `port` = #{port},
+        `updateTime` = #{updateTime}
+        where `id` = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM PumaServer WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByName">
+        DELETE FROM PumaServer WHERE name = #{name}
+    </delete>
+
+</mapper>

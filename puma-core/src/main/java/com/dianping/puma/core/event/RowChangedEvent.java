@@ -1,12 +1,12 @@
 /**
  * Project: ${puma-client.aid}
- *
+ * <p/>
  * File Created at 2012-6-25
  * $Id$
- *
+ * <p/>
  * Copyright 2010 dianping.com.
  * All rights reserved.
- *
+ * <p/>
  * This software is the confidential and proprietary information of
  * Dianping Company. ("Confidential Information").  You shall not
  * disclose such Confidential Information and shall use it only in
@@ -15,6 +15,7 @@
  */
 package com.dianping.puma.core.event;
 
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.sql.DMLType;
 
 import java.io.Serializable;
@@ -89,316 +90,321 @@ import java.util.Map;
  */
 public class RowChangedEvent extends ChangedEvent implements Serializable, Cloneable {
 
-	private static final long serialVersionUID = -3426837914222597530L;
+    private final EventType eventType = EventType.DML;
 
-	public static final int INSERT = 0;
+    private static final long serialVersionUID = -3426837914222597530L;
 
-	public static final int DELETE = 1;
+    public static final int INSERT = 0;
 
-	public static final int UPDATE = 2;
+    public static final int DELETE = 1;
 
-	private Map<String, ColumnInfo> columns = new HashMap<String, ColumnInfo>();
+    public static final int UPDATE = 2;
 
-	private int actionType;
+    private int actionType;
 
-	private DMLType dmlType;
+    private DMLType dmlType;
 
-	private boolean isTransactionBegin = false;
+    private boolean isTransactionBegin = false;
 
-	private boolean isTransactionCommit = false;
+    private boolean isTransactionCommit = false;
 
-	private boolean sync = false;
+    private Map<String, ColumnInfo> columns = new HashMap<String, ColumnInfo>();
 
-	public boolean isSync() {
-		return sync;
-	}
+    public RowChangedEvent(){
+    }
+    
+    public RowChangedEvent(long executionTime,long serverId, String binlogFile, long binlogPosition){
+   	 this.executeTime = executionTime;
+   	 this.serverId = serverId;
+   	 this.binlogInfo = new BinlogInfo(serverId, binlogFile, binlogPosition, 0, executionTime);
+    }
+    
+    public DMLType getDmlType() {
+        return dmlType;
+    }
 
-	public void setSync(boolean sync) {
-		this.sync = sync;
-	}
+    public void setDmlType(DMLType dmlType) {
+        this.dmlType = dmlType;
+    }
 
-	public DMLType getDmlType() {
-		return dmlType;
-	}
+    /**
+     * @return the isTransactionBegin
+     */
+    public boolean isTransactionBegin() {
+        return isTransactionBegin;
+    }
 
-	public void setDmlType(DMLType dmlType) {
-		this.dmlType = dmlType;
-	}
+    /**
+     * @param isTransactionBegin the isTransactionBegin to set
+     */
+    public void setTransactionBegin(boolean isTransactionBegin) {
+        this.isTransactionBegin = isTransactionBegin;
+    }
 
-	/**
-	 * @return the isTransactionBegin
-	 */
-	public boolean isTransactionBegin() {
-		return isTransactionBegin;
-	}
+    /**
+     * @return the isTransactionCommit
+     */
+    public boolean isTransactionCommit() {
+        return isTransactionCommit;
+    }
 
-	/**
-	 * @param isTransactionBegin the isTransactionBegin to set
-	 */
-	public void setTransactionBegin(boolean isTransactionBegin) {
-		this.isTransactionBegin = isTransactionBegin;
-	}
+    /**
+     * @param isTransactionCommit the isTransactionCommit to set
+     */
+    public void setTransactionCommit(boolean isTransactionCommit) {
+        this.isTransactionCommit = isTransactionCommit;
+    }
 
-	/**
-	 * @return the isTransactionCommit
-	 */
-	public boolean isTransactionCommit() {
-		return isTransactionCommit;
-	}
+    /**
+     * @return the columns
+     */
+    public Map<String, ColumnInfo> getColumns() {
+        return columns;
+    }
 
-	/**
-	 * @param isTransactionCommit the isTransactionCommit to set
-	 */
-	public void setTransactionCommit(boolean isTransactionCommit) {
-		this.isTransactionCommit = isTransactionCommit;
-	}
+    /**
+     * @param columns the columns to set
+     */
+    public void setColumns(Map<String, ColumnInfo> columns) {
+        this.columns = columns;
+    }
 
-	/**
-	 * @return the columns
-	 */
-	public Map<String, ColumnInfo> getColumns() {
-		return columns;
-	}
+    /**
+     * @return the actionType
+     */
+    public int getActionType() {
+        return actionType;
+    }
 
-	/**
-	 * @param columns the columns to set
-	 */
-	public void setColumns(Map<String, ColumnInfo> columns) {
-		this.columns = columns;
-	}
+    /**
+     * @param actionType the actionType to set
+     */
+    public void setActionType(int actionType) {
+        this.actionType = actionType;
+    }
 
-	/**
-	 * @return the actionType
-	 */
-	public int getActionType() {
-		return actionType;
-	}
+    @Override
+    public String genFullName() {
+        if (isTransactionBegin || isTransactionCommit) {
+            return getDatabase();
+        } else {
+            return getDatabase() + "." + getTable();
+        }
+    }
 
-	/**
-	 * @param actionType the actionType to set
-	 */
-	public void setActionType(int actionType) {
-		this.actionType = actionType;
-	}
+    /*
+      * (non-Javadoc)
+      * @see java.lang.Object#toString()
+      */
+    @Override
+    public String toString() {
+        return "RowChangedEvent [columns=" + columns + ", actionType=" + actionType + ", isTransactionBegin="
+                + isTransactionBegin
+                + ", isTransactionCommit=" + isTransactionCommit + ", super.toString()=" + super.toString() + "]";
+    }
 
-	@Override
-	public String genFullName() {
-		if (isTransactionBegin || isTransactionCommit) {
-			return getDatabase();
-		} else {
-			return getDatabase() + "." + getTable();
-		}
-	}
+    @Override
+    public RowChangedEvent clone() {
+        RowChangedEvent e;
+        try {
+            e = (RowChangedEvent) super.clone();
+        } catch (CloneNotSupportedException e1) {
+            throw new RuntimeException(e1);
+        }
+        e.columns = new HashMap<String, ColumnInfo>();
+        for (Map.Entry<String, ColumnInfo> entry : this.columns.entrySet()) {
+            ColumnInfo columnInfo0 = entry.getValue();
+            ColumnInfo columnInfo = new ColumnInfo(columnInfo0.isKey, columnInfo0.oldValue, columnInfo0.newValue);
+            e.columns.put(entry.getKey(), columnInfo);
+        }
+        return e;
+    }
 
-	/*
-	  * (non-Javadoc)
-	  * @see java.lang.Object#toString()
-	  */
-	@Override
-	public String toString() {
-		return "RowChangedEvent [columns=" + columns + ", actionType=" + actionType + ", isTransactionBegin="
-				+ isTransactionBegin
-				+ ", isTransactionCommit=" + isTransactionCommit + ", super.toString()=" + super.toString() + "]";
-	}
+    @Override
+    public EventType getEventType() {
+        return eventType;
+    }
 
-	@Override
-	public RowChangedEvent clone() {
-		RowChangedEvent e;
-		try {
-			e = (RowChangedEvent) super.clone();
-		} catch (CloneNotSupportedException e1) {
-			throw new RuntimeException(e1);
-		}
-		e.columns = new HashMap<String, ColumnInfo>();
-		for (Map.Entry<String, ColumnInfo> entry : this.columns.entrySet()) {
-			ColumnInfo columnInfo0 = entry.getValue();
-			ColumnInfo columnInfo = new ColumnInfo(columnInfo0.isKey, columnInfo0.oldValue, columnInfo0.newValue);
-			e.columns.put(entry.getKey(), columnInfo);
-		}
-		return e;
-	}
+    public static class ColumnInfo implements Serializable {
+        private static final long serialVersionUID = 8036820944314281838L;
 
-	public static class ColumnInfo implements Serializable {
-		private static final long serialVersionUID = 8036820944314281838L;
+        private boolean isKey;
 
-		private boolean isKey;
+        private Object oldValue;
 
-		private Object oldValue;
+        private Object newValue;
 
-		private Object newValue;
+        /**
+         *
+         */
+        public ColumnInfo() {
+            super();
+        }
 
-		/**
-		 *
-		 */
-		public ColumnInfo() {
-			super();
-		}
+        /**
+         * @param isKey
+         * @param oldValue
+         * @param newValue
+         */
+        public ColumnInfo(boolean isKey, Object oldValue, Object newValue) {
+            super();
+            this.isKey = isKey;
+            this.oldValue = oldValue;
+            this.newValue = newValue;
+        }
 
-		/**
-		 * @param isKey
-		 * @param oldValue
-		 * @param newValue
-		 */
-		public ColumnInfo(boolean isKey, Object oldValue, Object newValue) {
-			super();
-			this.isKey = isKey;
-			this.oldValue = oldValue;
-			this.newValue = newValue;
-		}
+        /**
+         * @return the isKey
+         */
+        public boolean isKey() {
+            return isKey;
+        }
 
-		/**
-		 * @return the isKey
-		 */
-		public boolean isKey() {
-			return isKey;
-		}
+        /**
+         * @param isKey the isKey to set
+         */
+        public void setKey(boolean isKey) {
+            this.isKey = isKey;
+        }
 
-		/**
-		 * @param isKey the isKey to set
-		 */
-		public void setKey(boolean isKey) {
-			this.isKey = isKey;
-		}
+        /**
+         * @return the oldValue
+         */
+        public Object getOldValue() {
+            return oldValue;
+        }
 
-		/**
-		 * @return the oldValue
-		 */
-		public Object getOldValue() {
-			return oldValue;
-		}
+        /**
+         * @param oldValue the oldValue to set
+         */
+        public void setOldValue(Object oldValue) {
+            this.oldValue = oldValue;
+        }
 
-		/**
-		 * @param oldValue the oldValue to set
-		 */
-		public void setOldValue(Object oldValue) {
-			this.oldValue = oldValue;
-		}
+        /**
+         * @return the newValue
+         */
+        public Object getNewValue() {
+            return newValue;
+        }
 
-		/**
-		 * @return the newValue
-		 */
-		public Object getNewValue() {
-			return newValue;
-		}
-
-		/**
-		 * @param newValue the newValue to set
-		 */
-		public void setNewValue(Object newValue) {
-			this.newValue = newValue;
-		}
+        /**
+         * @param newValue the newValue to set
+         */
+        public void setNewValue(Object newValue) {
+            this.newValue = newValue;
+        }
 
 
+        /*
+            * (non-Javadoc)
+            * @see java.lang.Object#toString()
+            */
+        @Override
+        public String toString() {
+            return "ColumnInfo [isKey=" + isKey + ", oldValue=" + oldValue + ", newValue=" + newValue + "]";
+        }
 
-		/*
-			* (non-Javadoc)
-			* @see java.lang.Object#toString()
-			*/
-		@Override
-		public String toString() {
-			return "ColumnInfo [isKey=" + isKey + ", oldValue=" + oldValue + ", newValue=" + newValue + "]";
-		}
+        /*
+            * (non-Javadoc)
+            * @see java.lang.Object#hashCode()
+            */
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + (isKey ? 1231 : 1237);
+            result = prime * result + ((newValue == null) ? 0 : newValue.hashCode());
+            result = prime * result + ((oldValue == null) ? 0 : oldValue.hashCode());
+            return result;
+        }
 
-		/*
-			* (non-Javadoc)
-			* @see java.lang.Object#hashCode()
-			*/
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + (isKey ? 1231 : 1237);
-			result = prime * result + ((newValue == null) ? 0 : newValue.hashCode());
-			result = prime * result + ((oldValue == null) ? 0 : oldValue.hashCode());
-			return result;
-		}
+        /*
+            * (non-Javadoc)
+            * @see java.lang.Object#equals(java.lang.Object)
+            */
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            ColumnInfo other = (ColumnInfo) obj;
+            if (isKey != other.isKey) {
+                return false;
+            }
+            if (newValue == null) {
+                if (other.newValue != null) {
+                    return false;
+                }
+            } else if (!newValue.equals(other.newValue)) {
+                return false;
+            }
+            if (oldValue == null) {
+                if (other.oldValue != null) {
+                    return false;
+                }
+            } else if (!oldValue.equals(other.oldValue)) {
+                return false;
+            }
+            return true;
+        }
 
-		/*
-			* (non-Javadoc)
-			* @see java.lang.Object#equals(java.lang.Object)
-			*/
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj == null) {
-				return false;
-			}
-			if (getClass() != obj.getClass()) {
-				return false;
-			}
-			ColumnInfo other = (ColumnInfo) obj;
-			if (isKey != other.isKey) {
-				return false;
-			}
-			if (newValue == null) {
-				if (other.newValue != null) {
-					return false;
-				}
-			} else if (!newValue.equals(other.newValue)) {
-				return false;
-			}
-			if (oldValue == null) {
-				if (other.oldValue != null) {
-					return false;
-				}
-			} else if (!oldValue.equals(other.oldValue)) {
-				return false;
-			}
-			return true;
-		}
+    }
 
-	}
+    /*
+      * (non-Javadoc)
+      * @see java.lang.Object#hashCode()
+      */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + actionType;
+        result = prime * result + ((columns == null) ? 0 : columns.hashCode());
+        result = prime * result + (isTransactionBegin ? 1231 : 1237);
+        result = prime * result + (isTransactionCommit ? 1231 : 1237);
+        return result;
+    }
 
-	/*
-	  * (non-Javadoc)
-	  * @see java.lang.Object#hashCode()
-	  */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + actionType;
-		result = prime * result + ((columns == null) ? 0 : columns.hashCode());
-		result = prime * result + (isTransactionBegin ? 1231 : 1237);
-		result = prime * result + (isTransactionCommit ? 1231 : 1237);
-		return result;
-	}
-
-	/*
-	  * (non-Javadoc)
-	  * @see java.lang.Object#equals(java.lang.Object)
-	  */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!super.equals(obj)) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		RowChangedEvent other = (RowChangedEvent) obj;
-		if (actionType != other.actionType) {
-			return false;
-		}
-		if (columns == null) {
-			if (other.columns != null) {
-				return false;
-			}
-		} else if (!columns.equals(other.columns)) {
-			return false;
-		}
-		if (isTransactionBegin != other.isTransactionBegin) {
-			return false;
-		}
-		if (isTransactionCommit != other.isTransactionCommit) {
-			return false;
-		}
-		return true;
-	}
+    /*
+      * (non-Javadoc)
+      * @see java.lang.Object#equals(java.lang.Object)
+      */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        RowChangedEvent other = (RowChangedEvent) obj;
+        if (actionType != other.actionType) {
+            return false;
+        }
+        if (columns == null) {
+            if (other.columns != null) {
+                return false;
+            }
+        } else if (!columns.equals(other.columns)) {
+            return false;
+        }
+        if (isTransactionBegin != other.isTransactionBegin) {
+            return false;
+        }
+        if (isTransactionCommit != other.isTransactionCommit) {
+            return false;
+        }
+        return true;
+    }
 
 }

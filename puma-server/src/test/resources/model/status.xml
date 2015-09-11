@@ -1,0 +1,49 @@
+<status>
+	<clients>
+		<client ip="192.168.1.1" database="test" withDml="true"
+			withDdl="true" withTransaction="true" codec="raw|json">
+			<table name="test1"></table>
+			<table name="test2"></table>
+			<table name="test3"></table>
+			<sendBinlogInfo>
+				<serverId>1</serverId>
+				<binlogFile>mysql-00001</binlogFile>
+				<binlogPosition>123213</binlogPosition>
+			</sendBinlogInfo>
+			<ackBinlogInfo>
+				<serverId>1</serverId>
+				<binlogFile>mysql-00001</binlogFile>
+				<binlogPosition>123213</binlogPosition>
+			</ackBinlogInfo>
+		</client>
+		<client ip="192.168.1.2"></client>
+	</clients>
+
+	<servers>
+		<server name="database1" host="192.168.1.1" port="3306"
+			target="test">
+			<binlogFile>mysql-00001</binlogFile>
+			<binlogPosition>123213</binlogPosition>
+			<bucketDate>20120304</bucketDate>
+			<bucketName>Bucket-0</bucketName>
+			<bucketSizeBytes>1023</bucketSizeBytes>
+
+			<qps>123</qps>
+
+			<totalParsedEvent>1024</totalParsedEvent>
+			<totalStoreBytes>1231231</totalStoreBytes>
+			<totalInsertEvent>100</totalInsertEvent>
+			<totalUpdateEvent>100</totalUpdateEvent>
+			<totalDeleteEvent>100</totalDeleteEvent>
+		</server>
+		<server name="database2">
+		</server>
+	</servers>
+
+	<qps>123</qps>
+	<totalParsedEvent>1024</totalParsedEvent>
+	<totalStoreBytes>1231231</totalStoreBytes>
+	<totalInsertEvent>100</totalInsertEvent>
+	<totalUpdateEvent>100</totalUpdateEvent>
+	<totalDeleteEvent>100</totalDeleteEvent>
+</status>

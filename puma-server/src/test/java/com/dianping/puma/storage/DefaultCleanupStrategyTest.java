@@ -28,99 +28,111 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
+import com.dianping.puma.storage.index.DefaultIndexManager;
+import com.dianping.puma.storage.index.IndexKeyConvertor;
+import com.dianping.puma.storage.index.IndexKeyImpl;
+import com.dianping.puma.storage.index.IndexValueImpl;
+import com.dianping.puma.storage.index.IndexValueConvertor;
+
 /**
- * TODO Comment of DefaultCleanupStrategyTest
  * 
  * @author Leo Liang
  * 
  */
 public class DefaultCleanupStrategyTest {
 
-    private File baseDir;
-    private File binlogIndexBaseDir;
+	private File baseDir;
 
-    @Before
-    public void before() {
-        baseDir = new File(System.getProperty("java.io.tmpdir", "."), "Puma");
-        binlogIndexBaseDir = new File(System.getProperty("java.io.tmpdir", "."), "binlogIndex");
-    }
+	private File binlogIndexBaseDir;
 
-    @Test
-    public void testCleanup() throws Exception {
-        int preservedDay = 5;
-        DefaultCleanupStrategy defaultCleanupStrategy = new DefaultCleanupStrategy();
-        defaultCleanupStrategy.setPreservedDay(preservedDay);
-        LocalFileBucketIndex index = new LocalFileBucketIndex();
-        index.setBaseDir(baseDir.getAbsolutePath());
-        index.setBucketFilePrefix("bucket-");
+	@Before
+	public void before() {
+		baseDir = new File(System.getProperty("java.io.tmpdir", "."), "Puma");
+		binlogIndexBaseDir = new File(System.getProperty("java.io.tmpdir", "."), "binlogIndex");
+	}
 
-        DefaultDataIndexImpl<BinlogIndexKey, Long> binlogIndex = new DefaultDataIndexImpl<BinlogIndexKey, Long>(
-                binlogIndexBaseDir.getAbsolutePath(), new LongIndexItemConvertor(), new BinlogIndexKeyConvertor());
+	@Test
+	public void testCleanup() throws Exception {
+		int preservedDay = 5;
+		DefaultCleanupStrategy defaultCleanupStrategy = new DefaultCleanupStrategy();
+		defaultCleanupStrategy.setPreservedDay(preservedDay);
+		LocalFileDataBucketManager index = new LocalFileDataBucketManager();
+		index.setBaseDir(baseDir.getAbsolutePath());
+		index.setBucketFilePrefix("bucket-");
 
-        Calendar cal = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-        binlogIndex.start();
-        defaultCleanupStrategy.addDataIndex(binlogIndex);
+		DefaultIndexManager<IndexKeyImpl, IndexValueImpl> binlogIndex = new DefaultIndexManager<IndexKeyImpl, IndexValueImpl>(
+		      binlogIndexBaseDir.getAbsolutePath(), new IndexKeyConvertor(), new IndexValueConvertor());
 
-        for (int i = 0; i <= 12; i++) {
-            cal.add(Calendar.DAY_OF_MONTH, i == 0 ? 0 : -1);
-            File file = new File(baseDir, sdf.format(cal.getTime()) + "/bucket-0");
-            file.getParentFile().mkdirs();
-            file.createNewFile();
-            binlogIndex.addL1Index(new BinlogIndexKey("dd", i, i), sdf.format(cal.getTime()) + "-bucket-0");
-            binlogIndex.addL2Index(new BinlogIndexKey("dd", i, i), (long) i);
-        }
+		Calendar cal = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		binlogIndex.start();
+		defaultCleanupStrategy.addDataIndex(binlogIndex);
 
-        index.start();
+		for (int i = 0; i <= 12; i++) {
+			cal.add(Calendar.DAY_OF_MONTH, i == 0 ? 0 : -1);
+			File file = new File(baseDir, sdf.format(cal.getTime()) + "/bucket-0");
+			file.getParentFile().mkdirs();
+			file.createNewFile();
+			binlogIndex.addL1Index(new IndexKeyImpl(i, i, "dd", i), sdf.format(cal.getTime()) + "-bucket-0");
+			IndexKeyImpl binlogIndexKey = new IndexKeyImpl(i, "dd", i);
+			IndexValueImpl l2Index = new IndexValueImpl();
+			l2Index.setIndexKey(binlogIndexKey);
+			l2Index.setSequence(new Sequence(123L, 123));
 
-        defaultCleanupStrategy.cleanup(index);
+			binlogIndex.addL2Index(binlogIndexKey, l2Index);
+		}
 
-        Assert.assertEquals(preservedDay, index.size());
+		index.start();
 
-        sdf = new SimpleDateFormat("yyMMdd");
+		defaultCleanupStrategy.cleanup(index);
 
-        Properties binlogIndexL1 = new Properties();
-        binlogIndexL1.load(new FileInputStream(new File(binlogIndexBaseDir, "l1Index.l1idx")));
-        Assert.assertEquals(preservedDay, binlogIndexL1.size());
+		Assert.assertEquals(preservedDay, index.size());
 
-        cal = Calendar.getInstance();
-        for (int i = 0; i < preservedDay; i++) {
-            cal.add(Calendar.DAY_OF_MONTH, i == 0 ? 0 : -1);
+		sdf = new SimpleDateFormat("yyMMdd");
 
-            File file = new File(baseDir, "20" + sdf.format(cal.getTime()) + "/bucket-0");
-            Assert.assertTrue(file.exists());
-            Assert.assertNotNull(index.getReadBucket(
-                    new Sequence(Integer.valueOf(sdf.format(cal.getTime())), 0).longValue(), true));
-            File binlogIndexL2 = new File(new File(binlogIndexBaseDir, "l2Index"), "20" + sdf.format(cal.getTime())
-                    + "-bucket-0" + ".l2idx");
-            Assert.assertTrue(binlogIndexL2.exists());
-            Assert.assertEquals("20" + sdf.format(cal.getTime()) + "-bucket-0",
-                    binlogIndexL1.get(i + "!" + "dd" + "!" + i));
-        }
+		Properties binlogIndexL1 = new Properties();
+		binlogIndexL1.load(new FileInputStream(new File(binlogIndexBaseDir, "l1Index.l1idx")));
+		Assert.assertEquals(preservedDay, binlogIndexL1.size());
 
-        cal = Calendar.getInstance();
-        for (int i = preservedDay; i <= 12; i++) {
-            cal.add(Calendar.DAY_OF_MONTH, -1 * preservedDay);
+		cal = Calendar.getInstance();
+		for (int i = 0; i < preservedDay; i++) {
+			cal.add(Calendar.DAY_OF_MONTH, i == 0 ? 0 : -1);
 
-            File file = new File(baseDir, "20" + sdf.format(cal.getTime()) + "/bucket-0");
-            Assert.assertFalse(file.exists());
-            Assert.assertNull(index.getReadBucket(
-                    new Sequence(Integer.valueOf(sdf.format(cal.getTime())), 0).longValue(), true));
-            File binlogIndexL2 = new File(new File(binlogIndexBaseDir, "l2Index"), "20" + sdf.format(cal.getTime())
-                    + "-bucket-0" + ".l2idx");
-            Assert.assertFalse(binlogIndexL2.exists());
-        }
+			File file = new File(baseDir, "20" + sdf.format(cal.getTime()) + "/bucket-0");
+			Assert.assertTrue(file.exists());
+			Assert.assertNotNull(index.getReadBucket(
+			      new Sequence(Integer.valueOf(sdf.format(cal.getTime())), 0).longValue(), true));
+			File binlogIndexL2 = new File(new File(binlogIndexBaseDir, "l2Index"), "20" + sdf.format(cal.getTime())
+			      + "-bucket-0" + ".l2idx");
+			Assert.assertTrue(binlogIndexL2.exists());
+			Assert.assertEquals("20" + sdf.format(cal.getTime()) + "-bucket-0",
+			      binlogIndexL1.get(i + "!" + i + "!" + "dd" + "!" + i));
+		}
 
-    }
+		cal = Calendar.getInstance();
+		for (int i = preservedDay; i <= 12; i++) {
+			cal.add(Calendar.DAY_OF_MONTH, -1 * preservedDay);
 
-    @After
-    public void after() throws Exception {
-        if (baseDir != null && baseDir.exists() && baseDir.isDirectory()) {
-            FileUtils.deleteDirectory(baseDir);
-        }
-        if (binlogIndexBaseDir != null && binlogIndexBaseDir.exists() && binlogIndexBaseDir.isDirectory()) {
-            FileUtils.deleteDirectory(binlogIndexBaseDir);
-        }
-    }
+			File file = new File(baseDir, "20" + sdf.format(cal.getTime()) + "/bucket-0");
+			Assert.assertFalse(file.exists());
+			Assert.assertNull(index.getReadBucket(new Sequence(Integer.valueOf(sdf.format(cal.getTime())), 0).longValue(),
+			      true));
+			File binlogIndexL2 = new File(new File(binlogIndexBaseDir, "l2Index"), "20" + sdf.format(cal.getTime())
+			      + "-bucket-0" + ".l2idx");
+			Assert.assertFalse(binlogIndexL2.exists());
+		}
+
+	}
+
+	@After
+	public void after() throws Exception {
+		if (baseDir != null && baseDir.exists() && baseDir.isDirectory()) {
+			FileUtils.deleteDirectory(baseDir);
+		}
+		if (binlogIndexBaseDir != null && binlogIndexBaseDir.exists() && binlogIndexBaseDir.isDirectory()) {
+			FileUtils.deleteDirectory(binlogIndexBaseDir);
+		}
+	}
 
 }

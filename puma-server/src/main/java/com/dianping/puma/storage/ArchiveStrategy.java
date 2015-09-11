@@ -15,11 +15,13 @@
  */
 package com.dianping.puma.storage;
 
+import com.dianping.puma.storage.bucket.DataBucketManager;
+
 /**
  * 
  * @author Leo Liang
  * 
  */
 public interface ArchiveStrategy {
-	public void archive(BucketIndex masterIndex, BucketIndex slaveIndex);
+	public void archive(DataBucketManager masterIndex, DataBucketManager slaveIndex);
 }

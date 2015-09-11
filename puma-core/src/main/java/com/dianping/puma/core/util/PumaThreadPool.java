@@ -14,11 +14,11 @@ public class PumaThreadPool {
 		daemonThreadPool.execute(runnable);
 	}
 
-	public static ScheduledFuture schedule(Runnable runnable, int delay, int period, TimeUnit timeUnit) {
+	public static ScheduledFuture<?> schedule(Runnable runnable, int delay, int period, TimeUnit timeUnit) {
 		return scheduledThreadPool.scheduleAtFixedRate(runnable, delay, period, timeUnit);
 	}
 	
-	public static ScheduledFuture scheduleWithFixedDelay(Runnable runnable, int delay, int period, TimeUnit timeUnit){
+	public static ScheduledFuture<?> scheduleWithFixedDelay(Runnable runnable, int delay, int period, TimeUnit timeUnit){
 		return scheduledThreadPool.scheduleWithFixedDelay(runnable, delay, period, timeUnit);
 	}
 	

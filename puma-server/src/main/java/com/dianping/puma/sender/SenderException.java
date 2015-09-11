@@ -16,7 +16,6 @@
 package com.dianping.puma.sender;
 
 /**
- * TODO Comment of SenderException
  * 
  * @author Leo Liang
  * 

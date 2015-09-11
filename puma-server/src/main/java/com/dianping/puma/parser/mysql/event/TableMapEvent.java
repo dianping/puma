@@ -17,16 +17,15 @@ package com.dianping.puma.parser.mysql.event;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.BitSet;
 
-import com.dianping.puma.bo.PumaContext;
-import com.dianping.puma.core.datatype.UnsignedLong;
+import com.google.common.primitives.UnsignedLong;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.parser.mysql.Metadata;
 import com.dianping.puma.utils.PacketUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * TODO Comment of TableMapEvent
@@ -36,20 +35,29 @@ import org.slf4j.LoggerFactory;
  */
 public class TableMapEvent extends AbstractBinlogEvent {
 
-	private static final Logger logger = LoggerFactory.getLogger(TableMapEvent.class);
+	private static final long serialVersionUID = -6294463562672565471L;
 
-	private static final long	serialVersionUID	= -6294463562672565471L;
-	private long				tableId;
-	private int					reserved;
-	private byte				databaseNameLength;
-	private String				databaseName;
-	private byte				tableNameLength;
-	private String				tableName;
-	private UnsignedLong		columnCount;
-	private byte[]				columnTypes;
-	private UnsignedLong		columnMetadataCount;
-	private Metadata			columnMetadata;
-	private BitSet				columnNullabilities;
+	private long tableId;
+
+	private int reserved;
+
+	private byte databaseNameLength;
+
+	private String databaseName;
+
+	private byte tableNameLength;
+
+	private String tableName;
+
+	private UnsignedLong columnCount;
+
+	private byte[] columnTypes;
+
+	private UnsignedLong columnMetadataCount;
+
+	private Metadata columnMetadata;
+
+	private BitSet columnNullabilities;
 
 	/**
 	 * @return the tableId
@@ -130,28 +138,19 @@ public class TableMapEvent extends AbstractBinlogEvent {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this)
-				.append("super", super.toString())
-				.append("tableId", tableId)
-				.append("reserved", reserved)
-				.append("databaseNameLength", databaseNameLength)
-				.append("databaseName", databaseName)
-				.append("tableNameLength", tableNameLength)
-				.append("tableName", tableName)
-				.append("columnCount", columnCount)
-				.append("columnTypes", columnTypes)
-				.append("columnMetadataCount", columnMetadataCount)
-				.append("columnMetadata", columnMetadata)
-				.append("columnNullabilities", columnNullabilities)
-				.toString();
+		return new ToStringBuilder(this).append("super", super.toString()).append("tableId", tableId)
+		      .append("reserved", reserved).append("databaseNameLength", databaseNameLength)
+		      .append("databaseName", databaseName).append("tableNameLength", tableNameLength)
+		      .append("tableName", tableName).append("columnCount", columnCount).append("columnTypes", columnTypes)
+		      .append("columnMetadataCount", columnMetadataCount).append("columnMetadata", columnMetadata)
+		      .append("columnNullabilities", columnNullabilities).toString();
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * com.dianping.puma.parser.mysql.event.AbstractBinlogEvent#doParse(java
-	 * .nio.ByteBuffer, com.dianping.puma.common.bo.PumaContext)
+	 * @see com.dianping.puma.parser.mysql.event.AbstractBinlogEvent#doParse(java .nio.ByteBuffer,
+	 * com.dianping.puma.common.bo.PumaContext)
 	 */
 	@Override
 	public void doParse(ByteBuffer buf, PumaContext context) throws IOException {

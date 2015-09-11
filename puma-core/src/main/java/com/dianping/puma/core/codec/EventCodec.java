@@ -1,17 +1,20 @@
 package com.dianping.puma.core.codec;
 
-import java.io.IOException;
-
 import com.dianping.puma.core.event.Event;
 
+import java.io.IOException;
+import java.util.List;
+
 public interface EventCodec {
-    public static final int DDL_EVENT   = 0;
-    public static final int DML_EVENT   = 1;
-    public static final int HEARTBEAT_EVENT   = 2;
-    public static final int SERVER_ERROR_EVENT = 3;
+    int DDL_EVENT = 0;
+    int DML_EVENT = 1;
+    int SERVER_ERROR_EVENT = 3;
 
-    public byte[] encode(Event event) throws IOException;
+    byte[] encode(Event event) throws IOException;
 
-    public Event decode(byte[] data) throws IOException;
+    byte[] encodeList(List<Event> event) throws IOException;
 
+    Event decode(byte[] data) throws IOException;
+
+    List<Event> decodeList(byte[] data) throws IOException;
 }

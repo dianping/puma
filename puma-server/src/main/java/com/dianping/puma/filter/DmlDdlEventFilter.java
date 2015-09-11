@@ -2,12 +2,11 @@ package com.dianping.puma.filter;
 
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
-import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.RowChangedEvent;
 
 public class DmlDdlEventFilter extends AbstractEventFilter {
 
-	private int	operationType	= 0;
+	private int operationType = 0;
 
 	public void init(boolean needDdl, boolean needDml) {
 

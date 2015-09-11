@@ -15,12 +15,11 @@
  */
 package com.dianping.puma.datahandler;
 
-import com.dianping.puma.bo.PumaContext;
+import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.core.LifeCycle;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
 
 /**
- * TODO Comment of DataHandler
  * 
  * @author Leo Liang
  * 

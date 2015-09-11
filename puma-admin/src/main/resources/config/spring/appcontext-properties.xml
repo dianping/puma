@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+            http://www.springframework.org/schema/beans 
+            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <bean name="placeholder" lazy-init="false"
+        class="com.dianping.lion.client.InitializeConfig">
+        <property name="propertiesPath" value="puma-admin-config.properties" />
+    </bean>
+
+    <bean id="config" class="com.dianping.puma.admin.config.Config">
+        <property name="errorCodeHandler" value="${puma.admin.errorCodeHandler}" />
+    </bean>
+
+</beans>

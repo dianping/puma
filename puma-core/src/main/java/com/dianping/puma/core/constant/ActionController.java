@@ -4,5 +4,4 @@ public enum ActionController {
 	START,
 	STOP,
 	PAUSE,
-	RESUME,
 }

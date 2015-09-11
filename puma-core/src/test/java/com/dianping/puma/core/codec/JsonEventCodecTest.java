@@ -25,7 +25,8 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.codec.EventCodec;
+import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.RowChangedEvent;

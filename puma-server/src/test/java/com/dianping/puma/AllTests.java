@@ -1,40 +1,73 @@
 package com.dianping.puma;
 
-import com.dianping.puma.common.util.PacketUtilTest;
+import com.dianping.puma.comparison.TaskExecutorTest;
+import com.dianping.puma.comparison.comparison.FullComparisonTest;
+import com.dianping.puma.comparison.fetcher.SingleLineTargetFetcherTest;
+import com.dianping.puma.comparison.fetcher.UpdateTimeAndIdSourceFetcherTest;
+import com.dianping.puma.comparison.mapper.DefaultRowMapperTest;
 import com.dianping.puma.filter.*;
-import com.dianping.puma.integration.DataTypeIntegrationTest;
-import com.dianping.puma.integration.IndexIntegrationTest;
-import com.dianping.puma.integration.SQLIntegegrationTest;
-import com.dianping.puma.integration.SystemIntegegrationTest;
-import com.dianping.puma.storage.*;
-
+import com.dianping.puma.instance.ZebraInstanceManagerTest;
+import com.dianping.puma.pumaserver.channel.impl.DefaultAsyncBinlogChannelTest;
+import com.dianping.puma.status.QpsCounterTest;
+import com.dianping.puma.storage.DefaultArchiveStrategyTest;
+import com.dianping.puma.storage.DefaultBucketManagerTest;
+import com.dianping.puma.storage.DefaultCleanupStrategyTest;
+import com.dianping.puma.storage.SequenceTest;
+import com.dianping.puma.storage.bucket.LocalBucketIndexTest;
+import com.dianping.puma.storage.bucket.LocalBucketTest;
+import com.dianping.puma.storage.index.DefaultIndexManagerTest;
+import com.dianping.puma.storage.index.IndexValueConvertorTest;
+import com.dianping.puma.storage.index.LocalFileIndexBucketTest;
+import com.dianping.puma.utils.PacketUtilTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-
 @RunWith(Suite.class)
 @SuiteClasses({
-	// add test classes here
-        SequenceTest.class,
-        LocalBucketTest.class,
-        //LocalBucketIndexTest.class,
-        //DefaultArchiveStrategyTest.class,
-        //DefaultBucketManagerTest.class,
-		//HDFSBucketIndexTest.class,
-		//HDFSBucketTest.class,
-        DbTbEventFilterTest.class,
-        DefaultEventFilterChainTest.class,
-        DmlDdlEventFilterTest.class,
-        EventFilterChainFactoryTest.class,
-        TransactionInfoEventFilterTest.class,
-        //SQLIntegegrationTest.class,
-        //SystemIntegegrationTest.class,
-        //DataTypeIntegrationTest.class,
-        PacketUtilTest.class,
-        //DefaultCleanupStrategyTest.class,
-        DefaultDataIndexTest.class
-        //IndexIntegrationTest.class
+//
+        // filter
+        DbTbEventFilterTest.class, //
+        DDLEventFilterTest.class,//
+        DefaultEventFilterChainTest.class,//
+        DmlDdlEventFilterTest.class, //
+        DMLEventFilterTest.class,//
+        EventFilterChainFactoryTest.class,//
+        StorageEventFilterChainTest.class,//
+        TransactionEventFilterTest.class, //
+        TransactionInfoEventFilterTest.class,//
+
+        // status
+        QpsCounterTest.class,//
+
+        // storage.bucket
+        LocalBucketIndexTest.class, //
+        LocalBucketTest.class, //
+
+        // storage.index
+        DefaultIndexManagerTest.class,//
+        IndexValueConvertorTest.class,//
+        LocalFileIndexBucketTest.class,//
+
+        // storage
+        DefaultArchiveStrategyTest.class,//
+        DefaultBucketManagerTest.class,//
+        DefaultCleanupStrategyTest.class,//
+        SequenceTest.class,//
+//        StorageIntegrityCheckerTest.class,//
+
+        // utils
+        PacketUtilTest.class, //
+        DefaultAsyncBinlogChannelTest.class,
+
+        ZebraInstanceManagerTest.class,
+
+        //compare
+        TaskExecutorTest.class,
+        FullComparisonTest.class,
+        UpdateTimeAndIdSourceFetcherTest.class,
+        SingleLineTargetFetcherTest.class,
+        DefaultRowMapperTest.class
 })
 public class AllTests {
 

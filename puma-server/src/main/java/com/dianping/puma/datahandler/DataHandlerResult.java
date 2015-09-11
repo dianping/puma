@@ -20,17 +20,19 @@ import java.io.Serializable;
 import com.dianping.puma.core.event.ChangedEvent;
 
 /**
- * TODO Comment of DataHandlerResult
  * 
  * @author Leo Liang
  * 
  */
 public class DataHandlerResult implements Serializable {
 
-	private static final long	serialVersionUID	= 8537161008838420062L;
-	private ChangedEvent		data				= null;
-	private boolean				empty				= false;
-	private boolean				finished			= false;
+	private static final long serialVersionUID = 8537161008838420062L;
+
+	private ChangedEvent data = null;
+
+	private boolean empty = false;
+
+	private boolean finished = false;
 
 	/**
 	 * @return the finished
@@ -41,7 +43,7 @@ public class DataHandlerResult implements Serializable {
 
 	/**
 	 * @param finished
-	 *            the finished to set
+	 *           the finished to set
 	 */
 	public void setFinished(boolean finished) {
 		this.finished = finished;
@@ -56,7 +58,7 @@ public class DataHandlerResult implements Serializable {
 
 	/**
 	 * @param data
-	 *            the data to set
+	 *           the data to set
 	 */
 	public void setData(ChangedEvent data) {
 		this.data = data;
@@ -71,7 +73,7 @@ public class DataHandlerResult implements Serializable {
 
 	/**
 	 * @param empty
-	 *            the empty to set
+	 *           the empty to set
 	 */
 	public void setEmpty(boolean empty) {
 		this.empty = empty;

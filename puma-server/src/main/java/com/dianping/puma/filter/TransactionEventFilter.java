@@ -6,84 +6,85 @@ import com.dianping.puma.core.model.Schema;
 import com.dianping.puma.core.model.SchemaSet;
 import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
-import com.dianping.puma.core.model.event.AcceptedTableChangedEvent;
-import com.dianping.puma.core.model.event.EventListener;
+import com.dianping.puma.eventbus.DefaultEventBus;
+import com.dianping.puma.taskexecutor.change.TargetChangedEvent;
 import com.google.common.eventbus.Subscribe;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class TransactionEventFilter extends AbstractEventFilter implements EventListener<AcceptedTableChangedEvent> {
+public class TransactionEventFilter extends AbstractEventFilter {
 
-	private static final Logger LOG = LoggerFactory.getLogger(TransactionEventFilter.class);
+    protected String name;
 
-	private String name;
+    private boolean begin = true;
 
-	private boolean begin = true;
+    private boolean commit = true;
 
-	private boolean commit = true;
+    private SchemaSet acceptedSchemas = new SchemaSet();
 
-	private SchemaSet acceptedSchemas = new SchemaSet();
+    public TransactionEventFilter() {
+        DefaultEventBus.INSTANCE.register(this);
+    }
 
-	protected boolean checkEvent(ChangedEvent changedEvent) {
-		if (changedEvent instanceof RowChangedEvent) {
+    @Subscribe
+    public void listenTargetChangedEvent(TargetChangedEvent event) {
+        if (event.getTaskName().equals(name)) {
+            TableSet tableSet = event.getTableSet();
+            SchemaSet schemaSet = new SchemaSet();
+            for (Table table : tableSet.listSchemaTables()) {
+                schemaSet.add(new Schema(table.getSchemaName()));
+            }
+            setAcceptedSchemas(schemaSet);
+        }
+    }
 
-			// Transaction or not.
-			if (!((RowChangedEvent) changedEvent).isTransactionBegin() && !((RowChangedEvent) changedEvent)
-					.isTransactionCommit()) {
-				return true;
-			}
+    protected boolean checkEvent(ChangedEvent changedEvent) {
+        if (changedEvent instanceof RowChangedEvent) {
 
-			// Need begin or not.
-			if (((RowChangedEvent) changedEvent).isTransactionBegin() && !begin) {
-				return false;
-			}
+            // Transaction or not.
+            if (!((RowChangedEvent) changedEvent).isTransactionBegin()
+                    && !((RowChangedEvent) changedEvent).isTransactionCommit()) {
+                return true;
+            }
 
-			// Need commit or not.
-			if (((RowChangedEvent) changedEvent).isTransactionCommit() && !commit) {
-				return false;
-			}
+            // Need begin or not.
+            if (((RowChangedEvent) changedEvent).isTransactionBegin() && !begin) {
+                return false;
+            }
 
-			// In accepted table list.
-			Schema schema = new Schema(changedEvent.getDatabase());
-			if (!acceptedSchemas.contains(schema)) {
-				return false;
-			}
+            // Need commit or not.
+            if (((RowChangedEvent) changedEvent).isTransactionCommit() && !commit) {
+                return false;
+            }
 
-			return true;
-		}
+            // In accepted table list.
+            String database = changedEvent.getDatabase();
+            if (database == null || database.length() == 0) {
+                return true;
+            }
 
-		return true;
-	}
+            Schema schema = new Schema(database);
+            if (!acceptedSchemas.contains(schema)) {
+                return false;
+            }
 
-	@Subscribe
-	public void onEvent(AcceptedTableChangedEvent event) {
-		if (event.getName().equals(name)) {
-			LOG.info("`TransactionEventFilter` receives event: {}.", event.toString());
+            return true;
+        }
 
-			TableSet tableSet = event.getTableSet();
-			if (tableSet != null) {
-				SchemaSet schemaSet = new SchemaSet();
-				for (Table table : tableSet.listSchemaTables()) {
-					schemaSet.add(new Schema(table.getSchemaName()));
-				}
-				setAcceptedSchemas(schemaSet);
-			}
-		}
-	}
+        return true;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setBegin(boolean begin) {
-		this.begin = begin;
-	}
+    public void setBegin(boolean begin) {
+        this.begin = begin;
+    }
 
-	public void setCommit(boolean commit) {
-		this.commit = commit;
-	}
+    public void setCommit(boolean commit) {
+        this.commit = commit;
+    }
 
-	public void setAcceptedSchemas(SchemaSet acceptedSchemas) {
-		this.acceptedSchemas = acceptedSchemas;
-	}
+    public void setAcceptedSchemas(SchemaSet acceptedSchemas) {
+        this.acceptedSchemas = acceptedSchemas;
+    }
 }

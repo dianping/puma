@@ -21,7 +21,7 @@ import java.util.BitSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.dianping.puma.bo.PumaContext;
+import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.parser.mysql.Row;
 import com.dianping.puma.utils.PacketUtils;
 import org.slf4j.Logger;
@@ -35,10 +35,12 @@ import org.slf4j.LoggerFactory;
  */
 public class DeleteRowsEvent extends AbstractRowsEvent {
 
-	private static final Logger logger = LoggerFactory.getLogger(DeleteRowsEvent.class);
+	private final Logger logger = LoggerFactory.getLogger(DeleteRowsEvent.class);
 
 	private static final long serialVersionUID = -4574646483606347256L;
+
 	private BitSet usedColumns;
+
 	private List<Row> rows;
 
 	/**
@@ -63,13 +65,20 @@ public class DeleteRowsEvent extends AbstractRowsEvent {
 	@Override
 	public String toString() {
 		return "DeleteRowsEvent [usedColumns=" + usedColumns + ", rows=" + rows + ", super.toString()="
-				+ super.toString() + "]";
+		      + super.toString() + "]";
 	}
 
 	@Override
-	protected void innderParse(ByteBuffer buf, PumaContext context) throws IOException {
+	protected void innerParse(ByteBuffer buf, PumaContext context) throws IOException {
 		tableMapEvent = context.getTableMaps().get(tableId);
 		usedColumns = PacketUtils.readBitSet(buf, columnCount.intValue());
+
+		logger.debug("binlog event before parse rows:\n");
+		logger.debug("{}", this);
+
+		if (usedColumns.length() != columnCount.intValue()) {
+			throw new RuntimeException("Illegal column image.");
+		}
 
 		rows = parseRows(buf, context);
 	}

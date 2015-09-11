@@ -21,11 +21,12 @@ import java.util.BitSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.dianping.puma.bo.PumaContext;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.parser.mysql.Row;
 import com.dianping.puma.parser.mysql.UpdatedRowData;
 import com.dianping.puma.utils.PacketUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,20 +38,21 @@ import org.slf4j.LoggerFactory;
  */
 public class UpdateRowsEvent extends AbstractRowsEvent {
 
-	private static final Logger logger = LoggerFactory.getLogger(UpdateRowsEvent.class);
+	private final Logger logger = LoggerFactory.getLogger(UpdateRowsEvent.class);
 
 	private static final long serialVersionUID = -877826157536949565L;
+
 	private BitSet usedColumnsBefore;
+
 	private BitSet usedColumnsAfter;
+
 	private List<UpdatedRowData<Row>> rows;
 
-	@Override public String toString() {
-		return new ToStringBuilder(this)
-				.append("super", super.toString())
-				.append("usedColumnsBefore", usedColumnsBefore)
-				.append("usedColumnsAfter", usedColumnsAfter)
-				.append("rows", rows)
-				.toString();
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this).append("super", super.toString()).append("usedColumnsBefore",
+				usedColumnsBefore)
+		      .append("usedColumnsAfter", usedColumnsAfter).append("rows", rows).toString();
 	}
 
 	/**
@@ -75,10 +77,21 @@ public class UpdateRowsEvent extends AbstractRowsEvent {
 	}
 
 	@Override
-	protected void innderParse(ByteBuffer buf, PumaContext context) throws IOException {
+	protected void innerParse(ByteBuffer buf, PumaContext context) throws IOException {
 		tableMapEvent = context.getTableMaps().get(tableId);
 		usedColumnsBefore = PacketUtils.readBitSet(buf, columnCount.intValue());
 		usedColumnsAfter = PacketUtils.readBitSet(buf, columnCount.intValue());
+
+		logger.debug("binlog event before parse rows:\n");
+		logger.debug("{}", this);
+
+		if (usedColumnsBefore.length() != columnCount.intValue()) {
+			throw new RuntimeException("Illegal before column image.");
+		}
+
+		if (usedColumnsAfter.length() != columnCount.intValue()) {
+			throw new RuntimeException("Illegal after column image.");
+		}
 
 		rows = parseRows(buf, context);
 	}

@@ -35,12 +35,12 @@ public class DatabaseTaskLock implements TaskLock {
 
 			if (tempCheckTask.isRunning()) {
 				if (isTimeout(tempCheckTask.getUpdateTime())) {
-					return tryLock0(tempCheckTask);
+					return tryLock0();
 				} else {
-					return host.equals(tempCheckTask.getOwnerHost()) && tryLock0(tempCheckTask);
+					return host.equals(tempCheckTask.getOwnerHost()) && tryLock0();
 				}
 			} else {
-				return tryLock0(tempCheckTask);
+				return tryLock0();
 			}
 		} catch (Throwable t) {
 			return false;
@@ -90,7 +90,7 @@ public class DatabaseTaskLock implements TaskLock {
 		}
 	};
 
-	protected boolean tryLock0(CheckTaskEntity checkTask) {
+	protected boolean tryLock0() {
 		String host = checkTaskServerManager.findFirstAuthorizedHost();
 
 		checkTask.setRunning(true);
@@ -102,7 +102,6 @@ public class DatabaseTaskLock implements TaskLock {
 			return false;
 		}
 
-		this.checkTask = checkTask;
 		stopped = false;
 		ThreadPool.execute(heartbeatWorker);
 		return true;

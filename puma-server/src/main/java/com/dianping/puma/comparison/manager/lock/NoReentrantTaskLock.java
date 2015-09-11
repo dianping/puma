@@ -8,46 +8,52 @@ import java.util.concurrent.locks.Condition;
 
 public class NoReentrantTaskLock implements TaskLock {
 
-	protected CheckTaskContainer checkTaskContainer;
+    private static final int MAX_TASK_SIZE = 50;
 
-	protected CheckTaskEntity checkTask;
+    protected CheckTaskContainer checkTaskContainer;
 
-	@Override public void lock() {
+    protected CheckTaskEntity checkTask;
 
-	}
+    @Override
+    public void lock() {
 
-	@Override public void lockInterruptibly() throws InterruptedException {
+    }
 
-	}
+    @Override
+    public void lockInterruptibly() throws InterruptedException {
 
-	@Override
-	public boolean tryLock() {
-		if (checkTaskContainer.contains(checkTask.getId())) {
-			return false;
-		} else {
-			checkTaskContainer.create(checkTask);
-			return true;
-		}
-	}
+    }
 
-	@Override public boolean tryLock(long l, TimeUnit timeUnit) throws InterruptedException {
-		return false;
-	}
+    @Override
+    public boolean tryLock() {
+        if (checkTaskContainer.contains(checkTask.getId())) {
+            return false;
+        } else {
+            checkTaskContainer.create(checkTask);
+            return true;
+        }
+    }
 
-	@Override
-	public void unlock() {
-		checkTaskContainer.remove(checkTask.getId());
-	}
+    @Override
+    public boolean tryLock(long l, TimeUnit timeUnit) throws InterruptedException {
+        return false;
+    }
 
-	@Override public Condition newCondition() {
-		return null;
-	}
+    @Override
+    public void unlock() {
+        checkTaskContainer.remove(checkTask.getId());
+    }
 
-	public void setCheckTaskContainer(CheckTaskContainer checkTaskContainer) {
-		this.checkTaskContainer = checkTaskContainer;
-	}
+    @Override
+    public Condition newCondition() {
+        return null;
+    }
 
-	public void setCheckTask(CheckTaskEntity checkTask) {
-		this.checkTask = checkTask;
-	}
+    public void setCheckTaskContainer(CheckTaskContainer checkTaskContainer) {
+        this.checkTaskContainer = checkTaskContainer;
+    }
+
+    public void setCheckTask(CheckTaskEntity checkTask) {
+        this.checkTask = checkTask;
+    }
 }

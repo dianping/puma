@@ -40,7 +40,7 @@ public class DatabaseTaskLockTest extends MockTest {
 		doReturn("127.0.0.1").when(checkTaskServerManager).findFirstAuthorizedHost();
 		doReturn(1).when(checkTask).getId();
 		doReturn(1).when(checkTaskService).update(any(CheckTaskEntity.class));
-		doReturn(true).when(taskLock).tryLock0(any(CheckTaskEntity.class));
+		doReturn(true).when(taskLock).tryLock0();
 
 		CheckTaskEntity checkTask0 = new CheckTaskEntity();
 		checkTask0.setRunning(true);

@@ -30,23 +30,17 @@ public class DatabaseTaskLock implements TaskLock {
 	@Override
 	public boolean tryLock() {
 		try {
-			checkTask = checkTaskService.findById(checkTask.getId());
+			CheckTaskEntity tempCheckTask = checkTaskService.findById(checkTask.getId());
 			String host = checkTaskServerManager.findFirstAuthorizedHost();
 
-			if (checkTask.isRunning()
-					&& !isTimeout(checkTask.getUpdateTime())
-					&& !host.equals(checkTask.getOwnerHost())) {
-				return false;
-			}
-
-			if (checkTask.isRunning()) {
-				if (isTimeout(checkTask.getUpdateTime())) {
-					return tryLock0();
+			if (tempCheckTask.isRunning()) {
+				if (isTimeout(tempCheckTask.getUpdateTime())) {
+					return tryLock0(tempCheckTask);
 				} else {
-					return host.equals(checkTask.getOwnerHost()) && tryLock0();
+					return host.equals(tempCheckTask.getOwnerHost()) && tryLock0(tempCheckTask);
 				}
 			} else {
-				return tryLock0();
+				return tryLock0(tempCheckTask);
 			}
 		} catch (Throwable t) {
 			return false;
@@ -63,12 +57,12 @@ public class DatabaseTaskLock implements TaskLock {
 
 	@Override
 	public void unlock() {
-		checkTask = checkTaskService.findById(checkTask.getId());
+		CheckTaskEntity tempCheckTask = checkTaskService.findById(checkTask.getId());
 		String host = checkTaskServerManager.findFirstAuthorizedHost();
 
-		if (!checkTask.isRunning()
-				|| isTimeout(checkTask.getUpdateTime())
-				|| !host.equals(checkTask.getOwnerHost())) {
+		if (!tempCheckTask.isRunning()
+				|| isTimeout(tempCheckTask.getUpdateTime())
+				|| !host.equals(tempCheckTask.getOwnerHost())) {
 			return;
 		}
 
@@ -96,7 +90,7 @@ public class DatabaseTaskLock implements TaskLock {
 		}
 	};
 
-	protected boolean tryLock0() {
+	protected boolean tryLock0(CheckTaskEntity checkTask) {
 		String host = checkTaskServerManager.findFirstAuthorizedHost();
 
 		checkTask.setRunning(true);
@@ -108,6 +102,7 @@ public class DatabaseTaskLock implements TaskLock {
 			return false;
 		}
 
+		this.checkTask = checkTask;
 		stopped = false;
 		ThreadPool.execute(heartbeatWorker);
 		return true;

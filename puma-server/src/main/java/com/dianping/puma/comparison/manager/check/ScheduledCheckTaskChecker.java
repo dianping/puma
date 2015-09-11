@@ -24,7 +24,7 @@ public class ScheduledCheckTaskChecker implements CheckTaskChecker {
 		taskDispatcher.dispatch(checkTasks);
 	}
 
-	@Scheduled(fixedDelay = 60 * 1000)
+	@Scheduled(fixedDelay = 20 * 1000)
 	protected void scheduledCheck() {
 		check();
 	}

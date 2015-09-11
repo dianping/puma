@@ -4,13 +4,18 @@ import com.dianping.puma.biz.entity.CheckTaskEntity;
 import com.dianping.puma.biz.service.CheckTaskService;
 import com.dianping.puma.comparison.model.TaskResult;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Date;
 
 @Service
 public class DefaultTaskReporter implements TaskReporter {
+
+	private final Logger logger = LoggerFactory.getLogger(DefaultTaskReporter.class);
 
 	@Autowired
 	CheckTaskService checkTaskService;
@@ -22,7 +27,8 @@ public class DefaultTaskReporter implements TaskReporter {
 		if (result.getDifference().size() == 0) {
 			setStatus(checkTask, true, null);
 		} else {
-			setStatus(checkTask, false, result.getDifference().toString());
+			logger.error("check difference: \n{}.", result.getDifference().toString());
+			setStatus(checkTask, true, "check difference");
 		}
 
 		report0(checkTask);
@@ -35,7 +41,7 @@ public class DefaultTaskReporter implements TaskReporter {
 		report0(checkTask);
 	}
 
-	public void report0(CheckTaskEntity checkTask) {
+	protected void report0(CheckTaskEntity checkTask) {
 		checkTaskService.update(checkTask);
 	}
 

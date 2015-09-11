@@ -7,6 +7,8 @@ import com.dianping.puma.comparison.manager.lock.TaskLockBuilder;
 import com.dianping.puma.comparison.manager.report.TaskReporter;
 import com.dianping.puma.comparison.manager.run.TaskRunFutureListener;
 import com.dianping.puma.comparison.manager.run.TaskRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,8 @@ import java.util.List;
 
 @Service
 public class SingleTaskDispatcher implements TaskDispatcher {
+
+	private final Logger logger = LoggerFactory.getLogger(SingleTaskDispatcher.class);
 
 	@Autowired
 	TaskRunner taskRunner;
@@ -25,11 +29,15 @@ public class SingleTaskDispatcher implements TaskDispatcher {
 	@Autowired
 	TaskReporter taskReporter;
 
-	private final long checkTimePeriod = 30 * 60 * 1000; // 30 min.
+	private final long checkTimePeriod = 120 * 60 * 1000; // 120 min.
 
 	@Override
 	public void dispatch(List<CheckTaskEntity> checkTasks) {
 		for (final CheckTaskEntity checkTask: checkTasks) {
+
+			if (isFailure(checkTask)) {
+				continue;
+			}
 
 			if (!setNextTimeIfEnough(checkTask)) {
 				continue;
@@ -48,9 +56,13 @@ public class SingleTaskDispatcher implements TaskDispatcher {
 					continue;
 				}
 
+				logger.info("start run check task...");
+
 				taskRunner.run(checkTask).addListener(new TaskRunFutureListener() {
 					@Override
 					public void onSuccess(TaskResult result) {
+						logger.info("success to run check task.");
+
 						taskReporter.report(checkTask, result);
 						localTaskLock.unlock();
 						remoteTaskLock.unlock();
@@ -58,6 +70,8 @@ public class SingleTaskDispatcher implements TaskDispatcher {
 
 					@Override
 					public void onFailure(Throwable cause) {
+						logger.info("failure to run check task.");
+
 						taskReporter.report(checkTask, cause);
 						localTaskLock.unlock();
 						remoteTaskLock.unlock();
@@ -71,6 +85,10 @@ public class SingleTaskDispatcher implements TaskDispatcher {
 
 			break;
 		}
+	}
+
+	protected boolean isFailure(CheckTaskEntity checkTask) {
+		return !checkTask.isSuccess();
 	}
 
 	protected boolean setNextTimeIfEnough(CheckTaskEntity checkTask) {

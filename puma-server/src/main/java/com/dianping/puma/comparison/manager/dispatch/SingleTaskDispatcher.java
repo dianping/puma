@@ -85,6 +85,8 @@ public class SingleTaskDispatcher implements TaskDispatcher {
                 });
 
             } catch (Throwable t) {
+                logger.error("failed to execute check task.", t);
+
                 localTaskLock.unlock();
                 remoteTaskLock.unlock();
             }

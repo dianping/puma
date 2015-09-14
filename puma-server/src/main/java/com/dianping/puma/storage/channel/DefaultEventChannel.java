@@ -32,6 +32,8 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 
     private DataBucket readDataBucket;
 
+    private Sequence lastSequence;
+
     public DefaultEventChannel(String database) {
         this.database = database;
     }
@@ -39,7 +41,6 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
     @Override
     public Event next(boolean shouldSleep) throws StorageException {
         checkClosed();
-        Sequence lastSequence = null;
 
         while (true) {
             try {

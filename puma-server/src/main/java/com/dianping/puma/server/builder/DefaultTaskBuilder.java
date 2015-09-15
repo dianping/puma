@@ -8,6 +8,8 @@ import com.dianping.puma.core.model.*;
 import com.dianping.puma.instance.InstanceManager;
 import com.dianping.puma.taskexecutor.task.DatabaseTask;
 import com.dianping.puma.taskexecutor.task.InstanceTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +38,8 @@ import com.dianping.puma.taskexecutor.TaskExecutor;
 @Service("taskBuilder")
 public class DefaultTaskBuilder implements TaskBuilder {
 
+    private final Logger logger = LoggerFactory.getLogger(DefaultTaskBuilder.class);
+
     @Autowired
     BinlogInfoHolder binlogInfoHolder;
 
@@ -49,6 +53,8 @@ public class DefaultTaskBuilder implements TaskBuilder {
     RawEventCodec rawCodec;
 
     public TaskExecutor build(InstanceTask instanceTask) {
+        logger.info("start building puma task executor...\n{}", instanceTask);
+
         DefaultTaskExecutor taskExecutor = new DefaultTaskExecutor();
 
         taskExecutor.setInstanceTask(instanceTask);

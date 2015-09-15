@@ -1,8 +1,8 @@
 /*
-var underscore = angular.module('underscore', []);
-underscore.factory('_', ['$window', function() {
-  return $window._; // assumes underscore has already been loaded on the page
-}]);*/
+ var underscore = angular.module('underscore', []);
+ underscore.factory('_', ['$window', function() {
+ return $window._; // assumes underscore has already been loaded on the page
+ }]);*/
 
 var puma = angular.module('puma', [
     'ngRoute',
@@ -15,6 +15,25 @@ puma.filter('toLocaleString', function () {
     return function (value) {
         return new Date(value).toLocaleString();
     };
+});
+
+puma.controller('pumaCheckCreateController', function ($scope) {
+    $scope.templateBase = 'app/partials/puma-check/model/';
+    $scope.SourceDsBuilderTemplate = 'ds-group';
+    $scope.SourceFetcherTemplate = 'source-fetcher-update-id';
+    $scope.TargetDsBuilderTemplate = 'ds-group';
+    $scope.TargetFetcherTemplate = 'target-fetcher-single-line';
+    $scope.ComparisonTemplate = 'comparison-full';
+    $scope.MapperTemplate = 'mapper-default';
+    $scope.model = {};
+
+    $scope.changeTemplate = function (type, value) {
+        $scope[type] = value;
+    }
+
+    $scope.create = function () {
+        console.log($scope.model)
+    }
 });
 
 puma.controller('simpleModalController', function ($scope, item) {
@@ -159,10 +178,9 @@ puma.controller('pumaTaskCreateController', function ($scope, $http) {
     $scope.targets = [{
         database: null,
         tables: null
-  }];
+    }];
 
     $scope.submit = function () {
-
 
 
         $scope.task.targets[target.database]
@@ -199,6 +217,10 @@ puma.config(function ($routeProvider) {
         .when('/puma-create', {
             templateUrl: '/app/partials/puma-create.html',
             controller: 'pumaCreateController'
+        })
+        .when('/puma-check-create', {
+            templateUrl: '/app/partials/puma-check/create.html',
+            controller: 'pumaCheckCreateController'
         })
         .otherwise({
             'redirectTo': '/'

@@ -17,7 +17,7 @@ puma.filter('toLocaleString', function () {
     };
 });
 
-puma.controller('pumaCheckCreateController', function ($scope) {
+puma.controller('pumaCheckCreateController', function ($scope, $http) {
     $scope.templateBase = 'app/partials/puma-check/model/';
     $scope.SourceDsBuilderTemplate = 'ds-group';
     $scope.SourceFetcherTemplate = 'source-fetcher-update-id';
@@ -32,7 +32,18 @@ puma.controller('pumaCheckCreateController', function ($scope) {
     }
 
     $scope.create = function () {
-        console.log($scope.model)
+        if ($scope.model && $scope.model.baseInfo && $scope.model.baseInfo.initTime) {
+            $scope.model.baseInfo.initTime = new Date($scope.model.baseInfo.initTime).getTime();
+        }
+
+        $http.post('/a/puma-check', $scope.model).then(
+            function (response) {
+                alert('success');
+            },
+            function (response) {
+                alert('failure, ' + response.data.msg);
+            }
+        )
     }
 });
 

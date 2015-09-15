@@ -154,7 +154,7 @@ public class DefaultTaskContainer implements TaskContainer {
 		start(taskExecutor);
 		add(taskExecutor);
 
-		registryService.register(taskServerManager.findSelfHost(), database);
+		registryService.register(taskServerManager.findSelfHost() + ":4040", database);
 
 		logger.info("success to create task.");
 	}
@@ -220,7 +220,7 @@ public class DefaultTaskContainer implements TaskContainer {
 			registerTask(newTaskExecutor);
 		}
 
-		registryService.unregister(taskServerManager.findSelfHost(), database);
+		registryService.unregister(taskServerManager.findSelfHost() + ":4040", database);
 
 		logger.info("success to remove task.");
 	}

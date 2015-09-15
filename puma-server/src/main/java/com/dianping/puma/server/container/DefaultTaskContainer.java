@@ -134,6 +134,10 @@ public class DefaultTaskContainer implements TaskContainer {
 			createTemp(instanceTask);
 		}
 
+		for (DatabaseTask databaseTask: instanceTask.getDatabaseTasks()) {
+			registryService.register(taskServerManager.findSelfHost(), databaseTask.getDatabase());
+		}
+
 		logger.info("success to create instance task.");
 	}
 
@@ -149,6 +153,8 @@ public class DefaultTaskContainer implements TaskContainer {
 		TaskExecutor taskExecutor = taskBuilder.build(instanceTask);
 		start(taskExecutor);
 		add(taskExecutor);
+
+		registryService.register(taskServerManager.findSelfHost(), database);
 
 		logger.info("success to create task.");
 	}
@@ -213,6 +219,8 @@ public class DefaultTaskContainer implements TaskContainer {
 
 			registerTask(newTaskExecutor);
 		}
+
+		registryService.unregister(taskServerManager.findSelfHost(), database);
 
 		logger.info("success to remove task.");
 	}

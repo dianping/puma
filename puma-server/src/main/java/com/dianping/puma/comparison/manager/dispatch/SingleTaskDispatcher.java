@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -58,6 +59,11 @@ public class SingleTaskDispatcher implements TaskDispatcher {
 
                 logger.info("start run check task...");
 
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                logger.info("check period: {} - {}.",
+                        dateFormat.format(checkTask.getCurrTime()),
+                        dateFormat.format(checkTask.getNextTime()));
+
                 taskRunner.run(checkTask, new TaskRunFutureListener() {
                     @Override
                     public void onSuccess(TaskResult result) {
@@ -79,6 +85,8 @@ public class SingleTaskDispatcher implements TaskDispatcher {
                 });
 
             } catch (Throwable t) {
+                logger.error("failed to execute check task.", t);
+
                 localTaskLock.unlock();
                 remoteTaskLock.unlock();
             }

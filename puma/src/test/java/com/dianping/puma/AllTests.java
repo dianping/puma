@@ -55,7 +55,7 @@ import org.junit.runners.Suite.SuiteClasses;
         PacketUtilTest.class, //
         DefaultAsyncBinlogChannelTest.class,
 
-        ZebraInstanceManagerTest.class,
+        ZebraInstanceManagerTest.class
 })
 public class AllTests {
 

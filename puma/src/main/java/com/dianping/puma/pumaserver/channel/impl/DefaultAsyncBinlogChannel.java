@@ -169,11 +169,15 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
                         req = null;
                     }
 
-                    Event binlogEvent = getEvent();
-                    saveBinlogEvent(results, binlogEvent);
-                    if (binlogEvent == null) {
-                        Thread.sleep(EMPTY_SLEEP_TIME);
+                    if (req != null || results.size() < CACHE_SIZE) {
+                        Event binlogEvent = getEvent();
+                        if (binlogEvent != null) {
+                            results.add(binlogEvent);
+                            continue;
+                        }
                     }
+
+                    Thread.sleep(EMPTY_SLEEP_TIME);
                 }
             } catch (InterruptedException e) {
                 LOG.info("AsyncTask has be Interrupted");
@@ -206,17 +210,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
         }
 
         protected boolean isNeedSend(List<Event> results, BinlogGetRequest req) {
-            boolean needSend = false;
-            if (req != null && (results.size() >= req.getBatchSize() || req.isTimeout())) {
-                needSend = true;
-            }
-            return needSend;
-        }
-
-        protected void saveBinlogEvent(List<Event> results, Event binlogEvent) {
-            if (binlogEvent != null) {
-                results.add(binlogEvent);
-            }
+            return req != null && (results.size() >= req.getBatchSize() || req.isTimeout());
         }
 
         protected Event getEvent() {

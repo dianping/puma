@@ -69,7 +69,8 @@
 		CheckTask.Running = #{running},
 		CheckTask.OwnerHost = #{ownerHost},
 		CheckTask.Success = #{success},
-		CheckTask.Message = #{message}
+		CheckTask.Message = #{message},
+		CheckTask.UpdateTime = #{updateTime}
 		WHERE
 		CheckTask.Id = #{id}
 	</update>

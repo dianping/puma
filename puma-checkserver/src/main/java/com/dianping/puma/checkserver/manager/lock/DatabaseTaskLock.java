@@ -84,6 +84,7 @@ public class DatabaseTaskLock implements TaskLock {
 		@Override
 		public void run() {
 			if (!stopped) {
+				checkTask.setUpdateTime(new Date());
 				checkTaskService.update(checkTask);
 				Uninterruptibles.sleepUninterruptibly(5, TimeUnit.SECONDS);
 			}

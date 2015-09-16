@@ -38,10 +38,7 @@ puma.controller('pumaCheckCreateController', function ($scope, $http) {
 
         $http.post('/a/puma-check', $scope.model).then(
             function (response) {
-                alert('success');
-            },
-            function (response) {
-                alert('failure, ' + response.data.msg);
+                alert('Success');
             }
         )
     }
@@ -137,10 +134,7 @@ puma.controller('pumaCreateController', function ($scope, $http) {
 
         $http.post('/a/puma-create', json).then(
             function (response) {
-                alert('success');
-            },
-            function (response) {
-                alert('failure, ' + response.data.msg);
+                alert('Success');
             }
         )
     }
@@ -168,9 +162,6 @@ puma.controller('pumaTargetController', function ($scope, $http) {
                 if (response.data.status == "success") {
                     $scope.pumaDto = response.data.result;
                 }
-            },
-            function (response) {
-                alert("failure");
             }
         )
     }
@@ -198,10 +189,7 @@ puma.controller('pumaTaskCreateController', function ($scope, $http) {
 
         $http.post('/a/puma-task/create', $scope.pumaTaskJson).then(
             function (response) {
-                alert('success');
-            },
-            function (response) {
-                alert('failure');
+                alert('Success');
             }
         );
     }

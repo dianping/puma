@@ -26,7 +26,7 @@ import java.util.*;
  */
 @Controller
 @RequestMapping(value = {"/puma-check"})
-public class PumaCheckController {
+public class PumaCheckController extends BasicController {
 
     private static final String CLASS_NAME = "className";
     private static final String IT = "it";

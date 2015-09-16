@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Dozer @ 2015-09
@@ -30,6 +31,7 @@ public class PumaCheckController extends BasicController {
 
     private static final String CLASS_NAME = "className";
     private static final String IT = "it";
+    private static final Pattern TEMPLATE_REGEX = Pattern.compile(".*\\$\\{.+\\}.*");
     private final GStringTemplateEngine engine = new GStringTemplateEngine();
 
     @Autowired
@@ -48,28 +50,30 @@ public class PumaCheckController extends BasicController {
 
         List<CheckTaskEntity> result = new ArrayList<CheckTaskEntity>();
 
+        Map<String, Template> templateCache = new HashMap<String, Template>();
+
         for (Object it : batch) {
             CheckTaskEntity entity = new CheckTaskEntity();
 
             entity.setInitTime(new Date(model.getBaseInfo().getInitTime()));
 
             entity.setSourceDsBuilder(model.getSourceDsBuilderProp().get(CLASS_NAME).toString());
-            entity.setSourceDsBuilderProp(templateMake(model.getSourceDsBuilderProp(), it));
+            entity.setSourceDsBuilderProp(templateMake(templateCache, model.getSourceDsBuilderProp(), it));
 
             entity.setSourceFetcher(model.getSourceFetcherProp().get(CLASS_NAME).toString());
-            entity.setSourceFetcherProp(templateMake(model.getSourceFetcherProp(), it));
+            entity.setSourceFetcherProp(templateMake(templateCache, model.getSourceFetcherProp(), it));
 
             entity.setTargetDsBuilder(model.getTargetDsBuilderProp().get(CLASS_NAME).toString());
-            entity.setTargetDsBuilderProp(templateMake(model.getTargetDsBuilderProp(), it));
+            entity.setTargetDsBuilderProp(templateMake(templateCache, model.getTargetDsBuilderProp(), it));
 
             entity.setTargetFetcher(model.getTargetFetcherProp().get(CLASS_NAME).toString());
-            entity.setTargetFetcherProp(templateMake(model.getTargetFetcherProp(), it));
+            entity.setTargetFetcherProp(templateMake(templateCache, model.getTargetFetcherProp(), it));
 
             entity.setComparison(model.getComparisonProp().get(CLASS_NAME).toString());
-            entity.setComparisonProp(templateMake(model.getComparisonProp(), it));
+            entity.setComparisonProp(templateMake(templateCache, model.getComparisonProp(), it));
 
             entity.setMapper(model.getMapperProp().get(CLASS_NAME).toString());
-            entity.setMapperProp(templateMake(model.getMapperProp(), it));
+            entity.setMapperProp(templateMake(templateCache, model.getMapperProp(), it));
 
             result.add(entity);
         }
@@ -77,14 +81,24 @@ public class PumaCheckController extends BasicController {
         return null;
     }
 
-    protected String templateMake(Map<String, Object> properties, Object value) throws IOException, ClassNotFoundException {
+    protected String templateMake(Map<String, Template> templateCache, Map<String, Object> properties, Object value) throws IOException, ClassNotFoundException {
 
         Map<String, Object> result = new HashMap<String, Object>();
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
-            Template t = engine.createTemplate(entry.getValue().toString());
-            Map<String, Object> args = new HashMap<String, Object>();
-            args.put(IT, value);
-            result.put(entry.getKey(), t.make(args).toString());
+
+            if (!TEMPLATE_REGEX.matcher(entry.getValue().toString()).matches()) {
+                result.put(entry.getKey(), entry.getValue());
+            } else {
+                String templateStr = entry.getValue().toString();
+                if (!templateCache.containsKey(templateStr)) {
+                    templateCache.put(templateStr, engine.createTemplate(templateStr));
+                }
+
+                Template t = templateCache.get(templateStr);
+                Map<String, Object> args = new HashMap<String, Object>();
+                args.put(IT, value);
+                result.put(entry.getKey(), t.make(args).toString());
+            }
         }
         return GsonUtil.toJson(result);
     }

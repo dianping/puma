@@ -4,6 +4,10 @@ import java.util.Date;
 
 public class CheckTaskEntity {
 
+	private String taskName;
+
+	private String taskGroupName;
+
 	private int id;
 
 	private Date initTime;
@@ -212,5 +216,21 @@ public class CheckTaskEntity {
 
 	public void setSourceDsBuilder(String sourceDsBuilder) {
 		this.sourceDsBuilder = sourceDsBuilder;
+	}
+
+	public String getTaskName() {
+		return taskName;
+	}
+
+	public void setTaskName(String taskName) {
+		this.taskName = taskName;
+	}
+
+	public String getTaskGroupName() {
+		return taskGroupName;
+	}
+
+	public void setTaskGroupName(String taskGroupName) {
+		this.taskGroupName = taskGroupName;
 	}
 }

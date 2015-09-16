@@ -83,6 +83,8 @@ public class CheckTaskModel {
 
     public static class BaseInfo{
 
+        private String name;
+
         private long initTime;
 
         private String batch;
@@ -101,6 +103,14 @@ public class CheckTaskModel {
 
         public void setBatch(String batch) {
             this.batch = batch;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
     }
 }

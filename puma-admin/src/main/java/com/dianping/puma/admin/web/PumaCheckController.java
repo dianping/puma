@@ -57,6 +57,9 @@ public class PumaCheckController extends BasicController {
 
             entity.setInitTime(new Date(model.getBaseInfo().getInitTime()));
 
+            entity.setTaskGroupName(model.getBaseInfo().getName());
+            entity.setTaskName(model.getBaseInfo().getName() + "_" + it.toString());
+
             entity.setSourceDsBuilder(model.getSourceDsBuilderProp().get(CLASS_NAME).toString());
             entity.setSourceDsBuilderProp(templateMake(templateCache, model.getSourceDsBuilderProp(), it));
 

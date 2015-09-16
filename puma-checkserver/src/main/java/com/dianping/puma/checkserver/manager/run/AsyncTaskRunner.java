@@ -14,7 +14,7 @@ import java.util.concurrent.ThreadFactory;
 @Service
 public class AsyncTaskRunner implements TaskRunner {
 
-    private final int threadPoolSize = 5;
+    private final int threadPoolSize = 20;
 
     private final ExecutorService threadPool = Executors.newFixedThreadPool(threadPoolSize, new ThreadFactory() {
         @Override

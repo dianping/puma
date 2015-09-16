@@ -12,6 +12,8 @@ import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogAckResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
+import com.dianping.puma.core.lock.DistributedLock;
+import com.dianping.puma.core.lock.DistributedLockFactory;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.GsonUtil;
 import com.google.common.base.Strings;
@@ -69,9 +71,12 @@ public class SimplePumaClient implements PumaClient {
                             .setSocketTimeout(10 * 60 * 1000)
                             .build()).build();
 
+    private DistributedLock lock;
+
     public SimplePumaClient(PumaClientConfig config) {
         this.pumaServerHost = config.getServerHost();
         this.clientName = config.getClientName();
+        this.lock = config.getLock();
         this.baseUrl = String.format("http://%s", config.getServerHost());
         logger.info("Current puma client base url is: {}", baseUrl);
 
@@ -170,6 +175,9 @@ public class SimplePumaClient implements PumaClient {
     }
 
     protected void doSubscribe() throws PumaClientException {
+        // Block until get the lock.
+        lock();
+
         if (this.subscribeRequest == null) {
             throw new PumaClientException("Please subscribe first");
         }
@@ -249,5 +257,20 @@ public class SimplePumaClient implements PumaClient {
 
     public String getServerHost() {
         return pumaServerHost;
+    }
+
+    protected void lock() {
+        if (lock == null) {
+            lock = DistributedLockFactory.newZkDistributedLock(clientName);
+        }
+
+        while (true) {
+            try {
+                lock.lock();
+                return;
+            } catch (Throwable t) {
+                logger.error("failed to get the lock.", t);
+            }
+        }
     }
 }

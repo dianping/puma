@@ -147,34 +147,34 @@ public final class TaskExecutor implements Callable<TaskResult> {
         }
 
         protected static Comparison initComparison(TaskEntity task) {
-            return (Comparison) fromClassNameAndJson(task.getComparison(), task.getComparisonProp());
+            return (Comparison) fromClassNameAndJson(Comparison.class, task.getComparison(), task.getComparisonProp());
         }
 
         protected static TargetFetcher initTargetFetcher(TaskEntity task) {
-            return (TargetFetcher) fromClassNameAndJson(task.getTargetFetcher(), task.getTargetFetcherProp());
+            return (TargetFetcher) fromClassNameAndJson(TargetFetcher.class, task.getTargetFetcher(), task.getTargetFetcherProp());
         }
 
         protected static SourceFetcher initSourceFetcher(TaskEntity task) {
-            return (SourceFetcher) fromClassNameAndJson(task.getSourceFetcher(), task.getSourceFetcherProp());
+            return (SourceFetcher) fromClassNameAndJson(SourceFetcher.class, task.getSourceFetcher(), task.getSourceFetcherProp());
         }
 
         protected static RowMapper initRowMapper(TaskEntity task) {
-            return (RowMapper) fromClassNameAndJson(task.getMapper(), task.getMapperProp());
+            return (RowMapper) fromClassNameAndJson(RowMapper.class, task.getMapper(), task.getMapperProp());
         }
 
         protected static DataSource initTargetDataSource(TaskEntity task) {
-            DataSourceBuilder builder = (DataSourceBuilder) fromClassNameAndJson(task.getTargetDsBuilder(), task.getTargetDsBuilderProp());
+            DataSourceBuilder builder = (DataSourceBuilder) fromClassNameAndJson(DataSourceBuilder.class, task.getTargetDsBuilder(), task.getTargetDsBuilderProp());
             return builder.build();
         }
 
         protected static DataSource initSourceDataSource(TaskEntity task) {
-            DataSourceBuilder builder = (DataSourceBuilder) fromClassNameAndJson(task.getSourceDsBuilder(), task.getSourceDsBuilderProp());
+            DataSourceBuilder builder = (DataSourceBuilder) fromClassNameAndJson(DataSourceBuilder.class, task.getSourceDsBuilder(), task.getSourceDsBuilderProp());
             return builder.build();
         }
 
-        protected static Object fromClassNameAndJson(String className, String json) {
+        protected static Object fromClassNameAndJson(Class baseInterface, String className, String json) {
             try {
-                return GsonUtil.fromJson(json, Class.forName(className));
+                return GsonUtil.fromJson(json, Class.forName(baseInterface.getPackage().getName() + "." + className));
             } catch (ClassNotFoundException e) {
                 Cat.logError(className, e);
                 LOG.error(className, e);

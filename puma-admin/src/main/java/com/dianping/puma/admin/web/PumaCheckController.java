@@ -56,6 +56,7 @@ public class PumaCheckController extends BasicController {
             CheckTaskEntity entity = new CheckTaskEntity();
 
             entity.setInitTime(new Date(model.getBaseInfo().getInitTime()));
+            entity.setCurrTime(new Date(model.getBaseInfo().getInitTime()));
 
             entity.setTaskGroupName(model.getBaseInfo().getName());
             if (Strings.isNullOrEmpty(it.toString())) {
@@ -81,6 +82,8 @@ public class PumaCheckController extends BasicController {
 
             entity.setMapper(model.getMapperProp().get(CLASS_NAME).toString());
             entity.setMapperProp(templateMake(templateCache, model.getMapperProp(), it));
+
+            entity.setSuccess(true);
 
             checkTaskService.deleteByTaskName(entity.getTaskName());
             checkTaskService.create(entity);

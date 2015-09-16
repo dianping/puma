@@ -6,13 +6,13 @@ import org.apache.curator.framework.CuratorFramework;
 
 public class DistributedLockFactory {
 
-	public DistributedLock newZkDistributedLock(String lockName) {
+	public static DistributedLock newZkDistributedLock(String lockName) {
 		ZkManager zkManager = ZkManagerLoader.getLionZkManager();
 		CuratorFramework zkClient = zkManager.getZkClient();
 		return new ZkDistributedLock(lockName, zkClient);
 	}
 
-	public DistributedLock newLionDistributedLock(String lockName) {
+	public static DistributedLock newLionDistributedLock(String lockName) {
 		return null;
 	}
 }

@@ -8,8 +8,11 @@
 		SELECT * FROM CheckTask WHERE Id = #{id}
 	</select>
 
-    <select id="findAll" resultType="CheckTaskEntity">
-		SELECT * FROM CheckTask
+    <select id="findRunnable" resultType="CheckTaskEntity">
+		select * from CheckTask
+        where Success = 1
+        order by CurrTime
+        limit 100
 	</select>
 
     <insert id="create" parameterType="checkTaskEntity" useGeneratedKeys="true" keyColumn="ID">

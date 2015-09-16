@@ -8,7 +8,7 @@ public interface CheckTaskService {
 
     CheckTaskEntity findById(int id);
 
-    List<CheckTaskEntity> findAll();
+    List<CheckTaskEntity> findRunnable();
 
     int update(CheckTaskEntity checkTaskEntity);
 

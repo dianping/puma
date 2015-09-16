@@ -20,7 +20,7 @@ public class ScheduledCheckTaskChecker implements CheckTaskChecker {
 
 	@Override
 	public void check() {
-		List<CheckTaskEntity> checkTasks = checkTaskService.findAll();
+		List<CheckTaskEntity> checkTasks = checkTaskService.findRunnable();
 		taskDispatcher.dispatch(checkTasks);
 	}
 

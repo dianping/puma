@@ -7,19 +7,24 @@ import com.dianping.puma.checkserver.manager.report.TaskReporter;
 import com.dianping.puma.checkserver.manager.run.TaskRunFutureListener;
 import com.dianping.puma.checkserver.manager.run.TaskRunner;
 import com.dianping.puma.checkserver.model.TaskResult;
+import jodd.util.collection.SortedArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 @Service
 public class MultipleTaskDispatcher implements TaskDispatcher {
 
     private final Logger logger = LoggerFactory.getLogger(MultipleTaskDispatcher.class);
+
+    private final Random random = new Random();
 
     private final int max = 5;
 
@@ -36,13 +41,15 @@ public class MultipleTaskDispatcher implements TaskDispatcher {
 
     @Override
     public void dispatch(List<CheckTaskEntity> checkTasks) {
-        int count = 0;
-
-        for (final CheckTaskEntity checkTask : checkTasks) {
-
-            if (isFailure(checkTask)) {
-                continue;
+        SortedArrayList<CheckTaskEntity> randomList = new SortedArrayList<CheckTaskEntity>(new Comparator<CheckTaskEntity>() {
+            @Override
+            public int compare(CheckTaskEntity o1, CheckTaskEntity o2) {
+                return random.nextInt(3) - 1;
             }
+        });
+        randomList.addAll(checkTasks);
+
+        for (final CheckTaskEntity checkTask : randomList) {
 
             if (!setNextTimeIfEnough(checkTask)) {
                 continue;
@@ -67,8 +74,6 @@ public class MultipleTaskDispatcher implements TaskDispatcher {
                 logger.info("check period: {} - {}.",
                         dateFormat.format(checkTask.getCurrTime()),
                         dateFormat.format(checkTask.getNextTime()));
-
-                ++count;
 
                 taskRunner.run(checkTask, new TaskRunFutureListener() {
                     @Override
@@ -96,15 +101,7 @@ public class MultipleTaskDispatcher implements TaskDispatcher {
                 localTaskLock.unlock();
                 remoteTaskLock.unlock();
             }
-
-            if (count == max) {
-                break;
-            }
         }
-    }
-
-    protected boolean isFailure(CheckTaskEntity checkTask) {
-        return !checkTask.isSuccess();
     }
 
     protected boolean setNextTimeIfEnough(CheckTaskEntity checkTask) {

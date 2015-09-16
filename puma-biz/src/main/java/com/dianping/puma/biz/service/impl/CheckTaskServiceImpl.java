@@ -20,8 +20,8 @@ public class CheckTaskServiceImpl implements CheckTaskService {
     }
 
     @Override
-    public List<CheckTaskEntity> findAll() {
-        return checkTaskDao.findAll();
+    public List<CheckTaskEntity> findRunnable() {
+        return checkTaskDao.findRunnable();
     }
 
     @Override

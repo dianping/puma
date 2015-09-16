@@ -8,7 +8,7 @@ public interface CheckTaskDao {
 
     CheckTaskEntity findById(int id);
 
-    List<CheckTaskEntity> findAll();
+    List<CheckTaskEntity> findRunnable();
 
     int create(CheckTaskEntity checkTaskEntity);
 

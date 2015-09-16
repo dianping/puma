@@ -7,7 +7,6 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>puma-core</artifactId>
-    <groupId>com.dianping.puma</groupId>
     <version>2.0.0-SNAPSHOT</version>
     <name>puma-core</name>
     <packaging>jar</packaging>
@@ -96,5 +95,21 @@
 	        <artifactId>oro</artifactId>
 	        <version>2.0.8</version>
         </dependency>
+
+        <!-- zk -->
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-framework</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-recipes</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 </project>

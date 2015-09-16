@@ -11,6 +11,7 @@ import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.EventStorage;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -91,6 +92,15 @@ public class DefaultAsyncBinlogChannelTest {
         assertNotNull(response);
         assertEquals(1, response.getBinlogMessage().getBinlogEvents().size());
         assertSame(event1, response.getBinlogMessage().getBinlogEvents().get(0));
+    }
+
+    @Test
+    public void testCouldNotBeTooMuch() throws InterruptedException {
+        for (int k = 0; k < 2000; k++) {
+            eventQueue.add(new ServerErrorEvent(String.valueOf(k)));
+        }
+        Thread.sleep(100);
+        Assert.assertTrue(eventQueue.size() >= 500 && eventQueue.size() < 1500);
     }
 
     @Test

@@ -1,10 +1,5 @@
 package com.dianping.puma;
 
-import com.dianping.puma.comparison.TaskExecutorTest;
-import com.dianping.puma.comparison.comparison.FullComparisonTest;
-import com.dianping.puma.comparison.fetcher.SingleLineTargetFetcherTest;
-import com.dianping.puma.comparison.fetcher.UpdateTimeAndIdSourceFetcherTest;
-import com.dianping.puma.comparison.mapper.DefaultRowMapperTest;
 import com.dianping.puma.filter.*;
 import com.dianping.puma.instance.ZebraInstanceManagerTest;
 import com.dianping.puma.pumaserver.channel.impl.DefaultAsyncBinlogChannelTest;
@@ -61,13 +56,6 @@ import org.junit.runners.Suite.SuiteClasses;
         DefaultAsyncBinlogChannelTest.class,
 
         ZebraInstanceManagerTest.class,
-
-        //compare
-        TaskExecutorTest.class,
-        FullComparisonTest.class,
-        UpdateTimeAndIdSourceFetcherTest.class,
-        SingleLineTargetFetcherTest.class,
-        DefaultRowMapperTest.class
 })
 public class AllTests {
 

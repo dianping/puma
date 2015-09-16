@@ -5,6 +5,8 @@ import java.util.concurrent.locks.Condition;
 
 public class LionDistributedLock implements DistributedLock {
 
+	protected LionDistributedLock() {}
+
 	@Override
 	public void lock() {
 

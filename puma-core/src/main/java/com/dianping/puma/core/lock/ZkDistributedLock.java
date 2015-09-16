@@ -16,7 +16,7 @@ public class ZkDistributedLock implements DistributedLock {
 
 	private final InterProcessMutex lock;
 
-	public ZkDistributedLock(String lockName, CuratorFramework zkClient) {
+	protected ZkDistributedLock(String lockName, CuratorFramework zkClient) {
 		this.lockName = lockName;
 		this.lock = new InterProcessMutex(zkClient, genLockPath(lockName));
 	}

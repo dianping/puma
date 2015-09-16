@@ -7,9 +7,7 @@ import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
-@Service
 public class LionZkManager implements ZkManager {
 
 	private final Logger logger = LoggerFactory.getLogger(LionZkManager.class);
@@ -21,6 +19,8 @@ public class LionZkManager implements ZkManager {
 	private final RetryPolicy defaultRetryPolicy = new ExponentialBackoffRetry(1000, 3);
 
 	private volatile CuratorFramework zkClient;
+
+	protected LionZkManager() {}
 
 	@Override
 	public CuratorFramework getZkClient() {

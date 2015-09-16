@@ -3,13 +3,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.dianping.puma</groupId>
-    <artifactId>parent</artifactId>
+    <artifactId>puma-parent</artifactId>
     <version>2.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>parent</name>
+    <name>puma-parent</name>
     <modules>
         <module>puma-admin</module>
-        <module>puma-server</module>
+        <module>puma</module>
         <module>puma-client</module>
         <module>puma-core</module>
         <module>puma-biz</module>

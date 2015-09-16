@@ -35,32 +35,52 @@ public final class TaskExecutor implements Callable<TaskResult> {
 
     private final TargetFetcher targetFetcher;
 
+    private final DataSource sourceDs;
+
+    private final DataSource targetDs;
+
+    private final DataSourceBuilder sourceBuilder;
+
+    private final DataSourceBuilder targetBuilder;
+
     private final Comparison comparison;
 
     private static final int RETRY_TIMES = 3;
 
     private static final long RETRY_SLEEP_TIME = 10 * 1000;
 
-    private TaskExecutor(SourceFetcher sourceFetcher, TargetFetcher targetFetcher, RowMapper rowMapper, Comparison comparison) {
+    private TaskExecutor(DataSourceBuilder sourceBuilder, DataSourceBuilder targetBuilder, SourceFetcher sourceFetcher, TargetFetcher targetFetcher, RowMapper rowMapper, Comparison comparison) {
+        this.sourceBuilder = sourceBuilder;
+        this.targetBuilder = targetBuilder;
+        this.sourceDs = sourceBuilder.build();
+        this.targetDs = targetBuilder.build();
         this.sourceFetcher = sourceFetcher;
         this.targetFetcher = targetFetcher;
         this.rowMapper = rowMapper;
         this.comparison = comparison;
+
+        this.sourceFetcher.init(sourceDs);
+        this.targetFetcher.init(targetDs);
     }
 
     @Override
     public TaskResult call() throws Exception {
-        List<SourceTargetPair> difference = new ArrayList<SourceTargetPair>();
+        try {
+            List<SourceTargetPair> difference = new ArrayList<SourceTargetPair>();
 
-        fullCompare(difference);
+            fullCompare(difference);
 
-        int tryTimes = 0;
-        while (tryTimes++ < RETRY_TIMES && difference.size() > 0) {
-            Thread.sleep(RETRY_SLEEP_TIME);
-            retry(difference);
+            int tryTimes = 0;
+            while (tryTimes++ < RETRY_TIMES && difference.size() > 0) {
+                Thread.sleep(RETRY_SLEEP_TIME);
+                retry(difference);
+            }
+
+            return new TaskResult().setDifference(difference);
+        } finally {
+            sourceBuilder.destory(sourceDs);
+            targetBuilder.destory(targetDs);
         }
-
-        return new TaskResult().setDifference(difference);
     }
 
     protected void retry(List<SourceTargetPair> difference) {
@@ -118,6 +138,10 @@ public final class TaskExecutor implements Callable<TaskResult> {
 
         private TargetFetcher targetFetcher;
 
+        private DataSourceBuilder sourceBuilder;
+
+        private DataSourceBuilder targetBuilder;
+
         private Comparison comparison;
 
         private Builder() {
@@ -129,21 +153,19 @@ public final class TaskExecutor implements Callable<TaskResult> {
 
         public static Builder create(TaskEntity task) {
             Builder builder = new Builder();
-            DataSource sourceDataSource = initSourceDataSource(task);
-            DataSource targetDataSource = initTargetDataSource(task);
+            builder.sourceBuilder = initSourceDataSourceBuilder(task);
+            builder.targetBuilder = initTargetDataSourceBuilder(task);
             builder.sourceFetcher = initSourceFetcher(task);
-            builder.sourceFetcher.init(sourceDataSource);
             builder.sourceFetcher.setStartTime(task.getBeginTime());
             builder.sourceFetcher.setEndTime(task.getEndTime());
             builder.targetFetcher = initTargetFetcher(task);
-            builder.targetFetcher.init(targetDataSource);
             builder.rowMapper = initRowMapper(task);
             builder.comparison = initComparison(task);
             return builder;
         }
 
         public TaskExecutor build() {
-            return new TaskExecutor(this.sourceFetcher, this.targetFetcher, this.rowMapper, this.comparison);
+            return new TaskExecutor(this.sourceBuilder, this.targetBuilder, this.sourceFetcher, this.targetFetcher, this.rowMapper, this.comparison);
         }
 
         protected static Comparison initComparison(TaskEntity task) {
@@ -162,14 +184,14 @@ public final class TaskExecutor implements Callable<TaskResult> {
             return (RowMapper) fromClassNameAndJson(RowMapper.class, task.getMapper(), task.getMapperProp());
         }
 
-        protected static DataSource initTargetDataSource(TaskEntity task) {
+        protected static DataSourceBuilder initTargetDataSourceBuilder(TaskEntity task) {
             DataSourceBuilder builder = (DataSourceBuilder) fromClassNameAndJson(DataSourceBuilder.class, task.getTargetDsBuilder(), task.getTargetDsBuilderProp());
-            return builder.build();
+            return builder;
         }
 
-        protected static DataSource initSourceDataSource(TaskEntity task) {
+        protected static DataSourceBuilder initSourceDataSourceBuilder(TaskEntity task) {
             DataSourceBuilder builder = (DataSourceBuilder) fromClassNameAndJson(DataSourceBuilder.class, task.getSourceDsBuilder(), task.getSourceDsBuilderProp());
-            return builder.build();
+            return builder;
         }
 
         protected static Object fromClassNameAndJson(Class baseInterface, String className, String json) {
@@ -199,6 +221,16 @@ public final class TaskExecutor implements Callable<TaskResult> {
 
         public Builder setComparison(Comparison comparison) {
             this.comparison = comparison;
+            return this;
+        }
+
+        public Builder setSourceBuilder(DataSourceBuilder sourceBuilder) {
+            this.sourceBuilder = sourceBuilder;
+            return this;
+        }
+
+        public Builder setTargetBuilder(DataSourceBuilder targetBuilder) {
+            this.targetBuilder = targetBuilder;
             return this;
         }
     }

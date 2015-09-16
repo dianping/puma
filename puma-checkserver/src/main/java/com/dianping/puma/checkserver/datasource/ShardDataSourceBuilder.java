@@ -17,6 +17,7 @@ import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 
 import javax.sql.DataSource;
+import java.sql.SQLException;
 
 /**
  * Dozer @ 2015-09
@@ -33,11 +34,32 @@ public class ShardDataSourceBuilder implements DataSourceBuilder {
 
     @Override
     public DataSource build() {
-        ShardDataSource ds = new ShardDataSource();
-        ds.setRouterFactory(new RouterFactory(ruleName, tableName, dimensionIndex));
-        ds.setRuleName(ruleName);
-        ds.init();
-        return ds;
+        ShardDataSource ds = null;
+        try {
+            ds = new ShardDataSource();
+            ds.setRouterFactory(new RouterFactory(ruleName, tableName, dimensionIndex));
+            ds.setRuleName(ruleName);
+            ds.init();
+            return ds;
+        } catch (RuntimeException e) {
+            if (ds != null) {
+                try {
+                    ds.close();
+                } catch (SQLException ignore) {
+                }
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public void destory(DataSource ds) {
+        if (ds instanceof ShardDataSource) {
+            try {
+                ((ShardDataSource) ds).close();
+            } catch (SQLException ignore) {
+            }
+        }
     }
 
     public String getRuleName() {

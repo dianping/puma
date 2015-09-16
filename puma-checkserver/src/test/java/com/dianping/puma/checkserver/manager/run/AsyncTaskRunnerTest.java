@@ -57,6 +57,6 @@ public class AsyncTaskRunnerTest extends MockTest {
             }
         });
 
-        Uninterruptibles.sleepUninterruptibly(10, TimeUnit.SECONDS);
+        Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
     }
 }

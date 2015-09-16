@@ -11,4 +11,5 @@ import javax.sql.DataSource;
  */
 public interface DataSourceBuilder {
     DataSource build();
+    void destory(DataSource ds);
 }

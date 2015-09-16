@@ -2,6 +2,7 @@ package com.dianping.puma.checkserver;
 
 import com.dianping.puma.checkserver.comparison.Comparison;
 import com.dianping.puma.checkserver.comparison.FullComparison;
+import com.dianping.puma.checkserver.datasource.DataSourceBuilder;
 import com.dianping.puma.checkserver.fetcher.SingleLineTargetFetcher;
 import com.dianping.puma.checkserver.fetcher.UpdateTimeAndIdSourceFetcher;
 import com.dianping.puma.checkserver.mapper.DefaultRowMapper;
@@ -18,6 +19,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Dozer @ 2015-09
@@ -41,15 +45,19 @@ public class TaskExecutorTest {
         initData(sourceTemplate);
         initData(targetTemplate);
 
+        DataSourceBuilder sourceBuilder = mock(DataSourceBuilder.class);
+        when(sourceBuilder.build()).thenReturn(sourceDs);
+
+        DataSourceBuilder targetBuilder = mock(DataSourceBuilder.class);
+        when(targetBuilder.build()).thenReturn(targetDs);
+
         UpdateTimeAndIdSourceFetcher sourceFetcher = new UpdateTimeAndIdSourceFetcher();
         sourceFetcher.setStartTime(startTime);
         sourceFetcher.setEndTime(endTime);
-        sourceFetcher.init(sourceDs);
         sourceFetcher.setColumns("*");
         sourceFetcher.setTableName("Debug");
 
         SingleLineTargetFetcher targetFetcher = new SingleLineTargetFetcher();
-        targetFetcher.init(targetDs);
         targetFetcher.setColumns("*");
         targetFetcher.setTableName("Debug");
 
@@ -57,6 +65,8 @@ public class TaskExecutorTest {
         RowMapper mapper = new DefaultRowMapper().setMapKey(Sets.newHashSet("ID"));
 
         target = TaskExecutor.Builder.create()
+                .setSourceBuilder(sourceBuilder)
+                .setTargetBuilder(targetBuilder)
                 .setSourceFetcher(sourceFetcher)
                 .setTargetFetcher(targetFetcher)
                 .setComparison(comparison)

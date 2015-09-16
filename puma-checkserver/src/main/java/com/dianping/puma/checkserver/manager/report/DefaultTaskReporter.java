@@ -36,7 +36,7 @@ public class DefaultTaskReporter implements TaskReporter {
 
     @Override
     public void report(CheckTaskEntity checkTask, Throwable t) {
-        setStatus(checkTask, false, ExceptionUtils.getStackTrace(t));
+        setStatus(checkTask, false, t.getMessage());
 
         report0(checkTask);
     }

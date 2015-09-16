@@ -12,115 +12,117 @@ import java.util.concurrent.locks.Condition;
 
 public class DatabaseTaskLock implements TaskLock {
 
-	private CheckTaskService checkTaskService;
+    private CheckTaskService checkTaskService;
 
-	private CheckTaskServerManager checkTaskServerManager;
+    private CheckTaskServerManager checkTaskServerManager;
 
-	private CheckTaskEntity checkTask;
+    private CheckTaskEntity checkTask;
 
-	private volatile boolean stopped = false;
+    private volatile boolean stopped = false;
 
-	protected long lockTimeout = 60 * 1000; // 1 min.
+    protected long lockTimeout = 60 * 1000; // 1 min.
 
-	@Override
-	public void lock() {
+    @Override
+    public void lock() {
 
-	}
+    }
 
-	@Override
-	public boolean tryLock() {
-		try {
-			CheckTaskEntity tempCheckTask = checkTaskService.findById(checkTask.getId());
-			String host = checkTaskServerManager.findFirstAuthorizedHost();
+    @Override
+    public boolean tryLock() {
+        try {
+            CheckTaskEntity tempCheckTask = checkTaskService.findById(checkTask.getId());
+            String host = checkTaskServerManager.findFirstAuthorizedHost();
 
-			if (tempCheckTask.isRunning()) {
-				if (isTimeout(tempCheckTask.getUpdateTime())) {
-					return tryLock0();
-				} else {
-					return host.equals(tempCheckTask.getOwnerHost()) && tryLock0();
-				}
-			} else {
-				return tryLock0();
-			}
-		} catch (Throwable t) {
-			return false;
-		}
-	}
+            if (tempCheckTask.isRunning()) {
+                if (isTimeout(tempCheckTask.getUpdateTime())) {
+                    return tryLock0();
+                } else {
+                    return host.equals(tempCheckTask.getOwnerHost()) && tryLock0();
+                }
+            } else {
+                return tryLock0();
+            }
+        } catch (Throwable t) {
+            return false;
+        }
+    }
 
-	@Override public void lockInterruptibly() throws InterruptedException {
+    @Override
+    public void lockInterruptibly() throws InterruptedException {
 
-	}
+    }
 
-	@Override public boolean tryLock(long l, TimeUnit timeUnit) throws InterruptedException {
-		return false;
-	}
+    @Override
+    public boolean tryLock(long l, TimeUnit timeUnit) throws InterruptedException {
+        return false;
+    }
 
-	@Override
-	public void unlock() {
-		CheckTaskEntity tempCheckTask = checkTaskService.findById(checkTask.getId());
-		String host = checkTaskServerManager.findFirstAuthorizedHost();
+    @Override
+    public void unlock() {
+        CheckTaskEntity tempCheckTask = checkTaskService.findById(checkTask.getId());
+        String host = checkTaskServerManager.findFirstAuthorizedHost();
 
-		if (!tempCheckTask.isRunning()
-				|| isTimeout(tempCheckTask.getUpdateTime())
-				|| !host.equals(tempCheckTask.getOwnerHost())) {
-			return;
-		}
+        if (!tempCheckTask.isRunning()
+                || isTimeout(tempCheckTask.getUpdateTime())
+                || !host.equals(tempCheckTask.getOwnerHost())) {
+            return;
+        }
 
-		stopped = true;
+        stopped = true;
 
-		checkTask.setRunning(false);
-		checkTask.setOwnerHost(null);
-		checkTask.setUpdateTime(new Date());
+        checkTask.setRunning(false);
+        checkTask.setOwnerHost(null);
+        checkTask.setUpdateTime(new Date());
 
-		checkTaskService.update(checkTask);
-	}
+        checkTaskService.update(checkTask);
+    }
 
-	@Override
-	public Condition newCondition() {
-		return null;
-	}
+    @Override
+    public Condition newCondition() {
+        return null;
+    }
 
-	private Runnable heartbeatWorker = new Runnable() {
-		@Override
-		public void run() {
-			if (!stopped) {
-				checkTask.setUpdateTime(new Date());
-				checkTaskService.update(checkTask);
-				Uninterruptibles.sleepUninterruptibly(5, TimeUnit.SECONDS);
-			}
-		}
-	};
+    private Runnable heartbeatWorker = new Runnable() {
+        @Override
+        public void run() {
+            while (!stopped && !Thread.interrupted()) {
+                checkTask.setUpdateTime(new Date());
+                checkTaskService.update(checkTask);
+                Uninterruptibles.sleepUninterruptibly(5, TimeUnit.SECONDS);
+            }
+        }
+    };
 
-	protected boolean tryLock0() {
-		String host = checkTaskServerManager.findFirstAuthorizedHost();
+    protected boolean tryLock0() {
+        String host = checkTaskServerManager.findFirstAuthorizedHost();
 
-		checkTask.setRunning(true);
-		checkTask.setOwnerHost(host);
-		checkTask.setUpdateTime(new Date());
+        checkTask.setRunning(true);
+        checkTask.setOwnerHost(host);
+        checkTask.setUpdateTime(new Date());
 
-		int result = checkTaskService.update(checkTask);
-		if (result == 0) {
-			return false;
-		}
+        int result = checkTaskService.update(checkTask);
+        if (result == 0) {
+            return false;
+        }
 
-		stopped = false;
-		ThreadPool.execute(heartbeatWorker);
-		return true;
-	}
+        stopped = false;
+        ThreadPool.execute(heartbeatWorker);
+        return true;
+    }
 
-	protected boolean isTimeout(Date updateTime) {
-		return new Date().getTime() - updateTime.getTime() >= lockTimeout;
-	}
+    protected boolean isTimeout(Date updateTime) {
+        return new Date().getTime() - updateTime.getTime() >= lockTimeout;
+    }
 
-	public void setCheckTaskService(CheckTaskService checkTaskService) {
-		this.checkTaskService = checkTaskService;
-	}
+    public void setCheckTaskService(CheckTaskService checkTaskService) {
+        this.checkTaskService = checkTaskService;
+    }
 
-	public void setCheckTaskServerManager(CheckTaskServerManager checkTaskServerManager) {
-		this.checkTaskServerManager = checkTaskServerManager;
-	}
+    public void setCheckTaskServerManager(CheckTaskServerManager checkTaskServerManager) {
+        this.checkTaskServerManager = checkTaskServerManager;
+    }
 
-	public void setCheckTask(CheckTaskEntity checkTask) {
-		this.checkTask = checkTask;
-	}
+    public void setCheckTask(CheckTaskEntity checkTask) {
+        this.checkTask = checkTask;
+    }
 }

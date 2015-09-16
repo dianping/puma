@@ -6,9 +6,13 @@ import java.util.List;
 
 public interface CheckTaskService {
 
-	public CheckTaskEntity findById(int id);
+    CheckTaskEntity findById(int id);
 
-	public List<CheckTaskEntity> findAll();
+    List<CheckTaskEntity> findAll();
 
-	public int update(CheckTaskEntity checkTaskEntity);
+    int update(CheckTaskEntity checkTaskEntity);
+
+    int create(CheckTaskEntity checkTaskEntity);
+
+    int deleteByTaskName(String name);
 }

@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -41,14 +43,12 @@ public class PumaCheckController extends BasicController {
     @ResponseBody
     public Object create(@RequestBody CheckTaskModel model) throws IOException, ClassNotFoundException {
 
-        Iterable<Object> batch = Lists.newArrayList(new Object());
+        Iterable<Object> batch = Lists.<Object>newArrayList("");
 
         if (!Strings.isNullOrEmpty(model.getBaseInfo().getBatch())) {
             Eval groovy = new Eval();
             batch = (Iterable<Object>) groovy.me(model.getBaseInfo().getBatch());
         }
-
-        List<CheckTaskEntity> result = new ArrayList<CheckTaskEntity>();
 
         Map<String, Template> templateCache = new HashMap<String, Template>();
 
@@ -58,7 +58,11 @@ public class PumaCheckController extends BasicController {
             entity.setInitTime(new Date(model.getBaseInfo().getInitTime()));
 
             entity.setTaskGroupName(model.getBaseInfo().getName());
-            entity.setTaskName(model.getBaseInfo().getName() + "_" + it.toString());
+            if (Strings.isNullOrEmpty(it.toString())) {
+                entity.setTaskName(model.getBaseInfo().getName());
+            } else {
+                entity.setTaskName(model.getBaseInfo().getName() + "_" + it.toString());
+            }
 
             entity.setSourceDsBuilder(model.getSourceDsBuilderProp().get(CLASS_NAME).toString());
             entity.setSourceDsBuilderProp(templateMake(templateCache, model.getSourceDsBuilderProp(), it));
@@ -78,7 +82,8 @@ public class PumaCheckController extends BasicController {
             entity.setMapper(model.getMapperProp().get(CLASS_NAME).toString());
             entity.setMapperProp(templateMake(templateCache, model.getMapperProp(), it));
 
-            result.add(entity);
+            checkTaskService.deleteByTaskName(entity.getTaskName());
+            checkTaskService.create(entity);
         }
 
         return null;
@@ -88,6 +93,9 @@ public class PumaCheckController extends BasicController {
 
         Map<String, Object> result = new HashMap<String, Object>();
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
+            if (CLASS_NAME.contains(entry.getKey())) {
+                continue;
+            }
 
             if (!TEMPLATE_REGEX.matcher(entry.getValue().toString()).matches()) {
                 result.put(entry.getKey(), entry.getValue());

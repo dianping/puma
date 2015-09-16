@@ -1,18 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.dianping.puma.biz.dao.CheckTaskDao">
 
-	<select id="findById" resultType="CheckTaskEntity">
+    <select id="findById" resultType="CheckTaskEntity">
 		SELECT * FROM CheckTask WHERE Id = #{id}
 	</select>
 
-	<select id="findAll" resultType="CheckTaskEntity">
+    <select id="findAll" resultType="CheckTaskEntity">
 		SELECT * FROM CheckTask
 	</select>
 
-	<update id="update" parameterType="CheckTaskEntity">
+    <insert id="create" parameterType="checkTaskEntity" useGeneratedKeys="true" keyColumn="ID">
+		INSERT INTO CheckTask
+            (InitTime,
+            CurrTime,
+            Running,
+            OwnerHost,
+            Success,
+            Message,
+            Comparison,
+            SourceFetcher,
+            TargetFetcher,
+            Mapper,
+            SourceDsBuilder,
+            TargetDsBuilder,
+            ComparisonProp,
+            SourceFetcherProp,
+            TargetFetcherProp,
+            MapperProp,
+            SourceDsBuilderProp,
+            TargetDsBuilderProp,
+            TaskName,
+            TaskGroupName)
+        VALUES
+            (#{initTime},
+            #{currTime},
+            #{running},
+            #{ownerHost},
+            #{success},
+            #{message},
+            #{comparison},
+            #{sourceFetcher},
+            #{targetFetcher},
+            #{mapper},
+            #{sourceDsBuilder},
+            #{targetDsBuilder},
+            #{comparisonProp},
+            #{sourceFetcherProp},
+            #{targetFetcherProp},
+            #{mapperProp},
+            #{sourceDsBuilderProp},
+            #{targetDsBuilderProp},
+            #{taskName},
+            #{taskGroupName})
+	</insert>
+
+    <update id="update" parameterType="CheckTaskEntity">
 		UPDATE
 		CheckTask
 		SET
@@ -25,5 +70,11 @@
 		WHERE
 		CheckTask.Id = #{id}
 	</update>
+
+    <delete id="deleteByTaskName" parameterType="map">
+		DELETE FROM CheckTask
+		WHERE
+		TaskName = #{taskName}
+	</delete>
 
 </mapper>

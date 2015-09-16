@@ -14,7 +14,7 @@ import java.util.Date;
 @Service
 public class DefaultTaskReporter implements TaskReporter {
 
-    private final Logger logger = LoggerFactory.getLogger(DefaultTaskReporter.class);
+    private final Logger logger = LoggerFactory.getLogger("DefaultTaskReporter");
 
     @Autowired
     CheckTaskService checkTaskService;

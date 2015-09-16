@@ -278,8 +278,7 @@
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
-                <artifactId>netty-all</art
-                        ifactId>
+                <artifactId>netty-all</artifactId>
                 <version>4.0.31.Final</version>
             </dependency>
             <dependency>

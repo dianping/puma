@@ -35,10 +35,6 @@ public final class TaskExecutor implements Callable<TaskResult> {
 
     private final TargetFetcher targetFetcher;
 
-    private final DataSource sourceDs;
-
-    private final DataSource targetDs;
-
     private final DataSourceBuilder sourceBuilder;
 
     private final DataSourceBuilder targetBuilder;
@@ -52,20 +48,25 @@ public final class TaskExecutor implements Callable<TaskResult> {
     private TaskExecutor(DataSourceBuilder sourceBuilder, DataSourceBuilder targetBuilder, SourceFetcher sourceFetcher, TargetFetcher targetFetcher, RowMapper rowMapper, Comparison comparison) {
         this.sourceBuilder = sourceBuilder;
         this.targetBuilder = targetBuilder;
-        this.sourceDs = sourceBuilder.build();
-        this.targetDs = targetBuilder.build();
+
         this.sourceFetcher = sourceFetcher;
         this.targetFetcher = targetFetcher;
         this.rowMapper = rowMapper;
         this.comparison = comparison;
 
-        this.sourceFetcher.init(sourceDs);
-        this.targetFetcher.init(targetDs);
+
     }
 
     @Override
     public TaskResult call() throws Exception {
+        DataSource sourceDs = null;
+        DataSource targetDs = null;
         try {
+            sourceDs = sourceBuilder.build();
+            targetDs = targetBuilder.build();
+            this.sourceFetcher.init(sourceDs);
+            this.targetFetcher.init(targetDs);
+
             List<SourceTargetPair> difference = new ArrayList<SourceTargetPair>();
 
             fullCompare(difference);
@@ -77,6 +78,10 @@ public final class TaskExecutor implements Callable<TaskResult> {
             }
 
             return new TaskResult().setDifference(difference);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            Cat.logError(e.getMessage(), e);
+            throw e;
         } finally {
             sourceBuilder.destory(sourceDs);
             targetBuilder.destory(targetDs);

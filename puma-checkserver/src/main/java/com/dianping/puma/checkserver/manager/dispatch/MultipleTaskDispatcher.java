@@ -19,101 +19,101 @@ import java.util.List;
 @Service
 public class MultipleTaskDispatcher implements TaskDispatcher {
 
-	private final Logger logger = LoggerFactory.getLogger(MultipleTaskDispatcher.class);
+    private final Logger logger = LoggerFactory.getLogger(MultipleTaskDispatcher.class);
 
-	private final int max = 5;
+    private final int max = 5;
 
-	@Autowired
-	TaskRunner taskRunner;
+    @Autowired
+    TaskRunner taskRunner;
 
-	@Autowired
-	TaskLockBuilder taskLockBuilder;
+    @Autowired
+    TaskLockBuilder taskLockBuilder;
 
-	@Autowired
-	TaskReporter taskReporter;
+    @Autowired
+    TaskReporter taskReporter;
 
-	private final long checkTimePeriod = 120 * 60 * 1000; // 120 min.
+    private final long checkTimePeriod = 4 * 60 * 60 * 1000;
 
-	@Override
-	public void dispatch(List<CheckTaskEntity> checkTasks) {
-		int count = 0;
+    @Override
+    public void dispatch(List<CheckTaskEntity> checkTasks) {
+        int count = 0;
 
-		for (final CheckTaskEntity checkTask : checkTasks) {
+        for (final CheckTaskEntity checkTask : checkTasks) {
 
-			if (isFailure(checkTask)) {
-				continue;
-			}
+            if (isFailure(checkTask)) {
+                continue;
+            }
 
-			if (!setNextTimeIfEnough(checkTask)) {
-				continue;
-			}
+            if (!setNextTimeIfEnough(checkTask)) {
+                continue;
+            }
 
-			final TaskLock localTaskLock = taskLockBuilder.buildLocalLock(checkTask);
-			final TaskLock remoteTaskLock = taskLockBuilder.buildRemoteLock(checkTask);
+            final TaskLock localTaskLock = taskLockBuilder.buildLocalLock(checkTask);
+            final TaskLock remoteTaskLock = taskLockBuilder.buildRemoteLock(checkTask);
 
-			try {
-				if (!localTaskLock.tryLock()) {
-					continue;
-				}
+            try {
+                if (!localTaskLock.tryLock()) {
+                    continue;
+                }
 
-				if (!remoteTaskLock.tryLock()) {
-					localTaskLock.unlock();
-					continue;
-				}
+                if (!remoteTaskLock.tryLock()) {
+                    localTaskLock.unlock();
+                    continue;
+                }
 
-				logger.info("start run check task...");
+                logger.info("start run check task...");
 
-				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-				logger.info("check period: {} - {}.",
-						dateFormat.format(checkTask.getCurrTime()),
-						dateFormat.format(checkTask.getNextTime()));
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                logger.info("check period: {} - {}.",
+                        dateFormat.format(checkTask.getCurrTime()),
+                        dateFormat.format(checkTask.getNextTime()));
 
-				++count;
+                ++count;
 
-				taskRunner.run(checkTask, new TaskRunFutureListener() {
-					@Override
-					public void onSuccess(TaskResult result) {
-						logger.info("success to run check task.");
+                taskRunner.run(checkTask, new TaskRunFutureListener() {
+                    @Override
+                    public void onSuccess(TaskResult result) {
+                        logger.info("success to run check task.");
 
-						taskReporter.report(checkTask, result);
-						localTaskLock.unlock();
-						remoteTaskLock.unlock();
-					}
+                        taskReporter.report(checkTask, result);
+                        localTaskLock.unlock();
+                        remoteTaskLock.unlock();
+                    }
 
-					@Override
-					public void onFailure(Throwable cause) {
-						logger.info("failure to run check task.");
+                    @Override
+                    public void onFailure(Throwable cause) {
+                        logger.info("failure to run check task.");
 
-						taskReporter.report(checkTask, cause);
-						localTaskLock.unlock();
-						remoteTaskLock.unlock();
-					}
-				});
+                        taskReporter.report(checkTask, cause);
+                        localTaskLock.unlock();
+                        remoteTaskLock.unlock();
+                    }
+                });
 
-			} catch (Throwable t) {
-				logger.error("failed to execute check task.", t);
+            } catch (Throwable t) {
+                logger.error("failed to execute check task.", t);
 
-				localTaskLock.unlock();
-				remoteTaskLock.unlock();
-			}
+                localTaskLock.unlock();
+                remoteTaskLock.unlock();
+            }
 
-			if (count == max) {
-				break;
-			}
-		}
-	}
+            if (count == max) {
+                break;
+            }
+        }
+    }
 
-	protected boolean isFailure(CheckTaskEntity checkTask) {
-		return !checkTask.isSuccess();
-	}
+    protected boolean isFailure(CheckTaskEntity checkTask) {
+        return !checkTask.isSuccess();
+    }
 
-	protected boolean setNextTimeIfEnough(CheckTaskEntity checkTask) {
-		Date currTime = checkTask.getCurrTime();
-		Date nextTime = new Date(currTime.getTime() + checkTimePeriod);
-		if (nextTime.getTime() > new Date().getTime()) {
-			return false;
-		}
-		checkTask.setNextTime(nextTime);
-		return true;
-	}
+    protected boolean setNextTimeIfEnough(CheckTaskEntity checkTask) {
+        Date currTime = checkTask.getCurrTime();
+        Date nextTime = new Date(currTime.getTime() + checkTimePeriod);
+        if (nextTime.getTime() > new Date().getTime()) {
+            return false;
+        }
+        checkTask.setNextTime(nextTime);
+        return true;
+    }
 }

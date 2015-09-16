@@ -6,10 +6,7 @@ import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
 import com.dianping.zebra.shard.jdbc.ShardDataSource;
-import com.dianping.zebra.shard.router.AbstractDataSourceRouterFactory;
-import com.dianping.zebra.shard.router.DataSourceRouterFactory;
-import com.dianping.zebra.shard.router.ShardRouter;
-import com.dianping.zebra.shard.router.ShardRouterImpl;
+import com.dianping.zebra.shard.router.*;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
@@ -38,6 +35,7 @@ public class ShardDataSourceBuilder implements DataSourceBuilder {
         try {
             ds = new ShardDataSource();
             ds.setRouterFactory(new RouterFactory(ruleName, tableName, dimensionIndex));
+            ds.setDataSourceRepository(new DataSourceRepository());
             ds.setRuleName(ruleName);
             ds.init();
             return ds;

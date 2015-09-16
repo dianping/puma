@@ -4,7 +4,6 @@ import com.dianping.puma.biz.entity.CheckTaskEntity;
 import com.dianping.puma.biz.service.CheckTaskService;
 import com.dianping.puma.checkserver.model.TaskResult;
 import com.dianping.puma.core.util.GsonUtil;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +35,7 @@ public class DefaultTaskReporter implements TaskReporter {
 
     @Override
     public void report(CheckTaskEntity checkTask, Throwable t) {
-        setStatus(checkTask, false, t.getMessage());
+        setStatus(checkTask, false, t.getClass().getSimpleName() + ":" + t.getMessage());
 
         report0(checkTask);
     }

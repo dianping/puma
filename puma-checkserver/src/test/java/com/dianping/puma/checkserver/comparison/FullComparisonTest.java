@@ -1,5 +1,6 @@
 package com.dianping.puma.checkserver.comparison;
 
+import com.google.common.collect.Sets;
 import junit.framework.Assert;
 import org.junit.Test;
 
@@ -14,6 +15,22 @@ import java.util.Map;
  */
 public class FullComparisonTest {
     private FullComparison comparison = new FullComparison();
+
+    @Test
+    public void test_ignore() throws Exception {
+        Map<String, Object> source = new HashMap<String, Object>();
+        Map<String, Object> target = new HashMap<String, Object>();
+
+        source.put("Ignore", 1);
+        target.put("Ignore", 2);
+
+        source.put("2", "2");
+        target.put("2", "2");
+
+        comparison.setIgnoreColumns(Sets.newHashSet("Ignore"));
+
+        Assert.assertTrue(comparison.compare(source, target));
+    }
 
     @Test
     public void test_same() throws Exception {

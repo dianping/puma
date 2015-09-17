@@ -29,7 +29,7 @@ public class AsyncTaskRunner implements TaskRunner {
 
 
     public boolean isFull() {
-        return threadPool.getActiveCount() >= MAX_POOL_SIZE;
+        return threadPool.getActiveCount() >= MAX_POOL_SIZE * 5;
     }
 
     @Override

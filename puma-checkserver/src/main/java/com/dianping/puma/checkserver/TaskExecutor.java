@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Dozer @ 2015-09
@@ -55,8 +56,6 @@ public final class TaskExecutor implements Callable<TaskResult> {
         this.targetFetcher = targetFetcher;
         this.rowMapper = rowMapper;
         this.comparison = comparison;
-
-
     }
 
     @Override
@@ -143,6 +142,8 @@ public final class TaskExecutor implements Callable<TaskResult> {
 
     public static final class Builder {
 
+        private static final Map<String, Class> clazzMap = new ConcurrentHashMap<String, Class>();
+
         private RowMapper rowMapper;
 
         private SourceFetcher sourceFetcher;
@@ -207,11 +208,21 @@ public final class TaskExecutor implements Callable<TaskResult> {
 
         protected static Object fromClassNameAndJson(Class baseInterface, String className, String json) {
             try {
-                return GsonUtil.fromJson(json, Class.forName(baseInterface.getPackage().getName() + "." + className));
+                return GsonUtil.fromJson(json, loadClass(baseInterface.getPackage().getName() + "." + className));
             } catch (ClassNotFoundException e) {
                 Cat.logError(className, e);
                 LOG.error(className, e);
                 throw new IllegalArgumentException(className, e);
+            }
+        }
+
+        protected static Class loadClass(String name) throws ClassNotFoundException {
+            if (clazzMap.containsKey(name)) {
+                return clazzMap.get(name);
+            } else {
+                Class clazz = Class.forName(name);
+                clazzMap.put(name, clazz);
+                return clazz;
             }
         }
 

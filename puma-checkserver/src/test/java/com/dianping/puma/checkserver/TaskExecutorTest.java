@@ -61,6 +61,9 @@ public class TaskExecutorTest {
         targetFetcher.setColumns("*");
         targetFetcher.setTableName("Debug");
 
+        sourceFetcher.init(sourceDs);
+        targetFetcher.init(targetDs);
+
         Comparison comparison = new FullComparison();
         RowMapper mapper = new DefaultRowMapper().setMapKey(Sets.newHashSet("ID"));
 

@@ -11,12 +11,14 @@ import java.util.concurrent.*;
 @Service
 public class AsyncTaskRunner implements TaskRunner {
 
-    private static int MAX_POOL_SIZE = 20;
+    private static int MAX_POOL_SIZE = 25;
     private static int MIN_POOL_SIZE = 5;
     private static long TIMEOUT_MIN = 5;
 
+    private final BlockingQueue<Runnable> threadQueue = new LinkedBlockingQueue<Runnable>();
+
     private final ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
-            MIN_POOL_SIZE, MAX_POOL_SIZE, TIMEOUT_MIN, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(),
+            MIN_POOL_SIZE, MAX_POOL_SIZE, TIMEOUT_MIN, TimeUnit.MINUTES, threadQueue,
             new ThreadFactory() {
                 @Override
                 public Thread newThread(Runnable runnable) {
@@ -29,7 +31,7 @@ public class AsyncTaskRunner implements TaskRunner {
 
 
     public boolean isFull() {
-        return threadPool.getActiveCount() >= MAX_POOL_SIZE * 5;
+        return threadQueue.size() >= MAX_POOL_SIZE;
     }
 
     @Override

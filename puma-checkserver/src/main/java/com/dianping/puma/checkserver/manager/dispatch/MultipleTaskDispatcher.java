@@ -26,8 +26,6 @@ public class MultipleTaskDispatcher implements TaskDispatcher {
 
     private final Random random = new Random();
 
-    private final int max = 5;
-
     @Autowired
     TaskRunner taskRunner;
 
@@ -41,15 +39,7 @@ public class MultipleTaskDispatcher implements TaskDispatcher {
 
     @Override
     public void dispatch(List<CheckTaskEntity> checkTasks) {
-        SortedArrayList<CheckTaskEntity> randomList = new SortedArrayList<CheckTaskEntity>(new Comparator<CheckTaskEntity>() {
-            @Override
-            public int compare(CheckTaskEntity o1, CheckTaskEntity o2) {
-                return random.nextInt(3) - 1;
-            }
-        });
-        randomList.addAll(checkTasks);
-
-        for (final CheckTaskEntity checkTask : randomList) {
+        for (final CheckTaskEntity checkTask : getRandomTask(checkTasks)) {
 
             if (!setNextTimeIfEnough(checkTask)) {
                 continue;
@@ -68,40 +58,54 @@ public class MultipleTaskDispatcher implements TaskDispatcher {
                     continue;
                 }
 
-                logger.info("start run check task...");
+                logger.info("Start run check task...");
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                logger.info("check period: {} - {}.",
+                logger.info("Check period: {} - {}.",
                         dateFormat.format(checkTask.getCurrTime()),
                         dateFormat.format(checkTask.getNextTime()));
 
                 taskRunner.run(checkTask, new TaskRunFutureListener() {
                     @Override
                     public void onSuccess(TaskResult result) {
-                        logger.info("success to run check task.");
-
-                        taskReporter.report(checkTask, result);
-                        localTaskLock.unlock();
-                        remoteTaskLock.unlock();
+                        try {
+                            logger.info("Success to run check task.");
+                            taskReporter.report(checkTask, result);
+                        } finally {
+                            localTaskLock.unlock();
+                            remoteTaskLock.unlock();
+                        }
                     }
 
                     @Override
                     public void onFailure(Throwable cause) {
-                        logger.info("failure to run check task.");
-
-                        taskReporter.report(checkTask, cause);
-                        localTaskLock.unlock();
-                        remoteTaskLock.unlock();
+                        try {
+                            logger.info("Failure to run check task.");
+                            taskReporter.report(checkTask, cause);
+                        } finally {
+                            localTaskLock.unlock();
+                            remoteTaskLock.unlock();
+                        }
                     }
                 });
 
             } catch (Throwable t) {
-                logger.error("failed to execute check task.", t);
-
+                logger.error("Failed to execute check task.", t);
                 localTaskLock.unlock();
                 remoteTaskLock.unlock();
             }
         }
+    }
+
+    protected SortedArrayList<CheckTaskEntity> getRandomTask(List<CheckTaskEntity> checkTasks) {
+        SortedArrayList<CheckTaskEntity> randomList = new SortedArrayList<CheckTaskEntity>(new Comparator<CheckTaskEntity>() {
+            @Override
+            public int compare(CheckTaskEntity o1, CheckTaskEntity o2) {
+                return random.nextInt(3) - 1; // -1,0,1
+            }
+        });
+        randomList.addAll(checkTasks);
+        return randomList;
     }
 
     protected boolean setNextTimeIfEnough(CheckTaskEntity checkTask) {

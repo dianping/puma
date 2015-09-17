@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.CheckResultDao">
+    <insert id="create" parameterType="checkTaskEntity" useGeneratedKeys="true" keyColumn="Id">
+        INSERT INTO CheckResult
+          (TaskName, SourceData, TargetData)
+        VALUES
+          (#{taskName}, #{sourceData}, #{targetData})
+	</insert>
+</mapper>

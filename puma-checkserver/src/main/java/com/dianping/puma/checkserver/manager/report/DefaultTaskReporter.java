@@ -1,7 +1,10 @@
 package com.dianping.puma.checkserver.manager.report;
 
+import com.dianping.puma.biz.entity.CheckResultEntity;
 import com.dianping.puma.biz.entity.CheckTaskEntity;
+import com.dianping.puma.biz.service.CheckResultService;
 import com.dianping.puma.biz.service.CheckTaskService;
+import com.dianping.puma.checkserver.model.SourceTargetPair;
 import com.dianping.puma.checkserver.model.TaskResult;
 import com.dianping.puma.core.util.GsonUtil;
 import org.slf4j.Logger;
@@ -14,23 +17,29 @@ import java.util.Date;
 @Service
 public class DefaultTaskReporter implements TaskReporter {
 
-    private final Logger logger = LoggerFactory.getLogger("DefaultTaskReporter");
-
     @Autowired
     CheckTaskService checkTaskService;
 
+    @Autowired
+    CheckResultService checkResultService;
+
     @Override
     public void report(CheckTaskEntity checkTask, TaskResult result) {
-        setCurrTime(checkTask, checkTask.getNextTime());
+        try {
+            for (SourceTargetPair pair : result.getDifference()) {
+                CheckResultEntity entity = new CheckResultEntity();
+                entity.setTaskName(checkTask.getTaskName());
+                entity.setSourceData(GsonUtil.toJson(pair.getSource()));
+                entity.setTargetData(GsonUtil.toJson(pair.getTarget()));
+                checkResultService.create(entity);
+            }
 
-        if (result.getDifference().size() == 0) {
+            setCurrTime(checkTask, checkTask.getNextTime());
             setStatus(checkTask, true, null);
-        } else {
-            logger.error("Check Difference: \n{}.", GsonUtil.toJson(result.getDifference()));
-            setStatus(checkTask, true, "Check Difference");
+            report0(checkTask);
+        } catch (Exception e) {
+            report(checkTask, e);
         }
-
-        report0(checkTask);
     }
 
     @Override

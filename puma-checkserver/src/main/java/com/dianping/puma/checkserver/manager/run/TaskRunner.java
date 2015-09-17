@@ -4,5 +4,7 @@ import com.dianping.puma.biz.entity.CheckTaskEntity;
 
 public interface TaskRunner {
 
-    public TaskRunFuture run(CheckTaskEntity checkTask, TaskRunFutureListener listener);
+    TaskRunFuture run(CheckTaskEntity checkTask, TaskRunFutureListener listener);
+
+    boolean isFull();
 }

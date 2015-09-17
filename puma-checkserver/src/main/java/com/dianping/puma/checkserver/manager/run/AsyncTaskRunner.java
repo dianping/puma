@@ -6,25 +6,31 @@ import com.dianping.puma.checkserver.model.TaskEntity;
 import com.dianping.puma.checkserver.model.TaskResult;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.*;
 
 @Service
 public class AsyncTaskRunner implements TaskRunner {
 
-    private final int threadPoolSize = 20;
+    private static int MAX_POOL_SIZE = 20;
+    private static int MIN_POOL_SIZE = 5;
+    private static long TIMEOUT_MIN = 5;
 
-    private final ExecutorService threadPool = Executors.newFixedThreadPool(threadPoolSize, new ThreadFactory() {
-        @Override
-        public Thread newThread(Runnable runnable) {
-            Thread thread = new Thread(runnable);
-            thread.setName("async-task-runner");
-            thread.setDaemon(true);
-            return thread;
-        }
-    });
+    private final ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
+            MIN_POOL_SIZE, MAX_POOL_SIZE, TIMEOUT_MIN, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(),
+            new ThreadFactory() {
+                @Override
+                public Thread newThread(Runnable runnable) {
+                    Thread thread = new Thread(runnable);
+                    thread.setName("AsyncTaskRunner");
+                    thread.setDaemon(true);
+                    return thread;
+                }
+            });
+
+
+    public boolean isFull() {
+        return threadPool.getActiveCount() >= MAX_POOL_SIZE;
+    }
 
     @Override
     public TaskRunFuture run(CheckTaskEntity checkTask, TaskRunFutureListener listener) {

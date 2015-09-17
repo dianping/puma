@@ -40,6 +40,9 @@ public class MultipleTaskDispatcher implements TaskDispatcher {
     @Override
     public void dispatch(List<CheckTaskEntity> checkTasks) {
         for (final CheckTaskEntity checkTask : getRandomTask(checkTasks)) {
+            if (taskRunner.isFull()) {
+                break;
+            }
 
             if (!setNextTimeIfEnough(checkTask)) {
                 continue;

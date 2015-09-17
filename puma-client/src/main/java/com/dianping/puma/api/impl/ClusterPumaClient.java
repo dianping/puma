@@ -5,6 +5,8 @@ import com.dianping.puma.api.PumaClientConfig;
 import com.dianping.puma.api.PumaClientException;
 import com.dianping.puma.api.PumaServerRouter;
 import com.dianping.puma.core.dto.BinlogMessage;
+import com.dianping.puma.core.lock.DistributedLock;
+import com.dianping.puma.core.lock.DistributedLockFactory;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -37,6 +39,8 @@ public class ClusterPumaClient implements PumaClient {
     protected int retryInterval = 5000; // 5s.
 
     protected volatile SimplePumaClient client;
+
+    private DistributedLock distributedLock;
 
     public ClusterPumaClient() {
     }

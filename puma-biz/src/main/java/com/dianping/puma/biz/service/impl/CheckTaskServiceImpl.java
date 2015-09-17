@@ -11,21 +11,31 @@ import java.util.List;
 @Service
 public class CheckTaskServiceImpl implements CheckTaskService {
 
-	@Autowired
-	CheckTaskDao checkTaskDao;
+    @Autowired
+    CheckTaskDao checkTaskDao;
 
-	@Override
-	public CheckTaskEntity findById(int id) {
-		return checkTaskDao.findById(id);
-	}
+    @Override
+    public CheckTaskEntity findById(int id) {
+        return checkTaskDao.findById(id);
+    }
 
-	@Override
-	public List<CheckTaskEntity> findAll() {
-		return checkTaskDao.findAll();
-	}
+    @Override
+    public List<CheckTaskEntity> findRunnable() {
+        return checkTaskDao.findRunnable();
+    }
 
-	@Override
-	public int update(CheckTaskEntity checkTaskEntity) {
-		return checkTaskDao.update(checkTaskEntity);
-	}
+    @Override
+    public int update(CheckTaskEntity checkTaskEntity) {
+        return checkTaskDao.update(checkTaskEntity);
+    }
+
+    @Override
+    public int create(CheckTaskEntity checkTaskEntity) {
+        return checkTaskDao.create(checkTaskEntity);
+    }
+
+    @Override
+    public int deleteByTaskName(String name) {
+        return checkTaskDao.deleteByTaskName(name);
+    }
 }

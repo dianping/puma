@@ -6,7 +6,12 @@ puma.config(function ($httpProvider) {
             },
             responseError: function (responseError) {
                 if (responseError.status === 500) {
-                    alert('failure');
+                    console.log(responseError)
+                    if (responseError.data && responseError.data.msg) {
+                        alert('Failure:' + responseError.data.msg);
+                    } else {
+                        alert('Failure');
+                    }
                 }
                 return $q.reject(responseError);
             }
@@ -121,7 +126,7 @@ puma.controller('pumaTargetController', function ($scope, $http) {
                 $scope.pumaDto = response;
 
                 $scope.servers = [];
-                angular.forEach($scope.pumaDto.serverNames, function(serverName) {
+                angular.forEach($scope.pumaDto.serverNames, function (serverName) {
                     var server = {
                         name: serverName,
                         input: buildInput(serverName, $scope.pumaDto.serverNames),
@@ -165,11 +170,11 @@ puma.controller('pumaTargetController', function ($scope, $http) {
 
     function buildInput(serverName, allServers) {
         var list = [];
-        angular.forEach(allServers, function(server) {
+        angular.forEach(allServers, function (server) {
             if (server === serverName) {
-                list.push({ name: server, selected: true });
+                list.push({name: server, selected: true});
             } else {
-                list.push({ name: server });
+                list.push({name: server});
             }
         });
         return list;
@@ -177,15 +182,15 @@ puma.controller('pumaTargetController', function ($scope, $http) {
 
     function parseOutput(servers) {
         var list = [];
-        angular.forEach(servers, function(server) {
-             list.push(server.output[0].name);
+        angular.forEach(servers, function (server) {
+            list.push(server.output[0].name);
         });
         return list;
     };
 
     function parseTables(tables) {
         var list = [];
-        angular.forEach(tables, function(table) {
+        angular.forEach(tables, function (table) {
             list.push(table.name);
         });
         return list;
@@ -193,15 +198,16 @@ puma.controller('pumaTargetController', function ($scope, $http) {
 
     function parseBeginTime(servers) {
         var list = {};
-        angular.forEach(servers, function(server) {
+        angular.forEach(servers, function (server) {
             try {
                 list[server.output[0].name] = new Date(server.beginTime).getTime();
-            } catch (err) {}
+            } catch (err) {
+            }
         });
         return list;
     };
 
-    $scope.submit = function() {
+    $scope.submit = function () {
         $scope.pumaDto.serverNames = parseOutput($scope.servers);
         $scope.pumaDto.tables = parseTables($scope.tables);
         $scope.pumaDto.beginTimes = parseBeginTime($scope.servers);
@@ -213,12 +219,12 @@ puma.controller('pumaTargetController', function ($scope, $http) {
             beginTimestamps: $scope.pumaDto.beginTimes,
         };
 
-        $http.post('/a/puma-create', json).success(function(response) {
+        $http.post('/a/puma-create', json).success(function (response) {
             alert('success');
         });
     };
 
-    $scope.add = function() {
+    $scope.add = function () {
         $scope.servers.push({
             name: '',
             input: buildInput('', $scope.allServers),
@@ -226,20 +232,20 @@ puma.controller('pumaTargetController', function ($scope, $http) {
         });
     };
 
-    $scope.delete = function(server) {
+    $scope.delete = function (server) {
         var index = $scope.servers.indexOf(server);
         $scope.servers.splice(index, 1);
     };
 
-    $scope.checkShowWell = function() {
+    $scope.checkShowWell = function () {
         return _.size($scope.pumaDto.serverNames) === 0 && !$scope.createMode;
     };
 
-    $scope.checkShowNewServers = function() {
+    $scope.checkShowNewServers = function () {
         return $scope.createMode;
     };
 
-    $scope.checkShowOldServers = function() {
+    $scope.checkShowOldServers = function () {
         return !$scope.createMode;
     };
 });

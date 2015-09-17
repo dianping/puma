@@ -1,0 +1,227 @@
+<div ng-controller="pumaCheckCreateController">
+
+    <div class="breadcrumbs" id="breadcrumbs">
+        <script type="text/javascript">
+            try {
+                ace.settings.check('breadcrumbs', 'fixed')
+            } catch (e) {
+            }
+        </script>
+        <ul class="breadcrumb">
+            <li>
+                <i class="ace-icon fa fa-home home-icon"></i>
+                <a href="#">Home</a>
+            </li>
+            <li class="active">Puma Check Task Create</li>
+        </ul>
+    </div>
+    <div class="page-content">
+        <div class="page-content-area">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="widget-box ui-sortable-handle">
+                                <div class="widget-header widget-header-small">
+                                    <h5 class="widget-title smaller">Base Info</h5>
+                                </div>
+                                <div class="widget-body">
+                                    <div class="widget-main padding-6">
+                                        <div class="tab-content">
+                                            <div onload="item = model.baseInfo = {}"
+                                                 ng-if="true"
+                                                 ng-include="templateBase + 'base.html'"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="widget-box ui-sortable-handle">
+                                <div class="widget-header widget-header-small">
+                                    <h5 class="widget-title smaller">Source DataSource Builder</h5>
+
+                                    <div class="widget-toolbar no-border">
+                                        <ul class="nav nav-tabs">
+                                            <li class="active">
+                                                <a data-toggle="tab" href=""
+                                                   ng-click="changeTemplate('SourceDsBuilderTemplate','ds-group')">GroupDataSource</a>
+                                            </li>
+                                            <li>
+                                                <a data-toggle="tab" href=""
+                                                   ng-click="changeTemplate('SourceDsBuilderTemplate','ds-shard')">ShardDataSource</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="widget-body">
+                                    <div class="widget-main padding-6">
+                                        <div class="tab-content">
+                                            <div onload="item = model.sourceDsBuilderProp = {}"
+                                                 ng-if="true"
+                                                 ng-include="templateBase + SourceDsBuilderTemplate + '.html'"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="widget-box ui-sortable-handle">
+                                <div class="widget-header widget-header-small">
+                                    <h5 class="widget-title smaller">Source Fetcher</h5>
+
+                                    <div class="widget-toolbar no-border">
+                                        <ul class="nav nav-tabs">
+                                            <li class="active">
+                                                <a data-toggle="tab" href=""
+                                                   ng-click="changeTemplate('SourceFetcherTemplate','source-fetcher-update-id')">UpdateTimeAndIdSourceFetcher</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="widget-body">
+                                    <div class="widget-main padding-6">
+                                        <div class="tab-content">
+                                            <div onload="item = model.sourceFetcherProp = {}"
+                                                 ng-if="true"
+                                                 ng-include="templateBase + SourceFetcherTemplate + '.html'"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="widget-box ui-sortable-handle">
+                                <div class="widget-header widget-header-small">
+                                    <h5 class="widget-title smaller">Target DataSource Builder</h5>
+
+                                    <div class="widget-toolbar no-border">
+                                        <ul class="nav nav-tabs">
+                                            <li class="active">
+                                                <a data-toggle="tab" href=""
+                                                   ng-click="changeTemplate('TargetDsBuilderTemplate','ds-group')">GroupDataSource</a>
+                                            </li>
+                                            <li>
+                                                <a data-toggle="tab" href=""
+                                                   ng-click="changeTemplate('TargetDsBuilderTemplate','ds-shard')">ShardDataSource</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="widget-body">
+                                    <div class="widget-main padding-6">
+                                        <div class="tab-content">
+                                            <div onload="item = model.targetDsBuilderProp = {}"
+                                                 ng-if="true"
+                                                 ng-include="templateBase + TargetDsBuilderTemplate + '.html'"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="widget-box ui-sortable-handle">
+                                <div class="widget-header widget-header-small">
+                                    <h5 class="widget-title smaller">Target Fetcher</h5>
+
+                                    <div class="widget-toolbar no-border">
+                                        <ul class="nav nav-tabs">
+                                            <li class="active">
+                                                <a data-toggle="tab" href=""
+                                                   ng-click="changeTemplate('TargetFetcherTemplate','target-fetcher-single-line')">SingleLineTargetFetcher</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="widget-body">
+                                    <div class="widget-main padding-6">
+                                        <div class="tab-content">
+                                            <div onload="item = model.targetFetcherProp = {}"
+                                                 ng-if="true"
+                                                 ng-include="templateBase + TargetFetcherTemplate + '.html'"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="widget-box ui-sortable-handle">
+                                <div class="widget-header widget-header-small">
+                                    <h5 class="widget-title smaller">Comparison</h5>
+
+                                    <div class="widget-toolbar no-border">
+                                        <ul class="nav nav-tabs">
+                                            <li class="active">
+                                                <a data-toggle="tab" href=""
+                                                   ng-click="changeTemplate('ComparisonTemplate','comparison-full')">FullComparison</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="widget-body">
+                                    <div class="widget-main padding-6">
+                                        <div class="tab-content">
+                                            <div onload="item = model.comparisonProp = {}"
+                                                 ng-if="true"
+                                                 ng-include="templateBase + ComparisonTemplate + '.html'"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="widget-box ui-sortable-handle">
+                                <div class="widget-header widget-header-small">
+                                    <h5 class="widget-title smaller">Mapper</h5>
+
+                                    <div class="widget-toolbar no-border">
+                                        <ul class="nav nav-tabs">
+                                            <li class="active">
+                                                <a data-toggle="tab" href=""
+                                                   ng-click="changeTemplate('MapperTemplate','mapper-default')">DefaultMapper</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="widget-body">
+                                    <div class="widget-main padding-6">
+                                        <div class="tab-content">
+                                            <div onload="item = model.mapperProp = {}"
+                                                 ng-if="true"
+                                                 ng-include="templateBase + MapperTemplate + '.html'"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <span class="center btn btn-success btn-sm" ng-click="create()">Create</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

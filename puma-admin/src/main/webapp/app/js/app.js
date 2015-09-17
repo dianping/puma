@@ -1,8 +1,8 @@
 /*
-var underscore = angular.module('underscore', []);
-underscore.factory('_', ['$window', function() {
-  return $window._; // assumes underscore has already been loaded on the page
-}]);*/
+ var underscore = angular.module('underscore', []);
+ underscore.factory('_', ['$window', function() {
+ return $window._; // assumes underscore has already been loaded on the page
+ }]);*/
 
 var puma = angular.module('puma', [
     'ngRoute',
@@ -15,6 +15,33 @@ puma.filter('toLocaleString', function () {
     return function (value) {
         return new Date(value).toLocaleString();
     };
+});
+
+puma.controller('pumaCheckCreateController', function ($scope, $http) {
+    $scope.templateBase = 'app/partials/puma-check/model/';
+    $scope.SourceDsBuilderTemplate = 'ds-group';
+    $scope.SourceFetcherTemplate = 'source-fetcher-update-id';
+    $scope.TargetDsBuilderTemplate = 'ds-group';
+    $scope.TargetFetcherTemplate = 'target-fetcher-single-line';
+    $scope.ComparisonTemplate = 'comparison-full';
+    $scope.MapperTemplate = 'mapper-default';
+    $scope.model = {};
+
+    $scope.changeTemplate = function (type, value) {
+        $scope[type] = value;
+    }
+
+    $scope.create = function () {
+        if ($scope.model && $scope.model.baseInfo && $scope.model.baseInfo.initTime) {
+            $scope.model.baseInfo.initTime = new Date($scope.model.baseInfo.initTime).getTime();
+        }
+
+        $http.post('/a/puma-check', $scope.model).then(
+            function (response) {
+                alert('Success');
+            }
+        )
+    }
 });
 
 puma.controller('simpleModalController', function ($scope, item) {
@@ -107,10 +134,7 @@ puma.controller('pumaCreateController', function ($scope, $http) {
 
         $http.post('/a/puma-create', json).then(
             function (response) {
-                alert('success');
-            },
-            function (response) {
-                alert('failure, ' + response.data.msg);
+                alert('Success');
             }
         )
     }
@@ -138,9 +162,6 @@ puma.controller('pumaTargetController', function ($scope, $http) {
                 if (response.data.status == "success") {
                     $scope.pumaDto = response.data.result;
                 }
-            },
-            function (response) {
-                alert("failure");
             }
         )
     }
@@ -159,20 +180,16 @@ puma.controller('pumaTaskCreateController', function ($scope, $http) {
     $scope.targets = [{
         database: null,
         tables: null
-  }];
+    }];
 
     $scope.submit = function () {
-
 
 
         $scope.task.targets[target.database]
 
         $http.post('/a/puma-task/create', $scope.pumaTaskJson).then(
             function (response) {
-                alert('success');
-            },
-            function (response) {
-                alert('failure');
+                alert('Success');
             }
         );
     }
@@ -199,6 +216,10 @@ puma.config(function ($routeProvider) {
         .when('/puma-create', {
             templateUrl: '/app/partials/puma-create.html',
             controller: 'pumaCreateController'
+        })
+        .when('/puma-check-create', {
+            templateUrl: '/app/partials/puma-check/create.html',
+            controller: 'pumaCheckCreateController'
         })
         .otherwise({
             'redirectTo': '/'

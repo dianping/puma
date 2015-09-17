@@ -6,11 +6,13 @@ import java.util.List;
 
 public interface CheckTaskDao {
 
-	public CheckTaskEntity findById(int id);
+    CheckTaskEntity findById(int id);
 
-	public List<CheckTaskEntity> findAll();
+    List<CheckTaskEntity> findRunnable();
 
-	public int create(CheckTaskEntity checkTaskEntity);
+    int create(CheckTaskEntity checkTaskEntity);
 
-	public int update(CheckTaskEntity checkTaskEntity);
+    int update(CheckTaskEntity checkTaskEntity);
+
+    int deleteByTaskName(String taskName);
 }

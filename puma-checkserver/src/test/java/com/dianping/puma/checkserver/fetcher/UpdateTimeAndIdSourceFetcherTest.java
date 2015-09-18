@@ -37,10 +37,12 @@ public class UpdateTimeAndIdSourceFetcherTest {
                         "  UpdateTime timestamp,\n" +
                         "  PRIMARY KEY (Id))");
 
+        //把 ID 和 时间顺序错乱，验证数据是否正确
         for (int k = 1; k <= 8888; k++) {
-            template.update("INSERT INTO Debug (ID,UpdateTime) VALUES (?,?)", k, new Date(startTime.getTime() + 1));
+            template.update("INSERT INTO Debug (ID,UpdateTime) VALUES (?,?)", 8889 - k, new Date(startTime.getTime() + k * 1000));
         }
 
+        //插入一条最新的数据，确认是否不会被查到
         template.update("INSERT INTO Debug (ID,UpdateTime) VALUES (?,?)", 8889, new Date());
     }
 
@@ -63,10 +65,10 @@ public class UpdateTimeAndIdSourceFetcherTest {
 
         Assert.assertEquals(8888, result.size());
 
-        int index = 1;
+        int index = 8888;
         for (Map<String, Object> row : result) {
             long lastId = ((Number) row.get("ID")).longValue();
-            Assert.assertEquals(index++, lastId);
+            Assert.assertEquals(index--, lastId);
         }
     }
 

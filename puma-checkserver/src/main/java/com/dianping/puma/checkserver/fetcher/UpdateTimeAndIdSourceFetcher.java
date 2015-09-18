@@ -58,7 +58,7 @@ public class UpdateTimeAndIdSourceFetcher extends AbstractDataFetcher implements
         initSql();
 
         List<Map<String, Object>> rows;
-        rows = template.queryForList(sql, startTime, getTenMiniteAgo(), lastId, lastId);
+        rows = template.queryForList(sql, startTime, startTime, lastId, lastId, getTenMiniteAgo());
         if (rows.size() != 0) {
             lastId = rows.get(rows.size() - 1).get(idName);
             startTime = (Date) rows.get(rows.size() - 1).get(updateTimeName);
@@ -91,8 +91,11 @@ public class UpdateTimeAndIdSourceFetcher extends AbstractDataFetcher implements
     protected void initSql() {
         if (Strings.isNullOrEmpty(this.sql)) {
             this.sql = String.format(
-                    "SELECT %s FROM %s WHERE %s >= ? and %s < ? and (? is null or %s > ?) ORDER BY %s,%s limit %d",
-                    columns, tableName, updateTimeName, updateTimeName, idName, updateTimeName, idName, PAGE_SIZE);
+                    "SELECT %s FROM %s WHERE"
+                            + " ( %s > ? OR (%s = ? AND (? is null OR %s > ?)))"
+                            + " AND %s < ? "
+                            + " ORDER BY %s,%s limit %d",
+                    columns, tableName, updateTimeName, updateTimeName, idName, updateTimeName, updateTimeName, idName, PAGE_SIZE);
         }
     }
 

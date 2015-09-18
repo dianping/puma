@@ -32,52 +32,45 @@
 
 ### Single Client
 ```java
-	PumaClient client = new PumaClientConfig()
-		.setClientName("name")
-		.setDatabase("database")
-		.setTables(Lists.newArrayList("table0", "table1"))
-		.buildClusterPumaClient();
+PumaClient client = new PumaClientConfig()
+	.setClientName("name")
+	.setDatabase("database")
+	.setTables(Lists.newArrayList("table0", "table1"))
+	.buildClusterPumaClient();
 
-	while(true) {
-		try {
-			BinlogMessage binlogMessage = client.get(10, 1, TimeUnit.SECOND);
-
-			// Do business logic.
-			// ...
-
-			client.ack(binlogMessage.getBinlogInfo());
-		} catch(Throwable t) {
-			// Error handling.
-		}
+while(true) {
+	try {
+		BinlogMessage binlogMessage = client.get(10, 1, TimeUnit.SECOND);
+		// Do business logic.
+		// ...
+		client.ack(binlogMessage.getBinlogInfo());
+	} catch(Throwable t) {
+		// Error handling.
 	}
+}
 ```
 
 ### Distributed Clients
-```
-	PumaClient client = new PumaClientConfig()
-		.setClientName("name")
-		.setDatabase("database")
-		.setTables(Lists.newArrayList("table0", "table1"))
-		.buildClusterPumaClient();
+```java
+PumaClient client = new PumaClientConfig()
+	.setClientName("name")
+	.setDatabase("database")
+	.setTables(Lists.newArrayList("table0", "table1"))
+	.buildClusterPumaClient();
 
-	PumaClientLock lock = new PumaClient("name");
-	try {
-		lock.lock();
-
-		while(lock.isLock()) {
-			BinlogMessage binlogMessage = client.get(10, 1, TimeUnit.SECOND);
-
-         // Do business logic.
-         // ...
-
-         client.ack(binlogMessage.getBinlogInfo());
-		}
-
-	} catch(Throwable t) {
-
-	} finally {
-		lock.unlockQuietly();
+PumaClientLock lock = new PumaClient("name");
+try {
+	lock.lock();
+	while(lock.isLock()) {
+		BinlogMessage binlogMessage = client.get(10, 1, TimeUnit.SECOND);
+        // Do business logic.
+        // ...
+        client.ack(binlogMessage.getBinlogInfo());
 	}
+} catch(Throwable t) {
+} finally {
+	lock.unlockQuietly();
+}
 ```
 
 ## Document

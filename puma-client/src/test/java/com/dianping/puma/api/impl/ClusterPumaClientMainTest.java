@@ -52,8 +52,11 @@ public class ClusterPumaClientMainTest {
 
 		PumaClientLock lock = new PumaClientLock("dozer-debug");
 		try {
-			lock.lock();
-			while (lock.isLocked()) {
+			while (!Thread.interrupted()) {
+				if (!lock.isLocked()) {
+					lock.lock();
+				}
+
 				try {
 					BinlogMessage message = client.get(size, 1, TimeUnit.SECONDS);
 					client.ack(message.getLastBinlogInfo());

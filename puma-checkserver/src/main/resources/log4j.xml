@@ -7,25 +7,14 @@
             <param name="ConversionPattern" value="[puma]%d %-5p [%c] %m%n"/>
         </layout>
     </appender>
-    <appender name="DiffAppender" class="org.apache.log4j.DailyRollingFileAppender">
-        <param name="File" value="/data/applogs/puma/diff/app.log"/>
-        <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d %-5p %m%n"/>
-        </layout>
-    </appender>
     <appender name="appAppender" class="org.apache.log4j.DailyRollingFileAppender">
         <param name="File" value="/data/applogs/puma/logs/app.log"/>
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="[puma]%d %-5p [%c] %m%n"/>
         </layout>
     </appender>
-    <logger name="DefaultTaskReporter" additivity="false">
-        <level value="INFO"/>
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="DiffAppender"/>
-    </logger>
     <root>
-        <level value="INFO"/>
+        <level value="WARN"/>
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="appAppender"/>
     </root>

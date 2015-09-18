@@ -2,6 +2,7 @@ package com.dianping.puma.api;
 
 import java.util.concurrent.TimeUnit;
 
+import com.dianping.puma.api.lock.PumaClientLockListener;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.model.BinlogInfo;
 
@@ -20,4 +21,8 @@ public interface PumaClient {
 	void rollback(BinlogInfo binlogInfo) throws PumaClientException;
 
 	void rollback() throws PumaClientException;
+
+	void lock(PumaClientLockListener listener) throws PumaClientException;
+
+	void unlock() throws PumaClientException;
 }

@@ -1,28 +1,42 @@
 package com.dianping.puma.core.lock;
 
-import com.google.common.util.concurrent.Uninterruptibles;
+import org.apache.log4j.BasicConfigurator;
 
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ZkDistributedLockMainTest {
 
+
+	private static ExecutorService pool = Executors.newCachedThreadPool();
+
+	private static boolean keepOn = true;
+
 	public static void main(String args[]) {
-		System.out.println("start main...");
+
+		BasicConfigurator.configure();
 
 		DistributedLock lock = DistributedLockFactory.newZkDistributedLock("dozer-debug");
 
-		System.out.println("start locking...");
+		lock.lockNotify(new DistributedLockLostListener() {
+			@Override
+			public void onLost() {
+			}
+		});
 
 		lock.lock();
 
-		System.out.println("success to lock.");
-
-		Uninterruptibles.sleepUninterruptibly(60, TimeUnit.SECONDS);
-
-		System.out.println("start unlocking...");
+		System.out.println("lock lock.");
 
 		lock.unlock();
+		lock.unlock();
 
-		System.out.println("success to unlock.");
+		System.out.println("lock unlock.");
+
+		DistributedLock lock1 = DistributedLockFactory.newZkDistributedLock("dozer-debug");
+		lock1.lock();
+
+		System.out.println("lock1 lock.");
+
 	}
 }

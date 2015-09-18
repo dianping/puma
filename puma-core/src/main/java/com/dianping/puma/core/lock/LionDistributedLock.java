@@ -32,6 +32,22 @@ public class LionDistributedLock implements DistributedLock {
 
 	}
 
+	@Override public void unlockNotify() {
+
+	}
+
+	@Override public void lockNotify(DistributedLockLostListener listener) {
+
+	}
+
+	@Override public boolean tryLockNotify(DistributedLockLostListener listener) {
+		return false;
+	}
+
+	@Override public boolean tryLockNotify(long time, TimeUnit timeUnit, DistributedLockLostListener listener) {
+		return false;
+	}
+
 	@Override
 	public Condition newCondition() {
 		return null;

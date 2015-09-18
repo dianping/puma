@@ -6,6 +6,7 @@ import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.event.*;
 import com.dianping.puma.core.util.sql.DMLType;
 import com.google.common.collect.Lists;
+import org.apache.log4j.BasicConfigurator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,9 @@ import static com.dianping.puma.core.event.RowChangedEvent.*;
 public class ClusterPumaClientMainTest {
 
 	public static void main(String[] args) {
+
+		BasicConfigurator.configure();
+
 		List<String> tables = new ArrayList<String>();
 		tables.add("UOD_Order0");
 		tables.add("UOD_Order1");

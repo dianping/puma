@@ -3,6 +3,7 @@ package com.dianping.puma.api.impl;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.PumaClientConfig;
 import com.dianping.puma.api.PumaClientException;
+import com.dianping.puma.api.lock.PumaClientLockListener;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.codec.EventCodecFactory;
@@ -13,7 +14,6 @@ import com.dianping.puma.core.dto.binlog.response.BinlogAckResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
 import com.dianping.puma.core.lock.DistributedLock;
-import com.dianping.puma.core.lock.DistributedLockFactory;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.GsonUtil;
 import com.google.common.base.Strings;
@@ -174,10 +174,25 @@ public class SimplePumaClient implements PumaClient {
         rollback(null);
     }
 
-    protected void doSubscribe() throws PumaClientException {
-        // Block until get the lock.
-        lock();
+    @Override
+    public void lock(PumaClientLockListener listener) throws PumaClientException {
+        try {
+            lock.lockNotify(listener);
+        } catch (Throwable t) {
+            throw new PumaClientException("failed to lock.", t);
+        }
+    }
 
+    @Override
+    public void unlock() throws PumaClientException {
+        try {
+            lock.unlock();
+        } catch (Throwable t) {
+            throw new PumaClientException("failed to unlock.", t);
+        }
+    }
+
+    protected void doSubscribe() throws PumaClientException {
         if (this.subscribeRequest == null) {
             throw new PumaClientException("Please subscribe first");
         }
@@ -257,20 +272,5 @@ public class SimplePumaClient implements PumaClient {
 
     public String getServerHost() {
         return pumaServerHost;
-    }
-
-    protected void lock() {
-        if (lock == null) {
-            lock = DistributedLockFactory.newZkDistributedLock(clientName);
-        }
-
-        while (true) {
-            try {
-                lock.lock();
-                return;
-            } catch (Throwable t) {
-                logger.error("failed to get the lock.", t);
-            }
-        }
     }
 }

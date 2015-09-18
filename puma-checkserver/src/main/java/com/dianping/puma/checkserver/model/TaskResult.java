@@ -9,6 +9,8 @@ import java.util.List;
  */
 public class TaskResult {
 
+    private String cursor;
+
     private List<SourceTargetPair> difference;
 
     public List<SourceTargetPair> getDifference() {
@@ -20,4 +22,12 @@ public class TaskResult {
         return this;
     }
 
+    public String getCursor() {
+        return cursor;
+    }
+
+    public TaskResult setCursor(String cursor) {
+        this.cursor = cursor;
+        return this;
+    }
 }

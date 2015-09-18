@@ -30,7 +30,6 @@ import static org.mockito.Mockito.when;
  */
 public class TaskExecutorTest {
     private final Date startTime = new Date(1388534400000l); //2014-01-01
-    private final Date endTime = new Date(1391212800000l); //2014-02-01
     private final ComboPooledDataSource sourceDs = new ComboPooledDataSource();
     private final ComboPooledDataSource targetDs = new ComboPooledDataSource();
     private final JdbcTemplate sourceTemplate = new JdbcTemplate(sourceDs);
@@ -52,8 +51,7 @@ public class TaskExecutorTest {
         when(targetBuilder.build()).thenReturn(targetDs);
 
         UpdateTimeAndIdSourceFetcher sourceFetcher = new UpdateTimeAndIdSourceFetcher();
-        sourceFetcher.setStartTime(startTime);
-        sourceFetcher.setEndTime(endTime);
+        sourceFetcher.setCursor(String.valueOf(startTime.getTime()));
         sourceFetcher.setColumns("*");
         sourceFetcher.setTableName("Debug");
 

@@ -34,7 +34,7 @@ public class DefaultTaskReporter implements TaskReporter {
                 checkResultService.create(entity);
             }
 
-            setCurrTime(checkTask, checkTask.getNextTime());
+            checkTask.setCursor(result.getCursor());
             setStatus(checkTask, true, null);
             report0(checkTask);
         } catch (Exception e) {
@@ -45,16 +45,11 @@ public class DefaultTaskReporter implements TaskReporter {
     @Override
     public void report(CheckTaskEntity checkTask, Throwable t) {
         setStatus(checkTask, false, t.getClass().getSimpleName() + ":" + t.getMessage());
-
         report0(checkTask);
     }
 
     protected void report0(CheckTaskEntity checkTask) {
         checkTaskService.update(checkTask);
-    }
-
-    protected void setCurrTime(CheckTaskEntity checkTask, Date nextTime) {
-        checkTask.setCurrTime(nextTime);
     }
 
     protected void setStatus(CheckTaskEntity checkTask, boolean status, String message) {

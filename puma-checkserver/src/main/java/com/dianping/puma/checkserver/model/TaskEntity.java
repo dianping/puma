@@ -9,9 +9,7 @@ import java.util.Date;
  */
 public class TaskEntity {
 
-    private Date beginTime;
-
-    private Date endTime;
+    private String cursor;
 
     private String comparison;
 
@@ -133,19 +131,11 @@ public class TaskEntity {
         this.mapperProp = mapperProp;
     }
 
-    public Date getBeginTime() {
-        return beginTime;
+    public String getCursor() {
+        return cursor;
     }
 
-    public void setBeginTime(Date beginTime) {
-        this.beginTime = beginTime;
-    }
-
-    public Date getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Date endTime) {
-        this.endTime = endTime;
+    public void setCursor(String cursor) {
+        this.cursor = cursor;
     }
 }

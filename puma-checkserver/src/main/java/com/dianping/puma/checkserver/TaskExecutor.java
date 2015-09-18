@@ -48,6 +48,8 @@ public final class TaskExecutor implements Callable<TaskResult> {
 
     private static final int MAX_DIFFERENCE = 1000;
 
+    private static final int MAX_FETCH_ROW = 100000;
+
     private TaskExecutor(DataSourceBuilder sourceBuilder, DataSourceBuilder targetBuilder, SourceFetcher sourceFetcher, TargetFetcher targetFetcher, RowMapper rowMapper, Comparison comparison) {
         this.sourceBuilder = sourceBuilder;
         this.targetBuilder = targetBuilder;
@@ -78,7 +80,7 @@ public final class TaskExecutor implements Callable<TaskResult> {
                 retry(difference);
             }
 
-            return new TaskResult().setDifference(difference);
+            return new TaskResult().setDifference(difference).setCursor(sourceFetcher.getCursor());
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             Cat.logError(e.getMessage(), e);
@@ -112,6 +114,8 @@ public final class TaskExecutor implements Callable<TaskResult> {
     }
 
     protected void fullCompare(List<SourceTargetPair> difference) {
+        int rowCount = 0;
+
         List<Map<String, Object>> sourceData;
         do {
             if (difference.size() > MAX_DIFFERENCE) {
@@ -119,6 +123,7 @@ public final class TaskExecutor implements Callable<TaskResult> {
             }
 
             sourceData = sourceFetcher.fetch();
+            rowCount += sourceData.size();
 
             List<SourceTargetPair> pairs;
             if (targetFetcher.isBatch()) {
@@ -137,7 +142,7 @@ public final class TaskExecutor implements Callable<TaskResult> {
                     LOG.info("find difference:" + GsonUtil.toJson(pair));
                 }
             }
-        } while (sourceData != null && sourceData.size() > 0);
+        } while (sourceData != null && sourceData.size() > 0 && rowCount >= MAX_FETCH_ROW);
     }
 
     public static final class Builder {
@@ -168,8 +173,7 @@ public final class TaskExecutor implements Callable<TaskResult> {
             builder.sourceBuilder = initSourceDataSourceBuilder(task);
             builder.targetBuilder = initTargetDataSourceBuilder(task);
             builder.sourceFetcher = initSourceFetcher(task);
-            builder.sourceFetcher.setStartTime(task.getBeginTime());
-            builder.sourceFetcher.setEndTime(task.getEndTime());
+            builder.sourceFetcher.setCursor(String.valueOf(task.getCursor()));
             builder.targetFetcher = initTargetFetcher(task);
             builder.rowMapper = initRowMapper(task);
             builder.comparison = initComparison(task);

@@ -55,9 +55,6 @@ public class PumaCheckController extends BasicController {
         for (Object it : batch) {
             CheckTaskEntity entity = new CheckTaskEntity();
 
-            entity.setInitTime(new Date(model.getBaseInfo().getInitTime()));
-            entity.setCurrTime(new Date(model.getBaseInfo().getInitTime()));
-
             entity.setTaskGroupName(model.getBaseInfo().getName());
             if (Strings.isNullOrEmpty(it.toString())) {
                 entity.setTaskName(model.getBaseInfo().getName());

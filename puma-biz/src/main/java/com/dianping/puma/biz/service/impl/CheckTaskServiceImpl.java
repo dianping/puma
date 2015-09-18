@@ -6,6 +6,7 @@ import com.dianping.puma.biz.service.CheckTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -26,6 +27,7 @@ public class CheckTaskServiceImpl implements CheckTaskService {
 
     @Override
     public int update(CheckTaskEntity checkTaskEntity) {
+        checkTaskEntity.setUpdateTime(new Date());
         return checkTaskDao.update(checkTaskEntity);
     }
 

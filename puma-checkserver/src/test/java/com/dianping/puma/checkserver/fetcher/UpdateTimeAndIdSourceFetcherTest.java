@@ -19,8 +19,6 @@ public class UpdateTimeAndIdSourceFetcherTest {
 
     Date startTime = new Date(1388534400000l); //2014-01-01
 
-    Date endTime = new Date(1391212800000l); //2014-02-01
-
     UpdateTimeAndIdSourceFetcher target = new UpdateTimeAndIdSourceFetcher();
 
     @Before
@@ -49,8 +47,7 @@ public class UpdateTimeAndIdSourceFetcherTest {
     @Test
     public void testFetch() throws Exception {
         target.setTableName("Debug");
-        target.setStartTime(startTime);
-        target.setEndTime(endTime);
+        target.setCursor(String.valueOf(startTime.getTime()));
         target.setColumns("Id,UpdateTime");
         target.init(ds);
 
@@ -76,8 +73,7 @@ public class UpdateTimeAndIdSourceFetcherTest {
     @Test
     public void testRetry() throws Exception {
         target.setTableName("Debug");
-        target.setStartTime(startTime);
-        target.setEndTime(endTime);
+        target.setCursor(String.valueOf(startTime.getTime()));
         target.setColumns("Id,UpdateTime");
         target.init(ds);
 

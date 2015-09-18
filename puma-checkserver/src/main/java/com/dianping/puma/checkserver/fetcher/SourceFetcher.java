@@ -1,6 +1,5 @@
 package com.dianping.puma.checkserver.fetcher;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -11,9 +10,9 @@ import java.util.Map;
  */
 public interface SourceFetcher extends DataFetcher {
 
-    void setStartTime(Date time);
+    void setCursor(String cursor);
 
-    void setEndTime(Date time);
+    String getCursor();
 
     List<Map<String, Object>> fetch();
 

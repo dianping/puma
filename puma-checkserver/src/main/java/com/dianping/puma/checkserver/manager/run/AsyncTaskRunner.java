@@ -51,8 +51,7 @@ public class AsyncTaskRunner implements TaskRunner {
 
     protected TaskEntity transform(CheckTaskEntity checkTask) {
         TaskEntity taskEntity = new TaskEntity();
-        taskEntity.setBeginTime(checkTask.getCurrTime());
-        taskEntity.setEndTime(checkTask.getNextTime());
+        taskEntity.setCursor(checkTask.getCursor());
         taskEntity.setComparison(checkTask.getComparison());
         taskEntity.setComparisonProp(checkTask.getComparisonProp());
         taskEntity.setMapper(checkTask.getMapper());

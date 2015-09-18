@@ -44,10 +44,6 @@ public class MultipleTaskDispatcher implements TaskDispatcher {
                 break;
             }
 
-            if (!setNextTimeIfEnough(checkTask)) {
-                continue;
-            }
-
             final TaskLock localTaskLock = taskLockBuilder.buildLocalLock(checkTask);
             final TaskLock remoteTaskLock = taskLockBuilder.buildRemoteLock(checkTask);
 
@@ -62,11 +58,7 @@ public class MultipleTaskDispatcher implements TaskDispatcher {
                 }
 
                 logger.info("Start run check task...");
-
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                logger.info("Check period: {} - {}.",
-                        dateFormat.format(checkTask.getCurrTime()),
-                        dateFormat.format(checkTask.getNextTime()));
+                logger.info("Check period: {}", checkTask.getCursor());
 
                 taskRunner.run(checkTask, new TaskRunFutureListener() {
                     @Override
@@ -109,15 +101,5 @@ public class MultipleTaskDispatcher implements TaskDispatcher {
         });
         randomList.addAll(checkTasks);
         return randomList;
-    }
-
-    protected boolean setNextTimeIfEnough(CheckTaskEntity checkTask) {
-        Date currTime = checkTask.getCurrTime();
-        Date nextTime = new Date(currTime.getTime() + checkTimePeriod);
-        if (nextTime.getTime() > new Date().getTime()) {
-            return false;
-        }
-        checkTask.setNextTime(nextTime);
-        return true;
     }
 }

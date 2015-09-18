@@ -11,14 +11,14 @@
     <select id="findRunnable" resultType="CheckTaskEntity">
 		select * from CheckTask
         where Success = 1
-        order by CurrTime
+        order by UpdateTime
         limit 100
 	</select>
 
     <insert id="create" parameterType="checkTaskEntity" useGeneratedKeys="true" keyColumn="ID">
 		INSERT INTO CheckTask
-            (InitTime,
-            CurrTime,
+            (
+            Cursor,
             Running,
             OwnerHost,
             Success,
@@ -38,8 +38,8 @@
             TaskName,
             TaskGroupName)
         VALUES
-            (#{initTime},
-            #{currTime},
+            (
+            #{cursor},
             #{running},
             #{ownerHost},
             #{success},
@@ -64,8 +64,7 @@
 		UPDATE
 		CheckTask
 		SET
-		CheckTask.InitTime = #{initTime},
-		CheckTask.CurrTime = #{currTime},
+		CheckTask.Cursor = #{cursor},
 		CheckTask.Running = #{running},
 		CheckTask.OwnerHost = #{ownerHost},
 		CheckTask.Success = #{success},

@@ -10,11 +10,7 @@ public class CheckTaskEntity {
 
 	private int id;
 
-	private Date initTime;
-
-	private Date currTime;
-
-	private Date nextTime;
+	private String cursor;
 
 	private boolean running;
 
@@ -56,30 +52,6 @@ public class CheckTaskEntity {
 
 	public void setId(int id) {
 		this.id = id;
-	}
-
-	public Date getInitTime() {
-		return initTime;
-	}
-
-	public void setInitTime(Date initTime) {
-		this.initTime = initTime;
-	}
-
-	public Date getCurrTime() {
-		return currTime;
-	}
-
-	public void setCurrTime(Date currTime) {
-		this.currTime = currTime;
-	}
-
-	public Date getNextTime() {
-		return nextTime;
-	}
-
-	public void setNextTime(Date nextTime) {
-		this.nextTime = nextTime;
 	}
 
 	public boolean isRunning() {
@@ -232,5 +204,13 @@ public class CheckTaskEntity {
 
 	public void setTaskGroupName(String taskGroupName) {
 		this.taskGroupName = taskGroupName;
+	}
+
+	public String getCursor() {
+		return cursor;
+	}
+
+	public void setCursor(String cursor) {
+		this.cursor = cursor;
 	}
 }

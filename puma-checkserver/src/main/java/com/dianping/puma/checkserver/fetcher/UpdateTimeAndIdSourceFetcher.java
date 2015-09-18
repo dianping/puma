@@ -24,8 +24,6 @@ public class UpdateTimeAndIdSourceFetcher extends AbstractDataFetcher implements
 
     private Date startTime;
 
-    private Date endTime;
-
     private String sql;
 
     private Object lastId;
@@ -33,13 +31,13 @@ public class UpdateTimeAndIdSourceFetcher extends AbstractDataFetcher implements
     private static final int PAGE_SIZE = 1000;
 
     @Override
-    public void setStartTime(Date time) {
-        this.startTime = time;
+    public void setCursor(String cursor) {
+        startTime = Strings.isNullOrEmpty(cursor) ? new Date(1) : new Date(Long.valueOf(cursor));
     }
 
     @Override
-    public void setEndTime(Date time) {
-        this.endTime = time;
+    public String getCursor() {
+        return String.valueOf(startTime.getTime());
     }
 
     @Override
@@ -47,12 +45,16 @@ public class UpdateTimeAndIdSourceFetcher extends AbstractDataFetcher implements
         initSql();
 
         List<Map<String, Object>> rows;
-        rows = template.queryForList(sql, startTime, endTime, lastId, lastId);
+        rows = template.queryForList(sql, startTime, getTenMiniteAgo(), lastId, lastId);
         if (rows.size() != 0) {
             lastId = rows.get(rows.size() - 1).get(idName);
             startTime = (Date) rows.get(rows.size() - 1).get(updateTimeName);
         }
         return rows;
+    }
+
+    private Date getTenMiniteAgo() {
+        return new Date(new Date().getTime() - 60 * 1000);
     }
 
     @Override

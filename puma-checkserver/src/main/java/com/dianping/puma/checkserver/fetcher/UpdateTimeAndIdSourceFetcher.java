@@ -37,7 +37,7 @@ public class UpdateTimeAndIdSourceFetcher extends AbstractDataFetcher implements
             lastId = null;
         } else {
             String[] data = cursor.split(",");
-            startTime = new Date(Long.valueOf(cursor));
+            startTime = new Date(Long.valueOf(data[0]));
             lastId = data.length >= 2 ? data[1] : null;
         }
 

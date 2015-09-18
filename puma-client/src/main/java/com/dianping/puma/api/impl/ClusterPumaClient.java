@@ -1,10 +1,7 @@
 package com.dianping.puma.api.impl;
 
 import com.dianping.puma.api.*;
-import com.dianping.puma.api.lock.PumaClientLockListener;
 import com.dianping.puma.core.dto.BinlogMessage;
-import com.dianping.puma.core.lock.DistributedLock;
-import com.dianping.puma.core.lock.DistributedLockFactory;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -38,8 +35,6 @@ public class ClusterPumaClient implements PumaClient {
 
     protected volatile SimplePumaClient client;
 
-    private DistributedLock lock;
-
     public ClusterPumaClient() {
     }
 
@@ -51,7 +46,6 @@ public class ClusterPumaClient implements PumaClient {
         ddl = config.isDdl();
         transaction = config.isTransaction();
         router = config.getRouter();
-        lock = DistributedLockFactory.newZkDistributedLock(clientName);
     }
 
     protected SimplePumaClient newClient() {
@@ -71,7 +65,6 @@ public class ClusterPumaClient implements PumaClient {
                 .setDdl(ddl)
                 .setTransaction(transaction)
                 .setServerHost(serverHost)
-                .setLock(lock)
                 .buildSimplePumaClient();
     }
 
@@ -286,24 +279,6 @@ public class ClusterPumaClient implements PumaClient {
         String msg = String.format("[%s] failed to rollback after %s times retries.", clientName, retryTimes);
         logger.error(msg);
         throw new PumaClientException(msg, lastException);
-    }
-
-    @Override
-    public void lock(PumaClientLockListener listener) throws PumaClientException {
-        try {
-            lock.lockNotify(listener);
-        } catch (Throwable t) {
-            throw new PumaClientException("failed to lock.", t);
-        }
-    }
-
-    @Override
-    public void unlock() throws PumaClientException {
-        try {
-            lock.unlock();
-        } catch (Throwable t) {
-            throw new PumaClientException("failed to unlock.", t);
-        }
     }
 
     protected boolean needNewClient() {

@@ -60,17 +60,19 @@ PumaClient client = new PumaClientConfig()
 
 PumaClientLock lock = new PumaClient("name");
 try {
-	while(true) {
-   	try {
-   		BinlogMessage binlogMessage = client.get(10, 1, TimeUnit.SECOND);
-   		// Do business logic.
-   		// ...
-   		client.ack(binlogMessage.getBinlogInfo());
-   	} catch(Throwable t) {
-   		// Error handling.
-   	}
-   }
-} catch(Throwable t) {
+	while (!Thread.interrupted()) {
+		if (!lock.isLocked()) {
+			lock.lock();
+		}
+
+		try {
+			BinlogMessage message = client.get(size, 1, TimeUnit.SECONDS);
+			client.ack(message.getLastBinlogInfo());
+		} catch (Throwable e) {
+			// Error handling.
+		}
+	}
+} catch (Throwable t) {
 	// Error handling.
 } finally {
 	lock.unlockQuietly();

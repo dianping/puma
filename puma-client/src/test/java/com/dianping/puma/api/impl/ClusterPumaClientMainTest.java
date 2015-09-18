@@ -51,16 +51,9 @@ public class ClusterPumaClientMainTest {
 		final int size = 100;
 
 		PumaClientLock lock = new PumaClientLock("dozer-debug");
-		final boolean[] a = { true };
 		try {
-			lock.lock(new PumaClientLockListener() {
-				@Override public void onLost() {
-					a[0] = false;
-				}
-			});
-
-			while (a[0]) {
-				System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+			lock.lock();
+			while (lock.isLocked()) {
 				try {
 					BinlogMessage message = client.get(size, 1, TimeUnit.SECONDS);
 					client.ack(message.getLastBinlogInfo());
@@ -73,7 +66,5 @@ public class ClusterPumaClientMainTest {
 		} finally {
 			lock.unlockQuietly();
 		}
-
-		System.out.println("##################################################");
 	}
 }

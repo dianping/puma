@@ -21,8 +21,4 @@ public interface PumaClient {
 	void rollback(BinlogInfo binlogInfo) throws PumaClientException;
 
 	void rollback() throws PumaClientException;
-
-	void lock(PumaClientLockListener listener) throws PumaClientException;
-
-	void unlock() throws PumaClientException;
 }

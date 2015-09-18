@@ -101,3 +101,121 @@
 ```
 
 ## Document
+
+### PumaClient
+
+#### get(int batchSize)
+
+Gets batch of binlog events from puma server.
+
+**Arguments**
+
+* batchSize `int` - number of binlog events in a batch.
+
+**Return**
+
+* binlogMessage `BinlogMessage` - batch of binlog events.
+
+#### get(int batchSize, long timeout, TimeUnit timeUnit)
+
+Gets batch of binlog events from puma server in a given time.
+
+**Arguments**
+
+* batchSize `int` - number of binlog events in batch.
+* timeout `long` - timeout for getting binlog events.
+* timeUnit `TimeUnit` - time unit for timeout
+
+#### getWithAck(int batchSize)
+
+Gets batch of binlog events from puma server and acknowledges back automatically.
+
+**Arguments**
+
+* batchSize `int` - number of binlog events in batch.
+
+#### getWithAck(int batchSize, long timeout, TimeUnit timeUnit)
+
+Gets batch of binlog events from puma server in a given time and acknowledges back automatically if necessary.
+
+**Arguments**
+
+* batchSize `int` - number of binlog events in batch.
+* timeout `long` - timeout for getting binlog events.
+* timeUnit `TimeUnit` - time unit for timeout
+
+#### ack(BinlogInfo binlogInfo)
+
+Acknowledges back to puma server manually.
+
+**Arguments**
+
+* binlogInfo `BinlogInfo` - object contains binlog position info.
+
+#### rollback()
+
+Rolls back to the latest acknowledge binlog position.
+
+#### rollback(BinlogInfo binlogInfo)
+
+Rolls back to the given binlog position.
+
+**Arguments**
+
+* binlogInfo `BinlogInfo` - binlog position to be rolled back.
+
+
+### BinlogMessage
+
+#### getBinlogEvents()
+
+**Return**
+
+* `List<Event>` - list of binlog events.
+
+#### size()
+
+**Return**
+
+* `int` - number of binlog events.
+
+
+### PumaClientLock
+
+#### lock()
+
+Acquires the puma client distributed lock.
+
+#### tryLock()
+
+Acquires the puma client distributed lock only if it is free at the time of invocation.
+
+**Return**
+
+* `boolean` - lock was acquired or not.
+
+#### tryLock(long time, TimeUnit timeUnit)
+
+Acquires the puma client distributed lock if it is free within the given waiting time
+and the current thread has not been interrupted.
+
+**Return**
+
+* `boolean` - lock was acquired or not.
+
+#### unlock()
+
+Releases the puma client distributed lock.
+
+#### unlockQuietly()
+
+Releases the puma client distributed lock quietly.
+
+#### isLock()
+
+Queries whether the puma client distributed lock hold is lost or not.
+
+**Return**
+
+* `boolean` - lock hold is lost or not.
+

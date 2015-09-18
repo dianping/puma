@@ -48,7 +48,7 @@ public final class TaskExecutor implements Callable<TaskResult> {
 
     private static final int MAX_DIFFERENCE = 1000;
 
-    private static final int MAX_FETCH_ROW = 100000;
+    private static final int MAX_FETCH_ROW = 10000;
 
     private TaskExecutor(DataSourceBuilder sourceBuilder, DataSourceBuilder targetBuilder, SourceFetcher sourceFetcher, TargetFetcher targetFetcher, RowMapper rowMapper, Comparison comparison) {
         this.sourceBuilder = sourceBuilder;

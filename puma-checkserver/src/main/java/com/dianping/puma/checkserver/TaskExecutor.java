@@ -46,8 +46,6 @@ public final class TaskExecutor implements Callable<TaskResult> {
 
     private static final long RETRY_SLEEP_TIME = 10 * 1000;
 
-    private static final int MAX_DIFFERENCE = 1000;
-
     private static final int MAX_FETCH_ROW = 10000;
 
     private TaskExecutor(DataSourceBuilder sourceBuilder, DataSourceBuilder targetBuilder, SourceFetcher sourceFetcher, TargetFetcher targetFetcher, RowMapper rowMapper, Comparison comparison) {
@@ -115,13 +113,8 @@ public final class TaskExecutor implements Callable<TaskResult> {
 
     protected void fullCompare(List<SourceTargetPair> difference) {
         int rowCount = 0;
-
         List<Map<String, Object>> sourceData;
         do {
-            if (difference.size() > MAX_DIFFERENCE) {
-                throw new IllegalStateException("Too many difference");
-            }
-
             sourceData = sourceFetcher.fetch();
             rowCount += sourceData.size();
 

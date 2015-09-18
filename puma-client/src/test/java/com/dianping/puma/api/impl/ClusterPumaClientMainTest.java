@@ -2,6 +2,8 @@ package com.dianping.puma.api.impl;
 
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.PumaClientConfig;
+import com.dianping.puma.api.lock.PumaClientLock;
+import com.dianping.puma.api.lock.PumaClientLockListener;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.event.*;
 import com.dianping.puma.core.util.sql.DMLType;
@@ -35,13 +37,6 @@ public class ClusterPumaClientMainTest {
 		tables.add("UOD_OrderSKUExtraFields0");
 		tables.add("UOD_OrderSKUExtraFields1");
 
-		boolean ddl = false;
-		boolean dml = true;
-		boolean transaction = false;
-		boolean insert = true;
-		boolean update = true;
-		boolean delete = true;
-
 		PumaClient client = new PumaClientConfig()
 				.setClientName("dozer-debug")
 				.setDatabase("UnifiedOrder0")
@@ -55,86 +50,30 @@ public class ClusterPumaClientMainTest {
 
 		final int size = 100;
 
-		while (true) {
-			try {
-				BinlogMessage message = client.get(size, 1, TimeUnit.SECONDS);
-
-				for (Event event : message.getBinlogEvents()) {
-
-					if (event instanceof DdlEvent) {
-						if (!ddl) {
-							continue;
-						}
-
-						// do ddl business logic here.
-					} else if (event instanceof RowChangedEvent) {
-						RowChangedEvent rowChangedEvent = (RowChangedEvent) event;
-
-						if (rowChangedEvent.isTransactionBegin() || rowChangedEvent.isTransactionCommit()) {
-							if (!transaction) {
-								continue;
-							}
-
-							// do transaction business logic here.
-
-						} else {
-							if (!dml) {
-								continue;
-							}
-
-							if (rowChangedEvent.getDmlType().equals(DMLType.INSERT)) {
-								if (!insert) {
-									continue;
-								}
-
-								Map<String, ColumnInfo> columnInfoMap = rowChangedEvent.getColumns();
-								for (Map.Entry<String, ColumnInfo> entry : columnInfoMap.entrySet()) {
-									String columnName = entry.getKey();
-									ColumnInfo columnInfo = entry.getValue();
-									Object insertValue = columnInfo.getNewValue();
-
-									// do insert business logic here.
-								}
-							} else if (rowChangedEvent.getDmlType().equals(DMLType.UPDATE)) {
-								if (!update) {
-									continue;
-								}
-
-								Map<String, ColumnInfo> columnInfoMap = rowChangedEvent.getColumns();
-								for (Map.Entry<String, ColumnInfo> entry : columnInfoMap.entrySet()) {
-									String columnName = entry.getKey();
-									ColumnInfo columnInfo = entry.getValue();
-									Object oldValue = columnInfo.getOldValue();
-									Object newValue = columnInfo.getNewValue();
-
-									// do update business logic here.
-								}
-							} else if (rowChangedEvent.getDmlType().equals(DMLType.DELETE)) {
-								if (!delete) {
-									continue;
-								}
-
-								Map<String, ColumnInfo> columnInfoMap = rowChangedEvent.getColumns();
-								for (Map.Entry<String, ColumnInfo> entry : columnInfoMap.entrySet()) {
-									String columnName = entry.getKey();
-									ColumnInfo columnInfo = entry.getValue();
-									Object deleteValue = columnInfo.getOldValue();
-
-									// do delete business logic here.
-								}
-							}
-
-						}
-
-					}
-
-					System.out.println(event.toString());
+		PumaClientLock lock = new PumaClientLock("dozer-debug");
+		final boolean[] a = { true };
+		try {
+			lock.lock(new PumaClientLockListener() {
+				@Override public void onLost() {
+					a[0] = false;
 				}
+			});
 
-				client.ack(message.getLastBinlogInfo());
-			} catch (Exception exp) {
-				exp.printStackTrace();
+			while (a[0]) {
+				System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+				try {
+					BinlogMessage message = client.get(size, 1, TimeUnit.SECONDS);
+					client.ack(message.getLastBinlogInfo());
+				} catch (Exception exp) {
+					exp.printStackTrace();
+				}
 			}
+		} catch (Throwable t) {
+
+		} finally {
+			lock.unlockQuietly();
 		}
+
+		System.out.println("##################################################");
 	}
 }

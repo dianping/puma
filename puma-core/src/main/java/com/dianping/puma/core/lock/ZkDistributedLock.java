@@ -61,18 +61,8 @@ public class ZkDistributedLock implements DistributedLock {
 
 	@Override
 	public boolean tryLock() {
-		return tryLock(0, TimeUnit.SECONDS);
-	}
-
-	@Override
-	public boolean tryLockNotify(DistributedLockLostListener listener) {
-		return tryLock(0, TimeUnit.SECONDS);
-	}
-
-	@Override
-	public boolean tryLock(long time, TimeUnit timeUnit) {
 		try {
-			if (lock.acquire(time, timeUnit)) {
+			if (lock.acquire(0, TimeUnit.SECONDS)) {
 				logger.info("success to try lock `{}`.", lockName);
 				return true;
 			} else {
@@ -85,7 +75,31 @@ public class ZkDistributedLock implements DistributedLock {
 	}
 
 	@Override
-	public boolean tryLockNotify(long time, TimeUnit timeUnit, DistributedLockLostListener listener) {
+	public boolean tryLockNotify(DistributedLockLostListener listener) {
+		boolean result = tryLock();
+		push(listener);
+		return result;
+	}
+
+	@Override
+	public boolean tryLock(long time, TimeUnit timeUnit) throws InterruptedException {
+		try {
+			if (lock.acquire(time, timeUnit)) {
+				logger.info("success to try lock `{}`.", lockName);
+				return true;
+			} else {
+				logger.info("failed to try lock `{}`.", lockName);
+				return false;
+			}
+		} catch (InterruptedException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new RuntimeException("failed to try lock " + lockName + ".", e);
+		}
+	}
+
+	@Override
+	public boolean tryLockNotify(long time, TimeUnit timeUnit, DistributedLockLostListener listener) throws InterruptedException {
 		boolean result = tryLock(time, timeUnit);
 		push(listener);
 		return result;
@@ -123,7 +137,7 @@ public class ZkDistributedLock implements DistributedLock {
 	protected synchronized void trigger() {
 		List<DistributedLockLostListener> triggers = new ArrayList<DistributedLockLostListener>();
 
-		for (int i = 0; i != listeners.size(); ++i) {
+		while (listeners.size() != 0) {
 			DistributedLockLostListener listener = listeners.pop();
 			if (!triggers.contains(listener)) {
 				triggers.add(listener);

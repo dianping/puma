@@ -1,9 +1,11 @@
 package com.dianping.puma.core.lock;
 
+import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.log4j.BasicConfigurator;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class ZkDistributedLockMainTest {
 
@@ -19,24 +21,11 @@ public class ZkDistributedLockMainTest {
 		DistributedLock lock = DistributedLockFactory.newZkDistributedLock("dozer-debug");
 
 		lock.lockNotify(new DistributedLockLostListener() {
-			@Override
-			public void onLost() {
+			@Override public void onLost() {
+				System.out.println("######################");
 			}
 		});
 
-		lock.lock();
-
-		System.out.println("lock lock.");
-
-		lock.unlock();
-		lock.unlock();
-
-		System.out.println("lock unlock.");
-
-		DistributedLock lock1 = DistributedLockFactory.newZkDistributedLock("dozer-debug");
-		lock1.lock();
-
-		System.out.println("lock1 lock.");
-
+		Uninterruptibles.sleepUninterruptibly(100, TimeUnit.SECONDS);
 	}
 }

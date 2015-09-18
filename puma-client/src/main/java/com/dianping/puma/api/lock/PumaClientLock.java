@@ -2,6 +2,7 @@ package com.dianping.puma.api.lock;
 
 import com.dianping.puma.core.lock.DistributedLock;
 import com.dianping.puma.core.lock.DistributedLockFactory;
+import com.dianping.puma.core.lock.DistributedLockUtils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -21,11 +22,15 @@ public class PumaClientLock {
 		return lock.tryLockNotify(listener);
 	}
 
-	public boolean tryLock(long time, TimeUnit timeUnit, PumaClientLockListener listener) {
+	public boolean tryLock(long time, TimeUnit timeUnit, PumaClientLockListener listener) throws InterruptedException{
 		return lock.tryLockNotify(time, timeUnit, listener);
 	}
 
 	public void unlock() {
 		lock.unlockNotify();
+	}
+
+	public void unlockQuietly() {
+		DistributedLockUtils.unlockNotifyQuietly(lock);
 	}
 }

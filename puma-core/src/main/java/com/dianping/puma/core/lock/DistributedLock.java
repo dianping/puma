@@ -9,7 +9,7 @@ public interface DistributedLock extends Lock {
 
 	public boolean tryLockNotify(DistributedLockLostListener listener);
 
-	public boolean tryLockNotify(long time, TimeUnit timeUnit, DistributedLockLostListener listener);
+	public boolean tryLockNotify(long time, TimeUnit timeUnit, DistributedLockLostListener listener) throws InterruptedException;
 
 	public void unlockNotify();
 }

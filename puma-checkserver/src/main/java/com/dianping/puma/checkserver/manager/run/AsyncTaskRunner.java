@@ -11,7 +11,7 @@ import java.util.concurrent.*;
 @Service
 public class AsyncTaskRunner implements TaskRunner {
 
-    private static int MAX_POOL_SIZE = 25;
+    private static int MAX_POOL_SIZE = 10;
     private static int MIN_POOL_SIZE = 5;
     private static long TIMEOUT_MIN = 5;
 

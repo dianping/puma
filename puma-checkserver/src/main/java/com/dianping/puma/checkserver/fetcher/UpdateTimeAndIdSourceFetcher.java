@@ -32,12 +32,25 @@ public class UpdateTimeAndIdSourceFetcher extends AbstractDataFetcher implements
 
     @Override
     public void setCursor(String cursor) {
-        startTime = Strings.isNullOrEmpty(cursor) ? new Date(1) : new Date(Long.valueOf(cursor));
+        if (Strings.isNullOrEmpty(cursor)) {
+            startTime = new Date(1);
+            lastId = null;
+        } else {
+            String[] data = cursor.split(",");
+            startTime = new Date(Long.valueOf(cursor));
+            lastId = data.length >= 2 ? data[1] : null;
+        }
+
     }
 
     @Override
     public String getCursor() {
-        return String.valueOf(startTime.getTime());
+        String result = String.valueOf(startTime.getTime());
+        if (lastId != null) {
+            result += ",";
+            result += String.valueOf(lastId);
+        }
+        return result;
     }
 
     @Override

@@ -11,7 +11,10 @@
 	<name>puma-checkserver</name>
 	<packaging>war</packaging>
 	<dependencies>
-
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+        </dependency>
 		<!-- dianping -->
 		<dependency>
 			<groupId>com.dianping.puma</groupId>

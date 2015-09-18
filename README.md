@@ -29,75 +29,55 @@
 最新版本为`2.0.0`
 
 ## 使用实例
-```
-		PumaClient client = new PumaClientConfig()
-			.setClientName("name") // set your client name.
-        	.setDatabase("database") // set database to subscribe.
-        	.setTables(Lists.newArrayList("table1, table2, table3")) // set tables to subscribe.
-        	.buildClusterPumaClient();
-      while (true) {
-			try {
-				BinlogMessage message = client.get(size, 1, TimeUnit.SECONDS);
-				for (Event event : message.getBinlogEvents()) {
-					if (event instanceof DdlEvent) {
-						if (!ddl) {
-							continue;
-						}
-						// do ddl business logic here.
-					} else if (event instanceof RowChangedEvent) {
-						RowChangedEvent rowChangedEvent = (RowChangedEvent) event;
-						if (rowChangedEvent.isTransactionBegin() || rowChangedEvent.isTransactionCommit()) {
-							if (!transaction) {
-								continue;
-							}
-							// do transaction business logic here.
-						} else {
-							if (!dml) {
-								continue;
-							}
-							if (rowChangedEvent.getDmlType().equals(DMLType.INSERT)) {
-								if (!insert) {
-									continue;
-								}
-								Map<String, ColumnInfo> columnInfoMap = rowChangedEvent.getColumns();
-								for (Map.Entry<String, ColumnInfo> entry : columnInfoMap.entrySet()) {
-									String columnName = entry.getKey();
-									ColumnInfo columnInfo = entry.getValue();
-									Object insertValue = columnInfo.getNewValue();
-									// do insert business logic here.
-								}
-							} else if (rowChangedEvent.getDmlType().equals(DMLType.UPDATE)) {
-								if (!update) {
-									continue;
-								}
-								Map<String, ColumnInfo> columnInfoMap = rowChangedEvent.getColumns();
-								for (Map.Entry<String, ColumnInfo> entry : columnInfoMap.entrySet()) {
-									String columnName = entry.getKey();
-									ColumnInfo columnInfo = entry.getValue();
-									Object oldValue = columnInfo.getOldValue();
-									Object newValue = columnInfo.getNewValue();
-									// do update business logic here.
-								}
-							} else if (rowChangedEvent.getDmlType().equals(DMLType.DELETE)) {
-								if (!delete) {
-									continue;
-								}
-								Map<String, ColumnInfo> columnInfoMap = rowChangedEvent.getColumns();
-								for (Map.Entry<String, ColumnInfo> entry : columnInfoMap.entrySet()) {
-									String columnName = entry.getKey();
-									ColumnInfo columnInfo = entry.getValue();
-									Object deleteValue = columnInfo.getOldValue();
-									// do delete business logic here.
-								}
-							}
-						}
-					}
-				}
-				client.ack(message.getLastBinlogInfo());
-			} catch (Exception exp) {
-				exp.printStackTrace();
-			}
+
+### Single Client
+```java
+	PumaClient client = new PumaClientConfig()
+		.setClientName("name")
+		.setDatabase("database")
+		.setTables(Lists.newArrayList("table0", "table1"))
+		.buildClusterPumaClient();
+
+	while(true) {
+		try {
+			BinlogMessage binlogMessage = client.get(10, 1, TimeUnit.SECOND);
+
+			// Do business logic.
+			// ...
+
+			client.ack(binlogMessage.getBinlogInfo());
+		} catch(Throwable t) {
+			// Error handling.
 		}
+	}
+```
+
+### Distributed Clients
+```
+	PumaClient client = new PumaClientConfig()
+		.setClientName("name")
+		.setDatabase("database")
+		.setTables(Lists.newArrayList("table0", "table1"))
+		.buildClusterPumaClient();
+
+	PumaClientLock lock = new PumaClient("name");
+	try {
+		lock.lock();
+
+		while(lock.isLock()) {
+			BinlogMessage binlogMessage = client.get(10, 1, TimeUnit.SECOND);
+
+         // Do business logic.
+         // ...
+
+         client.ack(binlogMessage.getBinlogInfo());
+		}
+
+	} catch(Throwable t) {
+
+	} finally {
+		lock.unlockQuietly();
+	}
 ```
 
 ## Document

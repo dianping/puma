@@ -28,6 +28,10 @@ public class GroupDataSourceBuilder implements DataSourceBuilder {
         try {
             ds = new GroupDataSource();
             ds.setJdbcRef(this.jdbcRef);
+            ds.setPoolType("tomcat-jdbc");
+            ds.setMaxPoolSize(2);
+            ds.setMinPoolSize(1);
+            ds.setInitialPoolSize(1);
             ds.init();
             return ds;
         } catch (RuntimeException e) {

@@ -5,9 +5,9 @@ import com.dianping.puma.storage.Sequence;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
-public class IndexValueConvertor implements IndexItemConvertor<IndexValueImpl> {
+public class IndexValueConverter implements IndexItemConverter<IndexValueImpl> {
 
-	private IndexKeyConvertor indexKeyConvertor = new IndexKeyConvertor();
+	private IndexKeyConverter indexKeyConvertor = new IndexKeyConverter();
 
 	@Override
 	public IndexValueImpl convertFromObj(Object value) {

@@ -15,7 +15,7 @@ public class IndexValueConvertorTest {
 
 	@Test
 	public void testConvertor() {
-		IndexValueConvertor convertor = new IndexValueConvertor();
+		IndexValueConverter convertor = new IndexValueConverter();
 
 		IndexValueImpl l2Index = new IndexValueImpl();
 		l2Index.setIndexKey(new IndexKeyImpl(1L, "mysql-binlog.0000001", 4L));

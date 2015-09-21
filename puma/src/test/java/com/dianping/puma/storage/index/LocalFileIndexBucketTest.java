@@ -17,7 +17,7 @@ public class LocalFileIndexBucketTest {
 
     private String name;
 
-    private IndexItemConvertor<IndexValueImpl> valueConvertor = new IndexValueConvertor();
+    private IndexItemConverter<IndexValueImpl> valueConvertor = new IndexValueConverter();
 
     @Before
     public void setup() throws IOException {

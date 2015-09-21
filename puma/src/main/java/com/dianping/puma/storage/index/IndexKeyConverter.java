@@ -1,6 +1,6 @@
 package com.dianping.puma.storage.index;
 
-public class IndexKeyConvertor implements IndexItemConvertor<IndexKeyImpl> {
+public class IndexKeyConverter implements IndexItemConverter<IndexKeyImpl> {
 
 	@Override
 	public IndexKeyImpl convertFromObj(Object value) {

@@ -19,7 +19,7 @@ package com.dianping.puma.storage.index;
  * @author Leo Liang
  * 
  */
-public interface IndexItemConvertor<V> {
+public interface IndexItemConverter<V> {
 	public V convertFromObj(Object value);
 
 	public Object convertToObj(V value);

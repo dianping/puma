@@ -3,13 +3,12 @@ package com.dianping.puma.storage.index;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 import java.io.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class LocalFileIndexBucket<K, V extends IndexValue<K>> implements IndexBucket<K, V> {
 
 	private final DataInputStream input;
 
-	private final IndexItemConvertor<V> valueConvertor;
+	private final IndexItemConverter<V> valueConvertor;
 
 	private final File file;
 
@@ -19,14 +18,14 @@ public class LocalFileIndexBucket<K, V extends IndexValue<K>> implements IndexBu
 
 	private long currentPosition = 0L;
 
-	public LocalFileIndexBucket(String name,File file, IndexItemConvertor<V> valueConvertor) throws IOException {
+	public LocalFileIndexBucket(String name,File file, IndexItemConverter<V> valueConvertor) throws IOException {
 		this.name = name;
 		this.file = file;
 		this.input = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
 		this.valueConvertor = valueConvertor;
 	}
 
-	public LocalFileIndexBucket(String name,File file, IndexItemConvertor<V> valueConvertor, K startKey, boolean inclusive) throws IOException {
+	public LocalFileIndexBucket(String name,File file, IndexItemConverter<V> valueConvertor, K startKey, boolean inclusive) throws IOException {
 		this.name = name;
 		this.file = file;
 		this.input = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));

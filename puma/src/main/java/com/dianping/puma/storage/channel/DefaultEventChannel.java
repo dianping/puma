@@ -255,7 +255,7 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
         }
 
         this.indexManager = new DefaultIndexManager<IndexKeyImpl, IndexValueImpl>(GlobalStorageConfig.binlogIndexBaseDir
-                + "/" + database, new IndexKeyConvertor(), new IndexValueConvertor());
+                + "/" + database, new IndexKeyConverter(), new IndexValueConverter());
 
         stopped = false;
     }

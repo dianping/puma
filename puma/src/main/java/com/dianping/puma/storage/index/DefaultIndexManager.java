@@ -52,9 +52,9 @@ public class DefaultIndexManager<K extends IndexKey, V extends IndexValue<K>> im
 
     private DataOutputStream l2IndexWriter;
 
-    private IndexItemConvertor<K> indexKeyConvertor;
+    private IndexItemConverter<K> indexKeyConverter;
 
-    private IndexItemConvertor<V> indexValueConvertor;
+    private IndexItemConverter<V> indexValueConverter;
 
     private ReentrantReadWriteLock l1Lock = new ReentrantReadWriteLock();
 
@@ -68,11 +68,11 @@ public class DefaultIndexManager<K extends IndexKey, V extends IndexValue<K>> im
 
     private AtomicReference<K> latestL2Index = new AtomicReference<K>();
 
-    public DefaultIndexManager(String baseDir, IndexItemConvertor<K> indexKeyConvertor,
-                               IndexItemConvertor<V> indexValueConvertor) {
+    public DefaultIndexManager(String baseDir, IndexItemConverter<K> indexKeyConverter,
+                               IndexItemConverter<V> indexValueConverter) {
         this.baseDir = baseDir;
-        this.indexKeyConvertor = indexKeyConvertor;
-        this.indexValueConvertor = indexValueConvertor;
+        this.indexKeyConverter = indexKeyConverter;
+        this.indexValueConverter = indexValueConverter;
     }
 
     private File getL2IndexFile(String l2IndexName) {
@@ -118,7 +118,7 @@ public class DefaultIndexManager<K extends IndexKey, V extends IndexValue<K>> im
             is = new FileInputStream(l1IndexFile);
             prop.load(is);
             for (Map.Entry<Object, Object> entry : prop.entrySet()) {
-                K key = indexKeyConvertor.convertFromObj(entry.getKey());
+                K key = indexKeyConverter.convertFromObj(entry.getKey());
                 String value = String.valueOf(entry.getValue());
                 if (key != null && value != null) {
                     l1Index.put(key, value);
@@ -222,7 +222,7 @@ public class DefaultIndexManager<K extends IndexKey, V extends IndexValue<K>> im
     }
 
     private void appendL1IndexToFile(K key, String l2IndexName) throws IOException {
-        l1IndexWriter.write(indexKeyConvertor.convertToObj(key) + "=" + l2IndexName);
+        l1IndexWriter.write(indexKeyConverter.convertToObj(key) + "=" + l2IndexName);
         l1IndexWriter.newLine();
         l1IndexWriter.flush();
     }
@@ -232,7 +232,7 @@ public class DefaultIndexManager<K extends IndexKey, V extends IndexValue<K>> im
         l2WriteLock.lock();
         try {
             if (l2IndexWriter != null) {
-                Object object = indexValueConvertor.convertToObj(value);
+                Object object = indexValueConverter.convertToObj(value);
 
                 if (object instanceof byte[]) {
                     byte[] bytes = (byte[]) object;
@@ -330,7 +330,7 @@ public class DefaultIndexManager<K extends IndexKey, V extends IndexValue<K>> im
 
         File l2IndexFile = getL2IndexFile(l2Index);
         LocalFileIndexBucket<K, V> localFileIndexBucket = new LocalFileIndexBucket<K, V>(l2Index, l2IndexFile,
-                this.indexValueConvertor);
+                this.indexValueConverter);
 
         return localFileIndexBucket;
     }
@@ -343,7 +343,7 @@ public class DefaultIndexManager<K extends IndexKey, V extends IndexValue<K>> im
         } else {
             Entry<K, String> firstEntry = FluentIterable.from(l1Index.entrySet()).first().get();
             LocalFileIndexBucket<K, V> bucket = new LocalFileIndexBucket<K, V>(
-                    firstEntry.getValue(), getL2IndexFile(firstEntry.getValue()), this.indexValueConvertor);
+                    firstEntry.getValue(), getL2IndexFile(firstEntry.getValue()), this.indexValueConverter);
             bucket.start();
             return bucket.next();
         }
@@ -358,7 +358,7 @@ public class DefaultIndexManager<K extends IndexKey, V extends IndexValue<K>> im
             Entry<K, String> lastEntry = FluentIterable.from(l1Index.entrySet()).last().get();
 
             LocalFileIndexBucket<K, V> bucket = new LocalFileIndexBucket<K, V>(
-                    lastEntry.getValue(), getL2IndexFile(lastEntry.getValue()), this.indexValueConvertor);
+                    lastEntry.getValue(), getL2IndexFile(lastEntry.getValue()), this.indexValueConverter);
             bucket.start();
 
             V next = null;
@@ -401,7 +401,7 @@ public class DefaultIndexManager<K extends IndexKey, V extends IndexValue<K>> im
         }
 
         LocalFileIndexBucket<K, V> bucket = new LocalFileIndexBucket<K, V>(l1Index.get(matches), getL2IndexFile(l1Index.get(matches)),
-                this.indexValueConvertor);
+                this.indexValueConverter);
         bucket.start();
 
         V next = null;
@@ -456,7 +456,7 @@ public class DefaultIndexManager<K extends IndexKey, V extends IndexValue<K>> im
         K lastKey = keys.get(index - 1);
 
         LocalFileIndexBucket<K, V> bucket = new LocalFileIndexBucket<K, V>(l1Index.get(lastKey), getL2IndexFile(l1Index.get(lastKey)),
-                this.indexValueConvertor);
+                this.indexValueConverter);
         bucket.start();
 
         V commitValue = null;
@@ -513,7 +513,7 @@ public class DefaultIndexManager<K extends IndexKey, V extends IndexValue<K>> im
         }
 
         LocalFileIndexBucket<K, V> bucket = new LocalFileIndexBucket<K, V>(target.getValue(), getL2IndexFile(target.getValue()),
-                this.indexValueConvertor);
+                this.indexValueConverter);
         bucket.start();
 
         V next = null;
@@ -580,7 +580,7 @@ public class DefaultIndexManager<K extends IndexKey, V extends IndexValue<K>> im
         }
 
         LocalFileIndexBucket<K, V> bucket = new LocalFileIndexBucket<K, V>(target.getValue(), getL2IndexFile(target.getValue()),
-                this.indexValueConvertor);
+                this.indexValueConverter);
         bucket.start();
 
         V commitValue = null;
@@ -625,7 +625,7 @@ public class DefaultIndexManager<K extends IndexKey, V extends IndexValue<K>> im
     public IndexBucket<K, V> getIndexBucket(String fileName) throws IOException {
         File l2IndexFile = getL2IndexFile(fileName);
         LocalFileIndexBucket<K, V> localFileIndexBucket = new LocalFileIndexBucket<K, V>(fileName, l2IndexFile,
-                this.indexValueConvertor);
+                this.indexValueConverter);
 
         return localFileIndexBucket;
     }

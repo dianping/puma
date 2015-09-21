@@ -66,8 +66,8 @@ public class DefaultIndexManagerTest {
         baseDir = new File(System.getProperty("java.io.tmpdir", "."), "IndexTest");
         baseDir.mkdirs();
 
-        index = new DefaultIndexManager<IndexKeyImpl, IndexValueImpl>(baseDir.getAbsolutePath(), new IndexKeyConvertor(),
-                new IndexValueConvertor());
+        index = new DefaultIndexManager<IndexKeyImpl, IndexValueImpl>(baseDir.getAbsolutePath(), new IndexKeyConverter(),
+                new IndexValueConverter());
         index.start();
 
         addIndex(new IndexKeyImpl(1, 0, "bin-0001.bin", 5), "1", "dianping", "receipt", false, true, false, false,
@@ -132,7 +132,7 @@ public class DefaultIndexManagerTest {
         Assert.assertTrue(l2IndexFile3.exists());
 
         LocalFileIndexBucket<IndexKeyImpl, IndexValueImpl> bucket = new LocalFileIndexBucket<IndexKeyImpl, IndexValueImpl>(
-                "1" + DefaultIndexManager.L2INDEX_FILESUFFIX, l2IndexFile1, new IndexValueConvertor());
+                "1" + DefaultIndexManager.L2INDEX_FILESUFFIX, l2IndexFile1, new IndexValueConverter());
 
         Assert.assertEquals(new IndexKeyImpl(1, 0, "bin-0001.bin", 5), bucket.next().getIndexKey());
         Assert.assertEquals(new IndexKeyImpl(5, 0, "bin-0002.bin", 10), bucket.next().getIndexKey());

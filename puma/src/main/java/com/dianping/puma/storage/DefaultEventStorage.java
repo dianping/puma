@@ -22,10 +22,10 @@ import com.dianping.puma.storage.exception.StorageException;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;
 import com.dianping.puma.storage.exception.StorageWriteException;
 import com.dianping.puma.storage.index.DefaultIndexManager;
-import com.dianping.puma.storage.index.IndexKeyConvertor;
+import com.dianping.puma.storage.index.IndexKeyConverter;
 import com.dianping.puma.storage.index.IndexKeyImpl;
 import com.dianping.puma.storage.index.IndexManager;
-import com.dianping.puma.storage.index.IndexValueConvertor;
+import com.dianping.puma.storage.index.IndexValueConverter;
 import com.dianping.puma.storage.index.IndexValueImpl;
 
 public class DefaultEventStorage implements EventStorage {
@@ -92,7 +92,7 @@ public class DefaultEventStorage implements EventStorage {
 		slaveBucketIndex.setMaster(false);
 		bucketManager = new DefaultBucketManager(masterBucketIndex, slaveBucketIndex, archiveStrategy, cleanupStrategy);
 		indexManager = new DefaultIndexManager<IndexKeyImpl, IndexValueImpl>(binlogIndexBaseDir,
-		      new IndexKeyConvertor(), new IndexValueConvertor());
+		      new IndexKeyConverter(), new IndexValueConverter());
 		flushTask = new Thread(new Flush());
 		flushTask.setName("Puma-Storage-Flush");
 		flushTask.setDaemon(true);

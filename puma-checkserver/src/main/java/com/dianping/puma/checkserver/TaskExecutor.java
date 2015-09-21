@@ -60,6 +60,13 @@ public final class TaskExecutor implements Callable<TaskResult> {
 
     @Override
     public TaskResult call() throws Exception {
+        int tryTimes;
+        do {
+            return call0();
+        } while (tryTimes++ < RETRY_TIMES);
+    }
+
+    protected TaskResult call0() throws Exception {
         DataSource sourceDs = null;
         DataSource targetDs = null;
         try {
@@ -88,6 +95,7 @@ public final class TaskExecutor implements Callable<TaskResult> {
             targetBuilder.destory(targetDs);
         }
     }
+
 
     protected void retry(List<SourceTargetPair> difference) {
         Iterator<SourceTargetPair> iterable = difference.iterator();

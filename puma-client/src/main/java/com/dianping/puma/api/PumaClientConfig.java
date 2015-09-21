@@ -117,21 +117,21 @@ public class PumaClientConfig {
 		return lock;
 	}
 
-	public SimplePumaClient buildSimplePumaClient() {
+	public PumaClient buildSimplePumaClient() {
 		return new SimplePumaClient(this);
 	}
 
-	public ClusterPumaClient buildClusterPumaClient() {
+	public PumaClient buildClusterPumaClient() {
 		return buildLionClusterPumaClient();
 	}
 
-	public ClusterPumaClient buildLionClusterPumaClient() {
+	public PumaClient buildLionClusterPumaClient() {
 		ConfigPumaServerMonitor monitor = new ConfigPumaServerMonitor(database, tables);
 		router = new RoundRobinPumaServerRouter(monitor);
 		return new ClusterPumaClient(this);
 	}
 
-	public ClusterPumaClient buildFixedClusterPumaClient() {
+	public PumaClient buildFixedClusterPumaClient() {
 		FixedPumaServerMonitor monitor = new FixedPumaServerMonitor(serverHosts);
 		router = new RoundRobinPumaServerRouter(monitor);
 		return new ClusterPumaClient(this);

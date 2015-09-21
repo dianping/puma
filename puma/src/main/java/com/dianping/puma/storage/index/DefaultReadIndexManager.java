@@ -25,6 +25,11 @@ public class DefaultReadIndexManager<K extends IndexKey, V extends IndexValue<K>
 
 	private IndexItemConverter<V> indexValueConverter;
 
+	public DefaultReadIndexManager(IndexItemConverter<K> indexKeyConverter, IndexItemConverter<V> indexValueConverter) {
+		this.indexKeyConverter = indexKeyConverter;
+		this.indexValueConverter = indexValueConverter;
+	}
+
 	@Override
 	public V findFirst() throws IOException {
 		LinkedHashMap<K, String> l1Index = loadLinkedL1Index();

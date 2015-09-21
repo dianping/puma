@@ -79,11 +79,55 @@ try {
 }
 ```
 
-## Document
+
+## API文档
+
+### PumaClientConfig(com.dianping.puma.api.PumaClientConfig)
+
+使用PumaClientConfig类来构造Puma客户端。
+构造Puma客户端设置：
+1. 客户端名称（必须）
+2. 监听数据库名称（必须）
+3. 监听数据库表名称（必须）
+4. 是否需要DML事件（可选，默认为true）
+5. 是否需要DDL事件（可选，默认为false）
+6. 是否需要transaction事件（可选，默认为false）
+
+
+#### PumaClientConfig setClientName(String clientName)
+
+设置Puma客户端的名称。不同的客户端需使用不同的名称。
+
+
+#### PumaClientConfig setDatabase(String database)
+
+设置Puma客户端需要监听的数据库名称。每个客户端只能监听一个数据库。
+
+
+#### PumaClientConfig setTables(List<String> tables)
+
+设置Puma客户端需要监听的数据库表的名称。每个客户端可以监听一个数据库下的任意多张表。
+
+
+#### PumaClientConfig setDml(boolean transaction)
+
+设置Puma客户端是否需要所监听库表的DML（Data Manipulation Language）事件。
+
+
+#### PumaClientConfig setDdl(boolean transaction)
+
+设置Puma客户端是否需要所监听库表的DDL（Data Definition Language）事件。
+
+
+#### PumaClientConfig setTransaction(boolean transaction)
+
+设置Puma客户端是否需要所监听库表的Transaction（begin，commit）事件。
+
+
 
 ### PumaClient
 
-#### get(int batchSize)
+#### BinlogMessage get(int batchSize)
 
 Gets batch of binlog events from puma server.
 

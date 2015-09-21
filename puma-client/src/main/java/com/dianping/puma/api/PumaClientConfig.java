@@ -117,7 +117,7 @@ public class PumaClientConfig {
 		return lock;
 	}
 
-	public PumaClient buildSimplePumaClient() {
+	public SimplePumaClient buildSimplePumaClient() {
 		return new SimplePumaClient(this);
 	}
 

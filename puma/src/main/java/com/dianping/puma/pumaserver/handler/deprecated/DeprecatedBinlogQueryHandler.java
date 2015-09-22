@@ -22,7 +22,7 @@ import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.filter.EventFilterChainFactory;
 import com.dianping.puma.pumaserver.handler.HttpResponseEncoder;
-import com.dianping.puma.storage.EventChannel;
+import com.dianping.puma.storage.channel.EventChannel;
 import com.dianping.puma.storage.EventStorage;
 import com.dianping.puma.storage.channel.BufferedEventChannel;
 import com.dianping.puma.storage.channel.DefaultEventChannel;

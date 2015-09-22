@@ -31,6 +31,16 @@ public class DefaultReadIndexManager<K extends IndexKey, V extends IndexValue<K>
 	}
 
 	@Override
+	public void start() {
+
+	}
+
+	@Override
+	public void stop() {
+
+	}
+
+	@Override
 	public V findFirst() throws IOException {
 		LinkedHashMap<K, String> l1Index = loadLinkedL1Index();
 		if (l1Index.isEmpty()) {

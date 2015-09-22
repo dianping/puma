@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import com.dianping.cat.Cat;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.ServerErrorEvent;
-import com.dianping.puma.storage.EventChannel;
 import com.dianping.puma.storage.exception.StorageException;
 
 public class BufferedEventChannel extends AbstractEventChannel implements EventChannel {

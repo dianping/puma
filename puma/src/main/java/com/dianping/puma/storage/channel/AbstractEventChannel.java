@@ -1,7 +1,5 @@
 package com.dianping.puma.storage.channel;
 
-import com.dianping.puma.storage.EventChannel;
-
 import java.util.HashSet;
 import java.util.Set;
 

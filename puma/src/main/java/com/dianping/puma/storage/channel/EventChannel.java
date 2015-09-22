@@ -1,4 +1,4 @@
-package com.dianping.puma.storage;
+package com.dianping.puma.storage.channel;
 
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.storage.exception.StorageException;

@@ -45,7 +45,7 @@ import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
-import com.dianping.puma.storage.EventChannel;
+import com.dianping.puma.storage.channel.EventChannel;
 import com.dianping.puma.storage.channel.DefaultEventChannel;
 import com.dianping.puma.storage.conf.GlobalStorageConfig;
 import com.dianping.puma.storage.holder.impl.DefaultBinlogInfoHolder;

@@ -13,7 +13,7 @@ import com.dianping.puma.eventbus.event.ClientPositionChangedEvent;
 import com.dianping.puma.pumaserver.channel.AsyncBinlogChannel;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
 import com.dianping.puma.status.SystemStatusManager;
-import com.dianping.puma.storage.EventChannel;
+import com.dianping.puma.storage.channel.EventChannel;
 import com.dianping.puma.storage.channel.DefaultEventChannel;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;

@@ -143,7 +143,7 @@ public final class TaskExecutor implements Callable<TaskResult> {
                     LOG.info("find difference:" + GsonUtil.toJson(pair));
                 }
             }
-        } while (sourceData != null && sourceData.size() > 0 && rowCount >= MAX_FETCH_ROW);
+        } while (sourceData != null && sourceData.size() > 0 && rowCount <= MAX_FETCH_ROW);
     }
 
     public static final class Builder {

@@ -8,20 +8,10 @@
     </div>
 
     <div class="form-group">
-        <label class="col-sm-2 control-label no-padding-right"> Begin Time </label>
+        <label class="col-sm-2 control-label no-padding-right"> Cursor </label>
 
         <div class="col-sm-6">
-            <div class="dropdown">
-                <a class="dropdown-toggle" role="button" data-toggle="dropdown">
-                    <div class="input-group"><input type="text" class="form-control"
-                                                    data-ng-model="item.initTime"><span
-                            class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
-                    </div>
-                </a>
-                <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-                    <datetimepicker data-ng-model="item.initTime"/>
-                </ul>
-            </div>
+            <input ng-model="item.cursor" type="text" placeholder="Cursor" class="form-control"/>
         </div>
     </div>
 

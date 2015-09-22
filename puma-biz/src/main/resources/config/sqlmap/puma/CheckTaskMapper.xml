@@ -18,7 +18,7 @@
     <insert id="create" parameterType="checkTaskEntity" useGeneratedKeys="true" keyColumn="ID">
 		INSERT INTO CheckTask
             (
-            Cursor,
+            CheckTask.Cursor,
             Running,
             OwnerHost,
             Success,

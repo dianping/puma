@@ -1,7 +1,5 @@
 package com.dianping.puma.admin.model;
 
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -81,21 +79,13 @@ public class CheckTaskModel {
         this.sourceDsBuilderProp = sourceDsBuilderProp;
     }
 
-    public static class BaseInfo{
+    public static class BaseInfo {
 
         private String name;
 
-        private long initTime;
+        private String cursor;
 
         private String batch;
-
-        public long getInitTime() {
-            return initTime;
-        }
-
-        public void setInitTime(long initTime) {
-            this.initTime = initTime;
-        }
 
         public String getBatch() {
             return batch;
@@ -111,6 +101,14 @@ public class CheckTaskModel {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public String getCursor() {
+            return cursor;
+        }
+
+        public void setCursor(String cursor) {
+            this.cursor = cursor;
         }
     }
 }

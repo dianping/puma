@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -55,6 +54,7 @@ public class PumaCheckController extends BasicController {
         for (Object it : batch) {
             CheckTaskEntity entity = new CheckTaskEntity();
 
+            entity.setCursor(model.getBaseInfo().getCursor());
             entity.setTaskGroupName(model.getBaseInfo().getName());
             if (Strings.isNullOrEmpty(it.toString())) {
                 entity.setTaskName(model.getBaseInfo().getName());

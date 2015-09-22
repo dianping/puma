@@ -40,12 +40,19 @@ public class DefaultCleanupStrategyTest {
 
 	private File baseDir;
 
-	private File binlogIndexBaseDir;
+	private File l1IndexFolder;
+
+	private File l2IndexFolder;
 
 	@Before
 	public void before() {
+		l1IndexFolder = new File(System.getProperty("java.io.tmpdir", "."), "Index1Test");
+		l1IndexFolder.mkdirs();
+
+		l2IndexFolder = new File(System.getProperty("java.io.tempdir", "."), "Index2Test");
+		l2IndexFolder.mkdirs();
+
 		baseDir = new File(System.getProperty("java.io.tmpdir", "."), "Puma");
-		binlogIndexBaseDir = new File(System.getProperty("java.io.tmpdir", "."), "binlogIndex");
 	}
 
 	@Test
@@ -57,7 +64,9 @@ public class DefaultCleanupStrategyTest {
 		index.setBaseDir(baseDir.getAbsolutePath());
 		index.setBucketFilePrefix("bucket-");
 
-		DefaultWriteIndexManager<IndexKeyImpl, IndexValueImpl> binlogIndex = new DefaultWriteIndexManager<IndexKeyImpl, IndexValueImpl>(new IndexKeyConverter(), new IndexValueConverter());
+		DefaultWriteIndexManager<IndexKeyImpl, IndexValueImpl> binlogIndex
+				= new DefaultWriteIndexManager<IndexKeyImpl, IndexValueImpl>(
+				l1IndexFolder.getAbsolutePath(), l2IndexFolder.getAbsolutePath(), new IndexKeyConverter(), new IndexValueConverter());
 
 		Calendar cal = Calendar.getInstance();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
@@ -87,7 +96,7 @@ public class DefaultCleanupStrategyTest {
 		sdf = new SimpleDateFormat("yyMMdd");
 
 		Properties binlogIndexL1 = new Properties();
-		binlogIndexL1.load(new FileInputStream(new File(binlogIndexBaseDir, "l1Index.l1idx")));
+		binlogIndexL1.load(new FileInputStream(new File(l1IndexFolder, "l1Index.l1idx")));
 		Assert.assertEquals(preservedDay, binlogIndexL1.size());
 
 		cal = Calendar.getInstance();
@@ -98,7 +107,7 @@ public class DefaultCleanupStrategyTest {
 			Assert.assertTrue(file.exists());
 			Assert.assertNotNull(index.getReadBucket(
 			      new Sequence(Integer.valueOf(sdf.format(cal.getTime())), 0).longValue(), true));
-			File binlogIndexL2 = new File(new File(binlogIndexBaseDir, "l2Index"), "20" + sdf.format(cal.getTime())
+			File binlogIndexL2 = new File(l2IndexFolder, "20" + sdf.format(cal.getTime())
 			      + "-bucket-0" + ".l2idx");
 			Assert.assertTrue(binlogIndexL2.exists());
 			Assert.assertEquals("20" + sdf.format(cal.getTime()) + "-bucket-0",
@@ -113,7 +122,7 @@ public class DefaultCleanupStrategyTest {
 			Assert.assertFalse(file.exists());
 			Assert.assertNull(index.getReadBucket(new Sequence(Integer.valueOf(sdf.format(cal.getTime())), 0).longValue(),
 			      true));
-			File binlogIndexL2 = new File(new File(binlogIndexBaseDir, "l2Index"), "20" + sdf.format(cal.getTime())
+			File binlogIndexL2 = new File(l2IndexFolder, "20" + sdf.format(cal.getTime())
 			      + "-bucket-0" + ".l2idx");
 			Assert.assertFalse(binlogIndexL2.exists());
 		}
@@ -125,8 +134,11 @@ public class DefaultCleanupStrategyTest {
 		if (baseDir != null && baseDir.exists() && baseDir.isDirectory()) {
 			FileUtils.deleteDirectory(baseDir);
 		}
-		if (binlogIndexBaseDir != null && binlogIndexBaseDir.exists() && binlogIndexBaseDir.isDirectory()) {
-			FileUtils.deleteDirectory(binlogIndexBaseDir);
+		if (l1IndexFolder != null && l1IndexFolder.exists() && l1IndexFolder.isDirectory()) {
+			FileUtils.deleteDirectory(l1IndexFolder);
+		}
+		if (l2IndexFolder != null && l2IndexFolder.exists() && l2IndexFolder.isDirectory()) {
+			FileUtils.deleteDirectory(l2IndexFolder);
 		}
 	}
 

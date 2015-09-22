@@ -84,6 +84,8 @@ try {
 
 ### PumaClientConfig(com.dianping.puma.api.PumaClientConfig)
 
+***
+
 使用PumaClientConfig类来构造Puma客户端。
 构造Puma客户端设置：
 1. 客户端名称（必须）
@@ -98,47 +100,47 @@ try {
 **参数**
 * clientName `String` - 客户端名称
 **返回**
-* `PumaClientConfig` - Puma客户端配置<br/>
+* `PumaClientConfig` - Puma客户端配置
 
 #### PumaClientConfig setDatabase(String database)
 设置Puma客户端需要监听的数据库名称。每个客户端只能监听一个数据库。
 **参数**
 * database `String` - 监听数据库名称
 **返回**
-* `PumaClientConfig` - Puma客户端配置<br/>
+* `PumaClientConfig` - Puma客户端配置
 
 #### PumaClientConfig setTables(List<String> tables)
 设置Puma客户端需要监听的数据库表的名称列表。每个客户端可以监听一个数据库下的任意多张表。
 **参数**
 * tables `List<String>` - 监听数据库表名称列表
 **返回**
-* `PumaClientConfig` - Puma客户端配置<br/>
+* `PumaClientConfig` - Puma客户端配置
 
 #### PumaClientConfig setDml(boolean dml)
 设置Puma客户端是否需要所监听库表的DML（Data Manipulation Language）事件。
 **参数**
 * dml `boolean` - 是否需要DML事件
 **返回**
-* `PumaClientConfig` - Puma客户端配置<br/>
+* `PumaClientConfig` - Puma客户端配置
 
 #### PumaClientConfig setDdl(boolean ddl)
 设置Puma客户端是否需要所监听库表的DDL（Data Definition Language）事件。
 **参数**
 * ddl `boolean` - 是否需要DDL事件
 **返回**
-* `PumaClientConfig` - Puma客户端配置<br/>
+* `PumaClientConfig` - Puma客户端配置
 
 #### PumaClientConfig setTransaction(boolean transaction)
 设置Puma客户端是否需要所监听库表的Transaction（begin，commit）事件。
 **参数**
 * transaction `boolean` - 是否需要transaction事件
 **返回**
-* `PumaClientConfig` - Puma客户端配置<br/>
+* `PumaClientConfig` - Puma客户端配置
 
 #### PumaClient buildClusterPumaClient()
 根据PumaClientConfig的配置创建具备ha功能的Puma客户端。
 **返回**
-* `PumaClient` - Puma客户端<br/>
+* `PumaClient` - Puma客户端
 
 ***
 

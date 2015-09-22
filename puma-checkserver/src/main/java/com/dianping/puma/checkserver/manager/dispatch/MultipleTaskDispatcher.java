@@ -1,5 +1,6 @@
 package com.dianping.puma.checkserver.manager.dispatch;
 
+import com.dianping.cat.Cat;
 import com.dianping.puma.biz.entity.CheckTaskEntity;
 import com.dianping.puma.checkserver.manager.lock.TaskLock;
 import com.dianping.puma.checkserver.manager.lock.TaskLockBuilder;
@@ -13,9 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -84,8 +83,10 @@ public class MultipleTaskDispatcher implements TaskDispatcher {
                     }
                 });
 
-            } catch (Throwable t) {
-                logger.error("Failed to execute check task.", t);
+            } catch (Exception e) {
+                String msg = "Failed to execute check task.";
+                logger.error(msg, e);
+                Cat.logError(msg, e);
                 localTaskLock.unlock();
                 remoteTaskLock.unlock();
             }

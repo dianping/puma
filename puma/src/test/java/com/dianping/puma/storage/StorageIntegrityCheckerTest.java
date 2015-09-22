@@ -78,7 +78,7 @@
 //	@Test(expected = EOFException.class)
 //	public void testBrokenIndex() throws IOException {
 //		// build broken index
-//		IndexManager<IndexKeyImpl, IndexValueImpl> indexManager = this.eventStorage.getIndexManager();
+//		IndexManager<IndexKeyImpl, IndexValueImpl> indexManager = this.eventStorage.getWriteIndexManager();
 //
 //		indexManager.addL1Index(new IndexKeyImpl(0L, 1L, "mysql-000001", 4L), "1");
 //		indexManager.flush();
@@ -115,7 +115,7 @@
 //	@Test(expected = EOFException.class)
 //	public void testBrokenData() throws IOException {
 //		// build broken data
-//		IndexManager<IndexKeyImpl, IndexValueImpl> indexManager = this.eventStorage.getIndexManager();
+//		IndexManager<IndexKeyImpl, IndexValueImpl> indexManager = this.eventStorage.getWriteIndexManager();
 //
 //		indexManager.addL1Index(new IndexKeyImpl(0L, 1L, "mysql-000001", 4L), "1");
 //

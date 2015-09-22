@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Properties;
 
+import com.dianping.puma.storage.index.*;
 import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
@@ -29,11 +30,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
-import com.dianping.puma.storage.index.DefaultIndexManager;
-import com.dianping.puma.storage.index.IndexKeyConverter;
-import com.dianping.puma.storage.index.IndexKeyImpl;
-import com.dianping.puma.storage.index.IndexValueImpl;
-import com.dianping.puma.storage.index.IndexValueConverter;
 
 /**
  * 
@@ -61,8 +57,7 @@ public class DefaultCleanupStrategyTest {
 		index.setBaseDir(baseDir.getAbsolutePath());
 		index.setBucketFilePrefix("bucket-");
 
-		DefaultIndexManager<IndexKeyImpl, IndexValueImpl> binlogIndex = new DefaultIndexManager<IndexKeyImpl, IndexValueImpl>(
-		      binlogIndexBaseDir.getAbsolutePath(), new IndexKeyConverter(), new IndexValueConverter());
+		DefaultWriteIndexManager<IndexKeyImpl, IndexValueImpl> binlogIndex = new DefaultWriteIndexManager<IndexKeyImpl, IndexValueImpl>(new IndexKeyConverter(), new IndexValueConverter());
 
 		Calendar cal = Calendar.getInstance();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");

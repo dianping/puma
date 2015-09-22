@@ -10,7 +10,6 @@ import com.dianping.puma.storage.DefaultCleanupStrategyTest;
 import com.dianping.puma.storage.SequenceTest;
 import com.dianping.puma.storage.bucket.LocalBucketIndexTest;
 import com.dianping.puma.storage.bucket.LocalBucketTest;
-import com.dianping.puma.storage.index.DefaultIndexManagerTest;
 import com.dianping.puma.storage.index.IndexValueConvertorTest;
 import com.dianping.puma.storage.index.LocalFileIndexBucketTest;
 import com.dianping.puma.utils.PacketUtilTest;
@@ -40,7 +39,6 @@ import org.junit.runners.Suite.SuiteClasses;
         LocalBucketTest.class, //
 
         // storage.index
-        DefaultIndexManagerTest.class,//
         IndexValueConvertorTest.class,//
         LocalFileIndexBucketTest.class,//
 

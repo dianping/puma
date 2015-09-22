@@ -21,12 +21,7 @@ import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageException;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;
 import com.dianping.puma.storage.exception.StorageWriteException;
-import com.dianping.puma.storage.index.DefaultIndexManager;
-import com.dianping.puma.storage.index.IndexKeyConverter;
-import com.dianping.puma.storage.index.IndexKeyImpl;
-import com.dianping.puma.storage.index.IndexManager;
-import com.dianping.puma.storage.index.IndexValueConverter;
-import com.dianping.puma.storage.index.IndexValueImpl;
+import com.dianping.puma.storage.index.*;
 
 public class DefaultEventStorage implements EventStorage {
 
@@ -58,7 +53,7 @@ public class DefaultEventStorage implements EventStorage {
 
 	private String binlogIndexBaseDir;
 
-	private IndexManager<IndexKeyImpl, IndexValueImpl> indexManager;
+	private WriteIndexManager<IndexKeyImpl, IndexValueImpl> writeIndexManager;
 
 	private AtomicReference<IndexKeyImpl> lastIndexKey = new AtomicReference<IndexKeyImpl>(null);
 
@@ -91,21 +86,20 @@ public class DefaultEventStorage implements EventStorage {
 		masterBucketIndex.setMaster(true);
 		slaveBucketIndex.setMaster(false);
 		bucketManager = new DefaultBucketManager(masterBucketIndex, slaveBucketIndex, archiveStrategy, cleanupStrategy);
-		indexManager = new DefaultIndexManager<IndexKeyImpl, IndexValueImpl>(binlogIndexBaseDir,
-		      new IndexKeyConverter(), new IndexValueConverter());
+		writeIndexManager = new DefaultWriteIndexManager<IndexKeyImpl, IndexValueImpl>(new IndexKeyConverter(), new IndexValueConverter());
 		flushTask = new Thread(new Flush());
 		flushTask.setName("Puma-Storage-Flush");
 		flushTask.setDaemon(true);
 		flushTask.start();
 
-		cleanupStrategy.addDataIndex(indexManager);
+		cleanupStrategy.addDataIndex(writeIndexManager);
 
 		try {
 			masterBucketIndex.start();
 			slaveBucketIndex.start();
 			bucketManager.start();
 			writingBucket = null;
-			indexManager.start();
+			writeIndexManager.start();
 		} catch (Exception e) {
 			throw new StorageLifeCycleException("Storage init failed", e);
 		}
@@ -261,9 +255,9 @@ public class DefaultEventStorage implements EventStorage {
 			}
 		}
 
-		if (indexManager != null) {
+		if (writeIndexManager != null) {
 			try {
-				indexManager.flush();
+				writeIndexManager.flush();
 			} catch (IOException e) {
 			}
 		}	   
@@ -273,7 +267,7 @@ public class DefaultEventStorage implements EventStorage {
 		IndexKeyImpl indexKey = new IndexKeyImpl(event.getExecuteTime(), event.getBinlogInfo().getServerId(), event
 		      .getBinlogInfo().getBinlogFile(), event.getBinlogInfo().getBinlogPosition());
 		if (newL1Index) {
-			indexManager.addL1Index(indexKey, writingBucket.getBucketFileName().replace('/', '-'));
+			writeIndexManager.addL1Index(indexKey, writingBucket.getBucketFileName().replace('/', '-'));
 		}
 
 		if (lastIndexKey.get() == null || !lastIndexKey.get().equals(indexKey)) {
@@ -289,7 +283,7 @@ public class DefaultEventStorage implements EventStorage {
 				l2Index.setTransactionCommit(rowEvent.isTransactionCommit());
 			}
 
-			indexManager.addL2Index(indexKey, l2Index);
+			writeIndexManager.addL2Index(indexKey, l2Index);
 			lastIndexKey.set(indexKey);
 		}
 	}
@@ -314,8 +308,8 @@ public class DefaultEventStorage implements EventStorage {
 		}
 
 		try {
-			indexManager.stop();
-		} catch (IOException e1) {
+			writeIndexManager.stop();
+		} catch (Exception ignore) {
 			// ignore
 		}
 
@@ -330,8 +324,8 @@ public class DefaultEventStorage implements EventStorage {
 	}
 
 	@Override
-	public IndexManager<IndexKeyImpl, IndexValueImpl> getIndexManager() {
-		return this.indexManager;
+	public WriteIndexManager<IndexKeyImpl, IndexValueImpl> getWriteIndexManager() {
+		return this.writeIndexManager;
 	}
 
 	@Override

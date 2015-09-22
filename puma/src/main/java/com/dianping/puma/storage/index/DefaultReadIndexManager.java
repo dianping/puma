@@ -11,13 +11,13 @@ import java.util.Map;
 
 public class DefaultReadIndexManager<K extends IndexKey, V extends IndexValue<K>> implements ReadIndexManager<K, V> {
 
-	private final String L1_INDEX_FOLDER = "/data/appdatas/puma/binlogIndex/";
+	private String L1_INDEX_FOLDER = "/data/appdatas/puma/binlogIndex/";
 
 	private final String L1_INDEX_FILE = "l1index";
 
 	private final String L1_INDEX_FILE_SUFFIX = ".l1idx";
 
-	private final String L2_INDEX_FOLDER = "/data/appdatas/puma/binlogIndex/l2index/";
+	private String L2_INDEX_FOLDER = "/data/appdatas/puma/binlogIndex/l2index/";
 
 	private final String L2_INDEX_FILE_SUFFIX = ".l2idx";
 
@@ -26,6 +26,14 @@ public class DefaultReadIndexManager<K extends IndexKey, V extends IndexValue<K>
 	private IndexItemConverter<V> indexValueConverter;
 
 	public DefaultReadIndexManager(IndexItemConverter<K> indexKeyConverter, IndexItemConverter<V> indexValueConverter) {
+		this.indexKeyConverter = indexKeyConverter;
+		this.indexValueConverter = indexValueConverter;
+	}
+
+	public DefaultReadIndexManager(String l1IndexFolder, String l2IndexFolder,
+			IndexItemConverter<K> indexKeyConverter, IndexItemConverter<V> indexValueConverter) {
+		this.L1_INDEX_FOLDER = l1IndexFolder;
+		this.L2_INDEX_FOLDER = l2IndexFolder;
 		this.indexKeyConverter = indexKeyConverter;
 		this.indexValueConverter = indexValueConverter;
 	}

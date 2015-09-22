@@ -21,7 +21,7 @@ public class DefaultStorageIntegrityChecker implements StorageIntegrityChecker {
         //todo:
 //		TreeMap<IndexKeyImpl, String> l1Index = null;
 //      try {
-//	      l1Index = eventStorage.getIndexManager().getL1Index();
+//	      l1Index = eventStorage.getWriteIndexManager().getL1Index();
 //      } catch (IOException e1) {
 //      }
 //
@@ -35,7 +35,7 @@ public class DefaultStorageIntegrityChecker implements StorageIntegrityChecker {
 //			DataBucket readBucket = null;
 //
 //			try {
-//				indexBucket = eventStorage.getIndexManager().getIndexBucket(fileName);
+//				indexBucket = eventStorage.getWriteIndexManager().getIndexBucket(fileName);
 //				indexBucket.start();
 //				IndexValueImpl indexValue = null;
 //				Sequence lastReadSequence = null;

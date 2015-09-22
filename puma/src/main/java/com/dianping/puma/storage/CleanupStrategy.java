@@ -16,7 +16,7 @@
 package com.dianping.puma.storage;
 
 import com.dianping.puma.storage.bucket.DataBucketManager;
-import com.dianping.puma.storage.index.IndexManager;
+import com.dianping.puma.storage.index.WriteIndexManager;
 
 /**
  * TODO Comment of CleanupStrategy
@@ -28,5 +28,5 @@ public interface CleanupStrategy {
     public void cleanup(DataBucketManager index);
 
     @SuppressWarnings("rawtypes")
-    public void addDataIndex(IndexManager index);
+    public void addDataIndex(WriteIndexManager index);
 }

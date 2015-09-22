@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.dianping.puma.storage.index.WriteIndexManager;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import com.dianping.cat.Cat;
 import com.dianping.puma.storage.bucket.DataBucketManager;
 import com.dianping.puma.storage.exception.StorageClosedException;
-import com.dianping.puma.storage.index.IndexManager;
 
 /**
  * 
@@ -43,14 +43,14 @@ public class DefaultCleanupStrategy implements CleanupStrategy {
 	private List<String> toBeDeleteBuckets = new ArrayList<String>();
 
 	@SuppressWarnings("rawtypes")
-	private List<IndexManager> dataIndexes = new ArrayList<IndexManager>();
+	private List<WriteIndexManager> dataIndexes = new ArrayList<WriteIndexManager>();
 
 	public void setPreservedDay(int preservedDay) {
 		this.preservedDay = preservedDay;
 	}
 
 	@SuppressWarnings("rawtypes")
-	public void addDataIndex(IndexManager index) {
+	public void addDataIndex(WriteIndexManager index) {
 		this.dataIndexes.add(index);
 	}
 
@@ -64,7 +64,7 @@ public class DefaultCleanupStrategy implements CleanupStrategy {
 				index.remove(toBeDeleteBuckets);
 				for (String path : toBeDeleteBuckets) {
 					if (dataIndexes != null && !dataIndexes.isEmpty()) {
-						for (IndexManager dataIndex : dataIndexes) {
+						for (WriteIndexManager dataIndex : dataIndexes) {
 							try {
 								String indexName = path.replace('/', '-');
 								dataIndex.removeByL2IndexName(indexName);

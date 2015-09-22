@@ -7,8 +7,8 @@ import com.dianping.puma.storage.bucket.BucketManager;
 import com.dianping.puma.storage.exception.StorageException;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;
 import com.dianping.puma.storage.index.IndexKeyImpl;
-import com.dianping.puma.storage.index.IndexManager;
 import com.dianping.puma.storage.index.IndexValueImpl;
+import com.dianping.puma.storage.index.WriteIndexManager;
 
 public interface EventStorage extends LifeCycle<StorageLifeCycleException> {
 
@@ -18,7 +18,7 @@ public interface EventStorage extends LifeCycle<StorageLifeCycleException> {
 
 	public BucketManager getBucketManager();
 
-	public IndexManager<IndexKeyImpl, IndexValueImpl> getIndexManager();
+	public WriteIndexManager<IndexKeyImpl, IndexValueImpl> getWriteIndexManager();
 
 	public EventCodec getEventCodec();
 

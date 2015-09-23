@@ -14,7 +14,7 @@ import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.status.SystemStatusManager;
 import com.dianping.puma.storage.bucket.BucketManager;
-import com.dianping.puma.storage.bucket.DataBucket;
+import com.dianping.puma.storage.data.DataBucket;
 import com.dianping.puma.storage.bucket.DataBucketManager;
 import com.dianping.puma.storage.bucket.DefaultBucketManager;
 import com.dianping.puma.storage.exception.StorageClosedException;

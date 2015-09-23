@@ -12,7 +12,7 @@
 //
 //import com.dianping.puma.core.codec.RawEventCodec;
 //import com.dianping.puma.core.event.RowChangedEvent;
-//import com.dianping.puma.storage.bucket.DataBucket;
+//import com.dianping.puma.storage.data.DataBucket;
 //import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
 //import com.dianping.puma.storage.exception.StorageLifeCycleException;
 //import com.dianping.puma.storage.index.IndexBucket;

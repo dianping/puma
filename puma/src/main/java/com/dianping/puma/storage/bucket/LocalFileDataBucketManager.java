@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.TreeMap;
 import java.util.zip.GZIPOutputStream;
 
+import com.dianping.puma.storage.data.DataBucket;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 

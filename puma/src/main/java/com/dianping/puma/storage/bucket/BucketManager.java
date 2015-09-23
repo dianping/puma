@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.dianping.puma.core.LifeCycle;
 import com.dianping.puma.storage.Sequence;
+import com.dianping.puma.storage.data.DataBucket;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;
 

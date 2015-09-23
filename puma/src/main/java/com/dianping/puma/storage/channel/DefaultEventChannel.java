@@ -7,10 +7,13 @@ import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.bucket.DataBucket;
+import com.dianping.puma.storage.data.DataBucket;
 import com.dianping.puma.storage.bucket.DataBucketManager;
 import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
 import com.dianping.puma.storage.conf.GlobalStorageConfig;
+import com.dianping.puma.storage.data.DataManagerFactory;
+import com.dianping.puma.storage.data.DefaultReadDataManager;
+import com.dianping.puma.storage.data.ReadDataManager;
 import com.dianping.puma.storage.exception.InvalidSequenceException;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageException;
@@ -29,7 +32,7 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 
 	private volatile boolean stopped = true;
 
-	private DataBucket readDataBucket;
+	private ReadDataManager readDataManager;
 
 	private Sequence lastSequence;
 
@@ -37,153 +40,13 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 		this.database = database;
 	}
 
-	@Override
-	public Event next(boolean shouldSleep) throws StorageException {
-		checkClosed();
-
-		while (true) {
-			try {
-				checkClosed();
-				byte[] data = readDataBucket.getNext();
-				Event event = codec.decode(data);
-				lastSequence = new Sequence(event.getSeq(), data.length);
-
-				if (event instanceof DdlEvent && !this.withDdl) {
-					continue;
-				}
-				if (event instanceof RowChangedEvent) {
-					RowChangedEvent rowChangedEvent = (RowChangedEvent) event;
-					if ((rowChangedEvent.isTransactionBegin() || rowChangedEvent.isTransactionCommit())
-							) {
-						if (!this.withTransaction) {
-							continue;
-						}
-					} else {
-						if (!this.withDml) {
-							continue;
-						}
-
-						if (!this.tables.contains(rowChangedEvent.getTable())) {
-							continue;
-						}
-					}
-				}
-				return event;
-			} catch (EOFException e) {
-				try {
-					DataBucket newReadDataBucket = getNextReadBucket(lastSequence);
-					if (newReadDataBucket == null) {
-						return null;
-					}
-					this.readDataBucket = newReadDataBucket;
-				} catch (IOException exception) {
-					throw new StorageReadException("Failed to read", e);
-				}
-			} catch (IOException e) {
-				throw new StorageReadException("Failed to read", e);
-			}
-		}
+	protected void doStart() {
+		readDataManager = DataManagerFactory.newReadDataManager(database);
+		readDataManager.start();
 	}
 
-	protected DataBucket initReadBucket(Sequence seq, boolean fromNext) throws IOException {
-		checkClosed();
-		DataBucketManager slaveDataBucketManager = null;
-		DataBucketManager masterDataBucketManager = null;
-
-		try {
-			slaveDataBucketManager = createSlaveDataBucketManager();
-			DataBucket bucket = slaveDataBucketManager.getReadBucket(seq.longValue(), fromNext);
-			if (bucket != null) {
-				return bucket;
-			} else {
-				masterDataBucketManager = createMasterDataBucketManager();
-				return masterDataBucketManager.getReadBucket(seq.longValue(), fromNext);
-			}
-		} finally {
-			if (slaveDataBucketManager != null) {
-				slaveDataBucketManager.stop();
-			}
-			if (masterDataBucketManager != null) {
-				masterDataBucketManager.stop();
-			}
-		}
-	}
-
-	protected DataBucket getNextReadBucket(Sequence seq) throws IOException {
-		checkClosed();
-		DataBucketManager slaveDataBucketManager = null;
-		DataBucketManager masterDataBucketManager = null;
-
-		try {
-			slaveDataBucketManager = createSlaveDataBucketManager();
-			DataBucket bucket = slaveDataBucketManager.getNextReadBucket(seq);
-			if (bucket != null) {
-				return bucket;
-			} else {
-				masterDataBucketManager = createMasterDataBucketManager();
-				return masterDataBucketManager.getNextReadBucket(seq);
-			}
-		} finally {
-			if (slaveDataBucketManager != null) {
-				slaveDataBucketManager.stop();
-			}
-			if (masterDataBucketManager != null) {
-				masterDataBucketManager.stop();
-			}
-		}
-	}
-
-	private DataBucketManager createSlaveDataBucketManager() throws IOException {
-		DataBucketManager slaveIndex = createDataBucketManager(GlobalStorageConfig.slaveStorageBaseDir,
-				GlobalStorageConfig.slaveBucketFilePrefix, database, GlobalStorageConfig.maxMasterBucketLengthMB);
-		slaveIndex.start();
-		return slaveIndex;
-	}
-
-	private DataBucketManager createMasterDataBucketManager() throws IOException {
-		DataBucketManager masterIndex = createDataBucketManager(GlobalStorageConfig.masterStorageBaseDir,
-				GlobalStorageConfig.masterBucketFilePrefix, database, GlobalStorageConfig.maxMasterBucketLengthMB);
-		masterIndex.start();
-		return masterIndex;
-	}
-
-	private DataBucketManager createDataBucketManager(String baseDir, String prefix, String database, int lengthMB) {
-		LocalFileDataBucketManager bucketManager = new LocalFileDataBucketManager();
-
-		bucketManager.setBaseDir(baseDir + "/" + database);
-		bucketManager.setBucketFilePrefix(prefix);
-		bucketManager.setMaxBucketLengthMB(lengthMB);
-
-		return bucketManager;
-	}
-
-	@Override
-	public Event next() throws StorageException {
-		return next(false);
-	}
-
-	private void checkClosed() throws StorageClosedException {
-		if (stopped) {
-			throw new StorageClosedException("Channel has been closed.");
-		}
-	}
-
-	@Override
-	public void close() {
-		if (!stopped) {
-			stopped = true;
-			if (this.readDataBucket != null) {
-				try {
-					this.readDataBucket.stop();
-					this.readDataBucket = null;
-				} catch (IOException ignore) {
-				}
-			}
-			if (this.readIndexManager != null) {
-				this.readIndexManager.stop();
-				this.readIndexManager = null;
-			}
-		}
+	protected void doStop() {
+		readDataManager.stop();
 	}
 
 	@Override
@@ -208,11 +71,19 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 				throw new InvalidSequenceException("cannot find binlog position");
 			}
 
+			try {
+				readDataManager.open(value.getSequence());
+				//readDataManager.open(value.getSequence(), false);
+			} catch (IOException e) {
+				throw new InvalidSequenceException("cannot find binlog position.");
+			}
+
+			/*
 			this.readDataBucket = initReadBucket(value.getSequence(), false);
 
 			if (this.readDataBucket == null) {
 				throw new InvalidSequenceException("cannot find binlog position");
-			}
+			}*/
 		} else {
 			throw new InvalidSequenceException("Invalid binlog info");
 		}
@@ -239,10 +110,85 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 			throw new InvalidSequenceException("cannot find any latest binlog");
 		}
 
+		try {
+			readDataManager.open(value.getSequence());
+			//readDataManager.open(value.getSequence(), startTimeStamp == SubscribeConstant.SEQ_FROM_LATEST);
+		} catch (IOException e) {
+			throw new InvalidSequenceException("cannot find any latest binlog.");
+		}
+
+		/*
 		this.readDataBucket = initReadBucket(value.getSequence(), startTimeStamp == SubscribeConstant.SEQ_FROM_LATEST);
 
 		if (this.readDataBucket == null) {
 			throw new InvalidSequenceException("cannot find any latest binlog");
+		}*/
+	}
+
+	@Override
+	public Event next(boolean shouldSleep) throws StorageException {
+		checkClosed();
+
+		while (true) {
+			try {
+				checkClosed();
+				byte[] data = readDataManager.next();
+				//byte[] data = readDataBucket.getNext();
+				Event event = codec.decode(data);
+				lastSequence = new Sequence(event.getSeq(), data.length);
+
+				if (event instanceof DdlEvent && !this.withDdl) {
+					continue;
+				}
+				if (event instanceof RowChangedEvent) {
+					RowChangedEvent rowChangedEvent = (RowChangedEvent) event;
+					if ((rowChangedEvent.isTransactionBegin() || rowChangedEvent.isTransactionCommit())
+							) {
+						if (!this.withTransaction) {
+							continue;
+						}
+					} else {
+						if (!this.withDml) {
+							continue;
+						}
+
+						if (!this.tables.contains(rowChangedEvent.getTable())) {
+							continue;
+						}
+					}
+				}
+				return event;
+			} catch (IOException e) {
+				throw new StorageReadException("Failed to read", e);
+			}
+		}
+	}
+
+	@Override
+	public Event next() throws StorageException {
+		return next(false);
+	}
+
+	private void checkClosed() throws StorageClosedException {
+		if (stopped) {
+			throw new StorageClosedException("Channel has been closed.");
+		}
+	}
+
+	@Override
+	public void close() {
+		if (stopped) {
+			return;
+		}
+
+		stopped = true;
+
+		if (readDataManager != null) {
+			readDataManager.stop();
+		}
+
+		if (readIndexManager != null) {
+			readIndexManager.stop();
 		}
 	}
 

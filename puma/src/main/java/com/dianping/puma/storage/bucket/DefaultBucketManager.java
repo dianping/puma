@@ -3,6 +3,7 @@ package com.dianping.puma.storage.bucket;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import com.dianping.puma.storage.data.DataBucket;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.core.util.PumaThreadUtils;

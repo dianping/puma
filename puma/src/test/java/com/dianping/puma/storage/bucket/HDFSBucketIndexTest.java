@@ -24,9 +24,7 @@ import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.bucket.DataBucket;
-import com.dianping.puma.storage.bucket.HDFSDataBucket;
-import com.dianping.puma.storage.bucket.HDFSDataBucketManager;
+import com.dianping.puma.storage.data.DataBucket;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 public class HDFSBucketIndexTest {

@@ -12,7 +12,11 @@ public interface CheckTaskDao {
 
     int create(CheckTaskEntity checkTaskEntity);
 
-    int update(CheckTaskEntity checkTaskEntity);
+    void cleanUp();
+
+    int unlock(CheckTaskEntity checkTaskEntity);
+
+    int tryLock(CheckTaskEntity checkTaskEntity);
 
     int deleteByTaskName(String taskName);
 }

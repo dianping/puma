@@ -2,39 +2,40 @@ package com.dianping.puma.checkserver.manager.dispatch;
 
 import com.dianping.cat.Cat;
 import com.dianping.puma.biz.entity.CheckTaskEntity;
-import com.dianping.puma.checkserver.manager.lock.TaskLock;
-import com.dianping.puma.checkserver.manager.lock.TaskLockBuilder;
+import com.dianping.puma.biz.service.CheckTaskService;
 import com.dianping.puma.checkserver.manager.report.TaskReporter;
 import com.dianping.puma.checkserver.manager.run.TaskRunFutureListener;
 import com.dianping.puma.checkserver.manager.run.TaskRunner;
 import com.dianping.puma.checkserver.model.TaskResult;
+import com.dianping.puma.core.util.IPUtils;
 import jodd.util.collection.SortedArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class MultipleTaskDispatcher implements TaskDispatcher {
 
     private final Logger logger = LoggerFactory.getLogger(MultipleTaskDispatcher.class);
 
+    private final String ip = IPUtils.getFirstNoLoopbackIP4Address();
+
     private final Random random = new Random();
+
+    private final Set<Integer> tasks = Collections.newSetFromMap(new ConcurrentHashMap<Integer, Boolean>());
 
     @Autowired
     TaskRunner taskRunner;
 
     @Autowired
-    TaskLockBuilder taskLockBuilder;
-
-    @Autowired
     TaskReporter taskReporter;
 
-    private final long checkTimePeriod = 4 * 60 * 60 * 1000;
+    @Autowired
+    CheckTaskService checkTaskService;
 
     @Override
     public void dispatch(List<CheckTaskEntity> checkTasks) {
@@ -43,18 +44,14 @@ public class MultipleTaskDispatcher implements TaskDispatcher {
                 break;
             }
 
-            final TaskLock localTaskLock = taskLockBuilder.buildLocalLock(checkTask);
-            final TaskLock remoteTaskLock = taskLockBuilder.buildRemoteLock(checkTask);
-
             try {
-                if (!localTaskLock.tryLock()) {
+                checkTask.setRunning(true);
+                checkTask.setOwnerHost(ip);
+                if (tasks.contains(checkTask.getId()) || !checkTaskService.tryLock(checkTask)) {
                     continue;
                 }
 
-                if (!remoteTaskLock.tryLock()) {
-                    localTaskLock.unlock();
-                    continue;
-                }
+                tasks.add(checkTask.getId());
 
                 logger.info("Start run check task...");
                 logger.info("Check period: {}", checkTask.getCursor());
@@ -62,33 +59,27 @@ public class MultipleTaskDispatcher implements TaskDispatcher {
                 taskRunner.run(checkTask, new TaskRunFutureListener() {
                     @Override
                     public void onSuccess(TaskResult result) {
-                        try {
-                            logger.info("Success to run check task.");
-                            taskReporter.report(checkTask, result);
-                        } finally {
-                            localTaskLock.unlock();
-                            remoteTaskLock.unlock();
-                        }
+                        tasks.remove(checkTask.getId());
+                        logger.info("Success to run check task.");
+                        taskReporter.report(checkTask, result);
                     }
 
                     @Override
                     public void onFailure(Throwable cause) {
-                        try {
-                            logger.info("Failure to run check task.");
-                            taskReporter.report(checkTask, cause);
-                        } finally {
-                            localTaskLock.unlock();
-                            remoteTaskLock.unlock();
-                        }
+                        tasks.remove(checkTask.getId());
+                        String msg = "Failure to run check task.";
+                        logger.error(msg, cause);
+                        Cat.logError(msg, cause);
+                        taskReporter.report(checkTask, cause);
                     }
                 });
 
             } catch (Exception e) {
+                tasks.remove(checkTask.getId());
                 String msg = "Failed to execute check task.";
                 logger.error(msg, e);
                 Cat.logError(msg, e);
-                localTaskLock.unlock();
-                remoteTaskLock.unlock();
+                taskReporter.report(checkTask, e);
             }
         }
     }

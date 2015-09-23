@@ -5,10 +5,10 @@ import com.google.common.util.concurrent.FutureCallback;
 
 public interface TaskRunFutureListener extends FutureCallback<TaskResult> {
 
-	@Override
-	public void onSuccess(TaskResult result);
+    @Override
+    void onSuccess(TaskResult result);
 
-	@Override
-	public void onFailure(Throwable cause);
+    @Override
+    void onFailure(Throwable cause);
 
 }

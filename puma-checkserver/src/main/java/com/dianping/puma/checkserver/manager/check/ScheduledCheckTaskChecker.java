@@ -12,20 +12,21 @@ import java.util.List;
 @Service
 public class ScheduledCheckTaskChecker implements CheckTaskChecker {
 
-	@Autowired
-	CheckTaskService checkTaskService;
+    @Autowired
+    CheckTaskService checkTaskService;
 
-	@Autowired
-	TaskDispatcher taskDispatcher;
+    @Autowired
+    TaskDispatcher taskDispatcher;
 
-	@Override
-	public void check() {
-		List<CheckTaskEntity> checkTasks = checkTaskService.findRunnable();
-		taskDispatcher.dispatch(checkTasks);
-	}
+    @Override
+    public void check() {
+        checkTaskService.cleanUp();
+        List<CheckTaskEntity> checkTasks = checkTaskService.findRunnable();
+        taskDispatcher.dispatch(checkTasks);
+    }
 
-	@Scheduled(fixedDelay = 10 * 1000)
-	protected void scheduledCheck() {
-		check();
-	}
+    @Scheduled(fixedDelay = 10 * 1000)
+    protected void scheduledCheck() {
+        check();
+    }
 }

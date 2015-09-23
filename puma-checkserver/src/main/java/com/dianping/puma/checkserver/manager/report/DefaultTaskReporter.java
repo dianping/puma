@@ -7,8 +7,6 @@ import com.dianping.puma.biz.service.CheckTaskService;
 import com.dianping.puma.checkserver.model.SourceTargetPair;
 import com.dianping.puma.checkserver.model.TaskResult;
 import com.dianping.puma.core.util.GsonUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,11 +47,14 @@ public class DefaultTaskReporter implements TaskReporter {
     }
 
     protected void report0(CheckTaskEntity checkTask) {
-        checkTaskService.update(checkTask);
+        checkTaskService.unlock(checkTask);
     }
 
     protected void setStatus(CheckTaskEntity checkTask, boolean status, String message) {
         checkTask.setSuccess(status);
         checkTask.setMessage(message);
+        checkTask.setOwnerHost("");
+        checkTask.setRunning(false);
+        checkTask.setUpdateTime(new Date());
     }
 }

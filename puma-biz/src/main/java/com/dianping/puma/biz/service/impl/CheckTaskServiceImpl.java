@@ -26,9 +26,8 @@ public class CheckTaskServiceImpl implements CheckTaskService {
     }
 
     @Override
-    public int update(CheckTaskEntity checkTaskEntity) {
-        checkTaskEntity.setUpdateTime(new Date());
-        return checkTaskDao.update(checkTaskEntity);
+    public int unlock(CheckTaskEntity checkTaskEntity) {
+        return checkTaskDao.unlock(checkTaskEntity);
     }
 
     @Override
@@ -39,5 +38,14 @@ public class CheckTaskServiceImpl implements CheckTaskService {
     @Override
     public int deleteByTaskName(String name) {
         return checkTaskDao.deleteByTaskName(name);
+    }
+
+    @Override
+    public boolean tryLock(CheckTaskEntity checkTaskEntity) {
+        return checkTaskDao.tryLock(checkTaskEntity) > 0;
+    }
+
+    public void cleanUp(){
+        checkTaskDao.cleanUp();
     }
 }

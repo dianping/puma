@@ -10,9 +10,13 @@ public interface CheckTaskService {
 
     List<CheckTaskEntity> findRunnable();
 
-    int update(CheckTaskEntity checkTaskEntity);
+    int unlock(CheckTaskEntity checkTaskEntity);
 
     int create(CheckTaskEntity checkTaskEntity);
 
     int deleteByTaskName(String name);
+
+    boolean tryLock(CheckTaskEntity checkTaskEntity);
+
+    void cleanUp();
 }

@@ -60,18 +60,44 @@
             #{taskGroupName})
 	</insert>
 
-    <update id="update" parameterType="CheckTaskEntity">
+    <update id="cleanUp">
+        UPDATE
+		CheckTask
+		SET
+		CheckTask.Running = 0,
+		CheckTask.OwnerHost = null,
+		CheckTask.Success = 1,
+		CheckTask.UpdateTime = now()
+		WHERE
+		NOW() - interval 1 hour > CheckTask.UpdateTime
+    </update>
+
+    <update id="tryLock" parameterType="CheckTaskEntity">
+        UPDATE
+		CheckTask
+		SET
+		CheckTask.Running = 1,
+		CheckTask.OwnerHost = #{ownerHost},
+		CheckTask.UpdateTime = now()
+		WHERE
+		CheckTask.Id = #{id} AND CheckTask.Success = 1 AND
+		(CheckTask.Running = 0 OR CheckTask.OwnerHost = #{ownerHost})
+    </update>
+
+    <update id="unlock" parameterType="CheckTaskEntity">
 		UPDATE
 		CheckTask
 		SET
 		CheckTask.Cursor = #{cursor},
-		CheckTask.Running = #{running},
-		CheckTask.OwnerHost = #{ownerHost},
+		CheckTask.Running = 0,
+		CheckTask.OwnerHost = NULL ,
 		CheckTask.Success = #{success},
 		CheckTask.Message = #{message},
-		CheckTask.UpdateTime = #{updateTime}
+		CheckTask.UpdateTime = now()
 		WHERE
-		CheckTask.Id = #{id}
+		CheckTask.Id = #{id} AND
+        CheckTask.Running = 1 AND
+        CheckTask.Success = 1
 	</update>
 
     <delete id="deleteByTaskName" parameterType="map">

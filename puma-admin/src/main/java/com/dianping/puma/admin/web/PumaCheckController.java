@@ -2,6 +2,7 @@ package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.model.CheckTaskModel;
 import com.dianping.puma.biz.entity.CheckTaskEntity;
+import com.dianping.puma.biz.model.PageModel;
 import com.dianping.puma.biz.service.CheckTaskService;
 import com.dianping.puma.core.util.GsonUtil;
 import com.google.common.base.Strings;
@@ -32,11 +33,22 @@ public class PumaCheckController extends BasicController {
 
     private static final String CLASS_NAME = "className";
     private static final String IT = "it";
+    private static final int PAGE_SIZE = 200;
     private static final Pattern TEMPLATE_REGEX = Pattern.compile(".*\\$\\{.+\\}.*");
     private final GStringTemplateEngine engine = new GStringTemplateEngine();
 
     @Autowired
     private CheckTaskService checkTaskService;
+
+    @RequestMapping(method = RequestMethod.GET)
+    @ResponseBody
+    public Object list(String taskName, String taskGroupName, Integer page) {
+        Map<String, Object> result = new HashMap<String, Object>();
+        PageModel pageModel = new PageModel(page == null ? 1 : page.intValue(), PAGE_SIZE);
+        result.put("data", checkTaskService.list(taskName, taskGroupName, pageModel));
+        result.put("page", pageModel);
+        return result;
+    }
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody

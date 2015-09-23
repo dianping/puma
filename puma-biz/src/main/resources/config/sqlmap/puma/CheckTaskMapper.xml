@@ -15,6 +15,22 @@
         limit 100
 	</select>
 
+    <select id="count" resultType="int">
+        select count(*) from CheckTask
+        WHERE
+        ( #{taskName} is null or TaskName = #{taskName} ) AND
+        ( #{taskGroupName} is null or TaskGroupName = #{taskGroupName} )
+    </select>
+
+    <select id="list" resultType="CheckTaskEntity">
+        select * from CheckTask
+        WHERE
+        ( #{taskName} is null or TaskName = #{taskName} ) AND
+        ( #{taskGroupName} is null or TaskGroupName = #{taskGroupName} )
+        order by taskGroupName,taskName
+        limit #{offset},#{limit}
+    </select>
+
     <insert id="create" parameterType="checkTaskEntity" useGeneratedKeys="true" keyColumn="ID">
 		INSERT INTO CheckTask
             (

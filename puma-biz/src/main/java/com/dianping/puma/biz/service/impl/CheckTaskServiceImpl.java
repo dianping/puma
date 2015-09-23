@@ -2,11 +2,11 @@ package com.dianping.puma.biz.service.impl;
 
 import com.dianping.puma.biz.dao.CheckTaskDao;
 import com.dianping.puma.biz.entity.CheckTaskEntity;
+import com.dianping.puma.biz.model.PageModel;
 import com.dianping.puma.biz.service.CheckTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -23,6 +23,15 @@ public class CheckTaskServiceImpl implements CheckTaskService {
     @Override
     public List<CheckTaskEntity> findRunnable() {
         return checkTaskDao.findRunnable();
+    }
+
+    @Override
+    public List<CheckTaskEntity> list(String taskName, String taskGroupName, PageModel pageModel) {
+        pageModel.setCount(checkTaskDao.count(taskName, taskGroupName));
+        return checkTaskDao.list(taskName,
+                taskGroupName,
+                (pageModel.getPage() - 1) * pageModel.getPageSize(),
+                pageModel.getCount());
     }
 
     @Override
@@ -45,7 +54,7 @@ public class CheckTaskServiceImpl implements CheckTaskService {
         return checkTaskDao.tryLock(checkTaskEntity) > 0;
     }
 
-    public void cleanUp(){
+    public void cleanUp() {
         checkTaskDao.cleanUp();
     }
 }

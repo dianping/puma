@@ -1,6 +1,7 @@
 package com.dianping.puma.biz.service;
 
 import com.dianping.puma.biz.entity.CheckTaskEntity;
+import com.dianping.puma.biz.model.PageModel;
 
 import java.util.List;
 
@@ -9,6 +10,8 @@ public interface CheckTaskService {
     CheckTaskEntity findById(int id);
 
     List<CheckTaskEntity> findRunnable();
+
+    List<CheckTaskEntity> list(String taskName,String taskGroupName,PageModel pageModel);
 
     int unlock(CheckTaskEntity checkTaskEntity);
 

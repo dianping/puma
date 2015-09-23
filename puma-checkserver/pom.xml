@@ -36,10 +36,6 @@
 			<groupId>com.dianping.zebra</groupId>
 			<artifactId>zebra-api</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.dianping.zebra</groupId>
-			<artifactId>zebra-ds-monitor-client</artifactId>
-		</dependency>
 
 		<!-- spring -->
 		<dependency>

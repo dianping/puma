@@ -53,7 +53,7 @@ public class DefaultTaskReporter implements TaskReporter {
     protected void setStatus(CheckTaskEntity checkTask, boolean status, String message) {
         checkTask.setSuccess(status);
         checkTask.setMessage(message);
-        checkTask.setOwnerHost("");
+        checkTask.setOwnerHost(null);
         checkTask.setRunning(false);
         checkTask.setUpdateTime(new Date());
     }

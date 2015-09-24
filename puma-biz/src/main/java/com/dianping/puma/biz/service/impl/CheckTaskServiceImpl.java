@@ -28,11 +28,18 @@ public class CheckTaskServiceImpl implements CheckTaskService {
 
     @Override
     public List<CheckTaskEntity> list(CheckTaskQueryModel queryModel, PageModel pageModel) {
-        pageModel.setCount(checkTaskDao.count(queryModel));
-        return checkTaskDao.list(queryModel,
-                (pageModel.getPage() - 1) * pageModel.getPageSize(),
-                pageModel.getCount()
-        );
+        boolean onlyShowDiffs = queryModel.getDiffs() != null && queryModel.getDiffs().booleanValue();
+
+        pageModel.setCount(onlyShowDiffs ? checkTaskDao.countByResult(queryModel) : checkTaskDao.count(queryModel));
+        return onlyShowDiffs ?
+                checkTaskDao.listByResult(queryModel,
+                        (pageModel.getPage() - 1) * pageModel.getPageSize(),
+                        pageModel.getCount()
+                ) :
+                checkTaskDao.list(queryModel,
+                        (pageModel.getPage() - 1) * pageModel.getPageSize(),
+                        pageModel.getCount()
+                );
     }
 
     @Override

@@ -9,6 +9,15 @@ public class CheckTaskQueryModel {
     private String taskName;
     private String taskGroupName;
     private Boolean success;
+    private Boolean diffs;
+
+    public Boolean getDiffs() {
+        return diffs;
+    }
+
+    public void setDiffs(Boolean diffs) {
+        this.diffs = diffs;
+    }
 
     public String getTaskName() {
         return taskName;

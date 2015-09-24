@@ -26,6 +26,7 @@ puma.controller('pumaCheckController', function ($scope, $http) {
         $scope.taskName = "";
         $scope.taskGroupName = "";
         $scope.success = "";
+        $scope.diffs = "";
         $scope.pageModel.page = 1;
         $scope.query();
     }
@@ -36,6 +37,7 @@ puma.controller('pumaCheckController', function ($scope, $http) {
                 taskName: $scope.taskName,
                 taskGroupName: $scope.taskGroupName,
                 success: $scope.success,
+                diffs: $scope.diffs,
                 page: $scope.pageModel.page
             }
         }).then(

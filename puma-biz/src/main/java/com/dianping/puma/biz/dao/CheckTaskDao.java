@@ -18,6 +18,12 @@ public interface CheckTaskDao {
                                @Param(value = "offset") int offset,
                                @Param(value = "limit") int limit);
 
+    int countByResult(@Param(value = "model") CheckTaskQueryModel model);
+
+    List<CheckTaskEntity> listByResult(@Param(value = "model") CheckTaskQueryModel model,
+                               @Param(value = "offset") int offset,
+                               @Param(value = "limit") int limit);
+
     int create(CheckTaskEntity checkTaskEntity);
 
     void cleanUp();

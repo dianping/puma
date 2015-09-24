@@ -26,12 +26,18 @@
                         <div class="widget-body">
                             <div class="widget-main">
                                 <form class="form-inline">
-                                    <input class="form-control" type="text" placeholder="Task Name" ng-model="taskName"/>
-                                    <input class="form-control" type="text" placeholder="Task Group Name" ng-model="taskGroupName"/>
+                                    <input class="form-control" type="text" placeholder="Task Name"
+                                           ng-model="taskName"/>
+                                    <input class="form-control" type="text" placeholder="Task Group Name"
+                                           ng-model="taskGroupName"/>
                                     <select class="form-control" ng-model="success">
-                                        <option value="">All</option>
+                                        <option value="">==Status==</option>
                                         <option value="true">Success</option>
                                         <option value="false">Failed</option>
+                                    </select>
+                                    <select class="form-control" ng-model="diffs">
+                                        <option value="">==Diffs==</option>
+                                        <option value="true">Has Diffs</option>
                                     </select>
                                     <button type="button" class="btn btn-info btn-sm" ng-click="query()">
                                         Search
@@ -77,7 +83,7 @@
                                 <span ng-if="!item.success" data-html="true" data-toggle="popover" data-placement="top"
                                       data-content="{{item.message}}" class="label label-danger">Error</span>
                             </td>
-                            <td></td>
+                            <td><span ng-class="{'badge':true,'badge-danger': item.diffs}">{{item.diffs}}</span></td>
                             <td></td>
                         </tr>
                         </tbody>

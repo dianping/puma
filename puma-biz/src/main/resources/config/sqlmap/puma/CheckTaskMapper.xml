@@ -16,15 +16,39 @@
 	</select>
 
     <select id="count" resultType="int">
-        select count(*) from CheckTask
+        select count(Id) from CheckTask
         WHERE
         ( #{model.taskName} is null or #{model.taskName} = "" or TaskName LIKE #{model.taskName} ) AND
         ( #{model.taskGroupName} is null or #{model.taskGroupName} = ""  or TaskGroupName LIKE #{model.taskGroupName} ) AND
         ( #{model.success} is null or Success = #{model.success} )
     </select>
 
-    <select id="list" resultType="CheckTaskEntity">
-        select * from CheckTask
+    <select id="countByResult" resultType="int">
+        select count(DISTINCT t.TaskName) from CheckResult r
+        left join CheckTask t on t.TaskName = r.TaskName
+        WHERE
+        t.TaskName is not null AND
+        ( #{model.taskName} is null or #{model.taskName} = "" or t.TaskName LIKE #{model.taskName} ) AND
+        ( #{model.taskGroupName} is null or #{model.taskGroupName} = ""  or t.TaskGroupName LIKE #{model.taskGroupName} ) AND
+        ( #{model.success} is null or t.Success = #{model.success} )
+    </select>
+
+    <select id="listByResult" resultType="CheckTaskExtendEntity">
+        select t.*,count(r.Id) as diffs from CheckResult r
+        left join CheckTask t on t.TaskName = r.TaskName
+        WHERE
+        t.TaskName is not null AND
+        ( #{model.taskName} is null or #{model.taskName} = "" or t.TaskName LIKE #{model.taskName} ) AND
+        ( #{model.taskGroupName} is null or #{model.taskGroupName} = ""  or t.TaskGroupName LIKE #{model.taskGroupName} ) AND
+        ( #{model.success} is null or t.Success = #{model.success} )
+        group by t.TaskName
+        order by t.taskGroupName,t.taskName
+        limit #{offset},#{limit}
+    </select>
+
+    <select id="list" resultType="CheckTaskExtendEntity">
+        select *,(select count(Id) from CheckResult where t.TaskName = TaskName ) as Diffs
+        from CheckTask t
         WHERE
         ( #{model.taskName} is null or #{model.taskName} = "" or TaskName LIKE #{model.taskName} ) AND
         ( #{model.taskGroupName} is null or #{model.taskGroupName} = ""  or TaskGroupName LIKE #{model.taskGroupName} ) AND

@@ -86,9 +86,9 @@
                             <td>{{item.cursor}}</td>
                             <td>{{item.ownerHost}}</td>
                             <td>
-                                <span ng-if="item.success" class="label label-success">Running</span>
+                                <span ng-if="item.success" class="label label-success">Success</span>
                                 <span ng-if="!item.success" data-html="true" data-toggle="popover" data-placement="top"
-                                      data-content="{{item.message}}" class="label label-danger">Error</span>
+                                      data-content="{{item.message}}" class="label label-danger">Failed</span>
                             </td>
                             <td><span ng-class="{'badge':true,'badge-danger': item.diffs}">{{item.diffs}}</span></td>
                             <td>

@@ -34,11 +34,11 @@ public class CheckTaskServiceImpl implements CheckTaskService {
         return onlyShowDiffs ?
                 checkTaskDao.listByResult(queryModel,
                         (pageModel.getPage() - 1) * pageModel.getPageSize(),
-                        pageModel.getCount()
+                        pageModel.getPageSize()
                 ) :
                 checkTaskDao.list(queryModel,
                         (pageModel.getPage() - 1) * pageModel.getPageSize(),
-                        pageModel.getCount()
+                        pageModel.getPageSize()
                 );
     }
 

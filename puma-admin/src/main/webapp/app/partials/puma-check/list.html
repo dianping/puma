@@ -27,15 +27,20 @@
                             <div class="widget-main">
                                 <form class="form-inline">
                                     <input class="form-control" type="text" placeholder="Task Name"
-                                           ng-model="taskName"/>
+                                           ng-model="queryModel.taskName"/>
                                     <input class="form-control" type="text" placeholder="Task Group Name"
-                                           ng-model="taskGroupName"/>
-                                    <select class="form-control" ng-model="success">
+                                           ng-model="queryModel.taskGroupName"/>
+                                    <select class="form-control" ng-model="queryModel.running">
+                                        <option value="">==Running==</option>
+                                        <option value="true">Running</option>
+                                        <option value="false">Not Running</option>
+                                    </select>
+                                    <select class="form-control" ng-model="queryModel.success">
                                         <option value="">==Status==</option>
                                         <option value="true">Success</option>
                                         <option value="false">Failed</option>
                                     </select>
-                                    <select class="form-control" ng-model="diffs">
+                                    <select class="form-control" ng-model="queryModel.diffs">
                                         <option value="">==Diffs==</option>
                                         <option value="true">Has Diffs</option>
                                     </select>
@@ -60,6 +65,7 @@
                             </th>
                             <th>Name</th>
                             <th>Cursor</th>
+                            <th>OwnerHost</th>
                             <th>Status</th>
                             <th>Diffs</th>
                             <th>Action</th>
@@ -78,13 +84,19 @@
                                       data-content="TaskName: {{item.taskName}}<br/>TaskGroupName: {{item.taskGroupName}}">{{item.taskName}}</span>
                             </td>
                             <td>{{item.cursor}}</td>
+                            <td>{{item.ownerHost}}</td>
                             <td>
                                 <span ng-if="item.success" class="label label-success">Running</span>
                                 <span ng-if="!item.success" data-html="true" data-toggle="popover" data-placement="top"
                                       data-content="{{item.message}}" class="label label-danger">Error</span>
                             </td>
                             <td><span ng-class="{'badge':true,'badge-danger': item.diffs}">{{item.diffs}}</span></td>
-                            <td></td>
+                            <td>
+                                <button class="btn btn-minier btn-success" title="Edit"><i
+                                        class="ace-icon glyphicon glyphicon-pencil icon-only"></i></button>
+                                <button ng-click="remove(item.taskName)" class="btn btn-minier btn-danger" title="Remove"><i
+                                        class="ace-icon fa fa-trash-o icon-only"></i></button>
+                            </td>
                         </tr>
                         </tbody>
                     </table>

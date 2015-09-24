@@ -18,28 +18,18 @@ puma.filter('toLocaleString', function () {
 });
 
 puma.controller('pumaCheckController', function ($scope, $http) {
-    $scope.pageModel = {
-        "page": 1
-    };
 
     $scope.reset = function () {
-        $scope.taskName = "";
-        $scope.taskGroupName = "";
-        $scope.success = "";
-        $scope.diffs = "";
-        $scope.pageModel.page = 1;
+        $scope.queryModel = {
+            "page": 1
+        };
         $scope.query();
+
     }
 
     $scope.query = function () {
         $http.get('/a/puma-check', {
-            params: {
-                taskName: $scope.taskName,
-                taskGroupName: $scope.taskGroupName,
-                success: $scope.success,
-                diffs: $scope.diffs,
-                page: $scope.pageModel.page
-            }
+            params: $scope.queryModel
         }).then(
             function (response) {
                 $scope.list = response.data.list;
@@ -48,7 +38,17 @@ puma.controller('pumaCheckController', function ($scope, $http) {
         );
     }
 
-    $scope.query();
+    $scope.remove = function (taskName, skipConfirm) {
+        if (skipConfirm || confirm('Remove it?')) {
+            $http.delete('/a/puma-check/' + encodeURIComponent(taskName)).then(
+                function (response) {
+                    $scope.list = _.without($scope.list, _.findWhere($scope.list, {taskName: taskName}));
+                }
+            );
+        }
+    }
+
+    $scope.reset();
 });
 
 puma.controller('pumaCheckCreateController', function ($scope, $http) {

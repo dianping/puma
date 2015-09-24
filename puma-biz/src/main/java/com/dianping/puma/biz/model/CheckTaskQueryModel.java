@@ -10,6 +10,7 @@ public class CheckTaskQueryModel {
     private String taskGroupName;
     private Boolean success;
     private Boolean diffs;
+    private Boolean running;
 
     public Boolean getDiffs() {
         return diffs;
@@ -44,5 +45,13 @@ public class CheckTaskQueryModel {
     public CheckTaskQueryModel setSuccess(Boolean success) {
         this.success = success;
         return this;
+    }
+
+    public Boolean getRunning() {
+        return running;
+    }
+
+    public void setRunning(Boolean running) {
+        this.running = running;
     }
 }

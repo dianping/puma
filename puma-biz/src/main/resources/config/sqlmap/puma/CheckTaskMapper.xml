@@ -16,11 +16,12 @@
 	</select>
 
     <select id="count" resultType="int">
-        select count(Id) from CheckTask
+        select count(Id) from CheckTask t
         WHERE
-        ( #{model.taskName} is null or #{model.taskName} = "" or TaskName LIKE #{model.taskName} ) AND
-        ( #{model.taskGroupName} is null or #{model.taskGroupName} = ""  or TaskGroupName LIKE #{model.taskGroupName} ) AND
-        ( #{model.success} is null or Success = #{model.success} )
+        ( #{model.taskName} is null or #{model.taskName} = "" or t.TaskName LIKE #{model.taskName} ) AND
+        ( #{model.taskGroupName} is null or #{model.taskGroupName} = ""  or t.TaskGroupName LIKE #{model.taskGroupName} ) AND
+        ( #{model.success} is null or t.Success = #{model.success} ) AND
+        ( #{model.running} is null or t.Running = #{model.running} )
     </select>
 
     <select id="countByResult" resultType="int">
@@ -30,7 +31,8 @@
         t.TaskName is not null AND
         ( #{model.taskName} is null or #{model.taskName} = "" or t.TaskName LIKE #{model.taskName} ) AND
         ( #{model.taskGroupName} is null or #{model.taskGroupName} = ""  or t.TaskGroupName LIKE #{model.taskGroupName} ) AND
-        ( #{model.success} is null or t.Success = #{model.success} )
+        ( #{model.success} is null or t.Success = #{model.success} ) AND
+        ( #{model.running} is null or t.Running = #{model.running} )
     </select>
 
     <select id="listByResult" resultType="CheckTaskExtendEntity">
@@ -40,7 +42,8 @@
         t.TaskName is not null AND
         ( #{model.taskName} is null or #{model.taskName} = "" or t.TaskName LIKE #{model.taskName} ) AND
         ( #{model.taskGroupName} is null or #{model.taskGroupName} = ""  or t.TaskGroupName LIKE #{model.taskGroupName} ) AND
-        ( #{model.success} is null or t.Success = #{model.success} )
+        ( #{model.success} is null or t.Success = #{model.success} ) AND
+        ( #{model.running} is null or t.Running = #{model.running} )
         group by t.TaskName
         order by t.taskGroupName,t.taskName
         limit #{offset},#{limit}
@@ -50,9 +53,10 @@
         select *,(select count(Id) from CheckResult where t.TaskName = TaskName ) as Diffs
         from CheckTask t
         WHERE
-        ( #{model.taskName} is null or #{model.taskName} = "" or TaskName LIKE #{model.taskName} ) AND
-        ( #{model.taskGroupName} is null or #{model.taskGroupName} = ""  or TaskGroupName LIKE #{model.taskGroupName} ) AND
-        ( #{model.success} is null or Success = #{model.success} )
+        ( #{model.taskName} is null or #{model.taskName} = "" or t.TaskName LIKE #{model.taskName} ) AND
+        ( #{model.taskGroupName} is null or #{model.taskGroupName} = ""  or t.TaskGroupName LIKE #{model.taskGroupName} ) AND
+        ( #{model.success} is null or t.Success = #{model.success} ) AND
+        ( #{model.running} is null or t.Running = #{model.running} )
         order by taskGroupName,taskName
         limit #{offset},#{limit}
     </select>

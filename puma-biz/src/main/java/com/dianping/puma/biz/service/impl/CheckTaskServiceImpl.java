@@ -2,6 +2,7 @@ package com.dianping.puma.biz.service.impl;
 
 import com.dianping.puma.biz.dao.CheckTaskDao;
 import com.dianping.puma.biz.entity.CheckTaskEntity;
+import com.dianping.puma.biz.model.CheckTaskQueryModel;
 import com.dianping.puma.biz.model.PageModel;
 import com.dianping.puma.biz.service.CheckTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,12 +27,12 @@ public class CheckTaskServiceImpl implements CheckTaskService {
     }
 
     @Override
-    public List<CheckTaskEntity> list(String taskName, String taskGroupName, PageModel pageModel) {
-        pageModel.setCount(checkTaskDao.count(taskName, taskGroupName));
-        return checkTaskDao.list(taskName,
-                taskGroupName,
+    public List<CheckTaskEntity> list(CheckTaskQueryModel queryModel, PageModel pageModel) {
+        pageModel.setCount(checkTaskDao.count(queryModel));
+        return checkTaskDao.list(queryModel,
                 (pageModel.getPage() - 1) * pageModel.getPageSize(),
-                pageModel.getCount());
+                pageModel.getCount()
+        );
     }
 
     @Override

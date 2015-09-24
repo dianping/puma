@@ -17,6 +17,30 @@ puma.filter('toLocaleString', function () {
     };
 });
 
+puma.controller('pumaCheckController', function ($scope, $http) {
+    $scope.pageModel = {
+        "page": 1
+    };
+
+    $scope.query = function () {
+        $http.get('/a/puma-check', {
+            params: {
+                taskName: $scope.taskName,
+                taskGroupName: $scope.taskGroupName,
+                success: $scope.success,
+                page: $scope.pageModel.page
+            }
+        }).then(
+            function (response) {
+                $scope.list = response.data.list;
+                $scope.pageModel = response.data.page;
+            }
+        );
+    }
+
+    $scope.query();
+});
+
 puma.controller('pumaCheckCreateController', function ($scope, $http) {
     $scope.templateBase = 'app/partials/puma-check/model/';
     $scope.SourceDsBuilderTemplate = 'ds-group';
@@ -220,6 +244,10 @@ puma.config(function ($routeProvider) {
         .when('/puma-check-create', {
             templateUrl: '/app/partials/puma-check/create.html',
             controller: 'pumaCheckCreateController'
+        })
+        .when('/puma-check', {
+            templateUrl: '/app/partials/puma-check/list.html',
+            controller: 'pumaCheckController'
         })
         .otherwise({
             'redirectTo': '/'

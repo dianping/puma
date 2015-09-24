@@ -1,0 +1,64 @@
+<div ng-controller="pumaCheckController">
+
+    <div class="breadcrumbs" id="breadcrumbs">
+        <script type="text/javascript">
+            try {
+                ace.settings.check('breadcrumbs', 'fixed')
+            } catch (e) {
+            }
+        </script>
+        <ul class="breadcrumb">
+            <li>
+                <i class="ace-icon fa fa-home home-icon"></i>
+                <a href="#">Home</a>
+            </li>
+            <li class="active">Puma Check Task</li>
+        </ul>
+    </div>
+    <div class="page-content">
+        <div class="page-content-area">
+            <div class="row">
+                <div class="col-sm-12">
+                    <table id="simple-table" class="table table-striped table-bordered table-hover">
+                        <thead>
+                        <tr>
+                            <th class="center">
+                                <label class="pos-rel">
+                                    <input type="checkbox" class="ace">
+                                    <span class="lbl"></span>
+                                </label>
+                            </th>
+                            <th>Name</th>
+                            <th>Cursor</th>
+                            <th>Status</th>
+                            <th>Diffs</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        <tr ng-repeat="item in list">
+                            <td class="center">
+                                <label class="pos-rel">
+                                    <input type="checkbox" class="ace">
+                                    <span class="lbl"></span>
+                                </label>
+                            </td>
+                            <td><span data-html="true" data-toggle="popover" data-placement="top"
+                                      data-content="TaskName: {{item.taskName}}<br/>TaskGroupName: {{item.taskGroupName}}">{{item.taskName}}</span>
+                            </td>
+                            <td>{{item.cursor}}</td>
+                            <td>
+                                <span ng-if="item.success" class="label label-success">Running</span>
+                                <span ng-if="!item.success" data-html="true" data-toggle="popover" data-placement="top" data-content="{{item.message}}" class="label label-danger">Error</span>
+                            </td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

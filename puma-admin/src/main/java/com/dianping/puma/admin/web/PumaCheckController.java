@@ -2,6 +2,7 @@ package com.dianping.puma.admin.web;
 
 import com.dianping.puma.admin.model.CheckTaskModel;
 import com.dianping.puma.biz.entity.CheckTaskEntity;
+import com.dianping.puma.biz.model.CheckTaskQueryModel;
 import com.dianping.puma.biz.model.PageModel;
 import com.dianping.puma.biz.service.CheckTaskService;
 import com.dianping.puma.core.util.GsonUtil;
@@ -42,11 +43,17 @@ public class PumaCheckController extends BasicController {
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public Object list(String taskName, String taskGroupName, Integer page) {
+    public Object list(String taskName, String taskGroupName, Boolean success, Integer page) {
         Map<String, Object> result = new HashMap<String, Object>();
         PageModel pageModel = new PageModel(page == null ? 1 : page.intValue(), PAGE_SIZE);
-        result.put("data", checkTaskService.list(taskName, taskGroupName, pageModel));
+
+        result.put("list", checkTaskService.list(
+                new CheckTaskQueryModel().setTaskName(taskName)
+                        .setTaskGroupName(taskGroupName)
+                        .setSuccess(success),
+                pageModel));
         result.put("page", pageModel);
+
         return result;
     }
 

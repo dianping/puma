@@ -1,3 +1,7 @@
 *[data-toggle="popover"]{
     cursor: pointer;
 }
+
+.popover {
+    max-width: none!important;
+}

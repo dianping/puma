@@ -1,6 +1,7 @@
 package com.dianping.puma.biz.dao;
 
 import com.dianping.puma.biz.entity.CheckTaskEntity;
+import com.dianping.puma.biz.model.CheckTaskQueryModel;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -11,11 +12,9 @@ public interface CheckTaskDao {
 
     List<CheckTaskEntity> findRunnable();
 
-    int count(@Param(value = "taskName") String taskName,
-              @Param(value = "taskGroupName") String taskGroupName);
+    int count(@Param(value = "model") CheckTaskQueryModel model);
 
-    List<CheckTaskEntity> list(@Param(value = "taskName") String taskName,
-                               @Param(value = "taskGroupName") String taskGroupName,
+    List<CheckTaskEntity> list(@Param(value = "model") CheckTaskQueryModel model,
                                @Param(value = "offset") int offset,
                                @Param(value = "limit") int limit);
 
@@ -28,4 +27,5 @@ public interface CheckTaskDao {
     int tryLock(CheckTaskEntity checkTaskEntity);
 
     int deleteByTaskName(String taskName);
+
 }

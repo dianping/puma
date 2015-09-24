@@ -18,16 +18,16 @@
     <select id="count" resultType="int">
         select count(*) from CheckTask
         WHERE
-        ( #{model.taskName} is null or #{model.taskName} = "" or TaskName = #{model.taskName} ) AND
-        ( #{model.taskGroupName} is null or #{model.taskGroupName} = ""  or TaskGroupName = #{model.taskGroupName} ) AND
+        ( #{model.taskName} is null or #{model.taskName} = "" or TaskName LIKE #{model.taskName} ) AND
+        ( #{model.taskGroupName} is null or #{model.taskGroupName} = ""  or TaskGroupName LIKE #{model.taskGroupName} ) AND
         ( #{model.success} is null or Success = #{model.success} )
     </select>
 
     <select id="list" resultType="CheckTaskEntity">
         select * from CheckTask
         WHERE
-        ( #{model.taskName} is null or #{model.taskName} = "" or TaskName = #{model.taskName} ) AND
-        ( #{model.taskGroupName} is null or #{model.taskGroupName} = ""  or TaskGroupName = #{model.taskGroupName} ) AND
+        ( #{model.taskName} is null or #{model.taskName} = "" or TaskName LIKE #{model.taskName} ) AND
+        ( #{model.taskGroupName} is null or #{model.taskGroupName} = ""  or TaskGroupName LIKE #{model.taskGroupName} ) AND
         ( #{model.success} is null or Success = #{model.success} )
         order by taskGroupName,taskName
         limit #{offset},#{limit}

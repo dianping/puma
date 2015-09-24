@@ -22,6 +22,14 @@ puma.controller('pumaCheckController', function ($scope, $http) {
         "page": 1
     };
 
+    $scope.reset = function () {
+        $scope.taskName = "";
+        $scope.taskGroupName = "";
+        $scope.success = "";
+        $scope.pageModel.page = 1;
+        $scope.query();
+    }
+
     $scope.query = function () {
         $http.get('/a/puma-check', {
             params: {

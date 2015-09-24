@@ -43,17 +43,11 @@ public class PumaCheckController extends BasicController {
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public Object list(String taskName, String taskGroupName, Boolean success, Integer page) {
+    public Object list(CheckTaskQueryModel queryModel, Integer page) {
         Map<String, Object> result = new HashMap<String, Object>();
         PageModel pageModel = new PageModel(page == null ? 1 : page.intValue(), PAGE_SIZE);
-
-        result.put("list", checkTaskService.list(
-                new CheckTaskQueryModel().setTaskName(taskName)
-                        .setTaskGroupName(taskGroupName)
-                        .setSuccess(success),
-                pageModel));
+        result.put("list", checkTaskService.list(queryModel, pageModel));
         result.put("page", pageModel);
-
         return result;
     }
 

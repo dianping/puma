@@ -13,14 +13,16 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.storage.bucket;
+package com.dianping.puma.storage.data;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.TreeMap;
 import java.util.zip.GZIPOutputStream;
 
+import com.dianping.puma.storage.bucket.*;
 import com.dianping.puma.storage.data.DataBucket;
+import com.dianping.puma.storage.data.HDFSDataBucket;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.fs.FileStatus;
@@ -34,7 +36,7 @@ import com.dianping.puma.storage.exception.StorageClosedException;
 /**
  * @author Leo Liang
  */
-public class HDFSDataBucketManager extends AbstractDataBucketManager {
+public class HDFSDataBucketManager extends com.dianping.puma.storage.bucket.AbstractDataBucketManager {
 
     private FileSystem fileSystem;
     private HDFSConfig hdfsConfig;

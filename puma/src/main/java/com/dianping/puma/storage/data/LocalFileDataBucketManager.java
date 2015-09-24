@@ -3,13 +3,13 @@ package com.dianping.puma.storage.data;
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.storage.Sequence;
 
-public class DefaultDataBucketManager extends AbstractLifeCycle implements DataBucketManager {
+public class LocalFileDataBucketManager extends AbstractLifeCycle implements DataBucketManager {
 
 	private String baseDir;
 
 	private String database;
 
-	public DefaultDataBucketManager(String baseDir, String database) {
+	public LocalFileDataBucketManager(String baseDir, String database) {
 		this.baseDir = baseDir;
 		this.database = database;
 	}

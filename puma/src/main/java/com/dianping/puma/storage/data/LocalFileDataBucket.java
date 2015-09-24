@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.bucket;
+package com.dianping.puma.storage.data;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 
 import com.dianping.puma.storage.Sequence;
+import com.dianping.puma.storage.data.AbstractDataBucket;
 
 /**
  * 基于本地文件的Bucket实现

@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.bucket;
+package com.dianping.puma.storage.data;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -8,6 +8,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import com.dianping.puma.storage.bucket.*;
+import com.dianping.puma.storage.data.LocalFileDataBucket;
 import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
@@ -155,7 +157,7 @@ public class LocalBucketTest {
 		event.setSeq(seq.longValue());
 		event.setTable(null);
 
-		LocalFileDataBucketManager bucketIndex = new LocalFileDataBucketManager();
+		com.dianping.puma.storage.bucket.LocalFileDataBucketManager bucketIndex = new com.dianping.puma.storage.bucket.LocalFileDataBucketManager();
 		bucketIndex.setMaster(false);
 		bucketIndex.setBaseDir(new File(System.getProperty("java.io.tmpdir", "."), "Puma/zip/").getAbsolutePath());
 		bucketIndex.setBucketFilePrefix("bucket-");
@@ -300,7 +302,7 @@ public class LocalBucketTest {
 		event.setTable(null);
 		Sequence newSeq = null;
 
-		LocalFileDataBucketManager bucketIndex = new LocalFileDataBucketManager();
+		com.dianping.puma.storage.bucket.LocalFileDataBucketManager bucketIndex = new com.dianping.puma.storage.bucket.LocalFileDataBucketManager();
 		bucketIndex.setMaster(false);
 		bucketIndex.setBaseDir(new File(System.getProperty("java.io.tmpdir", "."), "Puma/zip/").getAbsolutePath());
 		bucketIndex.setBucketFilePrefix("bucket-");

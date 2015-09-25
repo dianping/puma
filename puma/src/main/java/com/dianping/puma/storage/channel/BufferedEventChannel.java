@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import com.dianping.puma.common.AbstractLifeCycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +18,7 @@ import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.ServerErrorEvent;
 import com.dianping.puma.storage.exception.StorageException;
 
-public class BufferedEventChannel extends AbstractEventChannel implements EventChannel {
+public class BufferedEventChannel extends AbstractLifeCycle implements EventChannel {
 
     private static final Logger logger = LoggerFactory.getLogger(BufferedEventChannel.class);
 
@@ -35,6 +36,16 @@ public class BufferedEventChannel extends AbstractEventChannel implements EventC
         this.clientName = clientName;
         this.eventChannel = eventChannel;
         this.eventBuffer = new ArrayBlockingQueue<Event>(bufSize);
+    }
+
+    @Override
+    protected void doStart() {
+
+    }
+
+    @Override
+    protected void doStop() {
+
     }
 
     @Override

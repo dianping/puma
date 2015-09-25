@@ -6,19 +6,21 @@ public abstract class AbstractLifeCycle implements LifeCycle {
 
 	@Override
 	public void start() {
-		if (!checkStop()) {
+		if (!isStopped()) {
 			return;
 		}
 
 		doStart();
+		stopped = false;
 	}
 
 	@Override
 	public void stop() {
-		if (checkStop()) {
+		if (isStopped()) {
 			return;
 		}
 
+		stopped = true;
 		doStop();
 	}
 
@@ -26,7 +28,13 @@ public abstract class AbstractLifeCycle implements LifeCycle {
 
 	protected abstract void doStop();
 
-	protected boolean checkStop() {
+	protected void checkStop() {
+		if (isStopped()) {
+			throw new RuntimeException("failed, life cycle is already stopped.");
+		}
+	}
+
+	protected boolean isStopped() {
 		return stopped || Thread.currentThread().isInterrupted();
 	}
 }

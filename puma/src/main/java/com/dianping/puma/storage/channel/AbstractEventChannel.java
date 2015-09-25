@@ -5,6 +5,7 @@ import java.util.Set;
 
 public abstract class AbstractEventChannel implements EventChannel {
 
+    /*
     protected String database;
 
     protected Set<String> tables;
@@ -60,5 +61,5 @@ public abstract class AbstractEventChannel implements EventChannel {
     @Override
     public boolean getDml() {
         return withDml;
-    }
+    }*/
 }

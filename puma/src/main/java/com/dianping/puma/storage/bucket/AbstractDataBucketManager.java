@@ -31,7 +31,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.data.DataBucket;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
@@ -117,7 +116,7 @@ public abstract class AbstractDataBucketManager implements DataBucketManager {
     }
 
     @Override
-    public void add(DataBucket bucket) throws StorageClosedException {
+    public void add(ReadDataBucket bucket) throws StorageClosedException {
         checkClosed();
         TreeMap<Sequence, String> newIndex = new TreeMap<Sequence, String>(index.get());
         newIndex.put(new Sequence(bucket.getStartingSequece()), convertToPath(bucket.getStartingSequece()));
@@ -125,7 +124,7 @@ public abstract class AbstractDataBucketManager implements DataBucketManager {
     }
 
     @Override
-    public DataBucket getNextReadBucket(Sequence sequence) throws IOException, StorageClosedException {
+    public ReadDataBucket getNextReadBucket(Sequence sequence) throws IOException, StorageClosedException {
         checkClosed();
         NavigableMap<Sequence, String> tailMap = index.get().tailMap(sequence, false);
         if (!tailMap.isEmpty()) {
@@ -135,11 +134,11 @@ public abstract class AbstractDataBucketManager implements DataBucketManager {
         return null;
     }
 
-    protected abstract DataBucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB)
+    protected abstract ReadDataBucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB)
             throws IOException;
 
     @Override
-    public DataBucket getNextWriteBucket() throws IOException, StorageClosedException {
+    public ReadDataBucket getNextWriteBucket() throws IOException, StorageClosedException {
         checkClosed();
         Entry<Sequence, String> lastEntry = index.get().lastEntry();
         Sequence nextSeq = null;
@@ -153,7 +152,7 @@ public abstract class AbstractDataBucketManager implements DataBucketManager {
 
     }
 
-    protected abstract DataBucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence)
+    protected abstract ReadDataBucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence)
             throws IOException;
 
     protected int getNowCreationDate() {
@@ -170,7 +169,7 @@ public abstract class AbstractDataBucketManager implements DataBucketManager {
     }
 
     @Override
-    public DataBucket getReadBucket(long seq, boolean fromNext) throws StorageClosedException, IOException {
+    public ReadDataBucket getReadBucket(long seq, boolean fromNext) throws StorageClosedException, IOException {
         checkClosed();
         Sequence sequence = null;
         String path = null;
@@ -203,7 +202,7 @@ public abstract class AbstractDataBucketManager implements DataBucketManager {
         }
 
         int offset = sequence.getOffset();
-        DataBucket bucket = doGetReadBucket(baseDir, path, sequence.clearOffset(), maxBucketLengthMB);
+        ReadDataBucket bucket = doGetReadBucket(baseDir, path, sequence.clearOffset(), maxBucketLengthMB);
 
         if (bucket != null) {
             bucket.skip(offset);

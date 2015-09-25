@@ -24,13 +24,12 @@ import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.data.DataBucket;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 public class HDFSBucketIndexTest {
 
     protected File               work            = null;
-    protected HDFSDataBucketManager    hdfsBucketIndex = new HDFSDataBucketManager();
+    protected HDFSDataBucketManager hdfsBucketIndex = new HDFSDataBucketManager();
     protected FileSystem         fileSystem;
     protected FSDataOutputStream fsoutput;
 
@@ -101,7 +100,7 @@ public class HDFSBucketIndexTest {
 
         Sequence sequence = new Sequence(120711, 0);
 
-        DataBucket bucket = null;
+        ReadDataBucket bucket = null;
         try {
             bucket = new HDFSDataBucket(fileSystem, "/tmp", "Puma/20120711/bucket-0", sequence, false);
             hdfsBucketIndex.add(bucket);
@@ -238,7 +237,7 @@ public class HDFSBucketIndexTest {
 
         Sequence seq = new Sequence(120710, 0);
         try {
-            DataBucket bucket = this.hdfsBucketIndex.getNextReadBucket(seq);
+            ReadDataBucket bucket = this.hdfsBucketIndex.getNextReadBucket(seq);
             Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
             Assert.assertEquals(1, bucket.getStartingSequece().getNumber());
             bucket.stop();
@@ -286,7 +285,7 @@ public class HDFSBucketIndexTest {
         }
 
         try {
-            DataBucket bucket = this.hdfsBucketIndex.getNextWriteBucket();
+            ReadDataBucket bucket = this.hdfsBucketIndex.getNextWriteBucket();
             Assert.assertEquals(null, bucket);
             if (bucket != null) {
                 bucket.stop();
@@ -351,7 +350,7 @@ public class HDFSBucketIndexTest {
         }
 
         try {
-            DataBucket bucket = this.hdfsBucketIndex.getReadBucket(-1, true);
+            ReadDataBucket bucket = this.hdfsBucketIndex.getReadBucket(-1, true);
 
             Assert.assertEquals(null, bucket);
             bucket = this.hdfsBucketIndex.getReadBucket(-2, true);
@@ -392,7 +391,7 @@ public class HDFSBucketIndexTest {
             e1.printStackTrace();
         }
         try {
-            DataBucket bucket = this.hdfsBucketIndex.getReadBucket(-1, true);
+            ReadDataBucket bucket = this.hdfsBucketIndex.getReadBucket(-1, true);
             Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
             Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
             bucket.stop();

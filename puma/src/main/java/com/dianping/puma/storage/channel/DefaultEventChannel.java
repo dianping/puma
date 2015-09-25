@@ -1,18 +1,12 @@
 package com.dianping.puma.storage.channel;
 
+import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.constant.SubscribeConstant;
-import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.Event;
-import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.data.DataBucket;
-import com.dianping.puma.storage.bucket.DataBucketManager;
-import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
-import com.dianping.puma.storage.conf.GlobalStorageConfig;
-import com.dianping.puma.storage.data.DataManagerFactory;
-import com.dianping.puma.storage.data.DefaultReadDataManager;
+import com.dianping.puma.storage.data.factory.DataManagerFactory;
 import com.dianping.puma.storage.data.ReadDataManager;
 import com.dianping.puma.storage.exception.InvalidSequenceException;
 import com.dianping.puma.storage.exception.StorageClosedException;
@@ -21,10 +15,11 @@ import com.dianping.puma.storage.exception.StorageReadException;
 import com.dianping.puma.storage.index.*;
 import com.google.common.base.Strings;
 
-import java.io.EOFException;
 import java.io.IOException;
 
-public class DefaultEventChannel extends AbstractEventChannel implements EventChannel {
+public class DefaultEventChannel extends AbstractLifeCycle implements EventChannel {
+
+	private String database;
 
 	private ReadIndexManager<IndexKeyImpl, IndexValueImpl> readIndexManager;
 
@@ -40,11 +35,13 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 		this.database = database;
 	}
 
+	@Override
 	protected void doStart() {
 		readDataManager = DataManagerFactory.newReadDataManager(database);
 		readDataManager.start();
 	}
 
+	@Override
 	protected void doStop() {
 		readDataManager.stop();
 	}
@@ -137,6 +134,7 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 				Event event = codec.decode(data);
 				lastSequence = new Sequence(event.getSeq(), data.length);
 
+				/*
 				if (event instanceof DdlEvent && !this.withDdl) {
 					continue;
 				}
@@ -157,6 +155,7 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 						}
 					}
 				}
+				*/
 				return event;
 			} catch (IOException e) {
 				throw new StorageReadException("Failed to read", e);

@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.storage.data;
+package com.dianping.puma.storage.bucket;
 
 import java.io.IOException;
 
@@ -27,7 +27,7 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  * @author Leo Liang
  * 
  */
-public interface DataBucket extends LifeCycle<IOException> {
+public interface ReadDataBucket extends LifeCycle<IOException> {
     /**
      * 获得当前存储对应的起始sequence(Offset一定为0)
      * 

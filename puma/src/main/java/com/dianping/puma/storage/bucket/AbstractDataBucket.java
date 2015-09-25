@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.storage.data;
+package com.dianping.puma.storage.bucket;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.data.DataBucket;
+import com.dianping.puma.storage.bucket.ReadDataBucket;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
@@ -31,7 +31,7 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  * @author Leo Liang
  * 
  */
-public abstract class AbstractDataBucket implements DataBucket {
+public abstract class AbstractDataBucket implements ReadDataBucket {
 	private Sequence startingSequence;
 
 	private int maxSizeMB;

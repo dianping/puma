@@ -1,4 +1,7 @@
-package com.dianping.puma.storage.data;
+package com.dianping.puma.storage.data.factory;
+
+import com.dianping.puma.storage.data.ReadDataManager;
+import com.dianping.puma.storage.data.WriteDataManager;
 
 public class DataManagerFactory {
 

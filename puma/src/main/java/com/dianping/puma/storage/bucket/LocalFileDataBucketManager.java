@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.util.TreeMap;
 import java.util.zip.GZIPOutputStream;
 
-import com.dianping.puma.storage.data.DataBucket;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -38,7 +37,7 @@ import com.dianping.puma.storage.exception.StorageClosedException;
 public class LocalFileDataBucketManager extends AbstractDataBucketManager {
 
     @Override
-    protected DataBucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB)
+    protected ReadDataBucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB)
             throws IOException {
         return new LocalFileDataBucket(new File(baseDir, path), startingSeq, maxSizeMB, path, !isMaster());
     }
@@ -95,7 +94,7 @@ public class LocalFileDataBucketManager extends AbstractDataBucketManager {
     }
 
     @Override
-    protected DataBucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence)
+    protected ReadDataBucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence)
             throws IOException {
         File bucketFile = new File(baseDir, bucketPath);
 

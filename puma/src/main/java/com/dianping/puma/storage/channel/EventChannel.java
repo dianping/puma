@@ -1,12 +1,14 @@
 package com.dianping.puma.storage.channel;
 
+import com.dianping.puma.common.LifeCycle;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.storage.exception.StorageException;
 
 import java.io.IOException;
 
-public interface EventChannel {
+public interface EventChannel extends LifeCycle {
 
+    /*
     EventChannel withTables(String... tables);
 
     String[] getTables();
@@ -21,7 +23,7 @@ public interface EventChannel {
 
     EventChannel withDml(boolean dml);
 
-    boolean getDml();
+    boolean getDml();*/
 
     void open(long serverId, String binlogFile, long binlogPosition) throws IOException;
 

@@ -3,7 +3,6 @@ package com.dianping.puma.storage.bucket;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import com.dianping.puma.storage.data.DataBucket;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.core.util.PumaThreadUtils;
@@ -75,12 +74,12 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	@Override
-	public DataBucket getNextReadBucket(long seq) throws StorageClosedException, IOException {
+	public ReadDataBucket getNextReadBucket(long seq) throws StorageClosedException, IOException {
 		checkClosed();
 		Sequence sequence = new Sequence(seq, 0);
 		sequence = sequence.clearOffset();
 
-		DataBucket bucket = slaveIndex.getNextReadBucket(sequence);
+		ReadDataBucket bucket = slaveIndex.getNextReadBucket(sequence);
 
 		if (bucket != null) {
 			return bucket;
@@ -95,9 +94,9 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	@Override
-	public DataBucket getNextWriteBucket() throws IOException, StorageClosedException {
+	public ReadDataBucket getNextWriteBucket() throws IOException, StorageClosedException {
 		checkClosed();
-		DataBucket bucket = masterIndex.getNextWriteBucket();
+		ReadDataBucket bucket = masterIndex.getNextWriteBucket();
 
 		if (bucket != null) {
 			masterIndex.add(bucket);
@@ -108,10 +107,10 @@ public class DefaultBucketManager implements BucketManager {
 	}
 
 	@Override
-	public DataBucket getReadBucket(long seq, boolean fromNext) throws IOException, StorageClosedException {
+	public ReadDataBucket getReadBucket(long seq, boolean fromNext) throws IOException, StorageClosedException {
 		checkClosed();
 
-		DataBucket bucket = slaveIndex.getReadBucket(seq, fromNext);
+		ReadDataBucket bucket = slaveIndex.getReadBucket(seq, fromNext);
 
 		if (bucket != null) {
 			return bucket;

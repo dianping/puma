@@ -20,7 +20,6 @@ import java.util.List;
 
 import com.dianping.puma.core.LifeCycle;
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.data.DataBucket;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**
@@ -31,7 +30,7 @@ import com.dianping.puma.storage.exception.StorageClosedException;
  */
 public interface DataBucketManager extends LifeCycle<IOException> {
 
-    public void add(DataBucket bucket) throws StorageClosedException;
+    public void add(ReadDataBucket bucket) throws StorageClosedException;
 
     public void add(List<String> paths) throws StorageClosedException;
 
@@ -39,13 +38,13 @@ public interface DataBucketManager extends LifeCycle<IOException> {
 
     public List<String> bulkGetRemainNDay(int remainDay) throws StorageClosedException;
 
-    public DataBucket getNextReadBucket(Sequence sequence) throws StorageClosedException, IOException;
+    public ReadDataBucket getNextReadBucket(Sequence sequence) throws StorageClosedException, IOException;
 
-    public DataBucket getNextWriteBucket() throws StorageClosedException, IOException;
+    public ReadDataBucket getNextWriteBucket() throws StorageClosedException, IOException;
 
     public boolean hasNexReadBucket(Sequence sequence) throws StorageClosedException;
 
-    public DataBucket getReadBucket(long seq, boolean fromNext) throws StorageClosedException, IOException;
+    public ReadDataBucket getReadBucket(long seq, boolean fromNext) throws StorageClosedException, IOException;
 
     public int size();
 

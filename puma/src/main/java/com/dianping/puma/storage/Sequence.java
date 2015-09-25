@@ -35,6 +35,12 @@ public class Sequence {
 		this(creationDate, number, 0, 0);
 	}
 
+	public Sequence(int creationDate, int number, int offset) {
+		this.creationDate = creationDate;
+		this.number = number;
+		this.offset = offset;
+	}
+
 	public Sequence(int creationDate, int number, int offset, int len) {
 		this.creationDate = creationDate;
 		this.number = number;

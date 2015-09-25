@@ -1,7 +1,11 @@
-package com.dianping.puma.storage.data;
+package com.dianping.puma.storage.data.impl;
 
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.storage.Sequence;
+import com.dianping.puma.storage.data.DataBucketManager;
+import com.dianping.puma.storage.data.ReadDataBucket;
+import com.dianping.puma.storage.data.ReadDataManager;
+import com.dianping.puma.storage.data.factory.DataBucketManagerFactory;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -16,7 +20,7 @@ public class DefaultReadDataManager extends AbstractLifeCycle implements ReadDat
 
 	private DataBucketManager slaveDataBucketManager;
 
-	private DataBucket dataBucket;
+	private ReadDataBucket readDataBucket;
 
 	public DefaultReadDataManager(String database) {
 		this.database = database;
@@ -39,14 +43,14 @@ public class DefaultReadDataManager extends AbstractLifeCycle implements ReadDat
 
 	@Override
 	public void open(Sequence sequence) throws IOException {
-		if (checkStop()) {
+		if (isStopped()) {
 			throw new RuntimeException("failed to open when read data manager is stopped.");
 		}
 
-		dataBucket = slaveDataBucketManager.findReadDataBucket(sequence);
-		if (dataBucket == null) {
-			dataBucket = masterDataBucketManager.findReadDataBucket(sequence);
-			if (dataBucket == null) {
+		readDataBucket = slaveDataBucketManager.findReadDataBucket(sequence);
+		if (readDataBucket == null) {
+			readDataBucket = masterDataBucketManager.findReadDataBucket(sequence);
+			if (readDataBucket == null) {
 				throw new IOException("failed to get data bucket.");
 			}
 		}
@@ -58,7 +62,7 @@ public class DefaultReadDataManager extends AbstractLifeCycle implements ReadDat
 	public byte[] next() throws IOException {
 		while (true) {
 			try {
-				byte[] data = dataBucket.getNext();
+				byte[] data = readDataBucket.next();
 				sequence.addOffset(data.length);
 				return data;
 			} catch (EOFException eof) {
@@ -68,14 +72,14 @@ public class DefaultReadDataManager extends AbstractLifeCycle implements ReadDat
 	}
 
 	protected void openNext(Sequence sequence) throws IOException {
-		if (checkStop()) {
+		if (isStopped()) {
 			throw new RuntimeException("failed to open next when read data manager is stopped.");
 		}
 
-		dataBucket = slaveDataBucketManager.findNextReadDataBucket(sequence);
-		if (dataBucket == null) {
-			dataBucket = masterDataBucketManager.findNextReadDataBucket(sequence);
-			if (dataBucket == null) {
+		readDataBucket = slaveDataBucketManager.findNextReadDataBucket(sequence);
+		if (readDataBucket == null) {
+			readDataBucket = masterDataBucketManager.findNextReadDataBucket(sequence);
+			if (readDataBucket == null) {
 				throw new IOException("failed to get data bucket.");
 			}
 		}

@@ -80,6 +80,20 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
         try {
             EventChannel newEventChannel;
+
+            try {
+                newEventChannel = initChannel(
+                        SubscribeConstant.SEQ_FROM_BINLOGINFO,
+                        event.getBinlogInfo(), Lists.newArrayList(""),
+                        false, false, false);
+            } catch (IOException e) {
+                newEventChannel = initChannel(
+                        SubscribeConstant.SEQ_FROM_TIMESTAMP,
+                        event.getBinlogInfo(), Lists.newArrayList(""),
+                        false, false, false);
+            }
+
+            /*
             try {
                 newEventChannel = initChannel(
                         SubscribeConstant.SEQ_FROM_BINLOGINFO,
@@ -90,7 +104,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
                         SubscribeConstant.SEQ_FROM_TIMESTAMP,
                         event.getBinlogInfo(), Lists.newArrayList(this.eventChannel.getTables()),
                         this.eventChannel.getDml(), this.eventChannel.getDdl(), this.eventChannel.getTransaction());
-            }
+            }*/
 
             EventChannel oldEventChannel = this.eventChannel;
             this.eventChannel = newEventChannel;
@@ -106,10 +120,10 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
     protected EventChannel initChannel(long sc, BinlogInfo binlogInfo, List<String> tables,
                                        boolean dml, boolean ddl, boolean transaction) throws IOException {
         DefaultEventChannel newEventChannel = new DefaultEventChannel(database);
-        newEventChannel.withTables(tables.toArray(new String[tables.size()]));
-        newEventChannel.withDml(dml);
-        newEventChannel.withDdl(ddl);
-        newEventChannel.withTransaction(transaction);
+        //newEventChannel.withTables(tables.toArray(new String[tables.size()]));
+        //newEventChannel.withDml(dml);
+        //newEventChannel.withDdl(ddl);
+        //newEventChannel.withTransaction(transaction);
 
         if (sc == SubscribeConstant.SEQ_FROM_BINLOGINFO) {
             newEventChannel.open(binlogInfo.getServerId(), binlogInfo.getBinlogFile(), binlogInfo.getBinlogPosition());

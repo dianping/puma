@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.data;
+package com.dianping.puma.storage.bucket;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -8,8 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import com.dianping.puma.storage.bucket.*;
-import com.dianping.puma.storage.data.LocalFileDataBucket;
+import com.dianping.puma.storage.bucket.LocalFileDataBucket;
 import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;

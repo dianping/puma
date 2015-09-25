@@ -1,6 +1,7 @@
 package com.dianping.puma.storage;
 
-import com.dianping.puma.storage.data.LocalFileReadDataBucketTest;
+import com.dianping.puma.storage.data.impl.LocalFileDataBucketManagerTest;
+import com.dianping.puma.storage.data.impl.LocalFileReadDataBucketTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -8,7 +9,8 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
 
 		// data.
-		LocalFileReadDataBucketTest.class
+		LocalFileReadDataBucketTest.class,
+		LocalFileDataBucketManagerTest.class
 })
 public class StorageAllTests {
 }

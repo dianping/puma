@@ -1,5 +1,6 @@
-package com.dianping.puma.storage.data;
+package com.dianping.puma.storage.data.impl;
 
+import com.dianping.puma.storage.data.impl.LocalFileReadDataBucket;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;

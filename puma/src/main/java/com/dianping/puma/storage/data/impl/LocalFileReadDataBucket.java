@@ -1,5 +1,6 @@
-package com.dianping.puma.storage.data;
+package com.dianping.puma.storage.data.impl;
 
+import com.dianping.puma.storage.data.AbstractReadDataBucket;
 import com.dianping.puma.utils.ZipUtils;
 
 import java.io.*;

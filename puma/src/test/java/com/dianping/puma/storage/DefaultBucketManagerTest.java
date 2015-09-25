@@ -1,7 +1,7 @@
 package com.dianping.puma.storage;
 
 import com.dianping.puma.storage.bucket.*;
-import com.dianping.puma.storage.data.DataBucket;
+import com.dianping.puma.storage.bucket.ReadDataBucket;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import junit.framework.Assert;
 import org.apache.commons.io.FileUtils;
@@ -101,7 +101,7 @@ public class DefaultBucketManagerTest {
         bucketManager = new DefaultBucketManager(masterIndex, slaveIndex, archiveStrategy, cleanupStrategy);
         bucketManager.start();
 
-        DataBucket bucket = bucketManager.getReadBucket(-1, true);
+        ReadDataBucket bucket = bucketManager.getReadBucket(-1, true);
         Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
         Assert.assertEquals(0, bucket.getStartingSequece().getNumber());
         bucket.stop();
@@ -204,7 +204,7 @@ public class DefaultBucketManagerTest {
         bucketManager.start();
 
         Sequence sequence = new Sequence(120710, 0, 0, 0);
-        DataBucket bucket = bucketManager.getNextReadBucket(sequence.longValue());
+        ReadDataBucket bucket = bucketManager.getNextReadBucket(sequence.longValue());
         Assert.assertEquals(120710, bucket.getStartingSequece().getCreationDate());
         Assert.assertEquals(1, bucket.getStartingSequece().getNumber());
         bucket.stop();
@@ -294,7 +294,7 @@ public class DefaultBucketManagerTest {
         bucketManager.start();
 
         // TDODO
-        DataBucket bucket = bucketManager.getNextWriteBucket();
+        ReadDataBucket bucket = bucketManager.getNextWriteBucket();
         SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
         Assert.assertEquals(new Sequence(Integer.valueOf(sdf.format(new Date())), 0).getCreationDate(), bucket
                 .getStartingSequece().getCreationDate());

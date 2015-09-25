@@ -13,16 +13,13 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.storage.data;
+package com.dianping.puma.storage.bucket;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.TreeMap;
 import java.util.zip.GZIPOutputStream;
 
-import com.dianping.puma.storage.bucket.*;
-import com.dianping.puma.storage.data.DataBucket;
-import com.dianping.puma.storage.data.HDFSDataBucket;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.fs.FileStatus;
@@ -95,7 +92,7 @@ public class HDFSDataBucketManager extends com.dianping.puma.storage.bucket.Abst
     }
 
     @Override
-    protected DataBucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB)
+    protected ReadDataBucket doGetReadBucket(String baseDir, String path, Sequence startingSeq, int maxSizeMB)
             throws IOException {
         return new HDFSDataBucket(fileSystem, baseDir, path, startingSeq, !isMaster());
     }
@@ -124,7 +121,7 @@ public class HDFSDataBucketManager extends com.dianping.puma.storage.bucket.Abst
      * .lang.String, java.lang.String, com.dianping.puma.storage.Sequence)
      */
     @Override
-    protected DataBucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence)
+    protected ReadDataBucket doGetNextWriteBucket(String baseDir, String bucketPath, Sequence startingSequence)
             throws IOException {
         return null;
     }

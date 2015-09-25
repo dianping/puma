@@ -9,7 +9,5 @@ public interface ReadDataManager extends LifeCycle {
 
 	public void open(Sequence sequence) throws IOException;
 
-	//public void open(Sequence sequence, boolean fromNext) throws IOException;
-
 	public byte[] next() throws IOException;
 }

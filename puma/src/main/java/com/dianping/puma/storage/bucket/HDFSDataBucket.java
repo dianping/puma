@@ -1,10 +1,9 @@
-package com.dianping.puma.storage.data;
+package com.dianping.puma.storage.bucket;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 
-import com.dianping.puma.storage.data.AbstractDataBucket;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 

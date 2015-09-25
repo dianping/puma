@@ -10,6 +10,8 @@ public interface CheckTaskService {
 
     CheckTaskEntity findById(int id);
 
+    CheckTaskEntity findByName(String name);
+
     List<CheckTaskEntity> findRunnable();
 
     List<CheckTaskEntity> list(CheckTaskQueryModel queryModel,PageModel pageModel);

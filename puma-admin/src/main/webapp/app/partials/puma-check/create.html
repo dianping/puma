@@ -1,4 +1,4 @@
-<div ng-controller="pumaCheckCreateController">
+<div>
 
     <div class="breadcrumbs" id="breadcrumbs">
         <script type="text/javascript">
@@ -28,9 +28,9 @@
                                 <div class="widget-body">
                                     <div class="widget-main padding-6">
                                         <div class="tab-content">
-                                            <div onload="item = model.baseInfo = {}"
+                                            <div onload="item = model.baseInfo"
                                                  ng-if="true"
-                                                 ng-include="templateBase + 'base.html'"></div>
+                                                 ng-include="templateBase + baseTemplate + '.html'"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -46,13 +46,13 @@
 
                                     <div class="widget-toolbar no-border">
                                         <ul class="nav nav-tabs">
-                                            <li class="active">
+                                            <li ng-class="{'active':model.sourceDsBuilderProp.className == 'GroupDataSourceBuilder'}">
                                                 <a data-toggle="tab" href=""
-                                                   ng-click="changeTemplate('SourceDsBuilderTemplate','ds-group')">GroupDataSource</a>
+                                                   ng-click="model.sourceDsBuilderProp = {'className' : 'GroupDataSourceBuilder'}">GroupDataSource</a>
                                             </li>
-                                            <li>
+                                            <li ng-class="{'active':model.sourceDsBuilderProp.className == 'ShardDataSourceBuilder'}">
                                                 <a data-toggle="tab" href=""
-                                                   ng-click="changeTemplate('SourceDsBuilderTemplate','ds-shard')">ShardDataSource</a>
+                                                   ng-click="model.sourceDsBuilderProp = {'className' : 'ShardDataSourceBuilder'}">ShardDataSource</a>
                                             </li>
                                         </ul>
                                     </div>
@@ -60,9 +60,9 @@
                                 <div class="widget-body">
                                     <div class="widget-main padding-6">
                                         <div class="tab-content">
-                                            <div onload="item = model.sourceDsBuilderProp = {}"
+                                            <div onload="item = model.sourceDsBuilderProp"
                                                  ng-if="true"
-                                                 ng-include="templateBase + SourceDsBuilderTemplate + '.html'"></div>
+                                                 ng-include="templateBase + model.sourceDsBuilderProp.className + '.html'"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -80,7 +80,7 @@
                                         <ul class="nav nav-tabs">
                                             <li class="active">
                                                 <a data-toggle="tab" href=""
-                                                   ng-click="changeTemplate('SourceFetcherTemplate','source-fetcher-update-id')">UpdateTimeAndIdSourceFetcher</a>
+                                                   ng-click="model.sourceFetcherProp = {'className' : 'UpdateTimeAndIdSourceFetcher'}">UpdateTimeAndIdSourceFetcher</a>
                                             </li>
                                         </ul>
                                     </div>
@@ -88,9 +88,9 @@
                                 <div class="widget-body">
                                     <div class="widget-main padding-6">
                                         <div class="tab-content">
-                                            <div onload="item = model.sourceFetcherProp = {}"
+                                            <div onload="item = model.sourceFetcherProp"
                                                  ng-if="true"
-                                                 ng-include="templateBase + SourceFetcherTemplate + '.html'"></div>
+                                                 ng-include="templateBase + model.sourceFetcherProp.className + '.html'"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -106,13 +106,13 @@
 
                                     <div class="widget-toolbar no-border">
                                         <ul class="nav nav-tabs">
-                                            <li class="active">
+                                            <li ng-class="{'active':model.targetDsBuilderProp.className == 'GroupDataSourceBuilder'}">
                                                 <a data-toggle="tab" href=""
-                                                   ng-click="changeTemplate('TargetDsBuilderTemplate','ds-group')">GroupDataSource</a>
+                                                   ng-click="model.targetDsBuilderProp = {'className' : 'GroupDataSourceBuilder'}">GroupDataSource</a>
                                             </li>
-                                            <li>
+                                            <li ng-class="{'active':model.targetDsBuilderProp.className == 'ShardDataSourceBuilder'}">
                                                 <a data-toggle="tab" href=""
-                                                   ng-click="changeTemplate('TargetDsBuilderTemplate','ds-shard')">ShardDataSource</a>
+                                                   ng-click="model.targetDsBuilderProp = {'className' : 'ShardDataSourceBuilder'}">ShardDataSource</a>
                                             </li>
                                         </ul>
                                     </div>
@@ -120,9 +120,9 @@
                                 <div class="widget-body">
                                     <div class="widget-main padding-6">
                                         <div class="tab-content">
-                                            <div onload="item = model.targetDsBuilderProp = {}"
+                                            <div onload="item = model.targetDsBuilderProp"
                                                  ng-if="true"
-                                                 ng-include="templateBase + TargetDsBuilderTemplate + '.html'"></div>
+                                                 ng-include="templateBase + model.targetDsBuilderProp.className + '.html'"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -140,7 +140,7 @@
                                         <ul class="nav nav-tabs">
                                             <li class="active">
                                                 <a data-toggle="tab" href=""
-                                                   ng-click="changeTemplate('TargetFetcherTemplate','target-fetcher-single-line')">SingleLineTargetFetcher</a>
+                                                   ng-click="model.targetFetcherProp = {'className' : 'SingleLineTargetFetcher'}">SingleLineTargetFetcher</a>
                                             </li>
                                         </ul>
                                     </div>
@@ -148,9 +148,9 @@
                                 <div class="widget-body">
                                     <div class="widget-main padding-6">
                                         <div class="tab-content">
-                                            <div onload="item = model.targetFetcherProp = {}"
+                                            <div onload="item = model.targetFetcherProp"
                                                  ng-if="true"
-                                                 ng-include="templateBase + TargetFetcherTemplate + '.html'"></div>
+                                                 ng-include="templateBase + model.targetFetcherProp.className + '.html'"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -168,7 +168,7 @@
                                         <ul class="nav nav-tabs">
                                             <li class="active">
                                                 <a data-toggle="tab" href=""
-                                                   ng-click="changeTemplate('ComparisonTemplate','comparison-full')">FullComparison</a>
+                                                   ng-click="model.comparisonProp = {'className' : 'FullComparison'}">FullComparison</a>
                                             </li>
                                         </ul>
                                     </div>
@@ -176,9 +176,9 @@
                                 <div class="widget-body">
                                     <div class="widget-main padding-6">
                                         <div class="tab-content">
-                                            <div onload="item = model.comparisonProp = {}"
+                                            <div onload="item = model.comparisonProp"
                                                  ng-if="true"
-                                                 ng-include="templateBase + ComparisonTemplate + '.html'"></div>
+                                                 ng-include="templateBase + model.comparisonProp.className + '.html'"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -196,7 +196,7 @@
                                         <ul class="nav nav-tabs">
                                             <li class="active">
                                                 <a data-toggle="tab" href=""
-                                                   ng-click="changeTemplate('MapperTemplate','mapper-default')">DefaultMapper</a>
+                                                   ng-click="model.mapperProp = {'className' : 'DefaultRowMapper'}">DefaultRowMapper</a>
                                             </li>
                                         </ul>
                                     </div>
@@ -204,9 +204,9 @@
                                 <div class="widget-body">
                                     <div class="widget-main padding-6">
                                         <div class="tab-content">
-                                            <div onload="item = model.mapperProp = {}"
+                                            <div onload="item = model.mapperProp"
                                                  ng-if="true"
-                                                 ng-include="templateBase + MapperTemplate + '.html'"></div>
+                                                 ng-include="templateBase + model.mapperProp.className + '.html'"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -216,7 +216,7 @@
 
                     <div class="row">
                         <div class="col-sm-8">
-                            <span class="center btn btn-success btn-sm" ng-click="create()">Create</span>
+                            <span class="center btn btn-success btn-sm" ng-click="create()">Save</span>
                         </div>
                     </div>
                 </div>

@@ -8,6 +8,10 @@
 		SELECT * FROM CheckTask WHERE Id = #{id}
 	</select>
 
+    <select id="findByName" resultType="CheckTaskEntity">
+        SELECT * FROM CheckTask WHERE TaskName = #{name}
+    </select>
+
     <select id="findRunnable" resultType="CheckTaskEntity">
 		select * from CheckTask
         where Success = 1

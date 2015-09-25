@@ -1,4 +1,4 @@
-<div ng-controller="pumaCheckController">
+<div>
 
     <div class="breadcrumbs" id="breadcrumbs">
         <script type="text/javascript">
@@ -92,9 +92,11 @@
                             </td>
                             <td><span ng-class="{'badge':true,'badge-danger': item.diffs}">{{item.diffs}}</span></td>
                             <td>
-                                <button class="btn btn-minier btn-success" title="Edit"><i
-                                        class="ace-icon glyphicon glyphicon-pencil icon-only"></i></button>
-                                <button ng-click="remove(item.taskName)" class="btn btn-minier btn-danger" title="Remove"><i
+                                <a href="#puma-check-create?name={{item.taskName | urlEncode}}"
+                                   class="btn btn-minier btn-success" title="Edit"><i
+                                        class="ace-icon glyphicon glyphicon-pencil icon-only"></i></a>
+                                <button ng-click="remove(item.taskName)" class="btn btn-minier btn-danger"
+                                        title="Remove"><i
                                         class="ace-icon fa fa-trash-o icon-only"></i></button>
                             </td>
                         </tr>

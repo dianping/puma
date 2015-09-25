@@ -8,6 +8,7 @@ import com.dianping.puma.biz.service.CheckTaskService;
 import com.dianping.puma.core.util.GsonUtil;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.reflect.TypeToken;
 import groovy.text.GStringTemplateEngine;
 import groovy.text.Template;
 import groovy.util.Eval;
@@ -48,6 +49,39 @@ public class PumaCheckController extends BasicController {
         return result;
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "{taskName}")
+    @ResponseBody
+    public Object get(@PathVariable String taskName) {
+
+        CheckTaskEntity entity = checkTaskService.findByName(taskName);
+        if (entity == null) {
+            return null;
+        }
+
+        CheckTaskModel model = new CheckTaskModel();
+        model.setSourceDsBuilderProp(convertJsonToMap(entity.getSourceDsBuilder(), entity.getSourceDsBuilderProp()));
+        model.setTargetDsBuilderProp(convertJsonToMap(entity.getTargetDsBuilder(), entity.getTargetDsBuilderProp()));
+
+        model.setSourceFetcherProp(convertJsonToMap(entity.getSourceFetcher(), entity.getSourceFetcherProp()));
+        model.setTargetFetcherProp(convertJsonToMap(entity.getTargetFetcher(), entity.getTargetFetcherProp()));
+
+        model.setMapperProp(convertJsonToMap(entity.getMapper(), entity.getMapperProp()));
+        model.setComparisonProp(convertJsonToMap(entity.getComparison(), entity.getComparisonProp()));
+
+        CheckTaskModel.BaseInfo baseInfo = new CheckTaskModel.BaseInfo();
+        baseInfo.setCursor(entity.getCursor());
+        baseInfo.setName(entity.getTaskName());
+        model.setBaseInfo(baseInfo);
+
+        return model;
+    }
+
+    private Map<String, Object> convertJsonToMap(String className, String prop) {
+        Map<String, Object> map = GsonUtil.fromJson(prop, new TypeToken<Map<String, Object>>() {
+        }.getType());
+        map.put(CLASS_NAME, className);
+        return map;
+    }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "{taskName}")
     @ResponseBody

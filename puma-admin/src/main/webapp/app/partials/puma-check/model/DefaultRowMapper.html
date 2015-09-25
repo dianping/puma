@@ -1,0 +1,11 @@
+<form class="form-horizontal" role="form">
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right"> MapKey </label>
+
+        <div class="col-sm-6">
+            <input ng-model="mapKey" type="text"
+                   placeholder="ID,Name,UpdateTime" ng-change="item.mapKey = mapKey.split(',')" class="form-control"/>
+            {{mapKey = item.mapKey.join(',');""}}
+        </div>
+    </div>
+</form>

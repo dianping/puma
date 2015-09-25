@@ -20,26 +20,8 @@ import static com.dianping.puma.core.event.RowChangedEvent.*;
 public class ClusterPumaClientMainTest {
 
 	public static void main(String[] args) {
-<<<<<<< HEAD
 
-		BasicConfigurator.configure();
-
-		List<String> tables = new ArrayList<String>();
-		tables.add("UOD_Order0");
-		tables.add("UOD_Order1");
-		tables.add("UOD_OrderExtraFields0");
-		tables.add("UOD_OrderExtraFields1");
-		tables.add("UOD_OrderLog0");
-		tables.add("UOD_OrderLog1");
-		tables.add("UOD_OrderPaymentDetail0");
-		tables.add("UOD_OrderPaymentDetail1");
-		tables.add("UOD_OrderSKU0");
-		tables.add("UOD_OrderSKU1");
-		tables.add("UOD_OrderSKUExtraFields0");
-		tables.add("UOD_OrderSKUExtraFields1");
-
-=======
->>>>>>> simplify puma client main test
+		//BasicConfigurator.configure();
 		PumaClient client = new PumaClientConfig()
 				.setClientName("technician-client")
 				.setDatabase("Profession")
@@ -57,17 +39,10 @@ public class ClusterPumaClientMainTest {
 					System.out.println(event);
 				}
 
-				try {
-					BinlogMessage message = client.get(size, 1, TimeUnit.SECONDS);
-					client.ack(message.getLastBinlogInfo());
-				} catch (Exception exp) {
-					exp.printStackTrace();
-				}
-			}
-		} catch (Throwable t) {
+				client.ack(message.getLastBinlogInfo());
+			} catch (Throwable t) {
 
-		} finally {
-			lock.unlockQuietly();
+			}
 		}
 	}
 }

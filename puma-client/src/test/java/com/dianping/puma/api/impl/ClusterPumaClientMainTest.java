@@ -20,6 +20,7 @@ import static com.dianping.puma.core.event.RowChangedEvent.*;
 public class ClusterPumaClientMainTest {
 
 	public static void main(String[] args) {
+<<<<<<< HEAD
 
 		BasicConfigurator.configure();
 
@@ -37,24 +38,23 @@ public class ClusterPumaClientMainTest {
 		tables.add("UOD_OrderSKUExtraFields0");
 		tables.add("UOD_OrderSKUExtraFields1");
 
+=======
+>>>>>>> simplify puma client main test
 		PumaClient client = new PumaClientConfig()
-				.setClientName("dozer-debug")
-				.setDatabase("UnifiedOrder0")
-				.setTables(tables)
-				.setDdl(true)
+				.setClientName("technician-client")
+				.setDatabase("Profession")
+				.setTables(Lists.newArrayList("Technician"))
+				.setDdl(false)
 				.setDml(true)
-				.setTransaction(true)
-						//                .buildClusterPumaClient();
-				.setServerHosts(Lists.newArrayList("127.0.0.1:4040"))
-				.buildFixedClusterPumaClient();
+				.setTransaction(false)
+				.buildClusterPumaClient();
 
-		final int size = 100;
+		while (true) {
+			try {
+				BinlogMessage message = client.get(1, 1, TimeUnit.SECONDS);
 
-		PumaClientLock lock = new PumaClientLock("dozer-debug");
-		try {
-			while (!Thread.interrupted()) {
-				if (!lock.isLocked()) {
-					lock.lock();
+				for (Event event: message.getBinlogEvents()) {
+					System.out.println(event);
 				}
 
 				try {

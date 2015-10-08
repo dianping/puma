@@ -12,50 +12,60 @@ import java.io.IOException;
 
 public class DefaultReadDataManager extends AbstractLifeCycle implements ReadDataManager {
 
+	private final String masterBaseDir;
+
+	private final String slaveBaseDir;
+
 	private final String database;
 
-	private Sequence sequence;
+	private DataBucketManager master;
 
-	private DataBucketManager masterDataBucketManager;
-
-	private DataBucketManager slaveDataBucketManager;
+	private DataBucketManager slave;
 
 	private ReadDataBucket readDataBucket;
 
-	public DefaultReadDataManager(String database) {
+	private Sequence sequence;
+
+	public DefaultReadDataManager(String masterBaseDir, String slaveBaseDir, String database) {
+		this.masterBaseDir = masterBaseDir;
+		this.slaveBaseDir = slaveBaseDir;
 		this.database = database;
 	}
 
 	@Override
 	public void doStart() {
-		masterDataBucketManager = DataBucketManagerFactory.newMasterDataBucketManager(database);
-		masterDataBucketManager.start();
+		master = DataBucketManagerFactory.newDataBucketManager(masterBaseDir, database);
+		master.start();
 
-		slaveDataBucketManager = DataBucketManagerFactory.newMasterDataBucketManager(database);
-		slaveDataBucketManager.start();
+		slave = DataBucketManagerFactory.newDataBucketManager(slaveBaseDir, database);
+		slave.start();
 	}
 
 	@Override
 	public void doStop() {
-		masterDataBucketManager.stop();
-		slaveDataBucketManager.stop();
+		master.stop();
+		slave.stop();
 	}
 
 	@Override
 	public void open(Sequence sequence) throws IOException {
-		if (isStopped()) {
-			throw new RuntimeException("failed to open when read data manager is stopped.");
-		}
+		checkStop();
 
-		readDataBucket = slaveDataBucketManager.findReadDataBucket(sequence);
-		if (readDataBucket == null) {
-			readDataBucket = masterDataBucketManager.findReadDataBucket(sequence);
-			if (readDataBucket == null) {
-				throw new IOException("failed to get data bucket.");
+		// 先找到sequence对应的bucket文件，再移动相应的偏移量。
+		long offset = sequence.getOffset();
+
+		readDataBucket = slave.findReadDataBucket(sequence);
+		if (readDataBucket != null) {
+			readDataBucket.skip(offset);
+		} else {
+			readDataBucket = master.findReadDataBucket(sequence);
+			if (readDataBucket != null) {
+				readDataBucket.skip(offset);
+			} else {
+				throw new IOException(
+						String.format("failed to get read data bucket for database `%s`", database));
 			}
 		}
-
-		// @todo: set sequence.
 	}
 
 	@Override
@@ -71,16 +81,19 @@ public class DefaultReadDataManager extends AbstractLifeCycle implements ReadDat
 		}
 	}
 
-	protected void openNext(Sequence sequence) throws IOException {
-		if (isStopped()) {
-			throw new RuntimeException("failed to open next when read data manager is stopped.");
-		}
+	protected void skip(ReadDataBucket readDataBucket, long offset) throws IOException {
+		readDataBucket.skip(offset);
+	}
 
-		readDataBucket = slaveDataBucketManager.findNextReadDataBucket(sequence);
+	protected void openNext(Sequence sequence) throws IOException {
+		checkStop();
+
+		readDataBucket = slave.findNextReadDataBucket(sequence);
 		if (readDataBucket == null) {
-			readDataBucket = masterDataBucketManager.findNextReadDataBucket(sequence);
+			readDataBucket = master.findNextReadDataBucket(sequence);
 			if (readDataBucket == null) {
-				throw new IOException("failed to get data bucket.");
+				throw new IOException(
+						String.format("failed to get next read data bucket for database `%s`.", database));
 			}
 		}
 

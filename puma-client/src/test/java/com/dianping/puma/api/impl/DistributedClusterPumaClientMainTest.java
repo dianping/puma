@@ -4,6 +4,7 @@ import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.PumaClientConfig;
 import com.dianping.puma.api.lock.PumaClientLock;
 import com.dianping.puma.core.dto.BinlogMessage;
+import com.dianping.puma.core.event.Event;
 import com.google.common.collect.Lists;
 
 import java.util.concurrent.TimeUnit;
@@ -33,6 +34,9 @@ public class DistributedClusterPumaClientMainTest {
 
 					// Do business logic.
 					// ...
+					for (Event event: message.getBinlogEvents()) {
+						System.out.println(event);
+					}
 
 					// Acknowledge binlog info.
 					client.ack(message.getLastBinlogInfo());

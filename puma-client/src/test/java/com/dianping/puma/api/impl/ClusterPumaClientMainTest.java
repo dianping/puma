@@ -45,7 +45,7 @@ public class ClusterPumaClientMainTest {
 				.setDml(true)
 				.setTransaction(true)
 						//                .buildClusterPumaClient();
-				.setServerHosts(Lists.newArrayList("127.0.0.1:4040"))
+				.setServerHosts(Lists.newArrayList("10.3.16.16:4040"))
 				.buildFixedClusterPumaClient();
 
 		final int size = 100;

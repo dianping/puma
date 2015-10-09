@@ -48,6 +48,8 @@ public class SimplePumaClient implements PumaClient {
 
     private static final Logger logger = LoggerFactory.getLogger(SimplePumaClient.class);
 
+    private static final Logger eventLogger = LoggerFactory.getLogger("PumaClientEventLogger");
+
     private static final Charset DEFAULT_CHARSET = Charset.forName("utf-8");
 
     private static final EventCodec codec = EventCodecFactory.createCodec("raw");
@@ -103,7 +105,17 @@ public class SimplePumaClient implements PumaClient {
             params.add(new BasicNameValuePair("timeUnit", timeUnit.toString()));
         }
         addToken(params);
-        return execute("/puma/binlog/get", params, "GET", null, BinlogGetResponse.class).getBinlogMessage();
+        BinlogMessage result = execute("/puma/binlog/get", params, "GET", null, BinlogGetResponse.class).getBinlogMessage();
+        logResult(result);
+        return result;
+    }
+
+    private void logResult(BinlogMessage message) {
+        for (com.dianping.puma.core.event.Event event : message.getBinlogEvents()) {
+            if (event.getBinlogInfo() != null) {
+                eventLogger.info(pumaServerHost + "/" + event.getBinlogInfo().hashCode());
+            }
+        }
     }
 
     @Override

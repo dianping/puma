@@ -35,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -214,14 +213,7 @@ public class SimplePumaClient implements PumaClient {
                 request = new HttpGet(uri);
             }
 
-            while (true) {
-                try {
-                    result = httpClient.execute(request);
-                    break;
-                } catch (SocketTimeoutException ignore) {
-                    ignore.printStackTrace();
-                }
-            }
+            result = httpClient.execute(request);
         } catch (Exception e) {
             this.token = null;
             String msg = request == null ? e.getMessage() : String.format("%s %s", request.getURI(), e.getMessage());

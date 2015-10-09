@@ -19,11 +19,6 @@ public abstract class AbstractReadDataBucket extends AbstractLifeCycle implement
 	}
 
 	@Override
-	public long offset() {
-		return offset;
-	}
-
-	@Override
 	public byte[] next() throws IOException {
 		checkStop();
 

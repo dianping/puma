@@ -74,6 +74,10 @@ public class Sequence {
 		return new Sequence(creationDate, number, this.offset + delta, delta);
 	}
 
+	public Sequence addOffset(long delta) {
+		return new Sequence(creationDate, number, this.offset + (int) delta, (int) delta);
+	}
+
 	/**
 	 * 获得本sequence对应的偏移量为0的sequence的新实例
 	 * 
@@ -134,5 +138,32 @@ public class Sequence {
 	public String toString() {
 		return "Sequence [creationDate=" + creationDate + ", number=" + number + ", offset=" + offset + ", len=" + len
 		      + "]";
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof Sequence))
+			return false;
+
+		Sequence sequence = (Sequence) o;
+
+		if (creationDate != sequence.creationDate)
+			return false;
+		if (number != sequence.number)
+			return false;
+		if (offset != sequence.offset)
+			return false;
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = creationDate;
+		result = 31 * result + number;
+		result = 31 * result + offset;
+		return result;
 	}
 }

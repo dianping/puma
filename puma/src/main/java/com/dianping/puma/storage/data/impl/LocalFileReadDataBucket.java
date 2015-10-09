@@ -1,19 +1,29 @@
 package com.dianping.puma.storage.data.impl;
 
+import com.dianping.puma.common.AbstractLifeCycle;
+import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.data.AbstractReadDataBucket;
+import com.dianping.puma.storage.data.ReadDataBucket;
 import com.dianping.puma.utils.ZipUtils;
 
 import java.io.*;
 import java.util.zip.GZIPInputStream;
 
-public class LocalFileReadDataBucket extends AbstractReadDataBucket {
+public class LocalFileReadDataBucket extends AbstractLifeCycle implements ReadDataBucket {
 
 	private static final int READ_BUF_SIZE = 1024 * 100; // 100k.
 
+	private String bucketName;
+
+	private Sequence sequence;
+
 	protected File file;
 
-	public LocalFileReadDataBucket(File file) {
-		super(file.getName());
+	private DataInputStream input;
+
+	public LocalFileReadDataBucket(Sequence sequence, File file) {
+		this.bucketName = file.getName();
+		this.sequence = sequence;
 		this.file = file;
 	}
 
@@ -42,6 +52,60 @@ public class LocalFileReadDataBucket extends AbstractReadDataBucket {
 	}
 
 	@Override
+	public Sequence sequence() {
+		return sequence;
+	}
+
+	@Override
+	public byte[] next() throws IOException {
+		checkStop();
+
+		try {
+			input.mark(Integer.MAX_VALUE);
+
+			int len = input.readInt();
+			if (len <= 0) {
+				throw new IOException(String.format(
+						"broken data found, expected to read %d bytes in bucket `%s`.", len, bucketName));
+			}
+
+			byte[] data = new byte[len];
+			int readable = input.read(data);
+			if (readable != len) {
+				throw new IOException(String.format("broken data found, expected to "
+						+ "read %d bytes but read %s bytes in bucket `%s`.", readable, len, bucketName));
+			}
+
+			sequence.addOffset(readable);
+			return data;
+		} catch (IOException io) {
+			try {
+				input.reset();
+			} catch (IOException ignore) {
+			}
+
+			throw io;
+		}
+	}
+
+	@Override
+	public void skip(long offset) throws IOException {
+		checkStop();
+
+		if (offset < 0) {
+			throw new IOException(String.format(
+					"failed to skip %s bytes in bucket `%s`.", offset, bucketName));
+		}
+
+		long count = offset;
+		while (count > 0) {
+			long skipLength = input.skip(count);
+			count -= skipLength;
+		}
+
+		sequence.addOffset(offset);
+	}
+
 	protected boolean checkCompressed() throws FileNotFoundException {
 		return ZipUtils.checkGZip(file);
 	}

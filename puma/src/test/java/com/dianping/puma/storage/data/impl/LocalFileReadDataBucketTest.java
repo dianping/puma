@@ -1,5 +1,6 @@
 package com.dianping.puma.storage.data.impl;
 
+import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.data.impl.LocalFileReadDataBucket;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -29,7 +30,7 @@ public class LocalFileReadDataBucketTest {
 		// Case 0.
 		File file_0 = new File(tempDir, "file_0");
 		createNewFile(file_0);
-		LocalFileReadDataBucket bucket_0 = new LocalFileReadDataBucket(file_0);
+		LocalFileReadDataBucket bucket_0 = new LocalFileReadDataBucket(new Sequence(0, 0, 0), file_0);
 		bucket_0.start();
 
 		DataOutputStream os_0 = new DataOutputStream(new FileOutputStream(file_0));
@@ -63,7 +64,7 @@ public class LocalFileReadDataBucketTest {
 		// Case 0.
 		File file_0 = new File(tempDir, "file_0");
 		createNewFile(file_0);
-		LocalFileReadDataBucket bucket_0 = new LocalFileReadDataBucket(file_0);
+		LocalFileReadDataBucket bucket_0 = new LocalFileReadDataBucket(new Sequence(0, 0, 0), file_0);
 		bucket_0.start();
 
 		DataOutputStream os_0 = new DataOutputStream(new FileOutputStream(file_0));
@@ -90,7 +91,7 @@ public class LocalFileReadDataBucketTest {
 		// Case 0.
 		File file_0 = new File(tempDir, "file_0");
 		createNewFile(file_0);
-		LocalFileReadDataBucket bucket_0 = new LocalFileReadDataBucket(file_0);
+		LocalFileReadDataBucket bucket_0 = new LocalFileReadDataBucket(new Sequence(0, 0, 0), file_0);
 		bucket_0.start();
 
 		DataOutputStream os_0 = new DataOutputStream(new FileOutputStream(file_0));
@@ -124,7 +125,7 @@ public class LocalFileReadDataBucketTest {
 		// Case 0.
 		File file_0 = new File(tempDir, "file_0");
 		createNewFile(file_0);
-		LocalFileReadDataBucket bucket_0 = new LocalFileReadDataBucket(file_0);
+		LocalFileReadDataBucket bucket_0 = new LocalFileReadDataBucket(new Sequence(0, 0, 0), file_0);
 		bucket_0.start();
 
 		try {

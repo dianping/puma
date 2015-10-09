@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.TreeMap;
 
 public class LocalFileDataBucketManager extends AbstractLifeCycle implements DataBucketManager {
@@ -67,17 +68,17 @@ public class LocalFileDataBucketManager extends AbstractLifeCycle implements Dat
 		if (file == null) {
 			return null;
 		}
-		return DataBucketFactory.newLocalFileReadDataBucket(file);
+		return DataBucketFactory.newLocalFileReadDataBucket(sequenceNoOffset, file);
 	}
 
 	@Override
 	public ReadDataBucket findNextReadDataBucket(Sequence sequence) throws IOException {
 		loadIndex();
-		File file = index.higherEntry(sequence).getValue();
-		if (file == null) {
+		Map.Entry<Sequence, File> entry = index.higherEntry(sequence);
+		if (entry == null) {
 			return null;
 		}
-		return DataBucketFactory.newLocalFileReadDataBucket(file);
+		return DataBucketFactory.newLocalFileReadDataBucket(entry.getKey(), entry.getValue());
 	}
 
 	protected void loadIndex() throws IOException {

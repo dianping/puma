@@ -24,8 +24,6 @@ public class DefaultReadDataManager extends AbstractLifeCycle implements ReadDat
 
 	private ReadDataBucket readDataBucket;
 
-	private Sequence sequence;
-
 	public DefaultReadDataManager(String masterBaseDir, String slaveBaseDir, String database) {
 		this.masterBaseDir = masterBaseDir;
 		this.slaveBaseDir = slaveBaseDir;
@@ -72,11 +70,9 @@ public class DefaultReadDataManager extends AbstractLifeCycle implements ReadDat
 	public byte[] next() throws IOException {
 		while (true) {
 			try {
-				byte[] data = readDataBucket.next();
-				sequence.addOffset(data.length);
-				return data;
+				return readDataBucket.next();
 			} catch (EOFException eof) {
-				openNext(sequence);
+				openNext(readDataBucket.sequence());
 			}
 		}
 	}
@@ -96,7 +92,5 @@ public class DefaultReadDataManager extends AbstractLifeCycle implements ReadDat
 						String.format("failed to get next read data bucket for database `%s`.", database));
 			}
 		}
-
-		// @todo: set sequence.
 	}
 }

@@ -2,7 +2,6 @@ package com.dianping.puma.storage.data.impl;
 
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.data.AbstractReadDataBucket;
 import com.dianping.puma.storage.data.ReadDataBucket;
 import com.dianping.puma.utils.ZipUtils;
 

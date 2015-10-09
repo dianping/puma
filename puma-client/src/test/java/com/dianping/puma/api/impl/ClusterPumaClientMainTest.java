@@ -21,53 +21,27 @@ public class ClusterPumaClientMainTest {
 
 	public static void main(String[] args) {
 
-		BasicConfigurator.configure();
-
-		List<String> tables = new ArrayList<String>();
-		tables.add("UOD_Order0");
-		tables.add("UOD_Order1");
-		tables.add("UOD_OrderExtraFields0");
-		tables.add("UOD_OrderExtraFields1");
-		tables.add("UOD_OrderLog0");
-		tables.add("UOD_OrderLog1");
-		tables.add("UOD_OrderPaymentDetail0");
-		tables.add("UOD_OrderPaymentDetail1");
-		tables.add("UOD_OrderSKU0");
-		tables.add("UOD_OrderSKU1");
-		tables.add("UOD_OrderSKUExtraFields0");
-		tables.add("UOD_OrderSKUExtraFields1");
-
+		//BasicConfigurator.configure();
 		PumaClient client = new PumaClientConfig()
-				.setClientName("dozer-debug")
-				.setDatabase("UnifiedOrder0")
-				.setTables(tables)
-				.setDdl(true)
-				.setDml(true)
-				.setTransaction(true)
+				.setClientName("technician-client")
+				.setDatabase("Profession")
+				.setTables(Lists.newArrayList("Technician"))
 						//                .buildClusterPumaClient();
 				.setServerHosts(Lists.newArrayList("10.3.16.16:4040"))
 				.buildFixedClusterPumaClient();
 
-		final int size = 100;
+		while (true) {
+			try {
+				BinlogMessage message = client.get(1, 1, TimeUnit.SECONDS);
 
-		PumaClientLock lock = new PumaClientLock("dozer-debug");
-		try {
-			while (!Thread.interrupted()) {
-				if (!lock.isLocked()) {
-					lock.lock();
+				for (Event event: message.getBinlogEvents()) {
+					System.out.println(event);
 				}
 
-				try {
-					BinlogMessage message = client.get(size, 1, TimeUnit.SECONDS);
-					client.ack(message.getLastBinlogInfo());
-				} catch (Exception exp) {
-					exp.printStackTrace();
-				}
+				client.ack(message.getLastBinlogInfo());
+			} catch (Throwable t) {
+
 			}
-		} catch (Throwable t) {
-
-		} finally {
-			lock.unlockQuietly();
 		}
 	}
 }

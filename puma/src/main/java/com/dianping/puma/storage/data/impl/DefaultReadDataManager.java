@@ -52,26 +52,31 @@ public class DefaultReadDataManager extends AbstractLifeCycle implements ReadDat
 		// 先找到sequence对应的bucket文件，再移动相应的偏移量。
 		long offset = sequence.getOffset();
 
+		// 先在slave中查找
 		readDataBucket = slave.findReadDataBucket(sequence);
 		if (readDataBucket != null) {
 			readDataBucket.skip(offset);
 		} else {
+			// 后在master中查找
 			readDataBucket = master.findReadDataBucket(sequence);
 			if (readDataBucket != null) {
 				readDataBucket.skip(offset);
 			} else {
 				throw new IOException(
-						String.format("failed to get read data bucket for database `%s`", database));
+						String.format("failed to open read data bucket for database `%s`", database));
 			}
 		}
 	}
 
 	@Override
 	public byte[] next() throws IOException {
+		checkStop();
+
 		while (true) {
 			try {
 				return readDataBucket.next();
 			} catch (EOFException eof) {
+				// 读完一个bucket后，打开下一个bucket
 				openNext(readDataBucket.sequence());
 			}
 		}
@@ -84,12 +89,14 @@ public class DefaultReadDataManager extends AbstractLifeCycle implements ReadDat
 	protected void openNext(Sequence sequence) throws IOException {
 		checkStop();
 
+		// 先在slave中查找
 		readDataBucket = slave.findNextReadDataBucket(sequence);
 		if (readDataBucket == null) {
+			// 后在master中查找
 			readDataBucket = master.findNextReadDataBucket(sequence);
 			if (readDataBucket == null) {
 				throw new IOException(
-						String.format("failed to get next read data bucket for database `%s`.", database));
+						String.format("failed to open next read data bucket for database `%s`.", database));
 			}
 		}
 	}

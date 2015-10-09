@@ -112,7 +112,7 @@ public class SimplePumaClient implements PumaClient {
     private void logResult(BinlogMessage message) {
         for (com.dianping.puma.core.event.Event event : message.getBinlogEvents()) {
             if (event.getBinlogInfo() != null) {
-                eventLogger.info(pumaServerHost + "/" + event.getBinlogInfo().hashCode());
+//                eventLogger.info(pumaServerHost + "/" + event.getBinlogInfo().hashCode());
             }
         }
     }

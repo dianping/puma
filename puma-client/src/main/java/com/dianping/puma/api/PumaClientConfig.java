@@ -7,6 +7,8 @@ import java.util.List;
 
 public class PumaClientConfig {
 
+	private boolean enableEventLog = false;
+
 	private String clientName;
 
 	private String database;
@@ -77,7 +79,16 @@ public class PumaClientConfig {
 		return this;
 	}
 
-	public String getClientName() {
+    public boolean isEnableEventLog() {
+        return enableEventLog;
+    }
+
+    public PumaClientConfig setEnableEventLog(boolean enableEventLog) {
+        this.enableEventLog = enableEventLog;
+        return this;
+    }
+
+    public String getClientName() {
 		return clientName;
 	}
 

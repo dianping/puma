@@ -9,9 +9,9 @@ import java.io.*;
 public class LocalFileWriteDataBucket extends AbstractLifeCycle implements WriteDataBucket {
 
 	/**
-	 * Due to the design of {@link Sequence}, the max size mb is 4096.
+	 * Due to the design of {@link Sequence}, the max size mb is 4096L * 1024L * 1024L.
 	 */
-	private final long maxSizeMB = 1024;
+	private final long maxSizeByte;
 
 	private Sequence sequence;
 
@@ -19,9 +19,10 @@ public class LocalFileWriteDataBucket extends AbstractLifeCycle implements Write
 
 	private DataOutputStream output;
 
-	public LocalFileWriteDataBucket(Sequence sequence, File file) {
+	public LocalFileWriteDataBucket(Sequence sequence, File file, long maxSizeByte) {
 		this.sequence = sequence;
 		this.file = file;
+		this.maxSizeByte = maxSizeByte;
 	}
 
 	@Override
@@ -46,7 +47,10 @@ public class LocalFileWriteDataBucket extends AbstractLifeCycle implements Write
 		checkStop();
 
 		output.writeInt(data.length);
+		sequence.incrOffset(4);
+
 		output.write(data);
+		sequence.incrOffset(data.length);
 	}
 
 	@Override
@@ -58,6 +62,6 @@ public class LocalFileWriteDataBucket extends AbstractLifeCycle implements Write
 
 	@Override
 	public boolean hasRemainingForWrite() throws IOException {
-		return sequence.getOffset() < maxSizeMB * 1024L * 1024L;
+		return sequence.getOffset() < maxSizeByte;
 	}
 }

@@ -78,6 +78,10 @@ public class Sequence {
 		return new Sequence(creationDate, number, this.offset + (int) delta, (int) delta);
 	}
 
+	public void incrOffset(int delta) {
+		this.offset += delta;
+	}
+
 	/**
 	 * 获得本sequence对应的偏移量为0的sequence的新实例
 	 * 

@@ -6,6 +6,6 @@ import com.dianping.puma.storage.data.impl.LocalFileDataBucketManager;
 public class DataBucketManagerFactory {
 
 	public static DataBucketManager newDataBucketManager(String baseDir, String database) {
-		return new LocalFileDataBucketManager(baseDir, baseDir);
+		return new LocalFileDataBucketManager(baseDir, database);
 	}
 }

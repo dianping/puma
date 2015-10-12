@@ -146,6 +146,12 @@ public class LocalFileReadDataBucketTest {
 		}
 	}
 
+	protected void createNewFolder(File file) throws IOException {
+		if (!file.mkdirs()) {
+			throw new RuntimeException("failed to create new folder.");
+		}
+	}
+
 	protected void createNewFile(File file) throws IOException {
 		if (!file.createNewFile()) {
 			throw new RuntimeException("failed to create new file.");

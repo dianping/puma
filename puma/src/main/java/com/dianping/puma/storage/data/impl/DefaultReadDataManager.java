@@ -43,6 +43,8 @@ public class DefaultReadDataManager extends AbstractLifeCycle implements ReadDat
 	public void doStop() {
 		master.stop();
 		slave.stop();
+
+		readDataBucket.stop();
 	}
 
 	@Override
@@ -54,18 +56,18 @@ public class DefaultReadDataManager extends AbstractLifeCycle implements ReadDat
 
 		// 先在slave中查找
 		readDataBucket = slave.findReadDataBucket(sequence);
-		if (readDataBucket != null) {
-			readDataBucket.skip(offset);
-		} else {
+		if (readDataBucket == null) {
 			// 后在master中查找
 			readDataBucket = master.findReadDataBucket(sequence);
-			if (readDataBucket != null) {
-				readDataBucket.skip(offset);
-			} else {
+			if (readDataBucket == null) {
 				throw new IOException(
-						String.format("failed to open read data bucket for database `%s`", database));
+						String.format("failed to open read data bucket for database `%s`.", database));
 			}
 		}
+
+		// 启动bucket
+		readDataBucket.start();
+		readDataBucket.skip(offset);
 	}
 
 	@Override
@@ -76,10 +78,16 @@ public class DefaultReadDataManager extends AbstractLifeCycle implements ReadDat
 			try {
 				return readDataBucket.next();
 			} catch (EOFException eof) {
-				// 读完一个bucket后，打开下一个bucket
-				openNext(readDataBucket.sequence());
+				// 读完一个bucket后，关闭当前bucket，打开下一个bucket
+				Sequence sequence = readDataBucket.sequence();
+				close(readDataBucket);
+				openNext(sequence);
 			}
 		}
+	}
+
+	protected void close(ReadDataBucket bucket) {
+		bucket.stop();
 	}
 
 	protected void skip(ReadDataBucket readDataBucket, long offset) throws IOException {
@@ -89,7 +97,7 @@ public class DefaultReadDataManager extends AbstractLifeCycle implements ReadDat
 	protected void openNext(Sequence sequence) throws IOException {
 		checkStop();
 
-		// 先在slave中查找
+		// 先在slave中查找,slave中的日期必定早于master
 		readDataBucket = slave.findNextReadDataBucket(sequence);
 		if (readDataBucket == null) {
 			// 后在master中查找
@@ -99,5 +107,8 @@ public class DefaultReadDataManager extends AbstractLifeCycle implements ReadDat
 						String.format("failed to open next read data bucket for database `%s`.", database));
 			}
 		}
+
+		// 启动bucket
+		readDataBucket.start();
 	}
 }

@@ -180,6 +180,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
                     Thread.sleep(EMPTY_SLEEP_TIME);
                 }
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 LOG.info("AsyncTask has be Interrupted");
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);

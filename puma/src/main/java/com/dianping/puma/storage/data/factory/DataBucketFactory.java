@@ -10,13 +10,11 @@ import java.io.File;
 
 public class DataBucketFactory {
 
-	private static final long maxSizeByte = 1024L * 1024L * 1024L; // 1G.
-
 	public static ReadDataBucket newLocalFileReadDataBucket(Sequence sequence, File file) {
 		return new LocalFileReadDataBucket(sequence, file);
 	}
 
 	public static WriteDataBucket newLocalFileWriteDataBucket(Sequence sequence, File file) {
-		return new LocalFileWriteDataBucket(sequence, file, maxSizeByte);
+		return new LocalFileWriteDataBucket(sequence, file);
 	}
 }

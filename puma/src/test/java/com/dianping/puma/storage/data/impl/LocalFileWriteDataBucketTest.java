@@ -24,12 +24,13 @@ public class LocalFileWriteDataBucketTest {
 	@Before
 	public void before() throws IOException {
 		tempDir = new File(System.getProperty("java.io.tmpdir"), "puma");
+		deleteNewFolder(tempDir);
 		createNewFolder(tempDir);
 
 		tempFile = new File(tempDir, "test-file");
 		createNewFile(tempFile);
 
-		bucket = new LocalFileWriteDataBucket(new Sequence(20151012, 0, 0), tempFile, 50);
+		bucket = new LocalFileWriteDataBucket(new Sequence(20151012, 0, 0), tempFile, 50, 50);
 		bucket.start();
 	}
 
@@ -39,6 +40,7 @@ public class LocalFileWriteDataBucketTest {
 		bucket.append(new byte[]{'c', 'd', 'e'});
 		bucket.append(new byte[]{'f', 'g', 'h', 'i'});
 		bucket.append(new byte[]{'j', 'k', 'l', 'm', 'n'});
+		bucket.flush();
 
 		DataInputStream input = new DataInputStream(new FileInputStream(tempFile));
 		assertEquals(2, input.readInt());
@@ -62,6 +64,7 @@ public class LocalFileWriteDataBucketTest {
 
 		bucket.append(new byte[]{'o'});
 		bucket.append(new byte[]{'p', 'q'});
+		bucket.flush();
 
 		assertEquals(1, input.readInt());
 		assertEquals('o', input.readByte());
@@ -75,18 +78,23 @@ public class LocalFileWriteDataBucketTest {
 		assertTrue(bucket.hasRemainingForWrite());
 
 		bucket.append(new byte[6]);
+		bucket.flush();
 		assertTrue(bucket.hasRemainingForWrite());
 
 		bucket.append(new byte[16]);
+		bucket.flush();
 		assertTrue(bucket.hasRemainingForWrite());
 
 		bucket.append(new byte[15]);
+		bucket.flush();
 		assertTrue(bucket.hasRemainingForWrite());
 
 		bucket.append(new byte[1]);
+		bucket.flush();
 		assertFalse(bucket.hasRemainingForWrite());
 
 		bucket.append(new byte[10]);
+		bucket.flush();
 		assertFalse(bucket.hasRemainingForWrite());
 	}
 

@@ -8,10 +8,9 @@ import java.io.*;
 
 public class LocalFileWriteDataBucket extends AbstractLifeCycle implements WriteDataBucket {
 
-	/**
-	 * Due to the design of {@link Sequence}, the max size mb is 4096L * 1024L * 1024L.
-	 */
-	private final long maxSizeByte;
+	private int bufSizeByte = 100 * 1024; // 默认buffer大小为100K
+
+	private int maxSizeByte = 1024 * 1024 * 1024; // 默认文件大小为1G
 
 	private Sequence sequence;
 
@@ -19,16 +18,22 @@ public class LocalFileWriteDataBucket extends AbstractLifeCycle implements Write
 
 	private DataOutputStream output;
 
-	public LocalFileWriteDataBucket(Sequence sequence, File file, long maxSizeByte) {
+	public LocalFileWriteDataBucket(Sequence sequence, File file) {
+		this.sequence = sequence;
+		this.file = file;
+	}
+
+	public LocalFileWriteDataBucket(Sequence sequence, File file, int maxSizeByte, int bufSizeByte) {
 		this.sequence = sequence;
 		this.file = file;
 		this.maxSizeByte = maxSizeByte;
+		this.bufSizeByte = bufSizeByte;
 	}
 
 	@Override
 	protected void doStart() {
 		try {
-			output = new DataOutputStream(new FileOutputStream(file));
+			output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file), bufSizeByte));
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException("failed to start local file write data bucket.", e);
 		}
@@ -40,6 +45,11 @@ public class LocalFileWriteDataBucket extends AbstractLifeCycle implements Write
 			output.close();
 		} catch (IOException ignore) {
 		}
+	}
+
+	@Override
+	public Sequence sequence() {
+		return sequence;
 	}
 
 	@Override

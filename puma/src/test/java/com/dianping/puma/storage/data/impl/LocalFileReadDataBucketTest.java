@@ -17,7 +17,7 @@ public class LocalFileReadDataBucketTest {
 
 	@Before
 	public void before() {
-		tempDir = new File(System.getProperty("java.io.tempdir"), "puma");
+		tempDir = new File(System.getProperty("java.io.tmpdir"), "puma");
 		if (!tempDir.mkdirs()) {
 			throw new RuntimeException("failed to create temp directory.");
 		}

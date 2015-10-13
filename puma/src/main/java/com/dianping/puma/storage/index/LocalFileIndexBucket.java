@@ -54,12 +54,7 @@ public class LocalFileIndexBucket<K, V extends IndexValue<K>> implements IndexBu
 		try {
 			int len = this.input.readInt();
 			byte[] bytes = new byte[len];
-			int readable = this.input.read(bytes);
-
-			if (readable != len) {
-				throw new IOException("found broken index!");
-			}
-
+			this.input.readFully(bytes);
 			prePosition = currentPosition;
 			currentPosition += 4 + len;
 			V result = this.valueConvertor.convertFromObj(bytes);

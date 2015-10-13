@@ -141,7 +141,7 @@ public class DefaultBucketManager implements BucketManager {
 
 	public synchronized void start() {
 		stopped = false;
-//		startArchiveJob();
+		startArchiveJob();
 		startCleanupJob();
 	}
 

@@ -44,7 +44,7 @@ while(true) {
 		// Do business logic.
 		// ...
 		client.ack(binlogMessage.getBinlogInfo());
-	} catch(Throwable t) {
+	} catch(Exception e) {
 		// Error handling.
 	}
 }
@@ -67,7 +67,7 @@ try {
 			// Do business logic.
 			// ...
 			client.ack(message.getLastBinlogInfo());
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			// Error handling.
 		}
 } finally {

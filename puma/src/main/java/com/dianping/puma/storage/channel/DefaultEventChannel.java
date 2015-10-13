@@ -136,24 +136,25 @@ public class DefaultEventChannel extends AbstractEventChannel implements EventCh
 
     private DataBucketManager createSlaveDataBucketManager() throws IOException {
         DataBucketManager slaveIndex = createDataBucketManager(GlobalStorageConfig.slaveStorageBaseDir,
-                GlobalStorageConfig.slaveBucketFilePrefix, database, GlobalStorageConfig.maxMasterBucketLengthMB);
+                GlobalStorageConfig.slaveBucketFilePrefix, database, GlobalStorageConfig.maxMasterBucketLengthMB, false);
         slaveIndex.start();
         return slaveIndex;
     }
 
     private DataBucketManager createMasterDataBucketManager() throws IOException {
         DataBucketManager masterIndex = createDataBucketManager(GlobalStorageConfig.masterStorageBaseDir,
-                GlobalStorageConfig.masterBucketFilePrefix, database, GlobalStorageConfig.maxMasterBucketLengthMB);
+                GlobalStorageConfig.masterBucketFilePrefix, database, GlobalStorageConfig.maxMasterBucketLengthMB, true);
         masterIndex.start();
         return masterIndex;
     }
 
-    private DataBucketManager createDataBucketManager(String baseDir, String prefix, String database, int lengthMB) {
+    private DataBucketManager createDataBucketManager(String baseDir, String prefix, String database, int lengthMB, boolean isMaster) {
         LocalFileDataBucketManager bucketManager = new LocalFileDataBucketManager();
 
         bucketManager.setBaseDir(baseDir + "/" + database);
         bucketManager.setBucketFilePrefix(prefix);
         bucketManager.setMaxBucketLengthMB(lengthMB);
+        bucketManager.setMaster(isMaster);
 
         return bucketManager;
     }

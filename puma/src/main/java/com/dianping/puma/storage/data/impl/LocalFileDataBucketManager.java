@@ -2,6 +2,7 @@ package com.dianping.puma.storage.data.impl;
 
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.storage.Sequence;
+import com.dianping.puma.storage.data.WriteDataBucket;
 import com.dianping.puma.storage.data.factory.DataBucketFactory;
 import com.dianping.puma.storage.data.DataBucketManager;
 import com.dianping.puma.storage.data.ReadDataBucket;
@@ -79,6 +80,11 @@ public class LocalFileDataBucketManager extends AbstractLifeCycle implements Dat
 			return null;
 		}
 		return DataBucketFactory.newLocalFileReadDataBucket(entry.getKey(), entry.getValue());
+	}
+
+	@Override
+	public WriteDataBucket genNextWriteDataBucket() throws IOException {
+		return null;
 	}
 
 	protected void loadIndex() throws IOException {

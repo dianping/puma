@@ -13,4 +13,6 @@ public interface DataBucketManager extends LifeCycle {
 	public ReadDataBucket findReadDataBucket(Sequence sequence) throws IOException;
 
 	public ReadDataBucket findNextReadDataBucket(Sequence sequence) throws IOException;
+
+	public WriteDataBucket genNextWriteDataBucket() throws IOException;
 }

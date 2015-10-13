@@ -1,7 +1,6 @@
 package com.dianping.puma.storage.data.factory;
 
 import com.dianping.puma.storage.data.ReadDataManager;
-import com.dianping.puma.storage.data.WriteDataManager;
 import com.dianping.puma.storage.data.impl.DefaultReadDataManager;
 
 public class DataManagerFactory {
@@ -12,9 +11,5 @@ public class DataManagerFactory {
 
 	public static ReadDataManager newReadDataManager(String database) {
 		return new DefaultReadDataManager(masterBaseDir, slaveBaseDir, database);
-	}
-
-	public static WriteDataManager newWriteDataManager(String database) {
-		return null;
 	}
 }

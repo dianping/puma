@@ -22,7 +22,7 @@ public class LocalFileDataBucketManagerTest {
 
 	@Before
 	public void before() throws IOException {
-		tempDir = new File(System.getProperty("java.io.tempdir"), "test");
+		tempDir = new File(System.getProperty("java.io.tmpdir"), "test");
 
 		FileUtils.deleteDirectory(tempDir);
 		createNewFolder(tempDir);

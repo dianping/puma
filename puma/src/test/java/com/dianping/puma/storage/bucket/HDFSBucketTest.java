@@ -17,6 +17,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.dianping.puma.core.codec.JsonEventCodec;
@@ -26,6 +27,7 @@ import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.bucket.HDFSDataBucket;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
+@Ignore
 public class HDFSBucketTest {
 
 	protected HDFSDataBucket			hdfsBucket;

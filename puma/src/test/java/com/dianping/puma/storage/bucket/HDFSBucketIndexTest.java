@@ -15,10 +15,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.security.SecurityUtil;
 import org.apache.hadoop.security.UserGroupInformation;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.event.DdlEvent;
@@ -29,6 +26,7 @@ import com.dianping.puma.storage.bucket.HDFSDataBucket;
 import com.dianping.puma.storage.bucket.HDFSDataBucketManager;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
+@Ignore
 public class HDFSBucketIndexTest {
 
     protected File               work            = null;

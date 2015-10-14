@@ -20,7 +20,7 @@ public class BinlogAckDecoderTest {
     public void test_match_and_decode() throws Exception {
         FullHttpRequest request = new DefaultFullHttpRequest(
                 HttpVersion.HTTP_1_1, HttpMethod.GET,
-                "/puma/binlog/ack?token=1&clientName=xx&binlogFile=f1&binlogPosition=1");
+                "/puma/binlog/ack?token=1&clientName=xx&binlogFile=f1&binlogPosition=1&serverId=2&timestamp=3");
 
         Assert.assertTrue(target.match(request));
 
@@ -31,5 +31,7 @@ public class BinlogAckDecoderTest {
         Assert.assertEquals("xx", result.getClientName());
         Assert.assertEquals("f1", result.getBinlogAck().getBinlogInfo().getBinlogFile());
         Assert.assertEquals(1, result.getBinlogAck().getBinlogInfo().getBinlogPosition());
+        Assert.assertEquals(2, result.getBinlogAck().getBinlogInfo().getServerId());
+        Assert.assertEquals(3, result.getBinlogAck().getBinlogInfo().getTimestamp());
     }
 }

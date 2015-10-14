@@ -2,6 +2,7 @@ package com.dianping.puma.core.util.sql;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
@@ -66,7 +67,7 @@ public class DDLParserTest {
 	@Test
 	public void testReplaceDdl() throws InvocationTargetException, IllegalAccessException {
 		String sql = "ALTER TABLE Persons ALTER COLUMN DateOfBirth year";
-		String expected = "ALTER TABLE Puma.test ALTER COLUMN DateOfBirth year";
+		String expected = "ALTER TABLE `Puma`.`test` ALTER COLUMN DateOfBirth year";
 		String result = DDLParser.replaceDdl(sql, "Puma", "test", DDLType.ALTER_TABLE);
 		Assert.assertEquals(expected, result);
 	}

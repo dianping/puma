@@ -574,7 +574,7 @@ public class LocalBucketIndexTest {
         System.out.println("***********************testGetBaseDir*************************");
         System.out.println("**************************************************************");
         this.localBucketIndex.start();
-        Assert.assertEquals((System.getProperty("java.io.tmpdir", ".").toString() + "Puma"),
+        Assert.assertEquals(new File(System.getProperty("java.io.tmpdir", "."), "Puma").getAbsolutePath(),
                 this.localBucketIndex.getBaseDir());
         System.out.println("*************************************************************");
         System.out.println("****************************End******************************");

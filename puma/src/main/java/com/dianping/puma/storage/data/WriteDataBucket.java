@@ -7,11 +7,13 @@ import java.io.IOException;
 
 public interface WriteDataBucket extends LifeCycle {
 
+	public String name();
+
 	public Sequence sequence();
 
 	public void append(byte[] data) throws IOException;
 
 	public void flush() throws IOException;
 
-	public boolean hasRemainingForWrite() throws IOException;
+	public boolean hasRemainingForWrite();
 }

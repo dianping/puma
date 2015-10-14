@@ -18,6 +18,10 @@ public class LocalFileWriteDataBucket extends AbstractLifeCycle implements Write
 
 	private DataOutputStream output;
 
+	private int date;
+
+	private int index;
+
 	public LocalFileWriteDataBucket(Sequence sequence, File file) {
 		this.sequence = sequence;
 		this.file = file;
@@ -48,6 +52,11 @@ public class LocalFileWriteDataBucket extends AbstractLifeCycle implements Write
 	}
 
 	@Override
+	public String name() {
+		return null;
+	}
+
+	@Override
 	public Sequence sequence() {
 		return sequence;
 	}
@@ -71,7 +80,7 @@ public class LocalFileWriteDataBucket extends AbstractLifeCycle implements Write
 	}
 
 	@Override
-	public boolean hasRemainingForWrite() throws IOException {
+	public boolean hasRemainingForWrite() {
 		return sequence.getOffset() < maxSizeByte;
 	}
 }

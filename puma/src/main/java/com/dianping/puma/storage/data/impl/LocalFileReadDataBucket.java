@@ -31,7 +31,7 @@ public class LocalFileReadDataBucket extends AbstractLifeCycle implements ReadDa
 		try {
 			if (checkCompressed()) {
 				input = new DataInputStream(new GZIPInputStream(
-								new BufferedInputStream(new FileInputStream(file), READ_BUF_SIZE)));
+						new BufferedInputStream(new FileInputStream(file), READ_BUF_SIZE)));
 			} else {
 				input = new DataInputStream(new BufferedInputStream(new FileInputStream(file), READ_BUF_SIZE));
 			}

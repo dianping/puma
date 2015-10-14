@@ -12,9 +12,7 @@ public interface ReadManager extends LifeCycle {
 
 	void openLatest() throws IOException;
 
-	void openByBinlog(BinlogInfo binlogInfo) throws IOException;
-
-	void openByTime(BinlogInfo binlogInfo) throws IOException;
+	void open(BinlogInfo binlogInfo) throws IOException;
 
 	ChangedEvent next() throws IOException;
 }

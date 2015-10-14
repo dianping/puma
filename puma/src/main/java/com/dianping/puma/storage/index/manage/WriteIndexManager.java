@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.index;
+package com.dianping.puma.storage.index.manage;
 
 import com.dianping.puma.common.LifeCycle;
 

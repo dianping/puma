@@ -1,12 +1,10 @@
-package com.dianping.puma.storage.index;
+package com.dianping.puma.storage.index.manage;
 
 import com.dianping.puma.common.LifeCycle;
 
 import java.io.IOException;
 
 public interface ReadIndexManager<K, V> extends LifeCycle {
-
-	void open() throws IOException;
 
 	V findOldest() throws IOException;
 

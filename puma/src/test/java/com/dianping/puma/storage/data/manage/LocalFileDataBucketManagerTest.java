@@ -1,8 +1,9 @@
-package com.dianping.puma.storage.data.impl;
+package com.dianping.puma.storage.data.manage;
 
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.data.factory.DataBucketFactory;
-import com.dianping.puma.storage.data.ReadDataBucket;
+import com.dianping.puma.storage.data.bucket.ReadDataBucket;
+import com.dianping.puma.storage.data.manage.LocalFileDataBucketManager;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.After;

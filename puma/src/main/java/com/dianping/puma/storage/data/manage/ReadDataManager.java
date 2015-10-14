@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.data;
+package com.dianping.puma.storage.data.manage;
 
 import com.dianping.puma.common.LifeCycle;
 import com.dianping.puma.storage.Sequence;

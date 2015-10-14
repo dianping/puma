@@ -1,11 +1,10 @@
-package com.dianping.puma.storage.data.impl;
+package com.dianping.puma.storage.data.manage;
 
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.data.WriteDataBucket;
+import com.dianping.puma.storage.data.bucket.WriteDataBucket;
 import com.dianping.puma.storage.data.factory.DataBucketFactory;
-import com.dianping.puma.storage.data.DataBucketManager;
-import com.dianping.puma.storage.data.ReadDataBucket;
+import com.dianping.puma.storage.data.bucket.ReadDataBucket;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;

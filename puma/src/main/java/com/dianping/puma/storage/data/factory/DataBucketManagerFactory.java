@@ -1,7 +1,7 @@
 package com.dianping.puma.storage.data.factory;
 
-import com.dianping.puma.storage.data.DataBucketManager;
-import com.dianping.puma.storage.data.impl.LocalFileDataBucketManager;
+import com.dianping.puma.storage.data.manage.DataBucketManager;
+import com.dianping.puma.storage.data.manage.LocalFileDataBucketManager;
 
 public class DataBucketManagerFactory {
 

@@ -1,10 +1,10 @@
 package com.dianping.puma.storage.data.factory;
 
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.data.ReadDataBucket;
-import com.dianping.puma.storage.data.WriteDataBucket;
-import com.dianping.puma.storage.data.impl.LocalFileReadDataBucket;
-import com.dianping.puma.storage.data.impl.LocalFileWriteDataBucket;
+import com.dianping.puma.storage.data.bucket.ReadDataBucket;
+import com.dianping.puma.storage.data.bucket.WriteDataBucket;
+import com.dianping.puma.storage.data.bucket.LocalFileReadDataBucket;
+import com.dianping.puma.storage.data.bucket.LocalFileWriteDataBucket;
 
 import java.io.File;
 

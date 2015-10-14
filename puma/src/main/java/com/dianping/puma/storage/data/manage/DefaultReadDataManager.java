@@ -1,10 +1,10 @@
-package com.dianping.puma.storage.data.impl.deprecated;
+package com.dianping.puma.storage.data.manage;
 
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.data.DataBucketManager;
-import com.dianping.puma.storage.data.ReadDataBucket;
-import com.dianping.puma.storage.data.ReadDataManager;
+import com.dianping.puma.storage.data.manage.DataBucketManager;
+import com.dianping.puma.storage.data.bucket.ReadDataBucket;
+import com.dianping.puma.storage.data.manage.ReadDataManager;
 import com.dianping.puma.storage.data.factory.DataBucketManagerFactory;
 
 import java.io.EOFException;

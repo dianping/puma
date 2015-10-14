@@ -1,7 +1,7 @@
-package com.dianping.puma.storage.data.impl;
+package com.dianping.puma.storage.data.manage;
 
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.data.impl.deprecated.DefaultReadDataManager;
+import com.dianping.puma.storage.data.manage.DefaultReadDataManager;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;

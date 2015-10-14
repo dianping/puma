@@ -1,7 +1,7 @@
 package com.dianping.puma.storage.data.factory;
 
-import com.dianping.puma.storage.data.ReadDataManager;
-import com.dianping.puma.storage.data.impl.deprecated.DefaultReadDataManager;
+import com.dianping.puma.storage.data.manage.ReadDataManager;
+import com.dianping.puma.storage.data.manage.DefaultReadDataManager;
 
 public class DataManagerFactory {
 

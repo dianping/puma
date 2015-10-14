@@ -6,10 +6,14 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.data.DataBucketManager;
-import com.dianping.puma.storage.data.DataValue;
+import com.dianping.puma.storage.data.model.DataValue;
 import com.dianping.puma.storage.data.WriteDataBucket;
 import com.dianping.puma.storage.data.WriteDataManager;
 import com.dianping.puma.storage.index.*;
+import com.dianping.puma.storage.index.model.L1IndexKey;
+import com.dianping.puma.storage.index.model.L1IndexValue;
+import com.dianping.puma.storage.index.model.L2IndexKey;
+import com.dianping.puma.storage.index.model.L2IndexValue;
 import com.dianping.puma.storage.manage.WriteManager;
 
 import java.io.IOException;

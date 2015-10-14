@@ -5,9 +5,9 @@ import com.dianping.puma.storage.Sequence;
 
 import java.io.IOException;
 
-public interface ReadDataManager extends LifeCycle {
+public interface ReadDataManager<K, V> extends LifeCycle {
 
-	public void open(Sequence sequence) throws IOException;
+	void open(K dataKey) throws IOException;
 
-	public byte[] next() throws IOException;
+	V next() throws IOException;
 }

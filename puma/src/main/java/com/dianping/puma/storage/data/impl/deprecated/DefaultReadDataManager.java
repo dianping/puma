@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.data.impl;
+package com.dianping.puma.storage.data.impl.deprecated;
 
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.storage.Sequence;
@@ -47,7 +47,10 @@ public class DefaultReadDataManager extends AbstractLifeCycle implements ReadDat
 		readDataBucket.stop();
 	}
 
-	@Override
+	@Override public void open(Object dataKey) throws IOException {
+
+	}
+
 	public void open(Sequence sequence) throws IOException {
 		checkStop();
 

@@ -453,7 +453,7 @@ public class LocalBucketIndexTest {
 						+ Integer.toString(i));
 				work.getParentFile().mkdirs();
 				if (work.createNewFile()) {
-					System.out.println("create a file: " + work.getName());
+					System.out.println("create a file: " + work.getAbsolutePath());
 
 				}
 			}

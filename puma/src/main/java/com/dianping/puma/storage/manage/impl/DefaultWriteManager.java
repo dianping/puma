@@ -3,14 +3,13 @@ package com.dianping.puma.storage.manage.impl;
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.data.DataBucketManager;
+import com.dianping.puma.storage.data.DataValue;
 import com.dianping.puma.storage.data.WriteDataBucket;
-import com.dianping.puma.storage.oldindex.IndexKeyImpl;
-import com.dianping.puma.storage.oldindex.IndexValueImpl;
-import com.dianping.puma.storage.oldindex.WriteIndexManager;
+import com.dianping.puma.storage.data.WriteDataManager;
+import com.dianping.puma.storage.index.*;
 import com.dianping.puma.storage.manage.WriteManager;
 
 import java.io.IOException;
@@ -23,9 +22,13 @@ public class DefaultWriteManager extends AbstractLifeCycle implements WriteManag
 
 	private WriteDataBucket writeDataBucket;
 
-	private DataBucketManager masterDataBucketManager;
+	private WriteIndexManager<L1IndexKey, L1IndexValue> l1WriteIndexManager;
 
-	private WriteIndexManager<IndexKeyImpl, IndexValueImpl> writeIndexManager;
+	private WriteIndexManager<L2IndexKey, L2IndexValue> l2WriteIndexManager;
+
+	private WriteDataManager<DataValue> writeDataManager;
+
+	private DataBucketManager masterDataBucketManager;
 
 	private Sequence writeSequence;
 
@@ -70,9 +73,9 @@ public class DefaultWriteManager extends AbstractLifeCycle implements WriteManag
 
 		// Writes to L2 index bucket and data bucket.
 		writeL2Index(binlogEvent);
-		int length = writeData(binlogEvent);
+		writeData(binlogEvent);
 
-		writeSequence.incrOffset(length);
+		//writeSequence.incrOffset(length);
 		currDate = sdf.format(new Date());
 		currServerId = binlogInfo.getServerId();
 	}
@@ -100,18 +103,21 @@ public class DefaultWriteManager extends AbstractLifeCycle implements WriteManag
 		return masterDataBucketManager.genNextWriteDataBucket();
 	}
 
-	protected void writeL1Index(ChangedEvent binlogEvent) throws IOException {
+	protected int writeL1Index(ChangedEvent binlogEvent) throws IOException {
+		/*
 		IndexKeyImpl indexKey = new IndexKeyImpl(
 				binlogEvent.getExecuteTime(),
 				binlogEvent.getBinlogInfo().getServerId(),
 				binlogEvent.getBinlogInfo().getBinlogFile(),
 				binlogEvent.getBinlogInfo().getBinlogPosition()
-		);
+		);*/
 
-		writeIndexManager.addL1Index(indexKey, writeDataBucket.name());
+		return l1WriteIndexManager.append(null, null);
+		//writeIndexManager.addL1Index(indexKey, writeDataBucket.name());
 	}
 
-	protected void writeL2Index(ChangedEvent binlogEvent) throws IOException {
+	protected int writeL2Index(ChangedEvent binlogEvent) throws IOException {
+		/*
 		IndexKeyImpl indexKey = new IndexKeyImpl(
 				binlogEvent.getExecuteTime(),
 				binlogEvent.getBinlogInfo().getServerId(),
@@ -130,13 +136,17 @@ public class DefaultWriteManager extends AbstractLifeCycle implements WriteManag
 		l2Index.setSequence(new Sequence(binlogEvent.getSeq(), 0));
 		l2Index.setIndexKey(indexKey);
 
-		writeIndexManager.addL2Index(indexKey, l2Index);
+		writeIndexManager.addL2Index(indexKey, l2Index);*/
+
+		return l2WriteIndexManager.append(null, null);
 	}
 
 	protected int writeData(ChangedEvent binlogEvent) throws IOException {
+		/*
 		byte[] data = codec.encode(binlogEvent);
 		writeDataBucket.append(data);
-		return data.length;
+		return data.length;*/
+		return writeDataManager.append(null);
 	}
 
 	private class FlushTask implements Runnable {

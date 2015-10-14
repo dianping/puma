@@ -6,5 +6,7 @@ import java.io.IOException;
 
 public interface WriteIndexManager<K, V> extends LifeCycle {
 
-	void append(K indexKey, V indexValue) throws IOException;
+	int append(K indexKey, V indexValue) throws IOException;
+
+	void flush() throws IOException;
 }

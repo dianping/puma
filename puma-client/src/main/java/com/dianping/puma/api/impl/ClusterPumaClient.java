@@ -1,6 +1,9 @@
 package com.dianping.puma.api.impl;
 
-import com.dianping.puma.api.*;
+import com.dianping.puma.api.PumaClient;
+import com.dianping.puma.api.PumaClientConfig;
+import com.dianping.puma.api.PumaClientException;
+import com.dianping.puma.api.PumaServerRouter;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -35,9 +38,6 @@ public class ClusterPumaClient implements PumaClient {
 
     protected volatile SimplePumaClient client;
 
-    public ClusterPumaClient() {
-    }
-
     public ClusterPumaClient(PumaClientConfig config) {
         clientName = config.getClientName();
         database = config.getDatabase();
@@ -70,31 +70,7 @@ public class ClusterPumaClient implements PumaClient {
 
     @Override
     public BinlogMessage get(int batchSize) throws PumaClientException {
-        if (needNewClient()) {
-            client = newClient();
-        }
-
-        Exception lastException = null;
-        for (int i = 0; i <= retryTimes; ++i) {
-            try {
-                return client.get(batchSize);
-            } catch (Exception t) {
-                lastException = t;
-                if (i == retryTimes) {
-                    break;
-                }
-
-                logger.warn("[{}] failed to get binlog message from server({}).\n{}",
-                        new Object[]{clientName, client.getServerHost(), ExceptionUtils.getStackTrace(t)});
-
-                Uninterruptibles.sleepUninterruptibly(retryInterval, TimeUnit.MILLISECONDS);
-                client = newClient();
-            }
-        }
-
-        String msg = String.format("[%s] failed to get after %s times retries.", clientName, retryTimes);
-        logger.error(msg);
-        throw new PumaClientException(msg, lastException);
+        return get(batchSize, 0, null);
     }
 
     @Override
@@ -129,62 +105,16 @@ public class ClusterPumaClient implements PumaClient {
 
     @Override
     public BinlogMessage getWithAck(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException {
-        if (needNewClient()) {
-            client = newClient();
-        }
-
-        Exception lastException = null;
-        for (int i = 0; i <= retryTimes; ++i) {
-            try {
-                return client.getWithAck(batchSize, timeout, timeUnit);
-            } catch (Exception t) {
-                lastException = t;
-                if (i == retryTimes) {
-                    break;
-                }
-
-                logger.warn("failed to get binlog message with ack from server {}.\n{}",
-                        client.getServerHost(),
-                        ExceptionUtils.getStackTrace(t));
-
-                Uninterruptibles.sleepUninterruptibly(retryInterval, TimeUnit.MILLISECONDS);
-                client = newClient();
-            }
-        }
-
-        String msg = String.format("[%s] failed to get with ack after %s times retries.", clientName, retryTimes);
-        logger.error(msg);
-        throw new PumaClientException(msg, lastException);
+        BinlogMessage message = get(batchSize, timeout, timeUnit);
+        ack(message.getLastBinlogInfo());
+        return message;
     }
 
     @Override
     public BinlogMessage getWithAck(int batchSize) throws PumaClientException {
-        if (needNewClient()) {
-            client = newClient();
-        }
-
-        Exception lastException = null;
-        for (int i = 0; i <= retryTimes; ++i) {
-            try {
-                return client.getWithAck(batchSize);
-            } catch (Exception t) {
-                lastException = t;
-                if (i == retryTimes) {
-                    break;
-                }
-
-                logger.warn("failed to get binlog message with ack from server {}.\n{}",
-                        client.getServerHost(),
-                        ExceptionUtils.getStackTrace(t));
-
-                Uninterruptibles.sleepUninterruptibly(retryInterval, TimeUnit.MILLISECONDS);
-                client = newClient();
-            }
-        }
-
-        String msg = String.format("[%s] failed to get with ack after %s times retries.", clientName, retryTimes);
-        logger.error(msg);
-        throw new PumaClientException(msg, lastException);
+        BinlogMessage message = get(batchSize);
+        ack(message.getLastBinlogInfo());
+        return message;
     }
 
     @Override
@@ -220,33 +150,7 @@ public class ClusterPumaClient implements PumaClient {
 
     @Override
     public void rollback() throws PumaClientException {
-        if (needNewClient()) {
-            client = newClient();
-        }
-
-        Exception lastException = null;
-        for (int i = 0; i <= retryTimes; ++i) {
-            try {
-                client.rollback();
-                return;
-            } catch (Exception t) {
-                lastException = t;
-                if (i == retryTimes) {
-                    break;
-                }
-
-                logger.warn("failed to rollback binlog message from server {}.\n{}",
-                        client.getServerHost(),
-                        ExceptionUtils.getStackTrace(t));
-
-                Uninterruptibles.sleepUninterruptibly(retryInterval, TimeUnit.MILLISECONDS);
-                client = newClient();
-            }
-        }
-
-        String msg = String.format("[%s] failed to rollback after %s times retries.", clientName, retryTimes);
-        logger.error(msg);
-        throw new PumaClientException(msg, lastException);
+        rollback(null);
     }
 
     @Override

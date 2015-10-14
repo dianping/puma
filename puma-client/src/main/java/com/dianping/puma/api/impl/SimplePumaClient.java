@@ -5,7 +5,6 @@ import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.PumaClientConfig;
 import com.dianping.puma.api.PumaClientException;
-import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.codec.EventCodecFactory;
 import com.dianping.puma.core.dto.BinlogMessage;
@@ -47,7 +46,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@ThreadUnSafe
 public class SimplePumaClient implements PumaClient {
 
     static {
@@ -82,6 +80,7 @@ public class SimplePumaClient implements PumaClient {
 
     private final String baseUrl;
 
+    private final long threadId = Thread.currentThread().getId();
 
     private final HttpClient httpClient = HttpClients.custom()
             .setDefaultRequestConfig(
@@ -136,6 +135,8 @@ public class SimplePumaClient implements PumaClient {
 
     @Override
     public BinlogMessage get(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException {
+        checkThreadNotSafe();
+
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair("clientName", clientName));
         params.add(new BasicNameValuePair("batchSize", String.valueOf(batchSize)));
@@ -177,6 +178,8 @@ public class SimplePumaClient implements PumaClient {
 
     @Override
     public void ack(BinlogInfo binlogInfo) throws PumaClientException {
+        checkThreadNotSafe();
+
         if (binlogInfo == null) {
             return;
         }
@@ -205,6 +208,8 @@ public class SimplePumaClient implements PumaClient {
 
     @Override
     public void rollback(BinlogInfo binlogInfo) throws PumaClientException {
+        checkThreadNotSafe();
+
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair("clientName", clientName));
 
@@ -293,6 +298,12 @@ public class SimplePumaClient implements PumaClient {
             } catch (IOException e) {
                 throw new PumaClientException(String.format("[HttpStatus:%d]%s", result.getStatusLine().getStatusCode(), e.getMessage()), e);
             }
+        }
+    }
+
+    private void checkThreadNotSafe() {
+        if (threadId != Thread.currentThread().getId()) {
+            throw new PumaClientException("PumaClient is not thread safe!");
         }
     }
 

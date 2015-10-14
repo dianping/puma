@@ -1,4 +1,4 @@
-package com.dianping.puma.api.impl;
+package com.dianping.puma.api.debug;
 
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.PumaClientConfig;

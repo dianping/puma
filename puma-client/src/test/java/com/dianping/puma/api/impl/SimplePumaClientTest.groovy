@@ -2,6 +2,21 @@ package com.dianping.puma.api.impl
 
 import com.dianping.puma.api.PumaClientConfig
 import com.dianping.puma.api.PumaClientException
+import com.dianping.puma.core.dto.BinlogMessage
+import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse
+import com.dianping.puma.core.event.DdlEvent
+import com.dianping.puma.core.model.BinlogInfo
+import com.dianping.puma.core.util.GsonUtil
+import com.dianping.puma.core.util.constant.DdlEventSubType
+import com.dianping.puma.core.util.constant.DdlEventType
+import com.dianping.puma.core.util.sql.DDLType
+import com.google.common.net.MediaType
+import org.apache.http.Header
+import org.apache.http.HttpResponse
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.entity.ByteArrayEntity
+import org.apache.http.entity.StringEntity
+import org.apache.http.message.BasicNameValuePair
 import org.junit.Test
 
 import java.util.concurrent.atomic.AtomicReference
@@ -12,14 +27,15 @@ import java.util.concurrent.atomic.AtomicReference
  * http://www.dozer.cc
  */
 class SimplePumaClientTest {
+    SimplePumaClient target = new SimplePumaClient(new PumaClientConfig(enableEventLog: true));
+
     @Test(expected = PumaClientException.class)
     public void testNotThreadSafe() throws Exception {
         final AtomicReference<SimplePumaClient> reference = new AtomicReference<SimplePumaClient>();
         new Thread(new Runnable() {
             @Override
             public void run() {
-                reference.set(new SimplePumaClient(new PumaClientConfig()));
-                System.out.println("init puma client");
+                reference.set(target);
             }
         }).start();
 
@@ -28,5 +44,59 @@ class SimplePumaClientTest {
         }
 
         reference.get().get(1);
+    }
+
+    @Test
+    public void testBuildGetRequest() throws Exception {
+        def path = "/debug"
+        def pairs = [new BasicNameValuePair("id", "1")]
+        def request = target.buildRequest(path, "GET", pairs, null);
+        assert request.getMethod() == "GET"
+        assert request.getURI().getRawQuery() == "id=1"
+        assert request.getURI().getPath() == path
+    }
+
+    @Test
+    public void testBuildPostRequest() throws Exception {
+        def path = "/debug"
+        def pairs = [new BasicNameValuePair("id", "1")]
+        def json = "{}"
+        def request = target.buildRequest(path, "POST", pairs, json);
+        assert request.getMethod() == "POST"
+        assert request.getURI().getRawQuery() == "id=1"
+        assert request.getURI().getPath() == path
+        assert ((HttpPost) request).getEntity().getContent().getText() == json
+    }
+
+    @Test
+    public void testDecodeJson() throws Exception {
+        def response = new BinlogGetResponse(binlogMessage: new BinlogMessage(binlogEvents: []));
+        def httpResponse = [
+                getEntity : { new StringEntity(GsonUtil.toJson(response)) },
+                getHeaders: { null }
+        ] as HttpResponse
+
+        def result = target.decode(BinlogGetResponse.class, httpResponse)
+
+        assert result.getBinlogMessage().getBinlogEvents() != null
+    }
+
+    @Test
+    public void testDecodeRaw() throws Exception {
+        def event = new DdlEvent(
+                binlogInfo: new BinlogInfo(),
+                ddlType: DDLType.ALTER_DATABASE,
+                ddlEventType: DdlEventType.DDL_ALTER,
+                ddlEventSubType: DdlEventSubType.DDL_ALTER_EVENT
+        )
+
+        def httpResponse = [
+                getEntity : { new ByteArrayEntity(target.CODEC.encodeList([event])) },
+                getHeaders: { [[getValue: { MediaType.OCTET_STREAM.toString() }] as Header] as Header[] }
+        ] as HttpResponse
+
+        def result = target.decode(BinlogGetResponse.class, httpResponse)
+
+        assert result.getBinlogMessage().getBinlogEvents().size() == 1
     }
 }

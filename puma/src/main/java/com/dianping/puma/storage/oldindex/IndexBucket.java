@@ -1,6 +1,5 @@
-package com.dianping.puma.storage.index;
+package com.dianping.puma.storage.oldindex;
 
-import java.io.File;
 import java.io.IOException;
 
 import com.dianping.puma.core.LifeCycle;

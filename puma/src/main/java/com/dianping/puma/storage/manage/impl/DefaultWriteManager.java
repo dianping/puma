@@ -8,9 +8,9 @@ import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.data.DataBucketManager;
 import com.dianping.puma.storage.data.WriteDataBucket;
-import com.dianping.puma.storage.index.IndexKeyImpl;
-import com.dianping.puma.storage.index.IndexValueImpl;
-import com.dianping.puma.storage.index.WriteIndexManager;
+import com.dianping.puma.storage.oldindex.IndexKeyImpl;
+import com.dianping.puma.storage.oldindex.IndexValueImpl;
+import com.dianping.puma.storage.oldindex.WriteIndexManager;
 import com.dianping.puma.storage.manage.WriteManager;
 
 import java.io.IOException;

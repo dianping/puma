@@ -16,7 +16,7 @@
 package com.dianping.puma.storage;
 
 import com.dianping.puma.storage.bucket.DataBucketManager;
-import com.dianping.puma.storage.index.WriteIndexManager;
+import com.dianping.puma.storage.oldindex.WriteIndexManager;
 
 /**
  * TODO Comment of CleanupStrategy

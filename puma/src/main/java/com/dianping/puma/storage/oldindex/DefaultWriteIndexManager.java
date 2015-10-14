@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.index;
+package com.dianping.puma.storage.oldindex;
 
 import com.dianping.puma.utils.LinkedProperties;
 import com.google.common.collect.Lists;

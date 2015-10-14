@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.index;
+package com.dianping.puma.storage.oldindex;
 
 import com.dianping.puma.storage.Sequence;
 import junit.framework.Assert;

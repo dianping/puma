@@ -1,14 +1,11 @@
 package com.dianping.puma.storage.manage.impl;
 
 import com.dianping.puma.common.AbstractLifeCycle;
-import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.data.DataBucketManager;
 import com.dianping.puma.storage.data.ReadDataManager;
-import com.dianping.puma.storage.exception.InvalidSequenceException;
-import com.dianping.puma.storage.index.*;
+import com.dianping.puma.storage.oldindex.*;
 import com.dianping.puma.storage.manage.ReadManager;
-import com.google.common.base.Strings;
 
 import java.io.IOException;
 

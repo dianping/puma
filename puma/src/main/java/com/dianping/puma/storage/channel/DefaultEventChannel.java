@@ -12,7 +12,7 @@ import com.dianping.puma.storage.exception.InvalidSequenceException;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageException;
 import com.dianping.puma.storage.exception.StorageReadException;
-import com.dianping.puma.storage.index.*;
+import com.dianping.puma.storage.oldindex.*;
 import com.google.common.base.Strings;
 
 import java.io.IOException;

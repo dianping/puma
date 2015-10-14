@@ -21,7 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Properties;
 
-import com.dianping.puma.storage.index.*;
+import com.dianping.puma.storage.oldindex.*;
 import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;

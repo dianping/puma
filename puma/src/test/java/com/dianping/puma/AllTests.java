@@ -10,7 +10,7 @@ import com.dianping.puma.storage.DefaultCleanupStrategyTest;
 import com.dianping.puma.storage.SequenceTest;
 import com.dianping.puma.storage.bucket.LocalBucketIndexTest;
 import com.dianping.puma.storage.bucket.LocalBucketTest;
-import com.dianping.puma.storage.index.*;
+import com.dianping.puma.storage.oldindex.*;
 import com.dianping.puma.utils.PacketUtilTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;

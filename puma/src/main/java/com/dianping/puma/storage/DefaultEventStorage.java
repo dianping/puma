@@ -21,7 +21,7 @@ import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageException;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;
 import com.dianping.puma.storage.exception.StorageWriteException;
-import com.dianping.puma.storage.index.*;
+import com.dianping.puma.storage.oldindex.*;
 
 public class DefaultEventStorage implements EventStorage {
 

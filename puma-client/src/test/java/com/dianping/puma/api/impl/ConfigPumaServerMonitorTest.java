@@ -21,7 +21,7 @@ public class ConfigPumaServerMonitorTest {
 
 	@Test
 	public void testParseServers() {
-		String node0 = "0.0.0.0\n1.0.0.0\n2.0.0.0";
+		String node0 = "0.0.0.0#1.0.0.0#2.0.0.0";
 		List<String> expected0 = new ArrayList<String>();
 		expected0.add("0.0.0.0");
 		expected0.add("1.0.0.0");
@@ -30,7 +30,7 @@ public class ConfigPumaServerMonitorTest {
 		List<String> result0 = monitor.parseServers(node0);
 		assertEquals(expected0, result0);
 
-		String node1 = "0.0.0.0\n\t1.0.0.0\n\t2.0.0.0";
+		String node1 = "0.0.0.0#1.0.0.0#2.0.0.0";
 		List<String> expected1 = new ArrayList<String>();
 		expected1.add("0.0.0.0");
 		expected1.add("1.0.0.0");
@@ -39,17 +39,11 @@ public class ConfigPumaServerMonitorTest {
 		List<String> result1 = monitor.parseServers(node1);
 		assertEquals(expected1, result1);
 
-		String node2 = "0.0.0.0\n";
+		String node2 = "0.0.0.0";
 		List<String> expected2 = new ArrayList<String>();
 		expected2.add("0.0.0.0");
 
 		List<String> result2 = monitor.parseServers(node2);
 		assertEquals(expected2, result2);
-
-		String node3 = "  ";
-		List<String> expected3 = new ArrayList<String>();
-
-		List<String> result3 = monitor.parseServers(node3);
-		assertEquals(expected3, result3);
 	}
 }

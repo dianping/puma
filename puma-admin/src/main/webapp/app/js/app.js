@@ -17,6 +17,10 @@ puma.filter('toLocaleString', function () {
     };
 });
 
+puma.filter('urlEncode', [function () {
+    return window.encodeURIComponent;
+}]);
+
 puma.controller('pumaCheckController', function ($scope, $http) {
 
     $scope.reset = function () {
@@ -51,18 +55,62 @@ puma.controller('pumaCheckController', function ($scope, $http) {
     $scope.reset();
 });
 
-puma.controller('pumaCheckCreateController', function ($scope, $http) {
+puma.controller('pumaCheckCreateController', function ($scope, $http, $location) {
     $scope.templateBase = 'app/partials/puma-check/model/';
-    $scope.SourceDsBuilderTemplate = 'ds-group';
-    $scope.SourceFetcherTemplate = 'source-fetcher-update-id';
-    $scope.TargetDsBuilderTemplate = 'ds-group';
-    $scope.TargetFetcherTemplate = 'target-fetcher-single-line';
-    $scope.ComparisonTemplate = 'comparison-full';
-    $scope.MapperTemplate = 'mapper-default';
-    $scope.model = {};
 
-    $scope.changeTemplate = function (type, value) {
-        $scope[type] = value;
+    if ($location.search()['name']) {
+        $scope.baseTemplate = 'empty';
+        $scope.model = {
+            'comparisonProp': {
+                'className': 'empty'
+            },
+            'sourceFetcherProp': {
+                'className': 'empty'
+            },
+            'targetFetcherProp': {
+                'className': 'empty'
+            },
+            'mapperProp': {
+                'className': 'empty'
+            },
+            'targetDsBuilderProp': {
+                'className': 'empty'
+            },
+            'sourceDsBuilderProp': {
+                'className': 'empty'
+            },
+        };
+
+        $http.get('/a/puma-check/' + encodeURIComponent($location.search()['name'])).then(
+            function (response) {
+                if (response.data) {
+                    $scope.baseTemplate = 'base';
+                    $scope.model = response.data;
+                }
+            }
+        )
+    } else {
+        $scope.baseTemplate = 'base';
+        $scope.model = {
+            'comparisonProp': {
+                'className': 'FullComparison'
+            },
+            'sourceFetcherProp': {
+                'className': 'UpdateTimeAndIdSourceFetcher'
+            },
+            'targetFetcherProp': {
+                'className': 'SingleLineTargetFetcher'
+            },
+            'mapperProp': {
+                'className': 'DefaultRowMapper'
+            },
+            'targetDsBuilderProp': {
+                'className': 'GroupDataSourceBuilder'
+            },
+            'sourceDsBuilderProp': {
+                'className': 'GroupDataSourceBuilder'
+            },
+        };
     }
 
     $scope.create = function () {

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration PUBLIC "-//log4j/log4j Configuration//EN" "log4j.dtd">
+<log4j:configuration debug="false">
+    <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+        <param name="Target" value="System.out"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[puma]%d %-5p [%c] %m%n"/>
+        </layout>
+    </appender>
+    <appender name="appAppender" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="File" value="/data/applogs/puma/logs/app.log"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[puma]%d %-5p [%c] %m%n"/>
+        </layout>
+    </appender>
+    <root>
+        <level value="INFO"/>
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="appAppender"/>
+    </root>
+</log4j:configuration>

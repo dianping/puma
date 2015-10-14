@@ -4,34 +4,34 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import com.dianping.puma.parser.type.BigIntTypeTest;
-import com.dianping.puma.parser.type.BinaryTypeTest;
-import com.dianping.puma.parser.type.BitTypeTest;
-import com.dianping.puma.parser.type.BlobTypeTest;
-import com.dianping.puma.parser.type.CharTypeTest;
-import com.dianping.puma.parser.type.DateTimeTypeTest;
-import com.dianping.puma.parser.type.DateTypeTest;
-import com.dianping.puma.parser.type.DecimalTypeTest;
-import com.dianping.puma.parser.type.DoubleTypeTest;
-import com.dianping.puma.parser.type.EnumTypeTest;
-import com.dianping.puma.parser.type.FloatTypeTest;
-import com.dianping.puma.parser.type.IntTypeTest;
-import com.dianping.puma.parser.type.LongBlobTypeTest;
-import com.dianping.puma.parser.type.LongTextTypeTest;
-import com.dianping.puma.parser.type.MediumBlobTypeTest;
-import com.dianping.puma.parser.type.MediumIntTypeTest;
-import com.dianping.puma.parser.type.MediumTextTypeTest;
-import com.dianping.puma.parser.type.SetTypeTest;
-import com.dianping.puma.parser.type.SmallIntTypeTest;
-import com.dianping.puma.parser.type.TextTypeTest;
-import com.dianping.puma.parser.type.TimeTypeTest;
-import com.dianping.puma.parser.type.TimestampTypeTest;
-import com.dianping.puma.parser.type.TinyBlobTypeTest;
-import com.dianping.puma.parser.type.TinyIntTypeTest;
-import com.dianping.puma.parser.type.TinyTextTypeTest;
-import com.dianping.puma.parser.type.VarBinaryTypeTest;
-import com.dianping.puma.parser.type.VarcharTypeTest;
-import com.dianping.puma.parser.type.YearTypeTest;
+import com.dianping.puma.parser.type.BigIntTypeDebug;
+import com.dianping.puma.parser.type.BinaryTypeDebug;
+import com.dianping.puma.parser.type.BitTypeDebug;
+import com.dianping.puma.parser.type.BlobTypeDebug;
+import com.dianping.puma.parser.type.CharTypeDebug;
+import com.dianping.puma.parser.type.DateTimeTypeDebug;
+import com.dianping.puma.parser.type.DateTypeDebug;
+import com.dianping.puma.parser.type.DecimalTypeDebug;
+import com.dianping.puma.parser.type.DoubleTypeDebug;
+import com.dianping.puma.parser.type.EnumTypeDebug;
+import com.dianping.puma.parser.type.FloatTypeDebug;
+import com.dianping.puma.parser.type.IntTypeDebug;
+import com.dianping.puma.parser.type.LongBlobTypeDebug;
+import com.dianping.puma.parser.type.LongTextTypeDebug;
+import com.dianping.puma.parser.type.MediumBlobTypeDebug;
+import com.dianping.puma.parser.type.MediumIntTypeDebug;
+import com.dianping.puma.parser.type.MediumTextTypeDebug;
+import com.dianping.puma.parser.type.SetTypeDebug;
+import com.dianping.puma.parser.type.SmallIntTypeDebug;
+import com.dianping.puma.parser.type.TextTypeDebug;
+import com.dianping.puma.parser.type.TimeTypeDebug;
+import com.dianping.puma.parser.type.TimestampTypeDebug;
+import com.dianping.puma.parser.type.TinyBlobTypeDebug;
+import com.dianping.puma.parser.type.TinyIntTypeDebug;
+import com.dianping.puma.parser.type.TinyTextTypeDebug;
+import com.dianping.puma.parser.type.VarBinaryTypeDebug;
+import com.dianping.puma.parser.type.VarcharTypeDebug;
+import com.dianping.puma.parser.type.YearTypeDebug;
 
 
 /***
@@ -43,41 +43,41 @@ import com.dianping.puma.parser.type.YearTypeTest;
 @RunWith(Suite.class)
 @SuiteClasses({
 	//int
-	BigIntTypeTest.class,
-	IntTypeTest.class,
-	MediumIntTypeTest.class,
-	SmallIntTypeTest.class,
-	TinyIntTypeTest.class,
+	BigIntTypeDebug.class,
+	IntTypeDebug.class,
+	MediumIntTypeDebug.class,
+	SmallIntTypeDebug.class,
+	TinyIntTypeDebug.class,
 	//float
-	DecimalTypeTest.class,
-	DoubleTypeTest.class,
-	FloatTypeTest.class,
+	DecimalTypeDebug.class,
+	DoubleTypeDebug.class,
+	FloatTypeDebug.class,
 	//char
-	CharTypeTest.class,
-	VarcharTypeTest.class,
+	CharTypeDebug.class,
+	VarcharTypeDebug.class,
 	//text
-	TextTypeTest.class,
-	LongTextTypeTest.class,
-	MediumTextTypeTest.class,
-	TinyTextTypeTest.class,
+	TextTypeDebug.class,
+	LongTextTypeDebug.class,
+	MediumTextTypeDebug.class,
+	TinyTextTypeDebug.class,
 	//blob
-	BlobTypeTest.class,
-	LongBlobTypeTest.class,
-	MediumBlobTypeTest.class,
-	TinyBlobTypeTest.class,
+	BlobTypeDebug.class,
+	LongBlobTypeDebug.class,
+	MediumBlobTypeDebug.class,
+	TinyBlobTypeDebug.class,
 	//binary
-	BinaryTypeTest.class,
-	VarBinaryTypeTest.class,
+	BinaryTypeDebug.class,
+	VarBinaryTypeDebug.class,
 	//time
-	DateTimeTypeTest.class,
-	TimeTypeTest.class,
-	TimestampTypeTest.class,
-	DateTypeTest.class,
-	YearTypeTest.class,
+	DateTimeTypeDebug.class,
+	TimeTypeDebug.class,
+	TimestampTypeDebug.class,
+	DateTypeDebug.class,
+	YearTypeDebug.class,
 	//bit,set,enum
-	BitTypeTest.class,
-	SetTypeTest.class,
-	EnumTypeTest.class
+	BitTypeDebug.class,
+	SetTypeDebug.class,
+	EnumTypeDebug.class
 })
 public class ParserTestForMySQL51 {
 

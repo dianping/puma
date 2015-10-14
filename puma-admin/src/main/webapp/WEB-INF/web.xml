@@ -23,10 +23,6 @@
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
-    <listener>
-        <listener-class>com.dianping.puma.admin.web.CleaningListener</listener-class>
-    </listener>
-
 
     <!-- Reads request input using UTF-8 encoding -->
     <filter>

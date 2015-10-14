@@ -1,11 +1,9 @@
 package com.dianping.puma.api;
 
+/**
+ * PumaClientException
+ */
 public class PumaClientException extends RuntimeException {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 5575514632552935756L;
-
 	public PumaClientException() {
 	}
 

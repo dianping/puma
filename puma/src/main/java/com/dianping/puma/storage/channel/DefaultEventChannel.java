@@ -6,8 +6,8 @@ import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.data.factory.DataManagerFactory;
 import com.dianping.puma.storage.data.ReadDataManager;
+import com.dianping.puma.storage.data.factory.DataManagerFactory;
 import com.dianping.puma.storage.exception.InvalidSequenceException;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import com.dianping.puma.storage.exception.StorageException;
@@ -19,100 +19,100 @@ import java.io.IOException;
 
 public class DefaultEventChannel extends AbstractLifeCycle implements EventChannel {
 
-	private String database;
+    private String database;
 
-	private ReadIndexManager<IndexKeyImpl, IndexValueImpl> readIndexManager;
+    private ReadIndexManager<IndexKeyImpl, IndexValueImpl> readIndexManager;
 
-	private EventCodec codec = new RawEventCodec();
+    private EventCodec codec = new RawEventCodec();
 
-	private volatile boolean stopped = true;
+    private volatile boolean stopped = true;
 
-	private ReadDataManager readDataManager;
+    private ReadDataManager readDataManager;
 
-	private Sequence lastSequence;
+    private Sequence lastSequence;
 
-	public DefaultEventChannel(String database) {
-		this.database = database;
-	}
+    public DefaultEventChannel(String database) {
+        this.database = database;
+    }
 
-	@Override
-	protected void doStart() {
-		readDataManager = DataManagerFactory.newReadDataManager(database);
-		readDataManager.start();
-	}
+    @Override
+    protected void doStart() {
+        readDataManager = DataManagerFactory.newReadDataManager(database);
+        readDataManager.start();
+    }
 
-	@Override
-	protected void doStop() {
-		readDataManager.stop();
-	}
+    @Override
+    protected void doStop() {
+        readDataManager.stop();
+    }
 
-	@Override
-	public void open(long serverId, String binlogFile, long binlogPosition) throws IOException {
-		if (Strings.isNullOrEmpty(binlogFile) || binlogPosition < 0) {
-			throw new InvalidSequenceException("Invalid binlog info");
-		}
+    @Override
+    public void open(long serverId, String binlogFile, long binlogPosition) throws IOException {
+        if (Strings.isNullOrEmpty(binlogFile) || binlogPosition < 0) {
+            throw new InvalidSequenceException("Invalid binlog info");
+        }
 
-		openInternal();
+        openInternal();
 
-		IndexValueImpl value;
+        IndexValueImpl value;
 
-		if (serverId != 0 && binlogPosition > 0) {
-			try {
-				value = this.readIndexManager
-						.findByBinlog(new IndexKeyImpl(serverId, binlogFile, binlogPosition), true);
-			} catch (IOException e) {
-				throw new InvalidSequenceException("find binlog error", e);
-			}
+        if (serverId != 0 && binlogPosition > 0) {
+            try {
+                value = this.readIndexManager
+                        .findByBinlog(new IndexKeyImpl(serverId, binlogFile, binlogPosition), true);
+            } catch (IOException e) {
+                throw new InvalidSequenceException("find binlog error", e);
+            }
 
-			if (value == null) {
-				throw new InvalidSequenceException("cannot find binlog position");
-			}
+            if (value == null) {
+                throw new InvalidSequenceException("cannot find binlog position");
+            }
 
-			try {
-				readDataManager.open(value.getSequence());
-				//readDataManager.open(value.getSequence(), false);
-			} catch (IOException e) {
-				throw new InvalidSequenceException("cannot find binlog position.");
-			}
+            try {
+                readDataManager.open(value.getSequence());
+                //readDataManager.open(value.getSequence(), false);
+            } catch (IOException e) {
+                throw new InvalidSequenceException("cannot find binlog position.");
+            }
 
 			/*
-			this.readDataBucket = initReadBucket(value.getSequence(), false);
+            this.readDataBucket = initReadBucket(value.getSequence(), false);
 
 			if (this.readDataBucket == null) {
 				throw new InvalidSequenceException("cannot find binlog position");
 			}*/
-		} else {
-			throw new InvalidSequenceException("Invalid binlog info");
-		}
-	}
+        } else {
+            throw new InvalidSequenceException("Invalid binlog info");
+        }
+    }
 
-	@Override
-	public void open(long startTimeStamp) throws IOException {
-		openInternal();
+    @Override
+    public void open(long startTimeStamp) throws IOException {
+        openInternal();
 
-		IndexValueImpl value;
-		try {
-			if (startTimeStamp == SubscribeConstant.SEQ_FROM_LATEST) {
-				value = this.readIndexManager.findLatest();
-			} else if (startTimeStamp == SubscribeConstant.SEQ_FROM_OLDEST) {
-				value = this.readIndexManager.findFirst();
-			} else {
-				value = this.readIndexManager.findByTime(new IndexKeyImpl(startTimeStamp), true);
-			}
-		} catch (IOException e) {
-			throw new InvalidSequenceException("find binlog error", e);
-		}
+        IndexValueImpl value;
+        try {
+            if (startTimeStamp == SubscribeConstant.SEQ_FROM_LATEST) {
+                value = this.readIndexManager.findLatest();
+            } else if (startTimeStamp == SubscribeConstant.SEQ_FROM_OLDEST) {
+                value = this.readIndexManager.findFirst();
+            } else {
+                value = this.readIndexManager.findByTime(new IndexKeyImpl(startTimeStamp), true);
+            }
+        } catch (IOException e) {
+            throw new InvalidSequenceException("find binlog error", e);
+        }
 
-		if (value == null) {
-			throw new InvalidSequenceException("cannot find any latest binlog");
-		}
+        if (value == null) {
+            throw new InvalidSequenceException("cannot find any latest binlog");
+        }
 
-		try {
-			readDataManager.open(value.getSequence());
-			//readDataManager.open(value.getSequence(), startTimeStamp == SubscribeConstant.SEQ_FROM_LATEST);
-		} catch (IOException e) {
-			throw new InvalidSequenceException("cannot find any latest binlog.");
-		}
+        try {
+            readDataManager.open(value.getSequence());
+            //readDataManager.open(value.getSequence(), startTimeStamp == SubscribeConstant.SEQ_FROM_LATEST);
+        } catch (IOException e) {
+            throw new InvalidSequenceException("cannot find any latest binlog.");
+        }
 
 		/*
 		this.readDataBucket = initReadBucket(value.getSequence(), startTimeStamp == SubscribeConstant.SEQ_FROM_LATEST);
@@ -120,19 +120,19 @@ public class DefaultEventChannel extends AbstractLifeCycle implements EventChann
 		if (this.readDataBucket == null) {
 			throw new InvalidSequenceException("cannot find any latest binlog");
 		}*/
-	}
+    }
 
-	@Override
-	public Event next(boolean shouldSleep) throws StorageException {
-		checkClosed();
+    @Override
+    public Event next(boolean shouldSleep) throws StorageException {
+        checkClosed();
 
-		while (true) {
-			try {
-				checkClosed();
-				byte[] data = readDataManager.next();
-				//byte[] data = readDataBucket.getNext();
-				Event event = codec.decode(data);
-				lastSequence = new Sequence(event.getSeq(), data.length);
+        while (true) {
+            try {
+                checkClosed();
+                byte[] data = readDataManager.next();
+                //byte[] data = readDataBucket.getNext();
+                Event event = codec.decode(data);
+                lastSequence = new Sequence(event.getSeq(), data.length);
 
 				/*
 				if (event instanceof DdlEvent && !this.withDdl) {
@@ -156,49 +156,49 @@ public class DefaultEventChannel extends AbstractLifeCycle implements EventChann
 					}
 				}
 				*/
-				return event;
-			} catch (IOException e) {
-				throw new StorageReadException("Failed to read", e);
-			}
-		}
-	}
+                return event;
+            } catch (IOException e) {
+                throw new StorageReadException("Failed to read", e);
+            }
+        }
+    }
 
-	@Override
-	public Event next() throws StorageException {
-		return next(false);
-	}
+    @Override
+    public Event next() throws StorageException {
+        return next(false);
+    }
 
-	private void checkClosed() throws StorageClosedException {
-		if (stopped) {
-			throw new StorageClosedException("Channel has been closed.");
-		}
-	}
+    private void checkClosed() throws StorageClosedException {
+        if (stopped) {
+            throw new StorageClosedException("Channel has been closed.");
+        }
+    }
 
-	@Override
-	public void close() {
-		if (stopped) {
-			return;
-		}
+    @Override
+    public void close() {
+        if (stopped) {
+            return;
+        }
 
-		stopped = true;
+        stopped = true;
 
-		if (readDataManager != null) {
-			readDataManager.stop();
-		}
+        if (readDataManager != null) {
+            readDataManager.stop();
+        }
 
-		if (readIndexManager != null) {
-			readIndexManager.stop();
-		}
-	}
+        if (readIndexManager != null) {
+            readIndexManager.stop();
+        }
+    }
 
-	private void openInternal() throws IOException {
-		if (!stopped) {
-			return;
-		}
+    private void openInternal() throws IOException {
+        if (!stopped) {
+            return;
+        }
 
-		this.readIndexManager = new DefaultReadIndexManager<IndexKeyImpl, IndexValueImpl>(
-				new IndexKeyConverter(), new IndexValueConverter());
+        this.readIndexManager = new DefaultReadIndexManager<IndexKeyImpl, IndexValueImpl>(
+                new IndexKeyConverter(), new IndexValueConverter());
 
-		stopped = false;
-	}
+        stopped = false;
+    }
 }

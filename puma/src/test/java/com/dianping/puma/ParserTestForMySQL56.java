@@ -4,9 +4,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import com.dianping.puma.parser.type.DateTime2TypeTest;
-import com.dianping.puma.parser.type.Time2TypeTest;
-import com.dianping.puma.parser.type.Timestamp2TypeTest;
+import com.dianping.puma.parser.type.DateTime2TypeDebug;
+import com.dianping.puma.parser.type.Time2TypeDebug;
+import com.dianping.puma.parser.type.Timestamp2TypeDebug;
 
 
 /***
@@ -19,9 +19,9 @@ import com.dianping.puma.parser.type.Timestamp2TypeTest;
 @SuiteClasses({
 	
 	//5.6
-	DateTime2TypeTest.class,
-	Time2TypeTest.class,
-	Timestamp2TypeTest.class
+	DateTime2TypeDebug.class,
+	Time2TypeDebug.class,
+	Timestamp2TypeDebug.class
 
 })
 public class ParserTestForMySQL56 {

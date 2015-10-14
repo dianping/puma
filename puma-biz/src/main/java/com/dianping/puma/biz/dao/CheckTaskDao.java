@@ -10,6 +10,8 @@ public interface CheckTaskDao {
 
     CheckTaskEntity findById(int id);
 
+    CheckTaskEntity findByName(String name);
+
     List<CheckTaskEntity> findRunnable();
 
     int count(@Param(value = "model") CheckTaskQueryModel model);

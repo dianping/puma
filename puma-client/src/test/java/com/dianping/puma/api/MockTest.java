@@ -3,7 +3,7 @@ package com.dianping.puma.api;
 import org.junit.Before;
 import org.mockito.MockitoAnnotations;
 
-public class MockTest {
+public abstract class MockTest {
 
 	@Before
 	public void initMocks() {

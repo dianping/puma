@@ -1,9 +1,10 @@
 package com.dianping.puma.api.impl;
 
+import com.dianping.lion.client.ConfigCache;
+import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.PumaClientConfig;
 import com.dianping.puma.api.PumaClientException;
-import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.codec.EventCodecFactory;
 import com.dianping.puma.core.dto.BinlogMessage;
@@ -14,7 +15,9 @@ import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.GsonUtil;
+import com.dianping.puma.log.LoggerLoader;
 import com.google.common.base.Strings;
+import com.google.common.collect.Sets;
 import com.google.common.net.MediaType;
 import com.google.gson.Gson;
 import org.apache.http.HttpHeaders;
@@ -35,7 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.SocketTimeoutException;
+import java.lang.ref.WeakReference;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -43,16 +46,29 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@ThreadUnSafe
 public class SimplePumaClient implements PumaClient {
 
-    private static final Logger logger = LoggerFactory.getLogger(SimplePumaClient.class);
+    static {
+        LoggerLoader.init();
+    }
+
+    private static final Logger LOG = LoggerFactory.getLogger(SimplePumaClient.class);
+
+    private static final Logger EVENT_LOGGER = LoggerFactory.getLogger("PumaClientEventLogger");
 
     private static final Charset DEFAULT_CHARSET = Charset.forName("utf-8");
 
-    private static final EventCodec codec = EventCodecFactory.createCodec("raw");
+    private static final String EVENT_LOG_LION_KEY = "puma.eventlog.clientlist";
 
-    private static final Gson gson = new Gson();
+    private static final EventCodec CODEC = EventCodecFactory.createCodec("raw");
+
+    private static final Gson GSON = new Gson();
+
+    private static final int CONNECT_TIMEOUT = 60 * 1000;
+
+    private static final int SOCKET_TIMEOUT = 10 * 60 * 1000;
+
+    private volatile boolean enableEventLog;
 
     private volatile BinlogSubscriptionRequest subscribeRequest;
 
@@ -61,12 +77,16 @@ public class SimplePumaClient implements PumaClient {
     private String pumaServerHost;
 
     private final String clientName;
+
     private final String baseUrl;
+
+    private final long threadId = Thread.currentThread().getId();
+
     private final HttpClient httpClient = HttpClients.custom()
             .setDefaultRequestConfig(
                     RequestConfig.custom()
-                            .setConnectTimeout(60 * 1000)
-                            .setSocketTimeout(10 * 60 * 1000)
+                            .setConnectTimeout(CONNECT_TIMEOUT)
+                            .setSocketTimeout(SOCKET_TIMEOUT)
                             .build()).build();
 
 
@@ -74,7 +94,7 @@ public class SimplePumaClient implements PumaClient {
         this.pumaServerHost = config.getServerHost();
         this.clientName = config.getClientName();
         this.baseUrl = String.format("http://%s", config.getServerHost());
-        logger.info("Current puma client base url is: {}", baseUrl);
+        LOG.info("Current puma client base url is: {}", baseUrl);
 
         BinlogSubscriptionRequest subscriptionRequest = new BinlogSubscriptionRequest();
         subscriptionRequest.setCodec("raw");
@@ -86,6 +106,26 @@ public class SimplePumaClient implements PumaClient {
         subscriptionRequest.setTables(config.getTables());
 
         this.subscribeRequest = subscriptionRequest;
+
+        if (config.isEnableEventLog()) {
+            enableEventLog = true;
+        } else {
+            enableEventLog = false;
+            initEventLogConfig();
+        }
+    }
+
+    private void initEventLogConfig() {
+        ConfigCache configCache = ConfigCache.getInstance();
+        String config = configCache.getProperty(EVENT_LOG_LION_KEY);
+        parseEventLogConfig(config);
+
+        configCache.addChange(new PumaClientConfigChange(this));
+    }
+
+    private void parseEventLogConfig(String config) {
+        enableEventLog = (!Strings.isNullOrEmpty(config)) &&
+                Sets.newHashSet(config.split(",")).contains(clientName);
     }
 
     @Override
@@ -95,6 +135,8 @@ public class SimplePumaClient implements PumaClient {
 
     @Override
     public BinlogMessage get(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException {
+        checkThreadNotSafe();
+
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair("clientName", clientName));
         params.add(new BasicNameValuePair("batchSize", String.valueOf(batchSize)));
@@ -103,7 +145,21 @@ public class SimplePumaClient implements PumaClient {
             params.add(new BasicNameValuePair("timeUnit", timeUnit.toString()));
         }
         addToken(params);
-        return execute("/puma/binlog/get", params, "GET", null, BinlogGetResponse.class).getBinlogMessage();
+        BinlogMessage result = execute("/puma/binlog/get", params, "GET", null, BinlogGetResponse.class).getBinlogMessage();
+        logResult(result);
+        return result;
+    }
+
+    private void logResult(BinlogMessage message) {
+        if (!enableEventLog) {
+            return;
+        }
+
+        for (com.dianping.puma.core.event.Event event : message.getBinlogEvents()) {
+            if (event.getBinlogInfo() != null) {
+                EVENT_LOGGER.info(String.valueOf(event.getBinlogInfo().hashCode()));
+            }
+        }
     }
 
     @Override
@@ -122,6 +178,8 @@ public class SimplePumaClient implements PumaClient {
 
     @Override
     public void ack(BinlogInfo binlogInfo) throws PumaClientException {
+        checkThreadNotSafe();
+
         if (binlogInfo == null) {
             return;
         }
@@ -150,6 +208,8 @@ public class SimplePumaClient implements PumaClient {
 
     @Override
     public void rollback(BinlogInfo binlogInfo) throws PumaClientException {
+        checkThreadNotSafe();
+
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair("clientName", clientName));
 
@@ -196,20 +256,13 @@ public class SimplePumaClient implements PumaClient {
             URI uri = new URI(url);
             if ("post".equalsIgnoreCase(method)) {
                 HttpPost post = new HttpPost(uri);
-                post.setEntity(new StringEntity(json, "utf-8"));
+                post.setEntity(new StringEntity(json, DEFAULT_CHARSET));
                 request = post;
             } else {
                 request = new HttpGet(uri);
             }
 
-            while (true) {
-                try {
-                    result = httpClient.execute(request);
-                    break;
-                } catch (SocketTimeoutException ignore) {
-                    ignore.printStackTrace();
-                }
-            }
+            result = httpClient.execute(request);
         } catch (Exception e) {
             this.token = null;
             String msg = request == null ? e.getMessage() : String.format("%s %s", request.getURI(), e.getMessage());
@@ -228,11 +281,11 @@ public class SimplePumaClient implements PumaClient {
                         result.getHeaders(HttpHeaders.CONTENT_TYPE)[0].getValue().equals(MediaType.OCTET_STREAM.toString())) {
                     BinlogGetResponse response = new BinlogGetResponse();
                     BinlogMessage message = new BinlogMessage();
-                    message.setBinlogEvents(codec.decodeList(EntityUtils.toByteArray(result.getEntity())));
+                    message.setBinlogEvents(CODEC.decodeList(EntityUtils.toByteArray(result.getEntity())));
                     response.setBinlogMessage(message);
                     return (T) response;
                 } else {
-                    return gson.fromJson(EntityUtils.toString(result.getEntity()), clazz);
+                    return GSON.fromJson(EntityUtils.toString(result.getEntity()), clazz);
                 }
             } catch (Exception e) {
                 this.token = null;
@@ -248,7 +301,33 @@ public class SimplePumaClient implements PumaClient {
         }
     }
 
+    private void checkThreadNotSafe() {
+        if (threadId != Thread.currentThread().getId()) {
+            throw new PumaClientException("PumaClient is not thread safe!");
+        }
+    }
+
     public String getServerHost() {
         return pumaServerHost;
+    }
+
+    static class PumaClientConfigChange implements ConfigChange {
+        private final WeakReference<SimplePumaClient> parent;
+
+        public PumaClientConfigChange(SimplePumaClient client) {
+            parent = new WeakReference<SimplePumaClient>(client);
+        }
+
+        @Override
+        public void onChange(String key, String value) {
+            SimplePumaClient client = parent.get();
+            if (client == null) {
+                ConfigCache.getInstance().removeChange(this);
+            } else {
+                if (EVENT_LOG_LION_KEY.equals(key)) {
+                    client.parseEventLogConfig(value);
+                }
+            }
+        }
     }
 }

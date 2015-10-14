@@ -73,7 +73,7 @@ public class UpdateTimeAndIdSourceFetcher extends AbstractDataFetcher implements
     public Map<String, Object> retry(Map<String, Object> source) {
         LinkedHashMap<String, Object> condition = Maps.newLinkedHashMap(source);
 
-        String sql = String.format("select %s from %s where %s limit 1",
+        String sql = String.format("/*+zebra:w*/select %s from %s where %s limit 1",
                 columns, tableName,
                 Joiner.on(" and ").join(FluentIterable.from(condition.keySet()).transform(new Function<String, String>() {
                     @Override
@@ -90,7 +90,7 @@ public class UpdateTimeAndIdSourceFetcher extends AbstractDataFetcher implements
     protected void initSql() {
         if (Strings.isNullOrEmpty(this.sql)) {
             this.sql = String.format(
-                    "SELECT %s FROM %s WHERE"
+                    "/*+zebra:w*/SELECT %s FROM %s WHERE"
                             + " ( %s > ? OR (%s = ? AND (? is null OR %s > ?)))"
                             + " AND %s < ? "
                             + " ORDER BY %s,%s limit %d",

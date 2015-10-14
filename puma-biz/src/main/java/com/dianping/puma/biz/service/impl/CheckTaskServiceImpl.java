@@ -22,6 +22,11 @@ public class CheckTaskServiceImpl implements CheckTaskService {
     }
 
     @Override
+    public CheckTaskEntity findByName(String name) {
+        return checkTaskDao.findByName(name);
+    }
+
+    @Override
     public List<CheckTaskEntity> findRunnable() {
         return checkTaskDao.findRunnable();
     }

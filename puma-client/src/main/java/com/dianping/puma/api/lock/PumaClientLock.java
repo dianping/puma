@@ -26,18 +26,28 @@ public class PumaClientLock {
 	}
 
 	public void lock() {
-		lock.lockNotify(listener);
-		lockState = true;
+		if (!lockState) {
+			lock.lockNotify(listener);
+			lockState = true;
+		}
 	}
 
 	public boolean tryLock() {
-		lockState = lock.tryLockNotify(listener);
-		return lockState;
+		if (!lockState) {
+			lockState = lock.tryLockNotify(listener);
+			return lockState;
+		} else {
+			return true;
+		}
 	}
 
 	public boolean tryLock(long time, TimeUnit timeUnit) throws InterruptedException {
-		lockState = lock.tryLockNotify(time, timeUnit, listener);
-		return lockState;
+		if (!lockState) {
+			lockState = lock.tryLockNotify(time, timeUnit, listener);
+			return lockState;
+		} else {
+			return true;
+		}
 	}
 
 	public void unlock() {

@@ -44,7 +44,7 @@ while(true) {
 		// Do business logic.
 		// ...
 		client.ack(binlogMessage.getBinlogInfo());
-	} catch(Throwable t) {
+	} catch(Exception e) {
 		// Error handling.
 	}
 }
@@ -60,20 +60,16 @@ PumaClient client = new PumaClientConfig()
 
 PumaClientLock lock = new PumaClient("name");
 try {
-	while (!Thread.interrupted()) {
-		if (!lock.isLocked()) {
-			lock.lock();
-		}
-
+	while (true) {
+		lock.lock();
 		try {
 			BinlogMessage message = client.get(size, 1, TimeUnit.SECONDS);
+			// Do business logic.
+			// ...
 			client.ack(message.getLastBinlogInfo());
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			// Error handling.
 		}
-	}
-} catch (Throwable t) {
-	// Error handling.
 } finally {
 	lock.unlockQuietly();
 }

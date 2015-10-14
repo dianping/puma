@@ -24,7 +24,7 @@ public class SingleLineTargetFetcher extends AbstractDataFetcher implements Targ
     @Override
     public SourceTargetPair fetch(Map<String, Object> source, Map<String, Object> c) {
         LinkedHashMap<String, Object> condition = Maps.newLinkedHashMap(c);
-        String sql = String.format("select %s from %s where %s limit 1",
+        String sql = String.format("/*+zebra:w*/select %s from %s where %s limit 1",
                 columns, tableName,
                 Joiner.on(" and ").join(FluentIterable.from(condition.keySet()).transform(new Function<String, String>() {
                     @Override

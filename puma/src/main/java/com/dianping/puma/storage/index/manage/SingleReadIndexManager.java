@@ -1,7 +1,6 @@
 package com.dianping.puma.storage.index.manage;
 
 import com.dianping.puma.common.AbstractLifeCycle;
-import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.index.bucket.LocalFileReadIndexBucket;
 import com.dianping.puma.storage.index.bucket.ReadIndexBucket;
 import com.dianping.puma.storage.index.codec.DefaultIndexCodec;

@@ -6,19 +6,29 @@ import java.io.IOException;
 
 public class LocalFileWriteIndexBucket extends AbstractLifeCycle implements WriteIndexBucket {
 
-	@Override protected void doStart() {
+	private String filename;
+
+	public LocalFileWriteIndexBucket(String filename) {
+		this.filename = filename;
+	}
+
+	@Override
+	protected void doStart() {
 
 	}
 
-	@Override protected void doStop() {
+	@Override
+	protected void doStop() {
 
 	}
 
-	@Override public void append(byte[] data) throws IOException {
+	@Override
+	public void append(byte[] data) throws IOException {
 
 	}
 
-	@Override public void flush() throws IOException {
+	@Override
+	public void flush() throws IOException {
 
 	}
 }

@@ -1,25 +1,31 @@
 package com.dianping.puma.storage.index.manage;
 
 import com.dianping.puma.common.AbstractLifeCycle;
+import com.dianping.puma.storage.index.bucket.LocalFileWriteIndexBucket;
 import com.dianping.puma.storage.index.bucket.WriteIndexBucket;
+import com.dianping.puma.storage.index.codec.DefaultIndexCodec;
 import com.dianping.puma.storage.index.codec.IndexCodec;
 
 import java.io.IOException;
 
 public class SingleWriteIndexManager<K, V> extends AbstractLifeCycle implements WriteIndexManager<K, V> {
 
+	private String filename;
+
 	private WriteIndexBucket writeIndexBucket;
 
 	private IndexCodec<K, V> indexCodec;
 
-	public SingleWriteIndexManager(WriteIndexBucket writeIndexBucket, IndexCodec<K, V> indexCodec) {
-		this.writeIndexBucket = writeIndexBucket;
-		this.indexCodec = indexCodec;
+	public SingleWriteIndexManager(String filename) {
+		this.filename = filename;
 	}
 
 	@Override
 	protected void doStart() {
+		writeIndexBucket = new LocalFileWriteIndexBucket(filename);
 		writeIndexBucket.start();
+
+		indexCodec = new DefaultIndexCodec<K, V>();
 		indexCodec.start();
 	}
 

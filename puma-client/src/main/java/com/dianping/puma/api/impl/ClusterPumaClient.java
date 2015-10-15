@@ -159,11 +159,6 @@ public class ClusterPumaClient implements PumaClient {
     }
 
     @Override
-    public void rollback() throws PumaClientException {
-        rollback(null);
-    }
-
-    @Override
     public void rollback(BinlogInfo binlogInfo) throws PumaClientException {
         lock();
 

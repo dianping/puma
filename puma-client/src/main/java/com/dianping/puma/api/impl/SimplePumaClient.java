@@ -237,11 +237,6 @@ public class SimplePumaClient implements PumaClient {
         execute("/puma/binlog/rollback", params, HTTP_GET, null, BinlogRollback.class);
     }
 
-    @Override
-    public void rollback() throws PumaClientException {
-        rollback(null);
-    }
-
     protected void doSubscribe() throws PumaClientException {
         if (this.subscribeRequest == null) {
             throw new PumaClientException("Please subscribe first");

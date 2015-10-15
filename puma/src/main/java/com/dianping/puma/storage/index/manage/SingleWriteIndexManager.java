@@ -5,6 +5,13 @@ import com.dianping.puma.common.AbstractLifeCycle;
 import java.io.IOException;
 
 public class SingleWriteIndexManager<K, V> extends AbstractLifeCycle implements WriteIndexManager<K, V> {
+
+	private String database;
+
+	public SingleWriteIndexManager(String database) {
+		this.database = database;
+	}
+
 	@Override protected void doStart() {
 
 	}
@@ -13,8 +20,7 @@ public class SingleWriteIndexManager<K, V> extends AbstractLifeCycle implements 
 
 	}
 
-	@Override public int append(K indexKey, V indexValue) throws IOException {
-		return 0;
+	@Override public void append(K indexKey, V indexValue) throws IOException {
 	}
 
 	@Override public void flush() throws IOException {

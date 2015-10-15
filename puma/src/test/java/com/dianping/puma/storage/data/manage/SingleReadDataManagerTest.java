@@ -1,7 +1,6 @@
 package com.dianping.puma.storage.data.manage;
 
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.data.manage.DefaultReadDataManager;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -11,9 +10,9 @@ import java.io.*;
 
 import static org.junit.Assert.*;
 
-public class DefaultReadDataManagerTest {
+public class SingleReadDataManagerTest {
 
-	private DefaultReadDataManager manager;
+	private SingleReadDataManager manager;
 
 	private File masterFolder;
 
@@ -38,7 +37,7 @@ public class DefaultReadDataManagerTest {
 		createNewFolder(new File(slaveFolder, "puma/20151010"));
 		createNewFolder(new File(slaveFolder, "puma/20151011"));
 
-		manager = new DefaultReadDataManager(masterFolder.getAbsolutePath(), slaveFolder.getAbsolutePath(), "puma");
+		manager = new SingleReadDataManager(masterFolder.getAbsolutePath(), slaveFolder.getAbsolutePath(), "puma");
 		manager.start();
 	}
 

@@ -1,12 +1,16 @@
-package com.dianping.puma.storage.index.model;
+package com.dianping.puma.storage.index.biz;
 
 import com.dianping.puma.core.model.BinlogInfo;
 
-public class L1IndexKey {
+public class L2IndexKey {
 
 	private BinlogInfo binlogInfo;
 
-	public L1IndexKey(BinlogInfo binlogInfo) {
+	public L2IndexKey(L1IndexKey l1IndexKey) {
+		this.binlogInfo = l1IndexKey.getBinlogInfo();
+	}
+
+	public L2IndexKey(BinlogInfo binlogInfo) {
 		this.binlogInfo = binlogInfo;
 	}
 

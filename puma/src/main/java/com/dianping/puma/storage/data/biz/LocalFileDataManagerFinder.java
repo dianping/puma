@@ -1,9 +1,9 @@
-package com.dianping.puma.storage.data.manage;
+package com.dianping.puma.storage.data.biz;
 
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.storage.Sequence;
+import com.dianping.puma.storage.data.bucket.LocalFileReadDataBucket;
 import com.dianping.puma.storage.data.bucket.WriteDataBucket;
-import com.dianping.puma.storage.data.factory.DataBucketFactory;
 import com.dianping.puma.storage.data.bucket.ReadDataBucket;
 import org.apache.commons.lang3.StringUtils;
 
@@ -15,7 +15,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class LocalFileDataBucketManager extends AbstractLifeCycle implements DataBucketManager {
+public class LocalFileDataManagerFinder extends AbstractLifeCycle implements DataManagerFinder {
 
 	private final String bucketPrefix = "Bucket-";
 
@@ -41,7 +41,7 @@ public class LocalFileDataBucketManager extends AbstractLifeCycle implements Dat
 		}
 	});
 
-	public LocalFileDataBucketManager(String baseDir, String database) {
+	public LocalFileDataManagerFinder(String baseDir, String database) {
 		this.baseDir = baseDir;
 		this.database = database;
 		this.rootDir = new File(baseDir, database);
@@ -68,7 +68,7 @@ public class LocalFileDataBucketManager extends AbstractLifeCycle implements Dat
 		if (file == null) {
 			return null;
 		}
-		return DataBucketFactory.newLocalFileReadDataBucket(sequenceNoOffset, file);
+		return new LocalFileReadDataBucket(sequenceNoOffset, file);
 	}
 
 	@Override
@@ -78,7 +78,7 @@ public class LocalFileDataBucketManager extends AbstractLifeCycle implements Dat
 		if (entry == null) {
 			return null;
 		}
-		return DataBucketFactory.newLocalFileReadDataBucket(entry.getKey(), entry.getValue());
+		return new LocalFileReadDataBucket(entry.getKey(), entry.getValue());
 	}
 
 	@Override

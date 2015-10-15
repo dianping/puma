@@ -1,9 +1,8 @@
-package com.dianping.puma.storage.data.manage;
+package com.dianping.puma.storage.data.biz;
 
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.data.factory.DataBucketFactory;
+import com.dianping.puma.storage.data.bucket.LocalFileReadDataBucket;
 import com.dianping.puma.storage.data.bucket.ReadDataBucket;
-import com.dianping.puma.storage.data.manage.LocalFileDataBucketManager;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.After;
@@ -15,11 +14,11 @@ import java.io.IOException;
 
 import static org.junit.Assert.*;
 
-public class LocalFileDataBucketManagerTest {
+public class LocalFileDataManagerFinderTest {
 
 	private File tempDir;
 
-	private LocalFileDataBucketManager manager;
+	private LocalFileDataManagerFinder manager;
 
 	@Before
 	public void before() throws IOException {
@@ -28,7 +27,7 @@ public class LocalFileDataBucketManagerTest {
 		FileUtils.deleteDirectory(tempDir);
 		createNewFolder(tempDir);
 
-		manager = new LocalFileDataBucketManager(tempDir.getName(), "test");
+		manager = new LocalFileDataManagerFinder(tempDir.getName(), "test");
 		manager.start();
 		createNewFolder(manager.rootDir());
 	}
@@ -50,25 +49,25 @@ public class LocalFileDataBucketManagerTest {
 		createNewFile(new File(file_0, "Bucket-1"));
 		createNewFile(new File(file_0, "Bucket-2"));
 
-		ReadDataBucket expected_0 = DataBucketFactory.newLocalFileReadDataBucket(
+		ReadDataBucket expected_0 = new LocalFileReadDataBucket(
 				new Sequence(20150925, 0, 0),
 				new File(new File(manager.rootDir(), "20150925"), "Bucket-0"));
 		ReadDataBucket result_0 = manager.findReadDataBucket(new Sequence(20150925, 0, 100));
 		assertTrue(EqualsBuilder.reflectionEquals(expected_0, result_0));
 
-		ReadDataBucket expected_1 = DataBucketFactory.newLocalFileReadDataBucket(
+		ReadDataBucket expected_1 = new LocalFileReadDataBucket(
 				new Sequence(20150926, 1, 0),
 				new File(new File(manager.rootDir(), "20150926"), "Bucket-1"));
 		ReadDataBucket result_1 = manager.findReadDataBucket(new Sequence(20150926, 1, 0));
 		assertTrue(EqualsBuilder.reflectionEquals(expected_1, result_1));
 
-		ReadDataBucket expected_2 = DataBucketFactory.newLocalFileReadDataBucket(
+		ReadDataBucket expected_2 = new LocalFileReadDataBucket(
 				new Sequence(20150926, 1, 0),
 				new File(new File(manager.rootDir(), "20150926"), "Bucket-1"));
 		ReadDataBucket result_2 = manager.findReadDataBucket(new Sequence(20150926, 1, 20000));
 		assertTrue(EqualsBuilder.reflectionEquals(expected_2, result_2));
 
-		ReadDataBucket expected_3 = DataBucketFactory.newLocalFileReadDataBucket(
+		ReadDataBucket expected_3 = new LocalFileReadDataBucket(
 				new Sequence(20150925, 0, 0),
 				new File(new File(manager.rootDir(), "20150925"), "Bucket-0"));
 		ReadDataBucket result_3 = manager.findReadDataBucket(new Sequence(20150925, 0, 1000));
@@ -119,25 +118,25 @@ public class LocalFileDataBucketManagerTest {
 		createNewFile(new File(file_0, "Bucket-1"));
 		createNewFile(new File(file_0, "Bucket-2"));
 
-		ReadDataBucket expected_0 = DataBucketFactory.newLocalFileReadDataBucket(
+		ReadDataBucket expected_0 = new LocalFileReadDataBucket(
 				new Sequence(20150925, 1, 0),
 				new File(new File(manager.rootDir(), "20150925"), "Bucket-1"));
 		ReadDataBucket result_0 = manager.findNextReadDataBucket(new Sequence(20150925, 0, 100));
 		assertTrue(EqualsBuilder.reflectionEquals(expected_0, result_0));
 
-		ReadDataBucket expected_1 = DataBucketFactory.newLocalFileReadDataBucket(
+		ReadDataBucket expected_1 = new LocalFileReadDataBucket(
 				new Sequence(20150926, 2, 0),
 				new File(new File(manager.rootDir(), "20150926"), "Bucket-2"));
 		ReadDataBucket result_1 = manager.findNextReadDataBucket(new Sequence(20150926, 1, 0));
 		assertTrue(EqualsBuilder.reflectionEquals(expected_1, result_1));
 
-		ReadDataBucket expected_2 = DataBucketFactory.newLocalFileReadDataBucket(
+		ReadDataBucket expected_2 = new LocalFileReadDataBucket(
 				new Sequence(20150926, 2, 0),
 				new File(new File(manager.rootDir(), "20150926"), "Bucket-2"));
 		ReadDataBucket result_2 = manager.findNextReadDataBucket(new Sequence(20150926, 1, 20000));
 		assertTrue(EqualsBuilder.reflectionEquals(expected_2, result_2));
 
-		ReadDataBucket expected_3 = DataBucketFactory.newLocalFileReadDataBucket(
+		ReadDataBucket expected_3 = new LocalFileReadDataBucket(
 				new Sequence(20150925, 1, 0),
 				new File(new File(manager.rootDir(), "20150925"), "Bucket-1"));
 		ReadDataBucket result_3 = manager.findNextReadDataBucket(new Sequence(20150925, 0, 1000));

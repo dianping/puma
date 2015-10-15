@@ -3,7 +3,7 @@
  * <p/>
  * File Created at Nov 29, 2013
  */
-package com.dianping.puma.storage.channel;
+package com.dianping.puma.storage.oldchannel;
 
 import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;

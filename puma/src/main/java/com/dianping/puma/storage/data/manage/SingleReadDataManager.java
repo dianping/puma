@@ -2,15 +2,13 @@ package com.dianping.puma.storage.data.manage;
 
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.data.manage.DataBucketManager;
+import com.dianping.puma.storage.data.biz.DataManagerFinder;
 import com.dianping.puma.storage.data.bucket.ReadDataBucket;
-import com.dianping.puma.storage.data.manage.ReadDataManager;
-import com.dianping.puma.storage.data.factory.DataBucketManagerFactory;
 
 import java.io.EOFException;
 import java.io.IOException;
 
-public class DefaultReadDataManager extends AbstractLifeCycle implements ReadDataManager {
+public class SingleReadDataManager extends AbstractLifeCycle implements ReadDataManager {
 
 	private final String masterBaseDir;
 
@@ -18,13 +16,13 @@ public class DefaultReadDataManager extends AbstractLifeCycle implements ReadDat
 
 	private final String database;
 
-	private DataBucketManager master;
+	private DataManagerFinder master;
 
-	private DataBucketManager slave;
+	private DataManagerFinder slave;
 
 	private ReadDataBucket readDataBucket;
 
-	public DefaultReadDataManager(String masterBaseDir, String slaveBaseDir, String database) {
+	public SingleReadDataManager(String masterBaseDir, String slaveBaseDir, String database) {
 		this.masterBaseDir = masterBaseDir;
 		this.slaveBaseDir = slaveBaseDir;
 		this.database = database;
@@ -32,10 +30,10 @@ public class DefaultReadDataManager extends AbstractLifeCycle implements ReadDat
 
 	@Override
 	public void doStart() {
-		master = DataBucketManagerFactory.newDataBucketManager(masterBaseDir, database);
+		//master = DataBucketManagerFactory.newDataBucketManager(masterBaseDir, database);
 		master.start();
 
-		slave = DataBucketManagerFactory.newDataBucketManager(slaveBaseDir, database);
+		//slave = DataBucketManagerFactory.newDataBucketManager(slaveBaseDir, database);
 		slave.start();
 	}
 

@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.data.manage;
+package com.dianping.puma.storage.data.biz;
 
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.storage.data.manage.ReadDataManager;

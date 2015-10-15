@@ -6,6 +6,8 @@ import java.io.IOException;
 
 public class SingleReadIndexManager<K, V> extends AbstractLifeCycle implements ReadIndexManager<K, V> {
 
+	private String database;
+
 	@Override
 	protected void doStart() {
 

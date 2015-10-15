@@ -7,7 +7,7 @@ import com.dianping.puma.core.event.EventType;
 import com.dianping.puma.core.event.ServerErrorEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.server.container.TaskContainer;
-import com.dianping.puma.storage.channel.EventChannel;
+import com.dianping.puma.storage.oldchannel.EventChannel;
 import com.dianping.puma.storage.EventStorage;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;

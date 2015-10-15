@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.channel;
+package com.dianping.puma.storage.oldchannel;
 
 import com.dianping.puma.common.LifeCycle;
 import com.dianping.puma.core.event.Event;

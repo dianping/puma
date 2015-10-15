@@ -1,7 +1,4 @@
-package com.dianping.puma.storage.channel;
-
-import java.util.HashSet;
-import java.util.Set;
+package com.dianping.puma.storage.oldchannel;
 
 public abstract class AbstractEventChannel implements EventChannel {
 

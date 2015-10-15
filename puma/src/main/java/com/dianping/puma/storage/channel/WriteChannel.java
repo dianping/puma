@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.manage;
+package com.dianping.puma.storage.channel;
 
 import com.dianping.puma.common.LifeCycle;
 import com.dianping.puma.core.event.ChangedEvent;
@@ -7,11 +7,7 @@ import com.dianping.puma.storage.Sequence;
 
 import java.io.IOException;
 
-public interface WriteManager extends LifeCycle {
-
-	Sequence writeSequence();
-
-	Sequence flushSequence();
+public interface WriteChannel extends LifeCycle {
 
 	void append(BinlogInfo binlogInfo, ChangedEvent binlogEvent) throws IOException;
 

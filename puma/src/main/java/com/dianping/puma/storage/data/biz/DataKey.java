@@ -1,10 +1,14 @@
-package com.dianping.puma.storage.index.model;
+package com.dianping.puma.storage.data.biz;
 
 import com.dianping.puma.storage.Sequence;
 
-public class L2IndexValue {
+public class DataKey {
 
 	private Sequence sequence;
+
+	public DataKey(Sequence sequence) {
+		this.sequence = sequence;
+	}
 
 	public Sequence getSequence() {
 		return sequence;

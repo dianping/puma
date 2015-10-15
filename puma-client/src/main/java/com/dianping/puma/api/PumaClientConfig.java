@@ -1,7 +1,6 @@
 package com.dianping.puma.api;
 
 import com.dianping.puma.api.impl.*;
-import com.dianping.puma.core.lock.DistributedLock;
 
 import java.util.List;
 
@@ -26,8 +25,6 @@ public class PumaClientConfig {
 	private String serverHost;
 
 	private List<String> serverHosts;
-
-	private DistributedLock lock;
 
 	public PumaClientConfig setClientName(String clientName) {
 		this.clientName = clientName;
@@ -74,11 +71,6 @@ public class PumaClientConfig {
 		return this;
 	}
 
-	public PumaClientConfig setLock(DistributedLock lock) {
-		this.lock = lock;
-		return this;
-	}
-
     public boolean isEnableEventLog() {
         return enableEventLog;
     }
@@ -122,10 +114,6 @@ public class PumaClientConfig {
 
 	public List<String> getServerHosts() {
 		return serverHosts;
-	}
-
-	public DistributedLock getLock() {
-		return lock;
 	}
 
 	public SimplePumaClient buildSimplePumaClient() {

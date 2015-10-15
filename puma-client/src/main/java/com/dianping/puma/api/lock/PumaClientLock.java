@@ -1,66 +1,70 @@
 package com.dianping.puma.api.lock;
 
-import com.dianping.puma.core.lock.DistributedLock;
-import com.dianping.puma.core.lock.DistributedLockFactory;
-import com.dianping.puma.core.lock.DistributedLockLostListener;
-import com.dianping.puma.core.lock.DistributedLockUtils;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.recipes.locks.InterProcessSemaphoreMutex;
+import org.apache.curator.framework.state.ConnectionState;
+import org.apache.curator.framework.state.ConnectionStateListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
 public class PumaClientLock {
 
-	private volatile boolean lockState = false;
+    private static final Logger LOG = LoggerFactory.getLogger(PumaClientLock.class);
 
-	private DistributedLock lock;
+    private volatile boolean lockState = false;
 
-	private DistributedLockLostListener listener;
+    private final InterProcessSemaphoreMutex lock;
 
-	public PumaClientLock(String clientName) {
-		lock = DistributedLockFactory.newZkDistributedLock(clientName);
-		listener = new DistributedLockLostListener() {
-			@Override
-			public void onLost() {
-				lockState = false;
-			}
-		};
-	}
+    private final String clientName;
 
-	public void lock() {
-		if (!lockState) {
-			lock.lockNotify(listener);
-			lockState = true;
-		}
-	}
+    public PumaClientLock(final String clientName) {
+        CuratorFramework zkClient = new LionZkManager().getZkClient();
 
-	public boolean tryLock() {
-		if (!lockState) {
-			lockState = lock.tryLockNotify(listener);
-			return lockState;
-		} else {
-			return true;
-		}
-	}
+        this.clientName = clientName;
+        this.lock = new InterProcessSemaphoreMutex(zkClient, genLockPath(clientName));
 
-	public boolean tryLock(long time, TimeUnit timeUnit) throws InterruptedException {
-		if (!lockState) {
-			lockState = lock.tryLockNotify(time, timeUnit, listener);
-			return lockState;
-		} else {
-			return true;
-		}
-	}
+        zkClient.getConnectionStateListenable().addListener(new ConnectionStateListener() {
+            @Override
+            public void stateChanged(CuratorFramework client, ConnectionState newState) {
+                if (newState.equals(ConnectionState.LOST) || newState.equals(ConnectionState.SUSPENDED)) {
+                    LOG.info("zookeeper connection lost or suspend for lock `{}`.", clientName);
+                    lockState = false;
+                }
+            }
+        });
+    }
 
-	public void unlock() {
-		lock.unlockNotify();
-		lockState = false;
-	}
+    public void lock() throws Exception {
+        if (!lockState) {
+            lock.acquire();
+            lockState = true;
+            LOG.info("{} get the lock", clientName);
+        }
+    }
 
-	public void unlockQuietly() {
-		DistributedLockUtils.unlockNotifyQuietly(lock);
-		lockState = false;
-	}
+    public boolean lock(long time, TimeUnit timeUnit) throws Exception {
+        if (!lockState) {
+            lockState = lock.acquire(time, timeUnit);
+            if (lockState) {
+                LOG.info("{} get the lock", clientName);
+            }
+            return lockState;
+        } else {
+            return true;
+        }
+    }
 
-	public boolean isLocked() {
-		return lockState;
-	}
+    public void unlock() throws Exception {
+        if(lockState) {
+            lock.release();
+            lockState = false;
+            LOG.info("{} release the lock", clientName);
+        }
+    }
+
+    protected String genLockPath(String lockName) {
+        return "/dp/lock/puma/" + lockName;
+    }
 }

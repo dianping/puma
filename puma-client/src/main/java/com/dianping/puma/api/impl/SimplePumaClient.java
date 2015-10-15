@@ -329,7 +329,7 @@ public class SimplePumaClient implements PumaClient {
         }
     }
 
-    private void checkThreadNotSafe() {
+    private void checkThreadNotSafe() throws PumaClientException {
         if (threadId != Thread.currentThread().getId()) {
             throw new PumaClientException("PumaClient is not thread safe!");
         }

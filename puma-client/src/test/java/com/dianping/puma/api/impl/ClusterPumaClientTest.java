@@ -25,12 +25,13 @@ public class ClusterPumaClientTest extends MockTest {
     SimplePumaClient simplePumaClient;
 
     @Before
-    public void before() {
+    public void before() throws PumaClientException {
         reset(clusterPumaClient, simplePumaClient);
+        doNothing().when(clusterPumaClient).lock();
     }
 
     @Test
-    public void testAutoCreateNewClient() {
+    public void testAutoCreateNewClient() throws PumaClientException {
         doReturn(simplePumaClient).when(clusterPumaClient).newClient();
 
         BinlogMessage binlogMessage = new BinlogMessage();
@@ -50,7 +51,7 @@ public class ClusterPumaClientTest extends MockTest {
     }
 
     @Test(expected = PumaClientException.class)
-    public void testGetFailure() {
+    public void testGetFailure() throws PumaClientException {
         clusterPumaClient.client = simplePumaClient;
         clusterPumaClient.retryTimes = 3;
         clusterPumaClient.retryInterval = 1;

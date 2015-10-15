@@ -2,7 +2,7 @@ package com.dianping.puma.storage.index.biz;
 
 import com.dianping.puma.core.model.BinlogInfo;
 
-public class L2IndexKey {
+public class L2IndexKey implements Comparable<L2IndexKey> {
 
 	private BinlogInfo binlogInfo;
 
@@ -12,6 +12,11 @@ public class L2IndexKey {
 
 	public L2IndexKey(BinlogInfo binlogInfo) {
 		this.binlogInfo = binlogInfo;
+	}
+
+	@Override
+	public int compareTo(L2IndexKey l2IndexKey) {
+		return binlogInfo.compareTo(l2IndexKey.getBinlogInfo());
 	}
 
 	public BinlogInfo getBinlogInfo() {

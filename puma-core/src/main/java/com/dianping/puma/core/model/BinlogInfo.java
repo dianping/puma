@@ -4,7 +4,7 @@ import com.google.common.base.Objects;
 
 import java.io.Serializable;
 
-public class BinlogInfo implements Serializable {
+public class BinlogInfo implements Serializable, Comparable<BinlogInfo> {
 
     private static final long serialVersionUID = 5056491879587690001L;
 
@@ -100,5 +100,25 @@ public class BinlogInfo implements Serializable {
                 ", eventIndex=" + eventIndex +
                 ", timestamp=" + timestamp +
                 '}';
+    }
+
+    @Override
+    public int compareTo(BinlogInfo binlogInfo) {
+        if (timestamp != 0 && binlogInfo.getTimestamp() != 0) {
+            return Long.valueOf(timestamp).compareTo(binlogInfo.getTimestamp());
+        }
+
+        if (serverId == binlogInfo.getServerId()) {
+            int binlogFileResult = binlogFile.compareTo(binlogInfo.getBinlogFile());
+            if (binlogFileResult < 0) {
+                return -1;
+            } else if (binlogFileResult == 0) {
+                return Long.valueOf(binlogPosition).compareTo(binlogInfo.getBinlogPosition());
+            } else {
+                return 1;
+            }
+        }
+
+        throw new RuntimeException("can not compare two binlog info.");
     }
 }

@@ -6,6 +6,12 @@ import java.io.IOException;
 
 public class LocalFileReadIndexBucket extends AbstractLifeCycle implements ReadIndexBucket {
 
+	private String filename;
+
+	public LocalFileReadIndexBucket(String filename) {
+		this.filename = filename;
+	}
+
 	@Override protected void doStart() {
 
 	}

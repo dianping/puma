@@ -465,7 +465,7 @@ public class DefaultIndexManager<K extends IndexKey, V extends IndexValue<K>> im
             while (true) {
                 V next = bucket.next();
 
-                if (next.isTransactionCommit()) {
+                if (next.isTransactionBegin()) {
                     commitValue = next;
                 }
             }
@@ -539,7 +539,7 @@ public class DefaultIndexManager<K extends IndexKey, V extends IndexValue<K>> im
             V last = entries.pollLast();
 
             while (last != null) {
-                if (last.isTransactionCommit()) {
+                if (last.isTransactionBegin()) {
                     return last;
                 } else {
                     last = entries.pollLast();

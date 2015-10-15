@@ -30,7 +30,6 @@
 
 ## 使用实例
 
-### Single Client
 ```java
 PumaClient client = new PumaClientConfig()
 	.setClientName("your-client-name")

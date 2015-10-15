@@ -4,6 +4,24 @@ import com.dianping.puma.api.impl.*;
 
 import java.util.List;
 
+/**
+ * 使用示例：
+ * PumaClient client = new PumaClientConfig()
+ *    .setClientName("your-client-name")
+ *   .setDatabase("database")
+ *   .setTables(Lists.newArrayList("table0", "table1"))
+ *   .buildClusterPumaClient();
+ *
+ * while(!Thread.interrupted()) {
+ *       try {
+ *          BinlogMessage binlogMessage = client.get(10, 1, TimeUnit.SECOND);
+ *          // 处理数据
+ *          client.ack(binlogMessage.getBinlogInfo());
+ *       } catch(Exception e) {
+ *          // 这里的异常主要是用来打点的，便于及时发现
+ *       }
+ *   }
+ */
 public class PumaClientConfig {
 
 	private boolean enableEventLog = false;

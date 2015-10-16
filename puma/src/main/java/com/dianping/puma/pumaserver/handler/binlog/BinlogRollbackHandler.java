@@ -31,6 +31,8 @@ public class BinlogRollbackHandler extends SimpleChannelInboundHandler<BinlogRol
 
         BinlogRollbackResponse response = new BinlogRollbackResponse();
         ctx.channel().writeAndFlush(response);
+
+        //todo: rollback 失败后下一次get报错，rollback成功清空缓存
     }
 
     public void setClientSessionService(ClientSessionService clientSessionService) {

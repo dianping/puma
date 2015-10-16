@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -60,7 +61,7 @@ public class SimplePumaClient implements PumaClient {
 
     private static final String EVENT_LOG_LION_KEY = "puma.eventlog.clientlist";
 
-    private static final EventCodec CODEC = EventCodecFactory.createCodec("raw");
+    protected static final EventCodec CODEC = EventCodecFactory.createCodec("raw");
 
     private static final Gson GSON = new Gson();
 
@@ -68,13 +69,13 @@ public class SimplePumaClient implements PumaClient {
 
     private static final int SOCKET_TIMEOUT = 10 * 60 * 1000;
 
-    private volatile boolean enableEventLog;
+    private static final String HTTP_GET = HttpGet.METHOD_NAME;
 
-    private volatile BinlogSubscriptionRequest subscribeRequest;
+    private static final String HTTP_POST = HttpPost.METHOD_NAME;
 
-    private volatile String token;
+    private static final String PAIR_NAME_TOKEN = "token";
 
-    private String pumaServerHost;
+    protected final BinlogSubscriptionRequest subscribeRequest;
 
     private final String clientName;
 
@@ -82,15 +83,26 @@ public class SimplePumaClient implements PumaClient {
 
     private final long threadId = Thread.currentThread().getId();
 
-    private final HttpClient httpClient = HttpClients.custom()
-            .setDefaultRequestConfig(
-                    RequestConfig.custom()
-                            .setConnectTimeout(CONNECT_TIMEOUT)
-                            .setSocketTimeout(SOCKET_TIMEOUT)
-                            .build()).build();
+    private final String pumaServerHost;
+
+    protected String token;
+
+    private boolean enableEventLog;
+
+    private final HttpClient httpClient;
 
 
     public SimplePumaClient(PumaClientConfig config) {
+        this(config, HttpClients.custom()
+                .setDefaultRequestConfig(
+                        RequestConfig.custom()
+                                .setConnectTimeout(CONNECT_TIMEOUT)
+                                .setSocketTimeout(SOCKET_TIMEOUT)
+                                .build()).build());
+    }
+
+    public SimplePumaClient(PumaClientConfig config, HttpClient httpClient) {
+        this.httpClient = httpClient;
         this.pumaServerHost = config.getServerHost();
         this.clientName = config.getClientName();
         this.baseUrl = String.format("http://%s", config.getServerHost());
@@ -145,7 +157,7 @@ public class SimplePumaClient implements PumaClient {
             params.add(new BasicNameValuePair("timeUnit", timeUnit.toString()));
         }
         addToken(params);
-        BinlogMessage result = execute("/puma/binlog/get", params, "GET", null, BinlogGetResponse.class).getBinlogMessage();
+        BinlogMessage result = execute("/puma/binlog/get", params, HTTP_GET, null, BinlogGetResponse.class).getBinlogMessage();
         logResult(result);
         return result;
     }
@@ -192,18 +204,18 @@ public class SimplePumaClient implements PumaClient {
         params.add(new BasicNameValuePair("eventIndex", String.valueOf(binlogInfo.getEventIndex())));
         params.add(new BasicNameValuePair("timestamp", String.valueOf(binlogInfo.getTimestamp())));
         addToken(params);
-        execute("/puma/binlog/ack", params, "GET", null, BinlogAckResponse.class);
+        execute("/puma/binlog/ack", params, HTTP_GET, null, BinlogAckResponse.class);
     }
 
     protected void addToken(List<NameValuePair> parma) {
         Iterator<NameValuePair> iterator = parma.iterator();
         while (iterator.hasNext()) {
             NameValuePair nameValuePair = iterator.next();
-            if (nameValuePair.getName().equals("token")) {
+            if (nameValuePair.getName().equals(PAIR_NAME_TOKEN)) {
                 iterator.remove();
             }
         }
-        parma.add(new BasicNameValuePair("token", this.token));
+        parma.add(new BasicNameValuePair(PAIR_NAME_TOKEN, this.token));
     }
 
     @Override
@@ -222,12 +234,7 @@ public class SimplePumaClient implements PumaClient {
         }
 
         addToken(params);
-        execute("/puma/binlog/rollback", params, "GET", null, BinlogRollback.class);
-    }
-
-    @Override
-    public void rollback() throws PumaClientException {
-        rollback(null);
+        execute("/puma/binlog/rollback", params, HTTP_GET, null, BinlogRollback.class);
     }
 
     protected void doSubscribe() throws PumaClientException {
@@ -235,33 +242,22 @@ public class SimplePumaClient implements PumaClient {
             throw new PumaClientException("Please subscribe first");
         }
         BinlogSubscriptionResponse response;
-        response = execute("/puma/binlog/subscribe", null, "POST", GsonUtil.toJson(this.subscribeRequest), BinlogSubscriptionResponse.class);
+        response = execute("/puma/binlog/subscribe", null, HTTP_POST, GsonUtil.toJson(this.subscribeRequest), BinlogSubscriptionResponse.class);
         this.token = response.getToken();
     }
 
 
-    protected <T> T execute(String path, List<NameValuePair> params, String method, String json, Class<T> clazz) throws PumaClientException {
-        if (Strings.isNullOrEmpty(this.token) && !clazz.equals(BinlogSubscriptionResponse.class)) {
+    protected <T> T execute(String path, List<NameValuePair> params, String method, String body, Class<T> clazz) throws PumaClientException {
+        if (needToSubscribe(clazz)) {
             doSubscribe();
             addToken(params);
         }
 
         HttpResponse result;
         HttpUriRequest request = null;
-        try {
-            String url = baseUrl + path;
-            if (params != null && params.size() > 0) {
-                url += ("?" + URLEncodedUtils.format(params, DEFAULT_CHARSET));
-            }
-            URI uri = new URI(url);
-            if ("post".equalsIgnoreCase(method)) {
-                HttpPost post = new HttpPost(uri);
-                post.setEntity(new StringEntity(json, DEFAULT_CHARSET));
-                request = post;
-            } else {
-                request = new HttpGet(uri);
-            }
 
+        try {
+            request = buildRequest(path, method, params, body);
             result = httpClient.execute(request);
         } catch (Exception e) {
             this.token = null;
@@ -272,36 +268,63 @@ public class SimplePumaClient implements PumaClient {
         if (result.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
             doSubscribe();
             addToken(params);
-            return execute(path, params, method, json, clazz);
+            return execute(path, params, method, body, clazz);
         }
 
         if (result.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
             try {
-                if (clazz.equals(BinlogGetResponse.class) &&
-                        result.getHeaders(HttpHeaders.CONTENT_TYPE)[0].getValue().equals(MediaType.OCTET_STREAM.toString())) {
-                    BinlogGetResponse response = new BinlogGetResponse();
-                    BinlogMessage message = new BinlogMessage();
-                    message.setBinlogEvents(CODEC.decodeList(EntityUtils.toByteArray(result.getEntity())));
-                    response.setBinlogMessage(message);
-                    return (T) response;
-                } else {
-                    return GSON.fromJson(EntityUtils.toString(result.getEntity()), clazz);
-                }
+                return decode(clazz, result);
             } catch (Exception e) {
                 this.token = null;
                 throw new PumaClientException(e.getMessage(), e);
             }
-        } else {
-            this.token = null;
-            try {
-                throw new PumaClientException(String.format("[HttpStatus:%d]%s", result.getStatusLine().getStatusCode(), EntityUtils.toString(result.getEntity())));
-            } catch (IOException e) {
-                throw new PumaClientException(String.format("[HttpStatus:%d]%s", result.getStatusLine().getStatusCode(), e.getMessage()), e);
-            }
+        }
+
+        this.token = null;
+        try {
+            throw new PumaClientException(String.format("[HttpStatus:%d]%s", result.getStatusLine().getStatusCode(), EntityUtils.toString(result.getEntity())));
+        } catch (IOException e) {
+            throw new PumaClientException(String.format("[HttpStatus:%d]%s", result.getStatusLine().getStatusCode(), e.getMessage()), e);
         }
     }
 
-    private void checkThreadNotSafe() {
+    protected <T> boolean needToSubscribe(Class<T> clazz) {
+        return Strings.isNullOrEmpty(this.token) && !clazz.equals(BinlogSubscriptionResponse.class);
+    }
+
+    protected HttpUriRequest buildRequest(String path, String method, List<NameValuePair> params, String body) throws URISyntaxException {
+        HttpUriRequest request;
+        String url = baseUrl + path;
+        if (params != null && params.size() > 0) {
+            url += ("?" + URLEncodedUtils.format(params, DEFAULT_CHARSET));
+        }
+        URI uri = new URI(url);
+        if (HTTP_POST.equalsIgnoreCase(method)) {
+            HttpPost post = new HttpPost(uri);
+            post.setEntity(new StringEntity(body, DEFAULT_CHARSET));
+            request = post;
+        } else {
+            request = new HttpGet(uri);
+        }
+        return request;
+    }
+
+    protected <T> T decode(Class<T> clazz, HttpResponse result) throws IOException {
+        if (clazz.equals(BinlogGetResponse.class) &&
+                result.getHeaders(HttpHeaders.CONTENT_TYPE) != null &&
+                result.getHeaders(HttpHeaders.CONTENT_TYPE).length != 0 &&
+                result.getHeaders(HttpHeaders.CONTENT_TYPE)[0].getValue().equals(MediaType.OCTET_STREAM.toString())) {
+            BinlogGetResponse response = new BinlogGetResponse();
+            BinlogMessage message = new BinlogMessage();
+            message.setBinlogEvents(CODEC.decodeList(EntityUtils.toByteArray(result.getEntity())));
+            response.setBinlogMessage(message);
+            return (T) response;
+        } else {
+            return GSON.fromJson(EntityUtils.toString(result.getEntity()), clazz);
+        }
+    }
+
+    private void checkThreadNotSafe() throws PumaClientException {
         if (threadId != Thread.currentThread().getId()) {
             throw new PumaClientException("PumaClient is not thread safe!");
         }

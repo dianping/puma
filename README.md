@@ -30,51 +30,23 @@
 
 ## 使用实例
 
-### Single Client
 ```java
 PumaClient client = new PumaClientConfig()
-	.setClientName("name")
+	.setClientName("your-client-name")
 	.setDatabase("database")
 	.setTables(Lists.newArrayList("table0", "table1"))
 	.buildClusterPumaClient();
 
-while(true) {
+while(!Thread.currentThread().isInterrupted()) {
 	try {
 		BinlogMessage binlogMessage = client.get(10, 1, TimeUnit.SECOND);
-		// Do business logic.
-		// ...
+		//Todo: 处理数据
 		client.ack(binlogMessage.getBinlogInfo());
 	} catch(Exception e) {
-		// Error handling.
+		// 这里的异常主要是用来打点的，便于及时发现问题
 	}
 }
 ```
-
-### Distributed Clients
-```java
-PumaClient client = new PumaClientConfig()
-	.setClientName("name")
-	.setDatabase("database")
-	.setTables(Lists.newArrayList("table0", "table1"))
-	.buildClusterPumaClient();
-
-PumaClientLock lock = new PumaClient("name");
-try {
-	while (true) {
-		lock.lock();
-		try {
-			BinlogMessage message = client.get(size, 1, TimeUnit.SECONDS);
-			// Do business logic.
-			// ...
-			client.ack(message.getLastBinlogInfo());
-		} catch (Exception e) {
-			// Error handling.
-		}
-} finally {
-	lock.unlockQuietly();
-}
-```
-
 
 ## API文档
 
@@ -94,7 +66,7 @@ try {
 #### PumaClientConfig setClientName(String clientName)
 设置Puma客户端的名称。不同的客户端需使用不同的名称。
 **参数**
-* clientName `String` - 客户端名称
+* clientName `String` - 客户端名称（如果多台机器启动的 clientName 相同，那么只会有一个能读取到数据，其余会一直等待）
 **返回**
 * `PumaClientConfig` - Puma客户端配置
 
@@ -137,123 +109,3 @@ try {
 根据PumaClientConfig的配置创建具备ha功能的Puma客户端。
 **返回**
 * `PumaClient` - Puma客户端
-
-***
-
-### PumaClient
-
-#### BinlogMessage get(int batchSize)
-
-Gets batch of binlog events from puma server.
-
-**Arguments**
-
-* batchSize `int` - number of binlog events in a batch.
-
-**Return**
-
-* binlogMessage `BinlogMessage` - batch of binlog events.
-
-#### get(int batchSize, long timeout, TimeUnit timeUnit)
-
-Gets batch of binlog events from puma server in a given time.
-
-**Arguments**
-
-* batchSize `int` - number of binlog events in batch.
-* timeout `long` - timeout for getting binlog events.
-* timeUnit `TimeUnit` - time unit for timeout
-
-#### getWithAck(int batchSize)
-
-Gets batch of binlog events from puma server and acknowledges back automatically.
-
-**Arguments**
-
-* batchSize `int` - number of binlog events in batch.
-
-#### getWithAck(int batchSize, long timeout, TimeUnit timeUnit)
-
-Gets batch of binlog events from puma server in a given time and acknowledges back automatically if necessary.
-
-**Arguments**
-
-* batchSize `int` - number of binlog events in batch.
-* timeout `long` - timeout for getting binlog events.
-* timeUnit `TimeUnit` - time unit for timeout
-
-#### ack(BinlogInfo binlogInfo)
-
-Acknowledges back to puma server manually.
-
-**Arguments**
-
-* binlogInfo `BinlogInfo` - object contains binlog position info.
-
-#### rollback()
-
-Rolls back to the latest acknowledge binlog position.
-
-#### rollback(BinlogInfo binlogInfo)
-
-Rolls back to the given binlog position.
-
-**Arguments**
-
-* binlogInfo `BinlogInfo` - binlog position to be rolled back.
-
-
-### BinlogMessage
-
-#### getBinlogEvents()
-
-**Return**
-
-* `List<Event>` - list of binlog events.
-
-#### size()
-
-**Return**
-
-* `int` - number of binlog events.
-
-
-### PumaClientLock
-
-#### lock()
-
-Acquires the puma client distributed lock.
-
-#### tryLock()
-
-Acquires the puma client distributed lock only if it is free at the time of invocation.
-
-**Return**
-
-* `boolean` - lock was acquired or not.
-
-#### tryLock(long time, TimeUnit timeUnit)
-
-Acquires the puma client distributed lock if it is free within the given waiting time
-and the current thread has not been interrupted.
-
-**Return**
-
-* `boolean` - lock was acquired or not.
-
-#### unlock()
-
-Releases the puma client distributed lock.
-
-#### unlockQuietly()
-
-Releases the puma client distributed lock quietly.
-
-#### isLock()
-
-Queries whether the puma client distributed lock hold is lost or not.
-
-**Return**
-
-* `boolean` - lock hold is lost or not.
-

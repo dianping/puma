@@ -33,28 +33,26 @@ public class BinlogRollbackDecoder implements RequestDecoder {
         binlogRollbackRequest.setClientName(params.get("clientName").get(0));
         binlogRollbackRequest.setToken(params.get("token").get(0));
 
+        BinlogInfo binlogInfo = new BinlogInfo();
+
+        if (params.containsKey("timestamp")) {
+            binlogInfo.setTimestamp(Long.valueOf(params.get("timestamp").get(0)));
+        }
+
         if (params.containsKey("binlogFile") &&
                 params.containsKey("binlogPosition") &&
-                params.containsKey("serverId") &&
-                params.containsKey("timestamp")) {
-
-            BinlogInfo binlogInfo = new BinlogInfo(
-                    Long.valueOf(params.get("serverId").get(0)),
-                    params.get("binlogFile").get(0),
-                    Long.valueOf(params.get("binlogPosition").get(0)),
-                    0,
-                    Long.valueOf(params.get("timestamp").get(0))
-            );
+                params.containsKey("serverId")) {
+            binlogInfo.setServerId(Long.valueOf(params.get("serverId").get(0)));
+            binlogInfo.setBinlogFile(params.get("binlogFile").get(0));
+            binlogInfo.setBinlogPosition(Long.valueOf(params.get("binlogPosition").get(0)));
             if (params.containsKey("eventIndex")) {
                 binlogInfo.setEventIndex(Integer.valueOf(params.get("eventIndex").get(0)));
             }
-
-            BinlogRollback binlogRollback = new BinlogRollback();
-            binlogRollback.setBinlogInfo(binlogInfo);
-            binlogRollbackRequest.setBinlogRollback(binlogRollback);
-        } else {
-            binlogRollbackRequest.setBinlogRollback(new BinlogRollback());
         }
+
+        BinlogRollback binlogRollback = new BinlogRollback();
+        binlogRollback.setBinlogInfo(binlogInfo);
+        binlogRollbackRequest.setBinlogRollback(binlogRollback);
 
         return binlogRollbackRequest;
     }

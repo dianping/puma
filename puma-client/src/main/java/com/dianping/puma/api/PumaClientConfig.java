@@ -1,10 +1,27 @@
 package com.dianping.puma.api;
 
 import com.dianping.puma.api.impl.*;
-import com.dianping.puma.core.lock.DistributedLock;
 
 import java.util.List;
 
+/**
+ * 使用示例：
+ * PumaClient client = new PumaClientConfig()
+ *    .setClientName("your-client-name")
+ *   .setDatabase("database")
+ *   .setTables(Lists.newArrayList("table0", "table1"))
+ *   .buildClusterPumaClient();
+ *
+ * while(!Thread.currentThread().isInterrupted()) {
+ *       try {
+ *          BinlogMessage binlogMessage = client.get(10, 1, TimeUnit.SECOND);
+ *          // 处理数据
+ *          client.ack(binlogMessage.getBinlogInfo());
+ *       } catch(Exception e) {
+ *          // 这里的异常主要是用来打点的，便于及时发现
+ *       }
+ *   }
+ */
 public class PumaClientConfig {
 
 	private boolean enableEventLog = false;
@@ -26,8 +43,6 @@ public class PumaClientConfig {
 	private String serverHost;
 
 	private List<String> serverHosts;
-
-	private DistributedLock lock;
 
 	public PumaClientConfig setClientName(String clientName) {
 		this.clientName = clientName;
@@ -74,11 +89,6 @@ public class PumaClientConfig {
 		return this;
 	}
 
-	public PumaClientConfig setLock(DistributedLock lock) {
-		this.lock = lock;
-		return this;
-	}
-
     public boolean isEnableEventLog() {
         return enableEventLog;
     }
@@ -122,10 +132,6 @@ public class PumaClientConfig {
 
 	public List<String> getServerHosts() {
 		return serverHosts;
-	}
-
-	public DistributedLock getLock() {
-		return lock;
 	}
 
 	public SimplePumaClient buildSimplePumaClient() {

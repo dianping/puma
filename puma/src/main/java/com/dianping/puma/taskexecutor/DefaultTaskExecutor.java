@@ -176,7 +176,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
                 Thread.sleep(((failCount % 10) + 1) * 2000);
             }
-        } while (!isStop() && !Thread.interrupted());
+        } while (!isStop() && !Thread.currentThread().isInterrupted());
 
     }
 

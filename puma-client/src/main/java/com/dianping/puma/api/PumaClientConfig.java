@@ -12,7 +12,7 @@ import java.util.List;
  *   .setTables(Lists.newArrayList("table0", "table1"))
  *   .buildClusterPumaClient();
  *
- * while(!Thread.interrupted()) {
+ * while(!Thread.currentThread().isInterrupted()) {
  *       try {
  *          BinlogMessage binlogMessage = client.get(10, 1, TimeUnit.SECOND);
  *          // 处理数据

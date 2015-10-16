@@ -18,7 +18,7 @@ public final class CleanUpHelper {
     private static final Thread cleanUpThread = new Thread(new Runnable() {
         @Override
         public void run() {
-            while (!Thread.interrupted()) {
+            while (!Thread.currentThread().isInterrupted()) {
                 try {
                     Reference target = referenceQueue.poll();
                     if (target != null) {

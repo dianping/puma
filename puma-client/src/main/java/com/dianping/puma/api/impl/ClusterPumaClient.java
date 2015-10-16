@@ -202,7 +202,7 @@ public class ClusterPumaClient implements PumaClient {
     }
 
     protected void lock() throws PumaClientException {
-        while (!Thread.interrupted()) {
+        while (!Thread.currentThread().isInterrupted()) {
             try {
                 if (lock.lock(1, TimeUnit.SECONDS)) {
                     return;

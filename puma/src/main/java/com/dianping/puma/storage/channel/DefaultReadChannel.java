@@ -4,14 +4,14 @@ import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.data.manage.ReadDataManager;
-import com.dianping.puma.storage.data.biz.GroupReadDataManager;
-import com.dianping.puma.storage.data.biz.DataKey;
-import com.dianping.puma.storage.data.biz.DataValue;
-import com.dianping.puma.storage.index.manage.ReadIndexManager;
-import com.dianping.puma.storage.index.biz.SeriesReadIndexManager;
-import com.dianping.puma.storage.index.biz.L1IndexKey;
-import com.dianping.puma.storage.index.biz.L2IndexValue;
+import com.dianping.puma.storage.data.ReadDataManager;
+import com.dianping.puma.storage.data.impl.GroupReadDataManager;
+import com.dianping.puma.storage.data.impl.DataKeyImpl;
+import com.dianping.puma.storage.data.impl.DataValueImpl;
+import com.dianping.puma.storage.index.ReadIndexManager;
+import com.dianping.puma.storage.index.impl.SeriesReadIndexManager;
+import com.dianping.puma.storage.index.impl.L1IndexKey;
+import com.dianping.puma.storage.index.impl.L2IndexValue;
 
 import java.io.IOException;
 
@@ -21,7 +21,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 
 	private ReadIndexManager<L1IndexKey, L2IndexValue> readIndexManager;
 
-	private ReadDataManager<DataKey, DataValue> readDataManager;
+	private ReadDataManager<DataKeyImpl, DataValueImpl> readDataManager;
 
 	protected DefaultReadChannel(String database) {
 		this.database = database;
@@ -32,7 +32,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 		readIndexManager = new SeriesReadIndexManager(database);
 		readIndexManager.start();
 
-		readDataManager = new GroupReadDataManager<DataKey, DataValue>(database);
+		readDataManager = new GroupReadDataManager(database);
 		readDataManager.start();
 	}
 
@@ -49,7 +49,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 			throw new IOException("failed to open oldest.");
 		}
 		Sequence sequence = l2IndexValue.getSequence();
-		readDataManager.open(new DataKey(sequence));
+		//readDataManager.open(new DataKey(sequence));
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 			throw new IOException("failed to open latest.");
 		}
 		Sequence sequence = l2IndexValue.getSequence();
-		readDataManager.open(new DataKey(sequence));
+		//readDataManager.open(new DataKey(sequence));
 	}
 
 	@Override
@@ -69,15 +69,15 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 			throw new IOException("failed to open.");
 		}
 		Sequence sequence = l2IndexValue.getSequence();
-		readDataManager.open(new DataKey(sequence));
+		//readDataManager.open(new DataKey(sequence));
 	}
 
 	@Override
 	public ChangedEvent next() throws IOException {
-		DataValue dataValue = readDataManager.next();
-		if (dataValue == null) {
+		DataValueImpl dataValueImpl = readDataManager.next();
+		if (dataValueImpl == null) {
 			throw new IOException("failed to next.");
 		}
-		return dataValue.getBinlogEvent();
+		return dataValueImpl.getBinlogEvent();
 	}
 }

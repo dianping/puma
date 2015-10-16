@@ -22,6 +22,9 @@ public class LocalFileWriteDataBucket extends AbstractLifeCycle implements Write
 
 	private int index;
 
+	public LocalFileWriteDataBucket(String filename) {
+	}
+
 	public LocalFileWriteDataBucket(Sequence sequence, File file) {
 		this.sequence = sequence;
 		this.file = file;

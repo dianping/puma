@@ -12,19 +12,23 @@ public class LocalFileReadIndexBucket extends AbstractLifeCycle implements ReadI
 		this.filename = filename;
 	}
 
-	@Override protected void doStart() {
+	@Override
+	protected void doStart() {
 
 	}
 
-	@Override protected void doStop() {
+	@Override
+	protected void doStop() {
 
 	}
 
-	@Override public byte[] next() throws IOException {
+	@Override
+	public byte[] next() throws IOException {
 		return new byte[0];
 	}
 
-	@Override public void skip(long offset) throws IOException {
+	@Override
+	public void skip(long offset) throws IOException {
 
 	}
 }

@@ -20,6 +20,10 @@ public class LocalFileReadDataBucket extends AbstractLifeCycle implements ReadDa
 
 	private DataInputStream input;
 
+	public LocalFileReadDataBucket(String filename) {
+
+	}
+
 	public LocalFileReadDataBucket(Sequence sequence, File file) {
 		this.bucketName = file.getName();
 		this.sequence = sequence;

@@ -30,7 +30,11 @@ public class ZkPumaClientLock implements PumaClientLock {
             public void stateChanged(CuratorFramework client, ConnectionState newState) {
                 if (newState.equals(ConnectionState.LOST) || newState.equals(ConnectionState.SUSPENDED)) {
                     LOG.info("zookeeper connection lost or suspend for lock `{}`.", clientName);
-                    lockState = false;
+                    try {
+                        lockState = false;
+                        lock.release();
+                    } catch (Exception ignore) {
+                    }
                 }
             }
         });
@@ -39,20 +43,32 @@ public class ZkPumaClientLock implements PumaClientLock {
     @Override
     public void lock() throws Exception {
         if (!lockState) {
-            lock.acquire();
-            lockState = true;
-            LOG.info("{} get the lock", clientName);
+            try {
+                lock.acquire();
+                lockState = true;
+                LOG.info("{} get the lock", clientName);
+            } catch (Exception e) {
+                lockState = false;
+                lock.release();
+                throw e;
+            }
         }
     }
 
     @Override
     public boolean lock(long time, TimeUnit timeUnit) throws Exception {
         if (!lockState) {
-            lockState = lock.acquire(time, timeUnit);
-            if (lockState) {
-                LOG.info("{} get the lock", clientName);
+            try {
+                lockState = lock.acquire(time, timeUnit);
+                if (lockState) {
+                    LOG.info("{} get the lock", clientName);
+                }
+                return lockState;
+            } catch (Exception e) {
+                lockState = false;
+                lock.release();
+                throw e;
             }
-            return lockState;
         } else {
             return true;
         }
@@ -60,7 +76,7 @@ public class ZkPumaClientLock implements PumaClientLock {
 
     @Override
     public void unlock() throws Exception {
-        if(lockState) {
+        if (lockState) {
             lock.release();
             lockState = false;
             LOG.info("{} release the lock", clientName);

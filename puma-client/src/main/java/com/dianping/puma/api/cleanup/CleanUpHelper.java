@@ -39,13 +39,13 @@ public final class CleanUpHelper {
         }
     });
 
-    private static final Map<Reference, CleanUp> maps = new ConcurrentHashMap<Reference, CleanUp>();
+    private static final Map<Reference<Object>, CleanUp> maps = new ConcurrentHashMap<Reference<Object>, CleanUp>();
 
-    private static final ReferenceQueue referenceQueue = new ReferenceQueue();
+    private static final ReferenceQueue<Object> referenceQueue = new ReferenceQueue<Object>();
 
     public static void register(Object watcher, CleanUp cleanUp) {
         init();
-        maps.put(new PhantomReference(watcher, referenceQueue), cleanUp);
+        maps.put(new PhantomReference<Object>(watcher, referenceQueue), cleanUp);
     }
 
     private static void init() {

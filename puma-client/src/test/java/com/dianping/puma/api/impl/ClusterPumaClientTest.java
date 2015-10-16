@@ -19,10 +19,10 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.*;
 
 public class ClusterPumaClientTest extends MockTest {
-
+    final MockLock lock = new MockLock();
 
     @Spy
-    ClusterPumaClient clusterPumaClient = new ClusterPumaClient(new PumaClientConfig().setEnableEventLog(true));
+    ClusterPumaClient clusterPumaClient = new ClusterPumaClient(new PumaClientConfig().setEnableEventLog(true), lock);
 
     @Mock
     SimplePumaClient simplePumaClient;
@@ -105,7 +105,6 @@ public class ClusterPumaClientTest extends MockTest {
 
     @Test
     public void testLockSuccess() throws Exception {
-        final MockLock lock = new MockLock();
 
         final AtomicReference<Exception> exp = new AtomicReference<Exception>();
 

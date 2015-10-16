@@ -25,6 +25,7 @@ public final class CleanUpHelper {
                         CleanUp cleanUp = maps.remove(target);
                         if (cleanUp != null) {
                             cleanUp.cleanUp();
+                            continue;
                         }
                     }
                 } catch (RuntimeException ignore) {

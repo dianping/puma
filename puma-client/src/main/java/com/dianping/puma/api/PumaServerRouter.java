@@ -2,7 +2,7 @@ package com.dianping.puma.api;
 
 public interface PumaServerRouter {
 
-	public String next();
+	String next();
 
-	public boolean exist(String server);
+	boolean exist(String server);
 }

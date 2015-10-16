@@ -13,16 +13,20 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class CleanUpHelper {
 
+    private CleanUpHelper(){}
+
     private static volatile boolean started = false;
 
-    private static final Thread cleanUpThread = new Thread(new Runnable() {
+    private static final int SLEEP_TIME = 100;
+
+    private static final Thread CLEAN_UP_THREAD = new Thread(new Runnable() {
         @Override
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    Reference target = referenceQueue.poll();
+                    Reference target = REFERENCE_QUEUE.poll();
                     if (target != null) {
-                        CleanUp cleanUp = maps.remove(target);
+                        CleanUp cleanUp = MAPS.remove(target);
                         if (cleanUp != null) {
                             cleanUp.cleanUp();
                             continue;
@@ -32,7 +36,7 @@ public final class CleanUpHelper {
                 }
 
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(SLEEP_TIME);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
@@ -40,22 +44,22 @@ public final class CleanUpHelper {
         }
     });
 
-    private static final Map<Reference<Object>, CleanUp> maps = new ConcurrentHashMap<Reference<Object>, CleanUp>();
+    private static final Map<Reference<Object>, CleanUp> MAPS = new ConcurrentHashMap<Reference<Object>, CleanUp>();
 
-    private static final ReferenceQueue<Object> referenceQueue = new ReferenceQueue<Object>();
+    private static final ReferenceQueue<Object> REFERENCE_QUEUE = new ReferenceQueue<Object>();
 
     public static void register(Object watcher, CleanUp cleanUp) {
         init();
-        maps.put(new PhantomReference<Object>(watcher, referenceQueue), cleanUp);
+        MAPS.put(new PhantomReference<Object>(watcher, REFERENCE_QUEUE), cleanUp);
     }
 
     private static void init() {
         if (!started) {
             synchronized (CleanUpHelper.class) {
                 if (!started) {
-                    cleanUpThread.setName("CleanUpThread");
-                    cleanUpThread.setDaemon(true);
-                    cleanUpThread.start();
+                    CLEAN_UP_THREAD.setName("CleanUpThread");
+                    CLEAN_UP_THREAD.setDaemon(true);
+                    CLEAN_UP_THREAD.start();
                     started = true;
                 }
             }

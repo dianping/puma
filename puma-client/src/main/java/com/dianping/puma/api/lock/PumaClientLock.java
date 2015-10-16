@@ -1,70 +1,18 @@
 package com.dianping.puma.api.lock;
 
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.recipes.locks.InterProcessSemaphoreMutex;
-import org.apache.curator.framework.state.ConnectionState;
-import org.apache.curator.framework.state.ConnectionStateListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.concurrent.TimeUnit;
 
-public class PumaClientLock {
+/**
+ * Dozer @ 2015-10
+ * mail@dozer.cc
+ * http://www.dozer.cc
+ */
+public interface PumaClientLock {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PumaClientLock.class);
+    void lock() throws Exception;
 
-    private volatile boolean lockState = false;
+    boolean lock(long time, TimeUnit timeUnit) throws Exception;
 
-    private final InterProcessSemaphoreMutex lock;
+    void unlock() throws Exception;
 
-    private final String clientName;
-
-    public PumaClientLock(final String clientName) {
-        CuratorFramework zkClient = new LionZkManager().getZkClient();
-
-        this.clientName = clientName;
-        this.lock = new InterProcessSemaphoreMutex(zkClient, genLockPath(clientName));
-
-        zkClient.getConnectionStateListenable().addListener(new ConnectionStateListener() {
-            @Override
-            public void stateChanged(CuratorFramework client, ConnectionState newState) {
-                if (newState.equals(ConnectionState.LOST) || newState.equals(ConnectionState.SUSPENDED)) {
-                    LOG.info("zookeeper connection lost or suspend for lock `{}`.", clientName);
-                    lockState = false;
-                }
-            }
-        });
-    }
-
-    public void lock() throws Exception {
-        if (!lockState) {
-            lock.acquire();
-            lockState = true;
-            LOG.info("{} get the lock", clientName);
-        }
-    }
-
-    public boolean lock(long time, TimeUnit timeUnit) throws Exception {
-        if (!lockState) {
-            lockState = lock.acquire(time, timeUnit);
-            if (lockState) {
-                LOG.info("{} get the lock", clientName);
-            }
-            return lockState;
-        } else {
-            return true;
-        }
-    }
-
-    public void unlock() throws Exception {
-        if(lockState) {
-            lock.release();
-            lockState = false;
-            LOG.info("{} release the lock", clientName);
-        }
-    }
-
-    protected String genLockPath(String lockName) {
-        return "/dp/lock/puma/" + lockName;
-    }
 }

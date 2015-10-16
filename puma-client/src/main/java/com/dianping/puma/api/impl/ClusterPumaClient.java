@@ -7,6 +7,7 @@ import com.dianping.puma.api.PumaServerRouter;
 import com.dianping.puma.api.cleanup.CleanUp;
 import com.dianping.puma.api.cleanup.CleanUpHelper;
 import com.dianping.puma.api.lock.PumaClientLock;
+import com.dianping.puma.api.lock.ZkPumaClientLock;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -43,7 +44,7 @@ public class ClusterPumaClient implements PumaClient {
 
     protected SimplePumaClient client;
 
-    public ClusterPumaClient(PumaClientConfig config) {
+    protected ClusterPumaClient(PumaClientConfig config, PumaClientLock lock) {
         this.clientName = config.getClientName();
         this.database = config.getDatabase();
         this.tables = config.getTables();
@@ -51,8 +52,12 @@ public class ClusterPumaClient implements PumaClient {
         this.ddl = config.isDdl();
         this.transaction = config.isTransaction();
         this.router = config.getRouter();
-        this.lock = new PumaClientLock(config.getClientName());
+        this.lock = lock;
         CleanUpHelper.register(this, new ClusterPumaClientCleanUp(this.lock));
+    }
+
+    public ClusterPumaClient(PumaClientConfig config) {
+        this(config, new ZkPumaClientLock(config.getClientName()));
     }
 
     protected SimplePumaClient newClient() throws PumaClientException {
@@ -197,17 +202,19 @@ public class ClusterPumaClient implements PumaClient {
     }
 
     protected void lock() throws PumaClientException {
-        while (!Thread.interrupted())
+        while (!Thread.interrupted()) {
             try {
-                if (lock.lock(10, TimeUnit.SECONDS)) {
+                if (lock.lock(1, TimeUnit.SECONDS)) {
                     return;
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new PumaClientException("Thread has been interrupted!", e);
+                break;
             } catch (Exception e) {
                 throw new PumaClientException("Lock failed!", e);
             }
+        }
+        throw new PumaClientException("Thread has been interrupted!");
     }
 
     static class ClusterPumaClientCleanUp implements CleanUp {

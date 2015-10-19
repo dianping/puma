@@ -49,7 +49,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 			throw new IOException("failed to open oldest.");
 		}
 		Sequence sequence = l2IndexValue.getSequence();
-		//readDataManager.open(new DataKey(sequence));
+		readDataManager.open(new DataKeyImpl(sequence));
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 			throw new IOException("failed to open latest.");
 		}
 		Sequence sequence = l2IndexValue.getSequence();
-		//readDataManager.open(new DataKey(sequence));
+		readDataManager.open(new DataKeyImpl(sequence));
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 			throw new IOException("failed to open.");
 		}
 		Sequence sequence = l2IndexValue.getSequence();
-		//readDataManager.open(new DataKey(sequence));
+		readDataManager.open(new DataKeyImpl(sequence));
 	}
 
 	@Override

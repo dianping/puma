@@ -5,9 +5,7 @@ import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.data.DataManagerFinder;
 import com.dianping.puma.storage.data.ReadDataManager;
 import com.dianping.puma.storage.data.WriteDataManager;
-import com.dianping.puma.storage.data.bucket.LocalFileReadDataBucket;
-import com.dianping.puma.storage.data.bucket.WriteDataBucket;
-import com.dianping.puma.storage.data.bucket.ReadDataBucket;
+import com.dianping.puma.storage.bucket.LocalFileReadBucket;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -73,26 +71,26 @@ public class GroupDataManagerFinder extends AbstractLifeCycle implements DataMan
 		return rootDir;
 	}
 
-	@Override
-	public ReadDataBucket findReadDataBucket(Sequence sequence) throws IOException {
-		loadIndex();
-		Sequence sequenceNoOffset = new Sequence(sequence).clearOffset();
-		File file = index.get(sequenceNoOffset);
-		if (file == null) {
-			return null;
-		}
-		return new LocalFileReadDataBucket(sequenceNoOffset, file);
-	}
-
-	@Override
-	public ReadDataBucket findNextReadDataBucket(Sequence sequence) throws IOException {
-		loadIndex();
-		Map.Entry<Sequence, File> entry = index.higherEntry(sequence);
-		if (entry == null) {
-			return null;
-		}
-		return new LocalFileReadDataBucket(entry.getKey(), entry.getValue());
-	}
+//	@Override
+//	public ReadDataBucket findReadDataBucket(Sequence sequence) throws IOException {
+//		loadIndex();
+//		Sequence sequenceNoOffset = new Sequence(sequence).clearOffset();
+//		File file = index.get(sequenceNoOffset);
+//		if (file == null) {
+//			return null;
+//		}
+//		return new LocalFileReadBucket(sequenceNoOffset, file);
+//	}
+//
+//	@Override
+//	public ReadDataBucket findNextReadDataBucket(Sequence sequence) throws IOException {
+//		loadIndex();
+//		Map.Entry<Sequence, File> entry = index.higherEntry(sequence);
+//		if (entry == null) {
+//			return null;
+//		}
+//		return new LocalFileReadBucket(entry.getKey(), entry.getValue());
+//	}
 
 	protected void loadIndex() throws IOException {
 		index.clear();

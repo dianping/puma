@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.bucket;
+package com.dianping.puma.storage.oldbucket;
 
 import java.io.DataInputStream;
 import java.io.IOException;

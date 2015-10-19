@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.bucket;
+package com.dianping.puma.storage.oldbucket;
 
 import com.dianping.puma.storage.Sequence;
 

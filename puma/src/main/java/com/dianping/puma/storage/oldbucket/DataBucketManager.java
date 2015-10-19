@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.storage.bucket;
+package com.dianping.puma.storage.oldbucket;
 
 import java.io.IOException;
 import java.util.List;

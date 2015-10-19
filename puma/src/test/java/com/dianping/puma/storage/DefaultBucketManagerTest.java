@@ -1,7 +1,7 @@
 package com.dianping.puma.storage;
 
-import com.dianping.puma.storage.bucket.*;
-import com.dianping.puma.storage.bucket.ReadDataBucket;
+import com.dianping.puma.storage.oldbucket.*;
+import com.dianping.puma.storage.oldbucket.ReadDataBucket;
 import com.dianping.puma.storage.exception.StorageClosedException;
 import junit.framework.Assert;
 import org.apache.commons.io.FileUtils;

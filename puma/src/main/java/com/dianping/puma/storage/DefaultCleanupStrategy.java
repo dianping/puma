@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
-import com.dianping.puma.storage.bucket.DataBucketManager;
+import com.dianping.puma.storage.oldbucket.DataBucketManager;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**

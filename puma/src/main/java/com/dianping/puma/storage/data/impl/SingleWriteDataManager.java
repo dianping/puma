@@ -1,10 +1,10 @@
 package com.dianping.puma.storage.data.impl;
 
 import com.dianping.puma.common.AbstractLifeCycle;
+import com.dianping.puma.storage.bucket.WriteBucket;
 import com.dianping.puma.storage.codec.Codec;
 import com.dianping.puma.storage.codec.DataCodec;
-import com.dianping.puma.storage.data.bucket.LocalFileWriteDataBucket;
-import com.dianping.puma.storage.data.bucket.WriteDataBucket;
+import com.dianping.puma.storage.bucket.LocalFileWriteBucket;
 import com.dianping.puma.storage.data.WriteDataManager;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ public class SingleWriteDataManager<K extends Comparable<K>, V> extends Abstract
 
 	private String filename;
 
-	private WriteDataBucket writeDataBucket;
+	private WriteBucket writeBucket;
 
 	private Codec<K, V> codec;
 
@@ -28,8 +28,8 @@ public class SingleWriteDataManager<K extends Comparable<K>, V> extends Abstract
 
 	@Override
 	protected void doStart() {
-		writeDataBucket = new LocalFileWriteDataBucket(filename);
-		writeDataBucket.start();
+		writeBucket = new LocalFileWriteBucket(filename);
+		writeBucket.start();
 
 		codec = new DataCodec<K, V>();
 		codec.start();
@@ -37,20 +37,20 @@ public class SingleWriteDataManager<K extends Comparable<K>, V> extends Abstract
 
 	@Override
 	protected void doStop() {
-		writeDataBucket.stop();
+		writeBucket.stop();
 		codec.stop();
 	}
 
 	@Override
 	public void append(K dataKey, V dataValue) throws IOException {
 		byte[] data = codec.encode(dataKey, dataValue);
-		writeDataBucket.append(data);
+		writeBucket.append(data);
 		offset += data.length;
 	}
 
 	@Override
 	public void flush() throws IOException {
-		writeDataBucket.flush();
+		writeBucket.flush();
 	}
 
 	@Override

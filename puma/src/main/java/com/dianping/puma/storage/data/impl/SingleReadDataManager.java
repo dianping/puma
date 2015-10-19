@@ -1,10 +1,10 @@
 package com.dianping.puma.storage.data.impl;
 
 import com.dianping.puma.common.AbstractLifeCycle;
+import com.dianping.puma.storage.bucket.ReadBucket;
 import com.dianping.puma.storage.codec.Codec;
 import com.dianping.puma.storage.codec.DataCodec;
-import com.dianping.puma.storage.data.bucket.LocalFileReadDataBucket;
-import com.dianping.puma.storage.data.bucket.ReadDataBucket;
+import com.dianping.puma.storage.bucket.LocalFileReadBucket;
 import com.dianping.puma.storage.data.DataKey;
 import com.dianping.puma.storage.data.DataValue;
 import com.dianping.puma.storage.data.ReadDataManager;
@@ -16,7 +16,7 @@ public class SingleReadDataManager<K extends DataKey, V extends DataValue> exten
 
 	private String filename;
 
-	private ReadDataBucket readDataBucket;
+	private ReadBucket readBucket;
 
 	private Codec<K, V> codec;
 
@@ -28,8 +28,8 @@ public class SingleReadDataManager<K extends DataKey, V extends DataValue> exten
 
 	@Override
 	protected void doStart() {
-		readDataBucket = new LocalFileReadDataBucket(filename);
-		readDataBucket.start();
+		readBucket = new LocalFileReadBucket(filename);
+		readBucket.start();
 
 		codec = new DataCodec<K, V>();
 		codec.start();
@@ -37,7 +37,7 @@ public class SingleReadDataManager<K extends DataKey, V extends DataValue> exten
 
 	@Override
 	protected void doStop() {
-		readDataBucket.stop();
+		readBucket.stop();
 		codec.stop();
 	}
 
@@ -59,14 +59,14 @@ public class SingleReadDataManager<K extends DataKey, V extends DataValue> exten
 		}
 
 		long offset = dataKey.offset();
-		readDataBucket.skip(offset);
+		readBucket.skip(offset);
 
 		position.addOffset(offset);
 	}
 
 	@Override
 	public V next() throws IOException {
-		byte[] data = readDataBucket.next();
+		byte[] data = readBucket.next();
 		if (data == null) {
 			return null;
 		}

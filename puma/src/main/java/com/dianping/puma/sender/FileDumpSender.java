@@ -30,7 +30,7 @@ import com.dianping.puma.storage.DefaultArchiveStrategy;
 import com.dianping.puma.storage.DefaultCleanupStrategy;
 import com.dianping.puma.storage.DefaultEventStorage;
 import com.dianping.puma.storage.EventStorage;
-import com.dianping.puma.storage.bucket.LocalFileDataBucketManager;
+import com.dianping.puma.storage.oldbucket.LocalFileDataBucketManager;
 import com.dianping.puma.storage.conf.GlobalStorageConfig;
 import com.dianping.puma.storage.exception.StorageException;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;

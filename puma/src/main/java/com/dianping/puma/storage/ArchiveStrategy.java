@@ -15,7 +15,7 @@
  */
 package com.dianping.puma.storage;
 
-import com.dianping.puma.storage.bucket.DataBucketManager;
+import com.dianping.puma.storage.oldbucket.DataBucketManager;
 
 /**
  * 

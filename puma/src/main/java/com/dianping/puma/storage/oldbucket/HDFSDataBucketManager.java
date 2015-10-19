@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.storage.bucket;
+package com.dianping.puma.storage.oldbucket;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +33,7 @@ import com.dianping.puma.storage.exception.StorageClosedException;
 /**
  * @author Leo Liang
  */
-public class HDFSDataBucketManager extends com.dianping.puma.storage.bucket.AbstractDataBucketManager {
+public class HDFSDataBucketManager extends com.dianping.puma.storage.oldbucket.AbstractDataBucketManager {
 
     private FileSystem fileSystem;
     private HDFSConfig hdfsConfig;

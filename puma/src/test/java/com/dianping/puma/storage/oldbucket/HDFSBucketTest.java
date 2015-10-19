@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.bucket;
+package com.dianping.puma.storage.oldbucket;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -24,7 +24,6 @@ import com.dianping.puma.core.codec.JsonEventCodec;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.bucket.HDFSDataBucket;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 @Ignore

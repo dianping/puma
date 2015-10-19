@@ -24,7 +24,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.dianping.puma.status.SystemStatusManager;
-import com.dianping.puma.storage.bucket.DataBucketManager;
+import com.dianping.puma.storage.oldbucket.DataBucketManager;
 import com.dianping.puma.storage.exception.StorageClosedException;
 
 /**

@@ -1,6 +1,8 @@
 package com.dianping.puma.pumaserver.handler.deprecated;
 
 import com.dianping.puma.server.container.DefaultTaskContainer;
+import com.dianping.puma.storage.channel.ReadChannel;
+import com.dianping.puma.storage.channel.WriteChannel;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;
@@ -23,9 +25,7 @@ import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.filter.EventFilterChainFactory;
 import com.dianping.puma.pumaserver.handler.HttpResponseEncoder;
 import com.dianping.puma.storage.oldchannel.EventChannel;
-import com.dianping.puma.storage.EventStorage;
 import com.dianping.puma.storage.oldchannel.BufferedEventChannel;
-import com.dianping.puma.storage.oldchannel.DefaultEventChannel;
 
 public class DeprecatedBinlogQueryHandler extends SimpleChannelInboundHandler<DeprecatedBinlogQuery> {
 
@@ -102,30 +102,31 @@ public class DeprecatedBinlogQueryHandler extends SimpleChannelInboundHandler<De
 	}
 
 	private void start() {
-		try {
-			eventCodec = EventCodecFactory.createCodec("json");
-			eventFilterChain = EventFilterChainFactory.createEventFilterChain(deprecatedBinlogQuery.isDdl(),
-			      deprecatedBinlogQuery.isDml(), deprecatedBinlogQuery.isTransaction(),
-			      deprecatedBinlogQuery.getDatabaseTables());
-			EventStorage eventStorage = DefaultTaskContainer.instance.getTaskStorage(deprecatedBinlogQuery.getTarget());
-
-			adjust();
-
-			DefaultEventChannel defaultChannel = new DefaultEventChannel(""); //TODO
-//			defaultChannel.withDatabase(database);//TODO
-			eventChannel = new BufferedEventChannel(deprecatedBinlogQuery.getClientName(), defaultChannel, 5000);
-
-			if (deprecatedBinlogQuery.getSeq() == SubscribeConstant.SEQ_FROM_BINLOGINFO) {
-				eventChannel.open(deprecatedBinlogQuery.getServerId(), deprecatedBinlogQuery.getBinlogInfo()
-				      .getBinlogFile(), deprecatedBinlogQuery.getBinlogInfo().getBinlogPosition());
-			} else if (deprecatedBinlogQuery.getSeq() == SubscribeConstant.SEQ_FROM_TIMESTAMP) {
-				eventChannel.open(deprecatedBinlogQuery.getTimestamp());
-			} else {
-				eventChannel.open(deprecatedBinlogQuery.getSeq());
-			}
-		} catch (Exception e) {
-			onException(ctx, e);
-		}
+//		try {
+//			eventCodec = EventCodecFactory.createCodec("json");
+//			eventFilterChain = EventFilterChainFactory.createEventFilterChain(deprecatedBinlogQuery.isDdl(),
+//			      deprecatedBinlogQuery.isDml(), deprecatedBinlogQuery.isTransaction(),
+//			      deprecatedBinlogQuery.getDatabaseTables());
+//
+//			ReadChannel readChannel = DefaultTaskContainer.instance.getTaskStorage(deprecatedBinlogQuery.getTarget());
+//
+//			adjust();
+//
+//			//DefaultEventChannel defaultChannel = new DefaultEventChannel(""); //TODO
+////			defaultChannel.withDatabase(database);//TODO
+//			eventChannel = new BufferedEventChannel(deprecatedBinlogQuery.getClientName(), defaultChannel, 5000);
+//
+//			if (deprecatedBinlogQuery.getSeq() == SubscribeConstant.SEQ_FROM_BINLOGINFO) {
+//				eventChannel.open(deprecatedBinlogQuery.getServerId(), deprecatedBinlogQuery.getBinlogInfo()
+//				      .getBinlogFile(), deprecatedBinlogQuery.getBinlogInfo().getBinlogPosition());
+//			} else if (deprecatedBinlogQuery.getSeq() == SubscribeConstant.SEQ_FROM_TIMESTAMP) {
+//				eventChannel.open(deprecatedBinlogQuery.getTimestamp());
+//			} else {
+//				eventChannel.open(deprecatedBinlogQuery.getSeq());
+//			}
+//		} catch (Exception e) {
+//			onException(ctx, e);
+//		}
 	}
 
 	private void stop() {

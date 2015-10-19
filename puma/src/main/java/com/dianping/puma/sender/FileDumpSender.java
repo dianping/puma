@@ -15,8 +15,12 @@
  */
 package com.dianping.puma.sender;
 
+import java.io.IOException;
 import java.util.Map;
 
+import com.dianping.puma.storage.channel.ChannelFactory;
+import com.dianping.puma.storage.channel.ReadChannel;
+import com.dianping.puma.storage.channel.WriteChannel;
 import org.jboss.netty.util.internal.ConcurrentHashMap;
 
 import com.dianping.cat.Cat;
@@ -26,11 +30,6 @@ import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.filter.EventFilterChain;
-import com.dianping.puma.storage.DefaultArchiveStrategy;
-import com.dianping.puma.storage.DefaultCleanupStrategy;
-import com.dianping.puma.storage.DefaultEventStorage;
-import com.dianping.puma.storage.EventStorage;
-import com.dianping.puma.storage.oldbucket.LocalFileDataBucketManager;
 import com.dianping.puma.storage.conf.GlobalStorageConfig;
 import com.dianping.puma.storage.exception.StorageException;
 import com.dianping.puma.storage.exception.StorageLifeCycleException;
@@ -41,7 +40,9 @@ import com.dianping.puma.storage.exception.StorageLifeCycleException;
  *
  */
 public class FileDumpSender extends AbstractSender {
-	private Map<String, DefaultEventStorage> storages = new ConcurrentHashMap<String, DefaultEventStorage>();
+	private Map<String, ReadChannel> readChannels = new ConcurrentHashMap<String, ReadChannel>();
+
+	private Map<String, WriteChannel> writeChannels = new ConcurrentHashMap<String, WriteChannel>();
 
 	private ChangedEvent transactionBegin;
 
@@ -75,11 +76,11 @@ public class FileDumpSender extends AbstractSender {
 			String database = event.getDatabase();
 
 			if (database != null && database.length() > 0) {
-				DefaultEventStorage eventStorage = storages.get(database);
+				WriteChannel writeChannel = this.writeChannels.get(database);
 
-				if (eventStorage == null) {
-					eventStorage = buildEventStorage(database);
-					storages.put(database, eventStorage);
+				if (writeChannel == null) {
+					writeChannel = buildEventStorage(database);
+					this.writeChannels.put(database, writeChannel);
 				}
 
 				boolean isTransactionBegin = false;
@@ -89,11 +90,11 @@ public class FileDumpSender extends AbstractSender {
 				}
 
 				if (transactionBegin != null && !isTransactionBegin) {
-					eventStorage.store(transactionBegin);
+					//readChannel.store(transactionBegin);
 					transactionBegin = null;
 				}
 
-				eventStorage.store(event);
+				writeChannel.append(null, event);
 			} else {
 				if (event instanceof RowChangedEvent) {
 					if (((RowChangedEvent) event).isTransactionBegin()) {
@@ -109,51 +110,42 @@ public class FileDumpSender extends AbstractSender {
 			}
 		} catch (StorageException e) {
 			throw new SenderException("FileDumpSender.doSend failed.", e);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
-	private DefaultEventStorage buildEventStorage(String database) throws StorageLifeCycleException {
-		// File sender master storage.
-		LocalFileDataBucketManager masterBucketIndex = new LocalFileDataBucketManager();
-		masterBucketIndex.setBaseDir(GlobalStorageConfig.masterStorageBaseDir + "/" + database);
-		masterBucketIndex.setBucketFilePrefix(GlobalStorageConfig.masterBucketFilePrefix);
-		masterBucketIndex.setMaxBucketLengthMB(GlobalStorageConfig.maxMasterBucketLengthMB);
+	private WriteChannel buildEventStorage(String database) throws StorageLifeCycleException {
+		WriteChannel writeChannel = ChannelFactory.newWriteChannel(database);
+		return writeChannel;
 
-		// File sender slave storage.
-		LocalFileDataBucketManager slaveBucketIndex = new LocalFileDataBucketManager();
-		slaveBucketIndex.setBaseDir(GlobalStorageConfig.slaveStorageBaseDir + "/" + database);
-		slaveBucketIndex.setBucketFilePrefix(GlobalStorageConfig.slaveBucketFilePrefix);
-		slaveBucketIndex.setMaxBucketLengthMB(GlobalStorageConfig.maxMasterBucketLengthMB);
-
-		// Archive strategy.
-		DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
-		archiveStrategy.setServerName(taskName);
-		archiveStrategy.setMaxMasterFileCount(GlobalStorageConfig.maxMasterFileCount);
-
-		// Clean up strategy.
-		DefaultCleanupStrategy cleanupStrategy = new DefaultCleanupStrategy();
-		cleanupStrategy.setPreservedDay(preservedDay);
-
-		DefaultEventStorage storage = new DefaultEventStorage();
-		storage.setName("storage-" + database);
-		storage.setTaskName(taskName);
-		storage.setCodec(codec);
-		storage.setMasterBucketIndex(masterBucketIndex);
-		storage.setSlaveBucketIndex(slaveBucketIndex);
-		storage.setArchiveStrategy(archiveStrategy);
-		storage.setCleanupStrategy(cleanupStrategy);
-		storage.setBinlogIndexBaseDir(GlobalStorageConfig.binlogIndexBaseDir + "/" + database);
-
-		storage.start();
-		return storage;
+//		// Archive strategy.
+//		DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
+//		archiveStrategy.setServerName(taskName);
+//		archiveStrategy.setMaxMasterFileCount(GlobalStorageConfig.maxMasterFileCount);
+//
+//		// Clean up strategy.
+//		DefaultCleanupStrategy cleanupStrategy = new DefaultCleanupStrategy();
+//		cleanupStrategy.setPreservedDay(preservedDay);
+//
+//		DefaultEventStorage storage = new DefaultEventStorage();
+//		storage.setName("storage-" + database);
+//		storage.setTaskName(taskName);
+//		storage.setCodec(codec);
+//		storage.setArchiveStrategy(archiveStrategy);
+//		storage.setCleanupStrategy(cleanupStrategy);
+//		storage.setBinlogIndexBaseDir(GlobalStorageConfig.binlogIndexBaseDir + "/" + database);
+//
+//		storage.start();
+//		return storage;
 	}
 
 	public void setStorageEventFilterChain(EventFilterChain storageEventFilterChain) {
 		this.storageEventFilterChain = storageEventFilterChain;
 	}
 
-	public void setStorages(Map<String, DefaultEventStorage> storages) {
-		this.storages = storages;
+	public void setReadChannels(Map<String, ReadChannel> readChannels) {
+		this.readChannels = readChannels;
 	}
 
 	public void setTaskName(String taskName) {
@@ -165,14 +157,14 @@ public class FileDumpSender extends AbstractSender {
 	}
 
 	@Override
-	public EventStorage getStorage(String database) {
+	public ReadChannel getStorage(String database) {
 		try {
-			DefaultEventStorage eventStorage = storages.get(database);
-			if (eventStorage == null) {
-				eventStorage = buildEventStorage(database);
-				storages.put(database, eventStorage);
-			}
-			return eventStorage;
+			ReadChannel readChannel = readChannels.get(database);
+//			if (readChannel == null) {
+//				readChannel = buildEventStorage(database);
+//				readChannels.put(database, readChannel);
+//			}
+			return readChannel;
 		} catch (Exception e) {
 			return null;
 		}

@@ -18,7 +18,7 @@ package com.dianping.puma.sender;
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.core.LifeCycle;
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.storage.EventStorage;
+import com.dianping.puma.storage.channel.ReadChannel;
 
 /**
  * 
@@ -30,6 +30,6 @@ public interface Sender extends LifeCycle<Exception> {
 
 	public void send(ChangedEvent event, PumaContext context) throws SenderException;
 	
-	public EventStorage getStorage(String database);
+	public ReadChannel getStorage(String database);
 	
 }

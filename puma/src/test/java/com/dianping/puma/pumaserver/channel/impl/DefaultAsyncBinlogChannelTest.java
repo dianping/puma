@@ -7,8 +7,8 @@ import com.dianping.puma.core.event.EventType;
 import com.dianping.puma.core.event.ServerErrorEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.server.container.TaskContainer;
+import com.dianping.puma.storage.channel.ReadChannel;
 import com.dianping.puma.storage.oldchannel.EventChannel;
-import com.dianping.puma.storage.EventStorage;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import junit.framework.Assert;
@@ -35,7 +35,7 @@ import static org.mockito.Mockito.*;
 public class DefaultAsyncBinlogChannelTest {
 
     TaskContainer taskContainer;
-    EventStorage eventStorage;
+    ReadChannel readChannel;
     EventChannel eventChannel;
     Queue<Event> eventQueue = new ConcurrentLinkedQueue<Event>();
 
@@ -44,10 +44,10 @@ public class DefaultAsyncBinlogChannelTest {
     @Before
     public void setUp() throws Exception {
         eventChannel = mock(EventChannel.class);
-        eventStorage = mock(EventStorage.class);
+        readChannel = mock(ReadChannel.class);
         taskContainer = mock(TaskContainer.class);
 
-        when(taskContainer.getTaskStorage(anyString())).thenReturn(eventStorage);
+        when(taskContainer.getTaskStorage(anyString())).thenReturn(readChannel);
 
         when(eventChannel.next(anyBoolean())).thenAnswer(new Answer<Event>() {
             @Override

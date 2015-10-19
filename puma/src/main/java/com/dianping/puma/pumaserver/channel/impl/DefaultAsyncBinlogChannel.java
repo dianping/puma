@@ -13,8 +13,9 @@ import com.dianping.puma.eventbus.event.ClientPositionChangedEvent;
 import com.dianping.puma.pumaserver.channel.AsyncBinlogChannel;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
 import com.dianping.puma.status.SystemStatusManager;
+import com.dianping.puma.storage.channel.ChannelFactory;
+import com.dianping.puma.storage.channel.ReadChannel;
 import com.dianping.puma.storage.oldchannel.EventChannel;
-import com.dianping.puma.storage.oldchannel.DefaultEventChannel;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
 import org.slf4j.Logger;
@@ -39,7 +40,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
     private volatile boolean stopped = false;
 
-    private volatile EventChannel eventChannel;
+    private volatile ReadChannel readChannel;
 
     private final BlockingQueue<BinlogGetRequest> requests = new LinkedBlockingQueue<BinlogGetRequest>(5);
 
@@ -59,7 +60,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
     ) throws BinlogChannelException {
         try {
             this.database = database;
-            this.eventChannel = initChannel(sc, binlogInfo, tables, dml, ddl, transaction);
+            this.readChannel = initChannel(sc, binlogInfo, tables, dml, ddl, transaction);
             THREAD_POOL.execute(new AsyncTask(new WeakReference<DefaultAsyncBinlogChannel>(this)));
             DefaultEventBus.INSTANCE.register(this);
         } catch (Exception e) {
@@ -74,20 +75,20 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
             return;
         }
 
-        if (this.eventChannel == null) {
+        if (this.readChannel == null) {
             return;
         }
 
         try {
-            EventChannel newEventChannel;
+            ReadChannel newReadChannel;
 
             try {
-                newEventChannel = initChannel(
+                newReadChannel = initChannel(
                         SubscribeConstant.SEQ_FROM_BINLOGINFO,
                         event.getBinlogInfo(), Lists.newArrayList(""),
                         false, false, false);
             } catch (IOException e) {
-                newEventChannel = initChannel(
+                newReadChannel = initChannel(
                         SubscribeConstant.SEQ_FROM_TIMESTAMP,
                         event.getBinlogInfo(), Lists.newArrayList(""),
                         false, false, false);
@@ -106,10 +107,10 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
                         this.eventChannel.getDml(), this.eventChannel.getDdl(), this.eventChannel.getTransaction());
             }*/
 
-            EventChannel oldEventChannel = this.eventChannel;
-            this.eventChannel = newEventChannel;
+            ReadChannel oldReadChannel = this.readChannel;
+            this.readChannel = newReadChannel;
 
-            oldEventChannel.close();
+            oldReadChannel.stop();
             Cat.logEvent("Switch.ClientPosition", String.format("%s %s", clientName, event.getBinlogInfo().toString()));
         } catch (IOException e) {
             Cat.logError(
@@ -117,22 +118,23 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
         }
     }
 
-    protected EventChannel initChannel(long sc, BinlogInfo binlogInfo, List<String> tables,
+    protected ReadChannel initChannel(long sc, BinlogInfo binlogInfo, List<String> tables,
                                        boolean dml, boolean ddl, boolean transaction) throws IOException {
-        DefaultEventChannel newEventChannel = new DefaultEventChannel(database);
-        //newEventChannel.withTables(tables.toArray(new String[tables.size()]));
-        //newEventChannel.withDml(dml);
-        //newEventChannel.withDdl(ddl);
-        //newEventChannel.withTransaction(transaction);
-
-        if (sc == SubscribeConstant.SEQ_FROM_BINLOGINFO) {
-            newEventChannel.open(binlogInfo.getServerId(), binlogInfo.getBinlogFile(), binlogInfo.getBinlogPosition());
-        } else if (sc == SubscribeConstant.SEQ_FROM_TIMESTAMP) {
-            newEventChannel.open(binlogInfo.getTimestamp());
-        } else {
-            newEventChannel.open(sc);
-        }
-        return newEventChannel;
+        ReadChannel readChannel = ChannelFactory.newReadChannel(database);
+//        DefaultEventChannel newEventChannel = new DefaultEventChannel(database);
+//        //newEventChannel.withTables(tables.toArray(new String[tables.size()]));
+//        //newEventChannel.withDml(dml);
+//        //newEventChannel.withDdl(ddl);
+//        //newEventChannel.withTransaction(transaction);
+//
+//        if (sc == SubscribeConstant.SEQ_FROM_BINLOGINFO) {
+//            newEventChannel.open(binlogInfo.getServerId(), binlogInfo.getBinlogFile(), binlogInfo.getBinlogPosition());
+//        } else if (sc == SubscribeConstant.SEQ_FROM_TIMESTAMP) {
+//            newEventChannel.open(binlogInfo.getTimestamp());
+//        } else {
+//            newEventChannel.open(sc);
+//        }
+        return readChannel;
     }
 
     @Override
@@ -143,8 +145,8 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
         } catch (Exception ignore) {
 
         }
-        if (eventChannel != null) {
-            eventChannel.close();
+        if (readChannel != null) {
+            readChannel.stop();
         }
     }
 
@@ -231,7 +233,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
         protected Event getEvent() {
             Event binlogEvent;
             try {
-                binlogEvent = getParent().eventChannel.next(false);
+                binlogEvent = getParent().readChannel.next();
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
                 binlogEvent = new ServerErrorEvent("get binlog event from storage failure.", e.getCause());

@@ -30,28 +30,31 @@ public class SeriesWriteIndexManager extends AbstractLifeCycle implements WriteI
 	protected void doStart() {
 		indexManagerFinder = new SeriesIndexManagerFinder(database, l1IndexBaseDir, l2IndexBaseDir);
 		indexManagerFinder.start();
-
-		// Find old L1 index bucket.
-		l1WriteIndexManager = indexManagerFinder.findL1WriteIndexManager();
-		l1WriteIndexManager.start();
-
-		// Create a new L2 index bucket.
-		l2WriteIndexManager = indexManagerFinder.findNextL2WriteIndexManager();
-		l2WriteIndexManager.start();
 	}
 
 	@Override
 	protected void doStop() {
-		l1WriteIndexManager.stop();
-		l2WriteIndexManager.stop();
+		indexManagerFinder.stop();
+
+		if (l1WriteIndexManager != null) {
+			l1WriteIndexManager.stop();
+		}
+
+		if (l2WriteIndexManager != null) {
+			l2WriteIndexManager.stop();
+		}
 	}
 
 	@Override
 	public void append(L1IndexKey l1IndexKey, L2IndexValue l2IndexValue) throws IOException {
-		if (l1IndexKey.isNewBucket()) {
-			l1WriteIndexManager.append(l1IndexKey, new L1IndexValue(l2IndexValue.getSequence()));
+		checkStop();
 
-			// Create a new l2 index bucket.
+		if (l1WriteIndexManager == null) {
+			l1WriteIndexManager = indexManagerFinder.findL1WriteIndexManager();
+			l1WriteIndexManager.start();
+		}
+
+		if (l2WriteIndexManager == null) {
 			l2WriteIndexManager = indexManagerFinder.findNextL2WriteIndexManager();
 			l2WriteIndexManager.start();
 		}
@@ -61,11 +64,47 @@ public class SeriesWriteIndexManager extends AbstractLifeCycle implements WriteI
 
 	@Override
 	public void flush() throws IOException {
+		checkStop();
+
+		if (l1WriteIndexManager == null) {
+			l1WriteIndexManager = indexManagerFinder.findL1WriteIndexManager();
+			l1WriteIndexManager.start();
+		}
+
+		if (l2WriteIndexManager == null) {
+			l2WriteIndexManager = indexManagerFinder.findNextL2WriteIndexManager();
+			l2WriteIndexManager.start();
+		}
+
 		l1WriteIndexManager.flush();
 		l2WriteIndexManager.flush();
 	}
 
-	public void pageAppend() throws IOException {
+	/**
+	 * Explicitly page index bucket, call it when paging.
+	 *
+	 * @param l1IndexKey key of l1 index.
+	 * @param l2IndexValue value of l2 index.
+	 * @throws IOException
+	 */
+	public void pageAppend(L1IndexKey l1IndexKey, L2IndexValue l2IndexValue) throws IOException {
+		checkStop();
 
+		if (l1WriteIndexManager == null) {
+			l1WriteIndexManager = indexManagerFinder.findL1WriteIndexManager();
+			l1WriteIndexManager.start();
+		}
+
+		// Append l1 index when paging.
+		l1WriteIndexManager.append(l1IndexKey, new L1IndexValue(l2IndexValue.getSequence()));
+
+		// Flush l2 index before paging.
+		if (l2WriteIndexManager != null) {
+			l2WriteIndexManager.flush();
+		}
+
+		l2WriteIndexManager = indexManagerFinder.findNextL2WriteIndexManager();
+		l2WriteIndexManager.start();
+		l2WriteIndexManager.append(new L2IndexKey(l1IndexKey.getBinlogInfo()), l2IndexValue);
 	}
 }

@@ -1,6 +1,6 @@
 package com.dianping.puma.server.container;
 
-import com.dianping.puma.storage.EventStorage;
+import com.dianping.puma.storage.channel.ReadChannel;
 import com.dianping.puma.taskexecutor.TaskExecutor;
 import com.dianping.puma.taskexecutor.task.DatabaseTask;
 import com.dianping.puma.taskexecutor.task.InstanceTask;
@@ -10,7 +10,7 @@ import java.util.Map;
 
 public interface TaskContainer {
 
-	public EventStorage getTaskStorage(String database);
+	public ReadChannel getTaskStorage(String database);
 
 	public Map<String, DatabaseTask> getDatabaseTasks();
 

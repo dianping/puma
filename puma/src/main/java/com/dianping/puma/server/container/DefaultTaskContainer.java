@@ -7,7 +7,7 @@ import com.dianping.puma.instance.InstanceManager;
 import com.dianping.puma.server.builder.TaskBuilder;
 import com.dianping.puma.server.server.TaskServerManager;
 import com.dianping.puma.status.SystemStatusManager;
-import com.dianping.puma.storage.EventStorage;
+import com.dianping.puma.storage.channel.ReadChannel;
 import com.dianping.puma.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.storage.manage.DatabaseStorageManager;
 import com.dianping.puma.taskexecutor.TaskExecutor;
@@ -52,7 +52,7 @@ public class DefaultTaskContainer implements TaskContainer {
 	private Map<String, TaskExecutor> taskExecutors = new HashMap<String, TaskExecutor>();
 
 	@Override
-	public EventStorage getTaskStorage(String database) {
+	public ReadChannel getTaskStorage(String database) {
 		for (TaskExecutor taskExecutor : taskExecutors.values()) {
 			TableSet tableSet = taskExecutor.getTask().getTableSet();
 			List<Table> tables = tableSet.listSchemaTables();

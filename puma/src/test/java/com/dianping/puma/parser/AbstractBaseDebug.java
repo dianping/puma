@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import com.dianping.puma.storage.channel.ChannelFactory;
+import com.dianping.puma.storage.channel.ReadChannel;
+import com.dianping.puma.storage.channel.WriteChannel;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.io.FileUtils;
@@ -46,7 +49,6 @@ import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
 import com.dianping.puma.storage.oldchannel.EventChannel;
-import com.dianping.puma.storage.oldchannel.DefaultEventChannel;
 import com.dianping.puma.storage.conf.GlobalStorageConfig;
 import com.dianping.puma.storage.holder.impl.DefaultBinlogInfoHolder;
 import com.dianping.puma.taskexecutor.DefaultTaskExecutor;
@@ -406,11 +408,11 @@ public abstract class AbstractBaseDebug {
 		waitForSync(WAIT_FOR_SYNC_TIME);
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
 
-		EventChannel channel = new DefaultEventChannel(SCHEMA_NAME);
-		channel.open(SubscribeConstant.SEQ_FROM_OLDEST);
+		ReadChannel readChannel = ChannelFactory.newReadChannel(SCHEMA_NAME);
+		readChannel.openOldest();
 
 		for (int i = 0; i < n;) {
-			ChangedEvent event = (ChangedEvent) channel.next();
+			ChangedEvent event = (ChangedEvent) readChannel.next();
 			if (!needTs) {
 				if (event instanceof RowChangedEvent) {
 					if (((RowChangedEvent) event).isTransactionBegin() || ((RowChangedEvent) event).isTransactionCommit()) {
@@ -425,7 +427,7 @@ public abstract class AbstractBaseDebug {
 			i++;
 			result.add(event);
 		}
-		channel.close();
+		readChannel.stop();
 		return result;
 	}
 
@@ -434,11 +436,11 @@ public abstract class AbstractBaseDebug {
 		waitForSync(WAIT_FOR_SYNC_TIME);
 		List<ChangedEvent> result = new ArrayList<ChangedEvent>();
 
-		EventChannel channel = new DefaultEventChannel(SCHEMA_NAME);
-		channel.open(serverId, binlog, binlogPos);
+		ReadChannel readChannel = ChannelFactory.newReadChannel(SCHEMA_NAME);
+		readChannel.open(new BinlogInfo(serverId, binlog, binlogPos, 0, 0));
 
 		for (int i = 0; i < n;) {
-			ChangedEvent event = (ChangedEvent) channel.next();
+			ChangedEvent event = (ChangedEvent) readChannel.next();
 			if (!needTs) {
 				if (event instanceof RowChangedEvent) {
 					if (((RowChangedEvent) event).isTransactionBegin() || ((RowChangedEvent) event).isTransactionCommit()) {
@@ -449,7 +451,7 @@ public abstract class AbstractBaseDebug {
 			i++;
 			result.add(event);
 		}
-		channel.close();
+		readChannel.stop();
 		return result;
 	}
 

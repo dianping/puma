@@ -109,6 +109,10 @@ public class Sequence {
 		}
 	}
 
+	public String date() {
+		return String.valueOf(creationDate);
+	}
+
 	public int getNumber() {
 		return number;
 	}

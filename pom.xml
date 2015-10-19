@@ -8,12 +8,10 @@
     <packaging>pom</packaging>
     <name>puma-parent</name>
     <modules>
-        <module>puma-admin</module>
         <module>puma</module>
         <module>puma-client</module>
         <module>puma-core</module>
         <module>puma-biz</module>
-        <module>puma-checkserver</module>
     </modules>
     <description>puma-parent</description>
     <properties>

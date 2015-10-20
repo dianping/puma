@@ -46,7 +46,7 @@ public class SeriesIndexManagerFinder implements IndexManagerFinder {
 	public ReadIndexManager<L1IndexKey, L1IndexValue> findL1ReadIndexManager() throws IOException {
 		File file = loadL1Index();
 
-		return new SingleReadIndexManager<L1IndexKey, L1IndexValue>(file.getName());
+		return new L1SingleReadIndexManager(file.getName());
 	}
 
 	@Override
@@ -56,14 +56,14 @@ public class SeriesIndexManagerFinder implements IndexManagerFinder {
 		int number = l1IndexValue.getSequence().getNumber();
 
 		File file = loadL2Index(date, number);
-		return new SingleReadIndexManager<L2IndexKey, L2IndexValue>(file.getName());
+		return new L2SingleReadIndexManager(file.getName());
 	}
 
 	@Override
 	public WriteIndexManager<L1IndexKey, L1IndexValue> findL1WriteIndexManager() throws IOException {
 		File file = loadL1Index();
 
-		return new SingleWriteIndexManager<L1IndexKey, L1IndexValue>(file.getName());
+		return new L1SingleWriteIndexManager(file.getName());
 	}
 
 	@Override

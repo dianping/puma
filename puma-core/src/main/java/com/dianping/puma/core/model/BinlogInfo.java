@@ -121,4 +121,16 @@ public class BinlogInfo implements Serializable, Comparable<BinlogInfo> {
 
         throw new RuntimeException("can not compare two binlog info.");
     }
+
+    public String encode() {
+        return new StringBuilder()
+                .append(timestamp)
+                .append("!")
+                .append(serverId)
+                .append("!")
+                .append(binlogFile)
+                .append("!")
+                .append(binlogPosition)
+                .toString();
+    }
 }

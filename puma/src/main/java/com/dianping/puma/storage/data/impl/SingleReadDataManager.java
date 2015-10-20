@@ -2,23 +2,20 @@ package com.dianping.puma.storage.data.impl;
 
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.storage.bucket.ReadBucket;
-import com.dianping.puma.storage.codec.Codec;
-import com.dianping.puma.storage.codec.DataCodec;
 import com.dianping.puma.storage.bucket.LocalFileReadBucket;
 import com.dianping.puma.storage.data.DataKey;
 import com.dianping.puma.storage.data.DataValue;
 import com.dianping.puma.storage.data.ReadDataManager;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.IOException;
 
-public class SingleReadDataManager<K extends DataKey, V extends DataValue> extends AbstractLifeCycle
+public abstract class SingleReadDataManager<K extends DataKey, V extends DataValue> extends AbstractLifeCycle
 		implements ReadDataManager<K, V> {
 
 	private String filename;
 
 	private ReadBucket readBucket;
-
-	private Codec<K, V> codec;
 
 	private K position;
 
@@ -30,15 +27,11 @@ public class SingleReadDataManager<K extends DataKey, V extends DataValue> exten
 	protected void doStart() {
 		readBucket = new LocalFileReadBucket(filename);
 		readBucket.start();
-
-		codec = new DataCodec<K, V>();
-		codec.start();
 	}
 
 	@Override
 	protected void doStop() {
 		readBucket.stop();
-		codec.stop();
 	}
 
 	@Override
@@ -71,6 +64,8 @@ public class SingleReadDataManager<K extends DataKey, V extends DataValue> exten
 			return null;
 		}
 		position.addOffset(data.length);
-		return codec.decode(data).getRight();
+		return decode(data).getRight();
 	}
+
+	abstract protected Pair<K, V> decode(byte[] data) throws IOException;
 }

@@ -4,24 +4,26 @@ import com.dianping.puma.common.AbstractLifeCycle;
 
 import java.io.*;
 
-public class LineReadBucket extends AbstractLifeCycle implements ReadBucket {
-
-	private final int typicalSize = 256; // 256B.
-
-	private final int bufSize = 1024; // 1K.
+public final class LineReadBucket extends AbstractLifeCycle implements ReadBucket {
 
 	private final String filename;
 
+	private final int bufSizeByte;
+
+	private final int avgSizeByte;
+
 	private BufferedReader reader;
 
-	public LineReadBucket(String filename) {
+	protected LineReadBucket(String filename, int bufSizeByte, int avgSizeByte) {
 		this.filename = filename;
+		this.bufSizeByte = bufSizeByte;
+		this.avgSizeByte = avgSizeByte;
 	}
 
 	@Override
 	protected void doStart() {
 		try {
-			reader = new BufferedReader(new FileReader(filename), bufSize);
+			reader = new BufferedReader(new FileReader(filename), bufSizeByte);
 			if (!reader.markSupported()) {
 				throw new RuntimeException("line read bucket should support mark.");
 			}
@@ -43,7 +45,7 @@ public class LineReadBucket extends AbstractLifeCycle implements ReadBucket {
 		checkStop();
 
 		try {
-			reader.mark(typicalSize);
+			reader.mark(avgSizeByte);
 
 			String line = reader.readLine();
 			if (line == null) {

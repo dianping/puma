@@ -22,7 +22,7 @@ public class LineReadBucketTest extends StorageBaseTest {
 		bucket = new File(testDir, "bucket");
 		createFile(bucket);
 
-		lineReadBucket = new LineReadBucket(bucket.getAbsolutePath());
+		lineReadBucket = BucketFactory.newLineReadBucket(bucket.getAbsolutePath());
 		lineReadBucket.start();
 	}
 

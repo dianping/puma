@@ -16,8 +16,8 @@ public class LineReadBucketTest extends StorageBaseTest {
 	File bucket;
 
 	@Before
-	public void before() throws IOException {
-		super.before();
+	public void setUp() throws IOException {
+		super.setUp();
 
 		bucket = new File(testDir, "bucket");
 		createFile(bucket);
@@ -27,11 +27,11 @@ public class LineReadBucketTest extends StorageBaseTest {
 	}
 
 	@After
-	public void after() throws IOException {
+	public void tearDown() throws IOException {
 		deleteFile(bucket);
 		lineReadBucket.stop();
 
-		super.after();
+		super.tearDown();
 	}
 
 	@Test

@@ -22,7 +22,7 @@ public class SingleReadIndexManagerTest extends StorageBaseTest {
 	private File baseDir;
 
 	@Before
-	public void before() throws IOException {
+	public void setUp() throws IOException {
 		baseDir = new File(System.getProperty("java.io.tmpdir"), "test");
 		createDirectory(baseDir);
 
@@ -54,7 +54,7 @@ public class SingleReadIndexManagerTest extends StorageBaseTest {
 	}
 
 	@After
-	public void after() throws IOException {
+	public void tearDown() throws IOException {
 		singleReadIndexManager.stop();
 		singleWriteIndexManager.stop();
 		deleteDirectory(baseDir);

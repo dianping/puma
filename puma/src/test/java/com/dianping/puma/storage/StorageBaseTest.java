@@ -10,12 +10,12 @@ public class StorageBaseTest {
 
 	protected File testDir;
 
-	protected void before() throws IOException {
+	protected void setUp() throws IOException {
 		testDir = new File(FileUtils.getTempDirectory(), "test-dir");
 		createDirectory(testDir);
 	}
 
-	protected void after() throws IOException {
+	protected void tearDown() throws IOException {
 		deleteDirectory(testDir);
 	}
 

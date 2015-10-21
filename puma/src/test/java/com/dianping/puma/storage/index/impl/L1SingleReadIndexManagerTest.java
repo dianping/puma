@@ -20,8 +20,8 @@ public class L1SingleReadIndexManagerTest extends StorageBaseTest {
 	File bucket;
 
 	@Before
-	public void before() throws IOException {
-		super.before();
+	public void setUp() throws IOException {
+		super.setUp();
 
 		bucket = new File(testDir, "bucket");
 		createFile(bucket);
@@ -31,12 +31,12 @@ public class L1SingleReadIndexManagerTest extends StorageBaseTest {
 	}
 
 	@After
-	public void after() throws IOException {
+	public void tearDown() throws IOException {
 		if (l1SingleReadIndexManager != null) {
 			l1SingleReadIndexManager.stop();
 		}
 
-		super.after();
+		super.tearDown();
 	}
 
 	@Test

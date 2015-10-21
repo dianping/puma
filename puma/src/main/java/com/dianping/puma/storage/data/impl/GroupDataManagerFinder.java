@@ -5,7 +5,6 @@ import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.data.DataManagerFinder;
 import com.dianping.puma.storage.data.ReadDataManager;
 import com.dianping.puma.storage.data.WriteDataManager;
-import com.dianping.puma.storage.bucket.LocalFileReadBucket;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -13,7 +12,6 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.TreeMap;
 
 public class GroupDataManagerFinder extends AbstractLifeCycle implements DataManagerFinder {

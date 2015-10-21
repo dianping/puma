@@ -6,23 +6,29 @@ import com.dianping.puma.utils.ZipUtils;
 import java.io.*;
 import java.util.zip.GZIPInputStream;
 
-public final class LocalFileReadBucket extends AbstractLifeCycle implements ReadBucket {
+public final class LengthReadBucket extends AbstractLifeCycle implements ReadBucket {
 
-	private static final int READ_BUF_SIZE = 1024 * 100; // 100k.
+	private final String filename;
 
-	private String filename;
+	private final int bufSizeByte;
+
+	private final int avgSizeByte;
 
 	private DataInputStream input;
 
-	public LocalFileReadBucket(String filename) {
+	protected LengthReadBucket(String filename, int bufSizeByte, int avgSizeByte) {
 		this.filename = filename;
+		this.bufSizeByte = bufSizeByte;
+		this.avgSizeByte = avgSizeByte;
 	}
 
 	@Override
 	protected void doStart() {
 		try {
 			input = file2Stream(filename);
-
+			if (!input.markSupported()) {
+				throw new RuntimeException("length read bucket should support mark.");
+			}
 		} catch (IOException io) {
 			throw new RuntimeException("failed to start read bucket.");
 		}
@@ -41,7 +47,7 @@ public final class LocalFileReadBucket extends AbstractLifeCycle implements Read
 		checkStop();
 
 		try {
-			input.mark(Integer.MAX_VALUE);
+			input.mark(avgSizeByte);
 
 			int len = input.readInt();
 			if (len <= 0) {
@@ -67,7 +73,7 @@ public final class LocalFileReadBucket extends AbstractLifeCycle implements Read
 		checkStop();
 
 		if (offset < 0) {
-			throw new IOException("failed to skip.");
+			throw new IllegalArgumentException("offset is negative");
 		}
 
 		long count = offset;
@@ -85,9 +91,9 @@ public final class LocalFileReadBucket extends AbstractLifeCycle implements Read
 
 		if (checkCompressed(file)) {
 			input = new DataInputStream(new BufferedInputStream(
-					new GZIPInputStream(new FileInputStream(file), READ_BUF_SIZE)));
+					new GZIPInputStream(new FileInputStream(file), bufSizeByte)));
 		} else {
-			input = new DataInputStream(new BufferedInputStream(new FileInputStream(file), READ_BUF_SIZE));
+			input = new DataInputStream(new BufferedInputStream(new FileInputStream(file), bufSizeByte));
 		}
 
 		return input;

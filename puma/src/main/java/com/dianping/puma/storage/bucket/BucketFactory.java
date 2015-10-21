@@ -10,6 +10,10 @@ public final class BucketFactory {
 
 	private static final int lineWriteBucketMaxSizeByte = 1024 * 1024 * 1024; // 1G.
 
+	private static final int lengthReadBucketBufSizeByte = 10 * 1024 * 1024; // 10M.
+
+	private static final int lengthReadBucketAvgSizeByte = 10 * 1024; // 10K.
+
 	public static LineReadBucket newLineReadBucket(String filename) {
 		return new LineReadBucket(filename, lineReadBucketBufSizeByte, lineReadBucketAvgSizeByte);
 	}
@@ -24,5 +28,13 @@ public final class BucketFactory {
 
 	public static LineWriteBucket newLineWriteBucket(String filename, int bufSizeByte, int maxSizeByte) {
 		return new LineWriteBucket(filename, bufSizeByte, maxSizeByte);
+	}
+
+	public static LengthReadBucket newLengthReadBucket(String filename) {
+		return new LengthReadBucket(filename, lengthReadBucketBufSizeByte, lengthReadBucketAvgSizeByte);
+	}
+
+	public static LengthReadBucket newLengthReadBucket(String filename, int bufSizeByte, int avgSizeByte) {
+		return new LengthReadBucket(filename, bufSizeByte, avgSizeByte);
 	}
 }

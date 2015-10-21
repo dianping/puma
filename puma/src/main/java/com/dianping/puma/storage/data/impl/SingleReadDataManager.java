@@ -1,8 +1,9 @@
 package com.dianping.puma.storage.data.impl;
 
 import com.dianping.puma.common.AbstractLifeCycle;
+import com.dianping.puma.storage.bucket.BucketFactory;
 import com.dianping.puma.storage.bucket.ReadBucket;
-import com.dianping.puma.storage.bucket.LocalFileReadBucket;
+import com.dianping.puma.storage.bucket.LengthReadBucket;
 import com.dianping.puma.storage.data.DataKey;
 import com.dianping.puma.storage.data.DataValue;
 import com.dianping.puma.storage.data.ReadDataManager;
@@ -25,7 +26,7 @@ public abstract class SingleReadDataManager<K extends DataKey, V extends DataVal
 
 	@Override
 	protected void doStart() {
-		readBucket = new LocalFileReadBucket(filename);
+		readBucket = BucketFactory.newLengthReadBucket(filename);
 		readBucket.start();
 	}
 

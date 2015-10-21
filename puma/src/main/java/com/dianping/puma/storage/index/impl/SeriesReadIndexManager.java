@@ -6,7 +6,8 @@ import com.dianping.puma.storage.index.ReadIndexManager;
 
 import java.io.IOException;
 
-public class SeriesReadIndexManager extends AbstractLifeCycle implements ReadIndexManager<L1IndexKey, L2IndexValue> {
+public final class SeriesReadIndexManager extends AbstractLifeCycle
+		implements ReadIndexManager<L1IndexKey, L2IndexValue> {
 
 	private String database;
 

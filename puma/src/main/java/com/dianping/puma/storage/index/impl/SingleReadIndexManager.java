@@ -75,5 +75,5 @@ public abstract class SingleReadIndexManager<K extends IndexKey<K>, V extends In
 		}
 	}
 
-	abstract protected Pair<K, V> decode(byte[] data);
+	abstract protected Pair<K, V> decode(byte[] data) throws IOException;
 }

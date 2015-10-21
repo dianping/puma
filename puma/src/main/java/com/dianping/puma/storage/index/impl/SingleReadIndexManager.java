@@ -35,11 +35,12 @@ public abstract class SingleReadIndexManager<K extends IndexKey<K>, V extends In
 
 	@Override
 	public V findOldest() throws IOException {
-		byte[] data = readBucket.next();
-		if (data == null) {
+		try {
+			byte[] data = readBucket.next();
+			return decode(data).getRight();
+		} catch (EOFException eof) {
 			return null;
 		}
-		return decode(data).getRight();
 	}
 
 	@Override

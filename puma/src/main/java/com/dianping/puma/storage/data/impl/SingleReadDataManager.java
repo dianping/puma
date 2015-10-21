@@ -32,7 +32,9 @@ public abstract class SingleReadDataManager<K extends DataKey, V extends DataVal
 
 	@Override
 	protected void doStop() {
-		readBucket.stop();
+		if (readBucket != null) {
+			readBucket.stop();
+		}
 	}
 
 	@Override

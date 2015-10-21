@@ -1,7 +1,8 @@
 package com.dianping.puma.storage.index.impl;
 
 import com.dianping.puma.common.AbstractLifeCycle;
-import com.dianping.puma.storage.bucket.LocalFileWriteBucket;
+import com.dianping.puma.storage.bucket.BucketFactory;
+import com.dianping.puma.storage.bucket.LengthWriteBucket;
 import com.dianping.puma.storage.bucket.WriteBucket;
 import com.dianping.puma.storage.index.WriteIndexManager;
 
@@ -19,7 +20,7 @@ public abstract class SingleWriteIndexManager<K, V> extends AbstractLifeCycle im
 
 	@Override
 	protected void doStart() {
-		writeBucket = new LocalFileWriteBucket(filename);
+		writeBucket = BucketFactory.newLengthWriteBucket(filename);
 		writeBucket.start();
 	}
 

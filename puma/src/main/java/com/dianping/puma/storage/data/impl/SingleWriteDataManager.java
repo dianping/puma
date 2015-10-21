@@ -1,8 +1,9 @@
 package com.dianping.puma.storage.data.impl;
 
 import com.dianping.puma.common.AbstractLifeCycle;
+import com.dianping.puma.storage.bucket.BucketFactory;
 import com.dianping.puma.storage.bucket.WriteBucket;
-import com.dianping.puma.storage.bucket.LocalFileWriteBucket;
+import com.dianping.puma.storage.bucket.LengthWriteBucket;
 import com.dianping.puma.storage.data.DataKey;
 import com.dianping.puma.storage.data.DataValue;
 import com.dianping.puma.storage.data.WriteDataManager;
@@ -26,7 +27,7 @@ public abstract class SingleWriteDataManager<K extends DataKey, V extends DataVa
 
 	@Override
 	protected void doStart() {
-		writeBucket = new LocalFileWriteBucket(filename);
+		writeBucket = BucketFactory.newLengthWriteBucket(filename);
 		writeBucket.start();
 	}
 

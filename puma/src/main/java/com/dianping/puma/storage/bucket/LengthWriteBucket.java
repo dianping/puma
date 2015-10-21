@@ -4,20 +4,22 @@ import com.dianping.puma.common.AbstractLifeCycle;
 
 import java.io.*;
 
-public final class LocalFileWriteBucket extends AbstractLifeCycle implements WriteBucket {
+public final class LengthWriteBucket extends AbstractLifeCycle implements WriteBucket {
 
-	private static final int BUF_SIZE_BYTE = 100 * 1024; // 100K.
+	private final String filename;
 
-	private static final int MAX_SIZE_BYTE = 1024 * 1024 * 1024; // 1G.
+	private final int bufSizeByte;
 
-	private String filename;
+	private final int maxSizeByte;
 
 	private long offset;
 
 	private DataOutputStream output;
 
-	public LocalFileWriteBucket(String filename) {
+	protected LengthWriteBucket(String filename, int bufSizeByte, int maxSizeByte) {
 		this.filename = filename;
+		this.bufSizeByte = bufSizeByte;
+		this.maxSizeByte = maxSizeByte;
 	}
 
 	@Override
@@ -32,10 +34,13 @@ public final class LocalFileWriteBucket extends AbstractLifeCycle implements Wri
 	@Override
 	protected void doStop() {
 		try {
-			// Flush all buffered contents into disk before closing.
-			flush();
-			output.close();
+			output.flush();
 		} catch (IOException ignore) {
+		} finally {
+			try {
+				output.close();
+			} catch (IOException ignore) {
+			}
 		}
 	}
 
@@ -46,7 +51,7 @@ public final class LocalFileWriteBucket extends AbstractLifeCycle implements Wri
 		output.writeInt(data.length);
 		output.write(data);
 
-		offset += (Integer.SIZE + data.length);
+		offset += ((Integer.SIZE >> 3) + data.length);
 	}
 
 	@Override
@@ -60,7 +65,7 @@ public final class LocalFileWriteBucket extends AbstractLifeCycle implements Wri
 	public boolean hasRemainingForWrite() {
 		checkStop();
 
-		return offset < MAX_SIZE_BYTE;
+		return offset < maxSizeByte;
 	}
 
 	protected DataOutputStream file2Stream(String filename) throws IOException {
@@ -69,6 +74,6 @@ public final class LocalFileWriteBucket extends AbstractLifeCycle implements Wri
 			throw new IOException("bucket can not write.");
 		}
 
-		return new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file), BUF_SIZE_BYTE));
+		return new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file), bufSizeByte));
 	}
 }

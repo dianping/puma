@@ -2,7 +2,6 @@ package com.dianping.puma.storage.index.impl;
 
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.storage.bucket.BucketFactory;
-import com.dianping.puma.storage.bucket.LengthReadBucket;
 import com.dianping.puma.storage.bucket.ReadBucket;
 import com.dianping.puma.storage.index.IndexKey;
 import com.dianping.puma.storage.index.IndexValue;
@@ -12,8 +11,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.io.EOFException;
 import java.io.IOException;
 
-public abstract class SingleReadIndexManager<K extends IndexKey<K>, V extends IndexValue> extends AbstractLifeCycle
-		implements ReadIndexManager<K, V> {
+public abstract class SingleReadIndexManager<K extends IndexKey<K>, V extends IndexValue>
+		extends AbstractLifeCycle implements ReadIndexManager<K, V> {
 
 	private String filename;
 
@@ -25,7 +24,7 @@ public abstract class SingleReadIndexManager<K extends IndexKey<K>, V extends In
 
 	@Override
 	protected void doStart() {
-		readBucket = BucketFactory.newLengthReadBucket(filename);
+		readBucket = BucketFactory.newLineReadBucket(filename);
 		readBucket.start();
 	}
 

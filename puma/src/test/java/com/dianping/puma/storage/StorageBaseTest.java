@@ -3,27 +3,49 @@ package com.dianping.puma.storage;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class StorageBaseTest {
 
-	protected void createFolder(File folder) throws IOException {
-		if (folder.mkdirs()) {
-			throw new IOException("failed to create folder.");
+	protected File testDir;
+
+	protected void before() throws IOException {
+		testDir = new File(FileUtils.getTempDirectory(), "test-dir");
+		createDirectory(testDir);
+	}
+
+	protected void after() throws IOException {
+		deleteDirectory(testDir);
+	}
+
+	protected void createDirectory(File directory) throws IOException {
+		FileUtils.forceMkdir(directory);
+		FileUtils.cleanDirectory(directory);
+	}
+
+	protected void deleteDirectory(File directory) throws IOException {
+		try {
+			FileUtils.forceDelete(directory);
+		} catch (FileNotFoundException ignore) {
 		}
 	}
 
-	protected void deleteFolder(File folder) throws IOException {
-		FileUtils.forceDelete(folder);
-	}
-
 	protected void createFile(File file) throws IOException {
-		if (file.createNewFile()) {
-			throw new IOException("failed to create file.");
+		File parent = file.getParentFile();
+		if (!parent.exists() && !parent.mkdirs()) {
+			throw new IOException("failed to create file parent directories.");
+		}
+
+		if (!file.createNewFile()) {
+			throw new IOException("file already exists.");
 		}
 	}
 
 	protected void deleteFile(File file) throws IOException {
-		FileUtils.forceDelete(file);
+		try {
+			FileUtils.forceDelete(file);
+		} catch (FileNotFoundException ignore) {
+		}
 	}
 }

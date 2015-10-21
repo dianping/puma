@@ -6,7 +6,11 @@ import java.io.*;
 
 public class LineReadBucket extends AbstractLifeCycle implements ReadBucket {
 
-	private String filename;
+	private final int typicalSize = 256; // 256B.
+
+	private final int bufSize = 1024; // 1K.
+
+	private final String filename;
 
 	private BufferedReader reader;
 
@@ -17,7 +21,10 @@ public class LineReadBucket extends AbstractLifeCycle implements ReadBucket {
 	@Override
 	protected void doStart() {
 		try {
-			reader = new BufferedReader(new FileReader(filename));
+			reader = new BufferedReader(new FileReader(filename), bufSize);
+			if (!reader.markSupported()) {
+				throw new RuntimeException("line read bucket should support mark.");
+			}
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException("bucket file not found.");
 		}
@@ -36,7 +43,7 @@ public class LineReadBucket extends AbstractLifeCycle implements ReadBucket {
 		checkStop();
 
 		try {
-			reader.mark(Integer.MAX_VALUE);
+			reader.mark(typicalSize);
 
 			String line = reader.readLine();
 			if (line == null) {

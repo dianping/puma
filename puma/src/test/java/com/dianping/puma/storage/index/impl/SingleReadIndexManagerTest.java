@@ -24,7 +24,7 @@ public class SingleReadIndexManagerTest extends StorageBaseTest {
 	@Before
 	public void before() throws IOException {
 		baseDir = new File(System.getProperty("java.io.tmpdir"), "test");
-		createFolder(baseDir);
+		createDirectory(baseDir);
 
 		File file = new File(baseDir, "puma");
 
@@ -57,6 +57,6 @@ public class SingleReadIndexManagerTest extends StorageBaseTest {
 	public void after() throws IOException {
 		singleReadIndexManager.stop();
 		singleWriteIndexManager.stop();
-		deleteFolder(baseDir);
+		deleteDirectory(baseDir);
 	}
 }

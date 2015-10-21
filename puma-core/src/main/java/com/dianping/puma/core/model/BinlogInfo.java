@@ -29,6 +29,13 @@ public class BinlogInfo implements Serializable, Comparable<BinlogInfo> {
         this.timestamp = timestamp;
     }
 
+    public BinlogInfo(long timestamp, long serverId, String binlogFile, long binlogPosition) {
+        this.timestamp = timestamp;
+        this.serverId = serverId;
+        this.binlogFile = binlogFile;
+        this.binlogPosition = binlogPosition;
+    }
+
     public String getBinlogFile() {
         return binlogFile;
     }

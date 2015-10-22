@@ -21,4 +21,11 @@ public interface ReadBucket extends LifeCycle {
 	 * @throws IOException
 	 */
 	void skip(long offset) throws IOException;
+
+	/**
+	 * Get the offset of the bucket count in byte.
+	 *
+	 * @return offset count in byte.
+	 */
+	long position();
 }

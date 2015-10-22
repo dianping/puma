@@ -16,6 +16,8 @@ public final class LengthReadBucket extends AbstractLifeCycle implements ReadBuc
 
 	private DataInputStream input;
 
+	private long position;
+
 	protected LengthReadBucket(String filename, int bufSizeByte, int avgSizeByte) {
 		this.filename = filename;
 		this.bufSizeByte = bufSizeByte;
@@ -56,7 +58,7 @@ public final class LengthReadBucket extends AbstractLifeCycle implements ReadBuc
 
 			byte[] data = new byte[len];
 			input.readFully(data);
-
+			position += data.length;
 			return data;
 		} catch (IOException io) {
 			try {
@@ -81,6 +83,11 @@ public final class LengthReadBucket extends AbstractLifeCycle implements ReadBuc
 			long skipLength = input.skip(count);
 			count -= skipLength;
 		}
+	}
+
+	@Override
+	public long position() {
+		return position;
 	}
 
 	protected DataInputStream file2Stream(String filename) throws IOException {

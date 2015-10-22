@@ -1,6 +1,9 @@
 package com.dianping.puma.storage.data.impl;
 
 import com.dianping.puma.common.AbstractLifeCycle;
+import com.dianping.puma.core.codec.EventCodec;
+import com.dianping.puma.core.codec.RawEventCodec;
+import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.storage.bucket.BucketFactory;
 import com.dianping.puma.storage.bucket.WriteBucket;
 import com.dianping.puma.storage.bucket.LengthWriteBucket;
@@ -10,48 +13,62 @@ import com.dianping.puma.storage.data.WriteDataManager;
 
 import java.io.IOException;
 
-public abstract class SingleWriteDataManager<K extends DataKey, V extends DataValue>
-		extends AbstractLifeCycle implements WriteDataManager<K, V> {
+public final class SingleWriteDataManager extends AbstractLifeCycle
+		implements WriteDataManager<DataKeyImpl, DataValueImpl> {
 
-	private final long MAX_SIZE_BYTE = 1024L * 1024L * 1024L;
+	private final String filename;
 
-	private String filename;
+	private final int bufSizeByte;
+
+	private final int maxSizeByte;
 
 	private WriteBucket writeBucket;
 
-	private long offset;
+	private EventCodec eventCodec = new RawEventCodec();
 
-	public SingleWriteDataManager(String filename) {
+	public SingleWriteDataManager(String filename, int bufSizeByte, int maxSizeByte) {
 		this.filename = filename;
+		this.bufSizeByte = bufSizeByte;
+		this.maxSizeByte = maxSizeByte;
 	}
 
 	@Override
 	protected void doStart() {
-		writeBucket = BucketFactory.newLengthWriteBucket(filename);
+		writeBucket = BucketFactory.newLengthWriteBucket(filename, bufSizeByte, maxSizeByte);
 		writeBucket.start();
 	}
 
 	@Override
 	protected void doStop() {
-		writeBucket.stop();
+		if (writeBucket != null) {
+			writeBucket.stop();
+		}
 	}
 
 	@Override
-	public void append(K dataKey, V dataValue) throws IOException {
+	public void append(DataKeyImpl dataKey, DataValueImpl dataValue) throws IOException {
+		checkStop();
+
 		byte[] data = encode(dataKey, dataValue);
 		writeBucket.append(data);
-		offset += data.length;
 	}
 
 	@Override
 	public void flush() throws IOException {
+		checkStop();
+
 		writeBucket.flush();
 	}
 
 	@Override
 	public boolean hasRemainingForWrite() {
-		return offset < MAX_SIZE_BYTE;
+		checkStop();
+
+		return writeBucket.hasRemainingForWrite();
 	}
 
-	abstract protected byte[] encode(K dataKey, V dataValue);
+	protected byte[] encode(DataKeyImpl dataKey, DataValueImpl dataValue) throws IOException {
+		ChangedEvent binlogEvent = dataValue.getBinlogEvent();
+		return eventCodec.encode(binlogEvent);
+	}
 }

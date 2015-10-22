@@ -14,6 +14,8 @@ public final class LineReadBucket extends AbstractLifeCycle implements ReadBucke
 
 	private BufferedReader reader;
 
+	private long position;
+
 	protected LineReadBucket(String filename, int bufSizeByte, int avgSizeByte) {
 		this.filename = filename;
 		this.bufSizeByte = bufSizeByte;
@@ -52,7 +54,9 @@ public final class LineReadBucket extends AbstractLifeCycle implements ReadBucke
 				throw new EOFException("reach the end of line reader bucket.");
 			}
 
-			return line.getBytes();
+			byte[] data = line.getBytes();
+			position += data.length;
+			return data;
 		} catch (EOFException eof) {
 			throw eof;
 		} catch (IOException io) {
@@ -78,5 +82,12 @@ public final class LineReadBucket extends AbstractLifeCycle implements ReadBucke
 			long skipLength = reader.skip(offset);
 			count -= skipLength;
 		}
+
+		position += offset;
+	}
+
+	@Override
+	public long position() {
+		return position;
 	}
 }

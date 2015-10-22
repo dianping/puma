@@ -1,10 +1,12 @@
 package com.dianping.puma.storage.index;
 
+import com.dianping.puma.common.AbstractLifeCycle;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 
-public class SeriesIndexManagerFinder implements IndexManagerFinder {
+public final class SeriesIndexManagerFinder extends AbstractLifeCycle implements IndexManagerFinder {
 
 	private static final String L1_INDEX_PREFIX = "l1index";
 
@@ -29,12 +31,12 @@ public class SeriesIndexManagerFinder implements IndexManagerFinder {
 	}
 
 	@Override
-	public void start() {
+	protected void doStart() {
 
 	}
 
 	@Override
-	public void stop() {
+	protected void doStop() {
 
 	}
 

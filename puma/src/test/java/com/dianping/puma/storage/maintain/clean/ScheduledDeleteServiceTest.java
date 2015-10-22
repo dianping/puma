@@ -1,0 +1,43 @@
+package com.dianping.puma.storage.maintain.clean;
+
+import com.dianping.puma.storage.StorageBaseTest;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+
+import static org.junit.Assert.*;
+
+public class ScheduledDeleteServiceTest extends StorageBaseTest {
+
+	ScheduledDeleteService scheduledDeleteService = new ScheduledDeleteService();
+
+	@Override @Before
+	public void setUp() throws IOException {
+		super.setUp();
+	}
+
+	@Test
+	public void testDeleteDirectory() throws Exception {
+		File directory0 = new File(testDir, "directory0");
+		createDirectory(directory0);
+
+		assertTrue(directory0.exists());
+		scheduledDeleteService.deleteDirectory(directory0);
+		assertFalse(directory0.exists());
+
+		File directory1 = new File(testDir, "directory1/hello");
+		createDirectory(directory1);
+
+		assertTrue(directory1.exists());
+		scheduledDeleteService.deleteDirectory(directory1);
+		assertFalse(directory1.exists());
+	}
+
+	@Override @After
+	public void tearDown() throws IOException {
+		super.tearDown();
+	}
+}

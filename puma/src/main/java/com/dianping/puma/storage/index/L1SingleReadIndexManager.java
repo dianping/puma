@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.index.impl;
+package com.dianping.puma.storage.index;
 
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.Sequence;

@@ -1,10 +1,6 @@
 package com.dianping.puma.storage.index;
 
 import com.dianping.puma.common.LifeCycle;
-import com.dianping.puma.storage.index.impl.L1IndexKey;
-import com.dianping.puma.storage.index.impl.L1IndexValue;
-import com.dianping.puma.storage.index.impl.L2IndexKey;
-import com.dianping.puma.storage.index.impl.L2IndexValue;
 
 import java.io.IOException;
 

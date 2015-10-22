@@ -9,9 +9,9 @@ import com.dianping.puma.storage.data.GroupReadDataManager;
 import com.dianping.puma.storage.data.DataKeyImpl;
 import com.dianping.puma.storage.data.DataValueImpl;
 import com.dianping.puma.storage.index.ReadIndexManager;
-import com.dianping.puma.storage.index.impl.SeriesReadIndexManager;
-import com.dianping.puma.storage.index.impl.L1IndexKey;
-import com.dianping.puma.storage.index.impl.L2IndexValue;
+import com.dianping.puma.storage.index.SeriesReadIndexManager;
+import com.dianping.puma.storage.index.L1IndexKey;
+import com.dianping.puma.storage.index.L2IndexValue;
 
 import java.io.IOException;
 

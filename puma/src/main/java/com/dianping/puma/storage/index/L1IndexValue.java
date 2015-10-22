@@ -1,13 +1,13 @@
-package com.dianping.puma.storage.index.impl;
+package com.dianping.puma.storage.index;
 
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.index.IndexValue;
 
-public class L2IndexValue implements IndexValue {
+public class L1IndexValue implements IndexValue {
 
 	private Sequence sequence;
 
-	public L2IndexValue(Sequence sequence) {
+	public L1IndexValue(Sequence sequence) {
 		this.sequence = sequence;
 	}
 

@@ -1,8 +1,4 @@
-package com.dianping.puma.storage.index.impl;
-
-import com.dianping.puma.storage.index.IndexManagerFinder;
-import com.dianping.puma.storage.index.ReadIndexManager;
-import com.dianping.puma.storage.index.WriteIndexManager;
+package com.dianping.puma.storage.index;
 
 import java.io.File;
 import java.io.FilenameFilter;

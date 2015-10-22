@@ -7,9 +7,9 @@ import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.data.DataKeyImpl;
 import com.dianping.puma.storage.data.GroupWriteDataManager;
 import com.dianping.puma.storage.data.DataValueImpl;
-import com.dianping.puma.storage.index.impl.L1IndexKey;
-import com.dianping.puma.storage.index.impl.L2IndexValue;
-import com.dianping.puma.storage.index.impl.SeriesWriteIndexManager;
+import com.dianping.puma.storage.index.L1IndexKey;
+import com.dianping.puma.storage.index.L2IndexValue;
+import com.dianping.puma.storage.index.SeriesWriteIndexManager;
 
 import java.io.IOException;
 

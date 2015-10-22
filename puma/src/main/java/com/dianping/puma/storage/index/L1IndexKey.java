@@ -1,7 +1,6 @@
-package com.dianping.puma.storage.index.impl;
+package com.dianping.puma.storage.index;
 
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.storage.index.IndexKey;
 
 public class L1IndexKey implements IndexKey<L1IndexKey> {
 

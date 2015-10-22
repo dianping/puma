@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.index.impl;
+package com.dianping.puma.storage.index;
 
 public final class L2SingleWriteIndexManager extends SingleWriteIndexManager<L2IndexKey, L2IndexValue> {
 

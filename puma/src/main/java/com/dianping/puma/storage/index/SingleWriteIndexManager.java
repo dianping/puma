@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.index.impl;
+package com.dianping.puma.storage.index;
 
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.storage.bucket.BucketFactory;

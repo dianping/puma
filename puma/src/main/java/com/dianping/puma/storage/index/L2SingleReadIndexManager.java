@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.index.impl;
+package com.dianping.puma.storage.index;
 
 import org.apache.commons.lang3.tuple.Pair;
 

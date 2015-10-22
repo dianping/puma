@@ -1,8 +1,11 @@
-package com.dianping.puma.storage.index.impl;
+package com.dianping.puma.storage.index;
 
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.StorageBaseTest;
+import com.dianping.puma.storage.index.L1IndexKey;
+import com.dianping.puma.storage.index.L1IndexValue;
+import com.dianping.puma.storage.index.L1SingleReadIndexManager;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.After;

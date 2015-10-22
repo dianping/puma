@@ -1,5 +1,6 @@
 package com.dianping.puma.storage.maintain.clean;
 
+import com.dianping.puma.storage.filesystem.FileSystem;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,11 +14,27 @@ import java.io.IOException;
 public class ScheduledDeleteService implements DeleteService {
 
 	@Autowired
+	FileSystem fileSystem;
+
+	@Autowired
 	DeleteStrategy deleteStrategy;
 
 	@Override
 	public void delete() {
+		File[] l1DateDirs = fileSystem.visitL1IndexDateDirs();
+		for (File l1DateDir: l1DateDirs) {
+			delete(l1DateDir);
+		}
 
+		File[] l2DateDirs = fileSystem.visitL2IndexDateDirs();
+		for (File l2DateDir: l2DateDirs) {
+			delete(l2DateDir);
+		}
+
+		File[] dataDateDirs = fileSystem.visitMasterDataDateDirs();
+		for (File dataDateDir: dataDateDirs) {
+			delete(dataDateDir);
+		}
 	}
 
 	protected void delete(File directory) {

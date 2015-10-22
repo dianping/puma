@@ -1,22 +1,33 @@
 package com.dianping.puma.storage.maintain.archive;
 
+import com.dianping.puma.storage.filesystem.*;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.util.Date;
 import java.util.zip.GZIPOutputStream;
 
 @Service
 public final class ScheduledArchiveService implements ArchiveService {
 
 	@Autowired
+	FileSystem fileSystem;
+
+	@Autowired
 	ArchiveStrategy archiveStrategy;
 
 	@Override
 	public void archive() {
-
+		File[] masterDataDateDirs = fileSystem.visitMasterDataDateDirs();
+		File slaveDataDir = fileSystem.getSlaveDataDir();
+		for (File masterDataDateDir: masterDataDateDirs) {
+			Date date = fileSystem.parseDateDir(masterDataDateDir);
+			File slaveDataDateDir = fileSystem.createDateDir(slaveDataDir, date);
+			archive(masterDataDateDir, slaveDataDateDir);
+		}
 	}
 
 	private void archive(File srcDirectory, File dstDirectory) {

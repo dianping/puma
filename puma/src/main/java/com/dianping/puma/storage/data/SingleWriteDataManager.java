@@ -22,7 +22,7 @@ public final class SingleWriteDataManager extends AbstractLifeCycle
 
 	private EventCodec eventCodec = new RawEventCodec();
 
-	public SingleWriteDataManager(String filename, int bufSizeByte, int maxSizeByte) {
+	protected SingleWriteDataManager(String filename, int bufSizeByte, int maxSizeByte) {
 		this.filename = filename;
 		this.bufSizeByte = bufSizeByte;
 		this.maxSizeByte = maxSizeByte;

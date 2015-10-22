@@ -25,9 +25,9 @@ public final class SingleReadDataManager extends AbstractLifeCycle
 
 	private Sequence sequence;
 
-	protected EventCodec eventCodec = new RawEventCodec();
+	private EventCodec eventCodec = new RawEventCodec();
 
-	public SingleReadDataManager(String filename, int bufSizeByte, int avgSizeByte) {
+	protected SingleReadDataManager(String filename, int bufSizeByte, int avgSizeByte) {
 		this.filename = filename;
 		this.bufSizeByte = bufSizeByte;
 		this.avgSizeByte = avgSizeByte;

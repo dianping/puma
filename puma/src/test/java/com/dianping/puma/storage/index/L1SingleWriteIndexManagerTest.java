@@ -30,7 +30,7 @@ public class L1SingleWriteIndexManagerTest extends StorageBaseTest {
 		bucket = new File(testDir, "bucket");
 		createFile(bucket);
 
-		l1SingleWriteIndexManager = new L1SingleWriteIndexManager(bucket.getAbsolutePath());
+		l1SingleWriteIndexManager = IndexManagerFactory.newL1SingleWriteIndexManager(bucket.getAbsolutePath());
 		l1SingleWriteIndexManager.start();
 	}
 

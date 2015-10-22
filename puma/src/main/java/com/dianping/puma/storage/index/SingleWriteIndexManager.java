@@ -9,12 +9,18 @@ import java.io.IOException;
 
 public abstract class SingleWriteIndexManager<K, V> extends AbstractLifeCycle implements WriteIndexManager<K, V> {
 
-	private String filename;
+	private final String filename;
+
+	private final int bufSizeByte;
+
+	private final int maxSizeByte;
 
 	private WriteBucket writeBucket;
 
-	public SingleWriteIndexManager(String filename) {
+	public SingleWriteIndexManager(String filename, int bufSizeByte, int maxSizeByte) {
 		this.filename = filename;
+		this.bufSizeByte = bufSizeByte;
+		this.maxSizeByte = maxSizeByte;
 	}
 
 	@Override

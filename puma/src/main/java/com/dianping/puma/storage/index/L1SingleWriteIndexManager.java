@@ -5,8 +5,8 @@ import com.dianping.puma.storage.Sequence;
 
 public final class L1SingleWriteIndexManager extends SingleWriteIndexManager<L1IndexKey, L1IndexValue> {
 
-	public L1SingleWriteIndexManager(String filename) {
-		super(filename);
+	public L1SingleWriteIndexManager(String filename, int bufSizeByte, int maxSizeByte) {
+		super(filename, bufSizeByte, maxSizeByte);
 	}
 
 	@Override

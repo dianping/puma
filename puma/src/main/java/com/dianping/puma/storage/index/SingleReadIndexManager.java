@@ -14,12 +14,18 @@ import java.io.IOException;
 public abstract class SingleReadIndexManager<K extends IndexKey<K>, V extends IndexValue>
 		extends AbstractLifeCycle implements ReadIndexManager<K, V> {
 
-	private String filename;
+	private final String filename;
+
+	private final int bufSizeByte;
+
+	private final int avgSizeByte;
 
 	private ReadBucket readBucket;
 
-	public SingleReadIndexManager(String filename) {
+	public SingleReadIndexManager(String filename, int bufSizeByte, int avgSizeByte) {
 		this.filename = filename;
+		this.bufSizeByte = bufSizeByte;
+		this.avgSizeByte = avgSizeByte;
 	}
 
 	@Override

@@ -9,8 +9,8 @@ import java.io.IOException;
 
 public final class L1SingleReadIndexManager extends SingleReadIndexManager<L1IndexKey, L1IndexValue> {
 
-	public L1SingleReadIndexManager(String filename) {
-		super(filename);
+	public L1SingleReadIndexManager(String filename, int bufSizeByte, int avgSizeByte) {
+		super(filename, bufSizeByte, avgSizeByte);
 	}
 
 	@Override

@@ -4,7 +4,7 @@ import com.dianping.puma.common.AbstractLifeCycle;
 
 import java.io.IOException;
 
-public class SeriesWriteIndexManager extends AbstractLifeCycle implements WriteIndexManager<L1IndexKey, L2IndexValue> {
+public final class SeriesWriteIndexManager extends AbstractLifeCycle implements WriteIndexManager<L1IndexKey, L2IndexValue> {
 
 	private String database;
 

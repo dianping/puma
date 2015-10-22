@@ -25,7 +25,7 @@ public abstract class SingleWriteIndexManager<K, V> extends AbstractLifeCycle im
 
 	@Override
 	protected void doStart() {
-		writeBucket = BucketFactory.newLineWriteBucket(filename);
+		writeBucket = BucketFactory.newLineWriteBucket(filename, bufSizeByte, maxSizeByte);
 		writeBucket.start();
 	}
 

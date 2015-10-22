@@ -1,10 +1,14 @@
 package com.dianping.puma.server.controller;
 
+import com.dianping.puma.core.dto.BinlogAck;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.eventbus.DefaultEventBus;
-import com.dianping.puma.eventbus.event.ClientPositionChangedEvent;
+import com.dianping.puma.pumaserver.service.BinlogAckService;
+import com.dianping.puma.pumaserver.service.ClientSessionService;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * Dozer @ 15/8/27
@@ -15,12 +19,16 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/client")
 public class ClientPositionController {
 
+    private ClientSessionService clientSessionService;
+
+    private BinlogAckService binlogAckService;
+
     @RequestMapping(value = "/position", method = RequestMethod.POST)
     @ResponseBody
     public void setClientBinlog(String name, @RequestBody BinlogInfo binlogInfo) {
-        ClientPositionChangedEvent event = new ClientPositionChangedEvent();
-        event.setClientName(name);
-        event.setBinlogInfo(binlogInfo);
-        DefaultEventBus.INSTANCE.post(event);
+        BinlogAck ack = new BinlogAck();
+        ack.setBinlogInfo(binlogInfo);
+        binlogAckService.save(name, ack, true);
+        clientSessionService.unsubscribe(name);
     }
 }

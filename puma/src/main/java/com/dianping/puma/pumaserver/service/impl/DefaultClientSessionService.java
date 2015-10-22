@@ -68,13 +68,13 @@ public class DefaultClientSessionService implements ClientSessionService {
     }
 
     @Override
-    public void unsubscribe(String clientName, String token) {
-        if (Strings.isNullOrEmpty(clientName) || Strings.isNullOrEmpty(token)) {
+    public void unsubscribe(String clientName) {
+        if (Strings.isNullOrEmpty(clientName)) {
             return;
         }
 
         ClientSession client = clients.remove(clientName);
-        if (client != null && token.equals(client.getToken())) {
+        if (client != null) {
             destory(client);
         }
     }

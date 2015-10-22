@@ -1,10 +1,10 @@
 package com.dianping.puma.pumaserver.handler.binlog;
 
+import com.dianping.puma.core.dto.BinlogAck;
 import com.dianping.puma.core.dto.binlog.request.BinlogRollbackRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogRollbackResponse;
-import com.dianping.puma.eventbus.DefaultEventBus;
-import com.dianping.puma.eventbus.event.ClientPositionChangedEvent;
 import com.dianping.puma.pumaserver.client.ClientSession;
+import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -21,21 +21,26 @@ public class BinlogRollbackHandler extends SimpleChannelInboundHandler<BinlogRol
 
     private ClientSessionService clientSessionService;
 
+    private BinlogAckService binlogAckService;
+
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, BinlogRollbackRequest msg) throws Exception {
         ClientSession session = clientSessionService.get(msg.getClientName(), msg.getToken());
-        ClientPositionChangedEvent event = new ClientPositionChangedEvent();
-        event.setClientName(session.getClientName());
-        event.setBinlogInfo(msg.getBinlogRollback().getBinlogInfo());
-        DefaultEventBus.INSTANCE.post(event);
+
+        BinlogAck ack = new BinlogAck();
+        ack.setBinlogInfo(msg.getBinlogRollback().getBinlogInfo());
+        binlogAckService.save(session.getClientName(), ack, true);
+        clientSessionService.unsubscribe(session.getClientName());
 
         BinlogRollbackResponse response = new BinlogRollbackResponse();
         ctx.channel().writeAndFlush(response);
-
-        //todo: rollback 失败后下一次get报错，rollback成功清空缓存
     }
 
     public void setClientSessionService(ClientSessionService clientSessionService) {
         this.clientSessionService = clientSessionService;
+    }
+
+    public void setBinlogAckService(BinlogAckService binlogAckService) {
+        this.binlogAckService = binlogAckService;
     }
 }

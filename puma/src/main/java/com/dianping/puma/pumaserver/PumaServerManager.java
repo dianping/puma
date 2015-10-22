@@ -49,6 +49,7 @@ public class PumaServerManager {
         // Initialize sharable handlers.
         final BinlogRollbackHandler binlogRollbackHandler = new BinlogRollbackHandler();
         binlogRollbackHandler.setClientSessionService(clientSessionService);
+        binlogRollbackHandler.setBinlogAckService(binlogAckService);
 
         final BinlogAckHandler binlogAckHandler = new BinlogAckHandler();
         binlogAckHandler.setBinlogAckService(binlogAckService);

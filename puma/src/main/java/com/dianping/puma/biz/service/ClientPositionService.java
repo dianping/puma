@@ -10,7 +10,7 @@ import com.dianping.puma.biz.entity.ClientPositionEntity;
 public interface ClientPositionService {
     ClientPositionEntity find(String clientName);
 
-    void update(ClientPositionEntity clientPositionEntity);
+    void update(ClientPositionEntity clientPositionEntity, boolean flush);
 
     void flush();
 }

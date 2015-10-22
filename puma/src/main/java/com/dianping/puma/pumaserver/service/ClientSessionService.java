@@ -20,9 +20,8 @@ public interface ClientSessionService {
      * 取消订阅
      *
      * @param clientName
-     * @param token
      */
-    void unsubscribe(String clientName, String token);
+    void unsubscribe(String clientName);
 
     /**
      * 根据 clientname 和 token 得到 client 信息

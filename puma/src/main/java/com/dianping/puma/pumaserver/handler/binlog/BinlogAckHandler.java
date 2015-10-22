@@ -21,12 +21,12 @@ public class BinlogAckHandler extends SimpleChannelInboundHandler<BinlogAckReque
     public void channelRead0(ChannelHandlerContext ctx, BinlogAckRequest binlogAckRequest) {
         ClientSession session = clientSessionService.get(binlogAckRequest.getClientName(), binlogAckRequest.getToken());
 
-        binlogAckService.save(session.getClientName(), binlogAckRequest.getBinlogAck());
+        binlogAckService.save(session.getClientName(), binlogAckRequest.getBinlogAck(), false);
 
         BinlogAckResponse response = new BinlogAckResponse();
         ctx.channel().writeAndFlush(response);
 
-        SystemStatusManager.updateClientAckBinlogInfo(binlogAckRequest.getClientName(),binlogAckRequest.getBinlogAck().getBinlogInfo());
+        SystemStatusManager.updateClientAckBinlogInfo(binlogAckRequest.getClientName(), binlogAckRequest.getBinlogAck().getBinlogInfo());
     }
 
     public void setBinlogAckService(BinlogAckService binlogAckService) {

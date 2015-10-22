@@ -35,8 +35,13 @@ public class ClientPositionServiceImpl implements ClientPositionService {
     }
 
     @Override
-    public void update(ClientPositionEntity clientPositionEntity) {
-        positionEntityMap.put(clientPositionEntity.getClientName(), clientPositionEntity);
+    public void update(ClientPositionEntity clientPositionEntity, boolean flush) {
+        if (flush) {
+            positionEntityMap.remove(clientPositionEntity.getClientName());
+            insertOrUpdate(clientPositionEntity);
+        } else {
+            positionEntityMap.put(clientPositionEntity.getClientName(), clientPositionEntity);
+        }
     }
 
     @Scheduled(fixedDelay = 5000)
@@ -47,16 +52,19 @@ public class ClientPositionServiceImpl implements ClientPositionService {
             if (entity == null) {
                 continue;
             }
+            insertOrUpdate(entity);
+        }
+    }
 
-            try {
-                entity.setUpdateTime(new Date());
-                int updateRow = clientPositionDao.update(entity);
-                if (updateRow == 0) {
-                    clientPositionDao.insert(entity);
-                }
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
+    private void insertOrUpdate(ClientPositionEntity entity) {
+        try {
+            entity.setUpdateTime(new Date());
+            int updateRow = clientPositionDao.update(entity);
+            if (updateRow == 0) {
+                clientPositionDao.insert(entity);
             }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
         }
     }
 }

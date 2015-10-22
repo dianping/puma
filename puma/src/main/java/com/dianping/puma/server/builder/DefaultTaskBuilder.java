@@ -1,30 +1,16 @@
 package com.dianping.puma.server.builder;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.dianping.puma.core.config.ConfigManager;
-import com.dianping.puma.core.model.*;
-import com.dianping.puma.instance.InstanceManager;
-import com.dianping.puma.taskexecutor.task.DatabaseTask;
-import com.dianping.puma.taskexecutor.task.InstanceTask;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import com.dianping.puma.core.codec.RawEventCodec;
+import com.dianping.puma.core.config.ConfigManager;
 import com.dianping.puma.core.constant.Status;
+import com.dianping.puma.core.model.*;
+import com.dianping.puma.core.util.IPUtils;
 import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.datahandler.DefaultDataHandler;
-import com.dianping.puma.filter.DDLEventFilter;
-import com.dianping.puma.filter.DMLEventFilter;
-import com.dianping.puma.filter.DefaultEventFilterChain;
-import com.dianping.puma.filter.EventFilter;
-import com.dianping.puma.filter.EventFilterChain;
-import com.dianping.puma.filter.TransactionEventFilter;
+import com.dianping.puma.filter.*;
+import com.dianping.puma.instance.InstanceManager;
 import com.dianping.puma.parser.DefaultBinlogParser;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
@@ -34,6 +20,15 @@ import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
 import com.dianping.puma.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.taskexecutor.DefaultTaskExecutor;
 import com.dianping.puma.taskexecutor.TaskExecutor;
+import com.dianping.puma.taskexecutor.task.DatabaseTask;
+import com.dianping.puma.taskexecutor.task.InstanceTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service("taskBuilder")
 public class DefaultTaskBuilder implements TaskBuilder {
@@ -61,14 +56,14 @@ public class DefaultTaskBuilder implements TaskBuilder {
 
         String taskName = instanceTask.getTaskName();
         taskExecutor.setTaskName(taskName);
-        taskExecutor.setServerId(taskName.hashCode());
+        taskExecutor.setServerId((taskName + IPUtils.getFirstNoLoopbackIP4Address()).hashCode());
         taskExecutor.setBeginTime(instanceTask.getDatabaseTasks().get(0).getBeginTime());
 
         TableSet tableSet = new TableSet();
-        for (DatabaseTask databaseTask: instanceTask.getDatabaseTasks()) {
+        for (DatabaseTask databaseTask : instanceTask.getDatabaseTasks()) {
             String database = databaseTask.getDatabase();
             List<String> tables = databaseTask.getTables();
-            for (String table: tables) {
+            for (String table : tables) {
                 tableSet.add(new Table(database, table));
             }
         }
@@ -173,7 +168,7 @@ public class DefaultTaskBuilder implements TaskBuilder {
         // Base.
         String taskName = pumaTask.getName();
         taskExecutor.setTaskName(taskName);
-        taskExecutor.setServerId(taskName.hashCode() + "self".hashCode());
+        taskExecutor.setServerId((taskName + IPUtils.getFirstNoLoopbackIP4Address()).hashCode());
 
         // Bin log.
         taskExecutor.setBinlogInfoHolder(binlogInfoHolder);

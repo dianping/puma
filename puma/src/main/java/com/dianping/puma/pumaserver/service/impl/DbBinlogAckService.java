@@ -17,7 +17,7 @@ public class DbBinlogAckService implements BinlogAckService {
 
 
     @Override
-    public void save(String clientName, BinlogAck binlogAck) throws BinlogAckException {
+    public void save(String clientName, BinlogAck binlogAck, boolean flush) throws BinlogAckException {
         ClientPositionEntity positionEntity = new ClientPositionEntity();
 
         positionEntity.setClientName(clientName);
@@ -27,7 +27,7 @@ public class DbBinlogAckService implements BinlogAckService {
         positionEntity.setEventIndex(binlogAck.getBinlogInfo().getEventIndex());
         positionEntity.setTimestamp(binlogAck.getBinlogInfo().getTimestamp());
 
-        clientPositionService.update(positionEntity);
+        clientPositionService.update(positionEntity, flush);
     }
 
     @Override

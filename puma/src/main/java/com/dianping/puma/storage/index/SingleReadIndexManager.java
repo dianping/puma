@@ -36,11 +36,15 @@ public abstract class SingleReadIndexManager<K extends IndexKey<K>, V extends In
 
 	@Override
 	protected void doStop() {
-		readBucket.stop();
+		if (readBucket != null) {
+			readBucket.stop();
+		}
 	}
 
 	@Override
 	public V findOldest() throws IOException {
+		checkStop();
+
 		try {
 			byte[] data = readBucket.next();
 			return decode(data).getRight();
@@ -51,6 +55,8 @@ public abstract class SingleReadIndexManager<K extends IndexKey<K>, V extends In
 
 	@Override
 	public V findLatest() throws IOException {
+		checkStop();
+
 		byte[] data = null;
 		try {
 			while (true) {
@@ -66,6 +72,8 @@ public abstract class SingleReadIndexManager<K extends IndexKey<K>, V extends In
 
 	@Override
 	public V find(K indexKey) throws IOException {
+		checkStop();
+
 		byte[] data;
 		try {
 			while (true) {

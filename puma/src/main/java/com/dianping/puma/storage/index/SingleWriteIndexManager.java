@@ -31,17 +31,23 @@ public abstract class SingleWriteIndexManager<K, V> extends AbstractLifeCycle im
 
 	@Override
 	protected void doStop() {
-		writeBucket.stop();
+		if (writeBucket != null) {
+			writeBucket.stop();
+		}
 	}
 
 	@Override
 	public void append(K indexKey, V indexValue) throws IOException {
+		checkStop();
+
 		byte[] data = encode(indexKey, indexValue);
 		writeBucket.append(data);
 	}
 
 	@Override
 	public void flush() throws IOException {
+		checkStop();
+
 		writeBucket.flush();
 	}
 

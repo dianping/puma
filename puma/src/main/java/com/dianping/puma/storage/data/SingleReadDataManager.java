@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.data.impl;
+package com.dianping.puma.storage.data;
 
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.core.codec.EventCodec;
@@ -8,7 +8,6 @@ import com.dianping.puma.core.event.Event;
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.bucket.BucketFactory;
 import com.dianping.puma.storage.bucket.ReadBucket;
-import com.dianping.puma.storage.data.ReadDataManager;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.IOException;

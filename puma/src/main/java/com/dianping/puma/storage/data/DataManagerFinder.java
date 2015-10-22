@@ -1,9 +1,6 @@
 package com.dianping.puma.storage.data;
 
 import com.dianping.puma.common.LifeCycle;
-import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.data.impl.DataKeyImpl;
-import com.dianping.puma.storage.data.impl.DataValueImpl;
 
 import java.io.File;
 import java.io.IOException;

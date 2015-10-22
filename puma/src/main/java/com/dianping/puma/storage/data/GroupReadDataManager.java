@@ -1,13 +1,11 @@
-package com.dianping.puma.storage.data.impl;
+package com.dianping.puma.storage.data;
 
 import com.dianping.puma.common.AbstractLifeCycle;
-import com.dianping.puma.storage.data.DataManagerFinder;
-import com.dianping.puma.storage.data.ReadDataManager;
 
 import java.io.EOFException;
 import java.io.IOException;
 
-public class GroupReadDataManager extends AbstractLifeCycle implements ReadDataManager<DataKeyImpl, DataValueImpl> {
+public final class GroupReadDataManager extends AbstractLifeCycle implements ReadDataManager<DataKeyImpl, DataValueImpl> {
 
 	private final String database;
 

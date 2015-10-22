@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.data.impl;
+package com.dianping.puma.storage.data;
 
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.core.codec.EventCodec;
@@ -6,10 +6,6 @@ import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.storage.bucket.BucketFactory;
 import com.dianping.puma.storage.bucket.WriteBucket;
-import com.dianping.puma.storage.bucket.LengthWriteBucket;
-import com.dianping.puma.storage.data.DataKey;
-import com.dianping.puma.storage.data.DataValue;
-import com.dianping.puma.storage.data.WriteDataManager;
 
 import java.io.IOException;
 

@@ -1,9 +1,6 @@
 package com.dianping.puma.storage.data;
 
-import com.dianping.puma.storage.data.impl.SingleReadDataManager;
-import com.dianping.puma.storage.data.impl.SingleWriteDataManager;
-
-public class DataManagerFactory {
+public final class DataManagerFactory {
 
 	private static final int readBufSizeByte = 64 * 1024 * 1024; // 64M.
 

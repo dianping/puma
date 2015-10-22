@@ -1,12 +1,10 @@
-package com.dianping.puma.storage.data.impl;
+package com.dianping.puma.storage.data;
 
 import com.dianping.puma.common.AbstractLifeCycle;
-import com.dianping.puma.storage.data.DataManagerFinder;
-import com.dianping.puma.storage.data.WriteDataManager;
 
 import java.io.IOException;
 
-public class GroupWriteDataManager extends AbstractLifeCycle implements WriteDataManager<DataKeyImpl, DataValueImpl> {
+public final class GroupWriteDataManager extends AbstractLifeCycle implements WriteDataManager<DataKeyImpl, DataValueImpl> {
 
 	private String database;
 

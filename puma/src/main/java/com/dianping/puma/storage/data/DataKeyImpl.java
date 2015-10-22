@@ -1,9 +1,8 @@
-package com.dianping.puma.storage.data.impl;
+package com.dianping.puma.storage.data;
 
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.data.DataKey;
 
-public class DataKeyImpl implements DataKey {
+public final class DataKeyImpl implements DataKey {
 
 	private Sequence sequence;
 

@@ -1,6 +1,6 @@
 package com.dianping.puma.storage.data.impl;
 
-import com.dianping.puma.storage.data.impl.SingleReadDataManager;
+import com.dianping.puma.storage.data.SingleReadDataManager;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;

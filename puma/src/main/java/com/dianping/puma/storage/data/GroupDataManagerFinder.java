@@ -1,10 +1,7 @@
-package com.dianping.puma.storage.data.impl;
+package com.dianping.puma.storage.data;
 
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.data.DataManagerFinder;
-import com.dianping.puma.storage.data.ReadDataManager;
-import com.dianping.puma.storage.data.WriteDataManager;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -14,7 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.TreeMap;
 
-public class GroupDataManagerFinder extends AbstractLifeCycle implements DataManagerFinder {
+public final class GroupDataManagerFinder extends AbstractLifeCycle implements DataManagerFinder {
 
 	private final String bucketPrefix = "Bucket-";
 

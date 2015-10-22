@@ -221,6 +221,45 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof RowChangedEvent))
+            return false;
+        if (!super.equals(o))
+            return false;
+
+        RowChangedEvent that = (RowChangedEvent) o;
+
+        if (actionType != that.actionType)
+            return false;
+        if (isTransactionBegin != that.isTransactionBegin)
+            return false;
+        if (isTransactionCommit != that.isTransactionCommit)
+            return false;
+        if (!columns.equals(that.columns))
+            return false;
+        if (dmlType != that.dmlType)
+            return false;
+        if (eventType != that.eventType)
+            return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + eventType.hashCode();
+        result = 31 * result + actionType;
+        result = 31 * result + dmlType.hashCode();
+        result = 31 * result + (isTransactionBegin ? 1 : 0);
+        result = 31 * result + (isTransactionCommit ? 1 : 0);
+        result = 31 * result + columns.hashCode();
+        return result;
+    }
+
+    @Override
     public EventType getEventType() {
         return eventType;
     }
@@ -355,56 +394,6 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
             return true;
         }
 
-    }
-
-    /*
-      * (non-Javadoc)
-      * @see java.lang.Object#hashCode()
-      */
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + actionType;
-        result = prime * result + ((columns == null) ? 0 : columns.hashCode());
-        result = prime * result + (isTransactionBegin ? 1231 : 1237);
-        result = prime * result + (isTransactionCommit ? 1231 : 1237);
-        return result;
-    }
-
-    /*
-      * (non-Javadoc)
-      * @see java.lang.Object#equals(java.lang.Object)
-      */
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        RowChangedEvent other = (RowChangedEvent) obj;
-        if (actionType != other.actionType) {
-            return false;
-        }
-        if (columns == null) {
-            if (other.columns != null) {
-                return false;
-            }
-        } else if (!columns.equals(other.columns)) {
-            return false;
-        }
-        if (isTransactionBegin != other.isTransactionBegin) {
-            return false;
-        }
-        if (isTransactionCommit != other.isTransactionCommit) {
-            return false;
-        }
-        return true;
     }
 
 }

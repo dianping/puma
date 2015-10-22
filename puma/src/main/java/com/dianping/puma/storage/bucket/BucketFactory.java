@@ -46,7 +46,7 @@ public final class BucketFactory {
 		return new LengthWriteBucket(filename, lengthWriteBucketBufSizeByte, lengthWriteBucketMaxSizeByte);
 	}
 
-	public static LengthWriteBucket newLengthWriteBucket(String filename, int bufSizeByte, int avgSizeByte) {
-		return new LengthWriteBucket(filename, bufSizeByte, avgSizeByte);
+	public static LengthWriteBucket newLengthWriteBucket(String filename, int bufSizeByte, int maxSizeByte) {
+		return new LengthWriteBucket(filename, bufSizeByte, maxSizeByte);
 	}
 }

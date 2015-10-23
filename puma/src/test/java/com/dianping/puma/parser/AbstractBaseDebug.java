@@ -14,7 +14,6 @@ import java.util.Set;
 
 import com.dianping.puma.storage.channel.ChannelFactory;
 import com.dianping.puma.storage.channel.ReadChannel;
-import com.dianping.puma.storage.channel.WriteChannel;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.io.FileUtils;
@@ -28,7 +27,6 @@ import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.constant.Status;
-import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
@@ -48,7 +46,6 @@ import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
-import com.dianping.puma.storage.oldchannel.EventChannel;
 import com.dianping.puma.storage.conf.GlobalStorageConfig;
 import com.dianping.puma.storage.holder.impl.DefaultBinlogInfoHolder;
 import com.dianping.puma.taskexecutor.DefaultTaskExecutor;
@@ -352,9 +349,9 @@ public abstract class AbstractBaseDebug {
 		senders.add(sender);
 
 		// Global Config
-		GlobalStorageConfig.binlogIndexBaseDir = binlogIndexBaseDir.getAbsolutePath();
-		GlobalStorageConfig.masterStorageBaseDir = masterStorageBaseDir.getAbsolutePath();
-		GlobalStorageConfig.slaveStorageBaseDir = slaveStorageBaseDir.getAbsolutePath();
+		GlobalStorageConfig.BINLOG_INDEX_BASE_DIR = binlogIndexBaseDir.getAbsolutePath();
+		GlobalStorageConfig.MASTER_STORAGE_BASE_DIR = masterStorageBaseDir.getAbsolutePath();
+		GlobalStorageConfig.SLAVE_STORAGE_BASE_DIR = slaveStorageBaseDir.getAbsolutePath();
 
 		// Dispatch.
 		SimpleDispatcherImpl dispatcher = new SimpleDispatcherImpl();

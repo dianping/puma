@@ -1,6 +1,6 @@
 package com.dianping.puma.storage.channel;
 
-public class ChannelFactory {
+public final class ChannelFactory {
 
 	private ChannelFactory() {}
 

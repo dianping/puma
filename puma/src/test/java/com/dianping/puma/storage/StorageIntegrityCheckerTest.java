@@ -22,13 +22,13 @@
 //
 //public class StorageIntegrityCheckerTest {
 //
-//	private static final File masterStorageBaseDir = new File(System.getProperty("java.io.tmpdir", "."),
+//	private static final File MASTER_STORAGE_BASE_DIR = new File(System.getProperty("java.io.tmpdir", "."),
 //	      "puma/storage/master");
 //
-//	private static final File slaveStorageBaseDir = new File(System.getProperty("java.io.tmpdir", "."),
+//	private static final File SLAVE_STORAGE_BASE_DIR = new File(System.getProperty("java.io.tmpdir", "."),
 //	      "puma/storage/slave/");
 //
-//	private static final File binlogIndexBaseDir = new File(System.getProperty("java.io.tmpdir", "."),
+//	private static final File BINLOG_INDEX_BASE_DIR = new File(System.getProperty("java.io.tmpdir", "."),
 //	      "puma/binlogIndex/");
 //
 //	private DefaultEventStorage eventStorage;
@@ -41,13 +41,13 @@
 //		eventStorage.setCodec(new RawEventCodec());
 //
 //		LocalFileDataBucketManager masterBucketIndex = new LocalFileDataBucketManager();
-//		masterBucketIndex.setBaseDir(masterStorageBaseDir.getAbsolutePath());
+//		masterBucketIndex.setBaseDir(MASTER_STORAGE_BASE_DIR.getAbsolutePath());
 //		masterBucketIndex.setBucketFilePrefix("Bucket-");
 //		masterBucketIndex.setMaxBucketLengthMB(1000);
 //		eventStorage.setMasterBucketIndex(masterBucketIndex);
 //
 //		LocalFileDataBucketManager slaveBucketIndex = new LocalFileDataBucketManager();
-//		slaveBucketIndex.setBaseDir(slaveStorageBaseDir.getAbsolutePath());
+//		slaveBucketIndex.setBaseDir(SLAVE_STORAGE_BASE_DIR.getAbsolutePath());
 //		slaveBucketIndex.setBucketFilePrefix("Bucket-");
 //		slaveBucketIndex.setMaxBucketLengthMB(1000);
 //		eventStorage.setSlaveBucketIndex(slaveBucketIndex);
@@ -61,7 +61,7 @@
 //		cleanupStrategy.setPreservedDay(2);
 //		eventStorage.setCleanupStrategy(cleanupStrategy);
 //
-//		eventStorage.setBinlogIndexBaseDir(binlogIndexBaseDir.getAbsolutePath());
+//		eventStorage.setBinlogIndexBaseDir(BINLOG_INDEX_BASE_DIR.getAbsolutePath());
 //
 //		eventStorage.start();
 //	}

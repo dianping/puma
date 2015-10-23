@@ -7,25 +7,25 @@ import com.dianping.puma.core.model.BinlogInfo;
  */
 public interface BinlogInfoHolder {
 
-    public void setBaseDir(String baseDir);
+    void setBaseDir(String baseDir);
 
-    public void setBakDir(String bakDir);
+    void setBakDir(String bakDir);
 
-    public void setMasterStorageBaseDir(String masterStorageBaseDir);
+    void setMasterStorageBaseDir(String masterStorageBaseDir);
 
-    public void setSlaveStorageBaseDir(String slaveStorageBaseDir);
+    void setSlaveStorageBaseDir(String slaveStorageBaseDir);
 
-    public void setBinlogIndexBaseDir(String binlogIndexBaseDir);
+    void setBinlogIndexBaseDir(String binlogIndexBaseDir);
 
-    public void setStorageBakDir(String storageBakDir);
+    void setStorageBakDir(String storageBakDir);
 
-    public BinlogInfo getBinlogInfo(String taskName);
+    BinlogInfo getBinlogInfo(String taskName);
 
-    public void setBinlogInfo(String taskName, BinlogInfo binlogInfo);
+    void setBinlogInfo(String taskName, BinlogInfo binlogInfo);
 
-    public void rename(String oriTaskName, String taskName);
+    void rename(String oriTaskName, String taskName);
 
-    public void remove(String taskName);
+    void remove(String taskName);
 
-    public void clean(String taskName);
+    void clean(String taskName);
 }

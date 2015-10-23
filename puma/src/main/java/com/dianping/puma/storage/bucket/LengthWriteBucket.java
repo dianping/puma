@@ -6,6 +6,8 @@ import java.io.*;
 
 public final class LengthWriteBucket extends AbstractLifeCycle implements WriteBucket {
 
+	private static final int INTEGER_SIZE_BYTE = Integer.SIZE >> 3;
+
 	private final String filename;
 
 	private final int bufSizeByte;
@@ -51,7 +53,7 @@ public final class LengthWriteBucket extends AbstractLifeCycle implements WriteB
 		output.writeInt(data.length);
 		output.write(data);
 
-		offset += ((Integer.SIZE >> 3) + data.length);
+		offset += (INTEGER_SIZE_BYTE + data.length);
 	}
 
 	@Override

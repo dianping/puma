@@ -122,7 +122,7 @@ public class FileDumpSender extends AbstractSender {
 //		// Archive strategy.
 //		DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
 //		archiveStrategy.setServerName(taskName);
-//		archiveStrategy.setMaxMasterFileCount(GlobalStorageConfig.maxMasterFileCount);
+//		archiveStrategy.setMaxMasterFileCount(GlobalStorageConfig.MAX_MASTER_FILE_COUNT);
 //
 //		// Clean up strategy.
 //		DefaultCleanupStrategy cleanupStrategy = new DefaultCleanupStrategy();
@@ -134,7 +134,7 @@ public class FileDumpSender extends AbstractSender {
 //		storage.setCodec(codec);
 //		storage.setArchiveStrategy(archiveStrategy);
 //		storage.setCleanupStrategy(cleanupStrategy);
-//		storage.setBinlogIndexBaseDir(GlobalStorageConfig.binlogIndexBaseDir + "/" + database);
+//		storage.setBinlogIndexBaseDir(GlobalStorageConfig.BINLOG_INDEX_BASE_DIR + "/" + database);
 //
 //		storage.start();
 //		return storage;

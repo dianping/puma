@@ -1,21 +1,21 @@
 package com.dianping.puma.storage.conf;
 
-public class GlobalStorageConfig {
+public final class GlobalStorageConfig {
 
 	private GlobalStorageConfig() {
 	}
 
-	public static final String masterStorageBaseDir = "/data/appdatas/puma/storage/master";
+	public static String MASTER_STORAGE_BASE_DIR = "/data/appdatas/puma/storage/master";
 
-	public static final String masterBucketFilePrefix = "Bucket-";
+	public static String MASTER_BUCKET_FILE_PREFIX = "Bucket-";
 
-	public static final int maxMasterBucketLengthMB = 1000;
+	public static int MAX_MASTER_BUCKET_LENGTH_MB = 1000;
 
-	public static final int maxMasterFileCount = 25;
+	public static int MAX_MASTER_FILE_COUNT = 25;
 
-	public static final String slaveStorageBaseDir = "/data/appdatas/puma/storage/slave";
+	public static String SLAVE_STORAGE_BASE_DIR = "/data/appdatas/puma/storage/slave";
 
-	public static final String slaveBucketFilePrefix = "Bucket-";
+	public static String SLAVE_BUCKET_FILE_PREFIX = "Bucket-";
 
-	public static final String binlogIndexBaseDir = "/data/appdatas/puma/binlogIndex";
+	public static String BINLOG_INDEX_BASE_DIR = "/data/appdatas/puma/binlogIndex";
 }

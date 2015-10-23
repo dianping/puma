@@ -2,7 +2,7 @@ package com.dianping.puma.storage.manage;
 
 public interface InstanceStorageManager {
 
-	public boolean exist(String filename);
+	boolean exist(String filename);
 
-	public void delete(String instance);
+	void delete(String instance);
 }

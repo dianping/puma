@@ -8,6 +8,8 @@ import java.io.IOException;
 
 public final class LineWriteBucket extends AbstractLifeCycle implements WriteBucket {
 
+	private static final int BYTE_SIZE_BYTE = Byte.SIZE >> 3;
+
 	private final String filename;
 
 	private final int bufSizeByte;
@@ -60,7 +62,7 @@ public final class LineWriteBucket extends AbstractLifeCycle implements WriteBuc
 		writer.write(line);
 		writer.newLine();
 
-		offset += (data.length + (Byte.SIZE >> 3));
+		offset += (data.length + BYTE_SIZE_BYTE);
 	}
 
 	@Override

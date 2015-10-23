@@ -9,6 +9,10 @@ import java.io.IOException;
 
 public final class L2SingleReadIndexManager extends SingleReadIndexManager<L2IndexKey, L2IndexValue> {
 
+	public static final int ENCODE_NUMBER = 2;
+	public static final int BINLOG_INFO_FIELD_NUMBER = 4;
+	public static final int SEQUENCE_FIELD_NUMBER = 3;
+
 	public L2SingleReadIndexManager(String filename, int bufSizeByte, int avgSizeByte) {
 		super(filename, bufSizeByte, avgSizeByte);
 	}
@@ -17,13 +21,13 @@ public final class L2SingleReadIndexManager extends SingleReadIndexManager<L2Ind
 	protected Pair<L2IndexKey, L2IndexValue> decode(byte[] data) throws IOException {
 		String rawString = new String(data);
 		String[] rawStrings = StringUtils.split(rawString, "=");
-		if (rawStrings == null || rawStrings.length != 2) {
+		if (rawStrings == null || rawStrings.length != ENCODE_NUMBER) {
 			throw new IOException("unknown L2 index format.");
 		}
 
 		String binlogInfoString = rawStrings[0];
 		String[] binlogInfoStrings = StringUtils.split(binlogInfoString, "!");
-		if (binlogInfoStrings == null || binlogInfoStrings.length != 4) {
+		if (binlogInfoStrings == null || binlogInfoStrings.length != BINLOG_INFO_FIELD_NUMBER) {
 			throw new IOException("unknown L2 index format.");
 		}
 
@@ -35,7 +39,7 @@ public final class L2SingleReadIndexManager extends SingleReadIndexManager<L2Ind
 
 		String sequenceString = rawStrings[1];
 		String[] sequenceStrings = StringUtils.split(sequenceString, "!");
-		if (sequenceStrings == null || sequenceStrings.length != 3) {
+		if (sequenceStrings == null || sequenceStrings.length != SEQUENCE_FIELD_NUMBER) {
 			throw new IOException("unknown L2 index format.");
 		}
 

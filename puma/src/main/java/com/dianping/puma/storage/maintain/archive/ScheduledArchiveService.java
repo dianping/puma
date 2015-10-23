@@ -13,6 +13,8 @@ import java.util.zip.GZIPOutputStream;
 @Service
 public final class ScheduledArchiveService implements ArchiveService {
 
+	private static final int BUF_SIZE = 1024;
+
 	@Autowired
 	FileSystem fileSystem;
 
@@ -69,7 +71,7 @@ public final class ScheduledArchiveService implements ArchiveService {
 		FileInputStream is = new FileInputStream(srcFile);
 		GZIPOutputStream gos = new GZIPOutputStream(new FileOutputStream(dstFile));
 
-		byte[] data = new byte[1024];
+		byte[] data = new byte[BUF_SIZE];
 		int count;
 
 		while ((count = is.read(data)) > 0) {

@@ -3,19 +3,15 @@ package com.dianping.puma.storage.data;
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.filesystem.FileSystem;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Comparator;
-import java.util.TreeMap;
 
 public final class GroupDataManagerFinder extends AbstractLifeCycle implements DataManagerFinder {
 
 	private String database;
 
+	/*
 	private TreeMap<Sequence, File> index = new TreeMap<Sequence, File>(new Comparator<Sequence>() {
 		@Override public int compare(Sequence sequence0, Sequence sequence1) {
 			long seq0 = sequence0.longValue();
@@ -28,7 +24,7 @@ public final class GroupDataManagerFinder extends AbstractLifeCycle implements D
 				return 1;
 			}
 		}
-	});
+	});*/
 
 	public GroupDataManagerFinder(String database) {
 		this.database = database;

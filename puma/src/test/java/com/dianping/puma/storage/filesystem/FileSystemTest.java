@@ -16,8 +16,6 @@ public class FileSystemTest extends StorageBaseTest {
 	@Override @Before
 	public void setUp() throws IOException {
 		super.setUp();
-
-		fileSystem = new FileSystem();
 	}
 
 	@Test

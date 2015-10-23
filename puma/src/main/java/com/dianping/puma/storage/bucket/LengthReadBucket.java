@@ -29,10 +29,10 @@ public final class LengthReadBucket extends AbstractLifeCycle implements ReadBuc
 		try {
 			input = file2Stream(filename);
 			if (!input.markSupported()) {
-				throw new RuntimeException("length read bucket should support mark.");
+				throw new UnsupportedOperationException("length read bucket should support mark.");
 			}
 		} catch (IOException io) {
-			throw new RuntimeException("failed to start read bucket.", io);
+			throw new IllegalStateException("failed to start read bucket.", io);
 		}
 	}
 

@@ -3,7 +3,6 @@ package com.dianping.puma.pumaserver;
 import com.dianping.puma.pumaserver.client.PumaClientsHolder;
 import com.dianping.puma.pumaserver.handler.*;
 import com.dianping.puma.pumaserver.handler.binlog.*;
-import com.dianping.puma.pumaserver.handler.deprecated.DeprecatedBinlogQueryHandler;
 import com.dianping.puma.pumaserver.server.ServerConfig;
 import com.dianping.puma.pumaserver.server.TcpServer;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
@@ -82,7 +81,7 @@ public class PumaServerManager {
                 result.put("BinlogQueryHandler", binlogGetHandler);
                 result.put("BinlogAckHandler", binlogAckHandler);
                 result.put("BinlogRollbackHandler", binlogRollbackHandler);
-                result.put("DeprecatedBinlogQueryHandler", new DeprecatedBinlogQueryHandler());
+                //result.put("DeprecatedBinlogQueryHandler", new DeprecatedBinlogQueryHandler());
                 result.put("ExceptionHandler", ExceptionHandler.INSTANCE);
                 return result;
             }

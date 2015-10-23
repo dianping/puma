@@ -87,7 +87,7 @@ public final class ScheduledArchiveService implements ArchiveService {
 		}
 	}
 
-	@Scheduled(cron = "0 0 2 * * *")
+	@Scheduled(cron = "0 0 3 * * *")
 	private void scheduledArchive() {
 		archive();
 	}

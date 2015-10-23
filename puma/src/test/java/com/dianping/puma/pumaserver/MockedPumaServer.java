@@ -12,7 +12,6 @@ import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.puma.pumaserver.client.PumaClientsHolder;
 import com.dianping.puma.pumaserver.handler.*;
-import com.dianping.puma.pumaserver.handler.deprecated.DeprecatedBinlogQueryHandler;
 import com.dianping.puma.pumaserver.server.ServerConfig;
 import com.dianping.puma.pumaserver.server.TcpServer;
 import io.netty.channel.ChannelHandler;
@@ -55,7 +54,6 @@ public class MockedPumaServer {
                 result.put("BinlogSubscriptionHandler", new BinlogSubscriptionHandler());
                 result.put("BinlogQueryHandler", new BinlogGetHandler());
                 result.put("BinlogAckHandler", new BinlogAckHandler());
-                result.put("DeprecatedBinlogQueryHandler", new DeprecatedBinlogQueryHandler());
                 result.put("ExceptionHandler", ExceptionHandler.INSTANCE);
                 return result;
             }

@@ -21,11 +21,6 @@ public class ScheduledDeleteService implements DeleteService {
 
 	@Override
 	public void delete() {
-		File[] l1DateDirs = fileSystem.visitL1IndexDateDirs();
-		for (File l1DateDir: l1DateDirs) {
-			delete(l1DateDir);
-		}
-
 		File[] l2DateDirs = fileSystem.visitL2IndexDateDirs();
 		for (File l2DateDir: l2DateDirs) {
 			delete(l2DateDir);

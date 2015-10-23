@@ -8,10 +8,6 @@ public final class GroupWriteDataManager extends AbstractLifeCycle implements Wr
 
 	private String database;
 
-	private String masterBaseDir = "/data/appdatas/puma/storage/master/";
-
-	private String slaveBaseDir = "/data/appdatas/puma/storage/slave/";
-
 	private DataManagerFinder dataManagerFinder;
 
 	private WriteDataManager<DataKeyImpl, DataValueImpl> writeDataManager;
@@ -22,13 +18,15 @@ public final class GroupWriteDataManager extends AbstractLifeCycle implements Wr
 
 	@Override
 	protected void doStart() {
-		dataManagerFinder = new GroupDataManagerFinder(database, masterBaseDir, slaveBaseDir);
+		dataManagerFinder = new GroupDataManagerFinder(database);
 		dataManagerFinder.start();
 	}
 
 	@Override
 	protected void doStop() {
-		dataManagerFinder.stop();
+		if (dataManagerFinder != null) {
+			dataManagerFinder.stop();
+		}
 
 		if (writeDataManager != null) {
 			writeDataManager.stop();
@@ -71,7 +69,7 @@ public final class GroupWriteDataManager extends AbstractLifeCycle implements Wr
 	protected void page() throws IOException {
 		checkStop();
 
-		writeDataManager = dataManagerFinder.genNextWriteDataBucket();
+		writeDataManager = dataManagerFinder.findNextMasterWriteDataManager();
 		if (writeDataManager == null) {
 			throw new IOException("failed to generate the next write data bucket.");
 		}

@@ -9,10 +9,6 @@ public final class GroupReadDataManager extends AbstractLifeCycle implements Rea
 
 	private final String database;
 
-	private final String masterBaseDir = "/data/appdatas/puma/storage/master/";
-
-	private final String slaveBaseDir = "/data/appdatas/puma/storage/slave";
-
 	private DataManagerFinder dataManagerFinder;
 
 	private ReadDataManager<DataKeyImpl, DataValueImpl> readDataManager;
@@ -23,13 +19,15 @@ public final class GroupReadDataManager extends AbstractLifeCycle implements Rea
 
 	@Override
 	protected void doStart() {
-		dataManagerFinder = new GroupDataManagerFinder(database, masterBaseDir, slaveBaseDir);
+		dataManagerFinder = new GroupDataManagerFinder(database);
 		dataManagerFinder.start();
 	}
 
 	@Override
 	protected void doStop() {
-		dataManagerFinder.stop();
+		if (dataManagerFinder != null) {
+			dataManagerFinder.stop();
+		}
 
 		if (readDataManager != null) {
 			readDataManager.stop();
@@ -40,14 +38,21 @@ public final class GroupReadDataManager extends AbstractLifeCycle implements Rea
 	public DataKeyImpl position() {
 		checkStop();
 
-		return (readDataManager == null) ? null : readDataManager.position();
+		return readDataManager == null ? null : readDataManager.position();
 	}
 
 	@Override
 	public void open(DataKeyImpl dataKey) throws IOException {
 		checkStop();
 
-		readDataManager = dataManagerFinder.findReadDataBucket(dataKey);
+		readDataManager = dataManagerFinder.findSlaveReadDataManager(dataKey);
+		if (readDataManager == null) {
+			readDataManager = dataManagerFinder.findMasterReadDataManager(dataKey);
+			if (readDataManager == null) {
+				throw new IOException("failed to open group read data manager.");
+			}
+		}
+
 		readDataManager.open(dataKey);
 	}
 
@@ -62,10 +67,14 @@ public final class GroupReadDataManager extends AbstractLifeCycle implements Rea
 				DataKeyImpl dataKey = readDataManager.position();
 				readDataManager.stop();
 
-				readDataManager = dataManagerFinder.findNextReadDataBucket(dataKey);
+				readDataManager = dataManagerFinder.findNextSlaveReadDataManager(dataKey);
 				if (readDataManager == null) {
-					throw new IOException("failed to find next read data bucket.");
+					readDataManager = dataManagerFinder.findNextMasterReadDataManager(dataKey);
+					if (readDataManager == null) {
+						throw new IOException("failed to open next read data manager.");
+					}
 				}
+
 				readDataManager.start();
 			}
 		}

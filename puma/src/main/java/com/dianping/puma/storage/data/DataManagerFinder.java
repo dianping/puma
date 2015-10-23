@@ -7,11 +7,15 @@ import java.io.IOException;
 
 public interface DataManagerFinder extends LifeCycle {
 
-	public File rootDir();
+	public ReadDataManager<DataKeyImpl, DataValueImpl> findMasterReadDataManager(DataKeyImpl dataKey) throws IOException;
 
-	public ReadDataManager<DataKeyImpl, DataValueImpl> findReadDataBucket(DataKeyImpl dataKey) throws IOException;
+	public ReadDataManager<DataKeyImpl, DataValueImpl> findSlaveReadDataManager(DataKeyImpl dataKey) throws IOException;
 
-	public ReadDataManager<DataKeyImpl, DataValueImpl> findNextReadDataBucket(DataKeyImpl dataKey) throws IOException;
+	public ReadDataManager<DataKeyImpl, DataValueImpl> findNextMasterReadDataManager(DataKeyImpl dataKey) throws IOException;
 
-	public WriteDataManager<DataKeyImpl, DataValueImpl> genNextWriteDataBucket() throws IOException;
+	public ReadDataManager<DataKeyImpl, DataValueImpl> findNextSlaveReadDataManager(DataKeyImpl dataKey) throws IOException;
+
+	public WriteDataManager<DataKeyImpl, DataValueImpl> findNextMasterWriteDataManager() throws IOException;
+
+	public WriteDataManager<DataKeyImpl, DataValueImpl> findNextSlaveWriteDataManager() throws IOException;
 }

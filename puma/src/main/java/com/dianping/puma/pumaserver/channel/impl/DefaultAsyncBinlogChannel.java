@@ -8,8 +8,6 @@ import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.ServerErrorEvent;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.eventbus.DefaultEventBus;
-import com.dianping.puma.eventbus.event.ClientPositionChangedEvent;
 import com.dianping.puma.pumaserver.channel.AsyncBinlogChannel;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
 import com.dianping.puma.status.SystemStatusManager;
@@ -62,59 +60,9 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
             this.database = database;
             this.readChannel = initChannel(sc, binlogInfo, tables, dml, ddl, transaction);
             THREAD_POOL.execute(new AsyncTask(new WeakReference<DefaultAsyncBinlogChannel>(this)));
-            DefaultEventBus.INSTANCE.register(this);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             throw new BinlogChannelException("find event storage failure", e);
-        }
-    }
-
-    @Subscribe
-    public void listenClientPositionChanged(ClientPositionChangedEvent event) {
-        if (event.getClientName() == null || !event.getClientName().equals(clientName)) {
-            return;
-        }
-
-        if (this.readChannel == null) {
-            return;
-        }
-
-        try {
-            ReadChannel newReadChannel;
-
-            try {
-                newReadChannel = initChannel(
-                        SubscribeConstant.SEQ_FROM_BINLOGINFO,
-                        event.getBinlogInfo(), Lists.newArrayList(""),
-                        false, false, false);
-            } catch (IOException e) {
-                newReadChannel = initChannel(
-                        SubscribeConstant.SEQ_FROM_TIMESTAMP,
-                        event.getBinlogInfo(), Lists.newArrayList(""),
-                        false, false, false);
-            }
-
-            /*
-            try {
-                newEventChannel = initChannel(
-                        SubscribeConstant.SEQ_FROM_BINLOGINFO,
-                        event.getBinlogInfo(), Lists.newArrayList(this.eventChannel.getTables()),
-                        this.eventChannel.getDml(), this.eventChannel.getDdl(), this.eventChannel.getTransaction());
-            } catch (IOException e) {
-                newEventChannel = initChannel(
-                        SubscribeConstant.SEQ_FROM_TIMESTAMP,
-                        event.getBinlogInfo(), Lists.newArrayList(this.eventChannel.getTables()),
-                        this.eventChannel.getDml(), this.eventChannel.getDdl(), this.eventChannel.getTransaction());
-            }*/
-
-            ReadChannel oldReadChannel = this.readChannel;
-            this.readChannel = newReadChannel;
-
-            oldReadChannel.stop();
-            Cat.logEvent("Switch.ClientPosition", String.format("%s %s", clientName, event.getBinlogInfo().toString()));
-        } catch (IOException e) {
-            Cat.logError(
-                    String.format("Switch ClientPosition Failed! %s %s", clientName, event.getBinlogInfo().toString()), e);
         }
     }
 
@@ -140,11 +88,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
     @Override
     public void destroy() {
         stopped = true;
-        try {
-            DefaultEventBus.INSTANCE.unregister(this);
-        } catch (Exception ignore) {
 
-        }
         if (readChannel != null) {
             readChannel.stop();
         }

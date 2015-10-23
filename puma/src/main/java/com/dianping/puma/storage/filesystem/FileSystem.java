@@ -121,11 +121,35 @@ public final class FileSystem {
 		return null;
 	}
 
+	public static File visitMasterDataFile(String database, String date, int number) {
+		return null;
+	}
+
+	public static File visitNextMasterDataFile(String database, String date, int number) {
+		return null;
+	}
+
+	public static File nextMasterDataFile(String database) {
+		return null;
+	}
+
 	public static File[] visitSlaveDataDateDirs() {
 		return null;
 	}
 
 	public static File[] visitSlaveDataDateDirs(String database) {
+		return null;
+	}
+
+	public static File visitSlaveDataFile(String database, String date, int number) {
+		return null;
+	}
+
+	public static File visitNextSlaveDataFile(String database, String date, int number) {
+		return null;
+	}
+
+	public static File nextSlaveDataFile(String database) {
 		return null;
 	}
 

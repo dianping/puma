@@ -2,6 +2,7 @@ package com.dianping.puma.storage.data;
 
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.storage.Sequence;
+import com.dianping.puma.storage.filesystem.FileSystem;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -44,35 +45,57 @@ public final class GroupDataManagerFinder extends AbstractLifeCycle implements D
 	@Override
 	public ReadDataManager<DataKeyImpl, DataValueImpl> findMasterReadDataManager(DataKeyImpl dataKey)
 			throws IOException {
-		return null;
+		Sequence sequence = dataKey.getSequence();
+		String date = sequence.date();
+		int number = sequence.getNumber();
+
+		File file = FileSystem.visitMasterDataFile(database, date, number);
+		return file == null ? null : DataManagerFactory.newSingleReadDataManager(file.getAbsolutePath());
 	}
 
 	@Override
 	public ReadDataManager<DataKeyImpl, DataValueImpl> findSlaveReadDataManager(DataKeyImpl dataKey)
 			throws IOException {
-		return null;
+		Sequence sequence = dataKey.getSequence();
+		String date = sequence.date();
+		int number = sequence.getNumber();
+
+		File file = FileSystem.visitSlaveDataFile(database, date, number);
+		return file == null ? null : DataManagerFactory.newSingleReadDataManager(file.getAbsolutePath());
 	}
 
 	@Override
 	public ReadDataManager<DataKeyImpl, DataValueImpl> findNextMasterReadDataManager(DataKeyImpl dataKey)
 			throws IOException {
-		return null;
+		Sequence sequence = dataKey.getSequence();
+		String date = sequence.date();
+		int number = sequence.getNumber();
+
+		File file = FileSystem.visitNextMasterDataFile(database, date, number);
+		return file == null ? null : DataManagerFactory.newSingleReadDataManager(file.getAbsolutePath());
 	}
 
 	@Override
 	public ReadDataManager<DataKeyImpl, DataValueImpl> findNextSlaveReadDataManager(DataKeyImpl dataKey)
 			throws IOException {
-		return null;
+		Sequence sequence = dataKey.getSequence();
+		String date = sequence.date();
+		int number = sequence.getNumber();
+
+		File file = FileSystem.visitNextSlaveDataFile(database, date, number);
+		return file == null ? null : DataManagerFactory.newSingleReadDataManager(file.getAbsolutePath());
 	}
 
 	@Override
 	public WriteDataManager<DataKeyImpl, DataValueImpl> findNextMasterWriteDataManager() throws IOException {
-		return null;
+		File file = FileSystem.nextMasterDataFile(database);
+		return file == null ? null : DataManagerFactory.newSingleWriteDataManager(file.getAbsolutePath());
 	}
 
 	@Override
 	public WriteDataManager<DataKeyImpl, DataValueImpl> findNextSlaveWriteDataManager() throws IOException {
-		return null;
+		File file = FileSystem.nextSlaveDataFile(database);
+		return file == null ? null : DataManagerFactory.newSingleWriteDataManager(file.getAbsolutePath());
 	}
 
 	//	protected Sequence buildSequence(File dateDir, File bucketFile) throws IOException {

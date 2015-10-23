@@ -30,7 +30,10 @@ public final class FileSystem {
 	private static File slaveDataDir;
 
 	private static DateFormat dateFormat = new SimpleDateFormat(datePattern);
-	
+
+	private FileSystem() {
+	}
+
 	public static File getL1IndexDir() {
 		return null;
 	}

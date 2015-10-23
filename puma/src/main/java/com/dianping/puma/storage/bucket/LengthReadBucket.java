@@ -32,7 +32,7 @@ public final class LengthReadBucket extends AbstractLifeCycle implements ReadBuc
 				throw new RuntimeException("length read bucket should support mark.");
 			}
 		} catch (IOException io) {
-			throw new RuntimeException("failed to start read bucket.");
+			throw new RuntimeException("failed to start read bucket.", io);
 		}
 	}
 

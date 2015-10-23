@@ -71,7 +71,7 @@ public final class GroupReadDataManager extends AbstractLifeCycle implements Rea
 				if (readDataManager == null) {
 					readDataManager = dataManagerFinder.findNextMasterReadDataManager(dataKey);
 					if (readDataManager == null) {
-						throw new IOException("failed to open next read data manager.");
+						throw new IOException("failed to open next read data manager.", eof);
 					}
 				}
 

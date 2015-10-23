@@ -29,8 +29,8 @@ public final class LineReadBucket extends AbstractLifeCycle implements ReadBucke
 			if (!reader.markSupported()) {
 				throw new RuntimeException("line read bucket should support mark.");
 			}
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException("bucket file not found.");
+		} catch (FileNotFoundException fnf) {
+			throw new RuntimeException("bucket file not found.", fnf);
 		}
 	}
 

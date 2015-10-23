@@ -53,7 +53,7 @@ public final class LineWriteBucket extends AbstractLifeCycle implements WriteBuc
 		checkStop();
 
 		if (data == null) {
-			throw new NullPointerException("data");
+			throw new IllegalArgumentException("data");
 		}
 
 		String line = new String(data);

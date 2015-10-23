@@ -30,7 +30,7 @@ public abstract class SingleReadIndexManager<K extends IndexKey<K>, V extends In
 
 	@Override
 	protected void doStart() {
-		readBucket = BucketFactory.newLineReadBucket(filename);
+		readBucket = BucketFactory.newLineReadBucket(filename, bufSizeByte, avgSizeByte);
 		readBucket.start();
 	}
 

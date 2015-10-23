@@ -11,7 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 @Service
-public class ScheduledDeleteService implements DeleteService {
+public final class ScheduledDeleteService implements DeleteService {
 
 	@Autowired
 	FileSystem fileSystem;
@@ -49,7 +49,7 @@ public class ScheduledDeleteService implements DeleteService {
 	}
 
 	@Scheduled(cron = "0 0 2 * * *")
-	protected void scheduledDelete() {
+	public void scheduledDelete() {
 		delete();
 	}
 }

@@ -9,20 +9,20 @@ import java.io.IOException;
 @Service
 public class LocalFileInstanceStorageManager implements InstanceStorageManager {
 
-	private final String binlogRootPath = "/data/appdatas/puma/binlog";
+	private static final String BINLOG_ROOT_PATH = "/data/appdatas/puma/binlog";
 
-	private final String binlogSuffix = ".binlog";
+	private static final String BINLOG_SUFFIX = ".binlog";
 
 	@Override
 	public boolean exist(String filename) {
-		File file = new File(binlogRootPath, filename + binlogSuffix);
+		File file = new File(BINLOG_ROOT_PATH, filename + BINLOG_SUFFIX);
 		return file.exists();
 	}
 
 	@Override
 	public void delete(String instance) {
 		try {
-			File file = new File(binlogRootPath, instance + binlogSuffix);
+			File file = new File(BINLOG_ROOT_PATH, instance + BINLOG_SUFFIX);
 			if (file.exists()) {
 				FileUtils.forceDelete(file);
 			}

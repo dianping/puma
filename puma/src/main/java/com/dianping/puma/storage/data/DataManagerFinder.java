@@ -2,7 +2,6 @@ package com.dianping.puma.storage.data;
 
 import com.dianping.puma.common.LifeCycle;
 
-import java.io.File;
 import java.io.IOException;
 
 public interface DataManagerFinder extends LifeCycle {

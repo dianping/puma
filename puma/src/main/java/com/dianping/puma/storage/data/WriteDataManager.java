@@ -7,7 +7,7 @@ import java.io.IOException;
 
 public interface WriteDataManager<K, V> extends LifeCycle {
 
-	void append(V dataValue) throws IOException;
+	K append(V dataValue) throws IOException;
 
 	void flush() throws IOException;
 

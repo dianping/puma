@@ -11,7 +11,7 @@ import com.dianping.puma.storage.index.SeriesWriteIndexManager;
 import com.google.common.util.concurrent.Uninterruptibles;
 
 import java.io.IOException;
-import java.util.concurrent.ThreadFactory;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChannel {
@@ -24,7 +24,7 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
 
 	private Long currServerId;
 
-	private String currDate;
+	private Date currDate;
 
 	private Thread thread;
 
@@ -63,9 +63,15 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
 
 	@Override
 	public void append(BinlogInfo binlogInfo, ChangedEvent binlogEvent) throws IOException {
-		Sequence sequence = writeDataManager.position();
+		checkStop();
+
+		if (needToPage(binlogEvent.getBinlogInfo(), writeDataManager)) {
+			Sequence sequence = writeDataManager.pageAppend(binlogEvent);
+			writeIndexManager.pageAppend(new L1IndexKey(binlogInfo), new L2IndexValue(sequence));
+		}
+
+		Sequence sequence = writeDataManager.append(binlogEvent);
 		writeIndexManager.append(new L1IndexKey(binlogInfo), new L2IndexValue(sequence));
-		writeDataManager.append(binlogEvent);
 	}
 
 	@Override
@@ -78,10 +84,6 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
 
 	protected boolean needToPage(BinlogInfo binlogInfo, GroupWriteDataManager writeDataManager) {
 		return !writeDataManager.hasRemainingForWriteOnCurrentPage();
-	}
-
-	protected Sequence nextSequence(BinlogInfo binlogInfo) {
-		return null;
 	}
 
 	private class FlushTask implements Runnable {

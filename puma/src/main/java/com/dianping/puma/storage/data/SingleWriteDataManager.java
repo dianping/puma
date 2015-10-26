@@ -50,11 +50,15 @@ public final class SingleWriteDataManager extends AbstractLifeCycle
     }
 
     @Override
-    public void append(ChangedEvent binlogEvent) throws IOException {
+    public Sequence append(ChangedEvent binlogEvent) throws IOException {
         checkStop();
+
+        Sequence sequence = position();
 
         byte[] data = encode(binlogEvent);
         writeBucket.append(data);
+
+        return sequence;
     }
 
     @Override

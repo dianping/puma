@@ -1,5 +1,7 @@
 package com.dianping.puma.storage.data;
 
+import java.io.File;
+
 public final class DataManagerFactory {
 
 	private static final int READ_BUF_SIZE_BYTE = 64 * 1024 * 1024; // 64M.
@@ -13,11 +15,11 @@ public final class DataManagerFactory {
 	private DataManagerFactory() {
 	}
 
-	public static SingleReadDataManager newSingleReadDataManager(String filename) {
-		return new SingleReadDataManager(filename, READ_BUF_SIZE_BYTE, READ_AVG_SIZE_BYTE);
+	public static SingleReadDataManager newSingleReadDataManager(File file) {
+		return new SingleReadDataManager(file, READ_BUF_SIZE_BYTE, READ_AVG_SIZE_BYTE);
 	}
 
-	public static SingleWriteDataManager newSingleWriteDataManager(String filename) {
-		return new SingleWriteDataManager(filename, WRITE_BUF_SIZE_BYTE, WRITE_MAX_SIZE_BYTE);
+	public static SingleWriteDataManager newSingleWriteDataManager(File file, String date, int number) {
+		return new SingleWriteDataManager(file, date, number, WRITE_BUF_SIZE_BYTE, WRITE_MAX_SIZE_BYTE);
 	}
 }

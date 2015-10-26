@@ -25,7 +25,7 @@ public class LengthWriteBucketTest extends StorageBaseTest {
 		bucket = new File(testDir, "bucket");
 		createFile(bucket);
 
-		lengthWriteBucket = BucketFactory.newLengthWriteBucket(bucket.getAbsolutePath(), 1024, 32);
+		lengthWriteBucket = BucketFactory.newLengthWriteBucket(bucket, 1024, 32);
 		lengthWriteBucket.start();
 	}
 

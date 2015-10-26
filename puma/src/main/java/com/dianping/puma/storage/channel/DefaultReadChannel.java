@@ -4,10 +4,10 @@ import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.data.ReadDataManager;
 import com.dianping.puma.storage.data.GroupReadDataManager;
-import com.dianping.puma.storage.data.DataKeyImpl;
 import com.dianping.puma.storage.data.DataValueImpl;
+import com.dianping.puma.storage.data.ReadDataManager;
+import com.dianping.puma.storage.data.SingleReadDataManager;
 import com.dianping.puma.storage.index.ReadIndexManager;
 import com.dianping.puma.storage.index.SeriesReadIndexManager;
 import com.dianping.puma.storage.index.L1IndexKey;
@@ -21,7 +21,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 
 	private ReadIndexManager<L1IndexKey, L2IndexValue> readIndexManager;
 
-	private ReadDataManager<DataKeyImpl, DataValueImpl> readDataManager;
+	private GroupReadDataManager readDataManager;
 
 	protected DefaultReadChannel(String database) {
 		this.database = database;
@@ -48,8 +48,8 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 		if (l2IndexValue == null) {
 			throw new IOException("failed to open oldest.");
 		}
-		Sequence sequence = l2IndexValue.getSequence();
-		readDataManager.open(new DataKeyImpl(sequence));
+		com.dianping.puma.storage.Sequence sequence = l2IndexValue.getSequence();
+		readDataManager.open(new Sequence(sequence));
 	}
 
 	@Override
@@ -58,8 +58,8 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 		if (l2IndexValue == null) {
 			throw new IOException("failed to open latest.");
 		}
-		Sequence sequence = l2IndexValue.getSequence();
-		readDataManager.open(new DataKeyImpl(sequence));
+		com.dianping.puma.storage.Sequence sequence = l2IndexValue.getSequence();
+		readDataManager.open(new Sequence(sequence));
 	}
 
 	@Override
@@ -68,16 +68,12 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 		if (l2IndexValue == null) {
 			throw new IOException("failed to open.");
 		}
-		Sequence sequence = l2IndexValue.getSequence();
-		readDataManager.open(new DataKeyImpl(sequence));
+		com.dianping.puma.storage.Sequence sequence = l2IndexValue.getSequence();
+		readDataManager.open(new Sequence(sequence));
 	}
 
 	@Override
 	public ChangedEvent next() throws IOException {
-		DataValueImpl dataValueImpl = readDataManager.next();
-		if (dataValueImpl == null) {
-			throw new IOException("failed to next.");
-		}
-		return dataValueImpl.getBinlogEvent();
+		return readDataManager.next();
 	}
 }

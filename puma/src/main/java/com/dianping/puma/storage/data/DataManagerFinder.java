@@ -1,20 +1,54 @@
 package com.dianping.puma.storage.data;
 
-import com.dianping.puma.common.LifeCycle;
+import com.dianping.puma.storage.Sequence;
+import com.dianping.puma.storage.filesystem.FileSystem;
 
+import java.io.File;
 import java.io.IOException;
 
-public interface DataManagerFinder extends LifeCycle {
+public final class DataManagerFinder {
 
-	ReadDataManager<DataKeyImpl, DataValueImpl> findMasterReadDataManager(DataKeyImpl dataKey) throws IOException;
+	public static SingleReadDataManager findMasterReadDataManager(String database, Sequence sequence)
+			throws IOException {
+		String date = sequence.date();
+		int number = sequence.getNumber();
 
-	ReadDataManager<DataKeyImpl, DataValueImpl> findSlaveReadDataManager(DataKeyImpl dataKey) throws IOException;
+		File file = FileSystem.visitMasterDataFile(database, date, number);
+		return file == null ? null : DataManagerFactory.newSingleReadDataManager(file);
+	}
 
-	ReadDataManager<DataKeyImpl, DataValueImpl> findNextMasterReadDataManager(DataKeyImpl dataKey) throws IOException;
+	public static SingleReadDataManager findSlaveReadDataManager(String database, Sequence sequence)
+			throws IOException {
+		String date = sequence.date();
+		int number = sequence.getNumber();
 
-	ReadDataManager<DataKeyImpl, DataValueImpl> findNextSlaveReadDataManager(DataKeyImpl dataKey) throws IOException;
+		File file = FileSystem.visitSlaveDataFile(database, date, number);
+		return file == null ? null : DataManagerFactory.newSingleReadDataManager(file);
+	}
 
-	WriteDataManager<DataKeyImpl, DataValueImpl> findNextMasterWriteDataManager() throws IOException;
+	public static SingleReadDataManager findNextMasterReadDataManager(String database, Sequence sequence)
+			throws IOException {
+		String date = sequence.date();
+		int number = sequence.getNumber();
 
-	WriteDataManager<DataKeyImpl, DataValueImpl> findNextSlaveWriteDataManager() throws IOException;
+		File file = FileSystem.visitNextMasterDataFile(database, date, number);
+		return file == null ? null : DataManagerFactory.newSingleReadDataManager(file);
+	}
+
+	public static SingleReadDataManager findNextSlaveReadDataManager(String database, Sequence sequence)
+			throws IOException {
+		String date = sequence.date();
+		int number = sequence.getNumber();
+
+		File file = FileSystem.visitNextSlaveDataFile(database, date, number);
+		return file == null ? null : DataManagerFactory.newSingleReadDataManager(file);
+	}
+
+	public static SingleWriteDataManager findNextMasterWriteDataManager(String database) throws IOException {
+		File file = FileSystem.nextMasterDataFile(database);
+		String date = FileSystem.parseMasterDataDate(file);
+		int number = FileSystem.parseMasterDataNumber(file);
+
+		return file == null ? null : DataManagerFactory.newSingleWriteDataManager(file, date, number);
+	}
 }

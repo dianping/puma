@@ -27,4 +27,6 @@ public interface WriteBucket extends LifeCycle {
 	 * @return true if has remaining space for writing.
 	 */
 	boolean hasRemainingForWrite();
+
+	long position();
 }

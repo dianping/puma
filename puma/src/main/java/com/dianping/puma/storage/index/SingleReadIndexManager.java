@@ -9,12 +9,13 @@ import com.dianping.puma.storage.index.ReadIndexManager;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.EOFException;
+import java.io.File;
 import java.io.IOException;
 
 public abstract class SingleReadIndexManager<K extends IndexKey<K>, V extends IndexValue>
 		extends AbstractLifeCycle implements ReadIndexManager<K, V> {
 
-	private final String filename;
+	private final File file;
 
 	private final int bufSizeByte;
 
@@ -22,15 +23,15 @@ public abstract class SingleReadIndexManager<K extends IndexKey<K>, V extends In
 
 	private ReadBucket readBucket;
 
-	public SingleReadIndexManager(String filename, int bufSizeByte, int avgSizeByte) {
-		this.filename = filename;
+	public SingleReadIndexManager(File file, int bufSizeByte, int avgSizeByte) {
+		this.file = file;
 		this.bufSizeByte = bufSizeByte;
 		this.avgSizeByte = avgSizeByte;
 	}
 
 	@Override
 	protected void doStart() {
-		readBucket = BucketFactory.newLineReadBucket(filename, bufSizeByte, avgSizeByte);
+		readBucket = BucketFactory.newLineReadBucket(file, bufSizeByte, avgSizeByte);
 		readBucket.start();
 	}
 

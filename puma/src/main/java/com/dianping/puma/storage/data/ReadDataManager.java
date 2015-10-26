@@ -4,7 +4,7 @@ import com.dianping.puma.common.LifeCycle;
 
 import java.io.IOException;
 
-public interface ReadDataManager<K extends DataKey, V extends DataValue> extends LifeCycle {
+public interface ReadDataManager<K, V> extends LifeCycle {
 
 	K position();
 

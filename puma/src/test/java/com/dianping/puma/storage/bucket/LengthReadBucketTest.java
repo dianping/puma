@@ -22,7 +22,7 @@ public class LengthReadBucketTest extends StorageBaseTest {
 		bucket = new File(testDir, "bucket");
 		createFile(bucket);
 
-		lengthReadBucket = BucketFactory.newLengthReadBucket(bucket.getAbsolutePath());
+		lengthReadBucket = BucketFactory.newLengthReadBucket(bucket);
 		lengthReadBucket.start();
 	}
 

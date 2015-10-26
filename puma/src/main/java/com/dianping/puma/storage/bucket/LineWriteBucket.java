@@ -3,6 +3,7 @@ package com.dianping.puma.storage.bucket;
 import com.dianping.puma.common.AbstractLifeCycle;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -10,7 +11,7 @@ public final class LineWriteBucket extends AbstractLifeCycle implements WriteBuc
 
 	private static final int BYTE_SIZE_BYTE = Byte.SIZE >> 3;
 
-	private final String filename;
+	private final File file;
 
 	private final int bufSizeByte;
 
@@ -20,8 +21,8 @@ public final class LineWriteBucket extends AbstractLifeCycle implements WriteBuc
 
 	private long offset;
 
-	protected LineWriteBucket(String filename, int bufSizeByte, int maxSizeByte) {
-		this.filename = filename;
+	protected LineWriteBucket(File file, int bufSizeByte, int maxSizeByte) {
+		this.file = file;
 		this.bufSizeByte = bufSizeByte;
 		this.maxSizeByte = maxSizeByte;
 	}
@@ -29,7 +30,7 @@ public final class LineWriteBucket extends AbstractLifeCycle implements WriteBuc
 	@Override
 	protected void doStart() {
 		try {
-			writer = new BufferedWriter(new FileWriter(filename), bufSizeByte);
+			writer = new BufferedWriter(new FileWriter(file), bufSizeByte);
 		} catch (IOException io) {
 			throw new RuntimeException("failed to start line write bucket.", io);
 		}
@@ -75,5 +76,10 @@ public final class LineWriteBucket extends AbstractLifeCycle implements WriteBuc
 	@Override
 	public boolean hasRemainingForWrite() {
 		return offset < maxSizeByte;
+	}
+
+	@Override
+	public long position() {
+		return offset;
 	}
 }

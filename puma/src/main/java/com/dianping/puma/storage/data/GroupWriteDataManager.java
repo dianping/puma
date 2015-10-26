@@ -1,16 +1,17 @@
 package com.dianping.puma.storage.data;
 
 import com.dianping.puma.common.AbstractLifeCycle;
+import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.storage.Sequence;
 
 import java.io.IOException;
 
-public final class GroupWriteDataManager extends AbstractLifeCycle implements WriteDataManager<DataKeyImpl, DataValueImpl> {
+public final class GroupWriteDataManager extends AbstractLifeCycle
+		implements WriteDataManager<Sequence, ChangedEvent> {
 
 	private String database;
 
-	private DataManagerFinder dataManagerFinder;
-
-	private WriteDataManager<DataKeyImpl, DataValueImpl> writeDataManager;
+	private SingleWriteDataManager writeDataManager;
 
 	public GroupWriteDataManager(String database) {
 		this.database = database;
@@ -18,28 +19,27 @@ public final class GroupWriteDataManager extends AbstractLifeCycle implements Wr
 
 	@Override
 	protected void doStart() {
-		dataManagerFinder = new GroupDataManagerFinder(database);
-		dataManagerFinder.start();
+		try {
+			writeDataManager = DataManagerFinder.findNextMasterWriteDataManager(database);
+		} catch (IOException io) {
+			throw new IllegalStateException("failed to start write data manager.");
+		}
 	}
 
 	@Override
 	protected void doStop() {
-		if (dataManagerFinder != null) {
-			dataManagerFinder.stop();
-		}
-
 		if (writeDataManager != null) {
 			writeDataManager.stop();
 		}
 	}
 
 	@Override
-	public void append(DataKeyImpl dataKeyImpl, DataValueImpl dataValueImpl) throws IOException {
+	public void append(ChangedEvent binlogEvent) throws IOException {
 		checkStop();
 
 		createWriteDataManagerIfNeeded();
 
-		writeDataManager.append(dataKeyImpl, dataValueImpl);
+		writeDataManager.append(binlogEvent);
 	}
 
 	@Override
@@ -56,7 +56,14 @@ public final class GroupWriteDataManager extends AbstractLifeCycle implements Wr
 		return true;
 	}
 
-	public void pageAppend(DataKeyImpl dataKeyImpl, DataValueImpl dataValueImpl) throws IOException {
+	@Override
+	public com.dianping.puma.storage.Sequence position() {
+		checkStop();
+
+		return writeDataManager.position();
+	}
+
+	public void pageAppend(Sequence sequence, DataValueImpl dataValueImpl) throws IOException {
 
 	}
 
@@ -69,7 +76,7 @@ public final class GroupWriteDataManager extends AbstractLifeCycle implements Wr
 	protected void page() throws IOException {
 		checkStop();
 
-		writeDataManager = dataManagerFinder.findNextMasterWriteDataManager();
+		writeDataManager = DataManagerFinder.findNextMasterWriteDataManager(database);
 		if (writeDataManager == null) {
 			throw new IOException("failed to generate the next write data bucket.");
 		}

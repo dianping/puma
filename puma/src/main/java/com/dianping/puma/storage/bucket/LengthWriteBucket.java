@@ -8,7 +8,7 @@ public final class LengthWriteBucket extends AbstractLifeCycle implements WriteB
 
 	private static final int INTEGER_SIZE_BYTE = Integer.SIZE >> 3;
 
-	private final String filename;
+	private final File file;
 
 	private final int bufSizeByte;
 
@@ -18,8 +18,8 @@ public final class LengthWriteBucket extends AbstractLifeCycle implements WriteB
 
 	private DataOutputStream output;
 
-	protected LengthWriteBucket(String filename, int bufSizeByte, int maxSizeByte) {
-		this.filename = filename;
+	protected LengthWriteBucket(File file, int bufSizeByte, int maxSizeByte) {
+		this.file = file;
 		this.bufSizeByte = bufSizeByte;
 		this.maxSizeByte = maxSizeByte;
 	}
@@ -27,7 +27,7 @@ public final class LengthWriteBucket extends AbstractLifeCycle implements WriteB
 	@Override
 	protected void doStart() {
 		try {
-			output = file2Stream(filename);
+			output = file2Stream(file);
 		} catch (IOException io) {
 			throw new RuntimeException("failed to start write bucket.", io);
 		}
@@ -70,8 +70,12 @@ public final class LengthWriteBucket extends AbstractLifeCycle implements WriteB
 		return offset < maxSizeByte;
 	}
 
-	protected DataOutputStream file2Stream(String filename) throws IOException {
-		File file = new File(filename);
+	@Override
+	public long position() {
+		return offset;
+	}
+
+	protected DataOutputStream file2Stream(File file) throws IOException {
 		if (!file.canWrite()) {
 			throw new IOException("bucket can not write.");
 		}

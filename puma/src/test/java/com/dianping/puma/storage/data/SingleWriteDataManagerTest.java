@@ -3,7 +3,6 @@ package com.dianping.puma.storage.data;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.StorageBaseTest;
-import com.dianping.puma.storage.bucket.BucketFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,36 +27,33 @@ public class SingleWriteDataManagerTest extends StorageBaseTest {
 		bucket = new File(testDir, "bucket");
 		createFile(bucket);
 
-		singleWriteDataManager = DataManagerFactory.newSingleWriteDataManager(bucket.getAbsolutePath());
+		singleWriteDataManager = DataManagerFactory.newSingleWriteDataManager(bucket, "20151010", 0);
 		singleWriteDataManager.start();
 
-		singleReadDataManager = DataManagerFactory.newSingleReadDataManager(bucket.getAbsolutePath());
+		singleReadDataManager = DataManagerFactory.newSingleReadDataManager(bucket);
 		singleReadDataManager.start();
 	}
 
 	@Test
 	public void testAppendAndFlush() throws IOException {
 		singleWriteDataManager.append(
-				new DataKeyImpl(new Sequence(2015, 0, 0)),
-				new DataValueImpl(new RowChangedEvent(0, 1, "2", 3))
+				new RowChangedEvent(0, 1, "2", 3)
 		);
 
 		singleWriteDataManager.append(
-				new DataKeyImpl(new Sequence(2015, 0, 0)),
-				new DataValueImpl(new RowChangedEvent(1, 2, "3", 4))
+				new RowChangedEvent(1, 2, "3", 4)
 		);
 
 		singleWriteDataManager.append(
-				new DataKeyImpl(new Sequence(2015, 0, 0)),
-				new DataValueImpl(new RowChangedEvent(2, 3, "4", 5))
+				new RowChangedEvent(2, 3, "4", 5)
 		);
 
 		singleWriteDataManager.flush();
 
-		singleReadDataManager.open(new DataKeyImpl(new Sequence(2015, 0, 0)));
-		assertTrue(singleReadDataManager.next().getBinlogEvent().equals(new RowChangedEvent(0, 1, "2", 3)));
-		assertTrue(singleReadDataManager.next().getBinlogEvent().equals(new RowChangedEvent(1, 2, "3", 4)));
-		assertTrue(singleReadDataManager.next().getBinlogEvent().equals(new RowChangedEvent(2, 3, "4", 5)));
+		singleReadDataManager.open(new Sequence(2015, 0, 0));
+		assertTrue(singleReadDataManager.next().equals(new RowChangedEvent(0, 1, "2", 3)));
+		assertTrue(singleReadDataManager.next().equals(new RowChangedEvent(1, 2, "3", 4)));
+		assertTrue(singleReadDataManager.next().equals(new RowChangedEvent(2, 3, "4", 5)));
 	}
 
 	@Test

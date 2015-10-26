@@ -1,5 +1,7 @@
 package com.dianping.puma.storage.bucket;
 
+import java.io.File;
+
 public final class BucketFactory {
 
 	private static final int LINE_READ_BUCKET_BUF_SIZE_BYTE = 1024; // 1K.
@@ -21,35 +23,35 @@ public final class BucketFactory {
 	private BucketFactory() {
 	}
 
-	public static LineReadBucket newLineReadBucket(String filename) {
-		return new LineReadBucket(filename, LINE_READ_BUCKET_BUF_SIZE_BYTE, LINE_READ_BUCKET_AVG_SIZE_BYTE);
+	public static LineReadBucket newLineReadBucket(File file) {
+		return new LineReadBucket(file, LINE_READ_BUCKET_BUF_SIZE_BYTE, LINE_READ_BUCKET_AVG_SIZE_BYTE);
 	}
 
-	public static LineReadBucket newLineReadBucket(String filename, int bufSizeByte, int avgBufSize) {
-		return new LineReadBucket(filename, bufSizeByte, avgBufSize);
+	public static LineReadBucket newLineReadBucket(File file, int bufSizeByte, int avgBufSize) {
+		return new LineReadBucket(file, bufSizeByte, avgBufSize);
 	}
 
-	public static LineWriteBucket newLineWriteBucket(String filename) {
-		return new LineWriteBucket(filename, LINE_WRITE_BUCKET_BUF_SIZE_BYTE, LINE_WRITE_BUCKET_MAX_SIZE_BYTE);
+	public static LineWriteBucket newLineWriteBucket(File file) {
+		return new LineWriteBucket(file, LINE_WRITE_BUCKET_BUF_SIZE_BYTE, LINE_WRITE_BUCKET_MAX_SIZE_BYTE);
 	}
 
-	public static LineWriteBucket newLineWriteBucket(String filename, int bufSizeByte, int maxSizeByte) {
-		return new LineWriteBucket(filename, bufSizeByte, maxSizeByte);
+	public static LineWriteBucket newLineWriteBucket(File file, int bufSizeByte, int maxSizeByte) {
+		return new LineWriteBucket(file, bufSizeByte, maxSizeByte);
 	}
 
-	public static LengthReadBucket newLengthReadBucket(String filename) {
-		return new LengthReadBucket(filename, LENGTH_READ_BUCKET_BUF_SIZE_BYTE, LENGTH_READ_BUCKET_AVG_SIZE_BYTE);
+	public static LengthReadBucket newLengthReadBucket(File file) {
+		return new LengthReadBucket(file, LENGTH_READ_BUCKET_BUF_SIZE_BYTE, LENGTH_READ_BUCKET_AVG_SIZE_BYTE);
 	}
 
-	public static LengthReadBucket newLengthReadBucket(String filename, int bufSizeByte, int avgSizeByte) {
-		return new LengthReadBucket(filename, bufSizeByte, avgSizeByte);
+	public static LengthReadBucket newLengthReadBucket(File file, int bufSizeByte, int avgSizeByte) {
+		return new LengthReadBucket(file, bufSizeByte, avgSizeByte);
 	}
 
-	public static LengthWriteBucket newLengthWriteBucket(String filename) {
-		return new LengthWriteBucket(filename, LENGTH_WRITE_BUCKET_BUF_SIZE_BYTE, LENGTH_WRITE_BUCKET_MAX_SIZE_BYTE);
+	public static LengthWriteBucket newLengthWriteBucket(File file) {
+		return new LengthWriteBucket(file, LENGTH_WRITE_BUCKET_BUF_SIZE_BYTE, LENGTH_WRITE_BUCKET_MAX_SIZE_BYTE);
 	}
 
-	public static LengthWriteBucket newLengthWriteBucket(String filename, int bufSizeByte, int maxSizeByte) {
-		return new LengthWriteBucket(filename, bufSizeByte, maxSizeByte);
+	public static LengthWriteBucket newLengthWriteBucket(File file, int bufSizeByte, int maxSizeByte) {
+		return new LengthWriteBucket(file, bufSizeByte, maxSizeByte);
 	}
 }

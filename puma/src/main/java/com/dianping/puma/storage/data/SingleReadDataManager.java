@@ -10,12 +10,13 @@ import com.dianping.puma.storage.bucket.BucketFactory;
 import com.dianping.puma.storage.bucket.ReadBucket;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.io.File;
 import java.io.IOException;
 
 public final class SingleReadDataManager extends AbstractLifeCycle
-		implements ReadDataManager<DataKeyImpl, DataValueImpl> {
+		implements ReadDataManager<Sequence, ChangedEvent> {
 
-	private final String filename;
+	private final File file;
 
 	private final int bufSizeByte;
 
@@ -27,15 +28,15 @@ public final class SingleReadDataManager extends AbstractLifeCycle
 
 	private EventCodec eventCodec = new RawEventCodec();
 
-	protected SingleReadDataManager(String filename, int bufSizeByte, int avgSizeByte) {
-		this.filename = filename;
+	protected SingleReadDataManager(File file, int bufSizeByte, int avgSizeByte) {
+		this.file = file;
 		this.bufSizeByte = bufSizeByte;
 		this.avgSizeByte = avgSizeByte;
 	}
 
 	@Override
 	protected void doStart() {
-		readBucket = BucketFactory.newLengthReadBucket(filename, bufSizeByte, avgSizeByte);
+		readBucket = BucketFactory.newLengthReadBucket(file, bufSizeByte, avgSizeByte);
 		readBucket.start();
 	}
 
@@ -47,41 +48,38 @@ public final class SingleReadDataManager extends AbstractLifeCycle
 	}
 
 	@Override
-	public DataKeyImpl position() {
+	public Sequence position() {
 		checkStop();
 
-		Sequence newSequence = new Sequence(sequence.getCreationDate(), sequence.getNumber(),
-				(int) readBucket.position());
-		return new DataKeyImpl(newSequence);
+		return sequence.addOffset(readBucket.position());
 	}
 
 	@Override
-	public void open(DataKeyImpl dataKey) throws IOException {
+	public void open(Sequence sequence) throws IOException {
 		checkStop();
 
-		sequence = new Sequence(dataKey.getSequence());
+		this.sequence = new Sequence(sequence.getCreationDate(), sequence.getNumber(), 0);
+
 		long offset = sequence.getOffset();
 		readBucket.skip(offset);
 	}
 
 	@Override
-	public DataValueImpl next() throws IOException {
+	public ChangedEvent next() throws IOException {
 		checkStop();
 
 		byte[] data = readBucket.next();
 		if (data == null) {
 			return null;
 		}
-		return decode(data).getRight();
+		return decode(data);
 	}
 
-	protected Pair<DataKeyImpl, DataValueImpl> decode(byte[] data) throws IOException {
+	protected ChangedEvent decode(byte[] data) throws IOException {
 		Event event = eventCodec.decode(data);
 		if (!(event instanceof ChangedEvent)) {
 			throw new IOException("unknown binlog event format.");
 		}
-
-		ChangedEvent binlogEvent = (ChangedEvent) event;
-		return Pair.of(null, new DataValueImpl(binlogEvent));
+		return (ChangedEvent) event;
 	}
 }

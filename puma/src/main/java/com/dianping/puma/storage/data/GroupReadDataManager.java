@@ -1,17 +1,18 @@
 package com.dianping.puma.storage.data;
 
 import com.dianping.puma.common.AbstractLifeCycle;
+import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.storage.Sequence;
 
 import java.io.EOFException;
 import java.io.IOException;
 
-public final class GroupReadDataManager extends AbstractLifeCycle implements ReadDataManager<DataKeyImpl, DataValueImpl> {
+public final class GroupReadDataManager extends AbstractLifeCycle
+		implements ReadDataManager<com.dianping.puma.storage.Sequence, ChangedEvent> {
 
 	private final String database;
 
-	private DataManagerFinder dataManagerFinder;
-
-	private ReadDataManager<DataKeyImpl, DataValueImpl> readDataManager;
+	private SingleReadDataManager readDataManager;
 
 	public GroupReadDataManager(String database) {
 		this.database = database;
@@ -19,57 +20,51 @@ public final class GroupReadDataManager extends AbstractLifeCycle implements Rea
 
 	@Override
 	protected void doStart() {
-		dataManagerFinder = new GroupDataManagerFinder(database);
-		dataManagerFinder.start();
 	}
 
 	@Override
 	protected void doStop() {
-		if (dataManagerFinder != null) {
-			dataManagerFinder.stop();
-		}
-
 		if (readDataManager != null) {
 			readDataManager.stop();
 		}
 	}
 
 	@Override
-	public DataKeyImpl position() {
+	public com.dianping.puma.storage.Sequence position() {
 		checkStop();
 
 		return readDataManager == null ? null : readDataManager.position();
 	}
 
 	@Override
-	public void open(DataKeyImpl dataKey) throws IOException {
+	public void open(Sequence sequence) throws IOException {
 		checkStop();
 
-		readDataManager = dataManagerFinder.findSlaveReadDataManager(dataKey);
+		readDataManager = DataManagerFinder.findSlaveReadDataManager(database, sequence);
 		if (readDataManager == null) {
-			readDataManager = dataManagerFinder.findMasterReadDataManager(dataKey);
+			readDataManager = DataManagerFinder.findMasterReadDataManager(database, sequence);
 			if (readDataManager == null) {
 				throw new IOException("failed to open group read data manager.");
 			}
 		}
 
-		readDataManager.open(dataKey);
+		readDataManager.open(sequence);
 	}
 
 	@Override
-	public DataValueImpl next() throws IOException {
+	public ChangedEvent next() throws IOException {
 		checkStop();
 
 		while (true) {
 			try {
 				return readDataManager.next();
 			} catch (EOFException eof) {
-				DataKeyImpl dataKey = readDataManager.position();
+				Sequence dataKey = readDataManager.position();
 				readDataManager.stop();
 
-				readDataManager = dataManagerFinder.findNextSlaveReadDataManager(dataKey);
+				readDataManager = DataManagerFinder.findNextSlaveReadDataManager(database, dataKey);
 				if (readDataManager == null) {
-					readDataManager = dataManagerFinder.findNextMasterReadDataManager(dataKey);
+					readDataManager = DataManagerFinder.findNextMasterReadDataManager(database, dataKey);
 					if (readDataManager == null) {
 						throw new IOException("failed to open next read data manager.", eof);
 					}

@@ -26,10 +26,10 @@ public class SingleReadDataManagerTest extends StorageBaseTest {
 		bucket = new File(testDir, "bucket");
 		createFile(bucket);
 
-		singleReadDataManager = DataManagerFactory.newSingleReadDataManager(bucket.getAbsolutePath());
+		singleReadDataManager = DataManagerFactory.newSingleReadDataManager(bucket);
 		singleReadDataManager.start();
 
-		singleWriteDataManager = DataManagerFactory.newSingleWriteDataManager(bucket.getAbsolutePath());
+		singleWriteDataManager = DataManagerFactory.newSingleWriteDataManager(bucket, "20151010", 0);
 		singleWriteDataManager.start();
 	}
 
@@ -41,31 +41,28 @@ public class SingleReadDataManagerTest extends StorageBaseTest {
 	@Test
 	public void testOpenAndNext() throws IOException {
 		singleWriteDataManager.append(
-				new DataKeyImpl(new Sequence(2015, 0, 0)),
-				new DataValueImpl(new RowChangedEvent(0, 1, "2", 3))
+				new RowChangedEvent(0, 1, "2", 3)
 		);
 
 		singleWriteDataManager.append(
-				new DataKeyImpl(new Sequence(2015, 0, 0)),
-				new DataValueImpl(new RowChangedEvent(1, 2, "3", 4))
+				new RowChangedEvent(1, 2, "3", 4)
 		);
 
 		singleWriteDataManager.append(
-				new DataKeyImpl(new Sequence(2015, 0, 0)),
-				new DataValueImpl(new RowChangedEvent(2, 3, "4", 5))
+				new RowChangedEvent(2, 3, "4", 5)
 		);
 
 		singleWriteDataManager.flush();
 
-		singleReadDataManager.open(new DataKeyImpl(new Sequence(2015, 0, 0)));
-		assertTrue(singleReadDataManager.next().getBinlogEvent().equals(new RowChangedEvent(0, 1, "2", 3)));
-		assertTrue(singleReadDataManager.next().getBinlogEvent().equals(new RowChangedEvent(1, 2, "3", 4)));
-		assertTrue(singleReadDataManager.next().getBinlogEvent().equals(new RowChangedEvent(2, 3, "4", 5)));
+		singleReadDataManager.open(new Sequence(2015, 0, 0));
+		assertTrue(singleReadDataManager.next().equals(new RowChangedEvent(0, 1, "2", 3)));
+		assertTrue(singleReadDataManager.next().equals(new RowChangedEvent(1, 2, "3", 4)));
+		assertTrue(singleReadDataManager.next().equals(new RowChangedEvent(2, 3, "4", 5)));
 	}
 
 	@Test(expected = EOFException.class)
 	public void testOpenAndNextEOF() throws IOException {
-		singleReadDataManager.open(new DataKeyImpl(new Sequence(2015, 0, 0)));
+		singleReadDataManager.open(new Sequence(new com.dianping.puma.storage.Sequence(2015, 0, 0)));
 		singleReadDataManager.next();
 	}
 

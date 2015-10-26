@@ -27,10 +27,10 @@ public class L2SingleReadIndexManagerTest extends StorageBaseTest {
 		bucket = new File(testDir, "bucket");
 		createFile(bucket);
 
-		l2SingleReadIndexManager = IndexManagerFactory.newL2SingleReadIndexManager(bucket.getAbsolutePath());
+		l2SingleReadIndexManager = IndexManagerFactory.newL2SingleReadIndexManager(bucket);
 		l2SingleReadIndexManager.start();
 
-		l2SingleWriteIndexManager = IndexManagerFactory.newL2SingleWriteIndexManager(bucket.getAbsolutePath());
+		l2SingleWriteIndexManager = IndexManagerFactory.newL2SingleWriteIndexManager(bucket);
 		l2SingleWriteIndexManager.start();
 	}
 

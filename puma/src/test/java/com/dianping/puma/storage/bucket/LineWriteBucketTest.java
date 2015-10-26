@@ -25,7 +25,7 @@ public class LineWriteBucketTest extends StorageBaseTest {
 		bucket = new File(testDir, "bucket");
 		createFile(bucket);
 
-		lineWriteBucket = BucketFactory.newLineWriteBucket(bucket.getAbsolutePath(), 1024, 32);
+		lineWriteBucket = BucketFactory.newLineWriteBucket(bucket, 1024, 32);
 		lineWriteBucket.start();
 	}
 

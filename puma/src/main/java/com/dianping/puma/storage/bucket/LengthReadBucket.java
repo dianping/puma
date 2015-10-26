@@ -8,7 +8,7 @@ import java.util.zip.GZIPInputStream;
 
 public final class LengthReadBucket extends AbstractLifeCycle implements ReadBucket {
 
-	private final String filename;
+	private final File file;
 
 	private final int bufSizeByte;
 
@@ -18,8 +18,8 @@ public final class LengthReadBucket extends AbstractLifeCycle implements ReadBuc
 
 	private long position;
 
-	protected LengthReadBucket(String filename, int bufSizeByte, int avgSizeByte) {
-		this.filename = filename;
+	protected LengthReadBucket(File file, int bufSizeByte, int avgSizeByte) {
+		this.file = file;
 		this.bufSizeByte = bufSizeByte;
 		this.avgSizeByte = avgSizeByte;
 	}
@@ -27,7 +27,7 @@ public final class LengthReadBucket extends AbstractLifeCycle implements ReadBuc
 	@Override
 	protected void doStart() {
 		try {
-			input = file2Stream(filename);
+			input = file2Stream(file);
 			if (!input.markSupported()) {
 				throw new UnsupportedOperationException("length read bucket should support mark.");
 			}
@@ -90,8 +90,7 @@ public final class LengthReadBucket extends AbstractLifeCycle implements ReadBuc
 		return position;
 	}
 
-	protected DataInputStream file2Stream(String filename) throws IOException {
-		File file = new File(filename);
+	protected DataInputStream file2Stream(File file) throws IOException {
 		if (!file.canRead()) {
 			throw new IOException("bucket can not read.");
 		}

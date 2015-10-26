@@ -5,6 +5,7 @@ import com.dianping.puma.storage.Sequence;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.io.File;
 import java.io.IOException;
 
 public final class L2SingleReadIndexManager extends SingleReadIndexManager<L2IndexKey, L2IndexValue> {
@@ -13,8 +14,8 @@ public final class L2SingleReadIndexManager extends SingleReadIndexManager<L2Ind
 	public static final int BINLOG_INFO_FIELD_NUMBER = 4;
 	public static final int SEQUENCE_FIELD_NUMBER = 3;
 
-	public L2SingleReadIndexManager(String filename, int bufSizeByte, int avgSizeByte) {
-		super(filename, bufSizeByte, avgSizeByte);
+	public L2SingleReadIndexManager(File file, int bufSizeByte, int avgSizeByte) {
+		super(file, bufSizeByte, avgSizeByte);
 	}
 
 	@Override

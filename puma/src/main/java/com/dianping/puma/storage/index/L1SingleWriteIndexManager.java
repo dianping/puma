@@ -3,10 +3,12 @@ package com.dianping.puma.storage.index;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.Sequence;
 
+import java.io.File;
+
 public final class L1SingleWriteIndexManager extends SingleWriteIndexManager<L1IndexKey, L1IndexValue> {
 
-	public L1SingleWriteIndexManager(String filename, int bufSizeByte, int maxSizeByte) {
-		super(filename, bufSizeByte, maxSizeByte);
+	public L1SingleWriteIndexManager(File file, int bufSizeByte, int maxSizeByte) {
+		super(file, bufSizeByte, maxSizeByte);
 	}
 
 	@Override

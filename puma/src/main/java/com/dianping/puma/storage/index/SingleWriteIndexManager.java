@@ -5,11 +5,12 @@ import com.dianping.puma.storage.bucket.BucketFactory;
 import com.dianping.puma.storage.bucket.WriteBucket;
 import com.dianping.puma.storage.index.WriteIndexManager;
 
+import java.io.File;
 import java.io.IOException;
 
 public abstract class SingleWriteIndexManager<K, V> extends AbstractLifeCycle implements WriteIndexManager<K, V> {
 
-	private final String filename;
+	private final File file;
 
 	private final int bufSizeByte;
 
@@ -17,15 +18,15 @@ public abstract class SingleWriteIndexManager<K, V> extends AbstractLifeCycle im
 
 	private WriteBucket writeBucket;
 
-	public SingleWriteIndexManager(String filename, int bufSizeByte, int maxSizeByte) {
-		this.filename = filename;
+	public SingleWriteIndexManager(File file, int bufSizeByte, int maxSizeByte) {
+		this.file = file;
 		this.bufSizeByte = bufSizeByte;
 		this.maxSizeByte = maxSizeByte;
 	}
 
 	@Override
 	protected void doStart() {
-		writeBucket = BucketFactory.newLineWriteBucket(filename, bufSizeByte, maxSizeByte);
+		writeBucket = BucketFactory.newLineWriteBucket(file, bufSizeByte, maxSizeByte);
 		writeBucket.start();
 	}
 

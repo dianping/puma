@@ -5,6 +5,7 @@ import com.dianping.puma.storage.Sequence;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.io.File;
 import java.io.IOException;
 
 public final class L1SingleReadIndexManager extends SingleReadIndexManager<L1IndexKey, L1IndexValue> {
@@ -13,8 +14,8 @@ public final class L1SingleReadIndexManager extends SingleReadIndexManager<L1Ind
 	public static final int SEQUENCE_FIELD_NUMBER = 3;
 	public static final int DECODE_NUMBER = 2;
 
-	public L1SingleReadIndexManager(String filename, int bufSizeByte, int avgSizeByte) {
-		super(filename, bufSizeByte, avgSizeByte);
+	public L1SingleReadIndexManager(File file, int bufSizeByte, int avgSizeByte) {
+		super(file, bufSizeByte, avgSizeByte);
 	}
 
 	@Override

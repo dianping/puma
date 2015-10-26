@@ -41,6 +41,12 @@ public class Sequence {
 		this.offset = offset;
 	}
 
+	public Sequence(String creationDate, int number, long offset) {
+		this.creationDate = Integer.valueOf(creationDate);
+		this.number = number;
+		this.offset = (int) offset;
+	}
+
 	public Sequence(int creationDate, int number, int offset, int len) {
 		this.creationDate = creationDate;
 		this.number = number;

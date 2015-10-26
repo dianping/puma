@@ -4,67 +4,79 @@ import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.core.codec.EventCodec;
 import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.bucket.BucketFactory;
 import com.dianping.puma.storage.bucket.WriteBucket;
 
+import java.io.File;
 import java.io.IOException;
 
 public final class SingleWriteDataManager extends AbstractLifeCycle
-		implements WriteDataManager<DataKeyImpl, DataValueImpl> {
+        implements WriteDataManager<Sequence, ChangedEvent> {
 
-	private final String filename;
+    private final File file;
 
-	private final int bufSizeByte;
+    private final int bufSizeByte;
 
-	private final int maxSizeByte;
+    private final int maxSizeByte;
 
-	private WriteBucket writeBucket;
+    private final String date;
 
-	private EventCodec eventCodec = new RawEventCodec();
+    private final int number;
 
-	protected SingleWriteDataManager(String filename, int bufSizeByte, int maxSizeByte) {
-		this.filename = filename;
-		this.bufSizeByte = bufSizeByte;
-		this.maxSizeByte = maxSizeByte;
-	}
+    private WriteBucket writeBucket;
 
-	@Override
-	protected void doStart() {
-		writeBucket = BucketFactory.newLengthWriteBucket(filename, bufSizeByte, maxSizeByte);
-		writeBucket.start();
-	}
+    private EventCodec eventCodec = new RawEventCodec();
 
-	@Override
-	protected void doStop() {
-		if (writeBucket != null) {
-			writeBucket.stop();
-		}
-	}
+    protected SingleWriteDataManager(File file, String date, int number, int bufSizeByte, int maxSizeByte) {
+        this.file = file;
+        this.date = date;
+        this.number = number;
+        this.bufSizeByte = bufSizeByte;
+        this.maxSizeByte = maxSizeByte;
+    }
 
-	@Override
-	public void append(DataKeyImpl dataKey, DataValueImpl dataValue) throws IOException {
-		checkStop();
+    @Override
+    protected void doStart() {
+        writeBucket = BucketFactory.newLengthWriteBucket(file, bufSizeByte, maxSizeByte);
+        writeBucket.start();
+    }
 
-		byte[] data = encode(dataKey, dataValue);
-		writeBucket.append(data);
-	}
+    @Override
+    protected void doStop() {
+        if (writeBucket != null) {
+            writeBucket.stop();
+        }
+    }
 
-	@Override
-	public void flush() throws IOException {
-		checkStop();
+    @Override
+    public void append(ChangedEvent binlogEvent) throws IOException {
+        checkStop();
 
-		writeBucket.flush();
-	}
+        byte[] data = encode(binlogEvent);
+        writeBucket.append(data);
+    }
 
-	@Override
-	public boolean hasRemainingForWrite() {
-		checkStop();
+    @Override
+    public void flush() throws IOException {
+        checkStop();
 
-		return writeBucket.hasRemainingForWrite();
-	}
+        writeBucket.flush();
+    }
 
-	protected byte[] encode(DataKeyImpl dataKey, DataValueImpl dataValue) throws IOException {
-		ChangedEvent binlogEvent = dataValue.getBinlogEvent();
-		return eventCodec.encode(binlogEvent);
-	}
+    @Override
+    public boolean hasRemainingForWrite() {
+        checkStop();
+
+        return writeBucket.hasRemainingForWrite();
+    }
+
+    @Override
+    public Sequence position() {
+        return new Sequence(date, number, writeBucket.position());
+    }
+
+    protected byte[] encode(ChangedEvent binlogEvent) throws IOException {
+        return eventCodec.encode(binlogEvent);
+    }
 }

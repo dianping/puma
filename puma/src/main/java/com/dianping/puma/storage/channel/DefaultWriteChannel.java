@@ -4,9 +4,7 @@ import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.data.DataKeyImpl;
 import com.dianping.puma.storage.data.GroupWriteDataManager;
-import com.dianping.puma.storage.data.DataValueImpl;
 import com.dianping.puma.storage.index.L1IndexKey;
 import com.dianping.puma.storage.index.L2IndexValue;
 import com.dianping.puma.storage.index.SeriesWriteIndexManager;
@@ -25,6 +23,8 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
 
 	private String currDate;
 
+	private Thread thread;
+
 	protected DefaultWriteChannel(String database) {
 		this.database = database;
 	}
@@ -36,6 +36,8 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
 
 		writeDataManager = new GroupWriteDataManager(database);
 		writeDataManager.start();
+
+		thread = new Thread(new FlushTask());
 	}
 
 	@Override
@@ -47,13 +49,17 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
 		if (writeDataManager != null) {
 			writeDataManager.stop();
 		}
+
+		if (thread != null) {
+			thread.interrupt();
+		}
 	}
 
 	@Override
 	public void append(BinlogInfo binlogInfo, ChangedEvent binlogEvent) throws IOException {
-		Sequence sequence = nextSequence(binlogInfo);
+		Sequence sequence = writeDataManager.position();
 		writeIndexManager.append(new L1IndexKey(binlogInfo), new L2IndexValue(sequence));
-		writeDataManager.append(new DataKeyImpl(sequence), new DataValueImpl(binlogEvent));
+		writeDataManager.append(binlogEvent);
 	}
 
 	@Override
@@ -75,9 +81,11 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
 	private class FlushTask implements Runnable {
 		@Override
 		public void run() {
-			try {
-				flush();
-			} catch (IOException ignore) {
+			while (!isStopped()) {
+				try {
+					flush();
+				} catch (IOException ignore) {
+				}
 			}
 		}
 	}

@@ -6,7 +6,7 @@ import java.io.*;
 
 public final class LineReadBucket extends AbstractLifeCycle implements ReadBucket {
 
-	private final String filename;
+	private final File file;
 
 	private final int bufSizeByte;
 
@@ -16,8 +16,8 @@ public final class LineReadBucket extends AbstractLifeCycle implements ReadBucke
 
 	private long position;
 
-	protected LineReadBucket(String filename, int bufSizeByte, int avgSizeByte) {
-		this.filename = filename;
+	protected LineReadBucket(File file, int bufSizeByte, int avgSizeByte) {
+		this.file = file;
 		this.bufSizeByte = bufSizeByte;
 		this.avgSizeByte = avgSizeByte;
 	}
@@ -25,7 +25,7 @@ public final class LineReadBucket extends AbstractLifeCycle implements ReadBucke
 	@Override
 	protected void doStart() {
 		try {
-			reader = new BufferedReader(new FileReader(filename), bufSizeByte);
+			reader = new BufferedReader(new FileReader(file), bufSizeByte);
 			if (!reader.markSupported()) {
 				throw new RuntimeException("line read bucket should support mark.");
 			}

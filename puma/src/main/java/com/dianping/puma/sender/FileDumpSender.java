@@ -118,6 +118,7 @@ public class FileDumpSender extends AbstractSender {
 
 	private WriteChannel buildEventStorage(String database) throws StorageLifeCycleException {
 		WriteChannel writeChannel = ChannelFactory.newWriteChannel(database);
+		writeChannel.start();
 		return writeChannel;
 
 //		// Archive strategy.

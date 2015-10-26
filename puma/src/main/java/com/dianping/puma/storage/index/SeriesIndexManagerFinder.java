@@ -25,7 +25,7 @@ public final class SeriesIndexManagerFinder extends AbstractLifeCycle implements
 	@Override
 	public ReadIndexManager<L1IndexKey, L1IndexValue> findL1ReadIndexManager() throws IOException {
 		File file = FileSystem.visitL1IndexFile(database);
-		return IndexManagerFactory.newL1SingleReadIndexManager(file.getAbsolutePath());
+		return IndexManagerFactory.newL1SingleReadIndexManager(file);
 	}
 
 	@Override
@@ -34,18 +34,21 @@ public final class SeriesIndexManagerFinder extends AbstractLifeCycle implements
 		String date = l1IndexValue.getSequence().date();
 		int number = l1IndexValue.getSequence().getNumber();
 		File file = FileSystem.visitL2IndexFile(database, date, number);
-		return IndexManagerFactory.newL2SingleReadIndexManager(file.getAbsolutePath());
+		return IndexManagerFactory.newL2SingleReadIndexManager(file);
 	}
 
 	@Override
 	public WriteIndexManager<L1IndexKey, L1IndexValue> findL1WriteIndexManager() throws IOException {
 		File file = FileSystem.visitL1IndexFile(database);
-		return IndexManagerFactory.newL1SingleWriteIndexManager(file.getAbsolutePath());
+		if (file == null) {
+			file = FileSystem.nextL1IndexFile(database);
+		}
+		return IndexManagerFactory.newL1SingleWriteIndexManager(file);
 	}
 
 	@Override
 	public WriteIndexManager<L2IndexKey, L2IndexValue> findNextL2WriteIndexManager() throws IOException {
 		File file = FileSystem.nextL2IndexFile(database);
-		return IndexManagerFactory.newL2SingleWriteIndexManager(file.getAbsolutePath());
+		return IndexManagerFactory.newL2SingleWriteIndexManager(file);
 	}
 }

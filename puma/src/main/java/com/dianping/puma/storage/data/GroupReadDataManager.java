@@ -60,17 +60,19 @@ public final class GroupReadDataManager extends AbstractLifeCycle
 				return readDataManager.next();
 			} catch (EOFException eof) {
 				Sequence dataKey = readDataManager.position();
-				readDataManager.stop();
 
-				readDataManager = DataManagerFinder.findNextSlaveReadDataManager(database, dataKey);
-				if (readDataManager == null) {
-					readDataManager = DataManagerFinder.findNextMasterReadDataManager(database, dataKey);
-					if (readDataManager == null) {
+				SingleReadDataManager tempReadDataManager = DataManagerFinder.findNextSlaveReadDataManager(database, dataKey);
+				if (tempReadDataManager == null) {
+					tempReadDataManager = DataManagerFinder.findNextMasterReadDataManager(database, dataKey);
+					if (tempReadDataManager == null) {
 						return null;
 					}
 				}
 
-				readDataManager.start();
+                readDataManager.stop();
+                tempReadDataManager.start();
+
+                readDataManager = tempReadDataManager;
 			}
 		}
 	}

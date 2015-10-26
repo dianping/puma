@@ -8,8 +8,11 @@ import com.dianping.puma.storage.data.GroupWriteDataManager;
 import com.dianping.puma.storage.index.L1IndexKey;
 import com.dianping.puma.storage.index.L2IndexValue;
 import com.dianping.puma.storage.index.SeriesWriteIndexManager;
+import com.google.common.util.concurrent.Uninterruptibles;
 
 import java.io.IOException;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChannel {
 
@@ -38,6 +41,9 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
 		writeDataManager.start();
 
 		thread = new Thread(new FlushTask());
+		thread.setDaemon(true);
+		thread.setName("flush-" + database);
+		thread.start();
 	}
 
 	@Override
@@ -84,6 +90,7 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
 			while (!isStopped()) {
 				try {
 					flush();
+					Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
 				} catch (IOException ignore) {
 				}
 			}

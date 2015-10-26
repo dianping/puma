@@ -21,6 +21,7 @@ public final class GroupWriteDataManager extends AbstractLifeCycle
 	protected void doStart() {
 		try {
 			writeDataManager = DataManagerFinder.findNextMasterWriteDataManager(database);
+			writeDataManager.start();
 		} catch (IOException io) {
 			throw new IllegalStateException("failed to start write data manager.");
 		}
@@ -57,14 +58,10 @@ public final class GroupWriteDataManager extends AbstractLifeCycle
 	}
 
 	@Override
-	public com.dianping.puma.storage.Sequence position() {
+	public Sequence position() {
 		checkStop();
 
 		return writeDataManager.position();
-	}
-
-	public void pageAppend(Sequence sequence, DataValueImpl dataValueImpl) throws IOException {
-
 	}
 
 	public boolean hasRemainingForWriteOnCurrentPage() {

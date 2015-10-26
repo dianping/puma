@@ -66,7 +66,7 @@ public final class GroupReadDataManager extends AbstractLifeCycle
 				if (readDataManager == null) {
 					readDataManager = DataManagerFinder.findNextMasterReadDataManager(database, dataKey);
 					if (readDataManager == null) {
-						throw new IOException("failed to open next read data manager.", eof);
+						return null;
 					}
 				}
 

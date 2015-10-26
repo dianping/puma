@@ -73,6 +73,8 @@ public final class SingleWriteDataManager extends AbstractLifeCycle
 
     @Override
     public Sequence position() {
+        checkStop();
+
         return new Sequence(date, number, writeBucket.position());
     }
 

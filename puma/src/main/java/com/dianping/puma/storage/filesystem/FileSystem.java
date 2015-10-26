@@ -1,6 +1,5 @@
 package com.dianping.puma.storage.filesystem;
 
-import com.dianping.puma.storage.Sequence;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -24,11 +23,11 @@ public final class FileSystem {
 
     private static String masterDataPrefix = "bucket-";
 
-    private static String masterDataSuffix = "";
+    private static String masterDataSuffix = ".data";
 
     private static String slaveDataPrefix = "bucket-";
 
-    private static String slaveDataSuffix = "";
+    private static String slaveDataSuffix = ".data";
 
     private static String datePattern = "yyyyMMdd";
 
@@ -43,6 +42,52 @@ public final class FileSystem {
     private static DateFormat dateFormat = new SimpleDateFormat(datePattern);
 
     private FileSystem() {
+    }
+
+    public static String parseDb(File file) {
+        return file.getParentFile().getParentFile().getName();
+    }
+
+    public static String parseDate(File file) {
+        return file.getParentFile().getName();
+    }
+
+    public static int parseNumber(File file, String prefix, String suffix) {
+        String numberString = StringUtils.substringBetween(file.getName(), prefix, suffix);
+        return Integer.valueOf(numberString);
+    }
+
+    protected static int maxFileNumber(String baseDir, String database, String date, String prefix, String suffix) {
+        File[] files = visitFiles(baseDir, database, date, prefix, suffix);
+        int max = -1;
+        for (File file : files) {
+            int number = parseNumber(file, prefix, suffix);
+            max = number > max ? number : max;
+        }
+        return max;
+    }
+
+    protected static File visitFile(
+            String baseDir, String database, String date, int number, String prefix, String suffix) {
+        File databaseDir = new File(baseDir, database);
+        File dateDir = new File(databaseDir, date);
+        File file = new File(dateDir, genFileName(number, prefix, suffix));
+
+        return file.isFile() ? file : null;
+    }
+
+    protected static File[] visitFiles(
+            String baseDir, String database, String date, final String prefix, final String suffix) {
+        File databaseDir = new File(baseDir, database);
+        File dateDir = new File(databaseDir, date);
+        File[] files = dateDir.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                return file.getName().startsWith(prefix) && file.getName().endsWith(suffix);
+            }
+        });
+
+        return files == null ? new File[0] : files;
     }
 
     public static File getL1IndexDir() {
@@ -224,28 +269,6 @@ public final class FileSystem {
         return files == null ? new File[0] : files;
     }
 
-    protected static File[] visitFiles(String baseDir, String database, String date) {
-        File databaseDir = new File(baseDir, database);
-        File dateDir = new File(databaseDir, date);
-        File[] files = dateDir.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File pathname) {
-                return true;
-            }
-        });
-
-        return files == null ? new File[0] : files;
-    }
-
-    protected static File visitFile(
-            String baseDir, String database, String date, int number, String prefix, String suffix) {
-        File databaseDir = new File(baseDir, database);
-        File dateDir = new File(databaseDir, date);
-        File file = new File(dateDir, genFileName(number, prefix, suffix));
-
-        return file.isFile() ? file : null;
-    }
-
     protected static String genFileName(int number, String prefix, String suffix) {
         return prefix + number + suffix;
     }
@@ -260,24 +283,6 @@ public final class FileSystem {
 
     protected static int maxSlaveFileNumber(String database, String date) {
         return maxFileNumber(slaveDataDir, database, date, slaveDataPrefix, slaveDataSuffix);
-    }
-
-    protected static int maxFileNumber(String baseDir, String database, String date, String prefix, String suffix) {
-        File[] files = visitFiles(baseDir, database, date);
-        int max = -1;
-        for (File file : files) {
-            int number = parseFileNumber(file.getName(), prefix, suffix);
-            max = number > max ? number : max;
-        }
-        return max;
-    }
-
-    protected static int parseFileNumber(String filename, String prefix, String suffix) {
-        return Integer.valueOf(StringUtils.substringBetween(filename, prefix, suffix));
-    }
-
-    protected static void createFolder(File directory) throws IOException {
-        FileUtils.forceMkdir(directory);
     }
 
     protected static void createFile(File file) throws IOException {
@@ -309,7 +314,7 @@ public final class FileSystem {
     }
 
     public static String parseMasterDataDb(File file) {
-        return parseDatabase(file);
+        return parseDb(file);
     }
 
     public static String parseMasterDataDate(File file) {
@@ -320,16 +325,4 @@ public final class FileSystem {
         return parseNumber(file, masterDataPrefix, masterDataSuffix);
     }
 
-    public static String parseDatabase(File file) {
-        return file.getParentFile().getParentFile().getName();
-    }
-
-    public static String parseDate(File file) {
-        return file.getParentFile().getName();
-    }
-
-    public static int parseNumber(File file, String prefix, String suffix) {
-        String numberString = StringUtils.substringBetween(file.getName(), prefix, suffix);
-        return Integer.valueOf(numberString);
-    }
 }

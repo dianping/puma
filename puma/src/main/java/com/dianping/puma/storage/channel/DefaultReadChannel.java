@@ -14,11 +14,9 @@ import com.dianping.puma.storage.index.L2IndexValue;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.Uninterruptibles;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel {
 
@@ -92,8 +90,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
         while (true) {
             ChangedEvent binlogEvent = readDataManager.next();
             if (binlogEvent == null) {
-                Uninterruptibles.sleepUninterruptibly(10, TimeUnit.MILLISECONDS);
-                continue;
+                return null;
             }
 
             if (!eventFilterChain.doNext(binlogEvent)) {

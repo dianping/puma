@@ -30,7 +30,7 @@ public final class LineWriteBucket extends AbstractLifeCycle implements WriteBuc
 	@Override
 	protected void doStart() {
 		try {
-			writer = new BufferedWriter(new FileWriter(file), bufSizeByte);
+			writer = new BufferedWriter(new FileWriter(file, true), bufSizeByte);
 		} catch (IOException io) {
 			throw new RuntimeException("failed to start line write bucket.", io);
 		}

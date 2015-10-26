@@ -49,7 +49,9 @@ public abstract class SingleWriteIndexManager<K, V> extends AbstractLifeCycle im
 	public void flush() throws IOException {
 		checkStop();
 
-		writeBucket.flush();
+		if (writeBucket != null) {
+			writeBucket.flush();
+		}
 	}
 
 	abstract protected byte[] encode(K indexKey, V indexValue);

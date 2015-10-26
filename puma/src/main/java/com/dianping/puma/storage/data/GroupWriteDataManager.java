@@ -19,12 +19,6 @@ public final class GroupWriteDataManager extends AbstractLifeCycle
 
 	@Override
 	protected void doStart() {
-		try {
-			writeDataManager = DataManagerFinder.findNextMasterWriteDataManager(database);
-			writeDataManager.start();
-		} catch (IOException io) {
-			throw new IllegalStateException("failed to start write data manager.");
-		}
 	}
 
 	@Override
@@ -35,21 +29,19 @@ public final class GroupWriteDataManager extends AbstractLifeCycle
 	}
 
 	@Override
-	public void append(ChangedEvent binlogEvent) throws IOException {
+	public Sequence append(ChangedEvent binlogEvent) throws IOException {
 		checkStop();
 
-		createWriteDataManagerIfNeeded();
-
-		writeDataManager.append(binlogEvent);
+		return writeDataManager.append(binlogEvent);
 	}
 
 	@Override
 	public void flush() throws IOException {
 		checkStop();
 
-		createWriteDataManagerIfNeeded();
-
-		writeDataManager.flush();
+		if (writeDataManager != null) {
+			writeDataManager.flush();
+		}
 	}
 
 	@Override
@@ -62,6 +54,14 @@ public final class GroupWriteDataManager extends AbstractLifeCycle
 		checkStop();
 
 		return writeDataManager.position();
+	}
+
+	public Sequence pageAppend(ChangedEvent binlogEvent) throws IOException {
+		checkStop();
+
+		writeDataManager = DataManagerFinder.findNextMasterWriteDataManager(database);
+		writeDataManager.start();
+		return writeDataManager.append(binlogEvent);
 	}
 
 	public boolean hasRemainingForWriteOnCurrentPage() {

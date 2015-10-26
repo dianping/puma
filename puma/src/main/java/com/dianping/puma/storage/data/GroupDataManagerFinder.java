@@ -6,7 +6,7 @@ import com.dianping.puma.storage.filesystem.FileSystem;
 import java.io.File;
 import java.io.IOException;
 
-public final class DataManagerFinder {
+public final class GroupDataManagerFinder {
 
 	public static SingleReadDataManager findMasterReadDataManager(String database, Sequence sequence)
 			throws IOException {
@@ -50,5 +50,9 @@ public final class DataManagerFinder {
 		int number = FileSystem.parseMasterDataNumber(file);
 
 		return file == null ? null : DataManagerFactory.newSingleWriteDataManager(file, date, number);
+	}
+
+	public static SingleWriteDataManager findNextMasterWriteDataManager(String database, String date) throws IOException {
+		return null;
 	}
 }

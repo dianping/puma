@@ -24,7 +24,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 
     private EventFilterChain eventFilterChain;
 
-    private ReadIndexManager<L1IndexKey, L2IndexValue> readIndexManager;
+    private SeriesReadIndexManager readIndexManager;
 
     private GroupReadDataManager readDataManager;
 
@@ -57,31 +57,28 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 
     @Override
     public void openOldest() throws IOException {
-        L2IndexValue l2IndexValue = readIndexManager.findOldest();
-        if (l2IndexValue == null) {
+        Sequence sequence = readIndexManager.findOldest();
+        if (sequence == null) {
             throw new IOException("failed to open oldest.");
         }
-        Sequence sequence = l2IndexValue.getSequence();
         readDataManager.open(new Sequence(sequence));
     }
 
     @Override
     public void openLatest() throws IOException {
-        L2IndexValue l2IndexValue = readIndexManager.findLatest();
-        if (l2IndexValue == null) {
+        Sequence sequence = readIndexManager.findLatest();
+        if (sequence == null) {
             throw new IOException("failed to open latest.");
         }
-        Sequence sequence = l2IndexValue.getSequence();
         readDataManager.open(new Sequence(sequence));
     }
 
     @Override
     public void open(BinlogInfo binlogInfo) throws IOException {
-        L2IndexValue l2IndexValue = readIndexManager.find(new L1IndexKey(binlogInfo));
-        if (l2IndexValue == null) {
+        Sequence sequence = readIndexManager.find(binlogInfo);
+        if (sequence == null) {
             throw new IOException("failed to open.");
         }
-        Sequence sequence = l2IndexValue.getSequence();
         readDataManager.open(new Sequence(sequence));
     }
 

@@ -1,44 +1,27 @@
 package com.dianping.puma.storage.index;
 
-import com.dianping.puma.common.AbstractLifeCycle;
+import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.filesystem.FileSystem;
 
 import java.io.File;
 import java.io.IOException;
 
-public final class SeriesIndexManagerFinder extends AbstractLifeCycle implements IndexManagerFinder {
+public final class SeriesIndexManagerFinder {
 
-	private String database;
-
-	public SeriesIndexManagerFinder(String database) {
-		this.database = database;
-	}
-
-	@Override
-	protected void doStart() {
-	}
-
-	@Override
-	protected void doStop() {
-	}
-
-	@Override
-	public ReadIndexManager<L1IndexKey, L1IndexValue> findL1ReadIndexManager() throws IOException {
+	public static L1SingleReadIndexManager findL1ReadIndexManager(String database) throws IOException {
 		File file = FileSystem.visitL1IndexFile(database);
 		return IndexManagerFactory.newL1SingleReadIndexManager(file);
 	}
 
-	@Override
-	public ReadIndexManager<L2IndexKey, L2IndexValue> findL2ReadIndexManager(L1IndexValue l1IndexValue)
+	public static L2SingleReadIndexManager findL2ReadIndexManager(String database, Sequence sequence)
 			throws IOException {
-		String date = l1IndexValue.getSequence().date();
-		int number = l1IndexValue.getSequence().getNumber();
+		String date = sequence.date();
+		int number = sequence.getNumber();
 		File file = FileSystem.visitL2IndexFile(database, date, number);
 		return IndexManagerFactory.newL2SingleReadIndexManager(file);
 	}
 
-	@Override
-	public WriteIndexManager<L1IndexKey, L1IndexValue> findL1WriteIndexManager() throws IOException {
+	public static L1SingleWriteIndexManager findL1WriteIndexManager(String database) throws IOException {
 		File file = FileSystem.visitL1IndexFile(database);
 		if (file == null) {
 			file = FileSystem.nextL1IndexFile(database);
@@ -46,8 +29,7 @@ public final class SeriesIndexManagerFinder extends AbstractLifeCycle implements
 		return IndexManagerFactory.newL1SingleWriteIndexManager(file);
 	}
 
-	@Override
-	public WriteIndexManager<L2IndexKey, L2IndexValue> findNextL2WriteIndexManager() throws IOException {
+	public static L2SingleWriteIndexManager findNextL2WriteIndexManager(String database) throws IOException {
 		File file = FileSystem.nextL2IndexFile(database);
 		return IndexManagerFactory.newL2SingleWriteIndexManager(file);
 	}

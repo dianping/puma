@@ -3,17 +3,14 @@ package com.dianping.puma.storage.index;
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.storage.bucket.BucketFactory;
 import com.dianping.puma.storage.bucket.ReadBucket;
-import com.dianping.puma.storage.index.IndexKey;
-import com.dianping.puma.storage.index.IndexValue;
-import com.dianping.puma.storage.index.ReadIndexManager;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 
-public abstract class SingleReadIndexManager<K extends IndexKey<K>, V extends IndexValue>
-		extends AbstractLifeCycle implements ReadIndexManager<K, V> {
+public abstract class SingleReadIndexManager<K, V> extends AbstractLifeCycle
+		implements ReadIndexManager<K, V> {
 
 	private final File file;
 
@@ -81,7 +78,7 @@ public abstract class SingleReadIndexManager<K extends IndexKey<K>, V extends In
 				data = readBucket.next();
 				if (data != null) {
 					Pair<K, V> pair = decode(data);
-					if (indexKey.compareTo(pair.getLeft()) >= 0) {
+					if (!greater(indexKey, pair.getLeft())) {
 						return pair.getRight();
 					}
 				}
@@ -90,6 +87,8 @@ public abstract class SingleReadIndexManager<K extends IndexKey<K>, V extends In
 			return null;
 		}
 	}
+
+	abstract protected boolean greater(K aIndexKey, K bIndexKey);
 
 	abstract protected Pair<K, V> decode(byte[] data) throws IOException;
 }

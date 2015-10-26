@@ -5,17 +5,14 @@ import com.dianping.puma.storage.Sequence;
 
 import java.io.File;
 
-public final class L1SingleWriteIndexManager extends SingleWriteIndexManager<L1IndexKey, L1IndexValue> {
+public final class L1SingleWriteIndexManager extends SingleWriteIndexManager<BinlogInfo, Sequence> {
 
 	public L1SingleWriteIndexManager(File file, int bufSizeByte, int maxSizeByte) {
 		super(file, bufSizeByte, maxSizeByte);
 	}
 
 	@Override
-	protected byte[] encode(L1IndexKey indexKey, L1IndexValue indexValue) {
-		BinlogInfo binlogInfo = indexKey.getBinlogInfo();
-		Sequence sequence = indexValue.getSequence();
-
+	protected byte[] encode(BinlogInfo binlogInfo, Sequence sequence) {
 		return new StringBuilder()
 				.append(binlogInfo.getTimestamp())
 				.append("!")

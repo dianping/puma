@@ -36,25 +36,13 @@ public class L2SingleReadIndexManagerTest extends StorageBaseTest {
 
 	@Test
 	public void testFindOldest() throws Exception {
-		l2SingleWriteIndexManager.append(
-				new L2IndexKey(new BinlogInfo(0, 1, "2", 3)),
-				new L2IndexValue(new Sequence(2015, 0, 0))
-		);
-
-		l2SingleWriteIndexManager.append(
-				new L2IndexKey(new BinlogInfo(1, 2, "3", 4)),
-				new L2IndexValue(new Sequence(2015, 0, 10))
-		);
-
-		l2SingleWriteIndexManager.append(
-				new L2IndexKey(new BinlogInfo(2, 3, "4", 5)),
-				new L2IndexValue(new Sequence(2015, 0, 20))
-		);
-
+		l2SingleWriteIndexManager.append(new BinlogInfo(0, 1, "2", 3), new Sequence(2015, 0, 0));
+		l2SingleWriteIndexManager.append(new BinlogInfo(1, 2, "3", 4), new Sequence(2015, 0, 10));
+		l2SingleWriteIndexManager.append(new BinlogInfo(2, 3, "4", 5), new Sequence(2015, 0, 20));
 		l2SingleWriteIndexManager.flush();
 
-		L2IndexValue l2IndexValue = l2SingleReadIndexManager.findOldest();
-		assertEquals(new Sequence(2015, 0, 0), l2IndexValue.getSequence());
+		Sequence sequence = l2SingleReadIndexManager.findOldest();
+		assertEquals(new Sequence(2015, 0, 0), sequence);
 	}
 
 	@Test
@@ -64,25 +52,13 @@ public class L2SingleReadIndexManagerTest extends StorageBaseTest {
 
 	@Test
 	public void testFindLatest() throws Exception {
-		l2SingleWriteIndexManager.append(
-				new L2IndexKey(new BinlogInfo(0, 1, "2", 3)),
-				new L2IndexValue(new Sequence(2015, 0, 0))
-		);
-
-		l2SingleWriteIndexManager.append(
-				new L2IndexKey(new BinlogInfo(1, 2, "3", 4)),
-				new L2IndexValue(new Sequence(2015, 0, 10))
-		);
-
-		l2SingleWriteIndexManager.append(
-				new L2IndexKey(new BinlogInfo(2, 3, "4", 5)),
-				new L2IndexValue(new Sequence(2015, 0, 20))
-		);
-
+		l2SingleWriteIndexManager.append(new BinlogInfo(0, 1, "2", 3), new Sequence(2015, 0, 0));
+		l2SingleWriteIndexManager.append(new BinlogInfo(1, 2, "3", 4), new Sequence(2015, 0, 10));
+		l2SingleWriteIndexManager.append(new BinlogInfo(2, 3, "4", 5), new Sequence(2015, 0, 20));
 		l2SingleWriteIndexManager.flush();
 
-		L2IndexValue l2IndexValue = l2SingleReadIndexManager.findLatest();
-		assertEquals(new Sequence(2015, 0, 20), l2IndexValue.getSequence());
+		Sequence sequence = l2SingleReadIndexManager.findLatest();
+		assertEquals(new Sequence(2015, 0, 20), sequence);
 	}
 
 	@Test
@@ -92,30 +68,18 @@ public class L2SingleReadIndexManagerTest extends StorageBaseTest {
 
 	@Test
 	public void testFind() throws IOException {
-		l2SingleWriteIndexManager.append(
-				new L2IndexKey(new BinlogInfo(0, 1, "2", 3)),
-				new L2IndexValue(new Sequence(2015, 0, 0))
-		);
-
-		l2SingleWriteIndexManager.append(
-				new L2IndexKey(new BinlogInfo(1, 1, "2", 3)),
-				new L2IndexValue(new Sequence(2015, 0, 10))
-		);
-
-		l2SingleWriteIndexManager.append(
-				new L2IndexKey(new BinlogInfo(2, 1, "2", 3)),
-				new L2IndexValue(new Sequence(2015, 0, 20))
-		);
-
+		l2SingleWriteIndexManager.append(new BinlogInfo(0, 1, "2", 3), new Sequence(2015, 0, 0));
+		l2SingleWriteIndexManager.append(new BinlogInfo(1, 2, "3", 4), new Sequence(2015, 0, 10));
+		l2SingleWriteIndexManager.append(new BinlogInfo(2, 3, "4", 5), new Sequence(2015, 0, 20));
 		l2SingleWriteIndexManager.flush();
 
-		L2IndexValue l2IndexValue = l2SingleReadIndexManager.find(new L2IndexKey(new BinlogInfo(1, 1, "2", 3)));
-		assertEquals(new Sequence(2015, 0, 0), l2IndexValue.getSequence());
+		Sequence sequence = l2SingleReadIndexManager.find(new BinlogInfo(1, 1, "2", 3));
+		assertEquals(new Sequence(2015, 0, 0), sequence);
 	}
 
 	@Test
 	public void testFindNull() throws IOException {
-		assertNull(l2SingleReadIndexManager.find(new L2IndexKey(new BinlogInfo(1, 2, "3", 4))));
+		assertNull(l2SingleReadIndexManager.find(new BinlogInfo(1, 2, "3", 4)));
 	}
 
 	@Override @After

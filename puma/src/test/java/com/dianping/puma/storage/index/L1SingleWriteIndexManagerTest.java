@@ -36,39 +36,31 @@ public class L1SingleWriteIndexManagerTest extends StorageBaseTest {
 
 	@Test
 	public void testEncode() throws Exception {
-		L1IndexKey l1IndexKey0 = new L1IndexKey(
-				new BinlogInfo().setTimestamp(1).setServerId(2).setBinlogFile("mysql-bin.3").setBinlogPosition(4)
-						.setEventIndex(0));
-		L1IndexValue l1IndexValue0 = new L1IndexValue(new Sequence(5, 6));
+		BinlogInfo binlogInfo0 = new BinlogInfo(1, 2, "mysql-bin.3", 4);
+		Sequence sequence0 = new Sequence(5, 6);
 		String string0 = "1!2!mysql-bin.3!4=5-Bucket-6";
-		assertArrayEquals(string0.getBytes(), l1SingleWriteIndexManager.encode(l1IndexKey0, l1IndexValue0));
+		assertArrayEquals(string0.getBytes(), l1SingleWriteIndexManager.encode(binlogInfo0, sequence0));
 
-		L1IndexKey l1IndexKey1 = new L1IndexKey(
-				new BinlogInfo().setTimestamp(2).setServerId(3).setBinlogFile("mysql-bin.4").setBinlogPosition(5)
-						.setEventIndex(0));
-		L1IndexValue l1IndexValue1 = new L1IndexValue(new Sequence(6, 7));
+		BinlogInfo binlogInfo1 = new BinlogInfo(2, 3, "mysql-bin.4", 5);
+		Sequence sequence1 = new Sequence(6, 7);
 		String string1 = "2!3!mysql-bin.4!5=6-Bucket-7";
-		assertArrayEquals(string1.getBytes(), l1SingleWriteIndexManager.encode(l1IndexKey1, l1IndexValue1));
+		assertArrayEquals(string1.getBytes(), l1SingleWriteIndexManager.encode(binlogInfo1, sequence1));
 	}
 
 	@Test
 	public void testAppendAndFlush() throws Exception {
 		BufferedReader bufferedReader = new BufferedReader(new FileReader(bucket));
 
-		L1IndexKey l1IndexKey0 = new L1IndexKey(
-				new BinlogInfo().setTimestamp(1).setServerId(2).setBinlogFile("mysql-bin.3").setBinlogPosition(4)
-						.setEventIndex(0));
-		L1IndexValue l1IndexValue0 = new L1IndexValue(new Sequence(5, 6));
-		l1SingleWriteIndexManager.append(l1IndexKey0, l1IndexValue0);
+		BinlogInfo binlogInfo0 = new BinlogInfo(1, 2, "mysql-bin.3", 4);
+		Sequence sequence0 = new Sequence(5, 6);
+		l1SingleWriteIndexManager.append(binlogInfo0, sequence0);
 		l1SingleWriteIndexManager.flush();
 
 		assertEquals("1!2!mysql-bin.3!4=5-Bucket-6", bufferedReader.readLine());
 
-		L1IndexKey l1IndexKey1 = new L1IndexKey(
-				new BinlogInfo().setTimestamp(2).setServerId(3).setBinlogFile("mysql-bin.4").setBinlogPosition(5)
-						.setEventIndex(0));
-		L1IndexValue l1IndexValue1 = new L1IndexValue(new Sequence(6, 7));
-		l1SingleWriteIndexManager.append(l1IndexKey1, l1IndexValue1);
+		BinlogInfo binlogInfo1 = new BinlogInfo(2, 3, "mysql-bin.4", 5);
+		Sequence sequence1 = new Sequence(6, 7);
+		l1SingleWriteIndexManager.append(binlogInfo1, sequence1);
 		l1SingleWriteIndexManager.flush();
 
 		assertEquals("2!3!mysql-bin.4!5=6-Bucket-7", bufferedReader.readLine());

@@ -63,7 +63,7 @@ public final class GroupWriteDataManager extends AbstractLifeCycle
 			writeDataManager.flush();
 		}
 
-		writeDataManager = DataManagerFinder.findNextMasterWriteDataManager(database);
+		writeDataManager = GroupDataManagerFinder.findNextMasterWriteDataManager(database);
 		writeDataManager.start();
 		return writeDataManager.append(binlogEvent);
 	}
@@ -81,7 +81,7 @@ public final class GroupWriteDataManager extends AbstractLifeCycle
 			writeDataManager.flush();
 		}
 
-		writeDataManager = DataManagerFinder.findNextMasterWriteDataManager(database);
+		writeDataManager = GroupDataManagerFinder.findNextMasterWriteDataManager(database);
 		writeDataManager.start();
 	}
 }

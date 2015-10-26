@@ -1,18 +1,18 @@
 package com.dianping.puma.storage.index;
 
 import com.dianping.puma.common.AbstractLifeCycle;
+import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.storage.Sequence;
 
 import java.io.IOException;
 
-public final class SeriesWriteIndexManager extends AbstractLifeCycle implements WriteIndexManager<L1IndexKey, L2IndexValue> {
+public final class SeriesWriteIndexManager extends AbstractLifeCycle implements WriteIndexManager<BinlogInfo, Sequence> {
 
     private String database;
 
-    private IndexManagerFinder indexManagerFinder;
+    private L1SingleWriteIndexManager l1WriteIndexManager;
 
-    private WriteIndexManager<L1IndexKey, L1IndexValue> l1WriteIndexManager;
-
-    private WriteIndexManager<L2IndexKey, L2IndexValue> l2WriteIndexManager;
+    private L2SingleWriteIndexManager l2WriteIndexManager;
 
     public SeriesWriteIndexManager(String database) {
         this.database = database;
@@ -20,14 +20,10 @@ public final class SeriesWriteIndexManager extends AbstractLifeCycle implements 
 
     @Override
     protected void doStart() {
-        indexManagerFinder = new SeriesIndexManagerFinder(database);
-        indexManagerFinder.start();
     }
 
     @Override
     protected void doStop() {
-        indexManagerFinder.stop();
-
         if (l1WriteIndexManager != null) {
             l1WriteIndexManager.stop();
         }
@@ -38,10 +34,10 @@ public final class SeriesWriteIndexManager extends AbstractLifeCycle implements 
     }
 
     @Override
-    public void append(L1IndexKey l1IndexKey, L2IndexValue l2IndexValue) throws IOException {
+    public void append(BinlogInfo binlogInfo, Sequence sequence) throws IOException {
         checkStop();
 
-        l2WriteIndexManager.append(new L2IndexKey(l1IndexKey.getBinlogInfo()), l2IndexValue);
+        l2WriteIndexManager.append(binlogInfo, sequence);
     }
 
     @Override
@@ -60,28 +56,28 @@ public final class SeriesWriteIndexManager extends AbstractLifeCycle implements 
     /**
      * Explicitly page index bucket, call it when paging.
      *
-     * @param l1IndexKey   key of l1 index.
-     * @param l2IndexValue value of l2 index.
+     * @param binlogInfo key of l1 index.
+     * @param sequence   value of l2 index.
      * @throws IOException
      */
-    public void pageAppend(L1IndexKey l1IndexKey, L2IndexValue l2IndexValue) throws IOException {
+    public void pageAppend(BinlogInfo binlogInfo, Sequence sequence) throws IOException {
         checkStop();
 
         if (l1WriteIndexManager == null) {
-            l1WriteIndexManager = indexManagerFinder.findL1WriteIndexManager();
+            l1WriteIndexManager = SeriesIndexManagerFinder.findL1WriteIndexManager(database);
             l1WriteIndexManager.start();
         }
 
         // Append l1 index when paging.
-        l1WriteIndexManager.append(l1IndexKey, new L1IndexValue(l2IndexValue.getSequence()));
+        l1WriteIndexManager.append(binlogInfo, sequence);
 
         // Flush l2 index before paging.
         if (l2WriteIndexManager != null) {
             l2WriteIndexManager.flush();
         }
 
-        l2WriteIndexManager = indexManagerFinder.findNextL2WriteIndexManager();
+        l2WriteIndexManager = SeriesIndexManagerFinder.findNextL2WriteIndexManager(database);
         l2WriteIndexManager.start();
-        l2WriteIndexManager.append(new L2IndexKey(l1IndexKey.getBinlogInfo()), l2IndexValue);
+        l2WriteIndexManager.append(binlogInfo, sequence);
     }
 }

@@ -8,7 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.io.File;
 import java.io.IOException;
 
-public final class L2SingleReadIndexManager extends SingleReadIndexManager<L2IndexKey, L2IndexValue> {
+public final class L2SingleReadIndexManager extends SingleReadIndexManager<BinlogInfo, Sequence> {
 
 	public static final int ENCODE_NUMBER = 2;
 	public static final int BINLOG_INFO_FIELD_NUMBER = 4;
@@ -19,7 +19,31 @@ public final class L2SingleReadIndexManager extends SingleReadIndexManager<L2Ind
 	}
 
 	@Override
-	protected Pair<L2IndexKey, L2IndexValue> decode(byte[] data) throws IOException {
+	protected boolean greater(BinlogInfo aBinlogInfo, BinlogInfo bBinlogInfo) {
+		long aServerId = aBinlogInfo.getServerId();
+		long bServerId = bBinlogInfo.getServerId();
+		if (aServerId == bServerId) {
+			String aBinlogFile = aBinlogInfo.getBinlogFile();
+			String bBinlogFile = bBinlogInfo.getBinlogFile();
+			int result = aBinlogFile.compareTo(bBinlogFile);
+			if (result > 0) {
+				return true;
+			} else if (result < 0) {
+				return false;
+			} else {
+				long aBinlogPosition = aBinlogInfo.getBinlogPosition();
+				long bBinlogPosition = bBinlogInfo.getBinlogPosition();
+				return aBinlogPosition - bBinlogPosition > 0;
+			}
+		} else {
+			long aTimestamp = aBinlogInfo.getTimestamp();
+			long bTimestamp = bBinlogInfo.getTimestamp();
+			return aTimestamp > bTimestamp;
+		}
+	}
+
+	@Override
+	protected Pair<BinlogInfo, Sequence> decode(byte[] data) throws IOException {
 		String rawString = new String(data);
 		String[] rawStrings = StringUtils.split(rawString, "=");
 		if (rawStrings == null || rawStrings.length != ENCODE_NUMBER) {
@@ -49,6 +73,6 @@ public final class L2SingleReadIndexManager extends SingleReadIndexManager<L2Ind
 		int offset = Integer.valueOf(sequenceStrings[2]);
 		Sequence sequence = new Sequence(date, number, offset);
 
-		return Pair.of(new L2IndexKey(binlogInfo), new L2IndexValue(sequence));
+		return Pair.of(binlogInfo, sequence);
 	}
 }

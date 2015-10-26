@@ -36,25 +36,13 @@ public class L2SingleWriteIndexManagerTest extends StorageBaseTest {
 
 	@Test
 	public void testAppendAndFlush() throws Exception {
-		l2SingleWriteIndexManager.append(
-				new L2IndexKey(new BinlogInfo(0, 1, "2", 3)),
-				new L2IndexValue(new Sequence(2015, 0, 0))
-		);
-
-		l2SingleWriteIndexManager.append(
-				new L2IndexKey(new BinlogInfo(1, 2, "3", 4)),
-				new L2IndexValue(new Sequence(2015, 0, 10))
-		);
-
-		l2SingleWriteIndexManager.append(
-				new L2IndexKey(new BinlogInfo(2, 3, "4", 5)),
-				new L2IndexValue(new Sequence(2015, 0, 20))
-		);
-
+		l2SingleWriteIndexManager.append(new BinlogInfo(0, 1, "2", 3), new Sequence(2015, 0, 0));
+		l2SingleWriteIndexManager.append(new BinlogInfo(1, 2, "3", 4), new Sequence(2015, 0, 10));
+		l2SingleWriteIndexManager.append(new BinlogInfo(2, 3, "4", 5), new Sequence(2015, 0, 20));
 		l2SingleWriteIndexManager.flush();
 
-		L2IndexValue l2IndexValue = l2SingleReadIndexManager.findLatest();
-		assertEquals(new Sequence(2015, 0, 20), l2IndexValue.getSequence());
+		Sequence sequence = l2SingleReadIndexManager.findLatest();
+		assertEquals(new Sequence(2015, 0, 20), sequence);
 	}
 
 	@Override @After

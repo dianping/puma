@@ -3,9 +3,6 @@ package com.dianping.puma.storage.index;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.StorageBaseTest;
-import com.dianping.puma.storage.index.L1IndexKey;
-import com.dianping.puma.storage.index.L1IndexValue;
-import com.dianping.puma.storage.index.L1SingleReadIndexManager;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.After;
@@ -44,24 +41,13 @@ public class L1SingleReadIndexManagerTest extends StorageBaseTest {
 
 	@Test
 	public void testDecode() throws Exception {
-		String string0 = "1441100813!3013306141!mysql-bin.002217!268451845=20150901-Bucket-0";
-		Pair<L1IndexKey, L1IndexValue> pair0 = l1SingleReadIndexManager.decode(string0.getBytes());
-		assertTrue(EqualsBuilder.reflectionEquals(
-				new L1IndexKey(new BinlogInfo().setTimestamp(1441100813).setBinlogFile("mysql-bin.002217")
-						.setBinlogPosition(268451845).setEventIndex(
-								0).setServerId(3013306141L)),
-				pair0.getLeft()
-		));
-		assertTrue(EqualsBuilder.reflectionEquals(new L1IndexValue(new Sequence(20150901, 0, 0)), pair0.getRight()));
-
 		String string1 = "1!2!mysql-bin.3!4=5-Bucket-6";
-		Pair<L1IndexKey, L1IndexValue> pair1 = l1SingleReadIndexManager.decode(string1.getBytes());
+		Pair<BinlogInfo, Sequence> pair1 = l1SingleReadIndexManager.decode(string1.getBytes());
 		assertTrue(EqualsBuilder.reflectionEquals(
-				new L1IndexKey(new BinlogInfo().setTimestamp(1).setBinlogFile("mysql-bin.3").setBinlogPosition(4)
-						.setEventIndex(0).setServerId(2)),
+				new BinlogInfo(1, 2, "mysql-bin.3", 4),
 				pair1.getLeft()
 		));
-		assertTrue(EqualsBuilder.reflectionEquals(new L1IndexValue(new Sequence(5, 6, 0)), pair1.getRight()));
+		assertTrue(EqualsBuilder.reflectionEquals(new Sequence(5, 6, 0), pair1.getRight()));
 	}
 
 	@Test(expected = IOException.class)
@@ -87,9 +73,7 @@ public class L1SingleReadIndexManagerTest extends StorageBaseTest {
 		bufferedWriter.newLine();
 		bufferedWriter.flush();
 
-		assertTrue(EqualsBuilder.reflectionEquals(
-				new Sequence(5, 6, 0),
-				l1SingleReadIndexManager.findOldest().getSequence()));
+		assertTrue(EqualsBuilder.reflectionEquals(new Sequence(5, 6, 0), l1SingleReadIndexManager.findOldest()));
 	}
 
 	@Test
@@ -122,9 +106,7 @@ public class L1SingleReadIndexManagerTest extends StorageBaseTest {
 		bufferedWriter.newLine();
 		bufferedWriter.flush();
 
-		assertTrue(EqualsBuilder.reflectionEquals(
-				new Sequence(7, 8, 0),
-				l1SingleReadIndexManager.findLatest().getSequence()));
+		assertTrue(EqualsBuilder.reflectionEquals(new Sequence(7, 8, 0), l1SingleReadIndexManager.findLatest()));
 	}
 
 	@Test
@@ -158,31 +140,22 @@ public class L1SingleReadIndexManagerTest extends StorageBaseTest {
 		bufferedWriter.flush();
 
 		assertTrue(EqualsBuilder.reflectionEquals(
-				l1SingleReadIndexManager.find(new L1IndexKey(
-						new BinlogInfo().setTimestamp(1).setServerId(2).setBinlogFile("mysql-bin.3")
-								.setBinlogPosition(4).setEventIndex(0))).getSequence(),
-				new Sequence(5, 6, 0)
+				l1SingleReadIndexManager.find(new BinlogInfo(1, 2, "mysql-bin.3", 4)), new Sequence(5, 6, 0)
 		));
 
 		assertTrue(EqualsBuilder.reflectionEquals(
-				l1SingleReadIndexManager.find(new L1IndexKey(
-						new BinlogInfo().setTimestamp(2).setServerId(3).setBinlogFile("mysql-bin.4")
-								.setBinlogPosition(5).setEventIndex(0))).getSequence(),
+				l1SingleReadIndexManager.find(new BinlogInfo(2, 3, "mysql-bin.4", 5)),
 				new Sequence(6, 7, 0)
 		));
 
 		assertTrue(EqualsBuilder.reflectionEquals(
-				l1SingleReadIndexManager.find(new L1IndexKey(
-						new BinlogInfo().setTimestamp(3).setServerId(4).setBinlogFile("mysql-bin.5")
-								.setBinlogPosition(6).setEventIndex(0))).getSequence(),
+				l1SingleReadIndexManager.find(new BinlogInfo(3, 4, "mysql-bin.5", 6)),
 				new Sequence(7, 8, 0)
 		));
 	}
 
 	@Test
 	public void testFindNull() throws Exception {
-		assertNull(l1SingleReadIndexManager.find(new L1IndexKey(
-				new BinlogInfo().setTimestamp(2).setServerId(3).setBinlogFile("mysql-bin.4")
-						.setBinlogPosition(5).setEventIndex(0))));
+		assertNull(l1SingleReadIndexManager.find(new BinlogInfo(2, 3, "mysql-bin.4", 5)));
 	}
 }

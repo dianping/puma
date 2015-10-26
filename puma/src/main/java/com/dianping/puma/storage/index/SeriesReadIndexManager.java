@@ -1,85 +1,82 @@
 package com.dianping.puma.storage.index;
 
 import com.dianping.puma.common.AbstractLifeCycle;
+import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.storage.Sequence;
 
 import java.io.IOException;
 
 public final class SeriesReadIndexManager extends AbstractLifeCycle
-		implements ReadIndexManager<L1IndexKey, L2IndexValue> {
+        implements ReadIndexManager<BinlogInfo, Sequence> {
 
-	private String database;
+    private String database;
 
-	private IndexManagerFinder indexManagerFinder;
+    private L1SingleReadIndexManager l1ReadIndexManager;
 
-	private ReadIndexManager<L1IndexKey, L1IndexValue> l1ReadIndexManager;
+    private L2SingleReadIndexManager l2ReadIndexManager;
 
-	private ReadIndexManager<L2IndexKey, L2IndexValue> l2ReadIndexManager;
+    public SeriesReadIndexManager(String database) {
+        this.database = database;
+    }
 
-	public SeriesReadIndexManager(String database) {
-		this.database = database;
-	}
+    @Override
+    protected void doStart() {
+    }
 
-	@Override
-	protected void doStart() {
-		indexManagerFinder = new SeriesIndexManagerFinder(database);
-		indexManagerFinder.start();
-	}
+    @Override
+    protected void doStop() {
+        if (l1ReadIndexManager != null) {
+            l1ReadIndexManager.stop();
+        }
 
-	@Override
-	protected void doStop() {
-		if (indexManagerFinder != null) {
-			indexManagerFinder.stop();
-		}
+        if (l2ReadIndexManager != null) {
+            l2ReadIndexManager.stop();
+        }
+    }
 
-		if (l1ReadIndexManager != null) {
-			l1ReadIndexManager.stop();
-		}
+    @Override
+    public Sequence findOldest() throws IOException {
+        checkStop();
 
-		if (l2ReadIndexManager != null) {
-			l2ReadIndexManager.stop();
-		}
-	}
+        l1ReadIndexManager = SeriesIndexManagerFinder.findL1ReadIndexManager(database);
+        l1ReadIndexManager.start();
+        Sequence sequence = l1ReadIndexManager.findOldest();
 
-	@Override
-	public L2IndexValue findOldest() throws IOException {
-		checkStop();
+        l2ReadIndexManager = SeriesIndexManagerFinder.findL2ReadIndexManager(database, sequence);
+        l2ReadIndexManager.start();
+        return l2ReadIndexManager.findOldest();
+    }
 
-		if (l1ReadIndexManager == null) {
-			l1ReadIndexManager = indexManagerFinder.findL1ReadIndexManager();
-			l1ReadIndexManager.start();
-		}
+    @Override
+    public Sequence findLatest() throws IOException {
+        checkStop();
 
-		L1IndexValue l1IndexValue = l1ReadIndexManager.findOldest();
-		l2ReadIndexManager = indexManagerFinder.findL2ReadIndexManager(l1IndexValue);
-		l2ReadIndexManager.start();
-		return l2ReadIndexManager.findOldest();
-	}
+        l1ReadIndexManager = SeriesIndexManagerFinder.findL1ReadIndexManager(database);
+        l1ReadIndexManager.start();
+        Sequence sequence = l1ReadIndexManager.findLatest();
 
-	@Override
-	public L2IndexValue findLatest() throws IOException {
-		checkStop();
+        l2ReadIndexManager = SeriesIndexManagerFinder.findL2ReadIndexManager(database, sequence);
+        l2ReadIndexManager.start();
+        return l2ReadIndexManager.findLatest();
+    }
 
-		if (l1ReadIndexManager == null) {
-			l1ReadIndexManager = indexManagerFinder.findL1ReadIndexManager();
-			l1ReadIndexManager.start();
-		}
+    @Override
+    public Sequence find(BinlogInfo binlogInfo) throws IOException {
+        checkStop();
 
-		L1IndexValue l1IndexValue = l1ReadIndexManager.findLatest();
-		l2ReadIndexManager = indexManagerFinder.findL2ReadIndexManager(l1IndexValue);
-		return l2ReadIndexManager.findLatest();
-	}
+        l1ReadIndexManager = SeriesIndexManagerFinder.findL1ReadIndexManager(database);
+        l1ReadIndexManager.start();
 
-	@Override
-	public L2IndexValue find(L1IndexKey l1IndexKey) throws IOException {
-		checkStop();
+        Sequence sequence = l1ReadIndexManager.find(binlogInfo);
+        if (sequence == null) {
+            sequence = findLatest();
+            if (sequence == null) {
+                throw new IOException("failed to find binlog info.");
+            }
+        }
 
-		if (l1ReadIndexManager == null) {
-			l1ReadIndexManager = indexManagerFinder.findL1ReadIndexManager();
-			l1ReadIndexManager.start();
-		}
-
-		L1IndexValue l1IndexValue = l1ReadIndexManager.find(l1IndexKey);
-		l2ReadIndexManager = indexManagerFinder.findL2ReadIndexManager(l1IndexValue);
-		return l2ReadIndexManager.find(new L2IndexKey(l1IndexKey));
-	}
+        l2ReadIndexManager = SeriesIndexManagerFinder.findL2ReadIndexManager(database, sequence);
+        l2ReadIndexManager.start();
+        return l2ReadIndexManager.find(binlogInfo);
+    }
 }

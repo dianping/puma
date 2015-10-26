@@ -13,22 +13,16 @@ import java.util.zip.GZIPOutputStream;
 @Service
 public final class ScheduledArchiveService implements ArchiveService {
 
-	private static final int BUF_SIZE = 1024;
-
-	@Autowired
-	FileSystem fileSystem;
+	private static final int GZIP_BUF_SIZE = 1024;
 
 	@Autowired
 	ArchiveStrategy archiveStrategy;
 
 	@Override
 	public void archive() {
-		File[] masterDataDateDirs = fileSystem.visitMasterDataDateDirs();
-		File slaveDataDir = fileSystem.getSlaveDataDir();
+		File[] masterDataDateDirs = FileSystem.visitMasterDataDateDirs();
+		File slaveDataDir = FileSystem.getSlaveDataDir();
 		for (File masterDataDateDir: masterDataDateDirs) {
-			Date date = fileSystem.parseDateDir(masterDataDateDir);
-			File slaveDataDateDir = fileSystem.createDateDir(slaveDataDir, date);
-			archive(masterDataDateDir, slaveDataDateDir);
 		}
 	}
 
@@ -71,7 +65,7 @@ public final class ScheduledArchiveService implements ArchiveService {
 		FileInputStream is = new FileInputStream(srcFile);
 		GZIPOutputStream gos = new GZIPOutputStream(new FileOutputStream(dstFile));
 
-		byte[] data = new byte[BUF_SIZE];
+		byte[] data = new byte[GZIP_BUF_SIZE];
 		int count;
 
 		while ((count = is.read(data)) > 0) {

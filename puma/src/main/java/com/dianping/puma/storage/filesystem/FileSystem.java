@@ -1,13 +1,13 @@
 package com.dianping.puma.storage.filesystem;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 public final class FileSystem {
 
@@ -19,15 +19,23 @@ public final class FileSystem {
 
 	private static String l2IndexSuffix = ".l2idx";
 
+	private static String masterDataPrefix = "bucket-";
+
+	private static String masterDataSuffix = "";
+
+	private static String slaveDataPrefix = "bucket-";
+
+	private static String slaveDataSuffix = "";
+
 	private static String datePattern = "yyyyMMdd";
 
-	private static File l1IndexDir;
+	private static String l1IndexDir = "/data/appdatas/puma/binlogIndex/l1Index/";
 
-	private static File l2IndexDir;
+	private static String l2IndexDir = "/data/appdatas/puma/binlogIndex/l2Index/";
 
-	private static File masterDataDir;
+	private static String masterDataDir = "/data/appdatas/puma/storage/master/";
 
-	private static File slaveDataDir;
+	private static String slaveDataDir = "/data/appdatas/puma/storage/slave";
 
 	private static DateFormat dateFormat = new SimpleDateFormat(datePattern);
 
@@ -35,19 +43,19 @@ public final class FileSystem {
 	}
 
 	public static File getL1IndexDir() {
-		return null;
+		return new File(l1IndexDir);
 	}
 
 	public static File getL2IndexDir() {
-		return null;
+		return new File(l2IndexDir);
 	}
 
 	public static File getMasterDataDir() {
-		return null;
+		return new File(masterDataDir);
 	}
 
 	public static File getSlaveDataDir() {
-		return null;
+		return new File(slaveDataDir);
 	}
 
 	public static File visitL1IndexFile(String database) {
@@ -57,138 +65,208 @@ public final class FileSystem {
 	}
 
 	public static File[] visitL2IndexDateDirs() {
-		File[] databaseDirs = l2IndexDir.listFiles(new FileFilter() {
-			@Override
-			public boolean accept(File file) {
-				return file.isDirectory();
-			}
-		});
-
-		if (databaseDirs == null) {
-			return new File[0];
+		File[] dateDirs = new File[0];
+		File[] databaseDirs = visitDatabaseDirs(l2IndexDir);
+		for (File databaseDir: databaseDirs) {
+			ArrayUtils.add(dateDirs, visitL2IndexDateDirs(databaseDir.getName()));
 		}
-
-		List<File> l2Indices = new ArrayList<File>();
-		for (File databaseDir : databaseDirs) {
-			String database = databaseDir.getName();
-			File[] files = visitL2IndexDateDirs(database);
-			l2Indices.addAll(Arrays.asList(files));
-		}
-
-		return l2Indices.toArray(new File[]{});
+		return dateDirs;
 	}
 
 	public static File[] visitL2IndexDateDirs(String database) {
-		File databaseDir = new File(l2IndexDir, database);
-		File[] l2Indices = databaseDir.listFiles(new FileFilter() {
-			@Override
-			public boolean accept(File file) {
-				return file.isDirectory();
-			}
-		});
-
-		if (l2Indices == null) {
-			return new File[0];
-		}
-		return l2Indices;
+		return visitDateDirs(l2IndexDir, database);
 	}
 
-	public static File visitL2IndexFile(String database, int date, int number) {
-		File databaseDir = new File(l2IndexDir, database);
-		File dateDir = new File(databaseDir, String.valueOf(date));
-		File l2Index = new File(dateDir, genL2IndexName(number));
-		return l2Index.isFile() && l2Index.canRead() && l2Index.canWrite() ? l2Index : null;
+	public static File visitL2IndexFile(String database, String date, int number) {
+		return visitFile(l2IndexDir, database, date, number, l2IndexPrefix, l2IndexPrefix);
 	}
 
 	public static File nextL2IndexFile(String database) {
-		File[] dateDirs = visitL2IndexDateDirs(database);
-		File maxDateDir = maxDateDir(dateDirs);
-
-		String maxDate = maxDateDir.getName();
-		String curDate = dateFormat.format(new Date());
-		if (curDate.compareTo(maxDate) > 0) {
-			maxDate = curDate;
-			maxDateDir = createDateDir(database, maxDate);
-		}
-
-		File maxL2IndexFile = maxL2IndexFile(database, maxDate);
-		int number = maxL2IndexFile == null ? 0 : parseL2IndexFileNumber(maxL2IndexFile);
-		return createL2IndexFile(database, maxDate, number);
+		int max = maxL2IndexFileNumber(database, today());
+		return createFile(l2IndexDir, database, today(), max + 1);
 	}
 
 	public static File[] visitMasterDataDateDirs() {
-		return null;
+		File[] dateDirs = new File[0];
+		File[] databaseDirs = visitDatabaseDirs(masterDataDir);
+		for (File databaseDir: databaseDirs) {
+			ArrayUtils.add(dateDirs, visitMasterDataDateDirs(databaseDir.getName()));
+		}
+		return dateDirs;
 	}
 
 	public static File[] visitMasterDataDateDirs(String database) {
-		return null;
+		return visitDateDirs(masterDataDir, database);
 	}
 
 	public static File visitMasterDataFile(String database, String date, int number) {
-		return null;
+		return visitFile(masterDataDir, database, date, number, masterDataPrefix, masterDataSuffix);
 	}
 
 	public static File visitNextMasterDataFile(String database, String date, int number) {
+		File file = visitMasterDataFile(database, date, number + 1);
+		if (file != null) {
+			return file;
+		}
+
+		date = tomorrow(date);
+		while ((date = tomorrow(date)).compareTo(today()) <= 0) {
+			file = visitMasterDataFile(database, date, 0);
+			if (file != null) {
+				return file;
+			}
+		}
+
 		return null;
 	}
 
 	public static File nextMasterDataFile(String database) {
-		return null;
+		int max = maxMasterFileNumber(database, today());
+		return createFile(masterDataDir, database, today(), max + 1);
 	}
 
 	public static File[] visitSlaveDataDateDirs() {
-		return null;
+		File[] dateDirs = new File[0];
+		File[] databaseDirs = visitDatabaseDirs(slaveDataDir);
+		for (File databaseDir: databaseDirs) {
+			ArrayUtils.add(dateDirs, visitSlaveDataDateDirs(databaseDir.getName()));
+		}
+		return dateDirs;
 	}
 
 	public static File[] visitSlaveDataDateDirs(String database) {
-		return null;
+		return visitDateDirs(slaveDataDir, database);
 	}
 
 	public static File visitSlaveDataFile(String database, String date, int number) {
-		return null;
+		return visitFile(slaveDataDir, database, date, number, slaveDataPrefix, slaveDataSuffix);
 	}
 
 	public static File visitNextSlaveDataFile(String database, String date, int number) {
+		File file = visitSlaveDataFile(database, date, number);
+		if (file != null) {
+			return file;
+		}
+
+		while ((date = tomorrow(date)).compareTo(today()) <= 0) {
+			file = visitSlaveDataFile(database, date, 0);
+			if (file != null) {
+				return file;
+			}
+		}
+
 		return null;
 	}
 
 	public static File nextSlaveDataFile(String database) {
+		int max = maxSlaveFileNumber(database, today());
+		return createFile(slaveDataDir, database, today(), max + 1);
+	}
+
+	public static File mapSlaveDatabaseDir(File masterDatabaseDir) {
+		String path = masterDatabaseDir.getAbsolutePath();
+		String relative = StringUtils.substringAfter(path, masterDataDir);
+		return new File(slaveDataDir, relative);
+	}
+
+	public static File mapSlaveDateDir(File masterDateDir) {
 		return null;
 	}
 
-	public static Date parseDateDir(File dateDir) {
+	public static File mapSlaveFile(File masterfile) {
 		return null;
 	}
 
-	public static File createDateDir(File baseDir, Date date) {
-		return null;
-	}
-
-	protected static File createDateDir(String database, String date) {
-		return null;
-	}
-
-	protected static File createL2IndexFile(String database, String date, int number) {
-		return null;
-	}
-
-	protected static File maxDateDir(File[] dateDirs) {
-		return null;
-	}
-
-	protected static File maxL2IndexFile(String database, String date) {
-		return null;
-	}
-
-	protected static int parseL2IndexFileNumber(File l2IndexFile) {
-		return 0;
-	}
 
 	protected static String genL1IndexName() {
 		return l1IndexPrefix + l1IndexSuffix;
 	}
 
-	protected static String genL2IndexName(int number) {
-		return l2IndexPrefix + number + l2IndexSuffix;
+	protected static String tomorrow(String date) {
+		int dateInt = Integer.valueOf(date);
+		return String.valueOf(dateInt + 1);
+	}
+
+	protected static String today() {
+		return dateFormat.format(new Date());
+	}
+
+	protected static File[] visitDatabaseDirs(String baseDir) {
+		File[] files = new File(baseDir).listFiles(new FileFilter() {
+			@Override
+			public boolean accept(File file) {
+				return true;
+			}
+		});
+
+		return files == null ? new File[0] : files;
+	}
+
+	protected static File[] visitDateDirs(String baseDir, String database) {
+		File databaseDir = new File(baseDir, database);
+		File[] files = databaseDir.listFiles(new FileFilter() {
+			@Override
+			public boolean accept(File file) {
+				return true;
+			}
+		});
+
+		return files == null ? new File[0] : files;
+	}
+
+	protected static File[] visitFiles(String baseDir, String database, String date) {
+		File databaseDir = new File(baseDir, database);
+		File dateDir = new File(databaseDir, date);
+		File[] files = dateDir.listFiles(new FileFilter() {
+			@Override
+			public boolean accept(File pathname) {
+				return true;
+			}
+		});
+
+		return files == null ? new File[0] : files;
+	}
+
+	protected static File visitFile(
+			String baseDir, String database, String date, int number, String prefix, String suffix) {
+		File databaseDir = new File(baseDir, database);
+		File dateDir = new File(databaseDir, date);
+		File file = new File(dateDir, genFileName(number, prefix, suffix));
+
+		return file.isFile() ? file : null;
+	}
+
+	protected static String genFileName(int number, String prefix, String suffix) {
+		return prefix + number + suffix;
+	}
+
+	protected static int maxL2IndexFileNumber(String database, String date) {
+		return maxFileNumber(l2IndexDir, database, date, l2IndexPrefix, l2IndexSuffix);
+	}
+
+	protected static int maxMasterFileNumber(String database, String date) {
+		return maxFileNumber(masterDataDir, database, date, masterDataPrefix, masterDataSuffix);
+	}
+
+	protected static int maxSlaveFileNumber(String database, String date) {
+		return maxFileNumber(slaveDataDir, database, date, slaveDataPrefix, slaveDataSuffix);
+	}
+
+	protected static int maxFileNumber(String baseDir, String database, String date, String prefix, String suffix) {
+		File[] files = visitFiles(baseDir, database, date);
+		int max = -1;
+		for (File file: files) {
+			int number = parseFileNumber(file.getName(), prefix, suffix);
+			max = number > max ? number : max;
+		}
+		return max;
+	}
+
+	protected static int parseFileNumber(String filename, String prefix, String suffix) {
+		return Integer.valueOf(StringUtils.substringBetween(filename, prefix, suffix));
+	}
+
+	protected static File createFile(String baseDir, String database, String date, int number) {
+		return null;
 	}
 }

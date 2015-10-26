@@ -31,13 +31,22 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
 
 	@Override
 	protected void doStart() {
+		writeIndexManager = new SeriesWriteIndexManager(database);
+		writeIndexManager.start();
+
 		writeDataManager = new GroupWriteDataManager(database);
 		writeDataManager.start();
 	}
 
 	@Override
 	protected void doStop() {
-		writeDataManager.stop();
+		if (writeIndexManager != null) {
+			writeIndexManager.stop();
+		}
+
+		if (writeDataManager != null) {
+			writeDataManager.stop();
+		}
 	}
 
 	@Override
@@ -48,12 +57,15 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
 	}
 
 	@Override
-	public void flush() {
+	public void flush() throws IOException {
+		checkStop();
 
+		writeIndexManager.flush();
+		writeDataManager.flush();
 	}
 
 	protected boolean needToPage(BinlogInfo binlogInfo, GroupWriteDataManager writeDataManager) {
-		return false;
+		return !writeDataManager.hasRemainingForWriteOnCurrentPage();
 	}
 
 	protected Sequence nextSequence(BinlogInfo binlogInfo) {
@@ -63,7 +75,10 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
 	private class FlushTask implements Runnable {
 		@Override
 		public void run() {
-			flush();
+			try {
+				flush();
+			} catch (IOException ignore) {
+			}
 		}
 	}
 }

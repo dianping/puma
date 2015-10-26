@@ -31,7 +31,7 @@ public final class SeriesIndexManagerFinder extends AbstractLifeCycle implements
 	@Override
 	public ReadIndexManager<L2IndexKey, L2IndexValue> findL2ReadIndexManager(L1IndexValue l1IndexValue)
 			throws IOException {
-		int date = l1IndexValue.getSequence().getCreationDate();
+		String date = l1IndexValue.getSequence().date();
 		int number = l1IndexValue.getSequence().getNumber();
 		File file = FileSystem.visitL2IndexFile(database, date, number);
 		return IndexManagerFactory.newL2SingleReadIndexManager(file.getAbsolutePath());

@@ -28,24 +28,4 @@
         <property name="binlogIndexBaseDir" value="/data/appdatas/puma/binlogIndex/"/>
     </bean>
 
-    <bean id="storageMasterBackup" class="com.dianping.puma.storage.backup.LocalFileBasedBackup"
-          init-method="init">
-        <property name="workingBaseFolder" value="/data/appdatas/puma/storage/master"/>
-        <property name="backupBaseFolder" value="/data/appdatas/puma/bak/storage/master"/>
-        <property name="backupDay" value="1"/>
-    </bean>
-
-    <bean id="storageSlaveBackup" class="com.dianping.puma.storage.backup.LocalFileBasedBackup"
-          init-method="init">
-        <property name="workingBaseFolder" value="/data/appdatas/puma/storage/slave"/>
-        <property name="backupBaseFolder" value="/data/appdatas/puma/bak/storage/slave"/>
-        <property name="backupDay" value="1"/>
-    </bean>
-
-    <bean id="storageBinlogIndexBackup" class="com.dianping.puma.storage.backup.LocalFileBasedBackup"
-          init-method="init">
-        <property name="workingBaseFolder" value="/data/appdatas/puma/binlogIndex"/>
-        <property name="backupBaseFolder" value="/data/appdatas/puma/bak/binlogIndex"/>
-        <property name="backupDay" value="1"/>
-    </bean>
 </beans>

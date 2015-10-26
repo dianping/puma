@@ -18,6 +18,7 @@ package com.dianping.puma.sender;
 import java.io.IOException;
 import java.util.Map;
 
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.channel.ChannelFactory;
 import com.dianping.puma.storage.channel.ReadChannel;
 import com.dianping.puma.storage.channel.WriteChannel;
@@ -94,7 +95,7 @@ public class FileDumpSender extends AbstractSender {
 					transactionBegin = null;
 				}
 
-				writeChannel.append(null, event);
+				writeChannel.append(event.getBinlogInfo(), event);
 			} else {
 				if (event instanceof RowChangedEvent) {
 					if (((RowChangedEvent) event).isTransactionBegin()) {

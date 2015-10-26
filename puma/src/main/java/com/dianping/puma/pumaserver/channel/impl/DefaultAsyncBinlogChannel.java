@@ -13,9 +13,6 @@ import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
 import com.dianping.puma.status.SystemStatusManager;
 import com.dianping.puma.storage.channel.ChannelFactory;
 import com.dianping.puma.storage.channel.ReadChannel;
-import com.dianping.puma.storage.oldchannel.EventChannel;
-import com.google.common.collect.Lists;
-import com.google.common.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -14,19 +14,16 @@ import java.io.IOException;
 public final class ScheduledDeleteService implements DeleteService {
 
 	@Autowired
-	FileSystem fileSystem;
-
-	@Autowired
 	DeleteStrategy deleteStrategy;
 
 	@Override
 	public void delete() {
-		File[] l2DateDirs = fileSystem.visitL2IndexDateDirs();
+		File[] l2DateDirs = FileSystem.visitL2IndexDateDirs();
 		for (File l2DateDir: l2DateDirs) {
 			delete(l2DateDir);
 		}
 
-		File[] dataDateDirs = fileSystem.visitMasterDataDateDirs();
+		File[] dataDateDirs = FileSystem.visitMasterDataDateDirs();
 		for (File dataDateDir: dataDateDirs) {
 			delete(dataDateDir);
 		}

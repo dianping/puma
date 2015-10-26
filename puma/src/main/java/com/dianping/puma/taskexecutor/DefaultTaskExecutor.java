@@ -531,16 +531,16 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         // 增加行变更计数器(除去ddl事件和事务信息事件)
         if ((changedEvent instanceof RowChangedEvent) && !((RowChangedEvent) changedEvent).isTransactionBegin()
                 && !((RowChangedEvent) changedEvent).isTransactionCommit()) {
-            switch (((RowChangedEvent) changedEvent).getActionType()) {
-                case RowChangedEvent.INSERT:
+            switch (((RowChangedEvent) changedEvent).getDmlType()) {
+                case INSERT:
                     incrRowsInsert();
                     SystemStatusManager.incServerRowInsertCounter(getTaskName());
                     break;
-                case RowChangedEvent.UPDATE:
+                case UPDATE:
                     incrRowsUpdate();
                     SystemStatusManager.incServerRowUpdateCounter(getTaskName());
                     break;
-                case RowChangedEvent.DELETE:
+                case DELETE:
                     incrRowsDelete();
                     SystemStatusManager.incServerRowDeleteCounter(getTaskName());
                     break;

@@ -23,69 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <pre>
- * 对应一行的数据变化
- * </pre>
- * <p>
- * 变更时间的基类
- * </p>
- * <p>
- * 域信息和含义如下：
- * </p>
- * <blockquote>
- * <table border=0 cellspacing=3 cellpadding=0 summary="">
- * <tr bgcolor="#ccccff">
- * <th align=left>域
- * <th align=left>含义
- * <tr>
- * <td><code>columns</code>
- * <td><code>列信息Map(key为列名，value为列信息)</code>
- * <tr bgcolor="#eeeeff">
- * <td><code>actionType</code>
- * <td><code>数据库操作类型</code>
- * <tr>
- * <td><code>isTransactionBegin</code>
- * <td><code>是否是transaction开始事件</code>
- * <tr bgcolor="#eeeeff">
- * <td><code>isTransactionCommit</code>
- * <td><code>是否是transaction提交事件</code>
- * </table>
- * <p>
- * <tt>ColumnInfo</tt>域信息和含义如下：
- * </p>
- * <table border=0 cellspacing=3 cellpadding=0 summary="">
- * <tr bgcolor="#ccccff">
- * <th align=left>域
- * <th align=left>含义
- * <tr>
- * <td><code>isKey</code>
- * <td><code>是否是主键</code>
- * <tr bgcolor="#eeeeff">
- * <td><code>oldValue</code>
- * <td><code>变更前的列值</code>
- * <tr>
- * <td><code>newValue</code>
- * <td><code>变更后的列值</code>
- * </table>
- * <p>
- * <tt>ActionType</tt>取值含义如下：
- * </p>
- * <table border=0 cellspacing=3 cellpadding=0 summary="">
- * <tr bgcolor="#ccccff">
- * <th align=left>值
- * <th align=left>含义
- * <tr>
- * <td><code>INSERT</code>
- * <td><code>0</code>
- * <tr bgcolor="#eeeeff">
- * <td><code>DELETE</code>
- * <td><code>1</code>
- * <tr>
- * <td><code>UPDATE</code>
- * <td><code>2</code>
- * </table>
- * </blockquote>
- *
  * @author Leo Liang
  */
 public class RowChangedEvent extends ChangedEvent implements Serializable, Cloneable {
@@ -93,14 +30,6 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
     private final EventType eventType = EventType.DML;
 
     private static final long serialVersionUID = -3426837914222597530L;
-
-    public static final int INSERT = 0;
-
-    public static final int DELETE = 1;
-
-    public static final int UPDATE = 2;
-
-    private int actionType;
 
     private DMLType dmlType;
 
@@ -110,17 +39,22 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
 
     private Map<String, ColumnInfo> columns = new HashMap<String, ColumnInfo>();
 
-    public RowChangedEvent(){
+    public RowChangedEvent() {
     }
-    
-    public RowChangedEvent(long executionTime,long serverId, String binlogFile, long binlogPosition){
-   	 this.executeTime = executionTime;
-   	 this.serverId = serverId;
-   	 this.binlogInfo = new BinlogInfo(serverId, binlogFile, binlogPosition, 0, executionTime);
+
+    public RowChangedEvent(long executionTime, long serverId, String binlogFile, long binlogPosition) {
+        this.executeTime = executionTime;
+        this.serverId = serverId;
+        this.binlogInfo = new BinlogInfo(serverId, binlogFile, binlogPosition, 0, executionTime);
     }
-    
+
     public DMLType getDmlType() {
         return dmlType;
+    }
+
+    @Deprecated
+    public int getActionType() {
+        return dmlType == null ? DMLType.NULL.getDMLType() : dmlType.getDMLType();
     }
 
     public void setDmlType(DMLType dmlType) {
@@ -169,20 +103,6 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
         this.columns = columns;
     }
 
-    /**
-     * @return the actionType
-     */
-    public int getActionType() {
-        return actionType;
-    }
-
-    /**
-     * @param actionType the actionType to set
-     */
-    public void setActionType(int actionType) {
-        this.actionType = actionType;
-    }
-
     @Override
     public String genFullName() {
         if (isTransactionBegin || isTransactionCommit) {
@@ -198,7 +118,7 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
       */
     @Override
     public String toString() {
-        return "RowChangedEvent [columns=" + columns + ", actionType=" + actionType + ", isTransactionBegin="
+        return "RowChangedEvent [columns=" + columns + ", dmlType=" + dmlType.getDMLType() + ", isTransactionBegin="
                 + isTransactionBegin
                 + ", isTransactionCommit=" + isTransactionCommit + ", super.toString()=" + super.toString() + "]";
     }
@@ -231,8 +151,6 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
 
         RowChangedEvent that = (RowChangedEvent) o;
 
-        if (actionType != that.actionType)
-            return false;
         if (isTransactionBegin != that.isTransactionBegin)
             return false;
         if (isTransactionCommit != that.isTransactionCommit)
@@ -251,7 +169,6 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + eventType.hashCode();
-        result = 31 * result + actionType;
         result = 31 * result + dmlType.hashCode();
         result = 31 * result + (isTransactionBegin ? 1 : 0);
         result = 31 * result + (isTransactionCommit ? 1 : 0);

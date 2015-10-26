@@ -66,7 +66,9 @@ public class RawEventCodec implements EventCodec {
             Map<String, ColumnInfo> columns = rcEvent.getColumns();
             int columnNum = columns.size();
 
-            buf.writeInt(rcEvent.getActionType());
+            //已经废弃的 getActionType
+            buf.writeInt(0);
+
             if (rcEvent.getDmlType() != null) {
                 buf.writeInt(rcEvent.getDmlType().getDMLType());
             } else {
@@ -274,7 +276,9 @@ public class RawEventCodec implements EventCodec {
         } else {
             RowChangedEvent rcEvent = (RowChangedEvent) event;
 
-            rcEvent.setActionType(buf.readInt());
+            //已经废弃的 getActionType
+            buf.readInt();
+
             DMLType dmlType = DMLType.getDMLType(buf.readInt());
             if (dmlType != DMLType.NULL) {
                 rcEvent.setDmlType(dmlType);

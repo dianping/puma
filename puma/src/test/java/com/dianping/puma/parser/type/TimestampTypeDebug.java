@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+import com.dianping.puma.core.util.sql.DMLType;
 import junit.framework.Assert;
 
 import org.junit.AfterClass;
@@ -57,7 +58,7 @@ public class TimestampTypeDebug extends AbstractBaseDebug {
 				for (int i = 0; i < testData.length; i++) {
 					Assert.assertTrue(events.get(i) instanceof RowChangedEvent);
 					RowChangedEvent rowChangedEvent = (RowChangedEvent) events.get(i);
-					Assert.assertEquals(RowChangedEvent.INSERT, rowChangedEvent.getActionType());
+					Assert.assertEquals(DMLType.INSERT, rowChangedEvent.getDmlType());
 					Assert.assertEquals(TABLE_NAME, rowChangedEvent.getTable());
 					Assert.assertEquals(SCHEMA_NAME, rowChangedEvent.getDatabase());
 					Assert.assertEquals(2, rowChangedEvent.getColumns().size());

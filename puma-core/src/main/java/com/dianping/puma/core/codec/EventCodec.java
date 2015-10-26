@@ -8,7 +8,6 @@ import java.util.List;
 public interface EventCodec {
     int DDL_EVENT = 0;
     int DML_EVENT = 1;
-    int SERVER_ERROR_EVENT = 3;
 
     byte[] encode(Event event) throws IOException;
 

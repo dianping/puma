@@ -27,8 +27,6 @@ public class RawEventCodecTest {
 
     private RawEventCodec codec = new RawEventCodec();
 
-    private JsonEventCodec jsonCodec = new JsonEventCodec();
-
     private long now = System.currentTimeMillis();
 
     private byte[] values = new byte[]{0, 1, 2, 3, 4};
@@ -71,10 +69,8 @@ public class RawEventCodecTest {
         event.setDdlEventType(DdlEventType.DDL_ALTER);
 
         byte[] encode = codec.encode(event);
-        byte[] encode2 = jsonCodec.encode(event);
 
         System.out.println("raw length = " + encode.length);
-        System.out.println("json length = " + encode2.length);
 
         DdlEvent result = (DdlEvent) codec.decode(encode);
 
@@ -113,7 +109,6 @@ public class RawEventCodecTest {
         // base info
         setChangedEventProperty(event);
 
-        event.setActionType(0);
         event.setDmlType(DMLType.INSERT);
         event.setTransactionBegin(true);
         event.setTransactionCommit(false);
@@ -129,7 +124,6 @@ public class RawEventCodecTest {
         long end = System.nanoTime();
 
         long start1 = System.nanoTime();
-        byte[] encode2 = jsonCodec.encode(event);
         long end1 = System.nanoTime();
 
         long start2 = System.nanoTime();
@@ -137,12 +131,10 @@ public class RawEventCodecTest {
         long end2 = System.nanoTime();
 
         System.out.println("raw length = " + encode.length + " encode time = " + (end - start) / 1000 + " decode time = " + (end2 - start2) / 1000);
-        System.out.println("json length = " + encode2.length + " encode time = " + (end1 - start1) / 1000);
 
         assertChangedEventProperty(result);
 
         // row changed event base info
-        Assert.assertEquals(0, result.getActionType());
         Assert.assertEquals(DMLType.INSERT, result.getDmlType());
         Assert.assertEquals(true, result.isTransactionBegin());
         Assert.assertEquals(false, result.isTransactionCommit());
@@ -159,7 +151,6 @@ public class RawEventCodecTest {
         // base info
         setChangedEventProperty(event);
 
-        event.setActionType(1);
         event.setDmlType(DMLType.DELETE);
         event.setTransactionBegin(true);
         event.setTransactionCommit(false);
@@ -175,7 +166,6 @@ public class RawEventCodecTest {
         long end = System.nanoTime();
 
         long start1 = System.nanoTime();
-        byte[] encode2 = jsonCodec.encode(event);
         long end1 = System.nanoTime();
 
         long start2 = System.nanoTime();
@@ -183,12 +173,10 @@ public class RawEventCodecTest {
         long end2 = System.nanoTime();
 
         System.out.println("raw length = " + encode.length + " encode time = " + (end - start) / 1000 + " decode time = " + (end2 - start2) / 1000);
-        System.out.println("json length = " + encode2.length + " encode time = " + (end1 - start1) / 1000);
 
         assertChangedEventProperty(result);
 
         // row changed event base info
-        Assert.assertEquals(1, result.getActionType());
         Assert.assertEquals(DMLType.DELETE, result.getDmlType());
         Assert.assertEquals(true, result.isTransactionBegin());
         Assert.assertEquals(false, result.isTransactionCommit());
@@ -205,7 +193,6 @@ public class RawEventCodecTest {
         // base info
         setChangedEventProperty(event);
 
-        event.setActionType(2);
         event.setDmlType(DMLType.UPDATE);
         event.setTransactionBegin(true);
         event.setTransactionCommit(false);
@@ -221,7 +208,6 @@ public class RawEventCodecTest {
         long end = System.nanoTime();
 
         long start1 = System.nanoTime();
-        byte[] encode2 = jsonCodec.encode(event);
         long end1 = System.nanoTime();
 
         long start2 = System.nanoTime();
@@ -229,12 +215,10 @@ public class RawEventCodecTest {
         long end2 = System.nanoTime();
 
         System.out.println("raw length = " + encode.length + " encode time = " + (end - start) / 1000 + " decode time = " + (end2 - start2) / 1000);
-        System.out.println("json length = " + encode2.length + " encode time = " + (end1 - start1) / 1000);
 
         assertChangedEventProperty(result);
 
         // row changed event base info
-        Assert.assertEquals(2, result.getActionType());
         Assert.assertEquals(DMLType.UPDATE, result.getDmlType());
         Assert.assertEquals(true, result.isTransactionBegin());
         Assert.assertEquals(false, result.isTransactionCommit());

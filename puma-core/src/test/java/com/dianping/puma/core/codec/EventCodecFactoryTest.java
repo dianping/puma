@@ -1,12 +1,12 @@
 /**
  * Project: puma-core
- * 
+ * <p/>
  * File Created at 2012-7-27
  * $Id$
- * 
+ * <p/>
  * Copyright 2010 dianping.com.
  * All rights reserved.
- *
+ * <p/>
  * This software is the confidential and proprietary information of
  * Dianping Company. ("Confidential Information").  You shall not
  * disclose such Confidential Information and shall use it only in
@@ -16,30 +16,21 @@
 package com.dianping.puma.core.codec;
 
 import junit.framework.Assert;
-
 import org.junit.Test;
 
-import com.dianping.puma.core.codec.EventCodec;
-import com.dianping.puma.core.codec.EventCodecFactory;
-import com.dianping.puma.core.codec.JsonEventCodec;
 
 /**
  * TODO Comment of EventCodecFactoryTest
- * 
+ *
  * @author Leo Liang
- * 
+ *
  */
 public class EventCodecFactoryTest {
-	@Test
-	public void createCodecTest() {
-		EventCodec codec = EventCodecFactory.createCodec("json");
-		Assert.assertNotNull(codec);
-		Assert.assertEquals(JsonEventCodec.class, codec.getClass());
-	}
+    @Test
+    public void createCodecTest() {
+        EventCodec codec = EventCodecFactory.createCodec("raw");
+        Assert.assertNotNull(codec);
+        Assert.assertEquals(RawEventCodec.class, codec.getClass());
+    }
 
-	/*@Test
-	public void createCodecTest2() {
-		EventCodec codec = EventCodecFactory.createCodec("hessian");
-		Assert.assertNull(codec);
-	}*/
 }

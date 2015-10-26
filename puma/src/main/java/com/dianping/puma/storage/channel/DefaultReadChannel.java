@@ -45,7 +45,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 		if (l2IndexValue == null) {
 			throw new IOException("failed to open oldest.");
 		}
-		com.dianping.puma.storage.Sequence sequence = l2IndexValue.getSequence();
+		Sequence sequence = l2IndexValue.getSequence();
 		readDataManager.open(new Sequence(sequence));
 	}
 
@@ -55,7 +55,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 		if (l2IndexValue == null) {
 			throw new IOException("failed to open latest.");
 		}
-		com.dianping.puma.storage.Sequence sequence = l2IndexValue.getSequence();
+		Sequence sequence = l2IndexValue.getSequence();
 		readDataManager.open(new Sequence(sequence));
 	}
 
@@ -65,7 +65,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 		if (l2IndexValue == null) {
 			throw new IOException("failed to open.");
 		}
-		com.dianping.puma.storage.Sequence sequence = l2IndexValue.getSequence();
+		Sequence sequence = l2IndexValue.getSequence();
 		readDataManager.open(new Sequence(sequence));
 	}
 

@@ -30,7 +30,7 @@ public final class GroupReadDataManager extends AbstractLifeCycle
 	}
 
 	@Override
-	public com.dianping.puma.storage.Sequence position() {
+	public Sequence position() {
 		checkStop();
 
 		return readDataManager == null ? null : readDataManager.position();
@@ -47,6 +47,8 @@ public final class GroupReadDataManager extends AbstractLifeCycle
 				throw new IOException("failed to open group read data manager.");
 			}
 		}
+
+		readDataManager.start();
 
 		readDataManager.open(sequence);
 	}

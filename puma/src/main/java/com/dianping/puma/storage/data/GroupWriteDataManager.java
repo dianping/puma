@@ -59,6 +59,10 @@ public final class GroupWriteDataManager extends AbstractLifeCycle
 	public Sequence pageAppend(ChangedEvent binlogEvent) throws IOException {
 		checkStop();
 
+		if (writeDataManager != null) {
+			writeDataManager.flush();
+		}
+
 		writeDataManager = DataManagerFinder.findNextMasterWriteDataManager(database);
 		writeDataManager.start();
 		return writeDataManager.append(binlogEvent);
@@ -73,15 +77,11 @@ public final class GroupWriteDataManager extends AbstractLifeCycle
 	protected void page() throws IOException {
 		checkStop();
 
-		writeDataManager = DataManagerFinder.findNextMasterWriteDataManager(database);
-		if (writeDataManager == null) {
-			throw new IOException("failed to generate the next write data bucket.");
+		if (writeDataManager != null) {
+			writeDataManager.flush();
 		}
-	}
 
-	protected void createWriteDataManagerIfNeeded() throws IOException {
-		if (writeDataManager == null) {
-			page();
-		}
+		writeDataManager = DataManagerFinder.findNextMasterWriteDataManager(database);
+		writeDataManager.start();
 	}
 }

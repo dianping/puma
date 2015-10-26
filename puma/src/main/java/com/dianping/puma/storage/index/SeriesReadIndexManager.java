@@ -51,6 +51,7 @@ public final class SeriesReadIndexManager extends AbstractLifeCycle
 
 		L1IndexValue l1IndexValue = l1ReadIndexManager.findOldest();
 		l2ReadIndexManager = indexManagerFinder.findL2ReadIndexManager(l1IndexValue);
+		l2ReadIndexManager.start();
 		return l2ReadIndexManager.findOldest();
 	}
 

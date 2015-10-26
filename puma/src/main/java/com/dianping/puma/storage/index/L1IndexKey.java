@@ -12,11 +12,6 @@ public class L1IndexKey implements IndexKey<L1IndexKey> {
 		this.binlogInfo = binlogInfo;
 	}
 
-	public L1IndexKey(boolean newBucket, BinlogInfo binlogInfo) {
-		this.newBucket = newBucket;
-		this.binlogInfo = binlogInfo;
-	}
-
 	@Override
 	public int compareTo(L1IndexKey l1IndexKey) {
 		return binlogInfo.compareTo(l1IndexKey.getBinlogInfo());

@@ -1,6 +1,5 @@
 package com.dianping.puma.storage.filesystem;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -42,6 +41,13 @@ public final class FileSystem {
     private static DateFormat dateFormat = new SimpleDateFormat(datePattern);
 
     private FileSystem() {
+    }
+
+    public static void testMode(String testDir) {
+        l1IndexDir = new File(testDir, "binlogIndex/l1Index").getAbsolutePath();
+        l2IndexDir = new File(testDir, "binlogIndex/l2Index").getAbsolutePath();
+        masterDataDir = new File(testDir, "storage/master").getAbsolutePath();
+        slaveDataDir = new File(testDir, "storage/slave").getAbsolutePath();
     }
 
     public static String parseDb(File file) {
@@ -133,7 +139,7 @@ public final class FileSystem {
     }
 
     public static File visitL2IndexFile(String database, String date, int number) {
-        return visitFile(l2IndexDir, database, date, number, l2IndexPrefix, l2IndexPrefix);
+        return visitFile(l2IndexDir, database, date, number, l2IndexPrefix, l2IndexSuffix);
     }
 
     public static File nextL2IndexFile(String database) throws IOException {

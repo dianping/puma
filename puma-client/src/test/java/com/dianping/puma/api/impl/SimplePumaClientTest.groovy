@@ -42,7 +42,7 @@ class SimplePumaClientTest {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                reference.set(target);
+                reference.set(new SimplePumaClient(new PumaClientConfig(enableEventLog: true)));
             }
         }).start();
 

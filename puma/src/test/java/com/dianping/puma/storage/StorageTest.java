@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -251,6 +252,24 @@ public class StorageTest extends StorageBaseTest {
         assertNull(readChannel.next());
 
         readChannel.stop();
+    }
+
+    @Test
+    public void testFilterTable() throws Exception {
+        ReadChannel readChannel
+                = ChannelFactory.newReadChannel("a", Lists.newArrayList("b", "c"), true, true, false);
+        readChannel.start();
+
+        writeChannel.append(EventFactory.dml(1, 1, "1", 1, "a", "a", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "1", 2, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "1", 3, "a", "c", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "1", 4, "a", "d", false, false, DMLType.INSERT));
+        writeChannel.flush();
+
+        readChannel.openOldest();
+        assertEquals(EventFactory.dml(1, 1, "1", 2, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.dml(1, 1, "1", 3, "a", "c", false, false, DMLType.INSERT), readChannel.next());
+        assertNull(readChannel.next());
     }
 
     @Override

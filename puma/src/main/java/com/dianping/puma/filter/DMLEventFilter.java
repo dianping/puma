@@ -34,11 +34,12 @@ public class DMLEventFilter extends AbstractEventFilter {
 
         if (changedEvent instanceof RowChangedEvent) {
 
+            /*
             // Transaction or not.
             if (((RowChangedEvent) changedEvent).isTransactionBegin()
                     || ((RowChangedEvent) changedEvent).isTransactionCommit()) {
                 return true;
-            }
+            }*/
 
             // Need dml or not.
             if (!dml) {

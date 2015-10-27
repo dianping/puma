@@ -320,6 +320,30 @@ public class StorageTest extends StorageBaseTest {
         readChannel.stop();
     }
 
+    @Test
+    public void testFilterTransaction() throws Exception {
+        ReadChannel readChannel
+                = ChannelFactory.newReadChannel("a", Lists.newArrayList("b", "c"), true, true, false);
+        readChannel.start();
+
+        writeChannel.append(EventFactory.ddl(1, 1, "1", 1, "a", "b"));
+        writeChannel.append(EventFactory.ddl(1, 1, "1", 2, "a", "b"));
+        writeChannel.append(EventFactory.dml(1, 1, "1", 3, "a", "c", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "1", 4, "a", "b", true, false, DMLType.NULL));
+        writeChannel.append(EventFactory.dml(1, 1, "1", 5, "a", "c", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "1", 6, "a", "b", false, true, DMLType.NULL));
+        writeChannel.flush();
+
+        readChannel.openOldest();
+        assertEquals(EventFactory.ddl(1, 1, "1", 1, "a", "b"), readChannel.next());
+        assertEquals(EventFactory.ddl(1, 1, "1", 2, "a", "b"), readChannel.next());
+        assertEquals(EventFactory.dml(1, 1, "1", 3, "a", "c", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.dml(1, 1, "1", 5, "a", "c", false, false, DMLType.INSERT), readChannel.next());
+        assertNull(readChannel.next());
+
+        readChannel.stop();
+    }
+
     @Override
     @After
     public void tearDown() throws IOException {

@@ -68,6 +68,7 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
 		if (needToPage(binlogInfo, writeDataManager)) {
 			Sequence sequence = writeDataManager.pageAppend(binlogEvent);
 			writeIndexManager.pageAppend(binlogInfo, sequence);
+			return;
 		}
 
 		Sequence sequence = writeDataManager.append(binlogEvent);

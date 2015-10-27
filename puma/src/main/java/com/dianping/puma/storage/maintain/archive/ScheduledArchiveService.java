@@ -1,13 +1,12 @@
 package com.dianping.puma.storage.maintain.archive;
 
-import com.dianping.puma.storage.filesystem.*;
+import com.dianping.puma.storage.filesystem.FileSystem;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.util.Date;
 import java.util.zip.GZIPOutputStream;
 
 @Service

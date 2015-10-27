@@ -8,7 +8,6 @@ import com.dianping.puma.core.event.Event;
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.bucket.BucketFactory;
 import com.dianping.puma.storage.bucket.ReadBucket;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
 import java.io.IOException;

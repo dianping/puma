@@ -46,7 +46,6 @@ import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
-import com.dianping.puma.storage.conf.GlobalStorageConfig;
 import com.dianping.puma.storage.holder.impl.DefaultBinlogInfoHolder;
 import com.dianping.puma.taskexecutor.DefaultTaskExecutor;
 import com.dianping.puma.taskexecutor.TaskExecutor;
@@ -349,9 +348,9 @@ public abstract class AbstractBaseDebug {
 		senders.add(sender);
 
 		// Global Config
-		GlobalStorageConfig.BINLOG_INDEX_BASE_DIR = binlogIndexBaseDir.getAbsolutePath();
-		GlobalStorageConfig.MASTER_STORAGE_BASE_DIR = masterStorageBaseDir.getAbsolutePath();
-		GlobalStorageConfig.SLAVE_STORAGE_BASE_DIR = slaveStorageBaseDir.getAbsolutePath();
+		//GlobalStorageConfig.BINLOG_INDEX_BASE_DIR = binlogIndexBaseDir.getAbsolutePath();
+		//GlobalStorageConfig.MASTER_STORAGE_BASE_DIR = masterStorageBaseDir.getAbsolutePath();
+		//GlobalStorageConfig.SLAVE_STORAGE_BASE_DIR = slaveStorageBaseDir.getAbsolutePath();
 
 		// Dispatch.
 		SimpleDispatcherImpl dispatcher = new SimpleDispatcherImpl();

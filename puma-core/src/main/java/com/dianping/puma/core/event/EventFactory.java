@@ -1,5 +1,6 @@
 package com.dianping.puma.core.event;
 
+import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.core.util.sql.DMLType;
 
 public final class EventFactory {
@@ -14,7 +15,11 @@ public final class EventFactory {
         return rowChangedEvent;
     }
 
-    public static RowChangedEvent ddl(long timestamp, long serverId, String binlogFile, long binlogPosition, String database, String table) {
-        return null;
+    public static DdlEvent ddl(long timestamp, long serverId, String binlogFile, long binlogPosition, String database, String table, DDLType ddlType) {
+        DdlEvent ddlEvent = new DdlEvent(timestamp, serverId, binlogFile, binlogPosition);
+        ddlEvent.setDatabase(database);
+        ddlEvent.setTable(table);
+        ddlEvent.setDDLType(ddlType);
+        return ddlEvent;
     }
 }

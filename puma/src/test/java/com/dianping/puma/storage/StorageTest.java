@@ -3,6 +3,7 @@ package com.dianping.puma.storage;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.EventFactory;
 import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.puma.storage.channel.*;
 import com.dianping.puma.storage.filesystem.FileSystem;
@@ -270,6 +271,28 @@ public class StorageTest extends StorageBaseTest {
         assertEquals(EventFactory.dml(1, 1, "1", 2, "a", "b", false, false, DMLType.INSERT), readChannel.next());
         assertEquals(EventFactory.dml(1, 1, "1", 3, "a", "c", false, false, DMLType.INSERT), readChannel.next());
         assertNull(readChannel.next());
+
+        readChannel.stop();
+    }
+
+    @Test
+    public void testFilterDml() throws Exception {
+        ReadChannel readChannel
+                = ChannelFactory.newReadChannel("a", Lists.newArrayList("b", "c"), true, false, false);
+        readChannel.start();
+
+        writeChannel.append(EventFactory.ddl(1, 1, "1", 1, "a", "b", DDLType.ALTER_TABLE));
+        writeChannel.append(EventFactory.ddl(1, 1, "1", 2, "a", "b", DDLType.ALTER_TABLE));
+        writeChannel.append(EventFactory.dml(1, 1, "1", 3, "a", "c", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "1", 4, "a", "c", false, false, DMLType.INSERT));
+        writeChannel.flush();
+
+        readChannel.openOldest();
+        assertEquals(EventFactory.dml(1, 1, "1", 3, "a", "c", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.dml(1, 1, "1", 4, "a", "c", false, false, DMLType.INSERT), readChannel.next());
+        assertNull(readChannel.next());
+
+        readChannel.stop();
     }
 
     @Override

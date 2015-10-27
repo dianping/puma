@@ -15,6 +15,7 @@
  */
 package com.dianping.puma.core.event;
 
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.constant.DdlEventSubType;
 import com.dianping.puma.core.util.constant.DdlEventType;
 import com.dianping.puma.core.util.sql.DDLType;
@@ -55,6 +56,16 @@ public class DdlEvent extends ChangedEvent implements Serializable {
     private DdlEventType ddlEventType;
 
     private DdlEventSubType ddlEventSubType;
+
+    public DdlEvent() {
+
+    }
+
+    public DdlEvent(long executeTime, long serverId, String binlogFile, long binlogPosition) {
+        this.executeTime = executeTime;
+        this.serverId = serverId;
+        this.binlogInfo = new BinlogInfo(serverId, binlogFile, binlogPosition, 0, executeTime);
+    }
 
     /**
      * @return the sql

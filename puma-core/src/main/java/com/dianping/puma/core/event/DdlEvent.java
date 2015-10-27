@@ -140,20 +140,8 @@ public class DdlEvent extends ChangedEvent implements Serializable {
         this.ddlEventType = ddlEventType;
     }
 
-    public DdlEventType getDdlEventType() {
-        return ddlEventType;
-    }
-
     public void setDdlEventSubType(DdlEventSubType ddlEventSubType) {
         this.ddlEventSubType = ddlEventSubType;
-    }
-
-    public DdlEventSubType getDdlEventSubType() {
-        return ddlEventSubType;
-    }
-
-    public DDLType getDDLType() {
-        return ddlType;
     }
 
     public void setDDLType(DDLType ddlType) {

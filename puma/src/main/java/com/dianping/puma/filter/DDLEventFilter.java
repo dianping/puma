@@ -47,9 +47,10 @@ public class DDLEventFilter extends AbstractEventFilter {
             }
 
             // In supported ddl type list or not.
+            /*
             if (!ddlTypes.contains(((DdlEvent) changedEvent).getDDLType())) {
                 return false;
-            }
+            }*/
 
             // In accepted table list.
             Table table = new Table(changedEvent.getDatabase(), changedEvent.getTable());

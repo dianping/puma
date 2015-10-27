@@ -58,9 +58,9 @@ public class RawEventCodec implements EventCodec {
             DdlEvent ddlEvent = (DdlEvent) event;
 
             writeIntoBuf(ddlEvent.getSql(), buf);
-            buf.writeInt(ddlEvent.getDDLType().getDDLType());
-            buf.writeInt(ddlEvent.getDdlEventType().getEventType());
-            buf.writeInt(ddlEvent.getDdlEventSubType().getEventSubType());
+            buf.writeInt(0); // deprecated.
+            buf.writeInt(0); // deprecated.
+            buf.writeInt(0); // deprecated.
         } else if (event instanceof RowChangedEvent) {
             RowChangedEvent rcEvent = (RowChangedEvent) event;
             Map<String, ColumnInfo> columns = rcEvent.getColumns();
@@ -280,9 +280,7 @@ public class RawEventCodec implements EventCodec {
             buf.readInt();
 
             DMLType dmlType = DMLType.getDMLType(buf.readInt());
-            if (dmlType != DMLType.NULL) {
-                rcEvent.setDmlType(dmlType);
-            }
+            rcEvent.setDmlType(dmlType);
             rcEvent.setTransactionBegin(buf.readBoolean());
             rcEvent.setTransactionCommit(buf.readBoolean());
             Map<String, ColumnInfo> columns = rcEvent.getColumns();

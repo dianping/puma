@@ -1,6 +1,7 @@
 package com.dianping.puma.storage;
 
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.EventFactory;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.sql.DDLType;
@@ -13,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -29,7 +29,6 @@ public class StorageTest extends StorageBaseTest {
         super.setUp();
 
         FileSystem.testMode(testDir.getAbsolutePath());
-        System.out.println(testDir);
 
         writeChannel = ChannelFactory.newWriteChannel("a");
         writeChannel.start();
@@ -278,18 +277,44 @@ public class StorageTest extends StorageBaseTest {
     @Test
     public void testFilterDml() throws Exception {
         ReadChannel readChannel
-                = ChannelFactory.newReadChannel("a", Lists.newArrayList("b", "c"), true, false, false);
+                = ChannelFactory.newReadChannel("a", Lists.newArrayList("b", "c"), false, true, true);
         readChannel.start();
 
-        writeChannel.append(EventFactory.ddl(1, 1, "1", 1, "a", "b", DDLType.ALTER_TABLE));
-        writeChannel.append(EventFactory.ddl(1, 1, "1", 2, "a", "b", DDLType.ALTER_TABLE));
+        writeChannel.append(EventFactory.ddl(1, 1, "1", 1, "a", "b"));
+        writeChannel.append(EventFactory.ddl(1, 1, "1", 2, "a", "b"));
         writeChannel.append(EventFactory.dml(1, 1, "1", 3, "a", "c", false, false, DMLType.INSERT));
-        writeChannel.append(EventFactory.dml(1, 1, "1", 4, "a", "c", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "1", 4, "a", "b", true, false, DMLType.NULL));
+        writeChannel.append(EventFactory.dml(1, 1, "1", 5, "a", "c", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "1", 6, "a", "b", false, true, DMLType.NULL));
+        writeChannel.flush();
+
+        readChannel.openOldest();
+        assertEquals(EventFactory.ddl(1, 1, "1", 1, "a", "b"), readChannel.next());
+        assertEquals(EventFactory.ddl(1, 1, "1", 2, "a", "b"), readChannel.next());
+        assertNull(readChannel.next());
+
+        readChannel.stop();
+    }
+
+    @Test
+    public void testFilterDdl() throws Exception {
+        ReadChannel readChannel
+                = ChannelFactory.newReadChannel("a", Lists.newArrayList("b", "c"), true, false, true);
+        readChannel.start();
+
+        writeChannel.append(EventFactory.ddl(1, 1, "1", 1, "a", "b"));
+        writeChannel.append(EventFactory.ddl(1, 1, "1", 2, "a", "b"));
+        writeChannel.append(EventFactory.dml(1, 1, "1", 3, "a", "c", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "1", 4, "a", "b", true, false, DMLType.NULL));
+        writeChannel.append(EventFactory.dml(1, 1, "1", 5, "a", "c", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "1", 6, "a", "b", false, true, DMLType.NULL));
         writeChannel.flush();
 
         readChannel.openOldest();
         assertEquals(EventFactory.dml(1, 1, "1", 3, "a", "c", false, false, DMLType.INSERT), readChannel.next());
-        assertEquals(EventFactory.dml(1, 1, "1", 4, "a", "c", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.dml(1, 1, "1", 4, "a", "b", true, false, DMLType.NULL), readChannel.next());
+        assertEquals(EventFactory.dml(1, 1, "1", 5, "a", "c", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.dml(1, 1, "1", 6, "a", "b", false, true, DMLType.NULL), readChannel.next());
         assertNull(readChannel.next());
 
         readChannel.stop();

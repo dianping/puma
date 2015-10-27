@@ -77,9 +77,6 @@ public class RawEventCodecTest {
         assertChangedEventProperty(result);
 
         Assert.assertEquals("SELECT * FROM testtb", result.getSql());
-        Assert.assertEquals(DDLType.ALTER_DATABASE, result.getDDLType());
-        Assert.assertEquals(DdlEventSubType.DDL_ALTER_DATABASE, result.getDdlEventSubType());
-        Assert.assertEquals(DdlEventType.DDL_ALTER, result.getDdlEventType());
     }
 
     private void assertChangedEventProperty(ChangedEvent result) {

@@ -204,31 +204,6 @@ public abstract class AbstractDataHandler implements DataHandler {
 		ddlEvent.setSql(sql);
 		ddlEvent.setDdlEventType(SimpleDdlParser.getEventType(sql));
 
-		ddlEvent.setDdlEventSubType(SimpleDdlParser.getEventSubType(ddlEvent.getDdlEventType(), sql));
-		if (ddlEvent.getDdlEventType() == DdlEventType.DDL_DEFAULT
-				|| ddlEvent.getDdlEventSubType() == DdlEventSubType.DDL_SUB_DEFAULT) {
-			log.info("DdlEvent Type do not found. ddl sql=" + sql);
-		}
-		DdlResult ddlResult = SimpleDdlParser
-				.getDdlResult(ddlEvent.getDdlEventType(), ddlEvent.getDdlEventSubType(), sql);
-		if (ddlResult != null) {
-			ddlEvent.setDatabase(StringUtils.isNotBlank(ddlResult.getDatabase()) ? ddlResult.getDatabase()
-					: StringUtils.EMPTY);
-			ddlEvent.setTable(StringUtils.isNotBlank(ddlResult.getTable()) ? ddlResult.getTable() : StringUtils.EMPTY);
-			if (ddlEvent.getDdlEventType() != DdlEventType.DDL_CREATE) {
-				log.info("DDL event, sql=" + sql + "  ,database =" + ddlResult.getDatabase() + " table ="
-						+ ddlResult.getTable() + " queryEvent.getDatabaseName()" + queryEvent.getDatabaseName());
-			}
-		}
-		if (StringUtils.isBlank(ddlEvent.getDatabase())) {
-			ddlEvent.setDatabase(queryEvent.getDatabaseName());
-		}
-
-		if (ddlEvent.getDdlEventType() == DdlEventType.DDL_ALTER
-				&& ddlEvent.getDdlEventSubType() == DdlEventSubType.DDL_ALTER_TABLE) {
-			ddlEvent.setDDLType(DDLType.ALTER_TABLE);
-		}
-
 		try {
 			tableMetasInfoFetcher.refreshTableMeta(ddlEvent.getDatabase(), ddlEvent.getTable());
 		} catch (SQLException e) {

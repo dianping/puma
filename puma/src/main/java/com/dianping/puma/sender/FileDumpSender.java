@@ -31,9 +31,6 @@ import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.filter.EventFilterChain;
-import com.dianping.puma.storage.conf.GlobalStorageConfig;
-import com.dianping.puma.storage.exception.StorageException;
-import com.dianping.puma.storage.exception.StorageLifeCycleException;
 
 /**
  *
@@ -109,14 +106,12 @@ public class FileDumpSender extends AbstractSender {
 					LOG.error(String.format("ChangeEvent[%s] has no database", event.toString()));
 				}
 			}
-		} catch (StorageException e) {
-			throw new SenderException("FileDumpSender.doSend failed.", e);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private WriteChannel buildEventStorage(String database) throws StorageLifeCycleException {
+	private WriteChannel buildEventStorage(String database) {
 		WriteChannel writeChannel = ChannelFactory.newWriteChannel(database);
 		writeChannel.start();
 		return writeChannel;

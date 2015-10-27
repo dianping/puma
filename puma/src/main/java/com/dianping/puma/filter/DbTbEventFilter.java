@@ -17,7 +17,7 @@ public class DbTbEventFilter extends AbstractEventFilter {
 
 	private static final String DB_TB_SPLIT_STR = ".";
 
-	private static final String SUFIX_ANY = "*";
+	private static final String SUFFIX_ANY = "*";
 
 	public void init(String[] dts) {
 		if (dts != null && dts.length > 0) {
@@ -26,13 +26,13 @@ public class DbTbEventFilter extends AbstractEventFilter {
 				String dbName = parts[0].trim().toLowerCase();
 				String tbName = parts[1].trim().toLowerCase();
 
-				if (!tbName.endsWith(SUFIX_ANY)) {
+				if (!tbName.endsWith(SUFFIX_ANY)) {
 					dbtbMap.put(dbName + DB_TB_SPLIT_STR + tbName, true);
 				} else {
-					if (SUFIX_ANY.length() < tbName.length()) {
+					if (SUFFIX_ANY.length() < tbName.length()) {
 						tbPrefixList
-						      .add(dbName + DB_TB_SPLIT_STR + tbName.substring(0, tbName.length() - SUFIX_ANY.length()));
-					} else if (SUFIX_ANY.length() == tbName.length()) {
+						      .add(dbName + DB_TB_SPLIT_STR + tbName.substring(0, tbName.length() - SUFFIX_ANY.length()));
+					} else if (SUFFIX_ANY.length() == tbName.length()) {
 						tbPrefixList.add(dbName + DB_TB_SPLIT_STR);
 					}
 

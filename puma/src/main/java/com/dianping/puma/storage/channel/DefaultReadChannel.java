@@ -87,6 +87,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
                 return null;
             }
 
+            eventFilterChain.reset();
             if (!eventFilterChain.doNext(binlogEvent)) {
                 continue;
             }

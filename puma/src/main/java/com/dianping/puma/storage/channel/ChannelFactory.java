@@ -7,15 +7,15 @@ public final class ChannelFactory {
     private ChannelFactory() {
     }
 
-    public static ReadChannel newReadChannel(String database) {
+    public static DefaultReadChannel newReadChannel(String database) {
         return new DefaultReadChannel(database);
     }
 
-    public static ReadChannel newReadChannel(String database, List<String> tables, boolean dml, boolean ddl, boolean transaction) {
+    public static DefaultReadChannel newReadChannel(String database, List<String> tables, boolean dml, boolean ddl, boolean transaction) {
         return new DefaultReadChannel(database, tables, dml, ddl, transaction);
     }
 
-    public static WriteChannel newWriteChannel(String database) {
+    public static DefaultWriteChannel newWriteChannel(String database) {
         return new DefaultWriteChannel(database);
     }
 }

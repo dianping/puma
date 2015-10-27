@@ -92,7 +92,7 @@ public class FileDumpSender extends AbstractSender {
 					transactionBegin = null;
 				}
 
-				writeChannel.append(event.getBinlogInfo(), event);
+				writeChannel.append(event);
 			} else {
 				if (event instanceof RowChangedEvent) {
 					if (((RowChangedEvent) event).isTransactionBegin()) {

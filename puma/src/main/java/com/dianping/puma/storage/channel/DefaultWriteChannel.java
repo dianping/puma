@@ -5,8 +5,6 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.data.GroupWriteDataManager;
-import com.dianping.puma.storage.index.L1IndexKey;
-import com.dianping.puma.storage.index.L2IndexValue;
 import com.dianping.puma.storage.index.SeriesWriteIndexManager;
 import com.google.common.util.concurrent.Uninterruptibles;
 
@@ -62,10 +60,12 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
 	}
 
 	@Override
-	public void append(BinlogInfo binlogInfo, ChangedEvent binlogEvent) throws IOException {
+	public void append(ChangedEvent binlogEvent) throws IOException {
 		checkStop();
 
-		if (needToPage(binlogEvent.getBinlogInfo(), writeDataManager)) {
+		BinlogInfo binlogInfo = binlogEvent.getBinlogInfo();
+
+		if (needToPage(binlogInfo, writeDataManager)) {
 			Sequence sequence = writeDataManager.pageAppend(binlogEvent);
 			writeIndexManager.pageAppend(binlogInfo, sequence);
 		}

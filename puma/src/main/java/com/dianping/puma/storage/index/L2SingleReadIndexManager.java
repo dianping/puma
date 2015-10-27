@@ -22,7 +22,7 @@ public final class L2SingleReadIndexManager extends SingleReadIndexManager<Binlo
 	protected boolean greater(BinlogInfo aBinlogInfo, BinlogInfo bBinlogInfo) {
 		long aServerId = aBinlogInfo.getServerId();
 		long bServerId = bBinlogInfo.getServerId();
-		if (aServerId == bServerId) {
+		if (aServerId != 0 && bServerId != 0 && aServerId == bServerId) {
 			String aBinlogFile = aBinlogInfo.getBinlogFile();
 			String bBinlogFile = bBinlogInfo.getBinlogFile();
 			int result = aBinlogFile.compareTo(bBinlogFile);
@@ -38,6 +38,9 @@ public final class L2SingleReadIndexManager extends SingleReadIndexManager<Binlo
 		} else {
 			long aTimestamp = aBinlogInfo.getTimestamp();
 			long bTimestamp = bBinlogInfo.getTimestamp();
+			if (aTimestamp == 0 || bTimestamp == 0) {
+				return true;
+			}
 			return aTimestamp > bTimestamp;
 		}
 	}

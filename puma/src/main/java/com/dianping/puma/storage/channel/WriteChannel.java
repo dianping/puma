@@ -8,7 +8,7 @@ import java.io.IOException;
 
 public interface WriteChannel extends LifeCycle {
 
-	void append(BinlogInfo binlogInfo, ChangedEvent binlogEvent) throws IOException;
+	void append(ChangedEvent binlogEvent) throws IOException;
 
 	void flush() throws IOException;
 }

@@ -65,20 +65,18 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
     protected ReadChannel initChannel(long sc, BinlogInfo binlogInfo, List<String> tables,
                                        boolean dml, boolean ddl, boolean transaction) throws IOException {
-        ReadChannel readChannel = ChannelFactory.newReadChannel(database);
-//        DefaultEventChannel newEventChannel = new DefaultEventChannel(database);
-//        //newEventChannel.withTables(tables.toArray(new String[tables.size()]));
-//        //newEventChannel.withDml(dml);
-//        //newEventChannel.withDdl(ddl);
-//        //newEventChannel.withTransaction(transaction);
-//
-//        if (sc == SubscribeConstant.SEQ_FROM_BINLOGINFO) {
-//            newEventChannel.open(binlogInfo.getServerId(), binlogInfo.getBinlogFile(), binlogInfo.getBinlogPosition());
-//        } else if (sc == SubscribeConstant.SEQ_FROM_TIMESTAMP) {
-//            newEventChannel.open(binlogInfo.getTimestamp());
-//        } else {
-//            newEventChannel.open(sc);
-//        }
+        ReadChannel readChannel = ChannelFactory.newReadChannel(database, tables, dml, ddl, transaction);
+
+        if (sc == SubscribeConstant.SEQ_FROM_BINLOGINFO) {
+            readChannel.open(binlogInfo);
+        } else if (sc == SubscribeConstant.SEQ_FROM_TIMESTAMP) {
+            readChannel.open(binlogInfo);
+        } else if (sc == SubscribeConstant.SEQ_FROM_LATEST) {
+            readChannel.openLatest();
+        } else {
+            readChannel.openOldest();
+        }
+
         return readChannel;
     }
 

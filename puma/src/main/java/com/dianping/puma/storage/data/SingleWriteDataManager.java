@@ -68,8 +68,7 @@ public final class SingleWriteDataManager extends AbstractLifeCycle
         writeBucket.flush();
     }
 
-    @Override
-    public boolean hasRemainingForWrite() {
+    protected boolean hasRemainingForWrite() {
         checkStop();
 
         return writeBucket.hasRemainingForWrite();

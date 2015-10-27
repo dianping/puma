@@ -37,6 +37,10 @@ public final class SeriesWriteIndexManager extends AbstractLifeCycle implements 
     public void append(BinlogInfo binlogInfo, Sequence sequence) throws IOException {
         checkStop();
 
+        if (!hasRemainingForWriteOnCurrentPage()) {
+            page(binlogInfo, sequence);
+        }
+
         l2WriteIndexManager.append(binlogInfo, sequence);
     }
 
@@ -53,6 +57,12 @@ public final class SeriesWriteIndexManager extends AbstractLifeCycle implements 
         }
     }
 
+    protected boolean hasRemainingForWriteOnCurrentPage() {
+        checkStop();
+
+        return l2WriteIndexManager != null && l2WriteIndexManager.hasRemainingForWrite();
+    }
+
     /**
      * Explicitly page index bucket, call it when paging.
      *
@@ -60,9 +70,7 @@ public final class SeriesWriteIndexManager extends AbstractLifeCycle implements 
      * @param sequence   value of l2 index.
      * @throws IOException
      */
-    public void pageAppend(BinlogInfo binlogInfo, Sequence sequence) throws IOException {
-        checkStop();
-
+    protected void page(BinlogInfo binlogInfo, Sequence sequence) throws IOException {
         if (l1WriteIndexManager == null) {
             l1WriteIndexManager = SeriesIndexManagerFinder.findL1WriteIndexManager(database);
             l1WriteIndexManager.start();
@@ -78,6 +86,5 @@ public final class SeriesWriteIndexManager extends AbstractLifeCycle implements 
 
         l2WriteIndexManager = SeriesIndexManagerFinder.findNextL2WriteIndexManager(database);
         l2WriteIndexManager.start();
-        l2WriteIndexManager.append(binlogInfo, sequence);
     }
 }

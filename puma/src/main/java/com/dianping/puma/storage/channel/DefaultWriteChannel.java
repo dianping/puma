@@ -65,12 +65,6 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
 
 		BinlogInfo binlogInfo = binlogEvent.getBinlogInfo();
 
-		if (needToPage(binlogInfo, writeDataManager)) {
-			Sequence sequence = writeDataManager.pageAppend(binlogEvent);
-			writeIndexManager.pageAppend(binlogInfo, sequence);
-			return;
-		}
-
 		Sequence sequence = writeDataManager.append(binlogEvent);
 		writeIndexManager.append(binlogInfo, sequence);
 	}
@@ -81,10 +75,6 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
 
 		writeIndexManager.flush();
 		writeDataManager.flush();
-	}
-
-	protected boolean needToPage(BinlogInfo binlogInfo, GroupWriteDataManager writeDataManager) {
-		return !writeDataManager.hasRemainingForWriteOnCurrentPage();
 	}
 
 	private class FlushTask implements Runnable {

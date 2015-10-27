@@ -7,81 +7,64 @@ import com.dianping.puma.storage.Sequence;
 import java.io.IOException;
 
 public final class GroupWriteDataManager extends AbstractLifeCycle
-		implements WriteDataManager<Sequence, ChangedEvent> {
+        implements WriteDataManager<Sequence, ChangedEvent> {
 
-	private String database;
+    private String database;
 
-	private SingleWriteDataManager writeDataManager;
+    private SingleWriteDataManager writeDataManager;
 
-	public GroupWriteDataManager(String database) {
-		this.database = database;
-	}
+    public GroupWriteDataManager(String database) {
+        this.database = database;
+    }
 
-	@Override
-	protected void doStart() {
-	}
+    @Override
+    protected void doStart() {
+    }
 
-	@Override
-	protected void doStop() {
-		if (writeDataManager != null) {
-			writeDataManager.stop();
-		}
-	}
+    @Override
+    protected void doStop() {
+        if (writeDataManager != null) {
+            writeDataManager.stop();
+        }
+    }
 
-	@Override
-	public Sequence append(ChangedEvent binlogEvent) throws IOException {
-		checkStop();
+    @Override
+    public Sequence append(ChangedEvent binlogEvent) throws IOException {
+        checkStop();
 
-		return writeDataManager.append(binlogEvent);
-	}
+        if (!hasRemainingForWriteOnCurrentPage()) {
+            page();
+        }
 
-	@Override
-	public void flush() throws IOException {
-		checkStop();
+        return writeDataManager.append(binlogEvent);
+    }
 
-		if (writeDataManager != null) {
-			writeDataManager.flush();
-		}
-	}
+    @Override
+    public void flush() throws IOException {
+        checkStop();
 
-	@Override
-	public boolean hasRemainingForWrite() {
-		return true;
-	}
+        if (writeDataManager != null) {
+            writeDataManager.flush();
+        }
+    }
 
-	@Override
-	public Sequence position() {
-		checkStop();
+    @Override
+    public Sequence position() {
+        checkStop();
 
-		return writeDataManager.position();
-	}
+        return writeDataManager.position();
+    }
 
-	public Sequence pageAppend(ChangedEvent binlogEvent) throws IOException {
-		checkStop();
+    protected boolean hasRemainingForWriteOnCurrentPage() {
+        return writeDataManager != null && writeDataManager.hasRemainingForWrite();
+    }
 
-		if (writeDataManager != null) {
-			writeDataManager.flush();
-		}
+    protected void page() throws IOException {
+        if (writeDataManager != null) {
+            writeDataManager.flush();
+        }
 
-		writeDataManager = GroupDataManagerFinder.findNextMasterWriteDataManager(database);
-		writeDataManager.start();
-		return writeDataManager.append(binlogEvent);
-	}
-
-	public boolean hasRemainingForWriteOnCurrentPage() {
-		checkStop();
-
-		return writeDataManager != null && writeDataManager.hasRemainingForWrite();
-	}
-
-	protected void page() throws IOException {
-		checkStop();
-
-		if (writeDataManager != null) {
-			writeDataManager.flush();
-		}
-
-		writeDataManager = GroupDataManagerFinder.findNextMasterWriteDataManager(database);
-		writeDataManager.start();
-	}
+        writeDataManager = GroupDataManagerFinder.findNextMasterWriteDataManager(database);
+        writeDataManager.start();
+    }
 }

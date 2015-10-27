@@ -11,6 +11,4 @@ public interface WriteDataManager<K, V> extends LifeCycle {
 	void flush() throws IOException;
 
 	K position();
-
-	boolean hasRemainingForWrite();
 }

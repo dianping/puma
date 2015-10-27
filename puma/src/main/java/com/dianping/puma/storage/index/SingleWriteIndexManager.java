@@ -53,5 +53,11 @@ public abstract class SingleWriteIndexManager<K, V> extends AbstractLifeCycle im
 		}
 	}
 
+	protected boolean hasRemainingForWrite(){
+        checkStop();
+
+        return writeBucket != null && writeBucket.hasRemainingForWrite();
+	}
+
 	abstract protected byte[] encode(K indexKey, V indexValue);
 }

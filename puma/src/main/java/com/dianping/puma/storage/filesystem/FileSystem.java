@@ -27,7 +27,7 @@ public final class FileSystem {
 
     private static final String SLAVE_DATA_SUFFIX = ".data";
 
-    private static final String DEFAULT_PATH = "/data/appdatas/puma/";
+    public static final String DEFAULT_PATH = "/data/appdatas/puma/";
 
     private static String l1IndexDir;
 

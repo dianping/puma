@@ -20,7 +20,7 @@ public class L1SingleReadIndexManagerTest extends StorageBaseTest {
 	File bucket;
 
 	@Before
-	public void setUp() throws IOException {
+	public void setUp() throws Exception {
 		super.setUp();
 
 		bucket = new File(testDir, "bucket");
@@ -31,7 +31,7 @@ public class L1SingleReadIndexManagerTest extends StorageBaseTest {
 	}
 
 	@After
-	public void tearDown() throws IOException {
+	public void tearDown() throws Exception {
 		if (l1SingleReadIndexManager != null) {
 			l1SingleReadIndexManager.stop();
 		}

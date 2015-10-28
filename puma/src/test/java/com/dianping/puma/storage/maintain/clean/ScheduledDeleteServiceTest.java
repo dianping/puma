@@ -15,7 +15,7 @@ public class ScheduledDeleteServiceTest extends StorageBaseTest {
 	ScheduledDeleteService scheduledDeleteService = new ScheduledDeleteService();
 
 	@Override @Before
-	public void setUp() throws IOException {
+	public void setUp() throws Exception {
 		super.setUp();
 	}
 
@@ -37,7 +37,7 @@ public class ScheduledDeleteServiceTest extends StorageBaseTest {
 	}
 
 	@Override @After
-	public void tearDown() throws IOException {
+	public void tearDown() throws Exception {
 		super.tearDown();
 	}
 }

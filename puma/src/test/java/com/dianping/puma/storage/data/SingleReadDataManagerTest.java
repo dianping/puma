@@ -24,7 +24,7 @@ public class SingleReadDataManagerTest extends StorageBaseTest {
 
     @Override
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws Exception {
         super.setUp();
 
         bucket = new File(testDir, "bucket");
@@ -73,7 +73,7 @@ public class SingleReadDataManagerTest extends StorageBaseTest {
 
     @Override
     @After
-    public void tearDown() throws IOException {
+    public void tearDown() throws Exception {
         if (singleReadDataManager != null) {
             singleReadDataManager.stop();
         }

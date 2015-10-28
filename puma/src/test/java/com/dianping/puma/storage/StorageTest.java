@@ -25,7 +25,7 @@ public class StorageTest extends StorageBaseTest {
 
     @Override
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws Exception {
         super.setUp();
 
         FileSystem.changeBasePath(testDir.getAbsolutePath());
@@ -346,7 +346,7 @@ public class StorageTest extends StorageBaseTest {
 
     @Override
     @After
-    public void tearDown() throws IOException {
+    public void tearDown() throws Exception {
         if (writeChannel != null) {
             writeChannel.stop();
         }
@@ -356,5 +356,7 @@ public class StorageTest extends StorageBaseTest {
         }
 
         super.tearDown();
+
+        FileSystem.changeBasePath(FileSystem.DEFAULT_PATH);
     }
 }

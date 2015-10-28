@@ -16,7 +16,7 @@ import static org.junit.Assert.*;
 public class FileSystemTest extends StorageBaseTest {
 
 	@Override @Before
-	public void setUp() throws IOException {
+	public void setUp() throws Exception {
 		super.setUp();
 	}
 
@@ -97,7 +97,7 @@ public class FileSystemTest extends StorageBaseTest {
 	}
 
 	@Override @After
-	public void tearDown() throws IOException {
+	public void tearDown() throws Exception {
 		super.tearDown();
 	}
 }

@@ -1,5 +1,7 @@
 package com.dianping.puma.storage.filesystem;
 
+import com.dianping.puma.utils.PropertyKeyConstants;
+import com.google.common.base.Strings;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -12,42 +14,50 @@ import java.util.Date;
 
 public final class FileSystem {
 
-    private static String l1IndexPrefix = "l1Index";
+    private static final String L1_INDEX_PREFIX = "l1Index";
 
-    private static String l1IndexSuffix = ".l1idx";
+    private static final String L1_INDEX_SUFFIX = ".l1idx";
 
-    private static String l2IndexPrefix = "bucket-";
+    private static final String L2_INDEX_PREFIX = "bucket-";
 
-    private static String l2IndexSuffix = ".l2idx";
+    private static final String L2_INDEX_SUFFIX = ".l2idx";
 
-    private static String masterDataPrefix = "bucket-";
+    private static final String MASTER_DATA_PREFIX = "bucket-";
 
-    private static String masterDataSuffix = ".data";
+    private static final String MASTER_DATA_SUFFIX = ".data";
 
-    private static String slaveDataPrefix = "bucket-";
+    private static final String SLAVE_DATA_PREFIX = "bucket-";
 
-    private static String slaveDataSuffix = ".data";
+    private static final String SLAVE_DATA_SUFFIX = ".data";
 
-    private static String datePattern = "yyyyMMdd";
+    private static final String DATE_PATTERN = "yyyyMMdd";
 
-    private static String l1IndexDir = "/data/appdatas/puma/binlogIndex/l1Index/";
+    private static final String DEFAULT_PATH = "/data/appdatas/puma/";
 
-    private static String l2IndexDir = "/data/appdatas/puma/binlogIndex/l2Index/";
+    private static String l1IndexDir;
 
-    private static String masterDataDir = "/data/appdatas/puma/storage/master/";
+    private static String l2IndexDir;
 
-    private static String slaveDataDir = "/data/appdatas/puma/storage/slave";
+    private static String masterDataDir;
 
-    private static DateFormat dateFormat = new SimpleDateFormat(datePattern);
+    private static String slaveDataDir;
 
-    private FileSystem() {
+    private static final DateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN);
+
+    static {
+        String path = System.getProperty(PropertyKeyConstants.PUMA_STORAGE_PATH);
+
+        if (Strings.isNullOrEmpty(path)) {
+            path = DEFAULT_PATH;
+        }
+
+        l1IndexDir = path + "binlogIndex/l1Index/";
+        l2IndexDir = path + "binlogIndex/l2Index/";
+        masterDataDir = "storage/master/";
+        slaveDataDir = "storage/slave/";
     }
 
-    public static void testMode(String testDir) {
-        l1IndexDir = new File(testDir, "binlogIndex/l1Index").getAbsolutePath();
-        l2IndexDir = new File(testDir, "binlogIndex/l2Index").getAbsolutePath();
-        masterDataDir = new File(testDir, "storage/master").getAbsolutePath();
-        slaveDataDir = new File(testDir, "storage/slave").getAbsolutePath();
+    private FileSystem() {
     }
 
     public static String parseDb(File file) {
@@ -114,7 +124,7 @@ public final class FileSystem {
 
     public static File nextL1IndexFile(String database) throws IOException {
         File databaseDir = new File(l1IndexDir, database);
-        File file = new File(databaseDir, l1IndexPrefix + l1IndexSuffix);
+        File file = new File(databaseDir, L1_INDEX_PREFIX + L1_INDEX_SUFFIX);
         createFile(file);
         return file;
     }
@@ -139,12 +149,12 @@ public final class FileSystem {
     }
 
     public static File visitL2IndexFile(String database, String date, int number) {
-        return visitFile(l2IndexDir, database, date, number, l2IndexPrefix, l2IndexSuffix);
+        return visitFile(l2IndexDir, database, date, number, L2_INDEX_PREFIX, L2_INDEX_SUFFIX);
     }
 
     public static File nextL2IndexFile(String database) throws IOException {
         int max = maxL2IndexFileNumber(database, today());
-        return createFile(l2IndexDir, database, today(), max + 1, l2IndexPrefix, l2IndexSuffix);
+        return createFile(l2IndexDir, database, today(), max + 1, L2_INDEX_PREFIX, L2_INDEX_SUFFIX);
     }
 
     public static File[] visitMasterDataDateDirs() {
@@ -161,7 +171,7 @@ public final class FileSystem {
     }
 
     public static File visitMasterDataFile(String database, String date, int number) {
-        return visitFile(masterDataDir, database, date, number, masterDataPrefix, masterDataSuffix);
+        return visitFile(masterDataDir, database, date, number, MASTER_DATA_PREFIX, MASTER_DATA_SUFFIX);
     }
 
     public static File visitNextMasterDataFile(String database, String date, int number) {
@@ -183,7 +193,7 @@ public final class FileSystem {
 
     public static File nextMasterDataFile(String database) throws IOException {
         int max = maxMasterFileNumber(database, today());
-        return createFile(masterDataDir, database, today(), max + 1, masterDataPrefix, masterDataSuffix);
+        return createFile(masterDataDir, database, today(), max + 1, MASTER_DATA_PREFIX, MASTER_DATA_SUFFIX);
     }
 
     public static File[] visitSlaveDataDateDirs() {
@@ -200,7 +210,7 @@ public final class FileSystem {
     }
 
     public static File visitSlaveDataFile(String database, String date, int number) {
-        return visitFile(slaveDataDir, database, date, number, slaveDataPrefix, slaveDataSuffix);
+        return visitFile(slaveDataDir, database, date, number, SLAVE_DATA_PREFIX, SLAVE_DATA_SUFFIX);
     }
 
     public static File visitNextSlaveDataFile(String database, String date, int number) {
@@ -221,7 +231,7 @@ public final class FileSystem {
 
     public static File nextSlaveDataFile(String database) throws IOException {
         int max = maxSlaveFileNumber(database, today());
-        return createFile(slaveDataDir, database, today(), max + 1, slaveDataPrefix, slaveDataSuffix);
+        return createFile(slaveDataDir, database, today(), max + 1, SLAVE_DATA_PREFIX, SLAVE_DATA_SUFFIX);
     }
 
     public static File mapSlaveDatabaseDir(File masterDatabaseDir) {
@@ -240,7 +250,7 @@ public final class FileSystem {
 
 
     protected static String genL1IndexName() {
-        return l1IndexPrefix + l1IndexSuffix;
+        return L1_INDEX_PREFIX + L1_INDEX_SUFFIX;
     }
 
     protected static String tomorrow(String date) {
@@ -280,15 +290,15 @@ public final class FileSystem {
     }
 
     protected static int maxL2IndexFileNumber(String database, String date) {
-        return maxFileNumber(l2IndexDir, database, date, l2IndexPrefix, l2IndexSuffix);
+        return maxFileNumber(l2IndexDir, database, date, L2_INDEX_PREFIX, L2_INDEX_SUFFIX);
     }
 
     protected static int maxMasterFileNumber(String database, String date) {
-        return maxFileNumber(masterDataDir, database, date, masterDataPrefix, masterDataSuffix);
+        return maxFileNumber(masterDataDir, database, date, MASTER_DATA_PREFIX, MASTER_DATA_SUFFIX);
     }
 
     protected static int maxSlaveFileNumber(String database, String date) {
-        return maxFileNumber(slaveDataDir, database, date, slaveDataPrefix, slaveDataSuffix);
+        return maxFileNumber(slaveDataDir, database, date, SLAVE_DATA_PREFIX, SLAVE_DATA_SUFFIX);
     }
 
     protected static void createFile(File file) throws IOException {
@@ -328,7 +338,7 @@ public final class FileSystem {
     }
 
     public static int parseMasterDataNumber(File file) {
-        return parseNumber(file, masterDataPrefix, masterDataSuffix);
+        return parseNumber(file, MASTER_DATA_PREFIX, MASTER_DATA_SUFFIX);
     }
 
 }

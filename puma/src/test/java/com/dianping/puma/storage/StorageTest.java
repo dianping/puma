@@ -4,8 +4,10 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.EventFactory;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.sql.DMLType;
-import com.dianping.puma.storage.channel.*;
-import com.dianping.puma.storage.filesystem.FileSystem;
+import com.dianping.puma.storage.channel.ChannelFactory;
+import com.dianping.puma.storage.channel.ReadChannel;
+import com.dianping.puma.storage.channel.WriteChannel;
+import com.dianping.puma.utils.PropertyKeyConstants;
 import com.google.common.collect.Lists;
 import org.junit.After;
 import org.junit.Before;
@@ -26,7 +28,7 @@ public class StorageTest extends StorageBaseTest {
     public void setUp() throws IOException {
         super.setUp();
 
-        FileSystem.testMode(testDir.getAbsolutePath());
+        System.setProperty(PropertyKeyConstants.PUMA_STORAGE_PATH, testDir.getAbsolutePath());
 
         writeChannel = ChannelFactory.newWriteChannel("a");
         writeChannel.start();

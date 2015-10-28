@@ -3,6 +3,7 @@ package com.dianping.puma.storage.filesystem;
 import com.dianping.puma.storage.utils.DateUtils;
 import com.dianping.puma.utils.PropertyKeyConstants;
 import com.google.common.base.Strings;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -45,10 +46,11 @@ public final class FileSystem {
             path = DEFAULT_PATH;
         }
 
-        l1IndexDir = path + "binlogIndex/l1Index/";
-        l2IndexDir = path + "binlogIndex/l2Index/";
-        masterDataDir = "storage/master/";
-        slaveDataDir = "storage/slave/";
+
+        l1IndexDir = FilenameUtils.concat(path, "binlogIndex/l1Index/");
+        l2IndexDir = FilenameUtils.concat(path, "binlogIndex/l2Index/");
+        masterDataDir = FilenameUtils.concat(path, "storage/master/");
+        slaveDataDir = FilenameUtils.concat(path, "storage/slave/");
     }
 
     private FileSystem() {

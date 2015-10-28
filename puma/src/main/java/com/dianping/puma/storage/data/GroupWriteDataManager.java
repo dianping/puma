@@ -72,6 +72,5 @@ public final class GroupWriteDataManager extends AbstractLifeCycle
         }
 
         writeDataManager = GroupDataManagerFinder.findNextMasterWriteDataManager(database);
-        writeDataManager.start();
     }
 }

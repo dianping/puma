@@ -165,22 +165,6 @@ public final class FileSystem {
         return visitFile(masterDataDir, database, date, number, MASTER_DATA_PREFIX, MASTER_DATA_SUFFIX);
     }
 
-    public static final File visitNextMasterDataFile(String database, String date, int number) {
-        File file = visitMasterDataFile(database, date, number + 1);
-        if (file != null) {
-            return file;
-        }
-
-        while ((date = DateUtils.getNextDayWithoutFuture(date)) != null) {
-            file = visitMasterDataFile(database, date, 0);
-            if (file != null) {
-                return file;
-            }
-        }
-
-        return null;
-    }
-
     public static final File nextMasterDataFile(String database) throws IOException {
         int max = maxMasterFileNumber(database, today());
         return createFile(masterDataDir, database, today(), max + 1, MASTER_DATA_PREFIX, MASTER_DATA_SUFFIX);
@@ -201,22 +185,6 @@ public final class FileSystem {
 
     public static final File visitSlaveDataFile(String database, String date, int number) {
         return visitFile(slaveDataDir, database, date, number, SLAVE_DATA_PREFIX, SLAVE_DATA_SUFFIX);
-    }
-
-    public static final File visitNextSlaveDataFile(String database, String date, int number) {
-        File file = visitSlaveDataFile(database, date, number);
-        if (file != null) {
-            return file;
-        }
-
-        while ((date = DateUtils.getNextDayWithoutFuture(date)) != null) {
-            file = visitSlaveDataFile(database, date, 0);
-            if (file != null) {
-                return file;
-            }
-        }
-
-        return null;
     }
 
     public static final File nextSlaveDataFile(String database) throws IOException {

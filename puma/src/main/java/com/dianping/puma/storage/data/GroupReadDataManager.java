@@ -40,17 +40,13 @@ public final class GroupReadDataManager extends AbstractLifeCycle
 	public void open(Sequence sequence) throws IOException {
 		checkStop();
 
-		readDataManager = GroupDataManagerFinder.findSlaveReadDataManager(database, sequence);
+		readDataManager = GroupDataManagerFinder.findMasterReadDataManager(database, sequence);
 		if (readDataManager == null) {
-			readDataManager = GroupDataManagerFinder.findMasterReadDataManager(database, sequence);
+			readDataManager = GroupDataManagerFinder.findSlaveReadDataManager(database, sequence);
 			if (readDataManager == null) {
 				throw new IOException("failed to open group read data manager.");
 			}
 		}
-
-		readDataManager.start();
-
-		readDataManager.open(sequence);
 	}
 
 	@Override
@@ -63,9 +59,9 @@ public final class GroupReadDataManager extends AbstractLifeCycle
 			} catch (EOFException eof) {
 				Sequence dataKey = readDataManager.position();
 
-				SingleReadDataManager tempReadDataManager = GroupDataManagerFinder.findNextSlaveReadDataManager(database, dataKey);
+				SingleReadDataManager tempReadDataManager = GroupDataManagerFinder.findNextMasterReadDataManager(database, dataKey);
 				if (tempReadDataManager == null) {
-					tempReadDataManager = GroupDataManagerFinder.findNextMasterReadDataManager(database, dataKey);
+					tempReadDataManager = GroupDataManagerFinder.findNextSlaveReadDataManager(database, dataKey);
 					if (tempReadDataManager == null) {
 						return null;
 					}

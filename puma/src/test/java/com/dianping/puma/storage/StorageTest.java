@@ -40,7 +40,6 @@ public class StorageTest extends StorageBaseTest {
     }
 
     @Test
-    @Ignore
     public void testPage() throws IOException {
         DateUtils.changeGetNowTime("20150101");
         writeChannel.append(EventFactory.dml(1, 1, "1", 1, "a", "b", false, false, DMLType.INSERT));

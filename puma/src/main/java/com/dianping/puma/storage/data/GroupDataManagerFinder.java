@@ -2,57 +2,110 @@ package com.dianping.puma.storage.data;
 
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.filesystem.FileSystem;
+import com.dianping.puma.storage.utils.DateUtils;
 
 import java.io.File;
 import java.io.IOException;
 
 public final class GroupDataManagerFinder {
 
-	public static SingleReadDataManager findMasterReadDataManager(String database, Sequence sequence)
-			throws IOException {
-		String date = sequence.date();
-		int number = sequence.getNumber();
+    public static SingleReadDataManager findMasterReadDataManager(String database, Sequence sequence)
+            throws IOException {
+        String date = sequence.date();
+        int number = sequence.getNumber();
 
-		File file = FileSystem.visitMasterDataFile(database, date, number);
-		return file == null ? null : DataManagerFactory.newSingleReadDataManager(file);
-	}
+        File file = FileSystem.visitMasterDataFile(database, date, number);
 
-	public static SingleReadDataManager findSlaveReadDataManager(String database, Sequence sequence)
-			throws IOException {
-		String date = sequence.date();
-		int number = sequence.getNumber();
+        if (file == null) {
+            return null;
+        }
 
-		File file = FileSystem.visitSlaveDataFile(database, date, number);
-		return file == null ? null : DataManagerFactory.newSingleReadDataManager(file);
-	}
+        SingleReadDataManager result = DataManagerFactory.newSingleReadDataManager(file);
+        result.start();
+        result.open(sequence);
+        return result;
+    }
 
-	public static SingleReadDataManager findNextMasterReadDataManager(String database, Sequence sequence)
-			throws IOException {
-		String date = sequence.date();
-		int number = sequence.getNumber();
+    public static SingleReadDataManager findSlaveReadDataManager(String database, Sequence sequence)
+            throws IOException {
+        String date = sequence.date();
+        int number = sequence.getNumber();
 
-		File file = FileSystem.visitNextMasterDataFile(database, date, number);
-		return file == null ? null : DataManagerFactory.newSingleReadDataManager(file);
-	}
+        File file = FileSystem.visitSlaveDataFile(database, date, number);
 
-	public static SingleReadDataManager findNextSlaveReadDataManager(String database, Sequence sequence)
-			throws IOException {
-		String date = sequence.date();
-		int number = sequence.getNumber();
+        if (file == null) {
+            return null;
+        }
 
-		File file = FileSystem.visitNextSlaveDataFile(database, date, number);
-		return file == null ? null : DataManagerFactory.newSingleReadDataManager(file);
-	}
+        SingleReadDataManager result = DataManagerFactory.newSingleReadDataManager(file);
+        result.start();
+        result.open(sequence);
+        return result;
+    }
 
-	public static SingleWriteDataManager findNextMasterWriteDataManager(String database) throws IOException {
-		File file = FileSystem.nextMasterDataFile(database);
-		String date = FileSystem.parseMasterDataDate(file);
-		int number = FileSystem.parseMasterDataNumber(file);
+    public static SingleReadDataManager findNextMasterReadDataManager(String database, Sequence sequence)
+            throws IOException {
+        String date = sequence.date();
+        int number = sequence.getNumber();
 
-		return file == null ? null : DataManagerFactory.newSingleWriteDataManager(file, date, number);
-	}
+        File file = FileSystem.visitMasterDataFile(database, date, ++number);
+        if (file == null) {
+            number = 0;
+            while ((date = DateUtils.getNextDayWithoutFuture(date)) != null) {
+                file = FileSystem.visitMasterDataFile(database, date, number);
+                if (file != null) {
+                    break;
+                }
+            }
+        }
 
-	public static SingleWriteDataManager findNextMasterWriteDataManager(String database, String date) throws IOException {
-		return null;
-	}
+        if (file == null) {
+            return null;
+        }
+
+        SingleReadDataManager result = DataManagerFactory.newSingleReadDataManager(file);
+        result.start();
+        result.open(new Sequence(date, number, 0));
+        return result;
+    }
+
+    public static SingleReadDataManager findNextSlaveReadDataManager(String database, Sequence sequence)
+            throws IOException {
+        String date = sequence.date();
+        int number = sequence.getNumber();
+
+        File file = FileSystem.visitSlaveDataFile(database, date, ++number);
+        if (file == null) {
+            number = 0;
+            while ((date = DateUtils.getNextDayWithoutFuture(date)) != null) {
+                file = FileSystem.visitSlaveDataFile(database, date, number);
+                if (file != null) {
+                    break;
+                }
+            }
+        }
+
+        if (file == null) {
+            return null;
+        }
+
+        SingleReadDataManager result = DataManagerFactory.newSingleReadDataManager(file);
+        result.start();
+        result.open(new Sequence(date, number, 0));
+        return result;
+    }
+
+    public static SingleWriteDataManager findNextMasterWriteDataManager(String database) throws IOException {
+        File file = FileSystem.nextMasterDataFile(database);
+        String date = FileSystem.parseMasterDataDate(file);
+        int number = FileSystem.parseMasterDataNumber(file);
+
+        if (file == null) {
+            return null;
+        }
+
+        SingleWriteDataManager result = DataManagerFactory.newSingleWriteDataManager(file, date, number);
+        result.start();
+        return result;
+    }
 }

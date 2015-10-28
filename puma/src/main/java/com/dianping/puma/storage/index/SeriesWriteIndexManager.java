@@ -15,6 +15,8 @@ public final class SeriesWriteIndexManager extends AbstractLifeCycle implements 
 
     private L2SingleWriteIndexManager l2WriteIndexManager;
 
+    private int lastDate;
+
     public SeriesWriteIndexManager(String database) {
         this.database = database;
     }
@@ -38,7 +40,7 @@ public final class SeriesWriteIndexManager extends AbstractLifeCycle implements 
     public void append(BinlogInfo binlogInfo, Sequence sequence) throws IOException {
         checkStop();
 
-        if (needPage(sequence)) {
+        if (needPage()) {
             page(binlogInfo, sequence);
         }
 
@@ -58,10 +60,10 @@ public final class SeriesWriteIndexManager extends AbstractLifeCycle implements 
         }
     }
 
-    protected boolean needPage(Sequence sequence) {
+    protected boolean needPage() {
         return l2WriteIndexManager == null ||
                 !l2WriteIndexManager.hasRemainingForWrite() ||
-                sequence.getCreationDate() != getNowInteger();
+                lastDate != getNowInteger();
     }
 
     protected int getNowInteger() {
@@ -91,5 +93,7 @@ public final class SeriesWriteIndexManager extends AbstractLifeCycle implements 
 
         l2WriteIndexManager = SeriesIndexManagerFinder.findNextL2WriteIndexManager(database);
         l2WriteIndexManager.start();
+
+        lastDate = sequence.getCreationDate();
     }
 }

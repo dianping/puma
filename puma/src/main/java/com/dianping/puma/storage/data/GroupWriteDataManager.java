@@ -3,6 +3,7 @@ package com.dianping.puma.storage.data;
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.storage.Sequence;
+import com.dianping.puma.storage.utils.DateUtils;
 
 import java.io.IOException;
 
@@ -32,7 +33,7 @@ public final class GroupWriteDataManager extends AbstractLifeCycle
     public Sequence append(ChangedEvent binlogEvent) throws IOException {
         checkStop();
 
-        if (!hasRemainingForWriteOnCurrentPage()) {
+        if (needPage()) {
             page();
         }
 
@@ -55,8 +56,14 @@ public final class GroupWriteDataManager extends AbstractLifeCycle
         return writeDataManager.position();
     }
 
-    protected boolean hasRemainingForWriteOnCurrentPage() {
-        return writeDataManager != null && writeDataManager.hasRemainingForWrite();
+    protected boolean needPage() {
+        return writeDataManager == null ||
+                !writeDataManager.hasRemainingForWrite() ||
+                writeDataManager.position().getCreationDate() != getNowInteger();
+    }
+
+    protected int getNowInteger() {
+        return DateUtils.getNowInteger();
     }
 
     protected void page() throws IOException {

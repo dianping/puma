@@ -3,6 +3,7 @@ package com.dianping.puma.storage.index;
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.Sequence;
+import com.dianping.puma.storage.utils.DateUtils;
 
 import java.io.IOException;
 
@@ -37,7 +38,7 @@ public final class SeriesWriteIndexManager extends AbstractLifeCycle implements 
     public void append(BinlogInfo binlogInfo, Sequence sequence) throws IOException {
         checkStop();
 
-        if (!hasRemainingForWriteOnCurrentPage()) {
+        if (needPage(sequence)) {
             page(binlogInfo, sequence);
         }
 
@@ -57,10 +58,14 @@ public final class SeriesWriteIndexManager extends AbstractLifeCycle implements 
         }
     }
 
-    protected boolean hasRemainingForWriteOnCurrentPage() {
-        checkStop();
+    protected boolean needPage(Sequence sequence) {
+        return l2WriteIndexManager == null ||
+                !l2WriteIndexManager.hasRemainingForWrite() ||
+                sequence.getCreationDate() != getNowInteger();
+    }
 
-        return l2WriteIndexManager != null && l2WriteIndexManager.hasRemainingForWrite();
+    protected int getNowInteger() {
+        return DateUtils.getNowInteger();
     }
 
     /**

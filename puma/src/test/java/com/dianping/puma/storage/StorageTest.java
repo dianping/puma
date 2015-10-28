@@ -12,7 +12,6 @@ import com.dianping.puma.storage.utils.DateUtils;
 import com.google.common.collect.Lists;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -51,6 +50,23 @@ public class StorageTest extends StorageBaseTest {
 
         readChannel.openOldest();
         assertEquals(EventFactory.dml(1, 1, "1", 1, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.dml(2, 1, "1", 2, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.dml(3, 1, "1", 3, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+
+        DateUtils.changeGetNowTime(null);
+    }
+
+    @Test
+    public void testPageFindByBinlog() throws IOException {
+        DateUtils.changeGetNowTime("20150101");
+        writeChannel.append(EventFactory.dml(1, 1, "1", 1, "a", "b", false, false, DMLType.INSERT));
+        DateUtils.changeGetNowTime("20150102");
+        writeChannel.append(EventFactory.dml(2, 1, "1", 2, "a", "b", false, false, DMLType.INSERT));
+        DateUtils.changeGetNowTime("20150103");
+        writeChannel.append(EventFactory.dml(3, 1, "1", 3, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.flush();
+
+        readChannel.open(new BinlogInfo(2, 1, "1", 2));
         assertEquals(EventFactory.dml(2, 1, "1", 2, "a", "b", false, false, DMLType.INSERT), readChannel.next());
         assertEquals(EventFactory.dml(3, 1, "1", 3, "a", "b", false, false, DMLType.INSERT), readChannel.next());
 

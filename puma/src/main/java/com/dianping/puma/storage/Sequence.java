@@ -23,6 +23,10 @@ import java.util.Calendar;
  * 
  */
 public class Sequence {
+
+	/**
+	 * format: 201501
+	 */
 	private int creationDate;
 
 	private int number;

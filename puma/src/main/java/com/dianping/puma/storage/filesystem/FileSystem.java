@@ -1,5 +1,6 @@
 package com.dianping.puma.storage.filesystem;
 
+import com.dianping.puma.storage.utils.DateUtils;
 import com.dianping.puma.utils.PropertyKeyConstants;
 import com.google.common.base.Strings;
 import org.apache.commons.lang3.ArrayUtils;
@@ -8,9 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public final class FileSystem {
 
@@ -30,8 +28,6 @@ public final class FileSystem {
 
     private static final String SLAVE_DATA_SUFFIX = ".data";
 
-    private static final String DATE_PATTERN = "yyyyMMdd";
-
     private static final String DEFAULT_PATH = "/data/appdatas/puma/";
 
     private static String l1IndexDir;
@@ -41,8 +37,6 @@ public final class FileSystem {
     private static String masterDataDir;
 
     private static String slaveDataDir;
-
-    private static final DateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN);
 
     static {
         String path = System.getProperty(PropertyKeyConstants.PUMA_STORAGE_PATH);
@@ -180,8 +174,7 @@ public final class FileSystem {
             return file;
         }
 
-        date = tomorrow(date);
-        while ((date = tomorrow(date)).compareTo(today()) <= 0) {
+        while ((date = DateUtils.getNextDayWithoutFuture(date)) != null) {
             file = visitMasterDataFile(database, date, 0);
             if (file != null) {
                 return file;
@@ -219,7 +212,7 @@ public final class FileSystem {
             return file;
         }
 
-        while ((date = tomorrow(date)).compareTo(today()) <= 0) {
+        while ((date = DateUtils.getNextDayWithoutFuture(date)) != null) {
             file = visitSlaveDataFile(database, date, 0);
             if (file != null) {
                 return file;
@@ -253,13 +246,8 @@ public final class FileSystem {
         return L1_INDEX_PREFIX + L1_INDEX_SUFFIX;
     }
 
-    protected static String tomorrow(String date) {
-        int dateInt = Integer.valueOf(date);
-        return String.valueOf(dateInt + 1);
-    }
-
     protected static String today() {
-        return dateFormat.format(new Date());
+        return DateUtils.getNowString();
     }
 
     protected static File[] visitDatabaseDirs(String baseDir) {

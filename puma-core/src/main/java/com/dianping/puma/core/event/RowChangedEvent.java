@@ -57,8 +57,9 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
         return dmlType == null ? DMLType.NULL.getDMLType() : dmlType.getDMLType();
     }
 
-    public void setDmlType(DMLType dmlType) {
+    public RowChangedEvent setDmlType(DMLType dmlType) {
         this.dmlType = dmlType;
+        return this;
     }
 
     /**
@@ -71,8 +72,9 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
     /**
      * @param isTransactionBegin the isTransactionBegin to set
      */
-    public void setTransactionBegin(boolean isTransactionBegin) {
+    public RowChangedEvent setTransactionBegin(boolean isTransactionBegin) {
         this.isTransactionBegin = isTransactionBegin;
+        return this;
     }
 
     /**
@@ -85,8 +87,9 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
     /**
      * @param isTransactionCommit the isTransactionCommit to set
      */
-    public void setTransactionCommit(boolean isTransactionCommit) {
+    public RowChangedEvent setTransactionCommit(boolean isTransactionCommit) {
         this.isTransactionCommit = isTransactionCommit;
+        return this;
     }
 
     /**
@@ -99,8 +102,9 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
     /**
      * @param columns the columns to set
      */
-    public void setColumns(Map<String, ColumnInfo> columns) {
+    public RowChangedEvent setColumns(Map<String, ColumnInfo> columns) {
         this.columns = columns;
+        return this;
     }
 
     @Override

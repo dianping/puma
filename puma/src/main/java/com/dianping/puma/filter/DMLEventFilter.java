@@ -34,16 +34,15 @@ public class DMLEventFilter extends AbstractEventFilter {
 
         if (changedEvent instanceof RowChangedEvent) {
 
-            /*
+            // Need dml or not.
+            if (!dml) {
+                return false;
+            }
+
             // Transaction or not.
             if (((RowChangedEvent) changedEvent).isTransactionBegin()
                     || ((RowChangedEvent) changedEvent).isTransactionCommit()) {
                 return true;
-            }*/
-
-            // Need dml or not.
-            if (!dml) {
-                return false;
             }
 
             // In accepted table list.

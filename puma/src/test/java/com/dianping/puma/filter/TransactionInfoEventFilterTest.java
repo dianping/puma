@@ -39,9 +39,9 @@ public class TransactionInfoEventFilterTest {
 	public void testAccept() {
 		changedEvent.setTransactionBegin(true);
 		eventFilter.init(true);
-		Assert.assertTrue(eventFilter.accept(changedEvent, null));
+		Assert.assertTrue(eventFilter.accept(changedEvent, this.filterChain));
 		changedEvent.setTransactionCommit(true);
-		Assert.assertTrue(eventFilter.accept(changedEvent, null));
+		Assert.assertTrue(eventFilter.accept(changedEvent, this.filterChain));
 		DdlEvent ddlEvent = new DdlEvent();
 		Assert.assertTrue(eventFilter.accept(ddlEvent, this.filterChain));
 		eventFilter.init(false);

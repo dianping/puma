@@ -23,7 +23,7 @@ public class EventFilterChainFactoryTest {
 		filterChain.reset();
 		Assert.assertFalse(filterChain.doNext(event));
 		filterChain = EventFilterChainFactory.createEventFilterChain(true, false, true, dts);
-		Assert.assertTrue(filterChain.doNext(event));
+		Assert.assertFalse(filterChain.doNext(event));
 
 	}
 

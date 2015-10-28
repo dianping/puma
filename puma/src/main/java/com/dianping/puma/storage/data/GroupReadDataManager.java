@@ -8,70 +8,70 @@ import java.io.EOFException;
 import java.io.IOException;
 
 public final class GroupReadDataManager extends AbstractLifeCycle
-		implements ReadDataManager<com.dianping.puma.storage.Sequence, ChangedEvent> {
+        implements ReadDataManager<com.dianping.puma.storage.Sequence, ChangedEvent> {
 
-	private final String database;
+    private final String database;
 
-	private SingleReadDataManager readDataManager;
+    private SingleReadDataManager readDataManager;
 
-	public GroupReadDataManager(String database) {
-		this.database = database;
-	}
+    public GroupReadDataManager(String database) {
+        this.database = database;
+    }
 
-	@Override
-	protected void doStart() {
-	}
+    @Override
+    protected void doStart() {
+    }
 
-	@Override
-	protected void doStop() {
-		if (readDataManager != null) {
-			readDataManager.stop();
-		}
-	}
+    @Override
+    protected void doStop() {
+        if (readDataManager != null) {
+            readDataManager.stop();
+        }
+    }
 
-	@Override
-	public Sequence position() {
-		checkStop();
+    @Override
+    public Sequence position() {
+        checkStop();
 
-		return readDataManager == null ? null : readDataManager.position();
-	}
+        return readDataManager == null ? null : readDataManager.position();
+    }
 
-	@Override
-	public void open(Sequence sequence) throws IOException {
-		checkStop();
+    @Override
+    public void open(Sequence sequence) throws IOException {
+        checkStop();
 
-		readDataManager = GroupDataManagerFinder.findMasterReadDataManager(database, sequence);
-		if (readDataManager == null) {
-			readDataManager = GroupDataManagerFinder.findSlaveReadDataManager(database, sequence);
-			if (readDataManager == null) {
-				throw new IOException("failed to open group read data manager.");
-			}
-		}
-	}
+        readDataManager = GroupDataManagerFinder.findSlaveReadDataManager(database, sequence);
+        if (readDataManager == null) {
+            readDataManager = GroupDataManagerFinder.findMasterReadDataManager(database, sequence);
+            if (readDataManager == null) {
+                throw new IOException("failed to open group read data manager.");
+            }
+        }
+    }
 
-	@Override
-	public ChangedEvent next() throws IOException {
-		checkStop();
+    @Override
+    public ChangedEvent next() throws IOException {
+        checkStop();
 
-		while (true) {
-			try {
-				return readDataManager.next();
-			} catch (EOFException eof) {
-				Sequence dataKey = readDataManager.position();
+        while (true) {
+            try {
+                return readDataManager.next();
+            } catch (EOFException eof) {
+                Sequence dataKey = readDataManager.position();
 
-				SingleReadDataManager tempReadDataManager = GroupDataManagerFinder.findNextMasterReadDataManager(database, dataKey);
-				if (tempReadDataManager == null) {
-					tempReadDataManager = GroupDataManagerFinder.findNextSlaveReadDataManager(database, dataKey);
-					if (tempReadDataManager == null) {
-						return null;
-					}
-				}
+                SingleReadDataManager tempReadDataManager = GroupDataManagerFinder.findNextSlaveReadDataManager(database, dataKey);
+                if (tempReadDataManager == null) {
+                    tempReadDataManager = GroupDataManagerFinder.findNextMasterReadDataManager(database, dataKey);
+                    if (tempReadDataManager == null) {
+                        return null;
+                    }
+                }
 
                 readDataManager.stop();
                 tempReadDataManager.start();
 
                 readDataManager = tempReadDataManager;
-			}
-		}
-	}
+            }
+        }
+    }
 }

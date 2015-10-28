@@ -66,6 +66,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
     protected ReadChannel initChannel(long sc, BinlogInfo binlogInfo, List<String> tables,
                                        boolean dml, boolean ddl, boolean transaction) throws IOException {
         ReadChannel readChannel = ChannelFactory.newReadChannel(database, tables, dml, ddl, transaction);
+        readChannel.start();
 
         if (sc == SubscribeConstant.SEQ_FROM_BINLOGINFO) {
             readChannel.open(binlogInfo);

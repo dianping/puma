@@ -25,7 +25,7 @@ import java.util.Calendar;
 public class Sequence {
 
 	/**
-	 * format: 201501
+	 * format: 20150102
 	 */
 	private int creationDate;
 

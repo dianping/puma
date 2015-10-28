@@ -1,6 +1,6 @@
 package com.dianping.puma.storage.utils;
 
-import com.dianping.puma.utils.PropertyKeyConstants;
+import com.google.common.base.Strings;
 import org.joda.time.DateTime;
 import org.joda.time.DurationFieldType;
 import org.joda.time.format.DateTimeFormatter;
@@ -15,24 +15,16 @@ public final class DateUtils {
     private DateUtils() {
     }
 
-    private static final String NOW_TYPE_ACTUAL_VALUE = "now";
-
-    private static final String NOW_TYPE_MOCK_VALUE = "mock";
-
     private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern("yyyyMMdd").toFormatter();
 
-    private static String nowType = NOW_TYPE_ACTUAL_VALUE;
+    private volatile static DateTime mockedNow;
 
-    private static DateTime mockedNow;
-
-    static {
-        if (NOW_TYPE_MOCK_VALUE.equals(System.getProperty(PropertyKeyConstants.PUMA_DATE_NOW_TYPE))) {
-            try {
-                mockedNow = DateTime.parse(System.getProperty(PropertyKeyConstants.PUMA_DATE_NOW_VALUE), DATE_FORMATTER);
-                nowType = NOW_TYPE_MOCK_VALUE;
-            } catch (Exception ignore) {
-            }
+    public static final void changeGetNowTime(String date) {
+        if (Strings.isNullOrEmpty(date)) {
+            mockedNow = null;
+            return;
         }
+        mockedNow = DateTime.parse(date, DATE_FORMATTER);
     }
 
     public static final String getNextDayWithoutFuture(String dateStr) {
@@ -43,7 +35,7 @@ public final class DateUtils {
     }
 
     protected static final DateTime getNow() {
-        if (NOW_TYPE_ACTUAL_VALUE.equals(nowType)) {
+        if (mockedNow == null) {
             return DateTime.now();
         } else {
             return mockedNow;

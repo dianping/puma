@@ -1,6 +1,5 @@
 package com.dianping.puma.storage.utils
 
-import com.dianping.puma.utils.PropertyKeyConstants
 import org.junit.Test
 
 /**
@@ -13,15 +12,13 @@ public class DateUtilsTest extends GroovyTestCase {
     @Override
     void setUp() {
         super.setUp();
-
-        System.setProperty(PropertyKeyConstants.PUMA_DATE_NOW_TYPE, "mock");
-        System.setProperty(PropertyKeyConstants.PUMA_DATE_NOW_VALUE, "20150101");
+        DateUtils.changeGetNowTime("20150101");
     }
 
     @Override
     void tearDown() {
         super.tearDown();
-        System.clearProperty(PropertyKeyConstants.PUMA_DATE_NOW_TYPE);
+        DateUtils.changeGetNowTime(null);
     }
 
     @Test

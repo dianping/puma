@@ -69,6 +69,8 @@ public final class SeriesReadIndexManager extends AbstractLifeCycle
 
         Sequence sequence = l1ReadIndexManager.find(binlogInfo);
         if (sequence == null) {
+            l1ReadIndexManager.stop();
+            l1ReadIndexManager.start();
             sequence = l1ReadIndexManager.findLatest();
             if (sequence == null) {
                 throw new IOException("failed to find binlog info.");

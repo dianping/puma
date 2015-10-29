@@ -30,7 +30,7 @@ public class L2SingleReadIndexManagerTest extends StorageBaseTest {
 		l2SingleReadIndexManager = IndexManagerFactory.newL2SingleReadIndexManager(bucket);
 		l2SingleReadIndexManager.start();
 
-		l2SingleWriteIndexManager = IndexManagerFactory.newL2SingleWriteIndexManager(bucket);
+		l2SingleWriteIndexManager = IndexManagerFactory.newL2SingleWriteIndexManager(bucket, "20151015", 0);
 		l2SingleWriteIndexManager.start();
 	}
 

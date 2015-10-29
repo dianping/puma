@@ -42,6 +42,10 @@ public final class SeriesWriteIndexManager extends AbstractLifeCycle implements 
 
         if (needPage()) {
             page(binlogInfo, sequence);
+            Sequence l2Sequence = l2WriteIndexManager.position();
+            l2WriteIndexManager.append(binlogInfo, sequence);
+            l1WriteIndexManager.append(binlogInfo, l2Sequence);
+            return;
         }
 
         l2WriteIndexManager.append(binlogInfo, sequence);
@@ -58,6 +62,11 @@ public final class SeriesWriteIndexManager extends AbstractLifeCycle implements 
         if (l2WriteIndexManager != null) {
             l2WriteIndexManager.flush();
         }
+    }
+
+    @Override
+    public Sequence position() {
+        return null;
     }
 
     protected boolean needPage() {
@@ -82,9 +91,6 @@ public final class SeriesWriteIndexManager extends AbstractLifeCycle implements 
             l1WriteIndexManager = SeriesIndexManagerFinder.findL1WriteIndexManager(database);
             l1WriteIndexManager.start();
         }
-
-        // Append l1 index when paging.
-        l1WriteIndexManager.append(binlogInfo, sequence);
 
         // Flush l2 index before paging.
         if (l2WriteIndexManager != null) {

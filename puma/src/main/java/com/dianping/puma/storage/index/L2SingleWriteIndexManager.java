@@ -7,8 +7,8 @@ import java.io.File;
 
 public final class L2SingleWriteIndexManager extends SingleWriteIndexManager<BinlogInfo, Sequence> {
 
-	public L2SingleWriteIndexManager(File file, int bufSizeByte, int maxSizeByte) {
-		super(file, bufSizeByte, maxSizeByte);
+	public L2SingleWriteIndexManager(File file, String date, int number, int bufSizeByte, int maxSizeByte) {
+		super(file, date, number, bufSizeByte, maxSizeByte);
 	}
 
 	@Override

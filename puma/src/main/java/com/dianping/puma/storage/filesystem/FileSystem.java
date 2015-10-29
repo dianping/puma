@@ -294,4 +294,11 @@ public final class FileSystem {
         return parseNumber(file, MASTER_DATA_PREFIX, MASTER_DATA_SUFFIX);
     }
 
+    public static String parseL2IndexDate(File file) {
+        return parseDate(file);
+    }
+
+    public static int parseL2IndexNumber(File file) {
+        return parseNumber(file, L2_INDEX_PREFIX, L2_INDEX_SUFFIX);
+    }
 }

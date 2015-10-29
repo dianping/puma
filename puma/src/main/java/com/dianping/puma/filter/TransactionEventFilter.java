@@ -6,9 +6,6 @@ import com.dianping.puma.core.model.Schema;
 import com.dianping.puma.core.model.SchemaSet;
 import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
-import com.dianping.puma.eventbus.DefaultEventBus;
-import com.dianping.puma.taskexecutor.change.TargetChangedEvent;
-import com.google.common.eventbus.Subscribe;
 
 public class TransactionEventFilter extends AbstractEventFilter {
 
@@ -19,22 +16,6 @@ public class TransactionEventFilter extends AbstractEventFilter {
     private boolean commit = true;
 
     private SchemaSet acceptedSchemas = new SchemaSet();
-
-    public TransactionEventFilter() {
-        DefaultEventBus.INSTANCE.register(this);
-    }
-
-    @Subscribe
-    public void listenTargetChangedEvent(TargetChangedEvent event) {
-        if (event.getTaskName().equals(name)) {
-            TableSet tableSet = event.getTableSet();
-            SchemaSet schemaSet = new SchemaSet();
-            for (Table table : tableSet.listSchemaTables()) {
-                schemaSet.add(new Schema(table.getSchemaName()));
-            }
-            setAcceptedSchemas(schemaSet);
-        }
-    }
 
     protected boolean checkEvent(ChangedEvent changedEvent) {
         if (changedEvent instanceof RowChangedEvent) {

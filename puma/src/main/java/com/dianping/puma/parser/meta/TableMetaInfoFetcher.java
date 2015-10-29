@@ -1,12 +1,12 @@
 /**
  * Project: puma-server
- *
+ * <p/>
  * File Created at 2012-8-3
  * $Id$
- *
+ * <p/>
  * Copyright 2010 dianping.com.
  * All rights reserved.
- *
+ * <p/>
  * This software is the confidential and proprietary information of
  * Dianping Company. ("Confidential Information").  You shall not
  * disclose such Confidential Information and shall use it only in
@@ -17,8 +17,6 @@ package com.dianping.puma.parser.meta;
 
 import com.dianping.puma.core.meta.TableMetaInfo;
 
-import java.sql.SQLException;
-
 /**
  *
  * @author Leo Liang
@@ -26,9 +24,9 @@ import java.sql.SQLException;
  */
 public interface TableMetaInfoFetcher {
 
-	public void refreshTableMeta(String database, String table) throws SQLException;
+    void refreshTableMeta(String database, String table);
 
-	public void refreshTableMetas() throws SQLException;
+    void refreshTableMetas();
 
-	TableMetaInfo getTableMetaInfo(String database, String table);
+    TableMetaInfo getTableMetaInfo(String database, String table);
 }

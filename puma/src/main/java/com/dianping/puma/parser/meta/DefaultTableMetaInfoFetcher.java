@@ -21,9 +21,6 @@ import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.core.meta.TableMetaInfo;
 import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
-import com.dianping.puma.eventbus.DefaultEventBus;
-import com.dianping.puma.taskexecutor.change.TargetChangedEvent;
-import com.google.common.eventbus.Subscribe;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -35,7 +32,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Leo Liang
@@ -46,7 +43,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 
     private String name;
 
-    private AtomicReference<Map<String, TableMetaInfo>> tableMetaInfoCache = new AtomicReference<Map<String, TableMetaInfo>>();
+    private final Map<String, TableMetaInfo> tableMetaInfoCache = new ConcurrentHashMap<String, TableMetaInfo>();
 
     private SrcDbEntity srcDbEntity;
 
@@ -54,51 +51,32 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 
     private TableSet acceptedTables;
 
-    public DefaultTableMetaInfoFetcher() {
-        DefaultEventBus.INSTANCE.register(this);
-    }
-
-    @Subscribe
-    public void listenTargetChangedEvent(TargetChangedEvent event) {
-        if (event.getTaskName().equals(name)) {
-            acceptedTables = event.getTableSet();
-            try {
-                refreshTableMetas();
-                logger.info("refresh table metas.");
-                logger.info("table set = {}", acceptedTables.toString());
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     @Override
     public TableMetaInfo getTableMetaInfo(String database, String table) {
-        return tableMetaInfoCache.get().get(database + "." + table);
+        Table tableModel = new Table(database, table);
+        if (!acceptedTables.contains(tableModel)) {
+            return null;
+        }
+
+        String key = database + "." + table;
+        if (!tableMetaInfoCache.containsKey(key)) {
+            try {
+                tableMetaInfoCache.put(key, _refreshTableMeta(database, table));
+            } catch (SQLException e) {
+                return null;
+            }
+        }
+        return tableMetaInfoCache.get(key);
     }
 
     @Override
-    public void refreshTableMeta(final String databaseName, final String tableName) throws SQLException {
-        Table table = new Table(databaseName, tableName);
-        if (acceptedTables.contains(table)) {
-            TableMetaInfo tableMetaInfo = _refreshTableMeta(databaseName, tableName);
-            tableMetaInfoCache.get().put(databaseName + "." + tableName, tableMetaInfo);
-        }
+    public void refreshTableMeta(final String databaseName, final String tableName) {
+        tableMetaInfoCache.remove(databaseName + "." + tableName);
     }
 
     @Override
-    public void refreshTableMetas() throws SQLException {
-        Map<String, TableMetaInfo> tableMetaInfoMap = new HashMap<String, TableMetaInfo>();
-
-        for (Table table : acceptedTables.listSchemaTables()) {
-            String databaseName = table.getSchemaName();
-            String tableName = table.getTableName();
-
-            TableMetaInfo tableMetaInfo = _refreshTableMeta(databaseName, tableName);
-            tableMetaInfoMap.put(databaseName + "." + tableName, tableMetaInfo);
-        }
-
-        tableMetaInfoCache.set(tableMetaInfoMap);
+    public void refreshTableMetas() {
+        tableMetaInfoCache.clear();
     }
 
     protected TableMetaInfo _refreshTableMeta(final String database, final String table) throws SQLException {

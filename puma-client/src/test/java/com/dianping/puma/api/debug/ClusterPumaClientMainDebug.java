@@ -14,7 +14,7 @@ public class ClusterPumaClientMainDebug {
     public static void main(String[] args) throws InterruptedException, IOException {
 
         PumaClient client = new PumaClientConfig()
-                .setClientName("dozer-debug")
+                .setClientName("lixt-debug")
                 .setDatabase("UnifiedOrder0")
                 .setTables(Lists.newArrayList("UOD_Order0"))
                 .setServerHosts(Lists.newArrayList("192.168.224.101:4040"))

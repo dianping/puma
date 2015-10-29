@@ -41,7 +41,7 @@ while(!Thread.currentThread().isInterrupted()) {
 	try {
 		BinlogMessage binlogMessage = client.get(10, 1, TimeUnit.SECOND);
 		//Todo: 处理数据
-		client.ack(binlogMessage.getBinlogInfo());
+		client.ack(binlogMessage.getLastBinlogInfo());
 	} catch(Exception e) {
 		// 这里的异常主要是用来打点的，便于及时发现问题
 	}

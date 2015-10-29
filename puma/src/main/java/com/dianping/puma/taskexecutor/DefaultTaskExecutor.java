@@ -806,6 +806,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
     protected void doStop() throws Exception {
         LOG.info("TaskName: " + getTaskName() + ", Stopped.");
         closeTransport();
+        SystemStatusManager.deleteServer(getTaskName());
     }
 
     private void stopTask() {

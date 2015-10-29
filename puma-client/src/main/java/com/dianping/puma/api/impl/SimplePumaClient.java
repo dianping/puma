@@ -65,7 +65,7 @@ public class SimplePumaClient implements PumaClient {
 
     private static final Gson GSON = new Gson();
 
-    private static final int CONNECT_TIMEOUT = 60 * 1000;
+    private static final int CONNECT_TIMEOUT = 10 * 1000;
 
     private static final int SOCKET_TIMEOUT = 10 * 60 * 1000;
 

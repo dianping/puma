@@ -10,7 +10,7 @@ public final class IndexManagerFactory {
 
 	private static final int L1_WRITE_BUF_SIZE_BYTE = 64 * 1024; // 64K.
 
-	private static final int L1_WRITE_MAX_SIZE_BYTE = 64 * 1024; // 64K.
+	private static final int L1_WRITE_MAX_SIZE_BYTE = 1024 * 1024 * 1024; // 1G..
 
 	private static final int L2_READ_BUF_SIZE_BYTE = 64 * 1024; // 64K.
 
@@ -18,7 +18,7 @@ public final class IndexManagerFactory {
 
 	private static final int L2_WRITE_BUF_SIZE_BYTE = 64 * 1024; // 64K.
 
-	private static final int L2_WRITE_MAX_SIZE_BYTE = 64 * 1024; // 64K.
+	private static final int L2_WRITE_MAX_SIZE_BYTE = 1024 * 1024 * 1024; // 1G..
 
 	private IndexManagerFactory() {
 	}

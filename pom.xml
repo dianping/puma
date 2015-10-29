@@ -50,11 +50,6 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.dianping.puma</groupId>
-                <artifactId>puma-biz</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.dianping.lion</groupId>
                 <artifactId>lion-client</artifactId>
                 <version>0.5.4</version>

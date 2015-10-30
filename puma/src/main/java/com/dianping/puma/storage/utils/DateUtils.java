@@ -2,6 +2,7 @@ package com.dianping.puma.storage.utils;
 
 import com.google.common.base.Strings;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeComparator;
 import org.joda.time.DurationFieldType;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
@@ -31,7 +32,7 @@ public final class DateUtils {
         DateTime date = DateTime.parse(dateStr, DATE_FORMATTER);
         date = date.withFieldAdded(DurationFieldType.days(), 1);
         DateTime now = getNow();
-        return date.compareTo(now) > 0 ? null : date.toString(DATE_FORMATTER);
+        return DateTimeComparator.getDateOnlyInstance().compare(date, now) > 0 ? null : date.toString(DATE_FORMATTER);
     }
 
     protected static final DateTime getNow() {

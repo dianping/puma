@@ -91,12 +91,6 @@ public class StorageDebug extends StorageBaseTest {
         }
     }
 
-    @Test
-    public void testName() throws Exception {
-        println(100000000 % 50000000)
-
-    }
-
     @Override
     @After
     public void tearDown() throws Exception {

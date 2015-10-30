@@ -80,14 +80,21 @@ public class StorageDebug extends StorageBaseTest {
             def event = EventFactory.dml(System.currentTimeMillis(), 1, (count / 1000).toString(), count % 1000, "test", table, false, false, DMLType.INSERT)
             writeChannel.append(event)
 
-            if (count % 50000000 == 0) {
-                DateUtils.changeGetNowTime(date.withFieldAdded(DurationFieldType.days(), 1).toString("yyyyMMdd"))
+            if (count % 30000000 == 0) {
+                date = date.withFieldAdded(DurationFieldType.days(), 1)
+                DateUtils.changeGetNowTime(date.toString("yyyyMMdd"))
             }
 
             if (tablesNeeded.contains(table)) {
                 events.put(event)
             }
         }
+    }
+
+    @Test
+    public void testName() throws Exception {
+        println(100000000 % 50000000)
+
     }
 
     @Override

@@ -7,6 +7,8 @@ import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.data.GroupWriteDataManager;
 import com.dianping.puma.storage.index.SeriesWriteIndexManager;
 import com.google.common.util.concurrent.Uninterruptibles;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Date;
@@ -14,79 +16,82 @@ import java.util.concurrent.TimeUnit;
 
 public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChannel {
 
-	private String database;
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultWriteChannel.class);
 
-	private SeriesWriteIndexManager writeIndexManager;
+    private String database;
 
-	private GroupWriteDataManager writeDataManager;
+    private SeriesWriteIndexManager writeIndexManager;
 
-	private Long currServerId;
+    private GroupWriteDataManager writeDataManager;
 
-	private Date currDate;
+    private Long currServerId;
 
-	private Thread thread;
+    private Date currDate;
 
-	protected DefaultWriteChannel(String database) {
-		this.database = database;
-	}
+    private Thread thread;
 
-	@Override
-	protected void doStart() {
-		writeIndexManager = new SeriesWriteIndexManager(database);
-		writeIndexManager.start();
+    protected DefaultWriteChannel(String database) {
+        this.database = database;
+    }
 
-		writeDataManager = new GroupWriteDataManager(database);
-		writeDataManager.start();
+    @Override
+    protected void doStart() {
+        writeIndexManager = new SeriesWriteIndexManager(database);
+        writeIndexManager.start();
 
-		thread = new Thread(new FlushTask());
-		thread.setDaemon(true);
-		thread.setName("flush-" + database);
-		thread.start();
-	}
+        writeDataManager = new GroupWriteDataManager(database);
+        writeDataManager.start();
 
-	@Override
-	protected void doStop() {
-		if (writeIndexManager != null) {
-			writeIndexManager.stop();
-		}
+        thread = new Thread(new FlushTask());
+        thread.setDaemon(true);
+        thread.setName("flush-" + database);
+        thread.start();
+    }
 
-		if (writeDataManager != null) {
-			writeDataManager.stop();
-		}
+    @Override
+    protected void doStop() {
+        if (writeIndexManager != null) {
+            writeIndexManager.stop();
+        }
 
-		if (thread != null) {
-			thread.interrupt();
-		}
-	}
+        if (writeDataManager != null) {
+            writeDataManager.stop();
+        }
 
-	@Override
-	public void append(ChangedEvent binlogEvent) throws IOException {
-		checkStop();
+        if (thread != null) {
+            thread.interrupt();
+        }
+    }
 
-		BinlogInfo binlogInfo = binlogEvent.getBinlogInfo();
+    @Override
+    public void append(ChangedEvent binlogEvent) throws IOException {
+        checkStop();
 
-		Sequence sequence = writeDataManager.append(binlogEvent);
-		writeIndexManager.append(binlogInfo, sequence);
-	}
+        BinlogInfo binlogInfo = binlogEvent.getBinlogInfo();
 
-	@Override
-	public void flush() throws IOException {
-		checkStop();
+        Sequence sequence = writeDataManager.append(binlogEvent);
+        writeIndexManager.append(binlogInfo, sequence);
+    }
 
-		writeIndexManager.flush();
-		writeDataManager.flush();
-	}
+    @Override
+    public void flush() throws IOException {
+        checkStop();
 
-	private class FlushTask implements Runnable {
-		@Override
-		public void run() {
-			while (!isStopped()) {
-				try {
-					flush();
-					Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
-				} catch (IOException ignore) {
-				}
-			}
-		}
-	}
+        writeIndexManager.flush();
+        writeDataManager.flush();
+    }
+
+    private class FlushTask implements Runnable {
+        @Override
+        public void run() {
+            while (!isStopped()) {
+                try {
+                    flush();
+                    Uninterruptibles.sleepUninterruptibly(200, TimeUnit.MILLISECONDS);
+                } catch (Exception ignore) {
+                    LOG.error("Flush failed!", ignore);
+                }
+            }
+        }
+    }
 }

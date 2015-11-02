@@ -33,7 +33,7 @@ public final class L1SingleReadIndexManager extends SingleReadIndexManager<Binlo
 			} else {
 				long aBinlogPosition = aBinlogInfo.getBinlogPosition();
 				long bBinlogPosition = bBinlogInfo.getBinlogPosition();
-				return aBinlogPosition - bBinlogPosition > 0;
+				return aBinlogPosition > bBinlogPosition ;
 			}
 		} else {
 			long aTimestamp = aBinlogInfo.getTimestamp();

@@ -137,7 +137,7 @@ public class DefaultTaskContainer implements TaskContainer {
         }
 
         for (DatabaseTask databaseTask : instanceTask.getDatabaseTasks()) {
-            registryService.register(taskServerManager.findSelfHost(), databaseTask.getDatabase());
+            registryService.register(taskServerManager.findSelfHost() + ":4040", databaseTask.getDatabase());
         }
 
         logger.info("success to create instance task.");

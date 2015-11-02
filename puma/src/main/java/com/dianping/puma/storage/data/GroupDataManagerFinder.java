@@ -43,6 +43,7 @@ public final class GroupDataManagerFinder {
         return result;
     }
 
+    //todo: + ut
     public static SingleReadDataManager findNextMasterReadDataManager(String database, Sequence sequence)
             throws IOException {
         String date = sequence.date();
@@ -69,6 +70,7 @@ public final class GroupDataManagerFinder {
         return result;
     }
 
+    //todo: + ut
     public static SingleReadDataManager findNextSlaveReadDataManager(String database, Sequence sequence)
             throws IOException {
         String date = sequence.date();

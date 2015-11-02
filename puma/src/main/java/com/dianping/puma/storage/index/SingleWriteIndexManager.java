@@ -1,6 +1,7 @@
 package com.dianping.puma.storage.index;
 
 import com.dianping.puma.common.AbstractLifeCycle;
+import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.bucket.BucketFactory;
 import com.dianping.puma.storage.bucket.WriteBucket;
 
@@ -15,10 +16,22 @@ public abstract class SingleWriteIndexManager<K, V> extends AbstractLifeCycle im
 
 	private final int maxSizeByte;
 
+	private String date;
+
+	private int number;
+
 	private WriteBucket writeBucket;
 
 	public SingleWriteIndexManager(File file, int bufSizeByte, int maxSizeByte) {
 		this.file = file;
+		this.bufSizeByte = bufSizeByte;
+		this.maxSizeByte = maxSizeByte;
+	}
+
+	public SingleWriteIndexManager(File file, String date, int number, int bufSizeByte, int maxSizeByte) {
+		this.file = file;
+		this.date = date;
+		this.number = number;
 		this.bufSizeByte = bufSizeByte;
 		this.maxSizeByte = maxSizeByte;
 	}
@@ -51,6 +64,13 @@ public abstract class SingleWriteIndexManager<K, V> extends AbstractLifeCycle im
 		if (writeBucket != null) {
 			writeBucket.flush();
 		}
+	}
+
+	@Override
+	public Sequence position() {
+		checkStop();
+
+		return new Sequence(date, number, writeBucket.position());
 	}
 
 	protected boolean hasRemainingForWrite(){

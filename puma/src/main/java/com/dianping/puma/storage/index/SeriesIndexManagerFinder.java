@@ -31,6 +31,8 @@ public final class SeriesIndexManagerFinder {
 
 	public static L2SingleWriteIndexManager findNextL2WriteIndexManager(String database) throws IOException {
 		File file = FileSystem.nextL2IndexFile(database);
-		return IndexManagerFactory.newL2SingleWriteIndexManager(file);
+		String date = FileSystem.parseL2IndexDate(file);
+		int number = FileSystem.parseL2IndexNumber(file);
+		return IndexManagerFactory.newL2SingleWriteIndexManager(file, date, number);
 	}
 }

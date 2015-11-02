@@ -27,7 +27,7 @@ public class L2SingleWriteIndexManagerTest extends StorageBaseTest {
 		bucket = new File(testDir, "bucket");
 		createFile(bucket);
 
-		l2SingleWriteIndexManager = IndexManagerFactory.newL2SingleWriteIndexManager(bucket);
+		l2SingleWriteIndexManager = IndexManagerFactory.newL2SingleWriteIndexManager(bucket, "20151015", 0);
 		l2SingleWriteIndexManager.start();
 
 		l2SingleReadIndexManager = IndexManagerFactory.newL2SingleReadIndexManager(bucket);

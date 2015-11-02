@@ -24,7 +24,6 @@ import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.datahandler.DataHandlerResult;
-import com.dianping.puma.eventbus.DefaultEventBus;
 import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.QueryExecutor;
@@ -87,10 +86,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
     private boolean merging = false;
 
     private long runUntilTimestamp;
-
-    public DefaultTaskExecutor() {
-        DefaultEventBus.INSTANCE.register(this);
-    }
 
     @Override
     public boolean isMerging() {

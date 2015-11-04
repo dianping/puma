@@ -44,35 +44,66 @@ public class PumaClientConfig {
 
 	private List<String> serverHosts;
 
+	/**
+	 * 客户端名称（如果多台机器启动的 clientName 相同，那么只会有一个能读取到数据，其余会一直等待）
+	 * @param clientName
+	 * @return
+     */
 	public PumaClientConfig setClientName(String clientName) {
 		this.clientName = clientName;
 		return this;
 	}
 
+    /**
+     * 设置Puma客户端需要监听的数据库名称。每个客户端只能监听一个数据库。
+     * @param database
+     * @return
+     */
 	public PumaClientConfig setDatabase(String database) {
 		this.database = database;
 		return this;
 	}
 
+    /**
+     * 设置Puma客户端需要监听的数据库表的名称列表。每个客户端可以监听一个数据库下的任意多张表。
+     * @param tables
+     * @return
+     */
 	public PumaClientConfig setTables(List<String> tables) {
 		this.tables = tables;
 		return this;
 	}
 
+    /**
+     * 设置Puma客户端是否需要所监听库表的DML（Data Manipulation Language）事件。
+     * @param dml
+     * @return
+     */
 	public PumaClientConfig setDml(boolean dml) {
 		this.dml = dml;
 		return this;
 	}
 
+    /**
+     * 设置Puma客户端是否需要所监听库表的DDL（Data Definition Language）事件。
+     * @param ddl
+     * @return
+     */
 	public PumaClientConfig setDdl(boolean ddl) {
 		this.ddl = ddl;
 		return this;
 	}
 
+    /**
+     * 设置Puma客户端是否需要所监听库表的Transaction（begin，commit）事件。
+     * @param transaction
+     * @return
+     */
 	public PumaClientConfig setTransaction(boolean transaction) {
 		this.transaction = transaction;
 		return this;
 	}
+
 
 	public PumaClientConfig setRouter(PumaServerRouter router) {
 		this.router = router;
@@ -138,6 +169,10 @@ public class PumaClientConfig {
 		return new SimplePumaClient(this);
 	}
 
+    /**
+     * 根据PumaClientConfig的配置创建具备ha功能的Puma客户端。
+     * @return
+     */
 	public PumaClient buildClusterPumaClient() {
 		return buildLionClusterPumaClient();
 	}

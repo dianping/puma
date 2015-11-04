@@ -25,13 +25,11 @@ public final class L1SingleReadIndexManager extends SingleReadIndexManager<Binlo
 		if (aServerId != 0 && bServerId != 0 && aServerId == bServerId) {
 			String aBinlogFile = aBinlogInfo.getBinlogFile();
 			String bBinlogFile = bBinlogInfo.getBinlogFile();
-<<<<<<< HEAD
-			int result = aBinlogFile.compareTo(bBinlogFile);
-=======
+
 			Integer aBinlogFileNumber = Integer.valueOf(StringUtils.substringAfterLast(aBinlogFile, "."));
             Integer bBinlogFileNumber = Integer.valueOf(StringUtils.substringAfterLast(bBinlogFile, "."));
 			int result = aBinlogFileNumber.compareTo(bBinlogFileNumber);
->>>>>>> temp commit
+
 			if (result > 0) {
 				return true;
 			} else if (result < 0) {

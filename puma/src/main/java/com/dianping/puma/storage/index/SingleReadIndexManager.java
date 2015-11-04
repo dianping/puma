@@ -88,13 +88,9 @@ public abstract class SingleReadIndexManager<K, V> extends AbstractLifeCycle
 		}
 	}
 
-<<<<<<< HEAD
-	abstract protected boolean greater(K aIndexKey, K bIndexKey);
 
-	abstract protected Pair<K, V> decode(byte[] data) throws IOException;
-=======
 	protected abstract boolean greater(K aIndexKey, K bIndexKey);
 
 	protected abstract Pair<K, V> decode(byte[] data) throws IOException;
->>>>>>> temp commit
+
 }

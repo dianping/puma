@@ -27,7 +27,7 @@ public interface PumaClient {
 
     /**
      * 获得一批数据
-     * 该方法会一直等待，直到服务器新数据量达到 batchSize 后返回
+     * 该方法会一直等待,直到服务器新数据量达到 batchSize 后返回
      * @param batchSize
      * @return 满足 batchSize 的数据
      * @throws PumaClientException
@@ -36,7 +36,7 @@ public interface PumaClient {
 
     /**
      * 获得一批数据，并设置超时时间
-     * 如果超过超时时间或者达到 batchSize，该方法就会返回。
+     * 如果超过超时时间或者达到 batchSize,该方法就会返回。
      * @param batchSize
      * @param timeout
      * @param timeUnit
@@ -46,7 +46,7 @@ public interface PumaClient {
     BinlogMessage get(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException;
 
     /**
-     * 得到数据后自动 ack，使用该方法可能会在极少数情况下丢失数据
+     * 得到数据后自动 ack,使用该方法可能会在极少数情况下丢失数据
      * 只有当不太关心数据准确性的情况下才使用
      * @param batchSize
      * @return
@@ -55,7 +55,7 @@ public interface PumaClient {
     BinlogMessage getWithAck(int batchSize) throws PumaClientException;
 
     /**
-     * 得到数据后自动 ack，使用该方法可能会在极少数情况下丢失数据
+     * 得到数据后自动 ack,使用该方法可能会在极少数情况下丢失数据
      * 只有当不太关心数据准确性的情况下才使用
      * @param batchSize
      * @param timeout
@@ -73,7 +73,7 @@ public interface PumaClient {
     void ack(BinlogInfo binlogInfo) throws PumaClientException;
 
     /**
-     * 会滚到制定位置重新开始
+     * 回滚到指定位置重新开始,下一次调用 get 的时候会从该位置开始
      * @param binlogInfo 可以指定 binlog 位置或直接指定时间
      * @throws PumaClientException
      */

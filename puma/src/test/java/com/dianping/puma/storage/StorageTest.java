@@ -41,6 +41,7 @@ public class StorageTest extends StorageBaseTest {
     @Test
     public void testPage() throws IOException {
         DateUtils.changeGetNowTime("20150101");
+<<<<<<< HEAD
         writeChannel.append(EventFactory.dml(1, 1, "1", 1, "a", "b", false, false, DMLType.INSERT));
         DateUtils.changeGetNowTime("20150102");
         writeChannel.append(EventFactory.dml(2, 1, "1", 2, "a", "b", false, false, DMLType.INSERT));
@@ -52,6 +53,19 @@ public class StorageTest extends StorageBaseTest {
         assertEquals(EventFactory.dml(1, 1, "1", 1, "a", "b", false, false, DMLType.INSERT), readChannel.next());
         assertEquals(EventFactory.dml(2, 1, "1", 2, "a", "b", false, false, DMLType.INSERT), readChannel.next());
         assertEquals(EventFactory.dml(3, 1, "1", 3, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+=======
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 1, "a", "b", false, false, DMLType.INSERT));
+        DateUtils.changeGetNowTime("20150102");
+        writeChannel.append(EventFactory.dml(2, 1, "f.1", 2, "a", "b", false, false, DMLType.INSERT));
+        DateUtils.changeGetNowTime("20150103");
+        writeChannel.append(EventFactory.dml(3, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.flush();
+
+        readChannel.openOldest();
+        assertEquals(EventFactory.dml(1, 1, "f.1", 1, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.dml(2, 1, "f.1", 2, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.dml(3, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+>>>>>>> temp commit
 
         DateUtils.changeGetNowTime(null);
     }
@@ -59,6 +73,7 @@ public class StorageTest extends StorageBaseTest {
     @Test
     public void testPageFindByBinlog() throws IOException {
         DateUtils.changeGetNowTime("20150101");
+<<<<<<< HEAD
         writeChannel.append(EventFactory.dml(1, 1, "1", 1, "a", "b", false, false, DMLType.INSERT));
         DateUtils.changeGetNowTime("20150102");
         writeChannel.append(EventFactory.dml(2, 1, "1", 2, "a", "b", false, false, DMLType.INSERT));
@@ -69,6 +84,18 @@ public class StorageTest extends StorageBaseTest {
         readChannel.open(new BinlogInfo(2, 1, "1", 2));
         assertEquals(EventFactory.dml(2, 1, "1", 2, "a", "b", false, false, DMLType.INSERT), readChannel.next());
         assertEquals(EventFactory.dml(3, 1, "1", 3, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+=======
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 1, "a", "b", false, false, DMLType.INSERT));
+        DateUtils.changeGetNowTime("20150102");
+        writeChannel.append(EventFactory.dml(2, 1, "f.1", 2, "a", "b", false, false, DMLType.INSERT));
+        DateUtils.changeGetNowTime("20150103");
+        writeChannel.append(EventFactory.dml(3, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.flush();
+
+        readChannel.open(new BinlogInfo(2, 1, "f.1", 2));
+        assertEquals(EventFactory.dml(2, 1, "f.1", 2, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.dml(3, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+>>>>>>> temp commit
 
         DateUtils.changeGetNowTime(null);
     }
@@ -86,6 +113,7 @@ public class StorageTest extends StorageBaseTest {
      */
     @Test
     public void testFindOldest() throws IOException {
+<<<<<<< HEAD
         writeChannel.append(EventFactory.dml(1, 1, "1", 1, "a", "b", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(2, 1, "1", 2, "a", "b", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(3, 1, "1", 3, "a", "b", false, false, DMLType.INSERT));
@@ -95,6 +123,17 @@ public class StorageTest extends StorageBaseTest {
         assertEquals(EventFactory.dml(1, 1, "1", 1, "a", "b", false, false, DMLType.INSERT), readChannel.next());
         assertEquals(EventFactory.dml(2, 1, "1", 2, "a", "b", false, false, DMLType.INSERT), readChannel.next());
         assertEquals(EventFactory.dml(3, 1, "1", 3, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+=======
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 1, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(2, 1, "f.1", 2, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(3, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.flush();
+
+        readChannel.openOldest();
+        assertEquals(EventFactory.dml(1, 1, "f.1", 1, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.dml(2, 1, "f.1", 2, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.dml(3, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+>>>>>>> temp commit
     }
 
     /**
@@ -110,14 +149,24 @@ public class StorageTest extends StorageBaseTest {
      */
     @Test
     public void testFindLatest() throws IOException {
+<<<<<<< HEAD
         writeChannel.append(EventFactory.dml(1, 1, "1", 1, "a", "b", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(2, 1, "1", 2, "a", "b", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(3, 1, "1", 3, "a", "b", false, false, DMLType.INSERT));
+=======
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 1, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(2, 1, "f.1", 2, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(3, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT));
+>>>>>>> temp commit
         writeChannel.flush();
 
         readChannel.openLatest();
         ChangedEvent binlogEvent = readChannel.next();
+<<<<<<< HEAD
         assertTrue(binlogEvent.equals(EventFactory.dml(3, 1, "1", 3, "a", "b", false, false, DMLType.INSERT)));
+=======
+        assertTrue(binlogEvent.equals(EventFactory.dml(3, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT)));
+>>>>>>> temp commit
     }
 
     /**
@@ -133,6 +182,7 @@ public class StorageTest extends StorageBaseTest {
      */
     @Test
     public void testFind0() throws IOException {
+<<<<<<< HEAD
         writeChannel.append(EventFactory.dml(1, 1, "1", 1, "a", "b", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(2, 1, "1", 2, "a", "b", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(3, 1, "1", 3, "a", "b", false, false, DMLType.INSERT));
@@ -141,6 +191,16 @@ public class StorageTest extends StorageBaseTest {
         readChannel.open(new BinlogInfo(2, 1, "1", 2));
         assertEquals(EventFactory.dml(2, 1, "1", 2, "a", "b", false, false, DMLType.INSERT), readChannel.next());
         assertEquals(EventFactory.dml(3, 1, "1", 3, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+=======
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 1, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(2, 1, "f.1", 2, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(3, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.flush();
+
+        readChannel.open(new BinlogInfo(2, 1, "f.1", 2));
+        assertEquals(EventFactory.dml(2, 1, "f.1", 2, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.dml(3, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+>>>>>>> temp commit
     }
 
     /**
@@ -156,6 +216,7 @@ public class StorageTest extends StorageBaseTest {
      */
     @Test
     public void testFind1() throws IOException {
+<<<<<<< HEAD
         writeChannel.append(EventFactory.dml(1, 1, "1", 1, "a", "b", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(1, 1, "1", 2, "a", "b", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(1, 1, "1", 3, "a", "b", false, false, DMLType.INSERT));
@@ -164,6 +225,16 @@ public class StorageTest extends StorageBaseTest {
         readChannel.open(new BinlogInfo(1, 1, "1", 2));
         ChangedEvent binlogEvent = readChannel.next();
         assertTrue(binlogEvent.equals(EventFactory.dml(1, 1, "1", 2, "a", "b", false, false, DMLType.INSERT)));
+=======
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 1, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 2, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.flush();
+
+        readChannel.open(new BinlogInfo(1, 1, "f.1", 2));
+        ChangedEvent binlogEvent = readChannel.next();
+        assertTrue(binlogEvent.equals(EventFactory.dml(1, 1, "f.1", 2, "a", "b", false, false, DMLType.INSERT)));
+>>>>>>> temp commit
     }
 
     /**
@@ -179,12 +250,21 @@ public class StorageTest extends StorageBaseTest {
      */
     @Test(expected = IOException.class)
     public void testFind2() throws IOException {
+<<<<<<< HEAD
         writeChannel.append(EventFactory.dml(1, 1, "1", 1, "a", "b", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(1, 1, "1", 2, "a", "b", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(1, 1, "1", 3, "a", "b", false, false, DMLType.INSERT));
         writeChannel.flush();
 
         readChannel.open(new BinlogInfo(1, 1, "1", 4));
+=======
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 1, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 2, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.flush();
+
+        readChannel.open(new BinlogInfo(1, 1, "f.1", 4));
+>>>>>>> temp commit
         readChannel.next();
     }
 
@@ -203,6 +283,7 @@ public class StorageTest extends StorageBaseTest {
      */
     @Test
     public void testServerIdChanged0() throws IOException {
+<<<<<<< HEAD
         writeChannel.append(EventFactory.dml(1, 1, "1", 1, "a", "b", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(2, 1, "1", 2, "a", "b", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(3, 1, "1", 3, "a", "b", false, false, DMLType.INSERT));
@@ -214,6 +295,19 @@ public class StorageTest extends StorageBaseTest {
         ChangedEvent binlogEvent = readChannel.next();
         assertTrue(binlogEvent.equals(EventFactory.dml(3, 1, "1", 3, "a", "b", false, false, DMLType.INSERT))
                 || binlogEvent.equals(EventFactory.dml(3, 2, "2", 8, "a", "b", false, false, DMLType.INSERT)));
+=======
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 1, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(2, 1, "f.1", 2, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(3, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 2, "f.2", 3, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(3, 2, "f.2", 8, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.flush();
+
+        readChannel.open(new BinlogInfo(3, 2, "f.2", 8));
+        ChangedEvent binlogEvent = readChannel.next();
+        assertTrue(binlogEvent.equals(EventFactory.dml(3, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT))
+                || binlogEvent.equals(EventFactory.dml(3, 2, "f.2", 8, "a", "b", false, false, DMLType.INSERT)));
+>>>>>>> temp commit
     }
 
     /**
@@ -231,6 +325,7 @@ public class StorageTest extends StorageBaseTest {
      */
     @Test
     public void testServerIdChanged1() throws IOException {
+<<<<<<< HEAD
         writeChannel.append(EventFactory.dml(1, 1, "1", 1, "a", "b", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(2, 1, "1", 2, "a", "b", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(3, 1, "1", 3, "a", "b", false, false, DMLType.INSERT));
@@ -241,6 +336,18 @@ public class StorageTest extends StorageBaseTest {
         readChannel.open(new BinlogInfo(0, 2, "2", 8));
         ChangedEvent binlogEvent = readChannel.next();
         assertTrue(binlogEvent.equals(EventFactory.dml(3, 2, "2", 8, "a", "b", false, false, DMLType.INSERT)));
+=======
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 1, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(2, 1, "f.1", 2, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(3, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 2, "f.2", 3, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(3, 2, "f.2", 8, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.flush();
+
+        readChannel.open(new BinlogInfo(0, 2, "f.2", 8));
+        ChangedEvent binlogEvent = readChannel.next();
+        assertTrue(binlogEvent.equals(EventFactory.dml(3, 2, "f.2", 8, "a", "b", false, false, DMLType.INSERT)));
+>>>>>>> temp commit
     }
 
     /**
@@ -258,17 +365,30 @@ public class StorageTest extends StorageBaseTest {
      */
     @Test
     public void testServerIdChanged2() throws IOException {
+<<<<<<< HEAD
         writeChannel.append(EventFactory.dml(1, 1, "1", 1, "a", "b", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(2, 1, "1", 2, "a", "b", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(3, 1, "1", 3, "a", "b", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(1, 2, "2", 3, "a", "b", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(3, 2, "2", 8, "a", "b", false, false, DMLType.INSERT));
+=======
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 1, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(2, 1, "f.1", 2, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(3, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 2, "f.2", 3, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(3, 2, "f.2", 8, "a", "b", false, false, DMLType.INSERT));
+>>>>>>> temp commit
         writeChannel.flush();
 
         readChannel.open(new BinlogInfo(3, 0, "0", 0));
         ChangedEvent binlogEvent = readChannel.next();
+<<<<<<< HEAD
         assertTrue(binlogEvent.equals(EventFactory.dml(3, 1, "1", 3, "a", "b", false, false, DMLType.INSERT))
                 || binlogEvent.equals(EventFactory.dml(3, 2, "2", 8, "a", "b", false, false, DMLType.INSERT)));
+=======
+        assertTrue(binlogEvent.equals(EventFactory.dml(3, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT))
+                || binlogEvent.equals(EventFactory.dml(3, 2, "f.2", 8, "a", "b", false, false, DMLType.INSERT)));
+>>>>>>> temp commit
     }
 
     @Test
@@ -277,6 +397,7 @@ public class StorageTest extends StorageBaseTest {
                 = ChannelFactory.newReadChannel("a", Lists.newArrayList("b", "c"), true, true, false);
         readChannel.start();
 
+<<<<<<< HEAD
         writeChannel.append(EventFactory.dml(1, 1, "1", 1, "a", "b", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(1, 1, "1", 2, "b", "c", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(1, 1, "1", 3, "a", "b", false, false, DMLType.INSERT));
@@ -286,6 +407,17 @@ public class StorageTest extends StorageBaseTest {
         readChannel.openOldest();
         assertEquals(EventFactory.dml(1, 1, "1", 1, "a", "b", false, false, DMLType.INSERT), readChannel.next());
         assertEquals(EventFactory.dml(1, 1, "1", 3, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+=======
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 1, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 2, "b", "c", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 4, "c", "b", false, false, DMLType.INSERT));
+        writeChannel.flush();
+
+        readChannel.openOldest();
+        assertEquals(EventFactory.dml(1, 1, "f.1", 1, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.dml(1, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+>>>>>>> temp commit
         assertNull(readChannel.next());
 
         readChannel.stop();
@@ -297,6 +429,7 @@ public class StorageTest extends StorageBaseTest {
                 = ChannelFactory.newReadChannel("a", Lists.newArrayList("b", "c"), true, true, false);
         readChannel.start();
 
+<<<<<<< HEAD
         writeChannel.append(EventFactory.dml(1, 1, "1", 1, "a", "a", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(1, 1, "1", 2, "a", "b", false, false, DMLType.INSERT));
         writeChannel.append(EventFactory.dml(1, 1, "1", 3, "a", "c", false, false, DMLType.INSERT));
@@ -306,6 +439,17 @@ public class StorageTest extends StorageBaseTest {
         readChannel.openOldest();
         assertEquals(EventFactory.dml(1, 1, "1", 2, "a", "b", false, false, DMLType.INSERT), readChannel.next());
         assertEquals(EventFactory.dml(1, 1, "1", 3, "a", "c", false, false, DMLType.INSERT), readChannel.next());
+=======
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 1, "a", "a", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 2, "a", "b", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 3, "a", "c", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 4, "a", "d", false, false, DMLType.INSERT));
+        writeChannel.flush();
+
+        readChannel.openOldest();
+        assertEquals(EventFactory.dml(1, 1, "f.1", 2, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.dml(1, 1, "f.1", 3, "a", "c", false, false, DMLType.INSERT), readChannel.next());
+>>>>>>> temp commit
         assertNull(readChannel.next());
 
         readChannel.stop();
@@ -317,6 +461,7 @@ public class StorageTest extends StorageBaseTest {
                 = ChannelFactory.newReadChannel("a", Lists.newArrayList("b", "c"), false, true, true);
         readChannel.start();
 
+<<<<<<< HEAD
         writeChannel.append(EventFactory.ddl(1, 1, "1", 1, "a", "b"));
         writeChannel.append(EventFactory.ddl(1, 1, "1", 2, "a", "b"));
         writeChannel.append(EventFactory.dml(1, 1, "1", 3, "a", "c", false, false, DMLType.INSERT));
@@ -328,6 +473,19 @@ public class StorageTest extends StorageBaseTest {
         readChannel.openOldest();
         assertEquals(EventFactory.ddl(1, 1, "1", 1, "a", "b"), readChannel.next());
         assertEquals(EventFactory.ddl(1, 1, "1", 2, "a", "b"), readChannel.next());
+=======
+        writeChannel.append(EventFactory.ddl(1, 1, "f.1", 1, "a", "b"));
+        writeChannel.append(EventFactory.ddl(1, 1, "f.1", 2, "a", "b"));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 3, "a", "c", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 4, "a", "b", true, false, DMLType.NULL));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 5, "a", "c", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 6, "a", "b", false, true, DMLType.NULL));
+        writeChannel.flush();
+
+        readChannel.openOldest();
+        assertEquals(EventFactory.ddl(1, 1, "f.1", 1, "a", "b"), readChannel.next());
+        assertEquals(EventFactory.ddl(1, 1, "f.1", 2, "a", "b"), readChannel.next());
+>>>>>>> temp commit
         assertNull(readChannel.next());
 
         readChannel.stop();
@@ -339,6 +497,7 @@ public class StorageTest extends StorageBaseTest {
                 = ChannelFactory.newReadChannel("a", Lists.newArrayList("b", "c"), true, false, true);
         readChannel.start();
 
+<<<<<<< HEAD
         writeChannel.append(EventFactory.ddl(1, 1, "1", 1, "a", "b"));
         writeChannel.append(EventFactory.ddl(1, 1, "1", 2, "a", "b"));
         writeChannel.append(EventFactory.dml(1, 1, "1", 3, "a", "c", false, false, DMLType.INSERT));
@@ -352,6 +511,21 @@ public class StorageTest extends StorageBaseTest {
         assertEquals(EventFactory.dml(1, 1, "1", 4, "a", "b", true, false, DMLType.NULL), readChannel.next());
         assertEquals(EventFactory.dml(1, 1, "1", 5, "a", "c", false, false, DMLType.INSERT), readChannel.next());
         assertEquals(EventFactory.dml(1, 1, "1", 6, "a", "b", false, true, DMLType.NULL), readChannel.next());
+=======
+        writeChannel.append(EventFactory.ddl(1, 1, "f.1", 1, "a", "b"));
+        writeChannel.append(EventFactory.ddl(1, 1, "f.1", 2, "a", "b"));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 3, "a", "c", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 4, "a", "b", true, false, DMLType.NULL));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 5, "a", "c", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 6, "a", "b", false, true, DMLType.NULL));
+        writeChannel.flush();
+
+        readChannel.openOldest();
+        assertEquals(EventFactory.dml(1, 1, "f.1", 3, "a", "c", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.dml(1, 1, "f.1", 4, "a", "b", true, false, DMLType.NULL), readChannel.next());
+        assertEquals(EventFactory.dml(1, 1, "f.1", 5, "a", "c", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.dml(1, 1, "f.1", 6, "a", "b", false, true, DMLType.NULL), readChannel.next());
+>>>>>>> temp commit
         assertNull(readChannel.next());
 
         readChannel.stop();
@@ -363,6 +537,7 @@ public class StorageTest extends StorageBaseTest {
                 = ChannelFactory.newReadChannel("a", Lists.newArrayList("b", "c"), true, true, false);
         readChannel.start();
 
+<<<<<<< HEAD
         writeChannel.append(EventFactory.ddl(1, 1, "1", 1, "a", "b"));
         writeChannel.append(EventFactory.ddl(1, 1, "1", 2, "a", "b"));
         writeChannel.append(EventFactory.dml(1, 1, "1", 3, "a", "c", false, false, DMLType.INSERT));
@@ -376,6 +551,21 @@ public class StorageTest extends StorageBaseTest {
         assertEquals(EventFactory.ddl(1, 1, "1", 2, "a", "b"), readChannel.next());
         assertEquals(EventFactory.dml(1, 1, "1", 3, "a", "c", false, false, DMLType.INSERT), readChannel.next());
         assertEquals(EventFactory.dml(1, 1, "1", 5, "a", "c", false, false, DMLType.INSERT), readChannel.next());
+=======
+        writeChannel.append(EventFactory.ddl(1, 1, "f.1", 1, "a", "b"));
+        writeChannel.append(EventFactory.ddl(1, 1, "f.1", 2, "a", "b"));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 3, "a", "c", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 4, "a", "b", true, false, DMLType.NULL));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 5, "a", "c", false, false, DMLType.INSERT));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 6, "a", "b", false, true, DMLType.NULL));
+        writeChannel.flush();
+
+        readChannel.openOldest();
+        assertEquals(EventFactory.ddl(1, 1, "f.1", 1, "a", "b"), readChannel.next());
+        assertEquals(EventFactory.ddl(1, 1, "f.1", 2, "a", "b"), readChannel.next());
+        assertEquals(EventFactory.dml(1, 1, "f.1", 3, "a", "c", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.dml(1, 1, "f.1", 5, "a", "c", false, false, DMLType.INSERT), readChannel.next());
+>>>>>>> temp commit
         assertNull(readChannel.next());
 
         readChannel.stop();

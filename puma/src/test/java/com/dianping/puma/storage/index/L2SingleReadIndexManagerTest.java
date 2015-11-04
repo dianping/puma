@@ -36,9 +36,15 @@ public class L2SingleReadIndexManagerTest extends StorageBaseTest {
 
 	@Test
 	public void testFindOldest() throws Exception {
+<<<<<<< HEAD
 		l2SingleWriteIndexManager.append(new BinlogInfo(0, 1, "2", 3), new Sequence(2015, 0, 0));
 		l2SingleWriteIndexManager.append(new BinlogInfo(1, 2, "3", 4), new Sequence(2015, 0, 10));
 		l2SingleWriteIndexManager.append(new BinlogInfo(2, 3, "4", 5), new Sequence(2015, 0, 20));
+=======
+		l2SingleWriteIndexManager.append(new BinlogInfo(0, 1, "f.2", 3), new Sequence(2015, 0, 0));
+		l2SingleWriteIndexManager.append(new BinlogInfo(1, 2, "f.3", 4), new Sequence(2015, 0, 10));
+		l2SingleWriteIndexManager.append(new BinlogInfo(2, 3, "f.4", 5), new Sequence(2015, 0, 20));
+>>>>>>> temp commit
 		l2SingleWriteIndexManager.flush();
 
 		Sequence sequence = l2SingleReadIndexManager.findOldest();
@@ -52,9 +58,15 @@ public class L2SingleReadIndexManagerTest extends StorageBaseTest {
 
 	@Test
 	public void testFindLatest() throws Exception {
+<<<<<<< HEAD
 		l2SingleWriteIndexManager.append(new BinlogInfo(0, 1, "2", 3), new Sequence(2015, 0, 0));
 		l2SingleWriteIndexManager.append(new BinlogInfo(1, 2, "3", 4), new Sequence(2015, 0, 10));
 		l2SingleWriteIndexManager.append(new BinlogInfo(2, 3, "4", 5), new Sequence(2015, 0, 20));
+=======
+		l2SingleWriteIndexManager.append(new BinlogInfo(0, 1, "f.2", 3), new Sequence(2015, 0, 0));
+		l2SingleWriteIndexManager.append(new BinlogInfo(1, 2, "f.3", 4), new Sequence(2015, 0, 10));
+		l2SingleWriteIndexManager.append(new BinlogInfo(2, 3, "f.4", 5), new Sequence(2015, 0, 20));
+>>>>>>> temp commit
 		l2SingleWriteIndexManager.flush();
 
 		Sequence sequence = l2SingleReadIndexManager.findLatest();
@@ -68,18 +80,31 @@ public class L2SingleReadIndexManagerTest extends StorageBaseTest {
 
 	@Test
 	public void testFind() throws IOException {
+<<<<<<< HEAD
 		l2SingleWriteIndexManager.append(new BinlogInfo(0, 1, "2", 3), new Sequence(2015, 0, 0));
 		l2SingleWriteIndexManager.append(new BinlogInfo(1, 2, "3", 4), new Sequence(2015, 0, 10));
 		l2SingleWriteIndexManager.append(new BinlogInfo(2, 3, "4", 5), new Sequence(2015, 0, 20));
 		l2SingleWriteIndexManager.flush();
 
 		Sequence sequence = l2SingleReadIndexManager.find(new BinlogInfo(1, 1, "2", 3));
+=======
+		l2SingleWriteIndexManager.append(new BinlogInfo(0, 1, "f.2", 3), new Sequence(2015, 0, 0));
+		l2SingleWriteIndexManager.append(new BinlogInfo(1, 2, "f.3", 4), new Sequence(2015, 0, 10));
+		l2SingleWriteIndexManager.append(new BinlogInfo(2, 3, "f.4", 5), new Sequence(2015, 0, 20));
+		l2SingleWriteIndexManager.flush();
+
+		Sequence sequence = l2SingleReadIndexManager.find(new BinlogInfo(1, 1, "f.2", 3));
+>>>>>>> temp commit
 		assertEquals(new Sequence(2015, 0, 0), sequence);
 	}
 
 	@Test
 	public void testFindNull() throws IOException {
+<<<<<<< HEAD
 		assertNull(l2SingleReadIndexManager.find(new BinlogInfo(1, 2, "3", 4)));
+=======
+		assertNull(l2SingleReadIndexManager.find(new BinlogInfo(1, 2, "f.3", 4)));
+>>>>>>> temp commit
 	}
 
 	@Override @After

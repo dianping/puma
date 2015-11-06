@@ -3,6 +3,8 @@ package com.dianping.puma.status;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.model.TableSet;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,6 +15,8 @@ public class SystemStatus {
     private Map<String, Client> clients = new ConcurrentHashMap<String, Client>();
 
     private Map<String, Server> servers = new ConcurrentHashMap<String, Server>();
+
+    private double load;
 
     private int storeQps;
 
@@ -48,6 +52,12 @@ public class SystemStatus {
         countTotalStoreBytes();
         countTotalParsedEvent();
         countTotalStoreCount();
+        countLoad();
+    }
+
+    private void countLoad() {
+        OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
+        load = os.getSystemLoadAverage() / os.getAvailableProcessors();
     }
 
     private void countFetchQps() {
@@ -135,6 +145,46 @@ public class SystemStatus {
         }
 
         this.totalUpdateEvent = totalUpdateEvent;
+    }
+
+    public double getLoad() {
+        return load;
+    }
+
+    public void setLoad(double load) {
+        this.load = load;
+    }
+
+    public int getStoreQps() {
+        return storeQps;
+    }
+
+    public long getTotalParsedEvent() {
+        return totalParsedEvent;
+    }
+
+    public long getTotalStoreBytes() {
+        return totalStoreBytes;
+    }
+
+    public long getTotalStoreCount() {
+        return totalStoreCount;
+    }
+
+    public long getTotalInsertEvent() {
+        return totalInsertEvent;
+    }
+
+    public long getTotalUpdateEvent() {
+        return totalUpdateEvent;
+    }
+
+    public long getTotalDeleteEvent() {
+        return totalDeleteEvent;
+    }
+
+    public long getTotalDdlEvent() {
+        return totalDdlEvent;
     }
 
     public void setClients(Map<String, Client> clients) {

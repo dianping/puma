@@ -73,18 +73,25 @@ public abstract class SingleReadIndexManager<K, V> extends AbstractLifeCycle
 		checkStop();
 
 		byte[] data;
+		Pair<K, V> oldPair = null;
 		try {
 			while (true) {
 				data = readBucket.next();
 				if (data != null) {
 					Pair<K, V> pair = decode(data);
 					if (!greater(indexKey, pair.getLeft())) {
-						return pair.getRight();
-					}
+                        if (oldPair == null) {
+                            throw new IOException("failed to find.");
+                        } else {
+                            return oldPair.getRight();
+                        }
+					} else {
+                        oldPair = pair;
+                    }
 				}
 			}
 		} catch (EOFException eof) {
-			return null;
+			return oldPair == null ? null : oldPair.getRight();
 		}
 	}
 

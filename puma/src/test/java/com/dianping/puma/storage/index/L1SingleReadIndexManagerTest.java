@@ -140,17 +140,8 @@ public class L1SingleReadIndexManagerTest extends StorageBaseTest {
 		bufferedWriter.flush();
 
 		assertTrue(EqualsBuilder.reflectionEquals(
-				l1SingleReadIndexManager.find(new BinlogInfo(1, 2, "mysql-bin.3", 4)), new Sequence(5, 6, 0)
-		));
-
-		assertTrue(EqualsBuilder.reflectionEquals(
 				l1SingleReadIndexManager.find(new BinlogInfo(2, 3, "mysql-bin.4", 5)),
-				new Sequence(6, 7, 0)
-		));
-
-		assertTrue(EqualsBuilder.reflectionEquals(
-				l1SingleReadIndexManager.find(new BinlogInfo(3, 4, "mysql-bin.5", 6)),
-				new Sequence(7, 8, 0)
+				new Sequence(5, 6, 0)
 		));
 	}
 

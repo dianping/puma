@@ -70,7 +70,7 @@ public class L2SingleReadIndexManagerTest extends StorageBaseTest {
 		assertNull(l2SingleReadIndexManager.findLatest());
 	}
 
-	@Test
+	@Test(expected = IOException.class)
 	public void testFind() throws IOException {
 
 		l2SingleWriteIndexManager.append(new BinlogInfo(0, 1, "f.2", 3), new Sequence(2015, 0, 0));
@@ -78,9 +78,7 @@ public class L2SingleReadIndexManagerTest extends StorageBaseTest {
 		l2SingleWriteIndexManager.append(new BinlogInfo(2, 3, "f.4", 5), new Sequence(2015, 0, 20));
 		l2SingleWriteIndexManager.flush();
 
-		Sequence sequence = l2SingleReadIndexManager.find(new BinlogInfo(1, 1, "f.2", 3));
-
-		assertEquals(new Sequence(2015, 0, 0), sequence);
+		l2SingleReadIndexManager.find(new BinlogInfo(1, 1, "f.2", 3));
 	}
 
 	@Test

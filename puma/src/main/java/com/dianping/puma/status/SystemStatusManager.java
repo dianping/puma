@@ -56,6 +56,7 @@ public class SystemStatusManager {
 
         if (server != null) {
             server.increaseTotalDdlEvent();
+            server.incStoreCount();
         }
     }
 
@@ -72,6 +73,7 @@ public class SystemStatusManager {
 
         if (server != null) {
             server.increaseTotalDeleteEvent();
+            server.incStoreCount();
         }
     }
 
@@ -80,6 +82,7 @@ public class SystemStatusManager {
 
         if (server != null) {
             server.increaseTotalInsertEvent();
+            server.incStoreCount();
         }
     }
 
@@ -88,14 +91,7 @@ public class SystemStatusManager {
 
         if (server != null) {
             server.increaseTotalUpdateEvent();
-        }
-    }
-
-    public static void incServerStoredBytes(String name, long size) {
-        Server server = status.getServers().get(name);
-
-        if (server != null) {
-            server.incStoreCountAndByte(size);
+            server.incStoreCount();
         }
     }
 

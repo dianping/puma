@@ -402,6 +402,11 @@ public class SystemStatus {
             this.storeQpsCounter.increase();
         }
 
+        public void incStoreCount() {
+            totalStoreCount = atomicTotalStoreCount.incrementAndGet();
+            storeQpsCounter.increase();
+        }
+
         public void setBucketDate(int bucketDate) {
             this.bucketDate = bucketDate;
         }

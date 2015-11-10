@@ -92,6 +92,8 @@ public class FileDumpSender extends AbstractSender {
 					transactionBegin = null;
 				}
 
+
+
 				writeChannel.append(event);
 			} else {
 				if (event instanceof RowChangedEvent) {

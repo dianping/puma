@@ -81,13 +81,6 @@ public class L2SingleReadIndexManagerTest extends StorageBaseTest {
 		l2SingleReadIndexManager.find(new BinlogInfo(1, 1, "f.2", 3));
 	}
 
-	@Test
-	public void testFindNull() throws IOException {
-
-		assertNull(l2SingleReadIndexManager.find(new BinlogInfo(1, 2, "f.3", 4)));
-
-	}
-
 	@Override @After
 	public void tearDown() throws Exception {
 		if (l2SingleReadIndexManager != null) {

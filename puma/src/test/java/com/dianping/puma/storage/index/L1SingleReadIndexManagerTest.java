@@ -144,9 +144,4 @@ public class L1SingleReadIndexManagerTest extends StorageBaseTest {
 				new Sequence(5, 6, 0)
 		));
 	}
-
-	@Test
-	public void testFindNull() throws Exception {
-		assertNull(l1SingleReadIndexManager.find(new BinlogInfo(2, 3, "mysql-bin.4", 5)));
-	}
 }

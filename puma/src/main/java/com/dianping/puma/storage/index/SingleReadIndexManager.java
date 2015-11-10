@@ -91,7 +91,11 @@ public abstract class SingleReadIndexManager<K, V> extends AbstractLifeCycle
 				}
 			}
 		} catch (EOFException eof) {
-			return oldPair == null ? null : oldPair.getRight();
+            if (oldPair == null) {
+                throw new IOException("failed to find.");
+            } else {
+                return oldPair.getRight();
+            }
 		}
 	}
 

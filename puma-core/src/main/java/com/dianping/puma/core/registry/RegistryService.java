@@ -1,18 +1,21 @@
 package com.dianping.puma.core.registry;
 
 import java.util.List;
+import java.util.Set;
 
 public interface RegistryService {
 
-	public List<String> find(String database);
+    List<String> find(String database);
 
-	public void register(String host, String database);
+    Set<String> findAllDatabase();
 
-	public void unregister(String host, String database);
+    void register(String host, String database);
 
-	public void registerAll(List<String> hosts, String database);
+    void unregister(String host, String database);
 
-	public void unregisterAll(List<String> hosts, String database);
+    void registerAll(List<String> hosts, String database);
 
-	public void registerResetAll(List<String> hosts, String database);
+    void unregisterAll(List<String> hosts, String database);
+
+    void registerResetAll(List<String> hosts, String database);
 }

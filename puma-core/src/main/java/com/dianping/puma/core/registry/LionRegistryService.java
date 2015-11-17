@@ -1,6 +1,9 @@
 package com.dianping.puma.core.registry;
 
+import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.puma.core.config.ConfigManager;
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -9,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class LionRegistryService implements RegistryService {
@@ -21,6 +25,16 @@ public class LionRegistryService implements RegistryService {
 
     @Autowired
     ConfigManager configManager;
+
+    public Set<String> findAllDatabase() {
+        return FluentIterable.from(configManager.getConfigByProject(EnvZooKeeperConfig.getEnv(), ZK_PROJECT).keySet())
+                .transform(new Function<String, String>() {
+                    @Override
+                    public String apply(String input) {
+                        return StringUtils.substringAfterLast(input, ".");
+                    }
+                }).toSet();
+    }
 
     @Override
     public List<String> find(String database) {
@@ -65,7 +79,7 @@ public class LionRegistryService implements RegistryService {
         List<String> hostList = find(database);
 
         boolean needToRegister = false;
-        for (String host: hosts) {
+        for (String host : hosts) {
             if (!hostList.contains(host)) {
                 hostList.add(host);
                 needToRegister = true;
@@ -82,7 +96,7 @@ public class LionRegistryService implements RegistryService {
         List<String> hostList = find(database);
 
         boolean needToRegister = false;
-        for (String host: hosts) {
+        for (String host : hosts) {
             if (hostList.contains(host)) {
                 hostList.remove(host);
                 needToRegister = true;

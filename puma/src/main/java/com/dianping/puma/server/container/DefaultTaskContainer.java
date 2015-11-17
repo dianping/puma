@@ -1,5 +1,6 @@
 package com.dianping.puma.server.container;
 
+import com.dianping.cat.Cat;
 import com.dianping.puma.core.model.Table;
 import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.core.registry.RegistryService;
@@ -234,20 +235,24 @@ public class DefaultTaskContainer implements TaskContainer {
 
     @Scheduled(fixedDelay = 10 * 60 * 1000)
     public void registryAliveTask() {
-        Set<String> dbs = FluentIterable.from(taskExecutors.values()).transformAndConcat(new Function<TaskExecutor, Iterable<Table>>() {
-            @Override
-            public Iterable<Table> apply(TaskExecutor input) {
-                return input.getTask().getTableSet().getTables();
-            }
-        }).transform(new Function<Table, String>() {
-            @Override
-            public String apply(Table input) {
-                return input.getSchemaName();
-            }
-        }).toSet();
+        try {
+            Set<String> dbs = FluentIterable.from(taskExecutors.values()).transformAndConcat(new Function<TaskExecutor, Iterable<Table>>() {
+                @Override
+                public Iterable<Table> apply(TaskExecutor input) {
+                    return input.getTask().getTableSet().getTables();
+                }
+            }).transform(new Function<Table, String>() {
+                @Override
+                public String apply(Table input) {
+                    return input.getSchemaName();
+                }
+            }).toSet();
 
-        for (String db : dbs) {
-            registryService.register(getServerHostAndPort(), db);
+            for (String db : dbs) {
+                registryService.register(getServerHostAndPort(), db);
+            }
+        } catch (Exception e) {
+            Cat.logError("Registry Alive Task Failed", e);
         }
     }
 

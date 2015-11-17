@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.config.Task;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -233,13 +234,13 @@ public class DefaultTaskContainer implements TaskContainer {
         return taskServerManager.findSelfHost() + ":4040";
     }
 
-    @Scheduled(fixedDelay = 10 * 60 * 1000)
+    @Scheduled(fixedDelay = 1000)
     public void registryAliveTask() {
         try {
             Set<String> dbs = FluentIterable.from(taskExecutors.values()).transformAndConcat(new Function<TaskExecutor, Iterable<Table>>() {
                 @Override
                 public Iterable<Table> apply(TaskExecutor input) {
-                    return input.getTask().getTableSet().getTables();
+                    return input.getTableSet().getTables();
                 }
             }).transform(new Function<Table, String>() {
                 @Override

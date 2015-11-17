@@ -12,15 +12,16 @@ import com.dianping.puma.storage.manage.DatabaseStorageManager;
 import com.dianping.puma.taskexecutor.TaskExecutor;
 import com.dianping.puma.taskexecutor.task.DatabaseTask;
 import com.dianping.puma.taskexecutor.task.InstanceTask;
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -51,7 +52,7 @@ public class DefaultTaskContainer implements TaskContainer {
 
     private ExecutorService pool = Executors.newCachedThreadPool();
 
-    private Map<String, TaskExecutor> taskExecutors = new HashMap<String, TaskExecutor>();
+    private Map<String, TaskExecutor> taskExecutors = new ConcurrentHashMap<String, TaskExecutor>();
 
     @Override
     public ReadChannel getTaskStorage(String database) {
@@ -137,7 +138,7 @@ public class DefaultTaskContainer implements TaskContainer {
         }
 
         for (DatabaseTask databaseTask : instanceTask.getDatabaseTasks()) {
-            registryService.register(taskServerManager.findSelfHost() + ":4040", databaseTask.getDatabase());
+            registryService.register(getServerHostAndPort(), databaseTask.getDatabase());
         }
 
         logger.info("success to create instance task.");
@@ -156,7 +157,7 @@ public class DefaultTaskContainer implements TaskContainer {
         start(taskExecutor);
         add(taskExecutor);
 
-        registryService.register(taskServerManager.findSelfHost() + ":4040", database);
+        registryService.register(getServerHostAndPort(), database);
 
         logger.info("success to create task.");
     }
@@ -222,9 +223,32 @@ public class DefaultTaskContainer implements TaskContainer {
             registerTask(newTaskExecutor);
         }
 
-        registryService.unregister(taskServerManager.findSelfHost() + ":4040", database);
+        registryService.unregister(getServerHostAndPort(), database);
 
         logger.info("success to remove task.");
+    }
+
+    private String getServerHostAndPort() {
+        return taskServerManager.findSelfHost() + ":4040";
+    }
+
+    @Scheduled(fixedDelay = 10 * 60 * 1000)
+    public void registryAliveTask() {
+        Set<String> dbs = FluentIterable.from(taskExecutors.values()).transformAndConcat(new Function<TaskExecutor, Iterable<Table>>() {
+            @Override
+            public Iterable<Table> apply(TaskExecutor input) {
+                return input.getTask().getTableSet().getTables();
+            }
+        }).transform(new Function<Table, String>() {
+            @Override
+            public String apply(Table input) {
+                return input.getSchemaName();
+            }
+        }).toSet();
+
+        for (String db : dbs) {
+            registryService.register(getServerHostAndPort(), db);
+        }
     }
 
     public void merge(TaskExecutor mainTaskExecutor, TaskExecutor tempTaskExecutor) {

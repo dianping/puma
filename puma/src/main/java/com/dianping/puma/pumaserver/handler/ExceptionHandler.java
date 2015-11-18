@@ -75,7 +75,7 @@ public class ExceptionHandler extends ChannelDuplexHandler {
             FullHttpResponse response = new DefaultFullHttpResponse(
                     HTTP_1_1,
                     howToHandle.getStatus(),
-                    Unpooled.wrappedBuffer(ConvertHelper.toBytes(new ExceptionResponse(howToHandle.getMsg()))));
+                    Unpooled.wrappedBuffer(ConvertHelper.toBytes(new ExceptionResponse(howToHandle.getMsg() + cause.getMessage()))));
 
             ChannelFuture future = ctx.channel().writeAndFlush(response);
 

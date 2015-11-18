@@ -202,11 +202,19 @@ public class ClusterPumaClient implements PumaClient {
     }
 
     protected void lock() throws PumaClientException {
+        int waitTime = 0;
+
         while (!Thread.currentThread().isInterrupted()) {
             try {
+
                 if (lock.lock(1, TimeUnit.SECONDS)) {
                     return;
                 }
+
+                if (waitTime++ % 60 == 0) {
+                    LOG.info("[{}] another client got the lock, please wait.", clientName);
+                }
+
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;

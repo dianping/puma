@@ -7,7 +7,7 @@ import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
 import com.dianping.puma.pumaserver.channel.impl.DefaultAsyncBinlogChannel;
 import com.dianping.puma.pumaserver.client.ClientSession;
-import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
+import com.dianping.puma.pumaserver.exception.binlog.BinlogTargetException;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
 import com.dianping.puma.status.SystemStatusManager;
@@ -29,36 +29,26 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
         BinlogAck binlogAck = binlogAckService.load(clientName);
 
+        if (binlogAck == null && !clientName.toLowerCase().endsWith("test")) {
+            throw new BinlogTargetException("you must register first!");
+        }
 
         long seq = binlogAck == null ? SubscribeConstant.SEQ_FROM_OLDEST :
                 (Strings.isNullOrEmpty(binlogAck.getBinlogInfo().getBinlogFile()) ?
                         SubscribeConstant.SEQ_FROM_TIMESTAMP :
                         SubscribeConstant.SEQ_FROM_BINLOGINFO);
-        DefaultAsyncBinlogChannel defaultAsyncBinlogChannel = null;
-        try {
-            defaultAsyncBinlogChannel = new DefaultAsyncBinlogChannel(clientName);
-            defaultAsyncBinlogChannel.init(
-                    seq,
-                    binlogAck == null ? null : binlogAck.getBinlogInfo(),
-                    binlogSubscriptionRequest.getDatabase(),
-                    binlogSubscriptionRequest.getTables(),
-                    binlogSubscriptionRequest.isDml(),
-                    binlogSubscriptionRequest.isDdl(),
-                    binlogSubscriptionRequest.isTransaction()
-            );
-        } catch (BinlogChannelException e) {
-            defaultAsyncBinlogChannel.destroy();
-            defaultAsyncBinlogChannel = new DefaultAsyncBinlogChannel(clientName);
-            defaultAsyncBinlogChannel.init(
-                    SubscribeConstant.SEQ_FROM_TIMESTAMP,
-                    binlogAck.getBinlogInfo(),
-                    binlogSubscriptionRequest.getDatabase(),
-                    binlogSubscriptionRequest.getTables(),
-                    binlogSubscriptionRequest.isDml(),
-                    binlogSubscriptionRequest.isDdl(),
-                    binlogSubscriptionRequest.isTransaction()
-            );
-        }
+
+        DefaultAsyncBinlogChannel defaultAsyncBinlogChannel = new DefaultAsyncBinlogChannel(clientName);
+        defaultAsyncBinlogChannel.init(
+                seq,
+                binlogAck == null ? null : binlogAck.getBinlogInfo(),
+                binlogSubscriptionRequest.getDatabase(),
+                binlogSubscriptionRequest.getTables(),
+                binlogSubscriptionRequest.isDml(),
+                binlogSubscriptionRequest.isDdl(),
+                binlogSubscriptionRequest.isTransaction()
+        );
+
 
         ClientSession session = new ClientSession(clientName, defaultAsyncBinlogChannel, binlogSubscriptionRequest.getCodec());
         clientSessionService.subscribe(session);

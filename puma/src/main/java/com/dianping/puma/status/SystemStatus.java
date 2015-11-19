@@ -34,6 +34,8 @@ public class SystemStatus {
 
     private long totalDdlEvent;
 
+    private long generateTime;
+
     public Map<String, Client> getClients() {
         return clients;
     }
@@ -53,6 +55,12 @@ public class SystemStatus {
         countTotalParsedEvent();
         countTotalStoreCount();
         countLoad();
+
+        generateTime = System.currentTimeMillis();
+    }
+
+    public long getGenerateTime() {
+        return generateTime;
     }
 
     private void countLoad() {

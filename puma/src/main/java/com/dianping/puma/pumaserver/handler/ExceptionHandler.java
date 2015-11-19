@@ -7,6 +7,7 @@ import com.dianping.puma.pumaserver.exception.binlog.BinlogAckException;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogAuthException;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogTargetException;
+import com.dianping.puma.pumaserver.exception.client.ClientNotRegisterException;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -48,6 +49,10 @@ public class ExceptionHandler extends ChannelDuplexHandler {
         howToHandles.put(
                 BinlogAckException.class,
                 new HowToHandle(INTERNAL_SERVER_ERROR, "puma binlog ack error.", true)
+        );
+        howToHandles.put(
+                ClientNotRegisterException.class,
+                new HowToHandle(INTERNAL_SERVER_ERROR, "client not register exception.", true)
         );
         howToHandles.put(
                 RuntimeException.class,

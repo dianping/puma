@@ -7,7 +7,7 @@ import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
 import com.dianping.puma.pumaserver.channel.impl.DefaultAsyncBinlogChannel;
 import com.dianping.puma.pumaserver.client.ClientSession;
-import com.dianping.puma.pumaserver.exception.binlog.BinlogTargetException;
+import com.dianping.puma.pumaserver.exception.client.ClientNotRegisterException;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
 import com.dianping.puma.status.SystemStatusManager;
@@ -30,7 +30,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
         BinlogAck binlogAck = binlogAckService.load(clientName);
 
         if (binlogAck == null && !clientName.toLowerCase().endsWith("test")) {
-            throw new BinlogTargetException("you must register first!");
+            throw new ClientNotRegisterException("you must register first!");
         }
 
         long seq = binlogAck == null ? SubscribeConstant.SEQ_FROM_OLDEST :

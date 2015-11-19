@@ -58,8 +58,8 @@ public class ExceptionHandler extends ChannelDuplexHandler {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         if (cause instanceof IOException) {
-            // Handle network exceptions.
-            // @todo
+            logger.error(cause.getMessage(), cause);
+            Cat.logError(cause.getMessage(), cause);
         } else {
             logger.error(cause.getMessage(), cause);
             Cat.logError(cause.getMessage(), cause);

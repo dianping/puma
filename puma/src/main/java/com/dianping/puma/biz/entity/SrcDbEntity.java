@@ -25,48 +25,54 @@ public class SrcDbEntity {
         return host;
     }
 
-    public void setHost(String host) {
+    public SrcDbEntity setHost(String host) {
         this.host = host;
+        return this;
     }
 
     public int getPort() {
         return port;
     }
 
-    public void setPort(int port) {
+    public SrcDbEntity setPort(int port) {
         this.port = port;
+        return this;
     }
 
     public String getUsername() {
         return username;
     }
 
-    public void setUsername(String username) {
+    public SrcDbEntity setUsername(String username) {
         this.username = username;
+        return this;
     }
 
     public String getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
+    public SrcDbEntity setPassword(String password) {
         this.password = password;
+        return this;
     }
 
     public long getServerId() {
         return serverId;
     }
 
-    public void setServerId(long serverId) {
+    public SrcDbEntity setServerId(long serverId) {
         this.serverId = serverId;
+        return this;
     }
 
     public Set<String> getTags() {
         return tags;
     }
 
-    public void setTags(Set<String> tags) {
+    public SrcDbEntity setTags(Set<String> tags) {
         this.tags = tags;
+        return this;
     }
 
     @Override

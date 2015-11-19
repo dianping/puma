@@ -38,10 +38,6 @@ public interface TaskExecutor extends LifeCycle<Exception> {
 
 	public void cancelStopUntil();
 
-	public PumaTaskEntity getTask();
-
-	public void setTask(PumaTaskEntity pumaTask);
-
 	public void setContext(PumaContext context);
 
 	public void initContext();

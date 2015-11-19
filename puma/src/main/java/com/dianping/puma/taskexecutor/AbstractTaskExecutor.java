@@ -38,8 +38,6 @@ import com.dianping.puma.storage.holder.BinlogInfoHolder;
 public abstract class AbstractTaskExecutor implements TaskExecutor {
 	private PumaContext context;
 
-	private PumaTaskEntity pumaTask;
-
 	private String taskId;
 
 	private long serverId;
@@ -220,14 +218,6 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
 
 	public void setTaskState(PumaTaskStateEntity state) {
 		this.state = state;
-	}
-
-	public PumaTaskEntity getTask() {
-		return pumaTask;
-	}
-
-	public void setTask(PumaTaskEntity pumaTask) {
-		this.pumaTask = pumaTask;
 	}
 
 	public Date getBeginTime() {

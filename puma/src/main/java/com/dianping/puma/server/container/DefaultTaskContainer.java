@@ -57,22 +57,6 @@ public class DefaultTaskContainer implements TaskContainer {
     private Map<String, TaskExecutor> taskExecutors = new ConcurrentHashMap<String, TaskExecutor>();
 
     @Override
-    public ReadChannel getTaskStorage(String database) {
-        for (TaskExecutor taskExecutor : taskExecutors.values()) {
-            TableSet tableSet = taskExecutor.getTask().getTableSet();
-            List<Table> tables = tableSet.listSchemaTables();
-
-            for (Table table : tables) {
-                if (table.getSchemaName().equals(database)) {
-                    return taskExecutor.getFileSender().get(0).getStorage(database);
-                }
-            }
-        }
-
-        return null;
-    }
-
-    @Override
     public TaskExecutor getExecutor(String database) {
         return taskExecutors.get(database);
     }

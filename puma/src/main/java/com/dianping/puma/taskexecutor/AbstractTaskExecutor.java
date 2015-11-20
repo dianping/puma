@@ -18,7 +18,6 @@ package com.dianping.puma.taskexecutor;
 import java.util.Date;
 import java.util.List;
 
-import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.core.annotation.ThreadUnSafe;
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;

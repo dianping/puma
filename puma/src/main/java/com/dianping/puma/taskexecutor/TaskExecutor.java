@@ -14,7 +14,6 @@ package com.dianping.puma.taskexecutor;
 
 import java.util.List;
 
-import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.core.LifeCycle;
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;

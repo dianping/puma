@@ -1,6 +1,5 @@
 package com.dianping.puma.server.builder;
 
-import com.dianping.puma.biz.entity.PumaTaskEntity;
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.config.ConfigManager;

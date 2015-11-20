@@ -30,43 +30,6 @@ public class LengthReadBucketTest extends StorageBaseTest {
         lengthReadBucket.start();
     }
 
-    @Test
-    public void testName() throws Exception {
-        lengthReadBucket = BucketFactory.newLengthReadBucket(new File("/Users/Dozer/Desktop/dozer-bucket-1.data"));
-        lengthReadBucket.start();
-
-        RawEventCodec codec = new RawEventCodec();
-
-        int all = 0;
-        int onlyBuy = 0;
-
-        while (true) {
-            Event item = codec.decode(lengthReadBucket.next());
-            if (item instanceof RowChangedEvent) {
-                RowChangedEvent rowChangedEvent = (RowChangedEvent) item;
-
-                if (rowChangedEvent.getColumns() != null &&
-                        rowChangedEvent.getColumns().containsKey("BuySuccessTime") &&
-                        !Objects.equal(rowChangedEvent.getColumns().get("BuySuccessTime").getNewValue(),
-                                rowChangedEvent.getColumns().get("BuySuccessTime").getOldValue())) {
-                    onlyBuy++;
-                    System.out.println(rowChangedEvent);
-                }
-                all++;
-
-//                if ("UOD_Order431".equals(rowChangedEvent.getTable()) &&
-//                        rowChangedEvent.getColumns() != null &&
-//                        rowChangedEvent.getColumns().containsKey("OrderID") &&
-//                        rowChangedEvent.getColumns().get("OrderID").getNewValue().equals("144794873982286850917198")
-//                        ) {
-//                    System.out.println(rowChangedEvent.toString());
-//                }
-
-                System.out.println(1.0 * onlyBuy / all);
-            }
-        }
-    }
-
     @After
     public void tearDown() throws Exception {
         lengthReadBucket.stop();

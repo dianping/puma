@@ -36,14 +36,6 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 
 	private File bakDir;
 
-	private File storageBakDir;
-
-	private File masterStorageBaseDir;
-
-	private File slaveStorageBaseDir;
-
-	private File binlogIndexBaseDir;
-
 	@PostConstruct
 	public void init() {
 		if (!baseDir.exists() && !baseDir.mkdirs()) {
@@ -206,26 +198,6 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 		this.bakDir = new File(bakDir);
 	}
 
-	@Override
-	public void setStorageBakDir(String storageBakDir) {
-		this.storageBakDir = new File(storageBakDir);
-	}
-
-	@Override
-	public void setMasterStorageBaseDir(String masterStorageBaseDir) {
-		this.masterStorageBaseDir = new File(masterStorageBaseDir);
-	}
-
-	@Override
-	public void setSlaveStorageBaseDir(String slaveStorageBaseDir) {
-		this.slaveStorageBaseDir = new File(slaveStorageBaseDir);
-	}
-
-	@Override
-	public void setBinlogIndexBaseDir(String binlogIndexBaseDir) {
-		this.binlogIndexBaseDir = new File(binlogIndexBaseDir);
-	}
-
 	private String task2file(String taskName) {
 		return taskName + SUFFIX;
 	}
@@ -237,49 +209,5 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 	private String genBakFileName(String taskName) {
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 		return taskName + '-' + timestamp.getTime() + SUFFIX;
-	}
-
-	public void clean(final String taskName) {
-		if (!storageBakDir.exists() && !storageBakDir.mkdirs()) {
-			throw new RuntimeException("Fail to make dir for " + storageBakDir.getAbsolutePath());
-		}
-
-		String newBinlogIndex = "/binlogIndex/" + taskName;
-		String newStorageMaster = "/storage/master/" + taskName;
-		String newStorageSlave = "/storage/slave/" + taskName;
-
-		File newBinlogIndexFolder = new File(storageBakDir, newBinlogIndex);
-		File newStorageMasterFolder = new File(storageBakDir, newStorageMaster);
-		File newStorageSlaveFolder = new File(storageBakDir, newStorageSlave);
-
-		if (!newBinlogIndexFolder.exists() && !newBinlogIndexFolder.mkdirs()) {
-			throw new RuntimeException("Fail to make dir for " + newBinlogIndexFolder.getAbsolutePath());
-		}
-
-		if (!newStorageMasterFolder.exists() && !newStorageMasterFolder.mkdirs()) {
-			throw new RuntimeException("Fail to make dir for " + newStorageMasterFolder.getAbsolutePath());
-		}
-
-		if (!newStorageSlaveFolder.exists() && !newStorageSlaveFolder.mkdirs()) {
-			throw new RuntimeException("Fail to make dir for " + newStorageSlaveFolder.getAbsolutePath());
-		}
-
-		// Bin log index.
-		File file1 = new File(binlogIndexBaseDir.getAbsolutePath(), taskName);
-		if (file1.exists() && file1.renameTo(newBinlogIndexFolder)) {
-			LOG.info("Backup bin log index success.");
-		}
-
-		// Master.
-		File file2 = new File(masterStorageBaseDir.getAbsolutePath(), taskName);
-		if (file2.exists() && file2.renameTo(newStorageMasterFolder)) {
-			LOG.info("Backup storage master success.");
-		}
-
-		// Slave.
-		File file3 = new File(slaveStorageBaseDir.getAbsolutePath(), taskName);
-		if (file3.exists() && file3.renameTo(newStorageSlaveFolder)) {
-			LOG.info("Backup storage slave success.");
-		}
 	}
 }

@@ -21,6 +21,7 @@ import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
 import com.dianping.puma.storage.channel.ChannelFactory;
 import com.dianping.puma.storage.channel.ReadChannel;
+import com.dianping.puma.storage.filesystem.FileSystem;
 import com.dianping.puma.storage.holder.impl.DefaultBinlogInfoHolder;
 import com.dianping.puma.taskexecutor.DefaultTaskExecutor;
 import com.dianping.puma.taskexecutor.TaskExecutor;
@@ -107,7 +108,7 @@ public abstract class AbstractBaseDebug {
 
     protected static QueryRunner queryRunner;
 
-    protected static final String SCHEMA_NAME = "Integrations";
+    protected static final String SCHEMA_NAME = "integrations";
 
     protected static String TABLE_NAME;
 
@@ -128,6 +129,7 @@ public abstract class AbstractBaseDebug {
     @Before
     public void before() throws Exception {
         System.out.println("java.io.tmpdir is at " + System.getProperty("java.io.tmpdir"));
+        FileSystem.changeBasePath(baseDir.getAbsolutePath());
 
         codec = new RawEventCodec();
         startTask();
@@ -395,10 +397,6 @@ public abstract class AbstractBaseDebug {
         binlogInfoHolder = new DefaultBinlogInfoHolder();
         binlogInfoHolder.setBaseDir(baseDir.getAbsolutePath());
         binlogInfoHolder.setBakDir(bakBaseDir.getAbsolutePath());
-        binlogInfoHolder.setBinlogIndexBaseDir(binlogIndexBaseDir.getAbsolutePath());
-        binlogInfoHolder.setMasterStorageBaseDir(masterStorageBaseDir.getAbsolutePath());
-        binlogInfoHolder.setSlaveStorageBaseDir(slaveStorageBaseDir.getAbsolutePath());
-        binlogInfoHolder.setStorageBakDir(storageBakBaseDir.getAbsolutePath());
         binlogInfoHolder.init();
     }
 
@@ -428,6 +426,7 @@ public abstract class AbstractBaseDebug {
         List<ChangedEvent> result = new ArrayList<ChangedEvent>();
 
         ReadChannel readChannel = ChannelFactory.newReadChannel(SCHEMA_NAME);
+        readChannel.start();
         readChannel.openOldest();
 
         for (int i = 0; i < n; ) {

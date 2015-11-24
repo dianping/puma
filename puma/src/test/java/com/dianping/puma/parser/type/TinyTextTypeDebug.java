@@ -21,7 +21,7 @@ import com.dianping.puma.parser.AbstractBaseDebug;
  */
 public class TinyTextTypeDebug extends AbstractBaseDebug {
 
-	private static final String TABLE_NAME = "tb_tinyText";
+	private static final String TABLE_NAME = "tb_tiny_text";
 
 	@BeforeClass
 	public static void doBefore() throws Exception {

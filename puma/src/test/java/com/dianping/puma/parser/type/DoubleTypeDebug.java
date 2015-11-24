@@ -26,9 +26,9 @@ public class DoubleTypeDebug extends AbstractBaseDebug {
 	@BeforeClass
 	public static void doBefore() throws Exception {
 		String create_SQL = "CREATE TABLE IF NOT EXISTS `" + SCHEMA_NAME + "`.`" + TABLE_NAME + "` (\n"
-		      + "`id` int NOT NULL AUTO_INCREMENT, \n" + "`unsigned_double` double unsigned DEFAULT NULL, \n"
-		      + "`signed_double` double DEFAULT NULL, \n" + "`zerofill_double` double(10,2) zerofill DEFAULT NULL, \n"
-		      + "`unzerofill_double` double(10,2) DEFAULT NULL, \n" + "PRIMARY KEY (`id`)"
+		      + "`id` int NOT NULL AUTO_INCREMENT, \n" + "`unsigned_double` double unsigned NULL DEFAULT NULL, \n"
+		      + "`signed_double` double NULL DEFAULT NULL, \n" + "`zerofill_double` double(10,2) zerofill NULL DEFAULT NULL, \n"
+		      + "`unzerofill_double` double(10,2) NULL DEFAULT NULL, \n" + "PRIMARY KEY (`id`)"
 		      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
 		queryRunner.update(create_SQL);
 		setFilterTable(TABLE_NAME);

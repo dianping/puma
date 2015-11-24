@@ -116,6 +116,7 @@ public abstract class AbstractBaseDebug {
 
     @Before
     public void before() throws Exception {
+        System.out.println();
         System.out.println("java.io.tmpdir is at " + System.getProperty("java.io.tmpdir"));
         codec = new RawEventCodec();
         startTask();

@@ -21,7 +21,7 @@ import com.dianping.puma.parser.AbstractBaseDebug;
  */
 public class MediumIntTypeDebug extends AbstractBaseDebug {
 
-	private static final String TABLE_NAME = "tb_mediumInt";
+	private static final String TABLE_NAME = "tb_medium_int";
 
 	@BeforeClass
 	public static void doBefore() throws Exception {

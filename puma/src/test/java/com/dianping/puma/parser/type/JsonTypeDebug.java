@@ -7,6 +7,7 @@ import com.dianping.puma.parser.AbstractBaseDebug;
 import junit.framework.Assert;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.List;
  *
  * @author qi.yin
  */
+@Ignore
 public class JsonTypeDebug extends AbstractBaseDebug {
 
     private static final String TABLE_NAME = "tb_json";

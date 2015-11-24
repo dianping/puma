@@ -21,7 +21,7 @@ import com.dianping.puma.parser.AbstractBaseDebug;
  */
 public class VarBinaryTypeDebug extends AbstractBaseDebug {
 
-	private static final String TABLE_NAME = "tb_varBinary";
+	private static final String TABLE_NAME = "tb_var_binary";
 
 	@BeforeClass
 	public static void doBefore() throws Exception {

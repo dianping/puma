@@ -26,8 +26,8 @@ public class YearTypeDebug extends AbstractBaseDebug {
 	@BeforeClass
 	public static void doBefore() throws Exception {
 		String create_SQL = "CREATE TABLE IF NOT EXISTS `" + SCHEMA_NAME + "`.`" + TABLE_NAME + "` (\n"
-		      + "`id` int NOT NULL AUTO_INCREMENT, \n" + "`size_year` year(2) DEFAULT NULL, \n"
-		      + "`unsize_year` year DEFAULT NULL, \n" + "PRIMARY KEY (`id`)" + ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
+		      + "`id` int NOT NULL AUTO_INCREMENT, \n" + "`size_year` year(4) NULL DEFAULT NULL, \n"
+		      + "`unsize_year` year NULL DEFAULT NULL, \n" + "PRIMARY KEY (`id`)" + ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
 		queryRunner.update(create_SQL);
 		setFilterTable(TABLE_NAME);
 	}

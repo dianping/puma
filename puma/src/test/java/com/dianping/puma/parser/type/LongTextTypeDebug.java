@@ -21,7 +21,7 @@ import com.dianping.puma.parser.AbstractBaseDebug;
  */
 public class LongTextTypeDebug extends AbstractBaseDebug {
 
-	private static final String TABLE_NAME = "tb_longText";
+	private static final String TABLE_NAME = "tb_long_text";
 
 	@BeforeClass
 	public static void doBefore() throws Exception {

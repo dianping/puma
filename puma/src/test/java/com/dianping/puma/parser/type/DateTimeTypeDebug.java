@@ -21,7 +21,7 @@ import com.dianping.puma.parser.AbstractBaseDebug;
  */
 public class DateTimeTypeDebug extends AbstractBaseDebug {
 
-	private static final String TABLE_NAME = "tb_dateTime";
+	private static final String TABLE_NAME = "tb_datetime";
 
 	@BeforeClass
 	public static void doBefore() throws Exception {

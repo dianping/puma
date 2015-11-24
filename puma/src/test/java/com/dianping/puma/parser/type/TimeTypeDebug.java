@@ -21,12 +21,12 @@ import com.dianping.puma.parser.AbstractBaseDebug;
  */
 public class TimeTypeDebug extends AbstractBaseDebug {
 
-	private static final String TABLE_NAME = "tb_dateTime";
+	private static final String TABLE_NAME = "tb_time";
 
 	@BeforeClass
 	public static void doBefore() throws Exception {
 		String create_SQL = "CREATE TABLE IF NOT EXISTS `" + SCHEMA_NAME + "`.`" + TABLE_NAME + "` (\n"
-		      + "`id` int NOT NULL AUTO_INCREMENT, \n" + "`default_time` time DEFAULT NULL, \n" + "PRIMARY KEY (`id`)"
+		      + "`id` int NOT NULL AUTO_INCREMENT, \n" + "`default_time` time NULL DEFAULT NULL, \n" + "PRIMARY KEY (`id`)"
 		      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
 		queryRunner.update(create_SQL);
 		setFilterTable(TABLE_NAME);

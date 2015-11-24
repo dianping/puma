@@ -26,10 +26,10 @@ public class Timestamp2TypeDebug extends AbstractBaseDebug {
 	@BeforeClass
 	public static void doBefore() throws Exception {
 		String create_SQL = "CREATE TABLE IF NOT EXISTS `" + SCHEMA_NAME + "`.`" + TABLE_NAME + "` (\n"
-		      + "`id` int NOT NULL AUTO_INCREMENT, \n" + "`size_timestamp1` timestamp(1) , \n"
-		      + "`size_timestamp2` timestamp(2) , \n" + "`size_timestamp3` timestamp(3) , \n"
-		      + "`size_timestamp4` timestamp(4) , \n" + "`size_timestamp5` timestamp(5) , \n"
-		      + "`size_timestamp6` timestamp(6) , \n" + "`unsize_timestamp` timestamp , \n" + "PRIMARY KEY (`id`)"
+		      + "`id` int NOT NULL AUTO_INCREMENT, \n" + "`size_timestamp1` timestamp(1) NULL default NULL, \n"
+		      + "`size_timestamp2` timestamp(2) NULL default NULL, \n" + "`size_timestamp3` timestamp(3) NULL default NULL, \n"
+		      + "`size_timestamp4` timestamp(4) NULL default NULL, \n" + "`size_timestamp5` timestamp(5) NULL default NULL, \n"
+		      + "`size_timestamp6` timestamp(6) NULL default NULL, \n" + "`unsize_timestamp` timestamp NULL default NULL, \n" + "PRIMARY KEY (`id`)"
 		      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
 		queryRunner.update(create_SQL);
 		setFilterTable(TABLE_NAME);

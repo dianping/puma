@@ -21,7 +21,7 @@ import com.dianping.puma.parser.AbstractBaseDebug;
  */
 public class BigIntTypeDebug extends AbstractBaseDebug {
 
-	private static final String TABLE_NAME = "tb_bigInt";
+	private static final String TABLE_NAME = "tb_big_int";
 
 	@BeforeClass
 	public static void doBefore() throws Exception {

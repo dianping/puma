@@ -21,15 +21,15 @@ import com.dianping.puma.parser.AbstractBaseDebug;
  */
 public class DateTime2TypeDebug extends AbstractBaseDebug {
 
-	private static final String TABLE_NAME = "tb_dateTime2";
+	private static final String TABLE_NAME = "tb_datetime2";
 
 	@BeforeClass
 	public static void doBefore() throws Exception {
 		String create_SQL = "CREATE TABLE IF NOT EXISTS `" + SCHEMA_NAME + "`.`" + TABLE_NAME + "` (\n"
-		      + "`id` int NOT NULL AUTO_INCREMENT, \n" + "`size_dateTime1` datetime(1) DEFAULT NULL, \n"
-		      + "`size_dateTime2` datetime(2) DEFAULT NULL, \n" + "`size_dateTime3` datetime(3) DEFAULT NULL, \n"
-		      + "`size_dateTime4` datetime(4) DEFAULT NULL, \n" + "`size_dateTime5` datetime(5) DEFAULT NULL, \n"
-		      + "`size_dateTime6` datetime(6) DEFAULT NULL, \n" + "`unsize_dateTime` datetime DEFAULT NULL, \n"
+		      + "`id` int NOT NULL AUTO_INCREMENT, \n" + "`size_dateTime1` datetime(1) NULL DEFAULT NULL, \n"
+		      + "`size_dateTime2` datetime(2) NULL DEFAULT NULL, \n" + "`size_dateTime3` datetime(3) NULL DEFAULT NULL, \n"
+		      + "`size_dateTime4` datetime(4) NULL DEFAULT NULL, \n" + "`size_dateTime5` datetime(5) NULL DEFAULT NULL, \n"
+		      + "`size_dateTime6` datetime(6) NULL DEFAULT NULL, \n" + "`unsize_dateTime` datetime NULL DEFAULT NULL, \n"
 		      + "PRIMARY KEY (`id`)" + ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
 		queryRunner.update(create_SQL);
 		setFilterTable(TABLE_NAME);

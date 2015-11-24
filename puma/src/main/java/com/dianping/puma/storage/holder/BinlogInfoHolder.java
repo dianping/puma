@@ -7,10 +7,6 @@ import com.dianping.puma.core.model.BinlogInfo;
  */
 public interface BinlogInfoHolder {
 
-    void setBaseDir(String baseDir);
-
-    void setBakDir(String bakDir);
-
     BinlogInfo getBinlogInfo(String taskName);
 
     void setBinlogInfo(String taskName, BinlogInfo binlogInfo);

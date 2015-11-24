@@ -65,20 +65,7 @@ public abstract class AbstractBaseDebug {
 
     private static final String serverIdKey = "serverId";
 
-    private static File baseDir = new File(System.getProperty("java.io.tmpdir", "."), "puma/binlog/");
-
-    private static File bakBaseDir = new File(System.getProperty("java.io.tmpdir", "."), "puma/binlog/bak/");
-
-    private static final File masterStorageBaseDir = new File(System.getProperty("java.io.tmpdir", "."),
-            "puma/storage/master");
-
-    private static final File slaveStorageBaseDir = new File(System.getProperty("java.io.tmpdir", "."),
-            "puma/storage/slave/");
-
-    private static final File storageBakBaseDir = new File(System.getProperty("java.io.tmpdir", "."), "puma/bak/");
-
-    private static final File binlogIndexBaseDir = new File(System.getProperty("java.io.tmpdir", "."),
-            "puma/binlogIndex/");
+    private static File baseDir = new File(System.getProperty("java.io.tmpdir", "."), "puma");
 
     private static DefaultBinlogInfoHolder binlogInfoHolder;
 
@@ -114,6 +101,7 @@ public abstract class AbstractBaseDebug {
 
     @BeforeClass
     public static void beforeClass() throws IOException, SQLException {
+        FileSystem.changeBasePath(baseDir.getAbsolutePath());
         initProperties();
         initDataSource();
         initSchema();
@@ -129,8 +117,6 @@ public abstract class AbstractBaseDebug {
     @Before
     public void before() throws Exception {
         System.out.println("java.io.tmpdir is at " + System.getProperty("java.io.tmpdir"));
-        FileSystem.changeBasePath(baseDir.getAbsolutePath());
-
         codec = new RawEventCodec();
         startTask();
     }
@@ -395,8 +381,6 @@ public abstract class AbstractBaseDebug {
 
     private static void initbinlogHolder() {
         binlogInfoHolder = new DefaultBinlogInfoHolder();
-        binlogInfoHolder.setBaseDir(baseDir.getAbsolutePath());
-        binlogInfoHolder.setBakDir(bakBaseDir.getAbsolutePath());
         binlogInfoHolder.init();
     }
 

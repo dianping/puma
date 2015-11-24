@@ -37,6 +37,10 @@ public final class FileSystem {
 
     private static String slaveDataDir;
 
+    private static String binlogInfoDir;
+
+    private static String backupDir;
+
     static {
         changeBasePath(DEFAULT_PATH);
     }
@@ -49,6 +53,8 @@ public final class FileSystem {
         l2IndexDir = FilenameUtils.concat(base, "binlogIndex/l2Index/");
         masterDataDir = FilenameUtils.concat(base, "storage/master/");
         slaveDataDir = FilenameUtils.concat(base, "storage/slave/");
+        binlogInfoDir = FilenameUtils.concat(base, "binlog");
+        backupDir = FilenameUtils.concat(base, "binlog/bak");
     }
 
     public static final String parseDb(File file) {
@@ -111,6 +117,14 @@ public final class FileSystem {
 
     public static final File getSlaveDataDir() {
         return new File(slaveDataDir);
+    }
+
+    public static final File getBinlogInfoDir() {
+        return new File(binlogInfoDir);
+    }
+
+    public static final File getBackupDir() {
+        return new File(backupDir);
     }
 
     public static final File nextL1IndexFile(String database) throws IOException {

@@ -5,6 +5,7 @@ import com.dianping.puma.biz.service.ClientPositionService;
 import com.dianping.puma.core.dto.BinlogAck;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogAckException;
+import com.dianping.puma.pumaserver.exception.client.ClientNotRegisterException;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,5 +47,12 @@ public class DbBinlogAckService implements BinlogAckService {
                 position.getTimestamp()
         ));
         return ack;
+    }
+
+    @Override
+    public void checkAck(String clientName, BinlogAck binlogAck) {
+        if (binlogAck == null && !clientName.toLowerCase().endsWith("test")) {
+            throw new ClientNotRegisterException("you must register first!");
+        }
     }
 }

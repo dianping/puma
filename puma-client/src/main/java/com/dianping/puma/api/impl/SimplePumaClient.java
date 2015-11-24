@@ -12,6 +12,7 @@ import com.dianping.puma.core.dto.BinlogRollback;
 import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogAckResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
+import com.dianping.puma.core.dto.binlog.response.BinlogRollbackResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.GsonUtil;
@@ -233,7 +234,6 @@ public class SimplePumaClient implements PumaClient {
             params.add(new BasicNameValuePair("timestamp", String.valueOf(binlogInfo.getTimestamp())));
         }
 
-        addToken(params);
         execute("/puma/binlog/rollback", params, HTTP_GET, null, BinlogRollback.class);
     }
 
@@ -289,7 +289,9 @@ public class SimplePumaClient implements PumaClient {
     }
 
     protected <T> boolean needToSubscribe(Class<T> clazz) {
-        return Strings.isNullOrEmpty(this.token) && !clazz.equals(BinlogSubscriptionResponse.class);
+        return Strings.isNullOrEmpty(this.token) &&
+                !clazz.equals(BinlogSubscriptionResponse.class) &&
+                !clazz.equals(BinlogRollbackResponse.class);
     }
 
     protected HttpUriRequest buildRequest(String path, String method, List<NameValuePair> params, String body) throws URISyntaxException {

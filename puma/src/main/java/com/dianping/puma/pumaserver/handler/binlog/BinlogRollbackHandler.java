@@ -25,12 +25,17 @@ public class BinlogRollbackHandler extends SimpleChannelInboundHandler<BinlogRol
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, BinlogRollbackRequest msg) throws Exception {
-        ClientSession session = clientSessionService.get(msg.getClientName(), msg.getToken());
+        BinlogAck oldAck = binlogAckService.load(msg.getClientName());
+        binlogAckService.checkAck(msg.getClientName(), oldAck);
 
         BinlogAck ack = new BinlogAck();
         ack.setBinlogInfo(msg.getBinlogRollback().getBinlogInfo());
-        binlogAckService.save(session.getClientName(), ack, true);
-        clientSessionService.unsubscribe(session.getClientName());
+        binlogAckService.save(msg.getClientName(), ack, true);
+
+        ClientSession session = clientSessionService.get(msg.getClientName(), msg.getToken());
+        if (session != null) {
+            clientSessionService.unsubscribe(msg.getClientName());
+        }
 
         BinlogRollbackResponse response = new BinlogRollbackResponse();
         ctx.channel().writeAndFlush(response);

@@ -111,4 +111,13 @@ public class DefaultClientSessionService implements ClientSessionService {
 
         throw new BinlogAuthException(clientName);
     }
+
+
+    @Override
+    public ClientSession get(String clientName) {
+        if (Strings.isNullOrEmpty(clientName)) {
+            return null;
+        }
+        return clients.get(clientName);
+    }
 }

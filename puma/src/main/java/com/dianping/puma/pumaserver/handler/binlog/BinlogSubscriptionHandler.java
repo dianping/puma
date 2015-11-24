@@ -29,9 +29,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
         BinlogAck binlogAck = binlogAckService.load(clientName);
 
-        if (binlogAck == null && !clientName.toLowerCase().endsWith("test")) {
-            throw new ClientNotRegisterException("you must register first!");
-        }
+        binlogAckService.checkAck(clientName,binlogAck);
 
         long seq = binlogAck == null ? SubscribeConstant.SEQ_FROM_OLDEST :
                 (Strings.isNullOrEmpty(binlogAck.getBinlogInfo().getBinlogFile()) ?

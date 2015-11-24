@@ -8,4 +8,6 @@ public interface BinlogAckService {
     void save(String clientName, BinlogAck binlogAck, boolean flush) throws BinlogAckException;
 
     BinlogAck load(String clientName) throws BinlogAckException;
+
+    void checkAck(String clientName, BinlogAck binlogAck);
 }

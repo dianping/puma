@@ -14,6 +14,7 @@
     </modules>
     <description>puma-parent</description>
     <properties>
+	    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.version>4.2.0.RELEASE</spring.version>
         <env>qa</env>
     </properties>

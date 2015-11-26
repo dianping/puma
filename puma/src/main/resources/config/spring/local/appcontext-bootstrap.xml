@@ -14,12 +14,4 @@
 
     <task:annotation-driven scheduler="taskScheduler"/>
     <task:scheduler id="taskScheduler" pool-size="20"/>
-
-    <bean id="rawCodec" class="com.dianping.puma.core.codec.RawEventCodec"/>
-
-    <bean id="binlogInfoHolder"
-          class="com.dianping.puma.storage.holder.impl.DefaultBinlogInfoHolder"
-          init-method="init">
-    </bean>
-
 </beans>

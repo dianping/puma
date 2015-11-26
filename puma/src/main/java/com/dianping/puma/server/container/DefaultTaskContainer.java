@@ -274,7 +274,6 @@ public class DefaultTaskContainer implements TaskContainer {
 
         instanceTask.temp2Main();
         String taskName = instanceTask.getTaskName();
-        binlogInfoHolder.rename(oriTaskName, taskName);
         binlogInfoHolder.remove(oriTaskName);
 
         TaskExecutor newTaskExecutor = taskBuilder.build(instanceTask);

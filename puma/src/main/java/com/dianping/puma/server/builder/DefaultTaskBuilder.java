@@ -35,16 +35,15 @@ public class DefaultTaskBuilder implements TaskBuilder {
     private final Logger logger = LoggerFactory.getLogger(DefaultTaskBuilder.class);
 
     @Autowired
-    BinlogInfoHolder binlogInfoHolder;
+    private BinlogInfoHolder binlogInfoHolder;
 
     @Autowired
-    InstanceManager instanceManager;
+    private InstanceManager instanceManager;
 
     @Autowired
-    ConfigManager configManager;
+    private ConfigManager configManager;
 
-    @Autowired
-    RawEventCodec rawCodec;
+    private RawEventCodec rawCodec = new RawEventCodec();
 
     public TaskExecutor build(InstanceTask instanceTask) {
         logger.info("start building puma task executor...\n{}", instanceTask);

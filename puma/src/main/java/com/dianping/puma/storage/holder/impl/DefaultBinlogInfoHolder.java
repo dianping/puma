@@ -5,6 +5,7 @@ import com.dianping.puma.storage.filesystem.*;
 import com.dianping.puma.storage.holder.BinlogInfoHolder;
 import com.google.common.base.Strings;
 import org.apache.log4j.Logger;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
@@ -17,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Leo Liang
  */
+@Service
 public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
 
     private static final Logger LOG = Logger.getLogger(DefaultBinlogInfoHolder.class);
@@ -75,13 +77,6 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
     public synchronized void setBinlogInfo(String taskName, BinlogInfo binlogInfo) {
         this.binlogInfoMap.put(taskName, binlogInfo);
         this.saveToFile(taskName, binlogInfo);
-    }
-
-    public synchronized void rename(String oriTaskName, String taskName) {
-        File f = new File(bakDir, task2file(oriTaskName));
-        if (f.exists() && !f.renameTo(new File(bakDir, task2file(taskName)))) {
-            throw new RuntimeException("failed to rename instance task file name.");
-        }
     }
 
     public synchronized void remove(String taskName) {

@@ -80,13 +80,13 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
     }
 
     public synchronized void rename(String oriTaskName, String taskName) {
+        binlogInfoMap.put(taskName, binlogInfoMap.remove(oriTaskName));
+        mappedByteBufferMapping.remove(oriTaskName);
+
         File f = new File(bakDir, task2file(oriTaskName));
         if (f.exists() && !f.renameTo(new File(bakDir, task2file(taskName)))) {
             throw new RuntimeException("failed to rename instance task file name.");
         }
-
-        binlogInfoMap.put(taskName, binlogInfoMap.remove(oriTaskName));
-        mappedByteBufferMapping.put(taskName, mappedByteBufferMapping.remove(oriTaskName));
     }
 
     public synchronized void remove(String taskName) {

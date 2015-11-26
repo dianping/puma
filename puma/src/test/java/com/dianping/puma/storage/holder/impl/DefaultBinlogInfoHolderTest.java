@@ -58,4 +58,13 @@ public class DefaultBinlogInfoHolderTest {
 
         Assert.assertNull(binlogInfoHolder.getBinlogInfo("test1"));
     }
+
+    @Test
+    public void testRename() throws Exception {
+        binlogInfoHolder.setBinlogInfo("test1", binlogInfo);
+        binlogInfoHolder.rename("test1", "test2");
+
+        Assert.assertNull(binlogInfoHolder.getBinlogInfo("test1"));
+        Assert.assertEquals(binlogInfoHolder.getBinlogInfo("test2"), binlogInfo);
+    }
 }

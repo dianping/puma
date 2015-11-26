@@ -1,7 +1,7 @@
 package com.dianping.puma.storage.holder.impl;
 
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.storage.filesystem.*;
+import com.dianping.puma.storage.filesystem.FileSystem;
 import com.dianping.puma.storage.holder.BinlogInfoHolder;
 import com.google.common.base.Strings;
 import org.apache.log4j.Logger;
@@ -77,6 +77,16 @@ public class DefaultBinlogInfoHolder implements BinlogInfoHolder {
     public synchronized void setBinlogInfo(String taskName, BinlogInfo binlogInfo) {
         this.binlogInfoMap.put(taskName, binlogInfo);
         this.saveToFile(taskName, binlogInfo);
+    }
+
+    public synchronized void rename(String oriTaskName, String taskName) {
+        File f = new File(bakDir, task2file(oriTaskName));
+        if (f.exists() && !f.renameTo(new File(bakDir, task2file(taskName)))) {
+            throw new RuntimeException("failed to rename instance task file name.");
+        }
+
+        binlogInfoMap.put(taskName, binlogInfoMap.remove(oriTaskName));
+        mappedByteBufferMapping.put(taskName, mappedByteBufferMapping.remove(oriTaskName));
     }
 
     public synchronized void remove(String taskName) {

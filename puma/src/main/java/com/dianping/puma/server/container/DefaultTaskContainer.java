@@ -2,12 +2,10 @@ package com.dianping.puma.server.container;
 
 import com.dianping.cat.Cat;
 import com.dianping.puma.core.model.Table;
-import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.core.registry.RegistryService;
 import com.dianping.puma.instance.InstanceManager;
 import com.dianping.puma.server.builder.TaskBuilder;
 import com.dianping.puma.server.server.TaskServerManager;
-import com.dianping.puma.storage.channel.ReadChannel;
 import com.dianping.puma.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.storage.manage.DatabaseStorageManager;
 import com.dianping.puma.taskexecutor.TaskExecutor;
@@ -19,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.config.Task;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -274,7 +271,7 @@ public class DefaultTaskContainer implements TaskContainer {
 
         instanceTask.temp2Main();
         String taskName = instanceTask.getTaskName();
-        binlogInfoHolder.remove(oriTaskName);
+        binlogInfoHolder.rename(oriTaskName, taskName);
 
         TaskExecutor newTaskExecutor = taskBuilder.build(instanceTask);
         start(newTaskExecutor);
